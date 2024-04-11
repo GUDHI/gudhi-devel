@@ -30,13 +30,9 @@ namespace persistence_matrix {
  * Inheritated instead of @ref Base_swap, when the column and row swaps are not enabled.
  */
 struct Dummy_base_swap {
-  // Dummy_base_swap& operator=([[maybe_unused]] Dummy_base_swap other) { return *this; }
   friend void swap([[maybe_unused]] Dummy_base_swap& d1, [[maybe_unused]] Dummy_base_swap& d2) {}
 
-  // Dummy_base_swap() {}
   Dummy_base_swap([[maybe_unused]] unsigned int numberOfColumns = 0) {}
-  // Dummy_base_swap([[maybe_unused]] const Dummy_base_swap& matrixToCopy) {}
-  // Dummy_base_swap([[maybe_unused]] Dummy_base_swap&& other) noexcept {}
 };
 
 /**

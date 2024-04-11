@@ -73,9 +73,9 @@ public:
 
 	template<typename Signed_integer_type, class = isSignedInteger<Signed_integer_type> >
 	element_type get_value(Signed_integer_type e) const{
-		if (e < -characteristic_) e = e % characteristic_;
+		if (e < -static_cast<Signed_integer_type>(characteristic_)) e = e % characteristic_;
 		if (e < 0) return e += characteristic_;
-		return e < characteristic_ ? e : e % characteristic_;
+		return e < static_cast<Signed_integer_type>(characteristic_) ? e : e % characteristic_;
 	}
 
 	//r = e1 + e2

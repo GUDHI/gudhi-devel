@@ -69,7 +69,7 @@ public:
 		}
 
 		primes_.clear();
-		while (curr_prime <= maximum) {
+		while (curr_prime <= static_cast<unsigned int>(maximum)) {
 			primes_.push_back(curr_prime);
 			mpz_nextprime(tmp_prime, tmp_prime);
 			curr_prime = mpz_get_ui(tmp_prime);

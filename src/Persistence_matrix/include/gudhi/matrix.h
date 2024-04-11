@@ -1253,8 +1253,8 @@ class Matrix {
    * @ref boundarymatrix "boundary matrices", that it really just swaps two rows and does not update anything else,
    * nor performs additions to maintain some properties on the matrix.
    *
-   * @param rowIndex1 First row index to swap.
-   * @param rowIndex2 Second row index to swap.
+   * @param rowIndex1 First @ref rowindex "row index" to swap.
+   * @param rowIndex2 Second @ref rowindex "row index" to swap.
    */
   void swap_rows(index rowIndex1, index rowIndex2);
   //TODO: find better name. And benchmark also to verify if it is really worth it to have this extra version in addition

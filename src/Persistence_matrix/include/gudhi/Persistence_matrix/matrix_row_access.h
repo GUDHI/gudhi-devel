@@ -29,7 +29,6 @@ namespace persistence_matrix {
  * Inheritated instead of @ref Matrix_row_access, when the the row access is not enabled.
  */
 struct Dummy_matrix_row_access {
-  // Dummy_matrix_row_access(){};
   Dummy_matrix_row_access([[maybe_unused]] unsigned int numberOfRows = 0){};
 
   friend void swap([[maybe_unused]] Dummy_matrix_row_access& d1, [[maybe_unused]] Dummy_matrix_row_access& d2) {}
@@ -98,7 +97,7 @@ class Matrix_row_access
    * @warning The @ref get_column_index method of the row cells returns the original @ref PosIdx indices (before any swaps)
    * for @ref boundarymatrix "boundary matrices" and @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
-   * @param rowIndex Row index of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices" or updated @ref IDIdx for @ref boundarymatrix "boundary matrices"
+   * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices" or updated @ref IDIdx for @ref boundarymatrix "boundary matrices"
    * if swaps occured, see [TODO: description].
    * @return Reference to the row.
    */
@@ -116,7 +115,7 @@ class Matrix_row_access
    * @warning The @ref get_column_index method of the row cells returns the original @ref PosIdx indices (before any swaps)
    * for @ref boundarymatrix "boundary matrices" and @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
-   * @param rowIndex Row index of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices" or updated @ref IDIdx for @ref boundarymatrix "boundary matrices"
+   * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices" or updated @ref IDIdx for @ref boundarymatrix "boundary matrices"
    * if swaps occured, see [TODO: description].
    * @return Const reference to the row.
    */
@@ -131,7 +130,7 @@ class Matrix_row_access
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_rows is true. Removes the given row
    * from the row container if the row exists and is empty.
    * 
-   * @param rowIndex Row index of the row to remove, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the row to remove, see [TODO: description].
    */
   void erase_row(id_index rowIndex) {
     static_assert(has_removable_rows, "'erase_row' is not implemented for the chosen options.");

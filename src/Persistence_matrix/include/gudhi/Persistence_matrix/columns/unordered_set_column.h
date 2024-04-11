@@ -597,7 +597,7 @@ Unordered_set_column<Master_matrix, Cell_constructor>::get_pivot_value() const
       if (column_.empty()) return 0;
       return (*std::max_element(column_.begin(), column_.end(), CellPointerComp()))->get_element();
     } else {
-      if (chain_opt::get_pivot() == -1) return Field_element_type();
+      if (chain_opt::get_pivot() == static_cast<id_index>(-1)) return Field_element_type();
       for (const Cell* cell : column_) {
         if (cell->get_row_index() == chain_opt::get_pivot()) return cell->get_element();
       }

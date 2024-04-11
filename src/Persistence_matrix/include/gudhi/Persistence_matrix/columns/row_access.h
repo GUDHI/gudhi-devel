@@ -35,7 +35,6 @@ struct Dummy_row_access
   Dummy_row_access() {}
   template <typename index, class Row_container_type>
   Dummy_row_access([[maybe_unused]] index columnIndex, [[maybe_unused]] Row_container_type& rows) {}
-  // Dummy_row_access([[maybe_unused]] Dummy_row_access&& other) noexcept {}
 };
 
 /**
@@ -77,7 +76,7 @@ class Row_access
   /**
    * @brief Inserts the given cell at the given row index.
    * 
-   * @param rowIndex Row index of the cell.
+   * @param rowIndex @ref rowindex "Row index" of the cell.
    * @param cell Pointer to the cell to insert.
    */
   void insert_cell(id_index rowIndex, Cell_type* cell);

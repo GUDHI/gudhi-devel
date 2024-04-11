@@ -33,12 +33,7 @@ namespace persistence_matrix {
  * is already managed by the vine update classes.
  */
 struct Dummy_base_pairing {
-  // Dummy_base_pairing& operator=([[maybe_unused]] Dummy_base_pairing other) { return *this; }
   friend void swap([[maybe_unused]] Dummy_base_pairing& d1, [[maybe_unused]] Dummy_base_pairing& d2) {}
-
-  // Dummy_base_pairing() {}
-  // Dummy_base_pairing([[maybe_unused]] const Dummy_base_pairing& matrixToCopy) {}
-  // Dummy_base_pairing([[maybe_unused]] Dummy_base_pairing&& other) noexcept {}
 };
 
 /**

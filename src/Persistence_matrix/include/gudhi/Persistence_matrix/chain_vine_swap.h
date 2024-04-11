@@ -55,8 +55,6 @@ struct Dummy_chain_vine_swap {
   template <typename EventComparatorFunction>
   Dummy_chain_vine_swap([[maybe_unused]] EventComparatorFunction&& birthComparator,
                         [[maybe_unused]] EventComparatorFunction&& deathComparator) {}
-  // Dummy_chain_vine_swap([[maybe_unused]] const Dummy_chain_vine_swap& matrixToCopy) {}
-  // Dummy_chain_vine_swap([[maybe_unused]] Dummy_chain_vine_swap&& other) noexcept {}
 };
 
 /**
@@ -67,8 +65,6 @@ struct Dummy_chain_vine_swap {
  */
 struct Dummy_chain_vine_pairing {
   friend void swap([[maybe_unused]] Dummy_chain_vine_pairing& d1, [[maybe_unused]] Dummy_chain_vine_pairing& d2) {}
-
-  // Dummy_chain_vine_pairing() {}
 };
 
 /**
@@ -281,9 +277,11 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
    * therefore skips a part of the case study.
    * 
    * @param columnIndex1 @ref MatIdx index of the first face.
-   * @param columnIndex2 @ref MatIdx index of the second face. It is assumed that the @ref PosIdx of both only differs by one.
-   * @return Let pos1 be the @ref PosIdx index of @p columnIndex1 and pos2 be the @ref PosIdx index of @p columnIndex2.
-   * The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx max(pos1, pos2).
+   * @param columnIndex2 @ref MatIdx index of the second face. It is assumed that the @ref PosIdx of both only differs
+   * by one.
+   * @return Let \f$ pos1 \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ pos2 \f$ be the @ref PosIdx index of
+   * @p columnIndex2. The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx
+   * \f$ max(pos1, pos2) \f$.
    */
   index vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2);
   /**
@@ -292,12 +290,14 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
    * corresponds to a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but with the two given faces
    * at swapped positions. Of course, the two faces should not have a face/coface relation which each other ;
    * \f$ F' \f$ has to be a valid filtration.
-   * See @cite [TODO: vineyard paper] for more information about vine and vineyards.
+   * See @cite vineyards for more information about vine and vineyards.
    * 
    * @param columnIndex1 @ref MatIdx index of the first face.
-   * @param columnIndex2 @ref MatIdx index of the second face. It is assumed that the @ref PosIdx of both only differs by one.
-   * @return Let pos1 be the @ref PosIdx index of @p columnIndex1 and pos2 be the @ref PosIdx index of @p columnIndex2.
-   * The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx max(pos1, pos2).
+   * @param columnIndex2 @ref MatIdx index of the second face. It is assumed that the @ref PosIdx of both only differs
+   * by one.
+   * @return Let \f$ pos1 \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ pos2 \f$ be the @ref PosIdx index of
+   * @p columnIndex2. The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx
+   * \f$ max(pos1, pos2) \f$.
    */
   index vine_swap(index columnIndex1, index columnIndex2);
 

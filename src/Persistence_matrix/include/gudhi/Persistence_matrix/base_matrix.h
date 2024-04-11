@@ -44,7 +44,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @brief Field operators class. Necessary only if @ref PersistenceMatrixOptions::is_z2 is false.
    */
   using Field_operators = typename Master_matrix::Field_operators;
-  using Field_element_type = typename Master_matrix::element_type;    /**< Type of an field element. */
+  using Field_element_type = typename Master_matrix::element_type;    /**< Type of a field element. */
   using Column_type = typename Master_matrix::Column_type;            /**< Column type. */
   using container_type = typename Master_matrix::boundary_type;       /**< Type of the column container. */
   using Row_type = typename Master_matrix::Row_type;                  /**< Row type,
@@ -101,8 +101,8 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   Base_matrix(Base_matrix&& other) noexcept;
 
   /**
-   * @brief Inserts a new ordered column at the end of the matrix by copying the given range of @ref cell_rep_type.
-   * The content of the range is assumed to be sorted by increasing ID value. 
+   * @brief Inserts a new ordered column at the end of the matrix by copying the given range of
+   * @ref Matrix::cell_rep_type. The content of the range is assumed to be sorted by increasing ID value.
    * 
    * @tparam Container_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
    * @param column Range of @ref Matrix::cell_rep_type from which the column has to be constructed. Assumed to be
@@ -111,7 +111,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   template <class Container_type = container_type>
   void insert_column(const Container_type& column);
   /**
-   * @brief Inserts a new ordered column at the given index by copying the given range of @ref cell_rep_type.
+   * @brief Inserts a new ordered column at the given index by copying the given range of @ref Matrix::cell_rep_type.
    * There should not be any other column inserted at that index which was not explicitely removed before.
    * The content of the range is assumed to be sorted by increasing ID value. 
    * Not available when row access is enabled.
@@ -138,7 +138,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
    *
    * Note that before returning the column, all column cells can eventually be reordered, if lazy swaps occurred.
-   * It is therefore recommended to avoid calling `get_column` between column or row swaps, otherwise the benefits
+   * It is therefore recommended to avoid calling @ref get_column between column or row swaps, otherwise the benefits
    * of the the lazyness is lost.
    * 
    * @param columnIndex @ref MatIdx index of the column to return.
@@ -146,27 +146,28 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    */
   Column_type& get_column(index columnIndex);
   /**
-   * @brief Only available if @ref has_row_access is true.
-   * Returns the row at the given row index (see [TODO: description]) of the matrix.
+   * @brief Only available if @ref PersistenceMatrixOptions::has_row_access is true.
+   * Returns the row at the given @ref rowindex "row index" of the matrix.
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    *
    * Note that before returning the row, all column cells can eventually be reordered, if lazy swaps occurred.
-   * It is therefore recommended to avoid calling `get_row` between column or row swaps, otherwise the benefits
+   * It is therefore recommended to avoid calling @ref get_row between column or row swaps, otherwise the benefits
    * of the the lazyness is lost.
    * 
-   * @param rowIndex Row index of the row to return, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @return Reference to the row.
    */
   Row_type& get_row(index rowIndex);
   /**
-   * @brief Only available if @ref has_map_column_container is true. Otherwise, see @ref remove_last.
-   * Erases the given column from the matrix. If the given column index corresponded to the last used column index,
-   * the "new last column index" will be ( @p columnIndex - 1 ), even if a column was never explicitely inserted at
-   * this index (possible when `insert_column(column, columnIndex)` was used). If the column didn't existed, it will
-   * simply be considered as an empty column.
+   * @brief Only available if @ref PersistenceMatrixOptions::has_map_column_container is true. Otherwise, see
+   * @ref remove_last. Erases the given column from the matrix. If the given column index corresponded to the last
+   * used column index, the "new last column index" will be `columnIndex - 1`, even if a column was never explicitely
+   * inserted at this index (possible when
+   * @ref insert_column(const Container_type& column, index columnIndex) "insert_column(column, columnIndex)" was used).
+   * If the column didn't existed, it will simply be considered as an empty column.
    *
-   * If @ref has_row_access is also true, the deleted column cells are also automatically removed from their 
-   * respective rows.
+   * If @ref PersistenceMatrixOptions::has_row_access is also true, the deleted column cells are also automatically
+   * removed from their  respective rows.
    * 
    * @param columnIndex @ref MatIdx index of the column to remove.
    */
@@ -174,11 +175,16 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   /**
    * @brief Removes the last column from the matrix. The last column is at index \f$ max(ins1, ins2, rem - 1) \f$,
    * where:
-   * - \f$ ins1 \f$ is the index of the last column inserted by `insert_column(column)`,
-   * - \f$ ins2 \f$ is largest index used with `insert_column(column, columnIndex)`,
-   * - \f$ rem \f$ is the last index just before the last call of `remove_column` or `remove_last`.
+   * - \f$ ins1 \f$ is the index of the last column inserted by
+   * @ref insert_column(const Container_type& column) "insert_column(column)",
+   * - \f$ ins2 \f$ is largest index used with
+   * @ref insert_column(const Container_type& column, index columnIndex) "insert_column(column, columnIndex)",
+   * - \f$ rem \f$ is the last index just before the last call of @ref remove_column or @ref remove_last.
+   *
    * If \f$ max(ins1, ins2, rem - 1) = rem - 1 \f$ but no column was explicitely inserted at that index (possible
-   * by the use of `insert_column(column, columnIndex)`), the column is assumed to be an empty column.
+   * by the use of
+   * @ref insert_column(const Container_type& column, index columnIndex) "insert_column(column, columnIndex)"),
+   * the column is assumed to be an empty column.
    *
    * See also @ref remove_column.
    */
@@ -192,15 +198,15 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row cells are not
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
    * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
-   * `erase_row` method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
+   * @ref erase_row method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
    * This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite frequent. 
    * 
-   * @param rowIndex Row index of the empty row, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the empty row.
    */
   void erase_row(index rowIndex);
 
   /**
-   * @brief Returns the current number of columns in the matrix, counting also the redundant columns.
+   * @brief Returns the current number of columns in the matrix.
    * 
    * @return The number of columns.
    */
@@ -218,7 +224,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   void add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
   /**
    * @brief Multiplies the target column with the coefficiant and then adds the source column to it.
-   * That is: targetColumn = (targetColumn * coefficient) + sourceColumn.
+   * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
    * 
    * @tparam Cell_range_or_column_index Either a range of @ref Cell with a begin() and end() method,
    * or any integer type.
@@ -232,10 +238,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
                                   index targetColumnIndex);
   /**
    * @brief Multiplies the source column with the coefficiant before adding it to the target column.
-   * That is: targetColumn += (coefficient * sourceColumn). The source column will **not** be modified.
-   *
-   * The representatives of redundant columns are summed together, which means that
-   * all column compressed together with the target column are affected by the change, not only the target.
+   * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
    * 
    * @tparam Cell_range_or_column_index Either a range of @ref Cell with a begin() and end() method,
    * or any integer type.
@@ -252,7 +255,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @brief Zeroes the cell at the given coordinates.
    * 
    * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex Row index of the row of the cell, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
    */
   void zero_cell(index columnIndex, index rowIndex);
   /**
@@ -265,7 +268,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @brief Indicates if the cell at given coordinates has value zero.
    * 
    * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex Row index of the row of the cell, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
    * @return true If the cell has value zero.
    * @return false Otherwise.
    */

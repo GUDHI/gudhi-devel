@@ -36,12 +36,6 @@ struct Dummy_cell_column_index_mixin
   Dummy_cell_column_index_mixin() {}
   template <typename index>
   Dummy_cell_column_index_mixin([[maybe_unused]] index columnIndex) {}
-  // Dummy_cell_column_index_mixin([[maybe_unused]] const Dummy_cell_column_index_mixin& cell){};
-  // Dummy_cell_column_index_mixin([[maybe_unused]] Dummy_cell_column_index_mixin&& cell){};
-
-  // Dummy_cell_column_index_mixin& operator=([[maybe_unused]] const Dummy_cell_column_index_mixin& other) {
-  //   return *this;
-  // };
 };
 
 /**
@@ -55,12 +49,6 @@ struct Dummy_cell_field_element_mixin
   Dummy_cell_field_element_mixin() {}
   template <class Field_element_type>
   Dummy_cell_field_element_mixin([[maybe_unused]] Field_element_type t) {}
-  // Dummy_cell_field_element_mixin([[maybe_unused]] const Dummy_cell_field_element_mixin& cell){};
-  // Dummy_cell_field_element_mixin([[maybe_unused]] Dummy_cell_field_element_mixin&& cell){};
-
-  // Dummy_cell_field_element_mixin& operator=([[maybe_unused]] const Dummy_cell_field_element_mixin& other) {
-  //   return *this;
-  // };
 };
 
 /**
@@ -191,7 +179,7 @@ class Cell_field_element
  * @class Cell cell_types.h gudhi/Persistence_matrix/columns/cell_types.h
  * @ingroup persistence_matrix
  *
- * @brief Matrix cell class. Stores by default only the row index it belongs to, but can also store its
+ * @brief %Matrix cell class. Stores by default only the row index it belongs to, but can also store its
  * column index when the row access is enabled, as well as its value when they are different from only 0 and 1.
  * Zero-valued cells are never explicited in the matrix.
  * 
@@ -219,14 +207,14 @@ class Cell : public Master_matrix::Cell_column_index_option,
   /**
    * @brief Constructs a cell with given row index. Other possible attributes are set at default values.
    * 
-   * @param rowIndex Row index of the cell.
+   * @param rowIndex @ref rowindex "Row index" of the cell.
    */
   Cell(id_index rowIndex) : col_opt(), field_opt(), rowIndex_(rowIndex){};
   /**
    * @brief Constructs a cell with given row and column index. Other possible attributes are set at default values.
    * 
    * @param columnIndex Column index of the cell.
-   * @param rowIndex Row index of the cell.
+   * @param rowIndex @ref rowindex "Row index" of the cell.
    */
   Cell(index columnIndex, id_index rowIndex) : col_opt(columnIndex), field_opt(), rowIndex_(rowIndex){};
   /**
@@ -251,13 +239,13 @@ class Cell : public Master_matrix::Cell_column_index_option,
   /**
    * @brief Returns the row index stored in the cell.
    * 
-   * @return Row index of the cell.
+   * @return @ref rowindex "Row index" of the cell.
    */
   id_index get_row_index() const { return rowIndex_; };
   /**
    * @brief Sets the row index stored in the cell.
    * 
-   * @param rowIndex Row index of the cell.
+   * @param rowIndex @ref rowindex "Row index" of the cell.
    */
   void set_row_index(id_index rowIndex) { rowIndex_ = rowIndex; };
 

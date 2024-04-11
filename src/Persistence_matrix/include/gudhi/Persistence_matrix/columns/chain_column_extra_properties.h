@@ -26,31 +26,27 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Chain_column_extra_properties, when the columns are not meant for @ref chainmatrix "chain matrices".
+ * Inheritated instead of @ref Chain_column_extra_properties, when the columns are not meant for
+ * @ref chainmatrix "chain matrices".
  */
 struct Dummy_chain_properties 
 {
-  // Dummy_chain_properties() {}
-  // Dummy_chain_properties([[maybe_unused]] int pivot) {}
   Dummy_chain_properties([[maybe_unused]] int pivot = 0, [[maybe_unused]] int pair = 0) {}
-  // Dummy_chain_properties([[maybe_unused]] const Dummy_chain_properties& col) {}
-  // Dummy_chain_properties([[maybe_unused]] Dummy_chain_properties&& col) {}
-
-  // Dummy_chain_properties& operator=([[maybe_unused]] const Dummy_chain_properties& other) { return *this; }
 
   friend void swap([[maybe_unused]] Dummy_chain_properties& col1, [[maybe_unused]] Dummy_chain_properties& col2) {}
 };
 
 /**
- * @class Chain_column_extra_properties chain_column_extra_properties.h gudhi/Persistence_matrix/columns/chain_column_extra_properties.h
+ * @class Chain_column_extra_properties chain_column_extra_properties.h \
+ * gudhi/Persistence_matrix/columns/chain_column_extra_properties.h
  * @ingroup persistence_matrix
  *
  * @brief Class managing the pivot and partitioning of columns in @ref Chain_matrix.
  *
- * The columns of a @ref chainmatrix "chain matrix" are partitioned in three sets: \f$ F \f$, \f$ G \f$ and \f$ H \f$ with a 
- * bijection between \f$ G \f$ and \f$ H \f$. If a column is in \f$ F \f$, the value of
- * @ref Chain_column_extra_properties::pairedColumn_ is -1, while the value corresponds to the @ref MatIdx index of 
- * the image of the bijection if the column is in either \f$ G \f$ or \f$ H \f$. See [TODO: zigzag paper] for
+ * The columns of a @ref chainmatrix "chain matrix" are partitioned in three sets: \f$ F \f$, \f$ G \f$ and \f$ H \f$
+ * with a bijection between \f$ G \f$ and \f$ H \f$. If a column is in \f$ F \f$, the value of
+ * `Chain_column_extra_properties::pairedColumn_` is `-1`, while the value corresponds to the @ref MatIdx index of
+ * the image of the bijection if the column is in either \f$ G \f$ or \f$ H \f$. See @cite zigzag for
  * more details.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
@@ -69,13 +65,15 @@ class Chain_column_extra_properties
   /**
    * @brief Constructor setting the pivot at the given value and the pair to -1 (i.e. not paired).
    * 
-   * @param pivot Row index of the pivot. Corresponds to the @ref IDIdx index of the face represented by the column.
+   * @param pivot @ref rowindex "Row index" of the pivot. Corresponds to the @ref IDIdx index of the face represented
+   * by the column.
    */
   Chain_column_extra_properties(id_index pivot) : pivot_(pivot), pairedColumn_(-1) {}
   /**
    * @brief Constructor setting the pivot and the pair at the given values.
    * 
-   * @param pivot Row index of the pivot. Corresponds to the @ref IDIdx index of the face represented by the column.
+   * @param pivot @ref rowindex "Row index" of the pivot. Corresponds to the @ref IDIdx index of the face represented
+   * by the column.
    * @param pair @ref MatIdx index of the pair of the column.
    */
   Chain_column_extra_properties(id_index pivot, index pair) : pivot_(pivot), pairedColumn_(pair) {}

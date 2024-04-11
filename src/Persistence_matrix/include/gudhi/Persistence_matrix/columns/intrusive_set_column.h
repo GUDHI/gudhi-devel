@@ -566,7 +566,7 @@ Intrusive_set_column<Master_matrix, Cell_constructor>::get_pivot_value() const
       if (column_.empty()) return 0;
       return column_.rbegin()->get_element();
     } else {
-      if (chain_opt::get_pivot() == -1) return 0;
+      if (chain_opt::get_pivot() == static_cast<id_index>(-1)) return 0;
       auto it = column_.find(Cell(chain_opt::get_pivot()));
       GUDHI_CHECK(it != column_.end(), "Pivot not found only if the column was misused.");
       return it->get_element();

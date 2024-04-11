@@ -578,7 +578,7 @@ Heap_column<Master_matrix, Cell_constructor>::get_pivot_value()
       return 0;
     } else {
       Field_element_type sum(0);
-      if (chain_opt::get_pivot() == -1) return sum;
+      if (chain_opt::get_pivot() == static_cast<id_index>(-1)) return sum;
       for (const Cell* cell : column_) {
         if (cell->get_row_index() == chain_opt::get_pivot()) sum = operators_->add(sum, cell->get_element());
       }

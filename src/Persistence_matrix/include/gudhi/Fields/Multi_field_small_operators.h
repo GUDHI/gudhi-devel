@@ -61,7 +61,7 @@ public:
 
 		productOfAllCharacteristics_ = 1;
 		primes_.clear();
-		for (unsigned int i = minimum; i <= maximum; ++i){
+		for (unsigned int i = minimum; i <= static_cast<unsigned int>(maximum); ++i){
 			if (_is_prime(i)){
 				primes_.push_back(i);
 				productOfAllCharacteristics_ *= i;

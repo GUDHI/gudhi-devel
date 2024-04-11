@@ -33,10 +33,6 @@ struct Dummy_dimension_holder
   Dummy_dimension_holder() {}
   template <typename dimension_type>
   Dummy_dimension_holder([[maybe_unused]] dimension_type dim) {}
-  // Dummy_dimension_holder([[maybe_unused]] const Dummy_dimension_holder& col) {}
-  // Dummy_dimension_holder([[maybe_unused]] Dummy_dimension_holder&& col) {}
-
-  // Dummy_dimension_holder& operator=([[maybe_unused]] const Dummy_dimension_holder& other) { return *this; }
 
   friend void swap([[maybe_unused]] Dummy_dimension_holder& col1, [[maybe_unused]] Dummy_dimension_holder& col2) {}
 };

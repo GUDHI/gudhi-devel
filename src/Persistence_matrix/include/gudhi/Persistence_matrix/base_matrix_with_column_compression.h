@@ -31,13 +31,14 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
- * @class Base_matrix_with_column_compression base_matrix_with_column_compression.h gudhi/Persistence_matrix/base_matrix_with_column_compression.h
+ * @class Base_matrix_with_column_compression base_matrix_with_column_compression.h \
+ * gudhi/Persistence_matrix/base_matrix_with_column_compression.h
  * @ingroup persistence_matrix
  *
- * @brief A @ref basematrix "base matrix" (see @ref Base_matrix), but with column compression. That is, all identical columns in
- * the matrix are compressed together as the same column. For matrices with a lot of redundant columns, this will
- * save a lot of space. Also, any addition made onto a column will be performed at the same time on all other
- * identical columns, which is an advantage for the cohomology algorithm for example.
+ * @brief A @ref basematrix "base matrix" (also see @ref Base_matrix), but with column compression. That is, all
+ * identical columns in the matrix are compressed together as the same column. For matrices with a lot of redundant
+ * columns, this will save a lot of space. Also, any addition made onto a column will be performed at the same time
+ * on all other identical columns, which is an advantage for the cohomology algorithm for example.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
  */
@@ -93,6 +94,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
         : Base(static_cast<const Base&>(column), columnIndex, rowContainer, operators, cellConstructor) {}
     Column_type(Column_type&& column) noexcept : Base(std::move(static_cast<Base&>(column))) {}
 
+    //TODO: is it possible to make this work?
     // template <class... U>
     // Column_type(U&&... u) : Base(std::forward<U>(u)...) {}
 
@@ -165,8 +167,8 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   ~Base_matrix_with_column_compression();
 
   /**
-   * @brief Inserts a new ordered column at the end of the matrix by copying the given range of @ref cell_rep_type.
-   * The content of the range is assumed to be sorted by increasing ID value. 
+   * @brief Inserts a new ordered column at the end of the matrix by copying the given range of
+   * @ref Matrix::cell_rep_type. The content of the range is assumed to be sorted by increasing ID value. 
    * 
    * @tparam Container_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
    * @param column Range of @ref Matrix::cell_rep_type from which the column has to be constructed. Assumed to be
@@ -196,12 +198,12 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    */
   const Column_type& get_column(index columnIndex);
   /**
-   * @brief Only available if @ref has_row_access is true.
-   * Returns the row at the given row index (see [TODO: description]) of the compressed matrix.
+   * @brief Only available if @ref PersistenceMatrixOptions::has_row_access is true.
+   * Returns the row at the given @ref rowindex "row index" of the compressed matrix.
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    * Note that the row will be from the compressed matrix, that is, the one with only unique columns.
    * 
-   * @param rowIndex @ref IDIdx row index of the row to return, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @return Const reference to the row.
    */
   const Row_type& get_row(index rowIndex) const;
@@ -212,10 +214,10 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row cells are not
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
    * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
-   * `erase_row` method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
+   * @ref erase_row method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
    * This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite frequent. 
    * 
-   * @param rowIndex @ref IDIdx row index of the empty row, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the empty row.
    */
   void erase_row(index rowIndex);
 
@@ -241,14 +243,14 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   void add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
   /**
    * @brief Multiplies the target column with the coefficiant and then adds the source column to it.
-   * That is: targetColumn = (targetColumn * coefficient) + sourceColumn.
+   * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
    *
    * The representatives of redundant columns are summed together, which means that
    * all column compressed together with the target column are affected by the change, not only the target.
    * 
    * @tparam Cell_range_or_column_index Either a range of @ref Cell with a begin() and end() method,
    * or any integer type.
-   * @param sourceColumn Either a cell range or the @ref MatIdx index of the column to add.
+   * @param sourceColumn Either a @ref Cell range or the @ref MatIdx index of the column to add.
    * @param coefficient Value to multiply.
    * @param targetColumnIndex @ref MatIdx index of the target column.
    */
@@ -258,7 +260,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
                                   index targetColumnIndex);
   /**
    * @brief Multiplies the source column with the coefficiant before adding it to the target column.
-   * That is: targetColumn += (coefficient * sourceColumn). The source column will **not** be modified.
+   * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
    *
    * The representatives of redundant columns are summed together, which means that
    * all column compressed together with the target column are affected by the change, not only the target.
@@ -266,7 +268,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * @tparam Cell_range_or_column_index Either a range of @ref Cell with a begin() and end() method,
    * or any integer type.
    * @param coefficient Value to multiply.
-   * @param sourceColumn Either a cell range or the @ref MatIdx index of the column to add.
+   * @param sourceColumn Either a @ref Cell range or the @ref MatIdx index of the column to add.
    * @param targetColumnIndex @ref MatIdx index of the target column.
    */
   template <class Cell_range_or_column_index>
@@ -278,7 +280,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * @brief Indicates if the cell at given coordinates has value zero.
    * 
    * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex Row index of the row of the cell.
+   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
    * @return true If the cell has value zero.
    * @return false Otherwise.
    */

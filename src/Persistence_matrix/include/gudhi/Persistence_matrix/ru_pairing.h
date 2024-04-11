@@ -31,8 +31,6 @@ namespace persistence_matrix {
  */
 struct Dummy_ru_pairing {
   friend void swap([[maybe_unused]] Dummy_ru_pairing& d1, [[maybe_unused]] Dummy_ru_pairing& d2) {}
-
-  // Dummy_ru_pairing() {}
 };
 
 /**

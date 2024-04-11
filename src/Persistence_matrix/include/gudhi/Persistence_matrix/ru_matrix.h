@@ -64,7 +64,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    */
   RU_matrix(Field_operators* operators, Cell_constructor* cellConstructor);
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref cell_rep_type. Each range corresponds to a column 
+   * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a column 
    * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
    * The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0. 
    * 
@@ -72,7 +72,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a @ref boundarymatrix "boundary matrix" of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
-   * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^th \f$ simplex in the filtration,
+   * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^{th} \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
    * in the matrix). That is why the indices of the simplices are assumed to be consecutifs and starting with 0 
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
@@ -157,7 +157,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
    *
    * Note that before returning the column, all column cells can eventually be reordered, if lazy swaps occurred.
-   * It is therefore recommended to avoid calling `get_column` between vine swaps, otherwise the benefits
+   * It is therefore recommended to avoid calling @ref get_column between vine swaps, otherwise the benefits
    * of the the lazyness is lost.
    * 
    * @param columnIndex @ref MatIdx index of the column to return.
@@ -167,15 +167,15 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    */
   Column_type& get_column(index columnIndex, bool inR = true);
   /**
-   * @brief Returns the row at the given row index (see [TODO: description]) in \f$ R \f$ if @p inR is true and
+   * @brief Returns the row at the given @ref rowindex "row index" in \f$ R \f$ if @p inR is true and
    * in \f$ U \f$ if @p inR is false.
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    *
    * Note that before returning the row, all column cells can eventually be reordered, if lazy swaps occurred.
-   * It is therefore recommended to avoid calling `get_row` between vine swaps, otherwise the benefits
+   * It is therefore recommended to avoid calling @ref get_row between vine swaps, otherwise the benefits
    * of the the lazyness is lost.
    * 
-   * @param rowIndex Row index of the row to return, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @param inR If true, returns the row in \f$ R \f$, if false, returns the row in \f$ U \f$.
    * Default value: true.
    * @return Reference to the row.
@@ -192,11 +192,11 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * @warning The removed rows are always assumed to be empty in \f$ R \f$. If it is not the case, the deleted row
    * cells are not removed from their columns. And in the case of intrusive rows, this will generate a segmentation
    * fault when the column cells are destroyed later. The row access is just meant as a "read only" access to the
-   * rows and the `erase_row` method just as a way to specify that a row is empty and can therefore be removed
+   * rows and the @ref erase_row method just as a way to specify that a row is empty and can therefore be removed
    * from dictionnaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can
    * be quite frequent. 
    * 
-   * @param rowIndex Row index of the empty row, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the empty row.
    */
   void erase_row(index rowIndex);
   /**
@@ -245,7 +245,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * @brief Adds column at @p sourceColumnIndex onto the column at @p targetColumnIndex in the matrix.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
-   * @ref boundarymatrix "boundary matrix" of a filtered complex. For example, a right-to-left addition could corrupt the computation
+   * boundary matrix of a filtered complex. For example, a right-to-left addition could corrupt the computation
    * of the barcode if done blindly. So should be used with care.
    * 
    * @param sourceColumnIndex @ref MatIdx index of the source column.
@@ -254,10 +254,10 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   void add_to(index sourceColumnIndex, index targetColumnIndex);
   /**
    * @brief Multiplies the target column with the coefficiant and then adds the source column to it.
-   * That is: targetColumn = (targetColumn * coefficient) + sourceColumn.
+   * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
-   * @ref boundarymatrix "boundary matrix" of a filtered complex. For example, a right-to-left addition could corrupt the computation
+   * boundary matrix of a filtered complex. For example, a right-to-left addition could corrupt the computation
    * of the barcode if done blindly. So should be used with care.
    * 
    * @param sourceColumnIndex @ref MatIdx index of the source column.
@@ -269,10 +269,10 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
                                   index targetColumnIndex);
   /**
    * @brief Multiplies the source column with the coefficiant before adding it to the target column.
-   * That is: targetColumn += (coefficient * sourceColumn). The source column will **not** be modified.
+   * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
-   * @ref boundarymatrix "boundary matrix" of a filtered complex. For example, a right-to-left addition could corrupt the computation
+   * boundary matrix of a filtered complex. For example, a right-to-left addition could corrupt the computation
    * of the barcode if done blindly. So should be used with care.
    * 
    * @param coefficient Value to multiply.
@@ -289,7 +289,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * related properties of the matrix.
    * 
    * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex Row index of the row of the cell.
+   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
    * @param inR Boolean indicating in which matrix to zero: if true in \f$ R \f$ and if false in \f$ U \f$.
    * Default value: true.
    */
@@ -309,7 +309,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * if @p inR is true or in \f$ U \f$ if @p inR is false.
    * 
    * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex Row index of the row of the cell.
+   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
    * @param inR Boolean indicating in which matrix to look: if true in \f$ R \f$ and if false in \f$ U \f$.
    * Default value: true.
    * @return true If the cell has value zero.
@@ -331,18 +331,18 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   bool is_zero_column(index columnIndex, bool inR = true);
 
   /**
-   * @brief Returns the @ref MatIdx index of the column which has the given row index as pivot in \f$ R \f$.
+   * @brief Returns the @ref MatIdx index of the column which has the given @ref rowindex "row index" as pivot in \f$ R \f$.
    * Assumes that the pivot exists.
    * 
-   * @param faceIndex Row index of the pivot, see [TODO: description].
+   * @param faceIndex @ref rowindex "Row index" of the pivot, see [TODO: description].
    * @return @ref MatIdx index of the column in \f$ R \f$ with the given pivot.
    */
   index get_column_with_pivot(index faceIndex) const;
   /**
-   * @brief Returns the row index of the pivot of the given column in \f$ R \f$.
+   * @brief Returns the @ref rowindex "row index" of the pivot of the given column in \f$ R \f$.
    * 
    * @param columnIndex @ref MatIdx index of the column in \f$ R \f$.
-   * @return The row index of the pivot.
+   * @return The @ref rowindex "row index" of the pivot.
    */
   index get_pivot(index columnIndex);
 
@@ -587,7 +587,7 @@ inline void RU_matrix<Master_matrix>::remove_last()
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
     if constexpr (Master_matrix::hasFixedBarcode) {
       auto& bar = _barcode()[_indexToBar()[nextEventIndex_]];
-      if (bar.death == -1) {    // birth
+      if (bar.death == static_cast<pos_index>(-1)) {    // birth
         _barcode().pop_back();  // sorted by birth and nextEventIndex_ has to be the heighest one
       } else {                  // death
         bar.death = -1;
@@ -597,7 +597,7 @@ inline void RU_matrix<Master_matrix>::remove_last()
       auto it = _indexToBar().find(nextEventIndex_);
       typename barcode_type::iterator bar = it->second;
 
-      if (bar->death == -1)
+      if (bar->death == static_cast<pos_index>(-1))
         _barcode().erase(bar);
       else
         bar->death = -1;
@@ -611,7 +611,7 @@ inline void RU_matrix<Master_matrix>::remove_last()
     pivotToColumnIndex_.erase(reducedMatrixR_.remove_last());
   } else {
     id_index lastPivot = reducedMatrixR_.remove_last();
-    if (lastPivot != -1) pivotToColumnIndex_[lastPivot] = -1;
+    if (lastPivot != static_cast<id_index>(-1)) pivotToColumnIndex_[lastPivot] = -1;
   }
 
   if constexpr (Master_matrix::Option_list::has_vine_update) {
@@ -779,7 +779,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_reduce() 
 {
   auto get_column_with_pivot_ = [&](id_index pivot) -> index {
-    if (pivot == -1) return -1;
+    if (pivot == static_cast<id_index>(-1)) return -1;
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       auto it = pivotToColumnIndex_.find(pivot);
       if (it == pivotToColumnIndex_.end())
@@ -807,7 +807,7 @@ inline void RU_matrix<Master_matrix>::_reduce()
       id_index pivot = curr.get_pivot();
       index currIndex = get_column_with_pivot_(pivot);
 
-      while (pivot != -1 && currIndex != -1) {
+      while (pivot != static_cast<id_index>(-1) && currIndex != static_cast<index>(-1)) {
         if constexpr (Master_matrix::Option_list::is_z2) {
           curr += reducedMatrixR_.get_column(currIndex);
           if constexpr (Master_matrix::Option_list::has_vine_update)
@@ -828,7 +828,7 @@ inline void RU_matrix<Master_matrix>::_reduce()
         currIndex = get_column_with_pivot_(pivot);
       }
 
-      if (pivot != -1) {
+      if (pivot != static_cast<id_index>(-1)) {
         if constexpr (Master_matrix::Option_list::has_map_column_container) {
           pivotToColumnIndex_.try_emplace(pivot, i);
         } else {

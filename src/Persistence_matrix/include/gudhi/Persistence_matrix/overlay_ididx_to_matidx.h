@@ -64,7 +64,7 @@ class Id_to_index_overlay
    */
   Id_to_index_overlay(Field_operators* operators, Cell_constructor* cellConstructor);
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref cell_rep_type. Each range corresponds to a column 
+   * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a column 
    * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
    * The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0. 
    * 
@@ -72,7 +72,7 @@ class Id_to_index_overlay
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a @ref boundarymatrix "boundary matrix" of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
-   * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^th \f$ simplex in the filtration,
+   * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^{th} \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
    * in the matrix). That is why the indices of the simplices are assumed to be consecutifs and starting with 0 
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
@@ -121,7 +121,7 @@ class Id_to_index_overlay
                       EventComparatorFunction&& deathComparator);
   /**
    * @brief Only available for @ref chainmatrix "chain matrices". 
-   * Constructs a new matrix from the given ranges of @ref cell_rep_type. Each range corresponds to a column 
+   * Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a column 
    * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
    * The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0. 
    *
@@ -135,7 +135,7 @@ class Id_to_index_overlay
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a @ref boundarymatrix "boundary matrix" of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
-   * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^th \f$ simplex in the filtration,
+   * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^{th} \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
    * in the matrix). That is why the indices of the simplices are assumed to be consecutifs and starting with 0 
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
@@ -266,14 +266,14 @@ class Id_to_index_overlay
    */
   Column_type& get_column(id_index faceID);
   /**
-   * @brief Only available if @ref has_row_access is true. Returns the row at the given row index, see [TODO: description].
+   * @brief Only available if @ref PersistenceMatrixOptions::has_row_access is true. Returns the row at the given row index, see [TODO: description].
    * For RU matrices, the returned row is from \f$ R \f$.
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    *
    * @warning The @ref get_column_index method of the row cells returns the original @ref PosIdx indices (before any swaps)
    * for @ref boundarymatrix "boundary matrices" and @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
-   * @param rowIndex Row index of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices" or updated @ref IDIdx for @ref boundarymatrix "boundary matrices"
+   * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices" or updated @ref IDIdx for @ref boundarymatrix "boundary matrices"
    * if swaps occured, see [TODO: description].
    * @return Reference to the row.
    */
@@ -296,10 +296,10 @@ class Id_to_index_overlay
    * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row cells are not
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
    * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
-   * `erase_row` method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
+   * @ref erase_row method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
    * This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite frequent. 
    * 
-   * @param rowIndex Row index of the empty row to remove, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the empty row to remove, see [TODO: description].
    */
   void erase_row(id_index rowIndex);
   /**
@@ -323,7 +323,7 @@ class Id_to_index_overlay
   void remove_maximal_face(id_index faceID);
   /**
    * @brief Only available for @ref chainmatrix "chain matrices" and if @ref has_removable_columns, @ref has_vine_update 
-   * and @ref has_map_column_container are true.
+   * and @ref PersistenceMatrixOptions::has_map_column_container are true.
    * Assumes that the face is maximal in the current complex and removes it such that the matrix remains consistent
    * (i.e., it is still a compatible bases of the chain complex in the sense of @cite [TODO: zigzag paper]).
    * The maximality of the face is not verified.
@@ -391,7 +391,7 @@ class Id_to_index_overlay
   void add_to(id_index sourceFaceID, id_index targetFaceID);
   /**
    * @brief Multiplies the target column with the coefficiant and then adds the source column to it.
-   * That is: targetColumn = (targetColumn * coefficient) + sourceColumn.
+   * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
    * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
@@ -404,7 +404,7 @@ class Id_to_index_overlay
   void multiply_target_and_add_to(id_index sourceFaceID, const Field_element_type& coefficient, id_index targetFaceID);
   /**
    * @brief Multiplies the source column with the coefficiant before adding it to the target column.
-   * That is: targetColumn += (coefficient * sourceColumn). The source column will **not** be modified.
+   * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
    * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
@@ -424,7 +424,7 @@ class Id_to_index_overlay
    * For RU matrices, zeros only the cell in \f$ R \f$.
    * 
    * @param faceID @ref IDIdx index of the face corresponding to the column of the cell.
-   * @param rowIndex Row index of the row of the cell.
+   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
    */
   void zero_cell(id_index faceID, id_index rowIndex);
   /**
@@ -443,7 +443,7 @@ class Id_to_index_overlay
    * For RU matrices, looks into \f$ R \f$.
    * 
    * @param faceID @ref IDIdx index of the face corresponding to the column of the cell.
-   * @param rowIndex Row index of the row of the cell.
+   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
    * @return true If the cell has value zero.
    * @return false Otherwise.
    */
@@ -463,21 +463,21 @@ class Id_to_index_overlay
   bool is_zero_column(id_index faceID);
 
   /**
-   * @brief Returns the @ref IDIdx index of the column which has the given row index as pivot.
+   * @brief Returns the @ref IDIdx index of the column which has the given @ref rowindex "row index" as pivot.
    * Assumes that the pivot exists. For RU matrices, the column is returned from \f$ R \f$.
    *
    * Recall that the row indices for @ref chainmatrix "chain matrices" correspond to the @ref IDIdx indices and that the row indices
    * for a RU matrix correspond to the updated @ref IDIdx indices which got potentially swapped by a vine swap.
    * 
-   * @param faceIndex Row index of the pivot.
+   * @param faceIndex @ref rowindex "Row index" of the pivot.
    * @return @ref IDIdx index of the column with the given pivot.
    */
   id_index get_column_with_pivot(id_index faceIndex) const;
   /**
-   * @brief Returns the row index of the pivot of the given column.
+   * @brief Returns the @ref rowindex "row index" of the pivot of the given column.
    * 
    * @param faceID @ref IDIdx index of the face corresponding to the column.
-   * @return The row index of the pivot.
+   * @return The @ref rowindex "row index" of the pivot.
    */
   id_index get_pivot(id_index faceID);
 
@@ -541,8 +541,8 @@ class Id_to_index_overlay
    * Swaps the two given rows. Note that it really just swaps two rows and do not updates
    * anything else, nor performs additions to maintain some properties on the matrix.
    * 
-   * @param rowIndex1 First row index to swap.
-   * @param rowIndex2 Second row index to swap.
+   * @param rowIndex1 First @ref rowindex "row index" to swap.
+   * @param rowIndex2 Second @ref rowindex "row index" to swap.
    */
   void swap_rows(index rowIndex1, index rowIndex2);
   /**
@@ -743,7 +743,7 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::insert_boundar
   if constexpr (Master_matrix_type::Option_list::has_map_column_container) {
     assert(idToIndex_->find(faceIndex) == idToIndex_->end() && "Index for simplex already chosen!");
   } else {
-    assert((idToIndex_->size() <= faceIndex || idToIndex_[faceIndex] == -1) && "Index for simplex already chosen!");
+    assert((idToIndex_->size() <= faceIndex || idToIndex_[faceIndex] == static_cast<index>(-1)) && "Index for simplex already chosen!");
   }
   matrix_.insert_boundary(faceIndex, boundary, dim);
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
@@ -790,7 +790,7 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::remove_maximal
       }
     } else {
       for (id_index i = 0; i < idToIndex_->size(); ++i) {
-        if (idToIndex_->operator[](i) != -1) indexToID[idToIndex_->operator[](i)] = i;
+        if (idToIndex_->operator[](i) != static_cast<index>(-1)) indexToID[idToIndex_->operator[](i)] = i;
       }
     }
     --nextIndex_;
@@ -837,7 +837,7 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::remove_last()
     } else {
       assert(idToIndex_->size() != 0);
       index id = idToIndex_->size() - 1;
-      while (idToIndex_->operator[](id) == -1) --id;  // should always stop before reaching -1
+      while (idToIndex_->operator[](id) == static_cast<index>(-1)) --id;  // should always stop before reaching -1
       assert(idToIndex_->operator[](id) == nextIndex_);
       idToIndex_->operator[](id) = -1;
     }
@@ -915,8 +915,8 @@ inline typename Id_to_index_overlay<Matrix_type, Master_matrix_type>::id_index
 Id_to_index_overlay<Matrix_type, Master_matrix_type>::get_column_with_pivot(id_index simplexIndex) const 
 {
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
-    int pos = matrix_.get_column_with_pivot(simplexIndex);
-    unsigned int i = 0;
+    index pos = matrix_.get_column_with_pivot(simplexIndex);
+    id_index i = 0;
     while (_id_to_index(i) != pos) ++i;
     return i;
   } else {

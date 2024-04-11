@@ -34,10 +34,6 @@ namespace persistence_matrix {
 struct Dummy_chain_representative_cycles {
   friend void swap([[maybe_unused]] Dummy_chain_representative_cycles& d1,
                    [[maybe_unused]] Dummy_chain_representative_cycles& d2) {}
-
-  // Dummy_chain_representative_cycles() {}
-  // Dummy_chain_representative_cycles([[maybe_unused]] const Dummy_chain_representative_cycles& matrixToCopy) {}
-  // Dummy_chain_representative_cycles([[maybe_unused]] Dummy_chain_representative_cycles&& other) noexcept {}
 };
 
 // TODO: add coefficients ? Only Z2 token into account for now.

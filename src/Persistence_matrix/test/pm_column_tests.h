@@ -1119,11 +1119,11 @@ void column_test_chain_methods(){
 	Column col(op, &pool);
 
 	BOOST_CHECK(!col.is_paired());
-	BOOST_CHECK(col.get_paired_chain_index() == -1);
+	BOOST_CHECK(col.get_paired_chain_index() == static_cast<typename Column::index>(-1));
 
 	col.unassign_paired_chain();
 	BOOST_CHECK(!col.is_paired());
-	BOOST_CHECK(col.get_paired_chain_index() == -1);
+	BOOST_CHECK(col.get_paired_chain_index() == static_cast<typename Column::index>(-1));
 
 	col.assign_paired_chain(2);
 	BOOST_CHECK(col.is_paired());
@@ -1131,7 +1131,7 @@ void column_test_chain_methods(){
 
 	col.unassign_paired_chain();
 	BOOST_CHECK(!col.is_paired());
-	BOOST_CHECK(col.get_paired_chain_index() == -1);
+	BOOST_CHECK(col.get_paired_chain_index() == static_cast<typename Column::index>(-1));
 }
 
 #endif // PM_COLUMN_TESTS_H

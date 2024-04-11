@@ -65,7 +65,7 @@ class Position_to_index_overlay
    */
   Position_to_index_overlay(Field_operators* operators, Cell_constructor* cellConstructor);
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref cell_rep_type. Each range corresponds to a column 
+   * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a column 
    * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
    * The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0. 
    * 
@@ -73,7 +73,7 @@ class Position_to_index_overlay
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a @ref boundarymatrix "boundary matrix" of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
-   * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^th \f$ simplex in the filtration,
+   * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^{th} \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
    * in the matrix). That is why the indices of the simplices are assumed to be consecutifs and starting with 0 
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
@@ -124,7 +124,7 @@ class Position_to_index_overlay
                             EventComparatorFunction&& deathComparator);
   /**
    * @brief Only available for @ref chainmatrix "chain matrices". 
-   * Constructs a new matrix from the given ranges of @ref cell_rep_type. Each range corresponds to a column 
+   * Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a column 
    * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
    * The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0. 
    *
@@ -138,7 +138,7 @@ class Position_to_index_overlay
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a @ref boundarymatrix "boundary matrix" of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
-   * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^th \f$ simplex in the filtration,
+   * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^{th} \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
    * in the matrix). That is why the indices of the simplices are assumed to be consecutifs and starting with 0 
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
@@ -271,7 +271,7 @@ class Position_to_index_overlay
    *
    * @warning The @ref get_column_index method of the row cells returns the @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
-   * @param rowIndex Row index of the row to return, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @return Reference to the row.
    */
   Row_type& get_row(id_index rowIndex);
@@ -282,7 +282,7 @@ class Position_to_index_overlay
    *
    * @warning The @ref get_column_index method of the row cells returns the @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
-   * @param rowIndex Row index of the row to return, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @return Const reference to the row.
    */
   const Row_type& get_row(id_index rowIndex) const;
@@ -294,10 +294,10 @@ class Position_to_index_overlay
    * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row cells are not
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
    * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
-   * `erase_row` method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
+   * @ref erase_row method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
    * This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite frequent. 
    * 
-   * @param rowIndex Row index of the empty row to remove, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the empty row to remove, see [TODO: description].
    */
   void erase_row(id_index rowIndex);
   /**
@@ -358,7 +358,7 @@ class Position_to_index_overlay
   void add_to(pos_index sourcePosition, pos_index targetPosition);
   /**
    * @brief Multiplies the target column with the coefficiant and then adds the source column to it.
-   * That is: targetColumn = (targetColumn * coefficient) + sourceColumn.
+   * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
    * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
@@ -373,7 +373,7 @@ class Position_to_index_overlay
                                   pos_index targetPosition);
   /**
    * @brief Multiplies the source column with the coefficiant before adding it to the target column.
-   * That is: targetColumn += (coefficient * sourceColumn). The source column will **not** be modified.
+   * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
    * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
@@ -391,7 +391,7 @@ class Position_to_index_overlay
    * @brief Indicates if the cell at given coordinates has value zero.
    * 
    * @param position @ref PosIdx index of the face corresponding to the column of the cell.
-   * @param rowIndex Row index of the row of the cell.
+   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
    * @return true If the cell has value zero.
    * @return false Otherwise.
    */
@@ -409,18 +409,18 @@ class Position_to_index_overlay
   bool is_zero_column(pos_index position);
 
   /**
-   * @brief Returns the @ref PosIdx index of the column which has the given row index as pivot.
+   * @brief Returns the @ref PosIdx index of the column which has the given @ref rowindex "row index" as pivot.
    * Assumes that the pivot exists.
    * 
-   * @param faceIndex Row index of the pivot.
+   * @param faceIndex @ref rowindex "Row index" of the pivot.
    * @return @ref PosIdx index of the column with the given pivot.
    */
   pos_index get_column_with_pivot(id_index faceIndex) const;  // assumes that pivot exists
   /**
-   * @brief Returns the row index of the pivot of the given column.
+   * @brief Returns the @ref rowindex "row index" of the pivot of the given column.
    * 
    * @param position @ref PosIdx index of the face corresponding to the column.
-   * @return The row index of the pivot.
+   * @return The @ref rowindex "row index" of the pivot.
    */
   id_index get_pivot(pos_index position);
 
