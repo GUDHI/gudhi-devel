@@ -20,21 +20,21 @@ namespace persistence_matrix {
  * \author    Hannah Schreiber
  *
  * The module provides a data structure for matrices, in particular thought for matrices representing filtered complexes
- * and used as backend for persistence algorithms, such at persistent homology, \ref persistent_cohomology,
- * or zigzag. TODO: refs.
+ * and used as backend for persistence algorithms, such at persistent homology, @ref persistent_cohomology,
+ * or zigzag @cite zigzag.
  *
  * The structure is entirely accessed via the class @ref Matrix and it provides several functionnalities which can
  * be enabled or disabled through a template argument following the @ref PersistenceMatrixOptions concept.
  * The main functionnalities are:
  * @li column and row access,
  * @li column addition and scalar multiplication,
- * @li removal of maximal faces while maintaining a valid reduced @ref boundarymatrix "boundary matrix" or compatible chain complex base
+ * @li removal of maximal faces while maintaining a valid reduced boundary matrix or compatible chain complex base
  * and a valid barcode with respect to the new filtration,
  * @li computation of persistent homology (but note that if the barcode is your only necessity, using the
- * \ref persistent_cohomology module is often more performant),
+ * @ref persistent_cohomology module is often more performant),
  * @li computation of representative cycles for the cycle classes,
- * @li swapping of two consecutive faces in a filtration (cf. vineyards @cite vineyards) while maintaining a valid reduced boundary
- * matrix or compatible chain complex base and a valid barcode with respect to the new filtration,
+ * @li swapping of two consecutive faces in a filtration (cf. vineyards @cite vineyards) while maintaining a valid
+ * reduced boundary matrix or compatible chain complex base and a valid barcode with respect to the new filtration,
  * 
  * 
  * \subsection matrixexamples Examples

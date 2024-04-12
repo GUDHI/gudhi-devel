@@ -65,8 +65,8 @@ enum Column_indexation_types {
  * @tparam col_type Column type for the matrix. Default value: @ref Column_types::INTRUSIVE_SET
  * @tparam is_z2_only Flag indicating if only \f$Z_2\f$ coefficient will be used with the matrix. Set to true if it
  * is the case, false otherwise. Default value: true.
- * @tparam FieldOperators Field operators used by the matrix, see [TODO: concept]. Only necessary if @p is_z2_only is false. 
- * Default value: @ref Zp_field_operators<>.
+ * @tparam FieldOperators Field operators used by the matrix, see FieldOperators concept. Only necessary if @p is_z2_only is false. 
+ * Default value: @ref Gudhi::persistence_fields::Zp_field_operators<>.
  */
 template <Column_types col_type = Column_types::INTRUSIVE_SET, 
           bool is_z2_only = true,

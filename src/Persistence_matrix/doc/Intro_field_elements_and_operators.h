@@ -19,22 +19,7 @@ namespace persistence_fields {
  * @{
  * \author    Hannah Schreiber
  *
- * The module provides a data structure for matrices, in particular thought for matrices representing filtered complexes
- * and used as backend for persistence algorithms, such at persistent homology, \ref persistent_cohomology,
- * or zigzag. TODO: refs.
- *
- * The structure provides several functionnalities which can be enabled or disabled through a structure following
- * the @ref PersistenceMatrixOptions concept which is then used as template parameter.
- * The main functionnalities are:
- * @li column and row access,
- * @li column addition and scalar multiplication,
- * @li removal of maximal faces while maintaining a valid reduced @ref boundarymatrix "boundary matrix" or compatible chain complex base
- * and a valid barcode with respect to the new filtration,
- * @li computation of persistent homology (but note that if the barcode is your only necessity, using the
- * \ref persistent_cohomology module is often more performant),
- * @li computation of representative cycles for the cycle classes,
- * @li swapping of two consecutive faces in a filtration (cf. vineyards) while maintaining a valid reduced boundary
- * matrix or compatible chain complex base and a valid barcode with respect to the new filtration,
+ * TODO:
  * 
  * 
  * \subsection fieldsexamples Examples

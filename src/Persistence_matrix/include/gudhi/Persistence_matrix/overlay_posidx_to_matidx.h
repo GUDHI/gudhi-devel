@@ -28,10 +28,11 @@ namespace persistence_matrix {
  * @class Position_to_index_overlay overlay_posidx_to_matidx.h gudhi/Persistence_matrix/overlay_posidx_to_matidx.h
  * @ingroup persistence_matrix
  *
- * @brief Overlay for @ref chainmatrix "chain matrices" replacing all input and output @ref MatIdx indices of the original methods
- * with @ref PosIdx indices. The overlay is useless for @ref boundarymatrix "boundary matrices" as @ref MatIdx == @ref PosIdx for them.
+ * @brief Overlay for @ref chainmatrix "chain matrices" replacing all input and output @ref MatIdx indices of the
+ * original methods with @ref PosIdx indices. The overlay is useless for @ref boundarymatrix "boundary matrices"
+ * as @ref MatIdx == @ref PosIdx for them.
  * 
- * @tparam Matrix_type Matrix type taking the overlay.
+ * @tparam %Matrix_type Matrix type taking the overlay.
  * @tparam Master_matrix_type An instanciation of @ref Matrix from which all types and options are deduced.
  */
 template <class Matrix_type, class Master_matrix_type>
@@ -54,7 +55,7 @@ class Position_to_index_overlay
   using bar_type = typename Master_matrix_type::Bar;                      /**< Bar type. */
   using barcode_type = typename Master_matrix_type::barcode_type;         /**< Barcode type. */
   using cycle_type = typename Master_matrix_type::cycle_type;             /**< Cycle type. */
-  using cell_rep_type = typename Master_matrix_type::cell_rep_type;       /**< Cell content representative. */
+  using cell_rep_type = typename Master_matrix_type::cell_rep_type;       /**< %Cell content representative. */
   using Cell_constructor = typename Master_matrix_type::Cell_constructor; /**< Factory of @ref Cell classes. */
 
   /**
@@ -65,21 +66,22 @@ class Position_to_index_overlay
    */
   Position_to_index_overlay(Field_operators* operators, Cell_constructor* cellConstructor);
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a column 
-   * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
-   * The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0. 
+   * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a
+   * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
+   * IDs. The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0.
    * 
    * @tparam Boundary_type Range type for @ref Matrix::cell_rep_type ranges.
    * Assumed to have a begin(), end() and size() method.
-   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a @ref boundarymatrix "boundary matrix" of a 
+   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
    * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^{th} \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
    * in the matrix). That is why the indices of the simplices are assumed to be consecutifs and starting with 0 
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
-   * interest and not everything should be stored, then use the `insert_boundary` method instead (after creating 
-   * the matrix with the `Matrix(int numberOfColumns)` constructor preferably).
+   * interest and not everything should be stored, then use the @ref insert_boundary method instead (after creating the
+   * matrix with the @ref Position_to_index_overlay(unsigned int, Field_operators*, Cell_constructor*)
+   * constructor preferably).
    * @param operators Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
    */
@@ -98,7 +100,8 @@ class Position_to_index_overlay
                             Field_operators* operators,
                             Cell_constructor* cellConstructor);
   /**
-   * @brief Only available for @ref chainmatrix "chain matrices". Constructs an empty matrix and stores the given comparators.
+   * @brief Only available for @ref chainmatrix "chain matrices". Constructs an empty matrix and stores the given
+   * comparators.
    *
    * @warning If @ref PersistenceMatrixOptions::has_vine_update is false, the comparators are not used.
    * And if @ref PersistenceMatrixOptions::has_vine_update is true, but
@@ -136,15 +139,16 @@ class Position_to_index_overlay
    * @tparam EventComparatorFunction Method of the form: ( @ref pos_index, @ref pos_index ) -> bool.
    * @tparam Boundary_type  Range type for @ref Matrix::cell_rep_type ranges.
    * Assumed to have a begin(), end() and size() method.
-   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a @ref boundarymatrix "boundary matrix" of a 
+   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
    * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^{th} \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
    * in the matrix). That is why the indices of the simplices are assumed to be consecutifs and starting with 0 
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
-   * interest and not everything should be stored, then use the `insert_boundary` method instead (after creating 
-   * the matrix with the `Matrix(int numberOfColumns)` constructor preferably).
+   * interest and not everything should be stored, then use the @ref insert_boundary method instead
+   * (after creating the matrix with the @ref Position_to_index_overlay(unsigned int, Field_operators*,
+   * Cell_constructor*, EventComparatorFunction&&, EventComparatorFunction&&) constructor preferably).
    * @param operators  Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
    * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
@@ -214,14 +218,15 @@ class Position_to_index_overlay
    * @brief Inserts at the end of the matrix a new ordered column corresponding to the given boundary. 
    * This means that it is assumed that this method is called on boundaries in the order of the filtration. 
    * It also assumes that the faces in the given boundary are identified by their relative position in the filtration, 
-   * starting at 0. If it is not the case, use the other `insert_boundary` instead by indicating the face ID
-   * used in the boundaries when the face is inserted.
+   * starting at 0. If it is not the case, use the other
+   * @ref insert_boundary(id_index, const Boundary_type&, dimension_type) "insert_boundary" instead by indicating the
+   * face ID used in the boundaries when the face is inserted.
    *
    * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
    * a more general cell complex. This includes cubical complexes or Morse complexes for example.
    *
    * When inserted, the given boundary is reduced and from the reduction process, the column is deduced in the form of:
-   * `@ref IDIdx + linear combination of older column @ref IDIdxs`. If the barcode is stored, it will be updated.
+   * `IDIdx + linear combination of older column IDIdxs`. If the barcode is stored, it will be updated.
    * 
    * @tparam Boundary_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
    * @param boundary Boundary generating the new column. The content should be ordered by ID.
@@ -266,10 +271,8 @@ class Position_to_index_overlay
   const Column_type& get_column(pos_index position) const;
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_row_access is true.
-   * Returns the row at the given row index, see [TODO: description].
+   * Returns the row at the given @ref rowindex "row index".
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
-   *
-   * @warning The @ref get_column_index method of the row cells returns the @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
    * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @return Reference to the row.
@@ -277,10 +280,8 @@ class Position_to_index_overlay
   Row_type& get_row(id_index rowIndex);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_row_access is true.
-   * Returns the row at the given row index, see [TODO: description].
+   * Returns the row at the given @ref rowindex "row index".
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
-   *
-   * @warning The @ref get_column_index method of the row cells returns the @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
    * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @return Const reference to the row.
@@ -297,7 +298,7 @@ class Position_to_index_overlay
    * @ref erase_row method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
    * This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite frequent. 
    * 
-   * @param rowIndex @ref rowindex "Row index" of the empty row to remove, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the empty row to remove.
    */
   void erase_row(id_index rowIndex);
   /**
@@ -305,7 +306,7 @@ class Position_to_index_overlay
    * @ref PersistenceMatrixOptions::has_vine_update and @ref PersistenceMatrixOptions::has_map_column_container
    * are true.
    * Assumes that the face is maximal in the current complex and removes it such that the matrix remains consistent
-   * (i.e., the matrix is still a compatible bases of the chain complex in the sense of @cite [TODO: zigzag paper]).
+   * (i.e., the matrix is still a compatible bases of the chain complex in the sense of @cite zigzag).
    * The maximality of the face is not verified.
    * Also updates the barcode if it was computed.
    *
@@ -326,7 +327,7 @@ class Position_to_index_overlay
 
   /**
    * @brief Returns the maximal dimension of a face stored in the matrix. Only available 
-   * if @ref has_matrix_maximal_dimension_access is true.
+   * if @ref PersistenceMatrixOptions::has_matrix_maximal_dimension_access is true.
    * 
    * @return The maximal dimension.
    */
@@ -348,9 +349,9 @@ class Position_to_index_overlay
   /**
    * @brief Adds column corresponding to @p sourcePosition onto the column corresponding to @p targetPosition.
    *
-   * @warning They will be no verification to ensure that the addition makes sense for the validity of a
-   * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
-   * of the barcode if done blindly. So should be used with care.
+   * @warning They will be no verification to ensure that the addition makes sense for the validity of the matrix.
+   * For example, a right-to-left addition could corrupt the computation of the barcode if done blindly.
+   * So should be used with care.
    * 
    * @param sourcePosition @ref PosIdx index of the source column.
    * @param targetPosition @ref PosIdx index of the target column.
@@ -360,9 +361,9 @@ class Position_to_index_overlay
    * @brief Multiplies the target column with the coefficiant and then adds the source column to it.
    * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
    *
-   * @warning They will be no verification to ensure that the addition makes sense for the validity of a
-   * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
-   * of the barcode if done blindly. So should be used with care.
+   * @warning They will be no verification to ensure that the addition makes sense for the validity of the matrix.
+   * For example, a right-to-left addition could corrupt the computation of the barcode if done blindly.
+   * So should be used with care.
    * 
    * @param sourcePosition @ref PosIdx index of the source column.
    * @param coefficient Value to multiply.
@@ -375,9 +376,9 @@ class Position_to_index_overlay
    * @brief Multiplies the source column with the coefficiant before adding it to the target column.
    * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
    *
-   * @warning They will be no verification to ensure that the addition makes sense for the validity of a
-   * @ref chainmatrix "chain matrix". For example, a right-to-left addition could corrupt the computation
-   * of the barcode if done blindly. So should be used with care.
+   * @warning They will be no verification to ensure that the addition makes sense for the validity of the matrix.
+   * For example, a right-to-left addition could corrupt the computation of the barcode if done blindly.
+   * So should be used with care.
    * 
    * @param coefficient Value to multiply.
    * @param sourcePosition @ref PosIdx index of the source column.
@@ -463,28 +464,28 @@ class Position_to_index_overlay
    *
    * Recall that we assume that the boundaries were inserted in the order of filtration for the barcode to be valid.
    * 
-   * @return A reference to the barcode. The barcode is a vector of @ref Bar. A bar stores three informations:
+   * @return A reference to the barcode. The barcode is a vector of @ref Matrix::Bar. A bar stores three informations:
    * the @ref PosIdx birth index, the @ref PosIdx death index and the dimension of the bar.
    */
   const barcode_type& get_current_barcode() const;
   
   /**
-   * @brief Only available if @ref can_retrieve_representative_cycles is true. Precomputes the representative cycles
-   * of the current state of the filtration represented by the matrix.
+   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Precomputes
+   * the representative cycles of the current state of the filtration represented by the matrix.
    * It does not need to be called before `get_representative_cycles` is called for the first time, but needs to be
    * called before calling `get_representative_cycles` again if the matrix was modified in between. Otherwise the
    * old cycles will be returned.
    */
   void update_representative_cycles();
   /**
-   * @brief Only available if @ref can_retrieve_representative_cycles is true.
+   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
    * Returns all representative cycles of the current filtration.
    * 
    * @return A const reference to the vector of representative cycles.
    */
   const std::vector<cycle_type>& get_representative_cycles();
   /**
-   * @brief Only available if @ref can_retrieve_representative_cycles is true.
+   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
    * Returns the cycle representing the given bar.
    * 
    * @param bar A bar from the current barcode.
@@ -497,7 +498,7 @@ class Position_to_index_overlay
    * Does the same than @ref vine_swap, but assumes that the swap is non trivial and
    * therefore skips a part of the case study.
    * 
-   * @param position @ref PosIdx index of the first face to swap. The second one has to be at (@p position + 1).
+   * @param position @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
@@ -506,12 +507,12 @@ class Position_to_index_overlay
    * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
    * Does a vine swap between two faces which are consecutives in the filtration. Roughly, if \f$ F \f$ is the current
    * filtration represented by the matrix, the method modifies the matrix such that the new state corresponds to 
-   * a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but with the two faces at position @p position
-   * and @p position + 1 swapped. Of course, the two faces should not have a face/coface relation which each other ;
+   * a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but with the two faces at position `position`
+   * and `position + 1` swapped. Of course, the two faces should not have a face/coface relation which each other ;
    * \f$ F' \f$ has to be a valid filtration.
-   * See @cite [TODO: vineyard paper] for more information about vine and vineyards.
+   * See @cite vineyards for more information about vine and vineyards.
    * 
-   * @param position @ref PosIdx index of the first face to swap. The second one has to be at (@p position + 1).
+   * @param position @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */

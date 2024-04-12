@@ -39,8 +39,9 @@ namespace persistence_matrix {
  * @brief Column class following the @ref PersistenceMatrixColumn concept.
  *
  * Column based on a vector structure. The cells are always ordered by row index, but cells are removed by 
- * @ref clear(index) in a lazy way, so erased values can still be in the underlying container. On the other hand,
- * two cells will never have the same row index.
+ * @ref PersistenceMatrixColumn::clear(PersistenceMatrixOptions::index_type rowIndex) "clear(index)" in a lazy way,
+ * so erased values can still be in the underlying container.
+ * On the other hand, two cells will never have the same row index.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
  * @tparam Cell_constructor Factory of @ref Cell classes.

@@ -72,12 +72,12 @@ struct PersistenceMatrixOptions
    * by a same column.
    *
    * Note that some methods of the @ref basematrix "base matrix" are not available when true:
-   * - @ref Matrix::insert_column "insert_column(const Container_type&, index)", <-- TODO: wasn't able to make the link work for Matrix::insert_column(const Container_type&, index), so it points to the wrong one...
-   * - @ref Matrix::zero_column "zero_column(index)",
-   * - @ref Matrix::zero_cell "zero_cell(index, id_index)",
-   * - @ref Matrix::swap_columns "swap_columns(index, index)",
-   * - @ref Matrix::swap_rows "swap_rows(index, index)",
-   * - @ref Matrix::remove_column "remove_column(index)",
+   * - @ref Matrix::insert_column(const Container_type&, index_type) "insert_column(const Container_type&, index)",
+   * - @ref Matrix::zero_column(index_type) "zero_column(index)",
+   * - @ref Matrix::zero_cell(index_type, index_type) "zero_cell(index, id_index)",
+   * - @ref Matrix::swap_columns(index_type, index_type) "swap_columns(index, index)",
+   * - @ref Matrix::swap_rows(index_type, index_type) "swap_rows(index, index)",
+   * - @ref Matrix::remove_column(index_type) "remove_column(index)",
    * - @ref Matrix::remove_last "remove_last()".
    */
   static const bool has_column_compression;
@@ -92,10 +92,10 @@ struct PersistenceMatrixOptions
    * @brief If set to true, the underlying container containing the matrix columns is an std::unordered_map. 
    * If set to false, the container is a std::vector. By default, it is recommended to set it to false, but some 
    * methods require it to be true to be enabled: 
-   * - @ref Matrix::remove_column "remove_column(index)" for @ref basematrix "base matrices",
-   * - @ref Matrix::remove_maximal_face "remove_maximal_face(index)" for @ref chainmatrix "chain matrices",
-   * - @ref Matrix::remove_maximal_face "remove_maximal_face(id_index, const std::vector<id_index>&)"
-   * for @ref chainmatrix "chain matrices",
+   * - @ref Matrix::remove_column(index_type) "remove_column(index)" for @ref basematrix "base matrices",
+   * - @ref Matrix::remove_maximal_face(index_type) "remove_maximal_face(index)" for @ref chainmatrix "chain matrices",
+   * - @ref Matrix::remove_maximal_face(index_type, const std::vector<index_type>&)
+   *  "remove_maximal_face(id_index, const std::vector<id_index>&)" for @ref chainmatrix "chain matrices",
    * - @ref Matrix::remove_last "remove_last()" for @ref chainmatrix "chain matrices" if @ref has_vine_update is true.
    */
   static const bool has_map_column_container;

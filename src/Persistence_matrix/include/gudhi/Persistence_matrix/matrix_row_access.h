@@ -91,14 +91,11 @@ class Matrix_row_access
   ~Matrix_row_access() { delete rows_; }
 
   /**
-   * @brief Returns the row at the given row index, see [TODO: description].
+   * @brief Returns the row at the given @ref rowindex "row index".
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
-   *
-   * @warning The @ref get_column_index method of the row cells returns the original @ref PosIdx indices (before any swaps)
-   * for @ref boundarymatrix "boundary matrices" and @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
-   * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices" or updated @ref IDIdx for @ref boundarymatrix "boundary matrices"
-   * if swaps occured, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices"
+   * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occured.
    * @return Reference to the row.
    */
   Row_type& get_row(id_index rowIndex) {
@@ -109,14 +106,11 @@ class Matrix_row_access
     }
   }
   /**
-   * @brief Returns the row at the given row index, see [TODO: description].
+   * @brief Returns the row at the given @ref rowindex "row index".
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
-   *
-   * @warning The @ref get_column_index method of the row cells returns the original @ref PosIdx indices (before any swaps)
-   * for @ref boundarymatrix "boundary matrices" and @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
-   * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices" or updated @ref IDIdx for @ref boundarymatrix "boundary matrices"
-   * if swaps occured, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices"
+   * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occured.
    * @return Const reference to the row.
    */
   const Row_type& get_row(id_index rowIndex) const {
@@ -130,7 +124,7 @@ class Matrix_row_access
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_rows is true. Removes the given row
    * from the row container if the row exists and is empty.
    * 
-   * @param rowIndex @ref rowindex "Row index" of the row to remove, see [TODO: description].
+   * @param rowIndex @ref rowindex "Row index" of the row to remove.
    */
   void erase_row(id_index rowIndex) {
     static_assert(has_removable_rows, "'erase_row' is not implemented for the chosen options.");

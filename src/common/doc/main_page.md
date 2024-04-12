@@ -403,7 +403,7 @@
  </tr>
  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref persistence_matrix
+    <b>User manual:</b> \ref persistence_matrix and \ref persistence_fields
     </td>
  </tr>
 </table>

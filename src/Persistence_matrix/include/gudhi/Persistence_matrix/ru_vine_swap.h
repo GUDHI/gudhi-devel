@@ -88,7 +88,7 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
    * @brief Does the same than @ref vine_swap, but assumes that the swap is non trivial and
    * therefore skips a part of the case study.
    * 
-   * @param position @ref PosIdx index of the first face to swap. The second one has to be at (@p position + 1).
+   * @param position @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
@@ -97,11 +97,11 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
    * @brief Does a vine swap between two faces which are consecutives in the filtration.
    * Roughly, if \f$ F \f$ is the current filtration represented by the matrix, the method modifies the matrix
    * such that the new state corresponds to a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but
-   * with the two faces at position @p position and @p position + 1 swapped. Of course, the two faces should
+   * with the two faces at position `position` and `position + 1` swapped. Of course, the two faces should
    * not have a face/coface relation which each other ; \f$ F' \f$ has to be a valid filtration.
-   * See @cite [TODO: vineyard paper] for more information about vine and vineyards.
+   * See @cite vineyards for more information about vine and vineyards.
    * 
-   * @param position @ref PosIdx index of the first face to swap. The second one has to be at (@p position + 1).
+   * @param position @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
@@ -294,7 +294,8 @@ inline void RU_vine_swap<Master_matrix>::_positive_transpose(index columnIndex)
       _matrix()->pivotToColumnIndex_.erase(columnIndex + 1);
     }
   } else {
-    std::swap(_matrix()->pivotToColumnIndex_.operator[](columnIndex), _matrix()->pivotToColumnIndex_.operator[](columnIndex + 1));
+    std::swap(_matrix()->pivotToColumnIndex_.operator[](columnIndex),
+              _matrix()->pivotToColumnIndex_.operator[](columnIndex + 1));
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {

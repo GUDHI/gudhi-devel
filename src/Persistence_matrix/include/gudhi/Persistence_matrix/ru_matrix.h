@@ -28,9 +28,9 @@ namespace persistence_matrix {
  * @class RU_matrix ru_matrix.h gudhi/Persistence_matrix/ru_matrix.h
  * @ingroup persistence_matrix
  *
- * @brief Matrix structure to store the ordered @ref boundarymatrix "boundary matrix" \f$ R \cdot U \f$ of a filtered complex
- * in order to compute its persistent homology, as well as representative cycles.
- * Supports vineyards (see [TODO: cite vineyard paper]) and the removal of maximal faces while maintaining
+ * @brief %Matrix structure to store the ordered @ref boundarymatrix "boundary matrix" \f$ R \cdot U \f$ of a filtered
+ * complex in order to compute its persistent homology, as well as representative cycles.
+ * Supports vineyards (see @cite vineyards) and the removal of maximal faces while maintaining
  * a valid barcode. Provides an access to its columns and rows.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
@@ -64,21 +64,21 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    */
   RU_matrix(Field_operators* operators, Cell_constructor* cellConstructor);
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a column 
-   * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
-   * The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0. 
+   * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a
+   * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
+   * IDs. The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0. 
    * 
    * @tparam Boundary_type Range type for @ref Matrix::cell_rep_type ranges.
    * Assumed to have a begin(), end() and size() method.
-   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a @ref boundarymatrix "boundary matrix" of a 
+   * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
    * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^{th} \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
    * in the matrix). That is why the indices of the simplices are assumed to be consecutifs and starting with 0 
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
-   * interest and not everything should be stored, then use the `insert_boundary` method instead (after creating 
-   * the matrix with the `Matrix(int numberOfColumns)` constructor preferably).
+   * interest and not everything should be stored, then use the @ref insert_boundary method instead (after creating the
+   * matrix with the @ref RU_matrix(unsigned int, Field_operators*, Cell_constructor*) constructor preferably).
    * @param operators Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
    */
@@ -115,11 +115,12 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   RU_matrix(RU_matrix&& other) noexcept;
 
   /**
-   * @brief Inserts at the end of the matrix a new ordered column corresponding to the given boundary. 
-   * This means that it is assumed that this method is called on boundaries in the order of the filtration. 
-   * It also assumes that the faces in the given boundary are identified by their relative position in the filtration, 
-   * starting at 0. If it is not the case, use the other `insert_boundary` instead by indicating the face ID
-   * used in the boundaries when the face is inserted.
+   * @brief Inserts at the end of the matrix a new ordered column corresponding to the given boundary.
+   * This means that it is assumed that this method is called on boundaries in the order of the filtration.
+   * It also assumes that the faces in the given boundary are identified by their relative position in the filtration,
+   * starting at 0. If it is not the case, use the other
+   * @ref insert_boundary(id_index, const Boundary_type&, dimension_type) "insert_boundary" instead by indicating the
+   * face ID used in the boundaries when the face is inserted.
    *
    * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
    * a more general cell complex. This includes cubical complexes or Morse complexes for example.
@@ -331,10 +332,10 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   bool is_zero_column(index columnIndex, bool inR = true);
 
   /**
-   * @brief Returns the @ref MatIdx index of the column which has the given @ref rowindex "row index" as pivot in \f$ R \f$.
-   * Assumes that the pivot exists.
+   * @brief Returns the @ref MatIdx index of the column which has the given @ref rowindex "row index" as pivot in
+   * \f$ R \f$. Assumes that the pivot exists.
    * 
-   * @param faceIndex @ref rowindex "Row index" of the pivot, see [TODO: description].
+   * @param faceIndex @ref rowindex "Row index" of the pivot.
    * @return @ref MatIdx index of the column in \f$ R \f$ with the given pivot.
    */
   index get_column_with_pivot(index faceIndex) const;

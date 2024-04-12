@@ -157,9 +157,8 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
    * interest and not everything should be stored, then use the @ref insert_boundary method instead
-   * (after creating the matrix with the
-   * @ref Chain_matrix(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor)
-   * constructor preferably).
+   * (after creating the matrix with the @ref Chain_matrix(unsigned int, Field_operators*, Cell_constructor*,
+   * EventComparatorFunction&&, EventComparatorFunction&&) constructor preferably).
    * @param operators  Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
    * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
