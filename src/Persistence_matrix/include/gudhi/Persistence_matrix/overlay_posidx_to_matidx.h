@@ -9,7 +9,7 @@
  */
 
 /**
- * @file overlay_@ref PosIdx_to_@ref MatIdx.h
+ * @file overlay_posidx_to_matidx.h
  * @author Hannah Schreiber
  * @brief Contains the @ref Position_to_index_overlay class.
  */

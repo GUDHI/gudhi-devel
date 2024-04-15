@@ -17,6 +17,7 @@
 #include <limits.h>
 
 namespace Gudhi {
+/// Field namespace
 namespace persistence_fields {
 
 /**

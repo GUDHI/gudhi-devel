@@ -42,7 +42,8 @@ class FieldOperators
   FieldOperators(characteristic_type characteristic = 0);
 
   /**
-   * @brief Sets the characteristic of the field.
+   * @brief Sets the characteristic of the field. Can eventually be omitted if the characteristic of the class
+   * is fixed.
    * 
    * @param characteristic Prime number corresponding to the desired characteristic of the field.
    */
@@ -107,8 +108,8 @@ class FieldOperators
   //  * Returns the result in the field.
   //  * 
   //  * @param e First element.
-  //  * @param m Second element.
-  //  * @param a Third element.
+  //  * @param a Second element.
+  //  * @param m Third element.
   //  * @return `((e + a) * m) % characteristic`, such that the result is positive.
   //  */
   // element_type add_and_multiply(element_type e, element_type a, element_type m) const;

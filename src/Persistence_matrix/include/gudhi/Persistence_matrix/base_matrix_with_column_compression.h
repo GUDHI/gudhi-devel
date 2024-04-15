@@ -8,7 +8,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
- /**
+/**
  * @file base_matrix_with_column_compression.h
  * @author Hannah Schreiber
  * @brief Contains the @ref Base_matrix_with_column_compression class.
@@ -325,7 +325,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    */
   friend void swap(Base_matrix_with_column_compression& matrix1, Base_matrix_with_column_compression& matrix2) {
     matrix1.columnToRep_.swap(matrix2.columnToRep_);
-    swap(matrix1.columnClasses_, matrix2.columnClasses_);
+    std::swap(matrix1.columnClasses_, matrix2.columnClasses_);
     matrix1.repToColumn_.swap(matrix2.repToColumn_);  // be careful when columnPool_ becomes not static
     std::swap(matrix1.nextColumnIndex_, matrix2.nextColumnIndex_);
     std::swap(matrix1.operators_, matrix2.operators_);

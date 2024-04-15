@@ -9,7 +9,7 @@
  */
 
 /**
- * @file overlay_@ref IDIdx_to_@ref MatIdx.h
+ * @file overlay_ididx_to_matidx.h
  * @author Hannah Schreiber
  * @brief Contains the @ref Id_to_index_overlay class.
  */
