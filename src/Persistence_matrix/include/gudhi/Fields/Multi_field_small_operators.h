@@ -10,7 +10,7 @@
 
 /**
  * @file Multi_field_small_operators.h
- * @author Hannah Schreiber
+ * @author Hannah Schreiber, Clément Maria
  * @brief Contains the @ref Multi_field_operators_with_small_characteristics class.
  */
 

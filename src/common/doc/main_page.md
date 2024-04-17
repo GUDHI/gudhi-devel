@@ -6,7 +6,7 @@
 
 ## Data structures for cell complexes {#Complexes}
 ### Cubical complexes
- 
+
 <table>
   <tr>
     <td width="35%" rowspan=2>
@@ -21,12 +21,12 @@
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref cubical_complex
+      <b>User manual:</b> \ref cubical_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Simplicial complexes
@@ -39,20 +39,20 @@
     </td>
     <td width="50%">
     The simplex tree is an efficient and flexible
- data structure for representing general (filtered) simplicial complexes. The data structure
- is described in \cite boissonnatmariasimplextreealgorithmica .
+    data structure for representing general (filtered) simplicial complexes. The data structure
+    is described in \cite boissonnatmariasimplextreealgorithmica .
     </td>
     <td width="15%">
       <b>Author:</b> Cl&eacute;ment Maria<br>
       <b>Introduced in:</b> GUDHI 1.0.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref simplex_tree
+      <b>User manual:</b> \ref simplex_tree
     </td>
- </tr>
+  </tr>
 </table>
 
 #### Toplex Map
@@ -72,12 +72,12 @@
       <b>Introduced in:</b> GUDHI 2.1.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref toplex_map
+      <b>User manual:</b> \ref toplex_map
     </td>
- </tr>
+  </tr>
 </table>
 
 #### Skeleton blocker
@@ -100,12 +100,12 @@
       <b>Introduced in:</b> GUDHI 1.1.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref skbl
+      <b>User manual:</b> \ref skbl
     </td>
- </tr>
+  </tr>
 </table>
 
 #### Basic operation: contraction
@@ -127,12 +127,12 @@
       <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
       <b>Requires:</b> \ref cgal &ge; 4.11.0
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref contr
+      <b>User manual:</b> \ref contr
     </td>
- </tr>
+  </tr>
 </table>
 
 ## Filtrations
@@ -158,18 +158,18 @@
       <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
       <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref alpha_complex
+      <b>User manual:</b> \ref alpha_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Čech complex
 
 <table>
- <tr>
+  <tr>
     <td width="35%" rowspan=2>
       \image html "cech_complex_representation.png"
     </td>
@@ -183,12 +183,12 @@
       <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
       <b>Requires:</b> \ref cgal
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref cech_complex
+      <b>User manual:</b> \ref cech_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Rips complex
@@ -209,12 +209,12 @@
       <b>Introduced in:</b> GUDHI 2.0.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref rips_complex
+      <b>User manual:</b> \ref rips_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Edge collapse
@@ -238,12 +238,12 @@
       <b>Introduced in:</b> GUDHI 3.3.0<br>
       <b>Copyright:</b> MIT
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref edge_collapse
+      <b>User manual:</b> \ref edge_collapse
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Witness complex
@@ -263,12 +263,12 @@
       <b>Copyright:</b> MIT ([GPL v3](../../licensing/) for Euclidean version)<br>
       <b>Euclidean version requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref witness_complex
+      <b>User manual:</b> \ref witness_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Cover Complexes
@@ -289,12 +289,12 @@
       <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
       <b>Requires:</b> \ref cgal &ge; 4.11.0
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref cover_complex
+      <b>User manual:</b> \ref cover_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ## Manifold reconstructions
@@ -315,12 +315,12 @@
       <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
       <b>Requires:</b> \ref eigen &ge; 3.1.0
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
     <b>User manual:</b> \ref coxeter_triangulation
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Tangential complex
@@ -343,12 +343,12 @@
       <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
       <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref tangential_complex
+      <b>User manual:</b> \ref tangential_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ## Topological descriptors computation {#TopologicalDescriptorsComputation}
@@ -375,16 +375,17 @@
       <b>Introduced in:</b> GUDHI 1.0.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref persistent_cohomology
+      <b>User manual:</b> \ref persistent_cohomology
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Persistence Matrix
 
+[//]: # (TODO: picture)
 <table>
   <tr>
     <td width="35%" rowspan=2>
@@ -393,19 +394,18 @@
     <td width="50%">
     Matrix structure for filtered complexes with multiple functionnalities related to persistence homology,
     such as representative cycles computation or vineyards.
-    TODO: picture
     </td>
     <td width="15%">
       <b>Author:</b> Hannah Schreiber<br>
       <b>Introduced in:</b> GUDHI 1.0.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref persistence_matrix and \ref persistence_fields
+      <b>User manual:</b> \ref persistence_matrix and \ref persistence_fields
     </td>
- </tr>
+  </tr>
 </table>
 
 ## Topological descriptors tools {#TopologicalDescriptorsTools}
@@ -431,12 +431,12 @@
       <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
       <b>Requires:</b> \ref cgal &ge; 4.11.0
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref bottleneck_distance
+      <b>User manual:</b> \ref bottleneck_distance
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Persistence representations
@@ -456,12 +456,12 @@
       <b>Introduced in:</b> GUDHI 2.1.0<br>
       <b>Copyright:</b> MIT<br>      
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref Persistence_representations
+      <b>User manual:</b> \ref Persistence_representations
     </td>
- </tr>
+  </tr>
 </table>
 
 ## Point cloud utilities {#PointCloudUtils}
@@ -479,10 +479,10 @@
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>Manuals:</b> \ref spatial_searching, \ref subsampling
+      <b>Manuals:</b> \ref spatial_searching, \ref subsampling
     </td>
- </tr>
+  </tr>
 </table>

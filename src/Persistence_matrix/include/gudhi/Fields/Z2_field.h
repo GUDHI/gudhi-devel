@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022 Inria
+ *    Copyright (C) 2022-24 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -31,7 +31,7 @@ namespace persistence_fields {
 class Z2_field_element
 {
  public:
-  using element_type = unsigned int;  /**< Type for the elements in the field. */
+  using element_type = bool;  /**< Type for the elements in the field. */
   template <class T>
   using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
@@ -42,15 +42,11 @@ class Z2_field_element
   /**
    * @brief Constructor setting the element to the given value.
    * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic.
    * @param element Value of the element.
    */
-  Z2_field_element(unsigned int element);
-  /**
-   * @brief Constructor setting the element to the given value.
-   * 
-   * @param element Value of the element.
-   */
-  Z2_field_element(int element);
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  Z2_field_element(Integer_type element);
   /**
    * @brief Copy constructor.
    * 
@@ -79,17 +75,18 @@ class Z2_field_element
   }
   /**
    * @brief operator+=
-   */
-  friend void operator+=(Z2_field_element& f, unsigned int const v) { f.element_ = (f.element_ != (v % 2)); }
-  /**
-   * @brief operator+
-   *
-   * @warning @p v will be casted into an unsigned int.
    *
    * @tparam Integer_type A native integer type: int, unsigned int, long int, bool, etc.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend Z2_field_element operator+(Z2_field_element f, const Integer_type v) {
+  friend void operator+=(Z2_field_element& f, const Integer_type& v) { f.element_ = (f.element_ != _get_value(v)); }
+  /**
+   * @brief operator+
+   *
+   * @tparam Integer_type A native integer type: int, unsigned int, long int, bool, etc.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend Z2_field_element operator+(Z2_field_element f, const Integer_type& v) {
     f += v;
     return f;
   }
@@ -99,8 +96,8 @@ class Z2_field_element
    * @tparam Integer_type A native integer type: int, unsigned int, long int, bool, etc.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend Integer_type operator+(const Integer_type v, Z2_field_element const& f) {
-    return f.element_ != (v % 2);
+  friend Integer_type operator+(const Integer_type& v, const Z2_field_element& f) {
+    return f.element_ != _get_value(v);
   }
 
   /**
@@ -118,17 +115,18 @@ class Z2_field_element
   }
   /**
    * @brief operator-=
-   */
-  friend void operator-=(Z2_field_element& f, unsigned int const v) { f.element_ = (f.element_ != (v % 2)); }
-  /**
-   * @brief operator-
-   *
-   * @warning @p v will be casted into an unsigned int.
    *
    * @tparam Integer_type A native integer type: int, unsigned int, long int, bool, etc.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend Z2_field_element operator-(Z2_field_element f, const Integer_type v) {
+  friend void operator-=(Z2_field_element& f, const Integer_type& v) { f.element_ = (f.element_ != _get_value(v)); }
+  /**
+   * @brief operator-
+   *
+   * @tparam Integer_type A native integer type: int, unsigned int, long int, bool, etc.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend Z2_field_element operator-(Z2_field_element f, const Integer_type& v) {
     f -= v;
     return f;
   }
@@ -139,7 +137,7 @@ class Z2_field_element
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend Integer_type operator-(const Integer_type v, Z2_field_element const& f) {
-    return f.element_ != (v % 2);
+    return f.element_ != _get_value(v);
   }
 
   /**
@@ -157,18 +155,18 @@ class Z2_field_element
   }
   /**
    * @brief operator*=
-   */
-  friend void operator*=(Z2_field_element& f, unsigned int const v) { f.element_ = (f.element_ && (v % 2)); }
-  // v will be casted into an unsigned int
-  /**
-   * @brief operator*
-   *
-   * @warning @p v will be casted into an unsigned int.
    *
    * @tparam Integer_type A native integer type: int, unsigned int, long int, bool, etc.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend Z2_field_element operator*(Z2_field_element f, const Integer_type v) {
+  friend void operator*=(Z2_field_element& f, const Integer_type& v) { f.element_ = (f.element_ && _get_value(v)); }
+  /**
+   * @brief operator*
+   *
+   * @tparam Integer_type A native integer type: int, unsigned int, long int, bool, etc.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend Z2_field_element operator*(Z2_field_element f, const Integer_type& v) {
     f *= v;
     return f;
   }
@@ -178,8 +176,8 @@ class Z2_field_element
    * @tparam Integer_type A native integer type: int, unsigned int, long int, bool, etc.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend Integer_type operator*(const Integer_type v, Z2_field_element const& f) {
-    return f.element_ && (v % 2);
+  friend Integer_type operator*(const Integer_type& v, Z2_field_element const& f) {
+    return f.element_ && _get_value(v);
   }
 
   /**
@@ -192,8 +190,8 @@ class Z2_field_element
    * @tparam Integer_type A native integer type: int, unsigned int, long int, bool, etc.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend bool operator==(const Integer_type v, const Z2_field_element& f) {
-    return (v % 2) == f.element_;
+  friend bool operator==(const Integer_type& v, const Z2_field_element& f) {
+    return _get_value(v) == f.element_;
   }
   /**
    * @brief operator==
@@ -201,8 +199,8 @@ class Z2_field_element
    * @tparam Integer_type A native integer type: int, unsigned int, long int, bool, etc.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend bool operator==(const Z2_field_element& f, const Integer_type v) {
-    return (v % 2) == f.element_;
+  friend bool operator==(const Z2_field_element& f, const Integer_type& v) {
+    return _get_value(v) == f.element_;
   }
   /**
    * @brief operator!=
@@ -290,19 +288,27 @@ class Z2_field_element
    * 
    * @return Value of the element.
    */
-  unsigned int get_value() const;
+  element_type get_value() const;
 
   // static constexpr bool handles_only_z2() { return true; }
 
  private:
-  bool element_;
+  element_type element_;
+
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  static constexpr element_type _get_value(Integer_type e) {
+    if constexpr (std::is_same_v<Integer_type, bool>) {
+      return e;
+    } else {
+      return e < 2 && e >= 0 ? e : e % 2;  // returns bool, so %2 won't be negative and is optimized to &
+    }
+  }
 };
 
 inline Z2_field_element::Z2_field_element() : element_(false) {}
 
-inline Z2_field_element::Z2_field_element(unsigned int element) : element_(element & 1U) {}
-
-inline Z2_field_element::Z2_field_element(int element) : element_(element & 1U) {}
+template <typename Integer_type, class>
+inline Z2_field_element::Z2_field_element(Integer_type element) : element_(_get_value(element)) {}
 
 inline Z2_field_element::Z2_field_element(const Z2_field_element& toCopy) : element_(toCopy.element_) {}
 
@@ -315,7 +321,7 @@ inline Z2_field_element& Z2_field_element::operator=(Z2_field_element other) {
 }
 
 inline Z2_field_element& Z2_field_element::operator=(unsigned int const value) {
-  element_ = value & 1U;
+  element_ = _get_value(value);
   return *this;
 }
 
@@ -341,7 +347,7 @@ inline Z2_field_element Z2_field_element::get_partial_multiplicative_identity(
 
 inline constexpr unsigned int Z2_field_element::get_characteristic() { return 2; }
 
-inline unsigned int Z2_field_element::get_value() const { return element_; }
+inline Z2_field_element::element_type Z2_field_element::get_value() const { return element_; }
 
 }  // namespace persistence_fields
 }  // namespace Gudhi

@@ -8,6 +8,12 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+/**
+ * @file Zp_field_shared.h
+ * @author Hannah Schreiber
+ * @brief Contains the @ref Shared_Zp_field_element class.
+ */
+
 #ifndef MATRIX_FIELD_ZP_VAR_H_
 #define MATRIX_FIELD_ZP_VAR_H_
 
@@ -20,322 +26,393 @@ namespace Gudhi {
 namespace persistence_fields {
 
 /**
+ * @class Shared_Zp_field_element Zp_field_shared.h gudhi/Fields/Zp_field_shared.h
  * @ingroup persistence_fields
  *
- * @brief TODO:
- * 
+ * @brief Class representing an element of the \f$ \mathbb{F}_p \f$ field for any prime number \f$ p \f$.
+ * If each instanciation of the class can represent another element, they all share the same characteritics.
+ * That is if the characteristics are set for one, they will be set for all the others. The characteristics can
+ * be set before instianciating the elements with the static @ref Shared_Zp_field_element::initialize method.
+ *
+ * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, long unsigned int, etc.
+ * Will be used as the field element type.
  */
+template <typename Unsigned_integer_type = unsigned int,
+          class = std::enable_if_t<std::is_unsigned_v<Unsigned_integer_type> > >
 class Shared_Zp_field_element {
-public:
-	using element_type = unsigned int;
-	template <class T>
-	using isInteger = std::enable_if_t<std::is_integral_v<T> >;
+ public:
+  using element_type = Unsigned_integer_type; /**< Type for the elements in the field. */
+  using characteristic_type = element_type;   /**< Type for the field characteristic. */
+  template <class T>
+  using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
-	Shared_Zp_field_element();
-	Shared_Zp_field_element(unsigned int element);
-	Shared_Zp_field_element(int element);	//only works if characteristic can be contained in an int
-	Shared_Zp_field_element(const Shared_Zp_field_element& toCopy);
-	Shared_Zp_field_element(Shared_Zp_field_element&& toMove) noexcept;
+  /**
+   * @brief Default constructor. Sets the element to 0.
+   */
+  Shared_Zp_field_element() : element_(0) {}
+  /**
+   * @brief Constructor setting the element to the given value.
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   * @param element Value of the element.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  Shared_Zp_field_element(Integer_type element) : element_(_get_value(element)) {}
+  /**
+   * @brief Copy constructor.
+   * 
+   * @param toCopy Element to copy.
+   */
+  Shared_Zp_field_element(const Shared_Zp_field_element& toCopy) : element_(toCopy.element_) {}
+  /**
+   * @brief Move constructor.
+   * 
+   * @param toMove Element to move.
+   */
+  Shared_Zp_field_element(Shared_Zp_field_element&& toMove) noexcept : element_(std::exchange(toMove.element_, 0)) {}
 
-	static void initialize(unsigned int characteristic);
+  /**
+   * @brief Initialize the field to the given characteristic.
+   * Should be called first before constructing the field elements.
+   * 
+   * @param characteristic Characteristic of the field. A positive prime number.
+   */
+  static void initialize(characteristic_type characteristic) {
+    if (characteristic <= 1)
+      throw std::invalid_argument("Characteristic must be strictly positive and a prime number.");
 
-	friend void operator+=(Shared_Zp_field_element& f1, Shared_Zp_field_element const &f2){
-		f1.element_ = Shared_Zp_field_element::_add(f1.element_, f2.element_);
-	}
-	friend Shared_Zp_field_element operator+(Shared_Zp_field_element f1, Shared_Zp_field_element const& f2){
-		f1 += f2;
-		return f1;
-	}
-	friend void operator+=(Shared_Zp_field_element& f, unsigned int const v){
-		f.element_ = Shared_Zp_field_element::_add(f.element_, v < characteristic_ ? v : v % characteristic_);
-	}
-	//v is assumed to be positive and will be casted into an unsigned int
-	template<typename Integer_type, class = isInteger<Integer_type> >
-	friend Shared_Zp_field_element operator+(Shared_Zp_field_element f, const Integer_type v){
-		f += v;
-		return f;
-	}
-	//v is assumed to be positive
-	template<typename Integer_type, class = isInteger<Integer_type> >
-	friend Integer_type operator+(Integer_type v, Shared_Zp_field_element const& f){
-		v += f.element_;
-		if (v >= characteristic_) v %= characteristic_;
-		return v;
-	}
+    inverse_.resize(characteristic);
+    inverse_[0] = 0;
+    for (element_type i = 1; i < characteristic; ++i) {
+      element_type inv = 1;
+      element_type mult = inv * i;
+      while ((mult % characteristic) != 1) {
+        ++inv;
+        if (mult == characteristic) throw std::invalid_argument("Characteristic must be a prime number.");
+        mult = inv * i;
+      }
+      inverse_[i] = inv;
+    }
 
-	friend void operator-=(Shared_Zp_field_element& f1, Shared_Zp_field_element const &f2){
-		f1.element_ = Shared_Zp_field_element::_substract(f1.element_, f2.element_);
-	}
-	friend Shared_Zp_field_element operator-(Shared_Zp_field_element f1, Shared_Zp_field_element const& f2){
-		f1 -= f2;
-		return f1;
-	}
-	friend void operator-=(Shared_Zp_field_element& f, unsigned int const v){
-		f.element_ = Shared_Zp_field_element::_substract(f.element_, v < characteristic_ ? v : v % characteristic_);
-	}
-	//v is assumed to be positive and will be casted into an unsigned int
-	template<typename Integer_type, class = isInteger<Integer_type> >
-	friend Shared_Zp_field_element operator-(Shared_Zp_field_element f, const Integer_type v){
-		f -= v;
-		return f;
-	}
-	//v is assumed to be positive
-	template<typename Integer_type, class = isInteger<Integer_type> >
-	friend Integer_type operator-(Integer_type v, Shared_Zp_field_element const& f){
-		if (v >= characteristic_) v %= characteristic_;
-		if (f.element_ > v) v += characteristic_;
-		v -= f.element_;
-		return v;
-	}
+    characteristic_ = characteristic;
+  }
 
-	friend void operator*=(Shared_Zp_field_element& f1, Shared_Zp_field_element const &f2){
-		f1.element_ = Shared_Zp_field_element::_multiply(f1.element_, f2.element_);
-	}
-	friend Shared_Zp_field_element operator*(Shared_Zp_field_element f1, Shared_Zp_field_element const& f2){
-		f1 *= f2;
-		return f1;
-	}
-	friend void operator*=(Shared_Zp_field_element& f, unsigned int const v){
-		f.element_ = Shared_Zp_field_element::_multiply(f.element_, v < characteristic_ ? v : v % characteristic_);
-	}
-	//v is assumed to be positive and will be casted into an unsigned int
-	template<typename Integer_type, class = isInteger<Integer_type> >
-	friend Shared_Zp_field_element operator*(Shared_Zp_field_element f, const Integer_type v){
-		f *= v;
-		return f;
-	}
-	//uses bitwise operations on v, so be carefull with signed integers
-	template<typename Integer_type, class = isInteger<Integer_type> >
-	friend Integer_type operator*(Integer_type v, Shared_Zp_field_element const& f){
-		unsigned int b = f.element_;
-		unsigned int res = 0;
-		unsigned int temp_b;
+  /**
+   * @brief Returns the value of the element.
+   * 
+   * @return Value of the element.
+   */
+  element_type get_value() const { return element_; }
 
-		while (v != 0) {
-			if (v & 1) {
-				if (b >= characteristic_ - res)
-					res -= characteristic_;
-				res += b;
-			}
-			v >>= 1;
+  /**
+   * @brief operator+=
+   */
+  friend void operator+=(Shared_Zp_field_element& f1, const Shared_Zp_field_element& f2) {
+    f1.element_ = Shared_Zp_field_element::_add(f1.element_, f2.element_);
+  }
+  /**
+   * @brief operator+
+   */
+  friend Shared_Zp_field_element operator+(Shared_Zp_field_element f1, const Shared_Zp_field_element& f2) {
+    f1 += f2;
+    return f1;
+  }
+  /**
+   * @brief operator+=
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend void operator+=(Shared_Zp_field_element& f, const Integer_type& v) {
+    f.element_ = Shared_Zp_field_element::_add(f.element_, _get_value(v));
+  }
+  /**
+   * @brief operator+
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend Shared_Zp_field_element operator+(Shared_Zp_field_element f, const Integer_type& v) {
+    f += v;
+    return f;
+  }
+  /**
+   * @brief operator+
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend Integer_type operator+(const Integer_type& v, Shared_Zp_field_element f) {
+    f += v;
+    return f.element_;
+  }
 
-			temp_b = b;
-			if (b >= characteristic_ - b)
-				temp_b -= characteristic_;
-			b += temp_b;
-		}
+  /**
+   * @brief operator-=
+   */
+  friend void operator-=(Shared_Zp_field_element& f1, const Shared_Zp_field_element& f2) {
+    f1.element_ = Shared_Zp_field_element::_substract(f1.element_, f2.element_);
+  }
+  /**
+   * @brief operator-
+   */
+  friend Shared_Zp_field_element operator-(Shared_Zp_field_element f1, const Shared_Zp_field_element& f2) {
+    f1 -= f2;
+    return f1;
+  }
+  /**
+   * @brief operator-=
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend void operator-=(Shared_Zp_field_element& f, const Integer_type& v) {
+    f.element_ = Shared_Zp_field_element::_substract(f.element_, _get_value(v));
+  }
+  /**
+   * @brief operator-
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend Shared_Zp_field_element operator-(Shared_Zp_field_element f, const Integer_type& v) {
+    f -= v;
+    return f;
+  }
+  /**
+   * @brief operator-
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend Integer_type operator-(const Integer_type& v, const Shared_Zp_field_element& f) {
+    return Shared_Zp_field_element::_substract(_get_value(v), f.element_);
+  }
 
-		return res;
-	}
+  /**
+   * @brief operator*=
+   */
+  friend void operator*=(Shared_Zp_field_element& f1, const Shared_Zp_field_element& f2) {
+    f1.element_ = Shared_Zp_field_element::_multiply(f1.element_, f2.element_);
+  }
+  /**
+   * @brief operator*
+   */
+  friend Shared_Zp_field_element operator*(Shared_Zp_field_element f1, const Shared_Zp_field_element& f2) {
+    f1 *= f2;
+    return f1;
+  }
+  /**
+   * @brief operator*=
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend void operator*=(Shared_Zp_field_element& f, const Integer_type& v) {
+    f.element_ = Shared_Zp_field_element::_multiply(f.element_, _get_value(v));
+  }
+  /**
+   * @brief operator*
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend Shared_Zp_field_element operator*(Shared_Zp_field_element f, const Integer_type& v) {
+    f *= v;
+    return f;
+  }
+  /**
+   * @brief operator*
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic. if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend Integer_type operator*(const Integer_type& v, Shared_Zp_field_element f) {
+    f *= v;
+    return f.element_;
+  }
 
-	friend bool operator==(const Shared_Zp_field_element& f1, const Shared_Zp_field_element& f2){
-		return f1.element_ == f2.element_;
-	}
-	//v is assumed to be positive
-	template<typename Integer_type, class = isInteger<Integer_type> >
-	friend bool operator==(const Integer_type v, const Shared_Zp_field_element& f){
-		if (v < characteristic_) return v == f.element_;
-		return (v % characteristic_) == f.element_;
-	}
-	//v is assumed to be positive
-	template<typename Integer_type, class = isInteger<Integer_type> >
-	friend bool operator==(const Shared_Zp_field_element& f, const Integer_type v){
-		if (v < characteristic_) return v == f.element_;
-		return (v % characteristic_) == f.element_;
-	}
-	friend bool operator!=(const Shared_Zp_field_element& f1, const Shared_Zp_field_element& f2){
-		return !(f1 == f2);
-	}
-	//v is assumed to be positive
-	template<typename Integer_type, class = isInteger<Integer_type> >
-	friend bool operator!=(const Integer_type v, const Shared_Zp_field_element& f){
-		return !(v == f);
-	}
-	//v is assumed to be positive
-	template<typename Integer_type, class = isInteger<Integer_type> >
-	friend bool operator!=(const Shared_Zp_field_element& f, const Integer_type v){
-		return !(v == f);
-	}
+  /**
+   * @brief operator==
+   */
+  friend bool operator==(const Shared_Zp_field_element& f1, const Shared_Zp_field_element& f2) {
+    return f1.element_ == f2.element_;
+  }
+  /**
+   * @brief operator==
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend bool operator==(const Integer_type& v, const Shared_Zp_field_element& f) {
+    return Shared_Zp_field_element::_get_value(v) == f.element_;
+  }
+  /**
+   * @brief operator==
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend bool operator==(const Shared_Zp_field_element& f, const Integer_type& v) {
+    return Shared_Zp_field_element::_get_value(v) == f.element_;
+  }
+  /**
+   * @brief operator!=
+   */
+  friend bool operator!=(const Shared_Zp_field_element& f1, const Shared_Zp_field_element& f2) { return !(f1 == f2); }
+  /**
+   * @brief operator!=
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend bool operator!=(const Integer_type& v, const Shared_Zp_field_element& f) {
+    return !(v == f);
+  }
+  /**
+   * @brief operator!=
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  friend bool operator!=(const Shared_Zp_field_element& f, const Integer_type& v) {
+    return !(v == f);
+  }
 
-	Shared_Zp_field_element& operator=(Shared_Zp_field_element other);
-	Shared_Zp_field_element& operator=(const unsigned int value);
-	operator unsigned int() const;
-	friend void swap(Shared_Zp_field_element& f1, Shared_Zp_field_element& f2){
-		std::swap(f1.element_, f2.element_);
-	}
+  /**
+   * @brief Assign operator.
+   */
+  Shared_Zp_field_element& operator=(Shared_Zp_field_element other) {
+    std::swap(element_, other.element_);
+    return *this;
+  }
+  /**
+   * @brief Assign operator.
+   * 
+   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+   */
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  Shared_Zp_field_element& operator=(const Integer_type& value) {
+    element_ = Shared_Zp_field_element::_get_value(value);
+    return *this;
+  }
+  /**
+   * @brief Swap operator.
+   */
+  friend void swap(Shared_Zp_field_element& f1, Shared_Zp_field_element& f2) { std::swap(f1.element_, f2.element_); }
 
-	Shared_Zp_field_element get_inverse() const;
-	std::pair<Shared_Zp_field_element, unsigned int> get_partial_inverse(unsigned int productOfCharacteristics) const;
+  /**
+   * @brief Casts the element into an unsigned int.
+   */
+  operator unsigned int() const { return element_; }
 
-	static Shared_Zp_field_element get_additive_identity();
-	static Shared_Zp_field_element get_multiplicative_identity();
-	static Shared_Zp_field_element get_partial_multiplicative_identity([[maybe_unused]] unsigned int productOfCharacteristics);
-	static unsigned int get_characteristic();
+  /**
+   * @brief Returns the inverse of the element in the field.
+   * 
+   * @return The inverse.
+   */
+  Shared_Zp_field_element get_inverse() const { return Shared_Zp_field_element(inverse_[element_]); }
+  /**
+   * @brief For interface purposes with multi-fields. Returns the inverse together with the argument.
+   * 
+   * @param productOfCharacteristics Some value.
+   * @return Pair whose first element is the inverse and the second element is @p productOfCharacteristics.
+   */
+  std::pair<Shared_Zp_field_element, characteristic_type> get_partial_inverse(
+      characteristic_type productOfCharacteristics) const {
+    return {get_inverse(), productOfCharacteristics};
+  }
 
-	unsigned int get_value() const;
+  /**
+   * @brief Returns the additive identity of the field.
+   * 
+   * @return 0.
+   */
+  static Shared_Zp_field_element get_additive_identity() { return Shared_Zp_field_element(); }
+  /**
+   * @brief Returns the multiplicative identity of the field.
+   * 
+   * @return 1.
+   */
+  static Shared_Zp_field_element get_multiplicative_identity() { return Shared_Zp_field_element(1); }
+  /**
+   * @brief For interface purposes with multi-fields. Returns the multiplicative identity of the field.
+   * 
+   * @param productOfCharacteristics Some value.
+   * @return 1.
+   */
+  static Shared_Zp_field_element get_partial_multiplicative_identity(
+      [[maybe_unused]] characteristic_type productOfCharacteristics) {
+    return Shared_Zp_field_element(1);
+  }
+  /**
+   * @brief Returns the current characteristic.
+   * 
+   * @return The value of the current characteristic.
+   */
+  static characteristic_type get_characteristic() { return characteristic_; }
 
-	static constexpr bool handles_only_z2(){
-		return false;
-	}
+  // static constexpr bool handles_only_z2() { return false; }
 
-private:
-	unsigned int element_;
-	static inline unsigned int characteristic_;
-	static inline std::vector<unsigned int> inverse_;
+ private:
+  element_type element_;                              /**< Field element. */
+  static inline characteristic_type characteristic_;  /**< Current characteristic of the field. */
+  static inline std::vector<element_type> inverse_;   /**< All inverse elements. */
 
-	static unsigned int _add(unsigned int element, unsigned int v);
-	static unsigned int _substract(unsigned int element, unsigned int v);
-	static unsigned int _multiply(unsigned int element, unsigned int v);
+  static element_type _add(element_type element, element_type v) {
+    if (UINT_MAX - element < v) {
+      // automatic unsigned integer overflow behaviour will make it work
+      element += v;
+      element -= characteristic_;
+      return element;
+    }
+
+    element += v;
+    if (element >= characteristic_) element -= characteristic_;
+
+    return element;
+  }
+  static element_type _substract(element_type element, element_type v) {
+    if (element < v) {
+      element += characteristic_;
+    }
+    element -= v;
+
+    return element;
+  }
+  static element_type _multiply(element_type element, element_type v) {
+    element_type a = element;
+    element = 0;
+    element_type temp_b;
+
+    while (a != 0) {
+      if (a & 1) {
+        if (v >= characteristic_ - element) element -= characteristic_;
+        element += v;
+      }
+      a >>= 1;
+
+      temp_b = v;
+      if (v >= characteristic_ - v) temp_b -= characteristic_;
+      v += temp_b;
+    }
+
+    return element;
+  }
+
+  template <typename Integer_type, class = isInteger<Integer_type> >
+  static constexpr element_type _get_value(Integer_type e) {
+    if constexpr (std::is_signed_v<Integer_type>){
+      if (e < -static_cast<Integer_type>(characteristic_)) e = e % characteristic_;
+      if (e < 0) return e += characteristic_;
+      return e < static_cast<Integer_type>(characteristic_) ? e : e % characteristic_;
+    } else {
+      return e < characteristic_ ? e : e % characteristic_;
+    }
+  }
 };
 
-inline Shared_Zp_field_element::Shared_Zp_field_element()
-	: element_(0)
-{}
-
-inline Shared_Zp_field_element::Shared_Zp_field_element(unsigned int element)
-	: element_(element < characteristic_ ? element : element % characteristic_)
-{}
-
-inline Shared_Zp_field_element::Shared_Zp_field_element(int element)
-	: element_()
-{
-	int res = element < static_cast<int>(characteristic_) ? element : element % static_cast<int>(characteristic_);
-	if (res < 0) res += characteristic_;
-	element_ = res;
-}
-
-inline Shared_Zp_field_element::Shared_Zp_field_element(const Shared_Zp_field_element &toCopy)
-	: element_(toCopy.element_)
-{}
-
-inline Shared_Zp_field_element::Shared_Zp_field_element(Shared_Zp_field_element &&toMove) noexcept
-	: element_(std::exchange(toMove.element_, 0))
-{}
-
-inline void Shared_Zp_field_element::initialize(unsigned int characteristic)
-{
-	if (characteristic <= 1)
-		throw std::invalid_argument("Characteristic must be strictly positive and a prime number.");
-
-	inverse_.resize(characteristic);
-	inverse_[0] = 0;
-	for (unsigned int i = 1; i < characteristic; ++i) {
-		unsigned int inv = 1;
-		unsigned int mult = inv * i;
-		while ((mult % characteristic) != 1) {
-			++inv;
-			if (mult == characteristic)
-				throw std::invalid_argument("Characteristic must be a prime number.");
-			mult = inv * i;
-		}
-		inverse_[i] = inv;
-	}
-
-	characteristic_ = characteristic;
-}
-
-inline Shared_Zp_field_element &Shared_Zp_field_element::operator=(Shared_Zp_field_element other)
-{
-	std::swap(element_, other.element_);
-	return *this;
-}
-
-inline Shared_Zp_field_element &Shared_Zp_field_element::operator=(unsigned int const value)
-{
-	element_ = value < characteristic_ ? value : value % characteristic_;
-	return *this;
-}
-
-inline Shared_Zp_field_element::operator unsigned int() const
-{
-	return element_;
-}
-
-inline Shared_Zp_field_element Shared_Zp_field_element::get_inverse() const
-{
-	return Shared_Zp_field_element(inverse_[element_]);
-}
-
-inline std::pair<Shared_Zp_field_element, unsigned int>
-Shared_Zp_field_element::get_partial_inverse(unsigned int productOfCharacteristics) const
-{
-	return {get_inverse(), productOfCharacteristics};
-}
-
-inline Shared_Zp_field_element Shared_Zp_field_element::get_additive_identity()
-{
-	return Shared_Zp_field_element();
-}
-
-inline Shared_Zp_field_element Shared_Zp_field_element::get_multiplicative_identity()
-{
-	return Shared_Zp_field_element(1);
-}
-
-inline Shared_Zp_field_element Shared_Zp_field_element::get_partial_multiplicative_identity([[maybe_unused]] unsigned int productOfCharacteristics)
-{
-	return Shared_Zp_field_element(1);
-}
-
-inline unsigned int Shared_Zp_field_element::get_characteristic()
-{
-	return characteristic_;
-}
-
-inline unsigned int Shared_Zp_field_element::get_value() const
-{
-	return element_;
-}
-
-inline unsigned int Shared_Zp_field_element::_add(unsigned int element, unsigned int v)
-{
-	if (UINT_MAX - element < v) {
-		//automatic unsigned integer overflow behaviour will make it work
-		element += v;
-		element -= characteristic_;
-		return element;
-	}
-
-	element += v;
-	if (element >= characteristic_) element -= characteristic_;
-
-	return element;
-}
-
-inline unsigned int Shared_Zp_field_element::_substract(unsigned int element, unsigned int v)
-{
-	if (element < v){
-		element += characteristic_;
-	}
-	element -= v;
-
-	return element;
-}
-
-inline unsigned int Shared_Zp_field_element::_multiply(unsigned int element, unsigned int v)
-{
-	unsigned int a = element;
-	element = 0;
-	unsigned int temp_b;
-
-	while (a != 0) {
-		if (a & 1) {
-			if (v >= characteristic_ - element)
-				element -= characteristic_;
-			element += v;
-		}
-		a >>= 1;
-
-		temp_b = v;
-		if (v >= characteristic_ - v)
-			temp_b -= characteristic_;
-		v += temp_b;
-	}
-
-	return element;
-}
-
-} //namespace persistence_fields
-} //namespace Gudhi
+}  // namespace persistence_fields
+}  // namespace Gudhi
 
 #endif  // MATRIX_FIELD_ZP_VAR_H_

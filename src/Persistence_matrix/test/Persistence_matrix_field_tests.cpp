@@ -326,35 +326,35 @@ BOOST_AUTO_TEST_CASE(Field_properties)
 
 BOOST_AUTO_TEST_CASE(Shared_Field_constructors)
 {
-	Shared_Zp_field_element::initialize(2);
-	test_z2_standart_field_constructors<Shared_Zp_field_element>();
+	Shared_Zp_field_element<>::initialize(2);
+	test_z2_standart_field_constructors<Shared_Zp_field_element<> >();
 
-	Shared_Zp_field_element::initialize(5);
-	test_z5_standart_field_constructors<Shared_Zp_field_element>();
+	Shared_Zp_field_element<>::initialize(5);
+	test_z5_standart_field_constructors<Shared_Zp_field_element<> >();
 
-	Shared_Zp_field_element::initialize(13);
-	test_z13_standart_field_constructors<Shared_Zp_field_element>();
+	Shared_Zp_field_element<>::initialize(13);
+	test_z13_standart_field_constructors<Shared_Zp_field_element<> >();
 }
 
 BOOST_AUTO_TEST_CASE(Shared_Field_operators)
 {
-	Shared_Zp_field_element::initialize(2);
-	test_z2_standart_field_operators<Shared_Zp_field_element>();
+	Shared_Zp_field_element<>::initialize(2);
+	test_z2_standart_field_operators<Shared_Zp_field_element<> >();
 
-	Shared_Zp_field_element::initialize(5);
-	test_z5_standart_field_operators<Shared_Zp_field_element>();
+	Shared_Zp_field_element<>::initialize(5);
+	test_z5_standart_field_operators<Shared_Zp_field_element<> >();
 }
 
 BOOST_AUTO_TEST_CASE(Shared_Field_properties)
 {
-	Shared_Zp_field_element::initialize(2);
-	test_z2_standart_field_properties<Shared_Zp_field_element>();
+	Shared_Zp_field_element<>::initialize(2);
+	test_z2_standart_field_properties<Shared_Zp_field_element<> >();
 
-	Shared_Zp_field_element::initialize(5);
-	test_z5_standart_field_properties<Shared_Zp_field_element>();
+	Shared_Zp_field_element<>::initialize(5);
+	test_z5_standart_field_properties<Shared_Zp_field_element<> >();
 
-	Shared_Zp_field_element::initialize(7);
-	test_z7_standart_field_properties<Shared_Zp_field_element>();
+	Shared_Zp_field_element<>::initialize(7);
+	test_z7_standart_field_properties<Shared_Zp_field_element<> >();
 }
 
 template<class MF>
@@ -362,29 +362,29 @@ void test_multi_field_constructors(){
 	using T = typename MF::element_type;
 
 	//default constructor
-	Multi_field_element<5,13> m_d;
+	MF m_d;
 	BOOST_CHECK_EQUAL(m_d, T(0));
 
 	//value constructor
-	Multi_field_element<5,13> m_v(5006);
+	MF m_v(5006);
 	BOOST_CHECK_EQUAL(m_v, T(1));
 
 	//copy constructor
-	Multi_field_element<5,13> m_c1(5006);
-	Multi_field_element<5,13> m_c2 = m_c1;
+	MF m_c1(5006);
+	MF m_c2 = m_c1;
 	BOOST_CHECK_EQUAL(m_c2, T(1));
-	Multi_field_element<5,13> m_c3(m_c2);
+	MF m_c3(m_c2);
 	BOOST_CHECK_EQUAL(m_c3, T(1));
 
 	//move constructor
-	Multi_field_element<5,13> m_m1(5006);
-	Multi_field_element<5,13> m_m2(std::move(m_m1));
+	MF m_m1(5006);
+	MF m_m2(std::move(m_m1));
 	BOOST_CHECK_EQUAL(m_m2, T(1));
 	BOOST_CHECK_EQUAL(m_m1, T(0));
 
 	//swap
-	Multi_field_element<5,13> m_s1(5006);
-	Multi_field_element<5,13> m_s2(5005);
+	MF m_s1(5006);
+	MF m_s2(5005);
 	swap(m_s1, m_s2);
 	BOOST_CHECK_EQUAL(m_s2, T(1));
 	BOOST_CHECK_EQUAL(m_s1, T(0));
@@ -499,8 +499,8 @@ BOOST_AUTO_TEST_CASE(Shared_Multi_Field_constructors)
 	Shared_multi_field_element::initialize(5, 13);
 	test_multi_field_constructors<Shared_multi_field_element>();
 
-	Shared_multi_field_element_with_small_characteristics::initialize(5, 13);
-	test_multi_field_constructors<Shared_multi_field_element>();
+	Shared_multi_field_element_with_small_characteristics<>::initialize(5, 13);
+	test_multi_field_constructors<Shared_multi_field_element_with_small_characteristics<> >();
 }
 
 BOOST_AUTO_TEST_CASE(Shared_Multi_Field_operators)
@@ -508,8 +508,8 @@ BOOST_AUTO_TEST_CASE(Shared_Multi_Field_operators)
 	Shared_multi_field_element::initialize(5, 13);
 	test_multi_field_operators<Shared_multi_field_element>();
 
-	Shared_multi_field_element_with_small_characteristics::initialize(5, 13);
-	test_multi_field_operators<Shared_multi_field_element>();
+	Shared_multi_field_element_with_small_characteristics<>::initialize(5, 13);
+	test_multi_field_operators<Shared_multi_field_element_with_small_characteristics<> >();
 }
 
 BOOST_AUTO_TEST_CASE(Shared_Multi_Field_properties)
@@ -517,13 +517,13 @@ BOOST_AUTO_TEST_CASE(Shared_Multi_Field_properties)
 	Shared_multi_field_element::initialize(5, 13);
 	test_multi_field_properties<Shared_multi_field_element>();
 
-	Shared_multi_field_element_with_small_characteristics::initialize(5, 13);
-	test_multi_field_properties<Shared_multi_field_element>();
+	Shared_multi_field_element_with_small_characteristics<>::initialize(5, 13);
+	test_multi_field_properties<Shared_multi_field_element_with_small_characteristics<> >();
 
 	Shared_multi_field_element::initialize(3, 30);
-	Shared_multi_field_element_with_small_characteristics::initialize(3, 30);
+	Shared_multi_field_element_with_small_characteristics<>::initialize(3, 30);
 	Shared_multi_field_element mb1(2);
-	Shared_multi_field_element_with_small_characteristics mb2(2);
+	Shared_multi_field_element_with_small_characteristics<> mb2(2);
 
 	BOOST_CHECK_EQUAL(mb1.get_characteristic(), mb2.get_characteristic());	// == 3234846615
 	BOOST_CHECK_EQUAL(mb1.get_partial_inverse(35).first.get_value(), mb2.get_partial_inverse(35).first.get_value());	// == 2033332158
