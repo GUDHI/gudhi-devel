@@ -22,7 +22,7 @@ endif()
 add_test(NAME Simplex_tree_example_mini_simplex_tree COMMAND $<TARGET_FILE:Simplex_tree_example_mini_simplex_tree>)
 
 # An example with Simplex-tree using CGAL alpha_shapes_3
-if(GMP_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
+if(GMP_FOUND AND CGAL_FOUND)
   add_executable ( Simplex_tree_example_alpha_shapes_3_from_off example_alpha_shapes_3_simplex_tree_from_off_file.cpp )
   target_link_libraries(Simplex_tree_example_alpha_shapes_3_from_off ${GMP_LIBRARIES} CGAL::CGAL)
   if(TARGET TBB::tbb)
@@ -33,7 +33,7 @@ if(GMP_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
 
 endif()
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+if (CGAL_FOUND AND EIGEN3_FOUND)
   if(TARGET Boost::program_options)
     add_executable ( Simplex_tree_example_cech_complex_cgal_mini_sphere_3d cech_complex_cgal_mini_sphere_3d.cpp )
     target_link_libraries(Simplex_tree_example_cech_complex_cgal_mini_sphere_3d Boost::program_options CGAL::CGAL)

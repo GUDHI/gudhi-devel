@@ -2,7 +2,7 @@ project(Coxeter_triangulation_test)
 
 include(GUDHI_boost_test)
 
-if (NOT EIGEN3_VERSION VERSION_LESS 3.1.0)
+if (EIGEN3_FOUND)
   add_executable ( Coxeter_triangulation_permutahedral_representation_test perm_rep_test.cpp )
   gudhi_add_boost_test(Coxeter_triangulation_permutahedral_representation_test)
   
@@ -13,7 +13,7 @@ if (NOT EIGEN3_VERSION VERSION_LESS 3.1.0)
   gudhi_add_boost_test(Coxeter_triangulation_functions_test)
   
   # because of random_orthogonal_matrix inclusion
-  if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
+  if (CGAL_FOUND)
     add_executable ( Coxeter_triangulation_random_orthogonal_matrix_function_test random_orthogonal_matrix_function_test.cpp )
     target_link_libraries(Coxeter_triangulation_random_orthogonal_matrix_function_test CGAL::CGAL)
     gudhi_add_boost_test(Coxeter_triangulation_random_orthogonal_matrix_function_test)

@@ -1,6 +1,6 @@
 project(Collapse_tests)
 
-if (NOT EIGEN3_VERSION VERSION_LESS 3.1.0)
+if (EIGEN3_FOUND)
 
   include(GUDHI_boost_test)
   

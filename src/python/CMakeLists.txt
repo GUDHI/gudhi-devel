@@ -176,16 +176,16 @@ if(PYTHONINTERP_FOUND)
     set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'hera/bottleneck', ")
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'nerve_gic', ")
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'subsampling', ")
-    if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
+    if (CGAL_FOUND)
       set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'datasets/generators/_points', ")
       set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'bottleneck', ")
     endif ()
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+    if (CGAL_FOUND AND EIGEN3_FOUND)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'tangential_complex', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_witness_complex', ")
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_strong_witness_complex', ")
     endif ()
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+    if (CGAL_FOUND AND EIGEN3_FOUND)
       set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'alpha_complex', ")
     endif ()
     set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_pers_cub_low_dim', ")
@@ -201,6 +201,7 @@ if(PYTHONINTERP_FOUND)
 
 
     add_gudhi_debug_info("Boost version ${Boost_VERSION}")
+    set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${Boost_INCLUDE_DIRS}', ")
     if(CGAL_FOUND)
       foreach(CGAL_INCLUDE_DIR ${CGAL_INCLUDE_DIRS})
         set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${CGAL_INCLUDE_DIR}', ")
@@ -364,7 +365,7 @@ if(PYTHONINTERP_FOUND)
                 if(SCIPY_FOUND)
                   if(SKLEARN_FOUND)
                     if(OT_FOUND)
-                      if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+                      if(CGAL_FOUND AND EIGEN3_FOUND)
                         set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
                         # User warning - Sphinx is a static pages generator, and configured to work fine with user_version
                         # Images and biblio warnings because not found on developer version
@@ -384,10 +385,10 @@ if(PYTHONINTERP_FOUND)
                                  ${SPHINX_PATH} -b doctest ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/doctest)
                         # Set missing or not modules
                         set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
-                      else(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
-                        message("++ Python documentation module will not be compiled because it requires a Eigen3 and CGAL version >= 5.1.0")
+                      else(CGAL_FOUND AND EIGEN3_FOUND)
+                        message("++ Python documentation module will not be compiled because it requires Eigen3 >= 3.1.0 and CGAL >= 5.1.0")
                         set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-                      endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+                      endif(CGAL_FOUND AND EIGEN3_FOUND)
                     else(OT_FOUND)
                       message("++ Python documentation module will not be compiled because POT was not found")
                       set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
@@ -451,15 +452,15 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     # Test examples
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+    if (CGAL_FOUND AND EIGEN3_FOUND)
       # Bottleneck and Alpha
       add_test(NAME alpha_rips_persistence_bottleneck_distance_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_rips_persistence_bottleneck_distance.py"
                -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -t 0.15 -d 3)
-    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+    endif (CGAL_FOUND AND EIGEN3_FOUND)
+    if (CGAL_FOUND AND EIGEN3_FOUND)
       # Tangential
       add_test(NAME tangential_complex_plain_homology_from_off_file_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -482,8 +483,8 @@ if(PYTHONINTERP_FOUND)
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/euclidean_witness_complex_diagram_persistence_from_off_file_example.py"
                --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off -a 1.0 -n 20 -d 2)
 
-    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-    if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
+    endif (CGAL_FOUND AND EIGEN3_FOUND)
+    if (CGAL_FOUND)
       # Bottleneck
       add_test(NAME bottleneck_basic_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -491,7 +492,7 @@ if(PYTHONINTERP_FOUND)
                ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/bottleneck_basic_example.py")
 
       add_gudhi_py_test(test_bottleneck_distance)
-    endif (NOT CGAL_VERSION VERSION_LESS 4.11.0)
+    endif (CGAL_FOUND)
 
     # Cover complex
     file(COPY ${CMAKE_SOURCE_DIR}/data/points/human.off DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
@@ -522,7 +523,7 @@ if(PYTHONINTERP_FOUND)
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/voronoi_graph_induced_complex.py"
              -f human.off -n 700 -v)
 
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+    if (CGAL_FOUND AND EIGEN3_FOUND)
       # Alpha
       add_test(NAME alpha_complex_from_points_example_py_test
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -538,16 +539,16 @@ if(PYTHONINTERP_FOUND)
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
              --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
       add_gudhi_py_test(test_alpha_complex)
-    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+    endif (CGAL_FOUND AND EIGEN3_FOUND)
 
-    if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+    if (CGAL_FOUND AND EIGEN3_FOUND)
       # Euclidean witness
       add_gudhi_py_test(test_euclidean_witness_complex)
 
       # Datasets generators
       add_gudhi_py_test(test_datasets_generators) # TODO separate full python datasets generators in another test file independent from CGAL ?
 
-    endif (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+    endif (CGAL_FOUND AND EIGEN3_FOUND)
 
     # Rips
     add_test(NAME rips_complex_diagram_persistence_from_distance_matrix_file_example_py_test
@@ -571,7 +572,7 @@ if(PYTHONINTERP_FOUND)
 
     if(SKLEARN_FOUND)
       # test_sklearn_rips_persistence is using gudhi.datasets.generators
-      if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+      if (CGAL_FOUND AND EIGEN3_FOUND)
         add_gudhi_py_test(test_sklearn_rips_persistence)
       endif()
 
@@ -629,7 +630,7 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     # Representations
-    if(SKLEARN_FOUND AND MATPLOTLIB_FOUND AND OT_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
+    if(SKLEARN_FOUND AND MATPLOTLIB_FOUND AND OT_FOUND AND CGAL_FOUND)
       add_gudhi_py_test(test_representations)
     endif()
 

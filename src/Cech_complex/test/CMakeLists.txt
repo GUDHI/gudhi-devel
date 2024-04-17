@@ -1,4 +1,4 @@
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.0.1)
+if (CGAL_FOUND AND EIGEN3_FOUND)
   include(GUDHI_boost_test)
 
   add_executable ( Cech_complex_test_unit test_cech_complex.cpp )

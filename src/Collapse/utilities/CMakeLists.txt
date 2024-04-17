@@ -1,6 +1,6 @@
 project(Collapse_utilities)
 
-if (NOT EIGEN3_VERSION VERSION_LESS 3.1.0)
+if (EIGEN3_FOUND)
   if (TARGET Boost::program_options)
     # From a point cloud
     add_executable ( point_cloud_edge_collapse_rips_persistence point_cloud_edge_collapse_rips_persistence.cpp )

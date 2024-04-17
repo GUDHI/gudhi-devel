@@ -1,7 +1,7 @@
 project(Edge_collapse_examples)
 
 
-if (NOT EIGEN3_VERSION VERSION_LESS 3.1.0)
+if (EIGEN3_FOUND)
 
   # Point cloud
   add_executable ( Edge_collapse_example_basic edge_collapse_basic_example.cpp )

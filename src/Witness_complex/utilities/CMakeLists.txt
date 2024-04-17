@@ -1,7 +1,7 @@
 project(Witness_complex_utilities)
 
 # CGAL and Eigen3 are required for Euclidean version of Witness
-if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+if(CGAL_FOUND AND EIGEN3_FOUND)
   if(TARGET Boost::program_options)
     add_executable ( Witness_complex_strong_witness_persistence strong_witness_persistence.cpp )
     target_link_libraries(Witness_complex_strong_witness_persistence CGAL::CGAL Boost::program_options)
@@ -24,4 +24,4 @@ if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
     install(TARGETS Witness_complex_strong_witness_persistence DESTINATION bin)
     install(TARGETS Witness_complex_weak_witness_persistence DESTINATION bin)
   endif()
-endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+endif(CGAL_FOUND AND EIGEN3_FOUND)

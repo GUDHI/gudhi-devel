@@ -1,6 +1,6 @@
 project(Cech_complex_benchmark)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.0.1)
+if (CGAL_FOUND AND EIGEN3_FOUND)
   if(TARGET Boost::filesystem)
     # Do not forget to copy test files in current binary dir
     file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)

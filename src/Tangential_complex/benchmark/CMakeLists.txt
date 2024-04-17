@@ -1,9 +1,9 @@
 project(Tangential_complex_benchmark)
 
-if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+if(CGAL_FOUND AND EIGEN3_FOUND)
   add_executable(Tangential_complex_benchmark benchmark_tc.cpp)
   target_link_libraries(Tangential_complex_benchmark CGAL::CGAL)
   if(TARGET TBB::tbb)
     target_link_libraries(Tangential_complex_benchmark TBB::tbb)
   endif()
-endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+endif(CGAL_FOUND AND EIGEN3_FOUND)

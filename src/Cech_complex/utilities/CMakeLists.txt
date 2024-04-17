@@ -1,7 +1,7 @@
 if (TARGET Boost::program_options)
   project(Cech_complex_utilities)
 
-  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.0.1)
+  if (CGAL_FOUND AND EIGEN3_FOUND)
     add_executable(cech_persistence cech_persistence.cpp)
     target_link_libraries(cech_persistence CGAL::CGAL Boost::program_options)
 
@@ -31,7 +31,7 @@ if (TARGET Boost::program_options)
     install(TARGETS cech_persistence DESTINATION bin)
   endif()
 
-  if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+  if (CGAL_FOUND AND EIGEN3_FOUND)
     add_executable(delaunay_cech_persistence delaunay_cech_persistence.cpp)
     target_link_libraries(delaunay_cech_persistence CGAL::CGAL Boost::program_options)
 
