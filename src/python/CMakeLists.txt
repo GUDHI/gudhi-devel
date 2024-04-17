@@ -202,6 +202,9 @@ if(PYTHONINTERP_FOUND)
 
     add_gudhi_debug_info("Boost version ${Boost_VERSION}")
     if(CGAL_FOUND)
+      foreach(CGAL_INCLUDE_DIR ${CGAL_INCLUDE_DIRS})
+        set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${CGAL_INCLUDE_DIR}', ")
+      endforeach()
       if(NOT CGAL_VERSION VERSION_LESS 5.3.0)
         # CGAL_HEADER_ONLY has been dropped for CGAL >= 5.3. Only the header-only version is supported.
         set(CGAL_HEADER_ONLY True)

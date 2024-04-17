@@ -2,6 +2,7 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.0.1)
   include(GUDHI_boost_test)
 
   add_executable ( Cech_complex_test_unit test_cech_complex.cpp )
+  target_link_libraries(Cech_complex_test_unit CGAL::CGAL)
   if(TARGET TBB::tbb)
     target_link_libraries(Cech_complex_test_unit TBB::tbb)
   endif()

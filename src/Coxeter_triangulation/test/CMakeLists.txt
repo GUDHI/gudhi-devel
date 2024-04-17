@@ -15,7 +15,7 @@ if (NOT EIGEN3_VERSION VERSION_LESS 3.1.0)
   # because of random_orthogonal_matrix inclusion
   if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
     add_executable ( Coxeter_triangulation_random_orthogonal_matrix_function_test random_orthogonal_matrix_function_test.cpp )
-    target_link_libraries(Coxeter_triangulation_random_orthogonal_matrix_function_test ${CGAL_LIBRARY})
+    target_link_libraries(Coxeter_triangulation_random_orthogonal_matrix_function_test CGAL::CGAL)
     gudhi_add_boost_test(Coxeter_triangulation_random_orthogonal_matrix_function_test)
   endif()
   

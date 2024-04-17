@@ -23,8 +23,9 @@ install(TARGETS compute_number_of_dominant_intervals DESTINATION bin)
 
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_executable ( compute_bottleneck_distance compute_bottleneck_distance.cpp )
+  target_link_libraries(compute_bottleneck_distance CGAL::CGAL)
   if(TARGET TBB::tbb)
-  target_link_libraries(compute_bottleneck_distance TBB::tbb)
+    target_link_libraries(compute_bottleneck_distance TBB::tbb)
   endif()
   add_test(NAME Persistence_representation_utilities_compute_bottleneck_distance
       COMMAND $<TARGET_FILE:compute_bottleneck_distance>

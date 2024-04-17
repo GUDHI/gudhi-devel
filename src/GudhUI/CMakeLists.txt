@@ -28,7 +28,7 @@ if (OPENGL_FOUND)
           view/Viewer_instructor.cpp
           view/Viewer.cpp
         )
-        target_link_libraries( GudhUI Qt5::Widgets Qt5::Xml Qt5::OpenGL )
+        target_link_libraries( GudhUI CGAL::CGAL Qt5::Widgets Qt5::Xml Qt5::OpenGL )
         target_link_libraries( GudhUI ${QGLVIEWER_LIBRARIES} )
         target_link_libraries( GudhUI OpenGL::GL OpenGL::GLU )
         if(TARGET TBB::tbb)

@@ -45,7 +45,6 @@ endif()
 
 if(CGAL_FOUND)
   message(STATUS "CGAL version: ${CGAL_VERSION}.")
-  include( ${CGAL_USE_FILE} )
 endif()
 
 option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
@@ -93,9 +92,14 @@ endif()
 set(CGAL_WITH_EIGEN3_VERSION 0.0.0)
 find_package(Eigen3 3.1.0)
 if (EIGEN3_FOUND)
+  message("** Eigen 3 is found")
   include( ${EIGEN3_USE_FILE} )
   set(CGAL_WITH_EIGEN3_VERSION ${CGAL_VERSION})
 endif (EIGEN3_FOUND)
+
+if (CGAL_VERSION VERSION_LESS 5.0.0)
+  message("++ CGAL version ${CGAL_VERSION} is less than 5.0.0")
+endif()
 
 # Required programs for unitary tests purpose
 FIND_PROGRAM( GCOVR_PATH gcovr )

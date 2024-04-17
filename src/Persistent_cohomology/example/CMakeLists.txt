@@ -62,7 +62,7 @@ endif(GMP_FOUND)
 
 if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
   add_executable(custom_persistence_sort custom_persistence_sort.cpp)
-  target_link_libraries(custom_persistence_sort ${CGAL_LIBRARY})
+  target_link_libraries(custom_persistence_sort CGAL::CGAL)
   if(TARGET TBB::tbb)
     target_link_libraries(custom_persistence_sort TBB::tbb)
   endif()

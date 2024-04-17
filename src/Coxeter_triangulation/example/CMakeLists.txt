@@ -4,7 +4,7 @@ if (NOT EIGEN3_VERSION VERSION_LESS 3.1.0)
   # because of random_orthogonal_matrix inclusion
   if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
     add_executable ( Coxeter_triangulation_manifold_tracing_flat_torus_with_boundary_example manifold_tracing_flat_torus_with_boundary.cpp )
-    target_link_libraries(Coxeter_triangulation_manifold_tracing_flat_torus_with_boundary_example ${CGAL_LIBRARY})
+    target_link_libraries(Coxeter_triangulation_manifold_tracing_flat_torus_with_boundary_example CGAL::CGAL)
     add_test(NAME Coxeter_triangulation_manifold_tracing_flat_torus_with_boundary_example
              COMMAND $<TARGET_FILE:Coxeter_triangulation_manifold_tracing_flat_torus_with_boundary_example>)
   endif()
