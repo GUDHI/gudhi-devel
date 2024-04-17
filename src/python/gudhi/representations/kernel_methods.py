@@ -86,7 +86,7 @@ def pairwise_persistence_diagram_kernels(X, Y=None, kernel="sliced_wasserstein",
     elif kernel == "persistence_weighted_gaussian":
         return _pairwise(pairwise_kernels, False, XX, YY, metric=_sklearn_wrapper(_persistence_weighted_gaussian_kernel, X, Y, **kwargs), n_jobs=n_jobs)
     else:
-        return _pairwise(pairwise_kernels, False, XX, YY, metric=_sklearn_wrapper(metric, **kwargs), n_jobs=n_jobs)
+        return _pairwise(pairwise_kernels, False, XX, YY, metric=_sklearn_wrapper(kernel, **kwargs), n_jobs=n_jobs)
 
 class SlicedWassersteinKernel(BaseEstimator, TransformerMixin):
     """
