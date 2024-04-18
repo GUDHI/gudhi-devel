@@ -34,10 +34,14 @@ class KNearestNeighbors:
             return_distance (bool): if True, return the distance to each neighbor.
             implementation (str): choice of the library that does the real work.
 
-                * 'keops' for a brute-force, CUDA implementation through pykeops. Useful when the dimension becomes large (10+) but the number of points remains low (less than a million). Only "minkowski" and its aliases are supported.
+                * 'keops' for a brute-force, CUDA implementation through pykeops. Useful when the dimension becomes
+                  large (10+) but the number of points remains low (less than a million). Only "minkowski" and its
+                  aliases are supported.
                 * 'ckdtree' for scipy's cKDTree. Only "minkowski" and its aliases are supported.
-                * 'sklearn' for scikit-learn's NearestNeighbors. Note that this provides in particular an option algorithm="brute".
-                * 'hnsw' for hnswlib.Index. It can be very fast but does not provide guarantees. Only supports "euclidean" for now.
+                * 'sklearn' for scikit-learn's NearestNeighbors. Note that this provides in particular an option
+                  algorithm="brute".
+                * 'hnsw' for hnswlib.Index. It can be very fast but does not provide guarantees. Only supports
+                  "euclidean" for now.
                 * None will try to select a sensible one (scipy if possible, scikit-learn otherwise).
             metric (str): see `sklearn.neighbors.NearestNeighbors`.
             eps (float): relative error when computing nearest neighbors with the cKDTree.
@@ -53,6 +57,8 @@ class KNearestNeighbors:
                 Defaults to False.
             kwargs: additional parameters are forwarded to the backends.
         """
+        if k < 1:
+            raise ValueError(f"Expected number of neighbors (aka. 'k') > 0. Got {k}")
         self.k = k
         self.return_index = return_index
         self.return_distance = return_distance
@@ -90,6 +96,10 @@ class KNearestNeighbors:
         Args:
             X (numpy.array): coordinates for reference points.
         """
+        if self.k > len(X):
+            raise ValueError(
+                f"Expected number of neighbors (aka. 'k') <= number of samples, but k={self.k} and number of samples={len(X)}"
+            )
         self.ref_points = X
         if self.params.get("enable_autodiff", False):
             import eagerpy as ep
@@ -166,9 +176,7 @@ class KNearestNeighbors:
             assert self.metric == "minkowski"
             p = self.params["p"]
             Y = ep.astensor(self.ref_points)
-            neighbor_pts = Y[
-                neighbors,
-            ]
+            neighbor_pts = Y[neighbors,]
             diff = neighbor_pts - X[:, None, :]
             if isinstance(diff, ep.PyTorchTensor):
                 # https://github.com/jonasrauber/eagerpy/issues/6
@@ -184,7 +192,8 @@ class KNearestNeighbors:
         k = self.k
 
         if metric == "precomputed":
-            # scikit-learn could handle that, but they insist on calling fit() with an unused square array, which is too unnatural.
+            # scikit-learn could handle that, but they insist on calling fit() with an unused square array
+            # which is too unnatural.
             if self.return_index:
                 n_jobs = self.params.get("n_jobs", 1)
                 # Supposedly numpy can be compiled with OpenMP and handle this, but nobody does that?!
@@ -259,7 +268,7 @@ class KNearestNeighbors:
                 self.graph.set_ef(ef)
             neighbors, distances = self.graph.knn_query(X, k, num_threads=self.params["num_threads"])
             with warnings.catch_warnings():
-                if not(numpy.all(numpy.isfinite(distances))):
+                if not (numpy.all(numpy.isfinite(distances))):
                     warnings.warn("Overflow/infinite value encountered while computing 'distances'", RuntimeWarning)
             # The k nearest neighbors are always sorted. I couldn't find it in the doc, but the code calls searchKnn,
             # which returns a priority_queue, and then fills the return array backwards with top/pop on the queue.
@@ -295,8 +304,9 @@ class KNearestNeighbors:
                 if self.return_distance:
                     distances, neighbors = mat.Kmin_argKmin(k, dim=1)
                     with warnings.catch_warnings():
-                        if not(torch.isfinite(distances).all()):
-                            warnings.warn("Overflow/infinite value encountered while computing 'distances'", RuntimeWarning)
+                        if not (torch.isfinite(distances).all()):
+                            warnings.warn("Overflow/infinite value encountered while computing 'distances'",
+                                          RuntimeWarning)
                     if p != numpy.inf:
                         distances = distances ** (1.0 / p)
                     return neighbors, distances
@@ -306,8 +316,9 @@ class KNearestNeighbors:
             if self.return_distance:
                 distances = mat.Kmin(k, dim=1)
                 with warnings.catch_warnings():
-                    if not(torch.isfinite(distances).all()):
-                        warnings.warn("Overflow/infinite value encountered while computing 'distances'", RuntimeWarning)
+                    if not (torch.isfinite(distances).all()):
+                        warnings.warn("Overflow/infinite value encountered while computing 'distances'",
+                                      RuntimeWarning)
                 if p != numpy.inf:
                     distances = distances ** (1.0 / p)
                 return distances

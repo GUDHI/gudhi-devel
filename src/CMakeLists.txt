@@ -73,7 +73,7 @@ foreach(GUDHI_MODULE ${GUDHI_MODULES})
   endforeach()
 endforeach()
 
-if (WITH_GUDHI_THIRD_PARTY)
+if (WITH_GUDHI_GUDHUI)
   add_subdirectory(GudhUI)
 endif()
 

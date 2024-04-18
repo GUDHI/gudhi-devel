@@ -5,8 +5,8 @@ on:
     types: [published]
 
 env:
-  MACOSX_DEPLOYMENT_TARGET: 11.7
-  _PYTHON_HOST_PLATFORM: macosx-11.7-universal2
+  MACOSX_DEPLOYMENT_TARGET: 12.0
+  _PYTHON_HOST_PLATFORM: macosx-12.0-universal2
   ARCHFLAGS: "-arch arm64 -arch x86_64"
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
       matrix:
         # numpy packages for osx x86 and arm are only available from 1.21.2, but stable for both versions from 1.21.4
         # and python 3.8+
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         include:
         # numpy >= 1.21.4 fort osx x86 and arm, but minimal numpy version for python 3.10 is 1.21.6 for instance
         # numpy~=1.21.6 means any numpy=1.21.*, but also numpy>=1.21.6 (numpy~=1.21 do not work as it means any numpy==1.*)
@@ -29,6 +29,8 @@ jobs:
             numpy-version: '1.21.6'
           - python-version: '3.11'
             numpy-version: '1.23.2'
+          - python-version: '3.12'
+            numpy-version: '1.26.0'
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3

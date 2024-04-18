@@ -10,12 +10,10 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         # gudhi requires numpy >= 1.15.0, but minimal numpy version for python 3.8 is 1.17.3 for instance
         # numpy~=1.17.3 means any numpy=1.17.*, but also numpy>=1.17.3 (numpy~=1.17 do not work as it means any numpy==1.*)
         include:
-          - python-version: '3.7'
-            numpy-version: '1.15.0'
           - python-version: '3.8'
             numpy-version: '1.17.3'
           - python-version: '3.9'
@@ -24,6 +22,8 @@ jobs:
             numpy-version: '1.21.6'
           - python-version: '3.11'
             numpy-version: '1.23.2'
+          - python-version: '3.12'
+            numpy-version: '1.26.0'
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3

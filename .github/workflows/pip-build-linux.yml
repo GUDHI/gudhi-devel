@@ -7,30 +7,30 @@ jobs:
     name: build pip wheel
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
-    container: gudhi/pip_for_gudhi:latest
+    container: gudhi/pip_for_gudhi:2023.12.01
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
-      - name: Build wheel for Python 3.6
+      - name: Build wheel for Python 3.8
         run: |
-          mkdir build_36
-          cd build_36
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON36/bin/python ..
+          mkdir build_38
+          cd build_38
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON38/bin/python ..
           cd src/python
-          $PYTHON36/bin/python -m build -n -w
+          $PYTHON38/bin/python -m build -n -w
           auditwheel repair dist/*.whl
-      - name: Install and test wheel for Python 3.6
+      - name: Install and test wheel for Python 3.8
         run: |
-          $PYTHON36/bin/python -m pip install --user pytest build_36/src/python/dist/*.whl
-          $PYTHON36/bin/python -m pip install numpy --upgrade
-          $PYTHON36/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON36/bin/python -m pytest -v src/python/test/test_alpha_complex.py
-          $PYTHON36/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
-          $PYTHON36/bin/python -m pytest -v src/python/test/test_cubical_complex.py
-          $PYTHON36/bin/python -m pytest -v src/python/test/test_rips_complex.py
+          $PYTHON38/bin/python -m pip install --user pytest build_38/src/python/dist/*.whl
+          $PYTHON38/bin/python -m pip install numpy --upgrade
+          $PYTHON38/bin/python -c "import gudhi; print(gudhi.__version__)"
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Upload linux python wheel
         uses: actions/upload-artifact@v3
         with:
           name: linux python wheel
-          path: build_36/src/python/wheelhouse/*.whl
+          path: build_38/src/python/wheelhouse/*.whl

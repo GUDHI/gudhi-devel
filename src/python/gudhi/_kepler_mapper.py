@@ -1,4 +1,3 @@
-from __future__ import division
 import numpy as np
 from collections import defaultdict
 import json
@@ -7,7 +6,7 @@ from sklearn import cluster, preprocessing, manifold
 from datetime import datetime
 import sys
 
-class KeplerMapper(object):
+class KeplerMapper:
   # With this class you can build topological networks from (high-dimensional) data.
   #
   # 1)   	Fit a projection/lens/function to a dataset and transform it. 

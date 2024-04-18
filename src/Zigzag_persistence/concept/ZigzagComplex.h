@@ -19,8 +19,7 @@ namespace Gudhi {
 namespace zigzag_persistence {
 
 /**
- * @brief Data structure storing the simplices in the current complex. 
- * The concept is realized for example by @ref Gudhi::Simplex_tree < Gudhi::Simplex_tree_options_zigzag_persistence >.
+ * @brief Data structure storing the simplices in the current complex.
  */
 class ZigzagComplex {
  public:

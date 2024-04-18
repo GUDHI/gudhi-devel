@@ -23,7 +23,12 @@
 
 using namespace Gudhi;
 using namespace boost::unit_test;
-using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_zigzag_persistence>;
+
+struct Simplex_tree_options_zigzag_persistence : Gudhi::Simplex_tree_options_minimal {
+  static const bool store_key = true;
+};
+
+using ST = Gudhi::Simplex_tree<Simplex_tree_options_zigzag_persistence>;
 using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
 using Vertex_handle = ST::Vertex_handle;
 using Filtration_value = ST::Filtration_value;

@@ -35,7 +35,7 @@ cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
         double compute_p_value()
         vector[pair[double, double]] compute_PD()
         void find_simplices()
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree)
+        void create_simplex_tree(Simplex_tree_python_interface* simplex_tree)
         bool read_point_cloud(string off_file_name)
         double set_automatic_resolution()
         void set_color_from_coordinate(int k)
@@ -174,7 +174,7 @@ cdef class CoverComplex:
         stree = SimplexTree()
         cdef intptr_t stree_int_ptr=stree.thisptr
         self.thisptr.create_simplex_tree(
-            <Simplex_tree_interface_full_featured*>stree_int_ptr)
+            <Simplex_tree_python_interface*>stree_int_ptr)
         return stree
 
     def find_simplices(self):
