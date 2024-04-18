@@ -20,6 +20,7 @@
 
 #include <utility>  //std::swap & std::move
 #include <cassert>
+#include <functional> //std::function
 
 #include "chain_pairing.h"
 
@@ -256,9 +257,8 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns. Default value: @ref _no_G_death_comparator.
    */
-  template <typename EventComparatorFunction>
-  Chain_vine_swap(EventComparatorFunction&& birthComparator,
-                  EventComparatorFunction&& deathComparator = _no_G_death_comparator);
+  Chain_vine_swap(std::function<bool(pos_index,pos_index)> birthComparator,
+                  std::function<bool(pos_index,pos_index)> deathComparator = _no_G_death_comparator);
   /**
    * @brief Copy constructor.
    * 
@@ -326,8 +326,8 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
  private:
   using chain_matrix = typename Master_matrix::Chain_matrix_type;
 
-  EventCompFuncPointer birthComp_;  /**< for F x F & H x H. */
-  EventCompFuncPointer deathComp_;  /**< for G x G. */
+  std::function<bool(pos_index,pos_index)> birthComp_;  /**< for F x F & H x H. */
+  std::function<bool(pos_index,pos_index)> deathComp_;  /**< for G x G. */
 
   bool _is_negative_in_pair(index columnIndex);
 
@@ -341,17 +341,16 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
 };
 
 template <class Master_matrix>
-inline Chain_vine_swap<Master_matrix>::Chain_vine_swap() : CP(), birthComp_(nullptr), deathComp_(nullptr) 
+inline Chain_vine_swap<Master_matrix>::Chain_vine_swap() : CP(), birthComp_(), deathComp_() 
 {
   static_assert(Master_matrix::Option_list::has_column_pairings,
                 "If barcode is not stored, at least a birth comparator has to be specified.");
 }
 
 template <class Master_matrix>
-template <typename EventComparatorFunction>
-inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(EventComparatorFunction&& birthComparator,
-                                                       EventComparatorFunction&& deathComparator)
-    : CP(), birthComp_(&birthComparator), deathComp_(&deathComparator) 
+inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(std::function<bool(pos_index,pos_index)> birthComparator,
+                                                       std::function<bool(pos_index,pos_index)> deathComparator)
+    : CP(), birthComp_(std::move(birthComparator)), deathComp_(std::move(deathComparator)) 
 {}
 
 template <class Master_matrix>
