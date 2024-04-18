@@ -9,6 +9,7 @@ jobs:
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
     container: gudhi/pip_for_gudhi:2023.12.01
     steps:
+      # Should use actions/checkout@v4, but requires node20, not available for quay.io/pypa/manylinux2014_x86_64
       - uses: actions/checkout@v3
         with:
           submodules: true
@@ -30,6 +31,7 @@ jobs:
           $PYTHON38/bin/python -m pytest -v src/python/test/test_cubical_complex.py
           $PYTHON38/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Upload linux python wheel
+        # Should use actions/upload-artifact@v4, but requires node20, not available for quay.io/pypa/manylinux2014_x86_64
         uses: actions/upload-artifact@v3
         with:
           name: linux python wheel
