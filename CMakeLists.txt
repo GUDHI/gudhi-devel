@@ -45,8 +45,8 @@ add_gudhi_module(Tangential_complex)
 add_gudhi_module(Toplex_map)
 add_gudhi_module(Witness_complex)
 add_gudhi_module(Nerve_GIC)
-add_gudhi_module(Zigzag_persistence)
 add_gudhi_module(Persistence_matrix)
+add_gudhi_module(Zigzag_persistence)
 
 # Include module CMake subdirectories
 # GUDHI_SUB_DIRECTORIES is managed in CMAKE_MODULE_PATH/GUDHI_modules.cmake

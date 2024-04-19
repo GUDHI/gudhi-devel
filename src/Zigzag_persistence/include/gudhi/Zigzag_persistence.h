@@ -40,8 +40,6 @@
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/matrix.h>
-#include <gudhi/options.h>
-#include <gudhi/utilities/utilities.h>
 
 namespace Gudhi {
 namespace zigzag_persistence {
@@ -225,7 +223,7 @@ class Zigzag_persistence
   };
 
   using matrix_type = Gudhi::persistence_matrix::Matrix<ZigzagPersistenceOptions>;
-  using index = Gudhi::persistence_matrix::index;
+  using index = typename matrix_type::index;
 
  public:
   /**
@@ -246,8 +244,14 @@ class Zigzag_persistence
   Zigzag_persistence(unsigned int min_number_of_simplices = 0, int ignore_cycles_above_dim = -1)
       : dim_max_(ignore_cycles_above_dim),
         matrix_(min_number_of_simplices,
-                [this](index columnIndex1, index columnIndex2) {
+                [this](index columnIndex1, index columnIndex2)->bool {
+                  if (matrix_.get_column(columnIndex1).is_paired()){
+                    return matrix_.get_pivot(columnIndex1) < matrix_.get_pivot(columnIndex2);
+                  }
                   return birth_ordering_.birth_order(births_.at(columnIndex1), births_.at(columnIndex2));
+                },
+                [this](index columnIndex1, index columnIndex2)->bool {
+                  return false;
                 }),
         num_arrow_(-1),
         previous_filtration_value_(std::numeric_limits<Filtration_value>::infinity()) {}
@@ -629,6 +633,7 @@ class Zigzag_persistence
     Simplex_key simplexIndex = cpx_.key(zzsh); // cpx_.key(zzsh) is the key of the simplex we remove, not a new one
     // column whose key is the one of the removed simplex
     index curr_col = matrix_.get_column_with_pivot(simplexIndex);
+
     // Record all columns that get affected by the transpositions, i.e., have a coeff
     std::vector<index> modified_columns;
     const auto& row = matrix_.get_row(simplexIndex);
@@ -662,7 +667,7 @@ class Zigzag_persistence
     }
 
     // cannot be in G as the removed simplex is maximal
-    matrix_.remove_maximal_simplex(simplexIndex);
+    matrix_.remove_maximal_face(simplexIndex, {});
   }
 
   /**

@@ -35,6 +35,7 @@ using Filtration_value = ST::Filtration_value;
 using interval_index = ZP::index_interval;
 using interval_filtration = ZP::filtration_value_interval;
 
+
 struct cmp_intervals_by_length {
   cmp_intervals_by_length() {}
   bool operator()(interval_filtration p, interval_filtration q) {

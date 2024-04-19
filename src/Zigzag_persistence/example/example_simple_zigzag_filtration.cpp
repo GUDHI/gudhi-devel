@@ -9,7 +9,6 @@
  */
 
 #include <iostream>
-#include <utility>
 #include <vector>
 
 #include <gudhi/Zigzag_persistence.h>
