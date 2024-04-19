@@ -4,7 +4,7 @@ if (EIGEN3_FOUND)
   if (TARGET Boost::program_options)
     # From a point cloud
     add_executable ( point_cloud_edge_collapse_rips_persistence point_cloud_edge_collapse_rips_persistence.cpp )
-    target_link_libraries(point_cloud_edge_collapse_rips_persistence Boost::program_options)
+    target_link_libraries(point_cloud_edge_collapse_rips_persistence Eigen3::Eigen Boost::program_options)
   
     if(TARGET TBB::tbb)
       target_link_libraries(point_cloud_edge_collapse_rips_persistence TBB::tbb)
@@ -16,7 +16,7 @@ if (EIGEN3_FOUND)
   
     # From a distance matrix
     add_executable ( distance_matrix_edge_collapse_rips_persistence distance_matrix_edge_collapse_rips_persistence.cpp )
-    target_link_libraries(distance_matrix_edge_collapse_rips_persistence Boost::program_options)
+    target_link_libraries(distance_matrix_edge_collapse_rips_persistence Eigen3::Eigen Boost::program_options)
   
     if(TARGET TBB::tbb)
       target_link_libraries(distance_matrix_edge_collapse_rips_persistence TBB::tbb)

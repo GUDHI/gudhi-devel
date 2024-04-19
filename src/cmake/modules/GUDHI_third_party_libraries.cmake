@@ -6,9 +6,8 @@ find_package(Boost 1.71.0 QUIET OPTIONAL_COMPONENTS filesystem unit_test_framewo
 if(NOT Boost_VERSION)
   message(FATAL_ERROR "NOTICE: This program requires Boost and will not be compiled.")
 endif(NOT Boost_VERSION)
+message("++ BOOST version ${Boost_VERSION}. Includes found in ${Boost_INCLUDE_DIRS}, libraries found in ${Boost_LIBRARY_DIRS}")
 include_directories(${Boost_INCLUDE_DIRS})
-message(STATUS "boost include dirs:" ${Boost_INCLUDE_DIRS})
-message(STATUS "boost library dirs:" ${Boost_LIBRARY_DIRS})
 
 find_package(GMP)
 if(GMP_FOUND)
@@ -30,15 +29,16 @@ endif()
 
 find_package(CGAL 5.1.0)
 
-if (CGAL_FOUND)
-  message(STATUS "CGAL version: ${CGAL_VERSION}.")
-endif()
+if (TARGET CGAL::CGAL)
+  message("++ CGAL version: ${CGAL_VERSION}. Includes found in ${CGAL_INCLUDE_DIRS}")
+endif ()
 
-find_package(Eigen3 3.1.0)
-if (EIGEN3_FOUND)
-  message(STATUS "Eigen 3 version: ${EIGEN3_VERSION}.")
-  include( ${EIGEN3_USE_FILE} )
-endif (EIGEN3_FOUND)
+find_package(Eigen3 3.3 NO_MODULE)
+if(TARGET Eigen3::Eigen)
+  # Not mandatory as it is set by Eigen3Config.cmake
+  get_target_property(EIGEN3_INCLUDE_DIRS Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
+  message("++ Eigen 3 version ${EIGEN3_VERSION_STRING}. Includes found in ${EIGEN3_INCLUDE_DIRS}")
+endif()
 
 option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
 
@@ -71,7 +71,7 @@ if(WITH_GUDHI_USE_TBB)
         # A correct version of TBB was found
         get_target_property(TBB_INCLUDE_DIRS TBB::tbb INTERFACE_INCLUDE_DIRECTORIES)
         get_filename_component(TBB_LIBRARY_DIRS ${TBB_LIBRARY} DIRECTORY)
-        message("++ TBB version ${TBB_VERSION} found in ${TBB_LIBRARY_DIRS} - includes in ${TBB_INCLUDE_DIRS}")
+        message("++ TBB version ${TBB_VERSION}. Includes found in ${TBB_INCLUDE_DIRS}, libraries found in ${TBB_LIBRARY_DIRS}")
         add_definitions(-DGUDHI_USE_TBB)
         if(MSVC)
           # cf. https://github.com/oneapi-src/oneTBB/issues/573

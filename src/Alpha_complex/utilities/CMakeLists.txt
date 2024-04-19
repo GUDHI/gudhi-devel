@@ -3,7 +3,7 @@ project(Alpha_complex_utilities)
 if (CGAL_FOUND AND EIGEN3_FOUND)
   if (TARGET Boost::program_options)
     add_executable (alpha_complex_persistence alpha_complex_persistence.cpp)
-    target_link_libraries(alpha_complex_persistence CGAL::CGAL Boost::program_options)
+    target_link_libraries(alpha_complex_persistence CGAL::CGAL Eigen3::Eigen Boost::program_options)
 
     if(TARGET TBB::tbb)
       target_link_libraries(alpha_complex_persistence TBB::tbb)

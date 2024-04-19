@@ -158,9 +158,10 @@ if(PYTHONINTERP_FOUND)
     endif()
 
     if (EIGEN3_FOUND)
-      add_gudhi_debug_info("Eigen3 version ${EIGEN3_VERSION}")
+      add_gudhi_debug_info("Eigen3 version ${EIGEN3_VERSION_STRING}")
       # No problem, even if no CGAL found
       set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
+      set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${EIGEN3_INCLUDE_DIRS}', ")
     endif (EIGEN3_FOUND)
 
     set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'off_utils', ")

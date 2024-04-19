@@ -15,7 +15,7 @@ endif (CGAL_FOUND)
 if (CGAL_FOUND AND EIGEN3_FOUND)
   if (TARGET Boost::program_options)
     add_executable (alpha_rips_persistence_bottleneck_distance alpha_rips_persistence_bottleneck_distance.cpp)
-    target_link_libraries(alpha_rips_persistence_bottleneck_distance CGAL::CGAL Boost::program_options)
+    target_link_libraries(alpha_rips_persistence_bottleneck_distance CGAL::CGAL Eigen3::Eigen Boost::program_options)
 
     if(TARGET TBB::tbb)
       target_link_libraries(alpha_rips_persistence_bottleneck_distance TBB::tbb)

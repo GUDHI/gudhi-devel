@@ -27,7 +27,7 @@ gudhi_add_boost_test(kernels_unit)
 
 if (CGAL_FOUND AND EIGEN3_FOUND)
   add_executable (Persistence_intervals_with_distances_test_unit persistence_intervals_with_distances_test.cpp )
-  target_link_libraries(Persistence_intervals_with_distances_test_unit CGAL::CGAL)
+  target_link_libraries(Persistence_intervals_with_distances_test_unit CGAL::CGAL Eigen3::Eigen)
   if(TARGET TBB::tbb)
     target_link_libraries(Persistence_intervals_with_distances_test_unit TBB::tbb)
   endif()

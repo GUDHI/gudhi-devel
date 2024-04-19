@@ -2,7 +2,7 @@ project(Cech_complex_examples)
 
 if (CGAL_FOUND AND EIGEN3_FOUND)
   add_executable ( Cech_complex_example_from_points cech_complex_example_from_points.cpp)
-  target_link_libraries(Cech_complex_example_from_points CGAL::CGAL)
+  target_link_libraries(Cech_complex_example_from_points CGAL::CGAL Eigen3::Eigen)
   if(TARGET TBB::tbb)
     target_link_libraries(Cech_complex_example_from_points TBB::tbb)
   endif()

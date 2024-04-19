@@ -4,10 +4,10 @@ project(Witness_complex_utilities)
 if(CGAL_FOUND AND EIGEN3_FOUND)
   if(TARGET Boost::program_options)
     add_executable ( Witness_complex_strong_witness_persistence strong_witness_persistence.cpp )
-    target_link_libraries(Witness_complex_strong_witness_persistence CGAL::CGAL Boost::program_options)
+    target_link_libraries(Witness_complex_strong_witness_persistence CGAL::CGAL Eigen3::Eigen Boost::program_options)
 
     add_executable ( Witness_complex_weak_witness_persistence weak_witness_persistence.cpp )
-    target_link_libraries(Witness_complex_weak_witness_persistence CGAL::CGAL Boost::program_options)
+    target_link_libraries(Witness_complex_weak_witness_persistence CGAL::CGAL Eigen3::Eigen Boost::program_options)
 
     if(TARGET TBB::tbb)
       target_link_libraries(Witness_complex_strong_witness_persistence TBB::tbb)

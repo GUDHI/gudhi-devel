@@ -3,7 +3,7 @@ if (TARGET Boost::program_options)
 
   if (CGAL_FOUND AND EIGEN3_FOUND)
     add_executable(cech_persistence cech_persistence.cpp)
-    target_link_libraries(cech_persistence CGAL::CGAL Boost::program_options)
+    target_link_libraries(cech_persistence CGAL::CGAL Eigen3::Eigen Boost::program_options)
 
     if(TARGET TBB::tbb)
       target_link_libraries(cech_persistence TBB::tbb)
@@ -33,7 +33,7 @@ if (TARGET Boost::program_options)
 
   if (CGAL_FOUND AND EIGEN3_FOUND)
     add_executable(delaunay_cech_persistence delaunay_cech_persistence.cpp)
-    target_link_libraries(delaunay_cech_persistence CGAL::CGAL Boost::program_options)
+    target_link_libraries(delaunay_cech_persistence CGAL::CGAL Eigen3::Eigen Boost::program_options)
 
     if(TARGET TBB::tbb)
       target_link_libraries(delaunay_cech_persistence TBB::tbb)

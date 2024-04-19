@@ -2,7 +2,7 @@ if (CGAL_FOUND AND EIGEN3_FOUND)
   include(GUDHI_boost_test)
 
   add_executable ( Cech_complex_test_unit test_cech_complex.cpp )
-  target_link_libraries(Cech_complex_test_unit CGAL::CGAL)
+  target_link_libraries(Cech_complex_test_unit CGAL::CGAL Eigen3::Eigen)
   if(TARGET TBB::tbb)
     target_link_libraries(Cech_complex_test_unit TBB::tbb)
   endif()

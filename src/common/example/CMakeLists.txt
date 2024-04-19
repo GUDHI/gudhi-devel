@@ -24,7 +24,7 @@ endif()
 # requires CGAL and Eigen3
 if(CGAL_FOUND AND EIGEN3_FOUND)
   add_executable ( cgal_off_reader example_CGAL_points_off_reader.cpp )
-  target_link_libraries(cgal_off_reader CGAL::CGAL)
+  target_link_libraries(cgal_off_reader Eigen3::Eigen CGAL::CGAL)
   add_test(NAME Common_example_vector_cgal_off_reader COMMAND $<TARGET_FILE:cgal_off_reader>
       "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off")
 endif(CGAL_FOUND AND EIGEN3_FOUND)

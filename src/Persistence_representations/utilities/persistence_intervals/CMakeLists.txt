@@ -23,7 +23,7 @@ install(TARGETS compute_number_of_dominant_intervals DESTINATION bin)
 
 if (CGAL_FOUND AND EIGEN3_FOUND)
   add_executable ( compute_bottleneck_distance compute_bottleneck_distance.cpp )
-  target_link_libraries(compute_bottleneck_distance CGAL::CGAL)
+  target_link_libraries(compute_bottleneck_distance CGAL::CGAL Eigen3::Eigen)
   if(TARGET TBB::tbb)
     target_link_libraries(compute_bottleneck_distance TBB::tbb)
   endif()
