@@ -53,9 +53,9 @@ struct Dummy_chain_vine_swap {
   friend void swap([[maybe_unused]] Dummy_chain_vine_swap& d1, [[maybe_unused]] Dummy_chain_vine_swap& d2) {}
 
   Dummy_chain_vine_swap() {}
-  template <typename EventComparatorFunction>
-  Dummy_chain_vine_swap([[maybe_unused]] EventComparatorFunction&& birthComparator,
-                        [[maybe_unused]] EventComparatorFunction&& deathComparator) {}
+  template <typename BirthComparatorFunction, typename DeathComparatorFunction>
+  Dummy_chain_vine_swap([[maybe_unused]] const BirthComparatorFunction& birthComparator,
+                        [[maybe_unused]] const DeathComparatorFunction& deathComparator) {}
 };
 
 /**
@@ -247,7 +247,6 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
   /**
    * @brief Constructor storing the given comparators.
    * 
-   * @tparam EventComparatorFunction Method of the form: ( @ref pos_index, @ref pos_index ) -> bool.
    * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the birth associated to the first position is strictly less than birth associated to
    * the second one with respect to some self defined order. It is used while swapping two unpaired or
@@ -277,8 +276,7 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
    * therefore skips a part of the case study.
    * 
    * @param columnIndex1 @ref MatIdx index of the first face.
-   * @param columnIndex2 @ref MatIdx index of the second face. It is assumed that the @ref PosIdx of both only differs
-   * by one.
+   * @param columnIndex2 @ref MatIdx index of the second face.
    * @return Let \f$ pos1 \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ pos2 \f$ be the @ref PosIdx index of
    * @p columnIndex2. The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx
    * \f$ max(pos1, pos2) \f$.
@@ -294,7 +292,7 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
    * 
    * @param columnIndex1 @ref MatIdx index of the first face.
    * @param columnIndex2 @ref MatIdx index of the second face. It is assumed that the @ref PosIdx of both only differs
-   * by one.
+   * by one if the barcode is maintained.
    * @return Let \f$ pos1 \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ pos2 \f$ be the @ref PosIdx index of
    * @p columnIndex2. The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx
    * \f$ max(pos1, pos2) \f$.
@@ -371,11 +369,6 @@ template <class Master_matrix>
 inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(
     index columnIndex1, index columnIndex2) 
 {
-  if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    assert(CP::are_adjacent(_matrix()->get_pivot(columnIndex1), _matrix()->get_pivot(columnIndex2)) &&
-           "Columns to be swaped need to be adjacent in the 'real' matrix.");
-  }
-
   const bool col1IsNeg = _is_negative_in_pair(columnIndex1);
   const bool col2IsNeg = _is_negative_in_pair(columnIndex2);
 
@@ -585,7 +578,7 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
     hasSmallerBirth = (CP::birth(col1.get_pivot()) < CP::birth(col2.get_pivot()));
   } else {
-    hasSmallerBirth = birthComp_(columnIndex1, columnIndex2);
+    hasSmallerBirth = birthComp_(pairedIndex1, pairedIndex2);
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {

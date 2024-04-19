@@ -116,6 +116,7 @@ struct Zigzag_options : Default_options<column_type, true>
   static const bool has_vine_update = true;
   static const bool is_of_boundary_type = false;
   static const bool has_map_column_container = true;
+  static const bool has_removable_columns = true;
   static const bool has_removable_rows = true;
 };
 

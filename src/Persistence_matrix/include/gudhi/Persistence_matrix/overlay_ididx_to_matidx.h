@@ -104,7 +104,8 @@ class Id_to_index_overlay
    * @ref PersistenceMatrixOptions::has_column_pairings is also true, the comparators are ignored and
    * the current barcode is used to compare birth and deaths. Therefore it is useless to provide them in those cases.
    * 
-   * @tparam EventComparatorFunction Method of the form: ( @ref Matrix::pos_index, @ref Matrix::pos_index ) -> bool.
+   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
+   * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @param operators Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
    * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
@@ -116,11 +117,11 @@ class Id_to_index_overlay
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
    */
-  template <typename EventComparatorFunction>
+  template <typename BirthComparatorFunction, typename DeathComparatorFunction>
   Id_to_index_overlay(Field_operators* operators, 
                       Cell_constructor* cellConstructor,
-                      EventComparatorFunction&& birthComparator, 
-                      EventComparatorFunction&& deathComparator);
+                      const BirthComparatorFunction& birthComparator, 
+                      const DeathComparatorFunction& deathComparator);
   /**
    * @brief Only available for @ref chainmatrix "chain matrices". 
    * Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a column 
@@ -132,7 +133,8 @@ class Id_to_index_overlay
    * @ref PersistenceMatrixOptions::has_column_pairings is also true, the comparators are ignored and
    * the current barcode is used to compare birth and deaths. Therefore it is useless to provide them in those cases.
    * 
-   * @tparam EventComparatorFunction Method of the form: ( @ref Matrix::pos_index, @ref Matrix::pos_index ) -> bool.
+   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
+   * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @tparam Boundary_type  Range type for @ref Matrix::cell_rep_type ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
@@ -144,7 +146,7 @@ class Id_to_index_overlay
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
    * interest and not everything should be stored, then use the @ref insert_boundary method instead
    * (after creating the matrix with the @ref Id_to_index_overlay(unsigned int, Field_operators*, Cell_constructor*,
-   * EventComparatorFunction&&, EventComparatorFunction&&) constructor preferably).
+   * const BirthComparatorFunction&, const DeathComparatorFunction&) constructor preferably).
    * @param operators  Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
    * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
@@ -156,12 +158,12 @@ class Id_to_index_overlay
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
    */
-  template <typename EventComparatorFunction, class Boundary_type>
+  template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type>
   Id_to_index_overlay(const std::vector<Boundary_type>& orderedBoundaries, 
                       Field_operators* operators,
                       Cell_constructor* cellConstructor, 
-                      EventComparatorFunction&& birthComparator,
-                      EventComparatorFunction&& deathComparator);
+                      const BirthComparatorFunction& birthComparator, 
+                      const DeathComparatorFunction& deathComparator);
   /**
    * @brief Only available for @ref chainmatrix "chain matrices".
    * Constructs a new empty matrix and reserves space for the given number of columns.
@@ -171,7 +173,8 @@ class Id_to_index_overlay
    * @ref PersistenceMatrixOptions::has_column_pairings is also true, the comparators are ignored and
    * the current barcode is used to compare birth and deaths. Therefore it is useless to provide them in those cases.
    * 
-   * @tparam EventComparatorFunction  Method of the form: ( @ref Matrix::pos_index, @ref Matrix::pos_index ) -> bool.
+   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
+   * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @param numberOfColumns Number of columns to reserve space for.
    * @param operators Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
@@ -184,12 +187,12 @@ class Id_to_index_overlay
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
    */
-  template <typename EventComparatorFunction>
+  template <typename BirthComparatorFunction, typename DeathComparatorFunction>
   Id_to_index_overlay(unsigned int numberOfColumns, 
                       Field_operators* operators, 
                       Cell_constructor* cellConstructor,
-                      EventComparatorFunction&& birthComparator, 
-                      EventComparatorFunction&& deathComparator);
+                      const BirthComparatorFunction& birthComparator, 
+                      const DeathComparatorFunction& deathComparator);
   /**
    * @brief Copy constructor. If @p operators or @p cellConstructor is not a null pointer, its value is kept
    * instead of the one in the copied matrix.
@@ -651,25 +654,25 @@ inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay
 }
 
 template <class Matrix_type, class Master_matrix_type>
-template <typename EventComparatorFunction>
+template <typename BirthComparatorFunction, typename DeathComparatorFunction>
 inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay(
     Field_operators* operators, 
     Cell_constructor* cellConstructor, 
-    EventComparatorFunction&& birthComparator,
-    EventComparatorFunction&& deathComparator)
+    const BirthComparatorFunction& birthComparator, 
+    const DeathComparatorFunction& deathComparator)
     : matrix_(operators, cellConstructor, birthComparator, deathComparator), idToIndex_(nullptr), nextIndex_(0) 
 {
   _initialize_map(0);
 }
 
 template <class Matrix_type, class Master_matrix_type>
-template <typename EventComparatorFunction, class Boundary_type>
+template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type>
 inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay(
     const std::vector<Boundary_type>& orderedBoundaries, 
     Field_operators* operators, 
     Cell_constructor* cellConstructor,
-    EventComparatorFunction&& birthComparator, 
-    EventComparatorFunction&& deathComparator)
+    const BirthComparatorFunction& birthComparator, 
+    const DeathComparatorFunction& deathComparator)
     : matrix_(orderedBoundaries, operators, cellConstructor, birthComparator, deathComparator),
       idToIndex_(nullptr),
       nextIndex_(orderedBoundaries.size()) 
@@ -683,13 +686,13 @@ inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay
 }
 
 template <class Matrix_type, class Master_matrix_type>
-template <typename EventComparatorFunction>
+template <typename BirthComparatorFunction, typename DeathComparatorFunction>
 inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay(
     unsigned int numberOfColumns, 
     Field_operators* operators, 
     Cell_constructor* cellConstructor,
-    EventComparatorFunction&& birthComparator, 
-    EventComparatorFunction&& deathComparator)
+    const BirthComparatorFunction& birthComparator, 
+    const DeathComparatorFunction& deathComparator)
     : matrix_(numberOfColumns, operators, cellConstructor, birthComparator, deathComparator),
       idToIndex_(nullptr),
       nextIndex_(0) 

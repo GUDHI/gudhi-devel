@@ -590,15 +590,13 @@ class Matrix {
    * information outside of the matrix about the barcode to provide a better suited comparator adapted to the situation
    * (as in the implementation of the Zigzag algorithm @cite zigzag for example.)
    *
-   * @tparam EventComparatorFunction Type of the birth or death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @param birthComparator Method taking two @ref PosIdx indices as parameter and returns true if and only if the first
    * face is associated to a bar with strictly smaller birth than the bar associated to the second one.
    * @param deathComparator Method taking two @ref PosIdx indices as parameter and returns true if and only if the first
    * face is associated to a bar with strictly smaller death than the bar associated to the second one.
    */
-  template <typename EventComparatorFunction>
-  Matrix(EventComparatorFunction&& birthComparator, 
-         EventComparatorFunction&& deathComparator);
+  Matrix(const std::function<bool(pos_index,pos_index)>& birthComparator, 
+         const std::function<bool(pos_index,pos_index)>& deathComparator);
   /**
    * @brief Constructs a new matrix from the given ranges with the given comparator functions.
    * Only available when those comparators are necessary.
@@ -610,10 +608,9 @@ class Matrix {
    *
    * See description of @ref Matrix(const std::vector<Container_type>& columns, characteristic_type characteristic)
    * for more information about  @p orderedBoundaries and
-   * @ref Matrix(EventComparatorFunction&& birthComparator, EventComparatorFunction&& deathComparator)
+   * @ref Matrix(const std::function<bool(pos_index,pos_index)>&, const std::function<bool(pos_index,pos_index)>&)
    * for more information about the comparators.
    *
-   * @tparam EventComparatorFunction Type of the birth or death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @tparam Boundary_type Range type for @ref cell_rep_type ranges. Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Vector of ordered boundaries in filtration order. Indexed continously starting at 0.
    * @param birthComparator Method taking two @ref PosIdx indices as parameter and returns true if and only if the first
@@ -624,10 +621,10 @@ class Matrix {
    * @ref PersistenceMatrixOptions::is_z2 is false. Default value is 11.
    * Ignored if @ref PersistenceMatrixOptions::is_z2 is true.
    */
-  template <typename EventComparatorFunction, class Boundary_type = boundary_type>
+  template <class Boundary_type = boundary_type>
   Matrix(const std::vector<Boundary_type>& orderedBoundaries, 
-         EventComparatorFunction&& birthComparator,
-         EventComparatorFunction&& deathComparator, 
+         const std::function<bool(pos_index,pos_index)>& birthComparator,
+         const std::function<bool(pos_index,pos_index)>& deathComparator, 
          characteristic_type characteristic = 11);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
@@ -639,10 +636,9 @@ class Matrix {
    *   - @ref PersistenceMatrixOptions::has_column_pairings = false
    *
    * See description of
-   * @ref Matrix(EventComparatorFunction&& birthComparator, EventComparatorFunction&& deathComparator)
+   * @ref Matrix(const std::function<bool(pos_index,pos_index)>&, const std::function<bool(pos_index,pos_index)>&)
    * for more information about the comparators.
    *
-   * @tparam EventComparatorFunction Type of the birth or death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @param numberOfColumns Number of columns to reserve space for.
    * @param birthComparator Method taking two @ref PosIdx indices as parameter and returns true if and only if the first
    * face is associated to a bar with strictly smaller birth than the bar associated to the second one.
@@ -653,10 +649,9 @@ class Matrix {
    * @ref set_characteristic before calling for the first time a method needing it.
    * Ignored if @ref PersistenceMatrixOptions::is_z2 is true.
    */
-  template <typename EventComparatorFunction>
   Matrix(unsigned int numberOfColumns, 
-         EventComparatorFunction&& birthComparator,
-         EventComparatorFunction&& deathComparator, 
+         const std::function<bool(pos_index,pos_index)>& birthComparator,
+         const std::function<bool(pos_index,pos_index)>& deathComparator, 
          characteristic_type characteristic = 0);
   /**
    * @brief Copy constructor.
@@ -1426,9 +1421,8 @@ inline Matrix<PersistenceMatrixOptions>::Matrix(int numberOfColumns, characteris
 }
 
 template <class PersistenceMatrixOptions>
-template <typename EventComparatorFunction>
-inline Matrix<PersistenceMatrixOptions>::Matrix(EventComparatorFunction&& birthComparator,
-                                                EventComparatorFunction&& deathComparator)
+inline Matrix<PersistenceMatrixOptions>::Matrix(const std::function<bool(pos_index,pos_index)>& birthComparator,
+                                                const std::function<bool(pos_index,pos_index)>& deathComparator)
     : operators_(new Field_operators()),
       cellPool_(new Cell_constructor()),
       matrix_(operators_, cellPool_, birthComparator, deathComparator) 
@@ -1441,10 +1435,10 @@ inline Matrix<PersistenceMatrixOptions>::Matrix(EventComparatorFunction&& birthC
 }
 
 template <class PersistenceMatrixOptions>
-template <typename EventComparatorFunction, class Boundary_type>
+template <class Boundary_type>
 inline Matrix<PersistenceMatrixOptions>::Matrix(const std::vector<Boundary_type>& orderedBoundaries,
-                               EventComparatorFunction&& birthComparator, 
-                               EventComparatorFunction&& deathComparator,
+                               const std::function<bool(pos_index,pos_index)>& birthComparator, 
+                               const std::function<bool(pos_index,pos_index)>& deathComparator,
                                characteristic_type characteristic)
     : operators_(new Field_operators(characteristic)),
       cellPool_(new Cell_constructor()),
@@ -1458,10 +1452,9 @@ inline Matrix<PersistenceMatrixOptions>::Matrix(const std::vector<Boundary_type>
 }
 
 template <class PersistenceMatrixOptions>
-template <typename EventComparatorFunction>
 inline Matrix<PersistenceMatrixOptions>::Matrix(unsigned int numberOfColumns, 
-                               EventComparatorFunction&& birthComparator,
-                               EventComparatorFunction&& deathComparator, 
+                               const std::function<bool(pos_index,pos_index)>& birthComparator,
+                               const std::function<bool(pos_index,pos_index)>& deathComparator, 
                                characteristic_type characteristic)
     : operators_(new Field_operators(characteristic)),
       cellPool_(new Cell_constructor()),

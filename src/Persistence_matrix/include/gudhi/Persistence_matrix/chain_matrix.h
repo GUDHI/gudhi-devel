@@ -119,7 +119,8 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * @ref PersistenceMatrixOptions::has_column_pairings is also true, the comparators are ignored and
    * the current barcode is used to compare birth and deaths. Therefore it is useless to provide them in those cases.
    * 
-   * @tparam EventComparatorFunction Method of the form: ( @ref pos_index, @ref pos_index ) -> bool.
+   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
+   * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @param operators Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
    * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
@@ -131,11 +132,11 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
    */
-  template <typename EventComparatorFunction>
+  template <typename BirthComparatorFunction, typename DeathComparatorFunction>
   Chain_matrix(Field_operators* operators, 
                Cell_constructor* cellConstructor, 
-               EventComparatorFunction&& birthComparator,
-               EventComparatorFunction&& deathComparator);
+               const BirthComparatorFunction& birthComparator,
+               const DeathComparatorFunction& deathComparator);
   /**
    * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a
    * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
@@ -146,7 +147,8 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * @ref PersistenceMatrixOptions::has_column_pairings is also true, the comparators are ignored and
    * the current barcode is used to compare birth and deaths. Therefore it is useless to provide them in those cases.
    * 
-   * @tparam EventComparatorFunction Method of the form: ( @ref pos_index, @ref pos_index ) -> bool.
+   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
+   * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @tparam Boundary_type  Range type for @ref Matrix::cell_rep_type ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
@@ -158,7 +160,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
    * interest and not everything should be stored, then use the @ref insert_boundary method instead
    * (after creating the matrix with the @ref Chain_matrix(unsigned int, Field_operators*, Cell_constructor*,
-   * EventComparatorFunction&&, EventComparatorFunction&&) constructor preferably).
+   * const BirthComparatorFunction&, const DeathComparatorFunction&) constructor preferably).
    * @param operators  Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
    * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
@@ -170,12 +172,12 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
    */
-  template <typename EventComparatorFunction, class Boundary_type = boundary_type>
+  template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type = boundary_type>
   Chain_matrix(const std::vector<Boundary_type>& orderedBoundaries, 
                Field_operators* operators,
                Cell_constructor* cellConstructor, 
-               EventComparatorFunction&& birthComparator,
-               EventComparatorFunction&& deathComparator);
+               const BirthComparatorFunction& birthComparator,
+               const DeathComparatorFunction& deathComparator);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
    *
@@ -184,7 +186,8 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * @ref PersistenceMatrixOptions::has_column_pairings is also true, the comparators are ignored and
    * the current barcode is used to compare birth and deaths. Therefore it is useless to provide them in those cases.
    * 
-   * @tparam EventComparatorFunction  Method of the form: ( @ref pos_index, @ref pos_index ) -> bool.
+   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
+   * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @param numberOfColumns Number of columns to reserve space for.
    * @param operators Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
@@ -197,12 +200,12 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
    */
-  template <typename EventComparatorFunction>
+  template <typename BirthComparatorFunction, typename DeathComparatorFunction>
   Chain_matrix(unsigned int numberOfColumns, 
                Field_operators* operators, 
                Cell_constructor* cellConstructor,
-               EventComparatorFunction&& birthComparator, 
-               EventComparatorFunction&& deathComparator);
+               const BirthComparatorFunction& birthComparator, 
+               const DeathComparatorFunction& deathComparator);
   /**
    * @brief Copy constructor. If @p operators or @p cellConstructor is not a null pointer, its value is kept
    * instead of the one in the copied matrix.
@@ -605,11 +608,11 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns,
 }
 
 template <class Master_matrix>
-template <typename EventComparatorFunction>
+template <typename BirthComparatorFunction, typename DeathComparatorFunction>
 inline Chain_matrix<Master_matrix>::Chain_matrix(Field_operators* operators, 
                                                  Cell_constructor* cellConstructor,
-                                                 EventComparatorFunction&& birthComparator,
-                                                 EventComparatorFunction&& deathComparator)
+                                                 const BirthComparatorFunction& birthComparator,
+                                                 const DeathComparatorFunction& deathComparator)
     : dim_opt(-1),
       pair_opt(),
       swap_opt(birthComparator, deathComparator),
@@ -621,12 +624,12 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(Field_operators* operators,
 {}
 
 template <class Master_matrix>
-template <typename EventComparatorFunction, class Boundary_type>
+template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type>
 inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_type>& orderedBoundaries,
                                                  Field_operators* operators, 
                                                  Cell_constructor* cellConstructor,
-                                                 EventComparatorFunction&& birthComparator,
-                                                 EventComparatorFunction&& deathComparator)
+                                                 const BirthComparatorFunction& birthComparator,
+                                                 const DeathComparatorFunction& deathComparator)
     : dim_opt(-1),
       pair_opt(),
       swap_opt(birthComparator, deathComparator),
@@ -648,12 +651,12 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_type
 }
 
 template <class Master_matrix>
-template <typename EventComparatorFunction>
+template <typename BirthComparatorFunction, typename DeathComparatorFunction>
 inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns, 
                                                  Field_operators* operators,
                                                  Cell_constructor* cellConstructor,
-                                                 EventComparatorFunction&& birthComparator,
-                                                 EventComparatorFunction&& deathComparator)
+                                                 const BirthComparatorFunction& birthComparator,
+                                                 const DeathComparatorFunction& deathComparator)
     : dim_opt(-1),
       pair_opt(),
       swap_opt(birthComparator, deathComparator),
