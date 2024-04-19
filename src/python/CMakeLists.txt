@@ -387,7 +387,7 @@ if(PYTHONINTERP_FOUND)
                         # Set missing or not modules
                         set(GUDHI_MODULES ${GUDHI_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MODULES")
                       else(CGAL_FOUND AND EIGEN3_FOUND)
-                        message("++ Python documentation module will not be compiled because it requires Eigen3 >= 3.1.0 and CGAL >= 5.1.0")
+                        message("++ Python documentation module will not be compiled because it requires Eigen3 >= 3.3.0 and CGAL >= 5.1.0")
                         set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
                       endif(CGAL_FOUND AND EIGEN3_FOUND)
                     else(OT_FOUND)

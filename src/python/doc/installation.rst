@@ -255,7 +255,7 @@ require `Eigen <http://eigen.tuxfamily.org/>`_, a C++ template
 library for linear algebra: matrices, vectors, numerical solvers, and related
 algorithms.
 
-The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version :math:`\geq` 3.1.0:
+The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version :math:`\geq` 3.3.0:
 
 .. only:: builder_html
 
