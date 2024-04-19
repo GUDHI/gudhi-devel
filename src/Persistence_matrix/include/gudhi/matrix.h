@@ -590,8 +590,6 @@ class Matrix {
    * information outside of the matrix about the barcode to provide a better suited comparator adapted to the situation
    * (as in the implementation of the Zigzag algorithm @cite zigzag for example.)
    *
-   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
-   * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @param birthComparator Method taking two @ref PosIdx indices as parameter and returns true if and only if the first
    * face is associated to a bar with strictly smaller birth than the bar associated to the second one.
    * @param deathComparator Method taking two @ref PosIdx indices as parameter and returns true if and only if the first
@@ -610,11 +608,9 @@ class Matrix {
    *
    * See description of @ref Matrix(const std::vector<Container_type>& columns, characteristic_type characteristic)
    * for more information about  @p orderedBoundaries and
-   * @ref Matrix(const BirthComparatorFunction& birthComparator, const DeathComparatorFunction& deathComparator)
+   * @ref Matrix(const std::function<bool(pos_index,pos_index)>&, const std::function<bool(pos_index,pos_index)>&)
    * for more information about the comparators.
    *
-   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
-   * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @tparam Boundary_type Range type for @ref cell_rep_type ranges. Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Vector of ordered boundaries in filtration order. Indexed continously starting at 0.
    * @param birthComparator Method taking two @ref PosIdx indices as parameter and returns true if and only if the first
@@ -640,11 +636,9 @@ class Matrix {
    *   - @ref PersistenceMatrixOptions::has_column_pairings = false
    *
    * See description of
-   * @ref Matrix(const BirthComparatorFunction& birthComparator, const DeathComparatorFunction& deathComparator)
+   * @ref Matrix(const std::function<bool(pos_index,pos_index)>&, const std::function<bool(pos_index,pos_index)>&)
    * for more information about the comparators.
    *
-   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
-   * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @param numberOfColumns Number of columns to reserve space for.
    * @param birthComparator Method taking two @ref PosIdx indices as parameter and returns true if and only if the first
    * face is associated to a bar with strictly smaller birth than the bar associated to the second one.

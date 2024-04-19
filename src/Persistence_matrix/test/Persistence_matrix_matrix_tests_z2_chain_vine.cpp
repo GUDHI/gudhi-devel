@@ -137,6 +137,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_representative_cycles, Matrix
 bool birth_comparator(unsigned int columnIndex1, unsigned int columnIndex2) {
 	if (columnIndex1 == 0) return false;
 	if (columnIndex1 == 3) return true;
+	if (columnIndex1 == 1) return true;
 	return false;
 }
 
