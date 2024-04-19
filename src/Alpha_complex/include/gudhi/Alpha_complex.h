@@ -249,8 +249,8 @@ class Alpha_complex {
     #endif
 
 #if CGAL_VERSION_NR < 1050101000
-    // Make compilation fail if weighted and CGAL < 5.1
-    static_assert(!Weighted, "Weighted Alpha_complex is only available for CGAL >= 5.1");
+    // Make compilation fail if weighted and CGAL < 5.1.0
+    static_assert(!Weighted, "Weighted Alpha_complex is only available for CGAL >= 5.1.0");
 #endif
 
     auto first = std::begin(points);

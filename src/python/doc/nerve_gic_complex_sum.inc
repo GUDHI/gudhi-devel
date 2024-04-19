@@ -8,7 +8,7 @@
    |      :figclass: align-center                                   | that comes e.g. from the preimages of a family of hypercubes covering  |                                                                 |
    |                                                                | the image of a continuous function defined on the data.                | :License: MIT (`GPL v3 </licensing/>`_)                         |
    |                                                                |                                                                        |                                                                 |
-   |                                                                |                                                                        | :Requires: `CGAL <installation.html#cgal>`_ :math:`\geq` 5.1.0 |
+   |                                                                |                                                                        | :Requires: `CGAL <installation.html#cgal>`_ :math:`\geq` 5.1.0  |
    |                                                                |                                                                        |                                                                 |
    |                                                                |                                                                        |                                                                 |
    +----------------------------------------------------------------+------------------------------------------------------------------------+-----------------------------------------------------------------+

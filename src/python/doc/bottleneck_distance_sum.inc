@@ -8,7 +8,7 @@
    |                                                   | diagonal points) such that any couple of matched points are at       |                                                                 |
    |      Bottleneck distance is the length of         | distance at most b, where the distance between points is the sup     | :License: MIT (`GPL v3 </licensing/>`_)                         |
    |      the longest edge                             | norm in :math:`\mathbb{R}^2`.                                        |                                                                 |
-   |                                                   |                                                                      | :Requires: `CGAL <installation.html#cgal>`_ :math:`\geq` 5.1.0 |
+   |                                                   |                                                                      | :Requires: `CGAL <installation.html#cgal>`_ :math:`\geq` 5.1.0  |
    +---------------------------------------------------+----------------------------------------------------------------------+-----------------------------------------------------------------+
    | * :doc:`bottleneck_distance_user`                                                                                                                                                          |
    +--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
