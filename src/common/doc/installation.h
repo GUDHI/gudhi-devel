@@ -115,7 +115,7 @@ make doxygen\endverbatim
  * matrices, vectors, numerical solvers, and related algorithms.
  * 
  * The following examples/utilities require the <a target="_blank" href="https://eigen.tuxfamily.org">Eigen</a> and will not be
- * built if Eigen is not installed:
+ * built if Eigen version 3.3.0 or higher is not installed:
  * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_off.cpp}
  * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_points.cpp}
  * \li \gudhi_example_link{Alpha_complex,alpha_complex_persistence.cpp}
