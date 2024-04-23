@@ -1,14 +1,7 @@
-project(Bottleneck_distance_tests)
+include(GUDHI_boost_test)
 
-if (CGAL_FOUND)
-  include(GUDHI_boost_test)
+add_executable_with_targets(Bottleneck_distance_test_unit bottleneck_unit_test.cpp CGAL::CGAL TBB::tbb)
 
-  add_executable ( Bottleneck_distance_test_unit bottleneck_unit_test.cpp )
-  target_link_libraries(Bottleneck_distance_test_unit CGAL::CGAL)
-  if(TARGET TBB::tbb)
-    target_link_libraries(Bottleneck_distance_test_unit TBB::tbb)
-  endif()
-
+if (TARGET CGAL::CGAL)
   gudhi_add_boost_test(Bottleneck_distance_test_unit)
-
-endif (CGAL_FOUND)
+endif()

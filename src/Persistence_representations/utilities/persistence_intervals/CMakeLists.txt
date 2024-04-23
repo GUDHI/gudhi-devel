@@ -1,6 +1,3 @@
-project(Persistence_representations_intervals_utilities)
-
-
 add_executable ( plot_histogram_of_intervals_lengths plot_histogram_of_intervals_lengths.cpp )
 
 add_test(NAME Persistence_representation_utilities_plot_histogram_of_intervals_lengths COMMAND $<TARGET_FILE:plot_histogram_of_intervals_lengths>
@@ -20,13 +17,9 @@ add_test(NAME Persistence_representation_utilities_compute_number_of_dominant_in
 
 install(TARGETS compute_number_of_dominant_intervals DESTINATION bin)
 
+add_executable_with_targets(compute_bottleneck_distance compute_bottleneck_distance.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)
 
-if (CGAL_FOUND AND EIGEN3_FOUND)
-  add_executable ( compute_bottleneck_distance compute_bottleneck_distance.cpp )
-  target_link_libraries(compute_bottleneck_distance CGAL::CGAL Eigen3::Eigen)
-  if(TARGET TBB::tbb)
-    target_link_libraries(compute_bottleneck_distance TBB::tbb)
-  endif()
+if(TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   add_test(NAME Persistence_representation_utilities_compute_bottleneck_distance
       COMMAND $<TARGET_FILE:compute_bottleneck_distance>
       "-1"
@@ -34,4 +27,4 @@ if (CGAL_FOUND AND EIGEN3_FOUND)
       "${CMAKE_CURRENT_BINARY_DIR}/../second.pers")
 
   install(TARGETS compute_bottleneck_distance DESTINATION bin)
-endif (CGAL_FOUND AND EIGEN3_FOUND)
+endif()

@@ -1,5 +1,3 @@
-project(GudhUI)
-
 # Need to find OpenGL first as find_package(Qt5) tries to #include"GL/gl.h" on some platforms
 find_package(OpenGL QUIET)
 
@@ -9,7 +7,7 @@ if (OPENGL_FOUND)
     find_package(QGLViewer QUIET)
     if ( QGLVIEWER_FOUND)
 
-      if (CGAL_FOUND)
+      if (TARGET CGAL::CGAL)
         set(CMAKE_AUTOMOC ON)
         set(CMAKE_AUTOUIC ON)
         set(CMAKE_INCLUDE_CURRENT_DIR ON)

@@ -1,9 +1,1 @@
-project(Tangential_complex_benchmark)
-
-if(CGAL_FOUND AND EIGEN3_FOUND)
-  add_executable(Tangential_complex_benchmark benchmark_tc.cpp)
-  target_link_libraries(Tangential_complex_benchmark CGAL::CGAL Eigen3::Eigen)
-  if(TARGET TBB::tbb)
-    target_link_libraries(Tangential_complex_benchmark TBB::tbb)
-  endif()
-endif(CGAL_FOUND AND EIGEN3_FOUND)
+add_executable_with_targets(Tangential_complex_benchmark benchmark_tc.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)

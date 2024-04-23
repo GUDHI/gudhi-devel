@@ -1,5 +1,3 @@
-project(Persistence_representations_test)
-
 include(GUDHI_boost_test)
 
 # copy data directory for tests purpose.
@@ -25,14 +23,10 @@ gudhi_add_boost_test(Read_persistence_from_file_test_unit)
 add_executable ( kernels_unit kernels.cpp )
 gudhi_add_boost_test(kernels_unit)
 
-if (CGAL_FOUND AND EIGEN3_FOUND)
-  add_executable (Persistence_intervals_with_distances_test_unit persistence_intervals_with_distances_test.cpp )
-  target_link_libraries(Persistence_intervals_with_distances_test_unit CGAL::CGAL Eigen3::Eigen)
-  if(TARGET TBB::tbb)
-    target_link_libraries(Persistence_intervals_with_distances_test_unit TBB::tbb)
-  endif()
+add_executable_with_targets(Persistence_intervals_with_distances_test_unit persistence_intervals_with_distances_test.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)
+if(TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   gudhi_add_boost_test(Persistence_intervals_with_distances_test_unit)
-endif (CGAL_FOUND AND EIGEN3_FOUND)
+endif()
 
 
 
