@@ -45,6 +45,7 @@
 #include <stdexcept>
 #include <numeric>  // for std::iota
 #include <algorithm>  // for std::sort
+#include <type_traits>  // for std::is_same_v
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
@@ -61,10 +62,6 @@ namespace alpha_complex {
 
 template<typename D> struct Is_Epeck_D { static const bool value = false; };
 template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool value = true; };
-
-template<typename D> struct Is_Dynamic_dimension_tag { static const bool value = false; };
-template<> struct Is_Dynamic_dimension_tag<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>> { static const bool value = true; };
-template<> struct Is_Dynamic_dimension_tag<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>> { static const bool value = true; };
 
 /**
  * \class Alpha_complex Alpha_complex.h gudhi/Alpha_complex.h
@@ -115,7 +112,7 @@ class Alpha_complex {
 
   // CGAL::Triangulation_ds_full_cell<void, CGAL::TDS_full_cell_mirror_storage_policy> has been enhanced for CGAL >= 6.0
   // But faster only with static dimensions
-  using Triangulation_full_cell = std::conditional_t<Is_Dynamic_dimension_tag<Kernel>::value,
+  using Triangulation_full_cell = std::conditional_t<std::is_same_v<typename Kernel::Dimension, CGAL::Dynamic_dimension_tag>,
                                                      CGAL::Triangulation_full_cell<Geom_traits>,
                                                      CGAL::Triangulation_ds_full_cell<void, CGAL::TDS_full_cell_mirror_storage_policy>>;
   // Add an int in TDS to save point index in the structure
