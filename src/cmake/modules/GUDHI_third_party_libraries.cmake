@@ -129,70 +129,73 @@ if (WITH_GUDHI_PYTHON)
   # Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 or -DPython_ADDITIONAL_VERSIONS=3 for instance.
   find_package( PythonInterp )
   
-  # find_python_module tries to import module in Python interpreter and to retrieve its version number
-  # returns ${PYTHON_MODULE_NAME_UP}_VERSION and ${PYTHON_MODULE_NAME_UP}_FOUND
-  function( find_python_module PYTHON_MODULE_NAME )
-    string(TOUPPER ${PYTHON_MODULE_NAME} PYTHON_MODULE_NAME_UP)
-    execute_process(
-            COMMAND ${PYTHON_EXECUTABLE}  -c "import ${PYTHON_MODULE_NAME}; print(${PYTHON_MODULE_NAME}.__version__)"
-            RESULT_VARIABLE PYTHON_MODULE_RESULT
-            OUTPUT_VARIABLE PYTHON_MODULE_VERSION
-            ERROR_VARIABLE PYTHON_MODULE_ERROR)
-    if(PYTHON_MODULE_RESULT EQUAL 0)
-      # Remove all carriage returns as it can be multiline
-      string(REGEX REPLACE "\n" " " PYTHON_MODULE_VERSION "${PYTHON_MODULE_VERSION}")
-      message ("++ Python module ${PYTHON_MODULE_NAME} - Version ${PYTHON_MODULE_VERSION} found")
-  
-      set(${PYTHON_MODULE_NAME_UP}_VERSION ${PYTHON_MODULE_VERSION} PARENT_SCOPE)
-      set(${PYTHON_MODULE_NAME_UP}_FOUND TRUE PARENT_SCOPE)
-    else()
-      message ("PYTHON_MODULE_NAME = ${PYTHON_MODULE_NAME}
-       - PYTHON_MODULE_RESULT = ${PYTHON_MODULE_RESULT}
-       - PYTHON_MODULE_VERSION = ${PYTHON_MODULE_VERSION}
-       - PYTHON_MODULE_ERROR = ${PYTHON_MODULE_ERROR}")
-      unset(${PYTHON_MODULE_NAME_UP}_VERSION PARENT_SCOPE)
-      set(${PYTHON_MODULE_NAME_UP}_FOUND FALSE PARENT_SCOPE)
-    endif()
-  endfunction( find_python_module )
-
-  # For modules that do not define module.__version__
-  function( find_python_module_no_version PYTHON_MODULE_NAME )
-    string(TOUPPER ${PYTHON_MODULE_NAME} PYTHON_MODULE_NAME_UP)
-    execute_process(
-            COMMAND ${PYTHON_EXECUTABLE}  -c "import ${PYTHON_MODULE_NAME}"
-            RESULT_VARIABLE PYTHON_MODULE_RESULT
-            ERROR_VARIABLE PYTHON_MODULE_ERROR)
-    if(PYTHON_MODULE_RESULT EQUAL 0)
-      # Remove carriage return
-      message ("++ Python module ${PYTHON_MODULE_NAME} found")
-      set(${PYTHON_MODULE_NAME_UP}_FOUND TRUE PARENT_SCOPE)
-    else()
-      message ("PYTHON_MODULE_NAME = ${PYTHON_MODULE_NAME}
-       - PYTHON_MODULE_RESULT = ${PYTHON_MODULE_RESULT}
-       - PYTHON_MODULE_ERROR = ${PYTHON_MODULE_ERROR}")
-      set(${PYTHON_MODULE_NAME_UP}_FOUND FALSE PARENT_SCOPE)
-    endif()
-  endfunction( find_python_module_no_version )
-  
   if( PYTHONINTERP_FOUND )
-    find_python_module("cython")
-    find_python_module("pytest")
-    find_python_module("matplotlib")
-    find_python_module("numpy")
-    find_python_module("scipy")
-    find_python_module("sphinx")
-    find_python_module("sklearn")
-    find_python_module("ot")
-    find_python_module("pybind11")
-    find_python_module("torch")
-    find_python_module("pykeops")
-    find_python_module("eagerpy")
-    find_python_module_no_version("hnswlib")
-    find_python_module("tensorflow")
-    find_python_module("sphinx_paramlinks")
-    find_python_module("pydata_sphinx_theme")
-    find_python_module_no_version("sphinxcontrib.bibtex")
-    find_python_module("networkx")
+    # GUDHI python run time third parties list, same syntax as detected by 'pip list', but in upper case
+    set(GUDHI_RUN_TIME_DEPENDENCIES "CYTHON;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "PYTEST;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "MATPLOTLIB;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "NUMPY;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "SCIPY;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "SPHINX;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "SCIKIT-LEARN;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "POT;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "PYBIND11;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "TORCH;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "PYKEOPS;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "EAGERPY;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "HNSWLIB;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "TENSORFLOW;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "SPHINX-PARAMLINKS;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "PYDATA-SPHINX-THEME;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "SPHINXCONTRIB-BIBTEX;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "NETWORKX;${GUDHI_RUN_TIME_DEPENDENCIES}")
+    set(GUDHI_RUN_TIME_DEPENDENCIES "POUET;${GUDHI_RUN_TIME_DEPENDENCIES}")
+
+    # Get list of installed packages with 'python -m pip freeze'
+    execute_process(COMMAND ${PYTHON_EXECUTABLE}  -m "pip" "freeze"
+            RESULT_VARIABLE PYTHON_MODULES_RESULT
+            OUTPUT_VARIABLE PYTHON_MODULES_LIST
+            ERROR_VARIABLE PYTHON_MODULES_ERROR)
+    if(PYTHON_MODULES_RESULT EQUAL 0)
+      string(REPLACE "\n" ";" PYTHON_MODULES_LIST ${PYTHON_MODULES_LIST})
+    else()
+      message ("No pip installed")
+    endif()
+  
+    # Set Cmake variables ${PYTHON_MODULE}_FOUND and ${PYTHON_MODULE}_VERSION
+    # of GUDHI_RUN_TIME_DEPENDENCIES found in 'pip list'
+    foreach(PYTHON_MODULE_LIST ${PYTHON_MODULES_LIST})
+      string(REPLACE "==" ";" PYTHON_MODULE ${PYTHON_MODULE_LIST})
+      list(POP_FRONT PYTHON_MODULE PYTHON_MODULE_NAME PYTHON_MODULE_VERSION)
+      string(TOUPPER ${PYTHON_MODULE_NAME} PYTHON_MODULE_NAME_UP)
+      string(TOLOWER ${PYTHON_MODULE_NAME} PYTHON_MODULE_NAME_LOW)
+      if(PYTHON_MODULE_NAME_UP IN_LIST GUDHI_RUN_TIME_DEPENDENCIES)
+        message("++ Python module ${PYTHON_MODULE_NAME_LOW} - Version ${PYTHON_MODULE_VERSION} found")
+        set(${PYTHON_MODULE_NAME_UP}_FOUND TRUE)
+        set(${PYTHON_MODULE_NAME_UP}_VERSION ${PYTHON_MODULE_VERSION})
+      else()
+        # message(" ## ${PYTHON_MODULE_NAME_UP} not found")
+      endif()
+    endforeach()
+
+    # Set gudhi.__debug_info__
+    # WARNING : to be done before setup.py.in configure_file
+    function( add_gudhi_debug_info DEBUG_INFO )
+      set(GUDHI_PYTHON_DEBUG_INFO "${GUDHI_PYTHON_DEBUG_INFO}    \"${DEBUG_INFO}\\n\" \\\n" PARENT_SCOPE)
+    endfunction( add_gudhi_debug_info )
+
+    add_gudhi_debug_info("Python version ${PYTHON_VERSION_STRING}")
+    foreach(GUDHI_RUN_TIME_DEPENDENCY ${GUDHI_RUN_TIME_DEPENDENCIES})
+      string(TOLOWER ${GUDHI_RUN_TIME_DEPENDENCY} GUDHI_RUN_TIME_DEPENDENCY_LOW)
+      if(${GUDHI_RUN_TIME_DEPENDENCY}_FOUND)
+        set(GUDHI_RUN_TIME_DEPENDENCY_VERSION "${${GUDHI_RUN_TIME_DEPENDENCY}_VERSION}")
+        add_gudhi_debug_info("${GUDHI_RUN_TIME_DEPENDENCY_LOW} version ${GUDHI_RUN_TIME_DEPENDENCY_VERSION}")
+      else()
+        # Output GUDHI_RUN_TIME_DEPENDENCIES not found in 'pip list'
+        message("++ Python module ${GUDHI_RUN_TIME_DEPENDENCY_LOW} not found")
+      endif()
+    endforeach()
+
   endif()
   
   if(NOT GUDHI_PYTHON_PATH)
