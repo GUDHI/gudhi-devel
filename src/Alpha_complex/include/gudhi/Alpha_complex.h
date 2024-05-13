@@ -113,7 +113,7 @@ class Alpha_complex {
   /** \brief Geometric traits class that provides the geometric types and predicates needed by the triangulations.*/
   using Geom_traits = std::conditional_t<Weighted, CGAL::Regular_triangulation_traits_adapter<Kernel>, Kernel>;
 
-  // CGAL::Triangulation_ds_full_cell<void, CGAL::TDS_full_cell_mirror_storage_policy> has been enhanced for CGAL > 6.0
+  // CGAL::Triangulation_ds_full_cell<void, CGAL::TDS_full_cell_mirror_storage_policy> has been enhanced for CGAL >= 6.0
   // But faster only with static dimensions
   using Triangulation_full_cell = std::conditional_t<Is_Dynamic_dimension_tag<Kernel>::value,
                                                      CGAL::Triangulation_full_cell<Geom_traits>,
