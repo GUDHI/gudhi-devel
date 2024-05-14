@@ -113,7 +113,7 @@ class Alpha_complex {
   // CGAL::Triangulation_ds_full_cell<void, CGAL::TDS_full_cell_mirror_storage_policy> has been enhanced for CGAL >= 6.0
   // But faster only with static dimensions
   using Triangulation_full_cell = std::conditional_t<std::is_same_v<typename Kernel::Dimension, CGAL::Dynamic_dimension_tag>,
-                                                     CGAL::Triangulation_full_cell<Geom_traits>,
+                                                     CGAL::Triangulation_ds_full_cell<>,
                                                      CGAL::Triangulation_ds_full_cell<void, CGAL::TDS_full_cell_mirror_storage_policy>>;
   // Add an int in TDS to save point index in the structure
   using TDS = CGAL::Triangulation_data_structure<typename Geom_traits::Dimension,
