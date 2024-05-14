@@ -625,6 +625,11 @@ if(PYTHONINTERP_FOUND)
       endif()
     endif()
 
+    # Quantization
+    if(SCIPY_FOUND)
+      add_gudhi_py_test(test_quantization)
+    endif()
+
     # Representations
     if(SKLEARN_FOUND AND MATPLOTLIB_FOUND AND OT_FOUND AND NOT CGAL_VERSION VERSION_LESS 4.11.0)
       add_gudhi_py_test(test_representations)

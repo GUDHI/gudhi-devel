@@ -8,8 +8,8 @@
 #   - YYYY/MM Author: Description of the modification
 
 import numpy as np
-import scipy.spatial.distance as sc
 import warnings
+from gudhi.wasserstein import _utils
 
 import ot
 
@@ -23,49 +23,11 @@ def _proj_on_diag(X):
     return np.array([Z , Z]).T
 
 
-def _dist_to_diag(X, internal_p):
-    '''
-    :param X: (n x 2) array encoding the points of a persistent diagram.
-    :param internal_p: Ground metric (i.e. norm L^p).
-    :returns: (n) array encoding the (respective orthogonal) distances of the points to the diagonal
-
-    .. note::
-        Assumes that the points are above the diagonal.
-    '''
-    return (X[:, 1] - X[:, 0]) * 2 ** (1.0 / internal_p - 1)
-
-
-def _build_dist_matrix(X, Y, order, internal_p):
-    '''
-    :param X: (n x 2) numpy.array encoding the (points of the) first diagram.
-    :param Y: (m x 2) numpy.array encoding the second diagram.
-    :param order: exponent for the Wasserstein metric.
-    :param internal_p: Ground metric (i.e. norm L^p).
-    :returns: (n+1) x (m+1) np.array encoding the cost matrix C.
-                For 0 <= i < n, 0 <= j < m, C[i,j] encodes the distance between X[i] and Y[j],
-                while C[i, m] (resp. C[n, j]) encodes the distance (to the p) between X[i] (resp Y[j])
-                and its orthogonal projection onto the diagonal.
-                note also that C[n, m] = 0  (it costs nothing to move from the diagonal to the diagonal).
-    '''
-    Cxd = _dist_to_diag(X, internal_p)**order
-    Cdy = _dist_to_diag(Y, internal_p)**order
-    if np.isinf(internal_p):
-        C = sc.cdist(X,Y, metric='chebyshev')**order
-    else:
-        C = sc.cdist(X,Y, metric='minkowski', p=internal_p)**order
-    Cf = np.hstack((C, Cxd[:,None]))
-    Cdy = np.append(Cdy, 0)
-
-    Cf = np.vstack((Cf, Cdy[None,:]))
-
-    return Cf
-
-
 def _perstot_autodiff(X, order, internal_p):
     '''
     Version of _perstot that works on eagerpy tensors.
     '''
-    return _dist_to_diag(X, internal_p).norms.lp(order)
+    return _utils._dist_to_diag(X, internal_p).norms.lp(order)
 
 
 def _perstot(X, order, internal_p, enable_autodiff):
@@ -86,7 +48,7 @@ def _perstot(X, order, internal_p, enable_autodiff):
 
         return _perstot_autodiff(ep.astensor(X), order, internal_p).raw
     else:
-        return np.linalg.norm(_dist_to_diag(X, internal_p), ord=order)
+        return np.linalg.norm(_utils._dist_to_diag(X, internal_p), ord=order)
 
 
 def _get_essential_parts(a):
@@ -311,7 +273,7 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
     n = len(X)
     m = len(Y)
 
-    M = _build_dist_matrix(X, Y, order=order, internal_p=internal_p)
+    M = _utils._build_dist_matrix(X, Y, order=order, internal_p=internal_p)
     a = np.ones(n+1) # weight vector of the input diagram. Uniform here.
     a[-1] = m
     b = np.ones(m+1) # weight vector of the input diagram. Uniform here.
@@ -322,14 +284,14 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
         P = ot.emd(a=a,b=b,M=M, numItermax=2000000)
         ot_cost = np.sum(np.multiply(P,M))
         P[-1, -1] = 0  # Remove matching corresponding to the diagonal
-        match = np.argwhere(P)
+        the_match = np.argwhere(P)
         # Now we turn to -1 points encoding the diagonal
-        match[:,0][match[:,0] >= n] = -1
-        match[:,1][match[:,1] >= m] = -1
+        the_match[:,0][the_match[:,0] >= n] = -1
+        the_match[:,1][the_match[:,1] >= m] = -1
         # Finally incorporate the essential part matching
         if essential_matching is not None:
-            match = np.concatenate([match, essential_matching]) if essential_matching.size else match
-        return (ot_cost + essential_cost) ** (1./order) , match
+            match = np.concatenate([the_match, essential_matching]) if essential_matching.size else the_match
+        return (ot_cost + essential_cost) ** (1./order) , the_match
 
     if enable_autodiff:
         P = ot.emd(a=a, b=b, M=M, numItermax=2000000)
