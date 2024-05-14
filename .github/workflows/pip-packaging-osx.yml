@@ -11,7 +11,7 @@ env:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-13
     strategy:
       max-parallel: 4
       matrix:
