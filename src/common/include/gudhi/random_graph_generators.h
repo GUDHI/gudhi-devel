@@ -12,6 +12,7 @@
 #define RANDOM_GRAPH_GENERATORS_H_
 
 #include <gudhi/Simplex_tree.h>
+#include <gudhi/Random.h>
 
 
 #include <algorithm>  // for std::prev_permutation
@@ -20,6 +21,7 @@
 #include <random>
 #include <numeric>  // for std::iota
 #include <cstddef>  // for std::size_t
+#include <type_traits>  // for std::is_floating_point_v
 #ifdef DEBUG_TRACES
 #include <iostream>
 #endif  // DEBUG_TRACES
@@ -27,16 +29,6 @@
 std::random_device rd;
 
 namespace Gudhi {
-
-template <typename Floating_type>
-std::vector<Floating_type> N_random_values(std::size_t nb_values, Floating_type min = 0., Floating_type max = 1.) {
-  std::uniform_real_distribution<Floating_type> unif(0., 1.);
-  std::mt19937 rand_engine(rd());
-  std::vector<Floating_type> random_filtrations(nb_values);
-  std::generate(random_filtrations.begin(), random_filtrations.end(),
-                [&unif, &rand_engine]() { return unif(rand_engine); });
-  return random_filtrations;
-}
 
 template <typename Vertex_handle>
 std::vector<std::array<Vertex_handle, 2>> random_edges(Vertex_handle nb_vertices, double density = 0.15) {
@@ -48,7 +40,7 @@ std::vector<std::array<Vertex_handle, 2>> random_edges(Vertex_handle nb_vertices
   std::fill(to_permute.begin(), to_permute.begin() + 2, true);
   
   std::size_t nb_permutations = (nb_vertices * (nb_vertices - 1)) / 2;
-  auto random_values = N_random_values<double>(nb_permutations);
+  auto random_values = Gudhi::Random().get_range<double>(nb_permutations);
   std::size_t idx = 0;
   do {
     // Keep only X% of the possible edges
@@ -92,7 +84,7 @@ void simplex_tree_random_flag_complex(
 
   auto edges = random_edges(nb_vertices, density);
 
-  auto random_filtrations = N_random_values<typename Simplex_tree::Filtration_value>(edges.size());
+  auto random_filtrations = Gudhi::Random().get_range<typename Simplex_tree::Filtration_value>(edges.size());
 
   std::size_t idx = 0;
   for (auto edge : edges) {
