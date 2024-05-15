@@ -9,7 +9,8 @@ env:
 
 jobs:
   build:
-    runs-on: macos-latest
+    # Should use macos-latest, but python 3.8 is no more available from macos-14
+    runs-on: macos-13
     strategy:
       max-parallel: 4
       matrix:
