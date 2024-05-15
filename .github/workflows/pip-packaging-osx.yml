@@ -5,8 +5,8 @@ on:
     types: [published]
 
 env:
-  MACOSX_DEPLOYMENT_TARGET: 11.7
-  _PYTHON_HOST_PLATFORM: macosx-11.7-universal2
+  MACOSX_DEPLOYMENT_TARGET: 12.0
+  _PYTHON_HOST_PLATFORM: macosx-12.0-universal2
   ARCHFLAGS: "-arch arm64 -arch x86_64"
 
 jobs:
@@ -33,10 +33,10 @@ jobs:
             numpy-version: '1.26.0'
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
