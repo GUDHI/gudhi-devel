@@ -19,7 +19,7 @@ jobs:
         run: |
           mkdir build_38
           cd build_38
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON38/bin/python ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON38/bin/python ..
           cd src/python
           $PYTHON38/bin/python -m build -n -w
           auditwheel repair dist/*.whl
@@ -36,7 +36,7 @@ jobs:
         run: |
           mkdir build_39
           cd build_39
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON39/bin/python ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON39/bin/python ..
           cd src/python
           $PYTHON39/bin/python -m build -n -w
           auditwheel repair dist/*.whl
@@ -53,7 +53,7 @@ jobs:
         run: |
           mkdir build_310
           cd build_310
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON310/bin/python ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON310/bin/python ..
           cd src/python
           $PYTHON310/bin/python -m build -n -w
           auditwheel repair dist/*.whl
@@ -70,7 +70,7 @@ jobs:
         run: |
           mkdir build_311
           cd build_311
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON311/bin/python ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON311/bin/python ..
           cd src/python
           $PYTHON311/bin/python -m build -n -w
           auditwheel repair dist/*.whl
@@ -87,7 +87,7 @@ jobs:
         run: |
           mkdir build_312
           cd build_312
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON312/bin/python ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON312/bin/python ..
           cd src/python
           $PYTHON312/bin/python -m build -n -w
           auditwheel repair dist/*.whl

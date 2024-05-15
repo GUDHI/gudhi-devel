@@ -17,7 +17,7 @@ jobs:
         run: |
           mkdir build_38
           cd build_38
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON38/bin/python ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON38/bin/python ..
           cd src/python
           $PYTHON38/bin/python -m build -n -w
           auditwheel repair dist/*.whl
