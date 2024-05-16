@@ -21,7 +21,12 @@
 #include <vector>
 #include <stdexcept>
 #include <type_traits>
-#include <unordered_set>
+// #include <unordered_set>
+#if BOOST_VERSION >= 108100
+#include <boost/unordered/unordered_flat_set.hpp>
+#else
+#include <boost/unordered_set.hpp>  // preferably with boost 1.79+ for speed
+#endif
 #include <set>
 #include <utility>  //std::swap, std::move & std::exchange
 
@@ -68,7 +73,12 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
     bool operator()(const Cell* c1, const Cell* c2) const { return *c1 < *c2; }
   };
 
-  using Column_type = std::unordered_set<Cell*, CellPointerHash, CellPointerEq>;
+#if BOOST_VERSION >= 108100
+  using Column_type = boost::unordered_flat_set<Cell*, CellPointerHash, CellPointerEq>;
+#else
+  using Column_type = boost::unordered_set<Cell*, CellPointerHash, CellPointerEq>;
+#endif
+  // using Column_type = std::unordered_set<Cell*, CellPointerHash, CellPointerEq>;
   using iterator = boost::indirect_iterator<typename Column_type::iterator>;
   using const_iterator = boost::indirect_iterator<typename Column_type::const_iterator>;
 
@@ -856,7 +866,9 @@ inline void Unordered_set_column<Master_matrix, Cell_constructor>::_delete_cell(
 {
   if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::unlink(*it);
   cellPool_->destroy(*it);
-  it = column_.erase(it);
+  auto tmp = it++;
+  // it = column_.erase(it);
+  column_.erase(tmp);
 }
 
 template <class Master_matrix, class Cell_constructor>

@@ -873,7 +873,7 @@ inline void Chain_matrix<Master_matrix>::remove_last()
     // and then call `remove_maximal_face` with it and an empty `columnsToSwap`.
 
     id_index pivot = 0;
-    index colIndex;
+    index colIndex = 0;
     for (auto& p : pivotToColumnIndex_) {
       if (p.first > pivot) {  // pivots have to be strictly increasing in order of filtration
         pivot = p.first;
