@@ -11,7 +11,6 @@
 #ifndef RANDOM_GRAPH_GENERATORS_H_
 #define RANDOM_GRAPH_GENERATORS_H_
 
-#include <gudhi/Simplex_tree.h>
 #include <gudhi/Random.h>
 
 
