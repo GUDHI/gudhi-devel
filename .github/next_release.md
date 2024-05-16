@@ -7,6 +7,12 @@ Below is a list of changes made since GUDHI 3.9.0:
 - [Rips complex](https://gudhi.inria.fr/python/latest/rips_complex_sklearn_itf_ref.html)
      - Rips complex persistence scikit-learn like interface
 
+- [Delaunay complex](https://gudhi.inria.fr/python/latest/delaunay_complex_user.html)
+     - The Delaunay complex filtration values computed with different techniques:
+          * Delaunay complex (without filtration values)
+          * Delaunay Čech complex (using minimal enclosing ball technique)
+          * Alpha complex (moved in this new section)
+
 - [Module](link)
      - **...**
 
