@@ -50,6 +50,8 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   using Row_type = typename Master_matrix::Row_type;                  /**< Row type,
                                                                            only necessary with row access option. */
   using Cell_constructor = typename Master_matrix::Cell_constructor;  /**< Factory of @ref Cell classes. */
+  using Column_settings = typename Master_matrix::Column_settings;    /**< Structure giving access to the columns to
+                                                                           necessary external classes. */
   using boundary_type = typename Master_matrix::boundary_type;        /**< Type of an input column. */
   using index = typename Master_matrix::index;                        /**< @ref MatIdx index type. */
   using id_index = typename Master_matrix::id_index;                  /**< @ref IDIdx index type. */
@@ -59,10 +61,10 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   /**
    * @brief Constructs an empty matrix.
    * 
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  RU_matrix(Field_operators* operators, Cell_constructor* cellConstructor);
+  RU_matrix(Column_settings* colSettings);
   /**
    * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a
    * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
@@ -78,35 +80,32 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
    * interest and not everything should be stored, then use the @ref insert_boundary method instead (after creating the
-   * matrix with the @ref RU_matrix(unsigned int, Field_operators*, Cell_constructor*) constructor preferably).
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * matrix with the @ref RU_matrix(unsigned int, Column_settings*) constructor preferably).
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
   template <class Boundary_type = boundary_type>
   RU_matrix(const std::vector<Boundary_type>& orderedBoundaries, 
-            Field_operators* operators,
-            Cell_constructor* cellConstructor);
+            Column_settings* colSettings);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
    * 
    * @param numberOfColumns Number of columns to reserve space for.
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  RU_matrix(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor);
+  RU_matrix(unsigned int numberOfColumns, Column_settings* colSettings);
   /**
-   * @brief Copy constructor. If @p operators or @p cellConstructor is not a null pointer, its value is kept
+   * @brief Copy constructor. If @p colSettings is not a null pointer, its value is kept
    * instead of the one in the copied matrix.
    * 
    * @param matrixToCopy Matrix to copy.
-   * @param operators Pointer to the field operators.
-   * If null pointer, the pointer in @p matrixToCopy is choosen instead.
-   * @param cellConstructor Pointer to the cell factory.
-   * If null pointer, the pointer in @p matrixToCopy is choosen instead.
+   * @param colSettings Either a pointer to an existing setting structure for the columns or a null pointer.
+   * The structure should contain all the necessary external classes specifically necessary for the choosen column type,
+   * such as custom allocators. If null pointer, the pointer stored in @p matrixToCopy is used instead.
    */
   RU_matrix(const RU_matrix& matrixToCopy, 
-            Field_operators* operators = nullptr,
-            Cell_constructor* cellConstructor = nullptr);
+            Column_settings* colSettings = nullptr);
   /**
    * @brief Move constructor.
    * 
@@ -350,22 +349,18 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   /**
    * @brief Resets the matrix to an empty matrix.
    * 
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  void reset(Field_operators* operators, Cell_constructor* cellConstructor) {
-    reducedMatrixR_.reset(operators, cellConstructor);
-    mirrorMatrixU_.reset(operators, cellConstructor);
+  void reset(Column_settings* colSettings) {
+    reducedMatrixR_.reset(colSettings);
+    mirrorMatrixU_.reset(colSettings);
     pivotToColumnIndex_.clear();
     nextEventIndex_ = 0;
-    operators_ = operators;
+    if constexpr (!Master_matrix::Option_list::is_z2){
+      operators_ = &(colSettings->operators);
+    }
   }
-
-  // void set_operators(Field_operators* operators) {
-  //   operators_ = operators;
-  //   reducedMatrixR_.set_operators(operators);
-  //   mirrorMatrixU_.set_operators(operators);
-  // }
 
   /**
    * @brief Assign operator.
@@ -424,29 +419,36 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
 };
 
 template <class Master_matrix>
-inline RU_matrix<Master_matrix>::RU_matrix(Field_operators* operators, Cell_constructor* cellConstructor)
+inline RU_matrix<Master_matrix>::RU_matrix(Column_settings* colSettings)
     : pair_opt(),
       swap_opt(),
       rep_opt(),
-      reducedMatrixR_(operators, cellConstructor),
-      mirrorMatrixU_(operators, cellConstructor),
+      reducedMatrixR_(colSettings),
+      mirrorMatrixU_(colSettings),
       nextEventIndex_(0),
-      operators_(operators) 
-{}
+      operators_(nullptr) 
+{
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
+}
 
 template <class Master_matrix>
 template <class Boundary_type>
 inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_type>& orderedBoundaries,
-                                           Field_operators* operators, 
-                                           Cell_constructor* cellConstructor)
+                                           Column_settings* colSettings)
     : pair_opt(),
       swap_opt(),
       rep_opt(),
-      reducedMatrixR_(orderedBoundaries, operators, cellConstructor),
-      mirrorMatrixU_(orderedBoundaries.size(), operators, cellConstructor),
+      reducedMatrixR_(orderedBoundaries, colSettings),
+      mirrorMatrixU_(orderedBoundaries.size(), colSettings),
       nextEventIndex_(orderedBoundaries.size()),
-      operators_(operators) 
+      operators_(nullptr) 
 {
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
+
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.reserve(orderedBoundaries.size());
   } else {
@@ -459,16 +461,19 @@ inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_type>& ord
 
 template <class Master_matrix>
 inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, 
-                                           Field_operators* operators,
-                                           Cell_constructor* cellConstructor)
+                                           Column_settings* colSettings)
     : pair_opt(),
       swap_opt(),
       rep_opt(),
-      reducedMatrixR_(numberOfColumns, operators, cellConstructor),
-      mirrorMatrixU_(numberOfColumns, operators, cellConstructor),
+      reducedMatrixR_(numberOfColumns, colSettings),
+      mirrorMatrixU_(numberOfColumns, colSettings),
       nextEventIndex_(0),
-      operators_(operators) 
+      operators_(nullptr) 
 {
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
+
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.reserve(numberOfColumns);
   } else {
@@ -484,17 +489,20 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns,
 
 template <class Master_matrix>
 inline RU_matrix<Master_matrix>::RU_matrix(const RU_matrix& matrixToCopy, 
-                                           Field_operators* operators,
-                                           Cell_constructor* cellConstructor)
+                                           Column_settings* colSettings)
     : pair_opt(static_cast<const pair_opt&>(matrixToCopy)),
       swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
       rep_opt(static_cast<const rep_opt&>(matrixToCopy)),
-      reducedMatrixR_(matrixToCopy.reducedMatrixR_, operators, cellConstructor),
-      mirrorMatrixU_(matrixToCopy.mirrorMatrixU_, operators, cellConstructor),
+      reducedMatrixR_(matrixToCopy.reducedMatrixR_, colSettings),
+      mirrorMatrixU_(matrixToCopy.mirrorMatrixU_, colSettings),
       pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
       nextEventIndex_(matrixToCopy.nextEventIndex_),
-      operators_(operators == nullptr ? matrixToCopy.operators_ : operators) 
-{}
+      operators_(colSettings == nullptr ? matrixToCopy.operators_ : nullptr) 
+{
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    if (colSettings != nullptr) operators_ = &(colSettings->operators);
+  }
+}
 
 template <class Master_matrix>
 inline RU_matrix<Master_matrix>::RU_matrix(RU_matrix&& other) noexcept

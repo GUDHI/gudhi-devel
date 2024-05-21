@@ -25,7 +25,7 @@ using Gudhi::persistence_matrix::Matrix;
 using Gudhi::persistence_matrix::Column_indexation_types;
 using Zp = Gudhi::persistence_fields::Zp_field_operators<> ;
 
-inline Zp _g_operators = Zp(5);
+// inline Zp _g_operators = Zp(5);
 
 template<class Column>
 constexpr bool is_z2(){
@@ -93,6 +93,7 @@ column_content<Heap_column<Matrix> > get_column_content_via_iterators(const Heap
 {
 	column_content<Heap_column<Matrix> > cells;
 	std::vector<typename Heap_column<Matrix>::Field_element_type> cont;
+	Zp operators(5);
 
 	for (const auto& c : col){
 		if constexpr (is_z2<Heap_column<Matrix> >()){
@@ -102,7 +103,7 @@ column_content<Heap_column<Matrix> > get_column_content_via_iterators(const Heap
 			}
 		} else {
 			if (cont.size() <= c.get_row_index()) cont.resize(c.get_row_index() + 1, 0u);
-			cont[c.get_row_index()] = _g_operators.add(cont[c.get_row_index()], c.get_element());
+			cont[c.get_row_index()] = operators.add(cont[c.get_row_index()], c.get_element());
 		}
 	}
 	if constexpr (!is_z2<Heap_column<Matrix> >()){

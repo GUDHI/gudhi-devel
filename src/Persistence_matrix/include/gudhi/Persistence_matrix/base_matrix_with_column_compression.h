@@ -56,6 +56,8 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   using Row_type = typename Master_matrix::Row_type;                  /**< Row type,
                                                                            only necessary with row access option. */
   using Cell_constructor = typename Master_matrix::Cell_constructor;  /**< Factory of @ref Cell classes. */
+  using Column_settings = typename Master_matrix::Column_settings;    /**< Structure giving access to the columns to
+                                                                           necessary external classes. */
 
   /**
    * @brief Type for columns. Only one for each "column class" is explicitely constructed.
@@ -67,31 +69,28 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    public:
     using Base = typename Master_matrix::Column_type;
 
-    Column_type(Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr)
-        : Base(operators, cellConstructor) {}
+    Column_type(Column_settings* colSettings = nullptr)
+        : Base(colSettings) {}
     template <class Container_type>
-    Column_type(const Container_type& nonZeroRowIndices, Field_operators* operators, 
-                Cell_constructor* cellConstructor)
-        : Base(nonZeroRowIndices, operators, cellConstructor) {}
+    Column_type(const Container_type& nonZeroRowIndices, Column_settings* colSettings)
+        : Base(nonZeroRowIndices, colSettings) {}
     template <class Container_type, class Row_container_type>
     Column_type(index columnIndex, const Container_type& nonZeroRowIndices, Row_container_type& rowContainer,
-                Field_operators* operators, Cell_constructor* cellConstructor)
-        : Base(columnIndex, nonZeroRowIndices, rowContainer, operators, cellConstructor) {}
+                Column_settings* colSettings)
+        : Base(columnIndex, nonZeroRowIndices, rowContainer, colSettings) {}
     template <class Container_type>
-    Column_type(const Container_type& nonZeroRowIndices, dimension_type dimension, Field_operators* operators,
-                Cell_constructor* cellConstructor)
-        : Base(nonZeroRowIndices, dimension, operators, cellConstructor) {}
+    Column_type(const Container_type& nonZeroRowIndices, dimension_type dimension, Column_settings* colSettings)
+        : Base(nonZeroRowIndices, dimension, colSettings) {}
     template <class Container_type, class Row_container_type>
     Column_type(index columnIndex, const Container_type& nonZeroRowIndices, dimension_type dimension,
-                Row_container_type& rowContainer, Field_operators* operators, Cell_constructor* cellConstructor)
-        : Base(columnIndex, nonZeroRowIndices, dimension, rowContainer, operators, cellConstructor) {}
-    Column_type(const Column_type& column, Field_operators* operators = nullptr,
-                Cell_constructor* cellConstructor = nullptr)
-        : Base(static_cast<const Base&>(column), operators, cellConstructor) {}
+                Row_container_type& rowContainer, Column_settings* colSettings)
+        : Base(columnIndex, nonZeroRowIndices, dimension, rowContainer, colSettings) {}
+    Column_type(const Column_type& column, Column_settings* colSettings = nullptr)
+        : Base(static_cast<const Base&>(column), colSettings) {}
     template <class Row_container_type>
     Column_type(const Column_type& column, index columnIndex, Row_container_type& rowContainer,
-                Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr)
-        : Base(static_cast<const Base&>(column), columnIndex, rowContainer, operators, cellConstructor) {}
+                Column_settings* colSettings = nullptr)
+        : Base(static_cast<const Base&>(column), columnIndex, rowContainer, colSettings) {}
     Column_type(Column_type&& column) noexcept : Base(std::move(static_cast<Base&>(column))) {}
 
     //TODO: is it possible to make this work?
@@ -112,10 +111,10 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   /**
    * @brief Constructs an empty matrix.
    * 
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  Base_matrix_with_column_compression(Field_operators* operators, Cell_constructor* cellConstructor);
+  Base_matrix_with_column_compression(Column_settings* colSettings);
   /**
    * @brief Constructs a matrix from the given ordered columns. The columns are inserted in the given order.
    * If no identical column already existed, a copy of the column is stored. If an identical one existed, no new
@@ -125,36 +124,32 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * Assumed to have a begin(), end() and size() method.
    * @param columns A vector of @ref Matrix::cell_rep_type ranges to construct the columns from.
    * The content of the ranges are assumed to be sorted by increasing ID value.
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
   template <class Container_type>
   Base_matrix_with_column_compression(const std::vector<Container_type>& columns, 
-                                      Field_operators* operators,
-                                      Cell_constructor* cellConstructor);
+                                      Column_settings* colSettings);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
    * 
    * @param numberOfColumns Number of columns to reserve space for.
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
   Base_matrix_with_column_compression(unsigned int numberOfColumns, 
-                                      Field_operators* operators,
-                                      Cell_constructor* cellConstructor);
+                                      Column_settings* colSettings);
   /**
-   * @brief Copy constructor. If @p operators or @p cellConstructor is not a null pointer, its value is kept
+   * @brief Copy constructor. If @p colSettings is not a null pointer, its value is kept
    * instead of the one in the copied matrix.
    * 
    * @param matrixToCopy Matrix to copy.
-   * @param operators Pointer to the field operators.
-   * If null pointer, the pointer in @p matrixToCopy is choosen instead.
-   * @param cellConstructor Pointer to the cell factory.
-   * If null pointer, the pointer in @p matrixToCopy is choosen instead.
+   * @param colSettings Either a pointer to an existing setting structure for the columns or a null pointer.
+   * The structure should contain all the necessary external classes specifically necessary for the choosen column type,
+   * such as custom allocators. If null pointer, the pointer stored in @p matrixToCopy is used instead.
    */
   Base_matrix_with_column_compression(const Base_matrix_with_column_compression& matrixToCopy,
-                                      Field_operators* operators = nullptr,
-                                      Cell_constructor* cellConstructor = nullptr);
+                                      Column_settings* colSettings = nullptr);
   /**
    * @brief Move constructor.
    * 
@@ -300,21 +295,13 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * @param operators Pointer to the field operators.
    * @param cellConstructor Pointer to the cell factory.
    */
-  void reset(Field_operators* operators, Cell_constructor* cellConstructor) {
+  void reset(Column_settings* colSettings) {
     columnToRep_.clear_and_dispose(delete_disposer());
     columnClasses_ = boost::disjoint_sets_with_storage<>();
     repToColumn_.clear();
     nextColumnIndex_ = 0;
-    operators_ = operators;
-    cellPool_ = cellConstructor;
+    colSettings_ = colSettings;
   }
-
-  // void set_operators(Field_operators* operators) {
-  //   operators_ = operators;
-  //   for (auto& col : columnToRep_) {
-  //     col.set_operators(operators);
-  //   }
-  // }
 
   /**
    * @brief Assign operator.
@@ -328,18 +315,11 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
     std::swap(matrix1.columnClasses_, matrix2.columnClasses_);
     matrix1.repToColumn_.swap(matrix2.repToColumn_);  // be careful when columnPool_ becomes not static
     std::swap(matrix1.nextColumnIndex_, matrix2.nextColumnIndex_);
-    std::swap(matrix1.operators_, matrix2.operators_);
-    std::swap(matrix1.cellPool_, matrix2.cellPool_);
+    std::swap(matrix1.colSettings_, matrix2.colSettings_);
 
     if constexpr (Master_matrix::Option_list::has_row_access) {
       swap(static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix1),
            static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix2));
-      // for (auto& col : matrix1.columnToRep_) {
-      //   col.set_rows(&matrix1.rows_);
-      // }
-      // for (auto& col : matrix2.columnToRep_) {
-      //   col.set_rows(&matrix2.rows_);
-      // }
     }
   }
 
@@ -372,9 +352,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   std::vector<Column_type*> repToColumn_;             /**< Map from the representative index to
                                                            the representative Column. */
   index nextColumnIndex_;                             /**< Next unused column index. */
-  Field_operators* operators_;                        /**< Field operators, can be nullptr if
-                                                           @ref PersistenceMatrixOptions::is_z2 is true. */
-  Cell_constructor* cellPool_;                        /**< Cell factory. */
+  Column_settings* colSettings_;                        /**< Cell factory. */
   /**
    * @brief Column factory.
    * @warning As the member is static, they can eventually be problems if the matrix is duplicated in several threads.
@@ -389,20 +367,23 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
 
 template <class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(
-    Field_operators* operators, Cell_constructor* cellConstructor)
-    : ra_opt(), nextColumnIndex_(0), operators_(operators), cellPool_(cellConstructor) 
-{}
+    Column_settings* colSettings)
+    : ra_opt(), nextColumnIndex_(0), colSettings_(colSettings)
+{
+  // if constexpr (Master_matrix::Option_list::has_row_access) {
+  //   colSettings_->rows = &ra_opt::rows_;
+  // }
+}
 
 template <class Master_matrix>
 template <class Container_type>
 inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(
-    const std::vector<Container_type>& columns, Field_operators* operators, Cell_constructor* cellConstructor)
+    const std::vector<Container_type>& columns, Column_settings* colSettings)
     : ra_opt(columns.size()),
       columnClasses_(columns.size()),
       repToColumn_(columns.size(), nullptr),
       nextColumnIndex_(0),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      colSettings_(colSettings) 
 {
   for (const Container_type& c : columns) {
     insert_column(c);
@@ -411,33 +392,30 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
 
 template <class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(
-    unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor)
+    unsigned int numberOfColumns, Column_settings* colSettings)
     : ra_opt(numberOfColumns),
       columnClasses_(numberOfColumns),
       repToColumn_(numberOfColumns, nullptr),
       nextColumnIndex_(0),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      colSettings_(colSettings)
 {}
 
 template <class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(
-    const Base_matrix_with_column_compression& matrixToCopy, Field_operators* operators,
-    Cell_constructor* cellConstructor)
+    const Base_matrix_with_column_compression& matrixToCopy, Column_settings* colSettings)
     : ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
       columnClasses_(matrixToCopy.columnClasses_),
       repToColumn_(matrixToCopy.repToColumn_.size(), nullptr),
       nextColumnIndex_(0),
-      operators_(operators == nullptr ? matrixToCopy.operators_ : operators),
-      cellPool_(cellConstructor == nullptr ? matrixToCopy.cellPool_ : cellConstructor) 
+      colSettings_(colSettings == nullptr ? matrixToCopy.colSettings_ : colSettings)
 {
   for (const Column_type* col : matrixToCopy.repToColumn_) {
     if (col != nullptr) {
       if constexpr (Master_matrix::Option_list::has_row_access) {
         repToColumn_[nextColumnIndex_] =
-            columnPool_.construct(*col, col->get_column_index(), ra_opt::rows_, operators_, cellPool_);
+            columnPool_.construct(*col, col->get_column_index(), ra_opt::rows_, colSettings_);
       } else {
-        repToColumn_[nextColumnIndex_] = columnPool_.construct(*col, operators_, cellPool_);
+        repToColumn_[nextColumnIndex_] = columnPool_.construct(*col, colSettings_);
       }
       columnToRep_.insert(columnToRep_.end(), *repToColumn_[nextColumnIndex_]);
       repToColumn_[nextColumnIndex_]->set_rep(nextColumnIndex_);
@@ -454,16 +432,8 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
       columnClasses_(std::move(other.columnClasses_)),
       repToColumn_(std::move(other.repToColumn_)),
       nextColumnIndex_(std::exchange(other.nextColumnIndex_, 0)),
-      operators_(std::exchange(other.operators_, nullptr)),
-      cellPool_(std::exchange(other.cellPool_, nullptr)) 
-{
-  // TODO: not sur this is necessary, as the address of rows_ should not change from the move, no?
-  // if constexpr (Master_matrix::Option_list::has_row_access) {
-  //   for (Column_type& col : columnToRep_) {
-  //     col.set_rows(&this->rows_);
-  //   }
-  // }
-}
+      colSettings_(std::exchange(other.colSettings_, nullptr)) 
+{}
 
 template <class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>::~Base_matrix_with_column_compression() 
@@ -505,16 +475,16 @@ inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(
     columnClasses_.link(nextColumnIndex_, nextColumnIndex_);
     if constexpr (Master_matrix::Option_list::has_row_access) {
       repToColumn_.push_back(
-          columnPool_.construct(nextColumnIndex_, boundary, dim, ra_opt::rows_, operators_, cellPool_));
+          columnPool_.construct(nextColumnIndex_, boundary, dim, ra_opt::rows_, colSettings_));
     } else {
-      repToColumn_.push_back(columnPool_.construct(boundary, dim, operators_, cellPool_));
+      repToColumn_.push_back(columnPool_.construct(boundary, dim, colSettings_));
     }
   } else {
     if constexpr (Master_matrix::Option_list::has_row_access) {
       repToColumn_[nextColumnIndex_] =
-          columnPool_.construct(nextColumnIndex_, boundary, dim, ra_opt::rows_, operators_, cellPool_);
+          columnPool_.construct(nextColumnIndex_, boundary, dim, ra_opt::rows_, colSettings_);
     } else {
-      repToColumn_[nextColumnIndex_] = columnPool_.construct(boundary, dim, operators_, cellPool_);
+      repToColumn_[nextColumnIndex_] = columnPool_.construct(boundary, dim, colSettings_);
     }
   }
   _insert_column(nextColumnIndex_);
@@ -637,14 +607,13 @@ Base_matrix_with_column_compression<Master_matrix>::operator=(const Base_matrix_
   columnToRep_.reserve(other.columnToRep_.size());
   repToColumn_.resize(other.repToColumn_.size(), nullptr);
   nextColumnIndex_ = 0;
-  operators_ = other.operators_;
-  cellPool_ = other.cellPool_;
+  colSettings_ = other.colSettings_;
   for (const Column_type* col : other.repToColumn_) {
     if constexpr (Master_matrix::Option_list::has_row_access) {
       repToColumn_[nextColumnIndex_] =
-          columnPool_.construct(*col, col->get_column_index(), ra_opt::rows_, operators_, cellPool_);
+          columnPool_.construct(*col, col->get_column_index(), ra_opt::rows_, colSettings_);
     } else {
-      repToColumn_[nextColumnIndex_] = columnPool_.construct(*col, operators_, cellPool_);
+      repToColumn_[nextColumnIndex_] = columnPool_.construct(*col, colSettings_);
     }
     columnToRep_.insert(columnToRep_.end(), *repToColumn_[nextColumnIndex_]);
     repToColumn_[nextColumnIndex_]->set_rep(nextColumnIndex_);

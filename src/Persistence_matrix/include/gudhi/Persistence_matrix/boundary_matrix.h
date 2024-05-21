@@ -56,14 +56,16 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
   using Row_type = typename Master_matrix::Row_type;                  /**< Row type,
                                                                            only necessary with row access option. */
   using Cell_constructor = typename Master_matrix::Cell_constructor;  /**< Factory of @ref Cell classes. */
+  using Column_settings = typename Master_matrix::Column_settings;    /**< Structure giving access to the columns to
+                                                                           necessary external classes. */
 
   /**
    * @brief Constructs an empty matrix.
    * 
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  Boundary_matrix(Field_operators* operators, Cell_constructor* cellConstructor);
+  Boundary_matrix(Column_settings* colSettings);
   /**
    * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to
    * a column  (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
@@ -80,36 +82,33 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
    * interest and not everything should be stored, then use the @ref insert_boundary method instead
    * (after creating the matrix with the
-   * @ref Boundary_matrix(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor)
+   * @ref Boundary_matrix(unsigned int numberOfColumns, Column_settings* colSettings)
    * constructor preferably).
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
   template <class Boundary_type = boundary_type>
   Boundary_matrix(const std::vector<Boundary_type>& orderedBoundaries, 
-                  Field_operators* operators,
-                  Cell_constructor* cellConstructor);
+                  Column_settings* colSettings);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
    * 
    * @param numberOfColumns Number of columns to reserve space for.
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  Boundary_matrix(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor);
+  Boundary_matrix(unsigned int numberOfColumns, Column_settings* colSettings);
   /**
-   * @brief Copy constructor. If @p operators or @p cellConstructor is not a null pointer, its value is kept
+   * @brief Copy constructor. If @p colSettings is not a null pointer, its value is kept
    * instead of the one in the copied matrix.
    * 
    * @param matrixToCopy Matrix to copy.
-   * @param operators Pointer to the field operators.
-   * If null pointer, the pointer in @p matrixToCopy is choosen instead.
-   * @param cellConstructor Pointer to the cell factory.
-   * If null pointer, the pointer in @p matrixToCopy is choosen instead.
+   * @param colSettings Either a pointer to an existing setting structure for the columns or a null pointer.
+   * The structure should contain all the necessary external classes specifically necessary for the choosen column type,
+   * such as custom allocators. If null pointer, the pointer stored in @p matrixToCopy is used instead.
    */
   Boundary_matrix(const Boundary_matrix& matrixToCopy, 
-                  Field_operators* operators = nullptr,
-                  Cell_constructor* cellConstructor = nullptr);
+                  Column_settings* colSettings = nullptr);
   /**
    * @brief Move constructor.
    * 
@@ -313,28 +312,14 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
   /**
    * @brief Resets the matrix to an empty matrix.
    * 
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  void reset(Field_operators* operators, Cell_constructor* cellConstructor) {
+  void reset(Column_settings* colSettings) {
     matrix_.clear();
     nextInsertIndex_ = 0;
-    operators_ = operators;
-    cellPool_ = cellConstructor;
+    colSettings_ = colSettings;
   }
-
-  // void set_operators(Field_operators* operators) {
-  //   operators_ = operators;
-  //   if constexpr (Master_matrix::Option_list::has_map_column_container) {
-  //     for (auto& p : matrix_) {
-  //       p.second.set_operators(operators);
-  //     }
-  //   } else {
-  //     for (auto& col : matrix_) {
-  //       col.set_operators(operators);
-  //     }
-  //   }
-  // }
 
   /**
    * @brief Assign operator.
@@ -352,27 +337,11 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
          static_cast<typename Master_matrix::Base_pairing_option&>(matrix2));
     matrix1.matrix_.swap(matrix2.matrix_);
     std::swap(matrix1.nextInsertIndex_, matrix2.nextInsertIndex_);
-    std::swap(matrix1.operators_, matrix2.operators_);
-    std::swap(matrix1.cellPool_, matrix2.cellPool_);
+    std::swap(matrix1.colSettings_, matrix2.colSettings_);
 
     if constexpr (Master_matrix::Option_list::has_row_access) {
       swap(static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix1),
            static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix2));
-      // if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      //   for (auto& p : matrix1.matrix_) {
-      //     p.second.set_rows(&matrix1.rows_);
-      //   }
-      //   for (auto& p : matrix2.matrix_) {
-      //     p.second.set_rows(&matrix2.rows_);
-      //   }
-      // } else {
-      //   for (auto& col : matrix1.matrix_) {
-      //     col.set_rows(&matrix1.rows_);
-      //   }
-      //   for (auto& col : matrix2.matrix_) {
-      //     col.set_rows(&matrix2.rows_);
-      //   }
-      // }
     }
   }
 
@@ -390,8 +359,7 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
 
   matrix_type matrix_;          /**< Column container. */
   index nextInsertIndex_;       /**< Next unused column index. */
-  Field_operators* operators_;  /**< Field operators, can be nullptr if @ref PersistenceMatrixOptions::is_z2 is true. */
-  Cell_constructor* cellPool_;  /**< Cell factory. */
+  Column_settings* colSettings_;  /**< Cell factory. */
 
   static const bool activeDimOption =
       Master_matrix::Option_list::has_matrix_maximal_dimension_access || Master_matrix::maxDimensionIsNeeded;
@@ -403,46 +371,43 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
 };
 
 template <class Master_matrix>
-inline Boundary_matrix<Master_matrix>::Boundary_matrix(Field_operators* operators, Cell_constructor* cellConstructor)
+inline Boundary_matrix<Master_matrix>::Boundary_matrix(Column_settings* colSettings)
     : dim_opt(-1),
       swap_opt(),
       pair_opt(),
       ra_opt(),
       nextInsertIndex_(0),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      colSettings_(colSettings)
 {}
 
 template <class Master_matrix>
 template <class Boundary_type>
 inline Boundary_matrix<Master_matrix>::Boundary_matrix(const std::vector<Boundary_type>& orderedBoundaries,
-                                                       Field_operators* operators, 
-                                                       Cell_constructor* cellConstructor)
+                                                       Column_settings* colSettings)
     : dim_opt(-1),
       swap_opt(orderedBoundaries.size()),
       pair_opt(),
       ra_opt(orderedBoundaries.size()),
       nextInsertIndex_(orderedBoundaries.size()),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      colSettings_(colSettings)
 {
   matrix_.reserve(orderedBoundaries.size());
 
   for (index i = 0; i < orderedBoundaries.size(); i++) {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.try_emplace(i, Column_type(i, orderedBoundaries[i], ra_opt::rows_, operators_, cellPool_));
+        matrix_.try_emplace(i, Column_type(i, orderedBoundaries[i], ra_opt::rows_, colSettings_));
       } else {
-        matrix_.try_emplace(i, Column_type(orderedBoundaries[i], operators_, cellPool_));
+        matrix_.try_emplace(i, Column_type(orderedBoundaries[i], colSettings_));
       }
       if constexpr (activeDimOption) {
         dim_opt::update_up(matrix_.at(i).get_dimension());
       }
     } else {
       if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.emplace_back(i, orderedBoundaries[i], ra_opt::rows_, operators_, cellPool_);
+        matrix_.emplace_back(i, orderedBoundaries[i], ra_opt::rows_, colSettings_);
       } else {
-        matrix_.emplace_back(orderedBoundaries[i], operators_, cellPool_);
+        matrix_.emplace_back(orderedBoundaries[i], colSettings_);
       }
       if constexpr (activeDimOption) {
         dim_opt::update_up(matrix_[i].get_dimension());
@@ -453,8 +418,7 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(const std::vector<Boundar
 
 template <class Master_matrix>
 inline Boundary_matrix<Master_matrix>::Boundary_matrix(unsigned int numberOfColumns, 
-                                                       Field_operators* operators,
-                                                       Cell_constructor* cellConstructor)
+                                                       Column_settings* colSettings)
     : dim_opt(-1),
       swap_opt(numberOfColumns),
       pair_opt(),
@@ -463,8 +427,7 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(unsigned int numberOfColu
                   ? 0
                   : numberOfColumns),
       nextInsertIndex_(0),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      colSettings_(colSettings)
 {
   if constexpr (!Master_matrix::Option_list::has_map_column_container && Master_matrix::Option_list::has_row_access)
     matrix_.reserve(numberOfColumns);
@@ -472,32 +435,30 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(unsigned int numberOfColu
 
 template <class Master_matrix>
 inline Boundary_matrix<Master_matrix>::Boundary_matrix(const Boundary_matrix& matrixToCopy, 
-                                                       Field_operators* operators,
-                                                       Cell_constructor* cellConstructor)
+                                                       Column_settings* colSettings)
     : dim_opt(static_cast<const dim_opt&>(matrixToCopy)),
       swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
       pair_opt(static_cast<const pair_opt&>(matrixToCopy)),
       ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
       nextInsertIndex_(matrixToCopy.nextInsertIndex_),
-      operators_(operators == nullptr ? matrixToCopy.operators_ : operators),
-      cellPool_(cellConstructor == nullptr ? matrixToCopy.cellPool_ : cellConstructor) 
+      colSettings_(colSettings == nullptr ? matrixToCopy.colSettings_ : colSettings) 
 {
   matrix_.reserve(matrixToCopy.matrix_.size());
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     for (const auto& p : matrixToCopy.matrix_) {
       const Column_type& col = p.second;
       if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_, cellPool_));
+        matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, colSettings_));
       } else {
-        matrix_.try_emplace(p.first, Column_type(col, operators_, cellPool_));
+        matrix_.try_emplace(p.first, Column_type(col, colSettings_));
       }
     }
   } else {
     for (const auto& col : matrixToCopy.matrix_) {
       if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_, cellPool_);
+        matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, colSettings_);
       } else {
-        matrix_.emplace_back(col, operators_, cellPool_);
+        matrix_.emplace_back(col, colSettings_);
       }
     }
   }
@@ -511,22 +472,8 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(Boundary_matrix&& other) 
       ra_opt(std::move(static_cast<ra_opt&>(other))),
       matrix_(std::move(other.matrix_)),
       nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0)),
-      operators_(std::exchange(other.operators_, nullptr)),
-      cellPool_(std::exchange(other.cellPool_, nullptr)) 
-{
-  // TODO: not sur this is necessary, as the address of rows_ should not change from the move, no?
-  // if constexpr (Master_matrix::Option_list::has_row_access) {
-  //   if constexpr (Master_matrix::Option_list::has_map_column_container) {
-  //     for (auto& p : matrix_) {
-  //       p.second.set_rows(&this->rows_);
-  //     }
-  //   } else {
-  //     for (auto& col : matrix_) {
-  //       col.set_rows(&this->rows_);
-  //     }
-  //   }
-  // }
-}
+      colSettings_(std::exchange(other.colSettings_, nullptr)) 
+{}
 
 template <class Master_matrix>
 template <class Boundary_type>
@@ -565,9 +512,9 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
 
     if constexpr (Master_matrix::Option_list::has_row_access) {
       matrix_.try_emplace(nextInsertIndex_,
-                          Column_type(nextInsertIndex_, boundary, dim, ra_opt::rows_, operators_, cellPool_));
+                          Column_type(nextInsertIndex_, boundary, dim, ra_opt::rows_, colSettings_));
     } else {
-      matrix_.try_emplace(nextInsertIndex_, boundary, dim, operators_, cellPool_);
+      matrix_.try_emplace(nextInsertIndex_, boundary, dim, colSettings_);
     }
   } else {
     if constexpr (activeSwapOption) {
@@ -578,12 +525,12 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
     }
 
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.emplace_back(nextInsertIndex_, boundary, dim, ra_opt::rows_, operators_, cellPool_);
+      matrix_.emplace_back(nextInsertIndex_, boundary, dim, ra_opt::rows_, colSettings_);
     } else {
       if (matrix_.size() <= nextInsertIndex_) {
-        matrix_.emplace_back(boundary, dim, operators_, cellPool_);
+        matrix_.emplace_back(boundary, dim, colSettings_);
       } else {
-        matrix_[nextInsertIndex_] = Column_type(boundary, dim, operators_, cellPool_);
+        matrix_[nextInsertIndex_] = Column_type(boundary, dim, colSettings_);
       }
     }
   }
@@ -828,25 +775,24 @@ inline Boundary_matrix<Master_matrix>& Boundary_matrix<Master_matrix>::operator=
 
   matrix_.clear();
   nextInsertIndex_ = other.nextInsertIndex_;
-  operators_ = other.operators_;
-  cellPool_ = other.cellPool_;
+  colSettings_ = other.colSettings_;
 
   matrix_.reserve(other.matrix_.size());
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     for (const auto& p : other.matrix_) {
       const Column_type& col = p.second;
       if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, operators_, cellPool_));
+        matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, colSettings_));
       } else {
-        matrix_.try_emplace(p.first, Column_type(col, operators_, cellPool_));
+        matrix_.try_emplace(p.first, Column_type(col, colSettings_));
       }
     }
   } else {
     for (const auto& col : other.matrix_) {
       if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, operators_, cellPool_);
+        matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, colSettings_);
       } else {
-        matrix_.emplace_back(col, operators_, cellPool_);
+        matrix_.emplace_back(col, colSettings_);
       }
     }
   }

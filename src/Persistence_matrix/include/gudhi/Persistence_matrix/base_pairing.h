@@ -163,9 +163,9 @@ inline void Base_pairing<Master_matrix>::_reduce()
           } else {
             auto& toadd = _matrix()->get_column(pivotsToColumn.at(pivot));
             typename Master_matrix::element_type coef = curr.get_pivot_value();
-            coef = _matrix()->operators_->get_inverse(coef);
-            coef = _matrix()->operators_->multiply(
-                coef, _matrix()->operators_->get_characteristic() - toadd.get_pivot_value());
+            auto& operators = _matrix()->colSettings_->operators;
+            coef = operators.get_inverse(coef);
+            coef = operators.multiply(coef, operators.get_characteristic() - toadd.get_pivot_value());
             curr.multiply_and_add(coef, toadd);
           }
 

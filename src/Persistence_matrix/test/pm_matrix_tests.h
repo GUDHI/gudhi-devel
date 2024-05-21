@@ -1569,8 +1569,7 @@ void test_base_col_comp_cell_range_operation(){
 template<class Matrix>
 void test_const_operation(){
 	using C = typename Matrix::Column_type;
-	typename Matrix::Field_operators op(5);
-	typename Matrix::Cell_constructor pool;
+	typename Matrix::Column_settings settings(5);
 
 	auto columns = build_general_matrix<C>();
 	Matrix m(columns, 5);
@@ -1579,28 +1578,28 @@ void test_const_operation(){
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[10] = {1};
-		m.add_to(C({0,1,4}, nullptr, &pool), 10);	//only works with the const version because of reference
+		m.add_to(C({0,1,4}, &settings), 10);	//only works with the const version because of reference
 	} else {
 		columns[10] = {{0,2},{1,4}};
-		m.add_to(C({{0,1},{1,4},{4,1}}, &op, &pool), 10);
+		m.add_to(C({{0,1},{1,4},{4,1}}, &settings), 10);
 	}
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[5] = {0,2,4};
-		m.multiply_target_and_add_to(C({0,1,4}, nullptr, &pool), 3, 5);
+		m.multiply_target_and_add_to(C({0,1,4}, &settings), 3, 5);
 	} else {
 		columns[5] = {{0,1},{1,2},{2,2},{4,1}};
-		m.multiply_target_and_add_to(C({{0,1},{1,4},{4,1}}, &op, &pool), 3, 5);
+		m.multiply_target_and_add_to(C({{0,1},{1,4},{4,1}}, &settings), 3, 5);
 	}
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[6] = {1};
-		m.multiply_source_and_add_to(3, C({0,1,4}, nullptr, &pool), 6);
+		m.multiply_source_and_add_to(3, C({0,1,4}, &settings), 6);
 	} else {
 		columns[6] = {{0,4},{1,2},{4,2}};
-		m.multiply_source_and_add_to(3, C({{0,1},{1,4},{4,1}}, &op, &pool), 6);
+		m.multiply_source_and_add_to(3, C({{0,1},{1,4},{4,1}}, &settings), 6);
 	}
 	test_content_equality(columns, m);
 }
@@ -1608,8 +1607,7 @@ void test_const_operation(){
 template<class Matrix>
 void test_base_col_comp_const_operation(){
 	using C = typename Matrix::Column_type;
-	typename Matrix::Field_operators op(5);
-	typename Matrix::Cell_constructor pool;
+	typename Matrix::Column_settings settings(5);
 
 	auto columns = build_general_matrix<C>();
 	Matrix m(columns, 5);
@@ -1619,33 +1617,33 @@ void test_base_col_comp_const_operation(){
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[6] = {1};
 		columns[10] = {1};
-		m.add_to(C({0,1,4}, nullptr, &pool), 10);	//only works with the const version because of reference
+		m.add_to(C({0,1,4}, &settings), 10);	//only works with the const version because of reference
 	} else {
 		columns[6] = {{0,2},{1,4}};
 		columns[10] = {{0,2},{1,4}};
-		m.add_to(C({{0,1},{1,4},{4,1}}, &op, &pool), 10);
+		m.add_to(C({{0,1},{1,4},{4,1}}, &settings), 10);
 	}
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[5] = {0,2,4};
 		columns[8] = {0,2,4};
-		m.multiply_target_and_add_to(C({0,1,4}, nullptr, &pool), 3, 5);
+		m.multiply_target_and_add_to(C({0,1,4}, &settings), 3, 5);
 	} else {
 		columns[5] = {{0,1},{1,2},{2,2},{4,1}};
 		columns[8] = {{0,1},{1,2},{2,2},{4,1}};
-		m.multiply_target_and_add_to(C({{0,1},{1,4},{4,1}}, &op, &pool), 3, 5);
+		m.multiply_target_and_add_to(C({{0,1},{1,4},{4,1}}, &settings), 3, 5);
 	}
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[6] = {0,4};
 		columns[10] = {0,4};
-		m.multiply_source_and_add_to(3, C({0,1,4}, nullptr, &pool), 6);
+		m.multiply_source_and_add_to(3, C({0,1,4}, &settings), 6);
 	} else {
 		columns[6] = {{1,1},{4,3}};
 		columns[10] = {{1,1},{4,3}};
-		m.multiply_source_and_add_to(3, C({{0,1},{1,4},{4,1}}, &op, &pool), 6);
+		m.multiply_source_and_add_to(3, C({{0,1},{1,4},{4,1}}, &settings), 6);
 	}
 	test_content_equality(columns, m);
 }
