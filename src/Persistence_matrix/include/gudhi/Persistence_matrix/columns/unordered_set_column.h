@@ -245,8 +245,8 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
   Cell_constructor* cellPool_;
 
   void _delete_cell(typename Column_type::iterator& it);
-  void _insert_cell(const Field_element_type& value, id_index rowIndex, const typename Column_type::iterator& position);
-  void _insert_cell(id_index rowIndex, const typename Column_type::iterator& position);
+  void _insert_cell(const Field_element_type& value, id_index rowIndex);
+  void _insert_cell(id_index rowIndex);
   template <class Cell_range>
   bool _add(const Cell_range& column);
   template <class Cell_range>
@@ -286,11 +286,11 @@ inline Unordered_set_column<Master_matrix>::Unordered_set_column(
 
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (id_index id : nonZeroRowIndices) {
-      _insert_cell(id, column_.end());
+      _insert_cell(id);
     }
   } else {
     for (const auto& p : nonZeroRowIndices) {
-      _insert_cell(operators_->get_value(p.second), p.first, column_.end());
+      _insert_cell(operators_->get_value(p.second), p.first);
     }
   }
 }
@@ -324,11 +324,11 @@ inline Unordered_set_column<Master_matrix>::Unordered_set_column(
 
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (id_index id : nonZeroRowIndices) {
-      _insert_cell(id, column_.end());
+      _insert_cell(id);
     }
   } else {
     for (const auto& p : nonZeroRowIndices) {
-      _insert_cell(operators_->get_value(p.second), p.first, column_.end());
+      _insert_cell(operators_->get_value(p.second), p.first);
     }
   }
 }
@@ -358,11 +358,11 @@ inline Unordered_set_column<Master_matrix>::Unordered_set_column(
 
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (id_index id : nonZeroRowIndices) {
-      _insert_cell(id, column_.end());
+      _insert_cell(id);
     }
   } else {
     for (const auto& p : nonZeroRowIndices) {
-      _insert_cell(operators_->get_value(p.second), p.first, column_.end());
+      _insert_cell(operators_->get_value(p.second), p.first);
     }
   }
 }
@@ -394,11 +394,11 @@ inline Unordered_set_column<Master_matrix>::Unordered_set_column(
 
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (id_index id : nonZeroRowIndices) {
-      _insert_cell(id, column_.end());
+      _insert_cell(id);
     }
   } else {
     for (const auto& p : nonZeroRowIndices) {
-      _insert_cell(operators_->get_value(p.second), p.first, column_.end());
+      _insert_cell(operators_->get_value(p.second), p.first);
     }
   }
 }
@@ -423,9 +423,9 @@ inline Unordered_set_column<Master_matrix>::Unordered_set_column(const Unordered
 
   for (const Cell* cell : column.column_) {
     if constexpr (Master_matrix::Option_list::is_z2) {
-      _insert_cell(cell->get_row_index(), column_.end());
+      _insert_cell(cell->get_row_index());
     } else {
-      _insert_cell(cell->get_element(), cell->get_row_index(), column_.end());
+      _insert_cell(cell->get_element(), cell->get_row_index());
     }
   }
 }
@@ -449,9 +449,9 @@ inline Unordered_set_column<Master_matrix>::Unordered_set_column(const Unordered
 
   for (const Cell* cell : column.column_) {
     if constexpr (Master_matrix::Option_list::is_z2) {
-      _insert_cell(cell->get_row_index(), column_.end());
+      _insert_cell(cell->get_row_index());
     } else {
-      _insert_cell(cell->get_element(), cell->get_row_index(), column_.end());
+      _insert_cell(cell->get_element(), cell->get_row_index());
     }
   }
 }
@@ -501,10 +501,8 @@ Unordered_set_column<Master_matrix>::get_content(int columnLength) const
 template <class Master_matrix>
 inline bool Unordered_set_column<Master_matrix>::is_non_zero(id_index rowIndex) const 
 {
-  auto cell = cellPool_->construct(rowIndex);
-  bool res = column_.find(cell) != column_.end();
-  cellPool_->destroy(cell);
-  return res;
+  Cell cell(rowIndex);
+  return column_.find(&cell) != column_.end();
 }
 
 template <class Master_matrix>
@@ -855,9 +853,9 @@ Unordered_set_column<Master_matrix>::operator=(const Unordered_set_column& other
 
   for (const Cell* cell : other.column_) {
     if constexpr (Master_matrix::Option_list::is_z2) {
-      _insert_cell(cell->get_row_index(), column_.end());
+      _insert_cell(cell->get_row_index());
     } else {
-      _insert_cell(cell->get_element(), cell->get_row_index(), column_.end());
+      _insert_cell(cell->get_element(), cell->get_row_index());
     }
   }
 
@@ -875,32 +873,30 @@ inline void Unordered_set_column<Master_matrix>::_delete_cell(typename Column_ty
 }
 
 template <class Master_matrix>
-inline void Unordered_set_column<Master_matrix>::_insert_cell(
-    const Field_element_type& value, id_index rowIndex, const typename Column_type::iterator& position) 
+inline void Unordered_set_column<Master_matrix>::_insert_cell(const Field_element_type& value, id_index rowIndex) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
     new_cell->set_element(value);
-    column_.insert(position, new_cell);
+    column_.insert(new_cell);
     ra_opt::insert_cell(rowIndex, new_cell);
   } else {
     Cell* new_cell = cellPool_->construct(rowIndex);
     new_cell->set_element(value);
-    column_.insert(position, new_cell);
+    column_.insert(new_cell);
   }
 }
 
 template <class Master_matrix>
-inline void Unordered_set_column<Master_matrix>::_insert_cell(
-    id_index rowIndex, const typename Column_type::iterator& position) 
+inline void Unordered_set_column<Master_matrix>::_insert_cell(id_index rowIndex) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    column_.insert(position, new_cell);
+    column_.insert(new_cell);
     ra_opt::insert_cell(rowIndex, new_cell);
   } else {
     Cell* new_cell = cellPool_->construct(rowIndex);
-    column_.insert(position, new_cell);
+    column_.insert(new_cell);
   }
 }
 
@@ -931,9 +927,9 @@ inline bool Unordered_set_column<Master_matrix>::_add(const Cell_range& column)
       }
     } else {
       if constexpr (Master_matrix::Option_list::is_z2) {
-        _insert_cell(cell.get_row_index(), column_.end());
+        _insert_cell(cell.get_row_index());
       } else {
-        _insert_cell(cell.get_element(), cell.get_row_index(), column_.end());
+        _insert_cell(cell.get_element(), cell.get_row_index());
       }
     }
   }
@@ -953,7 +949,7 @@ inline bool Unordered_set_column<Master_matrix>::_multiply_and_add(const Field_e
     } else {
       clear();
       for (const Cell& v : column) {
-        _insert_cell(v.get_element(), v.get_row_index(), column_.end());
+        _insert_cell(v.get_element(), v.get_row_index());
       }
       return true;
     }
@@ -988,7 +984,7 @@ inline bool Unordered_set_column<Master_matrix>::_multiply_and_add(const Cell_ra
         if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**it1);
       }
     } else {
-      _insert_cell(operators_->multiply(cell.get_element(), val), cell.get_row_index(), column_.end());
+      _insert_cell(operators_->multiply(cell.get_element(), val), cell.get_row_index());
     }
   }
 
