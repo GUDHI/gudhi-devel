@@ -1154,6 +1154,8 @@ inline bool Vector_column<Master_matrix>::_multiply_target_and_add(const Field_e
         _update_cell(cell.get_element(), cell.get_row_index(), i++);
       }
     }
+    if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix> >)
+      erasedValues_ = column.erasedValues_;
     return true;
   }
 

@@ -400,14 +400,7 @@ class PersistenceMatrixColumn :
    */
   template <class Cell_range>
   PersistenceMatrixColumn& multiply_target_and_add(const Field_element_type& val, const Cell_range& column);
-  /**
-   * @brief `this = val * this + column`
-   * 
-   * @param val Value to multiply.
-   * @param column Column to add.
-   * @return Reference to this column.
-   */
-  PersistenceMatrixColumn& multiply_target_and_add(const Field_element_type& val, PersistenceMatrixColumn& column);
+
   /**
    * @brief `this = this + column * val`
    * 
@@ -420,14 +413,6 @@ class PersistenceMatrixColumn :
    */
   template <class Cell_range>
   PersistenceMatrixColumn& multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
-  /**
-   * @brief `this = this + column * val`
-   * 
-   * @param column Column to add.
-   * @param val Value to multiply.
-   * @return Reference to this column.
-   */
-  PersistenceMatrixColumn& multiply_source_and_add(PersistenceMatrixColumn& column, const Field_element_type& val);
 
   /**
    * @brief Equality comparator. Equal in the sense that what is "supposed" to be contained in the columns is equal,

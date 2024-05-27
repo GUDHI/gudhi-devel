@@ -873,7 +873,6 @@ inline void Heap_column<Master_matrix>::_prune()
     pivot = _pop_pivot();
   }
   column_.swap(tempCol);
-  std::make_heap(column_.begin(), column_.end(), cellPointerComp_);
 
   insertsSinceLastPrune_ = 0;
 }

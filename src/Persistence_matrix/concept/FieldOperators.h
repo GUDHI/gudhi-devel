@@ -151,13 +151,13 @@ class FieldOperators
    * 
    * @return The additive identity of the field.
    */
-  static constexpr element_type get_additive_identity();
+  static element_type get_additive_identity();
   /**
    * @brief Returns the multiplicative identity of the field.
    * 
    * @return The multiplicative identity of the field.
    */
-  static constexpr element_type get_multiplicative_identity();
+  static element_type get_multiplicative_identity();
   // /**
   //  * @brief For multi-fields, returns the partial multiplicative identity of the field from the given product.
   //  * See @cite boissonnat:hal-00922572 for more details.
@@ -166,7 +166,7 @@ class FieldOperators
   //  * @param productOfCharacteristics Product of the different characteristics to take into account in the multi-field.
   //  * @return The partial multiplicative identity of the field
   //  */
-  // static constexpr element_type get_partial_multiplicative_identity(
+  // static element_type get_partial_multiplicative_identity(
   //     [[maybe_unused]] characteristic_type productOfCharacteristics);
 
   /**
