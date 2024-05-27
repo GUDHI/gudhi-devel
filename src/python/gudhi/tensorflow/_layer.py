@@ -10,7 +10,7 @@ class TensorflowKerasLayer(tensorflow.keras.layers.Layer):
         """
         Constructor for the TensorflowKerasLayer class
         """
-        # On tensorflow < 2.15.1 set dynamic argument to True
-        if parse_version(tensorflow.__version__) < parse_version('2.15.1'):
+        # On tensorflow < 2.16.0 set dynamic argument to True
+        if parse_version(tensorflow.__version__) < parse_version('2.16.0'):
             kwargs['dynamic'] = True
         super().__init__(**kwargs)
