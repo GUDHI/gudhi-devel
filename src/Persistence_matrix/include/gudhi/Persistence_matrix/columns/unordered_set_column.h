@@ -154,27 +154,35 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
     if (&c1 == &c2) return true;
     if (c1.column_.size() != c2.column_.size()) return false;
 
-    using id_index = Unordered_set_column<Master_matrix>::id_index;
-    using rep_type = typename std::conditional<Master_matrix::Option_list::is_z2, 
-                                               id_index,
-                                               std::pair<id_index, unsigned int>
-                                              >::type;
-
-    auto it1 = c1.column_.begin();
-    auto it2 = c2.column_.begin();
-    std::set<rep_type> cells1, cells2;
-    while (it1 != c1.column_.end()) {
-      if constexpr (Master_matrix::Option_list::is_z2) {
-        cells1.insert((*it1)->get_row_index());
-        cells2.insert((*it2)->get_row_index());
-      } else {
-        cells1.emplace((*it1)->get_row_index(), (*it1)->get_element());
-        cells2.emplace((*it2)->get_row_index(), (*it2)->get_element());
-      }
-      ++it1;
-      ++it2;
+    for (Cell* cell : c1.column_){
+      auto it = c2.column_.find(cell);
+      if (it == c2.column_.end()) return false;
+      if constexpr (!Master_matrix::Option_list::is_z2)
+        if ((*it)->get_element() != cell->get_element()) return false;
     }
-    return cells1 == cells2;
+    return true;
+
+    // using id_index = Unordered_set_column<Master_matrix>::id_index;
+    // using rep_type = typename std::conditional<Master_matrix::Option_list::is_z2, 
+    //                                            id_index,
+    //                                            std::pair<id_index, unsigned int>
+    //                                           >::type;
+
+    // auto it1 = c1.column_.begin();
+    // auto it2 = c2.column_.begin();
+    // std::set<rep_type> cells1, cells2;
+    // while (it1 != c1.column_.end()) {
+    //   if constexpr (Master_matrix::Option_list::is_z2) {
+    //     cells1.insert((*it1)->get_row_index());
+    //     cells2.insert((*it2)->get_row_index());
+    //   } else {
+    //     cells1.emplace((*it1)->get_row_index(), (*it1)->get_element());
+    //     cells2.emplace((*it2)->get_row_index(), (*it2)->get_element());
+    //   }
+    //   ++it1;
+    //   ++it2;
+    // }
+    // return cells1 == cells2;
   }
   friend bool operator<(const Unordered_set_column& c1, const Unordered_set_column& c2) {
     if (&c1 == &c2) return false;
