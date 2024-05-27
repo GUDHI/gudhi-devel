@@ -120,8 +120,8 @@ namespace persistence_matrix {
  *   the boundaries. If at the insertion of @f$ c @f$, its ID was not specified and it was the @f$ n^{th} @f$ insertion,
  *   it is assumed that the ID is @f$ n @f$ (which means that @ref IDIdx and @ref PosIdx will only start to differ when
  *   swaps or removals are performed). If an ID is specified at the insertion of @f$ c @f$, the ID is stored as the
- *   @ref IDIdx of @f$ c @f$. IDs can be freely choosed with the only restriction that they have to be strictly
- *   increasing in the order of the filtration.
+ *   @ref IDIdx of @f$ c @f$. IDs can be freely choosen with the only restriction that they have to be strictly
+ *   increasing in the order of the filtration at initialisation.
  *
  * In conclusion, with default values, if no vine swaps or removals occurs, all three indexing schemes are the same.
  *

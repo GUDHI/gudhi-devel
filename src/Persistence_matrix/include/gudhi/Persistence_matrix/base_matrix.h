@@ -564,15 +564,15 @@ inline void Base_matrix<Master_matrix>::multiply_target_and_add_to(const Cell_ra
 {
   if constexpr (std::is_integral_v<Cell_range_or_column_index>) {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      matrix_.at(targetColumnIndex).multiply_and_add(coefficient, matrix_.at(sourceColumn));
+      matrix_.at(targetColumnIndex).multiply_target_and_add(coefficient, matrix_.at(sourceColumn));
     } else {
-      matrix_[targetColumnIndex].multiply_and_add(coefficient, matrix_[sourceColumn]);
+      matrix_[targetColumnIndex].multiply_target_and_add(coefficient, matrix_[sourceColumn]);
     }
   } else {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      matrix_.at(targetColumnIndex).multiply_and_add(coefficient, sourceColumn);
+      matrix_.at(targetColumnIndex).multiply_target_and_add(coefficient, sourceColumn);
     } else {
-      matrix_[targetColumnIndex].multiply_and_add(coefficient, sourceColumn);
+      matrix_[targetColumnIndex].multiply_target_and_add(coefficient, sourceColumn);
     }
   }
 }
@@ -585,15 +585,15 @@ inline void Base_matrix<Master_matrix>::multiply_source_and_add_to(const Field_e
 {
   if constexpr (std::is_integral_v<Cell_range_or_column_index>) {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      matrix_.at(targetColumnIndex).multiply_and_add(matrix_.at(sourceColumn), coefficient);
+      matrix_.at(targetColumnIndex).multiply_source_and_add(matrix_.at(sourceColumn), coefficient);
     } else {
-      matrix_[targetColumnIndex].multiply_and_add(matrix_[sourceColumn], coefficient);
+      matrix_[targetColumnIndex].multiply_source_and_add(matrix_[sourceColumn], coefficient);
     }
   } else {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      matrix_.at(targetColumnIndex).multiply_and_add(sourceColumn, coefficient);
+      matrix_.at(targetColumnIndex).multiply_source_and_add(sourceColumn, coefficient);
     } else {
-      matrix_[targetColumnIndex].multiply_and_add(sourceColumn, coefficient);
+      matrix_[targetColumnIndex].multiply_source_and_add(sourceColumn, coefficient);
     }
   }
 }

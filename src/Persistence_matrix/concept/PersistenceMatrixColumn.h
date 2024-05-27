@@ -365,9 +365,9 @@ class PersistenceMatrixColumn :
    * @brief Adds the given @ref Cell range onto the column.
    * 
    * @tparam Cell_range @ref Cell range with %begin() and %end() method.
-   * @param column @ref Cell range. Every cell has to return the right value when using @ref Cell::get_row_index and,
-   * if @ref PersistenceMatrixOptions::is_z2 is false, also when using
-   * @ref Cell_field_element::get_element "Cell::get_element".
+   * @param column @ref Cell range. Only the stored row index and the stored element value
+   * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
+   * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.
    * @return Reference to this column.
    */
   template <class Cell_range>
@@ -393,13 +393,13 @@ class PersistenceMatrixColumn :
    * 
    * @tparam Cell_range @ref Cell range with %begin() and %end() method.
    * @param val Value to multiply.
-   * @param column @ref Cell range. Every cell has to return the right value when using @ref Cell::get_row_index and,
-   * if @ref PersistenceMatrixOptions::is_z2 is false, also when using
-   * @ref Cell_field_element::get_element "Cell::get_element".
+   * @param column @ref Cell range. Only the stored row index and the stored element value
+   * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
+   * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.
    * @return Reference to this column.
    */
   template <class Cell_range>
-  PersistenceMatrixColumn& multiply_and_add(const Field_element_type& val, const Cell_range& column);
+  PersistenceMatrixColumn& multiply_target_and_add(const Field_element_type& val, const Cell_range& column);
   /**
    * @brief `this = val * this + column`
    * 
@@ -407,19 +407,19 @@ class PersistenceMatrixColumn :
    * @param column Column to add.
    * @return Reference to this column.
    */
-  PersistenceMatrixColumn& multiply_and_add(const Field_element_type& val, PersistenceMatrixColumn& column);
+  PersistenceMatrixColumn& multiply_target_and_add(const Field_element_type& val, PersistenceMatrixColumn& column);
   /**
    * @brief `this = this + column * val`
    * 
    * @tparam Cell_range @ref Cell range with %begin() and %end() method.
-   * @param column @ref Cell range. Every cell has to return the right value when using @ref Cell::get_row_index and,
-   * if @ref PersistenceMatrixOptions::is_z2 is false, also when using
-   * @ref Cell_field_element::get_element "Cell::get_element".
+   * @param column @ref Cell range. Only the stored row index and the stored element value
+   * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
+   * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.
    * @param val Value to multiply.
    * @return Reference to this column.
    */
   template <class Cell_range>
-  PersistenceMatrixColumn& multiply_and_add(const Cell_range& column, const Field_element_type& val);
+  PersistenceMatrixColumn& multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
   /**
    * @brief `this = this + column * val`
    * 
@@ -427,7 +427,7 @@ class PersistenceMatrixColumn :
    * @param val Value to multiply.
    * @return Reference to this column.
    */
-  PersistenceMatrixColumn& multiply_and_add(PersistenceMatrixColumn& column, const Field_element_type& val);
+  PersistenceMatrixColumn& multiply_source_and_add(PersistenceMatrixColumn& column, const Field_element_type& val);
 
   /**
    * @brief Equality comparator. Equal in the sense that what is "supposed" to be contained in the columns is equal,

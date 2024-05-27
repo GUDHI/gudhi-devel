@@ -677,9 +677,9 @@ inline void Boundary_matrix<Master_matrix>::multiply_target_and_add_to(index sou
                                                                        index targetColumnIndex) 
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    matrix_.at(targetColumnIndex).multiply_and_add(coefficient, matrix_.at(sourceColumnIndex));
+    matrix_.at(targetColumnIndex).multiply_target_and_add(coefficient, matrix_.at(sourceColumnIndex));
   } else {
-    matrix_[targetColumnIndex].multiply_and_add(coefficient, matrix_[sourceColumnIndex]);
+    matrix_[targetColumnIndex].multiply_target_and_add(coefficient, matrix_[sourceColumnIndex]);
   }
 }
 
@@ -689,9 +689,9 @@ inline void Boundary_matrix<Master_matrix>::multiply_source_and_add_to(const Fie
                                                                        index targetColumnIndex) 
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    matrix_.at(targetColumnIndex).multiply_and_add(matrix_.at(sourceColumnIndex), coefficient);
+    matrix_.at(targetColumnIndex).multiply_source_and_add(matrix_.at(sourceColumnIndex), coefficient);
   } else {
-    matrix_[targetColumnIndex].multiply_and_add(matrix_[sourceColumnIndex], coefficient);
+    matrix_[targetColumnIndex].multiply_source_and_add(matrix_[sourceColumnIndex], coefficient);
   }
 }
 

@@ -552,9 +552,9 @@ inline void Base_matrix_with_column_compression<Master_matrix>::multiply_target_
   Column_type& target = *repToColumn_[targetRep];
   columnToRep_.erase(target);
   if constexpr (std::is_integral_v<Cell_range_or_column_index>) {
-    target.multiply_and_add(coefficient, get_column(sourceColumn));
+    target.multiply_target_and_add(coefficient, get_column(sourceColumn));
   } else {
-    target.multiply_and_add(coefficient, sourceColumn);
+    target.multiply_target_and_add(coefficient, sourceColumn);
   }
   _insert_column(targetRep);
 }
@@ -569,9 +569,9 @@ inline void Base_matrix_with_column_compression<Master_matrix>::multiply_source_
   Column_type& target = *repToColumn_[targetRep];
   columnToRep_.erase(target);
   if constexpr (std::is_integral_v<Cell_range_or_column_index>) {
-    target.multiply_and_add(get_column(sourceColumn), coefficient);
+    target.multiply_source_and_add(get_column(sourceColumn), coefficient);
   } else {
-    target.multiply_and_add(sourceColumn, coefficient);
+    target.multiply_source_and_add(sourceColumn, coefficient);
   }
   _insert_column(targetRep);
 }

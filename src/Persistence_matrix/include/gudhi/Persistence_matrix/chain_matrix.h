@@ -861,10 +861,10 @@ inline void Chain_matrix<Master_matrix>::multiply_target_and_add_to(index source
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     auto& col = matrix_.at(targetColumnIndex);
-    _add_to(col, [&]() { col.multiply_and_add(coefficient, matrix_.at(sourceColumnIndex)); });
+    _add_to(col, [&]() { col.multiply_target_and_add(coefficient, matrix_.at(sourceColumnIndex)); });
   } else {
     auto& col = matrix_[targetColumnIndex];
-    _add_to(col, [&]() { col.multiply_and_add(coefficient, matrix_[sourceColumnIndex]); });
+    _add_to(col, [&]() { col.multiply_target_and_add(coefficient, matrix_[sourceColumnIndex]); });
   }
 }
 
@@ -875,10 +875,10 @@ inline void Chain_matrix<Master_matrix>::multiply_source_and_add_to(const Field_
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     auto& col = matrix_.at(targetColumnIndex);
-    _add_to(col, [&]() { col.multiply_and_add(matrix_.at(sourceColumnIndex), coefficient); });
+    _add_to(col, [&]() { col.multiply_source_and_add(matrix_.at(sourceColumnIndex), coefficient); });
   } else {
     auto& col = matrix_[targetColumnIndex];
-    _add_to(col, [&]() { col.multiply_and_add(matrix_[sourceColumnIndex], coefficient); });
+    _add_to(col, [&]() { col.multiply_source_and_add(matrix_[sourceColumnIndex], coefficient); });
   }
 }
 

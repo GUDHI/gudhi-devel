@@ -449,22 +449,22 @@ void column_test_common_z5_operators(std::vector<Column> &matrix){
 	BOOST_CHECK(!(matrix[0] < matrix[0]));
 
 	//this = v * this + column
-	matrix[4].multiply_and_add(4, matrix[5]);
+	matrix[4].multiply_target_and_add(4, matrix[5]);
 	setcont = {{0,3},{2,1},{3,2},{5,2},{6,1}};
 	veccont = {3, 0, 1, 2, 0, 2, 1};
 	column_test_common_content_access(matrix[4], setcont, veccont);
 	//this = this + column * v
-	matrix[5].multiply_and_add(matrix[3], 3);
+	matrix[5].multiply_source_and_add(matrix[3], 3);
 	setcont = {{0,4},{1,2},{2,1},{5,1},{6,1}};
 	veccont = {4, 2, 1, 0, 0, 1, 1};
 	column_test_common_content_access(matrix[5], setcont, veccont);
 	//this = this + column * v
-	matrix[5].multiply_and_add(matrix[4], 3);
+	matrix[5].multiply_source_and_add(matrix[4], 3);
 	setcont = {{0,3},{1,2},{2,4},{3,1},{5,2},{6,4}};
 	veccont = {3, 2, 4, 1, 0, 2, 4};
 	column_test_common_content_access(matrix[5], setcont, veccont);
 	//this = v * this + column
-	matrix[3].multiply_and_add(4, matrix[5]);
+	matrix[3].multiply_target_and_add(4, matrix[5]);
 	setcont = {{0,3},{1,2},{2,4},{3,1},{5,2},{6,4}};
 	veccont = {3, 2, 4, 1, 0, 2, 4};
 	column_test_common_content_access(matrix[3], setcont, veccont);
@@ -510,24 +510,24 @@ void column_test_common_z2_operators(std::vector<Column> &matrix){
 	BOOST_CHECK(!(matrix[0] < matrix[0]));
 
 	//this = v * this + column
-	matrix[4].multiply_and_add(3, matrix[5]);
+	matrix[4].multiply_target_and_add(3, matrix[5]);
 	setcont = {2,3,6};
 	veccont = {0, 0, 1, 1, 0, 0, 1};
 	column_test_common_content_access(matrix[4], setcont, veccont);
 	BOOST_CHECK(matrix[4] == matrix[0]);
 	//this = this + column * v
-	matrix[5].multiply_and_add(matrix[3], 3);
+	matrix[5].multiply_source_and_add(matrix[3], 3);
 	setcont = {0,1,2,5,6};
 	veccont = {1, 1, 1, 0, 0, 1, 1};
 	column_test_common_content_access(matrix[5], setcont, veccont);
 	BOOST_CHECK(matrix[5] == matrix[2]);
 	//this = this + column * v
-	matrix[5].multiply_and_add(matrix[4], 3);
+	matrix[5].multiply_source_and_add(matrix[4], 3);
 	setcont = {0, 1,3,5};
 	veccont = {1, 1, 0, 1, 0, 1, 0};
 	column_test_common_content_access(matrix[5], setcont, veccont);
 	//this = v * this + column
-	matrix[3].multiply_and_add(3, matrix[5]);
+	matrix[3].multiply_target_and_add(3, matrix[5]);
 	setcont = {0, 1,3,5};
 	veccont = {1, 1, 0, 1, 0, 1, 0};
 	column_test_common_content_access(matrix[3], setcont, veccont);
@@ -782,7 +782,7 @@ void column_test_base_z5_operators(std::vector<Column> &matrix){
 	}
 
 	//this = v * this + column
-	matrix[4].multiply_and_add(4, setcont);
+	matrix[4].multiply_target_and_add(4, setcont);
 	veccont = {0, 1, 4, 2, 0, 0, 4};
 	BOOST_CHECK(matrix[4].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -790,7 +790,7 @@ void column_test_base_z5_operators(std::vector<Column> &matrix){
 	}
 	//this = this + column * v
 	setcont = {};
-	matrix[5].multiply_and_add(setcont, 3);
+	matrix[5].multiply_source_and_add(setcont, 3);
 	veccont = {4, 2, 1, 0, 0, 1, 1};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -813,7 +813,7 @@ void column_test_base_z5_operators(std::vector<Column> &matrix){
 	cell = Cell(6);
 	cell.set_element(1);
 	setcont.insert(cell);
-	matrix[5].multiply_and_add(setcont, 3);
+	matrix[5].multiply_source_and_add(setcont, 3);
 	veccont = {3, 2, 4, 1, 0, 2, 4};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -839,7 +839,7 @@ void column_test_base_z5_operators(std::vector<Column> &matrix){
 	cell = Cell(6);
 	cell.set_element(4);
 	setcont.insert(cell);
-	matrix[3].multiply_and_add(4, setcont);
+	matrix[3].multiply_target_and_add(4, setcont);
 	veccont = {3, 2, 4, 1, 0, 2, 4};
 	BOOST_CHECK(matrix[3].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -872,7 +872,7 @@ void column_test_base_z2_operators(std::vector<Column> &matrix){
 	}
 
 	//this = v * this + column
-	matrix[4].multiply_and_add(1, setcont);
+	matrix[4].multiply_target_and_add(1, setcont);
 	veccont = {0, 0, 1, 1, 0, 0, 1};
 	BOOST_CHECK(matrix[4].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -880,7 +880,7 @@ void column_test_base_z2_operators(std::vector<Column> &matrix){
 	}
 	//this = this + column * v
 	setcont = {};
-	matrix[5].multiply_and_add(setcont, 1);
+	matrix[5].multiply_source_and_add(setcont, 1);
 	veccont = {1, 1, 1, 0, 0, 1, 1};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -888,7 +888,7 @@ void column_test_base_z2_operators(std::vector<Column> &matrix){
 	}
 	//this = this + column * v
 	setcont = {2,3,6};
-	matrix[5].multiply_and_add(setcont, 1);
+	matrix[5].multiply_source_and_add(setcont, 1);
 	veccont = {1, 1, 0, 1, 0, 1, 0};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -896,7 +896,7 @@ void column_test_base_z2_operators(std::vector<Column> &matrix){
 	}
 	//this = v * this + column
 	setcont = {0,1,3,5};
-	matrix[3].multiply_and_add(0, setcont);
+	matrix[3].multiply_target_and_add(0, setcont);
 	veccont = {1, 1, 0, 1, 0, 1, 0};
 	BOOST_CHECK(matrix[3].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -999,7 +999,7 @@ void column_test_boundary_z5_operators(std::vector<Column> &matrix){
 	}
 
 	//this = v * this + column
-	matrix[4].multiply_and_add(4, col1);
+	matrix[4].multiply_target_and_add(4, col1);
 	veccont = {0, 1, 4, 2, 0, 0, 4};
 	BOOST_CHECK(matrix[4].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -1007,13 +1007,13 @@ void column_test_boundary_z5_operators(std::vector<Column> &matrix){
 	}
 	//this = this + column * v
 	const Column col2(cont{}, &settings);
-	matrix[5].multiply_and_add(col2, 3);
+	matrix[5].multiply_source_and_add(col2, 3);
 	veccont = {4, 2, 1, 0, 0, 1, 1};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
 	BOOST_CHECK_EQUAL(matrix[5].size(), 5);
 	//this = this + column * v
 	const Column col3(cont{{0,3},{2,1},{3,2},{5,2},{6,1}}, &settings);
-	matrix[5].multiply_and_add(col3, 3);
+	matrix[5].multiply_source_and_add(col3, 3);
 	veccont = {3, 2, 4, 1, 0, 2, 4};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -1021,7 +1021,7 @@ void column_test_boundary_z5_operators(std::vector<Column> &matrix){
 	}
 	//this = v * this + column
 	const Column col4(cont{{0,3},{1,2},{2,4},{3,1},{5,2},{6,4}}, &settings);
-	matrix[3].multiply_and_add(4, col4);
+	matrix[3].multiply_target_and_add(4, col4);
 	veccont = {3, 2, 4, 1, 0, 2, 4};
 	BOOST_CHECK(matrix[3].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -1056,7 +1056,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 	}
 
 	//this = v * this + column
-	matrix[4].multiply_and_add(3, col1);
+	matrix[4].multiply_target_and_add(3, col1);
 	veccont = {0, 0, 1, 1, 0, 0, 1};
 	BOOST_CHECK(matrix[4].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -1064,7 +1064,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 	}
 	//this = this + column * v
 	const Column col2(cont{}, &settings);
-	matrix[5].multiply_and_add(col2, 3);
+	matrix[5].multiply_source_and_add(col2, 3);
 	veccont = {1, 1, 1, 0, 0, 1, 1};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -1072,7 +1072,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 	}
 	//this = this + column * v
 	const Column col3(cont{2,3,6}, &settings);
-	matrix[5].multiply_and_add(col3, 3);
+	matrix[5].multiply_source_and_add(col3, 3);
 	veccont = {1, 1, 0, 1, 0, 1, 0};
 	BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){
@@ -1080,7 +1080,7 @@ void column_test_boundary_z2_operators(std::vector<Column> &matrix){
 	}
 	//this = v * this + column
 	const Column col4(cont{0,1,3,5}, &settings);
-	matrix[3].multiply_and_add(4, col4);
+	matrix[3].multiply_target_and_add(4, col4);
 	veccont = {1, 1, 0, 1, 0, 1, 0};
 	BOOST_CHECK(matrix[3].get_content(veccont.size()) == veccont);
 	if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP){

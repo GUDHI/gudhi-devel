@@ -166,7 +166,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
             auto& operators = _matrix()->colSettings_->operators;
             coef = operators.get_inverse(coef);
             coef = operators.multiply(coef, operators.get_characteristic() - toadd.get_pivot_value());
-            curr.multiply_and_add(coef, toadd);
+            curr.multiply_target_and_add(coef, toadd);
           }
 
           pivot = curr.get_pivot();

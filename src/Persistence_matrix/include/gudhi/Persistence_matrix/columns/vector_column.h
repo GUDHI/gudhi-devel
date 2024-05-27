@@ -128,12 +128,12 @@ class Vector_column : public Master_matrix::Row_access_option,
 
   // this = v * this + column
   template <class Cell_range>
-  Vector_column& multiply_and_add(const Field_element_type& val, const Cell_range& column);
-  Vector_column& multiply_and_add(const Field_element_type& val, Vector_column& column);
+  Vector_column& multiply_target_and_add(const Field_element_type& val, const Cell_range& column);
+  Vector_column& multiply_target_and_add(const Field_element_type& val, Vector_column& column);
   // this = this + column * v
   template <class Cell_range>
-  Vector_column& multiply_and_add(const Cell_range& column, const Field_element_type& val);
-  Vector_column& multiply_and_add(Vector_column& column, const Field_element_type& val);
+  Vector_column& multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
+  Vector_column& multiply_source_and_add(Vector_column& column, const Field_element_type& val);
 
   friend bool operator==(const Vector_column& c1, const Vector_column& c2) {
     if (&c1 == &c2) return true;
@@ -233,9 +233,9 @@ class Vector_column : public Master_matrix::Row_access_option,
   template <class Cell_range>
   bool _add(const Cell_range& column);
   template <class Cell_range>
-  bool _multiply_and_add(const Field_element_type& val, const Cell_range& column);
+  bool _multiply_target_and_add(const Field_element_type& val, const Cell_range& column);
   template <class Cell_range>
-  bool _multiply_and_add(const Cell_range& column, const Field_element_type& val);
+  bool _multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
 
 };
 
@@ -785,7 +785,7 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::operator*=(
 
 template <class Master_matrix>
 template <class Cell_range>
-inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_and_add(
+inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_target_and_add(
     const Field_element_type& val, const Cell_range& column) 
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Vector_column>),
@@ -802,14 +802,14 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_and_
       _add(column);
     }
   } else {
-    _multiply_and_add(val, column);
+    _multiply_target_and_add(val, column);
   }
 
   return *this;
 }
 
 template <class Master_matrix>
-inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_and_add(
+inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_target_and_add(
     const Field_element_type& val, Vector_column& column) 
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
@@ -824,7 +824,7 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_and_
         throw std::invalid_argument("A chain column should not be multiplied by 0.");
       }
     } else {
-      if (_multiply_and_add(val, column)) {
+      if (_multiply_target_and_add(val, column)) {
         chain_opt::swap_pivots(column);
         dim_opt::swap_dimension(column);
       }
@@ -838,7 +838,7 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_and_
         _add(column);
       }
     } else {
-      _multiply_and_add(val, column);
+      _multiply_target_and_add(val, column);
     }
   }
 
@@ -847,7 +847,7 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_and_
 
 template <class Master_matrix>
 template <class Cell_range>
-inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_and_add(
+inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_source_and_add(
     const Cell_range& column, const Field_element_type& val) 
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Vector_column>),
@@ -861,14 +861,14 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_and_
       _add(column);
     }
   } else {
-    _multiply_and_add(column, val);
+    _multiply_source_and_add(column, val);
   }
 
   return *this;
 }
 
 template <class Master_matrix>
-inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_and_add(
+inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_source_and_add(
     Vector_column& column, const Field_element_type& val) 
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
@@ -881,7 +881,7 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_and_
         }
       }
     } else {
-      if (_multiply_and_add(column, val)) {
+      if (_multiply_source_and_add(column, val)) {
         chain_opt::swap_pivots(column);
         dim_opt::swap_dimension(column);
       }
@@ -892,7 +892,7 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_and_
         _add(column);
       }
     } else {
-      _multiply_and_add(column, val);
+      _multiply_source_and_add(column, val);
     }
   }
 
@@ -1131,7 +1131,7 @@ inline bool Vector_column<Master_matrix>::_add(const Cell_range& column)
 
 template <class Master_matrix>
 template <class Cell_range>
-inline bool Vector_column<Master_matrix>::_multiply_and_add(const Field_element_type& val,
+inline bool Vector_column<Master_matrix>::_multiply_target_and_add(const Field_element_type& val,
                                                                               const Cell_range& column) 
 {
   bool pivotIsZeroed = false;
@@ -1241,7 +1241,7 @@ inline bool Vector_column<Master_matrix>::_multiply_and_add(const Field_element_
 
 template <class Master_matrix>
 template <class Cell_range>
-inline bool Vector_column<Master_matrix>::_multiply_and_add(const Cell_range& column,
+inline bool Vector_column<Master_matrix>::_multiply_source_and_add(const Cell_range& column,
                                                                               const Field_element_type& val) 
 {
   if (val == 0u || column.begin() == column.end()) {

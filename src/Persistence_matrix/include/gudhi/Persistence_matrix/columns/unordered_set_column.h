@@ -143,12 +143,12 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
 
   // this = v * this + column
   template <class Cell_range>
-  Unordered_set_column& multiply_and_add(const Field_element_type& val, const Cell_range& column);
-  Unordered_set_column& multiply_and_add(const Field_element_type& val, Unordered_set_column& column);
+  Unordered_set_column& multiply_target_and_add(const Field_element_type& val, const Cell_range& column);
+  Unordered_set_column& multiply_target_and_add(const Field_element_type& val, Unordered_set_column& column);
   // this = this + column * v
   template <class Cell_range>
-  Unordered_set_column& multiply_and_add(const Cell_range& column, const Field_element_type& val);
-  Unordered_set_column& multiply_and_add(Unordered_set_column& column, const Field_element_type& val);
+  Unordered_set_column& multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
+  Unordered_set_column& multiply_source_and_add(Unordered_set_column& column, const Field_element_type& val);
 
   friend bool operator==(const Unordered_set_column& c1, const Unordered_set_column& c2) {
     if (&c1 == &c2) return true;
@@ -258,9 +258,9 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
   template <class Cell_range>
   bool _add(const Cell_range& column);
   template <class Cell_range>
-  bool _multiply_and_add(const Field_element_type& val, const Cell_range& column);
+  bool _multiply_target_and_add(const Field_element_type& val, const Cell_range& column);
   template <class Cell_range>
-  bool _multiply_and_add(const Cell_range& column, const Field_element_type& val);
+  bool _multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
 
 };
 
@@ -724,7 +724,7 @@ Unordered_set_column<Master_matrix>::operator*=(unsigned int v)
 template <class Master_matrix>
 template <class Cell_range>
 inline Unordered_set_column<Master_matrix>&
-Unordered_set_column<Master_matrix>::multiply_and_add(const Field_element_type& val,
+Unordered_set_column<Master_matrix>::multiply_target_and_add(const Field_element_type& val,
                                                                         const Cell_range& column) 
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Unordered_set_column>),
@@ -741,7 +741,7 @@ Unordered_set_column<Master_matrix>::multiply_and_add(const Field_element_type& 
       _add(column);
     }
   } else {
-    _multiply_and_add(val, column);
+    _multiply_target_and_add(val, column);
   }
 
   return *this;
@@ -749,7 +749,7 @@ Unordered_set_column<Master_matrix>::multiply_and_add(const Field_element_type& 
 
 template <class Master_matrix>
 inline Unordered_set_column<Master_matrix>&
-Unordered_set_column<Master_matrix>::multiply_and_add(const Field_element_type& val,
+Unordered_set_column<Master_matrix>::multiply_target_and_add(const Field_element_type& val,
                                                                         Unordered_set_column& column) 
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
@@ -764,7 +764,7 @@ Unordered_set_column<Master_matrix>::multiply_and_add(const Field_element_type& 
         throw std::invalid_argument("A chain column should not be multiplied by 0.");
       }
     } else {
-      if (_multiply_and_add(val, column)) {
+      if (_multiply_target_and_add(val, column)) {
         chain_opt::swap_pivots(column);
         dim_opt::swap_dimension(column);
       }
@@ -778,7 +778,7 @@ Unordered_set_column<Master_matrix>::multiply_and_add(const Field_element_type& 
         _add(column);
       }
     } else {
-      _multiply_and_add(val, column);
+      _multiply_target_and_add(val, column);
     }
   }
 
@@ -788,7 +788,7 @@ Unordered_set_column<Master_matrix>::multiply_and_add(const Field_element_type& 
 template <class Master_matrix>
 template <class Cell_range>
 inline Unordered_set_column<Master_matrix>&
-Unordered_set_column<Master_matrix>::multiply_and_add(const Cell_range& column,
+Unordered_set_column<Master_matrix>::multiply_source_and_add(const Cell_range& column,
                                                                         const Field_element_type& val) 
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Unordered_set_column>),
@@ -802,7 +802,7 @@ Unordered_set_column<Master_matrix>::multiply_and_add(const Cell_range& column,
       _add(column);
     }
   } else {
-    _multiply_and_add(column, val);
+    _multiply_source_and_add(column, val);
   }
 
   return *this;
@@ -810,7 +810,7 @@ Unordered_set_column<Master_matrix>::multiply_and_add(const Cell_range& column,
 
 template <class Master_matrix>
 inline Unordered_set_column<Master_matrix>&
-Unordered_set_column<Master_matrix>::multiply_and_add(Unordered_set_column& column,
+Unordered_set_column<Master_matrix>::multiply_source_and_add(Unordered_set_column& column,
                                                                         const Field_element_type& val) 
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
@@ -823,7 +823,7 @@ Unordered_set_column<Master_matrix>::multiply_and_add(Unordered_set_column& colu
         }
       }
     } else {
-      if (_multiply_and_add(column, val)) {
+      if (_multiply_source_and_add(column, val)) {
         chain_opt::swap_pivots(column);
         dim_opt::swap_dimension(column);
       }
@@ -834,7 +834,7 @@ Unordered_set_column<Master_matrix>::multiply_and_add(Unordered_set_column& colu
         _add(column);
       }
     } else {
-      _multiply_and_add(column, val);
+      _multiply_source_and_add(column, val);
     }
   }
 
@@ -947,7 +947,7 @@ inline bool Unordered_set_column<Master_matrix>::_add(const Cell_range& column)
 
 template <class Master_matrix>
 template <class Cell_range>
-inline bool Unordered_set_column<Master_matrix>::_multiply_and_add(const Field_element_type& val,
+inline bool Unordered_set_column<Master_matrix>::_multiply_target_and_add(const Field_element_type& val,
                                                                                      const Cell_range& column) 
 {
   if (val == 0u) {
@@ -970,7 +970,7 @@ inline bool Unordered_set_column<Master_matrix>::_multiply_and_add(const Field_e
 
 template <class Master_matrix>
 template <class Cell_range>
-inline bool Unordered_set_column<Master_matrix>::_multiply_and_add(const Cell_range& column,
+inline bool Unordered_set_column<Master_matrix>::_multiply_source_and_add(const Cell_range& column,
                                                                                      const Field_element_type& val) 
 {
   if (val == 0u) {
