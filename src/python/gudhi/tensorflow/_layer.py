@@ -1,5 +1,4 @@
 import tensorflow
-from tensorflow import __version__ as tensorflow_version
 # The sklearn parse_version function is taken from 'packaging' and this dependency is not mandatory
 from sklearn.utils.fixes import parse_version
 
