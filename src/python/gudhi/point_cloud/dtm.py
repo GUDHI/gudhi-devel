@@ -17,7 +17,8 @@ __license__ = "MIT"
 
 class DistanceToMeasure:
     """
-    Class to compute the distance to the empirical measure defined by a point set, as introduced in :cite:`dtm`.
+    Class to compute the distance to the empirical measure defined by a point set, 
+    as introduced in :cite:`dtmgeoinference2011`.
     """
 
     def __init__(self, k, q=2, **kwargs):
