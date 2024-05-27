@@ -9,8 +9,9 @@
 
 import tensorflow as tf
 import math
+from ._layer import TensorflowKerasLayer
 
-class GridPerslayWeight(tf.keras.layers.Layer):
+class GridPerslayWeight(TensorflowKerasLayer):
     """
     This is a class for computing a differentiable weight function for persistence diagram points. This function is defined from an array that contains its values on a 2D grid.
     """
@@ -22,7 +23,7 @@ class GridPerslayWeight(tf.keras.layers.Layer):
             grid (n x n numpy array): grid of values.
             grid_bnds (2 x 2 numpy array): boundaries of the grid, of the form [[min_x, max_x], [min_y, max_y]].
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.grid = tf.Variable(initial_value=grid, trainable=True)
         self.grid_bnds = grid_bnds
     
@@ -49,7 +50,7 @@ class GridPerslayWeight(tf.keras.layers.Layer):
         weight = tf.gather_nd(params=self.grid, indices=tf.concat(indices, axis=2))
         return weight
     
-class GaussianMixturePerslayWeight(tf.keras.layers.Layer):
+class GaussianMixturePerslayWeight(TensorflowKerasLayer):
     """
     This is a class for computing a differentiable weight function for persistence diagram points. This function is defined from a mixture of Gaussian functions.
     """
@@ -60,7 +61,7 @@ class GaussianMixturePerslayWeight(tf.keras.layers.Layer):
         Parameters:
             gaussians (4 x n numpy array): parameters of the n Gaussian functions, of the form transpose([[mu_x^1, mu_y^1, sigma_x^1, sigma_y^1], ..., [mu_x^n, mu_y^n, sigma_x^n, sigma_y^n]]). 
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.W = tf.Variable(initial_value=gaussians, trainable=True)
 
     def build(self, input_shape):
@@ -83,7 +84,7 @@ class GaussianMixturePerslayWeight(tf.keras.layers.Layer):
         weight    = tf.math.reduce_sum(tf.math.exp(tf.math.reduce_sum(-dists, axis=2)), axis=2)
         return weight
     
-class PowerPerslayWeight(tf.keras.layers.Layer):
+class PowerPerslayWeight(TensorflowKerasLayer):
     """
     This is a class for computing a differentiable weight function for persistence diagram points. This function is defined as a constant multiplied by the distance to the diagonal of the persistence diagram point raised to some power.
     """
@@ -95,7 +96,7 @@ class PowerPerslayWeight(tf.keras.layers.Layer):
             constant (float): constant value.
             power (float): power applied to the distance to the diagonal. 
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.constant = tf.Variable(initial_value=constant, trainable=True)
         self.power = power
         
@@ -116,7 +117,7 @@ class PowerPerslayWeight(tf.keras.layers.Layer):
         return weight
     
 
-class GaussianPerslayPhi(tf.keras.layers.Layer):
+class GaussianPerslayPhi(TensorflowKerasLayer):
     """
     This is a class for computing a transformation function for persistence diagram points. This function turns persistence diagram points into 2D Gaussian functions centered on the points, that are then evaluated on a regular 2D grid.
     """
@@ -129,7 +130,7 @@ class GaussianPerslayPhi(tf.keras.layers.Layer):
             image_bnds (2 x 2 numpy array): boundaries of the grid, of the form [[min_x, max_x], [min_y, max_y]].
             variance (float): variance of the Gaussian functions. 
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.image_size = image_size
         self.image_bnds = image_bnds
         self.variance   = tf.Variable(initial_value=variance, trainable=True)
@@ -161,7 +162,7 @@ class GaussianPerslayPhi(tf.keras.layers.Layer):
         output_shape = M[0].shape + tuple([1])
         return output, output_shape
      
-class TentPerslayPhi(tf.keras.layers.Layer):
+class TentPerslayPhi(TensorflowKerasLayer):
     """
     This is a class for computing a transformation function for persistence diagram points. This function turns persistence diagram points into 1D tent functions (linearly increasing on the first half of the bar corresponding to the point from zero to half of the bar length, linearly decreasing on the second half and zero elsewhere) centered on the points, that are then evaluated on a regular 1D grid.
     """
@@ -172,7 +173,7 @@ class TentPerslayPhi(tf.keras.layers.Layer):
         Parameters:
             samples (float numpy array): grid elements on which to evaluate the tent functions, of the form [x_1, ..., x_n].
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.samples   = tf.Variable(initial_value=samples, trainable=True)
         
     def build(self, input_shape):
@@ -195,7 +196,7 @@ class TentPerslayPhi(tf.keras.layers.Layer):
         output_shape = self.samples.shape
         return output, output_shape
     
-class FlatPerslayPhi(tf.keras.layers.Layer):
+class FlatPerslayPhi(TensorflowKerasLayer):
     """
     This is a class for computing a transformation function for persistence diagram points. This function turns persistence diagram points into 1D constant functions (that evaluate to half of the bar length on the bar corresponding to the point and zero elsewhere), that are then evaluated on a regular 1D grid.
     """
@@ -207,7 +208,7 @@ class FlatPerslayPhi(tf.keras.layers.Layer):
             samples (float numpy array): grid elements on which to evaluate the constant functions, of the form [x_1, ..., x_n].
             theta (float): sigmoid parameter used to approximate the constant function with a differentiable sigmoid function. The bigger the theta, the closer to a constant function the output will be. 
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.samples = tf.Variable(initial_value=samples, trainable=True)
         self.theta   = tf.Variable(initial_value=theta,   trainable=True)
         
@@ -231,7 +232,7 @@ class FlatPerslayPhi(tf.keras.layers.Layer):
         output_shape = self.samples.shape
         return output, output_shape
 
-class Perslay(tf.keras.layers.Layer):
+class Perslay(TensorflowKerasLayer):
     """
     This is a TensorFlow layer for vectorizing persistence diagrams in a differentiable way within a neural network. This function implements the PersLay equation, see `the corresponding article <http://proceedings.mlr.press/v108/carriere20a.html>`_.
     """
@@ -245,7 +246,7 @@ class Perslay(tf.keras.layers.Layer):
             perm_op (function): permutation invariant function, such as `tf.math.reduce_sum`, `tf.math.reduce_mean`, `tf.math.reduce_max`, `tf.math.reduce_min`, or a custom TensorFlow function that takes two arguments: a tensor and an axis on which to apply the permutation invariant operation. If perm_op is the string "topk" (where k is a number), this function will be computed as `tf.math.top_k` with parameter `int(k)`.
             rho (function): postprocessing function that is applied after the permutation invariant operation. Can be any TensorFlow layer.
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.weight  = weight
         self.phi     = phi
         self.perm_op = perm_op  
