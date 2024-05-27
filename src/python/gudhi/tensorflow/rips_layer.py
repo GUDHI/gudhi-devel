@@ -1,6 +1,7 @@
 import numpy               as np
 import tensorflow          as tf
 from ..rips_complex     import RipsComplex
+from ._layer import TensorflowKerasLayer
 
 ############################
 # Vietoris-Rips filtration #
@@ -36,7 +37,7 @@ def _Rips(DX, max_edge, dimensions, homology_coeff_field):
 
     return L_indices
 
-class RipsLayer(tf.keras.layers.Layer):
+class RipsLayer(TensorflowKerasLayer):
     """
     TensorFlow layer for computing Rips persistence out of a point cloud
     """
@@ -50,7 +51,7 @@ class RipsLayer(tf.keras.layers.Layer):
             min_persistence (List[float]): minimum distance-to-diagonal of the points in the output persistence diagrams (default None, in which case 0. is used for all dimensions)
             homology_coeff_field (int): homology field coefficient. Must be a prime number. Default value is 11. Max is 46337.
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.max_edge = maximum_edge_length
         self.dimensions = homology_dimensions
         self.min_persistence = min_persistence if min_persistence is not None else [0. for _ in range(len(self.dimensions))]

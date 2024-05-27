@@ -1,5 +1,6 @@
 import numpy               as np
 import tensorflow          as tf
+from ._layer import TensorflowKerasLayer
 
 #########################################
 # Lower star filtration on simplex tree #
@@ -39,7 +40,7 @@ def _LowerStarSimplexTree(simplextree, filtration, dimensions, homology_coeff_fi
 
     return L_indices
 
-class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
+class LowerStarSimplexTreeLayer(TensorflowKerasLayer):
     """
     TensorFlow layer for computing lower-star persistence out of a simplex tree
     """
@@ -54,7 +55,7 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
             homology_coeff_field (int): homology field coefficient. Must be a prime number. Default value is 11. Max is 46337.
             persistence_dim_max (bool): if true, the persistent homology for the maximal dimension in the simplex tree is computed. If false, it is ignored. Default is false.
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.dimensions  = homology_dimensions
         self.simplextree = simplextree
         self.min_persistence = min_persistence if min_persistence is not None else [0. for _ in range(len(self.dimensions))]
