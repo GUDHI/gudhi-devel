@@ -220,7 +220,7 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
   Column_type column_;
 
   void _delete_cell(iterator& it);
-  void _insert_cell(const Field_element_type& value, id_index rowIndex, const iterator& position);
+  Cell* _insert_cell(const Field_element_type& value, id_index rowIndex, const iterator& position);
   void _insert_cell(id_index rowIndex, const iterator& position);
   template <class Cell_range>
   bool _add(const Cell_range& column);
@@ -689,7 +689,7 @@ Intrusive_list_column<Master_matrix>::operator*=(const Field_element_type& val)
     if (realVal == Field_operators::get_multiplicative_identity()) return *this;
 
     for (Cell& cell : column_) {
-      cell.get_element() = operators_->multiply(cell.get_element(), realVal);
+      operators_->multiply_inplace(cell.get_element(), realVal);
       if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(cell);
     }
   }
@@ -842,19 +842,20 @@ inline void Intrusive_list_column<Master_matrix>::_delete_cell(iterator& it)
 }
 
 template <class Master_matrix>
-inline void Intrusive_list_column<Master_matrix>::_insert_cell(const Field_element_type& value,
-                                                                                 id_index rowIndex,
-                                                                                 const iterator& position) 
+inline typename Intrusive_list_column<Master_matrix>::Cell* Intrusive_list_column<Master_matrix>::_insert_cell(
+    const Field_element_type& value, id_index rowIndex, const iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
     new_cell->set_element(value);
     column_.insert(position, *new_cell);
     ra_opt::insert_cell(rowIndex, new_cell);
+    return new_cell;
   } else {
     Cell* new_cell = cellPool_->construct(rowIndex);
     new_cell->set_element(value);
     column_.insert(position, *new_cell);
+    return new_cell;
   }
 }
 
@@ -897,7 +898,7 @@ inline bool Intrusive_list_column<Master_matrix>::_add(const Cell_range& column)
         }
         _delete_cell(itTarget);
       } else {
-        itTarget->get_element() = operators_->add(itTarget->get_element(), itSource->get_element());
+        operators_->add_inplace(itTarget->get_element(), itSource->get_element());
         if (itTarget->get_element() ==
             Field_operators::get_additive_identity()) {  // get_element is already modulo, so '==' works.
           if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
@@ -945,14 +946,14 @@ inline bool Intrusive_list_column<Master_matrix>::_multiply_target_and_add(const
   auto itSource = column.begin();
   while (itTarget != column_.end() && itSource != column.end()) {
     if (itTarget->get_row_index() < itSource->get_row_index()) {
-      itTarget->get_element() = operators_->multiply(itTarget->get_element(), val);
+      operators_->multiply_inplace(itTarget->get_element(), val);
       if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(*itTarget);
       ++itTarget;
     } else if (itTarget->get_row_index() > itSource->get_row_index()) {
       _insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
       ++itSource;
     } else {
-      itTarget->get_element() = operators_->multiply_and_add(itTarget->get_element(), val, itSource->get_element());
+      operators_->multiply_and_add_inplace_front(itTarget->get_element(), val, itSource->get_element());
       if (itTarget->get_element() == Field_operators::get_additive_identity()) {
         if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
           if (itTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -967,7 +968,7 @@ inline bool Intrusive_list_column<Master_matrix>::_multiply_target_and_add(const
   }
 
   while (itTarget != column_.end()) {
-    itTarget->get_element() = operators_->multiply(itTarget->get_element(), val);
+    operators_->multiply_inplace(itTarget->get_element(), val);
     if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(*itTarget);
     itTarget++;
   }
@@ -997,10 +998,11 @@ inline bool Intrusive_list_column<Master_matrix>::_multiply_source_and_add(const
     if (itTarget->get_row_index() < itSource->get_row_index()) {
       ++itTarget;
     } else if (itTarget->get_row_index() > itSource->get_row_index()) {
-      _insert_cell(operators_->multiply(itSource->get_element(), val), itSource->get_row_index(), itTarget);
+      Cell* cell = _insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
+      operators_->multiply_inplace(cell->get_element(), val);
       ++itSource;
     } else {
-      itTarget->get_element() = operators_->multiply_and_add(itSource->get_element(), val, itTarget->get_element());
+      operators_->multiply_and_add_inplace_back(itSource->get_element(), val, itTarget->get_element());
       if (itTarget->get_element() == Field_operators::get_additive_identity()) {
         if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
           if (itTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -1015,7 +1017,8 @@ inline bool Intrusive_list_column<Master_matrix>::_multiply_source_and_add(const
   }
 
   while (itSource != column.end()) {
-    _insert_cell(operators_->multiply(itSource->get_element(), val), itSource->get_row_index(), column_.end());
+    Cell* cell = _insert_cell(itSource->get_element(), itSource->get_row_index(), column_.end());
+    operators_->multiply_inplace(cell->get_element(), val);
     ++itSource;
   }
 

@@ -148,6 +148,160 @@ void test_z5_standart_field_operators(Z5& op){
 }
 
 template<class Z2>
+void test_z2_standart_field_inplace_operators(Z2& op)
+{
+	using T = typename Z2::element_type;
+
+	T z23 = op.get_value(7u);
+	T z24 = op.get_value(2u);
+	T z25 = 3;
+
+	//e * m + a
+	op.multiply_and_add_inplace_front(z23, z24, T(3));
+	BOOST_CHECK_EQUAL(z23, 1);
+	z23 = op.get_value(7u);
+	op.multiply_and_add_inplace_back(z23, z24, z25);
+	BOOST_CHECK_EQUAL(z25, 1);
+	z25 = 3;
+
+	//(e + a) * m
+	op.add_and_multiply_inplace_front(z23, z24, T(3));
+	BOOST_CHECK_EQUAL(z23, 1);
+	z23 = op.get_value(7u);
+	op.add_and_multiply_inplace_back(z23, z24, z25);
+	BOOST_CHECK_EQUAL(z25, 1);
+	z25 = 3;
+
+	//+
+	op.add_inplace(z23, z24);
+	BOOST_CHECK_EQUAL(z23, 1);
+	z23 = op.get_value(7u);
+	op.add_inplace(z23, T(3));
+	BOOST_CHECK_EQUAL(z23, 0);
+	z23 = op.get_value(7u);
+	op.add_inplace(z24, T(3));
+	BOOST_CHECK_EQUAL(z24, 1);
+	z24 = op.get_value(2u);
+	op.add_inplace(z23, op.get_value(6u));
+	BOOST_CHECK_EQUAL(z23, 1);
+	z23 = op.get_value(7u);
+	op.add_inplace(z24, op.get_value(6u));
+	BOOST_CHECK_EQUAL(z24, 0);
+	z24 = op.get_value(2u);
+	z23 = 0;
+
+	//-
+	op.substract_inplace_front(z23, z24);
+	BOOST_CHECK_EQUAL(z23, 0);
+	z23 = 0;
+	op.substract_inplace_front(z23, T(3));
+	BOOST_CHECK_EQUAL(z23, 1);
+	z23 = 0;
+	op.substract_inplace_front(z24, T(3));
+	BOOST_CHECK_EQUAL(z24, 1);
+	z24 = op.get_value(2u);
+	op.substract_inplace_back(op.get_value(6u), z23);
+	BOOST_CHECK_EQUAL(z23, 0);
+	z23 = 0;
+	op.substract_inplace_back(op.get_value(6u), z24);
+	BOOST_CHECK_EQUAL(z24, 0);
+	z24 = op.get_value(2u);
+	z23 = 1;
+
+	//*
+	op.multiply_inplace(z23, z24);
+	BOOST_CHECK_EQUAL(z23, 0);
+	z23 = 1;
+	op.multiply_inplace(z23, T(3));
+	BOOST_CHECK_EQUAL(z23, 1);
+	z23 = 1;
+	op.multiply_inplace(z24, T(3));
+	BOOST_CHECK_EQUAL(z24, 0);
+	z24 = op.get_value(2u);
+	op.multiply_inplace(z23, op.get_value(6u));
+	BOOST_CHECK_EQUAL(z23, 0);
+	op.multiply_inplace(z24, op.get_value(6u));
+	BOOST_CHECK_EQUAL(z24, 0);
+}
+
+template<class Z5>
+void test_z5_standart_field_inplace_operators(Z5& op){
+	using T = typename Z5::element_type;
+
+	T z53 = op.get_value(7);
+	T z54 = op.get_value(3);
+	T z55 = 3;
+
+	//e * m + a
+	op.multiply_and_add_inplace_front(z53, z54, 3);
+	BOOST_CHECK_EQUAL(z53, 4);
+	z53 = op.get_value(7);
+	op.multiply_and_add_inplace_back(z53, z54, z55);
+	BOOST_CHECK_EQUAL(z55, 4);
+	z55 = 3;
+
+	//(e + a) * m
+	op.add_and_multiply_inplace_front(z53, z54, 3);
+	BOOST_CHECK_EQUAL(z53, 0);
+	z53 = op.get_value(7);
+	op.add_and_multiply_inplace_back(z53, z54, z55);
+	BOOST_CHECK_EQUAL(z55, 0);
+	z55 = 3;
+
+	//+
+	op.add_inplace(z53, z54);
+	BOOST_CHECK_EQUAL(z53, 0);
+	z53 = op.get_value(7);
+	op.add_inplace(z53, 3);
+	BOOST_CHECK_EQUAL(z53, 0);
+	z53 = op.get_value(7);
+	op.add_inplace(z54, 3);
+	BOOST_CHECK_EQUAL(z54, 1);
+	z54 = op.get_value(3);
+	op.add_inplace(z53, 7);
+	BOOST_CHECK_EQUAL(z53, 4);
+	z53 = op.get_value(7);
+	op.add_inplace(z54, 7);
+	BOOST_CHECK_EQUAL(z54, 0);
+	z54 = op.get_value(3);
+	z53 = 3;
+
+	//-
+	op.substract_inplace_front(z53, z54);
+	BOOST_CHECK_EQUAL(z53, 0);
+	z53 = 3;
+	op.substract_inplace_front(z53, 3);
+	BOOST_CHECK_EQUAL(z53, 0);
+	z53 = 3;
+	op.substract_inplace_front(z54, 3);
+	BOOST_CHECK_EQUAL(z54, 0);
+	z54 = op.get_value(3);
+	op.substract_inplace_back(7, z53);
+	BOOST_CHECK_EQUAL(z53, 4);
+	z53 = 3;
+	op.substract_inplace_back(7, z54);
+	BOOST_CHECK_EQUAL(z54, 4);
+	z54 = op.get_value(3);
+	z53 = 2;
+
+	//*
+	op.multiply_inplace(z53, z54);
+	BOOST_CHECK_EQUAL(z53, 1);
+	z53 = 2;
+	op.multiply_inplace(z53, 3);
+	BOOST_CHECK_EQUAL(z53, 1);
+	z53 = 2;
+	op.multiply_inplace(z54, 3);
+	BOOST_CHECK_EQUAL(z54, 4);
+	z54 = op.get_value(3);
+	op.multiply_inplace(z53, 7);
+	BOOST_CHECK_EQUAL(z53, 4);
+	z53 = 2;
+	op.multiply_inplace(z54, 7);
+	BOOST_CHECK_EQUAL(z54, 1);
+}
+
+template<class Z2>
 void test_z2_standart_field_properties(Z2& op){
 	unsigned int z21 = 7;
 	unsigned int z22 = 2;
@@ -213,12 +367,15 @@ BOOST_AUTO_TEST_CASE(Field_operators_operation)
 {
 	Z2_field_operators z2op;
 	test_z2_standart_field_operators(z2op);
+	test_z2_standart_field_inplace_operators(z2op);
 
 	Zp_field_operators zpop;
 	zpop.set_characteristic(2);
 	test_z2_standart_field_operators(zpop);
+	test_z2_standart_field_inplace_operators(zpop);
 	zpop.set_characteristic(5);
 	test_z5_standart_field_operators(zpop);
+	test_z5_standart_field_inplace_operators(zpop);
 }
 
 BOOST_AUTO_TEST_CASE(Field_operators_properties)
@@ -289,6 +446,82 @@ void test_multi_field_operators(MF& op){
 }
 
 template<class MF>
+void test_multi_field_inplace_operators(MF& op){
+	using T = typename MF::element_type;
+
+	T m1(5005);
+	T m2(5007);
+	T m3(3);
+
+	//e * m + a
+	op.multiply_and_add_inplace_front(m1, m2, 3);
+	BOOST_CHECK_EQUAL(m1, 3);
+	m1 = 5005;
+	op.multiply_and_add_inplace_back(m1, m2, m3);
+	BOOST_CHECK_EQUAL(m3, 3);
+	m3 = 3;
+
+	//(e + a) * m
+	op.add_and_multiply_inplace_front(m1, m2, 3);
+	BOOST_CHECK_EQUAL(m1, 6);
+	m1 = 5005;
+	op.add_and_multiply_inplace_back(m1, m2, m3);
+	BOOST_CHECK_EQUAL(m3, 6);
+	m3 = 3;
+
+	//+
+	op.add_inplace(m1, m2);
+	BOOST_CHECK_EQUAL(m1, T(2));
+	m1 = 5005;
+	op.add_inplace(m1, 3);
+	BOOST_CHECK_EQUAL(m1, T(3));
+	m1 = 5005;
+	op.add_inplace(m2, 3);
+	BOOST_CHECK_EQUAL(m2, T(5));
+	m2 = 5007;
+	op.add_inplace(m1, 6);
+	BOOST_CHECK_EQUAL(m1, T(6));
+	m1 = 5005;
+	op.add_inplace(m2, 6);
+	BOOST_CHECK_EQUAL(m2, T(8));
+	m2 = 5007;
+	m1 = 5;
+
+	//-
+	op.substract_inplace_front(m1, m2);
+	BOOST_CHECK_EQUAL(m1, T(3));
+	m1 = 5;
+	op.substract_inplace_front(m1, 3);
+	BOOST_CHECK_EQUAL(m1, T(2));
+	m1 = 5;
+	op.substract_inplace_front(m2, 3);
+	BOOST_CHECK_EQUAL(m2, T(5004));
+	m2 = 5007;
+	op.substract_inplace_back(6, m1);
+	BOOST_CHECK_EQUAL(m1, T(1));
+	m1 = 5;
+	op.substract_inplace_back(6, m2);
+	BOOST_CHECK_EQUAL(m2, T(4));
+	m2 = 4999;
+
+	//*
+	op.multiply_inplace(m1, m2);
+	BOOST_CHECK_EQUAL(m1, T(4975));
+	m1 = 5;
+	op.multiply_inplace(m1, 3);
+	BOOST_CHECK_EQUAL(m1, T(15));
+	m1 = 5;
+	op.multiply_inplace(m2, 3);
+	BOOST_CHECK_EQUAL(m2, T(4987));
+	m2 = 4999;
+	op.multiply_inplace(m1, 6);
+	BOOST_CHECK_EQUAL(m1, T(30));
+	m1 = 5;
+	op.multiply_inplace(m2, 6);
+	BOOST_CHECK_EQUAL(m2, T(4969));
+}
+
+template<class MF>
 void test_multi_field_properties(MF& op){
 	using T = typename MF::element_type;
 
@@ -315,10 +548,12 @@ BOOST_AUTO_TEST_CASE(Multi_Field_operators_operation)
 	Multi_field_operators mfop;
 	mfop.set_characteristic(5, 13);
 	test_multi_field_operators(mfop);
+	test_multi_field_inplace_operators(mfop);
 
 	Multi_field_operators_with_small_characteristics smfop;
 	smfop.set_characteristic(5, 13);
 	test_multi_field_operators(smfop);
+	test_multi_field_inplace_operators(smfop);
 }
 
 BOOST_AUTO_TEST_CASE(Multi_Field_operators_properties)

@@ -194,7 +194,9 @@ class List_column : public Master_matrix::Row_access_option,
   Cell_constructor* cellPool_;
 
   void _delete_cell(typename Column_type::iterator& it);
-  void _insert_cell(const Field_element_type& value, id_index rowIndex, const typename Column_type::iterator& position);
+  Cell* _insert_cell(const Field_element_type& value,
+                     id_index rowIndex,
+                     const typename Column_type::iterator& position);
   void _insert_cell(id_index rowIndex, const typename Column_type::iterator& position);
   void _update_cell(const Field_element_type& value, id_index rowIndex, const typename Column_type::iterator& position);
   void _update_cell(id_index rowIndex, const typename Column_type::iterator& position);
@@ -684,7 +686,7 @@ inline List_column<Master_matrix>& List_column<Master_matrix>::operator*=(
     if (val == 1u) return *this;
 
     for (Cell* cell : column_) {
-      cell->get_element() = operators_->multiply(cell->get_element(), val);
+      operators_->multiply_inplace(cell->get_element(), val);
       if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(*cell);
     }
   }
@@ -856,19 +858,20 @@ inline void List_column<Master_matrix>::_delete_cell(typename Column_type::itera
 }
 
 template <class Master_matrix>
-inline void List_column<Master_matrix>::_insert_cell(const Field_element_type& value,
-                                                                       id_index rowIndex,
-                                                                       const typename Column_type::iterator& position) 
+inline typename List_column<Master_matrix>::Cell* List_column<Master_matrix>::_insert_cell(
+    const Field_element_type& value, id_index rowIndex, const typename Column_type::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
     new_cell->set_element(value);
     column_.insert(position, new_cell);
     ra_opt::insert_cell(rowIndex, new_cell);
+    return new_cell;
   } else {
     Cell* new_cell = cellPool_->construct(rowIndex);
     new_cell->set_element(value);
     column_.insert(position, new_cell);
+    return new_cell;
   }
 }
 
@@ -954,7 +957,7 @@ inline bool List_column<Master_matrix>::_add(const Cell_range& column)
         }
         _delete_cell(itTarget);
       } else {
-        cellTarget->get_element() = operators_->add(cellTarget->get_element(), cellSource.get_element());
+        operators_->add_inplace(cellTarget->get_element(), cellSource.get_element());
         if (cellTarget->get_element() == Field_operators::get_additive_identity()) {
           if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
             if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -1003,15 +1006,14 @@ inline bool List_column<Master_matrix>::_multiply_target_and_add(const Field_ele
     Cell* cellTarget = *itTarget;
     const Cell& cellSource = *itSource;
     if (cellTarget->get_row_index() < cellSource.get_row_index()) {
-      cellTarget->get_element() = operators_->multiply(cellTarget->get_element(), val);
+      operators_->multiply_inplace(cellTarget->get_element(), val);
       if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**itTarget);
       ++itTarget;
     } else if (cellTarget->get_row_index() > cellSource.get_row_index()) {
       _insert_cell(cellSource.get_element(), cellSource.get_row_index(), itTarget);
       ++itSource;
     } else {
-      cellTarget->get_element() =
-          operators_->multiply_and_add(cellTarget->get_element(), val, cellSource.get_element());
+      operators_->multiply_and_add_inplace_front(cellTarget->get_element(), val, cellSource.get_element());
       if (cellTarget->get_element() == Field_operators::get_additive_identity()) {
         if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
           if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -1026,7 +1028,7 @@ inline bool List_column<Master_matrix>::_multiply_target_and_add(const Field_ele
   }
 
   while (itTarget != column_.end()) {
-    (*itTarget)->get_element() = operators_->multiply((*itTarget)->get_element(), val);
+    operators_->multiply_inplace((*itTarget)->get_element(), val);
     if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**itTarget);
     itTarget++;
   }
@@ -1058,11 +1060,11 @@ inline bool List_column<Master_matrix>::_multiply_source_and_add(const Cell_rang
     if (cellTarget->get_row_index() < cellSource.get_row_index()) {
       ++itTarget;
     } else if (cellTarget->get_row_index() > cellSource.get_row_index()) {
-      _insert_cell(operators_->multiply(cellSource.get_element(), val), cellSource.get_row_index(), itTarget);
+      Cell* newCell = _insert_cell(cellSource.get_element(), cellSource.get_row_index(), itTarget);
+      operators_->multiply_inplace(newCell->get_element(), val);
       ++itSource;
     } else {
-      cellTarget->get_element() =
-          operators_->multiply_and_add(cellSource.get_element(), val, cellTarget->get_element());
+      operators_->multiply_and_add_inplace_back(cellSource.get_element(), val, cellTarget->get_element());
       if (cellTarget->get_element() == Field_operators::get_additive_identity()) {
         if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
           if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -1077,7 +1079,8 @@ inline bool List_column<Master_matrix>::_multiply_source_and_add(const Cell_rang
   }
 
   while (itSource != column.end()) {
-    _insert_cell(operators_->multiply(itSource->get_element(), val), itSource->get_row_index(), column_.end());
+    Cell* newCell = _insert_cell(itSource->get_element(), itSource->get_row_index(), column_.end());
+    operators_->multiply_inplace(newCell->get_element(), val);
     ++itSource;
   }
 

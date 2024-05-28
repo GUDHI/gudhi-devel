@@ -444,7 +444,7 @@ Heap_column<Master_matrix>::get_content(int columnLength) const
       if constexpr (Master_matrix::Option_list::is_z2) {
         container[(*it)->get_row_index()] = !container[(*it)->get_row_index()];
       } else {
-        container[(*it)->get_row_index()] = operators_->add(container[(*it)->get_row_index()], (*it)->get_element());
+        operators_->add_inplace(container[(*it)->get_row_index()], (*it)->get_element());
       }
     }
   }
@@ -468,7 +468,7 @@ inline bool Heap_column<Master_matrix>::is_non_zero(id_index rowIndex) const
   } else {
     Field_element_type c(0);
     for (const Cell* cell : column_) {
-      if (cell->get_row_index() == rowIndex) c = operators_->add(c, cell->get_element());
+      if (cell->get_row_index() == rowIndex) operators_->add_inplace(c, cell->get_element());
     }
     return c != Field_operators::get_additive_identity();
   }
@@ -581,7 +581,7 @@ Heap_column<Master_matrix>::get_pivot_value()
       Field_element_type sum(0);
       if (chain_opt::get_pivot() == static_cast<id_index>(-1)) return sum;
       for (const Cell* cell : column_) {
-        if (cell->get_row_index() == chain_opt::get_pivot()) sum = operators_->add(sum, cell->get_element());
+        if (cell->get_row_index() == chain_opt::get_pivot()) operators_->add_inplace(sum, cell->get_element());
       }
       return sum;  // should not be 0 if properly used.
     }
@@ -704,7 +704,7 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator*=(
     if (val == Field_operators::get_multiplicative_identity()) return *this;
 
     for (Cell* cell : column_) {
-      cell->get_element() = operators_->multiply(cell->get_element(), val);
+      operators_->multiply_inplace(cell->get_element(), val);
     }
   }
 
@@ -902,7 +902,7 @@ Heap_column<Master_matrix>::_pop_pivot()
     }
   } else {
     while (!column_.empty() && column_.front()->get_row_index() == pivot->get_row_index()) {
-      pivot->get_element() = operators_->add(pivot->get_element(), column_.front()->get_element());
+      operators_->add_inplace(pivot->get_element(), column_.front()->get_element());
       std::pop_heap(column_.begin(), column_.end(), cellPointerComp_);
       column_.pop_back();
     }
@@ -947,7 +947,7 @@ inline bool Heap_column<Master_matrix>::_add(const Cell_range& column)
       column_.push_back(cellPool_->construct(cell.get_row_index()));
     } else {
       if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        if (cell.get_row_index() == chain_opt::get_pivot()) pivotVal = operators_->add(pivotVal, cell.get_element());
+        if (cell.get_row_index() == chain_opt::get_pivot()) operators_->add_inplace(pivotVal, cell.get_element());
       }
       column_.push_back(cellPool_->construct(cell.get_row_index()));
       column_.back()->set_element(cell.get_element());
@@ -990,16 +990,16 @@ inline bool Heap_column<Master_matrix>::_multiply_target_and_add(const Field_ele
   Field_element_type pivotVal(0);
 
   for (Cell* cell : column_) {
-    cell->get_element() = operators_->multiply(cell->get_element(), val);
+    operators_->multiply_inplace(cell->get_element(), val);
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-      if (cell->get_row_index() == chain_opt::get_pivot()) pivotVal = operators_->add(pivotVal, cell->get_element());
+      if (cell->get_row_index() == chain_opt::get_pivot()) operators_->add_inplace(pivotVal, cell->get_element());
     }
   }
 
   for (const Cell& cell : column) {
     ++insertsSinceLastPrune_;
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-      if (cell.get_row_index() == chain_opt::get_pivot()) pivotVal = operators_->add(pivotVal, cell.get_element());
+      if (cell.get_row_index() == chain_opt::get_pivot()) operators_->add_inplace(pivotVal, cell.get_element());
     }
     column_.push_back(cellPool_->construct(cell.get_row_index()));
     column_.back()->set_element(cell.get_element());
@@ -1040,12 +1040,14 @@ inline bool Heap_column<Master_matrix>::_multiply_source_and_add(const Cell_rang
 
   for (const Cell& cell : column) {
     ++insertsSinceLastPrune_;
-    if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-      if (cell.get_row_index() == chain_opt::get_pivot())
-        pivotVal = operators_->multiply_and_add(cell.get_element(), val, pivotVal);
-    }
     column_.push_back(cellPool_->construct(cell.get_row_index()));
-    column_.back()->set_element(operators_->multiply(cell.get_element(), val));
+    column_.back()->set_element(cell.get_element());
+    operators_->multiply_inplace(column_.back()->get_element(), val);
+    if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
+      if (cell.get_row_index() == chain_opt::get_pivot()){
+        operators_->add_inplace(pivotVal, column_.back()->get_element());
+      }
+    }
     std::push_heap(column_.begin(), column_.end(), cellPointerComp_);
   }
 

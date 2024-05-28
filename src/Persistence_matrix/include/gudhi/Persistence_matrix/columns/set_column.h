@@ -199,7 +199,9 @@ class Set_column : public Master_matrix::Row_access_option,
   Cell_constructor* cellPool_;
 
   void _delete_cell(typename Column_type::iterator& it);
-  void _insert_cell(const Field_element_type& value, id_index rowIndex, const typename Column_type::iterator& position);
+  Cell* _insert_cell(const Field_element_type& value,
+                     id_index rowIndex,
+                     const typename Column_type::iterator& position);
   void _insert_cell(id_index rowIndex, const typename Column_type::iterator& position);
   template <class Cell_range>
   bool _add(const Cell_range& column);
@@ -676,7 +678,7 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::operator*=(
     if (val == Field_operators::get_multiplicative_identity()) return *this;
 
     for (Cell* cell : column_) {
-      cell->get_element() = operators_->multiply(cell->get_element(), val);
+      operators_->multiply_inplace(cell->get_element(), val);
       if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(*cell);
     }
   }
@@ -838,19 +840,20 @@ inline void Set_column<Master_matrix>::_delete_cell(typename Column_type::iterat
 }
 
 template <class Master_matrix>
-inline void Set_column<Master_matrix>::_insert_cell(const Field_element_type& value,
-                                                                      id_index rowIndex,
-                                                                      const typename Column_type::iterator& position) 
+inline typename Set_column<Master_matrix>::Cell* Set_column<Master_matrix>::_insert_cell(
+    const Field_element_type& value, id_index rowIndex, const typename Column_type::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
     new_cell->set_element(value);
     column_.insert(position, new_cell);
     ra_opt::insert_cell(rowIndex, new_cell);
+    return new_cell;
   } else {
     Cell* new_cell = cellPool_->construct(rowIndex);
     new_cell->set_element(value);
     column_.insert(position, new_cell);
+    return new_cell;
   }
 }
 
@@ -883,7 +886,7 @@ inline bool Set_column<Master_matrix>::_add(const Cell_range& column)
         }
         _delete_cell(it1);
       } else {
-        (*it1)->get_element() = operators_->add((*it1)->get_element(), cell.get_element());
+        operators_->add_inplace((*it1)->get_element(), cell.get_element());
         if ((*it1)->get_element() == Field_operators::get_additive_identity()) {
           if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
             if ((*it1)->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -929,15 +932,14 @@ inline bool Set_column<Master_matrix>::_multiply_target_and_add(const Field_elem
     Cell* cellTarget = *itTarget;
     const Cell& cellSource = *itSource;
     if (cellTarget->get_row_index() < cellSource.get_row_index()) {
-      cellTarget->get_element() = operators_->multiply(cellTarget->get_element(), val);
+      operators_->multiply_inplace(cellTarget->get_element(), val);
       if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**itTarget);
       ++itTarget;
     } else if (cellTarget->get_row_index() > cellSource.get_row_index()) {
       _insert_cell(cellSource.get_element(), cellSource.get_row_index(), itTarget);
       ++itSource;
     } else {
-      cellTarget->get_element() =
-          operators_->multiply_and_add(cellTarget->get_element(), val, cellSource.get_element());
+      operators_->multiply_and_add_inplace_front(cellTarget->get_element(), val, cellSource.get_element());
       if (cellTarget->get_element() == Field_operators::get_additive_identity()) {
         if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
           if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -952,7 +954,7 @@ inline bool Set_column<Master_matrix>::_multiply_target_and_add(const Field_elem
   }
 
   while (itTarget != column_.end()) {
-    (*itTarget)->get_element() = operators_->multiply((*itTarget)->get_element(), val);
+    operators_->multiply_inplace((*itTarget)->get_element(), val);
     if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**itTarget);
     itTarget++;
   }
@@ -979,7 +981,7 @@ inline bool Set_column<Master_matrix>::_multiply_source_and_add(const Cell_range
   for (const Cell& cell : column) {
     auto it1 = column_.find(const_cast<Cell*>(&cell));
     if (it1 != column_.end()) {
-      (*it1)->get_element() = operators_->multiply_and_add(cell.get_element(), val, (*it1)->get_element());
+      operators_->multiply_and_add_inplace_back(cell.get_element(), val, (*it1)->get_element());
       if ((*it1)->get_element() == Field_operators::get_additive_identity()) {
         if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
           if ((*it1)->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -989,7 +991,8 @@ inline bool Set_column<Master_matrix>::_multiply_source_and_add(const Cell_range
         if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**it1);
       }
     } else {
-      _insert_cell(operators_->multiply(cell.get_element(), val), cell.get_row_index(), column_.end());
+      Cell* newCell = _insert_cell(cell.get_element(), cell.get_row_index(), column_.end());
+      operators_->multiply_inplace(newCell->get_element(), val);
     }
   }
 

@@ -47,13 +47,13 @@ class FieldOperators
    * 
    * @param characteristic Prime number corresponding to the desired characteristic of the field.
    */
-  void set_characteristic(characteristic_type characteristic);
+  void set_characteristic(const characteristic_type& characteristic);
   /**
    * @brief Returns the current characteristic.
    * 
    * @return The value of the current characteristic.
    */
-  characteristic_type get_characteristic() const;
+  const characteristic_type& get_characteristic() const;
 
   /**
    * @brief Returns the value of an integer in the field.
@@ -66,63 +66,44 @@ class FieldOperators
   template <typename Integer_type>
   element_type get_value(Integer_type e) const;
 
+  // void get_value(element_type& e) const;
+
   /**
-   * @brief Returns the sum of two elements in the field.
+   * @brief Stores in the first element the sum of two given elements in the field, that is
+   * `(e1 + e2) % characteristic`, such that the result is positive.
    * 
    * @param e1 First element.
    * @param e2 Second element.
-   * @return `(e1 + e2) % characteristic`, such that the result is positive.
    */
-  element_type add(element_type e1, element_type e2) const;
-
-  // /**
-  //  * @brief Returns the substraction in the field of the first element by the second element.
-  //  * 
-  //  * @param e1 First element.
-  //  * @param e2 Second element.
-  //  * @return `(e1 - e2) % characteristic`, such that the result is positive.
-  //  */
-  // element_type substract(element_type e1, element_type e2) const;
+  void add_inplace(element_type& e1, const element_type& e2) const;
 
   /**
-   * @brief Returns the multiplication of two elements in the field.
+   * @brief Stores in the first element the multiplication of two given elements in the field,
+   * that is `(e1 * e2) % characteristic`, such that the result is positive.
    * 
    * @param e1 First element.
    * @param e2 Second element.
-   * @return `(e1 * e2) % characteristic`, such that the result is positive.
    */
-  element_type multiply(element_type e1, element_type e2) const;
+  void multiply_inplace(element_type& e1, const element_type& e2) const;
 
   /**
-   * @brief Multiplies the first element with the second one and adds the third one. Returns the result in the field.
+   * @brief Multiplies the first element with the second one and adds the third one, that is
+   * `(e * m + a) % characteristic`, such that the result is positive. Stores the result in the first element.
    * 
    * @param e First element.
    * @param m Second element.
    * @param a Third element.
-   * @return `(e * m + a) % characteristic`, such that the result is positive.
    */
-  element_type multiply_and_add(element_type e, element_type m, element_type a) const;
-
-  // /**
-  //  * @brief Adds the first element to the second one and multiplies the third one with it.
-  //  * Returns the result in the field.
-  //  * 
-  //  * @param e First element.
-  //  * @param a Second element.
-  //  * @param m Third element.
-  //  * @return `((e + a) * m) % characteristic`, such that the result is positive.
-  //  */
-  // element_type add_and_multiply(element_type e, element_type a, element_type m) const;
-
-  // /**
-  //  * @brief Returns true if the two given elements are equal in the field, false otherwise.
-  //  * 
-  //  * @param e1 First element to compare.
-  //  * @param e2 Second element to compare.
-  //  * @return true If `e1 % characteristic == e2 % characteristic`.
-  //  * @return false Otherwise.
-  //  */
-  // bool are_equal(element_type e1, element_type e2) const;
+  void multiply_and_add_inplace_front(element_type& e, const element_type& m, const element_type& a) const;
+  /**
+   * @brief Multiplies the first element with the second one and adds the third one, that is
+   * `(e * m + a) % characteristic`, such that the result is positive. Stores the result in the third element.
+   * 
+   * @param e First element.
+   * @param m Second element.
+   * @param a Third element.
+   */
+  void multiply_and_add_inplace_back(const element_type& e, const element_type& m, element_type& a) const;
 
   /**
    * @brief Returns the inverse of the given element in the field.
@@ -130,44 +111,20 @@ class FieldOperators
    * @param e Element to get the inverse from.
    * @return Inverse in the current field of `e % characteristic`.
    */
-  element_type get_inverse(element_type e) const;
-  // /**
-  //  * @brief In the case the field is a multi-field, returns the inverse of the given element in the fields
-  //  * corresponding to the given sub-product of the product of all characteristics in the multi-field.
-  //  * See @cite boissonnat:hal-00922572 for more details.
-  //  * If the field is a usual field, simply returns the inverse in the field.
-  //  * 
-  //  * @param e Element to get the inverse from.
-  //  * @param productOfCharacteristics Product of the different characteristics to take into account in the
-  //  * multi-field.
-  //  * @return If a multi-field: pair of the inverse of @p e and the characteristic the inverse is coming from.
-  //  * If a normal field: pair of the inverse of @p e and @p productOfCharacteristics.
-  //  */
-  // std::pair<element_type, characteristic_type> get_partial_inverse(
-  //   element_type e, characteristic_type productOfCharacteristics) const;
+  element_type get_inverse(const element_type& e) const;
 
   /**
    * @brief Returns the additive identity of the field.
    * 
    * @return The additive identity of the field.
    */
-  static element_type get_additive_identity();
+  static const element_type& get_additive_identity();
   /**
    * @brief Returns the multiplicative identity of the field.
    * 
    * @return The multiplicative identity of the field.
    */
-  static element_type get_multiplicative_identity();
-  // /**
-  //  * @brief For multi-fields, returns the partial multiplicative identity of the field from the given product.
-  //  * See @cite boissonnat:hal-00922572 for more details.
-  //  * Otherwise, simply returns the multiplicative identity of the field.
-  //  *  
-  //  * @param productOfCharacteristics Product of the different characteristics to take into account in the multi-field.
-  //  * @return The partial multiplicative identity of the field
-  //  */
-  // static element_type get_partial_multiplicative_identity(
-  //     [[maybe_unused]] characteristic_type productOfCharacteristics);
+  static const element_type& get_multiplicative_identity();
 
   /**
    * @brief Assign operator.

@@ -827,7 +827,7 @@ inline void RU_matrix<Master_matrix>::_reduce()
           Column_type& toadd = reducedMatrixR_.get_column(currIndex);
           Field_element_type coef = curr.get_pivot_value();
           coef = operators_->get_inverse(coef);
-          coef = operators_->multiply(coef, operators_->get_characteristic() - toadd.get_pivot_value());
+          operators_->multiply_inplace(coef, operators_->get_characteristic() - toadd.get_pivot_value());
 
           curr.multiply_target_and_add(coef, toadd);
           mirrorMatrixU_.multiply_target_and_add_to(currIndex, coef, i);
@@ -889,7 +889,7 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column(index lastIndex)
       Column_type& toadd = reducedMatrixR_.get_column(currIndex);
       Field_element_type coef = curr.get_pivot_value();
       coef = operators_->get_inverse(coef);
-      coef = operators_->multiply(coef, operators_->get_characteristic() - toadd.get_pivot_value());
+      operators_->multiply_inplace(coef, operators_->get_characteristic() - toadd.get_pivot_value());
 
       curr.multiply_target_and_add(coef, toadd);
       mirrorMatrixU_.get_column(lastIndex).multiply_target_and_add(coef, mirrorMatrixU_.get_column(currIndex));

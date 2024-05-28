@@ -132,7 +132,7 @@ class Multi_field_operators_with_small_characteristics
    * 
    * @return The value of the current characteristic.
    */
-  characteristic_type get_characteristic() const { return productOfAllCharacteristics_; }
+  const characteristic_type& get_characteristic() const { return productOfAllCharacteristics_; }
 
   /**
    * @brief Returns the value of an element in the field.
@@ -157,6 +157,17 @@ class Multi_field_operators_with_small_characteristics
   }
 
   /**
+   * @brief Stores in the first element the sum of two given elements in the field, that is
+   * `(e1 + e2) % productOfAllCharacteristics`, such that the result is positive.
+   * 
+   * @param e1 First element.
+   * @param e2 Second element.
+   */
+  void add_inplace(element_type& e1, element_type e2) const {
+    e1 = _add(get_value(e1), get_value(e2), productOfAllCharacteristics_);
+  }
+
+  /**
    * @brief Returns the substraction in the field of the first element by the second element.
    * 
    * @param e1 First element.
@@ -168,6 +179,27 @@ class Multi_field_operators_with_small_characteristics
   }
 
   /**
+   * @brief Stores in the first element the substraction in the field of the first element by the second element,
+   * that is `(e1 - e2) % productOfAllCharacteristics`, such that the result is positive.
+   * 
+   * @param e1 First element.
+   * @param e2 Second element.
+   */
+  void substract_inplace_front(element_type& e1, element_type e2) const {
+    e1 = _substract(get_value(e1), get_value(e2), productOfAllCharacteristics_);
+  }
+  /**
+   * @brief Stores in the second element the substraction in the field of the first element by the second element,
+   * that is `(e1 - e2) % productOfAllCharacteristics`, such that the result is positive.
+   * 
+   * @param e1 First element.
+   * @param e2 Second element.
+   */
+  void substract_inplace_back(element_type e1, element_type& e2) const {
+    e2 = _substract(get_value(e1), get_value(e2), productOfAllCharacteristics_);
+  }
+
+  /**
    * @brief Returns the multiplication of two elements in the field.
    * 
    * @param e1 First element.
@@ -176,6 +208,17 @@ class Multi_field_operators_with_small_characteristics
    */
   element_type multiply(element_type e1, element_type e2) const {
     return _multiply(get_value(e1), get_value(e2), productOfAllCharacteristics_);
+  }
+
+  /**
+   * @brief Stores in the first element the multiplication of two given elements in the field,
+   * that is `(e1 * e2) % productOfAllCharacteristics`, such that the result is positive.
+   * 
+   * @param e1 First element.
+   * @param e2 Second element.
+   */
+  void multiply_inplace(element_type& e1, element_type e2) const {
+    e1 = _multiply(get_value(e1), get_value(e2), productOfAllCharacteristics_);
   }
 
   /**
@@ -191,6 +234,35 @@ class Multi_field_operators_with_small_characteristics
   element_type multiply_and_add(element_type e, element_type m, element_type a) const { return get_value(e * m + a); }
 
   /**
+   * @brief Multiplies the first element with the second one and adds the third one, that is
+   * `(e * m + a) % productOfAllCharacteristics`, such that the result is positive.
+   * Stores the result in the first element.
+   *
+   * @warning Not overflow safe.
+   * 
+   * @param e First element.
+   * @param m Second element.
+   * @param a Third element.
+   */
+  void multiply_and_add_inplace_front(element_type& e, element_type m, element_type a) const {
+    e = get_value(e * m + a);
+  }
+  /**
+   * @brief Multiplies the first element with the second one and adds the third one, that is
+   * `(e * m + a) % productOfAllCharacteristics`, such that the result is positive.
+   * Stores the result in the third element.
+   *
+   * @warning Not overflow safe.
+   * 
+   * @param e First element.
+   * @param m Second element.
+   * @param a Third element.
+   */
+  void multiply_and_add_inplace_back(element_type e, element_type m, element_type& a) const {
+    a = get_value(e * m + a);
+  }
+
+  /**
    * @brief Adds the first element to the second one and multiplies the third one with it.
    * Returns the result in the field.
    *
@@ -202,6 +274,35 @@ class Multi_field_operators_with_small_characteristics
    * @return `((e + a) * m) % productOfAllCharacteristics`, such that the result is positive.
    */
   element_type add_and_multiply(element_type e, element_type a, element_type m) const { return get_value((e + a) * m); }
+
+  /**
+   * @brief Adds the first element to the second one and multiplies the third one with it, that is
+   * `((e + a) * m) % productOfAllCharacteristics`, such that the result is positive.
+   * Stores the result in the first element.
+   *
+   * @warning Not overflow safe.
+   * 
+   * @param e First element.
+   * @param a Second element.
+   * @param m Third element.
+   */
+  void add_and_multiply_inplace_front(element_type& e, element_type a, element_type m) const {
+    e = get_value((e + a) * m);
+  }
+  /**
+   * @brief Adds the first element to the second one and multiplies the third one with it, that is
+   * `((e + a) * m) % productOfAllCharacteristics`, such that the result is positive.
+   * Stores the result in the third element.
+   *
+   * @warning Not overflow safe.
+   * 
+   * @param e First element.
+   * @param a Second element.
+   * @param m Third element.
+   */
+  void add_and_multiply_inplace_back(element_type e, element_type a, element_type& m) const {
+    m = get_value((e + a) * m);
+  }
 
   /**
    * @brief Returns true if the two given elements are equal in the field, false otherwise.

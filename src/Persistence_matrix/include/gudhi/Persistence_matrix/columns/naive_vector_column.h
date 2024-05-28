@@ -195,7 +195,7 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
   Cell_constructor* cellPool_;
 
   void _delete_cell(Cell* cell);
-  void _insert_cell(const Field_element_type& value, id_index rowIndex, Column_type& column);
+  Cell* _insert_cell(const Field_element_type& value, id_index rowIndex, Column_type& column);
   void _insert_cell(id_index rowIndex, Column_type& column);
   void _update_cell(const Field_element_type& value, id_index rowIndex, index position);
   void _update_cell(id_index rowIndex, index position);
@@ -682,7 +682,7 @@ Naive_vector_column<Master_matrix>::operator*=(unsigned int v)
     if (val == Field_operators::get_multiplicative_identity()) return *this;
 
     for (Cell* cell : column_) {
-      cell->get_element() = operators_->multiply(cell->get_element(), val);
+      operators_->multiply_inplace(cell->get_element(), val);
       if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(*cell);
     }
   }
@@ -857,18 +857,20 @@ inline void Naive_vector_column<Master_matrix>::_delete_cell(Cell* cell)
 }
 
 template <class Master_matrix>
-inline void Naive_vector_column<Master_matrix>::_insert_cell(const Field_element_type& value,
-                                                                               id_index rowIndex, 
-                                                                               Column_type& column) 
+inline typename Naive_vector_column<Master_matrix>::Cell* Naive_vector_column<Master_matrix>::_insert_cell(
+    const Field_element_type& value, id_index rowIndex, Column_type& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
     new_cell->set_element(value);
     column.push_back(new_cell);
     ra_opt::insert_cell(rowIndex, new_cell);
+    return new_cell;
   } else {
-    column.push_back(cellPool_->construct(rowIndex));
-    column.back()->set_element(value);
+    Cell* new_cell = cellPool_->construct(rowIndex);
+    column.push_back(new_cell);
+    new_cell->set_element(value);
+    return new_cell;
   }
 }
 
@@ -956,7 +958,7 @@ inline bool Naive_vector_column<Master_matrix>::_add(const Cell_range& column)
         }
         _delete_cell(cellTarget);
       } else {
-        cellTarget->get_element() = operators_->add(cellTarget->get_element(), cellSource.get_element());
+        operators_->add_inplace(cellTarget->get_element(), cellSource.get_element());
         if (cellTarget->get_element() == Field_operators::get_additive_identity()) {
           if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
             if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -1028,7 +1030,7 @@ inline bool Naive_vector_column<Master_matrix>::_multiply_target_and_add(const F
     Cell* cellTarget = *itTarget;
     const Cell& cellSource = *itSource;
     if (cellTarget->get_row_index() < cellSource.get_row_index()) {
-      cellTarget->get_element() = operators_->multiply(cellTarget->get_element(), val);
+      operators_->multiply_inplace(cellTarget->get_element(), val);
       if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**itTarget);
       newColumn.push_back(cellTarget);
       ++itTarget;
@@ -1036,8 +1038,7 @@ inline bool Naive_vector_column<Master_matrix>::_multiply_target_and_add(const F
       _insert_cell(cellSource.get_element(), cellSource.get_row_index(), newColumn);
       ++itSource;
     } else {
-      cellTarget->get_element() =
-          operators_->multiply_and_add(cellTarget->get_element(), val, cellSource.get_element());
+      operators_->multiply_and_add_inplace_front(cellTarget->get_element(), val, cellSource.get_element());
       if (cellTarget->get_element() == Field_operators::get_additive_identity()) {
         if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
           if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -1053,7 +1054,7 @@ inline bool Naive_vector_column<Master_matrix>::_multiply_target_and_add(const F
   }
 
   while (itTarget != column_.end()) {
-    (*itTarget)->get_element() = operators_->multiply((*itTarget)->get_element(), val);
+    operators_->multiply_inplace((*itTarget)->get_element(), val);
     if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**itTarget);
     newColumn.push_back(*itTarget);
     itTarget++;
@@ -1091,11 +1092,11 @@ inline bool Naive_vector_column<Master_matrix>::_multiply_source_and_add(const C
       newColumn.push_back(cellTarget);
       ++itTarget;
     } else if (cellTarget->get_row_index() > cellSource.get_row_index()) {
-      _insert_cell(operators_->multiply(cellSource.get_element(), val), cellSource.get_row_index(), newColumn);
+      Cell* newCell = _insert_cell(cellSource.get_element(), cellSource.get_row_index(), newColumn);
+      operators_->multiply_inplace(newCell->get_element(), val);
       ++itSource;
     } else {
-      cellTarget->get_element() =
-          operators_->multiply_and_add(cellSource.get_element(), val, cellTarget->get_element());
+      operators_->multiply_and_add_inplace_back(cellSource.get_element(), val, cellTarget->get_element());
       if (cellTarget->get_element() == Field_operators::get_additive_identity()) {
         if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
           if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -1111,7 +1112,8 @@ inline bool Naive_vector_column<Master_matrix>::_multiply_source_and_add(const C
   }
 
   while (itSource != column.end()) {
-    _insert_cell(operators_->multiply(itSource->get_element(), val), itSource->get_row_index(), newColumn);
+    Cell* newCell = _insert_cell(itSource->get_element(), itSource->get_row_index(), newColumn);
+    operators_->multiply_inplace(newCell->get_element(), val);
     ++itSource;
   }
 

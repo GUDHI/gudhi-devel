@@ -1092,7 +1092,7 @@ inline void Chain_matrix<Master_matrix>::_reduce_by_G(tmp_column_type& column,
     Field_element_type coef = col.get_pivot_value();
     auto& operators = colSettings_->operators;
     coef = operators.get_inverse(coef);
-    coef = operators.multiply(coef, operators.get_characteristic() - column.rbegin()->second);
+    operators.multiply_inplace(coef, operators.get_characteristic() - column.rbegin()->second);
 
     _add_to(col, column, coef);                                       // Reduce with the column col_g
     chainsInH.emplace_back(col.get_paired_chain_index(), coef); // keep the col_h with which col_g is paired
@@ -1112,7 +1112,7 @@ inline void Chain_matrix<Master_matrix>::_reduce_by_F(tmp_column_type& column,
     Field_element_type coef = col.get_pivot_value();
     auto& operators = colSettings_->operators;
     coef = operators.get_inverse(coef);
-    coef = operators.multiply(coef, operators.get_characteristic() - column.rbegin()->second);
+    operators.multiply_inplace(coef, operators.get_characteristic() - column.rbegin()->second);
 
     _add_to(col, column, coef);  // Reduce with the column col_g
     chainsInF.emplace_back(currentIndex, operators.get_characteristic() - coef);
@@ -1259,13 +1259,13 @@ inline void Chain_matrix<Master_matrix>::_add_to(const Column_type& column,
       auto res_it = set.find(p);
 
       if (res_it != set.end()) {
-        p.second = operators.multiply_and_add(p.second, coef, res_it->second);
+        operators.multiply_and_add_inplace_front(p.second, coef, res_it->second);
         set.erase(res_it);
         if (p.second != Field_operators::get_additive_identity()) {
           set.insert(p);
         }
       } else {
-        p.second = operators.multiply(p.second, coef);
+        operators.multiply_inplace(p.second, coef);
         set.insert(p);
       }
     }
