@@ -862,16 +862,16 @@ inline typename List_column<Master_matrix>::Cell* List_column<Master_matrix>::_i
     const Field_element_type& value, id_index rowIndex, const typename Column_type::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    new_cell->set_element(value);
-    column_.insert(position, new_cell);
-    ra_opt::insert_cell(rowIndex, new_cell);
-    return new_cell;
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    newCell->set_element(value);
+    column_.insert(position, newCell);
+    ra_opt::insert_cell(rowIndex, newCell);
+    return newCell;
   } else {
-    Cell* new_cell = cellPool_->construct(rowIndex);
-    new_cell->set_element(value);
-    column_.insert(position, new_cell);
-    return new_cell;
+    Cell* newCell = cellPool_->construct(rowIndex);
+    newCell->set_element(value);
+    column_.insert(position, newCell);
+    return newCell;
   }
 }
 
@@ -880,12 +880,12 @@ inline void List_column<Master_matrix>::_insert_cell(id_index rowIndex,
                                                                        const typename Column_type::iterator& position) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    column_.insert(position, new_cell);
-    ra_opt::insert_cell(rowIndex, new_cell);
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    column_.insert(position, newCell);
+    ra_opt::insert_cell(rowIndex, newCell);
   } else {
-    Cell* new_cell = cellPool_->construct(rowIndex);
-    column_.insert(position, new_cell);
+    Cell* newCell = cellPool_->construct(rowIndex);
+    column_.insert(position, newCell);
   }
 }
 

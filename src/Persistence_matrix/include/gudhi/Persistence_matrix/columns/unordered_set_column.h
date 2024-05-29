@@ -22,11 +22,11 @@
 #include <stdexcept>
 #include <type_traits>
 // #include <unordered_set>
-#if BOOST_VERSION >= 108100
-#include <boost/unordered/unordered_flat_set.hpp>
-#else
+// #if BOOST_VERSION >= 108100
+// #include <boost/unordered/unordered_flat_set.hpp>
+// #else
 #include <boost/unordered_set.hpp>  // preferably with boost 1.79+ for speed
-#endif
+// #endif
 #include <set>
 #include <utility>  //std::swap, std::move & std::exchange
 
@@ -77,11 +77,11 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
     bool operator()(const Cell* c1, const Cell* c2) const { return *c1 < *c2; }
   };
 
-#if BOOST_VERSION >= 108100
-  using Column_type = boost::unordered_flat_set<Cell*, CellPointerHash, CellPointerEq>;
-#else
+// #if BOOST_VERSION >= 108100
+  // using Column_type = boost::unordered_flat_set<Cell*, CellPointerHash, CellPointerEq>;
+// #else
   using Column_type = boost::unordered_set<Cell*, CellPointerHash, CellPointerEq>;
-#endif
+// #endif
   // using Column_type = std::unordered_set<Cell*, CellPointerHash, CellPointerEq>;
 
  public:
@@ -885,16 +885,16 @@ inline typename Unordered_set_column<Master_matrix>::Cell* Unordered_set_column<
     const Field_element_type& value, id_index rowIndex)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    new_cell->set_element(value);
-    column_.insert(new_cell);
-    ra_opt::insert_cell(rowIndex, new_cell);
-    return new_cell;
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    newCell->set_element(value);
+    column_.insert(newCell);
+    ra_opt::insert_cell(rowIndex, newCell);
+    return newCell;
   } else {
-    Cell* new_cell = cellPool_->construct(rowIndex);
-    new_cell->set_element(value);
-    column_.insert(new_cell);
-    return new_cell;
+    Cell* newCell = cellPool_->construct(rowIndex);
+    newCell->set_element(value);
+    column_.insert(newCell);
+    return newCell;
   }
 }
 
@@ -902,12 +902,12 @@ template <class Master_matrix>
 inline void Unordered_set_column<Master_matrix>::_insert_cell(id_index rowIndex) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    column_.insert(new_cell);
-    ra_opt::insert_cell(rowIndex, new_cell);
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    column_.insert(newCell);
+    ra_opt::insert_cell(rowIndex, newCell);
   } else {
-    Cell* new_cell = cellPool_->construct(rowIndex);
-    column_.insert(new_cell);
+    Cell* newCell = cellPool_->construct(rowIndex);
+    column_.insert(newCell);
   }
 }
 
@@ -918,29 +918,33 @@ inline bool Unordered_set_column<Master_matrix>::_add(const Cell_range& column)
   bool pivotIsZeroed = false;
 
   for (const Cell& cell : column) {
-    auto it1 = column_.find(const_cast<Cell*>(&cell));
-    if (it1 != column_.end()) {
+    Cell* newCell;
+    if constexpr (Master_matrix::Option_list::has_row_access) {
+      newCell = cellPool_->construct(ra_opt::columnIndex_, cell.get_row_index());
+    } else {
+      newCell = cellPool_->construct(cell.get_row_index());
+    }
+    auto res = column_.insert(newCell);
+    if (res.second){
+      if constexpr (!Master_matrix::Option_list::is_z2) newCell->set_element(cell.get_element());
+      if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::insert_cell(cell.get_row_index(), newCell);
+    } else {
+      cellPool_->destroy(newCell);
       if constexpr (Master_matrix::Option_list::is_z2) {
         if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-          if ((*it1)->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
+          if (cell.get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
         }
-        _delete_cell(it1);
+        _delete_cell(res.first);
       } else {
-        operators_->add_inplace((*it1)->get_element(), cell.get_element());
-        if ((*it1)->get_element() == Field_operators::get_additive_identity()) {
+        operators_->add_inplace((*res.first)->get_element(), cell.get_element());
+        if ((*res.first)->get_element() == Field_operators::get_additive_identity()) {
           if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-            if ((*it1)->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
+            if ((*res.first)->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
           }
-          _delete_cell(it1);
+          _delete_cell(res.first);
         } else {
-          if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**it1);
+          if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**res.first);
         }
-      }
-    } else {
-      if constexpr (Master_matrix::Option_list::is_z2) {
-        _insert_cell(cell.get_row_index());
-      } else {
-        _insert_cell(cell.get_element(), cell.get_row_index());
       }
     }
   }
@@ -983,20 +987,28 @@ inline bool Unordered_set_column<Master_matrix>::_multiply_source_and_add(const 
   bool pivotIsZeroed = false;
 
   for (const Cell& cell : column) {
-    auto it1 = column_.find(const_cast<Cell*>(&cell));
-    if (it1 != column_.end()) {
-      operators_->multiply_and_add_inplace_back(cell.get_element(), val, (*it1)->get_element());
-      if ((*it1)->get_element() == Field_operators::get_additive_identity()) {
-        if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-          if ((*it1)->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
-        }
-        _delete_cell(it1);
-      } else {
-        if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**it1);
-      }
+    Cell* newCell;
+    if constexpr (Master_matrix::Option_list::has_row_access) {
+      newCell = cellPool_->construct(ra_opt::columnIndex_, cell.get_row_index());
     } else {
-      Cell* newCell = _insert_cell(cell.get_element(), cell.get_row_index());
+      newCell = cellPool_->construct(cell.get_row_index());
+    }
+    auto res = column_.insert(newCell);
+    if (res.second){
+      newCell->set_element(cell.get_element());
       operators_->multiply_inplace(newCell->get_element(), val);
+      if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::insert_cell(cell.get_row_index(), newCell);
+    } else {
+      cellPool_->destroy(newCell);
+      operators_->multiply_and_add_inplace_back(cell.get_element(), val, (*res.first)->get_element());
+      if ((*res.first)->get_element() == Field_operators::get_additive_identity()) {
+        if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
+          if ((*res.first)->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
+        }
+        _delete_cell(res.first);
+      } else {
+        if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**res.first);
+      }
     }
   }
 

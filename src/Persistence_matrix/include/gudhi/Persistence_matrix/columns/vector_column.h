@@ -968,16 +968,16 @@ inline typename Vector_column<Master_matrix>::Cell* Vector_column<Master_matrix>
     const Field_element_type& value, id_index rowIndex, Column_type& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    new_cell->set_element(value);
-    column.push_back(new_cell);
-    ra_opt::insert_cell(rowIndex, new_cell);
-    return new_cell;
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    newCell->set_element(value);
+    column.push_back(newCell);
+    ra_opt::insert_cell(rowIndex, newCell);
+    return newCell;
   } else {
-    Cell* new_cell = cellPool_->construct(rowIndex);
-    new_cell->set_element(value);
-    column.push_back(new_cell);
-    return new_cell;
+    Cell* newCell = cellPool_->construct(rowIndex);
+    newCell->set_element(value);
+    column.push_back(newCell);
+    return newCell;
   }
 }
 
@@ -985,12 +985,12 @@ template <class Master_matrix>
 inline void Vector_column<Master_matrix>::_insert_cell(id_index rowIndex, Column_type& column) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    column.push_back(new_cell);
-    ra_opt::insert_cell(rowIndex, new_cell);
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    column.push_back(newCell);
+    ra_opt::insert_cell(rowIndex, newCell);
   } else {
-    Cell* new_cell = cellPool_->construct(rowIndex);
-    column.push_back(new_cell);
+    Cell* newCell = cellPool_->construct(rowIndex);
+    column.push_back(newCell);
   }
 }
 
@@ -999,10 +999,10 @@ inline void Vector_column<Master_matrix>::_update_cell(const Field_element_type&
                                                                          id_index rowIndex, index position) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    new_cell->set_element(value);
-    column_[position] = new_cell;
-    ra_opt::insert_cell(rowIndex, new_cell);
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    newCell->set_element(value);
+    column_[position] = newCell;
+    ra_opt::insert_cell(rowIndex, newCell);
   } else {
     column_[position] = cellPool_->construct(rowIndex);
     column_[position]->set_element(value);
@@ -1013,9 +1013,9 @@ template <class Master_matrix>
 inline void Vector_column<Master_matrix>::_update_cell(id_index rowIndex, index position) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    column_[position] = new_cell;
-    ra_opt::insert_cell(rowIndex, new_cell);
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    column_[position] = newCell;
+    ra_opt::insert_cell(rowIndex, newCell);
   } else {
     column_[position] = cellPool_->construct(rowIndex);
   }

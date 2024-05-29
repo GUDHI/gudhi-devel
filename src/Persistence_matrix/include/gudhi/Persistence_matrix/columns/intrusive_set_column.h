@@ -488,15 +488,15 @@ inline void Intrusive_set_column<Master_matrix>::reorder(const Map_type& valueMa
 
   if constexpr (Master_matrix::Option_list::has_row_access) {
     for (auto it = column_.begin(); it != column_.end();) {
-      Cell* new_cell = cellPool_->construct(columnIndex == static_cast<index>(-1) ? ra_opt::columnIndex_ : columnIndex,
+      Cell* newCell = cellPool_->construct(columnIndex == static_cast<index>(-1) ? ra_opt::columnIndex_ : columnIndex,
                                             valueMap.at(it->get_row_index()));
       if constexpr (!Master_matrix::Option_list::is_z2) {
-        new_cell->set_element(it->get_element());
+        newCell->set_element(it->get_element());
       }
-      newSet.insert(newSet.end(), *new_cell);
+      newSet.insert(newSet.end(), *newCell);
       _delete_cell(it);   // increases it
       if constexpr (Master_matrix::Option_list::has_intrusive_rows)   // intrusive list
-        ra_opt::insert_cell(new_cell->get_row_index(), new_cell);
+        ra_opt::insert_cell(newCell->get_row_index(), newCell);
     }
 
     // when row is a set, all cells have to be deleted first, to avoid colliding when inserting
@@ -507,11 +507,11 @@ inline void Intrusive_set_column<Master_matrix>::reorder(const Map_type& valueMa
     }
   } else {
     for (auto it = column_.begin(); it != column_.end();) {
-      Cell* new_cell = cellPool_->construct(valueMap.at(it->get_row_index()));
+      Cell* newCell = cellPool_->construct(valueMap.at(it->get_row_index()));
       if constexpr (!Master_matrix::Option_list::is_z2) {
-        new_cell->set_element(it->get_element());
+        newCell->set_element(it->get_element());
       }
-      newSet.insert(newSet.end(), *new_cell);
+      newSet.insert(newSet.end(), *newCell);
       _delete_cell(it);   // increases it
     }
   }
@@ -850,16 +850,16 @@ inline typename Intrusive_set_column<Master_matrix>::Cell* Intrusive_set_column<
     const Field_element_type& value, id_index rowIndex, const iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    new_cell->set_element(value);
-    column_.insert(position, *new_cell);
-    ra_opt::insert_cell(rowIndex, new_cell);
-    return new_cell;
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    newCell->set_element(value);
+    column_.insert(position, *newCell);
+    ra_opt::insert_cell(rowIndex, newCell);
+    return newCell;
   } else {
-    Cell* new_cell = cellPool_->construct(rowIndex);
-    new_cell->set_element(value);
-    column_.insert(position, *new_cell);
-    return new_cell;
+    Cell* newCell = cellPool_->construct(rowIndex);
+    newCell->set_element(value);
+    column_.insert(position, *newCell);
+    return newCell;
   }
 }
 
@@ -868,12 +868,12 @@ inline void Intrusive_set_column<Master_matrix>::_insert_cell(id_index rowIndex,
                                                                                 const iterator& position) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    column_.insert(position, *new_cell);
-    ra_opt::insert_cell(rowIndex, new_cell);
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    column_.insert(position, *newCell);
+    ra_opt::insert_cell(rowIndex, newCell);
   } else {
-    Cell* new_cell = cellPool_->construct(rowIndex);
-    column_.insert(position, *new_cell);
+    Cell* newCell = cellPool_->construct(rowIndex);
+    column_.insert(position, *newCell);
   }
 }
 
