@@ -132,7 +132,7 @@ def write_points_to_off_file(fname, points):
     :param points: Point coordinates.
     :type points: numpy array of shape (n, dim)
     """
-    points = np.array(points, copy=False)
+    points = np.asarray(points)
     assert len(points.shape) == 2
     dim = points.shape[1]
     if dim == 3:
