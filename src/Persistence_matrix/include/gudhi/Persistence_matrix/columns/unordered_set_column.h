@@ -21,16 +21,15 @@
 #include <vector>
 #include <stdexcept>
 #include <type_traits>
-// #include <unordered_set>
-// #if BOOST_VERSION >= 108100
-// #include <boost/unordered/unordered_flat_set.hpp>
-// #else
-#include <boost/unordered_set.hpp>  // preferably with boost 1.79+ for speed
-// #endif
 #include <set>
 #include <utility>  //std::swap, std::move & std::exchange
 
 #include <boost/iterator/indirect_iterator.hpp>
+#if BOOST_VERSION >= 108100
+#include <boost/unordered/unordered_flat_set.hpp>
+#else
+#include <unordered_set>
+#endif
 
 #include <gudhi/Persistence_matrix/allocators/cell_constructors.h>
 
@@ -77,12 +76,11 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
     bool operator()(const Cell* c1, const Cell* c2) const { return *c1 < *c2; }
   };
 
-// #if BOOST_VERSION >= 108100
-  // using Column_type = boost::unordered_flat_set<Cell*, CellPointerHash, CellPointerEq>;
-// #else
-  using Column_type = boost::unordered_set<Cell*, CellPointerHash, CellPointerEq>;
-// #endif
-  // using Column_type = std::unordered_set<Cell*, CellPointerHash, CellPointerEq>;
+#if BOOST_VERSION >= 108100
+  using Column_type = boost::unordered_flat_set<Cell*, CellPointerHash, CellPointerEq>;
+#else
+  using Column_type = std::unordered_set<Cell*, CellPointerHash, CellPointerEq>;
+#endif
 
  public:
   using iterator = boost::indirect_iterator<typename Column_type::iterator>;
@@ -1033,8 +1031,7 @@ struct std::hash<Gudhi::persistence_matrix::Unordered_set_column<Master_matrix> 
       const Gudhi::persistence_matrix::Unordered_set_column<Master_matrix>& column) const {
     std::size_t seed = 0;
     for (const auto& cell : column) {
-      seed ^= std::hash<unsigned int>()(cell.get_row_index() * static_cast<unsigned int>(cell.get_element())) +
-              0x9e3779b9 + (seed << 6) + (seed >> 2);
+      seed ^= std::hash<unsigned int>()(cell.get_row_index() * static_cast<unsigned int>(cell.get_element()));
     }
     return seed;
   }
