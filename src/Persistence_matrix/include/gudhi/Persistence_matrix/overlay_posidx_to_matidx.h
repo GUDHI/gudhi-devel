@@ -293,12 +293,13 @@ class Position_to_index_overlay
    * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row cells are not
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
    * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
-   * @ref erase_row method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
-   * This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite frequent. 
+   * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
+   * dictionnaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be
+   * quite frequent. 
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row to remove.
    */
-  void erase_row(id_index rowIndex);
+  void erase_empty_row(id_index rowIndex);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns,
    * @ref PersistenceMatrixOptions::has_vine_update and @ref PersistenceMatrixOptions::has_map_column_container
@@ -667,9 +668,9 @@ Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_row(id_index row
 }
 
 template <class Matrix_type, class Master_matrix_type>
-inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::erase_row(id_index rowIndex) 
+inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::erase_empty_row(id_index rowIndex) 
 {
-  return matrix_.erase_row(rowIndex);
+  return matrix_.erase_empty_row(rowIndex);
 }
 
 template <class Matrix_type, class Master_matrix_type>

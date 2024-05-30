@@ -1346,7 +1346,7 @@ inline void Chain_matrix<Master_matrix>::_remove_last(index lastIndex)
   if constexpr (Master_matrix::Option_list::has_row_access) {
     assert(ra_opt::get_row(pivot).size() == 0 && "Column asked to be removed do not corresponds to a maximal simplex.");
     if constexpr (Master_matrix::Option_list::has_removable_rows) {
-      ra_opt::erase_row(pivot);
+      ra_opt::erase_empty_row(pivot);
     }
   }
 }

@@ -192,13 +192,13 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * @warning The removed rows are always assumed to be empty in \f$ R \f$. If it is not the case, the deleted row
    * cells are not removed from their columns. And in the case of intrusive rows, this will generate a segmentation
    * fault when the column cells are destroyed later. The row access is just meant as a "read only" access to the
-   * rows and the @ref erase_row method just as a way to specify that a row is empty and can therefore be removed
+   * rows and the @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed
    * from dictionnaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can
    * be quite frequent. 
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row.
    */
-  void erase_row(index rowIndex);
+  void erase_empty_row(index rowIndex);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns and
    * @ref PersistenceMatrixOptions::has_vine_update are true.
@@ -563,9 +563,9 @@ inline typename RU_matrix<Master_matrix>::Row_type& RU_matrix<Master_matrix>::ge
 }
 
 template <class Master_matrix>
-inline void RU_matrix<Master_matrix>::erase_row(index rowIndex) 
+inline void RU_matrix<Master_matrix>::erase_empty_row(index rowIndex) 
 {
-  reducedMatrixR_.erase_row(rowIndex);
+  reducedMatrixR_.erase_empty_row(rowIndex);
 }
 
 template <class Master_matrix>

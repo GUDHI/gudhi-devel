@@ -126,8 +126,8 @@ class Matrix_row_access
    * 
    * @param rowIndex @ref rowindex "Row index" of the row to remove.
    */
-  void erase_row(id_index rowIndex) {
-    static_assert(has_removable_rows, "'erase_row' is not implemented for the chosen options.");
+  void erase_empty_row(id_index rowIndex) {
+    static_assert(has_removable_rows, "'erase_empty_row' is not implemented for the chosen options.");
 
     auto it = rows_->find(rowIndex);
     if (it != rows_->end() && it->second.empty()) rows_->erase(it);

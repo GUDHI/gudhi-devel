@@ -920,12 +920,13 @@ class Matrix {
    * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row cells are not
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when
    * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
-   * @ref erase_row method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
-   * This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite frequent.
+   * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
+   * dictionnaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite
+   * frequent.
    *
    * @param rowIndex @ref rowindex "Row index" of the empty row to remove.
    */
-  void erase_row(id_index rowIndex);
+  void erase_empty_row(id_index rowIndex);
   //TODO: for chain matrices, replace IDIdx input with MatIdx input to homogenise.
   /**
    * @brief Only available for @ref boundarymatrix "RU" and @ref chainmatrix "chain matrices" and if
@@ -1694,13 +1695,13 @@ inline void Matrix<PersistenceMatrixOptions>::remove_column(index columnIndex)
 }
 
 template <class PersistenceMatrixOptions>
-inline void Matrix<PersistenceMatrixOptions>::erase_row(id_index rowIndex) 
+inline void Matrix<PersistenceMatrixOptions>::erase_empty_row(id_index rowIndex) 
 {
   static_assert(
       !isNonBasic || PersistenceMatrixOptions::is_of_boundary_type || PersistenceMatrixOptions::has_removable_rows,
-      "'erase_row' is not available for the chosen options.");
+      "'erase_empty_row' is not available for the chosen options.");
 
-  matrix_.erase_row(rowIndex);
+  matrix_.erase_empty_row(rowIndex);
 }
 
 template <class PersistenceMatrixOptions>

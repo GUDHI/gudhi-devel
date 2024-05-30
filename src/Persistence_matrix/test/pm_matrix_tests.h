@@ -991,7 +991,7 @@ void test_ru_u_row_access(){
 	// 	//chain: indirect, assumes the row is empty
 	// 	//id to pos
 	// 	//pos to id
-	// 	void erase_row(index rowIndex);
+	// 	void erase_empty_row(index rowIndex);
 	// 	//*******************
 
 template<class Matrix>
@@ -1001,18 +1001,18 @@ void test_row_removal(){
 
 	Matrix m(columns, 5);
 
-	m.erase_row(5);
+	m.erase_empty_row(5);
 
 	BOOST_CHECK_THROW(m.get_row(5), std::logic_error);
 }
 
 template<class Matrix>
 void test_chain_row_removal(Matrix& m){
-	m.erase_row(6);	//not empty, so ignored
+	m.erase_empty_row(6);	//not empty, so ignored
 	BOOST_CHECK_NO_THROW(m.get_row(6));
 
 	if constexpr (Matrix::Option_list::has_map_column_container || !Matrix::Option_list::has_vine_update){
-		m.remove_last();	//calls erase_row(6)
+		m.remove_last();	//calls erase_empty_row(6)
 		BOOST_CHECK_THROW(m.get_row(6), std::logic_error);
 	}
 }
@@ -1736,7 +1736,7 @@ void test_barcode(){
 // 	//boundary: does not update barcode
 // 	void swap_rows(index rowIndex1, index rowIndex2);
 // 	//base: no row access necessary (but then, has only effect with swaps), assumes the row is empty, just thought as an index cleanup
-// 	void erase_row(index rowIndex);
+// 	void erase_empty_row(index rowIndex);
 // 	//*******************
 
 template<class Matrix>

@@ -200,12 +200,13 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
    * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row cells are not
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
    * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
-   * @ref erase_row method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
-   * This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite frequent. 
+   * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
+   * dictionnaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be
+   * quite frequent. 
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row.
    */
-  void erase_row(index rowIndex);
+  void erase_empty_row(index rowIndex);
 
   /**
    * @brief Returns the current number of columns in the matrix.
@@ -611,7 +612,7 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
     }
   }
 
-  erase_row(nextInsertIndex_);  // maximal, so empty
+  erase_empty_row(nextInsertIndex_);  // maximal, so empty
 
   if constexpr (activePairingOption) {
     pair_opt::_remove_last(nextInsertIndex_);
@@ -621,7 +622,7 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
 }
 
 template <class Master_matrix>
-inline void Boundary_matrix<Master_matrix>::erase_row(index rowIndex) 
+inline void Boundary_matrix<Master_matrix>::erase_empty_row(index rowIndex) 
 {
   id_index rowID = rowIndex;
   if constexpr (activeSwapOption) {
@@ -636,7 +637,7 @@ inline void Boundary_matrix<Master_matrix>::erase_row(index rowIndex)
   }
 
   if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows) {
-    ra_opt::erase_row(rowID);
+    ra_opt::erase_empty_row(rowID);
   }
 }
 
