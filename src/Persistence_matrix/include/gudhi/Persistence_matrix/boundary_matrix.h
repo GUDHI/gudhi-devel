@@ -605,7 +605,8 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
       }
     }
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      assert(nextInsertIndex_ == matrix_.size() - 1 && "Indexation problem.");
+      GUDHI_CHECK(nextInsertIndex_ == matrix_.size() - 1,
+                  std::logic_error("Boundary_matrix::remove_last - Indexation problem."));
       matrix_.pop_back();
     } else {
       matrix_[nextInsertIndex_].clear();

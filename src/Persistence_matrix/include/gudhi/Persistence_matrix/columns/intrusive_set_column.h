@@ -571,7 +571,8 @@ Intrusive_set_column<Master_matrix>::get_pivot_value() const
     } else {
       if (chain_opt::get_pivot() == static_cast<id_index>(-1)) return 0;
       auto it = column_.find(Cell(chain_opt::get_pivot()));
-      GUDHI_CHECK(it != column_.end(), "Pivot not found only if the column was misused.");
+      GUDHI_CHECK(it != column_.end(),
+                  "Intrusive_set_column::get_pivot_value - Pivot not found only if the column was misused.");
       return it->get_element();
     }
   }

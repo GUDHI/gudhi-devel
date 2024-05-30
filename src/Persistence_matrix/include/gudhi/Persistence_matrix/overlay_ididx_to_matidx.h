@@ -17,10 +17,12 @@
 #ifndef PM_ID_TO_POS_TRANSLATION_H
 #define PM_ID_TO_POS_TRANSLATION_H
 
+#include <cmath>
 #include <vector>
 #include <cassert>
 #include <utility>    //std::swap, std::move & std::exchange
 #include <algorithm>  //std::transform
+#include <stdexcept>  //std::invalid_argument
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -748,10 +750,11 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::insert_boundar
                                                                                   dimension_type dim) 
 {
   if constexpr (Master_matrix_type::Option_list::has_map_column_container) {
-    assert(idToIndex_->find(faceIndex) == idToIndex_->end() && "Index for simplex already chosen!");
+    GUDHI_CHECK(idToIndex_->find(faceIndex) == idToIndex_->end(),
+                std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
   } else {
-    assert((idToIndex_->size() <= faceIndex || idToIndex_[faceIndex] == static_cast<index>(-1)) &&
-           "Index for simplex already chosen!");
+    GUDHI_CHECK((idToIndex_->size() <= faceIndex || idToIndex_[faceIndex] == static_cast<index>(-1)),
+                std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
   }
   matrix_.insert_boundary(faceIndex, boundary, dim);
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
@@ -807,7 +810,8 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::remove_maximal
       std::swap(idToIndex_->at(indexToID[curr]), idToIndex_->at(indexToID[curr + 1]));
     }
     matrix_.remove_last();
-    assert(_id_to_index(faceID) == nextIndex_ && "Indexation problem.");
+    GUDHI_CHECK(_id_to_index(faceID) == nextIndex_,
+                std::logic_error("Id_to_index_overlay::remove_maximal_face - Indexation problem."));
 
     if constexpr (Master_matrix_type::Option_list::has_map_column_container) {
       idToIndex_->erase(faceID);
@@ -834,19 +838,21 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::remove_maximal
 template <class Matrix_type, class Master_matrix_type>
 inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::remove_last() 
 {
+  if (idToIndex_->empty()) return;  //empty matrix
+
   matrix_.remove_last();
+
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
     --nextIndex_;
     if constexpr (Master_matrix_type::Option_list::has_map_column_container) {
       auto it = idToIndex_->begin();
-      while (it != idToIndex_->end() && it->second != nextIndex_) ++it;
-      assert(it != idToIndex_->end());
+      while (it->second != nextIndex_) ++it;   //should never reach idToIndex_->end()
       idToIndex_->erase(it);
     } else {
-      assert(idToIndex_->size() != 0);
       index id = idToIndex_->size() - 1;
       while (idToIndex_->operator[](id) == static_cast<index>(-1)) --id;  // should always stop before reaching -1
-      assert(idToIndex_->operator[](id) == nextIndex_);
+      GUDHI_CHECK(idToIndex_->operator[](id) == nextIndex_,
+                  std::logic_error("Id_to_index_overlay::remove_last - Indexation problem."));
       idToIndex_->operator[](id) = -1;
     }
   }
@@ -1012,7 +1018,9 @@ Id_to_index_overlay<Matrix_type, Master_matrix_type>::vine_swap_with_z_eq_1_case
   if (first > second) std::swap(first, second);
 
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
-    assert(second - first == 1 && "The columns to swap are not contiguous.");
+    GUDHI_CHECK(second - first == 1,
+                std::invalid_argument(
+                    "Id_to_index_overlay::vine_swap_with_z_eq_1_case - The columns to swap are not contiguous."));
 
     bool change = matrix_.vine_swap_with_z_eq_1_case(first);
 
@@ -1036,7 +1044,8 @@ Id_to_index_overlay<Matrix_type, Master_matrix_type>::vine_swap(id_index faceID1
   if (first > second) std::swap(first, second);
 
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
-    assert(second - first == 1 && "The columns to swap are not contiguous.");
+    GUDHI_CHECK(second - first == 1,
+                std::invalid_argument("Id_to_index_overlay::vine_swap - The columns to swap are not contiguous."));
 
     bool change = matrix_.vine_swap(first);
 

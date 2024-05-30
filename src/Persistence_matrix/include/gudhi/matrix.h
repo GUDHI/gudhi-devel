@@ -20,10 +20,11 @@
 #include <vector>
 #include <unordered_map>
 #include <map>
-#include <assert.h>
 #include <initializer_list>
 
 #include <boost/intrusive/list.hpp>
+
+#include <gudhi/Debug_utils.h>
 
 #include <gudhi/persistence_matrix_options.h>
 
@@ -1560,8 +1561,9 @@ template <class Container_type>
 inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container_type& column) 
 {
   if constexpr (!PersistenceMatrixOptions::is_z2){
-    assert(colSettings_->operators.get_characteristic() != 0 &&
-         "Columns cannot be initialized if the coefficient field characteristic is not specified.");
+    GUDHI_CHECK(colSettings_->operators.get_characteristic() != 0,
+                std::logic_error("Matrix::insert_column - Columns cannot be initialized if the coefficient field "
+                                 "characteristic is not specified."));
   }
 
   static_assert(
@@ -1575,8 +1577,9 @@ template <class Container_type>
 inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container_type& column, index columnIndex) 
 {
   if constexpr (!PersistenceMatrixOptions::is_z2){
-    assert(colSettings_->operators.get_characteristic() != 0 &&
-         "Columns cannot be initialized if the coefficient field characteristic is not specified.");
+    GUDHI_CHECK(colSettings_->operators.get_characteristic() != 0,
+                std::logic_error("Matrix::insert_column - Columns cannot be initialized if the coefficient field "
+                                 "characteristic is not specified."));
   }
 
   static_assert(!isNonBasic && !PersistenceMatrixOptions::has_column_compression,
@@ -1592,8 +1595,9 @@ inline typename Matrix<PersistenceMatrixOptions>::insertion_return_type
 Matrix<PersistenceMatrixOptions>::insert_boundary(const Boundary_type& boundary, dimension_type dim)
 {
   if constexpr (!PersistenceMatrixOptions::is_z2){
-    assert(colSettings_->operators.get_characteristic() != 0 &&
-         "Columns cannot be initialized if the coefficient field characteristic is not specified.");
+    GUDHI_CHECK(colSettings_->operators.get_characteristic() != 0,
+                std::logic_error("Matrix::insert_boundary - Columns cannot be initialized if the coefficient field "
+                                 "characteristic is not specified."));
   }
 
   if constexpr (isNonBasic && !PersistenceMatrixOptions::is_of_boundary_type &&
@@ -1611,8 +1615,9 @@ Matrix<PersistenceMatrixOptions>::insert_boundary(id_index faceIndex,
                                                   dimension_type dim)
 {
   if constexpr (!PersistenceMatrixOptions::is_z2){
-    assert(colSettings_->operators.get_characteristic() != 0 &&
-         "Columns cannot be initialized if the coefficient field characteristic is not specified.");
+    GUDHI_CHECK(colSettings_->operators.get_characteristic() != 0,
+                std::logic_error("Matrix::insert_boundary - Columns cannot be initialized if the coefficient field "
+                                 "characteristic is not specified."));
   }
   
   static_assert(isNonBasic, "Only enabled for non-basic matrices.");

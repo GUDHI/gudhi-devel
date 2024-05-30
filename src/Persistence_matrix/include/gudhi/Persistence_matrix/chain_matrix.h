@@ -19,6 +19,7 @@
 
 #include <iostream>   //print() only
 #include <set>
+#include <stdexcept>
 #include <vector>
 #include <utility>    //std::swap, std::move & std::exchange
 #include <algorithm>  //std::sort
@@ -1311,7 +1312,8 @@ inline void Chain_matrix<Master_matrix>::_remove_last(index lastIndex)
     pivotToColumnIndex_.erase(pivot);
     matrix_.erase(itToErase);
   } else {
-    assert(lastIndex == nextIndex_ - 1 && nextIndex_ == matrix_.size() && "Indexation problem.");
+    GUDHI_CHECK(lastIndex == nextIndex_ - 1 && nextIndex_ == matrix_.size(),
+                std::logic_error("Chain_matrix::_remove_last - Indexation problem."));
 
     Column_type& colToErase = matrix_[lastIndex];
     pivot = colToErase.get_pivot();
@@ -1344,7 +1346,10 @@ inline void Chain_matrix<Master_matrix>::_remove_last(index lastIndex)
   }
 
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    assert(ra_opt::get_row(pivot).size() == 0 && "Column asked to be removed do not corresponds to a maximal simplex.");
+    GUDHI_CHECK(
+        ra_opt::get_row(pivot).size() == 0,
+        std::invalid_argument(
+            "Chain_matrix::_remove_last - Column asked to be removed does not corresponds to a maximal simplex."));
     if constexpr (Master_matrix::Option_list::has_removable_rows) {
       ra_opt::erase_empty_row(pivot);
     }
