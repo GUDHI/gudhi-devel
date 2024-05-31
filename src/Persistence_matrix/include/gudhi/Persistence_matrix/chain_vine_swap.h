@@ -21,6 +21,7 @@
 #include <utility>  //std::swap & std::move
 #include <cassert>
 #include <functional> //std::function
+#include <stdexcept>  //std::invalid_argument
 
 #include "chain_pairing.h"
 
@@ -386,8 +387,9 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
                                                                                                 index columnIndex2) 
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    assert(CP::are_adjacent(_matrix()->get_pivot(columnIndex1), _matrix()->get_pivot(columnIndex2)) &&
-           "Columns to be swaped need to be adjacent in the 'real' matrix.");
+    GUDHI_CHECK(CP::are_adjacent(_matrix()->get_pivot(columnIndex1), _matrix()->get_pivot(columnIndex2)),
+                std::invalid_argument(
+                    "Chain_vine_swap::vine_swap - Columns to be swaped need to be adjacent in the 'real' matrix."));
   }
 
   const bool col1IsNeg = _is_negative_in_pair(columnIndex1);

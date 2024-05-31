@@ -25,7 +25,7 @@
 
 #include <boost/iterator/indirect_iterator.hpp>
 
-#include <gudhi/Persistence_matrix/columns/cell_constructors.h>
+#include <gudhi/Persistence_matrix/allocators/cell_constructors.h>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -45,33 +45,37 @@ namespace persistence_matrix {
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
  * @tparam Cell_constructor Factory of @ref Cell classes.
  */
-template <class Master_matrix, class Cell_constructor = New_cell_constructor<typename Master_matrix::Cell_type> >
+template <class Master_matrix>
 class Heap_column : public Master_matrix::Column_dimension_option, public Master_matrix::Chain_column_option 
 {
  public:
   using Master = Master_matrix;
-  using Field_operators = typename Master_matrix::Field_operators;
-  using Field_element_type = typename Master_matrix::element_type;
   using index = typename Master_matrix::index;
   using id_index = typename Master_matrix::id_index;
   using dimension_type = typename Master_matrix::dimension_type;
+  using Field_element_type = typename Master_matrix::element_type;
   using Cell = typename Master_matrix::Cell_type;
+  using Column_settings = typename Master_matrix::Column_settings;
+
+ private:
+  using Field_operators = typename Master_matrix::Field_operators;
   using Column_type = std::vector<Cell*>;
+  using Cell_constructor = typename Master_matrix::Cell_constructor;
+
+ public:
   using iterator = boost::indirect_iterator<typename Column_type::iterator>;
   using const_iterator = boost::indirect_iterator<typename Column_type::const_iterator>;
   using reverse_iterator = boost::indirect_iterator<typename Column_type::reverse_iterator>;
   using const_reverse_iterator = boost::indirect_iterator<typename Column_type::const_reverse_iterator>;
 
-  Heap_column(Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr);
+  Heap_column(Column_settings* colSettings = nullptr);
   template <class Container_type = typename Master_matrix::boundary_type>
-  Heap_column(const Container_type& nonZeroRowIndices, Field_operators* operators, Cell_constructor* cellConstructor);
+  Heap_column(const Container_type& nonZeroRowIndices, Column_settings* colSettings);
   template <class Container_type = typename Master_matrix::boundary_type>
   Heap_column(const Container_type& nonZeroChainRowIndices, 
               dimension_type dimension, 
-              Field_operators* operators,
-              Cell_constructor* cellConstructor);
-  Heap_column(const Heap_column& column, Field_operators* operators = nullptr,
-              Cell_constructor* cellConstructor = nullptr);
+              Column_settings* colSettings);
+  Heap_column(const Heap_column& column, Column_settings* colSettings = nullptr);
   Heap_column(Heap_column&& column) noexcept;
   ~Heap_column();
 
@@ -81,21 +85,18 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   Heap_column(index columnIndex, 
               const Container_type& nonZeroRowIndices, 
               Row_container_type* rowContainer,
-              Field_operators* operators, 
-              Cell_constructor* cellConstructor);
+              Column_settings* colSettings);
   template <class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
   Heap_column(index columnIndex, 
               const Container_type& nonZeroChainRowIndices, 
               dimension_type dimension,
               Row_container_type* rowContainer, 
-              Field_operators* operators, 
-              Cell_constructor* cellConstructor);
+              Column_settings* colSettings);
   template <class Row_container_type>
   Heap_column(const Heap_column& column, 
               index columnIndex, 
               Row_container_type* rowContainer,
-              Field_operators* operators = nullptr, 
-              Cell_constructor* cellConstructor = nullptr);
+              Column_settings* colSettings = nullptr);
 
   std::vector<Field_element_type> get_content(int columnLength = -1) const;
   bool is_non_zero(id_index rowIndex) const;
@@ -127,12 +128,12 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
 
   // this = v * this + column
   template <class Cell_range>
-  Heap_column& multiply_and_add(const Field_element_type& val, const Cell_range& column);
-  Heap_column& multiply_and_add(const Field_element_type& val, Heap_column& column);
+  Heap_column& multiply_target_and_add(const Field_element_type& val, const Cell_range& column);
+  Heap_column& multiply_target_and_add(const Field_element_type& val, Heap_column& column);
   // this = this + column * v
   template <class Cell_range>
-  Heap_column& multiply_and_add(const Cell_range& column, const Field_element_type& val);
-  Heap_column& multiply_and_add(Heap_column& column, const Field_element_type& val);
+  Heap_column& multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
+  Heap_column& multiply_source_and_add(Heap_column& column, const Field_element_type& val);
 
   friend bool operator==(const Heap_column& c1, const Heap_column& c2) {
     if (&c1 == &c2) return true;
@@ -190,46 +191,37 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   template <class Cell_range>
   bool _add(const Cell_range& column);
   template <class Cell_range>
-  bool _multiply_and_add(const Field_element_type& val, const Cell_range& column);
+  bool _multiply_target_and_add(const Field_element_type& val, const Cell_range& column);
   template <class Cell_range>
-  bool _multiply_and_add(const Cell_range& column, const Field_element_type& val);
-
-  void _verifyCellConstructor() {
-    if (cellPool_ == nullptr) {
-      if constexpr (std::is_same_v<Cell_constructor, New_cell_constructor<typename Master_matrix::Cell_type> >) {
-        cellPool_ = &Master_matrix::defaultCellConstructor;
-      } else {
-        throw std::invalid_argument("Cell constructor pointer cannot be null.");
-      }
-    }
-  }
+  bool _multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
 };
 
-template <class Master_matrix, class Cell_constructor>
-inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(Field_operators* operators,
-                                                                 Cell_constructor* cellConstructor)
-    : dim_opt(), chain_opt(), insertsSinceLastPrune_(0), operators_(operators) 
+template <class Master_matrix>
+inline Heap_column<Master_matrix>::Heap_column(Column_settings* colSettings)
+    : dim_opt(), chain_opt(), insertsSinceLastPrune_(0), operators_(nullptr), cellPool_(colSettings == nullptr ? nullptr : &(colSettings->cellConstructor)) 
 {
-  if (operators_ == nullptr && cellPool_ == nullptr) return;  //to allow default constructor which gives a dummy column
-  _verifyCellConstructor();
+  if (colSettings == nullptr) return;  //to allow default constructor which gives a dummy column
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Container_type>
-inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(const Container_type& nonZeroRowIndices,
-                                                                 Field_operators* operators,
-                                                                 Cell_constructor* cellConstructor)
+inline Heap_column<Master_matrix>::Heap_column(const Container_type& nonZeroRowIndices, Column_settings* colSettings)
     : dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
       chain_opt(),
       column_(nonZeroRowIndices.size(), nullptr),
       insertsSinceLastPrune_(0),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      operators_(nullptr),
+      cellPool_(&(colSettings->cellConstructor)) 
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
 
-  _verifyCellConstructor();
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
 
   index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
@@ -245,12 +237,11 @@ inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(const Container
   std::make_heap(column_.begin(), column_.end(), cellPointerComp_);
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Container_type>
-inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(const Container_type& nonZeroRowIndices,
+inline Heap_column<Master_matrix>::Heap_column(const Container_type& nonZeroRowIndices,
                                                                  dimension_type dimension, 
-                                                                 Field_operators* operators,
-                                                                 Cell_constructor* cellConstructor)
+                                                                 Column_settings* colSettings)
     : dim_opt(dimension),
       chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
@@ -261,10 +252,12 @@ inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(const Container
       }()),
       column_(nonZeroRowIndices.size(), nullptr),
       insertsSinceLastPrune_(0),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      operators_(nullptr),
+      cellPool_(&(colSettings->cellConstructor))
 {
-  _verifyCellConstructor();
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
 
   index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
@@ -280,20 +273,23 @@ inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(const Container
   std::make_heap(column_.begin(), column_.end(), cellPointerComp_);
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(const Heap_column& column, 
-                                                                 Field_operators* operators,
-                                                                 Cell_constructor* cellConstructor)
+template <class Master_matrix>
+inline Heap_column<Master_matrix>::Heap_column(const Heap_column& column, 
+                                                                 Column_settings* colSettings)
     : dim_opt(static_cast<const dim_opt&>(column)),
       chain_opt(static_cast<const chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
       insertsSinceLastPrune_(0),
-      operators_(operators == nullptr ? column.operators_ : operators),
-      cellPool_(cellConstructor == nullptr ? column.cellPool_ : cellConstructor) 
+      operators_(colSettings == nullptr ? column.operators_ : nullptr),
+      cellPool_(colSettings == nullptr ? column.cellPool_ : &(colSettings->cellConstructor))
 {
   static_assert(!Master_matrix::Option_list::has_row_access,
                 "Simple copy constructor not available when row access option enabled. Please specify the new column "
                 "index and the row container.");
+
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    if (colSettings != nullptr) operators_ = &(colSettings->operators);
+  }
 
   index i = 0;
   for (const Cell* cell : column.column_) {
@@ -307,8 +303,8 @@ inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(const Heap_colu
   // column.column_ already ordered as a heap, so no need of make_heap.
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(Heap_column&& column) noexcept
+template <class Master_matrix>
+inline Heap_column<Master_matrix>::Heap_column(Heap_column&& column) noexcept
     : dim_opt(std::move(static_cast<dim_opt&>(column))),
       chain_opt(std::move(static_cast<chain_opt&>(column))),
       column_(std::move(column.column_)),
@@ -317,13 +313,12 @@ inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(Heap_column&& c
       cellPool_(std::exchange(column.cellPool_, nullptr)) 
 {}
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Container_type, class Row_container_type>
-inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(index columnIndex,
+inline Heap_column<Master_matrix>::Heap_column(index columnIndex,
                                                                  const Container_type& nonZeroRowIndices,
                                                                  Row_container_type* rowContainer,
-                                                                 Field_operators* operators,
-                                                                 Cell_constructor* cellConstructor)
+                                                                 Column_settings* colSettings)
     : dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
       chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
@@ -334,13 +329,15 @@ inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(index columnInd
       }()),
       column_(nonZeroRowIndices.size(), nullptr),
       insertsSinceLastPrune_(0),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      operators_(nullptr),
+      cellPool_(&(colSettings->cellConstructor))
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
 
-  _verifyCellConstructor();
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
 
   index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
@@ -356,15 +353,14 @@ inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(index columnInd
   std::make_heap(column_.begin(), column_.end(), cellPointerComp_);
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Container_type, class Row_container_type>
-inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(
+inline Heap_column<Master_matrix>::Heap_column(
     index columnIndex, 
     const Container_type& nonZeroRowIndices, 
     dimension_type dimension,
     Row_container_type* rowContainer, 
-    Field_operators* operators, 
-    Cell_constructor* cellConstructor)
+    Column_settings* colSettings)
     : dim_opt(dimension),
       chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
@@ -375,10 +371,12 @@ inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(
       }()),
       column_(nonZeroRowIndices.size(), nullptr),
       insertsSinceLastPrune_(0),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      operators_(nullptr),
+      cellPool_(&(colSettings->cellConstructor))
 {
-  _verifyCellConstructor();
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
 
   index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
@@ -394,19 +392,22 @@ inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(
   std::make_heap(column_.begin(), column_.end(), cellPointerComp_);
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Row_container_type>
-inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(const Heap_column& column, index columnIndex,
+inline Heap_column<Master_matrix>::Heap_column(const Heap_column& column, index columnIndex,
                                                                  Row_container_type* rowContainer,
-                                                                 Field_operators* operators,
-                                                                 Cell_constructor* cellConstructor)
+                                                                 Column_settings* colSettings)
     : dim_opt(static_cast<const dim_opt&>(column)),
       chain_opt(static_cast<const chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
       insertsSinceLastPrune_(0),
-      operators_(operators == nullptr ? column.operators_ : operators),
-      cellPool_(cellConstructor == nullptr ? column.cellPool_ : cellConstructor) 
+      operators_(colSettings == nullptr ? column.operators_ : nullptr),
+      cellPool_(colSettings == nullptr ? column.cellPool_ : &(colSettings->cellConstructor)) 
 {
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    if (colSettings != nullptr) operators_ = &(colSettings->operators);
+  }
+
   index i = 0;
   for (const Cell* cell : column.column_) {
     if constexpr (Master_matrix::Option_list::is_z2) {
@@ -419,17 +420,17 @@ inline Heap_column<Master_matrix, Cell_constructor>::Heap_column(const Heap_colu
   // column.column_ already ordered as a heap, so no need of make_heap.
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Heap_column<Master_matrix, Cell_constructor>::~Heap_column() 
+template <class Master_matrix>
+inline Heap_column<Master_matrix>::~Heap_column() 
 {
   for (auto* cell : column_) {
     cellPool_->destroy(cell);
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline std::vector<typename Heap_column<Master_matrix, Cell_constructor>::Field_element_type>
-Heap_column<Master_matrix, Cell_constructor>::get_content(int columnLength) const 
+template <class Master_matrix>
+inline std::vector<typename Heap_column<Master_matrix>::Field_element_type>
+Heap_column<Master_matrix>::get_content(int columnLength) const 
 {
   bool pivotLength = (columnLength < 0);
   if (columnLength < 0 && column_.size() > 0)
@@ -443,7 +444,7 @@ Heap_column<Master_matrix, Cell_constructor>::get_content(int columnLength) cons
       if constexpr (Master_matrix::Option_list::is_z2) {
         container[(*it)->get_row_index()] = !container[(*it)->get_row_index()];
       } else {
-        container[(*it)->get_row_index()] = operators_->add(container[(*it)->get_row_index()], (*it)->get_element());
+        operators_->add_inplace(container[(*it)->get_row_index()], (*it)->get_element());
       }
     }
   }
@@ -455,8 +456,8 @@ Heap_column<Master_matrix, Cell_constructor>::get_content(int columnLength) cons
   return container;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline bool Heap_column<Master_matrix, Cell_constructor>::is_non_zero(id_index rowIndex) const 
+template <class Master_matrix>
+inline bool Heap_column<Master_matrix>::is_non_zero(id_index rowIndex) const 
 {
   if constexpr (Master_matrix::Option_list::is_z2) {
     bool c = false;
@@ -467,14 +468,14 @@ inline bool Heap_column<Master_matrix, Cell_constructor>::is_non_zero(id_index r
   } else {
     Field_element_type c(0);
     for (const Cell* cell : column_) {
-      if (cell->get_row_index() == rowIndex) c = operators_->add(c, cell->get_element());
+      if (cell->get_row_index() == rowIndex) operators_->add_inplace(c, cell->get_element());
     }
     return c != Field_operators::get_additive_identity();
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline bool Heap_column<Master_matrix, Cell_constructor>::is_empty() 
+template <class Master_matrix>
+inline bool Heap_column<Master_matrix>::is_empty() 
 {
   Cell* pivot = _pop_pivot();
   if (pivot != nullptr) {
@@ -485,15 +486,15 @@ inline bool Heap_column<Master_matrix, Cell_constructor>::is_empty()
   return true;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline std::size_t Heap_column<Master_matrix, Cell_constructor>::size() const 
+template <class Master_matrix>
+inline std::size_t Heap_column<Master_matrix>::size() const 
 {
   return column_.size();
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Map_type>
-inline void Heap_column<Master_matrix, Cell_constructor>::reorder(const Map_type& valueMap,
+inline void Heap_column<Master_matrix>::reorder(const Map_type& valueMap,
                                                                   [[maybe_unused]] index columnIndex) 
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
@@ -512,8 +513,8 @@ inline void Heap_column<Master_matrix, Cell_constructor>::reorder(const Map_type
   insertsSinceLastPrune_ = 0;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline void Heap_column<Master_matrix, Cell_constructor>::clear() 
+template <class Master_matrix>
+inline void Heap_column<Master_matrix>::clear() 
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns as a base element should not be empty.");
@@ -526,8 +527,8 @@ inline void Heap_column<Master_matrix, Cell_constructor>::clear()
   insertsSinceLastPrune_ = 0;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline void Heap_column<Master_matrix, Cell_constructor>::clear(id_index rowIndex) 
+template <class Master_matrix>
+inline void Heap_column<Master_matrix>::clear(id_index rowIndex) 
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns.");
@@ -538,9 +539,9 @@ inline void Heap_column<Master_matrix, Cell_constructor>::clear(id_index rowInde
   std::make_heap(column_.begin(), column_.end(), cellPointerComp_);
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Heap_column<Master_matrix, Cell_constructor>::id_index
-Heap_column<Master_matrix, Cell_constructor>::get_pivot() 
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::id_index
+Heap_column<Master_matrix>::get_pivot() 
 {
   static_assert(Master_matrix::isNonBasic,
                 "Method not available for base columns.");  // could technically be, but is the notion usefull then?
@@ -558,9 +559,9 @@ Heap_column<Master_matrix, Cell_constructor>::get_pivot()
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Heap_column<Master_matrix, Cell_constructor>::Field_element_type
-Heap_column<Master_matrix, Cell_constructor>::get_pivot_value() 
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::Field_element_type
+Heap_column<Master_matrix>::get_pivot_value() 
 {
   static_assert(Master_matrix::isNonBasic,
                 "Method not available for base columns.");  // could technically be, but is the notion usefull then?
@@ -580,72 +581,72 @@ Heap_column<Master_matrix, Cell_constructor>::get_pivot_value()
       Field_element_type sum(0);
       if (chain_opt::get_pivot() == static_cast<id_index>(-1)) return sum;
       for (const Cell* cell : column_) {
-        if (cell->get_row_index() == chain_opt::get_pivot()) sum = operators_->add(sum, cell->get_element());
+        if (cell->get_row_index() == chain_opt::get_pivot()) operators_->add_inplace(sum, cell->get_element());
       }
       return sum;  // should not be 0 if properly used.
     }
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Heap_column<Master_matrix, Cell_constructor>::iterator
-Heap_column<Master_matrix, Cell_constructor>::begin() noexcept 
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::iterator
+Heap_column<Master_matrix>::begin() noexcept 
 {
   return column_.begin();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Heap_column<Master_matrix, Cell_constructor>::const_iterator
-Heap_column<Master_matrix, Cell_constructor>::begin() const noexcept 
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::const_iterator
+Heap_column<Master_matrix>::begin() const noexcept 
 {
   return column_.begin();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Heap_column<Master_matrix, Cell_constructor>::iterator
-Heap_column<Master_matrix, Cell_constructor>::end() noexcept 
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::iterator
+Heap_column<Master_matrix>::end() noexcept 
 {
   return column_.end();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Heap_column<Master_matrix, Cell_constructor>::const_iterator
-Heap_column<Master_matrix, Cell_constructor>::end() const noexcept 
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::const_iterator
+Heap_column<Master_matrix>::end() const noexcept 
 {
   return column_.end();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Heap_column<Master_matrix, Cell_constructor>::reverse_iterator
-Heap_column<Master_matrix, Cell_constructor>::rbegin() noexcept 
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::reverse_iterator
+Heap_column<Master_matrix>::rbegin() noexcept 
 {
   return column_.rbegin();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Heap_column<Master_matrix, Cell_constructor>::const_reverse_iterator
-Heap_column<Master_matrix, Cell_constructor>::rbegin() const noexcept 
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::const_reverse_iterator
+Heap_column<Master_matrix>::rbegin() const noexcept 
 {
   return column_.rbegin();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Heap_column<Master_matrix, Cell_constructor>::reverse_iterator
-Heap_column<Master_matrix, Cell_constructor>::rend() noexcept 
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::reverse_iterator
+Heap_column<Master_matrix>::rend() noexcept 
 {
   return column_.rend();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Heap_column<Master_matrix, Cell_constructor>::const_reverse_iterator
-Heap_column<Master_matrix, Cell_constructor>::rend() const noexcept 
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::const_reverse_iterator
+Heap_column<Master_matrix>::rend() const noexcept 
 {
   return column_.rend();
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Cell_range>
-inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, Cell_constructor>::operator+=(
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator+=(
     const Cell_range& column) 
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Heap_column>),
@@ -659,8 +660,8 @@ inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, 
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, Cell_constructor>::operator+=(
+template <class Master_matrix>
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator+=(
     Heap_column& column) 
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
@@ -676,8 +677,8 @@ inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, 
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, Cell_constructor>::operator*=(
+template <class Master_matrix>
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator*=(
     unsigned int v) 
 {
   if constexpr (Master_matrix::Option_list::is_z2) {
@@ -703,16 +704,16 @@ inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, 
     if (val == Field_operators::get_multiplicative_identity()) return *this;
 
     for (Cell* cell : column_) {
-      cell->get_element() = operators_->multiply(cell->get_element(), val);
+      operators_->multiply_inplace(cell->get_element(), val);
     }
   }
 
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Cell_range>
-inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, Cell_constructor>::multiply_and_add(
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_target_and_add(
     const Field_element_type& val, const Cell_range& column) 
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Heap_column>),
@@ -729,14 +730,14 @@ inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, 
       _add(column);
     }
   } else {
-    _multiply_and_add(val, column);
+    _multiply_target_and_add(val, column);
   }
 
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, Cell_constructor>::multiply_and_add(
+template <class Master_matrix>
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_target_and_add(
     const Field_element_type& val, Heap_column& column) 
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
@@ -751,7 +752,7 @@ inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, 
         throw std::invalid_argument("A chain column should not be multiplied by 0.");
       }
     } else {
-      if (_multiply_and_add(val, column)) {
+      if (_multiply_target_and_add(val, column)) {
         chain_opt::swap_pivots(column);
         dim_opt::swap_dimension(column);
       }
@@ -765,16 +766,16 @@ inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, 
         _add(column);
       }
     } else {
-      _multiply_and_add(val, column);
+      _multiply_target_and_add(val, column);
     }
   }
 
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Cell_range>
-inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, Cell_constructor>::multiply_and_add(
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_source_and_add(
     const Cell_range& column, const Field_element_type& val) 
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Heap_column>),
@@ -788,14 +789,14 @@ inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, 
       _add(column);
     }
   } else {
-    _multiply_and_add(column, val);
+    _multiply_source_and_add(column, val);
   }
 
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, Cell_constructor>::multiply_and_add(
+template <class Master_matrix>
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_source_and_add(
     Heap_column& column, const Field_element_type& val) 
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
@@ -808,7 +809,7 @@ inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, 
         }
       }
     } else {
-      if (_multiply_and_add(column, val)) {
+      if (_multiply_source_and_add(column, val)) {
         chain_opt::swap_pivots(column);
         dim_opt::swap_dimension(column);
       }
@@ -819,15 +820,15 @@ inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, 
         _add(column);
       }
     } else {
-      _multiply_and_add(column, val);
+      _multiply_source_and_add(column, val);
     }
   }
 
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, Cell_constructor>::operator=(
+template <class Master_matrix>
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator=(
     const Heap_column& other) 
 {
   static_assert(!Master_matrix::Option_list::has_row_access, "= assignement not enabled with row access option.");
@@ -860,8 +861,8 @@ inline Heap_column<Master_matrix, Cell_constructor>& Heap_column<Master_matrix, 
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline void Heap_column<Master_matrix, Cell_constructor>::_prune() 
+template <class Master_matrix>
+inline void Heap_column<Master_matrix>::_prune() 
 {
   if (insertsSinceLastPrune_ == 0) return;
 
@@ -872,14 +873,13 @@ inline void Heap_column<Master_matrix, Cell_constructor>::_prune()
     pivot = _pop_pivot();
   }
   column_.swap(tempCol);
-  std::make_heap(column_.begin(), column_.end(), cellPointerComp_);
 
   insertsSinceLastPrune_ = 0;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Heap_column<Master_matrix, Cell_constructor>::Cell*
-Heap_column<Master_matrix, Cell_constructor>::_pop_pivot() 
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::Cell*
+Heap_column<Master_matrix>::_pop_pivot() 
 {
   if (column_.empty()) {
     return nullptr;
@@ -902,7 +902,7 @@ Heap_column<Master_matrix, Cell_constructor>::_pop_pivot()
     }
   } else {
     while (!column_.empty() && column_.front()->get_row_index() == pivot->get_row_index()) {
-      pivot->get_element() = operators_->add(pivot->get_element(), column_.front()->get_element());
+      operators_->add_inplace(pivot->get_element(), column_.front()->get_element());
       std::pop_heap(column_.begin(), column_.end(), cellPointerComp_);
       column_.pop_back();
     }
@@ -913,9 +913,9 @@ Heap_column<Master_matrix, Cell_constructor>::_pop_pivot()
   return pivot;
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Cell_range>
-inline bool Heap_column<Master_matrix, Cell_constructor>::_add(const Cell_range& column) 
+inline bool Heap_column<Master_matrix>::_add(const Cell_range& column) 
 {
   if (column.begin() == column.end()) return false;
   if (column_.empty()) {  // chain should never enter here.
@@ -947,7 +947,7 @@ inline bool Heap_column<Master_matrix, Cell_constructor>::_add(const Cell_range&
       column_.push_back(cellPool_->construct(cell.get_row_index()));
     } else {
       if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        if (cell.get_row_index() == chain_opt::get_pivot()) pivotVal = operators_->add(pivotVal, cell.get_element());
+        if (cell.get_row_index() == chain_opt::get_pivot()) operators_->add_inplace(pivotVal, cell.get_element());
       }
       column_.push_back(cellPool_->construct(cell.get_row_index()));
       column_.back()->set_element(cell.get_element());
@@ -963,9 +963,9 @@ inline bool Heap_column<Master_matrix, Cell_constructor>::_add(const Cell_range&
     return pivotVal == Field_operators::get_additive_identity();
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Cell_range>
-inline bool Heap_column<Master_matrix, Cell_constructor>::_multiply_and_add(const Field_element_type& val,
+inline bool Heap_column<Master_matrix>::_multiply_target_and_add(const Field_element_type& val,
                                                                             const Cell_range& column) 
 {
   if (val == 0u) {
@@ -990,16 +990,16 @@ inline bool Heap_column<Master_matrix, Cell_constructor>::_multiply_and_add(cons
   Field_element_type pivotVal(0);
 
   for (Cell* cell : column_) {
-    cell->get_element() = operators_->multiply(cell->get_element(), val);
+    operators_->multiply_inplace(cell->get_element(), val);
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-      if (cell->get_row_index() == chain_opt::get_pivot()) pivotVal = operators_->add(pivotVal, cell->get_element());
+      if (cell->get_row_index() == chain_opt::get_pivot()) operators_->add_inplace(pivotVal, cell->get_element());
     }
   }
 
   for (const Cell& cell : column) {
     ++insertsSinceLastPrune_;
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-      if (cell.get_row_index() == chain_opt::get_pivot()) pivotVal = operators_->add(pivotVal, cell.get_element());
+      if (cell.get_row_index() == chain_opt::get_pivot()) operators_->add_inplace(pivotVal, cell.get_element());
     }
     column_.push_back(cellPool_->construct(cell.get_row_index()));
     column_.back()->set_element(cell.get_element());
@@ -1014,9 +1014,9 @@ inline bool Heap_column<Master_matrix, Cell_constructor>::_multiply_and_add(cons
     return pivotVal == Field_operators::get_additive_identity();
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Cell_range>
-inline bool Heap_column<Master_matrix, Cell_constructor>::_multiply_and_add(const Cell_range& column,
+inline bool Heap_column<Master_matrix>::_multiply_source_and_add(const Cell_range& column,
                                                                             const Field_element_type& val) 
 {
   if (val == 0u || column.begin() == column.end()) {
@@ -1040,12 +1040,14 @@ inline bool Heap_column<Master_matrix, Cell_constructor>::_multiply_and_add(cons
 
   for (const Cell& cell : column) {
     ++insertsSinceLastPrune_;
-    if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-      if (cell.get_row_index() == chain_opt::get_pivot())
-        pivotVal = operators_->multiply_and_add(cell.get_element(), val, pivotVal);
-    }
     column_.push_back(cellPool_->construct(cell.get_row_index()));
-    column_.back()->set_element(operators_->multiply(cell.get_element(), val));
+    column_.back()->set_element(cell.get_element());
+    operators_->multiply_inplace(column_.back()->get_element(), val);
+    if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
+      if (cell.get_row_index() == chain_opt::get_pivot()){
+        operators_->add_inplace(pivotVal, column_.back()->get_element());
+      }
+    }
     std::push_heap(column_.begin(), column_.end(), cellPointerComp_);
   }
 
@@ -1065,10 +1067,10 @@ inline bool Heap_column<Master_matrix, Cell_constructor>::_multiply_and_add(cons
  * @tparam Master_matrix Template parameter of @ref Gudhi::persistence_matrix::Heap_column.
  * @tparam Cell_constructor Template parameter of @ref Gudhi::persistence_matrix::Heap_column.
  */
-template <class Master_matrix, class Cell_constructor>
-struct std::hash<Gudhi::persistence_matrix::Heap_column<Master_matrix, Cell_constructor> > 
+template <class Master_matrix>
+struct std::hash<Gudhi::persistence_matrix::Heap_column<Master_matrix> > 
 {
-  size_t operator()(const Gudhi::persistence_matrix::Heap_column<Master_matrix, Cell_constructor>& column) const {
+  size_t operator()(const Gudhi::persistence_matrix::Heap_column<Master_matrix>& column) const {
     std::size_t seed = 0;
     unsigned int i = 0;
     for (bool val : column.get_content()) {

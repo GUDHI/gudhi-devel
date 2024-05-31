@@ -991,7 +991,7 @@ void test_ru_u_row_access(){
 	// 	//chain: indirect, assumes the row is empty
 	// 	//id to pos
 	// 	//pos to id
-	// 	void erase_row(index rowIndex);
+	// 	void erase_empty_row(index rowIndex);
 	// 	//*******************
 
 template<class Matrix>
@@ -1001,18 +1001,18 @@ void test_row_removal(){
 
 	Matrix m(columns, 5);
 
-	m.erase_row(5);
+	m.erase_empty_row(5);
 
 	BOOST_CHECK_THROW(m.get_row(5), std::logic_error);
 }
 
 template<class Matrix>
 void test_chain_row_removal(Matrix& m){
-	m.erase_row(6);	//not empty, so ignored
+	m.erase_empty_row(6);	//not empty, so ignored
 	BOOST_CHECK_NO_THROW(m.get_row(6));
 
 	if constexpr (Matrix::Option_list::has_map_column_container || !Matrix::Option_list::has_vine_update){
-		m.remove_last();	//calls erase_row(6)
+		m.remove_last();	//calls erase_empty_row(6)
 		BOOST_CHECK_THROW(m.get_row(6), std::logic_error);
 	}
 }
@@ -1569,8 +1569,7 @@ void test_base_col_comp_cell_range_operation(){
 template<class Matrix>
 void test_const_operation(){
 	using C = typename Matrix::Column_type;
-	typename Matrix::Field_operators op(5);
-	typename Matrix::Cell_constructor pool;
+	typename Matrix::Column_settings settings(5);
 
 	auto columns = build_general_matrix<C>();
 	Matrix m(columns, 5);
@@ -1579,28 +1578,28 @@ void test_const_operation(){
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[10] = {1};
-		m.add_to(C({0,1,4}, nullptr, &pool), 10);	//only works with the const version because of reference
+		m.add_to(C({0,1,4}, &settings), 10);	//only works with the const version because of reference
 	} else {
 		columns[10] = {{0,2},{1,4}};
-		m.add_to(C({{0,1},{1,4},{4,1}}, &op, &pool), 10);
+		m.add_to(C({{0,1},{1,4},{4,1}}, &settings), 10);
 	}
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[5] = {0,2,4};
-		m.multiply_target_and_add_to(C({0,1,4}, nullptr, &pool), 3, 5);
+		m.multiply_target_and_add_to(C({0,1,4}, &settings), 3, 5);
 	} else {
 		columns[5] = {{0,1},{1,2},{2,2},{4,1}};
-		m.multiply_target_and_add_to(C({{0,1},{1,4},{4,1}}, &op, &pool), 3, 5);
+		m.multiply_target_and_add_to(C({{0,1},{1,4},{4,1}}, &settings), 3, 5);
 	}
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[6] = {1};
-		m.multiply_source_and_add_to(3, C({0,1,4}, nullptr, &pool), 6);
+		m.multiply_source_and_add_to(3, C({0,1,4}, &settings), 6);
 	} else {
 		columns[6] = {{0,4},{1,2},{4,2}};
-		m.multiply_source_and_add_to(3, C({{0,1},{1,4},{4,1}}, &op, &pool), 6);
+		m.multiply_source_and_add_to(3, C({{0,1},{1,4},{4,1}}, &settings), 6);
 	}
 	test_content_equality(columns, m);
 }
@@ -1608,8 +1607,7 @@ void test_const_operation(){
 template<class Matrix>
 void test_base_col_comp_const_operation(){
 	using C = typename Matrix::Column_type;
-	typename Matrix::Field_operators op(5);
-	typename Matrix::Cell_constructor pool;
+	typename Matrix::Column_settings settings(5);
 
 	auto columns = build_general_matrix<C>();
 	Matrix m(columns, 5);
@@ -1619,33 +1617,33 @@ void test_base_col_comp_const_operation(){
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[6] = {1};
 		columns[10] = {1};
-		m.add_to(C({0,1,4}, nullptr, &pool), 10);	//only works with the const version because of reference
+		m.add_to(C({0,1,4}, &settings), 10);	//only works with the const version because of reference
 	} else {
 		columns[6] = {{0,2},{1,4}};
 		columns[10] = {{0,2},{1,4}};
-		m.add_to(C({{0,1},{1,4},{4,1}}, &op, &pool), 10);
+		m.add_to(C({{0,1},{1,4},{4,1}}, &settings), 10);
 	}
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[5] = {0,2,4};
 		columns[8] = {0,2,4};
-		m.multiply_target_and_add_to(C({0,1,4}, nullptr, &pool), 3, 5);
+		m.multiply_target_and_add_to(C({0,1,4}, &settings), 3, 5);
 	} else {
 		columns[5] = {{0,1},{1,2},{2,2},{4,1}};
 		columns[8] = {{0,1},{1,2},{2,2},{4,1}};
-		m.multiply_target_and_add_to(C({{0,1},{1,4},{4,1}}, &op, &pool), 3, 5);
+		m.multiply_target_and_add_to(C({{0,1},{1,4},{4,1}}, &settings), 3, 5);
 	}
 	test_content_equality(columns, m);
 
 	if constexpr (Matrix::Option_list::is_z2){
 		columns[6] = {0,4};
 		columns[10] = {0,4};
-		m.multiply_source_and_add_to(3, C({0,1,4}, nullptr, &pool), 6);
+		m.multiply_source_and_add_to(3, C({0,1,4}, &settings), 6);
 	} else {
 		columns[6] = {{1,1},{4,3}};
 		columns[10] = {{1,1},{4,3}};
-		m.multiply_source_and_add_to(3, C({{0,1},{1,4},{4,1}}, &op, &pool), 6);
+		m.multiply_source_and_add_to(3, C({{0,1},{1,4},{4,1}}, &settings), 6);
 	}
 	test_content_equality(columns, m);
 }
@@ -1738,7 +1736,7 @@ void test_barcode(){
 // 	//boundary: does not update barcode
 // 	void swap_rows(index rowIndex1, index rowIndex2);
 // 	//base: no row access necessary (but then, has only effect with swaps), assumes the row is empty, just thought as an index cleanup
-// 	void erase_row(index rowIndex);
+// 	void erase_empty_row(index rowIndex);
 // 	//*******************
 
 template<class Matrix>

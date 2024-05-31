@@ -118,7 +118,7 @@ struct PersistenceMatrixOptions
   /**
    * @brief Only enabled if @ref has_row_access is true, ignored otherwise.
    * If set to true, the underlying container containing the rows is an std::map and for
-   * @ref chainmatrix "chain matrices", enables the method @ref Matrix::erase_row (always enabled for other
+   * @ref chainmatrix "chain matrices", enables the method @ref Matrix::erase_empty_row (always enabled for other
    * matrix types). If set to false, the container is a std::vector.
    */
   static const bool has_removable_rows;

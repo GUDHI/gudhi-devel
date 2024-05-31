@@ -17,10 +17,12 @@
 #ifndef PM_ID_TO_POS_TRANSLATION_H
 #define PM_ID_TO_POS_TRANSLATION_H
 
+#include <cmath>
 #include <vector>
 #include <cassert>
 #include <utility>    //std::swap, std::move & std::exchange
 #include <algorithm>  //std::transform
+#include <stdexcept>  //std::invalid_argument
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -55,14 +57,16 @@ class Id_to_index_overlay
   using barcode_type = typename Master_matrix_type::barcode_type;         /**< Barcode type. */
   using cycle_type = typename Master_matrix_type::cycle_type;             /**< Cycle type. */
   using Cell_constructor = typename Master_matrix_type::Cell_constructor; /**< Factory of @ref Cell classes. */
+  using Column_settings = typename Master_matrix_type::Column_settings;   /**< Structure giving access to the columns to
+                                                                               necessary external classes. */
 
   /**
    * @brief Constructs an empty matrix.
    * 
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  Id_to_index_overlay(Field_operators* operators, Cell_constructor* cellConstructor);
+  Id_to_index_overlay(Column_settings* colSettings);
   /**
    * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a
    * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
@@ -78,23 +82,22 @@ class Id_to_index_overlay
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
    * interest and not everything should be stored, then use the @ref insert_boundary method instead
-   * (after creating the matrix with the @ref Id_to_index_overlay(unsigned int, Field_operators*, Cell_constructor*)
+   * (after creating the matrix with the @ref Id_to_index_overlay(unsigned int, Column_settings*)
    * constructor preferably).
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
   template <class Boundary_type = boundary_type>
   Id_to_index_overlay(const std::vector<Boundary_type>& orderedBoundaries, 
-                      Field_operators* operators,
-                      Cell_constructor* cellConstructor);
+                      Column_settings* colSettings);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
    * 
    * @param numberOfColumns Number of columns to reserve space for.
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  Id_to_index_overlay(unsigned int numberOfColumns, Field_operators* operators, Cell_constructor* cellConstructor);
+  Id_to_index_overlay(unsigned int numberOfColumns, Column_settings* colSettings);
   /**
    * @brief Only available for @ref chainmatrix "chain matrices". Constructs an empty matrix and stores the given
    * comparators.
@@ -106,8 +109,8 @@ class Id_to_index_overlay
    * 
    * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
    * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the birth associated to the first position is strictly less than birth associated to
    * the second one with respect to some self defined order. It is used while swapping two unpaired or
@@ -118,8 +121,7 @@ class Id_to_index_overlay
    * columns.
    */
   template <typename BirthComparatorFunction, typename DeathComparatorFunction>
-  Id_to_index_overlay(Field_operators* operators, 
-                      Cell_constructor* cellConstructor,
+  Id_to_index_overlay(Column_settings* colSettings,
                       const BirthComparatorFunction& birthComparator, 
                       const DeathComparatorFunction& deathComparator);
   /**
@@ -145,10 +147,10 @@ class Id_to_index_overlay
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
    * interest and not everything should be stored, then use the @ref insert_boundary method instead
-   * (after creating the matrix with the @ref Id_to_index_overlay(unsigned int, Field_operators*, Cell_constructor*,
+   * (after creating the matrix with the @ref Id_to_index_overlay(unsigned int, Column_settings*,
    * const BirthComparatorFunction&, const DeathComparatorFunction&) constructor preferably).
-   * @param operators  Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the birth associated to the first position is strictly less than birth associated to
    * the second one with respect to some self defined order. It is used while swapping two unpaired or
@@ -160,8 +162,7 @@ class Id_to_index_overlay
    */
   template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type>
   Id_to_index_overlay(const std::vector<Boundary_type>& orderedBoundaries, 
-                      Field_operators* operators,
-                      Cell_constructor* cellConstructor, 
+                      Column_settings* colSettings, 
                       const BirthComparatorFunction& birthComparator, 
                       const DeathComparatorFunction& deathComparator);
   /**
@@ -176,8 +177,8 @@ class Id_to_index_overlay
    * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
    * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
    * @param numberOfColumns Number of columns to reserve space for.
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
    * the birth associated to the first position is strictly less than birth associated to
    * the second one with respect to some self defined order. It is used while swapping two unpaired or
@@ -189,8 +190,7 @@ class Id_to_index_overlay
    */
   template <typename BirthComparatorFunction, typename DeathComparatorFunction>
   Id_to_index_overlay(unsigned int numberOfColumns, 
-                      Field_operators* operators, 
-                      Cell_constructor* cellConstructor,
+                      Column_settings* colSettings,
                       const BirthComparatorFunction& birthComparator, 
                       const DeathComparatorFunction& deathComparator);
   /**
@@ -198,14 +198,12 @@ class Id_to_index_overlay
    * instead of the one in the copied matrix.
    * 
    * @param matrixToCopy Matrix to copy.
-   * @param operators Pointer to the field operators.
-   * If null pointer, the pointer in @p matrixToCopy is choosen instead.
-   * @param cellConstructor Pointer to the cell factory.
-   * If null pointer, the pointer in @p matrixToCopy is choosen instead.
+   * @param colSettings Either a pointer to an existing setting structure for the columns or a null pointer.
+   * The structure should contain all the necessary external classes specifically necessary for the choosen column type,
+   * such as custom allocators. If null pointer, the pointer stored in @p matrixToCopy is used instead.
    */
   Id_to_index_overlay(const Id_to_index_overlay& matrixToCopy, 
-                      Field_operators* operators = nullptr,
-                      Cell_constructor* cellConstructor = nullptr);
+                      Column_settings* colSettings = nullptr);
   /**
    * @brief Move constructor.
    * 
@@ -304,12 +302,13 @@ class Id_to_index_overlay
    * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row cells are not
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
    * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
-   * @ref erase_row method just as a way to specify that a row is empty and can therefore be removed from dictionnaries.
-   * This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite frequent. 
+   * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
+   * dictionnaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be
+   * quite frequent. 
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row to remove.
    */
-  void erase_row(id_index rowIndex);
+  void erase_empty_row(id_index rowIndex);
   /**
    * @brief Only available for RU and @ref chainmatrix "chain matrices" and if
    * @ref PersistenceMatrixOptions::has_removable_columns and @ref PersistenceMatrixOptions::has_vine_update are true.
@@ -497,11 +496,11 @@ class Id_to_index_overlay
   /**
    * @brief Resets the matrix to an empty matrix.
    * 
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
+   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  void reset(Field_operators* operators, Cell_constructor* cellConstructor) {
-    matrix_.reset(operators, cellConstructor);
+  void reset(Column_settings* colSettings) {
+    matrix_.reset(colSettings);
     nextIndex_ = 0;
   }
 
@@ -623,9 +622,8 @@ class Id_to_index_overlay
 };
 
 template <class Matrix_type, class Master_matrix_type>
-inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay(Field_operators* operators,
-                                                                                 Cell_constructor* cellConstructor)
-    : matrix_(operators, cellConstructor), idToIndex_(nullptr), nextIndex_(0) 
+inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay(Column_settings* colSettings)
+    : matrix_(colSettings), idToIndex_(nullptr), nextIndex_(0) 
 {
   _initialize_map(0);
 }
@@ -633,8 +631,8 @@ inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay
 template <class Matrix_type, class Master_matrix_type>
 template <class Boundary_type>
 inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay(
-    const std::vector<Boundary_type>& orderedBoundaries, Field_operators* operators, Cell_constructor* cellConstructor)
-    : matrix_(orderedBoundaries, operators, cellConstructor), idToIndex_(nullptr), nextIndex_(orderedBoundaries.size()) 
+    const std::vector<Boundary_type>& orderedBoundaries, Column_settings* colSettings)
+    : matrix_(orderedBoundaries, colSettings), idToIndex_(nullptr), nextIndex_(orderedBoundaries.size()) 
 {
   _initialize_map(orderedBoundaries.size());
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
@@ -646,9 +644,8 @@ inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay
 
 template <class Matrix_type, class Master_matrix_type>
 inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay(unsigned int numberOfColumns,
-                                                                                 Field_operators* operators,
-                                                                                 Cell_constructor* cellConstructor)
-    : matrix_(numberOfColumns, operators, cellConstructor), idToIndex_(nullptr), nextIndex_(0) 
+                                                                                 Column_settings* colSettings)
+    : matrix_(numberOfColumns, colSettings), idToIndex_(nullptr), nextIndex_(0) 
 {
   _initialize_map(numberOfColumns);
 }
@@ -656,11 +653,10 @@ inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay
 template <class Matrix_type, class Master_matrix_type>
 template <typename BirthComparatorFunction, typename DeathComparatorFunction>
 inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay(
-    Field_operators* operators, 
-    Cell_constructor* cellConstructor, 
+    Column_settings* colSettings, 
     const BirthComparatorFunction& birthComparator, 
     const DeathComparatorFunction& deathComparator)
-    : matrix_(operators, cellConstructor, birthComparator, deathComparator), idToIndex_(nullptr), nextIndex_(0) 
+    : matrix_(colSettings, birthComparator, deathComparator), idToIndex_(nullptr), nextIndex_(0) 
 {
   _initialize_map(0);
 }
@@ -669,11 +665,10 @@ template <class Matrix_type, class Master_matrix_type>
 template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type>
 inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay(
     const std::vector<Boundary_type>& orderedBoundaries, 
-    Field_operators* operators, 
-    Cell_constructor* cellConstructor,
+    Column_settings* colSettings,
     const BirthComparatorFunction& birthComparator, 
     const DeathComparatorFunction& deathComparator)
-    : matrix_(orderedBoundaries, operators, cellConstructor, birthComparator, deathComparator),
+    : matrix_(orderedBoundaries, colSettings, birthComparator, deathComparator),
       idToIndex_(nullptr),
       nextIndex_(orderedBoundaries.size()) 
 {
@@ -689,11 +684,10 @@ template <class Matrix_type, class Master_matrix_type>
 template <typename BirthComparatorFunction, typename DeathComparatorFunction>
 inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay(
     unsigned int numberOfColumns, 
-    Field_operators* operators, 
-    Cell_constructor* cellConstructor,
+    Column_settings* colSettings,
     const BirthComparatorFunction& birthComparator, 
     const DeathComparatorFunction& deathComparator)
-    : matrix_(numberOfColumns, operators, cellConstructor, birthComparator, deathComparator),
+    : matrix_(numberOfColumns, colSettings, birthComparator, deathComparator),
       idToIndex_(nullptr),
       nextIndex_(0) 
 {
@@ -702,8 +696,8 @@ inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay
 
 template <class Matrix_type, class Master_matrix_type>
 inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay(
-    const Id_to_index_overlay& matrixToCopy, Field_operators* operators, Cell_constructor* cellConstructor)
-    : matrix_(matrixToCopy.matrix_, operators, cellConstructor),
+    const Id_to_index_overlay& matrixToCopy, Column_settings* colSettings)
+    : matrix_(matrixToCopy.matrix_, colSettings),
       idToIndex_(nullptr),
       nextIndex_(matrixToCopy.nextIndex_) 
 {
@@ -756,10 +750,11 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::insert_boundar
                                                                                   dimension_type dim) 
 {
   if constexpr (Master_matrix_type::Option_list::has_map_column_container) {
-    assert(idToIndex_->find(faceIndex) == idToIndex_->end() && "Index for simplex already chosen!");
+    GUDHI_CHECK(idToIndex_->find(faceIndex) == idToIndex_->end(),
+                std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
   } else {
-    assert((idToIndex_->size() <= faceIndex || idToIndex_[faceIndex] == static_cast<index>(-1)) &&
-           "Index for simplex already chosen!");
+    GUDHI_CHECK((idToIndex_->size() <= faceIndex || idToIndex_[faceIndex] == static_cast<index>(-1)),
+                std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
   }
   matrix_.insert_boundary(faceIndex, boundary, dim);
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
@@ -790,9 +785,9 @@ Id_to_index_overlay<Matrix_type, Master_matrix_type>::get_row(id_index rowIndex)
 }
 
 template <class Matrix_type, class Master_matrix_type>
-inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::erase_row(id_index rowIndex) 
+inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::erase_empty_row(id_index rowIndex) 
 {
-  return matrix_.erase_row(rowIndex);
+  return matrix_.erase_empty_row(rowIndex);
 }
 
 template <class Matrix_type, class Master_matrix_type>
@@ -815,7 +810,8 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::remove_maximal
       std::swap(idToIndex_->at(indexToID[curr]), idToIndex_->at(indexToID[curr + 1]));
     }
     matrix_.remove_last();
-    assert(_id_to_index(faceID) == nextIndex_ && "Indexation problem.");
+    GUDHI_CHECK(_id_to_index(faceID) == nextIndex_,
+                std::logic_error("Id_to_index_overlay::remove_maximal_face - Indexation problem."));
 
     if constexpr (Master_matrix_type::Option_list::has_map_column_container) {
       idToIndex_->erase(faceID);
@@ -842,19 +838,21 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::remove_maximal
 template <class Matrix_type, class Master_matrix_type>
 inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::remove_last() 
 {
+  if (idToIndex_->empty()) return;  //empty matrix
+
   matrix_.remove_last();
+
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
     --nextIndex_;
     if constexpr (Master_matrix_type::Option_list::has_map_column_container) {
       auto it = idToIndex_->begin();
-      while (it != idToIndex_->end() && it->second != nextIndex_) ++it;
-      assert(it != idToIndex_->end());
+      while (it->second != nextIndex_) ++it;   //should never reach idToIndex_->end()
       idToIndex_->erase(it);
     } else {
-      assert(idToIndex_->size() != 0);
       index id = idToIndex_->size() - 1;
       while (idToIndex_->operator[](id) == static_cast<index>(-1)) --id;  // should always stop before reaching -1
-      assert(idToIndex_->operator[](id) == nextIndex_);
+      GUDHI_CHECK(idToIndex_->operator[](id) == nextIndex_,
+                  std::logic_error("Id_to_index_overlay::remove_last - Indexation problem."));
       idToIndex_->operator[](id) = -1;
     }
   }
@@ -1020,7 +1018,9 @@ Id_to_index_overlay<Matrix_type, Master_matrix_type>::vine_swap_with_z_eq_1_case
   if (first > second) std::swap(first, second);
 
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
-    assert(second - first == 1 && "The columns to swap are not contiguous.");
+    GUDHI_CHECK(second - first == 1,
+                std::invalid_argument(
+                    "Id_to_index_overlay::vine_swap_with_z_eq_1_case - The columns to swap are not contiguous."));
 
     bool change = matrix_.vine_swap_with_z_eq_1_case(first);
 
@@ -1044,7 +1044,8 @@ Id_to_index_overlay<Matrix_type, Master_matrix_type>::vine_swap(id_index faceID1
   if (first > second) std::swap(first, second);
 
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
-    assert(second - first == 1 && "The columns to swap are not contiguous.");
+    GUDHI_CHECK(second - first == 1,
+                std::invalid_argument("Id_to_index_overlay::vine_swap - The columns to swap are not contiguous."));
 
     bool change = matrix_.vine_swap(first);
 

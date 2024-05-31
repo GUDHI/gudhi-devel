@@ -27,8 +27,6 @@
 
 #include <boost/iterator/indirect_iterator.hpp>
 
-#include <gudhi/Persistence_matrix/columns/cell_constructors.h>
-
 namespace Gudhi {
 namespace persistence_matrix {
 
@@ -46,55 +44,56 @@ namespace persistence_matrix {
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
  * @tparam Cell_constructor Factory of @ref Cell classes.
  */
-template <class Master_matrix, class Cell_constructor = New_cell_constructor<typename Master_matrix::Cell_type> >
+template <class Master_matrix>
 class Vector_column : public Master_matrix::Row_access_option,
                       public Master_matrix::Column_dimension_option,
                       public Master_matrix::Chain_column_option 
 {
  public:
   using Master = Master_matrix;
-  using Field_operators = typename Master_matrix::Field_operators;
-  using Field_element_type = typename Master_matrix::element_type;
   using index = typename Master_matrix::index;
   using id_index = typename Master_matrix::id_index;
   using dimension_type = typename Master_matrix::dimension_type;
+  using Field_element_type = typename Master_matrix::element_type;
   using Cell = typename Master_matrix::Cell_type;
+  using Column_settings = typename Master_matrix::Column_settings;
+
+ private:
+  using Field_operators = typename Master_matrix::Field_operators;
   using Column_type = std::vector<Cell*>;
+  using Cell_constructor = typename Master_matrix::Cell_constructor;
+
+ public:
   using iterator = boost::indirect_iterator<typename Column_type::iterator>;
   using const_iterator = boost::indirect_iterator<typename Column_type::const_iterator>;
   using reverse_iterator = boost::indirect_iterator<typename Column_type::reverse_iterator>;
   using const_reverse_iterator = boost::indirect_iterator<typename Column_type::const_reverse_iterator>;
 
-  Vector_column(Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr);
+  Vector_column(Column_settings* colSettings = nullptr);
   template <class Container_type = typename Master_matrix::boundary_type>
-  Vector_column(const Container_type& nonZeroRowIndices, Field_operators* operators, Cell_constructor* cellConstructor);
+  Vector_column(const Container_type& nonZeroRowIndices, Column_settings* colSettings);
   template <class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
   Vector_column(index columnIndex, 
                 const Container_type& nonZeroRowIndices, 
                 Row_container_type* rowContainer,
-                Field_operators* operators,
-                Cell_constructor* cellConstructor);
+                Column_settings* colSettings);
   template <class Container_type = typename Master_matrix::boundary_type>
   Vector_column(const Container_type& nonZeroChainRowIndices, 
                 dimension_type dimension, 
-                Field_operators* operators,
-                Cell_constructor* cellConstructor);
+                Column_settings* colSettings);
   template <class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
   Vector_column(index columnIndex, 
                 const Container_type& nonZeroChainRowIndices, 
                 dimension_type dimension,
                 Row_container_type* rowContainer, 
-                Field_operators* operators,
-                Cell_constructor* cellConstructor);
+                Column_settings* colSettings);
   Vector_column(const Vector_column& column, 
-                Field_operators* operators = nullptr,
-                Cell_constructor* cellConstructor = nullptr);
+                Column_settings* colSettings = nullptr);
   template <class Row_container_type>
   Vector_column(const Vector_column& column, 
                 index columnIndex, 
                 Row_container_type* rowContainer,
-                Field_operators* operators = nullptr, 
-                Cell_constructor* cellConstructor = nullptr);
+                Column_settings* colSettings = nullptr);
   Vector_column(Vector_column&& column) noexcept;
   ~Vector_column();
 
@@ -129,12 +128,12 @@ class Vector_column : public Master_matrix::Row_access_option,
 
   // this = v * this + column
   template <class Cell_range>
-  Vector_column& multiply_and_add(const Field_element_type& val, const Cell_range& column);
-  Vector_column& multiply_and_add(const Field_element_type& val, Vector_column& column);
+  Vector_column& multiply_target_and_add(const Field_element_type& val, const Cell_range& column);
+  Vector_column& multiply_target_and_add(const Field_element_type& val, Vector_column& column);
   // this = this + column * v
   template <class Cell_range>
-  Vector_column& multiply_and_add(const Cell_range& column, const Field_element_type& val);
-  Vector_column& multiply_and_add(Vector_column& column, const Field_element_type& val);
+  Vector_column& multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
+  Vector_column& multiply_source_and_add(Vector_column& column, const Field_element_type& val);
 
   friend bool operator==(const Vector_column& c1, const Vector_column& c2) {
     if (&c1 == &c2) return true;
@@ -227,53 +226,46 @@ class Vector_column : public Master_matrix::Row_access_option,
 
   // void _clean_values();
   void _delete_cell(Cell* cell);
-  void _insert_cell(const Field_element_type& value, id_index rowIndex, Column_type& column);
+  Cell* _insert_cell(const Field_element_type& value, id_index rowIndex, Column_type& column);
   void _insert_cell(id_index rowIndex, Column_type& column);
   void _update_cell(const Field_element_type& value, id_index rowIndex, index position);
   void _update_cell(id_index rowIndex, index position);
   template <class Cell_range>
   bool _add(const Cell_range& column);
   template <class Cell_range>
-  bool _multiply_and_add(const Field_element_type& val, const Cell_range& column);
+  bool _multiply_target_and_add(const Field_element_type& val, const Cell_range& column);
   template <class Cell_range>
-  bool _multiply_and_add(const Cell_range& column, const Field_element_type& val);
+  bool _multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
 
-  void _verifyCellConstructor() {
-    if (cellPool_ == nullptr) {
-      if constexpr (std::is_same_v<Cell_constructor, New_cell_constructor<typename Master_matrix::Cell_type> >) {
-        cellPool_ = &Master_matrix::defaultCellConstructor;
-      } else {
-        throw std::invalid_argument("Cell constructor pointer cannot be null.");
-      }
-    }
-  }
 };
 
-template <class Master_matrix, class Cell_constructor>
-inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(Field_operators* operators,
-                                                                     Cell_constructor* cellConstructor)
-    : ra_opt(), dim_opt(), chain_opt(), operators_(operators), cellPool_(cellConstructor) 
+template <class Master_matrix>
+inline Vector_column<Master_matrix>::Vector_column(Column_settings* colSettings)
+    : ra_opt(), dim_opt(), chain_opt(), operators_(nullptr), cellPool_(colSettings == nullptr ? nullptr : &(colSettings->cellConstructor))
 {
   if (operators_ == nullptr && cellPool_ == nullptr) return;  //to allow default constructor which gives a dummy column
-  _verifyCellConstructor();
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Container_type>
-inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(const Container_type& nonZeroRowIndices,
-                                                                     Field_operators* operators,
-                                                                     Cell_constructor* cellConstructor)
+inline Vector_column<Master_matrix>::Vector_column(const Container_type& nonZeroRowIndices,
+                                                                     Column_settings* colSettings)
     : ra_opt(),
       dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
       chain_opt(),
       column_(nonZeroRowIndices.size(), nullptr),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      operators_(nullptr),
+      cellPool_(&(colSettings->cellConstructor))
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
 
-  _verifyCellConstructor();
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
 
   index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
@@ -287,13 +279,12 @@ inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(const Conta
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Container_type, class Row_container_type>
-inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(index columnIndex,
+inline Vector_column<Master_matrix>::Vector_column(index columnIndex,
                                                                      const Container_type& nonZeroRowIndices,
                                                                      Row_container_type* rowContainer,
-                                                                     Field_operators* operators,
-                                                                     Cell_constructor* cellConstructor)
+                                                                     Column_settings* colSettings)
     : ra_opt(columnIndex, rowContainer),
       dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
       chain_opt([&] {
@@ -304,13 +295,15 @@ inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(index colum
         }
       }()),
       column_(nonZeroRowIndices.size(), nullptr),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      operators_(nullptr),
+      cellPool_(&(colSettings->cellConstructor))
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
 
-  _verifyCellConstructor();
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
 
   index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
@@ -324,12 +317,11 @@ inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(index colum
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Container_type>
-inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(const Container_type& nonZeroRowIndices,
+inline Vector_column<Master_matrix>::Vector_column(const Container_type& nonZeroRowIndices,
                                                                      dimension_type dimension,
-                                                                     Field_operators* operators,
-                                                                     Cell_constructor* cellConstructor)
+                                                                     Column_settings* colSettings)
     : ra_opt(),
       dim_opt(dimension),
       chain_opt([&] {
@@ -340,10 +332,12 @@ inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(const Conta
         }
       }()),
       column_(nonZeroRowIndices.size(), nullptr),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      operators_(nullptr),
+      cellPool_(&(colSettings->cellConstructor))
 {
-  _verifyCellConstructor();
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
 
   index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
@@ -357,15 +351,14 @@ inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(const Conta
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Container_type, class Row_container_type>
-inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(
+inline Vector_column<Master_matrix>::Vector_column(
     index columnIndex, 
     const Container_type& nonZeroRowIndices, 
     dimension_type dimension,
     Row_container_type* rowContainer, 
-    Field_operators* operators, 
-    Cell_constructor* cellConstructor)
+    Column_settings* colSettings)
     : ra_opt(columnIndex, rowContainer),
       dim_opt(dimension),
       chain_opt([&] {
@@ -376,10 +369,12 @@ inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(
         }
       }()),
       column_(nonZeroRowIndices.size(), nullptr),
-      operators_(operators),
-      cellPool_(cellConstructor) 
+      operators_(nullptr),
+      cellPool_(&(colSettings->cellConstructor))
 {
-  _verifyCellConstructor();
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    operators_ = &(colSettings->operators);
+  }
 
   index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
@@ -393,22 +388,25 @@ inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(const Vector_column& column,
-                                                                     Field_operators* operators,
-                                                                     Cell_constructor* cellConstructor)
+template <class Master_matrix>
+inline Vector_column<Master_matrix>::Vector_column(const Vector_column& column,
+                                                                     Column_settings* colSettings)
     : ra_opt(),
       dim_opt(static_cast<const dim_opt&>(column)),
       chain_opt(static_cast<const chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
       erasedValues_(column.erasedValues_),
-      operators_(operators == nullptr ? column.operators_ : operators),
-      cellPool_(cellConstructor == nullptr ? column.cellPool_ : cellConstructor) 
+      operators_(colSettings == nullptr ? column.operators_ : nullptr),
+      cellPool_(colSettings == nullptr ? column.cellPool_ : &(colSettings->cellConstructor))
 {
   static_assert(!Master_matrix::Option_list::has_row_access,
                 "Simple copy constructor not available when row access option enabled. Please specify the new column "
                 "index and the row container.");
 
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    if (colSettings != nullptr) operators_ = &(colSettings->operators);
+  }
+
   index i = 0;
   for (const Cell* cell : column.column_) {
     if constexpr (Master_matrix::Option_list::is_z2) {
@@ -419,20 +417,23 @@ inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(const Vecto
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Row_container_type>
-inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(const Vector_column& column, index columnIndex,
+inline Vector_column<Master_matrix>::Vector_column(const Vector_column& column, index columnIndex,
                                                                      Row_container_type* rowContainer,
-                                                                     Field_operators* operators,
-                                                                     Cell_constructor* cellConstructor)
+                                                                     Column_settings* colSettings)
     : ra_opt(columnIndex, rowContainer),
       dim_opt(static_cast<const dim_opt&>(column)),
       chain_opt(static_cast<const chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
       erasedValues_(column.erasedValues_),
-      operators_(operators == nullptr ? column.operators_ : operators),
-      cellPool_(cellConstructor == nullptr ? column.cellPool_ : cellConstructor) 
+      operators_(colSettings == nullptr ? column.operators_ : nullptr),
+      cellPool_(colSettings == nullptr ? column.cellPool_ : &(colSettings->cellConstructor))
 {
+  if constexpr (!Master_matrix::Option_list::is_z2){
+    if (colSettings != nullptr) operators_ = &(colSettings->operators);
+  }
+
   index i = 0;
   for (const Cell* cell : column.column_) {
     if constexpr (Master_matrix::Option_list::is_z2) {
@@ -443,8 +444,8 @@ inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(const Vecto
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(Vector_column&& column) noexcept
+template <class Master_matrix>
+inline Vector_column<Master_matrix>::Vector_column(Vector_column&& column) noexcept
     : ra_opt(std::move(static_cast<ra_opt&>(column))),
       dim_opt(std::move(static_cast<dim_opt&>(column))),
       chain_opt(std::move(static_cast<chain_opt&>(column))),
@@ -454,17 +455,17 @@ inline Vector_column<Master_matrix, Cell_constructor>::Vector_column(Vector_colu
       cellPool_(std::exchange(column.cellPool_, nullptr)) 
 {}
 
-template <class Master_matrix, class Cell_constructor>
-inline Vector_column<Master_matrix, Cell_constructor>::~Vector_column() 
+template <class Master_matrix>
+inline Vector_column<Master_matrix>::~Vector_column() 
 {
   for (auto* cell : column_) {
     _delete_cell(cell);
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline std::vector<typename Vector_column<Master_matrix, Cell_constructor>::Field_element_type>
-Vector_column<Master_matrix, Cell_constructor>::get_content(int columnLength) const 
+template <class Master_matrix>
+inline std::vector<typename Vector_column<Master_matrix>::Field_element_type>
+Vector_column<Master_matrix>::get_content(int columnLength) const 
 {
   if (columnLength < 0 && column_.size() > 0)
     columnLength = column_.back()->get_row_index() + 1;
@@ -486,8 +487,8 @@ Vector_column<Master_matrix, Cell_constructor>::get_content(int columnLength) co
   return container;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline bool Vector_column<Master_matrix, Cell_constructor>::is_non_zero(id_index rowIndex) const 
+template <class Master_matrix>
+inline bool Vector_column<Master_matrix>::is_non_zero(id_index rowIndex) const 
 {
   if constexpr (!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type)
     if (erasedValues_.find(rowIndex) != erasedValues_.end()) return false;
@@ -497,8 +498,8 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::is_non_zero(id_index
                             [](const Cell* a, const Cell* b) { return a->get_row_index() < b->get_row_index(); });
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline bool Vector_column<Master_matrix, Cell_constructor>::is_empty() const 
+template <class Master_matrix>
+inline bool Vector_column<Master_matrix>::is_empty() const 
 {
   if constexpr (!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type) {
     return column_.size() == erasedValues_.size();  // assumes that erasedValues is always a subset of column_, which is
@@ -508,8 +509,8 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::is_empty() const
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline std::size_t Vector_column<Master_matrix, Cell_constructor>::size() const 
+template <class Master_matrix>
+inline std::size_t Vector_column<Master_matrix>::size() const 
 {
   if constexpr (!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type) {
     return column_.size() - erasedValues_.size();  // assumes that erasedValues is always a subset of column_, which is
@@ -519,9 +520,9 @@ inline std::size_t Vector_column<Master_matrix, Cell_constructor>::size() const
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Map_type>
-inline void Vector_column<Master_matrix, Cell_constructor>::reorder(const Map_type& valueMap,
+inline void Vector_column<Master_matrix>::reorder(const Map_type& valueMap,
                                                                     [[maybe_unused]] index columnIndex) 
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
@@ -574,8 +575,8 @@ inline void Vector_column<Master_matrix, Cell_constructor>::reorder(const Map_ty
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline void Vector_column<Master_matrix, Cell_constructor>::clear() 
+template <class Master_matrix>
+inline void Vector_column<Master_matrix>::clear() 
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns as a base element should not be empty.");
@@ -589,8 +590,8 @@ inline void Vector_column<Master_matrix, Cell_constructor>::clear()
   erasedValues_.clear();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline void Vector_column<Master_matrix, Cell_constructor>::clear(id_index rowIndex) 
+template <class Master_matrix>
+inline void Vector_column<Master_matrix>::clear(id_index rowIndex) 
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns.");
@@ -598,9 +599,9 @@ inline void Vector_column<Master_matrix, Cell_constructor>::clear(id_index rowIn
   erasedValues_.insert(rowIndex);
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Vector_column<Master_matrix, Cell_constructor>::id_index
-Vector_column<Master_matrix, Cell_constructor>::get_pivot() 
+template <class Master_matrix>
+inline typename Vector_column<Master_matrix>::id_index
+Vector_column<Master_matrix>::get_pivot() 
 {
   static_assert(Master_matrix::isNonBasic,
                 "Method not available for base columns.");  // could technically be, but is the notion usefull then?
@@ -624,9 +625,9 @@ Vector_column<Master_matrix, Cell_constructor>::get_pivot()
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Vector_column<Master_matrix, Cell_constructor>::Field_element_type
-Vector_column<Master_matrix, Cell_constructor>::get_pivot_value() 
+template <class Master_matrix>
+inline typename Vector_column<Master_matrix>::Field_element_type
+Vector_column<Master_matrix>::get_pivot_value() 
 {
   static_assert(Master_matrix::isNonBasic,
                 "Method not available for base columns.");  // could technically be, but is the notion usefull then?
@@ -658,65 +659,65 @@ Vector_column<Master_matrix, Cell_constructor>::get_pivot_value()
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Vector_column<Master_matrix, Cell_constructor>::iterator
-Vector_column<Master_matrix, Cell_constructor>::begin() noexcept 
+template <class Master_matrix>
+inline typename Vector_column<Master_matrix>::iterator
+Vector_column<Master_matrix>::begin() noexcept 
 {
   return column_.begin();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Vector_column<Master_matrix, Cell_constructor>::const_iterator
-Vector_column<Master_matrix, Cell_constructor>::begin() const noexcept 
+template <class Master_matrix>
+inline typename Vector_column<Master_matrix>::const_iterator
+Vector_column<Master_matrix>::begin() const noexcept 
 {
   return column_.begin();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Vector_column<Master_matrix, Cell_constructor>::iterator
-Vector_column<Master_matrix, Cell_constructor>::end() noexcept 
+template <class Master_matrix>
+inline typename Vector_column<Master_matrix>::iterator
+Vector_column<Master_matrix>::end() noexcept 
 {
   return column_.end();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Vector_column<Master_matrix, Cell_constructor>::const_iterator
-Vector_column<Master_matrix, Cell_constructor>::end() const noexcept 
+template <class Master_matrix>
+inline typename Vector_column<Master_matrix>::const_iterator
+Vector_column<Master_matrix>::end() const noexcept 
 {
   return column_.end();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Vector_column<Master_matrix, Cell_constructor>::reverse_iterator
-Vector_column<Master_matrix, Cell_constructor>::rbegin() noexcept 
+template <class Master_matrix>
+inline typename Vector_column<Master_matrix>::reverse_iterator
+Vector_column<Master_matrix>::rbegin() noexcept 
 {
   return column_.rbegin();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Vector_column<Master_matrix, Cell_constructor>::const_reverse_iterator
-Vector_column<Master_matrix, Cell_constructor>::rbegin() const noexcept 
+template <class Master_matrix>
+inline typename Vector_column<Master_matrix>::const_reverse_iterator
+Vector_column<Master_matrix>::rbegin() const noexcept 
 {
   return column_.rbegin();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Vector_column<Master_matrix, Cell_constructor>::reverse_iterator
-Vector_column<Master_matrix, Cell_constructor>::rend() noexcept 
+template <class Master_matrix>
+inline typename Vector_column<Master_matrix>::reverse_iterator
+Vector_column<Master_matrix>::rend() noexcept 
 {
   return column_.rend();
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline typename Vector_column<Master_matrix, Cell_constructor>::const_reverse_iterator
-Vector_column<Master_matrix, Cell_constructor>::rend() const noexcept 
+template <class Master_matrix>
+inline typename Vector_column<Master_matrix>::const_reverse_iterator
+Vector_column<Master_matrix>::rend() const noexcept 
 {
   return column_.rend();
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Cell_range>
-inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matrix, Cell_constructor>::operator+=(
+inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::operator+=(
     const Cell_range& column) 
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Vector_column>),
@@ -730,8 +731,8 @@ inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matr
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matrix, Cell_constructor>::operator+=(
+template <class Master_matrix>
+inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::operator+=(
     Vector_column& column) 
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
@@ -747,8 +748,8 @@ inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matr
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matrix, Cell_constructor>::operator*=(
+template <class Master_matrix>
+inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::operator*=(
     unsigned int v) 
 {
   if constexpr (Master_matrix::Option_list::is_z2) {
@@ -774,7 +775,7 @@ inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matr
     if (val == Field_operators::get_multiplicative_identity()) return *this;
 
     for (Cell* cell : column_) {
-      cell->get_element() = operators_->multiply(cell->get_element(), val);
+      operators_->multiply_inplace(cell->get_element(), val);
       if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(*cell);
     }
   }
@@ -782,9 +783,9 @@ inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matr
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Cell_range>
-inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matrix, Cell_constructor>::multiply_and_add(
+inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_target_and_add(
     const Field_element_type& val, const Cell_range& column) 
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Vector_column>),
@@ -801,14 +802,14 @@ inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matr
       _add(column);
     }
   } else {
-    _multiply_and_add(val, column);
+    _multiply_target_and_add(val, column);
   }
 
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matrix, Cell_constructor>::multiply_and_add(
+template <class Master_matrix>
+inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_target_and_add(
     const Field_element_type& val, Vector_column& column) 
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
@@ -823,7 +824,7 @@ inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matr
         throw std::invalid_argument("A chain column should not be multiplied by 0.");
       }
     } else {
-      if (_multiply_and_add(val, column)) {
+      if (_multiply_target_and_add(val, column)) {
         chain_opt::swap_pivots(column);
         dim_opt::swap_dimension(column);
       }
@@ -837,16 +838,16 @@ inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matr
         _add(column);
       }
     } else {
-      _multiply_and_add(val, column);
+      _multiply_target_and_add(val, column);
     }
   }
 
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Cell_range>
-inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matrix, Cell_constructor>::multiply_and_add(
+inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_source_and_add(
     const Cell_range& column, const Field_element_type& val) 
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Vector_column>),
@@ -860,14 +861,14 @@ inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matr
       _add(column);
     }
   } else {
-    _multiply_and_add(column, val);
+    _multiply_source_and_add(column, val);
   }
 
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matrix, Cell_constructor>::multiply_and_add(
+template <class Master_matrix>
+inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_source_and_add(
     Vector_column& column, const Field_element_type& val) 
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
@@ -880,7 +881,7 @@ inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matr
         }
       }
     } else {
-      if (_multiply_and_add(column, val)) {
+      if (_multiply_source_and_add(column, val)) {
         chain_opt::swap_pivots(column);
         dim_opt::swap_dimension(column);
       }
@@ -891,15 +892,15 @@ inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matr
         _add(column);
       }
     } else {
-      _multiply_and_add(column, val);
+      _multiply_source_and_add(column, val);
     }
   }
 
   return *this;
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matrix, Cell_constructor>::operator=(
+template <class Master_matrix>
+inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::operator=(
     const Vector_column& other) 
 {
   static_assert(!Master_matrix::Option_list::has_row_access, "= assignement not enabled with row access option.");
@@ -955,73 +956,74 @@ inline Vector_column<Master_matrix, Cell_constructor>& Vector_column<Master_matr
 // 	column_.swap(newColumn);
 // }
 
-template <class Master_matrix, class Cell_constructor>
-inline void Vector_column<Master_matrix, Cell_constructor>::_delete_cell(Cell* cell) 
+template <class Master_matrix>
+inline void Vector_column<Master_matrix>::_delete_cell(Cell* cell) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::unlink(cell);
   cellPool_->destroy(cell);
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline void Vector_column<Master_matrix, Cell_constructor>::_insert_cell(const Field_element_type& value,
-                                                                         id_index rowIndex, 
-                                                                         Column_type& column) 
+template <class Master_matrix>
+inline typename Vector_column<Master_matrix>::Cell* Vector_column<Master_matrix>::_insert_cell(
+    const Field_element_type& value, id_index rowIndex, Column_type& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    new_cell->set_element(value);
-    column.push_back(new_cell);
-    ra_opt::insert_cell(rowIndex, new_cell);
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    newCell->set_element(value);
+    column.push_back(newCell);
+    ra_opt::insert_cell(rowIndex, newCell);
+    return newCell;
   } else {
-    Cell* new_cell = cellPool_->construct(rowIndex);
-    new_cell->set_element(value);
-    column.push_back(new_cell);
+    Cell* newCell = cellPool_->construct(rowIndex);
+    newCell->set_element(value);
+    column.push_back(newCell);
+    return newCell;
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline void Vector_column<Master_matrix, Cell_constructor>::_insert_cell(id_index rowIndex, Column_type& column) 
+template <class Master_matrix>
+inline void Vector_column<Master_matrix>::_insert_cell(id_index rowIndex, Column_type& column) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    column.push_back(new_cell);
-    ra_opt::insert_cell(rowIndex, new_cell);
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    column.push_back(newCell);
+    ra_opt::insert_cell(rowIndex, newCell);
   } else {
-    Cell* new_cell = cellPool_->construct(rowIndex);
-    column.push_back(new_cell);
+    Cell* newCell = cellPool_->construct(rowIndex);
+    column.push_back(newCell);
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline void Vector_column<Master_matrix, Cell_constructor>::_update_cell(const Field_element_type& value,
+template <class Master_matrix>
+inline void Vector_column<Master_matrix>::_update_cell(const Field_element_type& value,
                                                                          id_index rowIndex, index position) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    new_cell->set_element(value);
-    column_[position] = new_cell;
-    ra_opt::insert_cell(rowIndex, new_cell);
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    newCell->set_element(value);
+    column_[position] = newCell;
+    ra_opt::insert_cell(rowIndex, newCell);
   } else {
     column_[position] = cellPool_->construct(rowIndex);
     column_[position]->set_element(value);
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
-inline void Vector_column<Master_matrix, Cell_constructor>::_update_cell(id_index rowIndex, index position) 
+template <class Master_matrix>
+inline void Vector_column<Master_matrix>::_update_cell(id_index rowIndex, index position) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* new_cell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
-    column_[position] = new_cell;
-    ra_opt::insert_cell(rowIndex, new_cell);
+    Cell* newCell = cellPool_->construct(ra_opt::columnIndex_, rowIndex);
+    column_[position] = newCell;
+    ra_opt::insert_cell(rowIndex, newCell);
   } else {
     column_[position] = cellPool_->construct(rowIndex);
   }
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Cell_range>
-inline bool Vector_column<Master_matrix, Cell_constructor>::_add(const Cell_range& column) 
+inline bool Vector_column<Master_matrix>::_add(const Cell_range& column) 
 {
   if (column.begin() == column.end()) return false;
   if (column_.empty()) {  // chain should never enter here.
@@ -1051,7 +1053,7 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_add(const Cell_rang
       }
       if (itTarget == column_.end()) break;
 
-      if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix, Cell_constructor> >) {
+      if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix> >) {
         while (itSource != column.end() &&
                column.erasedValues_.find(itSource->get_row_index()) != column.erasedValues_.end())
           ++itSource;
@@ -1078,7 +1080,7 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_add(const Cell_rang
         }
         _delete_cell(cellTarget);
       } else {
-        cellTarget->get_element() = operators_->add(cellTarget->get_element(), cellSource.get_element());
+        operators_->add_inplace(cellTarget->get_element(), cellSource.get_element());
         if (cellTarget->get_element() == Field_operators::get_additive_identity()) {
           if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
             if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -1095,7 +1097,7 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_add(const Cell_rang
   }
 
   while (itSource != column.end()) {
-    if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix, Cell_constructor> > &&
+    if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix> > &&
                   (!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type)) {
       while (itSource != column.end() &&
              column.erasedValues_.find(itSource->get_row_index()) != column.erasedValues_.end())
@@ -1128,9 +1130,9 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_add(const Cell_rang
   return pivotIsZeroed;
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Cell_range>
-inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(const Field_element_type& val,
+inline bool Vector_column<Master_matrix>::_multiply_target_and_add(const Field_element_type& val,
                                                                               const Cell_range& column) 
 {
   bool pivotIsZeroed = false;
@@ -1153,6 +1155,8 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(co
         _update_cell(cell.get_element(), cell.get_row_index(), i++);
       }
     }
+    if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix> >)
+      erasedValues_ = column.erasedValues_;
     return true;
   }
 
@@ -1169,7 +1173,7 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(co
       }
       if (itTarget == column_.end()) break;
 
-      if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix, Cell_constructor> >) {
+      if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix> >) {
         while (itSource != column.end() &&
                column.erasedValues_.find(itSource->get_row_index()) != column.erasedValues_.end())
           ++itSource;
@@ -1180,7 +1184,7 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(co
     Cell* cellTarget = *itTarget;
     const Cell& cellSource = *itSource;
     if (cellTarget->get_row_index() < cellSource.get_row_index()) {
-      cellTarget->get_element() = operators_->multiply(cellTarget->get_element(), val);
+      operators_->multiply_inplace(cellTarget->get_element(), val);
       if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**itTarget);
       newColumn.push_back(cellTarget);
       ++itTarget;
@@ -1188,8 +1192,7 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(co
       _insert_cell(cellSource.get_element(), cellSource.get_row_index(), newColumn);
       ++itSource;
     } else {
-      cellTarget->get_element() =
-          operators_->multiply_and_add(cellTarget->get_element(), val, cellSource.get_element());
+      operators_->multiply_and_add_inplace_front(cellTarget->get_element(), val, cellSource.get_element());
       if (cellTarget->get_element() == Field_operators::get_additive_identity()) {
         if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
           if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -1213,14 +1216,14 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(co
       if (itTarget == column_.end()) break;
     }
 
-    (*itTarget)->get_element() = operators_->multiply((*itTarget)->get_element(), val);
+    operators_->multiply_inplace((*itTarget)->get_element(), val);
     if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::update_cell(**itTarget);
     newColumn.push_back(*itTarget);
     itTarget++;
   }
 
   while (itSource != column.end()) {
-    if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix, Cell_constructor> > &&
+    if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix> > &&
                   (!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type)) {
       while (itSource != column.end() &&
              column.erasedValues_.find(itSource->get_row_index()) != column.erasedValues_.end())
@@ -1238,9 +1241,9 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(co
   return pivotIsZeroed;
 }
 
-template <class Master_matrix, class Cell_constructor>
+template <class Master_matrix>
 template <class Cell_range>
-inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(const Cell_range& column,
+inline bool Vector_column<Master_matrix>::_multiply_source_and_add(const Cell_range& column,
                                                                               const Field_element_type& val) 
 {
   if (val == 0u || column.begin() == column.end()) {
@@ -1261,7 +1264,7 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(co
       }
       if (itTarget == column_.end()) break;
 
-      if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix, Cell_constructor> >) {
+      if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix> >) {
         while (itSource != column.end() &&
                column.erasedValues_.find(itSource->get_row_index()) != column.erasedValues_.end())
           ++itSource;
@@ -1275,11 +1278,11 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(co
       newColumn.push_back(cellTarget);
       ++itTarget;
     } else if (cellTarget->get_row_index() > cellSource.get_row_index()) {
-      _insert_cell(operators_->multiply(cellSource.get_element(), val), cellSource.get_row_index(), newColumn);
+      Cell* newCell = _insert_cell(cellSource.get_element(), cellSource.get_row_index(), newColumn);
+      operators_->multiply_inplace(newCell->get_element(), val);
       ++itSource;
     } else {
-      cellTarget->get_element() =
-          operators_->multiply_and_add(cellSource.get_element(), val, cellTarget->get_element());
+      operators_->multiply_and_add_inplace_back(cellSource.get_element(), val, cellTarget->get_element());
       if (cellTarget->get_element() == Field_operators::get_additive_identity()) {
         if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
           if (cellTarget->get_row_index() == chain_opt::get_pivot()) pivotIsZeroed = true;
@@ -1295,7 +1298,7 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(co
   }
 
   while (itSource != column.end()) {
-    if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix, Cell_constructor> > &&
+    if constexpr (std::is_same_v<Cell_range, Vector_column<Master_matrix> > &&
                   (!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type)) {
       while (itSource != column.end() &&
              column.erasedValues_.find(itSource->get_row_index()) != column.erasedValues_.end())
@@ -1303,7 +1306,8 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(co
       if (itSource == column.end()) break;
     }
 
-    _insert_cell(operators_->multiply(itSource->get_element(), val), itSource->get_row_index(), newColumn);
+    Cell* newCell = _insert_cell(itSource->get_element(), itSource->get_row_index(), newColumn);
+    operators_->multiply_inplace(newCell->get_element(), val);
     ++itSource;
   }
 
@@ -1337,10 +1341,10 @@ inline bool Vector_column<Master_matrix, Cell_constructor>::_multiply_and_add(co
  * @tparam Master_matrix Template parameter of @ref Gudhi::persistence_matrix::Vector_column.
  * @tparam Cell_constructor Template parameter of @ref Gudhi::persistence_matrix::Vector_column.
  */
-template <class Master_matrix, class Cell_constructor>
-struct std::hash<Gudhi::persistence_matrix::Vector_column<Master_matrix, Cell_constructor> > 
+template <class Master_matrix>
+struct std::hash<Gudhi::persistence_matrix::Vector_column<Master_matrix> > 
 {
-  size_t operator()(const Gudhi::persistence_matrix::Vector_column<Master_matrix, Cell_constructor>& column) const {
+  size_t operator()(const Gudhi::persistence_matrix::Vector_column<Master_matrix>& column) const {
     std::size_t seed = 0;
     for (const auto& cell : column) {
       seed ^= std::hash<unsigned int>()(cell.get_row_index() * static_cast<unsigned int>(cell.get_element())) +

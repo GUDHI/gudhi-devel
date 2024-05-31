@@ -23,7 +23,7 @@
 #include <gudhi/Persistence_matrix/columns/chain_column_extra_properties.h>
 #include <gudhi/Persistence_matrix/columns/cell_types.h>
 #include <gudhi/Persistence_matrix/columns/row_access.h>
-#include <gudhi/Persistence_matrix/columns/cell_constructors.h>
+#include <gudhi/Persistence_matrix/allocators/cell_constructors.h>
 #include <gudhi/Fields/Z2_field_operators.h>
 #include <gudhi/Fields/Zp_field_operators.h>
 
@@ -55,6 +55,11 @@ struct Column_mini_matrix
 	using pos_index = typename Options::index_type;
 	using dimension_type = typename Options::dimension_type;
 	using element_type = typename std::conditional<Options::is_z2, bool, typename Field_operators::element_type>::type;
+	using characteristic_type =
+      typename std::conditional<Options::is_z2, 
+                                unsigned int, 
+                                typename Field_operators::characteristic_type
+                               >::type;
 
 	struct matrix_row_tag;
 	struct matrix_column_tag;
@@ -102,6 +107,28 @@ struct Column_mini_matrix
 	using Cell_type = Cell<Column_mini_matrix<Options> >;
 
 	inline static New_cell_constructor<Cell_type> defaultCellConstructor;
+	using Cell_constructor = New_cell_constructor<Cell_type>;
+
+	struct Column_z2_settings{
+		Column_z2_settings() : cellConstructor() {}
+		Column_z2_settings([[maybe_unused]] characteristic_type characteristic) : cellConstructor() {}
+
+		Cell_constructor cellConstructor;
+	};
+
+	struct Column_zp_settings{
+		Column_zp_settings() : operators(), cellConstructor() {}
+		Column_zp_settings(characteristic_type characteristic) : operators(characteristic), cellConstructor() {}
+
+		Field_operators operators;
+		Cell_constructor cellConstructor;
+	};
+
+	using Column_settings = typename std::conditional<
+		Options::is_z2,
+		Column_z2_settings,
+		Column_zp_settings
+		>::type;
 
 	template<class Cell_type>
 	struct RowCellComp {

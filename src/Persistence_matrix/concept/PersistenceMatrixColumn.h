@@ -60,14 +60,13 @@ class PersistenceMatrixColumn :
 {
  public:
   using Master = unspecified;                 /**< Master matrix, that is a templated @ref Matrix. */
-  using Cell_constructor = unspecified;       /**< @ref Cell factory. E.g., @ref Pool_cell_constructor. */
-  using Field_operators = unspecified;        /**< Follows the @ref FieldOperators concept. */
-  using Field_element_type = unspecified;     /**< Type of a field element. */
   using index = unspecified;                  /**< Type of @ref MatIdx index. */
   using id_index = unspecified;               /**< Type of @ref IDIdx index. */
   using dimension_type = unspecified;         /**< Type for dimension value. */
+  using Field_element_type = unspecified;     /**< Type of a field element. */
   using Cell = unspecified;                   /**< @ref Cell. */
-  using Column_type = unspecified;            /**< Type of cell container. */
+  using Column_settings = unspecified;        /**< Structure giving access to external classes eventually necessary,
+                                                   like a cell pool for example. */
   using iterator = unspecified;               /**< Column iterator type. */
   using const_iterator = unspecified;         /**< Column const_iterator type. */
   using reverse_iterator = unspecified;       /**< Column reverse_iterator type. */
@@ -78,10 +77,12 @@ class PersistenceMatrixColumn :
    * can only be used as a dummy, i.e., no modifying method should be used or there will be a segmentation fault.
    * Same goes for @p operators if @ref PersistenceMatrixOptions::is_z2 is false.
    * 
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to a setting structure or `nullptr`. The structure should contain all the necessary
+   * classes specific to the column type, such as custom allocators. The specificities are this way hidden behind
+   * a commun interface for all column types. If @p colSettings is not specified or is equal to `nullptr`, the column
+   * should still be constructable eventhough not necessarily "usable".
    */
-  PersistenceMatrixColumn(Field_operators* operators = nullptr, Cell_constructor* cellConstructor = nullptr);
+  PersistenceMatrixColumn(Column_settings* colSettings = nullptr);
   /**
    * @brief Constructs a column from the given range of @ref Matrix::cell_rep_type. If the dimension is stored,
    * the face is assumed to be simplicial and its dimension to be `nonZeroRowIndices length - 1` or `0`.
@@ -89,13 +90,13 @@ class PersistenceMatrixColumn :
    * 
    * @tparam Container_type Range of @ref Matrix::cell_rep_type. Assumed to have a %begin(), %end() and %size() method.
    * @param nonZeroRowIndices Range of @ref Matrix::cell_rep_type representing all rows with non zero values.
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure. The structure should contain all the necessary
+   * classes specific to the column type, such as custom allocators. The specificities are this way hidden behind
+   * a commun interface for all column types.
    */
   template <class Container_type = typename Master_matrix::boundary_type>
   PersistenceMatrixColumn(const Container_type& nonZeroRowIndices, 
-                          Field_operators* operators,
-                          Cell_constructor* cellConstructor);
+                          Column_settings* colSettings);
   /**
    * @brief Constructs a column from the given range of @ref Matrix::cell_rep_type such that the rows can be accessed.
    * Each new cell in the column is also inserted in a row using @ref Row_access::insert_cell.
@@ -108,15 +109,15 @@ class PersistenceMatrixColumn :
    * @param columnIndex @ref MatIdx column index that should be specified to the cells.
    * @param nonZeroRowIndices Range of @ref Matrix::cell_rep_type representing all rows with non zero values.
    * @param rowContainer Pointer to the row container that will be forwarded to @ref Row_access at construction.
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure. The structure should contain all the necessary
+   * classes specific to the column type, such as custom allocators. The specificities are this way hidden behind
+   * a commun interface for all column types.
    */
   template <class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
   PersistenceMatrixColumn(index columnIndex, 
                           const Container_type& nonZeroRowIndices, 
                           Row_container_type* rowContainer,
-                          Field_operators* operators,
-                          Cell_constructor* cellConstructor);
+                          Column_settings* colSettings);
   /**
    * @brief Constructs a column from the given range of @ref Matrix::cell_rep_type and stores the given dimension
    * if @ref Column_dimension_option is not a dummy.
@@ -124,14 +125,14 @@ class PersistenceMatrixColumn :
    * @tparam Container_type Range of @ref Matrix::cell_rep_type. Assumed to have a %begin(), %end() and %size() method.
    * @param nonZeroChainRowIndices Range of @ref Matrix::cell_rep_type representing all rows with non zero values.
    * @param dimension Dimension of the column. Is ignored if the dimension is not stored.
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure. The structure should contain all the necessary
+   * classes specific to the column type, such as custom allocators. The specificities are this way hidden behind
+   * a commun interface for all column types.
    */
   template <class Container_type = typename Master_matrix::boundary_type>
   PersistenceMatrixColumn(const Container_type& nonZeroChainRowIndices, 
                           dimension_type dimension,
-                          Field_operators* operators,
-                          Cell_constructor* cellConstructor);
+                          Column_settings* colSettings);
   /**
    * @brief Constructs a column from the given range of @ref Matrix::cell_rep_type such that the rows can be accessed.
    * Each new cell in the column is also inserted in a row using @ref Row_access::insert_cell.
@@ -144,29 +145,28 @@ class PersistenceMatrixColumn :
    * @param nonZeroRowIndices Range of @ref Matrix::cell_rep_type representing all rows with non zero values.
    * @param dimension Dimension of the column. Is ignored if the dimension is not stored.
    * @param rowContainer Pointer to the row container that will be forwarded to @ref Row_access at construction.
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to an existing setting structure. The structure should contain all the necessary
+   * classes specific to the column type, such as custom allocators. The specificities are this way hidden behind
+   * a commun interface for all column types.
    */
   template <class Container_type = typename Master_matrix::boundary_type, class Row_container_type>
   PersistenceMatrixColumn(index columnIndex, 
                           const Container_type& nonZeroChainRowIndices, 
                           dimension_type dimension,
                           Row_container_type* rowContainer, 
-                          Field_operators* operators,
-                          Cell_constructor* cellConstructor);
+                          Column_settings* colSettings);
   /**
    * @brief Copy constructor. If @p operators or @p cellConstructor is not a null pointer, its value is kept
    * instead of the one in the copied column.
    * 
    * @param column Column to copy.
-   * @param operators Pointer to the field operators.
-   * If null pointer, the pointer in @p column is choosen instead.
-   * @param cellConstructor Pointer to the cell factory.
-   * If null pointer, the pointer in @p column is choosen instead.
+   * @param colSettings Pointer to a setting structure or `nullptr`. The structure should contain all the necessary
+   * classes specific to the column type, such as custom allocators. The specificities are this way hidden behind
+   * a commun interface for all column types. If @p colSettings is not specified or is equal to `nullptr`, the structure
+   * stored in @p column is used instead.
    */
   PersistenceMatrixColumn(const PersistenceMatrixColumn& column, 
-                          Field_operators* operators = nullptr,
-                          Cell_constructor* cellConstructor = nullptr);
+                          Column_settings* colSettings = nullptr);
   /**
    * @brief Copy constructor with row access.
    * If @p operators or @p cellConstructor is not a null pointer, its value is kept
@@ -177,17 +177,16 @@ class PersistenceMatrixColumn :
    * @param column Column to copy.
    * @param columnIndex @ref MatIdx column index of the new column once copied.
    * @param rowContainer Pointer to the row container that will be forwarded to @ref Row_access.
-   * @param operators  Pointer to the field operators.
-   * If null pointer, the pointer in @p column is choosen instead.
-   * @param cellConstructor Pointer to the cell factory.
-   * If null pointer, the pointer in @p column is choosen instead.
+   * @param colSettings Pointer to a setting structure or `nullptr`. The structure should contain all the necessary
+   * classes specific to the column type, such as custom allocators. The specificities are this way hidden behind
+   * a commun interface for all column types. If @p colSettings is not specified or is equal to `nullptr`, the structure
+   * stored in @p column is used instead.
    */
   template <class Row_container_type>
   PersistenceMatrixColumn(const PersistenceMatrixColumn& column, 
                           index columnIndex, 
                           Row_container_type* rowContainer,
-                          Field_operators* operators = nullptr, 
-                          Cell_constructor* cellConstructor = nullptr);
+                          Column_settings* colSettings = nullptr);
   /**
    * @brief Move constructor.
    * 
@@ -366,9 +365,9 @@ class PersistenceMatrixColumn :
    * @brief Adds the given @ref Cell range onto the column.
    * 
    * @tparam Cell_range @ref Cell range with %begin() and %end() method.
-   * @param column @ref Cell range. Every cell has to return the right value when using @ref Cell::get_row_index and,
-   * if @ref PersistenceMatrixOptions::is_z2 is false, also when using
-   * @ref Cell_field_element::get_element "Cell::get_element".
+   * @param column @ref Cell range. Only the stored row index and the stored element value
+   * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
+   * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.
    * @return Reference to this column.
    */
   template <class Cell_range>
@@ -394,41 +393,26 @@ class PersistenceMatrixColumn :
    * 
    * @tparam Cell_range @ref Cell range with %begin() and %end() method.
    * @param val Value to multiply.
-   * @param column @ref Cell range. Every cell has to return the right value when using @ref Cell::get_row_index and,
-   * if @ref PersistenceMatrixOptions::is_z2 is false, also when using
-   * @ref Cell_field_element::get_element "Cell::get_element".
+   * @param column @ref Cell range. Only the stored row index and the stored element value
+   * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
+   * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.
    * @return Reference to this column.
    */
   template <class Cell_range>
-  PersistenceMatrixColumn& multiply_and_add(const Field_element_type& val, const Cell_range& column);
-  /**
-   * @brief `this = val * this + column`
-   * 
-   * @param val Value to multiply.
-   * @param column Column to add.
-   * @return Reference to this column.
-   */
-  PersistenceMatrixColumn& multiply_and_add(const Field_element_type& val, PersistenceMatrixColumn& column);
+  PersistenceMatrixColumn& multiply_target_and_add(const Field_element_type& val, const Cell_range& column);
+
   /**
    * @brief `this = this + column * val`
    * 
    * @tparam Cell_range @ref Cell range with %begin() and %end() method.
-   * @param column @ref Cell range. Every cell has to return the right value when using @ref Cell::get_row_index and,
-   * if @ref PersistenceMatrixOptions::is_z2 is false, also when using
-   * @ref Cell_field_element::get_element "Cell::get_element".
+   * @param column @ref Cell range. Only the stored row index and the stored element value
+   * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
+   * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.
    * @param val Value to multiply.
    * @return Reference to this column.
    */
   template <class Cell_range>
-  PersistenceMatrixColumn& multiply_and_add(const Cell_range& column, const Field_element_type& val);
-  /**
-   * @brief `this = this + column * val`
-   * 
-   * @param column Column to add.
-   * @param val Value to multiply.
-   * @return Reference to this column.
-   */
-  PersistenceMatrixColumn& multiply_and_add(PersistenceMatrixColumn& column, const Field_element_type& val);
+  PersistenceMatrixColumn& multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
 
   /**
    * @brief Equality comparator. Equal in the sense that what is "supposed" to be contained in the columns is equal,

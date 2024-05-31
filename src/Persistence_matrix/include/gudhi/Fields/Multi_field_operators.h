@@ -133,24 +133,30 @@ class Multi_field_operators
    * 
    * @return The value of the current characteristic.
    */
-  characteristic_type get_characteristic() const { return productOfAllCharacteristics_; }
-
-  // TODO: verify if mpz_class is trivial to copy around or not.
-  // If yes, remove the unnecessery references?
-  // If not, do the operations in-place instead?
+  const characteristic_type& get_characteristic() const { return productOfAllCharacteristics_; }
 
   /**
    * @brief Returns the value of an element in the field.
    * That is the positive value of the integer modulo the current characteristic.
    * 
-   * @param e Integer to return the value from.
+   * @param e Element to return the value from.
    * @return @p e modulo the current characteristic, such that the result is positive.
    */
   element_type get_value(element_type e) const {
+    get_value_inplace(e);
+    return e;
+  }
+
+  /**
+   * @brief Stores in the given element the value of this element in the field.
+   * That is the positive value of the integer modulo the current characteristic.
+   * 
+   * @param e Element to return the value from.
+   */
+  void get_value_inplace(element_type& e) const {
     if (e >= productOfAllCharacteristics_ || e < -productOfAllCharacteristics_)
       mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
     if (e < 0) mpz_add(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-    return e;
   }
 
   /**
@@ -161,8 +167,20 @@ class Multi_field_operators
    * @return `(e1 + e2) % productOfAllCharacteristics`, such that the result is positive.
    */
   element_type add(element_type e1, const element_type& e2) const {
+    add_inplace(e1, e2);
+    return e1;
+  }
+
+  /**
+   * @brief Stores in the first element the sum of two given elements in the field, that is
+   * `(e1 + e2) % productOfAllCharacteristics`, such that the result is positive.
+   * 
+   * @param e1 First element.
+   * @param e2 Second element.
+   */
+  void add_inplace(element_type& e1, const element_type& e2) const {
     mpz_add(e1.get_mpz_t(), e1.get_mpz_t(), e2.get_mpz_t());
-    return _get_value(e1);
+    get_value_inplace(e1);
   }
 
   /**
@@ -173,8 +191,31 @@ class Multi_field_operators
    * @return `(e1 - e2) % productOfAllCharacteristics`, such that the result is positive.
    */
   element_type substract(element_type e1, const element_type& e2) const {
+    substract_inplace_front(e1, e2);
+    return e1;
+  }
+
+  /**
+   * @brief Stores in the first element the substraction in the field of the first element by the second element,
+   * that is `(e1 - e2) % productOfAllCharacteristics`, such that the result is positive.
+   * 
+   * @param e1 First element.
+   * @param e2 Second element.
+   */
+  void substract_inplace_front(element_type& e1, const element_type& e2) const {
     mpz_sub(e1.get_mpz_t(), e1.get_mpz_t(), e2.get_mpz_t());
-    return _get_value(e1);
+    get_value_inplace(e1);
+  }
+  /**
+   * @brief Stores in the second element the substraction in the field of the first element by the second element,
+   * that is `(e1 - e2) % productOfAllCharacteristics`, such that the result is positive.
+   * 
+   * @param e1 First element.
+   * @param e2 Second element.
+   */
+  void substract_inplace_back(const element_type& e1, element_type& e2) const {
+    mpz_sub(e2.get_mpz_t(), e1.get_mpz_t(), e2.get_mpz_t());
+    get_value_inplace(e2);
   }
 
   /**
@@ -185,8 +226,20 @@ class Multi_field_operators
    * @return `(e1 * e2) % productOfAllCharacteristics`, such that the result is positive.
    */
   element_type multiply(element_type e1, const element_type& e2) const {
+    multiply_inplace(e1, e2);
+    return e1;
+  }
+
+  /**
+   * @brief Stores in the first element the multiplication of two given elements in the field,
+   * that is `(e1 * e2) % productOfAllCharacteristics`, such that the result is positive.
+   * 
+   * @param e1 First element.
+   * @param e2 Second element.
+   */
+  void multiply_inplace(element_type& e1, const element_type& e2) const {
     mpz_mul(e1.get_mpz_t(), e1.get_mpz_t(), e2.get_mpz_t());
-    return _get_value(e1);
+    get_value_inplace(e1);
   }
 
   /**
@@ -198,9 +251,36 @@ class Multi_field_operators
    * @return `(e * m + a) % productOfAllCharacteristics`, such that the result is positive.
    */
   element_type multiply_and_add(element_type e, const element_type& m, const element_type& a) const {
+    multiply_and_add_inplace_front(e, m, a);
+    return e;
+  }
+
+  /**
+   * @brief Multiplies the first element with the second one and adds the third one, that is
+   * `(e * m + a) % productOfAllCharacteristics`, such that the result is positive.
+   * Stores the result in the first element.
+   * 
+   * @param e First element.
+   * @param m Second element.
+   * @param a Third element.
+   */
+  void multiply_and_add_inplace_front(element_type& e, const element_type& m, const element_type& a) const {
     mpz_mul(e.get_mpz_t(), e.get_mpz_t(), m.get_mpz_t());
     mpz_add(e.get_mpz_t(), e.get_mpz_t(), a.get_mpz_t());
-    return _get_value(e);
+    get_value_inplace(e);
+  }
+  /**
+   * @brief Multiplies the first element with the second one and adds the third one, that is
+   * `(e * m + a) % productOfAllCharacteristics`, such that the result is positive.
+   * Stores the result in the third element.
+   * 
+   * @param e First element.
+   * @param m Second element.
+   * @param a Third element.
+   */
+  void multiply_and_add_inplace_back(const element_type& e, const element_type& m, element_type& a) const {
+    a += e * m;
+    get_value_inplace(a);
   }
 
   /**
@@ -213,9 +293,36 @@ class Multi_field_operators
    * @return `((e + a) * m) % productOfAllCharacteristics`, such that the result is positive.
    */
   element_type add_and_multiply(element_type e, const element_type& a, const element_type& m) const {
+    add_and_multiply_inplace_front(e, a, m);
+    return e;
+  }
+
+  /**
+   * @brief Adds the first element to the second one and multiplies the third one with it, that is
+   * `((e + a) * m) % productOfAllCharacteristics`, such that the result is positive.
+   * Stores the result in the first element.
+   * 
+   * @param e First element.
+   * @param a Second element.
+   * @param m Third element.
+   */
+  void add_and_multiply_inplace_front(element_type& e, const element_type& a, const element_type& m) const {
     mpz_add(e.get_mpz_t(), e.get_mpz_t(), a.get_mpz_t());
     mpz_mul(e.get_mpz_t(), e.get_mpz_t(), m.get_mpz_t());
-    return _get_value(e);
+    get_value_inplace(e);
+  }
+  /**
+   * @brief Adds the first element to the second one and multiplies the third one with it, that is
+   * `((e + a) * m) % productOfAllCharacteristics`, such that the result is positive.
+   * Stores the result in the third element.
+   * 
+   * @param e First element.
+   * @param a Second element.
+   * @param m Third element.
+   */
+  void add_and_multiply_inplace_back(const element_type& e, const element_type& a, element_type& m) const {
+    m *= e + a;
+    get_value_inplace(m);
   }
 
   /**
@@ -226,7 +333,10 @@ class Multi_field_operators
    * @return true If `e1 % productOfAllCharacteristics == e2 % productOfAllCharacteristics`.
    * @return false Otherwise.
    */
-  bool are_equal(element_type e1, element_type e2) const { return _get_value(e1) == _get_value(e2); }
+  bool are_equal(const element_type& e1, const element_type& e2) const {
+    if (e1 == e2) return true;
+    return get_value(e1) == get_value(e2);
+  }
 
   /**
    * @brief Returns the inverse of the given element in the sense of @cite boissonnat:hal-00922572 with respect
@@ -258,10 +368,11 @@ class Multi_field_operators
     characteristic_type inv_qt;
     mpz_invert(inv_qt.get_mpz_t(), e.get_mpz_t(), QT.get_mpz_t());
 
-    auto res = get_partial_multiplicative_identity(QT);
-    mpz_mul(res.get_mpz_t(), res.get_mpz_t(), inv_qt.get_mpz_t());
+    std::pair<element_type, characteristic_type> res(get_partial_multiplicative_identity(QT), QT);
+    mpz_mul(res.first.get_mpz_t(), res.first.get_mpz_t(), inv_qt.get_mpz_t());
+    get_value_inplace(res.first);
 
-    return {_get_value(res), QT};
+    return res;
   }
 
   /**
@@ -269,14 +380,14 @@ class Multi_field_operators
    * 
    * @return The additive identity of a field.
    */
-  static element_type get_additive_identity() { return 0; }
+  static const element_type& get_additive_identity() { return additiveID_; }
   /**
    * @brief Returns the multiplicative identity of a field.
    * 
    * @return The multiplicative identity of a field.
    */
-  static element_type get_multiplicative_identity() { return 1; }
-  // static element_type get_multiplicative_identity(){ return multiplicativeID_; }
+  static const element_type& get_multiplicative_identity() { return multiplicativeID_; }
+
   /**
    * @brief Returns the partial multiplicative identity of the multi-field from the given product.
    * See @cite boissonnat:hal-00922572 for more details.
@@ -294,7 +405,8 @@ class Multi_field_operators
         mpz_add(multIdentity.get_mpz_t(), multIdentity.get_mpz_t(), partials_[idx].get_mpz_t());
       }
     }
-    return _get_value(multIdentity);
+    get_value_inplace(multIdentity);
+    return multIdentity;
   }
 
   // static constexpr bool handles_only_z2() { return false; }
@@ -322,7 +434,8 @@ class Multi_field_operators
   std::vector<unsigned int> primes_;                /**< All characteristics. */
   characteristic_type productOfAllCharacteristics_; /**< Product of all characteristics. */
   std::vector<characteristic_type> partials_;       /**< Partial products of the characteristics. */
-  // static const element_type multiplicativeID_;
+  inline static const element_type multiplicativeID_ = 1;
+  inline static const element_type additiveID_ = 0;
 
   static constexpr bool _is_prime(const int p) {
     if (p <= 1) return false;
@@ -333,13 +446,6 @@ class Multi_field_operators
       if (p % i == 0 || p % (i + 2) == 0) return false;
 
     return true;
-  }
-
-  element_type& _get_value(element_type& e) const {
-    if (e >= productOfAllCharacteristics_ || e < -productOfAllCharacteristics_)
-      mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-    if (e < 0) mpz_add(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-    return e;
   }
 };
 

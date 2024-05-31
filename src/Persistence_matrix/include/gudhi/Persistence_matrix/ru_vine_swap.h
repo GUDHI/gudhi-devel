@@ -22,6 +22,7 @@
 #include <type_traits>  //std::conditional
 #include <cassert>
 #include <vector>
+#include <stdexcept>    //std::invalid_argument
 
 #include "ru_pairing.h"
 
@@ -173,7 +174,8 @@ inline RU_vine_swap<Master_matrix>::RU_vine_swap(RU_vine_swap<Master_matrix>&& o
 template <class Master_matrix>
 inline bool RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(pos_index index) 
 {
-  assert(index < _matrix()->reducedMatrixR_.get_number_of_columns() - 1 && "Index to swap out of bound.");
+  GUDHI_CHECK(index < _matrix()->reducedMatrixR_.get_number_of_columns() - 1,
+              std::invalid_argument("RU_vine_swap::vine_swap_with_z_eq_1_case - Index to swap out of bound."));
 
   bool iIsPositive = _matrix()->reducedMatrixR_.is_zero_column(index);
   bool iiIsPositive = _matrix()->reducedMatrixR_.is_zero_column(index + 1);
@@ -192,7 +194,8 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(pos_index in
 template <class Master_matrix>
 inline bool RU_vine_swap<Master_matrix>::vine_swap(pos_index index) 
 {
-  assert(index < _matrix()->reducedMatrixR_.get_number_of_columns() - 1 && "Index to swap out of bound.");
+  GUDHI_CHECK(index < _matrix()->reducedMatrixR_.get_number_of_columns() - 1,
+              std::invalid_argument("RU_vine_swap::vine_swap - Index to swap out of bound."));
 
   bool iIsPositive = _matrix()->reducedMatrixR_.is_zero_column(index);
   bool iiIsPositive = _matrix()->reducedMatrixR_.is_zero_column(index + 1);

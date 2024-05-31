@@ -85,6 +85,23 @@ class Z2_field_operators
   }
 
   /**
+   * @brief Stores in the first element the sum of two given elements in the field, that is
+   * `(e1 + e2) % 2`, such that the result is positive.
+   * 
+   * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
+   * @param e1 First element.
+   * @param e2 Second element.
+   */
+  template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
+  static void add_inplace(Unsigned_integer_type& e1, Unsigned_integer_type e2) {
+    if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
+      e1 = e1 != e2;
+    } else {
+      e1 = get_value(e1) != get_value(e2);
+    }
+  }
+
+  /**
    * @brief Returns the substraction in the field of the first element by the second element.
    * 
    * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
@@ -102,6 +119,39 @@ class Z2_field_operators
   }
 
   /**
+   * @brief Stores in the first element the substraction in the field of the first element by the second element,
+   * that is `(e1 - e2) % 2`, such that the result is positive.
+   * 
+   * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
+   * @param e1 First element.
+   * @param e2 Second element.
+   */
+  template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
+  static void substract_inplace_front(Unsigned_integer_type& e1, Unsigned_integer_type e2) {
+    if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
+      e1 = e1 != e2;
+    } else {
+      e1 = get_value(e1) != get_value(e2);
+    }
+  }
+  /**
+   * @brief Stores in the second element the substraction in the field of the first element by the second element,
+   * that is `(e1 - e2) % 2`, such that the result is positive.
+   * 
+   * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
+   * @param e1 First element.
+   * @param e2 Second element.
+   */
+  template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
+  static void substract_inplace_back(Unsigned_integer_type e1, Unsigned_integer_type& e2) {
+    if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
+      e2 = e1 != e2;
+    } else {
+      e2 = get_value(e1) != get_value(e2);
+    }
+  }
+
+  /**
    * @brief Returns the multiplication of two elements in the field.
    * 
    * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
@@ -115,6 +165,23 @@ class Z2_field_operators
       return e1 && e2;
     } else {
       return get_value(e1) ? get_value(e2) : false;
+    }
+  }
+
+  /**
+   * @brief Stores in the first element the multiplication of two given elements in the field,
+   * that is `(e1 * e2) % 2`, such that the result is positive.
+   * 
+   * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
+   * @param e1 First element.
+   * @param e2 Second element.
+   */
+  template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
+  static void multiply_inplace(Unsigned_integer_type& e1, Unsigned_integer_type e2) {
+    if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
+      e1 = e1 && e2;
+    } else {
+      e1 = get_value(e1) ? get_value(e2) : false;
     }
   }
 
@@ -137,6 +204,46 @@ class Z2_field_operators
   }
 
   /**
+   * @brief Multiplies the first element with the second one and adds the third one, that is
+   * `(e * m + a) % 2`, such that the result is positive. Stores the result in the first element.
+   * 
+   * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
+   * @param e First element.
+   * @param m Second element.
+   * @param a Third element.
+   */
+  template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
+  static void multiply_and_add_inplace_front(Unsigned_integer_type& e, 
+                                             Unsigned_integer_type m,
+                                             Unsigned_integer_type a) {
+    if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
+      e = (e && m) != a;
+    } else {
+      e = multiply(e, m) != get_value(a);
+    }
+  }
+
+  /**
+   * @brief Multiplies the first element with the second one and adds the third one, that is
+   * `(e * m + a) % 2`, such that the result is positive. Stores the result in the third element.
+   * 
+   * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
+   * @param e First element.
+   * @param m Second element.
+   * @param a Third element.
+   */
+  template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
+  static void multiply_and_add_inplace_back(Unsigned_integer_type e, 
+                                            Unsigned_integer_type m,
+                                            Unsigned_integer_type& a) {
+    if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
+      a = (e && m) != a;
+    } else {
+      a = multiply(e, m) != get_value(a);
+    }
+  }
+
+  /**
    * @brief Adds the first element to the second one and multiplies the third one with it.
    * Returns the result in the field.
    * 
@@ -152,6 +259,41 @@ class Z2_field_operators
       return (e != a) && m;
     } else {
       return add(e, a) ? get_value(m) : false;
+    }
+  }
+
+  /**
+   * @brief Adds the first element to the second one and multiplies the third one with it, that is
+   * `((e + a) * m) % 2`, such that the result is positive. Stores the result in the first element.
+   * 
+   * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
+   * @param e First element.
+   * @param a Second element.
+   * @param m Third element.
+   */
+  template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
+  static void add_and_multiply_inplace_front(Unsigned_integer_type& e, Unsigned_integer_type a, Unsigned_integer_type m) {
+    if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
+      e = (e != a) && m;
+    } else {
+      e = add(e, a) ? get_value(m) : false;
+    }
+  }
+  /**
+   * @brief Adds the first element to the second one and multiplies the third one with it, that is
+   * `((e + a) * m) % 2`, such that the result is positive. Stores the result in the third element.
+   * 
+   * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
+   * @param e First element.
+   * @param a Second element.
+   * @param m Third element.
+   */
+  template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
+  static void add_and_multiply_inplace_back(Unsigned_integer_type& e, Unsigned_integer_type a, Unsigned_integer_type m) {
+    if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
+      m = (e != a) && m;
+    } else {
+      m = add(e, a) ? get_value(m) : false;
     }
   }
 
