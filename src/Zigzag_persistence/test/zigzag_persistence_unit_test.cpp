@@ -48,9 +48,11 @@ BOOST_AUTO_TEST_CASE(constructor) {
 }
 
 void test_barcode(ZP& zp, std::vector<Interval_filtration>& barcode) {
+  auto bars = zp.get_persistence_diagram(0, true);
+  std::stable_sort(bars.begin(), bars.end(), cmp_intervals_by_length());
   std::stable_sort(barcode.begin(), barcode.end(), cmp_intervals_by_length());
   auto it = barcode.begin();
-  for (const auto& interval : zp.get_persistence_diagram(0, true)) {
+  for (const auto& interval : bars) {
     BOOST_CHECK_EQUAL(interval.dim(), it->dim());
     BOOST_CHECK_EQUAL(interval.birth(), it->birth());
     BOOST_CHECK_EQUAL(interval.death(), it->death());

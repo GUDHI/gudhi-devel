@@ -25,20 +25,20 @@ enum lineType : int { INCLUSION, REMOVAL, COMMENT };
 void print_barcode(ZP& zp) {
   std::clog << std::endl << "Current barcode:" << std::endl;
   for (auto& bar : zp.get_persistence_diagram(0, true)) {
-    std::clog << std::floor(bar.birth()) << " - ";
+    std::clog << bar.birth() << " - ";
     if (bar.death() == std::numeric_limits<filtration_value>::infinity()) {
       std::clog << "inf";
     } else {
-      std::clog << std::floor(bar.death());
+      std::clog << bar.death();
     }
     std::clog << " (" << bar.dim() << ")" << std::endl;
   }
   std::clog << std::endl;
 }
 
-lineType read_operation(std::string& line, std::vector<id_handle>& vertices, double& timestamp) {
+lineType read_operation(std::string& line, std::vector<id_handle>& faces, double& timestamp) {
   lineType type;
-  vertices.clear();
+  faces.clear();
   id_handle num;
 
   size_t current = line.find_first_not_of(' ', 0);
@@ -51,30 +51,25 @@ lineType read_operation(std::string& line, std::vector<id_handle>& vertices, dou
   else if (line[current] == '#')
     return COMMENT;
   else {
-    std::clog << "Syntaxe error in file." << std::endl;
+    std::clog << "(1) Syntaxe error in file." << std::endl;
     exit(0);
   }
 
   current = line.find_first_not_of(' ', current + 1);
   if (current == std::string::npos) {
-    std::clog << "Syntaxe error in file." << std::endl;
+    std::clog << "(2) Syntaxe error in file." << std::endl;
     exit(0);
   }
   size_t next = line.find_first_of(' ', current);
   timestamp = std::stod(line.substr(current, next - current));
 
   current = line.find_first_not_of(' ', next);
-  if (current == std::string::npos) {
-    std::clog << "Syntaxe error in file." << std::endl;
-    exit(0);
-  }
-
-  do {
+  while (current != std::string::npos) {
     next = line.find_first_of(' ', current);
     num = std::stoi(line.substr(current, next - current));
-    vertices.push_back(num);
+    faces.push_back(num);
     current = line.find_first_not_of(' ', next);
-  } while (current != std::string::npos);
+  }
 
   return type;
 }

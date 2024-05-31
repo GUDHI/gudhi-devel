@@ -96,15 +96,15 @@ class Zigzag_persistence {
     Interval(int dim, value_type b, value_type d) : dim_(dim), b_(b), d_(d) {}
     /** Returns the dimension of the homological feature corresponding to the interval. */
     int dim() const { return dim_; }
-    /** Returns the birth index of the interval.*/
+    /** Returns the birth value of the interval.*/
     value_type birth() const { return b_; }
-    /** Returns the death index of the interval.*/
+    /** Returns the death value of the interval.*/
     value_type death() const { return d_; }
 
    protected:
-    int dim_;       // homological dimension
-    value_type b_;  // filtration value associated to birth index
-    value_type d_;  // filtration value associated to death index
+    int dim_;       /**< Homological dimension. */
+    value_type b_;  /**< Value associated to the interval birth. */
+    value_type d_;  /**< Value associated to the interval death. */
   };
   using Index_interval = Interval<internal_key>;
 
@@ -155,7 +155,7 @@ class Zigzag_persistence {
  private:
   /** \brief Maintains the birth ordering \f$\leq_b\f$.
    *
-   * \details Contains an std::map of size the number of
+   * \details Contains a map of size the number of
    * non-zero rows of the homology matrix, at any time during the computation of
    * zigzag persistence.
    *
@@ -381,8 +381,7 @@ class Zigzag_persistence {
   }
 
   /**
-   * @brief Returns the current persistence diagram ordered first by length, than by dimension,
-   * than by birth value and finally by death value.
+   * @brief Returns the current persistence diagram.
    *
    * @param shortestInterval Threshold. Every bar shorter than the given value will be ignored. Default value: 0.
    * @param includeInfinitBars If set to true, infinit bars are included in the diagram. Default value: false.
@@ -390,18 +389,18 @@ class Zigzag_persistence {
    */
   std::vector<Filtration_value_interval> get_persistence_diagram(filtration_value shortestInterval = 0.,
                                                                  bool includeInfinitBars = false) {
-    auto comp = [](Filtration_value_interval p, Filtration_value_interval q) {
-      if (p.length() != q.length()) {
-        return p.length() > q.length();
-      }  // longest 1st
-      if (p.dim() != q.dim()) {
-        return p.dim() < q.dim();
-      }  // lower dimension first
-      if (p.birth() != q.birth()) {
-        return p.birth() < q.birth();
-      }  // lex order
-      return p.death() < q.death();
-    };
+    // auto comp = [](Filtration_value_interval p, Filtration_value_interval q) {
+    //   if (p.length() != q.length()) {
+    //     return p.length() > q.length();
+    //   }  // longest 1st
+    //   if (p.dim() != q.dim()) {
+    //     return p.dim() < q.dim();
+    //   }  // lower dimension first
+    //   if (p.birth() != q.birth()) {
+    //     return p.birth() < q.birth();
+    //   }  // lex order
+    //   return p.death() < q.death();
+    // };
 
     std::vector<Filtration_value_interval> diag = _get_persistence_diagram(shortestInterval);
 
@@ -409,7 +408,7 @@ class Zigzag_persistence {
       _retrieve_infinit_bars(diag);
     }
 
-    std::stable_sort(diag.begin(), diag.end(), comp);
+    // std::stable_sort(diag.begin(), diag.end(), comp);
 
     return diag;
   }
@@ -625,7 +624,7 @@ class Zigzag_persistence {
   std::unordered_map<face_key,internal_key> handleToKey_; /**< Map from input keys to internal keys. */
   dimension_type dimMax_;                                 /**< Maximal dimension of a bar to record. */
   Matrix_type matrix_;                                    /**< Matrix storing a base of the current chain complex. */
-  std::unordered_map<index, int> births_;                 /**< Map face index in F to corresponding birth. */
+  std::unordered_map<index, internal_key> births_;        /**< Map face index in F to corresponding birth. */
   Birth_ordering birthOrdering_;                          /**< Maintains <b ordering of the births. */
   std::list<Index_interval> persistenceDiagram_;          /**< Stores current closed persistence intervals. */
   internal_key numArrow_;                                 /**< Current arrow number. */
