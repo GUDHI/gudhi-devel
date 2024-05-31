@@ -139,7 +139,7 @@ class Zigzag_persistence {
       if (Base::b_ == Base::d_) {
         return 0;
       }  // otherwise inf - inf would return nan.
-      return std::abs(Base::b_ - Base::d_);
+      return Base::d_ - Base::b_;
     }
     /**
      * @brief Returns the absolute length of the log values of birth and death, i.e.  \f$|\log d - \log b|\f$.
@@ -148,7 +148,7 @@ class Zigzag_persistence {
       if (Base::b_ == Base::d_) {
         return 0;
       }  // otherwise inf - inf would return nan.
-      return std::abs(std::log2(static_cast<double>(Base::b_)) - std::log2(static_cast<double>(Base::d_)));
+      return std::log2(static_cast<double>(Base::d_)) - std::log2(static_cast<double>(Base::b_));
     }
   };
 
@@ -389,18 +389,18 @@ class Zigzag_persistence {
    */
   std::vector<Filtration_value_interval> get_persistence_diagram(filtration_value shortestInterval = 0.,
                                                                  bool includeInfinitBars = false) {
-    auto comp = [](Filtration_value_interval p, Filtration_value_interval q) {
-      if (p.length() != q.length()) {
-        return p.length() > q.length();
-      }  // longest 1st
-      if (p.dim() != q.dim()) {
-        return p.dim() < q.dim();
-      }  // lower dimension first
-      if (p.birth() != q.birth()) {
-        return p.birth() < q.birth();
-      }  // lex order
-      return p.death() < q.death();
-    };
+    // auto comp = [](Filtration_value_interval p, Filtration_value_interval q) {
+    //   if (p.length() != q.length()) {
+    //     return p.length() > q.length();
+    //   }  // longest 1st
+    //   if (p.dim() != q.dim()) {
+    //     return p.dim() < q.dim();
+    //   }  // lower dimension first
+    //   if (p.birth() != q.birth()) {
+    //     return p.birth() < q.birth();
+    //   }  // lex order
+    //   return p.death() < q.death();
+    // };
 
     std::vector<Filtration_value_interval> diag = _get_persistence_diagram(shortestInterval);
 
@@ -408,7 +408,7 @@ class Zigzag_persistence {
       _retrieve_infinit_bars(diag);
     }
 
-    std::stable_sort(diag.begin(), diag.end(), comp);
+    // std::stable_sort(diag.begin(), diag.end(), comp);
 
     return diag;
   }
