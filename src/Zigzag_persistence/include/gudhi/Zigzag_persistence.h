@@ -68,21 +68,21 @@ struct Default_zigzag_options {
 //also needs to be implemented. The theory needs to be done first.
 /** \class Zigzag_persistence Zigzag_persistence.h gudhi/Zigzag_persistence.h
  * \brief Class computating the zigzag persistent homology of a zigzag
- * filtration. Algorithm based on \cite zigzag_reflection.
+ * filtration. Algorithm based on \cite zigzag.
  *
  * \ingroup zigzag_persistence
  *
- * \tparam ZigzagOptions TODO: concept
+ * \tparam ZigzagOptions Structure following the @ref ZigzagOptions concept. Default value: @ref Default_zigzag_options.
  */
 template <class ZigzagOptions = Default_zigzag_options>
 class Zigzag_persistence {
  public:
-  using Options = ZigzagOptions;
-  using Matrix_options = Zigzag_matrix_options<Options::column_type>;  /**< Matrix options */
-  using internal_key = typename Options::internal_key;
-  using face_key = typename Options::face_key;
-  using filtration_value = typename Options::filtration_value; 
-  using dimension_type = typename Options::dimension_type;
+  using Options = ZigzagOptions;                                      /**< Zigzag options. */
+  using Matrix_options = Zigzag_matrix_options<Options::column_type>; /**< Matrix options. */
+  using internal_key = typename Options::internal_key;                /**< Key and index type, has to be signed. */
+  using face_key = typename Options::face_key;                        /**< Face ID type from external inputs. */
+  using filtration_value = typename Options::filtration_value;        /**< Type for filtration values. */
+  using dimension_type = typename Options::dimension_type;            /**< Type for dimension values. */
 
   /** \brief Structure to store persistence intervals by their index values.
    *
@@ -245,10 +245,10 @@ class Zigzag_persistence {
    * To retrieve the current persistence diagram at any moment of the filtration,
    * use @ref get_persistence_diagram or @ref get_index_persistence_diagram.
    *
-   * @param min_number_of_faces Minimum number of faces that will be inserted at some point in the filtration.
+   * @param minNumberOfFaces Minimum number of faces that will be inserted at some point in the filtration.
    * If the total number of faces is known in advance, the memory allocation can be better optimized.
    * Default value: 0.
-   * @param ignore_cycles_above_dim Ignores cycles in dimension larger or equal in the final diagram.
+   * @param ignoreCyclesAboveDim Ignores cycles in dimension larger or equal in the final diagram.
    * If -1, no cycles are ignored. Default value: -1.
    */
   Zigzag_persistence(unsigned int minNumberOfFaces = 0, int ignoreCyclesAboveDim = -1)
@@ -335,7 +335,7 @@ class Zigzag_persistence {
   }
 
   /**
-   * @brief Returns the ``index persistence diagram'' of the current filtration, that is, the pairs of atomic arrow
+   * @brief Returns the "index persistence diagram" of the current filtration, that is, the pairs of atomic arrow
    * numbers corresponding to a birth-death pair. Does not contain points at infinity, only the cycle classes which
    * already died are represented.
    *

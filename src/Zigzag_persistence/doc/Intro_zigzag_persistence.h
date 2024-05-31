@@ -33,7 +33,7 @@ namespace zigzag_persistence {
  * filtration anymore. This makes it possible to build very long fine tuned filtrations with relatively small complexes
  * which can be processed without overreaching memory space. For this purpose, it is possible to feed the module with
  * information about the filtration "on the fly" to avoid loading the whole filtration at once. Information about the
- * current complex and current barcode can be retrieved between any steps.
+ * current barcode can be retrieved between any steps.
  * 
  * \subsection zigzagexamples Examples
  * 
