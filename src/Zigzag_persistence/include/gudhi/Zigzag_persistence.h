@@ -341,7 +341,7 @@ class Zigzag_persistence {
    *
    * @return Reference to the list of intervals.
    */
-  const std::list<Index_interval>& get_index_persistence_diagram() const { return persistenceDiagram_; }
+  const std::vector<Index_interval>& get_index_persistence_diagram() const { return persistenceDiagram_; }
 
   /**
    * @brief Returns the filtration values \f$[f(b),f(d)]\f$ associated to the indices \f$[b,d]\f$ which are retrieved
@@ -389,18 +389,18 @@ class Zigzag_persistence {
    */
   std::vector<Filtration_value_interval> get_persistence_diagram(filtration_value shortestInterval = 0.,
                                                                  bool includeInfinitBars = false) {
-    // auto comp = [](Filtration_value_interval p, Filtration_value_interval q) {
-    //   if (p.length() != q.length()) {
-    //     return p.length() > q.length();
-    //   }  // longest 1st
-    //   if (p.dim() != q.dim()) {
-    //     return p.dim() < q.dim();
-    //   }  // lower dimension first
-    //   if (p.birth() != q.birth()) {
-    //     return p.birth() < q.birth();
-    //   }  // lex order
-    //   return p.death() < q.death();
-    // };
+    auto comp = [](Filtration_value_interval p, Filtration_value_interval q) {
+      if (p.length() != q.length()) {
+        return p.length() > q.length();
+      }  // longest 1st
+      if (p.dim() != q.dim()) {
+        return p.dim() < q.dim();
+      }  // lower dimension first
+      if (p.birth() != q.birth()) {
+        return p.birth() < q.birth();
+      }  // lex order
+      return p.death() < q.death();
+    };
 
     std::vector<Filtration_value_interval> diag = _get_persistence_diagram(shortestInterval);
 
@@ -408,7 +408,7 @@ class Zigzag_persistence {
       _retrieve_infinit_bars(diag);
     }
 
-    // std::stable_sort(diag.begin(), diag.end(), comp);
+    std::stable_sort(diag.begin(), diag.end(), comp);
 
     return diag;
   }
@@ -516,7 +516,7 @@ class Zigzag_persistence {
     births_.erase(chainFp);
 
     // Update persistence diagram with left interval [fil(b_max) ; fil(m))
-    persistenceDiagram_.emplace_back(dim - 1, maxb, numArrow_);  //-1);//
+    persistenceDiagram_.emplace_back(dim - 1, maxb, numArrow_);
   }
 
   /**
@@ -626,7 +626,7 @@ class Zigzag_persistence {
   Matrix_type matrix_;                                    /**< Matrix storing a base of the current chain complex. */
   std::unordered_map<index, internal_key> births_;        /**< Map face index in F to corresponding birth. */
   Birth_ordering birthOrdering_;                          /**< Maintains <b ordering of the births. */
-  std::list<Index_interval> persistenceDiagram_;          /**< Stores current closed persistence intervals. */
+  std::vector<Index_interval> persistenceDiagram_;        /**< Stores current closed persistence intervals. */
   internal_key numArrow_;                                 /**< Current arrow number. */
   filtration_value previousFiltrationValue_;              /**< Filtration value of the previous arrow. */
   /**
