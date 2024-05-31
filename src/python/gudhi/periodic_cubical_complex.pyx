@@ -131,7 +131,7 @@ cdef class PeriodicCubicalComplex:
         else:
             raise ValueError("Must specify one of top_dimensional_cells, vertices, or perseus_file")
         if dimensions is None:
-            array = np.array(array, copy=False, order='F')
+            array = np.asarray(array, order='F')
             dimensions = array.shape
             array = array.ravel(order='F')
         self._construct_from_cells(dimensions, array, periodic_dimensions, vertices is None)
