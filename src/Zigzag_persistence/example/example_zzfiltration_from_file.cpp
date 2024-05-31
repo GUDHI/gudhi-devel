@@ -10,20 +10,15 @@
 
 #include <iostream>
 #include <ostream>
+#include <fstream>
 #include <string>
 
 #include <gudhi/Zigzag_persistence.h>
-#include <gudhi/Simplex_tree.h>
 
-struct Simplex_tree_options_zigzag_persistence : Gudhi::Simplex_tree_options_minimal {
-  static const bool store_key = true;
-};
-
-using ST = Gudhi::Simplex_tree<Simplex_tree_options_zigzag_persistence>;
-using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
-using Vertex_handle = ST::Vertex_handle;
-using Filtration_value = ST::Filtration_value;
-using interval_filtration = ZP::filtration_value_interval;
+using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<>;
+using id_handle = ZP::face_key;
+using filtration_value = ZP::filtration_value;
+using Interval_filtration = ZP::Filtration_value_interval;
 
 enum lineType : int { INCLUSION, REMOVAL, COMMENT };
 
@@ -31,7 +26,7 @@ void print_barcode(ZP& zp) {
   std::clog << std::endl << "Current barcode:" << std::endl;
   for (auto& bar : zp.get_persistence_diagram(0, true)) {
     std::clog << std::floor(bar.birth()) << " - ";
-    if (bar.death() == std::numeric_limits<Filtration_value>::infinity()) {
+    if (bar.death() == std::numeric_limits<filtration_value>::infinity()) {
       std::clog << "inf";
     } else {
       std::clog << std::floor(bar.death());
@@ -41,10 +36,10 @@ void print_barcode(ZP& zp) {
   std::clog << std::endl;
 }
 
-lineType read_operation(std::string& line, std::vector<Vertex_handle>& vertices, double& timestamp) {
+lineType read_operation(std::string& line, std::vector<id_handle>& vertices, double& timestamp) {
   lineType type;
   vertices.clear();
-  Vertex_handle num;
+  id_handle num;
 
   size_t current = line.find_first_not_of(' ', 0);
   if (current == std::string::npos) return COMMENT;
@@ -98,18 +93,19 @@ int main(int argc, char* const argv[]) {
   ZP zp;
 
   if (file.is_open()) {
-    std::vector<Vertex_handle> vertices;
+    std::vector<id_handle> data;
+    unsigned int id = 0;
     double timestamp;
     lineType type;
 
-    while (getline(file, line, '\n') && read_operation(line, vertices, timestamp) == COMMENT);
+    while (getline(file, line, '\n') && read_operation(line, data, timestamp) == COMMENT);
     double lastTimestamp = timestamp;
     // first operation has to be an insertion.
-    zp.insert_simplex(vertices, timestamp);
+    zp.insert_face(id, data, 0, timestamp);
     std::cout << line << std::endl;
 
     while (getline(file, line, '\n')) {
-      type = read_operation(line, vertices, timestamp);
+      type = read_operation(line, data, timestamp);
       if (type != COMMENT && lastTimestamp != timestamp) {
         print_barcode(zp);
         lastTimestamp = timestamp;
@@ -117,9 +113,12 @@ int main(int argc, char* const argv[]) {
       if (type != COMMENT) std::cout << line << std::endl;
 
       if (type == INCLUSION) {
-        zp.insert_simplex(vertices, timestamp);
+        ++id;
+        int dim = data.size() == 0 ? 0 : data.size() - 1;
+        zp.insert_face(id, data, dim, timestamp);
       } else if (type == REMOVAL) {
-        zp.remove_simplex(vertices, timestamp);
+        ++id;
+        zp.remove_face(data[0], data[1], timestamp);
       }
     }
     print_barcode(zp);
