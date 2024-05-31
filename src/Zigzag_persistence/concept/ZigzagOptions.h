@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2023 Inria
+ *    Copyright (C) 2024 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -11,77 +11,41 @@
 #ifndef CONCEPT_ZZ_OPTIONS_TYPE_H_
 #define CONCEPT_ZZ_OPTIONS_TYPE_H_
 
-/** @file ZigzagPersistenceOptions.h
- * @brief Contains @ref Gudhi::zigzag_persistence::ZigzagPersistenceOptions concept.
+/** @file ZigzagOptions.h
+ * @brief Contains @ref Gudhi::zigzag_persistence::ZigzagOptions concept.
  */
 
 namespace Gudhi {
 namespace zigzag_persistence {
 
 /**
- * @brief List of options used for the matrix maintained for the zigzag persistence computation.
+ * @brief List of options used for the zigzag persistence computation.
  */
-struct ZigzagPersistenceOptions {
+struct ZigzagOptions {
   /**
-   * @brief Type for the coefficient field type. Has to support \f$Z_2\f$.
+   * @brief Type for the face IDs used internally and other indexations. It must be signed.
    */
-  typename field_coeff_type;
+  using internal_key = unspecified;
 
   /**
-   * @brief Has to be set to true. Indicates that the computation will be made with \f$Z_2\f$ coefficients.
+   * @brief Type for the face IDs used at insertion and in the boundaries given as argument.
    */
-  static const bool is_z2 = true;
-  /**
-   * @brief Type of the columns in the matrix. 
-   * The available column types are given by @ref Gudhi::persistence_matrix::Column_types. 
-   * The column type has to support row access.
-   */
-  static const Column_types column_type;
+  using face_key = unspecified;
 
   /**
-   * @brief Has to be set to true. Indicates that the rows should be directly accessible in the matrix.
+   * @brief Type for filtration values.
    */
-  static const bool has_row_access = true;
+  using filtration_value = unspecified;
+
   /**
-   * @brief Set to true, if the rows should be intrusive lists or to false if they should be sets. True is recommended.
-   * Note that intrusive rows are not compatible with certain column types.
+   * @brief Type for the dimension values.
    */
-  static const bool has_intrusive_rows;
+  using dimension_type = unspecified;
+
   /**
-   * @brief Has to set to true. Indicates that the rows of the matrix can be removed.
+   * @brief Column type used by the internal matrix.
    */
-  static const bool has_removable_rows = true;
-  /**
-   * @brief Has to be set to false. Indicates that the matrix should not store birth/death pairs of its columns.
-   */
-  static const bool has_column_pairings = false;
-  /**
-   * @brief Has to be set to true. Enables maintaining the matrix while switching columns.
-   */
-  static const bool has_vine_update = true;
-  /**
-   * @brief If set to true, the matrix can retrieve the representative cycles for the cycle classes. 
-   * This option is useless for zigzag computation and therefore it is recommended to set it to false.
-   */
-  static const bool can_retrieve_representative_cycles;
-  /**
-   * @brief This value has to be defined but will be ignored.
-   */
-  static const bool has_column_compression;
-  /**
-   * @brief Has to be set to false. 
-   * Indicates that the matrix should represent the base of the chain complex and not of the boundary group.
-   */
-  static const bool is_of_boundary_type = false;
-  /**
-   * @brief Has to be set to true. Indicates that the columns of the matrix can be removed.
-   */
-  static const bool has_removable_columns = true;
-  /**
-   * @brief Has to be set to false.
-   * Indicates that the access to the columns will be done through simplex IDs instead of column positions.
-   */
-  static const bool is_indexed_by_position = false;
+  static const Gudhi::persistence_matrix::Column_types column_type;
 };
 
 }  // namespace zigzag_persistence
