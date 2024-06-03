@@ -34,12 +34,9 @@ namespace persistence_fields {
  * 
  * \subsection fieldsexamples Examples
  * 
- * Here is a list of examples using the module: TODO:
- * \li \gudhi_example_link{Zigzag_persistence,example_simple_zigzag_filtration.cpp} - A simple example to showcase how
- * to use the \ref Zigzag_persistence class.
- *
- * \li \gudhi_example_link{Zigzag_persistence,example_zzfiltration_from_file.cpp} - An example of a "stream-like" usage
- * by reading of the filtration from a file.
+ * Here is a list of examples using the module:
+ * \li \gudhi_example_link{Persistence_field,example_field_operations.cpp} - A simple example to showcase how
+ * to use the different field element and operator classes.
  * 
  * @}
  */
