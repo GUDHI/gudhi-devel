@@ -147,8 +147,8 @@ inline void Base_pairing<Master_matrix>::_reduce()
     columnsByDim[dim - _matrix()->get_column_dimension(i)].push_back(i);
   }
 
-  for (auto cols : columnsByDim) {
-    for (auto i : cols) {
+  for (const auto& cols : columnsByDim) {
+    for (index i : cols) {
       auto& curr = _matrix()->get_column(i);
       if (curr.is_empty()) {
         if (pivotsToColumn.find(i) == pivotsToColumn.end()) {

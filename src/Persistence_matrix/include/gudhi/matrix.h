@@ -28,6 +28,8 @@
 
 #include <gudhi/persistence_matrix_options.h>
 
+#include <gudhi/Fields/Z2_field_operators.h>
+
 #include <gudhi/Persistence_matrix/overlay_ididx_to_matidx.h>
 #include <gudhi/Persistence_matrix/overlay_posidx_to_matidx.h>
 
@@ -146,37 +148,30 @@ class Matrix {
   using pos_index = typename PersistenceMatrixOptions::index_type;             /**< Type of @ref PosIdx index. */
   using dimension_type = typename PersistenceMatrixOptions::dimension_type;    /**< Type for dimension value. */
 
-  struct Dummy_field_operators{
-    using element_type = unsigned int;
-    using characteristic_type = element_type;
+  // struct Dummy_field_operators{
+  //   using element_type = unsigned int;
+  //   using characteristic_type = element_type;
 
-    Dummy_field_operators([[maybe_unused]] characteristic_type characteristic = 0){}
+  //   Dummy_field_operators([[maybe_unused]] characteristic_type characteristic = 0){}
 
-    friend void swap([[maybe_unused]] Dummy_field_operators& d1, [[maybe_unused]] Dummy_field_operators& d2){}
+  //   friend void swap([[maybe_unused]] Dummy_field_operators& d1, [[maybe_unused]] Dummy_field_operators& d2){}
 
-    static constexpr characteristic_type get_characteristic() { return 2; }
-  };
+  //   static constexpr characteristic_type get_characteristic() { return 2; }
+  // };
 
   /**
    * @brief Coefficiants field type.
    */
   using Field_operators =
       typename std::conditional<PersistenceMatrixOptions::is_z2, 
-                                Dummy_field_operators, 
+                                Gudhi::persistence_fields::Z2_field_operators, 
                                 typename PersistenceMatrixOptions::Field_coeff_operators
                                >::type;
   /**
    * @brief Type of a field element.
    */
-  using element_type = typename std::conditional<PersistenceMatrixOptions::is_z2, 
-                                                 bool, 
-                                                 typename Field_operators::element_type
-                                                >::type;
-  using characteristic_type =
-      typename std::conditional<PersistenceMatrixOptions::is_z2, 
-                                unsigned int, 
-                                typename Field_operators::characteristic_type
-                               >::type;
+  using element_type = typename Field_operators::element_type;
+  using characteristic_type = typename Field_operators::characteristic_type;
 
   // TODO: move outside? unify with other bar types in Gudhi?
   /**
