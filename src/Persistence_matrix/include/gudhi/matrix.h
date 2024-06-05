@@ -269,17 +269,6 @@ class Matrix {
                                                  >::type;
 
   /**
-   * @brief Compaires two pairs, representing a cell (first = row index, second = value), 
-   * by their position in the column and not their values. 
-   * The two represented cells are therefore assumed to be in the same column.
-   */
-  struct CellPairComparator {
-    bool operator()(const std::pair<id_index, element_type>& p1, const std::pair<id_index, element_type>& p2) const {
-      return p1.first < p2.first;
-    };
-  };
-
-  /**
    * @brief Compaires two cells by their position in the row. They are assume to be in the same row.
    */
   struct RowCellComp {

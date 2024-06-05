@@ -19,7 +19,6 @@
 
 #include <iostream>   //print() only
 #include <vector>
-#include <set>
 #include <utility>    //std::swap, std::move & std::exchange
 
 #include <boost/intrusive/set.hpp>
@@ -335,16 +334,6 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   };
 
   using ra_opt = typename Master_matrix::Matrix_row_access_option;
-  using cell_rep_type =
-      typename std::conditional<Master_matrix::Option_list::is_z2, 
-                                index, 
-                                std::pair<index, Field_element_type>
-                               >::type;
-  using tmp_column_type = typename std::conditional<
-      Master_matrix::Option_list::is_z2, 
-      std::set<index>,
-      std::set<std::pair<index, Field_element_type>, typename Master_matrix::CellPairComparator>
-    >::type;
   using col_dict_type = boost::intrusive::set<Column_type, boost::intrusive::constant_time_size<false> >;
 
   col_dict_type columnToRep_;                         /**< Map from a column to the index of its representative. */

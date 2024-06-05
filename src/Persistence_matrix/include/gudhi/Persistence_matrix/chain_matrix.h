@@ -19,6 +19,7 @@
 
 #include <iostream>   //print() only
 #include <set>
+#include <map>
 #include <stdexcept>
 #include <vector>
 #include <utility>    //std::swap, std::move & std::exchange
@@ -485,7 +486,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   using tmp_column_type = typename std::conditional<
       Master_matrix::Option_list::is_z2, 
       std::set<id_index>,
-      std::set<std::pair<id_index, Field_element_type>, typename Master_matrix::CellPairComparator>
+      std::map<id_index, Field_element_type>
     >::type;
 
   matrix_type matrix_;                  /**< Column container. */
@@ -1256,18 +1257,14 @@ inline void Chain_matrix<Master_matrix>::_add_to(const Column_type& column,
   } else {
     auto& operators = colSettings_->operators;
     for (const Cell& cell : column) {
-      std::pair<index, Field_element_type> p(cell.get_row_index(), cell.get_element());
-      auto res_it = set.find(p);
-
-      if (res_it != set.end()) {
-        operators.multiply_and_add_inplace_front(p.second, coef, res_it->second);
-        set.erase(res_it);
-        if (p.second != Field_operators::get_additive_identity()) {
-          set.insert(p);
-        }
+      auto res = set.emplace(cell.get_row_index(), cell.get_element());
+      if (res.second){
+        operators.multiply_inplace(res.first->second, coef);
       } else {
-        operators.multiply_inplace(p.second, coef);
-        set.insert(p);
+        operators.multiply_and_add_inplace_back(cell.get_element(), coef, res.first->second);
+        if (res.first->second == Field_operators::get_additive_identity()) {
+          set.erase(res.first);
+        }
       }
     }
   }

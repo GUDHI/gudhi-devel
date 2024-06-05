@@ -162,11 +162,11 @@ inline void Base_pairing<Master_matrix>::_reduce()
             curr += _matrix()->get_column(pivotsToColumn.at(pivot));
           } else {
             auto& toadd = _matrix()->get_column(pivotsToColumn.at(pivot));
-            typename Master_matrix::element_type coef = curr.get_pivot_value();
+            typename Master_matrix::element_type coef = toadd.get_pivot_value();
             auto& operators = _matrix()->colSettings_->operators;
             coef = operators.get_inverse(coef);
-            operators.multiply_inplace(coef, operators.get_characteristic() - toadd.get_pivot_value());
-            curr.multiply_target_and_add(coef, toadd);
+            operators.multiply_inplace(coef, operators.get_characteristic() - curr.get_pivot_value());
+            curr.multiply_source_and_add(toadd, coef);
           }
 
           pivot = curr.get_pivot();

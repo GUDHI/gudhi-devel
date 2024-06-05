@@ -799,7 +799,7 @@ void test_ru_u_access(){
 		uColumns[2] = {{2,1}};
 		uColumns[3] = {{3,1}};
 		uColumns[4] = {{4,1}};
-		uColumns[5] = {{3,1},{4,1},{5,4}};
+		uColumns[5] = {{3,4},{4,4},{5,1}};
 		uColumns[6] = {{6,1}};
 	}
 
@@ -961,9 +961,9 @@ void test_ru_u_row_access(){
 		rows.push_back({{0,1}});
 		rows.push_back({{1,1}});
 		rows.push_back({{2,1}});
-		rows.push_back({{3,1},{5,1}});
-		rows.push_back({{4,1},{5,1}});
-		rows.push_back({{5,4}});
+		rows.push_back({{3,1},{5,4}});
+		rows.push_back({{4,1},{5,4}});
+		rows.push_back({{5,1}});
 		rows.push_back({{6,1}});
 	}
 
@@ -1319,7 +1319,7 @@ void test_ru_operation(){
 		uColumns[2] = {{2,1}};
 		uColumns[3] = {{3,1}};
 		uColumns[4] = {{4,1}};
-		uColumns[5] = {{3,1},{4,1},{5,4}};
+		uColumns[5] = {{3,4},{4,4},{5,1}};
 		uColumns[6] = {{6,1}};
 	}
 
@@ -1340,7 +1340,7 @@ void test_ru_operation(){
 			uColumns[5] = {4,5};
 	} else {
 		columns[5] = {{0,1},{1,4}};
-		uColumns[5] = {{3,2},{4,1},{5,4}};
+		uColumns[5] = {{4,4},{5,1}};
 	}
 	test_content_equality(columns, m);
 	if constexpr (is_indexed_by_position<Matrix>()){
@@ -1359,7 +1359,7 @@ void test_ru_operation(){
 			uColumns[5] = {5};
 	} else {
 		columns[5] = {{0,1},{2,4}};
-		uColumns[5] = {{3,2},{4,2},{5,4}};
+		uColumns[5] = {{5,1}};
 	}
 	test_content_equality(columns, m);
 	if constexpr (is_indexed_by_position<Matrix>()){
@@ -1376,7 +1376,7 @@ void test_ru_operation(){
 			uColumns[3] = {3,5};
 		} else {
 			columns[3] = {{0,4},{1,2},{2,4}};
-			uColumns[3] = {{4,2},{5,4}};
+			uColumns[3] = {{3,3},{5,1}};
 		}
 		test_content_equality(columns, m);
 		if constexpr (is_indexed_by_position<Matrix>()){
@@ -1392,7 +1392,7 @@ void test_ru_operation(){
 			uColumns[4] = {4};
 		} else {
 			columns[4] = {{0,4},{1,1}};
-			uColumns[4] = {{3,3},{4,4},{5,1}};
+			uColumns[4] = {{4,1},{5,4}};
 		}
 		test_content_equality(columns, m);
 		if constexpr (is_indexed_by_position<Matrix>()){

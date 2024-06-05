@@ -819,18 +819,20 @@ inline void RU_matrix<Master_matrix>::_reduce()
       while (pivot != static_cast<id_index>(-1) && currIndex != static_cast<index>(-1)) {
         if constexpr (Master_matrix::Option_list::is_z2) {
           curr += reducedMatrixR_.get_column(currIndex);
+          //to avoid having to do line operations during vineyards, U is transposed
+          //TODO: explain this somewhere in the documentation...
           if constexpr (Master_matrix::Option_list::has_vine_update)
             mirrorMatrixU_.get_column(currIndex) += mirrorMatrixU_.get_column(i);
           else
             mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(currIndex);
         } else {
           Column_type& toadd = reducedMatrixR_.get_column(currIndex);
-          Field_element_type coef = curr.get_pivot_value();
+          Field_element_type coef = toadd.get_pivot_value();
           coef = operators_->get_inverse(coef);
-          operators_->multiply_inplace(coef, operators_->get_characteristic() - toadd.get_pivot_value());
+          operators_->multiply_inplace(coef, operators_->get_characteristic() - curr.get_pivot_value());
 
-          curr.multiply_target_and_add(coef, toadd);
-          mirrorMatrixU_.multiply_target_and_add_to(currIndex, coef, i);
+          curr.multiply_source_and_add(toadd, coef);
+          mirrorMatrixU_.multiply_source_and_add_to(coef, currIndex, i);
         }
 
         pivot = curr.get_pivot();
@@ -881,18 +883,20 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column(index lastIndex)
   while (pivot != static_cast<id_index>(-1) && currIndex != static_cast<index>(-1)) {
     if constexpr (Master_matrix::Option_list::is_z2) {
       curr += reducedMatrixR_.get_column(currIndex);
+      //to avoid having to do line operations during vineyards, U is transposed
+      //TODO: explain this somewhere in the documentation...
       if constexpr (Master_matrix::Option_list::has_vine_update)
         mirrorMatrixU_.get_column(currIndex) += mirrorMatrixU_.get_column(lastIndex);
       else
         mirrorMatrixU_.get_column(lastIndex) += mirrorMatrixU_.get_column(currIndex);
     } else {
       Column_type& toadd = reducedMatrixR_.get_column(currIndex);
-      Field_element_type coef = curr.get_pivot_value();
+      Field_element_type coef = toadd.get_pivot_value();
       coef = operators_->get_inverse(coef);
-      operators_->multiply_inplace(coef, operators_->get_characteristic() - toadd.get_pivot_value());
+      operators_->multiply_inplace(coef, operators_->get_characteristic() - curr.get_pivot_value());
 
-      curr.multiply_target_and_add(coef, toadd);
-      mirrorMatrixU_.get_column(lastIndex).multiply_target_and_add(coef, mirrorMatrixU_.get_column(currIndex));
+      curr.multiply_source_and_add(toadd, coef);
+      mirrorMatrixU_.get_column(lastIndex).multiply_source_and_add(mirrorMatrixU_.get_column(currIndex), coef);
     }
 
     pivot = curr.get_pivot();
