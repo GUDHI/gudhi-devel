@@ -379,7 +379,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         if not self.is_fitted():
             raise NotFittedError("Not fitted.")
 
-        if not X:
+        if len(X) == 0:
             X = [np.zeros((0, 2))]
         
         N = len(X)
@@ -412,7 +412,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         """
 
         if self.predefined_grid is None and self.resolution is None:
-            if not X:
+            if len(X) == 0:
                 X = [np.zeros((0, 2))]
 
             N = len(X)
