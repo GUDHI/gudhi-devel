@@ -1,29 +1,18 @@
-project(Rips_complex_examples)
-
 # Point cloud
-add_executable ( Rips_complex_example_from_off example_rips_complex_from_off_file.cpp )
+add_executable_with_targets(Rips_complex_example_from_off example_rips_complex_from_off_file.cpp TBB::tbb)
 
-add_executable ( Rips_complex_example_one_skeleton_from_points example_one_skeleton_rips_from_points.cpp )
+add_executable_with_targets(Rips_complex_example_one_skeleton_from_points example_one_skeleton_rips_from_points.cpp TBB::tbb)
 
 # Distance matrix
-add_executable ( Rips_complex_example_one_skeleton_from_distance_matrix example_one_skeleton_rips_from_distance_matrix.cpp )
+add_executable_with_targets(Rips_complex_example_one_skeleton_from_distance_matrix example_one_skeleton_rips_from_distance_matrix.cpp TBB::tbb)
 
-add_executable ( Rips_complex_example_from_csv_distance_matrix example_rips_complex_from_csv_distance_matrix_file.cpp )
+add_executable_with_targets(Rips_complex_example_from_csv_distance_matrix example_rips_complex_from_csv_distance_matrix_file.cpp TBB::tbb)
 
 # Sparse rips from points
-add_executable ( Rips_complex_example_sparse example_sparse_rips.cpp )
+add_executable_with_targets(Rips_complex_example_sparse example_sparse_rips.cpp TBB::tbb)
 
 # Correlation matrix
-add_executable (  Rips_complex_example_one_skeleton_rips_from_correlation_matrix example_one_skeleton_rips_from_correlation_matrix.cpp )
-
-if(TARGET TBB::tbb)
-  target_link_libraries(Rips_complex_example_from_off TBB::tbb)
-  target_link_libraries(Rips_complex_example_one_skeleton_from_points TBB::tbb)
-  target_link_libraries(Rips_complex_example_one_skeleton_from_distance_matrix TBB::tbb)
-  target_link_libraries(Rips_complex_example_from_csv_distance_matrix TBB::tbb)
-  target_link_libraries(Rips_complex_example_sparse TBB::tbb)
-  target_link_libraries(Rips_complex_example_one_skeleton_rips_from_correlation_matrix TBB::tbb)
-endif()
+add_executable_with_targets(Rips_complex_example_one_skeleton_rips_from_correlation_matrix example_one_skeleton_rips_from_correlation_matrix.cpp TBB::tbb)
 
 add_test(NAME Rips_complex_example_one_skeleton_from_points
     COMMAND $<TARGET_FILE:Rips_complex_example_one_skeleton_from_points>)

@@ -1,5 +1,3 @@
-project(Common_tests)
-
 include(GUDHI_boost_test)
 
 add_executable ( Common_test_points_off_reader test_points_off_reader.cpp )

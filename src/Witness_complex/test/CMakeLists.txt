@@ -1,20 +1,10 @@
-project(Witness_complex_tests)
-
 include(GUDHI_boost_test)
 
-add_executable ( Witness_complex_test_simple_witness_complex test_simple_witness_complex.cpp )
-if(TARGET TBB::tbb)
-  target_link_libraries(Witness_complex_test_simple_witness_complex TBB::tbb)
-endif()
-
+add_executable_with_targets(Witness_complex_test_simple_witness_complex test_simple_witness_complex.cpp TBB::tbb)
 gudhi_add_boost_test(Witness_complex_test_simple_witness_complex)
 
+add_executable_with_targets(Witness_complex_test_euclidean_simple_witness_complex test_euclidean_simple_witness_complex.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)
 # CGAL and Eigen3 are required for Euclidean version of Witness
-if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-  add_executable ( Witness_complex_test_euclidean_simple_witness_complex test_euclidean_simple_witness_complex.cpp )
-  if(TARGET TBB::tbb)
-    target_link_libraries(Witness_complex_test_euclidean_simple_witness_complex TBB::tbb)
-  endif()
-
+if(TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   gudhi_add_boost_test(Witness_complex_test_euclidean_simple_witness_complex)
-endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+endif()
