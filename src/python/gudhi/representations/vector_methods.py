@@ -406,7 +406,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         return np.array(bettis, dtype=int)[:, 0:-1]
 
-    def fit_transform(self, X):
+    def fit_transform(self, X, y = None):
         """
         The result is the same as fit(X) followed by transform(X), but potentially faster.
         """

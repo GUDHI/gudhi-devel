@@ -1,5 +1,3 @@
-project(Persistence_vectors_utilities)
-
 add_persistence_representation_creation_utility(create_persistence_vectors "-1")
 
 add_persistence_representation_plot_utility(create_persistence_vectors plot_persistence_vectors ".vect")

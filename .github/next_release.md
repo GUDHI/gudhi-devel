@@ -13,6 +13,10 @@ Below is a list of changes made since GUDHI 3.9.0:
           * Delaunay Čech complex (using minimal enclosing ball technique)
           * Alpha complex (moved in this new section)
 
+- Installation
+     - CGAL &ge; 5.1.0 is now required (was &ge; 4.11.0).
+     - Eigen3 &ge; 3.3.0 is now required (was &ge; 3.1.0).
+
 - [Module](link)
      - **...**
 
