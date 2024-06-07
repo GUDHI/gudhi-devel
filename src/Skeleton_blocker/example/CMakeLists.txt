@@ -1,5 +1,3 @@
-project(Skeleton_blocker_examples)
-
 add_executable(Skeleton_blocker_example_from_simplices Skeleton_blocker_from_simplices.cpp)
 add_executable(Skeleton_blocker_example_iteration Skeleton_blocker_iteration.cpp)
 add_executable(Skeleton_blocker_example_link Skeleton_blocker_link.cpp)

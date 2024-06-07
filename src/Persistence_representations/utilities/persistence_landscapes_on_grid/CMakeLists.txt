@@ -1,5 +1,3 @@
-project(Persistence_representations_lanscapes_on_grid_utilities)
-
 # Need to set grid min and max for further average, distance and scalar_product
 add_persistence_representation_creation_utility(create_landscapes_on_grid "100" "0" "35" "-1")
 

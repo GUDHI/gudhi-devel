@@ -1,18 +1,9 @@
-project(Alpha_complex_examples)
+add_executable_with_targets(Alpha_complex_example_from_points Alpha_complex_from_points.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)
+add_executable_with_targets(Alpha_complex_example_from_off Alpha_complex_from_off.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)
+add_executable_with_targets(Alpha_complex_example_fast_from_off Fast_alpha_complex_from_off.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)
+add_executable_with_targets(Weighted_alpha_complex_example_from_points Weighted_alpha_complex_from_points.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)
 
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
-  add_executable ( Alpha_complex_example_from_points Alpha_complex_from_points.cpp )
-  target_link_libraries(Alpha_complex_example_from_points  ${CGAL_LIBRARY})
-  add_executable ( Alpha_complex_example_from_off Alpha_complex_from_off.cpp )
-  target_link_libraries(Alpha_complex_example_from_off ${CGAL_LIBRARY})
-  add_executable ( Alpha_complex_example_fast_from_off Fast_alpha_complex_from_off.cpp )
-  target_link_libraries(Alpha_complex_example_fast_from_off ${CGAL_LIBRARY})
-  if(TARGET TBB::tbb)
-    target_link_libraries(Alpha_complex_example_from_points TBB::tbb)
-    target_link_libraries(Alpha_complex_example_from_off TBB::tbb)
-    target_link_libraries(Alpha_complex_example_fast_from_off TBB::tbb)
-  endif()
-
+if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   add_test(NAME Alpha_complex_example_from_points COMMAND $<TARGET_FILE:Alpha_complex_example_from_points>)
 
   add_test(NAME Alpha_complex_example_from_off_60 COMMAND $<TARGET_FILE:Alpha_complex_example_from_off>
@@ -44,32 +35,16 @@ if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
         ${CMAKE_CURRENT_BINARY_DIR}/fastalphaoffreader_result_32.txt ${CMAKE_CURRENT_BINARY_DIR}/alphaoffreader_for_doc_32.txt)
     set_tests_properties(Alpha_complex_example_fast_from_off_32_diff_files PROPERTIES DEPENDS Alpha_complex_example_fast_from_off_32) 
   endif()
-endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+  add_test(NAME Weighted_alpha_complex_example_from_points COMMAND $<TARGET_FILE:Weighted_alpha_complex_example_from_points>)
+endif()
 
-if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
-  add_executable ( Alpha_complex_example_weighted_3d_from_points Weighted_alpha_complex_3d_from_points.cpp )
-  target_link_libraries(Alpha_complex_example_weighted_3d_from_points  ${CGAL_LIBRARY})
-  if(TARGET TBB::tbb)
-    target_link_libraries(Alpha_complex_example_weighted_3d_from_points TBB::tbb)
-  endif()
+add_executable_with_targets(Alpha_complex_example_weighted_3d_from_points Weighted_alpha_complex_3d_from_points.cpp CGAL::CGAL TBB::tbb)
+add_executable_with_targets(Alpha_complex_example_3d_from_points Alpha_complex_3d_from_points.cpp CGAL::CGAL TBB::tbb)
+
+if (TARGET CGAL::CGAL)
   add_test(NAME Alpha_complex_example_weighted_3d_from_points
           COMMAND $<TARGET_FILE:Alpha_complex_example_weighted_3d_from_points>)
 
-  add_executable ( Alpha_complex_example_3d_from_points Alpha_complex_3d_from_points.cpp )
-  target_link_libraries(Alpha_complex_example_3d_from_points  ${CGAL_LIBRARY})
-  if(TARGET TBB::tbb)
-    target_link_libraries(Alpha_complex_example_3d_from_points TBB::tbb)
-  endif()
   add_test(NAME Alpha_complex_example_3d_from_points
           COMMAND $<TARGET_FILE:Alpha_complex_example_3d_from_points>)
-
-endif(NOT CGAL_VERSION VERSION_LESS 4.11.0)
-
-if (NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
-  add_executable ( Weighted_alpha_complex_example_from_points Weighted_alpha_complex_from_points.cpp )
-  target_link_libraries(Weighted_alpha_complex_example_from_points  ${CGAL_LIBRARY})
-  if(TARGET TBB::tbb)
-    target_link_libraries(Weighted_alpha_complex_example_from_points TBB::tbb)
-  endif()
-  add_test(NAME Weighted_alpha_complex_example_from_points COMMAND $<TARGET_FILE:Weighted_alpha_complex_example_from_points>)
-endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 5.1.0)
+endif()
