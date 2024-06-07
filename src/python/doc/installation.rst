@@ -236,7 +236,7 @@ The procedure to install this library
 according to your operating system is detailed
 `here <http://doc.cgal.org/latest/Manual/installation.html>`_.
 
-The following examples require CGAL version :math:`\geq` 4.11.0:
+The following examples require CGAL version :math:`\geq` 5.1.0:
 
 .. only:: builder_html
 
@@ -255,7 +255,7 @@ require `Eigen <http://eigen.tuxfamily.org/>`_, a C++ template
 library for linear algebra: matrices, vectors, numerical solvers, and related
 algorithms.
 
-The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version :math:`\geq` 3.1.0:
+The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version :math:`\geq` 3.3.0:
 
 .. only:: builder_html
 

@@ -1,5 +1,3 @@
-project(Persistence_representations_heat_maps_utilities)
-
 add_persistence_representation_creation_utility(create_pssk  "10" "-1" "-1" "4" "-1")
 add_persistence_representation_creation_utility(create_p_h_m_weighted_by_arctan_of_their_persistence "10" "-1" "-1" "4" "-1")
 

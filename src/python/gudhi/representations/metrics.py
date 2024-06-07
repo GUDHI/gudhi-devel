@@ -243,7 +243,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
     r"""
     This is a class for computing the bottleneck distance matrix from a list of persistence diagrams.
 
-    :Requires: `CGAL <installation.html#cgal>`_ :math:`\geq` 4.11.0
+    :Requires: `CGAL <installation.html#cgal>`_ :math:`\geq` 5.1.0
     """
     def __init__(self, epsilon=None, n_jobs=None):
         """

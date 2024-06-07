@@ -1,5 +1,3 @@
-project(GudhUI)
-
 # Need to find OpenGL first as find_package(Qt5) tries to #include"GL/gl.h" on some platforms
 find_package(OpenGL QUIET)
 
@@ -9,7 +7,7 @@ if (OPENGL_FOUND)
     find_package(QGLViewer QUIET)
     if ( QGLVIEWER_FOUND)
 
-      if (NOT CGAL_VERSION VERSION_LESS 4.11.0)
+      if (TARGET CGAL::CGAL)
         set(CMAKE_AUTOMOC ON)
         set(CMAKE_AUTOUIC ON)
         set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -28,7 +26,7 @@ if (OPENGL_FOUND)
           view/Viewer_instructor.cpp
           view/Viewer.cpp
         )
-        target_link_libraries( GudhUI Qt5::Widgets Qt5::Xml Qt5::OpenGL )
+        target_link_libraries( GudhUI CGAL::CGAL Qt5::Widgets Qt5::Xml Qt5::OpenGL )
         target_link_libraries( GudhUI ${QGLVIEWER_LIBRARIES} )
         target_link_libraries( GudhUI OpenGL::GL OpenGL::GLU )
         if(TARGET TBB::tbb)
@@ -39,7 +37,7 @@ if (OPENGL_FOUND)
         install(TARGETS GudhUI DESTINATION bin)
         set(GUDHI_MODULES ${GUDHI_MODULES} "GudhUI" CACHE INTERNAL "GUDHI_MODULES")
       else()
-        message("++ GudhUI will not be compiled because CGAL < 4.11.0 or not found")
+        message("++ GudhUI will not be compiled because CGAL < 5.1.0 or not found")
         set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "GudhUI" CACHE INTERNAL "GUDHI_MISSING_MODULES")
       endif()
     else()
