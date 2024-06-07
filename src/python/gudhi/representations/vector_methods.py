@@ -788,20 +788,34 @@ class Atol(BaseEstimator, TransformerMixin):
             self
         """
         if not hasattr(self.quantiser, 'fit'):
-            raise TypeError("quantiser %s has no `fit` attribute." % (self.quantiser))
-
-        # In fitting we remove infinite death time points so that every center is finite
-        X = [dgm[~np.isinf(dgm).any(axis=1), :] for dgm in X]
+            raise TypeError(f"quantiser {self.quantiser} has no `fit` attribute.")
+        n_clusters = self.quantiser.n_clusters
 
         if sample_weight is None:
             sample_weight = [self.get_weighting_method()(measure) for measure in X]
 
         measures_concat = np.concatenate(X)
         weights_concat = np.concatenate(sample_weight)
+        # In fitting we remove infinite birth/death time points so that every center is finite
+        filtered_measures_concat = measures_concat[~np.isinf(measures_concat).any(axis=1), :] if len(measures_concat) else measures_concat
+        filtered_weights_concat = weights_concat[~np.isinf(measures_concat).any(axis=1)] if len(measures_concat) else weights_concat
 
-        self.quantiser.fit(X=measures_concat, sample_weight=weights_concat)
+        if not len(filtered_measures_concat) or len(filtered_measures_concat) < n_clusters:
+            # If no point to fit, let's arbitrarily put centers in [0, 1)
+            print(f" [Atol] had {len(filtered_measures_concat)} points to fit {n_clusters} clusters,"
+                  f"        adding random points in [0, 1)^2")
+            filtered_weights_concat = np.concatenate((
+                filtered_weights_concat,
+                np.ones(shape=(n_clusters - len(filtered_measures_concat)))
+            ))
+            filtered_measures_concat = np.concatenate((
+                filtered_measures_concat,
+                np.random.random((n_clusters - len(filtered_measures_concat), 2))
+            ))
 
+        self.quantiser.fit(X=filtered_measures_concat, sample_weight=filtered_weights_concat)
         self.centers = self.quantiser.cluster_centers_
+
         # Hack, but some people are unhappy if the order depends on the version of sklearn
         self.centers = self.centers[np.lexsort(self.centers.T)]
         if self.quantiser.n_clusters == 1:
