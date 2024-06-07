@@ -1,5 +1,3 @@
-project(Toplex_map_tests)
-
 include(GUDHI_boost_test)
 
 add_executable( Toplex_map_unit_test toplex_map_unit_test.cpp )

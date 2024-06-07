@@ -1,11 +1,6 @@
-project(Graph_induced_complex_tests)
-
 include(GUDHI_boost_test)
 
-add_executable ( Nerve_GIC_test_unit test_GIC.cpp )
-if(TARGET TBB::tbb)
-  target_link_libraries(Nerve_GIC_test_unit TBB::tbb)
-endif()
+add_executable_with_targets(Nerve_GIC_test_unit test_GIC.cpp TBB::tbb)
 
 file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
