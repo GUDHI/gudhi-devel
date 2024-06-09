@@ -149,7 +149,7 @@ def _grid_from_sample_range(self, X):
     self.sample_range_fixed_ = _automatic_sample_range(sample_range, X)
     if sum([len(x) for x in X]) == 0:
         # if empty list or empty diagrams, self.grid_ is a list containing self.resolution copies of -infinity for consistency with exact computation 
-        self.grid_ = -np.inf * np.ones(shape=[self.resolution])
+        self.grid_ = -np.inf * np.ones(shape=[self.new_resolution_])
     else:
         self.grid_ = np.linspace(self.sample_range_fixed_[0], self.sample_range_fixed_[1], self.new_resolution_)
     if not self.keep_endpoints:
@@ -360,9 +360,8 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         if self.predefined_grid is None:
             if self.resolution is None: # Flexible/exact version
-                events = np.unique(np.concatenate([pd.ravel() for pd in X] + [[-np.inf]], axis=0)) # if empty list or empty diagrams, the list events only contains -infinity 
-                self.grid_ = np.array(events)
-                self.resolution = len(self.grid_)
+                print("Empty list or empty diagrams: evaluation grid only contains -infinity")
+                self.grid_ = np.unique(np.concatenate([pd.ravel() for pd in X] + [[-np.inf]], axis=0)) 
             else:
                 _grid_from_sample_range(self, X)
         else:
@@ -388,7 +387,10 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         if sum([len(x) for x in X]) == 0:
 
-            return np.zeros((N, self.resolution))
+            if self.resolution is None:
+                return np.zeros((N, 1))
+            else:
+                return np.zeros((N, self.resolution))
             
         else:
 
@@ -424,7 +426,8 @@ class BettiCurve(BaseEstimator, TransformerMixin):
             N = len(X)
 
             if sum([len(x) for x in X]) == 0:
-
+                print("Empty list or empty diagrams: evaluation grid only contains -infinity")
+                self.grid_ = np.array([-np.inf])
                 return np.zeros((N, 1))
 
             else:
@@ -500,7 +503,10 @@ class Entropy(BaseEstimator, TransformerMixin):
         """
         if self.mode == "vector":
             _grid_from_sample_range(self, X)
-            self.step_ = self.grid_[1] - self.grid_[0]
+            if sum([len(x) for x in X]) > 0:
+                self.step_ = self.grid_[1] - self.grid_[0]
+            else:
+                self.step_ = 0.
         return self
 
     def transform(self, X):
