@@ -47,8 +47,8 @@ call *'complex'* in the following text.
   the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
   output is a valid filtration (faces have a filtration value no larger than their cofaces).
 
-Both versions are kept as :class:`~gudhi.DelaunayCechComplex` is a bit faster than :class:`~gudhi.AlphaComplex`, but
-only :class:`~gudhi.AlphaComplex` has a weighted version.
+:class:`~gudhi.DelaunayCechComplex` is a bit faster than :class:`~gudhi.AlphaComplex`, but only
+:class:`~gudhi.AlphaComplex` has a weighted version.
 
 Example from points
 -------------------
