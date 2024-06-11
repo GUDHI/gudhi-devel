@@ -46,6 +46,7 @@ jobs:
       pythonVersion: '3.7'
       cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
       cmakeFlags: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
+      cmakeRunnerBugFlags: /D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR
 
     steps:
     # Use a specific Python version
@@ -69,7 +70,7 @@ jobs:
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON -DCMAKE_CXX_FLAGS="/DWIN32 /D_WINDOWS /W3 /GR /EHsc /W3 /MD /O2 /Ob2 /DNDEBUG /D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" $(cmakeVcpkgFlags) $(cmakeFlags) ..
+        cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON -DCMAKE_CXX_FLAGS=$(cmakeRunnerBugFlags) $(cmakeVcpkgFlags) $(cmakeFlags) ..
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         ninja
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
@@ -81,6 +82,7 @@ jobs:
         copy "C:\vcpkg\installed\x64-windows\bin\mpfr*.dll" ".\gudhi\"
         copy "C:\vcpkg\installed\x64-windows\bin\gmp*.dll" ".\gudhi\"
         copy "C:\vcpkg\installed\x64-windows\bin\tbb*.dll" ".\gudhi\"
+        SET CPPFLAGS=$(cmakeRunnerBugFlags)
         python setup.py build_ext --inplace
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         SET PYTHONPATH=%CD%;%PYTHONPATH%
