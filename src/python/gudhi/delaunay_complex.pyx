@@ -41,7 +41,7 @@ cdef extern from "Delaunay_complex_interface.h" namespace "Gudhi":
 cdef class DelaunayComplex:
     """DelaunayComplex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
 
-    When :paramref:`~gudhi.DelaunayComplex.create_simplex_tree.filtrations` is:
+    When :paramref:`~gudhi.DelaunayComplex.create_simplex_tree.filtration` is:
 
     * `None` (default value) - The filtration value of each simplex is not computed (set to `NaN`)
     * `'alpha'`              - The filtration value of each simplex is computed as an :class:`~gudhi.AlphaComplex`
@@ -104,25 +104,25 @@ cdef class DelaunayComplex:
         """
         return self.this_ptr.get_point(vertex)
 
-    def create_simplex_tree(self, max_alpha_square = float('inf'), filtrations = None):
+    def create_simplex_tree(self, max_alpha_square = float('inf'), filtration = None):
         """
         :param max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
             infinity, and there is very little point using anything else since it does not save time.
         :type max_alpha_square: float
-        :param filtrations: Set this value to `None` (default value) if filtration values are not needed to be computed
+        :param filtration: Set this value to `None` (default value) if filtration values are not needed to be computed
             (will be set to `NaN`). Set it to `alpha` to compute the filtration values with the Alpha complex, or to
             `cech` to compute the Delaunay Cech complex.
-        :type filtrations: string or None
+        :type filtration: string or None
         :returns: A simplex tree created from the Delaunay Triangulation.
         :rtype: SimplexTree
         """
-        if not filtrations in [None, 'alpha', 'cech']:
-            raise ValueError(f"\'{filtrations}\' is not a valid filtration value. Must be None, \'alpha\' or \'cech\'")
+        if not filtration in [None, 'alpha', 'cech']:
+            raise ValueError(f"\'{filtration}\' is not a valid filtration value. Must be None, \'alpha\' or \'cech\'")
         stree = SimplexTree()
         cdef double mas = max_alpha_square
         cdef intptr_t stree_int_ptr=stree.thisptr
-        cdef bool compute_filtration = filtrations is None
-        cdef bool cech = filtrations == 'cech'
+        cdef bool compute_filtration = filtration is None
+        cdef bool cech = filtration == 'cech'
         with nogil:
             self.this_ptr.create_simplex_tree(<Simplex_tree_python_interface*>stree_int_ptr,
                                               mas, compute_filtration, cech)
@@ -182,13 +182,13 @@ cdef class AlphaComplex(DelaunayComplex):
         :returns: A simplex tree created from the Delaunay Triangulation.
         :rtype: SimplexTree
         """
-        filtrations = 'alpha'
+        filtration = 'alpha'
         if default_filtration_value:
-            filtrations = None
+            filtration = None
             warnings.warn('''Since Gudhi 3.10, creating an AlphaComplex with default_filtration_value=True is deprecated.
                           Please consider constructing a DelaunayComplex instead.
                           ''', DeprecationWarning)
-        return super().create_simplex_tree(max_alpha_square, filtrations)
+        return super().create_simplex_tree(max_alpha_square, filtration)
 
 cdef class DelaunayCechComplex(DelaunayComplex):
     """DelaunayCechComplex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
