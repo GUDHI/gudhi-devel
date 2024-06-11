@@ -61,8 +61,7 @@ jobs:
         python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
         # No PyKeOps on windows, let's workaround this one.
         for /F "tokens=*" %%A in (ext\gudhi-deploy\test-requirements.txt) do python -m pip install  %%A
-        echo.set(VCPKG_BUILD_TYPE release)>> C:\vcpkg\triplets\x64-windows.cmake
-        vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows
+        vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
         choco install -y ninja --force --force-dependencies
       displayName: 'Install build dependencies'
     - script: |
@@ -70,7 +69,7 @@ jobs:
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(cmakeFlags) ..
+        cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON -DCMAKE_CXX_FLAGS="/DWIN32 /D_WINDOWS /W3 /GR /EHsc /W3 /MD /O2 /Ob2 /DNDEBUG /D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR" $(cmakeVcpkgFlags) $(cmakeFlags) ..
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
         ninja
         IF %errorlevel% NEQ 0 exit /b %errorlevel%
