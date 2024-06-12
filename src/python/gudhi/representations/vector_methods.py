@@ -725,9 +725,9 @@ class Atol(BaseEstimator, TransformerMixin):
     >>> atol_vectoriser.fit(X=[a, b, c]).centers
     array([[ 2.6       ,  2.8       , -0.4       ],
            [ 2.        ,  0.66666667,  3.33333333]])
-    >>> atol_vectoriser._transform(a)
+    >>> atol_vectoriser(a)
     array([0.42375966, 1.18168665])
-    >>> atol_vectoriser._transform(c)
+    >>> atol_vectoriser(c)
     array([1.25157463, 0.02062512])
     >>> atol_vectoriser.transform(X=[a, b, c])
     array([[0.42375966, 1.18168665],
@@ -815,7 +815,7 @@ class Atol(BaseEstimator, TransformerMixin):
             self.inertias = np.min(dist_centers, axis=0)/2
         return self
 
-    def _transform(self, measure, sample_weight=None):
+    def __call__(self, measure, sample_weight=None):
         """
         Apply measure vectorisation on a single measure. Only available after `fit` has been called.
 
@@ -845,7 +845,7 @@ class Atol(BaseEstimator, TransformerMixin):
         if sample_weight is None:
             sample_weight = [self.get_weighting_method()(measure) for measure in X]
         self._running_transform_names = [f"Atol Center {i + 1}" for i in range(self.quantiser.n_clusters)]
-        return np.stack([self._transform(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])
+        return np.stack([self(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])
 
     def get_feature_names_out(self):
         return self._running_transform_names

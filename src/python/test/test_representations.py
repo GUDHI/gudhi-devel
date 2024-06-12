@@ -132,9 +132,9 @@ def test_atol_doc():
     np.isclose(centers, second_cluster.mean(axis=0)).all(1).any() 
 
     vectorization = atol_vectoriser.transform(X=[a, b, c])
-    assert np.allclose(vectorization[0], atol_vectoriser._transform(a))
-    assert np.allclose(vectorization[1], atol_vectoriser._transform(b))
-    assert np.allclose(vectorization[2], atol_vectoriser._transform(c))
+    assert np.allclose(vectorization[0], atol_vectoriser(a))
+    assert np.allclose(vectorization[1], atol_vectoriser(b))
+    assert np.allclose(vectorization[2], atol_vectoriser(c))
 
 
 def test_dummy_atol():
@@ -150,7 +150,7 @@ def test_dummy_atol():
                 contrast=contrast,
             )
             atol_vectoriser.fit([a, b, c])
-            atol_vectoriser._transform(a)
+            atol_vectoriser(a)
             atol_vectoriser.transform(X=[a, b, c])
 
 
