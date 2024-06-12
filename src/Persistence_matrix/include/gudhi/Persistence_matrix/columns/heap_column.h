@@ -135,6 +135,8 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   Heap_column& multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
   Heap_column& multiply_source_and_add(Heap_column& column, const Field_element_type& val);
 
+  std::size_t compute_hash_value();
+
   friend bool operator==(const Heap_column& c1, const Heap_column& c2) {
     if (&c1 == &c2) return true;
     return c1.get_content() == c2.get_content();
@@ -842,6 +844,18 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator=(const H
 }
 
 template <class Master_matrix>
+inline std::size_t Heap_column<Master_matrix>::compute_hash_value()
+{
+  _prune();
+  //can't use Gudhi::persistence_matrix::hash_column because the same heap can ordered differently
+  std::size_t seed = 0;
+  for (const auto& cell : column_) {
+    seed ^= std::hash<unsigned int>()(cell.get_row_index() * static_cast<unsigned int>(cell.get_element()));
+  }
+  return seed;
+}
+
+template <class Master_matrix>
 inline void Heap_column<Master_matrix>::_prune() 
 {
   if (insertsSinceLastPrune_ == 0) return;
@@ -1049,13 +1063,8 @@ inline bool Heap_column<Master_matrix>::_multiply_source_and_add(const Cell_rang
 template <class Master_matrix>
 struct std::hash<Gudhi::persistence_matrix::Heap_column<Master_matrix> > 
 {
-  size_t operator()(const Gudhi::persistence_matrix::Heap_column<Master_matrix>& column) const {
-    std::size_t seed = 0;
-    unsigned int i = 0;
-    for (bool val : column.get_content()) {
-      seed ^= std::hash<unsigned int>()(i++ * val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    }
-    return seed;
+  size_t operator()(Gudhi::persistence_matrix::Heap_column<Master_matrix>& column) const {
+    return column.compute_hash_value();
   }
 };
 

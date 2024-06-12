@@ -995,6 +995,7 @@ template <class Master_matrix>
 struct std::hash<Gudhi::persistence_matrix::Unordered_set_column<Master_matrix> > 
 {
   std::size_t operator()(const Gudhi::persistence_matrix::Unordered_set_column<Master_matrix>& column) const {
+    //can't use Gudhi::persistence_matrix::hash_column because unordered
     std::size_t seed = 0;
     for (const auto& cell : column) {
       seed ^= std::hash<unsigned int>()(cell.get_row_index() * static_cast<unsigned int>(cell.get_element()));

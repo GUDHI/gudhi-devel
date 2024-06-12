@@ -18,6 +18,7 @@
 #ifndef PM_VECTOR_COLUMN_H
 #define PM_VECTOR_COLUMN_H
 
+#include <cstddef>
 #include <vector>
 #include <stdexcept>
 #include <type_traits>
@@ -135,6 +136,8 @@ class Vector_column : public Master_matrix::Row_access_option,
   template <class Cell_range>
   Vector_column& multiply_source_and_add(const Cell_range& column, const Field_element_type& val);
   Vector_column& multiply_source_and_add(Vector_column& column, const Field_element_type& val);
+
+  std::size_t compute_hash_value();
 
   friend bool operator==(const Vector_column& c1, const Vector_column& c2) {
     if (&c1 == &c2) return true;
@@ -953,6 +956,19 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::operator=(
 }
 
 template <class Master_matrix>
+inline std::size_t Vector_column<Master_matrix>::compute_hash_value()
+{
+  std::size_t seed = 0;
+  for (Cell* cell : column_) {
+    if (erasedValues_.find(cell->get_row_index()) == erasedValues_.end()){
+      seed ^= std::hash<unsigned int>()(cell->get_row_index() * static_cast<unsigned int>(cell->get_element())) +
+              0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+  }
+  return seed;
+}
+
+template <class Master_matrix>
 inline void Vector_column<Master_matrix>::_delete_cell(Cell* cell) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access) ra_opt::unlink(cell);
@@ -1223,7 +1239,7 @@ template <class Master_matrix>
 struct std::hash<Gudhi::persistence_matrix::Vector_column<Master_matrix> > 
 {
   std::size_t operator()(const Gudhi::persistence_matrix::Vector_column<Master_matrix>& column) const {
-    return Gudhi::persistence_matrix::hash_column(column);
+    return column.compute_hash_value();
   }
 };
 

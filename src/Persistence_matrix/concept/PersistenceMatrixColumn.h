@@ -49,6 +49,7 @@ using Chain_column_option = Chain_column_extra_properties;
  *
  * @brief Concept of the column classes used by the @ref Matrix class. The classes the columns inheritates from
  * are either real or dummy classes, see @ref Row_access_option, @ref Column_dimension_option, @ref Chain_column_option.
+ * If used with column compression, the column type has to have its `std::hash` method.
  *
  * Implementations of this concept are @ref Heap_column, @ref List_column, @ref Vector_column, @ref Naive_vector_column
  * @ref Set_column, @ref Unordered_set_column, @ref Intrusive_list_column and @ref Intrusive_set_column.

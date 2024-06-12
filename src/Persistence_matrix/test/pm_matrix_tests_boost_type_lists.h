@@ -138,7 +138,7 @@ using col_type_list = boost::mp11::mp_list<ct_list>;
 using col_type_list = boost::mp11::mp_list<ct_set>;
 #else
 #ifdef PM_TEST_HEAP
-using col_type_list = boost::mp11::mp_list<ct_heap>;	//WARNING: unit tests involving row access will not compile (they template list will be empty), so they have to be commented to test heap columns alone
+using col_type_list = boost::mp11::mp_list<ct_heap,ct_vector>;	//WARNING: unit tests involving row access will not compile with heap columns alone (they template list will be empty), so they have to be commented to test only heap columns
 #else
 #ifdef PM_TEST_UNORD_SET
 using col_type_list = boost::mp11::mp_list<ct_unordered_set>;
