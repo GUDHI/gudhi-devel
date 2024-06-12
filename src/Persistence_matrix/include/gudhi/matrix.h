@@ -1382,7 +1382,7 @@ class Matrix {
   const cycle_type& get_representative_cycle(const Bar& bar);
 
  private:
-  using matrix_type = 
+  using Matrix_type = 
     typename std::conditional<
         isNonBasic,
         typename std::conditional<
@@ -1418,7 +1418,7 @@ class Matrix {
   // Field_operators* operators_;
   // Cell_constructor* cellPool_;
   Column_settings* colSettings_;  //pointer because the of swap operator on matrix_ which also stores the pointer
-  matrix_type matrix_;
+  Matrix_type matrix_;
 
   static constexpr void _assert_options();
 };

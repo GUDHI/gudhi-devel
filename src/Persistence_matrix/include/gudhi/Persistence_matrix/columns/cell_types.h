@@ -196,6 +196,7 @@ class Cell : public Master_matrix::Cell_column_index_option,
   using field_opt = typename Master_matrix::Cell_field_element_option;
 
  public:
+  using Master = Master_matrix;                                     /**< Access to options from outside. */
   using index = typename Master_matrix::index;                      /**< Column index type. */
   using id_index = typename Master_matrix::id_index;                /**< Row index type. */
   using Field_element_type = typename Master_matrix::element_type;  /**< Value type. */

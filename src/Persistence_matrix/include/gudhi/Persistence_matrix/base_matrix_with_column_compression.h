@@ -359,11 +359,7 @@ template <class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(
     Column_settings* colSettings)
     : ra_opt(), nextColumnIndex_(0), colSettings_(colSettings)
-{
-  // if constexpr (Master_matrix::Option_list::has_row_access) {
-  //   colSettings_->rows = &ra_opt::rows_;
-  // }
-}
+{}
 
 template <class Master_matrix>
 template <class Container_type>

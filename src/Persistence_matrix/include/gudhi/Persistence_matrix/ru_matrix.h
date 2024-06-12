@@ -411,6 +411,8 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   void _initialize_U();
   void _reduce();
   void _reduce_last_column(index lastIndex);
+  void _reduce_column(index target, index eventIndex);
+  void _reduce_column_by(index target, index source);
   void _update_barcode(pos_index birth, pos_index death);
   void _add_bar(dimension_type dim, pos_index birth);
 
@@ -520,13 +522,9 @@ template <class Master_matrix>
 template <class Boundary_type>
 inline void RU_matrix<Master_matrix>::insert_boundary(const Boundary_type& boundary, dimension_type dim) 
 {
-  if constexpr (Master_matrix::Option_list::has_vine_update) {
-    auto id = reducedMatrixR_.insert_boundary(boundary, dim);
-    swap_opt::positionToRowIdx_.push_back(id);
-    _insert_boundary(id);
-  } else {
-    _insert_boundary(reducedMatrixR_.insert_boundary(boundary, dim));
-  }
+  auto id = reducedMatrixR_.insert_boundary(boundary, dim);
+  if constexpr (Master_matrix::Option_list::has_vine_update) swap_opt::positionToRowIdx_.push_back(id);
+  _insert_boundary(id);
 }
 
 template <class Master_matrix>
@@ -592,13 +590,13 @@ inline void RU_matrix<Master_matrix>::remove_last()
   if (nextEventIndex_ == 0) return;  // empty matrix
   --nextEventIndex_;
 
-  // assumes @ref PosIdx == @ref MatIdx for @ref boundarymatrix "boundary matrices".
+  // assumes PosIdx == MatIdx for boundary matrices.
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
     if constexpr (Master_matrix::hasFixedBarcode) {
       auto& bar = _barcode()[_indexToBar()[nextEventIndex_]];
-      if (bar.death == static_cast<pos_index>(-1)) {    // birth
+      if (bar.death == static_cast<pos_index>(-1)) {  // birth
         _barcode().pop_back();  // sorted by birth and nextEventIndex_ has to be the heighest one
-      } else {                  // death
+      } else {                                        // death
         bar.death = -1;
       };
       _indexToBar().pop_back();
@@ -651,6 +649,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex) 
 {
   reducedMatrixR_.add_to(sourceColumnIndex, targetColumnIndex);
+  //U transposed to avoid row operations
   if constexpr (Master_matrix::Option_list::has_vine_update)
     mirrorMatrixU_.add_to(targetColumnIndex, sourceColumnIndex);
   else
@@ -787,19 +786,6 @@ inline void RU_matrix<Master_matrix>::_initialize_U()
 template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_reduce() 
 {
-  auto get_column_with_pivot_ = [&](id_index pivot) -> index {
-    if (pivot == static_cast<id_index>(-1)) return -1;
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      auto it = pivotToColumnIndex_.find(pivot);
-      if (it == pivotToColumnIndex_.end())
-        return -1;
-      else
-        return it->second;
-    } else {
-      return pivotToColumnIndex_[pivot];
-    }
-  };
-
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
     _indexToBar().reserve(reducedMatrixR_.get_number_of_columns());
   }
@@ -812,43 +798,7 @@ inline void RU_matrix<Master_matrix>::_reduce()
       swap_opt::positionToRowIdx_.push_back(i);
     }
     if (!(reducedMatrixR_.is_zero_column(i))) {
-      Column_type& curr = reducedMatrixR_.get_column(i);
-      id_index pivot = curr.get_pivot();
-      index currIndex = get_column_with_pivot_(pivot);
-
-      while (pivot != static_cast<id_index>(-1) && currIndex != static_cast<index>(-1)) {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          curr += reducedMatrixR_.get_column(currIndex);
-          //to avoid having to do line operations during vineyards, U is transposed
-          //TODO: explain this somewhere in the documentation...
-          if constexpr (Master_matrix::Option_list::has_vine_update)
-            mirrorMatrixU_.get_column(currIndex) += mirrorMatrixU_.get_column(i);
-          else
-            mirrorMatrixU_.get_column(i) += mirrorMatrixU_.get_column(currIndex);
-        } else {
-          Column_type& toadd = reducedMatrixR_.get_column(currIndex);
-          Field_element_type coef = toadd.get_pivot_value();
-          coef = operators_->get_inverse(coef);
-          operators_->multiply_inplace(coef, operators_->get_characteristic() - curr.get_pivot_value());
-
-          curr.multiply_source_and_add(toadd, coef);
-          mirrorMatrixU_.multiply_source_and_add_to(coef, currIndex, i);
-        }
-
-        pivot = curr.get_pivot();
-        currIndex = get_column_with_pivot_(pivot);
-      }
-
-      if (pivot != static_cast<id_index>(-1)) {
-        if constexpr (Master_matrix::Option_list::has_map_column_container) {
-          pivotToColumnIndex_.try_emplace(pivot, i);
-        } else {
-          pivotToColumnIndex_[pivot] = i;
-        }
-        _update_barcode(pivot, i);
-      } else {
-        _add_bar(get_column_dimension(i), i);
-      }
+      _reduce_column(i, i);
     } else {
       _add_bar(get_column_dimension(i), i);
     }
@@ -857,6 +807,17 @@ inline void RU_matrix<Master_matrix>::_reduce()
 
 template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_reduce_last_column(index lastIndex) 
+{
+  if (reducedMatrixR_.get_column(lastIndex).is_empty()) {
+    _add_bar(get_column_dimension(lastIndex), nextEventIndex_);
+    return;
+  }
+
+  _reduce_column(lastIndex, nextEventIndex_);
+}
+
+template <class Master_matrix>
+inline void RU_matrix<Master_matrix>::_reduce_column(index target, index eventIndex)
 {
   auto get_column_with_pivot_ = [&](id_index pivot) -> index {
     if (pivot == static_cast<id_index>(-1)) return -1;
@@ -871,47 +832,49 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column(index lastIndex)
     }
   };
 
-  Column_type& curr = reducedMatrixR_.get_column(lastIndex);
-  if (curr.is_empty()) {
-    _add_bar(get_column_dimension(lastIndex), nextEventIndex_);
-    return;
-  }
-
+  Column_type& curr = reducedMatrixR_.get_column(target);
   id_index pivot = curr.get_pivot();
   index currIndex = get_column_with_pivot_(pivot);
 
   while (pivot != static_cast<id_index>(-1) && currIndex != static_cast<index>(-1)) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      curr += reducedMatrixR_.get_column(currIndex);
-      //to avoid having to do line operations during vineyards, U is transposed
-      //TODO: explain this somewhere in the documentation...
-      if constexpr (Master_matrix::Option_list::has_vine_update)
-        mirrorMatrixU_.get_column(currIndex) += mirrorMatrixU_.get_column(lastIndex);
-      else
-        mirrorMatrixU_.get_column(lastIndex) += mirrorMatrixU_.get_column(currIndex);
-    } else {
-      Column_type& toadd = reducedMatrixR_.get_column(currIndex);
-      Field_element_type coef = toadd.get_pivot_value();
-      coef = operators_->get_inverse(coef);
-      operators_->multiply_inplace(coef, operators_->get_characteristic() - curr.get_pivot_value());
-
-      curr.multiply_source_and_add(toadd, coef);
-      mirrorMatrixU_.get_column(lastIndex).multiply_source_and_add(mirrorMatrixU_.get_column(currIndex), coef);
-    }
-
+    _reduce_column_by(target, currIndex);
     pivot = curr.get_pivot();
     currIndex = get_column_with_pivot_(pivot);
   }
 
   if (pivot != static_cast<id_index>(-1)) {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      pivotToColumnIndex_.try_emplace(pivot, lastIndex);
+      pivotToColumnIndex_.try_emplace(pivot, target);
     } else {
-      pivotToColumnIndex_[pivot] = lastIndex;
+      pivotToColumnIndex_[pivot] = target;
     }
-    _update_barcode(pivot, nextEventIndex_);
+    _update_barcode(pivot, eventIndex);
   } else {
-    _add_bar(get_column_dimension(lastIndex), nextEventIndex_);
+    _add_bar(get_column_dimension(target), eventIndex);
+  }
+}
+
+template <class Master_matrix>
+inline void RU_matrix<Master_matrix>::_reduce_column_by(index target, index source)
+{
+  Column_type& curr = reducedMatrixR_.get_column(target);
+  if constexpr (Master_matrix::Option_list::is_z2) {
+    curr += reducedMatrixR_.get_column(source);
+    //to avoid having to do line operations during vineyards, U is transposed
+    //TODO: explain this somewhere in the documentation...
+    if constexpr (Master_matrix::Option_list::has_vine_update)
+      mirrorMatrixU_.get_column(source) += mirrorMatrixU_.get_column(target);
+    else
+      mirrorMatrixU_.get_column(target) += mirrorMatrixU_.get_column(source);
+  } else {
+    Column_type& toadd = reducedMatrixR_.get_column(source);
+    Field_element_type coef = toadd.get_pivot_value();
+    coef = operators_->get_inverse(coef);
+    operators_->multiply_inplace(coef, operators_->get_characteristic() - curr.get_pivot_value());
+
+    curr.multiply_source_and_add(toadd, coef);
+    mirrorMatrixU_.multiply_source_and_add_to(coef, source, target);
+    // mirrorMatrixU_.get_column(target).multiply_source_and_add(mirrorMatrixU_.get_column(source), coef);
   }
 }
 

@@ -40,7 +40,7 @@ namespace persistence_matrix {
  * the cell with the biggest row index. The sum of two columns is lazy: the content of the source is simply inserted
  * into the heap of the target. Therefore the underlying vector can contain several cells with the same row index.
  * The real value of a cell at a row index corresponds to the sum in the coeffcient field of all values with same
- * row index.
+ * row index. Additionaly, the given cell range added into the heap does not need to be somehow ordered.
  * 
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
  * @tparam Cell_constructor Factory of @ref Cell classes.
@@ -157,8 +157,6 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
     return it2 != cont2.end();
   }
 
-  // void set_operators(Field_operators* operators){ operators_ = operators; }
-
   // Disabled with row access.
   Heap_column& operator=(const Heap_column& other);
 
@@ -255,16 +253,13 @@ inline Heap_column<Master_matrix>::Heap_column(const Container_type& nonZeroRowI
       operators_(nullptr),
       cellPool_(&(colSettings->cellConstructor))
 {
-  if constexpr (!Master_matrix::Option_list::is_z2){
-    operators_ = &(colSettings->operators);
-  }
-
   index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (id_index id : nonZeroRowIndices) {
       column_[i++] = cellPool_->construct(id);
     }
   } else {
+    operators_ = &(colSettings->operators);
     for (const auto& p : nonZeroRowIndices) {
       column_[i] = cellPool_->construct(p.first);
       column_[i++]->set_element(operators_->get_value(p.second));
@@ -316,9 +311,9 @@ inline Heap_column<Master_matrix>::Heap_column(Heap_column&& column) noexcept
 template <class Master_matrix>
 template <class Container_type, class Row_container_type>
 inline Heap_column<Master_matrix>::Heap_column(index columnIndex,
-                                                                 const Container_type& nonZeroRowIndices,
-                                                                 Row_container_type* rowContainer,
-                                                                 Column_settings* colSettings)
+                                               const Container_type& nonZeroRowIndices,
+                                               Row_container_type* rowContainer,
+                                               Column_settings* colSettings)
     : dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
       chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
@@ -335,16 +330,13 @@ inline Heap_column<Master_matrix>::Heap_column(index columnIndex,
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
 
-  if constexpr (!Master_matrix::Option_list::is_z2){
-    operators_ = &(colSettings->operators);
-  }
-
   index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (id_index id : nonZeroRowIndices) {
       column_[i++] = cellPool_->construct(id);
     }
   } else {
+    operators_ = &(colSettings->operators);
     for (const auto& p : nonZeroRowIndices) {
       column_[i] = cellPool_->construct(p.first);
       column_[i++]->set_element(operators_->get_value(p.second));
@@ -374,16 +366,13 @@ inline Heap_column<Master_matrix>::Heap_column(
       operators_(nullptr),
       cellPool_(&(colSettings->cellConstructor))
 {
-  if constexpr (!Master_matrix::Option_list::is_z2){
-    operators_ = &(colSettings->operators);
-  }
-
   index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (id_index id : nonZeroRowIndices) {
       column_[i++] = cellPool_->construct(id);
     }
   } else {
+    operators_ = &(colSettings->operators);
     for (const auto& p : nonZeroRowIndices) {
       column_[i] = cellPool_->construct(p.first);
       column_[i++]->set_element(operators_->get_value(p.second));
@@ -394,9 +383,10 @@ inline Heap_column<Master_matrix>::Heap_column(
 
 template <class Master_matrix>
 template <class Row_container_type>
-inline Heap_column<Master_matrix>::Heap_column(const Heap_column& column, index columnIndex,
-                                                                 Row_container_type* rowContainer,
-                                                                 Column_settings* colSettings)
+inline Heap_column<Master_matrix>::Heap_column(const Heap_column& column,
+                                               index columnIndex,
+                                               Row_container_type* rowContainer,
+                                               Column_settings* colSettings)
     : dim_opt(static_cast<const dim_opt&>(column)),
       chain_opt(static_cast<const chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
@@ -459,19 +449,14 @@ Heap_column<Master_matrix>::get_content(int columnLength) const
 template <class Master_matrix>
 inline bool Heap_column<Master_matrix>::is_non_zero(id_index rowIndex) const 
 {
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    bool c = false;
-    for (const Cell* cell : column_) {
-      if (cell->get_row_index() == rowIndex) c = !c;
+  Field_element_type c(0);
+  for (const Cell* cell : column_) {
+    if (cell->get_row_index() == rowIndex) {
+      if constexpr (Master_matrix::Option_list::is_z2) c = !c;
+      else operators_->add_inplace(c, cell->get_element());
     }
-    return c;
-  } else {
-    Field_element_type c(0);
-    for (const Cell* cell : column_) {
-      if (cell->get_row_index() == rowIndex) operators_->add_inplace(c, cell->get_element());
-    }
-    return c != Field_operators::get_additive_identity();
   }
+  return c != Field_operators::get_additive_identity();
 }
 
 template <class Master_matrix>
@@ -646,8 +631,7 @@ Heap_column<Master_matrix>::rend() const noexcept
 
 template <class Master_matrix>
 template <class Cell_range>
-inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator+=(
-    const Cell_range& column) 
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator+=(const Cell_range& column) 
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Heap_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
@@ -661,8 +645,7 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator+=(
 }
 
 template <class Master_matrix>
-inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator+=(
-    Heap_column& column) 
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator+=(Heap_column& column) 
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
@@ -678,8 +661,7 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator+=(
 }
 
 template <class Master_matrix>
-inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator*=(
-    unsigned int v) 
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator*=(unsigned int v) 
 {
   if constexpr (Master_matrix::Option_list::is_z2) {
     if (v % 2 == 0) {
@@ -828,8 +810,7 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_source_a
 }
 
 template <class Master_matrix>
-inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator=(
-    const Heap_column& other) 
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator=(const Heap_column& other) 
 {
   static_assert(!Master_matrix::Option_list::has_row_access, "= assignement not enabled with row access option.");
 
@@ -847,12 +828,11 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator=(
     if (column_[i] != nullptr) {
       cellPool_->destroy(column_[i]);
     }
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      column_[i++] = other.cellPool_->construct(cell->get_row_index());
-    } else {
-      column_[i] = other.cellPool_->construct(cell->get_row_index());
-      column_[i++]->set_element(cell->get_element());
+    column_[i] = other.cellPool_->construct(cell->get_row_index());
+    if constexpr (!Master_matrix::Option_list::is_z2) {
+      column_[i]->set_element(cell->get_element());
     }
+    ++i;
   }
   insertsSinceLastPrune_ = other.insertsSinceLastPrune_;
   operators_ = other.operators_;
@@ -922,12 +902,11 @@ inline bool Heap_column<Master_matrix>::_add(const Cell_range& column)
     column_.resize(column.size());
     index i = 0;
     for (const Cell& cell : column) {
-      if constexpr (Master_matrix::Option_list::is_z2) {
-        column_[i++] = cellPool_->construct(cell.get_row_index());
-      } else {
-        column_[i] = cellPool_->construct(cell.get_row_index());
-        column_[i++]->set_element(cell.get_element());
+      column_[i] = cellPool_->construct(cell.get_row_index());
+      if constexpr (!Master_matrix::Option_list::is_z2) {
+        column_[i]->set_element(cell.get_element());
       }
+      ++i;
     }
     insertsSinceLastPrune_ = column_.size();
     return true;
@@ -966,7 +945,7 @@ inline bool Heap_column<Master_matrix>::_add(const Cell_range& column)
 template <class Master_matrix>
 template <class Cell_range>
 inline bool Heap_column<Master_matrix>::_multiply_target_and_add(const Field_element_type& val,
-                                                                            const Cell_range& column) 
+                                                                 const Cell_range& column) 
 {
   if (val == 0u) {
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
@@ -1017,7 +996,7 @@ inline bool Heap_column<Master_matrix>::_multiply_target_and_add(const Field_ele
 template <class Master_matrix>
 template <class Cell_range>
 inline bool Heap_column<Master_matrix>::_multiply_source_and_add(const Cell_range& column,
-                                                                            const Field_element_type& val) 
+                                                                 const Field_element_type& val) 
 {
   if (val == 0u || column.begin() == column.end()) {
     return false;

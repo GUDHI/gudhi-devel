@@ -365,6 +365,7 @@ class PersistenceMatrixColumn :
    * @brief Adds the given @ref Cell range onto the column.
    * 
    * @tparam Cell_range @ref Cell range with %begin() and %end() method.
+   * Has to be ordered by row index if not specified otherwise.
    * @param column @ref Cell range. Only the stored row index and the stored element value
    * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
    * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.
@@ -392,6 +393,7 @@ class PersistenceMatrixColumn :
    * @brief `this = val * this + column`
    * 
    * @tparam Cell_range @ref Cell range with %begin() and %end() method.
+   * Has to be ordered by row index if not specified otherwise.
    * @param val Value to multiply.
    * @param column @ref Cell range. Only the stored row index and the stored element value
    * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
@@ -405,6 +407,7 @@ class PersistenceMatrixColumn :
    * @brief `this = this + column * val`
    * 
    * @tparam Cell_range @ref Cell range with %begin() and %end() method.
+   * Has to be ordered by row index if not specified otherwise.
    * @param column @ref Cell range. Only the stored row index and the stored element value
    * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
    * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.
