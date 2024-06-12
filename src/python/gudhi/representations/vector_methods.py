@@ -148,8 +148,9 @@ def _grid_from_sample_range(self, X):
         self.new_resolution_ += self.nan_in_range_.sum()
     self.sample_range_fixed_ = _automatic_sample_range(sample_range, X)
     if sum([len(x) for x in X]) == 0:
-        # if empty list or empty diagrams, self.grid_ is a list containing self.resolution copies of -infinity for consistency with exact computation 
-        self.grid_ = -np.inf * np.ones(shape=[self.new_resolution_])
+        # if empty list or empty diagrams, self.grid_ is a list containing self.resolution copies of -infinity for consistency with exact computation
+        print("Empty list or empty diagrams: evaluation grid only contains -infinity")
+        self.grid_ = np.full(shape=[self.new_resolution_], fill_value=-np.inf)
     else:
         self.grid_ = np.linspace(self.sample_range_fixed_[0], self.sample_range_fixed_[1], self.new_resolution_)
     if not self.keep_endpoints:
@@ -360,7 +361,6 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         if self.predefined_grid is None:
             if self.resolution is None: # Flexible/exact version
-                print("Empty list or empty diagrams: evaluation grid only contains -infinity")
                 self.grid_ = np.unique(np.concatenate([pd.ravel() for pd in X] + [[-np.inf]], axis=0)) 
             else:
                 _grid_from_sample_range(self, X)
@@ -386,10 +386,14 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         N = len(X)
 
         if sum([len(x) for x in X]) == 0:
-
+            print("Empty list or empty diagrams: output contains only zeros")
             if self.resolution is None:
+                if not self.is_fitted():
+                    self.grid_ = np.array([-np.inf])
                 return np.zeros((N, 1))
             else:
+                if not self.is_fitted():
+                    self.grid_ = np.full(shape=[self.resolution], fill_value=-np.inf)
                 return np.zeros((N, self.resolution))
             
         else:
@@ -426,7 +430,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
             N = len(X)
 
             if sum([len(x) for x in X]) == 0:
-                print("Empty list or empty diagrams: evaluation grid only contains -infinity")
+                print("Empty list or empty diagrams: evaluation grid only contains -infinity and output contains only zeros")
                 self.grid_ = np.array([-np.inf])
                 return np.zeros((N, 1))
 
