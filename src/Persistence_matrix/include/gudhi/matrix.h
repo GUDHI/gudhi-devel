@@ -148,17 +148,6 @@ class Matrix {
   using pos_index = typename PersistenceMatrixOptions::index_type;             /**< Type of @ref PosIdx index. */
   using dimension_type = typename PersistenceMatrixOptions::dimension_type;    /**< Type for dimension value. */
 
-  // struct Dummy_field_operators{
-  //   using element_type = unsigned int;
-  //   using characteristic_type = element_type;
-
-  //   Dummy_field_operators([[maybe_unused]] characteristic_type characteristic = 0){}
-
-  //   friend void swap([[maybe_unused]] Dummy_field_operators& d1, [[maybe_unused]] Dummy_field_operators& d2){}
-
-  //   static constexpr characteristic_type get_characteristic() { return 2; }
-  // };
-
   /**
    * @brief Coefficiants field type.
    */
@@ -390,7 +379,11 @@ class Matrix {
 
   struct Column_zp_settings {
     Column_zp_settings() : operators(), cellConstructor() {}
-    Column_zp_settings(characteristic_type characteristic) : operators(characteristic), cellConstructor() {}
+    //purposely triggers operators() instead of operators(characteristic) as the "dummy" values for the different
+    //operators can be different from -1.
+    Column_zp_settings(characteristic_type characteristic) : operators(), cellConstructor() {
+      if (characteristic != static_cast<characteristic_type>(-1)) operators.set_characteristic(characteristic);
+    }
     Column_zp_settings(const Column_zp_settings& toCopy)
         : operators(toCopy.operators.get_characteristic()), cellConstructor() {}
 
@@ -615,7 +608,7 @@ class Matrix {
    * @ref set_characteristic before calling for the first time a method needing it. Ignored if
    * @ref PersistenceMatrixOptions::is_z2 is true.
    */
-  Matrix(int numberOfColumns, characteristic_type characteristic = 0);
+  Matrix(int numberOfColumns, characteristic_type characteristic = static_cast<characteristic_type>(-1));
   /**
    * @brief Constructs a new empty matrix with the given comparator functions. Only available when those comparators
    * are necessary.
@@ -693,7 +686,7 @@ class Matrix {
   Matrix(unsigned int numberOfColumns, 
          const std::function<bool(pos_index,pos_index)>& birthComparator,
          const std::function<bool(pos_index,pos_index)>& deathComparator, 
-         characteristic_type characteristic = 0);
+         characteristic_type characteristic = static_cast<characteristic_type>(-1));
   /**
    * @brief Copy constructor.
    * 
@@ -1531,7 +1524,7 @@ template <class PersistenceMatrixOptions>
 inline void Matrix<PersistenceMatrixOptions>::set_characteristic(characteristic_type characteristic) 
 {
   if constexpr (!PersistenceMatrixOptions::is_z2) {
-    if (colSettings_->operators.get_characteristic() != 0) {
+    if (colSettings_->operators.get_characteristic() != static_cast<characteristic_type>(-1)) {
       std::cerr << "Warning: Characteristic already initialised. Changing it could lead to incoherences in the matrice "
                    "as the modulo was already applied to values in existing columns.";
     }
@@ -1545,7 +1538,7 @@ template <class Container_type>
 inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container_type& column) 
 {
   if constexpr (!PersistenceMatrixOptions::is_z2){
-    GUDHI_CHECK(colSettings_->operators.get_characteristic() != 0,
+    GUDHI_CHECK(colSettings_->operators.get_characteristic() != static_cast<characteristic_type>(-1),
                 std::logic_error("Matrix::insert_column - Columns cannot be initialized if the coefficient field "
                                  "characteristic is not specified."));
   }
@@ -1561,7 +1554,7 @@ template <class Container_type>
 inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container_type& column, index columnIndex) 
 {
   if constexpr (!PersistenceMatrixOptions::is_z2){
-    GUDHI_CHECK(colSettings_->operators.get_characteristic() != 0,
+    GUDHI_CHECK(colSettings_->operators.get_characteristic() != static_cast<characteristic_type>(-1),
                 std::logic_error("Matrix::insert_column - Columns cannot be initialized if the coefficient field "
                                  "characteristic is not specified."));
   }
@@ -1579,7 +1572,7 @@ inline typename Matrix<PersistenceMatrixOptions>::insertion_return_type
 Matrix<PersistenceMatrixOptions>::insert_boundary(const Boundary_type& boundary, dimension_type dim)
 {
   if constexpr (!PersistenceMatrixOptions::is_z2){
-    GUDHI_CHECK(colSettings_->operators.get_characteristic() != 0,
+    GUDHI_CHECK(colSettings_->operators.get_characteristic() != static_cast<characteristic_type>(-1),
                 std::logic_error("Matrix::insert_boundary - Columns cannot be initialized if the coefficient field "
                                  "characteristic is not specified."));
   }
@@ -1599,7 +1592,7 @@ Matrix<PersistenceMatrixOptions>::insert_boundary(id_index faceIndex,
                                                   dimension_type dim)
 {
   if constexpr (!PersistenceMatrixOptions::is_z2){
-    GUDHI_CHECK(colSettings_->operators.get_characteristic() != 0,
+    GUDHI_CHECK(colSettings_->operators.get_characteristic() != static_cast<characteristic_type>(-1),
                 std::logic_error("Matrix::insert_boundary - Columns cannot be initialized if the coefficient field "
                                  "characteristic is not specified."));
   }

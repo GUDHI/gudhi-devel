@@ -76,7 +76,7 @@ class Shared_multi_field_element
    * @brief operator+=
    */
   friend void operator+=(Shared_multi_field_element& f1, Shared_multi_field_element const& f2) {
-    mpz_add(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), f2.element_.get_mpz_t());
+    f1.element_ += f2.element_;
     mpz_mod(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
@@ -90,7 +90,7 @@ class Shared_multi_field_element
    * @brief operator+=
    */
   friend void operator+=(Shared_multi_field_element& f, element_type const v) {
-    mpz_add(f.element_.get_mpz_t(), f.element_.get_mpz_t(), v.get_mpz_t());
+    f.element_ += v;
     mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
@@ -104,17 +104,16 @@ class Shared_multi_field_element
    * @brief operator+
    */
   friend element_type operator+(element_type v, Shared_multi_field_element const& f) {
-    element_type e(v);
-    mpz_add(e.get_mpz_t(), e.get_mpz_t(), f.element_.get_mpz_t());
-    mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-    return e;
+    v += f.element_;
+    mpz_mod(v.get_mpz_t(), v.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+    return v;
   }
 
   /**
    * @brief operator-=
    */
   friend void operator-=(Shared_multi_field_element& f1, Shared_multi_field_element const& f2) {
-    mpz_sub(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), f2.element_.get_mpz_t());
+    f1.element_ -= f2.element_;
     mpz_mod(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
@@ -128,7 +127,7 @@ class Shared_multi_field_element
    * @brief operator-=
    */
   friend void operator-=(Shared_multi_field_element& f, element_type const v) {
-    mpz_sub(f.element_.get_mpz_t(), f.element_.get_mpz_t(), v.get_mpz_t());
+    f.element_ -= v;
     mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
@@ -142,19 +141,18 @@ class Shared_multi_field_element
    * @brief operator-
    */
   friend element_type operator-(element_type v, Shared_multi_field_element const& f) {
-    element_type e(v);
-    if (e >= productOfAllCharacteristics_)
-      mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-    if (f.element_ > e) mpz_add(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-    mpz_sub(e.get_mpz_t(), e.get_mpz_t(), f.element_.get_mpz_t());
-    return e;
+    if (v >= productOfAllCharacteristics_)
+      mpz_mod(v.get_mpz_t(), v.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+    if (f.element_ > v) v += productOfAllCharacteristics_;
+    v -= f.element_;
+    return v;
   }
 
   /**
    * @brief operator*=
    */
   friend void operator*=(Shared_multi_field_element& f1, Shared_multi_field_element const& f2) {
-    mpz_mul(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), f2.element_.get_mpz_t());
+    f1.element_ *= f2.element_;
     mpz_mod(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
@@ -168,7 +166,7 @@ class Shared_multi_field_element
    * @brief operator*=
    */
   friend void operator*=(Shared_multi_field_element& f, element_type const v) {
-    mpz_mul(f.element_.get_mpz_t(), f.element_.get_mpz_t(), v.get_mpz_t());
+    f.element_ *= v;
     mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
@@ -182,10 +180,9 @@ class Shared_multi_field_element
    * @brief operator*
    */
   friend element_type operator*(element_type v, Shared_multi_field_element const& f) {
-    element_type e(v);
-    mpz_mul(e.get_mpz_t(), e.get_mpz_t(), f.element_.get_mpz_t());
-    mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-    return e;
+    v *= f.element_;
+    mpz_mod(v.get_mpz_t(), v.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+    return v;
   }
 
   /**
@@ -197,7 +194,7 @@ class Shared_multi_field_element
   /**
    * @brief operator==
    */
-  friend bool operator==(const element_type v, const Shared_multi_field_element& f) {
+  friend bool operator==(const element_type& v, const Shared_multi_field_element& f) {
     if (v < productOfAllCharacteristics_) return v == f.element_;
     element_type e(v);
     mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
@@ -206,7 +203,7 @@ class Shared_multi_field_element
   /**
    * @brief operator==
    */
-  friend bool operator==(const Shared_multi_field_element& f, const element_type v) {
+  friend bool operator==(const Shared_multi_field_element& f, const element_type& v) {
     if (v < productOfAllCharacteristics_) return v == f.element_;
     element_type e(v);
     mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
@@ -221,11 +218,11 @@ class Shared_multi_field_element
   /**
    * @brief operator!=
    */
-  friend bool operator!=(const element_type v, const Shared_multi_field_element& f) { return !(v == f); }
+  friend bool operator!=(const element_type& v, const Shared_multi_field_element& f) { return !(v == f); }
   /**
    * @brief operator!=
    */
-  friend bool operator!=(const Shared_multi_field_element& f, const element_type v) { return !(v == f); }
+  friend bool operator!=(const Shared_multi_field_element& f, const element_type& v) { return !(v == f); }
 
   /**
    * @brief Assign operator.
@@ -234,7 +231,7 @@ class Shared_multi_field_element
   /**
    * @brief Assign operator.
    */
-  Shared_multi_field_element& operator=(const element_type value);
+  Shared_multi_field_element& operator=(const element_type& value);
   /**
    * @brief Swap operator.
    */
@@ -377,7 +374,7 @@ inline Shared_multi_field_element& Shared_multi_field_element::operator=(Shared_
   return *this;
 }
 
-inline Shared_multi_field_element& Shared_multi_field_element::operator=(element_type const value) {
+inline Shared_multi_field_element& Shared_multi_field_element::operator=(const element_type& value) {
   mpz_mod(element_.get_mpz_t(), value.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   return *this;
 }
