@@ -28,13 +28,14 @@ namespace persistence_matrix {
  * @brief List of column types.
  */
 enum Column_types { 
-  LIST,           /**< @ref List_column "": Underlying container is a std::list<@ref Cell>. */
-  SET,            /**< @ref Set_column "": Underlying container is a std::set<@ref Cell>. */
-  HEAP,           /**< @ref Heap_column "": Underlying container is a std::vector<@ref Cell> ordered as a heap.
+  LIST,           /**< @ref List_column "": Underlying container is a std::list<@ref Cell*>. */
+  SET,            /**< @ref Set_column "": Underlying container is a std::set<@ref Cell*>. */
+  HEAP,           /**< @ref Heap_column "": Underlying container is a std::vector<@ref Cell*> ordered as a heap.
                        Is not compatible with row access and column compression. */
-  VECTOR,         /**< @ref Vector_column "": Underlying container is a std::vector<@ref Cell> with a lazy removal method. */
-  NAIVE_VECTOR,   /**< @ref Naive_vector_column "": Underlying container is a std::vector<@ref Cell>. */
-  UNORDERED_SET,  /**< @ref Unordered_set_column "": Underlying container is a std::unordered_set<@ref Cell>. */
+  VECTOR,         /**< @ref Vector_column "": Underlying container is a std::vector<@ref Cell*>
+                       with a lazy removal method. */
+  NAIVE_VECTOR,   /**< @ref Naive_vector_column "": Underlying container is a std::vector<@ref Cell*>. */
+  UNORDERED_SET,  /**< @ref Unordered_set_column "": Underlying container is a std::unordered_set<@ref Cell*>. */
   INTRUSIVE_LIST, /**< @ref Intrusive_list_column "": Underlying container is a boost::intrusive::list<@ref Cell>. */
   INTRUSIVE_SET   /**< @ref Intrusive_set_column "": Underlying container is a boost::intrusive::set<@ref Cell>. */
 };
@@ -42,8 +43,8 @@ enum Column_types {
 /**
  * @ingroup persistence_matrix
  *
- * @brief List if indexation schemes. See @ref mp_indexation "description of indexation schemes" for more details about the meaning
- * of the indexation types.
+ * @brief List if indexation schemes. See @ref mp_indexation "description of indexation schemes" for more details
+ * about the meaning of the indexation types.
  */
 enum Column_indexation_types { 
   CONTAINER,  /**< Default use of @ref MatIdx indices. */
@@ -65,7 +66,8 @@ enum Column_indexation_types {
  * @tparam col_type Column type for the matrix. Default value: @ref Column_types::INTRUSIVE_SET
  * @tparam is_z2_only Flag indicating if only \f$Z_2\f$ coefficient will be used with the matrix. Set to true if it
  * is the case, false otherwise. Default value: true.
- * @tparam FieldOperators Field operators used by the matrix, see FieldOperators concept. Only necessary if @p is_z2_only is false. 
+ * @tparam FieldOperators Field operators used by the matrix, see FieldOperators concept.
+ * Only necessary if @p is_z2_only is false. 
  * Default value: @ref Gudhi::persistence_fields::Zp_field_operators<>.
  */
 template <Column_types col_type = Column_types::INTRUSIVE_SET, 
