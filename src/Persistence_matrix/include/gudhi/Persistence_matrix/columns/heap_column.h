@@ -847,12 +847,7 @@ template <class Master_matrix>
 inline std::size_t Heap_column<Master_matrix>::compute_hash_value()
 {
   _prune();
-  //can't use Gudhi::persistence_matrix::hash_column because the same heap can ordered differently
-  std::size_t seed = 0;
-  for (const auto& cell : column_) {
-    seed ^= std::hash<unsigned int>()(cell.get_row_index() * static_cast<unsigned int>(cell.get_element()));
-  }
-  return seed;
+  return hash_column(*this);
 }
 
 template <class Master_matrix>
