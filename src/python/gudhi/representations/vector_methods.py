@@ -385,16 +385,10 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         N = len(X)
 
-        if sum([len(x) for x in X]) == 0:
+        if N == 0:
+
             print("Empty list or empty diagrams: output contains only zeros")
-            if self.resolution is None:
-                if not self.is_fitted():
-                    self.grid_ = np.array([-np.inf])
-                return np.zeros((N, 1))
-            else:
-                if not self.is_fitted():
-                    self.grid_ = np.full(shape=[self.resolution], fill_value=-np.inf)
-                return np.zeros((N, self.resolution))
+            return np.zeros((N, len(self.grid_)))
             
         else:
 
