@@ -835,3 +835,75 @@ class Atol(BaseEstimator, TransformerMixin):
         if sample_weight is None:
             sample_weight = [self.get_weighting_method()(measure) for measure in X]
         return np.stack([self(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])
+        
+def topological_disorder(diag,split=False):
+    """
+    Compute the topological disorder of a persistence diagram.
+    Topological disorder is a measure inspired from persistent entropy used to quantify the structural disorder of a dataset. The formal definition of this quantity and an example application to the design of disordered metasurfaces is in Ref. [1]. The main difference between topological disorder and persistent entropy is that topological features of different degree are considered separately. This improves the quantification of structural disorder in the case of the surfaces analysed in Ref. [1]. 
+    If you use this function in a publication please reference:   
+
+    [1] Tristan Madeleine, Nina Podoliak, Oleksandr Buchnev, Ingrid Membrillo Solis, Tetiana Orlova, Maria van Rossem, Malgosia Kaczmarek, Giampaolo D’Alessandro, and Jacek Brodzki, Topological Learning for the Classification of Disorder: An Application to the Design of Metasurfaces, ACS Nano (2023) - https://doi.org/10.1021/acsnano.3c08776
+
+    Parameters
+    ----------
+    diag : list of 2-tuple. 
+        Persistence diagram as a list of topological features, such as computed via GUDHI.
+        The first element of each tuple is the homology degree of the topological feature while the second element is the birth-death coordinates.
+    split : boolean, optional
+        If True, the function will additionally return a list of the computed topological disorders performed over the topological features of different degree.
+        The default is False.
+
+    Returns
+    -------
+    TD: float 
+        The computed topological disorder
+    TD_split: array, optional
+        Only returned if split is True
+        The list of the computed topological disorders performed over the topological features of different degree.
+        The elements of this list are in the same order as the degrees of the topological features in diag, the persistence diagram received in input.
+
+    Example
+    --------
+
+    I would put a couple of examples, if this is a standard procedure in Gudhi.
+
+    from gudhi.representations import topological_disorder
+
+    pd = [[0,[10,100]],[0,[30,500]],[1,[20,430]]]
+    # Compute the topological disorder
+    TD = topological_disorder(pd)
+    # Should return XX
+
+    # Compute the topological disorder and the contributions of the different degrees of homology
+    TD,TD_h = topological_disorder(pd,split=true)
+    # Should return XX for TD and YY and ZZ for the contributions from homology of degree 0 and 1 respectively.
+    """
+    
+    # The topological features of the persistent diagram are first regrouped in terms of the homology degree
+    homology_features_by_degree=[]
+    degrees_set=[]
+    for feature in diag:
+        
+        degree=feature[0]
+        if degree not in degrees_set:
+            degrees_set.append(degree)
+            homology_features_by_degree.append([])
+        index=degrees_set.index(degree)
+        
+        if True not in np.isinf(feature[1]):
+            homology_features_by_degree[index].append(feature[1][1]-feature[1][0])
+            
+            
+            
+    # Computation of topological disorder
+            
+    TD_list=[]
+    for degree in homology_features_by_degree:
+        if len(degree)>1:
+            degree=degree/np.sum(degree)
+            TD_list.append(1+np.dot(degree, np.log(degree))/np.log(len(degree)))
+        
+    if split:
+        return sum(TD_list),TD_list
+    else:
+        return sum(TD_list)
