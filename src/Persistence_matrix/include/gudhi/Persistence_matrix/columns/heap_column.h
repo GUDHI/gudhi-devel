@@ -139,24 +139,42 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
 
   friend bool operator==(const Heap_column& c1, const Heap_column& c2) {
     if (&c1 == &c2) return true;
-    return c1.get_content() == c2.get_content();
+
+    Heap_column cc1(c1), cc2(c2);
+    Cell* p1 = cc1._pop_pivot();
+    Cell* p2 = cc2._pop_pivot();
+    while (p1 != nullptr && p2 != nullptr) {
+      if (p1->get_row_index() != p2->get_row_index()) return false;
+      if constexpr (!Master_matrix::Option_list::is_z2){
+        if (p1->get_element() != p2->get_element()) return false;
+      }
+      p1 = cc1._pop_pivot();
+      p2 = cc2._pop_pivot();
+    }
+
+    if (p1 == nullptr && p2 == nullptr) return true;
+    return false;
   }
   friend bool operator<(const Heap_column& c1, const Heap_column& c2) {
     if (&c1 == &c2) return false;
 
-    auto cont1 = c1.get_content();
-    auto cont2 = c2.get_content();
-
-    auto it1 = cont1.begin();
-    auto it2 = cont2.begin();
-    while (it1 != cont1.end() && it2 != cont2.end()) {
-      if (*it1 == 0u && *it2 != 0u) return false;
-      if (*it1 != 0u && *it2 == 0u) return true;
-      if (*it1 != *it2) return *it1 < *it2;
-      ++it1;
-      ++it2;
+    //lexicographical order but starting from last value and not first
+    Heap_column cc1(c1), cc2(c2);
+    Cell* p1 = cc1._pop_pivot();
+    Cell* p2 = cc2._pop_pivot();
+    while (p1 != nullptr && p2 != nullptr) {
+      if (p1->get_row_index() > p2->get_row_index()) return false;
+      if (p1->get_row_index() < p2->get_row_index()) return true;
+      if constexpr (!Master_matrix::Option_list::is_z2){
+        if (p1->get_element() > p2->get_element()) return false;
+        if (p1->get_element() < p2->get_element()) return true;
+      }
+      p1 = cc1._pop_pivot();
+      p2 = cc2._pop_pivot();
     }
-    return it2 != cont2.end();
+
+    if (p2 == nullptr) return false;
+    return true;
   }
 
   // Disabled with row access.

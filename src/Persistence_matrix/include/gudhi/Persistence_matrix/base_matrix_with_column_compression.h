@@ -342,7 +342,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   std::vector<Column_type*> repToColumn_;             /**< Map from the representative index to
                                                            the representative Column. */
   index nextColumnIndex_;                             /**< Next unused column index. */
-  Column_settings* colSettings_;                        /**< Cell factory. */
+  Column_settings* colSettings_;                      /**< Cell factory. */
   /**
    * @brief Column factory.
    * @warning As the member is static, they can eventually be problems if the matrix is duplicated in several threads.

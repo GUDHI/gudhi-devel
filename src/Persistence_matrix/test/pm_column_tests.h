@@ -429,7 +429,11 @@ void column_test_common_z5_operators(std::vector<Column> &matrix){
 	BOOST_CHECK(matrix[1] == matrix[1]);
 	BOOST_CHECK(matrix[1] == matrix[3]);
 	BOOST_CHECK(matrix[1] < matrix[0]);
-	BOOST_CHECK(matrix[2] < matrix[0]);
+	if constexpr (Column::Master::Option_list::column_type == Column_types::HEAP){
+		BOOST_CHECK(matrix[0] < matrix[2]);	//order different for heap columns
+	} else {
+		BOOST_CHECK(matrix[2] < matrix[0]);
+	}
 	BOOST_CHECK(!(matrix[0] < matrix[0]));
 
 	matrix[0] *= 4;
@@ -445,7 +449,11 @@ void column_test_common_z5_operators(std::vector<Column> &matrix){
 	BOOST_CHECK(matrix[1] == matrix[1]);
 	BOOST_CHECK(matrix[1] == matrix[3]);
 	BOOST_CHECK(matrix[1] < matrix[0]);
-	BOOST_CHECK(matrix[2] < matrix[0]);
+	if constexpr (Column::Master::Option_list::column_type == Column_types::HEAP){
+		BOOST_CHECK(matrix[0] < matrix[2]);	//order different for heap columns
+	} else {
+		BOOST_CHECK(matrix[2] < matrix[0]);
+	}
 	BOOST_CHECK(!(matrix[0] < matrix[0]));
 
 	//this = v * this + column
@@ -472,8 +480,13 @@ void column_test_common_z5_operators(std::vector<Column> &matrix){
 	BOOST_CHECK(!(matrix[5] == matrix[4]));
 	BOOST_CHECK(!(matrix[5] < matrix[3]));
 	BOOST_CHECK(!(matrix[3] < matrix[5]));
-	BOOST_CHECK(matrix[5] < matrix[4]);
-	BOOST_CHECK(matrix[3] < matrix[4]);
+	if constexpr (Column::Master::Option_list::column_type == Column_types::HEAP){
+		BOOST_CHECK(matrix[4] < matrix[5]);
+		BOOST_CHECK(matrix[4] < matrix[3]);
+	} else {
+		BOOST_CHECK(matrix[5] < matrix[4]);
+		BOOST_CHECK(matrix[3] < matrix[4]);
+	}
 }
 
 //assumes that matrix was build with build_column_matrix and was not modified since.
@@ -491,7 +504,11 @@ void column_test_common_z2_operators(std::vector<Column> &matrix){
 	BOOST_CHECK(matrix[1] == matrix[1]);
 	BOOST_CHECK(matrix[1] == matrix[3]);
 	BOOST_CHECK(matrix[1] < matrix[0]);
-	BOOST_CHECK(matrix[2] < matrix[0]);
+	if constexpr (Column::Master::Option_list::column_type == Column_types::HEAP){
+		BOOST_CHECK(matrix[0] < matrix[2]);	//order different for heap columns
+	} else {
+		BOOST_CHECK(matrix[2] < matrix[0]);
+	}
 	BOOST_CHECK(!(matrix[0] < matrix[0]));
 
 	matrix[0] *= 5;
@@ -506,7 +523,11 @@ void column_test_common_z2_operators(std::vector<Column> &matrix){
 	BOOST_CHECK(!(matrix[0] == matrix[2]));
 	BOOST_CHECK(matrix[2] == matrix[2]);
 	BOOST_CHECK(matrix[1] < matrix[0]);
-	BOOST_CHECK(matrix[2] < matrix[0]);
+	if constexpr (Column::Master::Option_list::column_type == Column_types::HEAP){
+		BOOST_CHECK(matrix[0] < matrix[2]);	//order different for heap columns
+	} else {
+		BOOST_CHECK(matrix[2] < matrix[0]);
+	}
 	BOOST_CHECK(!(matrix[0] < matrix[0]));
 
 	//this = v * this + column
