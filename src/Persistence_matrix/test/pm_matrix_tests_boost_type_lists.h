@@ -179,6 +179,7 @@ using all_ra_values_list =
 using ra_values_list = boost::mp11::mp_list<ra_value<true, false, false>, ra_value<true, true, true>,
                                             ra_value<true, true, false>, ra_value<true, false, true> >;
 using ra_r_values_list = boost::mp11::mp_list<ra_value<true, true, true>, ra_value<true, true, false> >;
+using no_ra_values_list = boost::mp11::mp_list<ra_value<false, false, false> >;
 
 // Base matrices
 
@@ -194,13 +195,21 @@ using base_option_template = boost::mp11::mp_remove_if<
                                                       bool_swap> >,
     matrix_non_validity>;
 
+#if PM_TEST_ALL
 using opt_base_z2 = base_option_template<true_value_list, all_ra_values_list, bool_value_list, bool_value_list>;
+#else
+using opt_base_z2 = base_option_template<true_value_list, no_ra_values_list, bool_value_list, bool_value_list>;
+#endif
 using opt_base_z2_ra = base_option_template<true_value_list, ra_values_list, bool_value_list, bool_value_list>;
 using opt_base_z2_ra_r = base_option_template<true_value_list, ra_r_values_list, bool_value_list, bool_value_list>;
 using opt_base_z2_r = base_option_template<true_value_list, all_ra_values_list, true_value_list, bool_value_list>;
 using opt_base_z2_swap = base_option_template<true_value_list, all_ra_values_list, bool_value_list, true_value_list>;
 
+#if PM_TEST_ALL
 using opt_base_zp = base_option_template<false_value_list, all_ra_values_list, bool_value_list, bool_value_list>;
+#else
+using opt_base_zp = base_option_template<false_value_list, no_ra_values_list, bool_value_list, bool_value_list>;
+#endif
 using opt_base_zp_ra = base_option_template<false_value_list, ra_values_list, bool_value_list, bool_value_list>;
 using opt_base_zp_ra_r = base_option_template<false_value_list, ra_r_values_list, bool_value_list, bool_value_list>;
 using opt_base_zp_r = base_option_template<false_value_list, all_ra_values_list, true_value_list, bool_value_list>;
@@ -240,9 +249,15 @@ using boundary_option_template = boost::mp11::mp_remove_if<
                                           bool_pos_idx> >,
     matrix_non_validity>;
 
+#if PM_TEST_ALL
 template <typename bool_pos_idx>
 using opt_boundary_z2 =
     boundary_option_template<true_value_list, all_ra_values_list, bool_value_list, bool_value_list, bool_pos_idx>;
+#else
+template <typename bool_pos_idx>
+using opt_boundary_z2 =
+    boundary_option_template<true_value_list, no_ra_values_list, bool_value_list, bool_value_list, bool_pos_idx>;
+#endif
 template <typename bool_pos_idx>
 using opt_boundary_z2_ra =
     boundary_option_template<true_value_list, ra_values_list, bool_value_list, bool_value_list, bool_pos_idx>;
@@ -260,9 +275,16 @@ template <typename bool_pos_idx>
 using opt_boundary_z2_swap =
     boundary_option_template<true_value_list, all_ra_values_list, bool_value_list, true_value_list, bool_pos_idx>;
 
+
+#if PM_TEST_ALL
 template <typename bool_pos_idx>
 using opt_boundary_zp =
     boundary_option_template<false_value_list, all_ra_values_list, bool_value_list, bool_value_list, bool_pos_idx>;
+#else
+template <typename bool_pos_idx>
+using opt_boundary_zp =
+    boundary_option_template<false_value_list, no_ra_values_list, bool_value_list, bool_value_list, bool_pos_idx>;
+#endif
 template <typename bool_pos_idx>
 using opt_boundary_zp_ra =
     boundary_option_template<false_value_list, ra_values_list, bool_value_list, bool_value_list, bool_pos_idx>;
@@ -302,21 +324,33 @@ using ru_option_template = boost::mp11::mp_remove_if<
                                           bool_barcode> >,
     matrix_non_validity>;
 
+#if PM_TEST_ALL
 template <typename bool_pos_idx, typename bool_barcode, typename bool_dim>
 using opt_ru_vine_z2 = ru_option_template<z2_ru_vine_values_list, all_ra_values_list, bool_value_list, bool_pos_idx,
                                           bool_dim, bool_barcode>;
-template <typename bool_pos_idx, typename bool_barcode, typename bool_dim>
-using opt_ru_vine_z2_ra =
-    ru_option_template<z2_ru_vine_values_list, ra_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
-template <typename bool_pos_idx, typename bool_barcode, typename bool_dim>
-using opt_ru_vine_z2_ra_r =
-    ru_option_template<z2_ru_vine_values_list, ra_r_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
 template <typename bool_pos_idx, typename bool_barcode, typename bool_dim>
 using opt_ru_vine_z2_r = ru_option_template<z2_ru_vine_values_list, all_ra_values_list, true_value_list, bool_pos_idx,
                                             bool_dim, bool_barcode>;
 template <typename bool_pos_idx, typename bool_barcode, typename bool_dim>
 using opt_ru_vine_z2_rep = ru_option_template<z2_ru_vine_rep_values_list, all_ra_values_list, bool_value_list,
                                               bool_pos_idx, bool_dim, bool_barcode>;
+#else
+template <typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_vine_z2 = ru_option_template<z2_ru_vine_values_list, no_ra_values_list, bool_value_list, bool_pos_idx,
+                                          bool_dim, bool_barcode>;
+template <typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_vine_z2_r = ru_option_template<z2_ru_vine_values_list, no_ra_values_list, true_value_list, bool_pos_idx,
+                                            bool_dim, bool_barcode>;
+template <typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_vine_z2_rep = ru_option_template<z2_ru_vine_rep_values_list, no_ra_values_list, bool_value_list,
+                                              bool_pos_idx, bool_dim, bool_barcode>;
+#endif
+template <typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_vine_z2_ra =
+    ru_option_template<z2_ru_vine_values_list, ra_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
+template <typename bool_pos_idx, typename bool_barcode, typename bool_dim>
+using opt_ru_vine_z2_ra_r =
+    ru_option_template<z2_ru_vine_values_list, ra_r_values_list, bool_value_list, bool_pos_idx, bool_dim, bool_barcode>;
 
 template <typename bool_pos_idx, typename bool_barcode, typename bool_dim>
 using opt_ru_rep_z2 = ru_option_template<z2_ru_rep_values_list, all_ra_values_list, bool_value_list, bool_pos_idx,
@@ -402,9 +436,15 @@ using opt_chain_vine_z2_ra_r =
 template <typename bool_pos_idx, typename bool_rem_col, typename bool_dim>
 using opt_chain_vine_z2_ra_r_no_barcode =
     chain_option_template<z2_chain_vine_no_barcode_values_list, ra_r_values_list, bool_rem_col, bool_pos_idx, bool_dim>;
+#if PM_TEST_ALL
 template <typename bool_pos_idx, typename bool_rem_col, typename bool_dim>
 using opt_chain_vine_z2_barcode =
     chain_option_template<z2_chain_vine_barcode_values_list, all_ra_values_list, bool_rem_col, bool_pos_idx, bool_dim>;
+#else
+template <typename bool_pos_idx, typename bool_rem_col, typename bool_dim>
+using opt_chain_vine_z2_barcode =
+    chain_option_template<z2_chain_vine_barcode_values_list, no_ra_values_list, bool_rem_col, bool_pos_idx, bool_dim>;
+#endif
 template <typename bool_pos_idx, typename bool_rem_col, typename bool_dim>
 using opt_chain_vine_z2_no_barcode = chain_option_template<z2_chain_vine_no_barcode_values_list, all_ra_values_list,
                                                            bool_rem_col, bool_pos_idx, bool_dim>;
@@ -416,9 +456,15 @@ using opt_chain_vine_z2_rep_no_barcode =
     chain_option_template<z2_chain_vine_rep_no_barcode_values_list, all_ra_values_list, bool_rem_col, bool_pos_idx,
                           bool_dim>;
 
+#if PM_TEST_ALL
 template <typename bool_pos_idx, typename bool_dim>
 using opt_chain_rep_z2 =
     chain_option_template<z2_chain_rep_values_list, all_ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+#else
+template <typename bool_pos_idx, typename bool_dim>
+using opt_chain_rep_z2 =
+    chain_option_template<z2_chain_rep_values_list, no_ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+#endif
 template <typename bool_pos_idx, typename bool_dim>
 using opt_chain_rep_z2_ra =
     chain_option_template<z2_chain_rep_values_list, ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
@@ -432,9 +478,15 @@ template <typename bool_pos_idx, typename bool_dim>
 using opt_chain_rep_z2_barcode = chain_option_template<z2_chain_rep_barcode_values_list, all_ra_values_list,
                                                        bool_value_list, bool_pos_idx, bool_dim>;
 
+#if PM_TEST_ALL
 template <typename bool_pos_idx, typename bool_dim>
 using opt_chain_rep_zp =
     chain_option_template<zp_chain_rep_values_list, all_ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+#else
+template <typename bool_pos_idx, typename bool_dim>
+using opt_chain_rep_zp =
+    chain_option_template<zp_chain_rep_values_list, no_ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
+#endif
 template <typename bool_pos_idx, typename bool_dim>
 using opt_chain_rep_zp_ra =
     chain_option_template<zp_chain_rep_values_list, ra_values_list, bool_value_list, bool_pos_idx, bool_dim>;
