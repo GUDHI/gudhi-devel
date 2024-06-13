@@ -59,19 +59,20 @@ void _generic_merge_cell_to_column(Column_type& targetColumn,
     if constexpr (Column_type::Master::Option_list::is_z2) {
       //_multiply_*_and_add never enters here so not treated
       if constexpr (Column_type::Master::isNonBasic && !Column_type::Master::Option_list::is_of_boundary_type) {
-        if (targetCell->get_row_index() == targetColumn.chain_opt::get_pivot()) pivotIsZeroed = true;
+        if (targetCell->get_row_index() == targetColumn.get_pivot()) pivotIsZeroed = true;
       }
       targetColumn._delete_cell(itTarget);
     } else {
       update_target1(targetCell->get_element(), itSource);
       if (targetCell->get_element() == Column_type::Field_operators::get_additive_identity()) {
         if constexpr (Column_type::Master::isNonBasic && !Column_type::Master::Option_list::is_of_boundary_type) {
-          if (targetCell->get_row_index() == targetColumn.chain_opt::get_pivot()) pivotIsZeroed = true;
+          if (targetCell->get_row_index() == targetColumn.get_pivot()) pivotIsZeroed = true;
         }
         targetColumn._delete_cell(itTarget);
       } else {
         update_target2(targetCell);
-        if constexpr (Column_type::Master::Option_list::has_row_access) targetColumn.ra_opt::update_cell(*targetCell);
+        if constexpr (Column_type::Master::Option_list::has_row_access)
+          targetColumn.Column_type::Master::Row_access_option::update_cell(*targetCell);
         ++itTarget;
       }
     }
@@ -95,8 +96,9 @@ bool _generic_add_to_column(const Cell_range& source,
   auto itTarget = target.begin();
   auto itSource = source.begin();
   while (itTarget != target.end() && itSource != source.end()) {
-    _generic_merge_cell_to_column(targetColumn, itSource, itTarget, process_target, process_source, update_target1,
-                                  update_target2, pivotIsZeroed);
+    _generic_merge_cell_to_column(targetColumn, itSource, itTarget,
+                                  process_target, process_source, update_target1, update_target2,
+                                  pivotIsZeroed);
   }
 
   finish_target(itTarget);
@@ -113,7 +115,8 @@ template <class Column_type, class Cell_range>
 bool _add_to_column(const Cell_range& source, Column_type& targetColumn)
 {
   return _generic_add_to_column(
-      source, targetColumn, [&]([[maybe_unused]] typename Column_type::Cell* cellTarget) {},
+      source,
+      targetColumn, [&]([[maybe_unused]] typename Column_type::Cell* cellTarget) {},
       [&](typename Cell_range::const_iterator& itSource, const typename Column_type::Column_type::iterator& itTarget) {
         if constexpr (Column_type::Master::Option_list::is_z2) {
           targetColumn._insert_cell(itSource->get_row_index(), itTarget);
@@ -172,8 +175,7 @@ bool _multiply_target_and_add_to_column(const typename Column_type::Field_elemen
 }
 
 template <class Column_type, class Cell_range>
-bool _multiply_source_and_add_to_column(const typename Column_type::Field_element_type& val,
-                                        const Cell_range& source,
+bool _multiply_source_and_add_to_column(const typename Column_type::Field_element_type& val, const Cell_range& source,
                                         Column_type& targetColumn)
 {
   if (val == 0u) {
@@ -182,8 +184,7 @@ bool _multiply_source_and_add_to_column(const typename Column_type::Field_elemen
 
   return _generic_add_to_column(
       source,
-      targetColumn,
-      []([[maybe_unused]] typename Column_type::Cell* cellTarget) {},
+      targetColumn, []([[maybe_unused]] typename Column_type::Cell* cellTarget) {},
       [&](typename Cell_range::const_iterator& itSource, const typename Column_type::Column_type::iterator& itTarget) {
         typename Column_type::Cell* cell =
             targetColumn._insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
@@ -201,8 +202,7 @@ bool _multiply_source_and_add_to_column(const typename Column_type::Field_elemen
 // column has to be ordered (ie. not suited for unordered_map and heap) and contain the exact values
 // (ie. not suited for vector and heap). A same colonne but ordered differently will have another hash value.
 template <class Column_type>
-std::size_t hash_column(const Column_type& column)
-{
+std::size_t hash_column(const Column_type& column) {
   std::size_t seed = 0;
   for (auto& cell : column) {
     seed ^= std::hash<unsigned int>()(cell.get_row_index() * static_cast<unsigned int>(cell.get_element())) +
