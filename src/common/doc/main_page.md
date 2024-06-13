@@ -397,7 +397,7 @@
     </td>
     <td width="15%">
       <b>Author:</b> Hannah Schreiber<br>
-      <b>Introduced in:</b> GUDHI 1.0.0<br>
+      <b>Introduced in:</b> GUDHI 3.10.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
   </tr>

@@ -22,34 +22,34 @@ using option_name_list = mp_list_q<c_boundary_options>;
 using z2_no_row_access_columns = columns_list<z2_no_ra_option_list<option_name_list> >;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_column_constructors, Column, z2_no_row_access_columns) {
-	column_test_common_constructors<Column>();
-	column_test_base_boundary_constructors<Column>();
+  column_test_common_constructors<Column>();
+  column_test_base_boundary_constructors<Column>();
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z2_column_content_access, Column, z2_no_row_access_columns) {
-	typename Column::Column_settings settings;
-	std::vector<Column> matrix = build_column_matrix<Column>(settings);
-	column_test_common_z2_content_access(matrix);
+  typename Column::Column_settings settings;
+  std::vector<Column> matrix = build_column_matrix<Column>(settings);
+  column_test_common_z2_content_access(matrix);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z2_column_operators, Column, z2_no_row_access_columns) {
-	typename Column::Column_settings settings;
-	std::vector<Column> matrix = build_column_matrix<Column>(settings);
-	column_test_common_z2_operators(matrix);
+  typename Column::Column_settings settings;
+  std::vector<Column> matrix = build_column_matrix<Column>(settings);
+  column_test_common_z2_operators(matrix);
 
-	matrix = build_column_matrix<Column>(settings);
-	column_test_boundary_z2_operators(matrix);
+  matrix = build_column_matrix<Column>(settings);
+  column_test_boundary_z2_operators(matrix);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z2_column_other, Column, z2_no_row_access_columns) {
-	typename Column::Column_settings settings;
-	column_test_base_boundary_z2_methods<Column>();
+  typename Column::Column_settings settings;
+  column_test_base_boundary_z2_methods<Column>();
 
-	std::vector<Column> matrix = build_base_boundary_column_matrix<Column>(settings);
-	column_test_boundary_methods<Column>(matrix);
+  std::vector<Column> matrix = build_base_boundary_column_matrix<Column>(settings);
+  column_test_boundary_methods<Column>(matrix);
 
-	matrix = build_column_matrix<Column>(settings);
-	column_test_boundary_chain_methods<Column>(matrix);
+  matrix = build_column_matrix<Column>(settings);
+  column_test_boundary_chain_methods<Column>(matrix);
 }
 
 #else
@@ -61,44 +61,44 @@ using z2_only_row_access_columns = columns_list<z2_only_ra_option_list<option_na
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z2_column_with_row_access_content_access, Column, z2_only_row_access_columns) {
-	typename Column::Master::row_container_type rows;	//do not destroy before matrix
-	typename Column::Column_settings settings;
-	std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
-	column_test_common_z2_content_access(matrix);
+  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Column_settings settings;
+  std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
+  column_test_common_z2_content_access(matrix);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z2_column_with_row_access_operators, Column, z2_only_row_access_columns) {
-	typename Column::Master::row_container_type rows;	//do not destroy before matrix
-	typename Column::Column_settings settings;
-	std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
-	column_test_common_z2_operators(matrix);
+  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Column_settings settings;
+  std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
+  column_test_common_z2_operators(matrix);
 
-	matrix.clear();
-	rows.clear();
-	matrix = build_column_matrix<Column>(rows, settings);
-	column_test_boundary_z2_operators(matrix);
+  matrix.clear();
+  rows.clear();
+  matrix = build_column_matrix<Column>(rows, settings);
+  column_test_boundary_z2_operators(matrix);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_column_row_access_constructors, Column, z2_only_row_access_columns) {
-	typename Column::Master::row_container_type rows;	//do not destroy before matrix
-	typename Column::Column_settings settings;
-	std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
+  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Column_settings settings;
+  std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
 
-	column_test_row_access_constructors(matrix, rows);
+  column_test_row_access_constructors(matrix, rows);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z2_column_with_row_access_other, Column, z2_only_row_access_columns) {
-	column_test_base_boundary_z2_methods<Column>();
+  column_test_base_boundary_z2_methods<Column>();
 
-	typename Column::Master::row_container_type rows;	//do not destroy before matrix
-	typename Column::Column_settings settings;
-	std::vector<Column> matrix = build_base_boundary_column_matrix<Column>(rows, settings);
-	column_test_boundary_methods<Column>(matrix);
+  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Column_settings settings;
+  std::vector<Column> matrix = build_base_boundary_column_matrix<Column>(rows, settings);
+  column_test_boundary_methods<Column>(matrix);
 
-	matrix.clear();
-	rows.clear();
-	matrix = build_column_matrix<Column>(rows, settings);
-	column_test_boundary_chain_methods<Column>(matrix);
+  matrix.clear();
+  rows.clear();
+  matrix = build_column_matrix<Column>(rows, settings);
+  column_test_boundary_chain_methods<Column>(matrix);
 }
 
 #endif
@@ -110,34 +110,34 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z2_column_with_row_access_other, Column, 
 using z5_no_row_access_columns = columns_list<z5_no_ra_option_list<option_name_list> >;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_column_constructors, Column, z5_no_row_access_columns) {
-	column_test_common_constructors<Column>();
-	column_test_base_boundary_constructors<Column>();
+  column_test_common_constructors<Column>();
+  column_test_base_boundary_constructors<Column>();
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z5_column_content_access, Column, z5_no_row_access_columns) {
-	typename Column::Column_settings settings(5);
-	std::vector<Column> matrix = build_column_matrix<Column>(settings);
-	column_test_common_z5_content_access(matrix);
+  typename Column::Column_settings settings(5);
+  std::vector<Column> matrix = build_column_matrix<Column>(settings);
+  column_test_common_z5_content_access(matrix);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z5_column_operators, Column, z5_no_row_access_columns) {
-	typename Column::Column_settings settings(5);
-	std::vector<Column> matrix = build_column_matrix<Column>(settings);
-	column_test_common_z5_operators(matrix);
+  typename Column::Column_settings settings(5);
+  std::vector<Column> matrix = build_column_matrix<Column>(settings);
+  column_test_common_z5_operators(matrix);
 
-	matrix = build_column_matrix<Column>(settings);
-	column_test_boundary_z5_operators(matrix);
+  matrix = build_column_matrix<Column>(settings);
+  column_test_boundary_z5_operators(matrix);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z5_column_other, Column, z5_no_row_access_columns) {
-	typename Column::Column_settings settings(5);
-	column_test_base_boundary_z5_methods<Column>();
+  typename Column::Column_settings settings(5);
+  column_test_base_boundary_z5_methods<Column>();
 
-	std::vector<Column> matrix = build_base_boundary_column_matrix<Column>(settings);
-	column_test_boundary_methods<Column>(matrix);
+  std::vector<Column> matrix = build_base_boundary_column_matrix<Column>(settings);
+  column_test_boundary_methods<Column>(matrix);
 
-	matrix = build_column_matrix<Column>(settings);
-	column_test_boundary_chain_methods<Column>(matrix);
+  matrix = build_column_matrix<Column>(settings);
+  column_test_boundary_chain_methods<Column>(matrix);
 }
 
 #else
@@ -149,47 +149,45 @@ using z5_only_row_access_columns = columns_list<z5_only_ra_option_list<option_na
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z5_column_with_row_access_content_access, Column, z5_only_row_access_columns) {
-	typename Column::Master::row_container_type rows;	//do not destroy before matrix
-	typename Column::Column_settings settings(5);
-	std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
-	column_test_common_z5_content_access(matrix);
+  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Column_settings settings(5);
+  std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
+  column_test_common_z5_content_access(matrix);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z5_column_with_row_access_operators, Column, z5_only_row_access_columns) {
-	typename Column::Master::row_container_type rows;	//do not destroy before matrix
-	typename Column::Column_settings settings(5);
-	std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
-	column_test_common_z5_operators(matrix);
+  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Column_settings settings(5);
+  std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
+  column_test_common_z5_operators(matrix);
 
-	matrix.clear();
-	rows.clear();
-	matrix = build_column_matrix<Column>(rows, settings);
-	column_test_boundary_z5_operators(matrix);
+  matrix.clear();
+  rows.clear();
+  matrix = build_column_matrix<Column>(rows, settings);
+  column_test_boundary_z5_operators(matrix);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_column_row_access_constructors, Column, z5_only_row_access_columns) {
-	typename Column::Master::row_container_type rows;	//do not destroy before matrix
-	typename Column::Column_settings settings(5);
-	std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
+  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Column_settings settings(5);
+  std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
 
-	column_test_row_access_constructors(matrix, rows);
+  column_test_row_access_constructors(matrix, rows);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_z5_column_with_row_access_other, Column, z5_only_row_access_columns) {
-	typename Column::Column_settings settings(5);
-	column_test_base_boundary_z5_methods<Column>();
+  typename Column::Column_settings settings(5);
+  column_test_base_boundary_z5_methods<Column>();
 
-	typename Column::Master::row_container_type rows;	//do not destroy before matrix
-	std::vector<Column> matrix = build_base_boundary_column_matrix<Column>(rows, settings);
-	column_test_boundary_methods<Column>(matrix);
+  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  std::vector<Column> matrix = build_base_boundary_column_matrix<Column>(rows, settings);
+  column_test_boundary_methods<Column>(matrix);
 
-	matrix.clear();
-	rows.clear();
-	matrix = build_column_matrix<Column>(rows, settings);
-	column_test_boundary_chain_methods<Column>(matrix);
+  matrix.clear();
+  rows.clear();
+  matrix = build_column_matrix<Column>(rows, settings);
+  column_test_boundary_chain_methods<Column>(matrix);
 }
 
 #endif
 #endif
-
-

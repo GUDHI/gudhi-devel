@@ -85,7 +85,7 @@ gudhi_add_boost_test(Persistence_matrix_column_tests_chain_z5_with_rem_row)
 ### Matrix Tests
 
 set(COL_TYPE -DPM_TEST_INTR_LIST)
-# set(COL_TYPE -DPM_TEST_UNORD_SET)
+# set(COL_TYPE -DPM_TEST_HEAP)
 
 # Base matrices
 
