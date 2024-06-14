@@ -365,10 +365,12 @@ gudhi_add_boost_test(Persistence_matrix_matrix_tests_zp_chain_barcode_id_idx_col
 if(GMP_FOUND AND GMPXX_FOUND)
   add_executable(Persistence_matrix_field_tests Persistence_matrix_field_tests.cpp)
   target_compile_options(Persistence_matrix_field_tests PUBLIC -DPM_GMP_FOUND)
+  target_link_libraries(Persistence_matrix_field_tests ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
   gudhi_add_boost_test(Persistence_matrix_field_tests)
 
   add_executable(Persistence_matrix_field_operators_tests Persistence_matrix_field_operators_tests.cpp)
   target_compile_options(Persistence_matrix_field_operators_tests PUBLIC -DPM_GMP_FOUND)
+  target_link_libraries(Persistence_matrix_field_operators_tests ${GMPXX_LIBRARIES} ${GMP_LIBRARIES})
   gudhi_add_boost_test(Persistence_matrix_field_operators_tests)
 else()
   add_executable(Persistence_matrix_field_tests Persistence_matrix_field_tests.cpp)
