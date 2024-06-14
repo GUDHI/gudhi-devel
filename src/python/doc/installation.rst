@@ -292,7 +292,7 @@ Joblib
 ------
 
 `Joblib <https://joblib.readthedocs.io/>`_ is used both as a dependency of
-`scikit-learn <installation.html#scikit-learn>`_, and directly for parallelism in some modules
+`Scikit-learn`_, and directly for parallelism in some modules
 (:class:`~gudhi.point_cloud.knn.KNearestNeighbors`,
 :func:`~gudhi.representations.metrics.pairwise_persistence_diagram_distances`).
 
@@ -304,7 +304,7 @@ Hnswlib
 requested, to speed-up queries.
 
 LaTeX
-~~~~~
+-----
 
 If a sufficiently complete LaTeX toolchain is available (including dvipng and ghostscript), the LaTeX option of
 matplotlib is enabled for prettier captions (cf.
@@ -365,7 +365,7 @@ Pandas
 -------
 
 `Pandas <https://pandas.pydata.org/docs/>`_ is an optional Run time dependency of
-`scikit-learn <installation.html#scikit-learn>`_.
+`Scikit-learn`_.
 For instance `sklearn.datasets.fetch_openml`, used in
 `Cubical complex persistence scikit-learn like interface example <cubical_complex_sklearn_itf_ref.html>`_
 requires pandas with Scikit-learn :math:`\geq` 1.5.0.
@@ -394,14 +394,14 @@ Scikit-learn
 ------------
 
 The :doc:`persistence representations </representations>` module requires
-`scikit-learn <https://scikit-learn.org/>`_, a Python-based ecosystem of
+`Scikit-learn <https://scikit-learn.org/>`_, a Python-based ecosystem of
 open-source software for machine learning.
 
 Some classes of the :doc:`cover complex </cover_complex_sklearn_isk_ref>` module
-also follow and require the `scikit-learn <https://scikit-learn.org/>`_ interface.
+also follow and require the `Scikit-learn <https://scikit-learn.org/>`_ interface.
 
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
-`scikit-learn <https://scikit-learn.org/>`_ as a backend if explicitly
+`Scikit-learn <https://scikit-learn.org/>`_ as a backend if explicitly
 requested.
 
 SciPy
