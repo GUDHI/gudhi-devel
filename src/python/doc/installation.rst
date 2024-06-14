@@ -228,7 +228,7 @@ CGAL
 ----
 
 Some GUDHI modules (cf. :doc:`modules list </index>`), and few examples
-require `CGAL <https://www.cgal.org/>`_, a C++ library that provides easy
+require `CGAL <https://www.cgal.org/>`_ version :math:`\geq` 5.1.0, a C++ library that provides easy
 access to efficient and reliable geometric algorithms.
 
 
@@ -236,7 +236,7 @@ The procedure to install this library
 according to your operating system is detailed
 `here <http://doc.cgal.org/latest/Manual/installation.html>`_.
 
-The following examples require CGAL version :math:`\geq` 5.1.0:
+The following examples require CGAL:
 
 .. only:: builder_html
 
@@ -251,11 +251,11 @@ Eigen
 -----
 
 Some GUDHI modules (cf. :doc:`modules list </index>`), and few examples
-require `Eigen <http://eigen.tuxfamily.org/>`_, a C++ template
+require `Eigen <http://eigen.tuxfamily.org/>`_ version :math:`\geq` 3.3.0, a C++ template
 library for linear algebra: matrices, vectors, numerical solvers, and related
 algorithms.
 
-The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version :math:`\geq` 3.3.0:
+The following examples require `Eigen <http://eigen.tuxfamily.org/>`_:
 
 .. only:: builder_html
 
@@ -291,8 +291,9 @@ PyTorch, TensorFlow and JAX in a common interface.
 Joblib
 ------
 
-`Joblib <https://joblib.readthedocs.io/>`_ is used both as a dependency of `Scikit-learn`_,
-and directly for parallelism in some modules (:class:`~gudhi.point_cloud.knn.KNearestNeighbors`,
+`Joblib <https://joblib.readthedocs.io/>`_ is used both as a dependency of
+`scikit-learn <installation.html#scikit-learn>`_, and directly for parallelism in some modules
+(:class:`~gudhi.point_cloud.knn.KNearestNeighbors`,
 :func:`~gudhi.representations.metrics.pairwise_persistence_diagram_distances`).
 
 Hnswlib
