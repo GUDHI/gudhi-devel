@@ -15,14 +15,16 @@
 #include "gudhi/Fields/Z2_field.h"
 #include "gudhi/Fields/Zp_field.h"
 #include "gudhi/Fields/Zp_field_shared.h"
-#include "gudhi/Fields/Multi_field.h"
 #include "gudhi/Fields/Multi_field_small.h"
-#include "gudhi/Fields/Multi_field_shared.h"
 #include "gudhi/Fields/Multi_field_small_shared.h"
+#ifdef PM_GMP_FOUND
+#include "gudhi/Fields/Multi_field.h"
+#include "gudhi/Fields/Multi_field_shared.h"
 
 using Gudhi::persistence_fields::Multi_field_element;
-using Gudhi::persistence_fields::Multi_field_element_with_small_characteristics;
 using Gudhi::persistence_fields::Shared_multi_field_element;
+#endif
+using Gudhi::persistence_fields::Multi_field_element_with_small_characteristics;
 using Gudhi::persistence_fields::Shared_multi_field_element_with_small_characteristics;
 using Gudhi::persistence_fields::Shared_Zp_field_element;
 using Gudhi::persistence_fields::Z2_field_element;
@@ -465,18 +467,23 @@ void test_multi_field_properties() {
 }
 
 BOOST_AUTO_TEST_CASE(Multi_Field_constructors) {
+#ifdef PM_GMP_FOUND
   test_multi_field_constructors<Multi_field_element<5, 13> >();
+#endif
   test_multi_field_constructors<Multi_field_element_with_small_characteristics<5, 13> >();
 }
 
 BOOST_AUTO_TEST_CASE(Multi_Field_operators) {
+#ifdef PM_GMP_FOUND
   test_multi_field_operators<Multi_field_element<5, 13> >();
+#endif
   test_multi_field_operators<Multi_field_element_with_small_characteristics<5, 13> >();
 }
 
 BOOST_AUTO_TEST_CASE(Multi_Field_properties) {
-  test_multi_field_properties<Multi_field_element<5, 13> >();
   test_multi_field_properties<Multi_field_element_with_small_characteristics<5, 13> >();
+#ifdef PM_GMP_FOUND
+  test_multi_field_properties<Multi_field_element<5, 13> >();
 
   Multi_field_element<3, 30> mb1(2);
   Multi_field_element_with_small_characteristics<3, 30> mb2(2);
@@ -484,30 +491,34 @@ BOOST_AUTO_TEST_CASE(Multi_Field_properties) {
   BOOST_CHECK_EQUAL(mb1.get_characteristic(), mb2.get_characteristic());  // == 3234846615
   BOOST_CHECK_EQUAL(mb1.get_partial_inverse(35).first.get_value(),
                     mb2.get_partial_inverse(35).first.get_value());  // == 2033332158
+#endif
 }
 
 BOOST_AUTO_TEST_CASE(Shared_Multi_Field_constructors) {
+#ifdef PM_GMP_FOUND
   Shared_multi_field_element::initialize(5, 13);
   test_multi_field_constructors<Shared_multi_field_element>();
-
+#endif
   Shared_multi_field_element_with_small_characteristics<>::initialize(5, 13);
   test_multi_field_constructors<Shared_multi_field_element_with_small_characteristics<> >();
 }
 
 BOOST_AUTO_TEST_CASE(Shared_Multi_Field_operators) {
+#ifdef PM_GMP_FOUND
   Shared_multi_field_element::initialize(5, 13);
   test_multi_field_operators<Shared_multi_field_element>();
-
+#endif
   Shared_multi_field_element_with_small_characteristics<>::initialize(5, 13);
   test_multi_field_operators<Shared_multi_field_element_with_small_characteristics<> >();
 }
 
 BOOST_AUTO_TEST_CASE(Shared_Multi_Field_properties) {
-  Shared_multi_field_element::initialize(5, 13);
-  test_multi_field_properties<Shared_multi_field_element>();
-
   Shared_multi_field_element_with_small_characteristics<>::initialize(5, 13);
   test_multi_field_properties<Shared_multi_field_element_with_small_characteristics<> >();
+
+#ifdef PM_GMP_FOUND
+  Shared_multi_field_element::initialize(5, 13);
+  test_multi_field_properties<Shared_multi_field_element>();
 
   Shared_multi_field_element::initialize(3, 30);
   Shared_multi_field_element_with_small_characteristics<>::initialize(3, 30);
@@ -517,4 +528,5 @@ BOOST_AUTO_TEST_CASE(Shared_Multi_Field_properties) {
   BOOST_CHECK_EQUAL(mb1.get_characteristic(), mb2.get_characteristic());  // == 3234846615
   BOOST_CHECK_EQUAL(mb1.get_partial_inverse(35).first.get_value(),
                     mb2.get_partial_inverse(35).first.get_value());  // == 2033332158
+#endif
 }

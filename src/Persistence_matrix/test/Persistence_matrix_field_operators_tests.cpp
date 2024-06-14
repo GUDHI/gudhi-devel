@@ -14,10 +14,12 @@
 
 #include "gudhi/Fields/Z2_field_operators.h"
 #include "gudhi/Fields/Zp_field_operators.h"
-#include "gudhi/Fields/Multi_field_operators.h"
 #include "gudhi/Fields/Multi_field_small_operators.h"
+#ifdef PM_GMP_FOUND
+#include "gudhi/Fields/Multi_field_operators.h"
 
 using Gudhi::persistence_fields::Multi_field_operators;
+#endif
 using Gudhi::persistence_fields::Multi_field_operators_with_small_characteristics;
 using Gudhi::persistence_fields::Z2_field_operators;
 using Gudhi::persistence_fields::Zp_field_operators;
@@ -540,11 +542,12 @@ void test_multi_field_properties(MF& op) {
 }
 
 BOOST_AUTO_TEST_CASE(Multi_Field_operators_operation) {
+#ifdef PM_GMP_FOUND
   Multi_field_operators mfop;
   mfop.set_characteristic(5, 13);
   test_multi_field_operators(mfop);
   test_multi_field_inplace_operators(mfop);
-
+#endif
   Multi_field_operators_with_small_characteristics smfop;
   smfop.set_characteristic(5, 13);
   test_multi_field_operators(smfop);
@@ -552,13 +555,13 @@ BOOST_AUTO_TEST_CASE(Multi_Field_operators_operation) {
 }
 
 BOOST_AUTO_TEST_CASE(Multi_Field_operators_properties) {
-  Multi_field_operators mfop;
-  mfop.set_characteristic(5, 13);
-  test_multi_field_properties(mfop);
-
   Multi_field_operators_with_small_characteristics smfop;
   smfop.set_characteristic(5, 13);
   test_multi_field_properties(smfop);
+#ifdef PM_GMP_FOUND
+  Multi_field_operators mfop;
+  mfop.set_characteristic(5, 13);
+  test_multi_field_properties(mfop);
 
   mfop.set_characteristic(3, 30);
   smfop.set_characteristic(3, 30);
@@ -567,4 +570,6 @@ BOOST_AUTO_TEST_CASE(Multi_Field_operators_properties) {
   BOOST_CHECK_EQUAL(mfop.get_partial_inverse(2, 35).first, smfop.get_partial_inverse(2, 35).first);    // == 2033332158
   BOOST_CHECK_EQUAL(mfop.get_partial_inverse(2, 35).second, smfop.get_partial_inverse(2, 35).second);  // == 2033332158
   BOOST_CHECK_EQUAL(mfop.get_partial_multiplicative_identity(35), smfop.get_partial_multiplicative_identity(35));
+#endif
 }
+
