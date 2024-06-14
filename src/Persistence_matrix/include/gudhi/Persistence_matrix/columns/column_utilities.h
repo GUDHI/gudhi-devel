@@ -72,7 +72,7 @@ void _generic_merge_cell_to_column(Column_type& targetColumn,
       } else {
         update_target2(targetCell);
         if constexpr (Column_type::Master::Option_list::has_row_access)
-          targetColumn.Column_type::Master::Row_access_option::update_cell(*targetCell);
+          targetColumn.update_cell(*targetCell);
         ++itTarget;
       }
     }
@@ -154,7 +154,7 @@ bool _multiply_target_and_add_to_column(const typename Column_type::Field_elemen
         // targetColumn.ra_opt::update_cell(*itTarget) produces an internal compiler error
         // even though it works in _generic_add_to_column... Probably because of the lambda.
         if constexpr (Column_type::Master::Option_list::has_row_access)
-          targetColumn.Column_type::Master::Row_access_option::update_cell(*cellTarget);
+          targetColumn.update_cell(*cellTarget);
       },
       [&](typename Cell_range::const_iterator& itSource, const typename Column_type::Column_type::iterator& itTarget) {
         targetColumn._insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
@@ -168,7 +168,7 @@ bool _multiply_target_and_add_to_column(const typename Column_type::Field_elemen
           typename Column_type::Cell* targetCell = _get_cell<typename Column_type::Cell>(itTarget);
           targetColumn.operators_->multiply_inplace(targetCell->get_element(), val);
           if constexpr (Column_type::Master::Option_list::has_row_access)
-            targetColumn.Column_type::Master::Row_access_option::update_cell(*targetCell);
+            targetColumn.update_cell(*targetCell);
           itTarget++;
         }
       });
@@ -190,7 +190,7 @@ bool _multiply_source_and_add_to_column(const typename Column_type::Field_elemen
             targetColumn._insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
         targetColumn.operators_->multiply_inplace(cell->get_element(), val);
         if constexpr (Column_type::Master::Option_list::has_row_access)
-          targetColumn.Column_type::Master::Row_access_option::update_cell(*cell);
+          targetColumn.update_cell(*cell);
       },
       [&](typename Column_type::Field_element_type& targetElement, typename Cell_range::const_iterator& itSource) {
         targetColumn.operators_->multiply_and_add_inplace_back(itSource->get_element(), val, targetElement);

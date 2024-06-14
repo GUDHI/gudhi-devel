@@ -74,9 +74,9 @@ column_content<Column> get_column_content_via_iterators(const Column& col) {
 
   for (const auto& c : col) {
     if constexpr (is_z2<Column>()) {
-      auto p = cells.insert(c.get_row_index());
+      cells.insert(c.get_row_index());
     } else {
-      auto p = cells.insert({c.get_row_index(), c.get_element()});
+      cells.insert({c.get_row_index(), c.get_element()});
     }
   }
 
