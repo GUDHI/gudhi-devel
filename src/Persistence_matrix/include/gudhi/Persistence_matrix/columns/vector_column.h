@@ -510,8 +510,8 @@ inline bool Vector_column<Master_matrix>::is_non_zero(id_index rowIndex) const
   if constexpr (!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type)
     if (erasedValues_.find(rowIndex) != erasedValues_.end()) return false;
 
-  // cell gets destroyed with the pool at the end, but I don't know if that's a good solution
-  return std::binary_search(column_.begin(), column_.end(), cellPool_->construct(rowIndex),
+  Cell cell(rowIndex);
+  return std::binary_search(column_.begin(), column_.end(), &cell,
                             [](const Cell* a, const Cell* b) { return a->get_row_index() < b->get_row_index(); });
 }
 

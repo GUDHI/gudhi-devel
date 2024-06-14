@@ -464,10 +464,8 @@ Set_column<Master_matrix>::get_content(int columnLength) const
 template <class Master_matrix>
 inline bool Set_column<Master_matrix>::is_non_zero(id_index rowIndex) const 
 {
-  auto cell = cellPool_->construct(rowIndex);
-  bool res = column_.find(cell) != column_.end();
-  cellPool_->destroy(cell);
-  return res;
+  Cell cell(rowIndex);
+  return column_.find(&cell) != column_.end();
 }
 
 template <class Master_matrix>

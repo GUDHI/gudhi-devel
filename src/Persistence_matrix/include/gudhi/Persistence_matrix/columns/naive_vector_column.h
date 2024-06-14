@@ -465,9 +465,8 @@ Naive_vector_column<Master_matrix>::get_content(int columnLength) const
 template <class Master_matrix>
 inline bool Naive_vector_column<Master_matrix>::is_non_zero(id_index rowIndex) const 
 {
-  // cell gets destroyed with the pool at the end, but I don't know if that's a good solution
-  // in particular because there is a chance of using another factory later depending on the options.
-  return std::binary_search(column_.begin(), column_.end(), cellPool_->construct(rowIndex),
+  Cell cell(rowIndex);
+  return std::binary_search(column_.begin(), column_.end(), &cell,
                             [](const Cell* a, const Cell* b) { return a->get_row_index() < b->get_row_index(); });
 }
 
