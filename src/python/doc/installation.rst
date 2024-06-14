@@ -360,6 +360,15 @@ The :class:`~gudhi.cover_complex.GraphInducedComplex`, :class:`~gudhi.cover_comp
 :class:`~gudhi.cover_complex.NerveComplex` `get_networkx` methods require `NetworkX <https://networkx.org/>`_,
 a Python library for studying and visualizing graphs and networks.
 
+Pandas
+-------
+
+`Pandas <https://pandas.pydata.org/docs/>`_ is an optional Run time dependency of
+`scikit-learn <installation.html#scikit-learn>`_.
+For instance `sklearn.datasets.fetch_openml`, used in
+`Cubical complex persistence scikit-learn like interface example <cubical_complex_sklearn_itf_ref.html>`_
+requires pandas with Scikit-learn :math:`\geq` 1.5.0.
+
 PyKeOps
 -------
 
