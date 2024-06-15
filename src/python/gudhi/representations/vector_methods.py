@@ -503,7 +503,7 @@ class Entropy(BaseEstimator, TransformerMixin):
         """
         if self.mode == "vector":
             _grid_from_sample_range(self, X)
-            if sum([len(x) for x in X]) > 0:
+            if self.sample_range_fixed_[0] != self.sample_range_fixed_[1]:
                 self.step_ = self.grid_[1] - self.grid_[0]
             else:
                 self.step_ = 0.
