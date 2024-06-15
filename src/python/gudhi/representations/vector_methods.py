@@ -129,8 +129,8 @@ def _automatic_sample_range(sample_range, X):
                 [Mx,My] = [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
                 return np.where(nan_in_range, np.array([mx, My]), sample_range)
             except ValueError:
-                # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
-                pass
+                print("Empty list or empty diagrams: sample range is [-infinity, -infinity]")
+                return np.array([-np.inf, -np.inf])
         return sample_range
 
 
@@ -149,12 +149,11 @@ def _grid_from_sample_range(self, X):
     if not self.keep_endpoints:
         self.new_resolution_ += self.nan_in_range_.sum()
     self.sample_range_fixed_ = _automatic_sample_range(sample_range, X)
-    if sum([len(x) for x in X]) == 0:
-        # if empty list or empty diagrams, self.grid_ is a list containing self.resolution copies of -infinity for consistency with exact computation
-        print("Empty list or empty diagrams: evaluation grid only contains -infinity")
-        self.grid_ = np.full(shape=[self.new_resolution_], fill_value=-np.inf)
-    else:
+    if self.sample_range_fixed_[0] != self.sample_range_fixed_[1]:
         self.grid_ = np.linspace(self.sample_range_fixed_[0], self.sample_range_fixed_[1], self.new_resolution_)
+    else:
+        print('First value and second value in range are the same: grid is made of resolution copies of -infinity')
+        self.grid_ = np.full(shape=[self.new_resolution_], fill_value=-np.inf)
     if not self.keep_endpoints:
         self.grid_ = _trim_endpoints(self.grid_, self.nan_in_range_)
 
@@ -389,7 +388,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         if N == 0:
 
-            print("Empty list or empty diagrams: output contains only zeros")
+            print("Empty list: output has shape [0, len(grid)]")
             return np.zeros((N, len(self.grid_)))
             
         else:
