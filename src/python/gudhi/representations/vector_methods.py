@@ -129,8 +129,9 @@ def _automatic_sample_range(sample_range, X):
                 [Mx,My] = [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
                 return np.where(nan_in_range, np.array([mx, My]), sample_range)
             except ValueError:
-                print("Empty list or empty diagrams: sample range is [-infinity, -infinity]")
-                return np.array([-np.inf, -np.inf])
+                b = np.nanmax([sample_range[0], sample_range[1], -np.inf])
+                print(f"Empty list or empty diagrams: sample range is [{b}, {b}]")
+                return np.array([b, b])
         return sample_range
 
 
@@ -152,8 +153,8 @@ def _grid_from_sample_range(self, X):
     if self.sample_range_fixed_[0] != self.sample_range_fixed_[1]:
         self.grid_ = np.linspace(self.sample_range_fixed_[0], self.sample_range_fixed_[1], self.new_resolution_)
     else:
-        print('First value and second value in range are the same: grid is made of resolution copies of -infinity')
-        self.grid_ = np.full(shape=[self.new_resolution_], fill_value=-np.inf)
+        print('First value and second value in range are the same: grid is made of resolution copies of this value')
+        self.grid_ = np.full(shape=[self.new_resolution_], fill_value=self.sample_range_fixed_[0])
     if not self.keep_endpoints:
         self.grid_ = _trim_endpoints(self.grid_, self.nan_in_range_)
 
@@ -415,7 +416,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
     
             return np.array(bettis, dtype=int)[:, 0:-1]
 
-    def fit_transform(self, X):
+    def fit_transform(self, X, y = None):
         """
         The result is the same as fit(X) followed by transform(X), but potentially faster.
         """
