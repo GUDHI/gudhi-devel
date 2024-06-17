@@ -144,15 +144,30 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
     Cell* p1 = cc1._pop_pivot();
     Cell* p2 = cc2._pop_pivot();
     while (p1 != nullptr && p2 != nullptr) {
-      if (p1->get_row_index() != p2->get_row_index()) return false;
-      if constexpr (!Master_matrix::Option_list::is_z2){
-        if (p1->get_element() != p2->get_element()) return false;
+      if (p1->get_row_index() != p2->get_row_index()) {
+        c1.cellPool_->destroy(p1);
+        c2.cellPool_->destroy(p2);
+        return false;
       }
+      if constexpr (!Master_matrix::Option_list::is_z2){
+        if (p1->get_element() != p2->get_element()) {
+          c1.cellPool_->destroy(p1);
+          c2.cellPool_->destroy(p2);
+          return false;
+        }
+      }
+      c1.cellPool_->destroy(p1);
+      c2.cellPool_->destroy(p2);
       p1 = cc1._pop_pivot();
       p2 = cc2._pop_pivot();
     }
 
     if (p1 == nullptr && p2 == nullptr) return true;
+    if (p1 != nullptr) {
+      c1.cellPool_->destroy(p1);
+      return false;
+    }
+    c2.cellPool_->destroy(p2);
     return false;
   }
   friend bool operator<(const Heap_column& c1, const Heap_column& c2) {
@@ -163,17 +178,39 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
     Cell* p1 = cc1._pop_pivot();
     Cell* p2 = cc2._pop_pivot();
     while (p1 != nullptr && p2 != nullptr) {
-      if (p1->get_row_index() > p2->get_row_index()) return false;
-      if (p1->get_row_index() < p2->get_row_index()) return true;
-      if constexpr (!Master_matrix::Option_list::is_z2){
-        if (p1->get_element() > p2->get_element()) return false;
-        if (p1->get_element() < p2->get_element()) return true;
+      if (p1->get_row_index() > p2->get_row_index()) {
+        c1.cellPool_->destroy(p1);
+        c2.cellPool_->destroy(p2);
+        return false;
       }
+      if (p1->get_row_index() < p2->get_row_index()) {
+        c1.cellPool_->destroy(p1);
+        c2.cellPool_->destroy(p2);
+        return true;
+      }
+      if constexpr (!Master_matrix::Option_list::is_z2){
+        if (p1->get_element() > p2->get_element()) {
+          c1.cellPool_->destroy(p1);
+          c2.cellPool_->destroy(p2);
+          return false;
+        }
+        if (p1->get_element() < p2->get_element()) {
+          c1.cellPool_->destroy(p1);
+          c2.cellPool_->destroy(p2);
+          return true;
+        }
+      }
+      c1.cellPool_->destroy(p1);
+      c2.cellPool_->destroy(p2);
       p1 = cc1._pop_pivot();
       p2 = cc2._pop_pivot();
     }
 
-    if (p2 == nullptr) return false;
+    if (p2 == nullptr) {
+      c1.cellPool_->destroy(p1);
+      return false;
+    }
+    c2.cellPool_->destroy(p2);
     return true;
   }
 
@@ -538,10 +575,19 @@ inline void Heap_column<Master_matrix>::clear(id_index rowIndex)
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns.");
 
-  column_.erase(std::remove_if(column_.begin(), column_.end(),
-                               [rowIndex](const Cell* c) { return c->get_row_index() == rowIndex; }),
-                column_.end());
-  std::make_heap(column_.begin(), column_.end(), cellPointerComp_);
+  Column_type tempCol;
+  Cell* pivot = _pop_pivot();
+  while (pivot != nullptr) {
+    if (pivot->get_row_index() != rowIndex){
+      tempCol.push_back(pivot);
+    } else {
+      cellPool_->destroy(pivot);
+    }
+    pivot = _pop_pivot();
+  }
+  column_.swap(tempCol);
+
+  insertsSinceLastPrune_ = 0;
 }
 
 template <class Master_matrix>
@@ -898,8 +944,10 @@ Heap_column<Master_matrix>::_pop_pivot()
   if constexpr (Master_matrix::Option_list::is_z2) {
     while (!column_.empty() && column_.front()->get_row_index() == pivot->get_row_index()) {
       std::pop_heap(column_.begin(), column_.end(), cellPointerComp_);
+      cellPool_->destroy(column_.back());
       column_.pop_back();
 
+      cellPool_->destroy(pivot);
       if (column_.empty()) {
         return nullptr;
       }
@@ -911,10 +959,14 @@ Heap_column<Master_matrix>::_pop_pivot()
     while (!column_.empty() && column_.front()->get_row_index() == pivot->get_row_index()) {
       operators_->add_inplace(pivot->get_element(), column_.front()->get_element());
       std::pop_heap(column_.begin(), column_.end(), cellPointerComp_);
+      cellPool_->destroy(column_.back());
       column_.pop_back();
     }
 
-    if (pivot->get_element() == Field_operators::get_additive_identity()) return _pop_pivot();
+    if (pivot->get_element() == Field_operators::get_additive_identity()) {
+      cellPool_->destroy(pivot);
+      return _pop_pivot();
+    }
   }
 
   return pivot;
