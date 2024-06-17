@@ -125,7 +125,7 @@
       <b>Author:</b> David Salinas<br>
       <b>Introduced in:</b> GUDHI 1.1.0<br>
       <b>License:</b> MIT [(LGPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal &ge; 4.11.0
+      <b>Requires:</b> \ref cgal
     </td>
   </tr>
   <tr>
@@ -149,14 +149,13 @@
     circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration
     values of the codimension 1 cofaces that make it not Gabriel otherwise.
     All simplices that have a filtration value \f$ > \alpha^2 \f$ are removed from the Delaunay complex
-    when creating the simplicial complex if it is specified.<br>
-    For performances reasons, it is advised to use \ref cgal &ge; 5.0.0.
+    when creating the simplicial complex if it is specified.
     </td>
     <td width="15%">
       <b>Author:</b> Vincent Rouvreau<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>License:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+      <b>Requires:</b> \ref eigen and \ref cgal
     </td>
   </tr>
   <tr>
@@ -261,7 +260,7 @@
       <b>Author:</b> Siargey Kachanovich<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>License:</b> MIT ([GPL v3](../../licensing/) for Euclidean version)<br>
-      <b>Euclidean version requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+      <b>Euclidean version requires:</b> \ref eigen and \ref cgal
     </td>
   </tr>
   <tr>
@@ -287,7 +286,7 @@
       <b>Author:</b> Mathieu Carri&egrave;re<br>
       <b>Introduced in:</b> GUDHI 2.1.0<br>
       <b>License:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal &ge; 4.11.0
+      <b>Requires:</b> \ref cgal
     </td>
   </tr>
   <tr>
@@ -313,7 +312,7 @@
       <b>Author:</b> Siargey Kachanovich<br>
       <b>Introduced in:</b> GUDHI 3.4.0<br>
       <b>License:</b> MIT [(LGPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref eigen &ge; 3.1.0
+      <b>Requires:</b> \ref eigen
     </td>
   </tr>
   <tr>
@@ -341,7 +340,7 @@
       <b>Author:</b> Cl&eacute;ment Jamin<br>
       <b>Introduced in:</b> GUDHI 2.0.0<br>
       <b>License:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+      <b>Requires:</b> \ref eigen and \ref cgal
     </td>
   </tr>
   <tr>
@@ -429,7 +428,7 @@
       <b>Author:</b> Fran&ccedil;ois Godi<br>
       <b>Introduced in:</b> GUDHI 2.0.0<br>
       <b>License:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal &ge; 4.11.0
+      <b>Requires:</b> \ref cgal
     </td>
   </tr>
   <tr>

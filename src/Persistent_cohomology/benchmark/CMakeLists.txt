@@ -1,5 +1,3 @@
-project(Persistent_cohomology_benchmark)
-  
 if(GMP_FOUND)
    if(GMPXX_FOUND)
      if (TARGET Boost::program_options)
@@ -13,14 +11,8 @@ if(GMP_FOUND)
    endif(GMPXX_FOUND)
 endif(GMP_FOUND)
 
-add_executable ( line line.cpp )
-if(TARGET TBB::tbb)
-  target_link_libraries(line TBB::tbb)
-endif()
+add_executable_with_targets(line line.cpp TBB::tbb)
 add_test(NAME Compare_pers_on_line COMMAND $<TARGET_FILE:line> 1000 10)
 
-add_executable(persistence_2d persistence_2d.cpp)
-if (TBB_FOUND)
-  target_link_libraries(persistence_2d TBB::tbb)
-endif()
+add_executable_with_targets(persistence_2d persistence_2d.cpp TBB::tbb)
 add_test(NAME Compare_persistence_2d COMMAND $<TARGET_FILE:persistence_2d>)

@@ -63,3 +63,13 @@ def test_tomato_1():
     assert t.diagram_.size == 0
     assert t.max_weight_per_cc_.size == 1
     t.plot_diagram()
+
+
+def test_tomato_kde_underflow():
+    # 1D construction with 2 Gaussians, embedded in high dimension
+    X = np.zeros((200, 1000))
+    X[:100, 0] = np.random.default_rng().normal(-2, 1, 100)
+    X[100:, 0] = np.random.default_rng().normal(2, 1, 100)
+    # X[:,0].sort()
+    t = Tomato(density_type="KDE").fit(X)
+    assert (t.weights_ != 0).all()
