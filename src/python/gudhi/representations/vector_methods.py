@@ -737,7 +737,7 @@ class Atol(BaseEstimator, TransformerMixin):
     # Note the example above must be up to date with the one in tests called test_atol_doc
     def __init__(
             self,
-            quantiser=KMeans(n_clusters=2, random_state=202312, n_init=10),
+            quantiser=KMeans(n_clusters=2, n_init="auto"),
             weighting_method="cloud",
             contrast="gaussian"
     ):
@@ -747,9 +747,8 @@ class Atol(BaseEstimator, TransformerMixin):
         Parameters:
             quantiser (Object): Object with `fit` (sklearn API consistent) and `cluster_centers` and `n_clusters`
                 attributes, e.g. `sklearn.cluster.KMeans`. It will be fitted when the Atol object function `fit` is
-                called (default: `sklearn.cluster.KMeans` with 2 clusters because there are very few points, a fixed
-                `random_state` to be deterministic and `n_init=10` because it was KMeans default value for sklearn <
-                1.4.0)
+                called. Users are encouraged to provide their own quantiser, and in particular increase the number
+                of clusters.
             weighting_method (string): constant generic function for weighting the measure points
                 choose from {"cloud", "iidproba"}
                 (default: constant function, i.e. the measure is seen as a point cloud by default).
