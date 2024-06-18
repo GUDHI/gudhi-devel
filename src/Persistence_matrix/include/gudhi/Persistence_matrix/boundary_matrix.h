@@ -362,13 +362,21 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
   index nextInsertIndex_;       /**< Next unused column index. */
   Column_settings* colSettings_;  /**< Cell factory. */
 
-  static const bool activeDimOption =
+  static constexpr bool activeDimOption =
       Master_matrix::Option_list::has_matrix_maximal_dimension_access || Master_matrix::maxDimensionIsNeeded;
-  static const bool activeSwapOption =
+  static constexpr bool activeSwapOption =
       Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update;
-  static const bool activePairingOption = Master_matrix::Option_list::has_column_pairings &&
-                                          !Master_matrix::Option_list::has_vine_update &&
-                                          !Master_matrix::Option_list::can_retrieve_representative_cycles;
+  static constexpr bool activePairingOption = Master_matrix::Option_list::has_column_pairings &&
+                                              !Master_matrix::Option_list::has_vine_update &&
+                                              !Master_matrix::Option_list::can_retrieve_representative_cycles;
+
+  void _orderRowsIfNecessary();
+  const Column_type& _get_column(index columnIndex) const;
+  Column_type& _get_column(index columnIndex);
+  index _get_real_row_index(index rowIndex) const;
+  template <class Container_type>
+  void _container_insert(const Container_type& column, index pos, dimension_type dim);
+  void _container_insert(const Column_type& column, [[maybe_unused]] index pos = 0);
 };
 
 template <class Master_matrix>
@@ -395,25 +403,7 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(const std::vector<Boundar
   matrix_.reserve(orderedBoundaries.size());
 
   for (index i = 0; i < orderedBoundaries.size(); i++) {
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.try_emplace(i, Column_type(i, orderedBoundaries[i], ra_opt::rows_, colSettings_));
-      } else {
-        matrix_.try_emplace(i, Column_type(orderedBoundaries[i], colSettings_));
-      }
-      if constexpr (activeDimOption) {
-        dim_opt::update_up(matrix_.at(i).get_dimension());
-      }
-    } else {
-      if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.emplace_back(i, orderedBoundaries[i], ra_opt::rows_, colSettings_);
-      } else {
-        matrix_.emplace_back(orderedBoundaries[i], colSettings_);
-      }
-      if constexpr (activeDimOption) {
-        dim_opt::update_up(matrix_[i].get_dimension());
-      }
-    }
+    _container_insert(orderedBoundaries[i], i, orderedBoundaries[i].size() == 0 ? 0 : orderedBoundaries[i].size() - 1);
   }
 }
 
@@ -445,22 +435,11 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(const Boundary_matrix& ma
       colSettings_(colSettings == nullptr ? matrixToCopy.colSettings_ : colSettings) 
 {
   matrix_.reserve(matrixToCopy.matrix_.size());
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    for (const auto& p : matrixToCopy.matrix_) {
-      const Column_type& col = p.second;
-      if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, colSettings_));
-      } else {
-        matrix_.try_emplace(p.first, Column_type(col, colSettings_));
-      }
-    }
-  } else {
-    for (const auto& col : matrixToCopy.matrix_) {
-      if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, colSettings_);
-      } else {
-        matrix_.emplace_back(col, colSettings_);
-      }
+  for (const auto& cont : matrixToCopy.matrix_){
+    if constexpr (Master_matrix::Option_list::has_map_column_container){
+      _container_insert(cont.second, cont.first);
+    } else {
+      _container_insert(cont);
     }
   }
 }
@@ -491,10 +470,9 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
 {
   if (dim == -1) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
 
-  if constexpr (activeSwapOption) {
-    if (swap_opt::rowSwapped_) swap_opt::_orderRows();
-  }
+  _orderRowsIfNecessary();
 
+  //updates container sizes
   if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows) {
     id_index pivot;
     if constexpr (Master_matrix::Option_list::is_z2) {
@@ -502,20 +480,15 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
     } else {
       pivot = std::prev(boundary.end())->first;
     }
+    //row container
     if (ra_opt::rows_->size() <= pivot) ra_opt::rows_->resize(pivot + 1);
   }
 
+  //row swap map containers
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     if constexpr (activeSwapOption) {
       swap_opt::indexToRow_.emplace(faceIndex, faceIndex);
       swap_opt::rowToIndex_.emplace(faceIndex, faceIndex);
-    }
-
-    if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.try_emplace(nextInsertIndex_,
-                          Column_type(nextInsertIndex_, boundary, dim, ra_opt::rows_, colSettings_));
-    } else {
-      matrix_.try_emplace(nextInsertIndex_, boundary, dim, colSettings_);
     }
   } else {
     if constexpr (activeSwapOption) {
@@ -524,21 +497,9 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
         swap_opt::rowToIndex_.push_back(i);
       }
     }
-
-    if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.emplace_back(nextInsertIndex_, boundary, dim, ra_opt::rows_, colSettings_);
-    } else {
-      if (matrix_.size() <= nextInsertIndex_) {
-        matrix_.emplace_back(boundary, dim, colSettings_);
-      } else {
-        matrix_[nextInsertIndex_] = Column_type(boundary, dim, colSettings_);
-      }
-    }
   }
 
-  if constexpr (activeDimOption) {
-    dim_opt::update_up(boundary.size() == 0 ? 0 : boundary.size() - 1);
-  }
+  _container_insert(boundary, nextInsertIndex_, dim);
 
   return nextInsertIndex_++;
 }
@@ -547,15 +508,9 @@ template <class Master_matrix>
 inline typename Boundary_matrix<Master_matrix>::Column_type& Boundary_matrix<Master_matrix>::get_column(
     index columnIndex) 
 {
-  if constexpr (activeSwapOption) {
-    if (swap_opt::rowSwapped_) swap_opt::_orderRows();
-  }
+  _orderRowsIfNecessary();
 
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    return matrix_.at(columnIndex);
-  } else {
-    return matrix_[columnIndex];
-  }
+  return _get_column(columnIndex);
 }
 
 template <class Master_matrix>
@@ -563,9 +518,7 @@ inline typename Boundary_matrix<Master_matrix>::Row_type& Boundary_matrix<Master
 {
   static_assert(Master_matrix::Option_list::has_row_access, "'get_row' is not implemented for the chosen options.");
 
-  if constexpr (activeSwapOption) {
-    if (swap_opt::rowSwapped_) swap_opt::_orderRows();
-  }
+  _orderRowsIfNecessary();
 
   return ra_opt::get_row(rowIndex);
 }
@@ -579,10 +532,12 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
   if (nextInsertIndex_ == 0) return -1;  // empty matrix
   --nextInsertIndex_;
 
+  //updates dimension max
   if constexpr (activeDimOption) {
     dim_opt::update_down(matrix_.at(nextInsertIndex_).get_dimension());
   }
 
+  //computes pivot and removes column from matrix_
   id_index pivot;
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     auto it = matrix_.find(nextInsertIndex_);
@@ -615,6 +570,7 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
 
   erase_empty_row(nextInsertIndex_);  // maximal, so empty
 
+  //updates barcode
   if constexpr (activePairingOption) {
     pair_opt::_remove_last(nextInsertIndex_);
   }
@@ -625,6 +581,7 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
 template <class Master_matrix>
 inline void Boundary_matrix<Master_matrix>::erase_empty_row(index rowIndex) 
 {
+  //computes real row index and erases it if necessary from the row swap map containers
   id_index rowID = rowIndex;
   if constexpr (activeSwapOption) {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
@@ -656,21 +613,13 @@ template <class Master_matrix>
 inline typename Boundary_matrix<Master_matrix>::dimension_type Boundary_matrix<Master_matrix>::get_column_dimension(
     index columnIndex) const 
 {
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    return matrix_.at(columnIndex).get_dimension();
-  } else {
-    return matrix_[columnIndex].get_dimension();
-  }
+  return _get_column(columnIndex).get_dimension();
 }
 
 template <class Master_matrix>
 inline void Boundary_matrix<Master_matrix>::add_to(index sourceColumnIndex, index targetColumnIndex) 
 {
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    matrix_.at(targetColumnIndex) += matrix_.at(sourceColumnIndex);
-  } else {
-    matrix_[targetColumnIndex] += matrix_[sourceColumnIndex];
-  }
+  _get_column(targetColumnIndex) += _get_column(sourceColumnIndex);
 }
 
 template <class Master_matrix>
@@ -678,11 +627,7 @@ inline void Boundary_matrix<Master_matrix>::multiply_target_and_add_to(index sou
                                                                        const Field_element_type& coefficient,
                                                                        index targetColumnIndex) 
 {
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    matrix_.at(targetColumnIndex).multiply_target_and_add(coefficient, matrix_.at(sourceColumnIndex));
-  } else {
-    matrix_[targetColumnIndex].multiply_target_and_add(coefficient, matrix_[sourceColumnIndex]);
-  }
+  _get_column(targetColumnIndex).multiply_target_and_add(coefficient, _get_column(sourceColumnIndex));
 }
 
 template <class Master_matrix>
@@ -690,81 +635,39 @@ inline void Boundary_matrix<Master_matrix>::multiply_source_and_add_to(const Fie
                                                                        index sourceColumnIndex,
                                                                        index targetColumnIndex) 
 {
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    matrix_.at(targetColumnIndex).multiply_source_and_add(matrix_.at(sourceColumnIndex), coefficient);
-  } else {
-    matrix_[targetColumnIndex].multiply_source_and_add(matrix_[sourceColumnIndex], coefficient);
-  }
+  _get_column(targetColumnIndex).multiply_source_and_add(_get_column(sourceColumnIndex), coefficient);
 }
 
 template <class Master_matrix>
 inline void Boundary_matrix<Master_matrix>::zero_cell(index columnIndex, index rowIndex) 
 {
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    if constexpr (activeSwapOption) {
-      matrix_.at(columnIndex).clear(swap_opt::indexToRow_[rowIndex]);
-    } else {
-      matrix_.at(columnIndex).clear(rowIndex);
-    }
-  } else {
-    if constexpr (activeSwapOption) {
-      matrix_[columnIndex].clear(swap_opt::indexToRow_[rowIndex]);
-    } else {
-      matrix_[columnIndex].clear(rowIndex);
-    }
-  }
+  _get_column(columnIndex).clear(_get_real_row_index(rowIndex));
 }
 
 template <class Master_matrix>
 inline void Boundary_matrix<Master_matrix>::zero_column(index columnIndex) 
 {
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    matrix_.at(columnIndex).clear();
-  } else {
-    matrix_[columnIndex].clear();
-  }
+  _get_column(columnIndex).clear();
 }
 
 template <class Master_matrix>
 inline bool Boundary_matrix<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const 
 {
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    if constexpr (activeSwapOption) {
-      return !(matrix_.at(columnIndex).is_non_zero(swap_opt::indexToRow_.at(rowIndex)));
-    } else {
-      return !(matrix_.at(columnIndex).is_non_zero(rowIndex));
-    }
-  } else {  // operator[] non const for maps
-    if constexpr (activeSwapOption) {
-      return !(matrix_[columnIndex].is_non_zero(swap_opt::indexToRow_[rowIndex]));
-    } else {
-      return !(matrix_[columnIndex].is_non_zero(rowIndex));
-    }
-  }
+  return !(_get_column(columnIndex).is_non_zero(_get_real_row_index(rowIndex)));
 }
 
 template <class Master_matrix>
 inline bool Boundary_matrix<Master_matrix>::is_zero_column(index columnIndex) 
 {
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    return matrix_.at(columnIndex).is_empty();
-  } else {
-    return matrix_[columnIndex].is_empty();
-  }
+  return _get_column(columnIndex).is_empty();
 }
 
 template <class Master_matrix>
 inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_matrix>::get_pivot(index columnIndex) 
 {
-  if constexpr (activeSwapOption) {
-    if (swap_opt::rowSwapped_) swap_opt::_orderRows();
-  }
+  _orderRowsIfNecessary();
 
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    return matrix_.at(columnIndex).get_pivot();
-  } else {
-    return matrix_[columnIndex].get_pivot();
-  }
+  return _get_column(columnIndex).get_pivot();
 }
 
 template <class Master_matrix>
@@ -780,22 +683,11 @@ inline Boundary_matrix<Master_matrix>& Boundary_matrix<Master_matrix>::operator=
   colSettings_ = other.colSettings_;
 
   matrix_.reserve(other.matrix_.size());
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    for (const auto& p : other.matrix_) {
-      const Column_type& col = p.second;
-      if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, colSettings_));
-      } else {
-        matrix_.try_emplace(p.first, Column_type(col, colSettings_));
-      }
-    }
-  } else {
-    for (const auto& col : other.matrix_) {
-      if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, colSettings_);
-      } else {
-        matrix_.emplace_back(col, colSettings_);
-      }
+  for (const auto& cont : other.matrix_){
+    if constexpr (Master_matrix::Option_list::has_map_column_container){
+      _container_insert(cont.second, cont.first);
+    } else {
+      _container_insert(cont);
     }
   }
 
@@ -830,6 +722,97 @@ inline void Boundary_matrix<Master_matrix>::print()
       std::cout << "(" << i << ")\n";
     }
     std::cout << "\n";
+  }
+}
+
+template <class Master_matrix>
+inline void Boundary_matrix<Master_matrix>::_orderRowsIfNecessary() 
+{
+  if constexpr (activeSwapOption) {
+    if (swap_opt::rowSwapped_) swap_opt::_orderRows();
+  }
+}
+
+template <class Master_matrix>
+inline const typename Boundary_matrix<Master_matrix>::Column_type& Boundary_matrix<Master_matrix>::_get_column(
+    index columnIndex) const
+{
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    return matrix_.at(columnIndex);
+  } else {
+    return matrix_[columnIndex];
+  }
+}
+
+template <class Master_matrix>
+inline typename Boundary_matrix<Master_matrix>::Column_type& Boundary_matrix<Master_matrix>::_get_column(
+    index columnIndex)
+{
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    return matrix_.at(columnIndex);
+  } else {
+    return matrix_[columnIndex];
+  }
+}
+
+template <class Master_matrix>
+inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_matrix>::_get_real_row_index(
+    index rowIndex) const
+{
+  if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
+    if constexpr (Master_matrix::Option_list::has_map_column_container) {
+      return swap_opt::indexToRow_.at(rowIndex);
+    } else {
+      return swap_opt::indexToRow_[rowIndex];
+    }
+  } else {
+    return rowIndex;
+  }
+}
+
+template <class Master_matrix>
+template <class Container_type>
+inline void Boundary_matrix<Master_matrix>::_container_insert(const Container_type& column,
+                                                              index pos,
+                                                              dimension_type dim)
+{
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    if constexpr (Master_matrix::Option_list::has_row_access) {
+      matrix_.try_emplace(pos, Column_type(pos, column, dim, ra_opt::rows_, colSettings_));
+    } else {
+      matrix_.try_emplace(pos, Column_type(column, dim, colSettings_));
+    }
+  } else {
+    if constexpr (Master_matrix::Option_list::has_row_access) {
+      matrix_.emplace_back(pos, column, dim, ra_opt::rows_, colSettings_);
+    } else {
+      if (matrix_.size() <= pos) {
+        matrix_.emplace_back(column, dim, colSettings_);
+      } else {
+        matrix_[pos] = Column_type(column, dim, colSettings_);
+      }
+    }
+  }
+  if constexpr (activeDimOption) {
+    dim_opt::update_up(dim);
+  }
+}
+
+template <class Master_matrix>
+inline void Boundary_matrix<Master_matrix>::_container_insert(const Column_type& column, [[maybe_unused]] index pos)
+{
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    if constexpr (Master_matrix::Option_list::has_row_access) {
+      matrix_.try_emplace(pos, Column_type(column, column.get_column_index(), ra_opt::rows_, colSettings_));
+    } else {
+      matrix_.try_emplace(pos, Column_type(column, colSettings_));
+    }
+  } else {
+    if constexpr (Master_matrix::Option_list::has_row_access) {
+      matrix_.emplace_back(column, column.get_column_index(), ra_opt::rows_, colSettings_);
+    } else {
+      matrix_.emplace_back(column, colSettings_);
+    }
   }
 }
 

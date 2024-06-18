@@ -50,7 +50,7 @@ class Multi_field_element {
    *
    * @param element Value of the element.
    */
-  Multi_field_element(element_type element);
+  Multi_field_element(const element_type& element);
   /**
    * @brief Copy constructor.
    *
@@ -68,7 +68,7 @@ class Multi_field_element {
    * @brief operator+=
    */
   friend void operator+=(Multi_field_element& f1, Multi_field_element const& f2) {
-    mpz_add(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), f2.element_.get_mpz_t());
+    f1.element_ += f2.element_;
     mpz_mod(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
@@ -81,14 +81,14 @@ class Multi_field_element {
   /**
    * @brief operator+=
    */
-  friend void operator+=(Multi_field_element& f, element_type const v) {
-    mpz_add(f.element_.get_mpz_t(), f.element_.get_mpz_t(), v.get_mpz_t());
+  friend void operator+=(Multi_field_element& f, const element_type& v) {
+    f.element_ += v;
     mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
    * @brief operator+
    */
-  friend Multi_field_element operator+(Multi_field_element f, element_type const v) {
+  friend Multi_field_element operator+(Multi_field_element f, const element_type& v) {
     f += v;
     return f;
   }
@@ -96,17 +96,16 @@ class Multi_field_element {
    * @brief operator+
    */
   friend element_type operator+(element_type v, Multi_field_element const& f) {
-    element_type e(v);
-    mpz_add(e.get_mpz_t(), e.get_mpz_t(), f.element_.get_mpz_t());
-    mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-    return e;
+    v += f.element_;
+    mpz_mod(v.get_mpz_t(), v.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+    return v;
   }
 
   /**
    * @brief operator-=
    */
   friend void operator-=(Multi_field_element& f1, Multi_field_element const& f2) {
-    mpz_sub(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), f2.element_.get_mpz_t());
+    f1.element_ -= f2.element_;
     mpz_mod(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
@@ -119,14 +118,14 @@ class Multi_field_element {
   /**
    * @brief operator-=
    */
-  friend void operator-=(Multi_field_element& f, element_type const v) {
-    mpz_sub(f.element_.get_mpz_t(), f.element_.get_mpz_t(), v.get_mpz_t());
+  friend void operator-=(Multi_field_element& f, const element_type& v) {
+    f.element_ -= v;
     mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
    * @brief operator-
    */
-  friend Multi_field_element operator-(Multi_field_element f, element_type const v) {
+  friend Multi_field_element operator-(Multi_field_element f, const element_type& v) {
     f -= v;
     return f;
   }
@@ -134,19 +133,19 @@ class Multi_field_element {
    * @brief operator-
    */
   friend element_type operator-(element_type v, Multi_field_element const& f) {
-    element_type e(v);
-    if (e >= productOfAllCharacteristics_)
-      mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-    if (f.element_ > e) mpz_add(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-    mpz_sub(e.get_mpz_t(), e.get_mpz_t(), f.element_.get_mpz_t());
-    return e;
+    // element_type e(v);
+    if (v >= productOfAllCharacteristics_)
+      mpz_mod(v.get_mpz_t(), v.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+    if (f.element_ > v) v += productOfAllCharacteristics_;
+    v -= f.element_;
+    return v;
   }
 
   /**
    * @brief operator*=
    */
   friend void operator*=(Multi_field_element& f1, Multi_field_element const& f2) {
-    mpz_mul(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), f2.element_.get_mpz_t());
+    f1.element_ *= f2.element_;
     mpz_mod(f1.element_.get_mpz_t(), f1.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
@@ -159,14 +158,14 @@ class Multi_field_element {
   /**
    * @brief operator*=
    */
-  friend void operator*=(Multi_field_element& f, element_type const v) {
-    mpz_mul(f.element_.get_mpz_t(), f.element_.get_mpz_t(), v.get_mpz_t());
+  friend void operator*=(Multi_field_element& f, const element_type& v) {
+    f.element_ *= v;
     mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
    * @brief operator*
    */
-  friend Multi_field_element operator*(Multi_field_element f, element_type const v) {
+  friend Multi_field_element operator*(Multi_field_element f, const element_type& v) {
     f *= v;
     return f;
   }
@@ -174,10 +173,9 @@ class Multi_field_element {
    * @brief operator*
    */
   friend element_type operator*(element_type v, Multi_field_element const& f) {
-    element_type e(v);
-    mpz_mul(e.get_mpz_t(), e.get_mpz_t(), f.element_.get_mpz_t());
-    mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-    return e;
+    v *= f.element_;
+    mpz_mod(v.get_mpz_t(), v.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+    return v;
   }
 
   /**
@@ -189,7 +187,7 @@ class Multi_field_element {
   /**
    * @brief operator==
    */
-  friend bool operator==(const element_type v, const Multi_field_element& f) {
+  friend bool operator==(const element_type& v, const Multi_field_element& f) {
     if (v < productOfAllCharacteristics_) return v == f.element_;
     element_type e(v);
     mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
@@ -198,7 +196,7 @@ class Multi_field_element {
   /**
    * @brief operator==
    */
-  friend bool operator==(const Multi_field_element& f, const element_type v) {
+  friend bool operator==(const Multi_field_element& f, const element_type& v) {
     if (v < productOfAllCharacteristics_) return v == f.element_;
     element_type e(v);
     mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
@@ -211,11 +209,11 @@ class Multi_field_element {
   /**
    * @brief operator!=
    */
-  friend bool operator!=(const element_type v, const Multi_field_element& f) { return !(v == f); }
+  friend bool operator!=(const element_type& v, const Multi_field_element& f) { return !(v == f); }
   /**
    * @brief operator!=
    */
-  friend bool operator!=(const Multi_field_element& f, const element_type v) { return !(v == f); }
+  friend bool operator!=(const Multi_field_element& f, const element_type& v) { return !(v == f); }
 
   /**
    * @brief Assign operator.
@@ -224,7 +222,7 @@ class Multi_field_element {
   /**
    * @brief Assign operator.
    */
-  Multi_field_element& operator=(const element_type value);
+  Multi_field_element& operator=(const element_type& value);
   /**
    * @brief Swap operator.
    */
@@ -362,7 +360,7 @@ inline Multi_field_element<minimum, maximum>::Multi_field_element() : element_(0
 }
 
 template <unsigned int minimum, unsigned int maximum>
-inline Multi_field_element<minimum, maximum>::Multi_field_element(element_type element) : element_(element) {
+inline Multi_field_element<minimum, maximum>::Multi_field_element(const element_type& element) : element_(element) {
   static_assert(maximum >= 2, "Characteristics has to be positive.");
   static_assert(minimum <= maximum, "The given interval is not valid.");
   static_assert(minimum != maximum || _is_prime(minimum), "The given interval does not contain a prime number.");
@@ -391,7 +389,7 @@ inline Multi_field_element<minimum, maximum>& Multi_field_element<minimum, maxim
 
 template <unsigned int minimum, unsigned int maximum>
 inline Multi_field_element<minimum, maximum>& Multi_field_element<minimum, maximum>::operator=(
-    element_type const value) {
+    const element_type& value) {
   mpz_mod(element_.get_mpz_t(), value.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   return *this;
 }

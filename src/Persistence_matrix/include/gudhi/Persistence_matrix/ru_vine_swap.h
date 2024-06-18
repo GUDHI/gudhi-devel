@@ -183,12 +183,13 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(pos_index in
   if (iIsPositive && iiIsPositive) {
     _matrix()->mirrorMatrixU_.zero_cell(index, positionToRowIdx_[index + 1]);
     return _positive_vine_swap(index);
-  } else if (!iIsPositive && !iiIsPositive)
+  } else if (!iIsPositive && !iiIsPositive) {
     return _negative_vine_swap(index);
-  else if (iIsPositive && !iiIsPositive)
+  } else if (iIsPositive && !iiIsPositive) {
     return _positive_negative_vine_swap(index);
-  else
+  } else {
     return _negative_positive_vine_swap(index);
+  }
 }
 
 template <class Master_matrix>

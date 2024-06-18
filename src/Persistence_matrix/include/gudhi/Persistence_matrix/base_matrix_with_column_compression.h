@@ -19,7 +19,6 @@
 
 #include <iostream>   //print() only
 #include <vector>
-#include <set>
 #include <utility>    //std::swap, std::move & std::exchange
 
 #include <boost/intrusive/set.hpp>
@@ -335,16 +334,6 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   };
 
   using ra_opt = typename Master_matrix::Matrix_row_access_option;
-  using cell_rep_type =
-      typename std::conditional<Master_matrix::Option_list::is_z2, 
-                                index, 
-                                std::pair<index, Field_element_type>
-                               >::type;
-  using tmp_column_type = typename std::conditional<
-      Master_matrix::Option_list::is_z2, 
-      std::set<index>,
-      std::set<std::pair<index, Field_element_type>, typename Master_matrix::CellPairComparator>
-    >::type;
   using col_dict_type = boost::intrusive::set<Column_type, boost::intrusive::constant_time_size<false> >;
 
   col_dict_type columnToRep_;                         /**< Map from a column to the index of its representative. */
@@ -353,7 +342,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   std::vector<Column_type*> repToColumn_;             /**< Map from the representative index to
                                                            the representative Column. */
   index nextColumnIndex_;                             /**< Next unused column index. */
-  Column_settings* colSettings_;                        /**< Cell factory. */
+  Column_settings* colSettings_;                      /**< Cell factory. */
   /**
    * @brief Column factory.
    * @warning As the member is static, they can eventually be problems if the matrix is duplicated in several threads.
@@ -370,11 +359,7 @@ template <class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(
     Column_settings* colSettings)
     : ra_opt(), nextColumnIndex_(0), colSettings_(colSettings)
-{
-  // if constexpr (Master_matrix::Option_list::has_row_access) {
-  //   colSettings_->rows = &ra_opt::rows_;
-  // }
-}
+{}
 
 template <class Master_matrix>
 template <class Container_type>

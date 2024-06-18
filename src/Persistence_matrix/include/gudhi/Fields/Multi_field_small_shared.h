@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 #include <limits.h>
-#include <gmpxx.h>
+#include <stdexcept>
 #include <numeric>
 
 namespace Gudhi {
@@ -404,7 +404,7 @@ class Shared_multi_field_element_with_small_characteristics {
    * @return The partial multiplicative identity of the multi-field.
    */
   static Shared_multi_field_element_with_small_characteristics get_partial_multiplicative_identity(
-      const mpz_class& productOfCharacteristics) {
+      const characteristic_type& productOfCharacteristics) {
     if (productOfCharacteristics == 0) {
       return Shared_multi_field_element_with_small_characteristics(multiplicativeID_);
     }

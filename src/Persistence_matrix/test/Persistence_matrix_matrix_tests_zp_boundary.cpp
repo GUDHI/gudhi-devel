@@ -32,53 +32,38 @@ using barcode_matrices = matrices_list<opt_boundary_zp_barcode<true_value_list> 
 using swap_matrices = matrices_list<opt_boundary_zp_swap<true_value_list> >;
 #endif
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_constructors, Matrix, full_matrices) {
-	test_constructors<Matrix>();
-}
+BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_constructors, Matrix, full_matrices) { test_constructors<Matrix>(); }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_insertion, Matrix, full_matrices) {
-	test_boundary_insertion<Matrix>();
+  test_boundary_insertion<Matrix>();
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_access, Matrix, full_matrices) {
-	test_boundary_access<Matrix>();
-}
+BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_access, Matrix, full_matrices) { test_boundary_access<Matrix>(); }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_zeroing, Matrix, full_matrices) {
-	test_zeroing<Matrix>();
-}
+BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_zeroing, Matrix, full_matrices) { test_zeroing<Matrix>(); }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_row_access, Matrix, row_access_matrices) {
-	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns, 5);
-	test_non_base_row_access<Matrix>(m);
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  Matrix m(columns, 5);
+  test_non_base_row_access<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_row_removal, Matrix, removable_rows_matrices) {
-	test_row_removal<Matrix>();
+  test_row_removal<Matrix>();
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_column_removal, Matrix, removable_columns_matrices) {
-	test_boundary_maximal_simplex_removal<Matrix>();
+  test_boundary_maximal_simplex_removal<Matrix>();
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_max_dimension, Matrix, max_dim_matrices) {
-	auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
-	Matrix m(columns, 5);
-	test_maximal_dimension<Matrix>(m);
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  Matrix m(columns, 5);
+  test_maximal_dimension<Matrix>(m);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_operation, Matrix, full_matrices) {
-	test_base_operation<Matrix>();
-}
+BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_operation, Matrix, full_matrices) { test_base_operation<Matrix>(); }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_barcode, Matrix, barcode_matrices) {
-	test_barcode<Matrix>();
-}
+BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_barcode, Matrix, barcode_matrices) { test_barcode<Matrix>(); }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_swaps, Matrix, swap_matrices) {
-	test_base_swaps<Matrix>();
-}
-
-
-
+BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_swaps, Matrix, swap_matrices) { test_base_swaps<Matrix>(); }

@@ -12,3 +12,8 @@ if(TARGET TBB::tbb)
 endif()
 add_test(NAME Matrix_examples_simplex_tree_matrix COMMAND $<TARGET_FILE:Matrix_examples_simplex_tree_matrix>)
 
+add_executable(Matrix_examples_field_operations example_field_operations.cpp)
+if(TARGET TBB::tbb)
+  target_link_libraries(Matrix_examples_field_operations TBB::tbb)
+endif()
+add_test(NAME Matrix_examples_field_operations COMMAND $<TARGET_FILE:Matrix_examples_field_operations>)

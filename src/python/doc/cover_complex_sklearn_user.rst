@@ -38,7 +38,7 @@ Class for cover complexes
 
    * - :Since: GUDHI 3.5.0
      - :License: MIT
-     - :Requires: `Scikit-learn <installation.html#scikit-learn>`__
+     - :Requires: `Scikit-learn <installation.html#scikit-learn>`_
 
 We provide classes for computing cover complexes, i.e., Nerve, Graph Induced and Mapper complexes. Detailed examples on how to use these classes in practice are available
 in the following `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cover-complex.ipynb>`_.

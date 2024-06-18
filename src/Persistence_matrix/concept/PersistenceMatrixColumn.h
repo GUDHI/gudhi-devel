@@ -49,6 +49,7 @@ using Chain_column_option = Chain_column_extra_properties;
  *
  * @brief Concept of the column classes used by the @ref Matrix class. The classes the columns inheritates from
  * are either real or dummy classes, see @ref Row_access_option, @ref Column_dimension_option, @ref Chain_column_option.
+ * If used with column compression, the column type has to have its `std::hash` method.
  *
  * Implementations of this concept are @ref Heap_column, @ref List_column, @ref Vector_column, @ref Naive_vector_column
  * @ref Set_column, @ref Unordered_set_column, @ref Intrusive_list_column and @ref Intrusive_set_column.
@@ -365,6 +366,7 @@ class PersistenceMatrixColumn :
    * @brief Adds the given @ref Cell range onto the column.
    * 
    * @tparam Cell_range @ref Cell range with %begin() and %end() method.
+   * Has to be ordered by row index if not specified otherwise.
    * @param column @ref Cell range. Only the stored row index and the stored element value
    * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
    * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.
@@ -392,6 +394,7 @@ class PersistenceMatrixColumn :
    * @brief `this = val * this + column`
    * 
    * @tparam Cell_range @ref Cell range with %begin() and %end() method.
+   * Has to be ordered by row index if not specified otherwise.
    * @param val Value to multiply.
    * @param column @ref Cell range. Only the stored row index and the stored element value
    * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
@@ -405,6 +408,7 @@ class PersistenceMatrixColumn :
    * @brief `this = this + column * val`
    * 
    * @tparam Cell_range @ref Cell range with %begin() and %end() method.
+   * Has to be ordered by row index if not specified otherwise.
    * @param column @ref Cell range. Only the stored row index and the stored element value
    * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
    * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.

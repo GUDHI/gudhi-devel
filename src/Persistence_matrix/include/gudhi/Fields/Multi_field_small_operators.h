@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 #include <limits.h>
-#include <gmpxx.h>
+#include <stdexcept>
 #include <numeric>
 
 namespace Gudhi {

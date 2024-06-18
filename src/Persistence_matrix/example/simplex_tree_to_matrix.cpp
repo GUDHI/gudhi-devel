@@ -131,7 +131,7 @@ int main() {
     for (auto b : st.boundary_simplex_range(sh)){
       boundary.push_back(st.key(b));
     }
-    std::sort(boundary.begin(), boundary.end());  //boundaries have to ordered
+    std::sort(boundary.begin(), boundary.end());  //boundaries have to be ordered
 
     //insertion in the matrices, the id is continuously increasing from 0 so no need to give it as an argument.
     bm.insert_boundary(boundary);

@@ -39,12 +39,12 @@ namespace persistence_matrix {
  * 
  * \subsection matrixexamples Examples
  * 
- * Here is a list of examples using the module: TODO:
- * \li \gudhi_example_link{Zigzag_persistence,example_simple_zigzag_filtration.cpp} - A simple example to showcase how
- * to use the \ref Zigzag_persistence class.
+ * Here is a list of examples using the module:
+ * \li \gudhi_example_link{Persistence_matrix,representative_cycles_from_matrix.cpp} - A simple example on how to
+ * use the matrix to compute representative cycles.
  *
- * \li \gudhi_example_link{Zigzag_persistence,example_zzfiltration_from_file.cpp} - An example of a "stream-like" usage
- * by reading of the filtration from a file.
+ * \li \gudhi_example_link{Persistence_matrix,simplex_tree_to_matrix.cpp} - A simplex example on how to build
+ * a the different matrices from a simplex tree.
  * 
  * @}
  */

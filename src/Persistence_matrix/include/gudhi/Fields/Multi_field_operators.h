@@ -156,7 +156,7 @@ class Multi_field_operators
   void get_value_inplace(element_type& e) const {
     if (e >= productOfAllCharacteristics_ || e < -productOfAllCharacteristics_)
       mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
-    if (e < 0) mpz_add(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
+    if (e < 0) e += productOfAllCharacteristics_;
   }
 
   /**
@@ -179,7 +179,7 @@ class Multi_field_operators
    * @param e2 Second element.
    */
   void add_inplace(element_type& e1, const element_type& e2) const {
-    mpz_add(e1.get_mpz_t(), e1.get_mpz_t(), e2.get_mpz_t());
+    e1 += e2;
     get_value_inplace(e1);
   }
 
@@ -203,7 +203,7 @@ class Multi_field_operators
    * @param e2 Second element.
    */
   void substract_inplace_front(element_type& e1, const element_type& e2) const {
-    mpz_sub(e1.get_mpz_t(), e1.get_mpz_t(), e2.get_mpz_t());
+    e1 -= e2;
     get_value_inplace(e1);
   }
   /**
@@ -238,7 +238,7 @@ class Multi_field_operators
    * @param e2 Second element.
    */
   void multiply_inplace(element_type& e1, const element_type& e2) const {
-    mpz_mul(e1.get_mpz_t(), e1.get_mpz_t(), e2.get_mpz_t());
+    e1 *= e2;
     get_value_inplace(e1);
   }
 
@@ -265,8 +265,8 @@ class Multi_field_operators
    * @param a Third element.
    */
   void multiply_and_add_inplace_front(element_type& e, const element_type& m, const element_type& a) const {
-    mpz_mul(e.get_mpz_t(), e.get_mpz_t(), m.get_mpz_t());
-    mpz_add(e.get_mpz_t(), e.get_mpz_t(), a.get_mpz_t());
+    e *= m;
+    e += a;
     get_value_inplace(e);
   }
   /**
@@ -307,8 +307,8 @@ class Multi_field_operators
    * @param m Third element.
    */
   void add_and_multiply_inplace_front(element_type& e, const element_type& a, const element_type& m) const {
-    mpz_add(e.get_mpz_t(), e.get_mpz_t(), a.get_mpz_t());
-    mpz_mul(e.get_mpz_t(), e.get_mpz_t(), m.get_mpz_t());
+    e += a;
+    e *= m;
     get_value_inplace(e);
   }
   /**
@@ -369,7 +369,7 @@ class Multi_field_operators
     mpz_invert(inv_qt.get_mpz_t(), e.get_mpz_t(), QT.get_mpz_t());
 
     std::pair<element_type, characteristic_type> res(get_partial_multiplicative_identity(QT), QT);
-    mpz_mul(res.first.get_mpz_t(), res.first.get_mpz_t(), inv_qt.get_mpz_t());
+    res.first *= inv_qt;
     get_value_inplace(res.first);
 
     return res;
@@ -402,7 +402,7 @@ class Multi_field_operators
     element_type multIdentity(0);
     for (unsigned int idx = 0; idx < primes_.size(); ++idx) {
       if ((productOfCharacteristics % primes_[idx]) == 0) {
-        mpz_add(multIdentity.get_mpz_t(), multIdentity.get_mpz_t(), partials_[idx].get_mpz_t());
+        multIdentity += partials_[idx];
       }
     }
     get_value_inplace(multIdentity);

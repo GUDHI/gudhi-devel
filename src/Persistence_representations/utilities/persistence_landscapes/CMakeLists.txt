@@ -1,5 +1,3 @@
-project(Persistence_representations_landscapes_utilities)
-
 add_persistence_representation_creation_utility(create_landscapes "-1")
 
 add_persistence_representation_plot_utility(create_landscapes plot_landscapes ".land")

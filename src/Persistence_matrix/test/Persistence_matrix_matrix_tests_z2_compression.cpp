@@ -19,29 +19,27 @@ using row_access_matrices = matrices_list<opt_col_comp_z2_ra>;
 using removable_rows_matrices = matrices_list<opt_col_comp_z2_ra_r>;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_column_compression_matrix_z2_constructors, Matrix, full_matrices) {
-	test_constructors<Matrix>();
+  test_constructors<Matrix>();
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_column_compression_matrix_z2_insertion, Matrix, full_matrices) {
-	test_general_insertion<Matrix>();
+  test_general_insertion<Matrix>();
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_column_compression_matrix_z2_access, Matrix, full_matrices) {
-	test_base_access<Matrix>();
+  test_base_access<Matrix>();
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_column_compression_matrix_z2_row_access, Matrix, row_access_matrices) {
-	test_base_z2_row_access<Matrix>();
+  test_base_z2_row_access<Matrix>();
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_column_compression_matrix_z2_row_removal, Matrix, removable_rows_matrices) {
-	test_row_removal<Matrix>();
+  test_row_removal<Matrix>();
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_column_compression_matrix_z2_operation, Matrix, full_matrices) {
-	test_base_col_comp_operation<Matrix>();
-	test_base_col_comp_cell_range_operation<Matrix>();
-	test_base_col_comp_const_operation<Matrix>();
+  test_base_col_comp_operation<Matrix>();
+  test_base_col_comp_cell_range_operation<Matrix>();
+  test_base_col_comp_const_operation<Matrix>();
 }
-
-

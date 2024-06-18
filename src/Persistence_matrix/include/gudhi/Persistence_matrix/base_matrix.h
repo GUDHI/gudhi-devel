@@ -328,13 +328,19 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
 
   friend swap_opt;  // direct access to matrix_ to avoid row reorder.
 
-  matrix_type matrix_;          /**< Column container. */
-  index nextInsertIndex_;       /**< Next unused column index. */
+  matrix_type matrix_;            /**< Column container. */
+  index nextInsertIndex_;         /**< Next unused column index. */
   Column_settings* colSettings_;  /**< Cell factory. */
 
   template <class Container_type = container_type>
   void _insert(const Container_type& column, index columnIndex, dimension_type dim);
   void _orderRowsIfNecessary();
+  const Column_type& _get_column(index columnIndex) const;
+  Column_type& _get_column(index columnIndex);
+  index _get_real_row_index(index rowIndex) const;
+  template <class Container_type>
+  void _container_insert(const Container_type& column, index pos, dimension_type dim);
+  void _container_insert(const Column_type& column, [[maybe_unused]] index pos = 0);
 };
 
 template <class Master_matrix>
@@ -359,19 +365,7 @@ inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Container_type>
     matrix_.reserve(columns.size());
 
   for (index i = 0; i < columns.size(); i++) {
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.try_emplace(i, Column_type(i, columns[i], ra_opt::rows_, colSettings_));
-      } else {
-        matrix_.try_emplace(i, Column_type(columns[i], colSettings_));
-      }
-    } else {
-      if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.emplace_back(i, columns[i], ra_opt::rows_, colSettings_);
-      } else {
-        matrix_[i] = Column_type(columns[i], colSettings_);
-      }
-    }
+    _container_insert(columns[i], i, columns[i].size() == 0 ? 0 : columns[i].size() - 1);
   }
 }
 
@@ -399,22 +393,11 @@ inline Base_matrix<Master_matrix>::Base_matrix(const Base_matrix& matrixToCopy,
       colSettings_(colSettings == nullptr ? matrixToCopy.colSettings_ : colSettings)
 {
   matrix_.reserve(matrixToCopy.matrix_.size());
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    for (const auto& p : matrixToCopy.matrix_) {
-      const Column_type& col = p.second;
-      if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, colSettings_));
-      } else {
-        matrix_.try_emplace(p.first, Column_type(col, colSettings_));
-      }
-    }
-  } else {
-    for (const auto& col : matrixToCopy.matrix_) {
-      if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, colSettings_);
-      } else {
-        matrix_.emplace_back(col, colSettings_);
-      }
+  for (const auto& cont : matrixToCopy.matrix_){
+    if constexpr (Master_matrix::Option_list::has_map_column_container){
+      _container_insert(cont.second, cont.first);
+    } else {
+      _container_insert(cont);
     }
   }
 }
@@ -462,11 +445,7 @@ template <class Master_matrix>
 inline typename Base_matrix<Master_matrix>::Column_type& Base_matrix<Master_matrix>::get_column(index columnIndex) 
 {
   _orderRowsIfNecessary();
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    return matrix_.at(columnIndex);
-  } else {
-    return matrix_[columnIndex];
-  }
+  return _get_column(columnIndex);
 }
 
 template <class Master_matrix>
@@ -512,19 +491,14 @@ inline void Base_matrix<Master_matrix>::remove_last()
 template <class Master_matrix>
 inline void Base_matrix<Master_matrix>::erase_empty_row(index rowIndex) 
 {
-  if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
-    if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows) {
-      ra_opt::erase_empty_row(swap_opt::indexToRow_[rowIndex]);
-    }
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      auto it = swap_opt::indexToRow_.find(rowIndex);
-      swap_opt::rowToIndex_.erase(it->second);
-      swap_opt::indexToRow_.erase(it);
-    }
-  } else {
-    if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows) {
-      ra_opt::erase_empty_row(rowIndex);
-    }
+  if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows) {
+    ra_opt::erase_empty_row(_get_real_row_index(rowIndex));
+  }
+  if constexpr ((Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) &&
+                Master_matrix::Option_list::has_map_column_container) {
+    auto it = swap_opt::indexToRow_.find(rowIndex);
+    swap_opt::rowToIndex_.erase(it->second);
+    swap_opt::indexToRow_.erase(it);
   }
 }
 
@@ -544,17 +518,9 @@ inline void Base_matrix<Master_matrix>::add_to(const Cell_range_or_column_index&
                                                index targetColumnIndex) 
 {
   if constexpr (std::is_integral_v<Cell_range_or_column_index>) {
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      matrix_.at(targetColumnIndex) += matrix_.at(sourceColumn);
-    } else {
-      matrix_[targetColumnIndex] += matrix_[sourceColumn];
-    }
+    _get_column(targetColumnIndex) += _get_column(sourceColumn);
   } else {
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      matrix_.at(targetColumnIndex) += sourceColumn;
-    } else {
-      matrix_[targetColumnIndex] += sourceColumn;
-    }
+    _get_column(targetColumnIndex) += sourceColumn;
   }
 }
 
@@ -565,17 +531,9 @@ inline void Base_matrix<Master_matrix>::multiply_target_and_add_to(const Cell_ra
                                                                    index targetColumnIndex) 
 {
   if constexpr (std::is_integral_v<Cell_range_or_column_index>) {
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      matrix_.at(targetColumnIndex).multiply_target_and_add(coefficient, matrix_.at(sourceColumn));
-    } else {
-      matrix_[targetColumnIndex].multiply_target_and_add(coefficient, matrix_[sourceColumn]);
-    }
+    _get_column(targetColumnIndex).multiply_target_and_add(coefficient, _get_column(sourceColumn));
   } else {
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      matrix_.at(targetColumnIndex).multiply_target_and_add(coefficient, sourceColumn);
-    } else {
-      matrix_[targetColumnIndex].multiply_target_and_add(coefficient, sourceColumn);
-    }
+    _get_column(targetColumnIndex).multiply_target_and_add(coefficient, sourceColumn);
   }
 }
 
@@ -586,73 +544,33 @@ inline void Base_matrix<Master_matrix>::multiply_source_and_add_to(const Field_e
                                                                    index targetColumnIndex) 
 {
   if constexpr (std::is_integral_v<Cell_range_or_column_index>) {
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      matrix_.at(targetColumnIndex).multiply_source_and_add(matrix_.at(sourceColumn), coefficient);
-    } else {
-      matrix_[targetColumnIndex].multiply_source_and_add(matrix_[sourceColumn], coefficient);
-    }
+    _get_column(targetColumnIndex).multiply_source_and_add(_get_column(sourceColumn), coefficient);
   } else {
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      matrix_.at(targetColumnIndex).multiply_source_and_add(sourceColumn, coefficient);
-    } else {
-      matrix_[targetColumnIndex].multiply_source_and_add(sourceColumn, coefficient);
-    }
+    _get_column(targetColumnIndex).multiply_source_and_add(sourceColumn, coefficient);
   }
 }
 
 template <class Master_matrix>
 inline void Base_matrix<Master_matrix>::zero_cell(index columnIndex, index rowIndex) 
 {
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
-      matrix_.at(columnIndex).clear(swap_opt::indexToRow_.at(rowIndex));  // TODO: reorganize columns
-    } else {
-      matrix_.at(columnIndex).clear(rowIndex);  // TODO: reorganize columns
-    }
-  } else {
-    if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
-      matrix_[columnIndex].clear(swap_opt::indexToRow_[rowIndex]);  // TODO: reorganize columns
-    } else {
-      matrix_[columnIndex].clear(rowIndex);  // TODO: reorganize columns
-    }
-  }
+  _get_column(columnIndex).clear(_get_real_row_index(rowIndex));
 }
 
 template <class Master_matrix>
 inline void Base_matrix<Master_matrix>::zero_column(index columnIndex) {
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    matrix_.at(columnIndex).clear();  // TODO: reorganize columns
-  } else {
-    matrix_[columnIndex].clear();  // TODO: reorganize columns
-  }
+  _get_column(columnIndex).clear();
 }
 
 template <class Master_matrix>
 inline bool Base_matrix<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const 
 {
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
-      return !(matrix_.at(columnIndex).is_non_zero(swap_opt::indexToRow_.at(rowIndex)));
-    } else {
-      return !(matrix_.at(columnIndex).is_non_zero(rowIndex));
-    }
-  } else {  // operator[] non const for maps
-    if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
-      return !(matrix_[columnIndex].is_non_zero(swap_opt::indexToRow_[rowIndex]));
-    } else {
-      return !(matrix_[columnIndex].is_non_zero(rowIndex));
-    }
-  }
+  return !(_get_column(columnIndex).is_non_zero(_get_real_row_index(rowIndex)));
 }
 
 template <class Master_matrix>
 inline bool Base_matrix<Master_matrix>::is_zero_column(index columnIndex) 
 {
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    return matrix_.at(columnIndex).is_empty();
-  } else {
-    return matrix_[columnIndex].is_empty();
-  }
+  return _get_column(columnIndex).is_empty();
 }
 
 template <class Master_matrix>
@@ -665,22 +583,11 @@ inline Base_matrix<Master_matrix>& Base_matrix<Master_matrix>::operator=(const B
   colSettings_ = other.colSettings_;
 
   matrix_.reserve(other.matrix_.size());
-  if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    for (const auto& p : other.matrix_) {
-      const Column_type& col = p.second;
-      if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.try_emplace(p.first, Column_type(col, col.get_column_index(), ra_opt::rows_, colSettings_));
-      } else {
-        matrix_.try_emplace(p.first, Column_type(col, colSettings_));
-      }
-    }
-  } else {
-    for (const auto& col : other.matrix_) {
-      if constexpr (Master_matrix::Option_list::has_row_access) {
-        matrix_.emplace_back(col, col.get_column_index(), ra_opt::rows_, colSettings_);
-      } else {
-        matrix_.emplace_back(col, colSettings_);
-      }
+  for (const auto& cont : other.matrix_){
+    if constexpr (Master_matrix::Option_list::has_map_column_container){
+      _container_insert(cont.second, cont.first);
+    } else {
+      _container_insert(cont);
     }
   }
 
@@ -722,17 +629,21 @@ inline void Base_matrix<Master_matrix>::_insert(const Container_type& column, in
 {
   _orderRowsIfNecessary();
 
+  //resize of containers when necessary:
   index pivot = 0;
   if (column.begin() != column.end()) {
+    //first, compute pivot of `column`
     if constexpr (Master_matrix::Option_list::is_z2) {
       pivot = *std::prev(column.end());
     } else {
       pivot = std::prev(column.end())->first;
     }
+    //row container
     if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows)
       if (ra_opt::rows_->size() <= pivot) ra_opt::rows_->resize(pivot + 1);
   }
 
+  //row swap map containers
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
       for (auto id : column) {
@@ -746,12 +657,6 @@ inline void Base_matrix<Master_matrix>::_insert(const Container_type& column, in
         swap_opt::rowToIndex_[idx] = idx;
       }
     }
-
-    if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.try_emplace(columnIndex, Column_type(columnIndex, column, dim, ra_opt::rows_, colSettings_));
-    } else {
-      matrix_.try_emplace(columnIndex, column, dim, colSettings_);
-    }
   } else {
     if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
       index size = swap_opt::indexToRow_.size();
@@ -762,15 +667,15 @@ inline void Base_matrix<Master_matrix>::_insert(const Container_type& column, in
         }
       }
     }
-    if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.emplace_back(columnIndex, column, dim, ra_opt::rows_, colSettings_);
-    } else {
+    //column container
+    if constexpr (!Master_matrix::Option_list::has_row_access) {
       if (matrix_.size() <= columnIndex) {
         matrix_.resize(columnIndex + 1);
       }
-      matrix_[columnIndex] = Column_type(column, dim, colSettings_);
     }
   }
+
+  _container_insert(column, columnIndex, dim);
 }
 
 template <class Master_matrix>
@@ -778,6 +683,76 @@ inline void Base_matrix<Master_matrix>::_orderRowsIfNecessary()
 {
   if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
     if (swap_opt::rowSwapped_) swap_opt::_orderRows();
+  }
+}
+
+template <class Master_matrix>
+inline const typename Base_matrix<Master_matrix>::Column_type& Base_matrix<Master_matrix>::_get_column(
+    index columnIndex) const
+{
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    return matrix_.at(columnIndex);
+  } else {
+    return matrix_[columnIndex];
+  }
+}
+
+template <class Master_matrix>
+inline typename Base_matrix<Master_matrix>::Column_type& Base_matrix<Master_matrix>::_get_column(index columnIndex)
+{
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    return matrix_.at(columnIndex);
+  } else {
+    return matrix_[columnIndex];
+  }
+}
+
+template <class Master_matrix>
+inline typename Base_matrix<Master_matrix>::index Base_matrix<Master_matrix>::_get_real_row_index(index rowIndex) const
+{
+  if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
+    if constexpr (Master_matrix::Option_list::has_map_column_container) {
+      return swap_opt::indexToRow_.at(rowIndex);
+    } else {
+      return swap_opt::indexToRow_[rowIndex];
+    }
+  } else {
+    return rowIndex;
+  }
+}
+
+template <class Master_matrix>
+template <class Container_type>
+inline void Base_matrix<Master_matrix>::_container_insert(const Container_type& column, index pos, dimension_type dim){
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    if constexpr (Master_matrix::Option_list::has_row_access) {
+      matrix_.try_emplace(pos, Column_type(pos, column, dim, ra_opt::rows_, colSettings_));
+    } else {
+      matrix_.try_emplace(pos, Column_type(column, dim, colSettings_));
+    }
+  } else {
+    if constexpr (Master_matrix::Option_list::has_row_access) {
+      matrix_.emplace_back(pos, column, dim, ra_opt::rows_, colSettings_);
+    } else {
+      matrix_[pos] = Column_type(column, dim, colSettings_);
+    }
+  }
+}
+
+template <class Master_matrix>
+inline void Base_matrix<Master_matrix>::_container_insert(const Column_type& column, [[maybe_unused]] index pos){
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    if constexpr (Master_matrix::Option_list::has_row_access) {
+      matrix_.try_emplace(pos, Column_type(column, column.get_column_index(), ra_opt::rows_, colSettings_));
+    } else {
+      matrix_.try_emplace(pos, Column_type(column, colSettings_));
+    }
+  } else {
+    if constexpr (Master_matrix::Option_list::has_row_access) {
+      matrix_.emplace_back(column, column.get_column_index(), ra_opt::rows_, colSettings_);
+    } else {
+      matrix_.emplace_back(column, colSettings_);
+    }
   }
 }
 
