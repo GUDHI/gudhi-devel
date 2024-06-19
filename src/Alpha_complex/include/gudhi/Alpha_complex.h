@@ -17,10 +17,6 @@
 // to construct Alpha_complex from a OFF file of points
 #include <gudhi/Points_off_io.h>
 
-#include <cmath>  // isnan, fmax
-#include <memory>  // for std::unique_ptr
-#include <cstddef>  // for std::size_t
-
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Regular_triangulation.h>  // aka. Weighted Delaunay triangulation
 #include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
@@ -44,8 +40,12 @@
 #include <utility>  // std::pair
 #include <stdexcept>
 #include <numeric>  // for std::iota
-#include <algorithm>  // for std::sort
+#include <algorithm>  // for std::sort, std::transform
 #include <type_traits>  // for std::is_same_v
+#include <cmath>  // isnan, fmax
+#include <memory>  // for std::unique_ptr
+#include <cstddef>  // for std::size_t
+#include <iterator>  // std::back_inserter
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
@@ -540,14 +540,14 @@ class Alpha_complex {
   // Kernel::Point_d are not weighted points
   std::vector<typename Kernel::Point_d> get_point_cloud() {
     std::vector<typename Kernel::Point_d> point_cloud;
-    int point_cloud_size = vertex_handle_to_iterator_.size();
-    point_cloud.resize(point_cloud_size);
-    for (int index = 0; index < point_cloud_size; index++) {
-      if constexpr (Weighted)
-        point_cloud[index] = vertex_handle_to_iterator_[index]->point().point();
-      else
-        point_cloud[index] = vertex_handle_to_iterator_[index]->point();
-    }
+    std::transform (vertex_handle_to_iterator_.begin(), vertex_handle_to_iterator_.end(),
+                    std::back_inserter(point_cloud),
+                    [](auto iter){ 
+                      if constexpr (Weighted)
+                        return iter->point().point();
+                      else
+                        return iter->point();
+                    });
     return point_cloud;
   }
 };
