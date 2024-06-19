@@ -22,7 +22,7 @@ class GridPerslayWeight(tf.keras.layers.Layer):
             grid (n x n numpy array): grid of values.
             grid_bnds (2 x 2 numpy array): boundaries of the grid, of the form [[min_x, max_x], [min_y, max_y]].
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.grid = tf.Variable(initial_value=grid, trainable=True)
         self.grid_bnds = grid_bnds
     
@@ -60,7 +60,7 @@ class GaussianMixturePerslayWeight(tf.keras.layers.Layer):
         Parameters:
             gaussians (4 x n numpy array): parameters of the n Gaussian functions, of the form transpose([[mu_x^1, mu_y^1, sigma_x^1, sigma_y^1], ..., [mu_x^n, mu_y^n, sigma_x^n, sigma_y^n]]). 
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.W = tf.Variable(initial_value=gaussians, trainable=True)
 
     def build(self, input_shape):
@@ -95,7 +95,7 @@ class PowerPerslayWeight(tf.keras.layers.Layer):
             constant (float): constant value.
             power (float): power applied to the distance to the diagonal. 
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.constant = tf.Variable(initial_value=constant, trainable=True)
         self.power = power
         
@@ -129,7 +129,7 @@ class GaussianPerslayPhi(tf.keras.layers.Layer):
             image_bnds (2 x 2 numpy array): boundaries of the grid, of the form [[min_x, max_x], [min_y, max_y]].
             variance (float): variance of the Gaussian functions. 
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.image_size = image_size
         self.image_bnds = image_bnds
         self.variance   = tf.Variable(initial_value=variance, trainable=True)
@@ -172,7 +172,7 @@ class TentPerslayPhi(tf.keras.layers.Layer):
         Parameters:
             samples (float numpy array): grid elements on which to evaluate the tent functions, of the form [x_1, ..., x_n].
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.samples   = tf.Variable(initial_value=samples, trainable=True)
         
     def build(self, input_shape):
@@ -207,7 +207,7 @@ class FlatPerslayPhi(tf.keras.layers.Layer):
             samples (float numpy array): grid elements on which to evaluate the constant functions, of the form [x_1, ..., x_n].
             theta (float): sigmoid parameter used to approximate the constant function with a differentiable sigmoid function. The bigger the theta, the closer to a constant function the output will be. 
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.samples = tf.Variable(initial_value=samples, trainable=True)
         self.theta   = tf.Variable(initial_value=theta,   trainable=True)
         
@@ -245,7 +245,7 @@ class Perslay(tf.keras.layers.Layer):
             perm_op (function): permutation invariant function, such as `tf.math.reduce_sum`, `tf.math.reduce_mean`, `tf.math.reduce_max`, `tf.math.reduce_min`, or a custom TensorFlow function that takes two arguments: a tensor and an axis on which to apply the permutation invariant operation. If perm_op is the string "topk" (where k is a number), this function will be computed as `tf.math.top_k` with parameter `int(k)`.
             rho (function): postprocessing function that is applied after the permutation invariant operation. Can be any TensorFlow layer.
         """
-        super().__init__(dynamic=True, **kwargs)
+        super().__init__(**kwargs)
         self.weight  = weight
         self.phi     = phi
         self.perm_op = perm_op  
