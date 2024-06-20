@@ -13,28 +13,14 @@
 #include <fstream>
 #include <string>
 
-#include <gudhi/Zigzag_persistence.h>
+#include <gudhi/Filtered_zigzag_persistence.h>
 
-using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<>;
+using ZP = Gudhi::zigzag_persistence::Filtered_zigzag_persistence<>;
 using id_handle = ZP::face_key;
 using filtration_value = ZP::filtration_value;
-using Interval_filtration = ZP::Filtration_value_interval;
+using dimension_type = ZP::dimension_type;
 
 enum lineType : int { INCLUSION, REMOVAL, COMMENT };
-
-void print_barcode(ZP& zp) {
-  std::clog << std::endl << "Current barcode:" << std::endl;
-  for (auto& bar : zp.get_persistence_diagram(0, true)) {
-    std::clog << bar.birth() << " - ";
-    if (bar.death() == std::numeric_limits<filtration_value>::infinity()) {
-      std::clog << "inf";
-    } else {
-      std::clog << bar.death();
-    }
-    std::clog << " (" << bar.dim() << ")" << std::endl;
-  }
-  std::clog << std::endl;
-}
 
 lineType read_operation(std::string& line, std::vector<id_handle>& faces, double& timestamp) {
   lineType type;
@@ -85,7 +71,13 @@ int main(int argc, char* const argv[]) {
 
   std::string line;
   std::ifstream file(argv[1]);
-  ZP zp;
+
+  //std::clog could be replaced by any other output stream
+  ZP zp([](dimension_type dim, filtration_value birth, filtration_value death) {
+    std::clog << "[" << dim << "] ";
+    std::clog << birth << " - " << death;
+    std::clog << std::endl;
+  });
 
   if (file.is_open()) {
     std::vector<id_handle> data;
@@ -97,15 +89,12 @@ int main(int argc, char* const argv[]) {
     double lastTimestamp = timestamp;
     // first operation has to be an insertion.
     zp.insert_face(id, data, 0, timestamp);
-    std::cout << line << std::endl;
 
     while (getline(file, line, '\n')) {
       type = read_operation(line, data, timestamp);
       if (type != COMMENT && lastTimestamp != timestamp) {
-        print_barcode(zp);
         lastTimestamp = timestamp;
       }
-      if (type != COMMENT) std::cout << line << std::endl;
 
       if (type == INCLUSION) {
         ++id;
@@ -116,13 +105,20 @@ int main(int argc, char* const argv[]) {
         zp.remove_face(data[0], data[1], timestamp);
       }
     }
-    print_barcode(zp);
 
     file.close();
   } else {
     std::clog << "Unable to open input file." << std::endl;
     file.setstate(std::ios::failbit);
   }
+
+  //retrieve infinit bars remaining at the end
+  //again std::clog could be replaced by any other output stream
+  zp.get_current_infinit_intervals([](dimension_type dim, filtration_value birth) {
+    std::clog << "[" << dim << "] ";
+    std::clog << birth << " - inf";
+    std::clog << std::endl;
+  });
 
   return 0;
 }

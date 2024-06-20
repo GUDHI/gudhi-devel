@@ -9,7 +9,6 @@
  */
 
 #include <vector>
-#include <limits>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "zigzag_persistence"
@@ -18,96 +17,44 @@
 #include <gudhi/Zigzag_persistence.h>
 
 using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<>;
-using face_handle = ZP::face_key;
-using filtration_value = ZP::filtration_value;
-using Interval_index = ZP::Index_interval;
-using Interval_filtration = ZP::Filtration_value_interval;
+// using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<Gudhi::zigzag_persistence::Default_zigzag_options, false>;
 
-struct cmp_intervals_by_length {
-  cmp_intervals_by_length() {}
-  bool operator()(Interval_filtration p, Interval_filtration q) {
-    if (p.length() != q.length()) {
-      return p.length() > q.length();
-    }
-    if (p.dim() != q.dim()) {
-      return p.dim() < q.dim();
-    }
-    if (p.birth() != q.birth()) {
-      return p.birth() < q.birth();
-    }
-    return p.death() < q.death();
-  }
+struct Interval {
+  Interval() {}
+  Interval(int dim, ZP::index b, ZP::index d) : dim_(dim), b_(b), d_(d) {}
+
+  int dim() const { return dim_; }
+  int birth() const { return b_; }
+  int death() const { return d_; }
+
+private:
+  int dim_;
+  ZP::index b_;
+  ZP::index d_;
 };
 
 BOOST_AUTO_TEST_CASE(constructor) {
-  BOOST_CHECK_NO_THROW(ZP zp);
-  BOOST_CHECK_NO_THROW(ZP zp(28));
-  BOOST_CHECK_NO_THROW(ZP zp(28, 2));
-  ZP zp;
-  BOOST_CHECK(zp.get_persistence_diagram(0).empty());
+  std::vector<Interval> pairs;
+  auto stream = [&](int dim, ZP::index birth, ZP::index death){ pairs.emplace_back(dim, birth, death); };
+  BOOST_CHECK_NO_THROW(ZP zp(stream));
+  BOOST_CHECK_NO_THROW(ZP zp(stream, 28));
+
+  ZP zp(stream);
+  BOOST_CHECK(pairs.empty());
 }
 
-void test_barcode(ZP& zp, std::vector<Interval_filtration>& barcode) {
-  auto bars = zp.get_persistence_diagram(0, true);
-  std::stable_sort(bars.begin(), bars.end(), cmp_intervals_by_length());
-  std::stable_sort(barcode.begin(), barcode.end(), cmp_intervals_by_length());
-  auto it = barcode.begin();
-  for (const auto& interval : bars) {
+void test_indices(std::vector<Interval>& zp_indices, std::vector<Interval>& witness_indices) {
+  auto it = witness_indices.begin();
+  for (const Interval& interval : zp_indices) {
     BOOST_CHECK_EQUAL(interval.dim(), it->dim());
     BOOST_CHECK_EQUAL(interval.birth(), it->birth());
     BOOST_CHECK_EQUAL(interval.death(), it->death());
     ++it;
   }
-  BOOST_CHECK(it == barcode.end());
+  BOOST_CHECK(it == witness_indices.end());
 }
 
-void test_indices(ZP& zp, std::vector<Interval_index>& indices, std::vector<filtration_value>& indexToFil) {
-  auto it = indices.begin();
-  for (const auto& interval : zp.get_index_persistence_diagram()) {
-    BOOST_CHECK_EQUAL(interval.dim(), it->dim());
-    BOOST_CHECK_EQUAL(interval.birth(), it->birth());
-    BOOST_CHECK_EQUAL(interval.death(), it->death());
-    auto p = zp.map_index_to_filtration_value(interval.birth(), interval.death());
-    BOOST_CHECK_EQUAL(p.first, indexToFil[interval.birth()]);
-    BOOST_CHECK_EQUAL(p.second, indexToFil[interval.death()]);
-    ++it;
-  }
-  BOOST_CHECK(it == indices.end());
-}
-
-std::vector<std::vector<face_handle> > get_simplices() {
-  return {{0},
-          {1},
-          {2},
-          {0, 1},
-          {0, 2},
-          {3},
-          {1, 2},
-          {4},
-          {3, 4},
-          {5},
-          {0, 1, 2},
-          {4, 5},
-          {3, 5},
-          {3, 4, 5},
-          {0, 1, 2},            // remove
-          {3, 4, 5},            // remove
-          {1, 4},
-          {0, 1, 2},
-          {2, 4},
-          {3, 4, 5},
-          {0, 4},
-          {0, 2, 4},
-          {1, 2, 4},
-          {0, 1, 4},
-          {3, 4, 5},            // remove
-          {3, 4},                   // remove
-          {3, 5},                   // remove
-          {0, 1, 2, 4},
-          {0, 1, 2, 4}};    // remove
-}
-
-std::vector<std::vector<face_handle> > get_boundaries() {
+std::vector<std::vector<int> > get_boundaries() {
   return {{},
           {},
           {},
@@ -139,32 +86,18 @@ std::vector<std::vector<face_handle> > get_boundaries() {
           {27}};                        // remove
 }
 
-std::vector<filtration_value> get_filtration_values() {
-  return {0, 0, 0, 
-          1, 1, 1, 
-          2, 2, 2, 
-          3, 3, 3, 3, 
-          4, 
-          5, 
-          6, 6, 6, 
-          7, 7, 7, 7, 7, 7, 
-          8, 
-          9, 9, 9, 
-          10};
-}
-
 BOOST_AUTO_TEST_CASE(zigzag_persistence_single) {
-  ZP zp(28);
-  std::vector<Interval_index> realIndices;
-  std::vector<Interval_filtration> realBarcode;
+  std::vector<Interval> pairs;
+  auto stream = [&](int dim, ZP::index birth, ZP::index death) { pairs.emplace_back(dim, birth, death); };
+  auto stream_inf = [&](int dim, ZP::index birth) { pairs.emplace_back(dim, birth, -1); };
+  ZP zp(stream, 28);
+  std::vector<Interval> realIndices;
   realIndices.reserve(13);
-  realBarcode.reserve(9);
 
-  std::vector<std::vector<face_handle> > simplices = get_boundaries();
-  std::vector<filtration_value> filValues = get_filtration_values();
+  std::vector<std::vector<int> > simplices = get_boundaries();
 
   for (unsigned int i = 0; i < 14; ++i) {
-    zp.insert_face(i, simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1, filValues[i]);
+    zp.insert_face(simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1);
   }
 
   realIndices.emplace_back(0, 1, 3);
@@ -174,18 +107,13 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_single) {
   realIndices.emplace_back(0, 9, 11);
   realIndices.emplace_back(1, 12, 13);
 
-  realBarcode.emplace_back(0, 0, 1);
-  realBarcode.emplace_back(0, 0, 1);
-  realBarcode.emplace_back(1, 2, 3);
-  realBarcode.emplace_back(1, 3, 4);
-
   for (unsigned int i = 14; i < 16; ++i) {
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
+    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1);
   }
 
   for (unsigned int i = 16; i < 24; ++i) {
-    zp.insert_face(i, simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1, filValues[i]);
+    zp.insert_face(simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1);
   }
 
   realIndices.emplace_back(0, 5, 16);
@@ -194,94 +122,86 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_single) {
   realIndices.emplace_back(1, 20, 21);
   realIndices.emplace_back(1, 18, 22);
 
-  realBarcode.emplace_back(0, 1, 6);
-  realBarcode.emplace_back(1, 5, 6);
-  realBarcode.emplace_back(1, 6, 7);
-
   for (unsigned int i = 24; i < 27; ++i) {
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
+    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1);
   }
 
   realIndices.emplace_back(1, 24, 25);
-  realBarcode.emplace_back(1, 8, 9);
 
-  zp.insert_face(27, simplices[27], simplices[27].size() == 0 ? 0 : simplices[27].size() - 1, filValues[27]);
+  zp.insert_face(simplices[27], simplices[27].size() == 0 ? 0 : simplices[27].size() - 1);
 
   realIndices.emplace_back(2, 23, 27);
-  realBarcode.emplace_back(2, 7, 9);
 
   auto id = simplices[28][0];
-  zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[28]);
+  zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1);
 
-  realBarcode.emplace_back(0, 0, std::numeric_limits<filtration_value>::infinity());
-  realBarcode.emplace_back(0, 9, std::numeric_limits<filtration_value>::infinity());
-  realBarcode.emplace_back(2, 10, std::numeric_limits<filtration_value>::infinity());
+  realIndices.emplace_back(0, 0, -1);
+  realIndices.emplace_back(0, 26, -1);
+  realIndices.emplace_back(2, 28, -1);
 
-  test_indices(zp, realIndices, filValues);
-  test_barcode(zp, realBarcode);
+  auto start = pairs.size();
+  zp.get_current_infinit_intervals(stream_inf);
+  std::sort(pairs.begin() + start, pairs.end(), [](const Interval& i1, const Interval& i2){
+    if (i1.dim() != i2.dim()) return i1.dim() < i2.dim();
+    return i1.birth() < i2.birth();
+  });
+
+  test_indices(pairs, realIndices);
 }
 
 BOOST_AUTO_TEST_CASE(zigzag_persistence_single_max1) {
-  ZP zp(28, 1);
-  std::vector<Interval_index> realIndices;
-  std::vector<filtration_value> indexToFil(28);
-  std::vector<Interval_filtration> realBarcode;
+  std::vector<Interval> pairs;
+  auto stream = [&](int dim, ZP::index birth, ZP::index death) {
+    if (dim < 1) pairs.emplace_back(dim, birth, death);
+  };
+  auto stream_inf = [&](int dim, ZP::index birth) {
+    if (dim < 1) pairs.emplace_back(dim, birth, -1);
+  };
+  ZP zp(stream, 28);
+  std::vector<Interval> realIndices;
   realIndices.reserve(5);
-  realBarcode.reserve(3);
 
-  std::vector<std::vector<face_handle> > simplices = get_boundaries();
-  std::vector<filtration_value> filValues = get_filtration_values();
-  unsigned int currIndex = 0;
+  std::vector<std::vector<int> > simplices = get_boundaries();
 
   for (unsigned int i = 0; i < 14; ++i) {
-    zp.insert_face(i, simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1, filValues[i]);
-    if (simplices[i].size() < 3) {
-      indexToFil[currIndex++] = filValues[i];
-    }
+    zp.insert_face(simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1);
   }
 
   realIndices.emplace_back(0, 1, 3);
   realIndices.emplace_back(0, 2, 4);
   realIndices.emplace_back(0, 7, 8);
-  realIndices.emplace_back(0, 9, 10);
-
-  realBarcode.emplace_back(0, 0, 1);
-  realBarcode.emplace_back(0, 0, 1);
+  realIndices.emplace_back(0, 9, 11);
 
   for (unsigned int i = 14; i < 16; ++i) {
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
-    if (simplices[id].size() < 3) {
-      indexToFil[currIndex++] = filValues[i];
-    }
+    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1);
   }
 
   for (unsigned int i = 16; i < 24; ++i) {
-    zp.insert_face(i, simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1, filValues[i]);
-    if (simplices[i].size() < 3) {
-      indexToFil[currIndex++] = filValues[i];
-    }
+    zp.insert_face(simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1);
   }
 
-  realIndices.emplace_back(0, 5, 12);
-  realBarcode.emplace_back(0, 1, 6);
+  realIndices.emplace_back(0, 5, 16);
 
   for (unsigned int i = 24; i < 27; ++i) {
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
-    if (simplices[id].size() < 3) {
-      indexToFil[currIndex++] = filValues[i];
-    }
+    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1);
   }
 
-  zp.insert_face(27, simplices[27], simplices[27].size() == 0 ? 0 : simplices[27].size() - 1, filValues[27]);
+  zp.insert_face(simplices[27], simplices[27].size() == 0 ? 0 : simplices[27].size() - 1);
   auto id = simplices[28][0];
-  zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[28]);
+  zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1);
 
-  realBarcode.emplace_back(0, 0, std::numeric_limits<filtration_value>::infinity());
-  realBarcode.emplace_back(0, 9, std::numeric_limits<filtration_value>::infinity());
+  realIndices.emplace_back(0, 0, -1);
+  realIndices.emplace_back(0, 26, -1);
 
-  test_indices(zp, realIndices, indexToFil);
-  test_barcode(zp, realBarcode);
+  auto start = pairs.size();
+  zp.get_current_infinit_intervals(stream_inf);
+  std::sort(pairs.begin() + start, pairs.end(), [](const Interval& i1, const Interval& i2){
+    if (i1.dim() != i2.dim()) return i1.dim() < i2.dim();
+    return i1.birth() < i2.birth();
+  });
+
+  test_indices(pairs, realIndices);
 }

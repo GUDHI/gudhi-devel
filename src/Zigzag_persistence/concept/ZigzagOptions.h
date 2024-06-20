@@ -12,16 +12,19 @@
 #define CONCEPT_ZZ_OPTIONS_TYPE_H_
 
 /** @file ZigzagOptions.h
- * @brief Contains @ref Gudhi::zigzag_persistence::ZigzagOptions concept.
+ * @brief Contains @ref Gudhi::zigzag_persistence::ZigzagOptions and
+ * @ref Gudhi::zigzag_persistence::FilteredZigzagOptions concept.
  */
 
 namespace Gudhi {
 namespace zigzag_persistence {
 
 /**
- * @brief List of options used for the zigzag persistence computation.
+ * @ingroup zigzag_persistence
+ *
+ * @brief List of options used for the filtered zigzag persistence computation.
  */
-struct ZigzagOptions {
+struct FilteredZigzagOptions {
   /**
    * @brief Type for the face IDs used internally and other indexations. It must be signed.
    */
@@ -36,6 +39,28 @@ struct ZigzagOptions {
    * @brief Type for filtration values.
    */
   using filtration_value = unspecified;
+
+  /**
+   * @brief Type for the dimension values.
+   */
+  using dimension_type = unspecified;
+
+  /**
+   * @brief Column type used by the internal matrix.
+   */
+  static const Gudhi::persistence_matrix::Column_types column_type;
+};
+
+/**
+ * @ingroup zigzag_persistence
+ *
+ * @brief List of options used for the zigzag persistence computation.
+ */
+struct ZigzagOptions {
+  /**
+   * @brief Type for the face IDs used internally and other indexations. It must be signed.
+   */
+  using internal_key = unspecified;
 
   /**
    * @brief Type for the dimension values.

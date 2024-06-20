@@ -2,10 +2,11 @@ project(Zigzag_persistence_tests)
 
 include(GUDHI_boost_test)
 
-add_executable ( Zigzag_persistence_unit_test zigzag_persistence_unit_test.cpp )
-if(TARGET TBB::tbb)
-  target_link_libraries(Zigzag_persistence_unit_test TBB::tbb)
-endif()
-
+add_executable_with_targets(Zigzag_persistence_unit_test zigzag_persistence_unit_test.cpp TBB::tbb)
 gudhi_add_boost_test(Zigzag_persistence_unit_test)
+
+add_executable_with_targets(Filtered_zigzag_persistence_unit_test filtered_zigzag_persistence_unit_test.cpp TBB::tbb)
+gudhi_add_boost_test(Filtered_zigzag_persistence_unit_test)
+
+
 

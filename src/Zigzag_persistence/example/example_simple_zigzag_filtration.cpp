@@ -11,9 +11,9 @@
 #include <iostream>
 #include <vector>
 
-#include <gudhi/Zigzag_persistence.h>
+#include <gudhi/Filtered_zigzag_persistence.h>
 
-using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<>;
+using ZP = Gudhi::zigzag_persistence::Filtered_zigzag_persistence_with_storage<>;
 using face_handle = ZP::face_key;
 using filtration_value = ZP::filtration_value;
 using Interval_filtration = ZP::Filtration_value_interval;
