@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70218" creator="Ipe 7.2.24">
-<info created="D:20240620100348" modified="D:20240620102959"/>
+<info created="D:20240620100348" modified="D:20240620232436"/>
 <preamble>\usepackage{amssymb, mathrsfs}</preamble>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
@@ -343,7 +343,6 @@ h
 <text matrix="1 0 0 1 16 0" transformations="translations" pos="320 640" stroke="darkblue" type="label" width="48.379" height="11.953" depth="3.35" valign="baseline" size="LARGE" style="math">\bf \beta_1 = 2</text>
 <use name="mark/circle(sx)" pos="288 704" size="large" stroke="black"/>
 <use name="mark/circle(sx)" pos="160 704" size="large" stroke="black"/>
-<text transformations="translations" pos="320 720" stroke="black" type="label" width="133.365" height="12.915" depth="4.3" valign="baseline" size="LARGE" style="math">\textrm{In } \mathbb{Z}/2\mathbb{Z} \textrm{ homology,}</text>
-<text matrix="1 0 0 1 0 16" transformations="translations" pos="320 688" stroke="black" type="label" width="128.936" height="11.955" depth="0" valign="baseline" size="LARGE" style="math">\textrm{Betti numbers are:}</text>
+<text matrix="1 0 0 1 0 16" transformations="translations" pos="320 688" stroke="black" type="label" width="102.751" height="11.955" depth="0" valign="baseline" size="LARGE" style="math">\textrm{Betti numbers:}</text>
 </page>
 </ipe>
