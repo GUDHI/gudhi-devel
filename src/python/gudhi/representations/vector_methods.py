@@ -129,8 +129,9 @@ def _automatic_sample_range(sample_range, X):
                 [Mx,My] = [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
                 return np.where(nan_in_range, np.array([mx, My]), sample_range)
             except ValueError:
-                # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
-                pass
+                b = np.nanmax([sample_range[0], sample_range[1], -np.inf])
+                print(f"Empty list or empty diagrams: sample range is [{b}, {b}]")
+                return np.array([b, b])
         return sample_range
 
 
@@ -149,7 +150,11 @@ def _grid_from_sample_range(self, X):
     if not self.keep_endpoints:
         self.new_resolution_ += self.nan_in_range_.sum()
     self.sample_range_fixed_ = _automatic_sample_range(sample_range, X)
-    self.grid_ = np.linspace(self.sample_range_fixed_[0], self.sample_range_fixed_[1], self.new_resolution_)
+    if self.sample_range_fixed_[0] != self.sample_range_fixed_[1]:
+        self.grid_ = np.linspace(self.sample_range_fixed_[0], self.sample_range_fixed_[1], self.new_resolution_)
+    else:
+        print('First value and second value in range are the same: grid is made of resolution copies of this value')
+        self.grid_ = np.full(shape=[self.new_resolution_], fill_value=self.sample_range_fixed_[0])
     if not self.keep_endpoints:
         self.grid_ = _trim_endpoints(self.grid_, self.nan_in_range_)
 
@@ -358,8 +363,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         if self.predefined_grid is None:
             if self.resolution is None: # Flexible/exact version
-                events = np.unique(np.concatenate([pd.ravel() for pd in X] + [[-np.inf]], axis=0))
-                self.grid_ = np.array(events)
+                self.grid_ = np.unique(np.concatenate([pd.ravel() for pd in X] + [[-np.inf]], axis=0)) 
             else:
                 _grid_from_sample_range(self, X)
         else:
@@ -381,43 +385,14 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         if not self.is_fitted():
             raise NotFittedError("Not fitted.")
 
-        if not X:
-            X = [np.zeros((0, 2))]
-        
         N = len(X)
 
-        events = np.concatenate([pd.ravel(order="F") for pd in X], axis=0)
-        sorting = np.argsort(events)
-        offsets = np.zeros(1 + N, dtype=int)
-        for i in range(0, N):
-            offsets[i+1] = offsets[i] + 2*X[i].shape[0]
-        starts = offsets[0:N]
-        ends = offsets[1:N + 1] - 1
+        if N == 0:
 
-        bettis = [[0] for i in range(0, N)]
-
-        i = 0
-        for x in self.grid_:
-            while i < len(sorting) and events[sorting[i]] <= x:
-                j = np.searchsorted(ends, sorting[i])
-                delta = 1 if sorting[i] - starts[j] < len(X[j]) else -1
-                bettis[j][-1] += delta
-                i += 1
-            for k in range(0, N):
-                bettis[k].append(bettis[k][-1])
-
-        return np.array(bettis, dtype=int)[:, 0:-1]
-
-    def fit_transform(self, X, y = None):
-        """
-        The result is the same as fit(X) followed by transform(X), but potentially faster.
-        """
-
-        if self.predefined_grid is None and self.resolution is None:
-            if not X:
-                X = [np.zeros((0, 2))]
-
-            N = len(X)
+            print("Empty list: output has shape [0, len(grid)]")
+            return np.zeros((N, len(self.grid_)))
+            
+        else:
 
             events = np.concatenate([pd.ravel(order="F") for pd in X], axis=0)
             sorting = np.argsort(events)
@@ -427,26 +402,65 @@ class BettiCurve(BaseEstimator, TransformerMixin):
             starts = offsets[0:N]
             ends = offsets[1:N + 1] - 1
 
-            xs = [-np.inf]
             bettis = [[0] for i in range(0, N)]
 
-            for i in sorting:
-                j = np.searchsorted(ends, i)
-                delta = 1 if i - starts[j] < len(X[j]) else -1
-                if events[i] == xs[-1]:
+            i = 0
+            for x in self.grid_:
+                while i < len(sorting) and events[sorting[i]] <= x:
+                    j = np.searchsorted(ends, sorting[i])
+                    delta = 1 if sorting[i] - starts[j] < len(X[j]) else -1
                     bettis[j][-1] += delta
-                else:
-                    xs.append(events[i])
-                    for k in range(0, j):
-                        bettis[k].append(bettis[k][-1])
-                    bettis[j].append(bettis[j][-1] + delta)
-                    for k in range(j+1, N):
-                        bettis[k].append(bettis[k][-1])
+                    i += 1
+                for k in range(0, N):
+                    bettis[k].append(bettis[k][-1])
+    
+            return np.array(bettis, dtype=int)[:, 0:-1]
 
-            self.grid_ = np.array(xs)
-            return np.array(bettis, dtype=int)
+    def fit_transform(self, X, y = None):
+        """
+        The result is the same as fit(X) followed by transform(X), but potentially faster.
+        """
+
+        if self.predefined_grid is None and self.resolution is None:
+
+            N = len(X)
+
+            if sum([len(x) for x in X]) == 0:
+                print("Empty list or empty diagrams: evaluation grid only contains -infinity and output contains only zeros")
+                self.grid_ = np.array([-np.inf])
+                return np.zeros((N, 1))
+
+            else:
+
+                events = np.concatenate([pd.ravel(order="F") for pd in X], axis=0)
+                sorting = np.argsort(events)
+                offsets = np.zeros(1 + N, dtype=int)
+                for i in range(0, N):
+                    offsets[i+1] = offsets[i] + 2*X[i].shape[0]
+                starts = offsets[0:N]
+                ends = offsets[1:N + 1] - 1
+
+                xs = [-np.inf]
+                bettis = [[0] for i in range(0, N)]
+
+                for i in sorting:
+                    j = np.searchsorted(ends, i)
+                    delta = 1 if i - starts[j] < len(X[j]) else -1
+                    if events[i] == xs[-1]:
+                        bettis[j][-1] += delta
+                    else:
+                        xs.append(events[i])
+                        for k in range(0, j):
+                            bettis[k].append(bettis[k][-1])
+                        bettis[j].append(bettis[j][-1] + delta)
+                        for k in range(j+1, N):
+                            bettis[k].append(bettis[k][-1])
+
+                self.grid_ = np.array(xs)
+                return np.array(bettis, dtype=int)
 
         else:
+
             return self.fit(X).transform(X)
 
     def __call__(self, diag):
@@ -489,7 +503,10 @@ class Entropy(BaseEstimator, TransformerMixin):
         """
         if self.mode == "vector":
             _grid_from_sample_range(self, X)
-            self.step_ = self.grid_[1] - self.grid_[0]
+            if self.sample_range_fixed_[0] != self.sample_range_fixed_[1]:
+                self.step_ = self.grid_[1] - self.grid_[0]
+            else:
+                self.step_ = 0.
         return self
 
     def transform(self, X):
