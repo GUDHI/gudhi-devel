@@ -36,6 +36,17 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
+//For unordered_set container. Outside of Unordered_set_column because of a msvc bug who can't compile properly
+//unordered_flat_set if the hash method is nested.
+template <class Cell>
+struct CellPointerHash {
+  size_t operator()(const Cell* c) const { return std::hash<Cell>()(*c); }
+};
+template <class Cell>
+struct CellPointerEq {
+  bool operator()(const Cell* c1, const Cell* c2) const { return *c1 == *c2; }
+};
+
 /**
  * @class Unordered_set_column unordered_set_column.h gudhi/Persistence_matrix/columns/unordered_set_column.h
  * @ingroup persistence_matrix
@@ -67,20 +78,14 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
   using Field_operators = typename Master_matrix::Field_operators;
   using Cell_constructor = typename Master_matrix::Cell_constructor;
 
-  struct CellPointerHash {
-    size_t operator()(const Cell* c) const { return std::hash<Cell>()(*c); }
-  };
-  struct CellPointerEq {
-    bool operator()(const Cell* c1, const Cell* c2) const { return *c1 == *c2; }
-  };
   struct CellPointerComp {
     bool operator()(const Cell* c1, const Cell* c2) const { return *c1 < *c2; }
   };
 
 #if BOOST_VERSION >= 108100
-  using Column_type = boost::unordered_flat_set<Cell*, CellPointerHash, CellPointerEq>;
+  using Column_type = boost::unordered_flat_set<Cell*, CellPointerHash<Cell>, CellPointerEq<Cell>>;
 #else
-  using Column_type = std::unordered_set<Cell*, CellPointerHash, CellPointerEq>;
+  using Column_type = std::unordered_set<Cell*, CellPointerHash<Cell>, CellPointerEq<Cell>>;
 #endif
 
  public:

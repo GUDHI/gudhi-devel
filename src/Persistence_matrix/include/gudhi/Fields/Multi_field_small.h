@@ -392,7 +392,7 @@ class Multi_field_element_with_small_characteristics {
     if (p <= 3) return true;
     if (p % 2 == 0 || p % 3 == 0) return false;
 
-    for (long i = 5; i * i <= p; i = i + 6)
+    for (unsigned long i = 5; i * i <= p; i = i + 6)
       if (p % i == 0 || p % (i + 2) == 0) return false;
 
     return true;
