@@ -20,7 +20,7 @@ namespace Gudhi {
  * dimension d+1.
  *
  * This function calls `complex.insert_simplex_and_subfaces` on a set of simplices large enough that, with their
- * faces, they define the incremental Delaunay complex. However, this set is not supposed to be minimal, there
+ * faces, they define the incremental Delaunay complex. However, this set is not guaranteed to be minimal, there
  * may be redundancies.
  *
  * No filtration values are computed here, those can be computed separately afterwards, for instance
@@ -35,6 +35,8 @@ namespace Gudhi {
  * @param[in] k The geometric kernel.
  * @param[out] complex The simplicial complex.
  * @param[in] points Embedding of the points.
+ *
+ * Authors: Michael Kerber, Marc Glisse
  */
 template<typename K, typename SimplicialComplex, typename PointRange>
 void construct_incremental_delaunay(K const&k, SimplicialComplex& complex, PointRange const& points) {

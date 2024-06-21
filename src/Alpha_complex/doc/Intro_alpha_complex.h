@@ -18,7 +18,7 @@ namespace alpha_complex {
 
 /**  \defgroup alpha_complex Alpha complex
  *
- * \author    Vincent Rouvreau, Michael Kerber, Marc Glisse
+ * \authors   Vincent Rouvreau, Michael Kerber, Marc Glisse
  *
  * @{
  *

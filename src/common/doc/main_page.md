@@ -136,7 +136,7 @@
 </table>
 
 ## Filtrations
-### Alpha complex
+### Alpha complex and Delaunay
 
 <table>
   <tr>
@@ -144,15 +144,14 @@
       \image html "alpha_complex_representation.png"
     </td>
     <td width="50%">
-    Alpha complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.<br>
-    The filtration value of each simplex is computed as the square of the circumradius of the simplex if the
-    circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration
-    values of the codimension 1 cofaces that make it not Gabriel otherwise.
-    All simplices that have a filtration value \f$ > \alpha^2 \f$ are removed from the Delaunay complex
-    when creating the simplicial complex if it is specified.
+    The alpha-complex is a filtration of the finite cells of a Delaunay Triangulation which is topologically
+    equivalent to the Čech.
+    The filtration value of each simplex is computed as the squared radius of the smallest Delaunay ball
+    of this simplex.<br>
+    Also provided are the (unfiltered) Delaunay triangulation, and the *incremental* Delaunay triangulation.
     </td>
     <td width="15%">
-      <b>Author:</b> Vincent Rouvreau, Michael Kerber, Marc Glisse<br>
+      <b>Authors:</b> Vincent Rouvreau, Michael Kerber, Marc Glisse<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
       <b>License:</b> MIT [(GPL v3)](../../licensing/), GPL v3 (only for incremental Delaunay)<br>
       <b>Requires:</b> \ref eigen and \ref cgal
@@ -173,7 +172,7 @@
       \image html "cech_complex_representation.png"
     </td>
     <td width="50%">
-    The Čech complex is a simplicial complex constructed from a proximity graph.
+    The Čech complex is a filtered simplicial complex defined as the nerve of a union of balls.
     The set of all simplices is filtered by the radius of their minimal enclosing ball.
     </td>
     <td width="15%">
@@ -198,9 +197,8 @@
       \image html "rips_complex_representation.png"
     </td>
     <td width="50%">
-    Rips complex is a simplicial complex constructed from a one skeleton graph.<br>
-    The filtration value of each edge is computed from a user-given distance function and is inserted until a
-    user-given threshold value.<br>
+    The (Vietoris-)Rips complex is a filtered simplicial complex where every tuple of points appears with its diameter
+    as filtration value. Alternatively, it is defined by the cliques of a graph, usually representing a metric.<br>
     This complex can be built from a point cloud and a distance function, or from a distance matrix.
     </td>
     <td width="15%">
