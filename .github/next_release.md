@@ -5,9 +5,9 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 Below is a list of changes made since GUDHI 3.9.0:
 
 - [Persistence matrix](https://gudhi.inria.fr/doc/latest/group__persistence__matrix.html)
+     > Matrix API is in a bêta version and we reserve the right to modify it in the near future.
      - Matrix structure for filtered complexes with multiple functionnalities related to persistence homology, such as
      representative cycles computation or vineyards. 
-     - Matrix API is in a bêta version and we reserve the right to modify it in the near future.
 
 - [Rips complex](https://gudhi.inria.fr/python/latest/rips_complex_sklearn_itf_ref.html)
      - Rips complex persistence scikit-learn like interface
@@ -20,8 +20,7 @@ Below is a list of changes made since GUDHI 3.9.0:
      - Eigen3 &ge; 3.3.0 is now required (was &ge; 3.1.0).
 
 - Maintenance
-     - Some bug fix for CGAL &ge; 6.0, NumPy &ge; 2.0, Scikit-learn &ge; 1.4, Matplotlib &ge; 3.6 and
-     TensorFlow &ge; 2.16.
+     - Some bug fix for CGAL &ge; 6.0, NumPy &ge; 2.0, Scikit-learn &ge; 1.4, Matplotlib &ge; 3.6 and TensorFlow &ge; 2.16.
 
 - Miscellaneous
      - The [list of bugs that were solved since GUDHI-3.9.0](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.10.0+is%3Aclosed) is available on GitHub.
