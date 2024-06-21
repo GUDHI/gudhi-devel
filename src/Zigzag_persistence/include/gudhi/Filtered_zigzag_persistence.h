@@ -95,7 +95,7 @@ struct Default_filtered_zigzag_options {
    * @brief Column type use by the internal matrix.
    */
   static const Gudhi::persistence_matrix::Column_types column_type =
-      Gudhi::persistence_matrix::Column_types::INTRUSIVE_LIST;
+      Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR;
 };
 
 /**

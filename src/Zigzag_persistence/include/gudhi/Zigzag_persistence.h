@@ -22,9 +22,12 @@
 
 #include <cmath>
 #include <set>
-#include <unordered_map>
+// #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include <boost/unordered/unordered_flat_map.hpp>
+// #include <boost/unordered/unordered_map.hpp>
 
 #include <gudhi/matrix.h>
 
@@ -61,7 +64,7 @@ struct Default_zigzag_options {
    * @brief Column type use by the internal matrix.
    */
   static const Gudhi::persistence_matrix::Column_types column_type =
-      Gudhi::persistence_matrix::Column_types::INTRUSIVE_LIST;  // TODO: benchmark different column types
+      Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR;  //TODO: redo benchmark with oscillating rips
 };
 
 // TODO: add the possibility of something else than Z2. Which means that the possibility of vineyards without Z2
@@ -85,7 +88,9 @@ class Zigzag_persistence
   using dimension_type = typename Options::dimension_type; /**< Type for dimension values. */
 
  private:
-  using birth_dictionnary = std::unordered_map<index, index>;             /**< Dictionnary type. */
+  // using birth_dictionnary = std::unordered_map<index, index>;             /**< Dictionnary type. */
+  using birth_dictionnary = boost::unordered_flat_map<index, index>;      /**< Dictionnary type. */
+  // using birth_dictionnary = boost::unordered_map<index, index>;           /**< Dictionnary type. */
   using Matrix_options = Zigzag_matrix_options<Options::column_type>;     /**< Matrix options. */
   using Matrix_type = Gudhi::persistence_matrix::Matrix<Matrix_options>;  /**< Matrix. */
   using matrix_index = typename Matrix_type::index;                       /**< Matrix indexation type. */
