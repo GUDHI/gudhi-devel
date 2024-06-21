@@ -394,7 +394,7 @@
     such as representative cycles computation or vineyards.
     <dl class="section note">
       <dt>Note</dt>
-      <dd>Matrix API is in a bêta version and we reserve the right to modify it in the near future.</dd>
+      <dd>Matrix API is in a beta version and may change in incompatible ways in the near future.</dd>
     </dl>
 
     </td>
