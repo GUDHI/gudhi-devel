@@ -1,5 +1,3 @@
-project(Skeleton_blocker_tests)
-
 include(GUDHI_boost_test)
 
 add_executable ( Skeleton_blocker_test_unit test_skeleton_blocker_complex.cpp )

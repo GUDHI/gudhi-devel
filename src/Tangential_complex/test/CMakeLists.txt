@@ -1,13 +1,7 @@
-project(Tangential_complex_tests)
+add_executable_with_targets(Tangential_complex_test_TC test_tangential_complex.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)
 
-if(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+if(TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   include(GUDHI_boost_test)
 
-  add_executable( Tangential_complex_test_TC test_tangential_complex.cpp )
-  target_link_libraries(Tangential_complex_test_TC ${CGAL_LIBRARY})
-  if(TARGET TBB::tbb)
-    target_link_libraries(Tangential_complex_test_TC TBB::tbb)
-  endif()
-
   gudhi_add_boost_test(Tangential_complex_test_TC)
-endif(NOT CGAL_WITH_EIGEN3_VERSION VERSION_LESS 4.11.0)
+endif()

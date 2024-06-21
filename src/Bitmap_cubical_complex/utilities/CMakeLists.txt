@@ -1,9 +1,4 @@
-project(Bitmap_cubical_complex_utilities)
-
-add_executable ( cubical_complex_persistence cubical_complex_persistence.cpp )
-if(TARGET TBB::tbb)
-  target_link_libraries(cubical_complex_persistence TBB::tbb)
-endif()
+add_executable_with_targets(cubical_complex_persistence cubical_complex_persistence.cpp TBB::tbb)
 
 add_test(NAME Bitmap_cubical_complex_utility_persistence_one_sphere COMMAND $<TARGET_FILE:cubical_complex_persistence>
     "${CMAKE_SOURCE_DIR}/data/bitmap/CubicalOneSphere.txt")
@@ -11,10 +6,7 @@ add_test(NAME Bitmap_cubical_complex_utility_persistence_one_sphere COMMAND $<TA
 add_test(NAME Bitmap_cubical_complex_utility_persistence_two_sphere COMMAND $<TARGET_FILE:cubical_complex_persistence>
     "${CMAKE_SOURCE_DIR}/data/bitmap/CubicalTwoSphere.txt")
 
-add_executable ( periodic_cubical_complex_persistence periodic_cubical_complex_persistence.cpp )
-if(TARGET TBB::tbb)
-  target_link_libraries(periodic_cubical_complex_persistence TBB::tbb)
-endif()
+add_executable_with_targets(periodic_cubical_complex_persistence periodic_cubical_complex_persistence.cpp TBB::tbb)
 
 add_test(NAME Bitmap_cubical_complex_utility_periodic_boundary_conditions_2d_torus
     COMMAND $<TARGET_FILE:periodic_cubical_complex_persistence>

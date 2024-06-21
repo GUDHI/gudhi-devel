@@ -18,7 +18,6 @@
 * Example files should be called `example_[what_it_is].cpp`. E.g. `example_sparsify_point_set.cpp`
 
 ### In CMakeLists.txt files:
-* The name of the "project" should be in this form: `Package_[tests|examples|…]`. E.g. `project(Simplex_tree_examples)`.
 * The name if each "target" (first parameter of add_executable) should be in this form: `Package_{name of the cpp file without extension}`. E.g `add_executable(Subsampling_test_sparsify_point_set test_sparsify_point_set.cpp)`.
 
 ### Code style

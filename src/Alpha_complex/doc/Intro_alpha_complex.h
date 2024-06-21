@@ -163,7 +163,6 @@ Table of Contents
  * In the following example, the value is given by the user as argument of the program.
  *
  * \section weightedversion Weighted specific version
- * <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 5.1.0.
  * 
  * A weighted version for Alpha complex is available (cf. Alpha_complex). It is like a usual Alpha complex, but based
  * on a <a href="https://doc.cgal.org/latest/Triangulation/index.html#TriangulationSecRT">CGAL regular triangulation</a> instead

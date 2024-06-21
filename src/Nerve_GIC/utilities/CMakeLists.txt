@@ -1,12 +1,5 @@
-project(Nerve_GIC_examples)
-
-add_executable ( Nerve Nerve.cpp )
-add_executable ( VoronoiGIC VoronoiGIC.cpp )
-
-if(TARGET TBB::tbb)
-  target_link_libraries(Nerve TBB::tbb)
-  target_link_libraries(VoronoiGIC TBB::tbb)
-endif()
+add_executable_with_targets(Nerve Nerve.cpp TBB::tbb)
+add_executable_with_targets(VoronoiGIC VoronoiGIC.cpp TBB::tbb)
 
 file(COPY KeplerMapperVisuFromTxtFile.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 # Copy files for not to pollute sources when testing
