@@ -1,5 +1,3 @@
-project(Persistence_matrix_tests)
-
 include(GUDHI_boost_test)
 
 ### Column Tests

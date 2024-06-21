@@ -357,7 +357,7 @@
 <table>
   <tr>
     <td width="35%" rowspan=2>
-      \image html "3DTorus_poch.png"
+      \image html "plain_homology.png"
     </td>
     <td width="50%">
     The theory of homology consists in attaching to a topological space a sequence of (homology) groups, capturing
@@ -384,15 +384,19 @@
 
 ### Persistence Matrix
 
-[//]: # (TODO: picture)
 <table>
   <tr>
     <td width="35%" rowspan=2>
-      \image html "3DTorus_poch.png"
+      \image html "persistence_matrix.png"
     </td>
     <td width="50%">
     Matrix structure for filtered complexes with multiple functionnalities related to persistence homology,
     such as representative cycles computation or vineyards.
+    <dl class="section note">
+      <dt>Note</dt>
+      <dd>Matrix API is in a bêta version and we reserve the right to modify it in the near future.</dd>
+    </dl>
+
     </td>
     <td width="15%">
       <b>Author:</b> Hannah Schreiber<br>
