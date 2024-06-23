@@ -1,11 +1,6 @@
-project(Rips_complex_tests)
-
 include(GUDHI_boost_test)
 
-add_executable ( Rips_complex_test_unit test_rips_complex.cpp )
-if(TARGET TBB::tbb)
-  target_link_libraries(Rips_complex_test_unit TBB::tbb)
-endif()
+add_executable_with_targets(Rips_complex_test_unit test_rips_complex.cpp TBB::tbb)
 
 # Do not forget to copy test files in current binary dir
 file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)

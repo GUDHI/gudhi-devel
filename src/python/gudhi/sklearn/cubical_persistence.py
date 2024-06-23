@@ -17,14 +17,16 @@ from joblib import Parallel, delayed
 
 # Mermaid sequence diagram - https://mermaid-js.github.io/mermaid-live-editor/
 # sequenceDiagram
-#     USER->>CubicalPersistence: fit_transform(X)
-#     CubicalPersistence->>thread1: _tranform(X[0])
-#     CubicalPersistence->>thread2: _tranform(X[1])
-#     Note right of CubicalPersistence: ...
-#     thread1->>CubicalPersistence: [array( H0(X[0]) ), array( H1(X[0]) )]
-#     thread2->>CubicalPersistence: [array( H0(X[1]) ), array( H1(X[1]) )]
-#     Note right of CubicalPersistence: ...
-#     CubicalPersistence->>USER: [[array( H0(X[0]) ), array( H1(X[0]) )],<br/> [array( H0(X[1]) ), array( H1(X[1]) )],<br/> ...]
+#   participant USER
+#   participant CP as CubicalPersistence
+#   USER->>CP: fit_transform(X)
+#   CP->>thread1: _tranform(X[0])
+#   CP->>thread2: _tranform(X[1])
+#   Note right of CP: ...
+#   thread1->>CP: [array( H0(X[0]) ), array( H1(X[0]) )]
+#   thread2->>CP: [array( H0(X[1]) ), array( H1(X[1]) )]
+#   Note right of CP: ...
+#   CP->>USER: [[array( H0(X[0]) ), array( H1(X[0]) )],<br/> [array( H0(X[1]) ), array( H1(X[1]) )],<br/> ...]
 
 
 class CubicalPersistence(BaseEstimator, TransformerMixin):
@@ -111,7 +113,8 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         :return: Persistence diagrams in the format:
 
               - If `homology_dimensions` was set to `n`: `[array( Hn(X[0]) ), array( Hn(X[1]) ), ...]` 
-              - If `homology_dimensions` was set to `[i, j]`: `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
+              - If `homology_dimensions` was set to `[i, j]`:
+                `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
         :rtype: list of (,2) array_like or list of list of (,2) array_like
         """
         # Depends on homology_dimensions is an integer or a list of integer (else case)

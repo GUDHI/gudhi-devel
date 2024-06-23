@@ -1,5 +1,3 @@
-project(Persistence_representations_example)
-
 add_executable ( Persistence_representations_example_landscape_on_grid persistence_landscape_on_grid.cpp )
 add_test(NAME Persistence_representations_example_landscape_on_grid
     COMMAND $<TARGET_FILE:Persistence_representations_example_landscape_on_grid>)

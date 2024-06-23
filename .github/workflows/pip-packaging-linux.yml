@@ -9,45 +9,12 @@ jobs:
     name: build pip wheel
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
-    container: gudhi/pip_for_gudhi:latest
+    container: gudhi/pip_for_gudhi:2024.06.01
     steps:
+      # Should use actions/checkout@v4, but requires node20, not available for quay.io/pypa/manylinux2014_x86_64
       - uses: actions/checkout@v3
         with:
           submodules: true
-      - name: Build wheel for Python 3.6
-        run: |
-          mkdir build_36
-          cd build_36
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON36/bin/python ..
-          cd src/python
-          $PYTHON36/bin/python -m build -n -w
-          auditwheel repair dist/*.whl
-      - name: Install and test wheel for Python 3.6
-        run: |
-          $PYTHON36/bin/python -m pip install --user pytest build_36/src/python/dist/*.whl
-          $PYTHON36/bin/python -m pip install numpy --upgrade
-          $PYTHON36/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON36/bin/python -m pytest -v src/python/test/test_alpha_complex.py
-          $PYTHON36/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
-          $PYTHON36/bin/python -m pytest -v src/python/test/test_cubical_complex.py
-          $PYTHON36/bin/python -m pytest -v src/python/test/test_rips_complex.py
-      - name: Build wheel for Python 3.7
-        run: |
-          mkdir build_37
-          cd build_37
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON37/bin/python ..
-          cd src/python
-          $PYTHON37/bin/python -m build -n -w
-          auditwheel repair dist/*.whl
-      - name: Install and test wheel for Python 3.7
-        run: |
-          $PYTHON37/bin/python -m pip install --user pytest build_37/src/python/dist/*.whl
-          $PYTHON37/bin/python -m pip install numpy --upgrade
-          $PYTHON37/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON37/bin/python -m pytest -v src/python/test/test_alpha_complex.py
-          $PYTHON37/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
-          $PYTHON37/bin/python -m pytest -v src/python/test/test_cubical_complex.py
-          $PYTHON37/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.8
         run: |
           mkdir build_38
@@ -116,14 +83,30 @@ jobs:
           $PYTHON311/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON311/bin/python -m pytest -v src/python/test/test_cubical_complex.py
           $PYTHON311/bin/python -m pytest -v src/python/test/test_rips_complex.py
+      - name: Build wheel for Python 3.12
+        run: |
+          mkdir build_312
+          cd build_312
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON312/bin/python ..
+          cd src/python
+          $PYTHON312/bin/python -m build -n -w
+          auditwheel repair dist/*.whl
+      - name: Install and test wheel for Python 3.12
+        run: |
+          $PYTHON312/bin/python -m pip install --user pytest build_312/src/python/dist/*.whl
+          $PYTHON312/bin/python -m pip install numpy --upgrade
+          $PYTHON312/bin/python -c "import gudhi; print(gudhi.__version__)"
+          $PYTHON312/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON312/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON312/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON312/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Publish on PyPi
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          $PYTHON36/bin/python -m twine upload build_36/src/python/wheelhouse/*.whl
-          $PYTHON36/bin/python -m twine upload build_37/src/python/wheelhouse/*.whl
-          $PYTHON36/bin/python -m twine upload build_38/src/python/wheelhouse/*.whl
-          $PYTHON36/bin/python -m twine upload build_39/src/python/wheelhouse/*.whl
-          $PYTHON36/bin/python -m twine upload build_310/src/python/wheelhouse/*.whl
-          $PYTHON36/bin/python -m twine upload build_311/src/python/wheelhouse/*.whl
+          $PYTHON38/bin/python -m twine upload build_38/src/python/wheelhouse/*.whl
+          $PYTHON38/bin/python -m twine upload build_39/src/python/wheelhouse/*.whl
+          $PYTHON38/bin/python -m twine upload build_310/src/python/wheelhouse/*.whl
+          $PYTHON38/bin/python -m twine upload build_311/src/python/wheelhouse/*.whl
+          $PYTHON38/bin/python -m twine upload build_312/src/python/wheelhouse/*.whl

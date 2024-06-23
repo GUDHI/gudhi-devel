@@ -1,12 +1,5 @@
-project(Nerve_GIC_examples)
-
-add_executable ( CoordGIC CoordGIC.cpp )
-add_executable ( FuncGIC FuncGIC.cpp )
-
-if(TARGET TBB::tbb)
-  target_link_libraries(CoordGIC TBB::tbb)
-  target_link_libraries(FuncGIC TBB::tbb)
-endif()
+add_executable_with_targets(CoordGIC CoordGIC.cpp TBB::tbb)
+add_executable_with_targets(FuncGIC FuncGIC.cpp TBB::tbb)
 
 # Copy files for not to pollute sources when testing
 file(COPY "${CMAKE_SOURCE_DIR}/data/points/tore3D_1307.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)

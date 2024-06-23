@@ -45,6 +45,7 @@
 #include <stdexcept>
 #include <numeric>  // for std::iota
 #include <algorithm>  // for std::sort
+#include <type_traits>  // for std::is_same_v
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
@@ -97,7 +98,6 @@ template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool val
  * [10^12,10^12+10^6]. Using `CGAL::Epick_d` makes the computations slightly faster, and the combinatorics are still
  * exact, but the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still
  * guarantee that the output is a valid filtration (faces have a filtration value no larger than their cofaces).
- * - For performances reasons, it is advised to use `Alpha_complex` with \ref cgal &ge; 5.0.0.
  */
 template<class Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, bool Weighted = false>
 class Alpha_complex {
@@ -109,10 +109,15 @@ class Alpha_complex {
   /** \brief Geometric traits class that provides the geometric types and predicates needed by the triangulations.*/
   using Geom_traits = std::conditional_t<Weighted, CGAL::Regular_triangulation_traits_adapter<Kernel>, Kernel>;
 
+  // CGAL::Triangulation_ds_full_cell<void, CGAL::TDS_full_cell_mirror_storage_policy> has been enhanced for CGAL >= 6.0
+  // But faster only with static dimensions
+  using Triangulation_full_cell = std::conditional_t<std::is_same_v<typename Kernel::Dimension, CGAL::Dynamic_dimension_tag>,
+                                                     CGAL::Triangulation_ds_full_cell<>,
+                                                     CGAL::Triangulation_ds_full_cell<void, CGAL::TDS_full_cell_mirror_storage_policy>>;
   // Add an int in TDS to save point index in the structure
   using TDS = CGAL::Triangulation_data_structure<typename Geom_traits::Dimension,
                                                  CGAL::Triangulation_vertex<Geom_traits, Internal_vertex_handle>,
-                                                 CGAL::Triangulation_full_cell<Geom_traits> >;
+                                                 Triangulation_full_cell >;
 
   /** \brief A (Weighted or not) Delaunay triangulation of a set of points in \f$ \mathbb{R}^D\f$.*/
   using Triangulation = std::conditional_t<Weighted, CGAL::Regular_triangulation<Kernel, TDS>,
@@ -250,8 +255,8 @@ class Alpha_complex {
     #endif
 
 #if CGAL_VERSION_NR < 1050101000
-    // Make compilation fail if weighted and CGAL < 5.1
-    static_assert(!Weighted, "Weighted Alpha_complex is only available for CGAL >= 5.1");
+    // Make compilation fail if weighted and CGAL < 5.1.0
+    static_assert(!Weighted, "Weighted Alpha_complex is only available for CGAL >= 5.1.0");
 #endif
 
     auto first = std::begin(points);

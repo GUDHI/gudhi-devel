@@ -74,7 +74,12 @@ class Cech_blocker {
     Filtration_value radius = 0;
     bool is_min_enclos_ball = false;
     Point_cloud points;
-    points.reserve(sc_ptr_->dimension(sh)+1);
+    auto dim = sc_ptr_->dimension(sh);
+    if (dim > kernel_.point_dimension_d_object()(cc_ptr_->get_point(0))) {
+      // A sphere is always determined by at most d+1 points
+      return false;
+    }
+    points.reserve(dim + 1);
 
     // for each face of simplex sh, test outsider point is indeed inside enclosing ball, if yes, take it and exit loop, otherwise, new sphere is circumsphere of all vertices
     for (auto face_opposite_vertex : sc_ptr_->boundary_opposite_vertex_simplex_range(sh)) {
