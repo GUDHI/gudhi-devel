@@ -410,7 +410,6 @@ class Simplex_tree {
     std::clog << "Simplex_tree copy constructor" << std::endl;
 #endif  // DEBUG_TRACES
     copy_from(complex_source);
-    if constexpr (Options::is_multi_parameter) number_of_parameters_ = complex_source.number_of_parameters_;
   }
 
   /** \brief User-defined move constructor relocates the whole tree structure.
@@ -480,6 +479,7 @@ class Simplex_tree {
       map_el.second.assign_children(&root_);
     }
     rec_copy(&root_, &root_source);
+    if constexpr (Options::is_multi_parameter) number_of_parameters_ = complex_source.number_of_parameters_;
   }
 
   /** \brief depth first search, inserts simplices when reaching a leaf. */
@@ -1918,7 +1918,7 @@ class Simplex_tree {
       Filtration_value max_filt_border_value;
       if constexpr (SimplexTreeOptions::is_multi_parameter) {
         // in that case, we assume that Filtration_value has a `push_to` member to handle this.
-        max_filt_border_value = Filtration_value(*number_of_parameters_); 
+        max_filt_border_value = Filtration_value(number_of_parameters_); 
         for (auto& face_sh : boundary) {
           max_filt_border_value.push_to(
               filtration(face_sh));  // pushes the value of max_filt_border_value to reach simplex' filtration
@@ -2606,7 +2606,7 @@ class Simplex_tree {
    * */
   int get_number_of_parameters() const { 
     if constexpr (SimplexTreeOptions::is_multi_parameter)
-      return *number_of_parameters_;
+      return number_of_parameters_;
     else
       return 1;
   }
@@ -2616,7 +2616,7 @@ class Simplex_tree {
     : std::numeric_limits<Filtration_value>::max(); /**< Default infinite value. */
 
  private:
-  std::optional<int> number_of_parameters_; /**< Number of parameters of the multi-filtrations when SimplexTreeOptions::is_multi_parameter.-*/
+  int number_of_parameters_; /**< Number of parameters of the multi-filtrations when SimplexTreeOptions::is_multi_parameter.-*/
 };
 
 // Print a Simplex_tree in os.
