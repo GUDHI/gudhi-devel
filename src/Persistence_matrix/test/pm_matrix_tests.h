@@ -1443,6 +1443,34 @@ void test_barcode() {
   BOOST_CHECK_EQUAL(std::get<2>(*it), 6);
   ++it;
   BOOST_CHECK(it == bars.end());
+
+  //same test but with std::get
+  bars.clear();
+  for (auto it = barcode.begin(); it != barcode.end(); ++it) {
+    bars.emplace(std::get<2>(*it), std::get<0>(*it), std::get<1>(*it));
+  }
+  it = bars.begin();
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), -1);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 1);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 3);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 2);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 4);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 7);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 8);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 1);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 5);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 6);
+  ++it;
+  BOOST_CHECK(it == bars.end());
 }
 
 template <class Matrix>
