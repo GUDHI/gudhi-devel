@@ -540,6 +540,7 @@ class Alpha_complex {
   // Kernel::Point_d are not weighted points
   std::vector<typename Kernel::Point_d> get_point_cloud() {
     std::vector<typename Kernel::Point_d> point_cloud;
+    point_cloud.reserve(vertex_handle_to_iterator_.size());
     std::transform (vertex_handle_to_iterator_.begin(), vertex_handle_to_iterator_.end(),
                     std::back_inserter(point_cloud),
                     [](auto iter){ 
