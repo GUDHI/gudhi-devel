@@ -79,8 +79,8 @@ class DTMDensity:
     only works for a Euclidean metric, so in other cases the total measure may not be 1.
 
     .. note:: When the dimension is high, using it as an exponent can quickly lead to under- or overflows.
-        We recommend using a small fixed value instead in those cases, even if it won't have the same nice
-        theoretical properties as the dimension.
+        We recommend using a small fixed value instead (for both dim and q) in those cases, even if it won't
+        have the same nice theoretical properties as the dimension.
     """
 
     def __init__(self, k=None, weights=None, q=None, dim=None, normalize=False, n_samples=None, **kwargs):
