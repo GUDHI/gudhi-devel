@@ -60,8 +60,8 @@ struct Persistence_interval {
 
 namespace std {
 
-template<>
-struct tuple_size<Gudhi::persistence_matrix::Persistence_interval<int, double> >
+template<typename dimension_type, typename event_value_type>
+struct tuple_size<Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type> >
     : std::integral_constant<std::size_t, 3> {};
 
 template <size_t I, typename dimension_type, typename event_value_type>
