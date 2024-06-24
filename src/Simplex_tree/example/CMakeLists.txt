@@ -10,10 +10,7 @@ add_test(NAME Simplex_tree_example_simple_simplex_tree COMMAND $<TARGET_FILE:Sim
 add_executable_with_targets(Simplex_tree_example_mini_simplex_tree mini_simplex_tree.cpp TBB::tbb)
 add_test(NAME Simplex_tree_example_mini_simplex_tree COMMAND $<TARGET_FILE:Simplex_tree_example_mini_simplex_tree>)
 
-add_executable ( Simplex_tree_multi_example simplex_tree_multi.cpp )
-if(TARGET TBB::tbb)
-  target_link_libraries(Simplex_tree_multi_example TBB::tbb)
-endif()
+add_executable_with_targets ( Simplex_tree_multi_example simplex_tree_multi.cpp TBB::tbb)
 add_test(NAME Simplex_tree_multi_example COMMAND $<TARGET_FILE:Simplex_tree_multi_example>)
 
 
