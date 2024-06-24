@@ -28,10 +28,19 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 cdef extern from "Delaunay_complex_interface.h" namespace "Gudhi":
+    cdef cppclass Delaunay_filtration "Gudhi::delaunay_complex::Delaunay_filtration":
+        pass
+
+cdef extern from "Delaunay_complex_interface.h" namespace "Gudhi::delaunay_complex::Delaunay_filtration":
+    cdef Delaunay_filtration NONE
+    cdef Delaunay_filtration CECH
+    cdef Delaunay_filtration ALPHA
+
+cdef extern from "Delaunay_complex_interface.h" namespace "Gudhi":
     cdef cppclass Delaunay_complex_interface "Gudhi::delaunay_complex::Delaunay_complex_interface":
         Delaunay_complex_interface(vector[vector[double]] points, vector[double] weights, bool fast_version, bool exact_version) nogil except +
         vector[double] get_point(int vertex) nogil except +
-        void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, double max_alpha_square, bool default_filtration_value, bool assign_meb_filtration) nogil except +
+        void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, double max_alpha_square, Delaunay_filtration filtration) nogil except +
         @staticmethod
         void set_float_relative_precision(double precision) nogil
         @staticmethod
@@ -121,11 +130,16 @@ cdef class DelaunayComplex:
         stree = SimplexTree()
         cdef double mas = max_alpha_square
         cdef intptr_t stree_int_ptr=stree.thisptr
-        cdef bool compute_filtration = filtration is None
-        cdef bool cech = filtration == 'cech'
+
+        cdef Delaunay_filtration filt = NONE
+        if filtration == 'cech':
+            filt = CECH
+        elif filtration == 'alpha':
+            filt = ALPHA
+
         with nogil:
             self.this_ptr.create_simplex_tree(<Simplex_tree_python_interface*>stree_int_ptr,
-                                              mas, compute_filtration, cech)
+                                              mas, filt)
         return stree
 
     @staticmethod

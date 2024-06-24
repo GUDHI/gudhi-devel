@@ -31,6 +31,12 @@ namespace Gudhi {
 
 namespace delaunay_complex {
 
+enum class Delaunay_filtration : char {
+  NONE  = 'n',   ///< Delaunay complex
+  CECH  = 'c',   ///< Delaunay Cech complex
+  ALPHA = 'a',   ///< Alpha complex
+};
+
 // template Functor that transforms a CGAL point to a vector of double as expected by cython
 template<typename CgalPointType, bool Weighted>
 struct Point_cgal_to_cython;
@@ -66,11 +72,8 @@ static CgalPointType pt_cython_to_cgal(std::vector<double> const& vec) {
 
 template <typename Delaunay_complex, typename Kernel, bool Weighted>
 bool create_complex(Delaunay_complex& delaunay_complex, Simplex_tree_interface* simplex_tree, double max_alpha_square,
-                    bool exact_version, bool default_filtration_value, bool assign_meb_filtration) {
-  if (assign_meb_filtration == false) {
-    return delaunay_complex.create_complex(*simplex_tree, max_alpha_square,
-                                            exact_version, default_filtration_value);
-  } else {
+                    bool exact_version, Delaunay_filtration filtration) {
+  if (filtration == Delaunay_filtration::CECH) {
     if (Weighted)
       throw std::runtime_error("Weighted Delaunay-Cech complex is not available");
     // Construct the Delaunay complex
@@ -78,13 +81,17 @@ bool create_complex(Delaunay_complex& delaunay_complex, Simplex_tree_interface* 
                                      std::numeric_limits<Simplex_tree_interface::Filtration_value>::infinity(),
                                      exact_version,
                                      true);
-    if ((result == true) && (default_filtration_value == false)) {
+    if (result == true) {
       // Construct the Delaunay-Cech complex by assigning filtration values with MEB
       Gudhi::cech_complex::assign_MEB_filtration(Kernel(), *simplex_tree,
                                                  delaunay_complex.get_point_cloud());
     }
     return result;
+  } else {
+    return delaunay_complex.create_complex(*simplex_tree, max_alpha_square,
+                                          exact_version, filtration == Delaunay_filtration::NONE);
   }
+
 }
 
 class Abstract_delaunay_complex {
@@ -92,7 +99,7 @@ class Abstract_delaunay_complex {
   virtual std::vector<double> get_point(int vh) = 0;
 
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
-                                   bool default_filtration_value, bool assign_meb_filtration) = 0;
+                                   Delaunay_filtration filtration) = 0;
   
   virtual std::size_t num_vertices() const = 0;
   
@@ -126,10 +133,9 @@ class Delaunay_complex_t final : public Abstract_delaunay_complex {
   }
 
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
-                                   bool default_filtration_value, bool assign_meb_filtration) override {
+                                   Delaunay_filtration filtration) override {
     return create_complex<Delaunay_complex, Kernel, Weighted>(delaunay_complex_, simplex_tree, max_alpha_square,
-                                                              exact_version_, default_filtration_value,
-                                                              assign_meb_filtration);
+                                                              exact_version_, filtration);
   }
 
   virtual std::size_t num_vertices() const override {

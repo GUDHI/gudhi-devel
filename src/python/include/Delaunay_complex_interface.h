@@ -81,10 +81,10 @@ class Delaunay_complex_interface {
   }
 
   void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
-                           bool default_filtration_value, bool assign_meb_filtration = false) {
+                           Delaunay_filtration filtration) {
     // Nothing to be done in case of an empty point set
     if (delaunay_ptr_->num_vertices() > 0)
-      delaunay_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, default_filtration_value, assign_meb_filtration);
+      delaunay_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, filtration);
   }
 
   static void set_float_relative_precision(double precision) {
