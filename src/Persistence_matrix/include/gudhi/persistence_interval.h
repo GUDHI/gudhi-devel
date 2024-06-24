@@ -17,7 +17,7 @@
 #ifndef PM_INTERVAL_INCLUDED
 #define PM_INTERVAL_INCLUDED
 
-#include <iostream>
+#include <ostream>
 #include <limits>
 #include <tuple>
 
@@ -32,25 +32,48 @@ namespace persistence_matrix {
  */
 template <typename dimension_type, typename event_value_type>
 struct Persistence_interval {
+  /**
+   * @brief Stores the infinity value for birth and death events.
+   *
+   * Is also used as default value for birth and death attributes when not initialized.
+   */
   static constexpr event_value_type inf = std::numeric_limits<event_value_type>::has_infinity
                                               ? std::numeric_limits<event_value_type>::infinity()
                                               : static_cast<event_value_type>(-1);
 
+  /**
+   * @brief Default constructor. Initializes the stored dimension to -1 and the stored birth and death values
+   * to @ref Persistence_interval::inf.
+   */
   Persistence_interval() : dim(-1), birth(inf), death(inf) {}
 
+  /**
+   * @brief Constructor. Initializes the stored dimension and the stored birth to the given values and the stored
+   * death value to @ref Persistence_interval::inf.
+   * 
+   * @param dim Dimension of the cycle.
+   * @param birth Birth value of the cycle.
+   */
   Persistence_interval(dimension_type dim, event_value_type birth) : dim(dim), birth(birth), death(inf) {}
 
+  /**
+   * @brief Constructor. Initializes the stored dimension, the stored birth value and the stored
+   * death value to the given values.
+   * 
+   * @param dim Dimension of the cycle.
+   * @param birth Birth value of the cycle.
+   * @param death Death value of the cycle.
+   */
   Persistence_interval(dimension_type dim, event_value_type birth, event_value_type death)
       : dim(dim), birth(birth), death(death) {}
 
-  dimension_type dim;     /**< Dimension of the bar.*/
-  event_value_type birth; /**< Birth index in the current filtration. */
-  event_value_type death; /**< Death index in the current filtration. */
+  dimension_type dim;     /**< Dimension of the cycle.*/
+  event_value_type birth; /**< Birth value of the cycle. */
+  event_value_type death; /**< Death value of the cycle. */
 
   inline friend std::ostream &operator<<(std::ostream &stream, const Persistence_interval &interval) {
     stream << "[" << interval.dim << "] ";
     stream << interval.birth << ", " << interval.death;
-    stream << "\n";
     return stream;
   }
 };
@@ -60,9 +83,16 @@ struct Persistence_interval {
 
 namespace std {
 
-template<typename dimension_type, typename event_value_type>
+template <typename dimension_type, typename event_value_type>
 struct tuple_size<Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type> >
     : std::integral_constant<std::size_t, 3> {};
+
+template <std::size_t I, typename dimension_type, typename event_value_type>
+struct tuple_element<I, Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type> > {
+  static_assert(I < 3, "Value mismatch at argument 1 in template parameter list. Maximal possible value is 2.");
+
+  using type = typename std::conditional<I < 2, event_value_type, dimension_type>::type;
+};
 
 template <size_t I, typename dimension_type, typename event_value_type>
 constexpr typename tuple_element<I, tuple<event_value_type, event_value_type, dimension_type> >::type& get(
