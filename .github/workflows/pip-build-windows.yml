@@ -10,7 +10,7 @@ jobs:
       matrix:
         python-version: ['3.9']
         include:
-          - python-version: '3.8'
+          - python-version: '3.9'
             numpy-version: '1.19.3'
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
