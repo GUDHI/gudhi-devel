@@ -29,8 +29,9 @@ namespace persistence_matrix {
  * @class Persistence_interval persistence_interval.h gudhi/persistence_interval.h
  * @ingroup persistence_matrix
  *
- * @brief Type for an interval in a persistent diagram or barcode.
- * Stores the birth, death and dimension of the interval.
+ * @brief Type for an interval in a persistent diagram or barcode. Stores the birth, death and dimension of the
+ * interval. It can be used as a tuple with `get`/`std::get` (birth, death and dimension in this order),
+ * `std::tuple_element` and `std::tuple_size`, as well as structured binding.
  * 
  * @tparam dimension_type Type of the dimension value.
  * @tparam event_value_type Type of the birth and death value.
@@ -51,29 +52,13 @@ struct Persistence_interval {
                                               : static_cast<event_value_type>(-1);
 
   /**
-   * @brief Default constructor. Initializes the stored dimension to -1 and the stored birth and death values
-   * to @ref inf.
-   */
-  Persistence_interval() : dim(-1), birth(inf), death(inf) {}
-
-  /**
-   * @brief Constructor. Initializes the stored dimension and the stored birth to the given values and the stored
-   * death value to @ref inf.
+   * @brief Constructor.
    * 
-   * @param dim Dimension of the cycle.
-   * @param birth Birth value of the cycle.
+   * @param dim Dimension of the cycle. Default value: -1.
+   * @param birth Birth value of the cycle. Default value: @ref inf.
+   * @param death Death value of the cycle. Default value: @ref inf.
    */
-  Persistence_interval(dimension_type dim, event_value_type birth) : dim(dim), birth(birth), death(inf) {}
-
-  /**
-   * @brief Constructor. Initializes the stored dimension, the stored birth value and the stored
-   * death value to the given values.
-   * 
-   * @param dim Dimension of the cycle.
-   * @param birth Birth value of the cycle.
-   * @param death Death value of the cycle.
-   */
-  Persistence_interval(dimension_type dim, event_value_type birth, event_value_type death)
+  Persistence_interval(dimension_type dim = -1, event_value_type birth = inf, event_value_type death = inf)
       : dim(dim), birth(birth), death(death) {}
 
   dimension_type dim;     /**< Dimension of the cycle.*/
@@ -85,40 +70,6 @@ struct Persistence_interval {
     stream << interval.birth << ", " << interval.death;
     return stream;
   }
-};
-
-}  // namespace persistence_matrix
-}  // namespace Gudhi
-
-namespace std {
-
-/**
- * @ingroup persistence_matrix
- *
- * @brief Overload of `std::tuple_size` for @ref Gudhi::persistence_matrix::Persistence_interval.
- * 
- * @tparam dimension_type First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
- * @tparam event_value_type Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
- */
-template <typename dimension_type, typename event_value_type>
-struct tuple_size<Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type> >
-    : std::integral_constant<std::size_t, 3> {};
-
-/**
- * @ingroup persistence_matrix
- *
- * @brief Overload of `std::tuple_element` for @ref Gudhi::persistence_matrix::Persistence_interval.
- * 
- * @tparam I Index of the type to store: 0 for the birth value type, 1 for the death value type and 2 for the
- * dimension value type.
- * @tparam dimension_type First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
- * @tparam event_value_type Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
- */
-template <std::size_t I, typename dimension_type, typename event_value_type>
-struct tuple_element<I, Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type> > {
-  static_assert(I < 3, "Value mismatch at argument 1 in template parameter list. Maximal possible value is 2.");
-
-  using type = typename std::conditional<I < 2, event_value_type, dimension_type>::type;
 };
 
 /**
@@ -201,6 +152,62 @@ constexpr const auto&& get(
   if constexpr (I == 0) return std::move(i.birth);
   if constexpr (I == 1) return std::move(i.death);
   if constexpr (I == 2) return std::move(i.dim);
+}
+
+}  // namespace persistence_matrix
+}  // namespace Gudhi
+
+namespace std {
+
+/**
+ * @ingroup persistence_matrix
+ *
+ * @brief Overload of `std::tuple_size` for @ref Gudhi::persistence_matrix::Persistence_interval.
+ * 
+ * @tparam dimension_type First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @tparam event_value_type Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
+ */
+template <typename dimension_type, typename event_value_type>
+struct tuple_size<Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type> >
+    : std::integral_constant<std::size_t, 3> {};
+
+/**
+ * @ingroup persistence_matrix
+ *
+ * @brief Overload of `std::tuple_element` for @ref Gudhi::persistence_matrix::Persistence_interval.
+ * 
+ * @tparam I Index of the type to store: 0 for the birth value type, 1 for the death value type and 2 for the
+ * dimension value type.
+ * @tparam dimension_type First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @tparam event_value_type Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
+ */
+template <std::size_t I, typename dimension_type, typename event_value_type>
+struct tuple_element<I, Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type> > {
+  static_assert(I < 3, "Value mismatch at argument 1 in template parameter list. Maximal possible value is 2.");
+
+  using type = typename std::conditional<I < 2, event_value_type, dimension_type>::type;
+};
+
+template <size_t I, typename dimension_type, typename event_value_type>
+constexpr auto& get(Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type>& i) noexcept {
+  return Gudhi::persistence_matrix::get<I>(i);
+}
+
+template <size_t I, typename dimension_type, typename event_value_type>
+constexpr const auto& get(
+    const Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type>& i) noexcept {
+  return Gudhi::persistence_matrix::get<I>(i);
+}
+
+template <size_t I, typename dimension_type, typename event_value_type>
+constexpr auto&& get(Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type>&& i) noexcept {
+  return Gudhi::persistence_matrix::get<I>(i);
+}
+
+template <size_t I, typename dimension_type, typename event_value_type>
+constexpr const auto&& get(
+    const Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type>&& i) noexcept {
+  return Gudhi::persistence_matrix::get<I>(i);
 }
 
 }  // namespace std
