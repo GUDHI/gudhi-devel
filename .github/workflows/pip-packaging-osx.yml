@@ -14,7 +14,7 @@ env:
 # numpy~=1.21.4 means any numpy=1.21.*, but also numpy>=1.21.4 (numpy~=1.21 do not work as it means any numpy==1.*)
 jobs:
   build:
-    # Should use macos-latest, but python 3.8 is no more available from macos-14
+    # Should use macos-latest, but python 3.8 and 3.9 is no more available from macos-14
     runs-on: macos-13
     name: Build wheels for Python 3.8
     steps:
@@ -69,7 +69,8 @@ jobs:
 # NumPy packages for osx x86 and arm are only available from 1.21.2, but stable for both versions from 1.21.4 and python 3.8+
 jobs:
   build:
-    runs-on: macos-latest
+    # Should use macos-latest, but python 3.8 and 3.9 is no more available from macos-14
+    runs-on: macos-13
     strategy:
       max-parallel: 4
       matrix:
