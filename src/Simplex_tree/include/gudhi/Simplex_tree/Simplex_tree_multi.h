@@ -13,7 +13,6 @@
 
 #include <algorithm>
 #include <gudhi/Simplex_tree.h>
-#include <tbb/parallel_for.h>
 
 namespace Gudhi::multiparameter {
 /** Model of SimplexTreeOptions, with a multiparameter filtration. */
