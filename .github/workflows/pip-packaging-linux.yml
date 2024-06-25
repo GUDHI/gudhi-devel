@@ -9,12 +9,14 @@ jobs:
     name: build pip wheel
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
-    container: gudhi/pip_for_gudhi:2024.06.01
+    container: gudhi/pip_for_gudhi:2024.06.02
     steps:
       # Should use actions/checkout@v4, but requires node20, not available for quay.io/pypa/manylinux2014_x86_64
       - uses: actions/checkout@v3
         with:
           submodules: true
+      # Python 3.8 specific case where NumPy 2.x will not be supported
+      # numpy~=1.21.4 means any numpy=1.21.*, but also numpy>=1.21.4 (numpy~=1.21 do not work as it means any numpy==1.*)
       - name: Build wheel for Python 3.8
         run: |
           mkdir build_38
@@ -40,10 +42,14 @@ jobs:
           cd src/python
           $PYTHON39/bin/python -m build -n -w
           auditwheel repair dist/*.whl
+      # For python >=3.9, numpy >= 2.0 is used to package and test ABI compatibility with numpy 1.X
+      # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
+      # gudhi requires numpy >= 1.15.0, but minimal numpy version for python 3.9 is 1.19.3 for instance
+      # numpy~=1.19.3 means any numpy=1.19.*, but also numpy>=1.19.3 (numpy~=1.19 do not work as it means any numpy==1.*)
       - name: Install and test wheel for Python 3.9
         run: |
           $PYTHON39/bin/python -m pip install --user pytest build_39/src/python/dist/*.whl
-          $PYTHON39/bin/python -m pip install numpy --upgrade
+          $PYTHON39/bin/python -m pip install numpy~=1.19.3
           $PYTHON39/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON39/bin/python -m pytest -v src/python/test/test_alpha_complex.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
@@ -60,7 +66,7 @@ jobs:
       - name: Install and test wheel for Python 3.10
         run: |
           $PYTHON310/bin/python -m pip install --user pytest build_310/src/python/dist/*.whl
-          $PYTHON310/bin/python -m pip install numpy --upgrade
+          $PYTHON310/bin/python -m pip install numpy~=1.21.6
           $PYTHON310/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON310/bin/python -m pytest -v src/python/test/test_alpha_complex.py
           $PYTHON310/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
@@ -77,7 +83,7 @@ jobs:
       - name: Install and test wheel for Python 3.11
         run: |
           $PYTHON311/bin/python -m pip install --user pytest build_311/src/python/dist/*.whl
-          $PYTHON311/bin/python -m pip install numpy --upgrade
+          $PYTHON311/bin/python -m pip install numpy~=1.23.2
           $PYTHON311/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON311/bin/python -m pytest -v src/python/test/test_alpha_complex.py
           $PYTHON311/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
@@ -94,7 +100,7 @@ jobs:
       - name: Install and test wheel for Python 3.12
         run: |
           $PYTHON312/bin/python -m pip install --user pytest build_312/src/python/dist/*.whl
-          $PYTHON312/bin/python -m pip install numpy --upgrade
+          $PYTHON312/bin/python -m pip install numpy~=1.26.0
           $PYTHON312/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON312/bin/python -m pytest -v src/python/test/test_alpha_complex.py
           $PYTHON312/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
