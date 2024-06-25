@@ -26,6 +26,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @class Persistence_interval persistence_interval.h gudhi/persistence_interval.h
  * @ingroup persistence_matrix
  *
  * @brief Type for an interval in a persistent diagram or barcode.
@@ -37,7 +38,11 @@ namespace persistence_matrix {
 template <typename dimension_type, typename event_value_type>
 struct Persistence_interval {
   /**
-   * @brief Stores the infinity value for birth and death events.
+   * @brief Stores the infinity value for birth and death events. Its value depends on the template parameter
+   * `event_value_type`:
+   * - if `event_value_type` has a native infinity value, it takes this value,
+   * - otherwise, if `event_value_type` is a signed type, it takes value -1,
+   * - otherwise, if `event_value_type` is a unsigned type, it takes the maximal possible value.
    *
    * Is also used as default value for birth and death attributes when not initialized.
    */
@@ -47,13 +52,13 @@ struct Persistence_interval {
 
   /**
    * @brief Default constructor. Initializes the stored dimension to -1 and the stored birth and death values
-   * to @ref Persistence_interval::inf.
+   * to @ref inf.
    */
   Persistence_interval() : dim(-1), birth(inf), death(inf) {}
 
   /**
    * @brief Constructor. Initializes the stored dimension and the stored birth to the given values and the stored
-   * death value to @ref Persistence_interval::inf.
+   * death value to @ref inf.
    * 
    * @param dim Dimension of the cycle.
    * @param birth Birth value of the cycle.
