@@ -83,7 +83,7 @@ jobs:
   python:
     docker:
       - image: gudhi/ci_for_gudhi:2024.06.01
-    resource_class: medium+ # Delaunay complex requires about 5 Gb of RAM to compile
+    resource_class: large # Delaunay complex requires about 5 Gb of RAM to compile
     steps:
       - checkout
       - run:
