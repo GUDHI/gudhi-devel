@@ -5,7 +5,6 @@ on:
     types: [published]
 
 # Python 3.8 specific case where NumPy 2.x will not be supported
-# NumPy packages for osx x86 and arm are only available from 1.21.2, but stable for both versions from 1.21.4 and python 3.8+
 # numpy~=1.21.4 means any numpy=1.21.*, but also numpy>=1.21.4 (numpy~=1.21 do not work as it means any numpy==1.*)
 jobs:
   build:
