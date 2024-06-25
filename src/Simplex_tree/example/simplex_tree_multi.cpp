@@ -10,6 +10,7 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Simplex_tree/Simplex_tree_multi.h>
+#include <gudhi/Simplex_tree/multi_filtrations/Finitely_critical_filtrations.h>
 
 #include <iostream>
 #include <initializer_list>
@@ -19,7 +20,7 @@ public:
 	typedef Gudhi::linear_indexing_tag Indexing_tag;
 	typedef int Vertex_handle;
 	typedef float value_type;
-	using Filtration_value = Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration<value_type>;
+	using Filtration_value = Gudhi::multiparameter::multi_filtrations::One_critical_filtration<value_type>;
 	typedef std::uint32_t Simplex_key;
 	static const bool store_key = true;
 	static const bool store_filtration = true;
