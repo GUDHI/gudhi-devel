@@ -19,6 +19,7 @@ jobs:
       # numpy~=1.21.4 means any numpy=1.21.*, but also numpy>=1.21.4 (numpy~=1.21 do not work as it means any numpy==1.*)
       - name: Build wheel for Python 3.8
         run: |
+          rm -rf src/python/gudhi/*.cpp
           mkdir build_38
           cd build_38
           cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON38/bin/python ..
@@ -36,6 +37,7 @@ jobs:
           $PYTHON38/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.9
         run: |
+          rm -rf src/python/gudhi/*.cpp
           mkdir build_39
           cd build_39
           cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON39/bin/python ..
@@ -57,6 +59,7 @@ jobs:
           $PYTHON39/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.10
         run: |
+          rm -rf src/python/gudhi/*.cpp
           mkdir build_310
           cd build_310
           cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON310/bin/python ..
@@ -74,6 +77,7 @@ jobs:
           $PYTHON310/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.11
         run: |
+          rm -rf src/python/gudhi/*.cpp
           mkdir build_311
           cd build_311
           cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON311/bin/python ..
@@ -91,6 +95,7 @@ jobs:
           $PYTHON311/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.12
         run: |
+          rm -rf src/python/gudhi/*.cpp
           mkdir build_312
           cd build_312
           cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON312/bin/python ..

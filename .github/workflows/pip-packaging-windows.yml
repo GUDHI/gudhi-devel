@@ -4,10 +4,10 @@ on:
   release:
     types: [published]
 
-# Python 3.8 specific case where NumPy 2.x will not be supported
-# numpy~=1.21.4 means any numpy=1.21.*, but also numpy>=1.21.4 (numpy~=1.21 do not work as it means any numpy==1.*)
 jobs:
-  build:
+  # Python 3.8 specific case where NumPy 2.x will not be supported
+  # numpy~=1.21.4 means any numpy=1.21.*, but also numpy>=1.21.4 (numpy~=1.21 do not work as it means any numpy==1.*)
+  wheels_3_8:
     runs-on: windows-latest
     name: Build wheels for Python 3.8
     steps:
@@ -58,9 +58,8 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: python -m twine upload build/src/python/dist/*.whl
 
-# Python 3.9+ specific case where NumPy 2.x will be supported
-jobs:
-  build:
+  # Python 3.9+ specific case where NumPy 2.x will be supported
+  wheels:
     runs-on: windows-latest
     strategy:
       max-parallel: 4
