@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
     name: build pip wheel
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
     container: gudhi/pip_for_gudhi:2024.06.02
     steps:
