@@ -13,6 +13,25 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
+      # Python 3.8 specific case where NumPy 2.x will not be supported
+      # numpy~=1.21.4 means any numpy=1.21.*, but also numpy>=1.21.4 (numpy~=1.21 do not work as it means any numpy==1.*)
+      - name: Build wheel for Python 3.8
+        run: |
+          mkdir build_38
+          cd build_38
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON38/bin/python ..
+          cd src/python
+          $PYTHON38/bin/python -m build -n -w
+          auditwheel repair dist/*.whl
+      - name: Install and test wheel for Python 3.8
+        run: |
+          $PYTHON38/bin/python -m pip install --user pytest build_38/src/python/dist/*.whl
+          $PYTHON38/bin/python -m pip install numpy --upgrade
+          $PYTHON38/bin/python -c "import gudhi; print(gudhi.__version__)"
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.9
         run: |
           mkdir build_39
@@ -21,7 +40,10 @@ jobs:
           cd src/python
           $PYTHON39/bin/python -m build -n -w
           auditwheel repair dist/*.whl
-      # NumPy 2.X is installed and guarantees ABI compatibility, test it with the minimal numpy version for python version
+      # For python >=3.9, numpy >= 2.0 is used to package and test ABI compatibility with numpy 1.X
+      # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
+      # gudhi requires numpy >= 1.15.0, but minimal numpy version for python 3.9 is 1.19.3 for instance
+      # numpy~=1.19.3 means any numpy=1.19.*, but also numpy>=1.19.3 (numpy~=1.19 do not work as it means any numpy==1.*)
       - name: Install and test wheel for Python 3.9
         run: |
           $PYTHON39/bin/python -m pip install --user pytest build_39/src/python/dist/*.whl
@@ -31,9 +53,54 @@ jobs:
           $PYTHON39/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_cubical_complex.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_rips_complex.py
-      - name: Upload linux python wheel
-        # Should use actions/upload-artifact@v4, but requires node20, not available for quay.io/pypa/manylinux2014_x86_64
-        uses: actions/upload-artifact@v3
-        with:
-          name: linux python wheel
-          path: build_39/src/python/wheelhouse/*.whl
+      - name: Build wheel for Python 3.10
+        run: |
+          mkdir build_310
+          cd build_310
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON310/bin/python ..
+          cd src/python
+          $PYTHON310/bin/python -m build -n -w
+          auditwheel repair dist/*.whl
+      - name: Install and test wheel for Python 3.10
+        run: |
+          $PYTHON310/bin/python -m pip install --user pytest build_310/src/python/dist/*.whl
+          $PYTHON310/bin/python -m pip install numpy~=1.21.6
+          $PYTHON310/bin/python -c "import gudhi; print(gudhi.__version__)"
+          $PYTHON310/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON310/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON310/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON310/bin/python -m pytest -v src/python/test/test_rips_complex.py
+      - name: Build wheel for Python 3.11
+        run: |
+          mkdir build_311
+          cd build_311
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON311/bin/python ..
+          cd src/python
+          $PYTHON311/bin/python -m build -n -w
+          auditwheel repair dist/*.whl
+      - name: Install and test wheel for Python 3.11
+        run: |
+          $PYTHON311/bin/python -m pip install --user pytest build_311/src/python/dist/*.whl
+          $PYTHON311/bin/python -m pip install numpy~=1.23.2
+          $PYTHON311/bin/python -c "import gudhi; print(gudhi.__version__)"
+          $PYTHON311/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON311/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON311/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON311/bin/python -m pytest -v src/python/test/test_rips_complex.py
+      - name: Build wheel for Python 3.12
+        run: |
+          mkdir build_312
+          cd build_312
+          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON312/bin/python ..
+          cd src/python
+          $PYTHON312/bin/python -m build -n -w
+          auditwheel repair dist/*.whl
+      - name: Install and test wheel for Python 3.12
+        run: |
+          $PYTHON312/bin/python -m pip install --user pytest build_312/src/python/dist/*.whl
+          $PYTHON312/bin/python -m pip install numpy~=1.26.0
+          $PYTHON312/bin/python -c "import gudhi; print(gudhi.__version__)"
+          $PYTHON312/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON312/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON312/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON312/bin/python -m pytest -v src/python/test/test_rips_complex.py
