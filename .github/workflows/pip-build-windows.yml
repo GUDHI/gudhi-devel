@@ -8,10 +8,10 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.8']
+        python-version: ['3.9']
         include:
-          - python-version: '3.8'
-            numpy-version: '1.21.4'
+          - python-version: '3.9'
+            numpy-version: '1.19.3'
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
@@ -21,16 +21,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
+      # For python >=3.9, numpy >= 2.0 for package build and ABI compatibility with numpy 1.X and 2.X
+      # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
       - name: Install dependencies
         run: |
+          $ErrorActionPreference = 'Stop'
           set VCPKG_BUILD_TYPE=release
           vcpkg install eigen3 cgal --triplet x64-windows
           vcpkg version
           ls "C:\vcpkg\installed\x64-windows\bin\"
-          python -m pip install --user numpy~=${{ matrix.numpy-version }}
+          python -m pip install --user numpy>=2.0
           python -m pip install --user -r .\ext\gudhi-deploy\build-requirements.txt
       - name: Build python wheel and install it
         run: |
+          $ErrorActionPreference = 'Stop'
           mkdir build
           cd ".\build\"
           cmake -DCMAKE_BUILD_TYPE=Release -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows ..
@@ -41,11 +45,13 @@ jobs:
           ls ".\dist\"
           cd ".\dist\"
           Get-ChildItem *.whl | ForEach-Object{python -m pip install --user $_.Name}
+      # Test ABI compatibility with numpy 1.X
       - name: Test python wheel
         run: |
+          $ErrorActionPreference = 'Stop'
           Get-Location
           dir
-          python -m pip install --user  numpy --upgrade
+          python -m pip install --user numpy~=${{ matrix.numpy-version }}
           python -m pip install --user pytest
           python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest -v ".\src\python\test\test_alpha_complex.py"
