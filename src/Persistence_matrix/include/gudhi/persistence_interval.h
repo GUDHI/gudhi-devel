@@ -75,7 +75,7 @@ struct Persistence_interval {
 /**
  * @ingroup persistence_matrix
  *
- * @brief Overload of `std::get` for @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @brief Partial specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
  * 
  * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
  * @tparam dimension_type First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
@@ -95,7 +95,7 @@ constexpr auto& get(Gudhi::persistence_matrix::Persistence_interval<dimension_ty
 /**
  * @ingroup persistence_matrix
  *
- * @brief Overload of `std::get` for @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @brief Partial specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
  * 
  * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
  * @tparam dimension_type First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
@@ -116,7 +116,7 @@ constexpr const auto& get(
 /**
  * @ingroup persistence_matrix
  *
- * @brief Overload of `std::get` for @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @brief Partial specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
  * 
  * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
  * @tparam dimension_type First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
@@ -136,7 +136,7 @@ constexpr auto&& get(Gudhi::persistence_matrix::Persistence_interval<dimension_t
 /**
  * @ingroup persistence_matrix
  *
- * @brief Overload of `std::get` for @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @brief Partial specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
  * 
  * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
  * @tparam dimension_type First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
@@ -162,7 +162,7 @@ namespace std {
 /**
  * @ingroup persistence_matrix
  *
- * @brief Overload of `std::tuple_size` for @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @brief Partial specialization of `std::tuple_size` for @ref Gudhi::persistence_matrix::Persistence_interval.
  * 
  * @tparam dimension_type First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
  * @tparam event_value_type Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
@@ -174,7 +174,7 @@ struct tuple_size<Gudhi::persistence_matrix::Persistence_interval<dimension_type
 /**
  * @ingroup persistence_matrix
  *
- * @brief Overload of `std::tuple_element` for @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @brief Partial specialization of `std::tuple_element` for @ref Gudhi::persistence_matrix::Persistence_interval.
  * 
  * @tparam I Index of the type to store: 0 for the birth value type, 1 for the death value type and 2 for the
  * dimension value type.
@@ -201,13 +201,13 @@ constexpr const auto& get(
 
 template <size_t I, typename dimension_type, typename event_value_type>
 constexpr auto&& get(Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type>&& i) noexcept {
-  return Gudhi::persistence_matrix::get<I>(i);
+  return Gudhi::persistence_matrix::get<I>(std::move(i));
 }
 
 template <size_t I, typename dimension_type, typename event_value_type>
 constexpr const auto&& get(
     const Gudhi::persistence_matrix::Persistence_interval<dimension_type, event_value_type>&& i) noexcept {
-  return Gudhi::persistence_matrix::get<I>(i);
+  return Gudhi::persistence_matrix::get<I>(std::move(i));
 }
 
 }  // namespace std
