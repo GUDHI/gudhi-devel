@@ -1,13 +1,13 @@
 [
     {
-        "name": "v3.10.0rc2",
-        "version": "3.10.0rc2",
-        "url": "https://gudhi.inria.fr/python/3.10.0rc2/"
+        "name": "v3.10.0 (latest)",
+        "version": "3.10.0",
+        "url": "https://gudhi.inria.fr/python/latest/"
     },
     {
-        "name": "v3.9.0 (latest)",
+        "name": "v3.9.0",
         "version": "3.9.0",
-        "url": "https://gudhi.inria.fr/python/latest/"
+        "url": "https://gudhi.inria.fr/python/3.9.0/"
     },
     {
         "name": "v3.8.0",
