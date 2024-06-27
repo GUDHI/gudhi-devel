@@ -7,7 +7,7 @@ jobs:
     pool:
       vmImage: macOS-latest
     variables:
-      pythonVersion: '3.7'
+      pythonVersion: '3.9'
       cmakeBuildType: Release
 
     steps:
@@ -43,7 +43,7 @@ jobs:
     pool:
       vmImage: windows-latest
     variables:
-      pythonVersion: '3.7'
+      pythonVersion: '3.9'
       cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
       cmakeFlags: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
 
@@ -59,34 +59,27 @@ jobs:
     - script: |
         git submodule update --init
         python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-        # No PyKeOps on windows, let's workaround this one.
-        for /F "tokens=*" %%A in (ext\gudhi-deploy\test-requirements.txt) do python -m pip install  %%A
+        python -m pip install --user -r ext/gudhi-deploy/test-requirements.txt
         # Only vcpkg release libs for CI
         echo.set(VCPKG_BUILD_TYPE release)>> C:\vcpkg\triplets\x64-windows.cmake
         vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
         choco install -y ninja --force --force-dependencies
       displayName: 'Install build dependencies'
     - script: |
+        $ErrorActionPreference = 'Stop'
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
-        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         mkdir build
         cd build
         cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(cmakeFlags) ..
-        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         ninja
-        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         ctest --output-on-failure -C Release -E diff_files
-        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cmake  -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
-        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         cd src\python
         copy "C:\vcpkg\installed\x64-windows\bin\mpfr*.dll" ".\gudhi\"
         copy "C:\vcpkg\installed\x64-windows\bin\gmp*.dll" ".\gudhi\"
         copy "C:\vcpkg\installed\x64-windows\bin\tbb*.dll" ".\gudhi\"
         python setup.py build_ext --inplace
-        IF %errorlevel% NEQ 0 exit /b %errorlevel%
         SET PYTHONPATH=%CD%;%PYTHONPATH%
         echo %PYTHONPATH%
         ctest --output-on-failure -C Release
-        IF %errorlevel% NEQ 0 exit /b %errorlevel%
       displayName: 'Build and test'

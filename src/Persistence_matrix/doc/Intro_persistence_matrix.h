@@ -36,7 +36,8 @@ namespace persistence_matrix {
  * @li swapping of two consecutive faces in a filtration (cf. vineyards @cite vineyards) while maintaining a valid
  * reduced boundary matrix or compatible chain complex base and a valid barcode with respect to the new filtration,
  * 
- * 
+ * \note Matrix API is in a beta version and may change in incompatible ways in the near future.
+ *
  * \subsection matrixexamples Examples
  * 
  * Here is a list of examples using the module:
