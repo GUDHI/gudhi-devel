@@ -331,8 +331,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * @brief The disposer object function for boost intrusive container
    */
   struct delete_disposer {
-    delete_disposer() {};
-    delete_disposer(Base_matrix_with_column_compression* matrix) : matrix_(matrix) {};
+    delete_disposer(Base_matrix_with_column_compression* matrix) : matrix_(matrix) {}
 
     void operator()(Column_type* delete_this) { matrix_->columnPool_->destroy(delete_this); }
 
@@ -353,7 +352,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * @brief Column factory. Has to be a pointer as Simple_object_pool is not swappable, so their adresses have to be
    * exchanged instead.
    */
-  Simple_object_pool<Column_type>* columnPool_;
+  std::unique_ptr<Simple_object_pool<Column_type> > columnPool_;
   inline static const Column_type empty_column_;      /**< Representative for empty columns. */
 
   void _insert_column(index columnIndex);
@@ -434,7 +433,6 @@ template <class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>::~Base_matrix_with_column_compression() 
 {
   columnToRep_.clear_and_dispose(delete_disposer(this));
-  delete columnPool_;
 }
 
 template <class Master_matrix>
