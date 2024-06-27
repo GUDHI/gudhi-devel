@@ -103,16 +103,6 @@ cdef class DelaunayComplex:
          """
         return self.this_ptr != NULL
 
-    def get_point(self, vertex):
-        """This function returns the point corresponding to a given vertex from the :class:`~gudhi.SimplexTree`.
-
-        :param vertex: The vertex.
-        :type vertex: int
-        :rtype: list of float
-        :returns: the point.
-        """
-        return self.this_ptr.get_point(vertex)
-
     def create_simplex_tree(self, max_alpha_square = float('inf'), filtration = None):
         """
         :param max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
@@ -203,6 +193,21 @@ cdef class AlphaComplex(DelaunayComplex):
                           Please consider constructing a DelaunayComplex instead.
                           ''', DeprecationWarning)
         return super().create_simplex_tree(max_alpha_square, filtration)
+
+    def get_point(self, vertex):
+        """This function returns the point corresponding to a given vertex from the :class:`~gudhi.SimplexTree` (the
+        same as the k-th input point, where `k=vertex`)
+
+        :param vertex: The vertex.
+        :type vertex: int
+        :rtype: list of float
+        :returns: the point.
+
+        :raises IndexError: In case the point has no associated vertex in the diagram (because of weights or because it
+            is a duplicate).
+        """
+        return self.this_ptr.get_point(vertex)
+
 
 cdef class DelaunayCechComplex(DelaunayComplex):
     """DelaunayCechComplex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
