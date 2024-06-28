@@ -1,6 +1,6 @@
-from copy import deepcopy
 import numpy as np
 
+from sklearn.base import clone
 from sklearn.cluster import KMeans
 
 from gudhi.representations import (Atol, Landscape, Silhouette, BettiCurve, ComplexPolynomial, \
@@ -41,28 +41,28 @@ def test_fit():
     print(f" > Testing `fit`.")
     for name, vectorizer in vectorizers.items():
         print(f" >> Testing {name}")
-        deepcopy(vectorizer).fit(X=[diag1[0], diag2[0]])
+        clone(vectorizer).fit(X=[diag1[0], diag2[0]])
 
 
 def test_fit_empty():
     print(f" > Testing `fit_empty`.")
     for name, vectorizer in vectorizers.items():
         print(f" >> Testing {name}")
-        deepcopy(vectorizer).fit(X=[diag3[0], diag3[0]])
+        clone(vectorizer).fit(X=[diag3[0], diag3[0]])
 
 
 def test_transform():
     print(f" > Testing `transform`.")
     for name, vectorizer in vectorizers.items():
         print(f" >> Testing {name}")
-        deepcopy(vectorizer).fit_transform(X=[diag1[0], diag2[0], diag3[0]])
+        clone(vectorizer).fit_transform(X=[diag1[0], diag2[0], diag3[0]])
 
 
 def test_transform_empty():
     print(f" > Testing `transform_empty`.")
     for name, vectorizer in vectorizers.items():
         print(f" >> Testing {name}")
-        copy_vec = deepcopy(vectorizer).fit(X=[diag1[0], diag2[0]])
+        copy_vec = clone(vectorizer).fit(X=[diag1[0], diag2[0]])
         copy_vec.transform(X=[diag3[0], diag3[0]])
 
 
@@ -72,7 +72,7 @@ def test_set_output():
         import pandas
         for name, vectorizer in vectorizers.items():
             print(f" >> Testing {name}")
-            deepcopy(vectorizer).set_output(transform="pandas")
+            clone(vectorizer).set_output(transform="pandas")
     except ImportError:
         print("Missing pandas, skipping set_output test")
 
@@ -83,8 +83,8 @@ def test_compose():
     for name, vectorizer in vectorizers.items():
         print(f" >> Testing {name}")
         ct = ColumnTransformer([
-            (f"{name}-0", deepcopy(vectorizer), 0),
-            (f"{name}-1", deepcopy(vectorizer), 1),
-            (f"{name}-2", deepcopy(vectorizer), 2)]
+            (f"{name}-0", clone(vectorizer), 0),
+            (f"{name}-1", clone(vectorizer), 1),
+            (f"{name}-2", clone(vectorizer), 2)]
         )
         ct.fit_transform(X=[diag1, diag2])
