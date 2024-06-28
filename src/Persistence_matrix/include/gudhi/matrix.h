@@ -27,6 +27,7 @@
 #include <gudhi/Debug_utils.h>
 
 #include <gudhi/persistence_matrix_options.h>
+#include <gudhi/persistence_interval.h>
 
 #include <gudhi/Fields/Z2_field_operators.h>
 
@@ -161,27 +162,11 @@ class Matrix {
    */
   using element_type = typename Field_operators::element_type;
   using characteristic_type = typename Field_operators::characteristic_type;
-
-  // TODO: move outside? unify with other bar types in Gudhi?
+  
   /**
    * @brief Type for a bar in the computed barcode. Stores the birth, death and dimension of the bar.
    */
-  struct Bar {
-    Bar() : dim(-1), birth(-1), death(-1) {}
-
-    Bar(dimension_type dim, pos_index birth, pos_index death) : dim(dim), birth(birth), death(death) {}
-
-    dimension_type dim; /**< Dimension of the bar.*/
-    pos_index birth;    /**< Birth index in the current filtration. */
-    pos_index death;    /**< Death index in the current filtration. */
-
-    inline friend std::ostream &operator<<(std::ostream &stream, const Bar& bar) {
-      stream << "[" << bar.dim << "] ";
-      stream << bar.birth << ", " << bar.death;
-      stream << "\n";
-      return stream;
-    }
-  };
+  using Bar = Persistence_interval<dimension_type, pos_index>;
 
   //tags for boost to associate a row and a column to a same cell
   struct matrix_row_tag;
