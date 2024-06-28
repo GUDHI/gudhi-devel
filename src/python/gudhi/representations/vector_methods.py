@@ -818,6 +818,13 @@ class Atol(BaseEstimator, TransformerMixin):
         filtered_measures_concat = measures_concat[~np.isinf(measures_concat).any(axis=1), :] if len(measures_concat) else measures_concat
         filtered_weights_concat = weights_concat[~np.isinf(measures_concat).any(axis=1)] if len(measures_concat) else weights_concat
 
+        n_clusters = self.quantiser.n_clusters
+        n_points = len(filtered_measures_concat)
+        if n_points < n_clusters:
+            # If not enough points to fit (including 0), let's arbitrarily put centers in [0, 1)^2
+            print(f"[Atol] had {n_points} points to fit {n_clusters} clusters, adding random points in [0, 1)^2.")
+            filtered_weights_concat = np.concatenate((filtered_weights_concat, np.ones(shape=(n_clusters - n_points))))
+            filtered_measures_concat = np.concatenate((filtered_measures_concat, np.random.random((n_clusters - n_points, 2))))
 
         self.quantiser.fit(X=filtered_measures_concat, sample_weight=filtered_weights_concat)
         self.centers = self.quantiser.cluster_centers_
