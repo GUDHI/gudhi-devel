@@ -807,7 +807,7 @@ class Atol(BaseEstimator, TransformerMixin):
             self
         """
         if not hasattr(self.quantiser, 'fit'):
-            raise TypeError("quantiser %s has no `fit` attribute." % (self.quantiser))
+            raise TypeError(f"quantiser {self.quantiser} has no `fit` attribute.")
 
         if sample_weight is None:
             sample_weight = [self.get_weighting_method()(measure) for measure in X]
