@@ -1,3 +1,5 @@
+# The following tests only check that the program runs, not what it outputs
+
 import numpy as np
 
 from sklearn.base import clone
