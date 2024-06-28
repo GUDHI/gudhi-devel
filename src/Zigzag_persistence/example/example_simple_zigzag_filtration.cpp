@@ -19,24 +19,34 @@ using filtration_value = ZP::filtration_value;
 using Interval_filtration = ZP::Filtration_value_interval;
 
 void print_barcode(ZP& zp) {
-  std::clog << std::endl << "Current barcode:" << std::endl;
-  for (auto& bar : zp.get_persistence_diagram(0, true)) {
-    std::clog << std::floor(bar.birth()) << " - ";
-    if (bar.death() == std::numeric_limits<filtration_value>::infinity()) {
-      std::clog << "inf";
-    } else {
-      std::clog << std::floor(bar.death());
-    }
-    std::clog << " (" << bar.dim() << ")" << std::endl;
+  std::cout << std::endl << "Current barcode:" << std::endl;
+  for (Interval_filtration& bar : zp.get_persistence_diagram(0, true)) {
+    //stream out content of bar
+    std::cout << bar << std::endl;
+    //to access the content of the bar, it can either be used as a struct:
+    //  bar.birth
+    //  bar.death
+    //  bar.dim
+    //or as a tuple
+    //  std::get<0>(bar) <- birth
+    //  std::get<1>(bar) <- death
+    //  std::get<2>(bar) <- dim
   }
 }
 
 void print_indices(ZP& zp) {
-  std::clog << std::endl << "Current pairs:" << std::endl;
+  std::cout << std::endl << "Current pairs:" << std::endl;
   for (auto& bar : zp.get_index_persistence_diagram()) {
-    std::clog << bar.birth() << " - ";
-    std::clog << bar.death();
-    std::clog << " (" << bar.dim() << ")" << std::endl;
+    //stream out content of bar
+    std::cout << bar << std::endl;
+    //to access the content of the bar, it can either be used as a struct:
+    //  bar.birth
+    //  bar.death
+    //  bar.dim
+    //or as a tuple:
+    //  std::get<0>(bar) <- birth
+    //  std::get<1>(bar) <- death
+    //  std::get<2>(bar) <- dim
   }
 }
 

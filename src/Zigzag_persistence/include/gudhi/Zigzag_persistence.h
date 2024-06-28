@@ -181,7 +181,7 @@ class Zigzag_persistence
    * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
    * the filtration. The pairs of birth and death indices are retrieved via the given callback method every time
    * a pair is closed. To retrieve the open pairs (corresponding to infinit bars),
-   * use @ref get_current_infinit_intervals.
+   * use @ref get_current_infinite_intervals.
    *
    * @param stream_interval Callback method to process the birth and death index pairs. Has to take three arguments
    * as input: first the dimension of the cycle, then the birth index of the cycle and third the death index of the
@@ -247,7 +247,7 @@ class Zigzag_persistence
    * @param stream_infinit_interval Method processing the unpaired birth indices.
    */
   template <typename F>
-  void get_current_infinit_intervals(F&& stream_infinit_interval) {
+  void get_current_infinite_intervals(F&& stream_infinit_interval) {
     for (auto& p : births_) {
       if constexpr (erase_birth_history) {
         auto& col = matrix_.get_column(p.first);

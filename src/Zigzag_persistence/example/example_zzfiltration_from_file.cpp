@@ -60,6 +60,7 @@ lineType read_operation(std::string& line, std::vector<id_handle>& faces, double
   return type;
 }
 
+//example of input file: example/zigzag_filtration_example.txt
 int main(int argc, char* const argv[]) {
   if (argc != 2) {
     if (argc < 2)
@@ -72,11 +73,11 @@ int main(int argc, char* const argv[]) {
   std::string line;
   std::ifstream file(argv[1]);
 
-  //std::clog could be replaced by any other output stream
+  //std::cout could be replaced by any other output stream
   ZP zp([](dimension_type dim, filtration_value birth, filtration_value death) {
-    std::clog << "[" << dim << "] ";
-    std::clog << birth << " - " << death;
-    std::clog << std::endl;
+    std::cout << "[" << dim << "] ";
+    std::cout << birth << " - " << death;
+    std::cout << std::endl;
   });
 
   if (file.is_open()) {
@@ -113,11 +114,11 @@ int main(int argc, char* const argv[]) {
   }
 
   //retrieve infinit bars remaining at the end
-  //again std::clog could be replaced by any other output stream
-  zp.get_current_infinit_intervals([](dimension_type dim, filtration_value birth) {
-    std::clog << "[" << dim << "] ";
-    std::clog << birth << " - inf";
-    std::clog << std::endl;
+  //again std::cout could be replaced by any other output stream
+  zp.get_current_infinite_intervals([](dimension_type dim, filtration_value birth) {
+    std::cout << "[" << dim << "] ";
+    std::cout << birth << " - inf";
+    std::cout << std::endl;
   });
 
   return 0;

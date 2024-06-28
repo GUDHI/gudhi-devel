@@ -31,55 +31,10 @@
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Zigzag_persistence.h>
+#include <gudhi/persistence_interval.h>
 
 namespace Gudhi {
 namespace zigzag_persistence {
-
-/**
- * @ingroup zigzag_persistence
- *
- * @brief Structure to store persistence intervals by their birth and death values.
- * 
- * @tparam value_type Type for the birth and death indices.
- */
-template <typename value_type>
-struct Interval {
-  /**
-   * @brief Default constructor. All values are initialized with default values.
-   */
-  Interval() {}
-  /**
-   * @brief Constructor.
-   * 
-   * @param dim Dimension of the cycle.
-   * @param b Birth index or value of the cycle.
-   * @param d Death index or value of the cycle.
-   */
-  Interval(int dim, value_type b, value_type d) : dim_(dim), b_(b), d_(d) {}
-  /**
-   * @brief Returns the dimension of the homological feature corresponding to the interval.
-   * 
-   * @return Stored dimension.
-   */
-  int dim() const { return dim_; }
-  /**
-   * @brief Returns the birth value of the interval.
-   * 
-   * @return The stored birth.
-   */
-  value_type birth() const { return b_; }
-  /**
-   * @brief Returns the death value of the interval.
-   * 
-   * @return The stored death.
-   */
-  value_type death() const { return d_; }
-
- protected:
-  int dim_;       /**< Homological dimension. */
-  value_type b_;  /**< Value associated to the interval birth. */
-  value_type d_;  /**< Value associated to the interval death. */
-};
 
 /**
  * @ingroup zigzag_persistence
@@ -118,51 +73,67 @@ class Filtered_zigzag_persistence_with_storage
   using face_key = typename Options::face_key;                  /**< Face ID type from external inputs. */
   using filtration_value = typename Options::filtration_value;  /**< Type for filtration values. */
   using dimension_type = typename Options::dimension_type;      /**< Type for dimension values. */
-  using Index_interval = Interval<internal_key>;                /**< Persistence interval type. */
 
-  /** \brief Structure to store persistence intervals by their filtration values.
-   *
-   * \details By convention, interval \f$[b;d]\f$ are
-   * closed for finite indices b and d, and open for left-infinite and/or
-   * right-infinite endpoints.
+  /**
+   * @brief Persistence index interval type.
    */
-  struct Filtration_value_interval : Interval<filtration_value> {
-   private:
-    using Base = Interval<filtration_value>;
+  using Index_interval = Gudhi::persistence_matrix::Persistence_interval<dimension_type,internal_key>;
+  /**
+   * @brief Persistence filtration interval type.
+   */
+  using Filtration_value_interval = Gudhi::persistence_matrix::Persistence_interval<dimension_type,filtration_value>;
 
-   public:
-    /**
-     * @brief Default constructor
-     */
-    Filtration_value_interval() : Base() {}
-    /**
-     * @brief Construct a new interval with given parameters
-     *
-     * @param dim Dimension of the interval.
-     * @param b Start value of the interval.
-     * @param d End value of the interval.
-     */
-    Filtration_value_interval(int dim, filtration_value b, filtration_value d) : Base(dim, b, d) {}
+  // /** \brief Structure to store persistence intervals by their filtration values.
+  //  *
+  //  * \details By convention, interval \f$[b;d]\f$ are
+  //  * closed for finite indices b and d, and open for left-infinite and/or
+  //  * right-infinite endpoints.
+  //  */
+  // struct Filtration_value_interval
+  //     : public Gudhi::persistence_matrix::Persistence_interval<dimension_type, filtration_value> {
+  //  private:
+  //   using Base = Gudhi::persistence_matrix::Persistence_interval<int, filtration_value>;
 
-    /**
-     * @brief Returns the absolute length of the interval \f$|d-b|\f$.
-     */
-    filtration_value length() const {
-      if (Base::b_ == Base::d_) {
-        return 0;
-      }  // otherwise inf - inf would return nan.
-      return Base::d_ - Base::b_;
-    }
-    /**
-     * @brief Returns the absolute length of the log values of birth and death, i.e.  \f$|\log d - \log b|\f$.
-     */
-    filtration_value log_length() const {
-      if (Base::b_ == Base::d_) {
-        return 0;
-      }  // otherwise inf - inf would return nan.
-      return std::log2(static_cast<double>(Base::d_)) - std::log2(static_cast<double>(Base::b_));
-    }
-  };
+  //  public:
+  //   /**
+  //    * @brief Default constructor
+  //    */
+  //   Filtration_value_interval() : Base() {}
+  //   /**
+  //    * @brief Construct a new infinit interval with given parameters.
+  //    *
+  //    * @param dim Dimension of the interval.
+  //    * @param b Start value of the interval.
+  //    */
+  //   Filtration_value_interval(int dim, filtration_value b) : Base(dim, b) {}
+  //   /**
+  //    * @brief Construct a new interval with given parameters
+  //    *
+  //    * @param dim Dimension of the interval.
+  //    * @param b Start value of the interval.
+  //    * @param d End value of the interval.
+  //    */
+  //   Filtration_value_interval(int dim, filtration_value b, filtration_value d) : Base(dim, b, d) {}
+
+  //   /**
+  //    * @brief Returns the absolute length of the interval \f$|d-b|\f$.
+  //    */
+  //   filtration_value length() const {
+  //     if (Base::birth == Base::death) {
+  //       return 0;
+  //     }  // otherwise inf - inf would return nan.
+  //     return Base::death - Base::birth;
+  //   }
+  //   /**
+  //    * @brief Returns the absolute length of the log values of birth and death, i.e.  \f$|\log d - \log b|\f$.
+  //    */
+  //   filtration_value log_length() const {
+  //     if (Base::birth == Base::death) {
+  //       return 0;
+  //     }  // otherwise inf - inf would return nan.
+  //     return std::log2(static_cast<double>(Base::death)) - std::log2(static_cast<double>(Base::birth));
+  //   }
+  // };
 
   /**
    * @brief Constructor.
@@ -368,13 +339,13 @@ class Filtered_zigzag_persistence_with_storage
 
     for (auto bar : persistenceDiagram_) {
       filtration_value birth, death;
-      std::tie(birth, death) = map_index_to_filtration_value(bar.birth(), bar.death());
+      std::tie(birth, death) = map_index_to_filtration_value(bar.birth, bar.death);
       if (birth > death) {
         std::swap(birth, death);
       }
 
       if (death - birth > shortestInterval) {
-        diag.emplace_back(bar.dim(), birth, death);
+        diag.emplace_back(bar.dim, birth, death);
       }
     }
 
@@ -403,10 +374,10 @@ class Filtered_zigzag_persistence_with_storage
 
     auto stream_infinit_interval = [&](dimension_type dim, internal_key birthIndex) {
       if (dimMax_ == -1 || (dimMax_ != -1 && dim < dimMax_))
-        diag.emplace_back(dim, birth(birthIndex), std::numeric_limits<filtration_value>::infinity());
+        diag.emplace_back(dim, birth(birthIndex));
     };
 
-    pers_.get_current_infinit_intervals(stream_infinit_interval);
+    pers_.get_current_infinite_intervals(stream_infinit_interval);
   }
 };  // end class Filtered_zigzag_persistence_with_storage
 
@@ -432,7 +403,7 @@ class Filtered_zigzag_persistence {
    * @details After construction of the class, the zigzag filtration should be given in a streaming like way, i.e.,
    * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
    * the filtration. The bars of the diagram are retrieved via the given callback method every time
-   * a pair with non-zero length is closed. To retrieve the open/infinit bars, use @ref get_current_infinit_intervals.
+   * a pair with non-zero length is closed. To retrieve the open/infinit bars, use @ref get_current_infinite_intervals.
    *
    * @param stream_interval Callback method to process the birth and death values of a persistence bar.
    * Has to take three arguments as input: first the dimension of the cycle, then the birth value of the cycle
@@ -531,8 +502,8 @@ class Filtered_zigzag_persistence {
    * @param stream_infinit_interval Method processing the unpaired birth values.
    */
   template <typename F>
-  void get_current_infinit_intervals(F&& stream_infinit_interval) {
-    pers_.get_current_infinit_intervals(
+  void get_current_infinite_intervals(F&& stream_infinit_interval) {
+    pers_.get_current_infinite_intervals(
         [&](dimension_type dim, internal_key birth) { stream_infinit_interval(dim, keyToFiltrationValue_.at(birth)); });
   }
 

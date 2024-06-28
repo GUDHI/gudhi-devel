@@ -25,6 +25,23 @@ namespace zigzag_persistence {
  * complex by adding simplices, zigzag persistence also allows removals. Hence the name "zigzag", as the module
  * diagram will have arrows alterning between forward and backward.
  *
+ * The module is partitioned in two types of classes: filtered and non-filtered.
+ * - There is one non-filtered class:
+ * @ref Zigzag_persistence. It computes the persistence by considering only the atomic operations in the filtration.
+ * If the order in which the operations are made still matters, the filtration values associated to an operation 
+ * is not token into account. For example, if a cycle is born at operation number 6 and dies at operation number 7, it
+ * will output a bar starting at 6 and ending at 7, even if both operations have the same filtration value and therefore
+ * the "real" bar has length 0.
+ * - There are two filtered classes: @ref Filtered_zigzag_persistence and @ref Filtered_zigzag_persistence_with_storage.
+ * They are both based on @ref Zigzag_persistence and manage additionnaly the filtration values which are ignored by 
+ * @ref Zigzag_persistence. They automatically translate the operation numbers into their corresponding filtration
+ * values and remove bars below a given length threshold. They also have more flexible inputs (the boundaries do not
+ * have to be ordered, nor identified continously from 0). The two classes diverge on the way they manage the memory:
+ * @ref Filtered_zigzag_persistence removes systematically all unnecessary information and outputs a pair as soon
+ * it is closed, while @ref Filtered_zigzag_persistence_with_storage will store all informations about filtration values
+ * and bars until the end and output the pairs only when asked. Depending on the use and the length of the filtration,
+ * one will be more efficiant than the other and vice versa.
+ *
  * The implementation is based on the algorithm introduced in \cite zigzag.
  *
  * \subsection zigzaginterface Stream-like interface
@@ -33,16 +50,16 @@ namespace zigzag_persistence {
  * filtration anymore. This makes it possible to build very long fine tuned filtrations with relatively small complexes
  * which can be processed without overreaching memory space. For this purpose, it is possible to feed the module with
  * information about the filtration "on the fly" to avoid loading the whole filtration at once. Information about the
- * current barcode can be retrieved between any steps.
+ * current barcode can be retrieved between any steps via callback methods.
  * 
  * \subsection zigzagexamples Examples
  * 
  * Here is a list of zigzag persistence examples :
  * \li \gudhi_example_link{Zigzag_persistence,example_simple_zigzag_filtration.cpp} - A simple example to showcase how
- * to use the \ref Zigzag_persistence class.
+ * to use the @ref Filtered_zigzag_persistence_with_storage class.
  *
  * \li \gudhi_example_link{Zigzag_persistence,example_zzfiltration_from_file.cpp} - An example of a "stream-like" usage
- * by reading of the filtration from a file.
+ * with @ref Filtered_zigzag_persistence by reading off the filtration from a file.
  * 
  * @}
  */

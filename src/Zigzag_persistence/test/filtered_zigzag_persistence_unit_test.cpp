@@ -18,20 +18,17 @@
 
 #include <gudhi/Filtered_zigzag_persistence.h>
 
-struct cmp_intervals_by_length {
-  cmp_intervals_by_length() {}
+struct Interval_comparator {
+  Interval_comparator() {}
   template<class Interval_filtration>
   bool operator()(const Interval_filtration& p, const Interval_filtration& q) {
-    if (p.length() != q.length()) {
-      return p.length() > q.length();
+    if (p.dim != q.dim) {
+      return p.dim < q.dim;
     }
-    if (p.dim() != q.dim()) {
-      return p.dim() < q.dim();
+    if (p.birth != q.birth) {
+      return p.birth < q.birth;
     }
-    if (p.birth() != q.birth()) {
-      return p.birth() < q.birth();
-    }
-    return p.death() < q.death();
+    return p.death < q.death;
   }
 };
 
@@ -56,13 +53,13 @@ BOOST_AUTO_TEST_CASE(constructor) {
 template<class ZP>
 void test_barcode(ZP& zp, std::vector<typename ZP::Filtration_value_interval>& barcode) {
   auto bars = zp.get_persistence_diagram(0, true);
-  std::stable_sort(bars.begin(), bars.end(), cmp_intervals_by_length());
-  std::stable_sort(barcode.begin(), barcode.end(), cmp_intervals_by_length());
+  std::stable_sort(bars.begin(), bars.end(), Interval_comparator());
+  std::stable_sort(barcode.begin(), barcode.end(), Interval_comparator());
   auto it = barcode.begin();
   for (const auto& interval : bars) {
-    BOOST_CHECK_EQUAL(interval.dim(), it->dim());
-    BOOST_CHECK_EQUAL(interval.birth(), it->birth());
-    BOOST_CHECK_EQUAL(interval.death(), it->death());
+    BOOST_CHECK_EQUAL(interval.dim, it->dim);
+    BOOST_CHECK_EQUAL(interval.birth, it->birth);
+    BOOST_CHECK_EQUAL(interval.death, it->death);
     ++it;
   }
   BOOST_CHECK(it == barcode.end());
@@ -73,12 +70,12 @@ void test_indices(ZP& zp, std::vector<typename ZP::Index_interval>& indices,
                   std::vector<typename ZP::filtration_value>& indexToFil) {
   auto it = indices.begin();
   for (const auto& interval : zp.get_index_persistence_diagram()) {
-    BOOST_CHECK_EQUAL(interval.dim(), it->dim());
-    BOOST_CHECK_EQUAL(interval.birth(), it->birth());
-    BOOST_CHECK_EQUAL(interval.death(), it->death());
-    auto p = zp.map_index_to_filtration_value(interval.birth(), interval.death());
-    BOOST_CHECK_EQUAL(p.first, indexToFil[interval.birth()]);
-    BOOST_CHECK_EQUAL(p.second, indexToFil[interval.death()]);
+    BOOST_CHECK_EQUAL(interval.dim, it->dim);
+    BOOST_CHECK_EQUAL(interval.birth, it->birth);
+    BOOST_CHECK_EQUAL(interval.death, it->death);
+    auto p = zp.map_index_to_filtration_value(interval.birth, interval.death);
+    BOOST_CHECK_EQUAL(p.first, indexToFil[interval.birth]);
+    BOOST_CHECK_EQUAL(p.second, indexToFil[interval.death]);
     ++it;
   }
   BOOST_CHECK(it == indices.end());
@@ -197,9 +194,9 @@ void test_filtered_zigzag_with_storage() {
   auto id = simplices[28][0];
   zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[28]);
 
-  realBarcode.emplace_back(0, 0, std::numeric_limits<filtration_value>::infinity());
-  realBarcode.emplace_back(0, 9, std::numeric_limits<filtration_value>::infinity());
-  realBarcode.emplace_back(2, 10, std::numeric_limits<filtration_value>::infinity());
+  realBarcode.emplace_back(0, 0);
+  realBarcode.emplace_back(0, 9);
+  realBarcode.emplace_back(2, 10);
 
   test_indices(zp, realIndices, filValues);
   test_barcode(zp, realBarcode);
@@ -254,8 +251,8 @@ void test_filtered_zigzag_with_storage_max1() {
   auto id = simplices[28][0];
   zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[28]);
 
-  realBarcode.emplace_back(0, 0, std::numeric_limits<filtration_value>::infinity());
-  realBarcode.emplace_back(0, 9, std::numeric_limits<filtration_value>::infinity());
+  realBarcode.emplace_back(0, 0);
+  realBarcode.emplace_back(0, 9);
 
   test_indices(zp, realIndices, filValues);
   test_barcode(zp, realBarcode);
@@ -346,7 +343,7 @@ void test_filtered_zigzag() {
 
   //there is no real garantee on the order of the infinite bars
   std::vector<Interval> infiniteBars;
-  zp.get_current_infinit_intervals([&](dimension_type dim, filtration_value birth) {
+  zp.get_current_infinite_intervals([&](dimension_type dim, filtration_value birth) {
     infiniteBars.emplace_back(dim, birth, std::numeric_limits<filtration_value>::infinity());
   });
 
@@ -450,7 +447,7 @@ void test_filtered_zigzag_max1() {
 
   //there is no real garantee on the order of the infinite bars
   std::vector<Interval> infiniteBars;
-  zp.get_current_infinit_intervals([&](dimension_type dim, filtration_value birth) {
+  zp.get_current_infinite_intervals([&](dimension_type dim, filtration_value birth) {
     if (dim < 1){
       infiniteBars.emplace_back(dim, birth, std::numeric_limits<filtration_value>::infinity());
     }

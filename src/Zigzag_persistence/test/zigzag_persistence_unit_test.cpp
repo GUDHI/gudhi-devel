@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_single) {
   realIndices.emplace_back(2, 28, -1);
 
   auto start = pairs.size();
-  zp.get_current_infinit_intervals(stream_inf);
+  zp.get_current_infinite_intervals(stream_inf);
   std::sort(pairs.begin() + start, pairs.end(), [](const Interval& i1, const Interval& i2){
     if (i1.dim() != i2.dim()) return i1.dim() < i2.dim();
     return i1.birth() < i2.birth();
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_single_max1) {
   realIndices.emplace_back(0, 26, -1);
 
   auto start = pairs.size();
-  zp.get_current_infinit_intervals(stream_inf);
+  zp.get_current_infinite_intervals(stream_inf);
   std::sort(pairs.begin() + start, pairs.end(), [](const Interval& i1, const Interval& i2){
     if (i1.dim() != i2.dim()) return i1.dim() < i2.dim();
     return i1.birth() < i2.birth();
