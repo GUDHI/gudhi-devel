@@ -129,6 +129,9 @@
  * @example example_one_skeleton_rips_from_distance_matrix.cpp
  * @example example_one_skeleton_rips_from_points.cpp
  * @example example_rips_complex_from_off_file.cpp
+ * \section Zigzag_persistence_example_section Zigzag_persistence
+ * @example example_simple_zigzag_filtration.cpp
+ * @example example_zzfiltration_from_file.cpp
  * \section Persistence_matrix_example_section Persistence_matrix
  * @example representative_cycles_from_matrix.cpp
  * @example simplex_tree_to_matrix.cpp
