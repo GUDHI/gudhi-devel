@@ -296,7 +296,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * @param cellConstructor Pointer to the cell factory.
    */
   void reset(Column_settings* colSettings) {
-    columnToRep_.clear_and_dispose(delete_disposer());
+    columnToRep_.clear_and_dispose(delete_disposer(this));
     columnClasses_ = boost::disjoint_sets_with_storage<>();
     repToColumn_.clear();
     nextColumnIndex_ = 0;
@@ -313,9 +313,10 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   friend void swap(Base_matrix_with_column_compression& matrix1, Base_matrix_with_column_compression& matrix2) {
     matrix1.columnToRep_.swap(matrix2.columnToRep_);
     std::swap(matrix1.columnClasses_, matrix2.columnClasses_);
-    matrix1.repToColumn_.swap(matrix2.repToColumn_);  // be careful when columnPool_ becomes not static
+    matrix1.repToColumn_.swap(matrix2.repToColumn_);
     std::swap(matrix1.nextColumnIndex_, matrix2.nextColumnIndex_);
     std::swap(matrix1.colSettings_, matrix2.colSettings_);
+    std::swap(matrix1.columnPool_, matrix2.columnPool_);
 
     if constexpr (Master_matrix::Option_list::has_row_access) {
       swap(static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix1),
@@ -330,7 +331,11 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * @brief The disposer object function for boost intrusive container
    */
   struct delete_disposer {
-    void operator()(Column_type* delete_this) { columnPool_.destroy(delete_this); }
+    delete_disposer(Base_matrix_with_column_compression* matrix) : matrix_(matrix) {}
+
+    void operator()(Column_type* delete_this) { matrix_->columnPool_->destroy(delete_this); }
+
+    Base_matrix_with_column_compression* matrix_;
   };
 
   using ra_opt = typename Master_matrix::Matrix_row_access_option;
@@ -344,11 +349,10 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   index nextColumnIndex_;                             /**< Next unused column index. */
   Column_settings* colSettings_;                      /**< Cell factory. */
   /**
-   * @brief Column factory.
-   * @warning As the member is static, they can eventually be problems if the matrix is duplicated in several threads.
-   * If this become necessary, the static should be removed in the future.
+   * @brief Column factory. Has to be a pointer as Simple_object_pool is not swappable, so their adresses have to be
+   * exchanged instead.
    */
-  inline static Simple_object_pool<Column_type> columnPool_;
+  std::unique_ptr<Simple_object_pool<Column_type> > columnPool_;
   inline static const Column_type empty_column_;      /**< Representative for empty columns. */
 
   void _insert_column(index columnIndex);
@@ -358,7 +362,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
 template <class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_column_compression(
     Column_settings* colSettings)
-    : ra_opt(), nextColumnIndex_(0), colSettings_(colSettings)
+    : ra_opt(), nextColumnIndex_(0), colSettings_(colSettings), columnPool_(new Simple_object_pool<Column_type>)
 {}
 
 template <class Master_matrix>
@@ -369,7 +373,8 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
       columnClasses_(columns.size()),
       repToColumn_(columns.size(), nullptr),
       nextColumnIndex_(0),
-      colSettings_(colSettings) 
+      colSettings_(colSettings),
+      columnPool_(new Simple_object_pool<Column_type>)
 {
   for (const Container_type& c : columns) {
     insert_column(c);
@@ -383,7 +388,8 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
       columnClasses_(numberOfColumns),
       repToColumn_(numberOfColumns, nullptr),
       nextColumnIndex_(0),
-      colSettings_(colSettings)
+      colSettings_(colSettings),
+      columnPool_(new Simple_object_pool<Column_type>)
 {}
 
 template <class Master_matrix>
@@ -393,15 +399,16 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
       columnClasses_(matrixToCopy.columnClasses_),
       repToColumn_(matrixToCopy.repToColumn_.size(), nullptr),
       nextColumnIndex_(0),
-      colSettings_(colSettings == nullptr ? matrixToCopy.colSettings_ : colSettings)
+      colSettings_(colSettings == nullptr ? matrixToCopy.colSettings_ : colSettings),
+      columnPool_(new Simple_object_pool<Column_type>)
 {
   for (const Column_type* col : matrixToCopy.repToColumn_) {
     if (col != nullptr) {
       if constexpr (Master_matrix::Option_list::has_row_access) {
         repToColumn_[nextColumnIndex_] =
-            columnPool_.construct(*col, col->get_column_index(), ra_opt::rows_, colSettings_);
+            columnPool_->construct(*col, col->get_column_index(), ra_opt::rows_, colSettings_);
       } else {
-        repToColumn_[nextColumnIndex_] = columnPool_.construct(*col, colSettings_);
+        repToColumn_[nextColumnIndex_] = columnPool_->construct(*col, colSettings_);
       }
       columnToRep_.insert(columnToRep_.end(), *repToColumn_[nextColumnIndex_]);
       repToColumn_[nextColumnIndex_]->set_rep(nextColumnIndex_);
@@ -418,13 +425,14 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
       columnClasses_(std::move(other.columnClasses_)),
       repToColumn_(std::move(other.repToColumn_)),
       nextColumnIndex_(std::exchange(other.nextColumnIndex_, 0)),
-      colSettings_(std::exchange(other.colSettings_, nullptr)) 
+      colSettings_(std::exchange(other.colSettings_, nullptr)),
+      columnPool_(std::exchange(other.columnPool_, nullptr))
 {}
 
 template <class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>::~Base_matrix_with_column_compression() 
 {
-  columnToRep_.clear_and_dispose(delete_disposer());
+  columnToRep_.clear_and_dispose(delete_disposer(this));
 }
 
 template <class Master_matrix>
@@ -461,16 +469,16 @@ inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(
     columnClasses_.link(nextColumnIndex_, nextColumnIndex_);
     if constexpr (Master_matrix::Option_list::has_row_access) {
       repToColumn_.push_back(
-          columnPool_.construct(nextColumnIndex_, boundary, dim, ra_opt::rows_, colSettings_));
+          columnPool_->construct(nextColumnIndex_, boundary, dim, ra_opt::rows_, colSettings_));
     } else {
-      repToColumn_.push_back(columnPool_.construct(boundary, dim, colSettings_));
+      repToColumn_.push_back(columnPool_->construct(boundary, dim, colSettings_));
     }
   } else {
     if constexpr (Master_matrix::Option_list::has_row_access) {
       repToColumn_[nextColumnIndex_] =
-          columnPool_.construct(nextColumnIndex_, boundary, dim, ra_opt::rows_, colSettings_);
+          columnPool_->construct(nextColumnIndex_, boundary, dim, ra_opt::rows_, colSettings_);
     } else {
-      repToColumn_[nextColumnIndex_] = columnPool_.construct(boundary, dim, colSettings_);
+      repToColumn_[nextColumnIndex_] = columnPool_->construct(boundary, dim, colSettings_);
     }
   }
   _insert_column(nextColumnIndex_);
@@ -584,7 +592,7 @@ Base_matrix_with_column_compression<Master_matrix>::operator=(const Base_matrix_
 {
   for (auto col : repToColumn_) {
     if (col != nullptr) {
-      columnPool_.destroy(col);
+      columnPool_->destroy(col);
       col = nullptr;
     }
   }
@@ -597,9 +605,9 @@ Base_matrix_with_column_compression<Master_matrix>::operator=(const Base_matrix_
   for (const Column_type* col : other.repToColumn_) {
     if constexpr (Master_matrix::Option_list::has_row_access) {
       repToColumn_[nextColumnIndex_] =
-          columnPool_.construct(*col, col->get_column_index(), ra_opt::rows_, colSettings_);
+          columnPool_->construct(*col, col->get_column_index(), ra_opt::rows_, colSettings_);
     } else {
-      repToColumn_[nextColumnIndex_] = columnPool_.construct(*col, colSettings_);
+      repToColumn_[nextColumnIndex_] = columnPool_->construct(*col, colSettings_);
     }
     columnToRep_.insert(columnToRep_.end(), *repToColumn_[nextColumnIndex_]);
     repToColumn_[nextColumnIndex_]->set_rep(nextColumnIndex_);
@@ -643,7 +651,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::_insert_column(i
   Column_type& col = *repToColumn_[columnIndex];
 
   if (col.is_empty()) {
-    columnPool_.destroy(&col);  // delete curr_col;
+    columnPool_->destroy(&col);  // delete curr_col;
     repToColumn_[columnIndex] = nullptr;
     return;
   }
@@ -663,7 +671,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::_insert_double_c
   columnClasses_.link(columnIndex, doubleRep);  // both should be representatives
   index newRep = columnClasses_.find_set(columnIndex);
 
-  columnPool_.destroy(repToColumn_[columnIndex]);
+  columnPool_->destroy(repToColumn_[columnIndex]);
   repToColumn_[columnIndex] = nullptr;
 
   if (newRep == columnIndex) {
