@@ -19,27 +19,63 @@
 
 namespace Gudhi::multiparameter::multi_filtrations {
 
+/*
+* A line in \f$\mathbb R^n\f$, with some helpers to project points on it.
+* When the direction is not given, it is assumed to be diagonal.
+* As the line has a builtin parametrization, points in \f$\mathbb R^n\f$
+* that are on a line are given a time parameter in \f$\mathbb R\f$.
+* The method that end with a 2 returns the time t, while the other
+* ones return the full coordinates
+*/
 template <typename T> class Line {
 public:
   using point_type = One_critical_filtration<T>;
   using kcritical_point_type = Multi_critical_filtration<T>;
+  /*
+   * Checks that the argument define a correct, positively slopped line.
+   */
   bool check_direction() const;
   Line();
   Line(const point_type &x);
   Line(point_type &&x);
   Line(const point_type &x, const point_type &v);
+  /*
+  * Returns the point whose intersection is \f$ \min\{ y\ge x \} \cap \mathrm{this}\f$
+  */
   inline point_type push_forward(point_type x) const;
+  /*
+  * Retuns the time parameter of the coordinate given by push_forward.
+  */
   template <typename U=T>
   inline U push_forward2(const point_type &x) const;
+  /*
+  * Retuns the time parameter of the coordinate given by push_forward.
+  */
   template <typename U=T>
   inline U push_forward2(const kcritical_point_type &x) const;
+  /*
+  * Returns the point whose intersection is \f$ \max\{ y\le x \} \cap \mathrm{this}\f$
+  */
   inline point_type push_back(point_type x) const;
+  /*
+  * Retuns the time parameter of the coordinate given by push_back.
+  */
   template <typename U=T>
   inline U push_back2(const point_type &x) const;
+  /*
+  * Retuns the time parameter of the coordinate given by push_back.
+  */
   template <typename U=T>
   inline U push_back2(const kcritical_point_type &x) const;
   inline int get_dim() const;
+  /*
+  * Given a box, returns the coordinates of the intersection of this box and `this` as a pair of points (low, high)
+  * in this line, representing this interval.
+  */
   std::pair<point_type, point_type> get_bounds(const Box<T> &box) const;
+  /*
+  * Retuns the times parameter of the coordinates in the pair given by get_bounds.
+  */
   std::pair<T,T> get_bounds2(const Box<T> &box) const;
 
   // translation
@@ -64,6 +100,8 @@ template <typename T> inline bool Line<T>::check_direction() const {
     if (stuff < 0){ throw std::invalid_argument("Direction should have positive entries.");}
   }
   if (is_trivial){throw std::invalid_argument("Direction should have at least one non-trivial entry.");}
+  if (direction_.size() && direction_.size() != basepoint_.size())
+    throw std::invalid_argument("The dimensions of basepoint and direction are not equal.");
 }
 template <typename T> Line<T>::Line() {}
 
@@ -93,8 +131,9 @@ Line<T>::push_forward(point_type x) const { // TODO remove copy
 template <typename T>
 template <typename U>
 inline U Line<T>::push_forward2(const point_type &x) const {
-  constexpr const U inf = std::numeric_limits<U>::infinity(); // This disable it for e.g.
-                                                    // ints, but that's good
+  constexpr const U inf = std::numeric_limits<U>::has_infinity ? 
+      std::numeric_limits<U>::infinity() 
+    : std::numeric_limits<U>::max();
   if (x.is_inf() || x.is_nan())
     return inf;
   if (x.is_minus_inf())
@@ -122,7 +161,9 @@ inline U Line<T>::push_forward2(const point_type &x) const {
 template <typename T>
 template <typename U>
 inline U Line<T>::push_forward2(const kcritical_point_type &x) const {
-  constexpr const U inf = std::numeric_limits<U>::infinity();
+  constexpr const U inf = std::numeric_limits<U>::has_infinity ? 
+      std::numeric_limits<U>::infinity() 
+    : std::numeric_limits<U>::max();
   if (x.is_inf() || x.is_nan())
     return inf;
   if (x.is_minus_inf())
@@ -152,7 +193,9 @@ inline typename Line<T>::point_type Line<T>::push_back(point_type x) const {
 
 template <typename T>
 template <typename U> inline U Line<T>::push_back2(const point_type &x) const {
-  constexpr const  U inf = std::numeric_limits<U>::infinity();
+  constexpr const U inf = std::numeric_limits<U>::has_infinity ? 
+      std::numeric_limits<U>::infinity() 
+    : std::numeric_limits<U>::max();
   if (x.is_inf())
     return inf;
   if (x.is_minus_inf() || x.is_nan())
@@ -182,7 +225,9 @@ template <typename T>
 
 template <typename U>
 inline U Line<T>::push_back2(const kcritical_point_type &x) const {
-  constexpr const U inf = std::numeric_limits<U>::infinity();
+  constexpr const U inf = std::numeric_limits<U>::has_infinity ? 
+      std::numeric_limits<U>::infinity() 
+    : std::numeric_limits<U>::max();
   if (x.is_inf())
     return inf;
   if (x.is_minus_inf() || x.is_nan())
