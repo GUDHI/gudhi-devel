@@ -40,12 +40,11 @@
 #include <utility>  // std::pair
 #include <stdexcept>
 #include <numeric>  // for std::iota
-#include <algorithm>  // for std::sort, std::transform
+#include <algorithm>  // for std::sort
 #include <type_traits>  // for std::is_same_v
 #include <cmath>  // isnan, fmax
 #include <memory>  // for std::unique_ptr
 #include <cstddef>  // for std::size_t
-#include <iterator>  // std::back_inserter
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
@@ -534,22 +533,6 @@ class Alpha_complex {
         }
       }
     }
-  }
-
- public:
-  // Kernel::Point_d are not weighted points
-  std::vector<typename Kernel::Point_d> get_point_cloud() {
-    std::vector<typename Kernel::Point_d> point_cloud;
-    point_cloud.reserve(vertex_handle_to_iterator_.size());
-    std::transform (vertex_handle_to_iterator_.begin(), vertex_handle_to_iterator_.end(),
-                    std::back_inserter(point_cloud),
-                    [](auto iter){ 
-                      if constexpr (Weighted)
-                        return iter->point().point();
-                      else
-                        return iter->point();
-                    });
-    return point_cloud;
   }
 };
 

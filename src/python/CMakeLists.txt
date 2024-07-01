@@ -536,6 +536,7 @@ if(PYTHONINTERP_FOUND)
              ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
              --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
       add_gudhi_py_test(test_alpha_complex)
+      add_gudhi_py_test(test_delaunay_complex)
     endif (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
 
     if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)

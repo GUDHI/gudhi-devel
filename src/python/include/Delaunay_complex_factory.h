@@ -70,8 +70,9 @@ static CgalPointType pt_cython_to_cgal(std::vector<double> const& vec) {
   return CgalPointType(vec.size(), vec.begin(), vec.end());
 }
 
-template <typename Delaunay_complex, typename Kernel, bool Weighted>
-bool create_complex(Delaunay_complex& delaunay_complex, Simplex_tree_interface* simplex_tree, double max_alpha_square,
+template <typename Delaunay_complex, typename Kernel, bool Weighted, typename Point_cloud>
+bool create_complex(Delaunay_complex& delaunay_complex, Simplex_tree_interface* simplex_tree,
+                    const Point_cloud& points, double max_alpha_square,
                     bool exact_version, Delaunay_filtration filtration) {
   if (filtration == Delaunay_filtration::CECH) {
     if (Weighted)
@@ -83,8 +84,8 @@ bool create_complex(Delaunay_complex& delaunay_complex, Simplex_tree_interface* 
                                      true);
     if (result == true) {
       // Construct the Delaunay-Cech complex by assigning filtration values with MEB
-      Gudhi::cech_complex::assign_MEB_filtration(Kernel(), *simplex_tree,
-                                                 delaunay_complex.get_point_cloud());
+      Gudhi::cech_complex::assign_MEB_filtration(Kernel(), *simplex_tree, points);
+      simplex_tree->prune_above_filtration(max_alpha_square);
     }
     return result;
   } else {
@@ -118,13 +119,17 @@ class Delaunay_complex_t final : public Abstract_delaunay_complex {
  public:
   Delaunay_complex_t(const std::vector<std::vector<double>>& points, bool exact_version)
     : exact_version_(exact_version),
-      delaunay_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>)) {
+      points_(boost::begin(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>)),
+              boost::end(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>))),
+      delaunay_complex_(points_) {
   }
 
   Delaunay_complex_t(const std::vector<std::vector<double>>& points,
                            const std::vector<double>& weights, bool exact_version)
     : exact_version_(exact_version),
-      delaunay_complex_(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>), weights) {
+      points_(boost::begin(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>)),
+              boost::end(boost::adaptors::transform(points, pt_cython_to_cgal<Bare_point>))),
+      delaunay_complex_(points_, weights) {
   }
 
   virtual std::vector<double> get_point(int vh) override {
@@ -134,8 +139,9 @@ class Delaunay_complex_t final : public Abstract_delaunay_complex {
 
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
                                    Delaunay_filtration filtration) override {
-    return create_complex<Delaunay_complex, Kernel, Weighted>(delaunay_complex_, simplex_tree, max_alpha_square,
-                                                              exact_version_, filtration);
+    return create_complex<Delaunay_complex, Kernel, Weighted, std::vector<Bare_point>>(delaunay_complex_, simplex_tree,
+                                                                                       points_, max_alpha_square,
+                                                                                       exact_version_, filtration);
   }
 
   virtual std::size_t num_vertices() const override {
@@ -144,6 +150,7 @@ class Delaunay_complex_t final : public Abstract_delaunay_complex {
 
  private:
   bool exact_version_;
+  std::vector<Bare_point> points_;
   Delaunay_complex delaunay_complex_;
 };
 
