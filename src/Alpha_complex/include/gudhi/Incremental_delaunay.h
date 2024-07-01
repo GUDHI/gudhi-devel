@@ -88,15 +88,16 @@ void construct_incremental_delaunay(K const&k, SimplicialComplex& complex, Point
         typename Triangulation::Facet ft = tri.compute_conflict_zone(p, s, out);
         for(auto c : cs) {
           /* std::vector<int> splx; */ splx.clear();
+          bool interrupted = false;
           for(int i = 0; i <= tri.current_dimension(); ++i) {
             // We could skip the infinite vertex and output a (new) simplex, but that's not so useful
-            if(tri.is_infinite(c->vertex(i))) goto next_conflicting_cell;
+            if(tri.is_infinite(c->vertex(i))) { interrupted = true; break; }
             splx.push_back(c->vertex(i)->data());
           }
+          if (interrupted) continue;
           // We could put idx at the beginning of the vector once instead of reinserting it each time
           splx.push_back(idx);
           complex.insert_simplex_and_subfaces(splx);
-next_conflicting_cell:;
         }
         tri.insert_in_hole(p, cs.begin(), cs.end(), ft)->data() = idx;
       }
