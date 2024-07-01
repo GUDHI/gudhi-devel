@@ -756,7 +756,7 @@ class Atol(BaseEstimator, TransformerMixin):
             self,
             quantiser=KMeans(n_clusters=2, n_init="auto"),
             weighting_method="cloud",
-            contrast="gaussian"
+            contrast="gaussian",
     ):
         """
         Constructor for the Atol measure vectorisation class.
@@ -794,7 +794,8 @@ class Atol(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None, sample_weight=None):
         """
-        Calibration step: fit centers to the sample measures and derive inertias between centers.
+        Calibration step: fit centers to the target sample measures and derive inertias between centers. If the target
+        does not contain enough points for creating the intended number of centers, we fill in with bogus centers.
 
         Parameters:
             X (list N x d numpy arrays): input measures in R^d from which to learn center locations and inertias
@@ -806,22 +807,24 @@ class Atol(BaseEstimator, TransformerMixin):
         Returns:
             self
         """
-        if not hasattr(self.quantiser, 'fit'):
-            raise TypeError(f"quantiser {self.quantiser} has no `fit` attribute.")
+        n_clusters = self.quantiser.n_clusters
 
+        if not len(X):
+            raise Exception("Cannot fit Atol on empty target.")
+        measures_concat = np.concatenate(X)
         if sample_weight is None:
             sample_weight = [self.get_weighting_method()(measure) for measure in X]
-
-        measures_concat = np.concatenate(X)
         weights_concat = np.concatenate(sample_weight)
-        # In fitting we remove infinite birth/death time points so that every center is finite
+
+        # In fitting we remove infinite birth/death time points so that every center is finite. We do not care about duplicates.
         filtered_measures_concat = measures_concat[~np.isinf(measures_concat).any(axis=1), :] if len(measures_concat) else measures_concat
         filtered_weights_concat = weights_concat[~np.isinf(measures_concat).any(axis=1)] if len(measures_concat) else weights_concat
-
-        n_clusters = self.quantiser.n_clusters
         n_points = len(filtered_measures_concat)
+        if not n_points:
+            raise Exception("Cannot fit Atol on empty target.")
+
         if n_points < n_clusters:
-            # If not enough points to fit (including 0), we will arbitrarily put centers as [-np.inf]^measure_dim at the end
+            # If not enough points to fit (including 0), we will arbitrarily put centers as [-np.inf]^measure_dim at the end.
             print(f"[Atol] had {n_points} points to fit {n_clusters} clusters, adding meaningless cluster centers.")
             self.quantiser.n_clusters = n_points
 
@@ -841,10 +844,10 @@ class Atol(BaseEstimator, TransformerMixin):
             self.inertias = np.min(dist_centers, axis=0)/2
 
         if n_points < n_clusters:
-            # Where we arbitrarily put centers as [-np.inf]^measure_dim at the end
-            fill_center = np.array([[-np.inf, -np.inf]])
+            # Where we arbitrarily put centers as [-np.inf]^measure_dim.
+            fill_center = np.repeat(np.inf, repeats=X[0].shape[1])
             fill_inertia = 0
-            self.centers = np.concatenate([self.centers, np.repeat(fill_center, repeats=n_clusters-n_points, axis=0)])
+            self.centers = np.concatenate([self.centers, np.repeat([fill_center], repeats=n_clusters-n_points, axis=0)])
             self.inertias = np.concatenate([self.inertias, np.repeat(fill_inertia, repeats=n_clusters-n_points)])
             self.quantiser.n_clusters = n_clusters
         return self
