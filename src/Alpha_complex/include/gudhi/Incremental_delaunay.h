@@ -16,15 +16,15 @@ namespace Gudhi {
  * Given a list of points (p1, ..., pn), the incremental Delaunay complex contains the Delaunay triangulation
  * of (p1, ..., pk) for all k≤n. For any simplex s of the triangulation of (p1, ..., pk) that is not in the
  * triangulation of (p1, ..., pn), the complex also contains a simplex formed with the same points as s plus the
- * first pj that conflicts with s (is inside its circumsphere). For points in R^d, the complex usually has
- * dimension d+1.
+ * first pj that conflicts with s (is inside its circumsphere). For points in \f$\mathbb{R}^d\f$, the complex
+ * usually has dimension d+1.
  *
  * This function calls `complex.insert_simplex_and_subfaces` on a set of simplices large enough that, with their
  * faces, they define the incremental Delaunay complex. However, this set is not guaranteed to be minimal, there
  * may be redundancies.
  *
  * No filtration values are computed here, those can be computed separately afterwards, for instance
- * with `Gudhi::cech_complex::assign_MEB_filtration`.
+ * with `Gudhi::cech_complex::assign_MEB_filtration()`.
  *
  * @tparam K CGAL kernel: either Epick_d or Epeck_d.
  * @tparam SimplicialComplex Simplicial complex. It must provide a type `Vertex_handle` constructible from `int`
