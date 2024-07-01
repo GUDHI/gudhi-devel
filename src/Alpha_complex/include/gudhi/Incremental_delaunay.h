@@ -73,32 +73,32 @@ void construct_incremental_delaunay(K const&k, SimplicialComplex& complex, Point
     }
     else {
       if(tri.current_dimension() == 1) {
-	if(lt == Triangulation::OUTSIDE_CONVEX_HULL) {
-	  // only an infinite face disappears
-	} else {
-	  complex.insert_simplex_and_subfaces({s->vertex(0)->data(), s->vertex(1)->data(), idx});
+        if(lt == Triangulation::OUTSIDE_CONVEX_HULL) {
+          // only an infinite face disappears
+        } else {
+          complex.insert_simplex_and_subfaces({s->vertex(0)->data(), s->vertex(1)->data(), idx});
         }
         typename Triangulation::Vertex_handle v = tri.tds().insert_in_full_cell(s);
         v->set_point(p);
         v->data() = idx;
       } else { // main case
         // Adapted from Delaunay_triangulation::insert_in_conflicting_cell(Point,Full_cell_handle)
-	/* Full_cell_h_vector cs; */ cs.clear();
-	std::back_insert_iterator<Full_cell_h_vector> out(cs);
-	typename Triangulation::Facet ft = tri.compute_conflict_zone(p, s, out);
-	for(auto c : cs) {
-	  /* std::vector<int> splx; */ splx.clear();
-	  for(int i = 0; i <= tri.current_dimension(); ++i) {
-	    // We could skip the infinite vertex and output a (new) simplex, but that's not so useful
-	    if(tri.is_infinite(c->vertex(i))) goto next_conflicting_cell;
-	    splx.push_back(c->vertex(i)->data());
-	  }
+        /* Full_cell_h_vector cs; */ cs.clear();
+        std::back_insert_iterator<Full_cell_h_vector> out(cs);
+        typename Triangulation::Facet ft = tri.compute_conflict_zone(p, s, out);
+        for(auto c : cs) {
+          /* std::vector<int> splx; */ splx.clear();
+          for(int i = 0; i <= tri.current_dimension(); ++i) {
+            // We could skip the infinite vertex and output a (new) simplex, but that's not so useful
+            if(tri.is_infinite(c->vertex(i))) goto next_conflicting_cell;
+            splx.push_back(c->vertex(i)->data());
+          }
           // We could put idx at the beginning of the vector once instead of reinserting it each time
-	  splx.push_back(idx);
-	  complex.insert_simplex_and_subfaces(splx);
+          splx.push_back(idx);
+          complex.insert_simplex_and_subfaces(splx);
 next_conflicting_cell:;
-	}
-	tri.insert_in_hole(p, cs.begin(), cs.end(), ft)->data() = idx;
+        }
+        tri.insert_in_hole(p, cs.begin(), cs.end(), ft)->data() = idx;
       }
     }
   }
