@@ -14,7 +14,7 @@
 #include <boost/range/adaptor/sliced.hpp>
 
 #include <CGAL/Epick_d.h>
-//#include <CGAL/Epeck_d.h>
+#include <CGAL/Epeck_d.h>
 
 #include <vector>
 
@@ -25,7 +25,9 @@
 
 using Static_kernel_3 = CGAL::Epick_d< CGAL::Dimension_tag<3> >;
 using Dynamic_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
-using list_of_kernel_3_variants = boost::mpl::list<Static_kernel_3, Dynamic_kernel>;
+// Epick_d should be all that users need, but still test Epeck_d
+using Exact_kernel = CGAL::Epeck_d< CGAL::Dynamic_dimension_tag >;
+using list_of_kernel_3_variants = boost::mpl::list<Static_kernel_3, Dynamic_kernel, Exact_kernel>;
 using Complex = Gudhi::Simplex_tree<>;
 
 template<class K, class R> Complex check_contains_sub_delaunay(K const&, Complex&cplx, R const& points, int i) {
