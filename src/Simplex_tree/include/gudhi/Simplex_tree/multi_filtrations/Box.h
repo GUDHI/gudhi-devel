@@ -38,14 +38,26 @@ public:
   Box(const point_type &bottomCorner, const point_type &upperCorner);
   Box(const std::pair<point_type, point_type> &box);
 
+  /*
+   * Inflates the box by delta
+   */
   void inflate(T delta);
   const point_type &get_bottom_corner() const;
   const point_type &get_upper_corner() const;
   point_type &get_bottom_corner();
   point_type &get_upper_corner();
+  /**
+   * Thresholds a point x to be lower than the top corner of the box
+   */
   inline void threshold_up(point_type &x) const;
+  /*
+   * Thresholds a point x to be upper than the bottom corner of the box
+   */
   inline void threshold_down(point_type &x) const;
   bool contains(const point_type &point) const;
+  /**
+   * Given a list of points, builds the smallest box containing all of them.
+   */
   void infer_from_filters(const std::vector<point_type> &Filters_list);
   bool is_trivial() const;
   std::pair<const point_type &, const point_type &> get_pair() const {
