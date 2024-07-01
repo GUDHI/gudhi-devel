@@ -883,7 +883,7 @@ public:
 
 
   /*
-  * Same as its one parameter counterpart.
+  * Same as its one critical counterpart.
   * If a grid is given, projects multifiltration_ on this grid and returns
   * multi critical filtration composed of the coordinates in the given grid
   *
