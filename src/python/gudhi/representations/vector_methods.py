@@ -821,10 +821,9 @@ class Atol(BaseEstimator, TransformerMixin):
         n_clusters = self.quantiser.n_clusters
         n_points = len(filtered_measures_concat)
         if n_points < n_clusters:
-            # If not enough points to fit (including 0), let's arbitrarily put centers in [0, 1)^2
-            print(f"[Atol] had {n_points} points to fit {n_clusters} clusters, adding random points in [0, 1)^2.")
-            filtered_weights_concat = np.concatenate((filtered_weights_concat, np.ones(shape=(n_clusters - n_points))))
-            filtered_measures_concat = np.concatenate((filtered_measures_concat, np.random.random((n_clusters - n_points, 2))))
+            # If not enough points to fit (including 0), we will arbitrarily put centers as [-np.inf]^measure_dim at the end
+            print(f"[Atol] had {n_points} points to fit {n_clusters} clusters, adding meaningless cluster centers.")
+            self.quantiser.n_clusters = n_points
 
         self.quantiser.fit(X=filtered_measures_concat, sample_weight=filtered_weights_concat)
         self.centers = self.quantiser.cluster_centers_
@@ -840,6 +839,14 @@ class Atol(BaseEstimator, TransformerMixin):
             dist_centers = pairwise.pairwise_distances(self.centers)
             dist_centers[dist_centers == 0] = np.inf
             self.inertias = np.min(dist_centers, axis=0)/2
+
+        if n_points < n_clusters:
+            # Where we arbitrarily put centers as [-np.inf]^measure_dim at the end
+            fill_center = np.array([[-np.inf, -np.inf]])
+            fill_inertia = 0
+            self.centers = np.concatenate([self.centers, np.repeat(fill_center, repeats=n_clusters-n_points, axis=0)])
+            self.inertias = np.concatenate([self.inertias, np.repeat(fill_inertia, repeats=n_clusters-n_points)])
+            self.quantiser.n_clusters = n_clusters
         return self
 
     def __call__(self, measure, sample_weight=None):
