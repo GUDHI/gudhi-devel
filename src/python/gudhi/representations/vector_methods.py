@@ -834,7 +834,7 @@ class Atol(BaseEstimator, TransformerMixin):
         # Hack, but some people are unhappy if the order depends on the version of sklearn
         self.centers = self.centers[np.lexsort(self.centers.T)]
         if self.quantiser.n_clusters == 1:
-            dist_centers = pairwise.pairwise_distances(measures_concat)
+            dist_centers = pairwise.pairwise_distances(filtered_measures_concat)
             np.fill_diagonal(dist_centers, 0)
             best_inertia = np.max(dist_centers)/2 if np.max(dist_centers)/2 > 0 else 1
             self.inertias = np.array([best_inertia])
