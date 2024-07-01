@@ -24,7 +24,7 @@
 #include "Finitely_critical_filtrations.h"
 
 /**
- * @brief Simple box in $\mathbb R^n$ .
+ * @brief Simple box in \f$\mathbb R^n\f$ .
  */
 
 namespace Gudhi::multiparameter::multi_filtrations {
