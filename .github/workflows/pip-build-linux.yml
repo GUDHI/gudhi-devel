@@ -28,6 +28,7 @@ jobs:
           $PYTHON39/bin/python -m pip install numpy~=1.19.3
           $PYTHON39/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON39/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON39/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_cubical_complex.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_rips_complex.py

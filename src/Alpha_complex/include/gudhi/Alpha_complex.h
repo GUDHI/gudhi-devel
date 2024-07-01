@@ -17,10 +17,6 @@
 // to construct Alpha_complex from a OFF file of points
 #include <gudhi/Points_off_io.h>
 
-#include <cmath>  // isnan, fmax
-#include <memory>  // for std::unique_ptr
-#include <cstddef>  // for std::size_t
-
 #include <CGAL/Delaunay_triangulation.h>
 #include <CGAL/Regular_triangulation.h>  // aka. Weighted Delaunay triangulation
 #include <CGAL/Epeck_d.h>  // For EXACT or SAFE version
@@ -46,6 +42,9 @@
 #include <numeric>  // for std::iota
 #include <algorithm>  // for std::sort
 #include <type_traits>  // for std::is_same_v
+#include <cmath>  // isnan, fmax
+#include <memory>  // for std::unique_ptr
+#include <cstddef>  // for std::size_t
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000

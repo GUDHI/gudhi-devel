@@ -51,6 +51,7 @@ jobs:
           python -m pip install --user pytest build/src/python/dist/*.whl
           python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest -v src/python/test/test_alpha_complex.py
+          python -m pytest -v src/python/test/test_delaunay_complex.py
           python -m pytest -v src/python/test/test_bottleneck_distance.py
           python -m pytest -v src/python/test/test_cubical_complex.py
           python -m pytest -v src/python/test/test_rips_complex.py
@@ -121,6 +122,7 @@ jobs:
           python -m pip install --user pytest build/src/python/dist/*.whl
           python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest -v src/python/test/test_alpha_complex.py
+          python -m pytest -v src/python/test/test_delaunay_complex.py
           python -m pytest -v src/python/test/test_bottleneck_distance.py
           python -m pytest -v src/python/test/test_cubical_complex.py
           python -m pytest -v src/python/test/test_rips_complex.py

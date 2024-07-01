@@ -25,10 +25,10 @@ Simplex tree
 Filtrations and reconstructions
 *******************************
 
-Alpha complex
-=============
+Delaunay complex
+================
 
-.. include:: alpha_complex_sum.inc
+.. include:: delaunay_complex_sum.inc
 
 Rips complex
 ============
