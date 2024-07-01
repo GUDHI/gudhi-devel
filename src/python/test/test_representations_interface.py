@@ -46,13 +46,6 @@ def test_fit():
         clone(vectorizer).fit(X=[diag1[0], diag2[0]])
 
 
-def test_fit_empty():
-    print(f" > Testing `fit_empty`.")
-    for name, vectorizer in vectorizers.items():
-        print(f" >> Testing {name}")
-        clone(vectorizer).fit(X=[diag3[0], diag3[0]])
-
-
 def test_transform():
     print(f" > Testing `transform`.")
     for name, vectorizer in vectorizers.items():

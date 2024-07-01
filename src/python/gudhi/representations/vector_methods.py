@@ -821,7 +821,7 @@ class Atol(BaseEstimator, TransformerMixin):
         filtered_weights_concat = weights_concat[~np.isinf(measures_concat).any(axis=1)] if len(measures_concat) else weights_concat
         n_points = len(filtered_measures_concat)
         if not n_points:
-            raise Exception("Cannot fit Atol on empty target.")
+            raise Exception("Cannot fit Atol on measure with infinite components only.")
 
         if n_points < n_clusters:
             # If not enough points to fit (including 0), we will arbitrarily put centers as [-np.inf]^measure_dim at the end.
