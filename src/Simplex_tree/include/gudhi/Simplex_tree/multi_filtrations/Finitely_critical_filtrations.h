@@ -459,14 +459,16 @@ public:
     }
     return sqrt(out);
   }
+  /**
+   * Given a grid in an array of shape (num_parameters, filtration_values of this parameter),
+   * projects itself into this grid, and returns the coordinates of this projected points
+   * in the given grid
+   */
   template <typename out_type=std::int32_t,typename U>
   inline One_critical_filtration<out_type>
   coordinates_in_grid(const std::vector<std::vector<U>>& grid) const {
     One_critical_filtration<out_type> coords(this->size());
     assert(grid.size() >= this->size());
-    // U grid_inf = std::numeric_limits<U>::has_infinity
-    //                  ? std::numeric_limits<U>::infinity()
-    //                  : std::numeric_limits<U>::max();
     for (std::size_t parameter = 0u; parameter < grid.size(); ++parameter) {
       const auto &filtration = grid[parameter];
       auto C = std::distance(
@@ -477,6 +479,11 @@ public:
     }
     return coords;
   }
+  /**
+   * Given a grid in an array of shape (num_parameters, filtration_values of this parameter),
+   * and assuming that `this` correspond to the coordinates in this grid, 
+   * returns the points evaluated in this grid
+   */
   template <typename U>
   inline One_critical_filtration<U>
   evaluate_in_grid(const std::vector<std::vector<U>>& grid) const {
@@ -493,6 +500,9 @@ public:
     return pushed_value;
   }
 
+  /*
+   * Same as `evaluate_in_grid` but does the operation in-place
+   */
   template <typename oned_array>
   inline void coordinates_in_grid_inplace(const std::vector<oned_array>& grid,
                                           bool coordinate = true) {
@@ -509,6 +519,7 @@ public:
       ;
     }
   }
+  // like numpy
   template <typename U> inline One_critical_filtration<U> astype() const {
     One_critical_filtration<U> out(this->size());
     for (std::size_t i = 0u; i < this->size(); i++)
@@ -528,6 +539,15 @@ public:
   constexpr static bool is_multi_critical = false;
 };
 
+/*
+ * Multi-critical filtration. If the `co` parameter is set to true, it reverses the poset order,
+ * i.e., the order \f$\le$\f  in \f$\mathbb R^n\f$ becomes \f$\ge$\f. 
+ *
+ * if `multi_filtration_` contains the points \f$(a_1, a_2, \ldots, a_k) \in (\mathbb R^n)^k\f$,
+ * then a new point \f$x$\f will be in this filtration if there exists an \f$a_i\f$ such that 
+ * \f$a_i \le x\f$.
+ *
+ */
 template <typename T, bool co=false> class Multi_critical_filtration {
 public:
   using value_type = T;
@@ -625,7 +645,10 @@ public:
     }
     return result;
   }
-
+  /*
+   * returns the smallest value for the poset order that is bigger than all of the values
+   * in this multi filtration
+   */
   inline OneCritical factorize_above() const {
     if (this->num_generators() == 0) [[unlikely]]
       return OneCritical();
@@ -720,6 +743,11 @@ public:
     }
   }
 
+  /*
+  * Same method as the one in OneCriticalFiltration. 
+  * Given a grid, and assuming that `this` are the coordianates
+  * in this grid, evaluate `this` into this grid
+  */
   template <typename U>
   inline Multi_critical_filtration<U>
   evaluate_in_grid(const std::vector<std::vector<U>>& grid) const {
@@ -730,6 +758,9 @@ public:
     return out;
   }
   
+  /*
+  * Remove redundant values 
+  */
   inline void clean(value_type max_error = 0) {
     // A bit ugly, todo : erase+removeif ?
     for (std::size_t i = 0; i < multi_filtration_.size(); i++) {
@@ -752,6 +783,12 @@ public:
                        }),
         multi_filtration_.end());
   }
+
+
+  /*
+  * Adds a birth point to the list of births, 
+  * if it is useful (according to the method `dominate`)
+  */
   inline void add_point(const One_critical_filtration<T> &x) {
     const bool verbose = false;
     if (multi_filtration_.empty()) {
@@ -843,6 +880,14 @@ public:
   end() const {
     return multi_filtration_.end();
   }
+
+
+  /*
+  * Same as its one parameter counterpart.
+  * If a grid is given, projects multifiltration_ on this grid and returns
+  * multi critical filtration composed of the coordinates in the given grid
+  *
+  */
   template <typename oned_array>
   inline Multi_critical_filtration<std::int32_t>
   coordinates_in_grid(const std::vector<oned_array>& grid) const {
@@ -853,6 +898,10 @@ public:
     }
     return out;
   }
+  /*
+  * Same as `coordinates_in_grid`, but does the operation in-place.
+  *
+  */
   template <typename oned_array>
   inline void coordinates_in_grid_inplace(const std::vector<oned_array>& grid,
                                           bool coordinate = true) {
@@ -902,6 +951,10 @@ public:
 
 
   // TODO : this costs a lot... optimize / cheat in some way for python ?
+  /*
+  * Checks if `this`, seen as a birth curve is under the `other` birth curve,
+  *
+  */
   inline bool operator<(const Multi_critical_filtration<T,co> &other) const {
     //check if this curves is below other's curve 
     // ie for each guy in this, check if there is a guy in other that dominates him
@@ -915,10 +968,16 @@ public:
     }
     return true;
   }
+  /*
+  * Checks if `this`, seen as a birth curve is over the `other` birth curve,
+  */
   inline bool operator>(const Multi_critical_filtration<T,co> &other) const {
     return other < *this;
   }
 
+  /*
+  * Checks if `this`, seen as a birth curve is under the `other` birth curve,
+  */
   inline bool operator<=(const Multi_critical_filtration<T,co> &other) const {
     //check if this curves is below other's curve 
     // ie for each guy in this, check if there is a guy in other that dominates him
@@ -932,6 +991,9 @@ public:
     }
     return true;
   }
+  /*
+  * Checks if `this`, seen as a birth curve is over the `other` birth curve,
+  */
   inline bool operator>=(const Multi_critical_filtration<T,co> &other) const {
     return other <= *this;
   }
