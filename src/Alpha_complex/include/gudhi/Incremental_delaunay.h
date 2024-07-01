@@ -2,7 +2,7 @@
 // As an exception, if you have a commercial license for the CGAL package Triangulation,
 // you may use this file under the same conditions.
 //
-// Author(s)    : Michael Kerber, Marc Glisse
+// Author(s)    : Michael Kerber, Marc Glisse, (Samuel Hornus for the original CGAL code)
 
 #include <CGAL/Delaunay_triangulation.h>
 #include <iterator>
@@ -36,7 +36,7 @@ namespace Gudhi {
  * @param[out] complex The simplicial complex.
  * @param[in] points Embedding of the points.
  *
- * Authors: Michael Kerber, Marc Glisse
+ * Authors: Michael Kerber, Marc Glisse, (Samuel Hornus for the original CGAL code)
  */
 template<typename K, typename SimplicialComplex, typename PointRange>
 void construct_incremental_delaunay(K const&k, SimplicialComplex& complex, PointRange const& points) {
