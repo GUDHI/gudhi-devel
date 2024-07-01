@@ -34,18 +34,5 @@ For further information about downloading and installing the library ([C++](http
 
 ## Contributors
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 - **...**
 - **...**
-=======
-- @hschreiber
-- @MathieuCarriere
-- @martinroyer
-- @mglisse
-- @VincentRouvreau
->>>>>>> master
-=======
-- **...**
-- **...**
->>>>>>> master
