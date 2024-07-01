@@ -15,6 +15,7 @@
 #include "Box.h"
 #include "Finitely_critical_filtrations.h"
 #include <cstddef>
+#include <stdexcept>
 
 namespace Gudhi::multiparameter::multi_filtrations {
 
@@ -22,6 +23,7 @@ template <typename T> class Line {
 public:
   using point_type = One_critical_filtration<T>;
   using kcritical_point_type = Multi_critical_filtration<T>;
+  bool check_direction() const;
   Line();
   Line(const point_type &x);
   Line(point_type &&x);
@@ -55,14 +57,24 @@ private:
   point_type basepoint_; // any point on the line
   point_type direction_; // direction of the line
 };
+template <typename T> inline bool Line<T>::check_direction() const {
+  bool is_trivial=true;
+  for (const auto& stuff : basepoint_){
+    if (!stuff){ is_trivial = false;}
+    if (stuff < 0){ throw std::invalid_argument("Direction should have positive entries.");}
+  }
+  if (is_trivial){throw std::invalid_argument("Direction should have at least one non-trivial entry.");}
+}
 template <typename T> Line<T>::Line() {}
 
-template <typename T> Line<T>::Line(const point_type &x) : basepoint_(x) {}
+template <typename T> Line<T>::Line(const point_type &x) : basepoint_(x) { check_direction();}
 template <typename T>
-Line<T>::Line(point_type &&x) : basepoint_(std::move(x)) {}
+Line<T>::Line(point_type &&x) : basepoint_(std::move(x)) {check_direction();}
 template <typename T>
 Line<T>::Line(const point_type &x, const point_type &v)
-    : basepoint_(x), direction_(v) {}
+    : basepoint_(x), direction_(v) {check_direction();}
+
+
 template <typename T>
 inline typename Line<T>::point_type
 Line<T>::push_forward(point_type x) const { // TODO remove copy
@@ -87,7 +99,6 @@ inline U Line<T>::push_forward2(const point_type &x) const {
     return inf;
   if (x.is_minus_inf())
     return -inf;
-  // x -= basepoint_;
   U t = -inf;
   if (direction_.size()) {
     for (std::size_t i = 0; i < x.size(); i++) {
@@ -98,8 +109,6 @@ inline U Line<T>::push_forward2(const point_type &x) const {
           return inf;
         }
       } else [[likely]] {
-        // the cast float -> float should not be a overhead (if compiler is not
-        // stupid)
         t = std::max(t, (static_cast<U>(x[i]) - static_cast<U>(basepoint_[i])) / static_cast<U>((direction_[i])));
       }
     }
@@ -108,16 +117,6 @@ inline U Line<T>::push_forward2(const point_type &x) const {
       t = std::max(t, static_cast<U>(x[i]) - static_cast<U>(basepoint_[i]));
   }
 
-  // for (std::size_t i = 0; i < x.size(); i++) {
-  //   T dir = this->direction_.size() > i ? direction_[i] : 1;
-  //   T scaled_coord;
-  //   if (dir == 0) [[unlikely]] {
-  //     scaled_coord = x[i] > basepoint_[i] ? inf : -inf;
-  //   } else [[likely]] {
-  //     scaled_coord = (x[i] - basepoint_[i]) / dir;
-  //   }
-  //   t = std::max(t, scaled_coord);
-  // }
   return t;
 }
 template <typename T>
@@ -148,10 +147,6 @@ inline typename Line<T>::point_type Line<T>::push_back(point_type x) const {
     for (std::size_t i = 0; i < x.size(); i++)
       x[i] = basepoint_[i] + t;
 
-  // for (std::size_t i = 0; i < x.size(); i++)
-  //   x[i] =
-  //       basepoint_[i] + t * (this->direction_.size() > i ? direction_[i] :
-  //       1);
   return x;
 }
 
@@ -163,7 +158,6 @@ template <typename U> inline U Line<T>::push_back2(const point_type &x) const {
   if (x.is_minus_inf() || x.is_nan())
     return -inf;
   U t = inf;
-  // x -= basepoint_;
 
   if (direction_.size()) {
     for (std::size_t i = 0; i < x.size(); i++) {
@@ -181,16 +175,6 @@ template <typename U> inline U Line<T>::push_back2(const point_type &x) const {
     for (std::size_t i = 0; i < x.size(); i++)
       t = std::min(t, static_cast<U>(x[i] - basepoint_[i]));
   }
-  // for (std::size_t i = 0; i < x.size(); i++) {
-  //   T dir = this->direction_.size() > i ? direction_[i] : 1;
-  //   T scaled_coord;
-  //   if (dir == 0) [[unlikely]] {
-  //     scaled_coord = x[i] > basepoint_[i] ? inf : -inf;
-  //   } else [[likely]] {
-  //     scaled_coord = (x[i] - basepoint_[i]) / dir;
-  //   }
-  //   t = std::min(t, scaled_coord);
-  // }
   return t;
 }
 
