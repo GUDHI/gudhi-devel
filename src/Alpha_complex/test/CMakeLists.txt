@@ -7,6 +7,7 @@ add_executable_with_targets(Delaunay_complex_Epeck_dynamic_test_unit Delaunay_co
 add_executable_with_targets(Delaunay_complex_Epeck_static_test_unit Delaunay_complex_Epeck_static_unit_test.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)
 add_executable_with_targets(Delaunay_complex_Epick_dynamic_test_unit Delaunay_complex_Epick_dynamic_unit_test.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)
 add_executable_with_targets(Delaunay_complex_Epick_static_test_unit Delaunay_complex_Epick_static_unit_test.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)
+add_executable_with_targets(Incremental_delaunay_test Incremental_delaunay_test.cpp CGAL::CGAL Eigen3::Eigen TBB::tbb)
 
 include(GUDHI_boost_test)
 if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
@@ -22,6 +23,7 @@ if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   gudhi_add_boost_test(Delaunay_complex_Epeck_static_test_unit)
   gudhi_add_boost_test(Delaunay_complex_Epick_dynamic_test_unit)
   gudhi_add_boost_test(Delaunay_complex_Epick_static_test_unit)
+  gudhi_add_boost_test(Incremental_delaunay_test)
 endif ()
 
 add_executable_with_targets(Alpha_complex_3d_test_unit Alpha_complex_3d_unit_test.cpp CGAL::CGAL TBB::tbb)
