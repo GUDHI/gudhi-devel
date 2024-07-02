@@ -1,19 +1,8 @@
-We are pleased to announce the release 3.11.0 of the GUDHI library.
+We are pleased to announce the release 3.10.1 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers **...**
+Only bug fixes have been implemented for this minor version.
 
-We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
-
-Below is a list of changes:
-
-- [Module](link)
-     - **...**
-
-- [Module](link)
-     - **...**
-
-- Miscellaneous
-     - The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.1.1+is%3Aclosed) is available on GitHub.
+The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.10.1+is%3Aclosed) is available on GitHub.
 
 All modules are distributed under the terms of the MIT license.
 However, there are still GPL dependencies for many modules. We invite you to check our [license dedicated web page](https://gudhi.inria.fr/licensing/) for further details.
@@ -28,5 +17,6 @@ For further information about downloading and installing the library ([C++](http
 
 ## Contributors
 
-- **...**
-- **...**
+- @hschreiber
+- @mglisse
+- @VincentRouvreau

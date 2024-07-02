@@ -1,6 +1,17 @@
 Release History
 ===============
 
+[Release 3.10.1](https://github.com/GUDHI/gudhi-devel/releases/tag/tags%2Fgudhi-release-3.10.1)
+-----------
+
+Release date: June 2024
+
+Below is a list of changes made since GUDHI 3.10.1:
+
+Only bug fixes have been implemented for this minor version.
+
+The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.10.1+is%3Aclosed) is available on GitHub.
+
 [Release 3.10.0](https://github.com/GUDHI/gudhi-devel/releases/tag/tags%2Fgudhi-release-3.10.0)
 -----------
 
