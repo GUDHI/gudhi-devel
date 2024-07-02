@@ -23,9 +23,7 @@
 
 namespace Gudhi::multiparameter::multi_filtrations {
 
-/** \class Finitely_critical_multi_filtration
- * Finitely_critical_multi_filtration.h
- * gudhi/Simplex_tree/multi_filtrations/Finitely_critical_multi_filtration.h
+/** 
  * \brief Vector-like filtration value, for multiparameter persistence, with
  * numpy-like methods.
  *
@@ -41,8 +39,9 @@ namespace Gudhi::multiparameter::multi_filtrations {
  *  - \f$ \{ x \in  \mathbb R^2 : x>=(1,2)\} \cap \{ x \in  \mathbb R^2 :
  * x>=(2,1)\} \f$ is finitely critical, and more particularly 2-critical, while
  *  - \f$ \{ x \in  \mathbb R^2 : x>= \mathrm{epigraph}(y\mapsto e^{-y})\} \f$
- * is not. Non 1-critical filtrations are not supported yet. \tparam T value
- * type of the vector-like.
+ * is not.
+ * Use \ref Multi_critical_filtration for multicritical filtrations.
+ * \tparam T value type of the vector-like.
  */
 template <typename T>
 class One_critical_filtration : public std::vector<T> {
@@ -540,7 +539,8 @@ public:
 };
 
 /*
- * Multi-critical filtration. If the `co` parameter is set to true, it reverses the poset order,
+ * Multi-critical filtration extension to \ref One_critical_filtration . 
+ * If the `co` parameter is set to true, it reverses the poset order,
  * i.e., the order \f$\le$\f  in \f$\mathbb R^n\f$ becomes \f$\ge$\f. 
  *
  * if `multi_filtration_` contains the points \f$(a_1, a_2, \ldots, a_k) \in (\mathbb R^n)^k\f$,
@@ -551,7 +551,7 @@ public:
 template <typename T, bool co=false> class Multi_critical_filtration {
 public:
   using value_type = T;
-  using OneCritical = One_critical_filtration<T>;
+  using OneCritical = One_critical_filtration<T>; // Type of the One critical subtype
   template <typename value_type>
   using Base = Multi_critical_filtration<value_type>;
   std::size_t num_parameters() const { return multi_filtration_.size() == 0 ? 0 : multi_filtration_[0].size(); }
