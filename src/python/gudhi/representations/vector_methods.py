@@ -9,6 +9,8 @@
 #   - 2020/12 Gard: A more flexible Betti curve class capable of computing exact curves.
 #   - 2021/11 Vincent Rouvreau: factorize _automatic_sample_range
 
+import warnings
+
 import numpy as np
 from scipy.spatial.distance import cdist
 from sklearn.base          import BaseEstimator, TransformerMixin
@@ -819,13 +821,11 @@ class Atol(BaseEstimator, TransformerMixin):
         # In fitting we remove infinite birth/death time points so that every center is finite. We do not care about duplicates.
         filtered_measures_concat = measures_concat[~np.isinf(measures_concat).any(axis=1), :] if len(measures_concat) else measures_concat
         filtered_weights_concat = weights_concat[~np.isinf(measures_concat).any(axis=1)] if len(measures_concat) else weights_concat
+
         n_points = len(filtered_measures_concat)
         if not n_points:
             raise ValueError("Cannot fit Atol on measure with infinite components only.")
-
         if n_points < n_clusters:
-            # If not enough points to fit (including 0), we will arbitrarily put centers as [-np.inf]^measure_dim at the end.
-            print(f"[Atol] had {n_points} points to fit {n_clusters} clusters, adding meaningless cluster centers.")
             self.quantiser.n_clusters = n_points
 
         self.quantiser.fit(X=filtered_measures_concat, sample_weight=filtered_weights_concat)
@@ -844,7 +844,9 @@ class Atol(BaseEstimator, TransformerMixin):
             self.inertias = np.min(dist_centers, axis=0)/2
 
         if n_points < n_clusters:
-            # Where we arbitrarily put centers as [-np.inf]^measure_dim.
+            # There weren't enough points to fit n_clusters, so we arbitrarily put centers as [-np.inf]^measure_dim.
+            warnings.warn(f"[Atol] after flitering had only {n_points} points to fit {n_clusters} clusters,"
+                          f"adding meaningless cluster centers.", RuntimeWarning)
             fill_center = np.repeat(np.inf, repeats=X[0].shape[1])
             fill_inertia = 0
             self.centers = np.concatenate([self.centers, np.repeat([fill_center], repeats=n_clusters-n_points, axis=0)])
