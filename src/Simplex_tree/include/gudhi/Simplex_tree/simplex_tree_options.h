@@ -38,6 +38,7 @@ struct Simplex_tree_options_default {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
   static const bool stable_simplex_handles = false;
+  static const bool is_multi_parameter = false;
 };
 
 /** Model of SimplexTreeOptions.
@@ -54,6 +55,7 @@ struct Simplex_tree_options_full_featured {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
   static const bool stable_simplex_handles = true;
+  static const bool is_multi_parameter = false;
 };
 
 /** Model of SimplexTreeOptions.
@@ -70,6 +72,7 @@ struct Simplex_tree_options_minimal {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
   static const bool stable_simplex_handles = false;
+  static const bool is_multi_parameter = false;
 };
 
 /** @private @brief Model of SimplexTreeOptions, faster than `Simplex_tree_options_default` but note the unsafe
@@ -87,6 +90,7 @@ struct Simplex_tree_options_fast_persistence {
   static const bool contiguous_vertices = true;
   static const bool link_nodes_by_label = false;
   static const bool stable_simplex_handles = false;
+  static const bool is_multi_parameter = false;
 };
 
 /** @}*/  // end addtogroup simplex_tree

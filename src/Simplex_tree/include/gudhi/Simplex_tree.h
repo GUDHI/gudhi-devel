@@ -151,16 +151,18 @@ class Simplex_tree {
       Key_simplex_base;
 
   struct Filtration_simplex_base_real {
-    Filtration_simplex_base_real() : filt_(0) {}
-    void assign_filtration(Filtration_value f) { filt_ = f; }
-    Filtration_value filtration() const { return filt_; }
+    Filtration_simplex_base_real() : filt_{} {}
+    void assign_filtration(const Filtration_value& f) { filt_ = f; }
+    const Filtration_value& filtration() const { return filt_; }
+    Filtration_value& filtration() { return filt_; }
    private:
     Filtration_value filt_;
   };
   struct Filtration_simplex_base_dummy {
     Filtration_simplex_base_dummy() {}
     void assign_filtration(Filtration_value GUDHI_CHECK_code(f)) { GUDHI_CHECK(f == 0, "filtration value specified for a complex that does not store them"); }
-    Filtration_value filtration() const { return 0; }
+    const Filtration_value& filtration() const  { return null_value; }
+    static constexpr Filtration_value null_value={};
   };
   typedef typename std::conditional<Options::store_filtration, Filtration_simplex_base_real,
     Filtration_simplex_base_dummy>::type Filtration_simplex_base;
@@ -398,7 +400,9 @@ class Simplex_tree {
       : null_vertex_(-1),
       root_(nullptr, null_vertex_),
       filtration_vect_(),
-      dimension_(-1) { }
+      dimension_(-1) { 
+        if constexpr (Options::is_multi_parameter) number_of_parameters_ = 2;
+      }
 
   /** \brief User-defined copy constructor reproduces the whole tree structure. */
   Simplex_tree(const Simplex_tree& complex_source) {
@@ -411,7 +415,7 @@ class Simplex_tree {
   /** \brief User-defined move constructor relocates the whole tree structure.
    *  \exception std::invalid_argument In debug mode, if the complex_source is invalid.
    */
-  Simplex_tree(Simplex_tree && complex_source) {
+  Simplex_tree(Simplex_tree && complex_source) : number_of_parameters_(std::move(complex_source.number_of_parameters_)) {
 #ifdef DEBUG_TRACES
     std::clog << "Simplex_tree move constructor" << std::endl;
 #endif  // DEBUG_TRACES
@@ -475,6 +479,7 @@ class Simplex_tree {
       map_el.second.assign_children(&root_);
     }
     rec_copy(&root_, &root_source);
+    if constexpr (Options::is_multi_parameter) number_of_parameters_ = complex_source.number_of_parameters_;
   }
 
   /** \brief depth first search, inserts simplices when reaching a leaf. */
@@ -583,7 +588,7 @@ class Simplex_tree {
    *
    * Same as `filtration()`, but does not handle `null_simplex()`.
    */
-  static Filtration_value filtration_(Simplex_handle sh) {
+  static const Filtration_value& filtration_(Simplex_handle sh) {
     GUDHI_CHECK (sh != null_simplex(), "null simplex");
     return sh->second.filtration();
   }
@@ -611,18 +616,25 @@ class Simplex_tree {
    * Called on the null_simplex, it returns infinity.
    * If SimplexTreeOptions::store_filtration is false, returns 0.
    */
-  static Filtration_value filtration(Simplex_handle sh) {
+  static const Filtration_value& filtration(Simplex_handle sh){
     if (sh != null_simplex()) {
       return sh->second.filtration();
     } else {
-      return std::numeric_limits<Filtration_value>::infinity();
+      return inf_;
+    }
+  }
+  static Filtration_value& filtration_mutable(Simplex_handle sh){
+    if (sh != null_simplex()) {
+      return sh->second.filtration();
+    } else {
+      return inf_;
     }
   }
 
   /** \brief Sets the filtration value of a simplex.
    * \exception std::invalid_argument In debug mode, if sh is a null_simplex.
    */
-  void assign_filtration(Simplex_handle sh, Filtration_value fv) {
+  void assign_filtration(Simplex_handle sh, const Filtration_value& fv) {
     GUDHI_CHECK(sh != null_simplex(),
                 std::invalid_argument("Simplex_tree::assign_filtration - cannot assign filtration on null_simplex"));
     sh->second.assign_filtration(fv);
@@ -838,14 +850,16 @@ class Simplex_tree {
    * to the new simplex.
    * If the insertion fails (the simplex is already there), the bool is set to false. If the insertion
    * fails and the simplex already in the complex has a filtration value strictly bigger than 'filtration',
+   * and the simplex tree is not multi parameter (`SimplexTreeOptions::is_multi_parameter == false`),
    * we assign this simplex with the new value 'filtration', and set the Simplex_handle field of the
-   * output pair to the Simplex_handle of the simplex. Otherwise, we set the Simplex_handle part to
-   * null_simplex.
+   * output pair to the Simplex_handle of the simplex. When the simplex tree is multi parameter,
+   * the existing filtration values are not updated. If the insertion fails for other reasons, 
+   * we set the Simplex_handle part to `null_simplex`.
    * 
   */
   template <class RandomVertexHandleRange = std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex_raw(const RandomVertexHandleRange& simplex,
-                                                     Filtration_value filtration) {
+                                                     const Filtration_value& filtration) {
     Siblings * curr_sib = &root_;
     std::pair<Simplex_handle, bool> res_insert;
     auto vi = simplex.begin();
@@ -911,7 +925,7 @@ class Simplex_tree {
    * .end() return input iterators, with 'value_type' Vertex_handle. */
   template<class InputVertexRange = std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex(const InputVertexRange & simplex,
-                                                 Filtration_value filtration = 0) {
+                                                 const Filtration_value& filtration = {}) {
     auto first = std::begin(simplex);
     auto last = std::end(simplex);
 
@@ -940,7 +954,7 @@ class Simplex_tree {
    */
   template<class InputVertexRange = std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(const InputVertexRange& Nsimplex,
-                    Filtration_value filtration = 0) {
+				    const Filtration_value& filtration = {}) {
     auto first = std::begin(Nsimplex);
     auto last = std::end(Nsimplex);
 
@@ -969,7 +983,7 @@ class Simplex_tree {
   std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces_sorted(Siblings* sib,
                                                                            ForwardVertexIterator first,
                                                                            ForwardVertexIterator last,
-                                                                           Filtration_value filt) {
+  	                                                                     const Filtration_value& filt) {
     // An alternative strategy would be:
     // - try to find the complete simplex, if found (and low filtration) exit
     // - insert all the vertices at once in sib
@@ -985,14 +999,17 @@ class Simplex_tree {
 
     Simplex_handle simplex_one = insertion_result.first;
     bool one_is_new = insertion_result.second;
-    if (!one_is_new) {
-      if (filtration(simplex_one) > filt) {
-        assign_filtration(simplex_one, filt);
-      } else {
-        // FIXME: this interface makes no sense, and it doesn't seem to be tested.
-        insertion_result.first = null_simplex();
+    if constexpr (!SimplexTreeOptions::is_multi_parameter){ // Ignores the assign part for multiparameter filtrations.
+      if (!one_is_new) {
+        if (filtration(simplex_one) > filt){ 
+            assign_filtration(simplex_one, filt);
+        } else {
+          // FIXME: this interface makes no sense, and it doesn't seem to be tested.
+          insertion_result.first = null_simplex();
+        }
       }
     }
+
     if (++first == last) return insertion_result;
     if (!has_children(simplex_one))
       // TODO: have special code here, we know we are building the whole subtree from scratch.
@@ -1332,7 +1349,7 @@ class Simplex_tree {
    * The complex does not need to be empty before calling this function. However, if a vertex is
    * already present, its filtration value is not modified, unlike with other insertion functions. */
   template <class VertexRange>
-  void insert_batch_vertices(VertexRange const& vertices, Filtration_value filt = 0) {
+  void insert_batch_vertices(VertexRange const& vertices, const Filtration_value& filt ={}) {
     auto verts = vertices | boost::adaptors::transformed([&](auto v){
         return Dit_value_t(v, Node(&root_, filt)); });
     root_.members_.insert(boost::begin(verts), boost::end(verts));
@@ -1686,7 +1703,7 @@ class Simplex_tree {
   static void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
                            Dictionary_it begin1, Dictionary_it end1,
                            Dictionary_it begin2, Dictionary_it end2,
-                           Filtration_value filtration_) {
+                           const Filtration_value& filtration_) {
     if (begin1 == end1 || begin2 == end2)
       return;  // ----->>
     while (true) {
@@ -1898,18 +1915,33 @@ class Simplex_tree {
       if (dim == 0) return;
       // Find the maximum filtration value in the border
       Boundary_simplex_range&& boundary = boundary_simplex_range(sh);
-      Boundary_simplex_iterator max_border = std::max_element(std::begin(boundary), std::end(boundary),
-                                                              [](Simplex_handle sh1, Simplex_handle sh2) {
-                                                                return filtration(sh1) < filtration(sh2);
-                                                              });
+      Filtration_value max_filt_border_value;
+      if constexpr (SimplexTreeOptions::is_multi_parameter) {
+        // in that case, we assume that Filtration_value has a `push_to` member to handle this.
+        max_filt_border_value = Filtration_value(number_of_parameters_); 
+        for (auto& face_sh : boundary) {
+          max_filt_border_value.push_to(
+              filtration(face_sh));  // pushes the value of max_filt_border_value to reach simplex' filtration
+        }
+      } else {
+        Boundary_simplex_iterator max_border =
+            std::max_element(std::begin(boundary), std::end(boundary),
+                             [](Simplex_handle sh1, Simplex_handle sh2) { return filtration(sh1) < filtration(sh2); });
+        max_filt_border_value = filtration(*max_border);
+      }
 
-      Filtration_value max_filt_border_value = filtration(*max_border);
       // Replacing if(f<max) with if(!(f>=max)) would mean that if f is NaN, we replace it with the max of the children.
       // That seems more useful than keeping NaN.
       if (!(sh->second.filtration() >= max_filt_border_value)) {
         // Store the filtration modification information
         modified = true;
-        sh->second.assign_filtration(max_filt_border_value);
+        if constexpr (Options::is_multi_parameter){
+          auto& to_increase_filtration = filtration_mutable(sh);
+          to_increase_filtration.push_to(max_filt_border_value);
+        }
+        else{
+         sh->second.assign_filtration(max_filt_border_value);
+        }
       }
     };
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
@@ -1938,7 +1970,7 @@ class Simplex_tree {
    * than it was before. However, `upper_bound_dimension()` will return the old value, which remains a valid upper
    * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    */
-  bool prune_above_filtration(Filtration_value filtration) {
+  bool prune_above_filtration(const Filtration_value& filtration) {
     if (std::numeric_limits<Filtration_value>::has_infinity && filtration == std::numeric_limits<Filtration_value>::infinity())
       return false;  // ---->>
     bool modified = rec_prune_above_filtration(root(), filtration);
@@ -1948,7 +1980,7 @@ class Simplex_tree {
   }
 
  private:
-  bool rec_prune_above_filtration(Siblings* sib, Filtration_value filt) {
+  bool rec_prune_above_filtration(Siblings* sib, const Filtration_value& filt) {
     auto&& list = sib->members();
     bool modified = false;
     bool emptied = false;
@@ -2380,7 +2412,7 @@ class Simplex_tree {
    * @param[in] filt_value The new filtration value.
    * @param[in] min_dim The minimal dimension. Default value is 0.
    */
-  void reset_filtration(Filtration_value filt_value, int min_dim = 0) {
+  void reset_filtration(const Filtration_value& filt_value, int min_dim = 0) {
     rec_reset_filtration(&root_, filt_value, min_dim);
     clear_filtration(); // Drop the cache.
   }
@@ -2391,7 +2423,7 @@ class Simplex_tree {
    * @param[in] filt_value The new filtration value.
    * @param[in] min_depth The minimal depth.
    */
-  void rec_reset_filtration(Siblings * sib, Filtration_value filt_value, int min_depth) {
+  void rec_reset_filtration(Siblings * sib, const Filtration_value& filt_value, int min_depth) {
     for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
       if (min_depth <= 0) {
         sh->second.assign_filtration(filt_value);
@@ -2557,6 +2589,35 @@ class Simplex_tree {
   /** \brief Upper bound on the dimension of the simplicial complex.*/
   int dimension_;
   bool dimension_to_be_lowered_ = false;
+
+  // MULTIPERS STUFF
+ public:
+  /**
+   * \brief Sets the number of parameters of the filtrations if SimplexTreeOptions::is_multi_parameter. 
+   * */
+  void set_number_of_parameters(int num) { 
+    static_assert(SimplexTreeOptions::is_multi_parameter, 
+      "Cannot set number of parameters of 1-parameter simplextree."
+    ); 
+    number_of_parameters_ = num; 
+  }
+  /**
+   * \brief Gets the number of parameters of the filtrations if SimplexTreeOptions::is_multi_parameter. 
+   * */
+  int get_number_of_parameters() const { 
+    if constexpr (SimplexTreeOptions::is_multi_parameter)
+      return number_of_parameters_;
+    else
+      return 1;
+  }
+
+  // cannot be const due to `filtration_mutable`, TODO : find a proper way to make that const
+  inline static Filtration_value inf_ = std::numeric_limits<Filtration_value>::has_infinity ? 
+      std::numeric_limits<Filtration_value>::infinity() 
+    : std::numeric_limits<Filtration_value>::max(); /**< Default infinite value. */
+
+ private:
+  int number_of_parameters_; /**< Number of parameters of the multi-filtrations when SimplexTreeOptions::is_multi_parameter.-*/
 };
 
 // Print a Simplex_tree in os.
