@@ -845,8 +845,7 @@ class Atol(BaseEstimator, TransformerMixin):
 
         if n_points < n_clusters:
             # There weren't enough points to fit n_clusters, so we arbitrarily put centers as [-np.inf]^measure_dim.
-            warnings.warn(f"[Atol] after flitering had only {n_points} points to fit {n_clusters} clusters,"
-                          f"adding meaningless cluster centers.", RuntimeWarning)
+            print(f"[Atol] after filtering had only {n_points=} to fit {n_clusters=}, adding meaningless centers.")
             fill_center = np.repeat(np.inf, repeats=X[0].shape[1])
             fill_inertia = 0
             self.centers = np.concatenate([self.centers, np.repeat([fill_center], repeats=n_clusters-n_points, axis=0)])
