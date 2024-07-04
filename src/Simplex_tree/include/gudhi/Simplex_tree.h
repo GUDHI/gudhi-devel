@@ -104,6 +104,8 @@ class Simplex_tree {
    *
    * Must be an integer type. */
   typedef typename Options::Simplex_key Simplex_key;
+  /** \bried Extra data stored in each simplex. */
+  typedef typename Get_simplex_data_type<Options>::type Simplex_data;
   /** \brief Type for the vertex handle.
    *
    * Must be a signed integer type. It admits a total order <. */
@@ -639,6 +641,13 @@ class Simplex_tree {
   /** \brief Returns a fixed number not in the interval [0, `num_simplices()`).  */
   static Simplex_key null_key() {
     return -1;
+  }
+
+  /** \brief Returns the extra data stored in a simplex. */
+  static Simplex_data& simplex_data(Simplex_handle sh) {
+    GUDHI_CHECK(sh != null_simplex(),
+                std::invalid_argument("Simplex_tree::simplex_data - no data associated to null_simplex"));
+    return sh->second.data();
   }
 
   /** \brief Returns a Vertex_handle different from all Vertex_handles associated
