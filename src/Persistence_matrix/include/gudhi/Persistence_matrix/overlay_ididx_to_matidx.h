@@ -43,6 +43,7 @@ class Id_to_index_overlay
  public:
   using index = typename Master_matrix_type::index;                       /**< @ref MatIdx index type. */
   using id_index = typename Master_matrix_type::id_index;                 /**< @ref IDIdx index type. */
+  using pos_index = typename Master_matrix_type::pos_index;               /**< @ref PosIdx index type. */
   using dimension_type = typename Master_matrix_type::dimension_type;     /**< Dimension value type. */
   /**
    * @brief Field operators class. Necessary only if @ref PersistenceMatrixOptions::is_z2 is false.

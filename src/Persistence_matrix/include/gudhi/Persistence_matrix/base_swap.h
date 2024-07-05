@@ -66,7 +66,7 @@ class Base_swap {
    * 
    * @param matrixToCopy Matrix to copy.
    */
-  Base_swap(const Base_swap& matrixToCopy);
+  Base_swap(const Base_swap& matrixToCopy) = default;
   /**
    * @brief Move constructor.
    * 
@@ -132,13 +132,7 @@ inline Base_swap<Master_matrix, Base_matrix>::Base_swap(unsigned int numberOfCol
 }
 
 template <class Master_matrix, class Base_matrix>
-inline Base_swap<Master_matrix, Base_matrix>::Base_swap(const Base_swap<Master_matrix, Base_matrix>& matrixToCopy)
-    : indexToRow_(matrixToCopy.indexToRow_),
-      rowToIndex_(matrixToCopy.rowToIndex_),
-      rowSwapped_(matrixToCopy.rowSwapped_) {}
-
-template <class Master_matrix, class Base_matrix>
-inline Base_swap<Master_matrix, Base_matrix>::Base_swap(Base_swap<Master_matrix, Base_matrix>&& other) noexcept
+inline Base_swap<Master_matrix, Base_matrix>::Base_swap(Base_swap&& other) noexcept
     : indexToRow_(std::move(other.indexToRow_)),
       rowToIndex_(std::move(other.rowToIndex_)),
       rowSwapped_(std::exchange(other.rowSwapped_, 0)) {}

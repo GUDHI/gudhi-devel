@@ -128,7 +128,7 @@ class Cell_field_element
   /**
    * @brief Stores the given element.
    * 
-   * @param columnIndex Value to store.
+   * @param element Value to store.
    */
   Cell_field_element(Field_element_type element) : element_(element){};
   /**

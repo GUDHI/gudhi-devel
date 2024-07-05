@@ -71,7 +71,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
- * @class Matrix persistence_matrix.h gudhi/persistence_matrix.h
+ * @class Matrix matrix.h gudhi/matrix.h
  * @ingroup persistence_matrix
  *
  * @brief Data structure for matrices, and in particular thought for matrices representing filtered complexes

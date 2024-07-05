@@ -292,8 +292,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   /**
    * @brief Resets the matrix to an empty matrix.
    * 
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to the cell factory.
    */
   void reset(Column_settings* colSettings) {
     columnToRep_.clear_and_dispose(delete_disposer(this));

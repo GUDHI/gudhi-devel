@@ -232,7 +232,7 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   using dim_opt = typename Master_matrix::Column_dimension_option;
   using chain_opt = typename Master_matrix::Chain_column_option;
 
-  struct {
+  struct CellPointerComp {
     bool operator()(const Cell* c1, const Cell* c2) const { return *c1 < *c2; }
   } cellPointerComp_;
 

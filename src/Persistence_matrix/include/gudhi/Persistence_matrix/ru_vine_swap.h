@@ -89,7 +89,7 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
    * @brief Does the same than @ref vine_swap, but assumes that the swap is non trivial and
    * therefore skips a part of the case study.
    * 
-   * @param position @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
+   * @param index @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
@@ -102,7 +102,7 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
    * not have a face/coface relation which each other ; \f$ F' \f$ has to be a valid filtration.
    * See @cite vineyards for more information about vine and vineyards.
    * 
-   * @param position @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
+   * @param index @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
