@@ -67,7 +67,15 @@ struct Persistence_interval {
 
   inline friend std::ostream &operator<<(std::ostream &stream, const Persistence_interval &interval) {
     stream << "[" << interval.dim << "] ";
-    stream << interval.birth << ", " << interval.death;
+    if constexpr (std::numeric_limits<event_value_type>::has_infinity) {
+      stream << interval.birth << " - " << interval.death;
+    } else {
+      if (interval.birth == inf) stream << "inf";
+      else stream << interval.birth;
+      stream << " - ";
+      if (interval.death == inf) stream << "inf";
+      else stream << interval.death;
+    }
     return stream;
   }
 };
