@@ -8,7 +8,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-/** @file matrix.h
+/** @file Matrix.h
  * @author Hannah Schreiber
  * @brief Contains @ref Gudhi::persistence_matrix::Matrix class.
  */
@@ -30,8 +30,8 @@
 
 #include <gudhi/Fields/Z2_field_operators.h>
 
-#include <gudhi/Persistence_matrix/overlay_ididx_to_matidx.h>
-#include <gudhi/Persistence_matrix/overlay_posidx_to_matidx.h>
+#include <gudhi/Persistence_matrix/Id_to_index_overlay.h>
+#include <gudhi/Persistence_matrix/Position_to_index_overlay.h>
 
 #include <gudhi/Persistence_matrix/matrix_dimension_holders.h>
 #include <gudhi/Persistence_matrix/matrix_row_access.h>
@@ -44,11 +44,11 @@
 #include <gudhi/Persistence_matrix/chain_vine_swap.h>
 #include <gudhi/Persistence_matrix/chain_rep_cycles.h>
 
-#include <gudhi/Persistence_matrix/base_matrix.h>
-#include <gudhi/Persistence_matrix/base_matrix_with_column_compression.h>
-#include <gudhi/Persistence_matrix/boundary_matrix.h>
-#include <gudhi/Persistence_matrix/ru_matrix.h>
-#include <gudhi/Persistence_matrix/chain_matrix.h>
+#include <gudhi/Persistence_matrix/Base_matrix.h>
+#include <gudhi/Persistence_matrix/Base_matrix_with_column_compression.h>
+#include <gudhi/Persistence_matrix/Boundary_matrix.h>
+#include <gudhi/Persistence_matrix/RU_matrix.h>
+#include <gudhi/Persistence_matrix/Chain_matrix.h>
 
 #include <gudhi/Persistence_matrix/allocators/cell_constructors.h>
 #include <gudhi/Persistence_matrix/columns/cell_types.h>

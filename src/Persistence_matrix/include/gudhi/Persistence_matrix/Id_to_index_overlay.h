@@ -9,7 +9,7 @@
  */
 
 /**
- * @file overlay_ididx_to_matidx.h
+ * @file Id_to_index_overlay.h
  * @author Hannah Schreiber
  * @brief Contains the @ref Id_to_index_overlay class.
  */
@@ -28,7 +28,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
- * @class Id_to_index_overlay overlay_ididx_to_matidx.h gudhi/Persistence_matrix/overlay_ididx_to_matidx.h
+ * @class Id_to_index_overlay Id_to_index_overlay.h gudhi/Persistence_matrix/Id_to_index_overlay.h
  * @ingroup persistence_matrix
  *
  * @brief Overlay for @ref mp_matrices "non-basic matrices" replacing all input and output @ref MatIdx indices of

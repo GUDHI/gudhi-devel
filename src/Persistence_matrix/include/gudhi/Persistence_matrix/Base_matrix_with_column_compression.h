@@ -9,7 +9,7 @@
  */
 
 /**
- * @file base_matrix_with_column_compression.h
+ * @file Base_matrix_with_column_compression.h
  * @author Hannah Schreiber
  * @brief Contains the @ref Base_matrix_with_column_compression class.
  */
@@ -30,8 +30,8 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
- * @class Base_matrix_with_column_compression base_matrix_with_column_compression.h \
- * gudhi/Persistence_matrix/base_matrix_with_column_compression.h
+ * @class Base_matrix_with_column_compression Base_matrix_with_column_compression.h \
+ * gudhi/Persistence_matrix/Base_matrix_with_column_compression.h
  * @ingroup persistence_matrix
  *
  * @brief A @ref basematrix "base matrix" (also see @ref Base_matrix), but with column compression. That is, all

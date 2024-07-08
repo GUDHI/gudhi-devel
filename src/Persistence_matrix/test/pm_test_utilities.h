@@ -17,7 +17,7 @@
 #include <boost/test/test_tools.hpp>
 #include <gudhi/persistence_matrix_options.h>
 #include <gudhi/Persistence_matrix/columns/heap_column.h>
-#include <gudhi/matrix.h>
+#include <gudhi/Matrix.h>
 #include <gudhi/Fields/Zp_field_operators.h>
 
 using Gudhi::persistence_matrix::Column_indexation_types;

@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-#include <gudhi/matrix.h>
+#include <gudhi/Matrix.h>
 #include <gudhi/persistence_matrix_options.h>
 
 using Gudhi::persistence_matrix::Default_options;
