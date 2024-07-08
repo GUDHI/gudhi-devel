@@ -1,29 +1,19 @@
-We are pleased to announce the release 3.10.0 of the GUDHI library.
+We are pleased to announce the release 3.11.0 of the GUDHI library.
+
+As a major new feature, the GUDHI library now offers **...**
 
 We are now using GitHub to develop the GUDHI library, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel). From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
-Below is a list of changes made since GUDHI 3.9.0:
+Below is a list of changes:
 
-- [Persistence matrix](https://gudhi.inria.fr/doc/latest/group__persistence__matrix.html)
-     > Matrix API is in a beta version and may change in incompatible ways in the near future.
-     - Matrix structure for filtered complexes with multiple functionnalities related to persistence homology, such as
-     representative cycles computation or vineyards. 
+- [Module](link)
+     - **...**
 
-- [Rips complex](https://gudhi.inria.fr/python/latest/rips_complex_sklearn_itf_ref.html)
-     - Rips complex persistence scikit-learn like interface
-
-- [Čech complex](https://gudhi.inria.fr/cechcomplex/)
-     - A new utility to compute the Delaunay-Čech filtration on a Delaunay triangulation.
-
-- Installation
-     - CGAL &ge; 5.1.0 is now required (was &ge; 4.11.0).
-     - Eigen3 &ge; 3.3.0 is now required (was &ge; 3.1.0).
-
-- Maintenance
-     - Some bug fix for CGAL &ge; 6.0, NumPy &ge; 2.0, Scikit-learn &ge; 1.4, Matplotlib &ge; 3.6 and TensorFlow &ge; 2.16.
+- [Module](link)
+     - **...**
 
 - Miscellaneous
-     - The [list of bugs that were solved since GUDHI-3.9.0](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.10.0+is%3Aclosed) is available on GitHub.
+     - The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.11.0+is%3Aclosed) is available on GitHub.
 
 All modules are distributed under the terms of the MIT license.
 However, there are still GPL dependencies for many modules. We invite you to check our [license dedicated web page](https://gudhi.inria.fr/licensing/) for further details.
@@ -38,8 +28,5 @@ For further information about downloading and installing the library ([C++](http
 
 ## Contributors
 
-- @hschreiber
-- @MathieuCarriere
-- @martinroyer
-- @mglisse
-- @VincentRouvreau
+- **...**
+- **...**
