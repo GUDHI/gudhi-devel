@@ -12,7 +12,7 @@
  */
 
 /**
- * @file Filtered_zigzag_persistence.h
+ * @file filtered_zigzag_persistence.h
  * @author Clément Maria, Hannah Schreiber
  * @brief Contains the implementation of the @ref Interval structure and the
  * @ref Gudhi::zigzag_persistence::Filtered_zigzag_persistence_with_storage and
@@ -30,7 +30,7 @@
 #include <vector>
 
 #include <gudhi/Debug_utils.h>
-#include <gudhi/Zigzag_persistence.h>
+#include <gudhi/zigzag_persistence.h>
 #include <gudhi/persistence_interval.h>
 
 namespace Gudhi {

@@ -12,7 +12,7 @@
  */
 
 /**
- * @file Zigzag_persistence.h
+ * @file zigzag_persistence.h
  * @author Clément Maria, Hannah Schreiber
  * @brief Contains the implementation of the @ref Gudhi::zigzag_persistence::Zigzag_persistence class.
  */
@@ -72,7 +72,7 @@ struct Default_zigzag_options {
 // TODO: erase_birth_history will be moved to the options if it is proven to be useful. In the meantime
 // it stays here undocumented to ease benchmarks.
 /**
- * @class Zigzag_persistence Zigzag_persistence.h gudhi/Zigzag_persistence.h
+ * @class Zigzag_persistence zigzag_persistence.h gudhi/zigzag_persistence.h
  * @brief Class computating the zigzag persistent homology of a zigzag sequence. Algorithm based on \cite zigzag.
  *
  * @ingroup zigzag_persistence

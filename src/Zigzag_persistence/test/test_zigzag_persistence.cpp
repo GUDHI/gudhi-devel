@@ -14,7 +14,7 @@
 #define BOOST_TEST_MODULE "zigzag_persistence"
 #include <boost/test/unit_test.hpp>
 
-#include <gudhi/Zigzag_persistence.h>
+#include <gudhi/zigzag_persistence.h>
 
 using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<>;
 // using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<Gudhi::zigzag_persistence::Default_zigzag_options, false>;

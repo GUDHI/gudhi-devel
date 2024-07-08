@@ -11,7 +11,7 @@
 #include <iostream>
 #include <vector>
 
-#include <gudhi/Filtered_zigzag_persistence.h>
+#include <gudhi/filtered_zigzag_persistence.h>
 
 using ZP = Gudhi::zigzag_persistence::Filtered_zigzag_persistence_with_storage<>;
 using face_handle = ZP::face_key;

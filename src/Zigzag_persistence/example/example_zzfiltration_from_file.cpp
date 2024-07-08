@@ -13,7 +13,7 @@
 #include <fstream>
 #include <string>
 
-#include <gudhi/Filtered_zigzag_persistence.h>
+#include <gudhi/filtered_zigzag_persistence.h>
 
 using ZP = Gudhi::zigzag_persistence::Filtered_zigzag_persistence<>;
 using id_handle = ZP::face_key;

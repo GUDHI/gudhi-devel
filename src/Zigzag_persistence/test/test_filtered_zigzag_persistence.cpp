@@ -16,7 +16,7 @@
 #define BOOST_TEST_MODULE "zigzag_persistence"
 #include <boost/test/unit_test.hpp>
 
-#include <gudhi/Filtered_zigzag_persistence.h>
+#include <gudhi/filtered_zigzag_persistence.h>
 
 struct Interval_comparator {
   Interval_comparator() {}
