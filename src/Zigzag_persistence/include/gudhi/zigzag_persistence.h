@@ -22,12 +22,16 @@
 
 #include <cmath>
 #include <set>
-// #include <unordered_map>
 #include <utility>
 #include <vector>
 
-#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/iterator/indirect_iterator.hpp>
+#if BOOST_VERSION >= 108100
+#include <boost/unordered/unordered_flat_map.hpp>   //don't exist for lower versions of boost
 // #include <boost/unordered/unordered_map.hpp>
+#else
+#include <unordered_map>
+#endif
 
 #include <gudhi/matrix.h>
 
@@ -88,9 +92,12 @@ class Zigzag_persistence
   using dimension_type = typename Options::dimension_type; /**< Type for dimension values. */
 
  private:
-  // using birth_dictionnary = std::unordered_map<index, index>;             /**< Dictionnary type. */
+#if BOOST_VERSION >= 108100
   using birth_dictionnary = boost::unordered_flat_map<index, index>;      /**< Dictionnary type. */
   // using birth_dictionnary = boost::unordered_map<index, index>;           /**< Dictionnary type. */
+#else
+  using birth_dictionnary = std::unordered_map<index, index>;             /**< Dictionnary type. */
+#endif
   using Matrix_options = Zigzag_matrix_options<Options::column_type>;     /**< Matrix options. */
   using Matrix_type = Gudhi::persistence_matrix::Matrix<Matrix_options>;  /**< Matrix. */
   using matrix_index = typename Matrix_type::index;                       /**< Matrix indexation type. */
