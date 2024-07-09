@@ -11,7 +11,7 @@
 /**
  * @file overlay_ididx_to_matidx.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Id_to_index_overlay class.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Id_to_index_overlay class.
  */
 
 #ifndef PM_ID_TO_POS_TRANSLATION_H
@@ -277,8 +277,9 @@ class Id_to_index_overlay
    * For @ref boundarymatrix "RU matrices", the returned row is from \f$ R \f$.
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    *
-   * @warning The @ref get_column_index method of the row cells returns the original @ref PosIdx indices (before any
-   * swaps) for @ref boundarymatrix "boundary matrices" and @ref MatIdx indices for @ref chainmatrix "chain matrices".
+   * @warning The @ref Cell_column_index::get_column_index "get_column_index" method of the row cells returns the
+   * original @ref PosIdx indices (before any swaps) for @ref boundarymatrix "boundary matrices" and
+   * @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
    * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices"
    * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occured.
@@ -322,7 +323,8 @@ class Id_to_index_overlay
    * Also updates the barcode if it was computed.
    *
    * For @ref chainmatrix "chain matrices", using the other version of the method could perform better depending on
-   * how the data is maintained on the side of the user. Then, @ref has_column_pairings also do not need to be true.
+   * how the data is maintained on the side of the user. Then, @ref PersistenceMatrixOptions::has_column_pairings also
+   * do not need to be true.
    *
    * See also @ref remove_last.
    * 

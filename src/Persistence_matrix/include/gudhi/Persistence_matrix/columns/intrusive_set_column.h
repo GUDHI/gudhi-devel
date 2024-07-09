@@ -11,8 +11,8 @@
 /**
  * @file intrusive_set_column.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Intrusive_set_column class.
- * Also defines the std::hash method for @ref Intrusive_set_column.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Intrusive_set_column class.
+ * Also defines the std::hash method for @ref Gudhi::persistence_matrix::Intrusive_set_column.
  */
 
 #ifndef PM_INTRUSIVE_SET_COLUMN_H

@@ -11,7 +11,8 @@
 /**
  * @file cell_constructors.h
  * @author Hannah Schreiber
- * @brief Contains the @ref New_cell_constructor and @ref Pool_cell_constructor structures.
+ * @brief Contains the @ref Gudhi::persistence_matrix::New_cell_constructor and
+ * @ref Gudhi::persistence_matrix::Pool_cell_constructor structures.
  */
 
 #ifndef PM_COLUMN_CELL_CONSTRUCTORS_H

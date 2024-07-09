@@ -11,7 +11,8 @@
 /**
  * @file heap_column.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Heap_column class. Also defines the std::hash method for @ref Heap_column.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Heap_column class. Also defines the std::hash method
+ * for @ref Gudhi::persistence_matrix::Heap_column.
  */
 
 #ifndef PM_HEAP_COLUMN_H

@@ -11,7 +11,8 @@
 /**
  * @file chain_column_extra_properties.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Chain_column_extra_properties class and @ref Dummy_chain_properties structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Chain_column_extra_properties class and
+ * @ref Gudhi::persistence_matrix::Dummy_chain_properties structure.
  */
 
 #ifndef PM_CHAIN_COLUMN_PROP_H

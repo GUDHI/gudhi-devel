@@ -11,7 +11,8 @@
 /**
  * @file base_swap.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Base_swap class and @ref Dummy_base_swap structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Base_swap class and
+ * @ref Gudhi::persistence_matrix::Dummy_base_swap structure.
  */
 
 #ifndef PM_BASE_SWAP_H

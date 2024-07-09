@@ -11,9 +11,11 @@
 /**
  * @file cell_types.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Cell, @ref Cell_column_index and @ref Cell_field_element classes, as well as the
- * @ref Dummy_cell_column_index_mixin and @ref Dummy_cell_field_element_mixin structures. Also defines the
- * std::hash method for @ref Cell.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Cell, @ref Gudhi::persistence_matrix::Cell_column_index and
+ * @ref Gudhi::persistence_matrix::Cell_field_element classes, as well as the
+ * @ref Gudhi::persistence_matrix::Dummy_cell_column_index_mixin and
+ * @ref Gudhi::persistence_matrix::Dummy_cell_field_element_mixin structures.
+ * Also defines the std::hash method for @ref Gudhi::persistence_matrix::Cell.
  */
 
 #ifndef PM_MATRIX_CELL_H

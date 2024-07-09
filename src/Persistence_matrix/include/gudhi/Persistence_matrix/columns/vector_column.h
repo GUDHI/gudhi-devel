@@ -11,8 +11,8 @@
 /**
  * @file vector_column.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Vector_column class.
- * Also defines the std::hash method for @ref Vector_column.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Vector_column class.
+ * Also defines the std::hash method for @ref Gudhi::persistence_matrix::Vector_column.
  */
 
 #ifndef PM_VECTOR_COLUMN_H

@@ -11,8 +11,9 @@
 /**
  * @file ru_vine_swap.h
  * @author Hannah Schreiber
- * @brief Contains the @ref RU_vine_swap class, as well as the
- * @ref Dummy_ru_vine_swap and @ref Dummy_ru_vine_pairing structures.
+ * @brief Contains the @ref Gudhi::persistence_matrix::RU_vine_swap class, as well as the
+ * @ref Gudhi::persistence_matrix::Dummy_ru_vine_swap and
+ * @ref Gudhi::persistence_matrix::Dummy_ru_vine_pairing structures.
  */
 
 #ifndef PM_RU_VINE_SWAP_H

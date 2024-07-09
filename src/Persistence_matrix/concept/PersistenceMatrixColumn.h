@@ -23,7 +23,7 @@ namespace persistence_matrix {
  * @brief If PersistenceMatrixOptions::has_row_access is true, then @ref Row_access. Otherwise @ref Dummy_row_access.
  * Can eventually be removed if the structure of the column does not allow row access (as for @ref Heap_column), but
  * then it needs to be notified in the documentation of @ref Column_types and as static_assert in
- * @ref Matrix::_assert_options.
+ * Matrix::_assert_options.
  */
 using Row_access_option = Row_access;
 /**

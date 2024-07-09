@@ -11,7 +11,7 @@
 /**
  * @file chain_matrix.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Chain_matrix class.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Chain_matrix class.
  */
 
 #ifndef PM_CHAIN_MATRIX_H

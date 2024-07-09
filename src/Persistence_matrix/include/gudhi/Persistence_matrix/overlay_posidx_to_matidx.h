@@ -11,7 +11,7 @@
 /**
  * @file overlay_posidx_to_matidx.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Position_to_index_overlay class.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Position_to_index_overlay class.
  */
 
 #ifndef PM_POS_TO_ID_TRANSLATION_H

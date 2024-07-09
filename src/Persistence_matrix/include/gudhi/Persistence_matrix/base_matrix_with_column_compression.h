@@ -11,7 +11,7 @@
 /**
  * @file base_matrix_with_column_compression.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Base_matrix_with_column_compression class.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Base_matrix_with_column_compression class.
  */
 
 #ifndef PM_BASE_MATRIX_COMPRESSION_H

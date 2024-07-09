@@ -19,6 +19,8 @@ namespace persistence_matrix {
  * @{
  * \author    Hannah Schreiber
  *
+ * \section matrixintro Persistence Matrix
+ *
  * The module provides a data structure for matrices, in particular thought for matrices representing filtered complexes
  * and used as backend for persistence algorithms, such at persistent homology, @ref persistent_cohomology,
  * or zigzag @cite zigzag.
