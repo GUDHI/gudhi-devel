@@ -11,8 +11,7 @@
 /**
  * @file cell_constructors.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Gudhi::persistence_matrix::New_cell_constructor and
- * @ref Gudhi::persistence_matrix::Pool_cell_constructor structures.
+ * @brief Contains different versions of @ref Gudhi::persistence_matrix::Cell factories.
  */
 
 #ifndef PM_COLUMN_CELL_CONSTRUCTORS_H
@@ -26,6 +25,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
+ * @private
  * @ingroup persistence_matrix
  *
  * @brief @ref Cell factory. Constructs and destroyes cell pointers with new and delete.
@@ -65,6 +65,7 @@ struct New_cell_constructor
 };
 
 /**
+ * @private
  * @ingroup persistence_matrix
  *
  * @brief @ref Cell factory. Uses @ref Gudhi::Simple_object_pool, which is based on boost::object_pool,
