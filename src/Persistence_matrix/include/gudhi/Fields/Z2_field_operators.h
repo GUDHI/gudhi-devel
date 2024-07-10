@@ -11,7 +11,7 @@
 /**
  * @file Z2_field_operators.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Z2_field_operators class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Z2_field_operators class.
  */
 
 #ifndef MATRIX_FIELD_Z2_OPERATORS_H_

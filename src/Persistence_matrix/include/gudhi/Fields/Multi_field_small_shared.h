@@ -11,7 +11,7 @@
 /**
  * @file Multi_field_small_shared.h
  * @author Hannah Schreiber, Clément Maria
- * @brief Contains the @ref Shared_multi_field_element_with_small_characteristics class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Shared_multi_field_element_with_small_characteristics class.
  */
 
 #ifndef MATRIX_FIELD_MULTI_SMALL_SHARED_H_

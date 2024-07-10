@@ -72,6 +72,7 @@ endif()
 
 # For "make user_version" - Requires GUDHI_modules to be performed
 include(GUDHI_user_version_target)
+set(GUDHI_BIBLIO_DIR ${CMAKE_CURRENT_BINARY_DIR})
 # For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set - Done in GUDHI_user_version_target for dev version
 include(GUDHI_doxygen_target)
 

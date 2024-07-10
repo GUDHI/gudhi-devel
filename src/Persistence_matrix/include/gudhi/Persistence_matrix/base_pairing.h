@@ -11,7 +11,8 @@
 /**
  * @file base_pairing.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Base_pairing class and @ref Dummy_base_pairing structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Base_pairing class and
+ * @ref Gudhi::persistence_matrix::Dummy_base_pairing structure.
  */
 
 #ifndef PM_BASE_PAIRING_H
@@ -152,7 +153,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
       auto& curr = _matrix()->get_column(i);
       if (curr.is_empty()) {
         if (pivotsToColumn.find(i) == pivotsToColumn.end()) {
-          barcode_.emplace_back(dim, i, -1);
+          barcode_.emplace_back(i, -1, dim);
         }
       } else {
         id_index pivot = curr.get_pivot();
@@ -175,10 +176,10 @@ inline void Base_pairing<Master_matrix>::_reduce()
         if (pivot != static_cast<id_index>(-1)) {
           pivotsToColumn.emplace(pivot, i);
           _matrix()->get_column(pivot).clear();
-          barcode_.emplace_back(dim - 1, pivot, i);
+          barcode_.emplace_back(pivot, i, dim - 1);
         } else {
           curr.clear();
-          barcode_.emplace_back(dim, i, -1);
+          barcode_.emplace_back(i, -1, dim);
         }
       }
     }

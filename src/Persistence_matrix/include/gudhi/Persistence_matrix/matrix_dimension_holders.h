@@ -11,8 +11,9 @@
 /**
  * @file matrix_dimension_holders.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Matrix_max_dimension_holder @ref Matrix_all_dimension_holder classes
- * and the @ref Dummy_matrix_dimension_holder structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Matrix_max_dimension_holder
+ * @ref Gudhi::persistence_matrix::Matrix_all_dimension_holder classes
+ * and the @ref Gudhi::persistence_matrix::Dummy_matrix_dimension_holder structure.
  */
 
 #ifndef PM_MATRIX_DIM_HOLDER_H

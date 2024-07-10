@@ -11,8 +11,10 @@
 /**
  * @file chain_vine_swap.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Chain_barcode_swap and @ref Chain_vine_swap classes, as well as the
- * @ref Dummy_chain_vine_swap and @ref Dummy_chain_vine_pairing structures.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Chain_barcode_swap and
+ * @ref Gudhi::persistence_matrix::Chain_vine_swap classes, as well as the
+ * @ref Gudhi::persistence_matrix::Dummy_chain_vine_swap and
+ * @ref Gudhi::persistence_matrix::Dummy_chain_vine_pairing structures.
  */
 
 #ifndef PM_CHAIN_VINE_SWAP_H

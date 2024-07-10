@@ -11,7 +11,7 @@
 /**
  * @file Zp_field_shared.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Shared_Zp_field_element class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Shared_Zp_field_element class.
  */
 
 #ifndef MATRIX_FIELD_ZP_VAR_H_

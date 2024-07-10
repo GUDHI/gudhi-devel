@@ -11,7 +11,7 @@
 /**
  * @file Zp_field_operators.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Zp_field_operators class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Zp_field_operators class.
  */
 
 #ifndef MATRIX_FIELD_ZP_OPERATOR_H_

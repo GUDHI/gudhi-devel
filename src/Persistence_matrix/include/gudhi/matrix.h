@@ -72,7 +72,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
- * @class Matrix persistence_matrix.h gudhi/persistence_matrix.h
+ * @class Matrix matrix.h gudhi/matrix.h
  * @ingroup persistence_matrix
  *
  * @brief Data structure for matrices, and in particular thought for matrices representing filtered complexes
@@ -254,7 +254,7 @@ class Matrix {
   /**
    * @brief Type of the rows stored in the matrix. Is either an intrusive list of @ref Cell_type (not ordered) if
    * @ref PersistenceMatrixOptions::has_intrusive_rows is true, or a set of @ref Cell_type (ordered by
-   * @ref get_column_index) otherwise.
+   * column index) otherwise.
    */
   using Row_type =
       typename std::conditional<PersistenceMatrixOptions::has_intrusive_rows,

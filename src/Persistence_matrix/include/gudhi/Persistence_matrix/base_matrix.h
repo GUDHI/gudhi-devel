@@ -11,7 +11,7 @@
 /**
  * @file base_matrix.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Base_matrix class.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Base_matrix class.
  */
 
 #ifndef PM_BASE_MATRIX_H

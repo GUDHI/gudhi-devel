@@ -54,20 +54,34 @@ struct Persistence_interval {
   /**
    * @brief Constructor.
    * 
-   * @param dim Dimension of the cycle. Default value: -1.
    * @param birth Birth value of the cycle. Default value: @ref inf.
    * @param death Death value of the cycle. Default value: @ref inf.
+   * @param dim Dimension of the cycle. Default value: -1.
    */
-  Persistence_interval(dimension_type dim = -1, event_value_type birth = inf, event_value_type death = inf)
+  Persistence_interval(event_value_type birth = inf, event_value_type death = inf, dimension_type dim = -1)
       : dim(dim), birth(birth), death(death) {}
 
   dimension_type dim;     /**< Dimension of the cycle.*/
   event_value_type birth; /**< Birth value of the cycle. */
   event_value_type death; /**< Death value of the cycle. */
 
+  /**
+   * @brief operator<<
+   * 
+   * @param stream outstream
+   * @param interval interval to stream
+   */
   inline friend std::ostream &operator<<(std::ostream &stream, const Persistence_interval &interval) {
     stream << "[" << interval.dim << "] ";
-    stream << interval.birth << ", " << interval.death;
+    if constexpr (std::numeric_limits<event_value_type>::has_infinity) {
+      stream << interval.birth << " - " << interval.death;
+    } else {
+      if (interval.birth == inf) stream << "inf";
+      else stream << interval.birth;
+      stream << " - ";
+      if (interval.death == inf) stream << "inf";
+      else stream << interval.death;
+    }
     return stream;
   }
 };

@@ -11,8 +11,8 @@
 /**
  * @file list_column.h
  * @author Hannah Schreiber
- * @brief Contains the @ref List_column class.
- * Also defines the std::hash method for @ref List_column.
+ * @brief Contains the @ref Gudhi::persistence_matrix::List_column class.
+ * Also defines the std::hash method for @ref Gudhi::persistence_matrix::List_column.
  */
 
 #ifndef PM_LIST_COLUMN_H

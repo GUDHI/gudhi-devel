@@ -11,7 +11,7 @@
 /**
  * @file ru_matrix.h
  * @author Hannah Schreiber
- * @brief Contains the @ref RU_matrix class.
+ * @brief Contains the @ref Gudhi::persistence_matrix::RU_matrix class.
  */
 
 #ifndef PM_RU_MATRIX_H
@@ -897,7 +897,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_add_bar(dimension_type dim, pos_index birth) 
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _barcode().emplace_back(dim, birth, -1);
+    _barcode().emplace_back(birth, -1, dim);
     if constexpr (Master_matrix::hasFixedBarcode || !Master_matrix::Option_list::has_removable_columns) {
       _indexToBar().push_back(_barcode().size() - 1);
     } else {

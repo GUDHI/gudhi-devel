@@ -11,7 +11,7 @@
 /**
  * @file chain_matrix.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Chain_matrix class.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Chain_matrix class.
  */
 
 #ifndef PM_CHAIN_MATRIX_H
@@ -1260,7 +1260,7 @@ template <class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_add_bar(dimension_type dim) 
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _barcode().emplace_back(dim, _nextPosition(), -1);
+    _barcode().emplace_back(_nextPosition(), -1, dim);
     if constexpr (Master_matrix::Option_list::has_removable_columns) {
       _indexToBar().try_emplace(_nextPosition(), --_barcode().end());
     } else {

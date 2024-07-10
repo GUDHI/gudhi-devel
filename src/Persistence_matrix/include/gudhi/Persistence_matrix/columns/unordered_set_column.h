@@ -11,8 +11,8 @@
 /**
  * @file unordered_set_column.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Unordered_set_column class.
- * Also defines the std::hash method for @ref Unordered_set_column.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Unordered_set_column class.
+ * Also defines the std::hash method for @ref Gudhi::persistence_matrix::Unordered_set_column.
  */
 
 #ifndef PM_UNORDERED_SET_COLUMN_H
