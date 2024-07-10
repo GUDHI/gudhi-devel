@@ -156,7 +156,7 @@ class Filtered_zigzag_persistence_with_storage
         pers_(
             [&](dimension_type dim, internal_key birth, internal_key death) {
               if (dimMax_ == -1 || (dimMax_ != -1 && dim < dimMax_)) {  // don't record intervals over max dim
-                persistenceDiagram_.emplace_back(dim, birth, death);
+                persistenceDiagram_.emplace_back(birth, death, dim);
               }
             },
             minNumberOfFaces) {}
@@ -345,7 +345,7 @@ class Filtered_zigzag_persistence_with_storage
       }
 
       if (death - birth > shortestInterval) {
-        diag.emplace_back(bar.dim, birth, death);
+        diag.emplace_back(birth, death, bar.dim);
       }
     }
 
@@ -374,7 +374,7 @@ class Filtered_zigzag_persistence_with_storage
 
     auto stream_infinit_interval = [&](dimension_type dim, internal_key birthIndex) {
       if (dimMax_ == -1 || (dimMax_ != -1 && dim < dimMax_))
-        diag.emplace_back(dim, birth(birthIndex));
+        diag.emplace_back(birth(birthIndex), Filtration_value_interval::inf, dim);
     };
 
     pers_.get_current_infinite_intervals(stream_infinit_interval);

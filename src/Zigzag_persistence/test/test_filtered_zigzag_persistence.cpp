@@ -147,17 +147,17 @@ void test_filtered_zigzag_with_storage() {
     zp.insert_face(i, simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1, filValues[i]);
   }
 
-  realIndices.emplace_back(0, 1, 3);
-  realIndices.emplace_back(0, 2, 4);
-  realIndices.emplace_back(0, 7, 8);
-  realIndices.emplace_back(1, 6, 10);
-  realIndices.emplace_back(0, 9, 11);
-  realIndices.emplace_back(1, 12, 13);
+  realIndices.emplace_back(1, 3, 0);
+  realIndices.emplace_back(2, 4, 0);
+  realIndices.emplace_back(7, 8, 0);
+  realIndices.emplace_back(6, 10, 1);
+  realIndices.emplace_back(9, 11, 0);
+  realIndices.emplace_back(12, 13, 1);
 
-  realBarcode.emplace_back(0, 0, 1);
-  realBarcode.emplace_back(0, 0, 1);
-  realBarcode.emplace_back(1, 2, 3);
-  realBarcode.emplace_back(1, 3, 4);
+  realBarcode.emplace_back(0, 1, 0);
+  realBarcode.emplace_back(0, 1, 0);
+  realBarcode.emplace_back(2, 3, 1);
+  realBarcode.emplace_back(3, 4, 1);
 
   for (unsigned int i = 14; i < 16; ++i) {
     auto id = simplices[i][0];
@@ -168,35 +168,35 @@ void test_filtered_zigzag_with_storage() {
     zp.insert_face(i, simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1, filValues[i]);
   }
 
-  realIndices.emplace_back(0, 5, 16);
-  realIndices.emplace_back(1, 14, 17);
-  realIndices.emplace_back(1, 15, 19);
-  realIndices.emplace_back(1, 20, 21);
-  realIndices.emplace_back(1, 18, 22);
+  realIndices.emplace_back(5, 16, 0);
+  realIndices.emplace_back(14, 17, 1);
+  realIndices.emplace_back(15, 19, 1);
+  realIndices.emplace_back(20, 21, 1);
+  realIndices.emplace_back(18, 22, 1);
 
-  realBarcode.emplace_back(0, 1, 6);
-  realBarcode.emplace_back(1, 5, 6);
-  realBarcode.emplace_back(1, 6, 7);
+  realBarcode.emplace_back(1, 6, 0);
+  realBarcode.emplace_back(5, 6, 1);
+  realBarcode.emplace_back(6, 7, 1);
 
   for (unsigned int i = 24; i < 27; ++i) {
     auto id = simplices[i][0];
     zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
   }
 
-  realIndices.emplace_back(1, 24, 25);
-  realBarcode.emplace_back(1, 8, 9);
+  realIndices.emplace_back(24, 25, 1);
+  realBarcode.emplace_back(8, 9, 1);
 
   zp.insert_face(27, simplices[27], simplices[27].size() == 0 ? 0 : simplices[27].size() - 1, filValues[27]);
 
-  realIndices.emplace_back(2, 23, 27);
-  realBarcode.emplace_back(2, 7, 9);
+  realIndices.emplace_back(23, 27, 2);
+  realBarcode.emplace_back(7, 9, 2);
 
   auto id = simplices[28][0];
   zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[28]);
 
-  realBarcode.emplace_back(0, 0);
-  realBarcode.emplace_back(0, 9);
-  realBarcode.emplace_back(2, 10);
+  realBarcode.emplace_back(0, Interval_filtration::inf, 0);
+  realBarcode.emplace_back(9, Interval_filtration::inf, 0);
+  realBarcode.emplace_back(10, Interval_filtration::inf, 2);
 
   test_indices(zp, realIndices, filValues);
   test_barcode(zp, realBarcode);
@@ -222,13 +222,13 @@ void test_filtered_zigzag_with_storage_max1() {
     zp.insert_face(i, simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1, filValues[i]);
   }
 
-  realIndices.emplace_back(0, 1, 3);
-  realIndices.emplace_back(0, 2, 4);
-  realIndices.emplace_back(0, 7, 8);
-  realIndices.emplace_back(0, 9, 11);
+  realIndices.emplace_back(1, 3, 0);
+  realIndices.emplace_back(2, 4, 0);
+  realIndices.emplace_back(7, 8, 0);
+  realIndices.emplace_back(9, 11, 0);
 
-  realBarcode.emplace_back(0, 0, 1);
-  realBarcode.emplace_back(0, 0, 1);
+  realBarcode.emplace_back( 0, 1, 0);
+  realBarcode.emplace_back(0, 1, 0);
 
   for (unsigned int i = 14; i < 16; ++i) {
     auto id = simplices[i][0];
@@ -239,8 +239,8 @@ void test_filtered_zigzag_with_storage_max1() {
     zp.insert_face(i, simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1, filValues[i]);
   }
 
-  realIndices.emplace_back(0, 5, 16);
-  realBarcode.emplace_back(0, 1, 6);
+  realIndices.emplace_back(5, 16, 0);
+  realBarcode.emplace_back(1, 6, 0);
 
   for (unsigned int i = 24; i < 27; ++i) {
     auto id = simplices[i][0];
@@ -251,8 +251,8 @@ void test_filtered_zigzag_with_storage_max1() {
   auto id = simplices[28][0];
   zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[28]);
 
-  realBarcode.emplace_back(0, 0);
-  realBarcode.emplace_back(0, 9);
+  realBarcode.emplace_back(0, Interval_filtration::inf, 0);
+  realBarcode.emplace_back(9, Interval_filtration::inf, 0);
 
   test_indices(zp, realIndices, filValues);
   test_barcode(zp, realBarcode);
