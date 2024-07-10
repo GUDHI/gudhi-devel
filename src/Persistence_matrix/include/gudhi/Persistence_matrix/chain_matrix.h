@@ -1260,7 +1260,7 @@ template <class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_add_bar(dimension_type dim) 
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _barcode().emplace_back(dim, _nextPosition(), -1);
+    _barcode().emplace_back(_nextPosition(), -1, dim);
     if constexpr (Master_matrix::Option_list::has_removable_columns) {
       _indexToBar().try_emplace(_nextPosition(), --_barcode().end());
     } else {

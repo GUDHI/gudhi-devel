@@ -152,7 +152,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
       auto& curr = _matrix()->get_column(i);
       if (curr.is_empty()) {
         if (pivotsToColumn.find(i) == pivotsToColumn.end()) {
-          barcode_.emplace_back(dim, i, -1);
+          barcode_.emplace_back(i, -1, dim);
         }
       } else {
         id_index pivot = curr.get_pivot();
@@ -175,10 +175,10 @@ inline void Base_pairing<Master_matrix>::_reduce()
         if (pivot != static_cast<id_index>(-1)) {
           pivotsToColumn.emplace(pivot, i);
           _matrix()->get_column(pivot).clear();
-          barcode_.emplace_back(dim - 1, pivot, i);
+          barcode_.emplace_back(pivot, i, dim - 1);
         } else {
           curr.clear();
-          barcode_.emplace_back(dim, i, -1);
+          barcode_.emplace_back(i, -1, dim);
         }
       }
     }

@@ -897,7 +897,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_add_bar(dimension_type dim, pos_index birth) 
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _barcode().emplace_back(dim, birth, -1);
+    _barcode().emplace_back(birth, -1, dim);
     if constexpr (Master_matrix::hasFixedBarcode || !Master_matrix::Option_list::has_removable_columns) {
       _indexToBar().push_back(_barcode().size() - 1);
     } else {
