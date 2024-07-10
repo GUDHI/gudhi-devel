@@ -11,7 +11,8 @@
 /**
  * @file row_access.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Row_access class and @ref Dummy_row_access structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Row_access class and
+ * @ref Gudhi::persistence_matrix::Dummy_row_access structure.
  */
 
 #ifndef PM_ROW_ACCESS_H

@@ -11,7 +11,8 @@
 /**
  * @file ru_rep_cycles.h
  * @author Hannah Schreiber
- * @brief Contains the @ref RU_representative_cycles class and @ref Dummy_ru_representative_cycles structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::RU_representative_cycles class and
+ * @ref Gudhi::persistence_matrix::Dummy_ru_representative_cycles structure.
  */
 
 #ifndef PM_RU_REP_CYCLES_H

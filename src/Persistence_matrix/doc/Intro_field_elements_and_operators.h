@@ -19,6 +19,8 @@ namespace persistence_fields {
  * @{
  * \author    Hannah Schreiber, Clément Maria
  *
+ * \section fieldintro Persistence Fields
+ *
  * Set of classes allowing addition and multiplication, as well as inverse computation, in \f$ \mathbb{F}_p \f$ fields,
  * with \f$ p \f$ some prime number, or in multi-fields as defined in \cite boissonnat:hal-00922572.
  *

@@ -11,7 +11,7 @@
 /**
  * @file Multi_field_operators.h
  * @author Hannah Schreiber, Clément Maria
- * @brief Contains the @ref Multi_field_operators class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Multi_field_operators class.
  */
 
 #ifndef MATRIX_FIELD_MULTI_OPERATORS_H_

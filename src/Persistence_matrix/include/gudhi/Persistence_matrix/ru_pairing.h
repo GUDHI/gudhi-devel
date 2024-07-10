@@ -11,7 +11,8 @@
 /**
  * @file ru_pairing.h
  * @author Hannah Schreiber
- * @brief Contains the @ref RU_pairing class and @ref Dummy_ru_pairing structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::RU_pairing class and
+ * @ref Gudhi::persistence_matrix::Dummy_ru_pairing structure.
  */
 
 #ifndef PM_RU_PAIRING_H

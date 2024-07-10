@@ -11,7 +11,7 @@
 /**
  * @file base_matrix_with_column_compression.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Base_matrix_with_column_compression class.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Base_matrix_with_column_compression class.
  */
 
 #ifndef PM_BASE_MATRIX_COMPRESSION_H
@@ -292,8 +292,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   /**
    * @brief Resets the matrix to an empty matrix.
    * 
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to the cell factory.
    */
   void reset(Column_settings* colSettings) {
     columnToRep_.clear_and_dispose(delete_disposer(this));

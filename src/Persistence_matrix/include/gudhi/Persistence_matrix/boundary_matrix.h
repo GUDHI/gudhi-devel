@@ -11,7 +11,7 @@
 /**
  * @file boundary_matrix.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Boundary_matrix class.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Boundary_matrix class.
  */
 
 #ifndef PM_BOUNDARY_MATRIX_H

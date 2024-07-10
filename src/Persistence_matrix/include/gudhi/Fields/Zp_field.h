@@ -11,7 +11,7 @@
 /**
  * @file Zp_field.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Zp_field_element class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Zp_field_element class.
  */
 
 #ifndef MATRIX_FIELD_ZP_H_

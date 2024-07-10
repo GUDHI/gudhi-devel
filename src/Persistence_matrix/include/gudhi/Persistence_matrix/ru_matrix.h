@@ -11,7 +11,7 @@
 /**
  * @file ru_matrix.h
  * @author Hannah Schreiber
- * @brief Contains the @ref RU_matrix class.
+ * @brief Contains the @ref Gudhi::persistence_matrix::RU_matrix class.
  */
 
 #ifndef PM_RU_MATRIX_H

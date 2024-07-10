@@ -11,7 +11,7 @@
 /**
  * @file Multi_field.h
  * @author Hannah Schreiber, Clément Maria
- * @brief Contains the @ref Multi_field_element class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Multi_field_element class.
  */
 
 #ifndef MATRIX_FIELD_MULTI_H_
