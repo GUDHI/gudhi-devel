@@ -6,7 +6,7 @@
  *
  *    Modification(s):
  *      - 2023/05 Hannah Schreiber: Rework of the interface, reorganization and debug
- *      - 2023/05 Hannah Schreiber: Addition of infinit bars
+ *      - 2023/05 Hannah Schreiber: Addition of infinite bars
  *      - 2024/06 Hannah Schreiber: Separation of the zigzag algorithm from the filtration value management
  *      - YYYY/MM Author: Description of the modification
  */
@@ -42,7 +42,7 @@ namespace zigzag_persistence {
  * @brief Default options for @ref Filtered_zigzag_persistence_with_storage and @ref Filtered_zigzag_persistence.
  */
 struct Default_filtered_zigzag_options {
-  using internal_key = int;        /**< Face ID used internaly, must be signed. */
+  using internal_key = int;        /**< Face ID used internally, must be signed. */
   using face_key = int;            /**< Face ID used in the given boundaries. */
   using filtration_value = double; /**< Filtration value type. */
   using dimension_type = int;      /**< Dimension value type. */
@@ -56,8 +56,8 @@ struct Default_filtered_zigzag_options {
 /**
  * @ingroup zigzag_persistence
  *
- * @brief Class computating the zigzag persistent homology of a zigzag filtration. Algorithm based on \cite zigzag.
- * Eventhough the insertions and removals are given in a "stream-like" way, the barcode and other values are
+ * @brief Class computing the zigzag persistent homology of a zigzag filtration. Algorithm based on \cite zigzag.
+ * Even though the insertions and removals are given in a "stream-like" way, the barcode and other values are
  * stored during the whole process and not removed. It is therefore suited for smaller filtrations where the clean
  * ups produce a higher overhead than the memory consumption.
  * 
@@ -143,8 +143,7 @@ class Filtered_zigzag_persistence_with_storage
 
     GUDHI_CHECK(res.second, "Zigzag_persistence::insert_face - face already in the complex");
 
-    // Reduce the boundary of zzsh in the basis of cycles.
-    // Compute the keys of the faces of the boundary of zzsh.
+    // Compute the keys of the faces of the boundary.
     std::set<internal_key> translatedBoundary;  // set maintains the natural order on indices
     for (auto b : boundary) {
       translatedBoundary.insert(handleToKey_.at(b));  // TODO: add possibilities of coefficients
@@ -184,7 +183,7 @@ class Filtered_zigzag_persistence_with_storage
 
   /**
    * @brief To use when a face is neither inserted nor removed, but the filtration moves along the identity operator
-   * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposly skipped
+   * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposely skipped
    * to avoid useless computation.
    */
   void apply_identity() {
@@ -242,15 +241,15 @@ class Filtered_zigzag_persistence_with_storage
    * @brief Returns the current persistence diagram.
    *
    * @param shortestInterval Threshold. Every bar shorter than the given value will be ignored. Default value: 0.
-   * @param includeInfinitBars If set to true, infinit bars are included in the diagram. Default value: false.
+   * @param includeInfiniteBars If set to true, infinite bars are included in the diagram. Default value: false.
    * @return A vector of pairs of filtration values representing the persistence diagram.
    */
   std::vector<Filtration_value_interval> get_persistence_diagram(filtration_value shortestInterval = 0.,
-                                                                 bool includeInfinitBars = false) {
+                                                                 bool includeInfiniteBars = false) {
     std::vector<Filtration_value_interval> diag = _get_persistence_diagram(shortestInterval);
 
-    if (includeInfinitBars) {
-      _retrieve_infinit_bars(diag);
+    if (includeInfiniteBars) {
+      _retrieve_infinite_bars(diag);
     }
 
     return diag;
@@ -271,7 +270,7 @@ class Filtered_zigzag_persistence_with_storage
   Zigzag_persistence<FilteredZigzagOptions, false> pers_; /**< Class computing the pairs. */
 
   /**
-   * @brief Returns the current persistence diagram without infinit bars.
+   * @brief Returns the current persistence diagram without infinite bars.
    *
    * @param shortestInterval Intervals shorter than the given value are ignored.
    * @return Vector of intervals.
@@ -303,9 +302,9 @@ class Filtered_zigzag_persistence_with_storage
   /**
    * @brief Computes the births of the current essential cycles.
    *
-   * @param diag Reference to vector where to store the infinit bars.
+   * @param diag Reference to vector where to store the infinite bars.
    */
-  void _retrieve_infinit_bars(std::vector<Filtration_value_interval>& diag) {
+  void _retrieve_infinite_bars(std::vector<Filtration_value_interval>& diag) {
     auto birth = [this](internal_key birthKey) {
       auto itBirth =  // lower_bound(x) returns leftmost y s.t. x <= y
           std::lower_bound(
@@ -320,19 +319,19 @@ class Filtered_zigzag_persistence_with_storage
       return itBirth->second;
     };
 
-    auto stream_infinit_interval = [&](dimension_type dim, internal_key birthIndex) {
+    auto stream_infinite_interval = [&](dimension_type dim, internal_key birthIndex) {
       if (dimMax_ == -1 || (dimMax_ != -1 && dim < dimMax_))
         diag.emplace_back(birth(birthIndex), Filtration_value_interval::inf, dim);
     };
 
-    pers_.get_current_infinite_intervals(stream_infinit_interval);
+    pers_.get_current_infinite_intervals(stream_infinite_interval);
   }
 };  // end class Filtered_zigzag_persistence_with_storage
 
 /**
  * @ingroup zigzag_persistence
  *
- * @brief Class computating the zigzag persistent homology of a zigzag filtration. Algorithm based on \cite zigzag.
+ * @brief Class computing the zigzag persistent homology of a zigzag filtration. Algorithm based on \cite zigzag.
  * 
  * @tparam FilteredZigzagOptions Structure following the @ref FilteredZigzagOptions concept.
  * Default value: @ref Default_filtered_zigzag_options.
@@ -351,7 +350,7 @@ class Filtered_zigzag_persistence {
    * @details After construction of the class, the zigzag filtration should be given in a streaming like way, i.e.,
    * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
    * the filtration. The bars of the diagram are retrieved via the given callback method every time
-   * a pair with non-zero length is closed. To retrieve the open/infinit bars, use @ref get_current_infinite_intervals.
+   * a pair with non-zero length is closed. To retrieve the open/infinite bars, use @ref get_current_infinite_intervals.
    *
    * @param stream_interval Callback method to process the birth and death values of a persistence bar.
    * Has to take three arguments as input: first the dimension of the cycle, then the birth value of the cycle
@@ -402,8 +401,7 @@ class Filtered_zigzag_persistence {
 
     keyToFiltrationValue_.try_emplace(numArrow_, filtrationValue);
 
-    // Reduce the boundary of zzsh in the basis of cycles.
-    // Compute the keys of the faces of the boundary of zzsh.
+    // Compute the keys of the faces of the boundary.
     std::set<internal_key> translatedBoundary;  // set maintains the natural order on indices
     for (auto b : boundary) {
       translatedBoundary.insert(handleToKey_.at(b));  // TODO: add possibilities of coefficients
@@ -434,7 +432,7 @@ class Filtered_zigzag_persistence {
 
   /**
    * @brief To use when a face is neither inserted nor removed, but the filtration moves along the identity operator
-   * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposly skipped
+   * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposely skipped
    * to avoid useless computation.
    */
   void apply_identity() {
@@ -443,25 +441,25 @@ class Filtered_zigzag_persistence {
   }
 
   /**
-   * @brief Outputs through the given callback method all current infinit bars.
+   * @brief Outputs through the given callback method all current infinite bars.
    * 
    * @tparam F Type of the callback method. Takes two arguments: the dimension of the cycle and the birth value
    * of the cycle.
-   * @param stream_infinit_interval Method processing the unpaired birth values.
+   * @param stream_infinite_interval Method processing the unpaired birth values.
    */
   template <typename F>
-  void get_current_infinite_intervals(F&& stream_infinit_interval) {
+  void get_current_infinite_intervals(F&& stream_infinite_interval) {
     pers_.get_current_infinite_intervals(
-        [&](dimension_type dim, internal_key birth) { stream_infinit_interval(dim, keyToFiltrationValue_.at(birth)); });
+        [&](dimension_type dim, internal_key birth) { stream_infinite_interval(dim, keyToFiltrationValue_.at(birth)); });
   }
 
  private:
   template <typename key_type, typename value_type>
-  using dictionnary = std::unordered_map<key_type, value_type>;  // TODO: benchmark with other map types
+  using dictionary = std::unordered_map<key_type, value_type>;  // TODO: benchmark with other map types
 
-  dictionnary<face_key, internal_key> handleToKey_;                   /**< Map from input keys to internal keys. */
+  dictionary<face_key, internal_key> handleToKey_;                   /**< Map from input keys to internal keys. */
   internal_key numArrow_;                                             /**< Current arrow number. */
-  dictionnary<internal_key, filtration_value> keyToFiltrationValue_;  /**< Face Key to filtration value map. */
+  dictionary<internal_key, filtration_value> keyToFiltrationValue_;  /**< Face Key to filtration value map. */
   std::function<void(int,filtration_value,filtration_value)> stream_interval_;  /**< Callback method for finite bars. */
   Zigzag_persistence<FilteredZigzagOptions, true> pers_;              /**< Class computing the pairs. */
 };  // end class Filtered_zigzag_persistence

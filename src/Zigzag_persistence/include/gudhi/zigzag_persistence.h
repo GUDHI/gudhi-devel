@@ -6,7 +6,7 @@
  *
  *    Modification(s):
  *      - 2023/05 Hannah Schreiber: Rework of the interface, reorganization and debug
- *      - 2023/05 Hannah Schreiber: Addition of infinit bars
+ *      - 2023/05 Hannah Schreiber: Addition of infinite bars
  *      - 2024/06 Hannah Schreiber: Separation of the zigzag algorithm from the filtration value management
  *      - YYYY/MM Author: Description of the modification
  */
@@ -62,7 +62,7 @@ struct Zigzag_matrix_options : Gudhi::persistence_matrix::Default_options<column
  * @brief Default options for @ref Zigzag_persistence.
  */
 struct Default_zigzag_options {
-  using internal_key = int;   /**< Face ID used internaly, must be signed. */
+  using internal_key = int;   /**< Face ID used internally, must be signed. */
   using dimension_type = int; /**< Dimension value type. */
   /**
    * @brief Column type use by the internal matrix.
@@ -77,7 +77,7 @@ struct Default_zigzag_options {
 // it stays here undocumented to ease benchmarks.
 /**
  * @class Zigzag_persistence zigzag_persistence.h gudhi/zigzag_persistence.h
- * @brief Class computating the zigzag persistent homology of a zigzag sequence. Algorithm based on \cite zigzag.
+ * @brief Class computing the zigzag persistent homology of a zigzag sequence. Algorithm based on \cite zigzag.
  *
  * @ingroup zigzag_persistence
  *
@@ -93,10 +93,10 @@ class Zigzag_persistence
 
  private:
 #if BOOST_VERSION >= 108100
-  using birth_dictionnary = boost::unordered_flat_map<index, index>;      /**< Dictionnary type. */
-  // using birth_dictionnary = boost::unordered_map<index, index>;           /**< Dictionnary type. */
+  using birth_dictionary = boost::unordered_flat_map<index, index>;      /**< Dictionary type. */
+  // using birth_dictionary = boost::unordered_map<index, index>;           /**< Dictionary type. */
 #else
-  using birth_dictionnary = std::unordered_map<index, index>;             /**< Dictionnary type. */
+  using birth_dictionary = std::unordered_map<index, index>;             /**< Dictionary type. */
 #endif
   using Matrix_options = Zigzag_matrix_options<Options::column_type>;     /**< Matrix options. */
   using Matrix_type = Gudhi::persistence_matrix::Matrix<Matrix_options>;  /**< Matrix. */
@@ -176,7 +176,7 @@ class Zigzag_persistence
     bool reverse_birth_order(index k1, index k2) const { return birthToPos_.at(k1) > birthToPos_.at(k2); }
 
    private:
-    birth_dictionnary birthToPos_; /**< birth_to_pos_[i] < birth_to_pos_[j] iff i <b j */
+    birth_dictionary birthToPos_; /**< birth_to_pos_[i] < birth_to_pos_[j] iff i <b j */
     index maxBirthPos_;            /**< is strictly larger than any other birth so far */
     index minBirthPos_;            /**< is strictly smaller than any other birth so far */
   };
@@ -187,12 +187,12 @@ class Zigzag_persistence
    * @details After construction of the class, the zigzag filtration should be given in a streaming like way, i.e.,
    * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
    * the filtration. The pairs of birth and death indices are retrieved via the given callback method every time
-   * a pair is closed. To retrieve the open pairs (corresponding to infinit bars),
+   * a pair is closed. To retrieve the open pairs (corresponding to infinite bars),
    * use @ref get_current_infinite_intervals.
    *
    * @param stream_interval Callback method to process the birth and death index pairs. Has to take three arguments
    * as input: first the dimension of the cycle, then the birth index of the cycle and third the death index of the
-   * cycle. An index always corresponds to the arrow number the event occured (one call to @ref insert_face,
+   * cycle. An index always corresponds to the arrow number the event occurred (one call to @ref insert_face,
    * @ref remove_face or @ref apply_identity is equal to one arrow and increases the arrow count by one).
    * @param minNumberOfFaces Minimum number of faces that will be in a complex at some point in the filtration.
    * If the maximal number of faces is known in advance, the memory allocation can be better optimized.
@@ -240,7 +240,7 @@ class Zigzag_persistence
 
   /**
    * @brief To use when a face is neither inserted nor removed, but the filtration moves along the identity operator
-   * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposly skipped
+   * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposely skipped
    * to avoid useless computation. Increases the arrow number by one.
    */
   void apply_identity() { ++numArrow_; }
@@ -251,19 +251,19 @@ class Zigzag_persistence
    * 
    * @tparam F Type of the callback method. Takes two arguments: the dimension of the cycle and the birth index
    * of the cycle.
-   * @param stream_infinit_interval Method processing the unpaired birth indices.
+   * @param stream_infinite_interval Method processing the unpaired birth indices.
    */
   template <typename F>
-  void get_current_infinite_intervals(F&& stream_infinit_interval) {
+  void get_current_infinite_intervals(F&& stream_infinite_interval) {
     for (auto& p : births_) {
       if constexpr (erase_birth_history) {
         auto& col = matrix_.get_column(p.first);
-        stream_infinit_interval(col.get_dimension(), p.second);
+        stream_infinite_interval(col.get_dimension(), p.second);
       } else {
         try {
           auto& col = matrix_.get_column(p.first);
           if (!col.is_paired()) {
-            stream_infinit_interval(col.get_dimension(), p.second);
+            stream_infinite_interval(col.get_dimension(), p.second);
           }
         } catch (const std::out_of_range& e) {
           continue;
@@ -326,10 +326,10 @@ class Zigzag_persistence
       return birthOrdering_.reverse_birth_order(k1, k2);
     };  // true iff b(k1) >b b(k2)
 
-    // available_birth: for all i by >d value of the d_i,
+    // availableBirth: for all i by >d value of the d_i,
     // contains at step i all b_j, j > i, and maybe b_i if not stolen
     std::set<index, decltype(cmp_birth)> availableBirth(cmp_birth);
-    // for f1 to f_{p} (i by <=d), insertion in available_birth_to_fidx sorts by >=b
+    // for f1 to f_{p} (i by <=d), insertion in availableBirth sorts by >=b
     for (auto& chainF : chainsInF) {
       availableBirth.insert(births_.at(chainF));
     }
@@ -348,7 +348,7 @@ class Zigzag_persistence
       if (birthIt == availableBirth.end())  // birth is not available. *chain_f_it
       {                                     // must become the sum of all chains in F with smaller death index.
         // this gives as birth the maximal birth of all chains with strictly larger
-        // death <=> the maximal availabe death.
+        // death <=> the maximal available death.
         // Let c_1 ... c_f be the chains s.t. <[c_1+...+c_f]> is the kernel and
         //  death(c_i) >d death(c_i-1). If the birth of c_i is not available, we set
         // c_i <- c_i + c_i-1 + ... + c_1, which is [c_i + c_i-1 + ... + c_1] on
@@ -367,7 +367,7 @@ class Zigzag_persistence
         }
         lastModifiedChainIt = chainFIt;  // new cumulated c_i+...+c_1
         // remove the max available death
-        auto maxAvailBirthIt = availableBirth.begin();  // max because order by deacr <b
+        auto maxAvailBirthIt = availableBirth.begin();  // max because order by decreasing <b
         index maxAvailBirth = *maxAvailBirthIt;         // max available birth
 
         births_.at(*chainFIt) = maxAvailBirth;  // give new birth
@@ -434,12 +434,12 @@ class Zigzag_persistence
     }
 
     // cannot be in G as the removed face is maximal
-    matrix_.remove_maximal_face(faceID, {});  // also unpaires c_g if in H
+    matrix_.remove_maximal_face(faceID, {});  // also un-pairs c_g if in H
   }
 
  private:
   Matrix_type matrix_;           /**< Matrix storing a base of the current chain complex. */
-  birth_dictionnary births_;     /**< Map face index in F to corresponding birth. */
+  birth_dictionary births_;     /**< Map face index in F to corresponding birth. */
   Birth_ordering birthOrdering_; /**< Maintains <b ordering of the births. */
   index numArrow_;               /**< Current arrow number. */
   std::function<void(dimension_type, index, index)> stream_interval_; /**< Callback method for closed pairs. */

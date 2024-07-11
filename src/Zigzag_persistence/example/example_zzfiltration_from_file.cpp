@@ -113,7 +113,7 @@ int main(int argc, char* const argv[]) {
     file.setstate(std::ios::failbit);
   }
 
-  //retrieve infinit bars remaining at the end
+  //retrieve infinite bars remaining at the end
   //again std::cout could be replaced by any other output stream
   zp.get_current_infinite_intervals([](dimension_type dim, filtration_value birth) {
     std::cout << "[" << dim << "] ";

@@ -24,25 +24,25 @@ namespace zigzag_persistence {
  * We refer to the introduction page \ref persistent_cohomology for persistent (co)homology for an introduction
  * to the topic.
  * Zigzag persistence is a generalization of the latter. While standard persistence only allows to grow the filtered
- * complex by adding simplices, zigzag persistence also allows removals. Hence the name "zigzag", as the module
- * diagram will have arrows alterning between forward and backward.
+ * complex by adding faces, zigzag persistence also allows removals. Hence the name "zigzag", as the module
+ * diagram will have arrows alternating between forward and backward.
  *
- * The module is partitioned in two types of classes: filtered and non-filtered.
- * - There is one non-filtered class:
- * @ref Zigzag_persistence. It computes the persistence by considering only the atomic operations in the filtration.
- * If the order in which the operations are made still matters, the filtration values associated to an operation 
- * is not token into account. For example, if a cycle is born at operation number 6 and dies at operation number 7, it
- * will output a bar starting at 6 and ending at 7, even if both operations have the same filtration value and therefore
- * the "real" bar has length 0.
+ * The module is partitioned in two types of classes: filtered by filtration values and filtered by the atomic
+ * operations.
+ * - There is one atomic class:
+ * @ref Zigzag_persistence. It computes the persistence by considering only the index of an atomic operations in the
+ * filtration and not its possibly associated filtration value. For example, if a cycle is born at operation number 6
+ * and dies at operation number 7, it will output a bar starting at 6 and ending at 7, even if both operations have
+ * the same filtration value in the zigzag filtration and therefore the "real" bar has length 0.
  * - There are two filtered classes: @ref Filtered_zigzag_persistence and @ref Filtered_zigzag_persistence_with_storage.
- * They are both based on @ref Zigzag_persistence and manage additionnaly the filtration values which are ignored by 
+ * They are both based on @ref Zigzag_persistence and manage additionally the filtration values which are ignored by 
  * @ref Zigzag_persistence. They automatically translate the operation numbers into their corresponding filtration
- * values and remove bars below a given length threshold. They also have more flexible inputs (the boundaries do not
- * have to be ordered, nor identified continously from 0). The two classes diverge on the way they manage the memory:
- * @ref Filtered_zigzag_persistence removes systematically all unnecessary information and outputs a pair as soon
- * it is closed, while @ref Filtered_zigzag_persistence_with_storage will store all informations about filtration values
- * and bars until the end and output the pairs only when asked. Depending on the use and the length of the filtration,
- * one will be more efficiant than the other and vice versa.
+ * values. They also have more flexible inputs (the boundaries do not have to be ordered, nor identified continuously
+ * from 0). The two classes diverge on the way they manage the memory: @ref Filtered_zigzag_persistence removes
+ * systematically all unnecessary information and outputs a pair as soon it is closed, while
+ * @ref Filtered_zigzag_persistence_with_storage will store all informations about filtration values and bars until the
+ * end and output the pairs only when asked. Depending on the use and the length of the filtration, one will be more
+ * efficient than the other and vice versa.
  *
  * The implementation is based on the algorithm introduced in \cite zigzag.
  *
