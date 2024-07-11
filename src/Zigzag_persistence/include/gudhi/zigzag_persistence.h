@@ -78,6 +78,11 @@ struct Default_zigzag_options {
 /**
  * @class Zigzag_persistence zigzag_persistence.h gudhi/zigzag_persistence.h
  * @brief Class computing the zigzag persistent homology of a zigzag sequence. Algorithm based on \cite zigzag.
+ * @details After construction of the class, the zigzag filtration should be given in a streaming like way, i.e.,
+ * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
+ * the filtration. The pairs of birth and death indices are retrieved via the given callback method every time
+ * a pair is closed. To retrieve the open pairs (corresponding to infinite bars),
+ * use @ref get_current_infinite_intervals.
  *
  * @ingroup zigzag_persistence
  *
@@ -194,8 +199,8 @@ class Zigzag_persistence
    * as input: first the dimension of the cycle, then the birth index of the cycle and third the death index of the
    * cycle. An index always corresponds to the arrow number the event occurred (one call to @ref insert_face,
    * @ref remove_face or @ref apply_identity is equal to one arrow and increases the arrow count by one).
-   * @param minNumberOfFaces Minimum number of faces that will be in a complex at some point in the filtration.
-   * If the maximal number of faces is known in advance, the memory allocation can be better optimized.
+   * @param minNumberOfFaces Maximal value among the minimum numbers of faces known to be at the same time in each
+   * complex of the filtration. It will be used to optimize the memory allocation.
    * Default value: 0.
    */
   Zigzag_persistence(std::function<void(dimension_type, index, index)> stream_interval,
@@ -214,7 +219,7 @@ class Zigzag_persistence
   /**
    * @brief Updates the zigzag persistence diagram after the insertion of the given face.
    *
-   * @tparam BoundaryRange Range type needing begin and end members.
+   * @tparam BoundaryRange Range type needing size, begin and end members.
    * @param boundary Boundary of the inserted face. The boundary should be represented by all the faces with
    * non-zero coefficients generating it. A face should be represented by the arrow number when the face appeared for
    * the first time in the filtration (if a face was inserted and then removed and reinserted etc., only the last
@@ -355,7 +360,7 @@ class Zigzag_persistence
         // the right (of death the maximal<d death(c_i)), and is [c_i + c_i-1 + ... +
         // c_1] + kernel = [c_f + c_f-1 + ... + c_i+1] on the left (of birth the max<b
         // of the birth of the c_j, j>i  <=> the max<b available birth).
-        // N.B. some of the c_k, k<i, ahve already been modified to be equal to
+        // N.B. some of the c_k, k<i, have already been modified to be equal to
         // c_k + c_k-1 + ... + c_1. The largest k with this property is maintained in
         // last_modified_chain_it (no need to compute from scratch the full sum).
 

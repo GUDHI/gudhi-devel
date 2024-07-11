@@ -27,14 +27,15 @@ namespace zigzag_persistence {
  * complex by adding faces, zigzag persistence also allows removals. Hence the name "zigzag", as the module
  * diagram will have arrows alternating between forward and backward.
  *
- * The module is partitioned in two types of classes: filtered by filtration values and filtered by the atomic
+ * The module is partitioned in two types of classes: filtered by filtration values and filtered by the elementary
  * operations.
- * - There is one atomic class:
+ * - For the latter, there is one class:
  * @ref Zigzag_persistence. It computes the persistence by considering only the index of an atomic operations in the
  * filtration and not its possibly associated filtration value. For example, if a cycle is born at operation number 6
  * and dies at operation number 7, it will output a bar starting at 6 and ending at 7, even if both operations have
  * the same filtration value in the zigzag filtration and therefore the "real" bar has length 0.
- * - There are two filtered classes: @ref Filtered_zigzag_persistence and @ref Filtered_zigzag_persistence_with_storage.
+ * - For the other type, there are two classes: @ref Filtered_zigzag_persistence and
+ * @ref Filtered_zigzag_persistence_with_storage.
  * They are both based on @ref Zigzag_persistence and manage additionally the filtration values which are ignored by 
  * @ref Zigzag_persistence. They automatically translate the operation numbers into their corresponding filtration
  * values. They also have more flexible inputs (the boundaries do not have to be ordered, nor identified continuously

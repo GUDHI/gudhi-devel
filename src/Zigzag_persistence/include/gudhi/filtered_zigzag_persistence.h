@@ -112,7 +112,7 @@ class Filtered_zigzag_persistence_with_storage
   /**
    * @brief Updates the zigzag persistence diagram after the insertion of the given face.
    *
-   * @tparam BoundaryRange Range type needing begin and end members.
+   * @tparam BoundaryRange Range type needing size, begin and end members.
    * @param faceID ID representing the inserted face.
    * @param boundary Boundary of the inserted face. The range should be composed of the IDs of all faces contained in
    * the boundary (i.e. with non-zero coefficients), using the ID specified as `faceID` when the corresponding face
@@ -379,7 +379,7 @@ class Filtered_zigzag_persistence {
   /**
    * @brief Updates the zigzag persistence diagram after the insertion of the given face.
    *
-   * @tparam BoundaryRange Range type needing begin and end members.
+   * @tparam BoundaryRange Range type needing size, begin and end members.
    * @param faceID ID representing the inserted face.
    * @param boundary Boundary of the inserted face. The range should be composed of the IDs of all faces contained in
    * the boundary (i.e. with non-zero coefficients), using the ID specified as `faceID` when the corresponding face
