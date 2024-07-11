@@ -27,7 +27,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Row_access, if the row access is not enabled.
+ * Inherited instead of @ref Row_access, if the row access is not enabled.
  */
 struct Dummy_row_access 
 {
@@ -44,7 +44,7 @@ struct Dummy_row_access
  *
  * @brief Class managing the row access for the columns.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class Row_access 
@@ -92,7 +92,7 @@ class Row_access
    * Otherwise does nothing.
    *
    * If the rows are intrusive, only a pointer of the cell is stored and therefore any update on the cell (value
-   * or column index) is automatically forwarded. But for non intrusive rows, any update has to be pushed explicitely.
+   * or column index) is automatically forwarded. But for non intrusive rows, any update has to be pushed explicitly.
    * 
    * @param cell Cell to update.
    */
@@ -116,7 +116,7 @@ class Row_access
 
  protected:
   index columnIndex_;         /**< Column index. */
-  Row_container_type* rows_;  /**< Row container. Be carefull to not destroy before the columns. */
+  Row_container_type* rows_;  /**< Row container. Be careful to not destroy before the columns. */
 
  private:
   using base_hook_matrix_row = typename Master_matrix::base_hook_matrix_row;

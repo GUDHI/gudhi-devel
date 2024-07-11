@@ -68,7 +68,7 @@ struct PersistenceMatrixOptions
   /**
    * @brief Only enabled for @ref basematrix "base matrices" (i.e., none of the following is true:
    * @ref has_column_pairings, @ref has_vine_update, @ref can_retrieve_representative_cycles), is ignored otherwise.
-   * If set to true, two identical columns in the matrix are not explicitely stored separately but are represented 
+   * If set to true, two identical columns in the matrix are not explicitly stored separately but are represented 
    * by a same column.
    *
    * Note that some methods of the @ref basematrix "base matrix" are not available when true:
@@ -166,7 +166,7 @@ struct PersistenceMatrixOptions
   //  * the following is true: @ref has_column_pairings, @ref has_vine_update or
   //  * @ref can_retrieve_representative_cycles.
   //  * Is ignored otherwise
-  //  * If set to true, the matrix is decomposed in several submatrices containing each all the
+  //  * If set to true, the matrix is decomposed in several sub-matrices containing each all the
   //  * columns of same dimension.
   //  */
   //  static const bool is_separated_by_dimension;

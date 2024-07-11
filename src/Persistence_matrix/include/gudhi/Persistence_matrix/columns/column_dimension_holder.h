@@ -27,7 +27,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Column_dimension_holder, when the columns are not storing a dimension.
+ * Inherited instead of @ref Column_dimension_holder, when the columns are not storing a dimension.
  */
 struct Dummy_dimension_holder 
 {
@@ -44,7 +44,7 @@ struct Dummy_dimension_holder
  *
  * @brief Class managing the dimension access of a column.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 struct Column_dimension_holder 

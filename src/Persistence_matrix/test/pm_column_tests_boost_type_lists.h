@@ -53,7 +53,7 @@ struct c_chain_options {
 template <class col_type>
 class column_non_validity {
  private:
-  static constexpr bool is_non_valide() {
+  static constexpr bool is_non_valid() {
     if constexpr (col_type::Master::Option_list::column_type == Column_types::INTRUSIVE_LIST) {
       return !std::is_same_v<col_type, Intrusive_list_column<typename col_type::Master> >;
     } else if constexpr (col_type::Master::Option_list::column_type == Column_types::INTRUSIVE_SET) {
@@ -76,7 +76,7 @@ class column_non_validity {
   }
 
  public:
-  static constexpr bool value = is_non_valide();
+  static constexpr bool value = is_non_valid();
 };
 
 // if a new column type is implemented, create a `ct_*` structure for it and add it to this list...
@@ -117,7 +117,7 @@ using z5_only_ra_option_list = option_template<option_name_list, false_value_lis
 template <typename complete_option_list>
 using c_matrices_list = boost::mp11::mp_product<boost::mp11::mp_invoke_q, c_matrix_type_list, complete_option_list>;
 
-// the remove_if here is quite unefficiant as it has to remove a lot. But I did not found another way to do it without
+// the remove_if here is quite non efficient as it has to remove a lot. But I did not found another way to do it without
 // having to define something for each column type individually.
 template <typename complete_option_list>
 using columns_list = boost::mp11::mp_remove_if<
