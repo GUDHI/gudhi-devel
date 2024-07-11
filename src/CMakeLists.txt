@@ -46,6 +46,7 @@ add_gudhi_module(Witness_complex)
 add_gudhi_module(Nerve_GIC)
 add_gudhi_module(Persistence_matrix)
 
+set(GUDHI_BIBLIO_DIR ${CMAKE_SOURCE_DIR})
 # For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set
 set(GUDHI_USER_VERSION_DIR ${CMAKE_SOURCE_DIR})
 include(GUDHI_doxygen_target)

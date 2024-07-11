@@ -23,7 +23,7 @@ namespace persistence_matrix {
  * @brief If PersistenceMatrixOptions::has_row_access is true, then @ref Row_access. Otherwise @ref Dummy_row_access.
  * Can eventually be removed if the structure of the column does not allow row access (as for @ref Heap_column), but
  * then it needs to be notified in the documentation of @ref Column_types and as static_assert in
- * @ref Matrix::_assert_options.
+ * Matrix::_assert_options.
  */
 using Row_access_option = Row_access;
 /**
@@ -143,7 +143,7 @@ class PersistenceMatrixColumn :
    * @tparam Row_container_type Either std::map if @ref PersistenceMatrixOptions::has_removable_rows is true or
    * std::vector<Row_type>.
    * @param columnIndex @ref MatIdx column index that should be specified to the cells.
-   * @param nonZeroRowIndices Range of @ref Matrix::cell_rep_type representing all rows with non zero values.
+   * @param nonZeroChainRowIndices Range of @ref Matrix::cell_rep_type representing all rows with non zero values.
    * @param dimension Dimension of the column. Is ignored if the dimension is not stored.
    * @param rowContainer Pointer to the row container that will be forwarded to @ref Row_access at construction.
    * @param colSettings Pointer to an existing setting structure. The structure should contain all the necessary

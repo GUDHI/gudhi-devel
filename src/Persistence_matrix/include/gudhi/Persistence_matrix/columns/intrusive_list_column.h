@@ -11,8 +11,8 @@
 /**
  * @file intrusive_list_column.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Intrusive_list_column class.
- * Also defines the std::hash method for @ref Intrusive_list_column.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Intrusive_list_column class.
+ * Also defines the std::hash method for @ref Gudhi::persistence_matrix::Intrusive_list_column.
  */
 
 #ifndef PM_INTRUSIVE_LIST_COLUMN_H

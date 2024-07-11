@@ -11,8 +11,8 @@
 /**
  * @file naive_vector_column.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Naive_vector_column class.
- * Also defines the std::hash method for @ref Naive_vector_column.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Naive_vector_column class.
+ * Also defines the std::hash method for @ref Gudhi::persistence_matrix::Naive_vector_column.
  */
 
 #ifndef PM_NAIVE_VECTOR_COLUMN_H

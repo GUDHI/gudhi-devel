@@ -11,7 +11,8 @@
 /**
  * @file column_dimension_holder.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Column_dimension_holder class and @ref Dummy_dimension_holder structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Column_dimension_holder class and
+ * @ref Gudhi::persistence_matrix::Dummy_dimension_holder structure.
  */
 
 #ifndef PM_COLUMN_DIM_HOLDER_H

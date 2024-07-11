@@ -11,7 +11,8 @@
 /**
  * @file base_pairing.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Base_pairing class and @ref Dummy_base_pairing structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Base_pairing class and
+ * @ref Gudhi::persistence_matrix::Dummy_base_pairing structure.
  */
 
 #ifndef PM_BASE_PAIRING_H

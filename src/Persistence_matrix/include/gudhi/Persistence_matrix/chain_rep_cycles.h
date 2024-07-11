@@ -11,7 +11,8 @@
 /**
  * @file chain_rep_cycles.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Chain_representative_cycles class and @ref Dummy_chain_representative_cycles structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Chain_representative_cycles class and
+ * @ref Gudhi::persistence_matrix::Dummy_chain_representative_cycles structure.
  */
 
 #ifndef PM_CHAIN_REP_CYCLES_H

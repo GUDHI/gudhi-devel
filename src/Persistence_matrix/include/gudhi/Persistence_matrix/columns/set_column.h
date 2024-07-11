@@ -11,8 +11,8 @@
 /**
  * @file set_column.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Set_column class.
- * Also defines the std::hash method for @ref Set_column.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Set_column class.
+ * Also defines the std::hash method for @ref Gudhi::persistence_matrix::Set_column.
  */
 
 #ifndef PM_SET_COLUMN_H
