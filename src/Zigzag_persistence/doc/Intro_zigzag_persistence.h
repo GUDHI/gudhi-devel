@@ -19,6 +19,8 @@ namespace zigzag_persistence {
  * @{
  * \author    Cl&eacute;ment Maria, Hannah Schreiber
  *
+ * \section zigzagintro Zigzag Persistence
+ *
  * We refer to the introduction page \ref persistent_cohomology for persistent (co)homology for an introduction
  * to the topic.
  * Zigzag persistence is a generalization of the latter. While standard persistence only allows to grow the filtered

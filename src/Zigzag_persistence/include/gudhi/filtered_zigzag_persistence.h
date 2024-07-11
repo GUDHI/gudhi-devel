@@ -14,8 +14,8 @@
 /**
  * @file filtered_zigzag_persistence.h
  * @author Clément Maria, Hannah Schreiber
- * @brief Contains the implementation of the @ref Interval structure and the
- * @ref Gudhi::zigzag_persistence::Filtered_zigzag_persistence_with_storage and
+ * @brief Contains the implementation of the @ref Gudhi::zigzag_persistence::Default_filtered_zigzag_options structure
+ * and the @ref Gudhi::zigzag_persistence::Filtered_zigzag_persistence_with_storage and
  * @ref Gudhi::zigzag_persistence::Filtered_zigzag_persistence classes.
  */
 
@@ -82,58 +82,6 @@ class Filtered_zigzag_persistence_with_storage
    * @brief Persistence filtration interval type.
    */
   using Filtration_value_interval = Gudhi::persistence_matrix::Persistence_interval<dimension_type,filtration_value>;
-
-  // /** \brief Structure to store persistence intervals by their filtration values.
-  //  *
-  //  * \details By convention, interval \f$[b;d]\f$ are
-  //  * closed for finite indices b and d, and open for left-infinite and/or
-  //  * right-infinite endpoints.
-  //  */
-  // struct Filtration_value_interval
-  //     : public Gudhi::persistence_matrix::Persistence_interval<dimension_type, filtration_value> {
-  //  private:
-  //   using Base = Gudhi::persistence_matrix::Persistence_interval<int, filtration_value>;
-
-  //  public:
-  //   /**
-  //    * @brief Default constructor
-  //    */
-  //   Filtration_value_interval() : Base() {}
-  //   /**
-  //    * @brief Construct a new infinit interval with given parameters.
-  //    *
-  //    * @param dim Dimension of the interval.
-  //    * @param b Start value of the interval.
-  //    */
-  //   Filtration_value_interval(int dim, filtration_value b) : Base(dim, b) {}
-  //   /**
-  //    * @brief Construct a new interval with given parameters
-  //    *
-  //    * @param dim Dimension of the interval.
-  //    * @param b Start value of the interval.
-  //    * @param d End value of the interval.
-  //    */
-  //   Filtration_value_interval(int dim, filtration_value b, filtration_value d) : Base(dim, b, d) {}
-
-  //   /**
-  //    * @brief Returns the absolute length of the interval \f$|d-b|\f$.
-  //    */
-  //   filtration_value length() const {
-  //     if (Base::birth == Base::death) {
-  //       return 0;
-  //     }  // otherwise inf - inf would return nan.
-  //     return Base::death - Base::birth;
-  //   }
-  //   /**
-  //    * @brief Returns the absolute length of the log values of birth and death, i.e.  \f$|\log d - \log b|\f$.
-  //    */
-  //   filtration_value log_length() const {
-  //     if (Base::birth == Base::death) {
-  //       return 0;
-  //     }  // otherwise inf - inf would return nan.
-  //     return std::log2(static_cast<double>(Base::death)) - std::log2(static_cast<double>(Base::birth));
-  //   }
-  // };
 
   /**
    * @brief Constructor.
