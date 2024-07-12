@@ -11,8 +11,8 @@
 /**
  * @file vector_column.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Vector_column class.
- * Also defines the std::hash method for @ref Vector_column.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Vector_column class.
+ * Also defines the std::hash method for @ref Gudhi::persistence_matrix::Vector_column.
  */
 
 #ifndef PM_VECTOR_COLUMN_H
@@ -43,7 +43,7 @@ namespace persistence_matrix {
  * so erased values can still be in the underlying container.
  * On the other hand, two cells will never have the same row index.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  * @tparam Cell_constructor Factory of @ref Cell classes.
  */
 template <class Master_matrix>
@@ -520,7 +520,7 @@ inline bool Vector_column<Master_matrix>::is_empty() const
 {
   if constexpr (!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type) {
     return column_.size() == erasedValues_.size();  // assumes that erasedValues is always a subset of column_, which is
-                                                    // wrong if someone cleared an non exitsing value...
+                                                    // wrong if someone cleared an non existing value...
   } else {
     return column_.empty();
   }
@@ -531,7 +531,7 @@ inline std::size_t Vector_column<Master_matrix>::size() const
 {
   if constexpr (!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type) {
     return column_.size() - erasedValues_.size();  // assumes that erasedValues is always a subset of column_, which is
-                                                   // wrong if someone cleared an non exitsing value...
+                                                   // wrong if someone cleared an non existing value...
   } else {
     return column_.size();
   }
@@ -621,7 +621,7 @@ inline typename Vector_column<Master_matrix>::id_index
 Vector_column<Master_matrix>::get_pivot() 
 {
   static_assert(Master_matrix::isNonBasic,
-                "Method not available for base columns.");  // could technically be, but is the notion usefull then?
+                "Method not available for base columns.");  // could technically be, but is the notion useful then?
 
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
     if (column_.empty()) return -1;
@@ -647,7 +647,7 @@ inline typename Vector_column<Master_matrix>::Field_element_type
 Vector_column<Master_matrix>::get_pivot_value() 
 {
   static_assert(Master_matrix::isNonBasic,
-                "Method not available for base columns.");  // could technically be, but is the notion usefull then?
+                "Method not available for base columns.");  // could technically be, but is the notion useful then?
 
   if constexpr (Master_matrix::Option_list::is_z2) {
     return 1;
@@ -739,7 +739,7 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::operator+=(
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Vector_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
-                "base element.");  // could be removed, if we give the responsability to the user.
+                "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
@@ -807,7 +807,7 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_targ
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Vector_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
-                "base element.");  // could be removed, if we give the responsability to the user.
+                "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
@@ -869,7 +869,7 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_sour
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Vector_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
-                "base element.");  // could be removed, if we give the responsability to the user.
+                "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
@@ -920,7 +920,7 @@ template <class Master_matrix>
 inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::operator=(
     const Vector_column& other) 
 {
-  static_assert(!Master_matrix::Option_list::has_row_access, "= assignement not enabled with row access option.");
+  static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
 
   dim_opt::operator=(other);
   chain_opt::operator=(other);

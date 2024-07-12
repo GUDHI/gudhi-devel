@@ -11,7 +11,7 @@
 /**
  * @file Multi_field_operators.h
  * @author Hannah Schreiber, Clément Maria
- * @brief Contains the @ref Multi_field_operators class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Multi_field_operators class.
  */
 
 #ifndef MATRIX_FIELD_MULTI_OPERATORS_H_
@@ -29,7 +29,7 @@ namespace persistence_fields {
  * @class Multi_field_operators Multi_field_operators.h gudhi/Fields/Multi_field_operators.h
  * @ingroup persistence_fields
  *
- * @brief Class defining operators for a multi-field with "consecutive" charateristic range.
+ * @brief Class defining operators for a multi-field with "consecutive" characteristic range.
  */
 class Multi_field_operators
 {
@@ -46,7 +46,7 @@ class Multi_field_operators
    * @brief Constructor setting the characteristics to all prime numbers between the two given integers.
    * 
    * @param minCharacteristic Smallest value of a prime.
-   * @param maxCharacteristic Heighest value of a prime.
+   * @param maxCharacteristic Highest value of a prime.
    */
   Multi_field_operators(int minCharacteristic, int maxCharacteristic)
       : productOfAllCharacteristics_(0)  //, multiplicativeID_(1)
@@ -81,7 +81,7 @@ class Multi_field_operators
    * The characteristics will be all prime numbers in the given interval.
    * 
    * @param minimum Smallest value of a prime.
-   * @param maximum Heighest value of a prime.
+   * @param maximum Highest value of a prime.
    */
   void set_characteristic(int minimum, int maximum) {
     if (maximum < 2) throw std::invalid_argument("Characteristic must be strictly positive");
@@ -184,36 +184,36 @@ class Multi_field_operators
   }
 
   /**
-   * @brief Returns the substraction in the field of the first element by the second element.
+   * @brief Returns the subtraction in the field of the first element by the second element.
    * 
    * @param e1 First element.
    * @param e2 Second element.
    * @return `(e1 - e2) % productOfAllCharacteristics`, such that the result is positive.
    */
-  element_type substract(element_type e1, const element_type& e2) const {
-    substract_inplace_front(e1, e2);
+  element_type subtract(element_type e1, const element_type& e2) const {
+    subtract_inplace_front(e1, e2);
     return e1;
   }
 
   /**
-   * @brief Stores in the first element the substraction in the field of the first element by the second element,
+   * @brief Stores in the first element the subtraction in the field of the first element by the second element,
    * that is `(e1 - e2) % productOfAllCharacteristics`, such that the result is positive.
    * 
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void substract_inplace_front(element_type& e1, const element_type& e2) const {
+  void subtract_inplace_front(element_type& e1, const element_type& e2) const {
     e1 -= e2;
     get_value_inplace(e1);
   }
   /**
-   * @brief Stores in the second element the substraction in the field of the first element by the second element,
+   * @brief Stores in the second element the subtraction in the field of the first element by the second element,
    * that is `(e1 - e2) % productOfAllCharacteristics`, such that the result is positive.
    * 
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void substract_inplace_back(const element_type& e1, element_type& e2) const {
+  void subtract_inplace_back(const element_type& e1, element_type& e2) const {
     mpz_sub(e2.get_mpz_t(), e1.get_mpz_t(), e2.get_mpz_t());
     get_value_inplace(e2);
   }

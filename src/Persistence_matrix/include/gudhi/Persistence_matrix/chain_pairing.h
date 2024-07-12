@@ -11,7 +11,8 @@
 /**
  * @file chain_pairing.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Chain_pairing class and @ref Dummy_chain_pairing structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Chain_pairing class and
+ * @ref Gudhi::persistence_matrix::Dummy_chain_pairing structure.
  */
 
 #ifndef PM_CHAIN_PAIRING_H
@@ -26,7 +27,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Chain_pairing, when the computation of the barcode was not enabled or if the pairing
+ * Inherited instead of @ref Chain_pairing, when the computation of the barcode was not enabled or if the pairing
  * is already managed by the vine update classes.
  */
 struct Dummy_chain_pairing {
@@ -39,7 +40,7 @@ struct Dummy_chain_pairing {
  *
  * @brief Class managing the barcode for @ref Chain_matrix if the option was enabled.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class Chain_pairing 
@@ -86,11 +87,11 @@ class Chain_pairing
   }
 
  protected:
-  using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
+  using dictionary_type = typename Master_matrix::bar_dictionary_type;
   using pos_index = typename Master_matrix::pos_index;
 
   barcode_type barcode_;        /**< Bar container. */
-  dictionnary_type indexToBar_; /**< Map from @ref MatIdx index to bar index. */
+  dictionary_type indexToBar_; /**< Map from @ref MatIdx index to bar index. */
   pos_index nextPosition_;      /**< Next relative position in the filtration. */
 };
 

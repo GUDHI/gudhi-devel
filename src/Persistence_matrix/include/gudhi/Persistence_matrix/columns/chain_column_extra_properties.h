@@ -11,7 +11,8 @@
 /**
  * @file chain_column_extra_properties.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Chain_column_extra_properties class and @ref Dummy_chain_properties structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Chain_column_extra_properties class and
+ * @ref Gudhi::persistence_matrix::Dummy_chain_properties structure.
  */
 
 #ifndef PM_CHAIN_COLUMN_PROP_H
@@ -26,7 +27,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Chain_column_extra_properties, when the columns are not meant for
+ * Inherited instead of @ref Chain_column_extra_properties, when the columns are not meant for
  * @ref chainmatrix "chain matrices".
  */
 struct Dummy_chain_properties 
@@ -49,7 +50,7 @@ struct Dummy_chain_properties
  * the image of the bijection if the column is in either \f$ G \f$ or \f$ H \f$. See @cite zigzag for
  * more details.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class Chain_column_extra_properties 
@@ -112,7 +113,7 @@ class Chain_column_extra_properties
    */
   void assign_paired_chain(index other_col) { pairedColumn_ = other_col; }
   /**
-   * @brief Unpairs a column.
+   * @brief Un-pairs a column.
    */
   void unassign_paired_chain() { pairedColumn_ = -1; };
 

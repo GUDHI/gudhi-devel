@@ -1114,6 +1114,7 @@ class Simplex_tree {
   /** Recursive search of cofaces
    * This function uses DFS
    *\param vertices contains a list of vertices, which represent the vertices of the simplex not found yet.
+   *\param curr_sib pointer to the siblings to iterate over for this iteration of the recursion.
    *\param curr_nbVertices represents the number of vertices of the simplex we reached by going through the tree.
    *\param cofaces contains a list of Simplex_handle, representing all the cofaces asked.
    *\param star true if we need the star of the simplex

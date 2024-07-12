@@ -11,7 +11,7 @@
 /**
  * @file base_matrix_with_column_compression.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Base_matrix_with_column_compression class.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Base_matrix_with_column_compression class.
  */
 
 #ifndef PM_BASE_MATRIX_COMPRESSION_H
@@ -39,7 +39,7 @@ namespace persistence_matrix {
  * columns, this will save a lot of space. Also, any addition made onto a column will be performed at the same time
  * on all other identical columns, which is an advantage for the cohomology algorithm for example.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_access_option 
@@ -59,7 +59,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
                                                                            necessary external classes. */
 
   /**
-   * @brief Type for columns. Only one for each "column class" is explicitely constructed.
+   * @brief Type for columns. Only one for each "column class" is explicitly constructed.
    */
   class Column_type
       : public Master_matrix::Column_type,
@@ -209,7 +209,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
    * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
    * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
-   * dictionnaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be
+   * dictionaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be
    * quite frequent. 
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row.
@@ -237,7 +237,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   template <class Cell_range_or_column_index>
   void add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
   /**
-   * @brief Multiplies the target column with the coefficiant and then adds the source column to it.
+   * @brief Multiplies the target column with the coefficient and then adds the source column to it.
    * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
    *
    * The representatives of redundant columns are summed together, which means that
@@ -254,7 +254,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
                                   const Field_element_type& coefficient,
                                   index targetColumnIndex);
   /**
-   * @brief Multiplies the source column with the coefficiant before adding it to the target column.
+   * @brief Multiplies the source column with the coefficient before adding it to the target column.
    * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
    *
    * The representatives of redundant columns are summed together, which means that
@@ -292,8 +292,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   /**
    * @brief Resets the matrix to an empty matrix.
    * 
-   * @param operators Pointer to the field operators.
-   * @param cellConstructor Pointer to the cell factory.
+   * @param colSettings Pointer to the cell factory.
    */
   void reset(Column_settings* colSettings) {
     columnToRep_.clear_and_dispose(delete_disposer(this));
@@ -349,7 +348,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   index nextColumnIndex_;                             /**< Next unused column index. */
   Column_settings* colSettings_;                      /**< Cell factory. */
   /**
-   * @brief Column factory. Has to be a pointer as Simple_object_pool is not swappable, so their adresses have to be
+   * @brief Column factory. Has to be a pointer as Simple_object_pool is not swappable, so their addresses have to be
    * exchanged instead.
    */
   std::unique_ptr<Simple_object_pool<Column_type> > columnPool_;

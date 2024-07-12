@@ -11,7 +11,8 @@
 /**
  * @file column_dimension_holder.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Column_dimension_holder class and @ref Dummy_dimension_holder structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Column_dimension_holder class and
+ * @ref Gudhi::persistence_matrix::Dummy_dimension_holder structure.
  */
 
 #ifndef PM_COLUMN_DIM_HOLDER_H
@@ -26,7 +27,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Column_dimension_holder, when the columns are not storing a dimension.
+ * Inherited instead of @ref Column_dimension_holder, when the columns are not storing a dimension.
  */
 struct Dummy_dimension_holder 
 {
@@ -43,7 +44,7 @@ struct Dummy_dimension_holder
  *
  * @brief Class managing the dimension access of a column.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 struct Column_dimension_holder 

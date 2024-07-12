@@ -11,7 +11,7 @@
 /**
  * @file Zp_field_operators.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Zp_field_operators class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Zp_field_operators class.
  */
 
 #ifndef MATRIX_FIELD_ZP_OPERATOR_H_
@@ -146,35 +146,35 @@ class Zp_field_operators
   }
 
   /**
-   * @brief Returns the substraction in the field of the first element by the second element.
+   * @brief Returns the subtraction in the field of the first element by the second element.
    * 
    * @param e1 First element.
    * @param e2 Second element.
    * @return `(e1 - e2) % characteristic`, such that the result is positive.
    */
-  element_type substract(element_type e1, element_type e2) const {
-    return _substract(get_value(e1), get_value(e2), characteristic_);
+  element_type subtract(element_type e1, element_type e2) const {
+    return _subtract(get_value(e1), get_value(e2), characteristic_);
   }
 
   /**
-   * @brief Stores in the first element the substraction in the field of the first element by the second element,
+   * @brief Stores in the first element the subtraction in the field of the first element by the second element,
    * that is `(e1 - e2) % 2`, such that the result is positive.
    * 
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void substract_inplace_front(element_type& e1, element_type e2) const {
-    e1 = _substract(get_value(e1), get_value(e2), characteristic_);
+  void subtract_inplace_front(element_type& e1, element_type e2) const {
+    e1 = _subtract(get_value(e1), get_value(e2), characteristic_);
   }
   /**
-   * @brief Stores in the second element the substraction in the field of the first element by the second element,
+   * @brief Stores in the second element the subtraction in the field of the first element by the second element,
    * that is `(e1 - e2) % 2`, such that the result is positive.
    * 
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void substract_inplace_back(element_type e1, element_type& e2) const {
-    e2 = _substract(get_value(e1), get_value(e2), characteristic_);
+  void subtract_inplace_back(element_type e1, element_type& e2) const {
+    e2 = _subtract(get_value(e1), get_value(e2), characteristic_);
   }
 
   /**
@@ -365,7 +365,7 @@ class Zp_field_operators
 
     return e1;
   }
-  static element_type _substract(element_type e1, element_type e2, characteristic_type characteristic) {
+  static element_type _subtract(element_type e1, element_type e2, characteristic_type characteristic) {
     if (e1 < e2) {
       e1 += characteristic;
     }

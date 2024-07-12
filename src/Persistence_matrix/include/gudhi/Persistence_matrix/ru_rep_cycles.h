@@ -11,7 +11,8 @@
 /**
  * @file ru_rep_cycles.h
  * @author Hannah Schreiber
- * @brief Contains the @ref RU_representative_cycles class and @ref Dummy_ru_representative_cycles structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::RU_representative_cycles class and
+ * @ref Gudhi::persistence_matrix::Dummy_ru_representative_cycles structure.
  */
 
 #ifndef PM_RU_REP_CYCLES_H
@@ -28,7 +29,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref RU_representative_cycles, when the computation of the representative cycles
+ * Inherited instead of @ref RU_representative_cycles, when the computation of the representative cycles
  * were not enabled.
  */
 struct Dummy_ru_representative_cycles {
@@ -43,7 +44,7 @@ struct Dummy_ru_representative_cycles {
  *
  * @brief Class managing the representative cycles for @ref RU_matrix if the option was enabled.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class RU_representative_cycles 

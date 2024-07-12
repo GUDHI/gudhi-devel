@@ -11,7 +11,8 @@
 /**
  * @file chain_rep_cycles.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Chain_representative_cycles class and @ref Dummy_chain_representative_cycles structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Chain_representative_cycles class and
+ * @ref Gudhi::persistence_matrix::Dummy_chain_representative_cycles structure.
  */
 
 #ifndef PM_CHAIN_REP_CYCLES_H
@@ -28,7 +29,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Chain_representative_cycles, when the computation of the representative cycles
+ * Inherited instead of @ref Chain_representative_cycles, when the computation of the representative cycles
  * were not enabled.
  */
 struct Dummy_chain_representative_cycles {
@@ -43,7 +44,7 @@ struct Dummy_chain_representative_cycles {
  *
  * @brief Class managing the representative cycles for @ref Chain_matrix if the option was enabled.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class Chain_representative_cycles 
@@ -110,7 +111,7 @@ class Chain_representative_cycles
   std::vector<cycle_type> representativeCycles_;            /**< Cycle container. */
   std::vector<typename Master_matrix::index> birthToCycle_; /**< Map from birth index to cycle index. */
 
-  //access to inheritating Chain_matrix class
+  //access to inheriting Chain_matrix class
   constexpr chain_matrix* _matrix() { return static_cast<chain_matrix*>(this); }
   constexpr const chain_matrix* _matrix() const { return static_cast<const chain_matrix*>(this); }
 };

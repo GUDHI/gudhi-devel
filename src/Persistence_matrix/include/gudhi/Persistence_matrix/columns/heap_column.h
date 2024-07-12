@@ -11,7 +11,8 @@
 /**
  * @file heap_column.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Heap_column class. Also defines the std::hash method for @ref Heap_column.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Heap_column class. Also defines the std::hash method
+ * for @ref Gudhi::persistence_matrix::Heap_column.
  */
 
 #ifndef PM_HEAP_COLUMN_H
@@ -39,10 +40,10 @@ namespace persistence_matrix {
  * Column based on a heap structure. The heap is represented as a vector sorted as a heap. The top of the heap is
  * the cell with the biggest row index. The sum of two columns is lazy: the content of the source is simply inserted
  * into the heap of the target. Therefore the underlying vector can contain several cells with the same row index.
- * The real value of a cell at a row index corresponds to the sum in the coeffcient field of all values with same
- * row index. Additionaly, the given cell range added into the heap does not need to be somehow ordered.
+ * The real value of a cell at a row index corresponds to the sum in the coefficient field of all values with same
+ * row index. Additionally, the given cell range added into the heap does not need to be somehow ordered.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  * @tparam Cell_constructor Factory of @ref Cell classes.
  */
 template <class Master_matrix>
@@ -232,7 +233,7 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   using dim_opt = typename Master_matrix::Column_dimension_option;
   using chain_opt = typename Master_matrix::Chain_column_option;
 
-  struct {
+  struct CellPointerComp {
     bool operator()(const Cell* c1, const Cell* c2) const { return *c1 < *c2; }
   } cellPointerComp_;
 
@@ -253,10 +254,15 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
 
 template <class Master_matrix>
 inline Heap_column<Master_matrix>::Heap_column(Column_settings* colSettings)
-    : dim_opt(), chain_opt(), insertsSinceLastPrune_(0), operators_(nullptr), cellPool_(colSettings == nullptr ? nullptr : &(colSettings->cellConstructor)) 
+    : dim_opt(),
+      chain_opt(),
+      insertsSinceLastPrune_(0),
+      operators_(nullptr),
+      cellPool_(colSettings == nullptr ? nullptr : &(colSettings->cellConstructor))
 {
-  if (colSettings == nullptr) return;  //to allow default constructor which gives a dummy column
-  if constexpr (!Master_matrix::Option_list::is_z2){
+  if (colSettings == nullptr) return;  // to allow default constructor which gives a dummy column
+
+  if constexpr (!Master_matrix::Option_list::is_z2) {
     operators_ = &(colSettings->operators);
   }
 }
@@ -595,7 +601,7 @@ inline typename Heap_column<Master_matrix>::id_index
 Heap_column<Master_matrix>::get_pivot() 
 {
   static_assert(Master_matrix::isNonBasic,
-                "Method not available for base columns.");  // could technically be, but is the notion usefull then?
+                "Method not available for base columns.");  // could technically be, but is the notion useful then?
 
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
     Cell* pivot = _pop_pivot();
@@ -615,7 +621,7 @@ inline typename Heap_column<Master_matrix>::Field_element_type
 Heap_column<Master_matrix>::get_pivot_value() 
 {
   static_assert(Master_matrix::isNonBasic,
-                "Method not available for base columns.");  // could technically be, but is the notion usefull then?
+                "Method not available for base columns.");  // could technically be, but is the notion useful then?
 
   if constexpr (Master_matrix::Option_list::is_z2) {
     return 1;
@@ -701,7 +707,7 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator+=(const 
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Heap_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
-                "base element.");  // could be removed, if we give the responsability to the user.
+                "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
@@ -766,7 +772,7 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_target_a
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Heap_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
-                "base element.");  // could be removed, if we give the responsability to the user.
+                "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
@@ -828,7 +834,7 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_source_a
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Heap_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
-                "base element.");  // could be removed, if we give the responsability to the user.
+                "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
@@ -878,7 +884,7 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_source_a
 template <class Master_matrix>
 inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator=(const Heap_column& other) 
 {
-  static_assert(!Master_matrix::Option_list::has_row_access, "= assignement not enabled with row access option.");
+  static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
 
   dim_opt::operator=(other);
   chain_opt::operator=(other);

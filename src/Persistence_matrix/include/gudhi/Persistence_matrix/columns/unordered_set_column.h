@@ -11,8 +11,8 @@
 /**
  * @file unordered_set_column.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Unordered_set_column class.
- * Also defines the std::hash method for @ref Unordered_set_column.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Unordered_set_column class.
+ * Also defines the std::hash method for @ref Gudhi::persistence_matrix::Unordered_set_column.
  */
 
 #ifndef PM_UNORDERED_SET_COLUMN_H
@@ -57,7 +57,7 @@ struct CellPointerEq {
  * are stored uniquely in the underlying container. When adding a cell range into it, the given cell range
  * also does not need to be ordered (contrary to most other column types).
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  * @tparam Cell_constructor Factory of @ref Cell classes.
  */
 template <class Master_matrix>
@@ -563,7 +563,7 @@ inline typename Unordered_set_column<Master_matrix>::id_index
 Unordered_set_column<Master_matrix>::get_pivot() const 
 {
   static_assert(Master_matrix::isNonBasic,
-                "Method not available for base columns.");  // could technically be, but is the notion usefull then?
+                "Method not available for base columns.");  // could technically be, but is the notion useful then?
 
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
     if (column_.empty()) return -1;
@@ -580,7 +580,7 @@ inline typename Unordered_set_column<Master_matrix>::Field_element_type
 Unordered_set_column<Master_matrix>::get_pivot_value() const 
 {
   static_assert(Master_matrix::isNonBasic,
-                "Method not available for base columns.");  // could technically be, but is the notion usefull then?
+                "Method not available for base columns.");  // could technically be, but is the notion useful then?
 
   if constexpr (Master_matrix::Option_list::is_z2) {
     return 1;
@@ -633,7 +633,7 @@ Unordered_set_column<Master_matrix>::operator+=(const Cell_range& column)
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Unordered_set_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
-                "base element.");  // could be removed, if we give the responsability to the user.
+                "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
@@ -702,7 +702,7 @@ Unordered_set_column<Master_matrix>::multiply_target_and_add(const Field_element
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Unordered_set_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
-                "base element.");  // could be removed, if we give the responsability to the user.
+                "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
@@ -766,7 +766,7 @@ Unordered_set_column<Master_matrix>::multiply_source_and_add(const Cell_range& c
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Unordered_set_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
-                "base element.");  // could be removed, if we give the responsability to the user.
+                "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
@@ -818,7 +818,7 @@ template <class Master_matrix>
 inline Unordered_set_column<Master_matrix>&
 Unordered_set_column<Master_matrix>::operator=(const Unordered_set_column& other) 
 {
-  static_assert(!Master_matrix::Option_list::has_row_access, "= assignement not enabled with row access option.");
+  static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
 
   dim_opt::operator=(other);
   chain_opt::operator=(other);
@@ -918,7 +918,7 @@ inline bool Unordered_set_column<Master_matrix>::_multiply_target_and_add(const 
   }
 
   // because the column is unordered, I don't see a way to do both operations in one go
-  // without garantees on the cell range...
+  // without guarantees on the cell range...
   operator*=(val);
   return _add(column);
 }

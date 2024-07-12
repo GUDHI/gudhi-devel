@@ -11,7 +11,8 @@
 /**
  * @file base_pairing.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Base_pairing class and @ref Dummy_base_pairing structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Base_pairing class and
+ * @ref Gudhi::persistence_matrix::Dummy_base_pairing structure.
  */
 
 #ifndef PM_BASE_PAIRING_H
@@ -29,7 +30,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Base_pairing, when the computation of the barcode was not enabled or if the pairing
+ * Inherited instead of @ref Base_pairing, when the computation of the barcode was not enabled or if the pairing
  * is already managed by the vine update classes.
  */
 struct Dummy_base_pairing {
@@ -42,7 +43,7 @@ struct Dummy_base_pairing {
  *
  * @brief Class managing the barcode for @ref Boundary_matrix if the option was enabled.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class Base_pairing 
@@ -97,17 +98,17 @@ class Base_pairing
 
  protected:
   using pos_index = typename Master_matrix::pos_index;
-  using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
+  using dictionary_type = typename Master_matrix::bar_dictionary_type;
   using base_matrix = typename Master_matrix::Boundary_matrix_type;
 
   barcode_type barcode_;        /**< Bar container. */
-  dictionnary_type deathToBar_; /**< Map from death index to bar index. */
+  dictionary_type deathToBar_; /**< Map from death index to bar index. */
   bool isReduced_;              /**< True if `_reduce()` was called. */
 
   void _reduce();
   void _remove_last(pos_index columnIndex);
 
-  //access to inheritating Boundary_matrix class
+  //access to inheriting Boundary_matrix class
   constexpr base_matrix* _matrix() { return static_cast<base_matrix*>(this); }
   constexpr const base_matrix* _matrix() const { return static_cast<const base_matrix*>(this); }
 };
@@ -152,7 +153,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
       auto& curr = _matrix()->get_column(i);
       if (curr.is_empty()) {
         if (pivotsToColumn.find(i) == pivotsToColumn.end()) {
-          barcode_.emplace_back(dim, i, -1);
+          barcode_.emplace_back(i, -1, dim);
         }
       } else {
         id_index pivot = curr.get_pivot();
@@ -175,10 +176,10 @@ inline void Base_pairing<Master_matrix>::_reduce()
         if (pivot != static_cast<id_index>(-1)) {
           pivotsToColumn.emplace(pivot, i);
           _matrix()->get_column(pivot).clear();
-          barcode_.emplace_back(dim - 1, pivot, i);
+          barcode_.emplace_back(pivot, i, dim - 1);
         } else {
           curr.clear();
-          barcode_.emplace_back(dim, i, -1);
+          barcode_.emplace_back(i, -1, dim);
         }
       }
     }
@@ -209,7 +210,7 @@ inline void Base_pairing<Master_matrix>::_remove_last(pos_index columnIndex)
     auto it = deathToBar_.find(columnIndex);
 
     if (it == deathToBar_.end()) {  // birth
-      barcode_.pop_back();          // sorted by birth and columnIndex has to be the heighest one
+      barcode_.pop_back();          // sorted by birth and columnIndex has to be the highest one
     } else {                        // death
       barcode_[it->second].death = -1;
       deathToBar_.erase(it);

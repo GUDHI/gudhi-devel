@@ -11,7 +11,8 @@
 /**
  * @file matrix_row_access.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Matrix_row_access class and @ref Dummy_matrix_row_access structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Matrix_row_access class and
+ * @ref Gudhi::persistence_matrix::Dummy_matrix_row_access structure.
  */
 
 #ifndef PM_BASE_MATRIX_RA_H
@@ -26,7 +27,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Matrix_row_access, when the the row access is not enabled.
+ * Inherited instead of @ref Matrix_row_access, when the the row access is not enabled.
  */
 struct Dummy_matrix_row_access {
   Dummy_matrix_row_access([[maybe_unused]] unsigned int numberOfRows = 0){};
@@ -38,7 +39,7 @@ struct Dummy_matrix_row_access {
  * @class Matrix_row_access matrix_row_access.h gudhi/Persistence_matrix/matrix_row_access.h
  * @ingroup persistence_matrix
  *
- * @brief Class managing the row access for the inheritating matrix.
+ * @brief Class managing the row access for the inheriting matrix.
  * 
  * @tparam Row_type Either boost::intrusive::list<Cell_type,...> if @ref PersistenceMatrixOptions::has_intrusive_rows
  * is true, or std::set<Cell_type, RowCellComp> otherwise.
@@ -95,7 +96,7 @@ class Matrix_row_access
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    * 
    * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices"
-   * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occured.
+   * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occurred.
    * @return Reference to the row.
    */
   Row_type& get_row(id_index rowIndex) {
@@ -110,7 +111,7 @@ class Matrix_row_access
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    * 
    * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices"
-   * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occured.
+   * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occurred.
    * @return Const reference to the row.
    */
   const Row_type& get_row(id_index rowIndex) const {
@@ -150,7 +151,7 @@ class Matrix_row_access
 
  protected:
   /**
-   * @brief Row container. A pointer to faciliate column swaps when two matrices are swapped.
+   * @brief Row container. A pointer to facilitate column swaps when two matrices are swapped.
    * Has to be destroyed after matrix_, therefore has to be inherited.
    */
   Row_container_type* rows_;

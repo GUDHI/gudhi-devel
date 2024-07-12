@@ -11,7 +11,7 @@
 /**
  * @file Zp_field_shared.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Shared_Zp_field_element class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Shared_Zp_field_element class.
  */
 
 #ifndef MATRIX_FIELD_ZP_VAR_H_
@@ -30,9 +30,9 @@ namespace persistence_fields {
  * @ingroup persistence_fields
  *
  * @brief Class representing an element of the \f$ \mathbb{F}_p \f$ field for any prime number \f$ p \f$.
- * If each instanciation of the class can represent another element, they all share the same characteritics.
+ * If each instantiation of the class can represent another element, they all share the same characteristics.
  * That is if the characteristics are set for one, they will be set for all the others. The characteristics can
- * be set before instianciating the elements with the static @ref Shared_Zp_field_element::initialize method.
+ * be set before instantiating the elements with the static @ref Shared_Zp_field_element::initialize method.
  *
  * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, long unsigned int, etc.
  * Will be used as the field element type.
@@ -151,7 +151,7 @@ class Shared_Zp_field_element {
    * @brief operator-=
    */
   friend void operator-=(Shared_Zp_field_element& f1, const Shared_Zp_field_element& f2) {
-    f1.element_ = Shared_Zp_field_element::_substract(f1.element_, f2.element_);
+    f1.element_ = Shared_Zp_field_element::_subtract(f1.element_, f2.element_);
   }
   /**
    * @brief operator-
@@ -167,7 +167,7 @@ class Shared_Zp_field_element {
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend void operator-=(Shared_Zp_field_element& f, const Integer_type& v) {
-    f.element_ = Shared_Zp_field_element::_substract(f.element_, _get_value(v));
+    f.element_ = Shared_Zp_field_element::_subtract(f.element_, _get_value(v));
   }
   /**
    * @brief operator-
@@ -186,7 +186,7 @@ class Shared_Zp_field_element {
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend Integer_type operator-(const Integer_type& v, const Shared_Zp_field_element& f) {
-    return Shared_Zp_field_element::_substract(_get_value(v), f.element_);
+    return Shared_Zp_field_element::_subtract(_get_value(v), f.element_);
   }
 
   /**
@@ -372,7 +372,7 @@ class Shared_Zp_field_element {
 
     return element;
   }
-  static element_type _substract(element_type element, element_type v) {
+  static element_type _subtract(element_type element, element_type v) {
     if (element < v) {
       element += characteristic_;
     }

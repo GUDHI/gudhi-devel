@@ -11,8 +11,9 @@
 /**
  * @file ru_vine_swap.h
  * @author Hannah Schreiber
- * @brief Contains the @ref RU_vine_swap class, as well as the
- * @ref Dummy_ru_vine_swap and @ref Dummy_ru_vine_pairing structures.
+ * @brief Contains the @ref Gudhi::persistence_matrix::RU_vine_swap class, as well as the
+ * @ref Gudhi::persistence_matrix::Dummy_ru_vine_swap and
+ * @ref Gudhi::persistence_matrix::Dummy_ru_vine_pairing structures.
  */
 
 #ifndef PM_RU_VINE_SWAP_H
@@ -33,7 +34,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref RU_vine_swap, when vine swappes are not enabled.
+ * Inherited instead of @ref RU_vine_swap, when vine swaps are not enabled.
  */
 struct Dummy_ru_vine_swap {
   friend void swap([[maybe_unused]] Dummy_ru_vine_swap& d1, [[maybe_unused]] Dummy_ru_vine_swap& d2) {}
@@ -43,7 +44,7 @@ struct Dummy_ru_vine_swap {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref RU_pairing, when the barcode is not stored.
+ * Inherited instead of @ref RU_pairing, when the barcode is not stored.
  */
 struct Dummy_ru_vine_pairing {
   friend void swap([[maybe_unused]] Dummy_ru_vine_pairing& d1, [[maybe_unused]] Dummy_ru_vine_pairing& d2) {}
@@ -55,7 +56,7 @@ struct Dummy_ru_vine_pairing {
  *
  * @brief Class managing the vine swaps for @ref RU_matrix.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_column_pairings, 
@@ -89,20 +90,20 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
    * @brief Does the same than @ref vine_swap, but assumes that the swap is non trivial and
    * therefore skips a part of the case study.
    * 
-   * @param position @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
+   * @param index @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
   bool vine_swap_with_z_eq_1_case(pos_index index);
   /**
-   * @brief Does a vine swap between two faces which are consecutives in the filtration.
+   * @brief Does a vine swap between two faces which are consecutive in the filtration.
    * Roughly, if \f$ F \f$ is the current filtration represented by the matrix, the method modifies the matrix
    * such that the new state corresponds to a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but
    * with the two faces at position `position` and `position + 1` swapped. Of course, the two faces should
    * not have a face/coface relation which each other ; \f$ F' \f$ has to be a valid filtration.
    * See @cite vineyards for more information about vine and vineyards.
    * 
-   * @param position @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
+   * @param index @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
@@ -123,7 +124,7 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
   }
 
  protected:
-  // only usefull when simplex id does not corresponds to position, so feels kinda useless most of the time...
+  // only useful when simplex id does not corresponds to position, so feels kinda useless most of the time...
   // TODO: as it takes up some non trivial memory, see if this should not be optional
   // or only remember the positions with a difference. but then a map is needed, ie find instead of [].
   std::vector<id_index> positionToRowIdx_;  /**< Map from @ref PosIdx index to row index. */

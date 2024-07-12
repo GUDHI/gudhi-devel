@@ -11,7 +11,7 @@
 /**
  * @file Multi_field_small.h
  * @author Hannah Schreiber, Clément Maria
- * @brief Contains the @ref Multi_field_element_with_small_characteristics class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Multi_field_element_with_small_characteristics class.
  */
 
 #ifndef MATRIX_FIELD_MULTI_SMALL_H_
@@ -135,7 +135,7 @@ class Multi_field_element_with_small_characteristics {
    */
   friend void operator-=(Multi_field_element_with_small_characteristics& f1,
                          Multi_field_element_with_small_characteristics const& f2) {
-    f1.element_ = _substract(f1.element_, f2.element_);
+    f1.element_ = _subtract(f1.element_, f2.element_);
   }
   /**
    * @brief operator-
@@ -152,7 +152,7 @@ class Multi_field_element_with_small_characteristics {
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend void operator-=(Multi_field_element_with_small_characteristics& f, const Integer_type& v) {
-    f.element_ = _substract(f.element_, _get_value(v));
+    f.element_ = _subtract(f.element_, _get_value(v));
   }
   /**
    * @brief operator-
@@ -172,7 +172,7 @@ class Multi_field_element_with_small_characteristics {
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend Integer_type operator-(const Integer_type& v, const Multi_field_element_with_small_characteristics& f) {
-    return _substract(_get_value(v), f.element_);
+    return _subtract(_get_value(v), f.element_);
   }
 
   /**
@@ -431,7 +431,7 @@ class Multi_field_element_with_small_characteristics {
 
     return element;
   }
-  static constexpr element_type _substract(element_type element, element_type v) {
+  static constexpr element_type _subtract(element_type element, element_type v) {
     if (element < v) {
       element += productOfAllCharacteristics_;
     }
@@ -444,7 +444,7 @@ class Multi_field_element_with_small_characteristics {
     int M = mod;
     int A = element;
     int y = 0, x = 1;
-    // extended euclidien division
+    // extended euclidean division
     while (A > 1) {
       int quotient = A / M;
       int temp = M;

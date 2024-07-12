@@ -11,7 +11,7 @@
 /**
  * @file Multi_field_shared.h
  * @author Hannah Schreiber, Clément Maria
- * @brief Contains the @ref Shared_multi_field_element class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Shared_multi_field_element class.
  */
 
 #ifndef MATRIX_FIELD_MULTI_SHARED_H_
@@ -29,9 +29,9 @@ namespace persistence_fields {
  * @class Shared_multi_field_element Multi_field_shared.h gudhi/Fields/Multi_field_shared.h
  * @ingroup persistence_fields
  *
- * @brief Class representing an element of a multi-field. If each instanciation of the class can represent another
- * element, they all share the same characteritics. That is if the characteristics are set for one, they will be
- * set for all the others. The characteristics can be set before instianciating the elements with the static 
+ * @brief Class representing an element of a multi-field. If each instantiation of the class can represent another
+ * element, they all share the same characteristics. That is if the characteristics are set for one, they will be
+ * set for all the others. The characteristics can be set before instantiating the elements with the static 
  * @ref Shared_multi_field_element::initialize method.
  */
 class Shared_multi_field_element 

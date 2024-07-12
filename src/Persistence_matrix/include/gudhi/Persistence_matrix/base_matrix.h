@@ -11,7 +11,7 @@
 /**
  * @file base_matrix.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Base_matrix class.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Base_matrix class.
  */
 
 #ifndef PM_BASE_MATRIX_H
@@ -31,7 +31,7 @@ namespace persistence_matrix {
  * @brief A @ref basematrix "basic matrix" structure allowing to easily manipulate and access entire columns and rows,
  * but not individual cells.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<Master_matrix> >,
@@ -111,7 +111,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   void insert_column(const Container_type& column);
   /**
    * @brief Inserts a new ordered column at the given index by copying the given range of @ref Matrix::cell_rep_type.
-   * There should not be any other column inserted at that index which was not explicitely removed before.
+   * There should not be any other column inserted at that index which was not explicitly removed before.
    * The content of the range is assumed to be sorted by increasing ID value. 
    * Not available when row access is enabled.
    * 
@@ -138,7 +138,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    *
    * Note that before returning the column, all column cells can eventually be reordered, if lazy swaps occurred.
    * It is therefore recommended to avoid calling @ref get_column between column or row swaps, otherwise the benefits
-   * of the the lazyness is lost.
+   * of the the laziness is lost.
    * 
    * @param columnIndex @ref MatIdx index of the column to return.
    * @return Reference to the column.
@@ -151,7 +151,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    *
    * Note that before returning the row, all column cells can eventually be reordered, if lazy swaps occurred.
    * It is therefore recommended to avoid calling @ref get_row between column or row swaps, otherwise the benefits
-   * of the the lazyness is lost.
+   * of the the laziness is lost.
    * 
    * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @return Reference to the row.
@@ -160,7 +160,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_map_column_container is true. Otherwise, see
    * @ref remove_last. Erases the given column from the matrix. If the given column index corresponded to the last
-   * used column index, the "new last column index" will be `columnIndex - 1`, even if a column was never explicitely
+   * used column index, the "new last column index" will be `columnIndex - 1`, even if a column was never explicitly
    * inserted at this index (possible when
    * @ref insert_column(const Container_type& column, index columnIndex) "insert_column(column, columnIndex)" was used).
    * If the column didn't existed, it will simply be considered as an empty column.
@@ -180,7 +180,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @ref insert_column(const Container_type& column, index columnIndex) "insert_column(column, columnIndex)",
    * - \f$ rem \f$ is the last index just before the last call of @ref remove_column or @ref remove_last.
    *
-   * If \f$ max(ins1, ins2, rem - 1) = rem - 1 \f$ but no column was explicitely inserted at that index (possible
+   * If \f$ max(ins1, ins2, rem - 1) = rem - 1 \f$ but no column was explicitly inserted at that index (possible
    * by the use of
    * @ref insert_column(const Container_type& column, index columnIndex) "insert_column(column, columnIndex)"),
    * the column is assumed to be an empty column.
@@ -198,7 +198,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
    * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
    * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
-   * dictionnaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be
+   * dictionaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be
    * quite frequent. 
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row.
@@ -223,7 +223,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   template <class Cell_range_or_column_index>
   void add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
   /**
-   * @brief Multiplies the target column with the coefficiant and then adds the source column to it.
+   * @brief Multiplies the target column with the coefficient and then adds the source column to it.
    * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
    * 
    * @tparam Cell_range_or_column_index Either a range of @ref Cell with a begin() and end() method,
@@ -237,7 +237,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
                                   const Field_element_type& coefficient,
                                   index targetColumnIndex);
   /**
-   * @brief Multiplies the source column with the coefficiant before adding it to the target column.
+   * @brief Multiplies the source column with the coefficient before adding it to the target column.
    * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
    * 
    * @tparam Cell_range_or_column_index Either a range of @ref Cell with a begin() and end() method,

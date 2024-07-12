@@ -41,7 +41,7 @@ void field_element_example(int ini){
   std::cout << "e -= 4: " << e << "\n";
   t = 4;
   t -= e;   //standard integer addition
-  std::cout << "4 -= e: " << t << "    //standard integer substraction\n";
+  std::cout << "4 -= e: " << t << "    //standard integer subtraction\n";
   std::cout << "e * 6: " << (e * 6) << "\n";
   std::cout << "6 * e: " << (6 * e) << "\n";
   e *= 6;
@@ -57,8 +57,8 @@ void field_operator_example(const Field_operator& op){
   std::cout << "Characteristic: " << op.get_characteristic() << "\n";
   std::cout << "2 + 3: " << op.add(2u, 3u) << "\n";
   std::cout << "3 + 2: " << op.add(3u, 2u) << "\n";
-  std::cout << "10 - 4: " << op.substract(10u, 4u) << "\n";
-  std::cout << "4 - 10: " << op.substract(4u, 10u) << "\n";
+  std::cout << "10 - 4: " << op.subtract(10u, 4u) << "\n";
+  std::cout << "4 - 10: " << op.subtract(4u, 10u) << "\n";
   std::cout << "3 * 6: " << op.multiply(3u, 6u) << "\n";
   std::cout << "6 * 3: " << op.multiply(6u, 3u) << "\n";
   std::cout << "Value of 7: " << op.get_value(7u) << "\n";

@@ -11,7 +11,7 @@
 /**
  * @file Multi_field_small_operators.h
  * @author Hannah Schreiber, Clément Maria
- * @brief Contains the @ref Multi_field_operators_with_small_characteristics class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Multi_field_operators_with_small_characteristics class.
  */
 
 #ifndef MATRIX_FIELD_MULTI_SMALL_OPERATORS_H_
@@ -31,7 +31,7 @@ namespace persistence_fields {
  * gudhi/Fields/Multi_field_small_operators.h
  * @ingroup persistence_fields
  *
- * @brief Class defining operators for a multi-field with "consecutive" charateristic range, such that
+ * @brief Class defining operators for a multi-field with "consecutive" characteristic range, such that
  * `productOfAllCharacteristics ^ 2` fits into an unsigned int.
  */
 class Multi_field_operators_with_small_characteristics 
@@ -50,7 +50,7 @@ class Multi_field_operators_with_small_characteristics
    * The product of all primes to the square has to fit into an unsigned int.
    * 
    * @param minCharacteristic Smallest value of a prime.
-   * @param maxCharacteristic Heighest value of a prime.
+   * @param maxCharacteristic Highest value of a prime.
    */
   Multi_field_operators_with_small_characteristics(int minCharacteristic, int maxCharacteristic)
       : productOfAllCharacteristics_(0)  //, multiplicativeID_(1)
@@ -86,7 +86,7 @@ class Multi_field_operators_with_small_characteristics
    * The product of all primes to the square has to fit into an unsigned int.
    * 
    * @param minimum Smallest value of a prime.
-   * @param maximum Heighest value of a prime.
+   * @param maximum Highest value of a prime.
    */
   void set_characteristic(int minimum, int maximum) {
     if (maximum < 2) throw std::invalid_argument("Characteristic must be strictly positive");
@@ -168,35 +168,35 @@ class Multi_field_operators_with_small_characteristics
   }
 
   /**
-   * @brief Returns the substraction in the field of the first element by the second element.
+   * @brief Returns the subtraction in the field of the first element by the second element.
    * 
    * @param e1 First element.
    * @param e2 Second element.
    * @return `(e1 - e2) % productOfAllCharacteristics`, such that the result is positive.
    */
-  element_type substract(element_type e1, element_type e2) const {
-    return _substract(get_value(e1), get_value(e2), productOfAllCharacteristics_);
+  element_type subtract(element_type e1, element_type e2) const {
+    return _subtract(get_value(e1), get_value(e2), productOfAllCharacteristics_);
   }
 
   /**
-   * @brief Stores in the first element the substraction in the field of the first element by the second element,
+   * @brief Stores in the first element the subtraction in the field of the first element by the second element,
    * that is `(e1 - e2) % productOfAllCharacteristics`, such that the result is positive.
    * 
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void substract_inplace_front(element_type& e1, element_type e2) const {
-    e1 = _substract(get_value(e1), get_value(e2), productOfAllCharacteristics_);
+  void subtract_inplace_front(element_type& e1, element_type e2) const {
+    e1 = _subtract(get_value(e1), get_value(e2), productOfAllCharacteristics_);
   }
   /**
-   * @brief Stores in the second element the substraction in the field of the first element by the second element,
+   * @brief Stores in the second element the subtraction in the field of the first element by the second element,
    * that is `(e1 - e2) % productOfAllCharacteristics`, such that the result is positive.
    * 
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void substract_inplace_back(element_type e1, element_type& e2) const {
-    e2 = _substract(get_value(e1), get_value(e2), productOfAllCharacteristics_);
+  void subtract_inplace_back(element_type e1, element_type& e2) const {
+    e2 = _subtract(get_value(e1), get_value(e2), productOfAllCharacteristics_);
   }
 
   /**
@@ -410,7 +410,7 @@ class Multi_field_operators_with_small_characteristics
   // static inline constexpr unsigned int multiplicativeID_ = 1;
 
   static element_type _add(element_type element, element_type v, characteristic_type characteristic);
-  static element_type _substract(element_type element, element_type v, characteristic_type characteristic);
+  static element_type _subtract(element_type element, element_type v, characteristic_type characteristic);
   static element_type _multiply(element_type a, element_type b, characteristic_type characteristic);
   static constexpr long int _get_inverse(element_type element, characteristic_type mod);
   static constexpr bool _is_prime(const int p);
@@ -433,7 +433,7 @@ Multi_field_operators_with_small_characteristics::_add(element_type element, ele
 }
 
 inline Multi_field_operators_with_small_characteristics::element_type
-Multi_field_operators_with_small_characteristics::_substract(element_type element, element_type v,
+Multi_field_operators_with_small_characteristics::_subtract(element_type element, element_type v,
                                                              characteristic_type characteristic) {
   if (element < v) {
     element += characteristic;
@@ -473,7 +473,7 @@ inline constexpr long int Multi_field_operators_with_small_characteristics::_get
   element_type M = mod;
   element_type A = element;
   long int y = 0, x = 1;
-  // extended euclidien division
+  // extended euclidean division
   while (A > 1) {
     int quotient = A / M;
     int temp = M;

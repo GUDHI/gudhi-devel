@@ -11,7 +11,7 @@
 /**
  * @file Multi_field_small_shared.h
  * @author Hannah Schreiber, Clément Maria
- * @brief Contains the @ref Shared_multi_field_element_with_small_characteristics class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Shared_multi_field_element_with_small_characteristics class.
  */
 
 #ifndef MATRIX_FIELD_MULTI_SMALL_SHARED_H_
@@ -32,9 +32,9 @@ namespace persistence_fields {
  * @ingroup persistence_fields
  *
  * @brief Class representing an element of a multi-field, such that `productOfAllCharacteristics ^ 2` fits into
- * the given @p Unsigned_integer_type template argument. If each instanciation of the class can represent another
- * element, they all share the same characteritics. That is if the characteristics are set for one, they will be
- * set for all the others. The characteristics can be set before instanciating the elements with the static
+ * the given @p Unsigned_integer_type template argument. If each instantiation of the class can represent another
+ * element, they all share the same characteristics. That is if the characteristics are set for one, they will be
+ * set for all the others. The characteristics can be set before instantiating the elements with the static
  * @ref Shared_multi_field_element_with_small_characteristics::initialize method.
  *
  * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, long unsigned int, etc.
@@ -178,7 +178,7 @@ class Shared_multi_field_element_with_small_characteristics {
    */
   friend void operator-=(Shared_multi_field_element_with_small_characteristics& f1,
                          Shared_multi_field_element_with_small_characteristics const& f2) {
-    f1.element_ = _substract(f1.element_, f2.element_);
+    f1.element_ = _subtract(f1.element_, f2.element_);
   }
   /**
    * @brief operator-
@@ -196,7 +196,7 @@ class Shared_multi_field_element_with_small_characteristics {
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend void operator-=(Shared_multi_field_element_with_small_characteristics& f, const Integer_type& v) {
-    f.element_ = _substract(f.element_, _get_value(v));
+    f.element_ = _subtract(f.element_, _get_value(v));
   }
   /**
    * @brief operator-
@@ -216,7 +216,7 @@ class Shared_multi_field_element_with_small_characteristics {
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend Integer_type operator-(const Integer_type& v, const Shared_multi_field_element_with_small_characteristics& f) {
-    return _substract(_get_value(v), f.element_);
+    return _subtract(_get_value(v), f.element_);
   }
 
   /**
@@ -477,7 +477,7 @@ class Shared_multi_field_element_with_small_characteristics {
 
     return element;
   }
-  static element_type _substract(element_type element, element_type v) {
+  static element_type _subtract(element_type element, element_type v) {
     if (element < v) {
       element += productOfAllCharacteristics_;
     }
@@ -490,7 +490,7 @@ class Shared_multi_field_element_with_small_characteristics {
     int M = mod;
     int A = element;
     int y = 0, x = 1;
-    // extended euclidien division
+    // extended euclidean division
     while (A > 1) {
       int quotient = A / M;
       int temp = M;

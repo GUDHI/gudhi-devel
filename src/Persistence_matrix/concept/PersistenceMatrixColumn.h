@@ -23,7 +23,7 @@ namespace persistence_matrix {
  * @brief If PersistenceMatrixOptions::has_row_access is true, then @ref Row_access. Otherwise @ref Dummy_row_access.
  * Can eventually be removed if the structure of the column does not allow row access (as for @ref Heap_column), but
  * then it needs to be notified in the documentation of @ref Column_types and as static_assert in
- * @ref Matrix::_assert_options.
+ * Matrix::_assert_options.
  */
 using Row_access_option = Row_access;
 /**
@@ -47,7 +47,7 @@ using Chain_column_option = Chain_column_extra_properties;
 /** 
  * @ingroup persistence_matrix
  *
- * @brief Concept of the column classes used by the @ref Matrix class. The classes the columns inheritates from
+ * @brief Concept of the column classes used by the @ref Matrix class. The classes the columns inherit from
  * are either real or dummy classes, see @ref Row_access_option, @ref Column_dimension_option, @ref Chain_column_option.
  * If used with column compression, the column type has to have its `std::hash` method.
  *
@@ -81,7 +81,7 @@ class PersistenceMatrixColumn :
    * @param colSettings Pointer to a setting structure or `nullptr`. The structure should contain all the necessary
    * classes specific to the column type, such as custom allocators. The specificities are this way hidden behind
    * a commun interface for all column types. If @p colSettings is not specified or is equal to `nullptr`, the column
-   * should still be constructable eventhough not necessarily "usable".
+   * should still be constructable even though not necessarily "usable".
    */
   PersistenceMatrixColumn(Column_settings* colSettings = nullptr);
   /**
@@ -143,7 +143,7 @@ class PersistenceMatrixColumn :
    * @tparam Row_container_type Either std::map if @ref PersistenceMatrixOptions::has_removable_rows is true or
    * std::vector<Row_type>.
    * @param columnIndex @ref MatIdx column index that should be specified to the cells.
-   * @param nonZeroRowIndices Range of @ref Matrix::cell_rep_type representing all rows with non zero values.
+   * @param nonZeroChainRowIndices Range of @ref Matrix::cell_rep_type representing all rows with non zero values.
    * @param dimension Dimension of the column. Is ignored if the dimension is not stored.
    * @param rowContainer Pointer to the row container that will be forwarded to @ref Row_access at construction.
    * @param colSettings Pointer to an existing setting structure. The structure should contain all the necessary
@@ -291,7 +291,7 @@ class PersistenceMatrixColumn :
    * @brief Returns a begin @ref Cell iterator to iterate over all cells contained in the underlying container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
-   * neither the content nor the order is garanteed. See description of the actual Column class for more details.
+   * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
    * @return @ref Cell iterator.
    */
@@ -300,7 +300,7 @@ class PersistenceMatrixColumn :
    * @brief Returns a begin @ref Cell const iterator to iterate over all cells contained in the underlying container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
-   * neither the content nor the order is garanteed. See description of the actual Column class for more details.
+   * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
    * @return @ref Cell const iterator.
    */
@@ -309,7 +309,7 @@ class PersistenceMatrixColumn :
    * @brief Returns a end @ref Cell iterator, iterating over all cells contained in the underlying container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
-   * neither the content nor the order is garanteed. See description of the actual Column class for more details.
+   * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
    * @return @ref Cell iterator.
    */
@@ -318,7 +318,7 @@ class PersistenceMatrixColumn :
    * @brief Returns a end @ref Cell const iterator, iterating over all cells contained in the underlying container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
-   * neither the content nor the order is garanteed. See description of the actual Column class for more details.
+   * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
    * @return @ref Cell const iterator.
    */
@@ -327,7 +327,7 @@ class PersistenceMatrixColumn :
    * @brief Returns a begin @ref Cell reverse iterator to iterate over all cells contained in the underlying container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
-   * neither the content nor the order is garanteed. See description of the actual Column class for more details.
+   * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
    * @return @ref Cell reverse iterator.
    */
@@ -337,7 +337,7 @@ class PersistenceMatrixColumn :
    * container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
-   * neither the content nor the order is garanteed. See description of the actual Column class for more details.
+   * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
    * @return @ref Cell const reverse iterator.
    */
@@ -346,7 +346,7 @@ class PersistenceMatrixColumn :
    * @brief Returns a end @ref Cell reverse iterator, iterating over all cells contained in the underlying container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
-   * neither the content nor the order is garanteed. See description of the actual Column class for more details.
+   * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
    * @return @ref Cell reverse iterator.
    */
@@ -356,7 +356,7 @@ class PersistenceMatrixColumn :
    * container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
-   * neither the content nor the order is garanteed. See description of the actual Column class for more details.
+   * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
    * @return @ref Cell const reverse iterator.
    */
@@ -420,8 +420,8 @@ class PersistenceMatrixColumn :
 
   /**
    * @brief Equality comparator. Equal in the sense that what is "supposed" to be contained in the columns is equal,
-   * not what is actually stored in the underlying container. For exemple, the underlying container of 
-   * @ref Vector_column can contain cells which were erased explicitely by @ref clear(index). Those cells should not
+   * not what is actually stored in the underlying container. For example, the underlying container of 
+   * @ref Vector_column can contain cells which were erased explicitly by @ref clear(index). Those cells should not
    * be taken into account while comparing.
    * 
    * @param c1 First column to compare.
@@ -433,8 +433,8 @@ class PersistenceMatrixColumn :
   /**
    * @brief "Strictly smaller than" comparator. Usually a lexicographical order, but what matters is that the
    * order is total. The order should apply on what is "supposed" to be contained in the columns,
-   * not what is actually stored in the underlying container. For exemple, the underlying container of 
-   * @ref Vector_column can contain cells which were erased explicitely by @ref clear(index). Those cells should not
+   * not what is actually stored in the underlying container. For example, the underlying container of 
+   * @ref Vector_column can contain cells which were erased explicitly by @ref clear(index). Those cells should not
    * be taken into account while comparing.
    * 
    * @param c1 First column to compare.

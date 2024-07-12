@@ -11,8 +11,9 @@
 /**
  * @file matrix_dimension_holders.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Matrix_max_dimension_holder @ref Matrix_all_dimension_holder classes
- * and the @ref Dummy_matrix_dimension_holder structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Matrix_max_dimension_holder
+ * @ref Gudhi::persistence_matrix::Matrix_all_dimension_holder classes
+ * and the @ref Gudhi::persistence_matrix::Dummy_matrix_dimension_holder structure.
  */
 
 #ifndef PM_MATRIX_DIM_HOLDER_H
@@ -28,7 +29,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Matrix_max_dimension_holder or @ref Matrix_all_dimension_holder, when the maximal
+ * Inherited instead of @ref Matrix_max_dimension_holder or @ref Matrix_all_dimension_holder, when the maximal
  * dimension of a matrix is not stored.
  */
 struct Dummy_matrix_dimension_holder {
@@ -42,7 +43,7 @@ struct Dummy_matrix_dimension_holder {
 /**
  * @ingroup persistence_matrix
  *
- * @brief Class managing the maximal dimension of a face represented in the inheritating matrix, when the option of
+ * @brief Class managing the maximal dimension of a face represented in the inheriting matrix, when the option of
  * face removal is not enabled.
  * 
  * @tparam dimension_type Dimension value type. Has to be an integer type.
@@ -104,7 +105,7 @@ class Matrix_max_dimension_holder
 /**
  * @ingroup persistence_matrix
  *
- * @brief Class managing the maximal dimension of a face represented in the inheritating matrix, when the option of
+ * @brief Class managing the maximal dimension of a face represented in the inheriting matrix, when the option of
  * face removal is enabled.
  * 
  * @tparam dimension_type Dimension value type. Has to be an integer type.

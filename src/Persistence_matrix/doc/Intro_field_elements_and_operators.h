@@ -19,16 +19,18 @@ namespace persistence_fields {
  * @{
  * \author    Hannah Schreiber, Clément Maria
  *
+ * \section fieldintro Persistence Fields
+ *
  * Set of classes allowing addition and multiplication, as well as inverse computation, in \f$ \mathbb{F}_p \f$ fields,
  * with \f$ p \f$ some prime number, or in multi-fields as defined in \cite boissonnat:hal-00922572.
  *
  * There are two types of classes:
  * - those defining directly a field element, allowing to use them as any integer: the operators are overwritten such
- *   that the calculation is done in the field. For example, if \f$ e = 2 \f$ is an instanciation of an
- *   \f$ \mathbb{F}_3 \f$ element class, then `e + 3` returns an element instanciation of value `2`,
+ *   that the calculation is done in the field. For example, if \f$ e = 2 \f$ is an instantiation of an
+ *   \f$ \mathbb{F}_3 \f$ element class, then `e + 3` returns an element instantiation of value `2`,
  * - those only defining the operators of a field or multi-field. They represent a collection of methods taking
  *   one or two integers as input and treating them as elements of the field. For example, if \f$ op \f$ is an
- *   instanciation of a \f$ \mathbb{F}_3 \f$ operator class, `op.add(2, 3)` returns `2`.
+ *   instantiation of a \f$ \mathbb{F}_3 \f$ operator class, `op.add(2, 3)` returns `2`.
  *
  * The field operator classes all respect the @ref persistence_matrix::FieldOperators concept.
  * 

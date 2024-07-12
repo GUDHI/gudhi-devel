@@ -11,8 +11,8 @@
 /**
  * @file set_column.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Set_column class.
- * Also defines the std::hash method for @ref Set_column.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Set_column class.
+ * Also defines the std::hash method for @ref Gudhi::persistence_matrix::Set_column.
  */
 
 #ifndef PM_SET_COLUMN_H
@@ -41,7 +41,7 @@ namespace persistence_matrix {
  * Column based on a set structure. The cells are always ordered by row index and only non-zero values
  * are stored uniquely in the underlying container.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  * @tparam Cell_constructor Factory of @ref Cell classes.
  */
 template <class Master_matrix>
@@ -545,7 +545,7 @@ inline typename Set_column<Master_matrix>::id_index
 Set_column<Master_matrix>::get_pivot() const 
 {
   static_assert(Master_matrix::isNonBasic,
-                "Method not available for base columns.");  // could technically be, but is the notion usefull then?
+                "Method not available for base columns.");  // could technically be, but is the notion useful then?
 
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
     if (column_.empty()) return -1;
@@ -560,7 +560,7 @@ inline typename Set_column<Master_matrix>::Field_element_type
 Set_column<Master_matrix>::get_pivot_value() const 
 {
   static_assert(Master_matrix::isNonBasic,
-                "Method not available for base columns.");  // could technically be, but is the notion usefull then?
+                "Method not available for base columns.");  // could technically be, but is the notion useful then?
 
   if constexpr (Master_matrix::Option_list::is_z2) {
     return 1;
@@ -641,7 +641,7 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::operator+=(
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Set_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
-                "base element.");  // could be removed, if we give the responsability to the user.
+                "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
@@ -709,7 +709,7 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::multiply_target_and
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Set_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
-                "base element.");  // could be removed, if we give the responsability to the user.
+                "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
@@ -771,7 +771,7 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::multiply_source_and
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, Set_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
-                "base element.");  // could be removed, if we give the responsability to the user.
+                "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
@@ -822,7 +822,7 @@ template <class Master_matrix>
 inline Set_column<Master_matrix>& Set_column<Master_matrix>::operator=(
     const Set_column& other) 
 {
-  static_assert(!Master_matrix::Option_list::has_row_access, "= assignement not enabled with row access option.");
+  static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
 
   dim_opt::operator=(other);
   chain_opt::operator=(other);

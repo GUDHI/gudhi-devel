@@ -11,9 +11,11 @@
 /**
  * @file cell_types.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Cell, @ref Cell_column_index and @ref Cell_field_element classes, as well as the
- * @ref Dummy_cell_column_index_mixin and @ref Dummy_cell_field_element_mixin structures. Also defines the
- * std::hash method for @ref Cell.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Cell, @ref Gudhi::persistence_matrix::Cell_column_index and
+ * @ref Gudhi::persistence_matrix::Cell_field_element classes, as well as the
+ * @ref Gudhi::persistence_matrix::Dummy_cell_column_index_mixin and
+ * @ref Gudhi::persistence_matrix::Dummy_cell_field_element_mixin structures.
+ * Also defines the std::hash method for @ref Gudhi::persistence_matrix::Cell.
  */
 
 #ifndef PM_MATRIX_CELL_H
@@ -29,7 +31,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Cell_column_index, when the row access is disabled.
+ * Inherited instead of @ref Cell_column_index, when the row access is disabled.
  */
 struct Dummy_cell_column_index_mixin 
 {
@@ -42,7 +44,7 @@ struct Dummy_cell_column_index_mixin
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Cell_field_element, when @ref PersistenceMatrixOptions::is_z2 is true.
+ * Inherited instead of @ref Cell_field_element, when @ref PersistenceMatrixOptions::is_z2 is true.
  */
 struct Dummy_cell_field_element_mixin 
 {
@@ -128,7 +130,7 @@ class Cell_field_element
   /**
    * @brief Stores the given element.
    * 
-   * @param columnIndex Value to store.
+   * @param element Value to store.
    */
   Cell_field_element(Field_element_type element) : element_(element){};
   /**
@@ -181,9 +183,9 @@ class Cell_field_element
  *
  * @brief %Matrix cell class. Stores by default only the row index it belongs to, but can also store its
  * column index when the row access is enabled, as well as its value when they are different from only 0 and 1.
- * Zero-valued cells are never explicited in the matrix.
+ * Zero-valued cells are never made explicit in the matrix.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class Cell : public Master_matrix::Cell_column_index_option,
@@ -310,7 +312,7 @@ class Cell : public Master_matrix::Cell_column_index_option,
  *
  * @brief Hash method for @ref Gudhi::persistence_matrix::Cell.
  *
- * The cells are differentiated by their row indices only. For exemple, two cells with the same row index
+ * The cells are differentiated by their row indices only. For example, two cells with the same row index
  * but different column indices have the same hash value.
  * 
  * @tparam Master_matrix Template parameter of @ref Gudhi::persistence_matrix::Cell.

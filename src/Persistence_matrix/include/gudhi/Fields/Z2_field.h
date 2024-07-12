@@ -11,7 +11,7 @@
 /**
  * @file Z2_field.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Z2_field_element class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Z2_field_element class.
  */
 
 #ifndef MATRIX_FIELD_Z2_H_

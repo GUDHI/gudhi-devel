@@ -200,7 +200,7 @@ bool _multiply_source_and_add_to_column(const typename Column_type::Field_elemen
 }
 
 // column has to be ordered (ie. not suited for unordered_map and heap) and contain the exact values
-// (ie. not suited for vector and heap). A same colonne but ordered differently will have another hash value.
+// (ie. not suited for vector and heap). A same column but ordered differently will have another hash value.
 template <class Column_type>
 std::size_t hash_column(const Column_type& column) {
   std::size_t seed = 0;

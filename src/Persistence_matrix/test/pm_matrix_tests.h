@@ -15,6 +15,7 @@
 #include <utility>  //std::swap, std::move & std::exchange
 #include <vector>
 #include <set>
+#include <tuple>
 
 #include <boost/test/unit_test.hpp>
 #include "pm_test_utilities.h"
@@ -874,7 +875,7 @@ void test_boundary_maximal_simplex_removal() {
 
   test_content_equality(columns, m);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 7);
-  // pairing always true for boundary for now (only thing differenciating it from base)
+  // pairing always true for boundary for now (only thing differentiating it from base)
   BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, 6);
 
   m.remove_last();
@@ -1415,12 +1416,18 @@ void test_barcode() {
     }
   }
 
-  std::set<std::tuple<int, int, int>, BarComp> bars;
+  std::set<std::tuple<int, int, int>, BarComp> bars1;
+  std::set<std::tuple<int, int, int>, BarComp> bars2;
+  std::set<std::tuple<int, int, int>, BarComp> bars3;
   // bars are not ordered the same for all matrices
   for (auto it = barcode.begin(); it != barcode.end(); ++it) {
-    bars.emplace(it->dim, it->birth, it->death);
+    //three access possibilities
+    bars1.emplace(it->dim, it->birth, it->death);
+    bars2.emplace(std::get<2>(*it), std::get<0>(*it), std::get<1>(*it));
+    auto [ x, y, z ] = *it;
+    bars3.emplace(z, x, y);
   }
-  auto it = bars.begin();
+  auto it = bars1.begin();
   BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
   BOOST_CHECK_EQUAL(std::get<1>(*it), 0);
   // TODO: verify why this -1 works...: it->death should be unsigned int, so double conversion
@@ -1442,7 +1449,10 @@ void test_barcode() {
   BOOST_CHECK_EQUAL(std::get<1>(*it), 5);
   BOOST_CHECK_EQUAL(std::get<2>(*it), 6);
   ++it;
-  BOOST_CHECK(it == bars.end());
+  BOOST_CHECK(it == bars1.end());
+
+  BOOST_CHECK(bars1 == bars2);
+  BOOST_CHECK(bars1 == bars3);
 }
 
 template <class Matrix>

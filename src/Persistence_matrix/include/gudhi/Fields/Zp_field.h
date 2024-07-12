@@ -11,7 +11,7 @@
 /**
  * @file Zp_field.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Zp_field_element class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Zp_field_element class.
  */
 
 #ifndef MATRIX_FIELD_ZP_H_
@@ -115,7 +115,7 @@ class Zp_field_element {
    * @brief operator-=
    */
   friend void operator-=(Zp_field_element& f1, const Zp_field_element& f2) {
-    f1.element_ = Zp_field_element::_substract(f1.element_, f2.element_);
+    f1.element_ = Zp_field_element::_subtract(f1.element_, f2.element_);
   }
   /**
    * @brief operator-
@@ -129,7 +129,7 @@ class Zp_field_element {
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend void operator-=(Zp_field_element& f, const Integer_type& v) {
-    f.element_ = Zp_field_element::_substract(f.element_, _get_value(v));
+    f.element_ = Zp_field_element::_subtract(f.element_, _get_value(v));
   }
   /**
    * @brief operator-
@@ -148,7 +148,7 @@ class Zp_field_element {
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend Integer_type operator-(const Integer_type& v, const Zp_field_element& f) {
-    return Zp_field_element::_substract(_get_value(v), f.element_);
+    return Zp_field_element::_subtract(_get_value(v), f.element_);
   }
 
   /**
@@ -272,7 +272,7 @@ class Zp_field_element {
    * @return The inverse.
    */
   Zp_field_element get_inverse() const {
-    if (element_ != 0 && inverse_[element_] == 0) {  // initialize everything at instanciation instead?
+    if (element_ != 0 && inverse_[element_] == 0) {  // initialize everything at instantiation instead?
       inverse_[element_] = _get_inverse(element_);
     }
 
@@ -342,7 +342,7 @@ class Zp_field_element {
 
     return element;
   }
-  static element_type _substract(element_type element, element_type v) {
+  static element_type _subtract(element_type element, element_type v) {
     if (element < v) {
       element += characteristic;
     }
@@ -374,7 +374,7 @@ class Zp_field_element {
     int M = characteristic;
     int A = element;
     int y = 0, x = 1;
-    // extended euclidien division
+    // extended euclidean division
     while (A > 1) {
       int quotient = A / M;
       int temp = M;

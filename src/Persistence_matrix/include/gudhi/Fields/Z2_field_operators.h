@@ -11,7 +11,7 @@
 /**
  * @file Z2_field_operators.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Z2_field_operators class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Z2_field_operators class.
  */
 
 #ifndef MATRIX_FIELD_Z2_OPERATORS_H_
@@ -102,7 +102,7 @@ class Z2_field_operators
   }
 
   /**
-   * @brief Returns the substraction in the field of the first element by the second element.
+   * @brief Returns the subtraction in the field of the first element by the second element.
    * 
    * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
    * @param e1 First element.
@@ -110,7 +110,7 @@ class Z2_field_operators
    * @return `(e1 - e2) % 2` as a boolean.
    */
   template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
-  static element_type substract(Unsigned_integer_type e1, Unsigned_integer_type e2) {
+  static element_type subtract(Unsigned_integer_type e1, Unsigned_integer_type e2) {
     if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
       return e1 != e2;
     } else {
@@ -119,7 +119,7 @@ class Z2_field_operators
   }
 
   /**
-   * @brief Stores in the first element the substraction in the field of the first element by the second element,
+   * @brief Stores in the first element the subtraction in the field of the first element by the second element,
    * that is `(e1 - e2) % 2`, such that the result is positive.
    * 
    * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
@@ -127,7 +127,7 @@ class Z2_field_operators
    * @param e2 Second element.
    */
   template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
-  static void substract_inplace_front(Unsigned_integer_type& e1, Unsigned_integer_type e2) {
+  static void subtract_inplace_front(Unsigned_integer_type& e1, Unsigned_integer_type e2) {
     if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
       e1 = e1 != e2;
     } else {
@@ -135,7 +135,7 @@ class Z2_field_operators
     }
   }
   /**
-   * @brief Stores in the second element the substraction in the field of the first element by the second element,
+   * @brief Stores in the second element the subtraction in the field of the first element by the second element,
    * that is `(e1 - e2) % 2`, such that the result is positive.
    * 
    * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, bool, etc.
@@ -143,7 +143,7 @@ class Z2_field_operators
    * @param e2 Second element.
    */
   template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
-  static void substract_inplace_back(Unsigned_integer_type e1, Unsigned_integer_type& e2) {
+  static void subtract_inplace_back(Unsigned_integer_type e1, Unsigned_integer_type& e2) {
     if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
       e2 = e1 != e2;
     } else {

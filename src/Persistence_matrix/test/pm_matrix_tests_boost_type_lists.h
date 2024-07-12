@@ -126,12 +126,12 @@ struct m_chain_options {
 template <class option>
 class matrix_non_validity {
  private:
-  static constexpr bool is_non_valide() {
+  static constexpr bool is_non_valid() {
     return (option::has_row_access || option::has_column_compression) && option::column_type == Column_types::HEAP;
   }
 
  public:
-  static constexpr bool value = is_non_valide();
+  static constexpr bool value = is_non_valid();
 };
 
 // to avoid long compilation time and high memory usage, the tests are restricted to one column type by default for

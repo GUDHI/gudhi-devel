@@ -11,8 +11,10 @@
 /**
  * @file chain_vine_swap.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Chain_barcode_swap and @ref Chain_vine_swap classes, as well as the
- * @ref Dummy_chain_vine_swap and @ref Dummy_chain_vine_pairing structures.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Chain_barcode_swap and
+ * @ref Gudhi::persistence_matrix::Chain_vine_swap classes, as well as the
+ * @ref Gudhi::persistence_matrix::Dummy_chain_vine_swap and
+ * @ref Gudhi::persistence_matrix::Dummy_chain_vine_pairing structures.
  */
 
 #ifndef PM_CHAIN_VINE_SWAP_H
@@ -48,7 +50,7 @@ constexpr bool _no_G_death_comparator([[maybe_unused]] unsigned int columnIndex1
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Chain_vine_swap, when vine swappes are not enabled.
+ * Inherited instead of @ref Chain_vine_swap, when vine swaps are not enabled.
  */
 struct Dummy_chain_vine_swap {
   friend void swap([[maybe_unused]] Dummy_chain_vine_swap& d1, [[maybe_unused]] Dummy_chain_vine_swap& d2) {}
@@ -63,7 +65,7 @@ struct Dummy_chain_vine_swap {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Chain_barcode_swap, when the barcode is not stored.
+ * Inherited instead of @ref Chain_barcode_swap, when the barcode is not stored.
  */
 struct Dummy_chain_vine_pairing {
   friend void swap([[maybe_unused]] Dummy_chain_vine_pairing& d1, [[maybe_unused]] Dummy_chain_vine_pairing& d2) {}
@@ -74,7 +76,7 @@ struct Dummy_chain_vine_pairing {
  *
  * @brief Class managing the barcode for @ref Chain_vine_swap.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <typename Master_matrix>
 class Chain_barcode_swap : public Chain_pairing<Master_matrix> 
@@ -104,9 +106,9 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
       : CP(std::move(static_cast<CP&>(other))), pivotToPosition_(std::move(other.pivotToPosition_)){};
 
  protected:
-  using dictionnary_type = typename Master_matrix::template dictionnary_type<pos_index>;
+  using dictionary_type = typename Master_matrix::template dictionary_type<pos_index>;
 
-  dictionnary_type pivotToPosition_;  // necessary to keep track of the barcode changes
+  dictionary_type pivotToPosition_;  // necessary to keep track of the barcode changes
 
   void swap_positions(id_index pivot1, id_index pivot2) {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
@@ -196,7 +198,7 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
   pos_index _get_pivot_position(id_index pivot) const {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       return pivotToPosition_.at(
-          pivot);  // quite often called, make public and pass position instead of pivot to avoid find() everytime?
+          pivot);  // quite often called, make public and pass position instead of pivot to avoid find() every time?
     } else {
       return pivotToPosition_[pivot];
     }
@@ -225,7 +227,7 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
  *
  * @brief Class managing the vine swaps for @ref Chain_matrix.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_column_pairings,
@@ -284,7 +286,7 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
    */
   index vine_swap_with_z_eq_1_case(index columnIndex1, index columnIndex2);
   /**
-   * @brief Does a vine swap between two faces which are consecutives in the filtration. Roughly, if \f$ F \f$ is
+   * @brief Does a vine swap between two faces which are consecutive in the filtration. Roughly, if \f$ F \f$ is
    * the current filtration represented by the matrix, the method modifies the matrix such that the new state
    * corresponds to a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but with the two given faces
    * at swapped positions. Of course, the two faces should not have a face/coface relation which each other ;
@@ -389,7 +391,7 @@ inline typename Chain_vine_swap<Master_matrix>::index Chain_vine_swap<Master_mat
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
     GUDHI_CHECK(CP::are_adjacent(_matrix()->get_pivot(columnIndex1), _matrix()->get_pivot(columnIndex2)),
                 std::invalid_argument(
-                    "Chain_vine_swap::vine_swap - Columns to be swaped need to be adjacent in the 'real' matrix."));
+                    "Chain_vine_swap::vine_swap - Columns to be swapped need to be adjacent in the 'real' matrix."));
   }
 
   const bool col1IsNeg = _is_negative_in_pair(columnIndex1);
