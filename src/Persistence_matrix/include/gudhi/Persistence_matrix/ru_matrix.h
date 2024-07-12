@@ -413,10 +413,10 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   void _reduce_last_column(index lastIndex);
   void _reduce_column(index target, index eventIndex);
   void _reduce_column_by(index target, index source);
-  void _update_barcode(pos_index birth, pos_index death);
+  void _update_barcode(id_index birthPivot, pos_index death);
   void _add_bar(dimension_type dim, pos_index birth);
+  void _remove_last_in_barcode(pos_index eventIndex);
 
-  constexpr barcode_type& _barcode();
   constexpr bar_dictionnary_type& _indexToBar();
 };
 
@@ -485,7 +485,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns,
     _indexToBar().reserve(numberOfColumns);
   }
   if constexpr (Master_matrix::Option_list::has_vine_update) {
-    swap_opt::positionToRowIdx_.reserve(numberOfColumns);
+    swap_opt::_positionToRowIdx().reserve(numberOfColumns);
   }
 }
 
@@ -522,9 +522,7 @@ template <class Master_matrix>
 template <class Boundary_type>
 inline void RU_matrix<Master_matrix>::insert_boundary(const Boundary_type& boundary, dimension_type dim) 
 {
-  auto id = reducedMatrixR_.insert_boundary(boundary, dim);
-  if constexpr (Master_matrix::Option_list::has_vine_update) swap_opt::positionToRowIdx_.push_back(id);
-  _insert_boundary(id);
+  _insert_boundary(reducedMatrixR_.insert_boundary(boundary, dim));
 }
 
 template <class Master_matrix>
@@ -533,8 +531,22 @@ inline void RU_matrix<Master_matrix>::insert_boundary(id_index faceIndex,
                                                       const Boundary_type& boundary,
                                                       dimension_type dim) 
 {
+  //maps for possible shifting between column content and position indices used for birth events
+  if constexpr (Master_matrix::Option_list::has_column_pairings && !Master_matrix::Option_list::has_vine_update){
+    if (faceIndex != nextEventIndex_){
+      pair_opt::idToPosition_.emplace(faceIndex, nextEventIndex_);
+      if constexpr (Master_matrix::Option_list::has_removable_columns){
+        pair_opt::RUM::map_.emplace(nextEventIndex_, faceIndex);
+      }
+    }
+  }
   if constexpr (Master_matrix::Option_list::has_vine_update) {
-    swap_opt::positionToRowIdx_.push_back(faceIndex);
+    if (faceIndex != nextEventIndex_){
+      swap_opt::_positionToRowIdx().emplace(nextEventIndex_, faceIndex);
+      if (Master_matrix::Option_list::has_column_pairings){
+        swap_opt::template RU_pairing<Master_matrix>::idToPosition_.emplace(faceIndex, nextEventIndex_);
+      }
+    }
   }
   _insert_boundary(reducedMatrixR_.insert_boundary(faceIndex, boundary, dim));
 }
@@ -591,27 +603,7 @@ inline void RU_matrix<Master_matrix>::remove_last()
   --nextEventIndex_;
 
   // assumes PosIdx == MatIdx for boundary matrices.
-  if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    if constexpr (Master_matrix::hasFixedBarcode) {
-      auto& bar = _barcode()[_indexToBar()[nextEventIndex_]];
-      if (bar.death == static_cast<pos_index>(-1)) {  // birth
-        _barcode().pop_back();  // sorted by birth and nextEventIndex_ has to be the heighest one
-      } else {                                        // death
-        bar.death = -1;
-      };
-      _indexToBar().pop_back();
-    } else {  // birth order eventually shuffled by vine updates. No sort possible to keep the matchings.
-      auto it = _indexToBar().find(nextEventIndex_);
-      typename barcode_type::iterator bar = it->second;
-
-      if (bar->death == static_cast<pos_index>(-1))
-        _barcode().erase(bar);
-      else
-        bar->death = -1;
-
-      _indexToBar().erase(it);
-    }
-  }
+  _remove_last_in_barcode(nextEventIndex_);
 
   mirrorMatrixU_.remove_last();
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
@@ -621,8 +613,10 @@ inline void RU_matrix<Master_matrix>::remove_last()
     if (lastPivot != static_cast<id_index>(-1)) pivotToColumnIndex_[lastPivot] = -1;
   }
 
-  if constexpr (Master_matrix::Option_list::has_vine_update) {
-    swap_opt::positionToRowIdx_.pop_back();
+  // if has_vine_update and has_column_pairings are both true,
+  // then the element is already removed in _remove_last_in_barcode
+  if constexpr (Master_matrix::Option_list::has_vine_update && !Master_matrix::Option_list::has_column_pairings) {
+    swap_opt::_positionToRowIdx().erase(nextEventIndex_);
   }
 }
 
@@ -760,8 +754,9 @@ inline void RU_matrix<Master_matrix>::_insert_boundary(index currentIndex)
   }
 
   if constexpr (!Master_matrix::Option_list::has_map_column_container) {
-    while (pivotToColumnIndex_.size() <= currentIndex)
-      pivotToColumnIndex_.resize((pivotToColumnIndex_.size() + 1) * 2, -1);
+    id_index pivot = reducedMatrixR_.get_column(currentIndex).get_pivot();
+    if (pivot != static_cast<id_index>(-1) && pivotToColumnIndex_.size() <= pivot)
+      pivotToColumnIndex_.resize((pivot + 1) * 2, -1);
   }
 
   _reduce_last_column(currentIndex);
@@ -789,14 +784,8 @@ inline void RU_matrix<Master_matrix>::_reduce()
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
     _indexToBar().reserve(reducedMatrixR_.get_number_of_columns());
   }
-  if constexpr (Master_matrix::Option_list::has_vine_update) {
-    swap_opt::positionToRowIdx_.reserve(reducedMatrixR_.get_number_of_columns());
-  }
 
   for (index i = 0; i < reducedMatrixR_.get_number_of_columns(); i++) {
-    if constexpr (Master_matrix::Option_list::has_vine_update) {
-      swap_opt::positionToRowIdx_.push_back(i);
-    }
     if (!(reducedMatrixR_.is_zero_column(i))) {
       _reduce_column(i, i);
     } else {
@@ -879,17 +868,13 @@ inline void RU_matrix<Master_matrix>::_reduce_column_by(index target, index sour
 }
 
 template <class Master_matrix>
-inline void RU_matrix<Master_matrix>::_update_barcode(pos_index birth, pos_index death) 
+inline void RU_matrix<Master_matrix>::_update_barcode(id_index birthPivot, pos_index death)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    if constexpr (Master_matrix::hasFixedBarcode || !Master_matrix::Option_list::has_removable_columns) {
-      _barcode()[_indexToBar()[birth]].death = death;
-      _indexToBar().push_back(_indexToBar()[birth]);
-    } else {
-      auto& barIt = _indexToBar().at(birth);
-      barIt->death = death;
-      _indexToBar().try_emplace(death, barIt);  // list so iterators are stable
-    }
+    if constexpr (Master_matrix::Option_list::has_vine_update)
+      swap_opt::template RU_pairing<Master_matrix>::_update_barcode(birthPivot, death);
+    else
+      pair_opt::_update_barcode(birthPivot, death);
   }
 }
 
@@ -897,22 +882,22 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_add_bar(dimension_type dim, pos_index birth) 
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _barcode().emplace_back(birth, -1, dim);
-    if constexpr (Master_matrix::hasFixedBarcode || !Master_matrix::Option_list::has_removable_columns) {
-      _indexToBar().push_back(_barcode().size() - 1);
-    } else {
-      _indexToBar().try_emplace(birth, --_barcode().end());
-    }
+    if constexpr (Master_matrix::Option_list::has_vine_update)
+      swap_opt::template RU_pairing<Master_matrix>::_add_bar(dim, birth);
+    else
+      pair_opt::_add_bar(dim, birth);
   }
 }
 
 template <class Master_matrix>
-inline constexpr typename RU_matrix<Master_matrix>::barcode_type& RU_matrix<Master_matrix>::_barcode() 
+inline void RU_matrix<Master_matrix>::_remove_last_in_barcode(pos_index eventIndex) 
 {
-  if constexpr (Master_matrix::Option_list::has_vine_update)
-    return swap_opt::template RU_pairing<Master_matrix>::barcode_;
-  else
-    return pair_opt::barcode_;
+  if constexpr (Master_matrix::Option_list::has_column_pairings) {
+    if constexpr (Master_matrix::Option_list::has_vine_update)
+      swap_opt::template RU_pairing<Master_matrix>::_remove_last(eventIndex);
+    else
+      pair_opt::_remove_last(eventIndex);
+  }
 }
 
 template <class Master_matrix>

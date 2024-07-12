@@ -786,7 +786,7 @@ class Matrix {
    * @return If it is a @ref chainmatrix "chain matrix", the method returns the @ref MatIdx indices of the unpaired
    * chains used to reduce the boundary. Otherwise, nothing.
    */
-  template <class Boundary_type>
+  template <class Boundary_type = boundary_type>
   insertion_return_type insert_boundary(id_index faceIndex, const Boundary_type& boundary, dimension_type dim = -1);
 
   /**

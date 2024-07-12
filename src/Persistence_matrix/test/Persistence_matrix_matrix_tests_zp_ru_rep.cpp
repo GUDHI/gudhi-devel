@@ -74,7 +74,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_zp_rep_max_dimension, Matrix, full_matri
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_zp_rep_operation, Matrix, full_matrices) { test_ru_operation<Matrix>(); }
 
 #ifdef PM_TEST_BARCODE
-BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_zp_rep_barcode, Matrix, full_matrices) { test_barcode<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_zp_rep_barcode, Matrix, full_matrices) {
+  test_barcode<Matrix>();
+  test_shifted_barcode<Matrix>();
+}
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_zp_rep_representative_cycles, Matrix, full_matrices) {

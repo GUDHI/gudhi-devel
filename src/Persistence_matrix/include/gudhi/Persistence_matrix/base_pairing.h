@@ -23,6 +23,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "boundary_face_position_to_id_mapper.h"
+
 namespace Gudhi {
 namespace persistence_matrix {
 
@@ -46,7 +48,11 @@ struct Dummy_base_pairing {
  * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
-class Base_pairing 
+class Base_pairing : public std::conditional<
+                       Master_matrix::Option_list::has_removable_columns,
+                       Face_position_to_ID_mapper<typename Master_matrix::id_index, typename Master_matrix::pos_index>,
+                       Dummy_pos_mapper
+                    >::type
 {
  public:
   using Bar = typename Master_matrix::Bar;                            /**< Bar type. */
@@ -91,18 +97,32 @@ class Base_pairing
    * @brief Swap operator.
    */
   friend void swap(Base_pairing& pairing1, Base_pairing& pairing2) {
+    if constexpr (Master_matrix::Option_list::has_removable_columns) {
+      swap(static_cast<Face_position_to_ID_mapper<id_index, pos_index>&>(pairing1),
+           static_cast<Face_position_to_ID_mapper<id_index, pos_index>&>(pairing2));
+    }
     pairing1.barcode_.swap(pairing2.barcode_);
     pairing1.deathToBar_.swap(pairing2.deathToBar_);
+    pairing1.idToPosition_.swap(pairing2.idToPosition_);
     std::swap(pairing1.isReduced_, pairing2.isReduced_);
   }
 
  protected:
   using pos_index = typename Master_matrix::pos_index;
+  using id_index = typename Master_matrix::id_index;
   using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
   using base_matrix = typename Master_matrix::Boundary_matrix_type;
+  using RUM = typename std::conditional<Master_matrix::Option_list::has_removable_columns,
+                                        Face_position_to_ID_mapper<id_index, pos_index>,
+                                        Dummy_pos_mapper
+                                       >::type;
 
   barcode_type barcode_;        /**< Bar container. */
   dictionnary_type deathToBar_; /**< Map from death index to bar index. */
+  /**
+   * @brief Map from face ID to face position. Only stores a pair if ID != position.
+   */
+  std::unordered_map<id_index, pos_index> idToPosition_;  //TODO: test other map types
   bool isReduced_;              /**< True if `_reduce()` was called. */
 
   void _reduce();
@@ -114,18 +134,24 @@ class Base_pairing
 };
 
 template <class Master_matrix>
-inline Base_pairing<Master_matrix>::Base_pairing() : isReduced_(false) 
+inline Base_pairing<Master_matrix>::Base_pairing() : RUM(), isReduced_(false) 
 {}
 
 template <class Master_matrix>
 inline Base_pairing<Master_matrix>::Base_pairing(const Base_pairing& matrixToCopy)
-    : barcode_(matrixToCopy.barcode_), deathToBar_(matrixToCopy.deathToBar_), isReduced_(matrixToCopy.isReduced_) 
+    : RUM(static_cast<const RUM&>(matrixToCopy)),
+      barcode_(matrixToCopy.barcode_),
+      deathToBar_(matrixToCopy.deathToBar_),
+      idToPosition_(matrixToCopy.idToPosition_),
+      isReduced_(matrixToCopy.isReduced_)
 {}
 
 template <class Master_matrix>
 inline Base_pairing<Master_matrix>::Base_pairing(Base_pairing<Master_matrix>&& other) noexcept
-    : barcode_(std::move(other.barcode_)),
+    : RUM(std::move(static_cast<RUM&>(other))),
+      barcode_(std::move(other.barcode_)),
       deathToBar_(std::move(other.deathToBar_)),
+      idToPosition_(std::move(other.idToPosition_)),
       isReduced_(std::move(other.isReduced_)) 
 {}
 
@@ -139,7 +165,6 @@ inline const typename Base_pairing<Master_matrix>::barcode_type& Base_pairing<Ma
 template <class Master_matrix>
 inline void Base_pairing<Master_matrix>::_reduce() 
 {
-  using id_index = typename Master_matrix::index;
   std::unordered_map<id_index, index> pivotsToColumn(_matrix()->get_number_of_columns());
 
   auto dim = _matrix()->get_max_dimension();
@@ -175,8 +200,10 @@ inline void Base_pairing<Master_matrix>::_reduce()
 
         if (pivot != static_cast<id_index>(-1)) {
           pivotsToColumn.emplace(pivot, i);
-          _matrix()->get_column(pivot).clear();
-          barcode_.emplace_back(pivot, i, dim - 1);
+          auto it = idToPosition_.find(pivot);
+          auto pivotColumnNumber = it == idToPosition_.end() ? pivot : it->second;
+          _matrix()->get_column(pivotColumnNumber).clear();
+          barcode_.emplace_back(pivotColumnNumber, i, dim - 1);
         } else {
           curr.clear();
           barcode_.emplace_back(i, -1, dim);
@@ -216,13 +243,21 @@ inline void Base_pairing<Master_matrix>::_remove_last(pos_index columnIndex)
       deathToBar_.erase(it);
     };
   }
+
+  auto it = RUM::map_.find(columnIndex);
+  if (it != RUM::map_.end()){
+    idToPosition_.erase(it->second);
+    RUM::map_.erase(it);
+  }
 }
 
 template <class Master_matrix>
 inline Base_pairing<Master_matrix>& Base_pairing<Master_matrix>::operator=(Base_pairing<Master_matrix> other) 
 {
+  RUM::operator=(other);
   barcode_.swap(other.barcode_);
   deathToBar_.swap(other.deathToBar_);
+  idToPosition_.swap(other.idToPosition_);
   std::swap(isReduced_, other.isReduced_);
   return *this;
 }

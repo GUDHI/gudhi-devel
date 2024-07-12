@@ -64,6 +64,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_max_dimension, Matrix, max_dim_
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_operation, Matrix, full_matrices) { test_base_operation<Matrix>(); }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_barcode, Matrix, barcode_matrices) { test_barcode<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_barcode, Matrix, barcode_matrices) {
+  test_barcode<Matrix>();
+  test_shifted_barcode<Matrix>();
+}
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Boundary_matrix_zp_swaps, Matrix, swap_matrices) { test_base_swaps<Matrix>(); }
