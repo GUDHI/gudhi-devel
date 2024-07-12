@@ -35,7 +35,7 @@ namespace persistence_matrix {
  * the original methods with @ref IDIdx indices.
  * 
  * @tparam Matrix_type %Matrix type taking the overlay.
- * @tparam Master_matrix_type An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix_type An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Matrix_type, class Master_matrix_type>
 class Id_to_index_overlay 
@@ -71,7 +71,7 @@ class Id_to_index_overlay
   /**
    * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a
    * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
-   * IDs. The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0.
+   * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0.
    * 
    * @tparam Boundary_type Range type for @ref Matrix::cell_rep_type ranges.
    * Assumed to have a begin(), end() and size() method.
@@ -79,7 +79,7 @@ class Id_to_index_overlay
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
    * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^{th} \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
-   * in the matrix). That is why the indices of the simplices are assumed to be consecutifs and starting with 0 
+   * in the matrix). That is why the indices of the simplices are assumed to be consecutive and starting with 0 
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
    * interest and not everything should be stored, then use the @ref insert_boundary method instead
@@ -129,7 +129,7 @@ class Id_to_index_overlay
    * @brief Only available for @ref chainmatrix "chain matrices". 
    * Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a column 
    * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
-   * The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0. 
+   * The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0. 
    *
    * @warning If @ref PersistenceMatrixOptions::has_vine_update is false, the comparators are not used.
    * And if @ref PersistenceMatrixOptions::has_vine_update is true, but
@@ -144,7 +144,7 @@ class Id_to_index_overlay
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
    * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^{th} \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
-   * in the matrix). That is why the indices of the simplices are assumed to be consecutifs and starting with 0 
+   * in the matrix). That is why the indices of the simplices are assumed to be consecutive and starting with 0 
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
    * interest and not everything should be stored, then use the @ref insert_boundary method instead
@@ -229,7 +229,7 @@ class Id_to_index_overlay
    *
    * The content of the new column will vary depending on the underlying @ref mp_matrices "type of the matrix":
    * - If it is a boundary type matrix and only \f$ R \f$ is stored, the boundary is just copied. The column will only 
-   *   be reduced later when the barcode is requested in order to apply some optimisations with the additional
+   *   be reduced later when the barcode is requested in order to apply some optimizations with the additional
    *   knowledge. Hence, the barcode will also not be updated.
    * - If it is a boundary type matrix and both \f$ R \f$ and \f$ U \f$ are stored, the new boundary is stored in its
    *   reduced form and the barcode, if active, is also updated.
@@ -253,7 +253,7 @@ class Id_to_index_overlay
    * the faces are inserted by order of filtration), it is sufficient to indicate the ID of the face being inserted.
    * 
    * @tparam Boundary_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
-   * @param faceIndex @ref IDIdx index to use to indentify the new face.
+   * @param faceIndex @ref IDIdx index to use to identify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the 
    * @p faceIndex values of precedent calls of the method for the corresponding faces and should be ordered in 
    * increasing order.
@@ -282,7 +282,7 @@ class Id_to_index_overlay
    * @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
    * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices"
-   * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occured.
+   * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occurred.
    * @return Reference to the row.
    */
   Row_type& get_row(id_index rowIndex);
@@ -305,7 +305,7 @@ class Id_to_index_overlay
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
    * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
    * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
-   * dictionnaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be
+   * dictionaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be
    * quite frequent. 
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row to remove.
@@ -356,7 +356,7 @@ class Id_to_index_overlay
    */
   void remove_maximal_face(id_index faceID, const std::vector<id_index>& columnsToSwap);
   /**
-   * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns is true. Additionnaly, if the
+   * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns is true. Additionally, if the
    * matrix is a @ref chainmatrix "chain matrix", either @ref PersistenceMatrixOptions::has_map_column_container has to
    * be true or @ref PersistenceMatrixOptions::has_vine_update has to be false.
    * Removes the last face in the filtration from the matrix and updates the barcode if it is stored.
@@ -404,7 +404,7 @@ class Id_to_index_overlay
    */
   void add_to(id_index sourceFaceID, id_index targetFaceID);
   /**
-   * @brief Multiplies the target column with the coefficiant and then adds the source column to it.
+   * @brief Multiplies the target column with the coefficient and then adds the source column to it.
    * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of the matrix.
@@ -417,7 +417,7 @@ class Id_to_index_overlay
    */
   void multiply_target_and_add_to(id_index sourceFaceID, const Field_element_type& coefficient, id_index targetFaceID);
   /**
-   * @brief Multiplies the source column with the coefficiant before adding it to the target column.
+   * @brief Multiplies the source column with the coefficient before adding it to the target column.
    * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of the matrix.
@@ -524,7 +524,7 @@ class Id_to_index_overlay
 
   void print();  // for debug
 
-  // access to optionnal methods
+  // access to optional methods
 
   /**
    * @brief Returns the current barcode of the matrix.
@@ -574,7 +574,7 @@ class Id_to_index_overlay
   id_index vine_swap_with_z_eq_1_case(id_index faceID1, id_index faceID2);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
-   * Does a vine swap between two faces which are consecutives in the filtration. Roughly, if \f$ F \f$ is
+   * Does a vine swap between two faces which are consecutive in the filtration. Roughly, if \f$ F \f$ is
    * the current filtration represented by the matrix, the method modifies the matrix such that the new state
    * corresponds to a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but with the two given faces
    * at swapped positions. Of course, the two faces should not have a face/coface relation which each other ;
@@ -590,8 +590,8 @@ class Id_to_index_overlay
   id_index vine_swap(id_index faceID1, id_index faceID2);
   
   /**
-   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Precomputes the
-   * representative cycles of the current state of the filtration represented by the matrix.
+   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
+   * the representative cycles of the current state of the filtration represented by the matrix.
    * It does not need to be called before `get_representative_cycles` is called for the first time, but needs to be
    * called before calling `get_representative_cycles` again if the matrix was modified in between. Otherwise the
    * old cycles will be returned.
@@ -614,10 +614,10 @@ class Id_to_index_overlay
   const cycle_type& get_representative_cycle(const bar_type& bar);
 
  private:
-  using dictionnary_type = typename Master_matrix_type::template dictionnary_type<index>;
+  using dictionary_type = typename Master_matrix_type::template dictionary_type<index>;
 
   Matrix_type matrix_;          /**< Interfaced matrix. */
-  dictionnary_type* idToIndex_; /**< Map from @ref IDIdx index to @ref MatIdx index. */
+  dictionary_type* idToIndex_; /**< Map from @ref IDIdx index to @ref MatIdx index. */
   index nextIndex_;             /**< Next unused index. */
 
   void _initialize_map(unsigned int size);
@@ -705,7 +705,7 @@ inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay
       nextIndex_(matrixToCopy.nextIndex_) 
 {
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
-    idToIndex_ = new dictionnary_type(*matrixToCopy.idToIndex_);
+    idToIndex_ = new dictionary_type(*matrixToCopy.idToIndex_);
   } else {
     idToIndex_ = &matrix_.pivotToColumnIndex_;
   }
@@ -1068,9 +1068,9 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::_initialize_ma
 {
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
     if constexpr (Master_matrix_type::Option_list::has_map_column_container) {
-      idToIndex_ = new dictionnary_type(size);
+      idToIndex_ = new dictionary_type(size);
     } else {
-      idToIndex_ = new dictionnary_type(size, -1);
+      idToIndex_ = new dictionary_type(size, -1);
     }
   } else {
     idToIndex_ = &matrix_.pivotToColumnIndex_;

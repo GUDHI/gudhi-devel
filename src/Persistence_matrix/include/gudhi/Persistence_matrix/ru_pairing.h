@@ -29,7 +29,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref RU_pairing, when the computation of the barcode was not enabled or if the pairing
+ * Inherited instead of @ref RU_pairing, when the computation of the barcode was not enabled or if the pairing
  * is already managed by the vine update classes.
  */
 struct Dummy_ru_pairing {
@@ -42,7 +42,7 @@ struct Dummy_ru_pairing {
  *
  * @brief Class managing the barcode for @ref RU_matrix if the option was enabled.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class RU_pairing : public std::conditional<
@@ -86,10 +86,10 @@ class RU_pairing : public std::conditional<
 
  protected:
   using dimension_type = typename Master_matrix::dimension_type;
-  using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
+  using dictionary_type = typename Master_matrix::bar_dictionary_type;
 
   barcode_type barcode_;        /**< Bar container. */
-  dictionnary_type indexToBar_; /**< Map from @ref MatIdx index to bar index. */
+  dictionary_type indexToBar_; /**< Map from @ref MatIdx index to bar index. */
   /**
    * @brief Map from face ID to face position. Only stores a pair if ID != position.
    */

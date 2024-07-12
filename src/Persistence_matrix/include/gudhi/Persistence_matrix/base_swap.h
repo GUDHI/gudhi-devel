@@ -28,7 +28,7 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Base_swap, when the column and row swaps are not enabled.
+ * Inherited instead of @ref Base_swap, when the column and row swaps are not enabled.
  */
 struct Dummy_base_swap {
   friend void swap([[maybe_unused]] Dummy_base_swap& d1, [[maybe_unused]] Dummy_base_swap& d2) {}
@@ -42,7 +42,7 @@ struct Dummy_base_swap {
  *
  * @brief Class managing the column and row swaps in @ref Base_matrix and @ref Boundary_matrix.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  * @tparam Base_matrix Either @ref Base_matrix or @ref Boundary_matrix.
  */
 template <class Master_matrix, class Base_matrix>
@@ -106,16 +106,16 @@ class Base_swap {
   }
 
  protected:
-  using index_dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
-  using row_dictionnary_type = typename Master_matrix::template dictionnary_type<id_index>;
+  using index_dictionary_type = typename Master_matrix::template dictionary_type<index>;
+  using row_dictionary_type = typename Master_matrix::template dictionary_type<id_index>;
 
-  index_dictionnary_type indexToRow_; /**< Map from row index to actual index in row container. */
-  row_dictionnary_type rowToIndex_;   /**< Map from index in row container to "public" row index. */
+  index_dictionary_type indexToRow_; /**< Map from row index to actual index in row container. */
+  row_dictionary_type rowToIndex_;   /**< Map from index in row container to "public" row index. */
   bool rowSwapped_;                   /**< True if any rows were swapped since last call to `_orderRows()`. */
 
   void _orderRows();
 
-  //access to inheritating matrix class
+  //access to inheriting matrix class
   constexpr Base_matrix* _matrix() { return static_cast<Base_matrix*>(this); }
   constexpr const Base_matrix* _matrix() const { return static_cast<const Base_matrix*>(this); }
 };

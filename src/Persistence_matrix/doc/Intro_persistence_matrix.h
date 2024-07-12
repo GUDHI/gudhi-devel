@@ -25,9 +25,9 @@ namespace persistence_matrix {
  * and used as backend for persistence algorithms, such at persistent homology, @ref persistent_cohomology,
  * or zigzag @cite zigzag.
  *
- * The structure is entirely accessed via the class @ref Matrix and it provides several functionnalities which can
+ * The structure is entirely accessed via the class @ref Matrix and it provides several functionalities which can
  * be enabled or disabled through a template argument following the @ref PersistenceMatrixOptions concept.
- * The main functionnalities are:
+ * The main functionalities are:
  * @li column and row access,
  * @li column addition and scalar multiplication,
  * @li removal of maximal faces while maintaining a valid reduced boundary matrix or compatible chain complex base

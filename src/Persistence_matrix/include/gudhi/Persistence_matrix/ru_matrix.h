@@ -33,7 +33,7 @@ namespace persistence_matrix {
  * Supports vineyards (see @cite vineyards) and the removal of maximal faces while maintaining
  * a valid barcode. Provides an access to its columns and rows.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class RU_matrix : public Master_matrix::RU_pairing_option,
@@ -68,7 +68,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   /**
    * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a
    * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
-   * IDs. The IDs of the simplices are also assumed to be consecutifs, ordered by filtration value, starting with 0. 
+   * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0. 
    * 
    * @tparam Boundary_type Range type for @ref Matrix::cell_rep_type ranges.
    * Assumed to have a begin(), end() and size() method.
@@ -76,7 +76,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
    * Therefore, `orderedBoundaries[i]` should store the boundary of the \f$ i^{th} \f$ simplex in the filtration,
    * as an ordered list of indices of its facets (again those indices correspond to their respective position
-   * in the matrix). That is why the indices of the simplices are assumed to be consecutifs and starting with 0 
+   * in the matrix). That is why the indices of the simplices are assumed to be consecutive and starting with 0 
    * (an empty boundary is interpreted as a vertex boundary and not as a non existing simplex). 
    * All dimensions up to the maximal dimension of interest have to be present. If only a higher dimension is of 
    * interest and not everything should be stored, then use the @ref insert_boundary method instead (after creating the
@@ -142,7 +142,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * the faces are inserted by order of filtration), it is sufficient to indicate the ID of the face being inserted.
    * 
    * @tparam Boundary_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
-   * @param faceIndex @ref IDIdx index to use to indentify the new face.
+   * @param faceIndex @ref IDIdx index to use to identify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the 
    * @p faceIndex values of precedent calls of the method for the corresponding faces and should be ordered in 
    * increasing order.
@@ -158,7 +158,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    *
    * Note that before returning the column, all column cells can eventually be reordered, if lazy swaps occurred.
    * It is therefore recommended to avoid calling @ref get_column between vine swaps, otherwise the benefits
-   * of the the lazyness is lost.
+   * of the the laziness is lost.
    * 
    * @param columnIndex @ref MatIdx index of the column to return.
    * @param inR If true, returns the column in \f$ R \f$, if false, returns the column in \f$ U \f$.
@@ -173,7 +173,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    *
    * Note that before returning the row, all column cells can eventually be reordered, if lazy swaps occurred.
    * It is therefore recommended to avoid calling @ref get_row between vine swaps, otherwise the benefits
-   * of the the lazyness is lost.
+   * of the the laziness is lost.
    * 
    * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @param inR If true, returns the row in \f$ R \f$, if false, returns the row in \f$ U \f$.
@@ -193,7 +193,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * cells are not removed from their columns. And in the case of intrusive rows, this will generate a segmentation
    * fault when the column cells are destroyed later. The row access is just meant as a "read only" access to the
    * rows and the @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed
-   * from dictionnaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can
+   * from dictionaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can
    * be quite frequent. 
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row.
@@ -253,7 +253,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    */
   void add_to(index sourceColumnIndex, index targetColumnIndex);
   /**
-   * @brief Multiplies the target column with the coefficiant and then adds the source column to it.
+   * @brief Multiplies the target column with the coefficient and then adds the source column to it.
    * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
@@ -268,7 +268,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
                                   const Field_element_type& coefficient,
                                   index targetColumnIndex);
   /**
-   * @brief Multiplies the source column with the coefficiant before adding it to the target column.
+   * @brief Multiplies the source column with the coefficient before adding it to the target column.
    * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of a
@@ -389,9 +389,9 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   using swap_opt = typename Master_matrix::RU_vine_swap_option;
   using pair_opt = typename Master_matrix::RU_pairing_option;
   using rep_opt = typename Master_matrix::RU_representative_cycles_option;
-  using dictionnary_type = typename Master_matrix::template dictionnary_type<index>;
+  using dictionary_type = typename Master_matrix::template dictionary_type<index>;
   using barcode_type = typename Master_matrix::barcode_type;
-  using bar_dictionnary_type = typename Master_matrix::bar_dictionnary_type;
+  using bar_dictionary_type = typename Master_matrix::bar_dictionary_type;
   using r_matrix_type = typename Master_matrix::Boundary_matrix_type;
   using u_matrix_type = typename Master_matrix::Base_matrix_type;
 
@@ -402,7 +402,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   // TODO: make U not accessible by default and add option to enable access? Inaccessible, it
   // needs less options and we could avoid some ifs.
   u_matrix_type mirrorMatrixU_;         /**< U. */
-  dictionnary_type pivotToColumnIndex_; /**< Map from pivot row index to column @ref MatIdx index. */
+  dictionary_type pivotToColumnIndex_; /**< Map from pivot row index to column @ref MatIdx index. */
   pos_index nextEventIndex_;            /**< Next birth or death index. */
   Field_operators* operators_;          /**< Field operators,
                                              can be nullptr if @ref PersistenceMatrixOptions::is_z2 is true. */
@@ -417,7 +417,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   void _add_bar(dimension_type dim, pos_index birth);
   void _remove_last_in_barcode(pos_index eventIndex);
 
-  constexpr bar_dictionnary_type& _indexToBar();
+  constexpr bar_dictionary_type& _indexToBar();
 };
 
 template <class Master_matrix>
@@ -901,7 +901,7 @@ inline void RU_matrix<Master_matrix>::_remove_last_in_barcode(pos_index eventInd
 }
 
 template <class Master_matrix>
-inline constexpr typename RU_matrix<Master_matrix>::bar_dictionnary_type& RU_matrix<Master_matrix>::_indexToBar() 
+inline constexpr typename RU_matrix<Master_matrix>::bar_dictionary_type& RU_matrix<Master_matrix>::_indexToBar() 
 {
   if constexpr (Master_matrix::Option_list::has_vine_update)
     return swap_opt::template RU_pairing<Master_matrix>::indexToBar_;
