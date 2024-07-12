@@ -756,7 +756,7 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::insert_boundar
     GUDHI_CHECK(idToIndex_->find(faceIndex) == idToIndex_->end(),
                 std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
   } else {
-    GUDHI_CHECK((idToIndex_->size() <= faceIndex || idToIndex_[faceIndex] == static_cast<index>(-1)),
+    GUDHI_CHECK((idToIndex_->size() <= faceIndex || idToIndex_->operator[](faceIndex) == static_cast<index>(-1)),
                 std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
   }
   matrix_.insert_boundary(faceIndex, boundary, dim);
