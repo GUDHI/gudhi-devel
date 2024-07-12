@@ -875,7 +875,7 @@ void test_boundary_maximal_simplex_removal() {
 
   test_content_equality(columns, m);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 7);
-  // pairing always true for boundary for now (only thing differenciating it from base)
+  // pairing always true for boundary for now (only thing differentiating it from base)
   BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, 6);
 
   m.remove_last();

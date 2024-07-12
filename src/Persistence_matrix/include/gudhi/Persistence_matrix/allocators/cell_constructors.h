@@ -28,7 +28,7 @@ namespace persistence_matrix {
  * @private
  * @ingroup persistence_matrix
  *
- * @brief @ref Cell factory. Constructs and destroyes cell pointers with new and delete.
+ * @brief @ref Cell factory. Constructs and destroys cell pointers with new and delete.
  * 
  * @tparam Cell @ref Cell with the right templates.
  */
@@ -52,7 +52,7 @@ struct New_cell_constructor
   }
 
   /**
-   * @brief Destroyes the given cell.
+   * @brief Destroys the given cell.
    * 
    * @param cell @ref Cell pointer.
    */
@@ -108,7 +108,7 @@ struct Pool_cell_constructor
   }
 
   /**
-   * @brief Destroyes the given cell.
+   * @brief Destroys the given cell.
    * 
    * @param cell @ref Cell pointer.
    */
