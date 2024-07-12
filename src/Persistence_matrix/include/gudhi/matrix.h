@@ -132,9 +132,9 @@ namespace persistence_matrix {
  * @anchor rowindex Let @f$ r @f$ be a row. Rows are indexed in two ways depending only if the matrix is a
  * @ref chainmatrix "chain matrix" or not. If the matrix is a @ref chainmatrix "chain matrix", @f$ r @f$ is always
  * indexed by its ID, so it correspond to the @ref IDIdx indexing scheme. If the matrix is not a
- * @ref chainmatrix "chain matrix", @f$ r @f$ will originaly also be indexed by the ID, but when a swap occurs,
+ * @ref chainmatrix "chain matrix", @f$ r @f$ will originally also be indexed by the ID, but when a swap occurs,
  * the rows also swap IDs and the new ID has to be used to access @f$ r @f$. This means that when the default
- * @ref IDIdx scheme is used (the faces are numerated in order of appearence in the filtration starting at 0),
+ * @ref IDIdx scheme is used (the faces are numerated in order of appearance in the filtration starting at 0),
  * the indexation of the rows correspond to @ref PosIdx.
  *
  * @tparam PersistenceMatrixOptions Structure encoding all the options of the matrix.
@@ -150,7 +150,7 @@ class Matrix {
   using dimension_type = typename PersistenceMatrixOptions::dimension_type;    /**< Type for dimension value. */
 
   /**
-   * @brief Coefficiants field type.
+   * @brief coefficients field type.
    */
   using Field_operators =
       typename std::conditional<PersistenceMatrixOptions::is_z2, 
@@ -200,7 +200,7 @@ class Matrix {
                                >::type
     >::type;
 
-  //Option to store the column index within the cell (additionnaly to the row index). Necessary only with row access.
+  //Option to store the column index within the cell (additionally to the row index). Necessary only with row access.
   using Cell_column_index_option =
       typename std::conditional<PersistenceMatrixOptions::has_row_access,
                                 Cell_column_index<index>,
@@ -221,7 +221,7 @@ class Matrix {
   /**
    * @brief Default cell constructor/destructor, using classic new and delete.
    * For now, only used as default value for columns constructed independently outside of the matrix by the user.
-   * Could be used in the futur when parallel options are implemented, as usual pools are not thread safe.
+   * Could be used in the future when parallel options are implemented, as usual pools are not thread safe.
    */
   inline static New_cell_constructor<Cell_type> defaultCellConstructor;
   /**
@@ -231,7 +231,7 @@ class Matrix {
   using Cell_constructor = Pool_cell_constructor<Cell_type>;
 
   /**
-   * @brief Type used to identify a cell, for exemple when inserting a boundary.
+   * @brief Type used to identify a cell, for example when inserting a boundary.
    * If @ref PersistenceMatrixOptions::is_z2 is true, the type is an @ref IDIdx and corresponds to the row index of the
    * cell (the cell value is assumed to be 1). If @ref PersistenceMatrixOptions::is_z2 is false, the type is a pair
    * whose first element is the row index of the cell and the second element is the value of the cell (which again is
@@ -243,7 +243,7 @@ class Matrix {
                                                  >::type;
 
   /**
-   * @brief Compaires two cells by their position in the row. They are assume to be in the same row.
+   * @brief Compares two cells by their position in the row. They are assume to be in the same row.
    */
   struct RowCellComp {
     bool operator()(const Cell_type& c1, const Cell_type& c2) const {
@@ -288,7 +288,7 @@ class Matrix {
                                >::type;
 
   template <typename value_type>
-  using dictionnary_type =
+  using dictionary_type =
       typename std::conditional<PersistenceMatrixOptions::has_map_column_container,
                                 std::unordered_map<unsigned int, value_type>,
                                 std::vector<value_type>
@@ -433,7 +433,7 @@ class Matrix {
                                   std::vector<Bar>
                                 >::type
                                >::type;
-  using bar_dictionnary_type = 
+  using bar_dictionary_type = 
       typename std::conditional<hasFixedBarcode,
                                 typename std::conditional<PersistenceMatrixOptions::can_retrieve_representative_cycles,
                                   std::vector<index>,                   //RU
@@ -559,10 +559,10 @@ class Matrix {
   /**
    * @brief Constructs a new matrix from the given ranges of @ref cell_rep_type. Each range corresponds to a column (the
    * order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs. If the
-   * columns are representing a boundary matrix, the IDs of the simplices are also assumed to be consecutifs, ordered by
+   * columns are representing a boundary matrix, the IDs of the simplices are also assumed to be consecutive, ordered by
    * filtration value, starting with 0.
    *
-   * See @ref mp_matrices "matrix descriptions" for futher details on how the given matrix is handled.
+   * See @ref mp_matrices "matrix descriptions" for further details on how the given matrix is handled.
    *
    * @tparam Container_type Range type for @ref cell_rep_type ranges. Assumed to have a begin(), end() and size()
    * method.
@@ -570,7 +570,7 @@ class Matrix {
    * are activated, @p columns is interpreted as a boundary matrix of a **simplicial** complex. In this case,
    * `columns[i]` should store the boundary of simplex `i` as an ordered list of indices of its facets (again those
    * indices correspond to their respective position in the matrix). Therefore the indices of the simplices are assumed
-   * to be consecutifs and starting with 0 (an empty boundary is interpreted as a vertex boundary and not as a non
+   * to be consecutive and starting with 0 (an empty boundary is interpreted as a vertex boundary and not as a non
    * existing simplex). All dimensions up to the maximal dimension of interest have to be present. If only a higher
    * dimension is of interest and not everything should be stored, then use the @ref insert_boundary method instead
    * (after creating the matrix with the @ref Matrix(int numberOfColumns, characteristic_type characteristic)
@@ -603,7 +603,7 @@ class Matrix {
    *   - @ref PersistenceMatrixOptions::has_vine_update = true
    *   - @ref PersistenceMatrixOptions::has_column_pairings = false
    *
-   * Those comparators are necesseray to distinguish cases in a vine update. When the matrix is of
+   * Those comparators are necessary to distinguish cases in a vine update. When the matrix is of
    * @ref boundarymatrix "boundary type" or if the column pairing is activated (i.e., the barcode is stored),
    * the comparators can be easily deduced without overhead. If neither are true, we assume that one has additional
    * information outside of the matrix about the barcode to provide a better suited comparator adapted to the situation
@@ -631,7 +631,7 @@ class Matrix {
    * for more information about the comparators.
    *
    * @tparam Boundary_type Range type for @ref cell_rep_type ranges. Assumed to have a begin(), end() and size() method.
-   * @param orderedBoundaries Vector of ordered boundaries in filtration order. Indexed continously starting at 0.
+   * @param orderedBoundaries Vector of ordered boundaries in filtration order. Indexed continuously starting at 0.
    * @param birthComparator Method taking two @ref PosIdx indices as parameter and returns true if and only if the first
    * face is associated to a bar with strictly smaller birth than the bar associated to the second one.
    * @param deathComparator Method taking two @ref PosIdx indices as parameter and returns true if and only if the first
@@ -688,7 +688,7 @@ class Matrix {
 
   ~Matrix();
 
-  //TODO: compatibily with multi fields:
+  //TODO: compatibility with multi fields:
   //  - set_characteristic(characteristic_type min, characteristic_type max)
   //  - readapt reduction?
   /**
@@ -720,7 +720,7 @@ class Matrix {
   void insert_column(const Container_type& column);
   /**
    * @brief Inserts a new ordered column at the given index by copying the given range of @ref cell_rep_type.
-   * There should not be any other column inserted at that index which was not explicitely removed before.
+   * There should not be any other column inserted at that index which was not explicitly removed before.
    * The content of the range is assumed to be sorted by increasing ID value. 
    *
    * Only available for @ref basematrix "base matrices" without column compression and without row access.
@@ -748,7 +748,7 @@ class Matrix {
    * - If it is a @ref basematrix "basic matrix" type, the boundary is copied as it is, i.e., the method is equivalent
    * to @ref insert_column.
    * - If it is a @ref boundarymatrix "boundary type matrix" and only \f$ R \f$ is stored, the boundary is also just
-   * copied. The column will only be reduced later when the barcode is requested in order to apply some optimisations
+   * copied. The column will only be reduced later when the barcode is requested in order to apply some optimizations
    * with the additional knowledge. Hence, the barcode will also not be updated, so call @ref get_current_barcode only
    * when the matrix is complete.
    * - If it is a @ref boundarymatrix "boundary type matrix" and both \f$ R \f$ and \f$ U \f$ are stored, the new
@@ -767,7 +767,7 @@ class Matrix {
   template <class Boundary_type = boundary_type>
   insertion_return_type insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);
   /**
-   * @brief Only avalaible for @ref mp_matrices "non-basic matrices".
+   * @brief Only available for @ref mp_matrices "non-basic matrices".
    * It does the same as the other version, but allows the boundary faces to be identified without restrictions
    * except that all IDs have to be strictly increasing in the order of filtration. Note that you should avoid then
    * to use the other insertion method to avoid overwriting IDs.
@@ -777,7 +777,7 @@ class Matrix {
    * indicate the ID of the face being inserted.
    *
    * @tparam Boundary_type Range of @ref cell_rep_type. Assumed to have a begin(), end() and size() method.
-   * @param faceIndex @ref IDIdx index to use to indentify the new face.
+   * @param faceIndex @ref IDIdx index to use to identify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
    * @p faceIndex values of precedent calls of the method for the corresponding faces and should be ordered in
    * increasing order.
@@ -829,7 +829,7 @@ class Matrix {
    * choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    *
    * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices" or
-   * updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occured.
+   * updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occurred.
    * @return Reference to the row. Is `const` if the matrix has column compression.
    */
   returned_row_type& get_row(id_index rowIndex);
@@ -839,7 +839,7 @@ class Matrix {
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    * 
    * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices"
-   * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occured.
+   * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occurred.
    * @return Const reference to the row.
    */
   const Row_type& get_row(id_index rowIndex) const;
@@ -851,7 +851,7 @@ class Matrix {
    * @p inR is false. The type of the row depends on the choosen options, see
    * @ref PersistenceMatrixOptions::has_intrusive_rows.
    *
-   * @param rowIndex @ref rowindex "Row index" of the row to return: updated @ref IDIdx if swaps occured.
+   * @param rowIndex @ref rowindex "Row index" of the row to return: updated @ref IDIdx if swaps occurred.
    * @param inR If true, returns the row in \f$ R \f$, if false, returns the row in \f$ U \f$.
    * @return Const reference to the row.
    */
@@ -884,13 +884,13 @@ class Matrix {
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when
    * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
    * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
-   * dictionnaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite
+   * dictionaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite
    * frequent.
    *
    * @param rowIndex @ref rowindex "Row index" of the empty row to remove.
    */
   void erase_empty_row(id_index rowIndex);
-  //TODO: for chain matrices, replace IDIdx input with MatIdx input to homogenise.
+  //TODO: for chain matrices, replace IDIdx input with MatIdx input to homogenize.
   /**
    * @brief Only available for @ref boundarymatrix "RU" and @ref chainmatrix "chain matrices" and if
    * @ref PersistenceMatrixOptions::has_removable_columns and @ref PersistenceMatrixOptions::has_vine_update are true.
@@ -939,7 +939,7 @@ class Matrix {
   /**
    * @brief Removes the last inserted column/face from the matrix.
    * If the matrix is @ref mp_matrices "non basic", @ref PersistenceMatrixOptions::has_removable_columns has to be true
-   * for the method to be available. Additionnaly, if the matrix is a @ref chainmatrix "chain matrix", either
+   * for the method to be available. Additionally, if the matrix is a @ref chainmatrix "chain matrix", either
    * @ref PersistenceMatrixOptions::has_map_column_container has to be true or
    * @ref PersistenceMatrixOptions::has_vine_update has to be false. And if the matrix is a
    * @ref basematrix "base matrix" it should be without column compression.
@@ -1274,7 +1274,7 @@ class Matrix {
   //TODO: find better name. And benchmark also to verify if it is really worth it to have this extra version in addition
   //to vine_swap.
   /**
-   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true and if it is either a bounary
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true and if it is either a boundary
    * matrix or @ref PersistenceMatrixOptions::column_indexation_type is set to @ref Column_indexation_types::POSITION.
    * Does the same than @ref vine_swap, but assumes that the swap is non trivial and therefore skips a part of the case
    * study.
@@ -1302,7 +1302,7 @@ class Matrix {
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true and if it is either a
    * @ref boundarymatrix "boundary matrix" or @ref PersistenceMatrixOptions::column_indexation_type is set to
-   * @ref Column_indexation_types::POSITION. Does a vine swap between two faces which are consecutives in the
+   * @ref Column_indexation_types::POSITION. Does a vine swap between two faces which are consecutive in the
    * filtration. Roughly, if \f$ F \f$ is the current filtration represented by the matrix, the method modifies the
    * matrix such that the new state corresponds to a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but
    * with the two faces at position `index` and `index + 1` swapped. Of course, the two faces should not have a
@@ -1318,7 +1318,7 @@ class Matrix {
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true and if it is either a
    * @ref chainmatrix "chain matrix" or @ref PersistenceMatrixOptions::column_indexation_type is set to
-   * @ref Column_indexation_types::IDENTIFIER. Does a vine swap between two faces which are consecutives in the
+   * @ref Column_indexation_types::IDENTIFIER. Does a vine swap between two faces which are consecutive in the
    * filtration. Roughly, if \f$ F \f$ is the current filtration represented by the matrix, the method modifies the
    * matrix such that the new state corresponds to a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but
    * with the two given faces at swapped positions. Of course, the two faces should not have a face/coface relation
@@ -1336,8 +1336,8 @@ class Matrix {
 
   //TODO: Rethink the interface for representative cycles
   /**
-   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Precomputes the
-   * representative cycles of the current state of the filtration represented by the matrix. It does not need to be
+   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
+   * the representative cycles of the current state of the filtration represented by the matrix. It does not need to be
    * called before @ref get_representative_cycles is called for the first time, but needs to be called before calling
    * @ref get_representative_cycles again if the matrix was modified in between. Otherwise the old cycles will be
    * returned.
@@ -1447,7 +1447,7 @@ inline Matrix<PersistenceMatrixOptions>::Matrix(const std::function<bool(pos_ind
   static_assert(
       !PersistenceMatrixOptions::is_of_boundary_type && PersistenceMatrixOptions::has_vine_update &&
           !PersistenceMatrixOptions::has_column_pairings,
-      "Constructor only available for chain matrices when vine swaps are enabled, but barcodes are not recorded.");
+      "Constructor only available for chain matrices when vine swaps are enabled, but the barcode is not recorded.");
   _assert_options();
 }
 
@@ -1463,7 +1463,7 @@ inline Matrix<PersistenceMatrixOptions>::Matrix(const std::vector<Boundary_type>
   static_assert(
       !PersistenceMatrixOptions::is_of_boundary_type && PersistenceMatrixOptions::has_vine_update &&
           !PersistenceMatrixOptions::has_column_pairings,
-      "Constructor only available for chain matrices when vine swaps are enabled, but barcodes are not recorded.");
+      "Constructor only available for chain matrices when vine swaps are enabled, but the barcode is not recorded.");
   _assert_options();
 }
 
@@ -1478,7 +1478,7 @@ inline Matrix<PersistenceMatrixOptions>::Matrix(unsigned int numberOfColumns,
   static_assert(
       !PersistenceMatrixOptions::is_of_boundary_type && PersistenceMatrixOptions::has_vine_update &&
           !PersistenceMatrixOptions::has_column_pairings,
-      "Constructor only available for chain matrices when vine swaps are enabled, but barcodes are not recorded.");
+      "Constructor only available for chain matrices when vine swaps are enabled, but the barcode is not recorded.");
   _assert_options();
 }
 
@@ -1510,7 +1510,7 @@ inline void Matrix<PersistenceMatrixOptions>::set_characteristic(characteristic_
 {
   if constexpr (!PersistenceMatrixOptions::is_z2) {
     if (colSettings_->operators.get_characteristic() != static_cast<characteristic_type>(-1)) {
-      std::cerr << "Warning: Characteristic already initialised. Changing it could lead to incoherences in the matrice "
+      std::cerr << "Warning: Characteristic already initialised. Changing it could lead to incoherences in the matrix "
                    "as the modulo was already applied to values in existing columns.";
     }
 
@@ -1952,7 +1952,7 @@ Matrix<PersistenceMatrixOptions>::get_current_barcode() const
   static_assert(
       !PersistenceMatrixOptions::is_of_boundary_type || PersistenceMatrixOptions::has_vine_update ||
           PersistenceMatrixOptions::can_retrieve_representative_cycles,
-      "'get_current_barcode' is not const for boundary matrices as the barcode is only computed when explicitely "
+      "'get_current_barcode' is not const for boundary matrices as the barcode is only computed when explicitly "
       "asked.");
 
   return matrix_.get_current_barcode();
@@ -2059,7 +2059,7 @@ inline constexpr void Matrix<PersistenceMatrixOptions>::_assert_options()
   static_assert(!PersistenceMatrixOptions::has_vine_update || PersistenceMatrixOptions::is_z2,
                 "Vine update currently works only for Z_2 coefficients.");
   // static_assert(!PersistenceMatrixOptions::can_retrieve_representative_cycles || PersistenceMatrixOptions::is_z2,
-  //               "Representaive cycles can currently only be computed with Z_2 coefficients.");
+  //               "Representative cycles can currently only be computed with Z_2 coefficients.");
   static_assert(
       PersistenceMatrixOptions::column_type != Column_types::HEAP || !PersistenceMatrixOptions::has_column_compression,
       "Column compression not compatible with heap columns.");
