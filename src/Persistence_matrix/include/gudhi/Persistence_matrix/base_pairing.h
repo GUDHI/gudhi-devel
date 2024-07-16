@@ -65,18 +65,6 @@ class Base_pairing : public std::conditional<
    * @brief Default constructor.
    */
   Base_pairing();
-  /**
-   * @brief Copy constructor.
-   * 
-   * @param matrixToCopy Matrix to copy.
-   */
-  Base_pairing(const Base_pairing& matrixToCopy);
-  /**
-   * @brief Move constructor.
-   * 
-   * @param other Matrix to move.
-   */
-  Base_pairing(Base_pairing&& other) noexcept;
 
   /**
    * @brief Reduces the matrix stored in @ref Boundary_matrix and computes the corresponding barcode.
@@ -135,24 +123,6 @@ class Base_pairing : public std::conditional<
 
 template <class Master_matrix>
 inline Base_pairing<Master_matrix>::Base_pairing() : RUM(), isReduced_(false) 
-{}
-
-template <class Master_matrix>
-inline Base_pairing<Master_matrix>::Base_pairing(const Base_pairing& matrixToCopy)
-    : RUM(static_cast<const RUM&>(matrixToCopy)),
-      barcode_(matrixToCopy.barcode_),
-      deathToBar_(matrixToCopy.deathToBar_),
-      idToPosition_(matrixToCopy.idToPosition_),
-      isReduced_(matrixToCopy.isReduced_)
-{}
-
-template <class Master_matrix>
-inline Base_pairing<Master_matrix>::Base_pairing(Base_pairing<Master_matrix>&& other) noexcept
-    : RUM(std::move(static_cast<RUM&>(other))),
-      barcode_(std::move(other.barcode_)),
-      deathToBar_(std::move(other.deathToBar_)),
-      idToPosition_(std::move(other.idToPosition_)),
-      isReduced_(std::move(other.isReduced_)) 
 {}
 
 template <class Master_matrix>

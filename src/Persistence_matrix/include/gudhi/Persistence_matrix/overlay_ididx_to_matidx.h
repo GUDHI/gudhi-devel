@@ -622,6 +622,7 @@ class Id_to_index_overlay
 
   void _initialize_map(unsigned int size);
   index _id_to_index(id_index id) const;
+  index& _id_to_index(id_index id);
 };
 
 template <class Matrix_type, class Master_matrix_type>
@@ -640,7 +641,7 @@ inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay
   _initialize_map(orderedBoundaries.size());
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
     for (unsigned int i = 0; i < orderedBoundaries.size(); i++) {
-      idToIndex_->operator[](i) = i;
+      _id_to_index(i) = i;
     }
   }
 }
@@ -678,7 +679,7 @@ inline Id_to_index_overlay<Matrix_type, Master_matrix_type>::Id_to_index_overlay
   _initialize_map(orderedBoundaries.size());
   if constexpr (Master_matrix_type::Option_list::is_of_boundary_type) {
     for (unsigned int i = 0; i < orderedBoundaries.size(); i++) {
-      idToIndex_->operator[](i) = i;
+      _id_to_index(i) = i;
     }
   }
 }
@@ -739,7 +740,7 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::insert_boundar
       if (idToIndex_->size() == nextIndex_) {
         idToIndex_->push_back(nextIndex_);
       } else {
-        idToIndex_->operator[](nextIndex_) = nextIndex_;
+        _id_to_index(nextIndex_) = nextIndex_;
       }
     }
     ++nextIndex_;
@@ -756,7 +757,7 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::insert_boundar
     GUDHI_CHECK(idToIndex_->find(faceIndex) == idToIndex_->end(),
                 std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
   } else {
-    GUDHI_CHECK((idToIndex_->size() <= faceIndex || idToIndex_->operator[](faceIndex) == static_cast<index>(-1)),
+    GUDHI_CHECK((idToIndex_->size() <= faceIndex || _id_to_index(faceIndex) == static_cast<index>(-1)),
                 std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
   }
   matrix_.insert_boundary(faceIndex, boundary, dim);
@@ -767,7 +768,7 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::insert_boundar
       if (idToIndex_->size() <= faceIndex) {
         idToIndex_->resize(faceIndex + 1, -1);
       }
-      idToIndex_->operator[](faceIndex) = nextIndex_;
+      _id_to_index(faceIndex) = nextIndex_;
     }
     ++nextIndex_;
   }
@@ -804,7 +805,7 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::remove_maximal
       }
     } else {
       for (id_index i = 0; i < idToIndex_->size(); ++i) {
-        if (idToIndex_->operator[](i) != static_cast<index>(-1)) indexToID[idToIndex_->operator[](i)] = i;
+        if (_id_to_index(i) != static_cast<index>(-1)) indexToID[_id_to_index(i)] = i;
       }
     }
     --nextIndex_;
@@ -819,7 +820,7 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::remove_maximal
     if constexpr (Master_matrix_type::Option_list::has_map_column_container) {
       idToIndex_->erase(faceID);
     } else {
-      idToIndex_->operator[](faceID) = -1;
+      _id_to_index(faceID) = -1;
     }
   } else {
     matrix_.remove_maximal_face(faceID);
@@ -853,10 +854,10 @@ inline void Id_to_index_overlay<Matrix_type, Master_matrix_type>::remove_last()
       idToIndex_->erase(it);
     } else {
       index id = idToIndex_->size() - 1;
-      while (idToIndex_->operator[](id) == static_cast<index>(-1)) --id;  // should always stop before reaching -1
-      GUDHI_CHECK(idToIndex_->operator[](id) == nextIndex_,
+      while (_id_to_index(id) == static_cast<index>(-1)) --id;  // should always stop before reaching -1
+      GUDHI_CHECK(_id_to_index(id) == nextIndex_,
                   std::logic_error("Id_to_index_overlay::remove_last - Indexation problem."));
-      idToIndex_->operator[](id) = -1;
+      _id_to_index(id) = -1;
     }
   }
 }
@@ -1086,6 +1087,13 @@ Id_to_index_overlay<Matrix_type, Master_matrix_type>::_id_to_index(id_index id) 
   } else {
     return idToIndex_->operator[](id);
   }
+}
+
+template <class Matrix_type, class Master_matrix_type>
+inline typename Id_to_index_overlay<Matrix_type, Master_matrix_type>::index&
+Id_to_index_overlay<Matrix_type, Master_matrix_type>::_id_to_index(id_index id)
+{
+  return idToIndex_->operator[](id);  //for maps, the entry is created if not existing as needed in the constructors
 }
 
 }  // namespace persistence_matrix
