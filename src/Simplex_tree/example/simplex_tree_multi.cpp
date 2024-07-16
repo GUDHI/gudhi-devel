@@ -52,6 +52,6 @@ int main() {
   ST::Simplex_handle e = st.find(edge02);
   // Finitely_critical_multi_filtration has an operator<<
   std::cout << st.filtration(e) << std::endl;
-  assert(st.filtration(st.find(edge03)) == std::vector<float>({4,5,6}));
+  GUDHI_CHECK(st.filtration(st.find(edge03)) == ST_MULTI::Filtration_value({4, 5, 6}), "edge03 does not have the right value.");
   
 }
