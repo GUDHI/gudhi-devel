@@ -78,10 +78,6 @@ class Base_pairing : public std::conditional<
   const barcode_type& get_current_barcode();
 
   /**
-   * @brief Assign operator.
-   */
-  Base_pairing& operator=(Base_pairing other);
-  /**
    * @brief Swap operator.
    */
   friend void swap(Base_pairing& pairing1, Base_pairing& pairing2) {
@@ -219,17 +215,6 @@ inline void Base_pairing<Master_matrix>::_remove_last(pos_index columnIndex)
     idToPosition_.erase(it->second);
     RUM::map_.erase(it);
   }
-}
-
-template <class Master_matrix>
-inline Base_pairing<Master_matrix>& Base_pairing<Master_matrix>::operator=(Base_pairing<Master_matrix> other) 
-{
-  RUM::operator=(other);
-  barcode_.swap(other.barcode_);
-  deathToBar_.swap(other.deathToBar_);
-  idToPosition_.swap(other.idToPosition_);
-  std::swap(isReduced_, other.isReduced_);
-  return *this;
 }
 
 }  // namespace persistence_matrix
