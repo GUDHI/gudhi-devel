@@ -538,13 +538,13 @@ public:
   constexpr static bool is_multi_critical = false;
 };
 
-/*
+/**
  * Multi-critical filtration extension to \ref One_critical_filtration . 
  * If the `co` parameter is set to true, it reverses the poset order,
- * i.e., the order \f$\le$\f  in \f$\mathbb R^n\f$ becomes \f$\ge$\f. 
+ * i.e., the order \f$\le\f$  in \f$\mathbb R^n\f$ becomes \f$\ge\f$. 
  *
  * if `multi_filtration_` contains the points \f$(a_1, a_2, \ldots, a_k) \in (\mathbb R^n)^k\f$,
- * then a new point \f$x$\f will be in this filtration if there exists an \f$a_i\f$ such that 
+ * then a new point \f$x\f$ will be in this filtration if there exists an \f$a_i\f$ such that 
  * \f$a_i \le x\f$.
  *
  */
