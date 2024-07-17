@@ -536,7 +536,7 @@ inline void RU_matrix<Master_matrix>::insert_boundary(id_index faceIndex,
     if (faceIndex != nextEventIndex_){
       pair_opt::idToPosition_.emplace(faceIndex, nextEventIndex_);
       if constexpr (Master_matrix::Option_list::has_removable_columns){
-        pair_opt::RUM::map_.emplace(nextEventIndex_, faceIndex);
+        pair_opt::PIDM::map_.emplace(nextEventIndex_, faceIndex);
       }
     }
   }

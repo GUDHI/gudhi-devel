@@ -527,7 +527,7 @@ template <class Master_matrix>
 inline constexpr auto& RU_vine_swap<Master_matrix>::_positionToRowIdx()
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings && Master_matrix::Option_list::has_removable_columns)
-    return RUP::RUM::map_;
+    return RUP::PIDM::map_;
   else
     return RUM::map_;
 }

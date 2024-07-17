@@ -506,7 +506,7 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
     if (faceIndex != nextInsertIndex_){
       pair_opt::idToPosition_.emplace(faceIndex, nextInsertIndex_);
       if constexpr (Master_matrix::Option_list::has_removable_columns){
-        pair_opt::RUM::map_.emplace(nextInsertIndex_, faceIndex);
+        pair_opt::PIDM::map_.emplace(nextInsertIndex_, faceIndex);
       }
     }
   }
