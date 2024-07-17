@@ -87,7 +87,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_operation, Matrix, full_matric
   test_chain_operation<Matrix>(m);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_barcode, Matrix, barcode_matrices) { test_barcode<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_barcode, Matrix, barcode_matrices) {
+  test_barcode<Matrix>();
+  test_shifted_barcode<Matrix>();
+}
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_rep_representative_cycles, Matrix, full_matrices) {
   auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();

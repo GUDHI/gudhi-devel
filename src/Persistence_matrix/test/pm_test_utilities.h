@@ -160,6 +160,7 @@ void test_content_equality(const std::vector<witness_content<typename Matrix::Co
     const auto& col = m.get_column(i++);  // to force the const version
     test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(col));
   }
+  BOOST_CHECK_EQUAL(m.get_number_of_columns(), i);
 }
 
 #endif  // PM_TEST_UTILITIES_H
