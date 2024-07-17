@@ -54,7 +54,8 @@ class RU_pairing : public std::conditional<
  protected:
   using pos_index = typename Master_matrix::pos_index;
   using id_index = typename Master_matrix::id_index;
-  using RUM = typename std::conditional<Master_matrix::Option_list::has_removable_columns,
+  //PIDM = Position to ID Map
+  using PIDM = typename std::conditional<Master_matrix::Option_list::has_removable_columns,
                                         Face_position_to_ID_mapper<id_index, pos_index>,
                                         Dummy_pos_mapper
                                        >::type;
@@ -65,7 +66,7 @@ class RU_pairing : public std::conditional<
   /**
    * @brief Default constructor.
    */
-  RU_pairing() : RUM() {}
+  RU_pairing() : PIDM() {}
 
   /**
    * @brief Returns the current barcode which is maintained at any insertion, removal or vine swap.
@@ -78,7 +79,7 @@ class RU_pairing : public std::conditional<
    * @brief Swap operator.
    */
   friend void swap(RU_pairing& pairing1, RU_pairing& pairing2) {
-    swap(static_cast<RUM&>(pairing1), static_cast<RUM&>(pairing2));
+    swap(static_cast<PIDM&>(pairing1), static_cast<PIDM&>(pairing2));
     pairing1.barcode_.swap(pairing2.barcode_);
     pairing1.indexToBar_.swap(pairing2.indexToBar_);
     pairing1.idToPosition_.swap(pairing2.idToPosition_);
@@ -140,10 +141,10 @@ class RU_pairing : public std::conditional<
       indexToBar_.erase(it);
     }
 
-    auto it = RUM::map_.find(eventIndex);
-    if (it != RUM::map_.end()){
+    auto it = PIDM::map_.find(eventIndex);
+    if (it != PIDM::map_.end()){
       idToPosition_.erase(it->second);
-      RUM::map_.erase(it);
+      PIDM::map_.erase(it);
     }
   }
 };

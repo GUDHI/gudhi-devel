@@ -96,7 +96,8 @@ class Base_pairing : public std::conditional<
   using id_index = typename Master_matrix::id_index;
   using dictionary_type = typename Master_matrix::bar_dictionary_type;
   using base_matrix = typename Master_matrix::Boundary_matrix_type;
-  using RUM = typename std::conditional<Master_matrix::Option_list::has_removable_columns,
+  //PIDM = Position to ID Map
+  using PIDM = typename std::conditional<Master_matrix::Option_list::has_removable_columns,
                                         Face_position_to_ID_mapper<id_index, pos_index>,
                                         Dummy_pos_mapper
                                        >::type;
@@ -118,7 +119,7 @@ class Base_pairing : public std::conditional<
 };
 
 template <class Master_matrix>
-inline Base_pairing<Master_matrix>::Base_pairing() : RUM(), isReduced_(false) 
+inline Base_pairing<Master_matrix>::Base_pairing() : PIDM(), isReduced_(false) 
 {}
 
 template <class Master_matrix>
@@ -210,10 +211,10 @@ inline void Base_pairing<Master_matrix>::_remove_last(pos_index columnIndex)
     };
   }
 
-  auto it = RUM::map_.find(columnIndex);
-  if (it != RUM::map_.end()){
+  auto it = PIDM::map_.find(columnIndex);
+  if (it != PIDM::map_.end()){
     idToPosition_.erase(it->second);
-    RUM::map_.erase(it);
+    PIDM::map_.erase(it);
   }
 }
 

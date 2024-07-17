@@ -133,10 +133,12 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
   }
 
  protected:
+  //RUP = RU matrix Pairing
   using RUP = typename std::conditional<Master_matrix::Option_list::has_column_pairings, 
                                         RU_pairing<Master_matrix>,
                                         Dummy_ru_vine_pairing
                                        >::type;
+  //RUM = RU matrix position to id Map
   using RUM = typename std::conditional<Master_matrix::Option_list::has_column_pairings &&
                                             Master_matrix::Option_list::has_removable_columns, 
                                          Dummy_pos_mapper,
