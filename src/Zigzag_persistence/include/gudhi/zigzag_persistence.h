@@ -199,14 +199,14 @@ class Zigzag_persistence
    * as input: first the dimension of the cycle, then the birth index of the cycle and third the death index of the
    * cycle. An index always corresponds to the arrow number the event occurred (one call to @ref insert_face,
    * @ref remove_face or @ref apply_identity is equal to one arrow and increases the arrow count by one).
-   * @param minNumberOfFaces Maximal value among the minimum numbers of faces known to be at the same time in each
+   * @param preallocationSize Maximal value among the minimum numbers of faces known to be at the same time in each
    * complex of the filtration. It will be used to optimize the memory allocation.
    * Default value: 0.
    */
   Zigzag_persistence(std::function<void(dimension_type, index, index)> stream_interval,
-                     unsigned int minNumberOfFaces = 0)
+                     unsigned int preallocationSize = 0)
       : matrix_(
-            minNumberOfFaces,
+            preallocationSize,
             [this](matrix_index columnIndex1, matrix_index columnIndex2) -> bool {
               if (matrix_.get_column(columnIndex1).is_paired()) {
                 return matrix_.get_pivot(columnIndex1) < matrix_.get_pivot(columnIndex2);
@@ -225,11 +225,13 @@ class Zigzag_persistence
    * the first time in the filtration (if a face was inserted and then removed and reinserted etc., only the last
    * insertion counts). The face range should be ordered by increasing arrow numbers.
    * @param dimension Dimension of the inserted face.
+   * @return Number of the operation.
    */
   template <class BoundaryRange = std::initializer_list<index> >
-  void insert_face(const BoundaryRange& boundary, dimension_type dimension) {
+  index insert_face(const BoundaryRange& boundary, dimension_type dimension) {
     ++numArrow_;
     _process_forward_arrow(boundary, dimension);
+    return numArrow_;
   }
 
   /**
@@ -237,18 +239,21 @@ class Zigzag_persistence
    *
    * @param arrowNumber Arrow number of when the face to remove was inserted for the last time.
    * @param dimension Dimension of the face to remove.
+   * @return Number of the operation.
    */
-  void remove_face(index arrowNumber, dimension_type dimension) {
+  index remove_face(index arrowNumber, dimension_type dimension) {
     ++numArrow_;
     _process_backward_arrow(arrowNumber, dimension);
+    return numArrow_;
   }
 
   /**
    * @brief To use when a face is neither inserted nor removed, but the filtration moves along the identity operator
    * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposely skipped
    * to avoid useless computation. Increases the arrow number by one.
+   * @return Number of the operation.
    */
-  void apply_identity() { ++numArrow_; }
+  index apply_identity() { return ++numArrow_; }
 
   /**
    * @brief Outputs through the given callback method all birth indices which are currently not paired with 

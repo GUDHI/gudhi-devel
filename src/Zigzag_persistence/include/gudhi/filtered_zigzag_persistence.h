@@ -60,6 +60,10 @@ struct Default_filtered_zigzag_options {
  * Even though the insertions and removals are given in a "stream-like" way, the barcode and other values are
  * stored during the whole process and not removed. It is therefore suited for smaller filtrations where the clean
  * ups produce a higher overhead than the memory consumption.
+ * @details After construction of the class, the zigzag filtration should be given in a streaming like way, i.e.,
+ * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
+ * the filtration. To retrieve the current persistence diagram at any moment of the filtration,
+ * use @ref get_persistence_diagram or @ref get_index_persistence_diagram.
  * 
  * @tparam FilteredZigzagOptions Structure following the @ref FilteredZigzagOptions concept.
  * Default value: @ref Default_filtered_zigzag_options.
@@ -90,13 +94,14 @@ class Filtered_zigzag_persistence_with_storage
    * the filtration. To retrieve the current persistence diagram at any moment of the filtration,
    * use @ref get_persistence_diagram or @ref get_index_persistence_diagram.
    *
-   * @param minNumberOfFaces Minimum number of faces that will be in a complex at some point in the filtration.
-   * If the maximal number of faces is known in advance, the memory allocation can be better optimized.
-   * Default value: 0.
+   * @param preallocationSize Space for @p preallocationSize faces are reserved in the underlying structure.
+   * Theoretically, any values works therefore, but for better performances, it is better to be as close as possible
+   * to the maximal value of the number of faces stored at the same time. At a same time are stored faces which were
+   * inserted before that time but not removed until that time. Default value: 0.
    * @param ignoreCyclesAboveDim Ignores cycles in dimension larger or equal in the final diagram.
    * If -1, no cycles are ignored. Default value: -1.
    */
-  Filtered_zigzag_persistence_with_storage(unsigned int minNumberOfFaces = 0, int ignoreCyclesAboveDim = -1)
+  Filtered_zigzag_persistence_with_storage(unsigned int preallocationSize = 0, int ignoreCyclesAboveDim = -1)
       : dimMax_(ignoreCyclesAboveDim),
         persistenceDiagram_(),
         numArrow_(-1),
@@ -107,7 +112,7 @@ class Filtered_zigzag_persistence_with_storage
                 persistenceDiagram_.emplace_back(birth, death, dim);
               }
             },
-            minNumberOfFaces) {}
+            preallocationSize) {}
 
   /**
    * @brief Updates the zigzag persistence diagram after the insertion of the given face.
@@ -119,18 +124,21 @@ class Filtered_zigzag_persistence_with_storage
    * was previously inserted (recall that the faces should be inserted in order of filtration).
    * @param dimension Dimension of the inserted face.
    * @param filtrationValue Filtration value associated to the face.
-   * Assumed to be larger or equal to previously used filtration values.
+   * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
+   * values, ie. the changes are monotonous.
+   * @return Number of the operation.
    */
   template <class BoundaryRange = std::initializer_list<face_key> >
-  void insert_face(face_key faceID,
-                   const BoundaryRange& boundary,
-                   dimension_type dimension,
-                   filtration_value filtrationValue) {
+  internal_key insert_face(face_key faceID,
+                           const BoundaryRange& boundary,
+                           dimension_type dimension,
+                           filtration_value filtrationValue)
+  {
     ++numArrow_;
 
     if (dimMax_ != -1 && dimension > dimMax_) {
       pers_.apply_identity();
-      return;
+      return numArrow_;
     }
 
     if (filtrationValue != previousFiltrationValue_)  // check whether the filt value has changed
@@ -150,6 +158,8 @@ class Filtered_zigzag_persistence_with_storage
     }
 
     pers_.insert_face(translatedBoundary, dimension);
+
+    return numArrow_;
   }
 
   /**
@@ -158,14 +168,16 @@ class Filtered_zigzag_persistence_with_storage
    * @param faceID ID representing the face to remove. Should be the same than the one used to insert it.
    * @param dimension Dimension of the face.
    * @param filtrationValue Filtration value associated to the removal.
-   * Assumed to be larger or equal to previously used filtration values.
+   * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
+   * values, ie. the changes are monotonous.
+   * @return Number of the operation.
    */
-  void remove_face(face_key faceID, dimension_type dimension, filtration_value filtrationValue) {
+  internal_key remove_face(face_key faceID, dimension_type dimension, filtration_value filtrationValue) {
     ++numArrow_;
 
     if (dimMax_ != -1 && dimension > dimMax_) {
       pers_.apply_identity();
-      return;
+      return numArrow_;
     }
 
     auto it = handleToKey_.find(faceID);
@@ -179,16 +191,20 @@ class Filtered_zigzag_persistence_with_storage
 
     pers_.remove_face(it->second, dimension);
     handleToKey_.erase(it);
+
+    return numArrow_;
   }
 
   /**
    * @brief To use when a face is neither inserted nor removed, but the filtration moves along the identity operator
    * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposely skipped
    * to avoid useless computation.
+   * @return Number of the operation.
    */
-  void apply_identity() {
+  internal_key apply_identity() {
     ++numArrow_;
     pers_.apply_identity();
+    return numArrow_;
   }
 
   /**
@@ -214,9 +230,9 @@ class Filtered_zigzag_persistence_with_storage
     auto itBirth =  // lower_bound(x) returns leftmost y s.t. x <= y
         std::lower_bound(
             filtrationValues_.begin(), filtrationValues_.end(),
-            std::pair<internal_key, filtration_value>(birthKey, std::numeric_limits<filtration_value>::infinity()),
-            [](std::pair<internal_key, filtration_value> p1, std::pair<internal_key, filtration_value> p2) {
-              return p1.first < p2.first;
+            birthKey,
+            [](std::pair<internal_key, filtration_value> p, internal_key k) {
+              return p.first < k;
             });
     if (itBirth == filtrationValues_.end() || itBirth->first > birthKey) {
       --itBirth;
@@ -226,9 +242,9 @@ class Filtered_zigzag_persistence_with_storage
     auto itDeath =  //
         std::lower_bound(
             filtrationValues_.begin(), filtrationValues_.end(),
-            std::pair<internal_key, filtration_value>(deathKey, std::numeric_limits<filtration_value>::infinity()),
-            [](std::pair<internal_key, filtration_value> p1, std::pair<internal_key, filtration_value> p2) {
-              return p1.first < p2.first;
+            deathKey,
+            [](std::pair<internal_key, filtration_value> p, internal_key k) {
+              return p.first < k;
             });
     if (itDeath == filtrationValues_.end() || itDeath->first > deathKey) {
       --itDeath;
@@ -279,10 +295,10 @@ class Filtered_zigzag_persistence_with_storage
     std::vector<Filtration_value_interval> diag;
     diag.reserve(persistenceDiagram_.size());
 
-    std::stable_sort(filtrationValues_.begin(), filtrationValues_.end(),
-                     [](std::pair<internal_key, filtration_value> p1, std::pair<internal_key, filtration_value> p2) {
-                       return p1.first < p2.first;
-                     });
+    // std::stable_sort(filtrationValues_.begin(), filtrationValues_.end(),
+    //                  [](std::pair<internal_key, filtration_value> p1, std::pair<internal_key, filtration_value> p2) {
+    //                    return p1.first < p2.first;
+    //                  });
 
     for (auto bar : persistenceDiagram_) {
       filtration_value birth, death;
@@ -309,10 +325,10 @@ class Filtered_zigzag_persistence_with_storage
       auto itBirth =  // lower_bound(x) returns leftmost y s.t. x <= y
           std::lower_bound(
               filtrationValues_.begin(), filtrationValues_.end(),
-              std::pair<internal_key, filtration_value>(birthKey, std::numeric_limits<filtration_value>::infinity()),
-              [](std::pair<internal_key, filtration_value> p1, std::pair<internal_key, filtration_value> p2) {
-                return p1.first < p2.first;
-              });
+              birthKey,
+              [](std::pair<internal_key, filtration_value> p, internal_key k) {
+              return p.first < k;
+            });
       if (itBirth == filtrationValues_.end() || itBirth->first > birthKey) {
         --itBirth;
       }
@@ -332,6 +348,10 @@ class Filtered_zigzag_persistence_with_storage
  * @ingroup zigzag_persistence
  *
  * @brief Class computing the zigzag persistent homology of a zigzag filtration. Algorithm based on \cite zigzag.
+ * @details After construction of the class, the zigzag filtration should be given in a streaming like way, i.e.,
+ * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
+ * the filtration. The bars of the diagram are retrieved via the given callback method every time
+ * a pair with non-zero length is closed. To retrieve the open/infinite bars, use @ref get_current_infinite_intervals.
  * 
  * @tparam FilteredZigzagOptions Structure following the @ref FilteredZigzagOptions concept.
  * Default value: @ref Default_filtered_zigzag_options.
@@ -356,25 +376,25 @@ class Filtered_zigzag_persistence {
    * Has to take three arguments as input: first the dimension of the cycle, then the birth value of the cycle
    * and third the death value of the cycle. The values corresponds to the filtration values which were given at
    * insertions or removals.
-   * @param minNumberOfFaces Minimum number of faces that will be in a complex at some point in the filtration.
+   * @param preallocationSize Minimum number of faces that will be in a complex at some point in the filtration.
    * If the maximal number of faces is known in advance, the memory allocation can be better optimized.
    * Default value: 0.
+   * @tparam F Type of callback method.
    */
-  Filtered_zigzag_persistence(std::function<void(dimension_type, filtration_value, filtration_value)> stream_interval,
-                              unsigned int minNumberOfFaces = 0)
-      : handleToKey_(minNumberOfFaces),
+  template<typename F>
+  Filtered_zigzag_persistence(F&& stream_interval, unsigned int preallocationSize = 0)
+      : handleToKey_(preallocationSize),
         numArrow_(-1),
-        keyToFiltrationValue_(minNumberOfFaces),
-        stream_interval_(std::move(stream_interval)),
+        keyToFiltrationValue_(preallocationSize),
         pers_(
-            [&](dimension_type dim, internal_key birth, internal_key death) {
+            [&,stream_interval](dimension_type dim, internal_key birth, internal_key death) {
               auto itB = keyToFiltrationValue_.find(birth);
               auto itD = keyToFiltrationValue_.find(death);
-              if (itB->second != itD->second) stream_interval_(dim, itB->second, itD->second);
+              if (itB->second != itD->second) stream_interval(dim, itB->second, itD->second);
               keyToFiltrationValue_.erase(itB);
               keyToFiltrationValue_.erase(itD);
             },
-            minNumberOfFaces) {}
+            preallocationSize) {}
 
   /**
    * @brief Updates the zigzag persistence diagram after the insertion of the given face.
@@ -386,7 +406,8 @@ class Filtered_zigzag_persistence {
    * was previously inserted (recall that the faces should be inserted in order of filtration).
    * @param dimension Dimension of the inserted face.
    * @param filtrationValue Filtration value associated to the face.
-   * Assumed to be larger or equal to previously used filtration values.
+   * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
+   * values, ie. the changes are monotonous.
    */
   template <class BoundaryRange = std::initializer_list<face_key> >
   void insert_face(face_key faceID,
@@ -416,7 +437,8 @@ class Filtered_zigzag_persistence {
    * @param faceID ID representing the face to remove. Should be the same than the one used to insert it.
    * @param dimension Dimension of the face.
    * @param filtrationValue Filtration value associated to the removal.
-   * Assumed to be larger or equal to previously used filtration values.
+   * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
+   * values, ie. the changes are monotonous.
    */
   void remove_face(face_key faceID, dimension_type dimension, filtration_value filtrationValue) {
     ++numArrow_;
@@ -460,7 +482,6 @@ class Filtered_zigzag_persistence {
   dictionary<face_key, internal_key> handleToKey_;                   /**< Map from input keys to internal keys. */
   internal_key numArrow_;                                             /**< Current arrow number. */
   dictionary<internal_key, filtration_value> keyToFiltrationValue_;  /**< Face Key to filtration value map. */
-  std::function<void(int,filtration_value,filtration_value)> stream_interval_;  /**< Callback method for finite bars. */
   Zigzag_persistence<FilteredZigzagOptions, true> pers_;              /**< Class computing the pairs. */
 };  // end class Filtered_zigzag_persistence
 
