@@ -573,7 +573,7 @@ class Matrix {
    * to be consecutive and starting with 0 (an empty boundary is interpreted as a vertex boundary and not as a non
    * existing simplex). All dimensions up to the maximal dimension of interest have to be present. If only a higher
    * dimension is of interest and not everything should be stored, then use the @ref insert_boundary method instead
-   * (after creating the matrix with the @ref Matrix(int numberOfColumns, characteristic_type characteristic)
+   * (after creating the matrix with the @ref Matrix(unsigned int numberOfColumns, characteristic_type characteristic)
    * constructor preferably). If the persistence barcode has to be computed from this matrix, the simplices are also
    * assumed to be ordered by appearance order in the filtration. Also, depending of the options, the matrix is
    * eventually reduced on the fly or converted into a chain complex base, so the new matrix is not always identical to
@@ -593,7 +593,7 @@ class Matrix {
    * @ref set_characteristic before calling for the first time a method needing it. Ignored if
    * @ref PersistenceMatrixOptions::is_z2 is true.
    */
-  Matrix(int numberOfColumns, characteristic_type characteristic = static_cast<characteristic_type>(-1));
+  Matrix(unsigned int numberOfColumns, characteristic_type characteristic = static_cast<characteristic_type>(-1));
   /**
    * @brief Constructs a new empty matrix with the given comparator functions. Only available when those comparators
    * are necessary.
@@ -786,7 +786,7 @@ class Matrix {
    * @return If it is a @ref chainmatrix "chain matrix", the method returns the @ref MatIdx indices of the unpaired
    * chains used to reduce the boundary. Otherwise, nothing.
    */
-  template <class Boundary_type>
+  template <class Boundary_type = boundary_type>
   insertion_return_type insert_boundary(id_index faceIndex, const Boundary_type& boundary, dimension_type dim = -1);
 
   /**
@@ -1427,7 +1427,7 @@ inline Matrix<PersistenceMatrixOptions>::Matrix(const std::vector<Container_type
 }
 
 template <class PersistenceMatrixOptions>
-inline Matrix<PersistenceMatrixOptions>::Matrix(int numberOfColumns, characteristic_type characteristic)
+inline Matrix<PersistenceMatrixOptions>::Matrix(unsigned int numberOfColumns, characteristic_type characteristic)
     : colSettings_(new Column_settings(characteristic)),
       matrix_(numberOfColumns, colSettings_) 
 {

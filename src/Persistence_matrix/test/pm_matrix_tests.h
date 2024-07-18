@@ -875,7 +875,7 @@ void test_boundary_maximal_simplex_removal() {
 
   test_content_equality(columns, m);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 7);
-  // pairing always true for boundary for now (only thing differentiating it from base)
+  // pairing always true for boundary for now (only thing differenciating it from base)
   BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, 6);
 
   m.remove_last();
@@ -1414,6 +1414,140 @@ void test_barcode() {
         if (i == 6) continue;
       test_column_equality<typename Matrix::Column_type>(r, get_ordered_row(m, i++));
     }
+  }
+
+  std::set<std::tuple<int, int, int>, BarComp> bars1;
+  std::set<std::tuple<int, int, int>, BarComp> bars2;
+  std::set<std::tuple<int, int, int>, BarComp> bars3;
+  // bars are not ordered the same for all matrices
+  for (auto it = barcode.begin(); it != barcode.end(); ++it) {
+    //three access possibilities
+    bars1.emplace(it->dim, it->birth, it->death);
+    bars2.emplace(std::get<2>(*it), std::get<0>(*it), std::get<1>(*it));
+    auto [ x, y, z ] = *it;
+    bars3.emplace(z, x, y);
+  }
+  auto it = bars1.begin();
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 0);
+  // TODO: verify why this -1 works...: it->death should be unsigned int, so double conversion
+  BOOST_CHECK_EQUAL(std::get<2>(*it), -1);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 1);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 3);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 2);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 4);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 7);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 8);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 1);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 5);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 6);
+  ++it;
+  BOOST_CHECK(it == bars1.end());
+
+  BOOST_CHECK(bars1 == bars2);
+  BOOST_CHECK(bars1 == bars3);
+}
+
+template <class Matrix>
+void test_shifted_barcode() {
+  using C = typename Matrix::Column_type;
+  struct BarComp {
+    bool operator()(const std::tuple<int, int, int>& c1, const std::tuple<int, int, int>& c2) const {
+      if (std::get<0>(c1) == std::get<0>(c2)) return std::get<1>(c1) < std::get<1>(c2);
+      return std::get<0>(c1) < std::get<0>(c2);
+    }
+  };
+
+  Matrix m(9, 5);
+  if constexpr (is_z2<C>()) {
+    m.insert_boundary(2, {}, 0);
+    m.insert_boundary(3, {}, 0);
+    m.insert_boundary(5, {}, 0);
+    m.insert_boundary(7, {2, 3});
+    m.insert_boundary(8, {3, 5});
+    m.insert_boundary(9, {2, 5});
+    m.insert_boundary(10, {7, 8, 9});
+    m.insert_boundary(11, {}, 0);
+    m.insert_boundary(13, {3, 11});
+  } else {
+    m.insert_boundary(2, {}, 0);
+    m.insert_boundary(3, {}, 0);
+    m.insert_boundary(5, {}, 0);
+    m.insert_boundary(7, {{2, 1}, {3, 4}});
+    m.insert_boundary(8, {{3, 1}, {5, 4}});
+    m.insert_boundary(9, {{2, 1}, {5, 4}});
+    m.insert_boundary(10, {{7, 1}, {8, 1}, {9, 4}});
+    m.insert_boundary(11, {}, 0);
+    m.insert_boundary(13, {{3, 1}, {11, 4}});
+  }
+
+  const auto& barcode = m.get_current_barcode();
+
+  std::vector<witness_content<C> > reducedMatrix;
+  if constexpr (is_z2<C>()) {
+    if constexpr (Matrix::Option_list::is_of_boundary_type) {
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.push_back({2, 3});
+      reducedMatrix.push_back({3, 5});
+      reducedMatrix.emplace_back();
+      reducedMatrix.push_back({7, 8, 9});
+      reducedMatrix.emplace_back();
+      reducedMatrix.push_back({3, 11});
+    } else {
+      reducedMatrix.push_back({2});
+      reducedMatrix.push_back({2, 3});
+      reducedMatrix.push_back({2, 5});
+      reducedMatrix.push_back({7});
+      reducedMatrix.push_back({7, 8});
+      reducedMatrix.push_back({7, 8, 9});
+      reducedMatrix.push_back({10});
+      reducedMatrix.push_back({2, 11});
+      reducedMatrix.push_back({7, 13});
+    }
+  } else {
+    if constexpr (Matrix::Option_list::is_of_boundary_type) {
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.push_back({{2, 1}, {3, 4}});
+      reducedMatrix.push_back({{3, 1}, {5, 4}});
+      reducedMatrix.emplace_back();
+      reducedMatrix.push_back({{7, 1}, {8, 1}, {9, 4}});
+      reducedMatrix.emplace_back();
+      reducedMatrix.push_back({{3, 1}, {11, 4}});
+    } else {
+      reducedMatrix.push_back({{2, 1}});
+      reducedMatrix.push_back({{2, 1}, {3, 4}});
+      reducedMatrix.push_back({{2, 1}, {5, 4}});
+      reducedMatrix.push_back({{7, 1}});
+      reducedMatrix.push_back({{7, 1}, {8, 1}});
+      reducedMatrix.push_back({{7, 1}, {8, 1}, {9, 4}});
+      reducedMatrix.push_back({{10, 1}});
+      reducedMatrix.push_back({{2, 1}, {11, 4}});
+      reducedMatrix.push_back({{7, 1}, {13, 1}});
+    }
+  }
+  if constexpr (Matrix::Option_list::column_indexation_type == Column_indexation_types::IDENTIFIER){
+    test_column_equality<C>(reducedMatrix[0], get_column_content_via_iterators(m.get_column(2)));
+    test_column_equality<C>(reducedMatrix[1], get_column_content_via_iterators(m.get_column(3)));
+    test_column_equality<C>(reducedMatrix[2], get_column_content_via_iterators(m.get_column(5)));
+    test_column_equality<C>(reducedMatrix[3], get_column_content_via_iterators(m.get_column(7)));
+    test_column_equality<C>(reducedMatrix[4], get_column_content_via_iterators(m.get_column(8)));
+    test_column_equality<C>(reducedMatrix[5], get_column_content_via_iterators(m.get_column(9)));
+    test_column_equality<C>(reducedMatrix[6], get_column_content_via_iterators(m.get_column(10)));
+    test_column_equality<C>(reducedMatrix[7], get_column_content_via_iterators(m.get_column(11)));
+    test_column_equality<C>(reducedMatrix[8], get_column_content_via_iterators(m.get_column(13)));
+  } else {
+    test_content_equality(reducedMatrix, m);
   }
 
   std::set<std::tuple<int, int, int>, BarComp> bars1;

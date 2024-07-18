@@ -104,7 +104,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_operation, Matrix, full_matri
   test_chain_operation<Matrix>(m);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_barcode, Matrix, full_matrices) { test_barcode<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_barcode, Matrix, full_matrices) {
+  test_barcode<Matrix>();
+  test_shifted_barcode<Matrix>();
+}
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine, Matrix, full_matrices) {
   auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();

@@ -474,14 +474,16 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
 
   //updates container sizes
   if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows) {
-    id_index pivot;
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      pivot = *std::prev(boundary.end());
-    } else {
-      pivot = std::prev(boundary.end())->first;
+    if (boundary.size() != 0){
+      id_index pivot;
+      if constexpr (Master_matrix::Option_list::is_z2) {
+        pivot = *std::prev(boundary.end());
+      } else {
+        pivot = std::prev(boundary.end())->first;
+      }
+      //row container
+      if (ra_opt::rows_->size() <= pivot) ra_opt::rows_->resize(pivot + 1);
     }
-    //row container
-    if (ra_opt::rows_->size() <= pivot) ra_opt::rows_->resize(pivot + 1);
   }
 
   //row swap map containers
@@ -495,6 +497,16 @@ inline typename Boundary_matrix<Master_matrix>::index Boundary_matrix<Master_mat
       for (index i = swap_opt::indexToRow_.size(); i <= faceIndex; ++i) {
         swap_opt::indexToRow_.push_back(i);
         swap_opt::rowToIndex_.push_back(i);
+      }
+    }
+  }
+
+  //maps for possible shifting between column content and position indices used for birth events
+  if constexpr (activePairingOption){
+    if (faceIndex != nextInsertIndex_){
+      pair_opt::idToPosition_.emplace(faceIndex, nextInsertIndex_);
+      if constexpr (Master_matrix::Option_list::has_removable_columns){
+        pair_opt::PIDM::map_.emplace(nextInsertIndex_, faceIndex);
       }
     }
   }

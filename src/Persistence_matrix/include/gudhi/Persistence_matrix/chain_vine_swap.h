@@ -84,6 +84,7 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
  public:
   using id_index = typename Master_matrix::id_index;    /**< @ref IDIdx index type. */
   using pos_index = typename Master_matrix::pos_index;  /**< @ref PosIdx index type. */
+  //CP = Chain Pairing
   using CP = Chain_pairing<Master_matrix>;
 
   /**

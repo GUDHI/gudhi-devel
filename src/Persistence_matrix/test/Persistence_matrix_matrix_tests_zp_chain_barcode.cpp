@@ -88,4 +88,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_barcode_operation, Matrix, full_ma
   test_chain_operation<Matrix>(m);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_barcode_barcode, Matrix, full_matrices) { test_barcode<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_zp_barcode_barcode, Matrix, full_matrices) {
+  test_barcode<Matrix>();
+  test_shifted_barcode<Matrix>();
+}
