@@ -302,10 +302,7 @@ class Zigzag_persistence
       if constexpr (erase_birth_history) {
         births_.emplace_hint(births_.end(), matrix_.get_column_with_pivot(numArrow_), numArrow_);
       } else {
-        auto res = births_.try_emplace(matrix_.get_column_with_pivot(numArrow_), numArrow_);
-        if (!res.second) {
-          res.first->second = numArrow_;
-        }
+        births_[matrix_.get_column_with_pivot(numArrow_)] = numArrow_;
       }
     }
   }
