@@ -275,7 +275,7 @@ class Zigzag_persistence
           if (!col.is_paired()) {
             stream_infinite_interval(col.get_dimension(), p.second);
           }
-        } catch (const std::out_of_range& e) {
+        } catch (const std::out_of_range&) {
           continue;
         }
       }
