@@ -55,15 +55,15 @@ void test_z2_standart_field_operators(Z2& op) {
   z23 = op.get_value(z21);
 
   //-
-  BOOST_CHECK_EQUAL(op.substract(z21, z22), 0);
-  BOOST_CHECK_EQUAL(op.substract(z23, z24), 0);
-  BOOST_CHECK_EQUAL(op.substract(z23, T(3)), 1);
-  BOOST_CHECK_EQUAL(op.substract(z24, T(3)), 1);
-  BOOST_CHECK_EQUAL(op.substract(op.get_value(6u), z23), 0);
-  BOOST_CHECK_EQUAL(op.substract(op.get_value(6u), z24), 0);
-  z21 = op.substract(z21, 3u);
+  BOOST_CHECK_EQUAL(op.subtract(z21, z22), 0);
+  BOOST_CHECK_EQUAL(op.subtract(z23, z24), 0);
+  BOOST_CHECK_EQUAL(op.subtract(z23, T(3)), 1);
+  BOOST_CHECK_EQUAL(op.subtract(z24, T(3)), 1);
+  BOOST_CHECK_EQUAL(op.subtract(op.get_value(6u), z23), 0);
+  BOOST_CHECK_EQUAL(op.subtract(op.get_value(6u), z24), 0);
+  z21 = op.subtract(z21, 3u);
   BOOST_CHECK_EQUAL(z21, 1);
-  z21 = op.substract(z21, z22);
+  z21 = op.subtract(z21, z22);
   BOOST_CHECK_EQUAL(z21, 1);
   z23 = op.get_value(z21);
 
@@ -116,15 +116,15 @@ void test_z5_standart_field_operators(Z5& op) {
   z53 = op.get_value(z51);
 
   //-
-  BOOST_CHECK_EQUAL(op.substract(z51, z52), 0);
-  BOOST_CHECK_EQUAL(op.substract(z53, z54), 0);
-  BOOST_CHECK_EQUAL(op.substract(z53, 3), 0);
-  BOOST_CHECK_EQUAL(op.substract(z54, 3), 0);
-  BOOST_CHECK_EQUAL(op.substract(7, z53), 4);
-  BOOST_CHECK_EQUAL(op.substract(7, z54), 4);
-  z51 = op.substract(z51, 3);
+  BOOST_CHECK_EQUAL(op.subtract(z51, z52), 0);
+  BOOST_CHECK_EQUAL(op.subtract(z53, z54), 0);
+  BOOST_CHECK_EQUAL(op.subtract(z53, 3), 0);
+  BOOST_CHECK_EQUAL(op.subtract(z54, 3), 0);
+  BOOST_CHECK_EQUAL(op.subtract(7, z53), 4);
+  BOOST_CHECK_EQUAL(op.subtract(7, z54), 4);
+  z51 = op.subtract(z51, 3);
   BOOST_CHECK_EQUAL(z51, 0);
-  z51 = op.substract(z51, z52);
+  z51 = op.subtract(z51, z52);
   BOOST_CHECK_EQUAL(z51, 2);
   z53 = op.get_value(z51);
 
@@ -191,19 +191,19 @@ void test_z2_standart_field_inplace_operators(Z2& op) {
   z23 = 0;
 
   //-
-  op.substract_inplace_front(z23, z24);
+  op.subtract_inplace_front(z23, z24);
   BOOST_CHECK_EQUAL(z23, 0);
   z23 = 0;
-  op.substract_inplace_front(z23, T(3));
+  op.subtract_inplace_front(z23, T(3));
   BOOST_CHECK_EQUAL(z23, 1);
   z23 = 0;
-  op.substract_inplace_front(z24, T(3));
+  op.subtract_inplace_front(z24, T(3));
   BOOST_CHECK_EQUAL(z24, 1);
   z24 = op.get_value(2u);
-  op.substract_inplace_back(op.get_value(6u), z23);
+  op.subtract_inplace_back(op.get_value(6u), z23);
   BOOST_CHECK_EQUAL(z23, 0);
   z23 = 0;
-  op.substract_inplace_back(op.get_value(6u), z24);
+  op.subtract_inplace_back(op.get_value(6u), z24);
   BOOST_CHECK_EQUAL(z24, 0);
   z24 = op.get_value(2u);
   z23 = 1;
@@ -267,19 +267,19 @@ void test_z5_standart_field_inplace_operators(Z5& op) {
   z53 = 3;
 
   //-
-  op.substract_inplace_front(z53, z54);
+  op.subtract_inplace_front(z53, z54);
   BOOST_CHECK_EQUAL(z53, 0);
   z53 = 3;
-  op.substract_inplace_front(z53, 3);
+  op.subtract_inplace_front(z53, 3);
   BOOST_CHECK_EQUAL(z53, 0);
   z53 = 3;
-  op.substract_inplace_front(z54, 3);
+  op.subtract_inplace_front(z54, 3);
   BOOST_CHECK_EQUAL(z54, 0);
   z54 = op.get_value(3);
-  op.substract_inplace_back(7, z53);
+  op.subtract_inplace_back(7, z53);
   BOOST_CHECK_EQUAL(z53, 4);
   z53 = 3;
-  op.substract_inplace_back(7, z54);
+  op.subtract_inplace_back(7, z54);
   BOOST_CHECK_EQUAL(z54, 4);
   z54 = op.get_value(3);
   z53 = 2;
@@ -415,14 +415,14 @@ void test_multi_field_operators(MF& op) {
   BOOST_CHECK_EQUAL(m1, T(5));
 
   //-
-  BOOST_CHECK_EQUAL(op.substract(m1, m2), T(3));
-  BOOST_CHECK_EQUAL(op.substract(m1, 3), T(2));
-  BOOST_CHECK_EQUAL(op.substract(m2, 3), T(5004));
-  BOOST_CHECK_EQUAL(op.substract(6, m1), T(1));
-  BOOST_CHECK_EQUAL(op.substract(6, m2), T(4));
-  m2 = op.substract(m2, 3);
+  BOOST_CHECK_EQUAL(op.subtract(m1, m2), T(3));
+  BOOST_CHECK_EQUAL(op.subtract(m1, 3), T(2));
+  BOOST_CHECK_EQUAL(op.subtract(m2, 3), T(5004));
+  BOOST_CHECK_EQUAL(op.subtract(6, m1), T(1));
+  BOOST_CHECK_EQUAL(op.subtract(6, m2), T(4));
+  m2 = op.subtract(m2, 3);
   BOOST_CHECK_EQUAL(m2, T(5004));
-  m2 = op.substract(m2, m1);
+  m2 = op.subtract(m2, m1);
   BOOST_CHECK_EQUAL(m2, T(4999));
 
   //*
@@ -438,7 +438,7 @@ void test_multi_field_operators(MF& op) {
 
   //==
   BOOST_CHECK(!op.are_equal(m1, m2));
-  m2 = op.substract(m2, 84);
+  m2 = op.subtract(m2, 84);
   BOOST_CHECK(op.are_equal(m1, T(4915)));
   BOOST_CHECK(op.are_equal(m1, m2));
 }
@@ -486,19 +486,19 @@ void test_multi_field_inplace_operators(MF& op) {
   m1 = 5;
 
   //-
-  op.substract_inplace_front(m1, m2);
+  op.subtract_inplace_front(m1, m2);
   BOOST_CHECK_EQUAL(m1, T(3));
   m1 = 5;
-  op.substract_inplace_front(m1, 3);
+  op.subtract_inplace_front(m1, 3);
   BOOST_CHECK_EQUAL(m1, T(2));
   m1 = 5;
-  op.substract_inplace_front(m2, 3);
+  op.subtract_inplace_front(m2, 3);
   BOOST_CHECK_EQUAL(m2, T(5004));
   m2 = 5007;
-  op.substract_inplace_back(6, m1);
+  op.subtract_inplace_back(6, m1);
   BOOST_CHECK_EQUAL(m1, T(1));
   m1 = 5;
-  op.substract_inplace_back(6, m2);
+  op.subtract_inplace_back(6, m2);
   BOOST_CHECK_EQUAL(m2, T(4));
   m2 = 4999;
 
