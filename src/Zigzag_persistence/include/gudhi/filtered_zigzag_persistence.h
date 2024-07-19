@@ -261,7 +261,7 @@ class Filtered_zigzag_persistence_with_storage
    * @return A vector of pairs of filtration values representing the persistence diagram.
    */
   std::vector<Filtration_value_interval> get_persistence_diagram(filtration_value shortestInterval = 0.,
-                                                                 bool includeInfiniteBars = false) {
+                                                                 bool includeInfiniteBars = true) {
     std::vector<Filtration_value_interval> diag = _get_persistence_diagram(shortestInterval);
 
     if (includeInfiniteBars) {

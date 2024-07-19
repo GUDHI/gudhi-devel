@@ -446,7 +446,7 @@ class Zigzag_persistence
 
  private:
   Matrix_type matrix_;           /**< Matrix storing a base of the current chain complex. */
-  birth_dictionary births_;     /**< Map face index in F to corresponding birth. */
+  birth_dictionary births_;      /**< Map face index in F to corresponding birth. */
   Birth_ordering birthOrdering_; /**< Maintains <b ordering of the births. */
   index numArrow_;               /**< Current arrow number. */
   std::function<void(dimension_type, index, index)> stream_interval_; /**< Callback method for closed pairs. */
