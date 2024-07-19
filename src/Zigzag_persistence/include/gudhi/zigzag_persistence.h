@@ -199,9 +199,10 @@ class Zigzag_persistence
    * as input: first the dimension of the cycle, then the birth index of the cycle and third the death index of the
    * cycle. An index always corresponds to the arrow number the event occurred (one call to @ref insert_face,
    * @ref remove_face or @ref apply_identity is equal to one arrow and increases the arrow count by one).
-   * @param preallocationSize Maximal value among the minimum numbers of faces known to be at the same time in each
-   * complex of the filtration. It will be used to optimize the memory allocation.
-   * Default value: 0.
+   * @param preallocationSize Space for @p preallocationSize faces are reserved in the underlying structure.
+   * Theoretically, any values works therefore, but for better performances, it is better to be as close as possible
+   * to the maximal value of the number of faces stored at the same time. At a same time are stored faces which were
+   * inserted before that time but not removed until that time. Default value: 0.
    */
   Zigzag_persistence(std::function<void(dimension_type, index, index)> stream_interval,
                      unsigned int preallocationSize = 0)
@@ -299,11 +300,7 @@ class Zigzag_persistence
       _apply_surjective_reflection_diamond(dim, chainsInF);
     } else {
       birthOrdering_.add_birth_forward(numArrow_);
-      if constexpr (erase_birth_history) {
-        births_.emplace_hint(births_.end(), matrix_.get_column_with_pivot(numArrow_), numArrow_);
-      } else {
-        births_[matrix_.get_column_with_pivot(numArrow_)] = numArrow_;
-      }
+      births_[matrix_.get_column_with_pivot(numArrow_)] = numArrow_;
     }
   }
 

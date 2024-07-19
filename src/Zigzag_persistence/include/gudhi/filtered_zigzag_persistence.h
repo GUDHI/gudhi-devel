@@ -352,18 +352,21 @@ class Filtered_zigzag_persistence {
    * Has to take three arguments as input: first the dimension of the cycle, then the birth value of the cycle
    * and third the death value of the cycle. The values corresponds to the filtration values which were given at
    * insertions or removals.
-   * @param preallocationSize Minimum number of faces that will be in a complex at some point in the filtration.
-   * If the maximal number of faces is known in advance, the memory allocation can be better optimized.
-   * Default value: 0.
+   * @param preallocationSize Space for @p preallocationSize faces are reserved in the underlying structure.
+   * Theoretically, any values works therefore, but for better performances, it is better to be as close as possible
+   * to the maximal value of the number of faces stored at the same time. At a same time are stored faces which were
+   * inserted before that time but not removed until that time. Default value: 0.
    * @tparam F Type of callback method.
    */
-  template<typename F>
+  template <typename F>
   Filtered_zigzag_persistence(F&& stream_interval, unsigned int preallocationSize = 0)
       : handleToKey_(preallocationSize),
         numArrow_(-1),
         keyToFiltrationValue_(preallocationSize),
         pers_(
-            [&,stream_interval](dimension_type dim, internal_key birth, internal_key death) {
+            [&, stream_interval = std::forward<F>(stream_interval)](dimension_type dim,
+                                                                    internal_key birth,
+                                                                    internal_key death) {
               auto itB = keyToFiltrationValue_.find(birth);
               auto itD = keyToFiltrationValue_.find(death);
               if (itB->second != itD->second) stream_interval(dim, itB->second, itD->second);
