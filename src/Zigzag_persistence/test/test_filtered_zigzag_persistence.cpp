@@ -73,9 +73,8 @@ void test_indices(ZP& zp, std::vector<typename ZP::Index_interval>& indices,
     BOOST_CHECK_EQUAL(interval.dim, it->dim);
     BOOST_CHECK_EQUAL(interval.birth, it->birth);
     BOOST_CHECK_EQUAL(interval.death, it->death);
-    auto p = zp.map_index_to_filtration_value(interval.birth, interval.death);
-    BOOST_CHECK_EQUAL(p.first, indexToFil[interval.birth]);
-    BOOST_CHECK_EQUAL(p.second, indexToFil[interval.death]);
+    BOOST_CHECK_EQUAL(zp.get_filtration_value_from_index(interval.birth), indexToFil[interval.birth]);
+    BOOST_CHECK_EQUAL(zp.get_filtration_value_from_index(interval.death), indexToFil[interval.death]);
     ++it;
   }
   BOOST_CHECK(it == indices.end());

@@ -141,11 +141,7 @@ class Filtered_zigzag_persistence_with_storage
       return numArrow_;
     }
 
-    if (filtrationValue != previousFiltrationValue_)  // check whether the filt value has changed
-    {  // consecutive pairs (i,f), (j,f') mean faces of index k in [i,j-1] have
-      previousFiltrationValue_ = filtrationValue;  // filtration value f
-      filtrationValues_.emplace_back(numArrow_, previousFiltrationValue_);
-    }
+    _store_filtration_value(filtrationValue);
 
     [[maybe_unused]] auto res = handleToKey_.try_emplace(faceID, numArrow_);
 
@@ -183,11 +179,7 @@ class Filtered_zigzag_persistence_with_storage
     auto it = handleToKey_.find(faceID);
     GUDHI_CHECK(it != handleToKey_.end(), "Zigzag_persistence::remove_face - face not in the complex");
 
-    if (filtrationValue != previousFiltrationValue_)  // check whether the filt value has changed
-    {  // consecutive pairs (i,f), (j,f') mean faces of index k in [i,j-1] have
-      previousFiltrationValue_ = filtrationValue;  // filtration value f
-      filtrationValues_.emplace_back(numArrow_, previousFiltrationValue_);
-    }
+    _store_filtration_value(filtrationValue);
 
     pers_.remove_face(it->second, dimension);
     handleToKey_.erase(it);
@@ -217,47 +209,30 @@ class Filtered_zigzag_persistence_with_storage
   const std::vector<Index_interval>& get_index_persistence_diagram() const { return persistenceDiagram_; }
 
   /**
-   * @brief Returns the filtration values \f$[f(b),f(d)]\f$ associated to the indices \f$[b,d]\f$ which are retrieved
+   * @brief Returns the filtration value \f$f(idx)\f$ associated to the index \f$idx\f$ returned
    * by @ref get_index_persistence_diagram.
-   *
-   * @param birthKey Birth index
-   * @param deathKey Death index
-   * @return A pair of filtration values associated to the given indices.
+   * 
+   * @param idx Birth or death index
+   * @return filtration_value Filtration value associated to @p idx.
    */
-  std::pair<filtration_value, filtration_value> map_index_to_filtration_value(internal_key birthKey,
-                                                                              internal_key deathKey) const {
-    // filtration_values_ must be sorted by increasing keys.
-    auto itBirth =  // lower_bound(x) returns leftmost y s.t. x <= y
-        std::lower_bound(
-            filtrationValues_.begin(), filtrationValues_.end(),
-            birthKey,
-            [](std::pair<internal_key, filtration_value> p, internal_key k) {
-              return p.first < k;
-            });
-    if (itBirth == filtrationValues_.end() || itBirth->first > birthKey) {
+  filtration_value get_filtration_value_from_index(internal_key idx) {
+    // lower_bound(x) returns leftmost y s.t. x <= y
+    auto itBirth =
+        std::lower_bound(filtrationValues_.begin(),
+                         filtrationValues_.end(),
+                         idx,
+                         [](std::pair<internal_key, filtration_value> p, internal_key k) { return p.first < k; });
+    if (itBirth == filtrationValues_.end() || itBirth->first > idx) {
       --itBirth;
     }
-    // it points to the rightmost z such that z <= x
-
-    auto itDeath =  //
-        std::lower_bound(
-            filtrationValues_.begin(), filtrationValues_.end(),
-            deathKey,
-            [](std::pair<internal_key, filtration_value> p, internal_key k) {
-              return p.first < k;
-            });
-    if (itDeath == filtrationValues_.end() || itDeath->first > deathKey) {
-      --itDeath;
-    }
-
-    return std::make_pair(itBirth->second, itDeath->second);
-  }
+    return itBirth->second;
+  };
 
   /**
    * @brief Returns the current persistence diagram.
    *
    * @param shortestInterval Threshold. Every bar shorter than the given value will be ignored. Default value: 0.
-   * @param includeInfiniteBars If set to true, infinite bars are included in the diagram. Default value: false.
+   * @param includeInfiniteBars If set to true, infinite bars are included in the diagram. Default value: true.
    * @return A vector of pairs of filtration values representing the persistence diagram.
    */
   std::vector<Filtration_value_interval> get_persistence_diagram(filtration_value shortestInterval = 0.,
@@ -272,11 +247,11 @@ class Filtered_zigzag_persistence_with_storage
   }
 
  private:
-  std::unordered_map<face_key, internal_key> handleToKey_; /**< Map from input keys to internal keys. */
-  dimension_type dimMax_;                                  /**< Maximal dimension of a bar to record. */
-  std::vector<Index_interval> persistenceDiagram_;         /**< Stores current closed persistence intervals. */
-  internal_key numArrow_;                                  /**< Current arrow number. */
-  filtration_value previousFiltrationValue_;               /**< Filtration value of the previous arrow. */
+  std::unordered_map<face_key, internal_key> handleToKey_;  /**< Map from input keys to internal keys. */
+  dimension_type dimMax_;                                   /**< Maximal dimension of a bar to record. */
+  std::vector<Index_interval> persistenceDiagram_;          /**< Stores current closed persistence intervals. */
+  internal_key numArrow_;                                   /**< Current arrow number. */
+  filtration_value previousFiltrationValue_;                /**< Filtration value of the previous arrow. */
   /**
    * @brief filtrationValues_ stores consecutive pairs (i,f) , (j,f') with f != f',
    * meaning that all inserted faces with key in [i;j-1] have filtration value f,
@@ -284,6 +259,21 @@ class Filtered_zigzag_persistence_with_storage
    */
   std::vector<std::pair<internal_key, filtration_value> > filtrationValues_;
   Zigzag_persistence<FilteredZigzagOptions, false> pers_; /**< Class computing the pairs. */
+
+  /**
+   * @brief Stores the filtration value if the value is new. Assumes that the given value is either greater (or equal)
+   * than previous ones or smaller (or equal) than previous ones.
+   * 
+   * @param filtrationValue Filtration value to store.
+   */
+  void _store_filtration_value(filtration_value filtrationValue) {
+    if (filtrationValue != previousFiltrationValue_)  // check whether the filt value has changed
+    {
+      // consecutive pairs (i,f), (j,f') mean faces of index k in [i,j-1] have filtration value f
+      previousFiltrationValue_ = filtrationValue;
+      filtrationValues_.emplace_back(numArrow_, previousFiltrationValue_);
+    }
+  }
 
   /**
    * @brief Returns the current persistence diagram without infinite bars.
@@ -301,8 +291,8 @@ class Filtered_zigzag_persistence_with_storage
     //                  });
 
     for (auto bar : persistenceDiagram_) {
-      filtration_value birth, death;
-      std::tie(birth, death) = map_index_to_filtration_value(bar.birth, bar.death);
+      filtration_value birth = get_filtration_value_from_index(bar.birth);
+      filtration_value death = get_filtration_value_from_index(bar.death);
       if (birth > death) {
         std::swap(birth, death);
       }
@@ -321,23 +311,9 @@ class Filtered_zigzag_persistence_with_storage
    * @param diag Reference to vector where to store the infinite bars.
    */
   void _retrieve_infinite_bars(std::vector<Filtration_value_interval>& diag) {
-    auto birth = [this](internal_key birthKey) {
-      auto itBirth =  // lower_bound(x) returns leftmost y s.t. x <= y
-          std::lower_bound(
-              filtrationValues_.begin(), filtrationValues_.end(),
-              birthKey,
-              [](std::pair<internal_key, filtration_value> p, internal_key k) {
-              return p.first < k;
-            });
-      if (itBirth == filtrationValues_.end() || itBirth->first > birthKey) {
-        --itBirth;
-      }
-      return itBirth->second;
-    };
-
     auto stream_infinite_interval = [&](dimension_type dim, internal_key birthIndex) {
       if (dimMax_ == -1 || (dimMax_ != -1 && dim < dimMax_))
-        diag.emplace_back(birth(birthIndex), Filtration_value_interval::inf, dim);
+        diag.emplace_back(get_filtration_value_from_index(birthIndex), Filtration_value_interval::inf, dim);
     };
 
     pers_.get_current_infinite_intervals(stream_infinite_interval);
@@ -359,11 +335,11 @@ class Filtered_zigzag_persistence_with_storage
 template <class FilteredZigzagOptions = Default_filtered_zigzag_options>
 class Filtered_zigzag_persistence {
  public:
-  using Options = FilteredZigzagOptions;                       /**< Zigzag options. */
-  using internal_key = typename Options::internal_key;         /**< Key and index type, has to be signed. */
-  using face_key = typename Options::face_key;                 /**< Face ID type from external inputs. */
-  using filtration_value = typename Options::filtration_value; /**< Type for filtration values. */
-  using dimension_type = typename Options::dimension_type;     /**< Type for dimension values. */
+  using Options = FilteredZigzagOptions;                        /**< Zigzag options. */
+  using internal_key = typename Options::internal_key;          /**< Key and index type, has to be signed. */
+  using face_key = typename Options::face_key;                  /**< Face ID type from external inputs. */
+  using filtration_value = typename Options::filtration_value;  /**< Type for filtration values. */
+  using dimension_type = typename Options::dimension_type;      /**< Type for dimension values. */
 
   /**
    * @brief Constructor.
@@ -479,10 +455,10 @@ class Filtered_zigzag_persistence {
   template <typename key_type, typename value_type>
   using dictionary = std::unordered_map<key_type, value_type>;  // TODO: benchmark with other map types
 
-  dictionary<face_key, internal_key> handleToKey_;                   /**< Map from input keys to internal keys. */
-  internal_key numArrow_;                                             /**< Current arrow number. */
-  dictionary<internal_key, filtration_value> keyToFiltrationValue_;  /**< Face Key to filtration value map. */
-  Zigzag_persistence<FilteredZigzagOptions, true> pers_;              /**< Class computing the pairs. */
+  dictionary<face_key, internal_key> handleToKey_;                  /**< Map from input keys to internal keys. */
+  internal_key numArrow_;                                           /**< Current arrow number. */
+  dictionary<internal_key, filtration_value> keyToFiltrationValue_; /**< Face Key to filtration value map. */
+  Zigzag_persistence<FilteredZigzagOptions, true> pers_;            /**< Class computing the pairs. */
 };  // end class Filtered_zigzag_persistence
 
 }  // namespace zigzag_persistence
