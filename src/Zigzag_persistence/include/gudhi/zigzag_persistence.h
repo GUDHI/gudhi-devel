@@ -84,6 +84,64 @@ struct Default_zigzag_options {
  * a pair is closed. To retrieve the open pairs (corresponding to infinite bars),
  * use @ref get_current_infinite_intervals.
  *
+ * ### Minimalistic example of usage
+ *
+ * #### Includes
+ * ```
+ * #include <gudhi/zigzag_persistence.h>
+ * ```
+ *
+ * #### Useful aliases
+ * ```
+ * using Zigzag_persistence = Gudhi::zigzag_persistence::Zigzag_persistence<>;
+ *
+ * using dimension_type = Zigzag_persistence::dimension_type;
+ * using index = Zigzag_persistence::index;
+ * ```
+ *
+ * #### Construction with default values
+ * ```
+ * //Zigzag_persistence(callback) with for example callback method as a anonymous lambda
+ * Zigzag_persistence zp([](dimension_type dim, index birth, index death) {
+ *   std::cout << "[" << dim << "] " << birth << " - " << death << std::endl;
+ * });
+ * ```
+ *
+ * #### Input of the zigzag sequence/filtration
+ * ```
+ * // In all cases, it is important that the operations of insertions and removals are made **in the same order**
+ * // as in the zigzag filtration ones wants to compute the barcode from.
+ *
+ * // A face has to be identified in the boundaries by the operation number the face was inserted with in the sequence.
+ *
+ * //inserts vertex 0 -> birth at 0 of 0-cycle
+ * zp.insert_face({}, 0);
+ * //inserts vertex 1 -> birth at 1 of 0-cycle
+ * zp.insert_face({}, 0);
+ * //inserts edge 2 = (0,1) -> death at 2 -> outputs (0, 1, 2)
+ * zp.insert_face({0, 1}, 1);
+ * //inserts vertex 3 -> birth at 3 of 0-cycle
+ * zp.insert_face({}, 0);
+ * //inserts edge 4 = (0,3) -> death at 4 -> outputs (0, 3, 4)
+ * zp.insert_face({0, 3}, 1);
+ * //inserts edge 5 = (1,3) -> birth at 5 of 1-cycle
+ * zp.insert_face({1, 3}, 1);
+ * //removes edge 4 -> death at 6 -> outputs (1, 5, 6)
+ * zp.remove_face(4);
+ * //removes edge 2 -> birth at 7 of 0-cycle
+ * zp.remove_face(2);
+ * ```
+ *
+ * #### Finalizations
+ * ```
+ * // Only the closed bars where output so far, so the open/infinite bars still need to be retrieved.
+ *
+ * //in this example, outputs (0, 0) and (0, 7)
+ * zp.get_current_infinite_intervals([](dimension_type dim, index birth){
+ *   std::cout << "[" << dim << "] " << birth << " - inf" << std::endl;
+ * });
+ * ```
+ *
  * @ingroup zigzag_persistence
  *
  * @tparam ZigzagOptions Structure following the @ref ZigzagOptions concept. Default value: @ref Default_zigzag_options.
@@ -199,10 +257,10 @@ class Zigzag_persistence
    * as input: first the dimension of the cycle, then the birth index of the cycle and third the death index of the
    * cycle. An index always corresponds to the arrow number the event occurred (one call to @ref insert_face,
    * @ref remove_face or @ref apply_identity is equal to one arrow and increases the arrow count by one).
-   * @param preallocationSize Space for @p preallocationSize faces are reserved in the underlying structure.
-   * Theoretically, any values works therefore, but for better performances, it is better to be as close as possible
-   * to the maximal value of the number of faces stored at the same time. At a same time are stored faces which were
-   * inserted before that time but not removed until that time. Default value: 0.
+   * @param preallocationSize Reserves space for @p preallocationSize faces in the internal data structure.
+   * This is optional and just helps skip a few reallocations. The optimal value (no reallocation, no wasted space) is
+   * the number of faces in the biggest complex of the filtration.
+   * Default value: 0.
    */
   Zigzag_persistence(std::function<void(dimension_type, index, index)> stream_interval,
                      unsigned int preallocationSize = 0)
@@ -393,7 +451,6 @@ class Zigzag_persistence
    * @brief Removes the given face by pushing up the matrix the corresponding column and erasing it.
    *
    * @param faceID Internal ID of the face to remove.
-   * @param dim Dimension of the face to remove.
    */
   void _process_backward_arrow(index faceID) {
     // column whose key is the one of the removed face
@@ -427,14 +484,7 @@ class Zigzag_persistence
     } else {  // in H    -> paired with c_g, that now belongs to F now
       // maintain the <=b order
       birthOrdering_.add_birth_backward(numArrow_);
-      if constexpr (erase_birth_history) {
-        births_.try_emplace(col.get_paired_chain_index(), numArrow_);
-      } else {
-        auto res = births_.try_emplace(col.get_paired_chain_index(), numArrow_);
-        if (!res.second) {
-          res.first->second = numArrow_;
-        }
-      }
+      births_[col.get_paired_chain_index()] = numArrow_;
     }
 
     // cannot be in G as the removed face is maximal

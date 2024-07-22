@@ -130,7 +130,10 @@
  * @example example_one_skeleton_rips_from_points.cpp
  * @example example_rips_complex_from_off_file.cpp
  * \section Zigzag_persistence_example_section Zigzag_persistence
- * @example example_simple_zigzag_filtration.cpp
+ * @example example_usage_zigzag_persistence.cpp
+ * @example example_usage_filtered_zigzag_persistence.cpp
+ * @example example_usage_filtered_zigzag_persistence_with_storage.cpp
+ * @example example_zigzag_filtration_as_input_loop.cpp
  * @example example_zzfiltration_from_file.cpp
  * \section Persistence_matrix_example_section Persistence_matrix
  * @example representative_cycles_from_matrix.cpp

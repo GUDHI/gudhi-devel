@@ -64,6 +64,62 @@ struct Default_filtered_zigzag_options {
  * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
  * the filtration. To retrieve the current persistence diagram at any moment of the filtration,
  * use @ref get_persistence_diagram or @ref get_index_persistence_diagram.
+ *
+ * ### Minimalistic example of usage
+ *
+ * #### Includes
+ * ```
+ * #include <gudhi/filtered_zigzag_persistence.h>
+ * ```
+ *
+ * #### Useful aliases
+ * ```
+ * using Filtered_zigzag_persistence_with_storage = Gudhi::zigzag_persistence::Filtered_zigzag_persistence_with_storage<>;
+ * ```
+ *
+ * #### Construction with default values
+ * ```
+ * Filtered_zigzag_persistence_with_storage zp;
+ * ```
+ *
+ * #### Input of the zigzag sequence/filtration
+ * ```
+ * // In all cases, it is important that the operations of insertions and removals are made **in the same order**
+ * // as in the zigzag filtration ones wants to compute the barcode from.
+ *
+ * // A face can be identified in the boundaries by any given numerical label, it is just important that the given
+ * // filtration values are monotonous (ie., either only increasing or only decreasing).
+ *
+ * //inserts vertex 2 at filtration value 0.1 -> birth at 0.1 of 0-cycle
+ * zp.insert_face(2, {}, 0, 0.1);
+ * //inserts vertex 4 at filtration value 0.1 -> birth at 0.1 of 0-cycle
+ * zp.insert_face(4, {}, 0, 0.1);
+ * //inserts edge 5 = (2,4) at filtration value 0.3 -> death at 0.3 -> outputs/stores (0, 0.1, 0.3)
+ * zp.insert_face(5, {2, 4}, 1, 0.3);
+ * //inserts vertex 3 at filtration value 0.4 -> birth at 0.4 of 0-cycle
+ * zp.insert_face(3, {}, 0, 0.4);
+ * //inserts edge 6 = (2,3) at filtration value 0.4 -> death at 0.4 of the cycle born at 0.4 -> outputs/stores nothing
+ * zp.insert_face(6, {2, 3}, 1, 0.4);
+ * //inserts edge 9 = (3,4) at filtration value 1.2 -> birth at 1.2 of 1-cycle
+ * zp.insert_face(9, {4, 3}, 1, 1.2);
+ * //removes edge 6 at filtration value 1.5 -> death at 1.5 -> outputs/stores (1, 1.2, 1.5)
+ * zp.remove_face(6, 1.5);
+ * //removes edge 5 at filtration value 2.0 -> birth at 2.0 of 0-cycle
+ * zp.remove_face(5, 2.0);
+ * ```
+ *
+ * #### Finalizations
+ * ```
+ * // The bars are stored within the class and where not output at all for now.
+ *
+ * //get all bars in a vector
+ * auto barcode = zp.get_persistence_diagram();
+ *
+ * //do something with the vector, e.g., stream out content:
+ * for (auto& bar : barcode) {
+ *   std::cout << bar << std::endl;
+ * }
+ * ```
  * 
  * @tparam FilteredZigzagOptions Structure following the @ref FilteredZigzagOptions concept.
  * Default value: @ref Default_filtered_zigzag_options.
@@ -94,10 +150,10 @@ class Filtered_zigzag_persistence_with_storage
    * the filtration. To retrieve the current persistence diagram at any moment of the filtration,
    * use @ref get_persistence_diagram or @ref get_index_persistence_diagram.
    *
-   * @param preallocationSize Space for @p preallocationSize faces are reserved in the underlying structure.
-   * Theoretically, any values works therefore, but for better performances, it is better to be as close as possible
-   * to the maximal value of the number of faces stored at the same time. At a same time are stored faces which were
-   * inserted before that time but not removed until that time. Default value: 0.
+   * @param preallocationSize Reserves space for @p preallocationSize faces in the internal data structure.
+   * This is optional and just helps skip a few reallocations. The optimal value (no reallocation, no wasted space) is
+   * the number of faces in the biggest complex of the filtration.
+   * Default value: 0.
    * @param ignoreCyclesAboveDim Ignores cycles in dimension larger or equal in the final diagram.
    * If -1, no cycles are ignored. Default value: -1.
    */
@@ -229,7 +285,7 @@ class Filtered_zigzag_persistence_with_storage
   /**
    * @brief Returns the current persistence diagram.
    *
-   * @param shortestInterval Threshold. Every bar shorter than the given value will be ignored. Default value: 0.
+   * @param shortestInterval Threshold. Every bar shorter than the given value will not be returned. Default value: 0.
    * @param includeInfiniteBars If set to true, infinite bars are included in the diagram. Default value: true.
    * @return A vector of pairs of filtration values representing the persistence diagram.
    */
@@ -326,6 +382,64 @@ class Filtered_zigzag_persistence_with_storage
  * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
  * the filtration. The bars of the diagram are retrieved via the given callback method every time
  * a pair with non-zero length is closed. To retrieve the open/infinite bars, use @ref get_current_infinite_intervals.
+ *
+ * ### Minimalistic example of usage
+ *
+ * #### Includes
+ * ```
+ * #include <gudhi/filtered_zigzag_persistence.h>
+ * ```
+ *
+ * #### Useful aliases
+ * ```
+ * using Filtered_zigzag_persistence = Gudhi::zigzag_persistence::Filtered_zigzag_persistence<>;
+ * using dimension_type = Filtered_zigzag_persistence::dimension_type;
+ * using filtration_value_type = Filtered_zigzag_persistence::filtration_value;
+ * ```
+ *
+ * #### Construction with default values
+ * ```
+ * //Filtered_zigzag_persistence(callback) with for example callback method as a anonymous lambda
+ * Filtered_zigzag_persistence zp([](dimension_type dim, filtration_value_type birth, filtration_value_type death) {
+ *   std::cout << "[" << dim << "] " << birth << " - " << death << std::endl;
+ * });
+ * ```
+ *
+ * #### Input of the zigzag sequence/filtration
+ * ```
+ * // In all cases, it is important that the operations of insertions and removals are made **in the same order**
+ * // as in the zigzag filtration ones wants to compute the barcode from.
+ *
+ * // A face can be identified in the boundaries by any given numerical label, it is just important that the given
+ * // filtration values are monotonous (ie., either only increasing or only decreasing).
+ *
+ * //inserts vertex 2 at filtration value 0.1 -> birth at 0.1 of 0-cycle
+ * zp.insert_face(2, {}, 0, 0.1);
+ * //inserts vertex 4 at filtration value 0.1 -> birth at 0.1 of 0-cycle
+ * zp.insert_face(4, {}, 0, 0.1);
+ * //inserts edge 5 = (2,4) at filtration value 0.3 -> death at 0.3 -> outputs/stores (0, 0.1, 0.3)
+ * zp.insert_face(5, {2, 4}, 1, 0.3);
+ * //inserts vertex 3 at filtration value 0.4 -> birth at 0.4 of 0-cycle
+ * zp.insert_face(3, {}, 0, 0.4);
+ * //inserts edge 6 = (2,3) at filtration value 0.4 -> death at 0.4 of the cycle born at 0.4 -> outputs/stores nothing
+ * zp.insert_face(6, {2, 3}, 1, 0.4);
+ * //inserts edge 9 = (3,4) at filtration value 1.2 -> birth at 1.2 of 1-cycle
+ * zp.insert_face(9, {4, 3}, 1, 1.2);
+ * //removes edge 6 at filtration value 1.5 -> death at 1.5 -> outputs/stores (1, 1.2, 1.5)
+ * zp.remove_face(6, 1.5);
+ * //removes edge 5 at filtration value 2.0 -> birth at 2.0 of 0-cycle
+ * zp.remove_face(5, 2.0);
+ * ```
+ *
+ * #### Finalizations
+ * ```
+ * // Only the closed bars where output so far, so the open/infinite bars still need to be retrieved.
+ *
+ * //in this example, outputs (0, 0.1) and (0, 2.0)
+ * zp.get_current_infinite_intervals([](dimension_type dim, filtration_value_type birth){
+ *   std::cout << "[" << dim << "] " << birth << " - inf" << std::endl;
+ * });
+ * ```
  * 
  * @tparam FilteredZigzagOptions Structure following the @ref FilteredZigzagOptions concept.
  * Default value: @ref Default_filtered_zigzag_options.
@@ -349,11 +463,11 @@ class Filtered_zigzag_persistence {
    * @param stream_interval Callback method to process the birth and death values of a persistence bar.
    * Has to take three arguments as input: first the dimension of the cycle, then the birth value of the cycle
    * and third the death value of the cycle. The values corresponds to the filtration values which were given at
-   * insertions or removals.
-   * @param preallocationSize Space for @p preallocationSize faces are reserved in the underlying structure.
-   * Theoretically, any values works therefore, but for better performances, it is better to be as close as possible
-   * to the maximal value of the number of faces stored at the same time. At a same time are stored faces which were
-   * inserted before that time but not removed until that time. Default value: 0.
+   * insertions or removals. Note that bars of length 0 will not be token into account.
+   * @param preallocationSize Reserves space for @p preallocationSize faces in the internal data structure.
+   * This is optional and just helps skip a few reallocations. The optimal value (no reallocation, no wasted space) is
+   * the number of faces in the biggest complex of the filtration.
+   * Default value: 0.
    * @tparam F Type of callback method.
    */
   template <typename F>
@@ -413,7 +527,7 @@ class Filtered_zigzag_persistence {
 
   /**
    * @brief Updates the zigzag persistence diagram after the removal of the given face.
-   *
+   *preallocationSize
    * @param faceID ID representing the face to remove. Should be the same than the one used to insert it.
    * @param filtrationValue Filtration value associated to the removal.
    * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
