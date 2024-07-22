@@ -134,12 +134,11 @@ class Filtered_zigzag_persistence_with_storage
                            dimension_type dimension,
                            filtration_value filtrationValue)
   {
-    ++numArrow_;
-
     if (dimMax_ != -1 && dimension > dimMax_) {
-      pers_.apply_identity();
-      return numArrow_;
+      return apply_identity();
     }
+
+    ++numArrow_;
 
     _store_filtration_value(filtrationValue);
 
@@ -159,29 +158,28 @@ class Filtered_zigzag_persistence_with_storage
   }
 
   /**
-   * @brief Updates the zigzag persistence diagram after the removal of the given face.
+   * @brief Updates the zigzag persistence diagram after the removal of the given face if the face was contained
+   * in the current complex (note that it will not contain faces of dimension > ignoreCyclesAboveDim if the latter was
+   * non negative at construction of the class). Otherwise, just increases the operation count by one.
    *
    * @param faceID ID representing the face to remove. Should be the same than the one used to insert it.
-   * @param dimension Dimension of the face.
    * @param filtrationValue Filtration value associated to the removal.
    * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
    * values, ie. the changes are monotonous.
    * @return Number of the operation.
    */
-  internal_key remove_face(face_key faceID, dimension_type dimension, filtration_value filtrationValue) {
-    ++numArrow_;
+  internal_key remove_face(face_key faceID, filtration_value filtrationValue) {
+    auto it = handleToKey_.find(faceID);
 
-    if (dimMax_ != -1 && dimension > dimMax_) {
-      pers_.apply_identity();
-      return numArrow_;
+    if (it == handleToKey_.end()) {
+      return apply_identity();
     }
 
-    auto it = handleToKey_.find(faceID);
-    GUDHI_CHECK(it != handleToKey_.end(), "Zigzag_persistence::remove_face - face not in the complex");
+    ++numArrow_;
 
     _store_filtration_value(filtrationValue);
 
-    pers_.remove_face(it->second, dimension);
+    pers_.remove_face(it->second);
     handleToKey_.erase(it);
 
     return numArrow_;
@@ -389,10 +387,11 @@ class Filtered_zigzag_persistence {
    * values, ie. the changes are monotonous.
    */
   template <class BoundaryRange = std::initializer_list<face_key> >
-  void insert_face(face_key faceID,
-                   const BoundaryRange& boundary,
-                   dimension_type dimension,
-                   filtration_value filtrationValue) {
+  internal_key insert_face(face_key faceID,
+                           const BoundaryRange& boundary,
+                           dimension_type dimension,
+                           filtration_value filtrationValue)
+  {
     ++numArrow_;
 
     [[maybe_unused]] auto res = handleToKey_.try_emplace(faceID, numArrow_);
@@ -408,18 +407,19 @@ class Filtered_zigzag_persistence {
     }
 
     pers_.insert_face(translatedBoundary, dimension);
+
+    return numArrow_;
   }
 
   /**
    * @brief Updates the zigzag persistence diagram after the removal of the given face.
    *
    * @param faceID ID representing the face to remove. Should be the same than the one used to insert it.
-   * @param dimension Dimension of the face.
    * @param filtrationValue Filtration value associated to the removal.
    * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
    * values, ie. the changes are monotonous.
    */
-  void remove_face(face_key faceID, dimension_type dimension, filtration_value filtrationValue) {
+  internal_key remove_face(face_key faceID, filtration_value filtrationValue) {
     ++numArrow_;
 
     auto it = handleToKey_.find(faceID);
@@ -427,8 +427,10 @@ class Filtered_zigzag_persistence {
 
     keyToFiltrationValue_.try_emplace(numArrow_, filtrationValue);
 
-    pers_.remove_face(it->second, dimension);
+    pers_.remove_face(it->second);
     handleToKey_.erase(it);
+
+    return numArrow_;
   }
 
   /**
@@ -436,9 +438,10 @@ class Filtered_zigzag_persistence {
    * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposely skipped
    * to avoid useless computation.
    */
-  void apply_identity() {
+  internal_key apply_identity() {
     ++numArrow_;
     pers_.apply_identity();
+    return numArrow_;
   }
 
   /**

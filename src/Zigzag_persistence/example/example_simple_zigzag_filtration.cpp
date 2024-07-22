@@ -128,8 +128,7 @@ int main(int argc, char* const argv[]) {
       zp.insert_face(i, simplices[i], dim, fils[i]);
     } else {
       auto id = simplices[i][0];
-      int dim = simplices[id].size() == 0 ? 0 : simplices[id].size() - 1;
-      zp.remove_face(id, dim, fils[i]);
+      zp.remove_face(id, fils[i]);
     }
   }
 

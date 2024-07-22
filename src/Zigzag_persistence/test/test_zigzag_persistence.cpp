@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_single) {
 
   for (unsigned int i = 14; i < 16; ++i) {
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1);
+    zp.remove_face(id);
   }
 
   for (unsigned int i = 16; i < 24; ++i) {
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_single) {
 
   for (unsigned int i = 24; i < 27; ++i) {
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1);
+    zp.remove_face(id);
   }
 
   realIndices.emplace_back(1, 24, 25);
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_single) {
   realIndices.emplace_back(2, 23, 27);
 
   auto id = simplices[28][0];
-  zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1);
+  zp.remove_face(id);
 
   realIndices.emplace_back(0, 0, -1);
   realIndices.emplace_back(0, 26, -1);
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_single_max1) {
 
   for (unsigned int i = 14; i < 16; ++i) {
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1);
+    zp.remove_face(id);
   }
 
   for (unsigned int i = 16; i < 24; ++i) {
@@ -186,12 +186,12 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_single_max1) {
 
   for (unsigned int i = 24; i < 27; ++i) {
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1);
+    zp.remove_face(id);
   }
 
   zp.insert_face(simplices[27], simplices[27].size() == 0 ? 0 : simplices[27].size() - 1);
   auto id = simplices[28][0];
-  zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1);
+  zp.remove_face(id);
 
   realIndices.emplace_back(0, 0, -1);
   realIndices.emplace_back(0, 26, -1);

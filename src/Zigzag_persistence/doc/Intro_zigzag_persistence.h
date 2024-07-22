@@ -126,9 +126,9 @@ namespace zigzag_persistence {
  * //inserts edge 5 = (1,3) -> birth at 5 of 1-cycle
  * zp.insert_face({1, 3}, 1);
  * //removes edge 4 -> death at 6 -> outputs (1, 5, 6)
- * zp.remove_face(4, 1);
+ * zp.remove_face(4);
  * //removes edge 2 -> birth at 7 of 0-cycle
- * zp.remove_face(2, 1);
+ * zp.remove_face(2);
  * ```
  *
  * #### Filtered_zigzag_persistence and Filtered_zigzag_persistence_with_storage
@@ -150,9 +150,9 @@ namespace zigzag_persistence {
  * //inserts edge 9 = (3,4) at filtration value 1.2 -> birth at 1.2 of 1-cycle
  * zp.insert_face(9, {4, 3}, 1, 1.2);
  * //removes edge 6 at filtration value 1.5 -> death at 1.5 -> outputs/stores (1, 1.2, 1.5)
- * zp.remove_face(6, 1, 1.5);
+ * zp.remove_face(6, 1.5);
  * //removes edge 5 at filtration value 2.0 -> birth at 2.0 of 0-cycle
- * zp.remove_face(5, 1, 2.0);
+ * zp.remove_face(5, 2.0);
  * ```
  *
  * ### Finalizations

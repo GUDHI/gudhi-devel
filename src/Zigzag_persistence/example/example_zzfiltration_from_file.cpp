@@ -103,7 +103,7 @@ int main(int argc, char* const argv[]) {
         zp.insert_face(id, data, dim, timestamp);
       } else if (type == REMOVAL) {
         ++id;
-        zp.remove_face(data[0], data[1], timestamp);
+        zp.remove_face(data[0], timestamp);
       }
     }
 

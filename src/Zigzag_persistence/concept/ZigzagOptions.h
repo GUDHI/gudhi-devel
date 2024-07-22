@@ -26,7 +26,7 @@ namespace zigzag_persistence {
  */
 struct FilteredZigzagOptions {
   /**
-   * @brief Type for the face IDs used internally and other indexations. It must be signed.
+   * @brief Numerical type for the face IDs used internally and other indexations. It must be signed.
    */
   using internal_key = unspecified;
 
@@ -59,7 +59,7 @@ struct FilteredZigzagOptions {
  */
 struct ZigzagOptions {
   /**
-   * @brief Type for the face IDs used internally and other indexations. It must be signed.
+   * @brief Numerical type for the face IDs used internally and other indexations. It must be signed.
    */
   using internal_key = unspecified;
 

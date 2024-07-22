@@ -239,12 +239,11 @@ class Zigzag_persistence
    * @brief Updates the zigzag persistence diagram after the removal of the given face.
    *
    * @param arrowNumber Arrow number of when the face to remove was inserted for the last time.
-   * @param dimension Dimension of the face to remove.
    * @return Number of the operation.
    */
-  index remove_face(index arrowNumber, dimension_type dimension) {
+  index remove_face(index arrowNumber) {
     ++numArrow_;
-    _process_backward_arrow(arrowNumber, dimension);
+    _process_backward_arrow(arrowNumber);
     return numArrow_;
   }
 
@@ -294,7 +293,7 @@ class Zigzag_persistence
    */
   template <class BoundaryRange>
   void _process_forward_arrow(const BoundaryRange& boundary, dimension_type dim) {
-    std::vector<matrix_index> chainsInF = matrix_.insert_boundary(numArrow_, boundary);
+    std::vector<matrix_index> chainsInF = matrix_.insert_boundary(numArrow_, boundary, dim);
 
     if (!chainsInF.empty()) {
       _apply_surjective_reflection_diamond(dim, chainsInF);
@@ -396,7 +395,7 @@ class Zigzag_persistence
    * @param faceID Internal ID of the face to remove.
    * @param dim Dimension of the face to remove.
    */
-  void _process_backward_arrow(index faceID, dimension_type dim) {
+  void _process_backward_arrow(index faceID) {
     // column whose key is the one of the removed face
     matrix_index currCol = matrix_.get_column_with_pivot(faceID);
 
@@ -417,9 +416,10 @@ class Zigzag_persistence
     }
 
     // curr_col points to the column to remove by restriction of K to K-{\sigma}
-    if (!matrix_.get_column(currCol).is_paired()) {  // in F
+    auto& col = matrix_.get_column(currCol);
+    if (!col.is_paired()) {  // in F
       auto it = births_.find(currCol);
-      stream_interval_(dim, it->second, numArrow_);
+      stream_interval_(col.get_dimension(), it->second, numArrow_);
       if constexpr (erase_birth_history) {
         birthOrdering_.remove_birth(it->second);
         births_.erase(it);
@@ -428,9 +428,9 @@ class Zigzag_persistence
       // maintain the <=b order
       birthOrdering_.add_birth_backward(numArrow_);
       if constexpr (erase_birth_history) {
-        births_.try_emplace(matrix_.get_column(currCol).get_paired_chain_index(), numArrow_);
+        births_.try_emplace(col.get_paired_chain_index(), numArrow_);
       } else {
-        auto res = births_.try_emplace(matrix_.get_column(currCol).get_paired_chain_index(), numArrow_);
+        auto res = births_.try_emplace(col.get_paired_chain_index(), numArrow_);
         if (!res.second) {
           res.first->second = numArrow_;
         }

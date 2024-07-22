@@ -160,7 +160,7 @@ void test_filtered_zigzag_with_storage() {
 
   for (unsigned int i = 14; i < 16; ++i) {
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
+    zp.remove_face(id, filValues[i]);
   }
 
   for (unsigned int i = 16; i < 24; ++i) {
@@ -179,7 +179,7 @@ void test_filtered_zigzag_with_storage() {
 
   for (unsigned int i = 24; i < 27; ++i) {
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
+    zp.remove_face(id, filValues[i]);
   }
 
   realIndices.emplace_back(24, 25, 1);
@@ -191,7 +191,7 @@ void test_filtered_zigzag_with_storage() {
   realBarcode.emplace_back(7, 9, 2);
 
   auto id = simplices[28][0];
-  zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[28]);
+  zp.remove_face(id, filValues[28]);
 
   realBarcode.emplace_back(0, Interval_filtration::inf, 0);
   realBarcode.emplace_back(9, Interval_filtration::inf, 0);
@@ -231,7 +231,7 @@ void test_filtered_zigzag_with_storage_max1() {
 
   for (unsigned int i = 14; i < 16; ++i) {
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
+    zp.remove_face(id, filValues[i]);
   }
 
   for (unsigned int i = 16; i < 24; ++i) {
@@ -243,12 +243,12 @@ void test_filtered_zigzag_with_storage_max1() {
 
   for (unsigned int i = 24; i < 27; ++i) {
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
+    zp.remove_face(id, filValues[i]);
   }
 
   zp.insert_face(27, simplices[27], simplices[27].size() == 0 ? 0 : simplices[27].size() - 1, filValues[27]);
   auto id = simplices[28][0];
-  zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[28]);
+  zp.remove_face(id, filValues[28]);
 
   realBarcode.emplace_back(0, Interval_filtration::inf, 0);
   realBarcode.emplace_back(9, Interval_filtration::inf, 0);
@@ -319,7 +319,7 @@ void test_filtered_zigzag() {
   for (unsigned int i = 14; i < 16; ++i) {
     interval = realBarcode[i];
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
+    zp.remove_face(id, filValues[i]);
   }
 
   for (unsigned int i = 16; i < 24; ++i) {
@@ -330,7 +330,7 @@ void test_filtered_zigzag() {
   for (unsigned int i = 24; i < 27; ++i) {
     interval = realBarcode[i];
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
+    zp.remove_face(id, filValues[i]);
   }
 
   interval = realBarcode[27];
@@ -338,9 +338,9 @@ void test_filtered_zigzag() {
 
   interval = realBarcode[28];
   auto id = simplices[28][0];
-  zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[28]);
+  zp.remove_face(id, filValues[28]);
 
-  //there is no real garantee on the order of the infinite bars
+  //there is no real guarantee on the order of the infinite bars
   std::vector<Interval> infiniteBars;
   zp.get_current_infinite_intervals([&](dimension_type dim, filtration_value birth) {
     infiniteBars.emplace_back(dim, birth, std::numeric_limits<filtration_value>::infinity());
@@ -423,7 +423,7 @@ void test_filtered_zigzag_max1() {
   for (unsigned int i = 14; i < 16; ++i) {
     interval = realBarcode[i];
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
+    zp.remove_face(id, filValues[i]);
   }
 
   for (unsigned int i = 16; i < 24; ++i) {
@@ -434,7 +434,7 @@ void test_filtered_zigzag_max1() {
   for (unsigned int i = 24; i < 27; ++i) {
     interval = realBarcode[i];
     auto id = simplices[i][0];
-    zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[i]);
+    zp.remove_face(id, filValues[i]);
   }
 
   interval = realBarcode[27];
@@ -442,9 +442,9 @@ void test_filtered_zigzag_max1() {
 
   interval = realBarcode[28];
   auto id = simplices[28][0];
-  zp.remove_face(id, simplices[id].size() == 0 ? 0 : simplices[id].size() - 1, filValues[28]);
+  zp.remove_face(id, filValues[28]);
 
-  //there is no real garantee on the order of the infinite bars
+  //there is no real guarantee on the order of the infinite bars
   std::vector<Interval> infiniteBars;
   zp.get_current_infinite_intervals([&](dimension_type dim, filtration_value birth) {
     if (dim < 1){
