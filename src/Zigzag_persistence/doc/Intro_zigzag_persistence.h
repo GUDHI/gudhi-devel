@@ -60,17 +60,26 @@ namespace zigzag_persistence {
  * \li \gudhi_example_link{Zigzag_persistence,example_usage_zigzag_persistence.cpp} - A simple example to showcase how
  * to use the @ref Zigzag_persistence class to compute a barcode.
  * <details>
- *   @include example_usage_zigzag_persistence.cpp
+ *   @dontinclude example_usage_zigzag_persistence.cpp
+ *   @skip #include
+ *   @until return 0;
+ *   @skipline }
  * </details>
  * \li \gudhi_example_link{Zigzag_persistence,example_usage_filtered_zigzag_persistence.cpp} - A simple example to
  * showcase how to use the @ref Filtered_zigzag_persistence class to compute a barcode.
  * <details>
- *   @include example_usage_filtered_zigzag_persistence.cpp
+ *   @dontinclude example_usage_filtered_zigzag_persistence.cpp
+ *   @skip #include
+ *   @until return 0;
+ *   @skipline }
  * </details>
  * \li \gudhi_example_link{Zigzag_persistence,example_usage_filtered_zigzag_persistence_with_storage.cpp} - A simple
  * example to showcase how to use the @ref Filtered_zigzag_persistence_with_storage class to compute a barcode.
  * <details open>
- *   @include example_usage_filtered_zigzag_persistence_with_storage.cpp
+ *   @dontinclude example_usage_filtered_zigzag_persistence_with_storage.cpp
+ *   @skip #include
+ *   @until return 0;
+ *   @skipline }
  * </details>
  *
  * \subsection zzexamples More elaborate examples

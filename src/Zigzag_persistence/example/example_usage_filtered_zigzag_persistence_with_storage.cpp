@@ -14,7 +14,7 @@
 
 using Zigzag_persistence = Gudhi::zigzag_persistence::Filtered_zigzag_persistence_with_storage<>;
 
-int main(int argc, char* const argv[]) {
+int main() {
   std::clog << "** Minimalistic example of usage of the Filtered_zigzag_persistence_with_storage class **" << std::endl;
 
   Zigzag_persistence zp;

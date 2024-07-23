@@ -16,7 +16,7 @@ using Zigzag_persistence = Gudhi::zigzag_persistence::Zigzag_persistence<>;
 using dimension_type = Zigzag_persistence::dimension_type;
 using index_type = Zigzag_persistence::index;
 
-int main(int argc, char* const argv[]) {
+int main() {
   std::clog << "************* Minimalistic example of usage of the Zigzag_persistence class *************" << std::endl;
 
   // Zigzag_persistence(callback) with for example callback method as a anonymous lambda
@@ -45,9 +45,9 @@ int main(int argc, char* const argv[]) {
   // removes edge 2 -> birth at 7 of 0-cycle
   zp.remove_face(2);
 
-  // Only the closed bars where output so far, so the open/infinite bars still need to be retrieved.
+  // Only the closed bars were output so far, so the open/infinite bars still need to be retrieved.
 
-  // in this example, outputs (0, 0) and (0, 7)
+  // in this example, computes (0, 0) and (0, 7)
   zp.get_current_infinite_intervals(
       [](dimension_type dim, index_type birth) { std::cout << "[" << dim << "] " << birth << " - inf" << std::endl; });
 

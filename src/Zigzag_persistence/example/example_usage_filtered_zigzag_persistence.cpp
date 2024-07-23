@@ -16,7 +16,7 @@ using Zigzag_persistence = Gudhi::zigzag_persistence::Filtered_zigzag_persistenc
 using dimension_type = Zigzag_persistence::dimension_type;
 using filtration_value_type = Zigzag_persistence::filtration_value;
 
-int main(int argc, char* const argv[]) {
+int main() {
   std::clog << "********* Minimalistic example of usage of the Filtered_zigzag_persistence class ********" << std::endl;
 
   // Filtered_zigzag_persistence(callback) with for example callback method as a anonymous lambda
@@ -48,7 +48,7 @@ int main(int argc, char* const argv[]) {
 
   // Only the closed bars where output so far, so the open/infinite bars still need to be retrieved.
 
-  // in this example, outputs (0, 0.1) and (0, 2.0)
+  // in this example, computes (0, 0.1) and (0, 2.0)
   zp.get_current_infinite_intervals([](dimension_type dim, filtration_value_type birth) {
     std::cout << "[" << dim << "] " << birth << " - inf" << std::endl;
   });
