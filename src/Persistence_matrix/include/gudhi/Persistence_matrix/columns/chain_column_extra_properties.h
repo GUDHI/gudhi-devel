@@ -56,8 +56,8 @@ template <class Master_matrix>
 class Chain_column_extra_properties 
 {
  public:
-  using index = typename Master_matrix::index;        /**< @ref MatIdx index type. */
-  using id_index = typename Master_matrix::id_index;  /**< @ref IDIdx index type. */
+  using Index = typename Master_matrix::Index;        /**< @ref MatIdx index type. */
+  using ID_index = typename Master_matrix::ID_index;  /**< @ref IDIdx index type. */
 
   /**
    * @brief Default constructor. Sets the pivot and pair to -1, which means "not existing".
@@ -69,7 +69,7 @@ class Chain_column_extra_properties
    * @param pivot @ref rowindex "Row index" of the pivot. Corresponds to the @ref IDIdx index of the face represented
    * by the column.
    */
-  Chain_column_extra_properties(id_index pivot) : pivot_(pivot), pairedColumn_(-1) {}
+  Chain_column_extra_properties(ID_index pivot) : pivot_(pivot), pairedColumn_(-1) {}
   /**
    * @brief Constructor setting the pivot and the pair at the given values.
    * 
@@ -77,7 +77,7 @@ class Chain_column_extra_properties
    * by the column.
    * @param pair @ref MatIdx index of the pair of the column.
    */
-  Chain_column_extra_properties(id_index pivot, index pair) : pivot_(pivot), pairedColumn_(pair) {}
+  Chain_column_extra_properties(ID_index pivot, Index pair) : pivot_(pivot), pairedColumn_(pair) {}
   /**
    * @brief Copy constructor.
    * 
@@ -98,20 +98,20 @@ class Chain_column_extra_properties
    * 
    * @return -1 if the column is not paired, the @ref MatIdx of the pair otherwise.
    */
-  index get_paired_chain_index() const { return pairedColumn_; }
+  Index get_paired_chain_index() const { return pairedColumn_; }
   /**
    * @brief Indicates if the column is paired or not.
    * 
    * @return true If the column is paired.
    * @return false Otherwise.
    */
-  bool is_paired() const { return pairedColumn_ != static_cast<index>(-1); }
+  bool is_paired() const { return pairedColumn_ != static_cast<Index>(-1); }
   /**
    * @brief Sets the value of the pair.
    * 
    * @param other_col @ref MatIdx of the pair column.
    */
-  void assign_paired_chain(index other_col) { pairedColumn_ = other_col; }
+  void assign_paired_chain(Index other_col) { pairedColumn_ = other_col; }
   /**
    * @brief Un-pairs a column.
    */
@@ -134,12 +134,12 @@ class Chain_column_extra_properties
   }
 
  protected:
-  id_index get_pivot() const { return pivot_; }
+  ID_index get_pivot() const { return pivot_; }
   void swap_pivots(Chain_column_extra_properties& other) { std::swap(pivot_, other.pivot_); }
 
  private:
-  id_index pivot_;      /**< @ref IDIdx index associated to the chain */
-  index pairedColumn_;  /**< Represents the (F, G x H) partition of the columns.
+  ID_index pivot_;      /**< @ref IDIdx index associated to the chain */
+  Index pairedColumn_;  /**< Represents the (F, G x H) partition of the columns.
                              -1 if in F, @ref MatIdx of image of bijection otherwise. 
                              The pivot of a column in G will always be smaller than the pivot of its image in H. */
 };

@@ -54,14 +54,14 @@ using z2_only_row_access_columns = columns_list<z2_only_ra_option_list<option_na
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_z2_column_with_row_access_content_access, Column, z2_only_row_access_columns) {
-  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Master::Row_container rows;  // do not destroy before matrix
   typename Column::Column_settings settings;
   std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
   column_test_common_z2_content_access(matrix);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_z2_column_with_row_access_operators, Column, z2_only_row_access_columns) {
-  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Master::Row_container rows;  // do not destroy before matrix
   typename Column::Column_settings settings;
   std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
   column_test_common_z2_operators(matrix);
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Base_z2_column_with_row_access_operators, Column, 
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_column_row_access_constructors, Column, z2_only_row_access_columns) {
-  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Master::Row_container rows;  // do not destroy before matrix
   typename Column::Column_settings settings;
   std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
 
@@ -125,14 +125,14 @@ using z5_only_row_access_columns = columns_list<z5_only_ra_option_list<option_na
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_z5_column_with_row_access_content_access, Column, z5_only_row_access_columns) {
-  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Master::Row_container rows;  // do not destroy before matrix
   typename Column::Column_settings settings(5);
   std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
   column_test_common_z5_content_access(matrix);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_z5_column_with_row_access_operators, Column, z5_only_row_access_columns) {
-  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Master::Row_container rows;  // do not destroy before matrix
   typename Column::Column_settings settings(5);
   std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
   column_test_common_z5_operators(matrix);
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Base_z5_column_with_row_access_operators, Column, 
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_column_row_access_constructors, Column, z5_only_row_access_columns) {
-  typename Column::Master::row_container_type rows;  // do not destroy before matrix
+  typename Column::Master::Row_container rows;  // do not destroy before matrix
   typename Column::Column_settings settings(5);
   std::vector<Column> matrix = build_column_matrix<Column>(rows, settings);
 

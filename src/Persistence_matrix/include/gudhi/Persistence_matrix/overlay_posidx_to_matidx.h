@@ -32,33 +32,33 @@ namespace persistence_matrix {
  * original methods with @ref PosIdx indices. The overlay is useless for @ref boundarymatrix "boundary matrices"
  * as @ref MatIdx == @ref PosIdx for them.
  * 
- * @tparam %Matrix_type Matrix type taking the overlay.
- * @tparam Master_matrix_type An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam %Underlying_matrix Matrix type taking the overlay.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
-template <class Matrix_type, class Master_matrix_type>
+template <class Underlying_matrix, class Master_matrix>
 class Position_to_index_overlay 
 {
  public:
-  using index = typename Master_matrix_type::index;                       /**< @ref MatIdx index type. */
-  using id_index = typename Master_matrix_type::id_index;                 /**< @ref IDIdx index type. */
-  using pos_index = typename Master_matrix_type::pos_index;               /**< @ref PosIdx index type. */
-  using dimension_type = typename Master_matrix_type::dimension_type;     /**< Dimension value type. */
+  using Index = typename Master_matrix::Index;                              /**< @ref MatIdx index type. */
+  using ID_index = typename Master_matrix::ID_index;                        /**< @ref IDIdx index type. */
+  using Pos_index = typename Master_matrix::Pos_index;                      /**< @ref PosIdx index type. */
+  using Dimension = typename Master_matrix::Dimension;                      /**< Dimension value type. */
   /**
    * @brief Field operators class. Necessary only if @ref PersistenceMatrixOptions::is_z2 is false.
    */
-  using Field_operators = typename Master_matrix_type::Field_operators;
-  using Field_element_type = typename Master_matrix_type::element_type;   /**< Type of an field element. */
-  using boundary_type = typename Master_matrix_type::boundary_type;       /**< Type of an input column. */
-  using Column_type = typename Master_matrix_type::Column_type;           /**< Column type. */
-  using Row_type = typename Master_matrix_type::Row_type;                 /**< Row type,
-                                                                               only necessary with row access option. */
-  using bar_type = typename Master_matrix_type::Bar;                      /**< Bar type. */
-  using barcode_type = typename Master_matrix_type::barcode_type;         /**< Barcode type. */
-  using cycle_type = typename Master_matrix_type::cycle_type;             /**< Cycle type. */
-  using cell_rep_type = typename Master_matrix_type::cell_rep_type;       /**< %Cell content representative. */
-  using Cell_constructor = typename Master_matrix_type::Cell_constructor; /**< Factory of @ref Cell classes. */
-  using Column_settings = typename Master_matrix_type::Column_settings;   /**< Structure giving access to the columns to
-                                                                               necessary external classes. */
+  using Field_operators = typename Master_matrix::Field_operators;
+  using Field_element = typename Master_matrix::Element;                    /**< Type of an field element. */
+  using Boundary = typename Master_matrix::Boundary;                        /**< Type of an input column. */
+  using Column = typename Master_matrix::Column;                            /**< Column type. */
+  using Row = typename Master_matrix::Row;                                  /**< Row type, only
+                                                                                 necessary with row access option. */
+  using Bar = typename Master_matrix::Bar;                                  /**< Bar type. */
+  using Barcode = typename Master_matrix::Barcode;                          /**< Barcode type. */
+  using Cycle = typename Master_matrix::Cycle;                              /**< Cycle type. */
+  using Cell_representative = typename Master_matrix::Cell_representative;  /**< %Cell content representative. */
+  using Cell_constructor = typename Master_matrix::Cell_constructor;        /**< Factory of @ref Cell classes. */
+  using Column_settings = typename Master_matrix::Column_settings;          /**< Structure giving access to the columns
+                                                                                 to necessary external classes. */
 
   /**
    * @brief Constructs an empty matrix.
@@ -68,11 +68,11 @@ class Position_to_index_overlay
    */
   Position_to_index_overlay(Column_settings* colSettings);
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a
+   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Cell_representative. Each range corresponds to a
    * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
    * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0.
    * 
-   * @tparam Boundary_type Range type for @ref Matrix::cell_rep_type ranges.
+   * @tparam Boundary_container Range type for @ref Matrix::Cell_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
@@ -87,8 +87,8 @@ class Position_to_index_overlay
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
    * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  template <class Boundary_type = boundary_type>
-  Position_to_index_overlay(const std::vector<Boundary_type>& orderedBoundaries, 
+  template <class Boundary_container = Boundary>
+  Position_to_index_overlay(const std::vector<Boundary_container>& orderedBoundaries, 
                             Column_settings* colSettings);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
@@ -108,8 +108,8 @@ class Position_to_index_overlay
    * @ref PersistenceMatrixOptions::has_column_pairings is also true, the comparators are ignored and
    * the current barcode is used to compare birth and deaths. Therefore it is useless to provide them in those cases.
    * 
-   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
-   * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
+   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref Pos_index, @ref Pos_index) -> bool
+   * @tparam DeathComparatorFunction Type of the death comparator: (@ref Pos_index, @ref Pos_index) -> bool
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
    * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    * @param birthComparator Method taking two @ref PosIdx indices as input and returning true if and only if
@@ -127,7 +127,7 @@ class Position_to_index_overlay
                             const DeathComparatorFunction& deathComparator);
   /**
    * @brief Only available for @ref chainmatrix "chain matrices". 
-   * Constructs a new matrix from the given ranges of @ref Matrix::cell_rep_type. Each range corresponds to a column 
+   * Constructs a new matrix from the given ranges of @ref Matrix::Cell_representative. Each range corresponds to a column 
    * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
    * The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0. 
    *
@@ -136,9 +136,9 @@ class Position_to_index_overlay
    * @ref PersistenceMatrixOptions::has_column_pairings is also true, the comparators are ignored and
    * the current barcode is used to compare birth and deaths. Therefore it is useless to provide them in those cases.
    * 
-   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
-   * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
-   * @tparam Boundary_type  Range type for @ref Matrix::cell_rep_type ranges.
+   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref Pos_index, @ref Pos_index) -> bool
+   * @tparam DeathComparatorFunction Type of the death comparator: (@ref Pos_index, @ref Pos_index) -> bool
+   * @tparam Boundary_container  Range type for @ref Matrix::Cell_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
@@ -161,8 +161,8 @@ class Position_to_index_overlay
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
    */
-  template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type>
-  Position_to_index_overlay(const std::vector<Boundary_type>& orderedBoundaries, 
+  template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_container>
+  Position_to_index_overlay(const std::vector<Boundary_container>& orderedBoundaries, 
                             Column_settings* colSettings, 
                             const BirthComparatorFunction& birthComparator, 
                             const DeathComparatorFunction& deathComparator);
@@ -175,8 +175,8 @@ class Position_to_index_overlay
    * @ref PersistenceMatrixOptions::has_column_pairings is also true, the comparators are ignored and
    * the current barcode is used to compare birth and deaths. Therefore it is useless to provide them in those cases.
    * 
-   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref pos_index, @ref pos_index) -> bool
-   * @tparam DeathComparatorFunction Type of the death comparator: (@ref pos_index, @ref pos_index) -> bool
+   * @tparam BirthComparatorFunction Type of the birth comparator: (@ref Pos_index, @ref Pos_index) -> bool
+   * @tparam DeathComparatorFunction Type of the death comparator: (@ref Pos_index, @ref Pos_index) -> bool
    * @param numberOfColumns Number of columns to reserve space for.
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
    * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
@@ -217,7 +217,7 @@ class Position_to_index_overlay
    * This means that it is assumed that this method is called on boundaries in the order of the filtration. 
    * It also assumes that the faces in the given boundary are identified by their relative position in the filtration, 
    * starting at 0. If it is not the case, use the other
-   * @ref insert_boundary(id_index, const Boundary_type&, dimension_type) "insert_boundary" instead by indicating the
+   * @ref insert_boundary(ID_index, const Boundary_container&, Dimension) "insert_boundary" instead by indicating the
    * face ID used in the boundaries when the face is inserted.
    *
    * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
@@ -226,13 +226,13 @@ class Position_to_index_overlay
    * When inserted, the given boundary is reduced and from the reduction process, the column is deduced in the form of:
    * `IDIdx + linear combination of older column IDIdxs`. If the barcode is stored, it will be updated.
    * 
-   * @tparam Boundary_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_container Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
    * @param boundary Boundary generating the new column. The content should be ordered by ID.
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
-  template <class Boundary_type = boundary_type>
-  void insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);
+  template <class Boundary_container = Boundary>
+  void insert_boundary(const Boundary_container& boundary, Dimension dim = -1);
   /**
    * @brief It does the same as the other version, but allows the boundary faces to be identified without restrictions
    * except that all IDs have to be strictly increasing in the order of filtration. Note that you should avoid then
@@ -241,7 +241,7 @@ class Position_to_index_overlay
    * As a face has to be inserted before one of its cofaces in a valid filtration (recall that it is assumed that
    * the faces are inserted by order of filtration), it is sufficient to indicate the ID of the face being inserted.
    * 
-   * @tparam Boundary_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_container Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
    * @param faceIndex @ref IDIdx index to use to identify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the 
    * @p faceID values of precedent calls of the method for the corresponding faces and should be ordered in 
@@ -249,8 +249,8 @@ class Position_to_index_overlay
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
-  template <class Boundary_type = boundary_type>
-  void insert_boundary(id_index faceIndex, const Boundary_type& boundary, dimension_type dim = -1);
+  template <class Boundary_container = Boundary>
+  void insert_boundary(ID_index faceIndex, const Boundary_container& boundary, Dimension dim = -1);
   /**
    * @brief Returns the column at the given @ref PosIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -258,7 +258,7 @@ class Position_to_index_overlay
    * @param position @ref PosIdx index of the column to return.
    * @return Reference to the column.
    */
-  Column_type& get_column(pos_index position);
+  Column& get_column(Pos_index position);
   /**
    * @brief Returns the column at the given @ref PosIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -266,7 +266,7 @@ class Position_to_index_overlay
    * @param position @ref PosIdx index of the column to return.
    * @return Const reference to the column.
    */
-  const Column_type& get_column(pos_index position) const;
+  const Column& get_column(Pos_index position) const;
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_row_access is true.
    * Returns the row at the given @ref rowindex "row index".
@@ -275,7 +275,7 @@ class Position_to_index_overlay
    * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @return Reference to the row.
    */
-  Row_type& get_row(id_index rowIndex);
+  Row& get_row(ID_index rowIndex);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_row_access is true.
    * Returns the row at the given @ref rowindex "row index".
@@ -284,7 +284,7 @@ class Position_to_index_overlay
    * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @return Const reference to the row.
    */
-  const Row_type& get_row(id_index rowIndex) const;
+  const Row& get_row(ID_index rowIndex) const;
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_row_access and
    * @ref PersistenceMatrixOptions::has_removable_rows are true.
@@ -299,7 +299,7 @@ class Position_to_index_overlay
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row to remove.
    */
-  void erase_empty_row(id_index rowIndex);
+  void erase_empty_row(ID_index rowIndex);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns,
    * @ref PersistenceMatrixOptions::has_vine_update and @ref PersistenceMatrixOptions::has_map_column_container
@@ -313,7 +313,7 @@ class Position_to_index_overlay
    * 
    * @param position @ref PosIdx index of the face to remove.
    */
-  void remove_maximal_face(pos_index position);
+  void remove_maximal_face(Pos_index position);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns is true and,
    * if @ref PersistenceMatrixOptions::has_map_column_container is true or
@@ -330,20 +330,20 @@ class Position_to_index_overlay
    * 
    * @return The maximal dimension.
    */
-  dimension_type get_max_dimension() const;
+  Dimension get_max_dimension() const;
   /**
    * @brief Returns the current number of columns in the matrix.
    * 
    * @return The number of columns.
    */
-  index get_number_of_columns() const;
+  Index get_number_of_columns() const;
   /**
    * @brief Returns the dimension of the given face.
    * 
    * @param position @ref PosIdx index of the face.
    * @return Dimension of the face.
    */
-  dimension_type get_column_dimension(pos_index position) const;
+  Dimension get_column_dimension(Pos_index position) const;
 
   /**
    * @brief Adds column corresponding to @p sourcePosition onto the column corresponding to @p targetPosition.
@@ -355,7 +355,7 @@ class Position_to_index_overlay
    * @param sourcePosition @ref PosIdx index of the source column.
    * @param targetPosition @ref PosIdx index of the target column.
    */
-  void add_to(pos_index sourcePosition, pos_index targetPosition);
+  void add_to(Pos_index sourcePosition, Pos_index targetPosition);
   /**
    * @brief Multiplies the target column with the coefficient and then adds the source column to it.
    * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
@@ -368,9 +368,9 @@ class Position_to_index_overlay
    * @param coefficient Value to multiply.
    * @param targetPosition @ref PosIdx index of the target column.
    */
-  void multiply_target_and_add_to(pos_index sourcePosition, 
-                                  const Field_element_type& coefficient,
-                                  pos_index targetPosition);
+  void multiply_target_and_add_to(Pos_index sourcePosition, 
+                                  const Field_element& coefficient,
+                                  Pos_index targetPosition);
   /**
    * @brief Multiplies the source column with the coefficient before adding it to the target column.
    * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
@@ -383,9 +383,9 @@ class Position_to_index_overlay
    * @param sourcePosition @ref PosIdx index of the source column.
    * @param targetPosition @ref PosIdx index of the target column.
    */
-  void multiply_source_and_add_to(const Field_element_type& coefficient, 
-                                  pos_index sourcePosition,
-                                  pos_index targetPosition);
+  void multiply_source_and_add_to(const Field_element& coefficient, 
+                                  Pos_index sourcePosition,
+                                  Pos_index targetPosition);
 
   /**
    * @brief Indicates if the cell at given coordinates has value zero.
@@ -395,7 +395,7 @@ class Position_to_index_overlay
    * @return true If the cell has value zero.
    * @return false Otherwise.
    */
-  bool is_zero_cell(pos_index position, id_index rowIndex) const;
+  bool is_zero_cell(Pos_index position, ID_index rowIndex) const;
   /**
    * @brief Indicates if the column at given index has value zero.
    *
@@ -406,7 +406,7 @@ class Position_to_index_overlay
    * @return true If the column has value zero.
    * @return false Otherwise.
    */
-  bool is_zero_column(pos_index position);
+  bool is_zero_column(Pos_index position);
 
   /**
    * @brief Returns the @ref PosIdx index of the column which has the given @ref rowindex "row index" as pivot.
@@ -415,14 +415,14 @@ class Position_to_index_overlay
    * @param faceIndex @ref rowindex "Row index" of the pivot.
    * @return @ref PosIdx index of the column with the given pivot.
    */
-  pos_index get_column_with_pivot(id_index faceIndex) const;  // assumes that pivot exists
+  Pos_index get_column_with_pivot(ID_index faceIndex) const;  // assumes that pivot exists
   /**
    * @brief Returns the @ref rowindex "row index" of the pivot of the given column.
    * 
    * @param position @ref PosIdx index of the face corresponding to the column.
    * @return The @ref rowindex "row index" of the pivot.
    */
-  id_index get_pivot(pos_index position);
+  ID_index get_pivot(Pos_index position);
 
   /**
    * @brief Resets the matrix to an empty matrix.
@@ -466,7 +466,7 @@ class Position_to_index_overlay
    * @return A reference to the barcode. The barcode is a vector of @ref Matrix::Bar. A bar stores three informations:
    * the @ref PosIdx birth index, the @ref PosIdx death index and the dimension of the bar.
    */
-  const barcode_type& get_current_barcode() const;
+  const Barcode& get_current_barcode() const;
   
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
@@ -482,7 +482,7 @@ class Position_to_index_overlay
    * 
    * @return A const reference to the vector of representative cycles.
    */
-  const std::vector<cycle_type>& get_representative_cycles();
+  const std::vector<Cycle>& get_representative_cycles();
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
    * Returns the cycle representing the given bar.
@@ -490,7 +490,7 @@ class Position_to_index_overlay
    * @param bar A bar from the current barcode.
    * @return A const reference to the cycle representing @p bar.
    */
-  const cycle_type& get_representative_cycle(const bar_type& bar);
+  const Cycle& get_representative_cycle(const Bar& bar);
   
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
@@ -501,7 +501,7 @@ class Position_to_index_overlay
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
-  bool vine_swap_with_z_eq_1_case(pos_index position);
+  bool vine_swap_with_z_eq_1_case(Pos_index position);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
    * Does a vine swap between two faces which are consecutive in the filtration. Roughly, if \f$ F \f$ is the current
@@ -515,37 +515,37 @@ class Position_to_index_overlay
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
-  bool vine_swap(pos_index position);
+  bool vine_swap(Pos_index position);
 
  private:
-  Matrix_type matrix_;                  /**< Interfaced matrix. */
-  std::vector<index> positionToIndex_;  /**< Map from @ref PosIdx index to @ref MatIdx index. */
-  pos_index nextPosition_;              /**< Next unused position. */
-  index nextIndex_;                     /**< Next unused index. */
+  Underlying_matrix matrix_;            /**< Interfaced matrix. */
+  std::vector<Index> positionToIndex_;  /**< Map from @ref PosIdx index to @ref MatIdx index. */
+  Pos_index nextPosition_;              /**< Next unused position. */
+  Index nextIndex_;                     /**< Next unused index. */
 };
 
-template <class Matrix_type, class Master_matrix_type>
-inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_index_overlay(
+template <class Underlying_matrix, class Master_matrix>
+inline Position_to_index_overlay<Underlying_matrix, Master_matrix>::Position_to_index_overlay(
     Column_settings* colSettings)
     : matrix_(colSettings), nextPosition_(0), nextIndex_(0) 
 {}
 
-template <class Matrix_type, class Master_matrix_type>
-template <class Boundary_type>
-inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_index_overlay(
-    const std::vector<Boundary_type>& orderedBoundaries, Column_settings* colSettings)
+template <class Underlying_matrix, class Master_matrix>
+template <class Boundary_container>
+inline Position_to_index_overlay<Underlying_matrix, Master_matrix>::Position_to_index_overlay(
+    const std::vector<Boundary_container>& orderedBoundaries, Column_settings* colSettings)
     : matrix_(orderedBoundaries, colSettings),
       positionToIndex_(orderedBoundaries.size()),
       nextPosition_(orderedBoundaries.size()),
       nextIndex_(orderedBoundaries.size()) 
 {
-  for (index i = 0; i < orderedBoundaries.size(); i++) {
+  for (Index i = 0; i < orderedBoundaries.size(); i++) {
     positionToIndex_[i] = i;
   }
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_index_overlay(
+template <class Underlying_matrix, class Master_matrix>
+inline Position_to_index_overlay<Underlying_matrix, Master_matrix>::Position_to_index_overlay(
     unsigned int numberOfColumns, Column_settings* colSettings)
     : matrix_(numberOfColumns, colSettings),
       positionToIndex_(numberOfColumns),
@@ -553,19 +553,19 @@ inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_i
       nextIndex_(0) 
 {}
 
-template <class Matrix_type, class Master_matrix_type>
+template <class Underlying_matrix, class Master_matrix>
 template <typename BirthComparatorFunction, typename DeathComparatorFunction>
-inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_index_overlay(
+inline Position_to_index_overlay<Underlying_matrix, Master_matrix>::Position_to_index_overlay(
     Column_settings* colSettings, 
     const BirthComparatorFunction& birthComparator, 
     const DeathComparatorFunction& deathComparator)
     : matrix_(colSettings, birthComparator, deathComparator), nextPosition_(0), nextIndex_(0) 
 {}
 
-template <class Matrix_type, class Master_matrix_type>
-template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_type>
-inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_index_overlay(
-    const std::vector<Boundary_type>& orderedBoundaries, 
+template <class Underlying_matrix, class Master_matrix>
+template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_container>
+inline Position_to_index_overlay<Underlying_matrix, Master_matrix>::Position_to_index_overlay(
+    const std::vector<Boundary_container>& orderedBoundaries, 
     Column_settings* colSettings,
     const BirthComparatorFunction& birthComparator, 
     const DeathComparatorFunction& deathComparator)
@@ -574,14 +574,14 @@ inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_i
       nextPosition_(orderedBoundaries.size()),
       nextIndex_(orderedBoundaries.size()) 
 {
-  for (index i = 0; i < orderedBoundaries.size(); i++) {
+  for (Index i = 0; i < orderedBoundaries.size(); i++) {
     positionToIndex_[i] = i;
   }
 }
 
-template <class Matrix_type, class Master_matrix_type>
+template <class Underlying_matrix, class Master_matrix>
 template <typename BirthComparatorFunction, typename DeathComparatorFunction>
-inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_index_overlay(
+inline Position_to_index_overlay<Underlying_matrix, Master_matrix>::Position_to_index_overlay(
     unsigned int numberOfColumns, 
     Column_settings* colSettings,
     const BirthComparatorFunction& birthComparator, 
@@ -592,8 +592,8 @@ inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_i
       nextIndex_(0) 
 {}
 
-template <class Matrix_type, class Master_matrix_type>
-inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_index_overlay(
+template <class Underlying_matrix, class Master_matrix>
+inline Position_to_index_overlay<Underlying_matrix, Master_matrix>::Position_to_index_overlay(
     const Position_to_index_overlay& matrixToCopy, Column_settings* colSettings)
     : matrix_(matrixToCopy.matrix_, colSettings),
       positionToIndex_(matrixToCopy.positionToIndex_),
@@ -601,8 +601,8 @@ inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_i
       nextIndex_(matrixToCopy.nextIndex_) 
 {}
 
-template <class Matrix_type, class Master_matrix_type>
-inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_index_overlay(
+template <class Underlying_matrix, class Master_matrix>
+inline Position_to_index_overlay<Underlying_matrix, Master_matrix>::Position_to_index_overlay(
     Position_to_index_overlay&& other) noexcept
     : matrix_(std::move(other.matrix_)),
       positionToIndex_(std::move(other.positionToIndex_)),
@@ -610,10 +610,10 @@ inline Position_to_index_overlay<Matrix_type, Master_matrix_type>::Position_to_i
       nextIndex_(std::exchange(other.nextIndex_, 0)) 
 {}
 
-template <class Matrix_type, class Master_matrix_type>
-template <class Boundary_type>
-inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::insert_boundary(const Boundary_type& boundary,
-                                                                                        dimension_type dim) 
+template <class Underlying_matrix, class Master_matrix>
+template <class Boundary_container>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::insert_boundary(const Boundary_container& boundary,
+                                                                                        Dimension dim) 
 {
   if (positionToIndex_.size() <= nextPosition_) {
     positionToIndex_.resize(nextPosition_ * 2 + 1);
@@ -624,11 +624,11 @@ inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::insert_b
   matrix_.insert_boundary(boundary, dim);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-template <class Boundary_type>
-inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::insert_boundary(id_index faceIndex,
-                                                                                        const Boundary_type& boundary,
-                                                                                        dimension_type dim) 
+template <class Underlying_matrix, class Master_matrix>
+template <class Boundary_container>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::insert_boundary(ID_index faceIndex,
+                                                                                        const Boundary_container& boundary,
+                                                                                        Dimension dim) 
 {
   if (positionToIndex_.size() <= nextPosition_) {
     positionToIndex_.resize(nextPosition_ * 2 + 1);
@@ -639,51 +639,51 @@ inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::insert_b
   matrix_.insert_boundary(faceIndex, boundary, dim);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline typename Position_to_index_overlay<Matrix_type, Master_matrix_type>::Column_type&
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_column(pos_index position) 
+template <class Underlying_matrix, class Master_matrix>
+inline typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Column&
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_column(Pos_index position) 
 {
   return matrix_.get_column(positionToIndex_[position]);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline const typename Position_to_index_overlay<Matrix_type, Master_matrix_type>::Column_type&
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_column(pos_index position) const 
+template <class Underlying_matrix, class Master_matrix>
+inline const typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Column&
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_column(Pos_index position) const 
 {
   return matrix_.get_column(positionToIndex_[position]);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline typename Position_to_index_overlay<Matrix_type, Master_matrix_type>::Row_type&
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_row(id_index rowIndex) 
+template <class Underlying_matrix, class Master_matrix>
+inline typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Row&
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_row(ID_index rowIndex) 
 {
   return matrix_.get_row(rowIndex);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline const typename Position_to_index_overlay<Matrix_type, Master_matrix_type>::Row_type&
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_row(id_index rowIndex) const 
+template <class Underlying_matrix, class Master_matrix>
+inline const typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Row&
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_row(ID_index rowIndex) const 
 {
   return matrix_.get_row(rowIndex);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::erase_empty_row(id_index rowIndex) 
+template <class Underlying_matrix, class Master_matrix>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::erase_empty_row(ID_index rowIndex) 
 {
   return matrix_.erase_empty_row(rowIndex);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::remove_maximal_face(pos_index position) 
+template <class Underlying_matrix, class Master_matrix>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maximal_face(Pos_index position) 
 {
   --nextPosition_;
 
-  id_index pivot = matrix_.get_pivot(positionToIndex_[position]);
-  std::vector<index> columnsToSwap(nextPosition_ - position);
+  ID_index pivot = matrix_.get_pivot(positionToIndex_[position]);
+  std::vector<Index> columnsToSwap(nextPosition_ - position);
 
   if (nextPosition_ != position) {
     positionToIndex_[position] = positionToIndex_[position + 1];
-    for (pos_index p = position + 1; p < nextPosition_; ++p) {
+    for (Pos_index p = position + 1; p < nextPosition_; ++p) {
       columnsToSwap[p - position - 1] = positionToIndex_[p];
       positionToIndex_[p] = positionToIndex_[p + 1];
     }
@@ -693,97 +693,97 @@ inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::remove_m
   matrix_.remove_maximal_face(pivot, columnsToSwap);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::remove_last() 
+template <class Underlying_matrix, class Master_matrix>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::remove_last() 
 {
   --nextPosition_;
-  if constexpr (Master_matrix_type::Option_list::has_vine_update) {
-    std::vector<index> columnsToSwap;
+  if constexpr (Master_matrix::Option_list::has_vine_update) {
+    std::vector<Index> columnsToSwap;
     matrix_.remove_maximal_face(matrix_.get_pivot(positionToIndex_[nextPosition_]), columnsToSwap);
   } else {
     matrix_.remove_last();  // linear with vine updates, so it is better to use remove_maximal_face
   }
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline typename Position_to_index_overlay<Matrix_type, Master_matrix_type>::dimension_type
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_max_dimension() const 
+template <class Underlying_matrix, class Master_matrix>
+inline typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Dimension
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_max_dimension() const 
 {
   return matrix_.get_max_dimension();
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline typename Position_to_index_overlay<Matrix_type, Master_matrix_type>::index
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_number_of_columns() const 
+template <class Underlying_matrix, class Master_matrix>
+inline typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Index
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_number_of_columns() const 
 {
   return matrix_.get_number_of_columns();
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline typename Position_to_index_overlay<Matrix_type, Master_matrix_type>::dimension_type
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_column_dimension(pos_index position) const 
+template <class Underlying_matrix, class Master_matrix>
+inline typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Dimension
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_column_dimension(Pos_index position) const 
 {
   return matrix_.get_column_dimension(positionToIndex_[position]);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::add_to(pos_index sourcePosition,
-                                                                               pos_index targetPosition) 
+template <class Underlying_matrix, class Master_matrix>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::add_to(Pos_index sourcePosition,
+                                                                               Pos_index targetPosition) 
 {
   return matrix_.add_to(positionToIndex_[sourcePosition], positionToIndex_[targetPosition]);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::multiply_target_and_add_to(
-    pos_index sourcePosition, const Field_element_type& coefficient, pos_index targetPosition) 
+template <class Underlying_matrix, class Master_matrix>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::multiply_target_and_add_to(
+    Pos_index sourcePosition, const Field_element& coefficient, Pos_index targetPosition) 
 {
   return matrix_.multiply_target_and_add_to(positionToIndex_[sourcePosition], 
                                             coefficient,
                                             positionToIndex_[targetPosition]);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::multiply_source_and_add_to(
-    const Field_element_type& coefficient, pos_index sourcePosition, pos_index targetPosition) 
+template <class Underlying_matrix, class Master_matrix>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::multiply_source_and_add_to(
+    const Field_element& coefficient, Pos_index sourcePosition, Pos_index targetPosition) 
 {
   return matrix_.multiply_source_and_add_to(coefficient, 
                                             positionToIndex_[sourcePosition],
                                             positionToIndex_[targetPosition]);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline bool Position_to_index_overlay<Matrix_type, Master_matrix_type>::is_zero_cell(pos_index position,
-                                                                                     id_index rowIndex) const 
+template <class Underlying_matrix, class Master_matrix>
+inline bool Position_to_index_overlay<Underlying_matrix, Master_matrix>::is_zero_cell(Pos_index position,
+                                                                                     ID_index rowIndex) const 
 {
   return matrix_.is_zero_cell(positionToIndex_[position], rowIndex);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline bool Position_to_index_overlay<Matrix_type, Master_matrix_type>::is_zero_column(pos_index position) 
+template <class Underlying_matrix, class Master_matrix>
+inline bool Position_to_index_overlay<Underlying_matrix, Master_matrix>::is_zero_column(Pos_index position) 
 {
   return matrix_.is_zero_column(positionToIndex_[position]);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline typename Position_to_index_overlay<Matrix_type, Master_matrix_type>::pos_index
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_column_with_pivot(id_index faceIndex) const 
+template <class Underlying_matrix, class Master_matrix>
+inline typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Pos_index
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_column_with_pivot(ID_index faceIndex) const 
 {
-  index id = matrix_.get_column_with_pivot(faceIndex);
-  pos_index i = 0;
+  Index id = matrix_.get_column_with_pivot(faceIndex);
+  Pos_index i = 0;
   while (positionToIndex_[i] != id) ++i;
   return i;
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline typename Position_to_index_overlay<Matrix_type, Master_matrix_type>::id_index
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_pivot(pos_index position) 
+template <class Underlying_matrix, class Master_matrix>
+inline typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::ID_index
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_pivot(Pos_index position) 
 {
   return matrix_.get_pivot(positionToIndex_[position]);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline Position_to_index_overlay<Matrix_type, Master_matrix_type>&
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::operator=(const Position_to_index_overlay& other) 
+template <class Underlying_matrix, class Master_matrix>
+inline Position_to_index_overlay<Underlying_matrix, Master_matrix>&
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::operator=(const Position_to_index_overlay& other) 
 {
   matrix_ = other.matrix_;
   positionToIndex_ = other.positionToIndex_;
@@ -793,43 +793,43 @@ Position_to_index_overlay<Matrix_type, Master_matrix_type>::operator=(const Posi
   return *this;
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::print() 
+template <class Underlying_matrix, class Master_matrix>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::print() 
 {
   return matrix_.print();
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline const typename Position_to_index_overlay<Matrix_type, Master_matrix_type>::barcode_type&
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_current_barcode() const 
+template <class Underlying_matrix, class Master_matrix>
+inline const typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Barcode&
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_current_barcode() const 
 {
   return matrix_.get_current_barcode();
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline void Position_to_index_overlay<Matrix_type, Master_matrix_type>::update_representative_cycles() 
+template <class Underlying_matrix, class Master_matrix>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::update_representative_cycles() 
 {
   matrix_.update_representative_cycles();
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline const std::vector<typename Position_to_index_overlay<Matrix_type, Master_matrix_type>::cycle_type>&
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_representative_cycles() 
+template <class Underlying_matrix, class Master_matrix>
+inline const std::vector<typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Cycle>&
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_representative_cycles() 
 {
   return matrix_.get_representative_cycles();
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline const typename Position_to_index_overlay<Matrix_type, Master_matrix_type>::cycle_type&
-Position_to_index_overlay<Matrix_type, Master_matrix_type>::get_representative_cycle(const bar_type& bar) 
+template <class Underlying_matrix, class Master_matrix>
+inline const typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Cycle&
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_representative_cycle(const Bar& bar) 
 {
   return matrix_.get_representative_cycle(bar);
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline bool Position_to_index_overlay<Matrix_type, Master_matrix_type>::vine_swap_with_z_eq_1_case(pos_index position) 
+template <class Underlying_matrix, class Master_matrix>
+inline bool Position_to_index_overlay<Underlying_matrix, Master_matrix>::vine_swap_with_z_eq_1_case(Pos_index position) 
 {
-  index next = matrix_.vine_swap_with_z_eq_1_case(positionToIndex_[position], positionToIndex_[position + 1]);
+  Index next = matrix_.vine_swap_with_z_eq_1_case(positionToIndex_[position], positionToIndex_[position + 1]);
   if (next == positionToIndex_[position]) {
     std::swap(positionToIndex_[position], positionToIndex_[position + 1]);
     return true;
@@ -838,10 +838,10 @@ inline bool Position_to_index_overlay<Matrix_type, Master_matrix_type>::vine_swa
   return false;
 }
 
-template <class Matrix_type, class Master_matrix_type>
-inline bool Position_to_index_overlay<Matrix_type, Master_matrix_type>::vine_swap(pos_index position) 
+template <class Underlying_matrix, class Master_matrix>
+inline bool Position_to_index_overlay<Underlying_matrix, Master_matrix>::vine_swap(Pos_index position) 
 {
-  index next = matrix_.vine_swap(positionToIndex_[position], positionToIndex_[position + 1]);
+  Index next = matrix_.vine_swap(positionToIndex_[position], positionToIndex_[position + 1]);
   if (next == positionToIndex_[position]) {
     std::swap(positionToIndex_[position], positionToIndex_[position + 1]);
     return true;
