@@ -61,12 +61,15 @@ def test_distance_matrix_rips_persistence_of_points_on_a_circle():
 
 
 def test_set_output():
-    NB_PC = 5
-    point_clouds = [points.sphere(n_samples=random.randint(100, 150), ambient_dim=2) for _ in range(NB_PC)]
+    try:
+        import pandas
+        NB_PC = 5
+        point_clouds = [points.sphere(n_samples=random.randint(100, 150), ambient_dim=2) for _ in range(NB_PC)]
 
-    rips = RipsPersistence(homology_dimensions=[0, 2], n_jobs=-2)
-    diags_pandas = rips.set_output(transform="pandas").fit_transform(point_clouds)
-    assert 'H0' == diags_pandas.columns[0]
-    assert 'H2' == diags_pandas.columns[1]
-    assert len(diags_pandas.index) == NB_PC
-
+        rips = RipsPersistence(homology_dimensions=[0, 2], n_jobs=-2)
+        diags_pandas = rips.set_output(transform="pandas").fit_transform(point_clouds)
+        assert 'H0' == diags_pandas.columns[0]
+        assert 'H2' == diags_pandas.columns[1]
+        assert len(diags_pandas.index) == NB_PC
+    except ImportError:
+        print("Missing pandas, skipping set_output test")
