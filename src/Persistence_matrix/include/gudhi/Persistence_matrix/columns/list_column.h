@@ -60,14 +60,14 @@ class List_column : public Master_matrix::Row_access_option,
 
  private:
   using Field_operators = typename Master_matrix::Field_operators;
-  using Column = std::list<Cell*>;
+  using Column_support = std::list<Cell*>;
   using Cell_constructor = typename Master_matrix::Cell_constructor;
 
  public:
-  using iterator = boost::indirect_iterator<typename Column::iterator>;
-  using const_iterator = boost::indirect_iterator<typename Column::const_iterator>;
-  using reverse_iterator = boost::indirect_iterator<typename Column::reverse_iterator>;
-  using const_reverse_iterator = boost::indirect_iterator<typename Column::const_reverse_iterator>;
+  using iterator = boost::indirect_iterator<typename Column_support::iterator>;
+  using const_iterator = boost::indirect_iterator<typename Column_support::const_iterator>;
+  using reverse_iterator = boost::indirect_iterator<typename Column_support::reverse_iterator>;
+  using const_reverse_iterator = boost::indirect_iterator<typename Column_support::const_reverse_iterator>;
 
   List_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -185,14 +185,14 @@ class List_column : public Master_matrix::Row_access_option,
   using Dim_opt = typename Master_matrix::Column_dimension_option;
   using Chain_opt = typename Master_matrix::Chain_column_option;
 
-  Column column_;
+  Column_support column_;
   Field_operators* operators_;
   Cell_constructor* cellPool_;
 
   template <class Column, class Cell_iterator, typename F1, typename F2, typename F3, typename F4>
   friend void _generic_merge_cell_to_column(Column& targetColumn,
                                             Cell_iterator& itSource,
-                                            typename Column::Column::iterator& itTarget,
+                                            typename Column::Column_support::iterator& itTarget,
                                             F1&& process_target,
                                             F2&& process_source,
                                             F3&& update_target1,
@@ -217,11 +217,11 @@ class List_column : public Master_matrix::Row_access_option,
                                                  const Cell_range& source,
                                                  Column& targetColumn);
 
-  void _delete_cell(typename Column::iterator& it);
-  Cell* _insert_cell(const Field_element& value, ID_index rowIndex, const typename Column::iterator& position);
-  void _insert_cell(ID_index rowIndex, const typename Column::iterator& position);
-  void _update_cell(const Field_element& value, ID_index rowIndex, const typename Column::iterator& position);
-  void _update_cell(ID_index rowIndex, const typename Column::iterator& position);
+  void _delete_cell(typename Column_support::iterator& it);
+  Cell* _insert_cell(const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position);
+  void _insert_cell(ID_index rowIndex, const typename Column_support::iterator& position);
+  void _update_cell(const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position);
+  void _update_cell(ID_index rowIndex, const typename Column_support::iterator& position);
   template <class Cell_range>
   bool _add(const Cell_range& column);
   template <class Cell_range>
@@ -844,7 +844,7 @@ inline List_column<Master_matrix>& List_column<Master_matrix>::operator=(const L
 }
 
 template <class Master_matrix>
-inline void List_column<Master_matrix>::_delete_cell(typename Column::iterator& it)
+inline void List_column<Master_matrix>::_delete_cell(typename Column_support::iterator& it)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(*it);
   cellPool_->destroy(*it);
@@ -853,7 +853,7 @@ inline void List_column<Master_matrix>::_delete_cell(typename Column::iterator& 
 
 template <class Master_matrix>
 inline typename List_column<Master_matrix>::Cell* List_column<Master_matrix>::_insert_cell(
-    const Field_element& value, ID_index rowIndex, const typename Column::iterator& position)
+    const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* newCell = cellPool_->construct(RA_opt::columnIndex_, rowIndex);
@@ -870,7 +870,8 @@ inline typename List_column<Master_matrix>::Cell* List_column<Master_matrix>::_i
 }
 
 template <class Master_matrix>
-inline void List_column<Master_matrix>::_insert_cell(ID_index rowIndex, const typename Column::iterator& position)
+inline void List_column<Master_matrix>::_insert_cell(ID_index rowIndex,
+                                                     const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* newCell = cellPool_->construct(RA_opt::columnIndex_, rowIndex);
@@ -885,7 +886,7 @@ inline void List_column<Master_matrix>::_insert_cell(ID_index rowIndex, const ty
 template <class Master_matrix>
 inline void List_column<Master_matrix>::_update_cell(const Field_element& value,
                                                      ID_index rowIndex,
-                                                     const typename Column::iterator& position)
+                                                     const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     *position = cellPool_->construct(RA_opt::columnIndex_, rowIndex);
@@ -898,7 +899,8 @@ inline void List_column<Master_matrix>::_update_cell(const Field_element& value,
 }
 
 template <class Master_matrix>
-inline void List_column<Master_matrix>::_update_cell(ID_index rowIndex, const typename Column::iterator& position)
+inline void List_column<Master_matrix>::_update_cell(ID_index rowIndex,
+                                                     const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     *position = cellPool_->construct(RA_opt::columnIndex_, rowIndex);

@@ -73,7 +73,7 @@ class Id_to_index_overlay
    * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
    * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0.
    * 
-   * @tparam Boundary_container Range type for @ref Matrix::Cell_representative ranges.
+   * @tparam Boundary_range Range type for @ref Matrix::Cell_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
@@ -88,8 +88,8 @@ class Id_to_index_overlay
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
    * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  template <class Boundary_container = Boundary>
-  Id_to_index_overlay(const std::vector<Boundary_container>& orderedBoundaries, 
+  template <class Boundary_range = Boundary>
+  Id_to_index_overlay(const std::vector<Boundary_range>& orderedBoundaries, 
                       Column_settings* colSettings);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
@@ -138,7 +138,7 @@ class Id_to_index_overlay
    * 
    * @tparam BirthComparatorFunction Type of the birth comparator: (@ref Pos_index, @ref Pos_index) -> bool
    * @tparam DeathComparatorFunction Type of the death comparator: (@ref Pos_index, @ref Pos_index) -> bool
-   * @tparam Boundary_container  Range type for @ref Matrix::Cell_representative ranges.
+   * @tparam Boundary_range  Range type for @ref Matrix::Cell_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
@@ -161,8 +161,8 @@ class Id_to_index_overlay
    * the second one with respect to some self defined order. It is used while swapping two positive but paired
    * columns.
    */
-  template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_container>
-  Id_to_index_overlay(const std::vector<Boundary_container>& orderedBoundaries, 
+  template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_range>
+  Id_to_index_overlay(const std::vector<Boundary_range>& orderedBoundaries, 
                       Column_settings* colSettings, 
                       const BirthComparatorFunction& birthComparator, 
                       const DeathComparatorFunction& deathComparator);
@@ -221,7 +221,7 @@ class Id_to_index_overlay
    * This means that it is assumed that this method is called on boundaries in the order of the filtration. 
    * It also assumes that the faces in the given boundary are identified by their relative position in the filtration, 
    * starting at 0. If it is not the case, use the other
-   * @ref insert_boundary(ID_index, const Boundary_container&, Dimension) "insert_boundary" instead by indicating the
+   * @ref insert_boundary(ID_index, const Boundary_range&, Dimension) "insert_boundary" instead by indicating the
    * face ID used in the boundaries when the face is inserted.
    *
    * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
@@ -237,13 +237,13 @@ class Id_to_index_overlay
    *   `IDIdx + linear combination of older column IDIdxs`, where the combination is deduced while reducing the 
    *   given boundary. If the barcode is stored, it will also be updated.
    * 
-   * @tparam Boundary_container Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
    * @param boundary Boundary generating the new column. The content should be ordered by ID.
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
-  template <class Boundary_container = Boundary>
-  void insert_boundary(const Boundary_container& boundary, Dimension dim = -1);
+  template <class Boundary_range = Boundary>
+  void insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
   /**
    * @brief It does the same as the other version, but allows the boundary faces to be identified without restrictions
    * except that all IDs have to be strictly increasing in the order of filtration. Note that you should avoid then
@@ -252,7 +252,7 @@ class Id_to_index_overlay
    * As a face has to be inserted before one of its cofaces in a valid filtration (recall that it is assumed that
    * the faces are inserted by order of filtration), it is sufficient to indicate the ID of the face being inserted.
    * 
-   * @tparam Boundary_container Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
    * @param faceIndex @ref IDIdx index to use to identify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the 
    * @p faceIndex values of precedent calls of the method for the corresponding faces and should be ordered in 
@@ -260,8 +260,8 @@ class Id_to_index_overlay
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
-  template <class Boundary_container = Boundary>
-  void insert_boundary(ID_index faceIndex, const Boundary_container& boundary, Dimension dim = -1);
+  template <class Boundary_range = Boundary>
+  void insert_boundary(ID_index faceIndex, const Boundary_range& boundary, Dimension dim = -1);
   /**
    * @brief Returns the column at the given @ref IDIdx index. 
    * For @ref boundarymatrix "RU matrices", the returned column is from \f$ R \f$.
@@ -633,9 +633,9 @@ inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::Id_to_index_overla
 }
 
 template <class Underlying_matrix, class Master_matrix>
-template <class Boundary_container>
+template <class Boundary_range>
 inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::Id_to_index_overlay(
-    const std::vector<Boundary_container>& orderedBoundaries, Column_settings* colSettings)
+    const std::vector<Boundary_range>& orderedBoundaries, Column_settings* colSettings)
     : matrix_(orderedBoundaries, colSettings), idToIndex_(nullptr), nextIndex_(orderedBoundaries.size()) 
 {
   _initialize_map(orderedBoundaries.size());
@@ -666,9 +666,9 @@ inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::Id_to_index_overla
 }
 
 template <class Underlying_matrix, class Master_matrix>
-template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_container>
+template <typename BirthComparatorFunction, typename DeathComparatorFunction, class Boundary_range>
 inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::Id_to_index_overlay(
-    const std::vector<Boundary_container>& orderedBoundaries, 
+    const std::vector<Boundary_range>& orderedBoundaries, 
     Column_settings* colSettings,
     const BirthComparatorFunction& birthComparator, 
     const DeathComparatorFunction& deathComparator)
@@ -728,8 +728,8 @@ inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::~Id_to_index_overl
 }
 
 template <class Underlying_matrix, class Master_matrix>
-template <class Boundary_container>
-inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_boundary(const Boundary_container& boundary,
+template <class Boundary_range>
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_boundary(const Boundary_range& boundary,
                                                                                   Dimension dim) 
 {
   matrix_.insert_boundary(boundary, dim);
@@ -748,9 +748,9 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_bounda
 }
 
 template <class Underlying_matrix, class Master_matrix>
-template <class Boundary_container>
+template <class Boundary_range>
 inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_boundary(ID_index faceIndex,
-                                                                                  const Boundary_container& boundary,
+                                                                                  const Boundary_range& boundary,
                                                                                   Dimension dim) 
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {

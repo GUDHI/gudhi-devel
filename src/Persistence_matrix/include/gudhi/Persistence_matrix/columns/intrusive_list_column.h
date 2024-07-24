@@ -59,16 +59,16 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
 
  private:
   using Field_operators = typename Master_matrix::Field_operators;
-  using Column =
+  using Column_support =
       boost::intrusive::list<Cell, boost::intrusive::constant_time_size<false>,
                              boost::intrusive::base_hook<typename Master_matrix::Base_hook_matrix_list_column> >;
   using Cell_constructor = typename Master_matrix::Cell_constructor;
 
  public:
-  using iterator = typename Column::iterator;
-  using const_iterator = typename Column::const_iterator;
-  using reverse_iterator = typename Column::reverse_iterator;
-  using const_reverse_iterator = typename Column::const_reverse_iterator;
+  using iterator = typename Column_support::iterator;
+  using const_iterator = typename Column_support::const_iterator;
+  using reverse_iterator = typename Column_support::reverse_iterator;
+  using const_reverse_iterator = typename Column_support::const_reverse_iterator;
 
   Intrusive_list_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -211,12 +211,12 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
 
   Field_operators* operators_;
   Cell_constructor* cellPool_;
-  Column column_;
+  Column_support column_;
 
   template <class Column, class Cell_iterator, typename F1, typename F2, typename F3, typename F4>
   friend void _generic_merge_cell_to_column(Column& targetColumn,
                                             Cell_iterator& itSource,
-                                            typename Column::Column::iterator& itTarget,
+                                            typename Column::Column_support::iterator& itTarget,
                                             F1&& process_target,
                                             F2&& process_source,
                                             F3&& update_target1,

@@ -70,7 +70,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * a column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
    * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0.
    *
-   * @tparam Boundary_container Range type for @ref Matrix::Cell_representative ranges.
+   * @tparam Boundary_range Range type for @ref Matrix::Cell_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order.
@@ -84,8 +84,8 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
    * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  template <class Boundary_container = Boundary>
-  RU_matrix(const std::vector<Boundary_container>& orderedBoundaries, Column_settings* colSettings);
+  template <class Boundary_range = Boundary>
+  RU_matrix(const std::vector<Boundary_range>& orderedBoundaries, Column_settings* colSettings);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
    *
@@ -116,7 +116,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * This means that it is assumed that this method is called on boundaries in the order of the filtration.
    * It also assumes that the faces in the given boundary are identified by their relative position in the filtration,
    * starting at 0. If it is not the case, use the other
-   * @ref insert_boundary(ID_index, const Boundary_container&, Dimension) "insert_boundary" instead by indicating the
+   * @ref insert_boundary(ID_index, const Boundary_range&, Dimension) "insert_boundary" instead by indicating the
    * face ID used in the boundaries when the face is inserted.
    *
    * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
@@ -124,14 +124,14 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    *
    * At the insertion, the boundary is stored in its reduced form and the barcode, if enabled, is updated.
    *
-   * @tparam Boundary_container Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size()
+   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size()
    * method.
    * @param boundary Boundary generating the new column. The content should be ordered by ID.
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
-  template <class Boundary_container = Boundary>
-  void insert_boundary(const Boundary_container& boundary, Dimension dim = -1);
+  template <class Boundary_range = Boundary>
+  void insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
   /**
    * @brief It does the same as the other version, but allows the boundary faces to be identified without restrictions
    * except that all IDs have to be strictly increasing in the order of filtration. Note that you should avoid then
@@ -140,7 +140,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * As a face has to be inserted before one of its cofaces in a valid filtration (recall that it is assumed that
    * the faces are inserted by order of filtration), it is sufficient to indicate the ID of the face being inserted.
    *
-   * @tparam Boundary_container Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size()
+   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size()
    * method.
    * @param faceIndex @ref IDIdx index to use to identify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
@@ -149,8 +149,8 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
-  template <class Boundary_container = Boundary>
-  void insert_boundary(ID_index faceIndex, const Boundary_container& boundary, Dimension dim = -1);
+  template <class Boundary_range = Boundary>
+  void insert_boundary(ID_index faceIndex, const Boundary_range& boundary, Dimension dim = -1);
   /**
    * @brief Returns the column at the given @ref MatIdx index in \f$ R \f$ if @p inR is true and
    * in \f$ U \f$ if @p inR is false.
@@ -432,8 +432,8 @@ inline RU_matrix<Master_matrix>::RU_matrix(Column_settings* colSettings)
 }
 
 template <class Master_matrix>
-template <class Boundary_container>
-inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_container>& orderedBoundaries,
+template <class Boundary_range>
+inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_range>& orderedBoundaries,
                                            Column_settings* colSettings)
     : Pair_opt(),
       Swap_opt(),
@@ -513,16 +513,16 @@ inline RU_matrix<Master_matrix>::RU_matrix(RU_matrix&& other) noexcept
 {}
 
 template <class Master_matrix>
-template <class Boundary_container>
-inline void RU_matrix<Master_matrix>::insert_boundary(const Boundary_container& boundary, Dimension dim)
+template <class Boundary_range>
+inline void RU_matrix<Master_matrix>::insert_boundary(const Boundary_range& boundary, Dimension dim)
 {
   _insert_boundary(reducedMatrixR_.insert_boundary(boundary, dim));
 }
 
 template <class Master_matrix>
-template <class Boundary_container>
+template <class Boundary_range>
 inline void RU_matrix<Master_matrix>::insert_boundary(ID_index faceIndex,
-                                                      const Boundary_container& boundary,
+                                                      const Boundary_range& boundary,
                                                       Dimension dim)
 {
   // maps for possible shifting between column content and position indices used for birth events

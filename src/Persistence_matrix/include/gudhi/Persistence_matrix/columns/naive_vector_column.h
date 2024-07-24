@@ -60,14 +60,14 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
 
  private:
   using Field_operators = typename Master_matrix::Field_operators;
-  using Column = std::vector<Cell*>;
+  using Column_support = std::vector<Cell*>;
   using Cell_constructor = typename Master_matrix::Cell_constructor;
 
  public:
-  using iterator = boost::indirect_iterator<typename Column::iterator>;
-  using const_iterator = boost::indirect_iterator<typename Column::const_iterator>;
-  using reverse_iterator = boost::indirect_iterator<typename Column::reverse_iterator>;
-  using const_reverse_iterator = boost::indirect_iterator<typename Column::const_reverse_iterator>;
+  using iterator = boost::indirect_iterator<typename Column_support::iterator>;
+  using const_iterator = boost::indirect_iterator<typename Column_support::const_iterator>;
+  using reverse_iterator = boost::indirect_iterator<typename Column_support::reverse_iterator>;
+  using const_reverse_iterator = boost::indirect_iterator<typename Column_support::const_reverse_iterator>;
 
   Naive_vector_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -185,14 +185,14 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
   using Dim_opt = typename Master_matrix::Column_dimension_option;
   using Chain_opt = typename Master_matrix::Chain_column_option;
 
-  Column column_;
+  Column_support column_;
   Field_operators* operators_;
   Cell_constructor* cellPool_;
 
   template <class Column, class Cell_iterator, typename F1, typename F2, typename F3, typename F4>
   friend void _generic_merge_cell_to_column(Column& targetColumn,
                                             Cell_iterator& itSource,
-                                            typename Column::Column::iterator& itTarget,
+                                            typename Column::Column_support::iterator& itTarget,
                                             F1&& process_target,
                                             F2&& process_source,
                                             F3&& update_target1,
@@ -208,9 +208,9 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
                                      F5&& finish_target);
 
   void _delete_cell(Cell* cell);
-  void _delete_cell(typename Column::iterator& it);
-  Cell* _insert_cell(const Field_element& value, ID_index rowIndex, Column& column);
-  void _insert_cell(ID_index rowIndex, Column& column);
+  void _delete_cell(typename Column_support::iterator& it);
+  Cell* _insert_cell(const Field_element& value, ID_index rowIndex, Column_support& column);
+  void _insert_cell(ID_index rowIndex, Column_support& column);
   void _update_cell(const Field_element& value, ID_index rowIndex, Index position);
   void _update_cell(ID_index rowIndex, Index position);
   template <class Cell_range>
@@ -848,7 +848,7 @@ inline void Naive_vector_column<Master_matrix>::_delete_cell(Cell* cell)
 }
 
 template <class Master_matrix>
-inline void Naive_vector_column<Master_matrix>::_delete_cell(typename Column::iterator& it)
+inline void Naive_vector_column<Master_matrix>::_delete_cell(typename Column_support::iterator& it)
 {
   _delete_cell(*it);
   ++it;
@@ -856,7 +856,7 @@ inline void Naive_vector_column<Master_matrix>::_delete_cell(typename Column::it
 
 template <class Master_matrix>
 inline typename Naive_vector_column<Master_matrix>::Cell* Naive_vector_column<Master_matrix>::_insert_cell(
-    const Field_element& value, ID_index rowIndex, Column& column)
+    const Field_element& value, ID_index rowIndex, Column_support& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* newCell = cellPool_->construct(RA_opt::columnIndex_, rowIndex);
@@ -873,7 +873,7 @@ inline typename Naive_vector_column<Master_matrix>::Cell* Naive_vector_column<Ma
 }
 
 template <class Master_matrix>
-inline void Naive_vector_column<Master_matrix>::_insert_cell(ID_index rowIndex, Column& column)
+inline void Naive_vector_column<Master_matrix>::_insert_cell(ID_index rowIndex, Column_support& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* newCell = cellPool_->construct(RA_opt::columnIndex_, rowIndex);
@@ -930,12 +930,15 @@ inline bool Naive_vector_column<Master_matrix>::_add(const Cell_range& column)
     return true;
   }
 
-  Column newColumn;
+  Column_support newColumn;
   newColumn.reserve(column_.size() + column.size());  // safe upper bound
 
   auto pivotIsZeroed = _generic_add_to_column(
-      column, *this, [&](Cell* cellTarget) { newColumn.push_back(cellTarget); },
-      [&](typename Cell_range::const_iterator& itSource, [[maybe_unused]] const typename Column::iterator& itTarget) {
+      column, 
+      *this, 
+      [&](Cell* cellTarget) { newColumn.push_back(cellTarget); },
+      [&](typename Cell_range::const_iterator& itSource,
+          [[maybe_unused]] const typename Column_support::iterator& itTarget) {
         if constexpr (Master_matrix::Option_list::is_z2) {
           _insert_cell(itSource->get_row_index(), newColumn);
         } else {
@@ -947,7 +950,7 @@ inline bool Naive_vector_column<Master_matrix>::_add(const Cell_range& column)
           operators_->add_inplace(targetElement, itSource->get_element());
       },
       [&](Cell* cellTarget) { newColumn.push_back(cellTarget); },
-      [&](typename Column::iterator& itTarget) {
+      [&](typename Column_support::iterator& itTarget) {
         while (itTarget != column_.end()) {
           newColumn.push_back(*itTarget);
           itTarget++;
@@ -985,24 +988,25 @@ inline bool Naive_vector_column<Master_matrix>::_multiply_target_and_add(const F
     return true;
   }
 
-  Column newColumn;
+  Column_support newColumn;
   newColumn.reserve(column_.size() + column.size());  // safe upper bound
 
   auto pivotIsZeroed = _generic_add_to_column(
-      column, *this,
+      column,
+      *this,
       [&](Cell* cellTarget) {
         operators_->multiply_inplace(cellTarget->get_element(), val);
         if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_cell(*cellTarget);
         newColumn.push_back(cellTarget);
       },
-      [&](typename Cell_range::const_iterator& itSource, const typename Column::iterator& itTarget) {
+      [&](typename Cell_range::const_iterator& itSource, const typename Column_support::iterator& itTarget) {
         _insert_cell(itSource->get_element(), itSource->get_row_index(), newColumn);
       },
       [&](Field_element& targetElement, typename Cell_range::const_iterator& itSource) {
         operators_->multiply_and_add_inplace_front(targetElement, val, itSource->get_element());
       },
       [&](Cell* cellTarget) { newColumn.push_back(cellTarget); },
-      [&](typename Column::iterator& itTarget) {
+      [&](typename Column_support::iterator& itTarget) {
         while (itTarget != column_.end()) {
           operators_->multiply_inplace((*itTarget)->get_element(), val);
           if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_cell(**itTarget);
@@ -1025,12 +1029,14 @@ inline bool Naive_vector_column<Master_matrix>::_multiply_source_and_add(const C
     return false;
   }
 
-  Column newColumn;
+  Column_support newColumn;
   newColumn.reserve(column_.size() + column.size());  // safe upper bound
 
   auto pivotIsZeroed = _generic_add_to_column(
-      column, *this, [&](Cell* cellTarget) { newColumn.push_back(cellTarget); },
-      [&](typename Cell_range::const_iterator& itSource, const typename Column::iterator& itTarget) {
+      column,
+      *this,
+      [&](Cell* cellTarget) { newColumn.push_back(cellTarget); },
+      [&](typename Cell_range::const_iterator& itSource, const typename Column_support::iterator& itTarget) {
         Cell* newCell = _insert_cell(itSource->get_element(), itSource->get_row_index(), newColumn);
         operators_->multiply_inplace(newCell->get_element(), val);
         if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_cell(*newCell);
@@ -1039,7 +1045,7 @@ inline bool Naive_vector_column<Master_matrix>::_multiply_source_and_add(const C
         operators_->multiply_and_add_inplace_back(itSource->get_element(), val, targetElement);
       },
       [&](Cell* cellTarget) { newColumn.push_back(cellTarget); },
-      [&](typename Column::iterator& itTarget) {
+      [&](typename Column_support::iterator& itTarget) {
         while (itTarget != column_.end()) {
           newColumn.push_back(*itTarget);
           itTarget++;

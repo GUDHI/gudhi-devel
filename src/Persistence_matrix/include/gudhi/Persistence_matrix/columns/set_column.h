@@ -65,14 +65,14 @@ class Set_column : public Master_matrix::Row_access_option,
     bool operator()(const Cell* c1, const Cell* c2) const { return *c1 < *c2; }
   };
 
-  using Column = std::set<Cell*, CellPointerComp>;
+  using Column_support = std::set<Cell*, CellPointerComp>;
   using Cell_constructor = typename Master_matrix::Cell_constructor;
 
  public:
-  using iterator = boost::indirect_iterator<typename Column::iterator>;
-  using const_iterator = boost::indirect_iterator<typename Column::const_iterator>;
-  using reverse_iterator = boost::indirect_iterator<typename Column::reverse_iterator>;
-  using const_reverse_iterator = boost::indirect_iterator<typename Column::const_reverse_iterator>;
+  using iterator = boost::indirect_iterator<typename Column_support::iterator>;
+  using const_iterator = boost::indirect_iterator<typename Column_support::const_iterator>;
+  using reverse_iterator = boost::indirect_iterator<typename Column_support::reverse_iterator>;
+  using const_reverse_iterator = boost::indirect_iterator<typename Column_support::const_reverse_iterator>;
 
   Set_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -190,14 +190,14 @@ class Set_column : public Master_matrix::Row_access_option,
   using Dim_opt = typename Master_matrix::Column_dimension_option;
   using Chain_opt = typename Master_matrix::Chain_column_option;
 
-  Column column_;
+  Column_support column_;
   Field_operators* operators_;
   Cell_constructor* cellPool_;
 
   template <class Column, class Cell_iterator, typename F1, typename F2, typename F3, typename F4>
   friend void _generic_merge_cell_to_column(Column& targetColumn,
                                             Cell_iterator& itSource,
-                                            typename Column::Column::iterator& itTarget,
+                                            typename Column::Column_support::iterator& itTarget,
                                             F1&& process_target,
                                             F2&& process_source,
                                             F3&& update_target1,
@@ -222,9 +222,9 @@ class Set_column : public Master_matrix::Row_access_option,
                                                  const Cell_range& source,
                                                  Column& targetColumn);
 
-  void _delete_cell(typename Column::iterator& it);
-  Cell* _insert_cell(const Field_element& value, ID_index rowIndex, const typename Column::iterator& position);
-  void _insert_cell(ID_index rowIndex, const typename Column::iterator& position);
+  void _delete_cell(typename Column_support::iterator& it);
+  Cell* _insert_cell(const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position);
+  void _insert_cell(ID_index rowIndex, const typename Column_support::iterator& position);
   template <class Cell_range>
   bool _add(const Cell_range& column);
   template <class Cell_range>
@@ -480,7 +480,7 @@ inline void Set_column<Master_matrix>::reorder(const Row_index_map& valueMap, [[
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns.");
 
-  Column newSet;
+  Column_support newSet;
 
   for (Cell* cell : column_) {
     if constexpr (Master_matrix::Option_list::has_row_access) {
@@ -826,7 +826,7 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::operator=(const Set
 }
 
 template <class Master_matrix>
-inline void Set_column<Master_matrix>::_delete_cell(typename Column::iterator& it)
+inline void Set_column<Master_matrix>::_delete_cell(typename Column_support::iterator& it)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(*it);
   cellPool_->destroy(*it);
@@ -835,7 +835,7 @@ inline void Set_column<Master_matrix>::_delete_cell(typename Column::iterator& i
 
 template <class Master_matrix>
 inline typename Set_column<Master_matrix>::Cell* Set_column<Master_matrix>::_insert_cell(
-    const Field_element& value, ID_index rowIndex, const typename Column::iterator& position)
+    const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* newCell = cellPool_->construct(RA_opt::columnIndex_, rowIndex);
@@ -852,7 +852,8 @@ inline typename Set_column<Master_matrix>::Cell* Set_column<Master_matrix>::_ins
 }
 
 template <class Master_matrix>
-inline void Set_column<Master_matrix>::_insert_cell(ID_index rowIndex, const typename Column::iterator& position)
+inline void Set_column<Master_matrix>::_insert_cell(ID_index rowIndex,
+                                                    const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* newCell = cellPool_->construct(RA_opt::columnIndex_, rowIndex);

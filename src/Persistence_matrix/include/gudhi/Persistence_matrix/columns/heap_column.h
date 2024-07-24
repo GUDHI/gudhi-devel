@@ -60,14 +60,14 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
 
  private:
   using Field_operators = typename Master_matrix::Field_operators;
-  using Column = std::vector<Cell*>;
+  using Column_support = std::vector<Cell*>;
   using Cell_constructor = typename Master_matrix::Cell_constructor;
 
  public:
-  using iterator = boost::indirect_iterator<typename Column::iterator>;
-  using const_iterator = boost::indirect_iterator<typename Column::const_iterator>;
-  using reverse_iterator = boost::indirect_iterator<typename Column::reverse_iterator>;
-  using const_reverse_iterator = boost::indirect_iterator<typename Column::const_reverse_iterator>;
+  using iterator = boost::indirect_iterator<typename Column_support::iterator>;
+  using const_iterator = boost::indirect_iterator<typename Column_support::const_iterator>;
+  using reverse_iterator = boost::indirect_iterator<typename Column_support::reverse_iterator>;
+  using const_reverse_iterator = boost::indirect_iterator<typename Column_support::const_reverse_iterator>;
 
   Heap_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -235,7 +235,7 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
     bool operator()(const Cell* c1, const Cell* c2) const { return *c1 < *c2; }
   } cellPointerComp_;
 
-  Column column_;
+  Column_support column_;
   unsigned int insertsSinceLastPrune_;
   Field_operators* operators_;
   Cell_constructor* cellPool_;
@@ -545,7 +545,7 @@ inline void Heap_column<Master_matrix>::reorder(const Row_index_map& valueMap, [
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns.");
 
-  Column tempCol;
+  Column_support tempCol;
   Cell* pivot = _pop_pivot();
   while (pivot != nullptr) {
     pivot->set_row_index(valueMap.at(pivot->get_row_index()));
@@ -578,7 +578,7 @@ inline void Heap_column<Master_matrix>::clear(ID_index rowIndex)
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns.");
 
-  Column tempCol;
+  Column_support tempCol;
   Cell* pivot = _pop_pivot();
   while (pivot != nullptr) {
     if (pivot->get_row_index() != rowIndex) {
@@ -912,7 +912,7 @@ inline void Heap_column<Master_matrix>::_prune()
 {
   if (insertsSinceLastPrune_ == 0) return;
 
-  Column tempCol;
+  Column_support tempCol;
   Cell* pivot = _pop_pivot();
   while (pivot != nullptr) {
     tempCol.push_back(pivot);

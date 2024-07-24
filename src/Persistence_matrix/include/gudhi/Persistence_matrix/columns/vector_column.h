@@ -62,14 +62,14 @@ class Vector_column : public Master_matrix::Row_access_option,
 
  private:
   using Field_operators = typename Master_matrix::Field_operators;
-  using Column = std::vector<Cell*>;
+  using Column_support = std::vector<Cell*>;
   using Cell_constructor = typename Master_matrix::Cell_constructor;
 
  public:
-  using iterator = boost::indirect_iterator<typename Column::iterator>;
-  using const_iterator = boost::indirect_iterator<typename Column::const_iterator>;
-  using reverse_iterator = boost::indirect_iterator<typename Column::reverse_iterator>;
-  using const_reverse_iterator = boost::indirect_iterator<typename Column::const_reverse_iterator>;
+  using iterator = boost::indirect_iterator<typename Column_support::iterator>;
+  using const_iterator = boost::indirect_iterator<typename Column_support::const_iterator>;
+  using reverse_iterator = boost::indirect_iterator<typename Column_support::reverse_iterator>;
+  using const_reverse_iterator = boost::indirect_iterator<typename Column_support::const_reverse_iterator>;
 
   Vector_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -217,7 +217,7 @@ class Vector_column : public Master_matrix::Row_access_option,
   using Dim_opt = typename Master_matrix::Column_dimension_option;
   using Chain_opt = typename Master_matrix::Chain_column_option;
 
-  Column column_;
+  Column_support column_;
   std::unordered_set<ID_index> erasedValues_;  // TODO: test other containers? Useless when clear(Index) is never
                                                // called, how much is it worth it?
   Field_operators* operators_;
@@ -226,7 +226,7 @@ class Vector_column : public Master_matrix::Row_access_option,
   template <class Column, class Cell_iterator, typename F1, typename F2, typename F3, typename F4>
   friend void _generic_merge_cell_to_column(Column& targetColumn,
                                             Cell_iterator& itSource,
-                                            typename Column::Column::iterator& itTarget,
+                                            typename Column::Column_support::iterator& itTarget,
                                             F1&& process_target,
                                             F2&& process_source,
                                             F3&& update_target1,
@@ -234,9 +234,9 @@ class Vector_column : public Master_matrix::Row_access_option,
                                             bool& pivotIsZeroed);
 
   void _delete_cell(Cell* cell);
-  void _delete_cell(typename Column::iterator& it);
-  Cell* _insert_cell(const Field_element& value, ID_index rowIndex, Column& column);
-  void _insert_cell(ID_index rowIndex, Column& column);
+  void _delete_cell(typename Column_support::iterator& it);
+  Cell* _insert_cell(const Field_element& value, ID_index rowIndex, Column_support& column);
+  void _insert_cell(ID_index rowIndex, Column_support& column);
   void _update_cell(const Field_element& value, ID_index rowIndex, Index position);
   void _update_cell(ID_index rowIndex, Index position);
   template <class Cell_range>
@@ -563,7 +563,7 @@ inline void Vector_column<Master_matrix>::reorder(const Row_index_map& valueMap,
 
     std::sort(column_.begin(), column_.end(), [](const Cell* c1, const Cell* c2) { return *c1 < *c2; });
   } else {
-    Column newColumn;
+    Column_support newColumn;
     for (Cell* cell : column_) {
       if (erasedValues_.find(cell->get_row_index()) == erasedValues_.end()) {
         if constexpr (Master_matrix::Option_list::has_row_access) {
@@ -962,7 +962,7 @@ inline void Vector_column<Master_matrix>::_delete_cell(Cell* cell)
 }
 
 template <class Master_matrix>
-inline void Vector_column<Master_matrix>::_delete_cell(typename Column::iterator& it)
+inline void Vector_column<Master_matrix>::_delete_cell(typename Column_support::iterator& it)
 {
   _delete_cell(*it);
   ++it;
@@ -970,7 +970,7 @@ inline void Vector_column<Master_matrix>::_delete_cell(typename Column::iterator
 
 template <class Master_matrix>
 inline typename Vector_column<Master_matrix>::Cell* Vector_column<Master_matrix>::_insert_cell(
-    const Field_element& value, ID_index rowIndex, Column& column)
+    const Field_element& value, ID_index rowIndex, Column_support& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* newCell = cellPool_->construct(RA_opt::columnIndex_, rowIndex);
@@ -987,7 +987,7 @@ inline typename Vector_column<Master_matrix>::Cell* Vector_column<Master_matrix>
 }
 
 template <class Master_matrix>
-inline void Vector_column<Master_matrix>::_insert_cell(ID_index rowIndex, Column& column)
+inline void Vector_column<Master_matrix>::_insert_cell(ID_index rowIndex, Column_support& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Cell* newCell = cellPool_->construct(RA_opt::columnIndex_, rowIndex);
@@ -1043,13 +1043,14 @@ inline bool Vector_column<Master_matrix>::_add(const Cell_range& column)
     return true;
   }
 
-  Column newColumn;
+  Column_support newColumn;
   newColumn.reserve(column_.size() + column.size());  // safe upper bound
 
   auto pivotIsZeroed = _generic_add(
       column,
       [&](Cell* cellTarget) { newColumn.push_back(cellTarget); },
-      [&](typename Cell_range::const_iterator& itSource, [[maybe_unused]] const typename Column::iterator& itTarget) {
+      [&](typename Cell_range::const_iterator& itSource,
+          [[maybe_unused]] const typename Column_support::iterator& itTarget) {
         if constexpr (Master_matrix::Option_list::is_z2) {
           _insert_cell(itSource->get_row_index(), newColumn);
         } else {
@@ -1060,7 +1061,8 @@ inline bool Vector_column<Master_matrix>::_add(const Cell_range& column)
         if constexpr (!Master_matrix::Option_list::is_z2)
           operators_->add_inplace(targetElement, itSource->get_element());
       },
-      [&](Cell* cellTarget) { newColumn.push_back(cellTarget); });
+      [&](Cell* cellTarget) { newColumn.push_back(cellTarget); }
+    );
 
   column_.swap(newColumn);
 
@@ -1093,7 +1095,7 @@ inline bool Vector_column<Master_matrix>::_multiply_target_and_add(const Field_e
     return true;
   }
 
-  Column newColumn;
+  Column_support newColumn;
   newColumn.reserve(column_.size() + column.size());  // safe upper bound
 
   auto pivotIsZeroed = _generic_add(
@@ -1103,13 +1105,14 @@ inline bool Vector_column<Master_matrix>::_multiply_target_and_add(const Field_e
         if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_cell(*cellTarget);
         newColumn.push_back(cellTarget);
       },
-      [&](typename Cell_range::const_iterator& itSource, const typename Column::iterator& itTarget) {
+      [&](typename Cell_range::const_iterator& itSource, const typename Column_support::iterator& itTarget) {
         _insert_cell(itSource->get_element(), itSource->get_row_index(), newColumn);
       },
       [&](Field_element& targetElement, typename Cell_range::const_iterator& itSource) {
         operators_->multiply_and_add_inplace_front(targetElement, val, itSource->get_element());
       },
-      [&](Cell* cellTarget) { newColumn.push_back(cellTarget); });
+      [&](Cell* cellTarget) { newColumn.push_back(cellTarget); }
+    );
 
   column_.swap(newColumn);
 
@@ -1124,13 +1127,13 @@ inline bool Vector_column<Master_matrix>::_multiply_source_and_add(const Cell_ra
     return false;
   }
 
-  Column newColumn;
+  Column_support newColumn;
   newColumn.reserve(column_.size() + column.size());  // safe upper bound
 
   auto pivotIsZeroed = _generic_add(
       column,
       [&](Cell* cellTarget) { newColumn.push_back(cellTarget); },
-      [&](typename Cell_range::const_iterator& itSource, const typename Column::iterator& itTarget) {
+      [&](typename Cell_range::const_iterator& itSource, const typename Column_support::iterator& itTarget) {
         Cell* newCell = _insert_cell(itSource->get_element(), itSource->get_row_index(), newColumn);
         operators_->multiply_inplace(newCell->get_element(), val);
         if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_cell(*newCell);
@@ -1138,7 +1141,8 @@ inline bool Vector_column<Master_matrix>::_multiply_source_and_add(const Cell_ra
       [&](Field_element& targetElement, typename Cell_range::const_iterator& itSource) {
         operators_->multiply_and_add_inplace_back(itSource->get_element(), val, targetElement);
       },
-      [&](Cell* cellTarget) { newColumn.push_back(cellTarget); });
+      [&](Cell* cellTarget) { newColumn.push_back(cellTarget); }
+    );
 
   column_.swap(newColumn);
 
@@ -1153,7 +1157,7 @@ inline bool Vector_column<Master_matrix>::_generic_add(const Cell_range& column,
                                                        F3&& update_target1,
                                                        F4&& update_target2)
 {
-  auto updateTargetIterator = [&](typename Column::iterator& itTarget) {
+  auto updateTargetIterator = [&](typename Column_support::iterator& itTarget) {
     if constexpr (!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type) {
       while (itTarget != column_.end() && erasedValues_.find((*itTarget)->get_row_index()) != erasedValues_.end()) {
         _delete_cell(*itTarget);

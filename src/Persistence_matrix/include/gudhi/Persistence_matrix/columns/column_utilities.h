@@ -40,7 +40,7 @@ Cell* _get_cell(const Cell_iterator& itTarget)
 template <class Column, class Cell_iterator, typename F1, typename F2, typename F3, typename F4>
 void _generic_merge_cell_to_column(Column& targetColumn,
                                    Cell_iterator& itSource,
-                                   typename Column::Column::iterator& itTarget,
+                                   typename Column::Column_support::iterator& itTarget,
                                    F1&& process_target,
                                    F2&& process_source,
                                    F3&& update_target1,
@@ -71,8 +71,7 @@ void _generic_merge_cell_to_column(Column& targetColumn,
         targetColumn._delete_cell(itTarget);
       } else {
         update_target2(targetCell);
-        if constexpr (Column::Master::Option_list::has_row_access)
-          targetColumn.update_cell(*targetCell);
+        if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_cell(*targetCell);
         ++itTarget;
       }
     }
@@ -116,8 +115,9 @@ bool _add_to_column(const Cell_range& source, Column& targetColumn)
 {
   return _generic_add_to_column(
       source,
-      targetColumn, [&]([[maybe_unused]] typename Column::Cell* cellTarget) {},
-      [&](typename Cell_range::const_iterator& itSource, const typename Column::Column::iterator& itTarget) {
+      targetColumn,
+      [&]([[maybe_unused]] typename Column::Cell* cellTarget) {},
+      [&](typename Cell_range::const_iterator& itSource, const typename Column::Column_support::iterator& itTarget) {
         if constexpr (Column::Master::Option_list::is_z2) {
           targetColumn._insert_cell(itSource->get_row_index(), itTarget);
         } else {
@@ -129,7 +129,8 @@ bool _add_to_column(const Cell_range& source, Column& targetColumn)
           targetColumn.operators_->add_inplace(targetElement, itSource->get_element());
       },
       [&]([[maybe_unused]] typename Column::Cell* cellTarget) {},
-      [&]([[maybe_unused]] typename Column::Column::iterator& itTarget) {});
+      [&]([[maybe_unused]] typename Column::Column_support::iterator& itTarget) {}
+    );
 }
 
 template <class Column, class Cell_range>
@@ -153,29 +154,29 @@ bool _multiply_target_and_add_to_column(const typename Column::Field_element& va
         targetColumn.operators_->multiply_inplace(cellTarget->get_element(), val);
         // targetColumn.RA_opt::update_cell(*itTarget) produces an internal compiler error
         // even though it works in _generic_add_to_column... Probably because of the lambda.
-        if constexpr (Column::Master::Option_list::has_row_access)
-          targetColumn.update_cell(*cellTarget);
+        if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_cell(*cellTarget);
       },
-      [&](typename Cell_range::const_iterator& itSource, const typename Column::Column::iterator& itTarget) {
+      [&](typename Cell_range::const_iterator& itSource, const typename Column::Column_support::iterator& itTarget) {
         targetColumn._insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
       },
       [&](typename Column::Field_element& targetElement, typename Cell_range::const_iterator& itSource) {
         targetColumn.operators_->multiply_and_add_inplace_front(targetElement, val, itSource->get_element());
       },
       [&]([[maybe_unused]] typename Column::Cell* cellTarget) {},
-      [&](typename Column::Column::iterator& itTarget) {
+      [&](typename Column::Column_support::iterator& itTarget) {
         while (itTarget != targetColumn.column_.end()) {
           typename Column::Cell* targetCell = _get_cell<typename Column::Cell>(itTarget);
           targetColumn.operators_->multiply_inplace(targetCell->get_element(), val);
-          if constexpr (Column::Master::Option_list::has_row_access)
-            targetColumn.update_cell(*targetCell);
+          if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_cell(*targetCell);
           itTarget++;
         }
-      });
+      }
+    );
 }
 
 template <class Column, class Cell_range>
-bool _multiply_source_and_add_to_column(const typename Column::Field_element& val, const Cell_range& source,
+bool _multiply_source_and_add_to_column(const typename Column::Field_element& val,
+                                        const Cell_range& source,
                                         Column& targetColumn)
 {
   if (val == 0u) {
@@ -184,25 +185,26 @@ bool _multiply_source_and_add_to_column(const typename Column::Field_element& va
 
   return _generic_add_to_column(
       source,
-      targetColumn, []([[maybe_unused]] typename Column::Cell* cellTarget) {},
-      [&](typename Cell_range::const_iterator& itSource, const typename Column::Column::iterator& itTarget) {
+      targetColumn,
+      []([[maybe_unused]] typename Column::Cell* cellTarget) {},
+      [&](typename Cell_range::const_iterator& itSource, const typename Column::Column_support::iterator& itTarget) {
         typename Column::Cell* cell =
             targetColumn._insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
         targetColumn.operators_->multiply_inplace(cell->get_element(), val);
-        if constexpr (Column::Master::Option_list::has_row_access)
-          targetColumn.update_cell(*cell);
+        if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_cell(*cell);
       },
       [&](typename Column::Field_element& targetElement, typename Cell_range::const_iterator& itSource) {
         targetColumn.operators_->multiply_and_add_inplace_back(itSource->get_element(), val, targetElement);
       },
       [&]([[maybe_unused]] typename Column::Cell* cellTarget) {},
-      []([[maybe_unused]] typename Column::Column::iterator& itTarget) {});
+      []([[maybe_unused]] typename Column::Column_support::iterator& itTarget) {});
 }
 
 // column has to be ordered (ie. not suited for unordered_map and heap) and contain the exact values
 // (ie. not suited for vector and heap). A same column but ordered differently will have another hash value.
 template <class Column>
-std::size_t hash_column(const Column& column) {
+std::size_t hash_column(const Column& column)
+{
   std::size_t seed = 0;
   for (auto& cell : column) {
     seed ^= std::hash<unsigned int>()(cell.get_row_index() * static_cast<unsigned int>(cell.get_element())) +

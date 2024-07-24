@@ -85,14 +85,14 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
   };
 
 #if BOOST_VERSION >= 108100
-  using Column = boost::unordered_flat_set<Cell*, CellPointerHash<Cell>, CellPointerEq<Cell>>;
+  using Column_support = boost::unordered_flat_set<Cell*, CellPointerHash<Cell>, CellPointerEq<Cell>>;
 #else
-  using Column = std::unordered_set<Cell*, CellPointerHash<Cell>, CellPointerEq<Cell>>;
+  using Column_support = std::unordered_set<Cell*, CellPointerHash<Cell>, CellPointerEq<Cell>>;
 #endif
 
  public:
-  using iterator = boost::indirect_iterator<typename Column::iterator>;
-  using const_iterator = boost::indirect_iterator<typename Column::const_iterator>;
+  using iterator = boost::indirect_iterator<typename Column_support::iterator>;
+  using const_iterator = boost::indirect_iterator<typename Column_support::const_iterator>;
 
   Unordered_set_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -227,11 +227,11 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
   using Dim_opt = typename Master_matrix::Column_dimension_option;
   using Chain_opt = typename Master_matrix::Chain_column_option;
 
-  Column column_;
+  Column_support column_;
   Field_operators* operators_;
   Cell_constructor* cellPool_;
 
-  void _delete_cell(typename Column::iterator& it);
+  void _delete_cell(typename Column_support::iterator& it);
   Cell* _insert_cell(const Field_element& value, ID_index rowIndex);
   void _insert_cell(ID_index rowIndex);
   template <class Cell_range>
@@ -501,7 +501,7 @@ inline void Unordered_set_column<Master_matrix>::reorder(const Row_index_map& va
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns.");
 
-  Column newSet;
+  Column_support newSet;
 
   for (Cell* cell : column_) {
     if constexpr (Master_matrix::Option_list::has_row_access) {
@@ -830,7 +830,7 @@ inline Unordered_set_column<Master_matrix>& Unordered_set_column<Master_matrix>:
 }
 
 template <class Master_matrix>
-inline void Unordered_set_column<Master_matrix>::_delete_cell(typename Column::iterator& it)
+inline void Unordered_set_column<Master_matrix>::_delete_cell(typename Column_support::iterator& it)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(*it);
   cellPool_->destroy(*it);

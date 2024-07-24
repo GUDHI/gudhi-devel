@@ -629,7 +629,7 @@ class Matrix {
    * @ref Matrix(const std::function<bool(Pos_index,Pos_index)>&, const std::function<bool(Pos_index,Pos_index)>&)
    * for more information about the comparators.
    *
-   * @tparam Boundary_container Range type for @ref Cell_representative ranges. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range type for @ref Cell_representative ranges. Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Vector of ordered boundaries in filtration order. Indexed continuously starting at 0.
    * @param birthComparator Method taking two @ref PosIdx indices as parameter and returns true if and only if the first
    * face is associated to a bar with strictly smaller birth than the bar associated to the second one.
@@ -639,8 +639,8 @@ class Matrix {
    * @ref PersistenceMatrixOptions::is_z2 is false. Default value is 11.
    * Ignored if @ref PersistenceMatrixOptions::is_z2 is true.
    */
-  template <class Boundary_container = Boundary>
-  Matrix(const std::vector<Boundary_container>& orderedBoundaries, 
+  template <class Boundary_range = Boundary>
+  Matrix(const std::vector<Boundary_range>& orderedBoundaries, 
          const std::function<bool(Pos_index,Pos_index)>& birthComparator,
          const std::function<bool(Pos_index,Pos_index)>& deathComparator, 
          Characteristic characteristic = 11);
@@ -737,7 +737,7 @@ class Matrix {
    * This means that it is assumed that this method is called on boundaries in the order of the filtration.
    * It also assumes that the faces in the given boundary are identified by their relative position in the filtration,
    * starting at 0. If it is not the case, use the other
-   * @ref insert_boundary(ID_index faceIndex, const Boundary_container& boundary, Dimension dim) "insert_boundary"
+   * @ref insert_boundary(ID_index faceIndex, const Boundary_range& boundary, Dimension dim) "insert_boundary"
    * instead by indicating the face ID used in the boundaries when the face is inserted.
    *
    * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
@@ -756,15 +756,15 @@ class Matrix {
    * older column IDIdxs`, where the combination is deduced while reducing the given boundary. If the barcode is stored,
    * it will also be updated.
    *
-   * @tparam Boundary_container Range of @ref Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range of @ref Cell_representative. Assumed to have a begin(), end() and size() method.
    * @param boundary Boundary generating the new column. The content should be ordered by ID.
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    * @return If it is a @ref chainmatrix "chain matrix", the method returns the @ref MatIdx indices of the unpaired
    * chains used to reduce the boundary. Otherwise, nothing.
    */
-  template <class Boundary_container = Boundary>
-  Insertion_return insert_boundary(const Boundary_container& boundary, Dimension dim = -1);
+  template <class Boundary_range = Boundary>
+  Insertion_return insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
   /**
    * @brief Only available for @ref mp_matrices "non-basic matrices".
    * It does the same as the other version, but allows the boundary faces to be identified without restrictions
@@ -775,7 +775,7 @@ class Matrix {
    * for @ref mp_matrices "non-basic matrices", the faces are inserted by order of filtration), it is sufficient to
    * indicate the ID of the face being inserted.
    *
-   * @tparam Boundary_container Range of @ref Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range of @ref Cell_representative. Assumed to have a begin(), end() and size() method.
    * @param faceIndex @ref IDIdx index to use to identify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
    * @p faceIndex values of precedent calls of the method for the corresponding faces and should be ordered in
@@ -785,8 +785,8 @@ class Matrix {
    * @return If it is a @ref chainmatrix "chain matrix", the method returns the @ref MatIdx indices of the unpaired
    * chains used to reduce the boundary. Otherwise, nothing.
    */
-  template <class Boundary_container = Boundary>
-  Insertion_return insert_boundary(ID_index faceIndex, const Boundary_container& boundary, Dimension dim = -1);
+  template <class Boundary_range = Boundary>
+  Insertion_return insert_boundary(ID_index faceIndex, const Boundary_range& boundary, Dimension dim = -1);
 
   /**
    * @brief Returns the column at the given @ref MatIdx index.
@@ -1452,8 +1452,8 @@ inline Matrix<PersistenceMatrixOptions>::Matrix(const std::function<bool(Pos_ind
 }
 
 template <class PersistenceMatrixOptions>
-template <class Boundary_container>
-inline Matrix<PersistenceMatrixOptions>::Matrix(const std::vector<Boundary_container>& orderedBoundaries,
+template <class Boundary_range>
+inline Matrix<PersistenceMatrixOptions>::Matrix(const std::vector<Boundary_range>& orderedBoundaries,
                                                 const std::function<bool(Pos_index, Pos_index)>& birthComparator,
                                                 const std::function<bool(Pos_index, Pos_index)>& deathComparator,
                                                 Characteristic characteristic)
@@ -1552,9 +1552,9 @@ inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container& col
 }
 
 template <class PersistenceMatrixOptions>
-template <class Boundary_container>
+template <class Boundary_range>
 inline typename Matrix<PersistenceMatrixOptions>::Insertion_return
-Matrix<PersistenceMatrixOptions>::insert_boundary(const Boundary_container& boundary, Dimension dim)
+Matrix<PersistenceMatrixOptions>::insert_boundary(const Boundary_range& boundary, Dimension dim)
 {
   if constexpr (!PersistenceMatrixOptions::is_z2){
     GUDHI_CHECK(colSettings_->operators.get_characteristic() != static_cast<Characteristic>(-1),
@@ -1570,10 +1570,10 @@ Matrix<PersistenceMatrixOptions>::insert_boundary(const Boundary_container& boun
 }
 
 template <class PersistenceMatrixOptions>
-template <class Boundary_container>
+template <class Boundary_range>
 inline typename Matrix<PersistenceMatrixOptions>::Insertion_return
 Matrix<PersistenceMatrixOptions>::insert_boundary(ID_index faceIndex,
-                                                  const Boundary_container& boundary,
+                                                  const Boundary_range& boundary,
                                                   Dimension dim)
 {
   if constexpr (!PersistenceMatrixOptions::is_z2){

@@ -173,13 +173,13 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   /**
    * @brief Same as @ref insert_column, only for interface purposes. The given dimension is ignored and not stored.
    * 
-   * @tparam Boundary_container Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
    * @param boundary Range of @ref Matrix::Cell_representative from which the column has to be constructed. Assumed to be
    * ordered by increasing ID value. 
    * @param dim Ignored.
    */
-  template <class Boundary_container>
-  void insert_boundary(const Boundary_container& boundary, Dimension dim = -1);
+  template <class Boundary_range>
+  void insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
   /**
    * @brief Returns the column at the given @ref MatIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -442,8 +442,8 @@ inline void Base_matrix_with_column_compression<Master_matrix>::insert_column(co
 }
 
 template <class Master_matrix>
-template <class Boundary_container>
-inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(const Boundary_container& boundary,
+template <class Boundary_range>
+inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(const Boundary_range& boundary,
                                                                                 Dimension dim) 
 {
   // handles a dimension which is not actually stored.
