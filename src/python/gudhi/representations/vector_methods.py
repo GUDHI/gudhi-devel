@@ -9,8 +9,6 @@
 #   - 2020/12 Gard: A more flexible Betti curve class capable of computing exact curves.
 #   - 2021/11 Vincent Rouvreau: factorize _automatic_sample_range
 
-import warnings
-
 import numpy as np
 from scipy.spatial.distance import cdist
 from sklearn.base          import BaseEstimator, TransformerMixin
