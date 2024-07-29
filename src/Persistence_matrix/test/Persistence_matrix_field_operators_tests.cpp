@@ -26,7 +26,7 @@ using Gudhi::persistence_fields::Zp_field_operators;
 
 template <class Z2>
 void test_z2_standart_field_operators(Z2& op) {
-  using T = typename Z2::element_type;
+  using T = typename Z2::Element;
 
   unsigned int z21 = 7u;
   unsigned int z22 = 2u;
@@ -150,7 +150,7 @@ void test_z5_standart_field_operators(Z5& op) {
 
 template <class Z2>
 void test_z2_standart_field_inplace_operators(Z2& op) {
-  using T = typename Z2::element_type;
+  using T = typename Z2::Element;
 
   T z23 = op.get_value(7u);
   T z24 = op.get_value(2u);
@@ -226,7 +226,7 @@ void test_z2_standart_field_inplace_operators(Z2& op) {
 
 template <class Z5>
 void test_z5_standart_field_inplace_operators(Z5& op) {
-  using T = typename Z5::element_type;
+  using T = typename Z5::Element;
 
   T z53 = op.get_value(7);
   T z54 = op.get_value(3);
@@ -308,8 +308,8 @@ void test_z2_standart_field_properties(Z2& op) {
 
   BOOST_CHECK_EQUAL(op.get_inverse(z21), 1);
   BOOST_CHECK_EQUAL(op.get_inverse(z22), 0);
-  BOOST_CHECK(op.get_partial_inverse(z21, 35) == std::make_pair(typename Z2::element_type(1), 35u));
-  BOOST_CHECK(op.get_partial_inverse(z22, 35) == std::make_pair(typename Z2::element_type(0), 35u));
+  BOOST_CHECK(op.get_partial_inverse(z21, 35) == std::make_pair(typename Z2::Element(1), 35u));
+  BOOST_CHECK(op.get_partial_inverse(z22, 35) == std::make_pair(typename Z2::Element(0), 35u));
 
   BOOST_CHECK_EQUAL(op.get_additive_identity(), 0);
   BOOST_CHECK_EQUAL(op.get_multiplicative_identity(), 1);
@@ -392,7 +392,7 @@ BOOST_AUTO_TEST_CASE(Field_operators_properties) {
 
 template <class MF>
 void test_multi_field_operators(MF& op) {
-  using T = typename MF::element_type;
+  using T = typename MF::Element;
 
   T m1(5005);
   T m2(5007);
@@ -445,7 +445,7 @@ void test_multi_field_operators(MF& op) {
 
 template <class MF>
 void test_multi_field_inplace_operators(MF& op) {
-  using T = typename MF::element_type;
+  using T = typename MF::Element;
 
   T m1(5005);
   T m2(5007);
@@ -521,7 +521,7 @@ void test_multi_field_inplace_operators(MF& op) {
 
 template <class MF>
 void test_multi_field_properties(MF& op) {
-  using T = typename MF::element_type;
+  using T = typename MF::Element;
 
   T m1(1);
   T m2(7);

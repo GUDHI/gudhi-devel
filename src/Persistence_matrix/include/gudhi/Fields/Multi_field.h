@@ -38,8 +38,8 @@ namespace persistence_fields {
 template <unsigned int minimum, unsigned int maximum>
 class Multi_field_element {
  public:
-  using element_type = mpz_class;           /**< Type for the elements in the field. */
-  using characteristic_type = element_type; /**< Type for the field characteristic. */
+  using Element = mpz_class;           /**< Type for the elements in the field. */
+  using Characteristic = Element; /**< Type for the field characteristic. */
 
   /**
    * @brief Default constructor. Sets the element to 0.
@@ -50,7 +50,7 @@ class Multi_field_element {
    *
    * @param element Value of the element.
    */
-  Multi_field_element(const element_type& element);
+  Multi_field_element(const Element& element);
   /**
    * @brief Copy constructor.
    *
@@ -81,21 +81,21 @@ class Multi_field_element {
   /**
    * @brief operator+=
    */
-  friend void operator+=(Multi_field_element& f, const element_type& v) {
+  friend void operator+=(Multi_field_element& f, const Element& v) {
     f.element_ += v;
     mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
    * @brief operator+
    */
-  friend Multi_field_element operator+(Multi_field_element f, const element_type& v) {
+  friend Multi_field_element operator+(Multi_field_element f, const Element& v) {
     f += v;
     return f;
   }
   /**
    * @brief operator+
    */
-  friend element_type operator+(element_type v, Multi_field_element const& f) {
+  friend Element operator+(Element v, Multi_field_element const& f) {
     v += f.element_;
     mpz_mod(v.get_mpz_t(), v.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
     return v;
@@ -118,22 +118,22 @@ class Multi_field_element {
   /**
    * @brief operator-=
    */
-  friend void operator-=(Multi_field_element& f, const element_type& v) {
+  friend void operator-=(Multi_field_element& f, const Element& v) {
     f.element_ -= v;
     mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
    * @brief operator-
    */
-  friend Multi_field_element operator-(Multi_field_element f, const element_type& v) {
+  friend Multi_field_element operator-(Multi_field_element f, const Element& v) {
     f -= v;
     return f;
   }
   /**
    * @brief operator-
    */
-  friend element_type operator-(element_type v, Multi_field_element const& f) {
-    // element_type e(v);
+  friend Element operator-(Element v, Multi_field_element const& f) {
+    // Element e(v);
     if (v >= productOfAllCharacteristics_)
       mpz_mod(v.get_mpz_t(), v.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
     if (f.element_ > v) v += productOfAllCharacteristics_;
@@ -158,21 +158,21 @@ class Multi_field_element {
   /**
    * @brief operator*=
    */
-  friend void operator*=(Multi_field_element& f, const element_type& v) {
+  friend void operator*=(Multi_field_element& f, const Element& v) {
     f.element_ *= v;
     mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
    * @brief operator*
    */
-  friend Multi_field_element operator*(Multi_field_element f, const element_type& v) {
+  friend Multi_field_element operator*(Multi_field_element f, const Element& v) {
     f *= v;
     return f;
   }
   /**
    * @brief operator*
    */
-  friend element_type operator*(element_type v, Multi_field_element const& f) {
+  friend Element operator*(Element v, Multi_field_element const& f) {
     v *= f.element_;
     mpz_mod(v.get_mpz_t(), v.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
     return v;
@@ -187,18 +187,18 @@ class Multi_field_element {
   /**
    * @brief operator==
    */
-  friend bool operator==(const element_type& v, const Multi_field_element& f) {
+  friend bool operator==(const Element& v, const Multi_field_element& f) {
     if (v < productOfAllCharacteristics_) return v == f.element_;
-    element_type e(v);
+    Element e(v);
     mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
     return e == f.element_;
   }
   /**
    * @brief operator==
    */
-  friend bool operator==(const Multi_field_element& f, const element_type& v) {
+  friend bool operator==(const Multi_field_element& f, const Element& v) {
     if (v < productOfAllCharacteristics_) return v == f.element_;
-    element_type e(v);
+    Element e(v);
     mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
     return e == f.element_;
   }
@@ -209,11 +209,11 @@ class Multi_field_element {
   /**
    * @brief operator!=
    */
-  friend bool operator!=(const element_type& v, const Multi_field_element& f) { return !(v == f); }
+  friend bool operator!=(const Element& v, const Multi_field_element& f) { return !(v == f); }
   /**
    * @brief operator!=
    */
-  friend bool operator!=(const Multi_field_element& f, const element_type& v) { return !(v == f); }
+  friend bool operator!=(const Multi_field_element& f, const Element& v) { return !(v == f); }
 
   /**
    * @brief Assign operator.
@@ -222,7 +222,7 @@ class Multi_field_element {
   /**
    * @brief Assign operator.
    */
-  Multi_field_element& operator=(const element_type& value);
+  Multi_field_element& operator=(const Element& value);
   /**
    * @brief Swap operator.
    */
@@ -250,8 +250,8 @@ class Multi_field_element {
    * @param productOfCharacteristics Sub-product of the characteristics.
    * @return Pair of the inverse and the characteristic the inverse corresponds to.
    */
-  std::pair<Multi_field_element, characteristic_type> get_partial_inverse(
-      const characteristic_type& productOfCharacteristics) const;
+  std::pair<Multi_field_element, Characteristic> get_partial_inverse(
+      const Characteristic& productOfCharacteristics) const;
 
   /**
    * @brief Returns the additive identity of a field.
@@ -272,25 +272,25 @@ class Multi_field_element {
    * @param productOfCharacteristics Product of the different characteristics to take into account in the multi-field.
    * @return The partial multiplicative identity of the multi-field.
    */
-  static Multi_field_element get_partial_multiplicative_identity(const characteristic_type& productOfCharacteristics);
+  static Multi_field_element get_partial_multiplicative_identity(const Characteristic& productOfCharacteristics);
   /**
    * @brief Returns the product of all characteristics.
    *
    * @return The product of all characteristics.
    */
-  static characteristic_type get_characteristic();
+  static Characteristic get_characteristic();
 
   /**
    * @brief Returns the value of the element.
    *
    * @return Value of the element.
    */
-  element_type get_value() const;
+  Element get_value() const;
 
   // static constexpr bool handles_only_z2() { return false; }
 
  private:
-  element_type element_;
+  Element element_;
   static inline const std::vector<unsigned int> primes_ = []() {
     std::vector<unsigned int> res;
 
@@ -314,16 +314,16 @@ class Multi_field_element {
 
     return res;
   }();
-  static inline const characteristic_type productOfAllCharacteristics_ = []() {
-    characteristic_type res = 1;
+  static inline const Characteristic productOfAllCharacteristics_ = []() {
+    Characteristic res = 1;
     for (const auto p : primes_) {
       res *= p;
     }
 
     return res;
   }();
-  static inline const std::vector<characteristic_type> partials_ = []() {
-    std::vector<characteristic_type> res;
+  static inline const std::vector<Characteristic> partials_ = []() {
+    std::vector<Characteristic> res;
 
     if (productOfAllCharacteristics_ == 1) return res;
 
@@ -337,7 +337,7 @@ class Multi_field_element {
   }();
   // If I understood the paper well, multiplicativeID_ always equals to 1. But in Clement's code,
   // multiplicativeID_ is computed (see commented lambda function below). TODO: verify with Clement.
-  static inline const element_type multiplicativeID_ = 1; /*[](){
+  static inline const Element multiplicativeID_ = 1; /*[](){
            mpz_class res = 0;
            for (unsigned int i = 0; i < partials_.size(); ++i){
                    res = (res + partials_[i]) % productOfAllCharacteristics_;
@@ -360,7 +360,7 @@ inline Multi_field_element<minimum, maximum>::Multi_field_element() : element_(0
 }
 
 template <unsigned int minimum, unsigned int maximum>
-inline Multi_field_element<minimum, maximum>::Multi_field_element(const element_type& element) : element_(element) {
+inline Multi_field_element<minimum, maximum>::Multi_field_element(const Element& element) : element_(element) {
   static_assert(maximum >= 2, "Characteristics has to be positive.");
   static_assert(minimum <= maximum, "The given interval is not valid.");
   static_assert(minimum != maximum || _is_prime(minimum), "The given interval does not contain a prime number.");
@@ -389,7 +389,7 @@ inline Multi_field_element<minimum, maximum>& Multi_field_element<minimum, maxim
 
 template <unsigned int minimum, unsigned int maximum>
 inline Multi_field_element<minimum, maximum>& Multi_field_element<minimum, maximum>::operator=(
-    const element_type& value) {
+    const Element& value) {
   mpz_mod(element_.get_mpz_t(), value.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   return *this;
 }
@@ -411,16 +411,16 @@ inline Multi_field_element<minimum, maximum> Multi_field_element<minimum, maximu
 
 template <unsigned int minimum, unsigned int maximum>
 inline std::pair<Multi_field_element<minimum, maximum>,
-                 typename Multi_field_element<minimum, maximum>::characteristic_type>
-Multi_field_element<minimum, maximum>::get_partial_inverse(const characteristic_type& productOfCharacteristics) const {
-  characteristic_type QR;
+                 typename Multi_field_element<minimum, maximum>::Characteristic>
+Multi_field_element<minimum, maximum>::get_partial_inverse(const Characteristic& productOfCharacteristics) const {
+  Characteristic QR;
   mpz_gcd(QR.get_mpz_t(), element_.get_mpz_t(), productOfCharacteristics.get_mpz_t());  // QR <- gcd(x,QS)
 
   if (QR == productOfCharacteristics) return {Multi_field_element(), multiplicativeID_};  // partial inverse is 0
 
-  characteristic_type QT = productOfCharacteristics / QR;
+  Characteristic QT = productOfCharacteristics / QR;
 
-  characteristic_type inv_qt;
+  Characteristic inv_qt;
   mpz_invert(inv_qt.get_mpz_t(), element_.get_mpz_t(), QT.get_mpz_t());
 
   auto res = get_partial_multiplicative_identity(QT);
@@ -441,7 +441,7 @@ inline Multi_field_element<minimum, maximum> Multi_field_element<minimum, maximu
 
 template <unsigned int minimum, unsigned int maximum>
 inline Multi_field_element<minimum, maximum> Multi_field_element<minimum, maximum>::get_partial_multiplicative_identity(
-    const characteristic_type& productOfCharacteristics) {
+    const Characteristic& productOfCharacteristics) {
   if (productOfCharacteristics == 0) {
     return Multi_field_element<minimum, maximum>(multiplicativeID_);
   }
@@ -455,13 +455,13 @@ inline Multi_field_element<minimum, maximum> Multi_field_element<minimum, maximu
 }
 
 template <unsigned int minimum, unsigned int maximum>
-inline typename Multi_field_element<minimum, maximum>::characteristic_type
+inline typename Multi_field_element<minimum, maximum>::Characteristic
 Multi_field_element<minimum, maximum>::get_characteristic() {
   return productOfAllCharacteristics_;
 }
 
 template <unsigned int minimum, unsigned int maximum>
-inline typename Multi_field_element<minimum, maximum>::element_type Multi_field_element<minimum, maximum>::get_value()
+inline typename Multi_field_element<minimum, maximum>::Element Multi_field_element<minimum, maximum>::get_value()
     const {
   return element_;
 }

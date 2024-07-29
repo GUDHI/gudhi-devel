@@ -34,8 +34,8 @@ struct Dummy_row_access
   friend void swap([[maybe_unused]] Dummy_row_access& d1, [[maybe_unused]] Dummy_row_access& d2) {}
 
   Dummy_row_access() {}
-  template <typename index, class Row_container_type>
-  Dummy_row_access([[maybe_unused]] index columnIndex, [[maybe_unused]] Row_container_type& rows) {}
+  template <typename Index, class Row_container>
+  Dummy_row_access([[maybe_unused]] Index columnIndex, [[maybe_unused]] Row_container& rows) {}
 };
 
 /**
@@ -50,10 +50,10 @@ template <class Master_matrix>
 class Row_access 
 {
  public:
-  using index = typename Master_matrix::index;                            /**< @ref MatIdx index type. */
-  using id_index = typename Master_matrix::id_index;                      /**< @ref IDIdx index type. */
-  using Cell_type = typename Master_matrix::Cell_type;                    /**< @ref Cell. */
-  using Row_container_type = typename Master_matrix::row_container_type;  /**< Type of the row container. */
+  using Index = typename Master_matrix::Index;                  /**< @ref MatIdx index type. */
+  using ID_index = typename Master_matrix::ID_index;            /**< @ref IDIdx index type. */
+  using Matrix_cell = typename Master_matrix::Matrix_cell;      /**< @ref Cell. */
+  using Row_container = typename Master_matrix::Row_container;  /**< Type of the row container. */
 
   /**
    * @brief Default constructor. Sets the column index to -1 and the row container to nullptr.
@@ -66,7 +66,7 @@ class Row_access
    * @param columnIndex Column index to store.
    * @param rows Pointer to the row container.
    */
-  Row_access(index columnIndex, Row_container_type* rows);
+  Row_access(Index columnIndex, Row_container* rows);
   /**
    * @brief Move constructor.
    * 
@@ -80,13 +80,13 @@ class Row_access
    * @param rowIndex @ref rowindex "Row index" of the cell.
    * @param cell Pointer to the cell to insert.
    */
-  void insert_cell(id_index rowIndex, Cell_type* cell);
+  void insert_cell(ID_index rowIndex, Matrix_cell* cell);
   /**
    * @brief Removes the given cell from its row.
    * 
    * @param cell Pointer to the cell to remove.
    */
-  void unlink(Cell_type* cell);
+  void unlink(Matrix_cell* cell);
   /**
    * @brief If @ref PersistenceMatrixOptions::has_intrusive_rows is false, updates the copy of the cell in its row. 
    * Otherwise does nothing.
@@ -96,13 +96,13 @@ class Row_access
    * 
    * @param cell Cell to update.
    */
-  void update_cell(const Cell_type& cell);
+  void update_cell(const Matrix_cell& cell);
   /**
    * @brief Returns the @ref MatIdx column index.
    * 
    * @return The @ref MatIdx column index.
    */
-  index get_column_index() const;
+  Index get_column_index() const;
 
   /**
    * @brief Swap operator.
@@ -112,14 +112,12 @@ class Row_access
     std::swap(r1.columnIndex_, r2.columnIndex_);
   }
 
-  // void set_rows(Row_container_type *rows);
-
  protected:
-  index columnIndex_;         /**< Column index. */
-  Row_container_type* rows_;  /**< Row container. Be careful to not destroy before the columns. */
+  Index columnIndex_;         /**< Column index. */
+  Row_container* rows_;  /**< Row container. Be careful to not destroy before the columns. */
 
  private:
-  using base_hook_matrix_row = typename Master_matrix::base_hook_matrix_row;
+  using Base_hook_matrix_row = typename Master_matrix::Base_hook_matrix_row;
 };
 
 template <class Master_matrix>
@@ -127,7 +125,7 @@ inline Row_access<Master_matrix>::Row_access() : columnIndex_(-1), rows_(nullptr
 {}
 
 template <class Master_matrix>
-inline Row_access<Master_matrix>::Row_access(index columnIndex, Row_container_type* rows)
+inline Row_access<Master_matrix>::Row_access(Index columnIndex, Row_container* rows)
     : columnIndex_(columnIndex), rows_(rows) 
 {}
 
@@ -137,7 +135,7 @@ inline Row_access<Master_matrix>::Row_access(Row_access&& other) noexcept
 {}
 
 template <class Master_matrix>
-inline void Row_access<Master_matrix>::insert_cell(id_index rowIndex, Cell_type* cell) 
+inline void Row_access<Master_matrix>::insert_cell(ID_index rowIndex, Matrix_cell* cell) 
 {
   if (rows_ == nullptr) return;
 
@@ -154,12 +152,12 @@ inline void Row_access<Master_matrix>::insert_cell(id_index rowIndex, Cell_type*
 }
 
 template <class Master_matrix>
-inline void Row_access<Master_matrix>::unlink(Cell_type* cell) 
+inline void Row_access<Master_matrix>::unlink(Matrix_cell* cell) 
 {
   if (rows_ == nullptr) return;
 
   if constexpr (Master_matrix::Option_list::has_intrusive_rows) {
-    cell->base_hook_matrix_row::unlink();
+    cell->Base_hook_matrix_row::unlink();
   } else {
     if constexpr (Master_matrix::Option_list::has_removable_rows) {
       auto it = rows_->find(cell->get_row_index());
@@ -171,7 +169,7 @@ inline void Row_access<Master_matrix>::unlink(Cell_type* cell)
 }
 
 template <class Master_matrix>
-inline void Row_access<Master_matrix>::update_cell(const Cell_type& cell) 
+inline void Row_access<Master_matrix>::update_cell(const Matrix_cell& cell) 
 {
   if constexpr (!Master_matrix::Option_list::has_intrusive_rows) {
     if (rows_ == nullptr) return;
@@ -183,16 +181,10 @@ inline void Row_access<Master_matrix>::update_cell(const Cell_type& cell)
 }
 
 template <class Master_matrix>
-inline typename Row_access<Master_matrix>::index Row_access<Master_matrix>::get_column_index() const 
+inline typename Row_access<Master_matrix>::Index Row_access<Master_matrix>::get_column_index() const 
 {
   return columnIndex_;
 }
-
-// template<class Master_matrix>
-// inline void Row_access<Master_matrix>::set_rows(Row_container_type *rows)
-// {
-// 	rows_ = rows;
-// }
 
 }  // namespace persistence_matrix
 }  // namespace Gudhi

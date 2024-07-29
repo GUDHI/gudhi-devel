@@ -48,9 +48,9 @@ struct Dummy_base_swap {
 template <class Master_matrix, class Base_matrix>
 class Base_swap {
  public:
-  using matrix_type = typename Master_matrix::column_container_type;  /**< Column container type. */
-  using index = typename Master_matrix::index;                        /**< Container index type. */
-  using id_index = typename Master_matrix::id_index;                  /**< @ref IDIdx index type. */
+  using Column_container = typename Master_matrix::Column_container;  /**< Column container type. */
+  using Index = typename Master_matrix::Index;                        /**< Container index type. */
+  using ID_index = typename Master_matrix::ID_index;                  /**< @ref IDIdx index type. */
 
   /**
    * @brief Default constructor.
@@ -82,7 +82,7 @@ class Base_swap {
    * @param columnIndex1 First @ref MatIdx column index.
    * @param columnIndex2 Second @ref MatIdx column index.
    */
-  void swap_columns(index columnIndex1, index columnIndex2);
+  void swap_columns(Index columnIndex1, Index columnIndex2);
   /**
    * @brief Swaps the two rows at the given indices, but in a lazy manner. That is, the swap is registered but not
    * executed. The reordering will be done when calling `_orderRows()`.
@@ -90,7 +90,7 @@ class Base_swap {
    * @param rowIndex1 First row index.
    * @param rowIndex2 Second row index.
    */
-  void swap_rows(id_index rowIndex1, id_index rowIndex2);
+  void swap_rows(ID_index rowIndex1, ID_index rowIndex2);
 
   /**
    * @brief Assign operator.
@@ -106,12 +106,12 @@ class Base_swap {
   }
 
  protected:
-  using index_dictionary_type = typename Master_matrix::template dictionary_type<index>;
-  using row_dictionary_type = typename Master_matrix::template dictionary_type<id_index>;
+  using Index_dictionary = typename Master_matrix::template Dictionary<Index>;
+  using Row_dictionary = typename Master_matrix::template Dictionary<ID_index>;
 
-  index_dictionary_type indexToRow_; /**< Map from row index to actual index in row container. */
-  row_dictionary_type rowToIndex_;   /**< Map from index in row container to "public" row index. */
-  bool rowSwapped_;                   /**< True if any rows were swapped since last call to `_orderRows()`. */
+  Index_dictionary indexToRow_; /**< Map from row index to actual index in row container. */
+  Row_dictionary rowToIndex_;   /**< Map from index in row container to "public" row index. */
+  bool rowSwapped_;             /**< True if any rows were swapped since last call to `_orderRows()`. */
 
   void _orderRows();
 
@@ -121,12 +121,14 @@ class Base_swap {
 };
 
 template <class Master_matrix, class Base_matrix>
-inline Base_swap<Master_matrix, Base_matrix>::Base_swap() : rowSwapped_(false) {}
+inline Base_swap<Master_matrix, Base_matrix>::Base_swap() : rowSwapped_(false)
+{}
 
 template <class Master_matrix, class Base_matrix>
 inline Base_swap<Master_matrix, Base_matrix>::Base_swap(unsigned int numberOfColumns)
-    : indexToRow_(numberOfColumns), rowToIndex_(numberOfColumns), rowSwapped_(false) {
-  for (index i = 0; i < numberOfColumns; i++) {
+    : indexToRow_(numberOfColumns), rowToIndex_(numberOfColumns), rowSwapped_(false)
+{
+  for (Index i = 0; i < numberOfColumns; i++) {
     indexToRow_[i] = i;
     rowToIndex_[i] = i;
   }
@@ -136,16 +138,19 @@ template <class Master_matrix, class Base_matrix>
 inline Base_swap<Master_matrix, Base_matrix>::Base_swap(Base_swap&& other) noexcept
     : indexToRow_(std::move(other.indexToRow_)),
       rowToIndex_(std::move(other.rowToIndex_)),
-      rowSwapped_(std::exchange(other.rowSwapped_, 0)) {}
+      rowSwapped_(std::exchange(other.rowSwapped_, 0))
+{}
 
 template <class Master_matrix, class Base_matrix>
-inline void Base_swap<Master_matrix, Base_matrix>::swap_columns(index columnIndex1, index columnIndex2) {
+inline void Base_swap<Master_matrix, Base_matrix>::swap_columns(Index columnIndex1, Index columnIndex2)
+{
   swap(_matrix()->matrix_.at(columnIndex1), _matrix()->matrix_.at(columnIndex2));
   if constexpr (Master_matrix::Option_list::has_row_access) rowSwapped_ = true; //to update column index in cells.
 }
 
 template <class Master_matrix, class Base_matrix>
-inline void Base_swap<Master_matrix, Base_matrix>::swap_rows(id_index rowIndex1, id_index rowIndex2) {
+inline void Base_swap<Master_matrix, Base_matrix>::swap_rows(ID_index rowIndex1, ID_index rowIndex2)
+{
   rowSwapped_ = true;
 
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
@@ -179,7 +184,8 @@ inline void Base_swap<Master_matrix, Base_matrix>::swap_rows(id_index rowIndex1,
 }
 
 template <class Master_matrix, class Base_matrix>
-inline Base_swap<Master_matrix, Base_matrix>& Base_swap<Master_matrix, Base_matrix>::operator=(Base_swap other) {
+inline Base_swap<Master_matrix, Base_matrix>& Base_swap<Master_matrix, Base_matrix>::operator=(Base_swap other)
+{
   indexToRow_.swap(other.indexToRow_);
   rowToIndex_.swap(other.rowToIndex_);
   std::swap(rowSwapped_, other.rowSwapped_);
@@ -187,11 +193,12 @@ inline Base_swap<Master_matrix, Base_matrix>& Base_swap<Master_matrix, Base_matr
 }
 
 template <class Master_matrix, class Base_matrix>
-inline void Base_swap<Master_matrix, Base_matrix>::_orderRows() {
+inline void Base_swap<Master_matrix, Base_matrix>::_orderRows()
+{
   for (unsigned int i = 0; i < _matrix()->get_number_of_columns(); i++) {
     _matrix()->matrix_.at(i).reorder(rowToIndex_, i);
   }
-  for (index i = 0; i < _matrix()->get_number_of_columns(); i++) {
+  for (Index i = 0; i < _matrix()->get_number_of_columns(); i++) {
     indexToRow_[i] = i;
     rowToIndex_[i] = i;
   }

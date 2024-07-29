@@ -42,8 +42,8 @@ template <unsigned int minimum, unsigned int maximum, typename Unsigned_integer_
           class = std::enable_if_t<std::is_unsigned_v<Unsigned_integer_type> > >
 class Multi_field_element_with_small_characteristics {
  public:
-  using element_type = Unsigned_integer_type; /**< Type for the elements in the field. */
-  using characteristic_type = element_type;   /**< Type for the field characteristic. */
+  using Element = Unsigned_integer_type; /**< Type for the elements in the field. */
+  using Characteristic = Element;   /**< Type for the field characteristic. */
   template <class T>
   using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
@@ -317,16 +317,16 @@ class Multi_field_element_with_small_characteristics {
    * @param productOfCharacteristics Sub-product of the characteristics.
    * @return Pair of the inverse and the characteristic the inverse corresponds to.
    */
-  std::pair<Multi_field_element_with_small_characteristics,characteristic_type> get_partial_inverse(
-      characteristic_type productOfCharacteristics) const {
-    characteristic_type gcd = std::gcd(element_, productOfAllCharacteristics_);
+  std::pair<Multi_field_element_with_small_characteristics,Characteristic> get_partial_inverse(
+      Characteristic productOfCharacteristics) const {
+    Characteristic gcd = std::gcd(element_, productOfAllCharacteristics_);
 
     if (gcd == productOfCharacteristics)
       return {Multi_field_element_with_small_characteristics(), multiplicativeID_};  // partial inverse is 0
 
-    characteristic_type QT = productOfCharacteristics / gcd;
+    Characteristic QT = productOfCharacteristics / gcd;
 
-    const element_type inv_qt = _get_inverse(element_, QT);
+    const Element inv_qt = _get_inverse(element_, QT);
 
     auto res = get_partial_multiplicative_identity(QT);
     res *= inv_qt;
@@ -358,12 +358,12 @@ class Multi_field_element_with_small_characteristics {
    * @return The partial multiplicative identity of the multi-field.
    */
   static Multi_field_element_with_small_characteristics get_partial_multiplicative_identity(
-      const characteristic_type& productOfCharacteristics) {
+      const Characteristic& productOfCharacteristics) {
     if (productOfCharacteristics == 0) {
       return Multi_field_element_with_small_characteristics<minimum, maximum>(multiplicativeID_);
     }
     Multi_field_element_with_small_characteristics<minimum, maximum> mult;
-    for (characteristic_type idx = 0; idx < primes_.size(); ++idx) {
+    for (Characteristic idx = 0; idx < primes_.size(); ++idx) {
       if ((productOfCharacteristics % primes_[idx]) == 0) {
         mult += partials_[idx];
       }
@@ -375,14 +375,14 @@ class Multi_field_element_with_small_characteristics {
    *
    * @return The product of all characteristics.
    */
-  static constexpr characteristic_type get_characteristic() { return productOfAllCharacteristics_; }
+  static constexpr Characteristic get_characteristic() { return productOfAllCharacteristics_; }
 
   /**
    * @brief Returns the value of the element.
    *
    * @return Value of the element.
    */
-  element_type get_value() const { return element_; }
+  Element get_value() const { return element_; }
 
   // static constexpr bool handles_only_z2() { return false; }
 
@@ -397,9 +397,9 @@ class Multi_field_element_with_small_characteristics {
 
     return true;
   }
-  static constexpr element_type _multiply(element_type a, element_type b) {
-    element_type res = 0;
-    element_type temp_b = 0;
+  static constexpr Element _multiply(Element a, Element b) {
+    Element res = 0;
+    Element temp_b = 0;
 
     if (b < a) std::swap(a, b);
 
@@ -418,7 +418,7 @@ class Multi_field_element_with_small_characteristics {
     }
     return res;
   }
-  static constexpr element_type _add(element_type element, element_type v) {
+  static constexpr Element _add(Element element, Element v) {
     if (UINT_MAX - element < v) {
       // automatic unsigned integer overflow behaviour will make it work
       element += v;
@@ -431,7 +431,7 @@ class Multi_field_element_with_small_characteristics {
 
     return element;
   }
-  static constexpr element_type _subtract(element_type element, element_type v) {
+  static constexpr Element _subtract(Element element, Element v) {
     if (element < v) {
       element += productOfAllCharacteristics_;
     }
@@ -439,7 +439,7 @@ class Multi_field_element_with_small_characteristics {
 
     return element;
   }
-  static constexpr int _get_inverse(element_type element, const element_type mod) {
+  static constexpr int _get_inverse(Element element, const Element mod) {
     // to solve: Ax + My = 1
     int M = mod;
     int A = element;
@@ -462,7 +462,7 @@ class Multi_field_element_with_small_characteristics {
   }
 
   template <typename Integer_type, class = isInteger<Integer_type> >
-  static constexpr element_type _get_value(Integer_type e) {
+  static constexpr Element _get_value(Integer_type e) {
     if constexpr (std::is_signed_v<Integer_type>){
       if (e < -static_cast<Integer_type>(productOfAllCharacteristics_)) e = e % productOfAllCharacteristics_;
       if (e < 0) return e += productOfAllCharacteristics_;
@@ -472,34 +472,34 @@ class Multi_field_element_with_small_characteristics {
     }
   }
 
-  element_type element_;
-  static inline const std::vector<characteristic_type> primes_ = []() {
-    std::vector<characteristic_type> res;
-    for (characteristic_type i = minimum; i <= maximum; ++i) {
+  Element element_;
+  static inline const std::vector<Characteristic> primes_ = []() {
+    std::vector<Characteristic> res;
+    for (Characteristic i = minimum; i <= maximum; ++i) {
       if (_is_prime(i)) {
         res.push_back(i);
       }
     }
     return res;
   }();
-  static inline constexpr characteristic_type productOfAllCharacteristics_ = []() {
-    characteristic_type res = 1;
-    for (characteristic_type i = minimum; i <= maximum; ++i) {
+  static inline constexpr Characteristic productOfAllCharacteristics_ = []() {
+    Characteristic res = 1;
+    for (Characteristic i = minimum; i <= maximum; ++i) {
       if (_is_prime(i)) {
         res *= i;
       }
     }
     return res;
   }();
-  static inline const std::vector<characteristic_type> partials_ = []() {
-    std::vector<characteristic_type> res;
+  static inline const std::vector<Characteristic> partials_ = []() {
+    std::vector<Characteristic> res;
 
     if (productOfAllCharacteristics_ == 1) return res;
 
-    for (characteristic_type i = 0; i < primes_.size(); ++i) {
-      characteristic_type p = primes_[i];
-      characteristic_type base = productOfAllCharacteristics_ / p;
-      characteristic_type exp = p - 1;
+    for (Characteristic i = 0; i < primes_.size(); ++i) {
+      Characteristic p = primes_[i];
+      Characteristic base = productOfAllCharacteristics_ / p;
+      Characteristic exp = p - 1;
       res.push_back(1);
 
       while (exp > 0) {
@@ -515,7 +515,7 @@ class Multi_field_element_with_small_characteristics {
   }();
   // If I understood the paper well, multiplicativeID_ always equals to 1. But in Clement's code,
   // multiplicativeID_ is computed (see commented lambda function below). TODO: verify with Clement.
-  static inline constexpr element_type multiplicativeID_ = 1; /*= [](){
+  static inline constexpr Element multiplicativeID_ = 1; /*= [](){
           unsigned int res = 0;
           for (unsigned int i = 0; i < partials_.size(); ++i){
                   res = (res + partials_[i]) % productOfAllCharacteristics_;

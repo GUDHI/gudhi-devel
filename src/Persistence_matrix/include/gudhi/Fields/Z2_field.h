@@ -31,7 +31,7 @@ namespace persistence_fields {
 class Z2_field_element
 {
  public:
-  using element_type = bool;  /**< Type for the elements in the field. */
+  using Element = bool;  /**< Type for the elements in the field. */
   template <class T>
   using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
@@ -288,15 +288,15 @@ class Z2_field_element
    * 
    * @return Value of the element.
    */
-  element_type get_value() const;
+  Element get_value() const;
 
   // static constexpr bool handles_only_z2() { return true; }
 
  private:
-  element_type element_;
+  Element element_;
 
   template <typename Integer_type, class = isInteger<Integer_type> >
-  static constexpr element_type _get_value(Integer_type e) {
+  static constexpr Element _get_value(Integer_type e) {
     if constexpr (std::is_same_v<Integer_type, bool>) {
       return e;
     } else {
@@ -347,7 +347,7 @@ inline Z2_field_element Z2_field_element::get_partial_multiplicative_identity(
 
 inline constexpr unsigned int Z2_field_element::get_characteristic() { return 2; }
 
-inline Z2_field_element::element_type Z2_field_element::get_value() const { return element_; }
+inline Z2_field_element::Element Z2_field_element::get_value() const { return element_; }
 
 }  // namespace persistence_fields
 }  // namespace Gudhi
