@@ -1,0 +1,12 @@
+project(Zigzag_persistence_tests)
+
+include(GUDHI_boost_test)
+
+add_executable_with_targets(Zigzag_persistence_test_zigzag_persistence test_zigzag_persistence.cpp TBB::tbb)
+gudhi_add_boost_test(Zigzag_persistence_test_zigzag_persistence)
+
+add_executable_with_targets(Zigzag_persistence_test_filtered_zigzag_persistence test_filtered_zigzag_persistence.cpp TBB::tbb)
+gudhi_add_boost_test(Zigzag_persistence_test_filtered_zigzag_persistence)
+
+
+
