@@ -134,7 +134,7 @@ add_definitions( -DBOOST_SYSTEM_NO_DEPRECATED )
 
 if (WITH_GUDHI_PYTHON)
   # Find the correct Python interpreter.
-  # Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 or -DPython_ADDITIONAL_VERSIONS=3 for instance.
+  # Can be set with -DPYTHON_EXECUTABLE=/usr/bin/python3 or for instance.
   find_package( PythonInterp )
   
   # find_python_module tries to import module in Python interpreter and to retrieve its version number
