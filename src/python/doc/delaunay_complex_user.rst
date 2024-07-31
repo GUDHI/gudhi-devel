@@ -43,7 +43,7 @@ call *'complex'* in the following text.
   If you pass :code:`precision = 'exact'` to the complex constructor, the filtration values are the exact
   ones converted to float. This can be very slow.
   Using :code:`precision = 'fast'` makes the computations slightly faster, and the combinatorics are still exact, but
-  the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
+  the filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
   output is a valid filtration (faces have a filtration value no larger than their cofaces).
 
 :class:`~gudhi.DelaunayCechComplex` is a bit faster than :class:`~gudhi.AlphaComplex`, but only
