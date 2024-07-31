@@ -161,9 +161,8 @@ cdef class DelaunayComplex:
 cdef class AlphaComplex(DelaunayComplex):
     """AlphaComplex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
 
-    The filtration value of each simplex is computed as the square of the circumradius of the simplex if the
-    circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration values of the
-    codimension 1 cofaces that make it not Gabriel otherwise.
+    The filtration value of each simplex is computed as the squared radius of the smallest empty sphere passing through
+    all of its vertices.
 
     All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
     the complex.
