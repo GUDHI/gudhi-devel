@@ -35,14 +35,13 @@ call *'complex'* in the following text.
   equivalent to the `Čech complex <https://gudhi.inria.fr/doc/latest/group__cech__complex.html>`_ and much smaller if
   you do not bound the radii. `Čech complex <https://gudhi.inria.fr/doc/latest/group__cech__complex.html>`_ can still
   make sense in higher dimension precisely because you can bound the radii.
-* Using the default :code:`precision = 'safe'` makes the construction safe.
-  If you pass :code:`precision = 'exact'` to the complex constructor, the filtration values are the exact
-  ones converted to float. This can be very slow.
-  If you pass :code:`precision = 'safe'` (the default), the filtration values are only
+* Using the default :code:`precision = 'safe'` makes the construction safe, but, the filtration values are only
   guaranteed to have a small multiplicative error compared to the exact value, see
   :func:`~gudhi.DelaunayComplex.set_float_relative_precision` to modify the precision.
   A drawback, when computing persistence, is that an empty exact interval [10^12,10^12] may become a
   non-empty approximate interval [10^12,10^12+10^6].
+  If you pass :code:`precision = 'exact'` to the complex constructor, the filtration values are the exact
+  ones converted to float. This can be very slow.
   Using :code:`precision = 'fast'` makes the computations slightly faster, and the combinatorics are still exact, but
   the computation of filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
   output is a valid filtration (faces have a filtration value no larger than their cofaces).
