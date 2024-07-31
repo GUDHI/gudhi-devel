@@ -49,63 +49,63 @@ template <class Options>
 struct Column_mini_matrix {
   using Option_list = Options;
   using Field_operators = typename Options::Field_coeff_operators;
-  using index = typename Options::index_type;
-  using id_index = typename Options::index_type;
-  using pos_index = typename Options::index_type;
-  using dimension_type = typename Options::dimension_type;
-  using element_type = typename std::conditional<Options::is_z2, bool, typename Field_operators::element_type>::type;
-  using characteristic_type =
-      typename std::conditional<Options::is_z2, unsigned int, typename Field_operators::characteristic_type>::type;
+  using Index = typename Options::Index;
+  using ID_index = typename Options::Index;
+  using Pos_index = typename Options::Index;
+  using Dimension = typename Options::Dimension;
+  using Element = typename std::conditional<Options::is_z2, bool, typename Field_operators::Element>::type;
+  using Characteristic =
+      typename std::conditional<Options::is_z2, unsigned int, typename Field_operators::Characteristic>::type;
 
-  struct matrix_row_tag;
-  struct matrix_column_tag;
+  struct Matrix_row_tag;
+  struct Matrix_column_tag;
 
-  using base_hook_matrix_row =
-      boost::intrusive::list_base_hook<boost::intrusive::tag<matrix_row_tag>,
+  using Base_hook_matrix_row =
+      boost::intrusive::list_base_hook<boost::intrusive::tag<Matrix_row_tag>,
                                        boost::intrusive::link_mode<boost::intrusive::auto_unlink> >;
-  using base_hook_matrix_list_column =
-      boost::intrusive::list_base_hook<boost::intrusive::tag<matrix_column_tag>,
+  using Base_hook_matrix_list_column =
+      boost::intrusive::list_base_hook<boost::intrusive::tag<Matrix_column_tag>,
                                        boost::intrusive::link_mode<boost::intrusive::safe_link> >;
-  using base_hook_matrix_set_column =
-      boost::intrusive::set_base_hook<boost::intrusive::tag<matrix_column_tag>,
+  using Base_hook_matrix_set_column =
+      boost::intrusive::set_base_hook<boost::intrusive::tag<Matrix_column_tag>,
                                       boost::intrusive::link_mode<boost::intrusive::safe_link> >;
   struct Dummy_row_hook {};
   struct Dummy_column_hook {};
 
-  using row_hook_type = typename std::conditional<Options::has_row_access && Options::has_intrusive_rows,
-                                                  base_hook_matrix_row,
+  using Row_hook = typename std::conditional<Options::has_row_access && Options::has_intrusive_rows,
+                                                  Base_hook_matrix_row,
                                                   Dummy_row_hook
                                                  >::type;
-  using column_hook_type =
+  using Column_hook =
       typename std::conditional<Options::column_type == Column_types::INTRUSIVE_LIST,
-                                base_hook_matrix_list_column,
+                                Base_hook_matrix_list_column,
                                 typename std::conditional<Options::column_type == Column_types::INTRUSIVE_SET,
-                                                          base_hook_matrix_set_column,
+                                                          Base_hook_matrix_set_column,
                                                           Dummy_column_hook
                                                          >::type
                                >::type;
 
   using Cell_column_index_option =
-      typename std::conditional<Options::has_row_access, Cell_column_index<index>, Dummy_cell_column_index_mixin>::type;
+      typename std::conditional<Options::has_row_access, Cell_column_index<Index>, Dummy_cell_column_index_mixin>::type;
   using Cell_field_element_option = typename std::conditional<Options::is_z2,
                                                               Dummy_cell_field_element_mixin,
-                                                              Cell_field_element<element_type>
+                                                              Cell_field_element<Element>
                                                              >::type;
-  using Cell_type = Cell<Column_mini_matrix<Options> >;
+  using Matrix_cell = Cell<Column_mini_matrix<Options> >;
 
-  inline static New_cell_constructor<Cell_type> defaultCellConstructor;
-  using Cell_constructor = New_cell_constructor<Cell_type>;
+  inline static New_cell_constructor<Matrix_cell> defaultCellConstructor;
+  using Cell_constructor = New_cell_constructor<Matrix_cell>;
 
   struct Column_z2_settings {
     Column_z2_settings() : cellConstructor() {}
-    Column_z2_settings([[maybe_unused]] characteristic_type characteristic) : cellConstructor() {}
+    Column_z2_settings([[maybe_unused]] Characteristic characteristic) : cellConstructor() {}
 
     Cell_constructor cellConstructor;
   };
 
   struct Column_zp_settings {
     Column_zp_settings() : operators(), cellConstructor() {}
-    Column_zp_settings(characteristic_type characteristic) : operators(characteristic), cellConstructor() {}
+    Column_zp_settings(Characteristic characteristic) : operators(characteristic), cellConstructor() {}
 
     Field_operators operators;
     Cell_constructor cellConstructor;
@@ -113,24 +113,24 @@ struct Column_mini_matrix {
 
   using Column_settings = typename std::conditional<Options::is_z2, Column_z2_settings, Column_zp_settings>::type;
 
-  template <class Cell_type>
+  template <class Matrix_cell>
   struct RowCellComp {
-    bool operator()(const Cell_type& c1, const Cell_type& c2) const {
+    bool operator()(const Matrix_cell& c1, const Matrix_cell& c2) const {
       return c1.get_column_index() < c2.get_column_index();
     }
   };
 
-  using Row_type =
+  using Row =
       typename std::conditional<Options::has_intrusive_rows,
-                                boost::intrusive::list<Cell_type,
+                                boost::intrusive::list<Matrix_cell,
                                                        boost::intrusive::constant_time_size<false>,
-                                                       boost::intrusive::base_hook<base_hook_matrix_row> >,
-                                std::set<Cell_type, RowCellComp<Cell_type> >
+                                                       boost::intrusive::base_hook<Base_hook_matrix_row> >,
+                                std::set<Matrix_cell, RowCellComp<Matrix_cell> >
                                >::type;
 
-  using row_container_type = typename std::conditional<Options::has_removable_rows,
-                                                       std::map<id_index, Row_type>,
-                                                       std::vector<Row_type>
+  using Row_container = typename std::conditional<Options::has_removable_rows,
+                                                       std::map<ID_index, Row>,
+                                                       std::vector<Row>
                                                       >::type;
 
   using Row_access_option = typename std::conditional<Options::has_row_access,
@@ -151,17 +151,17 @@ struct Column_mini_matrix {
                                                         Dummy_chain_properties
                                                        >::type;
 
-  using boundary_type = typename std::conditional<Options::is_z2,
-                                                  std::initializer_list<id_index>,
-                                                  std::initializer_list<std::pair<id_index, element_type> >
+  using Boundary = typename std::conditional<Options::is_z2,
+                                                  std::initializer_list<ID_index>,
+                                                  std::initializer_list<std::pair<ID_index, Element> >
                                                  >::type;
 };
 
 template <bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Base_col_options {
   using Field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
-  using index_type = unsigned int;
-  using dimension_type = int;  // needs to be signed.
+  using Index = unsigned int;
+  using Dimension = int;  // needs to be signed.
 
   static const bool is_basic = true;  // exists just for the tests
   static const bool is_of_boundary_type = true;
@@ -177,8 +177,8 @@ struct Base_col_options {
 template <bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Boundary_col_options {
   using Field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
-  using index_type = unsigned int;
-  using dimension_type = int;  // needs to be signed.
+  using Index = unsigned int;
+  using Dimension = int;  // needs to be signed.
 
   static const bool is_basic = false;  // exists just for the tests
   static const bool is_of_boundary_type = true;
@@ -194,8 +194,8 @@ struct Boundary_col_options {
 template <bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>
 struct Chain_col_options {
   using Field_coeff_operators = typename std::conditional<is_z2_only, Z2, Zp>::type;
-  using index_type = unsigned int;
-  using dimension_type = int;  // needs to be signed.
+  using Index = unsigned int;
+  using Dimension = int;  // needs to be signed.
 
   static const bool is_basic = false;  // exists just for the tests
   static const bool is_of_boundary_type = false;

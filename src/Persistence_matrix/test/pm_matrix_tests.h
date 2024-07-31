@@ -292,8 +292,8 @@ std::vector<witness_content<Column> > build_longer_chain_row_matrix() {
 
 template <class Matrix>
 void test_constructors() {
-  std::vector<witness_content<typename Matrix::Column_type> > empty;
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  std::vector<witness_content<typename Matrix::Column> > empty;
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
 
   // default constructor
   Matrix m;
@@ -305,7 +305,7 @@ void test_constructors() {
   if constexpr (is_RU<Matrix>()) {
     columns[5].clear();
   } else if constexpr (is_Chain<Matrix>()) {
-    columns = build_simple_chain_matrix<typename Matrix::Column_type>();
+    columns = build_simple_chain_matrix<typename Matrix::Column>();
   }
 
   BOOST_CHECK_EQUAL(mb.get_number_of_columns(), 7);
@@ -344,7 +344,7 @@ inline bool death_comp(unsigned int columnIndex1, unsigned int columnIndex2) { r
 
 template <class Matrix>
 void test_chain_constructors() {
-  auto ordered_boundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto ordered_boundaries = build_simple_boundary_matrix<typename Matrix::Column>();
 
   // default constructor
   Matrix m(birth_comp, death_comp);
@@ -388,7 +388,7 @@ void test_chain_constructors() {
 // for base and base comp
 template <class Matrix>
 void test_general_insertion() {
-  auto columns = build_general_matrix<typename Matrix::Column_type>();
+  auto columns = build_general_matrix<typename Matrix::Column>();
   auto col2 = columns.back();
   columns.pop_back();
   auto col1 = columns.back();
@@ -432,7 +432,7 @@ void test_general_insertion() {
 // for boundary and ru
 template <class Matrix>
 void test_boundary_insertion() {
-  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column>();
   auto boundary2 = orderedBoundaries.back();
   orderedBoundaries.pop_back();
   auto boundary1 = orderedBoundaries.back();
@@ -474,13 +474,13 @@ void test_boundary_insertion() {
   BOOST_CHECK_EQUAL(m.get_column_dimension(5), 1);
   BOOST_CHECK_EQUAL(m.get_column_dimension(6), 2);
 
-  BOOST_CHECK_EQUAL(m.get_pivot(0), static_cast<typename Matrix::id_index>(-1));
-  BOOST_CHECK_EQUAL(m.get_pivot(1), static_cast<typename Matrix::id_index>(-1));
-  BOOST_CHECK_EQUAL(m.get_pivot(2), static_cast<typename Matrix::id_index>(-1));
+  BOOST_CHECK_EQUAL(m.get_pivot(0), static_cast<typename Matrix::ID_index>(-1));
+  BOOST_CHECK_EQUAL(m.get_pivot(1), static_cast<typename Matrix::ID_index>(-1));
+  BOOST_CHECK_EQUAL(m.get_pivot(2), static_cast<typename Matrix::ID_index>(-1));
   BOOST_CHECK_EQUAL(m.get_pivot(3), 1);
   BOOST_CHECK_EQUAL(m.get_pivot(4), 2);
   if constexpr (is_RU<Matrix>()) {
-    BOOST_CHECK_EQUAL(m.get_pivot(5), static_cast<typename Matrix::id_index>(-1));  // was reduced
+    BOOST_CHECK_EQUAL(m.get_pivot(5), static_cast<typename Matrix::ID_index>(-1));  // was reduced
   } else {
     BOOST_CHECK_EQUAL(m.get_pivot(5), 2);  // not reduced
   }
@@ -533,7 +533,7 @@ void test_chain_boundary_insertion(Matrix& m1, Matrix& m2) {
     BOOST_CHECK_EQUAL(m.get_column_with_pivot(6), 6);
   };
 
-  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column>();
 
   for (unsigned int i = 0; i < orderedBoundaries.size(); ++i) {
     if constexpr (is_indexed_by_position<Matrix>())
@@ -568,7 +568,7 @@ void test_chain_boundary_insertion(Matrix& m1, Matrix& m2) {
 
 template <class Matrix>
 void test_base_access() {
-  auto columns = build_general_matrix<typename Matrix::Column_type>();
+  auto columns = build_general_matrix<typename Matrix::Column>();
   auto col2 = columns.back();
   columns.pop_back();
   auto col1 = columns.back();
@@ -588,7 +588,7 @@ void test_base_access() {
 
 template <class Matrix>
 void test_boundary_access() {
-  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(orderedBoundaries, 5);
 
   for (unsigned int i = 0; i < orderedBoundaries.size(); ++i) {
@@ -597,24 +597,24 @@ void test_boundary_access() {
         BOOST_CHECK(m.get_column(i).is_empty());  // reduced
       } else {
         const auto& col = m.get_column(i);  // to force the const version
-        test_column_equality<typename Matrix::Column_type>(orderedBoundaries[i], get_column_content_via_iterators(col));
+        test_column_equality<typename Matrix::Column>(orderedBoundaries[i], get_column_content_via_iterators(col));
       }
     } else {
       const auto& col = m.get_column(i);  // to force the const version
-      test_column_equality<typename Matrix::Column_type>(orderedBoundaries[i], get_column_content_via_iterators(col));
+      test_column_equality<typename Matrix::Column>(orderedBoundaries[i], get_column_content_via_iterators(col));
     }
   }
 }
 
 template <class Matrix>
 void test_chain_access(Matrix& m) {
-  auto columns = build_simple_chain_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_chain_matrix<typename Matrix::Column>();
   test_content_equality(columns, m);
 }
 
 template <class Matrix>
 void test_zeroing() {
-  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column>();
 
   Matrix m(orderedBoundaries, 5);
 
@@ -630,10 +630,10 @@ void test_zeroing() {
 
 template <class Matrix>
 void test_ru_u_access() {
-  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(orderedBoundaries, 5);
 
-  std::vector<witness_content<typename Matrix::Column_type> > uColumns(7);
+  std::vector<witness_content<typename Matrix::Column> > uColumns(7);
   if constexpr (Matrix::Option_list::is_z2) {
     if constexpr (Matrix::Option_list::has_vine_update) {
       uColumns[0] = {0};
@@ -665,7 +665,7 @@ void test_ru_u_access() {
   unsigned int i = 0;
   for (auto& c : uColumns) {
     const auto& col = m.get_column(i++, false);  // to force the const version
-    test_column_equality<typename Matrix::Column_type>(c, get_column_content_via_iterators(col));
+    test_column_equality<typename Matrix::Column>(c, get_column_content_via_iterators(col));
   }
 
   if constexpr (Matrix::Option_list::has_vine_update) {
@@ -691,7 +691,7 @@ void test_ru_u_access() {
 
 template <class Matrix>
 void test_base_z2_row_access() {
-  auto columns = build_general_matrix<typename Matrix::Column_type>();
+  auto columns = build_general_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
   std::vector<std::vector<unsigned int> > rows;
@@ -715,16 +715,16 @@ void test_base_z2_row_access() {
 
   unsigned int i = 0;
   for (auto& r : rows) {
-    test_column_equality<typename Matrix::Column_type>(r, get_ordered_row(m, i++));
+    test_column_equality<typename Matrix::Column>(r, get_ordered_row(m, i++));
   }
 }
 
 template <class Matrix>
 void test_base_z5_row_access() {
-  auto columns = build_general_matrix<typename Matrix::Column_type>();
+  auto columns = build_general_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
-  std::vector<std::vector<std::pair<unsigned int, typename Matrix::element_type> > > rows;
+  std::vector<std::vector<std::pair<unsigned int, typename Matrix::Element> > > rows;
   if constexpr (Matrix::Option_list::has_column_compression) {
     // if the union find structure changes, the column_index values of de cells could also change. Change the test with
     // all possibilities?
@@ -745,35 +745,35 @@ void test_base_z5_row_access() {
 
   unsigned int i = 0;
   for (auto& r : rows) {
-    test_column_equality<typename Matrix::Column_type>(r, get_ordered_row(m, i++));
+    test_column_equality<typename Matrix::Column>(r, get_ordered_row(m, i++));
   }
 }
 
 template <class Matrix>
 void test_non_base_row_access(Matrix& m) {
-  std::vector<witness_content<typename Matrix::Column_type> > rows;
+  std::vector<witness_content<typename Matrix::Column> > rows;
   if constexpr (Matrix::Option_list::is_of_boundary_type) {
     if constexpr (is_RU<Matrix>()) {
-      rows = build_simple_reduced_row_matrix<typename Matrix::Column_type>();
+      rows = build_simple_reduced_row_matrix<typename Matrix::Column>();
     } else {
-      rows = build_simple_row_matrix<typename Matrix::Column_type>();
+      rows = build_simple_row_matrix<typename Matrix::Column>();
     }
   } else {
-    rows = build_simple_chain_row_matrix<typename Matrix::Column_type>();
+    rows = build_simple_chain_row_matrix<typename Matrix::Column>();
   }
 
   unsigned int i = 0;
   for (auto& r : rows) {
-    test_column_equality<typename Matrix::Column_type>(r, get_ordered_row(m, i++));
+    test_column_equality<typename Matrix::Column>(r, get_ordered_row(m, i++));
   }
 }
 
 template <class Matrix>
 void test_ru_u_row_access() {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
-  std::vector<witness_content<typename Matrix::Column_type> > rows;
+  std::vector<witness_content<typename Matrix::Column> > rows;
   if constexpr (Matrix::Option_list::is_z2) {
     if constexpr (Matrix::Option_list::has_vine_update) {
       rows.push_back({0});
@@ -802,7 +802,7 @@ void test_ru_u_row_access() {
     rows.push_back({{6, 1}});
   }
 
-  column_content<typename Matrix::Column_type> orderedRows;
+  column_content<typename Matrix::Column> orderedRows;
   unsigned int i = 0;
   for (auto& r : rows) {
     orderedRows.clear();
@@ -813,13 +813,13 @@ void test_ru_u_row_access() {
         orderedRows.insert({cell.get_column_index(), cell.get_element()});
       }
     }
-    test_column_equality<typename Matrix::Column_type>(r, orderedRows);
+    test_column_equality<typename Matrix::Column>(r, orderedRows);
   }
 }
 
 template <class Matrix>
 void test_row_removal() {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   columns[6].pop_back();  // empties row 5. Not a legit boundary matrix anymore, but for the test,
                           // should be fine, except for chain.
 
@@ -843,7 +843,7 @@ void test_chain_row_removal(Matrix& m) {
 
 template <class Matrix>
 void test_column_removal() {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
   test_content_equality(columns, m);
@@ -858,11 +858,11 @@ void test_column_removal() {
   unsigned int i = 0;
   for (auto& b : columns) {
     if (i == 2 || i == 4) ++i;
-    test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++)));
+    test_column_equality<typename Matrix::Column>(b, get_column_content_via_iterators(m.get_column(i++)));
   }
 
   if constexpr (!Matrix::Option_list::has_row_access) {
-    m.insert_column(witness_content<typename Matrix::Column_type>{}, 2);
+    m.insert_column(witness_content<typename Matrix::Column>{}, 2);
     BOOST_CHECK_NO_THROW(m.get_column(2));
     BOOST_CHECK_THROW(m.get_column(4), std::logic_error);
   }
@@ -870,7 +870,7 @@ void test_column_removal() {
 
 template <class Matrix>
 void test_boundary_maximal_simplex_removal() {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
   test_content_equality(columns, m);
@@ -885,12 +885,12 @@ void test_boundary_maximal_simplex_removal() {
 
   test_content_equality(columns, m);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 6);
-  BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, static_cast<typename Matrix::pos_index>(-1));
+  BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, static_cast<typename Matrix::Pos_index>(-1));
 }
 
 template <class Matrix>
 void test_ru_maximal_simplex_removal() {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
   columns[5].clear();
@@ -911,13 +911,13 @@ void test_ru_maximal_simplex_removal() {
   test_content_equality(columns, m);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 6);
   if constexpr (Matrix::Option_list::has_column_pairings) {
-    BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, static_cast<typename Matrix::Pos_index>(-1));
   }
 }
 
 template <class Matrix>
 void test_chain_maximal_simplex_removal(Matrix& m) {
-  auto columns = build_simple_chain_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_chain_matrix<typename Matrix::Column>();
 
   test_content_equality(columns, m);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 7);
@@ -936,7 +936,7 @@ void test_chain_maximal_simplex_removal(Matrix& m) {
   test_content_equality(columns, m);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 6);
   if constexpr (Matrix::Option_list::has_column_pairings) {
-    BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, static_cast<typename Matrix::Pos_index>(-1));
   }
 }
 
@@ -964,7 +964,7 @@ void test_maximal_dimension(Matrix& m) {
 
 template <class Matrix>
 void test_base_operation() {
-  auto columns = build_general_matrix<typename Matrix::Column_type>();
+  auto columns = build_general_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
   test_content_equality(columns, m);
@@ -1006,7 +1006,7 @@ void test_base_operation() {
 
 template <class Matrix>
 void test_base_col_comp_operation() {
-  auto columns = build_general_matrix<typename Matrix::Column_type>();
+  auto columns = build_general_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
   test_content_equality(columns, m);
@@ -1052,12 +1052,12 @@ void test_base_col_comp_operation() {
 
 template <class Matrix>
 void test_ru_operation() {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
   columns[5].clear();
 
-  std::vector<witness_content<typename Matrix::Column_type> > uColumns(7);
+  std::vector<witness_content<typename Matrix::Column> > uColumns(7);
   if constexpr (Matrix::Option_list::is_z2) {
     if constexpr (Matrix::Option_list::has_vine_update) {
       uColumns[0] = {0};
@@ -1090,7 +1090,7 @@ void test_ru_operation() {
   unsigned int i = 0;
   if constexpr (is_indexed_by_position<Matrix>()) {
     for (auto& b : uColumns) {
-      test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++, false)));
+      test_column_equality<typename Matrix::Column>(b, get_column_content_via_iterators(m.get_column(i++, false)));
     }
   }
 
@@ -1109,7 +1109,7 @@ void test_ru_operation() {
   if constexpr (is_indexed_by_position<Matrix>()) {
     i = 0;
     for (auto& b : uColumns) {
-      test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++, false)));
+      test_column_equality<typename Matrix::Column>(b, get_column_content_via_iterators(m.get_column(i++, false)));
     }
   }
 
@@ -1128,7 +1128,7 @@ void test_ru_operation() {
   if constexpr (is_indexed_by_position<Matrix>()) {
     i = 0;
     for (auto& b : uColumns) {
-      test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(m.get_column(i++, false)));
+      test_column_equality<typename Matrix::Column>(b, get_column_content_via_iterators(m.get_column(i++, false)));
     }
   }
 
@@ -1145,7 +1145,7 @@ void test_ru_operation() {
     if constexpr (is_indexed_by_position<Matrix>()) {
       i = 0;
       for (auto& b : uColumns) {
-        test_column_equality<typename Matrix::Column_type>(b,
+        test_column_equality<typename Matrix::Column>(b,
                                                            get_column_content_via_iterators(m.get_column(i++, false)));
       }
     }
@@ -1162,7 +1162,7 @@ void test_ru_operation() {
     if constexpr (is_indexed_by_position<Matrix>()) {
       i = 0;
       for (auto& b : uColumns) {
-        test_column_equality<typename Matrix::Column_type>(b,
+        test_column_equality<typename Matrix::Column>(b,
                                                            get_column_content_via_iterators(m.get_column(i++, false)));
       }
     }
@@ -1171,7 +1171,7 @@ void test_ru_operation() {
 
 template <class Matrix>
 void test_chain_operation(Matrix& m) {
-  auto columns = build_simple_chain_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_chain_matrix<typename Matrix::Column>();
 
   test_content_equality(columns, m);
 
@@ -1210,9 +1210,9 @@ void test_chain_operation(Matrix& m) {
 
 template <class Matrix>
 void test_base_cell_range_operation() {
-  using Cell = typename Matrix::Cell_type;
+  using Cell = typename Matrix::Matrix_cell;
 
-  auto columns = build_general_matrix<typename Matrix::Column_type>();
+  auto columns = build_general_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
   std::vector<Cell> range;
@@ -1252,9 +1252,9 @@ void test_base_cell_range_operation() {
 
 template <class Matrix>
 void test_base_col_comp_cell_range_operation() {
-  using Cell = typename Matrix::Cell_type;
+  using Cell = typename Matrix::Matrix_cell;
 
-  auto columns = build_general_matrix<typename Matrix::Column_type>();
+  auto columns = build_general_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
   std::vector<Cell> range;
@@ -1300,7 +1300,7 @@ void test_base_col_comp_cell_range_operation() {
 
 template <class Matrix>
 void test_const_operation() {
-  using C = typename Matrix::Column_type;
+  using C = typename Matrix::Column;
   typename Matrix::Column_settings settings(5);
 
   auto columns = build_general_matrix<C>();
@@ -1338,7 +1338,7 @@ void test_const_operation() {
 
 template <class Matrix>
 void test_base_col_comp_const_operation() {
-  using C = typename Matrix::Column_type;
+  using C = typename Matrix::Column;
   typename Matrix::Column_settings settings(5);
 
   auto columns = build_general_matrix<C>();
@@ -1389,7 +1389,7 @@ void test_barcode() {
     }
   };
 
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
   const auto& barcode = m.get_current_barcode();
@@ -1397,22 +1397,22 @@ void test_barcode() {
   if constexpr (Matrix::Option_list::is_of_boundary_type) {
     columns[5].clear();
   } else {
-    columns = build_longer_chain_matrix<typename Matrix::Column_type>();
+    columns = build_longer_chain_matrix<typename Matrix::Column>();
   }
   test_content_equality(columns, m);
 
   if constexpr (Matrix::Option_list::has_row_access) {
-    std::vector<witness_content<typename Matrix::Column_type> > rows;
+    std::vector<witness_content<typename Matrix::Column> > rows;
     if constexpr (Matrix::Option_list::is_of_boundary_type) {
-      rows = build_longer_reduced_row_matrix<typename Matrix::Column_type>();
+      rows = build_longer_reduced_row_matrix<typename Matrix::Column>();
     } else {
-      rows = build_longer_chain_row_matrix<typename Matrix::Column_type>();
+      rows = build_longer_chain_row_matrix<typename Matrix::Column>();
     }
     unsigned int i = 0;
     for (auto& r : rows) {
       if constexpr (Matrix::Option_list::has_removable_rows)
         if (i == 6) continue;
-      test_column_equality<typename Matrix::Column_type>(r, get_ordered_row(m, i++));
+      test_column_equality<typename Matrix::Column>(r, get_ordered_row(m, i++));
     }
   }
 
@@ -1457,7 +1457,7 @@ void test_barcode() {
 
 template <class Matrix>
 void test_shifted_barcode() {
-  using C = typename Matrix::Column_type;
+  using C = typename Matrix::Column;
   struct BarComp {
     bool operator()(const std::tuple<int, int, int>& c1, const std::tuple<int, int, int>& c2) const {
       if (std::get<0>(c1) == std::get<0>(c2)) return std::get<1>(c1) < std::get<1>(c2);
@@ -1591,7 +1591,7 @@ void test_shifted_barcode() {
 
 template <class Matrix>
 void test_base_swaps() {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
   test_content_equality(columns, m);
@@ -1637,7 +1637,7 @@ void test_base_swaps() {
 // non-barcode
 template <class Matrix>
 void test_vine_swap_with_position_index(Matrix& m) {
-  std::vector<witness_content<typename Matrix::Column_type> > columns;
+  std::vector<witness_content<typename Matrix::Column> > columns;
   bool change;
 
   if constexpr (Matrix::Option_list::is_of_boundary_type) {
@@ -1650,7 +1650,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     BOOST_CHECK(m.is_zero_column(2));
     BOOST_CHECK(m.is_zero_column(5));
     BOOST_CHECK(m.is_zero_column(7));
-    columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+    columns = build_longer_boundary_matrix<typename Matrix::Column>();
     columns[5].clear();
   } else {
     BOOST_CHECK_EQUAL(m.get_column_with_pivot(0), 0);
@@ -1662,7 +1662,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     BOOST_CHECK_EQUAL(m.get_column_with_pivot(6), 6);
     BOOST_CHECK_EQUAL(m.get_column_with_pivot(7), 7);
     BOOST_CHECK_EQUAL(m.get_column_with_pivot(8), 8);
-    columns = build_longer_chain_matrix<typename Matrix::Column_type>();
+    columns = build_longer_chain_matrix<typename Matrix::Column>();
   }
   test_content_equality(columns, m);
 
@@ -1671,7 +1671,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -1730,7 +1730,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -1781,7 +1781,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -1832,7 +1832,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -1883,7 +1883,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -1950,7 +1950,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -1976,7 +1976,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
 // non-barcode
 template <class Matrix>
 void test_vine_swap_with_id_index(Matrix& m) {
-  std::vector<witness_content<typename Matrix::Column_type> > columns;
+  std::vector<witness_content<typename Matrix::Column> > columns;
   unsigned int next;
 
   if constexpr (Matrix::Option_list::is_of_boundary_type) {
@@ -1989,7 +1989,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     BOOST_CHECK(m.is_zero_column(2));
     BOOST_CHECK(m.is_zero_column(5));
     BOOST_CHECK(m.is_zero_column(7));
-    columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+    columns = build_longer_boundary_matrix<typename Matrix::Column>();
     columns[5].clear();
   } else {
     BOOST_CHECK_EQUAL(m.get_column_with_pivot(0), 0);
@@ -2001,7 +2001,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     BOOST_CHECK_EQUAL(m.get_column_with_pivot(6), 6);
     BOOST_CHECK_EQUAL(m.get_column_with_pivot(7), 7);
     BOOST_CHECK_EQUAL(m.get_column_with_pivot(8), 8);
-    columns = build_longer_chain_matrix<typename Matrix::Column_type>();
+    columns = build_longer_chain_matrix<typename Matrix::Column>();
   }
   test_content_equality(columns, m);
 
@@ -2010,7 +2010,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2069,7 +2069,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2120,7 +2120,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2171,7 +2171,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2222,7 +2222,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2294,7 +2294,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);

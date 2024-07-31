@@ -38,16 +38,16 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
                     protected Master_matrix::Matrix_row_access_option 
 {
  public:
-  using index = typename Master_matrix::index;                        /**< Container index type. */
-  using dimension_type = typename Master_matrix::dimension_type;      /**< Dimension value type. */
+  using Index = typename Master_matrix::Index;                        /**< Container index type. */
+  using Dimension = typename Master_matrix::Dimension;                /**< Dimension value type. */
   /**
    * @brief Field operators class. Necessary only if @ref PersistenceMatrixOptions::is_z2 is false.
    */
   using Field_operators = typename Master_matrix::Field_operators;
-  using Field_element_type = typename Master_matrix::element_type;    /**< Type of a field element. */
-  using Column_type = typename Master_matrix::Column_type;            /**< Column type. */
-  using container_type = typename Master_matrix::boundary_type;       /**< Type of the column container. */
-  using Row_type = typename Master_matrix::Row_type;                  /**< Row type,
+  using Field_element = typename Master_matrix::Element;              /**< Type of a field element. */
+  using Column = typename Master_matrix::Column;                      /**< Column type. */
+  using Boundary = typename Master_matrix::Boundary;                  /**< Type of the column container. */
+  using Row = typename Master_matrix::Row;                            /**< Row type,
                                                                            only necessary with row access option. */
   using Cell_constructor = typename Master_matrix::Cell_constructor;  /**< Factory of @ref Cell classes. */
   using Column_settings = typename Master_matrix::Column_settings;    /**< Structure giving access to the columns to
@@ -63,15 +63,15 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   /**
    * @brief Constructs a matrix from the given ordered columns. The columns are inserted in the given order.
    * 
-   * @tparam Container_type Range type for @ref Matrix::cell_rep_type ranges.
+   * @tparam Container Range type for @ref Matrix::Cell_representative ranges.
    * Assumed to have a begin(), end() and size() method.
-   * @param columns A vector of @ref Matrix::cell_rep_type ranges to construct the columns from.
+   * @param columns A vector of @ref Matrix::Cell_representative ranges to construct the columns from.
    * The content of the ranges are assumed to be sorted by increasing ID value.
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
    * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
    */
-  template <class Container_type = container_type>
-  Base_matrix(const std::vector<Container_type>& columns, 
+  template <class Container = Boundary>
+  Base_matrix(const std::vector<Container>& columns, 
               Column_settings* colSettings);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
@@ -101,37 +101,37 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
 
   /**
    * @brief Inserts a new ordered column at the end of the matrix by copying the given range of
-   * @ref Matrix::cell_rep_type. The content of the range is assumed to be sorted by increasing ID value.
+   * @ref Matrix::Cell_representative. The content of the range is assumed to be sorted by increasing ID value.
    * 
-   * @tparam Container_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
-   * @param column Range of @ref Matrix::cell_rep_type from which the column has to be constructed. Assumed to be
+   * @tparam Container Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @param column Range of @ref Matrix::Cell_representative from which the column has to be constructed. Assumed to be
    * ordered by increasing ID value. 
    */
-  template <class Container_type = container_type>
-  void insert_column(const Container_type& column);
+  template <class Container = Boundary>
+  void insert_column(const Container& column);
   /**
-   * @brief Inserts a new ordered column at the given index by copying the given range of @ref Matrix::cell_rep_type.
+   * @brief Inserts a new ordered column at the given index by copying the given range of @ref Matrix::Cell_representative.
    * There should not be any other column inserted at that index which was not explicitly removed before.
    * The content of the range is assumed to be sorted by increasing ID value. 
    * Not available when row access is enabled.
    * 
-   * @tparam Container_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
-   * @param column Range of @ref Matrix::cell_rep_type from which the column has to be constructed. Assumed to be
+   * @tparam Container Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @param column Range of @ref Matrix::Cell_representative from which the column has to be constructed. Assumed to be
    * ordered by increasing ID value. 
    * @param columnIndex @ref MatIdx index to which the column has to be inserted.
    */
-  template <class Container_type = container_type>
-  void insert_column(const Container_type& column, index columnIndex);
+  template <class Container = Boundary>
+  void insert_column(const Container& column, Index columnIndex);
   /**
    * @brief Same as @ref insert_column, only for interface purposes. The given dimension is ignored and not stored.
    * 
-   * @tparam Boundary_type Range of @ref Matrix::cell_rep_type. Assumed to have a begin(), end() and size() method.
-   * @param boundary Range of @ref Matrix::cell_rep_type from which the column has to be constructed. Assumed to be
+   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @param boundary Range of @ref Matrix::Cell_representative from which the column has to be constructed. Assumed to be
    * ordered by increasing ID value. 
    * @param dim Ignored.
    */
-  template <class Boundary_type>
-  void insert_boundary(const Boundary_type& boundary, dimension_type dim = -1);
+  template <class Boundary_range>
+  void insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
   /**
    * @brief Returns the column at the given @ref MatIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -143,7 +143,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @param columnIndex @ref MatIdx index of the column to return.
    * @return Reference to the column.
    */
-  Column_type& get_column(index columnIndex);
+  Column& get_column(Index columnIndex);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_row_access is true.
    * Returns the row at the given @ref rowindex "row index" of the matrix.
@@ -156,13 +156,13 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @return Reference to the row.
    */
-  Row_type& get_row(index rowIndex);
+  Row& get_row(Index rowIndex);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_map_column_container is true. Otherwise, see
    * @ref remove_last. Erases the given column from the matrix. If the given column index corresponded to the last
    * used column index, the "new last column index" will be `columnIndex - 1`, even if a column was never explicitly
    * inserted at this index (possible when
-   * @ref insert_column(const Container_type& column, index columnIndex) "insert_column(column, columnIndex)" was used).
+   * @ref insert_column(const Container& column, Index columnIndex) "insert_column(column, columnIndex)" was used).
    * If the column didn't existed, it will simply be considered as an empty column.
    *
    * If @ref PersistenceMatrixOptions::has_row_access is also true, the deleted column cells are also automatically
@@ -170,19 +170,19 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * 
    * @param columnIndex @ref MatIdx index of the column to remove.
    */
-  void remove_column(index columnIndex);
+  void remove_column(Index columnIndex);
   /**
    * @brief Removes the last column from the matrix. The last column is at index \f$ max(ins1, ins2, rem - 1) \f$,
    * where:
    * - \f$ ins1 \f$ is the index of the last column inserted by
-   * @ref insert_column(const Container_type& column) "insert_column(column)",
+   * @ref insert_column(const Container& column) "insert_column(column)",
    * - \f$ ins2 \f$ is largest index used with
-   * @ref insert_column(const Container_type& column, index columnIndex) "insert_column(column, columnIndex)",
+   * @ref insert_column(const Container& column, Index columnIndex) "insert_column(column, columnIndex)",
    * - \f$ rem \f$ is the last index just before the last call of @ref remove_column or @ref remove_last.
    *
    * If \f$ max(ins1, ins2, rem - 1) = rem - 1 \f$ but no column was explicitly inserted at that index (possible
    * by the use of
-   * @ref insert_column(const Container_type& column, index columnIndex) "insert_column(column, columnIndex)"),
+   * @ref insert_column(const Container& column, Index columnIndex) "insert_column(column, columnIndex)"),
    * the column is assumed to be an empty column.
    *
    * See also @ref remove_column.
@@ -203,14 +203,14 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row.
    */
-  void erase_empty_row(index rowIndex);
+  void erase_empty_row(Index rowIndex);
 
   /**
    * @brief Returns the current number of columns in the matrix.
    * 
    * @return The number of columns.
    */
-  index get_number_of_columns() const;
+  Index get_number_of_columns() const;
 
   /**
    * @brief Adds column represented by @p sourceColumn onto the column at @p targetColumnIndex in the matrix.
@@ -221,7 +221,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @param targetColumnIndex @ref MatIdx index of the target column.
    */
   template <class Cell_range_or_column_index>
-  void add_to(const Cell_range_or_column_index& sourceColumn, index targetColumnIndex);
+  void add_to(const Cell_range_or_column_index& sourceColumn, Index targetColumnIndex);
   /**
    * @brief Multiplies the target column with the coefficient and then adds the source column to it.
    * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
@@ -234,8 +234,8 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    */
   template <class Cell_range_or_column_index>
   void multiply_target_and_add_to(const Cell_range_or_column_index& sourceColumn, 
-                                  const Field_element_type& coefficient,
-                                  index targetColumnIndex);
+                                  const Field_element& coefficient,
+                                  Index targetColumnIndex);
   /**
    * @brief Multiplies the source column with the coefficient before adding it to the target column.
    * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
@@ -247,9 +247,9 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @param targetColumnIndex @ref MatIdx index of the target column.
    */
   template <class Cell_range_or_column_index>
-  void multiply_source_and_add_to(const Field_element_type& coefficient, 
+  void multiply_source_and_add_to(const Field_element& coefficient, 
                                   const Cell_range_or_column_index& sourceColumn,
-                                  index targetColumnIndex);
+                                  Index targetColumnIndex);
 
   /**
    * @brief Zeroes the cell at the given coordinates.
@@ -257,13 +257,13 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @param columnIndex @ref MatIdx index of the column of the cell.
    * @param rowIndex @ref rowindex "Row index" of the row of the cell.
    */
-  void zero_cell(index columnIndex, index rowIndex);
+  void zero_cell(Index columnIndex, Index rowIndex);
   /**
    * @brief Zeroes the column at the given index.
    * 
    * @param columnIndex @ref MatIdx index of the column to zero.
    */
-  void zero_column(index columnIndex);
+  void zero_column(Index columnIndex);
   /**
    * @brief Indicates if the cell at given coordinates has value zero.
    * 
@@ -272,7 +272,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @return true If the cell has value zero.
    * @return false Otherwise.
    */
-  bool is_zero_cell(index columnIndex, index rowIndex) const;
+  bool is_zero_cell(Index columnIndex, Index rowIndex) const;
   /**
    * @brief Indicates if the column at given index has value zero.
    * 
@@ -280,7 +280,7 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @return true If the column has value zero.
    * @return false Otherwise.
    */
-  bool is_zero_column(index columnIndex);
+  bool is_zero_column(Index columnIndex);
 
   /**
    * @brief Resets the matrix to an empty matrix.
@@ -317,44 +317,44 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   void print();  // for debug
 
  private:
-  using swap_opt = typename Master_matrix::template Base_swap_option<Base_matrix<Master_matrix> >;
-  using ra_opt = typename Master_matrix::Matrix_row_access_option;
-  using matrix_type = typename Master_matrix::column_container_type;
-  using cell_rep_type =
+  using Swap_opt = typename Master_matrix::template Base_swap_option<Base_matrix<Master_matrix> >;
+  using RA_opt = typename Master_matrix::Matrix_row_access_option;
+  using Column_container = typename Master_matrix::Column_container;
+  using Cell_representative =
       typename std::conditional<Master_matrix::Option_list::is_z2, 
-                                index, 
-                                std::pair<index, Field_element_type>
+                                Index, 
+                                std::pair<Index, Field_element>
                                >::type;
 
-  friend swap_opt;  // direct access to matrix_ to avoid row reorder.
+  friend Swap_opt;  // direct access to matrix_ to avoid row reorder.
 
-  matrix_type matrix_;            /**< Column container. */
-  index nextInsertIndex_;         /**< Next unused column index. */
+  Column_container matrix_;       /**< Column container. */
+  Index nextInsertIndex_;         /**< Next unused column index. */
   Column_settings* colSettings_;  /**< Cell factory. */
 
-  template <class Container_type = container_type>
-  void _insert(const Container_type& column, index columnIndex, dimension_type dim);
+  template <class Container = Boundary>
+  void _insert(const Container& column, Index columnIndex, Dimension dim);
   void _orderRowsIfNecessary();
-  const Column_type& _get_column(index columnIndex) const;
-  Column_type& _get_column(index columnIndex);
-  index _get_real_row_index(index rowIndex) const;
-  template <class Container_type>
-  void _container_insert(const Container_type& column, index pos, dimension_type dim);
-  void _container_insert(const Column_type& column, [[maybe_unused]] index pos = 0);
+  const Column& _get_column(Index columnIndex) const;
+  Column& _get_column(Index columnIndex);
+  Index _get_real_row_index(Index rowIndex) const;
+  template <class Container>
+  void _container_insert(const Container& column, Index pos, Dimension dim);
+  void _container_insert(const Column& column, [[maybe_unused]] Index pos = 0);
 };
 
 template <class Master_matrix>
 inline Base_matrix<Master_matrix>::Base_matrix(Column_settings* colSettings)
-    : swap_opt(), ra_opt(), nextInsertIndex_(0), colSettings_(colSettings)
+    : Swap_opt(), RA_opt(), nextInsertIndex_(0), colSettings_(colSettings)
 {}
 
 template <class Master_matrix>
-template <class Container_type>
-inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Container_type>& columns, 
+template <class Container>
+inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Container>& columns, 
                                                Column_settings* colSettings)
-    : swap_opt(columns.size()),
+    : Swap_opt(columns.size()),
       // not ideal if max row index is much smaller than max column index, does that happen often?
-      ra_opt(columns.size()),
+      RA_opt(columns.size()),
       matrix_(!Master_matrix::Option_list::has_map_column_container && Master_matrix::Option_list::has_row_access
                   ? 0
                   : columns.size()),
@@ -364,7 +364,7 @@ inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Container_type>
   if constexpr (!Master_matrix::Option_list::has_map_column_container && Master_matrix::Option_list::has_row_access)
     matrix_.reserve(columns.size());
 
-  for (index i = 0; i < columns.size(); i++) {
+  for (Index i = 0; i < columns.size(); i++) {
     _container_insert(columns[i], i, columns[i].size() == 0 ? 0 : columns[i].size() - 1);
   }
 }
@@ -372,8 +372,8 @@ inline Base_matrix<Master_matrix>::Base_matrix(const std::vector<Container_type>
 template <class Master_matrix>
 inline Base_matrix<Master_matrix>::Base_matrix(unsigned int numberOfColumns, 
                                                Column_settings* colSettings)
-    : swap_opt(numberOfColumns),
-      ra_opt(numberOfColumns),
+    : Swap_opt(numberOfColumns),
+      RA_opt(numberOfColumns),
       matrix_(!Master_matrix::Option_list::has_map_column_container && Master_matrix::Option_list::has_row_access
                   ? 0
                   : numberOfColumns),
@@ -387,8 +387,8 @@ inline Base_matrix<Master_matrix>::Base_matrix(unsigned int numberOfColumns,
 template <class Master_matrix>
 inline Base_matrix<Master_matrix>::Base_matrix(const Base_matrix& matrixToCopy, 
                                                Column_settings* colSettings)
-    : swap_opt(static_cast<const swap_opt&>(matrixToCopy)),
-      ra_opt(static_cast<const ra_opt&>(matrixToCopy)),
+    : Swap_opt(static_cast<const Swap_opt&>(matrixToCopy)),
+      RA_opt(static_cast<const RA_opt&>(matrixToCopy)),
       nextInsertIndex_(matrixToCopy.nextInsertIndex_),
       colSettings_(colSettings == nullptr ? matrixToCopy.colSettings_ : colSettings)
 {
@@ -404,16 +404,16 @@ inline Base_matrix<Master_matrix>::Base_matrix(const Base_matrix& matrixToCopy,
 
 template <class Master_matrix>
 inline Base_matrix<Master_matrix>::Base_matrix(Base_matrix&& other) noexcept
-    : swap_opt(std::move(static_cast<swap_opt&>(other))),
-      ra_opt(std::move(static_cast<ra_opt&>(other))),
+    : Swap_opt(std::move(static_cast<Swap_opt&>(other))),
+      RA_opt(std::move(static_cast<RA_opt&>(other))),
       matrix_(std::move(other.matrix_)),
       nextInsertIndex_(std::exchange(other.nextInsertIndex_, 0)),
       colSettings_(std::exchange(other.colSettings_, nullptr)) 
 {}
 
 template <class Master_matrix>
-template <class Container_type>
-inline void Base_matrix<Master_matrix>::insert_column(const Container_type& column) 
+template <class Container>
+inline void Base_matrix<Master_matrix>::insert_column(const Container& column) 
 {
   //TODO: dim not actually stored right now, so either get rid of it or store it again
   _insert(column, nextInsertIndex_, column.size() == 0 ? 0 : column.size() - 1);
@@ -421,8 +421,8 @@ inline void Base_matrix<Master_matrix>::insert_column(const Container_type& colu
 }
 
 template <class Master_matrix>
-template <class Container_type>
-inline void Base_matrix<Master_matrix>::insert_column(const Container_type& column, index columnIndex) 
+template <class Container>
+inline void Base_matrix<Master_matrix>::insert_column(const Container& column, Index columnIndex) 
 {
   static_assert(!Master_matrix::Option_list::has_row_access,
                 "Columns have to be inserted at the end of the matrix when row access is enabled.");
@@ -433,8 +433,8 @@ inline void Base_matrix<Master_matrix>::insert_column(const Container_type& colu
 }
 
 template <class Master_matrix>
-template <class Boundary_type>
-inline void Base_matrix<Master_matrix>::insert_boundary(const Boundary_type& boundary, dimension_type dim) 
+template <class Boundary_range>
+inline void Base_matrix<Master_matrix>::insert_boundary(const Boundary_range& boundary, Dimension dim) 
 {
   if (dim == -1) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
   //TODO: dim not actually stored right now, so either get rid of it or store it again
@@ -442,23 +442,23 @@ inline void Base_matrix<Master_matrix>::insert_boundary(const Boundary_type& bou
 }
 
 template <class Master_matrix>
-inline typename Base_matrix<Master_matrix>::Column_type& Base_matrix<Master_matrix>::get_column(index columnIndex) 
+inline typename Base_matrix<Master_matrix>::Column& Base_matrix<Master_matrix>::get_column(Index columnIndex) 
 {
   _orderRowsIfNecessary();
   return _get_column(columnIndex);
 }
 
 template <class Master_matrix>
-inline typename Base_matrix<Master_matrix>::Row_type& Base_matrix<Master_matrix>::get_row(index rowIndex) 
+inline typename Base_matrix<Master_matrix>::Row& Base_matrix<Master_matrix>::get_row(Index rowIndex) 
 {
   static_assert(Master_matrix::Option_list::has_row_access, "Row access has to be enabled for this method.");
 
   _orderRowsIfNecessary();
-  return ra_opt::get_row(rowIndex);
+  return RA_opt::get_row(rowIndex);
 }
 
 template <class Master_matrix>
-inline void Base_matrix<Master_matrix>::remove_column(index columnIndex) 
+inline void Base_matrix<Master_matrix>::remove_column(Index columnIndex) 
 {
   static_assert(Master_matrix::Option_list::has_map_column_container,
                 "'remove_column' is not implemented for the chosen options.");
@@ -489,21 +489,21 @@ inline void Base_matrix<Master_matrix>::remove_last()
 }
 
 template <class Master_matrix>
-inline void Base_matrix<Master_matrix>::erase_empty_row(index rowIndex) 
+inline void Base_matrix<Master_matrix>::erase_empty_row(Index rowIndex) 
 {
   if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows) {
-    ra_opt::erase_empty_row(_get_real_row_index(rowIndex));
+    RA_opt::erase_empty_row(_get_real_row_index(rowIndex));
   }
   if constexpr ((Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) &&
                 Master_matrix::Option_list::has_map_column_container) {
-    auto it = swap_opt::indexToRow_.find(rowIndex);
-    swap_opt::rowToIndex_.erase(it->second);
-    swap_opt::indexToRow_.erase(it);
+    auto it = Swap_opt::indexToRow_.find(rowIndex);
+    Swap_opt::rowToIndex_.erase(it->second);
+    Swap_opt::indexToRow_.erase(it);
   }
 }
 
 template <class Master_matrix>
-inline typename Base_matrix<Master_matrix>::index Base_matrix<Master_matrix>::get_number_of_columns() const 
+inline typename Base_matrix<Master_matrix>::Index Base_matrix<Master_matrix>::get_number_of_columns() const 
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     return matrix_.size();
@@ -515,7 +515,7 @@ inline typename Base_matrix<Master_matrix>::index Base_matrix<Master_matrix>::ge
 template <class Master_matrix>
 template <class Cell_range_or_column_index>
 inline void Base_matrix<Master_matrix>::add_to(const Cell_range_or_column_index& sourceColumn,
-                                               index targetColumnIndex) 
+                                               Index targetColumnIndex) 
 {
   if constexpr (std::is_integral_v<Cell_range_or_column_index>) {
     _get_column(targetColumnIndex) += _get_column(sourceColumn);
@@ -527,8 +527,8 @@ inline void Base_matrix<Master_matrix>::add_to(const Cell_range_or_column_index&
 template <class Master_matrix>
 template <class Cell_range_or_column_index>
 inline void Base_matrix<Master_matrix>::multiply_target_and_add_to(const Cell_range_or_column_index& sourceColumn,
-                                                                   const Field_element_type& coefficient,
-                                                                   index targetColumnIndex) 
+                                                                   const Field_element& coefficient,
+                                                                   Index targetColumnIndex) 
 {
   if constexpr (std::is_integral_v<Cell_range_or_column_index>) {
     _get_column(targetColumnIndex).multiply_target_and_add(coefficient, _get_column(sourceColumn));
@@ -539,9 +539,9 @@ inline void Base_matrix<Master_matrix>::multiply_target_and_add_to(const Cell_ra
 
 template <class Master_matrix>
 template <class Cell_range_or_column_index>
-inline void Base_matrix<Master_matrix>::multiply_source_and_add_to(const Field_element_type& coefficient,
+inline void Base_matrix<Master_matrix>::multiply_source_and_add_to(const Field_element& coefficient,
                                                                    const Cell_range_or_column_index& sourceColumn,
-                                                                   index targetColumnIndex) 
+                                                                   Index targetColumnIndex) 
 {
   if constexpr (std::is_integral_v<Cell_range_or_column_index>) {
     _get_column(targetColumnIndex).multiply_source_and_add(_get_column(sourceColumn), coefficient);
@@ -551,24 +551,24 @@ inline void Base_matrix<Master_matrix>::multiply_source_and_add_to(const Field_e
 }
 
 template <class Master_matrix>
-inline void Base_matrix<Master_matrix>::zero_cell(index columnIndex, index rowIndex) 
+inline void Base_matrix<Master_matrix>::zero_cell(Index columnIndex, Index rowIndex) 
 {
   _get_column(columnIndex).clear(_get_real_row_index(rowIndex));
 }
 
 template <class Master_matrix>
-inline void Base_matrix<Master_matrix>::zero_column(index columnIndex) {
+inline void Base_matrix<Master_matrix>::zero_column(Index columnIndex) {
   _get_column(columnIndex).clear();
 }
 
 template <class Master_matrix>
-inline bool Base_matrix<Master_matrix>::is_zero_cell(index columnIndex, index rowIndex) const 
+inline bool Base_matrix<Master_matrix>::is_zero_cell(Index columnIndex, Index rowIndex) const 
 {
   return !(_get_column(columnIndex).is_non_zero(_get_real_row_index(rowIndex)));
 }
 
 template <class Master_matrix>
-inline bool Base_matrix<Master_matrix>::is_zero_column(index columnIndex) 
+inline bool Base_matrix<Master_matrix>::is_zero_column(Index columnIndex) 
 {
   return _get_column(columnIndex).is_empty();
 }
@@ -576,8 +576,8 @@ inline bool Base_matrix<Master_matrix>::is_zero_column(index columnIndex)
 template <class Master_matrix>
 inline Base_matrix<Master_matrix>& Base_matrix<Master_matrix>::operator=(const Base_matrix& other) 
 {
-  swap_opt::operator=(other);
-  ra_opt::operator=(other);
+  Swap_opt::operator=(other);
+  RA_opt::operator=(other);
   matrix_.clear();
   nextInsertIndex_ = other.nextInsertIndex_;
   colSettings_ = other.colSettings_;
@@ -599,8 +599,8 @@ inline void Base_matrix<Master_matrix>::print()
 {
   _orderRowsIfNecessary();
   std::cout << "Base_matrix:\n";
-  for (index i = 0; i < nextInsertIndex_; ++i) {
-    const Column_type& col = matrix_[i];
+  for (Index i = 0; i < nextInsertIndex_; ++i) {
+    const Column& col = matrix_[i];
     for (const auto& e : col.get_content(nextInsertIndex_)) {
       if (e == 0u)
         std::cout << "- ";
@@ -612,8 +612,8 @@ inline void Base_matrix<Master_matrix>::print()
   std::cout << "\n";
   if constexpr (Master_matrix::Option_list::has_row_access) {
     std::cout << "Row Matrix:\n";
-    for (index i = 0; i < nextInsertIndex_; ++i) {
-      const auto& row = ra_opt::rows_[i];
+    for (Index i = 0; i < nextInsertIndex_; ++i) {
+      const auto& row = RA_opt::rows_[i];
       for (const auto& cell : row) {
         std::cout << cell.get_column_index() << " ";
       }
@@ -624,13 +624,13 @@ inline void Base_matrix<Master_matrix>::print()
 }
 
 template <class Master_matrix>
-template <class Container_type>
-inline void Base_matrix<Master_matrix>::_insert(const Container_type& column, index columnIndex, dimension_type dim) 
+template <class Container>
+inline void Base_matrix<Master_matrix>::_insert(const Container& column, Index columnIndex, Dimension dim) 
 {
   _orderRowsIfNecessary();
 
   //resize of containers when necessary:
-  index pivot = 0;
+  Index pivot = 0;
   if (column.begin() != column.end()) {
     //first, compute pivot of `column`
     if constexpr (Master_matrix::Option_list::is_z2) {
@@ -640,30 +640,30 @@ inline void Base_matrix<Master_matrix>::_insert(const Container_type& column, in
     }
     //row container
     if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows)
-      if (ra_opt::rows_->size() <= pivot) ra_opt::rows_->resize(pivot + 1);
+      if (RA_opt::rows_->size() <= pivot) RA_opt::rows_->resize(pivot + 1);
   }
 
   //row swap map containers
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
       for (auto id : column) {
-        index idx;
+        Index idx;
         if constexpr (Master_matrix::Option_list::is_z2) {
           idx = id;
         } else {
           idx = id.first;
         }
-        swap_opt::indexToRow_[idx] = idx;
-        swap_opt::rowToIndex_[idx] = idx;
+        Swap_opt::indexToRow_[idx] = idx;
+        Swap_opt::rowToIndex_[idx] = idx;
       }
     }
   } else {
     if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
-      index size = swap_opt::indexToRow_.size();
+      Index size = Swap_opt::indexToRow_.size();
       if (size <= pivot) {
-        for (index i = size; i <= pivot; i++) {
-          swap_opt::indexToRow_.push_back(i);
-          swap_opt::rowToIndex_.push_back(i);
+        for (Index i = size; i <= pivot; i++) {
+          Swap_opt::indexToRow_.push_back(i);
+          Swap_opt::rowToIndex_.push_back(i);
         }
       }
     }
@@ -682,13 +682,13 @@ template <class Master_matrix>
 inline void Base_matrix<Master_matrix>::_orderRowsIfNecessary() 
 {
   if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
-    if (swap_opt::rowSwapped_) swap_opt::_orderRows();
+    if (Swap_opt::rowSwapped_) Swap_opt::_orderRows();
   }
 }
 
 template <class Master_matrix>
-inline const typename Base_matrix<Master_matrix>::Column_type& Base_matrix<Master_matrix>::_get_column(
-    index columnIndex) const
+inline const typename Base_matrix<Master_matrix>::Column& Base_matrix<Master_matrix>::_get_column(
+    Index columnIndex) const
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     return matrix_.at(columnIndex);
@@ -698,7 +698,7 @@ inline const typename Base_matrix<Master_matrix>::Column_type& Base_matrix<Maste
 }
 
 template <class Master_matrix>
-inline typename Base_matrix<Master_matrix>::Column_type& Base_matrix<Master_matrix>::_get_column(index columnIndex)
+inline typename Base_matrix<Master_matrix>::Column& Base_matrix<Master_matrix>::_get_column(Index columnIndex)
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     return matrix_.at(columnIndex);
@@ -708,13 +708,13 @@ inline typename Base_matrix<Master_matrix>::Column_type& Base_matrix<Master_matr
 }
 
 template <class Master_matrix>
-inline typename Base_matrix<Master_matrix>::index Base_matrix<Master_matrix>::_get_real_row_index(index rowIndex) const
+inline typename Base_matrix<Master_matrix>::Index Base_matrix<Master_matrix>::_get_real_row_index(Index rowIndex) const
 {
   if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      return swap_opt::indexToRow_.at(rowIndex);
+      return Swap_opt::indexToRow_.at(rowIndex);
     } else {
-      return swap_opt::indexToRow_[rowIndex];
+      return Swap_opt::indexToRow_[rowIndex];
     }
   } else {
     return rowIndex;
@@ -722,34 +722,34 @@ inline typename Base_matrix<Master_matrix>::index Base_matrix<Master_matrix>::_g
 }
 
 template <class Master_matrix>
-template <class Container_type>
-inline void Base_matrix<Master_matrix>::_container_insert(const Container_type& column, index pos, dimension_type dim){
+template <class Container>
+inline void Base_matrix<Master_matrix>::_container_insert(const Container& column, Index pos, Dimension dim){
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.try_emplace(pos, Column_type(pos, column, dim, ra_opt::rows_, colSettings_));
+      matrix_.try_emplace(pos, Column(pos, column, dim, RA_opt::rows_, colSettings_));
     } else {
-      matrix_.try_emplace(pos, Column_type(column, dim, colSettings_));
+      matrix_.try_emplace(pos, Column(column, dim, colSettings_));
     }
   } else {
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.emplace_back(pos, column, dim, ra_opt::rows_, colSettings_);
+      matrix_.emplace_back(pos, column, dim, RA_opt::rows_, colSettings_);
     } else {
-      matrix_[pos] = Column_type(column, dim, colSettings_);
+      matrix_[pos] = Column(column, dim, colSettings_);
     }
   }
 }
 
 template <class Master_matrix>
-inline void Base_matrix<Master_matrix>::_container_insert(const Column_type& column, [[maybe_unused]] index pos){
+inline void Base_matrix<Master_matrix>::_container_insert(const Column& column, [[maybe_unused]] Index pos){
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.try_emplace(pos, Column_type(column, column.get_column_index(), ra_opt::rows_, colSettings_));
+      matrix_.try_emplace(pos, Column(column, column.get_column_index(), RA_opt::rows_, colSettings_));
     } else {
-      matrix_.try_emplace(pos, Column_type(column, colSettings_));
+      matrix_.try_emplace(pos, Column(column, colSettings_));
     }
   } else {
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.emplace_back(column, column.get_column_index(), ra_opt::rows_, colSettings_);
+      matrix_.emplace_back(column, column.get_column_index(), RA_opt::rows_, colSettings_);
     } else {
       matrix_.emplace_back(column, colSettings_);
     }

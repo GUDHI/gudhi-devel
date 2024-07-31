@@ -76,8 +76,8 @@ template <Column_types col_type = Column_types::INTRUSIVE_SET,
 struct Default_options 
 {
   using Field_coeff_operators = FieldOperators;
-  using dimension_type = int;
-  using index_type = unsigned int;
+  using Dimension = int;
+  using Index = unsigned int;
 
   static const bool is_z2 = is_z2_only;
   static const Column_types column_type = col_type;
