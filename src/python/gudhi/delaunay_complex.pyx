@@ -217,9 +217,6 @@ cdef class DelaunayCechComplex(DelaunayComplex):
     All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
     the complex.
 
-    For more details about the algorithm, please refer to the
-    `assign_MEB_filtration C++ documentation <https://gudhi.inria.fr/doc/latest/group__cech__complex.html>`_
-
     .. note::
 
         When DelaunayCechComplex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
