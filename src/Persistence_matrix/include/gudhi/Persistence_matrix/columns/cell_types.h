@@ -36,8 +36,8 @@ namespace persistence_matrix {
 struct Dummy_cell_column_index_mixin 
 {
   Dummy_cell_column_index_mixin() {}
-  template <typename index>
-  Dummy_cell_column_index_mixin([[maybe_unused]] index columnIndex) {}
+  template <typename Index>
+  Dummy_cell_column_index_mixin([[maybe_unused]] Index columnIndex) {}
 };
 
 /**
@@ -49,8 +49,8 @@ struct Dummy_cell_column_index_mixin
 struct Dummy_cell_field_element_mixin 
 {
   Dummy_cell_field_element_mixin() {}
-  template <class Field_element_type>
-  Dummy_cell_field_element_mixin([[maybe_unused]] Field_element_type t) {}
+  template <class Field_element>
+  Dummy_cell_field_element_mixin([[maybe_unused]] Field_element t) {}
 };
 
 /**
@@ -58,9 +58,9 @@ struct Dummy_cell_field_element_mixin
  *
  * @brief Class managing the column index access of a cell.
  * 
- * @tparam index @ref MatIdx index type.
+ * @tparam Index @ref MatIdx index type.
  */
-template <typename index>
+template <typename Index>
 class Cell_column_index 
 {
  public:
@@ -73,7 +73,7 @@ class Cell_column_index
    * 
    * @param columnIndex Column index of the cell.
    */
-  Cell_column_index(index columnIndex) : columnIndex_(columnIndex){};
+  Cell_column_index(Index columnIndex) : columnIndex_(columnIndex){};
   /**
    * @brief Copy constructor.
    * 
@@ -92,13 +92,13 @@ class Cell_column_index
    * 
    * @return Column index of the cell.
    */
-  index get_column_index() const { return columnIndex_; };
+  Index get_column_index() const { return columnIndex_; };
   /**
    * @brief Sets the column index to the given value.
    * 
    * @param columnIndex Column index of the cell.
    */
-  void set_column_index(index columnIndex) { columnIndex_ = columnIndex; }
+  void set_column_index(Index columnIndex) { columnIndex_ = columnIndex; }
 
   /**
    * @brief Assign operator.
@@ -109,7 +109,7 @@ class Cell_column_index
   };
 
  private:
-  index columnIndex_;   /**< Column index. */
+  Index columnIndex_;   /**< Column index. */
 };
 
 /**
@@ -117,9 +117,9 @@ class Cell_column_index
  *
  * @brief Class managing the value access of a cell.
  * 
- * @tparam Field_element_type Type of a cell value.
+ * @tparam Field_element Type of a cell value.
  */
-template <class Field_element_type>
+template <class Field_element>
 class Cell_field_element 
 {
  public:
@@ -132,7 +132,7 @@ class Cell_field_element
    * 
    * @param element Value to store.
    */
-  Cell_field_element(Field_element_type element) : element_(element){};
+  Cell_field_element(Field_element element) : element_(element){};
   /**
    * @brief Copy constructor.
    * 
@@ -151,19 +151,19 @@ class Cell_field_element
    * 
    * @return Reference to the value of the cell.
    */
-  Field_element_type& get_element() { return element_; };
+  Field_element& get_element() { return element_; };
   /**
    * @brief Returns the value stored in the cell.
    * 
    * @return Const reference to the value of the cell.
    */
-  const Field_element_type& get_element() const { return element_; };
+  const Field_element& get_element() const { return element_; };
   /**
    * @brief Sets the value.
    * 
    * @param element Value to store.
    */
-  void set_element(const Field_element_type& element) { element_ = element; }
+  void set_element(const Field_element& element) { element_ = element; }
 
   /**
    * @brief Assign operator.
@@ -174,7 +174,7 @@ class Cell_field_element
   };
 
  private:
-  Field_element_type element_;  /**< Value of the cell. */
+  Field_element element_;  /**< Value of the cell. */
 };
 
 /**
@@ -190,18 +190,18 @@ class Cell_field_element
 template <class Master_matrix>
 class Cell : public Master_matrix::Cell_column_index_option,
              public Master_matrix::Cell_field_element_option,
-             public Master_matrix::row_hook_type,
-             public Master_matrix::column_hook_type 
+             public Master_matrix::Row_hook,
+             public Master_matrix::Column_hook 
 {
  private:
   using col_opt = typename Master_matrix::Cell_column_index_option;
   using field_opt = typename Master_matrix::Cell_field_element_option;
 
  public:
-  using Master = Master_matrix;                                     /**< Access to options from outside. */
-  using index = typename Master_matrix::index;                      /**< Column index type. */
-  using id_index = typename Master_matrix::id_index;                /**< Row index type. */
-  using Field_element_type = typename Master_matrix::element_type;  /**< Value type. */
+  using Master = Master_matrix;                           /**< Access to options from outside. */
+  using Index = typename Master_matrix::Index;            /**< Column index type. */
+  using ID_index = typename Master_matrix::ID_index;      /**< Row index type. */
+  using Field_element = typename Master_matrix::Element;  /**< Value type. */
 
   /**
    * @brief Constructs an cell with all attributes at default values.
@@ -212,14 +212,14 @@ class Cell : public Master_matrix::Cell_column_index_option,
    * 
    * @param rowIndex @ref rowindex "Row index" of the cell.
    */
-  Cell(id_index rowIndex) : col_opt(), field_opt(), rowIndex_(rowIndex){};
+  Cell(ID_index rowIndex) : col_opt(), field_opt(), rowIndex_(rowIndex){};
   /**
    * @brief Constructs a cell with given row and column index. Other possible attributes are set at default values.
    * 
    * @param columnIndex Column index of the cell.
    * @param rowIndex @ref rowindex "Row index" of the cell.
    */
-  Cell(index columnIndex, id_index rowIndex) : col_opt(columnIndex), field_opt(), rowIndex_(rowIndex){};
+  Cell(Index columnIndex, ID_index rowIndex) : col_opt(columnIndex), field_opt(), rowIndex_(rowIndex){};
   /**
    * @brief Copy constructor.
    * 
@@ -244,13 +244,13 @@ class Cell : public Master_matrix::Cell_column_index_option,
    * 
    * @return @ref rowindex "Row index" of the cell.
    */
-  id_index get_row_index() const { return rowIndex_; };
+  ID_index get_row_index() const { return rowIndex_; };
   /**
    * @brief Sets the row index stored in the cell.
    * 
    * @param rowIndex @ref rowindex "Row index" of the cell.
    */
-  void set_row_index(id_index rowIndex) { rowIndex_ = rowIndex; };
+  void set_row_index(ID_index rowIndex) { rowIndex_ = rowIndex; };
 
   /**
    * @brief Assign operator.
@@ -286,13 +286,13 @@ class Cell : public Master_matrix::Cell_column_index_option,
    * 
    * @return The row index of the cell.
    */
-  operator id_index() const { return rowIndex_; }
+  operator ID_index() const { return rowIndex_; }
   /**
    * @brief Converts the cell into a pair of row index and cell value.
    * 
    * @return A std::pair with first element the row index and second element the value.
    */
-  operator std::pair<id_index, Field_element_type>() const {
+  operator std::pair<ID_index, Field_element>() const {
     if constexpr (Master_matrix::Option_list::is_z2) {
       return {rowIndex_, 1};
     } else {
@@ -301,7 +301,7 @@ class Cell : public Master_matrix::Cell_column_index_option,
   }
 
  private:
-  id_index rowIndex_;   /**< Row index of the cell. */
+  ID_index rowIndex_;   /**< Row index of the cell. */
 };
 
 }  // namespace persistence_matrix
@@ -319,7 +319,7 @@ class Cell : public Master_matrix::Cell_column_index_option,
  */
 template <class Master_matrix>
 struct std::hash<Gudhi::persistence_matrix::Cell<Master_matrix> > {
-  size_t operator()(const Gudhi::persistence_matrix::Cell<Master_matrix>& cell) const {
+  std::size_t operator()(const Gudhi::persistence_matrix::Cell<Master_matrix>& cell) const {
     return std::hash<unsigned int>()(cell.get_row_index());
   }
 };

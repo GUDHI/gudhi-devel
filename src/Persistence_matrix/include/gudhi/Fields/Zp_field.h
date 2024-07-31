@@ -38,8 +38,8 @@ template <unsigned int characteristic, typename Unsigned_integer_type = unsigned
           class = std::enable_if_t<std::is_unsigned_v<Unsigned_integer_type> > >
 class Zp_field_element {
  public:
-  using element_type = Unsigned_integer_type; /**< Type for the elements in the field. */
-  using characteristic_type = element_type;   /**< Type for the field characteristic. */
+  using Element = Unsigned_integer_type; /**< Type for the elements in the field. */
+  using Characteristic = Element;   /**< Type for the field characteristic. */
   template <class T>
   using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
@@ -321,15 +321,15 @@ class Zp_field_element {
    * 
    * @return Value of the element.
    */
-  element_type get_value() const { return element_; }
+  Element get_value() const { return element_; }
 
   // static constexpr bool handles_only_z2() { return false; }
 
  private:
-  element_type element_;                                            /**< Field element. */
+  Element element_;                                            /**< Field element. */
   static inline std::array<unsigned int, characteristic> inverse_;  /**< All inverse elements. */
 
-  static element_type _add(element_type element, element_type v) {
+  static Element _add(Element element, Element v) {
     if (UINT_MAX - element < v) {
       // automatic unsigned integer overflow behaviour will make it work
       element += v;
@@ -342,7 +342,7 @@ class Zp_field_element {
 
     return element;
   }
-  static element_type _subtract(element_type element, element_type v) {
+  static Element _subtract(Element element, Element v) {
     if (element < v) {
       element += characteristic;
     }
@@ -350,10 +350,10 @@ class Zp_field_element {
 
     return element;
   }
-  static element_type _multiply(element_type element, element_type v) {
-    element_type a = element;
+  static Element _multiply(Element element, Element v) {
+    Element a = element;
     element = 0;
-    element_type temp_b;
+    Element temp_b;
 
     while (a != 0) {
       if (a & 1) {
@@ -369,7 +369,7 @@ class Zp_field_element {
 
     return element;
   }
-  static int _get_inverse(element_type element) {
+  static int _get_inverse(Element element) {
     // to solve: Ax + My = 1
     int M = characteristic;
     int A = element;
@@ -392,7 +392,7 @@ class Zp_field_element {
   }
 
   template <typename Integer_type, class = isInteger<Integer_type> >
-  static constexpr element_type _get_value(Integer_type e) {
+  static constexpr Element _get_value(Integer_type e) {
     if constexpr (std::is_signed_v<Integer_type>) {
       if (e < -static_cast<Integer_type>(characteristic)) e = e % characteristic;
       if (e < 0) return e += characteristic;

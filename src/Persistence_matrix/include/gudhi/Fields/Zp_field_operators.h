@@ -40,8 +40,8 @@ template <typename Unsigned_integer_type = unsigned int,
 class Zp_field_operators
 {
  public:
-  using element_type = Unsigned_integer_type; /**< Type for the elements in the field. */
-  using characteristic_type = element_type;   /**< Type for the field characteristic. */
+  using Element = Unsigned_integer_type; /**< Type for the elements in the field. */
+  using Characteristic = Element;   /**< Type for the field characteristic. */
   template <class T>
   using isSignedInteger = std::enable_if_t<std::is_signed_v<T> >;
 
@@ -51,7 +51,7 @@ class Zp_field_operators
    *
    * @param characteristic Prime number corresponding to the desired characteristic of the field.
    */
-  Zp_field_operators(characteristic_type characteristic = 0) : characteristic_(0) {
+  Zp_field_operators(Characteristic characteristic = 0) : characteristic_(0) {
     if (characteristic != 0) set_characteristic(characteristic);
   }
   /**
@@ -74,7 +74,7 @@ class Zp_field_operators
    * 
    * @param characteristic Prime number corresponding to the desired characteristic of the field.
    */
-  void set_characteristic(characteristic_type characteristic) {
+  void set_characteristic(Characteristic characteristic) {
     if (characteristic <= 1)
       throw std::invalid_argument("Characteristic must be strictly positive and a prime number.");
 
@@ -98,7 +98,7 @@ class Zp_field_operators
    * 
    * @return The value of the current characteristic.
    */
-  const characteristic_type& get_characteristic() const { return characteristic_; }
+  const Characteristic& get_characteristic() const { return characteristic_; }
 
   /**
    * @brief Returns the value of an integer in the field.
@@ -107,7 +107,7 @@ class Zp_field_operators
    * @param e Unsigned integer to return the value from.
    * @return @p e modulo the current characteristic, such that the result is positive.
    */
-  element_type get_value(element_type e) const { return e < characteristic_ ? e : e % characteristic_; }
+  Element get_value(Element e) const { return e < characteristic_ ? e : e % characteristic_; }
   /**
    * @brief Returns the value of an integer in the field.
    * That is the positive value of the integer modulo the current characteristic.
@@ -117,7 +117,7 @@ class Zp_field_operators
    * @return @p e modulo the current characteristic, such that the result is positive.
    */
   template <typename Signed_integer_type, class = isSignedInteger<Signed_integer_type> >
-  element_type get_value(Signed_integer_type e) const {
+  Element get_value(Signed_integer_type e) const {
     if (e < -static_cast<Signed_integer_type>(characteristic_)) e = e % characteristic_;
     if (e < 0) return e += characteristic_;
     return e < static_cast<Signed_integer_type>(characteristic_) ? e : e % characteristic_;
@@ -130,7 +130,7 @@ class Zp_field_operators
    * @param e2 Second element.
    * @return `(e1 + e2) % characteristic`, such that the result is positive.
    */
-  element_type add(element_type e1, element_type e2) const {
+  Element add(Element e1, Element e2) const {
     return _add(get_value(e1), get_value(e2), characteristic_);
   }
 
@@ -141,7 +141,7 @@ class Zp_field_operators
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void add_inplace(element_type& e1, element_type e2) const {
+  void add_inplace(Element& e1, Element e2) const {
     e1 = _add(get_value(e1), get_value(e2), characteristic_);
   }
 
@@ -152,7 +152,7 @@ class Zp_field_operators
    * @param e2 Second element.
    * @return `(e1 - e2) % characteristic`, such that the result is positive.
    */
-  element_type subtract(element_type e1, element_type e2) const {
+  Element subtract(Element e1, Element e2) const {
     return _subtract(get_value(e1), get_value(e2), characteristic_);
   }
 
@@ -163,7 +163,7 @@ class Zp_field_operators
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void subtract_inplace_front(element_type& e1, element_type e2) const {
+  void subtract_inplace_front(Element& e1, Element e2) const {
     e1 = _subtract(get_value(e1), get_value(e2), characteristic_);
   }
   /**
@@ -173,7 +173,7 @@ class Zp_field_operators
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void subtract_inplace_back(element_type e1, element_type& e2) const {
+  void subtract_inplace_back(Element e1, Element& e2) const {
     e2 = _subtract(get_value(e1), get_value(e2), characteristic_);
   }
 
@@ -184,7 +184,7 @@ class Zp_field_operators
    * @param e2 Second element.
    * @return `(e1 * e2) % characteristic`, such that the result is positive.
    */
-  element_type multiply(element_type e1, element_type e2) const {
+  Element multiply(Element e1, Element e2) const {
     return _multiply(get_value(e1), get_value(e2), characteristic_);
   }
 
@@ -195,7 +195,7 @@ class Zp_field_operators
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void multiply_inplace(element_type& e1, element_type e2) const {
+  void multiply_inplace(Element& e1, Element e2) const {
     e1 = _multiply(get_value(e1), get_value(e2), characteristic_);
   }
 
@@ -209,7 +209,7 @@ class Zp_field_operators
    * @param a Third element.
    * @return `(e * m + a) % characteristic`, such that the result is positive.
    */
-  element_type multiply_and_add(element_type e, element_type m, element_type a) const { return get_value(e * m + a); }
+  Element multiply_and_add(Element e, Element m, Element a) const { return get_value(e * m + a); }
 
   /**
    * @brief Multiplies the first element with the second one and adds the third one, that is
@@ -221,7 +221,7 @@ class Zp_field_operators
    * @param m Second element.
    * @param a Third element.
    */
-  void multiply_and_add_inplace_front(element_type& e, element_type m, element_type a) const {
+  void multiply_and_add_inplace_front(Element& e, Element m, Element a) const {
     e = get_value(e * m + a);
   }
   /**
@@ -234,7 +234,7 @@ class Zp_field_operators
    * @param m Second element.
    * @param a Third element.
    */
-  void multiply_and_add_inplace_back(element_type e, element_type m, element_type& a) const {
+  void multiply_and_add_inplace_back(Element e, Element m, Element& a) const {
     a = get_value(e * m + a);
   }
 
@@ -249,7 +249,7 @@ class Zp_field_operators
    * @param m Third element.
    * @return `((e + a) * m) % characteristic`, such that the result is positive.
    */
-  element_type add_and_multiply(element_type e, element_type a, element_type m) const { return get_value((e + a) * m); }
+  Element add_and_multiply(Element e, Element a, Element m) const { return get_value((e + a) * m); }
 
   /**
    * @brief Adds the first element to the second one and multiplies the third one with it, that is
@@ -261,7 +261,7 @@ class Zp_field_operators
    * @param a Second element.
    * @param m Third element.
    */
-  void add_and_multiply_inplace_front(element_type& e, element_type a, element_type m) const {
+  void add_and_multiply_inplace_front(Element& e, Element a, Element m) const {
     e = get_value((e + a) * m);
   }
   /**
@@ -274,7 +274,7 @@ class Zp_field_operators
    * @param a Second element.
    * @param m Third element.
    */
-  void add_and_multiply_inplace_back(element_type e, element_type a, element_type& m) const {
+  void add_and_multiply_inplace_back(Element e, Element a, Element& m) const {
     m = get_value((e + a) * m);
   }
 
@@ -286,7 +286,7 @@ class Zp_field_operators
    * @return true If `e1 % characteristic == e2 % characteristic`.
    * @return false Otherwise.
    */
-  bool are_equal(element_type e1, element_type e2) const { return get_value(e1) == get_value(e2); }
+  bool are_equal(Element e1, Element e2) const { return get_value(e1) == get_value(e2); }
 
   /**
    * @brief Returns the inverse of the given element in the field.
@@ -294,7 +294,7 @@ class Zp_field_operators
    * @param e Element to get the inverse from.
    * @return Inverse in the current field of `e % characteristic`.
    */
-  element_type get_inverse(element_type e) const { return inverse_[get_value(e)]; }
+  Element get_inverse(Element e) const { return inverse_[get_value(e)]; }
   /**
    * @brief For interface purposes with multi-fields. Returns the inverse together with the second argument.
    * 
@@ -302,8 +302,8 @@ class Zp_field_operators
    * @param productOfCharacteristics Some value.
    * @return Pair whose first element is the inverse of @p e and the second element is @p productOfCharacteristics.
    */
-  std::pair<element_type, characteristic_type> get_partial_inverse(element_type e,
-                                                                   characteristic_type productOfCharacteristics) const {
+  std::pair<Element, Characteristic> get_partial_inverse(Element e,
+                                                                   Characteristic productOfCharacteristics) const {
     return {get_inverse(e), productOfCharacteristics};
   }
 
@@ -312,21 +312,21 @@ class Zp_field_operators
    * 
    * @return 0.
    */
-  static constexpr element_type get_additive_identity() { return 0; }
+  static constexpr Element get_additive_identity() { return 0; }
   /**
    * @brief Returns the multiplicative identity of the field.
    * 
    * @return 1.
    */
-  static constexpr element_type get_multiplicative_identity() { return 1; }
+  static constexpr Element get_multiplicative_identity() { return 1; }
   /**
    * @brief For interface purposes with multi-fields. Returns the multiplicative identity of the field.
    * 
    * @param productOfCharacteristics Some value.
    * @return 1.
    */
-  static constexpr element_type get_partial_multiplicative_identity(
-      [[maybe_unused]] characteristic_type productOfCharacteristics) {
+  static constexpr Element get_partial_multiplicative_identity(
+      [[maybe_unused]] Characteristic productOfCharacteristics) {
     return 1;
   }
 
@@ -349,10 +349,10 @@ class Zp_field_operators
   }
 
  private:
-  characteristic_type characteristic_;  /**< Current characteristic of the field. */
-  std::vector<element_type> inverse_;   /**< All inverse elements. */
+  Characteristic characteristic_;  /**< Current characteristic of the field. */
+  std::vector<Element> inverse_;   /**< All inverse elements. */
 
-  static element_type _add(element_type e1, element_type e2, characteristic_type characteristic) {
+  static Element _add(Element e1, Element e2, Characteristic characteristic) {
     if (UINT_MAX - e1 < e2) {
       // automatic unsigned integer overflow behaviour will make it work
       e1 += e2;
@@ -365,7 +365,7 @@ class Zp_field_operators
 
     return e1;
   }
-  static element_type _subtract(element_type e1, element_type e2, characteristic_type characteristic) {
+  static Element _subtract(Element e1, Element e2, Characteristic characteristic) {
     if (e1 < e2) {
       e1 += characteristic;
     }
@@ -373,7 +373,7 @@ class Zp_field_operators
 
     return e1;
   }
-  static element_type _multiply(element_type e1, element_type e2, characteristic_type characteristic) {
+  static Element _multiply(Element e1, Element e2, Characteristic characteristic) {
     unsigned int a = e1;
     e1 = 0;
     unsigned int temp_b;
