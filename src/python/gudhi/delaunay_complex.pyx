@@ -179,8 +179,9 @@ cdef class AlphaComplex(DelaunayComplex):
         :param max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
             infinity, and there is very little point using anything else since it does not save time.
         :type max_alpha_square: float
-        :param default_filtration_value: [Deprecated] Set this value to `True` if filtration values are not needed to
-            be computed (will be set to `NaN`). Default value is `False` (which means compute the filtration values).
+        :param default_filtration_value: [Deprecated] Default value is `False` (which means compute the filtration
+            values). Set this value to `True` if filtration values are not needed to be computed (will be set to
+            `NaN`), but please consider constructing a :class:`~gudhi.DelaunayComplex` instead.
         :type default_filtration_value: bool
         :returns: A simplex tree created from the Delaunay Triangulation.
         :rtype: SimplexTree
