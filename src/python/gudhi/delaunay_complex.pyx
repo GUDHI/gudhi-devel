@@ -112,7 +112,9 @@ cdef class DelaunayComplex:
             (will be set to `NaN`). Set it to `alpha` to compute the filtration values with the Alpha complex, or to
             `cech` to compute the Delaunay Cech complex.
         :type filtration: string or None
-        :returns: A simplex tree created from the Delaunay Triangulation.
+        :returns: A simplex tree created from the Delaunay Triangulation. The vertices may be not contiguous as some
+            points may be discarded in the triangulation (duplicate points, weighted hidden point, ...). The vertex
+            `k` corresponds to the k-th input point.
         :rtype: SimplexTree
         """
         if not filtration in [None, 'alpha', 'cech']:
@@ -183,7 +185,9 @@ cdef class AlphaComplex(DelaunayComplex):
             values). Set this value to `True` if filtration values are not needed to be computed (will be set to
             `NaN`), but please consider constructing a :class:`~gudhi.DelaunayComplex` instead.
         :type default_filtration_value: bool
-        :returns: A simplex tree created from the Delaunay Triangulation.
+        :returns: A simplex tree created from the Delaunay Triangulation. The vertices may be not contiguous as some
+            points may be discarded in the triangulation (duplicate points, weighted hidden point, ...). The vertex
+            `k` corresponds to the k-th input point.
         :rtype: SimplexTree
         """
         filtration = 'alpha'
@@ -237,7 +241,9 @@ cdef class DelaunayCechComplex(DelaunayComplex):
         :param max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
             infinity, and there is very little point using anything else since it does not save time.
         :type max_alpha_square: float
-        :returns: A simplex tree created from the Delaunay Triangulation.
+        :returns: A simplex tree created from the Delaunay Triangulation. The vertices may be not contiguous as some
+            points may be discarded in the triangulation (duplicate points, weighted hidden point, ...). The vertex
+            `k` corresponds to the k-th input point.
         :rtype: SimplexTree
         """
         return super().create_simplex_tree(max_alpha_square, 'cech')
