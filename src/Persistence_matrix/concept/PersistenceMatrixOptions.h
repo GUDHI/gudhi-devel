@@ -39,13 +39,13 @@ struct PersistenceMatrixOptions
    * @brief Type for the dimension. Has to be an integer type.
    * If unsigned, the maximal value of the type should not be attained during a run.
    */
-  using dimension_type = unspecified;
+  using Dimension = unspecified;
   /**
    * @brief Type for the different indexation types and should be able to contain the maximal number of columns
    * of the matrix during a run. Has to be an integer type.
    * If unsigned, the maximal value of the type should not be attained during a run.
    */
-  using index_type = unspecified;
+  using Index = unspecified;
 
   /**
    * @brief If true, indicates that the values contained in the matrix are in \f$ Z_2 \f$ and can therefore
@@ -68,16 +68,16 @@ struct PersistenceMatrixOptions
   /**
    * @brief Only enabled for @ref basematrix "base matrices" (i.e., none of the following is true:
    * @ref has_column_pairings, @ref has_vine_update, @ref can_retrieve_representative_cycles), is ignored otherwise.
-   * If set to true, two identical columns in the matrix are not explicitely stored separately but are represented 
+   * If set to true, two identical columns in the matrix are not explicitly stored separately but are represented 
    * by a same column.
    *
    * Note that some methods of the @ref basematrix "base matrix" are not available when true:
-   * - @ref Matrix::insert_column(const Container_type&, index_type) "insert_column(const Container_type&, index)",
-   * - @ref Matrix::zero_column(index_type) "zero_column(index)",
-   * - @ref Matrix::zero_cell(index_type, index_type) "zero_cell(index, id_index)",
-   * - @ref Matrix::swap_columns(index_type, index_type) "swap_columns(index, index)",
-   * - @ref Matrix::swap_rows(index_type, index_type) "swap_rows(index, index)",
-   * - @ref Matrix::remove_column(index_type) "remove_column(index)",
+   * - @ref Matrix::insert_column(const Container&, Index) "insert_column(const Container&, Index)",
+   * - @ref Matrix::zero_column(Index) "zero_column(Index)",
+   * - @ref Matrix::zero_cell(Index, Index) "zero_cell(Index, ID_index)",
+   * - @ref Matrix::swap_columns(Index, Index) "swap_columns(Index, Index)",
+   * - @ref Matrix::swap_rows(Index, Index) "swap_rows(Index, Index)",
+   * - @ref Matrix::remove_column(Index) "remove_column(Index)",
    * - @ref Matrix::remove_last "remove_last()".
    */
   static const bool has_column_compression;
@@ -92,10 +92,10 @@ struct PersistenceMatrixOptions
    * @brief If set to true, the underlying container containing the matrix columns is an std::unordered_map. 
    * If set to false, the container is a std::vector. By default, it is recommended to set it to false, but some 
    * methods require it to be true to be enabled: 
-   * - @ref Matrix::remove_column(index_type) "remove_column(index)" for @ref basematrix "base matrices",
-   * - @ref Matrix::remove_maximal_face(index_type) "remove_maximal_face(index)" for @ref chainmatrix "chain matrices",
-   * - @ref Matrix::remove_maximal_face(index_type, const std::vector<index_type>&)
-   *  "remove_maximal_face(id_index, const std::vector<id_index>&)" for @ref chainmatrix "chain matrices",
+   * - @ref Matrix::remove_column(Index) "remove_column(Index)" for @ref basematrix "base matrices",
+   * - @ref Matrix::remove_maximal_face(Index) "remove_maximal_face(Index)" for @ref chainmatrix "chain matrices",
+   * - @ref Matrix::remove_maximal_face(Index, const std::vector<Index>&)
+   *  "remove_maximal_face(ID_index, const std::vector<ID_index>&)" for @ref chainmatrix "chain matrices",
    * - @ref Matrix::remove_last "remove_last()" for @ref chainmatrix "chain matrices" if @ref has_vine_update is true.
    */
   static const bool has_map_column_container;
@@ -166,7 +166,7 @@ struct PersistenceMatrixOptions
   //  * the following is true: @ref has_column_pairings, @ref has_vine_update or
   //  * @ref can_retrieve_representative_cycles.
   //  * Is ignored otherwise
-  //  * If set to true, the matrix is decomposed in several submatrices containing each all the
+  //  * If set to true, the matrix is decomposed in several sub-matrices containing each all the
   //  * columns of same dimension.
   //  */
   //  static const bool is_separated_by_dimension;

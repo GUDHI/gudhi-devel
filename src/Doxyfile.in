@@ -314,7 +314,7 @@ AUTOLINK_SUPPORT       = YES
 # diagrams that involve STL classes more complete and accurate.
 # The default value is: NO.
 
-BUILTIN_STL_SUPPORT    = NO
+BUILTIN_STL_SUPPORT    = YES
 
 # If you use Microsoft's C++/CLI language, you should set this option to YES to
 # enable parsing support.
@@ -699,8 +699,8 @@ LAYOUT_FILE            =
 # LATEX_BIB_STYLE. To use this feature you need bibtex and perl available in the
 # search path. See also \cite for info how to create references.
 
-CITE_BIB_FILES         = @CMAKE_SOURCE_DIR@/biblio/bibliography.bib \
-                         @CMAKE_SOURCE_DIR@/biblio/how_to_cite_gudhi.bib
+CITE_BIB_FILES         = @GUDHI_BIBLIO_DIR@/biblio/bibliography.bib \
+                         @GUDHI_BIBLIO_DIR@/biblio/how_to_cite_gudhi.bib
 
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages

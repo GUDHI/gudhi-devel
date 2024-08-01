@@ -64,7 +64,7 @@ class Skeleton_blocker_sub_complex : public ComplexType {
 
  protected:
   /**
-   * @brief Determines whether all proper faces of simplex 'sigma' belong to 'link1' \cup 'link2'
+   * @brief Determines whether all proper faces of simplex 'sigma' belong to 'link1' \f$\cup\f$ 'link2'
    * where 'link1' and 'link2' are subcomplexes of the same complex of type ComplexType
    */
   typedef std::map<Root_vertex_handle, Vertex_handle> IdAddressMap;

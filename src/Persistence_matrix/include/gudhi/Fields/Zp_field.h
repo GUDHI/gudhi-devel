@@ -11,7 +11,7 @@
 /**
  * @file Zp_field.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Zp_field_element class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Zp_field_element class.
  */
 
 #ifndef MATRIX_FIELD_ZP_H_
@@ -38,8 +38,8 @@ template <unsigned int characteristic, typename Unsigned_integer_type = unsigned
           class = std::enable_if_t<std::is_unsigned_v<Unsigned_integer_type> > >
 class Zp_field_element {
  public:
-  using element_type = Unsigned_integer_type; /**< Type for the elements in the field. */
-  using characteristic_type = element_type;   /**< Type for the field characteristic. */
+  using Element = Unsigned_integer_type; /**< Type for the elements in the field. */
+  using Characteristic = Element;   /**< Type for the field characteristic. */
   template <class T>
   using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
@@ -115,7 +115,7 @@ class Zp_field_element {
    * @brief operator-=
    */
   friend void operator-=(Zp_field_element& f1, const Zp_field_element& f2) {
-    f1.element_ = Zp_field_element::_substract(f1.element_, f2.element_);
+    f1.element_ = Zp_field_element::_subtract(f1.element_, f2.element_);
   }
   /**
    * @brief operator-
@@ -129,7 +129,7 @@ class Zp_field_element {
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend void operator-=(Zp_field_element& f, const Integer_type& v) {
-    f.element_ = Zp_field_element::_substract(f.element_, _get_value(v));
+    f.element_ = Zp_field_element::_subtract(f.element_, _get_value(v));
   }
   /**
    * @brief operator-
@@ -148,7 +148,7 @@ class Zp_field_element {
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend Integer_type operator-(const Integer_type& v, const Zp_field_element& f) {
-    return Zp_field_element::_substract(_get_value(v), f.element_);
+    return Zp_field_element::_subtract(_get_value(v), f.element_);
   }
 
   /**
@@ -272,7 +272,7 @@ class Zp_field_element {
    * @return The inverse.
    */
   Zp_field_element get_inverse() const {
-    if (element_ != 0 && inverse_[element_] == 0) {  // initialize everything at instanciation instead?
+    if (element_ != 0 && inverse_[element_] == 0) {  // initialize everything at instantiation instead?
       inverse_[element_] = _get_inverse(element_);
     }
 
@@ -321,15 +321,15 @@ class Zp_field_element {
    * 
    * @return Value of the element.
    */
-  element_type get_value() const { return element_; }
+  Element get_value() const { return element_; }
 
   // static constexpr bool handles_only_z2() { return false; }
 
  private:
-  element_type element_;                                            /**< Field element. */
+  Element element_;                                            /**< Field element. */
   static inline std::array<unsigned int, characteristic> inverse_;  /**< All inverse elements. */
 
-  static element_type _add(element_type element, element_type v) {
+  static Element _add(Element element, Element v) {
     if (UINT_MAX - element < v) {
       // automatic unsigned integer overflow behaviour will make it work
       element += v;
@@ -342,7 +342,7 @@ class Zp_field_element {
 
     return element;
   }
-  static element_type _substract(element_type element, element_type v) {
+  static Element _subtract(Element element, Element v) {
     if (element < v) {
       element += characteristic;
     }
@@ -350,10 +350,10 @@ class Zp_field_element {
 
     return element;
   }
-  static element_type _multiply(element_type element, element_type v) {
-    element_type a = element;
+  static Element _multiply(Element element, Element v) {
+    Element a = element;
     element = 0;
-    element_type temp_b;
+    Element temp_b;
 
     while (a != 0) {
       if (a & 1) {
@@ -369,12 +369,12 @@ class Zp_field_element {
 
     return element;
   }
-  static int _get_inverse(element_type element) {
+  static int _get_inverse(Element element) {
     // to solve: Ax + My = 1
     int M = characteristic;
     int A = element;
     int y = 0, x = 1;
-    // extended euclidien division
+    // extended euclidean division
     while (A > 1) {
       int quotient = A / M;
       int temp = M;
@@ -392,7 +392,7 @@ class Zp_field_element {
   }
 
   template <typename Integer_type, class = isInteger<Integer_type> >
-  static constexpr element_type _get_value(Integer_type e) {
+  static constexpr Element _get_value(Integer_type e) {
     if constexpr (std::is_signed_v<Integer_type>) {
       if (e < -static_cast<Integer_type>(characteristic)) e = e % characteristic;
       if (e < 0) return e += characteristic;

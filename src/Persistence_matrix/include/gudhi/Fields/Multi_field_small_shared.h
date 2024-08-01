@@ -11,7 +11,7 @@
 /**
  * @file Multi_field_small_shared.h
  * @author Hannah Schreiber, Clément Maria
- * @brief Contains the @ref Shared_multi_field_element_with_small_characteristics class.
+ * @brief Contains the @ref Gudhi::persistence_fields::Shared_multi_field_element_with_small_characteristics class.
  */
 
 #ifndef MATRIX_FIELD_MULTI_SMALL_SHARED_H_
@@ -32,9 +32,9 @@ namespace persistence_fields {
  * @ingroup persistence_fields
  *
  * @brief Class representing an element of a multi-field, such that `productOfAllCharacteristics ^ 2` fits into
- * the given @p Unsigned_integer_type template argument. If each instanciation of the class can represent another
- * element, they all share the same characteritics. That is if the characteristics are set for one, they will be
- * set for all the others. The characteristics can be set before instanciating the elements with the static
+ * the given @p Unsigned_integer_type template argument. If each instantiation of the class can represent another
+ * element, they all share the same characteristics. That is if the characteristics are set for one, they will be
+ * set for all the others. The characteristics can be set before instantiating the elements with the static
  * @ref Shared_multi_field_element_with_small_characteristics::initialize method.
  *
  * @tparam Unsigned_integer_type A native unsigned integer type: unsigned int, long unsigned int, etc.
@@ -44,8 +44,8 @@ template <typename Unsigned_integer_type = unsigned int,
           class = std::enable_if_t<std::is_unsigned_v<Unsigned_integer_type> > >
 class Shared_multi_field_element_with_small_characteristics {
  public:
-  using element_type = Unsigned_integer_type; /**< Type for the elements in the field. */
-  using characteristic_type = element_type;   /**< Type for the field characteristic. */
+  using Element = Unsigned_integer_type; /**< Type for the elements in the field. */
+  using Characteristic = Element;   /**< Type for the field characteristic. */
   template <class T>
   using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
@@ -104,10 +104,10 @@ class Shared_multi_field_element_with_small_characteristics {
     if (primes_.empty()) throw std::invalid_argument("The given interval does not contain a prime number.");
 
     partials_.resize(primes_.size());
-    for (characteristic_type i = 0; i < primes_.size(); ++i) {
-      characteristic_type p = primes_[i];
-      characteristic_type base = productOfAllCharacteristics_ / p;
-      characteristic_type exp = p - 1;
+    for (Characteristic i = 0; i < primes_.size(); ++i) {
+      Characteristic p = primes_[i];
+      Characteristic base = productOfAllCharacteristics_ / p;
+      Characteristic exp = p - 1;
       partials_[i] = 1;
 
       while (exp > 0) {
@@ -178,7 +178,7 @@ class Shared_multi_field_element_with_small_characteristics {
    */
   friend void operator-=(Shared_multi_field_element_with_small_characteristics& f1,
                          Shared_multi_field_element_with_small_characteristics const& f2) {
-    f1.element_ = _substract(f1.element_, f2.element_);
+    f1.element_ = _subtract(f1.element_, f2.element_);
   }
   /**
    * @brief operator-
@@ -196,7 +196,7 @@ class Shared_multi_field_element_with_small_characteristics {
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend void operator-=(Shared_multi_field_element_with_small_characteristics& f, const Integer_type& v) {
-    f.element_ = _substract(f.element_, _get_value(v));
+    f.element_ = _subtract(f.element_, _get_value(v));
   }
   /**
    * @brief operator-
@@ -216,7 +216,7 @@ class Shared_multi_field_element_with_small_characteristics {
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend Integer_type operator-(const Integer_type& v, const Shared_multi_field_element_with_small_characteristics& f) {
-    return _substract(_get_value(v), f.element_);
+    return _subtract(_get_value(v), f.element_);
   }
 
   /**
@@ -363,16 +363,16 @@ class Shared_multi_field_element_with_small_characteristics {
    * @param productOfCharacteristics Sub-product of the characteristics.
    * @return Pair of the inverse and the characteristic the inverse corresponds to.
    */
-  std::pair<Shared_multi_field_element_with_small_characteristics,characteristic_type> get_partial_inverse(
-      characteristic_type productOfCharacteristics) const {
-    characteristic_type gcd = std::gcd(element_, productOfAllCharacteristics_);
+  std::pair<Shared_multi_field_element_with_small_characteristics,Characteristic> get_partial_inverse(
+      Characteristic productOfCharacteristics) const {
+    Characteristic gcd = std::gcd(element_, productOfAllCharacteristics_);
 
     if (gcd == productOfCharacteristics)
       return {Shared_multi_field_element_with_small_characteristics(), multiplicativeID_};  // partial inverse is 0
 
-    characteristic_type QT = productOfCharacteristics / gcd;
+    Characteristic QT = productOfCharacteristics / gcd;
 
-    const element_type inv_qt = _get_inverse(element_, QT);
+    const Element inv_qt = _get_inverse(element_, QT);
 
     auto res = get_partial_multiplicative_identity(QT);
     res *= inv_qt;
@@ -404,12 +404,12 @@ class Shared_multi_field_element_with_small_characteristics {
    * @return The partial multiplicative identity of the multi-field.
    */
   static Shared_multi_field_element_with_small_characteristics get_partial_multiplicative_identity(
-      const characteristic_type& productOfCharacteristics) {
+      const Characteristic& productOfCharacteristics) {
     if (productOfCharacteristics == 0) {
       return Shared_multi_field_element_with_small_characteristics(multiplicativeID_);
     }
     Shared_multi_field_element_with_small_characteristics mult;
-    for (characteristic_type idx = 0; idx < primes_.size(); ++idx) {
+    for (Characteristic idx = 0; idx < primes_.size(); ++idx) {
       if ((productOfCharacteristics % primes_[idx]) == 0) {
         mult += partials_[idx];
       }
@@ -421,14 +421,14 @@ class Shared_multi_field_element_with_small_characteristics {
    *
    * @return The product of all characteristics.
    */
-  static characteristic_type get_characteristic() { return productOfAllCharacteristics_; }
+  static Characteristic get_characteristic() { return productOfAllCharacteristics_; }
 
   /**
    * @brief Returns the value of the element.
    *
    * @return Value of the element.
    */
-  element_type get_value() const { return element_; }
+  Element get_value() const { return element_; }
 
   // static constexpr bool handles_only_z2() { return false; }
 
@@ -443,9 +443,9 @@ class Shared_multi_field_element_with_small_characteristics {
 
     return true;
   }
-  static element_type _multiply(element_type a, element_type b) {
-    element_type res = 0;
-    element_type temp_b = 0;
+  static Element _multiply(Element a, Element b) {
+    Element res = 0;
+    Element temp_b = 0;
 
     if (b < a) std::swap(a, b);
 
@@ -464,7 +464,7 @@ class Shared_multi_field_element_with_small_characteristics {
     }
     return res;
   }
-  static element_type _add(element_type element, element_type v) {
+  static Element _add(Element element, Element v) {
     if (UINT_MAX - element < v) {
       // automatic unsigned integer overflow behaviour will make it work
       element += v;
@@ -477,7 +477,7 @@ class Shared_multi_field_element_with_small_characteristics {
 
     return element;
   }
-  static element_type _substract(element_type element, element_type v) {
+  static Element _subtract(Element element, Element v) {
     if (element < v) {
       element += productOfAllCharacteristics_;
     }
@@ -485,12 +485,12 @@ class Shared_multi_field_element_with_small_characteristics {
 
     return element;
   }
-  static constexpr int _get_inverse(element_type element, const characteristic_type mod) {
+  static constexpr int _get_inverse(Element element, const Characteristic mod) {
     // to solve: Ax + My = 1
     int M = mod;
     int A = element;
     int y = 0, x = 1;
-    // extended euclidien division
+    // extended euclidean division
     while (A > 1) {
       int quotient = A / M;
       int temp = M;
@@ -508,7 +508,7 @@ class Shared_multi_field_element_with_small_characteristics {
   }
 
   template <typename Integer_type, class = isInteger<Integer_type> >
-  static constexpr element_type _get_value(Integer_type e) {
+  static constexpr Element _get_value(Integer_type e) {
     if constexpr (std::is_signed_v<Integer_type>){
       if (e < -static_cast<Integer_type>(productOfAllCharacteristics_)) e = e % productOfAllCharacteristics_;
       if (e < 0) return e += productOfAllCharacteristics_;
@@ -518,11 +518,11 @@ class Shared_multi_field_element_with_small_characteristics {
     }
   }
 
-  element_type element_;                                          /**< Element. */
-  static inline std::vector<characteristic_type> primes_;         /**< All characteristics. */
-  static inline characteristic_type productOfAllCharacteristics_; /**< Product of all characteristics. */
-  static inline std::vector<characteristic_type> partials_;       /**< Partial products of the characteristics. */
-  static inline constexpr element_type multiplicativeID_ = 1;     /**< Multiplicative identity. */
+  Element element_;                                          /**< Element. */
+  static inline std::vector<Characteristic> primes_;         /**< All characteristics. */
+  static inline Characteristic productOfAllCharacteristics_; /**< Product of all characteristics. */
+  static inline std::vector<Characteristic> partials_;       /**< Partial products of the characteristics. */
+  static inline constexpr Element multiplicativeID_ = 1;     /**< Multiplicative identity. */
 };
 
 }  // namespace persistence_fields

@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_constructors, Matrix, full_ma
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_insertion, Matrix, full_matrices) {
   Matrix m1;
 
-  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column>();
   orderedBoundaries.pop_back();
   orderedBoundaries.pop_back();
 
@@ -65,26 +65,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_insertion, Matrix, full_matri
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_access, Matrix, full_matrices) {
-  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(orderedBoundaries);
   test_chain_access<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_row_access, Matrix, row_access_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_non_base_row_access<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_row_removal, Matrix, removable_rows_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_chain_row_removal<Matrix>(m);
 }
 
 #ifdef PM_TEST_REM_COL
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_column_removal, Matrix, full_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_chain_maximal_simplex_removal<Matrix>(m);
 }
@@ -92,22 +92,25 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_column_removal, Matrix, full_
 
 #ifdef PM_TEST_MAX_DIM
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_max_dimension, Matrix, full_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_maximal_dimension<Matrix>(m);
 }
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_operation, Matrix, full_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_chain_operation<Matrix>(m);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_barcode, Matrix, full_matrices) { test_barcode<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_barcode, Matrix, full_matrices) {
+  test_barcode<Matrix>();
+  test_shifted_barcode<Matrix>();
+}
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine, Matrix, full_matrices) {
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
 #ifdef PM_TEST_ID_IDX
   test_vine_swap_with_id_index(m);
@@ -117,7 +120,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine, Matrix, full_matrices) {
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_representative_cycles, Matrix, rep_matrices) {
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_representative_cycles<Matrix>(m);
 }
@@ -144,7 +147,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_constructors, Matrix, full_ma
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_insertion, Matrix, full_matrices) {
   Matrix m1(birth_comparator, Gudhi::persistence_matrix::_no_G_death_comparator);
 
-  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column>();
   orderedBoundaries.pop_back();
   orderedBoundaries.pop_back();
 
@@ -154,26 +157,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_insertion, Matrix, full_matri
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_access, Matrix, full_matrices) {
-  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(orderedBoundaries, birth_comparator, Gudhi::persistence_matrix::_no_G_death_comparator);
   test_chain_access<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_row_access, Matrix, row_access_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, birth_comparator, Gudhi::persistence_matrix::_no_G_death_comparator);
   test_non_base_row_access<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_row_removal, Matrix, removable_rows_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, birth_comparator, Gudhi::persistence_matrix::_no_G_death_comparator);
   test_chain_row_removal<Matrix>(m);
 }
 
 #ifdef PM_TEST_REM_COL
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_column_removal, Matrix, full_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, birth_comparator, Gudhi::persistence_matrix::_no_G_death_comparator);
   test_chain_maximal_simplex_removal<Matrix>(m);
 }
@@ -181,34 +184,34 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_column_removal, Matrix, full_
 
 #ifdef PM_TEST_MAX_DIM
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_max_dimension, Matrix, full_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, birth_comparator, Gudhi::persistence_matrix::_no_G_death_comparator);
   test_maximal_dimension<Matrix>(m);
 }
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_operation, Matrix, full_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, birth_comparator, Gudhi::persistence_matrix::_no_G_death_comparator);
   test_chain_operation<Matrix>(m);
 }
 
 #ifdef PM_TEST_ID_IDX
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_without_barcode, Matrix, full_matrices) {
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, birth_comparator, Gudhi::persistence_matrix::_no_G_death_comparator);
   test_vine_swap_with_id_index(m);
 }
 #else
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_without_barcode, Matrix, full_matrices) {
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, birth_comparator, Gudhi::persistence_matrix::_no_G_death_comparator);
   test_vine_swap_with_position_index(m);
 }
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_representative_cycles, Matrix, rep_matrices) {
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns, birth_comparator, Gudhi::persistence_matrix::_no_G_death_comparator);
   test_representative_cycles<Matrix>(m);
 }

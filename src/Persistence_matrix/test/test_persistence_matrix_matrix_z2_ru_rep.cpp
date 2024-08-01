@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_column_removal, Matrix, removable
 
 #ifdef PM_TEST_MAX_DIM
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_max_dimension, Matrix, full_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_maximal_dimension<Matrix>(m);
 }
@@ -74,11 +74,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_max_dimension, Matrix, full_matri
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_operation, Matrix, full_matrices) { test_ru_operation<Matrix>(); }
 
 #ifdef PM_TEST_BARCODE
-BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_barcode, Matrix, full_matrices) { test_barcode<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_barcode, Matrix, full_matrices) {
+  test_barcode<Matrix>();
+  test_shifted_barcode<Matrix>();
+}
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_representative_cycles, Matrix, full_matrices) {
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_representative_cycles<Matrix>(m);
 }
@@ -87,7 +90,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_representative_cycles, Matrix, fu
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_access, Matrix, full_matrices) { test_boundary_access<Matrix>(); }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_row_access, Matrix, row_access_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_non_base_row_access<Matrix>(m);
 }
@@ -98,7 +101,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_access, Matrix, full_matrices) {
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_row_access, Matrix, row_access_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_non_base_row_access<Matrix>(m);
   test_ru_u_row_access<Matrix>();

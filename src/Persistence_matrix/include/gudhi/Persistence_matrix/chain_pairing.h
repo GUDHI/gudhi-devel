@@ -11,7 +11,8 @@
 /**
  * @file chain_pairing.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Chain_pairing class and @ref Dummy_chain_pairing structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Chain_pairing class and
+ * @ref Gudhi::persistence_matrix::Dummy_chain_pairing structure.
  */
 
 #ifndef PM_CHAIN_PAIRING_H
@@ -26,10 +27,11 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Chain_pairing, when the computation of the barcode was not enabled or if the pairing
+ * Inherited instead of @ref Chain_pairing, when the computation of the barcode was not enabled or if the pairing
  * is already managed by the vine update classes.
  */
-struct Dummy_chain_pairing {
+struct Dummy_chain_pairing
+{
   friend void swap([[maybe_unused]] Dummy_chain_pairing& d1, [[maybe_unused]] Dummy_chain_pairing& d2) {}
 };
 
@@ -39,14 +41,14 @@ struct Dummy_chain_pairing {
  *
  * @brief Class managing the barcode for @ref Chain_matrix if the option was enabled.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class Chain_pairing 
 {
  public:
-  using barcode_type = typename Master_matrix::barcode_type;      /**< Barcode type. */
-  using dimension_type = typename Master_matrix::dimension_type;  /**< Dimension value type. */
+  using Barcode = typename Master_matrix::Barcode;      /**< Barcode type. */
+  using Dimension = typename Master_matrix::Dimension;  /**< Dimension value type. */
 
   /**
    * @brief Default constructor.
@@ -70,7 +72,7 @@ class Chain_pairing
    * 
    * @return Const reference to the barcode.
    */
-  const barcode_type& get_current_barcode() const;
+  const Barcode& get_current_barcode() const;
 
   /**
    * @brief Assign operator.
@@ -86,12 +88,12 @@ class Chain_pairing
   }
 
  protected:
-  using dictionnary_type = typename Master_matrix::bar_dictionnary_type;
-  using pos_index = typename Master_matrix::pos_index;
+  using Dictionary = typename Master_matrix::Bar_dictionary;
+  using Pos_index = typename Master_matrix::Pos_index;
 
-  barcode_type barcode_;        /**< Bar container. */
-  dictionnary_type indexToBar_; /**< Map from @ref MatIdx index to bar index. */
-  pos_index nextPosition_;      /**< Next relative position in the filtration. */
+  Barcode barcode_;         /**< Bar container. */
+  Dictionary indexToBar_;   /**< Map from @ref MatIdx index to bar index. */
+  Pos_index nextPosition_;  /**< Next relative position in the filtration. */
 };
 
 template <class Master_matrix>
@@ -113,7 +115,7 @@ inline Chain_pairing<Master_matrix>::Chain_pairing(Chain_pairing<Master_matrix>&
 {}
 
 template <class Master_matrix>
-inline const typename Chain_pairing<Master_matrix>::barcode_type& Chain_pairing<Master_matrix>::get_current_barcode()
+inline const typename Chain_pairing<Master_matrix>::Barcode& Chain_pairing<Master_matrix>::get_current_barcode()
     const 
 {
   return barcode_;

@@ -30,8 +30,8 @@ namespace persistence_matrix {
 class FieldOperators 
 {
  public:
-  using element_type = unspecified;         /**< Type for the elements in the field. */
-  using characteristic_type = unspecified;  /**< Type for the field characteristic. */
+  using Element = unspecified;         /**< Type for the elements in the field. */
+  using Characteristic = unspecified;  /**< Type for the field characteristic. */
 
   /**
    * @brief Default constructor. If a non-zero characteristic is given, initializes the field with it.
@@ -39,7 +39,7 @@ class FieldOperators
    *
    * @param characteristic Prime number corresponding to the desired characteristic of the field.
    */
-  FieldOperators(characteristic_type characteristic = 0);
+  FieldOperators(Characteristic characteristic = 0);
 
   /**
    * @brief Sets the characteristic of the field. Can eventually be omitted if the characteristic of the class
@@ -47,13 +47,13 @@ class FieldOperators
    * 
    * @param characteristic Prime number corresponding to the desired characteristic of the field.
    */
-  void set_characteristic(const characteristic_type& characteristic);
+  void set_characteristic(const Characteristic& characteristic);
   /**
    * @brief Returns the current characteristic.
    * 
    * @return The value of the current characteristic.
    */
-  const characteristic_type& get_characteristic() const;
+  const Characteristic& get_characteristic() const;
 
   /**
    * @brief Returns the value of an integer in the field.
@@ -64,9 +64,9 @@ class FieldOperators
    * @return @p e modulo the current characteristic, such that the result is positive.
    */
   template <typename Integer_type>
-  element_type get_value(Integer_type e) const;
+  Element get_value(Integer_type e) const;
 
-  // void get_value(element_type& e) const;
+  // void get_value(Element& e) const;
 
   /**
    * @brief Stores in the first element the sum of two given elements in the field, that is
@@ -75,7 +75,7 @@ class FieldOperators
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void add_inplace(element_type& e1, const element_type& e2) const;
+  void add_inplace(Element& e1, const Element& e2) const;
 
   /**
    * @brief Stores in the first element the multiplication of two given elements in the field,
@@ -84,7 +84,7 @@ class FieldOperators
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void multiply_inplace(element_type& e1, const element_type& e2) const;
+  void multiply_inplace(Element& e1, const Element& e2) const;
 
   /**
    * @brief Multiplies the first element with the second one and adds the third one, that is
@@ -94,7 +94,7 @@ class FieldOperators
    * @param m Second element.
    * @param a Third element.
    */
-  void multiply_and_add_inplace_front(element_type& e, const element_type& m, const element_type& a) const;
+  void multiply_and_add_inplace_front(Element& e, const Element& m, const Element& a) const;
   /**
    * @brief Multiplies the first element with the second one and adds the third one, that is
    * `(e * m + a) % characteristic`, such that the result is positive. Stores the result in the third element.
@@ -103,7 +103,7 @@ class FieldOperators
    * @param m Second element.
    * @param a Third element.
    */
-  void multiply_and_add_inplace_back(const element_type& e, const element_type& m, element_type& a) const;
+  void multiply_and_add_inplace_back(const Element& e, const Element& m, Element& a) const;
 
   /**
    * @brief Returns the inverse of the given element in the field.
@@ -111,20 +111,20 @@ class FieldOperators
    * @param e Element to get the inverse from.
    * @return Inverse in the current field of `e % characteristic`.
    */
-  element_type get_inverse(const element_type& e) const;
+  Element get_inverse(const Element& e) const;
 
   /**
    * @brief Returns the additive identity of the field.
    * 
    * @return The additive identity of the field.
    */
-  static const element_type& get_additive_identity();
+  static const Element& get_additive_identity();
   /**
    * @brief Returns the multiplicative identity of the field.
    * 
    * @return The multiplicative identity of the field.
    */
-  static const element_type& get_multiplicative_identity();
+  static const Element& get_multiplicative_identity();
 
   /**
    * @brief Assign operator.

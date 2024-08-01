@@ -58,14 +58,14 @@ void print_representative_cycles_example()
   auto rc = mp.get_representative_cycles();
   for (auto cycle : rc) {
     // cycle[0] gives the row index of a simplex in the cycle
-    // because the simplices where indexed from 0 continously, the simplex represented by the row index cycle[0] is
+    // because the simplices where indexed from 0 continuously, the simplex represented by the row index cycle[0] is
     // the same simplex represented by the column at position cycle[0] in RU
     // that is why `mp.get_column_dimension(cycle[0])` gives us the dimension of the simplex for RU_matrix
     //
     // for the chain matrix, the row index will always represent a simplex ID. So,
     // `mp.get_column_dimension(mp.get_column_with_pivot(cycle[0]))` will always work to get the dimension
-    // of the simplex. But in this particlar case, because of the simplex indexation and the fact that no swap
-    // occured, mp.get_column_with_pivot(cycle[0]) == cycle[0] and so `mp.get_column_dimension(cycle[0])` also works.
+    // of the simplex. But in this particular case, because of the simplex indexation and the fact that no swap
+    // occurred, mp.get_column_with_pivot(cycle[0]) == cycle[0] and so `mp.get_column_dimension(cycle[0])` also works.
     std::cout << mp.get_column_dimension(cycle[0]);
     std::cout << "-cycle: ";
     for (auto index : cycle) {

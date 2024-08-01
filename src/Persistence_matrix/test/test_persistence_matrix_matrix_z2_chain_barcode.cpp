@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_barcode_constructors, Matrix, full
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_barcode_insertion, Matrix, full_matrices) {
   Matrix m1;
 
-  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto orderedBoundaries = build_simple_boundary_matrix<typename Matrix::Column>();
   orderedBoundaries.pop_back();
   orderedBoundaries.pop_back();
 
@@ -50,41 +50,44 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_barcode_insertion, Matrix, full_ma
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_barcode_access, Matrix, full_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_chain_access<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_barcode_row_access, Matrix, row_access_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_non_base_row_access<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_barcode_row_removal, Matrix, removable_rows_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_chain_row_removal<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_barcode_column_removal, Matrix, removable_columns_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_chain_maximal_simplex_removal<Matrix>(m);
 }
 
 #ifdef PM_TEST_MAX_DIM
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_barcode_max_dimension, Matrix, full_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_maximal_dimension<Matrix>(m);
 }
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_barcode_operation, Matrix, full_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_chain_operation<Matrix>(m);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_barcode_barcode, Matrix, full_matrices) { test_barcode<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_barcode_barcode, Matrix, full_matrices) {
+  test_barcode<Matrix>();
+  test_shifted_barcode<Matrix>();
+}

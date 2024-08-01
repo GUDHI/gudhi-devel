@@ -11,8 +11,9 @@
 /**
  * @file matrix_dimension_holders.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Matrix_max_dimension_holder @ref Matrix_all_dimension_holder classes
- * and the @ref Dummy_matrix_dimension_holder structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Matrix_max_dimension_holder
+ * @ref Gudhi::persistence_matrix::Matrix_all_dimension_holder classes
+ * and the @ref Gudhi::persistence_matrix::Dummy_matrix_dimension_holder structure.
  */
 
 #ifndef PM_MATRIX_DIM_HOLDER_H
@@ -28,12 +29,13 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Matrix_max_dimension_holder or @ref Matrix_all_dimension_holder, when the maximal
+ * Inherited instead of @ref Matrix_max_dimension_holder or @ref Matrix_all_dimension_holder, when the maximal
  * dimension of a matrix is not stored.
  */
-struct Dummy_matrix_dimension_holder {
-  template <typename dimension_type>
-  Dummy_matrix_dimension_holder([[maybe_unused]] dimension_type maximalDimension) {}
+struct Dummy_matrix_dimension_holder
+{
+  template <typename Dimension>
+  Dummy_matrix_dimension_holder([[maybe_unused]] Dimension maximalDimension) {}
 
   friend void swap([[maybe_unused]] Dummy_matrix_dimension_holder& d1,
                    [[maybe_unused]] Dummy_matrix_dimension_holder& d2) {}
@@ -42,13 +44,13 @@ struct Dummy_matrix_dimension_holder {
 /**
  * @ingroup persistence_matrix
  *
- * @brief Class managing the maximal dimension of a face represented in the inheritating matrix, when the option of
+ * @brief Class managing the maximal dimension of a face represented in the inheriting matrix, when the option of
  * face removal is not enabled.
  * 
- * @tparam dimension_type Dimension value type. Has to be an integer type.
+ * @tparam Dimension Dimension value type. Has to be an integer type.
  * If unsigned, the maximal value of the type should not be attained during a run.
  */
-template <typename dimension_type>
+template <typename Dimension>
 class Matrix_max_dimension_holder 
 {
  public:
@@ -57,7 +59,7 @@ class Matrix_max_dimension_holder
    * 
    * @param maximalDimension Value of the maximal dimension. Has to be either positive or -1. Default value: -1.
    */
-  Matrix_max_dimension_holder(dimension_type maximalDimension = -1) : maxDim_(maximalDimension){};
+  Matrix_max_dimension_holder(Dimension maximalDimension = -1) : maxDim_(maximalDimension){};
   /**
    * @brief Copy constructor.
    * 
@@ -77,7 +79,7 @@ class Matrix_max_dimension_holder
    * 
    * @return The maximal dimension.
    */
-  dimension_type get_max_dimension() const { return maxDim_; };
+  Dimension get_max_dimension() const { return maxDim_; };
 
   /**
    * @brief Assign operator.
@@ -94,9 +96,9 @@ class Matrix_max_dimension_holder
   }
 
  protected:
-  dimension_type maxDim_; /**< Current maximal dimension. */
+  Dimension maxDim_; /**< Current maximal dimension. */
 
-  void update_up(dimension_type dimension) {
+  void update_up(Dimension dimension) {
     if (maxDim_ == -1 || maxDim_ < dimension) maxDim_ = dimension;
   };
 };
@@ -104,13 +106,13 @@ class Matrix_max_dimension_holder
 /**
  * @ingroup persistence_matrix
  *
- * @brief Class managing the maximal dimension of a face represented in the inheritating matrix, when the option of
+ * @brief Class managing the maximal dimension of a face represented in the inheriting matrix, when the option of
  * face removal is enabled.
  * 
- * @tparam dimension_type Dimension value type. Has to be an integer type.
+ * @tparam Dimension Dimension value type. Has to be an integer type.
  * If unsigned, the maximal value of the type should not be attained during a run.
  */
-template <typename dimension_type>
+template <typename Dimension>
 class Matrix_all_dimension_holder 
 {
  public:
@@ -119,7 +121,7 @@ class Matrix_all_dimension_holder
    * 
    * @param maximalDimension Value of the maximal dimension. Has to be either positive or -1. Default value: -1.
    */
-  Matrix_all_dimension_holder(dimension_type maximalDimension = -1)
+  Matrix_all_dimension_holder(Dimension maximalDimension = -1)
       : dimensions_(maximalDimension < 0 ? 0 : maximalDimension + 1, 0), maxDim_(maximalDimension) {
     if (maxDim_ != -1) dimensions_[maxDim_] = 1;
   };
@@ -143,7 +145,7 @@ class Matrix_all_dimension_holder
    * 
    * @return The maximal dimension.
    */
-  dimension_type get_max_dimension() const { return maxDim_; };
+  Dimension get_max_dimension() const { return maxDim_; };
 
   /**
    * @brief Assign operator.
@@ -163,7 +165,7 @@ class Matrix_all_dimension_holder
 
  protected:
   std::vector<unsigned int> dimensions_;   /**< Number of faces by dimension. */
-  dimension_type maxDim_;                  /**< Current maximal dimension. */
+  Dimension maxDim_;                  /**< Current maximal dimension. */
 
   void update_up(unsigned int dimension) {
     if (dimensions_.size() <= dimension) dimensions_.resize(dimension + 1, 0);

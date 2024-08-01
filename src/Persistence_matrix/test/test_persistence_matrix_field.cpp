@@ -355,7 +355,7 @@ BOOST_AUTO_TEST_CASE(Shared_Field_properties) {
 
 template <class MF>
 void test_multi_field_constructors() {
-  using T = typename MF::element_type;
+  using T = typename MF::Element;
 
   // default constructor
   MF m_d;
@@ -388,7 +388,7 @@ void test_multi_field_constructors() {
 
 template <class MF>
 void test_multi_field_operators() {
-  using T = typename MF::element_type;
+  using T = typename MF::Element;
 
   MF m1(5005);
   MF m2(5007);
@@ -442,7 +442,7 @@ void test_multi_field_operators() {
 
 template <class MF>
 void test_multi_field_properties() {
-  using T = typename MF::element_type;
+  using T = typename MF::Element;
 
   MF m1(1);
   MF m2(7);

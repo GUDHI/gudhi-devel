@@ -11,7 +11,8 @@
 /**
  * @file column_dimension_holder.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Column_dimension_holder class and @ref Dummy_dimension_holder structure.
+ * @brief Contains the @ref Gudhi::persistence_matrix::Column_dimension_holder class and
+ * @ref Gudhi::persistence_matrix::Dummy_dimension_holder structure.
  */
 
 #ifndef PM_COLUMN_DIM_HOLDER_H
@@ -26,13 +27,13 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inheritated instead of @ref Column_dimension_holder, when the columns are not storing a dimension.
+ * Inherited instead of @ref Column_dimension_holder, when the columns are not storing a dimension.
  */
 struct Dummy_dimension_holder 
 {
   Dummy_dimension_holder() {}
-  template <typename dimension_type>
-  Dummy_dimension_holder([[maybe_unused]] dimension_type dim) {}
+  template <typename Dimension>
+  Dummy_dimension_holder([[maybe_unused]] Dimension dim) {}
 
   friend void swap([[maybe_unused]] Dummy_dimension_holder& col1, [[maybe_unused]] Dummy_dimension_holder& col2) {}
 };
@@ -43,12 +44,12 @@ struct Dummy_dimension_holder
  *
  * @brief Class managing the dimension access of a column.
  * 
- * @tparam Master_matrix An instanciation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 struct Column_dimension_holder 
 {
-  using dimension_type = typename Master_matrix::dimension_type;  /**< Dimension value type. */
+  using Dimension = typename Master_matrix::Dimension;  /**< Dimension value type. */
 
   /**
    * @brief Default constructor. Sets the dimension to 0 for @ref boundarymatrix "boundary matrices" and to -1 for @ref chainmatrix "chain matrices".
@@ -59,7 +60,7 @@ struct Column_dimension_holder
    * 
    * @param dim Dimension of the column.
    */
-  Column_dimension_holder(dimension_type dim) : dim_(dim) {}
+  Column_dimension_holder(Dimension dim) : dim_(dim) {}
   /**
    * @brief Copy constructor.
    * 
@@ -78,7 +79,7 @@ struct Column_dimension_holder
    * 
    * @return The dimension of the column.
    */
-  dimension_type get_dimension() const { return dim_; }
+  Dimension get_dimension() const { return dim_; }
 
   /**
    * @brief Assign operator.
@@ -96,7 +97,7 @@ struct Column_dimension_holder
   void swap_dimension(Column_dimension_holder& other) { std::swap(dim_, other.dim_); }
 
  private:
-  dimension_type dim_;  /**< Dimension of the column. */
+  Dimension dim_;  /**< Dimension of the column. */
 };
 
 }  // namespace persistence_matrix

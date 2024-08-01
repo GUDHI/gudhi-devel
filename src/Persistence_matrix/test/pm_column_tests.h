@@ -24,7 +24,7 @@ template <class Column>
 std::vector<column_content<Column> > get_ordered_column_contents(std::vector<Column>& matrix) {
   std::vector<std::set<typename std::conditional<is_z2<Column>(),
                                                  unsigned int,
-                                                 std::pair<unsigned int, typename Column::Field_element_type>
+                                                 std::pair<unsigned int, typename Column::Field_element>
                                                 >::type> > ordCol(matrix.size());
   for (unsigned int i = 0; i < matrix.size(); ++i) {
     Column& col = matrix[i];
@@ -44,7 +44,7 @@ template <class Column>
 std::vector<column_content<Column> > get_ordered_rows(std::vector<Column>& matrix) {
   std::vector<std::set<typename std::conditional<is_z2<Column>(),
                                                  unsigned int,
-                                                 std::pair<unsigned int, typename Column::Field_element_type>
+                                                 std::pair<unsigned int, typename Column::Field_element>
                                                 >::type> > rows;
   for (Column& col : matrix) {
     for (auto& cell : col) {
@@ -73,7 +73,7 @@ std::vector<Column> build_column_matrix(typename Column::Column_settings& settin
     matrix.emplace_back(cont{0, 1, 3, 5}, 4, &settings);
     matrix.emplace_back(matrix[1]);
   } else {
-    using cont = std::vector<std::pair<unsigned int, typename Column::Field_element_type> >;
+    using cont = std::vector<std::pair<unsigned int, typename Column::Field_element> >;
     matrix.emplace_back(cont{{0, 1}, {1, 2}, {3, 3}, {5, 4}}, 4, &settings);
     matrix.emplace_back(cont{{0, 4}, {1, 2}, {2, 1}, {5, 1}, {6, 1}}, 4, &settings);
     matrix.emplace_back(cont{{0, 1}, {1, 3}, {2, 4}, {5, 4}, {6, 4}}, 4, &settings);
@@ -98,7 +98,7 @@ std::vector<Column> build_column_matrix(Rows& rows, typename Column::Column_sett
     matrix.emplace_back(4, cont{0, 1, 3, 5}, 4, &rows, &settings);
     matrix.emplace_back(matrix[1], 5, &rows);
   } else {
-    using cont = std::vector<std::pair<unsigned int, typename Column::Field_element_type> >;
+    using cont = std::vector<std::pair<unsigned int, typename Column::Field_element> >;
     matrix.emplace_back(0, cont{{0, 1}, {1, 2}, {3, 3}, {5, 4}}, 4, &rows, &settings);
     matrix.emplace_back(1, cont{{0, 4}, {1, 2}, {2, 1}, {5, 1}, {6, 1}}, 4, &rows, &settings);
     matrix.emplace_back(2, cont{{0, 1}, {1, 3}, {2, 4}, {5, 4}, {6, 4}}, 4, &rows, &settings);
@@ -123,7 +123,7 @@ std::vector<Column> build_base_boundary_column_matrix(Rows& rows, typename Colum
     matrix.emplace_back(4, cont{0, 1, 3, 5}, &rows, &settings);
     matrix.emplace_back(matrix[1], 5, &rows);
   } else {
-    using cont = std::vector<std::pair<unsigned int, typename Column::Field_element_type> >;
+    using cont = std::vector<std::pair<unsigned int, typename Column::Field_element> >;
     matrix.emplace_back(0, cont{{0, 1}, {1, 2}, {3, 3}, {5, 4}}, &rows, &settings);
     matrix.emplace_back(1, cont{{0, 4}, {1, 2}, {2, 1}, {5, 1}, {6, 1}}, &rows, &settings);
     matrix.emplace_back(2, cont{{0, 1}, {1, 3}, {2, 4}, {5, 4}, {6, 4}}, &rows, &settings);
@@ -148,7 +148,7 @@ std::vector<Column> build_base_boundary_column_matrix(typename Column::Column_se
     matrix.emplace_back(cont{0, 1, 3, 5}, &settings);
     matrix.emplace_back(matrix[1]);
   } else {
-    using cont = std::vector<std::pair<unsigned int, typename Column::Field_element_type> >;
+    using cont = std::vector<std::pair<unsigned int, typename Column::Field_element> >;
     matrix.emplace_back(cont{{0, 1}, {1, 2}, {3, 3}, {5, 4}}, &settings);
     matrix.emplace_back(cont{{0, 4}, {1, 2}, {2, 1}, {5, 1}, {6, 1}}, &settings);
     matrix.emplace_back(cont{{0, 1}, {1, 3}, {2, 4}, {5, 4}, {6, 4}}, &settings);
@@ -164,14 +164,14 @@ template <class Column>
 std::vector<std::vector<typename std::conditional<
     is_z2<Column>(),
     unsigned int,
-    std::pair<unsigned int, typename Column::Field_element_type>
+    std::pair<unsigned int, typename Column::Field_element>
    >::type> > build_rows() {
   using cell_type = typename std::conditional<is_z2<Column>(),
                                               unsigned int,
-                                              std::pair<unsigned int, typename Column::Field_element_type>
+                                              std::pair<unsigned int, typename Column::Field_element>
                                              >::type;
-  using container_type = std::vector<cell_type>;
-  std::vector<container_type> rows(7);
+  using Container = std::vector<cell_type>;
+  std::vector<Container> rows(7);
 
   if constexpr (is_z2<Column>()) {
     rows[0] = {0, 1, 2, 4, 5};
@@ -198,14 +198,14 @@ template <class Column>
 std::vector<std::vector<typename std::conditional<
     is_z2<Column>(),
     unsigned int,
-    std::pair<unsigned int, typename Column::Field_element_type>
+    std::pair<unsigned int, typename Column::Field_element>
    >::type> > build_column_values() {
   using cell_type = typename std::conditional<is_z2<Column>(),
                                               unsigned int,
-                                              std::pair<unsigned int, typename Column::Field_element_type>
+                                              std::pair<unsigned int, typename Column::Field_element>
                                              >::type;
-  using container_type = std::vector<cell_type>;
-  std::vector<container_type> columns(6);
+  using Container = std::vector<cell_type>;
+  std::vector<Container> columns(6);
 
   if constexpr (is_z2<Column>()) {
     columns[0] = {0, 1, 3, 5};
@@ -230,11 +230,11 @@ template <class Column>
 void column_test_common_constructors() {
   using cell_type = typename std::conditional<is_z2<Column>(),
                                               unsigned int,
-                                              std::pair<unsigned int, typename Column::Field_element_type>
+                                              std::pair<unsigned int, typename Column::Field_element>
                                              >::type;
-  using container_type = std::vector<cell_type>;
+  using Container = std::vector<cell_type>;
 
-  container_type cont1, cont2;
+  Container cont1, cont2;
   typename Column::Column_settings settings(5);
 
   if constexpr (is_z2<Column>()) {
@@ -281,7 +281,7 @@ void column_test_common_constructors() {
 template <class Column, typename cell_type>
 void column_test_common_content_access(Column& col,
                                        const std::set<cell_type>& setcont,
-                                       const std::vector<typename Column::Field_element_type>& veccont) {
+                                       const std::vector<typename Column::Field_element>& veccont) {
   BOOST_CHECK(get_column_content_via_iterators(col) == setcont);
   BOOST_CHECK(col.get_content(veccont.size()) == veccont);
   if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP) {
@@ -304,8 +304,8 @@ void column_test_common_content_access(Column& col,
 // assumes that matrix was build with build_column_matrix and was not modified since.
 template <class Column>
 void column_test_common_z5_content_access(std::vector<Column>& matrix) {
-  std::set<std::pair<unsigned int, typename Column::Field_element_type> > setcont;
-  std::vector<typename Column::Field_element_type> veccont;
+  std::set<std::pair<unsigned int, typename Column::Field_element> > setcont;
+  std::vector<typename Column::Field_element> veccont;
 
   setcont = {{0, 1}, {1, 2}, {3, 3}, {5, 4}};
   veccont = {1, 2, 0, 3, 0, 4};
@@ -336,7 +336,7 @@ void column_test_common_z5_content_access(std::vector<Column>& matrix) {
 template <class Column>
 void column_test_common_z2_content_access(std::vector<Column>& matrix) {
   std::set<unsigned int> setcont;
-  std::vector<typename Column::Field_element_type> veccont;
+  std::vector<typename Column::Field_element> veccont;
 
   setcont = {0, 1, 3, 5};
   veccont = {1, 1, 0, 1, 0, 1};
@@ -366,8 +366,8 @@ void column_test_common_z2_content_access(std::vector<Column>& matrix) {
 // assumes that matrix was build with build_column_matrix and was not modified since.
 template <class Column>
 void column_test_common_z5_operators(std::vector<Column>& matrix) {
-  std::set<std::pair<unsigned int, typename Column::Field_element_type> > setcont;
-  std::vector<typename Column::Field_element_type> veccont;
+  std::set<std::pair<unsigned int, typename Column::Field_element> > setcont;
+  std::vector<typename Column::Field_element> veccont;
 
   matrix[0] += matrix[1];
   matrix[1] += matrix[2];
@@ -442,7 +442,7 @@ void column_test_common_z5_operators(std::vector<Column>& matrix) {
 template <class Column>
 void column_test_common_z2_operators(std::vector<Column>& matrix) {
   std::set<unsigned int> setcont;
-  std::vector<typename Column::Field_element_type> veccont;
+  std::vector<typename Column::Field_element> veccont;
 
   matrix[0] += matrix[1];
   matrix[1] += matrix[2];
@@ -510,8 +510,8 @@ void column_test_common_z2_operators(std::vector<Column>& matrix) {
 // common: assumes that matrix was build with build_column_matrix(rows) and not modified since.
 // base/boundary special: assumes that matrix was build with build_base_boundary_column_matrix(rows) and not modified
 // since.
-template <class Column, class row_container_type>
-void column_test_row_access_constructors(std::vector<Column>& matrix, row_container_type& rows) {
+template <class Column, class Row_container>
+void column_test_row_access_constructors(std::vector<Column>& matrix, Row_container& rows) {
   test_matrix_equality<Column>(build_rows<Column>(), get_ordered_rows(matrix));
   test_matrix_equality<Column>(build_column_values<Column>(), get_ordered_column_contents(matrix));
 
@@ -589,13 +589,13 @@ template <class Column>
 void column_test_base_boundary_constructors() {
   using cell_type = typename std::conditional<is_z2<Column>(),
                                               unsigned int,
-                                              std::pair<unsigned int, typename Column::Field_element_type>
+                                              std::pair<unsigned int, typename Column::Field_element>
                                              >::type;
-  using container_type = std::vector<cell_type>;
+  using Container = std::vector<cell_type>;
 
   typename Column::Column_settings settings(5);
 
-  container_type cont1, cont2;
+  Container cont1, cont2;
 
   if constexpr (is_z2<Column>()) {
     cont1 = {0, 2, 4};
@@ -617,11 +617,11 @@ void column_test_base_boundary_constructors() {
 
 template <class Column>
 void column_test_base_boundary_z5_methods() {
-  std::vector<typename Column::Field_element_type> veccont;
+  std::vector<typename Column::Field_element> veccont;
   typename Column::Column_settings settings(5);
 
   Column col(
-      std::vector<std::pair<unsigned int, typename Column::Field_element_type> >{
+      std::vector<std::pair<unsigned int, typename Column::Field_element> >{
           {0, 4}, {1, 2}, {2, 1}, {5, 1}, {6, 1}},
       &settings);
   veccont = {4, 2, 1, 0, 0, 1, 1};
@@ -648,7 +648,7 @@ void column_test_base_boundary_z5_methods() {
 
 template <class Column>
 void column_test_base_boundary_z2_methods() {
-  std::vector<typename Column::Field_element_type> veccont;
+  std::vector<typename Column::Field_element> veccont;
   typename Column::Column_settings settings;
 
   Column col(std::vector<unsigned int>{0, 1, 2, 5, 6}, &settings);
@@ -679,7 +679,7 @@ template <class Column>
 void column_test_base_z5_operators(std::vector<Column>& matrix) {
   using Cell = typename Column::Cell;
   std::set<Cell> setcont;
-  std::vector<typename Column::Field_element_type> veccont;
+  std::vector<typename Column::Field_element> veccont;
 
   Cell cell(0);
   cell.set_element(4);
@@ -890,9 +890,9 @@ void column_test_boundary_methods(std::vector<Column>& matrix) {
 // assumes that matrix was build with build_column_matrix and was not modified since.
 template <class Column>
 void column_test_boundary_z5_operators(std::vector<Column>& matrix) {
-  using cont = std::vector<std::pair<unsigned int, typename Column::Field_element_type> >;
+  using cont = std::vector<std::pair<unsigned int, typename Column::Field_element> >;
 
-  std::vector<typename Column::Field_element_type> veccont;
+  std::vector<typename Column::Field_element> veccont;
   typename Column::Column_settings settings(5);
 
   const Column col0(cont{{0, 4}, {1, 2}, {2, 1}, {5, 1}, {6, 1}}, &settings);
@@ -1010,11 +1010,11 @@ void column_test_chain_methods() {
   Column col(&settings);
 
   BOOST_CHECK(!col.is_paired());
-  BOOST_CHECK(col.get_paired_chain_index() == static_cast<typename Column::index>(-1));
+  BOOST_CHECK(col.get_paired_chain_index() == static_cast<typename Column::Index>(-1));
 
   col.unassign_paired_chain();
   BOOST_CHECK(!col.is_paired());
-  BOOST_CHECK(col.get_paired_chain_index() == static_cast<typename Column::index>(-1));
+  BOOST_CHECK(col.get_paired_chain_index() == static_cast<typename Column::Index>(-1));
 
   col.assign_paired_chain(2);
   BOOST_CHECK(col.is_paired());
@@ -1022,7 +1022,7 @@ void column_test_chain_methods() {
 
   col.unassign_paired_chain();
   BOOST_CHECK(!col.is_paired());
-  BOOST_CHECK(col.get_paired_chain_index() == static_cast<typename Column::index>(-1));
+  BOOST_CHECK(col.get_paired_chain_index() == static_cast<typename Column::Index>(-1));
 }
 
 #endif  // PM_COLUMN_TESTS_H

@@ -87,7 +87,7 @@ void print_matrix(Base_matrix& bm, unsigned int size){
 
 void print_matrix(const Chain_matrix& cm, unsigned int size){
   std::cout << "Chain_matrix:\n";
-  // just note that if some vine swaps or removals occured, this would
+  // just note that if some vine swaps or removals occurred, this would
   // not give us the columns in the order of filtration anymore, but just
   // in the order they are stored in the matrix
   for (unsigned int i = 0; i < size; ++i) {

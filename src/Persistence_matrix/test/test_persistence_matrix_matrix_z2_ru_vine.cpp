@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_column_removal, Matrix, removabl
 
 #ifdef PM_TEST_MAX_DIM
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_max_dimension, Matrix, full_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_maximal_dimension<Matrix>(m);
 }
@@ -75,11 +75,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_max_dimension, Matrix, full_matr
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_operation, Matrix, full_matrices) { test_ru_operation<Matrix>(); }
 
 #ifdef PM_TEST_BARCODE
-BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_barcode, Matrix, full_matrices) { test_barcode<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_barcode, Matrix, full_matrices) {
+  test_barcode<Matrix>();
+  test_shifted_barcode<Matrix>();
+}
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_representative_cycles, Matrix, rep_matrices) {
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_representative_cycles<Matrix>(m);
 }
@@ -88,13 +91,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_representative_cycles, Matrix, r
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_access, Matrix, full_matrices) { test_boundary_access<Matrix>(); }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_row_access, Matrix, row_access_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_non_base_row_access<Matrix>(m);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine, Matrix, full_matrices) {
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_vine_swap_with_id_index(m);
 }
@@ -105,14 +108,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_access, Matrix, full_matrices) {
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_row_access, Matrix, row_access_matrices) {
-  auto columns = build_simple_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_non_base_row_access<Matrix>(m);
   test_ru_u_row_access<Matrix>();
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine, Matrix, full_matrices) {
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column_type>();
+  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
   Matrix m(columns);
   test_vine_swap_with_position_index(m);
 }

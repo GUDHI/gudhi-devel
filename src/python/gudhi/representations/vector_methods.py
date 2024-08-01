@@ -756,7 +756,7 @@ class Atol(BaseEstimator, TransformerMixin):
             self,
             quantiser=KMeans(n_clusters=2, n_init="auto"),
             weighting_method="cloud",
-            contrast="gaussian"
+            contrast="gaussian",
     ):
         """
         Constructor for the Atol measure vectorisation class.
@@ -794,7 +794,8 @@ class Atol(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None, sample_weight=None):
         """
-        Calibration step: fit centers to the sample measures and derive inertias between centers.
+        Calibration step: fit centers to the target sample measures and derive inertias between centers. If the target
+        does not contain enough points for creating the intended number of centers, we fill in with bogus centers.
 
         Parameters:
             X (list N x d numpy arrays): input measures in R^d from which to learn center locations and inertias
@@ -806,25 +807,32 @@ class Atol(BaseEstimator, TransformerMixin):
         Returns:
             self
         """
-        if not hasattr(self.quantiser, 'fit'):
-            raise TypeError("quantiser %s has no `fit` attribute." % (self.quantiser))
+        n_clusters = self.quantiser.n_clusters
 
-        # In fitting we remove infinite death time points so that every center is finite
-        X = [dgm[~np.isinf(dgm).any(axis=1), :] for dgm in X]
-
+        if not len(X):
+            raise ValueError("Cannot fit Atol on empty target.")
+        measures_concat = np.concatenate(X)
         if sample_weight is None:
             sample_weight = [self.get_weighting_method()(measure) for measure in X]
-
-        measures_concat = np.concatenate(X)
         weights_concat = np.concatenate(sample_weight)
 
-        self.quantiser.fit(X=measures_concat, sample_weight=weights_concat)
+        # In fitting we remove infinite birth/death time points so that every center is finite. We do not care about duplicates.
+        filtered_measures_concat = measures_concat[~np.isinf(measures_concat).any(axis=1), :] if len(measures_concat) else measures_concat
+        filtered_weights_concat = weights_concat[~np.isinf(measures_concat).any(axis=1)] if len(measures_concat) else weights_concat
 
+        n_points = len(filtered_measures_concat)
+        if not n_points:
+            raise ValueError("Cannot fit Atol on measure with infinite components only.")
+        if n_points < n_clusters:
+            self.quantiser.n_clusters = n_points
+
+        self.quantiser.fit(X=filtered_measures_concat, sample_weight=filtered_weights_concat)
         self.centers = self.quantiser.cluster_centers_
+
         # Hack, but some people are unhappy if the order depends on the version of sklearn
         self.centers = self.centers[np.lexsort(self.centers.T)]
         if self.quantiser.n_clusters == 1:
-            dist_centers = pairwise.pairwise_distances(measures_concat)
+            dist_centers = pairwise.pairwise_distances(filtered_measures_concat)
             np.fill_diagonal(dist_centers, 0)
             best_inertia = np.max(dist_centers)/2 if np.max(dist_centers)/2 > 0 else 1
             self.inertias = np.array([best_inertia])
@@ -832,6 +840,15 @@ class Atol(BaseEstimator, TransformerMixin):
             dist_centers = pairwise.pairwise_distances(self.centers)
             dist_centers[dist_centers == 0] = np.inf
             self.inertias = np.min(dist_centers, axis=0)/2
+
+        if n_points < n_clusters:
+            # There weren't enough points to fit n_clusters, so we arbitrarily put centers as [-np.inf]^measure_dim.
+            print(f"[Atol] after filtering had only {n_points=} to fit {n_clusters=}, adding meaningless centers.")
+            fill_center = np.repeat(np.inf, repeats=X[0].shape[1])
+            fill_inertia = 0
+            self.centers = np.concatenate([self.centers, np.repeat([fill_center], repeats=n_clusters-n_points, axis=0)])
+            self.inertias = np.concatenate([self.inertias, np.repeat(fill_inertia, repeats=n_clusters-n_points)])
+            self.quantiser.n_clusters = n_clusters
         return self
 
     def __call__(self, measure, sample_weight=None):
