@@ -15,7 +15,7 @@ Definition
 :cite:`cgal:hdj-t-19b` from the `Computational Geometry Algorithms Library <http://www.cgal.org/>`_
 :cite:`cgal:eb-19b`.
 
-The Delaunay complex without filtration values (set to `NaN`) is available by passing :code:`filtrations = None`
+The Delaunay complex (all filtration values are set to `NaN`) is available by passing :code:`filtrations = None`
 (default value) to :func:`~gudhi.DelaunayComplex.create_simplex_tree`.
 
 When :paramref:`~gudhi.DelaunayComplex.create_simplex_tree.filtrations` is:
