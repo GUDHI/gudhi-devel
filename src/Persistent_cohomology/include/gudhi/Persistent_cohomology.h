@@ -559,7 +559,7 @@ class Persistent_cohomology {
   void output_diagram(std::ostream& ostream = std::cout) {
     cmp_intervals_by_length cmp(cpx_);
     std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
-    for (auto pair : persistent_pairs_) {
+    for (const auto& pair : persistent_pairs_) {
       ostream << get<2>(pair) << "  " << cpx_->dimension(get<0>(pair)) << " "
         << cpx_->filtration(get<0>(pair)) << " "
         << cpx_->filtration(get<1>(pair)) << " " << std::endl;
@@ -571,7 +571,7 @@ class Persistent_cohomology {
     diagram_out.exceptions(diagram_out.failbit);
     cmp_intervals_by_length cmp(cpx_);
     std::sort(std::begin(persistent_pairs_), std::end(persistent_pairs_), cmp);
-    for (auto pair : persistent_pairs_) {
+    for (const auto& pair : persistent_pairs_) {
       diagram_out << cpx_->dimension(get<0>(pair)) << " "
             << cpx_->filtration(get<0>(pair)) << " "
             << cpx_->filtration(get<1>(pair)) << std::endl;
@@ -586,7 +586,7 @@ class Persistent_cohomology {
     // size for an empty complex
     std::vector<int> betti_numbers(std::max(dim_max_, 0));
 
-    for (auto pair : persistent_pairs_) {
+    for (const auto& pair : persistent_pairs_) {
       // Count never ended persistence intervals
       if (cpx_->null_simplex() == get<1>(pair)) {
         // Increment corresponding betti number
@@ -604,7 +604,7 @@ class Persistent_cohomology {
   int betti_number(int dimension) const {
     int betti_number = 0;
 
-    for (auto pair : persistent_pairs_) {
+    for (const auto& pair : persistent_pairs_) {
       // Count never ended persistence intervals
       if (cpx_->null_simplex() == get<1>(pair)) {
         if (cpx_->dimension(get<0>(pair)) == dimension) {
@@ -625,7 +625,7 @@ class Persistent_cohomology {
     // Init Betti numbers vector with zeros until Simplicial complex dimension and don't allocate a vector of negative
     // size for an empty complex
     std::vector<int> betti_numbers(std::max(dim_max_, 0));
-    for (auto pair : persistent_pairs_) {
+    for (const auto& pair : persistent_pairs_) {
       // Count persistence intervals that covers the given interval
       // null_simplex test : if the function is called with to=+infinity, we still get something useful. And it will
       // still work if we change the complex filtration function to reject null simplices.
@@ -647,7 +647,7 @@ class Persistent_cohomology {
   int persistent_betti_number(int dimension, Filtration_value from, Filtration_value to) const {
     int betti_number = 0;
 
-    for (auto pair : persistent_pairs_) {
+    for (const auto& pair : persistent_pairs_) {
       // Count persistence intervals that covers the given interval
       // null_simplex test : if the function is called with to=+infinity, we still get something useful. And it will
       // still work if we change the complex filtration function to reject null simplices.

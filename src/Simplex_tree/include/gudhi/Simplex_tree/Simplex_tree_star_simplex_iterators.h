@@ -265,7 +265,7 @@ class Simplex_tree_optimized_star_simplex_iterator
   // curr Simplex_handle, returned by operator*, pointing to a coface of s
   Simplex_handle sh_;
   // set of siblings containing sh_ in the Simplex_tree
-  Siblings* sib_;  //
+  Siblings const* sib_;  //
   // Save children in a list to avoid calling sib_->members().find(.)
   std::vector<Siblings*> children_stack_;
   // true iff sh_ points to the root of a coface subtree

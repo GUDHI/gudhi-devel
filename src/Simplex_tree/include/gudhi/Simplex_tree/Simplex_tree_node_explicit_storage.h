@@ -57,6 +57,9 @@ struct GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION Simplex_tree_node_explicit_storage : 
   Siblings * children() {
     return children_;
   }
+  const Siblings * children() const {
+    return children_;
+  }
 
  private:
   Siblings * children_;

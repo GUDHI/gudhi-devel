@@ -43,6 +43,7 @@ class Simplex_tree_siblings {
   typedef typename SimplexTree::Node Node;
   typedef MapContainer Dictionary;
   typedef typename MapContainer::iterator Dictionary_it;
+  typedef typename MapContainer::const_iterator Const_dictionary_it;
 
   /* Default constructor.*/
   Simplex_tree_siblings()
@@ -87,8 +88,14 @@ class Simplex_tree_siblings {
   Dictionary_it find(Vertex_handle v) {
     return members_.find(v);
   }
+  Const_dictionary_it find(Vertex_handle v) const {
+    return members_.find(v);
+  }
 
   Simplex_tree_siblings * oncles() {
+    return oncles_;
+  }
+  const Simplex_tree_siblings * oncles() const {
     return oncles_;
   }
 
@@ -100,12 +107,20 @@ class Simplex_tree_siblings {
     return members_;
   }
 
+  const Dictionary & members() const {
+    return members_;
+  }
+
   size_t size() const {
     return members_.size();
   }
 
   void erase(const Dictionary_it iterator) {
     members_.erase(iterator);
+  }
+
+  Dictionary_it to_non_const_it(Const_dictionary_it it) {
+    return members_.erase(it, it);
   }
 
   Simplex_tree_siblings * oncles_;
