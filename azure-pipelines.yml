@@ -30,7 +30,8 @@ jobs:
     - bash: |
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON ..
+        which python
+        cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON -DPython_EXECUTABLE=$(which python) ..
         ninja
         ninja doxygen
         ctest --output-on-failure
