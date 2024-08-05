@@ -46,6 +46,7 @@ jobs:
       pythonVersion: '3.9'
       cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
       cmakeFlags: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
+    continueOnError: false
 
     steps:
     # Use a specific Python version
@@ -66,7 +67,6 @@ jobs:
         choco install -y ninja --force --force-dependencies
       displayName: 'Install build dependencies'
     - script: |
-        $ErrorActionPreference = 'Stop'
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
         mkdir build
         cd build
