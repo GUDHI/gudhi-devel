@@ -40,13 +40,13 @@ different, and in particular the `python/` subdirectory is actually `src/python/
 there.
 
 The library uses c++17 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.71.0,
-`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.8,
+`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.15,
 Python :math:`\geq` 3.5, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0, `Cython <https://www.cython.org/>`_
 :math:`\geq` 0.27 and `pybind11 <https://github.com/pybind/pybind11>`_ to compile the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2017 or later.
 
-If you have several Python/python installed, the version 2.X may be used by default, but you can force it by adding
-:code:`-DPython_ADDITIONAL_VERSIONS=3` to the cmake command.
+If you have several Python/python installed, you can force it by adding
+:code:`-DPython_EXECUTABLE=/custom/path/to/python3` to the cmake command (requires CMake :math:`\geq` 3.16).
 
 GUDHI Python module compilation
 ===============================

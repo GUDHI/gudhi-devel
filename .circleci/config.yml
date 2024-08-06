@@ -100,7 +100,7 @@ jobs:
             cmake -DWITH_GUDHI_THIRD_PARTY=OFF -DUSER_VERSION_DIR=version ..
             make user_version
             cd version
-            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 -DWITH_GUDHI_REMOTE_TEST=ON .
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
             cd python
             python3 setup.py build_ext --inplace
             ctest --output-on-failure
@@ -243,7 +243,7 @@ jobs:
           command: |
             mkdir build
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
+            cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON ..
             cd src/python
             python3 setup.py build_ext --inplace
             ctest --output-on-failure
@@ -323,7 +323,7 @@ jobs:
           command: |
             mkdir build
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DPython_ADDITIONAL_VERSIONS=3 ..
+            cmake -DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/eigen-3.3.9 -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON ..
             cd src/python
             python3 setup.py build_ext --inplace
             ctest --output-on-failure

@@ -42,7 +42,7 @@ jobs:
           python --version
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
+          cmake -DCMAKE_BUILD_TYPE=Release ..
           cd src/python
           python -m build -n -w
       - name: Install and test python wheel
@@ -112,7 +112,7 @@ jobs:
           python --version
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
+          cmake -DCMAKE_BUILD_TYPE=Release ..
           cd src/python
           python -m build -n -w
       # Test ABI compatibility with numpy 1.X
