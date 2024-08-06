@@ -6,6 +6,12 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 
 Below is a list of changes:
 
+- [Delaunay complex](https://gudhi.inria.fr/python/latest/delaunay_complex_user.html)
+     - The Delaunay complex can be equipped with different filtrations:
+          * Delaunay complex (no filtration values computed)
+          * Delaunay Čech complex (using minimal enclosing ball)
+          * Alpha complex (moved in this new section)
+
 - [Module](link)
      - **...**
 
