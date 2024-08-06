@@ -74,7 +74,9 @@ jobs:
         cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(cmakeFlags) ..
         ninja
         ctest --output-on-failure -C Release -E diff_files
-        cmake  -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
+        for /f %%i in ('where python') do set PYTHON_EXE=%%i
+        echo %PYTHON_EXE%
+        cmake  -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON -DPython_EXECUTABLE=%PYTHON_EXE% .
         cd src\python
         copy "C:\vcpkg\installed\x64-windows\bin\mpfr*.dll" ".\gudhi\"
         copy "C:\vcpkg\installed\x64-windows\bin\gmp*.dll" ".\gudhi\"
