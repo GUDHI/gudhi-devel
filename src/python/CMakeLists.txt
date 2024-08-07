@@ -187,6 +187,7 @@ if(PYTHONINTERP_FOUND)
     endif ()
     set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_pers_cub_low_dim', ")
     set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_edge_collapse', ")
+    set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_ripser', ")
 
     # from windows vcpkg eigen 3.4.0#2 : build fails with
     # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
