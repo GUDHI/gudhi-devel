@@ -104,7 +104,7 @@ class Simplex_tree {
    *
    * Must be an integer type. */
   typedef typename Options::Simplex_key Simplex_key;
-  /** \bried Extra data stored in each simplex. */
+  /** \brief Extra data stored in each simplex. */
   typedef typename Get_simplex_data_type<Options>::type Simplex_data;
   /** \brief Type for the vertex handle.
    *
