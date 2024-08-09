@@ -9,7 +9,7 @@
  */
 
 /**
- * @file base_matrix.h
+ * @file Base_matrix.h
  * @author Hannah Schreiber
  * @brief Contains the @ref Gudhi::persistence_matrix::Base_matrix class.
  */
@@ -25,7 +25,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
- * @class Base_matrix base_matrix.h gudhi/Persistence_matrix/base_matrix.h
+ * @class Base_matrix Base_matrix.h gudhi/Persistence_matrix/Base_matrix.h
  * @ingroup persistence_matrix
  *
  * @brief A @ref basematrix "basic matrix" structure allowing to easily manipulate and access entire columns and rows,
