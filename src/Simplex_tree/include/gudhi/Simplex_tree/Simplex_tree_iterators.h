@@ -206,7 +206,7 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
   }
 
   // any end() iterator
-  explicit Simplex_tree_boundary_opposite_vertex_simplex_iterator(SimplexTree * st)
+  explicit Simplex_tree_boundary_opposite_vertex_simplex_iterator(SimplexTree const* st)
       : last_(st->null_vertex()),
         next_(st->null_vertex()),
         sib_(nullptr),
@@ -215,7 +215,7 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
   }
 
   template<class SimplexHandle>
-  Simplex_tree_boundary_opposite_vertex_simplex_iterator(SimplexTree * st, SimplexHandle sh)
+  Simplex_tree_boundary_opposite_vertex_simplex_iterator(SimplexTree const* st, SimplexHandle sh)
       : last_(sh->first),
         next_(st->null_vertex()),
         sib_(nullptr),
@@ -258,8 +258,8 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
       baov_.first = st_->null_simplex();
       return;  // ------>>
     }
-    Siblings * for_sib = sib_;
-    Siblings * new_sib = sib_->oncles();
+    Siblings const* for_sib = sib_;
+    Siblings const* new_sib = sib_->oncles();
     auto rit = suffix_.rbegin();
     if constexpr (SimplexTree::Options::contiguous_vertices && !SimplexTree::Options::stable_simplex_handles) {
       if (new_sib == nullptr) {
@@ -318,7 +318,7 @@ class Simplex_tree_complex_simplex_iterator : public boost::iterator_facade<
         st_(nullptr) {
   }
 
-  explicit Simplex_tree_complex_simplex_iterator(SimplexTree * st)
+  explicit Simplex_tree_complex_simplex_iterator(SimplexTree const* st)
       : sib_(nullptr),
         st_(st) {
     if (st == nullptr || st->root() == nullptr || st->root()->members().empty()) {
@@ -394,7 +394,7 @@ class Simplex_tree_skeleton_simplex_iterator : public boost::iterator_facade<
         curr_dim_(0) {
   }
 
-  Simplex_tree_skeleton_simplex_iterator(SimplexTree * st, int dim_skel)
+  Simplex_tree_skeleton_simplex_iterator(SimplexTree const* st, int dim_skel)
       : sib_(nullptr),
         st_(st),
         dim_skel_(dim_skel),

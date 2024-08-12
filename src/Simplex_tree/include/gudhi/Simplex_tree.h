@@ -196,6 +196,7 @@ class Simplex_tree {
   typedef typename Dictionary::iterator Dictionary_it;
   typedef typename Dictionary::const_iterator Const_dictionary_it;
   typedef typename Dictionary_it::value_type Dit_value_t;
+  typedef typename Const_dictionary_it::value_type Const_dit_value_t;
 
   struct return_first {
     Vertex_handle operator()(const Dit_value_t& p_sh) const {
@@ -687,6 +688,7 @@ class Simplex_tree {
   }
 
   static bool has_filtration_value_infinity(Simplex_handle sh){
+    if (sh == null_simplex()) return true;
     return sh->second.filtration() == Filtration_simplex_base_real::get_infinity();
   }
 
@@ -704,7 +706,7 @@ class Simplex_tree {
    *
    * One can call filtration(null_simplex()). */
   static Simplex_handle null_simplex() {
-    return Dictionary_it();
+    return Const_dictionary_it();
   }
 
   /** \brief Returns a fixed number not in the interval [0, `num_simplices()`).  */
@@ -821,7 +823,7 @@ class Simplex_tree {
   /** \brief Returns the children of the node in the simplex tree pointed by sh.
    * \exception std::invalid_argument In debug mode, if sh has no child.
    */
-  Siblings* children(Simplex_handle sh) const {
+  Siblings const* children(Simplex_handle sh) const {
     GUDHI_CHECK(has_children(sh), std::invalid_argument("Simplex_tree::children - argument has no child"));
     return sh->second.children();
   }
@@ -1048,16 +1050,15 @@ class Simplex_tree {
     Vertex_handle vertex_one = *first;
     auto&& dict = sib->members();
     auto insertion_result = dict.emplace(vertex_one, Node(sib, filt));
-    std::pair<Simplex_handle, bool> result(insertion_result);
-    // update extra data structures in the insertion is successful
-    if (insertion_result.second) {
-      // Only required when insertion is successful
-      update_simplex_tree_after_node_insertion(insertion_result.first);
-    }
+    std::pair<Simplex_handle, bool> result(insertion_result); // const version of insertion_result for null_simplex()
 
     auto simplex_one = insertion_result.first;
     bool one_is_new = insertion_result.second;
-    if (!one_is_new) {
+    if (one_is_new) {
+      // update extra data structures in the insertion is successful
+      // Only required when insertion is successful
+      update_simplex_tree_after_node_insertion(insertion_result.first);
+    } else {
       if (filtration(simplex_one) > filt) {
         assign_filtration(simplex_one, filt);
       } else {
@@ -1065,7 +1066,7 @@ class Simplex_tree {
         result.first = null_simplex();
       }
     }
-    if (++first == last) return insertion_result;
+    if (++first == last) return result;
     if (!has_children(simplex_one))
       // TODO: have special code here, we know we are building the whole subtree from scratch.
       simplex_one->second.assign_children(new Siblings(sib, vertex_one));
@@ -1079,7 +1080,7 @@ class Simplex_tree {
   /** \brief Assign a value 'key' to the key of the simplex
    * represented by the Simplex_handle 'sh'. */
   void assign_key(Simplex_handle sh, Simplex_key key) {
-    sh->second.assign_key(key);
+    _to_node_it(sh)->second.assign_key(key);
   }
 
   /** Returns the two Simplex_handle corresponding to the endpoints of
@@ -1181,7 +1182,7 @@ class Simplex_tree {
    * Postfix actions : Finally, we add back the removed vertex into vertices, and remove this vertex from curr_nbVertices so that we didn't change the parameters.
    * If the vertices list is empty, we need to check if curr_nbVertices matches with the dimension of the cofaces asked.
    */
-  void rec_coface(std::vector<Vertex_handle> &vertices, Siblings *curr_sib, int curr_nbVertices,
+  void rec_coface(std::vector<Vertex_handle> &vertices, Siblings const*curr_sib, int curr_nbVertices,
                   std::vector<Simplex_handle>& cofaces, bool star, int nbVertices) const {
     if (!(star || curr_nbVertices <= nbVertices))  // dimension of actual simplex <= nbVertices
       return;
@@ -1565,7 +1566,7 @@ class Simplex_tree {
     {
       Node& node_u = static_cast<Node&>(node_as_hook); //corresponding node, has label u
       Simplex_handle sh_u = simplex_handle_from_node(node_u);
-      Siblings const* sib_u = self_siblings(sh_u);
+      Siblings* sib_u = const_cast<Siblings*>(self_siblings(sh_u));
       if (sib_u->members().find(v) != sib_u->members().end()) { //v is the label of a sibling of node_u
         int curr_dim = dimension(sib_u);
         if (dim_max == -1 || curr_dim < dim_max){
@@ -1653,14 +1654,14 @@ class Simplex_tree {
    * k must be > 0
    */
   void create_local_expansion(
-        Simplex_handle          sh_v       //Node with label v which has just been inserted
+        Dictionary_it           sh_v       //Node with label v which has just been inserted
       , Siblings              * curr_sib   //Siblings containing the node sh_v
       , const Filtration_value& fil_uv     //Fil value of the edge uv in the zz filtration
       , int                     k          //Stopping condition for recursion based on max dim
       , std::vector<Simplex_handle> &added_simplices) //range of all new simplices
   { //pick N^+(v)
     //intersect N^+(v) with labels y > v in curr_sib
-    Simplex_handle next_it = sh_v;
+    Dictionary_it next_it = sh_v;
     ++next_it;
 
     if (dimension_ > k) {
@@ -1771,7 +1772,7 @@ class Simplex_tree {
   template<bool force_filtration_value = false>
   static void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
                            Dictionary_it begin1, Dictionary_it end1,
-                           Dictionary_it begin2, Dictionary_it end2,
+                           Const_dictionary_it begin2, Const_dictionary_it end2,
                            const Filtration_value& filtration_) {
     if (begin1 == end1 || begin2 == end2)
       return;  // ----->>
@@ -1958,7 +1959,7 @@ class Simplex_tree {
 
  private:
   template<class Fun>
-  void rec_for_each_simplex(Siblings* sib, int dim, Fun&& fun) {
+  void rec_for_each_simplex(const Siblings* sib, int dim, Fun&& fun) {
     Simplex_handle sh = sib->members().end();
     GUDHI_CHECK(sh != sib->members().begin(), "Bug in Gudhi: only the root siblings may be empty");
     do {
@@ -2372,7 +2373,18 @@ class Simplex_tree {
   // unordered_map Vertex_handle v -> list of all Nodes with label v.
   std::unordered_map<Vertex_handle, List_max_vertex> nodes_label_to_list_;
 
-  List_max_vertex* nodes_by_label(Vertex_handle v) const {
+  List_max_vertex* nodes_by_label(Vertex_handle v) {
+    if constexpr (Options::link_nodes_by_label) {
+      auto it_v = nodes_label_to_list_.find(v);
+      if (it_v != nodes_label_to_list_.end()) {
+        return &(it_v->second);
+      } else {
+        return nullptr;
+      }
+    }
+    return nullptr;
+  }
+  List_max_vertex const* nodes_by_label(Vertex_handle v) const {
     if constexpr (Options::link_nodes_by_label) {
       auto it_v = nodes_label_to_list_.find(v);
       if (it_v != nodes_label_to_list_.end()) {
@@ -2386,7 +2398,7 @@ class Simplex_tree {
 
   /** \brief Helper method that returns the corresponding Simplex_handle from a member element defined by a node.
    */
-  static Simplex_handle simplex_handle_from_node(Node& node) {
+  static Simplex_handle simplex_handle_from_node(const Node& node) {
     if constexpr (Options::stable_simplex_handles){
       //Relies on the Dictionary type to be boost::container::map<Vertex_handle, Node>.
       //If the type changes or boost fundamentally changes something on the structure of their map,
@@ -2398,8 +2410,8 @@ class Simplex_tree {
       //   }
       //Requires an additional parameter "Vertex_handle label" which is the label of the node.
 
-      Dictionary_it testIt = node.children()->members().begin();
-      Node* testNode = &testIt->second;
+      Const_dictionary_it testIt = node.children()->members().begin();
+      const Node* testNode = &testIt->second;
       auto testIIt = testIt.get();
       auto testPtr = testIIt.pointed_node();
       //distance between node and pointer to map pair in memory
@@ -2420,11 +2432,13 @@ class Simplex_tree {
       //  false>
       decltype(testIIt) sh_ii;
       sh_ii = sh_ptr;           //creates ``subiterator'' from pointer
-      Dictionary_it sh(sh_ii);  //creates iterator from subiterator
+      Const_dictionary_it sh(sh_ii);  //creates iterator from subiterator
 
       return sh;
     } else {
-      return (Simplex_handle)(boost::intrusive::get_parent_from_member<Dit_value_t>(&node, &Dit_value_t::second));
+      //node needs to be casted as non const, because a const pair* cannot be casted into a Simplex_handle
+      return (Simplex_handle)(boost::intrusive::get_parent_from_member<Const_dit_value_t>(const_cast<Node*>(&node),
+                                                                                          &Const_dit_value_t::second));
     }
   }
 
@@ -2452,7 +2466,7 @@ class Simplex_tree {
     std::clog << "update_simplex_tree_before_node_removal" << std::endl;
 #endif  // DEBUG_TRACES
     if constexpr (Options::link_nodes_by_label) {
-      sh->second.unlink_hooks();  // remove from lists of same label Nodes
+      _to_node_it(sh)->second.unlink_hooks();  // remove from lists of same label Nodes
       if (nodes_label_to_list_[sh->first].empty())
         nodes_label_to_list_.erase(sh->first);
     }
@@ -2544,7 +2558,7 @@ class Simplex_tree {
 
  private:
   /** \brief Serialize each element of the sibling and recursively call serialization. */
-  char* rec_serialize(Siblings *sib, char* buffer) const {
+  char* rec_serialize(Siblings const *sib, char* buffer) const {
     char* ptr = buffer;
     ptr = Gudhi::simplex_tree::serialize_trivial(static_cast<Vertex_handle>(sib->members().size()), ptr);
 #ifdef DEBUG_TRACES
