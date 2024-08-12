@@ -63,13 +63,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_filtrations, typeST, list_of_tested_v
   BOOST_CHECK(st.filtration(res1) == 0);
 
   if constexpr (typeST::Options::store_filtration && !std::is_arithmetic_v<typename typeST::Filtration_value>){
-    typename typeST::Filtration_value& fil = st.filtration(res1);
+    typename typeST::Filtration_value& fil = st.filtration_raw(res1);
     fil = 5;
 
     BOOST_CHECK(st.filtration(res1) == 5);
   }
   
-  BOOST_CHECK(st.filtration(st.find({0,1})) == 2);
+  auto fil2 = st.filtration_raw(st.find({0,1}));
+  BOOST_CHECK(fil2 == 2);
 
   BOOST_CHECK(st.has_filtration_value_infinity(st.null_simplex()));
 }

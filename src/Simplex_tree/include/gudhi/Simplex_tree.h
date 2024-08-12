@@ -152,6 +152,11 @@ class Simplex_tree {
   typedef typename std::conditional<Options::store_key, Key_simplex_base_real, Key_simplex_base_dummy>::type
       Key_simplex_base;
 
+  /**
+   * @brief Equals @ref Filtration_value if @ref SimplexTreeOptions::store_filtration is false or the type
+   * corresponds to a native arithmetic type (int, double, etc.). Equals to a reference of @ref Filtration_value
+   * otherwise.
+   */
   using Filtration_value_rep = std::conditional_t<Options::store_filtration && !std::is_arithmetic_v<Filtration_value>,
                                                   Filtration_value&, Filtration_value>;
 
@@ -159,20 +164,19 @@ class Simplex_tree {
     Filtration_simplex_base_real() : filt_(0) {}
     void assign_filtration(const Filtration_value& f) { filt_ = f; }
     const Filtration_value_rep filtration() const { return filt_; }
-    Filtration_value_rep filtration() { return filt_; }
+    Filtration_value& filtration_raw() { return filt_; }
+    const Filtration_value& filtration_raw() const { return filt_; }
 
     constexpr static Filtration_value_rep get_infinity(){
-      if constexpr (!std::is_arithmetic_v<Filtration_value>) inf_ = _inf();
       return inf_;
     }
 
    private:
     Filtration_value filt_;
-    static constexpr Filtration_value _inf() {
-      return std::numeric_limits<Filtration_value>::has_infinity ? std::numeric_limits<Filtration_value>::infinity()
-                                                                 : std::numeric_limits<Filtration_value>::max();
-    }
-    static constexpr Filtration_value inf_ = _inf();
+
+    static constexpr Filtration_value inf_ = std::numeric_limits<Filtration_value>::has_infinity
+                                                 ? std::numeric_limits<Filtration_value>::infinity()
+                                                 : std::numeric_limits<Filtration_value>::max();
   };
   struct Filtration_simplex_base_dummy {
     Filtration_simplex_base_dummy() {}
@@ -201,7 +205,7 @@ class Simplex_tree {
   typedef typename Const_dictionary_it::value_type Const_dit_value_t;
 
   struct return_first {
-    Vertex_handle operator()(const Dit_value_t& p_sh) const {
+    Vertex_handle operator()(const Const_dit_value_t& p_sh) const {
       return p_sh.first;
     }
   };
@@ -257,6 +261,12 @@ class Simplex_tree {
   typedef boost::transform_iterator<return_first, Dictionary_it> Complex_vertex_iterator;
   /** \brief Range over the vertices of the simplicial complex. */
   typedef boost::iterator_range<Complex_vertex_iterator> Complex_vertex_range;
+  /** \brief Iterator over the vertices of the simplicial complex.
+   *
+   * 'value_type' is Vertex_handle. */
+  typedef boost::transform_iterator<return_first, Const_dictionary_it> Const_complex_vertex_iterator;
+  /** \brief Range over the vertices of the simplicial complex. */
+  typedef boost::iterator_range<Const_complex_vertex_iterator> Const_complex_vertex_range;
   /** \brief Iterator over the vertices of a simplex.
    *
    * 'value_type' is Vertex_handle. */
@@ -312,14 +322,12 @@ class Simplex_tree {
 
   /** \brief Returns a range over the vertices of the simplicial complex. 
    * The order is increasing according to < on Vertex_handles.*/
-  Complex_vertex_range complex_vertex_range() const {
-    return Complex_vertex_range(
-                                boost::make_transform_iterator(root_.members_.begin(), return_first()),
-                                boost::make_transform_iterator(root_.members_.end(), return_first()));
+  Const_complex_vertex_range complex_vertex_range() const {
+    return Const_complex_vertex_range(boost::make_transform_iterator(root_.members_.begin(), return_first()),
+                                      boost::make_transform_iterator(root_.members_.end(), return_first()));
   }
   Complex_vertex_range complex_vertex_range() {
-    return Complex_vertex_range(
-                                boost::make_transform_iterator(root_.members_.begin(), return_first()),
+    return Complex_vertex_range(boost::make_transform_iterator(root_.members_.begin(), return_first()),
                                 boost::make_transform_iterator(root_.members_.end(), return_first()));
   }
 
@@ -329,10 +337,6 @@ class Simplex_tree {
    * Consequently, simplices are ordered according to lexicographic order on the list of
    * Vertex_handles of a simplex, read in increasing < order for Vertex_handles. */
   Complex_simplex_range complex_simplex_range() const {
-    return Complex_simplex_range(Complex_simplex_iterator(this),
-                                 Complex_simplex_iterator());
-  }
-  Complex_simplex_range complex_simplex_range() {
     return Complex_simplex_range(Complex_simplex_iterator(this),
                                  Complex_simplex_iterator());
   }
@@ -347,10 +351,6 @@ class Simplex_tree {
    * The simplices are ordered according to lexicographic order on the list of
    * Vertex_handles of a simplex, read in increasing < order for Vertex_handles. */
   Skeleton_simplex_range skeleton_simplex_range(int dim) const {
-    return Skeleton_simplex_range(Skeleton_simplex_iterator(this, dim),
-                                  Skeleton_simplex_iterator());
-  }
-  Skeleton_simplex_range skeleton_simplex_range(int dim) {
     return Skeleton_simplex_range(Skeleton_simplex_iterator(this, dim),
                                   Skeleton_simplex_iterator());
   }
@@ -370,14 +370,8 @@ class Simplex_tree {
    * The filtration must be valid. If the filtration has not been initialized yet, the
    * method initializes it (i.e. order the simplices). If the complex has changed since the last time the filtration
    * was initialized, please call `clear_filtration()` or `initialize_filtration()` to recompute it. */
-  Filtration_simplex_range const& filtration_simplex_range(Indexing_tag = Indexing_tag()) {
-    maybe_initialize_filtration();
-    return filtration_vect_;
-  }
   Filtration_simplex_range const& filtration_simplex_range(Indexing_tag = Indexing_tag()) const {
-    GUDHI_CHECK(!filtration_vect_.empty() || Complex_simplex_range().empty(),
-                "Filtration range was not yet initialized. Please call `initialize_filtration`.");
-    if (filtration_vect_.empty() && !Complex_simplex_range().empty()) throw std::invalid_argument("filtration_simplex_range should be non const");
+    maybe_initialize_filtration();
     return filtration_vect_;
   }
 
@@ -639,7 +633,7 @@ class Simplex_tree {
     return sh->second.filtration();
   }
 
-  Dictionary_it _to_node_it(Simplex_handle sh){
+  static Dictionary_it _to_node_it(Simplex_handle sh){
     return const_cast<Siblings*>(self_siblings(sh))->to_non_const_it(sh);
   }
 
@@ -666,22 +660,7 @@ class Simplex_tree {
    * Called on the null_simplex, it returns infinity.
    * If SimplexTreeOptions::store_filtration is false, returns 0.
    */
-  Filtration_value_rep filtration(Simplex_handle sh) {
-    if (sh == null_simplex()) {
-      // get_infinity rewrites the inf_ value in case someone changes the value of the reference
-      //the only way to avoid this would be to forbid the use of this method with null simplices:
-
-      // if constexpr (Options::store_filtration && !std::is_arithmetic_v<Filtration_value>)
-      //   throw std::invalid_argument(
-      //       "Simplex handle does not redirect to a real simplex and a non constant reference cannot be returned. "
-      //       "Please use the `const` version of the method.");
-      // else
-        return Filtration_simplex_base_real::get_infinity();
-    }
-
-    return sh->second.filtration();
-  }
-  const Filtration_value_rep filtration(Simplex_handle sh) const {
+  static const Filtration_value_rep filtration(Simplex_handle sh) {
     if (sh != null_simplex()) {
       return sh->second.filtration();
     } else {
@@ -689,6 +668,42 @@ class Simplex_tree {
     }
   }
 
+  /**
+   * @brief Returns a reference to the filtration value of the given simplex.
+   * The given simplex handle has to be a valid handle and different from @ref null_simplex().
+   * Furthermore, the option @ref SimplexTreeOptions::store_filtration has to be true.
+   * 
+   * @param sh Valid simplex handle different from null_simplex()
+   * @return Reference to the filtration value.
+   */
+  Filtration_value& filtration_raw(Simplex_handle sh) {
+    static_assert(Options::store_filtration,
+                  "`filtration_raw` not available if SimplexTreeOptions::store_filtration is set to false.");
+    GUDHI_CHECK(sh != null_simplex(), "Simplex handle given to `filtration_raw` should not be a null simplex.");
+
+    return _to_node_it(sh)->second.filtration_raw();
+  }
+  /**
+   * @brief Const version of @ref filtration_raw(Simplex_handle sh).
+   */
+  const Filtration_value& filtration_raw(Simplex_handle sh) const {
+    static_assert(Options::store_filtration,
+                  "filtration_raw not available if SimplexTreeOptions::store_filtration is set to false.");
+    GUDHI_CHECK(sh != null_simplex(), "Simplex handle given to `filtration_raw` should not be a null simplex.");
+
+    return sh->second.filtration_raw();
+  }
+
+  //because there is no direct access to Filtration_simplex_base_real::get_infinity() from the visible interface
+  /**
+   * @brief Returns true if and only if the filtration value associated to the given simplex is infinity.
+   * If the given handle is @ref null_simplex(), returns true. If @ref SimplexTreeOptions::store_filtration is set
+   * to false, returns always false.
+   * 
+   * @param sh Simplex handle.
+   * @return true If the filtration value is equal to infinity or @p sh is @ref null_simplex().
+   * @return false Otherwise.
+   */
   static bool has_filtration_value_infinity(Simplex_handle sh){
     if (sh == null_simplex()) return true;
     return sh->second.filtration() == Filtration_simplex_base_real::get_infinity();
@@ -720,7 +735,7 @@ class Simplex_tree {
   static Simplex_data& simplex_data(Simplex_handle sh) {
     GUDHI_CHECK(sh != null_simplex(),
                 std::invalid_argument("Simplex_tree::simplex_data - no data associated to null_simplex"));
-    return sh->second.data();
+    return _to_node_it(sh)->second.data();
   }
 
   /** \brief Returns a Vertex_handle different from all Vertex_handles associated
@@ -1136,7 +1151,7 @@ class Simplex_tree {
    *
    * Any insertion, deletion or change of filtration value invalidates this cache,
    * which can be cleared with clear_filtration().  */
-  void initialize_filtration(bool ignore_infinite_values = false) {
+  void initialize_filtration(bool ignore_infinite_values = false) const {
     filtration_vect_.clear();
     filtration_vect_.reserve(num_simplices());
     for (Simplex_handle sh : complex_simplex_range()) {
@@ -1164,7 +1179,7 @@ class Simplex_tree {
   /** \brief Initializes the filtration cache if it isn't initialized yet.
    *
    * Automatically called by filtration_simplex_range(). */
-  void maybe_initialize_filtration() {
+  void maybe_initialize_filtration() const {
     if (filtration_vect_.empty()) {
       initialize_filtration();
     }
@@ -1325,7 +1340,7 @@ class Simplex_tree {
    * Reverse lexicographic order has the property to always consider the subsimplex of a simplex
    * to be smaller. The filtration function must be monotonic. */
   struct is_before_in_filtration {
-    explicit is_before_in_filtration(Simplex_tree * st)
+    explicit is_before_in_filtration(Simplex_tree const* st)
         : st_(st) { }
 
     bool operator()(const Simplex_handle sh1, const Simplex_handle sh2) const {
@@ -1337,7 +1352,7 @@ class Simplex_tree {
       return st_->reverse_lexicographic_order(sh1, sh2);
     }
 
-    Simplex_tree * st_;
+    Simplex_tree const* st_;
   };
 
  public:
@@ -2662,8 +2677,11 @@ class Simplex_tree {
   /** \brief Total number of simplices in the complex, without the empty simplex.*/
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
+
+  // all mutable as their content has no impact on the content of the simplex tree itself
+  // they correspond to some kind of cache or helper attributes.
   /** \brief Simplices ordered according to a filtration.*/
-  std::vector<Simplex_handle> filtration_vect_;
+  mutable std::vector<Simplex_handle> filtration_vect_;
   /** \brief Upper bound on the dimension of the simplicial complex.*/
   mutable int dimension_;
   mutable bool dimension_to_be_lowered_ = false;
