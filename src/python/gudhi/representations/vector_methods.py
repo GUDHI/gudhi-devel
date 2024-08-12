@@ -729,7 +729,7 @@ class Atol(BaseEstimator, TransformerMixin):
     This class allows to vectorise measures (e.g. point clouds, persistence diagrams, etc) after a quantisation step.
 
     ATOL paper: :cite:`royer2019atol`
-
+:paramref:`~gudhi.representations.PersistenceLengths.
     Example
     --------
     >>> from sklearn.cluster import KMeans
@@ -885,3 +885,64 @@ class Atol(BaseEstimator, TransformerMixin):
 
     def get_feature_names_out(self):
         return self._running_transform_names
+
+class PersistenceLengths(BaseEstimator, TransformerMixin):
+    """
+    This is a class that returns the N-longest persistence lengths.
+    """
+    def __init__(self, num_lengths=5):
+        """
+        Constructor for the PersistenceLengths class.
+
+        Parameters:
+            num_lengths (int): number of persistence lengths to return (default 5).
+        """
+        self.num_lengths  = num_lengths
+
+    def fit(self, X, y=None):
+        """
+        Fit the PersistenceLengths class on a list of persistence diagrams (this function actually does nothing but is
+        useful when PersistenceLengths is included in a scikit-learn Pipeline).
+
+        Parameters:
+            X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
+            y (n x 1 array): persistence diagram lengths (unused).
+        """
+        return self
+
+    def transform(self, X):
+        """
+        Compute the persistence landscape for each persistence diagram individually and concatenate the results.
+
+        Parameters:
+            X (list of n x 2 numpy arrays): input persistence diagrams.
+    
+        Returns:
+            numpy array with shape (number of diagrams) x (num_lengths): output persistence lengths.
+        """
+
+        pers_lengths = []
+        for pd in X:
+            # Sort in reverse order persistence lengths (where length = death - birth)
+            lengths = np.flip(np.sort(pd[:,1] - pd[:,0]))
+            if len(lengths) >= self.num_lengths:
+                pers_lengths.append(lengths[:self.num_lengths])
+            else:
+                # Fill with zeros if necessary
+                lengths_with_zeros = np.zeros((self.num_lengths))
+                lengths_with_zeros[:len(lengths)] = lengths
+                pers_lengths.append(lengths_with_zeros)
+        
+        return pers_lengths
+
+    def __call__(self, diag):
+        """
+        Apply PersistenceLengths on a single persistence diagram and outputs the result.
+
+        Parameters:
+            diag (n x 2 numpy array): input persistence diagram.
+
+        Returns:
+            numpy 1d array of length num_lengths: output persistence landscape.
+        """
+        return self.transform([diag])[0]

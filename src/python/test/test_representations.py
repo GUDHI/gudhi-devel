@@ -9,7 +9,7 @@ from sklearn.cluster import KMeans
 
 # Vectorization
 from gudhi.representations import (Landscape, Silhouette, BettiCurve, ComplexPolynomial,\
-  TopologicalVector, PersistenceImage, Entropy)
+  TopologicalVector, PersistenceImage, Entropy, PersistenceLengths)
 
 # Preprocessing
 from gudhi.representations import (BirthPersistenceTransform, Clamping, DiagramScaler, Padding, ProminentPoints, \
@@ -318,3 +318,16 @@ def test_endpoints():
 def test_get_params():
     for vec in [ Landscape(), Silhouette(), BettiCurve(), Entropy(mode="vector") ]:
         vec.get_params()
+
+def test_persistence_lengths():
+    diag = np.array([[3., 5.], [0, np.inf], [4., 4.], [2., 6.]])
+    for nl in range(6):
+        pl = PersistenceLengths(num_lengths=nl)(diag)
+        # test the result is sorted
+        assert np.all(sorted(pl, reverse=True) == pl)
+        if len(pl) > 0:
+            assert np.isinf(pl[0])
+        for idx in range(len(pl)):
+            if idx >= len(diag):
+                # test it is filled with zeros when going further the input
+                assert pl[idx] == 0.
