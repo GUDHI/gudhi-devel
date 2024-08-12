@@ -729,7 +729,7 @@ class Atol(BaseEstimator, TransformerMixin):
     This class allows to vectorise measures (e.g. point clouds, persistence diagrams, etc) after a quantisation step.
 
     ATOL paper: :cite:`royer2019atol`
-:paramref:`~gudhi.representations.PersistenceLengths.
+
     Example
     --------
     >>> from sklearn.cluster import KMeans
