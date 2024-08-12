@@ -17,7 +17,7 @@
 #include "pm_matrix_tests_options.h"
 #include "pm_common_boost_type_lists.h"
 #include <gudhi/persistence_matrix_options.h>
-#include <gudhi/matrix.h>
+#include <gudhi/Matrix.h>
 
 using Gudhi::persistence_matrix::Column_types;
 using Gudhi::persistence_matrix::Matrix;

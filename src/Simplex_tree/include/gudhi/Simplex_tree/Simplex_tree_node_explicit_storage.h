@@ -19,6 +19,7 @@
 #endif
 
 #include <vector>
+#include <boost/core/empty_value.hpp>
 
 namespace Gudhi {
 
@@ -35,10 +36,12 @@ namespace Gudhi {
 template<class SimplexTree>
 struct GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION Simplex_tree_node_explicit_storage : SimplexTree::Filtration_simplex_base,
                                                                           SimplexTree::Key_simplex_base,
-                                                                          SimplexTree::Hooks_simplex_base {
+                                                                          SimplexTree::Hooks_simplex_base,
+                                                                          boost::empty_value<typename SimplexTree::Simplex_data> {
   typedef typename SimplexTree::Siblings Siblings;
   typedef typename SimplexTree::Filtration_value Filtration_value;
   typedef typename SimplexTree::Simplex_key Simplex_key;
+  typedef typename SimplexTree::Simplex_data Simplex_data;
 
   Simplex_tree_node_explicit_storage(Siblings * sib = nullptr,
                                      Filtration_value filtration = 0)
@@ -60,6 +63,8 @@ struct GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION Simplex_tree_node_explicit_storage : 
   const Siblings * children() const {
     return children_;
   }
+
+  Simplex_data& data() { return boost::empty_value<Simplex_data>::get(); }
 
  private:
   Siblings * children_;

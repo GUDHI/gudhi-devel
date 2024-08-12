@@ -10,7 +10,7 @@
 
 #include <vector>
 
-#include <gudhi/matrix.h>
+#include <gudhi/Matrix.h>
 #include <gudhi/persistence_matrix_options.h>
 #include <gudhi/Simplex_tree.h>
 

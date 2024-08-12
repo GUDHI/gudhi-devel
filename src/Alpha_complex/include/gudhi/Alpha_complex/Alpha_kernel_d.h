@@ -48,6 +48,7 @@ class Alpha_kernel_d<Kernel, false> {
  private:
   // Kernel for functions access.
   Kernel kernel_;
+
  public:
   // Fake type for compilation to succeed (cf. std::conditional in Alpha_complex.h)
   using Weighted_point_d = void;

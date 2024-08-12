@@ -9,7 +9,7 @@
  */
 
 /**
- * @file boundary_matrix.h
+ * @file Boundary_matrix.h
  * @author Hannah Schreiber
  * @brief Contains the @ref Gudhi::persistence_matrix::Boundary_matrix class.
  */
@@ -25,9 +25,9 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-// TODO: factorize/inherit/compose with base matrix?
+// TODO: factorize/inherit/compose with Base_matrix?
 /**
- * @class Boundary_matrix boundary_matrix.h gudhi/Persistence_matrix/boundary_matrix.h
+ * @class Boundary_matrix Boundary_matrix.h gudhi/Persistence_matrix/Boundary_matrix.h
  * @ingroup persistence_matrix
  *
  * @brief %Matrix structure to store the ordered @ref boundarymatrix "boundary matrix" \f$ R \f$ of a filtered complex
