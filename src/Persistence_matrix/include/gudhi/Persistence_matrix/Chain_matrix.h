@@ -9,7 +9,7 @@
  */
 
 /**
- * @file chain_matrix.h
+ * @file Chain_matrix.h
  * @author Hannah Schreiber
  * @brief Contains the @ref Gudhi::persistence_matrix::Chain_matrix class.
  */
@@ -25,13 +25,13 @@
 #include <utility>    //std::swap, std::move & std::exchange
 #include <algorithm>  //std::sort
 
-#include <gudhi/Persistence_matrix/overlay_ididx_to_matidx.h> //friend
+#include <gudhi/Persistence_matrix/Id_to_index_overlay.h> //friend
 
 namespace Gudhi {
 namespace persistence_matrix {
 
 /**
- * @class Chain_matrix chain_matrix.h gudhi/Persistence_matrix/chain_matrix.h
+ * @class Chain_matrix Chain_matrix.h gudhi/Persistence_matrix/Chain_matrix.h
  * @ingroup persistence_matrix
  *
  * @brief %Matrix structure storing a compatible base of a filtered chain complex. See @cite zigzag.

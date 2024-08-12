@@ -14,6 +14,7 @@
 #include <gudhi/Simplex_tree/indexing_tag.h>
 
 #include <cstdint>
+#include <type_traits> // void_t
 
 namespace Gudhi {
 
@@ -94,6 +95,13 @@ struct Simplex_tree_options_fast_persistence {
 };
 
 /** @}*/  // end addtogroup simplex_tree
+
+struct No_simplex_data {};
+
+// Nested `type` is O::Simplex_data if that exists, No_simplex_data otherwise
+template <class, class=void> struct Get_simplex_data_type { typedef No_simplex_data type; };
+template <class O>
+struct Get_simplex_data_type<O, std::void_t<typename O::Simplex_data>> { typedef typename O::Simplex_data type; };
 
 }  // namespace Gudhi
 

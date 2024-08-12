@@ -23,6 +23,8 @@ struct SimplexTreeOptions {
   typedef FiltrationValue Filtration_value;
   /** @brief Must be an integer type. */
   typedef SimplexKey Simplex_key;
+  /** @brief Optional, can be omitted. */
+  typedef SimplexData Simplex_data;
   /** @brief If true, each simplex has extra storage for one `Simplex_key`. Necessary for `Persistent_cohomology`. */
   static const bool store_key;
   /** @brief If true, each simplex has extra storage for one `Filtration_value`, and this value is propagated by
