@@ -284,7 +284,10 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
   auto intervals_in_dimension_2 = pcoh.intervals_in_dimension(2);
   std::clog << "intervals_in_dimension_2.size() = " << intervals_in_dimension_2.size() << std::endl;
   BOOST_CHECK(intervals_in_dimension_2.size() == 0);
+}
 
+BOOST_AUTO_TEST_CASE( betti_numbers_empty_simplex_tree )
+{
   std::clog << "EMPTY COMPLEX" << std::endl;
   Simplex_tree empty;
   empty.initialize_filtration();
@@ -292,5 +295,36 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
   pcoh_empty.init_coefficients(2);
   pcoh_empty.compute_persistent_cohomology();
   BOOST_CHECK(pcoh_empty.betti_numbers().size() == 0);
-  BOOST_CHECK(pcoh_empty.persistent_betti_numbers(0,1).size() == 0);
+  BOOST_CHECK(pcoh_empty.betti_number(0) == 0);
+  BOOST_CHECK(pcoh_empty.persistent_betti_numbers(0., 1.).size() == 0);
+  BOOST_CHECK(pcoh_empty.persistent_betti_number(0, 0., 1.) == 0);
+}
+
+BOOST_AUTO_TEST_CASE( betti_numbers_isolated_zero_simplices )
+{
+  std::clog << "Betti numbers on isolated zero simplices" << std::endl;
+  Simplex_tree st;
+
+  st.insert_simplex_and_subfaces({0});
+  st.insert_simplex_and_subfaces({1});
+  st.insert_simplex_and_subfaces({2});
+  st.insert_simplex_and_subfaces({3});
+  st.insert_simplex_and_subfaces({4});
+
+  // Sort the simplices in the order of the filtration
+  st.initialize_filtration();
+
+  // Class for homology computation
+  St_persistence pcoh(st);
+
+  // Initialize the coefficient field Z/3Z for homology
+  pcoh.init_coefficients(3);
+
+  // Compute the persistence diagram of the complex
+  pcoh.compute_persistent_cohomology();
+
+  BOOST_CHECK(pcoh.betti_numbers().size() == 0);
+  BOOST_CHECK(pcoh.betti_number(0) == 5);
+  BOOST_CHECK(pcoh.persistent_betti_numbers(0., 1.).size() == 0);
+  BOOST_CHECK(pcoh.persistent_betti_number(0, 0., 1.) == 5);
 }

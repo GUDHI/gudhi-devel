@@ -584,13 +584,22 @@ class Persistent_cohomology {
   std::vector<int> betti_numbers() const {
     // Init Betti numbers vector with zeros until Simplicial complex dimension and don't allocate a vector of negative
     // size for an empty complex
-    std::vector<int> betti_numbers(std::max(dim_max_, 0));
-
+    int bn_dim = std::max(dim_max_, 0);
+    std::vector<int> betti_numbers(bn_dim);
+#ifdef DEBUG_TRACES
+    std::clog << "betti_numbers vector size is " << bn_dim << std::endl;
+#endif  // DEBUG_TRACES
     for (auto pair : persistent_pairs_) {
       // Count never ended persistence intervals
       if (cpx_->null_simplex() == get<1>(pair)) {
-        // Increment corresponding betti number
-        betti_numbers[cpx_->dimension(get<0>(pair))] += 1;
+        int dim = cpx_->dimension(get<0>(pair));
+#ifdef DEBUG_TRACES
+        std::clog << "Increment Betti number for dimension " << dim << std::endl;
+#endif  // DEBUG_TRACES
+        if (dim < bn_dim) {
+          // Increment corresponding betti number
+          betti_numbers[dim] += 1;
+        }
       }
     }
     return betti_numbers;
@@ -624,15 +633,25 @@ class Persistent_cohomology {
   std::vector<int> persistent_betti_numbers(Filtration_value from, Filtration_value to) const {
     // Init Betti numbers vector with zeros until Simplicial complex dimension and don't allocate a vector of negative
     // size for an empty complex
-    std::vector<int> betti_numbers(std::max(dim_max_, 0));
+    int bn_dim = std::max(dim_max_, 0);
+    std::vector<int> betti_numbers(bn_dim);
+#ifdef DEBUG_TRACES
+    std::clog << "betti_numbers vector size is " << bn_dim << std::endl;
+#endif  // DEBUG_TRACES
     for (auto pair : persistent_pairs_) {
       // Count persistence intervals that covers the given interval
       // null_simplex test : if the function is called with to=+infinity, we still get something useful. And it will
       // still work if we change the complex filtration function to reject null simplices.
       if (cpx_->filtration(get<0>(pair)) <= from &&
           (get<1>(pair) == cpx_->null_simplex() || cpx_->filtration(get<1>(pair)) > to)) {
-        // Increment corresponding betti number
-        betti_numbers[cpx_->dimension(get<0>(pair))] += 1;
+        int dim = cpx_->dimension(get<0>(pair));
+#ifdef DEBUG_TRACES
+        std::clog << "Increment Betti number for dimension " << dim << std::endl;
+#endif  // DEBUG_TRACES
+        if (dim < bn_dim) {
+          // Increment corresponding betti number
+          betti_numbers[cpx_->dimension(get<0>(pair))] += 1;
+        }
       }
     }
     return betti_numbers;
