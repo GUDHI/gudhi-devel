@@ -245,7 +245,7 @@ class Simplex_tree {
   typedef boost::iterator_range<Simplex_vertex_iterator> Simplex_vertex_range;
   /** \brief Range over the cofaces of a simplex. */
   typedef typename std::conditional<Options::link_nodes_by_label,
-                                    Optimized_cofaces_simplex_filtered_range,  // faster implem
+                                    Optimized_cofaces_simplex_filtered_range,  // faster implementation
                                     std::vector<Simplex_handle>>::type Cofaces_simplex_range;
 
   /** \private
@@ -345,7 +345,7 @@ class Simplex_tree {
   /** \brief Returns a range over the vertices of a simplex.
    *
    * The order in which the vertices are visited is the decreasing order for < on Vertex_handles,
-   * which is consequenlty
+   * which is consequently
    * equal to \f$(-1)^{\text{dim} \sigma}\f$ the canonical orientation on the simplex.
    */
   Simplex_vertex_range simplex_vertex_range(Simplex_handle sh) const {
@@ -401,6 +401,29 @@ class Simplex_tree {
       root_(nullptr, null_vertex_),
       filtration_vect_(),
       dimension_(-1) { }
+
+  /**
+   * @brief Construct the simplex tree as the copy of a given simplex tree with eventually different template
+   * parameters.
+   * Therefore, should provide a method converting the filtration values of one tree to the another. All other values
+   * are already implicitly convertible if the concept of @ref SimplexTreeOptions is respected (note that there is
+   * an eventual loss of precision or an undefined behaviour if a value is converted into a new type too small to
+   * contain it). Any extra data (@ref Simplex_data) stored in the simplices are ignored in the copy for now.
+   * 
+   * @tparam OtherSimplexTreeOptions Options of the given simplex tree.
+   * @tparam F Method taking an OtherSimplexTreeOptions::Filtration_value as input and returning an
+   * Options::Filtration_value.
+   * @param complex_source Simplex tree to copy.
+   * @param translate_filtration_value Method taking an OtherSimplexTreeOptions::Filtration_value from the source tree
+   * as input and returning the corresponding Options::Filtration_value in the new tree.
+   */
+  template<typename OtherSimplexTreeOptions, typename F>
+  Simplex_tree(const Simplex_tree<OtherSimplexTreeOptions>& complex_source, F&& translate_filtration_value) {
+#ifdef DEBUG_TRACES
+    std::clog << "Simplex_tree custom copy constructor" << std::endl;
+#endif  // DEBUG_TRACES
+    copy_from(complex_source, translate_filtration_value);
+  }
 
   /** \brief User-defined copy constructor reproduces the whole tree structure. */
   Simplex_tree(const Simplex_tree& complex_source) {
@@ -471,27 +494,58 @@ class Simplex_tree {
     auto root_source = complex_source.root_;
 
     // root members copy
-    root_.members() = Dictionary(boost::container::ordered_unique_range, root_source.members().begin(), root_source.members().end());
+    root_.members() =
+        Dictionary(boost::container::ordered_unique_range, root_source.members().begin(), root_source.members().end());
     // Needs to reassign children
     for (auto& map_el : root_.members()) {
       map_el.second.assign_children(&root_);
     }
-    rec_copy(&root_, &root_source);
+    rec_copy<Options::store_key>(
+        &root_, &root_source, [](const Filtration_value& fil) -> const Filtration_value& { return fil; });
+  }
+
+  // Copy from complex_source to "this"
+  template<typename OtherSimplexTreeOptions, typename F>
+  void copy_from(const Simplex_tree<OtherSimplexTreeOptions>& complex_source, F&& translate_filtration_value) {
+    null_vertex_ = complex_source.null_vertex_;
+    filtration_vect_.clear();
+    dimension_ = complex_source.dimension_;
+    auto root_source = complex_source.root_;
+
+    // root members copy
+    for (auto& p : root_source.members()){
+      auto it = root_.members().try_emplace(root_.members().end(), p.first);
+      it->second.assign_children(&root_);
+      it->second.assign_filtration(translate_filtration_value(p.second.filtration()));
+      if constexpr (Options::store_key && OtherSimplexTreeOptions::store_key) it->second.assign_key(p.second.key());
+    }
+
+    rec_copy<OtherSimplexTreeOptions::store_key>(&root_, &root_source, translate_filtration_value);
   }
 
   /** \brief depth first search, inserts simplices when reaching a leaf. */
-  void rec_copy(Siblings *sib, Siblings *sib_source) {
-    for (auto sh = sib->members().begin(), sh_source = sib_source->members().begin();
-         sh != sib->members().end(); ++sh, ++sh_source) {
+  template<bool store_key, typename OtherSiblings, typename F>
+  void rec_copy(Siblings *sib, OtherSiblings *sib_source, F&& translate_filtration_value) {
+    auto sh_source = sib_source->members().begin();
+    for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh, ++sh_source) {
       update_simplex_tree_after_node_insertion(sh);
       if (has_children(sh_source)) {
         Siblings * newsib = new Siblings(sib, sh_source->first);
         if constexpr (!Options::stable_simplex_handles) {
           newsib->members_.reserve(sh_source->second.children()->members().size());
         }
-        for (auto & child : sh_source->second.children()->members())
-          newsib->members_.emplace_hint(newsib->members_.end(), child.first, Node(newsib, child.second.filtration()));
-        rec_copy(newsib, sh_source->second.children());
+        for (auto & child : sh_source->second.children()->members()){
+          if constexpr (store_key)
+            newsib->members_.emplace_hint(
+                newsib->members_.end(),
+                child.first,
+                Node(newsib, translate_filtration_value(child.second.filtration()), child.second.key()));
+          else
+            newsib->members_.emplace_hint(newsib->members_.end(),
+                                          child.first,
+                                          Node(newsib, translate_filtration_value(child.second.filtration())));
+        }
+        rec_copy<store_key>(newsib, sh_source->second.children(), translate_filtration_value);
         sh->second.assign_children(newsib);
       }
     }
@@ -1432,9 +1486,9 @@ class Simplex_tree {
      *
      * Nodes with label @p u get affected only if a Node with label @p v is in their same
      * siblings set.
-     * We then try to insert "ponctually" @p v all over the subtree rooted
+     * We then try to insert "punctually" @p v all over the subtree rooted
      * at `Node(u)`. Each insertion of a Node with @p v label induces a local
-     * expansion at this Node (as explained above) and a sequence of "ponctual"
+     * expansion at this Node (as explained above) and a sequence of "punctual"
      * insertion of `Node(v)` in the subtree rooted at sibling nodes of the new node,
      * on its left.
      */
@@ -1479,7 +1533,7 @@ class Simplex_tree {
 
     //for all siblings containing a Node labeled with u (including the root), run
     //compute_punctual_expansion
-    //todo parallelise
+    //todo parallelize
     List_max_vertex* nodes_with_label_u = nodes_by_label(u);//all Nodes with u label
 
     GUDHI_CHECK(nodes_with_label_u != nullptr,
@@ -1798,7 +1852,7 @@ class Simplex_tree {
            if (blocker_result) {
              blocked_new_sib_vertex_list.push_back(new_sib_member->first);
              // update data structures for all deleted simplices
-             // can be done in the loop as part of another datastructure
+             // can be done in the loop as part of another data structure
              update_simplex_tree_before_node_removal(new_sib_member);
            }
         }
@@ -1972,7 +2026,7 @@ class Simplex_tree {
       return true;
     };
 
-    //TODO: `if constexpr` replacable by `std::erase_if` in C++20? Has a risk of additional runtime,
+    //TODO: `if constexpr` replaceable by `std::erase_if` in C++20? Has a risk of additional runtime,
     //so to benchmark first.
     if constexpr (Options::stable_simplex_handles) {
       modified = false;
@@ -2312,7 +2366,7 @@ class Simplex_tree {
   static Simplex_handle simplex_handle_from_node(Node& node) {
     if constexpr (Options::stable_simplex_handles){
       //Relies on the Dictionary type to be boost::container::map<Vertex_handle, Node>.
-      //If the type changes or boost fondamentally changes something on the structure of their map,
+      //If the type changes or boost fundamentally changes something on the structure of their map,
       //a safer/more general but much slower version is:
       //   if (node.children()->parent() == label) {  // verifies if node is a leaf
       //     return children->oncles()->find(label);
