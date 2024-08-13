@@ -294,9 +294,13 @@ BOOST_AUTO_TEST_CASE( betti_numbers_empty_simplex_tree )
   St_persistence pcoh_empty(empty, false);
   pcoh_empty.init_coefficients(2);
   pcoh_empty.compute_persistent_cohomology();
+  std::clog << "pcoh_empty.betti_numbers().size() = " << pcoh_empty.betti_numbers().size() << std::endl;
   BOOST_CHECK(pcoh_empty.betti_numbers().size() == 0);
+  std::clog << "pcoh_empty.betti_number(0) = " << pcoh_empty.betti_number(0) << std::endl;
   BOOST_CHECK(pcoh_empty.betti_number(0) == 0);
+  std::clog << "pcoh_empty.persistent_betti_numbers(0., 1.).size() = " << pcoh_empty.persistent_betti_numbers(0., 1.).size() << std::endl;
   BOOST_CHECK(pcoh_empty.persistent_betti_numbers(0., 1.).size() == 0);
+  std::clog << "pcoh_empty.persistent_betti_number(0, 0., 1.) = " << pcoh_empty.persistent_betti_number(0, 0., 1.) << std::endl;
   BOOST_CHECK(pcoh_empty.persistent_betti_number(0, 0., 1.) == 0);
 }
 
@@ -323,8 +327,21 @@ BOOST_AUTO_TEST_CASE( betti_numbers_isolated_zero_simplices )
   // Compute the persistence diagram of the complex
   pcoh.compute_persistent_cohomology();
 
-  BOOST_CHECK(pcoh.betti_numbers().size() == 0);
+  auto bn = pcoh.betti_numbers();
+  std::clog << "bn.size() = " << bn.size() << std::endl;
+  BOOST_CHECK(bn.size() == 1);
+  std::clog << "bn[0] = " << bn[0] << std::endl;
+  BOOST_CHECK(bn[0] == 5);
+
+  std::clog << "pcoh.betti_number(0) = " << pcoh.betti_number(0) << std::endl;
   BOOST_CHECK(pcoh.betti_number(0) == 5);
-  BOOST_CHECK(pcoh.persistent_betti_numbers(0., 1.).size() == 0);
+
+  auto pbn = pcoh.persistent_betti_numbers(0., 1.);
+  std::clog << "pbn.size() = " << pbn.size() << std::endl;
+  BOOST_CHECK(pbn.size() == 1);
+  std::clog << "pbn[0] = " << pbn[0] << std::endl;
+  BOOST_CHECK(pbn[0] == 5);
+
+  std::clog << "pcoh.persistent_betti_number(0, 0., 1.) = " << pcoh.persistent_betti_number(0, 0., 1.) << std::endl;
   BOOST_CHECK(pcoh.persistent_betti_number(0, 0., 1.) == 5);
 }
