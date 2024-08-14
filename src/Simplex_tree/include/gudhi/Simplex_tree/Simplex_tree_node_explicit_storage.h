@@ -18,7 +18,6 @@
  #define GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION
 #endif
 
-#include <vector>
 #include <boost/core/empty_value.hpp>
 
 namespace Gudhi {
@@ -33,19 +32,22 @@ namespace Gudhi {
  *
  * It stores explicitly its own filtration value and its own Simplex_key.
  */
-template<class SimplexTree>
-struct GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION Simplex_tree_node_explicit_storage : SimplexTree::Filtration_simplex_base,
-                                                                          SimplexTree::Key_simplex_base,
-                                                                          SimplexTree::Hooks_simplex_base,
-                                                                          boost::empty_value<typename SimplexTree::Simplex_data> {
+template <class SimplexTree>
+struct GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION Simplex_tree_node_explicit_storage
+    : SimplexTree::Filtration_simplex_base,
+      SimplexTree::Key_simplex_base,
+      SimplexTree::Hooks_simplex_base,
+      boost::empty_value<typename SimplexTree::Simplex_data> {
   typedef typename SimplexTree::Siblings Siblings;
   typedef typename SimplexTree::Filtration_value Filtration_value;
+  typedef typename SimplexTree::Filtration_value_rep Filtration_value_rep;
   typedef typename SimplexTree::Simplex_key Simplex_key;
   typedef typename SimplexTree::Simplex_data Simplex_data;
 
-  Simplex_tree_node_explicit_storage(Siblings * sib = nullptr,
-                                     Filtration_value filtration = 0)
-      : children_(sib) {
+  Simplex_tree_node_explicit_storage() : children_(nullptr) {}
+
+  Simplex_tree_node_explicit_storage(Siblings* sib, const Filtration_value_rep filtration) : children_(sib)
+  {
     this->assign_filtration(filtration);
   }
 

@@ -18,6 +18,33 @@
   * (see IndexingTag).
   */
   struct FiltrationValue {
+    /**
+     * @brief Has to construct the default value of FiltrationValue. E.g., 0 for a numerical value or {} for a vector.
+     */
+    FiltrationValue(0);
+
     /** \brief Operator < is a StrictWeakOrdering. */
     bool operator<(FiltrationValue f1, FiltrationValue f2);
+    /**
+     * @brief Equality operator
+     */
+    bool operator==(FiltrationValue f1, FiltrationValue f2);
+    /**
+     * @brief Not equal operator
+     */
+    bool operator!=(FiltrationValue f1, FiltrationValue f2);
+
+    // overload of the standard numeric_limits class from #include <limits>
+    class std::numeric_limits<FiltrationValue> {
+     public:
+      static constexpr bool has_infinity;
+
+      //can simply throw when called if has_infinity == false
+      static FiltrationValue infinity() throw();
+      //can simply throw when called if has_infinity == true
+      static FiltrationValue max() throw();
+
+      //only used in extened filtration
+      static FiltrationValue quiet_NaN() throw();
+    };
   };
