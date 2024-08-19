@@ -39,7 +39,6 @@ struct GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION Simplex_tree_node_explicit_storage
       SimplexTree::Hooks_simplex_base,
       boost::empty_value<typename SimplexTree::Simplex_data> {
   typedef typename SimplexTree::Siblings Siblings;
-  typedef typename SimplexTree::Filtration_value Filtration_value;
   typedef typename SimplexTree::Filtration_value_rep Filtration_value_rep;
   typedef typename SimplexTree::Simplex_key Simplex_key;
   typedef typename SimplexTree::Simplex_data Simplex_data;

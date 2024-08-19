@@ -5,10 +5,15 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
+ *      - 2024/08 Hannah Schreiber: Update of the concept after several additions to the Simplex tree.
  *      - YYYY/MM Author: Description of the modification
  */
 
 /** \brief Value type for a filtration function on a cell complex.
+  *
+  * Needs to implement `std::numeric_limits<FiltrationValue>::has_infinity` and when it returns `true`,
+  * has to implement `std::numeric_limits<FiltrationValue>::infinity()`. If it returns `false`, has to
+  * implement `std::numeric_limits<FiltrationValue>::max()` instead.
   *
   * A <EM>filtration</EM> of a cell complex (see FilteredComplex) is
   * a function \f$f:\mathbf{K} \rightarrow \mathbb{R}\f$ satisfying \f$f(\tau)\leq 
@@ -37,24 +42,6 @@
      * @brief Not equal operator
      */
     bool operator!=(FiltrationValue f1, FiltrationValue f2);
-
-    //TODO: how expressing in the concept that a class should "overload" an external method?
-    //Used the keyword `friend` to show that the class/method is not supposed to be inside FiltrationValue
-    //but this can be misunderstood, as it does not have to be a friend.
-
-    // overload of the standard numeric_limits class from #include <limits>
-    friend class std::numeric_limits<FiltrationValue> {
-     public:
-      static constexpr bool has_infinity;
-
-      //can simply throw when called if has_infinity == false
-      static FiltrationValue infinity() throw();
-      //can simply throw when called if has_infinity == true
-      static FiltrationValue max() throw();
-
-      //only used in decode_extended_filtration
-      // static FiltrationValue quiet_NaN() throw();
-    };
 
     /**
      * @brief Given two filtration values at which a simplex exists, returns the minimal union of births generating
