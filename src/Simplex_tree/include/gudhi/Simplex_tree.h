@@ -10,7 +10,7 @@
  *      - 2023/05 Clément Maria: Edge insertion method for flag complexes
  *      - 2023/05 Hannah Schreiber: Factorization of expansion methods
  *      - 2023/08 Hannah Schreiber (& Clément Maria): Add possibility of stable simplex handles.
- *      - 2024/08 Author: Generalization of the notion of filtration values.
+ *      - 2024/08 Hannah Schreiber: Generalization of the notion of filtration values.
  *      - YYYY/MM Author: Description of the modification
  */
 

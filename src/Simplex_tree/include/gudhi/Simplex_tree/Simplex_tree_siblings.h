@@ -11,6 +11,7 @@
 #ifndef SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
 #define SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
 
+#include <gudhi/Simplex_tree/simplex_tree_options.h>
 #include <gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h>
 
 #include <boost/container/flat_map.hpp>
@@ -77,8 +78,9 @@ class Simplex_tree_siblings {
    */
   void insert(Vertex_handle v, const Filtration_value filtration_value) {
     auto ins = members_.emplace(v, Node(this, filtration_value));
-    if (!ins.second && filtration_value < filtration(ins.first))
-      ins.first->second.assign_filtration(filtration_value);
+    if (!ins.second){
+      unify_births(ins.first->second.filtration_raw(), filtration_value);
+    }
   }
 
   Dictionary_it find(Vertex_handle v) {
