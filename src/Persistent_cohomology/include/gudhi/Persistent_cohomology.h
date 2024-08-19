@@ -220,7 +220,7 @@ class Persistent_cohomology {
     if (ku != kv) {        // Destroy a connected component
       dsets_.link(ku, kv);
       // Keys of the simplices which created the connected components containing
-      // respectively u and v.persistent_pairs_
+      // respectively u and v.
       Simplex_key idx_coc_u, idx_coc_v;
       auto map_it_u = zero_cocycles_.find(ku);
       // If the index of the cocycle representing the class is already ku.
