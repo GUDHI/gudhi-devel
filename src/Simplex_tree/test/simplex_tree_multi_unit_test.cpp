@@ -25,22 +25,16 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
-//  ^
-// /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
-#include "gudhi/Simplex_tree/Simplex_tree_multi.h"
-#include "gudhi/Simplex_tree/multi_filtrations/Finitely_critical_filtrations.h"
+#include <gudhi/Simplex_tree_multi.h>
+#include <gudhi/One_critical_filtration.h>
+#include <gudhi/Multi_critical_filtration.h>
 
 using namespace Gudhi;
-using namespace Gudhi::multiparameter;
-using Gudhi::multiparameter::multi_filtrations::One_critical_filtration;
-using Gudhi::multiparameter::multi_filtrations::Multi_critical_filtration;
-using namespace Gudhi;
-using namespace Gudhi::multiparameter;
-using OneCriticalFiltration = One_critical_filtration<float>;
-using KCriticalFiltration = Multi_critical_filtration<float>;
+using OneCriticalFiltration = Gudhi::multi_filtration::One_critical_filtration<float>;
+using Stree_options_multi_filtration = Gudhi::multi_persistence::Simplex_tree_options_multidimensional_filtration<OneCriticalFiltration>;
 
 using typeST_STD = Simplex_tree<Simplex_tree_options_full_featured>;
-using Stree_multi = Simplex_tree<Simplex_tree_options_multidimensional_filtration<OneCriticalFiltration>>;
+using Stree_multi = Simplex_tree<Stree_options_multi_filtration>;
 
 typedef boost::mpl::list<Stree_multi> list_of_tested_variants;
 
@@ -106,10 +100,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_when_empty, typeST, list_of_tested_va
   test_iterators_on_empty_simplex_tree(st);
 }
 
-bool AreAlmostTheSame(float a, float b) {
-  return std::fabs(a - b) < std::numeric_limits<float>::epsilon();
-}
-bool AreAlmostTheSame(One_critical_filtration<float> a, One_critical_filtration<float> b) {
+bool AreAlmostTheSame(Gudhi::multi_filtration::One_critical_filtration<float> a,
+                      Gudhi::multi_filtration::One_critical_filtration<float> b) {
   assert(a.size() == b.size());
   for (auto i=0u; i<a.size();i++)
     if (std::fabs(a[i] - b[i]) > std::numeric_limits<float>::epsilon())
@@ -661,7 +653,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multify_simplex_tree, typeST, list_of_tested_varia
   st.insert_simplex_and_subfaces({1,2,3}, 1.);
   BOOST_CHECK(st.get_number_of_parameters() == 1);
   int num_parameters = 3;
-  Gudhi::multiparameter::multify(st,st_multi,num_parameters,{2.,3.}); //fills st_multi by simplices of filtration [{st.filtration(sh)}, default_values[0],default_values[1], ...]
+  Gudhi::multi_persistence::multify(st,st_multi,num_parameters,{2.,3.}); //fills st_multi by simplices of filtration [{st.filtration(sh)}, default_values[0],default_values[1], ...]
   BOOST_CHECK(st_multi.get_number_of_parameters() == num_parameters); // num parameters is defined by multify
   BOOST_CHECK(st_multi.num_simplices() == st.num_simplices()); // simplicial complexes should be the same
   for (auto sh : st_multi.complex_simplex_range()){
@@ -673,7 +665,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multify_simplex_tree, typeST, list_of_tested_varia
 
   for (int dimension=0; dimension < 3; dimension++){
     st.clear();
-    Gudhi::multiparameter::flatten(st, st_multi, dimension);
+    Gudhi::multi_persistence::flatten(st, st_multi, dimension);
     for (auto sh : st.complex_simplex_range()){
       BOOST_CHECK(st.filtration(sh) == dimension +1);
     }
@@ -682,7 +674,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multify_simplex_tree, typeST, list_of_tested_varia
   // std::clog << "********************************************************************" << std::endl;
   // std::clog << "TEST LINEAR PROJECTION" << std::endl;
   // // st has already the same simplicial complex as st_multi, and the filtration values of st_multi are all {1,2,3}
-  // Gudhi::multiparameter::linear_projection(st,st_multi,{17,37,73}); // sets the filtration values of st to the dot product of st_multi.filtration and {17,37,73}.
+  // Gudhi::multi_persistence::linear_projection(st,st_multi,{17,37,73}); // sets the filtration values of st to the dot product of st_multi.filtration and {17,37,73}.
   // for (auto sh : st.complex_simplex_range()){
   //   BOOST_CHECK(st.filtration(sh) == 1*17 + 2*37 + 3*73);
   // }
@@ -823,7 +815,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_multi_filtration_multify) {
 
   Stree_multi st_multi;
   OneCriticalFiltration default_multi (3, std::numeric_limits<Stree_multi::Options::value_type>::quiet_NaN());
-  Gudhi::multiparameter::multify(st, st_multi, 3, default_multi);
+  Gudhi::multi_persistence::multify(st, st_multi, 3, default_multi);
 
   for (auto f_simplex : st_multi.complex_simplex_range()) {
     std::clog << "vertex = (";
@@ -839,13 +831,13 @@ BOOST_AUTO_TEST_CASE(simplex_tree_multi_filtration_multify) {
 
   {
     Simplex_tree<> copy;
-    Gudhi::multiparameter::flatten(copy, st_multi, 0);
+    Gudhi::multi_persistence::flatten(copy, st_multi, 0);
     BOOST_CHECK(st == copy);
   }
 
   {
     Simplex_tree<> copy;
-    Gudhi::multiparameter::flatten(copy, st_multi, 1);
+    Gudhi::multi_persistence::flatten(copy, st_multi, 1);
     for (auto f_simplex : copy.complex_simplex_range()) {
       std::clog << "vertex = (";
       for (auto vertex : copy.simplex_vertex_range(f_simplex)) {

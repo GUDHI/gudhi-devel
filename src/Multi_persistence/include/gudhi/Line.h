@@ -1,36 +1,39 @@
-/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which
- * is released under MIT. See file LICENSE or go to
- * https://gudhi.inria.fr/licensing/ for full license details. Author(s): David
- * Loiseaux
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+ *    Author(s):       David Loiseaux
  *
- *    tCopyright (C) 2023 Inria
+ *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
  */
 
+
 #ifndef LINE_FILTRATION_TRANSLATION_H_INCLUDED
 #define LINE_FILTRATION_TRANSLATION_H_INCLUDED
 
-#include "Box.h"
-#include "Finitely_critical_filtrations.h"
 #include <cstddef>
 #include <stdexcept>
 
-namespace Gudhi::multiparameter::multi_filtrations {
+#include <gudhi/One_critical_filtration.h>
+#include <gudhi/Multi_critical_filtration.h>
+#include <gudhi/Box.h>
 
-/*
-* A line in \f$\mathbb R^n\f$, with some helpers to project points on it.
-* When the direction is not given, it is assumed to be diagonal.
-* As the line has a builtin parametrization, points in \f$\mathbb R^n\f$
-* that are on a line are given a time parameter in \f$\mathbb R\f$.
-* The method that end with a 2 returns the time t, while the other
-* ones return the full coordinates
-*/
+namespace Gudhi::multi_persistence {
+
+/* A line in \f$\mathbb R^n\f$, with some helpers to project points on it.
+ * When the direction is not given, it is assumed to be diagonal.
+ * As the line has a builtin parametrization, points in \f$\mathbb R^n\f$
+ * that are on a line are given a time parameter in \f$\mathbb R\f$.
+ * The method that end with a 2 returns the time t, while the other
+ * ones return the full coordinates
+ *
+ * @ingroup multi_persistence
+ */
 template <typename T> class Line {
 public:
-  using point_type = One_critical_filtration<T>;
-  using kcritical_point_type = Multi_critical_filtration<T>;
+  using point_type = Gudhi::multi_filtration::One_critical_filtration<T>;
+  using kcritical_point_type = Gudhi::multi_filtration::Multi_critical_filtration<T>;
   /*
    * Checks that the argument define a correct, positively slopped line.
    */
@@ -95,7 +98,7 @@ private:
 };
 template <typename T> inline bool Line<T>::check_direction() const {
   bool is_trivial=true;
-  for (const auto& stuff : basepoint_){
+  for (const auto& stuff : basepOne_critical_filtrationoint_){
     if (!stuff){ is_trivial = false;}
     if (stuff < 0){ throw std::invalid_argument("Direction should have positive entries.");}
   }
@@ -113,7 +116,7 @@ Line<T>::Line(const point_type &x, const point_type &v)
     : basepoint_(x), direction_(v) {check_direction();}
 
 
-template <typename T>
+template <typename T>One_critical_filtration
 inline typename Line<T>::point_type
 Line<T>::push_forward(point_type x) const { // TODO remove copy
   if (x.is_inf() || x.is_nan() || x.is_minus_inf())
@@ -257,6 +260,6 @@ Line<T>::get_bounds(const Box<T> &box) const {
   return {this->push_forward(box.get_bottom_corner()),
           this->push_back(box.get_upper_corner())};
 }
-} // namespace Gudhi::multiparameter::multi_filtrations
+} // namespace Gudhi::multi_persistence
 
 #endif // LINE_FILTRATION_TRANSLATION_H_INCLUDED

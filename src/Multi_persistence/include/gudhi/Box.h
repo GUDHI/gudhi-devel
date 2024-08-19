@@ -1,36 +1,32 @@
-/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which
- * is released under MIT. See file LICENSE or go to
- * https://gudhi.inria.fr/licensing/ for full license details. Author(s): David
- * Loiseaux
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+ *    Author(s):       David Loiseaux
  *
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
  */
-/**
- * @file box.h
- * @author David Loiseaux
- * @brief BOX.
- */
+
 
 #ifndef BOX_H_INCLUDED
 #define BOX_H_INCLUDED
 
-#include <gudhi/Debug_utils.h>
 #include <ostream>
 #include <vector>
 
-#include "Finitely_critical_filtrations.h"
+#include <gudhi/One_critical_filtration.h>
+
+
+namespace Gudhi::multi_persistence {
 
 /**
  * @brief Simple box in \f$\mathbb R^n\f$ .
+ *
+ * @ingroup multi_persistence
  */
-
-namespace Gudhi::multiparameter::multi_filtrations {
-
 template <typename T> class Box {
-  using point_type = One_critical_filtration<T>;
+  using point_type = Gudhi::multi_filtration::One_critical_filtration<T>;
 
 public:
   Box();
@@ -177,6 +173,6 @@ template <typename T> inline void Box<T>::threshold_down(point_type &x) const {
   return;
 }
 
-} // namespace Gudhi::multiparameter::multi_filtrations
+} // namespace Gudhi::multi_persistence
 
 #endif // BOX_H_INCLUDED

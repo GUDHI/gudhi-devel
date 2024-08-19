@@ -44,7 +44,7 @@ struct SimplexTreeOptions {
   /// which has a `push_to` method that allows to push the filtration value `this` onto the set of points 
   /// \f$ \{ y\in \mathrm{Filtration_value} : y\geq x\}\f$ 
   /// that are greater than another filtration value \f$ x \f$.
-  /// An example of such a class is Gudhi::multiparameter::multi_filtrations::Finitely_critical_multi_filtration .
+  /// An example of such a class is Gudhi::multi_persistence::Finitely_critical_multi_filtration .
   static const bool is_multi_parameter;
 };
 
