@@ -167,6 +167,8 @@ class Simplex_tree {
     Filtration_simplex_base_real() : filt_(0) {}
     void assign_filtration(const Filtration_value_rep f) { filt_ = f; }
     const Filtration_value_rep filtration() const { return filt_; }
+    Filtration_value& filtration_raw() { return filt_; }
+    const Filtration_value& filtration_raw() const { return filt_; }
 
     static constexpr const Filtration_value_rep get_infinity() { return inf_; }
 
@@ -895,14 +897,19 @@ class Simplex_tree {
     GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
     res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
     if (!res_insert.second) {
-      // if already in the complex
-      if (filtration < res_insert.first->second.filtration()) {
+      if constexpr (Options::store_filtration){
+        // if already in the complex
+        auto oldFil = res_insert.first->second.filtration();
+        unify_births(res_insert.first->second.filtration_raw(), filtration);
+        if (oldFil == res_insert.first->second.filtration()) {
+          // if filtration value unchanged
+          return std::pair<Simplex_handle, bool>(null_simplex(), false);
+        }
         // if filtration value modified
-        res_insert.first->second.assign_filtration(filtration);
         return res_insert;
+      } else {
+        return std::pair<Simplex_handle, bool>(null_simplex(), false);
       }
-      // if filtration value unchanged
-      return std::pair<Simplex_handle, bool>(null_simplex(), false);
     }
     // otherwise the insertion has succeeded
 
@@ -1013,19 +1020,22 @@ class Simplex_tree {
     Vertex_handle vertex_one = *first;
     auto&& dict = sib->members();
     auto insertion_result = dict.emplace(vertex_one, Node(sib, filt));
-    // update extra data structures in the insertion is successful
-    if (insertion_result.second) {
-      // Only required when insertion is successful
-      update_simplex_tree_after_node_insertion(insertion_result.first);
-    }
 
     Simplex_handle simplex_one = insertion_result.first;
     bool one_is_new = insertion_result.second;
-    if (!one_is_new) {
-      if (filtration(simplex_one) > filt) {
-        assign_filtration(simplex_one, filt);
+    if (one_is_new) {
+      // update extra data structures in the insertion is successful
+      // Only required when insertion is successful
+      update_simplex_tree_after_node_insertion(insertion_result.first);
+    } else {
+      if constexpr (Options::store_filtration){
+        auto oldFil = simplex_one->second.filtration();
+        unify_births(simplex_one->second.filtration_raw(), filt);
+        if (oldFil == simplex_one->second.filtration()) {
+          // FIXME: this interface makes no sense, and it doesn't seem to be tested.
+          insertion_result.first = null_simplex();
+        }
       } else {
-        // FIXME: this interface makes no sense, and it doesn't seem to be tested.
         insertion_result.first = null_simplex();
       }
     }
@@ -1080,24 +1090,78 @@ class Simplex_tree {
     dimension_ = dimension;
   }
 
- public:
-  /** \brief Initializes the filtration cache, i.e. sorts the
-   * simplices according to their order in the filtration.
+ private:
+  /** \brief Returns true iff the list of vertices of sh1
+   * is smaller than the list of vertices of sh2 w.r.t.
+   * lexicographic order on the lists read in reverse.
    *
-   * It always recomputes the cache, even if one already exists.
+   * It defines a StrictWeakOrdering on simplices. The Simplex_vertex_iterators
+   * must traverse the Vertex_handle in decreasing order. Reverse lexicographic order satisfy
+   * the property that a subsimplex of a simplex is always strictly smaller with this order. */
+  bool reverse_lexicographic_order(Simplex_handle sh1, Simplex_handle sh2) {
+    Simplex_vertex_range rg1 = simplex_vertex_range(sh1);
+    Simplex_vertex_range rg2 = simplex_vertex_range(sh2);
+    Simplex_vertex_iterator it1 = rg1.begin();
+    Simplex_vertex_iterator it2 = rg2.begin();
+    while (it1 != rg1.end() && it2 != rg2.end()) {
+      if (*it1 == *it2) {
+        ++it1;
+        ++it2;
+      } else {
+        return *it1 < *it2;
+      }
+    }
+    return ((it1 == rg1.end()) && (it2 != rg2.end()));
+  }
+
+  /** \brief StrictWeakOrdering, for the simplices, defined by the filtration.
    *
-   * Any insertion, deletion or change of filtration value invalidates this cache,
-   * which can be cleared with clear_filtration().  */
-  void initialize_filtration(bool ignore_infinite_values = false) {
+   * It corresponds to the partial order
+   * induced by the filtration values, with ties resolved using reverse lexicographic order.
+   * Reverse lexicographic order has the property to always consider the subsimplex of a simplex
+   * to be smaller. The filtration function must be monotonic. */
+  struct is_before_in_totally_ordered_filtration {
+    explicit is_before_in_totally_ordered_filtration(Simplex_tree * st)
+        : st_(st) { }
+
+    bool operator()(const Simplex_handle sh1, const Simplex_handle sh2) const {
+      // Not using st_->filtration(sh1) because it uselessly tests for null_simplex.
+      if (sh1->second.filtration() != sh2->second.filtration()) {
+        return sh1->second.filtration() < sh2->second.filtration();
+      }
+      // is sh1 a proper subface of sh2
+      return st_->reverse_lexicographic_order(sh1, sh2);
+    }
+
+    Simplex_tree * st_;
+  };
+
+  void fill_filtration_cache(bool ignore_infinite_values){
     filtration_vect_.clear();
     filtration_vect_.reserve(num_simplices());
     for (Simplex_handle sh : complex_simplex_range()) {
       if (ignore_infinite_values && filtration(sh) == Filtration_simplex_base_real::get_infinity()) continue;
       filtration_vect_.push_back(sh);
     }
+  }
+
+ public:
+  /** \brief Initializes the filtration cache, i.e. sorts the
+   * simplices according to their order in the filtration.
+   * Assumes that the filtration values have a total order.
+   * If not, please use @ref initialize_filtration(Comparator&&, bool) instead.
+   * Two simplices with same filtration value are ordered by a reverse lexicographic order.
+   *
+   * It always recomputes the cache, even if one already exists.
+   *
+   * Any insertion, deletion or change of filtration value invalidates this cache,
+   * which can be cleared with clear_filtration().
+   */
+  void initialize_filtration(bool ignore_infinite_values = false) {
+    fill_filtration_cache(ignore_infinite_values);
 
     /* We use stable_sort here because with libstdc++ it is faster than sort.
-     * is_before_in_filtration is now a total order, but we used to call
+     * is_before_in_totally_ordered_filtration is now a total order, but we used to call
      * stable_sort for the following heuristic:
      * The use of a depth-first traversal of the simplex tree, provided by
      * complex_simplex_range(), combined with a stable sort is meant to
@@ -1106,11 +1170,51 @@ class Simplex_tree {
      * possible.
      */
 #ifdef GUDHI_USE_TBB
-    tbb::parallel_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_filtration(this));
+    tbb::parallel_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_totally_ordered_filtration(this));
 #else
-    std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_filtration(this));
+    std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_totally_ordered_filtration(this));
 #endif
   }
+
+  // TODO: is there a possibility to give `is_before_in_totally_ordered_filtration(this)()` as default parameter for
+  // `is_before_in_filtration` to avoid having two methods?
+  /**
+   * @brief Initializes the filtration cache, i.e. sorts the simplices according to the specified order.
+   * The given order has to totally order all simplices in the simplex tree such that the resulting order is a valid
+   * 1-parameter filtration.
+   * For example, if the stored filtration is a bi-filtration (or 2-parameter filtration), the given method can
+   * indicate, that the simplices have to be ordered by the first parameter and in case of equality by reverse
+   * lexicographic order. This would generate a valid 1-parameter filtration which can than be interpreted as a line
+   * in the 2-parameter module and used with @ref filtration_simplex_range "". Also, the persistence along this line
+   * can than be computed with @ref Gudhi::persistent_cohomology::Persistent_cohomology "Persistent_cohomology".
+   * Just note that it is important to call @ref initialize_filtration(Comparator&&, bool) explicitly before call
+   * @ref Gudhi::persistent_cohomology::Persistent_cohomology::compute_persistent_cohomology
+   * "Persistent_cohomology::compute_persistent_cohomology" in that case, otherwise, the computation of persistence
+   * will fail (if no call to @ref initialize_filtration() or @ref initialize_filtration(Comparator&&, bool) was made,
+   * it will call it it-self with no arguments and the simplices will be wrongly sorted).
+   *
+   * It always recomputes the cache, even if one already exists.
+   *
+   * Any insertion, deletion or change of filtration value invalidates this cache,
+   * which can be cleared with @ref clear_filtration().
+   * 
+   * @tparam Comparator Method type taking two Simplex_handle as input and returns a bool.
+   * @param is_before_in_filtration Method used to compare two simplices with respect to their position in the
+   * wanted filtration. Takes two Simplex_handle as input and returns true if and only if the first simplex appears
+   * strictly before the second simplex in the resulting 1-parameter filtration.
+   * @param ignore_infinite_values If true, simplices with filtration values at infinity are not cached.
+   */
+  template<typename Comparator>
+  void initialize_filtration(Comparator&& is_before_in_filtration, bool ignore_infinite_values = false) {
+    fill_filtration_cache(ignore_infinite_values);
+
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_filtration);
+#else
+    std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_filtration);
+#endif
+  }
+
   /** \brief Initializes the filtration cache if it isn't initialized yet.
    *
    * Automatically called by filtration_simplex_range(). */
@@ -1232,52 +1336,6 @@ class Simplex_tree {
       return cofaces;
     }
   }
-
- private:
-  /** \brief Returns true iff the list of vertices of sh1
-   * is smaller than the list of vertices of sh2 w.r.t.
-   * lexicographic order on the lists read in reverse.
-   *
-   * It defines a StrictWeakOrdering on simplices. The Simplex_vertex_iterators
-   * must traverse the Vertex_handle in decreasing order. Reverse lexicographic order satisfy
-   * the property that a subsimplex of a simplex is always strictly smaller with this order. */
-  bool reverse_lexicographic_order(Simplex_handle sh1, Simplex_handle sh2) {
-    Simplex_vertex_range rg1 = simplex_vertex_range(sh1);
-    Simplex_vertex_range rg2 = simplex_vertex_range(sh2);
-    Simplex_vertex_iterator it1 = rg1.begin();
-    Simplex_vertex_iterator it2 = rg2.begin();
-    while (it1 != rg1.end() && it2 != rg2.end()) {
-      if (*it1 == *it2) {
-        ++it1;
-        ++it2;
-      } else {
-        return *it1 < *it2;
-      }
-    }
-    return ((it1 == rg1.end()) && (it2 != rg2.end()));
-  }
-
-  /** \brief StrictWeakOrdering, for the simplices, defined by the filtration.
-   *
-   * It corresponds to the partial order
-   * induced by the filtration values, with ties resolved using reverse lexicographic order.
-   * Reverse lexicographic order has the property to always consider the subsimplex of a simplex
-   * to be smaller. The filtration function must be monotonic. */
-  struct is_before_in_filtration {
-    explicit is_before_in_filtration(Simplex_tree * st)
-        : st_(st) { }
-
-    bool operator()(const Simplex_handle sh1, const Simplex_handle sh2) const {
-      // Not using st_->filtration(sh1) because it uselessly tests for null_simplex.
-      if (sh1->second.filtration() != sh2->second.filtration()) {
-        return sh1->second.filtration() < sh2->second.filtration();
-      }
-      // is sh1 a proper subface of sh2
-      return st_->reverse_lexicographic_order(sh1, sh2);
-    }
-
-    Simplex_tree * st_;
-  };
 
  public:
   /** \brief Inserts a 1-skeleton in an empty Simplex_tree.
@@ -1729,8 +1787,9 @@ class Simplex_tree {
         if constexpr (force_filtration_value){
           intersection.emplace_back(begin1->first, Node(nullptr, filtration_));
         } else {
-          const Filtration_value_rep filt =
-              (std::max)({begin1->second.filtration(), begin2->second.filtration(), filtration_});
+          Filtration_value filt = begin1->second.filtration();
+          push_to_greatest_common_upper_bound(filt, begin2->second.filtration());
+          push_to_greatest_common_upper_bound(filt, filtration_);
           intersection.emplace_back(begin1->first, Node(nullptr, filt));
         }
         if (++begin1 == end1 || ++begin2 == end2)
@@ -1799,7 +1858,7 @@ class Simplex_tree {
             to_be_inserted=false;
             break;
           }
-          filt = (std::max)(filt, filtration(border_child));
+          push_to_greatest_common_upper_bound(filt, filtration(border_child));
         }
         if (to_be_inserted) {
           intersection.emplace_back(next->first, Node(nullptr, filt));
@@ -1932,26 +1991,25 @@ class Simplex_tree {
     bool modified = false;
     auto fun = [&modified, this](Simplex_handle sh, int dim) -> void {
       if (dim == 0) return;
-      // Find the maximum filtration value in the border
-      Boundary_simplex_range&& boundary = boundary_simplex_range(sh);
-      Boundary_simplex_iterator max_border = std::max_element(std::begin(boundary), std::end(boundary),
-                                                              [](Simplex_handle sh1, Simplex_handle sh2) {
-                                                                return filtration(sh1) < filtration(sh2);
-                                                              });
 
-      const Filtration_value_rep max_filt_border_value = filtration(*max_border);
-      // Replacing if(f<max) with if(!(f>=max)) would mean that if f is NaN, we replace it with the max of the children.
-      // That seems more useful than keeping NaN.
-      if (!(sh->second.filtration() >= max_filt_border_value)) {
+      const Filtration_value_rep old = sh->second.filtration();
+      Filtration_value& max_filt_border_value = sh->second.filtration_raw();
+
+      // Find the maximum filtration value in the border and assigns it if it is greater than the current
+      for (Simplex_handle b : boundary_simplex_range(sh)) {
+        // considers NaN as the lowest possible value.
+        push_to_greatest_common_upper_bound(max_filt_border_value, b->second.filtration());
+      }
+
+      if (old != sh->second.filtration()) {
         // Store the filtration modification information
         modified = true;
-        sh->second.assign_filtration(max_filt_border_value);
       }
     };
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
     for_each_simplex(fun);
 
-    if(modified)
+    if (modified)
       clear_filtration(); // Drop the cache.
     return modified;
   }
@@ -1998,7 +2056,7 @@ class Simplex_tree {
       return true;
     };
 
-    //TODO: `if constexpr` replacable by `std::erase_if` in C++20? Has a risk of additional runtime,
+    //TODO: `if constexpr` replaceable by `std::erase_if` in C++20? Has a risk of additional runtime,
     //so to benchmark first.
     if constexpr (Options::stable_simplex_handles) {
       modified = false;
@@ -2175,6 +2233,7 @@ class Simplex_tree {
     return p;
   };
 
+  //TODO: externalize this method and `decode_extended_filtration`
   /** \brief Extend filtration for computing extended persistence. 
    * This function only uses the filtration values at the 0-dimensional simplices, 
    * and computes the extended persistence diagram induced by the lower-star filtration 
@@ -2182,6 +2241,10 @@ class Simplex_tree {
    * \post Note that after calling this function, the filtration 
    * values are actually modified. The function `decode_extended_filtration()` 
    * retrieves the original values and outputs the extended simplex type.
+   *
+   * @warning Currently only works for @ref SimplexTreeOptions::Filtration_value which are native
+   * **signed** arithmetic types like `int` or `double`.
+   *
    * @exception std::invalid_argument In debug mode if the Simplex tree contains a vertex with the largest
    * Vertex_handle, as this method requires to create an extra vertex internally.
    * @return A data structure containing the maximum and minimum values of the original filtration.

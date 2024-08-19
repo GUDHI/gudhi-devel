@@ -14,7 +14,8 @@
 #include <gudhi/Simplex_tree/indexing_tag.h>
 
 #include <cstdint>
-#include <type_traits> // void_t
+#include <type_traits>  // void_t
+#include <cmath>        // std::min
 
 namespace Gudhi {
 
@@ -98,6 +99,57 @@ struct No_simplex_data {};
 template <class, class=void> struct Get_simplex_data_type { typedef No_simplex_data type; };
 template <class O>
 struct Get_simplex_data_type<O, std::void_t<typename O::Simplex_data>> { typedef typename O::Simplex_data type; };
+
+/**
+ * @private
+ * @brief Given two filtration values at which a simplex exists, stores in the first value the minimal union of births
+ * generating a lifetime including those two values.
+ * This is the overload for when `Filtration_value` is a native arithmetic type, like double, int etc.
+ * Because the filtration values are totally ordered then, the union is simply the minimum of the two values.
+ */
+template <typename Arithmetic_filtration_value>
+std::enable_if_t<std::is_arithmetic_v<Arithmetic_filtration_value>> unify_births(Arithmetic_filtration_value& f1,
+                                                                                 Arithmetic_filtration_value f2)
+{
+  f1 = std::min(f1, f2);
+}
+
+/**
+ * @private
+ * @brief Given two filtration values, stores in the first value the greatest common upper bound of the two values.
+ * If a filtration value has value `NaN`, it should be considered as the lowest value possible.
+ * This is the overload for when `Filtration_value` is a native floating type, like double, float etc.
+ * Because the filtration values are totally ordered then, the upper bound is always the maximum of the two values.
+ */
+template <typename Floating_filtration_value>
+std::enable_if_t<std::is_floating_point_v<Floating_filtration_value> > push_to_greatest_common_upper_bound(
+    Floating_filtration_value& f1,
+    Floating_filtration_value f2)
+{
+  if (std::isnan(f1)) {
+    f1 = f2;
+    return;
+  }
+
+  // Computes the max while handling NaN as lowest value.
+  f1 = !(f1 <= f2) ? f1 : f2;
+}
+
+/**
+ * @private
+ * @brief Given two filtration values, stores in the first value the greatest common upper bound of the two values.
+ * If a filtration value has value `NaN`, it should be considered as the lowest value possible.
+ * This is the overload for when `Filtration_value` is a native integer type, like int, unsigned int etc.
+ * Because the filtration values are totally ordered then, the upper bound is always the maximum of the two values.
+ */
+template <typename Integral_filtration_value>
+std::enable_if_t<std::is_integral_v<Integral_filtration_value> > push_to_greatest_common_upper_bound(
+    Integral_filtration_value& f1,
+    Integral_filtration_value f2)
+{
+  // NaN not possible.
+  f1 = f1 < f2 ? f2 : f1;
+}
 
 }  // namespace Gudhi
 
