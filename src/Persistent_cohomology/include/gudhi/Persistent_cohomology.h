@@ -220,7 +220,7 @@ class Persistent_cohomology {
     if (ku != kv) {        // Destroy a connected component
       dsets_.link(ku, kv);
       // Keys of the simplices which created the connected components containing
-      // respectively u and v.
+      // respectively u and v.persistent_pairs_
       Simplex_key idx_coc_u, idx_coc_v;
       auto map_it_u = zero_cocycles_.find(ku);
       // If the index of the cocycle representing the class is already ku.
@@ -582,7 +582,8 @@ class Persistent_cohomology {
    * @return A vector of Betti numbers.
    */
   std::vector<int> betti_numbers() const {
-    // Return an empty vector for an empty complex
+    // Return an empty vector when no persistent_pairs_
+    // (can happen if compute_persistent_cohomology was not performed or if FilteredComplex has no simplices)
     if (persistent_pairs_.size() == 0)
       return std::vector<int>();
     // Init Betti numbers vector with zeros until Simplicial complex dimension
@@ -624,7 +625,8 @@ class Persistent_cohomology {
    * @return A vector of persistent Betti numbers.
    */
   std::vector<int> persistent_betti_numbers(Filtration_value from, Filtration_value to) const {
-    // Return an empty vector for an empty complex
+    // Return an empty vector when no persistent_pairs_
+    // (can happen if compute_persistent_cohomology was not performed or if FilteredComplex has no simplices)
     if (persistent_pairs_.size() == 0)
       return std::vector<int>();
     // Init Betti numbers vector with zeros until Simplicial complex dimension

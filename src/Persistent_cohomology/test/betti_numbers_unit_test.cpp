@@ -345,3 +345,40 @@ BOOST_AUTO_TEST_CASE( betti_numbers_isolated_zero_simplices )
   std::clog << "pcoh.persistent_betti_number(0, 0., 1.) = " << pcoh.persistent_betti_number(0, 0., 1.) << std::endl;
   BOOST_CHECK(pcoh.persistent_betti_number(0, 0., 1.) == 5);
 }
+
+BOOST_AUTO_TEST_CASE( betti_numbers_no_compute_persistent_cohomology )
+{
+  std::clog << "Betti numbers when compute_persistent_cohomology is not performed" << std::endl;
+  Simplex_tree st;
+
+  st.insert_simplex_and_subfaces({0});
+  st.insert_simplex_and_subfaces({1});
+  st.insert_simplex_and_subfaces({2});
+  st.insert_simplex_and_subfaces({3});
+  st.insert_simplex_and_subfaces({4});
+
+  // Sort the simplices in the order of the filtration
+  st.initialize_filtration();
+
+  // Class for homology computation
+  St_persistence pcoh(st);
+
+  // Initialize the coefficient field Z/3Z for homology
+  pcoh.init_coefficients(3);
+
+  // NO pcoh.compute_persistent_cohomology(), this is the aim of this test !
+
+  auto bn = pcoh.betti_numbers();
+  std::clog << "bn.size() = " << bn.size() << std::endl;
+  BOOST_CHECK(bn.size() == 0);
+
+  std::clog << "pcoh.betti_number(0) = " << pcoh.betti_number(0) << std::endl;
+  BOOST_CHECK(pcoh.betti_number(0) == 0);
+
+  auto pbn = pcoh.persistent_betti_numbers(0., 1.);
+  std::clog << "pbn.size() = " << pbn.size() << std::endl;
+  BOOST_CHECK(pbn.size() == 0);
+
+  std::clog << "pcoh.persistent_betti_number(0, 0., 1.) = " << pcoh.persistent_betti_number(0, 0., 1.) << std::endl;
+  BOOST_CHECK(pcoh.persistent_betti_number(0, 0., 1.) == 0);
+}
