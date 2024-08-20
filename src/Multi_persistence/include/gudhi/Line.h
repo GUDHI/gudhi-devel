@@ -98,7 +98,7 @@ private:
 };
 template <typename T> inline bool Line<T>::check_direction() const {
   bool is_trivial=true;
-  for (const auto& stuff : basepOne_critical_filtrationoint_){
+  for (const auto& stuff : basepoint_){
     if (!stuff){ is_trivial = false;}
     if (stuff < 0){ throw std::invalid_argument("Direction should have positive entries.");}
   }
@@ -116,7 +116,7 @@ Line<T>::Line(const point_type &x, const point_type &v)
     : basepoint_(x), direction_(v) {check_direction();}
 
 
-template <typename T>One_critical_filtration
+template <typename T>
 inline typename Line<T>::point_type
 Line<T>::push_forward(point_type x) const { // TODO remove copy
   if (x.is_inf() || x.is_nan() || x.is_minus_inf())
@@ -134,8 +134,8 @@ Line<T>::push_forward(point_type x) const { // TODO remove copy
 template <typename T>
 template <typename U>
 inline U Line<T>::push_forward2(const point_type &x) const {
-  constexpr const U inf = std::numeric_limits<U>::has_infinity ? 
-      std::numeric_limits<U>::infinity() 
+  constexpr const U inf = std::numeric_limits<U>::has_infinity ?
+      std::numeric_limits<U>::infinity()
     : std::numeric_limits<U>::max();
   if (x.is_inf() || x.is_nan())
     return inf;
@@ -164,8 +164,8 @@ inline U Line<T>::push_forward2(const point_type &x) const {
 template <typename T>
 template <typename U>
 inline U Line<T>::push_forward2(const kcritical_point_type &x) const {
-  constexpr const U inf = std::numeric_limits<U>::has_infinity ? 
-      std::numeric_limits<U>::infinity() 
+  constexpr const U inf = std::numeric_limits<U>::has_infinity ?
+      std::numeric_limits<U>::infinity()
     : std::numeric_limits<U>::max();
   if (x.is_inf() || x.is_nan())
     return inf;
@@ -196,8 +196,8 @@ inline typename Line<T>::point_type Line<T>::push_back(point_type x) const {
 
 template <typename T>
 template <typename U> inline U Line<T>::push_back2(const point_type &x) const {
-  constexpr const U inf = std::numeric_limits<U>::has_infinity ? 
-      std::numeric_limits<U>::infinity() 
+  constexpr const U inf = std::numeric_limits<U>::has_infinity ?
+      std::numeric_limits<U>::infinity()
     : std::numeric_limits<U>::max();
   if (x.is_inf())
     return inf;
@@ -228,8 +228,8 @@ template <typename T>
 
 template <typename U>
 inline U Line<T>::push_back2(const kcritical_point_type &x) const {
-  constexpr const U inf = std::numeric_limits<U>::has_infinity ? 
-      std::numeric_limits<U>::infinity() 
+  constexpr const U inf = std::numeric_limits<U>::has_infinity ?
+      std::numeric_limits<U>::infinity()
     : std::numeric_limits<U>::max();
   if (x.is_inf())
     return inf;
