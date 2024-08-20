@@ -323,17 +323,6 @@ class Multi_critical_filtration {
   inline typename std::vector<One_critical_filtration<T>>::const_iterator end() const {
     return multi_filtration_.end();
   }
-  inline typename std::vector<
-      One_critical_filtration<T>>::const_iterator
-  begin() const {
-    return multi_filtration_.begin();
-  }
-  inline typename std::vector<
-      One_critical_filtration<T>>::const_iterator
-  end() const {
-    return multi_filtration_.end();
-  }
-
 
   /*
    * Same as its one critical counterpart.
