@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <type_traits>  // void_t
 #include <algorithm>    // std::min
+#include <cmath>        // std::isnan
 
 namespace Gudhi {
 
