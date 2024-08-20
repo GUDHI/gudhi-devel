@@ -17,7 +17,7 @@
 
 #include <gudhi/One_critical_filtration.h>
 #include <gudhi/Multi_critical_filtration.h>
-#include <gudhi/Box.h>
+#include <gudhi/Multi_persistence/Box.h>
 
 namespace Gudhi::multi_persistence {
 
