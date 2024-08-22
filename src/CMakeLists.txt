@@ -45,6 +45,8 @@ add_gudhi_module(Toplex_map)
 add_gudhi_module(Witness_complex)
 add_gudhi_module(Nerve_GIC)
 add_gudhi_module(Persistence_matrix)
+add_gudhi_module(Multi_persistence)
+add_gudhi_module(Multi_filtration)
 
 set(GUDHI_BIBLIO_DIR ${CMAKE_SOURCE_DIR})
 # For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set

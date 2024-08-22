@@ -1,40 +1,35 @@
-/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which
- * is released under MIT. See file LICENSE or go to
- * https://gudhi.inria.fr/licensing/ for full license details. Author(s): David
- * Loiseaux
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+ *    Author(s):       David Loiseaux
  *
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
  */
-/**
- * @file box.h
- * @author David Loiseaux
- * @brief BOX.
- */
 
 #ifndef BOX_H_INCLUDED
 #define BOX_H_INCLUDED
 
-#include <gudhi/Debug_utils.h>
 #include <ostream>
 #include <vector>
 
-#include "Finitely_critical_filtrations.h"
+#include <gudhi/One_critical_filtration.h>
+
+namespace Gudhi::multi_persistence {
 
 /**
  * @brief Simple box in \f$\mathbb R^n\f$ .
+ *
+ * @ingroup multi_persistence
  */
+template <typename T>
+class Box {
+  using point_type = Gudhi::multi_filtration::One_critical_filtration<T>;
 
-namespace Gudhi::multiparameter::multi_filtrations {
-
-template <typename T> class Box {
-  using point_type = One_critical_filtration<T>;
-
-public:
+ public:
   Box();
-  Box(T a, T b, T c, T d) : bottomCorner_({a, b}), upperCorner_({c, d}){};
+  Box(T a, T b, T c, T d) : bottomCorner_({a, b}), upperCorner_({c, d}) {};
   Box(const point_type &bottomCorner, const point_type &upperCorner);
   Box(const std::pair<point_type, point_type> &box);
 
@@ -60,35 +55,29 @@ public:
    */
   void infer_from_filters(const std::vector<point_type> &Filters_list);
   bool is_trivial() const;
-  std::pair<const point_type &, const point_type &> get_pair() const {
-    return {bottomCorner_, upperCorner_};
-  }
-  std::pair<point_type &, point_type &> get_pair() {
-    return {bottomCorner_, upperCorner_};
-  }
+  std::pair<const point_type &, const point_type &> get_pair() const { return {bottomCorner_, upperCorner_}; }
+  std::pair<point_type &, point_type &> get_pair() { return {bottomCorner_, upperCorner_}; }
   std::size_t dimension() const { return bottomCorner_.size(); }
 
-private:
+ private:
   point_type bottomCorner_;
   point_type upperCorner_;
 };
 
-template <typename T> inline Box<T>::Box() {}
+template <typename T>
+inline Box<T>::Box() {}
 
 template <typename T>
-inline Box<T>::Box(const point_type &bottomCorner,
-                   const point_type &upperCorner)
+inline Box<T>::Box(const point_type &bottomCorner, const point_type &upperCorner)
     : bottomCorner_(bottomCorner), upperCorner_(upperCorner) {
-  GUDHI_CHECK(bottomCorner.size() == upperCorner.size() &&
-                  bottomCorner <= upperCorner,
-              "This box is trivial !");
+  GUDHI_CHECK(bottomCorner.size() == upperCorner.size() && bottomCorner <= upperCorner, "This box is trivial !");
 }
 
 template <typename T>
-inline Box<T>::Box(const std::pair<point_type, point_type> &box)
-    : bottomCorner_(box.first), upperCorner_(box.second) {}
+inline Box<T>::Box(const std::pair<point_type, point_type> &box) : bottomCorner_(box.first), upperCorner_(box.second) {}
 
-template <typename T> inline void Box<T>::inflate(T delta) {
+template <typename T>
+inline void Box<T>::inflate(T delta) {
   bottomCorner_ -= delta;
   upperCorner_ += delta;
 }
@@ -97,8 +86,7 @@ template <typename T> inline void Box<T>::inflate(T delta) {
  * Define a box containing the filtration values.
  */
 template <typename T>
-inline void
-Box<T>::infer_from_filters(const std::vector<point_type> &Filters_list) {
+inline void Box<T>::infer_from_filters(const std::vector<point_type> &Filters_list) {
   int dimension = Filters_list.size();
   int nsplx = Filters_list[0].size();
   std::vector<T> lower(dimension);
@@ -116,9 +104,9 @@ Box<T>::infer_from_filters(const std::vector<point_type> &Filters_list) {
   bottomCorner_.swap(lower);
   upperCorner_.swap(upper);
 }
-template <typename T> inline bool Box<T>::is_trivial() const {
-  return bottomCorner_.empty() || upperCorner_.empty() ||
-         bottomCorner_.size() != upperCorner_.size();
+template <typename T>
+inline bool Box<T>::is_trivial() const {
+  return bottomCorner_.empty() || upperCorner_.empty() || bottomCorner_.size() != upperCorner_.size();
 }
 
 template <typename T>
@@ -160,23 +148,23 @@ std::ostream &operator<<(std::ostream &os, const Box<T> &box) {
   return os;
 }
 
-template <typename T> inline void Box<T>::threshold_up(point_type &x) const {
+template <typename T>
+inline void Box<T>::threshold_up(point_type &x) const {
   for (auto i = 0u; i < x.size(); i++) {
     auto t = upperCorner_[i];
-    if (x[i] > t)
-      x[i] = t;
+    if (x[i] > t) x[i] = t;
   }
   return;
 }
-template <typename T> inline void Box<T>::threshold_down(point_type &x) const {
+template <typename T>
+inline void Box<T>::threshold_down(point_type &x) const {
   for (auto i = 0u; i < x.size(); i++) {
     auto t = bottomCorner_[i];
-    if (x[i] < t)
-      x[i] = t;
+    if (x[i] < t) x[i] = t;
   }
   return;
 }
 
-} // namespace Gudhi::multiparameter::multi_filtrations
+}  // namespace Gudhi::multi_persistence
 
-#endif // BOX_H_INCLUDED
+#endif  // BOX_H_INCLUDED

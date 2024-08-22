@@ -14,8 +14,11 @@
 #include <algorithm>
 #include <gudhi/Simplex_tree.h>
 
-namespace Gudhi::multiparameter {
-/** Model of SimplexTreeOptions, with a multiparameter filtration. */
+namespace Gudhi::multi_persistence {
+
+/** Model of SimplexTreeOptions, with a multiparameter filtration.
+ * \ingroup multi_persistence
+ * */
 template <typename Filtration>
 struct Simplex_tree_options_multidimensional_filtration {
 public:
@@ -36,14 +39,13 @@ public:
  * \brief Turns a 1-parameter simplextree into a multiparameter simplextree,
  * and keeps the 1-filtration in the 1st axis.
  * Default values can be specified.
- * \ingroup multiparameter
+ * \ingroup multi_persistence
  * \tparam simplextree_std A non-multi simplextree
  * \tparam simplextree_multi A multi simplextree
  * \param st Simplextree to copy
  * \param st_multi Multiparameter simplextree container to fill.
- * \param default_values If given, this vector is assume to be of size
- * `num_parameters-1` and contains the default values of axes `1` to
- * `num_parameters`.
+ * \param default_values If given, this vector is assume to be of size `num_parameters-1` and contains the default
+ * values of axes `1` to `num_parameters`.
  * */
 template <class simplextree_std, class simplextree_multi>
 void multify(simplextree_std &st, simplextree_multi &st_multi,
@@ -94,11 +96,13 @@ void multify(simplextree_std &st, simplextree_multi &st_multi,
 
 /**
  * \brief Turns a multiparameter-parameter simplextree into a 1-parameter
- * simplextree. \ingroup multiparameter \tparam simplextree_std A non-multi
- * simplextree \tparam simplextree_multi A multi simplextree \param st
- * Simplextree to fill. \param st_multi Multiparameter simplextree to convert
- * into a 1 parameter simplex tree. \param dimension The filtration parameter to
- * put into the 1 parameter simplextree.
+ * simplextree.
+ * \ingroup multi_persistence
+ * \tparam simplextree_std A non-multi simplextree
+ * \tparam simplextree_multi A multi simplextree
+ * \param st Simplextree to fill.
+ * \param st_multi Multiparameter simplextree to convert into a 1 parameter simplex tree.
+ * \param dimension The filtration parameter to put into the 1 parameter simplextree.
  * */
 template <class simplextree_std, class simplextree_multi>
 void flatten(simplextree_std &st, simplextree_multi &st_multi,
@@ -122,7 +126,6 @@ void flatten(simplextree_std &st, simplextree_multi &st_multi,
   }
 }
 
-
-} // namespace Gudhi::multiparameter
+} // namespace Gudhi::multi_persistence
 
 #endif // SIMPLEX_TREE_MULTI_H_
