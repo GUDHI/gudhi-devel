@@ -45,7 +45,7 @@ struct GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION Simplex_tree_node_explicit_storage
 
   Simplex_tree_node_explicit_storage(Siblings * sib = nullptr,
                                      Filtration_value filtration = 0,
-                                     [[maybe_unused]] Simplex_key key = -1)
+                                     [[maybe_unused]] Simplex_key key = SimplexTree::null_key())
       : children_(sib) {
     this->assign_filtration(filtration);
     if constexpr (SimplexTree::Options::store_key) this->assign_key(key);
