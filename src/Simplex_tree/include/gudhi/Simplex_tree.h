@@ -185,7 +185,7 @@ class Simplex_tree {
 
     void assign_filtration(const Filtration_value_rep GUDHI_CHECK_code(f))
     {
-      GUDHI_CHECK(f == Filtration_value(0), "filtration value specified for a complex that does not store them");
+      GUDHI_CHECK(f == Filtration_value(), "filtration value specified for a complex that does not store them");
     }
     Filtration_value filtration() const { return 0; }
   };
@@ -950,7 +950,7 @@ class Simplex_tree {
    * .end() return input iterators, with 'value_type' Vertex_handle. */
   template<class InputVertexRange = std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex(const InputVertexRange & simplex,
-                                                 const Filtration_value_rep filtration = Filtration_value(0)) {
+                                                 const Filtration_value_rep filtration = Filtration_value()) {
     auto first = std::begin(simplex);
     auto last = std::end(simplex);
 
@@ -980,7 +980,7 @@ class Simplex_tree {
   template <class InputVertexRange = std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(
       const InputVertexRange& Nsimplex,
-      const Filtration_value_rep filtration = Filtration_value(0))
+      const Filtration_value_rep filtration = Filtration_value())
   {
     auto first = std::begin(Nsimplex);
     auto last = std::end(Nsimplex);
@@ -1422,7 +1422,7 @@ class Simplex_tree {
    * The complex does not need to be empty before calling this function. However, if a vertex is
    * already present, its filtration value is not modified, unlike with other insertion functions. */
   template <class VertexRange>
-  void insert_batch_vertices(VertexRange const& vertices, const Filtration_value_rep filt = Filtration_value(0)) {
+  void insert_batch_vertices(VertexRange const& vertices, const Filtration_value_rep filt = Filtration_value()) {
     auto verts = vertices | boost::adaptors::transformed([&](auto v){
         return Dit_value_t(v, Node(&root_, filt)); });
     root_.members_.insert(boost::begin(verts), boost::end(verts));
@@ -2041,11 +2041,14 @@ class Simplex_tree {
     Simplex_handle last;
 
     auto to_remove = [this, filt](Dit_value_t& simplex) {
-      if (simplex.second.filtration() <= filt) return false;
-      if (has_children(&simplex)) rec_delete(simplex.second.children());
-      // dimension may need to be lowered
-      dimension_to_be_lowered_ = true;
-      return true;
+      //if filt and simplex.second.filtration() are non comparable, should return false.
+      if (filt < simplex.second.filtration()) {
+        if (has_children(&simplex)) rec_delete(simplex.second.children());
+        // dimension may need to be lowered
+        dimension_to_be_lowered_ = true;
+        return true;
+      }
+      return false;
     };
 
     //TODO: `if constexpr` replaceable by `std::erase_if` in C++20? Has a risk of additional runtime,

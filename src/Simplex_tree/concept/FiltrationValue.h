@@ -29,18 +29,13 @@ struct FiltrationValue {
   /**
    * @brief Has to construct the default value of FiltrationValue. E.g., 0 for a numerical value or {} for a vector.
    */
-  FiltrationValue(0);
+  FiltrationValue();
 
-  // only for default ordering of filtration_vect_ in initialize_filtration
+  // only for default ordering of filtration_vect_ in initialize_filtration and for prune_above_filtration
   /**
    * @brief Strictly smaller operator. If the filtration values are totally ordered, should be a StrictWeakOrdering.
    */
   friend bool operator<(const FiltrationValue& f1, const FiltrationValue& f2);
-  // only for prune_above_filtration
-  /**
-   * @brief Smaller or equal operator.
-   */
-  friend bool operator<=(const FiltrationValue& f1, const FiltrationValue& f2);
   /**
    * @brief Equality operator
    */
