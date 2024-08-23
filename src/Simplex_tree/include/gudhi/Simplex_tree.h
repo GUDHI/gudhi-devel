@@ -10,7 +10,7 @@
  *      - 2023/05 Clément Maria: Edge insertion method for flag complexes
  *      - 2023/05 Hannah Schreiber: Factorization of expansion methods
  *      - 2023/08 Hannah Schreiber (& Clément Maria): Add possibility of stable simplex handles.
- *      - 2024/08 Hannah Schreiber: Addition of customable copy constructor.
+ *      - 2024/08 Hannah Schreiber: Addition of customizable copy constructor.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -133,6 +133,7 @@ class Simplex_tree {
 
   struct Key_simplex_base_real {
     Key_simplex_base_real() : key_(-1) {}
+    Key_simplex_base_real(Simplex_key k) : key_(k) {}
     void assign_key(Simplex_key k) { key_ = k; }
     Simplex_key key() const { return key_; }
    private:
@@ -140,6 +141,7 @@ class Simplex_tree {
   };
   struct Key_simplex_base_dummy {
     Key_simplex_base_dummy() {}
+    Key_simplex_base_dummy([[maybe_unused]] Simplex_key k) {}
     // Undefined so it will not link
     void assign_key(Simplex_key);
     Simplex_key key() const;
@@ -155,6 +157,7 @@ class Simplex_tree {
 
   struct Filtration_simplex_base_real {
     Filtration_simplex_base_real() : filt_(0) {}
+    Filtration_simplex_base_real(Filtration_value f) : filt_(f) {}
     void assign_filtration(Filtration_value f) { filt_ = f; }
     Filtration_value filtration() const { return filt_; }
    private:
@@ -162,6 +165,7 @@ class Simplex_tree {
   };
   struct Filtration_simplex_base_dummy {
     Filtration_simplex_base_dummy() {}
+    Filtration_simplex_base_dummy([[maybe_unused]] Filtration_value f) {}
     void assign_filtration(Filtration_value GUDHI_CHECK_code(f)) { GUDHI_CHECK(f == 0, "filtration value specified for a complex that does not store them"); }
     Filtration_value filtration() const { return 0; }
   };
@@ -514,11 +518,17 @@ class Simplex_tree {
     auto root_source = complex_source.root_;
 
     // root members copy
+    root_.members().reserve(root_source.size());
     for (auto& p : root_source.members()){
-      auto it = root_.members().try_emplace(root_.members().end(), p.first);
-      it->second.assign_children(&root_);
-      it->second.assign_filtration(translate_filtration_value(p.second.filtration()));
-      if constexpr (Options::store_key && OtherSimplexTreeOptions::store_key) it->second.assign_key(p.second.key());
+      if constexpr (Options::store_key && OtherSimplexTreeOptions::store_key) {
+        auto it = root_.members().try_emplace(
+            root_.members().end(),
+            p.first,
+            Node(&root_, translate_filtration_value(p.second.filtration()), p.second.key()));
+      } else {
+        auto it = root_.members().try_emplace(
+            root_.members().end(), p.first, Node(&root_, translate_filtration_value(p.second.filtration())));
+      }
     }
 
     rec_copy<OtherSimplexTreeOptions::store_key>(&root_, &root_source, translate_filtration_value);
