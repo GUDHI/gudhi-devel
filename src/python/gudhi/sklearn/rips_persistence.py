@@ -11,6 +11,7 @@ from .._ripser import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
 from ..flag_filtration.edge_collapse import reduce_graph
 import math
 import numpy as np
+from typing import Union, Iterable, Literal, Optional
 from sklearn.base import BaseEstimator, TransformerMixin
 from scipy.sparse import coo_matrix
 from scipy.spatial import cKDTree
@@ -41,12 +42,14 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        homology_dimensions,
-        threshold=float('inf'),
-        input_type='point cloud',
-        num_collapses='auto',
-        homology_coeff_field=11,
-        n_jobs=None,
+        homology_dimensions: Union[int, Iterable[int]],
+        threshold: float = float('inf'),
+        input_type: Literal[
+            "point cloud", "full distance matrix", "lower distance matrix", "distance coo_matrix"
+        ] = 'point cloud',
+        num_collapses: Union[int, Literal["auto"]] = 'auto',
+        homology_coeff_field: int = 11,
+        n_jobs: Optional[int] = None,
     ):
         """
         Constructor for the RipsPersistence class.
@@ -64,7 +67,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             num_collapses (int|str): Specify the number of iterations of :func:`~gudhi.flag_filtration.edge_collapse.reduce_graph`
                 (edge collapse) to perform on the graph. Default value is 'auto'.
             homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
-            n_jobs (int): Number of jobs to run in parallel. `None` (default value) means `n_jobs = 1` unless in a
+            n_jobs (Optional[int]): Number of jobs to run in parallel. `None` (default value) means `n_jobs = 1` unless in a
                 joblib.parallel_backend context. `-1` means using all processors. cf.
                 https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for more details.
         """
