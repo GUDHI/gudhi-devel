@@ -11,9 +11,12 @@
 
 /** \brief Value type for a filtration function on a cell complex.
  *
- * Needs to implement `std::numeric_limits<FiltrationValue>::has_infinity` and when it returns `true`,
- * has to implement `std::numeric_limits<FiltrationValue>::infinity()`. If it returns `false`, has to
- * implement `std::numeric_limits<FiltrationValue>::max()` instead.
+ * Needs to implement `std::numeric_limits<FiltrationValue>::has_infinity`,
+ * `std::numeric_limits<FiltrationValue>::infinity()` and `std::numeric_limits<FiltrationValue>::max()`.
+ * But when `std::numeric_limits<FiltrationValue>::has_infinity` returns `true`,
+ * `std::numeric_limits<FiltrationValue>::max()` can simply throw when called, as well as,
+ * `std::numeric_limits<FiltrationValue>::infinity()` if `std::numeric_limits<FiltrationValue>::has_infinity`
+ * returns `false`.
  *
  * A <EM>filtration</EM> of a cell complex (see FilteredComplex) is
  * a function \f$f:\mathbf{K} \rightarrow \mathbb{R}\f$ satisfying \f$f(\tau)\leq
@@ -32,38 +35,42 @@ struct FiltrationValue {
   /**
    * @brief Strictly smaller operator. If the filtration values are totally ordered, should be a StrictWeakOrdering.
    */
-  bool operator<(FiltrationValue f1, FiltrationValue f2);
+  friend bool operator<(const FiltrationValue& f1, const FiltrationValue& f2);
   // only for prune_above_filtration
   /**
    * @brief Smaller or equal operator.
    */
-  bool operator<=(FiltrationValue f1, FiltrationValue f2);
+  friend bool operator<=(const FiltrationValue& f1, const FiltrationValue& f2);
   /**
    * @brief Equality operator
    */
-  bool operator==(FiltrationValue f1, FiltrationValue f2);
+  friend bool operator==(const FiltrationValue& f1, const FiltrationValue& f2);
   /**
    * @brief Not equal operator
    */
-  bool operator!=(FiltrationValue f1, FiltrationValue f2);
+  friend bool operator!=(const FiltrationValue& f1, const FiltrationValue& f2);
 
   /**
    * @brief Given two filtration values at which a simplex exists, returns the minimal union of births generating
    * a lifetime including those two values. The overload for native arithmetic types like `double` or `int` is
    * already implemented.
-   * If the filtration is 1-critical and totally ordered (as in one parameter persistence), the union is simply
-   * the minimum of the two values. If the filtration is 1-critical, but not totally ordered (possible for
-   * multi-persistence), than the union is also the minium if the two given values are comparable and the
-   * method should throw an error if they are not, as a same simplex should not exist at those two values.
-   * Finally, if the filtration is k-critical, FiltrationValue should be able to store an union of values and this
-   * method adds the values of @p f2 in @p f1 and removes the values from @p f1 which are comparable and greater than
-   * other values.
+   *
+   * For a k-critical filtration, FiltrationValue should be able to store an union of values (corresponding to the
+   * different births of a same simplex) and this method adds the values of @p f2 in @p f1 and removes the values
+   * from @p f1 which are comparable and greater than other values.
+   * In the special case of 1-critical filtration, as the union should not contain more than one birth element,
+   * this method is expected to throw if the two given elements in the filtration values are not comparable.
+   * If they are comparable, the union is simply the minimum of both.
+   *
+   * @return True if and only if the values in @p f1 were actually modified.
    */
-  friend void unify_births(FiltrationValue& f1, const FiltrationValue& f2);
+  friend bool unify_births(FiltrationValue& f1, const FiltrationValue& f2);
 
   /**
    * @brief Given two filtration values, stores in the first value the greatest common upper bound of the two values.
    * The overload for native arithmetic types like `double` or `int` is already implemented.
+   *
+   * @return True if and only if the values in @p f1 were actually modified.
    */
-  friend void push_to_greatest_common_upper_bound(FiltrationValue& f1, const FiltrationValue& f2);
+  friend bool push_to_smallest_common_upper_bound(FiltrationValue& f1, const FiltrationValue& f2);
 };

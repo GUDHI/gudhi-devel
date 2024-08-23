@@ -900,14 +900,12 @@ class Simplex_tree {
     if (!res_insert.second) {
       if constexpr (Options::store_filtration){
         // if already in the complex
-        auto oldFil = res_insert.first->second.filtration();
-        unify_births(res_insert.first->second.filtration_raw(), filtration);
-        if (oldFil == res_insert.first->second.filtration()) {
-          // if filtration value unchanged
-          return std::pair<Simplex_handle, bool>(null_simplex(), false);
+        if (unify_births(res_insert.first->second.filtration_raw(), filtration)) {
+          // if filtration value modified
+          return res_insert;
         }
-        // if filtration value modified
-        return res_insert;
+        // if filtration value unchanged
+        return std::pair<Simplex_handle, bool>(null_simplex(), false);
       } else {
         return std::pair<Simplex_handle, bool>(null_simplex(), false);
       }
@@ -1030,9 +1028,7 @@ class Simplex_tree {
       update_simplex_tree_after_node_insertion(insertion_result.first);
     } else {
       if constexpr (Options::store_filtration){
-        auto oldFil = simplex_one->second.filtration();
-        unify_births(simplex_one->second.filtration_raw(), filt);
-        if (oldFil == simplex_one->second.filtration()) {
+        if (!unify_births(simplex_one->second.filtration_raw(), filt)) {
           // FIXME: this interface makes no sense, and it doesn't seem to be tested.
           insertion_result.first = null_simplex();
         }
@@ -1789,8 +1785,8 @@ class Simplex_tree {
           intersection.emplace_back(begin1->first, Node(nullptr, filtration_));
         } else {
           Filtration_value filt = begin1->second.filtration();
-          push_to_greatest_common_upper_bound(filt, begin2->second.filtration());
-          push_to_greatest_common_upper_bound(filt, filtration_);
+          push_to_smallest_common_upper_bound(filt, begin2->second.filtration());
+          push_to_smallest_common_upper_bound(filt, filtration_);
           intersection.emplace_back(begin1->first, Node(nullptr, filt));
         }
         if (++begin1 == end1 || ++begin2 == end2)
@@ -1859,7 +1855,7 @@ class Simplex_tree {
             to_be_inserted=false;
             break;
           }
-          push_to_greatest_common_upper_bound(filt, filtration(border_child));
+          push_to_smallest_common_upper_bound(filt, filtration(border_child));
         }
         if (to_be_inserted) {
           intersection.emplace_back(next->first, Node(nullptr, filt));
@@ -1993,18 +1989,13 @@ class Simplex_tree {
     auto fun = [&modified, this](Simplex_handle sh, int dim) -> void {
       if (dim == 0) return;
 
-      const Filtration_value_rep old = sh->second.filtration();
       Filtration_value& max_filt_border_value = sh->second.filtration_raw();
 
       // Find the maximum filtration value in the border and assigns it if it is greater than the current
       for (Simplex_handle b : boundary_simplex_range(sh)) {
         // considers NaN as the lowest possible value.
-        push_to_greatest_common_upper_bound(max_filt_border_value, b->second.filtration());
-      }
-
-      if (old != sh->second.filtration()) {
-        // Store the filtration modification information
-        modified = true;
+        // stores the filtration modification information
+        modified = push_to_smallest_common_upper_bound(max_filt_border_value, b->second.filtration()) || modified;
       }
     };
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
