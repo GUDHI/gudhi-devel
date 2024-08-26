@@ -229,7 +229,7 @@ constexpr const auto& get(const Gudhi::persistence_matrix::Persistence_interval<
  */
 template <size_t I, typename Dimension, typename Event_value>
 constexpr auto&& get(Gudhi::persistence_matrix::Persistence_interval<Dimension, Event_value>&& i) noexcept {
-  return std::move(i.template get<I>());
+  return std::move(i).template get<I>();
 }
 
 /**
