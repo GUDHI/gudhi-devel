@@ -1,0 +1,4 @@
+include(GUDHI_boost_test)
+
+add_executable_with_targets(Multi_filtration_onecritical_unit_test multifiltration_onecritical_unit_test.cpp TBB::tbb)
+gudhi_add_boost_test(Multi_filtration_onecritical_unit_test)
