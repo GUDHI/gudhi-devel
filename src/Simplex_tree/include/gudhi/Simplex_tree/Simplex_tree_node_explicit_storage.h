@@ -39,13 +39,13 @@ struct GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION Simplex_tree_node_explicit_storage
       SimplexTree::Hooks_simplex_base,
       boost::empty_value<typename SimplexTree::Simplex_data> {
   typedef typename SimplexTree::Siblings Siblings;
-  typedef typename SimplexTree::Filtration_value_rep Filtration_value_rep;
+  typedef typename SimplexTree::Filtration_value Filtration_value;
   typedef typename SimplexTree::Simplex_key Simplex_key;
   typedef typename SimplexTree::Simplex_data Simplex_data;
 
   Simplex_tree_node_explicit_storage() : children_(nullptr) {}
 
-  Simplex_tree_node_explicit_storage(Siblings* sib, const Filtration_value_rep filtration) : children_(sib)
+  Simplex_tree_node_explicit_storage(Siblings* sib, const Filtration_value& filtration) : children_(sib)
   {
     this->assign_filtration(filtration);
   }

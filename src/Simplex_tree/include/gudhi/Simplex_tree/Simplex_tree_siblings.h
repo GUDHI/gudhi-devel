@@ -37,7 +37,7 @@ class Simplex_tree_siblings {
   template<class T> friend class Simplex_tree_boundary_opposite_vertex_simplex_iterator;
 
   typedef typename SimplexTree::Vertex_handle Vertex_handle;
-  typedef typename SimplexTree::Filtration_value_rep Filtration_value;
+  typedef typename SimplexTree::Filtration_value Filtration_value;
   typedef typename SimplexTree::Node Node;
   typedef MapContainer Dictionary;
   typedef typename MapContainer::iterator Dictionary_it;
@@ -76,7 +76,7 @@ class Simplex_tree_siblings {
    * between input filtration_value and the value already 
    * present in the node.
    */
-  void insert(Vertex_handle v, const Filtration_value filtration_value) {
+  void insert(Vertex_handle v, const Filtration_value& filtration_value) {
     auto ins = members_.emplace(v, Node(this, filtration_value));
     if (!ins.second){
       unify_births(ins.first->second.filtration_raw(), filtration_value);
