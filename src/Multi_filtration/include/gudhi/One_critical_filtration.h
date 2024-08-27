@@ -5,7 +5,7 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
- *      - 2024/08 Hannah Schreiber: Generalization to all arithmetic types for T
+ *      - 2024/08 Hannah Schreiber: Generalization to all signed arithmetic types for T
  *      - YYYY/MM Author: Description of the modification
  */
 
