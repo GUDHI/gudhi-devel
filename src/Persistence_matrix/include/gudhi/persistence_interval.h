@@ -88,87 +88,67 @@ struct Persistence_interval {
     }
     return stream;
   }
+
+  /**
+   * @brief Specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
+   *
+   * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
+   * @return Either the birth value if @p I == 0, the death value if @p I == 1 or the dimension if @p I == 2.
+   */
+  template <std::size_t I>
+  constexpr auto& get() & noexcept {
+    static_assert(I < 3, "Value mismatch at argument 1 in template parameter list. Maximal possible value is 2.");
+
+    if constexpr (I == 0) return birth;
+    if constexpr (I == 1) return death;
+    if constexpr (I == 2) return dim;
+  }
+
+  /**
+   * @brief Specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
+   *
+   * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
+   * @return Either the birth value if @p I == 0, the death value if @p I == 1 or the dimension if @p I == 2.
+   */
+  template <std::size_t I>
+  constexpr const auto& get() const& noexcept {
+    static_assert(I < 3, "Value mismatch at argument 1 in template parameter list. Maximal possible value is 2.");
+
+    if constexpr (I == 0) return birth;
+    if constexpr (I == 1) return death;
+    if constexpr (I == 2) return dim;
+  }
+
+  /**
+   * @brief Specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
+   *
+   * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
+   * @return Either the birth value if @p I == 0, the death value if @p I == 1 or the dimension if @p I == 2.
+   */
+  template <std::size_t I>
+  constexpr auto&& get() && noexcept {
+    static_assert(I < 3, "Value mismatch at argument 1 in template parameter list. Maximal possible value is 2.");
+
+    if constexpr (I == 0) return std::move(birth);
+    if constexpr (I == 1) return std::move(death);
+    if constexpr (I == 2) return std::move(dim);
+  }
+
+  /**
+   * @brief Specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
+   *
+   * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
+   * @return Either the birth value if @p I == 0, the death value if @p I == 1 or the dimension if @p I == 2.
+   */
+  template <std::size_t I>
+  constexpr const auto&& get() const&& noexcept {
+    static_assert(I < 3, "Value mismatch at argument 1 in template parameter list. Maximal possible value is 2.");
+
+    if constexpr (I == 0) return std::move(birth);
+    if constexpr (I == 1) return std::move(death);
+    if constexpr (I == 2) return std::move(dim);
+  }
 };
-
-/**
- * @ingroup persistence_matrix
- *
- * @brief Partial specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
- *
- * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
- * @tparam Dimension First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
- * @tparam Event_value Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
- * @param i Interval from which the value should be returned.
- * @return Either the birth value if @p I == 0, the death value if @p I == 1 or the dimension if @p I == 2.
- */
-template <std::size_t I, typename Dimension, typename Event_value>
-constexpr auto& get(Gudhi::persistence_matrix::Persistence_interval<Dimension, Event_value>& i) noexcept {
-  static_assert(I < 3, "Value mismatch at argument 1 in template parameter list. Maximal possible value is 2.");
-
-  if constexpr (I == 0) return i.birth;
-  if constexpr (I == 1) return i.death;
-  if constexpr (I == 2) return i.dim;
-}
-
-/**
- * @ingroup persistence_matrix
- *
- * @brief Partial specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
- *
- * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
- * @tparam Dimension First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
- * @tparam Event_value Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
- * @param i Interval from which the value should be returned.
- * @return Either the birth value if @p I == 0, the death value if @p I == 1 or the dimension if @p I == 2.
- */
-template <std::size_t I, typename Dimension, typename Event_value>
-constexpr const auto& get(const Gudhi::persistence_matrix::Persistence_interval<Dimension, Event_value>& i) noexcept {
-  static_assert(I < 3, "Value mismatch at argument 1 in template parameter list. Maximal possible value is 2.");
-
-  if constexpr (I == 0) return i.birth;
-  if constexpr (I == 1) return i.death;
-  if constexpr (I == 2) return i.dim;
-}
-
-/**
- * @ingroup persistence_matrix
- *
- * @brief Partial specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
- *
- * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
- * @tparam Dimension First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
- * @tparam Event_value Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
- * @param i Interval from which the value should be returned.
- * @return Either the birth value if @p I == 0, the death value if @p I == 1 or the dimension if @p I == 2.
- */
-template <std::size_t I, typename Dimension, typename Event_value>
-constexpr auto&& get(Gudhi::persistence_matrix::Persistence_interval<Dimension, Event_value>&& i) noexcept {
-  static_assert(I < 3, "Value mismatch at argument 1 in template parameter list. Maximal possible value is 2.");
-
-  if constexpr (I == 0) return std::move(i.birth);
-  if constexpr (I == 1) return std::move(i.death);
-  if constexpr (I == 2) return std::move(i.dim);
-}
-
-/**
- * @ingroup persistence_matrix
- *
- * @brief Partial specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
- *
- * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
- * @tparam Dimension First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
- * @tparam Event_value Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
- * @param i Interval from which the value should be returned.
- * @return Either the birth value if @p I == 0, the death value if @p I == 1 or the dimension if @p I == 2.
- */
-template <std::size_t I, typename Dimension, typename Event_value>
-constexpr const auto&& get(const Gudhi::persistence_matrix::Persistence_interval<Dimension, Event_value>&& i) noexcept {
-  static_assert(I < 3, "Value mismatch at argument 1 in template parameter list. Maximal possible value is 2.");
-
-  if constexpr (I == 0) return std::move(i.birth);
-  if constexpr (I == 1) return std::move(i.death);
-  if constexpr (I == 2) return std::move(i.dim);
-}
 
 }  // namespace persistence_matrix
 }  // namespace Gudhi
@@ -204,24 +184,68 @@ struct tuple_element<I, Gudhi::persistence_matrix::Persistence_interval<Dimensio
   using type = typename conditional <I < 2, Event_value, Dimension>::type;
 };
 
+/**
+ * @ingroup persistence_matrix
+ *
+ * @brief Partial specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
+ * 
+ * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
+ * @tparam Dimension First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @tparam Event_value Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @param i Interval from which the value should be returned.
+ * @return Either the birth value if @p I == 0, the death value if @p I == 1 or the dimension if @p I == 2.
+ */
 template <size_t I, typename Dimension, typename Event_value>
 constexpr auto& get(Gudhi::persistence_matrix::Persistence_interval<Dimension, Event_value>& i) noexcept {
-  return Gudhi::persistence_matrix::get<I>(i);
+  return i.template get<I>();
 }
 
+/**
+ * @ingroup persistence_matrix
+ *
+ * @brief Partial specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
+ * 
+ * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
+ * @tparam Dimension First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @tparam Event_value Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @param i Interval from which the value should be returned.
+ * @return Either the birth value if @p I == 0, the death value if @p I == 1 or the dimension if @p I == 2.
+ */
 template <size_t I, typename Dimension, typename Event_value>
 constexpr const auto& get(const Gudhi::persistence_matrix::Persistence_interval<Dimension, Event_value>& i) noexcept {
-  return Gudhi::persistence_matrix::get<I>(i);
+  return i.template get<I>();
 }
 
+/**
+ * @ingroup persistence_matrix
+ *
+ * @brief Partial specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
+ * 
+ * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
+ * @tparam Dimension First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @tparam Event_value Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @param i Interval from which the value should be returned.
+ * @return Either the birth value if @p I == 0, the death value if @p I == 1 or the dimension if @p I == 2.
+ */
 template <size_t I, typename Dimension, typename Event_value>
 constexpr auto&& get(Gudhi::persistence_matrix::Persistence_interval<Dimension, Event_value>&& i) noexcept {
-  return Gudhi::persistence_matrix::get<I>(move(i));
+  return std::move(i).template get<I>();
 }
 
+/**
+ * @ingroup persistence_matrix
+ *
+ * @brief Partial specialization of `get` for @ref Gudhi::persistence_matrix::Persistence_interval.
+ * 
+ * @tparam I Index of the value to return: 0 for the birth value, 1 for the death value and 2 for the dimension.
+ * @tparam Dimension First template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @tparam Event_value Second template parameter of @ref Gudhi::persistence_matrix::Persistence_interval.
+ * @param i Interval from which the value should be returned.
+ * @return Either the birth value if @p I == 0, the death value if @p I == 1 or the dimension if @p I == 2.
+ */
 template <size_t I, typename Dimension, typename Event_value>
 constexpr const auto&& get(const Gudhi::persistence_matrix::Persistence_interval<Dimension, Event_value>&& i) noexcept {
-  return Gudhi::persistence_matrix::get<I>(move(i));
+  return std::move(i).template get<I>();
 }
 
 }  // namespace std
