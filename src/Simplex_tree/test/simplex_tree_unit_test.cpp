@@ -1241,3 +1241,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(for_each_simplex_skip_iteration, typeST, list_of_t
   BOOST_CHECK(num_simplices_by_dim_until_two[0] == num_simplices_by_dim[0]);
   BOOST_CHECK(num_simplices_by_dim_until_two[1] == num_simplices_by_dim[1]);
 }
+
+struct Options_with_int_data : Simplex_tree_options_minimal {
+  typedef int Simplex_data;
+};
+
+BOOST_AUTO_TEST_CASE(simplex_data) {
+  Simplex_tree<Options_with_int_data> st;
+  st.insert_simplex_and_subfaces({0, 1});
+  st.insert_simplex_and_subfaces({2, 1});
+  st.insert_simplex_and_subfaces({0, 2});
+  st.simplex_data(st.find({0, 1})) = 5;
+  st.expansion(3);
+  st.simplex_data(st.find({0, 1, 2})) = 4;
+  BOOST_CHECK(st.simplex_data(st.find({0, 1})) == 5);
+}
