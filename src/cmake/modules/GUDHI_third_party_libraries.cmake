@@ -137,7 +137,7 @@ if (WITH_GUDHI_PYTHON)
   # Can be set with -DPython_EXECUTABLE=/usr/bin/python3 for instance.
   # CMP0094 OLD finds system python interpreter instead of conda even when using '-DCMAKE_PREFIX_PATH=$CONDA_PREFIX'
   cmake_policy(SET CMP0094 NEW)
-  find_package( Python COMPONENTS Interpreter)
+  find_package( Python COMPONENTS Interpreter Development.Module NumPy)
 
   # find_python_module tries to import module in Python interpreter and to retrieve its version number
   # returns ${PYTHON_MODULE_NAME_UP}_VERSION and ${PYTHON_MODULE_NAME_UP}_FOUND
@@ -152,7 +152,7 @@ if (WITH_GUDHI_PYTHON)
       # Remove all carriage returns as it can be multiline
       string(REGEX REPLACE "\n" " " PYTHON_MODULE_VERSION "${PYTHON_MODULE_VERSION}")
       message ("++ Python module ${PYTHON_MODULE_NAME} - Version ${PYTHON_MODULE_VERSION} found")
-  
+
       set(${PYTHON_MODULE_NAME_UP}_VERSION ${PYTHON_MODULE_VERSION} PARENT_SCOPE)
       set(${PYTHON_MODULE_NAME_UP}_FOUND TRUE PARENT_SCOPE)
     else()
@@ -183,7 +183,7 @@ if (WITH_GUDHI_PYTHON)
       set(${PYTHON_MODULE_NAME_UP}_FOUND FALSE PARENT_SCOPE)
     endif()
   endfunction( find_python_module_no_version )
-  
+
   if( TARGET Python::Interpreter )
     find_python_module("cython")
     find_python_module("pytest")
@@ -204,11 +204,11 @@ if (WITH_GUDHI_PYTHON)
     find_python_module_no_version("sphinxcontrib.bibtex")
     find_python_module("networkx")
   endif()
-  
+
   if(NOT GUDHI_PYTHON_PATH)
     message(FATAL_ERROR "ERROR: GUDHI_PYTHON_PATH is not valid.")
   endif(NOT GUDHI_PYTHON_PATH)
-  
+
   option(WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "Build with setting runtime_library_dirs. Useful when setting rpath is not allowed" ON)
-  
+
 endif (WITH_GUDHI_PYTHON)
