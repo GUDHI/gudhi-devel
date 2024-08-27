@@ -90,9 +90,6 @@ class One_critical_filtration : public std::vector<T>
 
   operator std::vector<T>() const { return static_cast<std::vector<T> >(*this); }
 
-  // needed in python
-  friend One_critical_filtration get_copy(const One_critical_filtration &f) { return f; }
-
   // like numpy
   template <typename U>
   One_critical_filtration<U> as_type() const
