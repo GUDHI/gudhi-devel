@@ -56,7 +56,7 @@ jobs:
           addToPath: true
           architecture: "x64"
 
-    - script: |
+      - script: |
         git submodule update --init
         python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
         IF %ERRORLEVEL% NEQ 0 EXIT 1
@@ -68,8 +68,8 @@ jobs:
         IF %ERRORLEVEL% NEQ 0 EXIT 1
         choco install -y ninja --force --force-dependencies
         IF %ERRORLEVEL% NEQ 0 EXIT 1
-      displayName: 'Install build dependencies'
-    - script: |
+        displayName: 'Install build dependencies'
+      - script: |
         $ErrorActionPreference = 'Stop'
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
         mkdir build
@@ -97,4 +97,4 @@ jobs:
         echo %PYTHONPATH%
         ctest --output-on-failure -C Release
         IF %ERRORLEVEL% NEQ 0 EXIT 1
-      displayName: 'Build and test'
+        displayName: 'Build and test'
