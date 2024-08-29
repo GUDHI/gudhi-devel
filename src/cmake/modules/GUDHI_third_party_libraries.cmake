@@ -137,7 +137,8 @@ if (WITH_GUDHI_PYTHON)
   # Can be set with -DPython_EXECUTABLE=/usr/bin/python3 for instance.
   # CMP0094 OLD finds system python interpreter instead of conda even when using '-DCMAKE_PREFIX_PATH=$CONDA_PREFIX'
   cmake_policy(SET CMP0094 NEW)
-  find_package( Python COMPONENTS Interpreter Development.Module NumPy)
+  # Should be Development.Module (Development also includes Development.Embed) but it would require cmake 3.18. TODO in a later version
+  find_package( Python COMPONENTS Interpreter Development NumPy)
 
   # find_python_module tries to import module in Python interpreter and to retrieve its version number
   # returns ${PYTHON_MODULE_NAME_UP}_VERSION and ${PYTHON_MODULE_NAME_UP}_FOUND
