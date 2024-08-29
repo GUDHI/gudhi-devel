@@ -123,20 +123,6 @@ class Multi_critical_filtration
     return Multi_critical_filtration<U>(std::move(out));
   }
 
-  // only needed once in multipers and does not need to be a friend, so could just be defined
-  // at the place it is needed and removed from here.
-  friend std::vector<std::vector<T>> get_content(const Multi_critical_filtration &f)
-  {
-    std::vector<std::vector<T>> out(f.num_generators(), std::vector<T>(f.num_parameters()));
-    const auto &cont = f.get_underlying_container();
-    for (std::size_t i = 0; i < f.num_generators(); ++i) {
-      for (std::size_t j = 0; j < f.num_parameters(); ++j) {
-        out[i][j] = cont[i][j];
-      }
-    }
-    return out;
-  }
-
   // ACCESS
 
   const Points &get_underlying_container() const { return multi_filtration_; }
@@ -256,8 +242,8 @@ class Multi_critical_filtration
       multi_filtration_ = {x};
       return;
     }
-    for (auto &fil : *this) {
-      fil.push_to(x);
+    for (auto &g : *this) {
+      g.push_to(x);
     }
 
     simplify();
@@ -282,8 +268,8 @@ class Multi_critical_filtration
       multi_filtration_ = {x};
       return;
     }
-    for (auto &fil : *this) {
-      fil.pull_to(x);
+    for (auto &g : *this) {
+      g.pull_to(x);
     }
 
     simplify();
@@ -366,11 +352,11 @@ class Multi_critical_filtration
   {
     if (f.num_generators() == 0) return Single_point();
     Single_point result(f.num_parameters(), Single_point::T_inf);
-    for (const auto &fil : f) {
-      if (fil.is_nan() || fil.is_minus_inf()) return fil;
-      if (fil.is_inf()) continue;
+    for (const auto &g : f) {
+      if (g.is_nan() || g.is_minus_inf()) return g;
+      if (g.is_inf()) continue;
       for (std::size_t i = 0; i < f.num_parameters(); ++i) {
-        result[i] = std::min(result[i], fil[i]);
+        result[i] = std::min(result[i], g[i]);
       }
     }
     return result;
@@ -384,11 +370,11 @@ class Multi_critical_filtration
   {
     if (f.num_generators() == 0) return Single_point();
     Single_point result(f.num_parameters(), -Single_point::T_inf);
-    for (auto &fil : f) {
-      if (fil.is_nan() || fil.is_inf()) return fil;
-      if (fil.is_minus_inf()) continue;
-      for (std::size_t i = 0; i < fil.num_parameters(); ++i) {
-        result[i] = std::max(result[i], fil[i]);
+    for (auto &g : f) {
+      if (g.is_nan() || g.is_inf()) return g;
+      if (g.is_minus_inf()) continue;
+      for (std::size_t i = 0; i < g.num_parameters(); ++i) {
+        result[i] = std::max(result[i], g[i]);
       }
     }
     return result;
