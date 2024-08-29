@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(one_critical_filtration_comparators, T, list_of_te
 {
   One_critical_filtration<T> f1({0, 1, 2});
   One_critical_filtration<T> f2({-1, 0, 1});
-  One_critical_filtration<T> f3({1, 2, 3});
+  One_critical_filtration<T> f3({0, 2, 3});
   One_critical_filtration<T> f4({5, -1, 2});
 
   BOOST_CHECK(!(f1 < f1));

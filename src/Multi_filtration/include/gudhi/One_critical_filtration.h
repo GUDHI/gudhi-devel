@@ -5,7 +5,7 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
- *      - 2024/08 Hannah Schreiber: Generalization to all arithmetic types for T
+ *      - 2024/08 Hannah Schreiber: Generalization to all signed arithmetic types for T
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -89,9 +89,6 @@ class One_critical_filtration : public std::vector<T>
   operator std::vector<T> &() const { return *this; }
 
   operator std::vector<T>() const { return static_cast<std::vector<T> >(*this); }
-
-  // needed in python
-  friend One_critical_filtration get_copy(const One_critical_filtration &f) { return f; }
 
   // like numpy
   template <typename U>
