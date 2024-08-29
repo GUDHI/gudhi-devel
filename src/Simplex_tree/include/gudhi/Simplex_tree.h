@@ -1927,10 +1927,10 @@ class Simplex_tree {
       Boundary_simplex_range&& boundary = boundary_simplex_range(sh);
       Filtration_value max_filt_border_value;
       if constexpr (SimplexTreeOptions::is_multi_parameter) {
-        // in that case, we assume that Filtration_value has a `push_to` member to handle this.
+        // in that case, we assume that Filtration_value has a `push_to_least_common_upper_bound` member to handle this.
         max_filt_border_value = Filtration_value(number_of_parameters_); 
         for (auto& face_sh : boundary) {
-          max_filt_border_value.push_to(
+          max_filt_border_value.push_to_least_common_upper_bound(
               filtration(face_sh));  // pushes the value of max_filt_border_value to reach simplex' filtration
         }
       } else {
@@ -1947,7 +1947,7 @@ class Simplex_tree {
         modified = true;
         if constexpr (Options::is_multi_parameter){
           auto& to_increase_filtration = filtration_mutable(sh);
-          to_increase_filtration.push_to(max_filt_border_value);
+          to_increase_filtration.push_to_least_common_upper_bound(max_filt_border_value);
         }
         else{
          sh->second.assign_filtration(max_filt_border_value);

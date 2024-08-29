@@ -5,7 +5,7 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
- *      - 2024/08 Hannah Schreiber: Generalization to all signed arithmetic types for T
+ *      - 2024/08 Hannah Schreiber: Generalization to all signed arithmetic types for T + doc
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -26,26 +26,35 @@
 namespace Gudhi::multi_filtration {
 
 /**
- * \brief Vector-like filtration value, for multiparameter persistence, with
- * numpy-like methods.
+ * @class One_critical_filtration one_critical_filtration.h gudhi/one_critical_filtration.h
+ * @ingroup multi_filtration
  *
- * \ingroup multi_filtration
+ * @brief Class representing the apparition values of a same simplex for several parameters, that is, the filtration
+ * value of a simplex in the setting of a 1-critical multi-parameter filtration. The class can be used as a vector
+ * whose indices correspond to one parameter each. It also has several numpy-like arithmetic operators.
  *
- * \details Child of `std::vector<T>` that has numpy-like pointwise operators.
- * One critical simplicial filtrations are filtrations such that the lifetime
- * each simplex is a positive cone, e.g.
+ * @details Inherits of `std::vector<T>`. Overloads `std::numeric_limits` such that:
+ * - `std::numeric_limits<One_critical_filtration<T> >::has_infinity` returns `true`,
+ * - `std::numeric_limits<One_critical_filtration<T> >::infinity()` returns @ref One_critical_filtration<T>::inf() "",
+ * - `std::numeric_limits<One_critical_filtration<T> >::minus_infinity()` returns
+ *   @ref One_critical_filtration<T>::minus_inf() "",
+ * - `std::numeric_limits<One_critical_filtration<T> >::max()` throws,
+ * - `std::numeric_limits<One_critical_filtration<T> >::max(n)` returns a @ref One_critical_filtration<T> with `n`
+ *   parameters evaluated at value `std::numeric_limits<T>::max()`,
+ * - `std::numeric_limits<One_critical_filtration<T> >::quiet_NaN()` returns @ref One_critical_filtration<T>::nan() "".
+ *
+ * One critical simplicial filtrations are filtrations such that the lifetime of each simplex is a positive cone, e.g.
  *  - \f$ \{ x \in  \mathbb R^2 : x>=(1,2)\} \f$ is valid, while
- *  - \f$ \{ x \in  \mathbb R^2 : x>=(1,2)\} \cap \{x \in  \mathbb R^2 :
- * x>=(2,1)\} \f$ is not- Finitely critical filtrations are filtrations such
- * that the lifetime of each simplex is a union of such cones, e.g.,
- *  - \f$ \{ x \in  \mathbb R^2 : x>=(1,2)\} \cap \{ x \in  \mathbb R^2 :
- * x>=(2,1)\} \f$ is finitely critical, and more particularly 2-critical, while
- *  - \f$ \{ x \in  \mathbb R^2 : x>= \mathrm{epigraph}(y\mapsto e^{-y})\} \f$
- * is not.
- * Use \ref Multi_critical_filtration for multi-critical filtrations.
- * \tparam T value type of the vector-like. Has to implement std::isnan(), std::numeric_limits<T>::has_quiet_NaN,
- * std::numeric_limits<T>::quiet_NaN(), std::numeric_limits<T>::has_infinity, std::numeric_limits<T>::infinity(),
- * std::numeric_limits<T>::max().
+ *  - \f$ \{ x \in  \mathbb R^2 : x>=(1,2)\} \cap \{x \in \mathbb R^2 : x>=(2,1)\} \f$ is not.
+ *
+ * If the lifetime corresponds to a union of such positive cones, the filtration is called a multi-critical filtration.
+ * For those cases, use @ref Multi_critical_filtration instead.
+ * 
+ * @tparam T Arithmetic type of an entry for one parameter of the filtration value. Has to be **signed** and
+ * to implement `std::isnan(T)`, `std::numeric_limits<T>::has_quiet_NaN`, `std::numeric_limits<T>::quiet_NaN()`,
+ * `std::numeric_limits<T>::has_infinity`, `std::numeric_limits<T>::infinity()` and `std::numeric_limits<T>::max()`.
+ * If `std::numeric_limits<T>::has_infinity` returns `false`, a call to `std::numeric_limits<T>::infinity()`
+ * can simply throw. Examples are the native types `double`, `float` and `int`.
  */
 template <typename T>
 class One_critical_filtration : public std::vector<T>
@@ -54,25 +63,82 @@ class One_critical_filtration : public std::vector<T>
   using Base = std::vector<T>;
 
  public:
+ /**
+  * @brief Type of the origin of a "simplex lifetime cone". Common with @ref Multi_critical_filtration "".
+  * In the 1-critical case, simply the class it-self.
+  * 
+  * @tparam U Type of a value for one parameter within the filtration value. Default value: `T`.
+  */
   template <typename U = T>
-  using Single_point = One_critical_filtration<U>;
+  using Generator = One_critical_filtration<U>;
 
   // CONSTRUCTORS
 
+  /**
+   * @brief Default constructor. Constructs an empty vector with 0 parameters.
+   */
   One_critical_filtration() : Base() {};
-  // warning: can be problematic if the user never updates the values and let it like that, {-inf, -inf, ...} is not
-  // considered as -inf.
-  One_critical_filtration(int n) : Base(n, -T_inf) {};  // minus infinity by default
+  /**
+   * @brief Constructs a vector of the size of the given number of parameters with -inf as value for each entry.
+   *
+   * @warning The vector `{-inf, -inf, ...}` with \f$ n > 1 \f$ entries is not considered as "minus infinity" (the
+   * method @ref is_minus_inf() will not return true). The `-inf` are just meant as placeholders, at least one entry
+   * should be modified by the user. Otherwise, either use the static method @ref minus_inf() or set @p n to 1 instead.
+   * 
+   * @param n Number of parameters.
+   */
+  One_critical_filtration(int n) : Base(n, -T_inf) {};
+  /**
+   * @brief Constructs a vector of the size of the given number of parameters and the given value for each entry.
+   *
+   * @warning If @p value is `inf`, `-inf`, or `NaN`, the vector `{value, value, ...}` with \f$ n > 1 \f$ entries
+   * is not wrong but will not be considered as respectively "infinity", "minus infinity" or "NaN" (the corresponding
+   * methods @ref is_inf(), @ref is_minus_inf() and @ref is_nan() will return false). For this purpose, please use
+   * the static methods @ref inf(), @ref minus_inf() and @ref nan() instead.
+   * 
+   * @param n Number of parameters.
+   * @param value Value which will be used for each entry.
+   */
   One_critical_filtration(int n, T value) : Base(n, value) {};
+  /**
+   * @brief Construct a vector from the given initializer list.
+   * 
+   * @param init Initializer list with values for each parameter.
+   */
   One_critical_filtration(std::initializer_list<T> init) : Base(init) {};
+  /**
+   * @brief Construct a vector from the given vector.
+   * 
+   * @param v Vector with values for each parameter.
+   */
   One_critical_filtration(const std::vector<T> &v) : Base(v) {};
+  /**
+   * @brief Construct a vector from the given vector by moving it to the new vector.
+   * 
+   * @param v Vector with values for each parameter.
+   */
   One_critical_filtration(std::vector<T> &&v) : Base(std::move(v)) {};
+  /**
+   * @brief Construct a vector from the range given by the begin and end iterators.
+   * 
+   * @param it_begin Start of the range.
+   * @param it_end End of the range.
+   */
   One_critical_filtration(typename std::vector<T>::iterator it_begin, typename std::vector<T>::iterator it_end)
       : Base(it_begin, it_end) {};
+  /**
+   * @brief Construct a vector from the range given by the begin and end const iterators.
+   * 
+   * @param it_begin Start of the range.
+   * @param it_end End of the range.
+   */
   One_critical_filtration(typename std::vector<T>::const_iterator it_begin,
                           typename std::vector<T>::const_iterator it_end)
       : Base(it_begin, it_end) {};
 
+  /**
+   * @brief Assign operator.
+   */
   One_critical_filtration &operator=(const One_critical_filtration &a)
   {
     Base::operator=(a);
@@ -81,16 +147,28 @@ class One_critical_filtration : public std::vector<T>
 
   // HERITAGE
 
-  using std::vector<T>::operator[];
-  using value_type = T;
+  using std::vector<T>::operator[]; /**< Inheritance of entry access. */
+  using value_type = T;             /**< Entry type. */
 
   // CONVERTERS
 
+  /**
+   * @brief Cast into `std::vector<T> &`.
+   */
   operator std::vector<T> &() const { return *this; }
 
+  /**
+   * @brief Cast into `std::vector<T>`.
+   */
   operator std::vector<T>() const { return static_cast<std::vector<T> >(*this); }
 
   // like numpy
+  /**
+   * @brief Returns a copy with entries casted into the type given as template parameter.
+   * 
+   * @tparam U New type for the entries.
+   * @return Copy with new entry type.
+   */
   template <typename U>
   One_critical_filtration<U> as_type() const
   {
@@ -102,12 +180,33 @@ class One_critical_filtration : public std::vector<T>
 
   // ACCESS
 
+  /**
+   * @brief Returns the number of parameters of the finite filtration value. If the value is "inf", "-inf" or "NaN",
+   * returns 1.
+   * 
+   * @return Number of parameters.
+   */
   std::size_t num_parameters() const { return Base::size(); }
 
+  /**
+   * @brief Returns a filtration value for which @ref is_inf() returns `true`.
+   * 
+   * @return Infinity.
+   */
   constexpr static One_critical_filtration inf() { return {T_inf}; }
 
+  /**
+   * @brief Returns a filtration value for which @ref is_minus_inf() returns `true`.
+   * 
+   * @return Minus infinity.
+   */
   constexpr static One_critical_filtration minus_inf() { return {-T_inf}; }
 
+  /**
+   * @brief Returns a filtration value for which @ref is_nan() returns `true`.
+   * 
+   * @return NaN.
+   */
   constexpr static One_critical_filtration nan()
   {
     if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
@@ -119,12 +218,20 @@ class One_critical_filtration : public std::vector<T>
 
   // DESCRIPTORS
 
+  //TODO: Accept {-inf, -inf, ...} / {inf, inf, ...} / {NaN, NaN, ...} as resp. -inf / inf / NaN.
+
+  /**
+   * @brief Returns `true` if and only if the filtration value is considered as infinity.
+   */
   bool is_inf() const
   {
     if (Base::size() != 1) return false;
     return (Base::operator[](0) == T_inf);
   }
 
+  /**
+   * @brief Returns `true` if and only if the filtration value is considered as minus infinity.
+   */
   bool is_minus_inf() const
   {
     if constexpr (std::is_same<T, bool>::value) {
@@ -135,6 +242,9 @@ class One_critical_filtration : public std::vector<T>
     }
   }
 
+  /**
+   * @brief Returns `true` if and only if the filtration value is considered as NaN.
+   */
   bool is_nan() const
   {
     if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
@@ -145,6 +255,10 @@ class One_critical_filtration : public std::vector<T>
     }
   }
 
+  /**
+   * @brief Returns `true` if and only if the filtration value is non-empty and is not considered as infinity,
+   * minus infinity or NaN.
+   */
   bool is_finite() const
   {
     if (Base::size() > 1) return true;
@@ -156,13 +270,20 @@ class One_critical_filtration : public std::vector<T>
 
   // COMPARAISON OPERATORS
 
+  /**
+   * @brief Returns `true` if and only if for each \f$ i \f$, \f$ a[i] \f$ is strictly smaller than \f$ b[i] \f$.
+   * If @p a and @p b are both not infinite or NaN, they have to have the same number of parameters.
+   *
+   * Note that not all filtration values are comparable. That is, \f$ a < b \f$ and \f$ b < a \f$ returning both false
+   * does **not** imply \f$ a == b \f$.
+   */
   friend bool operator<(const One_critical_filtration &a, const One_critical_filtration &b)
   {
     if (a.is_inf() || a.is_nan() || b.is_nan() || b.is_minus_inf()) return false;
     if (b.is_inf() || a.is_minus_inf()) return true;
     bool isSame = true;
     auto n = a.size();
-    GUDHI_CHECK(a.size() == b.size(), "Two filtration points with different number of parameters are not comparable.");
+    GUDHI_CHECK(a.size() == b.size(), "Two filtration values with different number of parameters are not comparable.");
     for (auto i = 0u; i < n; ++i) {
       if (a[i] > b[i]) return false;
       if (isSame && a[i] != b[i]) isSame = false;
@@ -170,23 +291,47 @@ class One_critical_filtration : public std::vector<T>
     return !isSame;
   }
 
+  /**
+   * @brief Returns `true` if and only if for each \f$ i \f$, \f$ a[i] \f$ is smaller or equal than \f$ b[i] \f$.
+   * If @p a and @p b are both not infinite or NaN, they have to have the same number of parameters.
+   *
+   * Note that not all filtration values are comparable. That is, \f$ a \le b \f$ and \f$ b \le a \f$ can both return
+   * `false`.
+   */
   friend bool operator<=(const One_critical_filtration &a, const One_critical_filtration &b)
   {
     if (a.is_nan() || b.is_nan()) return false;
     if (b.is_inf() || a.is_minus_inf()) return true;
     if (a.is_inf() || b.is_minus_inf()) return false;
     auto n = a.size();
-    GUDHI_CHECK(a.size() == b.size(), "Two filtration points with different number of parameters are not comparable.");
+    GUDHI_CHECK(a.size() == b.size(), "Two filtration values with different number of parameters are not comparable.");
     for (std::size_t i = 0u; i < n; ++i) {
       if (a[i] > b[i]) return false;
     }
     return true;
   }
 
+  /**
+   * @brief Returns `true` if and only if for each \f$ i \f$, \f$ a[i] \f$ is strictly greater than \f$ b[i] \f$.
+   * If @p a and @p b are both not infinite or NaN, they have to have the same number of parameters.
+   *
+   * Note that not all filtration values are comparable. That is, \f$ a > b \f$ and \f$ b > a \f$ returning both false
+   * does **not** imply \f$ a == b \f$.
+   */
   friend bool operator>(const One_critical_filtration &a, const One_critical_filtration &b) { return b < a; }
 
+  /**
+   * @brief Returns `true` if and only if for each \f$ i \f$, \f$ a[i] \f$ is greater or equal than \f$ b[i] \f$.
+   * If @p a and @p b are both not infinite or NaN, they have to have the same number of parameters.
+   *
+   * Note that not all filtration values are comparable. That is, \f$ a \ge b \f$ and \f$ b \ge a \f$ can both return
+   * `false`.
+   */
   friend bool operator>=(const One_critical_filtration &a, const One_critical_filtration &b) { return b <= a; }
 
+  /**
+   * @brief Returns `true` if and only if for each \f$ i \f$, \f$ a[i] \f$ is equal to \f$ b[i] \f$.
+   */
   friend bool operator==(const One_critical_filtration &a, const One_critical_filtration &b)
   {
     if (a.num_parameters() != b.num_parameters()) return false;
@@ -196,11 +341,23 @@ class One_critical_filtration : public std::vector<T>
     return true;
   }
 
+  /**
+   * @brief Returns `true` if and only if \f$ a == b \f$ returns `false`.
+   */
   friend bool operator!=(const One_critical_filtration &a, const One_critical_filtration &b) { return !(a == b); }
 
   // ARITHMETIC OPERATORS
 
   // opposite
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ -f[i] \f$.
+   *
+   * Used conventions:
+   * - \f$ -NaN = NaN \f$.
+   * 
+   * @param f Value to opposite.
+   * @return The opposite of @p f.
+   */
   friend One_critical_filtration operator-(const One_critical_filtration &f)
   {
     One_critical_filtration result;
@@ -211,34 +368,94 @@ class One_critical_filtration : public std::vector<T>
     return result;
   }
 
-  // One_critical_filtration &operator-()
-  // {
-  //   for (auto &val : *this) {
-  //     val = -val;
-  //   }
-  // }
-
   // subtraction
-  friend One_critical_filtration operator-(One_critical_filtration result, const One_critical_filtration &to_subtract)
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ a[i] - b[i] \f$.
+   * If @p a and @p b are both not infinite or NaN, they have to have the same number of parameters.
+   *
+   * Used conventions:
+   * - \f$ inf - inf = NaN \f$,
+   * - \f$ -inf - (-inf) = NaN \f$,
+   * - \f$ NaN - b = NaN \f$,
+   * - \f$ a - NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param a First element of the subtraction.
+   * @param b Second element of the subtraction.
+   * @return Entry-wise \f$ a - b \f$.
+   */
+  friend One_critical_filtration operator-(One_critical_filtration a, const One_critical_filtration &b)
   {
-    result -= to_subtract;
-    return result;
+    a -= b;
+    return a;
   }
 
-  friend One_critical_filtration operator-(One_critical_filtration result, const T &to_subtract)
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ f[i] - val \f$.
+   *
+   * Used conventions:
+   * - \f$ inf - inf = NaN \f$,
+   * - \f$ -inf - (-inf) = NaN \f$,
+   * - \f$ NaN - b = NaN \f$,
+   * - \f$ a - NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param f First element of the subtraction.
+   * @param val Second element of the subtraction.
+   * @return Entry-wise \f$ f - val \f$.
+   */
+  friend One_critical_filtration operator-(One_critical_filtration f, const T &val)
   {
-    result -= to_subtract;
-    return result;
+    f -= val;
+    return f;
   }
 
-  friend One_critical_filtration operator-(const T &value, One_critical_filtration result)
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ val - f[i] \f$.
+   *
+   * Used conventions:
+   * - \f$ inf - inf = NaN \f$,
+   * - \f$ -inf - (-inf) = NaN \f$,
+   * - \f$ NaN - b = NaN \f$,
+   * - \f$ a - NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param val First element of the subtraction.
+   * @param f Second element of the subtraction.
+   * @return Entry-wise \f$ val - f \f$.
+   */
+  friend One_critical_filtration operator-(const T &val, One_critical_filtration f)
   {
     // TODO: in one go
-    result = -result;
-    result += value;
-    return result;
+    f = -f;
+    f += val;
+    return f;
   }
 
+  /**
+   * @brief Modifies the first parameters such that an entry at index \f$ i \f$ is equal to
+   * \f$ result[i] - to\_subtract[i] \f$.
+   * If @p result and @p to_subtract are both not infinite or NaN, they have to have the same number of parameters.
+   *
+   * Used conventions:
+   * - \f$ inf - inf = NaN \f$,
+   * - \f$ -inf - (-inf) = NaN \f$,
+   * - \f$ NaN - b = NaN \f$,
+   * - \f$ a - NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param result First element of the subtraction.
+   * @param to_subtract Second element of the subtraction.
+   * @return Entry-wise \f$ result - to\_subtract \f$.
+   */
   friend One_critical_filtration &operator-=(One_critical_filtration &result,
                                              const One_critical_filtration &to_subtract)
   {
@@ -259,11 +476,28 @@ class One_critical_filtration : public std::vector<T>
     }
 
     GUDHI_CHECK(result.size() == to_subtract.size(),
-                "Two filtration points with different number of parameters cannot be subtracted.");
+                "Two filtration values with different number of parameters cannot be subtracted.");
 
     return apply_operation_with_finite_values_(result, to_subtract, subtract_);
   }
 
+  /**
+   * @brief Modifies the first parameters such that an entry at index \f$ i \f$ is equal to
+   * \f$ result[i] - to\_subtract \f$.
+   *
+   * Used conventions:
+   * - \f$ inf - inf = NaN \f$,
+   * - \f$ -inf - (-inf) = NaN \f$,
+   * - \f$ NaN - b = NaN \f$,
+   * - \f$ a - NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param result First element of the subtraction.
+   * @param to_subtract Second element of the subtraction.
+   * @return Entry-wise \f$ result - to\_subtract \f$.
+   */
   friend One_critical_filtration &operator-=(One_critical_filtration &result, const T &to_subtract)
   {
     if (result.empty()) return result;
@@ -286,24 +520,83 @@ class One_critical_filtration : public std::vector<T>
   }
 
   // addition
-  friend One_critical_filtration operator+(One_critical_filtration result, const One_critical_filtration &to_add)
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ a[i] + b[i] \f$.
+   * If @p a and @p b are both not infinite or NaN, they have to have the same number of parameters.
+   *
+   * Used conventions:
+   * - \f$ NaN + b = NaN \f$,
+   * - \f$ a + NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param a First element of the addition.
+   * @param b Second element of the addition.
+   * @return Entry-wise \f$ a + b \f$.
+   */
+  friend One_critical_filtration operator+(One_critical_filtration a, const One_critical_filtration &b)
   {
-    result += to_add;
-    return result;
+    a += b;
+    return a;
   }
 
-  friend One_critical_filtration operator+(One_critical_filtration result, const T &to_add)
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ f[i] + val \f$.
+   *
+   * Used conventions:
+   * - \f$ NaN + b = NaN \f$,
+   * - \f$ a + NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param f First element of the addition.
+   * @param val Second element of the addition.
+   * @return Entry-wise \f$ f + val \f$.
+   */
+  friend One_critical_filtration operator+(One_critical_filtration f, const T &val)
   {
-    result += to_add;
-    return result;
+    f += val;
+    return f;
   }
 
-  friend One_critical_filtration operator+(const T &to_add, One_critical_filtration result)
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ val + f[i] \f$.
+   *
+   * Used conventions:
+   * - \f$ NaN + b = NaN \f$,
+   * - \f$ a + NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param val First element of the addition.
+   * @param f Second element of the addition.
+   * @return Entry-wise \f$ val + f \f$.
+   */
+  friend One_critical_filtration operator+(const T &val, One_critical_filtration f)
   {
-    result += to_add;
-    return result;
+    f += val;
+    return f;
   }
 
+  /**
+   * @brief Modifies the first parameters such that an entry at index \f$ i \f$ is equal to
+   * \f$ result[i] + to\_add[i] \f$.
+   * If @p result and @p to_add are both not infinite or NaN, they have to have the same number of parameters.
+   *
+   * Used conventions:
+   * - \f$ NaN + b = NaN \f$,
+   * - \f$ a + NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param result First element of the addition.
+   * @param to_add Second element of the addition.
+   * @return Entry-wise \f$ result + to\_add \f$.
+   */
   friend One_critical_filtration &operator+=(One_critical_filtration &result, const One_critical_filtration &to_add)
   {
     if (result.empty()) return result;
@@ -323,11 +616,26 @@ class One_critical_filtration : public std::vector<T>
     }
 
     GUDHI_CHECK(result.size() == to_add.size(),
-                "Two filtration points with different number of parameters cannot be added.");
+                "Two filtration values with different number of parameters cannot be added.");
 
     return apply_operation_with_finite_values_(result, to_add, add_);
   }
 
+  /**
+   * @brief Modifies the first parameters such that an entry at index \f$ i \f$ is equal to
+   * \f$ result[i] + to\_add \f$.
+   *
+   * Used conventions:
+   * - \f$ NaN + b = NaN \f$,
+   * - \f$ a + NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param result First element of the addition.
+   * @param to_add Second element of the addition.
+   * @return Entry-wise \f$ result + to\_add \f$.
+   */
   friend One_critical_filtration &operator+=(One_critical_filtration &result, const T &to_add)
   {
     if (result.empty()) return result;
@@ -350,24 +658,99 @@ class One_critical_filtration : public std::vector<T>
   }
 
   // multiplication
-  friend One_critical_filtration operator*(One_critical_filtration result, const One_critical_filtration &to_mul)
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ a[i] * b[i] \f$.
+   * If @p a and @p b are both not infinite or NaN, they have to have the same number of parameters.
+   *
+   * Used conventions:
+   * - \f$ inf * 0 = NaN \f$,
+   * - \f$ 0 * inf = NaN \f$,
+   * - \f$ -inf * 0 = NaN \f$,
+   * - \f$ 0 * -inf = NaN \f$,
+   * - \f$ NaN * b = NaN \f$,
+   * - \f$ a * NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param a First element of the multiplication.
+   * @param b Second element of the multiplication.
+   * @return Entry-wise \f$ a * b \f$.
+   */
+  friend One_critical_filtration operator*(One_critical_filtration a, const One_critical_filtration &b)
   {
-    result *= to_mul;
-    return result;
+    a *= b;
+    return a;
   }
 
-  friend One_critical_filtration operator*(One_critical_filtration result, const T &to_mul)
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ f[i] * val \f$.
+   *
+   * Used conventions:
+   * - \f$ inf * 0 = NaN \f$,
+   * - \f$ 0 * inf = NaN \f$,
+   * - \f$ -inf * 0 = NaN \f$,
+   * - \f$ 0 * -inf = NaN \f$,
+   * - \f$ NaN * b = NaN \f$,
+   * - \f$ a * NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param f First element of the multiplication.
+   * @param val Second element of the multiplication.
+   * @return Entry-wise \f$ f * val \f$.
+   */
+  friend One_critical_filtration operator*(One_critical_filtration f, const T &val)
   {
-    result *= to_mul;
-    return result;
+    f *= val;
+    return f;
   }
 
-  friend One_critical_filtration operator*(const T &to_mul, One_critical_filtration result)
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ val * f[i] \f$.
+   *
+   * Used conventions:
+   * - \f$ inf * 0 = NaN \f$,
+   * - \f$ 0 * inf = NaN \f$,
+   * - \f$ -inf * 0 = NaN \f$,
+   * - \f$ 0 * -inf = NaN \f$,
+   * - \f$ NaN * b = NaN \f$,
+   * - \f$ a * NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param val First element of the multiplication.
+   * @param f Second element of the multiplication.
+   * @return Entry-wise \f$ val * f \f$.
+   */
+  friend One_critical_filtration operator*(const T &val, One_critical_filtration f)
   {
-    result *= to_mul;
-    return result;
+    f *= val;
+    return f;
   }
 
+  /**
+   * @brief Modifies the first parameters such that an entry at index \f$ i \f$ is equal to
+   * \f$ result[i] * to\_mul[i] \f$.
+   * If @p result and @p to_mul are both not infinite or NaN, they have to have the same number of parameters.
+   *
+   * Used conventions:
+   * - \f$ inf * 0 = NaN \f$,
+   * - \f$ 0 * inf = NaN \f$,
+   * - \f$ -inf * 0 = NaN \f$,
+   * - \f$ 0 * -inf = NaN \f$,
+   * - \f$ NaN * b = NaN \f$,
+   * - \f$ a * NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param result First element of the multiplication.
+   * @param to_mul Second element of the multiplication.
+   * @return Entry-wise \f$ result * to\_mul \f$.
+   */
   friend One_critical_filtration &operator*=(One_critical_filtration &result, const One_critical_filtration &to_mul)
   {
     if (result.empty()) return result;
@@ -395,11 +778,30 @@ class One_critical_filtration : public std::vector<T>
     }
 
     GUDHI_CHECK(result.size() == to_mul.size(),
-                "Two filtration points with different number of parameters cannot be multiplied.");
+                "Two filtration values with different number of parameters cannot be multiplied.");
 
     return apply_operation_with_finite_values_(result, to_mul, multiply_);
   }
 
+  /**
+   * @brief Modifies the first parameters such that an entry at index \f$ i \f$ is equal to
+   * \f$ result[i] * to\_mul \f$.
+   *
+   * Used conventions:
+   * - \f$ inf * 0 = NaN \f$,
+   * - \f$ 0 * inf = NaN \f$,
+   * - \f$ -inf * 0 = NaN \f$,
+   * - \f$ 0 * -inf = NaN \f$,
+   * - \f$ NaN * b = NaN \f$,
+   * - \f$ a * NaN = NaN \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param result First element of the multiplication.
+   * @param to_mul Second element of the multiplication.
+   * @return Entry-wise \f$ result * to\_mul \f$.
+   */
   friend One_critical_filtration &operator*=(One_critical_filtration &result, const T &to_mul)
   {
     if (result.empty()) return result;
@@ -421,28 +823,115 @@ class One_critical_filtration : public std::vector<T>
   }
 
   // division
-  friend One_critical_filtration operator/(One_critical_filtration result, const One_critical_filtration &to_div)
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ a[i] / b[i] \f$.
+   * If @p a and @p b are both not infinite or NaN, they have to have the same number of parameters.
+   *
+   * Used conventions:
+   * - \f$ a / 0 = NaN \f$,
+   * - \f$ inf / inf = NaN \f$,
+   * - \f$ -inf / inf = NaN \f$,
+   * - \f$ inf / -inf = NaN \f$,
+   * - \f$ -inf / -inf = NaN \f$,
+   * - \f$ NaN / b = NaN \f$,
+   * - \f$ a / NaN = NaN \f$,
+   * - \f$ a / inf = 0 \f$,
+   * - \f$ a / -inf = 0 \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param a First element of the division.
+   * @param b Second element of the division.
+   * @return Entry-wise \f$ a / b \f$.
+   */
+  friend One_critical_filtration operator/(One_critical_filtration a, const One_critical_filtration &b)
   {
-    result /= to_div;
-    return result;
+    a /= b;
+    return a;
   }
 
-  friend One_critical_filtration operator/(One_critical_filtration result, const T &to_div)
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ f[i] / val \f$.
+   *
+   * Used conventions:
+   * - \f$ a / 0 = NaN \f$,
+   * - \f$ inf / inf = NaN \f$,
+   * - \f$ -inf / inf = NaN \f$,
+   * - \f$ inf / -inf = NaN \f$,
+   * - \f$ -inf / -inf = NaN \f$,
+   * - \f$ NaN / b = NaN \f$,
+   * - \f$ a / NaN = NaN \f$,
+   * - \f$ a / inf = 0 \f$,
+   * - \f$ a / -inf = 0 \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param f First element of the division.
+   * @param val Second element of the division.
+   * @return Entry-wise \f$ f / val \f$.
+   */
+  friend One_critical_filtration operator/(One_critical_filtration f, const T &val)
   {
-    result /= to_div;
-    return result;
+    f /= val;
+    return f;
   }
 
-  friend One_critical_filtration operator/(const T &value, const One_critical_filtration &f)
+  /**
+   * @brief Returns a filtration value such that an entry at index \f$ i \f$ is equal to \f$ val / f[i] \f$.
+   *
+   * Used conventions:
+   * - \f$ a / 0 = NaN \f$,
+   * - \f$ inf / inf = NaN \f$,
+   * - \f$ -inf / inf = NaN \f$,
+   * - \f$ inf / -inf = NaN \f$,
+   * - \f$ -inf / -inf = NaN \f$,
+   * - \f$ NaN / b = NaN \f$,
+   * - \f$ a / NaN = NaN \f$,
+   * - \f$ a / inf = 0 \f$,
+   * - \f$ a / -inf = 0 \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param val First element of the division.
+   * @param f Second element of the division.
+   * @return Entry-wise \f$ val / f \f$.
+   */
+  friend One_critical_filtration operator/(const T &val, const One_critical_filtration &f)
   {
     if (f.empty()) return f;
-    if (std::isnan(value) || f.is_nan()) return nan();
+    if (std::isnan(val) || f.is_nan()) return nan();
 
-    One_critical_filtration result(f.size(), value);
+    One_critical_filtration result(f.size(), val);
     result /= f;
     return result;
   }
 
+  /**
+   * @brief Modifies the first parameters such that an entry at index \f$ i \f$ is equal to
+   * \f$ result[i] / to\_div[i] \f$.
+   * If @p result and @p to_div are both not infinite or NaN, they have to have the same number of parameters.
+   *
+   * Used conventions:
+   * - \f$ a / 0 = NaN \f$,
+   * - \f$ inf / inf = NaN \f$,
+   * - \f$ -inf / inf = NaN \f$,
+   * - \f$ inf / -inf = NaN \f$,
+   * - \f$ -inf / -inf = NaN \f$,
+   * - \f$ NaN / b = NaN \f$,
+   * - \f$ a / NaN = NaN \f$,
+   * - \f$ a / inf = 0 \f$,
+   * - \f$ a / -inf = 0 \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param result First element of the division.
+   * @param to_div Second element of the division.
+   * @return Entry-wise \f$ result / to\_div \f$.
+   */
   friend One_critical_filtration &operator/=(One_critical_filtration &result, const One_critical_filtration &to_div)
   {
     if (result.empty()) return result;
@@ -460,7 +949,7 @@ class One_critical_filtration : public std::vector<T>
     }
 
     GUDHI_CHECK(res_is_infinite || result.size() == to_div.size(),
-                "Two filtration points with different number of parameters cannot be divided.");
+                "Two filtration values with different number of parameters cannot be divided.");
 
     if (res_is_infinite) {
       result.resize(to_div.size(), result[0]);
@@ -469,6 +958,28 @@ class One_critical_filtration : public std::vector<T>
     return apply_operation_with_finite_values_(result, to_div, divide_);
   }
 
+  /**
+   * @brief Modifies the first parameters such that an entry at index \f$ i \f$ is equal to
+   * \f$ result[i] / to\_div \f$.
+   *
+   * Used conventions:
+   * - \f$ a / 0 = NaN \f$,
+   * - \f$ inf / inf = NaN \f$,
+   * - \f$ -inf / inf = NaN \f$,
+   * - \f$ inf / -inf = NaN \f$,
+   * - \f$ -inf / -inf = NaN \f$,
+   * - \f$ NaN / b = NaN \f$,
+   * - \f$ a / NaN = NaN \f$,
+   * - \f$ a / inf = 0 \f$,
+   * - \f$ a / -inf = 0 \f$.
+   *
+   * If `std::numeric_limits<T>::has_quiet_NaN` is false, then the returned filtration value will be @ref nan()
+   * if any operation results in NaN, not only if all operations result in NaN.
+   * 
+   * @param result First element of the division.
+   * @param to_div Second element of the division.
+   * @return Entry-wise \f$ result / to\_div \f$.
+   */
   friend One_critical_filtration &operator/=(One_critical_filtration &result, const T &to_div)
   {
     if (result.empty()) return result;
@@ -491,13 +1002,16 @@ class One_critical_filtration : public std::vector<T>
 
   // MODIFIERS
 
-  /** \brief This functions take the filtration value `this` and pushes it to
-   * the cone \f$ \{ y\in \mathbb R^n : y>=x \} \f$. After calling this method,
-   * the value of this is updated to \f$ \mathrm{this} = \min \{ y\in \mathbb
-   * R^n : y>=this \}\cap \{ y\in \mathbb R^n : y>=x \}
-   * @param[in] x The target filtration value on which to push `this`.
+  /**
+   * @brief Sets the filtration value to the least common upper bound between the current value and the given value.
+   *
+   * More formally, it pushes the current filtration value to the cone \f$ \{ y \in \mathbb R^n : y \ge x \} \f$
+   * originating in the given filtration value \f$ x \f$. The resulting value corresponds to the intersection of both
+   * cones: \f$ \mathrm{this} = \min \{ y \in \mathbb R^n : y \ge this \} \cap \{ y \in \mathbb R^n : y \ge x \} \f$.
+   * 
+   * @param x The target filtration value towards which to push.
    */
-  void push_to(const One_critical_filtration &x)
+  void push_to_least_common_upper_bound(const One_critical_filtration &x)
   {
     if (this->is_inf() || this->is_nan() || x.is_nan() || x.is_minus_inf()) return;
     if (x.is_inf() || this->is_minus_inf()) {
@@ -512,13 +1026,16 @@ class One_critical_filtration : public std::vector<T>
       Base::operator[](i) = Base::operator[](i) > x[i] ? Base::operator[](i) : x[i];
   }
 
-  /** \brief This functions take the filtration value `this` and pulls it to the
-   * cone \f$ \{ y\in \mathbb R^n : y<=x \} \f$. After calling this method, the
-   * value of this is updated to \f$ \mathrm{this} = \max \{ y\in \mathbb R^n :
-   * y<=this \}\cap \{ y\in \mathbb R^n : y<=x \}
-   * @param[in] x The target filtration value on which to push `this`.
+  /**
+   * @brief Sets the filtration value to the greatest common lower bound between the current value and the given value.
+   *
+   * More formally, it pulls the current filtration value to the cone \f$ \{ y \in \mathbb R^n : y \le x \} \f$
+   * originating in the given filtration value \f$ x \f$. The resulting value corresponds to the intersection of both
+   * cones: \f$ \mathrm{this} = \min \{ y \in \mathbb R^n : y \le this \} \cap \{ y \in \mathbb R^n : y \le x \} \f$.
+   * 
+   * @param x The target filtration value towards which to pull.
    */
-  void pull_to(const One_critical_filtration &x)
+  void pull_to_greatest_common_lower_bound(const One_critical_filtration &x)
   {
     if (x.is_inf() || this->is_nan() || x.is_nan() || this->is_minus_inf()) return;
     if (this->is_inf() || x.is_minus_inf()) {
@@ -533,8 +1050,20 @@ class One_critical_filtration : public std::vector<T>
       Base::operator[](i) = Base::operator[](i) > x[i] ? x[i] : Base::operator[](i);
   }
 
-  /*
-   * Same as `compute_coordinates_in_grid` but does the operation in-place
+  /**
+   * @brief Projects the filtration value into the given grid. If @p coordinate is false, the entries are set to
+   * the nearest upper bound value with the same parameter in the grid. Otherwise, the entries are set to the indices
+   * of those nearest upper bound values.
+   * The grid has to be represented as a vector of ordered ranges of values convertible into `T`. An index
+   * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in the filtration value.
+   * The ranges correspond to the possible values of the parameters, ordered by increasing value, forming therefore
+   * all together a 2D grid.
+   * 
+   * @tparam oned_array A range of values convertible into `T` ordered by increasing value. Has to implement
+   * a begin, end and operator[] method.
+   * @param grid Vector of @p oned_array with size at least number of filtration parameters.
+   * @param coordinate If true, the values are set to the coordinates of the projection in the grid. If false,
+   * the values are set to the values at the coordinates of the projection.
    */
   template <typename oned_array>
   void project_onto_grid(const std::vector<oned_array> &grid, bool coordinate = true)
@@ -554,7 +1083,14 @@ class One_critical_filtration : public std::vector<T>
 
   // FONCTIONNALITIES
 
-  // scalar product of a filtration value with x.
+  /**
+   * @brief Computes the scalar product of the given filtration value with the given vector.
+   * 
+   * @tparam U Arithmetic type of the result. Default value: `T`.
+   * @param f Filtration value.
+   * @param x Vector of coefficients.
+   * @return Scalar product of @p f with @p x.
+   */
   template <typename U = T>
   friend U compute_linear_projection(const One_critical_filtration &f, const std::vector<U> &x)
   {
@@ -564,6 +1100,12 @@ class One_critical_filtration : public std::vector<T>
     return projection;
   }
 
+  /**
+   * @brief Computes the norm of the given filtration value.
+   * 
+   * @param f Filtration value.
+   * @return The norm of @p f.
+   */
   friend T compute_norm(const One_critical_filtration &f)
   {
     T out = 0;
@@ -571,6 +1113,13 @@ class One_critical_filtration : public std::vector<T>
     return std::sqrt(out);
   }
 
+  /**
+   * @brief Computes the euclidean distance from the first parameter to the second parameter.
+   * 
+   * @param f Start filtration value.
+   * @param other End filtration value.
+   * @return Euclidean distance between @p f and @p other.
+   */
   friend T compute_euclidean_distance_to(const One_critical_filtration &f, const One_critical_filtration &other)
   {
     T out = 0;
@@ -581,9 +1130,19 @@ class One_critical_filtration : public std::vector<T>
   }
 
   /**
-   * Given a grid in an array of shape (num_parameters, filtration_values of this parameter),
-   * projects itself into this grid, and returns the coordinates of this projected points
-   * in the given grid
+   * @brief Computes the coordinates in the given grid, corresponding to the nearest upper bounds of the entries
+   * in the given filtration value.
+   * The grid has to be represented as a vector of vectors of ordered values convertible into `out_type`. An index
+   * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in the filtration value.
+   * The inner vectors correspond to the possible values of the parameters, ordered by increasing value,
+   * forming therefore all together a 2D grid.
+   * 
+   * @tparam out_type Signed arithmetic type. Default value: std::int32_t.
+   * @tparam U Type which is convertible into `out_type`.
+   * @param f Filtration value to project.
+   * @param grid Vector of vectors to project into.
+   * @return Filtration value \f$ out \f$ whose entry correspond to the indices of the projected values. That is,
+   * the projection of \f$ f[i] \f$ is \f$ grid[i][out[i]] \f$.
    */
   template <typename out_type = std::int32_t, typename U = T>
   friend One_critical_filtration<out_type> compute_coordinates_in_grid(const One_critical_filtration &f,
@@ -593,11 +1152,16 @@ class One_critical_filtration : public std::vector<T>
     coords.project_onto_grid(grid);
     return coords;
   }
-
+  
   /**
-   * Given a grid in an array of shape (num_parameters, filtration_values of this parameter),
-   * and assuming that `this` correspond to the coordinates in this grid,
-   * returns the points evaluated in this grid
+   * @brief Computes the values in the given grid corresponding to the coordinates given by the given filtration 
+   * value. That is, if \f$ out \f$ is the result, \f$ out[i] = grid[i][f[i]] \f$. Assumes therefore, that the 
+   * values stored in the filtration value corresponds to indices existing in the given grid.
+   * 
+   * @tparam U Signed arithmetic type.
+   * @param f Filtration value storing coordinates compatible with `grid`.
+   * @param grid Vector of vector.
+   * @return Filtration value \f$ out \f$ whose entry correspond to \f$ out[i] = grid[i][f[i]] \f$.
    */
   template <typename U>
   friend One_critical_filtration<U> evaluate_coordinates_in_grid(const One_critical_filtration &f,
@@ -620,7 +1184,9 @@ class One_critical_filtration : public std::vector<T>
 
   // UTILITIES
 
-  // easy debug
+  /**
+   * @brief Outstream operator.
+   */
   friend std::ostream &operator<<(std::ostream &stream, const One_critical_filtration &f)
   {
     if (f.is_inf()) {
@@ -649,13 +1215,15 @@ class One_critical_filtration : public std::vector<T>
   }
 
  public:
-  // TODO : maybe add the {inf}, minus inf, nan  there as static members? this
-  // would make comparisons faster (just compare the ptr)
-  // TODO : I'm not sure why constexpr doesn't work anymore
+  /**
+   * @brief Infinity value of an entry of the filtration value.
+   */
   constexpr static const T T_inf =
       std::numeric_limits<T>::has_infinity ? std::numeric_limits<T>::infinity() : std::numeric_limits<T>::max();
 
-  // for compiler
+  /**
+   * @brief Indicates if the class manages multi-critical filtration values.
+   */
   constexpr static bool is_multi_critical = false;
 
  private:
