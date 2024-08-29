@@ -71,7 +71,6 @@ class Multi_critical_filtration {
    * @brief Type of the origin of a "simplex lifetime cone". Common with @ref One_critical_filtration "".
    */
   using Generator = One_critical_filtration<T>;
-  // TODO: not the best name...
   using Generators = std::vector<Generator>;                  /**< Container type for the filtration values. */
   using iterator = typename Generators::iterator;             /**< Iterator type for the generator container. */
   using const_iterator = typename Generators::const_iterator; /**< Const iterator type for the generator container. */
@@ -746,12 +745,10 @@ class Multi_critical_filtration {
     }
   }
 
-  // 0 == equal
-  // 1 == a dom b
-  // 2 == b dom a
-  // 3 == none
-  static int _get_domination_relation(const Generator &a, const Generator &b) {
-    if (a.is_nan() || b.is_nan()) return 3;
+  enum class Rel { EQUAL, DOMINATES, IS_DOMINATED, NONE };
+
+  static Rel _get_domination_relation(const Generator &a, const Generator &b) {
+    if (a.is_nan() || b.is_nan()) return Rel::NONE;
 
     GUDHI_CHECK(a.size() == b.size(),
                 "Two generators in the same k-critical value have to have the same numbers of parameters.");
@@ -761,23 +758,23 @@ class Multi_critical_filtration {
     bool allSmaller = true;
     for (unsigned int i = 0; i < a.size(); ++i) {
       if (a[i] < b[i]) {
-        if (!allSmaller) return 3;
+        if (!allSmaller) return Rel::NONE;
         equal = false;
         allGreater = false;
       } else if (a[i] > b[i]) {
-        if (!allGreater) return 3;
+        if (!allGreater) return Rel::NONE;
         equal = false;
         allSmaller = false;
       }
     }
-    if (equal) return 0;
+    if (equal) return Rel::EQUAL;
 
     if constexpr (co) {
-      if (allSmaller) return 1;
-      return 2;
+      if (allSmaller) return Rel::DOMINATES;
+      return Rel::IS_DOMINATED;
     } else {
-      if (allGreater) return 1;
-      return 2;
+      if (allGreater) return Rel::DOMINATES;
+      return Rel::IS_DOMINATED;
     }
   }
 
@@ -795,12 +792,12 @@ class Multi_critical_filtration {
     }
 
     while (curr != end) {
-      int res = _get_domination_relation(multi_filtration_[curr], x);
-      if (res == 2 || res == 0) return false;  // x dominates or is equal
-      if (res == 1) {                          // x is dominated
+      Rel res = _get_domination_relation(multi_filtration_[curr], x);
+      if (res == Rel::IS_DOMINATED || res == Rel::EQUAL) return false;  // x dominates or is equal
+      if (res == Rel::DOMINATES) {                                      // x is dominated
         --end;
         std::swap(multi_filtration_[curr], multi_filtration_[end]);
-      } else {
+      } else {                                                          // no relation
         ++curr;
       }
     }
