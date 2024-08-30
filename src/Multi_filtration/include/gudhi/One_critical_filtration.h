@@ -19,6 +19,7 @@
 #include <ostream>    //std::ostream
 #include <limits>     //std::numerical_limits
 #include <stdexcept>  //std::logic_error
+#include <type_traits>
 #include <vector>
 
 #include <gudhi/Debug_utils.h>
@@ -1072,7 +1073,12 @@ class One_critical_filtration : public std::vector<T> {
   friend T compute_norm(const One_critical_filtration &f) {
     T out = 0;
     for (auto &val : f) out += (val * val);
-    return std::sqrt(out);
+    if constexpr (std::is_integral_v<T>){
+       //to avoid Windows issue which don't know how to cast integers for cmath methods
+      return std::sqrt(static_cast<double>(out));
+    } else {
+      return std::sqrt(out);
+    }
   }
 
   /**
@@ -1087,7 +1093,12 @@ class One_critical_filtration : public std::vector<T> {
     for (std::size_t i = 0u; i < other.size(); i++) {
       out += (f[i] - other[i]) * (f[i] - other[i]);
     }
-    return std::sqrt(out);
+    if constexpr (std::is_integral_v<T>){
+       //to avoid Windows issue which don't know how to cast integers for cmath methods
+      return std::sqrt(static_cast<double>(out));
+    } else {
+      return std::sqrt(out);
+    }
   }
 
   /**
