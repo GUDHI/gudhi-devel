@@ -141,11 +141,14 @@ class Simplex_tree {
   };
   struct Key_simplex_base_dummy {
     Key_simplex_base_dummy() {}
-    Key_simplex_base_dummy([[maybe_unused]] Simplex_key k) {}
+    Key_simplex_base_dummy(Simplex_key k) {
+      GUDHI_CHECK(k == -1, "key value specified for a complex that does not store them");
+    }
     // Undefined so it will not link
     void assign_key(Simplex_key);
     Simplex_key key() const;
   };
+
   struct Extended_filtration_data {
     Filtration_value minval;
     Filtration_value maxval;
@@ -165,8 +168,12 @@ class Simplex_tree {
   };
   struct Filtration_simplex_base_dummy {
     Filtration_simplex_base_dummy() {}
-    Filtration_simplex_base_dummy([[maybe_unused]] Filtration_value f) {}
-    void assign_filtration(Filtration_value GUDHI_CHECK_code(f)) { GUDHI_CHECK(f == 0, "filtration value specified for a complex that does not store them"); }
+    Filtration_simplex_base_dummy(Filtration_value f) {
+      GUDHI_CHECK(f == 0, "filtration value specified for a complex that does not store them");
+    }
+    void assign_filtration(Filtration_value GUDHI_CHECK_code(f)) {
+      GUDHI_CHECK(f == 0, "filtration value specified for a complex that does not store them");
+    }
     Filtration_value filtration() const { return 0; }
   };
   typedef typename std::conditional<Options::store_filtration, Filtration_simplex_base_real,
