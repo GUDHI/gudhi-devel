@@ -73,7 +73,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
-    
+
         Returns:
             numpy array with shape (number of diagrams) x (number of pixels = **resolution[0]** x **resolution[1]**): output persistence images.
         """
@@ -196,7 +196,7 @@ class Landscape(BaseEstimator, TransformerMixin):
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
-    
+
         Returns:
             numpy array with shape (number of diagrams) x (number of samples = **num_landscapes** x **resolution**): output persistence landscapes.
         """
@@ -271,7 +271,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
-    
+
         Returns:
             numpy array with shape (number of diagrams) x (**resolution**): output persistence silhouettes.
         """
@@ -363,7 +363,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         if self.predefined_grid is None:
             if self.resolution is None: # Flexible/exact version
-                self.grid_ = np.unique(np.concatenate([pd.ravel() for pd in X] + [[-np.inf]], axis=0)) 
+                self.grid_ = np.unique(np.concatenate([pd.ravel() for pd in X] + [[-np.inf]], axis=0))
             else:
                 _grid_from_sample_range(self, X)
         else:
@@ -391,7 +391,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
             print("Empty list: output has shape [0, len(grid)]")
             return np.zeros((N, len(self.grid_)))
-            
+
         else:
 
             events = np.concatenate([pd.ravel(order="F") for pd in X], axis=0)
@@ -413,7 +413,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
                     i += 1
                 for k in range(0, N):
                     bettis[k].append(bettis[k][-1])
-    
+
             return np.array(bettis, dtype=int)[:, 0:-1]
 
     def fit_transform(self, X, y = None):
@@ -485,7 +485,7 @@ class Entropy(BaseEstimator, TransformerMixin):
 
         Parameters:
             mode (string): what entropy to compute: either "scalar" for computing the entropy statistics, or "vector" for computing the entropy summary functions (default "scalar").
-            normalized (bool): whether to normalize the entropy summary function (default True). Used only if **mode** = "vector". 
+            normalized (bool): whether to normalize the entropy summary function (default True). Used only if **mode** = "vector".
             resolution (int): number of sample for the entropy summary function (default 100). Used only if **mode** = "vector".
             sample_range ([double, double]): minimum and maximum of the entropy summary function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method. Used only if **mode** = "vector".
             keep_endpoints (bool): when computing `sample_range`, use the exact extremities. This is mostly useful for plotting, the default is to use a slightly smaller range.
@@ -515,16 +515,16 @@ class Entropy(BaseEstimator, TransformerMixin):
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
-    
+
         Returns:
             numpy array with shape (number of diagrams) x (1 if **mode** = "scalar" else **resolution**): output entropy.
         """
         num_diag, Xfit = len(X), []
-        new_X = BirthPersistenceTransform().fit_transform(X)        
+        new_X = BirthPersistenceTransform().fit_transform(X)
 
         for i in range(num_diag):
             orig_diagram, new_diagram, num_pts_in_diag = X[i], new_X[i], X[i].shape[0]
-                
+
             p = new_diagram[:,1]
             p = p/np.sum(p)
             if self.mode == "scalar":
@@ -566,7 +566,7 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
         Constructor for the TopologicalVector class.
 
         Parameters:
-            threshold (int): number of distances to keep (default 10). This is the dimension of the topological vector. If -1, this threshold is computed from the list of persistence diagrams by considering the one with the largest number of points and using the dimension of its corresponding topological vector as threshold. 
+            threshold (int): number of distances to keep (default 10). This is the dimension of the topological vector. If -1, this threshold is computed from the list of persistence diagrams by considering the one with the largest number of points and using the dimension of its corresponding topological vector as threshold.
         """
         self.threshold = threshold
 
@@ -586,7 +586,7 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
-    
+
         Returns:
             numpy array with shape (number of diagrams) x (**threshold**): output topological vectors.
         """
@@ -638,7 +638,7 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
 
         Parameters:
            polynomial_type (char): either "R", "S" or "T" (default "R"). Type of complex polynomial that is going to be computed (explained in https://link.springer.com/chapter/10.1007%2F978-3-319-23231-7_27).
-           threshold (int): number of coefficients (default 10). This is the dimension of the complex vector of coefficients, i.e. the number of coefficients corresponding to the largest degree terms of the polynomial. If -1, this threshold is computed from the list of persistence diagrams by considering the one with the largest number of points and using the dimension of its corresponding complex vector of coefficients as threshold. 
+           threshold (int): number of coefficients (default 10). This is the dimension of the complex vector of coefficients, i.e. the number of coefficients corresponding to the largest degree terms of the polynomial. If -1, this threshold is computed from the list of persistence diagrams by considering the one with the largest number of points and using the dimension of its corresponding complex vector of coefficients as threshold.
         """
         self.threshold, self.polynomial_type = threshold, polynomial_type
 
@@ -658,7 +658,7 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
-    
+
         Returns:
             numpy array with shape (number of diagrams) x (**threshold**): output complex vectors of coefficients.
         """
@@ -681,9 +681,9 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
                 roots = np.multiply(  (D[:,1]-D[:,0])/2, np.cos(alpha) - np.sin(alpha) + 1j * (np.cos(alpha) + np.sin(alpha))  )
             coeff = [0] * (N+1)
             coeff[N] = 1
-            for i in range(1, N+1): 
-                for j in range(N-i-1, N): 
-                    coeff[j] += ((-1) * roots[i-1] * coeff[j+1])   
+            for i in range(1, N+1):
+                for j in range(N-i-1, N):
+                    coeff[j] += ((-1) * roots[i-1] * coeff[j+1])
             coeff = np.array(coeff[::-1])[1:]
             Xfit[d, :min(thresh, coeff.shape[0])] = coeff[:min(thresh, coeff.shape[0])]
         return Xfit
@@ -888,16 +888,22 @@ class Atol(BaseEstimator, TransformerMixin):
 
 class PersistenceLengths(BaseEstimator, TransformerMixin):
     """
-    This is a class that returns the N-longest persistence lengths.
+    This is a class that returns the sorted N-longest persistence lengths. If the input does not contain enough values,
+    the output will be filled with zeros.
     """
+
     def __init__(self, num_lengths=5):
         """
         Constructor for the PersistenceLengths class.
 
         Parameters:
             num_lengths (int): number of persistence lengths to return (default 5).
+
+        :raises ValueError: If num_lengths is lower or equal to 0.
         """
-        self.num_lengths  = num_lengths
+        if num_lengths <= 0:
+            raise ValueError("num_lengths must be greater than 0.")
+        self.num_lengths = num_lengths
 
     def fit(self, X, y=None):
         """
@@ -912,28 +918,29 @@ class PersistenceLengths(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         """
-        Compute the persistence landscape for each persistence diagram individually and concatenate the results.
+        Compute the persistence lengths for each persistence diagram individually and concatenate the results.
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
-    
+
         Returns:
             numpy array with shape (number of diagrams) x (num_lengths): output persistence lengths.
         """
 
-        pers_lengths = []
+        pers_length_list = []
         for pd in X:
-            # Sort in reverse order persistence lengths (where length = death - birth)
-            lengths = np.flip(np.sort(pd[:,1] - pd[:,0]))
-            if len(lengths) >= self.num_lengths:
-                pers_lengths.append(lengths[:self.num_lengths])
+            pl = pd[:, 1] - pd[:, 0]
+            if len(pl) >= self.num_lengths:
+                pers_length = np.partition(pl, -self.num_lengths)[-self.num_lengths :]
             else:
                 # Fill with zeros if necessary
-                lengths_with_zeros = np.zeros((self.num_lengths))
-                lengths_with_zeros[:len(lengths)] = lengths
-                pers_lengths.append(lengths_with_zeros)
-        
-        return pers_lengths
+                pers_length = np.zeros((self.num_lengths))
+                pers_length[: len(pl)] = pl
+
+            # Sort in reverse order persistence lengths (where length = death - birth)
+            pers_length_list.append(np.flip(np.sort(pers_length)))
+
+        return pers_length_list
 
     def __call__(self, diag):
         """
@@ -943,6 +950,6 @@ class PersistenceLengths(BaseEstimator, TransformerMixin):
             diag (n x 2 numpy array): input persistence diagram.
 
         Returns:
-            numpy 1d array of length num_lengths: output persistence landscape.
+            numpy 1d array of length num_lengths: output persistence lengths.
         """
         return self.transform([diag])[0]

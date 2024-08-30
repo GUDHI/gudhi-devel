@@ -128,8 +128,8 @@ def test_atol_doc():
 
     # Check the center of the first_cluster and second_cluster are in Atol centers
     centers = atol_vectoriser.fit(X=[a, b, c]).centers
-    np.isclose(centers, first_cluster.mean(axis=0)).all(1).any() 
-    np.isclose(centers, second_cluster.mean(axis=0)).all(1).any() 
+    np.isclose(centers, first_cluster.mean(axis=0)).all(1).any()
+    np.isclose(centers, second_cluster.mean(axis=0)).all(1).any()
 
     vectorization = atol_vectoriser.transform(X=[a, b, c])
     assert np.allclose(vectorization[0], atol_vectoriser(a))
@@ -203,7 +203,7 @@ def test_vectorization_empty_diagrams():
     scv = Entropy(mode="vector", normalized=False, resolution=random_resolution)(empty_diag)
     assert not np.any(scv)
     assert scv.shape[0] == random_resolution
-    
+
 def test_entropy_miscalculation():
     diag_ex = np.array([[0.0,1.0], [0.0,1.0], [0.0,2.0]])
     def pe(pd):
@@ -215,14 +215,14 @@ def test_entropy_miscalculation():
     sce = Entropy(mode="vector", resolution=4, normalized=False, keep_endpoints=True)
     pef = [-1/4*np.log(1/4)-1/4*np.log(1/4)-1/2*np.log(1/2),
            -1/4*np.log(1/4)-1/4*np.log(1/4)-1/2*np.log(1/2),
-           -1/2*np.log(1/2), 
+           -1/2*np.log(1/2),
            0.0]
     assert all(([pef] == sce.fit_transform([diag_ex]))[0])
     sce = Entropy(mode="vector", resolution=4, normalized=True)
     pefN = (sce.fit_transform([diag_ex]))[0]
     area = np.linalg.norm(pefN, ord=1)
     assert area==pytest.approx(1)
-        
+
 def test_kernel_empty_diagrams():
     empty_diag = np.empty(shape = [0, 2])
     assert SlicedWassersteinDistance(num_directions=100)(empty_diag, empty_diag) == 0.
@@ -321,7 +321,7 @@ def test_get_params():
 
 def test_persistence_lengths():
     diag = np.array([[3., 5.], [0, np.inf], [4., 4.], [2., 6.]])
-    for nl in range(6):
+    for nl in range(1, 6):
         pl = PersistenceLengths(num_lengths=nl)(diag)
         # test the result is sorted
         assert np.all(sorted(pl, reverse=True) == pl)
@@ -331,3 +331,5 @@ def test_persistence_lengths():
             if idx >= len(diag):
                 # test it is filled with zeros when going further the input
                 assert pl[idx] == 0.
+    with pytest.raises(ValueError):
+        pl = PersistenceLengths(num_lengths=0)(diag)
