@@ -8,6 +8,10 @@ jobs:
     variables:
       pythonVersion: "3.9"
       cmakeBuildType: Release
+      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON
+      # On this VM, 2 versions of python are installed. Default Python_FIND_FRAMEWORK is FIRST, which means asks frameworks first
+      # LAST means consult frameworks in last resort, use the PATH first
+      extraCmakeOptions: -DPython_FIND_FRAMEWORK=LAST
 
     steps:
       # Use a specific Python version
@@ -29,7 +33,8 @@ jobs:
       - bash: |
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON ..
+          which python
+          cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) $(extraCmakeOptions) -GNinja $(gudhiCmakeOptions) ..
           ninja
           ninja doxygen
           ctest --output-on-failure
@@ -44,7 +49,11 @@ jobs:
     variables:
       pythonVersion: "3.9"
       cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
-      cmakeFlags: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
+      # WITH_GUDHI_PYTHON=OFF on purpose. It is set to ON on a second cmake call
+      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
+      # On this VM, 2 versions of python are installed. Default Python_FIND_REGISTRY is FIRST, which means asks registry first
+      # LAST means consult registry in last resort, use the standard libraries or headers first
+      extraCmakeOptions: -DPython_FIND_REGISTRY=LAST
 
     steps:
       # Use a specific Python version
@@ -69,16 +78,16 @@ jobs:
           IF %ERRORLEVEL% NEQ 0 EXIT 1
         displayName: "Install build dependencies"
       - script: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(cmakeFlags) ..
+          cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(gudhiCmakeOptions) ..
           IF %ERRORLEVEL% NEQ 0 EXIT 1
           ninja
           IF %ERRORLEVEL% NEQ 0 EXIT 1
           ctest --output-on-failure -C Release -E diff_files
           IF %ERRORLEVEL% NEQ 0 EXIT 1
-          cmake  -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
+          cmake $(extraCmakeOptions) -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
           IF %ERRORLEVEL% NEQ 0 EXIT 1
           cd src\python
           copy "C:\vcpkg\installed\x64-windows\bin\mpfr*.dll" ".\gudhi\"
