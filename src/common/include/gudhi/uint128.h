@@ -15,6 +15,16 @@
 #include <utility>
 #include <boost/container_hash/hash.hpp>
 
+/* What about boost::multiprecision::uint128_t?
+ * It works on linux, mac, windows, etc.
+ * On linux x86_64, it has low overhead since it delegates to unsigned __int128.
+ * It is a bit slower than Fake_uint128, probably because of checks in << and >>, but I only noticed a 10%
+ * overhead compared to unsigned __int128 on 1 testcase.
+ * On windows, it is implemented as { size_t; uint64_t[2]; }, that's 50% overhead on storage. On the same
+ * testcase, forcing linux-gcc to use the windows code led to 4x slowdown. Other testcases were not affected.
+ * The pathological testcase is computing homology in all dimensions for the vertices of a regular 24-gon.
+ */
+
 // GUDHI_FORCE_FAKE_UINT128 is only used for tests
 #if !defined __SIZEOF_INT128__ || defined GUDHI_FORCE_FAKE_UINT128
 namespace Gudhi::numbers {
