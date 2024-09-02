@@ -9,6 +9,7 @@
 
 from .._ripser import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
 from ..flag_filtration.edge_collapse import reduce_graph
+from .. import SimplexTree
 import math
 import numpy as np
 from typing import Union, Iterable, Literal, Optional
@@ -143,7 +144,6 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             inp = reduce_graph(inp, num_collapses)
 
         if use_simplex_tree:
-            from gudhi import SimplexTree
             st = SimplexTree()
             # Use create_from_array in case of full matrix?
             # (not important since this fallback mostly matters in high dimension, where we use edge-collapse anyway)
