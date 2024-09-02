@@ -43,10 +43,10 @@ namespace persistence_matrix {
  * \subsection matrixexamples Examples
  * 
  * Here is a list of examples using the module:
- * \li \gudhi_example_link{Persistence_matrix,representative_cycles_from_matrix.cpp} - A simple example on how to
+ * \li \gudhi_example_link{Persistence_matrix,example_representative_cycles_from_matrix.cpp} - A simple example on how to
  * use the matrix to compute representative cycles.
  *
- * \li \gudhi_example_link{Persistence_matrix,simplex_tree_to_matrix.cpp} - A simplex example on how to build
+ * \li \gudhi_example_link{Persistence_matrix,example_simplex_tree_to_matrix.cpp} - A simplex example on how to build
  * a the different matrices from a simplex tree.
  * 
  * @}

@@ -9,7 +9,7 @@
  */
 
 /**
- * @file overlay_posidx_to_matidx.h
+ * @file Position_to_index_overlay.h
  * @author Hannah Schreiber
  * @brief Contains the @ref Gudhi::persistence_matrix::Position_to_index_overlay class.
  */
@@ -25,7 +25,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
- * @class Position_to_index_overlay overlay_posidx_to_matidx.h gudhi/Persistence_matrix/overlay_posidx_to_matidx.h
+ * @class Position_to_index_overlay Position_to_index_overlay.h gudhi/Persistence_matrix/Position_to_index_overlay.h
  * @ingroup persistence_matrix
  *
  * @brief Overlay for @ref chainmatrix "chain matrices" replacing all input and output @ref MatIdx indices of the

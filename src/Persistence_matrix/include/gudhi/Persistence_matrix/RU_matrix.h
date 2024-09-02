@@ -9,7 +9,7 @@
  */
 
 /**
- * @file ru_matrix.h
+ * @file RU_matrix.h
  * @author Hannah Schreiber
  * @brief Contains the @ref Gudhi::persistence_matrix::RU_matrix class.
  */
@@ -25,7 +25,7 @@ namespace Gudhi {
 namespace persistence_matrix {
 
 /**
- * @class RU_matrix ru_matrix.h gudhi/Persistence_matrix/ru_matrix.h
+ * @class RU_matrix RU_matrix.h gudhi/Persistence_matrix/RU_matrix.h
  * @ingroup persistence_matrix
  *
  * @brief %Matrix structure to store the ordered @ref boundarymatrix "boundary matrix" \f$ R \cdot U \f$ of a filtered
