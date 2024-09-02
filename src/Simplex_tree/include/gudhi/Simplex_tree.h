@@ -525,7 +525,7 @@ class Simplex_tree {
     auto root_source = complex_source.root_;
 
     // root members copy
-    root_.members().reserve(root_source.size());
+    if constexpr (!Options::stable_simplex_handles) root_.members().reserve(root_source.size());
     for (auto& p : root_source.members()){
       if constexpr (Options::store_key && OtherSimplexTreeOptions::store_key) {
         auto it = root_.members().try_emplace(

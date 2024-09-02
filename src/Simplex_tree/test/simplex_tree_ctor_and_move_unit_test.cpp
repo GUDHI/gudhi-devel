@@ -268,6 +268,74 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_custom_copy_constructor, typeST, list
   BOOST_CHECK(st1 == st_witness);
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_custom_copy_constructor_key, typeST, list_of_custom_fil_variants)
+{
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF CUSTOM COPY CONSTRUCTOR WITH KEY VALUES" << std::endl;
+
+  typeST st;
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, {3, 1});
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, {4, 1});
+  st.insert_simplex_and_subfaces({3, 0}, {2, 1});
+  st.insert_simplex_and_subfaces({3, 4, 5}, {3, 1});
+  st.insert_simplex_and_subfaces({8}, {1, 1});
+
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o   o       */
+  /*  2   0   3\X/4   8       */
+  /*            o             */
+  /*            5             */
+  /*                          */
+  /* In other words:          */
+  /*   A facet  [2,1,0]       */
+  /*   An edge  [0,3]         */
+  /*   A facet  [3,4,5]       */
+  /*   A cell   [0,1,6,7]     */
+  /*   A vertex [8]           */
+
+  if constexpr (typeST::Options::store_key){
+    for (auto f_simplex : st.complex_simplex_range()) {
+      std::int32_t key = 1;
+      for (auto filt : st.filtration(f_simplex)) {
+        key *= filt;
+      }
+      st.assign_key(f_simplex, key);
+    }
+  }
+
+  auto trans = [](const typename typeST::Filtration_value& fil)
+      -> Simplex_tree<Simplex_tree_options_custom_fil_values_full_featured>::Filtration_value {
+    Simplex_tree<Simplex_tree_options_custom_fil_values_full_featured>::Filtration_value copy(std::begin(fil),
+                                                                                              std::end(fil));
+    std::sort(copy.begin(), copy.end());
+    return copy;
+  };
+
+  Simplex_tree<Simplex_tree_options_custom_fil_values_full_featured> st_trans(st, trans);
+  for (auto f_simplex : st_trans.complex_simplex_range()) {
+    auto filtrations = st_trans.filtration(f_simplex);
+    BOOST_CHECK(std::is_sorted(std::begin(filtrations), std::end(filtrations)));
+
+    if constexpr (typeST::Options::store_key){
+      std::int32_t key = 1;
+      for (auto filt : st_trans.filtration(f_simplex)) {
+        key *= filt;
+      }
+      std::clog << "key = " << st_trans.key(f_simplex) << " vs " << key << std::endl;
+
+      BOOST_CHECK(st_trans.key(f_simplex) == key);
+    } else {
+      std::clog << "No key stored initially: key = " << st_trans.key(f_simplex) << std::endl;
+
+      BOOST_CHECK(st_trans.key(f_simplex) == -1);
+    }
+  }
+}
+
 template<typename Simplex_tree>
 std::vector<std::vector<typename Simplex_tree::Vertex_handle>> get_star(Simplex_tree& st) {
   std::vector<std::vector<typename Simplex_tree::Vertex_handle>> output;
