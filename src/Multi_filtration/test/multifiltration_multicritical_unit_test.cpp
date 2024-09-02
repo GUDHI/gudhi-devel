@@ -27,12 +27,10 @@ typedef boost::mpl::list<double, float, int> list_of_tested_variants;
 BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_constructors, T, list_of_tested_variants)
 {
   Multi_critical_filtration<T, false> f01;
-  BOOST_CHECK(!f01.empty());
   BOOST_CHECK(f01.num_parameters() == 1);
   BOOST_CHECK(f01.num_generators() == 1);
   BOOST_CHECK(f01[0][0] == -Multi_critical_filtration<T>::Generator::T_inf);
   Multi_critical_filtration<T, true> f02;
-  BOOST_CHECK(!f02.empty());
   BOOST_CHECK(f02.num_parameters() == 1);
   BOOST_CHECK(f02.num_generators() == 1);
   BOOST_CHECK(f02[0][0] == Multi_critical_filtration<T>::Generator::T_inf);
@@ -373,11 +371,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_add, T, list_of_tested_v
 
   std::vector<typename Multi_critical_filtration<T>::Generator> v{
       {0, 1, 2},
-      {},
+      typename Multi_critical_filtration<T>::Generator(0),
       Multi_critical_filtration<T>::Generator::inf(),
       {0, 1, 2},
       Multi_critical_filtration<T>::Generator::nan(),
-      {},
+      typename Multi_critical_filtration<T>::Generator(0),
       Multi_critical_filtration<T>::Generator::minus_inf()};
 
   Multi_critical_filtration<T> f2(v);

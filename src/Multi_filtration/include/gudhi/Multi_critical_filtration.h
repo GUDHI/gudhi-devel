@@ -31,11 +31,12 @@ namespace Gudhi::multi_filtration {
  * @class Multi_critical_filtration multi_critical_filtration.h gudhi/multi_critical_filtration.h
  * @ingroup multi_filtration
  *
- * @brief Class representing all apparition values of a same simplex for several parameters, that is, the filtration
- * values of a simplex in the setting of a k-critical multi-parameter filtration. The class can be used as a vector
- * whose indices correspond each to one filtration value. Then, the indices of each filtration value correspond to one
- * particular parameter. E.g., \f$ f[g][p] \f$ will be the apparition value at the \f$ p^{th} \f$ parameter of the
- * \f$ g^{th} \f$ generator of the simplex with @ref Multi_critical_filtration \f$ f \f$.
+ * @brief Class encoding the different generators, i.e., apparition times, of a \f$k\f$-critical
+ * \f$\mathbb R^n\f$-filtration value, e.g., the filtration of a simplex, or of the algebraic generator of a module
+ * presentation. The class can be used as a vector whose indices correspond each to a generator, i.e., a one-critical
+ * filtration value. Then, the indices of each generator correspond to a particular parameter. 
+ * E.g., \f$ f[i][p] \f$ will be  \f$ p^{\textit{th}} \f$ parameter of the \f$ i^{\textit{th}} \f$ generator 
+ * of this filtration value with @ref Multi_critical_filtration \f$ f \f$.
  *
  * @details Overloads `std::numeric_limits` such that:
  * - `std::numeric_limits<Multi_critical_filtration<T,co> >::has_infinity` returns `true`,
@@ -49,7 +50,8 @@ namespace Gudhi::multi_filtration {
  * - `std::numeric_limits<Multi_critical_filtration<T,co> >::quiet_NaN()` returns
  * @ref Multi_critical_filtration<T,co>::nan() "".
  *
- * Multi-critical filtrations are filtrations such that the lifetime of each simplex is a union of positive cones, e.g.,
+ * Multi-critical filtrations are filtrations such that the lifetime of each object is union of positive cones in
+ * \f$\mathbb R^n\f$, e.g.,
  *  - \f$ \{ x \in \mathbb R^2 : x \ge (1,2)\} \cap \{ x \in \mathbb R^2 : x \ge (2,1)\} \f$ is finitely critical,
  *    and more particularly 2-critical, while
  *  - \f$ \{ x \in \mathbb R^2 : x \ge \mathrm{epigraph}(y \mapsto e^{-y})\} \f$ is not.
@@ -68,7 +70,7 @@ template <typename T, bool co = false>
 class Multi_critical_filtration {
  public:
   /**
-   * @brief Type of the origin of a "simplex lifetime cone". Common with @ref One_critical_filtration "".
+   * @brief Type of the origin of a "lifetime cone". Common with @ref One_critical_filtration "".
    */
   using Generator = One_critical_filtration<T>;
   using Generators = std::vector<Generator>;                  /**< Container type for the filtration values. */
@@ -81,19 +83,20 @@ class Multi_critical_filtration {
    * @brief Default constructor. The constructed value will be either at infinity if `co` is true or at minus infinity
    * if `co` is false.
    */
-  Multi_critical_filtration() : multi_filtration_(1, co ? Generator::inf() : Generator::minus_inf()) {};
+  Multi_critical_filtration() : multi_filtration_(get_default_filtration_value()) {};
   /**
-   * @brief Constructs a filtration value with one generator and @p n parameters. All parameters will be initialized
-   * at -inf.
+   * @brief Constructs a filtration value with one generator and @p n parameters.
+   * All parameters will be initialized at -inf if `co` is false and at inf if `co` is true.
    *
-   * @warning The generator `{-inf, -inf, ...}` with \f$ n > 1 \f$ entries is not considered as "minus infinity" (the
-   * method @ref is_minus_inf() "", as well as the one of the generator, will not return true). The `-inf` are just
-   * meant as placeholders, at least one entry should be modified by the user.
-   * Otherwise, either use the static method @ref minus_inf() or set @p n to 1 instead.
+   * @warning The generator `{-inf, -inf, ...}`/`{inf, inf, ...}` with \f$ n > 1 \f$ entries is not considered as
+   * "(minus) infinity" (the resp. methods @ref is_minus_inf() and @ref is_inf() "", as well as the ones of the
+   * generator, will not return true). The `-inf/inf` are just meant as placeholders, at least one entry should be
+   * modified by the user.
+   * Otherwise, either use the static methods @ref minus_inf() or @ref inf(), or set @p n to 1 instead.
    *
    * @param n Number of parameters.
    */
-  Multi_critical_filtration(int n) : multi_filtration_({Generator(n)}) {};
+  Multi_critical_filtration(int n) : multi_filtration_(1, Generator(n, get_default_value())) {};
   /**
    * @brief Constructs a filtration value with one generator and @p n parameters. All parameters will be initialized
    * with @p value.
@@ -106,28 +109,30 @@ class Multi_critical_filtration {
    * @param n Number of parameters.
    * @param value Value which will be used for each entry.
    */
-  Multi_critical_filtration(int n, T value) : multi_filtration_({Generator(n, value)}) {};
+  Multi_critical_filtration(int n, T value) : multi_filtration_(1, Generator(n, value)) {};
   /**
    * @brief Constructs a filtration value with one generator which will be initialzed by the given initializer list.
    *
    * @param init Initializer list with values for each parameter.
    */
-  Multi_critical_filtration(std::initializer_list<T> init) : multi_filtration_({Generator(init)}) {};
+  Multi_critical_filtration(std::initializer_list<T> init) : multi_filtration_(1, Generator{init}) {};
   /**
    * @brief Constructs a filtration value with one generator which will be initialzed by the given vector.
    *
    * @param v Vector with values for each parameter.
    */
-  Multi_critical_filtration(const std::vector<T> &v) : multi_filtration_({v}) {};
+  Multi_critical_filtration(const std::vector<T> &v) : multi_filtration_(1, Generator{v}) {};
   /**
    * @brief Constructs a filtration value with one generator to which the given vector is moved to.
    *
    * @param v Vector with values for each parameter.
    */
-  Multi_critical_filtration(std::vector<T> &&v) : multi_filtration_({std::move(v)}) {};
+  Multi_critical_filtration(std::vector<T> &&v) : multi_filtration_(1, Generator{std::move(v)}) {};
   /**
    * @brief Constructs filtration value with as many generators than elements in the given vector and initialize
    * them with them.
+   * If the vector is empty, then the filtration value is either initialized at infinity if `co` is true or at
+   * minus infinity if `co` is false.
    * @pre All generators in the vector have to have the same number of parameters, i.e., size.
    * Furthermore, the generators have to be a minimal generating set.
    *
@@ -136,10 +141,13 @@ class Multi_critical_filtration {
    *
    * @param v Vector of generators.
    */
-  Multi_critical_filtration(const std::vector<Generator> &v) : multi_filtration_(v) {};
+  Multi_critical_filtration(const std::vector<Generator> &v)
+      : multi_filtration_(v.empty() ? get_default_filtration_value() : v) {};
   /**
    * @brief Constructs filtration value with as many generators than elements in the given vector and moves those
    * elements to initialize the generators.
+   * If the vector is empty, then the filtration value is either initialized at infinity if `co` is true or at
+   * minus infinity if `co` is false.
    * @pre All generators in the vector have to have the same number of parameters, i.e., size.
    * Furthermore, the generators have to be a minimal generating set.
    *
@@ -148,7 +156,8 @@ class Multi_critical_filtration {
    *
    * @param v Vector of generators.
    */
-  Multi_critical_filtration(std::vector<Generator> &&v) : multi_filtration_(std::move(v)) {};
+  Multi_critical_filtration(std::vector<Generator> &&v)
+      : multi_filtration_(v.empty() ? get_default_filtration_value() : std::move(v)) {};
   /**
    * @brief Constructs a filtration value with one generator initialzed by the range given by the begin and end
    * iterators.
@@ -157,7 +166,7 @@ class Multi_critical_filtration {
    * @param it_end End of the range.
    */
   Multi_critical_filtration(typename std::vector<T>::iterator it_begin, typename std::vector<T>::iterator it_end)
-      : multi_filtration_({Generator(it_begin, it_end)}) {};
+      : multi_filtration_(Generators(1, {it_begin, it_end})) {};
   /**
    * @brief Constructs a filtration value with one generator initialzed by the range given by the begin and end
    * const iterators.
@@ -167,7 +176,7 @@ class Multi_critical_filtration {
    */
   Multi_critical_filtration(typename std::vector<T>::const_iterator it_begin,
                             typename std::vector<T>::const_iterator it_end)
-      : multi_filtration_({Generator(it_begin, it_end)}) {};
+      : multi_filtration_(Generator(1, {it_begin, it_end})) {};
 
   // VECTOR-LIKE
 
@@ -203,21 +212,11 @@ class Multi_critical_filtration {
   const_iterator end() const { return multi_filtration_.end(); }
 
   /**
-   * @brief Returns true if and only if the number of generators is zero.
-   */
-  bool empty() const { return multi_filtration_.empty(); }
-
-  /**
    * @brief Reserves space for the given number of generators in the underlying container.
    *
    * @param n Number of generators.
    */
   void reserve(std::size_t n) { multi_filtration_.reserve(n); }
-
-  /**
-   * @brief Removes all generators.
-   */
-  void clear() { multi_filtration_.clear(); }
 
   // CONVERTERS
 
@@ -258,7 +257,7 @@ class Multi_critical_filtration {
   /**
    * @brief Returns the number of parameters.
    */
-  std::size_t num_parameters() const { return multi_filtration_.empty() ? 0 : multi_filtration_[0].num_parameters(); }
+  std::size_t num_parameters() const { return multi_filtration_[0].num_parameters(); }
 
   /**
    * @brief Returns the number of generators.
@@ -310,7 +309,6 @@ class Multi_critical_filtration {
    * minus infinity or NaN.
    */
   bool is_finite() const {
-    if (empty()) return false;
     if (multi_filtration_.size() > 1) return true;
     return multi_filtration_[0].is_finite();
   }
@@ -408,7 +406,8 @@ class Multi_critical_filtration {
   /**
    * @brief Sets the number of generators. If there were less generators before, new empty generators are constructed.
    * If there were more generators before, the exceed of generators is destroyed (any generator with index higher or
-   * equal than @p n to be more precise).
+   * equal than @p n to be more precise). If @p n is zero, the methods does nothing. A filtration value should never
+   * be empty.
    *
    * @warning All empty generators have 0 parameters. This can be problematic for some methods if there are also
    * non empty generators in the container. Make sure to fill them with real generators or to remove them before
@@ -416,7 +415,10 @@ class Multi_critical_filtration {
    *
    * @param n New number of generators.
    */
-  void set_num_generators(std::size_t n) { multi_filtration_.resize(n); }
+  void set_num_generators(std::size_t n) {
+    if (n == 0) return;
+    multi_filtration_.resize(n);
+  }
 
   /**
    * @brief Sets all generators to the least common upper bound between the current generator value and the given value.
@@ -443,8 +445,6 @@ class Multi_critical_filtration {
 
     simplify();
   }
-
-  // TODO: this is not well defined for k-critical <-> k-critical ?
 
   /**
    * @brief Sets all generators to the greatest common lower bound between the current generator value and the given
@@ -484,11 +484,6 @@ class Multi_critical_filtration {
    * @return false Otherwise.
    */
   bool add_generator(const Generator &x) {
-    if (multi_filtration_.empty()) {
-      multi_filtration_.push_back(x);
-      return true;
-    }
-
     GUDHI_CHECK(x.num_parameters() == multi_filtration_[0].num_parameters() || !is_finite() || !x.is_finite(),
                 "Cannot add a generator with different number of parameters.");
 
@@ -547,6 +542,8 @@ class Multi_critical_filtration {
   /**
    * @brief Removes all empty generators from the filtration value. If @p include_infinities is true, it also
    * removes the generators at infinity or minus infinity.
+   * If the set of generators is empty after removals, it is set to minus infinity if `co` is false or to infinity
+   * if `co` is true.
    *
    * @param include_infinities If true, removes also infinity values.
    */
@@ -557,6 +554,7 @@ class Multi_critical_filtration {
                                                     ((include_infinities) && (a.is_inf() || a.is_minus_inf()));
                                            }),
                             multi_filtration_.end());
+    if (multi_filtration_.empty()) multi_filtration_.push_back(Generator{get_default_value()});
   }
 
   /**
@@ -655,11 +653,17 @@ class Multi_critical_filtration {
    * projected to the same point, the doubles are removed in the output).
    */
   template <typename out_type = std::int32_t, typename U = T>
-  friend Multi_critical_filtration<out_type> compute_coordinates_in_grid(const Multi_critical_filtration &f,
+  friend Multi_critical_filtration<out_type> compute_coordinates_in_grid(Multi_critical_filtration f,
                                                                          const std::vector<std::vector<U>> &grid) {
-    Multi_critical_filtration<out_type> coords = f.as_type<out_type>();
-    coords.project_onto_grid(grid);
-    return coords;
+    // TODO: by replicating the code of the 1-critical "project_onto_grid", this could be done with just one copy
+    // instead of two. But it is not clear if it is really worth it, i.e., how much the change in type is really
+    // necessary in the use cases. To see later.
+    f.project_onto_grid(grid);
+    if constexpr (std::is_same_v<out_type, T>) {
+      return f;
+    } else {
+      return f.as_type<out_type>();
+    }
   }
 
   /**
@@ -723,6 +727,10 @@ class Multi_critical_filtration {
 
  private:
   Generators multi_filtration_; /**< Container for generators. */
+
+  constexpr static T get_default_value() { return co ? Generator::T_inf : -Generator::T_inf; }
+
+  constexpr static Generators get_default_filtration_value() { return Generators{Generator{get_default_value()}}; }
 
   /**
    * @brief Verifies if @p b is strictly contained in the positive cone originating in `a`.

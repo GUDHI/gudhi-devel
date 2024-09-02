@@ -19,7 +19,6 @@
 #include <ostream>    //std::ostream
 #include <limits>     //std::numerical_limits
 #include <stdexcept>  //std::logic_error
-#include <type_traits>
 #include <vector>
 
 #include <gudhi/Debug_utils.h>
@@ -30,9 +29,10 @@ namespace Gudhi::multi_filtration {
  * @class One_critical_filtration one_critical_filtration.h gudhi/one_critical_filtration.h
  * @ingroup multi_filtration
  *
- * @brief Class representing the apparition values of a same simplex for several parameters, that is, the filtration
- * value of a simplex in the setting of a 1-critical multi-parameter filtration. The class can be used as a vector
- * whose indices correspond to one parameter each. It also has several numpy-like arithmetic operators.
+ * @brief Class encoding the apparition time, i.e., filtration value of an object 
+ * (e.g., simplex, cell, abstract algebraic generator) in the setting of 1-critical multiparameter filtrations. 
+ * The class can be used as a vector whose indices correspond to one parameter each.
+ * It also follows numpy-like broadcast semantic.
  *
  * @details Inherits of `std::vector<T>`. Overloads `std::numeric_limits` such that:
  * - `std::numeric_limits<One_critical_filtration<T> >::has_infinity` returns `true`,
@@ -44,7 +44,7 @@ namespace Gudhi::multi_filtration {
  *   parameters evaluated at value `std::numeric_limits<T>::max()`,
  * - `std::numeric_limits<One_critical_filtration<T> >::quiet_NaN()` returns @ref One_critical_filtration<T>::nan() "".
  *
- * One critical simplicial filtrations are filtrations such that the lifetime of each simplex is a positive cone, e.g.
+ * One critical simplicial filtrations are filtrations such that the lifetime of each object is a positive cone, e.g.
  *  - \f$ \{ x \in  \mathbb R^2 : x>=(1,2)\} \f$ is valid, while
  *  - \f$ \{ x \in  \mathbb R^2 : x>=(1,2)\} \cap \{x \in \mathbb R^2 : x>=(2,1)\} \f$ is not.
  *
@@ -64,8 +64,8 @@ class One_critical_filtration : public std::vector<T> {
 
  public:
   /**
-   * @brief Type of the origin of a "simplex lifetime cone". Common with @ref Multi_critical_filtration "".
-   * In the 1-critical case, simply the class it-self.
+   * @brief Type of the origin of a "lifetime cone", i.e., of a one-critical filtration value.
+   * Common with @ref Multi_critical_filtration "". In the 1-critical case, simply the class it-self.
    *
    * @tparam U Type of a value for one parameter within the filtration value. Default value: `T`.
    */
@@ -75,9 +75,9 @@ class One_critical_filtration : public std::vector<T> {
   // CONSTRUCTORS
 
   /**
-   * @brief Default constructor. Constructs an empty vector with 0 parameters.
+   * @brief Default constructor. Constructs a value at minus infinity.
    */
-  One_critical_filtration() : Base() {};
+  One_critical_filtration() : Base{-T_inf} {};
   /**
    * @brief Constructs a vector of the size of the given number of parameters with -inf as value for each entry.
    *
@@ -170,7 +170,7 @@ class One_critical_filtration : public std::vector<T> {
    */
   template <typename U>
   One_critical_filtration<U> as_type() const {
-    One_critical_filtration<U> out;
+    One_critical_filtration<U> out(0);
     out.reserve(Base::size());
     for (std::size_t i = 0u; i < Base::size(); i++) out.push_back(static_cast<U>(Base::operator[](i)));
     return out;
@@ -209,7 +209,7 @@ class One_critical_filtration : public std::vector<T> {
     if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
       return {std::numeric_limits<T>::quiet_NaN()};
     } else {
-      return {};  // to differentiate it from 0, an empty filtration value can't do much anyway.
+      return One_critical_filtration(0);  // to differentiate it from 0, an empty filtration value can't do much anyway.
     }
   }
 
@@ -229,12 +229,8 @@ class One_critical_filtration : public std::vector<T> {
    * @brief Returns `true` if and only if the filtration value is considered as minus infinity.
    */
   bool is_minus_inf() const {
-    if constexpr (std::is_same<T, bool>::value) {
-      return false;  // suppresses a warning
-    } else {
-      if (Base::size() != 1) return false;
-      return (Base::operator[](0) == -T_inf);
-    }
+    if (Base::size() != 1) return false;
+    return (Base::operator[](0) == -T_inf);
   }
 
   /**
@@ -349,7 +345,7 @@ class One_critical_filtration : public std::vector<T> {
    * @return The opposite of @p f.
    */
   friend One_critical_filtration operator-(const One_critical_filtration &f) {
-    One_critical_filtration result;
+    One_critical_filtration result(0);
     result.reserve(f.size());
     for (auto val : f) {
       result.push_back(-val);
@@ -1117,11 +1113,17 @@ class One_critical_filtration : public std::vector<T> {
    * the projection of \f$ f[i] \f$ is \f$ grid[i][out[i]] \f$.
    */
   template <typename out_type = std::int32_t, typename U = T>
-  friend One_critical_filtration<out_type> compute_coordinates_in_grid(const One_critical_filtration &f,
+  friend One_critical_filtration<out_type> compute_coordinates_in_grid(One_critical_filtration f,
                                                                        const std::vector<std::vector<U> > &grid) {
-    One_critical_filtration<out_type> coords = f.as_type<out_type>();
-    coords.project_onto_grid(grid);
-    return coords;
+    // TODO: by replicating the code of "project_onto_grid", this could be done with just one copy
+    // instead of two. But it is not clear if it is really worth it, i.e., how much the change in type is really
+    // necessary in the use cases. To see later.
+    f.project_onto_grid(grid);
+    if constexpr (std::is_same_v<out_type, T>) {
+      return f;
+    } else {
+      return f.as_type<out_type>();
+    }
   }
 
   /**

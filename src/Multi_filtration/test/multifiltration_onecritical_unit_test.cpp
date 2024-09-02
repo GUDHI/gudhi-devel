@@ -26,8 +26,8 @@ typedef boost::mpl::list<double, float, int> list_of_tested_variants;
 BOOST_AUTO_TEST_CASE_TEMPLATE(one_critical_filtration_constructors, T, list_of_tested_variants)
 {
   One_critical_filtration<T> f;
-  BOOST_CHECK(f.empty());
-  BOOST_CHECK(f.num_parameters() == 0);
+  BOOST_CHECK(!f.empty());
+  BOOST_CHECK(f.num_parameters() == 1);
 
   One_critical_filtration<T> f1(3);
   BOOST_CHECK(f1.size() == 3);
@@ -91,12 +91,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(one_critical_filtration_utilities, T, list_of_test
 
   One_critical_filtration<T> f3;
   BOOST_CHECK(!f3.is_inf());
-  BOOST_CHECK(!f3.is_minus_inf());
-  if constexpr (std::numeric_limits<T>::has_quiet_NaN){
-    BOOST_CHECK(!f3.is_nan());
-  } else {
-    BOOST_CHECK(f3.is_nan()); //by default nan if T has no nan
-  }
+  BOOST_CHECK(f3.is_minus_inf());
+  BOOST_CHECK(!f3.is_nan());
   BOOST_CHECK(!f3.is_finite());
 
   //{-inf, -inf, -inf} is considered finite as the user is supposed to updates the values to something else
