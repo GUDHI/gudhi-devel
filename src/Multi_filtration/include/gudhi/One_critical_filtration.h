@@ -1201,7 +1201,7 @@ class One_critical_filtration : public std::vector<T> {
   static bool is_nan_(T val){
     if constexpr (std::is_integral_v<T>){
        //to avoid Windows issue which don't know how to cast integers for cmath methods
-      return std::isnan(static_cast<double>(val));
+      return false;
     } else {
       return std::isnan(val);
     }
