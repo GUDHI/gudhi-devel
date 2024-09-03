@@ -912,7 +912,7 @@ class PersistenceLengths(BaseEstimator, TransformerMixin):
 
         Parameters:
             X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
-            y (n x 1 array): persistence diagram lengths (unused).
+            y (None): Ignored.
         """
         return self
 
