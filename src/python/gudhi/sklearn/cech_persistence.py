@@ -30,7 +30,8 @@ from joblib import Parallel, delayed
 
 class CechPersistence(BaseEstimator, TransformerMixin):
     """
-    This is a class for constructing Čech complexes and computing the persistence diagrams from them.
+    This is a class for computing the same persistent homology as the Čech complex, while being significantly smaller,
+    using internally a :class:`~gudhi.DelaunayCechComplex` or a :class:`~gudhi.AlphaComplex`.
     """
 
     def __init__(
