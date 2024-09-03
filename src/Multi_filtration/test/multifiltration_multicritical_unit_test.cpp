@@ -27,22 +27,20 @@ typedef boost::mpl::list<double, float, int> list_of_tested_variants;
 BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_constructors, T, list_of_tested_variants)
 {
   Multi_critical_filtration<T, false> f01;
-  BOOST_CHECK(!f01.empty());
   BOOST_CHECK(f01.num_parameters() == 1);
   BOOST_CHECK(f01.num_generators() == 1);
-  BOOST_CHECK(f01[0][0] == -Multi_critical_filtration<T>::Single_point::T_inf);
+  BOOST_CHECK(f01[0][0] == -Multi_critical_filtration<T>::Generator::T_inf);
   Multi_critical_filtration<T, true> f02;
-  BOOST_CHECK(!f02.empty());
   BOOST_CHECK(f02.num_parameters() == 1);
   BOOST_CHECK(f02.num_generators() == 1);
-  BOOST_CHECK(f02[0][0] == Multi_critical_filtration<T>::Single_point::T_inf);
+  BOOST_CHECK(f02[0][0] == Multi_critical_filtration<T>::Generator::T_inf);
 
   Multi_critical_filtration<T> f1(3);
   BOOST_CHECK(f1.num_parameters() == 3);
   BOOST_CHECK(f1.num_generators() == 1);
-  BOOST_CHECK(f1[0][0] == -Multi_critical_filtration<T>::Single_point::T_inf);
-  BOOST_CHECK(f1[0][1] == -Multi_critical_filtration<T>::Single_point::T_inf);
-  BOOST_CHECK(f1[0][2] == -Multi_critical_filtration<T>::Single_point::T_inf);
+  BOOST_CHECK(f1[0][0] == -Multi_critical_filtration<T>::Generator::T_inf);
+  BOOST_CHECK(f1[0][1] == -Multi_critical_filtration<T>::Generator::T_inf);
+  BOOST_CHECK(f1[0][2] == -Multi_critical_filtration<T>::Generator::T_inf);
 
   Multi_critical_filtration<T> f2(3, 0);
   BOOST_CHECK(f2.num_parameters() == 3);
@@ -80,7 +78,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_constructors, T, list_of
   BOOST_CHECK(f42[0][1] == 1);
   BOOST_CHECK(f42[0][2] == 2);
 
-  std::vector<typename Multi_critical_filtration<T>::Single_point> v2{{0, 1, 2}, {3, 4, 5}};
+  std::vector<typename Multi_critical_filtration<T>::Generator> v2{{0, 1, 2}, {3, 4, 5}};
   Multi_critical_filtration<T> f6(std::move(v2));
   BOOST_CHECK(f6.num_parameters() == 3);
   BOOST_CHECK(f6.num_generators() == 2);
@@ -235,7 +233,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_modifiers, T, list_of_te
   BOOST_CHECK_EQUAL(f[1][1], 1);
   BOOST_CHECK_EQUAL(f[1][2], 7);
 
-  f.push_to({-1, 5, 6});
+  f.push_to_least_common_upper_bound({-1, 5, 6});
   BOOST_CHECK_EQUAL(f[0][0], 0);
   BOOST_CHECK_EQUAL(f[0][1], 5);
   BOOST_CHECK_EQUAL(f[0][2], 6);
@@ -243,7 +241,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_modifiers, T, list_of_te
   BOOST_CHECK_EQUAL(f[1][1], 5);
   BOOST_CHECK_EQUAL(f[1][2], 7);
 
-  f.push_to({-1, -5, -6});
+  f.push_to_least_common_upper_bound({-1, -5, -6});
   BOOST_CHECK_EQUAL(f[0][0], 0);
   BOOST_CHECK_EQUAL(f[0][1], 5);
   BOOST_CHECK_EQUAL(f[0][2], 6);
@@ -251,7 +249,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_modifiers, T, list_of_te
   BOOST_CHECK_EQUAL(f[1][1], 5);
   BOOST_CHECK_EQUAL(f[1][2], 7);
 
-  f.push_to(Multi_critical_filtration<T>::Single_point::minus_inf());
+  f.push_to_least_common_upper_bound(Multi_critical_filtration<T>::Generator::minus_inf());
   BOOST_CHECK_EQUAL(f[0][0], 0);
   BOOST_CHECK_EQUAL(f[0][1], 5);
   BOOST_CHECK_EQUAL(f[0][2], 6);
@@ -259,42 +257,42 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_modifiers, T, list_of_te
   BOOST_CHECK_EQUAL(f[1][1], 5);
   BOOST_CHECK_EQUAL(f[1][2], 7);
 
-  f.push_to(Multi_critical_filtration<T>::Single_point::inf());
+  f.push_to_least_common_upper_bound(Multi_critical_filtration<T>::Generator::inf());
   BOOST_CHECK(f.is_inf());
 
-  f.push_to(Multi_critical_filtration<T>::Single_point::nan());
+  f.push_to_least_common_upper_bound(Multi_critical_filtration<T>::Generator::nan());
   BOOST_CHECK(f.is_inf());
 
-  f.pull_to({-1, 5, 6});
+  f.pull_to_greatest_common_lower_bound({-1, 5, 6});
   BOOST_CHECK_EQUAL(f[0][0], -1);
   BOOST_CHECK_EQUAL(f[0][1], 5);
   BOOST_CHECK_EQUAL(f[0][2], 6);
 
-  f.pull_to({1, 8, 9});
+  f.pull_to_greatest_common_lower_bound({1, 8, 9});
   BOOST_CHECK_EQUAL(f[0][0], -1);
   BOOST_CHECK_EQUAL(f[0][1], 5);
   BOOST_CHECK_EQUAL(f[0][2], 6);
 
-  f.pull_to(Multi_critical_filtration<T>::Single_point::inf());
+  f.pull_to_greatest_common_lower_bound(Multi_critical_filtration<T>::Generator::inf());
   BOOST_CHECK_EQUAL(f[0][0], -1);
   BOOST_CHECK_EQUAL(f[0][1], 5);
   BOOST_CHECK_EQUAL(f[0][2], 6);
 
-  f.pull_to(Multi_critical_filtration<T>::Single_point::minus_inf());
+  f.pull_to_greatest_common_lower_bound(Multi_critical_filtration<T>::Generator::minus_inf());
   BOOST_CHECK(f.is_minus_inf());
 
-  f.pull_to(Multi_critical_filtration<T>::Single_point::nan());
+  f.pull_to_greatest_common_lower_bound(Multi_critical_filtration<T>::Generator::nan());
   BOOST_CHECK(f.is_minus_inf());
 
   std::vector<std::vector<int> > grid = {{0, 2, 4, 8}, {0, 3, 6, 9}, {0, 4, 8, 16}};
 
-  f.push_to({1, 7, 5});
+  f.push_to_least_common_upper_bound({1, 7, 5});
   f.project_onto_grid(grid, true);
   BOOST_CHECK_EQUAL(f[0][0], 1);
   BOOST_CHECK_EQUAL(f[0][1], 3);
   BOOST_CHECK_EQUAL(f[0][2], 2);
 
-  f.push_to({1, 7, 5});
+  f.push_to_least_common_upper_bound({1, 7, 5});
   f.project_onto_grid(grid, false);
   BOOST_CHECK_EQUAL(f[0][0], 2);
   BOOST_CHECK_EQUAL(f[0][1], 9);
@@ -310,7 +308,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_add, T, list_of_tested_v
   BOOST_CHECK_EQUAL(f[0][1], 1);
   BOOST_CHECK_EQUAL(f[0][2], 2);
 
-  bool res = f.add_point({-3, 1, 7});
+  bool res = f.add_generator({-3, 1, 7});
   BOOST_CHECK(res);
   BOOST_CHECK_EQUAL(f.num_generators(), 2);
   BOOST_CHECK_EQUAL(f.num_parameters(), 3);
@@ -321,7 +319,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_add, T, list_of_tested_v
   BOOST_CHECK_EQUAL(f[1][1], 1);
   BOOST_CHECK_EQUAL(f[1][2], 7);
 
-  res = f.add_point({-1, -2, -3});
+  res = f.add_generator({-1, -2, -3});
   BOOST_CHECK(res);
   BOOST_CHECK_EQUAL(f.num_generators(), 2);
   BOOST_CHECK_EQUAL(f.num_parameters(), 3);
@@ -332,7 +330,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_add, T, list_of_tested_v
   BOOST_CHECK_EQUAL(f[1][1], -2);
   BOOST_CHECK_EQUAL(f[1][2], -3);
 
-  res = f.add_point({8, 9, 10});
+  res = f.add_generator({8, 9, 10});
   BOOST_CHECK(!res);
   BOOST_CHECK_EQUAL(f.num_generators(), 2);
   BOOST_CHECK_EQUAL(f.num_parameters(), 3);
@@ -343,7 +341,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_add, T, list_of_tested_v
   BOOST_CHECK_EQUAL(f[1][1], -2);
   BOOST_CHECK_EQUAL(f[1][2], -3);
 
-  res = f.add_point(Multi_critical_filtration<T>::Single_point::inf());
+  res = f.add_generator(Multi_critical_filtration<T>::Generator::inf());
   BOOST_CHECK(!res);
   BOOST_CHECK_EQUAL(f.num_generators(), 2);
   BOOST_CHECK_EQUAL(f.num_parameters(), 3);
@@ -354,7 +352,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_add, T, list_of_tested_v
   BOOST_CHECK_EQUAL(f[1][1], -2);
   BOOST_CHECK_EQUAL(f[1][2], -3);
 
-  res = f.add_point(Multi_critical_filtration<T>::Single_point::nan());
+  res = f.add_generator(Multi_critical_filtration<T>::Generator::nan());
   BOOST_CHECK(!res);
   BOOST_CHECK_EQUAL(f.num_generators(), 2);
   BOOST_CHECK_EQUAL(f.num_parameters(), 3);
@@ -365,23 +363,23 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_add, T, list_of_tested_v
   BOOST_CHECK_EQUAL(f[1][1], -2);
   BOOST_CHECK_EQUAL(f[1][2], -3);
 
-  res = f.add_point(Multi_critical_filtration<T>::Single_point::minus_inf());
+  res = f.add_generator(Multi_critical_filtration<T>::Generator::minus_inf());
   BOOST_CHECK(res);
   BOOST_CHECK_EQUAL(f.num_generators(), 1);
   BOOST_CHECK_EQUAL(f.num_parameters(), 1);
-  BOOST_CHECK_EQUAL(f[0][0], -Multi_critical_filtration<T>::Single_point::T_inf);
+  BOOST_CHECK_EQUAL(f[0][0], -Multi_critical_filtration<T>::Generator::T_inf);
 
-  std::vector<typename Multi_critical_filtration<T>::Single_point> v{
+  std::vector<typename Multi_critical_filtration<T>::Generator> v{
       {0, 1, 2},
-      {},
-      Multi_critical_filtration<T>::Single_point::inf(),
+      typename Multi_critical_filtration<T>::Generator(0),
+      Multi_critical_filtration<T>::Generator::inf(),
       {0, 1, 2},
-      Multi_critical_filtration<T>::Single_point::nan(),
-      {},
-      Multi_critical_filtration<T>::Single_point::minus_inf()};
+      Multi_critical_filtration<T>::Generator::nan(),
+      typename Multi_critical_filtration<T>::Generator(0),
+      Multi_critical_filtration<T>::Generator::minus_inf()};
 
   Multi_critical_filtration<T> f2(v);
-  f2.remove_empty_points(false);
+  f2.remove_empty_generators(false);
   BOOST_CHECK_EQUAL(f2[0][0], 0);
   BOOST_CHECK_EQUAL(f2[0][1], 1);
   BOOST_CHECK_EQUAL(f2[0][2], 2);
@@ -399,7 +397,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_add, T, list_of_tested_v
   }
 
   Multi_critical_filtration<T> f3(v);
-  f3.remove_empty_points(true);
+  f3.remove_empty_generators(true);
   BOOST_CHECK_EQUAL(f3[0][0], 0);
   BOOST_CHECK_EQUAL(f3[0][1], 1);
   BOOST_CHECK_EQUAL(f3[0][2], 2);
@@ -432,8 +430,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_friends, T, list_of_test
   Multi_critical_filtration<T> f({{0, 1, 2}, {2, 0, 4}});
   
   BOOST_CHECK_EQUAL(compute_linear_projection(f, {2,3,5,9}), 13);
-  BOOST_CHECK(factorize_below(f) == typename Multi_critical_filtration<T>::Single_point({0, 0, 2}));
-  BOOST_CHECK(factorize_above(f) == typename Multi_critical_filtration<T>::Single_point({2, 1, 4}));
+  BOOST_CHECK(factorize_below(f) == typename Multi_critical_filtration<T>::Generator({0, 0, 2}));
+  BOOST_CHECK(factorize_above(f) == typename Multi_critical_filtration<T>::Generator({2, 1, 4}));
 
   Multi_critical_filtration<T, true> f2({{0, 1, 2}, {2, 0, 4}});
   BOOST_CHECK_EQUAL(compute_linear_projection(f2, {2,3,5,9}), 24);

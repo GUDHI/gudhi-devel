@@ -41,7 +41,7 @@ struct SimplexTreeOptions {
   static const bool stable_simplex_handles;
   /// If true, assumes that SimplexTreeOptions::Filtration_value is vector-like instead of float-like. 
   /// In that case only, this also assumes that SimplexTreeOptions::Filtration_value is a class, 
-  /// which has a `push_to` method that allows to push the filtration value `this` onto the set of points 
+  /// which has a `push_to_least_common_upper_bound` method that allows to push the filtration value `this` onto the set of points 
   /// \f$ \{ y\in \mathrm{Filtration_value} : y\geq x\}\f$ 
   /// that are greater than another filtration value \f$ x \f$.
   /// An example of such a class is Gudhi::multi_persistence::Finitely_critical_multi_filtration .

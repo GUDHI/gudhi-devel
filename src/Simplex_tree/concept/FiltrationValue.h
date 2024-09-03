@@ -30,6 +30,6 @@ struct FiltrationValue {
    * This function is called when using, e.g. `make_filtration_non_decreasing`, as the filtration of a simplex
    * has to be greater than the filtration of any of its faces.
    * */ 
-  void push_to(const FiltrationValue f);
+  void push_to_least_common_upper_bound(const FiltrationValue f);
 
 };
