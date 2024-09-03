@@ -918,7 +918,7 @@ class PersistenceLengths(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         """
-        Compute the persistence lengths for each persistence diagram individually and concatenate the results.
+        Compute the persistence lengths for each persistence diagram individually.
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
@@ -926,21 +926,21 @@ class PersistenceLengths(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (number of diagrams) x (num_lengths): output persistence lengths.
         """
-
-        pers_length_list = []
+        pers_length_array = np.zeros((len(X), self.num_lengths))
+        idx = 0
         for pd in X:
             pl = pd[:, 1] - pd[:, 0]
             if len(pl) >= self.num_lengths:
-                pers_length = np.partition(pl, -self.num_lengths)[-self.num_lengths :]
-            else:
-                # Fill with zeros if necessary
-                pers_length = np.zeros((self.num_lengths))
-                pers_length[: len(pl)] = pl
+                # Select the num_lengths biggest persistence bars length
+                pl = np.partition(pl, -self.num_lengths)[-self.num_lengths :]
 
             # Sort in reverse order persistence lengths (where length = death - birth)
-            pers_length_list.append(np.flip(np.sort(pers_length)))
+            pl = np.flip(np.sort(pl))
+            # Filled with zeros if not enough values
+            pers_length_array[idx][:len(pl)] = pl
+            idx = idx + 1
 
-        return pers_length_list
+        return pers_length_array
 
     def __call__(self, diag):
         """
