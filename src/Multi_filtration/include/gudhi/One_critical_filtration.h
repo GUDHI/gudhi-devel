@@ -239,7 +239,7 @@ class One_critical_filtration : public std::vector<T> {
   bool is_nan() const {
     if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
       if (Base::size() != 1) return false;
-      return std::isnan(Base::operator[](0));
+      return is_nan_(Base::operator[](0));
     } else {
       return Base::empty();
     }
@@ -253,7 +253,7 @@ class One_critical_filtration : public std::vector<T> {
     if (Base::size() > 1) return true;
     if (Base::size() == 0) return false;
     auto first_value = Base::operator[](0);  // TODO : Maybe check all entries ?
-    if (std::isnan(first_value) || first_value == -T_inf || first_value == T_inf) return false;
+    if (is_nan_(first_value) || first_value == -T_inf || first_value == T_inf) return false;
     return true;
   }
 
@@ -482,7 +482,7 @@ class One_critical_filtration : public std::vector<T> {
   friend One_critical_filtration &operator-=(One_critical_filtration &result, const T &to_subtract) {
     if (result.empty()) return result;
 
-    if (result.is_nan() || std::isnan(to_subtract) || (result.is_inf() && to_subtract == T_inf) ||
+    if (result.is_nan() || is_nan_(to_subtract) || (result.is_inf() && to_subtract == T_inf) ||
         (result.is_minus_inf() && to_subtract == -T_inf)) {
       result = nan();
       return result;
@@ -615,7 +615,7 @@ class One_critical_filtration : public std::vector<T> {
   friend One_critical_filtration &operator+=(One_critical_filtration &result, const T &to_add) {
     if (result.empty()) return result;
 
-    if (result.is_nan() || std::isnan(to_add) || (result.is_inf() && to_add == -T_inf) ||
+    if (result.is_nan() || is_nan_(to_add) || (result.is_inf() && to_add == -T_inf) ||
         (result.is_minus_inf() && to_add == T_inf)) {
       result = nan();
       return result;
@@ -776,7 +776,7 @@ class One_critical_filtration : public std::vector<T> {
   friend One_critical_filtration &operator*=(One_critical_filtration &result, const T &to_mul) {
     if (result.empty()) return result;
 
-    if (result.is_nan() || std::isnan(to_mul)) {
+    if (result.is_nan() || is_nan_(to_mul)) {
       result = nan();
       return result;
     }
@@ -869,7 +869,7 @@ class One_critical_filtration : public std::vector<T> {
    */
   friend One_critical_filtration operator/(const T &val, const One_critical_filtration &f) {
     if (f.empty()) return f;
-    if (std::isnan(val) || f.is_nan()) return nan();
+    if (is_nan_(val) || f.is_nan()) return nan();
 
     One_critical_filtration result(f.size(), val);
     result /= f;
@@ -952,7 +952,7 @@ class One_critical_filtration : public std::vector<T> {
     bool res_is_infinite = result.is_inf() || result.is_minus_inf();
     bool to_div_is_infinite = to_div == T_inf || to_div == -T_inf;
 
-    if (to_div == 0 || std::isnan(to_div) || result.is_nan() || (res_is_infinite && to_div_is_infinite)) {
+    if (to_div == 0 || is_nan_(to_div) || result.is_nan() || (res_is_infinite && to_div_is_infinite)) {
       result = nan();
       return result;
     }
@@ -1198,10 +1198,19 @@ class One_critical_filtration : public std::vector<T> {
   constexpr static bool is_multi_critical = false;
 
  private:
+  static bool is_nan_(T val){
+    if constexpr (std::is_integral_v<T>){
+       //to avoid Windows issue which don't know how to cast integers for cmath methods
+      return std::isnan(static_cast<double>(val));
+    } else {
+      return std::isnan(val);
+    }
+  }
+
   constexpr static bool subtract_(T &v1, T v2) { return add_(v1, -v2); }
 
   constexpr static bool add_(T &v1, T v2) {
-    if (std::isnan(v1) || std::isnan(v2) || (v1 == T_inf && v2 == -T_inf) || (v1 == -T_inf && v2 == T_inf)) {
+    if (is_nan_(v1) || is_nan_(v2) || (v1 == T_inf && v2 == -T_inf) || (v1 == -T_inf && v2 == T_inf)) {
       v1 = std::numeric_limits<T>::quiet_NaN();
       return false;
     }
@@ -1221,7 +1230,7 @@ class One_critical_filtration : public std::vector<T> {
     bool v1_is_infinite = v1 == T_inf || v1 == -T_inf;
     bool v2_is_infinite = v2 == T_inf || v2 == -T_inf;
 
-    if (std::isnan(v1) || std::isnan(v2) || (v1_is_infinite && v2 == 0) || (v1 == 0 && v2_is_infinite)) {
+    if (is_nan_(v1) || is_nan_(v2) || (v1_is_infinite && v2 == 0) || (v1 == 0 && v2_is_infinite)) {
       v1 = std::numeric_limits<T>::quiet_NaN();
       return false;
     }
@@ -1244,7 +1253,7 @@ class One_critical_filtration : public std::vector<T> {
     bool v1_is_infinite = v1 == T_inf || v1 == -T_inf;
     bool v2_is_infinite = v2 == T_inf || v2 == -T_inf;
 
-    if (std::isnan(v1) || std::isnan(v2) || v2 == 0 || (v1_is_infinite && v2_is_infinite)) {
+    if (is_nan_(v1) || is_nan_(v2) || v2 == 0 || (v1_is_infinite && v2_is_infinite)) {
       v1 = std::numeric_limits<T>::quiet_NaN();
       return false;
     }
