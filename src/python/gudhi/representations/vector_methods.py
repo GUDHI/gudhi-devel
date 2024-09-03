@@ -927,8 +927,7 @@ class PersistenceLengths(BaseEstimator, TransformerMixin):
             numpy array with shape (number of diagrams) x (num_lengths): output persistence lengths.
         """
         pers_length_array = np.zeros((len(X), self.num_lengths))
-        idx = 0
-        for pd in X:
+        for idx, pd in enumerate(X):
             pl = pd[:, 1] - pd[:, 0]
             if len(pl) >= self.num_lengths:
                 # Select the num_lengths biggest persistence bars length
@@ -938,7 +937,6 @@ class PersistenceLengths(BaseEstimator, TransformerMixin):
             pl = np.flip(np.sort(pl))
             # Filled with zeros if not enough values
             pers_length_array[idx][:len(pl)] = pl
-            idx = idx + 1
 
         return pers_length_array
 
