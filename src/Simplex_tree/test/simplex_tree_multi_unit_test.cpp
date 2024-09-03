@@ -360,7 +360,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
 BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_of_tested_variants) {
   typedef std::pair<typename typeST::Simplex_handle, bool> typePairSimplexBool;
   typedef std::vector<typename typeST::Vertex_handle> typeVectorVertex;
-  typedef std::pair<typeVectorVertex, typename typeST::Filtration_value> typeSimplex;
+  typedef typename typeST::Filtration_value F;
+  typedef std::pair<typeVectorVertex, F> typeSimplex;
   std::clog << "********************************************************************" << std::endl;
   std::clog << "TEST OF RECURSIVE INSERTION" << std::endl;
   typeST st;
@@ -488,12 +489,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
   /*   A facet [3,4,5]        */
   /*   A cell  [0,1,6,7]      */
 
-  typeSimplex simplexPair1 = std::make_pair(SimplexVector1, 0.0);
-  typeSimplex simplexPair2 = std::make_pair(SimplexVector2, 0.0);
-  typeSimplex simplexPair3 = std::make_pair(SimplexVector3, 0.0);
-  typeSimplex simplexPair4 = std::make_pair(SimplexVector4, 0.0);
-  typeSimplex simplexPair5 = std::make_pair(SimplexVector5, 0.0);
-  typeSimplex simplexPair6 = std::make_pair(SimplexVector6, 0.0);
+  typeSimplex simplexPair1 = std::make_pair(SimplexVector1, F());
+  typeSimplex simplexPair2 = std::make_pair(SimplexVector2, F());
+  typeSimplex simplexPair3 = std::make_pair(SimplexVector3, F());
+  typeSimplex simplexPair4 = std::make_pair(SimplexVector4, F());
+  typeSimplex simplexPair5 = std::make_pair(SimplexVector5, F());
+  typeSimplex simplexPair6 = std::make_pair(SimplexVector6, F());
   test_simplex_tree_contains(st, simplexPair1, 6); // (2,1,0) is in position 6
   test_simplex_tree_contains(st, simplexPair2, 7); // (3) is in position 7
   test_simplex_tree_contains(st, simplexPair3, 8); // (3,0) is in position 8
