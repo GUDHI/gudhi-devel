@@ -70,19 +70,6 @@ class Simplex_tree_siblings {
     }
   }
 
-  /** \brief Inserts a Node in the set of siblings nodes.
-   *
-   * If already present, assigns the minimal filtration value 
-   * between input filtration_value and the value already 
-   * present in the node.
-   */
-  void insert(Vertex_handle v, const Filtration_value& filtration_value) {
-    auto ins = members_.emplace(v, Node(this, filtration_value));
-    if (!ins.second){
-      unify_births(ins.first->second.filtration_raw(), filtration_value);
-    }
-  }
-
   Dictionary_it find(Vertex_handle v) {
     return members_.find(v);
   }

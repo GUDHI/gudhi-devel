@@ -855,6 +855,49 @@ class Simplex_tree {
     return true;
   }
 
+ private:
+  /**
+   * @brief Inserts a Node in the set of siblings nodes. Calls `update_simplex_tree_after_node_insertion`
+   * if the insertion succeeded.
+   * 
+   * @tparam update_fil If true and the node is already present, assigns the "union" of the input filtration_value
+   * and the value already present in the node as filtration value.
+   * @tparam update_children If true and the node has no children, create a child with sib as uncle.
+   * @tparam set_to_null If true and the node is already present, sets the returned simplex handle to null if the
+   * filtration value of the simplex was not modified.
+   * @tparam Filt Filtration value type.
+   * @param sib Sibling in where the node has to be inserted.
+   * @param v Label of the node.
+   * @param filtration_value Filtration value stored in the node.
+   * @return Pair of the iterator to the new node and a boolean indicating if the insertion succeeded.
+   */
+  template<bool update_fil, bool update_children, bool set_to_null, class Filt>
+  std::pair<Simplex_handle, bool> insert_node_(Siblings *sib, Vertex_handle v, Filt&& filtration_value) {
+    std::pair<Simplex_handle, bool> ins = sib->members_.try_emplace(v, sib, std::forward<Filt>(filtration_value));
+
+    if constexpr (update_children){
+      if (!(has_children(ins.first))) {
+        ins.first->second.assign_children(new Siblings(sib, v));
+      }
+    }
+
+    if (ins.second){
+      // Only required when insertion is successful
+      update_simplex_tree_after_node_insertion(ins.first);
+      return ins;
+    }
+
+    if constexpr (update_fil){
+      if (unify_births(ins.first->second.filtration_raw(), filtration_value)) return ins;
+    }
+
+    if constexpr (set_to_null){
+      ins.first = null_simplex();
+    }
+
+    return ins;
+  }
+
  protected:
   /** \brief Inserts a simplex represented by a range of vertex.
    * @param[in]  simplex    range of Vertex_handles, representing the vertices of the new simplex. The range must be
@@ -876,43 +919,21 @@ class Simplex_tree {
     Siblings * curr_sib = &root_;
     std::pair<Simplex_handle, bool> res_insert;
     auto vi = simplex.begin();
+
     for (; vi != std::prev(simplex.end()); ++vi) {
       GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
-      res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
-      if (res_insert.second) {
-        // Only required when insertion is successful
-        update_simplex_tree_after_node_insertion(res_insert.first);
-      }
-      if (!(has_children(res_insert.first))) {
-        res_insert.first->second.assign_children(new Siblings(curr_sib, *vi));
-      }
+      res_insert = insert_node_<false, true, false>(curr_sib, *vi, filtration);
       curr_sib = res_insert.first->second.children();
     }
+
     GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
-    res_insert = curr_sib->members_.emplace(*vi, Node(curr_sib, filtration));
-    if (!res_insert.second) {
-      if constexpr (Options::store_filtration){
-        // if already in the complex
-        if (unify_births(res_insert.first->second.filtration_raw(), filtration)) {
-          // if filtration value modified
-          return res_insert;
-        }
-        // if filtration value unchanged
-        return std::pair<Simplex_handle, bool>(null_simplex(), false);
-      } else {
-        return std::pair<Simplex_handle, bool>(null_simplex(), false);
+    res_insert = insert_node_<Options::store_filtration, false, true>(curr_sib, *vi, filtration);
+    if (res_insert.second){
+      int dim = static_cast<int>(boost::size(simplex)) - 1;
+      if (dim > dimension_) {
+        // Update dimension if needed
+        dimension_ = dim;
       }
-    }
-    // otherwise the insertion has succeeded
-
-    // Only required when insertion is successful
-    update_simplex_tree_after_node_insertion(res_insert.first);
-
-    // size is a size_type
-    int dim = static_cast<int>(boost::size(simplex)) - 1;
-    if (dim > dimension_) {
-      // Update dimension if needed
-      dimension_ = dim;
     }
     return res_insert;
   }
@@ -1010,30 +1031,13 @@ class Simplex_tree {
     // - insert all the vertices at once in sib
     // - loop over those (new or not) simplices, with a recursive call(++first, last)
     Vertex_handle vertex_one = *first;
-    auto&& dict = sib->members();
-    auto insertion_result = dict.emplace(vertex_one, Node(sib, filt));
 
-    Simplex_handle simplex_one = insertion_result.first;
-    bool one_is_new = insertion_result.second;
-    if (one_is_new) {
-      // update extra data structures in the insertion is successful
-      // Only required when insertion is successful
-      update_simplex_tree_after_node_insertion(insertion_result.first);
-    } else {
-      if constexpr (Options::store_filtration){
-        if (!unify_births(simplex_one->second.filtration_raw(), filt)) {
-          // FIXME: this interface makes no sense, and it doesn't seem to be tested.
-          insertion_result.first = null_simplex();
-        }
-      } else {
-        insertion_result.first = null_simplex();
-      }
-    }
-    if (++first == last) return insertion_result;
-    if (!has_children(simplex_one))
-      // TODO: have special code here, we know we are building the whole subtree from scratch.
-      simplex_one->second.assign_children(new Siblings(sib, vertex_one));
-    auto res = rec_insert_simplex_and_subfaces_sorted(simplex_one->second.children(), first, last, filt);
+    if (++first == last) return insert_node_<Options::store_filtration, false, true>(sib, vertex_one, filt);
+
+    // TODO: have special code here, we know we are building the whole subtree from scratch.
+    auto insertion_result = insert_node_<Options::store_filtration, true, false>(sib, vertex_one, filt);
+
+    auto res = rec_insert_simplex_and_subfaces_sorted(insertion_result.first->second.children(), first, last, filt);
     // No need to continue if the full simplex was already there with a low enough filtration value.
     if (res.first != null_simplex()) rec_insert_simplex_and_subfaces_sorted(sib, first, last, filt);
     return res;
@@ -1401,9 +1405,7 @@ class Simplex_tree {
         sh->second.assign_children(new Siblings(&root_, sh->first));
       }
 
-      auto insertion_res = sh->second.children()->members().emplace(
-          v, Node(sh->second.children(), get(edge_filtration_t(), skel_graph, edge)));
-      if (insertion_res.second) update_simplex_tree_after_node_insertion(insertion_res.first);
+      insert_node_<false, false, false>(sh->second.children(), v, get(edge_filtration_t(), skel_graph, edge));
     }
   }
 
@@ -1515,10 +1517,9 @@ class Simplex_tree {
     static_assert(Options::link_nodes_by_label, "Options::link_nodes_by_label must be true");
 
     if (u == v) { // Are we inserting a vertex?
-      auto res_ins = root_.members().emplace(u, Node(&root_,fil));
+      auto res_ins = insert_node_<false, false, false>(&root_, u, fil);
       if (res_ins.second) { //if the vertex is not in the complex, insert it
         added_simplices.push_back(res_ins.first); //no more insert in root_.members()
-        update_simplex_tree_after_node_insertion(res_ins.first);
         if (dimension_ == -1) dimension_ = 0;
       }
       return; //because the vertex is isolated, no more insertions.
