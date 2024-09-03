@@ -911,7 +911,7 @@ class PersistenceLengths(BaseEstimator, TransformerMixin):
         useful when PersistenceLengths is included in a scikit-learn Pipeline).
 
         Parameters:
-            X (list of n x 2 or n x 1 numpy arrays): input persistence diagrams.
+            X (list of n x 2 numpy arrays): input persistence diagrams.
             y (None): Ignored.
         """
         return self
