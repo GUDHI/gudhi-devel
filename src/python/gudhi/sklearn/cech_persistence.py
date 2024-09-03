@@ -38,7 +38,6 @@ class CechPersistence(BaseEstimator, TransformerMixin):
         self,
         homology_dimensions,
         input_type="point cloud",
-        filtration=True,
         precision="safe",
         max_alpha_square=float("inf"),
         homology_coeff_field=11,
@@ -53,8 +52,6 @@ class CechPersistence(BaseEstimator, TransformerMixin):
                 dimension matters (in other words, when `homology_dimensions` is an int).
             input_type (str): Can be 'point cloud' when inputs are point clouds, or 'weighted point cloud', when
                 inputs are point clouds plus the weight (as the last column value). Default is 'point cloud'.
-            filtration (bool): Can be True, the filtration value of each simplex is computed, or False, the filtration
-                value of each simplex is not computed (set to NaN). Default is True.
             precision (str): Delaunay complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
             max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed. Default is set
                 to infinity, and there is very little point using anything else since it does not save time.
@@ -65,7 +62,6 @@ class CechPersistence(BaseEstimator, TransformerMixin):
         """
         self.homology_dimensions = homology_dimensions
         self.input_type = input_type
-        self.filtration = filtration
         self.precision = precision
         self.max_alpha_square = max_alpha_square
         self.homology_coeff_field = homology_coeff_field
@@ -84,22 +80,18 @@ class CechPersistence(BaseEstimator, TransformerMixin):
     def __transform(self, inputs):
         max_dimension = max(self.dim_list_) + 1
 
-        # Default filtration value
-        fltr = None
         if self.input_type == "point cloud":
             pts = inputs
-            cech = DelaunayComplex(points=pts, precision=self.precision)
-            if self.filtration:
-                fltr = "cech"
+            delaunay = DelaunayComplex(points=pts, precision=self.precision)
+            fltr = "cech"
 
         elif self.input_type == "weighted point cloud":
             wgts = inputs[:, -1]
             pts = inputs[:, :-1]
-            cech = DelaunayComplex(points=pts, weights=wgts, precision=self.precision)
-            if self.filtration:
-                fltr = "alpha"
+            delaunay = DelaunayComplex(points=pts, weights=wgts, precision=self.precision)
+            fltr = "alpha"
 
-        stree = cech.create_simplex_tree(max_alpha_square=self.max_alpha_square, filtration=fltr)
+        stree = delaunay.create_simplex_tree(max_alpha_square=self.max_alpha_square, filtration=fltr)
 
         persistence_dim_max = False
         # Specific case where, despite expansion(max_dimension), stree has a lower dimension
