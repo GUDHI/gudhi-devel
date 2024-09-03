@@ -18,6 +18,9 @@ Below is a list of changes:
 - [Module](link)
      - **...**
 
+- Installation
+     - CMake &ge; 3.15 is now required (was &ge; 3.8).
+
 - Miscellaneous
      - The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.11.0+is%3Aclosed) is available on GitHub.
 
