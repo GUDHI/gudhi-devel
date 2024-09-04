@@ -5,7 +5,14 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
+ *      - 2024/08 Hannah Schreiber: doc
  *      - YYYY/MM Author: Description of the modification
+ */
+
+/**
+ * @file Line.h
+ * @author David Loiseaux
+ * @brief Contains the @ref Gudhi::multi_persistence::Line class.
  */
 
 #ifndef LINE_FILTRATION_TRANSLATION_H_INCLUDED
@@ -13,245 +20,263 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include <limits>
 
+#include <gudhi/Debug_utils.h>
 #include <gudhi/One_critical_filtration.h>
 #include <gudhi/Multi_critical_filtration.h>
 #include <gudhi/Multi_persistence/Box.h>
 
 namespace Gudhi::multi_persistence {
 
-/* A line in \f$\mathbb R^n\f$, with some helpers to project points on it.
- * When the direction is not given, it is assumed to be diagonal.
- * As the line has a builtin parametrization, points in \f$\mathbb R^n\f$
- * that are on a line are given a time parameter in \f$\mathbb R\f$.
- * The method that end with a 2 returns the time t, while the other
- * ones return the full coordinates
- *
+/**
+ * @class Line Line.h gudhi/Multi_persistence/Line.h
  * @ingroup multi_persistence
+ *
+ * @brief A line in \f$\mathbb R^n\f$, with some helpers to project points on it.
+ * 
+ * @tparam T Type of the coordinate values. Has to follow the conditions of the template parameter of
+ * @ref One_critical_filtration "".
  */
 template <typename T>
-class Line {
+class Line
+{
  public:
-  using point_type = Gudhi::multi_filtration::One_critical_filtration<T>;
-  using kcritical_point_type = Gudhi::multi_filtration::Multi_critical_filtration<T>;
-  /*
-   * Checks that the argument define a correct, positively slopped line.
+  /**
+   * @brief Coordinates in \f$\mathbb R^n\f$.
    */
-  bool check_direction() const;
-  Line();
-  Line(const point_type &x);
-  Line(point_type &&x);
-  Line(const point_type &x, const point_type &v);
-  /*
-   * Returns the point whose intersection is \f$ \min\{ y\ge x \} \cap \mathrm{this}\f$
+  using Point = Gudhi::multi_filtration::One_critical_filtration<T>;
+  /**
+   * @brief Set of coordinates in \f$\mathbb R^n\f$.
    */
-  inline point_type push_forward(point_type x) const;
-  /*
-   * Retuns the time parameter of the coordinate given by push_forward.
-   */
-  template <typename U = T>
-  inline U push_forward2(const point_type &x) const;
-  /*
-   * Retuns the time parameter of the coordinate given by push_forward.
-   */
-  template <typename U = T>
-  inline U push_forward2(const kcritical_point_type &x) const;
-  /*
-   * Returns the point whose intersection is \f$ \max\{ y\le x \} \cap \mathrm{this}\f$
-   */
-  inline point_type push_back(point_type x) const;
-  /*
-   * Retuns the time parameter of the coordinate given by push_back.
-   */
-  template <typename U = T>
-  inline U push_back2(const point_type &x) const;
-  /*
-   * Retuns the time parameter of the coordinate given by push_back.
-   */
-  template <typename U = T>
-  inline U push_back2(const kcritical_point_type &x) const;
-  inline int get_dim() const;
-  /*
-   * Given a box, returns the coordinates of the intersection of this box and `this` as a pair of points (low, high)
-   * in this line, representing this interval.
-   */
-  std::pair<point_type, point_type> get_bounds(const Box<T> &box) const;
-  /*
-   * Retuns the times parameter of the coordinates in the pair given by get_bounds.
-   */
-  std::pair<T, T> get_bounds2(const Box<T> &box) const;
+  using K_critical_point = Gudhi::multi_filtration::Multi_critical_filtration<T>;
 
-  // translation
-  inline friend Line &operator+=(Line &to_translate, const point_type &x) {
-    to_translate.basepoint_ -= x;
+  /**
+   * @brief Default constructor. Sets the number of coordinates to 0.
+   */
+  Line() {}
+  /**
+   * @brief Constructs a line going through the given point with slope 1.
+   * 
+   * @param x A point of the line.
+   */
+  Line(const Point &x) : basePoint_(x) {}       //default direction
+  /**
+   * @brief Constructs a line going through the given point with slope 1.
+   * 
+   * @param x A point of the line. Will be moved.
+   */
+  Line(Point &&x) : basePoint_(std::move(x)) {} //default direction
+  /**
+   * @brief Constructs a line going through the given point in the direction of the given vector.
+   * If the vector has no coordinates, the slope is assumed to be 1.
+   * Otherwise, the vector has to be non trivial and all its coordinates have to be positive.
+   * 
+   * @param x A point of the line.
+   * @param vector Direction of the line. Positive and non trivial.
+   */
+  Line(const Point &x, const Point &vector) : basePoint_(x), direction_(vector) { check_direction_(); }
+
+  /**
+   * @brief Returns the coordinates of the point on the line with "time" parameter `t`. That is, the point \f$ x \f$
+   * such that \f$ x[i] = base\_point[i] + t \times direction[i] \f$ for all \f$ i \in [0, n - 1] \f$ with \f$ n \f$
+   * the number of coordinates.
+   */
+  Point operator[](T t) const
+  {
+    Point x(basePoint_.size());
+
+    if (direction_.size() > 0) {
+      for (std::size_t i = 0; i < x.size(); i++) x[i] = basePoint_[i] + t * direction_[i];
+    } else
+      for (std::size_t i = 0; i < x.size(); i++) x[i] = basePoint_[i] + t;
+
+    return x;
+  }
+
+  /**
+   * @brief Translates the given line in the given direction.
+   */
+  friend Line &operator+=(Line &to_translate, const Point &v)
+  {
+    to_translate.basePoint_ += v;
     return to_translate;
   }
 
-  inline point_type &basepoint() { return basepoint_; }
-  inline point_type &direction() { return direction_; }
-  inline const point_type &basepoint() const { return basepoint_; }
-  inline const point_type &direction() const { return direction_; }
+  /**
+   * @brief Returns a reference to the current base point of the line.
+   */
+  Point &base_point() { return basePoint_; }
+  /**
+   * @brief Returns a const reference to the current base point of the line.
+   */
+  const Point &base_point() const { return basePoint_; }
+
+  /**
+   * @brief Returns a reference to the direction vector of the line.
+   */
+  Point &direction() { return direction_; }
+  /**
+   * @brief Returns a const reference to the direction vector of the line.
+   */
+  const Point &direction() const { return direction_; }
+
+  // TODO: factorize forward and backward version by adding a `co` to One_critical_filtration?
+  // Could make problems with One_critical_filtration being the type of basePoint_ and direction_
+   
+  /**
+   * @brief Computes the "time" parameter \f$ t \f$ of the starting point \f$ p = base\_point + t \times direction \f$
+   * of the intersection between the line and the closed positive cone originating at `x`.
+   * 
+   * @tparam U Type of the time parameter.
+   * @param x Origin of the closed positive cone.
+   */
+  template <typename U = T>
+  U compute_forward_intersection(const Point &x) const
+  {
+    GUDHI_CHECK(direction_.empty() || direction_.size() == x.size(), "x has not as many parameters as the line.");
+
+    constexpr const U inf =
+        std::numeric_limits<U>::has_infinity ? std::numeric_limits<U>::infinity() : std::numeric_limits<U>::max();
+    if (x.is_inf() || x.is_nan()) return inf;
+    if (x.is_minus_inf()) return -inf;
+    U t = -inf;
+    if (direction_.size()) {
+      for (std::size_t i = 0; i < x.size(); i++) {
+        if (direction_[i] == 0) {
+          if (x[i] > basePoint_[i])
+            return inf;
+        } else {
+          t = std::max(t, (static_cast<U>(x[i]) - static_cast<U>(basePoint_[i])) / static_cast<U>((direction_[i])));
+        }
+      }
+    } else {
+      for (std::size_t i = 0; i < x.size(); i++) t = std::max(t, static_cast<U>(x[i]) - static_cast<U>(basePoint_[i]));
+    }
+
+    return t;
+  }
+
+  /**
+   * @brief Computes the "time" parameter \f$ t \f$ of the starting point \f$ p = base\_point + t \times direction \f$
+   * of the intersection between the line and the union of closed positive cones originating at the points in `x`.
+   * 
+   * @tparam U Type of the time parameter.
+   * @param x Set of origins for the closed positive cones.
+   */
+  template <typename U = T>
+  U compute_forward_intersection(const K_critical_point &x) const
+  {
+    constexpr const U inf =
+        std::numeric_limits<U>::has_infinity ? std::numeric_limits<U>::infinity() : std::numeric_limits<U>::max();
+    if (x.is_inf() || x.is_nan()) return inf;
+    if (x.is_minus_inf()) return -inf;
+    U t = inf;
+    for (const auto &y : x) {
+      t = std::min(t, compute_forward_intersection<U>(y));
+    }
+    return t;
+  }
+
+  /**
+   * @brief Computes the "time" parameter \f$ t \f$ of the starting point \f$ p = base\_point + t \times direction \f$
+   * of the intersection between the line and the open negative cone originating at `x`.
+   * 
+   * @tparam U Type of the time parameter.
+   * @param x Origin of the open negative cone.
+   */
+  template <typename U = T>
+  U compute_backward_intersection(const Point &x) const
+  {
+    constexpr const U inf =
+        std::numeric_limits<U>::has_infinity ? std::numeric_limits<U>::infinity() : std::numeric_limits<U>::max();
+    if (x.is_inf()) return inf;
+    if (x.is_minus_inf() || x.is_nan()) return -inf;
+    U t = inf;
+
+    if (direction_.size()) {
+      for (std::size_t i = 0; i < x.size(); i++) {
+        if (direction_[i] == 0) {
+          if (x[i] <= basePoint_[i])
+            return -inf;
+        } else {
+          t = std::min(t, (static_cast<U>(x[i]) - static_cast<U>(basePoint_[i])) / static_cast<U>(direction_[i]));
+        }
+      }
+    } else {
+      for (std::size_t i = 0; i < x.size(); i++) t = std::min(t, static_cast<U>(x[i] - basePoint_[i]));
+    }
+    return t;
+  }
+
+  /**
+   * @brief Computes the "time" parameter \f$ t \f$ of the starting point \f$ p = base\_point + t \times direction \f$
+   * of the intersection between the line and the union of open negative cones originating at the points in `x`.
+   * 
+   * @tparam U Type of the time parameter.
+   * @param x Set of origins for the open negative cones.
+   */
+  template <typename U = T>
+  U compute_backward_intersection(const K_critical_point &x) const
+  {
+    constexpr const U inf =
+        std::numeric_limits<U>::has_infinity ? std::numeric_limits<U>::infinity() : std::numeric_limits<U>::max();
+    if (x.is_inf()) return inf;
+    if (x.is_minus_inf() || x.is_nan()) return -inf;
+    U t = -inf;
+    for (const auto &y : x) {
+      t = std::max(t, compute_backward_intersection<U>(y));
+    }
+    return t;
+  }
+
+  /**
+   * @brief Given a box, returns the intersection of this box and the line.
+   * 
+   * @param box Box to intersect.
+   * @return A pair representing the two bounding points of the intersection, such that the first element is the
+   * smallest of the two. If the box and the line do not intersect, returns the pair {inf, inf}.
+   */
+  std::pair<Point, Point> get_bounds(const Box<T> &box) const
+  {
+    if (box.is_trivial()) return {Point::inf(), Point::inf()};
+
+    T bottom = compute_forward_intersection(box.get_bottom_corner());
+    T top = compute_backward_intersection(box.get_upper_corner());
+
+    if (bottom > top) return {Point::inf(), Point::inf()}; //no intersection
+
+    return {(*this)[bottom], (*this)[top]};
+  }
 
  private:
-  point_type basepoint_;  // any point on the line
-  point_type direction_;  // direction of the line
+  Point basePoint_; /**< Any point on the line. */
+  Point direction_; /**< Direction of the line. */
+
+  /**
+   * @brief Checks that the arguments define a correct and positively slopped line.
+   */
+  void check_direction_() const
+  {
+    if (direction_.size() == 0) return; //default slope
+
+    bool is_trivial = true;
+    for (T v : direction_) {
+      if (v) {
+        is_trivial = false;
+      }
+      if (v < 0) {
+        throw std::invalid_argument("Direction should have positive entries.");
+      }
+    }
+    if (is_trivial) {
+      throw std::invalid_argument("Direction should have at least one non-trivial entry.");
+    }
+    if (direction_.size() != basePoint_.size())
+      throw std::invalid_argument("The dimensions of base point and direction are not equal.");
+  }
 };
-template <typename T>
-inline bool Line<T>::check_direction() const {
-  bool is_trivial = true;
-  for (const auto &stuff : basepoint_) {
-    if (!stuff) {
-      is_trivial = false;
-    }
-    if (stuff < 0) {
-      throw std::invalid_argument("Direction should have positive entries.");
-    }
-  }
-  if (is_trivial) {
-    throw std::invalid_argument("Direction should have at least one non-trivial entry.");
-  }
-  if (direction_.size() && direction_.size() != basepoint_.size())
-    throw std::invalid_argument("The dimensions of basepoint and direction are not equal.");
-}
-template <typename T>
-Line<T>::Line() {}
 
-template <typename T> Line<T>::Line(const point_type &x) : basepoint_(x) { check_direction();}
-
-template <typename T>
-Line<T>::Line(const point_type &x) : basepoint_(x) {
-  check_direction();
-}
-template <typename T>
-Line<T>::Line(point_type &&x) : basepoint_(std::move(x)) {
-  check_direction();
-}
-template <typename T>
-Line<T>::Line(const point_type &x, const point_type &v) : basepoint_(x), direction_(v) {
-  check_direction();
-}
-
-template <typename T>
-inline typename Line<T>::point_type Line<T>::push_forward(point_type x) const {  // TODO remove copy
-  if (x.is_inf() || x.is_nan() || x.is_minus_inf()) return x;
-  T t = this->push_forward2<T>(x);
-  if (direction_.size() > 0) {
-    for (std::size_t i = 0; i < x.size(); i++) x[i] = basepoint_[i] + t * direction_[i];
-  } else {
-    for (std::size_t i = 0; i < x.size(); i++) x[i] = basepoint_[i] + t;
-  }
-  return x;
-}
-template <typename T>
-template <typename U>
-inline U Line<T>::push_forward2(const point_type &x) const {
-  constexpr const U inf =
-      std::numeric_limits<U>::has_infinity ? std::numeric_limits<U>::infinity() : std::numeric_limits<U>::max();
-  if (x.is_inf() || x.is_nan()) return inf;
-  if (x.is_minus_inf()) return -inf;
-  U t = -inf;
-  if (direction_.size()) {
-    for (std::size_t i = 0; i < x.size(); i++) {
-      if (direction_[i] == 0) [[unlikely]] {
-        if (x[i] < basepoint_[i])
-          continue;
-        else {
-          return inf;
-        }
-      } else [[likely]] {
-        t = std::max(t, (static_cast<U>(x[i]) - static_cast<U>(basepoint_[i])) / static_cast<U>((direction_[i])));
-      }
-    }
-  } else {
-    for (std::size_t i = 0; i < x.size(); i++) t = std::max(t, static_cast<U>(x[i]) - static_cast<U>(basepoint_[i]));
-  }
-
-  return t;
-}
-template <typename T>
-template <typename U>
-inline U Line<T>::push_forward2(const kcritical_point_type &x) const {
-  constexpr const U inf =
-      std::numeric_limits<U>::has_infinity ? std::numeric_limits<U>::infinity() : std::numeric_limits<U>::max();
-  if (x.is_inf() || x.is_nan()) return inf;
-  if (x.is_minus_inf()) return -inf;
-  U t = inf;
-  for (const auto &y : x) {
-    t = std::min(t, this->push_forward2<U>(y));
-  }
-  return t;
-}
-
-template <typename T>
-inline typename Line<T>::point_type Line<T>::push_back(point_type x) const {
-  if (x.is_inf() || x.is_nan() || x.is_minus_inf()) return x;
-
-  T t = this->push_back2(x);
-  if (direction_.size() > 0) {
-    for (std::size_t i = 0; i < x.size(); i++) x[i] = basepoint_[i] + t * direction_[i];
-  } else
-    for (std::size_t i = 0; i < x.size(); i++) x[i] = basepoint_[i] + t;
-
-  return x;
-}
-
-template <typename T>
-template <typename U>
-inline U Line<T>::push_back2(const point_type &x) const {
-  constexpr const U inf =
-      std::numeric_limits<U>::has_infinity ? std::numeric_limits<U>::infinity() : std::numeric_limits<U>::max();
-  if (x.is_inf()) return inf;
-  if (x.is_minus_inf() || x.is_nan()) return -inf;
-  U t = inf;
-
-  if (direction_.size()) {
-    for (std::size_t i = 0; i < x.size(); i++) {
-      if (direction_[i] == 0) [[unlikely]] {
-        if (x[i] > basepoint_[i])
-          continue;
-        else {
-          return -inf;
-        }
-      } else [[likely]] {
-        t = std::min(t, (static_cast<U>(x[i]) - static_cast<U>(basepoint_[i])) / static_cast<U>(direction_[i]));
-      }
-    }
-  } else {
-    for (std::size_t i = 0; i < x.size(); i++) t = std::min(t, static_cast<U>(x[i] - basepoint_[i]));
-  }
-  return t;
-}
-
-template <typename T>
-
-template <typename U>
-inline U Line<T>::push_back2(const kcritical_point_type &x) const {
-  constexpr const U inf =
-      std::numeric_limits<U>::has_infinity ? std::numeric_limits<U>::infinity() : std::numeric_limits<U>::max();
-  if (x.is_inf()) return inf;
-  if (x.is_minus_inf() || x.is_nan()) return -inf;
-  U t = -inf;
-  for (const auto &y : x) {
-    t = std::max(t, this->push_back2<U>(y));
-  }
-  return t;
-}
-
-template <typename T>
-inline int Line<T>::get_dim() const {
-  return basepoint_.size();
-}
-
-template <typename T>
-inline std::pair<T, T> Line<T>::get_bounds2(const Box<T> &box) const {
-  return {this->push_forward2(box.get_bottom_corner()), this->push_back2(box.get_upper_corner())};
-}
-
-template <typename T>
-inline std::pair<typename Line<T>::point_type, typename Line<T>::point_type> Line<T>::get_bounds(
-    const Box<T> &box) const {
-  return {this->push_forward(box.get_bottom_corner()), this->push_back(box.get_upper_corner())};
-}
 }  // namespace Gudhi::multi_persistence
 
 #endif  // LINE_FILTRATION_TRANSLATION_H_INCLUDED

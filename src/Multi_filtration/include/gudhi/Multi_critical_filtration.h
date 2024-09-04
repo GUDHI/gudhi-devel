@@ -9,6 +9,12 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+/**
+ * @file Multi_critical_filtration.h
+ * @author David Loiseaux
+ * @brief Contains the @ref Gudhi::multi_filtration::Multi_critical_filtration class.
+ */
+
 #ifndef MULTI_CRITICAL_FILTRATIONS_H_
 #define MULTI_CRITICAL_FILTRATIONS_H_
 
