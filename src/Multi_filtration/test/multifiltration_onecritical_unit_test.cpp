@@ -8,7 +8,6 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <boost/test/tools/old/interface.hpp>
 #include <cmath>
 #include <limits>
 
