@@ -348,7 +348,7 @@ class Multi_critical_filtration {
       // for each generator in b, verify if it is strictly in the cone of at least one generator of a
       bool isContained = false;
       for (std::size_t j = 0u; j < a.multi_filtration_.size() && !isContained; ++j) {
-        // lexicographical order, so if a[j][0] >= b[j][0], than a[j'] can never strictly dominate b[i] for all j' > j.
+        // lexicographical order, so if a[j][0] >= b[j][0], than a[j'] can never strictly contain b[i] for all j' > j.
         if (!a.multi_filtration_[j].empty() && !b.is_nan() && a.multi_filtration_[j][0] >= b.multi_filtration_[i][0])
           return false;
         isContained = _strictly_contains(a.multi_filtration_[j], b.multi_filtration_[i]);
@@ -383,7 +383,7 @@ class Multi_critical_filtration {
       // for each generator in b, verify if it is in the cone of at least one generator of a
       bool isContained = false;
       for (std::size_t j = 0u; j < a.multi_filtration_.size() && !isContained; ++j) {
-        // lexicographical order, so if a[j][0] > b[j][0], than a[j'] can never dominate b[i] for all j' > j.
+        // lexicographical order, so if a[j][0] > b[j][0], than a[j'] can never contain b[i] for all j' > j.
         if (!a.multi_filtration_[j].empty() && !b.is_nan() && a.multi_filtration_[j][0] > b.multi_filtration_[i][0])
           return false;
         isContained = _contains(a.multi_filtration_[j], b.multi_filtration_[i]);
