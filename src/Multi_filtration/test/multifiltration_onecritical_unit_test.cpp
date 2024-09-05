@@ -83,13 +83,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(one_critical_filtration_utilities, T, list_of_test
   BOOST_CHECK(f2[1] == 1.);
   BOOST_CHECK(f2[2] == 2.);
 
-  BOOST_CHECK(!f.is_inf());
+  BOOST_CHECK(!f.is_plus_inf());
   BOOST_CHECK(!f.is_minus_inf());
   BOOST_CHECK(!f.is_nan());
   BOOST_CHECK(f.is_finite());
 
   One_critical_filtration<T> f3;
-  BOOST_CHECK(!f3.is_inf());
+  BOOST_CHECK(!f3.is_plus_inf());
   BOOST_CHECK(f3.is_minus_inf());
   BOOST_CHECK(!f3.is_nan());
   BOOST_CHECK(!f3.is_finite());
@@ -98,25 +98,25 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(one_critical_filtration_utilities, T, list_of_test
   //the idea is just to reserve space and to give the possibility to use `f4[i] =`
   //if the value should really be -inf, use `f4(1)` or `f4 = minus_inf()` instead.
   One_critical_filtration<T> f4(3);
-  BOOST_CHECK(!f4.is_inf());
+  BOOST_CHECK(!f4.is_plus_inf());
   BOOST_CHECK(!f4.is_minus_inf());
   BOOST_CHECK(!f4.is_nan());
   BOOST_CHECK(f4.is_finite());
 
   One_critical_filtration<T> f5(1);
-  BOOST_CHECK(!f5.is_inf());
+  BOOST_CHECK(!f5.is_plus_inf());
   BOOST_CHECK(f5.is_minus_inf());
   BOOST_CHECK(!f5.is_nan());
   BOOST_CHECK(!f5.is_finite());
 
   auto f6 = One_critical_filtration<T>::nan();
-  BOOST_CHECK(!f6.is_inf());
+  BOOST_CHECK(!f6.is_plus_inf());
   BOOST_CHECK(!f6.is_minus_inf());
   BOOST_CHECK(f6.is_nan());
   BOOST_CHECK(!f6.is_finite());
 
   auto f7 = One_critical_filtration<T>::inf();
-  BOOST_CHECK(f7.is_inf());
+  BOOST_CHECK(f7.is_plus_inf());
   BOOST_CHECK(!f7.is_minus_inf());
   BOOST_CHECK(!f7.is_nan());
   BOOST_CHECK(!f7.is_finite());
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(one_critical_filtration_operators, T, list_of_test
   BOOST_CHECK_EQUAL(res[1], 0);
   BOOST_CHECK_EQUAL(res[2], -1);
   BOOST_CHECK((-One_critical_filtration<T>::inf()).is_minus_inf());
-  BOOST_CHECK((-One_critical_filtration<T>::minus_inf()).is_inf());
+  BOOST_CHECK((-One_critical_filtration<T>::minus_inf()).is_plus_inf());
   BOOST_CHECK((-One_critical_filtration<T>::nan()).is_nan());
 
   res = f - f2;
@@ -221,8 +221,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(one_critical_filtration_operators, T, list_of_test
   BOOST_CHECK_EQUAL(res[2], -4);
 
   BOOST_CHECK((f - One_critical_filtration<T>::inf()).is_minus_inf());
-  BOOST_CHECK((One_critical_filtration<T>::inf() - f).is_inf());
-  BOOST_CHECK((f - One_critical_filtration<T>::minus_inf()).is_inf());
+  BOOST_CHECK((One_critical_filtration<T>::inf() - f).is_plus_inf());
+  BOOST_CHECK((f - One_critical_filtration<T>::minus_inf()).is_plus_inf());
   BOOST_CHECK((One_critical_filtration<T>::minus_inf() - f).is_minus_inf());
   BOOST_CHECK((f - One_critical_filtration<T>::nan()).is_nan());
   BOOST_CHECK((One_critical_filtration<T>::nan() - f).is_nan());
@@ -254,8 +254,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(one_critical_filtration_operators, T, list_of_test
   BOOST_CHECK_EQUAL(res[1], 5);
   BOOST_CHECK_EQUAL(res[2], 6);
 
-  BOOST_CHECK((f + One_critical_filtration<T>::inf()).is_inf());
-  BOOST_CHECK((One_critical_filtration<T>::inf() + f).is_inf());
+  BOOST_CHECK((f + One_critical_filtration<T>::inf()).is_plus_inf());
+  BOOST_CHECK((One_critical_filtration<T>::inf() + f).is_plus_inf());
   BOOST_CHECK((f + One_critical_filtration<T>::minus_inf()).is_minus_inf());
   BOOST_CHECK((One_critical_filtration<T>::minus_inf() + f).is_minus_inf());
   BOOST_CHECK((f + One_critical_filtration<T>::nan()).is_nan());
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(one_critical_filtration_operators, T, list_of_test
   BOOST_CHECK(res.is_nan());
 
   res = f3 * f3;
-  BOOST_CHECK(res.is_inf());
+  BOOST_CHECK(res.is_plus_inf());
   res = f3 * f4;
   BOOST_CHECK(res.is_minus_inf());
 
@@ -427,10 +427,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(one_critical_filtration_modifiers, T, list_of_test
   BOOST_CHECK_EQUAL(f[2], 6);
 
   f.push_to_least_common_upper_bound(One_critical_filtration<T>::inf());
-  BOOST_CHECK(f.is_inf());
+  BOOST_CHECK(f.is_plus_inf());
 
   f.push_to_least_common_upper_bound(One_critical_filtration<T>::nan());
-  BOOST_CHECK(f.is_inf());
+  BOOST_CHECK(f.is_plus_inf());
 
   f.pull_to_greatest_common_lower_bound({-1, 5, 6});
   BOOST_CHECK_EQUAL(f[0], -1);
@@ -493,7 +493,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(one_critical_filtration_friends, T, list_of_tested
 BOOST_AUTO_TEST_CASE_TEMPLATE(one_critical_filtration_numerical_limits, T, list_of_tested_variants)
 {
   BOOST_CHECK(std::numeric_limits<One_critical_filtration<T> >::has_infinity);
-  BOOST_CHECK(std::numeric_limits<One_critical_filtration<T> >::infinity().is_inf());
+  BOOST_CHECK(std::numeric_limits<One_critical_filtration<T> >::infinity().is_plus_inf());
   BOOST_CHECK(std::numeric_limits<One_critical_filtration<T> >::quiet_NaN().is_nan());
   BOOST_CHECK_THROW(std::numeric_limits<One_critical_filtration<T> >::max(), std::logic_error);
   auto max = std::numeric_limits<One_critical_filtration<T> >::max(3);

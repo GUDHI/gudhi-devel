@@ -100,8 +100,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_intersections, T, list_of_tested_variants)
   BOOST_CHECK_EQUAL(top[2], T(3. + T(7. / 6.) * 6.));
 
   bounds = l.get_bounds({{-10, 0, 10}, {10, 1, 10}});
-  BOOST_CHECK(bounds.first.is_inf());
-  BOOST_CHECK(bounds.second.is_inf());
+  BOOST_CHECK(bounds.first.is_plus_inf());
+  BOOST_CHECK(bounds.second.is_plus_inf());
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(line_other, T, list_of_tested_variants)

@@ -9,7 +9,6 @@
  */
 
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <algorithm>
 #include <utility>  // std::pair, std::make_pair
@@ -932,7 +931,7 @@ BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing_on_multi_nan_values) {
   Stree_multi st;
   
   BOOST_CHECK(std::numeric_limits<OneCriticalFiltration>::quiet_NaN().is_nan());
-  BOOST_CHECK(std::numeric_limits<OneCriticalFiltration>::infinity().is_inf());
+  BOOST_CHECK(std::numeric_limits<OneCriticalFiltration>::infinity().is_plus_inf());
 
   st.insert_simplex_and_subfaces({2, 1, 0}, {1.,2.,3.});
   st.insert_simplex_and_subfaces({3, 0},    {1.,2.,3.});
@@ -976,7 +975,7 @@ BOOST_AUTO_TEST_CASE(make_filtration_non_decreasing_on_multi_nan_values) {
     bool is_zero = dim == 0 && contains0;
     std::clog << "Filtration: " << filt << std::endl;
     if (is_zero) BOOST_CHECK(filt.is_nan());
-    else if (contains3) BOOST_CHECK(filt.is_inf());
+    else if (contains3) BOOST_CHECK(filt.is_plus_inf());
     else BOOST_CHECK(filt == OneCriticalFiltration({1.,2.,3.}));
   }
 }

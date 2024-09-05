@@ -89,27 +89,27 @@ class Multi_critical_filtration {
    * @brief Default constructor. The constructed value will be either at infinity if `co` is true or at minus infinity
    * if `co` is false.
    */
-  Multi_critical_filtration() : multi_filtration_(get_default_filtration_value()) {};
+  Multi_critical_filtration() : multi_filtration_(_get_default_filtration_value()) {};
   /**
    * @brief Constructs a filtration value with one generator and @p n parameters.
    * All parameters will be initialized at -inf if `co` is false and at inf if `co` is true.
    *
    * @warning The generator `{-inf, -inf, ...}`/`{inf, inf, ...}` with \f$ n > 1 \f$ entries is not considered as
-   * "(minus) infinity" (the resp. methods @ref is_minus_inf() and @ref is_inf() "", as well as the ones of the
+   * "(minus) infinity" (the resp. methods @ref is_minus_inf() and @ref is_plus_inf() "", as well as the ones of the
    * generator, will not return true). The `-inf/inf` are just meant as placeholders, at least one entry should be
    * modified by the user.
    * Otherwise, either use the static methods @ref minus_inf() or @ref inf(), or set @p n to 1 instead.
    *
    * @param n Number of parameters.
    */
-  Multi_critical_filtration(int n) : multi_filtration_(1, Generator(n, get_default_value())) {};
+  Multi_critical_filtration(int n) : multi_filtration_(1, Generator(n, _get_default_value())) {};
   /**
    * @brief Constructs a filtration value with one generator and @p n parameters. All parameters will be initialized
    * with @p value.
    *
    * @warning If @p value is `inf`, `-inf`, or `NaN`, the generator `{value, value, ...}` with \f$ n > 1 \f$ entries
    * is not wrong but will not be considered as respectively "infinity", "minus infinity" or "NaN" (the corresponding
-   * methods @ref is_inf(), @ref is_minus_inf() and @ref is_nan() will return false). For this purpose, please use
+   * methods @ref is_plus_inf(), @ref is_minus_inf() and @ref is_nan() will return false). For this purpose, please use
    * the static methods @ref inf(), @ref minus_inf() and @ref nan() instead.
    *
    * @param n Number of parameters.
@@ -142,13 +142,13 @@ class Multi_critical_filtration {
    * @pre All generators in the vector have to have the same number of parameters, i.e., size.
    * Furthermore, the generators have to be a minimal generating set.
    *
-   * @warning If the set of generators is not minimal, the behaviour of most methods is undefined. It is possible
-   * to call @ref simplify() after construction if there is a doubt to ensure this property.
+   * @warning If the set of generators is not minimal or not sorted, the behaviour of most methods is undefined.
+   * It is possible to call @ref simplify() after construction if there is a doubt to ensure this property.
    *
    * @param v Vector of generators.
    */
   Multi_critical_filtration(const std::vector<Generator> &v)
-      : multi_filtration_(v.empty() ? get_default_filtration_value() : v) {};
+      : multi_filtration_(v.empty() ? _get_default_filtration_value() : v) {};
   /**
    * @brief Constructs filtration value with as many generators than elements in the given vector and moves those
    * elements to initialize the generators.
@@ -157,13 +157,13 @@ class Multi_critical_filtration {
    * @pre All generators in the vector have to have the same number of parameters, i.e., size.
    * Furthermore, the generators have to be a minimal generating set.
    *
-   * @warning If the set of generators is not minimal, the behaviour of most methods is undefined. It is possible
-   * to call @ref simplify() after construction if there is a doubt to ensure this property.
+   * @warning If the set of generators is not minimal or not sorted, the behaviour of most methods is undefined.
+   * It is possible to call @ref simplify() after construction if there is a doubt to ensure this property.
    *
    * @param v Vector of generators.
    */
   Multi_critical_filtration(std::vector<Generator> &&v)
-      : multi_filtration_(v.empty() ? get_default_filtration_value() : std::move(v)) {};
+      : multi_filtration_(v.empty() ? _get_default_filtration_value() : std::move(v)) {};
   /**
    * @brief Constructs a filtration value with one generator initialzed by the range given by the begin and end
    * iterators.
@@ -199,11 +199,19 @@ class Multi_critical_filtration {
 
   /**
    * @brief Returns begin iterator of the generator range.
+   *
+   * @warning If the generator is modified and the new set of generators is not minimal or not sorted, the behaviour
+   * of most methods is undefined. It is possible to call @ref simplify() after construction if there is a doubt to
+   * ensure this property.
    */
   iterator begin() { return multi_filtration_.begin(); }
 
   /**
    * @brief Returns end iterator of the generator range.
+   *
+   * @warning If the generator is modified and the new set of generators is not minimal or not sorted, the behaviour
+   * of most methods is undefined. It is possible to call @ref simplify() after construction if there is a doubt to
+   * ensure this property.
    */
   iterator end() { return multi_filtration_.end(); }
 
@@ -231,7 +239,7 @@ class Multi_critical_filtration {
    * @pre The filtration value is 1-critical. If there are more than one generator, only the first will be preserved
    * and if there is no generator, the method will segfault.
    */
-  operator Generator() const {
+  operator Generator() {
     GUDHI_CHECK(num_generators() == 1, "Casting a " + std::to_string(num_generators()) +
                                            "-critical filtration value into an 1-critical filtration value.");
     return multi_filtration_[0];
@@ -257,6 +265,10 @@ class Multi_critical_filtration {
 
   /**
    * @brief Returns a reference to the underlying container storing the generators.
+   *
+   * @warning If a generator is modified and the new set of generators is not minimal or not sorted, the behaviour
+   * of most methods is undefined. It is possible to call @ref simplify() after construction if there is a doubt to
+   * ensure this property.
    */
   const Generators &get_underlying_container() const { return multi_filtration_; }
 
@@ -271,7 +283,7 @@ class Multi_critical_filtration {
   std::size_t num_generators() const { return multi_filtration_.size(); }
 
   /**
-   * @brief Returns a filtration value for which @ref is_inf() returns `true`.
+   * @brief Returns a filtration value for which @ref is_plus_inf() returns `true`.
    *
    * @return Infinity.
    */
@@ -298,7 +310,7 @@ class Multi_critical_filtration {
   /**
    * @brief Returns `true` if and only if the filtration value is considered as infinity.
    */
-  bool is_inf() const { return multi_filtration_.size() == 1 && multi_filtration_[0].is_inf(); }
+  bool is_plus_inf() const { return multi_filtration_.size() == 1 && multi_filtration_[0].is_plus_inf(); }
 
   /**
    * @brief Returns `true` if and only if the filtration value is considered as minus infinity.
@@ -322,10 +334,6 @@ class Multi_critical_filtration {
   // COMPARAISON OPERATORS
 
   // TODO : this costs a lot... optimize / cheat in some way for python ?
-  /*
-   * Checks if `this`, seen as a birth curve is under the `other` birth curve,
-   *
-   */
 
   /**
    * @brief Returns `true` if and only if the positive cones generated by @p b are strictly contained in the
@@ -340,7 +348,9 @@ class Multi_critical_filtration {
       // for each generator in b, verify if it is strictly in the cone of at least one generator of a
       bool isContained = false;
       for (std::size_t j = 0u; j < a.multi_filtration_.size() && !isContained; ++j) {
-        // i<j
+        // lexicographical order, so if a[j][0] >= b[j][0], than a[j'] can never strictly dominate b[i] for all j' > j.
+        if (!a.multi_filtration_[j].empty() && !b.is_nan() && a.multi_filtration_[j][0] >= b.multi_filtration_[i][0])
+          return false;
         isContained = _strictly_contains(a.multi_filtration_[j], b.multi_filtration_[i]);
       }
       if (!isContained) return false;
@@ -370,10 +380,12 @@ class Multi_critical_filtration {
     // check if this curves is below other's curve
     //  ie for each guy in this, check if there is a guy in other that dominates him
     for (std::size_t i = 0u; i < b.multi_filtration_.size(); ++i) {
-      // for each generator in other, verify if it is in the cone of at least one generator of this
+      // for each generator in b, verify if it is in the cone of at least one generator of a
       bool isContained = false;
       for (std::size_t j = 0u; j < a.multi_filtration_.size() && !isContained; ++j) {
-        // i<j
+        // lexicographical order, so if a[j][0] > b[j][0], than a[j'] can never dominate b[i] for all j' > j.
+        if (!a.multi_filtration_[j].empty() && !b.is_nan() && a.multi_filtration_[j][0] > b.multi_filtration_[i][0])
+          return false;
         isContained = _contains(a.multi_filtration_[j], b.multi_filtration_[i]);
       }
       if (!isContained) return false;
@@ -395,11 +407,8 @@ class Multi_critical_filtration {
    * @brief Returns `true` if and only if for each \f$ i \f$, \f$ a[i] \f$ is equal to \f$ b[i] \f$.
    */
   friend bool operator==(const Multi_critical_filtration &a, const Multi_critical_filtration &b) {
-    if (a.num_generators() != b.num_generators()) return false;
-    for (auto i = 0u; i < a.num_generators(); i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
+    // assumes lexicographical order for both
+    return a.multi_filtration_ == b.multi_filtration_;
   }
 
   /**
@@ -419,6 +428,9 @@ class Multi_critical_filtration {
    * non empty generators in the container. Make sure to fill them with real generators or to remove them before
    * using those methods.
    *
+   * @warning Be sure to call @ref simplify if necessary after setting all the generators. Most methods will have an
+   * undefined behaviour if the set of generators is not minimal or sorted.
+   *
    * @param n New number of generators.
    */
   void set_num_generators(std::size_t n) {
@@ -436,12 +448,12 @@ class Multi_critical_filtration {
    * @param x The target filtration value towards which to push.
    */
   void push_to_least_common_upper_bound(const Generator &x) {
-    if (this->is_inf() || this->is_nan() || x.is_nan() || x.is_minus_inf()) return;
+    if (this->is_plus_inf() || this->is_nan() || x.is_nan() || x.is_minus_inf()) return;
 
-    GUDHI_CHECK(x.is_inf() || x.num_parameters() == multi_filtration_[0].num_parameters() || !is_finite(),
+    GUDHI_CHECK(x.is_plus_inf() || x.num_parameters() == multi_filtration_[0].num_parameters() || !is_finite(),
                 "Pushing to a filtration value with different number of parameters.");
 
-    if (x.is_inf() || this->is_minus_inf()) {
+    if (x.is_plus_inf() || this->is_minus_inf()) {
       multi_filtration_ = {x};
       return;
     }
@@ -463,12 +475,12 @@ class Multi_critical_filtration {
    * @param x The target filtration value towards which to pull.
    */
   void pull_to_greatest_common_lower_bound(const Generator &x) {
-    if (x.is_inf() || this->is_nan() || x.is_nan() || this->is_minus_inf()) return;
+    if (x.is_plus_inf() || this->is_nan() || x.is_nan() || this->is_minus_inf()) return;
 
     GUDHI_CHECK(x.is_minus_inf() || x.num_parameters() == multi_filtration_[0].num_parameters() || !is_finite(),
                 "Pulling to a filtration value with different number of parameters.");
 
-    if (this->is_inf() || x.is_minus_inf()) {
+    if (this->is_plus_inf() || x.is_minus_inf()) {
       multi_filtration_ = {x};
       return;
     }
@@ -498,6 +510,7 @@ class Multi_critical_filtration {
     if (_generator_can_be_added(x, 0, end)) {
       multi_filtration_.resize(end);
       multi_filtration_.push_back(x);
+      std::sort(multi_filtration_.begin(), multi_filtration_.end(), Is_strictly_smaller_lexicographically());
       return true;
     }
 
@@ -520,8 +533,10 @@ class Multi_critical_filtration {
 
   /**
    * @brief Projects the filtration value into the given grid. If @p coordinate is false, the entries are set to
-   * the nearest upper bound value with the same parameter in the grid. Otherwise, the entries are set to the indices
-   * of those nearest upper bound values.
+   * the nearest upper bound value with the same parameter in the grid and the new generators are simplified and
+   * ordered. Otherwise, the entries are set to the indices of those nearest upper bound values. In this case,
+   * no simplification or sort are done, such that the new coordinates have a one by one correspondence with the
+   * positions of the old generators.
    * The grid has to be represented as a vector of ordered ranges of values convertible into `T`. An index
    * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator.
    * The ranges correspond to the possible values of the parameters, ordered by increasing value, forming therefore
@@ -557,15 +572,17 @@ class Multi_critical_filtration {
     multi_filtration_.erase(std::remove_if(multi_filtration_.begin(), multi_filtration_.end(),
                                            [include_infinities](const Generator &a) {
                                              return a.empty() ||
-                                                    ((include_infinities) && (a.is_inf() || a.is_minus_inf()));
+                                                    ((include_infinities) && (a.is_plus_inf() || a.is_minus_inf()));
                                            }),
                             multi_filtration_.end());
-    if (multi_filtration_.empty()) multi_filtration_.push_back(Generator{get_default_value()});
+    std::sort(multi_filtration_.begin(), multi_filtration_.end(), Is_strictly_smaller_lexicographically());
+    if (multi_filtration_.empty()) multi_filtration_.push_back(Generator{_get_default_value()});
   }
 
   /**
-   * @brief Simplifies the current set of generators such that it becomes minimal. Only necessary if generators were
-   * added "by hand" either trough the constructor or with @ref add_guaranteed_generator "".
+   * @brief Simplifies the current set of generators such that it becomes minimal. Also orders it in increasing
+   * lexicographical order. Only necessary if generators were added "by hand" without verification either trough the
+   * constructor or with @ref add_guaranteed_generator "", etc.
    */
   void simplify() {
     std::size_t end = 0;
@@ -578,6 +595,7 @@ class Multi_critical_filtration {
     }
 
     multi_filtration_.resize(end);
+    std::sort(multi_filtration_.begin(), multi_filtration_.end(), Is_strictly_smaller_lexicographically());
   }
 
   // FONCTIONNALITIES
@@ -591,7 +609,7 @@ class Multi_critical_filtration {
     Generator result(f.num_parameters(), Generator::T_inf);
     for (const auto &g : f) {
       if (g.is_nan() || g.is_minus_inf()) return g;
-      if (g.is_inf()) continue;
+      if (g.is_plus_inf()) continue;
       for (std::size_t i = 0; i < f.num_parameters(); ++i) {
         result[i] = std::min(result[i], g[i]);
       }
@@ -607,7 +625,7 @@ class Multi_critical_filtration {
     if (f.num_generators() == 0) return Generator();
     Generator result(f.num_parameters(), -Generator::T_inf);
     for (auto &g : f) {
-      if (g.is_nan() || g.is_inf()) return g;
+      if (g.is_nan() || g.is_plus_inf()) return g;
       if (g.is_minus_inf()) continue;
       for (std::size_t i = 0; i < g.num_parameters(); ++i) {
         result[i] = std::max(result[i], g[i]);
@@ -701,7 +719,7 @@ class Multi_critical_filtration {
    * @brief Outstream operator.
    */
   friend std::ostream &operator<<(std::ostream &stream, const Multi_critical_filtration &f) {
-    if (f.is_inf()) {
+    if (f.is_plus_inf()) {
       stream << "[inf, ..., inf]";
       return stream;
     }
@@ -734,9 +752,26 @@ class Multi_critical_filtration {
  private:
   Generators multi_filtration_; /**< Container for generators. */
 
-  constexpr static T get_default_value() { return co ? Generator::T_inf : -Generator::T_inf; }
+  struct Is_strictly_smaller_lexicographically {
+    //assumes both generators have the same length if not infinite/nan.
+    bool operator()(const Generator &g1, const Generator &g2) {
+      if (g1.is_nan() || g2.is_nan()) return !g1.is_nan();
+      if (g1.is_plus_inf()) return false;
+      if (g2.is_plus_inf()) return true;
+      if (g1.is_minus_inf()) return false;
+      if (g2.is_minus_inf()) return true;
 
-  constexpr static Generators get_default_filtration_value() { return Generators{Generator{get_default_value()}}; }
+      // g1 and g2 have to finite and of the same size
+      for (std::size_t i = 0; i < g1.size(); ++i) {
+        if (g1[i] != g2[i]) return g1[i] < g2[i];
+      }
+      return false;
+    }
+  };
+
+  constexpr static T _get_default_value() { return co ? Generator::T_inf : -Generator::T_inf; }
+
+  constexpr static Generators _get_default_filtration_value() { return Generators{Generator{_get_default_value()}}; }
 
   /**
    * @brief Verifies if @p b is strictly contained in the positive cone originating in `a`.
@@ -794,8 +829,9 @@ class Multi_critical_filtration {
 
   // assumes between 'curr' and 'end' everything is simplified:
   // no nan values and if there is an inf/-inf, then 'end - curr == 1'
+  // modifies multi_filtration_ only if true is returned.
   bool _generator_can_be_added(const Generator &x, std::size_t curr, std::size_t &end) {
-    if (x.empty() || x.is_nan() || (x.is_inf() && end - curr != 0)) return false;
+    if (x.empty() || x.is_nan() || (x.is_plus_inf() && end - curr != 0)) return false;
 
     if (x.is_minus_inf()) {
       if (end - curr == 1 && multi_filtration_[curr].is_minus_inf()) return false;
