@@ -9,6 +9,12 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+/**
+ * @file One_critical_filtration.h
+ * @author David Loiseaux
+ * @brief Contains the @ref Gudhi::multi_filtration::One_critical_filtration class.
+ */
+
 #ifndef ONE_CRITICAL_FILTRATIONS_H_
 #define ONE_CRITICAL_FILTRATIONS_H_
 
