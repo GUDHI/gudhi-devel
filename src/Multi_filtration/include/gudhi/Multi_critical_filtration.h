@@ -348,9 +348,8 @@ class Multi_critical_filtration {
       // for each generator in b, verify if it is strictly in the cone of at least one generator of a
       bool isContained = false;
       for (std::size_t j = 0u; j < a.multi_filtration_.size() && !isContained; ++j) {
-        // lexicographical order, so if a[j][0] >= b[j][0], than a[j'] can never strictly contain b[i] for all j' > j.
-        if (!a.multi_filtration_[j].empty() && !b.is_nan() && a.multi_filtration_[j][0] >= b.multi_filtration_[i][0])
-          return false;
+        // lexicographical order, so if a[j][0] dom b[j][0], than a[j'] can never strictly contain b[i] for all j' > j.
+        if (_first_dominates(a.multi_filtration_[j], b.multi_filtration_[i])) return false;
         isContained = _strictly_contains(a.multi_filtration_[j], b.multi_filtration_[i]);
       }
       if (!isContained) return false;
@@ -383,9 +382,8 @@ class Multi_critical_filtration {
       // for each generator in b, verify if it is in the cone of at least one generator of a
       bool isContained = false;
       for (std::size_t j = 0u; j < a.multi_filtration_.size() && !isContained; ++j) {
-        // lexicographical order, so if a[j][0] > b[j][0], than a[j'] can never contain b[i] for all j' > j.
-        if (!a.multi_filtration_[j].empty() && !b.is_nan() && a.multi_filtration_[j][0] > b.multi_filtration_[i][0])
-          return false;
+        // lexicographical order, so if a[j][0] strictly dom b[j][0], than a[j'] can never contain b[i] for all j' > j.
+        if (_first_strictly_dominates(a.multi_filtration_[j], b.multi_filtration_[i])) return false;
         isContained = _contains(a.multi_filtration_[j], b.multi_filtration_[i]);
       }
       if (!isContained) return false;
@@ -791,6 +789,22 @@ class Multi_critical_filtration {
       return a >= b;
     else {
       return a <= b;
+    }
+  }
+  
+  static bool _first_strictly_dominates(const Generator& a, const Generator& b){
+    if constexpr (co){
+      return !a.empty() && !b.empty() && a[0] < b[0];
+    } else {
+      return !a.empty() && !b.empty() && a[0] > b[0];
+    }
+  }
+
+  static bool _first_dominates(const Generator& a, const Generator& b){
+    if constexpr (co){
+      return !a.empty() && !b.empty() && a[0] <= b[0];
+    } else {
+      return !a.empty() && !b.empty() && a[0] >= b[0];
     }
   }
 
