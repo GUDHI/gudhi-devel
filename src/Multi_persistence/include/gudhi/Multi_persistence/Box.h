@@ -61,7 +61,7 @@ class Box {
    *
    * @param box Pair of corners defining the wished box.
    */
-  Box(const std::pair<Point, Point> &box) : lowerCorner_(box.first), upperCorner_(box.second) {}
+  Box(const std::pair<Point, Point> &box) : Box(box.first, box.second) {}
 
   /**
    * @brief Returns the lowest of both defining corners.
@@ -103,7 +103,7 @@ class Box {
    */
   bool is_trivial() const {
     return lowerCorner_.empty() || upperCorner_.empty() || lowerCorner_.is_nan() || upperCorner_.is_nan() ||
-           (lowerCorner_.is_inf() && upperCorner_.is_inf()) ||
+           (lowerCorner_.is_plus_inf() && upperCorner_.is_plus_inf()) ||
            (lowerCorner_.is_minus_inf() && upperCorner_.is_minus_inf()) ||
            (lowerCorner_.is_finite() && upperCorner_.is_finite() &&
             lowerCorner_.num_parameters() != upperCorner_.num_parameters());
@@ -116,7 +116,7 @@ class Box {
    */
   bool contains(const Point &point) const {
     if (point.is_nan() || is_trivial()) return false;
-    if (point.is_inf()) return upperCorner_.is_inf();
+    if (point.is_plus_inf()) return upperCorner_.is_plus_inf();
     if (point.is_minus_inf()) return lowerCorner_.is_minus_inf();
 
     if ((lowerCorner_.is_finite() && point.size() != lowerCorner_.size()) ||
@@ -134,7 +134,7 @@ class Box {
    */
   std::size_t dimension() const {
     if (is_trivial()) return 0;
-    if (lowerCorner_.is_minus_inf() && upperCorner_.is_inf()) return 0;  // not so sure what we want to do here
+    if (lowerCorner_.is_minus_inf() && upperCorner_.is_plus_inf()) return 0;  // not so sure what we want to do here
     return lowerCorner_.is_finite() ? lowerCorner_.size() : upperCorner_.size();
   }
 

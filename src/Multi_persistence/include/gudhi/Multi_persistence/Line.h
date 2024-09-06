@@ -134,7 +134,7 @@ class Line {
 
     constexpr const U inf =
         std::numeric_limits<U>::has_infinity ? std::numeric_limits<U>::infinity() : std::numeric_limits<U>::max();
-    if (x.is_inf() || x.is_nan()) return inf;
+    if (x.is_plus_inf() || x.is_nan()) return inf;
     if (x.is_minus_inf()) return -inf;
     U t = -inf;
     if (direction_.size()) {
@@ -163,7 +163,7 @@ class Line {
   U compute_forward_intersection(const K_critical_point &x) const {
     constexpr const U inf =
         std::numeric_limits<U>::has_infinity ? std::numeric_limits<U>::infinity() : std::numeric_limits<U>::max();
-    if (x.is_inf() || x.is_nan()) return inf;
+    if (x.is_plus_inf() || x.is_nan()) return inf;
     if (x.is_minus_inf()) return -inf;
     U t = inf;
     for (const auto &y : x) {
@@ -183,7 +183,7 @@ class Line {
   U compute_backward_intersection(const Point &x) const {
     constexpr const U inf =
         std::numeric_limits<U>::has_infinity ? std::numeric_limits<U>::infinity() : std::numeric_limits<U>::max();
-    if (x.is_inf()) return inf;
+    if (x.is_plus_inf()) return inf;
     if (x.is_minus_inf() || x.is_nan()) return -inf;
     U t = inf;
 
@@ -212,7 +212,7 @@ class Line {
   U compute_backward_intersection(const K_critical_point &x) const {
     constexpr const U inf =
         std::numeric_limits<U>::has_infinity ? std::numeric_limits<U>::infinity() : std::numeric_limits<U>::max();
-    if (x.is_inf()) return inf;
+    if (x.is_plus_inf()) return inf;
     if (x.is_minus_inf() || x.is_nan()) return -inf;
     U t = -inf;
     for (const auto &y : x) {

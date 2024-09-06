@@ -99,7 +99,7 @@ class One_critical_filtration : public std::vector<T> {
    *
    * @warning If @p value is `inf`, `-inf`, or `NaN`, the vector `{value, value, ...}` with \f$ n > 1 \f$ entries
    * is not wrong but will not be considered as respectively "infinity", "minus infinity" or "NaN" (the corresponding
-   * methods @ref is_inf(), @ref is_minus_inf() and @ref is_nan() will return false). For this purpose, please use
+   * methods @ref is_plus_inf(), @ref is_minus_inf() and @ref is_nan() will return false). For this purpose, please use
    * the static methods @ref inf(), @ref minus_inf() and @ref nan() instead.
    *
    * @param n Number of parameters.
@@ -142,30 +142,12 @@ class One_critical_filtration : public std::vector<T> {
                           typename std::vector<T>::const_iterator it_end)
       : Base(it_begin, it_end) {};
 
-  /**
-   * @brief Assign operator.
-   */
-  One_critical_filtration &operator=(const One_critical_filtration &a) {
-    Base::operator=(a);
-    return *this;
-  }
-
   // HERITAGE
 
   using std::vector<T>::operator[]; /**< Inheritance of entry access. */
   using value_type = T;             /**< Entry type. */
 
   // CONVERTERS
-
-  /**
-   * @brief Cast into `std::vector<T> &`.
-   */
-  operator std::vector<T> &() const { return *this; }
-
-  /**
-   * @brief Cast into `std::vector<T>`.
-   */
-  operator std::vector<T>() const { return static_cast<std::vector<T> >(*this); }
 
   // like numpy
   /**
@@ -193,7 +175,7 @@ class One_critical_filtration : public std::vector<T> {
   std::size_t num_parameters() const { return Base::size(); }
 
   /**
-   * @brief Returns a filtration value for which @ref is_inf() returns `true`.
+   * @brief Returns a filtration value for which @ref is_plus_inf() returns `true`.
    *
    * @return Infinity.
    */
@@ -226,7 +208,7 @@ class One_critical_filtration : public std::vector<T> {
   /**
    * @brief Returns `true` if and only if the filtration value is considered as infinity.
    */
-  bool is_inf() const {
+  bool is_plus_inf() const {
     if (Base::size() != 1) return false;
     return (Base::operator[](0) == T_inf);
   }
@@ -273,8 +255,8 @@ class One_critical_filtration : public std::vector<T> {
    * does **not** imply \f$ a == b \f$.
    */
   friend bool operator<(const One_critical_filtration &a, const One_critical_filtration &b) {
-    if (a.is_inf() || a.is_nan() || b.is_nan() || b.is_minus_inf()) return false;
-    if (b.is_inf() || a.is_minus_inf()) return true;
+    if (a.is_plus_inf() || a.is_nan() || b.is_nan() || b.is_minus_inf()) return false;
+    if (b.is_plus_inf() || a.is_minus_inf()) return true;
     bool isSame = true;
     auto n = a.size();
     GUDHI_CHECK(a.size() == b.size(), "Two filtration values with different number of parameters are not comparable.");
@@ -294,8 +276,8 @@ class One_critical_filtration : public std::vector<T> {
    */
   friend bool operator<=(const One_critical_filtration &a, const One_critical_filtration &b) {
     if (a.is_nan() || b.is_nan()) return false;
-    if (b.is_inf() || a.is_minus_inf()) return true;
-    if (a.is_inf() || b.is_minus_inf()) return false;
+    if (b.is_plus_inf() || a.is_minus_inf()) return true;
+    if (a.is_plus_inf() || b.is_minus_inf()) return false;
     auto n = a.size();
     GUDHI_CHECK(a.size() == b.size(), "Two filtration values with different number of parameters are not comparable.");
     for (std::size_t i = 0u; i < n; ++i) {
@@ -326,11 +308,7 @@ class One_critical_filtration : public std::vector<T> {
    * @brief Returns `true` if and only if for each \f$ i \f$, \f$ a[i] \f$ is equal to \f$ b[i] \f$.
    */
   friend bool operator==(const One_critical_filtration &a, const One_critical_filtration &b) {
-    if (a.num_parameters() != b.num_parameters()) return false;
-    for (auto i = 0u; i < a.num_parameters(); i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
+    return static_cast<const Base&>(a) == static_cast<const Base&>(b);
   }
 
   /**
@@ -448,16 +426,16 @@ class One_critical_filtration : public std::vector<T> {
                                              const One_critical_filtration &to_subtract) {
     if (result.empty()) return result;
 
-    if (result.is_nan() || to_subtract.is_nan() || (result.is_inf() && to_subtract.is_inf()) ||
+    if (result.is_nan() || to_subtract.is_nan() || (result.is_plus_inf() && to_subtract.is_plus_inf()) ||
         (result.is_minus_inf() && to_subtract.is_minus_inf())) {
       result = nan();
       return result;
     }
-    if (result.is_inf() || to_subtract.is_minus_inf()) {
+    if (result.is_plus_inf() || to_subtract.is_minus_inf()) {
       result = inf();
       return result;
     }
-    if (result.is_minus_inf() || to_subtract.is_inf()) {
+    if (result.is_minus_inf() || to_subtract.is_plus_inf()) {
       result = minus_inf();
       return result;
     }
@@ -488,12 +466,12 @@ class One_critical_filtration : public std::vector<T> {
   friend One_critical_filtration &operator-=(One_critical_filtration &result, const T &to_subtract) {
     if (result.empty()) return result;
 
-    if (result.is_nan() || is_nan_(to_subtract) || (result.is_inf() && to_subtract == T_inf) ||
+    if (result.is_nan() || is_nan_(to_subtract) || (result.is_plus_inf() && to_subtract == T_inf) ||
         (result.is_minus_inf() && to_subtract == -T_inf)) {
       result = nan();
       return result;
     }
-    if (result.is_inf() || to_subtract == -T_inf) {
+    if (result.is_plus_inf() || to_subtract == -T_inf) {
       result = inf();
       return result;
     }
@@ -583,12 +561,12 @@ class One_critical_filtration : public std::vector<T> {
   friend One_critical_filtration &operator+=(One_critical_filtration &result, const One_critical_filtration &to_add) {
     if (result.empty()) return result;
 
-    if (result.is_nan() || to_add.is_nan() || (result.is_inf() && to_add.is_minus_inf()) ||
-        (result.is_minus_inf() && to_add.is_inf())) {
+    if (result.is_nan() || to_add.is_nan() || (result.is_plus_inf() && to_add.is_minus_inf()) ||
+        (result.is_minus_inf() && to_add.is_plus_inf())) {
       result = nan();
       return result;
     }
-    if (result.is_inf() || to_add.is_inf()) {
+    if (result.is_plus_inf() || to_add.is_plus_inf()) {
       result = inf();
       return result;
     }
@@ -621,12 +599,12 @@ class One_critical_filtration : public std::vector<T> {
   friend One_critical_filtration &operator+=(One_critical_filtration &result, const T &to_add) {
     if (result.empty()) return result;
 
-    if (result.is_nan() || is_nan_(to_add) || (result.is_inf() && to_add == -T_inf) ||
+    if (result.is_nan() || is_nan_(to_add) || (result.is_plus_inf() && to_add == -T_inf) ||
         (result.is_minus_inf() && to_add == T_inf)) {
       result = nan();
       return result;
     }
-    if (result.is_inf() || to_add == T_inf) {
+    if (result.is_plus_inf() || to_add == T_inf) {
       result = inf();
       return result;
     }
@@ -737,8 +715,8 @@ class One_critical_filtration : public std::vector<T> {
       return result;
     }
 
-    bool res_is_infinite = result.is_inf() || result.is_minus_inf();
-    bool to_mul_is_infinite = to_mul.is_inf() || to_mul.is_minus_inf();
+    bool res_is_infinite = result.is_plus_inf() || result.is_minus_inf();
+    bool to_mul_is_infinite = to_mul.is_plus_inf() || to_mul.is_minus_inf();
 
     if (res_is_infinite && to_mul_is_infinite) {
       if (to_mul.is_minus_inf()) {
@@ -787,7 +765,7 @@ class One_critical_filtration : public std::vector<T> {
       return result;
     }
 
-    if (result.is_inf() || result.is_minus_inf()) {
+    if (result.is_plus_inf() || result.is_minus_inf()) {
       if (to_mul == 0)
         result = nan();
       else if (to_mul < 0)
@@ -908,8 +886,8 @@ class One_critical_filtration : public std::vector<T> {
   friend One_critical_filtration &operator/=(One_critical_filtration &result, const One_critical_filtration &to_div) {
     if (result.empty()) return result;
 
-    bool res_is_infinite = result.is_inf() || result.is_minus_inf();
-    bool to_div_is_infinite = to_div.is_inf() || to_div.is_minus_inf();
+    bool res_is_infinite = result.is_plus_inf() || result.is_minus_inf();
+    bool to_div_is_infinite = to_div.is_plus_inf() || to_div.is_minus_inf();
 
     if (result.is_nan() || to_div.is_nan() || (res_is_infinite && to_div_is_infinite)) {
       result = nan();
@@ -955,7 +933,7 @@ class One_critical_filtration : public std::vector<T> {
   friend One_critical_filtration &operator/=(One_critical_filtration &result, const T &to_div) {
     if (result.empty()) return result;
 
-    bool res_is_infinite = result.is_inf() || result.is_minus_inf();
+    bool res_is_infinite = result.is_plus_inf() || result.is_minus_inf();
     bool to_div_is_infinite = to_div == T_inf || to_div == -T_inf;
 
     if (to_div == 0 || is_nan_(to_div) || result.is_nan() || (res_is_infinite && to_div_is_infinite)) {
@@ -983,8 +961,8 @@ class One_critical_filtration : public std::vector<T> {
    * @param x The target filtration value towards which to push.
    */
   void push_to_least_common_upper_bound(const One_critical_filtration &x) {
-    if (this->is_inf() || this->is_nan() || x.is_nan() || x.is_minus_inf()) return;
-    if (x.is_inf() || this->is_minus_inf()) {
+    if (this->is_plus_inf() || this->is_nan() || x.is_nan() || x.is_minus_inf()) return;
+    if (x.is_plus_inf() || this->is_minus_inf()) {
       *this = x;
       return;
     }
@@ -1006,8 +984,8 @@ class One_critical_filtration : public std::vector<T> {
    * @param x The target filtration value towards which to pull.
    */
   void pull_to_greatest_common_lower_bound(const One_critical_filtration &x) {
-    if (x.is_inf() || this->is_nan() || x.is_nan() || this->is_minus_inf()) return;
-    if (this->is_inf() || x.is_minus_inf()) {
+    if (x.is_plus_inf() || this->is_nan() || x.is_nan() || this->is_minus_inf()) return;
+    if (this->is_plus_inf() || x.is_minus_inf()) {
       *this = x;
       return;
     }
@@ -1166,7 +1144,7 @@ class One_critical_filtration : public std::vector<T> {
    * @brief Outstream operator.
    */
   friend std::ostream &operator<<(std::ostream &stream, const One_critical_filtration &f) {
-    if (f.is_inf()) {
+    if (f.is_plus_inf()) {
       stream << "[inf, ..., inf]";
       return stream;
     }
@@ -1186,7 +1164,7 @@ class One_critical_filtration : public std::vector<T> {
     for (std::size_t i = 0; i < f.size() - 1; i++) {
       stream << f[i] << ", ";
     }
-    if (!f.empty()) stream << f.back();
+    stream << f.back();
     stream << "]";
     return stream;
   }

@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
   BOOST_CHECK_EQUAL(bottom[0], -4);
   BOOST_CHECK_EQUAL(bottom[1], -3);
   BOOST_CHECK_EQUAL(bottom[2], -2);
-  BOOST_CHECK(top.is_inf());
+  BOOST_CHECK(top.is_plus_inf());
 
   bottom = P::minus_inf();
   top = {4,5,6};
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
 
   b.inflate(2);
   BOOST_CHECK(bottom.is_minus_inf());
-  BOOST_CHECK(top.is_inf());
+  BOOST_CHECK(top.is_plus_inf());
 }
 
 
