@@ -82,6 +82,9 @@ class Line {
    * the number of coordinates.
    */
   Point operator[](T t) const {
+    GUDHI_CHECK(direction_.empty() || direction_.size() == basePoint_.size(),
+                "Direction and base point do not have the same dimension.");
+
     Point x(basePoint_.size());
 
     if (direction_.size() > 0) {
@@ -227,9 +230,10 @@ class Line {
    * @param box Box to intersect.
    * @return A pair representing the two bounding points of the intersection, such that the first element is the
    * smallest of the two. If the box and the line do not intersect, returns the pair {inf, inf}.
+   * If the box is trivial, returns {NaN, NaN}.
    */
   std::pair<Point, Point> get_bounds(const Box<T> &box) const {
-    if (box.is_trivial()) return {Point::inf(), Point::inf()};
+    if (box.is_trivial()) return {Point::nan(), Point::nan()};
 
     T bottom = compute_forward_intersection(box.get_lower_corner());
     T top = compute_backward_intersection(box.get_upper_corner());

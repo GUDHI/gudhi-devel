@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -240,8 +241,9 @@ class Multi_critical_filtration {
    * and if there is no generator, the method will segfault.
    */
   operator Generator() {
-    GUDHI_CHECK(num_generators() == 1, "Casting a " + std::to_string(num_generators()) +
-                                           "-critical filtration value into an 1-critical filtration value.");
+    if (num_generators() != 1)
+      throw std::logic_error("Casting a " + std::to_string(num_generators()) +
+                             "-critical filtration value into an 1-critical filtration value.");
     return multi_filtration_[0];
   }
 
