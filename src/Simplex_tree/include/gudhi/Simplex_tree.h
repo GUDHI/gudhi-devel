@@ -165,7 +165,7 @@ class Simplex_tree {
   };
   struct Filtration_simplex_base_dummy {
     Filtration_simplex_base_dummy() {}
-    Filtration_simplex_base_dummy(Filtration_value f) {
+    Filtration_simplex_base_dummy(Filtration_value GUDHI_CHECK_code(f)) {
       GUDHI_CHECK(f == 0, "filtration value specified for a complex that does not store them");
     }
     void assign_filtration(Filtration_value GUDHI_CHECK_code(f)) {
