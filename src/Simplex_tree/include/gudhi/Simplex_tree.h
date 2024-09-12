@@ -141,9 +141,6 @@ class Simplex_tree {
   };
   struct Key_simplex_base_dummy {
     Key_simplex_base_dummy() {}
-    Key_simplex_base_dummy(Simplex_key k) {
-      GUDHI_CHECK(k == -1, "key value specified for a complex that does not store them");
-    }
     // Undefined so it will not link
     void assign_key(Simplex_key);
     Simplex_key key() const;
@@ -529,12 +526,10 @@ class Simplex_tree {
     for (auto& p : root_source.members()){
       if constexpr (Options::store_key && OtherSimplexTreeOptions::store_key) {
         auto it = root_.members().try_emplace(
-            root_.members().end(),
-            p.first,
-            Node(&root_, translate_filtration_value(p.second.filtration()), p.second.key()));
+            root_.members().end(), p.first, &root_, translate_filtration_value(p.second.filtration()), p.second.key());
       } else {
         auto it = root_.members().try_emplace(
-            root_.members().end(), p.first, Node(&root_, translate_filtration_value(p.second.filtration())));
+            root_.members().end(), p.first, &root_, translate_filtration_value(p.second.filtration()));
       }
     }
 
@@ -553,15 +548,16 @@ class Simplex_tree {
           newsib->members_.reserve(sh_source->second.children()->members().size());
         }
         for (auto & child : sh_source->second.children()->members()){
-          if constexpr (store_key)
+          if constexpr (store_key && Options::store_key) {
             newsib->members_.emplace_hint(
                 newsib->members_.end(),
                 child.first,
                 Node(newsib, translate_filtration_value(child.second.filtration()), child.second.key()));
-          else
+          } else {
             newsib->members_.emplace_hint(newsib->members_.end(),
                                           child.first,
                                           Node(newsib, translate_filtration_value(child.second.filtration())));
+          }
         }
         rec_copy<store_key>(newsib, sh_source->second.children(), translate_filtration_value);
         sh->second.assign_children(newsib);
