@@ -77,11 +77,11 @@ BOOST_AUTO_TEST_CASE( plain_homology_betti_numbers )
 
   // Print the result. The format is, on each line: 2 dim 0 inf
   // where 2 represents the field, dim the dimension of the feature.
-  // 2  0 0 inf 
-  // 2  0 0 inf 
-  // 2  1 0 inf 
+  // 2  0 0 inf
+  // 2  0 0 inf
+  // 2  1 0 inf
   // means that in Z/2Z-homology, the Betti numbers are b0=2 and b1=1.
-  
+
   std::clog << "BETTI NUMBERS" << std::endl;
 
   BOOST_CHECK(pcoh.betti_number(0) == 2);
@@ -95,13 +95,13 @@ BOOST_AUTO_TEST_CASE( plain_homology_betti_numbers )
   BOOST_CHECK(bns[2] == 0);
 
   std::clog << "GET PERSISTENT PAIRS" << std::endl;
-  
+
   // Custom sort and output persistence
   cmp_intervals_by_dim_then_length<Mini_simplex_tree> cmp(&st);
   auto persistent_pairs = pcoh.get_persistent_pairs();
-  
+
   std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
-  
+
   BOOST_CHECK(persistent_pairs.size() == 3);
   // persistent_pairs[0] = 2  1 0 inf
   BOOST_CHECK(st.dimension(get<0>(persistent_pairs[0])) == 1);
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
   BOOST_CHECK(bns[0] == 2);
   BOOST_CHECK(bns[1] == 1);
   BOOST_CHECK(bns[2] == 0);
-  
+
   // Check the persistent Betti numbers in [4., 10.] are b0=2, b1=1 and b2=0.
   BOOST_CHECK(pcoh.persistent_betti_number(0, 4., 10.) == 2);
   BOOST_CHECK(pcoh.persistent_betti_number(1, 4., 10.) == 1);
@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
   BOOST_CHECK(bns[0] == 2);
   BOOST_CHECK(bns[1] == 1);
   BOOST_CHECK(bns[2] == 0);
-  
+
   // Check the persistent Betti numbers in [2.1, 100000.] are b0=2, b1=0 and b2=0.
   bns = pcoh.persistent_betti_numbers(2.1, 100000.);
   BOOST_CHECK(bns[0] == 2);
@@ -230,19 +230,19 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
   BOOST_CHECK(bns[0] == 1);
   BOOST_CHECK(bns[1] == 0);
   BOOST_CHECK(bns[2] == 0);
-  
+
   // Check the persistent Betti numbers in [.1, 10000000.] are b0=0, b1=0 and b2=0.
   bns = pcoh.persistent_betti_numbers(.1, 10000000.);
   BOOST_CHECK(bns[0] == 0);
   BOOST_CHECK(bns[1] == 0);
   BOOST_CHECK(bns[2] == 0);
-  
+
   // Custom sort and output persistence
   cmp_intervals_by_dim_then_length<Simplex_tree> cmp(&st);
   auto persistent_pairs = pcoh.get_persistent_pairs();
-  
+
   std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
-  
+
   BOOST_CHECK(persistent_pairs.size() == 3);
   // persistent_pairs[0] = 2  1 4 inf
   BOOST_CHECK(st.dimension(get<0>(persistent_pairs[0])) == 1);
@@ -284,13 +284,141 @@ BOOST_AUTO_TEST_CASE( betti_numbers )
   auto intervals_in_dimension_2 = pcoh.intervals_in_dimension(2);
   std::clog << "intervals_in_dimension_2.size() = " << intervals_in_dimension_2.size() << std::endl;
   BOOST_CHECK(intervals_in_dimension_2.size() == 0);
+}
 
+BOOST_AUTO_TEST_CASE( betti_numbers_empty_simplex_tree )
+{
   std::clog << "EMPTY COMPLEX" << std::endl;
   Simplex_tree empty;
   empty.initialize_filtration();
   St_persistence pcoh_empty(empty, false);
   pcoh_empty.init_coefficients(2);
   pcoh_empty.compute_persistent_cohomology();
+  std::clog << "pcoh_empty.betti_numbers().size() = " << pcoh_empty.betti_numbers().size() << std::endl;
   BOOST_CHECK(pcoh_empty.betti_numbers().size() == 0);
-  BOOST_CHECK(pcoh_empty.persistent_betti_numbers(0,1).size() == 0);
+  std::clog << "pcoh_empty.betti_number(0) = " << pcoh_empty.betti_number(0) << std::endl;
+  BOOST_CHECK(pcoh_empty.betti_number(0) == 0);
+  std::clog << "pcoh_empty.persistent_betti_numbers(0., 1.).size() = " << pcoh_empty.persistent_betti_numbers(0., 1.).size() << std::endl;
+  BOOST_CHECK(pcoh_empty.persistent_betti_numbers(0., 1.).size() == 0);
+  std::clog << "pcoh_empty.persistent_betti_number(0, 0., 1.) = " << pcoh_empty.persistent_betti_number(0, 0., 1.) << std::endl;
+  BOOST_CHECK(pcoh_empty.persistent_betti_number(0, 0., 1.) == 0);
+}
+
+BOOST_AUTO_TEST_CASE( betti_numbers_isolated_zero_simplices )
+{
+  std::clog << "Betti numbers on isolated zero simplices" << std::endl;
+  Simplex_tree st;
+
+  st.insert_simplex_and_subfaces({0});
+  st.insert_simplex_and_subfaces({1});
+  st.insert_simplex_and_subfaces({2});
+  st.insert_simplex_and_subfaces({3});
+  st.insert_simplex_and_subfaces({4});
+
+  st.initialize_filtration();
+  {
+    St_persistence pcoh(st);
+    pcoh.init_coefficients(3);
+    pcoh.compute_persistent_cohomology();
+
+    // Should have no Betti numbers
+    auto bn = pcoh.betti_numbers();
+    std::clog << "bn.size() = " << bn.size() << std::endl;
+    BOOST_CHECK(bn.size() == 0);
+
+    std::clog << "pcoh.betti_number(0) = " << pcoh.betti_number(0) << std::endl;
+    BOOST_CHECK(pcoh.betti_number(0) == 0);
+
+    auto pbn = pcoh.persistent_betti_numbers(0., 1.);
+    std::clog << "pbn.size() = " << pbn.size() << std::endl;
+    BOOST_CHECK(pbn.size() == 0);
+
+    std::clog << "pcoh.persistent_betti_number(0, 0., 1.) = " << pcoh.persistent_betti_number(0, 0., 1.) << std::endl;
+    BOOST_CHECK(pcoh.persistent_betti_number(0, 0., 1.) == 0);
+  }
+  // Set dim_max to true
+  {
+    St_persistence pcoh(st, true);
+    pcoh.init_coefficients(3);
+    pcoh.compute_persistent_cohomology();
+
+    int num_simplices = st.num_simplices();
+    // Should have Betti numbers
+    auto bn = pcoh.betti_numbers();
+    std::clog << "bn.size() = " << bn.size() << std::endl;
+    BOOST_CHECK(bn.size() == 1);
+    std::clog << "bn[0] = " << bn[0] << std::endl;
+    BOOST_CHECK(bn[0] == num_simplices);
+
+    std::clog << "pcoh.betti_number(0) = " << pcoh.betti_number(0) << std::endl;
+    BOOST_CHECK(pcoh.betti_number(0) == num_simplices);
+
+    auto pbn = pcoh.persistent_betti_numbers(0., 1.);
+    std::clog << "pbn.size() = " << pbn.size() << std::endl;
+    BOOST_CHECK(pbn.size() == 1);
+    std::clog << "pbn[0] = " << pbn[0] << std::endl;
+    BOOST_CHECK(pbn[0] == num_simplices);
+
+    std::clog << "pcoh.persistent_betti_number(0, 0., 1.) = " << pcoh.persistent_betti_number(0, 0., 1.) << std::endl;
+    BOOST_CHECK(pcoh.persistent_betti_number(0, 0., 1.) == num_simplices);
+  }
+}
+
+BOOST_AUTO_TEST_CASE( betti_numbers_no_compute_persistent_cohomology )
+{
+  std::clog << "Betti numbers when compute_persistent_cohomology is not performed" << std::endl;
+  Simplex_tree st;
+
+  st.insert_simplex_and_subfaces({0});
+  st.insert_simplex_and_subfaces({1});
+  st.insert_simplex_and_subfaces({2});
+  st.insert_simplex_and_subfaces({3});
+  st.insert_simplex_and_subfaces({4});
+
+  st.initialize_filtration();
+  {
+    St_persistence pcoh(st);
+    pcoh.init_coefficients(3);
+    // NO pcoh.compute_persistent_cohomology(), this is the aim of this test !
+
+    // Should have no Betti numbers
+    auto bn = pcoh.betti_numbers();
+    std::clog << "bn.size() = " << bn.size() << std::endl;
+    BOOST_CHECK(bn.size() == 0);
+
+    std::clog << "pcoh.betti_number(0) = " << pcoh.betti_number(0) << std::endl;
+    BOOST_CHECK(pcoh.betti_number(0) == 0);
+
+    auto pbn = pcoh.persistent_betti_numbers(0., 1.);
+    std::clog << "pbn.size() = " << pbn.size() << std::endl;
+    BOOST_CHECK(pbn.size() == 0);
+
+    std::clog << "pcoh.persistent_betti_number(0, 0., 1.) = " << pcoh.persistent_betti_number(0, 0., 1.) << std::endl;
+    BOOST_CHECK(pcoh.persistent_betti_number(0, 0., 1.) == 0);
+  }
+  // Set dim_max to true
+  {
+    St_persistence pcoh(st, true);
+    pcoh.init_coefficients(3);
+    // NO pcoh.compute_persistent_cohomology(), this is the aim of this test !
+
+    // Should have no Betti numbers
+    auto bn = pcoh.betti_numbers();
+    std::clog << "bn.size() = " << bn.size() << std::endl;
+    BOOST_CHECK(bn.size() == 1);
+    std::clog << "bn[0] = " << bn[0] << std::endl;
+    BOOST_CHECK(bn[0] == 0);
+
+    std::clog << "pcoh.betti_number(0) = " << pcoh.betti_number(0) << std::endl;
+    BOOST_CHECK(pcoh.betti_number(0) == 0);
+
+    auto pbn = pcoh.persistent_betti_numbers(0., 1.);
+    std::clog << "pbn.size() = " << pbn.size() << std::endl;
+    BOOST_CHECK(pbn.size() == 1);
+    std::clog << "pbn[0] = " << pbn[0] << std::endl;
+    BOOST_CHECK(pbn[0] == 0);
+
+    std::clog << "pcoh.persistent_betti_number(0, 0., 1.) = " << pcoh.persistent_betti_number(0, 0., 1.) << std::endl;
+    BOOST_CHECK(pcoh.persistent_betti_number(0, 0., 1.) == 0);
+  }
 }
