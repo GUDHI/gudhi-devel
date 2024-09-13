@@ -26,22 +26,20 @@
 
 using namespace Gudhi;
 
-struct Simplex_tree_options_stable_simplex_handles {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::uint32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = true;
-  static const bool stable_simplex_handles = true;
-};
-
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
-                         Simplex_tree<Simplex_tree_options_full_featured>,
-                         Simplex_tree<Simplex_tree_options_stable_simplex_handles> > list_of_tested_variants;
+                         Simplex_tree<Simplex_tree_options_full_featured> > list_of_tested_variants;
+
+std::string print_filtration_value(double fil){
+  return std::to_string(fil);
+}
+
+std::string print_filtration_value(std::vector<int> fil){
+  std::string ss;
+  for (auto val : fil) ss += std::to_string(val) + " ";
+  ss.pop_back();
+  return ss;
+}
 
 template<typename Simplex_tree>
 void print_simplex_filtration(Simplex_tree& st, const std::string& msg) {
@@ -55,7 +53,7 @@ void print_simplex_filtration(Simplex_tree& st, const std::string& msg) {
   std::clog << "* Iterator on Simplices in the filtration, with [filtration value]:\n";
   for (auto f_simplex : st.filtration_simplex_range()) {
     std::clog << "   "
-              << "[" << st.filtration(f_simplex) << "] ";
+              << "[" << print_filtration_value(st.filtration(f_simplex)) << "] ";
     for (auto vertex : st.simplex_vertex_range(f_simplex)) std::clog << "(" << vertex << ")";
     std::clog << std::endl;
   }
@@ -177,6 +175,165 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
 
   BOOST_CHECK(st7 == st);
 
+}
+
+struct Simplex_tree_options_custom_fil_values_default {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef std::int16_t Vertex_handle;
+  typedef std::vector<int> Filtration_value;
+  typedef std::int32_t Simplex_key;
+  static const bool store_key = false;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
+  static const bool stable_simplex_handles = false;
+};
+
+struct Simplex_tree_options_custom_fil_values_fast_persistence {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef std::int16_t Vertex_handle;
+  typedef std::vector<int> Filtration_value;
+  typedef std::int32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = true;
+  static const bool link_nodes_by_label = false;
+  static const bool stable_simplex_handles = false;
+};
+
+struct Simplex_tree_options_custom_fil_values_full_featured {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef std::int16_t Vertex_handle;
+  typedef std::vector<int> Filtration_value;
+  typedef std::int32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = true;
+  static const bool stable_simplex_handles = true;
+};
+
+typedef boost::mpl::list<Simplex_tree<Simplex_tree_options_custom_fil_values_default>,
+                         Simplex_tree<Simplex_tree_options_custom_fil_values_fast_persistence>,
+                         Simplex_tree<Simplex_tree_options_custom_fil_values_full_featured> >
+    list_of_custom_fil_variants;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_custom_copy_constructor, typeST, list_of_custom_fil_variants) {
+  typeST st;
+  Simplex_tree<> st_witness;
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, {3, 1});
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, {4, 1});
+  st.insert_simplex_and_subfaces({3, 0}, {2, 1});
+  st.insert_simplex_and_subfaces({3, 4, 5}, {3, 1});
+  st.insert_simplex_and_subfaces({8}, {1, 1});
+
+  st_witness.insert_simplex_and_subfaces({2, 1, 0}, 3.0);
+  st_witness.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.0);
+  st_witness.insert_simplex_and_subfaces({3, 0}, 2.0);
+  st_witness.insert_simplex_and_subfaces({3, 4, 5}, 3.0);
+  st_witness.insert_simplex_and_subfaces({8}, 1.0);
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o   o       */
+  /*  2   0   3\X/4   8       */
+  /*            o             */
+  /*            5             */
+  /*                          */
+  /* In other words:          */
+  /*   A facet  [2,1,0]       */
+  /*   An edge  [0,3]         */
+  /*   A facet  [3,4,5]       */
+  /*   A cell   [0,1,6,7]     */
+  /*   A vertex [8]           */
+
+  print_simplex_filtration(st, "Simplex_tree is initialized");
+
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF CUSTOM COPY CONSTRUCTOR" << std::endl;
+
+  auto trans = [](const typename typeST::Filtration_value& fil) -> Simplex_tree<>::Filtration_value {
+    return fil[0];
+  };
+
+  Simplex_tree<> st1(st, trans);
+  Simplex_tree<> st2(st, trans);
+  print_simplex_filtration(st1, "First custom copy constructor from the Simplex_tree");
+  print_simplex_filtration(st2, "Second custom copy constructor from the Simplex_tree");
+  // Cross check
+  BOOST_CHECK(st1 == st2);
+  BOOST_CHECK(st_witness == st2);
+  BOOST_CHECK(st1 == st_witness);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_custom_copy_constructor_key, typeST, list_of_custom_fil_variants)
+{
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF CUSTOM COPY CONSTRUCTOR WITH KEY VALUES" << std::endl;
+
+  typeST st;
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, {3, 1});
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, {4, 1});
+  st.insert_simplex_and_subfaces({3, 0}, {2, 1});
+  st.insert_simplex_and_subfaces({3, 4, 5}, {3, 1});
+  st.insert_simplex_and_subfaces({8}, {1, 1});
+
+  /* Inserted simplex:        */
+  /*    1   6                 */
+  /*    o---o                 */
+  /*   /X\7/                  */
+  /*  o---o---o---o   o       */
+  /*  2   0   3\X/4   8       */
+  /*            o             */
+  /*            5             */
+  /*                          */
+  /* In other words:          */
+  /*   A facet  [2,1,0]       */
+  /*   An edge  [0,3]         */
+  /*   A facet  [3,4,5]       */
+  /*   A cell   [0,1,6,7]     */
+  /*   A vertex [8]           */
+
+  if constexpr (typeST::Options::store_key){
+    for (auto f_simplex : st.complex_simplex_range()) {
+      std::int32_t key = 1;
+      for (auto filt : st.filtration(f_simplex)) {
+        key *= filt;
+      }
+      st.assign_key(f_simplex, key);
+    }
+  }
+
+  auto trans = [](const typename typeST::Filtration_value& fil)
+      -> Simplex_tree<Simplex_tree_options_custom_fil_values_full_featured>::Filtration_value {
+    Simplex_tree<Simplex_tree_options_custom_fil_values_full_featured>::Filtration_value copy(std::begin(fil),
+                                                                                              std::end(fil));
+    std::sort(copy.begin(), copy.end());
+    return copy;
+  };
+
+  Simplex_tree<Simplex_tree_options_custom_fil_values_full_featured> st_trans(st, trans);
+  for (auto f_simplex : st_trans.complex_simplex_range()) {
+    auto filtrations = st_trans.filtration(f_simplex);
+    BOOST_CHECK(std::is_sorted(std::begin(filtrations), std::end(filtrations)));
+
+    if constexpr (typeST::Options::store_key){
+      std::int32_t key = 1;
+      for (auto filt : st_trans.filtration(f_simplex)) {
+        key *= filt;
+      }
+      std::clog << "key = " << st_trans.key(f_simplex) << " vs " << key << std::endl;
+
+      BOOST_CHECK(st_trans.key(f_simplex) == key);
+    } else {
+      std::clog << "No key stored initially: key = " << st_trans.key(f_simplex) << std::endl;
+
+      BOOST_CHECK(st_trans.key(f_simplex) == -1);
+    }
+  }
 }
 
 template<typename Simplex_tree>
