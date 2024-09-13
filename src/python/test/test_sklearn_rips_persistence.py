@@ -10,6 +10,11 @@
 
 from gudhi.datasets.generators import points
 from gudhi.sklearn.rips_persistence import RipsPersistence
+from gudhi import RipsComplex, SimplexTree
+from gudhi._ripser import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
+from scipy.sparse import coo_matrix
+from scipy.spatial.distance import pdist, squareform
+from scipy.spatial import cKDTree
 import numpy as np
 import random
 import pytest
@@ -87,3 +92,58 @@ def test_big():
     # Ripser cannot handle it, have to fall back to SimplexTree
     # Computing the full distance matrix would require too much memory -> kd-tree
     RipsPersistence(range(25), threshold=10).fit_transform([X])
+
+
+def test_ripser_interfaces():
+    primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+    random_prime = primes[random.randint(0, 9)]
+    print(f"random prime = {random_prime}")
+
+    point_cloud = points.sphere(n_samples=random.randint(100, 150), ambient_dim=2)
+    print(f"nb points = {len(point_cloud)}")
+    inp = squareform(pdist(point_cloud))
+
+    # Check cone radius
+    assert inp.max(-1).min() < 2.0
+    assert _lower_cone_radius(inp) < 2.0
+
+    ## As there is no easy way to force the use of SimplexTree, let's build it
+    stree = RipsComplex(distance_matrix=inp).create_simplex_tree(max_dimension=2)
+    stree.compute_persistence(homology_coeff_field=random_prime, persistence_dim_max=True)
+    dgm0 = stree.persistence_intervals_in_dimension(0)
+    dgm1 = stree.persistence_intervals_in_dimension(1)
+
+    dgm = _full(inp, max_dimension=2, max_edge_length=float("inf"), homology_coeff_field=random_prime)
+    np.testing.assert_almost_equal(dgm0, dgm[0])
+    np.testing.assert_almost_equal(dgm1, dgm[1])
+
+    dgm = _lower(inp, max_dimension=2, max_edge_length=float("inf"), homology_coeff_field=random_prime)
+    np.testing.assert_almost_equal(dgm0, dgm[0])
+    np.testing.assert_almost_equal(dgm1, dgm[1])
+
+    # From a coo matrix
+    n = len(point_cloud)
+    tree = cKDTree(point_cloud)
+    pairs = tree.query_pairs(r=float("inf"), output_type="ndarray")
+    data = np.ravel(np.linalg.norm(np.diff(point_cloud[pairs], axis=1), axis=-1))
+    inp = coo_matrix((data, (pairs[:, 0], pairs[:, 1])), shape=(n,) * 2)
+    ## As there is no easy way to force the use of SimplexTree, let's build it
+    stree = SimplexTree()
+    stree.insert_batch(np.arange(n).reshape(1, -1), np.zeros(n))
+    stree.insert_edges_from_coo_matrix(inp)
+    stree.expansion(2)
+    stree.compute_persistence(homology_coeff_field=random_prime, persistence_dim_max=True)
+    dgm0 = stree.persistence_intervals_in_dimension(0)
+    dgm1 = stree.persistence_intervals_in_dimension(1)
+
+    dgm = _sparse(
+        inp.row,
+        inp.col,
+        inp.data,
+        inp.shape[0],
+        max_dimension=2,
+        max_edge_length=float("inf"),
+        homology_coeff_field=random_prime,
+    )
+    np.testing.assert_almost_equal(dgm0, dgm[0])
+    np.testing.assert_almost_equal(dgm1, dgm[1])
