@@ -13,7 +13,7 @@ from gudhi.sklearn.rips_persistence import RipsPersistence
 from gudhi import RipsComplex, SimplexTree
 from gudhi._ripser import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
 from scipy.sparse import coo_matrix
-from scipy.spatial.distance import pdist, squareform
+from scipy.spatial.distance import cdist
 from scipy.spatial import cKDTree
 import numpy as np
 import random
@@ -96,54 +96,57 @@ def test_big():
 
 def test_ripser_interfaces():
     primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
-    random_prime = primes[random.randint(0, 9)]
-    print(f"random prime = {random_prime}")
+    field = primes[random.randint(0, 9)]
+    print(f"random prime = {field}")
 
     point_cloud = points.sphere(n_samples=random.randint(100, 150), ambient_dim=2)
-    print(f"nb points = {len(point_cloud)}")
-    inp = squareform(pdist(point_cloud))
+    # point_cloud = np.random.rand(random.randint(100, 150), random.randint(2, 3))
+    print(f"nb points = {len(point_cloud)}, dim = {point_cloud.shape[1]}")
+    dists = cdist(point_cloud, point_cloud)
 
     # Check cone radius
-    assert inp.max(-1).min() < 2.0
-    assert _lower_cone_radius(inp) < 2.0
+    cr = dists.max(-1).min()
+    assert cr == _lower_cone_radius(dists)
+    assert cr < 2.0
 
     ## As there is no easy way to force the use of SimplexTree, let's build it
-    stree = RipsComplex(distance_matrix=inp).create_simplex_tree(max_dimension=2)
-    stree.compute_persistence(homology_coeff_field=random_prime, persistence_dim_max=True)
+    stree = RipsComplex(distance_matrix=dists).create_simplex_tree(max_dimension=2)
+    stree.compute_persistence(homology_coeff_field=field, persistence_dim_max=True)
     dgm0 = stree.persistence_intervals_in_dimension(0)
     dgm1 = stree.persistence_intervals_in_dimension(1)
 
-    dgm = _full(inp, max_dimension=2, max_edge_length=float("inf"), homology_coeff_field=random_prime)
+    dgm = _full(dists, max_dimension=1, max_edge_length=float("inf"), homology_coeff_field=field)
     np.testing.assert_almost_equal(dgm0, dgm[0])
     np.testing.assert_almost_equal(dgm1, dgm[1])
 
-    dgm = _lower(inp, max_dimension=2, max_edge_length=float("inf"), homology_coeff_field=random_prime)
+    dgm = _lower(dists, max_dimension=1, max_edge_length=float("inf"), homology_coeff_field=field)
     np.testing.assert_almost_equal(dgm0, dgm[0])
     np.testing.assert_almost_equal(dgm1, dgm[1])
 
     # From a coo matrix
     n = len(point_cloud)
-    tree = cKDTree(point_cloud)
-    pairs = tree.query_pairs(r=float("inf"), output_type="ndarray")
-    data = np.ravel(np.linalg.norm(np.diff(point_cloud[pairs], axis=1), axis=-1))
-    inp = coo_matrix((data, (pairs[:, 0], pairs[:, 1])), shape=(n,) * 2)
+    dists_copy = np.array(dists, copy=True)
+    dists_copy[np.triu_indices_from(dists_copy)] = 0  # Keep only the lower entries
+    dists_sparse = coo_matrix(dists_copy)
     ## As there is no easy way to force the use of SimplexTree, let's build it
     stree = SimplexTree()
     stree.insert_batch(np.arange(n).reshape(1, -1), np.zeros(n))
-    stree.insert_edges_from_coo_matrix(inp)
+    stree.insert_edges_from_coo_matrix(dists_sparse)
     stree.expansion(2)
-    stree.compute_persistence(homology_coeff_field=random_prime, persistence_dim_max=True)
-    dgm0 = stree.persistence_intervals_in_dimension(0)
-    dgm1 = stree.persistence_intervals_in_dimension(1)
+    stree.compute_persistence(homology_coeff_field=field, persistence_dim_max=True)
+    sp_dgm0 = stree.persistence_intervals_in_dimension(0)
+    sp_dgm1 = stree.persistence_intervals_in_dimension(1)
 
-    dgm = _sparse(
-        inp.row,
-        inp.col,
-        inp.data,
-        inp.shape[0],
-        max_dimension=2,
+    sp_dgm = _sparse(
+        dists_sparse.row,
+        dists_sparse.col,
+        dists_sparse.data,
+        dists_sparse.shape[0],
+        max_dimension=1,
         max_edge_length=float("inf"),
-        homology_coeff_field=random_prime,
+        homology_coeff_field=field,
     )
-    np.testing.assert_almost_equal(dgm0, dgm[0])
-    np.testing.assert_almost_equal(dgm1, dgm[1])
+    np.testing.assert_almost_equal(sp_dgm0, sp_dgm[0])
+    np.testing.assert_almost_equal(sp_dgm1, sp_dgm[1])
+    np.testing.assert_almost_equal(sp_dgm0, dgm0)
+    np.testing.assert_almost_equal(sp_dgm1, dgm1)

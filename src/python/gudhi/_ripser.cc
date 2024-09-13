@@ -177,7 +177,7 @@ double lower_cone_radius(py::object low_mat) {
     if (coli < rowi) throw std::invalid_argument("Not enough elements for a lower triangular matrix");
     ++rowi;
   };
-  return *std::max_element(maxs.begin(), maxs.end());
+  return *std::min_element(maxs.begin(), maxs.end());
 }
 
 PYBIND11_MODULE(_ripser, m) {
