@@ -107,6 +107,8 @@ struct Get_simplex_data_type<O, std::void_t<typename O::Simplex_data>> { typedef
  * generating a lifetime including those two values.
  * This is the overload for when `Filtration_value` is a native arithmetic type, like double, int etc.
  * Because the filtration values are totally ordered then, the union is simply the minimum of the two values.
+ *
+ * NaN values are not supported.
  */
 template <typename Arithmetic_filtration_value,
           typename = std::enable_if_t<std::is_arithmetic_v<Arithmetic_filtration_value> > >
@@ -126,18 +128,18 @@ bool unify_births(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f
  * This is the overload for when `Filtration_value` is a native arithmetic type, like double, float, int etc.
  * Because the filtration values are totally ordered then, the upper bound is always the maximum of the two values.
  */
-template <typename Floating_filtration_value,
-          typename = std::enable_if_t<std::is_arithmetic_v<Floating_filtration_value> > >
-bool push_to_smallest_common_upper_bound(Floating_filtration_value& f1, Floating_filtration_value f2)
+template <typename Arithmetic_filtration_value,
+          typename = std::enable_if_t<std::is_arithmetic_v<Arithmetic_filtration_value> > >
+bool push_to_smallest_common_upper_bound(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
 {
-  if constexpr (std::is_floating_point_v<Floating_filtration_value>) {
+  if constexpr (std::is_floating_point_v<Arithmetic_filtration_value>) {
     if (std::isnan(f1)) {
       f1 = f2;
-      return !std::isnan(f1);
+      return !std::isnan(f2);
     }
 
     // Computes the max while handling NaN as lowest value.
-    if (f1 == f2 || !(f1 <= f2)) return false;
+    if (!(f1 < f2)) return false;
 
     f1 = f2;
     return true;

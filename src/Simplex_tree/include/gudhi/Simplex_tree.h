@@ -158,8 +158,7 @@ class Simplex_tree {
     Filtration_simplex_base_real() : filt_(0) {}
     void assign_filtration(const Filtration_value& f) { filt_ = f; }
     const Filtration_value& filtration() const { return filt_; }
-    Filtration_value& filtration_raw() { return filt_; }
-    const Filtration_value& filtration_raw() const { return filt_; }
+    Filtration_value& filtration() { return filt_; }
 
     static constexpr const Filtration_value& get_infinity() { return inf_; }
 
@@ -860,8 +859,8 @@ class Simplex_tree {
    * @brief Inserts a Node in the set of siblings nodes. Calls `update_simplex_tree_after_node_insertion`
    * if the insertion succeeded.
    * 
-   * @tparam update_fil If true and the node is already present, assigns the "union" of the input filtration_value
-   * and the value already present in the node as filtration value.
+   * @tparam update_fil If true, as well as Options::store_filtration, and the node is already present, assigns
+   * the "union" of the input filtration_value and the value already present in the node as filtration value.
    * @tparam update_children If true and the node has no children, create a child with sib as uncle.
    * @tparam set_to_null If true and the node is already present, sets the returned simplex handle to null if the
    * filtration value of the simplex was not modified.
@@ -887,8 +886,8 @@ class Simplex_tree {
       return ins;
     }
 
-    if constexpr (update_fil){
-      if (unify_births(ins.first->second.filtration_raw(), filtration_value)) return ins;
+    if constexpr (Options::store_filtration && update_fil){
+      if (unify_births(ins.first->second.filtration(), filtration_value)) return ins;
     }
 
     if constexpr (set_to_null){
@@ -927,7 +926,7 @@ class Simplex_tree {
     }
 
     GUDHI_CHECK(*vi != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
-    res_insert = insert_node_<Options::store_filtration, false, true>(curr_sib, *vi, filtration);
+    res_insert = insert_node_<true, false, true>(curr_sib, *vi, filtration);
     if (res_insert.second){
       int dim = static_cast<int>(boost::size(simplex)) - 1;
       if (dim > dimension_) {
@@ -1032,10 +1031,10 @@ class Simplex_tree {
     // - loop over those (new or not) simplices, with a recursive call(++first, last)
     Vertex_handle vertex_one = *first;
 
-    if (++first == last) return insert_node_<Options::store_filtration, false, true>(sib, vertex_one, filt);
+    if (++first == last) return insert_node_<true, false, true>(sib, vertex_one, filt);
 
     // TODO: have special code here, we know we are building the whole subtree from scratch.
-    auto insertion_result = insert_node_<Options::store_filtration, true, false>(sib, vertex_one, filt);
+    auto insertion_result = insert_node_<true, true, false>(sib, vertex_one, filt);
 
     auto res = rec_insert_simplex_and_subfaces_sorted(insertion_result.first->second.children(), first, last, filt);
     // No need to continue if the full simplex was already there with a low enough filtration value.
@@ -1983,13 +1982,13 @@ class Simplex_tree {
     auto fun = [&modified, this](Simplex_handle sh, int dim) -> void {
       if (dim == 0) return;
 
-      Filtration_value& max_filt_border_value = sh->second.filtration_raw();
+      Filtration_value& current_filt = sh->second.filtration();
 
       // Find the maximum filtration value in the border and assigns it if it is greater than the current
       for (Simplex_handle b : boundary_simplex_range(sh)) {
         // considers NaN as the lowest possible value.
         // stores the filtration modification information
-        modified = push_to_smallest_common_upper_bound(max_filt_border_value, b->second.filtration()) || modified;
+        modified |= push_to_smallest_common_upper_bound(current_filt, b->second.filtration());
       }
     };
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree

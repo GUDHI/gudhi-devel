@@ -46,9 +46,10 @@ struct FiltrationValue {
   friend bool operator!=(const FiltrationValue& f1, const FiltrationValue& f2);
 
   /**
-   * @brief Given two filtration values at which a simplex exists, returns the minimal union of births generating
-   * a lifetime including those two values. The overload for native arithmetic types like `double` or `int` is
-   * already implemented.
+   * @brief Given two filtration values at which a simplex exists, computes the minimal union of births generating
+   * a lifetime including those two values. The result is stored in the first parameter.
+   * The overload for native arithmetic types like `double` or `int` is already implemented as the minimum of the
+   * two given values.
    *
    * For a k-critical filtration, FiltrationValue should be able to store an union of values (corresponding to the
    * different births of a same simplex) and this method adds the values of @p f2 in @p f1 and removes the values
@@ -63,7 +64,8 @@ struct FiltrationValue {
 
   /**
    * @brief Given two filtration values, stores in the first value the greatest common upper bound of the two values.
-   * The overload for native arithmetic types like `double` or `int` is already implemented.
+   * The overload for native arithmetic types like `double` or `int` is already implemented as the maximum of the two
+   * given values.
    *
    * @return True if and only if the values in @p f1 were actually modified.
    */
