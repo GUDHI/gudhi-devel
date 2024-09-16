@@ -2100,7 +2100,8 @@ class Simplex_tree {
 
     auto to_remove = [this, filt](Dit_value_t& simplex) {
       //if filt and simplex.second.filtration() are non comparable, should return false.
-      if (filt < simplex.second.filtration()) {
+      //if simplex.second.filtration() is NaN, should return true.
+      if (filt < simplex.second.filtration() || !(simplex.second.filtration() == simplex.second.filtration())) {
         if (has_children(&simplex)) rec_delete(simplex.second.children());
         // dimension may need to be lowered
         dimension_to_be_lowered_ = true;
