@@ -33,15 +33,15 @@ int main() {
   zp.insert_face(2, {}, 0, 0.1);
   // inserts vertex 4 at filtration value 0.1 -> birth at 0.1 of 0-cycle
   zp.insert_face(4, {}, 0, 0.1);
-  // inserts edge 5 = (2,4) at filtration value 0.3 -> death at 0.3 -> outputs/stores (0, 0.1, 0.3)
+  // inserts edge 5 = (2,4) at filtration value 0.3 -> death at 0.3 -> outputs (0, 0.1, 0.3)
   zp.insert_face(5, {2, 4}, 1, 0.3);
   // inserts vertex 3 at filtration value 0.4 -> birth at 0.4 of 0-cycle
   zp.insert_face(3, {}, 0, 0.4);
-  // inserts edge 6 = (2,3) at filtration value 0.4 -> death at 0.4 of the cycle born at 0.4 -> outputs/stores nothing
+  // inserts edge 6 = (2,3) at filtration value 0.4 -> death at 0.4 of the cycle born at 0.4 -> outputs nothing
   zp.insert_face(6, {2, 3}, 1, 0.4);
   // inserts edge 9 = (3,4) at filtration value 1.2 -> birth at 1.2 of 1-cycle
   zp.insert_face(9, {4, 3}, 1, 1.2);
-  // removes edge 6 at filtration value 1.5 -> death at 1.5 -> outputs/stores (1, 1.2, 1.5)
+  // removes edge 6 at filtration value 1.5 -> death at 1.5 -> outputs (1, 1.2, 1.5)
   zp.remove_face(6, 1.5);
   // removes edge 5 at filtration value 2.0 -> birth at 2.0 of 0-cycle
   zp.remove_face(5, 2.0);
