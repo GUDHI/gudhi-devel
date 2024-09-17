@@ -33,7 +33,7 @@
 #include <unordered_map>
 #endif
 
-#include <gudhi/matrix.h>
+#include <gudhi/Matrix.h>
 
 namespace Gudhi {
 namespace zigzag_persistence {
@@ -163,7 +163,7 @@ class Zigzag_persistence
 #endif
   using Matrix_options = Zigzag_matrix_options<Options::column_type>;     /**< Matrix options. */
   using Matrix_type = Gudhi::persistence_matrix::Matrix<Matrix_options>;  /**< Matrix. */
-  using matrix_index = typename Matrix_type::index;                       /**< Matrix indexation type. */
+  using matrix_index = typename Matrix_type::Index;                       /**< Matrix indexation type. */
 
   /** \brief Maintains the birth ordering \f$\leq_b\f$.
    *
