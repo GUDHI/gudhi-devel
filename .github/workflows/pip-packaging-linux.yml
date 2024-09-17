@@ -22,7 +22,7 @@ jobs:
           rm -rf src/python/gudhi/*.cpp
           mkdir build_38
           cd build_38
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON38/bin/python ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON38/bin/python ..
           cd src/python
           $PYTHON38/bin/python -m build -n -w
           auditwheel repair dist/*.whl
@@ -32,6 +32,7 @@ jobs:
           $PYTHON38/bin/python -m pip install numpy --upgrade
           $PYTHON38/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON38/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
           $PYTHON38/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON38/bin/python -m pytest -v src/python/test/test_cubical_complex.py
           $PYTHON38/bin/python -m pytest -v src/python/test/test_rips_complex.py
@@ -40,7 +41,7 @@ jobs:
           rm -rf src/python/gudhi/*.cpp
           mkdir build_39
           cd build_39
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON39/bin/python ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON39/bin/python ..
           cd src/python
           $PYTHON39/bin/python -m build -n -w
           auditwheel repair dist/*.whl
@@ -54,6 +55,7 @@ jobs:
           $PYTHON39/bin/python -m pip install numpy~=1.19.3
           $PYTHON39/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON39/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON39/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_cubical_complex.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_rips_complex.py
@@ -62,7 +64,7 @@ jobs:
           rm -rf src/python/gudhi/*.cpp
           mkdir build_310
           cd build_310
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON310/bin/python ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON310/bin/python ..
           cd src/python
           $PYTHON310/bin/python -m build -n -w
           auditwheel repair dist/*.whl
@@ -72,6 +74,7 @@ jobs:
           $PYTHON310/bin/python -m pip install numpy~=1.21.6
           $PYTHON310/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON310/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON310/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
           $PYTHON310/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON310/bin/python -m pytest -v src/python/test/test_cubical_complex.py
           $PYTHON310/bin/python -m pytest -v src/python/test/test_rips_complex.py
@@ -80,7 +83,7 @@ jobs:
           rm -rf src/python/gudhi/*.cpp
           mkdir build_311
           cd build_311
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON311/bin/python ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON311/bin/python ..
           cd src/python
           $PYTHON311/bin/python -m build -n -w
           auditwheel repair dist/*.whl
@@ -90,6 +93,7 @@ jobs:
           $PYTHON311/bin/python -m pip install numpy~=1.23.2
           $PYTHON311/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON311/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON311/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
           $PYTHON311/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON311/bin/python -m pytest -v src/python/test/test_cubical_complex.py
           $PYTHON311/bin/python -m pytest -v src/python/test/test_rips_complex.py
@@ -98,7 +102,7 @@ jobs:
           rm -rf src/python/gudhi/*.cpp
           mkdir build_312
           cd build_312
-          cmake -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHON312/bin/python ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON312/bin/python ..
           cd src/python
           $PYTHON312/bin/python -m build -n -w
           auditwheel repair dist/*.whl
@@ -108,6 +112,7 @@ jobs:
           $PYTHON312/bin/python -m pip install numpy~=1.26.0
           $PYTHON312/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON312/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON312/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
           $PYTHON312/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON312/bin/python -m pytest -v src/python/test/test_cubical_complex.py
           $PYTHON312/bin/python -m pytest -v src/python/test/test_rips_complex.py

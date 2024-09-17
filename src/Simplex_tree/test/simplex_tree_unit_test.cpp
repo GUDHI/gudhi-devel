@@ -31,22 +31,9 @@
 
 using namespace Gudhi;
 
-struct Simplex_tree_options_stable_simplex_handles {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef int Vertex_handle;
-  typedef double Filtration_value;
-  typedef std::uint32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = true;
-  static const bool stable_simplex_handles = true;
-};
-
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
-                         Simplex_tree<Simplex_tree_options_full_featured>,
-                         Simplex_tree<Simplex_tree_options_stable_simplex_handles> > list_of_tested_variants;
+                         Simplex_tree<Simplex_tree_options_full_featured> > list_of_tested_variants;
 
 template<class typeST>
 void test_empty_simplex_tree(typeST& tst) {
@@ -933,7 +920,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insert_graph, Graph, list_of_graph_va
   st1.insert_graph(g);
   BOOST_CHECK(st1.num_simplices() == 6);
 
-  Simplex_tree<Simplex_tree_options_stable_simplex_handles> sst1;
+  Simplex_tree<Simplex_tree_options_full_featured> sst1;
   sst1.insert_graph(g);
   BOOST_CHECK(sst1.num_simplices() == 6);
 
@@ -948,7 +935,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insert_graph, Graph, list_of_graph_va
   st2.insert_graph(g);
   BOOST_CHECK(st2.num_simplices() == 6);
 
-  Simplex_tree<Simplex_tree_options_stable_simplex_handles> sst2;
+  Simplex_tree<Simplex_tree_options_full_featured> sst2;
   sst2.insert_graph(g);
   BOOST_CHECK(sst2.num_simplices() == 6);
 
@@ -1157,8 +1144,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_boundaries_and_opposite_vertex_iterat
 }
 
 typedef boost::mpl::list<Simplex_tree<>,
-                         Simplex_tree<Simplex_tree_options_full_featured>,
-                         Simplex_tree<Simplex_tree_options_stable_simplex_handles> >
+                         Simplex_tree<Simplex_tree_options_full_featured> >
                            list_of_tested_variants_wo_fast_persistence;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(batch_vertices, typeST, list_of_tested_variants_wo_fast_persistence) {
@@ -1240,4 +1226,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(for_each_simplex_skip_iteration, typeST, list_of_t
 
   BOOST_CHECK(num_simplices_by_dim_until_two[0] == num_simplices_by_dim[0]);
   BOOST_CHECK(num_simplices_by_dim_until_two[1] == num_simplices_by_dim[1]);
+}
+
+struct Options_with_int_data : Simplex_tree_options_minimal {
+  typedef int Simplex_data;
+};
+
+BOOST_AUTO_TEST_CASE(simplex_data) {
+  Simplex_tree<Options_with_int_data> st;
+  st.insert_simplex_and_subfaces({0, 1});
+  st.insert_simplex_and_subfaces({2, 1});
+  st.insert_simplex_and_subfaces({0, 2});
+  st.simplex_data(st.find({0, 1})) = 5;
+  st.expansion(3);
+  st.simplex_data(st.find({0, 1, 2})) = 4;
+  BOOST_CHECK(st.simplex_data(st.find({0, 1})) == 5);
 }

@@ -46,7 +46,7 @@ jobs:
           python --version
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DPython_ADDITIONAL_VERSIONS=3 ..
+          cmake -DCMAKE_BUILD_TYPE=Release ..
           cd src/python
           python -m build -n -w
           export PATH="$PATH:`python -m site --user-base`/bin"
@@ -58,6 +58,7 @@ jobs:
           python -m pip install --user pytest build/src/python/dist/*.whl
           python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest -v src/python/test/test_alpha_complex.py
+          python -m pytest -v src/python/test/test_delaunay_complex.py
           python -m pytest -v src/python/test/test_bottleneck_distance.py
           python -m pytest -v src/python/test/test_cubical_complex.py
           python -m pytest -v src/python/test/test_rips_complex.py

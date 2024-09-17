@@ -40,14 +40,14 @@ struct Dummy_pos_mapper {
  *
  * @brief Map from face position to face ID. Only stores a pair if ID != position and has_removable_column is true.
  * 
- * @tparam id_index @ref IDIdx index type
- * @tparam pos_index @ref PosIdx index type
+ * @tparam ID_index @ref IDIdx index type
+ * @tparam Pos_index @ref PosIdx index type
  */
-template<typename id_index, typename pos_index>
+template<typename ID_index, typename Pos_index>
 struct Face_position_to_ID_mapper {
-  using map_type = std::unordered_map<pos_index,id_index>; //TODO: test other map types
+  using Index_map = std::unordered_map<Pos_index,ID_index>; //TODO: test other map types
 
-  map_type map_;
+  Index_map map_;
 
   friend void swap(Face_position_to_ID_mapper& mapper1, Face_position_to_ID_mapper& mapper2) {
     mapper1.map_.swap(mapper2.map_);

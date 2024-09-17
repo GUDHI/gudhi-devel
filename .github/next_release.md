@@ -6,11 +6,20 @@ We are now using GitHub to develop the GUDHI library, do not hesitate to [fork t
 
 Below is a list of changes:
 
+- [Delaunay complex](https://gudhi.inria.fr/python/latest/delaunay_complex_user.html)
+     - The Delaunay complex can be equipped with different filtrations:
+          * Delaunay complex (no filtration values computed)
+          * Delaunay Čech complex (using minimal enclosing ball)
+          * Alpha complex (moved in this new section)
+
 - [Module](link)
      - **...**
 
 - [Module](link)
      - **...**
+
+- Installation
+     - CMake &ge; 3.15 is now required (was &ge; 3.8).
 
 - Miscellaneous
      - The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.11.0+is%3Aclosed) is available on GitHub.

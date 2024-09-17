@@ -31,8 +31,8 @@ namespace persistence_fields {
 class Z2_field_operators
 {
  public:
-  using element_type = bool;                /**< Type for the elements in the field. */
-  using characteristic_type = unsigned int; /**< Type for the field characteristic. */
+  using Element = bool;                /**< Type for the elements in the field. */
+  using Characteristic = unsigned int; /**< Type for the field characteristic. */
   template <class T>
   using isUnsignedInteger = std::enable_if_t<std::is_unsigned_v<T> >;
   template <class T>
@@ -48,7 +48,7 @@ class Z2_field_operators
    * 
    * @return 2.
    */
-  static constexpr characteristic_type get_characteristic() { return 2; }
+  static constexpr Characteristic get_characteristic() { return 2; }
 
   /**
    * @brief Returns the value of an integer in the field.
@@ -59,7 +59,7 @@ class Z2_field_operators
    * @return A boolean representing `e % 2`.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  static element_type get_value(Integer_type e) {
+  static Element get_value(Integer_type e) {
     if constexpr (std::is_same_v<Integer_type, bool>) {
       return e;
     } else {
@@ -76,7 +76,7 @@ class Z2_field_operators
    * @return `(e1 + e2) % 2` as a boolean.
    */
   template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
-  static element_type add(Unsigned_integer_type e1, Unsigned_integer_type e2) {
+  static Element add(Unsigned_integer_type e1, Unsigned_integer_type e2) {
     if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
       return e1 != e2;
     } else {
@@ -110,7 +110,7 @@ class Z2_field_operators
    * @return `(e1 - e2) % 2` as a boolean.
    */
   template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
-  static element_type subtract(Unsigned_integer_type e1, Unsigned_integer_type e2) {
+  static Element subtract(Unsigned_integer_type e1, Unsigned_integer_type e2) {
     if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
       return e1 != e2;
     } else {
@@ -160,7 +160,7 @@ class Z2_field_operators
    * @return `(e1 * e2) % 2` as a boolean.
    */
   template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
-  static element_type multiply(Unsigned_integer_type e1, Unsigned_integer_type e2) {
+  static Element multiply(Unsigned_integer_type e1, Unsigned_integer_type e2) {
     if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
       return e1 && e2;
     } else {
@@ -195,7 +195,7 @@ class Z2_field_operators
    * @return `(e * m + a) % 2` as a boolean.
    */
   template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
-  static element_type multiply_and_add(Unsigned_integer_type e, Unsigned_integer_type m, Unsigned_integer_type a) {
+  static Element multiply_and_add(Unsigned_integer_type e, Unsigned_integer_type m, Unsigned_integer_type a) {
     if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
       return (e && m) != a;
     } else {
@@ -254,7 +254,7 @@ class Z2_field_operators
    * @return `((e + a) * m) % 2` as a boolean.
    */
   template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
-  static element_type add_and_multiply(Unsigned_integer_type e, Unsigned_integer_type a, Unsigned_integer_type m) {
+  static Element add_and_multiply(Unsigned_integer_type e, Unsigned_integer_type a, Unsigned_integer_type m) {
     if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
       return (e != a) && m;
     } else {
@@ -323,7 +323,7 @@ class Z2_field_operators
    * @return Inverse in the current field of `e % 2`.
    */
   template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
-  static element_type get_inverse(Unsigned_integer_type e) {
+  static Element get_inverse(Unsigned_integer_type e) {
     if constexpr (std::is_same_v<Unsigned_integer_type, bool>) {
       return e;
     } else {
@@ -339,8 +339,8 @@ class Z2_field_operators
    * @return Pair whose first element is the inverse of @p e and the second element is @p productOfCharacteristics.
    */
   template <typename Unsigned_integer_type, class = isUnsignedInteger<Unsigned_integer_type> >
-  static std::pair<element_type, characteristic_type> get_partial_inverse(
-      Unsigned_integer_type e, characteristic_type productOfCharacteristics) {
+  static std::pair<Element, Characteristic> get_partial_inverse(
+      Unsigned_integer_type e, Characteristic productOfCharacteristics) {
     return {get_inverse(e), productOfCharacteristics};
   }
 
@@ -349,21 +349,21 @@ class Z2_field_operators
    * 
    * @return false.
    */
-  static constexpr element_type get_additive_identity() { return false; }
+  static constexpr Element get_additive_identity() { return false; }
   /**
    * @brief Returns the multiplicative identity of the field.
    * 
    * @return true.
    */
-  static constexpr element_type get_multiplicative_identity() { return true; }
+  static constexpr Element get_multiplicative_identity() { return true; }
   /**
    * @brief For interface purposes with multi-fields. Returns the multiplicative identity of the field.
    * 
    * @param productOfCharacteristics Some value.
    * @return true.
    */
-  static constexpr element_type get_partial_multiplicative_identity(
-      [[maybe_unused]] characteristic_type productOfCharacteristics) {
+  static constexpr Element get_partial_multiplicative_identity(
+      [[maybe_unused]] Characteristic productOfCharacteristics) {
     return true;
   }
 

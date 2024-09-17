@@ -27,7 +27,7 @@ namespace persistence_matrix {
  *
  * @brief List of column types.
  */
-enum Column_types { 
+enum class Column_types { 
   LIST,           /**< @ref List_column "": Underlying container is a std::list<@ref Cell*>. */
   SET,            /**< @ref Set_column "": Underlying container is a std::set<@ref Cell*>. */
   HEAP,           /**< @ref Heap_column "": Underlying container is a std::vector<@ref Cell*> ordered as a heap.
@@ -46,7 +46,7 @@ enum Column_types {
  * @brief List if indexation schemes. See @ref mp_indexation "description of indexation schemes" for more details
  * about the meaning of the indexation types.
  */
-enum Column_indexation_types { 
+enum class Column_indexation_types { 
   CONTAINER,  /**< Default use of @ref MatIdx indices. */
   POSITION,   /**< All input and output @ref MatIdx indices are replaced with @ref PosIdx indices. */
   IDENTIFIER  /**< All input and output @ref MatIdx indices are replaced with @ref IDIdx indices. */
@@ -76,8 +76,8 @@ template <Column_types col_type = Column_types::INTRUSIVE_SET,
 struct Default_options 
 {
   using Field_coeff_operators = FieldOperators;
-  using dimension_type = int;
-  using index_type = unsigned int;
+  using Dimension = int;
+  using Index = unsigned int;
 
   static const bool is_z2 = is_z2_only;
   static const Column_types column_type = col_type;

@@ -37,8 +37,8 @@ namespace persistence_fields {
 class Shared_multi_field_element 
 {
  public:
-  using element_type = mpz_class;           /**< Type for the elements in the field. */
-  using characteristic_type = element_type; /**< Type for the field characteristic. */
+  using Element = mpz_class;           /**< Type for the elements in the field. */
+  using Characteristic = Element; /**< Type for the field characteristic. */
 
   /**
    * @brief Default constructor. Sets the element to 0.
@@ -49,7 +49,7 @@ class Shared_multi_field_element
    * 
    * @param element Value of the element.
    */
-  Shared_multi_field_element(element_type element);
+  Shared_multi_field_element(Element element);
   /**
    * @brief Copy constructor.
    * 
@@ -89,21 +89,21 @@ class Shared_multi_field_element
   /**
    * @brief operator+=
    */
-  friend void operator+=(Shared_multi_field_element& f, element_type const v) {
+  friend void operator+=(Shared_multi_field_element& f, Element const v) {
     f.element_ += v;
     mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
    * @brief operator+
    */
-  friend Shared_multi_field_element operator+(Shared_multi_field_element f, element_type const v) {
+  friend Shared_multi_field_element operator+(Shared_multi_field_element f, Element const v) {
     f += v;
     return f;
   }
   /**
    * @brief operator+
    */
-  friend element_type operator+(element_type v, Shared_multi_field_element const& f) {
+  friend Element operator+(Element v, Shared_multi_field_element const& f) {
     v += f.element_;
     mpz_mod(v.get_mpz_t(), v.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
     return v;
@@ -126,21 +126,21 @@ class Shared_multi_field_element
   /**
    * @brief operator-=
    */
-  friend void operator-=(Shared_multi_field_element& f, element_type const v) {
+  friend void operator-=(Shared_multi_field_element& f, Element const v) {
     f.element_ -= v;
     mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
    * @brief operator-
    */
-  friend Shared_multi_field_element operator-(Shared_multi_field_element f, element_type const v) {
+  friend Shared_multi_field_element operator-(Shared_multi_field_element f, Element const v) {
     f -= v;
     return f;
   }
   /**
    * @brief operator-
    */
-  friend element_type operator-(element_type v, Shared_multi_field_element const& f) {
+  friend Element operator-(Element v, Shared_multi_field_element const& f) {
     if (v >= productOfAllCharacteristics_)
       mpz_mod(v.get_mpz_t(), v.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
     if (f.element_ > v) v += productOfAllCharacteristics_;
@@ -165,21 +165,21 @@ class Shared_multi_field_element
   /**
    * @brief operator*=
    */
-  friend void operator*=(Shared_multi_field_element& f, element_type const v) {
+  friend void operator*=(Shared_multi_field_element& f, Element const v) {
     f.element_ *= v;
     mpz_mod(f.element_.get_mpz_t(), f.element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   }
   /**
    * @brief operator*
    */
-  friend Shared_multi_field_element operator*(Shared_multi_field_element f, element_type const v) {
+  friend Shared_multi_field_element operator*(Shared_multi_field_element f, Element const v) {
     f *= v;
     return f;
   }
   /**
    * @brief operator*
    */
-  friend element_type operator*(element_type v, Shared_multi_field_element const& f) {
+  friend Element operator*(Element v, Shared_multi_field_element const& f) {
     v *= f.element_;
     mpz_mod(v.get_mpz_t(), v.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
     return v;
@@ -194,18 +194,18 @@ class Shared_multi_field_element
   /**
    * @brief operator==
    */
-  friend bool operator==(const element_type& v, const Shared_multi_field_element& f) {
+  friend bool operator==(const Element& v, const Shared_multi_field_element& f) {
     if (v < productOfAllCharacteristics_) return v == f.element_;
-    element_type e(v);
+    Element e(v);
     mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
     return e == f.element_;
   }
   /**
    * @brief operator==
    */
-  friend bool operator==(const Shared_multi_field_element& f, const element_type& v) {
+  friend bool operator==(const Shared_multi_field_element& f, const Element& v) {
     if (v < productOfAllCharacteristics_) return v == f.element_;
-    element_type e(v);
+    Element e(v);
     mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
     return e == f.element_;
   }
@@ -218,11 +218,11 @@ class Shared_multi_field_element
   /**
    * @brief operator!=
    */
-  friend bool operator!=(const element_type& v, const Shared_multi_field_element& f) { return !(v == f); }
+  friend bool operator!=(const Element& v, const Shared_multi_field_element& f) { return !(v == f); }
   /**
    * @brief operator!=
    */
-  friend bool operator!=(const Shared_multi_field_element& f, const element_type& v) { return !(v == f); }
+  friend bool operator!=(const Shared_multi_field_element& f, const Element& v) { return !(v == f); }
 
   /**
    * @brief Assign operator.
@@ -231,7 +231,7 @@ class Shared_multi_field_element
   /**
    * @brief Assign operator.
    */
-  Shared_multi_field_element& operator=(const element_type& value);
+  Shared_multi_field_element& operator=(const Element& value);
   /**
    * @brief Swap operator.
    */
@@ -261,8 +261,8 @@ class Shared_multi_field_element
    * @param productOfCharacteristics Sub-product of the characteristics.
    * @return Pair of the inverse and the characteristic the inverse corresponds to.
    */
-  std::pair<Shared_multi_field_element, characteristic_type> get_partial_inverse(
-      const characteristic_type& productOfCharacteristics) const;
+  std::pair<Shared_multi_field_element, Characteristic> get_partial_inverse(
+      const Characteristic& productOfCharacteristics) const;
 
   /**
    * @brief Returns the additive identity of a field.
@@ -284,36 +284,36 @@ class Shared_multi_field_element
    * @return The partial multiplicative identity of the multi-field.
    */
   static Shared_multi_field_element get_partial_multiplicative_identity(
-      const characteristic_type& productOfCharacteristics);
+      const Characteristic& productOfCharacteristics);
   /**
    * @brief Returns the product of all characteristics.
    * 
    * @return The product of all characteristics.
    */
-  static characteristic_type get_characteristic();
+  static Characteristic get_characteristic();
 
   /**
    * @brief Returns the value of the element.
    * 
    * @return Value of the element.
    */
-  element_type get_value() const;
+  Element get_value() const;
 
   // static constexpr bool handles_only_z2() { return false; }
 
  private:
-  element_type element_;                                       /**< Element. */
+  Element element_;                                       /**< Element. */
   static inline std::vector<unsigned int> primes_;          /**< All characteristics. */
-  static inline characteristic_type productOfAllCharacteristics_ = 0; /**< Product of all characteristics. */
-  static inline std::vector<element_type> partials_;           /**< Partial products of the characteristics. */
-  static inline const element_type multiplicativeID_ = 1;      /**< Multiplicative identity. */
+  static inline Characteristic productOfAllCharacteristics_ = 0; /**< Product of all characteristics. */
+  static inline std::vector<Element> partials_;           /**< Partial products of the characteristics. */
+  static inline const Element multiplicativeID_ = 1;      /**< Multiplicative identity. */
 
   static constexpr bool _is_prime(const int p);
 };
 
 inline Shared_multi_field_element::Shared_multi_field_element() : element_(0) {}
 
-inline Shared_multi_field_element::Shared_multi_field_element(element_type element) : element_(element) {
+inline Shared_multi_field_element::Shared_multi_field_element(Element element) : element_(element) {
   mpz_mod(element_.get_mpz_t(), element_.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
 }
 
@@ -374,7 +374,7 @@ inline Shared_multi_field_element& Shared_multi_field_element::operator=(Shared_
   return *this;
 }
 
-inline Shared_multi_field_element& Shared_multi_field_element::operator=(const element_type& value) {
+inline Shared_multi_field_element& Shared_multi_field_element::operator=(const Element& value) {
   mpz_mod(element_.get_mpz_t(), value.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
   return *this;
 }
@@ -387,16 +387,16 @@ inline Shared_multi_field_element Shared_multi_field_element::get_inverse() cons
   return get_partial_inverse(productOfAllCharacteristics_).first;
 }
 
-inline std::pair<Shared_multi_field_element, Shared_multi_field_element::characteristic_type>
-Shared_multi_field_element::get_partial_inverse(const characteristic_type& productOfCharacteristics) const {
-  element_type QR;
+inline std::pair<Shared_multi_field_element, Shared_multi_field_element::Characteristic>
+Shared_multi_field_element::get_partial_inverse(const Characteristic& productOfCharacteristics) const {
+  Element QR;
   mpz_gcd(QR.get_mpz_t(), element_.get_mpz_t(), productOfCharacteristics.get_mpz_t());  // QR <- gcd(x,QS)
 
   if (QR == productOfCharacteristics) return {Shared_multi_field_element(), multiplicativeID_};  // partial inverse is 0
 
-  element_type QT = productOfCharacteristics / QR;
+  Element QT = productOfCharacteristics / QR;
 
-  element_type inv_qt;
+  Element inv_qt;
   mpz_invert(inv_qt.get_mpz_t(), element_.get_mpz_t(), QT.get_mpz_t());
 
   auto res = get_partial_multiplicative_identity(QT);
@@ -414,7 +414,7 @@ inline Shared_multi_field_element Shared_multi_field_element::get_multiplicative
 }
 
 inline Shared_multi_field_element Shared_multi_field_element::get_partial_multiplicative_identity(
-    const characteristic_type& productOfCharacteristics) {
+    const Characteristic& productOfCharacteristics) {
   if (productOfCharacteristics == 0) {
     return Shared_multi_field_element(multiplicativeID_);
   }
@@ -427,11 +427,11 @@ inline Shared_multi_field_element Shared_multi_field_element::get_partial_multip
   return mult;
 }
 
-inline Shared_multi_field_element::characteristic_type Shared_multi_field_element::get_characteristic() {
+inline Shared_multi_field_element::Characteristic Shared_multi_field_element::get_characteristic() {
   return productOfAllCharacteristics_;
 }
 
-inline Shared_multi_field_element::element_type Shared_multi_field_element::get_value() const { return element_; }
+inline Shared_multi_field_element::Element Shared_multi_field_element::get_value() const { return element_; }
 
 inline constexpr bool Shared_multi_field_element::_is_prime(const int p) {
   if (p <= 1) return false;

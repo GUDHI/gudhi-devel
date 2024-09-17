@@ -136,8 +136,8 @@
  * @example example_zigzag_filtration_as_input_loop.cpp
  * @example example_zzfiltration_from_file.cpp
  * \section Persistence_matrix_example_section Persistence_matrix
- * @example representative_cycles_from_matrix.cpp
- * @example simplex_tree_to_matrix.cpp
+ * @example example_representative_cycles_from_matrix.cpp
+ * @example example_simplex_tree_to_matrix.cpp
  * \section Persistence_fields_example_section Persistence_field
  * @example example_field_operations.cpp
  */

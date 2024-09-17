@@ -34,8 +34,8 @@ namespace persistence_fields {
 class Multi_field_operators
 {
  public:
-  using element_type = mpz_class;             /**< Type for the elements in the field. */
-  using characteristic_type = element_type;   /**< Type for the field characteristic. */
+  using Element = mpz_class;             /**< Type for the elements in the field. */
+  using Characteristic = Element;   /**< Type for the field characteristic. */
 
   /**
    * @brief Default constructor, sets the product of all characteristics to 0.
@@ -133,7 +133,7 @@ class Multi_field_operators
    * 
    * @return The value of the current characteristic.
    */
-  const characteristic_type& get_characteristic() const { return productOfAllCharacteristics_; }
+  const Characteristic& get_characteristic() const { return productOfAllCharacteristics_; }
 
   /**
    * @brief Returns the value of an element in the field.
@@ -142,7 +142,7 @@ class Multi_field_operators
    * @param e Element to return the value from.
    * @return @p e modulo the current characteristic, such that the result is positive.
    */
-  element_type get_value(element_type e) const {
+  Element get_value(Element e) const {
     get_value_inplace(e);
     return e;
   }
@@ -153,7 +153,7 @@ class Multi_field_operators
    * 
    * @param e Element to return the value from.
    */
-  void get_value_inplace(element_type& e) const {
+  void get_value_inplace(Element& e) const {
     if (e >= productOfAllCharacteristics_ || e < -productOfAllCharacteristics_)
       mpz_mod(e.get_mpz_t(), e.get_mpz_t(), productOfAllCharacteristics_.get_mpz_t());
     if (e < 0) e += productOfAllCharacteristics_;
@@ -166,7 +166,7 @@ class Multi_field_operators
    * @param e2 Second element.
    * @return `(e1 + e2) % productOfAllCharacteristics`, such that the result is positive.
    */
-  element_type add(element_type e1, const element_type& e2) const {
+  Element add(Element e1, const Element& e2) const {
     add_inplace(e1, e2);
     return e1;
   }
@@ -178,7 +178,7 @@ class Multi_field_operators
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void add_inplace(element_type& e1, const element_type& e2) const {
+  void add_inplace(Element& e1, const Element& e2) const {
     e1 += e2;
     get_value_inplace(e1);
   }
@@ -190,7 +190,7 @@ class Multi_field_operators
    * @param e2 Second element.
    * @return `(e1 - e2) % productOfAllCharacteristics`, such that the result is positive.
    */
-  element_type subtract(element_type e1, const element_type& e2) const {
+  Element subtract(Element e1, const Element& e2) const {
     subtract_inplace_front(e1, e2);
     return e1;
   }
@@ -202,7 +202,7 @@ class Multi_field_operators
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void subtract_inplace_front(element_type& e1, const element_type& e2) const {
+  void subtract_inplace_front(Element& e1, const Element& e2) const {
     e1 -= e2;
     get_value_inplace(e1);
   }
@@ -213,7 +213,7 @@ class Multi_field_operators
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void subtract_inplace_back(const element_type& e1, element_type& e2) const {
+  void subtract_inplace_back(const Element& e1, Element& e2) const {
     mpz_sub(e2.get_mpz_t(), e1.get_mpz_t(), e2.get_mpz_t());
     get_value_inplace(e2);
   }
@@ -225,7 +225,7 @@ class Multi_field_operators
    * @param e2 Second element.
    * @return `(e1 * e2) % productOfAllCharacteristics`, such that the result is positive.
    */
-  element_type multiply(element_type e1, const element_type& e2) const {
+  Element multiply(Element e1, const Element& e2) const {
     multiply_inplace(e1, e2);
     return e1;
   }
@@ -237,7 +237,7 @@ class Multi_field_operators
    * @param e1 First element.
    * @param e2 Second element.
    */
-  void multiply_inplace(element_type& e1, const element_type& e2) const {
+  void multiply_inplace(Element& e1, const Element& e2) const {
     e1 *= e2;
     get_value_inplace(e1);
   }
@@ -250,7 +250,7 @@ class Multi_field_operators
    * @param a Third element.
    * @return `(e * m + a) % productOfAllCharacteristics`, such that the result is positive.
    */
-  element_type multiply_and_add(element_type e, const element_type& m, const element_type& a) const {
+  Element multiply_and_add(Element e, const Element& m, const Element& a) const {
     multiply_and_add_inplace_front(e, m, a);
     return e;
   }
@@ -264,7 +264,7 @@ class Multi_field_operators
    * @param m Second element.
    * @param a Third element.
    */
-  void multiply_and_add_inplace_front(element_type& e, const element_type& m, const element_type& a) const {
+  void multiply_and_add_inplace_front(Element& e, const Element& m, const Element& a) const {
     e *= m;
     e += a;
     get_value_inplace(e);
@@ -278,7 +278,7 @@ class Multi_field_operators
    * @param m Second element.
    * @param a Third element.
    */
-  void multiply_and_add_inplace_back(const element_type& e, const element_type& m, element_type& a) const {
+  void multiply_and_add_inplace_back(const Element& e, const Element& m, Element& a) const {
     a += e * m;
     get_value_inplace(a);
   }
@@ -292,7 +292,7 @@ class Multi_field_operators
    * @param m Third element.
    * @return `((e + a) * m) % productOfAllCharacteristics`, such that the result is positive.
    */
-  element_type add_and_multiply(element_type e, const element_type& a, const element_type& m) const {
+  Element add_and_multiply(Element e, const Element& a, const Element& m) const {
     add_and_multiply_inplace_front(e, a, m);
     return e;
   }
@@ -306,7 +306,7 @@ class Multi_field_operators
    * @param a Second element.
    * @param m Third element.
    */
-  void add_and_multiply_inplace_front(element_type& e, const element_type& a, const element_type& m) const {
+  void add_and_multiply_inplace_front(Element& e, const Element& a, const Element& m) const {
     e += a;
     e *= m;
     get_value_inplace(e);
@@ -320,7 +320,7 @@ class Multi_field_operators
    * @param a Second element.
    * @param m Third element.
    */
-  void add_and_multiply_inplace_back(const element_type& e, const element_type& a, element_type& m) const {
+  void add_and_multiply_inplace_back(const Element& e, const Element& a, Element& m) const {
     m *= e + a;
     get_value_inplace(m);
   }
@@ -333,7 +333,7 @@ class Multi_field_operators
    * @return true If `e1 % productOfAllCharacteristics == e2 % productOfAllCharacteristics`.
    * @return false Otherwise.
    */
-  bool are_equal(const element_type& e1, const element_type& e2) const {
+  bool are_equal(const Element& e1, const Element& e2) const {
     if (e1 == e2) return true;
     return get_value(e1) == get_value(e2);
   }
@@ -345,7 +345,7 @@ class Multi_field_operators
    * @param e Element to get the inverse from.
    * @return Inverse in the current field.
    */
-  element_type get_inverse(const element_type& e) const {
+  Element get_inverse(const Element& e) const {
     return get_partial_inverse(e, productOfAllCharacteristics_).first;
   }
   /**
@@ -356,19 +356,19 @@ class Multi_field_operators
    * @param productOfCharacteristics Product of the different characteristics to take into account in the multi-field.
    * @return Pair of the inverse of @p e and the characteristic the inverse is coming from.
    */
-  std::pair<element_type, characteristic_type> get_partial_inverse(
-      const element_type& e, const characteristic_type& productOfCharacteristics) const {
-    characteristic_type QR;
+  std::pair<Element, Characteristic> get_partial_inverse(
+      const Element& e, const Characteristic& productOfCharacteristics) const {
+    Characteristic QR;
     mpz_gcd(QR.get_mpz_t(), e.get_mpz_t(), productOfCharacteristics.get_mpz_t());  // QR <- gcd(x,QS)
 
     if (QR == productOfCharacteristics) return {0, get_multiplicative_identity()};  // partial inverse is 0
 
-    characteristic_type QT = productOfCharacteristics / QR;
+    Characteristic QT = productOfCharacteristics / QR;
 
-    characteristic_type inv_qt;
+    Characteristic inv_qt;
     mpz_invert(inv_qt.get_mpz_t(), e.get_mpz_t(), QT.get_mpz_t());
 
-    std::pair<element_type, characteristic_type> res(get_partial_multiplicative_identity(QT), QT);
+    std::pair<Element, Characteristic> res(get_partial_multiplicative_identity(QT), QT);
     res.first *= inv_qt;
     get_value_inplace(res.first);
 
@@ -380,13 +380,13 @@ class Multi_field_operators
    * 
    * @return The additive identity of a field.
    */
-  static const element_type& get_additive_identity() { return additiveID_; }
+  static const Element& get_additive_identity() { return additiveID_; }
   /**
    * @brief Returns the multiplicative identity of a field.
    * 
    * @return The multiplicative identity of a field.
    */
-  static const element_type& get_multiplicative_identity() { return multiplicativeID_; }
+  static const Element& get_multiplicative_identity() { return multiplicativeID_; }
 
   /**
    * @brief Returns the partial multiplicative identity of the multi-field from the given product.
@@ -395,11 +395,11 @@ class Multi_field_operators
    * @param productOfCharacteristics Product of the different characteristics to take into account in the multi-field.
    * @return The partial multiplicative identity of the multi-field.
    */
-  element_type get_partial_multiplicative_identity(const characteristic_type& productOfCharacteristics) const {
+  Element get_partial_multiplicative_identity(const Characteristic& productOfCharacteristics) const {
     if (productOfCharacteristics == 0) {
       return get_multiplicative_identity();
     }
-    element_type multIdentity(0);
+    Element multIdentity(0);
     for (unsigned int idx = 0; idx < primes_.size(); ++idx) {
       if ((productOfCharacteristics % primes_[idx]) == 0) {
         multIdentity += partials_[idx];
@@ -432,10 +432,10 @@ class Multi_field_operators
 
  private:
   std::vector<unsigned int> primes_;                /**< All characteristics. */
-  characteristic_type productOfAllCharacteristics_; /**< Product of all characteristics. */
-  std::vector<characteristic_type> partials_;       /**< Partial products of the characteristics. */
-  inline static const element_type multiplicativeID_ = 1;
-  inline static const element_type additiveID_ = 0;
+  Characteristic productOfAllCharacteristics_; /**< Product of all characteristics. */
+  std::vector<Characteristic> partials_;       /**< Partial products of the characteristics. */
+  inline static const Element multiplicativeID_ = 1;
+  inline static const Element additiveID_ = 0;
 
   static constexpr bool _is_prime(const int p) {
     if (p <= 1) return false;

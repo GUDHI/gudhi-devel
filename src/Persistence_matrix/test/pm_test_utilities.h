@@ -17,7 +17,7 @@
 #include <boost/test/test_tools.hpp>
 #include <gudhi/persistence_matrix_options.h>
 #include <gudhi/Persistence_matrix/columns/heap_column.h>
-#include <gudhi/matrix.h>
+#include <gudhi/Matrix.h>
 #include <gudhi/Fields/Zp_field_operators.h>
 
 using Gudhi::persistence_matrix::Column_indexation_types;
@@ -27,7 +27,7 @@ using Zp = Gudhi::persistence_fields::Zp_field_operators<>;
 
 template <class Column>
 constexpr bool is_z2() {
-  return std::is_same_v<typename Column::Field_element_type, bool>;
+  return std::is_same_v<typename Column::Field_element, bool>;
 }
 
 template <class Column>
@@ -59,15 +59,15 @@ constexpr bool is_indexed_by_position() {
 }
 
 template <class Column>
-using cell_rep_type = typename std::conditional<is_z2<Column>(), unsigned int,
-                                                std::pair<unsigned int, typename Column::Field_element_type> >::type;
+using Cell_representative = typename std::conditional<is_z2<Column>(), unsigned int,
+                                                std::pair<unsigned int, typename Column::Field_element> >::type;
 
 template <class Column>
-using column_content = std::set<cell_rep_type<Column> >;
+using column_content = std::set<Cell_representative<Column> >;
 template <class Column>
-using witness_content = std::vector<cell_rep_type<Column> >;
+using witness_content = std::vector<Cell_representative<Column> >;
 
-// for vector, assumes no cell was removed via clear(index)
+// for vector, assumes no cell was removed via clear(Index)
 template <class Column>
 column_content<Column> get_column_content_via_iterators(const Column& col) {
   column_content<Column> cells;
@@ -83,11 +83,11 @@ column_content<Column> get_column_content_via_iterators(const Column& col) {
   return cells;
 }
 
-// assumes no cell was removed via clear(index)
+// assumes no cell was removed via clear(Index)
 template <class Matrix>
 column_content<Heap_column<Matrix> > get_column_content_via_iterators(const Heap_column<Matrix>& col) {
   column_content<Heap_column<Matrix> > cells;
-  std::vector<typename Heap_column<Matrix>::Field_element_type> cont;
+  std::vector<typename Heap_column<Matrix>::Field_element> cont;
   Zp operators(5);
 
   for (const auto& c : col) {
@@ -110,13 +110,13 @@ column_content<Heap_column<Matrix> > get_column_content_via_iterators(const Heap
   return cells;
 }
 
-// for vector, assumes no cell was removed via clear(index)
+// for vector, assumes no cell was removed via clear(Index)
 // base and base comp cannot call get_row as const so m cannot be const...
 template <class Matrix>
-column_content<typename Matrix::Column_type> get_ordered_row(Matrix& m, unsigned int rowIndex) {
-  column_content<typename Matrix::Column_type> orderedRows;
+column_content<typename Matrix::Column> get_ordered_row(Matrix& m, unsigned int rowIndex) {
+  column_content<typename Matrix::Column> orderedRows;
   for (const auto& cell : m.get_row(rowIndex)) {
-    if constexpr (is_z2<typename Matrix::Column_type>()) {
+    if constexpr (is_z2<typename Matrix::Column>()) {
       orderedRows.insert(cell.get_column_index());
     } else {
       orderedRows.insert({cell.get_column_index(), cell.get_element()});
@@ -153,12 +153,12 @@ void test_matrix_equality(const std::vector<witness_content<Column> >& witness,
 
 // base and base comp cannot call get_column as const so m cannot be const...
 template <class Matrix>
-void test_content_equality(const std::vector<witness_content<typename Matrix::Column_type> >& witness, Matrix& m)
+void test_content_equality(const std::vector<witness_content<typename Matrix::Column> >& witness, Matrix& m)
 {
   unsigned int i = 0;
   for (auto& b : witness) {
     const auto& col = m.get_column(i++);  // to force the const version
-    test_column_equality<typename Matrix::Column_type>(b, get_column_content_via_iterators(col));
+    test_column_equality<typename Matrix::Column>(b, get_column_content_via_iterators(col));
   }
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), i);
 }
