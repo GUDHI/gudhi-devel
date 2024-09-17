@@ -62,8 +62,8 @@ struct Zigzag_matrix_options : Gudhi::persistence_matrix::Default_options<column
  * @brief Default options for @ref Zigzag_persistence.
  */
 struct Default_zigzag_options {
-  using internal_key = int;   /**< Face ID used internally, must be signed. */
-  using dimension_type = int; /**< Dimension value type. */
+  using Internal_key = int;   /**< Face ID used internally, must be signed. */
+  using Dimension = int;      /**< Dimension value type. */
   /**
    * @brief Column type use by the internal matrix.
    */
@@ -95,14 +95,14 @@ struct Default_zigzag_options {
  * ```
  * using Zigzag_persistence = Gudhi::zigzag_persistence::Zigzag_persistence<>;
  *
- * using dimension_type = Zigzag_persistence::dimension_type;
- * using index = Zigzag_persistence::index;
+ * using Dimension = Zigzag_persistence::Dimension;
+ * using Index = Zigzag_persistence::Index;
  * ```
  *
  * #### Construction with default values
  * ```
  * //Zigzag_persistence(callback) with for example callback method as a anonymous lambda
- * Zigzag_persistence zp([](dimension_type dim, index birth, index death) {
+ * Zigzag_persistence zp([](Dimension dim, Index birth, Index death) {
  *   std::cout << "[" << dim << "] " << birth << " - " << death << std::endl;
  * });
  * ```
@@ -137,7 +137,7 @@ struct Default_zigzag_options {
  * // Only the closed bars where output so far, so the open/infinite bars still need to be retrieved.
  *
  * //in this example, outputs (0, 0) and (0, 7)
- * zp.get_current_infinite_intervals([](dimension_type dim, index birth){
+ * zp.get_current_infinite_intervals([](Dimension dim, Index birth){
  *   std::cout << "[" << dim << "] " << birth << " - inf" << std::endl;
  * });
  * ```
@@ -150,20 +150,20 @@ template <class ZigzagOptions = Default_zigzag_options, bool erase_birth_history
 class Zigzag_persistence
 {
  public:
-  using Options = ZigzagOptions;                           /**< Zigzag options. */
-  using index = typename Options::internal_key;            /**< Key and index type, has to be signed. */
-  using dimension_type = typename Options::dimension_type; /**< Type for dimension values. */
+  using Options = ZigzagOptions;                    /**< Zigzag options. */
+  using Index = typename Options::Internal_key;     /**< Key and index type, has to be signed. */
+  using Dimension = typename Options::Dimension;    /**< Type for dimension values. */
 
  private:
 #if BOOST_VERSION >= 108100
-  using birth_dictionary = boost::unordered_flat_map<index, index>;      /**< Dictionary type. */
-  // using birth_dictionary = boost::unordered_map<index, index>;           /**< Dictionary type. */
+  using Birth_dictionary = boost::unordered_flat_map<Index, Index>;   /**< Dictionary type. */
+  // using Birth_dictionary = boost::unordered_map<Index, Index>;        /**< Dictionary type. */
 #else
-  using birth_dictionary = std::unordered_map<index, index>;             /**< Dictionary type. */
+  using Birth_dictionary = std::unordered_map<Index, Index>;             /**< Dictionary type. */
 #endif
-  using Matrix_options = Zigzag_matrix_options<Options::column_type>;     /**< Matrix options. */
-  using Matrix_type = Gudhi::persistence_matrix::Matrix<Matrix_options>;  /**< Matrix. */
-  using matrix_index = typename Matrix_type::Index;                       /**< Matrix indexation type. */
+  using Matrix_options = Zigzag_matrix_options<Options::column_type>; /**< Matrix options. */
+  using Matrix = Gudhi::persistence_matrix::Matrix<Matrix_options>;   /**< Matrix. */
+  using Matrix_index = typename Matrix::Index;                        /**< Matrix indexation type. */
 
   /** \brief Maintains the birth ordering \f$\leq_b\f$.
    *
@@ -197,7 +197,7 @@ class Zigzag_persistence
      *
      * @param arrowNumber Forward arrow number.
      */
-    void add_birth_forward(index arrowNumber) {  // amortized constant time
+    void add_birth_forward(Index arrowNumber) {  // amortized constant time
       birthToPos_.emplace_hint(birthToPos_.end(), arrowNumber, maxBirthPos_);
       ++maxBirthPos_;
     }
@@ -208,7 +208,7 @@ class Zigzag_persistence
      *
      * @param arrowNumber Backward arrow number.
      */
-    void add_birth_backward(index arrowNumber) {  // amortized constant time
+    void add_birth_backward(Index arrowNumber) {  // amortized constant time
       birthToPos_.emplace_hint(birthToPos_.end(), arrowNumber, minBirthPos_);
       --minBirthPos_;
     }
@@ -220,7 +220,7 @@ class Zigzag_persistence
      *
      * @param birth Birth to remove.
      */
-    void remove_birth(index birth) { birthToPos_.erase(birth); }
+    void remove_birth(Index birth) { birthToPos_.erase(birth); }
     /**
      * @brief Increasing birth order <=b, true iff k1 <b k2.
      *
@@ -228,7 +228,7 @@ class Zigzag_persistence
      * @param k2
      * @return true if k1 <b k2, false otherwise.
      */
-    bool birth_order(index k1, index k2) const { return birthToPos_.at(k1) < birthToPos_.at(k2); }
+    bool birth_order(Index k1, Index k2) const { return birthToPos_.at(k1) < birthToPos_.at(k2); }
     /**
      * @brief Decreasing birth order <=b, true iff k1 >b k2.
      *
@@ -236,12 +236,12 @@ class Zigzag_persistence
      * @param k2
      * @return true if k1 >b k2, false otherwise.
      */
-    bool reverse_birth_order(index k1, index k2) const { return birthToPos_.at(k1) > birthToPos_.at(k2); }
+    bool reverse_birth_order(Index k1, Index k2) const { return birthToPos_.at(k1) > birthToPos_.at(k2); }
 
    private:
-    birth_dictionary birthToPos_; /**< birth_to_pos_[i] < birth_to_pos_[j] iff i <b j */
-    index maxBirthPos_;            /**< is strictly larger than any other birth so far */
-    index minBirthPos_;            /**< is strictly smaller than any other birth so far */
+    Birth_dictionary birthToPos_; /**< birth_to_pos_[i] < birth_to_pos_[j] iff i <b j */
+    Index maxBirthPos_;            /**< is strictly larger than any other birth so far */
+    Index minBirthPos_;            /**< is strictly smaller than any other birth so far */
   };
 
  public:
@@ -262,17 +262,17 @@ class Zigzag_persistence
    * the number of faces in the biggest complex of the filtration.
    * Default value: 0.
    */
-  Zigzag_persistence(std::function<void(dimension_type, index, index)> stream_interval,
+  Zigzag_persistence(std::function<void(Dimension, Index, Index)> stream_interval,
                      unsigned int preallocationSize = 0)
       : matrix_(
             preallocationSize,
-            [this](matrix_index columnIndex1, matrix_index columnIndex2) -> bool {
+            [this](Matrix_index columnIndex1, Matrix_index columnIndex2) -> bool {
               if (matrix_.get_column(columnIndex1).is_paired()) {
                 return matrix_.get_pivot(columnIndex1) < matrix_.get_pivot(columnIndex2);
               }
               return birthOrdering_.birth_order(births_.at(columnIndex1), births_.at(columnIndex2));
             },
-            [this](matrix_index columnIndex1, matrix_index columnIndex2) -> bool { return false; }),
+            [this](Matrix_index columnIndex1, Matrix_index columnIndex2) -> bool { return false; }),
         numArrow_(-1),
         stream_interval_(std::move(stream_interval)) {}
   /**
@@ -286,8 +286,8 @@ class Zigzag_persistence
    * @param dimension Dimension of the inserted face.
    * @return Number of the operation.
    */
-  template <class BoundaryRange = std::initializer_list<index> >
-  index insert_face(const BoundaryRange& boundary, dimension_type dimension) {
+  template <class BoundaryRange = std::initializer_list<Index> >
+  Index insert_face(const BoundaryRange& boundary, Dimension dimension) {
     ++numArrow_;
     _process_forward_arrow(boundary, dimension);
     return numArrow_;
@@ -299,7 +299,7 @@ class Zigzag_persistence
    * @param arrowNumber Arrow number of when the face to remove was inserted for the last time.
    * @return Number of the operation.
    */
-  index remove_face(index arrowNumber) {
+  Index remove_face(Index arrowNumber) {
     ++numArrow_;
     _process_backward_arrow(arrowNumber);
     return numArrow_;
@@ -311,7 +311,7 @@ class Zigzag_persistence
    * to avoid useless computation. Increases the arrow number by one.
    * @return Number of the operation.
    */
-  index apply_identity() { return ++numArrow_; }
+  Index apply_identity() { return ++numArrow_; }
 
   /**
    * @brief Outputs through the given callback method all birth indices which are currently not paired with 
@@ -350,8 +350,8 @@ class Zigzag_persistence
    * @param dim Dimension of the inserted face.
    */
   template <class BoundaryRange>
-  void _process_forward_arrow(const BoundaryRange& boundary, dimension_type dim) {
-    std::vector<matrix_index> chainsInF = matrix_.insert_boundary(numArrow_, boundary, dim);
+  void _process_forward_arrow(const BoundaryRange& boundary, Dimension dim) {
+    std::vector<Matrix_index> chainsInF = matrix_.insert_boundary(numArrow_, boundary, dim);
 
     if (!chainsInF.empty()) {
       _apply_surjective_reflection_diamond(dim, chainsInF);
@@ -372,7 +372,7 @@ class Zigzag_persistence
    * @param dim Dimension of the inserted face.
    * @param chainsInF Indices of the non paired columns in the matrix.
    */
-  void _apply_surjective_reflection_diamond(dimension_type dim, const std::vector<matrix_index>& chainsInF) {
+  void _apply_surjective_reflection_diamond(Dimension dim, const std::vector<Matrix_index>& chainsInF) {
     // fp is the largest death index for <=d
     // Set col_fp: col_fp <- col_f1+...+col_fp (now in G); preserves lowest idx
     auto chainFp = chainsInF[0];  // col_fp, with largest death <d index.
@@ -383,13 +383,13 @@ class Zigzag_persistence
     // decreasing death for <d.
     // Pair the col_fi, i = 1 ... p-1, according to the reflection diamond principle
     // Order the fi by reverse birth ordering <=_b
-    auto cmp_birth = [this](index k1, index k2) -> bool {
+    auto cmp_birth = [this](Index k1, Index k2) -> bool {
       return birthOrdering_.reverse_birth_order(k1, k2);
     };  // true iff b(k1) >b b(k2)
 
     // availableBirth: for all i by >d value of the d_i,
     // contains at step i all b_j, j > i, and maybe b_i if not stolen
-    std::set<index, decltype(cmp_birth)> availableBirth(cmp_birth);
+    std::set<Index, decltype(cmp_birth)> availableBirth(cmp_birth);
     // for f1 to f_{p} (i by <=d), insertion in availableBirth sorts by >=b
     for (auto& chainF : chainsInF) {
       availableBirth.insert(births_.at(chainF));
@@ -429,7 +429,7 @@ class Zigzag_persistence
         lastModifiedChainIt = chainFIt;  // new cumulated c_i+...+c_1
         // remove the max available death
         auto maxAvailBirthIt = availableBirth.begin();  // max because order by decreasing <b
-        index maxAvailBirth = *maxAvailBirthIt;         // max available birth
+        Index maxAvailBirth = *maxAvailBirthIt;         // max available birth
 
         births_.at(*chainFIt) = maxAvailBirth;  // give new birth
         availableBirth.erase(maxAvailBirthIt);  // remove birth from availability
@@ -452,18 +452,18 @@ class Zigzag_persistence
    *
    * @param faceID Internal ID of the face to remove.
    */
-  void _process_backward_arrow(index faceID) {
+  void _process_backward_arrow(Index faceID) {
     // column whose key is the one of the removed face
-    matrix_index currCol = matrix_.get_column_with_pivot(faceID);
+    Matrix_index currCol = matrix_.get_column_with_pivot(faceID);
 
     // Record all columns that get affected by the transpositions, i.e., have a coeff
-    std::vector<matrix_index> modifiedColumns;
+    std::vector<Matrix_index> modifiedColumns;
     const auto& row = matrix_.get_row(faceID);
     modifiedColumns.reserve(row.size());
     std::transform(row.begin(), row.end(), std::back_inserter(modifiedColumns),
                    [](const auto& cell) { return cell.get_column_index(); });
     // Sort by left-to-right order in the matrix_ (no order maintained in rows)
-    std::stable_sort(modifiedColumns.begin(), modifiedColumns.end(), [this](matrix_index i1, matrix_index i2) {
+    std::stable_sort(modifiedColumns.begin(), modifiedColumns.end(), [this](Matrix_index i1, Matrix_index i2) {
       return matrix_.get_pivot(i1) < matrix_.get_pivot(i2);
     });
 
@@ -492,11 +492,11 @@ class Zigzag_persistence
   }
 
  private:
-  Matrix_type matrix_;           /**< Matrix storing a base of the current chain complex. */
-  birth_dictionary births_;      /**< Map face index in F to corresponding birth. */
+  Matrix matrix_;           /**< Matrix storing a base of the current chain complex. */
+  Birth_dictionary births_;      /**< Map face index in F to corresponding birth. */
   Birth_ordering birthOrdering_; /**< Maintains <b ordering of the births. */
-  index numArrow_;               /**< Current arrow number. */
-  std::function<void(dimension_type, index, index)> stream_interval_; /**< Callback method for closed pairs. */
+  Index numArrow_;               /**< Current arrow number. */
+  std::function<void(Dimension, Index, Index)> stream_interval_; /**< Callback method for closed pairs. */
 };  // end class Zigzag_persistence
 
 }  // namespace zigzag_persistence

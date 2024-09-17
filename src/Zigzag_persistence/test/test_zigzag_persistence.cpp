@@ -21,7 +21,7 @@ using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<>;
 
 struct Interval {
   Interval() {}
-  Interval(int dim, ZP::index b, ZP::index d) : dim_(dim), b_(b), d_(d) {}
+  Interval(int dim, ZP::Index b, ZP::Index d) : dim_(dim), b_(b), d_(d) {}
 
   int dim() const { return dim_; }
   int birth() const { return b_; }
@@ -29,13 +29,13 @@ struct Interval {
 
 private:
   int dim_;
-  ZP::index b_;
-  ZP::index d_;
+  ZP::Index b_;
+  ZP::Index d_;
 };
 
 BOOST_AUTO_TEST_CASE(constructor) {
   std::vector<Interval> pairs;
-  auto stream = [&](int dim, ZP::index birth, ZP::index death){ pairs.emplace_back(dim, birth, death); };
+  auto stream = [&](int dim, ZP::Index birth, ZP::Index death){ pairs.emplace_back(dim, birth, death); };
   BOOST_CHECK_NO_THROW(ZP zp(stream));
   BOOST_CHECK_NO_THROW(ZP zp(stream, 28));
 
@@ -88,8 +88,8 @@ std::vector<std::vector<int> > get_boundaries() {
 
 BOOST_AUTO_TEST_CASE(zigzag_persistence_single) {
   std::vector<Interval> pairs;
-  auto stream = [&](int dim, ZP::index birth, ZP::index death) { pairs.emplace_back(dim, birth, death); };
-  auto stream_inf = [&](int dim, ZP::index birth) { pairs.emplace_back(dim, birth, -1); };
+  auto stream = [&](int dim, ZP::Index birth, ZP::Index death) { pairs.emplace_back(dim, birth, death); };
+  auto stream_inf = [&](int dim, ZP::Index birth) { pairs.emplace_back(dim, birth, -1); };
   ZP zp(stream, 28);
   std::vector<Interval> realIndices;
   realIndices.reserve(13);
@@ -152,10 +152,10 @@ BOOST_AUTO_TEST_CASE(zigzag_persistence_single) {
 
 BOOST_AUTO_TEST_CASE(zigzag_persistence_single_max1) {
   std::vector<Interval> pairs;
-  auto stream = [&](int dim, ZP::index birth, ZP::index death) {
+  auto stream = [&](int dim, ZP::Index birth, ZP::Index death) {
     if (dim < 1) pairs.emplace_back(dim, birth, death);
   };
-  auto stream_inf = [&](int dim, ZP::index birth) {
+  auto stream_inf = [&](int dim, ZP::Index birth) {
     if (dim < 1) pairs.emplace_back(dim, birth, -1);
   };
   ZP zp(stream, 28);

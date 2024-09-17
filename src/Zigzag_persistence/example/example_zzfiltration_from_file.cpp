@@ -16,16 +16,16 @@
 #include <gudhi/filtered_zigzag_persistence.h>
 
 using ZP = Gudhi::zigzag_persistence::Filtered_zigzag_persistence<>;
-using id_handle = ZP::face_key;
-using filtration_value = ZP::filtration_value;
-using dimension_type = ZP::dimension_type;
+using ID_handle = ZP::Face_key;
+using Filtration_value = ZP::Filtration_value;
+using Dimension = ZP::Dimension;
 
 enum lineType : int { INCLUSION, REMOVAL, COMMENT };
 
-lineType read_operation(std::string& line, std::vector<id_handle>& faces, double& timestamp) {
+lineType read_operation(std::string& line, std::vector<ID_handle>& faces, double& timestamp) {
   lineType type;
   faces.clear();
-  id_handle num;
+  ID_handle num;
 
   size_t current = line.find_first_not_of(' ', 0);
   if (current == std::string::npos) return COMMENT;
@@ -74,14 +74,14 @@ int main(int argc, char* const argv[]) {
   std::ifstream file(argv[1]);
 
   //std::cout could be replaced by any other output stream
-  ZP zp([](dimension_type dim, filtration_value birth, filtration_value death) {
+  ZP zp([](Dimension dim, Filtration_value birth, Filtration_value death) {
     std::cout << "[" << dim << "] ";
     std::cout << birth << " - " << death;
     std::cout << std::endl;
   });
 
   if (file.is_open()) {
-    std::vector<id_handle> data;
+    std::vector<ID_handle> data;
     unsigned int id = 0;
     double timestamp;
     lineType type;
@@ -115,7 +115,7 @@ int main(int argc, char* const argv[]) {
 
   //retrieve infinite bars remaining at the end
   //again std::cout could be replaced by any other output stream
-  zp.get_current_infinite_intervals([](dimension_type dim, filtration_value birth) {
+  zp.get_current_infinite_intervals([](Dimension dim, Filtration_value birth) {
     std::cout << "[" << dim << "] ";
     std::cout << birth << " - inf";
     std::cout << std::endl;

@@ -14,8 +14,8 @@
 #include <gudhi/filtered_zigzag_persistence.h>
 
 using ZP = Gudhi::zigzag_persistence::Filtered_zigzag_persistence_with_storage<>;
-using face_handle = ZP::face_key;
-using filtration_value = ZP::filtration_value;
+using Face_handle = ZP::Face_key;
+using Filtration_value = ZP::Filtration_value;
 using Interval_filtration = ZP::Filtration_value_interval;
 
 void print_barcode(ZP& zp) {
@@ -50,7 +50,7 @@ void print_indices(ZP& zp) {
   }
 }
 
-std::vector<std::vector<face_handle> > get_boundaries() {
+std::vector<std::vector<Face_handle> > get_boundaries() {
   return {{},
           {},
           {},
@@ -82,7 +82,7 @@ std::vector<std::vector<face_handle> > get_boundaries() {
           {27}};                        // remove
 }
 
-std::vector<filtration_value> get_filtration_values() {
+std::vector<Filtration_value> get_filtration_values() {
   return {0, 0, 0, 
           1, 1, 1, 
           2, 2, 2, 
@@ -114,8 +114,8 @@ int main(int argc, char* const argv[]) {
   
   ZP zp;
 
-  std::vector<std::vector<face_handle> > simplices = get_boundaries();
-  std::vector<filtration_value> fils = get_filtration_values();
+  std::vector<std::vector<Face_handle> > simplices = get_boundaries();
+  std::vector<Filtration_value> fils = get_filtration_values();
   std::vector<bool> dirs = get_directions();
 
   for (unsigned int i = 0; i < simplices.size(); ++i) {

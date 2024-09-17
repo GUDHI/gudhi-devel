@@ -42,10 +42,10 @@ namespace zigzag_persistence {
  * @brief Default options for @ref Filtered_zigzag_persistence_with_storage and @ref Filtered_zigzag_persistence.
  */
 struct Default_filtered_zigzag_options {
-  using internal_key = int;        /**< Face ID used internally, must be signed. */
-  using face_key = int;            /**< Face ID used in the given boundaries. */
-  using filtration_value = double; /**< Filtration value type. */
-  using dimension_type = int;      /**< Dimension value type. */
+  using Internal_key = int;        /**< Face ID used internally, must be signed. */
+  using Face_key = int;            /**< Face ID used in the given boundaries. */
+  using Filtration_value = double; /**< Filtration value type. */
+  using Dimension = int;      /**< Dimension value type. */
   /**
    * @brief Column type use by the internal matrix.
    */
@@ -129,19 +129,19 @@ class Filtered_zigzag_persistence_with_storage
 {
  public:
   using Options = FilteredZigzagOptions;                        /**< Zigzag options. */
-  using internal_key = typename Options::internal_key;          /**< Key and index type, has to be signed. */
-  using face_key = typename Options::face_key;                  /**< Face ID type from external inputs. */
-  using filtration_value = typename Options::filtration_value;  /**< Type for filtration values. */
-  using dimension_type = typename Options::dimension_type;      /**< Type for dimension values. */
+  using Internal_key = typename Options::Internal_key;          /**< Key and index type, has to be signed. */
+  using Face_key = typename Options::Face_key;                  /**< Face ID type from external inputs. */
+  using Filtration_value = typename Options::Filtration_value;  /**< Type for filtration values. */
+  using Dimension = typename Options::Dimension;                /**< Type for dimension values. */
 
   /**
    * @brief Persistence index interval type.
    */
-  using Index_interval = Gudhi::persistence_matrix::Persistence_interval<dimension_type,internal_key>;
+  using Index_interval = Gudhi::persistence_matrix::Persistence_interval<Dimension,Internal_key>;
   /**
    * @brief Persistence filtration interval type.
    */
-  using Filtration_value_interval = Gudhi::persistence_matrix::Persistence_interval<dimension_type,filtration_value>;
+  using Filtration_value_interval = Gudhi::persistence_matrix::Persistence_interval<Dimension,Filtration_value>;
 
   /**
    * @brief Constructor.
@@ -161,9 +161,9 @@ class Filtered_zigzag_persistence_with_storage
       : dimMax_(ignoreCyclesAboveDim),
         persistenceDiagram_(),
         numArrow_(-1),
-        previousFiltrationValue_(std::numeric_limits<filtration_value>::infinity()),
+        previousFiltrationValue_(std::numeric_limits<Filtration_value>::infinity()),
         pers_(
-            [&](dimension_type dim, internal_key birth, internal_key death) {
+            [&](Dimension dim, Internal_key birth, Internal_key death) {
               if (dimMax_ == -1 || (dimMax_ != -1 && dim < dimMax_)) {  // don't record intervals over max dim
                 persistenceDiagram_.emplace_back(birth, death, dim);
               }
@@ -184,11 +184,11 @@ class Filtered_zigzag_persistence_with_storage
    * values, ie. the changes are monotonous.
    * @return Number of the operation.
    */
-  template <class BoundaryRange = std::initializer_list<face_key> >
-  internal_key insert_face(face_key faceID,
+  template <class BoundaryRange = std::initializer_list<Face_key> >
+  Internal_key insert_face(Face_key faceID,
                            const BoundaryRange& boundary,
-                           dimension_type dimension,
-                           filtration_value filtrationValue)
+                           Dimension dimension,
+                           Filtration_value filtrationValue)
   {
     if (dimMax_ != -1 && dimension > dimMax_) {
       return apply_identity();
@@ -203,7 +203,7 @@ class Filtered_zigzag_persistence_with_storage
     GUDHI_CHECK(res.second, "Zigzag_persistence::insert_face - face already in the complex");
 
     // Compute the keys of the faces of the boundary.
-    std::set<internal_key> translatedBoundary;  // set maintains the natural order on indices
+    std::set<Internal_key> translatedBoundary;  // set maintains the natural order on indices
     for (auto b : boundary) {
       translatedBoundary.insert(handleToKey_.at(b));  // TODO: add possibilities of coefficients
     }
@@ -224,7 +224,7 @@ class Filtered_zigzag_persistence_with_storage
    * values, ie. the changes are monotonous.
    * @return Number of the operation.
    */
-  internal_key remove_face(face_key faceID, filtration_value filtrationValue) {
+  Internal_key remove_face(Face_key faceID, Filtration_value filtrationValue) {
     auto it = handleToKey_.find(faceID);
 
     if (it == handleToKey_.end()) {
@@ -247,7 +247,7 @@ class Filtered_zigzag_persistence_with_storage
    * to avoid useless computation.
    * @return Number of the operation.
    */
-  internal_key apply_identity() {
+  Internal_key apply_identity() {
     ++numArrow_;
     pers_.apply_identity();
     return numArrow_;
@@ -267,15 +267,15 @@ class Filtered_zigzag_persistence_with_storage
    * by @ref get_index_persistence_diagram.
    * 
    * @param idx Birth or death index
-   * @return filtration_value Filtration value associated to @p idx.
+   * @return Filtration_value Filtration value associated to @p idx.
    */
-  filtration_value get_filtration_value_from_index(internal_key idx) {
+  Filtration_value get_filtration_value_from_index(Internal_key idx) {
     // lower_bound(x) returns leftmost y s.t. x <= y
     auto itBirth =
         std::lower_bound(filtrationValues_.begin(),
                          filtrationValues_.end(),
                          idx,
-                         [](std::pair<internal_key, filtration_value> p, internal_key k) { return p.first < k; });
+                         [](std::pair<Internal_key, Filtration_value> p, Internal_key k) { return p.first < k; });
     if (itBirth == filtrationValues_.end() || itBirth->first > idx) {
       --itBirth;
     }
@@ -289,7 +289,7 @@ class Filtered_zigzag_persistence_with_storage
    * @param includeInfiniteBars If set to true, infinite bars are included in the diagram. Default value: true.
    * @return A vector of pairs of filtration values representing the persistence diagram.
    */
-  std::vector<Filtration_value_interval> get_persistence_diagram(filtration_value shortestInterval = 0.,
+  std::vector<Filtration_value_interval> get_persistence_diagram(Filtration_value shortestInterval = 0.,
                                                                  bool includeInfiniteBars = true) {
     std::vector<Filtration_value_interval> diag = _get_persistence_diagram(shortestInterval);
 
@@ -301,17 +301,17 @@ class Filtered_zigzag_persistence_with_storage
   }
 
  private:
-  std::unordered_map<face_key, internal_key> handleToKey_;  /**< Map from input keys to internal keys. */
-  dimension_type dimMax_;                                   /**< Maximal dimension of a bar to record. */
+  std::unordered_map<Face_key, Internal_key> handleToKey_;  /**< Map from input keys to internal keys. */
+  Dimension dimMax_;                                   /**< Maximal dimension of a bar to record. */
   std::vector<Index_interval> persistenceDiagram_;          /**< Stores current closed persistence intervals. */
-  internal_key numArrow_;                                   /**< Current arrow number. */
-  filtration_value previousFiltrationValue_;                /**< Filtration value of the previous arrow. */
+  Internal_key numArrow_;                                   /**< Current arrow number. */
+  Filtration_value previousFiltrationValue_;                /**< Filtration value of the previous arrow. */
   /**
    * @brief filtrationValues_ stores consecutive pairs (i,f) , (j,f') with f != f',
    * meaning that all inserted faces with key in [i;j-1] have filtration value f,
    * i is the smallest face index whose face has filtration value f.
    */
-  std::vector<std::pair<internal_key, filtration_value> > filtrationValues_;
+  std::vector<std::pair<Internal_key, Filtration_value> > filtrationValues_;
   Zigzag_persistence<FilteredZigzagOptions, false> pers_; /**< Class computing the pairs. */
 
   /**
@@ -320,7 +320,7 @@ class Filtered_zigzag_persistence_with_storage
    * 
    * @param filtrationValue Filtration value to store.
    */
-  void _store_filtration_value(filtration_value filtrationValue) {
+  void _store_filtration_value(Filtration_value filtrationValue) {
     if (filtrationValue != previousFiltrationValue_)  // check whether the filt value has changed
     {
       // consecutive pairs (i,f), (j,f') mean faces of index k in [i,j-1] have filtration value f
@@ -335,18 +335,18 @@ class Filtered_zigzag_persistence_with_storage
    * @param shortestInterval Intervals shorter than the given value are ignored.
    * @return Vector of intervals.
    */
-  std::vector<Filtration_value_interval> _get_persistence_diagram(filtration_value shortestInterval) {
+  std::vector<Filtration_value_interval> _get_persistence_diagram(Filtration_value shortestInterval) {
     std::vector<Filtration_value_interval> diag;
     diag.reserve(persistenceDiagram_.size());
 
     // std::stable_sort(filtrationValues_.begin(), filtrationValues_.end(),
-    //                  [](std::pair<internal_key, filtration_value> p1, std::pair<internal_key, filtration_value> p2) {
+    //                  [](std::pair<Internal_key, Filtration_value> p1, std::pair<Internal_key, Filtration_value> p2) {
     //                    return p1.first < p2.first;
     //                  });
 
     for (auto bar : persistenceDiagram_) {
-      filtration_value birth = get_filtration_value_from_index(bar.birth);
-      filtration_value death = get_filtration_value_from_index(bar.death);
+      Filtration_value birth = get_filtration_value_from_index(bar.birth);
+      Filtration_value death = get_filtration_value_from_index(bar.death);
       if (birth > death) {
         std::swap(birth, death);
       }
@@ -365,7 +365,7 @@ class Filtered_zigzag_persistence_with_storage
    * @param diag Reference to vector where to store the infinite bars.
    */
   void _retrieve_infinite_bars(std::vector<Filtration_value_interval>& diag) {
-    auto stream_infinite_interval = [&](dimension_type dim, internal_key birthIndex) {
+    auto stream_infinite_interval = [&](Dimension dim, Internal_key birthIndex) {
       if (dimMax_ == -1 || (dimMax_ != -1 && dim < dimMax_))
         diag.emplace_back(get_filtration_value_from_index(birthIndex), Filtration_value_interval::inf, dim);
     };
@@ -393,14 +393,14 @@ class Filtered_zigzag_persistence_with_storage
  * #### Useful aliases
  * ```
  * using Filtered_zigzag_persistence = Gudhi::zigzag_persistence::Filtered_zigzag_persistence<>;
- * using dimension_type = Filtered_zigzag_persistence::dimension_type;
- * using filtration_value_type = Filtered_zigzag_persistence::filtration_value;
+ * using Dimension = Filtered_zigzag_persistence::Dimension;
+ * using filtration_value_type = Filtered_zigzag_persistence::Filtration_value;
  * ```
  *
  * #### Construction with default values
  * ```
  * //Filtered_zigzag_persistence(callback) with for example callback method as a anonymous lambda
- * Filtered_zigzag_persistence zp([](dimension_type dim, filtration_value_type birth, filtration_value_type death) {
+ * Filtered_zigzag_persistence zp([](Dimension dim, filtration_value_type birth, filtration_value_type death) {
  *   std::cout << "[" << dim << "] " << birth << " - " << death << std::endl;
  * });
  * ```
@@ -436,7 +436,7 @@ class Filtered_zigzag_persistence_with_storage
  * // Only the closed bars where output so far, so the open/infinite bars still need to be retrieved.
  *
  * //in this example, outputs (0, 0.1) and (0, 2.0)
- * zp.get_current_infinite_intervals([](dimension_type dim, filtration_value_type birth){
+ * zp.get_current_infinite_intervals([](Dimension dim, filtration_value_type birth){
  *   std::cout << "[" << dim << "] " << birth << " - inf" << std::endl;
  * });
  * ```
@@ -448,10 +448,10 @@ template <class FilteredZigzagOptions = Default_filtered_zigzag_options>
 class Filtered_zigzag_persistence {
  public:
   using Options = FilteredZigzagOptions;                        /**< Zigzag options. */
-  using internal_key = typename Options::internal_key;          /**< Key and index type, has to be signed. */
-  using face_key = typename Options::face_key;                  /**< Face ID type from external inputs. */
-  using filtration_value = typename Options::filtration_value;  /**< Type for filtration values. */
-  using dimension_type = typename Options::dimension_type;      /**< Type for dimension values. */
+  using Internal_key = typename Options::Internal_key;          /**< Key and index type, has to be signed. */
+  using Face_key = typename Options::Face_key;                  /**< Face ID type from external inputs. */
+  using Filtration_value = typename Options::Filtration_value;  /**< Type for filtration values. */
+  using Dimension = typename Options::Dimension;      /**< Type for dimension values. */
 
   /**
    * @brief Constructor.
@@ -476,9 +476,9 @@ class Filtered_zigzag_persistence {
         numArrow_(-1),
         keyToFiltrationValue_(preallocationSize),
         pers_(
-            [&, stream_interval = std::forward<F>(stream_interval)](dimension_type dim,
-                                                                    internal_key birth,
-                                                                    internal_key death) {
+            [&, stream_interval = std::forward<F>(stream_interval)](Dimension dim,
+                                                                    Internal_key birth,
+                                                                    Internal_key death) {
               auto itB = keyToFiltrationValue_.find(birth);
               auto itD = keyToFiltrationValue_.find(death);
               if (itB->second != itD->second) stream_interval(dim, itB->second, itD->second);
@@ -500,11 +500,11 @@ class Filtered_zigzag_persistence {
    * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
    * values, ie. the changes are monotonous.
    */
-  template <class BoundaryRange = std::initializer_list<face_key> >
-  internal_key insert_face(face_key faceID,
+  template <class BoundaryRange = std::initializer_list<Face_key> >
+  Internal_key insert_face(Face_key faceID,
                            const BoundaryRange& boundary,
-                           dimension_type dimension,
-                           filtration_value filtrationValue)
+                           Dimension dimension,
+                           Filtration_value filtrationValue)
   {
     ++numArrow_;
 
@@ -515,7 +515,7 @@ class Filtered_zigzag_persistence {
     keyToFiltrationValue_.try_emplace(numArrow_, filtrationValue);
 
     // Compute the keys of the faces of the boundary.
-    std::set<internal_key> translatedBoundary;  // set maintains the natural order on indices
+    std::set<Internal_key> translatedBoundary;  // set maintains the natural order on indices
     for (auto b : boundary) {
       translatedBoundary.insert(handleToKey_.at(b));  // TODO: add possibilities of coefficients
     }
@@ -533,7 +533,7 @@ class Filtered_zigzag_persistence {
    * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
    * values, ie. the changes are monotonous.
    */
-  internal_key remove_face(face_key faceID, filtration_value filtrationValue) {
+  Internal_key remove_face(Face_key faceID, Filtration_value filtrationValue) {
     ++numArrow_;
 
     auto it = handleToKey_.find(faceID);
@@ -552,7 +552,7 @@ class Filtered_zigzag_persistence {
    * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposely skipped
    * to avoid useless computation.
    */
-  internal_key apply_identity() {
+  Internal_key apply_identity() {
     ++numArrow_;
     pers_.apply_identity();
     return numArrow_;
@@ -568,16 +568,16 @@ class Filtered_zigzag_persistence {
   template <typename F>
   void get_current_infinite_intervals(F&& stream_infinite_interval) {
     pers_.get_current_infinite_intervals(
-        [&](dimension_type dim, internal_key birth) { stream_infinite_interval(dim, keyToFiltrationValue_.at(birth)); });
+        [&](Dimension dim, Internal_key birth) { stream_infinite_interval(dim, keyToFiltrationValue_.at(birth)); });
   }
 
  private:
   template <typename key_type, typename value_type>
-  using dictionary = std::unordered_map<key_type, value_type>;  // TODO: benchmark with other map types
+  using Dictionary = std::unordered_map<key_type, value_type>;  // TODO: benchmark with other map types
 
-  dictionary<face_key, internal_key> handleToKey_;                  /**< Map from input keys to internal keys. */
-  internal_key numArrow_;                                           /**< Current arrow number. */
-  dictionary<internal_key, filtration_value> keyToFiltrationValue_; /**< Face Key to filtration value map. */
+  Dictionary<Face_key, Internal_key> handleToKey_;                  /**< Map from input keys to internal keys. */
+  Internal_key numArrow_;                                           /**< Current arrow number. */
+  Dictionary<Internal_key, Filtration_value> keyToFiltrationValue_; /**< Face Key to filtration value map. */
   Zigzag_persistence<FilteredZigzagOptions, true> pers_;            /**< Class computing the pairs. */
 };  // end class Filtered_zigzag_persistence
 

@@ -13,14 +13,14 @@
 #include <gudhi/zigzag_persistence.h>
 
 using Zigzag_persistence = Gudhi::zigzag_persistence::Zigzag_persistence<>;
-using dimension_type = Zigzag_persistence::dimension_type;
-using index_type = Zigzag_persistence::index;
+using Dimension = Zigzag_persistence::Dimension;
+using Index = Zigzag_persistence::Index;
 
 int main() {
   std::clog << "************* Minimalistic example of usage of the Zigzag_persistence class *************" << std::endl;
 
   // Zigzag_persistence(callback) with for example callback method as a anonymous lambda
-  Zigzag_persistence zp([](dimension_type dim, index_type birth, index_type death) {
+  Zigzag_persistence zp([](Dimension dim, Index birth, Index death) {
     std::cout << "[" << dim << "] " << birth << " - " << death << std::endl;
   });
 
@@ -49,7 +49,7 @@ int main() {
 
   // in this example, computes (0, 0) and (0, 7)
   zp.get_current_infinite_intervals(
-      [](dimension_type dim, index_type birth) { std::cout << "[" << dim << "] " << birth << " - inf" << std::endl; });
+      [](Dimension dim, Index birth) { std::cout << "[" << dim << "] " << birth << " - inf" << std::endl; });
 
   return 0;
 }

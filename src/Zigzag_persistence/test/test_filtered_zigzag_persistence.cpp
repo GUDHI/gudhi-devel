@@ -67,7 +67,7 @@ void test_barcode(ZP& zp, std::vector<typename ZP::Filtration_value_interval>& b
 
 template <class ZP>
 void test_indices(ZP& zp, std::vector<typename ZP::Index_interval>& indices,
-                  std::vector<typename ZP::filtration_value>& indexToFil) {
+                  std::vector<typename ZP::Filtration_value>& indexToFil) {
   auto it = indices.begin();
   for (const auto& interval : zp.get_index_persistence_diagram()) {
     BOOST_CHECK_EQUAL(interval.dim, it->dim);
@@ -128,8 +128,8 @@ std::vector<double> get_filtration_values() {
 
 template<class ZP>
 void test_filtered_zigzag_with_storage() {
-  using face_handle = typename ZP::face_key;
-  using filtration_value = typename ZP::filtration_value;
+  using face_handle = typename ZP::Face_key;
+  using Filtration_value = typename ZP::Filtration_value;
   using Interval_index = typename ZP::Index_interval;
   using Interval_filtration = typename ZP::Filtration_value_interval;
 
@@ -140,7 +140,7 @@ void test_filtered_zigzag_with_storage() {
   realBarcode.reserve(9);
 
   std::vector<std::vector<face_handle> > simplices = get_boundaries();
-  std::vector<filtration_value> filValues = get_filtration_values();
+  std::vector<Filtration_value> filValues = get_filtration_values();
 
   for (unsigned int i = 0; i < 14; ++i) {
     zp.insert_face(i, simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1, filValues[i]);
@@ -203,8 +203,8 @@ void test_filtered_zigzag_with_storage() {
 
 template<class ZP>
 void test_filtered_zigzag_with_storage_max1() {
-  using face_handle = typename ZP::face_key;
-  using filtration_value = typename ZP::filtration_value;
+  using face_handle = typename ZP::Face_key;
+  using Filtration_value = typename ZP::Filtration_value;
   using Interval_index = typename ZP::Index_interval;
   using Interval_filtration = typename ZP::Filtration_value_interval;
 
@@ -215,7 +215,7 @@ void test_filtered_zigzag_with_storage_max1() {
   realBarcode.reserve(3);
 
   std::vector<std::vector<face_handle> > simplices = get_boundaries();
-  std::vector<filtration_value> filValues = get_filtration_values();
+  std::vector<Filtration_value> filValues = get_filtration_values();
 
   for (unsigned int i = 0; i < 14; ++i) {
     zp.insert_face(i, simplices[i], simplices[i].size() == 0 ? 0 : simplices[i].size() - 1, filValues[i]);
@@ -264,13 +264,13 @@ BOOST_AUTO_TEST_CASE(filtered_zigzag_persistence_with_storage) {
 
 template<class ZP>
 void test_filtered_zigzag() {
-  using face_handle = typename ZP::face_key;
-  using filtration_value = typename ZP::filtration_value;
-  using dimension_type = typename ZP::dimension_type;
-  using Interval = std::tuple<dimension_type, filtration_value, filtration_value>;
+  using face_handle = typename ZP::Face_key;
+  using Filtration_value = typename ZP::Filtration_value;
+  using Dimension = typename ZP::Dimension;
+  using Interval = std::tuple<Dimension, Filtration_value, Filtration_value>;
 
   Interval interval;
-  ZP zp([&](dimension_type dim, filtration_value birth, filtration_value death){
+  ZP zp([&](Dimension dim, Filtration_value birth, Filtration_value death){
     BOOST_CHECK_EQUAL(std::get<0>(interval), dim);
     BOOST_CHECK_EQUAL(std::get<1>(interval), birth);
     BOOST_CHECK_EQUAL(std::get<2>(interval), death);
@@ -309,7 +309,7 @@ void test_filtered_zigzag() {
   realBarcode.emplace_back(3, 0, 28);   //dummy
 
   std::vector<std::vector<face_handle> > simplices = get_boundaries();
-  std::vector<filtration_value> filValues = get_filtration_values();
+  std::vector<Filtration_value> filValues = get_filtration_values();
 
   for (unsigned int i = 0; i < 14; ++i) {
     interval = realBarcode[i];
@@ -342,14 +342,14 @@ void test_filtered_zigzag() {
 
   //there is no real guarantee on the order of the infinite bars
   std::vector<Interval> infiniteBars;
-  zp.get_current_infinite_intervals([&](dimension_type dim, filtration_value birth) {
-    infiniteBars.emplace_back(dim, birth, std::numeric_limits<filtration_value>::infinity());
+  zp.get_current_infinite_intervals([&](Dimension dim, Filtration_value birth) {
+    infiniteBars.emplace_back(dim, birth, std::numeric_limits<Filtration_value>::infinity());
   });
 
   realBarcode.clear();
-  realBarcode.emplace_back(0, 0, std::numeric_limits<filtration_value>::infinity());
-  realBarcode.emplace_back(0, 9, std::numeric_limits<filtration_value>::infinity());
-  realBarcode.emplace_back(2, 10, std::numeric_limits<filtration_value>::infinity());
+  realBarcode.emplace_back(0, 0, std::numeric_limits<Filtration_value>::infinity());
+  realBarcode.emplace_back(0, 9, std::numeric_limits<Filtration_value>::infinity());
+  realBarcode.emplace_back(2, 10, std::numeric_limits<Filtration_value>::infinity());
 
   std::sort(infiniteBars.begin(), infiniteBars.end());
   std::sort(realBarcode.begin(), realBarcode.end());
@@ -364,13 +364,13 @@ void test_filtered_zigzag() {
 
 template<class ZP>
 void test_filtered_zigzag_max1() {
-  using face_handle = typename ZP::face_key;
-  using filtration_value = typename ZP::filtration_value;
-  using dimension_type = typename ZP::dimension_type;
-  using Interval = std::tuple<dimension_type, filtration_value, filtration_value>;
+  using face_handle = typename ZP::Face_key;
+  using Filtration_value = typename ZP::Filtration_value;
+  using Dimension = typename ZP::Dimension;
+  using Interval = std::tuple<Dimension, Filtration_value, Filtration_value>;
 
   Interval interval;
-  ZP zp([&](dimension_type dim, filtration_value birth, filtration_value death){
+  ZP zp([&](Dimension dim, Filtration_value birth, Filtration_value death){
     if (dim < 1){
       BOOST_CHECK_EQUAL(std::get<0>(interval), dim);
       BOOST_CHECK_EQUAL(std::get<1>(interval), birth);
@@ -413,7 +413,7 @@ void test_filtered_zigzag_max1() {
   realBarcode.emplace_back(1, 0, 28);   //dummy
 
   std::vector<std::vector<face_handle> > simplices = get_boundaries();
-  std::vector<filtration_value> filValues = get_filtration_values();
+  std::vector<Filtration_value> filValues = get_filtration_values();
 
   for (unsigned int i = 0; i < 14; ++i) {
     interval = realBarcode[i];
@@ -446,15 +446,15 @@ void test_filtered_zigzag_max1() {
 
   //there is no real guarantee on the order of the infinite bars
   std::vector<Interval> infiniteBars;
-  zp.get_current_infinite_intervals([&](dimension_type dim, filtration_value birth) {
+  zp.get_current_infinite_intervals([&](Dimension dim, Filtration_value birth) {
     if (dim < 1){
-      infiniteBars.emplace_back(dim, birth, std::numeric_limits<filtration_value>::infinity());
+      infiniteBars.emplace_back(dim, birth, std::numeric_limits<Filtration_value>::infinity());
     }
   });
 
   realBarcode.clear();
-  realBarcode.emplace_back(0, 0, std::numeric_limits<filtration_value>::infinity());
-  realBarcode.emplace_back(0, 9, std::numeric_limits<filtration_value>::infinity());
+  realBarcode.emplace_back(0, 0, std::numeric_limits<Filtration_value>::infinity());
+  realBarcode.emplace_back(0, 9, std::numeric_limits<Filtration_value>::infinity());
 
   std::sort(infiniteBars.begin(), infiniteBars.end());
   std::sort(realBarcode.begin(), realBarcode.end());

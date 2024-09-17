@@ -28,23 +28,23 @@ struct FilteredZigzagOptions {
   /**
    * @brief Numerical type for the face IDs used internally and other indexations. It must be signed.
    */
-  using internal_key = unspecified;
+  using Internal_key = unspecified;
 
   /**
    * @brief Type for the face IDs used at insertion and in the boundaries given as argument.
    * Has to be usable as key in a hashtable, so "hashable" and comparable.
    */
-  using face_key = unspecified;
+  using Face_key = unspecified;
 
   /**
    * @brief Type for filtration values.
    */
-  using filtration_value = unspecified;
+  using Filtration_value = unspecified;
 
   /**
    * @brief Type for the dimension values.
    */
-  using dimension_type = unspecified;
+  using Dimension = unspecified;
 
   /**
    * @brief Column type used by the internal matrix.
@@ -61,12 +61,12 @@ struct ZigzagOptions {
   /**
    * @brief Numerical type for the face IDs used internally and other indexations. It must be signed.
    */
-  using internal_key = unspecified;
+  using Internal_key = unspecified;
 
   /**
    * @brief Type for the dimension values.
    */
-  using dimension_type = unspecified;
+  using Dimension = unspecified;
 
   /**
    * @brief Column type used by the internal matrix.
