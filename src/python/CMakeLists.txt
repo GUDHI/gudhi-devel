@@ -56,6 +56,14 @@ function( add_gudhi_py_test THE_TEST )
   endif()
 endfunction( add_gudhi_py_test )
 
+function( add_gudhi_symbolic_links GLOBBING_EXPRESSION )
+  file(GLOB GUDHI_GLOB_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${GLOBBING_EXPRESSION})
+  foreach(GUDHI_GLOB_FILENAME ${GUDHI_GLOB_FILES})
+    message("link ${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_GLOB_FILENAME} to ${CMAKE_CURRENT_BINARY_DIR}/${GUDHI_GLOB_FILENAME}")
+    file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_GLOB_FILENAME}" "${CMAKE_CURRENT_BINARY_DIR}/${GUDHI_GLOB_FILENAME}" SYMBOLIC)
+  endforeach()
+endfunction( add_gudhi_symbolic_links )
+
 # Set gudhi.__debug_info__
 # WARNING : to be done before setup.py.in configure_file
 function( add_gudhi_debug_info DEBUG_INFO )
@@ -382,6 +390,14 @@ file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi
 # Some files for pip package
 file(COPY "pyproject.toml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
 
+# Symbolic links to cython and Pybind11 sources to be built. "MAKE_DIRECTORY gudhi" must be done before
+add_gudhi_symbolic_links("gudhi/*.pxd")
+add_gudhi_symbolic_links("gudhi/*.pyx")
+add_gudhi_symbolic_links("gudhi/*.cc")
+add_gudhi_symbolic_links("gudhi/clustering/_tomato.cc")
+add_gudhi_symbolic_links("gudhi/hera/*.cc")
+add_gudhi_symbolic_links("gudhi/datasets/generators/_points.cc")
+
 add_custom_command(
     OUTPUT gudhi.so
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -438,7 +454,7 @@ add_test(NAME random_cubical_complex_persistence_example_py_test
 
 add_gudhi_py_test(test_cubical_complex)
 
-# Datasets are fetched for these tests 
+# Datasets are fetched for these tests
 if(SKLEARN_FOUND AND WITH_GUDHI_REMOTE_TEST)
   add_gudhi_py_test(test_sklearn_cubical_persistence)
 
@@ -574,7 +590,7 @@ if(SKLEARN_FOUND)
     add_gudhi_py_test(test_sklearn_rips_persistence)
   endif()
 
-  # Datasets are fetched for these tests 
+  # Datasets are fetched for these tests
   if(WITH_GUDHI_REMOTE_TEST)
     add_test(NAME rips_complex_sklearn_itf_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
