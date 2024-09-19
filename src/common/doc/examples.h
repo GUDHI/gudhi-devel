@@ -130,8 +130,16 @@
  * @example example_one_skeleton_rips_from_points.cpp
  * @example example_rips_complex_from_off_file.cpp
  * \section Zigzag_persistence_example_section Zigzag_persistence
- * @example example_simple_zigzag_filtration.cpp
+ * @example example_usage_zigzag_persistence.cpp
+ * @example example_usage_filtered_zigzag_persistence.cpp
+ * @example example_usage_filtered_zigzag_persistence_with_storage.cpp
+ * @example example_zigzag_filtration_as_input_loop.cpp
  * @example example_zzfiltration_from_file.cpp
  * @example example_oscillating_rips_persistence.cpp
+ * \section Persistence_matrix_example_section Persistence_matrix
+ * @example example_representative_cycles_from_matrix.cpp
+ * @example example_simplex_tree_to_matrix.cpp
+ * \section Persistence_fields_example_section Persistence_field
+ * @example example_field_operations.cpp
  */
  

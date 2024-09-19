@@ -40,13 +40,13 @@ different, and in particular the `python/` subdirectory is actually `src/python/
 there.
 
 The library uses c++17 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.71.0,
-`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.8,
+`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.15,
 Python :math:`\geq` 3.5, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0, `Cython <https://www.cython.org/>`_
 :math:`\geq` 0.27 and `pybind11 <https://github.com/pybind/pybind11>`_ to compile the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2017 or later.
 
-If you have several Python/python installed, the version 2.X may be used by default, but you can force it by adding
-:code:`-DPython_ADDITIONAL_VERSIONS=3` to the cmake command.
+If you have several Python/python installed, you can force it by adding
+:code:`-DPython_EXECUTABLE=/custom/path/to/python3` to the cmake command (requires CMake :math:`\geq` 3.16).
 
 GUDHI Python module compilation
 ===============================
@@ -228,7 +228,7 @@ CGAL
 ----
 
 Some GUDHI modules (cf. :doc:`modules list </index>`), and few examples
-require `CGAL <https://www.cgal.org/>`_, a C++ library that provides easy
+require `CGAL <https://www.cgal.org/>`_ version :math:`\geq` 5.1.0, a C++ library that provides easy
 access to efficient and reliable geometric algorithms.
 
 
@@ -236,7 +236,7 @@ The procedure to install this library
 according to your operating system is detailed
 `here <http://doc.cgal.org/latest/Manual/installation.html>`_.
 
-The following examples require CGAL version :math:`\geq` 4.11.0:
+The following examples require CGAL:
 
 .. only:: builder_html
 
@@ -251,11 +251,11 @@ Eigen
 -----
 
 Some GUDHI modules (cf. :doc:`modules list </index>`), and few examples
-require `Eigen <http://eigen.tuxfamily.org/>`_, a C++ template
+require `Eigen <http://eigen.tuxfamily.org/>`_ version :math:`\geq` 3.3.0, a C++ template
 library for linear algebra: matrices, vectors, numerical solvers, and related
 algorithms.
 
-The following examples require `Eigen <http://eigen.tuxfamily.org/>`_ version :math:`\geq` 3.1.0:
+The following examples require `Eigen <http://eigen.tuxfamily.org/>`_:
 
 .. only:: builder_html
 
@@ -291,8 +291,9 @@ PyTorch, TensorFlow and JAX in a common interface.
 Joblib
 ------
 
-`Joblib <https://joblib.readthedocs.io/>`_ is used both as a dependency of `Scikit-learn`_,
-and directly for parallelism in some modules (:class:`~gudhi.point_cloud.knn.KNearestNeighbors`,
+`Joblib <https://joblib.readthedocs.io/>`_ is used both as a dependency of
+`Scikit-learn`_, and directly for parallelism in some modules
+(:class:`~gudhi.point_cloud.knn.KNearestNeighbors`,
 :func:`~gudhi.representations.metrics.pairwise_persistence_diagram_distances`).
 
 Hnswlib
@@ -303,7 +304,7 @@ Hnswlib
 requested, to speed-up queries.
 
 LaTeX
-~~~~~
+-----
 
 If a sufficiently complete LaTeX toolchain is available (including dvipng and ghostscript), the LaTeX option of
 matplotlib is enabled for prettier captions (cf.
@@ -360,6 +361,15 @@ The :class:`~gudhi.cover_complex.GraphInducedComplex`, :class:`~gudhi.cover_comp
 :class:`~gudhi.cover_complex.NerveComplex` `get_networkx` methods require `NetworkX <https://networkx.org/>`_,
 a Python library for studying and visualizing graphs and networks.
 
+Pandas
+-------
+
+`Pandas <https://pandas.pydata.org/docs/>`_ is an optional Run time dependency of
+`Scikit-learn`_.
+For instance `sklearn.datasets.fetch_openml`, used in
+`Cubical complex persistence scikit-learn like interface example <cubical_complex_sklearn_itf_ref.html>`_
+requires pandas with Scikit-learn :math:`\geq` 1.5.0.
+
 PyKeOps
 -------
 
@@ -384,14 +394,14 @@ Scikit-learn
 ------------
 
 The :doc:`persistence representations </representations>` module requires
-`scikit-learn <https://scikit-learn.org/>`_, a Python-based ecosystem of
+`Scikit-learn <https://scikit-learn.org/>`_, a Python-based ecosystem of
 open-source software for machine learning.
 
 Some classes of the :doc:`cover complex </cover_complex_sklearn_isk_ref>` module
-also follow and require the `scikit-learn <https://scikit-learn.org/>`_ interface.
+also follow and require the `Scikit-learn <https://scikit-learn.org/>`_ interface.
 
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
-`scikit-learn <https://scikit-learn.org/>`_ as a backend if explicitly
+`Scikit-learn <https://scikit-learn.org/>`_ as a backend if explicitly
 requested.
 
 SciPy

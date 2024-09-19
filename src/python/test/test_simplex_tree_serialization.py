@@ -22,3 +22,16 @@ def test_pickle_simplex_tree():
         with open('stree.pkl','rb') as f:
             st_copy = pickle.load(f)
         assert st == st_copy
+
+def test_simplex_tree_serialization_copy():
+    st = SimplexTree()
+    st.insert([1, 2, 3], 0.5)
+    # compute persistence only on the original
+    st.compute_persistence()
+
+    st_copy = st.copy()
+    st_data = pickle.dumps(st)
+    # Modify the original before reloading it from its dump
+    st.insert([4, 5], 2.)
+    st = pickle.loads(st_data)
+    assert st == st_copy

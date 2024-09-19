@@ -22,7 +22,7 @@ namespace Gudhi {
 namespace zigzag_persistence {
 
 /**
- * @brief Class giving access to a range over the simplices in an oscilliating Rips filtration 
+ * @brief Class giving access to a range over the simplices in an oscillating Rips filtration 
  * in order of the filtration.
  *
  * A simplex has to be represented by a tuple of three elements:
@@ -33,7 +33,7 @@ namespace zigzag_persistence {
 class OscillatingRipsSimplexRange {
  public:
   /**
-   * @brief Returns a range over the simplices in an oscilliating Rips filtration 
+   * @brief Returns a range over the simplices in an oscillating Rips filtration 
    * in order of the filtration.
    * 
    * @param edgeStartIterator Begin iterator of the edge range.
@@ -44,11 +44,11 @@ class OscillatingRipsSimplexRange {
    */
   static auto get_iterator_range(Oscillating_rips_edge_range<double>::Oscillating_rips_edge_iterator& edgeStartIterator,
                                  Oscillating_rips_edge_range<double>::Oscillating_rips_edge_iterator& edgeEndIterator,
-                                 Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_oscillating_rips>& complex,
+                                 StableFilteredComplex& complex,
                                  int maxDimension);
 
   /**
-   * @brief Returns a range over the simplices in an oscilliating Rips filtration 
+   * @brief Returns a range over the simplices in an oscillating Rips filtration 
    * in order of the filtration.
    * 
    * @param edgeStartIterator Begin iterator of the edge range.
@@ -59,7 +59,7 @@ class OscillatingRipsSimplexRange {
    */
   static auto get_iterator_range(std::vector<Zigzag_edge<double> >::iterator& edgeStartIterator,
                                  std::vector<Zigzag_edge<double> >::iterator& edgeEndIterator,
-                                 Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_oscillating_rips>& complex,
+                                 StableFilteredComplex& complex,
                                  int maxDimension);
 };
 

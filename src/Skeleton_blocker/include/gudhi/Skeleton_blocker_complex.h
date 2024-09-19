@@ -1094,7 +1094,7 @@ class Skeleton_blocker_complex {
  private:
   /**
    * after removing the star of a simplex, blockers sigma that contains this simplex must be removed.
-   * Furthermore, all simplices tau of the form sigma \setminus simplex_to_be_removed must be added
+   * Furthermore, all simplices tau of the form sigma \f$\setminus\f$ simplex_to_be_removed must be added
    * whenever the dimension of tau is at least 2.
    */
   void update_blockers_after_remove_star_of_vertex_or_edge(const Simplex& simplex_to_be_removed);

@@ -31,7 +31,6 @@ import gudhi
 
 # General information about the project.
 project = gudhi.__name__
-copyright = f"{gudhi.__copyright__} - MIT"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

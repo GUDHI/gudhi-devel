@@ -19,11 +19,29 @@ namespace zigzag_persistence {
  * @{
  * \author    Cl&eacute;ment Maria, Hannah Schreiber
  *
+ * \section zigzagintro Zigzag Persistence
+ *
  * We refer to the introduction page \ref persistent_cohomology for persistent (co)homology for an introduction
  * to the topic.
  * Zigzag persistence is a generalization of the latter. While standard persistence only allows to grow the filtered
- * complex by adding simplices, zigzag persistence also allows removals. Hence the name "zigzag", as the module
- * diagram will have arrows alterning between forward and backward.
+ * complex by adding faces, zigzag persistence also allows removals. Hence the name "zigzag", as the module
+ * diagram will have arrows alternating between forward and backward.
+ *
+ * The module consists of the @ref Zigzag_persistence class and two wrappers @ref Filtered_zigzag_persistence and
+ * @ref Filtered_zigzag_persistence_with_storage "":
+ * - @ref Zigzag_persistence computes the persistence of a sequence of insertions and removals. A face can be inserted
+ * or removed one at a time and the returned persistence pairs / bars are indexed on the operation numbers.
+ * For example, if a cycle is born at operation number 6 and dies at operation number 7, it will output a bar starting
+ * at 6 and ending at 7.
+ * - @ref Filtered_zigzag_persistence and @ref Filtered_zigzag_persistence_with_storage are adding the notion of
+ * "filtration value" to @ref Zigzag_persistence. At each call, an operation can be associated to a filtration value,
+ * which will be used to index the returned bars instead (bars with new length 0 are then ignored). The two classes
+ * also have more flexible inputs (the boundaries do not have to be ordered, nor identified continuously
+ * from 0). The difference between both classes is on the way they manage the memory: @ref Filtered_zigzag_persistence
+ * removes systematically all unnecessary information and outputs a pair as soon it is closed, while
+ * @ref Filtered_zigzag_persistence_with_storage will store all informations about filtration values and bars until the
+ * end and output the pairs only when asked. Depending on the use and the length of the filtration, one will be more
+ * efficient than the other and vice versa.
  *
  * The implementation is based on the algorithm introduced in \cite zigzag.
  *
@@ -33,23 +51,49 @@ namespace zigzag_persistence {
  * filtration anymore. This makes it possible to build very long fine tuned filtrations with relatively small complexes
  * which can be processed without overreaching memory space. For this purpose, it is possible to feed the module with
  * information about the filtration "on the fly" to avoid loading the whole filtration at once. Information about the
- * current complex and current barcode can be retrieved between any steps.
+ * current barcode can be retrieved between any steps via callback methods.
  *
  * \subsection zigzagrips Oscillating Rips
  * 
- * A typical example of zigzag filtrations are oscillating rips filtrations. Similar to standart Rips filtrations, they 
- * completely depend on their edges. But here we look at neighborhoods ''oscillating'' in size around the points, so 
+ * A typical example of zigzag filtrations are oscillating rips filtrations. Similar to standard Rips filtrations, they 
+ * completely depend on their edges. But here we look at neighborhoods "oscillating" in size around the points, so 
  * edges are added but also removed. We refer for example to \cite osc_zz.
  * 
- * \subsection zigzagexamples Examples
+ * \section zigzagexamples Examples
+ *
+ * \subsection zzminusage Minimalistic examples
+ *
+ * \li \gudhi_example_link{Zigzag_persistence,example_usage_zigzag_persistence.cpp} - A simple example to showcase how
+ * to use the @ref Zigzag_persistence class to compute a barcode.
+ * <details>
+ *   @dontinclude example_usage_zigzag_persistence.cpp
+ *   @skip #include
+ *   @until return 0;
+ *   @skipline }
+ * </details>
+ * \li \gudhi_example_link{Zigzag_persistence,example_usage_filtered_zigzag_persistence.cpp} - A simple example to
+ * showcase how to use the @ref Filtered_zigzag_persistence class to compute a barcode.
+ * <details>
+ *   @dontinclude example_usage_filtered_zigzag_persistence.cpp
+ *   @skip #include
+ *   @until return 0;
+ *   @skipline }
+ * </details>
+ * \li \gudhi_example_link{Zigzag_persistence,example_usage_filtered_zigzag_persistence_with_storage.cpp} - A simple
+ * example to showcase how to use the @ref Filtered_zigzag_persistence_with_storage class to compute a barcode.
+ * <details open>
+ *   @dontinclude example_usage_filtered_zigzag_persistence_with_storage.cpp
+ *   @skip #include
+ *   @until return 0;
+ *   @skipline }
+ * </details>
+ *
+ * \subsection zzexamples More elaborate examples
  * 
- * Here is a list of zigzag persistence examples :
- * \li \gudhi_example_link{Zigzag_persistence,example_simple_zigzag_filtration.cpp} - A simple example to showcase how
- * to use the \ref Zigzag_persistence class.
- *
+ * \li \gudhi_example_link{Zigzag_persistence,example_zigzag_filtration_as_input_loop.cpp} - A simple example to showcase how
+ * to use the @ref Filtered_zigzag_persistence_with_storage class within an input loop.
  * \li \gudhi_example_link{Zigzag_persistence,example_zzfiltration_from_file.cpp} - An example of a "stream-like" usage
- * by reading of the filtration from a file.
- *
+ * with @ref Filtered_zigzag_persistence by reading off the filtration from a file.
  * \li \gudhi_example_link{Zigzag_persistence,example_oscillating_rips_persistence.cpp} - An example of a how to
  * compute the persistence of an oscillating rips filtration.
  * 

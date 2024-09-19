@@ -17,7 +17,49 @@ from sklearn.cluster         import DBSCAN, AgglomerativeClustering
 from sklearn.metrics         import pairwise_distances
 from scipy.spatial.distance  import directed_hausdorff
 
+from sklearn import __version__ as sklearn_version
+from sklearn.utils.fixes import parse_version
+agglomerative_clustering_metric = parse_version(sklearn_version) >= parse_version('1.2.0')
+
 from . import SimplexTree, CoverComplex
+
+def _save_to_html(dat, lens, color, param, points, edges, html_output_filename):
+
+    from ._kepler_mapper import KeplerMapper
+    network = {}
+    mapper = KeplerMapper(verbose=0)
+    data = np.zeros((3,3))
+    projected_data = mapper.fit_transform( data, projection="sum", scaler=None )
+
+    from collections import defaultdict
+    nodes = defaultdict(list)
+    links = defaultdict(list)
+    custom = defaultdict(list)
+
+    for point in points:
+        nodes[  str(int(point[0]))  ] = [  int(point[0]), point[1], int(point[2])  ]
+        links[  str(int(point[0]))  ] = []
+        custom[  int(point[0])  ] = point[1]
+
+    for edge in edges:
+        links[  str(edge[0])  ].append(  str(edge[1])  )
+        links[  str(edge[1])  ].append(  str(edge[0])  )
+
+    custom_val = custom.values()
+    m = min(custom_val)
+    M = max(custom_val)
+    
+    network["nodes"] = nodes
+    network["links"] = links
+    network["meta"] = lens
+
+
+    mapper.visualize(network, color_function=color, path_html=html_output_filename, title=dat,
+    graph_link_distance=30, graph_gravity=0.1, graph_charge=-120, custom_tooltips=custom, width_html=0,
+    height_html=0, show_tooltips=True, show_title=True, show_meta=True, res=param[0], gain=param[1], minimum=m, maximum=M)
+    message = repr(html_output_filename) + " is generated. You can now use your favorite web browser to visualize it."
+    print(message)
+
 
 class CoverComplexPy(BaseEstimator):
     """
@@ -82,8 +124,8 @@ class CoverComplexPy(BaseEstimator):
         st = self.simplex_tree_
         node_info_ = self.node_info_
 
-        maxv, minv = max([node_info_[k]["colors"][0] for k in node_info_.keys()]), min([node_info_[k]["colors"][0] for k in node_info_.keys()])
-        maxs, mins = max([node_info_[k]["size"]      for k in node_info_.keys()]), min([node_info_[k]["size"]      for k in node_info_.keys()])
+        maxv, minv = max(node_info_[k]["colors"][0] for k in node_info_.keys()), min(node_info_[k]["colors"][0] for k in node_info_.keys())
+        maxs, mins = max(node_info_[k]["size"]      for k in node_info_.keys()), min(node_info_[k]["size"]      for k in node_info_.keys())
 
         if not file_name.lower().endswith(".dot"):
             file_name += ".dot"
@@ -138,7 +180,7 @@ class CoverComplexPy(BaseEstimator):
             f.write(data_name + "\n")
             f.write(cover_name + "\n")
             f.write(color_name + "\n")
-            f.write("0 0\n")
+            f.write(str(self.resolutions[0]) + " " + str(self.gains[0]) + "\n")
             f.write(str(st.num_vertices()) + " " + str(len(list(st.get_skeleton(1)))-st.num_vertices()) + "\n")
             name2id = {}
             idv = 0
@@ -150,6 +192,39 @@ class CoverComplexPy(BaseEstimator):
                 if len(s) == 2:
                     f.write(str(name2id[s[0]]) + " " + str(name2id[s[1]]) + "\n")
     
+    def save_to_html(self, file_name="cover_complex", data_name="data", cover_name="cover", color_name="color"):
+        """
+        Write the cover complex to an HTML file called "{file_name}.html", that can be visualized in a browser. This function is based on a fork of https://github.com/MLWave/kepler-mapper
+
+        Parameters
+        ----------
+        file_name : string
+            name for the output .html file, default "cover_complex" 
+        data_name : string
+            name to use for the data on which the cover complex was computed, default "data".
+        cover_name : string
+            name to use for the cover used to compute the cover complex, default "cover".
+        color_name : string
+            name to use for the color used to color the cover complex nodes, default "color".
+        """
+
+        st = self.simplex_tree_
+
+        if not file_name.lower().endswith(".html"):
+            file_name += ".html"
+
+        points, edges, name2id, idv = [], [], {}, 0
+        for s,_ in st.get_skeleton(0):
+            points.append([ idv, self.node_info_[s[0]]["colors"][0], self.node_info_[s[0]]["size"] ])
+            name2id[s[0]] = idv
+            idv += 1
+        for s,_ in st.get_skeleton(1):
+            if len(s) == 2:
+                edges.append([ name2id[s[0]] , name2id[s[1]] ])
+
+        _save_to_html(data_name, cover_name, color_name, [self.resolutions[0], self.gains[0]], points, edges, file_name)
+
+
     class _constant_clustering():
         def fit_predict(X):
             return np.zeros([len(X)], dtype=np.int32)
@@ -324,10 +399,10 @@ class MapperComplex(CoverComplexPy):
         if self.resolutions is None or self.clustering is None:
             delta, resolutions = self.get_optimal_parameters_for_agglomerative_clustering(X=X, beta=self.beta, C=self.C, N=self.N)
             if self.clustering is None:
-                if self.input_type == "point cloud":
-                    self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, affinity="euclidean")
-                else:
-                    self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, affinity="precomputed")
+                self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, **{
+        "metric" if agglomerative_clustering_metric else "affinity":
+        "euclidean" if self.input_type == "point cloud" else "precomputed"
+                                                        })
             if self.resolutions is None:
                 self.resolutions = np.multiply(resolutions, 1./self.gains)
                 self.resolutions = np.array([int( (self.filter_bnds[ir,1]-self.filter_bnds[ir,0])/r) for ir, r in enumerate(self.resolutions)])

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 
 project(GUDHIdev)
 
@@ -45,8 +45,8 @@ add_gudhi_module(Tangential_complex)
 add_gudhi_module(Toplex_map)
 add_gudhi_module(Witness_complex)
 add_gudhi_module(Nerve_GIC)
-add_gudhi_module(Zigzag_persistence)
 add_gudhi_module(Persistence_matrix)
+add_gudhi_module(Zigzag_persistence)
 
 # Include module CMake subdirectories
 # GUDHI_SUB_DIRECTORIES is managed in CMAKE_MODULE_PATH/GUDHI_modules.cmake
@@ -58,7 +58,7 @@ foreach(GUDHI_MODULE ${GUDHI_MODULES})
   endforeach()
 endforeach()
 
-if (WITH_GUDHI_THIRD_PARTY)
+if (WITH_GUDHI_GUDHUI)
   add_subdirectory(src/GudhUI)
 endif()
 
@@ -72,6 +72,7 @@ endif()
 
 # For "make user_version" - Requires GUDHI_modules to be performed
 include(GUDHI_user_version_target)
+set(GUDHI_BIBLIO_DIR ${CMAKE_CURRENT_BINARY_DIR})
 # For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set - Done in GUDHI_user_version_target for dev version
 include(GUDHI_doxygen_target)
 

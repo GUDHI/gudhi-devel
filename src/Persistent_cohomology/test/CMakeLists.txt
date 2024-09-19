@@ -1,13 +1,7 @@
-project(Persistent_cohomology_tests)
-
 include(GUDHI_boost_test)
 
-add_executable ( Persistent_cohomology_test_unit persistent_cohomology_unit_test.cpp )
-add_executable ( Persistent_cohomology_test_betti_numbers betti_numbers_unit_test.cpp )
-if(TARGET TBB::tbb)
-  target_link_libraries(Persistent_cohomology_test_unit TBB::tbb)
-  target_link_libraries(Persistent_cohomology_test_betti_numbers TBB::tbb)
-endif()
+add_executable_with_targets(Persistent_cohomology_test_unit persistent_cohomology_unit_test.cpp TBB::tbb)
+add_executable_with_targets(Persistent_cohomology_test_betti_numbers betti_numbers_unit_test.cpp TBB::tbb)
 
 # Do not forget to copy test results files in current binary dir
 file(COPY "${CMAKE_SOURCE_DIR}/src/Persistent_cohomology/test/simplex_tree_file_for_unit_test.txt"
@@ -31,4 +25,3 @@ if(GMPXX_FOUND AND GMP_FOUND)
   gudhi_add_boost_test(Persistent_cohomology_test_unit_multi_field)
 
 endif(GMPXX_FOUND AND GMP_FOUND)
-

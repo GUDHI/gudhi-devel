@@ -8,28 +8,36 @@
  *      - YYYY/MM Author: Description of the modification
  */
   
-/** \brief Concept of the template parameter for the class `Gudhi::Simplex_tree<SimplexTreeOptions>`.
+/** @brief Concept of the template parameter for the class `Gudhi::Simplex_tree<SimplexTreeOptions>`.
  *
- * One model for this is `Gudhi::Simplex_tree_options_full_featured`. If you want to provide your own, it is recommended that you derive from it and override some parts instead of writing a class from scratch.
+ * A model for this is `Gudhi::Simplex_tree_options_full_featured` or  `Gudhi::Simplex_tree_options_minimal`.
+ * If you want to provide your own, it is recommended that you derive from it and override some parts instead of
+ * writing a class from scratch.
  */
 struct SimplexTreeOptions {
-  /// Forced for now.
+  /** @brief Forced for now. */
   typedef IndexingTag Indexing_tag;
-  /// Must be a signed integer type. It admits a total order <.
+  /** @brief Must be a signed integer type. It admits a total order <. */
   typedef VertexHandle Vertex_handle;
-  /// Must be comparable with operator<.
+  /** @brief Must be comparable with operator<. */
   typedef FiltrationValue Filtration_value;
-  /// Must be an integer type.
+  /** @brief Must be an integer type. */
   typedef SimplexKey Simplex_key;
-  /// If true, each simplex has extra storage for one `Simplex_key`. Necessary for `Persistent_cohomology`.
+  /** @brief Optional, can be omitted. */
+  typedef SimplexData Simplex_data;
+  /** @brief If true, each simplex has extra storage for one `Simplex_key`. Necessary for `Persistent_cohomology`. */
   static const bool store_key;
-  /// If true, each simplex has extra storage for one `Filtration_value`, and this value is propagated by operations like `Gudhi::Simplex_tree::expansion`. Without it, `Persistent_cohomology` degenerates to computing usual (non-persistent) cohomology.
+  /** @brief If true, each simplex has extra storage for one `Filtration_value`, and this value is propagated by
+   * operations like `Gudhi::Simplex_tree::expansion`. Without it, `Persistent_cohomology` degenerates to computing
+   * usual (non-persistent) cohomology.
+   */
   static const bool store_filtration;
-  /// If true, the list of vertices present in the complex must always be 0, ..., num_vertices-1, without any hole.
+  
+  /** @brief If true, the list of vertices present in the complex must always be 0, ..., num_vertices-1, without any hole. */
   static constexpr bool contiguous_vertices;
-  /// If true, the lists of `Node` with same label are stored to enhance cofaces and stars access.
+  /** @brief If true, the lists of `Node` with same label are stored to enhance cofaces and stars access. */
   static const bool link_nodes_by_label;
-  /// If true, Simplex_handle will not be invalidated after insertions or removals.
+  /** @brief If true, Simplex_handle will not be invalidated after insertions or removals. */
   static const bool stable_simplex_handles;
 };
 

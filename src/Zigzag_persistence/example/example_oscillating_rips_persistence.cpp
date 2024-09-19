@@ -15,23 +15,14 @@
 #include <gudhi/distance_functions.h>
 #include <gudhi/Oscillating_rips_persistence.h>
 
-using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_oscillating_rips>;
-using Filtration_value = ST::Filtration_value;
-using Simplex_handle = ST::Simplex_handle;
+using Filtration_value = double;
 using Point = std::vector<double>;
-using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
-using Barcode = std::vector<typename ZP::filtration_value_interval>;
+using Barcode = std::vector<Gudhi::persistence_matrix::Persistence_interval<int, Filtration_value> >;
 
 void print_barcode(const Barcode& bars) {
   std::clog << "Resulting barcode:" << std::endl;
   for (auto& bar : bars) {
-    std::clog << "[" << bar.dim() << "] " << bar.birth() << " - ";
-    if (bar.death() == std::numeric_limits<Filtration_value>::infinity()) {
-      std::clog << "inf";
-    } else {
-      std::clog << bar.death();
-    }
-    std::clog << std::endl;
+    std::clog << bar << std::endl;
   }
 }
 
@@ -66,7 +57,7 @@ std::vector<Point> build_point_cloud(unsigned int numberOfPoints, int seed) {
 
 int main(int argc, char* const argv[]) {
   if (argc != 5 && argc != 6) {
-    std::clog << "Usage: ./comp nu mu max_dim nomberOfPoints [seed]" << std::endl;
+    std::clog << "Usage: ./comp nu mu max_dim numberOfPoints [seed]" << std::endl;
     return 0;
   }
 
@@ -87,7 +78,7 @@ int main(int argc, char* const argv[]) {
   std::vector<Point> points = build_point_cloud(numberOfPoints, seed);
 
   std::clog << "********** Computing oscillating rips filtration and persistence" << std::endl;
-  //with default templates and parameters. See documention for more information.
+  //with default templates and parameters. See documentation for more information.
   Barcode res = Gudhi::zigzag_persistence::compute_oscillating_rips_persistence(points, nu, mu, maxDim);
   print_barcode(res);
 

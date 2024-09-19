@@ -11,11 +11,7 @@ import numpy as np
 import scipy.spatial.distance as sc
 import warnings
 
-try:
-    import ot
-except ImportError:
-    print("POT (Python Optimal Transport) package is not installed. Try to run $ conda install -c conda-forge pot ; or $ pip install POT")
-
+import ot
 
 # Currently unused, but Théo says it is likely to be used again.
 def _proj_on_diag(X):
@@ -117,12 +113,16 @@ def _get_essential_parts(a):
         first_coord_infinite_negative = (a[:,0] == -np.inf)
         second_coord_infinite_negative = (a[:,1] == -np.inf)
 
-        ess_first_type  = np.where(second_coord_finite & first_coord_infinite_negative)[0] # coord (-inf, x)
-        ess_second_type = np.where(first_coord_finite & second_coord_infinite_positive)[0]  # coord (x, +inf)
-        ess_third_type  = np.where(first_coord_infinite_negative & second_coord_infinite_positive)[0]  # coord (-inf, +inf)
-
-        ess_fourth_type = np.where(first_coord_infinite_negative & second_coord_infinite_negative)[0] # coord (-inf, -inf)
-        ess_fifth_type  = np.where(first_coord_infinite_positive  & second_coord_infinite_positive)[0]  # coord (+inf, +inf)
+        # coord (-inf, x)
+        ess_first_type  = np.where(second_coord_finite & first_coord_infinite_negative)[0]
+        # coord (x, +inf)
+        ess_second_type = np.where(first_coord_finite & second_coord_infinite_positive)[0]
+        # coord (-inf, +inf)
+        ess_third_type  = np.where(first_coord_infinite_negative & second_coord_infinite_positive)[0]
+        # coord (-inf, -inf)
+        ess_fourth_type = np.where(first_coord_infinite_negative & second_coord_infinite_negative)[0]
+        # coord (+inf, +inf)
+        ess_fifth_type  = np.where(first_coord_infinite_positive  & second_coord_infinite_positive)[0]
         return ess_first_type, ess_second_type, ess_third_type, ess_fourth_type, ess_fifth_type
     else:
         return [], [], [], [], []
@@ -202,11 +202,12 @@ def _warn_infty(matching):
     Handle essential parts with different cardinalities. Warn the user about cost being infinite and (if
     `matching=True`) about the returned matching being `None`.
     '''
+    user_warning = 'Cardinality of essential parts differs.'
     if matching:
-        warnings.warn('Cardinality of essential parts differs. Distance (cost) is +inf, and the returned matching is None.')
+        warnings.warn(f'{user_warning} Distance (cost) is +inf, and the returned matching is None.')
         return np.inf, None
     else:
-        warnings.warn('Cardinality of essential parts differs. Distance (cost) is +inf.')
+        warnings.warn(f'{user_warning} Distance (cost) is +inf.')
         return np.inf
 
 
@@ -338,7 +339,8 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
         dists = []
         # empty arrays are not handled properly by the helpers, so we avoid calling them
         if len(pairs_X_Y):
-            dists.append((Y_orig[pairs_X_Y[:, 1]] - X_orig[pairs_X_Y[:, 0]]).norms.lp(internal_p, axis=-1).norms.lp(order))
+            dists.append((Y_orig[pairs_X_Y[:, 1]] -
+                          X_orig[pairs_X_Y[:, 0]]).norms.lp(internal_p, axis=-1).norms.lp(order))
         if len(pairs_X_diag[0]):
             dists.append(_perstot_autodiff(X_orig[pairs_X_diag], order, internal_p))
         if len(pairs_Y_diag[0]):

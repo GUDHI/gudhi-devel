@@ -263,9 +263,12 @@ typename GeometricSimplifiableComplex::Vertex_handle> {
   }
 
   boost::optional<Edge_handle> pop_from_PQ() {
-    boost::optional<Edge_handle> edge = heap_PQ_->extract_top();
-    if (edge)
+    boost::optional<Edge_handle> edge;
+    if (!heap_PQ_->empty()) {
+      edge = heap_PQ_->top();
+      heap_PQ_->pop();
       get_data(*edge).reset_PQ_handle();
+    }
     return edge;
   }
 

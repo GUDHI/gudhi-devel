@@ -28,7 +28,7 @@ cdef extern from "Rips_complex_interface.h" namespace "Gudhi":
         void init_matrix(vector[vector[double]] values, double threshold) nogil
         void init_points_sparse(vector[vector[double]] values, double threshold, double sparse) nogil
         void init_matrix_sparse(vector[vector[double]] values, double threshold, double sparse) nogil
-        void create_simplex_tree(Simplex_tree_interface_full_featured* simplex_tree, int dim_max) nogil except +
+        void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, int dim_max) nogil except +
 
 # RipsComplex python interface
 cdef class RipsComplex:
@@ -92,5 +92,5 @@ cdef class RipsComplex:
         cdef intptr_t stree_int_ptr=stree.thisptr
         cdef int maxdim = max_dimension
         with nogil:
-            self.thisref.create_simplex_tree(<Simplex_tree_interface_full_featured*>stree_int_ptr, maxdim)
+            self.thisref.create_simplex_tree(<Simplex_tree_python_interface*>stree_int_ptr, maxdim)
         return stree

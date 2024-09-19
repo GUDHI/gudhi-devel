@@ -41,13 +41,13 @@ cdef class SimplexTree:
     This class is a filtered, with keys, and non contiguous vertices version
     of the simplex tree.
     """
-    # unfortunately 'cdef public Simplex_tree_interface_full_featured* thisptr' is not possible
+    # unfortunately 'cdef public Simplex_tree_python_interface* thisptr' is not possible
     # Use intptr_t instead to cast the pointer
     cdef public intptr_t thisptr
 
     # Get the pointer casted as it should be
-    cdef Simplex_tree_interface_full_featured* get_ptr(self) nogil:
-        return <Simplex_tree_interface_full_featured*>(self.thisptr)
+    cdef Simplex_tree_python_interface* get_ptr(self) nogil:
+        return <Simplex_tree_python_interface*>(self.thisptr)
 
     cdef Simplex_tree_persistence_interface * pcohptr
 
@@ -74,10 +74,10 @@ cdef class SimplexTree:
             else:
                 raise TypeError("`other` argument requires to be of type `SimplexTree`, or `None`.")
         else:
-            self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
+            self.thisptr = <intptr_t>(new Simplex_tree_python_interface())
 
     def __dealloc__(self):
-        cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
+        cdef Simplex_tree_python_interface* ptr = self.get_ptr()
         if ptr != NULL:
             del ptr
         if self.pcohptr != NULL:
@@ -801,14 +801,11 @@ cdef class SimplexTree:
         :param nb_iterations: The number of edge collapse iterations to perform. Default is 1.
         :type nb_iterations: int
         """
-        # Backup old pointer
-        cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
+        if nb_iterations < 1:
+            return
         cdef int nb_iter = nb_iterations
         with nogil:
-            # New pointer is a new collapsed simplex tree
-            self.thisptr = <intptr_t>(ptr.collapse_edges(nb_iter))
-            # Delete old pointer
-            del ptr
+            self.get_ptr().collapse_edges(nb_iter)
 
     def __eq__(self, other:SimplexTree):
         """:returns: True if the 2 complexes have the same simplices with the same filtration values, False otherwise.
@@ -840,14 +837,12 @@ cdef class SimplexTree:
         cdef char[:] buffer = state
         cdef size_t buffer_size = state.shape[0]
         cdef char* buffer_start = &buffer[0]
-        # Delete pointer, just in case, as deserialization requires an empty SimplexTree
-        cdef Simplex_tree_interface_full_featured* ptr = self.get_ptr()
-        del ptr
-        self.thisptr = <intptr_t>(new Simplex_tree_interface_full_featured())
         with nogil:
+            # deserialization requires an empty SimplexTree
+            self.get_ptr().clear()
             # New pointer is a deserialized simplex tree
             self.get_ptr().deserialize(buffer_start, buffer_size)
 
 
 cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
-    return <intptr_t>(new Simplex_tree_interface_full_featured(dereference(stree.get_ptr())))
+    return <intptr_t>(new Simplex_tree_python_interface(dereference(stree.get_ptr())))

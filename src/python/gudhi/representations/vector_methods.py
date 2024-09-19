@@ -10,10 +10,13 @@
 #   - 2021/11 Vincent Rouvreau: factorize _automatic_sample_range
 
 import numpy as np
+from scipy.spatial.distance import cdist
 from sklearn.base          import BaseEstimator, TransformerMixin
 from sklearn.exceptions    import NotFittedError
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.metrics       import pairwise
+from sklearn.cluster import KMeans
+
 try:
     # New location since 1.0
     from sklearn.metrics     import DistanceMetric
@@ -126,8 +129,9 @@ def _automatic_sample_range(sample_range, X):
                 [Mx,My] = [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
                 return np.where(nan_in_range, np.array([mx, My]), sample_range)
             except ValueError:
-                # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
-                pass
+                b = np.nanmax([sample_range[0], sample_range[1], -np.inf])
+                print(f"Empty list or empty diagrams: sample range is [{b}, {b}]")
+                return np.array([b, b])
         return sample_range
 
 
@@ -146,7 +150,11 @@ def _grid_from_sample_range(self, X):
     if not self.keep_endpoints:
         self.new_resolution_ += self.nan_in_range_.sum()
     self.sample_range_fixed_ = _automatic_sample_range(sample_range, X)
-    self.grid_ = np.linspace(self.sample_range_fixed_[0], self.sample_range_fixed_[1], self.new_resolution_)
+    if self.sample_range_fixed_[0] != self.sample_range_fixed_[1]:
+        self.grid_ = np.linspace(self.sample_range_fixed_[0], self.sample_range_fixed_[1], self.new_resolution_)
+    else:
+        print('First value and second value in range are the same: grid is made of resolution copies of this value')
+        self.grid_ = np.full(shape=[self.new_resolution_], fill_value=self.sample_range_fixed_[0])
     if not self.keep_endpoints:
         self.grid_ = _trim_endpoints(self.grid_, self.nan_in_range_)
 
@@ -355,8 +363,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
         if self.predefined_grid is None:
             if self.resolution is None: # Flexible/exact version
-                events = np.unique(np.concatenate([pd.ravel() for pd in X] + [[-np.inf]], axis=0))
-                self.grid_ = np.array(events)
+                self.grid_ = np.unique(np.concatenate([pd.ravel() for pd in X] + [[-np.inf]], axis=0)) 
             else:
                 _grid_from_sample_range(self, X)
         else:
@@ -378,43 +385,14 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         if not self.is_fitted():
             raise NotFittedError("Not fitted.")
 
-        if not X:
-            X = [np.zeros((0, 2))]
-        
         N = len(X)
 
-        events = np.concatenate([pd.ravel(order="F") for pd in X], axis=0)
-        sorting = np.argsort(events)
-        offsets = np.zeros(1 + N, dtype=int)
-        for i in range(0, N):
-            offsets[i+1] = offsets[i] + 2*X[i].shape[0]
-        starts = offsets[0:N]
-        ends = offsets[1:N + 1] - 1
+        if N == 0:
 
-        bettis = [[0] for i in range(0, N)]
-
-        i = 0
-        for x in self.grid_:
-            while i < len(sorting) and events[sorting[i]] <= x:
-                j = np.searchsorted(ends, sorting[i])
-                delta = 1 if sorting[i] - starts[j] < len(X[j]) else -1
-                bettis[j][-1] += delta
-                i += 1
-            for k in range(0, N):
-                bettis[k].append(bettis[k][-1])
-
-        return np.array(bettis, dtype=int)[:, 0:-1]
-
-    def fit_transform(self, X):
-        """
-        The result is the same as fit(X) followed by transform(X), but potentially faster.
-        """
-
-        if self.predefined_grid is None and self.resolution is None:
-            if not X:
-                X = [np.zeros((0, 2))]
-
-            N = len(X)
+            print("Empty list: output has shape [0, len(grid)]")
+            return np.zeros((N, len(self.grid_)))
+            
+        else:
 
             events = np.concatenate([pd.ravel(order="F") for pd in X], axis=0)
             sorting = np.argsort(events)
@@ -424,26 +402,65 @@ class BettiCurve(BaseEstimator, TransformerMixin):
             starts = offsets[0:N]
             ends = offsets[1:N + 1] - 1
 
-            xs = [-np.inf]
             bettis = [[0] for i in range(0, N)]
 
-            for i in sorting:
-                j = np.searchsorted(ends, i)
-                delta = 1 if i - starts[j] < len(X[j]) else -1
-                if events[i] == xs[-1]:
+            i = 0
+            for x in self.grid_:
+                while i < len(sorting) and events[sorting[i]] <= x:
+                    j = np.searchsorted(ends, sorting[i])
+                    delta = 1 if sorting[i] - starts[j] < len(X[j]) else -1
                     bettis[j][-1] += delta
-                else:
-                    xs.append(events[i])
-                    for k in range(0, j):
-                        bettis[k].append(bettis[k][-1])
-                    bettis[j].append(bettis[j][-1] + delta)
-                    for k in range(j+1, N):
-                        bettis[k].append(bettis[k][-1])
+                    i += 1
+                for k in range(0, N):
+                    bettis[k].append(bettis[k][-1])
+    
+            return np.array(bettis, dtype=int)[:, 0:-1]
 
-            self.grid_ = np.array(xs)
-            return np.array(bettis, dtype=int)
+    def fit_transform(self, X, y = None):
+        """
+        The result is the same as fit(X) followed by transform(X), but potentially faster.
+        """
+
+        if self.predefined_grid is None and self.resolution is None:
+
+            N = len(X)
+
+            if sum([len(x) for x in X]) == 0:
+                print("Empty list or empty diagrams: evaluation grid only contains -infinity and output contains only zeros")
+                self.grid_ = np.array([-np.inf])
+                return np.zeros((N, 1))
+
+            else:
+
+                events = np.concatenate([pd.ravel(order="F") for pd in X], axis=0)
+                sorting = np.argsort(events)
+                offsets = np.zeros(1 + N, dtype=int)
+                for i in range(0, N):
+                    offsets[i+1] = offsets[i] + 2*X[i].shape[0]
+                starts = offsets[0:N]
+                ends = offsets[1:N + 1] - 1
+
+                xs = [-np.inf]
+                bettis = [[0] for i in range(0, N)]
+
+                for i in sorting:
+                    j = np.searchsorted(ends, i)
+                    delta = 1 if i - starts[j] < len(X[j]) else -1
+                    if events[i] == xs[-1]:
+                        bettis[j][-1] += delta
+                    else:
+                        xs.append(events[i])
+                        for k in range(0, j):
+                            bettis[k].append(bettis[k][-1])
+                        bettis[j].append(bettis[j][-1] + delta)
+                        for k in range(j+1, N):
+                            bettis[k].append(bettis[k][-1])
+
+                self.grid_ = np.array(xs)
+                return np.array(bettis, dtype=int)
 
         else:
+
             return self.fit(X).transform(X)
 
     def __call__(self, diag):
@@ -486,7 +503,10 @@ class Entropy(BaseEstimator, TransformerMixin):
         """
         if self.mode == "vector":
             _grid_from_sample_range(self, X)
-            self.step_ = self.grid_[1] - self.grid_[0]
+            if self.sample_range_fixed_[0] != self.sample_range_fixed_[1]:
+                self.step_ = self.grid_[1] - self.grid_[0]
+            else:
+                self.step_ = 0.
         return self
 
     def transform(self, X):
@@ -681,16 +701,19 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
         return self.transform([diag])[0,:]
 
 def _lapl_contrast(measure, centers, inertias):
-    """contrast function for vectorising `measure` in ATOL"""
-    return np.exp(-pairwise.pairwise_distances(measure, Y=centers) / inertias)
+    """contrast function for vectorising `measure` in ATOL
+    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise"""
+    return np.exp(-cdist(XA=measure, XB=centers) / inertias)
 
 def _gaus_contrast(measure, centers, inertias):
-    """contrast function for vectorising `measure` in ATOL"""
-    return np.exp(-pairwise.pairwise_distances(measure, Y=centers, squared=True) / inertias**2)
+    """contrast function for vectorising `measure` in ATOL
+    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise"""
+    return np.exp(-cdist(XA=measure, XB=centers, metric="sqeuclidean") / inertias**2)
 
 def _indicator_contrast(diags, centers, inertias):
-    """contrast function for vectorising `measure` in ATOL"""
-    robe_curve = np.clip(2-pairwise.pairwise_distances(diags, Y=centers)/inertias, 0, 1)
+    """contrast function for vectorising `measure` in ATOL
+    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise"""
+    robe_curve = np.clip(2-cdist(XA=diags, XB=centers)/inertias, 0, 1)
     return robe_curve
 
 def _cloud_weighting(measure):
@@ -715,7 +738,7 @@ class Atol(BaseEstimator, TransformerMixin):
     >>> a = np.array([[1, 2, 4], [1, 4, 0], [1, 0, 4]])
     >>> b = np.array([[4, 2, 0], [4, 4, 0], [4, 0, 2]])
     >>> c = np.array([[3, 2, -1], [1, 2, -1]])
-    >>> atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006))
+    >>> atol_vectoriser = Atol(quantiser=KMeans(n_clusters=2, random_state=202006, n_init=10))
     >>> atol_vectoriser.fit(X=[a, b, c]).centers
     array([[ 2.6       ,  2.8       , -0.4       ],
            [ 2.        ,  0.66666667,  3.33333333]])
@@ -729,13 +752,20 @@ class Atol(BaseEstimator, TransformerMixin):
            [1.25157463, 0.02062512]])
     """
     # Note the example above must be up to date with the one in tests called test_atol_doc
-    def __init__(self, quantiser, weighting_method="cloud", contrast="gaussian"):
+    def __init__(
+            self,
+            quantiser=KMeans(n_clusters=2, n_init="auto"),
+            weighting_method="cloud",
+            contrast="gaussian",
+    ):
         """
         Constructor for the Atol measure vectorisation class.
 
         Parameters:
             quantiser (Object): Object with `fit` (sklearn API consistent) and `cluster_centers` and `n_clusters`
-                attributes, e.g. sklearn.cluster.KMeans. It will be fitted when the Atol object function `fit` is called.
+                attributes, e.g. `sklearn.cluster.KMeans`. It will be fitted when the Atol object function `fit` is
+                called. Users are encouraged to provide their own quantiser, and in particular increase the number
+                of clusters.
             weighting_method (string): constant generic function for weighting the measure points
                 choose from {"cloud", "iidproba"}
                 (default: constant function, i.e. the measure is seen as a point cloud by default).
@@ -745,19 +775,27 @@ class Atol(BaseEstimator, TransformerMixin):
                 (default: gaussian contrast function, see page 3 in the ATOL paper).
         """
         self.quantiser = quantiser
-        self.contrast = {
+        self.contrast = contrast
+        self.weighting_method = weighting_method
+        self._running_transform_names = ""
+
+    def get_contrast(self):
+        return {
             "gaussian": _gaus_contrast,
             "laplacian": _lapl_contrast,
             "indicator": _indicator_contrast,
-        }.get(contrast, _gaus_contrast)
-        self.weighting_method = {
+        }.get(self.contrast, _gaus_contrast)
+
+    def get_weighting_method(self):
+        return {
             "cloud"   : _cloud_weighting,
             "iidproba": _iidproba_weighting,
-        }.get(weighting_method, _cloud_weighting)
+        }.get(self.weighting_method, _cloud_weighting)
 
     def fit(self, X, y=None, sample_weight=None):
         """
-        Calibration step: fit centers to the sample measures and derive inertias between centers.
+        Calibration step: fit centers to the target sample measures and derive inertias between centers. If the target
+        does not contain enough points for creating the intended number of centers, we fill in with bogus centers.
 
         Parameters:
             X (list N x d numpy arrays): input measures in R^d from which to learn center locations and inertias
@@ -769,24 +807,48 @@ class Atol(BaseEstimator, TransformerMixin):
         Returns:
             self
         """
-        if not hasattr(self.quantiser, 'fit'):
-            raise TypeError("quantiser %s has no `fit` attribute." % (self.quantiser))
-        if sample_weight is None:
-            sample_weight = np.concatenate([self.weighting_method(measure) for measure in X])
+        n_clusters = self.quantiser.n_clusters
 
+        if not len(X):
+            raise ValueError("Cannot fit Atol on empty target.")
         measures_concat = np.concatenate(X)
-        self.quantiser.fit(X=measures_concat, sample_weight=sample_weight)
+        if sample_weight is None:
+            sample_weight = [self.get_weighting_method()(measure) for measure in X]
+        weights_concat = np.concatenate(sample_weight)
+
+        # In fitting we remove infinite birth/death time points so that every center is finite. We do not care about duplicates.
+        filtered_measures_concat = measures_concat[~np.isinf(measures_concat).any(axis=1), :] if len(measures_concat) else measures_concat
+        filtered_weights_concat = weights_concat[~np.isinf(measures_concat).any(axis=1)] if len(measures_concat) else weights_concat
+
+        n_points = len(filtered_measures_concat)
+        if not n_points:
+            raise ValueError("Cannot fit Atol on measure with infinite components only.")
+        if n_points < n_clusters:
+            self.quantiser.n_clusters = n_points
+
+        self.quantiser.fit(X=filtered_measures_concat, sample_weight=filtered_weights_concat)
         self.centers = self.quantiser.cluster_centers_
+
         # Hack, but some people are unhappy if the order depends on the version of sklearn
         self.centers = self.centers[np.lexsort(self.centers.T)]
         if self.quantiser.n_clusters == 1:
-            dist_centers = pairwise.pairwise_distances(measures_concat)
+            dist_centers = pairwise.pairwise_distances(filtered_measures_concat)
             np.fill_diagonal(dist_centers, 0)
-            self.inertias = np.array([np.max(dist_centers)/2])
+            best_inertia = np.max(dist_centers)/2 if np.max(dist_centers)/2 > 0 else 1
+            self.inertias = np.array([best_inertia])
         else:
             dist_centers = pairwise.pairwise_distances(self.centers)
             dist_centers[dist_centers == 0] = np.inf
             self.inertias = np.min(dist_centers, axis=0)/2
+
+        if n_points < n_clusters:
+            # There weren't enough points to fit n_clusters, so we arbitrarily put centers as [-np.inf]^measure_dim.
+            print(f"[Atol] after filtering had only {n_points=} to fit {n_clusters=}, adding meaningless centers.")
+            fill_center = np.repeat(np.inf, repeats=X[0].shape[1])
+            fill_inertia = 0
+            self.centers = np.concatenate([self.centers, np.repeat([fill_center], repeats=n_clusters-n_points, axis=0)])
+            self.inertias = np.concatenate([self.inertias, np.repeat(fill_inertia, repeats=n_clusters-n_points)])
+            self.quantiser.n_clusters = n_clusters
         return self
 
     def __call__(self, measure, sample_weight=None):
@@ -800,8 +862,8 @@ class Atol(BaseEstimator, TransformerMixin):
             numpy array in R^self.quantiser.n_clusters.
         """
         if sample_weight is None:
-            sample_weight = self.weighting_method(measure)
-        return np.sum(sample_weight * self.contrast(measure, self.centers, self.inertias.T).T, axis=1)
+            sample_weight = self.get_weighting_method()(measure)
+        return np.sum(sample_weight * self.get_contrast()(measure, self.centers, self.inertias.T).T, axis=1)
 
     def transform(self, X, sample_weight=None):
         """
@@ -817,5 +879,9 @@ class Atol(BaseEstimator, TransformerMixin):
             numpy array with shape (number of measures) x (self.quantiser.n_clusters).
         """
         if sample_weight is None:
-            sample_weight = [self.weighting_method(measure) for measure in X]
+            sample_weight = [self.get_weighting_method()(measure) for measure in X]
+        self._running_transform_names = [f"Atol Center {i + 1}" for i in range(self.quantiser.n_clusters)]
         return np.stack([self(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])
+
+    def get_feature_names_out(self):
+        return self._running_transform_names

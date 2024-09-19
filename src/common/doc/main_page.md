@@ -6,7 +6,7 @@
 
 ## Data structures for cell complexes {#Complexes}
 ### Cubical complexes
- 
+
 <table>
   <tr>
     <td width="35%" rowspan=2>
@@ -19,14 +19,14 @@
     <td width="15%">
       <b>Author:</b> Pawel Dlotko<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
-      <b>Copyright:</b> MIT<br>
+      <b>License:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref cubical_complex
+      <b>User manual:</b> \ref cubical_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Simplicial complexes
@@ -39,20 +39,20 @@
     </td>
     <td width="50%">
     The simplex tree is an efficient and flexible
- data structure for representing general (filtered) simplicial complexes. The data structure
- is described in \cite boissonnatmariasimplextreealgorithmica .
+    data structure for representing general (filtered) simplicial complexes. The data structure
+    is described in \cite boissonnatmariasimplextreealgorithmica .
     </td>
     <td width="15%">
       <b>Author:</b> Cl&eacute;ment Maria<br>
       <b>Introduced in:</b> GUDHI 1.0.0<br>
-      <b>Copyright:</b> MIT<br>
+      <b>License:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref simplex_tree
+      <b>User manual:</b> \ref simplex_tree
     </td>
- </tr>
+  </tr>
 </table>
 
 #### Toplex Map
@@ -70,14 +70,14 @@
     <td width="15%">
       <b>Author:</b> Fran&ccedil;ois Godi<br>
       <b>Introduced in:</b> GUDHI 2.1.0<br>
-      <b>Copyright:</b> MIT<br>
+      <b>License:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref toplex_map
+      <b>User manual:</b> \ref toplex_map
     </td>
- </tr>
+  </tr>
 </table>
 
 #### Skeleton blocker
@@ -98,14 +98,14 @@
     <td width="15%">
       <b>Author:</b> David Salinas<br>
       <b>Introduced in:</b> GUDHI 1.1.0<br>
-      <b>Copyright:</b> MIT<br>
+      <b>License:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref skbl
+      <b>User manual:</b> \ref skbl
     </td>
- </tr>
+  </tr>
 </table>
 
 #### Basic operation: contraction
@@ -124,19 +124,19 @@
     <td width="15%">
       <b>Author:</b> David Salinas<br>
       <b>Introduced in:</b> GUDHI 1.1.0<br>
-      <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal &ge; 4.11.0
+      <b>License:</b> MIT [(LGPL v3)](../../licensing/)<br>
+      <b>Requires:</b> \ref cgal
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref contr
+      <b>User manual:</b> \ref contr
     </td>
- </tr>
+  </tr>
 </table>
 
 ## Filtrations
-### Alpha complex
+### Alpha complex and Delaunay
 
 <table>
   <tr>
@@ -144,51 +144,49 @@
       \image html "alpha_complex_representation.png"
     </td>
     <td width="50%">
-    Alpha complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.<br>
-    The filtration value of each simplex is computed as the square of the circumradius of the simplex if the
-    circumsphere is empty (the simplex is then said to be Gabriel), and as the minimum of the filtration
-    values of the codimension 1 cofaces that make it not Gabriel otherwise.
-    All simplices that have a filtration value \f$ > \alpha^2 \f$ are removed from the Delaunay complex
-    when creating the simplicial complex if it is specified.<br>
-    For performances reasons, it is advised to use \ref cgal &ge; 5.0.0.
+    The alpha-complex is a filtration of the finite cells of a Delaunay Triangulation which is topologically
+    equivalent to the Čech.
+    The filtration value of each simplex is computed as the squared radius of the smallest Delaunay ball
+    of this simplex.<br>
+    Also provided are the (unfiltered) Delaunay triangulation, and the *incremental* Delaunay triangulation.
     </td>
     <td width="15%">
-      <b>Author:</b> Vincent Rouvreau<br>
+      <b>Authors:</b> Vincent Rouvreau, Michael Kerber, Marc Glisse<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+      <b>License:</b> MIT [(GPL v3)](../../licensing/), GPL v3 (only for incremental Delaunay)<br>
+      <b>Requires:</b> \ref eigen and \ref cgal
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref alpha_complex
+      <b>User manual:</b> \ref alpha_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Čech complex
 
 <table>
- <tr>
+  <tr>
     <td width="35%" rowspan=2>
       \image html "cech_complex_representation.png"
     </td>
     <td width="50%">
-    The Čech complex is a simplicial complex constructed from a proximity graph.
+    The Čech complex is a filtered simplicial complex defined as the nerve of a union of balls.
     The set of all simplices is filtered by the radius of their minimal enclosing ball.
     </td>
     <td width="15%">
       <b>Author:</b> Vincent Rouvreau, Hind Montassif<br>
       <b>Introduced in:</b> GUDHI 2.2.0<br>
-      <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
+      <b>License:</b> MIT [(LGPL v3)](../../licensing/)<br>
       <b>Requires:</b> \ref cgal
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref cech_complex
+      <b>User manual:</b> \ref cech_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Rips complex
@@ -199,22 +197,21 @@
       \image html "rips_complex_representation.png"
     </td>
     <td width="50%">
-    Rips complex is a simplicial complex constructed from a one skeleton graph.<br>
-    The filtration value of each edge is computed from a user-given distance function and is inserted until a
-    user-given threshold value.<br>
+    The (Vietoris-)Rips complex is a filtered simplicial complex where every tuple of points appears with its diameter
+    as filtration value. Alternatively, it is defined by the cliques of a graph, usually representing a metric.<br>
     This complex can be built from a point cloud and a distance function, or from a distance matrix.
     </td>
     <td width="15%">
       <b>Author:</b> Cl&eacute;ment Maria, Pawel Dlotko, Vincent Rouvreau, Marc Glisse<br>
       <b>Introduced in:</b> GUDHI 2.0.0<br>
-      <b>Copyright:</b> MIT<br>
+      <b>License:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref rips_complex
+      <b>User manual:</b> \ref rips_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Edge collapse
@@ -236,14 +233,14 @@
     <td width="15%">
       <b>Author:</b> Siddharth Pritam, Marc Glisse<br>
       <b>Introduced in:</b> GUDHI 3.3.0<br>
-      <b>Copyright:</b> MIT
+      <b>License:</b> MIT
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref edge_collapse
+      <b>User manual:</b> \ref edge_collapse
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Witness complex
@@ -260,15 +257,15 @@
     <td width="15%">
       <b>Author:</b> Siargey Kachanovich<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
-      <b>Copyright:</b> MIT ([GPL v3](../../licensing/) for Euclidean version)<br>
-      <b>Euclidean version requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+      <b>License:</b> MIT ([GPL v3](../../licensing/) for Euclidean version)<br>
+      <b>Euclidean version requires:</b> \ref eigen and \ref cgal
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref witness_complex
+      <b>User manual:</b> \ref witness_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Cover Complexes
@@ -286,15 +283,15 @@
     <td width="15%">
       <b>Author:</b> Mathieu Carri&egrave;re<br>
       <b>Introduced in:</b> GUDHI 2.1.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal &ge; 4.11.0
+      <b>License:</b> MIT [(GPL v3)](../../licensing/)<br>
+      <b>Requires:</b> \ref cgal
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref cover_complex
+      <b>User manual:</b> \ref cover_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ## Manifold reconstructions
@@ -312,15 +309,15 @@
     <td width="15%">
       <b>Author:</b> Siargey Kachanovich<br>
       <b>Introduced in:</b> GUDHI 3.4.0<br>
-      <b>Copyright:</b> MIT [(LGPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref eigen &ge; 3.1.0
+      <b>License:</b> MIT [(LGPL v3)](../../licensing/)<br>
+      <b>Requires:</b> \ref eigen
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
     <b>User manual:</b> \ref coxeter_triangulation
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Tangential complex
@@ -340,15 +337,15 @@
     <td width="15%">
       <b>Author:</b> Cl&eacute;ment Jamin<br>
       <b>Introduced in:</b> GUDHI 2.0.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref eigen &ge; 3.1.0 and \ref cgal &ge; 4.11.0
+      <b>License:</b> MIT [(GPL v3)](../../licensing/)<br>
+      <b>Requires:</b> \ref eigen and \ref cgal
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref tangential_complex
+      <b>User manual:</b> \ref tangential_complex
     </td>
- </tr>
+  </tr>
 </table>
 
 ## Topological descriptors computation {#TopologicalDescriptorsComputation}
@@ -358,7 +355,7 @@
 <table>
   <tr>
     <td width="35%" rowspan=2>
-      \image html "3DTorus_poch.png"
+      \image html "plain_homology.png"
     </td>
     <td width="50%">
     The theory of homology consists in attaching to a topological space a sequence of (homology) groups, capturing
@@ -373,14 +370,43 @@
     <td width="15%">
       <b>Author:</b> Cl&eacute;ment Maria<br>
       <b>Introduced in:</b> GUDHI 1.0.0<br>
+      <b>License:</b> MIT<br>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2 height="25">
+      <b>User manual:</b> \ref persistent_cohomology
+    </td>
+  </tr>
+</table>
+
+### Persistence Matrix
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "persistence_matrix.png"
+    </td>
+    <td width="50%">
+    Matrix structure for filtered complexes with multiple functionnalities related to persistence homology,
+    such as representative cycles computation or vineyards.
+    <dl class="section note">
+      <dt>Note</dt>
+      <dd>Matrix API is in a beta version and may change in incompatible ways in the near future.</dd>
+    </dl>
+
+    </td>
+    <td width="15%">
+      <b>Author:</b> Hannah Schreiber<br>
+      <b>Introduced in:</b> GUDHI 3.10.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref persistent_cohomology
+      <b>User manual:</b> \ref persistence_matrix and \ref persistence_fields
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Zigzag Persistent Homology
@@ -428,15 +454,15 @@
     <td width="15%">
       <b>Author:</b> Fran&ccedil;ois Godi<br>
       <b>Introduced in:</b> GUDHI 2.0.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
-      <b>Requires:</b> \ref cgal &ge; 4.11.0
+      <b>License:</b> MIT [(GPL v3)](../../licensing/)<br>
+      <b>Requires:</b> \ref cgal
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref bottleneck_distance
+      <b>User manual:</b> \ref bottleneck_distance
     </td>
- </tr>
+  </tr>
 </table>
 
 ### Persistence representations
@@ -454,14 +480,14 @@
     <td width="15%">
       <b>Author:</b> Pawel Dlotko<br>
       <b>Introduced in:</b> GUDHI 2.1.0<br>
-      <b>Copyright:</b> MIT<br>      
+      <b>License:</b> MIT<br>      
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>User manual:</b> \ref Persistence_representations
+      <b>User manual:</b> \ref Persistence_representations
     </td>
- </tr>
+  </tr>
 </table>
 
 ## Point cloud utilities {#PointCloudUtils}
@@ -477,12 +503,12 @@
     <td width="15%">
       <b>Author:</b>Clément Jamin, Siargey Kachanovich, Marc Glisse<br>
       <b>Introduced in:</b> GUDHI 1.3.0<br>
-      <b>Copyright:</b> MIT [(GPL v3)](../../licensing/)<br>
+      <b>License:</b> MIT [(GPL v3)](../../licensing/)<br>
     </td>
- </tr>
- <tr>
+  </tr>
+  <tr>
     <td colspan=2 height="25">
-    <b>Manuals:</b> \ref spatial_searching, \ref subsampling
+      <b>Manuals:</b> \ref spatial_searching, \ref subsampling
     </td>
- </tr>
+  </tr>
 </table>

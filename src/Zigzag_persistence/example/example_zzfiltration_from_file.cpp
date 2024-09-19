@@ -10,37 +10,22 @@
 
 #include <iostream>
 #include <ostream>
+#include <fstream>
 #include <string>
 
-#include <gudhi/Zigzag_persistence.h>
-#include <gudhi/Simplex_tree.h>
+#include <gudhi/filtered_zigzag_persistence.h>
 
-using ST = Gudhi::Simplex_tree<Gudhi::Simplex_tree_options_zigzag_persistence>;
-using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<ST>;
-using Vertex_handle = ST::Vertex_handle;
-using Filtration_value = ST::Filtration_value;
-using interval_filtration = ZP::filtration_value_interval;
+using ZP = Gudhi::zigzag_persistence::Filtered_zigzag_persistence<>;
+using ID_handle = ZP::Face_key;
+using Filtration_value = ZP::Filtration_value;
+using Dimension = ZP::Dimension;
 
 enum lineType : int { INCLUSION, REMOVAL, COMMENT };
 
-void print_barcode(ZP& zp) {
-  std::clog << std::endl << "Current barcode:" << std::endl;
-  for (auto& bar : zp.get_persistence_diagram(0, true)) {
-    std::clog << std::floor(bar.birth()) << " - ";
-    if (bar.death() == std::numeric_limits<Filtration_value>::infinity()) {
-      std::clog << "inf";
-    } else {
-      std::clog << std::floor(bar.death());
-    }
-    std::clog << " (" << bar.dim() << ")" << std::endl;
-  }
-  std::clog << std::endl;
-}
-
-lineType read_operation(std::string& line, std::vector<Vertex_handle>& vertices, double& timestamp) {
+lineType read_operation(std::string& line, std::vector<ID_handle>& faces, double& timestamp) {
   lineType type;
-  vertices.clear();
-  Vertex_handle num;
+  faces.clear();
+  ID_handle num;
 
   size_t current = line.find_first_not_of(' ', 0);
   if (current == std::string::npos) return COMMENT;
@@ -52,34 +37,30 @@ lineType read_operation(std::string& line, std::vector<Vertex_handle>& vertices,
   else if (line[current] == '#')
     return COMMENT;
   else {
-    std::clog << "Syntaxe error in file." << std::endl;
+    std::clog << "(1) Syntaxe error in file." << std::endl;
     exit(0);
   }
 
   current = line.find_first_not_of(' ', current + 1);
   if (current == std::string::npos) {
-    std::clog << "Syntaxe error in file." << std::endl;
+    std::clog << "(2) Syntaxe error in file." << std::endl;
     exit(0);
   }
   size_t next = line.find_first_of(' ', current);
   timestamp = std::stod(line.substr(current, next - current));
 
   current = line.find_first_not_of(' ', next);
-  if (current == std::string::npos) {
-    std::clog << "Syntaxe error in file." << std::endl;
-    exit(0);
-  }
-
-  do {
+  while (current != std::string::npos) {
     next = line.find_first_of(' ', current);
     num = std::stoi(line.substr(current, next - current));
-    vertices.push_back(num);
+    faces.push_back(num);
     current = line.find_first_not_of(' ', next);
-  } while (current != std::string::npos);
+  }
 
   return type;
 }
 
+//example of input file: example/zigzag_filtration_example.txt
 int main(int argc, char* const argv[]) {
   if (argc != 2) {
     if (argc < 2)
@@ -91,40 +72,54 @@ int main(int argc, char* const argv[]) {
 
   std::string line;
   std::ifstream file(argv[1]);
-  ZP zp;
+
+  //std::cout could be replaced by any other output stream
+  ZP zp([](Dimension dim, Filtration_value birth, Filtration_value death) {
+    std::cout << "[" << dim << "] ";
+    std::cout << birth << " - " << death;
+    std::cout << std::endl;
+  });
 
   if (file.is_open()) {
-    std::vector<Vertex_handle> vertices;
+    std::vector<ID_handle> data;
+    unsigned int id = 0;
     double timestamp;
     lineType type;
 
-    while (getline(file, line, '\n') && read_operation(line, vertices, timestamp) == COMMENT);
+    while (getline(file, line, '\n') && read_operation(line, data, timestamp) == COMMENT);
     double lastTimestamp = timestamp;
     // first operation has to be an insertion.
-    zp.insert_simplex(vertices, timestamp);
-    std::cout << line << std::endl;
+    zp.insert_face(id, data, 0, timestamp);
 
     while (getline(file, line, '\n')) {
-      type = read_operation(line, vertices, timestamp);
+      type = read_operation(line, data, timestamp);
       if (type != COMMENT && lastTimestamp != timestamp) {
-        print_barcode(zp);
         lastTimestamp = timestamp;
       }
-      if (type != COMMENT) std::cout << line << std::endl;
 
       if (type == INCLUSION) {
-        zp.insert_simplex(vertices, timestamp);
+        ++id;
+        int dim = data.size() == 0 ? 0 : data.size() - 1;
+        zp.insert_face(id, data, dim, timestamp);
       } else if (type == REMOVAL) {
-        zp.remove_simplex(vertices, timestamp);
+        ++id;
+        zp.remove_face(data[0], timestamp);
       }
     }
-    print_barcode(zp);
 
     file.close();
   } else {
     std::clog << "Unable to open input file." << std::endl;
     file.setstate(std::ios::failbit);
   }
+
+  //retrieve infinite bars remaining at the end
+  //again std::cout could be replaced by any other output stream
+  zp.get_current_infinite_intervals([](Dimension dim, Filtration_value birth) {
+    std::cout << "[" << dim << "] ";
+    std::cout << birth << " - inf";
+    std::cout << std::endl;
+  });
 
   return 0;
 }

@@ -16,3 +16,8 @@ data/points/human.off_sc.txt
 # IDE specific
 # CLion
 .idea/
+# VSCode
+.vscode
+
+# macOS metadata
+.DS_Store

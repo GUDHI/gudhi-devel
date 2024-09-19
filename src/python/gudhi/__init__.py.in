@@ -8,7 +8,6 @@
 #   - YYYY/MM Author: Description of the modification
 
 from importlib import import_module
-from sys import exc_info
 
 __author__ = "GUDHI Editorial Board"
 __copyright__ = "Copyright (C) 2016 Inria"

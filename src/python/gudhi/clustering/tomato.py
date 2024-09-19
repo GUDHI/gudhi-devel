@@ -66,6 +66,7 @@ class Tomato:
             graph_type (str): 'manual', 'knn' or 'radius'. Default is 'knn'.
             density_type (str): 'manual', 'DTM', 'logDTM', 'KDE' or 'logKDE'. When you have many points,
                 'KDE' and 'logKDE' tend to be slower. Default is 'logDTM'.
+                The values computed for 'DTM' or 'KDE' are not normalized (this does not affect the clustering).
             metric (str|Callable): metric used when calculating the distance between instances in a feature array.
                 Defaults to Minkowski of parameter p.
             kde_params (dict): if density_type is 'KDE' or 'logKDE', additional parameters passed directly to
@@ -82,9 +83,10 @@ class Tomato:
                 This can be useful with k-NN for small k. Defaults to false.
             p (float): norm L^p on input points. Defaults to 2.
             q (float): order used to compute the distance to measure. Defaults to dim.
-                Beware that when the dimension is large, this can easily cause overflows.
             dim (float): final exponent in DTM density estimation, representing the dimension. Defaults to the
                 dimension, or 2 when the dimension cannot be read from the input (metric is "precomputed").
+                Beware that when the dimension is large, this can easily cause overflows, see
+                :class:`~gudhi.point_cloud.dtm.DTMDensity` for details
             n_jobs (int): Number of jobs to schedule for parallel processing on the CPU.
                 If -1 is given all processors are used. Default: 1.
             params: extra parameters are passed to :class:`~gudhi.point_cloud.knn.KNearestNeighbors` and
@@ -223,6 +225,8 @@ class Tomato:
 
             weights = KernelDensity(**kde_params).fit(self.points_).score_samples(self.points_)
             if self.density_type_ == "KDE":
+                # First rescale to avoid computing exp(-1000)
+                weights -= numpy.max(weights)
                 weights = numpy.exp(weights)
 
         # TODO: do it at the C++ level and/or in parallel if this is too slow?
