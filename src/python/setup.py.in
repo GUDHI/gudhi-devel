@@ -17,7 +17,7 @@ import pybind11
 cython_modules = [@GUDHI_CYTHON_MODULES@]
 pybind11_modules = [@GUDHI_PYBIND11_MODULES@]
 
-source_dir='@CMAKE_CURRENT_SOURCE_DIR@/gudhi/'
+source_dir='gudhi/'
 extra_compile_args=[@GUDHI_PYTHON_EXTRA_COMPILE_ARGS@]
 extra_link_args=[@GUDHI_PYTHON_EXTRA_LINK_ARGS@]
 libraries=[@GUDHI_PYTHON_LIBRARIES@]
