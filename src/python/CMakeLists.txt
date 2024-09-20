@@ -63,7 +63,9 @@ function( add_gudhi_symbolic_links GLOBBING_EXPRESSION )
   endif()
   file(GLOB GUDHI_GLOB_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${GLOBBING_EXPRESSION})
   foreach(GUDHI_GLOB_FILENAME ${GUDHI_GLOB_FILES})
-    file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_GLOB_FILENAME}" "${CMAKE_CURRENT_BINARY_DIR}/${GUDHI_GLOB_FILENAME}" SYMBOLIC)
+    # COPY_ON_ERROR is activated because on windows, user needs to be root or in dev mode to be able to make symbolic links
+    # This case can be problematic, because if you modify the sources, build is still done on the copy
+    file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_GLOB_FILENAME}" "${CMAKE_CURRENT_BINARY_DIR}/${GUDHI_GLOB_FILENAME}" COPY_ON_ERROR SYMBOLIC)
   endforeach()
 endfunction( add_gudhi_symbolic_links )
 
