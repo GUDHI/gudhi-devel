@@ -401,7 +401,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
   const bool col2IsNeg = _is_negative_in_pair(columnIndex2);
 
   if (col1IsNeg && col2IsNeg) {
-    if (_matrix()->is_zero_cell(columnIndex2, _matrix()->get_pivot(columnIndex1))) {
+    if (_matrix()->is_zero_entry(columnIndex2, _matrix()->get_pivot(columnIndex1))) {
       if constexpr (Master_matrix::Option_list::has_column_pairings) {
         ID_index pivot1 = _matrix()->get_pivot(columnIndex1);
         ID_index pivot2 = _matrix()->get_pivot(columnIndex2);
@@ -415,7 +415,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
   }
 
   if (col1IsNeg) {
-    if (_matrix()->is_zero_cell(columnIndex2, _matrix()->get_pivot(columnIndex1))) {
+    if (_matrix()->is_zero_entry(columnIndex2, _matrix()->get_pivot(columnIndex1))) {
       if constexpr (Master_matrix::Option_list::has_column_pairings) {
         ID_index pivot1 = _matrix()->get_pivot(columnIndex1);
         ID_index pivot2 = _matrix()->get_pivot(columnIndex2);
@@ -429,7 +429,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
   }
 
   if (col2IsNeg) {
-    if (_matrix()->is_zero_cell(columnIndex2, _matrix()->get_pivot(columnIndex1))) {
+    if (_matrix()->is_zero_entry(columnIndex2, _matrix()->get_pivot(columnIndex1))) {
       if constexpr (Master_matrix::Option_list::has_column_pairings) {
         ID_index pivot1 = _matrix()->get_pivot(columnIndex1);
         ID_index pivot2 = _matrix()->get_pivot(columnIndex2);
@@ -442,7 +442,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
     return _positive_negative_vine_swap(columnIndex1, columnIndex2);
   }
 
-  if (_matrix()->is_zero_cell(columnIndex2, _matrix()->get_pivot(columnIndex1))) {
+  if (_matrix()->is_zero_entry(columnIndex2, _matrix()->get_pivot(columnIndex1))) {
     if constexpr (Master_matrix::Option_list::has_column_pairings) {
       ID_index pivot1 = _matrix()->get_pivot(columnIndex1);
       ID_index pivot2 = _matrix()->get_pivot(columnIndex2);

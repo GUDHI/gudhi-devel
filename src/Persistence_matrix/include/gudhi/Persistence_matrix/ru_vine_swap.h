@@ -201,7 +201,7 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(Pos_index in
   bool iiIsPositive = _matrix()->reducedMatrixR_.is_zero_column(index + 1);
 
   if (iIsPositive && iiIsPositive) {
-    _matrix()->mirrorMatrixU_.zero_cell(index, _get_row_id_from_position(index + 1));
+    _matrix()->mirrorMatrixU_.zero_entry(index, _get_row_id_from_position(index + 1));
     return _positive_vine_swap(index);
   } else if (!iIsPositive && !iiIsPositive) {
     return _negative_vine_swap(index);
@@ -228,14 +228,14 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap(Pos_index index)
       _swap_at_index(index);
       return true;
     }
-    if (!_matrix()->mirrorMatrixU_.is_zero_cell(index, _get_row_id_from_position(index + 1))) {
-      _matrix()->mirrorMatrixU_.zero_cell(index, _get_row_id_from_position(index + 1));
+    if (!_matrix()->mirrorMatrixU_.is_zero_entry(index, _get_row_id_from_position(index + 1))) {
+      _matrix()->mirrorMatrixU_.zero_entry(index, _get_row_id_from_position(index + 1));
     }
     return _positive_vine_swap(index);
   } else if (!iIsPositive && !iiIsPositive) {
     if (_matrix()->reducedMatrixR_.get_column_dimension(index) !=
             _matrix()->reducedMatrixR_.get_column_dimension(index + 1) ||
-        _matrix()->mirrorMatrixU_.is_zero_cell(index, _get_row_id_from_position(index + 1))) {
+        _matrix()->mirrorMatrixU_.is_zero_entry(index, _get_row_id_from_position(index + 1))) {
       _negative_transpose(index);
       _swap_at_index(index);
       return true;
@@ -244,7 +244,7 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap(Pos_index index)
   } else if (iIsPositive && !iiIsPositive) {
     if (_matrix()->reducedMatrixR_.get_column_dimension(index) !=
             _matrix()->reducedMatrixR_.get_column_dimension(index + 1) ||
-        _matrix()->mirrorMatrixU_.is_zero_cell(index, _get_row_id_from_position(index + 1))) {
+        _matrix()->mirrorMatrixU_.is_zero_entry(index, _get_row_id_from_position(index + 1))) {
       _positive_negative_transpose(index);
       _swap_at_index(index);
       return true;
@@ -253,7 +253,7 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap(Pos_index index)
   } else {
     if (_matrix()->reducedMatrixR_.get_column_dimension(index) !=
             _matrix()->reducedMatrixR_.get_column_dimension(index + 1) ||
-        _matrix()->mirrorMatrixU_.is_zero_cell(index, _get_row_id_from_position(index + 1))) {
+        _matrix()->mirrorMatrixU_.is_zero_entry(index, _get_row_id_from_position(index + 1))) {
       _negative_positive_transpose(index);
       _swap_at_index(index);
       return true;
@@ -392,7 +392,7 @@ inline bool RU_vine_swap<Master_matrix>::_positive_vine_swap(Index columnIndex)
   const Pos_index iiDeath = _get_death(columnIndex + 1);
 
   if (iDeath != static_cast<Pos_index>(-1) && iiDeath != static_cast<Pos_index>(-1) &&
-      !(_matrix()->reducedMatrixR_.is_zero_cell(iiDeath, _get_row_id_from_position(columnIndex)))) {
+      !(_matrix()->reducedMatrixR_.is_zero_entry(iiDeath, _get_row_id_from_position(columnIndex)))) {
     if (iDeath < iiDeath) {
       _swap_at_index(columnIndex);
       _add_to(iDeath, iiDeath);
@@ -408,7 +408,7 @@ inline bool RU_vine_swap<Master_matrix>::_positive_vine_swap(Index columnIndex)
   _swap_at_index(columnIndex);
 
   if (iDeath != static_cast<Pos_index>(-1) || iiDeath == static_cast<Pos_index>(-1) ||
-      _matrix()->reducedMatrixR_.is_zero_cell(iiDeath, _get_row_id_from_position(columnIndex + 1))) {
+      _matrix()->reducedMatrixR_.is_zero_entry(iiDeath, _get_row_id_from_position(columnIndex + 1))) {
     _positive_transpose(columnIndex);
     return true;
   }
@@ -437,7 +437,7 @@ inline bool RU_vine_swap<Master_matrix>::_negative_vine_swap(Index columnIndex)
 template <class Master_matrix>
 inline bool RU_vine_swap<Master_matrix>::_positive_negative_vine_swap(Index columnIndex) 
 {
-  _matrix()->mirrorMatrixU_.zero_cell(columnIndex, _get_row_id_from_position(columnIndex + 1));
+  _matrix()->mirrorMatrixU_.zero_entry(columnIndex, _get_row_id_from_position(columnIndex + 1));
 
   _swap_at_index(columnIndex);
   _positive_negative_transpose(columnIndex);

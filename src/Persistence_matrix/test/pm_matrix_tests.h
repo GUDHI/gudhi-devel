@@ -395,8 +395,8 @@ void test_general_insertion() {
   columns.pop_back();
 
   Matrix m(columns, 5);
-  BOOST_CHECK(m.is_zero_cell(1, 0));
-  BOOST_CHECK(!m.is_zero_cell(3, 0));
+  BOOST_CHECK(m.is_zero_entry(1, 0));
+  BOOST_CHECK(!m.is_zero_entry(3, 0));
   BOOST_CHECK(m.is_zero_column(0));
   BOOST_CHECK(m.is_zero_column(1));
   BOOST_CHECK(m.is_zero_column(2));
@@ -412,8 +412,8 @@ void test_general_insertion() {
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 11);
   m.insert_column(col2);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 12);
-  BOOST_CHECK(m.is_zero_cell(1, 0));
-  BOOST_CHECK(!m.is_zero_cell(3, 0));
+  BOOST_CHECK(m.is_zero_entry(1, 0));
+  BOOST_CHECK(!m.is_zero_entry(3, 0));
   BOOST_CHECK(m.is_zero_column(0));
   BOOST_CHECK(m.is_zero_column(1));
   BOOST_CHECK(m.is_zero_column(2));
@@ -426,7 +426,7 @@ void test_general_insertion() {
   BOOST_CHECK(!m.is_zero_column(9));
   BOOST_CHECK(!m.is_zero_column(10));
   BOOST_CHECK(!m.is_zero_column(11));
-  BOOST_CHECK(!m.is_zero_cell(3, 1));
+  BOOST_CHECK(!m.is_zero_entry(3, 1));
 }
 
 // for boundary and ru
@@ -439,8 +439,8 @@ void test_boundary_insertion() {
   orderedBoundaries.pop_back();
 
   Matrix m(orderedBoundaries, 5);
-  BOOST_CHECK(m.is_zero_cell(1, 0));
-  BOOST_CHECK(!m.is_zero_cell(3, 0));
+  BOOST_CHECK(m.is_zero_entry(1, 0));
+  BOOST_CHECK(!m.is_zero_entry(3, 0));
   BOOST_CHECK(m.is_zero_column(0));
   BOOST_CHECK(m.is_zero_column(1));
   BOOST_CHECK(m.is_zero_column(2));
@@ -452,8 +452,8 @@ void test_boundary_insertion() {
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 6);
   m.insert_boundary(boundary2);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 7);
-  BOOST_CHECK(m.is_zero_cell(1, 0));
-  BOOST_CHECK(!m.is_zero_cell(3, 0));
+  BOOST_CHECK(m.is_zero_entry(1, 0));
+  BOOST_CHECK(!m.is_zero_entry(3, 0));
   BOOST_CHECK(m.is_zero_column(0));
   BOOST_CHECK(m.is_zero_column(1));
   BOOST_CHECK(m.is_zero_column(2));
@@ -497,9 +497,9 @@ void test_boundary_insertion() {
 template <class Matrix>
 void test_chain_boundary_insertion(Matrix& m1, Matrix& m2) {
   auto test = [](Matrix& m) {
-    BOOST_CHECK(m.is_zero_cell(1, 2));
-    BOOST_CHECK(!m.is_zero_cell(1, 1));
-    BOOST_CHECK(!m.is_zero_cell(3, 3));
+    BOOST_CHECK(m.is_zero_entry(1, 2));
+    BOOST_CHECK(!m.is_zero_entry(1, 1));
+    BOOST_CHECK(!m.is_zero_entry(3, 3));
     BOOST_CHECK(!m.is_zero_column(0));
     BOOST_CHECK(!m.is_zero_column(1));
     BOOST_CHECK(!m.is_zero_column(2));
@@ -549,9 +549,9 @@ void test_chain_boundary_insertion(Matrix& m1, Matrix& m2) {
   auto boundary1 = orderedBoundaries.back();
   orderedBoundaries.pop_back();
 
-  BOOST_CHECK(m2.is_zero_cell(1, 2));
-  BOOST_CHECK(!m2.is_zero_cell(1, 1));
-  BOOST_CHECK(!m2.is_zero_cell(3, 3));
+  BOOST_CHECK(m2.is_zero_entry(1, 2));
+  BOOST_CHECK(!m2.is_zero_entry(1, 1));
+  BOOST_CHECK(!m2.is_zero_entry(3, 3));
   BOOST_CHECK(!m2.is_zero_column(0));
   BOOST_CHECK(!m2.is_zero_column(1));
   BOOST_CHECK(!m2.is_zero_column(2));
@@ -618,13 +618,13 @@ void test_zeroing() {
 
   Matrix m(orderedBoundaries, 5);
 
-  BOOST_CHECK(!m.is_zero_cell(3, 1));
+  BOOST_CHECK(!m.is_zero_entry(3, 1));
   BOOST_CHECK(!m.is_zero_column(3));
-  m.zero_cell(3, 1);
-  BOOST_CHECK(m.is_zero_cell(3, 1));
+  m.zero_entry(3, 1);
+  BOOST_CHECK(m.is_zero_entry(3, 1));
   BOOST_CHECK(!m.is_zero_column(3));
   m.zero_column(3);
-  BOOST_CHECK(m.is_zero_cell(3, 1));
+  BOOST_CHECK(m.is_zero_entry(3, 1));
   BOOST_CHECK(m.is_zero_column(3));
 }
 
@@ -669,22 +669,22 @@ void test_ru_u_access() {
   }
 
   if constexpr (Matrix::Option_list::has_vine_update) {
-    BOOST_CHECK(!m.is_zero_cell(3, 5, false));
+    BOOST_CHECK(!m.is_zero_entry(3, 5, false));
     BOOST_CHECK(!m.is_zero_column(4, false));
-    m.zero_cell(3, 5, false);
-    BOOST_CHECK(m.is_zero_cell(3, 5, false));
+    m.zero_entry(3, 5, false);
+    BOOST_CHECK(m.is_zero_entry(3, 5, false));
     BOOST_CHECK(!m.is_zero_column(4, false));
     m.zero_column(4, false);
-    BOOST_CHECK(m.is_zero_cell(3, 5, false));
+    BOOST_CHECK(m.is_zero_entry(3, 5, false));
     BOOST_CHECK(m.is_zero_column(4, false));
   } else {
-    BOOST_CHECK(!m.is_zero_cell(5, 3, false));
+    BOOST_CHECK(!m.is_zero_entry(5, 3, false));
     BOOST_CHECK(!m.is_zero_column(4, false));
-    m.zero_cell(5, 3, false);
-    BOOST_CHECK(m.is_zero_cell(5, 3, false));
+    m.zero_entry(5, 3, false);
+    BOOST_CHECK(m.is_zero_entry(5, 3, false));
     BOOST_CHECK(!m.is_zero_column(4, false));
     m.zero_column(4, false);
-    BOOST_CHECK(m.is_zero_cell(5, 3, false));
+    BOOST_CHECK(m.is_zero_entry(5, 3, false));
     BOOST_CHECK(m.is_zero_column(4, false));
   }
 }
@@ -696,8 +696,8 @@ void test_base_z2_row_access() {
 
   std::vector<std::vector<unsigned int> > rows;
   if constexpr (Matrix::Option_list::has_column_compression) {
-    // if the union find structure changes, the column_index values of de cells could also change. Change the test with
-    // all possibilities?
+    // if the union find structure changes, the column_index values of the entries could also change. Change the test
+    // with all possibilities?
     rows.push_back({3, 6});
     rows.push_back({3, 5});
     rows.push_back({5});
@@ -726,8 +726,8 @@ void test_base_z5_row_access() {
 
   std::vector<std::vector<std::pair<unsigned int, typename Matrix::Element> > > rows;
   if constexpr (Matrix::Option_list::has_column_compression) {
-    // if the union find structure changes, the column_index values of de cells could also change. Change the test with
-    // all possibilities?
+    // if the union find structure changes, the column_index values of the entries could also change. Change the test
+    // with all possibilities?
     rows.push_back({{3, 1}, {6, 1}});
     rows.push_back({{3, 4}, {5, 1}});
     rows.push_back({{5, 4}});
@@ -806,11 +806,11 @@ void test_ru_u_row_access() {
   unsigned int i = 0;
   for (auto& r : rows) {
     orderedRows.clear();
-    for (const auto& cell : m.get_row(i++, false)) {
+    for (const auto& entry : m.get_row(i++, false)) {
       if constexpr (Matrix::Option_list::is_z2) {
-        orderedRows.insert(cell.get_column_index());
+        orderedRows.insert(entry.get_column_index());
       } else {
-        orderedRows.insert({cell.get_column_index(), cell.get_element()});
+        orderedRows.insert({entry.get_column_index(), entry.get_element()});
       }
     }
     test_column_equality<typename Matrix::Column>(r, orderedRows);
@@ -1209,14 +1209,14 @@ void test_chain_operation(Matrix& m) {
 }
 
 template <class Matrix>
-void test_base_cell_range_operation() {
-  using Cell = typename Matrix::Matrix_cell;
+void test_base_entry_range_operation() {
+  using Entry = typename Matrix::Matrix_entry;
 
   auto columns = build_general_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
-  std::vector<Cell> range;
-  range = {Cell(0), Cell(1), Cell(4)};
+  std::vector<Entry> range;
+  range = {Entry(0), Entry(1), Entry(4)};
   if constexpr (!Matrix::Option_list::is_z2) {
     range[0].set_element(1);
     range[1].set_element(4);
@@ -1251,14 +1251,14 @@ void test_base_cell_range_operation() {
 }
 
 template <class Matrix>
-void test_base_col_comp_cell_range_operation() {
-  using Cell = typename Matrix::Matrix_cell;
+void test_base_col_comp_entry_range_operation() {
+  using Entry = typename Matrix::Matrix_entry;
 
   auto columns = build_general_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
-  std::vector<Cell> range;
-  range = {Cell(0), Cell(1), Cell(4)};
+  std::vector<Entry> range;
+  range = {Entry(0), Entry(1), Entry(4)};
   if constexpr (!Matrix::Option_list::is_z2) {
     range[0].set_element(1);
     range[1].set_element(4);
