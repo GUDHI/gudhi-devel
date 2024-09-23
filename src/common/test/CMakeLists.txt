@@ -3,6 +3,11 @@ include(GUDHI_boost_test)
 add_executable ( Common_test_points_off_reader test_points_off_reader.cpp )
 add_executable ( Common_test_distance_matrix_reader test_distance_matrix_reader.cpp )
 add_executable ( Common_test_persistence_intervals_reader test_persistence_intervals_reader.cpp )
+add_executable ( Common_test_random_graph_generators test_random_graph_generators.cpp )
+if(TARGET TBB::tbb)
+  target_link_libraries(Common_test_random_graph_generators TBB::tbb)
+endif()
+add_executable ( Common_test_random test_random.cpp )
 
 # Do not forget to copy test files in current binary dir
 file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
@@ -15,3 +20,5 @@ file(COPY "${CMAKE_SOURCE_DIR}/src/common/test/persistence_intervals_without_dim
 gudhi_add_boost_test(Common_test_points_off_reader)
 gudhi_add_boost_test(Common_test_distance_matrix_reader)
 gudhi_add_boost_test(Common_test_persistence_intervals_reader)
+gudhi_add_boost_test(Common_test_random_graph_generators)
+gudhi_add_boost_test(Common_test_random)
