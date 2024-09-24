@@ -87,9 +87,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_intersections, T, list_of_tested_variants)
   t = l.template compute_backward_intersection<double>(KP({P{2,1,3}, P{2,3,3}}));
   BOOST_CHECK_EQUAL(t, 0);
 
-  std::pair<P, P> bounds = l.get_bounds({{-10, 0, 10}, {10, 4, 10}});
-  auto& bottom = bounds.first;
-  auto& top = bounds.second;
+  std::pair<T, T> bounds = l.get_bounds({{-10, 0, 10}, {10, 4, 10}});
+  auto bottom = l[bounds.first];
+  auto top = l[bounds.second];
   BOOST_CHECK_EQUAL(bottom.size(), 3);
   BOOST_CHECK_EQUAL(bottom[0], T(5. + 2. / 3.));
   BOOST_CHECK_EQUAL(bottom[1], 2);
@@ -100,8 +100,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_intersections, T, list_of_tested_variants)
   BOOST_CHECK_EQUAL(top[2], T(3. + T(7. / 6.) * 6.));
 
   bounds = l.get_bounds({{-10, 0, 10}, {10, 1, 10}});
-  BOOST_CHECK(bounds.first.is_plus_inf());
-  BOOST_CHECK(bounds.second.is_plus_inf());
+  BOOST_CHECK_EQUAL(bounds.first, P::T_inf);
+  BOOST_CHECK_EQUAL(bounds.second, -P::T_inf);
+  BOOST_CHECK(l[bounds.first].is_plus_inf());
+  BOOST_CHECK(l[bounds.second].is_minus_inf());
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(line_other, T, list_of_tested_variants)
