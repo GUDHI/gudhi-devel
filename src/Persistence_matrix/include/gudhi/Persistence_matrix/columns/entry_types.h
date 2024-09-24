@@ -18,8 +18,8 @@
  * Also defines the std::hash method for @ref Gudhi::persistence_matrix::Entry.
  */
 
-#ifndef PM_MATRIX_CELL_H
-#define PM_MATRIX_CELL_H
+#ifndef PM_MATRIX_ENTRY_H
+#define PM_MATRIX_ENTRY_H
 
 #include <utility>     //std::swap, std::exchange & std::move
 #include <functional>  //std::hash
@@ -324,4 +324,4 @@ struct std::hash<Gudhi::persistence_matrix::Entry<Master_matrix> > {
   }
 };
 
-#endif  // PM_MATRIX_CELL_H
+#endif  // PM_MATRIX_ENTRY_H

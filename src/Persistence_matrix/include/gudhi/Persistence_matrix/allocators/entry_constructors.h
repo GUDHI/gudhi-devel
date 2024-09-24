@@ -14,8 +14,8 @@
  * @brief Contains different versions of @ref Gudhi::persistence_matrix::Entry factories.
  */
 
-#ifndef PM_COLUMN_CELL_CONSTRUCTORS_H
-#define PM_COLUMN_CELL_CONSTRUCTORS_H
+#ifndef PM_COLUMN_ENTRY_CONSTRUCTORS_H
+#define PM_COLUMN_ENTRY_CONSTRUCTORS_H
 
 #include <utility>  //std::swap
 
@@ -136,4 +136,4 @@ struct Pool_entry_constructor
 }  // namespace persistence_matrix
 }  // namespace Gudhi
 
-#endif  // PM_COLUMN_CELL_CONSTRUCTORS_H
+#endif  // PM_COLUMN_ENTRY_CONSTRUCTORS_H
