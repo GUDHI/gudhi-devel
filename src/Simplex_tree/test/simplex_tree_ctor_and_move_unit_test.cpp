@@ -187,19 +187,8 @@ class Vector_filtration_value : public std::vector<int>
   Vector_filtration_value() : Base() {}
   Vector_filtration_value(std::initializer_list<int> init) : Base(init) {}
   Vector_filtration_value(const_iterator start, const_iterator end) : Base(start, end) {}
-//   vector() noexcept(noexcept(Allocator()));
-// explicit vector( const Allocator& alloc ) noexcept;
-// vector( size_type count,
-//         const T& value,
-//         const Allocator& alloc = Allocator() );
-// explicit vector( size_type count,
-//                  const Allocator& alloc = Allocator() );
-// vector( const vector& other );
-// vector( const vector& other, const Allocator& alloc );
-// vector( vector&& other );
-// vector( vector&& other, const Allocator& alloc );
 
-  friend bool unify_births(Vector_filtration_value& f1, const Vector_filtration_value& f2) {
+  friend bool unify(Vector_filtration_value& f1, const Vector_filtration_value& f2) {
     if (f1 > f2) {
       f1 = f2;
       return true;
@@ -207,7 +196,7 @@ class Vector_filtration_value : public std::vector<int>
     return false;
   }
 
-  friend bool push_to_smallest_common_upper_bound(Vector_filtration_value& f1, const Vector_filtration_value& f2) {
+  friend bool intersect(Vector_filtration_value& f1, const Vector_filtration_value& f2) {
     if (f1 < f2) {
       f1 = f2;
       return true;

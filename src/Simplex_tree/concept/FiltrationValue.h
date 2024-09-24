@@ -40,10 +40,6 @@ struct FiltrationValue {
    * @brief Equality operator
    */
   friend bool operator==(const FiltrationValue& f1, const FiltrationValue& f2);
-  /**
-   * @brief Not equal operator
-   */
-  friend bool operator!=(const FiltrationValue& f1, const FiltrationValue& f2);
 
   /**
    * @brief Given two filtration values at which a simplex exists, computes the minimal union of births generating
@@ -60,7 +56,7 @@ struct FiltrationValue {
    *
    * @return True if and only if the values in @p f1 were actually modified.
    */
-  friend bool unify_births(FiltrationValue& f1, const FiltrationValue& f2);
+  friend bool unify(FiltrationValue& f1, const FiltrationValue& f2);
 
   /**
    * @brief Given two filtration values, stores in the first value the greatest common upper bound of the two values.
@@ -69,5 +65,5 @@ struct FiltrationValue {
    *
    * @return True if and only if the values in @p f1 were actually modified.
    */
-  friend bool push_to_smallest_common_upper_bound(FiltrationValue& f1, const FiltrationValue& f2);
+  friend bool intersect(FiltrationValue& f1, const FiltrationValue& f2);
 };

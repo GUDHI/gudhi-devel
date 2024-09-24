@@ -112,7 +112,7 @@ struct Get_simplex_data_type<O, std::void_t<typename O::Simplex_data>> { typedef
  */
 template <typename Arithmetic_filtration_value,
           typename = std::enable_if_t<std::is_arithmetic_v<Arithmetic_filtration_value> > >
-bool unify_births(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
+bool unify(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
 {
   if (f1 > f2){
     f1 = f2;
@@ -130,7 +130,7 @@ bool unify_births(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f
  */
 template <typename Arithmetic_filtration_value,
           typename = std::enable_if_t<std::is_arithmetic_v<Arithmetic_filtration_value> > >
-bool push_to_smallest_common_upper_bound(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
+bool intersect(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
 {
   if constexpr (std::is_floating_point_v<Arithmetic_filtration_value>) {
     if (std::isnan(f1)) {

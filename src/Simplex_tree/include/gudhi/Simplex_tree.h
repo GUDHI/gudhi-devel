@@ -651,7 +651,7 @@ class Simplex_tree {
     for (auto sh1 = s1->members().begin();
          (sh1 != s1->members().end() && sh2 != s2->members().end());
          ++sh1, ++sh2) {
-      if (sh1->first != sh2->first || sh1->second.filtration() != sh2->second.filtration())
+      if (sh1->first != sh2->first || !(sh1->second.filtration() == sh2->second.filtration()))
         return false;
       if (has_children(sh1) != has_children(sh2))
         return false;
@@ -952,7 +952,7 @@ class Simplex_tree {
     }
 
     if constexpr (Options::store_filtration && update_fil){
-      if (unify_births(ins.first->second.filtration(), filtration_value)) return ins;
+      if (unify(ins.first->second.filtration(), filtration_value)) return ins;
     }
 
     if constexpr (set_to_null){
@@ -1184,7 +1184,7 @@ class Simplex_tree {
 
     bool operator()(const Simplex_handle sh1, const Simplex_handle sh2) const {
       // Not using st_->filtration(sh1) because it uselessly tests for null_simplex.
-      if (sh1->second.filtration() != sh2->second.filtration()) {
+      if (!(sh1->second.filtration() == sh2->second.filtration())) {
         return sh1->second.filtration() < sh2->second.filtration();
       }
       // is sh1 a proper subface of sh2
@@ -1843,8 +1843,8 @@ class Simplex_tree {
           intersection.emplace_back(begin1->first, Node(nullptr, filtration_));
         } else {
           Filtration_value filt = begin1->second.filtration();
-          push_to_smallest_common_upper_bound(filt, begin2->second.filtration());
-          push_to_smallest_common_upper_bound(filt, filtration_);
+          intersect(filt, begin2->second.filtration());
+          intersect(filt, filtration_);
           intersection.emplace_back(begin1->first, Node(nullptr, filt));
         }
         if (++begin1 == end1 || ++begin2 == end2)
@@ -1913,7 +1913,7 @@ class Simplex_tree {
             to_be_inserted=false;
             break;
           }
-          push_to_smallest_common_upper_bound(filt, filtration(border_child));
+          intersect(filt, filtration(border_child));
         }
         if (to_be_inserted) {
           intersection.emplace_back(next->first, Node(nullptr, filt));
@@ -2053,7 +2053,7 @@ class Simplex_tree {
       for (Simplex_handle b : boundary_simplex_range(sh)) {
         // considers NaN as the lowest possible value.
         // stores the filtration modification information
-        modified |= push_to_smallest_common_upper_bound(current_filt, b->second.filtration());
+        modified |= intersect(current_filt, b->second.filtration());
       }
     };
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
@@ -2075,7 +2075,11 @@ class Simplex_tree {
       nodes_label_to_list_.clear();
   }
 
-  /** \brief Prune above filtration value given as parameter.
+  /** \brief Prune above filtration value given as parameter. That is: if \f$ f \f$ is the given filtration value
+   * and \f$ f_s \f$ the filtration value associated to the simplex \f$ s \f$ contained in the tree, \f$ s \f$ is
+   * removed if and only if \f$ f < f_s \f$ or \f$ f_s = NaN \f$, where \f$ < \f$ is the
+   * @ref FiltrationValue::operator< "operator<" defined for the type
+   * @ref SimplexTreeOptions::Filtration_value "Simplex_tree::Filtration_value".
    * @param[in] filtration Maximum threshold value.
    * @return True if any simplex was removed, false if all simplices already had a value below the threshold.
    * \post Note that the dimension of the simplicial complex may be lower after calling `prune_above_filtration()`
