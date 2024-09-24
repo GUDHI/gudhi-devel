@@ -21,7 +21,7 @@ args = parser.parse_args()
 no_plot = args.no_plot
 
 # Build the dataset
-dataset_size = 1000
+dataset_size = 500
 # Noise is expressed in percentage of radius - set it to 0. for no noise
 noise = 0.1
 # target is a list of 1000 random circle radiuses (between 1. and 10.)

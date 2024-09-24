@@ -16,7 +16,7 @@
 Čech complex persistence scikit-learn like interface example
 ------------------------------------------------------------
 
-In this example, we build a dataset `X` composed of 1000 circles of radius randomly between 1.0 and 10.0.
+In this example, we build a dataset `X` composed of 500 circles of radius randomly between 1.0 and 10.0.
 N points are subsampled randomly on each circle, where N randomly between 100 and 300 for each circle.
 In order to complicate things, some noise (+/- 5% of the radius value) to the point coordinates.
 
