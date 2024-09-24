@@ -134,7 +134,7 @@ void compute_oscillating_rips_persistence(
   using VectorEdgeRange = std::vector<Zigzag_edge<Filtration_value> >;
   using EdgeRangeIterator = typename std::conditional<edge_range_type == Edge_range_type::BOOST_RANGE,
                                                       typename EdgeRange::Oscillating_rips_edge_iterator,
-                                                      typename VectorEdgeRange::iterator>::type;
+                                                      typename VectorEdgeRange::const_iterator>::type;
   using OscillatingRipsSimplexRange = Oscillating_rips_simplex_range<StableFilteredComplex, EdgeRangeIterator>;
 
   StableFilteredComplex st;
@@ -213,7 +213,7 @@ compute_oscillating_rips_persistence(
   using VectorEdgeRange = std::vector<Zigzag_edge<Filtration_value> >;
   using EdgeRangeIterator = typename std::conditional<edge_range_type == Edge_range_type::BOOST_RANGE,
                                                       typename EdgeRange::Oscillating_rips_edge_iterator,
-                                                      typename VectorEdgeRange::iterator>::type;
+                                                      typename VectorEdgeRange::const_iterator>::type;
   using OscillatingRipsSimplexRange = Oscillating_rips_simplex_range<StableFilteredComplex, EdgeRangeIterator>;
 
   StableFilteredComplex st;

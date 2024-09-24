@@ -894,7 +894,7 @@ class Oscillating_rips_edge_range
       for (size_t k = i + 1; k < n; ++k) {
         // set eps_range[k] <- d(p_k, P_i) ==
         //                            min{ d(p_k, P_{i-1}), d(p_k, p_i) }  for k >= i.
-        double dist_i_k = distance(points[i], points[k]);
+        double dist_i_k = distance(sortedPoints[i], sortedPoints[k]);
         if (dist_i_k < eps_range[k]) {
           eps_range[k] = dist_i_k;
         }
