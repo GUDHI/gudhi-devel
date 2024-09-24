@@ -165,26 +165,28 @@ A complete configuration would be :
 
 .. code-block:: none
 
-    Pybind11 version 2.8.1
-    Python version 3.9.7
-    Cython version 0.29.24
-    Pytest version 6.2.5
-    Matplotlib version 3.5.0
-    Numpy version 1.21.4
-    Scipy version 1.7.3
-    Scikit-learn version 1.0.1
-    POT version 0.8.0
-    HNSWlib found
-    PyKeOps version [pyKeOps]: 2.1
+    Python version 3.11.9
+    Pybind11 version 2.12.0
+    Cython version 3.0.10
+    Numpy version 1.24.3
+    Pytest version 8.2.1
+    Matplotlib version 3.9.0
+    Scipy version 1.13.1
+    Scikit-learn version 1.3.2
+    POT version 0.9.4
+    HNSWlib version 0.8.0
+    PyTorch version 2.3.0
+    PyKeOps version 2.2.3
     EagerPy version 0.30.0
-    TensorFlow version 2.7.0
-    Sphinx version 4.3.0
-    Sphinx-paramlinks version 0.5.2
-    pydata_sphinx_theme version 0.13.1
-    NetworkX version 3.0
+    TensorFlow version 2.13.1
+    Sphinx version 7.3.7
+    Sphinx-paramlinks version 0.6.0
+    pydata_sphinx_theme version 0.15.2
+    sphinxcontrib-bibtex version 2.6.2
+    NetworkX version 3.3
     Eigen3 version 3.4.0
-    Boost version 1.74.0
-    CGAL version 5.3
+    Boost version 1.84.0
+    CGAL header only version 5.6.1
     GMP_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmp.so
     GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
     MPFR_LIBRARIES = /usr/lib/x86_64-linux-gnu/libmpfr.so

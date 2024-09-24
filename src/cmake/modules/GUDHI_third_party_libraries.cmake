@@ -145,8 +145,9 @@ if (WITH_GUDHI_PYTHON)
   # returns ${PYTHON_MODULE_NAME_UP}_VERSION and ${PYTHON_MODULE_NAME_UP}_FOUND
   function( find_python_module PYTHON_MODULE_NAME )
     string(TOUPPER ${PYTHON_MODULE_NAME} PYTHON_MODULE_NAME_UP)
+    # Modify tracebacklimit as the exception is quite verbose when module is not found
     execute_process(
-            COMMAND ${Python_EXECUTABLE}  -c "import ${PYTHON_MODULE_NAME}; print(${PYTHON_MODULE_NAME}.__version__)"
+            COMMAND ${Python_EXECUTABLE}  -c "import sys; sys.tracebacklimit = 0; from importlib.metadata import version; print(version('${PYTHON_MODULE_NAME}'))"
             RESULT_VARIABLE PYTHON_MODULE_RESULT
             OUTPUT_VARIABLE PYTHON_MODULE_VERSION
             ERROR_VARIABLE PYTHON_MODULE_ERROR)
@@ -167,25 +168,6 @@ if (WITH_GUDHI_PYTHON)
     endif()
   endfunction( find_python_module )
 
-  # For modules that do not define module.__version__
-  function( find_python_module_no_version PYTHON_MODULE_NAME )
-    string(TOUPPER ${PYTHON_MODULE_NAME} PYTHON_MODULE_NAME_UP)
-    execute_process(
-            COMMAND ${Python_EXECUTABLE}  -c "import ${PYTHON_MODULE_NAME}"
-            RESULT_VARIABLE PYTHON_MODULE_RESULT
-            ERROR_VARIABLE PYTHON_MODULE_ERROR)
-    if(PYTHON_MODULE_RESULT EQUAL 0)
-      # Remove carriage return
-      message ("++ Python module ${PYTHON_MODULE_NAME} found")
-      set(${PYTHON_MODULE_NAME_UP}_FOUND TRUE PARENT_SCOPE)
-    else()
-      message ("PYTHON_MODULE_NAME = ${PYTHON_MODULE_NAME}
-       - PYTHON_MODULE_RESULT = ${PYTHON_MODULE_RESULT}
-       - PYTHON_MODULE_ERROR = ${PYTHON_MODULE_ERROR}")
-      set(${PYTHON_MODULE_NAME_UP}_FOUND FALSE PARENT_SCOPE)
-    endif()
-  endfunction( find_python_module_no_version )
-
   if( TARGET Python::Interpreter )
     find_python_module("cython")
     find_python_module("pytest")
@@ -193,17 +175,17 @@ if (WITH_GUDHI_PYTHON)
     find_python_module("numpy")
     find_python_module("scipy")
     find_python_module("sphinx")
-    find_python_module("sklearn")
-    find_python_module("ot")
+    find_python_module("scikit-learn")
+    find_python_module("POT")
     find_python_module("pybind11")
     find_python_module("torch")
     find_python_module("pykeops")
     find_python_module("eagerpy")
-    find_python_module_no_version("hnswlib")
+    find_python_module("hnswlib")
     find_python_module("tensorflow")
     find_python_module("sphinx_paramlinks")
     find_python_module("pydata_sphinx_theme")
-    find_python_module_no_version("sphinxcontrib.bibtex")
+    find_python_module("sphinxcontrib.bibtex")
     find_python_module("networkx")
   endif()
 
