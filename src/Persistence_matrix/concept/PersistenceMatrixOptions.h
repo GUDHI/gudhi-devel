@@ -93,14 +93,14 @@ struct PersistenceMatrixOptions
    * If set to false, the container is a std::vector. By default, it is recommended to set it to false, but some 
    * methods require it to be true to be enabled: 
    * - @ref Matrix::remove_column(Index) "remove_column(Index)" for @ref basematrix "base matrices",
-   * - @ref Matrix::remove_maximal_face(Index) "remove_maximal_face(Index)" for @ref chainmatrix "chain matrices",
-   * - @ref Matrix::remove_maximal_face(Index, const std::vector<Index>&)
-   *  "remove_maximal_face(ID_index, const std::vector<ID_index>&)" for @ref chainmatrix "chain matrices",
+   * - @ref Matrix::remove_maximal_cell(Index) "remove_maximal_cell(Index)" for @ref chainmatrix "chain matrices",
+   * - @ref Matrix::remove_maximal_cell(Index, const std::vector<Index>&)
+   *  "remove_maximal_cell(ID_index, const std::vector<ID_index>&)" for @ref chainmatrix "chain matrices",
    * - @ref Matrix::remove_last "remove_last()" for @ref chainmatrix "chain matrices" if @ref has_vine_update is true.
    */
   static const bool has_map_column_container;
   /**
-   * @brief If set to true, enables the methods @ref Matrix::remove_maximal_face and @ref Matrix::remove_last,
+   * @brief If set to true, enables the methods @ref Matrix::remove_maximal_cell and @ref Matrix::remove_last,
    * except for @ref basematrix "base matrices" when @ref has_column_compression is true.
    */
   static const bool has_removable_columns;

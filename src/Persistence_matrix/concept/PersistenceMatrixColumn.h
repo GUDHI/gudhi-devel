@@ -86,7 +86,7 @@ class PersistenceMatrixColumn :
   PersistenceMatrixColumn(Column_settings* colSettings = nullptr);
   /**
    * @brief Constructs a column from the given range of @ref Matrix::Entry_representative. If the dimension is stored,
-   * the face is assumed to be simplicial and its dimension to be `nonZeroRowIndices length - 1` or `0`.
+   * the cell is assumed to be simplicial and its dimension to be `nonZeroRowIndices length - 1` or `0`.
    * Otherwise, the dimension should be specified with another constructor.
    * 
    * @tparam Container Range of @ref Matrix::Entry_representative. Assumed to have a %begin(), %end() and %size()
@@ -102,7 +102,7 @@ class PersistenceMatrixColumn :
   /**
    * @brief Constructs a column from the given range of @ref Matrix::Entry_representative such that the rows can be
    * accessed. Each new entry in the column is also inserted in a row using @ref Row_access::insert_entry.
-   * If the dimension is stored, the face is assumed to be simplicial and its dimension to be
+   * If the dimension is stored, the cell is assumed to be simplicial and its dimension to be
    * `nonZeroRowIndices length - 1` or `0`. Otherwise, the dimension should be specified with another constructor.
    * 
    * @tparam Container Range of @ref Matrix::Entry_representative. Assumed to have a %begin(), %end() and %size()

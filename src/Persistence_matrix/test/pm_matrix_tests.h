@@ -902,7 +902,7 @@ void test_ru_maximal_simplex_removal() {
   }
 
   if constexpr (Matrix::Option_list::has_vine_update) {
-    m.remove_maximal_face(6);
+    m.remove_maximal_cell(6);
   } else {
     m.remove_last();
   }
@@ -927,7 +927,7 @@ void test_chain_maximal_simplex_removal(Matrix& m) {
 
   if constexpr (Matrix::Option_list::has_vine_update && Matrix::Option_list::has_map_column_container &&
                 Matrix::Option_list::has_column_pairings) {
-    m.remove_maximal_face(6);
+    m.remove_maximal_cell(6);
   } else {
     m.remove_last();
   }
@@ -957,7 +957,7 @@ void test_maximal_dimension(Matrix& m) {
   if constexpr (Matrix::Option_list::has_vine_update &&
                 (Matrix::Option_list::is_of_boundary_type ||
                  (Matrix::Option_list::has_map_column_container && Matrix::Option_list::has_column_pairings))) {
-    m.remove_maximal_face(7);
+    m.remove_maximal_cell(7);
     BOOST_CHECK_EQUAL(m.get_max_dimension(), 3);
   }
 }

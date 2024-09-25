@@ -25,7 +25,7 @@
 #include <stdexcept>    //std::invalid_argument
 
 #include "ru_pairing.h"
-#include "boundary_face_position_to_id_mapper.h"
+#include "boundary_cell_position_to_id_mapper.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -68,7 +68,7 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
                      public std::conditional<Master_matrix::Option_list::has_column_pairings &&
                                                 Master_matrix::Option_list::has_removable_columns, 
                                              Dummy_pos_mapper,
-                                             Face_position_to_ID_mapper<typename Master_matrix::ID_index,
+                                             Cell_position_to_ID_mapper<typename Master_matrix::ID_index,
                                                                         typename Master_matrix::Pos_index>
                                             >::type
 {
@@ -98,20 +98,20 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
    * @brief Does the same than @ref vine_swap, but assumes that the swap is non trivial and
    * therefore skips a part of the case study.
    * 
-   * @param index @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
+   * @param index @ref PosIdx index of the first cell to swap. The second one has to be at `position + 1`.
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
   bool vine_swap_with_z_eq_1_case(Pos_index index);
   /**
-   * @brief Does a vine swap between two faces which are consecutive in the filtration.
+   * @brief Does a vine swap between two cells which are consecutive in the filtration.
    * Roughly, if \f$ F \f$ is the current filtration represented by the matrix, the method modifies the matrix
    * such that the new state corresponds to a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but
-   * with the two faces at position `position` and `position + 1` swapped. Of course, the two faces should
+   * with the two cells at position `position` and `position + 1` swapped. Of course, the two cells should
    * not have a face/coface relation which each other ; \f$ F' \f$ has to be a valid filtration.
    * See @cite vineyards for more information about vine and vineyards.
    * 
-   * @param index @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
+   * @param index @ref PosIdx index of the first cell to swap. The second one has to be at `position + 1`.
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
@@ -129,8 +129,8 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
       swap(static_cast<RU_pairing<Master_matrix>&>(swap1), static_cast<RU_pairing<Master_matrix>&>(swap2));
     }
     if (!Master_matrix::Option_list::has_column_pairings || !Master_matrix::Option_list::has_removable_columns) {
-      swap(static_cast<Face_position_to_ID_mapper<ID_index, Pos_index>&>(swap1),
-           static_cast<Face_position_to_ID_mapper<ID_index, Pos_index>&>(swap2));
+      swap(static_cast<Cell_position_to_ID_mapper<ID_index, Pos_index>&>(swap1),
+           static_cast<Cell_position_to_ID_mapper<ID_index, Pos_index>&>(swap2));
     }
   }
 
@@ -144,7 +144,7 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
   using RUM = typename std::conditional<Master_matrix::Option_list::has_column_pairings &&
                                             Master_matrix::Option_list::has_removable_columns,
                                         Dummy_pos_mapper,
-                                        Face_position_to_ID_mapper<ID_index, Pos_index>
+                                        Cell_position_to_ID_mapper<ID_index, Pos_index>
                                        >::type;
   constexpr auto& _positionToRowIdx();
 
