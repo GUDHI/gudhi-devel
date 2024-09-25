@@ -148,8 +148,8 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
     representativeCycles_.clear();
     representativeCycles_.resize(c);
     for (Index i = 0; i < _matrix()->mirrorMatrixU_.get_number_of_columns(); i++) {
-      for (const auto& cell : _matrix()->mirrorMatrixU_.get_column(i)) {
-        auto idx = birthToCycle_[cell.get_row_index()];
+      for (const auto& entry : _matrix()->mirrorMatrixU_.get_column(i)) {
+        auto idx = birthToCycle_[entry.get_row_index()];
         if (idx != static_cast<Index>(-1)) {
           representativeCycles_[idx].push_back(i);
         }
@@ -161,8 +161,8 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
     for (Index i = 0; i < _matrix()->reducedMatrixR_.get_number_of_columns(); i++) {
       if (_matrix()->reducedMatrixR_.is_zero_column(i)) {
         representativeCycles_.push_back(Cycle());
-        for (const auto& cell : _matrix()->mirrorMatrixU_.get_column(i)) {
-          representativeCycles_.back().push_back(cell.get_row_index());
+        for (const auto& entry : _matrix()->mirrorMatrixU_.get_column(i)) {
+          representativeCycles_.back().push_back(entry.get_row_index());
         }
         if constexpr (std::is_same_v<typename Master_matrix::Column, typename Master_matrix::Matrix_heap_column> ||
                       std::is_same_v<typename Master_matrix::Column,

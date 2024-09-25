@@ -63,18 +63,18 @@ class PersistenceMatrixColumn :
   using Master = unspecified;                 /**< Master matrix, that is a templated @ref Matrix. */
   using Index = unspecified;                  /**< Type of @ref MatIdx index. */
   using ID_index = unspecified;               /**< Type of @ref IDIdx index. */
-  using Dimension = unspecified;         /**< Type for dimension value. */
-  using Field_element = unspecified;     /**< Type of a field element. */
-  using Cell = unspecified;                   /**< @ref Cell. */
+  using Dimension = unspecified;              /**< Type for dimension value. */
+  using Field_element = unspecified;          /**< Type of a field element. */
+  using Entry = unspecified;                  /**< @ref Entry. */
   using Column_settings = unspecified;        /**< Structure giving access to external classes eventually necessary,
-                                                   like a cell pool for example. */
+                                                   like an entry pool for example. */
   using iterator = unspecified;               /**< Column iterator type. */
   using const_iterator = unspecified;         /**< Column const_iterator type. */
   using reverse_iterator = unspecified;       /**< Column reverse_iterator type. */
   using const_reverse_iterator = unspecified; /**< Column const_reverse_iterator type. */
 
   /**
-   * @brief Constructs an empty column. If @p cellConstructor is not specified or is set to `nullptr`, the column
+   * @brief Constructs an empty column. If @p entryConstructor is not specified or is set to `nullptr`, the column
    * can only be used as a dummy, i.e., no modifying method should be used or there will be a segmentation fault.
    * Same goes for @p operators if @ref PersistenceMatrixOptions::is_z2 is false.
    * 
@@ -85,12 +85,13 @@ class PersistenceMatrixColumn :
    */
   PersistenceMatrixColumn(Column_settings* colSettings = nullptr);
   /**
-   * @brief Constructs a column from the given range of @ref Matrix::Cell_representative. If the dimension is stored,
+   * @brief Constructs a column from the given range of @ref Matrix::Entry_representative. If the dimension is stored,
    * the face is assumed to be simplicial and its dimension to be `nonZeroRowIndices length - 1` or `0`.
    * Otherwise, the dimension should be specified with another constructor.
    * 
-   * @tparam Container Range of @ref Matrix::Cell_representative. Assumed to have a %begin(), %end() and %size() method.
-   * @param nonZeroRowIndices Range of @ref Matrix::Cell_representative representing all rows with non zero values.
+   * @tparam Container Range of @ref Matrix::Entry_representative. Assumed to have a %begin(), %end() and %size()
+   * method.
+   * @param nonZeroRowIndices Range of @ref Matrix::Entry_representative representing all rows with non zero values.
    * @param colSettings Pointer to an existing setting structure. The structure should contain all the necessary
    * classes specific to the column type, such as custom allocators. The specificities are this way hidden behind
    * a commun interface for all column types.
@@ -99,16 +100,17 @@ class PersistenceMatrixColumn :
   PersistenceMatrixColumn(const Container& nonZeroRowIndices, 
                           Column_settings* colSettings);
   /**
-   * @brief Constructs a column from the given range of @ref Matrix::Cell_representative such that the rows can be accessed.
-   * Each new cell in the column is also inserted in a row using @ref Row_access::insert_cell.
+   * @brief Constructs a column from the given range of @ref Matrix::Entry_representative such that the rows can be
+   * accessed. Each new entry in the column is also inserted in a row using @ref Row_access::insert_entry.
    * If the dimension is stored, the face is assumed to be simplicial and its dimension to be
    * `nonZeroRowIndices length - 1` or `0`. Otherwise, the dimension should be specified with another constructor.
    * 
-   * @tparam Container Range of @ref Matrix::Cell_representative. Assumed to have a %begin(), %end() and %size() method.
+   * @tparam Container Range of @ref Matrix::Entry_representative. Assumed to have a %begin(), %end() and %size()
+   * method.
    * @tparam Row_container Either std::map if @ref PersistenceMatrixOptions::has_removable_rows is true or
    * std::vector<Row>.
-   * @param columnIndex @ref MatIdx column index that should be specified to the cells.
-   * @param nonZeroRowIndices Range of @ref Matrix::Cell_representative representing all rows with non zero values.
+   * @param columnIndex @ref MatIdx column index that should be specified to the entries.
+   * @param nonZeroRowIndices Range of @ref Matrix::Entry_representative representing all rows with non zero values.
    * @param rowContainer Pointer to the row container that will be forwarded to @ref Row_access at construction.
    * @param colSettings Pointer to an existing setting structure. The structure should contain all the necessary
    * classes specific to the column type, such as custom allocators. The specificities are this way hidden behind
@@ -120,11 +122,13 @@ class PersistenceMatrixColumn :
                           Row_container* rowContainer,
                           Column_settings* colSettings);
   /**
-   * @brief Constructs a column from the given range of @ref Matrix::Cell_representative and stores the given dimension
+   * @brief Constructs a column from the given range of @ref Matrix::Entry_representative and stores the given dimension
    * if @ref Column_dimension_option is not a dummy.
    * 
-   * @tparam Container Range of @ref Matrix::Cell_representative. Assumed to have a %begin(), %end() and %size() method.
-   * @param nonZeroChainRowIndices Range of @ref Matrix::Cell_representative representing all rows with non zero values.
+   * @tparam Container Range of @ref Matrix::Entry_representative. Assumed to have a %begin(), %end() and %size()
+   * method.
+   * @param nonZeroChainRowIndices Range of @ref Matrix::Entry_representative representing all rows with non zero
+   * values.
    * @param dimension Dimension of the column. Is ignored if the dimension is not stored.
    * @param colSettings Pointer to an existing setting structure. The structure should contain all the necessary
    * classes specific to the column type, such as custom allocators. The specificities are this way hidden behind
@@ -135,15 +139,17 @@ class PersistenceMatrixColumn :
                           Dimension dimension,
                           Column_settings* colSettings);
   /**
-   * @brief Constructs a column from the given range of @ref Matrix::Cell_representative such that the rows can be accessed.
-   * Each new cell in the column is also inserted in a row using @ref Row_access::insert_cell.
+   * @brief Constructs a column from the given range of @ref Matrix::Entry_representative such that the rows can be
+   * accessed. Each new entry in the column is also inserted in a row using @ref Row_access::insert_entry.
    * Stores the given dimension if @ref Column_dimension_option is not a dummy.
    * 
-   * @tparam Container Range of @ref Matrix::Cell_representative. Assumed to have a %begin(), %end() and %size() method.
+   * @tparam Container Range of @ref Matrix::Entry_representative. Assumed to have a %begin(), %end() and %size()
+   * method.
    * @tparam Row_container Either std::map if @ref PersistenceMatrixOptions::has_removable_rows is true or
    * std::vector<Row>.
-   * @param columnIndex @ref MatIdx column index that should be specified to the cells.
-   * @param nonZeroChainRowIndices Range of @ref Matrix::Cell_representative representing all rows with non zero values.
+   * @param columnIndex @ref MatIdx column index that should be specified to the entries.
+   * @param nonZeroChainRowIndices Range of @ref Matrix::Entry_representative representing all rows with non zero
+   * values.
    * @param dimension Dimension of the column. Is ignored if the dimension is not stored.
    * @param rowContainer Pointer to the row container that will be forwarded to @ref Row_access at construction.
    * @param colSettings Pointer to an existing setting structure. The structure should contain all the necessary
@@ -157,7 +163,7 @@ class PersistenceMatrixColumn :
                           Row_container* rowContainer, 
                           Column_settings* colSettings);
   /**
-   * @brief Copy constructor. If @p operators or @p cellConstructor is not a null pointer, its value is kept
+   * @brief Copy constructor. If @p operators or @p entryConstructor is not a null pointer, its value is kept
    * instead of the one in the copied column.
    * 
    * @param column Column to copy.
@@ -170,7 +176,7 @@ class PersistenceMatrixColumn :
                           Column_settings* colSettings = nullptr);
   /**
    * @brief Copy constructor with row access.
-   * If @p operators or @p cellConstructor is not a null pointer, its value is kept
+   * If @p operators or @p entryConstructor stored in @p colSettings is not a null pointer, its value is kept
    * instead of the one in the copied column.
    * 
    * @tparam Row_container  Either std::map if @ref PersistenceMatrixOptions::has_removable_rows is true or
@@ -209,10 +215,10 @@ class PersistenceMatrixColumn :
    */
   std::vector<Field_element> get_content(int columnLength = -1) const;
   /**
-   * @brief Indicates if the cell at given row index has value zero.
+   * @brief Indicates if the entry at given row index has value zero.
    * 
    * @param rowIndex Row index to look at.
-   * @return true If the cell has value zero.
+   * @return true If the entry has value zero.
    * @return false Otherwise.
    */
   bool is_non_zero(ID_index rowIndex) const;
@@ -226,7 +232,7 @@ class PersistenceMatrixColumn :
   /**
    * @brief Returns the size of the underlying container.
    *
-   * @warning Depending of the column type, the container does not have to contain only the non-zero cells.
+   * @warning Depending of the column type, the container does not have to contain only the non-zero entries.
    * Even if for most of the types, the size of the container will correspond to the number of non-zero values
    * in the column, it is not always the case. See description of the actual Column class for more details.
    * 
@@ -236,12 +242,12 @@ class PersistenceMatrixColumn :
 
   /**
    * @brief Reorders the column with the given map of row indices. Also changes the column index stored in the
-   * cells if row access is enabled and @p columnIndex is not -1.
+   * entries if row access is enabled and @p columnIndex is not -1.
    *
    * Only useful for @ref basematrix "base" and @ref boundarymatrix "boundary matrices" using lazy swaps.
    * 
    * @tparam Row_index_map Map with an %at() method.
-   * @param valueMap Map such that `valueMap.at(i)` indicates the new row index of the cell
+   * @param valueMap Map such that `valueMap.at(i)` indicates the new row index of the entry
    * at current row index `i`.
    * @param columnIndex New @ref MatIdx column index of the column. If -1, the index does not change. Ignored if
    * the row access is not enabled. Default value: -1.
@@ -256,15 +262,15 @@ class PersistenceMatrixColumn :
    */
   void clear();
   /**
-   * @brief Zeros the cell at given row index.
+   * @brief Zeros the entry at given row index.
    * 
    * Only useful for @ref basematrix "base" and @ref boundarymatrix "boundary matrices".
-   * Used in @ref Matrix::zero_cell and during vine swaps.
+   * Used in @ref Matrix::zero_entry and during vine swaps.
    *
-   * @warning For @ref Vector_column, do not clear a cell that was already at zero or the results of @ref size and
+   * @warning For @ref Vector_column, do not clear an entry that was already at zero or the results of @ref size and
    * @ref is_empty will be wrong.
    * 
-   * @param rowIndex Row index of the cell to zero.
+   * @param rowIndex Row index of the entry to zero.
    */
   void clear(ID_index rowIndex);
 
@@ -288,92 +294,94 @@ class PersistenceMatrixColumn :
   Field_element get_pivot_value();
 
   /**
-   * @brief Returns a begin @ref Cell iterator to iterate over all cells contained in the underlying container.
+   * @brief Returns a begin @ref Entry iterator to iterate over all entries contained in the underlying container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
    * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
-   * @return @ref Cell iterator.
+   * @return @ref Entry iterator.
    */
   iterator begin() noexcept;
   /**
-   * @brief Returns a begin @ref Cell const iterator to iterate over all cells contained in the underlying container.
+   * @brief Returns a begin @ref Entry const iterator to iterate over all entries contained in the underlying container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
    * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
-   * @return @ref Cell const iterator.
+   * @return @ref Entry const iterator.
    */
   const_iterator begin() const noexcept;
   /**
-   * @brief Returns a end @ref Cell iterator, iterating over all cells contained in the underlying container.
+   * @brief Returns an end @ref Entry iterator, iterating over all entries contained in the underlying container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
    * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
-   * @return @ref Cell iterator.
+   * @return @ref Entry iterator.
    */
   iterator end() noexcept;
   /**
-   * @brief Returns a end @ref Cell const iterator, iterating over all cells contained in the underlying container.
+   * @brief Returns an end @ref Entry const iterator, iterating over all entries contained in the underlying container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
    * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
-   * @return @ref Cell const iterator.
+   * @return @ref Entry const iterator.
    */
   const_iterator end() const noexcept;
   /**
-   * @brief Returns a begin @ref Cell reverse iterator to iterate over all cells contained in the underlying container.
+   * @brief Returns a begin @ref Entry reverse iterator to iterate over all entries contained in the underlying
+   * container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
    * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
-   * @return @ref Cell reverse iterator.
+   * @return @ref Entry reverse iterator.
    */
   reverse_iterator rbegin() noexcept;
   /**
-   * @brief Returns a begin @ref Cell const reverse iterator to iterate over all cells contained in the underlying
+   * @brief Returns a begin @ref Entry const reverse iterator to iterate over all entries contained in the underlying
    * container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
    * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
-   * @return @ref Cell const reverse iterator.
+   * @return @ref Entry const reverse iterator.
    */
   const_reverse_iterator rbegin() const noexcept;
   /**
-   * @brief Returns a end @ref Cell reverse iterator, iterating over all cells contained in the underlying container.
-   *
-   * @warning The iterators really just iterate over the underlying container. Depending of the column type,
-   * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
-   * 
-   * @return @ref Cell reverse iterator.
-   */
-  reverse_iterator rend() noexcept;
-  /**
-   * @brief Returns a end @ref Cell const reverse iterator, iterating over all cells contained in the underlying
+   * @brief Returns an end @ref Entry reverse iterator, iterating over all entries contained in the underlying
    * container.
    *
    * @warning The iterators really just iterate over the underlying container. Depending of the column type,
    * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
    * 
-   * @return @ref Cell const reverse iterator.
+   * @return @ref Entry reverse iterator.
+   */
+  reverse_iterator rend() noexcept;
+  /**
+   * @brief Returns an end @ref Entry const reverse iterator, iterating over all entries contained in the underlying
+   * container.
+   *
+   * @warning The iterators really just iterate over the underlying container. Depending of the column type,
+   * neither the content nor the order is guaranteed. See description of the actual Column class for more details.
+   * 
+   * @return @ref Entry const reverse iterator.
    */
   const_reverse_iterator rend() const noexcept;
 
   /**
-   * @brief Adds the given @ref Cell range onto the column.
+   * @brief Adds the given @ref Entry range onto the column.
    * 
-   * @tparam Cell_range @ref Cell range with %begin() and %end() method.
+   * @tparam Entry_range @ref Entry range with %begin() and %end() method.
    * Has to be ordered by row index if not specified otherwise.
-   * @param column @ref Cell range. Only the stored row index and the stored element value
+   * @param column @ref Entry range. Only the stored row index and the stored element value
    * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
    * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.
    * @return Reference to this column.
    */
-  template <class Cell_range>
-  PersistenceMatrixColumn& operator+=(const Cell_range& column);
+  template <class Entry_range>
+  PersistenceMatrixColumn& operator+=(const Entry_range& column);
   /**
    * @brief Adds the given column onto this column.
    * 
@@ -393,35 +401,35 @@ class PersistenceMatrixColumn :
   /**
    * @brief `this = val * this + column`
    * 
-   * @tparam Cell_range @ref Cell range with %begin() and %end() method.
+   * @tparam Entry_range @ref Entry range with %begin() and %end() method.
    * Has to be ordered by row index if not specified otherwise.
    * @param val Value to multiply.
-   * @param column @ref Cell range. Only the stored row index and the stored element value
+   * @param column @ref Entry range. Only the stored row index and the stored element value
    * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
    * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.
    * @return Reference to this column.
    */
-  template <class Cell_range>
-  PersistenceMatrixColumn& multiply_target_and_add(const Field_element& val, const Cell_range& column);
+  template <class Entry_range>
+  PersistenceMatrixColumn& multiply_target_and_add(const Field_element& val, const Entry_range& column);
 
   /**
    * @brief `this = this + column * val`
    * 
-   * @tparam Cell_range @ref Cell range with %begin() and %end() method.
+   * @tparam Entry_range @ref Entry range with %begin() and %end() method.
    * Has to be ordered by row index if not specified otherwise.
-   * @param column @ref Cell range. Only the stored row index and the stored element value
+   * @param column @ref Entry range. Only the stored row index and the stored element value
    * (if @ref PersistenceMatrixOptions::is_z2 is false) are token into account for this method.
    * Even if @ref PersistenceMatrixOptions::has_row_access is true, the column index does not need to be correct.
    * @param val Value to multiply.
    * @return Reference to this column.
    */
-  template <class Cell_range>
-  PersistenceMatrixColumn& multiply_source_and_add(const Cell_range& column, const Field_element& val);
+  template <class Entry_range>
+  PersistenceMatrixColumn& multiply_source_and_add(const Entry_range& column, const Field_element& val);
 
   /**
    * @brief Equality comparator. Equal in the sense that what is "supposed" to be contained in the columns is equal,
    * not what is actually stored in the underlying container. For example, the underlying container of 
-   * @ref Vector_column can contain cells which were erased explicitly by @ref clear(Index). Those cells should not
+   * @ref Vector_column can contain entries which were erased explicitly by @ref clear(Index). Those entries should not
    * be taken into account while comparing.
    * 
    * @param c1 First column to compare.
@@ -434,7 +442,7 @@ class PersistenceMatrixColumn :
    * @brief "Strictly smaller than" comparator. Usually a lexicographical order, but what matters is that the
    * order is total. The order should apply on what is "supposed" to be contained in the columns,
    * not what is actually stored in the underlying container. For example, the underlying container of 
-   * @ref Vector_column can contain cells which were erased explicitly by @ref clear(Index). Those cells should not
+   * @ref Vector_column can contain entries which were erased explicitly by @ref clear(Index). Those entries should not
    * be taken into account while comparing.
    * 
    * @param c1 First column to compare.

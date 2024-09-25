@@ -45,18 +45,18 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * @brief Field operators class. Necessary only if @ref PersistenceMatrixOptions::is_z2 is false.
    */
   using Field_operators = typename Master_matrix::Field_operators;
-  using Field_element = typename Master_matrix::Element;             /**< Type of an field element. */
-  using Column = typename Master_matrix::Column;                     /**< Column type. */
-  using Row = typename Master_matrix::Row;                           /**< Row type,
-                                                                          only necessary with row access option. */
-  using Cell_constructor = typename Master_matrix::Cell_constructor; /**< Factory of @ref Cell classes. */
-  using Column_settings = typename Master_matrix::Column_settings;   /**< Structure giving access to the columns to
-                                                                          necessary external classes. */
-  using Boundary = typename Master_matrix::Boundary;                 /**< Type of an input column. */
-  using Index = typename Master_matrix::Index;                       /**< @ref MatIdx index type. */
-  using ID_index = typename Master_matrix::ID_index;                 /**< @ref IDIdx index type. */
-  using Pos_index = typename Master_matrix::Pos_index;               /**< @ref PosIdx index type. */
-  using Dimension = typename Master_matrix::Dimension;               /**< Dimension value type. */
+  using Field_element = typename Master_matrix::Element;                /**< Type of an field element. */
+  using Column = typename Master_matrix::Column;                        /**< Column type. */
+  using Row = typename Master_matrix::Row;                              /**< Row type,
+                                                                             only necessary with row access option. */
+  using Entry_constructor = typename Master_matrix::Entry_constructor;  /**< Factory of @ref Entry classes. */
+  using Column_settings = typename Master_matrix::Column_settings;      /**< Structure giving access to the columns to
+                                                                             necessary external classes. */
+  using Boundary = typename Master_matrix::Boundary;                    /**< Type of an input column. */
+  using Index = typename Master_matrix::Index;                          /**< @ref MatIdx index type. */
+  using ID_index = typename Master_matrix::ID_index;                    /**< @ref IDIdx index type. */
+  using Pos_index = typename Master_matrix::Pos_index;                  /**< @ref PosIdx index type. */
+  using Dimension = typename Master_matrix::Dimension;                  /**< Dimension value type. */
 
   /**
    * @brief Constructs an empty matrix.
@@ -66,11 +66,12 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    */
   RU_matrix(Column_settings* colSettings);
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Cell_representative. Each range corresponds to
-   * a column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
-   * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0.
+   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Entry_representative. Each range corresponds
+   * to a column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by
+   * increasing IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting
+   * with 0.
    *
-   * @tparam Boundary_range Range type for @ref Matrix::Cell_representative ranges.
+   * @tparam Boundary_range Range type for @ref Matrix::Entry_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order.
@@ -120,11 +121,11 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * face ID used in the boundaries when the face is inserted.
    *
    * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
-   * a more general cell complex. This includes cubical complexes or Morse complexes for example.
+   * a more general entry complex. This includes cubical complexes or Morse complexes for example.
    *
    * At the insertion, the boundary is stored in its reduced form and the barcode, if enabled, is updated.
    *
-   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size()
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
    * method.
    * @param boundary Boundary generating the new column. The content should be ordered by ID.
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial,
@@ -140,7 +141,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * As a face has to be inserted before one of its cofaces in a valid filtration (recall that it is assumed that
    * the faces are inserted by order of filtration), it is sufficient to indicate the ID of the face being inserted.
    *
-   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size()
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
    * method.
    * @param faceIndex @ref IDIdx index to use to identify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
@@ -156,7 +157,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * in \f$ U \f$ if @p inR is false.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
    *
-   * Note that before returning the column, all column cells can eventually be reordered, if lazy swaps occurred.
+   * Note that before returning the column, all column entries can eventually be reordered, if lazy swaps occurred.
    * It is therefore recommended to avoid calling @ref get_column between vine swaps, otherwise the benefits
    * of the the laziness is lost.
    *
@@ -171,7 +172,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * in \f$ U \f$ if @p inR is false.
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    *
-   * Note that before returning the row, all column cells can eventually be reordered, if lazy swaps occurred.
+   * Note that before returning the row, all column entries can eventually be reordered, if lazy swaps occurred.
    * It is therefore recommended to avoid calling @ref get_row between vine swaps, otherwise the benefits
    * of the the laziness is lost.
    *
@@ -190,10 +191,10 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * Otherwise, does nothing.
    *
    * @warning The removed rows are always assumed to be empty in \f$ R \f$. If it is not the case, the deleted row
-   * cells are not removed from their columns. And in the case of intrusive rows, this will generate a segmentation
-   * fault when the column cells are destroyed later. The row access is just meant as a "read only" access to the
+   * entries are not removed from their columns. And in the case of intrusive rows, this will generate a segmentation
+   * fault when the column entries are destroyed later. The row access is just meant as a "read only" access to the
    * rows and the @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed
-   * from dictionaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can
+   * from dictionaries. This allows to avoid testing the emptiness of a row at each column entry removal, what can
    * be quite frequent.
    *
    * @param rowIndex @ref rowindex "Row index" of the empty row.
@@ -280,16 +281,16 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   void multiply_source_and_add_to(const Field_element& coefficient, Index sourceColumnIndex, Index targetColumnIndex);
 
   /**
-   * @brief Zeroes the cell at the given coordinates in \f$ R \f$ if @p inR is true or in
+   * @brief Zeroes the entry at the given coordinates in \f$ R \f$ if @p inR is true or in
    * \f$ U \f$ if @p inR is false. Should be used with care to not destroy the validity of the persistence
    * related properties of the matrix.
    *
-   * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
+   * @param columnIndex @ref MatIdx index of the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
    * @param inR Boolean indicating in which matrix to zero: if true in \f$ R \f$ and if false in \f$ U \f$.
    * Default value: true.
    */
-  void zero_cell(Index columnIndex, Index rowIndex, bool inR = true);
+  void zero_entry(Index columnIndex, Index rowIndex, bool inR = true);
   /**
    * @brief Zeroes the column at the given index in \f$ R \f$ if @p inR is true or in
    * \f$ U \f$ if @p inR is false. Should be used with care to not destroy the validity of the persistence
@@ -301,17 +302,17 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    */
   void zero_column(Index columnIndex, bool inR = true);
   /**
-   * @brief Indicates if the cell at given coordinates has value zero in \f$ R \f$
+   * @brief Indicates if the entry at given coordinates has value zero in \f$ R \f$
    * if @p inR is true or in \f$ U \f$ if @p inR is false.
    *
-   * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
+   * @param columnIndex @ref MatIdx index of the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
    * @param inR Boolean indicating in which matrix to look: if true in \f$ R \f$ and if false in \f$ U \f$.
    * Default value: true.
-   * @return true If the cell has value zero.
+   * @return true If the entry has value zero.
    * @return false Otherwise.
    */
-  bool is_zero_cell(Index columnIndex, Index rowIndex, bool inR = true) const;
+  bool is_zero_entry(Index columnIndex, Index rowIndex, bool inR = true) const;
   /**
    * @brief Indicates if the column at given index has value zero in \f$ R \f$
    * if @p inR is true or in \f$ U \f$ if @p inR is false.
@@ -662,12 +663,12 @@ inline void RU_matrix<Master_matrix>::multiply_source_and_add_to(const Field_ele
 }
 
 template <class Master_matrix>
-inline void RU_matrix<Master_matrix>::zero_cell(Index columnIndex, Index rowIndex, bool inR)
+inline void RU_matrix<Master_matrix>::zero_entry(Index columnIndex, Index rowIndex, bool inR)
 {
   if (inR) {
-    return reducedMatrixR_.zero_cell(columnIndex, rowIndex);
+    return reducedMatrixR_.zero_entry(columnIndex, rowIndex);
   }
-  return mirrorMatrixU_.zero_cell(columnIndex, rowIndex);
+  return mirrorMatrixU_.zero_entry(columnIndex, rowIndex);
 }
 
 template <class Master_matrix>
@@ -680,12 +681,12 @@ inline void RU_matrix<Master_matrix>::zero_column(Index columnIndex, bool inR)
 }
 
 template <class Master_matrix>
-inline bool RU_matrix<Master_matrix>::is_zero_cell(Index columnIndex, Index rowIndex, bool inR) const
+inline bool RU_matrix<Master_matrix>::is_zero_entry(Index columnIndex, Index rowIndex, bool inR) const
 {
   if (inR) {
-    return reducedMatrixR_.is_zero_cell(columnIndex, rowIndex);
+    return reducedMatrixR_.is_zero_entry(columnIndex, rowIndex);
   }
-  return mirrorMatrixU_.is_zero_cell(columnIndex, rowIndex);
+  return mirrorMatrixU_.is_zero_entry(columnIndex, rowIndex);
 }
 
 template <class Master_matrix>

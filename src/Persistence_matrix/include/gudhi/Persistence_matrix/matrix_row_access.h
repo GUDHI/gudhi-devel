@@ -42,8 +42,8 @@ struct Dummy_matrix_row_access
  *
  * @brief Class managing the row access for the inheriting matrix.
  * 
- * @tparam Row Either boost::intrusive::list<Matrix_cell,...> if @ref PersistenceMatrixOptions::has_intrusive_rows
- * is true, or std::set<Matrix_cell, RowCellComp> otherwise.
+ * @tparam Row Either boost::intrusive::list<Matrix_entry,...> if @ref PersistenceMatrixOptions::has_intrusive_rows
+ * is true, or std::set<Matrix_entry, RowEntryComp> otherwise.
  * @tparam Row_container Either std::map<Index,Row> if @ref PersistenceMatrixOptions::has_removable_rows is
  *  true, or std::vector<Row> otherwise.
  * @tparam has_removable_rows Value of @ref PersistenceMatrixOptions::has_removable_rows.

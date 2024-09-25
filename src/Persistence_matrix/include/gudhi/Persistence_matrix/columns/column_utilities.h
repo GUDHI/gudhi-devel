@@ -25,11 +25,11 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
-template <class Cell, typename Cell_iterator>
-Cell* _get_cell(const Cell_iterator& itTarget)
+template <class Entry, typename Entry_iterator>
+Entry* _get_entry(const Entry_iterator& itTarget)
 {
-  if constexpr (Cell::Master::Option_list::column_type == Column_types::INTRUSIVE_LIST ||
-                Cell::Master::Option_list::column_type == Column_types::INTRUSIVE_SET) {
+  if constexpr (Entry::Master::Option_list::column_type == Column_types::INTRUSIVE_LIST ||
+                Entry::Master::Option_list::column_type == Column_types::INTRUSIVE_SET) {
     return &*itTarget;
   } else {
     return *itTarget;
@@ -37,41 +37,41 @@ Cell* _get_cell(const Cell_iterator& itTarget)
 }
 
 // works only for ordered columns
-template <class Column, class Cell_iterator, typename F1, typename F2, typename F3, typename F4>
-void _generic_merge_cell_to_column(Column& targetColumn,
-                                   Cell_iterator& itSource,
-                                   typename Column::Column_support::iterator& itTarget,
-                                   F1&& process_target,
-                                   F2&& process_source,
-                                   F3&& update_target1,
-                                   F4&& update_target2,
-                                   bool& pivotIsZeroed)
+template <class Column, class Entry_iterator, typename F1, typename F2, typename F3, typename F4>
+void _generic_merge_entry_to_column(Column& targetColumn,
+                                    Entry_iterator& itSource,
+                                    typename Column::Column_support::iterator& itTarget,
+                                    F1&& process_target,
+                                    F2&& process_source,
+                                    F3&& update_target1,
+                                    F4&& update_target2,
+                                    bool& pivotIsZeroed)
 {
-  typename Column::Cell* targetCell = _get_cell<typename Column::Cell>(itTarget);
+  typename Column::Entry* targetEntry = _get_entry<typename Column::Entry>(itTarget);
 
-  if (targetCell->get_row_index() < itSource->get_row_index()) {
-    process_target(targetCell);
+  if (targetEntry->get_row_index() < itSource->get_row_index()) {
+    process_target(targetEntry);
     ++itTarget;
-  } else if (targetCell->get_row_index() > itSource->get_row_index()) {
+  } else if (targetEntry->get_row_index() > itSource->get_row_index()) {
     process_source(itSource, itTarget);
     ++itSource;
   } else {
     if constexpr (Column::Master::Option_list::is_z2) {
       //_multiply_*_and_add never enters here so not treated
       if constexpr (Column::Master::isNonBasic && !Column::Master::Option_list::is_of_boundary_type) {
-        if (targetCell->get_row_index() == targetColumn.get_pivot()) pivotIsZeroed = true;
+        if (targetEntry->get_row_index() == targetColumn.get_pivot()) pivotIsZeroed = true;
       }
-      targetColumn._delete_cell(itTarget);
+      targetColumn._delete_entry(itTarget);
     } else {
-      update_target1(targetCell->get_element(), itSource);
-      if (targetCell->get_element() == Column::Field_operators::get_additive_identity()) {
+      update_target1(targetEntry->get_element(), itSource);
+      if (targetEntry->get_element() == Column::Field_operators::get_additive_identity()) {
         if constexpr (Column::Master::isNonBasic && !Column::Master::Option_list::is_of_boundary_type) {
-          if (targetCell->get_row_index() == targetColumn.get_pivot()) pivotIsZeroed = true;
+          if (targetEntry->get_row_index() == targetColumn.get_pivot()) pivotIsZeroed = true;
         }
-        targetColumn._delete_cell(itTarget);
+        targetColumn._delete_entry(itTarget);
       } else {
-        update_target2(targetCell);
-        if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_cell(*targetCell);
+        update_target2(targetEntry);
+        if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_entry(*targetEntry);
         ++itTarget;
       }
     }
@@ -80,8 +80,8 @@ void _generic_merge_cell_to_column(Column& targetColumn,
 }
 
 // works only for ordered columns
-template <class Column, class Cell_range, typename F1, typename F2, typename F3, typename F4, typename F5>
-bool _generic_add_to_column(const Cell_range& source,
+template <class Column, class Entry_range, typename F1, typename F2, typename F3, typename F4, typename F5>
+bool _generic_add_to_column(const Entry_range& source,
                             Column& targetColumn,
                             F1&& process_target,
                             F2&& process_source,
@@ -95,9 +95,9 @@ bool _generic_add_to_column(const Cell_range& source,
   auto itTarget = target.begin();
   auto itSource = source.begin();
   while (itTarget != target.end() && itSource != source.end()) {
-    _generic_merge_cell_to_column(targetColumn, itSource, itTarget,
-                                  process_target, process_source, update_target1, update_target2,
-                                  pivotIsZeroed);
+    _generic_merge_entry_to_column(targetColumn, itSource, itTarget,
+                                   process_target, process_source, update_target1, update_target2,
+                                   pivotIsZeroed);
   }
 
   finish_target(itTarget);
@@ -110,32 +110,32 @@ bool _generic_add_to_column(const Cell_range& source,
   return pivotIsZeroed;
 }
 
-template <class Column, class Cell_range>
-bool _add_to_column(const Cell_range& source, Column& targetColumn)
+template <class Column, class Entry_range>
+bool _add_to_column(const Entry_range& source, Column& targetColumn)
 {
   return _generic_add_to_column(
       source,
       targetColumn,
-      [&]([[maybe_unused]] typename Column::Cell* cellTarget) {},
-      [&](typename Cell_range::const_iterator& itSource, const typename Column::Column_support::iterator& itTarget) {
+      [&]([[maybe_unused]] typename Column::Entry* entryTarget) {},
+      [&](typename Entry_range::const_iterator& itSource, const typename Column::Column_support::iterator& itTarget) {
         if constexpr (Column::Master::Option_list::is_z2) {
-          targetColumn._insert_cell(itSource->get_row_index(), itTarget);
+          targetColumn._insert_entry(itSource->get_row_index(), itTarget);
         } else {
-          targetColumn._insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
+          targetColumn._insert_entry(itSource->get_element(), itSource->get_row_index(), itTarget);
         }
       },
-      [&](typename Column::Field_element& targetElement, typename Cell_range::const_iterator& itSource) {
+      [&](typename Column::Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
         if constexpr (!Column::Master::Option_list::is_z2)
           targetColumn.operators_->add_inplace(targetElement, itSource->get_element());
       },
-      [&]([[maybe_unused]] typename Column::Cell* cellTarget) {},
+      [&]([[maybe_unused]] typename Column::Entry* entryTarget) {},
       [&]([[maybe_unused]] typename Column::Column_support::iterator& itTarget) {}
     );
 }
 
-template <class Column, class Cell_range>
+template <class Column, class Entry_range>
 bool _multiply_target_and_add_to_column(const typename Column::Field_element& val,
-                                        const Cell_range& source,
+                                        const Entry_range& source,
                                         Column& targetColumn)
 {
   if (val == 0u) {
@@ -150,33 +150,33 @@ bool _multiply_target_and_add_to_column(const typename Column::Field_element& va
   return _generic_add_to_column(
       source,
       targetColumn,
-      [&](typename Column::Cell* cellTarget) {
-        targetColumn.operators_->multiply_inplace(cellTarget->get_element(), val);
-        // targetColumn.RA_opt::update_cell(*itTarget) produces an internal compiler error
+      [&](typename Column::Entry* entryTarget) {
+        targetColumn.operators_->multiply_inplace(entryTarget->get_element(), val);
+        // targetColumn.RA_opt::update_entry(*itTarget) produces an internal compiler error
         // even though it works in _generic_add_to_column... Probably because of the lambda.
-        if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_cell(*cellTarget);
+        if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_entry(*entryTarget);
       },
-      [&](typename Cell_range::const_iterator& itSource, const typename Column::Column_support::iterator& itTarget) {
-        targetColumn._insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
+      [&](typename Entry_range::const_iterator& itSource, const typename Column::Column_support::iterator& itTarget) {
+        targetColumn._insert_entry(itSource->get_element(), itSource->get_row_index(), itTarget);
       },
-      [&](typename Column::Field_element& targetElement, typename Cell_range::const_iterator& itSource) {
+      [&](typename Column::Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
         targetColumn.operators_->multiply_and_add_inplace_front(targetElement, val, itSource->get_element());
       },
-      [&]([[maybe_unused]] typename Column::Cell* cellTarget) {},
+      [&]([[maybe_unused]] typename Column::Entry* entryTarget) {},
       [&](typename Column::Column_support::iterator& itTarget) {
         while (itTarget != targetColumn.column_.end()) {
-          typename Column::Cell* targetCell = _get_cell<typename Column::Cell>(itTarget);
-          targetColumn.operators_->multiply_inplace(targetCell->get_element(), val);
-          if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_cell(*targetCell);
+          typename Column::Entry* targetEntry = _get_entry<typename Column::Entry>(itTarget);
+          targetColumn.operators_->multiply_inplace(targetEntry->get_element(), val);
+          if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_entry(*targetEntry);
           itTarget++;
         }
       }
     );
 }
 
-template <class Column, class Cell_range>
+template <class Column, class Entry_range>
 bool _multiply_source_and_add_to_column(const typename Column::Field_element& val,
-                                        const Cell_range& source,
+                                        const Entry_range& source,
                                         Column& targetColumn)
 {
   if (val == 0u) {
@@ -186,17 +186,17 @@ bool _multiply_source_and_add_to_column(const typename Column::Field_element& va
   return _generic_add_to_column(
       source,
       targetColumn,
-      []([[maybe_unused]] typename Column::Cell* cellTarget) {},
-      [&](typename Cell_range::const_iterator& itSource, const typename Column::Column_support::iterator& itTarget) {
-        typename Column::Cell* cell =
-            targetColumn._insert_cell(itSource->get_element(), itSource->get_row_index(), itTarget);
-        targetColumn.operators_->multiply_inplace(cell->get_element(), val);
-        if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_cell(*cell);
+      []([[maybe_unused]] typename Column::Entry* entryTarget) {},
+      [&](typename Entry_range::const_iterator& itSource, const typename Column::Column_support::iterator& itTarget) {
+        typename Column::Entry* entry =
+            targetColumn._insert_entry(itSource->get_element(), itSource->get_row_index(), itTarget);
+        targetColumn.operators_->multiply_inplace(entry->get_element(), val);
+        if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_entry(*entry);
       },
-      [&](typename Column::Field_element& targetElement, typename Cell_range::const_iterator& itSource) {
+      [&](typename Column::Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
         targetColumn.operators_->multiply_and_add_inplace_back(itSource->get_element(), val, targetElement);
       },
-      [&]([[maybe_unused]] typename Column::Cell* cellTarget) {},
+      [&]([[maybe_unused]] typename Column::Entry* entryTarget) {},
       []([[maybe_unused]] typename Column::Column_support::iterator& itTarget) {});
 }
 
@@ -206,8 +206,8 @@ template <class Column>
 std::size_t hash_column(const Column& column)
 {
   std::size_t seed = 0;
-  for (auto& cell : column) {
-    seed ^= std::hash<unsigned int>()(cell.get_row_index() * static_cast<unsigned int>(cell.get_element())) +
+  for (auto& entry : column) {
+    seed ^= std::hash<unsigned int>()(entry.get_row_index() * static_cast<unsigned int>(entry.get_element())) +
             0x9e3779b9 + (seed << 6) + (seed >> 2);
   }
   return seed;

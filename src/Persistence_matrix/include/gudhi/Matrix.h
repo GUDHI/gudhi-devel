@@ -51,8 +51,8 @@
 #include <gudhi/Persistence_matrix/RU_matrix.h>
 #include <gudhi/Persistence_matrix/Chain_matrix.h>
 
-#include <gudhi/Persistence_matrix/allocators/cell_constructors.h>
-#include <gudhi/Persistence_matrix/columns/cell_types.h>
+#include <gudhi/Persistence_matrix/allocators/entry_constructors.h>
+#include <gudhi/Persistence_matrix/columns/entry_types.h>
 #include <gudhi/Persistence_matrix/columns/row_access.h>
 
 #include <gudhi/Persistence_matrix/columns/column_dimension_holder.h>
@@ -168,7 +168,7 @@ class Matrix {
    */
   using Bar = Persistence_interval<Dimension, Pos_index>;
 
-  //tags for boost to associate a row and a column to a same cell
+  //tags for boost to associate a row and a column to a same entry
   struct Matrix_row_tag;
   struct Matrix_column_tag;
 
@@ -182,7 +182,7 @@ class Matrix {
       boost::intrusive::set_base_hook<boost::intrusive::tag<Matrix_column_tag>,
                                       boost::intrusive::link_mode<boost::intrusive::safe_link> >;
 
-  //Two dummies are necessary to avoid double inheritance as a cell can inherit both a row and a column hook.
+  //Two dummies are necessary to avoid double inheritance as an entry can inherit both a row and a column hook.
   struct Dummy_row_hook {};
   struct Dummy_column_hook {};
 
@@ -200,69 +200,69 @@ class Matrix {
                                >::type
     >::type;
 
-  //Option to store the column index within the cell (additionally to the row index). Necessary only with row access.
-  using Cell_column_index_option =
+  //Option to store the column index within the entry (additionally to the row index). Necessary only with row access.
+  using Entry_column_index_option =
       typename std::conditional<PersistenceMatrixOptions::has_row_access,
-                                Cell_column_index<Index>,
-                                Dummy_cell_column_index_mixin
+                                Entry_column_index<Index>,
+                                Dummy_entry_column_index_mixin
                                >::type;
-  //Option to store the value of the cell. 
-  //Unnecessary for values in Z_2 as there are always 1 (0-valued cells are never stored).
-  using Cell_field_element_option =
+  //Option to store the value of the entry. 
+  //Unnecessary for values in Z_2 as there are always 1 (0-valued entries are never stored).
+  using Entry_field_element_option =
       typename std::conditional<PersistenceMatrixOptions::is_z2,
-                                Dummy_cell_field_element_mixin,
-                                Cell_field_element<Element>
+                                Dummy_entry_field_element_mixin,
+                                Entry_field_element<Element>
                                >::type;
   /**
-   * @brief Type of a matrix cell. See @ref Cell for a more detailed description.
+   * @brief Type of a matrix entry. See @ref Entry for a more detailed description.
    */
-  using Matrix_cell = Cell<Matrix<PersistenceMatrixOptions> >;
+  using Matrix_entry = Entry<Matrix<PersistenceMatrixOptions> >;
 
   /**
-   * @brief Default cell constructor/destructor, using classic new and delete.
+   * @brief Default entry constructor/destructor, using classic new and delete.
    * For now, only used as default value for columns constructed independently outside of the matrix by the user.
    * Could be used in the future when parallel options are implemented, as usual pools are not thread safe.
    */
-  inline static New_cell_constructor<Matrix_cell> defaultCellConstructor;
+  inline static New_entry_constructor<Matrix_entry> defaultEntryConstructor;
   /**
-   * @brief Cell constructor/destructor used by the matrix. Uses a pool of cells to accelerate memory management,
-   * as cells are constructed and destroyed a lot during reduction, swaps or additions.
+   * @brief Entry constructor/destructor used by the matrix. Uses a pool of entries to accelerate memory management,
+   * as entries are constructed and destroyed a lot during reduction, swaps or additions.
    */
-  using Cell_constructor = Pool_cell_constructor<Matrix_cell>;
+  using Entry_constructor = Pool_entry_constructor<Matrix_entry>;
 
   /**
-   * @brief Type used to identify a cell, for example when inserting a boundary.
+   * @brief Type used to identify an entry, for example when inserting a boundary.
    * If @ref PersistenceMatrixOptions::is_z2 is true, the type is an @ref IDIdx and corresponds to the row index of the
-   * cell (the cell value is assumed to be 1). If @ref PersistenceMatrixOptions::is_z2 is false, the type is a pair
-   * whose first element is the row index of the cell and the second element is the value of the cell (which again is
+   * entry (the entry value is assumed to be 1). If @ref PersistenceMatrixOptions::is_z2 is false, the type is a pair
+   * whose first element is the row index of the entry and the second element is the value of the entry (which again is
    * assumed to be non-zero). The column index of the row is always deduced from the context in which the type is used.
    */
-  using Cell_representative = typename std::conditional<PersistenceMatrixOptions::is_z2,
+  using Entry_representative = typename std::conditional<PersistenceMatrixOptions::is_z2,
                                                   ID_index,
                                                   std::pair<ID_index, Element>
                                                  >::type;
 
   /**
-   * @brief Compares two cells by their position in the row. They are assume to be in the same row.
+   * @brief Compares two entries by their position in the row. They are assume to be in the same row.
    */
-  struct RowCellComp {
-    bool operator()(const Matrix_cell& c1, const Matrix_cell& c2) const {
+  struct RowEntryComp {
+    bool operator()(const Matrix_entry& c1, const Matrix_entry& c2) const {
       return c1.get_column_index() < c2.get_column_index();
     }
   };
 
   /**
-   * @brief Type of the rows stored in the matrix. Is either an intrusive list of @ref Matrix_cell (not ordered) if
-   * @ref PersistenceMatrixOptions::has_intrusive_rows is true, or a set of @ref Matrix_cell (ordered by
+   * @brief Type of the rows stored in the matrix. Is either an intrusive list of @ref Matrix_entry (not ordered) if
+   * @ref PersistenceMatrixOptions::has_intrusive_rows is true, or a set of @ref Matrix_entry (ordered by
    * column index) otherwise.
    */
   using Row =
       typename std::conditional<PersistenceMatrixOptions::has_intrusive_rows,
-                                boost::intrusive::list<Matrix_cell, 
+                                boost::intrusive::list<Matrix_entry, 
                                                        boost::intrusive::constant_time_size<false>,
                                                        boost::intrusive::base_hook<Base_hook_matrix_row>
                                                       >,
-                                std::set<Matrix_cell, RowCellComp>
+                                std::set<Matrix_entry, RowEntryComp>
                                >::type;
 
   using Row_container =
@@ -355,43 +355,43 @@ class Matrix {
         >::type;
 
   struct Column_z2_settings{
-    Column_z2_settings() : cellConstructor() {}
-    Column_z2_settings([[maybe_unused]] Characteristic characteristic) : cellConstructor() {}
-    Column_z2_settings(const Column_z2_settings& toCopy) : cellConstructor() {}
+    Column_z2_settings() : entryConstructor() {}
+    Column_z2_settings([[maybe_unused]] Characteristic characteristic) : entryConstructor() {}
+    Column_z2_settings(const Column_z2_settings& toCopy) : entryConstructor() {}
 
-    Cell_constructor cellConstructor;   //will be replaced by more specific allocators depending on the column type.
+    Entry_constructor entryConstructor;   //will be replaced by more specific allocators depending on the column type.
   };
 
   struct Column_zp_settings {
-    Column_zp_settings() : operators(), cellConstructor() {}
+    Column_zp_settings() : operators(), entryConstructor() {}
     //purposely triggers operators() instead of operators(characteristic) as the "dummy" values for the different
     //operators can be different from -1.
-    Column_zp_settings(Characteristic characteristic) : operators(), cellConstructor() {
+    Column_zp_settings(Characteristic characteristic) : operators(), entryConstructor() {
       if (characteristic != static_cast<Characteristic>(-1)) operators.set_characteristic(characteristic);
     }
     Column_zp_settings(const Column_zp_settings& toCopy)
-        : operators(toCopy.operators.get_characteristic()), cellConstructor() {}
+        : operators(toCopy.operators.get_characteristic()), entryConstructor() {}
 
     Field_operators operators;
-    Cell_constructor cellConstructor;   //will be replaced by more specific allocators depending on the column type.
+    Entry_constructor entryConstructor;   //will be replaced by more specific allocators depending on the column type.
   };
 
   // struct Column_z2_with_rows_settings {
-  //   Column_z2_with_rows_settings() : cellConstructor(), rows(nullptr) {}
+  //   Column_z2_with_rows_settings() : entryConstructor(), rows(nullptr) {}
   //   Column_z2_with_rows_settings([[maybe_unused]] Characteristic characteristic)
-  //       : cellConstructor(), rows(nullptr) {}
+  //       : entryConstructor(), rows(nullptr) {}
 
-  //   Cell_constructor cellConstructor;
+  //   Entry_constructor entryConstructor;
   //   Row_container* rows;
   // };
 
   // struct Column_zp_with_rows_settings {
-  //   Column_zp_with_rows_settings() : operators(), cellConstructor(), rows(nullptr) {}
+  //   Column_zp_with_rows_settings() : operators(), entryConstructor(), rows(nullptr) {}
   //   Column_zp_with_rows_settings(Characteristic characteristic)
-  //       : operators(characteristic), cellConstructor(), rows(nullptr) {}
+  //       : operators(characteristic), entryConstructor(), rows(nullptr) {}
 
   //   Field_operators operators;
-  //   Cell_constructor cellConstructor;
+  //   Entry_constructor entryConstructor;
   //   Row_container* rows;
   // };
 
@@ -548,7 +548,7 @@ class Matrix {
                                     PersistenceMatrixOptions::column_indexation_type ==
                                         Column_indexation_types::POSITION,
                                 void, 
-                                std::vector<Cell_representative>
+                                std::vector<Entry_representative>
                                >::type;
 
   /**
@@ -556,14 +556,14 @@ class Matrix {
    */
   Matrix();
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref Cell_representative. Each range corresponds to a column (the
-   * order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs. If the
-   * columns are representing a boundary matrix, the IDs of the simplices are also assumed to be consecutive, ordered by
-   * filtration value, starting with 0.
+   * @brief Constructs a new matrix from the given ranges of @ref Entry_representative. Each range corresponds to a
+   * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
+   * IDs. If the columns are representing a boundary matrix, the IDs of the simplices are also assumed to be
+   * consecutive, ordered by filtration value, starting with 0.
    *
    * See @ref mp_matrices "matrix descriptions" for further details on how the given matrix is handled.
    *
-   * @tparam Container Range type for @ref Cell_representative ranges. Assumed to have a begin(), end() and size()
+   * @tparam Container Range type for @ref Entry_representative ranges. Assumed to have a begin(), end() and size()
    * method.
    * @param columns For a @ref basematrix "base matrix", the columns are copied as is. If options related to homology
    * are activated, @p columns is interpreted as a boundary matrix of a **simplicial** complex. In this case,
@@ -629,7 +629,8 @@ class Matrix {
    * @ref Matrix(const std::function<bool(Pos_index,Pos_index)>&, const std::function<bool(Pos_index,Pos_index)>&)
    * for more information about the comparators.
    *
-   * @tparam Boundary_range Range type for @ref Cell_representative ranges. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range type for @ref Entry_representative ranges. Assumed to have a begin(), end() and size()
+   * method.
    * @param orderedBoundaries Vector of ordered boundaries in filtration order. Indexed continuously starting at 0.
    * @param birthComparator Method taking two @ref PosIdx indices as parameter and returns true if and only if the first
    * face is associated to a bar with strictly smaller birth than the bar associated to the second one.
@@ -697,7 +698,7 @@ class Matrix {
    * Do not change the value of the characteristic once used.
    *
    * @warning The coefficient values stored in the matrix are stored after computing the corresponding modulo.
-   * Therefore, changing the characteristic after is very likely to invalidate all cell values.
+   * Therefore, changing the characteristic after is very likely to invalidate all entry values.
    * 
    * @param characteristic The characteristic to set.
    */
@@ -706,25 +707,25 @@ class Matrix {
   // (TODO: if there is no row access and the column type corresponds to the internal column type of the matrix, 
   // moving the column instead of copying it should be possible. Is it worth implementing it?)
   /**
-   * @brief Inserts a new ordered column at the end of the matrix by copying the given range of @ref Cell_representative.
-   * The content of the range is assumed to be sorted by increasing ID value. 
+   * @brief Inserts a new ordered column at the end of the matrix by copying the given range of
+   * @ref Entry_representative. The content of the range is assumed to be sorted by increasing ID value. 
    *
    * Only available for @ref basematrix "base matrices".
    * Otherwise use @ref insert_boundary which will deduce a new column from the boundary given.
    * 
-   * @tparam Container Range of @ref Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Container Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
    * @param column Column to be inserted.
    */
   template <class Container>
   void insert_column(const Container& column);
   /**
-   * @brief Inserts a new ordered column at the given index by copying the given range of @ref Cell_representative.
+   * @brief Inserts a new ordered column at the given index by copying the given range of @ref Entry_representative.
    * There should not be any other column inserted at that index which was not explicitly removed before.
    * The content of the range is assumed to be sorted by increasing ID value. 
    *
    * Only available for @ref basematrix "base matrices" without column compression and without row access.
    * 
-   * @tparam Container Range of @ref Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Container Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
    * @param column Column to be inserted.
    * @param columnIndex @ref MatIdx index to which the column has to be inserted.
    */
@@ -741,7 +742,7 @@ class Matrix {
    * instead by indicating the face ID used in the boundaries when the face is inserted.
    *
    * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
-   * a more general cell complex. This includes cubical complexes or Morse complexes for example.
+   * a more general entry complex. This includes cubical complexes or Morse complexes for example.
    *
    * The content of the new column will vary depending on the underlying @ref mp_matrices "type of the matrix":
    * - If it is a @ref basematrix "basic matrix" type, the boundary is copied as it is, i.e., the method is equivalent
@@ -756,7 +757,7 @@ class Matrix {
    * older column IDIdxs`, where the combination is deduced while reducing the given boundary. If the barcode is stored,
    * it will also be updated.
    *
-   * @tparam Boundary_range Range of @ref Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
    * @param boundary Boundary generating the new column. The content should be ordered by ID.
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
@@ -775,7 +776,7 @@ class Matrix {
    * for @ref mp_matrices "non-basic matrices", the faces are inserted by order of filtration), it is sufficient to
    * indicate the ID of the face being inserted.
    *
-   * @tparam Boundary_range Range of @ref Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
    * @param faceIndex @ref IDIdx index to use to identify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
    * @p faceIndex values of precedent calls of the method for the corresponding faces and should be ordered in
@@ -859,8 +860,8 @@ class Matrix {
   /**
    * @brief Only available for @ref basematrix "base matrices" without column compression and if
    * @ref PersistenceMatrixOptions::has_map_column_container is true. Otherwise, see @ref remove_last. Erases the given
-   * column from the matrix. If @ref PersistenceMatrixOptions::has_row_access is also true, the deleted column cells are
-   * also automatically removed from their respective rows.
+   * column from the matrix. If @ref PersistenceMatrixOptions::has_row_access is also true, the deleted column entries
+   * are also automatically removed from their respective rows.
    *
    * @param columnIndex @ref MatIdx index of the column to remove.
    */
@@ -879,11 +880,11 @@ class Matrix {
    * - @ref chainmatrix "chain matrix": only available if @ref PersistenceMatrixOptions::has_row_access and
    *   @ref PersistenceMatrixOptions::has_removable_rows are true. Assumes that the row is empty and removes it.
    *
-   * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row cells are not
+   * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row entries are not
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when
-   * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
+   * the column entries are destroyed later. The row access is just meant as a "read only" access to the rows and the
    * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
-   * dictionaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be quite
+   * dictionaries. This allows to avoid testing the emptiness of a row at each column entry removal, what can be quite
    * frequent.
    *
    * @param rowIndex @ref rowindex "Row index" of the empty row to remove.
@@ -992,19 +993,19 @@ class Matrix {
   std::enable_if_t<std::is_integral_v<Integer_index> > add_to(Integer_index sourceColumnIndex,
                                                               Integer_index targetColumnIndex);
   /**
-   * @brief Adds the given range of @ref Cell onto the column at @p targetColumnIndex in the matrix. Only available 
+   * @brief Adds the given range of @ref Entry onto the column at @p targetColumnIndex in the matrix. Only available 
    * for @ref basematrix "basic matrices".
    *
    * For @ref basematrix "basic matrices" with column compression, the range is summed onto the representative, which
    * means that all column compressed together with the target column are affected by the change, not only the target.
    * 
-   * @tparam Cell_range Range of @ref Cell. Needs a begin() and end() method. A column index does not need to be
-   * stored in the cells, even if @ref PersistenceMatrixOptions::has_row_access is true.
-   * @param sourceColumn Source @ref Cell range.
+   * @tparam Entry_range Range of @ref Entry. Needs a begin() and end() method. A column index does not need to be
+   * stored in the entries, even if @ref PersistenceMatrixOptions::has_row_access is true.
+   * @param sourceColumn Source @ref Entry range.
    * @param targetColumnIndex @ref MatIdx index of the target column.
    */
-  template <class Cell_range>
-  std::enable_if_t<!std::is_integral_v<Cell_range> > add_to(const Cell_range& sourceColumn, Index targetColumnIndex);
+  template <class Entry_range>
+  std::enable_if_t<!std::is_integral_v<Entry_range> > add_to(const Entry_range& sourceColumn, Index targetColumnIndex);
 
   /**
    * @brief Multiplies the target column with the coefficient and then adds the source column to it.
@@ -1027,21 +1028,21 @@ class Matrix {
                                                                                int coefficient,
                                                                                Integer_index targetColumnIndex);
   /**
-   * @brief Multiplies the target column with the coefficient and then adds the given range of @ref Cell to it.
+   * @brief Multiplies the target column with the coefficient and then adds the given range of @ref Entry to it.
    * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`. Only available for
    * @ref basematrix "basic matrices".
    *
    * For @ref basematrix "basic matrices" with column compression, the range is summed onto the representative, which
    * means that all column compressed together with the target column are affected by the change, not only the target.
    * 
-   * @tparam Cell_range Range of @ref Cell. Needs a begin() and end() method. A column index does not need to be
-   * stored in the cells, even if @ref PersistenceMatrixOptions::has_row_access is true.
-   * @param sourceColumn Source @ref Cell range.
+   * @tparam Entry_range Range of @ref Entry. Needs a begin() and end() method. A column index does not need to be
+   * stored in the entries, even if @ref PersistenceMatrixOptions::has_row_access is true.
+   * @param sourceColumn Source @ref Entry range.
    * @param coefficient Value to multiply.
    * @param targetColumnIndex @ref MatIdx index of the target column.
    */
-  template <class Cell_range>
-  std::enable_if_t<!std::is_integral_v<Cell_range> > multiply_target_and_add_to(const Cell_range& sourceColumn,
+  template <class Entry_range>
+  std::enable_if_t<!std::is_integral_v<Entry_range> > multiply_target_and_add_to(const Entry_range& sourceColumn,
                                                                                 int coefficient,
                                                                                 Index targetColumnIndex);
 
@@ -1073,40 +1074,40 @@ class Matrix {
    * For @ref basematrix "basic matrices" with column compression, the range is summed onto the representative, which
    * means that all column compressed together with the target column are affected by the change, not only the target.
    * 
-   * @tparam Cell_range Range of @ref Cell. Needs a begin() and end() method. A column index does not need to be
-   * stored in the cells, even if @ref PersistenceMatrixOptions::has_row_access is true.
+   * @tparam Entry_range Range of @ref Entry. Needs a begin() and end() method. A column index does not need to be
+   * stored in the entries, even if @ref PersistenceMatrixOptions::has_row_access is true.
    * @param coefficient Value to multiply.
-   * @param sourceColumn Source @ref Cell range.
+   * @param sourceColumn Source @ref Entry range.
    * @param targetColumnIndex @ref MatIdx index of the target column.
    */
-  template <class Cell_range>
-  std::enable_if_t<!std::is_integral_v<Cell_range> > multiply_source_and_add_to(int coefficient,
-                                                                                const Cell_range& sourceColumn,
+  template <class Entry_range>
+  std::enable_if_t<!std::is_integral_v<Entry_range> > multiply_source_and_add_to(int coefficient,
+                                                                                const Entry_range& sourceColumn,
                                                                                 Index targetColumnIndex);
 
   /**
-   * @brief Zeroes the cell at the given coordinates. Not available for @ref chainmatrix "chain matrices" and for
+   * @brief Zeroes the entry at the given coordinates. Not available for @ref chainmatrix "chain matrices" and for
    * @ref basematrix "base matrices" with column compression. In general, should be used with care with
    * @ref mp_matrices "non-basic matrices" to not destroy the validity of the persistence related properties of the
    * matrix.
    *
    * For @ref boundarymatrix "RU matrices", equivalent to
-   * @ref zero_cell(Index columnIndex, ID_index rowIndex, bool inR) "zero_cell(columnIndex, rowIndex, true)".
+   * @ref zero_entry(Index columnIndex, ID_index rowIndex, bool inR) "zero_entry(columnIndex, rowIndex, true)".
    *
-   * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
+   * @param columnIndex @ref MatIdx index of the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
    */
-  void zero_cell(Index columnIndex, ID_index rowIndex);
+  void zero_entry(Index columnIndex, ID_index rowIndex);
   /**
-   * @brief Only available for @ref boundarymatrix "RU matrices". Zeroes the cell at the given coordinates in \f$ R \f$
+   * @brief Only available for @ref boundarymatrix "RU matrices". Zeroes the entry at the given coordinates in \f$ R \f$
    * if @p inR is true or in \f$ U \f$ if @p inR is false. Should be used with care to not destroy the validity of the
    * persistence related properties of the matrix.
    *
-   * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
+   * @param columnIndex @ref MatIdx index of the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
    * @param inR Boolean indicating in which matrix to zero: if true in \f$ R \f$ and if false in \f$ U \f$.
    */
-  void zero_cell(Index columnIndex, ID_index rowIndex, bool inR);
+  void zero_entry(Index columnIndex, ID_index rowIndex, bool inR);
   /**
    * @brief Zeroes the column at the given index. Not available for @ref chainmatrix "chain matrices" and for
    * @ref basematrix "base matrices" with column compression. In general, should be used with care with
@@ -1129,29 +1130,29 @@ class Matrix {
    */
   void zero_column(Index columnIndex, bool inR);
   /**
-   * @brief Indicates if the cell at given coordinates has value zero.
+   * @brief Indicates if the entry at given coordinates has value zero.
    *
    * For @ref boundarymatrix "RU matrices", equivalent to
-   * @ref is_zero_cell(Index columnIndex, ID_index rowIndex, bool inR) const
-   * "is_zero_cell(columnIndex, rowIndex, true)".
+   * @ref is_zero_entry(Index columnIndex, ID_index rowIndex, bool inR) const
+   * "is_zero_entry(columnIndex, rowIndex, true)".
    *
-   * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
-   * @return true If the cell has value zero.
+   * @param columnIndex @ref MatIdx index of the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
+   * @return true If the entry has value zero.
    * @return false Otherwise.
    */
-  bool is_zero_cell(Index columnIndex, ID_index rowIndex);
+  bool is_zero_entry(Index columnIndex, ID_index rowIndex);
   /**
-   * @brief Only available for @ref boundarymatrix "RU matrices". Indicates if the cell at given coordinates has value
+   * @brief Only available for @ref boundarymatrix "RU matrices". Indicates if the entry at given coordinates has value
    * zero in \f$ R \f$ if @p inR is true or in \f$ U \f$ if @p inR is false.
    *
-   * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
+   * @param columnIndex @ref MatIdx index of the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
    * @param inR Boolean indicating in which matrix to look: if true in \f$ R \f$ and if false in \f$ U \f$.
-   * @return true If the cell has value zero.
+   * @return true If the entry has value zero.
    * @return false Otherwise.
    */
-  bool is_zero_cell(Index columnIndex, ID_index rowIndex, bool inR) const;
+  bool is_zero_entry(Index columnIndex, ID_index rowIndex, bool inR) const;
   /**
    * @brief Indicates if the column at given index has value zero.
    *
@@ -1394,7 +1395,7 @@ class Matrix {
     >::type;
 
   // Field_operators* operators_;
-  // Cell_constructor* cellPool_;
+  // Entry_constructor* entryPool_;
   Column_settings* colSettings_;  //pointer because the of swap operator on matrix_ which also stores the pointer
   Underlying_matrix matrix_;
 
@@ -1746,9 +1747,9 @@ inline std::enable_if_t<std::is_integral_v<Integer_index> > Matrix<PersistenceMa
 }
 
 template <class PersistenceMatrixOptions>
-template <class Cell_range>
-inline std::enable_if_t<!std::is_integral_v<Cell_range> > Matrix<PersistenceMatrixOptions>::add_to(
-    const Cell_range& sourceColumn, Index targetColumnIndex)
+template <class Entry_range>
+inline std::enable_if_t<!std::is_integral_v<Entry_range> > Matrix<PersistenceMatrixOptions>::add_to(
+    const Entry_range& sourceColumn, Index targetColumnIndex)
 {
   static_assert(!isNonBasic,
                 "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain "
@@ -1771,9 +1772,9 @@ inline std::enable_if_t<std::is_integral_v<Integer_index> > Matrix<PersistenceMa
 }
 
 template <class PersistenceMatrixOptions>
-template <class Cell_range>
-inline std::enable_if_t<!std::is_integral_v<Cell_range> > Matrix<PersistenceMatrixOptions>::multiply_target_and_add_to(
-    const Cell_range& sourceColumn, int coefficient, Index targetColumnIndex) 
+template <class Entry_range>
+inline std::enable_if_t<!std::is_integral_v<Entry_range> > Matrix<PersistenceMatrixOptions>::multiply_target_and_add_to(
+    const Entry_range& sourceColumn, int coefficient, Index targetColumnIndex) 
 {
   static_assert(!isNonBasic,
                 "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain "
@@ -1801,9 +1802,9 @@ inline std::enable_if_t<std::is_integral_v<Integer_index> > Matrix<PersistenceMa
 }
 
 template <class PersistenceMatrixOptions>
-template <class Cell_range>
-inline std::enable_if_t<!std::is_integral_v<Cell_range> > Matrix<PersistenceMatrixOptions>::multiply_source_and_add_to(
-    int coefficient, const Cell_range& sourceColumn, Index targetColumnIndex) 
+template <class Entry_range>
+inline std::enable_if_t<!std::is_integral_v<Entry_range> > Matrix<PersistenceMatrixOptions>::multiply_source_and_add_to(
+    int coefficient, const Entry_range& sourceColumn, Index targetColumnIndex) 
 {
   static_assert(!isNonBasic,
                 "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain "
@@ -1818,16 +1819,16 @@ inline std::enable_if_t<!std::is_integral_v<Cell_range> > Matrix<PersistenceMatr
 }
 
 template <class PersistenceMatrixOptions>
-inline void Matrix<PersistenceMatrixOptions>::zero_cell(Index columnIndex, ID_index rowIndex) 
+inline void Matrix<PersistenceMatrixOptions>::zero_entry(Index columnIndex, ID_index rowIndex) 
 {
   static_assert(PersistenceMatrixOptions::is_of_boundary_type && !PersistenceMatrixOptions::has_column_compression,
-                "'zero_cell' is not available for the chosen options.");
+                "'zero_entry' is not available for the chosen options.");
 
-  return matrix_.zero_cell(columnIndex, rowIndex);
+  return matrix_.zero_entry(columnIndex, rowIndex);
 }
 
 template <class PersistenceMatrixOptions>
-inline void Matrix<PersistenceMatrixOptions>::zero_cell(Index columnIndex, ID_index rowIndex, bool inR) 
+inline void Matrix<PersistenceMatrixOptions>::zero_entry(Index columnIndex, ID_index rowIndex, bool inR) 
 {
   // TODO: I don't think there is a particular reason why the indexation is forced, should be removed.
   static_assert(
@@ -1836,7 +1837,7 @@ inline void Matrix<PersistenceMatrixOptions>::zero_cell(Index columnIndex, ID_in
           PersistenceMatrixOptions::column_indexation_type != Column_indexation_types::IDENTIFIER,
       "Only enabled for RU matrices.");
 
-  return matrix_.zero_cell(columnIndex, rowIndex, inR);
+  return matrix_.zero_entry(columnIndex, rowIndex, inR);
 }
 
 template <class PersistenceMatrixOptions>
@@ -1862,13 +1863,13 @@ inline void Matrix<PersistenceMatrixOptions>::zero_column(Index columnIndex, boo
 }
 
 template <class PersistenceMatrixOptions>
-inline bool Matrix<PersistenceMatrixOptions>::is_zero_cell(Index columnIndex, ID_index rowIndex) 
+inline bool Matrix<PersistenceMatrixOptions>::is_zero_entry(Index columnIndex, ID_index rowIndex) 
 {
-  return matrix_.is_zero_cell(columnIndex, rowIndex);
+  return matrix_.is_zero_entry(columnIndex, rowIndex);
 }
 
 template <class PersistenceMatrixOptions>
-inline bool Matrix<PersistenceMatrixOptions>::is_zero_cell(Index columnIndex, ID_index rowIndex, bool inR) const 
+inline bool Matrix<PersistenceMatrixOptions>::is_zero_entry(Index columnIndex, ID_index rowIndex, bool inR) const 
 {
   // TODO: I don't think there is a particular reason why the indexation is forced, should be removed.
   static_assert(
@@ -1877,7 +1878,7 @@ inline bool Matrix<PersistenceMatrixOptions>::is_zero_cell(Index columnIndex, ID
           PersistenceMatrixOptions::column_indexation_type != Column_indexation_types::IDENTIFIER,
       "Only enabled for RU matrices.");
 
-  return matrix_.is_zero_cell(columnIndex, rowIndex, inR);
+  return matrix_.is_zero_entry(columnIndex, rowIndex, inR);
 }
 
 template <class PersistenceMatrixOptions>
