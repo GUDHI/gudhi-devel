@@ -346,7 +346,7 @@ class Oscillating_rips_edge_range
     Filtration_value nu_;                                                         /**< Lower multiplier. */
     Filtration_value mu_;                                                         /**< Upper multiplier. */
     Zigzag_edge<Filtration_value> currentEdge_;    /**< Stores the current edge in the range. */
-    size_t epsilonIndex_, rowIndex_, columnIndex_; /**< Indices indicating the next position in the range. */
+    std::size_t epsilonIndex_, rowIndex_, columnIndex_; /**< Indices indicating the next position in the range. */
     bool inPositiveDirection_, insertVertex_;      /**< Next direction and indicates if next ''edge'' is a vertex. */
 
     /**
@@ -521,7 +521,7 @@ class Oscillating_rips_edge_range
      * @param i Epsilon value index.
      * @param direction Direction.
      */
-    void _update_edge(size_t i, bool direction)
+    void _update_edge(std::size_t i, bool direction)
     {
       if constexpr (EdgeModifier::isActive_)
         currentEdge_.set(distanceMatrix_[rowIndex_][columnIndex_].first,
@@ -589,7 +589,7 @@ class Oscillating_rips_edge_range
     // only at the very last step of the oscillating Rips filtration.
     std::vector<std::vector<Zigzag_edge<Filtration_value> > > edgesAdded, edgesRemoved;
 
-    size_t number_of_arrows = _compute_edges(nu, mu, epsilonValues, distanceMatrix, edgesAdded, edgesRemoved);
+    std::size_t number_of_arrows = _compute_edges(nu, mu, epsilonValues, distanceMatrix, edgesAdded, edgesRemoved);
 
     // Now, sort edges according to lengths, and put everything in edgeFiltration
     edgeFiltration.clear();
@@ -602,7 +602,7 @@ class Oscillating_rips_edge_range
                                 true);
     // epsilonValues[0], true);
 
-    for (size_t i = 0; i < n - 1; ++i) {  // all ascending arrows eps_i
+    for (std::size_t i = 0; i < n - 1; ++i) {  // all ascending arrows eps_i
       if constexpr (EdgeModifier::isActive_) {
         edgeFiltration.emplace_back(i + 1,
                                     i + 1,
@@ -815,7 +815,7 @@ class Oscillating_rips_edge_range
   {
     GUDHI_CHECK((nu <= mu) && (nu >= 0), "Invalid parameters mu and nu");
 
-    size_t n = points.size();  // number of points
+    std::size_t n = points.size();  // number of points
     PointRange sortedPoints;
     sortedPoints.reserve(n);
 
@@ -873,16 +873,16 @@ class Oscillating_rips_edge_range
   static std::vector<Filtration_value> _compute_epsilon_values(const PointRange& sortedPoints,
                                                                DistanceFunction&& distance)
   {
-    size_t n = sortedPoints.size();
+    std::size_t n = sortedPoints.size();
     std::vector<Filtration_value> eps_range(n, std::numeric_limits<double>::infinity());
 
     // compute all \f$\varepsilon_i\f$ values, such that eps_range[i] ==
     // eps_i==d_H(P_i,P), for i=0 ... n-1:
-    for (size_t i = 0; i < n; ++i) {
+    for (std::size_t i = 0; i < n; ++i) {
       // entering step i, maintain eps_range[j] = eps_j for j<i, and
       // eps_range[k] = d(p_k, P_{i-1}) for k >= i.
 #ifdef GUDHI_USE_TBB
-      tbb::parallel_for(size_t(i + 1), n, [&](size_t k) {
+      tbb::parallel_for(std::size_t(i + 1), n, [&](std::size_t k) {
         // set eps_range[k] <- d(p_k, P_i) ==
         //                            min{ d(p_k, P_{i-1}), d(p_k, p_i) }  for k >= i.
         double dist_i_k = distance(sortedPoints[i], sortedPoints[k]);
@@ -891,7 +891,7 @@ class Oscillating_rips_edge_range
         }
       });
 #else
-      for (size_t k = i + 1; k < n; ++k) {
+      for (std::size_t k = i + 1; k < n; ++k) {
         // set eps_range[k] <- d(p_k, P_i) ==
         //                            min{ d(p_k, P_{i-1}), d(p_k, p_i) }  for k >= i.
         double dist_i_k = distance(sortedPoints[i], sortedPoints[k]);
@@ -904,7 +904,7 @@ class Oscillating_rips_edge_range
       // to do: implement parallel version by dividing the vector
       // set eps_range[i] <- eps_i = d_H(P_i,P) = max_{k>i} d(p_k, P_i)
       double eps_i = 0.;
-      for (size_t k = i + 1; k < n; ++k) {
+      for (std::size_t k = i + 1; k < n; ++k) {
         if (eps_range[k] > eps_i) {
           eps_i = eps_range[k];
         }
@@ -936,10 +936,10 @@ class Oscillating_rips_edge_range
   {
     std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix(sortedPoints.size());
 #ifdef GUDHI_USE_TBB
-    tbb::parallel_for(size_t(0), sortedPoints.size(), [&](size_t i) {
+    tbb::parallel_for(std::size_t(0), sortedPoints.size(), [&](std::size_t i) {
       // distanceMatrix[i] = std::vector< std::pair<int, Filtration_value> >();
       distanceMatrix[i].resize(i);
-      for (size_t j = 0; j < i; ++j) {
+      for (std::size_t j = 0; j < i; ++j) {
         distanceMatrix[i][j] = std::make_pair(j, distance(sortedPoints[i], sortedPoints[j]));
       }
       // distanceMatrix[i] is sorted by (j, d(p_i,p_j)) < (k, d(p_i,p_k)) iff
@@ -947,10 +947,10 @@ class Oscillating_rips_edge_range
       std::stable_sort(distanceMatrix[i].begin(), distanceMatrix[i].end(), Point_distance_comp());
     });
 #else
-    for (size_t i = 0; i < sortedPoints.size(); ++i) {  // for all vertices
+    for (std::size_t i = 0; i < sortedPoints.size(); ++i) {  // for all vertices
       // distanceMatrix[i] = std::vector< std::pair<int, Filtration_value> >();
       distanceMatrix[i].resize(i);
-      for (size_t j = 0; j < i; ++j) {
+      for (std::size_t j = 0; j < i; ++j) {
         distanceMatrix[i][j] = std::make_pair(j, distance(sortedPoints[i], sortedPoints[j]));
       }
       std::stable_sort(distanceMatrix[i].begin(), distanceMatrix[i].end(), Point_distance_comp());
@@ -973,14 +973,14 @@ class Oscillating_rips_edge_range
    *
    * @return Total number of edges.
    */
-  static size_t _compute_edges(Filtration_value nu,
-                               Filtration_value mu,
-                               const std::vector<Filtration_value>& epsilonValues,
-                               std::vector<std::vector<std::pair<int, Filtration_value> > >& distanceMatrix,
-                               std::vector<std::vector<Zigzag_edge<Filtration_value> > >& edgesAdded,
-                               std::vector<std::vector<Zigzag_edge<Filtration_value> > >& edgesRemoved)
+  static std::size_t _compute_edges(Filtration_value nu,
+                                    Filtration_value mu,
+                                    const std::vector<Filtration_value>& epsilonValues,
+                                    std::vector<std::vector<std::pair<int, Filtration_value> > >& distanceMatrix,
+                                    std::vector<std::vector<Zigzag_edge<Filtration_value> > >& edgesAdded,
+                                    std::vector<std::vector<Zigzag_edge<Filtration_value> > >& edgesRemoved)
   {
-    size_t number_of_arrows = 0;
+    std::size_t number_of_arrows = 0;
     auto n = epsilonValues.size();
     edgesAdded.resize(n);
     edgesRemoved.resize(n);
@@ -994,7 +994,7 @@ class Oscillating_rips_edge_range
     // R({p_0, ... , p_{i+1}}, mu * eps_i) <- R({p_0, ... , p_{i+1}}, nu * eps_{i+1})
 #ifdef GUDHI_USE_TBB
     // no need to consider the case i=n-1 in an oscillating Rips filtration
-    tbb::parallel_for(size_t(0), n - 1, [&](size_t i) {
+    tbb::parallel_for(std::size_t(0), n - 1, [&](std::size_t i) {
       typename std::vector<std::pair<int, Filtration_value> >::iterator it;
       //----edgesAdded[i]:
       // consider first all edges added in inclusion:
@@ -1002,7 +1002,7 @@ class Oscillating_rips_edge_range
       // i.e., all (p_j,p_k) with 0 <= k < j <= i with
       //                                           nu eps_i < d(p_j,p_k) <= mu eps_i
       // these new edges get filtration value epsilonValues[i]
-      for (size_t j = 1; j <= i; ++j) {
+      for (std::size_t j = 1; j <= i; ++j) {
         // get very first edge (k,j), over all k<j, strictly longer than  mu * eps_i
         // distanceMatrix[j][k] = d(p_j,p_k) with k<j
         it = std::upper_bound(distanceMatrix[j].begin(),
@@ -1050,7 +1050,7 @@ class Oscillating_rips_edge_range
       // i.e., all edges (p_k,p_j), 0<=k<j<=i+1, such that
       // nu eps_{i+1} < d(p_k,p_j) <= mu eps_i
       // these new edges get filtration value epsilonValues[i]
-      for (size_t j = 1; j <= i + 1; ++j) {
+      for (std::size_t j = 1; j <= i + 1; ++j) {
         // get very first edge (k,j), over all k<j, strictly longer than  mu * eps_i
         // distanceMatrix[j][k] = d(p_j,p_k) with k<j
         it = std::upper_bound(distanceMatrix[j].begin(),
@@ -1077,14 +1077,14 @@ class Oscillating_rips_edge_range
 
     typename std::vector<std::pair<int, Filtration_value> >::iterator it;
 
-    for (size_t i = 0; i < n - 1; ++i) {
+    for (std::size_t i = 0; i < n - 1; ++i) {
       //----edgesAdded[i]:
       // consider first all edges added in inclusion:
       // R({p_0, ... , p_i}, nu * eps_i) -> R({p_0, ... , p_i}, mu * eps_i),
       // i.e., all (p_j,p_k) with 0 <= k < j <= i with
       //                                           nu eps_i < d(p_j,p_k) <= mu eps_i
       // these new edges get filtration value epsilonValues[i]
-      for (size_t j = 1; j <= i; ++j) {
+      for (std::size_t j = 1; j <= i; ++j) {
         // get very first edge (k,j), over all k<j, strictly longer than  mu * eps_i
         // distanceMatrix[j][k] = d(p_j,p_k) with k<j
         it = std::upper_bound(distanceMatrix[j].begin(),
@@ -1131,7 +1131,7 @@ class Oscillating_rips_edge_range
       // i.e., all edges (p_k,p_j), 0<=k<j<=i+1, such that
       // nu eps_{i+1} < d(p_k,p_j) <= mu eps_i
       // these new edges get filtration value epsilonValues[i]
-      for (size_t j = 1; j <= i + 1; ++j) {
+      for (std::size_t j = 1; j <= i + 1; ++j) {
         // get very first edge (k,j), over all k<j, strictly longer than  mu * eps_i
         // distanceMatrix[j][k] = d(p_j,p_k) with k<j
         it = std::upper_bound(distanceMatrix[j].begin(),
@@ -1379,7 +1379,7 @@ class Oscillating_rips_simplex_range
 
     std::vector<Simplex_handle> currentSimplices_; /**< Stores current simplex handles. */
     StableFilteredComplex* complex_;               /**< Pointer to the complex. */
-    size_t currentSimplexIndex_;                   /**< Index to current position in currentSimplices_. */
+    std::size_t currentSimplexIndex_;              /**< Index to current position in currentSimplices_. */
     EdgeRangeIterator currentEdgeIt_;              /**< Iterator pointing to the next edge. */
     EdgeRangeIterator endEdgeIt_;                  /**< End edge iterator. */
     bool currentDirection_;                        /**< Current direction. */
