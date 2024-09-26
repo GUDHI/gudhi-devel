@@ -52,25 +52,25 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         homology_coeff_field: int = 11,
         n_jobs: Optional[int] = None,
     ):
-        """
-        Constructor for the RipsPersistence class.
+        """Constructor for the RipsPersistence class.
 
-        Parameters:
-            homology_dimensions (int or list of int): The returned persistence diagrams dimension(s).
-                Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
-                dimension matters (in other words, when `homology_dimensions` is an int).
-            threshold (float): Rips maximal edge length value. Default is +Inf. Ignored if input_type is 'distance coo_matrix'.
-            input_type (str): Can be 'point cloud' when inputs are point clouds, 'full distance matrix',
-                'lower distance matrix' when inputs are lower triangular distance matrix (can be full square,
-                but the upper part will not be considered), or 'distance coo_matrix' for a distance matrix in SciPy's
-                sparse format, which should contain each edge at most once (avoid the symmetric) and no diagonal entry.
-                Default is 'point cloud'.
-            num_collapses (int|str): Specify the number of iterations of :func:`~gudhi.flag_filtration.edge_collapse.reduce_graph`
-                (edge collapse) to perform on the graph. Default value is 'auto'.
-            homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
-            n_jobs (Optional[int]): Number of jobs to run in parallel. `None` (default value) means `n_jobs = 1` unless in a
-                joblib.parallel_backend context. `-1` means using all processors. cf.
-                https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for more details.
+        :param homology_dimensions: The returned persistence diagrams dimension(s).
+            Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
+            dimension matters (in other words, when `homology_dimensions` is an int).
+        :param threshold: Rips maximal edge length value. Default is +Inf. Ignored if input_type is
+            'distance coo_matrix'.
+        :param input_type: Can be 'point cloud' when inputs are point clouds, 'full distance matrix',
+            'lower distance matrix' when inputs are lower triangular distance matrix (can be full square,
+            but the upper part will not be considered), or 'distance coo_matrix' for a distance matrix in SciPy's
+            sparse format, which should contain each edge at most once (avoid the symmetric) and no diagonal entry.
+            Default is 'point cloud'.
+        :param num_collapses: Specify the number of iterations of
+            :func:`~gudhi.flag_filtration.edge_collapse.reduce_graph` (edge collapse) to perform on the graph.
+            Default value is 'auto'.
+        :param homology_coeff_field: The homology coefficient field. Must be a prime number. Default value is 11.
+        :param n_jobs: Number of jobs to run in parallel. `None` (default value) means `n_jobs = 1` unless in a
+            joblib.parallel_backend context. `-1` means using all processors. cf.
+            https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for more details.
         """
         self.homology_dimensions = homology_dimensions
         self.threshold = threshold
@@ -165,7 +165,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             dgm = _sparse(inp.row, inp.col, inp.data, inp.shape[0], max_dimension=max_dimension, max_edge_length=threshold, homology_coeff_field=self.homology_coeff_field)
         else:
             raise ValueError("Only 'point cloud', 'lower distance matrix', 'full distance matrix' and 'distance coo_matrix' are valid input_type") # move to __init__?
-        
+
         # dgm stops at n-2
         return [dgm[dim] if dim < len(dgm) else np.empty((0,2)) for dim in self.dim_list_]
 
@@ -177,7 +177,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
 
         :return: Persistence diagrams in the format:
 
-              - If `homology_dimensions` was set to `n`: `[array( Hn(X[0]) ), array( Hn(X[1]) ), ...]` 
+              - If `homology_dimensions` was set to `n`: `[array( Hn(X[0]) ), array( Hn(X[1]) ), ...]`
               - If `homology_dimensions` was set to `[i, j]`:
                 `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
         :rtype: list of numpy ndarray of shape (,2) or list of list of numpy ndarray of shape (,2)

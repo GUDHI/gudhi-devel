@@ -8,18 +8,21 @@ import os
 sys.path.insert(0, os.path.abspath("."))
 
 extensions = [
+    "sphinx.ext.napoleon",
+    # let napoleon be the first extension, cf. https://github.com/tox-dev/sphinx-autodoc-typehints/issues/15
     "matplotlib.sphinxext.plot_directive",
     "sphinx.ext.autodoc",
+    "sphinx_autodoc_typehints",
     "sphinx.ext.doctest",
     "sphinx.ext.mathjax",
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
     "sphinxcontrib.bibtex",
     "sphinx_paramlinks",
 ]
 
 autodoc_class_signature = "separated"
+autodoc_typehints = "description"
 
 bibtex_bibfiles = ["../../biblio/bibliography.bib"]
 
