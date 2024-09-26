@@ -74,7 +74,7 @@ struct PersistenceMatrixOptions
    * Note that some methods of the @ref basematrix "base matrix" are not available when true:
    * - @ref Matrix::insert_column(const Container&, Index) "insert_column(const Container&, Index)",
    * - @ref Matrix::zero_column(Index) "zero_column(Index)",
-   * - @ref Matrix::zero_cell(Index, Index) "zero_cell(Index, ID_index)",
+   * - @ref Matrix::zero_entry(Index, Index) "zero_entry(Index, ID_index)",
    * - @ref Matrix::swap_columns(Index, Index) "swap_columns(Index, Index)",
    * - @ref Matrix::swap_rows(Index, Index) "swap_rows(Index, Index)",
    * - @ref Matrix::remove_column(Index) "remove_column(Index)",
@@ -93,14 +93,14 @@ struct PersistenceMatrixOptions
    * If set to false, the container is a std::vector. By default, it is recommended to set it to false, but some 
    * methods require it to be true to be enabled: 
    * - @ref Matrix::remove_column(Index) "remove_column(Index)" for @ref basematrix "base matrices",
-   * - @ref Matrix::remove_maximal_face(Index) "remove_maximal_face(Index)" for @ref chainmatrix "chain matrices",
-   * - @ref Matrix::remove_maximal_face(Index, const std::vector<Index>&)
-   *  "remove_maximal_face(ID_index, const std::vector<ID_index>&)" for @ref chainmatrix "chain matrices",
+   * - @ref Matrix::remove_maximal_cell(Index) "remove_maximal_cell(Index)" for @ref chainmatrix "chain matrices",
+   * - @ref Matrix::remove_maximal_cell(Index, const std::vector<Index>&)
+   *  "remove_maximal_cell(ID_index, const std::vector<ID_index>&)" for @ref chainmatrix "chain matrices",
    * - @ref Matrix::remove_last "remove_last()" for @ref chainmatrix "chain matrices" if @ref has_vine_update is true.
    */
   static const bool has_map_column_container;
   /**
-   * @brief If set to true, enables the methods @ref Matrix::remove_maximal_face and @ref Matrix::remove_last,
+   * @brief If set to true, enables the methods @ref Matrix::remove_maximal_cell and @ref Matrix::remove_last,
    * except for @ref basematrix "base matrices" when @ref has_column_compression is true.
    */
   static const bool has_removable_columns;
@@ -111,8 +111,8 @@ struct PersistenceMatrixOptions
   static const bool has_row_access;
   /**
    * @brief Only enabled if @ref has_row_access is true, ignored otherwise.
-   * If set to true, the underlying container representing a row is an boost::intrusive::list<Cell>.
-   * If set to false, the container is a std::set<Cell>. It is usually recommended to set it to true.
+   * If set to true, the underlying container representing a row is an boost::intrusive::list<Entry>.
+   * If set to false, the container is a std::set<Entry>. It is usually recommended to set it to true.
    */
   static const bool has_intrusive_rows;
   /**

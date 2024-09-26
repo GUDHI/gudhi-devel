@@ -59,42 +59,44 @@ constexpr bool is_indexed_by_position() {
 }
 
 template <class Column>
-using Cell_representative = typename std::conditional<is_z2<Column>(), unsigned int,
-                                                std::pair<unsigned int, typename Column::Field_element> >::type;
+using Entry_representative = typename std::conditional<is_z2<Column>(),
+                                                       unsigned int,
+                                                       std::pair<unsigned int, typename Column::Field_element>
+                                                      >::type;
 
 template <class Column>
-using column_content = std::set<Cell_representative<Column> >;
+using column_content = std::set<Entry_representative<Column> >;
 template <class Column>
-using witness_content = std::vector<Cell_representative<Column> >;
+using witness_content = std::vector<Entry_representative<Column> >;
 
-// for vector, assumes no cell was removed via clear(Index)
+// for vector, assumes no entry was removed via clear(Index)
 template <class Column>
 column_content<Column> get_column_content_via_iterators(const Column& col) {
-  column_content<Column> cells;
+  column_content<Column> entries;
 
   for (const auto& c : col) {
     if constexpr (is_z2<Column>()) {
-      cells.insert(c.get_row_index());
+      entries.insert(c.get_row_index());
     } else {
-      cells.insert({c.get_row_index(), c.get_element()});
+      entries.insert({c.get_row_index(), c.get_element()});
     }
   }
 
-  return cells;
+  return entries;
 }
 
-// assumes no cell was removed via clear(Index)
+// assumes no entry was removed via clear(Index)
 template <class Matrix>
 column_content<Heap_column<Matrix> > get_column_content_via_iterators(const Heap_column<Matrix>& col) {
-  column_content<Heap_column<Matrix> > cells;
+  column_content<Heap_column<Matrix> > entries;
   std::vector<typename Heap_column<Matrix>::Field_element> cont;
   Zp operators(5);
 
   for (const auto& c : col) {
     if constexpr (is_z2<Heap_column<Matrix> >()) {
-      auto p = cells.insert(c.get_row_index());
+      auto p = entries.insert(c.get_row_index());
       if (!p.second) {  // possible in heap
-        cells.erase(p.first);
+        entries.erase(p.first);
       }
     } else {
       if (cont.size() <= c.get_row_index()) cont.resize(c.get_row_index() + 1, 0u);
@@ -103,23 +105,23 @@ column_content<Heap_column<Matrix> > get_column_content_via_iterators(const Heap
   }
   if constexpr (!is_z2<Heap_column<Matrix> >()) {
     for (unsigned int i = 0; i < cont.size(); ++i) {
-      if (cont[i] != 0u) cells.insert({i, cont[i]});
+      if (cont[i] != 0u) entries.insert({i, cont[i]});
     }
   }
 
-  return cells;
+  return entries;
 }
 
-// for vector, assumes no cell was removed via clear(Index)
+// for vector, assumes no entry was removed via clear(Index)
 // base and base comp cannot call get_row as const so m cannot be const...
 template <class Matrix>
 column_content<typename Matrix::Column> get_ordered_row(Matrix& m, unsigned int rowIndex) {
   column_content<typename Matrix::Column> orderedRows;
-  for (const auto& cell : m.get_row(rowIndex)) {
+  for (const auto& entry : m.get_row(rowIndex)) {
     if constexpr (is_z2<typename Matrix::Column>()) {
-      orderedRows.insert(cell.get_column_index());
+      orderedRows.insert(entry.get_column_index());
     } else {
-      orderedRows.insert({cell.get_column_index(), cell.get_element()});
+      orderedRows.insert({entry.get_column_index(), entry.get_element()});
     }
   }
   return orderedRows;
