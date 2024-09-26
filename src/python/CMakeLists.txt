@@ -63,7 +63,9 @@ function( add_gudhi_symbolic_links GLOBBING_EXPRESSION )
   endif()
   file(GLOB GUDHI_GLOB_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${GLOBBING_EXPRESSION})
   foreach(GUDHI_GLOB_FILENAME ${GUDHI_GLOB_FILES})
-    file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_GLOB_FILENAME}" "${CMAKE_CURRENT_BINARY_DIR}/${GUDHI_GLOB_FILENAME}" SYMBOLIC)
+    # COPY_ON_ERROR is activated because on windows 10, user needs to be root or in dev mode to be able to make symbolic links
+    # This case can be problematic, because if you modify the sources, build is still done on the copy
+    file(CREATE_LINK "${CMAKE_CURRENT_SOURCE_DIR}/${GUDHI_GLOB_FILENAME}" "${CMAKE_CURRENT_BINARY_DIR}/${GUDHI_GLOB_FILENAME}" COPY_ON_ERROR SYMBOLIC)
   endforeach()
 endfunction( add_gudhi_symbolic_links )
 
@@ -245,6 +247,7 @@ if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
 endif ()
 set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_pers_cub_low_dim', ")
 set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_edge_collapse', ")
+set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_ripser', ")
 
 # from windows vcpkg eigen 3.4.0#2 : build fails with
 # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'

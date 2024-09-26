@@ -74,7 +74,7 @@ struct PersistenceMatrixOptions
    * Note that some methods of the @ref basematrix "base matrix" are not available when true:
    * - @ref Matrix::insert_column(const Container&, Index) "insert_column(const Container&, Index)",
    * - @ref Matrix::zero_column(Index) "zero_column(Index)",
-   * - @ref Matrix::zero_cell(Index, Index) "zero_cell(Index, ID_index)",
+   * - @ref Matrix::zero_entry(Index, Index) "zero_entry(Index, ID_index)",
    * - @ref Matrix::swap_columns(Index, Index) "swap_columns(Index, Index)",
    * - @ref Matrix::swap_rows(Index, Index) "swap_rows(Index, Index)",
    * - @ref Matrix::remove_column(Index) "remove_column(Index)",
@@ -111,8 +111,8 @@ struct PersistenceMatrixOptions
   static const bool has_row_access;
   /**
    * @brief Only enabled if @ref has_row_access is true, ignored otherwise.
-   * If set to true, the underlying container representing a row is an boost::intrusive::list<Cell>.
-   * If set to false, the container is a std::set<Cell>. It is usually recommended to set it to true.
+   * If set to true, the underlying container representing a row is an boost::intrusive::list<Entry>.
+   * If set to false, the container is a std::set<Entry>. It is usually recommended to set it to true.
    */
   static const bool has_intrusive_rows;
   /**

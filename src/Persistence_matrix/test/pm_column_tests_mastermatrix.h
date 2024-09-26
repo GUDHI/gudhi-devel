@@ -21,25 +21,25 @@
 #include <gudhi/persistence_matrix_options.h>
 #include <gudhi/Persistence_matrix/columns/column_dimension_holder.h>
 #include <gudhi/Persistence_matrix/columns/chain_column_extra_properties.h>
-#include <gudhi/Persistence_matrix/columns/cell_types.h>
+#include <gudhi/Persistence_matrix/columns/entry_types.h>
 #include <gudhi/Persistence_matrix/columns/row_access.h>
-#include <gudhi/Persistence_matrix/allocators/cell_constructors.h>
+#include <gudhi/Persistence_matrix/allocators/entry_constructors.h>
 #include <gudhi/Fields/Z2_field_operators.h>
 #include <gudhi/Fields/Zp_field_operators.h>
 
-using Gudhi::persistence_matrix::Cell;
-using Gudhi::persistence_matrix::Cell_column_index;
-using Gudhi::persistence_matrix::Cell_field_element;
+using Gudhi::persistence_matrix::Entry;
+using Gudhi::persistence_matrix::Entry_column_index;
+using Gudhi::persistence_matrix::Entry_field_element;
 using Gudhi::persistence_matrix::Chain_column_extra_properties;
 using Gudhi::persistence_matrix::Column_dimension_holder;
 using Gudhi::persistence_matrix::Column_types;
-using Gudhi::persistence_matrix::Dummy_cell_column_index_mixin;
-using Gudhi::persistence_matrix::Dummy_cell_field_element_mixin;
+using Gudhi::persistence_matrix::Dummy_entry_column_index_mixin;
+using Gudhi::persistence_matrix::Dummy_entry_field_element_mixin;
 using Gudhi::persistence_matrix::Dummy_chain_properties;
 using Gudhi::persistence_matrix::Dummy_dimension_holder;
 using Gudhi::persistence_matrix::Dummy_row_access;
-using Gudhi::persistence_matrix::New_cell_constructor;
-using Gudhi::persistence_matrix::Pool_cell_constructor;
+using Gudhi::persistence_matrix::New_entry_constructor;
+using Gudhi::persistence_matrix::Pool_entry_constructor;
 using Gudhi::persistence_matrix::Row_access;
 
 using Zp = Gudhi::persistence_fields::Zp_field_operators<>;
@@ -85,47 +85,48 @@ struct Column_mini_matrix {
                                                          >::type
                                >::type;
 
-  using Cell_column_index_option =
-      typename std::conditional<Options::has_row_access, Cell_column_index<Index>, Dummy_cell_column_index_mixin>::type;
-  using Cell_field_element_option = typename std::conditional<Options::is_z2,
-                                                              Dummy_cell_field_element_mixin,
-                                                              Cell_field_element<Element>
-                                                             >::type;
-  using Matrix_cell = Cell<Column_mini_matrix<Options> >;
+  using Entry_column_index_option = typename std::conditional<Options::has_row_access,
+                                                              Entry_column_index<Index>,
+                                                              Dummy_entry_column_index_mixin>::type;
+  using Entry_field_element_option = typename std::conditional<Options::is_z2,
+                                                               Dummy_entry_field_element_mixin,
+                                                               Entry_field_element<Element>
+                                                              >::type;
+  using Matrix_entry = Entry<Column_mini_matrix<Options> >;
 
-  inline static New_cell_constructor<Matrix_cell> defaultCellConstructor;
-  using Cell_constructor = New_cell_constructor<Matrix_cell>;
+  inline static New_entry_constructor<Matrix_entry> defaultEntryConstructor;
+  using Entry_constructor = New_entry_constructor<Matrix_entry>;
 
   struct Column_z2_settings {
-    Column_z2_settings() : cellConstructor() {}
-    Column_z2_settings([[maybe_unused]] Characteristic characteristic) : cellConstructor() {}
+    Column_z2_settings() : entryConstructor() {}
+    Column_z2_settings([[maybe_unused]] Characteristic characteristic) : entryConstructor() {}
 
-    Cell_constructor cellConstructor;
+    Entry_constructor entryConstructor;
   };
 
   struct Column_zp_settings {
-    Column_zp_settings() : operators(), cellConstructor() {}
-    Column_zp_settings(Characteristic characteristic) : operators(characteristic), cellConstructor() {}
+    Column_zp_settings() : operators(), entryConstructor() {}
+    Column_zp_settings(Characteristic characteristic) : operators(characteristic), entryConstructor() {}
 
     Field_operators operators;
-    Cell_constructor cellConstructor;
+    Entry_constructor entryConstructor;
   };
 
   using Column_settings = typename std::conditional<Options::is_z2, Column_z2_settings, Column_zp_settings>::type;
 
-  template <class Matrix_cell>
-  struct RowCellComp {
-    bool operator()(const Matrix_cell& c1, const Matrix_cell& c2) const {
+  template <class Matrix_entry>
+  struct RowEntryComp {
+    bool operator()(const Matrix_entry& c1, const Matrix_entry& c2) const {
       return c1.get_column_index() < c2.get_column_index();
     }
   };
 
   using Row =
       typename std::conditional<Options::has_intrusive_rows,
-                                boost::intrusive::list<Matrix_cell,
+                                boost::intrusive::list<Matrix_entry,
                                                        boost::intrusive::constant_time_size<false>,
                                                        boost::intrusive::base_hook<Base_hook_matrix_row> >,
-                                std::set<Matrix_cell, RowCellComp<Matrix_cell> >
+                                std::set<Matrix_entry, RowEntryComp<Matrix_entry> >
                                >::type;
 
   using Row_container = typename std::conditional<Options::has_removable_rows,

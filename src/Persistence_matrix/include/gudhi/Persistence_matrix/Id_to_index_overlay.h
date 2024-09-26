@@ -41,25 +41,25 @@ template <class Underlying_matrix, class Master_matrix>
 class Id_to_index_overlay 
 {
  public:
-  using Index = typename Master_matrix::Index;                       /**< @ref MatIdx index type. */
-  using ID_index = typename Master_matrix::ID_index;                 /**< @ref IDIdx index type. */
-  using Pos_index = typename Master_matrix::Pos_index;               /**< @ref PosIdx index type. */
-  using Dimension = typename Master_matrix::Dimension;               /**< Dimension value type. */
+  using Index = typename Master_matrix::Index;                          /**< @ref MatIdx index type. */
+  using ID_index = typename Master_matrix::ID_index;                    /**< @ref IDIdx index type. */
+  using Pos_index = typename Master_matrix::Pos_index;                  /**< @ref PosIdx index type. */
+  using Dimension = typename Master_matrix::Dimension;                  /**< Dimension value type. */
   /**
    * @brief Field operators class. Necessary only if @ref PersistenceMatrixOptions::is_z2 is false.
    */
   using Field_operators = typename Master_matrix::Field_operators;
-  using Field_element = typename Master_matrix::Element;             /**< Type of an field element. */
-  using Boundary = typename Master_matrix::Boundary;                 /**< Type of an input column. */
-  using Column = typename Master_matrix::Column;                     /**< Column type. */
-  using Row = typename Master_matrix::Row;                           /**< Row type,
-                                                                          only necessary with row access option. */
-  using Bar = typename Master_matrix::Bar;                           /**< Bar type. */
-  using Barcode = typename Master_matrix::Barcode;                   /**< Barcode type. */
-  using Cycle = typename Master_matrix::Cycle;                       /**< Cycle type. */
-  using Cell_constructor = typename Master_matrix::Cell_constructor; /**< Factory of @ref Cell classes. */
-  using Column_settings = typename Master_matrix::Column_settings;   /**< Structure giving access to the columns to
-                                                                          necessary external classes. */
+  using Field_element = typename Master_matrix::Element;                /**< Type of an field element. */
+  using Boundary = typename Master_matrix::Boundary;                    /**< Type of an input column. */
+  using Column = typename Master_matrix::Column;                        /**< Column type. */
+  using Row = typename Master_matrix::Row;                              /**< Row type,
+                                                                             only necessary with row access option. */
+  using Bar = typename Master_matrix::Bar;                              /**< Bar type. */
+  using Barcode = typename Master_matrix::Barcode;                      /**< Barcode type. */
+  using Cycle = typename Master_matrix::Cycle;                          /**< Cycle type. */
+  using Entry_constructor = typename Master_matrix::Entry_constructor;  /**< Factory of @ref Entry classes. */
+  using Column_settings = typename Master_matrix::Column_settings;      /**< Structure giving access to the columns to
+                                                                             necessary external classes. */
 
   /**
    * @brief Constructs an empty matrix.
@@ -69,11 +69,12 @@ class Id_to_index_overlay
    */
   Id_to_index_overlay(Column_settings* colSettings);
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Cell_representative. Each range corresponds to a
-   * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
-   * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0.
+   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Entry_representative. Each range corresponds
+   * to a column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by
+   * increasing IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting
+   * with 0.
    * 
-   * @tparam Boundary_range Range type for @ref Matrix::Cell_representative ranges.
+   * @tparam Boundary_range Range type for @ref Matrix::Entry_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
@@ -127,9 +128,9 @@ class Id_to_index_overlay
                       const DeathComparatorFunction& deathComparator);
   /**
    * @brief Only available for @ref chainmatrix "chain matrices". 
-   * Constructs a new matrix from the given ranges of @ref Matrix::Cell_representative. Each range corresponds to a column 
-   * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
-   * The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0. 
+   * Constructs a new matrix from the given ranges of @ref Matrix::Entry_representative. Each range corresponds to a
+   * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
+   * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0. 
    *
    * @warning If @ref PersistenceMatrixOptions::has_vine_update is false, the comparators are not used.
    * And if @ref PersistenceMatrixOptions::has_vine_update is true, but
@@ -138,7 +139,7 @@ class Id_to_index_overlay
    * 
    * @tparam BirthComparatorFunction Type of the birth comparator: (@ref Pos_index, @ref Pos_index) -> bool
    * @tparam DeathComparatorFunction Type of the death comparator: (@ref Pos_index, @ref Pos_index) -> bool
-   * @tparam Boundary_range  Range type for @ref Matrix::Cell_representative ranges.
+   * @tparam Boundary_range  Range type for @ref Matrix::Entry_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
@@ -195,7 +196,7 @@ class Id_to_index_overlay
                       const BirthComparatorFunction& birthComparator, 
                       const DeathComparatorFunction& deathComparator);
   /**
-   * @brief Copy constructor. If @p operators or @p cellConstructor is not a null pointer, its value is kept
+   * @brief Copy constructor. If @p operators or @p entryConstructor is not a null pointer, its value is kept
    * instead of the one in the copied matrix.
    * 
    * @param matrixToCopy Matrix to copy.
@@ -225,7 +226,7 @@ class Id_to_index_overlay
    * face ID used in the boundaries when the face is inserted.
    *
    * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
-   * a more general cell complex. This includes cubical complexes or Morse complexes for example.
+   * a more general entry complex. This includes cubical complexes or Morse complexes for example.
    *
    * The content of the new column will vary depending on the underlying @ref mp_matrices "type of the matrix":
    * - If it is a boundary type matrix and only \f$ R \f$ is stored, the boundary is just copied. The column will only 
@@ -237,7 +238,8 @@ class Id_to_index_overlay
    *   `IDIdx + linear combination of older column IDIdxs`, where the combination is deduced while reducing the 
    *   given boundary. If the barcode is stored, it will also be updated.
    * 
-   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
    * @param boundary Boundary generating the new column. The content should be ordered by ID.
    * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
@@ -252,7 +254,8 @@ class Id_to_index_overlay
    * As a face has to be inserted before one of its cofaces in a valid filtration (recall that it is assumed that
    * the faces are inserted by order of filtration), it is sufficient to indicate the ID of the face being inserted.
    * 
-   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
    * @param faceIndex @ref IDIdx index to use to identify the new face.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the 
    * @p faceIndex values of precedent calls of the method for the corresponding faces and should be ordered in 
@@ -277,7 +280,7 @@ class Id_to_index_overlay
    * For @ref boundarymatrix "RU matrices", the returned row is from \f$ R \f$.
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    *
-   * @warning The @ref Cell_column_index::get_column_index "get_column_index" method of the row cells returns the
+   * @warning The @ref Entry_column_index::get_column_index "get_column_index" method of the row entries returns the
    * original @ref PosIdx indices (before any swaps) for @ref boundarymatrix "boundary matrices" and
    * @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
@@ -301,11 +304,11 @@ class Id_to_index_overlay
    *   @ref PersistenceMatrixOptions::has_removable_rows are true.
    *   Assumes that the row is empty and removes it. 
    *
-   * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row cells are not
+   * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row entries are not
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
-   * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
+   * the column entries are destroyed later. The row access is just meant as a "read only" access to the rows and the
    * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
-   * dictionaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be
+   * dictionaries. This allows to avoid testing the emptiness of a row at each column entry removal, what can be
    * quite frequent. 
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row to remove.
@@ -431,16 +434,16 @@ class Id_to_index_overlay
   void multiply_source_and_add_to(const Field_element& coefficient, ID_index sourceFaceID, ID_index targetFaceID);
 
   /**
-   * @brief Zeroes the cell at the given coordinates. Not available for @ref chainmatrix "chain matrices".
+   * @brief Zeroes the entry at the given coordinates. Not available for @ref chainmatrix "chain matrices".
    * In general, should be used with care to not destroy the validity 
    * of the persistence related properties of the matrix.
    *
-   * For @ref boundarymatrix "RU matrices", zeros only the cell in \f$ R \f$.
+   * For @ref boundarymatrix "RU matrices", zeros only the entry in \f$ R \f$.
    * 
-   * @param faceID @ref IDIdx index of the face corresponding to the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
+   * @param faceID @ref IDIdx index of the face corresponding to the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
    */
-  void zero_cell(ID_index faceID, ID_index rowIndex);
+  void zero_entry(ID_index faceID, ID_index rowIndex);
   /**
    * @brief Zeroes the column at the given index. Not available for @ref chainmatrix "chain matrices".
    * In general, should be used with care to not destroy the validity 
@@ -452,16 +455,16 @@ class Id_to_index_overlay
    */
   void zero_column(ID_index faceID);
   /**
-   * @brief Indicates if the cell at given coordinates has value zero.
+   * @brief Indicates if the entry at given coordinates has value zero.
    *
    * For @ref boundarymatrix "RU matrices", looks into \f$ R \f$.
    * 
-   * @param faceID @ref IDIdx index of the face corresponding to the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
-   * @return true If the cell has value zero.
+   * @param faceID @ref IDIdx index of the face corresponding to the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
+   * @return true If the entry has value zero.
    * @return false Otherwise.
    */
-  bool is_zero_cell(ID_index faceID, ID_index rowIndex) const;
+  bool is_zero_entry(ID_index faceID, ID_index rowIndex) const;
   /**
    * @brief Indicates if the column at given index has value zero.
    *
@@ -904,9 +907,9 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::multiply_sour
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::zero_cell(ID_index faceID, ID_index rowIndex) 
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::zero_entry(ID_index faceID, ID_index rowIndex) 
 {
-  return matrix_.zero_cell(_id_to_index(faceID), rowIndex);
+  return matrix_.zero_entry(_id_to_index(faceID), rowIndex);
 }
 
 template <class Underlying_matrix, class Master_matrix>
@@ -916,10 +919,10 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::zero_column(I
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline bool Id_to_index_overlay<Underlying_matrix, Master_matrix>::is_zero_cell(ID_index faceID,
+inline bool Id_to_index_overlay<Underlying_matrix, Master_matrix>::is_zero_entry(ID_index faceID,
                                                                                ID_index rowIndex) const 
 {
-  return matrix_.is_zero_cell(_id_to_index(faceID), rowIndex);
+  return matrix_.is_zero_entry(_id_to_index(faceID), rowIndex);
 }
 
 template <class Underlying_matrix, class Master_matrix>
