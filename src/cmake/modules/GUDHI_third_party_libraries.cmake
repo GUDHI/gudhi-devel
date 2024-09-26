@@ -186,18 +186,12 @@ if (WITH_GUDHI_PYTHON)
     find_python_module("pydata_sphinx_theme")
     find_python_module("sphinxcontrib.bibtex")
     find_python_module("networkx")
+    # Specific case for PyKeops that can be imported on Windows, but fails because it uses fcntl (not available on Windows)
+    if (NOT WIN32)
+      find_python_module("pykeops")
+    endif()
   endif()
 
-  # Specific case for PyKeops that can be imported on Windows, but fails because it uses fcntl (not available on Windows)
-  # Also fcntl has no metadata, so find_python_module does not work
-  # "import fcntl" is about 1 sec. faster than "import pykeops"
-  execute_process(
-          COMMAND ${Python_EXECUTABLE}  -c "import fcntl"
-          RESULT_VARIABLE FCNTL_IMPORT_MODULE_RESULT
-          OUTPUT_VARIABLE FCNTL_IMPORT_MODULE_OUPUT)
-  if(FCNTL_IMPORT_MODULE_RESULT EQUAL 0)
-    find_python_module("pykeops")
-  endif()
 
   if(NOT GUDHI_PYTHON_PATH)
     message(FATAL_ERROR "ERROR: GUDHI_PYTHON_PATH is not valid.")
