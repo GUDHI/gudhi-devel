@@ -22,7 +22,7 @@ extensions = [
 ]
 
 autodoc_class_signature = "separated"
-autodoc_typehints = "description"
+autodoc_typehints = "none"
 
 bibtex_bibfiles = ["../../biblio/bibliography.bib"]
 
