@@ -8,6 +8,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 from .. import DelaunayComplex
+from typing import Union, Iterable, Literal, Optional, Any
 from sklearn.base import BaseEstimator, TransformerMixin
 
 # joblib is required by scikit-learn
@@ -36,29 +37,31 @@ class CechPersistence(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        homology_dimensions,
-        input_type="point cloud",
-        precision="safe",
-        max_alpha_square=float("inf"),
-        homology_coeff_field=11,
-        n_jobs=None,
+        homology_dimensions: Union[int, Iterable[int]],
+        input_type: Literal[
+            "point cloud", "weighted point cloud"
+        ] = "point cloud",
+        precision: Literal[
+            "fast", "safe", "exact"
+        ] = "safe",
+        max_alpha_square: float = float('inf'),
+        homology_coeff_field: int = 11,
+        n_jobs: Optional[int] = None,
     ):
-        """
-        Constructor for the CechPersistence class.
+        """Constructor for the CechPersistence class.
 
-        Parameters:
-            homology_dimensions (int or list of int): The returned persistence diagrams dimension(s).
-                Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
-                dimension matters (in other words, when `homology_dimensions` is an int).
-            input_type (str): Can be 'point cloud' when inputs are point clouds, or 'weighted point cloud', when
-                inputs are point clouds plus the weight (as the last column value). Default is 'point cloud'.
-            precision (str): Delaunay complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
-            max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed. Default is set
-                to infinity, and there is very little point using anything else since it does not save time.
-            homology_coeff_field (int): The homology coefficient field. Must be a prime number. Default value is 11.
-            n_jobs (int): Number of jobs to run in parallel. `None` (default value) means `n_jobs = 1` unless in a
-                joblib.parallel_backend context. `-1` means using all processors. cf.
-                https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for more details.
+        :param homology_dimensions: The returned persistence diagrams dimension(s).
+            Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only one
+            dimension matters (in other words, when `homology_dimensions` is an int).
+        :param input_type: Can be 'point cloud' when inputs are point clouds, or 'weighted point cloud', when
+            inputs are point clouds plus the weight (as the last column value). Default is 'point cloud'.
+        :param precision: Delaunay complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+        :param max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set
+            to infinity, and there is very little point using anything else since it does not save time.
+        :param homology_coeff_field: The homology coefficient field. Must be a prime number. Default value is 11.
+        :param n_jobs: Number of jobs to run in parallel. `None` (default value) means `n_jobs = 1` unless in a
+            joblib.parallel_backend context. `-1` means using all processors. cf.
+            https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for more details.
         """
         self.homology_dimensions = homology_dimensions
         self.input_type = input_type
