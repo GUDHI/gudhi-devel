@@ -131,19 +131,18 @@ if(SCIPY_FOUND)
 else()
   disable_python_documentation("scipy")
 endif()
-if(SKLEARN_FOUND)
-  add_gudhi_debug_info("Scikit-learn version ${SKLEARN_VERSION}")
+if(SCIKIT-LEARN_FOUND)
+  add_gudhi_debug_info("Scikit-learn version ${SCIKIT-LEARN_VERSION}")
 else()
-  disable_python_documentation("sklearn")
+  disable_python_documentation("scikit-learn")
 endif()
-if(OT_FOUND)
-  add_gudhi_debug_info("POT version ${OT_VERSION}")
+if(POT_FOUND)
+  add_gudhi_debug_info("POT version ${POT_VERSION}")
 else()
   disable_python_documentation("ot")
 endif()
 if(HNSWLIB_FOUND)
-  # Does not have a version number...
-  add_gudhi_debug_info("HNSWlib found")
+  add_gudhi_debug_info("HNSWlib version ${HNSWLIB_VERSION}")
 endif()
 if(TORCH_FOUND)
   add_gudhi_debug_info("PyTorch version ${TORCH_VERSION}")
@@ -175,8 +174,7 @@ else()
   disable_python_documentation("pydata_sphinx_theme")
 endif()
 if(SPHINXCONTRIB.BIBTEX_FOUND)
-  # Does not have a version number...
-  add_gudhi_debug_info("sphinxcontrib-bibtex found")
+  add_gudhi_debug_info("sphinxcontrib-bibtex version ${SPHINXCONTRIB.BIBTEX_VERSION}")
 else()
   disable_python_documentation("sphinxcontrib-bibtex")
 endif()
@@ -461,7 +459,7 @@ add_test(NAME random_cubical_complex_persistence_example_py_test
 add_gudhi_py_test(test_cubical_complex)
 
 # Datasets are fetched for these tests
-if(SKLEARN_FOUND AND WITH_GUDHI_REMOTE_TEST)
+if(SCIKIT-LEARN_FOUND AND WITH_GUDHI_REMOTE_TEST)
   add_gudhi_py_test(test_sklearn_cubical_persistence)
 
   add_test(NAME cubical_complex_sklearn_itf_py_test
@@ -598,7 +596,7 @@ add_test(NAME rips_complex_from_points_example_py_test
 
 add_gudhi_py_test(test_rips_complex)
 
-if(SKLEARN_FOUND)
+if(SCIKIT-LEARN_FOUND)
   # test_sklearn_rips_persistence is using gudhi.datasets.generators
   if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
     add_gudhi_py_test(test_sklearn_rips_persistence)
@@ -644,7 +642,7 @@ add_gudhi_py_test(test_reader_utils)
 add_gudhi_py_test(test_off)
 
 # Wasserstein
-if(OT_FOUND)
+if(POT_FOUND)
   # EagerPy dependency because of enable_autodiff=True
   if(EAGERPY_FOUND)
     add_gudhi_py_test(test_wasserstein_distance)
@@ -656,7 +654,7 @@ if(OT_FOUND)
 endif()
 
 # Representations
-if(SKLEARN_FOUND AND MATPLOTLIB_FOUND AND OT_FOUND AND TARGET CGAL::CGAL)
+if(SCIKIT-LEARN_FOUND AND MATPLOTLIB_FOUND AND POT_FOUND AND TARGET CGAL::CGAL)
   add_gudhi_py_test(test_representations)
 endif()
 
@@ -666,17 +664,17 @@ if(TENSORFLOW_FOUND)
 endif()
 
 # Perslay
-if(TENSORFLOW_FOUND AND SKLEARN_FOUND)
+if(TENSORFLOW_FOUND AND SCIKIT-LEARN_FOUND)
   add_gudhi_py_test(test_perslay)
 endif()
 
 # Betti curves
-if(SKLEARN_FOUND AND SCIPY_FOUND)
+if(SCIKIT-LEARN_FOUND AND SCIPY_FOUND)
   add_gudhi_py_test(test_betti_curve_representations)
 endif()
 
 # Representations preprocessing
-if(SKLEARN_FOUND)
+if(SCIKIT-LEARN_FOUND)
   add_gudhi_py_test(test_representations_preprocessing)
 endif()
 
@@ -684,13 +682,13 @@ endif()
 add_gudhi_py_test(test_time_delay)
 
 # DTM
-if(SCIPY_FOUND AND SKLEARN_FOUND AND TORCH_FOUND AND HNSWLIB_FOUND AND PYKEOPS_FOUND AND EAGERPY_FOUND)
+if(SCIPY_FOUND AND SCIKIT-LEARN_FOUND AND TORCH_FOUND AND HNSWLIB_FOUND AND PYKEOPS_FOUND AND EAGERPY_FOUND)
   add_gudhi_py_test(test_knn)
   add_gudhi_py_test(test_dtm)
 endif()
 
 # Tomato
-if(SCIPY_FOUND AND SKLEARN_FOUND)
+if(SCIPY_FOUND AND SCIKIT-LEARN_FOUND)
   add_gudhi_py_test(test_tomato)
 endif()
 
@@ -705,7 +703,7 @@ if(SCIPY_FOUND)
 endif()
 
 # Cover complex
-if(SKLEARN_FOUND)
+if(SCIKIT-LEARN_FOUND)
   add_gudhi_py_test(test_cover_complex)
 endif()
 
