@@ -22,7 +22,10 @@ extensions = [
 ]
 
 autodoc_class_signature = "separated"
+# cf. https://github.com/tox-dev/sphinx-autodoc-typehints#options
 autodoc_typehints = "none"
+napoleon_use_rtype = True
+always_use_bars_union = True
 
 bibtex_bibfiles = ["../../biblio/bibliography.bib"]
 
