@@ -7,6 +7,13 @@ if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen AND TARGET Boost::program_options
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-p" "2" "-m" "0.45" "-o" "fast.pers" "-f")
   add_test(NAME Alpha_complex_utilities_exact_alpha_complex_persistence COMMAND $<TARGET_FILE:alpha_complex_persistence>
       "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-p" "2" "-m" "0.45" "-o" "exact.pers" "-e")
+  # Same with sqrt filtration values - "-s"
+  add_test(NAME Alpha_complex_utilities_safe_sqrt_alpha_complex_persistence COMMAND $<TARGET_FILE:alpha_complex_persistence>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-s" "-p" "2" "-m" "0.45" "-o" "safe_sqrt.pers")
+  add_test(NAME Alpha_complex_utilities_fast_sqrt_alpha_complex_persistence COMMAND $<TARGET_FILE:alpha_complex_persistence>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-s" "-p" "2" "-m" "0.45" "-o" "fast_sqrt.pers" "-f")
+  add_test(NAME Alpha_complex_utilities_exact_sqrt_alpha_complex_persistence COMMAND $<TARGET_FILE:alpha_complex_persistence>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-s" "-p" "2" "-m" "0.45" "-o" "exact_sqrt.pers" "-e")
   if (DIFF_PATH)
     add_test(Alpha_complex_utilities_diff_exact_alpha_complex ${DIFF_PATH}
              "exact.pers" "safe.pers")
@@ -17,6 +24,17 @@ if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen AND TARGET Boost::program_options
              "fast.pers" "safe.pers")
     set_tests_properties(Alpha_complex_utilities_diff_fast_alpha_complex PROPERTIES DEPENDS
              "Alpha_complex_utilities_fast_alpha_complex_persistence;Alpha_complex_utilities_safe_alpha_complex_persistence")
+
+    # Same with sqrt filtration values - "-s"
+    add_test(Alpha_complex_utilities_diff_exact_sqrt_alpha_complex ${DIFF_PATH}
+             "exact_sqrt.pers" "safe_sqrt.pers")
+    set_tests_properties(Alpha_complex_utilities_diff_exact_sqrt_alpha_complex PROPERTIES DEPENDS
+             "Alpha_complex_utilities_exact_sqrt_alpha_complex_persistence;Alpha_complex_utilities_safe_sqrt_alpha_complex_persistence")
+
+    add_test(Alpha_complex_utilities_diff_fast_sqrt_alpha_complex ${DIFF_PATH}
+             "fast_sqrt.pers" "safe_sqrt.pers")
+    set_tests_properties(Alpha_complex_utilities_diff_fast_sqrt_alpha_complex PROPERTIES DEPENDS
+             "Alpha_complex_utilities_fast_sqrt_alpha_complex_persistence;Alpha_complex_utilities_safe_sqrt_alpha_complex_persistence")
   endif()
 
   install(TARGETS alpha_complex_persistence DESTINATION bin)
@@ -62,6 +80,6 @@ if (TARGET CGAL::CGAL AND TARGET Boost::program_options)
       "-w" "${CMAKE_SOURCE_DIR}/data/points/grid_10_10_10_in_0_1.weights"
       "-c" "${CMAKE_SOURCE_DIR}/data/points/iso_cuboid_3_in_0_1.txt"
       "-p" "2" "-m" "0" "-e")
-  
+
   install(TARGETS alpha_complex_3d_persistence DESTINATION bin)
 endif()
