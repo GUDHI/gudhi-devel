@@ -354,6 +354,8 @@ class Alpha_complex {
    * It also computes the filtration values accordingly to the \ref createcomplexalgorithm if default_filtration_value
    * is not set.
    *
+   * \tparam square_root_filtrations If false (default value), it assigns to each simplex a filtration value equal to
+   * the squared cicumradius of the simplices, or to the radius when square_root_filtrations is true.
    * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
    *
    * @param[in] complex SimplicialComplexForAlpha to be created.
