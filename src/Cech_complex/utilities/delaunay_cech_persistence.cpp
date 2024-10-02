@@ -5,6 +5,7 @@
  *    Copyright (C) 2024 Inria
  *
  *    Modification(s):
+ *      - 2024/10 Vincent Rouvreau: Add square_root_filtrations argument to enable/disable squared radii computation
  *      - YYYY/MM Author: Description of the modification
  */
 

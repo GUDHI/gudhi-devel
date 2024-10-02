@@ -5,6 +5,7 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
+ *      - 2024/10 Vincent Rouvreau: Add square root filtration values interface
  *      - YYYY/MM Author: Description of the modification
  */
 

@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL and Eigen3
+ *      - 2024/10 Vincent Rouvreau: Add square root filtration values interface
  *      - YYYY/MM Author: Description of the modification
  */
 
