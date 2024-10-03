@@ -183,6 +183,7 @@ A complete configuration would be :
     Sphinx-paramlinks version 0.6.0
     pydata_sphinx_theme version 0.15.2
     sphinxcontrib-bibtex version 2.6.2
+    sphinx-autodoc-typehints version 2.4.4
     NetworkX version 3.3
     Eigen3 version 3.4.0
     Boost version 1.84.0
@@ -204,6 +205,7 @@ Documentation
 
 To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_,
 `sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_,
+`sphinx-autodoc-typehints <https://github.com/tox-dev/sphinx-autodoc-typehints>`_,
 `sphinxcontrib-paramlinks <https://github.com/sqlalchemyorg/sphinx-paramlinks>`_ and
 `pydata-sphinx-theme <https://github.com/pydata/pydata-sphinx-theme>`_ :math:`\geq` 0.8.0 are
 required. As the documentation is auto-tested, `CGAL`_, `Eigen`_,
