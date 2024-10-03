@@ -19,7 +19,7 @@ from libcpp.string cimport string
 from libcpp cimport bool
 from libc.stdint cimport intptr_t
 import warnings
-from typing import Literal, Optional
+from typing import Literal, Optional, Iterable
 
 from gudhi.simplex_tree cimport *
 from gudhi.simplex_tree import SimplexTree
@@ -67,9 +67,9 @@ cdef class DelaunayComplex:
         """DelaunayComplex constructor.
 
         Args:
-            points: A list of points in d-Dimension.
-            weights: A list of weights. If set, the number of weights must correspond to the number of points.
-            precision: Delaunay complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+            points (Iterable[Iterable[float]]): A list of points in d-Dimension.
+            weights (Optional[Iterable[float]]): A list of weights. If set, the number of weights must correspond to the number of points.
+            precision (str): Delaunay complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
 
         :raises ValueError: In case of inconsistency between the number of points and weights.
         """
@@ -155,7 +155,8 @@ cdef class DelaunayComplex:
     @staticmethod
     def get_float_relative_precision() -> float:
         """
-        Returns: The float relative precision of filtration values computation in
+        Returns:
+            The float relative precision of filtration values computation in
             :func:`~gudhi.DelaunayComplex.create_simplex_tree` when the DelaunayComplex is constructed with
             :code:`precision = 'safe'` (the default).
         """
@@ -233,8 +234,8 @@ cdef class DelaunayCechComplex(DelaunayComplex):
         """DelaunayCechComplex constructor.
 
         Args:
-            points: A list of points in d-Dimension.
-            precision: Delaunay Čech complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+            points (Iterable[Iterable[float]]): A list of points in d-Dimension.
+            precision (str): Delaunay Čech complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
         """
         super().__init__(points = points, weights = [], precision = precision)
 
