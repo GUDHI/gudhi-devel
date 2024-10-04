@@ -131,6 +131,8 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
   Naive_vector_column& multiply_source_and_add(const Entry_range& column, const Field_element& val);
   Naive_vector_column& multiply_source_and_add(Naive_vector_column& column, const Field_element& val);
 
+  void push_back(const Entry& entry);
+
   friend bool operator==(const Naive_vector_column& c1, const Naive_vector_column& c2) {
     if (&c1 == &c2) return true;
     if (c1.column_.size() != c2.column_.size()) return false;
@@ -799,6 +801,18 @@ inline Naive_vector_column<Master_matrix>& Naive_vector_column<Master_matrix>::m
   }
 
   return *this;
+}
+
+template <class Master_matrix>
+inline void Naive_vector_column<Master_matrix>::push_back(const Entry& entry)
+{
+  static_assert(Master_matrix::Option_list::is_of_boundary_type, "`push_back` is not available for Chain matrices.");
+
+  if constexpr (Master_matrix::Option_list::is_z2) {
+    _insert_entry(entry.get_row_index(), column_);
+  } else {
+    _insert_entry(entry.get_element(), entry.get_row_index(), column_);
+  }
 }
 
 template <class Master_matrix>

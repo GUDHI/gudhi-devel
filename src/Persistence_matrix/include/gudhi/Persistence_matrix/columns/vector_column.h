@@ -134,6 +134,8 @@ class Vector_column : public Master_matrix::Row_access_option,
   Vector_column& multiply_source_and_add(const Entry_range& column, const Field_element& val);
   Vector_column& multiply_source_and_add(Vector_column& column, const Field_element& val);
 
+  void push_back(const Entry& entry);
+
   std::size_t compute_hash_value();
 
   friend bool operator==(const Vector_column& c1, const Vector_column& c2) {
@@ -901,6 +903,18 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_sour
   }
 
   return *this;
+}
+
+template <class Master_matrix>
+inline void Vector_column<Master_matrix>::push_back(const Entry& entry)
+{
+  static_assert(Master_matrix::Option_list::is_of_boundary_type, "`push_back` is not available for Chain matrices.");
+
+  if constexpr (Master_matrix::Option_list::is_z2) {
+    _insert_entry(entry.get_row_index(), column_);
+  } else {
+    _insert_entry(entry.get_element(), entry.get_row_index(), column_);
+  }
 }
 
 template <class Master_matrix>

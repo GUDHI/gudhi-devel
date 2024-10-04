@@ -134,6 +134,8 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   Heap_column& multiply_source_and_add(const Entry_range& column, const Field_element& val);
   Heap_column& multiply_source_and_add(Heap_column& column, const Field_element& val);
 
+  void push_back(const Entry& entry);
+
   std::size_t compute_hash_value();
 
   friend bool operator==(const Heap_column& c1, const Heap_column& c2) {
@@ -866,6 +868,19 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_source_a
   }
 
   return *this;
+}
+
+template <class Master_matrix>
+inline void Heap_column<Master_matrix>::push_back(const Entry& entry)
+{
+  static_assert(Master_matrix::Option_list::is_of_boundary_type, "`push_back` is not available for Chain matrices.");
+
+  Entry* newEntry = entryPool_->construct(entry.get_row_index());
+  if constexpr (!Master_matrix::Option_list::is_z2) {
+    newEntry->set_element(operators_->get_value(entry.get_element()));
+  }
+  column_.push_back(newEntry);
+  std::push_heap(column_.begin(), column_.end(), entryPointerComp_);
 }
 
 template <class Master_matrix>
