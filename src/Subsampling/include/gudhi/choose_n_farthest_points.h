@@ -168,7 +168,7 @@ using radius_priority_ds =
                           boost::heap::mutable_<true>, boost::heap::constant_time_size<false>>;
 template<class FT>
 struct Landmark_info {
-  std::size_t far_idx; FT radius;
+  std::size_t farthest; FT radius;
   // The points that are closer to this landmark than to other landmarks
   std::vector<std::pair<std::size_t, FT>> voronoi;
   // For a landmark A, the list of landmarks B such that picking a Voronoi
@@ -251,7 +251,7 @@ void choose_n_farthest_points_metric(Distance dist_,
       }
     }
     landmarks[i].radius = r;
-    landmarks[i].far_idx = jmax;
+    landmarks[i].farthest = jmax;
   };
   auto update_radius = [&](std::size_t i)
   {
@@ -280,7 +280,7 @@ void choose_n_farthest_points_metric(Distance dist_,
   for (std::size_t current_number_of_landmarks = 1; current_number_of_landmarks != final_size; current_number_of_landmarks++) {
     std::size_t l_parent = radius_priority.top();
     auto& parent_info = landmarks[l_parent];
-    std::size_t l = parent_info.far_idx;
+    std::size_t l = parent_info.farthest;
     FT radius = parent_info.radius;
     auto& info = landmarks[l];
     *output_it++ = input_pts[l];
@@ -309,8 +309,8 @@ void choose_n_farthest_points_metric(Distance dist_,
       if (it != ngb_info.voronoi.end()) { // modified, always true for ngb==l_parent
         ngb_info.voronoi.erase(it, ngb_info.voronoi.end());
         modified_neighbors.push_back(ngb);
-        // We only need to recompute the radius if far_idx was removed, which we can test here with
-        //   if (dist(l, ngb_info.far_idx) < ngb_info.radius)
+        // We only need to recompute the radius if farthest was removed, which we can test here with
+        //   if (dist(l, ngb_info.farthest) < ngb_info.radius)
         // to avoid a costly test for each w in the loop above, but it does not seem to help.
         update_radius(ngb);
         // if (ngb_info.voronoi.empty()) radius_priority.erase(ngb_info.position_in_queue);
