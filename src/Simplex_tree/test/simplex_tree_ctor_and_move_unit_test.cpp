@@ -177,10 +177,57 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
 
 }
 
+class Vector_filtration_value : public std::vector<int>
+{
+  using Base = std::vector<int>;
+
+ public:
+  using const_iterator = Base::const_iterator;
+
+  Vector_filtration_value() : Base() {}
+  Vector_filtration_value(std::initializer_list<int> init) : Base(init) {}
+  Vector_filtration_value(const_iterator start, const_iterator end) : Base(start, end) {}
+
+  friend bool unify(Vector_filtration_value& f1, const Vector_filtration_value& f2) {
+    if (f1 > f2) {
+      f1 = f2;
+      return true;
+    }
+    return false;
+  }
+
+  friend bool intersect(Vector_filtration_value& f1, const Vector_filtration_value& f2) {
+    if (f1 < f2) {
+      f1 = f2;
+      return true;
+    }
+    return false;
+  }
+};
+
+namespace std {
+
+template<>
+class numeric_limits<Vector_filtration_value> {
+ public:
+  static constexpr bool has_infinity = true;
+
+  static Vector_filtration_value infinity() noexcept {
+    return {std::numeric_limits<int>::max()};
+  };
+
+  static Vector_filtration_value max() noexcept(false) {
+    throw std::logic_error(
+        "The maximal value cannot be represented with no finite numbers of parameters.");
+  };
+};
+
+}  // namespace std
+
 struct Simplex_tree_options_custom_fil_values_default {
   typedef linear_indexing_tag Indexing_tag;
   typedef std::int16_t Vertex_handle;
-  typedef std::vector<int> Filtration_value;
+  typedef Vector_filtration_value Filtration_value;
   typedef std::int32_t Simplex_key;
   static const bool store_key = false;
   static const bool store_filtration = true;
@@ -192,7 +239,7 @@ struct Simplex_tree_options_custom_fil_values_default {
 struct Simplex_tree_options_custom_fil_values_fast_persistence {
   typedef linear_indexing_tag Indexing_tag;
   typedef std::int16_t Vertex_handle;
-  typedef std::vector<int> Filtration_value;
+  typedef Vector_filtration_value Filtration_value;
   typedef std::int32_t Simplex_key;
   static const bool store_key = true;
   static const bool store_filtration = true;
@@ -204,7 +251,7 @@ struct Simplex_tree_options_custom_fil_values_fast_persistence {
 struct Simplex_tree_options_custom_fil_values_full_featured {
   typedef linear_indexing_tag Indexing_tag;
   typedef std::int16_t Vertex_handle;
-  typedef std::vector<int> Filtration_value;
+  typedef Vector_filtration_value Filtration_value;
   typedef std::int32_t Simplex_key;
   static const bool store_key = true;
   static const bool store_filtration = true;
