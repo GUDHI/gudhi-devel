@@ -12,6 +12,7 @@
 #define BOOST_TEST_MODULE "incremental_delaunay"
 #include <boost/test/unit_test.hpp>
 #include <boost/range/adaptor/sliced.hpp>
+#include <boost/mpl/list.hpp>
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/Epeck_d.h>
