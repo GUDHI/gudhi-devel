@@ -538,7 +538,7 @@ inline void RU_matrix<Master_matrix>::insert_boundary(ID_index cellIndex,
   if constexpr (Master_matrix::Option_list::has_vine_update) {
     if (cellIndex != nextEventIndex_) {
       Swap_opt::_positionToRowIdx().emplace(nextEventIndex_, cellIndex);
-      if (Master_matrix::Option_list::has_column_pairings) {
+      if constexpr (Master_matrix::Option_list::has_column_pairings) {
         Swap_opt::template RU_pairing<Master_matrix>::idToPosition_.emplace(cellIndex, nextEventIndex_);
       }
     }
