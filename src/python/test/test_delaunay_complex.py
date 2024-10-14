@@ -108,18 +108,18 @@ def _safe_persistence_comparison(simplicial_complex, precision):
     signal = [math.sin(x) for x in time]
     delta = math.pi
     delayed = [math.sin(x + delta) for x in time]
-    
+
     #construct embedding
     embedding1 = [[signal[i], -signal[i]] for i in range(len(time))]
     embedding2 = [[signal[i], delayed[i]] for i in range(len(time))]
-    
+
     #build simplicial_complex and simplex tree
     cplx1 = simplicial_complex(points=embedding1, precision = precision)
     simplex_tree1 = cplx1.create_simplex_tree()
-    
+
     cplx2 = simplicial_complex(points=embedding2, precision = precision)
     simplex_tree2 = cplx2.create_simplex_tree()
-    
+
     diag1 = simplex_tree1.persistence()
     diag2 = simplex_tree2.persistence()
 
@@ -192,3 +192,15 @@ def test_duplicated_2d_points_on_a_plane():
     for simplicial_complex in [AlphaComplex, DelaunayComplex, DelaunayCechComplex]:
         for precision in ['fast', 'safe', 'exact']:
             _duplicated_2d_points_on_a_plane(simplicial_complex, precision)
+
+def test_square_root_filtrations():
+    for filtration in ['alpha', 'cech', None]:
+        for precision in ['fast', 'safe', 'exact']:
+            dc = DelaunayComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
+                                 precision = precision)
+            stree = dc.create_simplex_tree(filtration='cech', square_root_filtrations=False)
+            stree_sqrt = dc.create_simplex_tree(filtration='cech', square_root_filtrations=True)
+            for simplex, filt in stree_sqrt.get_filtration():
+                # np.testing.assert_almost_equal(float('nan'), float('nan')) is ok
+                # while float('nan') == float('nan') is False
+                np.testing.assert_almost_equal(filt, math.sqrt(stree.filtration(simplex)))
