@@ -1634,10 +1634,10 @@ class Simplex_tree {
    * 2- All Node in the members of sib, with label @p x and @p x < @p v,
    * need in turn a local_expansion by @p v iff N^+(x) contains @p v.
    */
-  void compute_punctual_expansion(  Vertex_handle           v
-                                  , Siblings *              sib
-                                  , Filtration_value        fil
-                                  , int                     k    //k == dim_max - dimension simplices in sib
+  void compute_punctual_expansion(  Vertex_handle    v
+                                  , Siblings *       sib
+                                  , Filtration_value fil
+                                  , int              k    //k == dim_max - dimension simplices in sib
                                   , std::vector<Simplex_handle>& added_simplices )
   { //insertion always succeeds because the edge {u,v} used to not be here.
     auto res_ins_v = sib->members().emplace(v, Node(sib,fil));
@@ -1683,10 +1683,10 @@ class Simplex_tree {
    * k must be > 0
    */
   void create_local_expansion(
-        Dictionary_it           sh_v       //Node with label v which has just been inserted
-      , Siblings              * curr_sib   //Siblings containing the node sh_v
-      , Filtration_value        fil_uv     //Fil value of the edge uv in the zz filtration
-      , int                     k          //Stopping condition for recursion based on max dim
+        Dictionary_it    sh_v       //Node with label v which has just been inserted
+      , Siblings       * curr_sib   //Siblings containing the node sh_v
+      , Filtration_value fil_uv     //Fil value of the edge uv in the zz filtration
+      , int              k          //Stopping condition for recursion based on max dim
       , std::vector<Simplex_handle> &added_simplices) //range of all new simplices
   { //pick N^+(v)
     //intersect N^+(v) with labels y > v in curr_sib
@@ -1710,9 +1710,9 @@ class Simplex_tree {
    * Only called in the case of `void insert_edge_as_flag(...)`.
    */
   void siblings_expansion(
-        Siblings              * siblings  // must contain elements
-      , Filtration_value        fil
-      , int                     k         // == max_dim expansion - dimension curr siblings
+        Siblings       * siblings  // must contain elements
+      , Filtration_value fil
+      , int              k         // == max_dim expansion - dimension curr siblings
       , std::vector<Simplex_handle> & added_simplices )
   {
     if (dimension_ > k) {
@@ -2054,7 +2054,7 @@ class Simplex_tree {
    * than it was before. However, `upper_bound_dimension()` will return the old value, which remains a valid upper
    * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    */
-  bool prune_above_filtration(const Filtration_value& filtration) {
+  bool prune_above_filtration(Filtration_value filtration) {
     if (std::numeric_limits<Filtration_value>::has_infinity && filtration == std::numeric_limits<Filtration_value>::infinity())
       return false;  // ---->>
     bool modified = rec_prune_above_filtration(root(), filtration);
@@ -2064,7 +2064,7 @@ class Simplex_tree {
   }
 
  private:
-  bool rec_prune_above_filtration(Siblings* sib, const Filtration_value& filt) {
+  bool rec_prune_above_filtration(Siblings* sib, Filtration_value filt) {
     auto&& list = sib->members();
     bool modified = false;
     bool emptied = false;
