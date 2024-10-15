@@ -40,6 +40,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Base_column_compression_matrix_zp_row_removal, Mat
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_column_compression_matrix_zp_operation, Matrix, full_matrices) {
   test_base_col_comp_operation<Matrix>();
-  test_base_col_comp_cell_range_operation<Matrix>();
+  test_base_col_comp_entry_range_operation<Matrix>();
   test_base_col_comp_const_operation<Matrix>();
 }

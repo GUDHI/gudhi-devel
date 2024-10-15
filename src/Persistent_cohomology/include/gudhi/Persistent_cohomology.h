@@ -40,7 +40,7 @@ namespace persistent_cohomology {
 /** \brief Computes the persistent cohomology of a filtered complex.
  *
  * \ingroup persistent_cohomology
- * 
+ *
  * The computation is implemented with a Compressed Annotation Matrix
  * (CAM)\cite DBLP:conf/esa/BoissonnatDM13,
  * and is adapted to the computation of Multi-Field Persistent Homology (MF)
@@ -166,6 +166,9 @@ class Persistent_cohomology {
    * Assumes that the filtration provided by the simplicial complex is
    * valid. Undefined behavior otherwise. */
   void compute_persistent_cohomology(Filtration_value min_interval_length = 0) {
+    if (dim_max_ <= 0)
+      return;  // --------->>
+
     interval_length_policy.set_length(min_interval_length);
     Simplex_key idx_fil = -1;
     std::vector<Simplex_key> vertices; // so we can check the connected components at the end

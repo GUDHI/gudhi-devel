@@ -18,6 +18,10 @@ Below is a list of changes:
 - [Module](link)
      - **...**
 
+- Installation
+     - CMake &ge; 3.15 is now required (was &ge; 3.8).
+     - Python &ge; 3.8 is now required (was &ge; 3.5), because of `importlib.metadata`.
+
 - Miscellaneous
      - The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.11.0+is%3Aclosed) is available on GitHub.
 
@@ -26,7 +30,7 @@ However, there are still GPL dependencies for many modules. We invite you to che
 
 We kindly ask users to cite the GUDHI library as appropriately as possible in their papers, and to mention the use of the GUDHI library on the web pages of their projects using GUDHI and provide us with links to these web pages.
 
-We provide [bibtex entries](https://gudhi.inria.fr/doc/latest/_citation.html) for the modules of the User and Reference Manual, as well as for publications directly related to the GUDHI library. 
+We provide [bibtex entries](https://gudhi.inria.fr/doc/latest/_citation.html) for the modules of the User and Reference Manual, as well as for publications directly related to the GUDHI library.
 
 Feel free to [contact us](https://gudhi.inria.fr/contact/) in case you have any questions or remarks.
 

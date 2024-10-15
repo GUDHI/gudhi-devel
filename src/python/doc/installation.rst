@@ -40,13 +40,13 @@ different, and in particular the `python/` subdirectory is actually `src/python/
 there.
 
 The library uses c++17 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.71.0,
-`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.8,
-Python :math:`\geq` 3.5, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0, `Cython <https://www.cython.org/>`_
+`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.15,
+Python :math:`\geq` 3.8, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0, `Cython <https://www.cython.org/>`_
 :math:`\geq` 0.27 and `pybind11 <https://github.com/pybind/pybind11>`_ to compile the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2017 or later.
 
-If you have several Python/python installed, the version 2.X may be used by default, but you can force it by adding
-:code:`-DPython_ADDITIONAL_VERSIONS=3` to the cmake command.
+If you have several Python/python installed, you can force it by adding
+:code:`-DPython_EXECUTABLE=/custom/path/to/python3` to the cmake command (requires CMake :math:`\geq` 3.16).
 
 GUDHI Python module compilation
 ===============================
@@ -145,10 +145,10 @@ You shall have something like:
 
 .. code-block:: none
 
-    Pybind11 version 2.8.1 
+    Pybind11 version 2.8.1
     Python version 3.7.12
-    Cython version 0.29.25 
-    Numpy version 1.21.4 
+    Cython version 0.29.25
+    Numpy version 1.21.4
     Boost version 1.77.0
     + Installed modules are: off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
         persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;
@@ -156,7 +156,7 @@ You shall have something like:
         euclidean_strong_witness_complex;
 
 Here, you can see that the modules that need CGAL are missing, because CGAL is not installed.
-:code:`persistence_graphical_tools` is installed, but 
+:code:`persistence_graphical_tools` is installed, but
 `its functions <https://gudhi.inria.fr/python/latest/persistence_graphical_tools_ref.html>`_ will produce an error as
 matplotlib is not available.
 Unitary tests cannot be run as pytest is missing.
@@ -165,26 +165,29 @@ A complete configuration would be :
 
 .. code-block:: none
 
-    Pybind11 version 2.8.1 
-    Python version 3.9.7
-    Cython version 0.29.24 
-    Pytest version 6.2.5 
-    Matplotlib version 3.5.0 
-    Numpy version 1.21.4 
-    Scipy version 1.7.3 
-    Scikit-learn version 1.0.1 
-    POT version 0.8.0 
-    HNSWlib found
-    PyKeOps version [pyKeOps]: 2.1
-    EagerPy version 0.30.0 
-    TensorFlow version 2.7.0 
-    Sphinx version 4.3.0 
-    Sphinx-paramlinks version 0.5.2 
-    pydata_sphinx_theme version 0.13.1 
-    NetworkX version 3.0 
+    Python version 3.11.9
+    Pybind11 version 2.12.0
+    Cython version 3.0.10
+    Numpy version 1.24.3
+    Pytest version 8.2.1
+    Matplotlib version 3.9.0
+    Scipy version 1.13.1
+    Scikit-learn version 1.3.2
+    POT version 0.9.4
+    HNSWlib version 0.8.0
+    PyTorch version 2.3.0
+    PyKeOps version 2.2.3
+    EagerPy version 0.30.0
+    TensorFlow version 2.13.1
+    Sphinx version 7.3.7
+    Sphinx-paramlinks version 0.6.0
+    pydata_sphinx_theme version 0.15.2
+    sphinxcontrib-bibtex version 2.6.2
+    sphinx-autodoc-typehints version 2.4.4
+    NetworkX version 3.3
     Eigen3 version 3.4.0
-    Boost version 1.74.0
-    CGAL version 5.3
+    Boost version 1.84.0
+    CGAL header only version 5.6.1
     GMP_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmp.so
     GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
     MPFR_LIBRARIES = /usr/lib/x86_64-linux-gnu/libmpfr.so
@@ -194,7 +197,7 @@ A complete configuration would be :
     + Installed modules are: bottleneck;off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
         persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;nerve_gic;subsampling;
         tangential_complex;alpha_complex;euclidean_witness_complex;euclidean_strong_witness_complex;
-    + Missing modules are: 
+    + Missing modules are:
 
 
 Documentation
@@ -202,6 +205,7 @@ Documentation
 
 To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_,
 `sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_,
+`sphinx-autodoc-typehints <https://github.com/tox-dev/sphinx-autodoc-typehints>`_,
 `sphinxcontrib-paramlinks <https://github.com/sqlalchemyorg/sphinx-paramlinks>`_ and
 `pydata-sphinx-theme <https://github.com/pydata/pydata-sphinx-theme>`_ :math:`\geq` 0.8.0 are
 required. As the documentation is auto-tested, `CGAL`_, `Eigen`_,
@@ -422,7 +426,7 @@ TensorFlow
 requires `TensorFlow <https://www.tensorflow.org/>`_.
 The :doc:`cubical complex </cubical_complex_tflow_itf_ref>`, :doc:`simplex tree </ls_simplex_tree_tflow_itf_ref>`
 and :doc:`Rips complex </rips_complex_tflow_itf_ref>` modules require `TensorFlow`_
-for incorporating them in neural nets. 
+for incorporating them in neural nets.
 
 `TensorFlow`_ is also used in some automatic differentiation tests.
 

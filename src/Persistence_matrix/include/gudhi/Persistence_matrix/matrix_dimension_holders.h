@@ -44,8 +44,8 @@ struct Dummy_matrix_dimension_holder
 /**
  * @ingroup persistence_matrix
  *
- * @brief Class managing the maximal dimension of a face represented in the inheriting matrix, when the option of
- * face removal is not enabled.
+ * @brief Class managing the maximal dimension of a cell represented in the inheriting matrix, when the option of
+ * cell removal is not enabled.
  * 
  * @tparam Dimension Dimension value type. Has to be an integer type.
  * If unsigned, the maximal value of the type should not be attained during a run.
@@ -75,7 +75,7 @@ class Matrix_max_dimension_holder
       : maxDim_(std::exchange(other.maxDim_, -1)){};
 
   /**
-   * @brief Returns the maximal dimension of a face represented in the matrix.
+   * @brief Returns the maximal dimension of a cell represented in the matrix.
    * 
    * @return The maximal dimension.
    */
@@ -106,8 +106,8 @@ class Matrix_max_dimension_holder
 /**
  * @ingroup persistence_matrix
  *
- * @brief Class managing the maximal dimension of a face represented in the inheriting matrix, when the option of
- * face removal is enabled.
+ * @brief Class managing the maximal dimension of a cell represented in the inheriting matrix, when the option of
+ * cell removal is enabled.
  * 
  * @tparam Dimension Dimension value type. Has to be an integer type.
  * If unsigned, the maximal value of the type should not be attained during a run.
@@ -141,7 +141,7 @@ class Matrix_all_dimension_holder
       : dimensions_(std::move(other.dimensions_)), maxDim_(std::exchange(other.maxDim_, -1)){};
 
   /**
-   * @brief Returns the maximal dimension of a face represented in the matrix.
+   * @brief Returns the maximal dimension of a cell represented in the matrix.
    * 
    * @return The maximal dimension.
    */
@@ -164,8 +164,8 @@ class Matrix_all_dimension_holder
   }
 
  protected:
-  std::vector<unsigned int> dimensions_;   /**< Number of faces by dimension. */
-  Dimension maxDim_;                  /**< Current maximal dimension. */
+  std::vector<unsigned int> dimensions_;  /**< Number of cells by dimension. */
+  Dimension maxDim_;                      /**< Current maximal dimension. */
 
   void update_up(unsigned int dimension) {
     if (dimensions_.size() <= dimension) dimensions_.resize(dimension + 1, 0);
