@@ -247,12 +247,6 @@ class Simplex_tree {
   typedef boost::transform_iterator<return_first, Const_dictionary_it> Complex_vertex_iterator;
   /** \brief Range over the vertices of the simplicial complex. */
   typedef boost::iterator_range<Complex_vertex_iterator> Complex_vertex_range;
-  // /** \brief Iterator over the vertices of the simplicial complex.
-  //  *
-  //  * 'value_type' is Vertex_handle. */
-  // typedef boost::transform_iterator<return_first, Const_dictionary_it> Const_complex_vertex_iterator;
-  // /** \brief Range over the vertices of the simplicial complex. */
-  // typedef boost::iterator_range<Const_complex_vertex_iterator> Const_complex_vertex_range;
   /** \brief Iterator over the vertices of a simplex.
    *
    * 'value_type' is Vertex_handle. */
@@ -308,10 +302,6 @@ class Simplex_tree {
 
   /** \brief Returns a range over the vertices of the simplicial complex. 
    * The order is increasing according to < on Vertex_handles.*/
-  // Const_complex_vertex_range complex_vertex_range() const {
-  //   return Const_complex_vertex_range(boost::make_transform_iterator(root_.members_.begin(), return_first()),
-  //                                     boost::make_transform_iterator(root_.members_.end(), return_first()));
-  // }
   Complex_vertex_range complex_vertex_range() const {
     return Complex_vertex_range(boost::make_transform_iterator(root_.members_.begin(), return_first()),
                                 boost::make_transform_iterator(root_.members_.end(), return_first()));
@@ -387,11 +377,6 @@ class Simplex_tree {
    * of the simplex.
    *
    * @param[in] sh Simplex for which the boundary is computed. */
-  // template<class SimplexHandle>
-  // Boundary_simplex_range boundary_simplex_range(SimplexHandle sh) {
-  //   return Boundary_simplex_range(Boundary_simplex_iterator(this, sh),
-  //                                 Boundary_simplex_iterator(this));
-  // }
   template<class SimplexHandle>
   Boundary_simplex_range boundary_simplex_range(SimplexHandle sh) const {
     return Boundary_simplex_range(Boundary_simplex_iterator(this, sh),
@@ -409,11 +394,6 @@ class Simplex_tree {
    *
    * @param[in] sh Simplex for which the boundary is computed.
    */
-  // template<class SimplexHandle>
-  // Boundary_opposite_vertex_simplex_range boundary_opposite_vertex_simplex_range(SimplexHandle sh) {
-  //   return Boundary_opposite_vertex_simplex_range(Boundary_opposite_vertex_simplex_iterator(this, sh),
-  //                                                 Boundary_opposite_vertex_simplex_iterator(this));
-  // }
   template<class SimplexHandle>
   Boundary_opposite_vertex_simplex_range boundary_opposite_vertex_simplex_range(SimplexHandle sh) const {
     return Boundary_opposite_vertex_simplex_range(Boundary_opposite_vertex_simplex_iterator(this, sh),
@@ -1260,9 +1240,6 @@ class Simplex_tree {
    * Simplex_tree::Simplex_handle range for an optimized search for the star of a simplex when
    * SimplexTreeOptions::link_nodes_by_label is true.
    */
-  // Cofaces_simplex_range star_simplex_range(const Simplex_handle simplex) {
-  //   return cofaces_simplex_range(simplex, 0);
-  // }
   Cofaces_simplex_range star_simplex_range(const Simplex_handle simplex) const {
     return cofaces_simplex_range(simplex, 0);
   }
@@ -1277,10 +1254,6 @@ class Simplex_tree {
    * Simplex_tree::Simplex_handle range for an optimized search for the coface of a simplex when
    * SimplexTreeOptions::link_nodes_by_label is true.
    */
-  // Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension) {
-  //   return _cofaces_simplex_range(simplex, codimension);
-  // }
-
   Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension) const{
     return _cofaces_simplex_range(simplex, codimension);
   }
