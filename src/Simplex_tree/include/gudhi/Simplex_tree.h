@@ -189,10 +189,9 @@ class Simplex_tree {
   typedef typename Dictionary::iterator Dictionary_it;
   typedef typename Dictionary::const_iterator Const_dictionary_it;
   typedef typename Dictionary_it::value_type Dit_value_t;
-  typedef typename Const_dictionary_it::value_type Const_dit_value_t;
 
   struct return_first {
-    Vertex_handle operator()(const Const_dit_value_t& p_sh) const {
+    Vertex_handle operator()(const Dit_value_t& p_sh) const {
       return p_sh.first;
     }
   };
@@ -209,11 +208,11 @@ class Simplex_tree {
   using Optimized_star_simplex_range = boost::iterator_range<Optimized_star_simplex_iterator>;
 
   class Fast_cofaces_predicate {
-    Simplex_tree* st_;
+    Simplex_tree const* st_;
     int codim_;
     int dim_;
    public:
-    Fast_cofaces_predicate(Simplex_tree* st, int codim, int dim)
+    Fast_cofaces_predicate(Simplex_tree const* st, int codim, int dim)
       : st_(st), codim_(codim), dim_(codim + dim) {}
     bool operator()( const Simplex_handle iter ) const {
       if (codim_ == 0)
@@ -245,15 +244,15 @@ class Simplex_tree {
   /** \brief Iterator over the vertices of the simplicial complex.
    *
    * 'value_type' is Vertex_handle. */
-  typedef boost::transform_iterator<return_first, Dictionary_it> Complex_vertex_iterator;
+  typedef boost::transform_iterator<return_first, Const_dictionary_it> Complex_vertex_iterator;
   /** \brief Range over the vertices of the simplicial complex. */
   typedef boost::iterator_range<Complex_vertex_iterator> Complex_vertex_range;
-  /** \brief Iterator over the vertices of the simplicial complex.
-   *
-   * 'value_type' is Vertex_handle. */
-  typedef boost::transform_iterator<return_first, Const_dictionary_it> Const_complex_vertex_iterator;
-  /** \brief Range over the vertices of the simplicial complex. */
-  typedef boost::iterator_range<Const_complex_vertex_iterator> Const_complex_vertex_range;
+  // /** \brief Iterator over the vertices of the simplicial complex.
+  //  *
+  //  * 'value_type' is Vertex_handle. */
+  // typedef boost::transform_iterator<return_first, Const_dictionary_it> Const_complex_vertex_iterator;
+  // /** \brief Range over the vertices of the simplicial complex. */
+  // typedef boost::iterator_range<Const_complex_vertex_iterator> Const_complex_vertex_range;
   /** \brief Iterator over the vertices of a simplex.
    *
    * 'value_type' is Vertex_handle. */
@@ -309,11 +308,11 @@ class Simplex_tree {
 
   /** \brief Returns a range over the vertices of the simplicial complex. 
    * The order is increasing according to < on Vertex_handles.*/
-  Const_complex_vertex_range complex_vertex_range() const {
-    return Const_complex_vertex_range(boost::make_transform_iterator(root_.members_.begin(), return_first()),
-                                      boost::make_transform_iterator(root_.members_.end(), return_first()));
-  }
-  Complex_vertex_range complex_vertex_range() {
+  // Const_complex_vertex_range complex_vertex_range() const {
+  //   return Const_complex_vertex_range(boost::make_transform_iterator(root_.members_.begin(), return_first()),
+  //                                     boost::make_transform_iterator(root_.members_.end(), return_first()));
+  // }
+  Complex_vertex_range complex_vertex_range() const {
     return Complex_vertex_range(boost::make_transform_iterator(root_.members_.begin(), return_first()),
                                 boost::make_transform_iterator(root_.members_.end(), return_first()));
   }
@@ -388,11 +387,11 @@ class Simplex_tree {
    * of the simplex.
    *
    * @param[in] sh Simplex for which the boundary is computed. */
-  template<class SimplexHandle>
-  Boundary_simplex_range boundary_simplex_range(SimplexHandle sh) {
-    return Boundary_simplex_range(Boundary_simplex_iterator(this, sh),
-                                  Boundary_simplex_iterator(this));
-  }
+  // template<class SimplexHandle>
+  // Boundary_simplex_range boundary_simplex_range(SimplexHandle sh) {
+  //   return Boundary_simplex_range(Boundary_simplex_iterator(this, sh),
+  //                                 Boundary_simplex_iterator(this));
+  // }
   template<class SimplexHandle>
   Boundary_simplex_range boundary_simplex_range(SimplexHandle sh) const {
     return Boundary_simplex_range(Boundary_simplex_iterator(this, sh),
@@ -410,11 +409,11 @@ class Simplex_tree {
    *
    * @param[in] sh Simplex for which the boundary is computed.
    */
-  template<class SimplexHandle>
-  Boundary_opposite_vertex_simplex_range boundary_opposite_vertex_simplex_range(SimplexHandle sh) {
-    return Boundary_opposite_vertex_simplex_range(Boundary_opposite_vertex_simplex_iterator(this, sh),
-                                                  Boundary_opposite_vertex_simplex_iterator(this));
-  }
+  // template<class SimplexHandle>
+  // Boundary_opposite_vertex_simplex_range boundary_opposite_vertex_simplex_range(SimplexHandle sh) {
+  //   return Boundary_opposite_vertex_simplex_range(Boundary_opposite_vertex_simplex_iterator(this, sh),
+  //                                                 Boundary_opposite_vertex_simplex_iterator(this));
+  // }
   template<class SimplexHandle>
   Boundary_opposite_vertex_simplex_range boundary_opposite_vertex_simplex_range(SimplexHandle sh) const {
     return Boundary_opposite_vertex_simplex_range(Boundary_opposite_vertex_simplex_iterator(this, sh),
@@ -798,7 +797,7 @@ class Simplex_tree {
 
  public:
   /** \brief Returns the number of simplices of each dimension in the simplex tree. */
-  std::vector<size_t> num_simplices_by_dimension() {
+  std::vector<size_t> num_simplices_by_dimension() const {
     if (is_empty()) return {};
     // std::min in case the upper bound got crazy
     std::vector<size_t> res(std::min(upper_bound_dimension()+1, max_dimension()+1));
@@ -1130,6 +1129,7 @@ class Simplex_tree {
   }
 
  public:
+  /** Returns a pointer to the root nodes of the simplex tree. */
   Siblings* root() { return &root_; }
 
   /** Returns a pointer to the root nodes of the simplex tree. */
@@ -1260,9 +1260,9 @@ class Simplex_tree {
    * Simplex_tree::Simplex_handle range for an optimized search for the star of a simplex when
    * SimplexTreeOptions::link_nodes_by_label is true.
    */
-  Cofaces_simplex_range star_simplex_range(const Simplex_handle simplex) {
-    return cofaces_simplex_range(simplex, 0);
-  }
+  // Cofaces_simplex_range star_simplex_range(const Simplex_handle simplex) {
+  //   return cofaces_simplex_range(simplex, 0);
+  // }
   Cofaces_simplex_range star_simplex_range(const Simplex_handle simplex) const {
     return cofaces_simplex_range(simplex, 0);
   }
@@ -1277,16 +1277,16 @@ class Simplex_tree {
    * Simplex_tree::Simplex_handle range for an optimized search for the coface of a simplex when
    * SimplexTreeOptions::link_nodes_by_label is true.
    */
-  Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension) {
-    return _cofaces_simplex_range(simplex, codimension);
-  }
+  // Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension) {
+  //   return _cofaces_simplex_range(simplex, codimension);
+  // }
 
   Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension) const{
     return _cofaces_simplex_range(simplex, codimension);
   }
 
  private:
-  Cofaces_simplex_range _cofaces_simplex_range(const Simplex_handle simplex, int codimension) {
+  Cofaces_simplex_range _cofaces_simplex_range(const Simplex_handle simplex, int codimension) const {
     // codimension must be positive or null integer
     assert(codimension >= 0);
 
@@ -1972,7 +1972,7 @@ class Simplex_tree {
    * the children of this simplex (a subset of the cofaces).
    */
   template<class Fun>
-  void for_each_simplex(Fun&& fun) {
+  void for_each_simplex(Fun&& fun) const {
     // Wrap callback so it always returns bool
     auto f = [&fun](Simplex_handle sh, int dim) -> bool {
       if constexpr (std::is_same_v<void, decltype(fun(sh, dim))>) {
@@ -1988,7 +1988,7 @@ class Simplex_tree {
 
  private:
   template<class Fun>
-  void rec_for_each_simplex(const Siblings* sib, int dim, Fun&& fun) {
+  void rec_for_each_simplex(const Siblings* sib, int dim, Fun&& fun) const {
     Simplex_handle sh = sib->members().end();
     GUDHI_CHECK(sh != sib->members().begin(), "Bug in Gudhi: only the root siblings may be empty");
     do {
@@ -2466,8 +2466,8 @@ class Simplex_tree {
       return sh;
     } else {
       //node needs to be casted as non const, because a const pair* cannot be casted into a Simplex_handle
-      return (Simplex_handle)(boost::intrusive::get_parent_from_member<Const_dit_value_t>(const_cast<Node*>(&node),
-                                                                                          &Const_dit_value_t::second));
+      return (Simplex_handle)(boost::intrusive::get_parent_from_member<Dit_value_t>(const_cast<Node*>(&node),
+                                                                                    &Dit_value_t::second));
     }
   }
 
@@ -2694,7 +2694,7 @@ class Simplex_tree {
 
 // Print a Simplex_tree in os.
 template<typename...T>
-std::ostream& operator<<(std::ostream & os, Simplex_tree<T...> & st) {
+std::ostream& operator<<(std::ostream & os, const Simplex_tree<T...> & st) {
   for (auto sh : st.filtration_simplex_range()) {
     os << st.dimension(sh) << " ";
     for (auto v : st.simplex_vertex_range(sh)) {

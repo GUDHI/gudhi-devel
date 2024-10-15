@@ -16,7 +16,6 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-#include <vector>
 #include <utility>  // for std::pair
 
 namespace Gudhi {

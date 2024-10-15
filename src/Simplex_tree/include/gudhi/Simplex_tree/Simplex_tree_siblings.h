@@ -15,9 +15,6 @@
 
 #include <boost/container/flat_map.hpp>
 
-#include <utility>
-#include <vector>
-
 namespace Gudhi {
 
 /** \addtogroup simplex_tree
