@@ -61,7 +61,7 @@
 
 namespace Gudhi {
 
-/** \addtogroup simplex_tree 
+/** \addtogroup simplex_tree
  *  @{
  */
 
@@ -281,12 +281,12 @@ class Simplex_tree {
   typedef Simplex_tree_complex_simplex_iterator<Simplex_tree> Complex_simplex_iterator;
   /** \brief Range over the simplices of the simplicial complex. */
   typedef boost::iterator_range<Complex_simplex_iterator> Complex_simplex_range;
-  /** \brief Iterator over the simplices of the skeleton of the simplicial complex, for a given 
+  /** \brief Iterator over the simplices of the skeleton of the simplicial complex, for a given
    * dimension.
    *
    * 'value_type' is Simplex_handle. */
   typedef Simplex_tree_skeleton_simplex_iterator<Simplex_tree> Skeleton_simplex_iterator;
-  /** \brief Range over the simplices of the skeleton of the simplicial complex, for a given 
+  /** \brief Range over the simplices of the skeleton of the simplicial complex, for a given
    * dimension. */
   typedef boost::iterator_range<Skeleton_simplex_iterator> Skeleton_simplex_range;
   /** \brief Range over the simplices of the simplicial complex, ordered by the filtration. */
@@ -300,7 +300,7 @@ class Simplex_tree {
   /** \name Range and iterator methods
    * @{ */
 
-  /** \brief Returns a range over the vertices of the simplicial complex. 
+  /** \brief Returns a range over the vertices of the simplicial complex.
    * The order is increasing according to < on Vertex_handles.*/
   Complex_vertex_range complex_vertex_range() const {
     return Complex_vertex_range(boost::make_transform_iterator(root_.members_.begin(), return_first()),
@@ -418,7 +418,7 @@ class Simplex_tree {
    * are already implicitly convertible if the concept of @ref SimplexTreeOptions is respected (note that there is
    * an eventual loss of precision or an undefined behaviour if a value is converted into a new type too small to
    * contain it). Any extra data (@ref Simplex_data) stored in the simplices are ignored in the copy for now.
-   * 
+   *
    * @tparam OtherSimplexTreeOptions Options of the given simplex tree.
    * @tparam F Method taking an OtherSimplexTreeOptions::Filtration_value as input and returning an
    * Options::Filtration_value.
@@ -614,7 +614,7 @@ class Simplex_tree {
 
   /** \brief Checks if two simplex trees are equal. */
   template<class OtherSimplexTreeOptions>
-  bool operator==(Simplex_tree<OtherSimplexTreeOptions>& st2) const {
+  bool operator==(const Simplex_tree<OtherSimplexTreeOptions>& st2) const {
     if ((null_vertex_ != st2.null_vertex_) ||
         (dimension_ != st2.dimension_ && !dimension_to_be_lowered_ && !st2.dimension_to_be_lowered_))
       return false;
@@ -623,7 +623,7 @@ class Simplex_tree {
 
   /** \brief Checks if two simplex trees are different. */
   template<class OtherSimplexTreeOptions>
-  bool operator!=(Simplex_tree<OtherSimplexTreeOptions>& st2) const {
+  bool operator!=(const Simplex_tree<OtherSimplexTreeOptions>& st2) const {
     return (!(*this == st2));
   }
 
@@ -762,7 +762,7 @@ class Simplex_tree {
 
   /**
    * @brief Returns the dimension of the given sibling simplices.
-   * 
+   *
    * @param curr_sib Pointer to the sibling container.
    * @return Height of the siblings in the tree (root counts as zero to make the height correspond to the dimension).
    */
@@ -922,7 +922,7 @@ class Simplex_tree {
    * we assign this simplex with the new value 'filtration', and set the Simplex_handle field of the
    * output pair to the Simplex_handle of the simplex. Otherwise, we set the Simplex_handle part to
    * null_simplex.
-   * 
+   *
   */
   template <class RandomVertexHandleRange = std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex_raw(const RandomVertexHandleRange& simplex,
@@ -1236,7 +1236,7 @@ class Simplex_tree {
    * \param simplex represent the simplex of which we search the star
    * \return Vector of Simplex_tree::Simplex_handle (empty vector if no star found) when
    * SimplexTreeOptions::link_nodes_by_label is false.
-   * 
+   *
    * Simplex_tree::Simplex_handle range for an optimized search for the star of a simplex when
    * SimplexTreeOptions::link_nodes_by_label is true.
    */
@@ -1250,7 +1250,7 @@ class Simplex_tree {
    * cofaces (equivalent of star function)
    * \return Vector of Simplex_tree::Simplex_handle (empty vector if no cofaces found) when
    * SimplexTreeOptions::link_nodes_by_label is false.
-   * 
+   *
    * Simplex_tree::Simplex_handle range for an optimized search for the coface of a simplex when
    * SimplexTreeOptions::link_nodes_by_label is true.
    */
@@ -1463,7 +1463,7 @@ class Simplex_tree {
     * @brief Adds a new vertex or a new edge in a flag complex, as well as all
     * simplices of its star, defined to maintain the property
     * of the complex to be a flag complex, truncated at dimension dim_max.
-    * To insert a new edge, the two given vertex handles have to correspond 
+    * To insert a new edge, the two given vertex handles have to correspond
     * to the two end points of the edge. To insert a new vertex, the handles
     * have to be twice the same and correspond to the number you want assigned
     * to it. I.e., to insert vertex \f$i\f$, give \f$u = v = i\f$.
@@ -1471,7 +1471,7 @@ class Simplex_tree {
     * the simplex tree, so the behaviour is undefined if called on an existing
     * edge. Also, the vertices of an edge have to be inserted before the edge.
     *
-    * @param[in] u,v              Vertex_handle representing the new edge 
+    * @param[in] u,v              Vertex_handle representing the new edge
     *                             (@p v != @p u) or the new vertex (@p v == @p u).
     * @param[in] fil              Filtration value of the edge.
     * @param[in] dim_max          Maximal dimension of the expansion.
@@ -1489,8 +1489,8 @@ class Simplex_tree {
     * filtration values, the method `make_filtration_non_decreasing()` has to be
     * called at the end of the insertions to restore the intended filtration.
     * Note that even then, an edge has to be inserted after its vertices.
-    * @warning The method assumes that the given edge or vertex was not already 
-    * contained in the simplex tree, so the behaviour is undefined if called on 
+    * @warning The method assumes that the given edge or vertex was not already
+    * contained in the simplex tree, so the behaviour is undefined if called on
     * an existing simplex.
     */
   void insert_edge_as_flag(  Vertex_handle                   u
@@ -2095,7 +2095,7 @@ class Simplex_tree {
   bool prune_above_dimension(int dimension) {
     if (dimension >= dimension_)
       return false;
-    
+
     bool modified = false;
     if (dimension < 0) {
       if (num_vertices() > 0) {
@@ -2197,17 +2197,17 @@ class Simplex_tree {
     }
   }
 
-  /** \brief Retrieve the original filtration value for a given simplex in the Simplex_tree. Since the 
+  /** \brief Retrieve the original filtration value for a given simplex in the Simplex_tree. Since the
    * computation of extended persistence requires modifying the filtration values, this function can be used
    * to recover the original values. Moreover, computing extended persistence requires adding new simplices
    * in the Simplex_tree. Hence, this function also outputs the type of each simplex. It can be either UP (which means
    * that the simplex was present originally, and is thus part of the ascending extended filtration), DOWN (which means
    * that the simplex is the cone of an original simplex, and is thus part of the descending extended filtration) or
    * EXTRA (which means the simplex is the cone point). See the definition of Extended_simplex_type. Note that if the simplex type is DOWN, the original filtration value
-   * is set to be the original filtration value of the corresponding (not coned) original simplex. 
+   * is set to be the original filtration value of the corresponding (not coned) original simplex.
    * \pre This function should be called only if `extend_filtration()` has been called first!
    * \post The output filtration value is supposed to be the same, but might be a little different, than the
-   * original filtration value, due to the internal transformation (scaling to [-2,-1]) that is 
+   * original filtration value, due to the internal transformation (scaling to [-2,-1]) that is
    * performed on the original filtration values during the computation of extended persistence.
    * @param[in] f Filtration value of the simplex in the extended (i.e., modified) filtration.
    * @param[in] efd Structure containing the minimum and maximum values of the original filtration. This the output of `extend_filtration()`.
@@ -2227,12 +2227,12 @@ class Simplex_tree {
     return p;
   };
 
-  /** \brief Extend filtration for computing extended persistence. 
-   * This function only uses the filtration values at the 0-dimensional simplices, 
-   * and computes the extended persistence diagram induced by the lower-star filtration 
-   * computed with these values. 
-   * \post Note that after calling this function, the filtration 
-   * values are actually modified. The function `decode_extended_filtration()` 
+  /** \brief Extend filtration for computing extended persistence.
+   * This function only uses the filtration values at the 0-dimensional simplices,
+   * and computes the extended persistence diagram induced by the lower-star filtration
+   * computed with these values.
+   * \post Note that after calling this function, the filtration
+   * values are actually modified. The function `decode_extended_filtration()`
    * retrieves the original values and outputs the extended simplex type.
    * @exception std::invalid_argument In debug mode if the Simplex tree contains a vertex with the largest
    * Vertex_handle, as this method requires to create an extra vertex internally.
@@ -2253,7 +2253,7 @@ class Simplex_tree {
       maxval = std::max(maxval, f);
       maxvert = std::max(sh->first, maxvert);
     }
-    
+
     GUDHI_CHECK(maxvert < std::numeric_limits<Vertex_handle>::max(), std::invalid_argument("Simplex_tree contains a vertex with the largest Vertex_handle"));
     maxvert++;
 
@@ -2292,7 +2292,7 @@ class Simplex_tree {
     // Automatically assign good values for simplices
     this->make_filtration_non_decreasing();
 
-    // Return the filtration data 
+    // Return the filtration data
     return Extended_filtration_data(minval, maxval);
   }
 
@@ -2421,14 +2421,14 @@ class Simplex_tree {
 
       //decltype(testPtr) = boost::intrusive::compact_rbtree_node<void*>*
       decltype(testPtr) sh_ptr = decltype(testPtr)((const char*)(&node) - shift);   //shifts from node to pointer
-      //decltype(testIIt) = 
+      //decltype(testIIt) =
       //boost::intrusive::tree_iterator<
       //  boost::intrusive::bhtraits<
       //    boost::container::base_node<
       //      std::pair<const int, Simplex_tree_node_explicit_storage<Simplex_tree>>,
       //      boost::container::dtl::intrusive_tree_hook<void*, boost::container::red_black_tree, true>, true>,
-      //    boost::intrusive::rbtree_node_traits<void*, true>, 
-      //    boost::intrusive::normal_link, 
+      //    boost::intrusive::rbtree_node_traits<void*, true>,
+      //    boost::intrusive::normal_link,
       //    boost::intrusive::dft_tag,
       //    3>,
       //  false>
@@ -2507,9 +2507,9 @@ class Simplex_tree {
 
  public:
    /** @private @brief Returns the serialization required buffer size.
-   * 
+   *
    * @return The exact serialization required size in number of bytes.
-   * 
+   *
    * @warning It is meant to return the same size with the same SimplexTreeOptions and on a computer with the same
    *   architecture.
    */
@@ -2522,14 +2522,14 @@ class Simplex_tree {
 #endif  // DEBUG_TRACES
     return buffer_byte_size;
   }
-  
+
   /** @private @brief Serialize the Simplex tree - Flatten it in a user given array of char
-   * 
+   *
    * @param[in] buffer An array of char allocated with enough space (cf. Gudhi::simplex_tree::get_serialization_size)
    * @param[in] buffer_size The buffer size.
-   * 
+   *
    * @exception std::invalid_argument If serialization does not match exactly the buffer_size value.
-   * 
+   *
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
    * SimplexTreeOptions and on a computer with the same architecture.
    */
@@ -2590,16 +2590,16 @@ class Simplex_tree {
  public:
   /** @private @brief Deserialize the array of char (flatten version of the tree) to initialize a Simplex tree.
    * It is the user's responsibility to provide an 'empty' Simplex_tree, there is no guarantee otherwise.
-   * 
+   *
    * @param[in] buffer A pointer on a buffer that contains a serialized Simplex_tree.
    * @param[in] buffer_size The size of the buffer.
-   * 
+   *
    * @exception std::invalid_argument In case the deserialization does not finish at the correct buffer_size.
    * @exception std::logic_error In debug mode, if the Simplex_tree is not 'empty'.
-   * 
+   *
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
    * SimplexTreeOptions and on a computer with the same architecture.
-   * 
+   *
    */
   void deserialize(const char* buffer, const std::size_t buffer_size) {
     GUDHI_CHECK(num_vertices() == 0, std::logic_error("Simplex_tree::deserialize - Simplex_tree must be empty"));
