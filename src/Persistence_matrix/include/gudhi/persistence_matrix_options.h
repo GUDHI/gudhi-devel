@@ -28,16 +28,16 @@ namespace persistence_matrix {
  * @brief List of column types.
  */
 enum class Column_types { 
-  LIST,           /**< @ref List_column "": Underlying container is a std::list<@ref Cell*>. */
-  SET,            /**< @ref Set_column "": Underlying container is a std::set<@ref Cell*>. */
-  HEAP,           /**< @ref Heap_column "": Underlying container is a std::vector<@ref Cell*> ordered as a heap.
+  LIST,           /**< @ref List_column "": Underlying container is a std::list<@ref Entry*>. */
+  SET,            /**< @ref Set_column "": Underlying container is a std::set<@ref Entry*>. */
+  HEAP,           /**< @ref Heap_column "": Underlying container is a std::vector<@ref Entry*> ordered as a heap.
                        Is not compatible with row access and column compression. */
-  VECTOR,         /**< @ref Vector_column "": Underlying container is a std::vector<@ref Cell*>
+  VECTOR,         /**< @ref Vector_column "": Underlying container is a std::vector<@ref Entry*>
                        with a lazy removal method. */
-  NAIVE_VECTOR,   /**< @ref Naive_vector_column "": Underlying container is a std::vector<@ref Cell*>. */
-  UNORDERED_SET,  /**< @ref Unordered_set_column "": Underlying container is a std::unordered_set<@ref Cell*>. */
-  INTRUSIVE_LIST, /**< @ref Intrusive_list_column "": Underlying container is a boost::intrusive::list<@ref Cell>. */
-  INTRUSIVE_SET   /**< @ref Intrusive_set_column "": Underlying container is a boost::intrusive::set<@ref Cell>. */
+  NAIVE_VECTOR,   /**< @ref Naive_vector_column "": Underlying container is a std::vector<@ref Entry*>. */
+  UNORDERED_SET,  /**< @ref Unordered_set_column "": Underlying container is a std::unordered_set<@ref Entry*>. */
+  INTRUSIVE_LIST, /**< @ref Intrusive_list_column "": Underlying container is a boost::intrusive::list<@ref Entry>. */
+  INTRUSIVE_SET   /**< @ref Intrusive_set_column "": Underlying container is a boost::intrusive::set<@ref Entry>. */
 };
 
 /**

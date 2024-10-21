@@ -66,14 +66,14 @@ class Chain_column_extra_properties
   /**
    * @brief Constructor setting the pivot at the given value and the pair to -1 (i.e. not paired).
    * 
-   * @param pivot @ref rowindex "Row index" of the pivot. Corresponds to the @ref IDIdx index of the face represented
+   * @param pivot @ref rowindex "Row index" of the pivot. Corresponds to the @ref IDIdx index of the cell represented
    * by the column.
    */
   Chain_column_extra_properties(ID_index pivot) : pivot_(pivot), pairedColumn_(-1) {}
   /**
    * @brief Constructor setting the pivot and the pair at the given values.
    * 
-   * @param pivot @ref rowindex "Row index" of the pivot. Corresponds to the @ref IDIdx index of the face represented
+   * @param pivot @ref rowindex "Row index" of the pivot. Corresponds to the @ref IDIdx index of the cell represented
    * by the column.
    * @param pair @ref MatIdx index of the pair of the column.
    */

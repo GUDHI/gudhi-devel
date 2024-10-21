@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <vector>
 
-#include "boundary_face_position_to_id_mapper.h"
+#include "boundary_cell_position_to_id_mapper.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -50,7 +50,7 @@ struct Dummy_base_pairing {
 template <class Master_matrix>
 class Base_pairing : public std::conditional<
                        Master_matrix::Option_list::has_removable_columns,
-                       Face_position_to_ID_mapper<typename Master_matrix::ID_index, typename Master_matrix::Pos_index>,
+                       Cell_position_to_ID_mapper<typename Master_matrix::ID_index, typename Master_matrix::Pos_index>,
                        Dummy_pos_mapper
                     >::type
 {
@@ -82,8 +82,8 @@ class Base_pairing : public std::conditional<
    */
   friend void swap(Base_pairing& pairing1, Base_pairing& pairing2) {
     if constexpr (Master_matrix::Option_list::has_removable_columns) {
-      swap(static_cast<Face_position_to_ID_mapper<ID_index, Pos_index>&>(pairing1),
-           static_cast<Face_position_to_ID_mapper<ID_index, Pos_index>&>(pairing2));
+      swap(static_cast<Cell_position_to_ID_mapper<ID_index, Pos_index>&>(pairing1),
+           static_cast<Cell_position_to_ID_mapper<ID_index, Pos_index>&>(pairing2));
     }
     pairing1.barcode_.swap(pairing2.barcode_);
     pairing1.deathToBar_.swap(pairing2.deathToBar_);
@@ -98,14 +98,14 @@ class Base_pairing : public std::conditional<
   using Base_matrix = typename Master_matrix::Master_boundary_matrix;
   //PIDM = Position to ID Map
   using PIDM = typename std::conditional<Master_matrix::Option_list::has_removable_columns,
-                                         Face_position_to_ID_mapper<ID_index, Pos_index>,
+                                         Cell_position_to_ID_mapper<ID_index, Pos_index>,
                                          Dummy_pos_mapper
                                         >::type;
 
   Barcode barcode_;       /**< Bar container. */
   Dictionary deathToBar_; /**< Map from death index to bar index. */
   /**
-   * @brief Map from face ID to face position. Only stores a pair if ID != position.
+   * @brief Map from cell ID to cell position. Only stores a pair if ID != position.
    */
   std::unordered_map<ID_index,Pos_index> idToPosition_;  //TODO: test other map types
   bool isReduced_;        /**< True if `_reduce()` was called. */

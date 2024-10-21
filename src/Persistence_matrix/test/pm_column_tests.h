@@ -28,11 +28,11 @@ std::vector<column_content<Column> > get_ordered_column_contents(std::vector<Col
                                                 >::type> > ordCol(matrix.size());
   for (unsigned int i = 0; i < matrix.size(); ++i) {
     Column& col = matrix[i];
-    for (auto& cell : col) {
+    for (auto& entry : col) {
       if constexpr (is_z2<Column>()) {
-        ordCol[i].insert(cell.get_row_index());
+        ordCol[i].insert(entry.get_row_index());
       } else {
-        ordCol[i].insert({cell.get_row_index(), cell.get_element()});
+        ordCol[i].insert({entry.get_row_index(), entry.get_element()});
       }
     }
   }
@@ -47,12 +47,12 @@ std::vector<column_content<Column> > get_ordered_rows(std::vector<Column>& matri
                                                  std::pair<unsigned int, typename Column::Field_element>
                                                 >::type> > rows;
   for (Column& col : matrix) {
-    for (auto& cell : col) {
-      if (cell.get_row_index() >= rows.size()) rows.resize(cell.get_row_index() + 1);
+    for (auto& entry : col) {
+      if (entry.get_row_index() >= rows.size()) rows.resize(entry.get_row_index() + 1);
       if constexpr (is_z2<Column>()) {
-        rows[cell.get_row_index()].insert(cell.get_column_index());
+        rows[entry.get_row_index()].insert(entry.get_column_index());
       } else {
-        rows[cell.get_row_index()].insert({cell.get_column_index(), cell.get_element()});
+        rows[entry.get_row_index()].insert({entry.get_column_index(), entry.get_element()});
       }
     }
   }
@@ -166,11 +166,11 @@ std::vector<std::vector<typename std::conditional<
     unsigned int,
     std::pair<unsigned int, typename Column::Field_element>
    >::type> > build_rows() {
-  using cell_type = typename std::conditional<is_z2<Column>(),
-                                              unsigned int,
-                                              std::pair<unsigned int, typename Column::Field_element>
-                                             >::type;
-  using Container = std::vector<cell_type>;
+  using entry_type = typename std::conditional<is_z2<Column>(),
+                                               unsigned int,
+                                               std::pair<unsigned int, typename Column::Field_element>
+                                              >::type;
+  using Container = std::vector<entry_type>;
   std::vector<Container> rows(7);
 
   if constexpr (is_z2<Column>()) {
@@ -200,11 +200,11 @@ std::vector<std::vector<typename std::conditional<
     unsigned int,
     std::pair<unsigned int, typename Column::Field_element>
    >::type> > build_column_values() {
-  using cell_type = typename std::conditional<is_z2<Column>(),
-                                              unsigned int,
-                                              std::pair<unsigned int, typename Column::Field_element>
-                                             >::type;
-  using Container = std::vector<cell_type>;
+  using entry_type = typename std::conditional<is_z2<Column>(),
+                                               unsigned int,
+                                               std::pair<unsigned int, typename Column::Field_element>
+                                              >::type;
+  using Container = std::vector<entry_type>;
   std::vector<Container> columns(6);
 
   if constexpr (is_z2<Column>()) {
@@ -228,11 +228,11 @@ std::vector<std::vector<typename std::conditional<
 
 template <class Column>
 void column_test_common_constructors() {
-  using cell_type = typename std::conditional<is_z2<Column>(),
-                                              unsigned int,
-                                              std::pair<unsigned int, typename Column::Field_element>
-                                             >::type;
-  using Container = std::vector<cell_type>;
+  using entry_type = typename std::conditional<is_z2<Column>(),
+                                               unsigned int,
+                                               std::pair<unsigned int, typename Column::Field_element>
+                                              >::type;
+  using Container = std::vector<entry_type>;
 
   Container cont1, cont2;
   typename Column::Column_settings settings(5);
@@ -278,9 +278,9 @@ void column_test_common_constructors() {
   BOOST_CHECK_EQUAL(rows.size(), 0);
 }
 
-template <class Column, typename cell_type>
+template <class Column, typename entry_type>
 void column_test_common_content_access(Column& col,
-                                       const std::set<cell_type>& setcont,
+                                       const std::set<entry_type>& setcont,
                                        const std::vector<typename Column::Field_element>& veccont) {
   BOOST_CHECK(get_column_content_via_iterators(col) == setcont);
   BOOST_CHECK(col.get_content(veccont.size()) == veccont);
@@ -519,18 +519,18 @@ void column_test_row_access_constructors(std::vector<Column>& matrix, Row_contai
   for (auto& r : rows) {
     if constexpr (Column::Master::Option_list::has_removable_rows) {
       if (!r.second.empty()) {
-        auto& cell = *r.second.rbegin();
-        if (cell.get_row_index() == 0 || cell.get_row_index() == 1 || cell.get_row_index() == 3 ||
-            cell.get_row_index() == 5) {
-          BOOST_CHECK_EQUAL(cell.get_column_index(), 6);
+        auto& entry = *r.second.rbegin();
+        if (entry.get_row_index() == 0 || entry.get_row_index() == 1 || entry.get_row_index() == 3 ||
+            entry.get_row_index() == 5) {
+          BOOST_CHECK_EQUAL(entry.get_column_index(), 6);
         }
       }
     } else {
       if (!r.empty()) {
-        auto& cell = *r.rbegin();
-        if (cell.get_row_index() == 0 || cell.get_row_index() == 1 || cell.get_row_index() == 3 ||
-            cell.get_row_index() == 5) {
-          BOOST_CHECK_EQUAL(cell.get_column_index(), 6);
+        auto& entry = *r.rbegin();
+        if (entry.get_row_index() == 0 || entry.get_row_index() == 1 || entry.get_row_index() == 3 ||
+            entry.get_row_index() == 5) {
+          BOOST_CHECK_EQUAL(entry.get_column_index(), 6);
         }
       }
     }
@@ -543,18 +543,18 @@ void column_test_row_access_constructors(std::vector<Column>& matrix, Row_contai
   for (auto& r : rows) {
     if constexpr (Column::Master::Option_list::has_removable_rows) {
       if (!r.second.empty()) {
-        auto& cell = *r.second.rbegin();
-        if (cell.get_row_index() == 0 || cell.get_row_index() == 1 || cell.get_row_index() == 3 ||
-            cell.get_row_index() == 5) {
-          BOOST_CHECK_EQUAL(cell.get_column_index(), 6);
+        auto& entry = *r.second.rbegin();
+        if (entry.get_row_index() == 0 || entry.get_row_index() == 1 || entry.get_row_index() == 3 ||
+            entry.get_row_index() == 5) {
+          BOOST_CHECK_EQUAL(entry.get_column_index(), 6);
         }
       }
     } else {
       if (!r.empty()) {
-        auto& cell = *r.rbegin();
-        if (cell.get_row_index() == 0 || cell.get_row_index() == 1 || cell.get_row_index() == 3 ||
-            cell.get_row_index() == 5) {
-          BOOST_CHECK_EQUAL(cell.get_column_index(), 6);
+        auto& entry = *r.rbegin();
+        if (entry.get_row_index() == 0 || entry.get_row_index() == 1 || entry.get_row_index() == 3 ||
+            entry.get_row_index() == 5) {
+          BOOST_CHECK_EQUAL(entry.get_column_index(), 6);
         }
       }
     }
@@ -567,18 +567,18 @@ void column_test_row_access_constructors(std::vector<Column>& matrix, Row_contai
   for (auto& r : rows) {
     if constexpr (Column::Master::Option_list::has_removable_rows) {
       if (!r.second.empty()) {
-        auto& cell = *r.second.rbegin();
-        if (cell.get_row_index() == 0 || cell.get_row_index() == 1 || cell.get_row_index() == 3 ||
-            cell.get_row_index() == 5) {
-          BOOST_CHECK_EQUAL(cell.get_column_index(), 6);
+        auto& entry = *r.second.rbegin();
+        if (entry.get_row_index() == 0 || entry.get_row_index() == 1 || entry.get_row_index() == 3 ||
+            entry.get_row_index() == 5) {
+          BOOST_CHECK_EQUAL(entry.get_column_index(), 6);
         }
       }
     } else {
       if (!r.empty()) {
-        auto& cell = *r.rbegin();
-        if (cell.get_row_index() == 0 || cell.get_row_index() == 1 || cell.get_row_index() == 3 ||
-            cell.get_row_index() == 5) {
-          BOOST_CHECK_EQUAL(cell.get_column_index(), 6);
+        auto& entry = *r.rbegin();
+        if (entry.get_row_index() == 0 || entry.get_row_index() == 1 || entry.get_row_index() == 3 ||
+            entry.get_row_index() == 5) {
+          BOOST_CHECK_EQUAL(entry.get_column_index(), 6);
         }
       }
     }
@@ -587,11 +587,11 @@ void column_test_row_access_constructors(std::vector<Column>& matrix, Row_contai
 
 template <class Column>
 void column_test_base_boundary_constructors() {
-  using cell_type = typename std::conditional<is_z2<Column>(),
-                                              unsigned int,
-                                              std::pair<unsigned int, typename Column::Field_element>
-                                             >::type;
-  using Container = std::vector<cell_type>;
+  using entry_type = typename std::conditional<is_z2<Column>(),
+                                               unsigned int,
+                                               std::pair<unsigned int, typename Column::Field_element>
+                                              >::type;
+  using Container = std::vector<entry_type>;
 
   typename Column::Column_settings settings(5);
 
@@ -677,25 +677,25 @@ void column_test_base_boundary_z2_methods() {
 // assumes that matrix was build with build_column_matrix and was not modified since.
 template <class Column>
 void column_test_base_z5_operators(std::vector<Column>& matrix) {
-  using Cell = typename Column::Cell;
-  std::set<Cell> setcont;
+  using Entry = typename Column::Entry;
+  std::set<Entry> setcont;
   std::vector<typename Column::Field_element> veccont;
 
-  Cell cell(0);
-  cell.set_element(4);
-  setcont.insert(cell);
-  cell = Cell(1);
-  cell.set_element(2);
-  setcont.insert(cell);
-  cell = Cell(2);
-  cell.set_element(1);
-  setcont.insert(cell);
-  cell = Cell(5);
-  cell.set_element(1);
-  setcont.insert(cell);
-  cell = Cell(6);
-  cell.set_element(1);
-  setcont.insert(cell);
+  Entry entry(0);
+  entry.set_element(4);
+  setcont.insert(entry);
+  entry = Entry(1);
+  entry.set_element(2);
+  setcont.insert(entry);
+  entry = Entry(2);
+  entry.set_element(1);
+  setcont.insert(entry);
+  entry = Entry(5);
+  entry.set_element(1);
+  setcont.insert(entry);
+  entry = Entry(6);
+  entry.set_element(1);
+  setcont.insert(entry);
   matrix[0] += setcont;
 
   veccont = {0, 4, 1, 3, 0, 0, 1};
@@ -705,21 +705,21 @@ void column_test_base_z5_operators(std::vector<Column>& matrix) {
   }
 
   setcont.clear();
-  cell = Cell(0);
-  cell.set_element(1);
-  setcont.insert(cell);
-  cell = Cell(1);
-  cell.set_element(3);
-  setcont.insert(cell);
-  cell = Cell(2);
-  cell.set_element(4);
-  setcont.insert(cell);
-  cell = Cell(5);
-  cell.set_element(4);
-  setcont.insert(cell);
-  cell = Cell(6);
-  cell.set_element(4);
-  setcont.insert(cell);
+  entry = Entry(0);
+  entry.set_element(1);
+  setcont.insert(entry);
+  entry = Entry(1);
+  entry.set_element(3);
+  setcont.insert(entry);
+  entry = Entry(2);
+  entry.set_element(4);
+  setcont.insert(entry);
+  entry = Entry(5);
+  entry.set_element(4);
+  setcont.insert(entry);
+  entry = Entry(6);
+  entry.set_element(4);
+  setcont.insert(entry);
   matrix[1] += setcont;
 
   veccont = {};
@@ -745,21 +745,21 @@ void column_test_base_z5_operators(std::vector<Column>& matrix) {
   }
   // this = this + column * v
   setcont.clear();
-  cell = Cell(0);
-  cell.set_element(3);
-  setcont.insert(cell);
-  cell = Cell(2);
-  cell.set_element(1);
-  setcont.insert(cell);
-  cell = Cell(3);
-  cell.set_element(2);
-  setcont.insert(cell);
-  cell = Cell(5);
-  cell.set_element(2);
-  setcont.insert(cell);
-  cell = Cell(6);
-  cell.set_element(1);
-  setcont.insert(cell);
+  entry = Entry(0);
+  entry.set_element(3);
+  setcont.insert(entry);
+  entry = Entry(2);
+  entry.set_element(1);
+  setcont.insert(entry);
+  entry = Entry(3);
+  entry.set_element(2);
+  setcont.insert(entry);
+  entry = Entry(5);
+  entry.set_element(2);
+  setcont.insert(entry);
+  entry = Entry(6);
+  entry.set_element(1);
+  setcont.insert(entry);
   matrix[5].multiply_source_and_add(setcont, 3);
   veccont = {3, 2, 4, 1, 0, 2, 4};
   BOOST_CHECK(matrix[5].get_content(veccont.size()) == veccont);
@@ -768,24 +768,24 @@ void column_test_base_z5_operators(std::vector<Column>& matrix) {
   }
   // this = v * this + column
   setcont.clear();
-  cell = Cell(0);
-  cell.set_element(3);
-  setcont.insert(cell);
-  cell = Cell(1);
-  cell.set_element(2);
-  setcont.insert(cell);
-  cell = Cell(2);
-  cell.set_element(4);
-  setcont.insert(cell);
-  cell = Cell(3);
-  cell.set_element(1);
-  setcont.insert(cell);
-  cell = Cell(5);
-  cell.set_element(2);
-  setcont.insert(cell);
-  cell = Cell(6);
-  cell.set_element(4);
-  setcont.insert(cell);
+  entry = Entry(0);
+  entry.set_element(3);
+  setcont.insert(entry);
+  entry = Entry(1);
+  entry.set_element(2);
+  setcont.insert(entry);
+  entry = Entry(2);
+  entry.set_element(4);
+  setcont.insert(entry);
+  entry = Entry(3);
+  entry.set_element(1);
+  setcont.insert(entry);
+  entry = Entry(5);
+  entry.set_element(2);
+  setcont.insert(entry);
+  entry = Entry(6);
+  entry.set_element(4);
+  setcont.insert(entry);
   matrix[3].multiply_target_and_add(4, setcont);
   veccont = {3, 2, 4, 1, 0, 2, 4};
   BOOST_CHECK(matrix[3].get_content(veccont.size()) == veccont);
@@ -797,7 +797,7 @@ void column_test_base_z5_operators(std::vector<Column>& matrix) {
 // assumes that matrix was build with build_column_matrix and was not modified since.
 template <class Column>
 void column_test_base_z2_operators(std::vector<Column>& matrix) {
-  std::set<typename Column::Cell> setcont;
+  std::set<typename Column::Entry> setcont;
   std::vector<bool> veccont;
 
   setcont = {0, 1, 2, 5, 6};

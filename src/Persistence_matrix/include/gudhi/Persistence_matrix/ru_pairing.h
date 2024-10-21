@@ -20,7 +20,7 @@
 
 #include <unordered_map>
 
-#include "boundary_face_position_to_id_mapper.h"
+#include "boundary_cell_position_to_id_mapper.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -48,7 +48,7 @@ struct Dummy_ru_pairing
 template <class Master_matrix>
 class RU_pairing : public std::conditional<
                        Master_matrix::Option_list::has_removable_columns,
-                       Face_position_to_ID_mapper<typename Master_matrix::ID_index, typename Master_matrix::Pos_index>,
+                       Cell_position_to_ID_mapper<typename Master_matrix::ID_index, typename Master_matrix::Pos_index>,
                        Dummy_pos_mapper
                     >::type
 {
@@ -57,9 +57,9 @@ class RU_pairing : public std::conditional<
   using ID_index = typename Master_matrix::ID_index;
   //PIDM = Position to ID Map
   using PIDM = typename std::conditional<Master_matrix::Option_list::has_removable_columns,
-                                        Face_position_to_ID_mapper<ID_index, Pos_index>,
-                                        Dummy_pos_mapper
-                                       >::type;
+                                          Cell_position_to_ID_mapper<ID_index, Pos_index>,
+                                          Dummy_pos_mapper
+                                        >::type;
 
  public:
   using Barcode = typename Master_matrix::Barcode;  /**< Barcode type. */
@@ -93,7 +93,7 @@ class RU_pairing : public std::conditional<
   Barcode barcode_;       /**< Bar container. */
   Dictionary indexToBar_; /**< Map from @ref MatIdx index to bar index. */
   /**
-   * @brief Map from face ID to face position. Only stores a pair if ID != position.
+   * @brief Map from cell ID to cell position. Only stores a pair if ID != position.
    */
   std::unordered_map<ID_index, Pos_index> idToPosition_;  //TODO: test other map types
 
