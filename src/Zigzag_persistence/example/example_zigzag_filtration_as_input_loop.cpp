@@ -14,7 +14,7 @@
 #include <gudhi/filtered_zigzag_persistence.h>
 
 using ZP = Gudhi::zigzag_persistence::Filtered_zigzag_persistence_with_storage<>;
-using Face_handle = ZP::Face_key;
+using Cell_handle = ZP::Cell_key;
 using Filtration_value = ZP::Filtration_value;
 using Interval_filtration = ZP::Filtration_value_interval;
 
@@ -50,7 +50,7 @@ void print_indices(ZP& zp) {
   }
 }
 
-std::vector<std::vector<Face_handle> > get_boundaries() {
+std::vector<std::vector<Cell_handle> > get_boundaries() {
   return {{},
           {},
           {},
@@ -114,7 +114,7 @@ int main(int argc, char* const argv[]) {
   
   ZP zp;
 
-  std::vector<std::vector<Face_handle> > simplices = get_boundaries();
+  std::vector<std::vector<Cell_handle> > simplices = get_boundaries();
   std::vector<Filtration_value> fils = get_filtration_values();
   std::vector<bool> dirs = get_directions();
 
@@ -125,10 +125,10 @@ int main(int argc, char* const argv[]) {
     }
     if (dirs[i]) {
       int dim = simplices[i].size() == 0 ? 0 : simplices[i].size() - 1;
-      zp.insert_face(i, simplices[i], dim, fils[i]);
+      zp.insert_cell(i, simplices[i], dim, fils[i]);
     } else {
       auto id = simplices[i][0];
-      zp.remove_face(id, fils[i]);
+      zp.remove_cell(id, fils[i]);
     }
   }
 

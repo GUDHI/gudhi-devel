@@ -16,15 +16,15 @@
 #include <gudhi/filtered_zigzag_persistence.h>
 
 using ZP = Gudhi::zigzag_persistence::Filtered_zigzag_persistence<>;
-using ID_handle = ZP::Face_key;
+using ID_handle = ZP::Cell_key;
 using Filtration_value = ZP::Filtration_value;
 using Dimension = ZP::Dimension;
 
 enum lineType : int { INCLUSION, REMOVAL, COMMENT };
 
-lineType read_operation(std::string& line, std::vector<ID_handle>& faces, double& timestamp) {
+lineType read_operation(std::string& line, std::vector<ID_handle>& cells, double& timestamp) {
   lineType type;
-  faces.clear();
+  cells.clear();
   ID_handle num;
 
   size_t current = line.find_first_not_of(' ', 0);
@@ -53,7 +53,7 @@ lineType read_operation(std::string& line, std::vector<ID_handle>& faces, double
   while (current != std::string::npos) {
     next = line.find_first_of(' ', current);
     num = std::stoi(line.substr(current, next - current));
-    faces.push_back(num);
+    cells.push_back(num);
     current = line.find_first_not_of(' ', next);
   }
 
@@ -89,7 +89,7 @@ int main(int argc, char* const argv[]) {
     while (getline(file, line, '\n') && read_operation(line, data, timestamp) == COMMENT);
     double lastTimestamp = timestamp;
     // first operation has to be an insertion.
-    zp.insert_face(id, data, 0, timestamp);
+    zp.insert_cell(id, data, 0, timestamp);
 
     while (getline(file, line, '\n')) {
       type = read_operation(line, data, timestamp);
@@ -100,10 +100,10 @@ int main(int argc, char* const argv[]) {
       if (type == INCLUSION) {
         ++id;
         int dim = data.size() == 0 ? 0 : data.size() - 1;
-        zp.insert_face(id, data, dim, timestamp);
+        zp.insert_cell(id, data, dim, timestamp);
       } else if (type == REMOVAL) {
         ++id;
-        zp.remove_face(data[0], timestamp);
+        zp.remove_cell(data[0], timestamp);
       }
     }
 

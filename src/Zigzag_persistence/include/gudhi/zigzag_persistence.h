@@ -62,7 +62,7 @@ struct Zigzag_matrix_options : Gudhi::persistence_matrix::Default_options<column
  * @brief Default options for @ref Zigzag_persistence.
  */
 struct Default_zigzag_options {
-  using Internal_key = int;   /**< Face ID used internally, must be signed. */
+  using Internal_key = int;   /**< Cell ID used internally, must be signed. */
   using Dimension = int;      /**< Dimension value type. */
   /**
    * @brief Column type use by the internal matrix.
@@ -79,7 +79,7 @@ struct Default_zigzag_options {
  * @class Zigzag_persistence zigzag_persistence.h gudhi/zigzag_persistence.h
  * @brief Class computing the zigzag persistent homology of a zigzag sequence. Algorithm based on \cite zigzag.
  * @details After construction of the class, the zigzag filtration should be given in a streaming like way, i.e.,
- * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
+ * call @ref insert_cell, @ref remove_cell or @ref apply_identity for each step of the filtration in order of
  * the filtration. The pairs of birth and death indices are retrieved via the given callback method every time
  * a pair is closed. To retrieve the open pairs (corresponding to infinite bars),
  * use @ref get_current_infinite_intervals.
@@ -112,24 +112,24 @@ struct Default_zigzag_options {
  * // In all cases, it is important that the operations of insertions and removals are made **in the same order**
  * // as in the zigzag filtration ones wants to compute the barcode from.
  *
- * // A face has to be identified in the boundaries by the operation number the face was inserted with in the sequence.
+ * // A cell has to be identified in the boundaries by the operation number the cell was inserted with in the sequence.
  *
  * //inserts vertex 0 -> birth at 0 of 0-cycle
- * zp.insert_face({}, 0);
+ * zp.insert_cell({}, 0);
  * //inserts vertex 1 -> birth at 1 of 0-cycle
- * zp.insert_face({}, 0);
+ * zp.insert_cell({}, 0);
  * //inserts edge 2 = (0,1) -> death at 2 -> outputs (0, 1, 2)
- * zp.insert_face({0, 1}, 1);
+ * zp.insert_cell({0, 1}, 1);
  * //inserts vertex 3 -> birth at 3 of 0-cycle
- * zp.insert_face({}, 0);
+ * zp.insert_cell({}, 0);
  * //inserts edge 4 = (0,3) -> death at 4 -> outputs (0, 3, 4)
- * zp.insert_face({0, 3}, 1);
+ * zp.insert_cell({0, 3}, 1);
  * //inserts edge 5 = (1,3) -> birth at 5 of 1-cycle
- * zp.insert_face({1, 3}, 1);
+ * zp.insert_cell({1, 3}, 1);
  * //removes edge 4 -> death at 6 -> outputs (1, 5, 6)
- * zp.remove_face(4);
+ * zp.remove_cell(4);
  * //removes edge 2 -> birth at 7 of 0-cycle
- * zp.remove_face(2);
+ * zp.remove_cell(2);
  * ```
  *
  * #### Finalizations
@@ -248,18 +248,18 @@ class Zigzag_persistence
   /**
    * @brief Constructor of the Zigzag_persistence class.
    * @details After construction of the class, the zigzag filtration should be given in a streaming like way, i.e.,
-   * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
+   * call @ref insert_cell, @ref remove_cell or @ref apply_identity for each step of the filtration in order of
    * the filtration. The pairs of birth and death indices are retrieved via the given callback method every time
    * a pair is closed. To retrieve the open pairs (corresponding to infinite bars),
    * use @ref get_current_infinite_intervals.
    *
    * @param stream_interval Callback method to process the birth and death index pairs. Has to take three arguments
    * as input: first the dimension of the cycle, then the birth index of the cycle and third the death index of the
-   * cycle. An index always corresponds to the arrow number the event occurred (one call to @ref insert_face,
-   * @ref remove_face or @ref apply_identity is equal to one arrow and increases the arrow count by one).
-   * @param preallocationSize Reserves space for @p preallocationSize faces in the internal data structure.
+   * cycle. An index always corresponds to the arrow number the event occurred (one call to @ref insert_cell,
+   * @ref remove_cell or @ref apply_identity is equal to one arrow and increases the arrow count by one).
+   * @param preallocationSize Reserves space for @p preallocationSize cells in the internal data structure.
    * This is optional and just helps skip a few reallocations. The optimal value (no reallocation, no wasted space) is
-   * the number of faces in the biggest complex of the filtration.
+   * the number of cells in the biggest complex of the filtration.
    * Default value: 0.
    */
   Zigzag_persistence(std::function<void(Dimension, Index, Index)> stream_interval,
@@ -276,37 +276,37 @@ class Zigzag_persistence
         numArrow_(-1),
         stream_interval_(std::move(stream_interval)) {}
   /**
-   * @brief Updates the zigzag persistence diagram after the insertion of the given face.
+   * @brief Updates the zigzag persistence diagram after the insertion of the given cell.
    *
    * @tparam BoundaryRange Range type needing size, begin and end members.
-   * @param boundary Boundary of the inserted face. The boundary should be represented by all the faces with
-   * non-zero coefficients generating it. A face should be represented by the arrow number when the face appeared for
-   * the first time in the filtration (if a face was inserted and then removed and reinserted etc., only the last
-   * insertion counts). The face range should be ordered by increasing arrow numbers.
-   * @param dimension Dimension of the inserted face.
+   * @param boundary Boundary of the inserted cell. The boundary should be represented by all the cells with
+   * non-zero coefficients generating it. A cell should be represented by the arrow number when the cell appeared for
+   * the first time in the filtration (if a cell was inserted and then removed and reinserted etc., only the last
+   * insertion counts). The cell range should be ordered by increasing arrow numbers.
+   * @param dimension Dimension of the inserted cell.
    * @return Number of the operation.
    */
   template <class BoundaryRange = std::initializer_list<Index> >
-  Index insert_face(const BoundaryRange& boundary, Dimension dimension) {
+  Index insert_cell(const BoundaryRange& boundary, Dimension dimension) {
     ++numArrow_;
     _process_forward_arrow(boundary, dimension);
     return numArrow_;
   }
 
   /**
-   * @brief Updates the zigzag persistence diagram after the removal of the given face.
+   * @brief Updates the zigzag persistence diagram after the removal of the given cell.
    *
-   * @param arrowNumber Arrow number of when the face to remove was inserted for the last time.
+   * @param arrowNumber Arrow number of when the cell to remove was inserted for the last time.
    * @return Number of the operation.
    */
-  Index remove_face(Index arrowNumber) {
+  Index remove_cell(Index arrowNumber) {
     ++numArrow_;
     _process_backward_arrow(arrowNumber);
     return numArrow_;
   }
 
   /**
-   * @brief To use when a face is neither inserted nor removed, but the filtration moves along the identity operator
+   * @brief To use when a cell is neither inserted nor removed, but the filtration moves along the identity operator
    * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposely skipped
    * to avoid useless computation. Increases the arrow number by one.
    * @return Number of the operation.
@@ -342,12 +342,12 @@ class Zigzag_persistence
 
  private:
   /**
-   * @brief Express the boundary cycle of the new face as a sum of cycles in a matrix.
+   * @brief Express the boundary cycle of the new cell as a sum of cycles in a matrix.
    * If some cycles are not boundary cycles, i.e., columns with F-index
    * in the matrix, it applies a surjective diamond to the zigzag module.
    *
-   * @param boundary Boundary of the inserted face.
-   * @param dim Dimension of the inserted face.
+   * @param boundary Boundary of the inserted cell.
+   * @param dim Dimension of the inserted cell.
    */
   template <class BoundaryRange>
   void _process_forward_arrow(const BoundaryRange& boundary, Dimension dim) {
@@ -369,7 +369,7 @@ class Zigzag_persistence
    * the boundary in _process_forward_arrow(...). It is equivalent to decreasing death index
    * order w.r.t. the <d ordering.
    *
-   * @param dim Dimension of the inserted face.
+   * @param dim Dimension of the inserted cell.
    * @param chainsInF Indices of the non paired columns in the matrix.
    */
   void _apply_surjective_reflection_diamond(Dimension dim, const std::vector<Matrix_index>& chainsInF) {
@@ -448,17 +448,17 @@ class Zigzag_persistence
   }
 
   /**
-   * @brief Removes the given face by pushing up the matrix the corresponding column and erasing it.
+   * @brief Removes the given cell by pushing up the matrix the corresponding column and erasing it.
    *
-   * @param faceID Internal ID of the face to remove.
+   * @param cellID Internal ID of the cell to remove.
    */
-  void _process_backward_arrow(Index faceID) {
-    // column whose key is the one of the removed face
-    Matrix_index currCol = matrix_.get_column_with_pivot(faceID);
+  void _process_backward_arrow(Index cellID) {
+    // column whose key is the one of the removed cell
+    Matrix_index currCol = matrix_.get_column_with_pivot(cellID);
 
     // Record all columns that get affected by the transpositions, i.e., have a coeff
     std::vector<Matrix_index> modifiedColumns;
-    const auto& row = matrix_.get_row(faceID);
+    const auto& row = matrix_.get_row(cellID);
     modifiedColumns.reserve(row.size());
     std::transform(row.begin(), row.end(), std::back_inserter(modifiedColumns),
                    [](const auto& cell) { return cell.get_column_index(); });
@@ -487,13 +487,13 @@ class Zigzag_persistence
       births_[col.get_paired_chain_index()] = numArrow_;
     }
 
-    // cannot be in G as the removed face is maximal
-    matrix_.remove_maximal_face(faceID, {});  // also un-pairs c_g if in H
+    // cannot be in G as the removed cell is maximal
+    matrix_.remove_maximal_cell(cellID, {});  // also un-pairs c_g if in H
   }
 
  private:
   Matrix matrix_;           /**< Matrix storing a base of the current chain complex. */
-  Birth_dictionary births_;      /**< Map face index in F to corresponding birth. */
+  Birth_dictionary births_;      /**< Map cell index in F to corresponding birth. */
   Birth_ordering birthOrdering_; /**< Maintains <b ordering of the births. */
   Index numArrow_;               /**< Current arrow number. */
   std::function<void(Dimension, Index, Index)> stream_interval_; /**< Callback method for closed pairs. */
