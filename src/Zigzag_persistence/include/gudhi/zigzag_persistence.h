@@ -68,13 +68,11 @@ struct Default_zigzag_options {
    * @brief Column type use by the internal matrix.
    */
   static const Gudhi::persistence_matrix::Column_types column_type =
-      Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR;  //TODO: redo benchmark with oscillating rips
+      Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR;
 };
 
 // TODO: add the possibility of something else than Z2. Which means that the possibility of vineyards without Z2
 // also needs to be implemented. The theory needs to be done first.
-// TODO: erase_birth_history will be moved to the options if it is proven to be useful. In the meantime
-// it stays here undocumented to ease benchmarks.
 /**
  * @class Zigzag_persistence zigzag_persistence.h gudhi/zigzag_persistence.h
  * @brief Class computing the zigzag persistent homology of a zigzag sequence. Algorithm based on \cite zigzag.
@@ -146,7 +144,7 @@ struct Default_zigzag_options {
  *
  * @tparam ZigzagOptions Structure following the @ref ZigzagOptions concept. Default value: @ref Default_zigzag_options.
  */
-template <class ZigzagOptions = Default_zigzag_options, bool erase_birth_history = true>
+template <class ZigzagOptions = Default_zigzag_options>
 class Zigzag_persistence
 {
  public:
@@ -324,19 +322,8 @@ class Zigzag_persistence
   template <typename F>
   void get_current_infinite_intervals(F&& stream_infinite_interval) {
     for (auto& p : births_) {
-      if constexpr (erase_birth_history) {
-        auto& col = matrix_.get_column(p.first);
-        stream_infinite_interval(col.get_dimension(), p.second);
-      } else {
-        try {
-          auto& col = matrix_.get_column(p.first);
-          if (!col.is_paired()) {
-            stream_infinite_interval(col.get_dimension(), p.second);
-          }
-        } catch (const std::out_of_range&) {
-          continue;
-        }
-      }
+      auto& col = matrix_.get_column(p.first);
+      stream_infinite_interval(col.get_dimension(), p.second);
     }
   }
 
@@ -438,10 +425,8 @@ class Zigzag_persistence
       }  // birth not available anymore, do not
     }  // modify *chain_f_it.
 
-    if constexpr (erase_birth_history) {
-      birthOrdering_.remove_birth(maxb);
-      births_.erase(chainFp);
-    }
+    birthOrdering_.remove_birth(maxb);
+    births_.erase(chainFp);
 
     // Update persistence diagram with left interval [fil(b_max) ; fil(m))
     stream_interval_(dim - 1, maxb, numArrow_);
@@ -477,10 +462,8 @@ class Zigzag_persistence
     if (!col.is_paired()) {  // in F
       auto it = births_.find(currCol);
       stream_interval_(col.get_dimension(), it->second, numArrow_);
-      if constexpr (erase_birth_history) {
-        birthOrdering_.remove_birth(it->second);
-        births_.erase(it);
-      }
+      birthOrdering_.remove_birth(it->second);
+      births_.erase(it);
     } else {  // in H    -> paired with c_g, that now belongs to F now
       // maintain the <=b order
       birthOrdering_.add_birth_backward(numArrow_);

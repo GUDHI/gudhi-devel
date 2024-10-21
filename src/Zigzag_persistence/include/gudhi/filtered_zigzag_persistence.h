@@ -41,16 +41,9 @@ namespace zigzag_persistence {
  *
  * @brief Default options for @ref Filtered_zigzag_persistence_with_storage and @ref Filtered_zigzag_persistence.
  */
-struct Default_filtered_zigzag_options {
-  using Internal_key = int;        /**< Cell ID used internally, must be signed. */
+struct Default_filtered_zigzag_options : Default_zigzag_options {
   using Cell_key = int;            /**< Cell ID used in the given boundaries. */
   using Filtration_value = double; /**< Filtration value type. */
-  using Dimension = int;      /**< Dimension value type. */
-  /**
-   * @brief Column type use by the internal matrix.
-   */
-  static const Gudhi::persistence_matrix::Column_types column_type =
-      Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR;
 };
 
 /**
@@ -302,7 +295,7 @@ class Filtered_zigzag_persistence_with_storage
 
  private:
   std::unordered_map<Cell_key, Internal_key> handleToKey_;  /**< Map from input keys to internal keys. */
-  Dimension dimMax_;                                   /**< Maximal dimension of a bar to record. */
+  Dimension dimMax_;                                        /**< Maximal dimension of a bar to record. */
   std::vector<Index_interval> persistenceDiagram_;          /**< Stores current closed persistence intervals. */
   Internal_key numArrow_;                                   /**< Current arrow number. */
   Filtration_value previousFiltrationValue_;                /**< Filtration value of the previous arrow. */
@@ -312,7 +305,7 @@ class Filtered_zigzag_persistence_with_storage
    * i is the smallest cell index whose cell has filtration value f.
    */
   std::vector<std::pair<Internal_key, Filtration_value> > filtrationValues_;
-  Zigzag_persistence<FilteredZigzagOptions, false> pers_; /**< Class computing the pairs. */
+  Zigzag_persistence<FilteredZigzagOptions> pers_;          /**< Class computing the pairs. */
 
   /**
    * @brief Stores the filtration value if the value is new. Assumes that the given value is either greater (or equal)
@@ -578,7 +571,7 @@ class Filtered_zigzag_persistence {
   Dictionary<Cell_key, Internal_key> handleToKey_;                  /**< Map from input keys to internal keys. */
   Internal_key numArrow_;                                           /**< Current arrow number. */
   Dictionary<Internal_key, Filtration_value> keyToFiltrationValue_; /**< Cell Key to filtration value map. */
-  Zigzag_persistence<FilteredZigzagOptions, true> pers_;            /**< Class computing the pairs. */
+  Zigzag_persistence<FilteredZigzagOptions> pers_;                  /**< Class computing the pairs. */
 };  // end class Filtered_zigzag_persistence
 
 }  // namespace zigzag_persistence

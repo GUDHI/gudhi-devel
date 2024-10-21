@@ -17,7 +17,6 @@
 #include <gudhi/zigzag_persistence.h>
 
 using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<>;
-// using ZP = Gudhi::zigzag_persistence::Zigzag_persistence<Gudhi::zigzag_persistence::Default_zigzag_options, false>;
 
 struct Interval {
   Interval() {}
