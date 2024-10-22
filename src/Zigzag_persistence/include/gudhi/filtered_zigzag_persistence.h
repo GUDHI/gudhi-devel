@@ -24,7 +24,6 @@
 
 #include <cmath>
 #include <limits>
-#include <set>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -196,10 +195,12 @@ class Filtered_zigzag_persistence_with_storage
     GUDHI_CHECK(res.second, "Zigzag_persistence::insert_cell - cell already in the complex");
 
     // Compute the keys of the cells of the boundary.
-    std::set<Internal_key> translatedBoundary;  // set maintains the natural order on indices
+    std::vector<Internal_key> translatedBoundary;
+    translatedBoundary.reserve(dimension * 2);  // boundary does not have to have `size()`
     for (auto b : boundary) {
-      translatedBoundary.insert(handleToKey_.at(b));  // TODO: add possibilities of coefficients
+      translatedBoundary.push_back(handleToKey_.at(b));  // TODO: add possibilities of coefficients
     }
+    std::sort(translatedBoundary.begin(), translatedBoundary.end());
 
     pers_.insert_cell(translatedBoundary, dimension);
 
@@ -508,10 +509,12 @@ class Filtered_zigzag_persistence {
     keyToFiltrationValue_.try_emplace(numArrow_, filtrationValue);
 
     // Compute the keys of the cells of the boundary.
-    std::set<Internal_key> translatedBoundary;  // set maintains the natural order on indices
+    std::vector<Internal_key> translatedBoundary;
+    translatedBoundary.reserve(dimension * 2);  // boundary does not have to have `size()`
     for (auto b : boundary) {
-      translatedBoundary.insert(handleToKey_.at(b));  // TODO: add possibilities of coefficients
+      translatedBoundary.push_back(handleToKey_.at(b));  // TODO: add possibilities of coefficients
     }
+    std::sort(translatedBoundary.begin(), translatedBoundary.end());
 
     pers_.insert_cell(translatedBoundary, dimension);
 
