@@ -46,7 +46,7 @@ struct FiltrationValue {
    * a lifetime including those two values. The result is stored in the first parameter.
    * The overload for arithmetic types like `double` or `int` is already implemented as the minimum of the
    * two given values and can also be used for non native arithmetic types like `CGAL::Gmpq` as long as it has an
-   * `operator<`. The overload is available with @ref Gudhi::unify in `simplex_tree_options.h`.
+   * `operator<`. The overload is available with @ref Gudhi::unify in @ref simplex_tree_options.h "".
    *
    * For a k-critical filtration, FiltrationValue should be able to store an union of values (corresponding to the
    * different births of a same simplex) and this method adds the values of @p f2 in @p f1 and removes the values
@@ -63,7 +63,7 @@ struct FiltrationValue {
    * @brief Given two filtration values, stores in the first value the lowest common upper bound of the two values.
    * The overload for arithmetic types like `double` or `int` is already implemented as the maximum of the two
    * given values and can also be used for non native arithmetic types like `CGAL::Gmpq` as long as it has an
-   * `operator<`. The overload is available with @ref Gudhi::intersect in `simplex_tree_options.h`.
+   * `operator<`. The overload is available with @ref Gudhi::intersect in @ref simplex_tree_options.h "".
    *
    * @return True if and only if the values in @p f1 were actually modified.
    */
