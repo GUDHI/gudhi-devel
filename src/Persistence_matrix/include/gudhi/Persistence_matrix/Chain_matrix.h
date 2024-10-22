@@ -35,9 +35,9 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief %Matrix structure storing a compatible base of a filtered chain complex. See @cite zigzag.
- * The base is constructed from the boundaries of the faces in the complex. Allows the persistent homology to be
+ * The base is constructed from the boundaries of the cells in the complex. Allows the persistent homology to be
  * computed, as well as representative cycles. Supports vineyards (see @cite vineyards) and the removal 
- * of maximal faces while maintaining a valid barcode. Provides an access to its columns and rows.
+ * of maximal cells while maintaining a valid barcode. Provides an access to its columns and rows.
  * 
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
@@ -57,12 +57,12 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   using Column = typename Master_matrix::Column;                            /**< Column type. */
   using Row = typename Master_matrix::Row;                                  /**< Row type, only necessary with row
                                                                                  access option. */
-  using Cell = typename Master_matrix::Matrix_cell;                         /**< @ref Cell "Matrix cell" type. */
-  using Cell_constructor = typename Master_matrix::Cell_constructor;        /**< Factory of @ref Cell classes. */
+  using Entry = typename Master_matrix::Matrix_entry;                       /**< @ref Entry "Matrix entry" type. */
+  using Entry_constructor = typename Master_matrix::Entry_constructor;      /**< Factory of @ref Entry classes. */
   using Column_settings = typename Master_matrix::Column_settings;          /**< Structure giving access to the columns
                                                                                  to necessary external classes. */
   using Boundary = typename Master_matrix::Boundary;                        /**< Type of an input column. */
-  using Cell_representative = typename Master_matrix::Cell_representative;  /**< %Cell content representative. */
+  using Entry_representative = typename Master_matrix::Entry_representative;  /**< %Entry content representative. */
   using Index = typename Master_matrix::Index;                              /**< @ref MatIdx index type. */
   using ID_index = typename Master_matrix::ID_index;                        /**< @ref IDIdx index type. */
   using Pos_index = typename Master_matrix::Pos_index;                      /**< @ref PosIdx index type. */
@@ -78,14 +78,14 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    */
   Chain_matrix(Column_settings* colSettings);
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Cell_representative. Each range corresponds to a
-   * column  (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
-   * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0. 
-   * Only available if @ref PersistenceMatrixOptions::has_column_pairings is true or
+   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Entry_representative. Each range corresponds
+   * to a column  (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by
+   * increasing IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting
+   * with 0. Only available if @ref PersistenceMatrixOptions::has_column_pairings is true or
    * @ref PersistenceMatrixOptions::has_vine_update is false. Otherwise, birth and death
    * comparators have to be provided.
    * 
-   * @tparam Boundary_range Range type for @ref Matrix::Cell_representative ranges.
+   * @tparam Boundary_range Range type for @ref Matrix::Entry_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
@@ -140,9 +140,10 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
                const BirthComparatorFunction& birthComparator,
                const DeathComparatorFunction& deathComparator);
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Cell_representative. Each range corresponds to a
-   * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
-   * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0.
+   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Entry_representative. Each range corresponds
+   * to a column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by
+   * increasing IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting
+   * with 0.
    *
    * @warning If @ref PersistenceMatrixOptions::has_vine_update is false, the comparators are not used.
    * And if @ref PersistenceMatrixOptions::has_vine_update is true, but
@@ -151,7 +152,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * 
    * @tparam BirthComparatorFunction Type of the birth comparator: (@ref Pos_index, @ref Pos_index) -> bool
    * @tparam DeathComparatorFunction Type of the death comparator: (@ref Pos_index, @ref Pos_index) -> bool
-   * @tparam Boundary_range  Range type for @ref Matrix::Cell_representative ranges.
+   * @tparam Boundary_range  Range type for @ref Matrix::Entry_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
@@ -227,44 +228,48 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   /**
    * @brief Inserts at the end of the matrix a new ordered column corresponding to the given boundary.
    * This means that it is assumed that this method is called on boundaries in the order of the filtration.
-   * It also assumes that the faces in the given boundary are identified by their relative position in the filtration,
+   * It also assumes that the cells in the given boundary are identified by their relative position in the filtration,
    * starting at 0. If it is not the case, use the other
-   * @ref insert_boundary(ID_index faceIndex, const Boundary_range& boundary, Dimension dim) "insert_boundary"
-   * instead by indicating the face ID used in the boundaries when the face is inserted.
+   * @ref insert_boundary(ID_index cellIndex, const Boundary_range& boundary, Dimension dim) "insert_boundary"
+   * instead by indicating the cell ID used in the boundaries when the cell is inserted.
    *
    * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
-   * a more general cell complex. This includes cubical complexes or Morse complexes for example.
+   * a more general entry complex. This includes cubical complexes or Morse complexes for example.
    *
    * When inserted, the given boundary is reduced and from the reduction process, the column is deduced in the form of:
    * `IDIdx + linear combination of older column IDIdxs`. If the barcode is stored, it will be updated.
    * 
-   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
    * @param boundary Boundary generating the new column. The content should be ordered by ID.
-   * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    * @return The @ref MatIdx indices of the unpaired chains used to reduce the boundary.
    */
   template <class Boundary_range = Boundary>
-  std::vector<Cell_representative> insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
+  std::vector<Entry_representative> insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
   /**
-   * @brief It does the same as the other version, but allows the boundary faces to be identified without restrictions
+   * @brief It does the same as the other version, but allows the boundary cells to be identified without restrictions
    * except that all IDs have to be strictly increasing in the order of filtration. Note that you should avoid then
    * to use the other insertion method to avoid overwriting IDs.
    *
-   * As a face has to be inserted before one of its cofaces in a valid filtration (recall that it is assumed that
-   * the faces are inserted by order of filtration), it is sufficient to indicate the ID of the face being inserted.
+   * As a cell has to be inserted before one of its cofaces in a valid filtration (recall that it is assumed that
+   * the cells are inserted by order of filtration), it is sufficient to indicate the ID of the cell being inserted.
    * 
-   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
-   * @param faceID @ref IDIdx index to use to identify the new face.
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param cellID @ref IDIdx index to use to identify the new cell.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the 
-   * @p faceID values of precedent calls of the method for the corresponding faces and should be ordered in 
+   * @p cellID values of precedent calls of the method for the corresponding cells and should be ordered in 
    * increasing order.
-   * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    * @return The @ref MatIdx index of the inserted boundary.
    */
   template <class Boundary_range = Boundary>
-  std::vector<Cell_representative> insert_boundary(ID_index faceID, const Boundary_range& boundary, Dimension dim = -1);
+  std::vector<Entry_representative> insert_boundary(ID_index cellID,
+                                                    const Boundary_range& boundary,
+                                                    Dimension dim = -1);
   /**
    * @brief Returns the column at the given @ref MatIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -285,9 +290,9 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns and
    * @ref PersistenceMatrixOptions::has_vine_update are true, as well as,
    * @ref PersistenceMatrixOptions::has_map_column_container and @ref PersistenceMatrixOptions::has_column_pairings.
-   * Assumes that the face is maximal in the current complex and removes it such that the matrix remains consistent
+   * Assumes that the cell is maximal in the current complex and removes it such that the matrix remains consistent
    * (i.e., the matrix is still a compatible bases of the chain complex in the sense of @cite zigzag).
-   * The maximality of the face is not verified.
+   * The maximality of the cell is not verified.
    * Also updates the barcode if it is stored.
    *
    * Note that using the other version of the method could perform better depending on how the data is 
@@ -295,46 +300,46 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    *
    * See also @ref remove_last.
    * 
-   * @param faceID @ref IDIdx index of the face to remove
+   * @param cellID @ref IDIdx index of the cell to remove
    */
-  void remove_maximal_face(ID_index faceID);
+  void remove_maximal_cell(ID_index cellID);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns,
    * @ref PersistenceMatrixOptions::has_vine_update and @ref PersistenceMatrixOptions::has_map_column_container
    * are true.
-   * Assumes that the face is maximal in the current complex and removes it such that the matrix remains consistent
+   * Assumes that the cell is maximal in the current complex and removes it such that the matrix remains consistent
    * (i.e., it is still a compatible bases of the chain complex in the sense of @cite zigzag).
-   * The maximality of the face is not verified.
+   * The maximality of the cell is not verified.
    * Also updates the barcode if it is stored.
    *
-   * To maintain the compatibility, vine swaps are done to move the face up to the end of the filtration. Once at 
+   * To maintain the compatibility, vine swaps are done to move the cell up to the end of the filtration. Once at 
    * the end, the removal is trivial. But for @ref chainmatrix "chain matrices", swaps do not actually swap the position
-   * of the column every time, so the faces appearing after @p faceID in the filtration have to be searched first within
-   * the matrix. If the user has an easy access to the @ref IDIdx of the faces in the order of filtration, passing them
+   * of the column every time, so the cells appearing after @p cellID in the filtration have to be searched first within
+   * the matrix. If the user has an easy access to the @ref IDIdx of the cells in the order of filtration, passing them
    * by argument with @p columnsToSwap allows to skip a linear search process. Typically, if the user knows that the
-   * face he wants to remove is already the last face of the filtration, calling
-   * @ref remove_maximal_face(ID_index faceIndex, const std::vector<ID_index>& columnsToSwap)
-   * "remove_maximal_face(faceID, {})" will be faster than @ref remove_last().
+   * cell he wants to remove is already the last cell of the filtration, calling
+   * @ref remove_maximal_cell(ID_index cellIndex, const std::vector<ID_index>& columnsToSwap)
+   * "remove_maximal_cell(cellID, {})" will be faster than @ref remove_last().
    *
    * See also @ref remove_last.
    * 
-   * @param faceID @ref IDIdx index of the face to remove
-   * @param columnsToSwap Vector of @ref IDIdx indices of the faces coming after @p faceID in the filtration.
+   * @param cellID @ref IDIdx index of the cell to remove
+   * @param columnsToSwap Vector of @ref IDIdx indices of the cells coming after @p cellID in the filtration.
    */
-  void remove_maximal_face(ID_index faceID, const std::vector<ID_index>& columnsToSwap);
+  void remove_maximal_cell(ID_index cellID, const std::vector<ID_index>& columnsToSwap);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns is true and,
    * if @ref PersistenceMatrixOptions::has_map_column_container is true or
    * @ref PersistenceMatrixOptions::has_vine_update is false.
-   * Removes the last face in the filtration from the matrix and updates the barcode if it is stored.
+   * Removes the last cell in the filtration from the matrix and updates the barcode if it is stored.
    *
-   * See also @ref remove_maximal_face.
+   * See also @ref remove_maximal_cell.
    *
-   * @warning If @ref PersistenceMatrixOptions::has_vine_update is true, the last face does not have to
+   * @warning If @ref PersistenceMatrixOptions::has_vine_update is true, the last cell does not have to
    * be at the end of the matrix container and therefore has to be searched first. In this case, if the user
-   * already knows the @ref IDIdx of the last face, calling
-   * @ref remove_maximal_face(ID_index faceIndex, const std::vector<ID_index>& columnsToSwap)
-   * "remove_maximal_face(faceID, {})" instead allows to skip the search.
+   * already knows the @ref IDIdx of the last cell, calling
+   * @ref remove_maximal_cell(ID_index cellIndex, const std::vector<ID_index>& columnsToSwap)
+   * "remove_maximal_cell(cellID, {})" instead allows to skip the search.
    */
   void remove_last();
 
@@ -348,8 +353,8 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   /**
    * @brief Returns the dimension of the given column.
    * 
-   * @param columnIndex @ref MatIdx index of the column representing the face.
-   * @return Dimension of the face.
+   * @param columnIndex @ref MatIdx index of the column representing the cell.
+   * @return Dimension of the cell.
    */
   Dimension get_column_dimension(Index columnIndex) const;
 
@@ -396,14 +401,14 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
                                   Index targetColumnIndex);
 
   /**
-   * @brief Indicates if the cell at given coordinates has value zero.
+   * @brief Indicates if the entry at given coordinates has value zero.
    * 
-   * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
-   * @return true If the cell has value zero.
+   * @param columnIndex @ref MatIdx index of the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
+   * @return true If the entry has value zero.
    * @return false Otherwise.
    */
-  bool is_zero_cell(Index columnIndex, ID_index rowIndex) const;
+  bool is_zero_entry(Index columnIndex, ID_index rowIndex) const;
   /**
    * @brief Indicates if the column at given index has value zero. Note that if the matrix is valid, this method
    * should always return false.
@@ -417,10 +422,10 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   /**
    * @brief Returns the column with given @ref rowindex "row index" as pivot. Assumes that the pivot exists.
    * 
-   * @param faceID @ref rowindex "Row index" of the pivot.
+   * @param cellID @ref rowindex "Row index" of the pivot.
    * @return @ref MatIdx index of the column with the given pivot.
    */
-  Index get_column_with_pivot(ID_index faceID) const;
+  Index get_column_with_pivot(ID_index cellID) const;
   /**
    * @brief Returns the @ref rowindex "row index" of the pivot of the given column.
    * 
@@ -491,14 +496,14 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   Column_container matrix_;       /**< Column container. */
   Dictionary pivotToColumnIndex_; /**< Map from @ref IDIdx to @ref MatIdx index. */
   Index nextIndex_;               /**< Next unused column index. */
-  Column_settings* colSettings_;  /**< Cell factory. */
+  Column_settings* colSettings_;  /**< Entry factory. */
 
   template <class Boundary_range>
-  std::vector<Cell_representative> _reduce_boundary(ID_index faceID, const Boundary_range& boundary, Dimension dim);
-  void _reduce_by_G(Tmp_column& column, std::vector<Cell_representative>& chainsInH, Index currentPivot);
-  void _reduce_by_F(Tmp_column& column, std::vector<Cell_representative>& chainsInF, Index currentPivot);
-  void _build_from_H(ID_index faceID, Tmp_column& column, std::vector<Cell_representative>& chainsInH);
-  void _update_largest_death_in_F(const std::vector<Cell_representative>& chainsInF);
+  std::vector<Entry_representative> _reduce_boundary(ID_index cellID, const Boundary_range& boundary, Dimension dim);
+  void _reduce_by_G(Tmp_column& column, std::vector<Entry_representative>& chainsInH, Index currentPivot);
+  void _reduce_by_F(Tmp_column& column, std::vector<Entry_representative>& chainsInF, Index currentPivot);
+  void _build_from_H(ID_index cellID, Tmp_column& column, std::vector<Entry_representative>& chainsInH);
+  void _update_largest_death_in_F(const std::vector<Entry_representative>& chainsInF);
   void _insert_chain(const Tmp_column& column, Dimension dimension);
   void _insert_chain(const Tmp_column& column, Dimension dimension, Index pair);
   void _add_to(const Column& column, Tmp_column& set, unsigned int coef);
@@ -667,7 +672,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(Chain_matrix&& other) noexcept
 
 template <class Master_matrix>
 template <class Boundary_range>
-inline std::vector<typename Master_matrix::Cell_representative> Chain_matrix<Master_matrix>::insert_boundary(
+inline std::vector<typename Master_matrix::Entry_representative> Chain_matrix<Master_matrix>::insert_boundary(
     const Boundary_range& boundary, Dimension dim) 
 {
   return insert_boundary(nextIndex_, boundary, dim);
@@ -675,22 +680,22 @@ inline std::vector<typename Master_matrix::Cell_representative> Chain_matrix<Mas
 
 template <class Master_matrix>
 template <class Boundary_range>
-inline std::vector<typename Master_matrix::Cell_representative> Chain_matrix<Master_matrix>::insert_boundary(
-    ID_index faceID, const Boundary_range& boundary, Dimension dim) 
+inline std::vector<typename Master_matrix::Entry_representative> Chain_matrix<Master_matrix>::insert_boundary(
+    ID_index cellID, const Boundary_range& boundary, Dimension dim) 
 {
   if constexpr (!Master_matrix::Option_list::has_map_column_container) {
-    if (pivotToColumnIndex_.size() <= faceID) {
-      pivotToColumnIndex_.resize(faceID * 2 + 1, -1);
+    if (pivotToColumnIndex_.size() <= cellID) {
+      pivotToColumnIndex_.resize(cellID * 2 + 1, -1);
     }
   }
 
   if constexpr (Master_matrix::Option_list::has_vine_update && Master_matrix::Option_list::has_column_pairings) {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      Swap_opt::CP::pivotToPosition_.try_emplace(faceID, _nextPosition());
+      Swap_opt::CP::pivotToPosition_.try_emplace(cellID, _nextPosition());
     } else {
-      if (Swap_opt::CP::pivotToPosition_.size() <= faceID)
+      if (Swap_opt::CP::pivotToPosition_.size() <= cellID)
         Swap_opt::CP::pivotToPosition_.resize(pivotToColumnIndex_.size(), -1);
-      Swap_opt::CP::pivotToPosition_[faceID] = _nextPosition();
+      Swap_opt::CP::pivotToPosition_[cellID] = _nextPosition();
     }
   }
 
@@ -698,7 +703,7 @@ inline std::vector<typename Master_matrix::Cell_representative> Chain_matrix<Mas
     Dim_opt::update_up(dim == static_cast<Dimension>(-1) ? (boundary.size() == 0 ? 0 : boundary.size() - 1) : dim);
   }
 
-  return _reduce_boundary(faceID, boundary, dim);
+  return _reduce_boundary(cellID, boundary, dim);
 }
 
 template <class Master_matrix>
@@ -723,22 +728,22 @@ inline const typename Chain_matrix<Master_matrix>::Column& Chain_matrix<Master_m
 }
 
 template <class Master_matrix>
-inline void Chain_matrix<Master_matrix>::remove_maximal_face(ID_index faceID)
+inline void Chain_matrix<Master_matrix>::remove_maximal_cell(ID_index cellID)
 {
   static_assert(Master_matrix::Option_list::has_removable_columns,
-                "'remove_maximal_face' is not implemented for the chosen options.");
+                "'remove_maximal_cell' is not implemented for the chosen options.");
   static_assert(Master_matrix::Option_list::has_map_column_container && 
                     Master_matrix::Option_list::has_vine_update &&
                     Master_matrix::Option_list::has_column_pairings,
-                "'remove_maximal_face' is not implemented for the chosen options.");
+                "'remove_maximal_cell' is not implemented for the chosen options.");
 
   // TODO: find simple test to verify that col at columnIndex is maximal even without row access.
 
   const auto& pivotToPosition = Swap_opt::CP::pivotToPosition_;
-  auto it = pivotToPosition.find(faceID);
-  if (it == pivotToPosition.end()) return;  // face does not exists. TODO: put an assert instead?
+  auto it = pivotToPosition.find(cellID);
+  if (it == pivotToPosition.end()) return;  // cell does not exists. TODO: put an assert instead?
   Pos_index startPos = it->second;
-  Index startIndex = pivotToColumnIndex_.at(faceID);
+  Index startIndex = pivotToColumnIndex_.at(cellID);
 
   if (startPos != _nextPosition() - 1) {
     std::vector<Index> colToSwap;
@@ -760,17 +765,17 @@ inline void Chain_matrix<Master_matrix>::remove_maximal_face(ID_index faceID)
 }
 
 template <class Master_matrix>
-inline void Chain_matrix<Master_matrix>::remove_maximal_face(ID_index faceID,
+inline void Chain_matrix<Master_matrix>::remove_maximal_cell(ID_index cellID,
                                                              const std::vector<ID_index>& columnsToSwap)
 {
   static_assert(Master_matrix::Option_list::has_removable_columns,
-                "'remove_maximal_face' is not implemented for the chosen options.");
+                "'remove_maximal_cell' is not implemented for the chosen options.");
   static_assert(Master_matrix::Option_list::has_map_column_container && Master_matrix::Option_list::has_vine_update,
-                "'remove_maximal_face' is not implemented for the chosen options.");
+                "'remove_maximal_cell' is not implemented for the chosen options.");
 
   // TODO: find simple test to verify that col at columnIndex is maximal even without row access.
 
-  Index startIndex = pivotToColumnIndex_.at(faceID);
+  Index startIndex = pivotToColumnIndex_.at(cellID);
 
   for (ID_index i : columnsToSwap) {
     startIndex = Swap_opt::vine_swap(startIndex, pivotToColumnIndex_.at(i));
@@ -792,7 +797,7 @@ inline void Chain_matrix<Master_matrix>::remove_last()
   if constexpr (Master_matrix::Option_list::has_vine_update) {
     // careful: linear because of the search of the last index. It is better to keep track of the @ref IDIdx index
     // of the last column while performing swaps (or the @ref MatIdx with the return values of `vine_swap` + get_pivot)
-    // and then call `remove_maximal_face` with it and an empty `columnsToSwap`.
+    // and then call `remove_maximal_cell` with it and an empty `columnsToSwap`.
 
     ID_index pivot = 0;
     Index colIndex = 0;
@@ -851,7 +856,7 @@ inline void Chain_matrix<Master_matrix>::multiply_source_and_add_to(const Field_
 }
 
 template <class Master_matrix>
-inline bool Chain_matrix<Master_matrix>::is_zero_cell(Index columnIndex, ID_index rowIndex) const 
+inline bool Chain_matrix<Master_matrix>::is_zero_entry(Index columnIndex, ID_index rowIndex) const 
 {
   return !get_column(columnIndex).is_non_zero(rowIndex);
 }
@@ -864,12 +869,12 @@ inline bool Chain_matrix<Master_matrix>::is_zero_column(Index columnIndex)
 
 template <class Master_matrix>
 inline typename Chain_matrix<Master_matrix>::Index Chain_matrix<Master_matrix>::get_column_with_pivot(
-    ID_index faceID) const
+    ID_index cellID) const
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    return pivotToColumnIndex_.at(faceID);
+    return pivotToColumnIndex_.at(cellID);
   } else {
-    return pivotToColumnIndex_[faceID];
+    return pivotToColumnIndex_[cellID];
   }
 }
 
@@ -911,8 +916,8 @@ inline void Chain_matrix<Master_matrix>::print() const
     for (ID_index i = 0; i < pivotToColumnIndex_.size() && pivotToColumnIndex_[i] != static_cast<Index>(-1); ++i) {
       Index pos = pivotToColumnIndex_[i];
       const Column& col = matrix_[pos];
-      for (const auto& cell : col) {
-        std::cout << cell.get_row_index() << " ";
+      for (const auto& entry : col) {
+        std::cout << entry.get_row_index() << " ";
       }
       std::cout << "(" << i << ", " << pos << ")\n";
     }
@@ -922,8 +927,8 @@ inline void Chain_matrix<Master_matrix>::print() const
       for (ID_index i = 0; i < pivotToColumnIndex_.size() && pivotToColumnIndex_[i] != static_cast<Index>(-1); ++i) {
         Index pos = pivotToColumnIndex_[i];
         const Row& row = RA_opt::get_row(pos);
-        for (const auto& cell : row) {
-          std::cout << cell.get_column_index() << " ";
+        for (const auto& entry : row) {
+          std::cout << entry.get_column_index() << " ";
         }
         std::cout << "(" << i << ", " << pos << ")\n";
       }
@@ -931,8 +936,8 @@ inline void Chain_matrix<Master_matrix>::print() const
   } else {
     for (const auto& p : pivotToColumnIndex_) {
       const Column& col = matrix_.at(p.second);
-      for (const auto& cell : col) {
-        std::cout << cell.get_row_index() << " ";
+      for (const auto& entry : col) {
+        std::cout << entry.get_row_index() << " ";
       }
       std::cout << "(" << p.first << ", " << p.second << ")\n";
     }
@@ -941,8 +946,8 @@ inline void Chain_matrix<Master_matrix>::print() const
       std::cout << "Row Matrix:\n";
       for (const auto& p : pivotToColumnIndex_) {
         const Row& row = RA_opt::get_row(p.first);
-        for (const auto& cell : row) {
-          std::cout << cell.get_column_index() << " ";
+        for (const auto& entry : row) {
+          std::cout << entry.get_column_index() << " ";
         }
         std::cout << "(" << p.first << ", " << p.second << ")\n";
       }
@@ -953,13 +958,13 @@ inline void Chain_matrix<Master_matrix>::print() const
 
 template <class Master_matrix>
 template <class Boundary_range>
-inline std::vector<typename Master_matrix::Cell_representative> Chain_matrix<Master_matrix>::_reduce_boundary(
-    ID_index faceID, const Boundary_range& boundary, Dimension dim)
+inline std::vector<typename Master_matrix::Entry_representative> Chain_matrix<Master_matrix>::_reduce_boundary(
+    ID_index cellID, const Boundary_range& boundary, Dimension dim)
 {
   Tmp_column column(boundary.begin(), boundary.end());
   if (dim == static_cast<Dimension>(-1)) dim = boundary.begin() == boundary.end() ? 0 : boundary.size() - 1;
-  std::vector<Cell_representative> chainsInH;  // for corresponding indices in H (paired columns)
-  std::vector<Cell_representative> chainsInF;  // for corresponding indices in F (unpaired, essential columns)
+  std::vector<Entry_representative> chainsInH;  // for corresponding indices in H (paired columns)
+  std::vector<Entry_representative> chainsInF;  // for corresponding indices in F (unpaired, essential columns)
 
   auto get_last = [&column]() {
     if constexpr (Master_matrix::Option_list::is_z2)
@@ -970,9 +975,9 @@ inline std::vector<typename Master_matrix::Cell_representative> Chain_matrix<Mas
 
   if (boundary.begin() == boundary.end()) {
     if constexpr (Master_matrix::Option_list::is_z2)
-      column.insert(faceID);
+      column.insert(cellID);
     else
-      column.emplace(faceID, 1);
+      column.emplace(cellID, 1);
     _insert_chain(column, dim);
     return chainsInF;
   }
@@ -984,7 +989,7 @@ inline std::vector<typename Master_matrix::Cell_representative> Chain_matrix<Mas
 
     if (column.empty()) {
       // produce the sum of all col_h in chains_in_H
-      _build_from_H(faceID, column, chainsInH);
+      _build_from_H(cellID, column, chainsInH);
       // create a new cycle (in F) sigma - \sum col_h
       _insert_chain(column, dim);
       return chainsInF;
@@ -1006,8 +1011,8 @@ inline std::vector<typename Master_matrix::Cell_representative> Chain_matrix<Mas
 
   _update_largest_death_in_F(chainsInF);
 
-  // Compute the new column faceID + \sum col_h, for col_h in chains_in_H
-  _build_from_H(faceID, column, chainsInH);
+  // Compute the new column cellID + \sum col_h, for col_h in chains_in_H
+  _build_from_H(cellID, column, chainsInH);
 
   // Create and insert (\sum col_h) + sigma (in H, paired with chain_fp) in matrix_
   if constexpr (Master_matrix::Option_list::is_z2)
@@ -1020,7 +1025,7 @@ inline std::vector<typename Master_matrix::Cell_representative> Chain_matrix<Mas
 
 template <class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_reduce_by_G(Tmp_column& column,
-                                                      std::vector<Cell_representative>& chainsInH,
+                                                      std::vector<Entry_representative>& chainsInH,
                                                       Index currentIndex)
 {
   Column& col = get_column(currentIndex);
@@ -1040,7 +1045,7 @@ inline void Chain_matrix<Master_matrix>::_reduce_by_G(Tmp_column& column,
 
 template <class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_reduce_by_F(Tmp_column& column, 
-                                                      std::vector<Cell_representative>& chainsInF,
+                                                      std::vector<Entry_representative>& chainsInF,
                                                       Index currentIndex) 
 {
   Column& col = get_column(currentIndex);
@@ -1059,17 +1064,17 @@ inline void Chain_matrix<Master_matrix>::_reduce_by_F(Tmp_column& column,
 }
 
 template <class Master_matrix>
-inline void Chain_matrix<Master_matrix>::_build_from_H(ID_index faceID,
+inline void Chain_matrix<Master_matrix>::_build_from_H(ID_index cellID,
                                                        Tmp_column& column,
-                                                       std::vector<Cell_representative>& chainsInH)
+                                                       std::vector<Entry_representative>& chainsInH)
 {
   if constexpr (Master_matrix::Option_list::is_z2) {
-    column.insert(faceID);
+    column.insert(cellID);
     for (Index idx_h : chainsInH) {
       _add_to(get_column(idx_h), column, 1u);
     }
   } else {
-    column.emplace(faceID, 1);
+    column.emplace(cellID, 1);
     for (std::pair<Index, Field_element>& idx_h : chainsInH) {
       _add_to(get_column(idx_h.first), column, idx_h.second);
     }
@@ -1077,7 +1082,7 @@ inline void Chain_matrix<Master_matrix>::_build_from_H(ID_index faceID,
 }
 
 template <class Master_matrix>
-inline void Chain_matrix<Master_matrix>::_update_largest_death_in_F(const std::vector<Cell_representative>& chainsInF) 
+inline void Chain_matrix<Master_matrix>::_update_largest_death_in_F(const std::vector<Entry_representative>& chainsInF) 
 {
   if constexpr (Master_matrix::Option_list::is_z2) {
     Index toUpdate = chainsInF[0];
@@ -1131,20 +1136,20 @@ inline void Chain_matrix<Master_matrix>::_add_to(const Column& column,
 {
   if constexpr (Master_matrix::Option_list::is_z2) {
     std::pair<typename std::set<Index>::iterator, bool> res_insert;
-    for (const Cell& cell : column) {
-      res_insert = set.insert(cell.get_row_index());
+    for (const Entry& entry : column) {
+      res_insert = set.insert(entry.get_row_index());
       if (!res_insert.second) {
         set.erase(res_insert.first);
       }
     }
   } else {
     auto& operators = colSettings_->operators;
-    for (const Cell& cell : column) {
-      auto res = set.emplace(cell.get_row_index(), cell.get_element());
+    for (const Entry& entry : column) {
+      auto res = set.emplace(entry.get_row_index(), entry.get_element());
       if (res.second){
         operators.multiply_inplace(res.first->second, coef);
       } else {
-        operators.multiply_and_add_inplace_back(cell.get_element(), coef, res.first->second);
+        operators.multiply_and_add_inplace_back(entry.get_element(), coef, res.first->second);
         if (res.first->second == Field_operators::get_additive_identity()) {
           set.erase(res.first);
         }

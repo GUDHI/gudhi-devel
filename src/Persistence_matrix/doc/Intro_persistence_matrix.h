@@ -30,12 +30,12 @@ namespace persistence_matrix {
  * The main functionalities are:
  * @li column and row access,
  * @li column addition and scalar multiplication,
- * @li removal of maximal faces while maintaining a valid reduced boundary matrix or compatible chain complex base
+ * @li removal of maximal cells while maintaining a valid reduced boundary matrix or compatible chain complex base
  * and a valid barcode with respect to the new filtration,
  * @li computation of persistent homology (but note that if the barcode is your only necessity, using the
  * @ref persistent_cohomology module is often more performant),
  * @li computation of representative cycles for the cycle classes,
- * @li swapping of two consecutive faces in a filtration (cf. vineyards @cite vineyards) while maintaining a valid
+ * @li swapping of two consecutive cells in a filtration (cf. vineyards @cite vineyards) while maintaining a valid
  * reduced boundary matrix or compatible chain complex base and a valid barcode with respect to the new filtration,
  * 
  * \note Matrix API is in a beta version and may change in incompatible ways in the near future.

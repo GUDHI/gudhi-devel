@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Base_matrix_zp_column_removal, Matrix, removable_c
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Base_matrix_zp_operation, Matrix, full_matrices) {
   test_base_operation<Matrix>();
-  test_base_cell_range_operation<Matrix>();
+  test_base_entry_range_operation<Matrix>();
   test_const_operation<Matrix>();
 }
 
