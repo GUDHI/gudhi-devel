@@ -1194,15 +1194,6 @@ class Simplex_tree {
     Simplex_tree * st_;
   };
 
-  void fill_filtration_cache(bool ignore_infinite_values){
-    filtration_vect_.clear();
-    filtration_vect_.reserve(num_simplices());
-    for (Simplex_handle sh : complex_simplex_range()) {
-      if (ignore_infinite_values && filtration(sh) == Filtration_simplex_base_real::get_infinity()) continue;
-      filtration_vect_.push_back(sh);
-    }
-  }
-
  public:
   /** \brief Initializes the filtration cache, i.e. sorts the
    * simplices according to their order in the filtration.
@@ -1216,26 +1207,9 @@ class Simplex_tree {
    * which can be cleared with clear_filtration().
    */
   void initialize_filtration(bool ignore_infinite_values = false) {
-    fill_filtration_cache(ignore_infinite_values);
-
-    /* We use stable_sort here because with libstdc++ it is faster than sort.
-     * is_before_in_totally_ordered_filtration is now a total order, but we used to call
-     * stable_sort for the following heuristic:
-     * The use of a depth-first traversal of the simplex tree, provided by
-     * complex_simplex_range(), combined with a stable sort is meant to
-     * optimize the order of simplices with same filtration value. The
-     * heuristic consists in inserting the cofaces of a simplex as soon as
-     * possible.
-     */
-#ifdef GUDHI_USE_TBB
-    tbb::parallel_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_totally_ordered_filtration(this));
-#else
-    std::stable_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_totally_ordered_filtration(this));
-#endif
+    initialize_filtration(is_before_in_totally_ordered_filtration(this), ignore_infinite_values);
   }
 
-  // TODO: is there a possibility to give `is_before_in_totally_ordered_filtration(this)()` as default parameter for
-  // `is_before_in_filtration` to avoid having two methods?
   /**
    * @brief Initializes the filtration cache, i.e. sorts the simplices according to the specified order.
    * The given order has to totally order all simplices in the simplex tree such that the resulting order is a valid
@@ -1264,7 +1238,12 @@ class Simplex_tree {
    */
   template<typename Comparator>
   void initialize_filtration(Comparator&& is_before_in_filtration, bool ignore_infinite_values = false) {
-    fill_filtration_cache(ignore_infinite_values);
+    filtration_vect_.clear();
+    filtration_vect_.reserve(num_simplices());
+    for (Simplex_handle sh : complex_simplex_range()) {
+      if (ignore_infinite_values && filtration(sh) == Filtration_simplex_base_real::get_infinity()) continue;
+      filtration_vect_.push_back(sh);
+    }
 
 #ifdef GUDHI_USE_TBB
     tbb::parallel_sort(filtration_vect_.begin(), filtration_vect_.end(), is_before_in_filtration);
@@ -2300,7 +2279,7 @@ class Simplex_tree {
    * values are actually modified. The function `decode_extended_filtration()` 
    * retrieves the original values and outputs the extended simplex type.
    *
-   * @warning Currently only works for @ref SimplexTreeOptions::Filtration_value which are native
+   * @warning Currently only works for @ref SimplexTreeOptions::Filtration_value which are
    * float types like `float` or `double`.
    *
    * @exception std::invalid_argument In debug mode if the Simplex tree contains a vertex with the largest

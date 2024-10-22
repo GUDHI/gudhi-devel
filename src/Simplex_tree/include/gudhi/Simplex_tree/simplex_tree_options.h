@@ -15,7 +15,6 @@
 
 #include <cstdint>
 #include <type_traits>  // void_t
-#include <algorithm>    // std::min
 #include <cmath>        // std::isnan
 
 namespace Gudhi {
@@ -102,19 +101,17 @@ template <class O>
 struct Get_simplex_data_type<O, std::void_t<typename O::Simplex_data>> { typedef typename O::Simplex_data type; };
 
 /**
- * @private
  * @brief Given two filtration values at which a simplex exists, stores in the first value the minimal union of births
  * generating a lifetime including those two values.
- * This is the overload for when `Filtration_value` is a native arithmetic type, like double, int etc.
+ * This is the overload for when `Filtration_value` is a arithmetic type, like double, int etc.
  * Because the filtration values are totally ordered then, the union is simply the minimum of the two values.
  *
  * NaN values are not supported.
  */
-template <typename Arithmetic_filtration_value,
-          typename = std::enable_if_t<std::is_arithmetic_v<Arithmetic_filtration_value> > >
+template <typename Arithmetic_filtration_value>
 bool unify(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
 {
-  if (f1 > f2){
+  if (f2 < f1){
     f1 = f2;
     return true;
   }
@@ -122,14 +119,12 @@ bool unify(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
 }
 
 /**
- * @private
  * @brief Given two filtration values, stores in the first value the greatest common upper bound of the two values.
  * If a filtration value has value `NaN`, it should be considered as the lowest value possible.
- * This is the overload for when `Filtration_value` is a native arithmetic type, like double, float, int etc.
+ * This is the overload for when `Filtration_value` is a arithmetic type, like double, float, int etc.
  * Because the filtration values are totally ordered then, the upper bound is always the maximum of the two values.
  */
-template <typename Arithmetic_filtration_value,
-          typename = std::enable_if_t<std::is_arithmetic_v<Arithmetic_filtration_value> > >
+template <typename Arithmetic_filtration_value>
 bool intersect(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
 {
   if constexpr (std::is_floating_point_v<Arithmetic_filtration_value>) {
