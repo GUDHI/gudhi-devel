@@ -716,7 +716,14 @@ class Simplex_tree {
   }
 
   /** \brief Returns the extra data stored in a simplex. */
-  static Simplex_data& simplex_data(Simplex_handle sh) {
+  Simplex_data& simplex_data(Simplex_handle sh) {
+    GUDHI_CHECK(sh != null_simplex(),
+                std::invalid_argument("Simplex_tree::simplex_data - no data associated to null_simplex"));
+    return _to_node_it(sh)->second.data();
+  }
+
+  /** \brief Returns the extra data stored in a simplex. */
+  const Simplex_data simplex_data(Simplex_handle sh) const {
     GUDHI_CHECK(sh != null_simplex(),
                 std::invalid_argument("Simplex_tree::simplex_data - no data associated to null_simplex"));
     return _to_node_it(sh)->second.data();

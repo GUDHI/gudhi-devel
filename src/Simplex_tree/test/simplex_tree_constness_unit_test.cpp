@@ -8,6 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <string>
+
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_constness"
 #include <boost/test/unit_test.hpp>
@@ -126,4 +128,28 @@ BOOST_AUTO_TEST_CASE(const_simplex_tree) {
 
   test_simplex_tree_constness(st);
 
+}
+
+template<typename Simplex_tree>
+void test_simplex_tree_data_constness(const Simplex_tree& const_stree) {
+  std::clog << "* test_simplex_tree_data_constness\n";
+  std::clog << "simplex_data({0, 1}) = " << const_stree.simplex_data(const_stree.find({0, 1})) << "\n";
+  BOOST_CHECK(const_stree.simplex_data(const_stree.find({0, 1})) == std::string("{0, 1}"));
+  std::clog << "simplex_data({0, 1, 2}) = " << const_stree.simplex_data(const_stree.find({0, 1, 2})) << "\n";
+  BOOST_CHECK(const_stree.simplex_data(const_stree.find({2, 1, 0})) == std::string("{0, 1, 2}"));
+}
+
+struct Options_with_int_data : Simplex_tree_options_minimal {
+  typedef std::string Simplex_data;
+};
+
+BOOST_AUTO_TEST_CASE(const_simplex_data) {
+  Simplex_tree<Options_with_int_data> st;
+  st.insert_simplex_and_subfaces({0, 1});
+  st.insert_simplex_and_subfaces({2, 1});
+  st.insert_simplex_and_subfaces({0, 2});
+  st.simplex_data(st.find({0, 1})) = std::string("{0, 1}");
+  st.expansion(3);
+  st.simplex_data(st.find({0, 1, 2})) = std::string("{0, 1, 2}");
+  test_simplex_tree_data_constness(st);
 }
