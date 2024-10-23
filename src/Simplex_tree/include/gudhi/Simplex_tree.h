@@ -1261,11 +1261,6 @@ class Simplex_tree {
    * SimplexTreeOptions::link_nodes_by_label is true.
    */
   Cofaces_simplex_range cofaces_simplex_range(const Simplex_handle simplex, int codimension) const{
-    return _cofaces_simplex_range(simplex, codimension);
-  }
-
- private:
-  Cofaces_simplex_range _cofaces_simplex_range(const Simplex_handle simplex, int codimension) const {
     // codimension must be positive or null integer
     assert(codimension >= 0);
 
@@ -1294,6 +1289,7 @@ class Simplex_tree {
     }
   }
 
+ private:
   /** \brief Returns true iff the list of vertices of sh1
    * is smaller than the list of vertices of sh2 w.r.t.
    * lexicographic order on the lists read in reverse.
