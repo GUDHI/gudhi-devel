@@ -807,6 +807,8 @@ inline void Unordered_set_column<Master_matrix>::push_back(const Entry& entry)
 {
   static_assert(Master_matrix::Option_list::is_of_boundary_type, "`push_back` is not available for Chain matrices.");
 
+  GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
+
   if constexpr (Master_matrix::Option_list::is_z2) {
     _insert_entry(entry.get_row_index());
   } else {

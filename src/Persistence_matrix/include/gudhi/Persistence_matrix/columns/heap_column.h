@@ -25,6 +25,7 @@
 #include <utility>    //std::swap, std::move & std::exchange
 
 #include <boost/iterator/indirect_iterator.hpp>
+#include "gudhi/Debug_utils.h"
 
 #include <gudhi/Persistence_matrix/allocators/entry_constructors.h>
 
@@ -874,6 +875,8 @@ template <class Master_matrix>
 inline void Heap_column<Master_matrix>::push_back(const Entry& entry)
 {
   static_assert(Master_matrix::Option_list::is_of_boundary_type, "`push_back` is not available for Chain matrices.");
+
+  GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
 
   Entry* newEntry = entryPool_->construct(entry.get_row_index());
   if constexpr (!Master_matrix::Option_list::is_z2) {
