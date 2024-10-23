@@ -103,6 +103,14 @@ void test_simplex_tree_constness(const Simplex_tree& const_stree) {
   std::clog << "* serialization size = " << const_stree.get_serialization_size() << "\n";
   std::clog << "* operator<<\n";
   std::clog << const_stree;
+
+  std::clog << "* for_each_simplex\n";
+  const_stree.for_each_simplex([&](auto sh, int dim) {
+    std::clog << "dim = " << dim << " - ";
+    for (auto vertex : const_stree.simplex_vertex_range(sh)) std::clog << "(" << vertex << ")";
+    std::clog << std::endl;
+    });
+
 }
 
 BOOST_AUTO_TEST_CASE(const_simplex_tree) {
