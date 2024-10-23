@@ -1775,7 +1775,7 @@ class Simplex_tree {
    * and assigns the maximal possible Filtration_value to the Nodes. */
   template<bool force_filtration_value = false>
   static void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
-                           Dictionary_it begin1, Dictionary_it end1,
+                           Const_dictionary_it begin1, Const_dictionary_it end1,
                            Const_dictionary_it begin2, Const_dictionary_it end2,
                            Filtration_value filtration_) {
     if (begin1 == end1 || begin2 == end2)
