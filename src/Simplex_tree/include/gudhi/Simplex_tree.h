@@ -1063,8 +1063,7 @@ class Simplex_tree {
     auto simplex_one = insertion_result.first;
     bool one_is_new = insertion_result.second;
     if (one_is_new) {
-      // update extra data structures in the insertion is successful
-      // Only required when insertion is successful
+      // update extra data structures if the insertion is successful
       update_simplex_tree_after_node_insertion(insertion_result.first);
     } else {
       if (filtration(simplex_one) > filt) {
