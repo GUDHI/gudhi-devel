@@ -362,8 +362,3 @@ BOOST_AUTO_TEST_CASE(flag_expansion) {
     BOOST_CHECK(st.edge_with_same_filtration(st.find({1,5}))==st.find({1,5}));
   }
 }
-
-
-
-
-

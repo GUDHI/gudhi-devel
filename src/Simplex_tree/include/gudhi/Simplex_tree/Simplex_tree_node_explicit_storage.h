@@ -63,6 +63,9 @@ struct GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION Simplex_tree_node_explicit_storage
   Siblings * children() {
     return children_;
   }
+  const Siblings * children() const {
+    return children_;
+  }
 
   Simplex_data& data() { return boost::empty_value<Simplex_data>::get(); }
 
