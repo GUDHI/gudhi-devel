@@ -635,23 +635,13 @@ void test_ru_u_access() {
 
   std::vector<witness_content<typename Matrix::Column> > uColumns(7);
   if constexpr (Matrix::Option_list::is_z2) {
-    if constexpr (Matrix::Option_list::has_vine_update) {
-      uColumns[0] = {0};
-      uColumns[1] = {1};
-      uColumns[2] = {2};
-      uColumns[3] = {3, 5};
-      uColumns[4] = {4, 5};
-      uColumns[5] = {5};
-      uColumns[6] = {6};
-    } else {
-      uColumns[0] = {0};
-      uColumns[1] = {1};
-      uColumns[2] = {2};
-      uColumns[3] = {3};
-      uColumns[4] = {4};
-      uColumns[5] = {3, 4, 5};
-      uColumns[6] = {6};
-    }
+    uColumns[0] = {0};
+    uColumns[1] = {1};
+    uColumns[2] = {2};
+    uColumns[3] = {3, 5};
+    uColumns[4] = {4, 5};
+    uColumns[5] = {5};
+    uColumns[6] = {6};
   } else {
     uColumns[0] = {{0, 1}};
     uColumns[1] = {{1, 1}};
@@ -668,7 +658,7 @@ void test_ru_u_access() {
     test_column_equality<typename Matrix::Column>(c, get_column_content_via_iterators(col));
   }
 
-  if constexpr (Matrix::Option_list::has_vine_update) {
+  if constexpr (Matrix::Option_list::is_z2) {
     BOOST_CHECK(!m.is_zero_entry(3, 5, false));
     BOOST_CHECK(!m.is_zero_column(4, false));
     m.zero_entry(3, 5, false);
@@ -775,23 +765,13 @@ void test_ru_u_row_access() {
 
   std::vector<witness_content<typename Matrix::Column> > rows;
   if constexpr (Matrix::Option_list::is_z2) {
-    if constexpr (Matrix::Option_list::has_vine_update) {
-      rows.push_back({0});
-      rows.push_back({1});
-      rows.push_back({2});
-      rows.push_back({3});
-      rows.push_back({4});
-      rows.push_back({3, 4, 5});
-      rows.push_back({6});
-    } else {
-      rows.push_back({0});
-      rows.push_back({1});
-      rows.push_back({2});
-      rows.push_back({3, 5});
-      rows.push_back({4, 5});
-      rows.push_back({5});
-      rows.push_back({6});
-    }
+    rows.push_back({0});
+    rows.push_back({1});
+    rows.push_back({2});
+    rows.push_back({3});
+    rows.push_back({4});
+    rows.push_back({3, 4, 5});
+    rows.push_back({6});
   } else {
     rows.push_back({{0, 1}});
     rows.push_back({{1, 1}});
@@ -1059,23 +1039,13 @@ void test_ru_operation() {
 
   std::vector<witness_content<typename Matrix::Column> > uColumns(7);
   if constexpr (Matrix::Option_list::is_z2) {
-    if constexpr (Matrix::Option_list::has_vine_update) {
-      uColumns[0] = {0};
-      uColumns[1] = {1};
-      uColumns[2] = {2};
-      uColumns[3] = {3, 5};
-      uColumns[4] = {4, 5};
-      uColumns[5] = {5};
-      uColumns[6] = {6};
-    } else {
-      uColumns[0] = {0};
-      uColumns[1] = {1};
-      uColumns[2] = {2};
-      uColumns[3] = {3};
-      uColumns[4] = {4};
-      uColumns[5] = {3, 4, 5};
-      uColumns[6] = {6};
-    }
+    uColumns[0] = {0};
+    uColumns[1] = {1};
+    uColumns[2] = {2};
+    uColumns[3] = {3, 5};
+    uColumns[4] = {4, 5};
+    uColumns[5] = {5};
+    uColumns[6] = {6};
   } else {
     uColumns[0] = {{0, 1}};
     uColumns[1] = {{1, 1}};
@@ -1097,10 +1067,7 @@ void test_ru_operation() {
   m.add_to(3, 5);
   if constexpr (Matrix::Option_list::is_z2) {
     columns[5] = {0, 1};
-    if constexpr (Matrix::Option_list::has_vine_update)
-      uColumns[3] = {3};
-    else
-      uColumns[5] = {4, 5};
+    uColumns[3] = {3};
   } else {
     columns[5] = {{0, 1}, {1, 4}};
     uColumns[5] = {{4, 4}, {5, 1}};
@@ -1116,10 +1083,7 @@ void test_ru_operation() {
   m.add_to(4, 5);
   if constexpr (Matrix::Option_list::is_z2) {
     columns[5] = {0, 2};
-    if constexpr (Matrix::Option_list::has_vine_update)
-      uColumns[4] = {4};
-    else
-      uColumns[5] = {5};
+    uColumns[4] = {4};
   } else {
     columns[5] = {{0, 1}, {2, 4}};
     uColumns[5] = {{5, 1}};
@@ -1132,11 +1096,11 @@ void test_ru_operation() {
     }
   }
 
-  if constexpr (!Matrix::Option_list::has_vine_update) {
+  if constexpr (!Matrix::Option_list::is_z2 || !is_RU<Matrix>()) {
     m.multiply_target_and_add_to(5, 3, 3);
     if constexpr (Matrix::Option_list::is_z2) {
       columns[3] = {1, 2};
-      uColumns[3] = {3, 5};
+      uColumns[5] = {3, 5};
     } else {
       columns[3] = {{0, 4}, {1, 2}, {2, 4}};
       uColumns[3] = {{3, 3}, {5, 1}};

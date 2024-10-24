@@ -427,6 +427,15 @@ class PersistenceMatrixColumn :
   PersistenceMatrixColumn& multiply_source_and_add(const Entry_range& column, const Field_element& val);
 
   /**
+   * @brief Adds a copy of the given entry at the end of the column. It is therefore assumed that the row index
+   * of the entry is higher than the current pivot of the column. Not available for @ref chainmatrix "chain matrices"
+   * and is only needed for @ref rumatrix "RU matrices".
+   * 
+   * @param entry Entry to push back.
+   */
+  void push_back(const Entry& entry);
+
+  /**
    * @brief Equality comparator. Equal in the sense that what is "supposed" to be contained in the columns is equal,
    * not what is actually stored in the underlying container. For example, the underlying container of 
    * @ref Vector_column can contain entries which were erased explicitly by @ref clear(Index). Those entries should not
