@@ -423,7 +423,7 @@
     </td>
     <td width="15%">
       <b>Author:</b> Cl&eacute;ment Maria, Hannah Schreiber<br>
-      <b>Introduced in:</b> GUDHI 3.9.0<br>
+      <b>Introduced in:</b> GUDHI 3.11.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
  </tr>
