@@ -6,7 +6,7 @@
 #
 # Modification(s):
 #   - 2020/02 Theo Lacombe: Added more options for improved rendering and more flexibility.
-#   - 2022/11 Vincent Rouvreau: "Automatic" legend display detected by _array_handler that returns if the persistence
+#   - 2022/11 Vincent Rouvreau: "Automatic" legend display detected by _format_handler that returns if the persistence
 #                               was a nx2 array.
 #   - YYYY/MM Author: Description of the modification
 
@@ -55,20 +55,36 @@ def _min_birth_max_death(persistence, band=0.0):
         max_death = max_death + 1.0
     return (min_birth, max_death)
 
-
-def _array_handler(a):
+def _format_handler(a):
     """
-    :param a: if array, assumes it is a (n x 2) np.array and returns a
-                persistence-compatible list (padding with 0), so that the
-                plot can be performed seamlessly.
+    :param a: * If array, assumes it is a (n x 2) np.array
+              * If iterable of array, assumes it is an iterable on (n x 2) np.array
+              Returns a persistence-compatible list so that the plot can be performed seamlessly. It is padding with
+              the index on the array, 0 in case of an array, in order to simulate the dimension required by the plot.
     :returns: * List[dimension, [birth, death]] Persistence, compatible with plot functions, list.
               * boolean Modification status (True if output is different from input)
     """
-    if isinstance(a[0][1], (np.floating, float)):
-        return [[0, x] for x in a], True
-    else:
-        return a, False
-
+    # Array
+    try:
+        first_death_value = a[0][1]
+        if isinstance(first_death_value, (np.floating, float)):
+            return [[0, x] for x in a], True
+    except IndexError:
+        pass
+    try:
+        pers = []
+        fake_dim = 0
+        for elt in a:
+            np_elt = np.array(elt)
+            if np_elt.dtype.kind == 'f' and np_elt.shape[1] != 2:
+                raise ValueError("Should be a list of (birth,death)")
+            for x in np_elt:
+                pers.append([fake_dim, x])
+            fake_dim = fake_dim + 1
+        return pers, True
+    except ValueError:
+        pass
+    return a, False
 
 def _limit_to_max_intervals(persistence, max_intervals, key):
     """This function returns truncated persistence if length is bigger than max_intervals.
@@ -188,7 +204,7 @@ def plot_persistence_barcode(
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), persistence_file)
 
     try:
-        persistence, nx2_array = _array_handler(persistence)
+        persistence, nx2_array = _format_handler(persistence)
         persistence = _limit_to_max_intervals(
             persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
         )
@@ -310,7 +326,7 @@ def plot_persistence_diagram(
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), persistence_file)
 
     try:
-        persistence, nx2_array = _array_handler(persistence)
+        persistence, nx2_array = _format_handler(persistence)
         persistence = _limit_to_max_intervals(
             persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
         )
@@ -463,7 +479,7 @@ def plot_persistence_density(
 
     try:
         # if not read from file but given by an argument
-        persistence, _ = _array_handler(persistence)
+        persistence, _ = _format_handler(persistence)
         persistence_dim = np.array(
             [
                 (dim_interval[1][0], dim_interval[1][1])

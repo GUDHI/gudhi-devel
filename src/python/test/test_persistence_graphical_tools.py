@@ -17,23 +17,32 @@ import warnings
 
 def test_array_handler():
     diags = np.array([[1, 2], [3, 4], [5, 6]], float)
-    arr_diags, nx2_array = gd.persistence_graphical_tools._array_handler(diags)
+    arr_diags, nx2_array = gd.persistence_graphical_tools._format_handler(diags)
     assert nx2_array
     for idx in range(len(diags)):
         assert arr_diags[idx][0] == 0
         np.testing.assert_array_equal(arr_diags[idx][1], diags[idx])
 
     diags = [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
-    arr_diags, nx2_array = gd.persistence_graphical_tools._array_handler(diags)
+    arr_diags, nx2_array = gd.persistence_graphical_tools._format_handler(diags)
     assert nx2_array
     for idx in range(len(diags)):
         assert arr_diags[idx][0] == 0
         assert arr_diags[idx][1] == diags[idx]
 
     diags = [(0, (1.0, 2.0)), (0, (3.0, 4.0)), (0, (5.0, 6.0))]
-    arr_diags, nx2_array = gd.persistence_graphical_tools._array_handler(diags)
+    arr_diags, nx2_array = gd.persistence_graphical_tools._format_handler(diags)
     assert not nx2_array
     assert arr_diags == diags
+
+    diags = [[(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)], [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]]
+    arr_diags, nx2_array = gd.persistence_graphical_tools._format_handler(diags)
+    assert nx2_array
+    assert len(arr_diags) == 6
+    for idx in range(3):
+        assert arr_diags[idx][0] == 0
+        assert arr_diags[idx+3][0] == 1
+        np.testing.assert_array_equal(arr_diags[idx][1], arr_diags[idx+3][1])
 
 
 def test_min_birth_max_death():
