@@ -1,8 +1,8 @@
 jobs:
   - job: "OSx"
     displayName: "Build and test OSx"
-    timeoutInMinutes: 0
-    cancelTimeoutInMinutes: 60
+    timeoutInMinutes: 180
+    #cancelTimeoutInMinutes: 60
     pool:
       vmImage: macOS-latest
     variables:
@@ -42,8 +42,8 @@ jobs:
 
   - job: "Windows"
     displayName: "Build and test Windows"
-    timeoutInMinutes: 0
-    cancelTimeoutInMinutes: 60
+    timeoutInMinutes: 180
+    #cancelTimeoutInMinutes: 60
     pool:
       vmImage: windows-latest
     variables:
