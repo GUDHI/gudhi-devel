@@ -615,7 +615,7 @@ inline void Base_matrix<Master_matrix>::print()
   if constexpr (Master_matrix::Option_list::has_row_access) {
     std::cout << "Row Matrix:\n";
     for (Index i = 0; i < nextInsertIndex_; ++i) {
-      const auto& row = RA_opt::rows_[i];
+      const auto& row = (*RA_opt::rows_)[i];
       for (const auto& entry : row) {
         std::cout << entry.get_column_index() << " ";
       }

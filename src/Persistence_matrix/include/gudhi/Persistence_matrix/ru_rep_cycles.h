@@ -135,7 +135,7 @@ inline RU_representative_cycles<Master_matrix>::RU_representative_cycles(
 template <class Master_matrix>
 inline void RU_representative_cycles<Master_matrix>::update_representative_cycles() 
 {
-  if constexpr (Master_matrix::Option_list::has_vine_update) {
+  if constexpr (Master_matrix::Option_list::is_z2) {
     birthToCycle_.clear();
     birthToCycle_.resize(_matrix()->reducedMatrixR_.get_number_of_columns(), -1);
     Index c = 0;

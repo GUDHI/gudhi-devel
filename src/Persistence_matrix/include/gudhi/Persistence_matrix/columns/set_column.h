@@ -136,6 +136,8 @@ class Set_column : public Master_matrix::Row_access_option,
   Set_column& multiply_source_and_add(const Entry_range& column, const Field_element& val);
   Set_column& multiply_source_and_add(Set_column& column, const Field_element& val);
 
+  void push_back(const Entry& entry);
+
   friend bool operator==(const Set_column& c1, const Set_column& c2) {
     if (&c1 == &c2) return true;
 
@@ -795,6 +797,20 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::multiply_source_and
   }
 
   return *this;
+}
+
+template <class Master_matrix>
+inline void Set_column<Master_matrix>::push_back(const Entry& entry)
+{
+  static_assert(Master_matrix::Option_list::is_of_boundary_type, "`push_back` is not available for Chain matrices.");
+
+  GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
+
+  if constexpr (Master_matrix::Option_list::is_z2) {
+    _insert_entry(entry.get_row_index(), column_.end());
+  } else {
+    _insert_entry(entry.get_element(), entry.get_row_index(), column_.end());
+  }
 }
 
 template <class Master_matrix>
