@@ -2290,7 +2290,7 @@ class Simplex_tree {
    * retrieves the original values and outputs the extended simplex type.
    *
    * @warning Currently only works for @ref SimplexTreeOptions::Filtration_value which are
-   * float types like `float` or `double`.
+   * float types like `float` or `double`, or **signed** integers.
    *
    * @exception std::invalid_argument In debug mode if the Simplex tree contains a vertex with the largest
    * Vertex_handle, as this method requires to create an extra vertex internally.
