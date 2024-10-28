@@ -14,6 +14,7 @@
 #include <gudhi/Simplex_tree/indexing_tag.h>
 
 #include <cstdint>
+#include <limits>
 #include <type_traits>  // void_t
 #include <cmath>        // std::isnan
 
@@ -109,7 +110,7 @@ struct Get_simplex_data_type<O, std::void_t<typename O::Simplex_data>> { typedef
  * NaN values are not supported.
  */
 template <typename Arithmetic_filtration_value>
-bool unify(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
+bool unify_lifetimes(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
 {
   if (f2 < f1){
     f1 = f2;
@@ -125,9 +126,9 @@ bool unify(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
  * Because the filtration values are totally ordered then, the upper bound is always the maximum of the two values.
  */
 template <typename Arithmetic_filtration_value>
-bool intersect(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
+bool intersect_lifetimes(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
 {
-  if constexpr (std::is_floating_point_v<Arithmetic_filtration_value>) {
+  if constexpr (std::numeric_limits<Arithmetic_filtration_value>::has_quiet_NaN) {
     if (std::isnan(f1)) {
       f1 = f2;
       return !std::isnan(f2);

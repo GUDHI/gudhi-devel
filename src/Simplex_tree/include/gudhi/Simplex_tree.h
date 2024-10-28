@@ -952,7 +952,7 @@ class Simplex_tree {
     }
 
     if constexpr (Options::store_filtration && update_fil){
-      if (unify(ins.first->second.filtration(), filtration_value)) return ins;
+      if (unify_lifetimes(ins.first->second.filtration(), filtration_value)) return ins;
     }
 
     if constexpr (set_to_null){
@@ -1207,7 +1207,15 @@ class Simplex_tree {
    * which can be cleared with clear_filtration().
    */
   void initialize_filtration(bool ignore_infinite_values = false) {
-    initialize_filtration(is_before_in_totally_ordered_filtration(this), ignore_infinite_values);
+    if (ignore_infinite_values){
+      initialize_filtration(is_before_in_totally_ordered_filtration(this), [&](Simplex_handle sh) -> bool {
+        return filtration(sh) == Filtration_simplex_base_real::get_infinity();
+      });
+    } else {
+      initialize_filtration(is_before_in_totally_ordered_filtration(this), [](Simplex_handle sh) -> bool {
+        return false;
+      });
+    }
   }
 
   /**
@@ -1231,17 +1239,19 @@ class Simplex_tree {
    * which can be cleared with @ref clear_filtration().
    * 
    * @tparam Comparator Method type taking two Simplex_handle as input and returns a bool.
+   * @tparam Ignorer Method type taking one Simplex_handle as input and returns a bool.
    * @param is_before_in_filtration Method used to compare two simplices with respect to their position in the
    * wanted filtration. Takes two Simplex_handle as input and returns true if and only if the first simplex appears
    * strictly before the second simplex in the resulting 1-parameter filtration.
-   * @param ignore_infinite_values If true, simplices with filtration values at infinity are not cached.
+   * @param ignore_simplex Method taking a simplex handle as input and returns true if and only if the corresponding
+   * simplex should be ignored in the filtration and therefore not be cached.
    */
-  template<typename Comparator>
-  void initialize_filtration(Comparator&& is_before_in_filtration, bool ignore_infinite_values = false) {
+  template<typename Comparator, typename Ignorer>
+  void initialize_filtration(Comparator&& is_before_in_filtration, Ignorer&& ignore_simplex) {
     filtration_vect_.clear();
     filtration_vect_.reserve(num_simplices());
     for (Simplex_handle sh : complex_simplex_range()) {
-      if (ignore_infinite_values && filtration(sh) == Filtration_simplex_base_real::get_infinity()) continue;
+      if (ignore_simplex(sh)) continue;
       filtration_vect_.push_back(sh);
     }
 
@@ -1822,8 +1832,8 @@ class Simplex_tree {
           intersection.emplace_back(begin1->first, Node(nullptr, filtration_));
         } else {
           Filtration_value filt = begin1->second.filtration();
-          intersect(filt, begin2->second.filtration());
-          intersect(filt, filtration_);
+          intersect_lifetimes(filt, begin2->second.filtration());
+          intersect_lifetimes(filt, filtration_);
           intersection.emplace_back(begin1->first, Node(nullptr, filt));
         }
         if (++begin1 == end1 || ++begin2 == end2)
@@ -1892,7 +1902,7 @@ class Simplex_tree {
             to_be_inserted=false;
             break;
           }
-          intersect(filt, filtration(border_child));
+          intersect_lifetimes(filt, filtration(border_child));
         }
         if (to_be_inserted) {
           intersection.emplace_back(next->first, Node(nullptr, filt));
@@ -2032,7 +2042,7 @@ class Simplex_tree {
       for (Simplex_handle b : boundary_simplex_range(sh)) {
         // considers NaN as the lowest possible value.
         // stores the filtration modification information
-        modified |= intersect(current_filt, b->second.filtration());
+        modified |= intersect_lifetimes(current_filt, b->second.filtration());
       }
     };
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
