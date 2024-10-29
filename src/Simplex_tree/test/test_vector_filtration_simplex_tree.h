@@ -11,6 +11,7 @@
 #ifndef SIMPLEX_TREE_TEST_CUSTOM_SIMPLEX_TREE_H_
 #define SIMPLEX_TREE_TEST_CUSTOM_SIMPLEX_TREE_H_
 
+#include <cstddef>
 #include <stdexcept>
 #include <vector>
 #include <limits>
@@ -28,6 +29,7 @@ class Vector_filtration_value : public std::vector<int>
   using const_iterator = Base::const_iterator;
 
   Vector_filtration_value() : Base() {}
+  Vector_filtration_value(std::size_t count) : Base(count) {}
   Vector_filtration_value(std::initializer_list<int> init) : Base(init) {}
   Vector_filtration_value(const_iterator start, const_iterator end) : Base(start, end) {}
 
@@ -65,6 +67,45 @@ class Vector_filtration_value : public std::vector<int>
       return true;
     }
     return false;
+  }
+
+  friend char* serialize_trivial(const Vector_filtration_value& value, char* start)
+  {
+    const auto length = value.size();
+    const std::size_t arg_size = sizeof(int) * length;
+    const std::size_t type_size = sizeof(Vector_filtration_value::size_type);
+    memcpy(start, &length, type_size);
+    memcpy(start + type_size, value.data(), arg_size);
+    return start + arg_size + type_size;
+  }
+
+  friend const char* deserialize_trivial(Vector_filtration_value& value, const char* start)
+  {
+    const std::size_t type_size = sizeof(Vector_filtration_value::size_type);
+    Vector_filtration_value::size_type length;
+    memcpy(&length, start, type_size);
+    std::size_t arg_size = sizeof(int) * length;
+    value.resize(length);
+    memcpy(value.data(), start + type_size, arg_size);
+    return start + arg_size + type_size;
+  }
+
+  friend std::size_t get_serialization_size_of(const Vector_filtration_value& value) {
+    return sizeof(Vector_filtration_value::size_type) + sizeof(int) * value.size();
+  }
+
+  friend std::ostream &operator<<(std::ostream &stream, const Vector_filtration_value &f) {
+    if (f.empty()) {
+      stream << "[]";
+      return stream;
+    }
+    stream << "[";
+    for (std::size_t i = 0; i < f.size() - 1; i++) {
+      stream << f[i] << ", ";
+    }
+    stream << f.back();
+    stream << "]";
+    return stream;
   }
 };
 

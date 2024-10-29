@@ -68,4 +68,34 @@ struct FiltrationValue {
    * @return True if and only if the values in @p f1 were actually modified.
    */
   friend bool intersect_lifetimes(FiltrationValue& f1, const FiltrationValue& f2);
+
+  /**
+   * @brief Only necessary when serializing the simplex tree. Serialize the given value and insert it at start position.
+   * Overloads for native arithmetic types or other simple types are already implemented with
+   * @ref Gudhi::simplex_tree::serialize_trivial "".
+   * 
+   * @param value The value to serialize.
+   * @param start Start position where the value is serialized.
+   * @return The new position in the array of char for the next serialization.
+   */
+  friend char* serialize_trivial(const FiltrationValue& value, char* start);
+
+  /**
+   * @brief Only necessary when deserializing the simplex tree. Deserialize at the start position in an array of char
+   * and sets the value with it.
+   * Overloads for native arithmetic types or other simple types are already implemented with
+   * @ref Gudhi::simplex_tree::deserialize_trivial "".
+   * 
+   * @param value The value where to deserialize based on its type.
+   * @param start Start position where the value is serialized.
+   * @return The new position in the array of char for the next deserialization.
+   */
+  friend const char* deserialize_trivial(FiltrationValue& value, const char* start);
+
+  /**
+   * @brief Only necessary when (de)serializing the simplex tree. Returns the serialization size of the given object.
+   * Overloads for native arithmetic types or other simple types are already implemented with
+   * @ref Gudhi::simplex_tree::get_serialization_size_of "".
+   */
+  friend std::size_t get_serialization_size_of(const FiltrationValue& value);
 };

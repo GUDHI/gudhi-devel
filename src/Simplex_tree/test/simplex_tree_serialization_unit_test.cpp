@@ -12,6 +12,7 @@
 #include <cstring>  // for std::size_t and strncmp
 #include <random>
 #include <iterator>  // for std::distance
+#include <type_traits>
 #include <vector>
 #include <cstdint>  // for std::uint8_t
 #include <iomanip>  // for std::setfill, setw
@@ -25,6 +26,8 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Simplex_tree/serialization_utils.h>  // for de/serialize_trivial
 #include <gudhi/Unitary_tests_utils.h>  // for GUDHI_TEST_FLOAT_EQUALITY_CHECK
+
+#include "test_vector_filtration_simplex_tree.h"
 
 using namespace Gudhi;
 using namespace Gudhi::simplex_tree;
@@ -49,15 +52,55 @@ typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
                          Simplex_tree<Low_options>,
                          Simplex_tree<Simplex_tree_options_full_featured>,
-                         Simplex_tree<Stable_options> > list_of_tested_variants;
+                         Simplex_tree<Stable_options>,
+                         Simplex_tree<Simplex_tree_options_custom_fil_values_default>,
+                         Simplex_tree<Simplex_tree_options_custom_fil_values_fast_persistence>,
+                         Simplex_tree<Simplex_tree_options_custom_fil_values_full_featured> > list_of_tested_variants;
 
-template<class Filtration_type>
-Filtration_type random_filtration(Filtration_type lower_bound = 0, Filtration_type upper_bound = 1) {
+template <class Filtration_type>
+Filtration_type random_filtration_ar(Filtration_type lower_bound = 0,
+                                     Filtration_type upper_bound = 1)
+{
   std::uniform_real_distribution<Filtration_type> unif(lower_bound, upper_bound);
   std::random_device rand_dev;
   std::mt19937 rand_engine(rand_dev());
-  
+
   return unif(rand_engine);
+}
+
+template <class Filtration_type>
+Filtration_type random_filtration_vec(typename Filtration_type::value_type lower_bound = 0,
+                                      typename Filtration_type::value_type upper_bound = 10,
+                                      unsigned int number_of_parameters = 2)
+{
+  std::uniform_int_distribution<typename Filtration_type::value_type> unif(lower_bound, upper_bound);
+  std::random_device rand_dev;
+  std::mt19937 rand_engine(rand_dev());
+
+  Filtration_type res(number_of_parameters);
+  for (unsigned int i = 0; i < number_of_parameters; ++i) res[i] = unif(rand_engine);
+
+  return res;
+}
+
+template <class Filtration_type>
+Filtration_type random_filtration()
+{
+  if constexpr (std::is_arithmetic_v<Filtration_type>) {
+    return random_filtration_ar<Filtration_type>();
+  } else {
+    return random_filtration_vec<Filtration_type>();
+  }
+}
+
+template <class Filtration_type>
+void test_equality(const Filtration_type& filt1, const Filtration_type& filt2)
+{
+  if constexpr (std::is_arithmetic_v<Filtration_type>) {
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(filt1, filt2);
+  } else {
+    BOOST_CHECK(filt1 == filt2);
+  }
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_tested_variants) {
@@ -111,12 +154,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   std::clog << "Serialization size in bytes = " << buffer_size << std::endl;
   // Sizes are expressed in bytes
   const std::size_t vertex_size = sizeof(Vertex_type);
-  const std::size_t filtration_size = Stree::Options::store_filtration ? sizeof(Filtration_type) : 0;
+  const std::size_t filtration_size =
+      Stree::Options::store_filtration ? get_serialization_size_of(random_filtration<Filtration_type>()) : 0;
   const std::size_t serialization_size = vertex_size + st.num_simplices() * (2 * vertex_size + filtration_size);
-  BOOST_CHECK(serialization_size == buffer_size);
+  BOOST_CHECK_EQUAL(serialization_size, buffer_size);
 
   Vertex_type vertex = 0;
-  Filtration_type filtration = 0;
+  Filtration_type filtration(0);
   // Reset position pointer at start
   const char* c_ptr = buffer;
   // 3 simplices ({0}, {1}, {2}) and its filtration values
@@ -126,19 +170,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   BOOST_CHECK(vertex == 0);
   if (Stree::Options::store_filtration) {
     c_ptr = deserialize_trivial(filtration, c_ptr);
-    GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({0})));
+    test_equality(filtration, st.filtration(st.find({0})));
   }
   c_ptr = deserialize_trivial(vertex, c_ptr);
   BOOST_CHECK(vertex == 1);
   if (Stree::Options::store_filtration) {
     c_ptr = deserialize_trivial(filtration, c_ptr);
-    GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({1})));
+    test_equality(filtration, st.filtration(st.find({1})));
   }
   c_ptr = deserialize_trivial(vertex, c_ptr);
   BOOST_CHECK(vertex == 2);
   if (Stree::Options::store_filtration) {
     c_ptr = deserialize_trivial(filtration, c_ptr);
-    GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({2})));
+    test_equality(filtration, st.filtration(st.find({2})));
   }
   // 1 simplex (2) from {0, 2} and its filtration values
   c_ptr = deserialize_trivial(vertex, c_ptr);
@@ -147,7 +191,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   BOOST_CHECK(vertex == 2);
   if (Stree::Options::store_filtration) {
     c_ptr = deserialize_trivial(filtration, c_ptr);
-    GUDHI_TEST_FLOAT_EQUALITY_CHECK(filtration, st.filtration(st.find({0, 2})));
+    test_equality(filtration, st.filtration(st.find({0, 2})));
   }
   c_ptr = deserialize_trivial(vertex, c_ptr);  // (0, 2) end of leaf
   BOOST_CHECK(vertex == 0);
