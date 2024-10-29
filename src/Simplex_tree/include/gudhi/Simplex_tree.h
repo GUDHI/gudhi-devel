@@ -1213,7 +1213,7 @@ class Simplex_tree {
         return filtration(sh) == Filtration_simplex_base_real::get_infinity();
       });
     } else {
-      initialize_filtration(is_before_in_totally_ordered_filtration(this), [](Simplex_handle sh) -> bool {
+      initialize_filtration(is_before_in_totally_ordered_filtration(this), [](Simplex_handle) -> bool {
         return false;
       });
     }
