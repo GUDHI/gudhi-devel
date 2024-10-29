@@ -1245,7 +1245,10 @@ class Simplex_tree {
    * wanted filtration. Takes two Simplex_handle as input and returns true if and only if the first simplex appears
    * strictly before the second simplex in the resulting 1-parameter filtration.
    * @param ignore_simplex Method taking a simplex handle as input and returns true if and only if the corresponding
-   * simplex should be ignored in the filtration and therefore not be cached.
+   * simplex should be ignored in the filtration and therefore not be cached. But note that it is important that
+   * the resulting filtration is still a valid filtration, that is all proper faces of a not ignored simplex
+   * should also not be ignored and have to appear before this simplex. There will be no tests to ensure that, so
+   * it is of the users responsibility.
    */
   template<typename Comparator, typename Ignorer>
   void initialize_filtration(Comparator&& is_before_in_filtration, Ignorer&& ignore_simplex) {
