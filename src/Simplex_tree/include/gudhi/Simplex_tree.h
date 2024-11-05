@@ -2381,13 +2381,10 @@ class Simplex_tree {
   List_max_vertex* nodes_by_label(Vertex_handle v) {
     // Scott Meyers in Effective C++ 3rd Edition. On page 23, Item 3: a non const method can safely call a const one
     // Doing it the other way is not safe
-    return const_cast<List_max_vertex*>(_nodes_by_label(v));
-  }
-  List_max_vertex const* nodes_by_label(Vertex_handle v) const {
-    return _nodes_by_label(v);
+    return const_cast<List_max_vertex*>(std::as_const(*this).nodes_by_label(v));
   }
 
-  List_max_vertex const* _nodes_by_label(Vertex_handle v) const {
+  List_max_vertex const* nodes_by_label(Vertex_handle v) const {
     if constexpr (Options::link_nodes_by_label) {
       auto it_v = nodes_label_to_list_.find(v);
       if (it_v != nodes_label_to_list_.end()) {
