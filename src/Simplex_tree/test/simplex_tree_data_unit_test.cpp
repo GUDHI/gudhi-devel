@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <string>
+#include <utility>  // for std::move
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_data"
@@ -39,6 +40,25 @@ struct Options_with_string_data : Simplex_tree_options_full_featured {
   using Simplex_data = std::string;
 };
 
+template<class Simplex_tree_source, class Simplex_tree_copy>
+void test_filtration_and_additionnal_data(Simplex_tree_source stree, Simplex_tree_copy stree_copy) {
+  for (auto simplex : stree_copy.complex_simplex_range()) {
+    std::vector<typename Simplex_tree_source::Vertex_handle> vec_of_vertices {};
+    std::clog << "(";
+    for (auto vertex : stree_copy.simplex_vertex_range(simplex)) {
+      std::clog << vertex << " ";
+      vec_of_vertices.push_back(vertex);
+    }
+    std::clog << ")";
+    auto sh = stree.find(vec_of_vertices);
+    BOOST_CHECK(sh != stree.null_simplex());
+    std::clog << " filtration=" << stree_copy.filtration(simplex) << " versus " << stree.filtration(sh);
+    std::clog << " - data='" << stree_copy.simplex_data(simplex) << "' versus '" << stree.simplex_data(sh) << "'\n";
+    BOOST_CHECK(stree_copy.filtration(simplex) == stree.filtration(sh));
+    BOOST_CHECK(stree_copy.simplex_data(simplex) == stree.simplex_data(sh));
+  }
+}
+
 BOOST_AUTO_TEST_CASE(simplex_data_copy) {
   Simplex_tree<Options_with_string_data> stree;
   stree.insert_simplex_and_subfaces({0, 1}, 1.);
@@ -57,22 +77,28 @@ BOOST_AUTO_TEST_CASE(simplex_data_copy) {
     }
     std::clog << ") filtration=" << stree.filtration(simplex) << " - data='" << stree.simplex_data(simplex) << "'\n";
   }
-  Simplex_tree<Options_with_string_data> stree_copy(stree);
-  std::clog << "\nIterator on copy:\n";
-  for (auto simplex : stree_copy.complex_simplex_range()) {
-    std::vector<Simplex_tree<Options_with_string_data>::Vertex_handle> vec_of_vertices {};
-    std::clog << "(";
-    for (auto vertex : stree_copy.simplex_vertex_range(simplex)) {
-      std::clog << vertex << " ";
-      vec_of_vertices.push_back(vertex);
-    }
-    std::clog << ")";
-    auto sh = stree.find(vec_of_vertices);
-    BOOST_CHECK(sh != stree.null_simplex());
-    std::clog << " filtration=" << stree_copy.filtration(simplex) << " versus " << stree.filtration(sh);
-    std::clog << " - data='" << stree_copy.simplex_data(simplex) << "' versus '" << stree.simplex_data(sh) << "'\n";
-    BOOST_CHECK(stree_copy.filtration(simplex) == stree.filtration(sh));
-    BOOST_CHECK(stree_copy.simplex_data(simplex) == stree.simplex_data(sh));
+  {
+    Simplex_tree<Options_with_string_data> stree_copy(stree);
+    std::clog << "\nIterator on copy constructor:\n";
+    test_filtration_and_additionnal_data(stree, stree_copy);
   }
-
+  {
+    Simplex_tree<Options_with_string_data> stree_copy = stree;
+    std::clog << "\nIterator on copy assignment:\n";
+    test_filtration_and_additionnal_data(stree, stree_copy);
+  }
+  {
+    // Needs to copy first for not to lose the original one
+    Simplex_tree<Options_with_string_data> stree_copy = stree;
+    Simplex_tree<Options_with_string_data> stree_moved(std::move(stree_copy));
+    std::clog << "\nIterator on move constructor:\n";
+    test_filtration_and_additionnal_data(stree, stree_moved);
+  }
+  {
+    // Needs to copy first for not to lose the original one
+    Simplex_tree<Options_with_string_data> stree_copy = stree;
+    Simplex_tree<Options_with_string_data> stree_moved = std::move(stree_copy);
+    std::clog << "\nIterator on move assignment:\n";
+    test_filtration_and_additionnal_data(stree, stree_moved);
+  }
 }

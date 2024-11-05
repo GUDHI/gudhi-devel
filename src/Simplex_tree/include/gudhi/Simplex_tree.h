@@ -11,6 +11,7 @@
  *      - 2023/05 Hannah Schreiber: Factorization of expansion methods
  *      - 2023/08 Hannah Schreiber (& Clément Maria): Add possibility of stable simplex handles.
  *      - 2024/08 Hannah Schreiber: Addition of customizable copy constructor.
+ *      - 2024/08 Marc Glisse: Allow storing custom data in simplices.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -434,7 +435,9 @@ class Simplex_tree {
     copy_from(complex_source, translate_filtration_value);
   }
 
-  /** \brief User-defined copy constructor reproduces the whole tree structure. */
+  /** \brief User-defined copy constructor reproduces the whole tree structure including extra data (@ref Simplex_data)
+   * stored in the simplices.
+   */
   Simplex_tree(const Simplex_tree& complex_source) {
 #ifdef DEBUG_TRACES
     std::clog << "Simplex_tree copy constructor" << std::endl;
@@ -442,7 +445,8 @@ class Simplex_tree {
     copy_from(complex_source);
   }
 
-  /** \brief User-defined move constructor relocates the whole tree structure.
+  /** \brief User-defined move constructor relocates the whole tree structure including extra data (@ref Simplex_data)
+   * stored in the simplices.
    *  \exception std::invalid_argument In debug mode, if the complex_source is invalid.
    */
   Simplex_tree(Simplex_tree && complex_source) {
@@ -461,7 +465,9 @@ class Simplex_tree {
     root_members_recursive_deletion();
   }
 
-  /** \brief User-defined copy assignment reproduces the whole tree structure. */
+  /** \brief User-defined copy assignment reproduces the whole tree structure including extra data (@ref Simplex_data)
+   * stored in the simplices.
+   */
   Simplex_tree& operator= (const Simplex_tree& complex_source) {
 #ifdef DEBUG_TRACES
     std::clog << "Simplex_tree copy assignment" << std::endl;
@@ -476,7 +482,8 @@ class Simplex_tree {
     return *this;
   }
 
-  /** \brief User-defined move assignment relocates the whole tree structure.
+  /** \brief User-defined move assignment relocates the whole tree structure including extra data (@ref Simplex_data)
+   * stored in the simplices.
    *  \exception std::invalid_argument In debug mode, if the complex_source is invalid.
    */
   Simplex_tree& operator=(Simplex_tree&& complex_source) {
@@ -551,7 +558,7 @@ class Simplex_tree {
   }
 
   /** \brief depth first search, inserts simplices when reaching a leaf. */
-  template<bool store_key, bool copy_data, typename OtherSiblings, typename F>
+  template<bool store_key, bool copy_simplex_data, typename OtherSiblings, typename F>
   void rec_copy(Siblings *sib, OtherSiblings *sib_source, F&& translate_filtration_value) {
     auto sh_source = sib_source->members().begin();
     for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh, ++sh_source) {
@@ -574,11 +581,11 @@ class Simplex_tree {
                                           Node(newsib, translate_filtration_value(child.second.filtration())));
           }
           // Specific for optionnal data
-          if constexpr (copy_data && !std::is_same_v<Simplex_data, No_simplex_data>) {
+          if constexpr (copy_simplex_data && !std::is_same_v<Simplex_data, No_simplex_data>) {
             new_it->second.data() = child.second.data();
           }
         }
-        rec_copy<store_key, copy_data>(newsib, sh_source->second.children(), translate_filtration_value);
+        rec_copy<store_key, copy_simplex_data>(newsib, sh_source->second.children(), translate_filtration_value);
         sh->second.assign_children(newsib);
       }
     }
