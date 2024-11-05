@@ -346,7 +346,10 @@ class Simplex_tree {
    *
    * The filtration must be valid. If the filtration has not been initialized yet, the
    * method initializes it (i.e. order the simplices). If the complex has changed since the last time the filtration
-   * was initialized, please call `clear_filtration()` or `initialize_filtration()` to recompute it. */
+   * was initialized, please call `clear_filtration()` or `initialize_filtration()` to recompute it.
+   *
+   * @note Not thread safe
+   */
   Filtration_simplex_range const& filtration_simplex_range(Indexing_tag = Indexing_tag()) const {
     maybe_initialize_filtration();
     return filtration_vect_;
@@ -676,6 +679,8 @@ class Simplex_tree {
   /** \brief Returns the simplex that has index idx in the filtration.
    *
    * The filtration must be initialized.
+   *
+   * @note Not thread safe
    */
   Simplex_handle simplex(Simplex_key idx) const {
     return filtration_vect_[idx];
@@ -810,15 +815,20 @@ class Simplex_tree {
     return dimension(self_siblings(sh));
   }
 
-  /** \brief Returns an upper bound on the dimension of the simplicial complex. */
+  /** \brief Returns an upper bound on the dimension of the simplicial complex.
+   *
+   * @note Not thread safe
+   */
   int upper_bound_dimension() const {
     return dimension_;
   }
 
   /** \brief Returns the dimension of the simplicial complex.
-      \details This function is not constant time because it can recompute dimension if required (can be triggered by
-      `remove_maximal_simplex()` or `prune_above_filtration()`).
-  */
+    * \details This function is not constant time because it can recompute dimension if required (can be triggered by
+    * `remove_maximal_simplex()` or `prune_above_filtration()`).
+    *
+    * @note Not thread safe
+    */
   int dimension() const {
     if (dimension_to_be_lowered_)
       lower_upper_bound_dimension();
@@ -1142,7 +1152,10 @@ class Simplex_tree {
    * It always recomputes the cache, even if one already exists.
    *
    * Any insertion, deletion or change of filtration value invalidates this cache,
-   * which can be cleared with clear_filtration().  */
+   * which can be cleared with clear_filtration().
+   *
+   * @note Not thread safe
+   */
   void initialize_filtration(bool ignore_infinite_values = false) const {
     filtration_vect_.clear();
     filtration_vect_.reserve(num_simplices());
@@ -1170,7 +1183,10 @@ class Simplex_tree {
   }
   /** \brief Initializes the filtration cache if it isn't initialized yet.
    *
-   * Automatically called by filtration_simplex_range(). */
+   * Automatically called by filtration_simplex_range().
+   *
+   * @note Not thread safe
+   */
   void maybe_initialize_filtration() const {
     if (filtration_vect_.empty()) {
       initialize_filtration();
@@ -1179,8 +1195,11 @@ class Simplex_tree {
   /** \brief Clears the filtration cache produced by initialize_filtration().
    *
    * Useful when initialize_filtration() has already been called and we perform an operation
-   * (say an insertion) that invalidates the cache. */
-  void clear_filtration() {
+   * (say an insertion) that invalidates the cache.
+   *
+   * @note Not thread safe
+   */
+  void clear_filtration() const {
     filtration_vect_.clear();
   }
 
@@ -1926,9 +1945,13 @@ class Simplex_tree {
    * Each row in the file correspond to a simplex. A line is written:
    * dim idx_1 ... idx_k fil   where dim is the dimension of the simplex,
    * idx_1 ... idx_k are the row index (starting from 0) of the simplices of the boundary
-   * of the simplex, and fil is its filtration value. */
+   * of the simplex, and fil is its filtration value.
+   *
+   * @note Not thread safe
+   */
   void print_hasse(std::ostream& os) const {
     os << num_simplices() << " " << std::endl;
+    // TODO: should use complex_simplex_range ?
     for (auto sh : filtration_simplex_range()) {
       os << dimension(sh) << " ";
       for (auto b_sh : boundary_simplex_range(sh)) {
