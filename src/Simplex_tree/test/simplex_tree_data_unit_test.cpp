@@ -33,6 +33,14 @@ BOOST_AUTO_TEST_CASE(simplex_data) {
   st.simplex_data(st.find({0, 1})) = 5;
   st.expansion(3);
   st.simplex_data(st.find({0, 1, 2})) = 4;
+  for (auto simplex : st.complex_simplex_range()) {
+    std::clog << "(";
+    for (auto vertex : st.simplex_vertex_range(simplex)) {
+      std::clog << vertex << " ";
+    }
+    std::clog << ")";
+    std::clog << " filtration=" << st.filtration(simplex) << " - data='" << st.simplex_data(simplex) << "'\n";
+  }
   BOOST_CHECK(st.simplex_data(st.find({0, 1})) == 5);
 }
 
@@ -100,5 +108,36 @@ BOOST_AUTO_TEST_CASE(simplex_data_copy) {
     Simplex_tree<Options_with_string_data> stree_moved = std::move(stree_copy);
     std::clog << "\nIterator on move assignment:\n";
     test_filtration_and_additionnal_data(stree, stree_moved);
+  }
+  {
+    auto trans = [](const typename Simplex_tree<Options_with_string_data>::Filtration_value& fil)
+      -> Simplex_tree<Options_with_int_data>::Filtration_value {
+        // spoiler: Options_with_int_data does not store filtrations
+        if constexpr(Options_with_int_data::store_filtration)
+          return fil;
+        else
+         return {};
+      };
+    Simplex_tree<Options_with_int_data> stree_copy(stree, trans);
+    std::clog << "\nIterator on transformer copy constructor:\n";
+    Simplex_tree<Options_with_int_data>::Filtration_value default_filtration_value{};
+    Simplex_tree<Options_with_int_data>::Simplex_data default_data_value{};
+    for (auto simplex : stree_copy.complex_simplex_range()) {
+      std::vector<Simplex_tree<Options_with_int_data>::Vertex_handle> vec_of_vertices {};
+      std::clog << "(";
+      for (auto vertex : stree_copy.simplex_vertex_range(simplex)) {
+        std::clog << vertex << " ";
+        vec_of_vertices.push_back(vertex);
+      }
+      std::clog << ")";
+      auto sh = stree.find(vec_of_vertices);
+      BOOST_CHECK(sh != stree.null_simplex());
+      std::clog << " filtration=" << stree_copy.filtration(simplex) << " versus " << stree.filtration(sh);
+      std::clog << " - data='" << stree_copy.simplex_data(simplex) << "' versus '" << stree.simplex_data(sh) << "'\n";
+      BOOST_CHECK(stree_copy.filtration(simplex) == default_filtration_value);
+      // With transformer constructors, simplex_data is not copied and not initialized, so we cannot test it
+      // I just keep it in comment if we find something smarter
+      // BOOST_CHECK(stree_copy.simplex_data(simplex) == default_data_value);
+    }
   }
 }
