@@ -2671,13 +2671,40 @@ class Simplex_tree {
    * 
    */
   void deserialize(const char* buffer, const std::size_t buffer_size) {
+    deserialize(buffer, buffer_size, [](Filtration_value& filtration, const char* ptr) {
+      using namespace Gudhi::simplex_tree;
+      return deserialize_trivial(filtration, ptr);
+    });
+  }
+
+  /** @private @brief Deserialize the array of char (flatten version of the tree) to initialize a Simplex tree.
+   * It is the user's responsibility to provide an 'empty' Simplex_tree, there is no guarantee otherwise.
+   * 
+   * @tparam F Method taking an @ref Filtration_value and a `const char*` as input and returning a
+   * `const char*`.
+   * @param[in] buffer A pointer on a buffer that contains a serialized Simplex_tree.
+   * @param[in] buffer_size The size of the buffer.
+   * @param[in] deserialize_filtration_value To provide if the type of @ref Filtration_value is not trivially
+   * convertible from the filtration value type of the serialized simplex tree. Takes the filtration value to fill and
+   * a pointer to the current position in the buffer as arguments and returns the new position of the pointer after
+   * reading the filtration value and transforming it into a element of the host's filtration value type.
+   * 
+   * @exception std::invalid_argument In case the deserialization does not finish at the correct buffer_size.
+   * @exception std::logic_error In debug mode, if the Simplex_tree is not 'empty'.
+   * 
+   * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
+   * SimplexTreeOptions (except for the @ref Filtration_value type) and on a computer with the same architecture.
+   * 
+   */
+  template <class F>
+  void deserialize(const char* buffer, const std::size_t buffer_size, F&& deserialize_filtration_value) {
     using namespace Gudhi::simplex_tree;
     GUDHI_CHECK(num_vertices() == 0, std::logic_error("Simplex_tree::deserialize - Simplex_tree must be empty"));
     const char* ptr = buffer;
     // Needs to read size before recursivity to manage new siblings for children
     Vertex_handle members_size;
     ptr = deserialize_trivial(members_size, ptr);
-    ptr = rec_deserialize(&root_, members_size, ptr, 0);
+    ptr = rec_deserialize(&root_, members_size, ptr, 0, deserialize_filtration_value);
     if (static_cast<std::size_t>(ptr - buffer) != buffer_size) {
       throw std::invalid_argument("Deserialization does not match end of buffer");
     }
@@ -2685,7 +2712,13 @@ class Simplex_tree {
 
  private:
   /** \brief Serialize each element of the sibling and recursively call serialization. */
-  const char* rec_deserialize(Siblings *sib, Vertex_handle members_size, const char* ptr, int dim) {
+  template <class F>
+  const char* rec_deserialize(Siblings* sib,
+                              Vertex_handle members_size,
+                              const char* ptr,
+                              int dim,
+                              [[maybe_unused]] F&& deserialize_filtration_value)
+  {
     using namespace Gudhi::simplex_tree;
     // In case buffer is just a 0 char
     if (members_size > 0) {
@@ -2694,8 +2727,8 @@ class Simplex_tree {
       Filtration_value filtration(0);
       for (Vertex_handle idx = 0; idx < members_size; idx++) {
         ptr = deserialize_trivial(vertex, ptr);
-        if (Options::store_filtration) {
-          ptr = deserialize_trivial(filtration, ptr);
+        if constexpr (Options::store_filtration) {
+          ptr = deserialize_filtration_value(filtration, ptr);
         }
         // Default is no children
         // If store_filtration is false, `filtration` is ignored.
@@ -2708,7 +2741,7 @@ class Simplex_tree {
         if (child_size > 0) {
           Siblings* child = new Siblings(sib, sh->first);
           sh->second.assign_children(child);
-          ptr = rec_deserialize(child, child_size, ptr, dim + 1);
+          ptr = rec_deserialize(child, child_size, ptr, dim + 1, deserialize_filtration_value);
         }
       }
       if (dim > dimension_) {

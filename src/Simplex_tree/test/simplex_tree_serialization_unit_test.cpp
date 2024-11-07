@@ -11,9 +11,7 @@
 #include <iostream>
 #include <cstring>  // for std::size_t and strncmp
 #include <random>
-#include <iterator>  // for std::distance
 #include <type_traits>
-#include <vector>
 #include <cstdint>  // for std::uint8_t
 #include <iomanip>  // for std::setfill, setw
 #include <ios>  // for std::hex, uppercase
@@ -363,4 +361,85 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_serialization_and_cofaces, Stree, lis
   // [([0, 1], 0.0), ([0, 1, 2], 0.0), ([0, 1, 6], 0.0), ([0, 1, 6, 7], 0.0), ([0, 1, 7], 0.0)]
   BOOST_CHECK(num_stars == 5);
 
+}
+
+struct Simplex_tree_vec_fil : Simplex_tree_options_default {
+  typedef Vector_filtration_value Filtration_value;
+};
+
+BOOST_AUTO_TEST_CASE(simplex_tree_custom_deserialization_vec_to_double) {
+  using source_st_type = Simplex_tree<Simplex_tree_vec_fil>;
+  using target_st_type = Simplex_tree<Simplex_tree_options_default>;
+
+  source_st_type st;
+  target_st_type st_copy;
+  target_st_type st_witness;
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, {3, 1});
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, {4, 1});
+  st.insert_simplex_and_subfaces({3, 0}, {2, 1});
+  st.insert_simplex_and_subfaces({3, 4, 5}, {3, 1});
+  st.insert_simplex_and_subfaces({8}, {1, 1});
+
+  st_witness.insert_simplex_and_subfaces({2, 1, 0}, 3.0);
+  st_witness.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.0);
+  st_witness.insert_simplex_and_subfaces({3, 0}, 2.0);
+  st_witness.insert_simplex_and_subfaces({3, 4, 5}, 3.0);
+  st_witness.insert_simplex_and_subfaces({8}, 1.0);
+
+  auto deserialize_filtration_value = [](typename target_st_type::Filtration_value& fil,
+                                         const char* start) -> const char* {
+    typename source_st_type::Filtration_value origin_fil;
+    const char* ptr = deserialize_trivial(origin_fil, start); //naive way to do it, but fine enough for a test
+    fil = origin_fil[0];
+    return ptr;
+  };
+
+  const std::size_t stree_buffer_size = st.get_serialization_size();
+  char* stree_buffer = new char[stree_buffer_size];
+  st.serialize(stree_buffer, stree_buffer_size);
+
+  st_copy.deserialize(stree_buffer, stree_buffer_size, deserialize_filtration_value);
+  delete[] stree_buffer;
+
+  BOOST_CHECK(st_witness == st_copy);
+}
+
+BOOST_AUTO_TEST_CASE(simplex_tree_custom_deserialization_double_to_vec) {
+  using source_st_type = Simplex_tree<Simplex_tree_options_default>;
+  using target_st_type = Simplex_tree<Simplex_tree_vec_fil>;
+
+  source_st_type st;
+  target_st_type st_copy;
+  target_st_type st_witness;
+
+  st_witness.insert_simplex_and_subfaces({2, 1, 0}, {3, 1});
+  st_witness.insert_simplex_and_subfaces({0, 1, 6, 7}, {4, 1});
+  st_witness.insert_simplex_and_subfaces({3, 0}, {2, 1});
+  st_witness.insert_simplex_and_subfaces({3, 4, 5}, {3, 1});
+  st_witness.insert_simplex_and_subfaces({8}, {1, 1});
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, 3.0);
+  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.0);
+  st.insert_simplex_and_subfaces({3, 0}, 2.0);
+  st.insert_simplex_and_subfaces({3, 4, 5}, 3.0);
+  st.insert_simplex_and_subfaces({8}, 1.0);
+
+  auto deserialize_filtration_value = [](typename target_st_type::Filtration_value& fil,
+                                         const char* start) -> const char* {
+    typename source_st_type::Filtration_value origin_fil;
+    const char* ptr = deserialize_trivial(origin_fil, start);
+    fil.resize(2, 1);
+    fil[0] = origin_fil;
+    return ptr;
+  };
+
+  const std::size_t stree_buffer_size = st.get_serialization_size();
+  char* stree_buffer = new char[stree_buffer_size];
+  st.serialize(stree_buffer, stree_buffer_size);
+
+  st_copy.deserialize(stree_buffer, stree_buffer_size, deserialize_filtration_value);
+  delete[] stree_buffer;
+
+  BOOST_CHECK(st_witness == st_copy);
 }
