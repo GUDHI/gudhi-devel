@@ -499,7 +499,8 @@ inline void Intrusive_set_column<Master_matrix>::reorder(const Row_index_map& va
   if constexpr (Master_matrix::Option_list::has_row_access) {
     for (auto it = column_.begin(); it != column_.end();) {
       Entry* newEntry = entryPool_->construct(
-          columnIndex == static_cast<Index>(-1) ? RA_opt::columnIndex_ : columnIndex, valueMap.at(it->get_row_index()));
+          columnIndex == Master_matrix::template get_null_value<Index>() ? RA_opt::columnIndex_ : columnIndex,
+          valueMap.at(it->get_row_index()));
       if constexpr (!Master_matrix::Option_list::is_z2) {
         newEntry->set_element(it->get_element());
       }
@@ -578,7 +579,7 @@ Intrusive_set_column<Master_matrix>::get_pivot_value() const
       if (column_.empty()) return 0;
       return column_.rbegin()->get_element();
     } else {
-      if (Chain_opt::get_pivot() == static_cast<ID_index>(-1)) return 0;
+      if (Chain_opt::get_pivot() == Master_matrix::template get_null_value<ID_index>()) return 0;
       auto it = column_.find(Entry(Chain_opt::get_pivot()));
       GUDHI_CHECK(it != column_.end(),
                   "Intrusive_set_column::get_pivot_value - Pivot not found only if the column was misused.");

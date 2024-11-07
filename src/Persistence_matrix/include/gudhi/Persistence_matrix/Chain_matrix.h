@@ -700,7 +700,9 @@ inline std::vector<typename Master_matrix::Entry_representative> Chain_matrix<Ma
   }
 
   if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access) {
-    Dim_opt::update_up(dim == static_cast<Dimension>(-1) ? (boundary.size() == 0 ? 0 : boundary.size() - 1) : dim);
+    Dim_opt::update_up(dim == Master_matrix::template get_null_value<Dimension>()
+                           ? (boundary.size() == 0 ? 0 : boundary.size() - 1)
+                           : dim);
   }
 
   return _reduce_boundary(cellID, boundary, dim);
@@ -915,7 +917,7 @@ inline void Chain_matrix<Master_matrix>::print() const
   if constexpr (!Master_matrix::Option_list::has_map_column_container) {
     for (ID_index i = 0; i < pivotToColumnIndex_.size(); ++i) {
       Index pos = pivotToColumnIndex_[i];
-      if (pos != static_cast<Index>(-1)){
+      if (pos != Master_matrix::template get_null_value<Index>()){
         const Column& col = matrix_[pos];
         for (const auto& entry : col) {
           std::cout << entry.get_row_index() << " ";
@@ -928,7 +930,7 @@ inline void Chain_matrix<Master_matrix>::print() const
       std::cout << "Row Matrix:\n";
       for (ID_index i = 0; i < pivotToColumnIndex_.size(); ++i) {
         Index pos = pivotToColumnIndex_[i];
-        if (pos != static_cast<Index>(-1)){
+        if (pos != Master_matrix::template get_null_value<Index>()){
           const Row& row = RA_opt::get_row(pos);
           for (const auto& entry : row) {
             std::cout << entry.get_column_index() << " ";
@@ -966,7 +968,8 @@ inline std::vector<typename Master_matrix::Entry_representative> Chain_matrix<Ma
     ID_index cellID, const Boundary_range& boundary, Dimension dim)
 {
   Tmp_column column(boundary.begin(), boundary.end());
-  if (dim == static_cast<Dimension>(-1)) dim = boundary.begin() == boundary.end() ? 0 : boundary.size() - 1;
+  if (dim == Master_matrix::template get_null_value<Dimension>())
+    dim = boundary.begin() == boundary.end() ? 0 : boundary.size() - 1;
   std::vector<Entry_representative> chainsInH;  // for corresponding indices in H (paired columns)
   std::vector<Entry_representative> chainsInF;  // for corresponding indices in F (unpaired, essential columns)
 
@@ -1225,7 +1228,7 @@ inline void Chain_matrix<Master_matrix>::_remove_last(Index lastIndex)
     auto it = _indexToBar().find(--_nextPosition());
     typename Barcode::iterator bar = it->second;
 
-    if (bar->death == static_cast<Pos_index>(-1))
+    if (bar->death == Master_matrix::template get_null_value<Pos_index>())
       _barcode().erase(bar);
     else
       bar->death = -1;

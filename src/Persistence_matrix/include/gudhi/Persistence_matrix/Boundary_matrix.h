@@ -558,7 +558,7 @@ inline typename Boundary_matrix<Master_matrix>::Index Boundary_matrix<Master_mat
     pivot = it->second.get_pivot();
     if constexpr (activeSwapOption) {
       // if the removed column is positive, the pivot won't change value
-      if (Swap_opt::rowSwapped_ && pivot != static_cast<ID_index>(-1)) {
+      if (Swap_opt::rowSwapped_ && pivot != Master_matrix::template get_null_value<ID_index>()) {
         Swap_opt::_orderRows();
         pivot = it->second.get_pivot();
       }
@@ -568,7 +568,7 @@ inline typename Boundary_matrix<Master_matrix>::Index Boundary_matrix<Master_mat
     pivot = matrix_[nextInsertIndex_].get_pivot();
     if constexpr (activeSwapOption) {
       // if the removed column is positive, the pivot won't change value
-      if (Swap_opt::rowSwapped_ && pivot != static_cast<ID_index>(-1)) {
+      if (Swap_opt::rowSwapped_ && pivot != Master_matrix::template get_null_value<ID_index>()) {
         Swap_opt::_orderRows();
         pivot = matrix_[nextInsertIndex_].get_pivot();
       }

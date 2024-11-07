@@ -155,7 +155,8 @@ inline void Base_pairing<Master_matrix>::_reduce()
         auto itNeg = negativeColumns.find(pivotColumnNumber);
         Index pivotKiller = itNeg == negativeColumns.end() ? -1 : itNeg->second;
 
-        while (pivot != static_cast<ID_index>(-1) && pivotKiller != static_cast<Index>(-1)) {
+        while (pivot != Master_matrix::template get_null_value<ID_index>() &&
+               pivotKiller != Master_matrix::template get_null_value<Index>()) {
           if constexpr (Master_matrix::Option_list::is_z2) {
             curr += _matrix()->get_column(pivotKiller);
           } else {
@@ -174,7 +175,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
           pivotKiller = itNeg == negativeColumns.end() ? -1 : itNeg->second;
         }
 
-        if (pivot != static_cast<ID_index>(-1)) {
+        if (pivot != Master_matrix::template get_null_value<ID_index>()) {
           negativeColumns.emplace(pivotColumnNumber, i);
           _matrix()->get_column(pivotColumnNumber).clear();
           barcode_.emplace_back(pivotColumnNumber, i, dim - 1);
@@ -193,7 +194,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
     // map can only be constructed once barcode is sorted
     for (Index i = 0; i < barcode_.size(); ++i) {
       auto d = barcode_[i].death;
-      if (d != static_cast<Pos_index>(-1)) {
+      if (d != Master_matrix::template get_null_value<Pos_index>()) {
         deathToBar_.emplace(d, i);
       }
     }

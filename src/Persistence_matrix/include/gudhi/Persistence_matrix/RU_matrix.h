@@ -604,7 +604,7 @@ inline void RU_matrix<Master_matrix>::remove_last()
     pivotToColumnIndex_.erase(reducedMatrixR_.remove_last());
   } else {
     ID_index lastPivot = reducedMatrixR_.remove_last();
-    if (lastPivot != static_cast<ID_index>(-1)) pivotToColumnIndex_[lastPivot] = -1;
+    if (lastPivot != Master_matrix::template get_null_value<ID_index>()) pivotToColumnIndex_[lastPivot] = -1;
   }
 
   // if has_vine_update and has_column_pairings are both true,
@@ -752,7 +752,7 @@ inline void RU_matrix<Master_matrix>::_insert_boundary(Index currentIndex)
 
   if constexpr (!Master_matrix::Option_list::has_map_column_container) {
     ID_index pivot = reducedMatrixR_.get_column(currentIndex).get_pivot();
-    if (pivot != static_cast<ID_index>(-1) && pivotToColumnIndex_.size() <= pivot)
+    if (pivot != Master_matrix::template get_null_value<ID_index>() && pivotToColumnIndex_.size() <= pivot)
       pivotToColumnIndex_.resize((pivot + 1) * 2, -1);
   }
 
@@ -806,7 +806,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_reduce_column(Index target, Index eventIndex)
 {
   auto get_column_with_pivot_ = [&](ID_index pivot) -> Index {
-    if (pivot == static_cast<ID_index>(-1)) return -1;
+    if (pivot == Master_matrix::template get_null_value<ID_index>()) return -1;
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       auto it = pivotToColumnIndex_.find(pivot);
       if (it == pivotToColumnIndex_.end())
@@ -822,13 +822,14 @@ inline void RU_matrix<Master_matrix>::_reduce_column(Index target, Index eventIn
   ID_index pivot = curr.get_pivot();
   Index currIndex = get_column_with_pivot_(pivot);
 
-  while (pivot != static_cast<ID_index>(-1) && currIndex != static_cast<Index>(-1)) {
+  while (pivot != Master_matrix::template get_null_value<ID_index>() &&
+         currIndex != Master_matrix::template get_null_value<Index>()) {
     _reduce_column_by(target, currIndex);
     pivot = curr.get_pivot();
     currIndex = get_column_with_pivot_(pivot);
   }
 
-  if (pivot != static_cast<ID_index>(-1)) {
+  if (pivot != Master_matrix::template get_null_value<ID_index>()) {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       pivotToColumnIndex_.try_emplace(pivot, target);
     } else {

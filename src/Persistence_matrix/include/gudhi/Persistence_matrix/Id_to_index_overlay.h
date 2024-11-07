@@ -760,8 +760,9 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_bounda
     GUDHI_CHECK(idToIndex_->find(cellIndex) == idToIndex_->end(),
                 std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
   } else {
-    GUDHI_CHECK((idToIndex_->size() <= cellIndex || _id_to_index(cellIndex) == static_cast<Index>(-1)),
-                std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
+    GUDHI_CHECK(
+        (idToIndex_->size() <= cellIndex || _id_to_index(cellIndex) == Master_matrix::template get_null_value<Index>()),
+        std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
   }
   matrix_.insert_boundary(cellIndex, boundary, dim);
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
@@ -808,7 +809,7 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maxima
       }
     } else {
       for (ID_index i = 0; i < idToIndex_->size(); ++i) {
-        if (_id_to_index(i) != static_cast<Index>(-1)) indexToID[_id_to_index(i)] = i;
+        if (_id_to_index(i) != Master_matrix::template get_null_value<Index>()) indexToID[_id_to_index(i)] = i;
       }
     }
     --nextIndex_;
@@ -857,7 +858,8 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_last()
       idToIndex_->erase(it);
     } else {
       Index id = idToIndex_->size() - 1;
-      while (_id_to_index(id) == static_cast<Index>(-1)) --id;  // should always stop before reaching -1
+      // should always stop before reaching -1
+      while (_id_to_index(id) == Master_matrix::template get_null_value<Index>()) --id;
       GUDHI_CHECK(_id_to_index(id) == nextIndex_,
                   std::logic_error("Id_to_index_overlay::remove_last - Indexation problem."));
       _id_to_index(id) = -1;

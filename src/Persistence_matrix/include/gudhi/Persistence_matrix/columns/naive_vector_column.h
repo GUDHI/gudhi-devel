@@ -488,7 +488,7 @@ inline void Naive_vector_column<Master_matrix>::reorder(const Row_index_map& val
   for (Entry* entry : column_) {
     if constexpr (Master_matrix::Option_list::has_row_access) {
       RA_opt::unlink(entry);
-      if (columnIndex != static_cast<Index>(-1)) entry->set_column_index(columnIndex);
+      if (columnIndex != Master_matrix::template get_null_value<Index>()) entry->set_column_index(columnIndex);
     }
     entry->set_row_index(valueMap.at(entry->get_row_index()));
     if constexpr (Master_matrix::Option_list::has_intrusive_rows && Master_matrix::Option_list::has_row_access)
@@ -559,7 +559,7 @@ inline typename Naive_vector_column<Master_matrix>::Field_element Naive_vector_c
     if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
       return column_.empty() ? Field_element() : column_.back()->get_element();
     } else {
-      if (Chain_opt::get_pivot() == static_cast<ID_index>(-1)) return Field_element();
+      if (Chain_opt::get_pivot() == Master_matrix::template get_null_value<ID_index>()) return Field_element();
       for (const Entry* entry : column_) {
         if (entry->get_row_index() == Chain_opt::get_pivot()) return entry->get_element();
       }

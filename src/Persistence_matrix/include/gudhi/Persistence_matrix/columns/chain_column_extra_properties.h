@@ -105,7 +105,7 @@ class Chain_column_extra_properties
    * @return true If the column is paired.
    * @return false Otherwise.
    */
-  bool is_paired() const { return pairedColumn_ != static_cast<Index>(-1); }
+  bool is_paired() const { return pairedColumn_ != Master_matrix::template get_null_value<Index>(); }
   /**
    * @brief Sets the value of the pair.
    * 

@@ -124,7 +124,7 @@ class RU_pairing : public std::conditional<
 
     if constexpr (Master_matrix::hasFixedBarcode) {
       auto& bar = barcode_[indexToBar_[eventIndex]];
-      if (bar.death == static_cast<Pos_index>(-1)) {  // birth
+      if (bar.death == Master_matrix::template get_null_value<Pos_index>()) {  // birth
         barcode_.pop_back();  // sorted by birth and eventIndex has to be the highest one
       } else {                // death
         bar.death = -1;
@@ -134,7 +134,7 @@ class RU_pairing : public std::conditional<
       auto it = indexToBar_.find(eventIndex);
       typename Barcode::iterator bar = it->second;
 
-      if (bar->death == static_cast<Pos_index>(-1))
+      if (bar->death == Master_matrix::template get_null_value<Pos_index>())
         barcode_.erase(bar);
       else
         bar->death = -1;

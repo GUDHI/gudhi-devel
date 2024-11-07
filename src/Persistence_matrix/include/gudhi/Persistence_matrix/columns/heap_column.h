@@ -634,7 +634,7 @@ inline typename Heap_column<Master_matrix>::Field_element Heap_column<Master_mat
       return 0;
     } else {
       Field_element sum(0);
-      if (Chain_opt::get_pivot() == static_cast<ID_index>(-1)) return sum;
+      if (Chain_opt::get_pivot() == Master_matrix::template get_null_value<ID_index>()) return sum;
       for (const Entry* entry : column_) {
         if (entry->get_row_index() == Chain_opt::get_pivot()) operators_->add_inplace(sum, entry->get_element());
       }
