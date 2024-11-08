@@ -601,7 +601,7 @@ class Matrix {
    * @ref set_characteristic before calling for the first time a method needing it. Ignored if
    * @ref PersistenceMatrixOptions::is_z2 is true.
    */
-  Matrix(unsigned int numberOfColumns, Characteristic characteristic = get_null_value<Characteristic>());
+  Matrix(unsigned int numberOfColumns, Characteristic characteristic = Matrix::get_null_value<Characteristic>());
   /**
    * @brief Constructs a new empty matrix with the given comparator functions. Only available when those comparators
    * are necessary.
@@ -680,7 +680,7 @@ class Matrix {
   Matrix(unsigned int numberOfColumns, 
          const std::function<bool(Pos_index,Pos_index)>& birthComparator,
          const std::function<bool(Pos_index,Pos_index)>& deathComparator, 
-         Characteristic characteristic = get_null_value<Characteristic>());
+         Characteristic characteristic = Matrix::get_null_value<Characteristic>());
   /**
    * @brief Copy constructor.
    * 
