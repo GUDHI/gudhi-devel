@@ -247,7 +247,8 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * @return The @ref MatIdx indices of the unpaired chains used to reduce the boundary.
    */
   template <class Boundary_range = Boundary>
-  std::vector<Entry_representative> insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
+  std::vector<Entry_representative> insert_boundary(
+      const Boundary_range& boundary, Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief It does the same as the other version, but allows the boundary cells to be identified without restrictions
    * except that all IDs have to be strictly increasing in the order of filtration. Note that you should avoid then
@@ -267,9 +268,10 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * @return The @ref MatIdx index of the inserted boundary.
    */
   template <class Boundary_range = Boundary>
-  std::vector<Entry_representative> insert_boundary(ID_index cellID,
-                                                    const Boundary_range& boundary,
-                                                    Dimension dim = -1);
+  std::vector<Entry_representative> insert_boundary(
+      ID_index cellID,
+      const Boundary_range& boundary,
+      Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Returns the column at the given @ref MatIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -523,7 +525,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
 
 template <class Master_matrix>
 inline Chain_matrix<Master_matrix>::Chain_matrix(Column_settings* colSettings)
-    : Dim_opt(-1),
+    : Dim_opt(Master_matrix::template get_null_value<Dimension>()),
       Pair_opt(),
       Swap_opt(),
       Rep_opt(),
@@ -536,7 +538,7 @@ template <class Master_matrix>
 template <class Boundary_range>
 inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_range>& orderedBoundaries,
                                                  Column_settings* colSettings)
-    : Dim_opt(-1),
+    : Dim_opt(Master_matrix::template get_null_value<Dimension>()),
       Pair_opt(),
       Swap_opt(),
       Rep_opt(),
@@ -548,7 +550,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_rang
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.reserve(orderedBoundaries.size());
   } else {
-    pivotToColumnIndex_.resize(orderedBoundaries.size(), -1);
+    pivotToColumnIndex_.resize(orderedBoundaries.size(), Master_matrix::template get_null_value<Index>());
   }
 
   for (const Boundary_range& b : orderedBoundaries) {
@@ -559,7 +561,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_rang
 template <class Master_matrix>
 inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns, 
                                                  Column_settings* colSettings)
-    : Dim_opt(-1),
+    : Dim_opt(Master_matrix::template get_null_value<Dimension>()),
       Pair_opt(),
       Swap_opt(),
       Rep_opt(),
@@ -571,7 +573,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns,
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.reserve(numberOfColumns);
   } else {
-    pivotToColumnIndex_.resize(numberOfColumns, -1);
+    pivotToColumnIndex_.resize(numberOfColumns, Master_matrix::template get_null_value<Index>());
   }
 }
 
@@ -580,7 +582,7 @@ template <typename BirthComparatorFunction, typename DeathComparatorFunction>
 inline Chain_matrix<Master_matrix>::Chain_matrix(Column_settings* colSettings,
                                                  const BirthComparatorFunction& birthComparator,
                                                  const DeathComparatorFunction& deathComparator)
-    : Dim_opt(-1),
+    : Dim_opt(Master_matrix::template get_null_value<Dimension>()),
       Pair_opt(),
       Swap_opt(birthComparator, deathComparator),
       Rep_opt(),
@@ -595,7 +597,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_rang
                                                  Column_settings* colSettings,
                                                  const BirthComparatorFunction& birthComparator,
                                                  const DeathComparatorFunction& deathComparator)
-    : Dim_opt(-1),
+    : Dim_opt(Master_matrix::template get_null_value<Dimension>()),
       Pair_opt(),
       Swap_opt(birthComparator, deathComparator),
       Rep_opt(),
@@ -607,7 +609,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const std::vector<Boundary_rang
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.reserve(orderedBoundaries.size());
   } else {
-    pivotToColumnIndex_.resize(orderedBoundaries.size(), -1);
+    pivotToColumnIndex_.resize(orderedBoundaries.size(), Master_matrix::template get_null_value<Index>());
   }
   for (const Boundary_range& b : orderedBoundaries) {
     insert_boundary(b);
@@ -620,7 +622,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns,
                                                  Column_settings* colSettings,
                                                  const BirthComparatorFunction& birthComparator,
                                                  const DeathComparatorFunction& deathComparator)
-    : Dim_opt(-1),
+    : Dim_opt(Master_matrix::template get_null_value<Dimension>()),
       Pair_opt(),
       Swap_opt(birthComparator, deathComparator),
       Rep_opt(),
@@ -632,7 +634,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(unsigned int numberOfColumns,
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.reserve(numberOfColumns);
   } else {
-    pivotToColumnIndex_.resize(numberOfColumns, -1);
+    pivotToColumnIndex_.resize(numberOfColumns, Master_matrix::template get_null_value<Index>());
   }
 }
 
@@ -685,7 +687,7 @@ inline std::vector<typename Master_matrix::Entry_representative> Chain_matrix<Ma
 {
   if constexpr (!Master_matrix::Option_list::has_map_column_container) {
     if (pivotToColumnIndex_.size() <= cellID) {
-      pivotToColumnIndex_.resize(cellID * 2 + 1, -1);
+      pivotToColumnIndex_.resize(cellID * 2 + 1, Master_matrix::template get_null_value<Index>());
     }
   }
 
@@ -694,7 +696,8 @@ inline std::vector<typename Master_matrix::Entry_representative> Chain_matrix<Ma
       Swap_opt::CP::pivotToPosition_.try_emplace(cellID, _nextPosition());
     } else {
       if (Swap_opt::CP::pivotToPosition_.size() <= cellID)
-        Swap_opt::CP::pivotToPosition_.resize(pivotToColumnIndex_.size(), -1);
+        Swap_opt::CP::pivotToPosition_.resize(pivotToColumnIndex_.size(),
+                                              Master_matrix::template get_null_value<Pos_index>());
       Swap_opt::CP::pivotToPosition_[cellID] = _nextPosition();
     }
   }
@@ -1215,7 +1218,7 @@ inline void Chain_matrix<Master_matrix>::_remove_last(Index lastIndex)
     }
 
     if (colToErase.is_paired()) matrix_.at(colToErase.get_paired_chain_index()).unassign_paired_chain();
-    pivotToColumnIndex_[pivot] = -1;
+    pivotToColumnIndex_[pivot] = Master_matrix::template get_null_value<Index>();
     matrix_.pop_back();
     // TODO: resize matrix_ when a lot is removed? Could be not the best strategy if user inserts a lot back afterwards.
   }
@@ -1231,7 +1234,7 @@ inline void Chain_matrix<Master_matrix>::_remove_last(Index lastIndex)
     if (bar->death == Master_matrix::template get_null_value<Pos_index>())
       _barcode().erase(bar);
     else
-      bar->death = -1;
+      bar->death = Master_matrix::template get_null_value<Pos_index>();
 
     _indexToBar().erase(it);
     if constexpr (Master_matrix::Option_list::has_vine_update) Swap_opt::CP::pivotToPosition_.erase(pivot);
@@ -1268,7 +1271,7 @@ template <class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_add_bar(Dimension dim)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _barcode().emplace_back(_nextPosition(), -1, dim);
+    _barcode().emplace_back(_nextPosition(), Master_matrix::template get_null_value<Pos_index>(), dim);
     if constexpr (Master_matrix::Option_list::has_removable_columns) {
       _indexToBar().try_emplace(_nextPosition(), --_barcode().end());
     } else {

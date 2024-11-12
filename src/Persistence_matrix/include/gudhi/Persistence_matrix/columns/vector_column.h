@@ -102,7 +102,8 @@ class Vector_column : public Master_matrix::Row_access_option,
   std::size_t size() const;
 
   template <class Row_index_map>
-  void reorder(const Row_index_map& valueMap, [[maybe_unused]] Index columnIndex = -1);
+  void reorder(const Row_index_map& valueMap,
+               [[maybe_unused]] Index columnIndex = Master_matrix::template get_null_value<Index>());
   void clear();
   // do not clear an entry to 0 if the entry was already 0, otherwise size/is_empty will be wrong.
   void clear(ID_index rowIndex);
@@ -170,6 +171,7 @@ class Vector_column : public Master_matrix::Row_access_option,
       return true;
     }
   }
+
   friend bool operator<(const Vector_column& c1, const Vector_column& c2) {
     if (&c1 == &c2) return false;
 
@@ -227,13 +229,13 @@ class Vector_column : public Master_matrix::Row_access_option,
 
   template <class Column, class Entry_iterator, typename F1, typename F2, typename F3, typename F4>
   friend void _generic_merge_entry_to_column(Column& targetColumn,
-                                            Entry_iterator& itSource,
-                                            typename Column::Column_support::iterator& itTarget,
-                                            F1&& process_target,
-                                            F2&& process_source,
-                                            F3&& update_target1,
-                                            F4&& update_target2,
-                                            bool& pivotIsZeroed);
+                                             Entry_iterator& itSource,
+                                             typename Column::Column_support::iterator& itTarget,
+                                             F1&& process_target,
+                                             F2&& process_source,
+                                             F3&& update_target1,
+                                             F4&& update_target2,
+                                             bool& pivotIsZeroed);
 
   void _delete_entry(Entry* entry);
   void _delete_entry(typename Column_support::iterator& it);
@@ -263,7 +265,8 @@ inline Vector_column<Master_matrix>::Vector_column(Column_settings* colSettings)
       operators_(nullptr),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor))
 {
-  if (operators_ == nullptr && entryPool_ == nullptr) return;  // to allow default constructor which gives a dummy column
+  if (operators_ == nullptr && entryPool_ == nullptr)
+    return;  // to allow default constructor which gives a dummy column
   if constexpr (!Master_matrix::Option_list::is_z2) {
     operators_ = &(colSettings->operators);
   }
@@ -308,9 +311,13 @@ inline Vector_column<Master_matrix>::Vector_column(Index columnIndex,
       Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
       Chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : *std::prev(nonZeroRowIndices.end());
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : *std::prev(nonZeroRowIndices.end());
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : std::prev(nonZeroRowIndices.end())->first;
         }
       }()),
       column_(nonZeroRowIndices.size(), nullptr),
@@ -345,9 +352,13 @@ inline Vector_column<Master_matrix>::Vector_column(const Container& nonZeroRowIn
       Dim_opt(dimension),
       Chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : *std::prev(nonZeroRowIndices.end());
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : *std::prev(nonZeroRowIndices.end());
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : std::prev(nonZeroRowIndices.end())->first;
         }
       }()),
       column_(nonZeroRowIndices.size(), nullptr),
@@ -381,9 +392,13 @@ inline Vector_column<Master_matrix>::Vector_column(Index columnIndex,
       Dim_opt(dimension),
       Chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : *std::prev(nonZeroRowIndices.end());
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : *std::prev(nonZeroRowIndices.end());
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : std::prev(nonZeroRowIndices.end())->first;
         }
       }()),
       column_(nonZeroRowIndices.size(), nullptr),
@@ -512,8 +527,9 @@ inline bool Vector_column<Master_matrix>::is_non_zero(ID_index rowIndex) const
     if (erasedValues_.find(rowIndex) != erasedValues_.end()) return false;
 
   Entry entry(rowIndex);
-  return std::binary_search(column_.begin(), column_.end(), &entry,
-                            [](const Entry* a, const Entry* b) { return a->get_row_index() < b->get_row_index(); });
+  return std::binary_search(column_.begin(), column_.end(), &entry, [](const Entry* a, const Entry* b) {
+    return a->get_row_index() < b->get_row_index();
+  });
 }
 
 template <class Master_matrix>
@@ -623,7 +639,7 @@ inline typename Vector_column<Master_matrix>::ID_index Vector_column<Master_matr
                 "Method not available for base columns.");  // could technically be, but is the notion useful then?
 
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
-    if (column_.empty()) return -1;
+    if (column_.empty()) return Master_matrix::template get_null_value<ID_index>();
     if (erasedValues_.empty()) return column_.back()->get_row_index();
 
     auto it = erasedValues_.find(column_.back()->get_row_index());
@@ -634,7 +650,7 @@ inline typename Vector_column<Master_matrix>::ID_index Vector_column<Master_matr
       if (!column_.empty()) it = erasedValues_.find(column_.back()->get_row_index());
     }
 
-    if (column_.empty()) return -1;
+    if (column_.empty()) return Master_matrix::template get_null_value<ID_index>();
     return column_.back()->get_row_index();
   } else {
     return Chain_opt::get_pivot();
@@ -718,8 +734,7 @@ inline typename Vector_column<Master_matrix>::reverse_iterator Vector_column<Mas
 }
 
 template <class Master_matrix>
-inline typename Vector_column<Master_matrix>::const_reverse_iterator Vector_column<Master_matrix>::rend()
-    const noexcept
+inline typename Vector_column<Master_matrix>::const_reverse_iterator Vector_column<Master_matrix>::rend() const noexcept
 {
   return column_.rend();
 }
@@ -985,8 +1000,8 @@ inline void Vector_column<Master_matrix>::_delete_entry(typename Column_support:
 }
 
 template <class Master_matrix>
-inline typename Vector_column<Master_matrix>::Entry* Vector_column<Master_matrix>::_insert_entry(
-    const Field_element& value, ID_index rowIndex, Column_support& column)
+inline typename Vector_column<Master_matrix>::Entry*
+Vector_column<Master_matrix>::_insert_entry(const Field_element& value, ID_index rowIndex, Column_support& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);

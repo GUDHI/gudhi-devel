@@ -245,7 +245,8 @@ class Id_to_index_overlay
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
+  void insert_boundary(const Boundary_range& boundary,
+                       Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief It does the same as the other version, but allows the boundary cells to be identified without restrictions
    * except that all IDs have to be strictly increasing in the order of filtration. Note that you should avoid then
@@ -264,7 +265,8 @@ class Id_to_index_overlay
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_boundary(ID_index cellIndex, const Boundary_range& boundary, Dimension dim = -1);
+  void insert_boundary(ID_index cellIndex, const Boundary_range& boundary,
+                       Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Returns the column at the given @ref IDIdx index. 
    * For @ref boundarymatrix "RU matrices", the returned column is from \f$ R \f$.
@@ -770,7 +772,7 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_bounda
       idToIndex_->emplace(cellIndex, nextIndex_);
     } else {
       if (idToIndex_->size() <= cellIndex) {
-        idToIndex_->resize(cellIndex + 1, -1);
+        idToIndex_->resize(cellIndex + 1, Master_matrix::template get_null_value<Index>());
       }
       _id_to_index(cellIndex) = nextIndex_;
     }
@@ -824,7 +826,7 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maxima
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       idToIndex_->erase(cellID);
     } else {
-      _id_to_index(cellID) = -1;
+      _id_to_index(cellID) = Master_matrix::template get_null_value<Index>();
     }
   } else {
     matrix_.remove_maximal_cell(cellID);
@@ -862,7 +864,7 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_last()
       while (_id_to_index(id) == Master_matrix::template get_null_value<Index>()) --id;
       GUDHI_CHECK(_id_to_index(id) == nextIndex_,
                   std::logic_error("Id_to_index_overlay::remove_last - Indexation problem."));
-      _id_to_index(id) = -1;
+      _id_to_index(id) = Master_matrix::template get_null_value<Index>();
     }
   }
 }
@@ -1076,7 +1078,7 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::_initialize_m
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       idToIndex_ = new Dictionary(size);
     } else {
-      idToIndex_ = new Dictionary(size, -1);
+      idToIndex_ = new Dictionary(size, Master_matrix::template get_null_value<Index>());
     }
   } else {
     idToIndex_ = &matrix_.pivotToColumnIndex_;

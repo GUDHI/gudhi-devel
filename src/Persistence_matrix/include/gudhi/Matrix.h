@@ -164,7 +164,6 @@ class Matrix {
   using Characteristic = typename Field_operators::Characteristic;
 
   /**
-   * @private
    * @brief Returns value from a type when not set.
    */
   template <typename T>
@@ -774,7 +773,7 @@ class Matrix {
    * chains used to reduce the boundary. Otherwise, nothing.
    */
   template <class Boundary_range = Boundary>
-  Insertion_return insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
+  Insertion_return insert_boundary(const Boundary_range& boundary, Dimension dim = Matrix::get_null_value<Dimension>());
   /**
    * @brief Only available for @ref mp_matrices "non-basic matrices".
    * It does the same as the other version, but allows the boundary cells to be identified without restrictions
@@ -796,7 +795,8 @@ class Matrix {
    * chains used to reduce the boundary. Otherwise, nothing.
    */
   template <class Boundary_range = Boundary>
-  Insertion_return insert_boundary(ID_index cellIndex, const Boundary_range& boundary, Dimension dim = -1);
+  Insertion_return insert_boundary(ID_index cellIndex, const Boundary_range& boundary,
+                                   Dimension dim = Matrix::get_null_value<Dimension>());
 
   /**
    * @brief Returns the column at the given @ref MatIdx index.

@@ -281,7 +281,7 @@ inline bool RU_vine_swap<Master_matrix>::_is_paired(Index columnIndex)
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       if (_matrix()->pivotToColumnIndex_.find(columnIndex) == _matrix()->pivotToColumnIndex_.end()) return false;
     } else {
-      if (_matrix()->pivotToColumnIndex_.operator[](columnIndex) == Master_matrix::template get_null_value<Index>())
+      if (_matrix()->pivotToColumnIndex_[columnIndex] == Master_matrix::template get_null_value<Index>())
         return false;
     }
 
@@ -321,8 +321,8 @@ inline void RU_vine_swap<Master_matrix>::_positive_transpose(Index columnIndex)
       _matrix()->pivotToColumnIndex_.erase(columnIndex + 1);
     }
   } else {
-    std::swap(_matrix()->pivotToColumnIndex_.operator[](columnIndex),
-              _matrix()->pivotToColumnIndex_.operator[](columnIndex + 1));
+    std::swap(_matrix()->pivotToColumnIndex_[columnIndex],
+              _matrix()->pivotToColumnIndex_[columnIndex + 1]);
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
@@ -354,8 +354,8 @@ inline void RU_vine_swap<Master_matrix>::_positive_negative_transpose(Index colu
       _matrix()->pivotToColumnIndex_.erase(columnIndex);
     }
   } else {
-    _matrix()->pivotToColumnIndex_.operator[](columnIndex + 1) = _matrix()->pivotToColumnIndex_.operator[](columnIndex);
-    _matrix()->pivotToColumnIndex_.operator[](columnIndex) = -1;
+    _matrix()->pivotToColumnIndex_[columnIndex + 1] = _matrix()->pivotToColumnIndex_[columnIndex];
+    _matrix()->pivotToColumnIndex_[columnIndex] = Master_matrix::template get_null_value<Index>();
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
@@ -375,8 +375,8 @@ inline void RU_vine_swap<Master_matrix>::_negative_positive_transpose(Index colu
       _matrix()->pivotToColumnIndex_.erase(columnIndex + 1);
     }
   } else {
-    _matrix()->pivotToColumnIndex_.operator[](columnIndex) = _matrix()->pivotToColumnIndex_.operator[](columnIndex + 1);
-    _matrix()->pivotToColumnIndex_.operator[](columnIndex + 1) = -1;
+    _matrix()->pivotToColumnIndex_[columnIndex] = _matrix()->pivotToColumnIndex_[columnIndex + 1];
+    _matrix()->pivotToColumnIndex_[columnIndex + 1] = Master_matrix::template get_null_value<Index>();
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
@@ -497,10 +497,10 @@ inline typename RU_vine_swap<Master_matrix>::Pos_index RU_vine_swap<Master_matri
 
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       auto it = _matrix()->pivotToColumnIndex_.find(simplexIndex);
-      if (it == _matrix()->pivotToColumnIndex_.end()) return -1;
+      if (it == _matrix()->pivotToColumnIndex_.end()) return Master_matrix::template get_null_value<Pos_index>();
       return it->second;
     } else {
-      return _matrix()->pivotToColumnIndex_.operator[](simplexIndex);
+      return _matrix()->pivotToColumnIndex_[simplexIndex];
     }
   }
 }
