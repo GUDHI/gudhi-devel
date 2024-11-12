@@ -723,9 +723,9 @@ class Simplex_tree {
 
   /** \brief Returns the extra data stored in a simplex. */
   Simplex_data& simplex_data(Simplex_handle sh) {
-    GUDHI_CHECK(sh != null_simplex(),
-                std::invalid_argument("Simplex_tree::simplex_data - no data associated to null_simplex"));
-    return _to_node_it(sh)->second.data();
+    // Scott Meyers in Effective C++ 3rd Edition. On page 23, Item 3: a non const method can safely call a const one
+    // Doing it the other way is not safe
+    return const_cast<Simplex_data&>(std::as_const(*this).simplex_data(sh));
   }
 
   /** \brief Returns the extra data stored in a simplex. */
@@ -2024,7 +2024,7 @@ class Simplex_tree {
       if (!(sh->second.filtration() >= max_filt_border_value)) {
         // Store the filtration modification information
         modified = true;
-        _to_node_it(sh)->second.assign_filtration(max_filt_border_value);
+        assign_filtration(sh, max_filt_border_value);
       }
     };
     // Loop must be from the end to the beginning, as higher dimension simplex are always on the left part of the tree
