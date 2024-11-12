@@ -124,6 +124,8 @@ void test_simplex_tree_constness(const Simplex_tree& const_stree) {
     });
 
   BOOST_CHECK(const_stree.contiguous_vertices());
+  BOOST_CHECK(const_stree.has_children(const_stree.find({0, 1})));
+  [[maybe_unused]] auto sh = const_stree.root();                                    // -> OK
 }
 
 BOOST_AUTO_TEST_CASE(const_simplex_tree) {
