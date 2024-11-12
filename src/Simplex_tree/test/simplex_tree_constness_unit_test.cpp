@@ -41,6 +41,14 @@ void test_simplex_tree_constness(const Simplex_tree& const_stree) {
     for (auto vertex : const_stree.simplex_vertex_range(sh)) std::clog << "(" << vertex << ")";
     std::clog << std::endl;
   }
+  std::clog << "* loop on simplex\n";
+  for (std::size_t idx = 0; idx < const_stree.num_simplices(); idx++) {
+    auto sh = const_stree.simplex(idx);
+    std::clog << "   "
+              << "[" << const_stree.filtration(sh) << "] ";
+    for (auto vertex : const_stree.simplex_vertex_range(sh)) std::clog << "(" << vertex << ")";
+    std::clog << std::endl;
+  }
   std::clog << "* complex_simplex_range\n";
   for (auto sh : const_stree.complex_simplex_range()) {
     std::clog << "   "
@@ -48,6 +56,10 @@ void test_simplex_tree_constness(const Simplex_tree& const_stree) {
     for (auto vertex : const_stree.simplex_vertex_range(sh)) std::clog << "(" << vertex << ")";
     std::clog << std::endl;
   }
+  std::clog << "* complex_vertex_range\n";
+  std::clog << "   ";
+  for (auto vertex : const_stree.complex_vertex_range()) std::clog << "(" << vertex << ")";
+  std::clog << std::endl;
   std::clog << "* skeleton_simplex_range in dim " << const_stree.dimension() << "\n";
   for (auto sh : const_stree.skeleton_simplex_range(const_stree.dimension())) {
     std::clog << "   "
@@ -111,6 +123,7 @@ void test_simplex_tree_constness(const Simplex_tree& const_stree) {
     std::clog << std::endl;
     });
 
+  BOOST_CHECK(const_stree.contiguous_vertices());
 }
 
 BOOST_AUTO_TEST_CASE(const_simplex_tree) {
