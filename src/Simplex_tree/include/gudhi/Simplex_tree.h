@@ -662,8 +662,9 @@ class Simplex_tree {
     return sh->second.filtration();
   }
 
-  static Dictionary_it _to_node_it(Simplex_handle sh){
-    return const_cast<Siblings*>(self_siblings(sh))->to_non_const_it(sh);
+  // Transform a Const_dictionary_it into a Dictionary_it
+  Dictionary_it _to_node_it(Simplex_handle sh) {
+    return self_siblings(sh)->to_non_const_it(sh);
   }
 
  public:
@@ -723,16 +724,16 @@ class Simplex_tree {
 
   /** \brief Returns the extra data stored in a simplex. */
   Simplex_data& simplex_data(Simplex_handle sh) {
-    // Scott Meyers in Effective C++ 3rd Edition. On page 23, Item 3: a non const method can safely call a const one
-    // Doing it the other way is not safe
-    return const_cast<Simplex_data&>(std::as_const(*this).simplex_data(sh));
+    GUDHI_CHECK(sh != null_simplex(),
+                std::invalid_argument("Simplex_tree::simplex_data - no data associated to null_simplex"));
+    return _to_node_it(sh)->second.data();
   }
 
   /** \brief Returns the extra data stored in a simplex. */
   const Simplex_data& simplex_data(Simplex_handle sh) const {
     GUDHI_CHECK(sh != null_simplex(),
                 std::invalid_argument("Simplex_tree::simplex_data - no data associated to null_simplex"));
-    return _to_node_it(sh)->second.data();
+    return sh->second.data();
   }
 
   /** \brief Returns a Vertex_handle different from all Vertex_handles associated
@@ -1118,11 +1119,19 @@ class Simplex_tree {
 
   /** Returns the Siblings containing a simplex.*/
   template<class SimplexHandle>
-  static Siblings const* self_siblings(SimplexHandle sh) {
+  Siblings const* self_siblings(SimplexHandle sh) const {
     if (sh->second.children()->parent() == sh->first)
       return sh->second.children()->oncles();
     else
       return sh->second.children();
+  }
+
+  /** Returns the Siblings containing a simplex.*/
+  template<class SimplexHandle>
+  Siblings* self_siblings(SimplexHandle sh) {
+    // Scott Meyers in Effective C++ 3rd Edition. On page 23, Item 3: a non const method can safely call a const one
+    // Doing it the other way is not safe
+    return const_cast<Siblings*>(std::as_const(*this).self_siblings(sh));
   }
 
  public:
@@ -1590,7 +1599,7 @@ class Simplex_tree {
     {
       Node& node_u = static_cast<Node&>(node_as_hook); //corresponding node, has label u
       Simplex_handle sh_u = simplex_handle_from_node(node_u);
-      Siblings* sib_u = const_cast<Siblings*>(self_siblings(sh_u));
+      Siblings* sib_u = self_siblings(sh_u);
       if (sib_u->members().find(v) != sib_u->members().end()) { //v is the label of a sibling of node_u
         int curr_dim = dimension(sib_u);
         if (dim_max == -1 || curr_dim < dim_max){
