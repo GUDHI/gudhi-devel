@@ -224,9 +224,9 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
 };
 
 template <class Master_matrix>
-using STD_naive_vector_column = Naive_vector_column<Master_matrix, std::vector<typename Master_matrix::Matrix_entry*> >;
+using Naive_std_vector_column = Naive_vector_column<Master_matrix, std::vector<typename Master_matrix::Matrix_entry*> >;
 template <class Master_matrix>
-using Small_naive_vector_column =
+using Naive_small_vector_column =
     Naive_vector_column<Master_matrix, boost::container::small_vector<typename Master_matrix::Matrix_entry*, 8> >;
 
 template <class Master_matrix, class Support>

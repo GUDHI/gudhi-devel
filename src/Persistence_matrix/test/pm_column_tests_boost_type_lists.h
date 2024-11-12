@@ -30,8 +30,8 @@ using Gudhi::persistence_matrix::Heap_column;
 using Gudhi::persistence_matrix::Intrusive_list_column;
 using Gudhi::persistence_matrix::Intrusive_set_column;
 using Gudhi::persistence_matrix::List_column;
-using Gudhi::persistence_matrix::STD_naive_vector_column;
-using Gudhi::persistence_matrix::Small_naive_vector_column;
+using Gudhi::persistence_matrix::Naive_std_vector_column;
+using Gudhi::persistence_matrix::Naive_small_vector_column;
 using Gudhi::persistence_matrix::Set_column;
 using Gudhi::persistence_matrix::Unordered_set_column;
 using Gudhi::persistence_matrix::Vector_column;
@@ -66,9 +66,9 @@ class column_non_validity {
     } else if constexpr (col_type::Master::Option_list::column_type == Column_types::UNORDERED_SET) {
       return !std::is_same_v<col_type, Unordered_set_column<typename col_type::Master> >;
     } else if constexpr (col_type::Master::Option_list::column_type == Column_types::NAIVE_VECTOR) {
-      return !std::is_same_v<col_type, STD_naive_vector_column<typename col_type::Master> >;
+      return !std::is_same_v<col_type, Naive_std_vector_column<typename col_type::Master> >;
     } else if constexpr (col_type::Master::Option_list::column_type == Column_types::SMALL_VECTOR) {
-      return !std::is_same_v<col_type, Small_naive_vector_column<typename col_type::Master> >;
+      return !std::is_same_v<col_type, Naive_small_vector_column<typename col_type::Master> >;
     } else if constexpr (col_type::Master::Option_list::column_type == Column_types::VECTOR) {
       return !std::is_same_v<col_type, Vector_column<typename col_type::Master> >;
     } else if constexpr (col_type::Master::Option_list::column_type == Column_types::HEAP) {
@@ -90,7 +90,7 @@ using row_col_type_list = boost::mp11::mp_list<ct_intrusive_list, ct_intrusive_s
 //...and add the column name here.
 using column_list =
     mp_list_q<Intrusive_list_column, Intrusive_set_column, List_column, Set_column, Unordered_set_column,
-              STD_naive_vector_column, Small_naive_vector_column, Vector_column, Heap_column>;
+              Naive_std_vector_column, Naive_small_vector_column, Vector_column, Heap_column>;
 using c_matrix_type_list = mp_list_q<Column_mini_matrix>;
 
 template <typename option_name_list, typename bool_is_z2, typename col_t, typename bool_has_row, typename bool_rem_row,
