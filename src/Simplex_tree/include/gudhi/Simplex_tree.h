@@ -100,7 +100,7 @@ class Simplex_tree {
   typedef typename Options::Indexing_tag Indexing_tag;
   /** \brief Type for the value of the filtration function.
    *
-   * Must be comparable with <. */
+   * Should implement the @ref FiltrationValue concept. */
   typedef typename Options::Filtration_value Filtration_value;
   /** \brief Key associated to each simplex.
    *
@@ -1199,7 +1199,7 @@ class Simplex_tree {
   /** \brief Initializes the filtration cache, i.e. sorts the
    * simplices according to their order in the filtration.
    * Assumes that the filtration values have a total order.
-   * If not, please use @ref initialize_filtration(Comparator&&, bool) instead.
+   * If not, please use @ref initialize_filtration(Comparator&&, Ignorer&&) instead.
    * Two simplices with same filtration value are ordered by a reverse lexicographic order.
    *
    * It always recomputes the cache, even if one already exists.
@@ -1228,11 +1228,11 @@ class Simplex_tree {
    * lexicographic order. This would generate a valid 1-parameter filtration which can than be interpreted as a line
    * in the 2-parameter module and used with @ref filtration_simplex_range "". Also, the persistence along this line
    * can than be computed with @ref Gudhi::persistent_cohomology::Persistent_cohomology "Persistent_cohomology".
-   * Just note that it is important to call @ref initialize_filtration(Comparator&&, bool) explicitly before call
+   * Just note that it is important to call @ref initialize_filtration(Comparator&&, Ignorer&&) explicitly before call
    * @ref Gudhi::persistent_cohomology::Persistent_cohomology::compute_persistent_cohomology
    * "Persistent_cohomology::compute_persistent_cohomology" in that case, otherwise, the computation of persistence
-   * will fail (if no call to @ref initialize_filtration() or @ref initialize_filtration(Comparator&&, bool) was made,
-   * it will call it it-self with no arguments and the simplices will be wrongly sorted).
+   * will fail (if no call to @ref initialize_filtration() or @ref initialize_filtration(Comparator&&, Ignorer&&)
+   * was made, it will call it it-self with no arguments and the simplices will be wrongly sorted).
    *
    * It always recomputes the cache, even if one already exists.
    *
@@ -2724,6 +2724,8 @@ class Simplex_tree {
     if (members_size > 0) {
       if constexpr (!Options::stable_simplex_handles) sib->members_.reserve(members_size);
       Vertex_handle vertex;
+      // Set explicitly to zero to avoid false positive error raising in debug mode when store_filtration == false
+      // and to force array like Filtration_value value to be empty.
       Filtration_value filtration(0);
       for (Vertex_handle idx = 0; idx < members_size; idx++) {
         ptr = deserialize_trivial(vertex, ptr);

@@ -27,9 +27,14 @@
  */
 struct FiltrationValue {
   /**
-   * @brief Has to construct the default value of FiltrationValue. E.g., 0 for a numerical value or {} for a vector.
+   * @brief Has to construct the default value of FiltrationValue.
    */
   FiltrationValue();
+  /**
+   * @brief Has to be able to take `0` as input at construction and in this case, construct an empty object.
+   * E.g., 0 for a numerical value or {} for a vector.
+   */
+  FiltrationValue(Any_arithmetic_type v);
 
   // only for default ordering of filtration_vect_ in initialize_filtration and for prune_above_filtration
   /**
