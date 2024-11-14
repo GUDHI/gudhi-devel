@@ -2605,7 +2605,7 @@ class Simplex_tree {
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
    * SimplexTreeOptions and on a computer with the same architecture.
    *
-   * Serialize/Deserialize ignore any extra data (@ref Simplex_data) stored in the simplices for now.
+   * Serialize/Deserialize ignores any extra data (@ref Simplex_data) stored in the simplices for now.
    */
   void deserialize(const char* buffer, const std::size_t buffer_size) {
     GUDHI_CHECK(num_vertices() == 0, std::logic_error("Simplex_tree::deserialize - Simplex_tree must be empty"));
