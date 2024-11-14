@@ -639,7 +639,7 @@ class Simplex_tree {
   template<typename> friend class Simplex_tree;
 
   /** \brief Checks if two simplex trees are equal. Any extra data (@ref Simplex_data) stored in the simplices are
-   * ignored in the coomparison
+   * ignored in the comparison.
    */
   template<class OtherSimplexTreeOptions>
   bool operator==(Simplex_tree<OtherSimplexTreeOptions>& st2) {
