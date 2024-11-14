@@ -2536,7 +2536,7 @@ class Simplex_tree {
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
    * SimplexTreeOptions and on a computer with the same architecture.
    *
-   * Serialize/Deserialize ignore any extra data (@ref Simplex_data) stored in the simplices for now.
+   * Serialize/Deserialize ignores any extra data (@ref Simplex_data) stored in the simplices for now.
    */
   /* Let's take the following simplicial complex as example:         */
   /* (vertices are represented as letters to ease the understanding) */
