@@ -193,7 +193,6 @@ if (WITH_GUDHI_PYTHON)
     endif()
   endif()
 
-
   if(NOT GUDHI_PYTHON_PATH)
     message(FATAL_ERROR "ERROR: GUDHI_PYTHON_PATH is not valid.")
   endif(NOT GUDHI_PYTHON_PATH)
