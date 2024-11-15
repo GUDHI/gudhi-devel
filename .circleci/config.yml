@@ -1,12 +1,11 @@
 version: 2.0
 jobs:
-
-### With all third parties
+  ### With all third parties
 
   examples:
     docker:
       # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image
-      - image: gudhi/ci_for_gudhi:2024.06.02
+      - image: gudhi/ci_for_gudhi:2024.09.01
     steps:
       - checkout
       - run:
@@ -25,7 +24,7 @@ jobs:
 
   tests:
     docker:
-      - image: gudhi/ci_for_gudhi:2024.06.02
+      - image: gudhi/ci_for_gudhi:2024.09.01
     steps:
       - checkout
       - run:
@@ -44,7 +43,7 @@ jobs:
 
   debug_tests:
     docker:
-      - image: gudhi/ci_for_gudhi:2024.06.02
+      - image: gudhi/ci_for_gudhi:2024.09.01
     steps:
       - checkout
       - run:
@@ -63,7 +62,7 @@ jobs:
 
   utils:
     docker:
-      - image: gudhi/ci_for_gudhi:2024.06.02
+      - image: gudhi/ci_for_gudhi:2024.09.01
     steps:
       - checkout
       - run:
@@ -82,7 +81,7 @@ jobs:
 
   python:
     docker:
-      - image: gudhi/ci_for_gudhi:2024.06.02
+      - image: gudhi/ci_for_gudhi:2024.09.01
     resource_class: large # Delaunay complex requires about 5 Gb of RAM to compile
     steps:
       - checkout
@@ -94,7 +93,6 @@ jobs:
       - run:
           name: Build and test python module. Generates and tests the python documentation
           command: |
-            pip3 install pydata-sphinx-theme
             mkdir build
             cd build
             cmake -DWITH_GUDHI_THIRD_PARTY=OFF -DUSER_VERSION_DIR=version ..
@@ -167,8 +165,7 @@ jobs:
             latexmk -pdf -interaction=nonstopmode test_biblio.tex
             latexmk -pdf -interaction=nonstopmode test_gudhi_citation.tex
 
-
-### With all third parties, except CGAL and Eigen
+  ### With all third parties, except CGAL and Eigen
 
   examples_without_cgal_eigen:
     docker:
@@ -248,8 +245,7 @@ jobs:
             python3 setup.py build_ext --inplace
             ctest --output-on-failure
 
-
-### With all third parties, except CGAL
+  ### With all third parties, except CGAL
 
   examples_without_cgal:
     docker:

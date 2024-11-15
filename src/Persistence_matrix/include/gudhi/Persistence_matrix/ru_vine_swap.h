@@ -25,7 +25,7 @@
 #include <stdexcept>    //std::invalid_argument
 
 #include "ru_pairing.h"
-#include "boundary_face_position_to_id_mapper.h"
+#include "boundary_cell_position_to_id_mapper.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -68,7 +68,7 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
                      public std::conditional<Master_matrix::Option_list::has_column_pairings &&
                                                 Master_matrix::Option_list::has_removable_columns, 
                                              Dummy_pos_mapper,
-                                             Face_position_to_ID_mapper<typename Master_matrix::ID_index,
+                                             Cell_position_to_ID_mapper<typename Master_matrix::ID_index,
                                                                         typename Master_matrix::Pos_index>
                                             >::type
 {
@@ -98,20 +98,20 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
    * @brief Does the same than @ref vine_swap, but assumes that the swap is non trivial and
    * therefore skips a part of the case study.
    * 
-   * @param index @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
+   * @param index @ref PosIdx index of the first cell to swap. The second one has to be at `position + 1`.
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
   bool vine_swap_with_z_eq_1_case(Pos_index index);
   /**
-   * @brief Does a vine swap between two faces which are consecutive in the filtration.
+   * @brief Does a vine swap between two cells which are consecutive in the filtration.
    * Roughly, if \f$ F \f$ is the current filtration represented by the matrix, the method modifies the matrix
    * such that the new state corresponds to a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but
-   * with the two faces at position `position` and `position + 1` swapped. Of course, the two faces should
+   * with the two cells at position `position` and `position + 1` swapped. Of course, the two cells should
    * not have a face/coface relation which each other ; \f$ F' \f$ has to be a valid filtration.
    * See @cite vineyards for more information about vine and vineyards.
    * 
-   * @param index @ref PosIdx index of the first face to swap. The second one has to be at `position + 1`.
+   * @param index @ref PosIdx index of the first cell to swap. The second one has to be at `position + 1`.
    * @return true If the barcode changed from the swap.
    * @return false Otherwise.
    */
@@ -129,8 +129,8 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
       swap(static_cast<RU_pairing<Master_matrix>&>(swap1), static_cast<RU_pairing<Master_matrix>&>(swap2));
     }
     if (!Master_matrix::Option_list::has_column_pairings || !Master_matrix::Option_list::has_removable_columns) {
-      swap(static_cast<Face_position_to_ID_mapper<ID_index, Pos_index>&>(swap1),
-           static_cast<Face_position_to_ID_mapper<ID_index, Pos_index>&>(swap2));
+      swap(static_cast<Cell_position_to_ID_mapper<ID_index, Pos_index>&>(swap1),
+           static_cast<Cell_position_to_ID_mapper<ID_index, Pos_index>&>(swap2));
     }
   }
 
@@ -144,7 +144,7 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
   using RUM = typename std::conditional<Master_matrix::Option_list::has_column_pairings &&
                                             Master_matrix::Option_list::has_removable_columns,
                                         Dummy_pos_mapper,
-                                        Face_position_to_ID_mapper<ID_index, Pos_index>
+                                        Cell_position_to_ID_mapper<ID_index, Pos_index>
                                        >::type;
   constexpr auto& _positionToRowIdx();
 
@@ -201,7 +201,7 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap_with_z_eq_1_case(Pos_index in
   bool iiIsPositive = _matrix()->reducedMatrixR_.is_zero_column(index + 1);
 
   if (iIsPositive && iiIsPositive) {
-    _matrix()->mirrorMatrixU_.zero_cell(index, _get_row_id_from_position(index + 1));
+    _matrix()->mirrorMatrixU_.zero_entry(index, _get_row_id_from_position(index + 1));
     return _positive_vine_swap(index);
   } else if (!iIsPositive && !iiIsPositive) {
     return _negative_vine_swap(index);
@@ -228,14 +228,14 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap(Pos_index index)
       _swap_at_index(index);
       return true;
     }
-    if (!_matrix()->mirrorMatrixU_.is_zero_cell(index, _get_row_id_from_position(index + 1))) {
-      _matrix()->mirrorMatrixU_.zero_cell(index, _get_row_id_from_position(index + 1));
+    if (!_matrix()->mirrorMatrixU_.is_zero_entry(index, _get_row_id_from_position(index + 1))) {
+      _matrix()->mirrorMatrixU_.zero_entry(index, _get_row_id_from_position(index + 1));
     }
     return _positive_vine_swap(index);
   } else if (!iIsPositive && !iiIsPositive) {
     if (_matrix()->reducedMatrixR_.get_column_dimension(index) !=
             _matrix()->reducedMatrixR_.get_column_dimension(index + 1) ||
-        _matrix()->mirrorMatrixU_.is_zero_cell(index, _get_row_id_from_position(index + 1))) {
+        _matrix()->mirrorMatrixU_.is_zero_entry(index, _get_row_id_from_position(index + 1))) {
       _negative_transpose(index);
       _swap_at_index(index);
       return true;
@@ -244,7 +244,7 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap(Pos_index index)
   } else if (iIsPositive && !iiIsPositive) {
     if (_matrix()->reducedMatrixR_.get_column_dimension(index) !=
             _matrix()->reducedMatrixR_.get_column_dimension(index + 1) ||
-        _matrix()->mirrorMatrixU_.is_zero_cell(index, _get_row_id_from_position(index + 1))) {
+        _matrix()->mirrorMatrixU_.is_zero_entry(index, _get_row_id_from_position(index + 1))) {
       _positive_negative_transpose(index);
       _swap_at_index(index);
       return true;
@@ -253,7 +253,7 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap(Pos_index index)
   } else {
     if (_matrix()->reducedMatrixR_.get_column_dimension(index) !=
             _matrix()->reducedMatrixR_.get_column_dimension(index + 1) ||
-        _matrix()->mirrorMatrixU_.is_zero_cell(index, _get_row_id_from_position(index + 1))) {
+        _matrix()->mirrorMatrixU_.is_zero_entry(index, _get_row_id_from_position(index + 1))) {
       _negative_positive_transpose(index);
       _swap_at_index(index);
       return true;
@@ -392,7 +392,7 @@ inline bool RU_vine_swap<Master_matrix>::_positive_vine_swap(Index columnIndex)
   const Pos_index iiDeath = _get_death(columnIndex + 1);
 
   if (iDeath != static_cast<Pos_index>(-1) && iiDeath != static_cast<Pos_index>(-1) &&
-      !(_matrix()->reducedMatrixR_.is_zero_cell(iiDeath, _get_row_id_from_position(columnIndex)))) {
+      !(_matrix()->reducedMatrixR_.is_zero_entry(iiDeath, _get_row_id_from_position(columnIndex)))) {
     if (iDeath < iiDeath) {
       _swap_at_index(columnIndex);
       _add_to(iDeath, iiDeath);
@@ -408,7 +408,7 @@ inline bool RU_vine_swap<Master_matrix>::_positive_vine_swap(Index columnIndex)
   _swap_at_index(columnIndex);
 
   if (iDeath != static_cast<Pos_index>(-1) || iiDeath == static_cast<Pos_index>(-1) ||
-      _matrix()->reducedMatrixR_.is_zero_cell(iiDeath, _get_row_id_from_position(columnIndex + 1))) {
+      _matrix()->reducedMatrixR_.is_zero_entry(iiDeath, _get_row_id_from_position(columnIndex + 1))) {
     _positive_transpose(columnIndex);
     return true;
   }
@@ -437,7 +437,7 @@ inline bool RU_vine_swap<Master_matrix>::_negative_vine_swap(Index columnIndex)
 template <class Master_matrix>
 inline bool RU_vine_swap<Master_matrix>::_positive_negative_vine_swap(Index columnIndex) 
 {
-  _matrix()->mirrorMatrixU_.zero_cell(columnIndex, _get_row_id_from_position(columnIndex + 1));
+  _matrix()->mirrorMatrixU_.zero_entry(columnIndex, _get_row_id_from_position(columnIndex + 1));
 
   _swap_at_index(columnIndex);
   _positive_negative_transpose(columnIndex);

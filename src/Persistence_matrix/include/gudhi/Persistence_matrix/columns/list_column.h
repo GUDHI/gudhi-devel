@@ -26,7 +26,7 @@
 
 #include <boost/iterator/indirect_iterator.hpp>
 
-#include <gudhi/Persistence_matrix/allocators/cell_constructors.h>
+#include <gudhi/Persistence_matrix/allocators/entry_constructors.h>
 #include <gudhi/Persistence_matrix/columns/column_utilities.h>
 
 namespace Gudhi {
@@ -38,11 +38,11 @@ namespace persistence_matrix {
  *
  * @brief Column class following the @ref PersistenceMatrixColumn concept.
  *
- * Column based on a list structure. The cells are always ordered by row index and only non-zero values
+ * Column based on a list structure. The entries are always ordered by row index and only non-zero values
  * are stored uniquely in the underlying container.
  *
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
- * @tparam Cell_constructor Factory of @ref Cell classes.
+ * @tparam Entry_constructor Factory of @ref Entry classes.
  */
 template <class Master_matrix>
 class List_column : public Master_matrix::Row_access_option,
@@ -55,13 +55,13 @@ class List_column : public Master_matrix::Row_access_option,
   using ID_index = typename Master_matrix::ID_index;
   using Dimension = typename Master_matrix::Dimension;
   using Field_element = typename Master_matrix::Element;
-  using Cell = typename Master_matrix::Matrix_cell;
+  using Entry = typename Master_matrix::Matrix_entry;
   using Column_settings = typename Master_matrix::Column_settings;
 
  private:
   using Field_operators = typename Master_matrix::Field_operators;
-  using Column_support = std::list<Cell*>;
-  using Cell_constructor = typename Master_matrix::Cell_constructor;
+  using Column_support = std::list<Entry*>;
+  using Entry_constructor = typename Master_matrix::Entry_constructor;
 
  public:
   using iterator = boost::indirect_iterator<typename Column_support::iterator>;
@@ -116,20 +116,22 @@ class List_column : public Master_matrix::Row_access_option,
   reverse_iterator rend() noexcept;
   const_reverse_iterator rend() const noexcept;
 
-  template <class Cell_range>
-  List_column& operator+=(const Cell_range& column);
+  template <class Entry_range>
+  List_column& operator+=(const Entry_range& column);
   List_column& operator+=(List_column& column);
 
   List_column& operator*=(unsigned int v);
 
   // this = v * this + column
-  template <class Cell_range>
-  List_column& multiply_target_and_add(const Field_element& val, const Cell_range& column);
+  template <class Entry_range>
+  List_column& multiply_target_and_add(const Field_element& val, const Entry_range& column);
   List_column& multiply_target_and_add(const Field_element& val, List_column& column);
   // this = this + column * v
-  template <class Cell_range>
-  List_column& multiply_source_and_add(const Cell_range& column, const Field_element& val);
+  template <class Entry_range>
+  List_column& multiply_source_and_add(const Entry_range& column, const Field_element& val);
   List_column& multiply_source_and_add(List_column& column, const Field_element& val);
+
+  void push_back(const Entry& entry);
 
   friend bool operator==(const List_column& c1, const List_column& c2) {
     if (&c1 == &c2) return true;
@@ -177,7 +179,7 @@ class List_column : public Master_matrix::Row_access_option,
          static_cast<typename Master_matrix::Chain_column_option&>(col2));
     col1.column_.swap(col2.column_);
     std::swap(col1.operators_, col2.operators_);
-    std::swap(col1.cellPool_, col2.cellPool_);
+    std::swap(col1.entryPool_, col2.entryPool_);
   }
 
  private:
@@ -187,47 +189,47 @@ class List_column : public Master_matrix::Row_access_option,
 
   Column_support column_;
   Field_operators* operators_;
-  Cell_constructor* cellPool_;
+  Entry_constructor* entryPool_;
 
-  template <class Column, class Cell_iterator, typename F1, typename F2, typename F3, typename F4>
-  friend void _generic_merge_cell_to_column(Column& targetColumn,
-                                            Cell_iterator& itSource,
-                                            typename Column::Column_support::iterator& itTarget,
-                                            F1&& process_target,
-                                            F2&& process_source,
-                                            F3&& update_target1,
-                                            F4&& update_target2,
-                                            bool& pivotIsZeroed);
-  template <class Column, class Cell_range, typename F1, typename F2, typename F3, typename F4, typename F5>
-  friend bool _generic_add_to_column(const Cell_range& source,
+  template <class Column, class Entry_iterator, typename F1, typename F2, typename F3, typename F4>
+  friend void _generic_merge_entry_to_column(Column& targetColumn,
+                                             Entry_iterator& itSource,
+                                             typename Column::Column_support::iterator& itTarget,
+                                             F1&& process_target,
+                                             F2&& process_source,
+                                             F3&& update_target1,
+                                             F4&& update_target2,
+                                             bool& pivotIsZeroed);
+  template <class Column, class Entry_range, typename F1, typename F2, typename F3, typename F4, typename F5>
+  friend bool _generic_add_to_column(const Entry_range& source,
                                      Column& targetColumn,
                                      F1&& process_target,
                                      F2&& process_source,
                                      F3&& update_target1,
                                      F4&& update_target2,
                                      F5&& finish_target);
-  template <class Column, class Cell_range>
-  friend bool _add_to_column(const Cell_range& source, Column& targetColumn);
-  template <class Column, class Cell_range>
+  template <class Column, class Entry_range>
+  friend bool _add_to_column(const Entry_range& source, Column& targetColumn);
+  template <class Column, class Entry_range>
   friend bool _multiply_target_and_add_to_column(const typename Column::Field_element& val,
-                                                 const Cell_range& source,
+                                                 const Entry_range& source,
                                                  Column& targetColumn);
-  template <class Column, class Cell_range>
+  template <class Column, class Entry_range>
   friend bool _multiply_source_and_add_to_column(const typename Column::Field_element& val,
-                                                 const Cell_range& source,
+                                                 const Entry_range& source,
                                                  Column& targetColumn);
 
-  void _delete_cell(typename Column_support::iterator& it);
-  Cell* _insert_cell(const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position);
-  void _insert_cell(ID_index rowIndex, const typename Column_support::iterator& position);
-  void _update_cell(const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position);
-  void _update_cell(ID_index rowIndex, const typename Column_support::iterator& position);
-  template <class Cell_range>
-  bool _add(const Cell_range& column);
-  template <class Cell_range>
-  bool _multiply_target_and_add(const Field_element& val, const Cell_range& column);
-  template <class Cell_range>
-  bool _multiply_source_and_add(const Cell_range& column, const Field_element& val);
+  void _delete_entry(typename Column_support::iterator& it);
+  Entry* _insert_entry(const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position);
+  void _insert_entry(ID_index rowIndex, const typename Column_support::iterator& position);
+  void _update_entry(const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position);
+  void _update_entry(ID_index rowIndex, const typename Column_support::iterator& position);
+  template <class Entry_range>
+  bool _add(const Entry_range& column);
+  template <class Entry_range>
+  bool _multiply_target_and_add(const Field_element& val, const Entry_range& column);
+  template <class Entry_range>
+  bool _multiply_source_and_add(const Entry_range& column, const Field_element& val);
 };
 
 template <class Master_matrix>
@@ -236,9 +238,9 @@ inline List_column<Master_matrix>::List_column(Column_settings* colSettings)
       Dim_opt(),
       Chain_opt(),
       operators_(nullptr),
-      cellPool_(colSettings == nullptr ? nullptr : &(colSettings->cellConstructor))
+      entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor))
 {
-  if (operators_ == nullptr && cellPool_ == nullptr) return;  // to allow default constructor which gives a dummy column
+  if (operators_ == nullptr && entryPool_ == nullptr) return;  // to allow default constructor which gives a dummy column
   if constexpr (!Master_matrix::Option_list::is_z2) {
     operators_ = &(colSettings->operators);
   }
@@ -252,7 +254,7 @@ inline List_column<Master_matrix>::List_column(const Container& nonZeroRowIndice
       Chain_opt(),
       column_(nonZeroRowIndices.size()),
       operators_(nullptr),
-      cellPool_(&(colSettings->cellConstructor))
+      entryPool_(&(colSettings->entryConstructor))
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
@@ -260,12 +262,12 @@ inline List_column<Master_matrix>::List_column(const Container& nonZeroRowIndice
   auto it = column_.begin();
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (ID_index id : nonZeroRowIndices) {
-      _update_cell(id, it++);
+      _update_entry(id, it++);
     }
   } else {
     operators_ = &(colSettings->operators);
     for (const auto& p : nonZeroRowIndices) {
-      _update_cell(operators_->get_value(p.second), p.first, it++);
+      _update_entry(operators_->get_value(p.second), p.first, it++);
     }
   }
 }
@@ -287,7 +289,7 @@ inline List_column<Master_matrix>::List_column(Index columnIndex,
       }()),
       column_(nonZeroRowIndices.size()),
       operators_(nullptr),
-      cellPool_(&(colSettings->cellConstructor))
+      entryPool_(&(colSettings->entryConstructor))
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
@@ -295,12 +297,12 @@ inline List_column<Master_matrix>::List_column(Index columnIndex,
   auto it = column_.begin();
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (ID_index id : nonZeroRowIndices) {
-      _update_cell(id, it++);
+      _update_entry(id, it++);
     }
   } else {
     operators_ = &(colSettings->operators);
     for (const auto& p : nonZeroRowIndices) {
-      _update_cell(operators_->get_value(p.second), p.first, it++);
+      _update_entry(operators_->get_value(p.second), p.first, it++);
     }
   }
 }
@@ -321,17 +323,17 @@ inline List_column<Master_matrix>::List_column(const Container& nonZeroRowIndice
       }()),
       column_(nonZeroRowIndices.size()),
       operators_(nullptr),
-      cellPool_(&(colSettings->cellConstructor))
+      entryPool_(&(colSettings->entryConstructor))
 {
   auto it = column_.begin();
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (ID_index id : nonZeroRowIndices) {
-      _update_cell(id, it++);
+      _update_entry(id, it++);
     }
   } else {
     operators_ = &(colSettings->operators);
     for (const auto& p : nonZeroRowIndices) {
-      _update_cell(operators_->get_value(p.second), p.first, it++);
+      _update_entry(operators_->get_value(p.second), p.first, it++);
     }
   }
 }
@@ -354,17 +356,17 @@ inline List_column<Master_matrix>::List_column(Index columnIndex,
       }()),
       column_(nonZeroRowIndices.size()),
       operators_(nullptr),
-      cellPool_(&(colSettings->cellConstructor))
+      entryPool_(&(colSettings->entryConstructor))
 {
   auto it = column_.begin();
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (ID_index id : nonZeroRowIndices) {
-      _update_cell(id, it++);
+      _update_entry(id, it++);
     }
   } else {
     operators_ = &(colSettings->operators);
     for (const auto& p : nonZeroRowIndices) {
-      _update_cell(operators_->get_value(p.second), p.first, it++);
+      _update_entry(operators_->get_value(p.second), p.first, it++);
     }
   }
 }
@@ -376,7 +378,7 @@ inline List_column<Master_matrix>::List_column(const List_column& column, Column
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.size()),
       operators_(colSettings == nullptr ? column.operators_ : nullptr),
-      cellPool_(colSettings == nullptr ? column.cellPool_ : &(colSettings->cellConstructor))
+      entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   static_assert(!Master_matrix::Option_list::has_row_access,
                 "Simple copy constructor not available when row access option enabled. Please specify the new column "
@@ -387,11 +389,11 @@ inline List_column<Master_matrix>::List_column(const List_column& column, Column
   }
 
   auto it = column_.begin();
-  for (const Cell* cell : column.column_) {
+  for (const Entry* entry : column.column_) {
     if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_cell(cell->get_row_index(), it++);
+      _update_entry(entry->get_row_index(), it++);
     } else {
-      _update_cell(cell->get_element(), cell->get_row_index(), it++);
+      _update_entry(entry->get_element(), entry->get_row_index(), it++);
     }
   }
 }
@@ -407,18 +409,18 @@ inline List_column<Master_matrix>::List_column(const List_column& column,
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.size()),
       operators_(colSettings == nullptr ? column.operators_ : nullptr),
-      cellPool_(colSettings == nullptr ? column.cellPool_ : &(colSettings->cellConstructor))
+      entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   if constexpr (!Master_matrix::Option_list::is_z2) {
     if (colSettings != nullptr) operators_ = &(colSettings->operators);
   }
 
   auto it = column_.begin();
-  for (const Cell* cell : column.column_) {
+  for (const Entry* entry : column.column_) {
     if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_cell(cell->get_row_index(), it++);
+      _update_entry(entry->get_row_index(), it++);
     } else {
-      _update_cell(cell->get_element(), cell->get_row_index(), it++);
+      _update_entry(entry->get_element(), entry->get_row_index(), it++);
     }
   }
 }
@@ -430,14 +432,14 @@ inline List_column<Master_matrix>::List_column(List_column&& column) noexcept
       Chain_opt(std::move(static_cast<Chain_opt&>(column))),
       column_(std::move(column.column_)),
       operators_(std::exchange(column.operators_, nullptr)),
-      cellPool_(std::exchange(column.cellPool_, nullptr))
+      entryPool_(std::exchange(column.entryPool_, nullptr))
 {}
 
 template <class Master_matrix>
 inline List_column<Master_matrix>::~List_column() {
-  for (auto* cell : column_) {
-    if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(cell);
-    cellPool_->destroy(cell);
+  for (auto* entry : column_) {
+    if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(entry);
+    entryPool_->destroy(entry);
   }
 }
 
@@ -468,8 +470,8 @@ inline bool List_column<Master_matrix>::is_non_zero(ID_index rowIndex) const
   // could be changed to dichotomic search as column is ordered by row index,
   // but I am not sure if it is really worth it as there is no random access
   // and the columns should not be that long anyway.
-  for (const Cell* cell : column_)
-    if (cell->get_row_index() == rowIndex) return true;
+  for (const Entry* entry : column_)
+    if (entry->get_row_index() == rowIndex) return true;
 
   return false;
 }
@@ -494,25 +496,25 @@ inline void List_column<Master_matrix>::reorder(const Row_index_map& valueMap, [
                 "Method not available for chain columns.");
 
   for (auto it = column_.begin(); it != column_.end(); ++it) {
-    Cell* cell = *it;
+    Entry* entry = *it;
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      RA_opt::unlink(cell);
-      if (columnIndex != static_cast<Index>(-1)) cell->set_column_index(columnIndex);
+      RA_opt::unlink(entry);
+      if (columnIndex != static_cast<Index>(-1)) entry->set_column_index(columnIndex);
     }
-    cell->set_row_index(valueMap.at(cell->get_row_index()));
+    entry->set_row_index(valueMap.at(entry->get_row_index()));
     if constexpr (Master_matrix::Option_list::has_intrusive_rows && Master_matrix::Option_list::has_row_access)
-      RA_opt::insert_cell(cell->get_row_index(), cell);
+      RA_opt::insert_entry(entry->get_row_index(), entry);
   }
 
-  // all cells have to be deleted first, to avoid problem with insertion when row is a set
+  // all entries have to be deleted first, to avoid problem with insertion when row is a set
   if constexpr (!Master_matrix::Option_list::has_intrusive_rows && Master_matrix::Option_list::has_row_access) {
     for (auto it = column_.begin(); it != column_.end(); ++it) {
-      Cell* cell = *it;
-      RA_opt::insert_cell(cell->get_row_index(), cell);
+      Entry* entry = *it;
+      RA_opt::insert_entry(entry->get_row_index(), entry);
     }
   }
 
-  column_.sort([](const Cell* c1, const Cell* c2) { return *c1 < *c2; });
+  column_.sort([](const Entry* c1, const Entry* c2) { return *c1 < *c2; });
 }
 
 template <class Master_matrix>
@@ -521,9 +523,9 @@ inline void List_column<Master_matrix>::clear()
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns as a base element should not be empty.");
 
-  for (auto* cell : column_) {
-    if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(cell);
-    cellPool_->destroy(cell);
+  for (auto* entry : column_) {
+    if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(entry);
+    entryPool_->destroy(entry);
   }
 
   column_.clear();
@@ -537,7 +539,7 @@ inline void List_column<Master_matrix>::clear(ID_index rowIndex)
 
   auto it = column_.begin();
   while (it != column_.end() && (*it)->get_row_index() != rowIndex) it++;
-  if (it != column_.end()) _delete_cell(it);
+  if (it != column_.end()) _delete_entry(it);
 }
 
 template <class Master_matrix>
@@ -568,8 +570,8 @@ inline typename List_column<Master_matrix>::Field_element List_column<Master_mat
       return column_.back()->get_element();
     } else {
       if (Chain_opt::get_pivot() == static_cast<ID_index>(-1)) return Field_element();
-      for (const Cell* cell : column_) {
-        if (cell->get_row_index() == Chain_opt::get_pivot()) return cell->get_element();
+      for (const Entry* entry : column_) {
+        if (entry->get_row_index() == Chain_opt::get_pivot()) return entry->get_element();
       }
       return Field_element();  // should never happen if chain column is used properly
     }
@@ -625,10 +627,10 @@ inline typename List_column<Master_matrix>::const_reverse_iterator List_column<M
 }
 
 template <class Master_matrix>
-template <class Cell_range>
-inline List_column<Master_matrix>& List_column<Master_matrix>::operator+=(const Cell_range& column)
+template <class Entry_range>
+inline List_column<Master_matrix>& List_column<Master_matrix>::operator+=(const Entry_range& column)
 {
-  static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, List_column>),
+  static_assert((!Master_matrix::isNonBasic || std::is_same_v<Entry_range, List_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
                 "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
@@ -680,9 +682,9 @@ inline List_column<Master_matrix>& List_column<Master_matrix>::operator*=(unsign
 
     if (val == 1u) return *this;
 
-    for (Cell* cell : column_) {
-      operators_->multiply_inplace(cell->get_element(), val);
-      if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_cell(*cell);
+    for (Entry* entry : column_) {
+      operators_->multiply_inplace(entry->get_element(), val);
+      if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(*entry);
     }
   }
 
@@ -690,11 +692,11 @@ inline List_column<Master_matrix>& List_column<Master_matrix>::operator*=(unsign
 }
 
 template <class Master_matrix>
-template <class Cell_range>
+template <class Entry_range>
 inline List_column<Master_matrix>& List_column<Master_matrix>::multiply_target_and_add(const Field_element& val,
-                                                                                       const Cell_range& column)
+                                                                                       const Entry_range& column)
 {
-  static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, List_column>),
+  static_assert((!Master_matrix::isNonBasic || std::is_same_v<Entry_range, List_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
                 "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
@@ -752,11 +754,11 @@ inline List_column<Master_matrix>& List_column<Master_matrix>::multiply_target_a
 }
 
 template <class Master_matrix>
-template <class Cell_range>
-inline List_column<Master_matrix>& List_column<Master_matrix>::multiply_source_and_add(const Cell_range& column,
+template <class Entry_range>
+inline List_column<Master_matrix>& List_column<Master_matrix>::multiply_source_and_add(const Entry_range& column,
                                                                                        const Field_element& val)
 {
-  static_assert((!Master_matrix::isNonBasic || std::is_same_v<Cell_range, List_column>),
+  static_assert((!Master_matrix::isNonBasic || std::is_same_v<Entry_range, List_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
                 "base element.");  // could be removed, if we give the responsibility to the user.
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
@@ -806,6 +808,20 @@ inline List_column<Master_matrix>& List_column<Master_matrix>::multiply_source_a
 }
 
 template <class Master_matrix>
+inline void List_column<Master_matrix>::push_back(const Entry& entry)
+{
+  static_assert(Master_matrix::Option_list::is_of_boundary_type, "`push_back` is not available for Chain matrices.");
+
+  GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
+
+  if constexpr (Master_matrix::Option_list::is_z2) {
+    _insert_entry(entry.get_row_index(), column_.end());
+  } else {
+    _insert_entry(entry.get_element(), entry.get_row_index(), column_.end());
+  }
+}
+
+template <class Master_matrix>
 inline List_column<Master_matrix>& List_column<Master_matrix>::operator=(const List_column& other)
 {
   static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
@@ -813,8 +829,8 @@ inline List_column<Master_matrix>& List_column<Master_matrix>::operator=(const L
   Dim_opt::operator=(other);
   Chain_opt::operator=(other);
 
-  auto tmpPool = cellPool_;
-  cellPool_ = other.cellPool_;
+  auto tmpPool = entryPool_;
+  entryPool_ = other.entryPool_;
 
   while (column_.size() > other.column_.size()) {
     if (column_.back() != nullptr) {
@@ -826,15 +842,15 @@ inline List_column<Master_matrix>& List_column<Master_matrix>::operator=(const L
 
   column_.resize(other.column_.size(), nullptr);
   auto it = column_.begin();
-  for (const Cell* cell : other.column_) {
+  for (const Entry* entry : other.column_) {
     if (*it != nullptr) {
       if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(*it);
       tmpPool->destroy(*it);
     }
     if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_cell(cell->get_row_index(), it++);
+      _update_entry(entry->get_row_index(), it++);
     } else {
-      _update_cell(cell->get_element(), cell->get_row_index(), it++);
+      _update_entry(entry->get_element(), entry->get_row_index(), it++);
     }
   }
 
@@ -844,85 +860,85 @@ inline List_column<Master_matrix>& List_column<Master_matrix>::operator=(const L
 }
 
 template <class Master_matrix>
-inline void List_column<Master_matrix>::_delete_cell(typename Column_support::iterator& it)
+inline void List_column<Master_matrix>::_delete_entry(typename Column_support::iterator& it)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(*it);
-  cellPool_->destroy(*it);
+  entryPool_->destroy(*it);
   it = column_.erase(it);
 }
 
 template <class Master_matrix>
-inline typename List_column<Master_matrix>::Cell* List_column<Master_matrix>::_insert_cell(
+inline typename List_column<Master_matrix>::Entry* List_column<Master_matrix>::_insert_entry(
     const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* newCell = cellPool_->construct(RA_opt::columnIndex_, rowIndex);
-    newCell->set_element(value);
-    column_.insert(position, newCell);
-    RA_opt::insert_cell(rowIndex, newCell);
-    return newCell;
+    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    newEntry->set_element(value);
+    column_.insert(position, newEntry);
+    RA_opt::insert_entry(rowIndex, newEntry);
+    return newEntry;
   } else {
-    Cell* newCell = cellPool_->construct(rowIndex);
-    newCell->set_element(value);
-    column_.insert(position, newCell);
-    return newCell;
+    Entry* newEntry = entryPool_->construct(rowIndex);
+    newEntry->set_element(value);
+    column_.insert(position, newEntry);
+    return newEntry;
   }
 }
 
 template <class Master_matrix>
-inline void List_column<Master_matrix>::_insert_cell(ID_index rowIndex,
-                                                     const typename Column_support::iterator& position)
+inline void List_column<Master_matrix>::_insert_entry(ID_index rowIndex,
+                                                      const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Cell* newCell = cellPool_->construct(RA_opt::columnIndex_, rowIndex);
-    column_.insert(position, newCell);
-    RA_opt::insert_cell(rowIndex, newCell);
+    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    column_.insert(position, newEntry);
+    RA_opt::insert_entry(rowIndex, newEntry);
   } else {
-    Cell* newCell = cellPool_->construct(rowIndex);
-    column_.insert(position, newCell);
+    Entry* newEntry = entryPool_->construct(rowIndex);
+    column_.insert(position, newEntry);
   }
 }
 
 template <class Master_matrix>
-inline void List_column<Master_matrix>::_update_cell(const Field_element& value,
-                                                     ID_index rowIndex,
-                                                     const typename Column_support::iterator& position)
+inline void List_column<Master_matrix>::_update_entry(const Field_element& value,
+                                                      ID_index rowIndex,
+                                                      const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    *position = cellPool_->construct(RA_opt::columnIndex_, rowIndex);
+    *position = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
     (*position)->set_element(value);
-    RA_opt::insert_cell(rowIndex, *position);
+    RA_opt::insert_entry(rowIndex, *position);
   } else {
-    *position = cellPool_->construct(rowIndex);
+    *position = entryPool_->construct(rowIndex);
     (*position)->set_element(value);
   }
 }
 
 template <class Master_matrix>
-inline void List_column<Master_matrix>::_update_cell(ID_index rowIndex,
-                                                     const typename Column_support::iterator& position)
+inline void List_column<Master_matrix>::_update_entry(ID_index rowIndex,
+                                                      const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    *position = cellPool_->construct(RA_opt::columnIndex_, rowIndex);
-    RA_opt::insert_cell(rowIndex, *position);
+    *position = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    RA_opt::insert_entry(rowIndex, *position);
   } else {
-    *position = cellPool_->construct(rowIndex);
+    *position = entryPool_->construct(rowIndex);
   }
 }
 
 template <class Master_matrix>
-template <class Cell_range>
-inline bool List_column<Master_matrix>::_add(const Cell_range& column)
+template <class Entry_range>
+inline bool List_column<Master_matrix>::_add(const Entry_range& column)
 {
   if (column.begin() == column.end()) return false;
   if (column_.empty()) {  // chain should never enter here.
     column_.resize(column.size());
     auto it = column_.begin();
-    for (const Cell& cell : column) {
+    for (const Entry& entry : column) {
       if constexpr (Master_matrix::Option_list::is_z2) {
-        _update_cell(cell.get_row_index(), it++);
+        _update_entry(entry.get_row_index(), it++);
       } else {
-        _update_cell(cell.get_element(), cell.get_row_index(), it++);
+        _update_entry(entry.get_element(), entry.get_row_index(), it++);
       }
     }
     return true;
@@ -932,15 +948,15 @@ inline bool List_column<Master_matrix>::_add(const Cell_range& column)
 }
 
 template <class Master_matrix>
-template <class Cell_range>
-inline bool List_column<Master_matrix>::_multiply_target_and_add(const Field_element& val, const Cell_range& column)
+template <class Entry_range>
+inline bool List_column<Master_matrix>::_multiply_target_and_add(const Field_element& val, const Entry_range& column)
 {
   return _multiply_target_and_add_to_column(val, column, *this);
 }
 
 template <class Master_matrix>
-template <class Cell_range>
-inline bool List_column<Master_matrix>::_multiply_source_and_add(const Cell_range& column, const Field_element& val)
+template <class Entry_range>
+inline bool List_column<Master_matrix>::_multiply_source_and_add(const Entry_range& column, const Field_element& val)
 {
   return _multiply_source_and_add_to_column(val, column, *this);
 }
@@ -954,7 +970,7 @@ inline bool List_column<Master_matrix>::_multiply_source_and_add(const Cell_rang
  * @brief Hash method for @ref Gudhi::persistence_matrix::List_column.
  *
  * @tparam Master_matrix Template parameter of @ref Gudhi::persistence_matrix::List_column.
- * @tparam Cell_constructor Template parameter of @ref Gudhi::persistence_matrix::List_column.
+ * @tparam Entry_constructor Template parameter of @ref Gudhi::persistence_matrix::List_column.
  */
 template <class Master_matrix>
 struct std::hash<Gudhi::persistence_matrix::List_column<Master_matrix> > {
