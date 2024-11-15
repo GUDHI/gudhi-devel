@@ -9,6 +9,7 @@ environment:
 
 image: macos-sonoma
 stack: python 3.9
+
 install:
   - sh: |
       git submodule update --init
