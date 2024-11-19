@@ -1,12 +1,5 @@
 version: 1.0.{build}
 
-environment:
-  cmakeBuildType: Release
-  gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON
-  # On this VM, 2 versions of python are installed. Default Python_FIND_FRAMEWORK is FIRST, which means asks frameworks first
-  # LAST means consult frameworks in last resort, use the PATH first
-  extraCmakeOptions: -DPython_FIND_FRAMEWORK=LAST
-
 image: macos-sonoma
 stack: python 3.9
 
@@ -24,7 +17,7 @@ build_script:
       mkdir build
       cd build
       which python
-      cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(gudhiCmakeOptions) ..
+      cmake -DCMAKE_BUILD_TYPE:STRING=Release -GNinja -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON ..
       ninja
       ninja doxygen
       ctest --output-on-failure
