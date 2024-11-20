@@ -4,7 +4,7 @@ jobs:
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
     pool:
-      vmImage: macOS-latest
+      vmImage: macOS-13
     variables:
       pythonVersion: "3.9"
       cmakeBuildType: Release
