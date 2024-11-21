@@ -81,10 +81,10 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
       FT r = k.squared_distance_d_object()(m, pu);
       if (exact) CGAL::exact(r);
       complex.assign_key(sh, cache_.size());
-      Filtration_value filt{cvt(r)};
+      Filtration_value filt{max(cvt(r), Filtration_value(0))};
       if constexpr (square_root_filtrations)
         filt = sqrt(filt);
-      complex.assign_filtration(sh, max(filt, Filtration_value(0)));
+      complex.assign_filtration(sh, filt);
       cache_.emplace_back(std::move(m), std::move(r));
     } else if (dim > ambient_dim) {
       // The sphere is always defined by at most d+1 points
@@ -121,7 +121,7 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
         //   int d2 = dim * dim;
         //   Filtration_value max_sanity = maxf * d2 / (d2 - 1);
         // and use min(max_sanity, ...), which would limit how bad numerical errors can be.
-        Filtration_value filt{cvt(r)};
+        Filtration_value filt{max(cvt(r), Filtration_value(0))};
         if constexpr (square_root_filtrations)
           filt = sqrt(filt);
         // maxf = filt except for rounding errors
