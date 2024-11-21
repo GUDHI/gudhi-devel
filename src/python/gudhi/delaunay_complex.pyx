@@ -19,7 +19,8 @@ from libcpp.string cimport string
 from libcpp cimport bool
 from libc.stdint cimport intptr_t
 import warnings
-from typing import Literal, Optional, Iterable
+from typing import Literal, Optional
+from collections.abc import Iterable
 
 from gudhi.simplex_tree cimport *
 from gudhi.simplex_tree import SimplexTree
