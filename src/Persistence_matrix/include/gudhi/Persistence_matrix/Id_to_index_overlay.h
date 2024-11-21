@@ -41,25 +41,25 @@ template <class Underlying_matrix, class Master_matrix>
 class Id_to_index_overlay 
 {
  public:
-  using Index = typename Master_matrix::Index;                       /**< @ref MatIdx index type. */
-  using ID_index = typename Master_matrix::ID_index;                 /**< @ref IDIdx index type. */
-  using Pos_index = typename Master_matrix::Pos_index;               /**< @ref PosIdx index type. */
-  using Dimension = typename Master_matrix::Dimension;               /**< Dimension value type. */
+  using Index = typename Master_matrix::Index;                          /**< @ref MatIdx index type. */
+  using ID_index = typename Master_matrix::ID_index;                    /**< @ref IDIdx index type. */
+  using Pos_index = typename Master_matrix::Pos_index;                  /**< @ref PosIdx index type. */
+  using Dimension = typename Master_matrix::Dimension;                  /**< Dimension value type. */
   /**
    * @brief Field operators class. Necessary only if @ref PersistenceMatrixOptions::is_z2 is false.
    */
   using Field_operators = typename Master_matrix::Field_operators;
-  using Field_element = typename Master_matrix::Element;             /**< Type of an field element. */
-  using Boundary = typename Master_matrix::Boundary;                 /**< Type of an input column. */
-  using Column = typename Master_matrix::Column;                     /**< Column type. */
-  using Row = typename Master_matrix::Row;                           /**< Row type,
-                                                                          only necessary with row access option. */
-  using Bar = typename Master_matrix::Bar;                           /**< Bar type. */
-  using Barcode = typename Master_matrix::Barcode;                   /**< Barcode type. */
-  using Cycle = typename Master_matrix::Cycle;                       /**< Cycle type. */
-  using Cell_constructor = typename Master_matrix::Cell_constructor; /**< Factory of @ref Cell classes. */
-  using Column_settings = typename Master_matrix::Column_settings;   /**< Structure giving access to the columns to
-                                                                          necessary external classes. */
+  using Field_element = typename Master_matrix::Element;                /**< Type of an field element. */
+  using Boundary = typename Master_matrix::Boundary;                    /**< Type of an input column. */
+  using Column = typename Master_matrix::Column;                        /**< Column type. */
+  using Row = typename Master_matrix::Row;                              /**< Row type,
+                                                                             only necessary with row access option. */
+  using Bar = typename Master_matrix::Bar;                              /**< Bar type. */
+  using Barcode = typename Master_matrix::Barcode;                      /**< Barcode type. */
+  using Cycle = typename Master_matrix::Cycle;                          /**< Cycle type. */
+  using Entry_constructor = typename Master_matrix::Entry_constructor;  /**< Factory of @ref Entry classes. */
+  using Column_settings = typename Master_matrix::Column_settings;      /**< Structure giving access to the columns to
+                                                                             necessary external classes. */
 
   /**
    * @brief Constructs an empty matrix.
@@ -69,11 +69,12 @@ class Id_to_index_overlay
    */
   Id_to_index_overlay(Column_settings* colSettings);
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Cell_representative. Each range corresponds to a
-   * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
-   * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0.
+   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Entry_representative. Each range corresponds
+   * to a column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by
+   * increasing IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting
+   * with 0.
    * 
-   * @tparam Boundary_range Range type for @ref Matrix::Cell_representative ranges.
+   * @tparam Boundary_range Range type for @ref Matrix::Entry_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
@@ -127,9 +128,9 @@ class Id_to_index_overlay
                       const DeathComparatorFunction& deathComparator);
   /**
    * @brief Only available for @ref chainmatrix "chain matrices". 
-   * Constructs a new matrix from the given ranges of @ref Matrix::Cell_representative. Each range corresponds to a column 
-   * (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing IDs.
-   * The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0. 
+   * Constructs a new matrix from the given ranges of @ref Matrix::Entry_representative. Each range corresponds to a
+   * column (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
+   * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0. 
    *
    * @warning If @ref PersistenceMatrixOptions::has_vine_update is false, the comparators are not used.
    * And if @ref PersistenceMatrixOptions::has_vine_update is true, but
@@ -138,7 +139,7 @@ class Id_to_index_overlay
    * 
    * @tparam BirthComparatorFunction Type of the birth comparator: (@ref Pos_index, @ref Pos_index) -> bool
    * @tparam DeathComparatorFunction Type of the death comparator: (@ref Pos_index, @ref Pos_index) -> bool
-   * @tparam Boundary_range  Range type for @ref Matrix::Cell_representative ranges.
+   * @tparam Boundary_range  Range type for @ref Matrix::Entry_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
@@ -195,7 +196,7 @@ class Id_to_index_overlay
                       const BirthComparatorFunction& birthComparator, 
                       const DeathComparatorFunction& deathComparator);
   /**
-   * @brief Copy constructor. If @p operators or @p cellConstructor is not a null pointer, its value is kept
+   * @brief Copy constructor. If @p operators or @p entryConstructor is not a null pointer, its value is kept
    * instead of the one in the copied matrix.
    * 
    * @param matrixToCopy Matrix to copy.
@@ -219,13 +220,13 @@ class Id_to_index_overlay
   /**
    * @brief Inserts at the end of the matrix a new ordered column corresponding to the given boundary. 
    * This means that it is assumed that this method is called on boundaries in the order of the filtration. 
-   * It also assumes that the faces in the given boundary are identified by their relative position in the filtration, 
+   * It also assumes that the cells in the given boundary are identified by their relative position in the filtration, 
    * starting at 0. If it is not the case, use the other
    * @ref insert_boundary(ID_index, const Boundary_range&, Dimension) "insert_boundary" instead by indicating the
-   * face ID used in the boundaries when the face is inserted.
+   * cell ID used in the boundaries when the cell is inserted.
    *
    * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
-   * a more general cell complex. This includes cubical complexes or Morse complexes for example.
+   * a more general entry complex. This includes cubical complexes or Morse complexes for example.
    *
    * The content of the new column will vary depending on the underlying @ref mp_matrices "type of the matrix":
    * - If it is a boundary type matrix and only \f$ R \f$ is stored, the boundary is just copied. The column will only 
@@ -237,47 +238,49 @@ class Id_to_index_overlay
    *   `IDIdx + linear combination of older column IDIdxs`, where the combination is deduced while reducing the 
    *   given boundary. If the barcode is stored, it will also be updated.
    * 
-   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
    * @param boundary Boundary generating the new column. The content should be ordered by ID.
-   * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
   void insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
   /**
-   * @brief It does the same as the other version, but allows the boundary faces to be identified without restrictions
+   * @brief It does the same as the other version, but allows the boundary cells to be identified without restrictions
    * except that all IDs have to be strictly increasing in the order of filtration. Note that you should avoid then
    * to use the other insertion method to avoid overwriting IDs.
    *
-   * As a face has to be inserted before one of its cofaces in a valid filtration (recall that it is assumed that
-   * the faces are inserted by order of filtration), it is sufficient to indicate the ID of the face being inserted.
+   * As a cell has to be inserted before one of its cofaces in a valid filtration (recall that it is assumed that
+   * the cells are inserted by order of filtration), it is sufficient to indicate the ID of the cell being inserted.
    * 
-   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
-   * @param faceIndex @ref IDIdx index to use to identify the new face.
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param cellIndex @ref IDIdx index to use to identify the new cell.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the 
-   * @p faceIndex values of precedent calls of the method for the corresponding faces and should be ordered in 
+   * @p cellIndex values of precedent calls of the method for the corresponding cells and should be ordered in 
    * increasing order.
-   * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_boundary(ID_index faceIndex, const Boundary_range& boundary, Dimension dim = -1);
+  void insert_boundary(ID_index cellIndex, const Boundary_range& boundary, Dimension dim = -1);
   /**
    * @brief Returns the column at the given @ref IDIdx index. 
    * For @ref boundarymatrix "RU matrices", the returned column is from \f$ R \f$.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
    * 
-   * @param faceID @ref IDIdx index of the column to return.
+   * @param cellID @ref IDIdx index of the column to return.
    * @return Reference to the column.
    */
-  Column& get_column(ID_index faceID);
+  Column& get_column(ID_index cellID);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_row_access is true.
    * Returns the row at the given @ref rowindex "row index".
    * For @ref boundarymatrix "RU matrices", the returned row is from \f$ R \f$.
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    *
-   * @warning The @ref Cell_column_index::get_column_index "get_column_index" method of the row cells returns the
+   * @warning The @ref Entry_column_index::get_column_index "get_column_index" method of the row entries returns the
    * original @ref PosIdx indices (before any swaps) for @ref boundarymatrix "boundary matrices" and
    * @ref MatIdx indices for @ref chainmatrix "chain matrices".
    * 
@@ -301,11 +304,11 @@ class Id_to_index_overlay
    *   @ref PersistenceMatrixOptions::has_removable_rows are true.
    *   Assumes that the row is empty and removes it. 
    *
-   * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row cells are not
+   * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row entries are not
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
-   * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
+   * the column entries are destroyed later. The row access is just meant as a "read only" access to the rows and the
    * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
-   * dictionaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be
+   * dictionaries. This allows to avoid testing the emptiness of a row at each column entry removal, what can be
    * quite frequent. 
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row to remove.
@@ -316,10 +319,10 @@ class Id_to_index_overlay
    * @ref PersistenceMatrixOptions::has_removable_columns and @ref PersistenceMatrixOptions::has_vine_update are true.
    * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_map_column_container and
    * @ref PersistenceMatrixOptions::has_column_pairings also need to be true.
-   * Assumes that the face is maximal in the current complex and removes it such that the matrix remains consistent
+   * Assumes that the cell is maximal in the current complex and removes it such that the matrix remains consistent
    * (i.e., RU is still an upper triangular decomposition of the @ref boundarymatrix "boundary matrix" and chain is
    * still a compatible bases of the chain complex in the sense of @cite zigzag).
-   * The maximality of the face is not verified.
+   * The maximality of the cell is not verified.
    * Also updates the barcode if it was computed.
    *
    * For @ref chainmatrix "chain matrices", using the other version of the method could perform better depending on
@@ -328,51 +331,51 @@ class Id_to_index_overlay
    *
    * See also @ref remove_last.
    * 
-   * @param faceID @ref IDIdx index of the face to remove.
+   * @param cellID @ref IDIdx index of the cell to remove.
    */
-  void remove_maximal_face(ID_index faceID);
+  void remove_maximal_cell(ID_index cellID);
   /**
    * @brief Only available for @ref chainmatrix "chain matrices" and if
    * @ref PersistenceMatrixOptions::has_removable_columns, @ref PersistenceMatrixOptions::has_vine_update
    * and @ref PersistenceMatrixOptions::has_map_column_container are true.
-   * Assumes that the face is maximal in the current complex and removes it such that the matrix remains consistent
+   * Assumes that the cell is maximal in the current complex and removes it such that the matrix remains consistent
    * (i.e., it is still a compatible bases of the chain complex in the sense of @cite zigzag).
-   * The maximality of the face is not verified.
+   * The maximality of the cell is not verified.
    * Also updates the barcode if it was computed.
    *
-   * To maintain the compatibility, vine swaps are done to move the face up to the end of the filtration. Once at 
+   * To maintain the compatibility, vine swaps are done to move the cell up to the end of the filtration. Once at 
    * the end, the removal is trivial. But for @ref chainmatrix "chain matrices", swaps do not actually swap the position
-   * of the column every time, so the faces appearing after @p faceIndex in the filtration have to be searched first
-   * within the matrix. If the user has an easy access to the @ref IDIdx of the faces in the order of filtration,
+   * of the column every time, so the cells appearing after @p cellIndex in the filtration have to be searched first
+   * within the matrix. If the user has an easy access to the @ref IDIdx of the cells in the order of filtration,
    * passing them by argument with @p columnsToSwap allows to skip a linear search process. Typically, if the user knows
-   * that the face he wants to remove is already the last face of the filtration, calling
-   * @ref remove_maximal_face(ID_index, const std::vector<ID_index>&) "remove_maximal_face(faceID, {})"
+   * that the cell he wants to remove is already the last cell of the filtration, calling
+   * @ref remove_maximal_cell(ID_index, const std::vector<ID_index>&) "remove_maximal_cell(cellID, {})"
    * will be faster than @ref remove_last().
    *
    * See also @ref remove_last.
    * 
-   * @param faceID @ref IDIdx index of the face to remove.
-   * @param columnsToSwap Vector of @ref IDIdx indices of the faces coming after @p faceID in the filtration.
+   * @param cellID @ref IDIdx index of the cell to remove.
+   * @param columnsToSwap Vector of @ref IDIdx indices of the cells coming after @p cellID in the filtration.
    */
-  void remove_maximal_face(ID_index faceID, const std::vector<ID_index>& columnsToSwap);
+  void remove_maximal_cell(ID_index cellID, const std::vector<ID_index>& columnsToSwap);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns is true. Additionally, if the
    * matrix is a @ref chainmatrix "chain matrix", either @ref PersistenceMatrixOptions::has_map_column_container has to
    * be true or @ref PersistenceMatrixOptions::has_vine_update has to be false.
-   * Removes the last face in the filtration from the matrix and updates the barcode if it is stored.
+   * Removes the last cell in the filtration from the matrix and updates the barcode if it is stored.
    * 
-   * See also @ref remove_maximal_face.
+   * See also @ref remove_maximal_cell.
    *
-   * For @ref chainmatrix "chain matrices", if @ref PersistenceMatrixOptions::has_vine_update is true, the last face
+   * For @ref chainmatrix "chain matrices", if @ref PersistenceMatrixOptions::has_vine_update is true, the last cell
    * does not have to be at the end of the matrix and therefore has to be searched first. In this case, if the user
-   * already knows the @ref IDIdx of the last face, calling
-   * @ref remove_maximal_face(ID_index, const std::vector<ID_index>&) "remove_maximal_face(faceID, {})"
+   * already knows the @ref IDIdx of the last cell, calling
+   * @ref remove_maximal_cell(ID_index, const std::vector<ID_index>&) "remove_maximal_cell(cellID, {})"
    * instead allows to skip the search.
    */
   void remove_last();
 
   /**
-   * @brief Returns the maximal dimension of a face stored in the matrix. Only available 
+   * @brief Returns the maximal dimension of a cell stored in the matrix. Only available 
    * if @ref PersistenceMatrixOptions::has_matrix_maximal_dimension_access is true.
    * 
    * @return The maximal dimension.
@@ -385,24 +388,24 @@ class Id_to_index_overlay
    */
   Index get_number_of_columns() const;
   /**
-   * @brief Returns the dimension of the given face. Only available for @ref mp_matrices "non-basic matrices".
+   * @brief Returns the dimension of the given cell. Only available for @ref mp_matrices "non-basic matrices".
    * 
-   * @param faceID @ref IDIdx index of the face.
-   * @return Dimension of the face.
+   * @param cellID @ref IDIdx index of the cell.
+   * @return Dimension of the cell.
    */
-  Dimension get_column_dimension(ID_index faceID) const;
+  Dimension get_column_dimension(ID_index cellID) const;
 
   /**
-   * @brief Adds column corresponding to @p sourceFaceID onto the column corresponding to @p targetFaceID.
+   * @brief Adds column corresponding to @p sourceCellID onto the column corresponding to @p targetCellID.
    *
    * @warning They will be no verification to ensure that the addition makes sense for the validity of the matrix.
    * For example, a right-to-left addition could corrupt the computation of the barcode if done blindly.
    * So should be used with care.
    * 
-   * @param sourceFaceID @ref IDIdx index of the source column.
-   * @param targetFaceID @ref IDIdx index of the target column.
+   * @param sourceCellID @ref IDIdx index of the source column.
+   * @param targetCellID @ref IDIdx index of the target column.
    */
-  void add_to(ID_index sourceFaceID, ID_index targetFaceID);
+  void add_to(ID_index sourceCellID, ID_index targetCellID);
   /**
    * @brief Multiplies the target column with the coefficient and then adds the source column to it.
    * That is: `targetColumn = (targetColumn * coefficient) + sourceColumn`.
@@ -411,11 +414,11 @@ class Id_to_index_overlay
    * For example, a right-to-left addition could corrupt the computation of the barcode if done blindly.
    * So should be used with care.
    * 
-   * @param sourceFaceID @ref IDIdx index of the source column.
+   * @param sourceCellID @ref IDIdx index of the source column.
    * @param coefficient Value to multiply.
-   * @param targetFaceID @ref IDIdx index of the target column.
+   * @param targetCellID @ref IDIdx index of the target column.
    */
-  void multiply_target_and_add_to(ID_index sourceFaceID, const Field_element& coefficient, ID_index targetFaceID);
+  void multiply_target_and_add_to(ID_index sourceCellID, const Field_element& coefficient, ID_index targetCellID);
   /**
    * @brief Multiplies the source column with the coefficient before adding it to the target column.
    * That is: `targetColumn += (coefficient * sourceColumn)`. The source column will **not** be modified.
@@ -425,22 +428,22 @@ class Id_to_index_overlay
    * So should be used with care.
    * 
    * @param coefficient Value to multiply.
-   * @param sourceFaceID @ref IDIdx index of the source column.
-   * @param targetFaceID @ref IDIdx index of the target column.
+   * @param sourceCellID @ref IDIdx index of the source column.
+   * @param targetCellID @ref IDIdx index of the target column.
    */
-  void multiply_source_and_add_to(const Field_element& coefficient, ID_index sourceFaceID, ID_index targetFaceID);
+  void multiply_source_and_add_to(const Field_element& coefficient, ID_index sourceCellID, ID_index targetCellID);
 
   /**
-   * @brief Zeroes the cell at the given coordinates. Not available for @ref chainmatrix "chain matrices".
+   * @brief Zeroes the entry at the given coordinates. Not available for @ref chainmatrix "chain matrices".
    * In general, should be used with care to not destroy the validity 
    * of the persistence related properties of the matrix.
    *
-   * For @ref boundarymatrix "RU matrices", zeros only the cell in \f$ R \f$.
+   * For @ref boundarymatrix "RU matrices", zeros only the entry in \f$ R \f$.
    * 
-   * @param faceID @ref IDIdx index of the face corresponding to the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
+   * @param cellID @ref IDIdx index of the cell corresponding to the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
    */
-  void zero_cell(ID_index faceID, ID_index rowIndex);
+  void zero_entry(ID_index cellID, ID_index rowIndex);
   /**
    * @brief Zeroes the column at the given index. Not available for @ref chainmatrix "chain matrices".
    * In general, should be used with care to not destroy the validity 
@@ -448,20 +451,20 @@ class Id_to_index_overlay
    *
    * For @ref boundarymatrix "RU matrices", zeros only the column in \f$ R \f$.
    * 
-   * @param faceID @ref IDIdx index of the face corresponding to the column.
+   * @param cellID @ref IDIdx index of the cell corresponding to the column.
    */
-  void zero_column(ID_index faceID);
+  void zero_column(ID_index cellID);
   /**
-   * @brief Indicates if the cell at given coordinates has value zero.
+   * @brief Indicates if the entry at given coordinates has value zero.
    *
    * For @ref boundarymatrix "RU matrices", looks into \f$ R \f$.
    * 
-   * @param faceID @ref IDIdx index of the face corresponding to the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
-   * @return true If the cell has value zero.
+   * @param cellID @ref IDIdx index of the cell corresponding to the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
+   * @return true If the entry has value zero.
    * @return false Otherwise.
    */
-  bool is_zero_cell(ID_index faceID, ID_index rowIndex) const;
+  bool is_zero_entry(ID_index cellID, ID_index rowIndex) const;
   /**
    * @brief Indicates if the column at given index has value zero.
    *
@@ -470,11 +473,11 @@ class Id_to_index_overlay
    * Note that for @ref chainmatrix "chain matrices", this method should always return false, as a valid
    * @ref chainmatrix "chain matrix" never has empty columns.
    * 
-   * @param faceID @ref IDIdx index of the face corresponding to the column.
+   * @param cellID @ref IDIdx index of the cell corresponding to the column.
    * @return true If the column has value zero.
    * @return false Otherwise.
    */
-  bool is_zero_column(ID_index faceID);
+  bool is_zero_column(ID_index cellID);
 
   /**
    * @brief Returns the @ref IDIdx index of the column which has the given @ref rowindex "row index" as pivot.
@@ -484,17 +487,17 @@ class Id_to_index_overlay
    * the row indices for a @ref boundarymatrix "RU matrix" correspond to the updated @ref IDIdx indices which got
    * potentially swapped by a vine swap.
    * 
-   * @param faceIndex @ref rowindex "Row index" of the pivot.
+   * @param cellIndex @ref rowindex "Row index" of the pivot.
    * @return @ref IDIdx index of the column with the given pivot.
    */
-  ID_index get_column_with_pivot(ID_index faceIndex) const;
+  ID_index get_column_with_pivot(ID_index cellIndex) const;
   /**
    * @brief Returns the @ref rowindex "row index" of the pivot of the given column.
    * 
-   * @param faceID @ref IDIdx index of the face corresponding to the column.
+   * @param cellID @ref IDIdx index of the cell corresponding to the column.
    * @return The @ref rowindex "row index" of the pivot.
    */
-  ID_index get_pivot(ID_index faceID);
+  ID_index get_pivot(ID_index cellID);
 
   /**
    * @brief Resets the matrix to an empty matrix.
@@ -546,10 +549,10 @@ class Id_to_index_overlay
    * Swaps the two given columns. Note that it really just swaps two columns and do not updates
    * anything else, nor performs additions to maintain some properties on the matrix.
    * 
-   * @param faceID1 First column @ref IDIdx index to swap.
-   * @param faceID2 Second column @ref IDIdx index to swap.
+   * @param cellID1 First column @ref IDIdx index to swap.
+   * @param cellID2 Second column @ref IDIdx index to swap.
    */
-  void swap_columns(ID_index faceID1, ID_index faceID2);
+  void swap_columns(ID_index cellID1, ID_index cellID2);
   /**
    * @brief Only available for simple @ref boundarymatrix "boundary matrices" (only storing R)
    * and if @ref PersistenceMatrixOptions::has_column_and_row_swaps is true.
@@ -565,29 +568,29 @@ class Id_to_index_overlay
    * Does the same than @ref vine_swap, but assumes that the swap is non trivial and
    * therefore skips a part of the case study.
    * 
-   * @param faceID1 @ref IDIdx index of the first face.
-   * @param faceID2 @ref IDIdx index of the second face. It is assumed that the @ref PosIdx of both only differs by one.
+   * @param cellID1 @ref IDIdx index of the first cell.
+   * @param cellID2 @ref IDIdx index of the second cell. It is assumed that the @ref PosIdx of both only differs by one.
    * @return Let \f$ pos1 \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ pos2 \f$ be the @ref PosIdx index of
    * @p columnIndex2. The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx
    * \f$ max(pos1, pos2) \f$.
    */
-  ID_index vine_swap_with_z_eq_1_case(ID_index faceID1, ID_index faceID2);
+  ID_index vine_swap_with_z_eq_1_case(ID_index cellID1, ID_index cellID2);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
-   * Does a vine swap between two faces which are consecutive in the filtration. Roughly, if \f$ F \f$ is
+   * Does a vine swap between two cells which are consecutive in the filtration. Roughly, if \f$ F \f$ is
    * the current filtration represented by the matrix, the method modifies the matrix such that the new state
-   * corresponds to a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but with the two given faces
-   * at swapped positions. Of course, the two faces should not have a face/coface relation which each other ;
+   * corresponds to a valid state for the filtration \f$ F' \f$ equal to \f$ F \f$ but with the two given cells
+   * at swapped positions. Of course, the two cells should not have a face/coface relation which each other ;
    * \f$ F' \f$ has to be a valid filtration.
    * See @cite vineyards for more information about vine and vineyards.
    * 
-   * @param faceID1 @ref IDIdx index of the first face.
-   * @param faceID2 @ref IDIdx index of the second face. It is assumed that the @ref PosIdx of both only differs by one.
+   * @param cellID1 @ref IDIdx index of the first cell.
+   * @param cellID2 @ref IDIdx index of the second cell. It is assumed that the @ref PosIdx of both only differs by one.
    * @return Let \f$ pos1 \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ pos2 \f$ be the @ref PosIdx index of
    * @p columnIndex2. The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx
    * \f$ max(pos1, pos2) \f$.
    */
-  ID_index vine_swap(ID_index faceID1, ID_index faceID2);
+  ID_index vine_swap(ID_index cellID1, ID_index cellID2);
   
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
@@ -749,26 +752,26 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_bounda
 
 template <class Underlying_matrix, class Master_matrix>
 template <class Boundary_range>
-inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_boundary(ID_index faceIndex,
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_boundary(ID_index cellIndex,
                                                                                   const Boundary_range& boundary,
                                                                                   Dimension dim) 
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
-    GUDHI_CHECK(idToIndex_->find(faceIndex) == idToIndex_->end(),
+    GUDHI_CHECK(idToIndex_->find(cellIndex) == idToIndex_->end(),
                 std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
   } else {
-    GUDHI_CHECK((idToIndex_->size() <= faceIndex || _id_to_index(faceIndex) == static_cast<Index>(-1)),
+    GUDHI_CHECK((idToIndex_->size() <= cellIndex || _id_to_index(cellIndex) == static_cast<Index>(-1)),
                 std::invalid_argument("Id_to_index_overlay::insert_boundary - Index for simplex already chosen!"));
   }
-  matrix_.insert_boundary(faceIndex, boundary, dim);
+  matrix_.insert_boundary(cellIndex, boundary, dim);
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      idToIndex_->emplace(faceIndex, nextIndex_);
+      idToIndex_->emplace(cellIndex, nextIndex_);
     } else {
-      if (idToIndex_->size() <= faceIndex) {
-        idToIndex_->resize(faceIndex + 1, -1);
+      if (idToIndex_->size() <= cellIndex) {
+        idToIndex_->resize(cellIndex + 1, -1);
       }
-      _id_to_index(faceIndex) = nextIndex_;
+      _id_to_index(cellIndex) = nextIndex_;
     }
     ++nextIndex_;
   }
@@ -776,9 +779,9 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_bounda
 
 template <class Underlying_matrix, class Master_matrix>
 inline typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::Column&
-Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_column(ID_index faceID) 
+Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_column(ID_index cellID) 
 {
-  return matrix_.get_column(_id_to_index(faceID));
+  return matrix_.get_column(_id_to_index(cellID));
 }
 
 template <class Underlying_matrix, class Master_matrix>
@@ -795,7 +798,7 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::erase_empty_r
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maximal_face(ID_index faceID) 
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maximal_cell(ID_index cellID) 
 {
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
     std::vector<ID_index> indexToID(nextIndex_);
@@ -809,34 +812,34 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maxima
       }
     }
     --nextIndex_;
-    for (Index curr = _id_to_index(faceID); curr < nextIndex_; ++curr) {
+    for (Index curr = _id_to_index(cellID); curr < nextIndex_; ++curr) {
       matrix_.vine_swap(curr);
       std::swap(idToIndex_->at(indexToID[curr]), idToIndex_->at(indexToID[curr + 1]));
     }
     matrix_.remove_last();
-    GUDHI_CHECK(_id_to_index(faceID) == nextIndex_,
-                std::logic_error("Id_to_index_overlay::remove_maximal_face - Indexation problem."));
+    GUDHI_CHECK(_id_to_index(cellID) == nextIndex_,
+                std::logic_error("Id_to_index_overlay::remove_maximal_cell - Indexation problem."));
 
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      idToIndex_->erase(faceID);
+      idToIndex_->erase(cellID);
     } else {
-      _id_to_index(faceID) = -1;
+      _id_to_index(cellID) = -1;
     }
   } else {
-    matrix_.remove_maximal_face(faceID);
+    matrix_.remove_maximal_cell(cellID);
   }
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maximal_face(
-    ID_index faceID, const std::vector<ID_index>& columnsToSwap) 
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maximal_cell(
+    ID_index cellID, const std::vector<ID_index>& columnsToSwap) 
 {
   static_assert(!Master_matrix::Option_list::is_of_boundary_type,
-                "'remove_maximal_face(ID_index,const std::vector<Index>&)' is not available for the chosen options.");
+                "'remove_maximal_cell(ID_index,const std::vector<Index>&)' is not available for the chosen options.");
   std::vector<Index> translatedIndices;
   std::transform(columnsToSwap.cbegin(), columnsToSwap.cend(), std::back_inserter(translatedIndices),
                  [&](ID_index id) { return _id_to_index(id); });
-  matrix_.remove_maximal_face(faceID, translatedIndices);
+  matrix_.remove_maximal_cell(cellID, translatedIndices);
 }
 
 template <class Underlying_matrix, class Master_matrix>
@@ -878,54 +881,54 @@ Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_number_of_columns() c
 
 template <class Underlying_matrix, class Master_matrix>
 inline typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::Dimension
-Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_column_dimension(ID_index faceID) const 
+Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_column_dimension(ID_index cellID) const 
 {
-  return matrix_.get_column_dimension(_id_to_index(faceID));
+  return matrix_.get_column_dimension(_id_to_index(cellID));
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::add_to(ID_index sourceFaceID, ID_index targetFaceID) 
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::add_to(ID_index sourceCellID, ID_index targetCellID) 
 {
-  return matrix_.add_to(_id_to_index(sourceFaceID), _id_to_index(targetFaceID));
+  return matrix_.add_to(_id_to_index(sourceCellID), _id_to_index(targetCellID));
 }
 
 template <class Underlying_matrix, class Master_matrix>
 inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::multiply_target_and_add_to(
-    ID_index sourceFaceID, const Field_element& coefficient, ID_index targetFaceID) 
+    ID_index sourceCellID, const Field_element& coefficient, ID_index targetCellID) 
 {
-  return matrix_.multiply_target_and_add_to(_id_to_index(sourceFaceID), coefficient, _id_to_index(targetFaceID));
+  return matrix_.multiply_target_and_add_to(_id_to_index(sourceCellID), coefficient, _id_to_index(targetCellID));
 }
 
 template <class Underlying_matrix, class Master_matrix>
 inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::multiply_source_and_add_to(
-    const Field_element& coefficient, ID_index sourceFaceID, ID_index targetFaceID) 
+    const Field_element& coefficient, ID_index sourceCellID, ID_index targetCellID) 
 {
-  return matrix_.multiply_source_and_add_to(coefficient, _id_to_index(sourceFaceID), _id_to_index(targetFaceID));
+  return matrix_.multiply_source_and_add_to(coefficient, _id_to_index(sourceCellID), _id_to_index(targetCellID));
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::zero_cell(ID_index faceID, ID_index rowIndex) 
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::zero_entry(ID_index cellID, ID_index rowIndex) 
 {
-  return matrix_.zero_cell(_id_to_index(faceID), rowIndex);
+  return matrix_.zero_entry(_id_to_index(cellID), rowIndex);
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::zero_column(ID_index faceID) 
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::zero_column(ID_index cellID) 
 {
-  return matrix_.zero_column(_id_to_index(faceID));
+  return matrix_.zero_column(_id_to_index(cellID));
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline bool Id_to_index_overlay<Underlying_matrix, Master_matrix>::is_zero_cell(ID_index faceID,
+inline bool Id_to_index_overlay<Underlying_matrix, Master_matrix>::is_zero_entry(ID_index cellID,
                                                                                ID_index rowIndex) const 
 {
-  return matrix_.is_zero_cell(_id_to_index(faceID), rowIndex);
+  return matrix_.is_zero_entry(_id_to_index(cellID), rowIndex);
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline bool Id_to_index_overlay<Underlying_matrix, Master_matrix>::is_zero_column(ID_index faceID) 
+inline bool Id_to_index_overlay<Underlying_matrix, Master_matrix>::is_zero_column(ID_index cellID) 
 {
-  return matrix_.is_zero_column(_id_to_index(faceID));
+  return matrix_.is_zero_column(_id_to_index(cellID));
 }
 
 template <class Underlying_matrix, class Master_matrix>
@@ -944,12 +947,12 @@ Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_column_with_pivot(ID_
 
 template <class Underlying_matrix, class Master_matrix>
 inline typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::ID_index
-Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_pivot(ID_index faceID) 
+Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_pivot(ID_index cellID) 
 {
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
-    return matrix_.get_pivot(_id_to_index(faceID));
+    return matrix_.get_pivot(_id_to_index(cellID));
   } else {
-    return faceID;
+    return cellID;
   }
 }
 
@@ -1001,10 +1004,10 @@ Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_representative_cycle(
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::swap_columns(ID_index faceID1, ID_index faceID2) 
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::swap_columns(ID_index cellID1, ID_index cellID2) 
 {
-  matrix_.swap_columns(_id_to_index(faceID1), _id_to_index(faceID2));
-  std::swap(idToIndex_->at(faceID1), idToIndex_->at(faceID2));
+  matrix_.swap_columns(_id_to_index(cellID1), _id_to_index(cellID2));
+  std::swap(idToIndex_->at(cellID1), idToIndex_->at(cellID2));
 }
 
 template <class Underlying_matrix, class Master_matrix>
@@ -1015,10 +1018,10 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::swap_rows(Ind
 
 template <class Underlying_matrix, class Master_matrix>
 inline typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::ID_index
-Id_to_index_overlay<Underlying_matrix, Master_matrix>::vine_swap_with_z_eq_1_case(ID_index faceID1, ID_index faceID2) 
+Id_to_index_overlay<Underlying_matrix, Master_matrix>::vine_swap_with_z_eq_1_case(ID_index cellID1, ID_index cellID2) 
 {
-  Index first = _id_to_index(faceID1);
-  Index second = _id_to_index(faceID2);
+  Index first = _id_to_index(cellID1);
+  Index second = _id_to_index(cellID2);
   if (first > second) std::swap(first, second);
 
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
@@ -1028,12 +1031,12 @@ Id_to_index_overlay<Underlying_matrix, Master_matrix>::vine_swap_with_z_eq_1_cas
 
     bool change = matrix_.vine_swap_with_z_eq_1_case(first);
 
-    std::swap(idToIndex_->at(faceID1), idToIndex_->at(faceID2));
+    std::swap(idToIndex_->at(cellID1), idToIndex_->at(cellID2));
 
     if (change) {
-      return faceID1;
+      return cellID1;
     }
-    return faceID2;
+    return cellID2;
   } else {
     return matrix_.vine_swap_with_z_eq_1_case(first, second);
   }
@@ -1041,10 +1044,10 @@ Id_to_index_overlay<Underlying_matrix, Master_matrix>::vine_swap_with_z_eq_1_cas
 
 template <class Underlying_matrix, class Master_matrix>
 inline typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::ID_index
-Id_to_index_overlay<Underlying_matrix, Master_matrix>::vine_swap(ID_index faceID1, ID_index faceID2) 
+Id_to_index_overlay<Underlying_matrix, Master_matrix>::vine_swap(ID_index cellID1, ID_index cellID2) 
 {
-  Index first = _id_to_index(faceID1);
-  Index second = _id_to_index(faceID2);
+  Index first = _id_to_index(cellID1);
+  Index second = _id_to_index(cellID2);
   if (first > second) std::swap(first, second);
 
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
@@ -1053,12 +1056,12 @@ Id_to_index_overlay<Underlying_matrix, Master_matrix>::vine_swap(ID_index faceID
 
     bool change = matrix_.vine_swap(first);
 
-    std::swap(idToIndex_->at(faceID1), idToIndex_->at(faceID2));
+    std::swap(idToIndex_->at(cellID1), idToIndex_->at(cellID2));
 
     if (change) {
-      return faceID1;
+      return cellID1;
     }
-    return faceID2;
+    return cellID2;
   } else {
     return matrix_.vine_swap(first, second);
   }

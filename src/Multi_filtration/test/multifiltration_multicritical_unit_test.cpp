@@ -421,6 +421,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_add, T, list_of_tested_v
   BOOST_CHECK_EQUAL(f5[0][0], 0);
   BOOST_CHECK_EQUAL(f5[0][1], 1);
   BOOST_CHECK_EQUAL(f5[0][2], 2);
+
+  Multi_critical_filtration<T, true> f6 = Multi_critical_filtration<T, true>::minus_inf();
+  bool change = f6.add_generator(Multi_critical_filtration<T, true>::inf());
+  BOOST_CHECK(change);
+  BOOST_CHECK(f6.is_plus_inf());
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_friends, T, list_of_tested_variants)

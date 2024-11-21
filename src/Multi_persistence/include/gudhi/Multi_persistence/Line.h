@@ -18,6 +18,7 @@
 #ifndef LINE_FILTRATION_TRANSLATION_H_INCLUDED
 #define LINE_FILTRATION_TRANSLATION_H_INCLUDED
 
+#include <cmath>
 #include <cstddef>
 #include <stdexcept>
 #include <limits>
@@ -82,6 +83,15 @@ class Line {
    * the number of coordinates.
    */
   Point operator[](T t) const {
+    GUDHI_CHECK(direction_.empty() || direction_.size() == basePoint_.size(),
+                "Direction and base point do not have the same dimension.");
+
+    if constexpr (std::numeric_limits<T>::has_quiet_NaN){   //to avoid windows error
+      if (std::isnan(t)) return Point::nan();
+    }
+    if (t == Point::T_inf) return Point::inf();
+    if (t == -Point::T_inf) return Point::minus_inf();
+
     Point x(basePoint_.size());
 
     if (direction_.size() > 0) {
@@ -222,21 +232,21 @@ class Line {
   }
 
   /**
-   * @brief Given a box, returns the intersection of this box and the line.
+   * @brief Given a box, returns "time" parameter of the intersection of this box and the line.
    *
    * @param box Box to intersect.
    * @return A pair representing the two bounding points of the intersection, such that the first element is the
-   * smallest of the two. If the box and the line do not intersect, returns the pair {inf, inf}.
+   * smallest of the two. If the box and the line do not intersect or the box is trivial, returns the pair {inf, -inf}.
    */
-  std::pair<Point, Point> get_bounds(const Box<T> &box) const {
-    if (box.is_trivial()) return {Point::inf(), Point::inf()};
+  std::pair<T, T> get_bounds(const Box<T> &box) const {
+    if (box.is_trivial()) return {Point::T_inf, -Point::T_inf};
 
     T bottom = compute_forward_intersection(box.get_lower_corner());
     T top = compute_backward_intersection(box.get_upper_corner());
 
-    if (bottom > top) return {Point::inf(), Point::inf()};  // no intersection
+    if (bottom > top) return {Point::T_inf, -Point::T_inf};  // no intersection
 
-    return {(*this)[bottom], (*this)[top]};
+    return {bottom, top};
   }
 
  private:

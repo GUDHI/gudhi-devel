@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -240,6 +241,18 @@ class Multi_critical_filtration {
    * and if there is no generator, the method will segfault.
    */
   operator Generator() {
+    if (num_generators() != 1)
+      throw std::logic_error("Casting a " + std::to_string(num_generators()) +
+                             "-critical filtration value into an 1-critical filtration value.");
+    return multi_filtration_[0];
+  }
+
+  /**
+   * @brief Casts the object into the type of a generator.
+   * @pre The filtration value is 1-critical. If there are more than one generator, only the first will be preserved
+   * and if there is no generator, the method will segfault.
+   */
+  operator const Generator() const {
     GUDHI_CHECK(num_generators() == 1, "Casting a " + std::to_string(num_generators()) +
                                            "-critical filtration value into an 1-critical filtration value.");
     return multi_filtration_[0];
@@ -845,14 +858,42 @@ class Multi_critical_filtration {
   // no nan values and if there is an inf/-inf, then 'end - curr == 1'
   // modifies multi_filtration_ only if true is returned.
   bool _generator_can_be_added(const Generator &x, std::size_t curr, std::size_t &end) {
-    if (x.empty() || x.is_nan() || (x.is_plus_inf() && end - curr != 0)) return false;
+    if (x.empty() || x.is_nan()) return false;
 
-    if (x.is_minus_inf()) {
-      if (end - curr == 1 && multi_filtration_[curr].is_minus_inf()) return false;
-      // assumes that everything between curr and end is already simplified
-      // so, if end - curr != 1, there can be no minus_inf anymore.
-      end = curr;
-      return true;
+    // assumes that everything between curr and end is simplified
+    // so, only multi_filtration_[curr] can be at inf or -inf.
+    if constexpr (co) {
+      if (multi_filtration_[curr].is_plus_inf() || (x.is_minus_inf() && end - curr != 0)) {
+        return false;
+      }
+      if (multi_filtration_[curr].is_minus_inf()) {
+        if (x.is_minus_inf()) {
+          return false;
+        }
+        end = curr;
+        return true;
+      }
+      if (x.is_plus_inf()) {
+        if (multi_filtration_[curr].is_plus_inf()) return false;
+        end = curr;
+        return true;
+      }
+    } else {
+      if (multi_filtration_[curr].is_minus_inf() || (x.is_plus_inf() && end - curr != 0)) {
+        return false;
+      }
+      if (multi_filtration_[curr].is_plus_inf()) {
+        if (x.is_plus_inf()) {
+          return false;
+        }
+        end = curr;
+        return true;
+      }
+      if (x.is_minus_inf()) {
+        if (multi_filtration_[curr].is_minus_inf()) return false;
+        end = curr;
+        return true;
+      }
     }
 
     while (curr != end) {

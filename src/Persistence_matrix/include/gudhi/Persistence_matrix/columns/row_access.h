@@ -52,7 +52,7 @@ class Row_access
  public:
   using Index = typename Master_matrix::Index;                  /**< @ref MatIdx index type. */
   using ID_index = typename Master_matrix::ID_index;            /**< @ref IDIdx index type. */
-  using Matrix_cell = typename Master_matrix::Matrix_cell;      /**< @ref Cell. */
+  using Matrix_entry = typename Master_matrix::Matrix_entry;    /**< @ref Entry. */
   using Row_container = typename Master_matrix::Row_container;  /**< Type of the row container. */
 
   /**
@@ -75,28 +75,28 @@ class Row_access
   Row_access(Row_access&& other) noexcept;
 
   /**
-   * @brief Inserts the given cell at the given row index.
+   * @brief Inserts the given entry at the given row index.
    * 
-   * @param rowIndex @ref rowindex "Row index" of the cell.
-   * @param cell Pointer to the cell to insert.
+   * @param rowIndex @ref rowindex "Row index" of the entry.
+   * @param entry Pointer to the entry to insert.
    */
-  void insert_cell(ID_index rowIndex, Matrix_cell* cell);
+  void insert_entry(ID_index rowIndex, Matrix_entry* entry);
   /**
-   * @brief Removes the given cell from its row.
+   * @brief Removes the given entry from its row.
    * 
-   * @param cell Pointer to the cell to remove.
+   * @param entry Pointer to the entry to remove.
    */
-  void unlink(Matrix_cell* cell);
+  void unlink(Matrix_entry* entry);
   /**
-   * @brief If @ref PersistenceMatrixOptions::has_intrusive_rows is false, updates the copy of the cell in its row. 
+   * @brief If @ref PersistenceMatrixOptions::has_intrusive_rows is false, updates the copy of the entry in its row. 
    * Otherwise does nothing.
    *
-   * If the rows are intrusive, only a pointer of the cell is stored and therefore any update on the cell (value
+   * If the rows are intrusive, only a pointer of the entry is stored and therefore any update on the entry (value
    * or column index) is automatically forwarded. But for non intrusive rows, any update has to be pushed explicitly.
    * 
-   * @param cell Cell to update.
+   * @param entry Entry to update.
    */
-  void update_cell(const Matrix_cell& cell);
+  void update_entry(const Matrix_entry& entry);
   /**
    * @brief Returns the @ref MatIdx column index.
    * 
@@ -135,7 +135,7 @@ inline Row_access<Master_matrix>::Row_access(Row_access&& other) noexcept
 {}
 
 template <class Master_matrix>
-inline void Row_access<Master_matrix>::insert_cell(ID_index rowIndex, Matrix_cell* cell) 
+inline void Row_access<Master_matrix>::insert_entry(ID_index rowIndex, Matrix_entry* entry) 
 {
   if (rows_ == nullptr) return;
 
@@ -145,38 +145,38 @@ inline void Row_access<Master_matrix>::insert_cell(ID_index rowIndex, Matrix_cel
 
   // if has_removable_rows should op[] create non existing entry? If not, use try_emplace()
   if constexpr (Master_matrix::Option_list::has_intrusive_rows) {
-    rows_->operator[](rowIndex).push_back(*cell);
+    rows_->operator[](rowIndex).push_back(*entry);
   } else {
-    rows_->operator[](rowIndex).insert(*cell);
+    rows_->operator[](rowIndex).insert(*entry);
   }
 }
 
 template <class Master_matrix>
-inline void Row_access<Master_matrix>::unlink(Matrix_cell* cell) 
+inline void Row_access<Master_matrix>::unlink(Matrix_entry* entry) 
 {
   if (rows_ == nullptr) return;
 
   if constexpr (Master_matrix::Option_list::has_intrusive_rows) {
-    cell->Base_hook_matrix_row::unlink();
+    entry->Base_hook_matrix_row::unlink();
   } else {
     if constexpr (Master_matrix::Option_list::has_removable_rows) {
-      auto it = rows_->find(cell->get_row_index());
-      it->second.erase(*cell);
+      auto it = rows_->find(entry->get_row_index());
+      it->second.erase(*entry);
     } else {
-      rows_->operator[](cell->get_row_index()).erase(*cell);
+      rows_->operator[](entry->get_row_index()).erase(*entry);
     }
   }
 }
 
 template <class Master_matrix>
-inline void Row_access<Master_matrix>::update_cell(const Matrix_cell& cell) 
+inline void Row_access<Master_matrix>::update_entry(const Matrix_entry& entry) 
 {
   if constexpr (!Master_matrix::Option_list::has_intrusive_rows) {
     if (rows_ == nullptr) return;
-    auto& row = rows_->at(cell.get_row_index());
-    auto it = row.find(cell);
+    auto& row = rows_->at(entry.get_row_index());
+    auto it = row.find(entry);
     it = row.erase(it);
-    row.insert(it, cell);
+    row.insert(it, entry);
   }
 }
 
