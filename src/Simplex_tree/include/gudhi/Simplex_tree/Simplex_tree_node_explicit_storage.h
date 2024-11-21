@@ -43,13 +43,9 @@ struct GUDHI_EMPTY_BASE_CLASS_OPTIMIZATION Simplex_tree_node_explicit_storage
   typedef typename SimplexTree::Simplex_key Simplex_key;
   typedef typename SimplexTree::Simplex_data Simplex_data;
 
-  // Simplex_tree_node_explicit_storage() : children_(nullptr) {}
+  Simplex_tree_node_explicit_storage() : children_(nullptr) {}
 
-  // Simplex_tree_node_explicit_storage(Siblings* sib, const Filtration_value& filtration) : children_(sib)
-  // {
-  //   this->assign_filtration(filtration);
-  // }
-  Simplex_tree_node_explicit_storage(Siblings* sib = nullptr, const Filtration_value& filtration = Filtration_value())
+  Simplex_tree_node_explicit_storage(Siblings* sib, const Filtration_value& filtration = Filtration_value())
       : SimplexTree::Filtration_simplex_base(filtration), children_(sib)
   {}
 
