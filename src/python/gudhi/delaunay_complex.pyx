@@ -104,9 +104,9 @@ cdef class DelaunayComplex:
          """
         return self.this_ptr != NULL
 
-    def create_simplex_tree(self, max_alpha_square: float = float('inf'),
+    def create_simplex_tree(self, double max_alpha_square: float = float('inf'),
                             filtration: Optional[Literal['alpha', 'cech']] = None,
-                            square_root_filtrations: bool = False):
+                            bool square_root_filtrations: bool = False) -> SimplexTree:
         """
         Args:
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
@@ -123,9 +123,7 @@ cdef class DelaunayComplex:
         if not filtration in [None, 'alpha', 'cech']:
             raise ValueError(f"\'{filtration}\' is not a valid filtration value. Must be None, \'alpha\' or \'cech\'")
         stree = SimplexTree()
-        cdef double mas = max_alpha_square
         cdef intptr_t stree_int_ptr=stree.thisptr
-        cdef bool srf = square_root_filtrations
 
         cdef Delaunay_filtration filt = NONE
         if filtration == 'cech':
@@ -135,7 +133,7 @@ cdef class DelaunayComplex:
 
         with nogil:
             self.this_ptr.create_simplex_tree(<Simplex_tree_python_interface*>stree_int_ptr,
-                                              mas, filt, srf)
+                                              max_alpha_square, filt, square_root_filtrations)
         return stree
 
     @staticmethod
@@ -180,9 +178,9 @@ cdef class AlphaComplex(DelaunayComplex):
 
         When DelaunayComplex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
     """
-    def create_simplex_tree(self, max_alpha_square: float = float('inf'),
+    def create_simplex_tree(self, double max_alpha_square: float = float('inf'),
                             default_filtration_value: bool = False,
-                            square_root_filtrations: bool = False):
+                            bool square_root_filtrations: bool = False) -> SimplexTree:
         """
         Args:
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
@@ -240,8 +238,8 @@ cdef class DelaunayCechComplex(DelaunayComplex):
         """
         super().__init__(points = points, weights = [], precision = precision)
 
-    def create_simplex_tree(self, max_alpha_square: float = float('inf'),
-                            square_root_filtrations: bool = False):
+    def create_simplex_tree(self, double max_alpha_square: float = float('inf'),
+                            bool square_root_filtrations: bool = False) -> SimplexTree:
         """
         Args:
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
