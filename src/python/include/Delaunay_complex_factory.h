@@ -74,7 +74,7 @@ static CgalPointType pt_cython_to_cgal(std::vector<double> const& vec) {
 template <typename Delaunay_complex, typename Kernel, bool Weighted, typename Point_cloud>
 bool create_complex(Delaunay_complex& delaunay_complex, Simplex_tree_interface* simplex_tree,
                     const Point_cloud& points, double max_alpha_square,
-                    bool exact_version, Delaunay_filtration filtration, bool square_root_filtrations) {
+                    bool exact_version, Delaunay_filtration filtration, bool output_squared_values) {
   if (filtration == Delaunay_filtration::CECH) {
     if (Weighted)
       throw std::runtime_error("Weighted Delaunay-Cech complex is not available");
@@ -85,7 +85,7 @@ bool create_complex(Delaunay_complex& delaunay_complex, Simplex_tree_interface* 
                                      true);
     if (result == true) {
       // Construct the Delaunay-Cech complex by assigning filtration values with MEB
-      if (square_root_filtrations)
+      if (output_squared_values)
         Gudhi::cech_complex::assign_MEB_filtration<true>(Kernel(), *simplex_tree, points);
       else
         Gudhi::cech_complex::assign_MEB_filtration<false>(Kernel(), *simplex_tree, points);
@@ -93,7 +93,7 @@ bool create_complex(Delaunay_complex& delaunay_complex, Simplex_tree_interface* 
     }
     return result;
   } else {
-    if (square_root_filtrations)
+    if (output_squared_values)
       return delaunay_complex.template create_complex<true>(*simplex_tree, max_alpha_square,
                                                    exact_version, filtration == Delaunay_filtration::NONE);
     else
@@ -108,7 +108,7 @@ class Abstract_delaunay_complex {
   virtual std::vector<double> get_point(int vh) = 0;
 
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
-                                   Delaunay_filtration filtration, bool square_root_filtrations) = 0;
+                                   Delaunay_filtration filtration, bool output_squared_values) = 0;
 
   virtual std::size_t num_vertices() const = 0;
 
@@ -146,11 +146,11 @@ class Delaunay_complex_t final : public Abstract_delaunay_complex {
   }
 
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
-                                   Delaunay_filtration filtration, bool square_root_filtrations) override {
+                                   Delaunay_filtration filtration, bool output_squared_values) override {
     return create_complex<Delaunay_complex, Kernel, Weighted, std::vector<Bare_point>>(delaunay_complex_, simplex_tree,
                                                                                        points_, max_alpha_square,
                                                                                        exact_version_, filtration,
-                                                                                       square_root_filtrations);
+                                                                                       output_squared_values);
   }
 
   virtual std::size_t num_vertices() const override {

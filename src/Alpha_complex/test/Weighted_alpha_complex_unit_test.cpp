@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(Is_weighted_alpha_complex_nan) {
       BOOST_CHECK(!std::isnan(stree.filtration(f_simplex)));
     }
   }
-  std::clog << "Weighted alpha complex with square_root_filtrations\n";
+  std::clog << "Weighted alpha complex with output_squared_values\n";
   Gudhi::Simplex_tree<> stree_sqrt;
   if (alpha_complex_from_weighted_points.create_complex<true>(stree_sqrt)) {
     for (auto f_simplex : stree_sqrt.filtration_simplex_range()) {

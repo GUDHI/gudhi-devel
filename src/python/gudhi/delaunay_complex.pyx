@@ -43,7 +43,7 @@ cdef extern from "Delaunay_complex_interface.h" namespace "Gudhi":
     cdef cppclass Delaunay_complex_interface "Gudhi::delaunay_complex::Delaunay_complex_interface":
         Delaunay_complex_interface(vector[vector[double]] points, vector[double] weights, bool fast_version, bool exact_version) nogil except +
         vector[double] get_point(int vertex) nogil except +
-        void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, double max_alpha_square, Delaunay_filtration filtration, bool square_root_filtrations) nogil except +
+        void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, double max_alpha_square, Delaunay_filtration filtration, bool output_squared_values) nogil except +
         @staticmethod
         void set_float_relative_precision(double precision) nogil
         @staticmethod
@@ -106,7 +106,7 @@ cdef class DelaunayComplex:
 
     def create_simplex_tree(self, double max_alpha_square: float = float('inf'),
                             filtration: Optional[Literal['alpha', 'cech']] = None,
-                            bool square_root_filtrations: bool = False) -> SimplexTree:
+                            bool output_squared_values: bool = False) -> SimplexTree:
         """
         Args:
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
@@ -114,7 +114,7 @@ cdef class DelaunayComplex:
             filtration: Set this value to `None` (default value) if filtration values are not needed to be computed
                 (will be set to `NaN`). Set it to `alpha` to compute the filtration values with the Alpha complex, or
                 to `cech` to compute the Delaunay Cech complex.
-            square_root_filtrations: Square root filtration values when True. Default is False.
+            output_squared_values: Square root filtration values when True. Default is False.
         Returns:
             SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th input
             point. The vertices may not be numbered contiguously as some points may be discarded in the
@@ -133,7 +133,7 @@ cdef class DelaunayComplex:
 
         with nogil:
             self.this_ptr.create_simplex_tree(<Simplex_tree_python_interface*>stree_int_ptr,
-                                              max_alpha_square, filt, square_root_filtrations)
+                                              max_alpha_square, filt, output_squared_values)
         return stree
 
     @staticmethod
@@ -180,7 +180,7 @@ cdef class AlphaComplex(DelaunayComplex):
     """
     def create_simplex_tree(self, double max_alpha_square: float = float('inf'),
                             default_filtration_value: bool = False,
-                            bool square_root_filtrations: bool = False) -> SimplexTree:
+                            bool output_squared_values: bool = False) -> SimplexTree:
         """
         Args:
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
@@ -188,7 +188,7 @@ cdef class AlphaComplex(DelaunayComplex):
             default_filtration_value: [Deprecated] Default value is `False` (which means compute the filtration
                 values). Set this value to `True` if filtration values are not needed to be computed (will be set to
                 `NaN`), but please consider constructing a :class:`~gudhi.DelaunayComplex` instead.
-            square_root_filtrations: Square root filtration values when True. Default is False.
+            output_squared_values: Square root filtration values when True. Default is False.
         Returns:
             SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th input
             point. The vertices may not be numbered contiguously as some points may be discarded in the triangulation
@@ -200,7 +200,7 @@ cdef class AlphaComplex(DelaunayComplex):
             warnings.warn('''Since Gudhi 3.10, creating an AlphaComplex with default_filtration_value=True is deprecated.
                           Please consider constructing a DelaunayComplex instead.
                           ''', DeprecationWarning)
-        return super().create_simplex_tree(max_alpha_square, filtration, square_root_filtrations)
+        return super().create_simplex_tree(max_alpha_square, filtration, output_squared_values)
 
     def get_point(self, vertex: int) -> list[float]:
         """This function returns the point corresponding to a given vertex from the :class:`~gudhi.SimplexTree` (the
@@ -239,15 +239,15 @@ cdef class DelaunayCechComplex(DelaunayComplex):
         super().__init__(points = points, weights = [], precision = precision)
 
     def create_simplex_tree(self, double max_alpha_square: float = float('inf'),
-                            bool square_root_filtrations: bool = False) -> SimplexTree:
+                            bool output_squared_values: bool = False) -> SimplexTree:
         """
         Args:
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
                 infinity, and there is very little point using anything else since it does not save time.
-            square_root_filtrations: Square root filtration values when True. Default is False.
+            output_squared_values: Square root filtration values when True. Default is False.
         Returns:
             SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th input
             point. The vertices may not be numbered contiguously as some points may be discarded in the triangulation
             (duplicate points, weighted hidden point, ...).
         """
-        return super().create_simplex_tree(max_alpha_square, 'cech', square_root_filtrations)
+        return super().create_simplex_tree(max_alpha_square, 'cech', output_squared_values)

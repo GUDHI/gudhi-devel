@@ -30,7 +30,7 @@ using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
 
 void program_options(int argc, char *argv[], std::string &off_file_points, bool &exact, bool &fast,
-                     bool& square_root_filtrations, std::string &weight_file, std::string &output_file_diag,
+                     bool& output_squared_values, std::string &weight_file, std::string &output_file_diag,
                      Filtration_value &alpha_square_max_value, int &coeff_field_characteristic,
                      Filtration_value &min_persistence);
 
@@ -64,7 +64,7 @@ std::vector<double> read_weight_file(const std::string &weight_file) {
 template<class Kernel>
 Simplex_tree create_simplex_tree(const std::string &off_file_points, const std::string &weight_file,
                                  bool exact_version, Filtration_value alpha_square_max_value,
-                                 bool square_root_filtrations) {
+                                 bool output_squared_values) {
   Simplex_tree stree;
   auto points = read_off<typename Kernel::Point_d>(off_file_points);
 
@@ -79,7 +79,7 @@ Simplex_tree create_simplex_tree(const std::string &off_file_points, const std::
     // Init of an alpha complex from an OFF file
     Gudhi::alpha_complex::Alpha_complex<Kernel, true> alpha_complex_from_file(points, weights);
 
-    if (square_root_filtrations)
+    if (output_squared_values)
       complex_creation = alpha_complex_from_file.template create_complex<true>(stree, alpha_square_max_value, exact_version);
     else
       complex_creation = alpha_complex_from_file.create_complex(stree, alpha_square_max_value, exact_version);
@@ -87,7 +87,7 @@ Simplex_tree create_simplex_tree(const std::string &off_file_points, const std::
     // Init of an alpha complex from an OFF file
     Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(points);
 
-    if (square_root_filtrations)
+    if (output_squared_values)
       complex_creation = alpha_complex_from_file.template create_complex<true>(stree, alpha_square_max_value, exact_version);
     else
       complex_creation = alpha_complex_from_file.create_complex(stree, alpha_square_max_value, exact_version);
@@ -105,12 +105,12 @@ int main(int argc, char **argv) {
   std::string output_file_diag;
   bool exact_version = false;
   bool fast_version = false;
-  bool square_root_filtrations = false;
+  bool output_squared_values = false;
   Filtration_value alpha_square_max_value;
   int coeff_field_characteristic;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, off_file_points, exact_version, fast_version, square_root_filtrations, weight_file,
+  program_options(argc, argv, off_file_points, exact_version, fast_version, output_squared_values, weight_file,
                   output_file_diag, alpha_square_max_value, coeff_field_characteristic, min_persistence);
 
   if ((exact_version) && (fast_version)) {
@@ -123,10 +123,10 @@ int main(int argc, char **argv) {
     // WARNING : CGAL::Epick_d is fast but not safe (unlike CGAL::Epeck_d)
     // (i.e. when the points are on a grid)
     using Fast_kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
-    stree = create_simplex_tree<Fast_kernel>(off_file_points, weight_file, exact_version, alpha_square_max_value, square_root_filtrations);
+    stree = create_simplex_tree<Fast_kernel>(off_file_points, weight_file, exact_version, alpha_square_max_value, output_squared_values);
   } else {
     using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
-    stree = create_simplex_tree<Kernel>(off_file_points, weight_file, exact_version, alpha_square_max_value, square_root_filtrations);
+    stree = create_simplex_tree<Kernel>(off_file_points, weight_file, exact_version, alpha_square_max_value, output_squared_values);
   }
   // ----------------------------------------------------------------------------
   // Display information about the alpha complex
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
 }
 
 void program_options(int argc, char *argv[], std::string &off_file_points, bool &exact, bool &fast,
-                     bool& square_root_filtrations, std::string &weight_file, std::string &output_file_diag,
+                     bool& output_squared_values, std::string &weight_file, std::string &output_file_diag,
                      Filtration_value &alpha_square_max_value, int &coeff_field_characteristic,
                      Filtration_value &min_persistence) {
   namespace po = boost::program_options;
@@ -170,7 +170,7 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool 
       "To activate exact version of Alpha complex (default is false, not available if fast is set)")(
       "fast,f", po::bool_switch(&fast),
       "To activate fast version of Alpha complex (default is false, not available if exact is set)")(
-      "square-root-filtrations,s", po::bool_switch(&square_root_filtrations),
+      "square-root-filtrations,s", po::bool_switch(&output_squared_values),
       "To activate square root filtration computations (default is false)")(
       "weight-file,w", po::value<std::string>(&weight_file)->default_value(std::string()),
       "Name of file containing a point weights. Format is one weight per line:\n  W1\n  ...\n  Wn ")(

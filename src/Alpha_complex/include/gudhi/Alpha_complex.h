@@ -355,8 +355,8 @@ class Alpha_complex {
    * It also computes the filtration values accordingly to the \ref createcomplexalgorithm if default_filtration_value
    * is not set.
    *
-   * \tparam square_root_filtrations If false (default value), it assigns to each simplex a filtration value equal to
-   * the squared cicumradius of the simplices, or to the radius when square_root_filtrations is true.
+   * \tparam output_squared_values If false (default value), it assigns to each simplex a filtration value equal to
+   * the squared cicumradius of the simplices, or to the radius when output_squared_values is true.
    * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
    *
    * @param[in] complex SimplicialComplexForAlpha to be created.
@@ -376,7 +376,7 @@ class Alpha_complex {
    *
    * Initialization can be launched once.
    */
-  template <bool square_root_filtrations = false,
+  template <bool output_squared_values = false,
             typename SimplicialComplexForAlpha,
             typename Filtration_value = typename SimplicialComplexForAlpha::Filtration_value>
   bool create_complex(SimplicialComplexForAlpha& complex,
@@ -464,7 +464,7 @@ class Alpha_complex {
                 if(exact) CGAL::exact(sqrad);
 #endif
                 alpha_complex_filtration = cgal_converter(sqrad);
-                if constexpr (square_root_filtrations) {
+                if constexpr (output_squared_values) {
                   alpha_complex_filtration = sqrt(alpha_complex_filtration);
                 }
               }
@@ -489,7 +489,7 @@ class Alpha_complex {
         // Only in not exact version, cf. https://github.com/GUDHI/gudhi-devel/issues/57
         complex.make_filtration_non_decreasing();
       // Remove all simplices that have a filtration value greater than max_alpha_square
-      if constexpr (square_root_filtrations) {
+      if constexpr (output_squared_values) {
         complex.prune_above_filtration(sqrt(max_alpha_square));
       } else {
         complex.prune_above_filtration(max_alpha_square);

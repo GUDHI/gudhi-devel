@@ -193,10 +193,10 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   }
   BOOST_CHECK(st3 == st3_save); // Should only be an approximate test
 
-  // Same test but with square_root_filtrations=true
+  // Same test but with output_squared_values=true
   st3.reset_filtration(-1); // unnecessary, but ensures we don't cheat
   Gudhi::cech_complex::assign_MEB_filtration<true>(Kernel(), st3, points);
-  std::clog << "Simplex tree from assign_MEB_filtration with square_root_filtrations=true\n";
+  std::clog << "Simplex tree from assign_MEB_filtration with output_squared_values=true\n";
   for (auto f_simplex : st3.filtration_simplex_range()) {
     std::clog << "   ( ";
     for (auto vertex : st3.simplex_vertex_range(f_simplex)) std::clog << vertex << " ";

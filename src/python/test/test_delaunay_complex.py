@@ -193,13 +193,13 @@ def test_duplicated_2d_points_on_a_plane():
         for precision in ['fast', 'safe', 'exact']:
             _duplicated_2d_points_on_a_plane(simplicial_complex, precision)
 
-def test_square_root_filtrations():
+def test_output_squared_values():
     for filtration in ['alpha', 'cech', None]:
         for precision in ['fast', 'safe', 'exact']:
             dc = DelaunayComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
                                  precision = precision)
-            stree = dc.create_simplex_tree(filtration='cech', square_root_filtrations=False)
-            stree_sqrt = dc.create_simplex_tree(filtration='cech', square_root_filtrations=True)
+            stree = dc.create_simplex_tree(filtration='cech', output_squared_values=False)
+            stree_sqrt = dc.create_simplex_tree(filtration='cech', output_squared_values=True)
             for simplex, filt in stree_sqrt.get_filtration():
                 # np.testing.assert_almost_equal(float('nan'), float('nan')) is ok
                 # while float('nan') == float('nan') is False
