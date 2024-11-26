@@ -10,26 +10,21 @@ Definition
 
 .. include:: delaunay_complex_sum.inc
 
-:class:`~gudhi.DelaunayComplex` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
+:func:`~gudhi.delaunay_complex` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
 `Delaunay Triangulation  <http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations>`_
 :cite:`cgal:hdj-t-19b` from the `Computational Geometry Algorithms Library <http://www.cgal.org/>`_
-:cite:`cgal:eb-19b`.
+:cite:`cgal:eb-19b`. In this case, all filtration values are set to `NaN`
 
-The Delaunay complex (all filtration values are set to `NaN`) is available by passing :code:`filtrations = None`
-(default value) to :func:`~gudhi.DelaunayComplex.create_simplex_tree`.
+In order to compute filtration values, :func:`~gudhi.delaunay_cech_complex` is a bit faster than
+:func:`~gudhi.alpha_complex`, and a weighted version, :func:`~gudhi.weighted_alpha_complex` is available.
 
-When :paramref:`~gudhi.DelaunayComplex.create_simplex_tree.filtrations` is:
+Remarks about the filtration value computation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* `'alpha'`              - The filtration value of each simplex is computed as an :class:`~gudhi.AlphaComplex`
-* `'cech'`               - The filtration value of each simplex is computed as a :class:`~gudhi.DelaunayCechComplex`
+These remarks apply to the :func:`~gudhi.delaunay_cech_complex`, :func:`~gudhi.alpha_complex`, and
+:func:`~gudhi.weighted_alpha_complex` that we will call *'complex'* in the following text.
 
-Remarks about the :class:`~gudhi.AlphaComplex` and the :class:`~gudhi.DelaunayCechComplex`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-These remarks apply to the :class:`~gudhi.AlphaComplex` and to the :class:`~gudhi.DelaunayCechComplex` that we will
-call *'complex'* in the following text.
-
-* When a complex is constructed with an infinite value of :math:`\alpha^2`, the complex is a Delaunay complex (with
+* When a complex is constructed with an infinite value of :math:`\alpha`, the complex is a Delaunay complex (with
   special filtration values).
 * For people only interested in the topology of the complex (for instance persistence), notice the complex is
   equivalent to the `Čech complex <https://gudhi.inria.fr/doc/latest/group__cech__complex.html>`_ and much smaller if
@@ -46,27 +41,22 @@ call *'complex'* in the following text.
   the filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
   output is a valid filtration (faces have a filtration value no larger than their cofaces).
 
-:class:`~gudhi.DelaunayCechComplex` is a bit faster than :class:`~gudhi.AlphaComplex`, but only
-:class:`~gudhi.AlphaComplex` has a weighted version.
-
 Example from points
 -------------------
 
-This example builds the Delaunay Čech complex from the given points:
+This example builds the Delaunay Čech complex (represented as a :doc:`SimplexTree <simplex_tree_ref>`) from the given
+points:
 
 .. testcode::
 
-    from gudhi import DelaunayCechComplex
+    from gudhi import delaunay_cech_complex
     points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
-    cpx = DelaunayCechComplex(points=points)
+    stree = delaunay_cech_complex(points=points)
 
-    stree = cpx.create_simplex_tree()
-    print('Complex is of dimension ', stree.dimension(), ' - ',
-      stree.num_simplices(), ' simplices - ', stree.num_vertices(), ' vertices.')
-
-    fmt = '%s -> %.2f'
+    print(f"Complex is of dimension {stree.dimension()} - {stree.num_simplices()} simplices - ",
+          f"{stree.num_vertices()} vertices.")
     for filtered_value in stree.get_filtration():
-        print(fmt % tuple(filtered_value))
+        print('%s -> %.2f' % tuple(filtered_value))
 
 
 The output is:
@@ -81,24 +71,24 @@ The output is:
    [4] -> 0.00
    [5] -> 0.00
    [6] -> 0.00
-   [2, 3] -> 6.25
-   [4, 5] -> 7.25
-   [0, 2] -> 8.50
-   [0, 1] -> 9.25
-   [1, 3] -> 10.00
-   [1, 2] -> 11.25
-   [1, 2, 3] -> 12.50
-   [0, 1, 2] -> 13.00
-   [5, 6] -> 13.25
-   [2, 4] -> 20.00
-   [4, 6] -> 22.50
-   [4, 5, 6] -> 22.50
-   [3, 6] -> 30.25
-   [2, 6] -> 36.50
-   [2, 3, 6] -> 36.50
-   [2, 4, 6] -> 37.24
-   [0, 4] -> 42.50
-   [0, 2, 4] -> 42.50
+   [2, 3] -> 2.50
+   [4, 5] -> 2.69
+   [0, 2] -> 2.92
+   [0, 1] -> 3.04
+   [1, 3] -> 3.16
+   [1, 2] -> 3.35
+   [1, 2, 3] -> 3.54
+   [0, 1, 2] -> 3.60
+   [5, 6] -> 3.64
+   [2, 4] -> 4.47
+   [4, 6] -> 4.74
+   [4, 5, 6] -> 4.74
+   [3, 6] -> 5.50
+   [2, 6] -> 6.04
+   [2, 3, 6] -> 6.04
+   [2, 4, 6] -> 6.10
+   [0, 4] -> 6.52
+   [0, 2, 4] -> 6.52
 
 **Note:** The Delaunay Čech complex can be easily replaced by the :math:`\alpha`-complex, but note that the resulting
 filtration values will be different.
@@ -117,20 +107,18 @@ Then, it is asked to display information about the :math:`\alpha`-complex.
 
 .. testcode::
 
-    from gudhi import AlphaComplex
-    wgt_ac = AlphaComplex(points=[[ 1., -1., -1.],
-                                  [-1.,  1., -1.],
-                                  [-1., -1.,  1.],
-                                  [ 1.,  1.,  1.],
-                                  [ 2.,  2.,  2.]],
-                          weights = [4., 4., 4., 4., 1.])
+    from gudhi import weighted_alpha_complex
+    stree = weighted_alpha_complex(points=[[ 1., -1., -1.],
+                                           [-1.,  1., -1.],
+                                           [-1., -1.,  1.],
+                                           [ 1.,  1.,  1.],
+                                           [ 2.,  2.,  2.]],
+                                    weights = [4., 4., 4., 4., 1.])
 
-    stree = wgt_ac.create_simplex_tree()
-    print('Weighted alpha complex is of dimension ', stree.dimension(), ' - ',
-          stree.num_simplices(), ' simplices - ', stree.num_vertices(), ' vertices.')
-    fmt = '%s -> %.2f'
+    print(f"Weighted alpha is of dimension {stree.dimension()} - {stree.num_simplices()} simplices - ",
+          f"{stree.num_vertices()} vertices.")
     for simplex in stree.get_simplices():
-        print(fmt % tuple(simplex))
+        print('%s -> %.2f' % tuple(simplex))
 
 The output is:
 

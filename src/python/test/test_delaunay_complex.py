@@ -9,7 +9,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import AlphaComplex, DelaunayComplex, DelaunayCechComplex
+from gudhi import weighted_alpha_complex, alpha_complex, delaunay_complex, delaunay_cech_complex
 import math
 import numpy as np
 import pytest
@@ -23,63 +23,97 @@ except ImportError:
 
 
 
-def _empty_complex(simplicial_complex, precision):
-    cplx = simplicial_complex(precision = precision)
-    assert cplx._is_defined() == True
-
-def _one_2d_point_complex(simplicial_complex, precision):
-    cplx = simplicial_complex(points=[[0, 0]], precision = precision)
-    assert cplx._is_defined() == True
-
 def test_empty_complex():
-    for simplicial_complex in [AlphaComplex, DelaunayComplex, DelaunayCechComplex]:
-        for precision in ['fast', 'safe', 'exact']:
-            _empty_complex(simplicial_complex, precision)
-            _one_2d_point_complex(simplicial_complex, precision)
+    # Specific for delaunay_complex as no precision
+    stree = delaunay_complex()
+    assert stree.is_empty()
 
-def _infinite_threshold(simplicial_complex, precision):
+    stree = delaunay_complex(points=[[0, 0]])
+    assert stree.num_vertices() == 1
+    assert stree.num_simplices() == 1
+
+    for precision in ['fast', 'safe', 'exact']:
+        # Specific for delaunay_complex as it requires weights
+        stree = weighted_alpha_complex(precision = precision)
+        assert stree.is_empty()
+
+        stree = weighted_alpha_complex(points=[[0, 0]], weights=[0], precision = precision)
+        assert stree.num_vertices() == 1
+        assert stree.num_simplices() == 1
+
+        for simplicial_complex_helper in [alpha_complex, delaunay_cech_complex]:
+            stree = simplicial_complex_helper(precision = precision)
+            assert stree.is_empty()
+
+            stree = simplicial_complex_helper(points=[[0, 0]], precision = precision)
+            assert stree.num_vertices() == 1
+            assert stree.num_simplices() == 1
+
+
+def _infinite_threshold(simplicial_complex_helper, precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    cplx = simplicial_complex(points=point_list, precision = precision)
-    assert cplx._is_defined() == True
+    simplex_tree = simplicial_complex_helper(points=point_list, precision=precision)
 
-    simplex_tree = cplx.create_simplex_tree()
     assert simplex_tree._is_persistence_defined() == False
 
     assert simplex_tree.num_simplices() == 11
     assert simplex_tree.num_vertices() == 4
 
-    assert list(simplex_tree.get_filtration()) == [
-        ([0], 0.0),
-        ([1], 0.0),
-        ([2], 0.0),
-        ([3], 0.0),
-        ([0, 1], 0.25),
-        ([0, 2], 0.25),
-        ([1, 3], 0.25),
-        ([2, 3], 0.25),
-        ([1, 2], 0.5),
-        ([0, 1, 2], 0.5),
-        ([1, 2, 3], 0.5),
+    diag_filt = 1. / math.sqrt(2.)
+    simplices = [filt[0] for filt in simplex_tree.get_filtration()]
+    assert simplices ==  [
+        [0],
+        [1],
+        [2],
+        [3],
+        [0, 1],
+        [0, 2],
+        [1, 3],
+        [2, 3],
+        [1, 2],
+        [0, 1, 2],
+        [1, 2, 3],
     ]
+    filtrations = [filt[1] for filt in simplex_tree.get_filtration()]
+    np.testing.assert_array_almost_equal(filtrations, [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        diag_filt,
+        diag_filt,
+        diag_filt,
+    ])
 
-    assert simplex_tree.get_star([0]) == [
-        ([0], 0.0),
-        ([0, 1], 0.25),
-        ([0, 1, 2], 0.5),
-        ([0, 2], 0.25),
+    simplices = [filt[0] for filt in simplex_tree.get_star([0])]
+    assert simplices == [
+        [0],
+        [0, 1],
+        [0, 1, 2],
+        [0, 2],
     ]
-    assert simplex_tree.get_cofaces([0], 1) == [([0, 1], 0.25), ([0, 2], 0.25)]
+    filtrations = [filt[1] for filt in simplex_tree.get_star([0])]
+    np.testing.assert_array_almost_equal(filtrations, [
+        0.0,
+        0.5,
+        diag_filt,
+        0.5,
+    ])
+
+    assert simplex_tree.get_cofaces([0], 1) == [([0, 1], 0.5), ([0, 2], 0.5)]
 
 def test_infinite_threshold():
-    for simplicial_complex in [AlphaComplex, DelaunayCechComplex]:
+    for simplicial_complex_helper in [alpha_complex, delaunay_cech_complex]:
         for precision in ['fast', 'safe', 'exact']:
-            _infinite_threshold(simplicial_complex, precision)
+            _infinite_threshold(simplicial_complex_helper, precision)
 
-def _finite_threshold(simplicial_complex, precision):
+def _finite_threshold(simplicial_complex_helper, precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    cplx = simplicial_complex(points=point_list, precision = precision)
-
-    simplex_tree = cplx.create_simplex_tree(max_alpha_square=0.25)
+    simplex_tree = simplicial_complex_helper(points=point_list, max_alpha=0.5, precision=precision)
 
     assert simplex_tree.num_simplices() == 8
     assert simplex_tree.num_vertices() == 4
@@ -89,20 +123,20 @@ def _finite_threshold(simplicial_complex, precision):
         ([1], 0.0),
         ([2], 0.0),
         ([3], 0.0),
-        ([0, 1], 0.25),
-        ([0, 2], 0.25),
-        ([1, 3], 0.25),
-        ([2, 3], 0.25),
+        ([0, 1], 0.5),
+        ([0, 2], 0.5),
+        ([1, 3], 0.5),
+        ([2, 3], 0.5),
     ]
-    assert simplex_tree.get_star([0]) == [([0], 0.0), ([0, 1], 0.25), ([0, 2], 0.25)]
-    assert simplex_tree.get_cofaces([0], 1) == [([0, 1], 0.25), ([0, 2], 0.25)]
+    assert simplex_tree.get_star([0]) == [([0], 0.0), ([0, 1], 0.5), ([0, 2], 0.5)]
+    assert simplex_tree.get_cofaces([0], 1) == [([0, 1], 0.5), ([0, 2], 0.5)]
 
 def test_filtered_complex():
-    for simplicial_complex in [AlphaComplex, DelaunayCechComplex]:
+    for simplicial_complex_helper in [alpha_complex, delaunay_cech_complex]:
         for precision in ['fast', 'safe', 'exact']:
-            _finite_threshold(simplicial_complex, precision)
+            _finite_threshold(simplicial_complex_helper, precision)
 
-def _safe_persistence_comparison(simplicial_complex, precision):
+def _safe_persistence_comparison(simplicial_complex_helper, precision):
     #generate periodic signal
     time = np.arange(0, 10, 1)
     signal = [math.sin(x) for x in time]
@@ -113,12 +147,10 @@ def _safe_persistence_comparison(simplicial_complex, precision):
     embedding1 = [[signal[i], -signal[i]] for i in range(len(time))]
     embedding2 = [[signal[i], delayed[i]] for i in range(len(time))]
 
-    #build simplicial_complex and simplex tree
-    cplx1 = simplicial_complex(points=embedding1, precision = precision)
-    simplex_tree1 = cplx1.create_simplex_tree()
+    #build simplicial_complex_helper and simplex tree
+    simplex_tree1 = simplicial_complex_helper(points=embedding1, precision = precision)
 
-    cplx2 = simplicial_complex(points=embedding2, precision = precision)
-    simplex_tree2 = cplx2.create_simplex_tree()
+    simplex_tree2 = simplicial_complex_helper(points=embedding2, precision = precision)
 
     diag1 = simplex_tree1.persistence()
     diag2 = simplex_tree2.persistence()
@@ -129,16 +161,14 @@ def _safe_persistence_comparison(simplicial_complex, precision):
 
 
 def test_safe_persistence_comparison():
-    for simplicial_complex in [AlphaComplex, DelaunayCechComplex]:
+    for simplicial_complex_helper in [alpha_complex, delaunay_cech_complex]:
         # Won't work for 'fast' version
-        _safe_persistence_comparison(simplicial_complex, 'safe')
-        _safe_persistence_comparison(simplicial_complex, 'exact')
+        _safe_persistence_comparison(simplicial_complex_helper, 'safe')
+        _safe_persistence_comparison(simplicial_complex_helper, 'exact')
 
-def _delaunay_complex(precision):
+def test_delaunay_complex():
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
-    cplx = DelaunayComplex(points=point_list, precision = precision)
-
-    simplex_tree = cplx.create_simplex_tree()
+    simplex_tree = delaunay_complex(points=point_list)
 
     assert simplex_tree.num_simplices() == 11
     assert simplex_tree.num_vertices() == 4
@@ -150,56 +180,48 @@ def _delaunay_complex(precision):
     for filtered_value in simplex_tree.get_cofaces([0], 1):
         assert math.isnan(filtered_value[1])
 
-def test_delaunay_complex():
-    for precision in ['fast', 'safe', 'exact']:
-        _delaunay_complex(precision)
+def _3d_points_on_a_plane(simplicial_complex_helper):
+    simplex_tree = simplicial_complex_helper(points = [[1.0, 1.0 , 0.0],
+                                                       [7.0, 0.0 , 0.0],
+                                                       [4.0, 6.0 , 0.0],
+                                                       [9.0, 6.0 , 0.0],
+                                                       [0.0, 14.0, 0.0],
+                                                       [2.0, 19.0, 0.0],
+                                                       [9.0, 17.0, 0.0]])
 
-def _3d_points_on_a_plane(simplicial_complex, precision):
-    cplx = simplicial_complex(points = [[1.0, 1.0 , 0.0],
-                                        [7.0, 0.0 , 0.0],
-                                        [4.0, 6.0 , 0.0],
-                                        [9.0, 6.0 , 0.0],
-                                        [0.0, 14.0, 0.0],
-                                        [2.0, 19.0, 0.0],
-                                        [9.0, 17.0, 0.0]], precision = precision)
-
-    simplex_tree = cplx.create_simplex_tree()
     assert simplex_tree.dimension() == 2
     assert simplex_tree.num_vertices() == 7
     assert simplex_tree.num_simplices() == 25
 
 def test_3d_points_on_a_plane():
-    for simplicial_complex in [AlphaComplex, DelaunayComplex, DelaunayCechComplex]:
+    for simplicial_complex_helper in [alpha_complex, delaunay_complex, delaunay_cech_complex]:
         for precision in ['fast', 'safe', 'exact']:
-            _3d_points_on_a_plane(simplicial_complex, precision)
+            _3d_points_on_a_plane(simplicial_complex_helper)
 
-def _duplicated_2d_points_on_a_plane(simplicial_complex, precision):
-    cplx = simplicial_complex(points = [[1.0, 1.0 ],
-                                        [7.0, 0.0 ], # This point is duplicate
-                                        [4.0, 6.0 ],
-                                        [9.0, 6.0 ],
-                                        [0.0, 14.0],
-                                        [2.0, 19.0],
-                                        [7.0, 0.0 ], # This point is duplicate
-                                        [9.0, 17.0]], precision = precision)
+def _duplicated_2d_points_on_a_plane(simplicial_complex_helper):
+    simplex_tree = simplicial_complex_helper(points = [[1.0, 1.0 ],
+                                                       [7.0, 0.0 ], # This point is duplicate
+                                                       [4.0, 6.0 ],
+                                                       [9.0, 6.0 ],
+                                                       [0.0, 14.0],
+                                                       [2.0, 19.0],
+                                                       [7.0, 0.0 ], # This point is duplicate
+                                                       [9.0, 17.0]])
 
-    simplex_tree = cplx.create_simplex_tree()
     assert simplex_tree.dimension() == 2
     assert simplex_tree.num_vertices() == 7
     assert simplex_tree.num_simplices() == 25
 
 def test_duplicated_2d_points_on_a_plane():
-    for simplicial_complex in [AlphaComplex, DelaunayComplex, DelaunayCechComplex]:
-        for precision in ['fast', 'safe', 'exact']:
-            _duplicated_2d_points_on_a_plane(simplicial_complex, precision)
+    for simplicial_complex_helper in [alpha_complex, delaunay_complex, delaunay_cech_complex]:
+        _duplicated_2d_points_on_a_plane(simplicial_complex_helper)
 
 def test_output_squared_values():
-    for filtration in ['alpha', 'cech', None]:
+    for simplicial_complex_helper in [alpha_complex, delaunay_cech_complex]:
         for precision in ['fast', 'safe', 'exact']:
-            dc = DelaunayComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
-                                 precision = precision)
-            stree = dc.create_simplex_tree(filtration='cech', output_squared_values=False)
-            stree_sqrt = dc.create_simplex_tree(filtration='cech', output_squared_values=True)
+            pts=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
+            stree = simplicial_complex_helper(points=pts, precision=precision, output_squared_values=False)
+            stree_sqrt = simplicial_complex_helper(points=pts, precision=precision, output_squared_values=True)
             for simplex, filt in stree_sqrt.get_filtration():
                 # np.testing.assert_almost_equal(float('nan'), float('nan')) is ok
                 # while float('nan') == float('nan') is False

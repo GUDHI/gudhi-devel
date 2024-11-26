@@ -8,7 +8,8 @@
 #
 # Modification(s):
 #   - 2024/03 Vincent Rouvreau: Renamed AlphaComplex as DelaunayComplex. AlphaComplex inherits from it.
-#   - 2024/10 Vincent Rouvreau: Add square root filtration values interface
+#   - 2024/10 Vincent Rouvreau: Add square root filtration values interface and new function interfaces (instead of
+#                               classes)
 #   - YYYY/MM Author: Description of the modification
 
 from __future__ import print_function
@@ -65,12 +66,11 @@ cdef class DelaunayComplex:
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, points: Iterable[Iterable[float]] = [], weights: Optional[Iterable[float]] = None,
                  precision: Literal['fast', 'safe', 'exact'] = 'safe'):
-        """DelaunayComplex constructor.
-
-        Args:
+        """Args:
             points (Iterable[Iterable[float]]): A list of points in d-Dimension.
-            weights (Optional[Iterable[float]]): A list of weights. If set, the number of weights must correspond to the number of points.
-            precision (str): Delaunay complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+            weights (Optional[Iterable[float]]): A list of weights. If set, the number of weights must correspond to
+                the number of points.
+            precision (str): Complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
 
         :raises ValueError: In case of inconsistency between the number of points and weights.
         """
@@ -78,7 +78,11 @@ cdef class DelaunayComplex:
     # The real cython constructor
     def __cinit__(self, points: Iterable[Iterable[float]] = [], weights: Optional[Iterable[float]] = None,
                   precision: Literal['fast', 'safe', 'exact'] = 'safe'):
-        assert precision in ['fast', 'safe', 'exact'], "Delaunay complex precision can only be 'fast', 'safe' or 'exact'"
+        assert precision in [
+            "fast",
+            "safe",
+            "exact",
+        ], "Delaunay complex precision can only be 'fast', 'safe' or 'exact'"
         cdef bool fast = precision == 'fast'
         cdef bool exact = precision == 'exact'
 
@@ -116,9 +120,9 @@ cdef class DelaunayComplex:
                 to `cech` to compute the Delaunay Cech complex.
             output_squared_values: Square root filtration values when True. Default is False.
         Returns:
-            SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th input
-            point. The vertices may not be numbered contiguously as some points may be discarded in the
-            triangulation (duplicate points, weighted hidden point, ...).
+            SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th
+                input point. The vertices may not be numbered contiguously as some points may be discarded in the
+                triangulation (duplicate points, weighted hidden point, ...).
         """
         if not filtration in [None, 'alpha', 'cech']:
             raise ValueError(f"\'{filtration}\' is not a valid filtration value. Must be None, \'alpha\' or \'cech\'")
@@ -140,12 +144,13 @@ cdef class DelaunayComplex:
     def set_float_relative_precision(precision: float):
         """
         Args:
-            precision: When the DelaunayComplex is constructed with :code:`precision = 'safe'` (the default),
-                one can set the float relative precision of filtration values computed in
-                :func:`~gudhi.DelaunayComplex.create_simplex_tree`.
-                Default is :code:`1e-5` (cf. :func:`~gudhi.DelaunayComplex.get_float_relative_precision`).
-                For more details, please refer to
+            precision: When constructing :func:`~gudhi.delaunay_cech_complex`, :func:`~gudhi.alpha_complex`, or
+                :func:`~gudhi.weighted_alpha_complex` with :code:`precision = 'safe'` (the default), one can
+                set the float relative precision of filtration values computed. Default is :code:`1e-5` (cf.
+                :func:`~gudhi.DelaunayComplex.get_float_relative_precision`). For more details, please refer to
                 `CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double <https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html>`_
+
+        :raises ValueError: If precision is not in (0, 1).
         """
         if precision <=0. or precision >= 1.:
             raise ValueError("Relative precision value must be strictly greater than 0 and strictly lower than 1")
@@ -155,8 +160,7 @@ cdef class DelaunayComplex:
     def get_float_relative_precision() -> float:
         """
         Returns:
-            The float relative precision of filtration values computation in
-            :func:`~gudhi.DelaunayComplex.create_simplex_tree` when the DelaunayComplex is constructed with
+            The float relative precision of filtration values computation when constructing with
             :code:`precision = 'safe'` (the default).
         """
         return Delaunay_complex_interface.get_float_relative_precision()
@@ -176,7 +180,7 @@ cdef class AlphaComplex(DelaunayComplex):
 
     .. note::
 
-        When DelaunayComplex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
+        When Alpha Complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
     """
     def create_simplex_tree(self, double max_alpha_square: float = float('inf'),
                             default_filtration_value: bool = False,
@@ -217,37 +221,132 @@ cdef class AlphaComplex(DelaunayComplex):
         return self.this_ptr.get_point(vertex)
 
 
-cdef class DelaunayCechComplex(DelaunayComplex):
-    """DelaunayCechComplex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
+def delaunay_cech_complex(
+    points: Iterable[Iterable[float]] = [],
+    precision: Literal["fast", "safe", "exact"] = "safe",
+    max_alpha: float = float("inf"),
+    output_squared_values: bool = True,
+) -> SimplexTree:
+    """Delaunay Čech complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
 
-    The filtration value of each simplex is equal to the squared radius of its minimal enclosing ball (MEB).
+    The filtration value of each simplex is equal to the radius (squared if `output_squared_values` is set to False) of
+    its minimal enclosing ball (MEB).
 
-    All simplices that have a filtration value strictly greater than a given alpha squared value are not inserted into
-    the complex.
+    All simplices that have a filtration value strictly greater than a given alpha value are not inserted into the
+    complex.
 
     .. note::
 
-        When DelaunayCechComplex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
+        When Delaunay Čech complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
+
+    Args:
+        points (Iterable[Iterable[float]]): A list of points in d-Dimension.
+        precision (str): Delaunay Čech complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+        max_alpha: The maximum alpha square threshold the simplices shall not exceed. Default is set to infinity, and
+            there is very little point using anything else since it does not save time.
+        output_squared_values: Square root filtration values when True. Default is True, but computation is faster when
+            set to False.
+    Returns:
+        SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th
+        input point. The vertices may not be numbered contiguously as some points may be discarded in the triangulation
+        (duplicate points, weighted hidden point, ...).
     """
-    def __init__(self, points: Iterable[Iterable[float]] = [], precision: Literal['fast', 'safe', 'exact'] = 'safe'):
-        """DelaunayCechComplex constructor.
+    cpx = DelaunayComplex(points=points, weights=None, precision=precision)
+    return cpx.create_simplex_tree(
+        max_alpha_square=max_alpha * max_alpha, filtration="cech", output_squared_values=output_squared_values
+    )
 
-        Args:
-            points (Iterable[Iterable[float]]): A list of points in d-Dimension.
-            precision (str): Delaunay Čech complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
-        """
-        super().__init__(points = points, weights = [], precision = precision)
+def delaunay_complex(
+    points: Iterable[Iterable[float]] = [],
+) -> SimplexTree:
+    """Delaunay Complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation. This is the method candidate if filtration values are not needed to be computed (will be set to `NaN`).
 
-    def create_simplex_tree(self, double max_alpha_square: float = float('inf'),
-                            bool output_squared_values: bool = False) -> SimplexTree:
-        """
-        Args:
-            max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
-                infinity, and there is very little point using anything else since it does not save time.
-            output_squared_values: Square root filtration values when True. Default is False.
-        Returns:
-            SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th input
-            point. The vertices may not be numbered contiguously as some points may be discarded in the triangulation
-            (duplicate points, weighted hidden point, ...).
-        """
-        return super().create_simplex_tree(max_alpha_square, 'cech', output_squared_values)
+    Args:
+        points (Iterable[Iterable[float]]): A list of points in d-Dimension.
+
+    Returns:
+        SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th
+        input point. The vertices may not be numbered contiguously as some points may be discarded in the triangulation
+        (duplicate points, ...).
+    """
+    # Weights and precision has no effect on the triangulation, set precision to "fast" for fatser computation
+    cpx = DelaunayComplex(points=points, weights=None, precision="fast")
+    return cpx.create_simplex_tree(
+        max_alpha_square=0., filtration=None, output_squared_values=False
+    )
+
+def alpha_complex(
+    points: Iterable[Iterable[float]] = [],
+    precision: Literal["fast", "safe", "exact"] = "safe",
+    double max_alpha: float = float("inf"),
+    bool output_squared_values: bool = True
+) -> SimplexTree:
+    """Alpha complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
+
+    The filtration value of each simplex is computed as the radius of the smallest empty sphere passing through all of
+    its vertices.
+
+    All simplices that have a filtration value strictly greater than a given alpha value are not inserted into the
+    complex.
+
+    For more details about the algorithm, please refer to the
+    `Alpha complex C++ documentation <https://gudhi.inria.fr/doc/latest/group__alpha__complex.html>`_
+
+    .. note::
+
+        When DelaunayComplex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
+
+    Args:
+        points (Iterable[Iterable[float]]): A list of points in d-Dimension.
+        precision (str): Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+        max_alpha: The maximum alpha threshold the simplices shall not exceed. Default is set to infinity, and there is
+            very little point using anything else since it does not save time.
+        output_squared_values: Square root filtration values when True. Default is True, but computation is faster when
+            set to False.
+    Returns:
+        SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th
+        input point. The vertices may not be numbered contiguously as some points may be discarded in the triangulation
+        (duplicate points, ...).
+    """
+    cpx = DelaunayComplex(points=points, weights=None, precision=precision)
+    return cpx.create_simplex_tree(
+        max_alpha_square=max_alpha * max_alpha, filtration="alpha", output_squared_values=output_squared_values
+    )
+
+def weighted_alpha_complex(
+    points: Iterable[Iterable[float]] = [],
+    weights: Iterable[float] = [],
+    precision: Literal["fast", "safe", "exact"] = "safe",
+    double max_power_distance: float = float("inf"),
+) -> SimplexTree:
+    """Weighted Alpha complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
+
+    The filtration value of each simplex is computed as the power distance of the smallest power sphere passing through
+    all of its vertices.
+
+    All simplices that have a filtration value strictly greater than a given alpha square value are not inserted into
+    the complex.
+
+    For more details about the algorithm, please refer to the
+    `Alpha complex C++ documentation <https://gudhi.inria.fr/doc/latest/group__alpha__complex.html>`_
+
+    .. note::
+
+        When DelaunayComplex is constructed with an infinite value of power distance, the complex is a Delaunay complex.
+
+    Args:
+        points (Iterable[Iterable[float]]): A list of points in d-Dimension.
+        precision (str): Weighted Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+        max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
+            infinity, and there is very little point using anything else since it does not save time.
+    Returns:
+        SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th
+        input point. The vertices may not be numbered contiguously as some points may be discarded in the triangulation
+        (duplicate points, weighted hidden point, ...).
+
+    :raises ValueError: In case of inconsistency between the number of points and weights.
+    """
+    cpx = DelaunayComplex(points=points, weights=weights, precision=precision)
+    return cpx.create_simplex_tree(
+        max_alpha_square=max_power_distance, filtration="alpha", output_squared_values=False
+    )

@@ -27,6 +27,7 @@
 #include <vector>
 #include <memory>  // for std::unique_ptr
 #include <stdexcept>
+#include <cmath>  // for std::sqrt
 
 namespace Gudhi {
 
@@ -85,11 +86,13 @@ bool create_complex(Delaunay_complex& delaunay_complex, Simplex_tree_interface* 
                                      true);
     if (result == true) {
       // Construct the Delaunay-Cech complex by assigning filtration values with MEB
-      if (output_squared_values)
+      if (output_squared_values) {
         Gudhi::cech_complex::assign_MEB_filtration<true>(Kernel(), *simplex_tree, points);
-      else
+        simplex_tree->prune_above_filtration(std::sqrt(max_alpha_square));
+      } else {
         Gudhi::cech_complex::assign_MEB_filtration<false>(Kernel(), *simplex_tree, points);
-      simplex_tree->prune_above_filtration(max_alpha_square);
+        simplex_tree->prune_above_filtration(max_alpha_square);
+      }
     }
     return result;
   } else {
