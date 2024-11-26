@@ -219,10 +219,14 @@ def test_duplicated_2d_points_on_a_plane():
 def test_output_squared_values():
     for simplicial_complex_helper in [alpha_complex, delaunay_cech_complex]:
         for precision in ['fast', 'safe', 'exact']:
-            pts=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
-            stree = simplicial_complex_helper(points=pts, precision=precision, output_squared_values=False)
-            stree_sqrt = simplicial_complex_helper(points=pts, precision=precision, output_squared_values=True)
-            for simplex, filt in stree_sqrt.get_filtration():
-                # np.testing.assert_almost_equal(float('nan'), float('nan')) is ok
-                # while float('nan') == float('nan') is False
-                np.testing.assert_almost_equal(filt, math.sqrt(stree.filtration(simplex)))
+            for max_alpha in [float('inf'), math.sqrt(20.)]:
+                pts=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
+                stree = simplicial_complex_helper(points=pts, precision=precision,
+                                                  output_squared_values=False, max_alpha=max_alpha)
+                stree_sqrt = simplicial_complex_helper(points=pts, precision=precision,
+                                                       output_squared_values=True, max_alpha=max_alpha)
+                assert stree.num_simplices() == stree_sqrt.num_simplices()
+                for simplex, filt in stree_sqrt.get_filtration():
+                    # np.testing.assert_almost_equal(float('nan'), float('nan')) is ok
+                    # while float('nan') == float('nan') is False
+                    np.testing.assert_almost_equal(filt, math.sqrt(stree.filtration(simplex)))
