@@ -913,24 +913,28 @@ inline void Chain_matrix<Master_matrix>::print() const
 {
   std::cout << "Column Matrix:\n";
   if constexpr (!Master_matrix::Option_list::has_map_column_container) {
-    for (ID_index i = 0; i < pivotToColumnIndex_.size() && pivotToColumnIndex_[i] != static_cast<Index>(-1); ++i) {
+    for (ID_index i = 0; i < pivotToColumnIndex_.size(); ++i) {
       Index pos = pivotToColumnIndex_[i];
-      const Column& col = matrix_[pos];
-      for (const auto& entry : col) {
-        std::cout << entry.get_row_index() << " ";
+      if (pos != static_cast<Index>(-1)){
+        const Column& col = matrix_[pos];
+        for (const auto& entry : col) {
+          std::cout << entry.get_row_index() << " ";
+        }
+        std::cout << "(" << i << ", " << pos << ")\n";
       }
-      std::cout << "(" << i << ", " << pos << ")\n";
     }
     if constexpr (Master_matrix::Option_list::has_row_access) {
       std::cout << "\n";
       std::cout << "Row Matrix:\n";
-      for (ID_index i = 0; i < pivotToColumnIndex_.size() && pivotToColumnIndex_[i] != static_cast<Index>(-1); ++i) {
+      for (ID_index i = 0; i < pivotToColumnIndex_.size(); ++i) {
         Index pos = pivotToColumnIndex_[i];
-        const Row& row = RA_opt::get_row(pos);
-        for (const auto& entry : row) {
-          std::cout << entry.get_column_index() << " ";
+        if (pos != static_cast<Index>(-1)){
+          const Row& row = RA_opt::get_row(pos);
+          for (const auto& entry : row) {
+            std::cout << entry.get_column_index() << " ";
+          }
+          std::cout << "(" << i << ", " << pos << ")\n";
         }
-        std::cout << "(" << i << ", " << pos << ")\n";
       }
     }
   } else {

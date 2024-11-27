@@ -1,9 +1,5 @@
-
-[![OSx and Win on Azure](https://dev.azure.com/GUDHI/gudhi-devel/_apis/build/status/GUDHI.gudhi-devel?branchName=master)](https://dev.azure.com/GUDHI/gudhi-devel/_build/latest?definitionId=1&branchName=master)
-[![Linux on CircleCI](https://circleci.com/gh/GUDHI/gudhi-devel/tree/master.svg?style=svg)](https://circleci.com/gh/GUDHI/gudhi-devel/tree/master)
-[![Anaconda Cloud](https://anaconda.org/conda-forge/gudhi/badges/version.svg)](https://anaconda.org/conda-forge/gudhi)
-[![Anaconda downloads](https://anaconda.org/conda-forge/gudhi/badges/downloads.svg)](https://anaconda.org/conda-forge/gudhi)
-
+| [![OSx and Win on Azure](https://dev.azure.com/GUDHI/gudhi-devel/_apis/build/status/GUDHI.gudhi-devel?branchName=master)](https://dev.azure.com/GUDHI/gudhi-devel/_build/latest?definitionId=1&branchName=master) [![Linux on CircleCI](https://circleci.com/gh/GUDHI/gudhi-devel/tree/master.svg?style=svg)](https://circleci.com/gh/GUDHI/gudhi-devel/tree/master) | [![Anaconda Cloud](https://anaconda.org/conda-forge/gudhi/badges/version.svg)](https://anaconda.org/conda-forge/gudhi) ![Conda Downloads](https://img.shields.io/conda/d/conda-forge/gudhi) | ![PyPI - Version](https://img.shields.io/pypi/v/gudhi) ![PyPI - Downloads](https://img.shields.io/pypi/dm/gudhi) |
+| --- | --- | --- |
 
 ![GUDHI](src/common/doc/Gudhi_banner.png "Topological Data Analysis (TDA) and Higher Dimensional Geometry Understanding")
 
