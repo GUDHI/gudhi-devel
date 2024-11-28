@@ -141,7 +141,8 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
    * @return The @ref MatIdx index of the inserted boundary.
    */
   template <class Boundary_range = Boundary>
-  Index insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
+  Index insert_boundary(const Boundary_range& boundary,
+                        Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief It does the same as the other version, but allows the boundary cells to be identified without restrictions
    * except that all IDs have to be strictly increasing in the order of filtration. Note that you should avoid then
@@ -161,7 +162,8 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
    * @return The @ref MatIdx index of the inserted boundary.
    */
   template <class Boundary_range = Boundary>
-  Index insert_boundary(ID_index cellIndex, const Boundary_range& boundary, Dimension dim = -1);
+  Index insert_boundary(ID_index cellIndex, const Boundary_range& boundary,
+                        Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Returns the column at the given @ref MatIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -384,7 +386,7 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
 
 template <class Master_matrix>
 inline Boundary_matrix<Master_matrix>::Boundary_matrix(Column_settings* colSettings)
-    : Dim_opt(-1),
+    : Dim_opt(Master_matrix::template get_null_value<Dimension>()),
       Swap_opt(),
       Pair_opt(),
       RA_opt(),
@@ -396,7 +398,7 @@ template <class Master_matrix>
 template <class Boundary_range>
 inline Boundary_matrix<Master_matrix>::Boundary_matrix(const std::vector<Boundary_range>& orderedBoundaries,
                                                        Column_settings* colSettings)
-    : Dim_opt(-1),
+    : Dim_opt(Master_matrix::template get_null_value<Dimension>()),
       Swap_opt(orderedBoundaries.size()),
       Pair_opt(),
       RA_opt(orderedBoundaries.size()),
@@ -413,7 +415,7 @@ inline Boundary_matrix<Master_matrix>::Boundary_matrix(const std::vector<Boundar
 template <class Master_matrix>
 inline Boundary_matrix<Master_matrix>::Boundary_matrix(unsigned int numberOfColumns, 
                                                        Column_settings* colSettings)
-    : Dim_opt(-1),
+    : Dim_opt(Master_matrix::template get_null_value<Dimension>()),
       Swap_opt(numberOfColumns),
       Pair_opt(),
       RA_opt(numberOfColumns),
@@ -471,7 +473,7 @@ template <class Boundary_range>
 inline typename Boundary_matrix<Master_matrix>::Index Boundary_matrix<Master_matrix>::insert_boundary(
     ID_index cellIndex, const Boundary_range& boundary, Dimension dim) 
 {
-  if (dim == -1) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
+  if (dim == Master_matrix::template get_null_value<Dimension>()) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
 
   _orderRowsIfNecessary();
 
@@ -543,7 +545,7 @@ inline typename Boundary_matrix<Master_matrix>::Index Boundary_matrix<Master_mat
   static_assert(Master_matrix::Option_list::has_removable_columns,
                 "'remove_last' is not implemented for the chosen options.");
 
-  if (nextInsertIndex_ == 0) return -1;  // empty matrix
+  if (nextInsertIndex_ == 0) return Master_matrix::template get_null_value<Index>();  // empty matrix
   --nextInsertIndex_;
 
   //updates dimension max
@@ -558,7 +560,7 @@ inline typename Boundary_matrix<Master_matrix>::Index Boundary_matrix<Master_mat
     pivot = it->second.get_pivot();
     if constexpr (activeSwapOption) {
       // if the removed column is positive, the pivot won't change value
-      if (Swap_opt::rowSwapped_ && pivot != static_cast<ID_index>(-1)) {
+      if (Swap_opt::rowSwapped_ && pivot != Master_matrix::template get_null_value<ID_index>()) {
         Swap_opt::_orderRows();
         pivot = it->second.get_pivot();
       }
@@ -568,7 +570,7 @@ inline typename Boundary_matrix<Master_matrix>::Index Boundary_matrix<Master_mat
     pivot = matrix_[nextInsertIndex_].get_pivot();
     if constexpr (activeSwapOption) {
       // if the removed column is positive, the pivot won't change value
-      if (Swap_opt::rowSwapped_ && pivot != static_cast<ID_index>(-1)) {
+      if (Swap_opt::rowSwapped_ && pivot != Master_matrix::template get_null_value<ID_index>()) {
         Swap_opt::_orderRows();
         pivot = matrix_[nextInsertIndex_].get_pivot();
       }

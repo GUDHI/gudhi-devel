@@ -180,7 +180,8 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * @param dim Ignored.
    */
   template <class Boundary_range>
-  void insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
+  void insert_boundary(const Boundary_range& boundary,
+                       Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Returns the column at the given @ref MatIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -450,7 +451,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(
   // handles a dimension which is not actually stored.
   // TODO: verify if this is not a problem for the cohomology algorithm and if yes,
   // change how Column_dimension_option is choosen.
-  if (dim == -1) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
+  if (dim == Master_matrix::template get_null_value<Dimension>()) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
 
   if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows) {
     if (boundary.begin() != boundary.end()) {
