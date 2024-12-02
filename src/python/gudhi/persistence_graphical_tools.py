@@ -282,27 +282,23 @@ def plot_persistence_diagram(
     :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_ file style name
         (reset persistence if both are set).
     :type persistence_file: string
-    :param alpha: plot transparency value (0.0 transparent through 1.0
-        opaque - default is 0.6).
+    :param alpha: plot transparency value (0.0 transparent through 1.0 opaque - default is 0.6).
     :type alpha: float
     :param band: band (not displayed if :math:`\leq` 0. - default is 0.)
     :type band: float
-    :param max_intervals: maximal number of intervals to display.
-        Selected intervals are those with the longest life time. Set it
-        to 0 to see all. Default value is 1000000.
+    :param max_intervals: maximal number of intervals to display. Selected intervals are those with the longest life
+        time. Set it to 0 to see all. Default value is 1000000.
     :type max_intervals: int
-    :param inf_delta: Infinity is placed at :code:`((max_death - min_birth) x
-        inf_delta)` above :code:`max_death` value. A reasonable value is
-        between 0.05 and 0.5 - default is 0.1.
+    :param inf_delta: Infinity is placed at :code:`((max_death - min_birth) x inf_delta)` above :code:`max_death`
+        value. A reasonable value is between 0.05 and 0.5 - default is 0.1.
     :type inf_delta: float
     :param legend: Display the dimension color legend. Default is None, meaning the legend is displayed if dimension
         is specified in the persistence argument, and not displayed if dimension is not specified.
     :type legend: boolean or None
-    :param colormap: A matplotlib-like qualitative colormaps. Default is None
-        which means :code:`matplotlib.cm.Set1.colors`.
+    :param colormap: A matplotlib-like qualitative colormaps. Default is None which means
+        :code:`matplotlib.cm.Set1.colors`.
     :type colormap: tuple of colors (3-tuple of float between 0. and 1.)
-    :param axes: A matplotlib-like subplot axes. If None, the plot is drawn on
-        a new set of axes.
+    :param axes: A matplotlib-like subplot axes. If None, the plot is drawn on a new set of axes.
     :type axes: `matplotlib.axes.Axes`
     :param fontsize: Fontsize to use in axis.
     :type fontsize: int
@@ -436,8 +432,8 @@ def plot_persistence_density(
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
     :type persistence: an array of (dimension, (birth, death)), an array of (birth, death) or an array of array of
         (birth, death)
-    :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_
-        file style name (reset persistence if both are set).
+    :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_ file style name (reset
+        persistence if both are set).
     :type persistence_file: string
     :param nbins: Evaluate a gaussian kde on a regular grid of nbins x nbins over data extents (default is 300)
     :type nbins: int
