@@ -6,9 +6,10 @@
 #
 # Modification(s):
 #   - 2020/02 Theo Lacombe: Added more options for improved rendering and more flexibility.
-#   - 2022/11 Vincent Rouvreau: "Automatic" legend display detected by _format_handler that returns if the persistence
+#   - 2022/11 Vincent Rouvreau: "Automatic" legend display detected by _array_handler that returns if the persistence
 #                               was a nx2 array.
-#   - 2024/11 Vincent Rouvreau: Support for sklearn like persistence feedback: New _format_handler function
+#   - 2024/11 Vincent Rouvreau: Support for sklearn like persistence feedback: New _format_handler function that
+#                               enhances former _array_handler function.
 #   - YYYY/MM Author: Description of the modification
 
 from os import path
