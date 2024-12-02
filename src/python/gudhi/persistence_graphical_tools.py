@@ -64,13 +64,14 @@ def _format_handler(a):
               Returns a persistence-compatible list so that the plot can be performed seamlessly. It is padding with
               the index on the array, 0 in case of an array, in order to simulate the dimension required by the plot.
     :returns: * List[dimension, [birth, death]] Persistence, compatible with plot functions, list.
-              * boolean Modification status (True if output is different from input)
+              * int Modification status: 0 if not modified, 1 if input was a (n x 2) np.array, 2 if input was an
+                  iterable on (n x 2) np.array
     """
     # Array
     try:
         first_death_value = a[0][1]
         if isinstance(first_death_value, (np.floating, float)):
-            return [[0, x] for x in a], True
+            return [[0, x] for x in a], 1
     except IndexError:
         pass
     # Iterable of array
@@ -83,20 +84,19 @@ def _format_handler(a):
                 raise TypeError("Should be a list of (birth,death)")
             pers.extend([fake_dim, x] for x in elt)
             fake_dim = fake_dim + 1
-        return pers, True
+        return pers, 2
     except TypeError:
         pass
     # Nothing to be done otherwise
-    return a, False
+    return a, 0
 
 
 def _limit_to_max_intervals(persistence, max_intervals, key):
     """This function returns truncated persistence if length is bigger than max_intervals.
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
     :type persistence: an array of (dimension, (birth, death)) or an array of (birth, death).
-    :param max_intervals: maximal number of intervals to display.
-        Selected intervals are those with the longest life time. Set it
-        to 0 to see all. Default value is 1000.
+    :param max_intervals: maximal number of intervals to display. Selected intervals are those with the longest life
+        time. Set it to 0 to see all. Default value is 1000.
     :type max_intervals: int.
     :param key: key function for sort algorithm.
     :type key: function or lambda.
@@ -192,8 +192,8 @@ def plot_persistence_barcode(
         plt.rc("text", usetex=False)
         plt.rc("font", family="DejaVu Sans")
 
-    # By default, let's say the persistence is not an array of shape (N x 2) - Can be from a persistence file
-    nx2_array = False
+    # By default, let's say the persistence is List[dimension, [birth, death]] - Can be from a persistence file
+    input_type = 0
     if persistence_file != "":
         if path.isfile(persistence_file):
             # Reset persistence
@@ -206,7 +206,7 @@ def plot_persistence_barcode(
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), persistence_file)
 
     try:
-        persistence, nx2_array = _format_handler(persistence)
+        persistence, input_type = _format_handler(persistence)
         persistence = _limit_to_max_intervals(
             persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
         )
@@ -217,8 +217,7 @@ def plot_persistence_barcode(
         pass
 
     delta = (max_death - min_birth) * inf_delta
-    # Replace infinity values with max_death + delta for bar code to be more
-    # readable
+    # Replace infinity values with max_death + delta for bar code to be more readable
     infinity = max_death + delta
     axis_start = min_birth - delta
 
@@ -233,14 +232,14 @@ def plot_persistence_barcode(
 
     axes.barh(range(len(x)), y, left=x, alpha=alpha, color=c, linewidth=0)
 
-    if legend is None:
+    if legend is None and input_type != 1:
         # By default, if persistence is an array of (dimension, (birth, death)), or an
         # iterator[iterator[birth, death]], display the legend
         legend = True
 
     if legend:
         title = "Dimension"
-        if nx2_array:
+        if input_type == 2:
             title = "Range"
         dimensions = {item[0] for item in persistence}
         axes.legend(
@@ -321,8 +320,8 @@ def plot_persistence_diagram(
         plt.rc("text", usetex=False)
         plt.rc("font", family="DejaVu Sans")
 
-    # By default, let's say the persistence is not an array of shape (N x 2) - Can be from a persistence file
-    nx2_array = False
+    # By default, let's say the persistence is List[dimension, [birth, death]] - Can be from a persistence file
+    input_type = 0
     if persistence_file != "":
         if path.isfile(persistence_file):
             # Reset persistence
@@ -335,7 +334,7 @@ def plot_persistence_diagram(
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), persistence_file)
 
     try:
-        persistence, nx2_array = _format_handler(persistence)
+        persistence, input_type = _format_handler(persistence)
         persistence = _limit_to_max_intervals(
             persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
         )
@@ -388,14 +387,14 @@ def plot_persistence_diagram(
         axes.set_yticks(yt)
         axes.set_yticklabels(ytl)
 
-    if legend is None:
+    if legend is None and input_type != 1:
         # By default, if persistence is an array of (dimension, (birth, death)), or an
         # iterator[iterator[birth, death]], display the legend
         legend = True
 
     if legend:
         title = "Dimension"
-        if nx2_array:
+        if input_type == 2:
             title = "Range"
         dimensions = list({item[0] for item in persistence})
         axes.legend(

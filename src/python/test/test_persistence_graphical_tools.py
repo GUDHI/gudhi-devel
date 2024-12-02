@@ -17,27 +17,27 @@ import warnings
 
 def test_array_handler():
     diags = np.array([[1, 2], [3, 4], [5, 6]], float)
-    arr_diags, nx2_array = gd.persistence_graphical_tools._format_handler(diags)
-    assert nx2_array
+    arr_diags, input_type = gd.persistence_graphical_tools._format_handler(diags)
+    assert input_type == 1
     for idx in range(len(diags)):
         assert arr_diags[idx][0] == 0
         np.testing.assert_array_equal(arr_diags[idx][1], diags[idx])
 
     diags = [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
-    arr_diags, nx2_array = gd.persistence_graphical_tools._format_handler(diags)
-    assert nx2_array
+    arr_diags, input_type = gd.persistence_graphical_tools._format_handler(diags)
+    assert input_type == 1
     for idx in range(len(diags)):
         assert arr_diags[idx][0] == 0
         assert arr_diags[idx][1] == diags[idx]
 
     diags = [(0, (1.0, 2.0)), (0, (3.0, 4.0)), (0, (5.0, 6.0))]
-    arr_diags, nx2_array = gd.persistence_graphical_tools._format_handler(diags)
-    assert not nx2_array
+    arr_diags, input_type = gd.persistence_graphical_tools._format_handler(diags)
+    assert input_type == 0
     assert arr_diags == diags
 
     diags = [[(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)], [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]]
-    arr_diags, nx2_array = gd.persistence_graphical_tools._format_handler(diags)
-    assert nx2_array
+    arr_diags, input_type = gd.persistence_graphical_tools._format_handler(diags)
+    assert input_type == 2
     assert len(arr_diags) == 6
     for idx in range(3):
         assert arr_diags[idx][0] == 0
@@ -143,7 +143,6 @@ def _sklearn_one_homology_dim_plot_persistence(function):
     diags = [np.array([[11.0, 12.0], [6.0, 7.0]]), np.array([[10.0, 11.0], [5.0, 6.0]])]
     for diag in diags:
         ax = function(diag)
-        assert ax.get_legend().get_title().get_text() == "Range"
 
 
 def test_sklearn_one_homology_dim_plot_persistence():
