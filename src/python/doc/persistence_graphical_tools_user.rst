@@ -50,17 +50,17 @@ This function can display the persistence result as a diagram:
     ax.set_aspect("equal")  # forces to be square shaped
     plt.show()
 
-Note that (as barcode and density) it can also take a simple `np.array` 
+Note that (as barcode and density) it can also take a simple `np.array`
 of shape (N x 2) encoding a persistence diagram (in a given dimension).
 
 .. plot::
     :include-source:
-    
+
     import matplotlib.pyplot as plt
     import gudhi
     import numpy as np
     d = np.array([[0., 1.], [1., 2.], [1., np.inf]])
-    gudhi.plot_persistence_diagram(d)
+    gudhi.plot_persistence_diagram(d, legend=False)
     plt.show()
 
 Persistence density
@@ -82,7 +82,7 @@ If you want more information on a specific dimension, for instance:
         persistence_file=persistence_file, only_this_dim=1)
     # Use subplots to display diagram and density side by side
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
-    gudhi.plot_persistence_diagram(persistence=birth_death, axes=axes[0])
+    gudhi.plot_persistence_diagram(persistence=birth_death, axes=axes[0], legend=False)
     gudhi.plot_persistence_density(persistence=birth_death, axes=axes[1])
     plt.show()
 

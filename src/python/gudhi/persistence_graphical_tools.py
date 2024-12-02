@@ -8,6 +8,7 @@
 #   - 2020/02 Theo Lacombe: Added more options for improved rendering and more flexibility.
 #   - 2022/11 Vincent Rouvreau: "Automatic" legend display detected by _format_handler that returns if the persistence
 #                               was a nx2 array.
+#   - 2024/11 Vincent Rouvreau: Support for sklearn like persistence feedback: New _format_handler function
 #   - YYYY/MM Author: Description of the modification
 
 from os import path
@@ -55,6 +56,7 @@ def _min_birth_max_death(persistence, band=0.0):
         max_death = max_death + 1.0
     return (min_birth, max_death)
 
+
 def _format_handler(a):
     """
     :param a: * If array, assumes it is a (n x 2) np.array
@@ -71,20 +73,22 @@ def _format_handler(a):
             return [[0, x] for x in a], True
     except IndexError:
         pass
+    # Iterable of array
     try:
         pers = []
         fake_dim = 0
         for elt in a:
-            np_elt = np.array(elt)
-            if np_elt.dtype.kind == 'f' and np_elt.shape[1] != 2:
-                raise ValueError("Should be a list of (birth,death)")
-            for x in np_elt:
-                pers.append([fake_dim, x])
+            first_death_value = elt[0][1]
+            if not isinstance(first_death_value, (np.floating, float)):
+                raise TypeError("Should be a list of (birth,death)")
+            pers.extend([fake_dim, x] for x in elt)
             fake_dim = fake_dim + 1
         return pers, True
-    except ValueError:
+    except TypeError:
         pass
+    # Nothing to be done otherwise
     return a, False
+
 
 def _limit_to_max_intervals(persistence, max_intervals, key):
     """This function returns truncated persistence if length is bigger than max_intervals.
@@ -146,35 +150,33 @@ def plot_persistence_barcode(
     axes=None,
     fontsize=16,
 ):
-    """This function plots the persistence bar code from persistence values list
-    , a np.array of shape (N x 2) (representing a diagram
-    in a single homology dimension),
-    or from a `persistence diagram <fileformats.html#persistence-diagram>`_ file.
+    """This function plots the persistence bar code from persistence values list, a np.array of shape (N x 2)
+    (representing a diagram in a single homology dimension), a list of np.array of shape (N x 2)
+    (representing a diagram in a range of homology dimensions), or from a `persistence diagram
+    <fileformats.html#persistence-diagram>`_ file.
 
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
-    :type persistence: an array of (dimension, (birth, death)) or an array of (birth, death)
+    :type persistence: an array of (dimension, (birth, death)), an array of (birth, death) or an array of array of
+        (birth, death)
     :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_ file style name
         (reset persistence if both are set).
     :type persistence_file: string
-    :param alpha: barcode transparency value (0.0 transparent through 1.0
-        opaque - default is 0.6).
+    :param alpha: barcode transparency value (0.0 transparent through 1.0 opaque - default is 0.6).
     :type alpha: float
-    :param max_intervals: maximal number of intervals to display.
-        Selected intervals are those with the longest life time. Set it
-        to 0 to see all. Default value is 20000.
+    :param max_intervals: maximal number of intervals to display. Selected intervals are those with the longest life
+        time. Set it to 0 to see all. Default value is 20000.
     :type max_intervals: int
-    :param inf_delta: Infinity is placed at :code:`((max_death - min_birth) x
-        inf_delta)` above :code:`max_death` value. A reasonable value is
-        between 0.05 and 0.5 - default is 0.1.
+    :param inf_delta: Infinity is placed at :code:`((max_death - min_birth) x inf_delta)` above :code:`max_death`
+        value. A reasonable value is between 0.05 and 0.5 - default is 0.1.
     :type inf_delta: float
-    :param legend: Display the dimension color legend. Default is None, meaning the legend is displayed if dimension
-        is specified in the persistence argument, and not displayed if dimension is not specified.
+    :param legend: Display the color legend. Default is None, meaning the legend is displayed if dimension is specified
+        in the persistence argument or if persistence is a range over an array of (birth, death), and not displayed
+        otherwise.
     :type legend: boolean or None
-    :param colormap: A matplotlib-like qualitative colormaps. Default is None
-        which means :code:`matplotlib.cm.Set1.colors`.
+    :param colormap: A matplotlib-like qualitative colormaps. Default is None which means
+        :code:`matplotlib.cm.Set1.colors`.
     :type colormap: tuple of colors (3-tuple of float between 0. and 1.)
-    :param axes: A matplotlib-like subplot axes. If None, the plot is drawn on
-        a new set of axes.
+    :param axes: A matplotlib-like subplot axes. If None, the plot is drawn on a new set of axes.
     :type axes: `matplotlib.axes.Axes`
     :param fontsize: Fontsize to use in axis.
     :type fontsize: int
@@ -231,14 +233,19 @@ def plot_persistence_barcode(
 
     axes.barh(range(len(x)), y, left=x, alpha=alpha, color=c, linewidth=0)
 
-    if legend is None and not nx2_array:
-        # By default, if persistence is an array of (dimension, (birth, death)), display the legend
+    if legend is None:
+        # By default, if persistence is an array of (dimension, (birth, death)), or an
+        # iterator[iterator[birth, death]], display the legend
         legend = True
 
     if legend:
+        title = "Dimension"
+        if nx2_array:
+            title = "Range"
         dimensions = {item[0] for item in persistence}
         axes.legend(
             handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions],
+            title=title,
             loc="best",
         )
 
@@ -265,12 +272,14 @@ def plot_persistence_diagram(
     fontsize=16,
     greyblock=True,
 ):
-    r"""This function plots the persistence diagram from persistence values
-    list, a np.array of shape (N x 2) representing a diagram in a single
-    homology dimension, or from a `persistence diagram <fileformats.html#persistence-diagram>`_ file`.
+    """This function plots the persistence diagram from persistence values list, a np.array of shape (N x 2)
+    (representing a diagram in a single homology dimension), a list of np.array of shape (N x 2)
+    (representing a diagram in a range of homology dimensions), or from a `persistence diagram
+    <fileformats.html#persistence-diagram>`_ file.
 
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
-    :type persistence: an array of (dimension, (birth, death)) or an array of (birth, death)
+    :type persistence: an array of (dimension, (birth, death)), an array of (birth, death) or an array of array of
+        (birth, death)
     :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_ file style name
         (reset persistence if both are set).
     :type persistence_file: string
@@ -379,14 +388,19 @@ def plot_persistence_diagram(
         axes.set_yticks(yt)
         axes.set_yticklabels(ytl)
 
-    if legend is None and not nx2_array:
-        # By default, if persistence is an array of (dimension, (birth, death)), display the legend
+    if legend is None:
+        # By default, if persistence is an array of (dimension, (birth, death)), or an
+        # iterator[iterator[birth, death]], display the legend
         legend = True
 
     if legend:
+        title = "Dimension"
+        if nx2_array:
+            title = "Range"
         dimensions = list({item[0] for item in persistence})
         axes.legend(
             handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions],
+            title=title,
             loc="lower right",
         )
 
@@ -411,15 +425,18 @@ def plot_persistence_density(
     fontsize=16,
     greyblock=False,
 ):
-    """This function plots the persistence density from persistence values list, np.array of shape (N x 2) representing
-    a diagram in a single homology dimension, or from a `persistence diagram <fileformats.html#persistence-diagram>`_
-    file. Be aware that this function does not distinguish the dimension, it is up to you to select the required one.
+    """This function plots the persistence density from persistence values list, a np.array of shape (N x 2)
+    (representing a diagram in a single homology dimension), a list of np.array of shape (N x 2)
+    (representing a diagram in a range of homology dimensions), or from a `persistence diagram
+    <fileformats.html#persistence-diagram>`_ file.
+    Be aware that this function does not distinguish the dimension, it is up to you to select the required one.
     This function also does not handle degenerate data set (scipy correlation matrix inversion can fail).
 
     :Requires: `SciPy <installation.html#scipy>`_
 
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
-    :type persistence: an array of (dimension, (birth, death)) or an array of (birth, death)
+    :type persistence: an array of (dimension, (birth, death)), an array of (birth, death) or an array of array of
+        (birth, death)
     :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_
         file style name (reset persistence if both are set).
     :type persistence_file: string
@@ -489,9 +506,7 @@ def plot_persistence_density(
         )
         persistence_dim = persistence_dim[np.isfinite(persistence_dim[:, 1])]
         persistence_dim = np.array(
-            _limit_to_max_intervals(
-                persistence_dim, max_intervals, key=lambda life_time: life_time[1] - life_time[0]
-            )
+            _limit_to_max_intervals(persistence_dim, max_intervals, key=lambda life_time: life_time[1] - life_time[0])
         )
 
         # Set as numpy array birth and death (remove undefined values - inf and NaN)
