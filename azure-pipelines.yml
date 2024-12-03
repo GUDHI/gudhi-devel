@@ -45,9 +45,8 @@ jobs:
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
     pool:
-      vmImage: windows-latest
+      vmImage: registry.gitlab.inria.fr/vrouvrea/play_with_ci/gudhi-windows-ci:latest
     variables:
-      pythonVersion: "3.9"
       cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
       # WITH_GUDHI_PYTHON=OFF on purpose. It is set to ON on a second cmake call
       gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
@@ -56,32 +55,29 @@ jobs:
       extraCmakeOptions: -DPython_FIND_REGISTRY=LAST
 
     steps:
-      # Use a specific Python version
-      - task: UsePythonVersion@0
-        displayName: Use Python $(pythonVersion)
-        inputs:
-          versionSpec: $(pythonVersion)
-          addToPath: true
-          architecture: "x64"
-
-      - script: |
-          git submodule update --init
-          python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
-          python -m pip install --user -r ext/gudhi-deploy/test-requirements.txt
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
-          # Only vcpkg release libs for CI
-          echo.set(VCPKG_BUILD_TYPE release)>> C:\vcpkg\triplets\x64-windows.cmake
-          vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
-          choco install -y ninja --force --force-dependencies
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
-        displayName: "Install build dependencies"
       - script: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(gudhiCmakeOptions) ..
+          cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAUpytest
+          pytest-cov
+          sphinx
+          sphinxcontrib-bibtex
+          sphinx-paramlinks
+          sphinx-autodoc-typehints
+          pydata-sphinx-theme>=0.8.0
+          matplotlib
+          scipy>=1.6.0
+          scikit-learn>=0.24.0
+          pandas # Required by scikit-learn >= 1.5.0 for fetch_openml
+          POT
+          tensorflow
+          tensorflow-addons
+          torch
+          pykeops
+          hnswlib
+          eagerpy
+          networkxLT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(gudhiCmakeOptions) ..
           IF %ERRORLEVEL% NEQ 0 EXIT 1
           ninja
           IF %ERRORLEVEL% NEQ 0 EXIT 1
