@@ -29,6 +29,8 @@
 // /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
 #include "gudhi/Simplex_tree.h"
 
+#include "test_vector_filtration_simplex_tree.h"
+
 using namespace Gudhi;
 
 typedef boost::mpl::list<Simplex_tree<>,
@@ -1241,4 +1243,215 @@ BOOST_AUTO_TEST_CASE(simplex_data) {
   st.expansion(3);
   st.simplex_data(st.find({0, 1, 2})) = 4;
   BOOST_CHECK(st.simplex_data(st.find({0, 1})) == 5);
+}
+
+typedef boost::mpl::list<Simplex_tree<Simplex_tree_options_custom_fil_values_default>,
+                         Simplex_tree<Simplex_tree_options_custom_fil_values_fast_persistence>,
+                         Simplex_tree<Simplex_tree_options_custom_fil_values_full_featured> >
+    list_of_custom_fil_variants;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(initialize_filtration_std, typeST, list_of_tested_variants) {
+  typeST st;
+  using Vertex_handle = typename typeST::Vertex_handle;
+  using Filtration_value = typename typeST::Filtration_value;
+
+  auto inf = typeST::Filtration_simplex_base::get_infinity();
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, 3.);
+  st.insert_simplex_and_subfaces({2, 3, 4}, 2.);
+  st.insert_simplex_and_subfaces({2, 3, 1}, inf);
+
+  std::vector<std::vector<Vertex_handle> > simplices{
+    {2},
+    {3},
+    {3, 2},
+    {4},
+    {4, 2},
+    {4, 3},
+    {4, 3, 2},
+    {0},
+    {1},
+    {1, 0},
+    {2, 0},
+    {2, 1},
+    {2, 1, 0},
+    {3, 1},
+    {3, 2, 1}
+  };
+  std::vector<Filtration_value> fil{
+    2.,
+    2.,
+    2.,
+    2.,
+    2.,
+    2.,
+    2.,
+    3.,
+    3.,
+    3.,
+    3.,
+    3.,
+    3.,
+    inf,
+    inf
+  };
+
+  st.initialize_filtration();
+  unsigned int i = 0;
+  for (auto sh : st.filtration_simplex_range()){
+    unsigned int j = 0;
+    for (auto v : st.simplex_vertex_range(sh)){
+      BOOST_CHECK_EQUAL(v, simplices[i][j]);
+      ++j;
+    }
+    BOOST_CHECK_EQUAL(st.filtration(sh), fil[i]);
+    ++i;
+  }
+  BOOST_CHECK_EQUAL(i, 15);
+
+  st.initialize_filtration(true);
+  i = 0;
+  for (auto sh : st.filtration_simplex_range()){
+    unsigned int j = 0;
+    for (auto v : st.simplex_vertex_range(sh)){
+      BOOST_CHECK_EQUAL(v, simplices[i][j]);
+      ++j;
+    }
+    BOOST_CHECK_EQUAL(st.filtration(sh), fil[i]);
+    ++i;
+  }
+  BOOST_CHECK_EQUAL(i, 13);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(initialize_filtration_vector, typeST, list_of_custom_fil_variants) {
+  typeST st;
+  using Vertex_handle = typename typeST::Vertex_handle;
+  using Filtration_value = typename typeST::Filtration_value;
+  using Simplex_handle = typename typeST::Simplex_handle;
+
+  auto inf = typeST::Filtration_simplex_base::get_infinity();
+  auto max = std::numeric_limits<int>::max();
+
+  st.insert_simplex_and_subfaces({2, 1, 0}, {3, 1});
+  st.insert_simplex_and_subfaces({2, 3, 4}, {2, max});
+  st.insert_simplex_and_subfaces({2, 3, 1}, inf);
+
+  std::vector<std::vector<Vertex_handle> > simplices1{
+    {2},
+    {3},
+    {3, 2},
+    {4},
+    {4, 2},
+    {4, 3},
+    {4, 3, 2},
+    {0},
+    {1},
+    {1, 0},
+    {2, 0},
+    {2, 1},
+    {2, 1, 0},
+    {3, 1},
+    {3, 2, 1}
+  };
+  std::vector<Filtration_value> fil1{
+    {2, 1},
+    {2, max},
+    {2, max},
+    {2, max},
+    {2, max},
+    {2, max},
+    {2, max},
+    {3, 1},
+    {3, 1},
+    {3, 1},
+    {3, 1},
+    {3, 1},
+    {3, 1},
+    inf,
+    inf
+  };
+
+  std::vector<std::vector<Vertex_handle> > simplices2{
+    {0},
+    {1},
+    {1, 0},
+    {2},
+    {2, 0},
+    {2, 1},
+    {2, 1, 0}
+  };
+  std::vector<Filtration_value> fil2{
+    {3, 1},
+    {3, 1},
+    {3, 1},
+    {2, 1},
+    {3, 1},
+    {3, 1},
+    {3, 1}
+  };
+
+  auto lex_order = [&st](Simplex_handle sh1, Simplex_handle sh2) -> bool {
+    auto rg1 = st.simplex_vertex_range(sh1);
+    auto rg2 = st.simplex_vertex_range(sh2);
+    auto it1 = rg1.begin();
+    auto it2 = rg2.begin();
+    while (it1 != rg1.end() && it2 != rg2.end()) {
+      if (*it1 == *it2) {
+        ++it1;
+        ++it2;
+      } else {
+        return *it1 < *it2;
+      }
+    }
+    return ((it1 == rg1.end()) && (it2 != rg2.end()));
+  };
+
+  st.initialize_filtration(
+      [&](Simplex_handle sh1, Simplex_handle sh2) {
+        auto f1 = st.filtration(sh1);
+        auto f2 = st.filtration(sh2);
+        if (f1[0] == f2[0]) {
+          return lex_order(sh1, sh2);
+        }
+        return st.filtration(sh1)[0] < st.filtration(sh2)[0];
+      },
+      [](Simplex_handle sh) { return false; });
+  unsigned int i = 0;
+  for (auto sh : st.filtration_simplex_range()){
+    unsigned int j = 0;
+    for (auto v : st.simplex_vertex_range(sh)){
+      BOOST_CHECK_EQUAL(v, simplices1[i][j]);
+      ++j;
+    }
+    BOOST_CHECK(st.filtration(sh) == fil1[i]);
+    ++i;
+  }
+  BOOST_CHECK_EQUAL(i, 15);
+
+  st.initialize_filtration(
+      [&](Simplex_handle sh1, Simplex_handle sh2) {
+        auto f1 = st.filtration(sh1);
+        auto f2 = st.filtration(sh2);
+        auto v1 = f1.size() == 1 ? f1[0] : f1[1];
+        auto v2 = f2.size() == 1 ? f2[0] : f2[1];
+        if (v1 == v2) {
+          return lex_order(sh1, sh2);
+        }
+        return v1 < v2;
+      },
+      [&st, max](Simplex_handle sh) {
+        auto f = st.filtration(sh);
+        return (f.size() == 1 ? f[0] : f[1]) == max;
+      });
+  i = 0;
+  for (auto sh : st.filtration_simplex_range()){
+    unsigned int j = 0;
+    for (auto v : st.simplex_vertex_range(sh)){
+      BOOST_CHECK_EQUAL(v, simplices2[i][j]);
+      ++j;
+    }
+    BOOST_CHECK(st.filtration(sh) == fil2[i]);
+    ++i;
+  }
+  BOOST_CHECK_EQUAL(i, 7);
 }

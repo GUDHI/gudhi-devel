@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <cstdint>  // for std::uint8_t
+#include <cmath>    // std::isnan
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_extended_filtration"
