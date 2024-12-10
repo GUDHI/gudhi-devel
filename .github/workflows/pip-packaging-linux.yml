@@ -9,7 +9,7 @@ jobs:
     name: build pip wheel
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
-    container: gudhi/pip_for_gudhi:2024.10.02
+    container: gudhi/pip_for_gudhi:2024.12.01
     steps:
       # Should use actions/checkout@v4, but requires node20, not available for quay.io/pypa/manylinux2014_x86_64
       - uses: actions/checkout@v3
