@@ -11,8 +11,7 @@ jobs:
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
     container: gudhi/pip_for_gudhi:2024.12.02
     steps:
-      # Should use actions/checkout@v4, but requires node20, not available for quay.io/pypa/manylinux2014_x86_64
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       # Python 3.8 specific case where NumPy 2.x will not be supported
