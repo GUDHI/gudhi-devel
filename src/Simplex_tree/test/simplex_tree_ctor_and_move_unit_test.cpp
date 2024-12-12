@@ -187,6 +187,7 @@ struct Simplex_tree_options_custom_fil_values_default {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
   static const bool stable_simplex_handles = false;
+  static const bool is_multi_parameter = false;
 };
 
 struct Simplex_tree_options_custom_fil_values_fast_persistence {
@@ -199,6 +200,7 @@ struct Simplex_tree_options_custom_fil_values_fast_persistence {
   static const bool contiguous_vertices = true;
   static const bool link_nodes_by_label = false;
   static const bool stable_simplex_handles = false;
+  static const bool is_multi_parameter = false;
 };
 
 struct Simplex_tree_options_custom_fil_values_full_featured {
@@ -211,6 +213,7 @@ struct Simplex_tree_options_custom_fil_values_full_featured {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
   static const bool stable_simplex_handles = true;
+  static const bool is_multi_parameter = false;
 };
 
 typedef boost::mpl::list<Simplex_tree<Simplex_tree_options_custom_fil_values_default>,

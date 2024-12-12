@@ -24,6 +24,7 @@ struct MyOptions : Simplex_tree_options_minimal {
   // Not doing persistence, so we don't need those
   static const bool store_key = false;
   static const bool store_filtration = false;
+  static const bool is_multi_parameter = false;
   // I have few vertices
   typedef short Vertex_handle;
 };

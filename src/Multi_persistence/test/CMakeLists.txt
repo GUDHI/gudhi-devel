@@ -1,0 +1,7 @@
+include(GUDHI_boost_test)
+
+add_executable_with_targets(Multi_persistence_box_unit_test multipersistence_box_unit_test.cpp TBB::tbb)
+gudhi_add_boost_test(Multi_persistence_box_unit_test)
+
+add_executable_with_targets(Multi_persistence_line_unit_test multipersistence_line_unit_test.cpp TBB::tbb)
+gudhi_add_boost_test(Multi_persistence_line_unit_test)
