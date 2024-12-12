@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2024/03 Vincent Rouvreau: Renamed Alpha_complex_interface as Delaunay_complex_interface for DelaunayCechComplex.
+ *      - 2024/10 Vincent Rouvreau: Add square root filtration values interface
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -81,10 +82,10 @@ class Delaunay_complex_interface {
   }
 
   void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
-                           Delaunay_filtration filtration) {
+                           Delaunay_filtration filtration, bool output_squared_values) {
     // Nothing to be done in case of an empty point set
     if (delaunay_ptr_->num_vertices() > 0)
-      delaunay_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, filtration);
+      delaunay_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, filtration, output_squared_values);
   }
 
   static void set_float_relative_precision(double precision) {
