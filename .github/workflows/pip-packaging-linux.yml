@@ -9,10 +9,9 @@ jobs:
     name: build pip wheel
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
-    container: gudhi/pip_for_gudhi:2024.06.02
+    container: gudhi/pip_for_gudhi:2024.12.02
     steps:
-      # Should use actions/checkout@v4, but requires node20, not available for quay.io/pypa/manylinux2014_x86_64
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       # Python 3.8 specific case where NumPy 2.x will not be supported
@@ -111,6 +110,24 @@ jobs:
           $PYTHON312/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON312/bin/python -m pytest -v src/python/test/test_cubical_complex.py
           $PYTHON312/bin/python -m pytest -v src/python/test/test_rips_complex.py
+      - name: Build wheel for Python 3.13
+        run: |
+          mkdir build_313
+          cd build_313
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON313/bin/python ..
+          cd src/python
+          $PYTHON313/bin/python -m build -n -w
+          auditwheel repair dist/*.whl
+      - name: Install and test wheel for Python 3.13
+        run: |
+          $PYTHON313/bin/python -m pip install --user pytest build_313/src/python/dist/*.whl
+          $PYTHON313/bin/python -m pip install numpy~=1.26.0
+          $PYTHON313/bin/python -c "import gudhi; print(gudhi.__version__)"
+          $PYTHON313/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON313/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
+          $PYTHON313/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON313/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON313/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Publish on PyPi
         env:
           TWINE_USERNAME: __token__
@@ -121,3 +138,4 @@ jobs:
           $PYTHON38/bin/python -m twine upload build_310/src/python/wheelhouse/*.whl
           $PYTHON38/bin/python -m twine upload build_311/src/python/wheelhouse/*.whl
           $PYTHON38/bin/python -m twine upload build_312/src/python/wheelhouse/*.whl
+          $PYTHON38/bin/python -m twine upload build_313/src/python/wheelhouse/*.whl
