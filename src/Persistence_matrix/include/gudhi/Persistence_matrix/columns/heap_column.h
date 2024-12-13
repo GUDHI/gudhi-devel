@@ -45,7 +45,6 @@ namespace persistence_matrix {
  * row index. Additionally, the given entry range added into the heap does not need to be somehow ordered.
  *
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
- * @tparam Entry_constructor Factory of @ref Entry classes.
  */
 template <class Master_matrix>
 class Heap_column : public Master_matrix::Column_dimension_option, public Master_matrix::Chain_column_option

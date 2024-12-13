@@ -49,6 +49,10 @@ struct ct_naive_vector {
   static constexpr const Column_types t = Column_types::NAIVE_VECTOR;
 };
 
+struct ct_small_vector {
+  static constexpr const Column_types t = Column_types::SMALL_VECTOR;
+};
+
 struct true_value {
   static constexpr const bool t = true;
 };

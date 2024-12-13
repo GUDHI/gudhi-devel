@@ -35,6 +35,8 @@ enum class Column_types {
   VECTOR,         /**< @ref Vector_column "": Underlying container is a std::vector<@ref Entry*>
                        with a lazy removal method. */
   NAIVE_VECTOR,   /**< @ref Naive_vector_column "": Underlying container is a std::vector<@ref Entry*>. */
+  SMALL_VECTOR,   /**< @ref Naive_vector_column "": Underlying container is a
+                       boost::container::small_vector<@ref Entry*, 8>. */
   UNORDERED_SET,  /**< @ref Unordered_set_column "": Underlying container is a std::unordered_set<@ref Entry*>. */
   INTRUSIVE_LIST, /**< @ref Intrusive_list_column "": Underlying container is a boost::intrusive::list<@ref Entry>. */
   INTRUSIVE_SET   /**< @ref Intrusive_set_column "": Underlying container is a boost::intrusive::set<@ref Entry>. */
