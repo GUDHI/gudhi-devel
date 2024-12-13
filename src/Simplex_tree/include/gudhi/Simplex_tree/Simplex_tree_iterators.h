@@ -16,7 +16,6 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-#include <vector>
 #include <utility>  // for std::pair
 
 namespace Gudhi {
@@ -67,7 +66,7 @@ class Simplex_tree_simplex_vertex_iterator : public boost::iterator_facade<
     sib_ = sib_->oncles();
   }
 
-  Siblings * sib_;
+  Siblings const* sib_;
   Vertex_handle v_;
 };
 
@@ -93,7 +92,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   }
 
 // any end() iterator
-  explicit Simplex_tree_boundary_simplex_iterator(SimplexTree * st)
+  explicit Simplex_tree_boundary_simplex_iterator(SimplexTree const* st)
       : last_(st->null_vertex()),
         next_(st->null_vertex()),
         sib_(nullptr),
@@ -102,7 +101,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   }
 
   template<class SimplexHandle>
-  Simplex_tree_boundary_simplex_iterator(SimplexTree * st, SimplexHandle sh)
+  Simplex_tree_boundary_simplex_iterator(SimplexTree const* st, SimplexHandle sh)
       : last_(sh->first),
         next_(st->null_vertex()),
         sib_(nullptr),
@@ -111,7 +110,7 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
     // Only check once at the beginning instead of for every increment, as this is expensive.
     if constexpr (SimplexTree::Options::contiguous_vertices)
       GUDHI_CHECK(st_->contiguous_vertices(), "The set of vertices is not { 0, ..., n } without holes");
-    Siblings * sib = st->self_siblings(sh);
+    Siblings const* sib = st->self_siblings(sh);
     next_ = sib->parent();
     sib_ = sib->oncles();
     if (sib_ != nullptr) {
@@ -146,8 +145,8 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
       return;
     }
 
-    Siblings * for_sib = sib_;
-    Siblings * new_sib = sib_->oncles();
+    Siblings const* for_sib = sib_;
+    Siblings const* new_sib = sib_->oncles();
     auto rit = suffix_.rbegin();
     if constexpr (SimplexTree::Options::contiguous_vertices && !SimplexTree::Options::stable_simplex_handles) {
       if (new_sib == nullptr) {
@@ -180,9 +179,9 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   Vertex_handle last_;  // last vertex of the simplex
   Vertex_handle next_;  // next vertex to push in suffix_
   Static_vertex_vector suffix_;
-  Siblings * sib_;  // where the next search will start from
+  Siblings const* sib_;  // where the next search will start from
   Simplex_handle sh_;  // current Simplex_handle in the boundary
-  SimplexTree * st_;  // simplex containing the simplicial complex
+  SimplexTree const* st_;  // simplex containing the simplicial complex
 };
 
 /** \brief Iterator over the simplices of the boundary of a simplex and their opposite vertices.
@@ -206,7 +205,7 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
   }
 
   // any end() iterator
-  explicit Simplex_tree_boundary_opposite_vertex_simplex_iterator(SimplexTree * st)
+  explicit Simplex_tree_boundary_opposite_vertex_simplex_iterator(SimplexTree const* st)
       : last_(st->null_vertex()),
         next_(st->null_vertex()),
         sib_(nullptr),
@@ -215,7 +214,7 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
   }
 
   template<class SimplexHandle>
-  Simplex_tree_boundary_opposite_vertex_simplex_iterator(SimplexTree * st, SimplexHandle sh)
+  Simplex_tree_boundary_opposite_vertex_simplex_iterator(SimplexTree const* st, SimplexHandle sh)
       : last_(sh->first),
         next_(st->null_vertex()),
         sib_(nullptr),
@@ -224,7 +223,7 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
     // Only check once at the beginning instead of for every increment, as this is expensive.
     if constexpr (SimplexTree::Options::contiguous_vertices)
       GUDHI_CHECK(st_->contiguous_vertices(), "The set of vertices is not { 0, ..., n } without holes");
-    Siblings * sib = st->self_siblings(sh);
+    Siblings const* sib = st->self_siblings(sh);
     next_ = sib->parent();
     sib_ = sib->oncles();
     if (sib_ != nullptr) {
@@ -258,8 +257,8 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
       baov_.first = st_->null_simplex();
       return;  // ------>>
     }
-    Siblings * for_sib = sib_;
-    Siblings * new_sib = sib_->oncles();
+    Siblings const* for_sib = sib_;
+    Siblings const* new_sib = sib_->oncles();
     auto rit = suffix_.rbegin();
     if constexpr (SimplexTree::Options::contiguous_vertices && !SimplexTree::Options::stable_simplex_handles) {
       if (new_sib == nullptr) {
@@ -294,9 +293,9 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
   Vertex_handle last_;  // last vertex of the simplex
   Vertex_handle next_;  // next vertex to push in suffix_
   Static_vertex_vector suffix_;
-  Siblings * sib_;  // where the next search will start from
+  Siblings const* sib_;  // where the next search will start from
   std::pair<Simplex_handle, Vertex_handle> baov_;  // a pair containing the current Simplex_handle in the boundary and its opposite vertex
-  SimplexTree * st_;  // simplex containing the simplicial complex
+  SimplexTree const* st_;  // simplex containing the simplicial complex
 };
 
 /*---------------------------------------------------------------------------*/
@@ -318,7 +317,7 @@ class Simplex_tree_complex_simplex_iterator : public boost::iterator_facade<
         st_(nullptr) {
   }
 
-  explicit Simplex_tree_complex_simplex_iterator(SimplexTree * st)
+  explicit Simplex_tree_complex_simplex_iterator(SimplexTree const* st)
       : sib_(nullptr),
         st_(st) {
     if (st == nullptr || st->root() == nullptr || st->root()->members().empty()) {
@@ -369,8 +368,8 @@ class Simplex_tree_complex_simplex_iterator : public boost::iterator_facade<
   }
 
   Simplex_handle sh_;
-  Siblings * sib_;
-  SimplexTree * st_;
+  Siblings const* sib_;
+  SimplexTree const* st_;
 };
 
 /** \brief Iterator over the simplices of the skeleton of a given
@@ -394,7 +393,7 @@ class Simplex_tree_skeleton_simplex_iterator : public boost::iterator_facade<
         curr_dim_(0) {
   }
 
-  Simplex_tree_skeleton_simplex_iterator(SimplexTree * st, int dim_skel)
+  Simplex_tree_skeleton_simplex_iterator(SimplexTree const* st, int dim_skel)
       : sib_(nullptr),
         st_(st),
         dim_skel_(dim_skel),
@@ -450,8 +449,8 @@ class Simplex_tree_skeleton_simplex_iterator : public boost::iterator_facade<
   }
 
   Simplex_handle sh_;
-  Siblings * sib_;
-  SimplexTree * st_;
+  Siblings const* sib_;
+  SimplexTree const* st_;
   int dim_skel_;
   int curr_dim_;
 };
