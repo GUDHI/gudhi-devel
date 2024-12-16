@@ -29,7 +29,7 @@ double bottleneck(Dgm d1, Dgm d2, std::optional<double> epsilon)
   return Gudhi::persistence_diagram::bottleneck_distance(diag1, diag2, e);
 }
 
-PYBIND11_MODULE(bottleneck, m) {
+NB_MODULE(bottleneck, m) {
       m.attr("__license__") = "GPL v3";
       m.def("bottleneck_distance", &bottleneck,
           py::arg("diagram_1"), py::arg("diagram_2"),

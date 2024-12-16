@@ -35,7 +35,7 @@ double bottleneck_distance(Dgm d1, Dgm d2, double delta)
     return hera::bottleneckDistApprox(diag1, diag2, delta);
 }
 
-PYBIND11_MODULE(bottleneck, m) {
+NB_MODULE(bottleneck, m) {
       m.def("bottleneck_distance", &bottleneck_distance,
           py::arg("X"), py::arg("Y"),
           py::arg("delta") = .01,

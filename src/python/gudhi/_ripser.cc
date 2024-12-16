@@ -12,7 +12,7 @@
 #include <array>
 #include <cmath>
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 #include <pybind11/numpy.h>
@@ -21,15 +21,15 @@
 
 using namespace Gudhi::ripser;
 
-namespace py = pybind11;
+namespace py = nanobind;
 typedef std::vector<   int> Vi;
 typedef std::vector<double> Vd;
 typedef std::vector<std::array< float, 2>> V2f;
 typedef std::vector<std::array<double, 2>> V2d;
-PYBIND11_MAKE_OPAQUE(Vi);
-PYBIND11_MAKE_OPAQUE(Vd);
-PYBIND11_MAKE_OPAQUE(V2f);
-PYBIND11_MAKE_OPAQUE(V2d);
+NB_MAKE_OPAQUE(Vi);
+NB_MAKE_OPAQUE(Vd);
+NB_MAKE_OPAQUE(V2f);
+NB_MAKE_OPAQUE(V2d);
 
 template<class T>struct Full {
   typedef Tag_dense Category;
@@ -180,7 +180,7 @@ double lower_cone_radius(py::object low_mat) {
   return *std::min_element(maxs.begin(), maxs.end());
 }
 
-PYBIND11_MODULE(_ripser, m) {
+NB_MODULE(_ripser, m) {
   py::bind_vector<Vi >(m, "VectorInt"       , py::buffer_protocol());
   py::bind_vector<Vd >(m, "VectorDouble"    , py::buffer_protocol());
   py::bind_vector<V2f>(m, "VectorPairFloat" , py::buffer_protocol());

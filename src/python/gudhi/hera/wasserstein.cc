@@ -8,6 +8,9 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
+
 #include <pybind11_diagram_utils.h>
 
 #ifdef _MSC_VER
@@ -62,7 +65,7 @@ py::object wasserstein_distance(
   // bug in Hera, matching_a_to_b_ is empty if one diagram is empty or both diagrams contain the same points
   if(res.matching_a_to_b_.size() == 0) {
     if(n1 == 0) { // diag1 is empty
-      py::array_t<int> matching({{ n2, 2 }}, nullptr);
+      py::ndarray<int> matching({{ n2, 2 }}, nullptr);
       auto m = matching.mutable_unchecked();
       for(int j=0; j<n2; ++j){
         m(j, 0) = -1;
@@ -71,7 +74,7 @@ py::object wasserstein_distance(
       return py::make_tuple(dist, matching);
     }
     if(n2 == 0) { // diag2 is empty
-      py::array_t<int> matching({{ n1, 2 }}, nullptr);
+      py::ndarray<int> matching({{ n1, 2 }}, nullptr);
       auto m = matching.mutable_unchecked();
       for(int i=0; i<n1; ++i){
         m(i, 0) = i;
@@ -102,7 +105,7 @@ py::object wasserstein_distance(
   for(auto p : diag2)
     if(p[0] == p[1]) { auto id = p.get_id(); res.matching_a_to_b_[-id-1] = id; }
 
-  py::array_t<int> matching({{ n1 + n2, 2 }}, nullptr);
+  py::ndarray<int> matching({{ n1 + n2, 2 }}, nullptr);
   auto m = matching.mutable_unchecked();
   int cur = 0;
   for(auto x : res.matching_a_to_b_){
@@ -126,11 +129,11 @@ py::object wasserstein_distance(
     }
   }
   // n1+n2 was too much, it only happens if everything matches to the diagonal, so we return matching[:cur,:]
-  py::array_t<int> ret({{ cur, 2 }}, {{ matching.strides()[0], matching.strides()[1] }}, matching.data(), matching);
+  py::ndarray<int> ret({{ cur, 2 }}, {{ matching.strides()[0], matching.strides()[1] }}, matching.data(), matching);
   return py::make_tuple(dist, ret);
 }
 
-PYBIND11_MODULE(wasserstein, m) {
+NB_MODULE(wasserstein, m) {
       m.def("wasserstein_distance", &wasserstein_distance,
           py::arg("X"), py::arg("Y"),
           py::arg("order") = 1,

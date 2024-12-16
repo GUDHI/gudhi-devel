@@ -13,7 +13,7 @@
 #include <limits>
 #include <stdexcept>
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 #include <pybind11/numpy.h>
@@ -25,11 +25,11 @@
 #include <gudhi/Persistence_on_rectangle.h>
 #include <gudhi/Debug_utils.h>
 
-namespace py = pybind11;
+namespace py = nanobind;
 typedef std::vector<std::array< float, 2>> Vf;
 typedef std::vector<std::array<double, 2>> Vd;
-PYBIND11_MAKE_OPAQUE(Vf);
-PYBIND11_MAKE_OPAQUE(Vd);
+NB_MAKE_OPAQUE(Vf);
+NB_MAKE_OPAQUE(Vd);
 
 template<class T>
 py::array wrap_persistence_1d(py::array_t<T> data) {
@@ -73,7 +73,7 @@ py::list wrap_persistence_2d(py::array_t<double, py::array::c_style | py::array:
   return ret;
 }
 
-PYBIND11_MODULE(_pers_cub_low_dim, m) {
+NB_MODULE(_pers_cub_low_dim, m) {
   py::bind_vector<Vf>(m, "VectorPairFloat" , py::buffer_protocol());
   py::bind_vector<Vd>(m, "VectorPairDouble", py::buffer_protocol());
   m.def("_persistence_on_a_line", wrap_persistence_1d<float>, py::arg().noconvert());

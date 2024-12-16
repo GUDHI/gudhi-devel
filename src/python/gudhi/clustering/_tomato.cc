@@ -19,11 +19,11 @@
 #include <boost/range/adaptor/transformed.hpp>
 #include <vector>
 #include <unordered_map>
-#include <pybind11/pybind11.h>
-#include <pybind11/numpy.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 #include <iostream>
 
-namespace py = pybind11;
+namespace py = nanobind;
 
 template <class T, class = std::enable_if_t<std::is_integral<T>::value>>
 int getint(int i) {
@@ -33,8 +33,8 @@ int getint(int i) {
 // template<class T, class=decltype(std::declval<T>().template cast<int>())>
 // int getint(T i){return i.template cast<int>();}
 template <class T>
-auto getint(T i) -> decltype(i.template cast<int>()) {
-  return i.template cast<int>();
+auto getint(T i) -> decltype(py::cast<int>(i)) {
+  return py::cast<int>(i);
 }
 
 // Raw clusters are clusters obtained through single-linkage, no merging.
@@ -189,9 +189,10 @@ auto tomato(Point_index num_points, Neighbors const& neighbors, Density const& d
   for (int i = 0; i < num_points; ++i) raw_cluster_ordered[i] = raw_cluster[rorder[i]];
   // return raw_cluster, children, persistence
   // TODO avoid copies: https://github.com/pybind/pybind11/issues/1042
-  return py::make_tuple(py::array(raw_cluster_ordered.size(), raw_cluster_ordered.data()),
-                        py::array(children.size(), children.data()), py::array(persistence.size(), persistence.data()),
-                        py::array(max_cc.size(), max_cc.data()));
+  return py::make_tuple(py::ndarray(raw_cluster_ordered.data(), {raw_cluster_ordered.size()}),
+                        py::ndarray(children.data(), {children.size()}),
+                        py::ndarray(persistence.data(), {persistence.size()}),
+                        py::ndarray(max_cc.data(), {max_cc.size()}));
 }
 
 auto merge(py::array_t<Cluster_index, py::array::c_style> children, Cluster_index n_leaves, Cluster_index n_final) {
@@ -270,7 +271,7 @@ auto hierarchy(py::handle ngb, py::array_t<double, py::array::c_style | py::arra
   return tomato(n, ngb, d, order, rorder);
 }
 
-PYBIND11_MODULE(_tomato, m) {
+NB_MODULE(_tomato, m) {
   m.doc() = "Internals of tomato clustering";
   m.def("hierarchy", &hierarchy, "does the clustering");
   m.def("merge", &merge, "merge clusters");
