@@ -14,7 +14,9 @@
 #include <gudhi/Simplex_tree/indexing_tag.h>
 
 #include <cstdint>
-#include <type_traits> // void_t
+#include <limits>
+#include <type_traits>  // void_t
+#include <cmath>        // std::isnan
 
 namespace Gudhi {
 
@@ -98,6 +100,54 @@ struct No_simplex_data {};
 template <class, class=void> struct Get_simplex_data_type { typedef No_simplex_data type; };
 template <class O>
 struct Get_simplex_data_type<O, std::void_t<typename O::Simplex_data>> { typedef typename O::Simplex_data type; };
+
+/**
+ * @brief Given two filtration values at which a simplex exists, stores in the first value the minimal union of births
+ * generating a lifetime including those two values.
+ * This is the overload for when @ref FiltrationValue is an arithmetic type, like double, int etc.
+ * Because the filtration values are totally ordered then, the union is simply the minimum of the two values.
+ *
+ * NaN values are not supported.
+ */
+template <typename Arithmetic_filtration_value>
+bool unify_lifetimes(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
+{
+  if (f2 < f1){
+    f1 = f2;
+    return true;
+  }
+  return false;
+}
+
+/**
+ * @brief Given two filtration values, stores in the first value the lowest common upper bound of the two values.
+ * If a filtration value has value `NaN`, it should be considered as the lowest value possible.
+ * This is the overload for when @ref FiltrationValue is an arithmetic type, like double, float, int etc.
+ * Because the filtration values are totally ordered then, the upper bound is always the maximum of the two values.
+ */
+template <typename Arithmetic_filtration_value>
+bool intersect_lifetimes(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
+{
+  if constexpr (std::numeric_limits<Arithmetic_filtration_value>::has_quiet_NaN) {
+    if (std::isnan(f1)) {
+      f1 = f2;
+      return !std::isnan(f2);
+    }
+
+    // Computes the max while handling NaN as lowest value.
+    if (!(f1 < f2)) return false;
+
+    f1 = f2;
+    return true;
+  } else {
+    // NaN not possible.
+    if (f1 < f2){
+      f1 = f2;
+      return true;
+    }
+    return false;
+  }
+}
 
 }  // namespace Gudhi
 
