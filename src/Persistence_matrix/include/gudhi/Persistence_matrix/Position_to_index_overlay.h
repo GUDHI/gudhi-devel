@@ -234,7 +234,8 @@ class Position_to_index_overlay
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
+  void insert_boundary(const Boundary_range& boundary,
+                       Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief It does the same as the other version, but allows the boundary cells to be identified without restrictions
    * except that all IDs have to be strictly increasing in the order of filtration. Note that you should avoid then
@@ -253,7 +254,8 @@ class Position_to_index_overlay
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_boundary(ID_index cellIndex, const Boundary_range& boundary, Dimension dim = -1);
+  void insert_boundary(ID_index cellIndex, const Boundary_range& boundary,
+                       Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Returns the column at the given @ref PosIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.

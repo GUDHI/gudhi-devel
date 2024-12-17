@@ -150,7 +150,7 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
     for (Index i = 0; i < _matrix()->mirrorMatrixU_.get_number_of_columns(); i++) {
       for (const auto& entry : _matrix()->mirrorMatrixU_.get_column(i)) {
         auto idx = birthToCycle_[entry.get_row_index()];
-        if (idx != static_cast<Index>(-1)) {
+        if (idx != Master_matrix::template get_null_value<Index>()) {
           representativeCycles_[idx].push_back(i);
         }
       }

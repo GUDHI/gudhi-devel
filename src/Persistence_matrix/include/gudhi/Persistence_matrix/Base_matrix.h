@@ -133,7 +133,8 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
    * @param dim Ignored.
    */
   template <class Boundary_range>
-  void insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
+  void insert_boundary(const Boundary_range& boundary,
+                       Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Returns the column at the given @ref MatIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -438,7 +439,7 @@ template <class Master_matrix>
 template <class Boundary_range>
 inline void Base_matrix<Master_matrix>::insert_boundary(const Boundary_range& boundary, Dimension dim) 
 {
-  if (dim == -1) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
+  if (dim == Master_matrix::template get_null_value<Dimension>()) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
   //TODO: dim not actually stored right now, so either get rid of it or store it again
   _insert(boundary, nextInsertIndex_++, dim);
 }

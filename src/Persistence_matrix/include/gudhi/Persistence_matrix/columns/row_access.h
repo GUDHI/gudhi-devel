@@ -56,8 +56,8 @@ class Row_access
   using Row_container = typename Master_matrix::Row_container;  /**< Type of the row container. */
 
   /**
-   * @brief Default constructor. Sets the column index to -1 and the row container to nullptr.
-   * Should only be used by dummy columns.
+   * @brief Default constructor. Sets the column index to @ref Matrix::get_null_value "null index" and the row
+   * container to nullptr. Should only be used by dummy columns.
    */
   Row_access();
   /**
@@ -121,7 +121,8 @@ class Row_access
 };
 
 template <class Master_matrix>
-inline Row_access<Master_matrix>::Row_access() : columnIndex_(-1), rows_(nullptr) 
+inline Row_access<Master_matrix>::Row_access()
+    : columnIndex_(Master_matrix::template get_null_value<Index>()), rows_(nullptr)
 {}
 
 template <class Master_matrix>
