@@ -1,7 +1,18 @@
 version: 2.0
-jobs:
-  ### With all third parties
 
+submodules: &checkout_submodules
+  name: Checkout submodules
+  command: |
+    git submodule sync
+    git submodule update --init
+
+assertions: &activate_assertions
+  name: Activate assertions
+  command: |
+    export CXXFLAGS='-UNDEBUG'
+    export CFLAGS='-UNDEBUG'
+
+jobs:
   examples:
     docker:
       # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image
@@ -9,10 +20,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test examples
           command: |
@@ -28,10 +38,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test unitary tests
           command: |
@@ -47,10 +56,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test unitary tests
           command: |
@@ -66,10 +74,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test utilities
           command: |
@@ -86,10 +93,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test python module. Generates and tests the python documentation
           command: |
@@ -121,10 +127,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Generates the C++ documentation with doxygen
           command: |
@@ -151,10 +156,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Test the LaTeX bibliography files
           command: |
@@ -174,10 +178,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test examples without cgal and eigen
           command: |
@@ -193,10 +196,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test unitary tests without cgal and eigen
           command: |
@@ -212,10 +214,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test utilities without cgal and eigen
           command: |
@@ -231,10 +232,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test python module without cgal and eigen
           command: |
@@ -253,10 +253,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test examples without cgal
           command: |
@@ -279,10 +278,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test unitary tests without cgal
           command: |
@@ -305,10 +303,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test utilities without cgal
           command: |
@@ -331,10 +328,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
+          <<: *checkout_submodules
+      - run:
+          <<: *activate_assertions
       - run:
           name: Build and test python module without cgal
           command: |
