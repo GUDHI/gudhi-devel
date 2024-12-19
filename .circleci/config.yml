@@ -126,6 +126,8 @@ jobs:
     steps:
       - checkout
       - run:
+          <<: *checkout_submodules
+      - run:
           name: Generates the C++ documentation with doxygen
           command: |
             mkdir build
