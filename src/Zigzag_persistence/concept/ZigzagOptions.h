@@ -34,7 +34,7 @@ struct FilteredZigzagOptions {
    * @brief Type for the face IDs used at insertion and in the boundaries given as argument.
    * Has to be usable as key in a hashtable, so "hashable" and comparable.
    */
-  using Face_key = unspecified;
+  using Cell_key = unspecified;
 
   /**
    * @brief Type for filtration values.

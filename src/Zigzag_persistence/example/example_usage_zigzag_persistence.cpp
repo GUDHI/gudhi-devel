@@ -29,21 +29,21 @@ int main() {
   // A face has to be identified in the boundaries by the operation number the face was inserted with in the sequence.
 
   // inserts vertex 0 -> birth at 0 of 0-cycle
-  zp.insert_face({}, 0);
+  zp.insert_cell({}, 0);
   // inserts vertex 1 -> birth at 1 of 0-cycle
-  zp.insert_face({}, 0);
+  zp.insert_cell({}, 0);
   // inserts edge 2 = (0,1) -> death at 2 -> outputs (0, 1, 2)
-  zp.insert_face({0, 1}, 1);
+  zp.insert_cell({0, 1}, 1);
   // inserts vertex 3 -> birth at 3 of 0-cycle
-  zp.insert_face({}, 0);
+  zp.insert_cell({}, 0);
   // inserts edge 4 = (0,3) -> death at 4 -> outputs (0, 3, 4)
-  zp.insert_face({0, 3}, 1);
+  zp.insert_cell({0, 3}, 1);
   // inserts edge 5 = (1,3) -> birth at 5 of 1-cycle
-  zp.insert_face({1, 3}, 1);
+  zp.insert_cell({1, 3}, 1);
   // removes edge 4 -> death at 6 -> outputs (1, 5, 6)
-  zp.remove_face(4);
+  zp.remove_cell(4);
   // removes edge 2 -> birth at 7 of 0-cycle
-  zp.remove_face(2);
+  zp.remove_cell(2);
 
   // Only the closed bars were output so far, so the open/infinite bars still need to be retrieved.
 

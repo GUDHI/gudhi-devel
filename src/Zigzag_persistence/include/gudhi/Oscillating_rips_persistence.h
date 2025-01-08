@@ -68,16 +68,16 @@ struct Simplex_tree_options_oscillating_rips {
 
 template <class StableFilteredComplex>
 struct Default_oscillating_rips_zigzag_options : Default_filtered_zigzag_options {
-  using Face_key = typename StableFilteredComplex::Simplex_handle;
+  using Cell_key = typename StableFilteredComplex::Simplex_handle;
   using Filtration_value = typename StableFilteredComplex::Filtration_value;
   using Dimension = int;  // it is `int` in the simplex tree
   struct Hash {
-    std::size_t operator()(const Face_key& sh) const {
+    std::size_t operator()(const Cell_key& sh) const {
       return sh->second.key();
     }
   };
   struct KeyEqual {
-    bool operator()(const Face_key& sh1, const Face_key& sh2) const {
+    bool operator()(const Cell_key& sh1, const Cell_key& sh2) const {
       return sh1->second.key() == sh2->second.key();
     }
   };
@@ -154,12 +154,12 @@ void compute_oscillating_rips_persistence(
 
   for (const auto& t : OscillatingRipsSimplexRange::get_iterator_range(start, end, st, maxDim)) {
     if (std::get<2>(t))
-      zp.insert_face(std::get<0>(t),
+      zp.insert_cell(std::get<0>(t),
                      st.boundary_simplex_range(std::get<0>(t)),
                      st.dimension(std::get<0>(t)),
                      std::get<1>(t));
     else
-      zp.remove_face(std::get<0>(t), std::get<1>(t));
+      zp.remove_cell(std::get<0>(t), std::get<1>(t));
   }
 
   zp.get_current_infinite_intervals([&](Dimension dim, Filtration_value birth) { outStream(dim, birth, Bar::inf); });
@@ -233,12 +233,12 @@ compute_oscillating_rips_persistence(
 
   for (const auto& t : OscillatingRipsSimplexRange::get_iterator_range(start, end, st, maxDim)) {
     if (std::get<2>(t))
-      zp.insert_face(std::get<0>(t),
+      zp.insert_cell(std::get<0>(t),
                      st.boundary_simplex_range(std::get<0>(t)),
                      st.dimension(std::get<0>(t)),
                      std::get<1>(t));
     else
-      zp.remove_face(std::get<0>(t), std::get<1>(t));
+      zp.remove_cell(std::get<0>(t), std::get<1>(t));
   }
 
   return zp.get_persistence_diagram();

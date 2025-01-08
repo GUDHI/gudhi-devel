@@ -24,7 +24,6 @@
 
 #include <cmath>
 #include <limits>
-#include <set>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -41,18 +40,11 @@ namespace zigzag_persistence {
  *
  * @brief Default options for @ref Filtered_zigzag_persistence_with_storage and @ref Filtered_zigzag_persistence.
  */
-struct Default_filtered_zigzag_options {
-  using Internal_key = int;                 /**< Face ID used internally, must be signed. */
-  using Face_key = int;                     /**< Face ID used in the given boundaries. */
-  using Filtration_value = double;          /**< Filtration value type. */
-  using Dimension = int;                    /**< Dimension value type. */
-  using Hash = std::hash<Face_key>;         /**< Hash method for Face_key */
-  using KeyEqual = std::equal_to<Face_key>; /**< Equality comparator for Face_key */
-  /**
-   * @brief Column type use by the internal matrix.
-   */
-  static const Gudhi::persistence_matrix::Column_types column_type =
-      Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR;
+struct Default_filtered_zigzag_options : Default_zigzag_options {
+  using Cell_key = int;            /**< Cell ID used in the given boundaries. */
+  using Filtration_value = double; /**< Filtration value type. */
+  using Hash = std::hash<Cell_key>;         /**< Hash method for Cell_key */
+  using KeyEqual = std::equal_to<Cell_key>; /**< Equality comparator for Cell_key */
 };
 
 /**
@@ -63,7 +55,7 @@ struct Default_filtered_zigzag_options {
  * stored during the whole process and not removed. It is therefore suited for smaller filtrations where the clean
  * ups produce a higher overhead than the memory consumption.
  * @details After construction of the class, the zigzag filtration should be given in a streaming like way, i.e.,
- * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
+ * call @ref insert_cell, @ref remove_cell or @ref apply_identity for each step of the filtration in order of
  * the filtration. To retrieve the current persistence diagram at any moment of the filtration,
  * use @ref get_persistence_diagram or @ref get_index_persistence_diagram.
  *
@@ -89,25 +81,25 @@ struct Default_filtered_zigzag_options {
  * // In all cases, it is important that the operations of insertions and removals are made **in the same order**
  * // as in the zigzag filtration ones wants to compute the barcode from.
  *
- * // A face can be identified in the boundaries by any given numerical label, it is just important that the given
+ * // A cell can be identified in the boundaries by any given numerical label, it is just important that the given
  * // filtration values are monotonous (ie., either only increasing or only decreasing).
  *
  * //inserts vertex 2 at filtration value 0.1 -> birth at 0.1 of 0-cycle
- * zp.insert_face(2, {}, 0, 0.1);
+ * zp.insert_cell(2, {}, 0, 0.1);
  * //inserts vertex 4 at filtration value 0.1 -> birth at 0.1 of 0-cycle
- * zp.insert_face(4, {}, 0, 0.1);
+ * zp.insert_cell(4, {}, 0, 0.1);
  * //inserts edge 5 = (2,4) at filtration value 0.3 -> death at 0.3 -> outputs/stores (0, 0.1, 0.3)
- * zp.insert_face(5, {2, 4}, 1, 0.3);
+ * zp.insert_cell(5, {2, 4}, 1, 0.3);
  * //inserts vertex 3 at filtration value 0.4 -> birth at 0.4 of 0-cycle
- * zp.insert_face(3, {}, 0, 0.4);
+ * zp.insert_cell(3, {}, 0, 0.4);
  * //inserts edge 6 = (2,3) at filtration value 0.4 -> death at 0.4 of the cycle born at 0.4 -> outputs/stores nothing
- * zp.insert_face(6, {2, 3}, 1, 0.4);
+ * zp.insert_cell(6, {2, 3}, 1, 0.4);
  * //inserts edge 9 = (3,4) at filtration value 1.2 -> birth at 1.2 of 1-cycle
- * zp.insert_face(9, {4, 3}, 1, 1.2);
+ * zp.insert_cell(9, {4, 3}, 1, 1.2);
  * //removes edge 6 at filtration value 1.5 -> death at 1.5 -> outputs/stores (1, 1.2, 1.5)
- * zp.remove_face(6, 1.5);
+ * zp.remove_cell(6, 1.5);
  * //removes edge 5 at filtration value 2.0 -> birth at 2.0 of 0-cycle
- * zp.remove_face(5, 2.0);
+ * zp.remove_cell(5, 2.0);
  * ```
  *
  * #### Finalizations
@@ -132,7 +124,7 @@ class Filtered_zigzag_persistence_with_storage
  public:
   using Options = FilteredZigzagOptions;                        /**< Zigzag options. */
   using Internal_key = typename Options::Internal_key;          /**< Key and index type, has to be signed. */
-  using Face_key = typename Options::Face_key;                  /**< Face ID type from external inputs. */
+  using Cell_key = typename Options::Cell_key;                  /**< Cell ID type from external inputs. */
   using Filtration_value = typename Options::Filtration_value;  /**< Type for filtration values. */
   using Dimension = typename Options::Dimension;                /**< Type for dimension values. */
 
@@ -148,13 +140,13 @@ class Filtered_zigzag_persistence_with_storage
   /**
    * @brief Constructor.
    * @details After construction of the class, the zigzag filtration should be given in a streaming like way, i.e.,
-   * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
+   * call @ref insert_cell, @ref remove_cell or @ref apply_identity for each step of the filtration in order of
    * the filtration. To retrieve the current persistence diagram at any moment of the filtration,
    * use @ref get_persistence_diagram or @ref get_index_persistence_diagram.
    *
-   * @param preallocationSize Reserves space for @p preallocationSize faces in the internal data structure.
+   * @param preallocationSize Reserves space for @p preallocationSize cells in the internal data structure.
    * This is optional and just helps skip a few reallocations. The optimal value (no reallocation, no wasted space) is
-   * the number of faces in the biggest complex of the filtration.
+   * the number of cells in the biggest complex of the filtration.
    * Default value: 0.
    * @param ignoreCyclesAboveDim Ignores cycles in dimension larger or equal in the final diagram.
    * If -1, no cycles are ignored. Default value: -1.
@@ -173,21 +165,21 @@ class Filtered_zigzag_persistence_with_storage
             preallocationSize) {}
 
   /**
-   * @brief Updates the zigzag persistence diagram after the insertion of the given face.
+   * @brief Updates the zigzag persistence diagram after the insertion of the given cell.
    *
    * @tparam BoundaryRange Range type needing size, begin and end members.
-   * @param faceID ID representing the inserted face.
-   * @param boundary Boundary of the inserted face. The range should be composed of the IDs of all faces contained in
-   * the boundary (i.e. with non-zero coefficients), using the ID specified as `faceID` when the corresponding face
-   * was previously inserted (recall that the faces should be inserted in order of filtration).
-   * @param dimension Dimension of the inserted face.
-   * @param filtrationValue Filtration value associated to the face.
+   * @param cellID ID representing the inserted cell.
+   * @param boundary Boundary of the inserted cell. The range should be composed of the IDs of all cells contained in
+   * the boundary (i.e. with non-zero coefficients), using the ID specified as `cellID` when the corresponding cell
+   * was previously inserted (recall that the cells should be inserted in order of filtration).
+   * @param dimension Dimension of the inserted cell.
+   * @param filtrationValue Filtration value associated to the cell.
    * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
    * values, ie. the changes are monotonous.
    * @return Number of the operation.
    */
-  template <class BoundaryRange = std::initializer_list<Face_key> >
-  Internal_key insert_face(Face_key faceID,
+  template <class BoundaryRange = std::initializer_list<Cell_key> >
+  Internal_key insert_cell(Cell_key cellID,
                            const BoundaryRange& boundary,
                            Dimension dimension,
                            Filtration_value filtrationValue)
@@ -200,34 +192,36 @@ class Filtered_zigzag_persistence_with_storage
 
     _store_filtration_value(filtrationValue);
 
-    [[maybe_unused]] auto res = handleToKey_.try_emplace(faceID, numArrow_);
+    [[maybe_unused]] auto res = handleToKey_.try_emplace(cellID, numArrow_);
 
-    GUDHI_CHECK(res.second, "Zigzag_persistence::insert_face - face already in the complex");
+    GUDHI_CHECK(res.second, "Zigzag_persistence::insert_cell - cell already in the complex");
 
-    // Compute the keys of the faces of the boundary.
-    std::set<Internal_key> translatedBoundary;  // set maintains the natural order on indices
+    // Compute the keys of the cells of the boundary.
+    std::vector<Internal_key> translatedBoundary;
+    translatedBoundary.reserve(dimension * 2);  // boundary does not have to have `size()`
     for (auto b : boundary) {
-      translatedBoundary.insert(handleToKey_.at(b));  // TODO: add possibilities of coefficients
+      translatedBoundary.push_back(handleToKey_.at(b));  // TODO: add possibilities of coefficients
     }
+    std::sort(translatedBoundary.begin(), translatedBoundary.end());
 
-    pers_.insert_face(translatedBoundary, dimension);
+    pers_.insert_cell(translatedBoundary, dimension);
 
     return numArrow_;
   }
 
   /**
-   * @brief Updates the zigzag persistence diagram after the removal of the given face if the face was contained
-   * in the current complex (note that it will not contain faces of dimension > ignoreCyclesAboveDim if the latter was
+   * @brief Updates the zigzag persistence diagram after the removal of the given cell if the cell was contained
+   * in the current complex (note that it will not contain cells of dimension > ignoreCyclesAboveDim if the latter was
    * non negative at construction of the class). Otherwise, just increases the operation count by one.
    *
-   * @param faceID ID representing the face to remove. Should be the same than the one used to insert it.
+   * @param cellID ID representing the cell to remove. Should be the same than the one used to insert it.
    * @param filtrationValue Filtration value associated to the removal.
    * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
    * values, ie. the changes are monotonous.
    * @return Number of the operation.
    */
-  Internal_key remove_face(Face_key faceID, Filtration_value filtrationValue) {
-    auto it = handleToKey_.find(faceID);
+  Internal_key remove_cell(Cell_key cellID, Filtration_value filtrationValue) {
+    auto it = handleToKey_.find(cellID);
 
     if (it == handleToKey_.end()) {
       return apply_identity();
@@ -237,14 +231,14 @@ class Filtered_zigzag_persistence_with_storage
 
     _store_filtration_value(filtrationValue);
 
-    pers_.remove_face(it->second);
+    pers_.remove_cell(it->second);
     handleToKey_.erase(it);
 
     return numArrow_;
   }
 
   /**
-   * @brief To use when a face is neither inserted nor removed, but the filtration moves along the identity operator
+   * @brief To use when a cell is neither inserted nor removed, but the filtration moves along the identity operator
    * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposely skipped
    * to avoid useless computation.
    * @return Number of the operation.
@@ -306,18 +300,18 @@ class Filtered_zigzag_persistence_with_storage
   /**
    * @brief Map from input keys to internal keys.
    */
-  std::unordered_map<Face_key, Internal_key, typename Options::Hash, typename Options::KeyEqual> handleToKey_;
+  std::unordered_map<Cell_key, Internal_key, typename Options::Hash, typename Options::KeyEqual> handleToKey_;
   Dimension dimMax_;                                        /**< Maximal dimension of a bar to record. */
   std::vector<Index_interval> persistenceDiagram_;          /**< Stores current closed persistence intervals. */
   Internal_key numArrow_;                                   /**< Current arrow number. */
   Filtration_value previousFiltrationValue_;                /**< Filtration value of the previous arrow. */
   /**
    * @brief filtrationValues_ stores consecutive pairs (i,f) , (j,f') with f != f',
-   * meaning that all inserted faces with key in [i;j-1] have filtration value f,
-   * i is the smallest face index whose face has filtration value f.
+   * meaning that all inserted cells with key in [i;j-1] have filtration value f,
+   * i is the smallest cell index whose cell has filtration value f.
    */
   std::vector<std::pair<Internal_key, Filtration_value> > filtrationValues_;
-  Zigzag_persistence<FilteredZigzagOptions, false> pers_; /**< Class computing the pairs. */
+  Zigzag_persistence<FilteredZigzagOptions> pers_;          /**< Class computing the pairs. */
 
   /**
    * @brief Stores the filtration value if the value is new. Assumes that the given value is either greater (or equal)
@@ -328,7 +322,7 @@ class Filtered_zigzag_persistence_with_storage
   void _store_filtration_value(Filtration_value filtrationValue) {
     if (filtrationValue != previousFiltrationValue_)  // check whether the filt value has changed
     {
-      // consecutive pairs (i,f), (j,f') mean faces of index k in [i,j-1] have filtration value f
+      // consecutive pairs (i,f), (j,f') mean cells of index k in [i,j-1] have filtration value f
       previousFiltrationValue_ = filtrationValue;
       filtrationValues_.emplace_back(numArrow_, previousFiltrationValue_);
     }
@@ -384,7 +378,7 @@ class Filtered_zigzag_persistence_with_storage
  *
  * @brief Class computing the zigzag persistent homology of a zigzag filtration. Algorithm based on \cite zigzag.
  * @details After construction of the class, the zigzag filtration should be given in a streaming like way, i.e.,
- * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
+ * call @ref insert_cell, @ref remove_cell or @ref apply_identity for each step of the filtration in order of
  * the filtration. The bars of the diagram are retrieved via the given callback method every time
  * a pair with non-zero length is closed. To retrieve the open/infinite bars, use @ref get_current_infinite_intervals.
  *
@@ -415,25 +409,25 @@ class Filtered_zigzag_persistence_with_storage
  * // In all cases, it is important that the operations of insertions and removals are made **in the same order**
  * // as in the zigzag filtration ones wants to compute the barcode from.
  *
- * // A face can be identified in the boundaries by any given numerical label, it is just important that the given
+ * // A cell can be identified in the boundaries by any given numerical label, it is just important that the given
  * // filtration values are monotonous (ie., either only increasing or only decreasing).
  *
  * //inserts vertex 2 at filtration value 0.1 -> birth at 0.1 of 0-cycle
- * zp.insert_face(2, {}, 0, 0.1);
+ * zp.insert_cell(2, {}, 0, 0.1);
  * //inserts vertex 4 at filtration value 0.1 -> birth at 0.1 of 0-cycle
- * zp.insert_face(4, {}, 0, 0.1);
+ * zp.insert_cell(4, {}, 0, 0.1);
  * //inserts edge 5 = (2,4) at filtration value 0.3 -> death at 0.3 -> outputs/stores (0, 0.1, 0.3)
- * zp.insert_face(5, {2, 4}, 1, 0.3);
+ * zp.insert_cell(5, {2, 4}, 1, 0.3);
  * //inserts vertex 3 at filtration value 0.4 -> birth at 0.4 of 0-cycle
- * zp.insert_face(3, {}, 0, 0.4);
+ * zp.insert_cell(3, {}, 0, 0.4);
  * //inserts edge 6 = (2,3) at filtration value 0.4 -> death at 0.4 of the cycle born at 0.4 -> outputs/stores nothing
- * zp.insert_face(6, {2, 3}, 1, 0.4);
+ * zp.insert_cell(6, {2, 3}, 1, 0.4);
  * //inserts edge 9 = (3,4) at filtration value 1.2 -> birth at 1.2 of 1-cycle
- * zp.insert_face(9, {4, 3}, 1, 1.2);
+ * zp.insert_cell(9, {4, 3}, 1, 1.2);
  * //removes edge 6 at filtration value 1.5 -> death at 1.5 -> outputs/stores (1, 1.2, 1.5)
- * zp.remove_face(6, 1.5);
+ * zp.remove_cell(6, 1.5);
  * //removes edge 5 at filtration value 2.0 -> birth at 2.0 of 0-cycle
- * zp.remove_face(5, 2.0);
+ * zp.remove_cell(5, 2.0);
  * ```
  *
  * #### Finalizations
@@ -454,14 +448,14 @@ class Filtered_zigzag_persistence {
  public:
   using Options = FilteredZigzagOptions;                        /**< Zigzag options. */
   using Internal_key = typename Options::Internal_key;          /**< Key and index type, has to be signed. */
-  using Face_key = typename Options::Face_key;                  /**< Face ID type from external inputs. */
+  using Cell_key = typename Options::Cell_key;                  /**< Cell ID type from external inputs. */
   using Filtration_value = typename Options::Filtration_value;  /**< Type for filtration values. */
   using Dimension = typename Options::Dimension;      /**< Type for dimension values. */
 
   /**
    * @brief Constructor.
    * @details After construction of the class, the zigzag filtration should be given in a streaming like way, i.e.,
-   * call @ref insert_face, @ref remove_face or @ref apply_identity for each step of the filtration in order of
+   * call @ref insert_cell, @ref remove_cell or @ref apply_identity for each step of the filtration in order of
    * the filtration. The bars of the diagram are retrieved via the given callback method every time
    * a pair with non-zero length is closed. To retrieve the open/infinite bars, use @ref get_current_infinite_intervals.
    *
@@ -469,9 +463,9 @@ class Filtered_zigzag_persistence {
    * Has to take three arguments as input: first the dimension of the cycle, then the birth value of the cycle
    * and third the death value of the cycle. The values corresponds to the filtration values which were given at
    * insertions or removals. Note that bars of length 0 will not be token into account.
-   * @param preallocationSize Reserves space for @p preallocationSize faces in the internal data structure.
+   * @param preallocationSize Reserves space for @p preallocationSize cells in the internal data structure.
    * This is optional and just helps skip a few reallocations. The optimal value (no reallocation, no wasted space) is
-   * the number of faces in the biggest complex of the filtration.
+   * the number of cells in the biggest complex of the filtration.
    * Default value: 0.
    * @tparam F Type of callback method.
    */
@@ -493,67 +487,69 @@ class Filtered_zigzag_persistence {
             preallocationSize) {}
 
   /**
-   * @brief Updates the zigzag persistence diagram after the insertion of the given face.
+   * @brief Updates the zigzag persistence diagram after the insertion of the given cell.
    *
    * @tparam BoundaryRange Range type needing size, begin and end members.
-   * @param faceID ID representing the inserted face.
-   * @param boundary Boundary of the inserted face. The range should be composed of the IDs of all faces contained in
-   * the boundary (i.e. with non-zero coefficients), using the ID specified as `faceID` when the corresponding face
-   * was previously inserted (recall that the faces should be inserted in order of filtration).
-   * @param dimension Dimension of the inserted face.
-   * @param filtrationValue Filtration value associated to the face.
+   * @param cellID ID representing the inserted cell.
+   * @param boundary Boundary of the inserted cell. The range should be composed of the IDs of all cells contained in
+   * the boundary (i.e. with non-zero coefficients), using the ID specified as `cellID` when the corresponding cell
+   * was previously inserted (recall that the cells should be inserted in order of filtration).
+   * @param dimension Dimension of the inserted cell.
+   * @param filtrationValue Filtration value associated to the cell.
    * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
    * values, ie. the changes are monotonous.
    */
-  template <class BoundaryRange = std::initializer_list<Face_key> >
-  Internal_key insert_face(Face_key faceID,
+  template <class BoundaryRange = std::initializer_list<Cell_key> >
+  Internal_key insert_cell(Cell_key cellID,
                            const BoundaryRange& boundary,
                            Dimension dimension,
                            Filtration_value filtrationValue)
   {
     ++numArrow_;
 
-    [[maybe_unused]] auto res = handleToKey_.try_emplace(faceID, numArrow_);
+    [[maybe_unused]] auto res = handleToKey_.try_emplace(cellID, numArrow_);
 
-    GUDHI_CHECK(res.second, "Zigzag_persistence::insert_face - face already in the complex");
+    GUDHI_CHECK(res.second, "Zigzag_persistence::insert_cell - cell already in the complex");
 
     keyToFiltrationValue_.try_emplace(numArrow_, filtrationValue);
 
-    // Compute the keys of the faces of the boundary.
-    std::set<Internal_key> translatedBoundary;  // set maintains the natural order on indices
+    // Compute the keys of the cells of the boundary.
+    std::vector<Internal_key> translatedBoundary;
+    translatedBoundary.reserve(dimension * 2);  // boundary does not have to have `size()`
     for (auto b : boundary) {
-      translatedBoundary.insert(handleToKey_.at(b));  // TODO: add possibilities of coefficients
+      translatedBoundary.push_back(handleToKey_.at(b));  // TODO: add possibilities of coefficients
     }
+    std::sort(translatedBoundary.begin(), translatedBoundary.end());
 
-    pers_.insert_face(translatedBoundary, dimension);
+    pers_.insert_cell(translatedBoundary, dimension);
 
     return numArrow_;
   }
 
   /**
-   * @brief Updates the zigzag persistence diagram after the removal of the given face.
+   * @brief Updates the zigzag persistence diagram after the removal of the given cell.
    *preallocationSize
-   * @param faceID ID representing the face to remove. Should be the same than the one used to insert it.
+   * @param cellID ID representing the cell to remove. Should be the same than the one used to insert it.
    * @param filtrationValue Filtration value associated to the removal.
    * Assumed to be always larger or equal to previously used filtration values or always smaller or equal than previous
    * values, ie. the changes are monotonous.
    */
-  Internal_key remove_face(Face_key faceID, Filtration_value filtrationValue) {
+  Internal_key remove_cell(Cell_key cellID, Filtration_value filtrationValue) {
     ++numArrow_;
 
-    auto it = handleToKey_.find(faceID);
-    GUDHI_CHECK(it != handleToKey_.end(), "Zigzag_persistence::remove_face - face not in the complex");
+    auto it = handleToKey_.find(cellID);
+    GUDHI_CHECK(it != handleToKey_.end(), "Zigzag_persistence::remove_cell - cell not in the complex");
 
     keyToFiltrationValue_.try_emplace(numArrow_, filtrationValue);
 
-    pers_.remove_face(it->second);
+    pers_.remove_cell(it->second);
     handleToKey_.erase(it);
 
     return numArrow_;
   }
 
   /**
-   * @brief To use when a face is neither inserted nor removed, but the filtration moves along the identity operator
+   * @brief To use when a cell is neither inserted nor removed, but the filtration moves along the identity operator
    * on homology level. Useful to keep the birth/death indices aligned when insertions/removals are purposely skipped
    * to avoid useless computation.
    */
@@ -581,10 +577,10 @@ class Filtered_zigzag_persistence {
   /**
    * @brief Map from input keys to internal keys.
    */
-  std::unordered_map<Face_key, Internal_key, typename Options::Hash, typename Options::KeyEqual> handleToKey_;
-  Internal_key numArrow_;                                                   /**< Current arrow number. */
-  std::unordered_map<Internal_key, Filtration_value> keyToFiltrationValue_; /**< Face Key to filtration value map. */
-  Zigzag_persistence<FilteredZigzagOptions, true> pers_;                    /**< Class computing the pairs. */
+  std::unordered_map<Cell_key, Internal_key, typename Options::Hash, typename Options::KeyEqual> handleToKey_;
+  Internal_key numArrow_;                                           /**< Current arrow number. */
+  std::unordered_map<Internal_key, Filtration_value> keyToFiltrationValue_; /**< Cell Key to filtration value map. */
+  Zigzag_persistence<FilteredZigzagOptions> pers_;                  /**< Class computing the pairs. */
 };  // end class Filtered_zigzag_persistence
 
 }  // namespace zigzag_persistence
