@@ -12,6 +12,9 @@ Below is a list of changes:
           * Delaunay Čech complex (using minimal enclosing ball)
           * Alpha complex (moved in this new section)
 
+- [Representations](https://gudhi.inria.fr/python/latest/representations.html)
+     - in metrics, `BottleneckDistance` argument `epsilon` is deprecrated and renamed `e` to be consistent with `bottleneck_distance` and `pairwise_persistence_diagram_distances`
+
 - [Module](link)
      - **...**
 

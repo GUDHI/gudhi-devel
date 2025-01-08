@@ -5,6 +5,7 @@
 # Copyright (C) 2018-2019 Inria
 #
 # Modification(s):
+#   - 2025/01 Vincent Rouvreau: BottleneckDistance(epsilon=...) is deprecated. Consider using BottleneckDistance(e=...)
 #   - YYYY/MM Author: Description of the modification
 
 import numpy as np
@@ -13,6 +14,7 @@ from sklearn.metrics import pairwise_distances
 from gudhi.hera import wasserstein_distance as hera_wasserstein_distance
 from .preprocessing import Padding
 from joblib import Parallel, delayed
+import warnings
 
 #############################################
 # Metrics ###################################
@@ -21,14 +23,14 @@ from joblib import Parallel, delayed
 def _sliced_wasserstein_distance(D1, D2, num_directions):
     """
     This is a function for computing the sliced Wasserstein distance from two persistence diagrams. The Sliced Wasserstein distance is computed by projecting the persistence diagrams onto lines, comparing the projections with the 1-norm, and finally averaging over the lines. See http://proceedings.mlr.press/v70/carriere17a.html for more details.
-    
+
     Parameters:
         D1: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
         D2: (m x 2) numpy.array encoding the second diagram.
         num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation.
 
-    Returns: 
-        float: the sliced Wasserstein distance between persistence diagrams. 
+    Returns:
+        float: the sliced Wasserstein distance between persistence diagrams.
     """
     thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions, endpoint=False)[np.newaxis,:-1]
     lines = np.concatenate([np.cos(thetas), np.sin(thetas)], axis=0)
@@ -43,13 +45,13 @@ def _sliced_wasserstein_distance(D1, D2, num_directions):
 
 def _compute_persistence_diagram_projections(X, num_directions):
     """
-    This is a function for projecting the points of a list of persistence diagrams (as well as their diagonal projections) onto a fixed number of lines sampled uniformly on [-pi/2, pi/2]. This function can be used as a preprocessing step in order to speed up the running time for computing all pairwise sliced Wasserstein distances / kernel values on a list of persistence diagrams. 
+    This is a function for projecting the points of a list of persistence diagrams (as well as their diagonal projections) onto a fixed number of lines sampled uniformly on [-pi/2, pi/2]. This function can be used as a preprocessing step in order to speed up the running time for computing all pairwise sliced Wasserstein distances / kernel values on a list of persistence diagrams.
 
     Parameters:
         X (list of n numpy arrays of shape (num,2)): list of persistence diagrams.
         num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation.
 
-    Returns: 
+    Returns:
         list of n numpy arrays of shape (2*num,num_directions): list of projected persistence diagrams.
     """
     thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions, endpoint=False)[np.newaxis,:-1]
@@ -61,12 +63,12 @@ def _sliced_wasserstein_distance_on_projections(D1, D2):
     """
     This is a function for computing the sliced Wasserstein distance between two persistence diagrams that have already been projected onto some lines. It simply amounts to comparing the sorted projections with the 1-norm, and averaging over the lines. See http://proceedings.mlr.press/v70/carriere17a.html for more details.
 
-    Parameters: 
+    Parameters:
         D1: (2n x number_of_lines) numpy.array containing the n projected points of the first diagram, and the n projections of their diagonal projections.
         D2: (2m x number_of_lines) numpy.array containing the m projected points of the second diagram, and the m projections of their diagonal projections.
 
-    Returns: 
-        float: the sliced Wasserstein distance between the projected persistence diagrams. 
+    Returns:
+        float: the sliced Wasserstein distance between the projected persistence diagrams.
     """
     lim1, lim2 = int(len(D1)/2), int(len(D2)/2)
     approx1, approx_diag1, approx2, approx_diag2 = D1[:lim1], D1[lim1:], D2[:lim2], D2[lim2:]
@@ -79,14 +81,14 @@ def _persistence_fisher_distance(D1, D2, kernel_approx=None, bandwidth=1.):
     """
     This is a function for computing the persistence Fisher distance from two persistence diagrams. The persistence Fisher distance is obtained by computing the original Fisher distance between the probability distributions associated to the persistence diagrams given by convolving them with a Gaussian kernel. See http://papers.nips.cc/paper/8205-persistence-fisher-kernel-a-riemannian-manifold-kernel-for-persistence-diagrams for more details.
 
-    Parameters: 
+    Parameters:
         D1: (n x 2) numpy.array encoding the (finite points of the) first diagram). Must not contain essential points (i.e. with infinite coordinate).
         D2: (m x 2) numpy.array encoding the second diagram.
         bandwidth (float): bandwidth of the Gaussian kernel used to turn persistence diagrams into probability distributions.
-        kernel_approx: kernel approximation class used to speed up computation. Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).   
+        kernel_approx: kernel approximation class used to speed up computation. Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).
 
-    Returns: 
-        float: the persistence Fisher distance between persistence diagrams. 
+    Returns:
+        float: the persistence Fisher distance between persistence diagrams.
     """
     projection = (1./2) * np.ones((2,2))
     diagonal_projections1 = np.matmul(D1, projection)
@@ -97,7 +99,7 @@ def _persistence_fisher_distance(D1, D2, kernel_approx=None, bandwidth=1.):
         approx2 = kernel_approx.transform(D2)
         approx_diagonal2 = kernel_approx.transform(diagonal_projections2)
         Z = np.concatenate([approx1, approx_diagonal1, approx2, approx_diagonal2], axis=0)
-        U, V = np.sum(np.concatenate([approx1, approx_diagonal2], axis=0), axis=0), np.sum(np.concatenate([approx2, approx_diagonal1], axis=0), axis=0) 
+        U, V = np.sum(np.concatenate([approx1, approx_diagonal2], axis=0), axis=0), np.sum(np.concatenate([approx2, approx_diagonal1], axis=0), axis=0)
         vectori, vectorj = np.abs(np.matmul(Z, U.T)), np.abs(np.matmul(Z, V.T))
         vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
         if vectori_sum != 0:
@@ -107,7 +109,7 @@ def _persistence_fisher_distance(D1, D2, kernel_approx=None, bandwidth=1.):
         return np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
     else:
         Z = np.concatenate([D1, diagonal_projections1, D2, diagonal_projections2], axis=0)
-        U, V = np.concatenate([D1, diagonal_projections2], axis=0), np.concatenate([D2, diagonal_projections1], axis=0) 
+        U, V = np.concatenate([D1, diagonal_projections2], axis=0), np.concatenate([D2, diagonal_projections1], axis=0)
         vectori = np.sum(np.exp(-np.square(pairwise_distances(Z,U))/(2 * np.square(bandwidth)))/(bandwidth * np.sqrt(2*np.pi)), axis=1)
         vectorj = np.sum(np.exp(-np.square(pairwise_distances(Z,V))/(2 * np.square(bandwidth)))/(bandwidth * np.sqrt(2*np.pi)), axis=1)
         vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
@@ -154,19 +156,19 @@ def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_job
     This function computes the distance matrix between two lists of persistence diagrams given as numpy arrays of shape (nx2).
 
     Parameters:
-        X (list of n numpy arrays of shape (numx2)): first list of persistence diagrams. 
+        X (list of n numpy arrays of shape (numx2)): first list of persistence diagrams.
         Y (list of m numpy arrays of shape (numx2)): second list of persistence diagrams (optional). If None, pairwise distances are computed from the first list only.
-        metric: distance to use. It can be either a string ("sliced_wasserstein", "wasserstein", "hera_wasserstein" (Wasserstein distance computed with Hera---note that Hera is also used for the default option "wasserstein"), "pot_wasserstein" (Wasserstein distance computed with POT), "bottleneck", "persistence_fisher") or a function taking two numpy arrays of shape (nx2) and (mx2) as inputs. If it is a function, make sure that it is symmetric and that it outputs 0 if called on the same two arrays. 
+        metric: distance to use. It can be either a string ("sliced_wasserstein", "wasserstein", "hera_wasserstein" (Wasserstein distance computed with Hera---note that Hera is also used for the default option "wasserstein"), "pot_wasserstein" (Wasserstein distance computed with POT), "bottleneck", "persistence_fisher") or a function taking two numpy arrays of shape (nx2) and (mx2) as inputs. If it is a function, make sure that it is symmetric and that it outputs 0 if called on the same two arrays.
         n_jobs (int): number of jobs to use for the computation. This uses joblib.Parallel(prefer="threads"), so metrics that do not release the GIL may not scale unless run inside a `joblib.parallel_backend <https://joblib.readthedocs.io/en/latest/parallel.html#joblib.parallel_backend>`_ block.
         **kwargs: optional keyword parameters. Any further parameters are passed directly to the distance function. See the docs of the various distance classes in this module.
 
-    Returns: 
+    Returns:
         numpy array of shape (nxm): distance matrix
     """
     XX = np.reshape(np.arange(len(X)), [-1,1])
     YY = None if Y is None or Y is X else np.reshape(np.arange(len(Y)), [-1,1])
     if metric == "bottleneck":
-        try: 
+        try:
             from .. import bottleneck_distance
             return _pairwise(pairwise_distances, True, XX, YY, metric=_sklearn_wrapper(bottleneck_distance, X, Y, **kwargs), n_jobs=n_jobs)
         except ImportError:
@@ -190,14 +192,14 @@ def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_job
 
 class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing the sliced Wasserstein distance matrix from a list of persistence diagrams. The Sliced Wasserstein distance is computed by projecting the persistence diagrams onto lines, comparing the projections with the 1-norm, and finally integrating over all possible lines. See http://proceedings.mlr.press/v70/carriere17a.html for more details. 
+    This is a class for computing the sliced Wasserstein distance matrix from a list of persistence diagrams. The Sliced Wasserstein distance is computed by projecting the persistence diagrams onto lines, comparing the projections with the 1-norm, and finally integrating over all possible lines. See http://proceedings.mlr.press/v70/carriere17a.html for more details.
     """
     def __init__(self, num_directions=10, n_jobs=None):
         """
         Constructor for the SlicedWassersteinDistance class.
 
         Parameters:
-            num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation (default 10). 
+            num_directions (int): number of lines evenly sampled from [-pi/2,pi/2] in order to approximate and speed up the distance computation (default 10).
             n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
         """
         self.num_directions = num_directions
@@ -245,15 +247,19 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
 
     :Requires: `CGAL <installation.html#cgal>`_
     """
-    def __init__(self, epsilon=None, n_jobs=None):
+    def __init__(self, e=None, n_jobs=None, epsilon=None):
         """
         Constructor for the BottleneckDistance class.
 
         Parameters:
-            epsilon (double): absolute (additive) error tolerated on the distance (default is the smallest positive float), see :func:`gudhi.bottleneck_distance`.
+            epsilon (double): **[deprecated]** consider using `e` instead.
+            e (double): absolute (additive) error tolerated on the distance (default is the smallest positive float), see :func:`gudhi.bottleneck_distance`.
             n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
         """
-        self.epsilon = epsilon
+        if epsilon is not None:
+            warnings.warn("epsilon is a deprecated argument, please consider using e", DeprecationWarning)
+            self.e = epsilon
+        self.e = e
         self.n_jobs = n_jobs
 
     def fit(self, X, y=None):
@@ -277,7 +283,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise bottleneck distances.
         """
-        Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="bottleneck", e=self.epsilon, n_jobs=self.n_jobs)
+        Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="bottleneck", e=self.e, n_jobs=self.n_jobs)
         return Xfit
 
     def __call__(self, diag1, diag2):
@@ -291,16 +297,16 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         Returns:
             float: bottleneck distance.
         """
-        try: 
+        try:
             from .. import bottleneck_distance
-            return bottleneck_distance(diag1, diag2, e=self.epsilon)
+            return bottleneck_distance(diag1, diag2, e=self.e)
         except ImportError:
             print("Gudhi built without CGAL")
             raise
 
 class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing the persistence Fisher distance matrix from a list of persistence diagrams. The persistence Fisher distance is obtained by computing the original Fisher distance between the probability distributions associated to the persistence diagrams given by convolving them with a Gaussian kernel. See http://papers.nips.cc/paper/8205-persistence-fisher-kernel-a-riemannian-manifold-kernel-for-persistence-diagrams for more details. 
+    This is a class for computing the persistence Fisher distance matrix from a list of persistence diagrams. The persistence Fisher distance is obtained by computing the original Fisher distance between the probability distributions associated to the persistence diagrams given by convolving them with a Gaussian kernel. See http://papers.nips.cc/paper/8205-persistence-fisher-kernel-a-riemannian-manifold-kernel-for-persistence-diagrams for more details.
     """
     def __init__(self, bandwidth=1., kernel_approx=None, n_jobs=None):
         """
@@ -308,7 +314,7 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
 
         Parameters:
             bandwidth (double): bandwidth of the Gaussian kernel used to turn persistence diagrams into probability distributions (default 1.).
-            kernel_approx (class): kernel approximation class used to speed up computation (default None). Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).   
+            kernel_approx (class): kernel approximation class used to speed up computation (default None). Common kernel approximations classes can be found in the scikit-learn library (such as RBFSampler for instance).
             n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
         """
         self.bandwidth, self.kernel_approx = bandwidth, kernel_approx
@@ -353,7 +359,7 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
 
 class WassersteinDistance(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing the Wasserstein distance matrix from a list of persistence diagrams. 
+    This is a class for computing the Wasserstein distance matrix from a list of persistence diagrams.
     """
 
     def __init__(self, order=1, internal_p=np.inf, mode="hera", delta=0.01, n_jobs=None):
