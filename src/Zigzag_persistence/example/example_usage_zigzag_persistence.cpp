@@ -26,7 +26,7 @@ int main() {
 
   // It is important that the operations of insertions and removals are made **in the same order** as in the zigzag
   // filtration ones wants to compute the barcode from.
-  // A face has to be identified in the boundaries by the operation number the face was inserted with in the sequence.
+  // A cell has to be identified in the boundaries by the operation number the cell was inserted with in the sequence.
 
   // inserts vertex 0 -> birth at 0 of 0-cycle
   zp.insert_cell({}, 0);

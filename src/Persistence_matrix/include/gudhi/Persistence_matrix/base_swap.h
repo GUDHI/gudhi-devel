@@ -77,7 +77,7 @@ class Base_swap {
 
   /**
    * @brief Swaps the two columns at given indices in the column container. Does not updates the column index value,
-   * potentially stored in the cells. This will be done when calling `_orderRows()`.
+   * potentially stored in the entries. This will be done when calling `_orderRows()`.
    * 
    * @param columnIndex1 First @ref MatIdx column index.
    * @param columnIndex2 Second @ref MatIdx column index.
@@ -145,7 +145,7 @@ template <class Master_matrix, class Base_matrix>
 inline void Base_swap<Master_matrix, Base_matrix>::swap_columns(Index columnIndex1, Index columnIndex2)
 {
   swap(_matrix()->matrix_.at(columnIndex1), _matrix()->matrix_.at(columnIndex2));
-  if constexpr (Master_matrix::Option_list::has_row_access) rowSwapped_ = true; //to update column index in cells.
+  if constexpr (Master_matrix::Option_list::has_row_access) rowSwapped_ = true; //to update column index in entries.
 }
 
 template <class Master_matrix, class Base_matrix>

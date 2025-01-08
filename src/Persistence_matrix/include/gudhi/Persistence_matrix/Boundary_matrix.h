@@ -32,7 +32,7 @@ namespace persistence_matrix {
  *
  * @brief %Matrix structure to store the ordered @ref boundarymatrix "boundary matrix" \f$ R \f$ of a filtered complex
  * in order to compute its persistent homology. Provides an access to its columns and rows as well as the possibility
- * to remove the last faces of the filtration while maintaining a valid barcode.
+ * to remove the last cells of the filtration while maintaining a valid barcode.
  * 
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
@@ -50,14 +50,14 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
    * @brief Field operators class. Necessary only if @ref PersistenceMatrixOptions::is_z2 is false.
    */
   using Field_operators = typename Master_matrix::Field_operators;
-  using Field_element = typename Master_matrix::Element;              /**< Type of an field element. */
-  using Column = typename Master_matrix::Column;                      /**< Column type. */
-  using Boundary = typename Master_matrix::Boundary;                  /**< Type of an input column. */
-  using Row = typename Master_matrix::Row;                            /**< Row type,
-                                                                           only necessary with row access option. */
-  using Cell_constructor = typename Master_matrix::Cell_constructor;  /**< Factory of @ref Cell classes. */
-  using Column_settings = typename Master_matrix::Column_settings;    /**< Structure giving access to the columns to
-                                                                           necessary external classes. */
+  using Field_element = typename Master_matrix::Element;                /**< Type of an field element. */
+  using Column = typename Master_matrix::Column;                        /**< Column type. */
+  using Boundary = typename Master_matrix::Boundary;                    /**< Type of an input column. */
+  using Row = typename Master_matrix::Row;                              /**< Row type,
+                                                                             only necessary with row access option. */
+  using Entry_constructor = typename Master_matrix::Entry_constructor;  /**< Factory of @ref Entry classes. */
+  using Column_settings = typename Master_matrix::Column_settings;      /**< Structure giving access to the columns to
+                                                                             necessary external classes. */
 
   /**
    * @brief Constructs an empty matrix.
@@ -67,11 +67,12 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
    */
   Boundary_matrix(Column_settings* colSettings);
   /**
-   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Cell_representative. Each range corresponds to
-   * a column  (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by increasing
-   * IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting with 0. 
+   * @brief Constructs a new matrix from the given ranges of @ref Matrix::Entry_representative. Each range corresponds
+   * to a column  (the order of the ranges are preserved). The content of the ranges is assumed to be sorted by
+   * increasing IDs. The IDs of the simplices are also assumed to be consecutive, ordered by filtration value, starting
+   * with 0. 
    * 
-   * @tparam Boundary_range Range type for @ref Matrix::Cell_representative ranges.
+   * @tparam Boundary_range Range type for @ref Matrix::Entry_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param orderedBoundaries Range of boundaries: @p orderedBoundaries is interpreted as a boundary matrix of a 
    * filtered **simplicial** complex, whose boundaries are ordered by filtration order. 
@@ -119,51 +120,53 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
   /**
    * @brief Inserts at the end of the matrix a new ordered column corresponding to the given boundary. 
    * This means that it is assumed that this method is called on boundaries in the order of the filtration. 
-   * It also assumes that the faces in the given boundary are identified by their relative position in the filtration, 
+   * It also assumes that the cells in the given boundary are identified by their relative position in the filtration, 
    * starting at 0. If it is not the case, use the other
-   * @ref insert_boundary(ID_index faceIndex, const Boundary_range& boundary, Dimension dim) "insert_boundary"
-   * instead by indicating the face ID used in the boundaries when the face is inserted.
+   * @ref insert_boundary(ID_index cellIndex, const Boundary_range& boundary, Dimension dim) "insert_boundary"
+   * instead by indicating the cell ID used in the boundaries when the cell is inserted.
    *
    * Different to the constructor, the boundaries do not have to come from a simplicial complex, but also from
-   * a more general cell complex. This includes cubical complexes or Morse complexes for example.
+   * a more general entry complex. This includes cubical complexes or Morse complexes for example.
    *
    * At the insertion, the boundary will be copied as is. The column will only be reduced later when the barcode
    * is requested in order to apply some optimizations with the additional knowledge. Hence, the barcode will also
    * not be updated, so call @ref Base_pairing::get_current_barcode "get_current_barcode" only when the matrix is
    * complete.
    * 
-   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
    * @param boundary Boundary generating the new column. The content should be ordered by ID.
-   * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    * @return The @ref MatIdx index of the inserted boundary.
    */
   template <class Boundary_range = Boundary>
   Index insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
   /**
-   * @brief It does the same as the other version, but allows the boundary faces to be identified without restrictions
+   * @brief It does the same as the other version, but allows the boundary cells to be identified without restrictions
    * except that all IDs have to be strictly increasing in the order of filtration. Note that you should avoid then
    * to use the other insertion method to avoid overwriting IDs.
    *
-   * As a face has to be inserted before one of its cofaces in a valid filtration (recall that it is assumed that
-   * the faces are inserted by order of filtration), it is sufficient to indicate the ID of the face being inserted.
+   * As a cell has to be inserted before one of its cofaces in a valid filtration (recall that it is assumed that
+   * the cells are inserted by order of filtration), it is sufficient to indicate the ID of the cell being inserted.
    * 
-   * @tparam Boundary_range Range of @ref Matrix::Cell_representative. Assumed to have a begin(), end() and size() method.
-   * @param faceIndex @ref IDIdx index to use to identify the new face.
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param cellIndex @ref IDIdx index to use to identify the new cell.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the 
-   * @p faceIndex values of precedent calls of the method for the corresponding faces and should be ordered in 
+   * @p cellIndex values of precedent calls of the method for the corresponding cells and should be ordered in 
    * increasing order.
-   * @param dim Dimension of the face whose boundary is given. If the complex is simplicial, 
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial, 
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    * @return The @ref MatIdx index of the inserted boundary.
    */
   template <class Boundary_range = Boundary>
-  Index insert_boundary(ID_index faceIndex, const Boundary_range& boundary, Dimension dim = -1);
+  Index insert_boundary(ID_index cellIndex, const Boundary_range& boundary, Dimension dim = -1);
   /**
    * @brief Returns the column at the given @ref MatIdx index.
    * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
    *
-   * Note that before returning the column, all column cells can eventually be reordered, if lazy swaps occurred.
+   * Note that before returning the column, all column entries can eventually be reordered, if lazy swaps occurred.
    * It is therefore recommended to avoid calling @ref get_column between column or row swaps, otherwise the benefits
    * of the the laziness is lost.
    * 
@@ -176,7 +179,7 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
    * Returns the row at the given @ref rowindex "row index" of the matrix.
    * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    *
-   * Note that before returning the row, all column cells can eventually be reordered, if lazy swaps occurred.
+   * Note that before returning the row, all column entries can eventually be reordered, if lazy swaps occurred.
    * It is therefore recommended to avoid calling @ref get_row between column or row swaps, otherwise the benefits
    * of the the laziness is lost.
    * 
@@ -186,9 +189,9 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
   Row& get_row(Index rowIndex);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns is true.
-   * Removes the last face in the filtration from the matrix and updates the barcode if this one was already computed.
+   * Removes the last cell in the filtration from the matrix and updates the barcode if this one was already computed.
    * 
-   * @return The pivot of the removed face.
+   * @return The pivot of the removed cell.
    */
   Index remove_last();
   /**
@@ -197,11 +200,11 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
    * and @ref PersistenceMatrixOptions::has_column_and_row_swaps are true: cleans up maps used for the lazy row swaps.
    * Otherwise, does nothing.
    *
-   * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row cells are not
+   * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row entries are not
    * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
-   * the column cells are destroyed later. The row access is just meant as a "read only" access to the rows and the
+   * the column entries are destroyed later. The row access is just meant as a "read only" access to the rows and the
    * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
-   * dictionaries. This allows to avoid testing the emptiness of a row at each column cell removal, what can be
+   * dictionaries. This allows to avoid testing the emptiness of a row at each column entry removal, what can be
    * quite frequent. 
    * 
    * @param rowIndex @ref rowindex "Row index" of the empty row.
@@ -218,8 +221,8 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
   /**
    * @brief Returns the dimension of the given column.
    * 
-   * @param columnIndex @ref MatIdx index of the column representing the face.
-   * @return Dimension of the face.
+   * @param columnIndex @ref MatIdx index of the column representing the cell.
+   * @return Dimension of the cell.
    */
   Dimension get_column_dimension(Index columnIndex) const;
 
@@ -266,15 +269,15 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
                                   Index targetColumnIndex);
 
   /**
-   * @brief Zeroes the cell at the given coordinates.
+   * @brief Zeroes the entry at the given coordinates.
    *
    * @warning They will be no verification to ensure that the zeroing makes sense for the validity of a
    * boundary matrix of a filtered complex. So should be used while knowing what one is doing.
    * 
-   * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
+   * @param columnIndex @ref MatIdx index of the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
    */
-  void zero_cell(Index columnIndex, Index rowIndex);
+  void zero_entry(Index columnIndex, Index rowIndex);
   /**
    * @brief Zeroes the column at the given index.
    *
@@ -285,14 +288,14 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
    */
   void zero_column(Index columnIndex);
   /**
-   * @brief Indicates if the cell at given coordinates has value zero.
+   * @brief Indicates if the entry at given coordinates has value zero.
    * 
-   * @param columnIndex @ref MatIdx index of the column of the cell.
-   * @param rowIndex @ref rowindex "Row index" of the row of the cell.
-   * @return true If the cell has value zero.
+   * @param columnIndex @ref MatIdx index of the column of the entry.
+   * @param rowIndex @ref rowindex "Row index" of the row of the entry.
+   * @return true If the entry has value zero.
    * @return false Otherwise.
    */
-  bool is_zero_cell(Index columnIndex, Index rowIndex) const;
+  bool is_zero_entry(Index columnIndex, Index rowIndex) const;
   /**
    * @brief Indicates if the column at given index has value zero.
    * 
@@ -358,9 +361,9 @@ class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
   friend Swap_opt;
   friend Pair_opt;
 
-  Column_container matrix_;          /**< Column container. */
-  Index nextInsertIndex_;       /**< Next unused column index. */
-  Column_settings* colSettings_;  /**< Cell factory. */
+  Column_container matrix_;       /**< Column container. */
+  Index nextInsertIndex_;         /**< Next unused column index. */
+  Column_settings* colSettings_;  /**< Entry factory. */
 
   static constexpr bool activeDimOption =
       Master_matrix::Option_list::has_matrix_maximal_dimension_access || Master_matrix::maxDimensionIsNeeded;
@@ -466,7 +469,7 @@ inline typename Boundary_matrix<Master_matrix>::Index Boundary_matrix<Master_mat
 template <class Master_matrix>
 template <class Boundary_range>
 inline typename Boundary_matrix<Master_matrix>::Index Boundary_matrix<Master_matrix>::insert_boundary(
-    ID_index faceIndex, const Boundary_range& boundary, Dimension dim) 
+    ID_index cellIndex, const Boundary_range& boundary, Dimension dim) 
 {
   if (dim == -1) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
 
@@ -489,12 +492,12 @@ inline typename Boundary_matrix<Master_matrix>::Index Boundary_matrix<Master_mat
   //row swap map containers
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     if constexpr (activeSwapOption) {
-      Swap_opt::indexToRow_.emplace(faceIndex, faceIndex);
-      Swap_opt::rowToIndex_.emplace(faceIndex, faceIndex);
+      Swap_opt::indexToRow_.emplace(cellIndex, cellIndex);
+      Swap_opt::rowToIndex_.emplace(cellIndex, cellIndex);
     }
   } else {
     if constexpr (activeSwapOption) {
-      for (Index i = Swap_opt::indexToRow_.size(); i <= faceIndex; ++i) {
+      for (Index i = Swap_opt::indexToRow_.size(); i <= cellIndex; ++i) {
         Swap_opt::indexToRow_.push_back(i);
         Swap_opt::rowToIndex_.push_back(i);
       }
@@ -503,10 +506,10 @@ inline typename Boundary_matrix<Master_matrix>::Index Boundary_matrix<Master_mat
 
   //maps for possible shifting between column content and position indices used for birth events
   if constexpr (activePairingOption){
-    if (faceIndex != nextInsertIndex_){
-      Pair_opt::idToPosition_.emplace(faceIndex, nextInsertIndex_);
+    if (cellIndex != nextInsertIndex_){
+      Pair_opt::idToPosition_.emplace(cellIndex, nextInsertIndex_);
       if constexpr (Master_matrix::Option_list::has_removable_columns){
-        Pair_opt::PIDM::map_.emplace(nextInsertIndex_, faceIndex);
+        Pair_opt::PIDM::map_.emplace(nextInsertIndex_, cellIndex);
       }
     }
   }
@@ -650,7 +653,7 @@ inline void Boundary_matrix<Master_matrix>::multiply_source_and_add_to(const Fie
 }
 
 template <class Master_matrix>
-inline void Boundary_matrix<Master_matrix>::zero_cell(Index columnIndex, Index rowIndex) 
+inline void Boundary_matrix<Master_matrix>::zero_entry(Index columnIndex, Index rowIndex) 
 {
   _get_column(columnIndex).clear(_get_real_row_index(rowIndex));
 }
@@ -662,7 +665,7 @@ inline void Boundary_matrix<Master_matrix>::zero_column(Index columnIndex)
 }
 
 template <class Master_matrix>
-inline bool Boundary_matrix<Master_matrix>::is_zero_cell(Index columnIndex, Index rowIndex) const 
+inline bool Boundary_matrix<Master_matrix>::is_zero_entry(Index columnIndex, Index rowIndex) const 
 {
   return !(_get_column(columnIndex).is_non_zero(_get_real_row_index(rowIndex)));
 }
@@ -726,9 +729,9 @@ inline void Boundary_matrix<Master_matrix>::print()
   if constexpr (Master_matrix::Option_list::has_row_access) {
     std::cout << "Row Matrix:\n";
     for (ID_index i = 0; i < nextInsertIndex_; ++i) {
-      const auto& row = RA_opt::rows_[i];
-      for (const auto& cell : row) {
-        std::cout << cell.get_column_index() << " ";
+      const auto& row = (*RA_opt::rows_)[i];
+      for (const typename Column::Entry& entry : row) {
+        std::cout << entry.get_column_index() << " ";
       }
       std::cout << "(" << i << ")\n";
     }

@@ -395,8 +395,8 @@ void test_general_insertion() {
   columns.pop_back();
 
   Matrix m(columns, 5);
-  BOOST_CHECK(m.is_zero_cell(1, 0));
-  BOOST_CHECK(!m.is_zero_cell(3, 0));
+  BOOST_CHECK(m.is_zero_entry(1, 0));
+  BOOST_CHECK(!m.is_zero_entry(3, 0));
   BOOST_CHECK(m.is_zero_column(0));
   BOOST_CHECK(m.is_zero_column(1));
   BOOST_CHECK(m.is_zero_column(2));
@@ -412,8 +412,8 @@ void test_general_insertion() {
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 11);
   m.insert_column(col2);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 12);
-  BOOST_CHECK(m.is_zero_cell(1, 0));
-  BOOST_CHECK(!m.is_zero_cell(3, 0));
+  BOOST_CHECK(m.is_zero_entry(1, 0));
+  BOOST_CHECK(!m.is_zero_entry(3, 0));
   BOOST_CHECK(m.is_zero_column(0));
   BOOST_CHECK(m.is_zero_column(1));
   BOOST_CHECK(m.is_zero_column(2));
@@ -426,7 +426,7 @@ void test_general_insertion() {
   BOOST_CHECK(!m.is_zero_column(9));
   BOOST_CHECK(!m.is_zero_column(10));
   BOOST_CHECK(!m.is_zero_column(11));
-  BOOST_CHECK(!m.is_zero_cell(3, 1));
+  BOOST_CHECK(!m.is_zero_entry(3, 1));
 }
 
 // for boundary and ru
@@ -439,8 +439,8 @@ void test_boundary_insertion() {
   orderedBoundaries.pop_back();
 
   Matrix m(orderedBoundaries, 5);
-  BOOST_CHECK(m.is_zero_cell(1, 0));
-  BOOST_CHECK(!m.is_zero_cell(3, 0));
+  BOOST_CHECK(m.is_zero_entry(1, 0));
+  BOOST_CHECK(!m.is_zero_entry(3, 0));
   BOOST_CHECK(m.is_zero_column(0));
   BOOST_CHECK(m.is_zero_column(1));
   BOOST_CHECK(m.is_zero_column(2));
@@ -452,8 +452,8 @@ void test_boundary_insertion() {
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 6);
   m.insert_boundary(boundary2);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 7);
-  BOOST_CHECK(m.is_zero_cell(1, 0));
-  BOOST_CHECK(!m.is_zero_cell(3, 0));
+  BOOST_CHECK(m.is_zero_entry(1, 0));
+  BOOST_CHECK(!m.is_zero_entry(3, 0));
   BOOST_CHECK(m.is_zero_column(0));
   BOOST_CHECK(m.is_zero_column(1));
   BOOST_CHECK(m.is_zero_column(2));
@@ -497,9 +497,9 @@ void test_boundary_insertion() {
 template <class Matrix>
 void test_chain_boundary_insertion(Matrix& m1, Matrix& m2) {
   auto test = [](Matrix& m) {
-    BOOST_CHECK(m.is_zero_cell(1, 2));
-    BOOST_CHECK(!m.is_zero_cell(1, 1));
-    BOOST_CHECK(!m.is_zero_cell(3, 3));
+    BOOST_CHECK(m.is_zero_entry(1, 2));
+    BOOST_CHECK(!m.is_zero_entry(1, 1));
+    BOOST_CHECK(!m.is_zero_entry(3, 3));
     BOOST_CHECK(!m.is_zero_column(0));
     BOOST_CHECK(!m.is_zero_column(1));
     BOOST_CHECK(!m.is_zero_column(2));
@@ -549,9 +549,9 @@ void test_chain_boundary_insertion(Matrix& m1, Matrix& m2) {
   auto boundary1 = orderedBoundaries.back();
   orderedBoundaries.pop_back();
 
-  BOOST_CHECK(m2.is_zero_cell(1, 2));
-  BOOST_CHECK(!m2.is_zero_cell(1, 1));
-  BOOST_CHECK(!m2.is_zero_cell(3, 3));
+  BOOST_CHECK(m2.is_zero_entry(1, 2));
+  BOOST_CHECK(!m2.is_zero_entry(1, 1));
+  BOOST_CHECK(!m2.is_zero_entry(3, 3));
   BOOST_CHECK(!m2.is_zero_column(0));
   BOOST_CHECK(!m2.is_zero_column(1));
   BOOST_CHECK(!m2.is_zero_column(2));
@@ -618,13 +618,13 @@ void test_zeroing() {
 
   Matrix m(orderedBoundaries, 5);
 
-  BOOST_CHECK(!m.is_zero_cell(3, 1));
+  BOOST_CHECK(!m.is_zero_entry(3, 1));
   BOOST_CHECK(!m.is_zero_column(3));
-  m.zero_cell(3, 1);
-  BOOST_CHECK(m.is_zero_cell(3, 1));
+  m.zero_entry(3, 1);
+  BOOST_CHECK(m.is_zero_entry(3, 1));
   BOOST_CHECK(!m.is_zero_column(3));
   m.zero_column(3);
-  BOOST_CHECK(m.is_zero_cell(3, 1));
+  BOOST_CHECK(m.is_zero_entry(3, 1));
   BOOST_CHECK(m.is_zero_column(3));
 }
 
@@ -635,23 +635,13 @@ void test_ru_u_access() {
 
   std::vector<witness_content<typename Matrix::Column> > uColumns(7);
   if constexpr (Matrix::Option_list::is_z2) {
-    if constexpr (Matrix::Option_list::has_vine_update) {
-      uColumns[0] = {0};
-      uColumns[1] = {1};
-      uColumns[2] = {2};
-      uColumns[3] = {3, 5};
-      uColumns[4] = {4, 5};
-      uColumns[5] = {5};
-      uColumns[6] = {6};
-    } else {
-      uColumns[0] = {0};
-      uColumns[1] = {1};
-      uColumns[2] = {2};
-      uColumns[3] = {3};
-      uColumns[4] = {4};
-      uColumns[5] = {3, 4, 5};
-      uColumns[6] = {6};
-    }
+    uColumns[0] = {0};
+    uColumns[1] = {1};
+    uColumns[2] = {2};
+    uColumns[3] = {3, 5};
+    uColumns[4] = {4, 5};
+    uColumns[5] = {5};
+    uColumns[6] = {6};
   } else {
     uColumns[0] = {{0, 1}};
     uColumns[1] = {{1, 1}};
@@ -668,23 +658,23 @@ void test_ru_u_access() {
     test_column_equality<typename Matrix::Column>(c, get_column_content_via_iterators(col));
   }
 
-  if constexpr (Matrix::Option_list::has_vine_update) {
-    BOOST_CHECK(!m.is_zero_cell(3, 5, false));
+  if constexpr (Matrix::Option_list::is_z2) {
+    BOOST_CHECK(!m.is_zero_entry(3, 5, false));
     BOOST_CHECK(!m.is_zero_column(4, false));
-    m.zero_cell(3, 5, false);
-    BOOST_CHECK(m.is_zero_cell(3, 5, false));
+    m.zero_entry(3, 5, false);
+    BOOST_CHECK(m.is_zero_entry(3, 5, false));
     BOOST_CHECK(!m.is_zero_column(4, false));
     m.zero_column(4, false);
-    BOOST_CHECK(m.is_zero_cell(3, 5, false));
+    BOOST_CHECK(m.is_zero_entry(3, 5, false));
     BOOST_CHECK(m.is_zero_column(4, false));
   } else {
-    BOOST_CHECK(!m.is_zero_cell(5, 3, false));
+    BOOST_CHECK(!m.is_zero_entry(5, 3, false));
     BOOST_CHECK(!m.is_zero_column(4, false));
-    m.zero_cell(5, 3, false);
-    BOOST_CHECK(m.is_zero_cell(5, 3, false));
+    m.zero_entry(5, 3, false);
+    BOOST_CHECK(m.is_zero_entry(5, 3, false));
     BOOST_CHECK(!m.is_zero_column(4, false));
     m.zero_column(4, false);
-    BOOST_CHECK(m.is_zero_cell(5, 3, false));
+    BOOST_CHECK(m.is_zero_entry(5, 3, false));
     BOOST_CHECK(m.is_zero_column(4, false));
   }
 }
@@ -696,8 +686,8 @@ void test_base_z2_row_access() {
 
   std::vector<std::vector<unsigned int> > rows;
   if constexpr (Matrix::Option_list::has_column_compression) {
-    // if the union find structure changes, the column_index values of de cells could also change. Change the test with
-    // all possibilities?
+    // if the union find structure changes, the column_index values of the entries could also change. Change the test
+    // with all possibilities?
     rows.push_back({3, 6});
     rows.push_back({3, 5});
     rows.push_back({5});
@@ -726,8 +716,8 @@ void test_base_z5_row_access() {
 
   std::vector<std::vector<std::pair<unsigned int, typename Matrix::Element> > > rows;
   if constexpr (Matrix::Option_list::has_column_compression) {
-    // if the union find structure changes, the column_index values of de cells could also change. Change the test with
-    // all possibilities?
+    // if the union find structure changes, the column_index values of the entries could also change. Change the test
+    // with all possibilities?
     rows.push_back({{3, 1}, {6, 1}});
     rows.push_back({{3, 4}, {5, 1}});
     rows.push_back({{5, 4}});
@@ -775,23 +765,13 @@ void test_ru_u_row_access() {
 
   std::vector<witness_content<typename Matrix::Column> > rows;
   if constexpr (Matrix::Option_list::is_z2) {
-    if constexpr (Matrix::Option_list::has_vine_update) {
-      rows.push_back({0});
-      rows.push_back({1});
-      rows.push_back({2});
-      rows.push_back({3});
-      rows.push_back({4});
-      rows.push_back({3, 4, 5});
-      rows.push_back({6});
-    } else {
-      rows.push_back({0});
-      rows.push_back({1});
-      rows.push_back({2});
-      rows.push_back({3, 5});
-      rows.push_back({4, 5});
-      rows.push_back({5});
-      rows.push_back({6});
-    }
+    rows.push_back({0});
+    rows.push_back({1});
+    rows.push_back({2});
+    rows.push_back({3});
+    rows.push_back({4});
+    rows.push_back({3, 4, 5});
+    rows.push_back({6});
   } else {
     rows.push_back({{0, 1}});
     rows.push_back({{1, 1}});
@@ -806,11 +786,11 @@ void test_ru_u_row_access() {
   unsigned int i = 0;
   for (auto& r : rows) {
     orderedRows.clear();
-    for (const auto& cell : m.get_row(i++, false)) {
+    for (const auto& entry : m.get_row(i++, false)) {
       if constexpr (Matrix::Option_list::is_z2) {
-        orderedRows.insert(cell.get_column_index());
+        orderedRows.insert(entry.get_column_index());
       } else {
-        orderedRows.insert({cell.get_column_index(), cell.get_element()});
+        orderedRows.insert({entry.get_column_index(), entry.get_element()});
       }
     }
     test_column_equality<typename Matrix::Column>(r, orderedRows);
@@ -902,7 +882,7 @@ void test_ru_maximal_simplex_removal() {
   }
 
   if constexpr (Matrix::Option_list::has_vine_update) {
-    m.remove_maximal_face(6);
+    m.remove_maximal_cell(6);
   } else {
     m.remove_last();
   }
@@ -927,7 +907,7 @@ void test_chain_maximal_simplex_removal(Matrix& m) {
 
   if constexpr (Matrix::Option_list::has_vine_update && Matrix::Option_list::has_map_column_container &&
                 Matrix::Option_list::has_column_pairings) {
-    m.remove_maximal_face(6);
+    m.remove_maximal_cell(6);
   } else {
     m.remove_last();
   }
@@ -957,7 +937,7 @@ void test_maximal_dimension(Matrix& m) {
   if constexpr (Matrix::Option_list::has_vine_update &&
                 (Matrix::Option_list::is_of_boundary_type ||
                  (Matrix::Option_list::has_map_column_container && Matrix::Option_list::has_column_pairings))) {
-    m.remove_maximal_face(7);
+    m.remove_maximal_cell(7);
     BOOST_CHECK_EQUAL(m.get_max_dimension(), 3);
   }
 }
@@ -1059,23 +1039,13 @@ void test_ru_operation() {
 
   std::vector<witness_content<typename Matrix::Column> > uColumns(7);
   if constexpr (Matrix::Option_list::is_z2) {
-    if constexpr (Matrix::Option_list::has_vine_update) {
-      uColumns[0] = {0};
-      uColumns[1] = {1};
-      uColumns[2] = {2};
-      uColumns[3] = {3, 5};
-      uColumns[4] = {4, 5};
-      uColumns[5] = {5};
-      uColumns[6] = {6};
-    } else {
-      uColumns[0] = {0};
-      uColumns[1] = {1};
-      uColumns[2] = {2};
-      uColumns[3] = {3};
-      uColumns[4] = {4};
-      uColumns[5] = {3, 4, 5};
-      uColumns[6] = {6};
-    }
+    uColumns[0] = {0};
+    uColumns[1] = {1};
+    uColumns[2] = {2};
+    uColumns[3] = {3, 5};
+    uColumns[4] = {4, 5};
+    uColumns[5] = {5};
+    uColumns[6] = {6};
   } else {
     uColumns[0] = {{0, 1}};
     uColumns[1] = {{1, 1}};
@@ -1097,10 +1067,7 @@ void test_ru_operation() {
   m.add_to(3, 5);
   if constexpr (Matrix::Option_list::is_z2) {
     columns[5] = {0, 1};
-    if constexpr (Matrix::Option_list::has_vine_update)
-      uColumns[3] = {3};
-    else
-      uColumns[5] = {4, 5};
+    uColumns[3] = {3};
   } else {
     columns[5] = {{0, 1}, {1, 4}};
     uColumns[5] = {{4, 4}, {5, 1}};
@@ -1116,10 +1083,7 @@ void test_ru_operation() {
   m.add_to(4, 5);
   if constexpr (Matrix::Option_list::is_z2) {
     columns[5] = {0, 2};
-    if constexpr (Matrix::Option_list::has_vine_update)
-      uColumns[4] = {4};
-    else
-      uColumns[5] = {5};
+    uColumns[4] = {4};
   } else {
     columns[5] = {{0, 1}, {2, 4}};
     uColumns[5] = {{5, 1}};
@@ -1132,11 +1096,11 @@ void test_ru_operation() {
     }
   }
 
-  if constexpr (!Matrix::Option_list::has_vine_update) {
+  if constexpr (!Matrix::Option_list::is_z2 || !is_RU<Matrix>()) {
     m.multiply_target_and_add_to(5, 3, 3);
     if constexpr (Matrix::Option_list::is_z2) {
       columns[3] = {1, 2};
-      uColumns[3] = {3, 5};
+      uColumns[5] = {3, 5};
     } else {
       columns[3] = {{0, 4}, {1, 2}, {2, 4}};
       uColumns[3] = {{3, 3}, {5, 1}};
@@ -1209,14 +1173,14 @@ void test_chain_operation(Matrix& m) {
 }
 
 template <class Matrix>
-void test_base_cell_range_operation() {
-  using Cell = typename Matrix::Matrix_cell;
+void test_base_entry_range_operation() {
+  using Entry = typename Matrix::Matrix_entry;
 
   auto columns = build_general_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
-  std::vector<Cell> range;
-  range = {Cell(0), Cell(1), Cell(4)};
+  std::vector<Entry> range;
+  range = {Entry(0), Entry(1), Entry(4)};
   if constexpr (!Matrix::Option_list::is_z2) {
     range[0].set_element(1);
     range[1].set_element(4);
@@ -1251,14 +1215,14 @@ void test_base_cell_range_operation() {
 }
 
 template <class Matrix>
-void test_base_col_comp_cell_range_operation() {
-  using Cell = typename Matrix::Matrix_cell;
+void test_base_col_comp_entry_range_operation() {
+  using Entry = typename Matrix::Matrix_entry;
 
   auto columns = build_general_matrix<typename Matrix::Column>();
   Matrix m(columns, 5);
 
-  std::vector<Cell> range;
-  range = {Cell(0), Cell(1), Cell(4)};
+  std::vector<Entry> range;
+  range = {Entry(0), Entry(1), Entry(4)};
   if constexpr (!Matrix::Option_list::is_z2) {
     range[0].set_element(1);
     range[1].set_element(4);
@@ -1384,8 +1348,9 @@ template <class Matrix>
 void test_barcode() {
   struct BarComp {
     bool operator()(const std::tuple<int, int, int>& c1, const std::tuple<int, int, int>& c2) const {
-      if (std::get<0>(c1) == std::get<0>(c2)) return std::get<1>(c1) < std::get<1>(c2);
-      return std::get<0>(c1) < std::get<0>(c2);
+      if (std::get<0>(c1) != std::get<0>(c2)) return std::get<0>(c1) < std::get<0>(c2);
+      if (std::get<1>(c1) != std::get<1>(c2)) return std::get<1>(c1) < std::get<1>(c2);
+      return std::get<2>(c1) < std::get<2>(c2);
     }
   };
 
@@ -1456,12 +1421,220 @@ void test_barcode() {
 }
 
 template <class Matrix>
-void test_shifted_barcode() {
+void test_shifted_barcode1() {
   using C = typename Matrix::Column;
   struct BarComp {
     bool operator()(const std::tuple<int, int, int>& c1, const std::tuple<int, int, int>& c2) const {
-      if (std::get<0>(c1) == std::get<0>(c2)) return std::get<1>(c1) < std::get<1>(c2);
-      return std::get<0>(c1) < std::get<0>(c2);
+      if (std::get<0>(c1) != std::get<0>(c2)) return std::get<0>(c1) < std::get<0>(c2);
+      if (std::get<1>(c1) != std::get<1>(c2)) return std::get<1>(c1) < std::get<1>(c2);
+      return std::get<2>(c1) < std::get<2>(c2);
+    }
+  };
+
+  Matrix m(17, 2);
+  if constexpr (is_z2<C>()) {
+    m.insert_boundary(0, {}, 0);
+    m.insert_boundary(1, {}, 0);
+    m.insert_boundary(2, {}, 0);
+    m.insert_boundary(3, {}, 0);
+    m.insert_boundary(4, {}, 0);
+    m.insert_boundary(5, {}, 0);
+    m.insert_boundary(6, {}, 0);
+    m.insert_boundary(10, {0, 1}, 1);
+    m.insert_boundary(11, {1, 3}, 1);
+    m.insert_boundary(12, {2, 3}, 1);
+    m.insert_boundary(13, {2, 4}, 1);
+    m.insert_boundary(14, {3, 4}, 1);
+    m.insert_boundary(15, {2, 6}, 1);
+    m.insert_boundary(16, {4, 6}, 1);
+    m.insert_boundary(17, {5, 6}, 1);
+    m.insert_boundary(30, {12, 13, 14}, 2);
+    m.insert_boundary(31, {13, 15, 16}, 2);
+  } else {
+    m.insert_boundary(0, {}, 0);
+    m.insert_boundary(1, {}, 0);
+    m.insert_boundary(2, {}, 0);
+    m.insert_boundary(3, {}, 0);
+    m.insert_boundary(4, {}, 0);
+    m.insert_boundary(5, {}, 0);
+    m.insert_boundary(6, {}, 0);
+    m.insert_boundary(10, {{0, 1}, {1, 1}}, 1);
+    m.insert_boundary(11, {{1, 1}, {3, 1}}, 1);
+    m.insert_boundary(12, {{2, 1}, {3, 1}}, 1);
+    m.insert_boundary(13, {{2, 1}, {4, 1}}, 1);
+    m.insert_boundary(14, {{3, 1}, {4, 1}}, 1);
+    m.insert_boundary(15, {{2, 1}, {6, 1}}, 1);
+    m.insert_boundary(16, {{4, 1}, {6, 1}}, 1);
+    m.insert_boundary(17, {{5, 1}, {6, 1}}, 1);
+    m.insert_boundary(30, {{12, 1}, {13, 1}, {14, 1}}, 2);
+    m.insert_boundary(31, {{13, 1}, {15, 1}, {16, 1}}, 2);
+  }
+
+  const auto& barcode = m.get_current_barcode();
+
+  std::vector<witness_content<C> > reducedMatrix;
+  if constexpr (is_z2<C>()) {
+    if constexpr (Matrix::Option_list::is_of_boundary_type) {
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.push_back({0, 1});
+      reducedMatrix.push_back({1, 3});
+      reducedMatrix.push_back({1, 2});
+      reducedMatrix.push_back({2, 4});
+      reducedMatrix.emplace_back();
+      reducedMatrix.push_back({2, 6});
+      reducedMatrix.emplace_back();
+      reducedMatrix.push_back({2, 5});
+      reducedMatrix.push_back({12, 13, 14});
+      reducedMatrix.push_back({13, 15, 16});
+    } else {
+      reducedMatrix.push_back({0});
+      reducedMatrix.push_back({0, 1});
+      reducedMatrix.push_back({0, 2});
+      reducedMatrix.push_back({0, 3});
+      reducedMatrix.push_back({0, 4});
+      reducedMatrix.push_back({0, 5});
+      reducedMatrix.push_back({0, 6});
+      reducedMatrix.push_back({10});
+      reducedMatrix.push_back({10, 11});
+      reducedMatrix.push_back({10, 11, 12});
+      reducedMatrix.push_back({10, 11, 12, 13});
+      reducedMatrix.push_back({12, 13, 14});
+      reducedMatrix.push_back({10, 11, 12, 15});
+      reducedMatrix.push_back({13, 15, 16});
+      reducedMatrix.push_back({10, 11, 12, 15, 17});
+      reducedMatrix.push_back({30});
+      reducedMatrix.push_back({31});
+    }
+  } else {
+    if constexpr (Matrix::Option_list::is_of_boundary_type) {
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.emplace_back();
+      reducedMatrix.push_back({{0, 1}, {1, 1}});
+      reducedMatrix.push_back({{1, 1}, {3, 1}});
+      reducedMatrix.push_back({{1, 1}, {2, 1}});
+      reducedMatrix.push_back({{2, 1}, {4, 1}});
+      reducedMatrix.emplace_back();
+      reducedMatrix.push_back({{2, 1}, {6, 1}});
+      reducedMatrix.emplace_back();
+      reducedMatrix.push_back({{2, 1}, {5, 1}});
+      reducedMatrix.push_back({{12, 1}, {13, 1}, {14, 1}});
+      reducedMatrix.push_back({{13, 1}, {15, 1}, {16, 1}});
+    } else {
+      reducedMatrix.push_back({{0, 1}});
+      reducedMatrix.push_back({{0, 1}, {1, 1}});
+      reducedMatrix.push_back({{0, 1}, {2, 1}});
+      reducedMatrix.push_back({{0, 1}, {3, 1}});
+      reducedMatrix.push_back({{0, 1}, {4, 1}});
+      reducedMatrix.push_back({{0, 1}, {5, 1}});
+      reducedMatrix.push_back({{0, 1}, {6, 1}});
+      reducedMatrix.push_back({{10, 1}});
+      reducedMatrix.push_back({{10, 1}, {11, 1}});
+      reducedMatrix.push_back({{10, 1}, {11, 1}, {12, 1}});
+      reducedMatrix.push_back({{10, 1}, {11, 1}, {12, 1}, {13, 1}});
+      reducedMatrix.push_back({{12, 1}, {13, 1}, {14, 1}});
+      reducedMatrix.push_back({{10, 1}, {11, 1}, {12, 1}, {15, 1}});
+      reducedMatrix.push_back({{13, 1}, {15, 1}, {16, 1}});
+      reducedMatrix.push_back({{10, 1}, {11, 1}, {12, 1}, {15, 1}, {17, 1}});
+      reducedMatrix.push_back({{30, 1}});
+      reducedMatrix.push_back({{31, 1}});
+    }
+  }
+
+  if constexpr (Matrix::Option_list::column_indexation_type == Column_indexation_types::IDENTIFIER){
+    test_column_equality<C>(reducedMatrix[0], get_column_content_via_iterators(m.get_column(0)));
+    test_column_equality<C>(reducedMatrix[1], get_column_content_via_iterators(m.get_column(1)));
+    test_column_equality<C>(reducedMatrix[2], get_column_content_via_iterators(m.get_column(2)));
+    test_column_equality<C>(reducedMatrix[3], get_column_content_via_iterators(m.get_column(3)));
+    test_column_equality<C>(reducedMatrix[4], get_column_content_via_iterators(m.get_column(4)));
+    test_column_equality<C>(reducedMatrix[5], get_column_content_via_iterators(m.get_column(5)));
+    test_column_equality<C>(reducedMatrix[6], get_column_content_via_iterators(m.get_column(6)));
+    test_column_equality<C>(reducedMatrix[7], get_column_content_via_iterators(m.get_column(10)));
+    test_column_equality<C>(reducedMatrix[8], get_column_content_via_iterators(m.get_column(11)));
+    test_column_equality<C>(reducedMatrix[9], get_column_content_via_iterators(m.get_column(12)));
+    test_column_equality<C>(reducedMatrix[10], get_column_content_via_iterators(m.get_column(13)));
+    test_column_equality<C>(reducedMatrix[11], get_column_content_via_iterators(m.get_column(14)));
+    test_column_equality<C>(reducedMatrix[12], get_column_content_via_iterators(m.get_column(15)));
+    test_column_equality<C>(reducedMatrix[13], get_column_content_via_iterators(m.get_column(16)));
+    test_column_equality<C>(reducedMatrix[14], get_column_content_via_iterators(m.get_column(17)));
+    test_column_equality<C>(reducedMatrix[15], get_column_content_via_iterators(m.get_column(30)));
+    test_column_equality<C>(reducedMatrix[16], get_column_content_via_iterators(m.get_column(31)));
+  } else {
+    test_content_equality(reducedMatrix, m);
+  }
+
+  std::set<std::tuple<int, int, int>, BarComp> bars1;
+  std::set<std::tuple<int, int, int>, BarComp> bars2;
+  std::set<std::tuple<int, int, int>, BarComp> bars3;
+  // bars are not ordered the same for all matrices
+  for (auto it = barcode.begin(); it != barcode.end(); ++it) {
+    //three access possibilities
+    bars1.emplace(it->dim, it->birth, it->death);
+    bars2.emplace(std::get<2>(*it), std::get<0>(*it), std::get<1>(*it));
+    auto [ x, y, z ] = *it;
+    bars3.emplace(z, x, y);
+  }
+  auto it = bars1.begin();
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), -1);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 1);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 7);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 2);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 9);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 3);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 8);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 4);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 10);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 5);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 14);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 0);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 6);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 12);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 1);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 11);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 15);
+  ++it;
+  BOOST_CHECK_EQUAL(std::get<0>(*it), 1);
+  BOOST_CHECK_EQUAL(std::get<1>(*it), 13);
+  BOOST_CHECK_EQUAL(std::get<2>(*it), 16);
+  ++it;
+  BOOST_CHECK(it == bars1.end());
+
+  BOOST_CHECK(bars1 == bars2);
+  BOOST_CHECK(bars1 == bars3);
+}
+
+template <class Matrix>
+void test_shifted_barcode2() {
+  using C = typename Matrix::Column;
+  struct BarComp {
+    bool operator()(const std::tuple<int, int, int>& c1, const std::tuple<int, int, int>& c2) const {
+      if (std::get<0>(c1) != std::get<0>(c2)) return std::get<0>(c1) < std::get<0>(c2);
+      if (std::get<1>(c1) != std::get<1>(c2)) return std::get<1>(c1) < std::get<1>(c2);
+      return std::get<2>(c1) < std::get<2>(c2);
     }
   };
 
@@ -1587,6 +1760,12 @@ void test_shifted_barcode() {
 
   BOOST_CHECK(bars1 == bars2);
   BOOST_CHECK(bars1 == bars3);
+}
+
+template <class Matrix>
+void test_shifted_barcode() {
+  test_shifted_barcode1<Matrix>();
+  test_shifted_barcode2<Matrix>();
 }
 
 template <class Matrix>

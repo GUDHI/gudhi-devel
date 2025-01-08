@@ -26,7 +26,7 @@ int main() {
 
   // It is important that the operations of insertions and removals are made **in the same order** as in the zigzag
   // filtration ones wants to compute the barcode from.
-  // A face can be identified in the boundaries by any given numerical label, it is just important that the given
+  // A cell can be identified in the boundaries by any given numerical label, it is just important that the given
   // filtration values are monotonous (ie., either only increasing or only decreasing).
 
   // inserts vertex 2 at filtration value 0.1 -> birth at 0.1 of 0-cycle

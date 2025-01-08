@@ -22,9 +22,9 @@ using Dimension = ZP::Dimension;
 
 enum lineType : int { INCLUSION, REMOVAL, COMMENT };
 
-lineType read_operation(std::string& line, std::vector<ID_handle>& faces, double& timestamp) {
+lineType read_operation(std::string& line, std::vector<ID_handle>& cells, double& timestamp) {
   lineType type;
-  faces.clear();
+  cells.clear();
   ID_handle num;
 
   std::size_t current = line.find_first_not_of(' ', 0);
@@ -53,7 +53,7 @@ lineType read_operation(std::string& line, std::vector<ID_handle>& faces, double
   while (current != std::string::npos) {
     next = line.find_first_of(' ', current);
     num = std::stoi(line.substr(current, next - current));
-    faces.push_back(num);
+    cells.push_back(num);
     current = line.find_first_not_of(' ', next);
   }
 

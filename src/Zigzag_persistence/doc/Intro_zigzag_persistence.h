@@ -24,12 +24,12 @@ namespace zigzag_persistence {
  * We refer to the introduction page \ref persistent_cohomology for persistent (co)homology for an introduction
  * to the topic.
  * Zigzag persistence is a generalization of the latter. While standard persistence only allows to grow the filtered
- * complex by adding faces, zigzag persistence also allows removals. Hence the name "zigzag", as the module
+ * complex by adding cells, zigzag persistence also allows removals. Hence the name "zigzag", as the module
  * diagram will have arrows alternating between forward and backward.
  *
  * The module consists of the @ref Zigzag_persistence class and two wrappers @ref Filtered_zigzag_persistence and
  * @ref Filtered_zigzag_persistence_with_storage "":
- * - @ref Zigzag_persistence computes the persistence of a sequence of insertions and removals. A face can be inserted
+ * - @ref Zigzag_persistence computes the persistence of a sequence of insertions and removals. A cell can be inserted
  * or removed one at a time and the returned persistence pairs / bars are indexed on the operation numbers.
  * For example, if a cycle is born at operation number 6 and dies at operation number 7, it will output a bar starting
  * at 6 and ending at 7.

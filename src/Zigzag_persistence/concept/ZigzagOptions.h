@@ -26,12 +26,12 @@ namespace zigzag_persistence {
  */
 struct FilteredZigzagOptions {
   /**
-   * @brief Numerical type for the face IDs used internally and other indexations. It must be signed.
+   * @brief Numerical type for the cell IDs used internally and other indexations. It must be signed.
    */
   using Internal_key = unspecified;
 
   /**
-   * @brief Type for the face IDs used at insertion and in the boundaries given as argument.
+   * @brief Type for the cell IDs used at insertion and in the boundaries given as argument.
    * Has to be usable as key in a hashtable, so "hashable" and comparable.
    */
   using Cell_key = unspecified;
@@ -59,7 +59,7 @@ struct FilteredZigzagOptions {
  */
 struct ZigzagOptions {
   /**
-   * @brief Numerical type for the face IDs used internally and other indexations. It must be signed.
+   * @brief Numerical type for the cell IDs used internally and other indexations. It must be signed.
    */
   using Internal_key = unspecified;
 
