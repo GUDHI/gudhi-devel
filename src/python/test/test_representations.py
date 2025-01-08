@@ -45,10 +45,13 @@ def _n_diags(n):
     return l
 
 metrics_dict = { # (class, metric_kwargs, tolerance_pytest_approx)
-    "bottleneck": (BottleneckDistance(epsilon=0.00001),
+    "bottleneck": (BottleneckDistance(e=0.00001),
                    dict(e=0.00001),
                    dict(abs=1e-5)),
-    "wasserstein": (WassersteinDistance(order=2, internal_p=2, n_jobs=4),
+    "wasserstein": (WassersteinDistance(order=2, internal_p=2, mode="hera", n_jobs=4),
+                    dict(order=2, internal_p=2, n_jobs=4),
+                    dict(rel=1e-3)),
+    "pot_wasserstein": (WassersteinDistance(order=2, internal_p=2, mode="pot", n_jobs=4),
                     dict(order=2, internal_p=2, n_jobs=4),
                     dict(rel=1e-3)),
     "sliced_wasserstein": (SlicedWassersteinDistance(num_directions=100, n_jobs=4),
@@ -223,13 +226,19 @@ def test_entropy_miscalculation():
     area = np.linalg.norm(pefN, ord=1)
     assert area==pytest.approx(1)
 
+def test_bottleneck_distance_deprecated_argument():
+    empty_diag = np.empty(shape = [0, 2])
+    with pytest.warns(DeprecationWarning):
+        bdist = BottleneckDistance(epsilon=.001)(empty_diag, empty_diag)
+        assert bdist == 0.
+
 def test_kernel_empty_diagrams():
     empty_diag = np.empty(shape = [0, 2])
     assert SlicedWassersteinDistance(num_directions=100)(empty_diag, empty_diag) == 0.
     assert SlicedWassersteinKernel(num_directions=100, bandwidth=1.)(empty_diag, empty_diag) == 1.
     assert WassersteinDistance(mode="hera", delta=0.0001)(empty_diag, empty_diag) == 0.
     assert WassersteinDistance(mode="pot")(empty_diag, empty_diag) == 0.
-    assert BottleneckDistance(epsilon=.001)(empty_diag, empty_diag) == 0.
+    assert BottleneckDistance(e=.001)(empty_diag, empty_diag) == 0.
     assert BottleneckDistance()(empty_diag, empty_diag) == 0.
 #    PersistenceWeightedGaussianKernel(bandwidth=1., kernel_approx=None, weight=arctan(1.,1.))(empty_diag, empty_diag)
 #    PersistenceWeightedGaussianKernel(kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])), weight=arctan(1.,1.))(empty_diag, empty_diag)
