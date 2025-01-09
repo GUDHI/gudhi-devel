@@ -23,9 +23,11 @@
 
 #include <cmath>
 #include <cstddef>
+#include <stdexcept>
 #include <vector>
 #include <algorithm>
 #include <tuple>
+#include <iomanip>
 
 #include <boost/iterator/iterator_facade.hpp>
 
@@ -120,6 +122,18 @@ class Zigzag_edge
   bool operator==(const Zigzag_edge& e) const
   {
     return ((e.u_ == u_) && (e.v_ == v_) && (e.fil_ == fil_) && (e.direction_ == direction_));
+  }
+
+  friend std::ostream &operator<<(std::ostream &stream, const Zigzag_edge &ze) {
+    stream << std::setprecision(6);
+    // stream << std::setprecision(std::numeric_limits<Filtration_value>::digits);
+    stream << "(" << ze.u_ << ", " << ze.v_<< ") ";
+    if (ze.direction_){
+      stream << "-- " << ze.fil_ << " -->";
+    } else {
+      stream << "<-- " << ze.fil_ << " --";
+    }
+    return stream;
   }
 
  private:
@@ -307,6 +321,7 @@ class Oscillating_rips_edge_range
                   "The number of points and the number of epsilon values should match.");
       GUDHI_CHECK((nu <= mu) && (nu >= 0), "Invalid parameters mu and nu");
 
+      //TODO: remove this if, the two method could just do nothing for the identity modifier.
       if constexpr (EdgeModifier::isActive_) {
         nu_ = EdgeModifier::apply_inverse_modifier(nu);
         mu_ = EdgeModifier::apply_inverse_modifier(mu);
@@ -577,56 +592,31 @@ class Oscillating_rips_edge_range
       DistanceFunction&& distance,
       Oscillating_rips_edge_order_policy orderPolicy = Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING)
   {
-    std::vector<Zigzag_edge<Filtration_value> > edgeFiltration;
     std::vector<Filtration_value> epsilonValues;
     std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix;
-    auto n = points.size();
 
     _initialize(nu, mu, epsilonValues, distanceMatrix, points, distance, orderPolicy);
 
-    // edgesAdded[i] (resp. edgesRemoved[i]) == list of edges (i,j), with j<i, added (resp. removed) at eps_i
-    // we also put there (later) vertices that are added. Note that vertices are removed
-    // only at the very last step of the oscillating Rips filtration.
-    std::vector<std::vector<Zigzag_edge<Filtration_value> > > edgesAdded, edgesRemoved;
+    return _compute_vector_range(nu, mu, distanceMatrix, epsilonValues);
+  }
 
-    std::size_t number_of_arrows = _compute_edges(nu, mu, epsilonValues, distanceMatrix, edgesAdded, edgesRemoved);
+  template <typename PointRange, typename DistanceFunction>
+  static std::vector<Zigzag_edge<Filtration_value> > compute_vector_range(
+      Filtration_value nu,
+      Filtration_value mu,
+      const PointRange& orderedPoints,
+      DistanceFunction&& distance,
+      const std::vector<Filtration_value>& epsilonValues)
+  {
+    GUDHI_CHECK(
+        orderedPoints.size() == epsilonValues.size(),
+        std::invalid_argument("Epsilon values should be initialized and have the same size than the point container."));
+    
+    std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix;
 
-    // Now, sort edges according to lengths, and put everything in edgeFiltration
-    edgeFiltration.clear();
-    edgeFiltration.reserve(number_of_arrows + n);  // count edges + vertices additions
+    _initialize(nu, mu, epsilonValues, distanceMatrix, orderedPoints, distance);
 
-    // initialise R({p_0}, +infinity)
-    edgeFiltration.emplace_back(0,
-                                0,  // add vertex p_0,+infty
-                                std::numeric_limits<Filtration_value>::infinity(),
-                                true);
-    // epsilonValues[0], true);
-
-    for (std::size_t i = 0; i < n - 1; ++i) {  // all ascending arrows eps_i
-      if constexpr (EdgeModifier::isActive_) {
-        edgeFiltration.emplace_back(i + 1,
-                                    i + 1,
-                                    EdgeModifier::apply_modifier(epsilonValues[i]),
-                                    true);  // add p_{i+1},eps_i
-      } else {
-        edgeFiltration.emplace_back(i + 1, i + 1, epsilonValues[i], true);  // add p_{i+1},eps_i
-      }
-      for (auto edgeIt = edgesAdded[i].begin(); edgeIt != edgesAdded[i].end(); ++edgeIt) {
-        edgeFiltration.push_back(*edgeIt);
-      }
-      for (auto edgeIt = edgesRemoved[i].rbegin();  // longest first
-           edgeIt != edgesRemoved[i].rend();
-           ++edgeIt) {
-        edgeFiltration.push_back(*edgeIt);
-      }
-    }
-    for (int i = n - 1; i >= 0; --i) {
-      edgeFiltration.emplace_back(i, i, -std::numeric_limits<Filtration_value>::infinity(), false);
-    }
-
-    _canonically_sort_edges(edgeFiltration);
-
-    return edgeFiltration;
+    return _compute_vector_range(nu, mu, distanceMatrix, epsilonValues);
   }
 
   /**
@@ -825,17 +815,18 @@ class Oscillating_rips_edge_range
     }
 
     // compute epsilon values
+
     if (orderPolicy == Oscillating_rips_edge_order_policy::ALREADY_ORDERED) {
       sortedPoints.assign(points.begin(), points.end());
       epsilonValues = _compute_epsilon_values(sortedPoints, distance);
     } else if (orderPolicy == Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING) {
       epsilonValues.reserve(n);
       Gudhi::subsampling::choose_n_farthest_points(distance,
-                                                   points,
-                                                   n,  // final size
-                                                   0,  // starting point
-                                                   std::back_inserter(sortedPoints),
-                                                   std::back_inserter(epsilonValues));
+                                                  points,
+                                                  n,  // final size
+                                                  0,  // starting point
+                                                  std::back_inserter(sortedPoints),
+                                                  std::back_inserter(epsilonValues));
       // need to shift values output by subsampling:
       for (unsigned int i = 1; i < n; ++i) {
         epsilonValues[i - 1] = epsilonValues[i];
@@ -848,6 +839,79 @@ class Oscillating_rips_edge_range
 
     // compute the distance matrix
     distanceMatrix = _compute_distance_matrix(sortedPoints, distance);
+  }
+
+  template <typename PointRange, typename DistanceFunction>
+  static void _initialize(Filtration_value& nu,
+                          Filtration_value& mu,
+                          const std::vector<Filtration_value>& epsilonValues,
+                          std::vector<std::vector<std::pair<int, Filtration_value> > >& distanceMatrix,
+                          const PointRange& points,
+                          DistanceFunction&& distance)
+  {
+    GUDHI_CHECK((nu <= mu) && (nu >= 0), "Invalid parameters mu and nu");
+
+    if constexpr (EdgeModifier::isActive_) {
+      nu = EdgeModifier::apply_inverse_modifier(nu);
+      mu = EdgeModifier::apply_inverse_modifier(mu);
+    }
+
+    // compute the distance matrix
+    distanceMatrix = _compute_distance_matrix(points, distance);
+  }
+
+  static std::vector<Zigzag_edge<Filtration_value> > _compute_vector_range(
+      Filtration_value nu,
+      Filtration_value mu,
+      const std::vector<std::vector<std::pair<int, Filtration_value> > >& distanceMatrix,
+      const std::vector<Filtration_value>& epsilonValues)
+  {
+    std::vector<Zigzag_edge<Filtration_value> > edgeFiltration;
+    auto n = epsilonValues.size();
+
+    // edgesAdded[i] (resp. edgesRemoved[i]) == list of edges (i,j), with j<i, added (resp. removed) at eps_i
+    // we also put there (later) vertices that are added. Note that vertices are removed
+    // only at the very last step of the oscillating Rips filtration.
+    std::vector<std::vector<Zigzag_edge<Filtration_value> > > edgesAdded, edgesRemoved;
+
+    std::size_t number_of_arrows = _compute_edges(nu, mu, epsilonValues, distanceMatrix, edgesAdded, edgesRemoved);
+
+    // Now, sort edges according to lengths, and put everything in edgeFiltration
+    edgeFiltration.clear();
+    edgeFiltration.reserve(number_of_arrows + n);  // count edges + vertices additions
+
+    // initialise R({p_0}, +infinity)
+    edgeFiltration.emplace_back(0,
+                                0,  // add vertex p_0,+infty
+                                std::numeric_limits<Filtration_value>::infinity(),
+                                true);
+    // epsilonValues[0], true);
+
+    for (std::size_t i = 0; i < n - 1; ++i) {  // all ascending arrows eps_i
+      if constexpr (EdgeModifier::isActive_) {
+        edgeFiltration.emplace_back(i + 1,
+                                    i + 1,
+                                    EdgeModifier::apply_modifier(epsilonValues[i]),
+                                    true);  // add p_{i+1},eps_i
+      } else {
+        edgeFiltration.emplace_back(i + 1, i + 1, epsilonValues[i], true);  // add p_{i+1},eps_i
+      }
+      for (auto edgeIt = edgesAdded[i].begin(); edgeIt != edgesAdded[i].end(); ++edgeIt) {
+        edgeFiltration.push_back(*edgeIt);
+      }
+      for (auto edgeIt = edgesRemoved[i].rbegin();  // longest first
+           edgeIt != edgesRemoved[i].rend();
+           ++edgeIt) {
+        edgeFiltration.push_back(*edgeIt);
+      }
+    }
+    for (int i = n - 1; i >= 0; --i) {
+      edgeFiltration.emplace_back(i, i, -std::numeric_limits<Filtration_value>::infinity(), false);
+    }
+
+    _canonically_sort_edges(edgeFiltration);
+
+    return edgeFiltration;
   }
 
   /**
@@ -976,7 +1040,7 @@ class Oscillating_rips_edge_range
   static std::size_t _compute_edges(Filtration_value nu,
                                     Filtration_value mu,
                                     const std::vector<Filtration_value>& epsilonValues,
-                                    std::vector<std::vector<std::pair<int, Filtration_value> > >& distanceMatrix,
+                                    const std::vector<std::vector<std::pair<int, Filtration_value> > >& distanceMatrix,
                                     std::vector<std::vector<Zigzag_edge<Filtration_value> > >& edgesAdded,
                                     std::vector<std::vector<Zigzag_edge<Filtration_value> > >& edgesRemoved)
   {
@@ -995,7 +1059,7 @@ class Oscillating_rips_edge_range
 #ifdef GUDHI_USE_TBB
     // no need to consider the case i=n-1 in an oscillating Rips filtration
     tbb::parallel_for(std::size_t(0), n - 1, [&](std::size_t i) {
-      typename std::vector<std::pair<int, Filtration_value> >::iterator it;
+      typename std::vector<std::pair<int, Filtration_value> >::const_iterator it;
       //----edgesAdded[i]:
       // consider first all edges added in inclusion:
       // R({p_0, ... , p_i}, nu * eps_i) -> R({p_0, ... , p_i}, mu * eps_i),
@@ -1075,7 +1139,7 @@ class Oscillating_rips_edge_range
     });
 #else  // GUDHI_USE_TBB not defined
 
-    typename std::vector<std::pair<int, Filtration_value> >::iterator it;
+    typename std::vector<std::pair<int, Filtration_value> >::const_iterator it;
 
     for (std::size_t i = 0; i < n - 1; ++i) {
       //----edgesAdded[i]:
