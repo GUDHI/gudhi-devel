@@ -210,6 +210,9 @@ enum Oscillating_rips_edge_order_policy {
   RANDOM_POINT_ORDERING    /**< The points are shuffled randomly. */
 };
 
+// TODO: make all the iterators more "copyable" by giving some additional pointer to a container they can fill
+// and which won't be copied together with the pointer
+
 /**
  * @class Oscillating_rips_edge_range oscillating_rips_iterators.h gudhi/Zigzag_persistence/oscillating_rips_iterators.h
  * @brief Gives access and computes different edge range types for an oscillating Rips filtration.
