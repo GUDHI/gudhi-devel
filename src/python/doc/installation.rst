@@ -145,7 +145,7 @@ You shall have something like:
 
 .. code-block:: none
 
-    Pybind11 version 2.8.1
+    Nanobind version 2.4.0
     Python version 3.7.12
     Cython version 0.29.25
     Numpy version 1.21.4
@@ -166,7 +166,7 @@ A complete configuration would be :
 .. code-block:: none
 
     Python version 3.11.9
-    Pybind11 version 2.12.0
+    Nanobind version 2.4.0
     Cython version 3.0.10
     Numpy version 1.24.3
     Pytest version 8.2.1

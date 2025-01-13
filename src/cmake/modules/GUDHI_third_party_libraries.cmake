@@ -138,8 +138,15 @@ if (WITH_GUDHI_PYTHON)
     # Default Python_FIND_STRATEGY to LOCATION: Stops lookup as soon as a version satisfying version constraints is founded
     # (as opposed to VERSION: Try to find the most recent version in all specified locations.)
     cmake_policy(SET CMP0094 NEW)
-    # Should be Development.Module (Development also includes Development.Embed) but it would require cmake 3.18. TODO in a later version
-    find_package( Python COMPONENTS Interpreter Development NumPy)
+
+    # cf. https://nanobind.readthedocs.io/en/latest/building.html #preliminaries
+    if (CMAKE_VERSION VERSION_LESS 3.18)
+        set(DEV_MODULE Development)
+    else()
+        set(DEV_MODULE Development.Module)
+    endif()
+
+    find_package( Python COMPONENTS Interpreter ${DEV_MODULE} NumPy)
 
     # find_python_module tries to import module in Python interpreter and to retrieve its version number
     # returns ${PYTHON_MODULE_NAME_UP}_VERSION and ${PYTHON_MODULE_NAME_UP}_FOUND

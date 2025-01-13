@@ -15,7 +15,7 @@ from numpy import get_include as numpy_get_include
 import nanobind
 
 cython_modules = [@GUDHI_CYTHON_MODULES@]
-nanobind_modules = [@GUDHI_NANOBIND_MODULES@]
+nanobind_modules = [] # [@GUDHI_NANOBIND_MODULES@]
 
 source_dir='gudhi/'
 extra_compile_args=[@GUDHI_PYTHON_EXTRA_COMPILE_ARGS@]
