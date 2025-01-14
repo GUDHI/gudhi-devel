@@ -25,8 +25,8 @@ namespace zigzag_persistence {
 class Point{};
 
 /**
- * @brief Range of @ref Point. Used with @ref Oscillating_rips_edge_range::Order_policy::FARTHEST_POINT_ORDERING order policy, 
- * it has to be a random access range.
+ * @brief Range of @ref Point. If used with @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING
+ * order policy, it has to be a random access range.
  */
 class PointRange {
  public:
@@ -52,8 +52,8 @@ class PointRange {
   std::size_t size();
 
   /**
-   * @brief Necessary only if used with @ref Oscillating_rips_edge_range::Order_policy::FARTHEST_POINT_ORDERING. Returns the element
-   * at the given index.
+   * @brief Necessary only if used with @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING.
+   * Returns the element at the given index.
    * 
    * @param index Index of the element to return.
    * @return Point at index @p index.

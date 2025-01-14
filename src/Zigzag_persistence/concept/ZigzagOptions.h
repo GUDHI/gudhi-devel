@@ -22,24 +22,35 @@ namespace zigzag_persistence {
 /**
  * @ingroup zigzag_persistence
  *
- * @brief List of options used for the filtered zigzag persistence computation.
+ * @brief List of options used for the filtered zigzag persistence computation. An implementation of this concept is
+ * @ref Default_filtered_zigzag_options "", which inherits from @ref Default_zigzag_options for the common types.
  */
 struct FilteredZigzagOptions {
-  /**
-   * @brief Numerical type for the cell IDs used internally and other indexations. It must be signed.
-   */
-  using Internal_key = unspecified;
-
-  /**
-   * @brief Type for the cell IDs used at insertion and in the boundaries given as argument.
-   * Has to be usable as key in a hashtable, so "hashable" and comparable.
-   */
-  using Cell_key = unspecified;
-
   /**
    * @brief Type for filtration values.
    */
   using Filtration_value = unspecified;
+
+  /**
+   * @brief Type for the cell IDs used at insertion and in the boundaries given as argument.
+   */
+  using Cell_key = unspecified;
+
+  /**
+   * @brief Hash method for @ref Cell_key type. Could simply be 'std::hash<Cell_key>' if the specialization exists;
+   */
+  using Cell_key_hash = unspecified;
+
+  /**
+   * @brief Equality comparator for @ref Cell_key type. Could simply be 'std::equal_to<Cell_key>' if the specialization
+   * exists;
+   */
+  using Cell_key_equal = unspecified;
+
+  /**
+   * @brief Numerical type for the cell IDs used internally and other indexations. It must be signed.
+   */
+  using Internal_key = unspecified;
 
   /**
    * @brief Type for the dimension values.
@@ -55,7 +66,8 @@ struct FilteredZigzagOptions {
 /**
  * @ingroup zigzag_persistence
  *
- * @brief List of options used for the zigzag persistence computation.
+ * @brief List of options used for the zigzag persistence computation. An implementation of this concept is
+ * @ref Default_zigzag_options "".
  */
 struct ZigzagOptions {
   /**

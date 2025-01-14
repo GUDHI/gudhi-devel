@@ -85,7 +85,8 @@ struct Default_oscillating_rips_zigzag_options : Default_filtered_zigzag_options
 
 /**
  * @brief Computes the oscillating Rips filtration based on the given parameters and computes the
- * corresponding zigzag barcode.
+ * corresponding zigzag barcode. The bars are not stored during the computation and returned via the given callback
+ * method instead.
  *
  * @ingroup zigzag_persistence
  *
@@ -96,22 +97,23 @@ struct Default_oscillating_rips_zigzag_options : Default_filtered_zigzag_options
  * more information). One can easily create their own method based on this one.
  *
  * @tparam PointRange Range containing the point cloud.
- * @tparam edge_range_type Either Edge_range_type::BOOST_RANGE or Edge_range_type::VECTOR.
- * Default value: Edge_range_type::BOOST_RANGE.
- * @tparam OscillatingRipsSimplexRange Type of the oscillating Rips simplex range.
- * Default value: Oscillating_rips_simplex_range with templates depending on @p edge_range_type.
- * @tparam ZigzagPersistenceOptions Options for the matrix used by the zigzag persistence algorithm.
- * Default value: @ref Gudhi::persistence_matrix::Zigzag_options<>.
+ * @tparam F Callback method type for the zigzag barcode output.
+ * @tparam edge_range_type Either @ref Edge_range_type::BOOST_RANGE or @ref Edge_range_type::VECTOR.
+ * Default value: @ref Edge_range_type::BOOST_RANGE.
+ * @tparam StableFilteredComplex Data structure to store and build the computed complex at each step.
  * @param points Point cloud.
  * @param nu Lower multiplier.
  * @param mu Upper multiplier.
  * @param maxDim Maximum dimension to which to expand the Rips complex. If set to -1, there is no limit.
+ * @param outStream Callback method to process the birth and death values of a persistence bar.
+ * Has to take three arguments as input: first the dimension of the cycle, then the birth value of the cycle
+ * and third the death value of the cycle. The values corresponds to the filtration values which were given at
+ * insertions or removals. Note that bars of length 0 will not be token into account.
  * @param p Order policy for the points.
- * Can be either @ref Oscillating_rips_edge_range::Order_policy::FARTHEST_POINT_ORDERING,
- * @ref Oscillating_rips_edge_range::Order_policy::ALREADY_ORDERED or
- * @ref Oscillating_rips_edge_range::Order_policy::RANDOM_POINT_ORDERING.
- * Default value: @ref Oscillating_rips_edge_range::Order_policy::FARTHEST_POINT_ORDERING.
- * @return The persistence diagram of the oscillating Rips filtration.
+ * Can be either @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
+ * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
+ * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
+ * Default value: @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING.
  */
 template <typename PointRange,
           typename F,
@@ -180,20 +182,18 @@ void compute_oscillating_rips_persistence(
  * @tparam PointRange Range containing the point cloud.
  * @tparam edge_range_type Either Edge_range_type::BOOST_RANGE or Edge_range_type::VECTOR.
  * Default value: Edge_range_type::BOOST_RANGE.
- * @tparam OscillatingRipsSimplexRange Type of the oscillating Rips simplex range.
- * Default value: Oscillating_rips_simplex_range with templates depending on @p edge_range_type.
- * @tparam ZigzagPersistenceOptions Options for the matrix used by the zigzag persistence algorithm.
- * Default value: @ref Gudhi::persistence_matrix::Zigzag_options<>.
+ * @tparam StableFilteredComplex Data structure to store and build the computed complex at each step.
  * @param points Point cloud.
  * @param nu Lower multiplier.
  * @param mu Upper multiplier.
  * @param maxDim Maximum dimension to which to expand the Rips complex. If set to -1, there is no limit.
  * @param p Order policy for the points.
- * Can be either @ref Oscillating_rips_edge_range::Order_policy::FARTHEST_POINT_ORDERING,
- * @ref Oscillating_rips_edge_range::Order_policy::ALREADY_ORDERED or
- * @ref Oscillating_rips_edge_range::Order_policy::RANDOM_POINT_ORDERING.
- * Default value: @ref Oscillating_rips_edge_range::Order_policy::FARTHEST_POINT_ORDERING.
- * @return The persistence diagram of the oscillating Rips filtration.
+ * Can be either @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
+ * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
+ * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
+ * Default value: @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING.
+ * @return The persistence diagram of the oscillating Rips filtration as vector of
+ * @ref Gudhi::persistence_matrix::Persistence_interval "".
  */
 template <typename PointRange,
           Edge_range_type edge_range_type = Edge_range_type::BOOST_RANGE,

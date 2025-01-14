@@ -20,13 +20,8 @@ namespace zigzag_persistence {
 
 /**
  * @brief Data structure storing the simplices and their filtration values in the current complex. 
- * The concept is realized for example by @ref Gudhi::Simplex_tree < Gudhi::Simplex_tree_options_oscillating_rips >.
- *
- * This concept is not incompatible with the @ref ZigzagComplex concept, so it is possible to use the same complex
- * for the @ref Oscillating_rips_iterator class and the @ref ZigzagPersistence class, as long as it realizes the two 
- * concepts (which is the case for @ref Gudhi::Simplex_tree < Gudhi::Simplex_tree_options_oscillating_rips >). 
- * This avoids having two complexes in memory and give the possibility to directly use the simplex handle instead
- * of the vector of vertices to communicate between the two classes.
+ * The concept is realized for example by
+ * @ref Gudhi::Simplex_tree < Gudhi::zigzag_persistence::Simplex_tree_options_oscillating_rips >.
  */
 class StableFilteredComplex {
  public:
@@ -36,9 +31,8 @@ class StableFilteredComplex {
   typename Simplex_key;
 
   /**
-   * @brief Handle to specify a simplex. Different from the @ref ZigzagComplex concept,
-   * the simplex handles have to be stable, that is, they do not invalidate when a simplex is 
-   * added or removed from the complex (except for the removed simplices them selves of course).
+   * @brief Handle to specify a simplex. The simplex handles have to be stable, that is, they do not invalidate when
+   * a simplex is added or removed from the complex (except for the removed simplices them selves of course).
    */
   typename Simplex_handle;
 
@@ -74,17 +68,11 @@ class StableFilteredComplex {
 
   /**
    * @brief Returns the key associated to the given simplex.
-   * 
-   * @param sh Simplex handle representing the simplex.
-   * @return The key.
    */
   Simplex_key key(Simplex_handle sh);
 
   /**
    * @brief Assignes the given value to the given simplex as a key.
-   * 
-   * @param sh Simplex handle representing the simplex.
-   * @param key Values to associate as key.
    */
   void assign_key(Simplex_handle sh, Simplex_key key);
 
@@ -93,16 +81,13 @@ class StableFilteredComplex {
    * 
    * @tparam VertexRange Range over the vertices of a simplex.
    * @param simplex Simplex to find represented by its vertices.
-   * @return The simplex handle associated to @p simplex if the simplex is found, @ref null_simplex() otherwise.
+   * @return The simplex handle associated to @p simplex if the simplex is found.
    */
   template <class VertexRange>
   Simplex_handle find(const VertexRange& simplex);
 
   /**
    * @brief Returns the filtration value of the given simplex.
-   * 
-   * @param sh 
-   * @return Filtration_value 
    */
   Filtration_value filtration(Simplex_handle sh);
 

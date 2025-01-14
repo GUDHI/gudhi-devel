@@ -51,7 +51,7 @@ namespace zigzag_persistence {
  * @details The edges of the filtration are computed first and the remaining simplices are deduced from them.
  * Is also used to represent the vertices for technical reasons, by giving both vertices the same value.
  *
- * @tparam Filtration_value Type of the filtration value.
+ * @tparam Filtration_value Type of the filtration value. Is recommended to be easy to copy, like an arithmetic type.
  */
 template <typename Filtration_value>
 class Zigzag_edge
@@ -143,6 +143,8 @@ class Zigzag_edge
   bool direction_;       /**< Direction. True = forward, false = backward. */
 };
 
+//TODO: remove the isActive_ members from the edge modifiers.
+
 /**
  * @class Identity_edge_modifier oscillating_rips_iterators.h gudhi/Zigzag_persistence/oscillating_rips_iterators.h
  * @brief Identity modifier, i.e., does nothing.
@@ -170,7 +172,7 @@ class Identity_edge_modifier
  * @details Useful in particular when geometric computations (edge length, etc) are
  * run with squared Euclidean distance for performance.
  *
- * @tparam Filtration_value Filtration value type.
+ * @tparam Filtration_value Filtration value type. Should be compatible with `std::sqrt` and `operator*`.
  */
 template <typename Filtration_value>
 class Square_root_edge_modifier
@@ -223,7 +225,7 @@ enum Oscillating_rips_edge_order_policy {
  * a Boost range made from a custom iterator computing an edge on the fly at each increment.
  * The custom iterator is therefore only a forward iterator and can only be incremented.
  *
- * @tparam Filtration_value Filtration value type
+ * @tparam Filtration_value Filtration value type. Should be compatible with the edge modifier.
  * @tparam EdgeModifier Modifier for the edge filtration values. If no modifications are wanted,
  * use @ref Identity_edge_modifier. Default value: @ref Identity_edge_modifier.
  *
@@ -263,8 +265,10 @@ class Oscillating_rips_edge_range
      * distance function.
      * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
      * and return the distance between those points.
-     * @param orderPolicy Order policy for the points. Can be either @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
-     * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
+     * @param orderPolicy Order policy for the points. Can be either
+     * @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING "",
+     * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
+     * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING "".
      */
     template <typename PointRange, typename DistanceFunction>
     Oscillating_rips_edge_iterator(Filtration_value nu,
@@ -573,6 +577,7 @@ class Oscillating_rips_edge_range
 
   /**
    * @brief Computes and return a vector with all edges in order of the oscillating Rips filtration.
+   * See the @ref zigzagrips "introduction page" for more details about the arguments.
    *
    * @tparam PointRange Point range type.
    * @tparam DistanceFunction Type of the distance function.
@@ -625,6 +630,7 @@ class Oscillating_rips_edge_range
   /**
    * @brief Returns a boost::iterator_range from @ref Oscillating_rips_edge_iterator. The edges are computed
    * on the fly at each increment. The iterator is a forward iterator only.
+   * See the @ref zigzagrips "introduction page" for more details about the arguments.
    *
    * @tparam PointRange Point range type.
    * @tparam DistanceFunction Type of the distance function.
@@ -659,6 +665,7 @@ class Oscillating_rips_edge_range
    * on the fly at each increment. The iterator is a forward iterator only.
    * Takes already computed epsilon values as input, but assumes that the points are already ordered accordingly.
    * Assumes also that the last epsilon value is 0.
+   * See the @ref zigzagrips "introduction page" for more details about the arguments.
    *
    * @tparam PointRange Point range type.
    * @tparam DistanceFunction Type of the distance function.
@@ -692,6 +699,7 @@ class Oscillating_rips_edge_range
 
   /**
    * @brief Returns the begin iterator of a the range of edges based on @ref Oscillating_rips_edge_iterator.
+   * See the @ref zigzagrips "introduction page" for more details about the arguments.
    *
    * @tparam PointRange Point range type.
    * @tparam DistanceFunction Type of the distance function.
@@ -722,6 +730,7 @@ class Oscillating_rips_edge_range
    * @brief Returns the begin iterator of a the range of edges based on @ref Oscillating_rips_edge_iterator.
    * Takes already computed epsilon values as input, but assumes that the points are already ordered accordingly.
    * Assumes also that the last epsilon value is 0.
+   * See the @ref zigzagrips "introduction page" for more details about the arguments.
    *
    * @tparam PointRange Point range type.
    * @tparam DistanceFunction Type of the distance function.

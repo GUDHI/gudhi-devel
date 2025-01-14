@@ -22,7 +22,7 @@ namespace zigzag_persistence {
  * @brief Methods whose purposes are to modify the filtration value of a given edge following a rule.
  * The concept is for example realized by @ref Square_root_edge_modifier.
  */
- template <typename Filtration_value>
+template <typename Filtration_value>
 class EdgeModifier {
  public:
   /**
