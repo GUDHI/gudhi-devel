@@ -250,7 +250,7 @@ class Tomato:
             ) + len(self.max_weight_per_cc_)
         if self.__n_clusters:
             # TODO: set corresponding merge_threshold?
-            renaming = merge(self.children_, self.n_leaves_, self.__n_clusters)
+            renaming = merge(self.children_.reshape(-1,2), self.n_leaves_, self.__n_clusters)
             self.labels_ = renaming[self.leaf_labels_]
             # In case the user asked for something impossible.
             # TODO: check for impossible situations before calling merge.
@@ -303,7 +303,7 @@ class Tomato:
         self.__n_clusters = n_clusters
         self.__merge_threshold = None
         if hasattr(self, "leaf_labels_"):
-            renaming = merge(self.children_, self.n_leaves_, self.__n_clusters)
+            renaming = merge(self.children_.reshape(-1,2), self.n_leaves_, self.__n_clusters)
             self.labels_ = renaming[self.leaf_labels_]
             # In case the user asked for something impossible
             self.__n_clusters = self.labels_.max() + 1
