@@ -24,6 +24,8 @@ namespace zigzag_persistence {
  *
  * @brief List of options used for the filtered zigzag persistence computation. An implementation of this concept is
  * @ref Default_filtered_zigzag_options "", which inherits from @ref Default_zigzag_options for the common types.
+ * Another implementation is
+ * @ref Gudhi::zigzag_persistence::Default_oscillating_rips_zigzag_options "Default_oscillating_rips_zigzag_options".
  */
 struct FilteredZigzagOptions {
   /**

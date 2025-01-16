@@ -125,7 +125,7 @@ class Zigzag_edge
   }
 
   friend std::ostream &operator<<(std::ostream &stream, const Zigzag_edge &ze) {
-    stream << std::setprecision(6);
+    // stream << std::setprecision(6);
     // stream << std::setprecision(std::numeric_limits<Filtration_value>::digits);
     stream << "(" << ze.u_ << ", " << ze.v_<< ") ";
     if (ze.direction_){
@@ -143,8 +143,6 @@ class Zigzag_edge
   bool direction_;       /**< Direction. True = forward, false = backward. */
 };
 
-//TODO: remove the isActive_ members from the edge modifiers.
-
 /**
  * @class Identity_edge_modifier oscillating_rips_iterators.h gudhi/Zigzag_persistence/oscillating_rips_iterators.h
  * @brief Identity modifier, i.e., does nothing.
@@ -154,7 +152,17 @@ class Zigzag_edge
 class Identity_edge_modifier
 {
  public:
-  static constexpr bool isActive_ = false; /**< Indicates that the modifier should be ignored. */
+  /**
+   * @brief Returns the given value.
+   */
+  template<typename Filtration_value>
+  static Filtration_value apply_modifier(Filtration_value f) { return f; }
+
+  /**
+   * @brief Returns the given value.
+   */
+  template<typename Filtration_value>
+  static Filtration_value apply_inverse_modifier(Filtration_value f) { return f; }
 
  private:
   /**
@@ -194,8 +202,6 @@ class Square_root_edge_modifier
    */
   static Filtration_value apply_inverse_modifier(Filtration_value f) { return f * f; }
 
-  static constexpr bool isActive_ = true; /**< Indicates that the modifier should not be ignored. */
-
  private:
   /**
    * @brief Default constructor. Should not be called and therefore private.
@@ -204,8 +210,10 @@ class Square_root_edge_modifier
 };
 
 /**
-  * @brief Order policy for the points.
-  */
+ * @brief Order policy for the points.
+ *
+ * @ingroup zigzag_persistence
+ */
 enum Oscillating_rips_edge_order_policy {
   ALREADY_ORDERED,         /**< The given range of points is considered ordered. */
   FARTHEST_POINT_ORDERING, /**< The points are reordered using @ref Gudhi::subsampling::choose_n_farthest_points.*/
@@ -238,7 +246,7 @@ class Oscillating_rips_edge_range
 {
  public:
   /**
-   * @class Oscillating_rips_edge_iterator oscillating_rips_iterators.h
+   * @class Oscillating_rips_edge_iterator oscillating_rips_iterators.h \
    * gudhi/Zigzag_persistence/oscillating_rips_iterators.h
    * @brief Custom iterator over the edges of an oscillating rips filtration.
    *
@@ -328,11 +336,8 @@ class Oscillating_rips_edge_range
                   "The number of points and the number of epsilon values should match.");
       GUDHI_CHECK((nu <= mu) && (nu >= 0), "Invalid parameters mu and nu");
 
-      //TODO: remove this if, the two method could just do nothing for the identity modifier.
-      if constexpr (EdgeModifier::isActive_) {
-        nu_ = EdgeModifier::apply_inverse_modifier(nu);
-        mu_ = EdgeModifier::apply_inverse_modifier(mu);
-      }
+      nu_ = EdgeModifier::apply_inverse_modifier(nu);
+      mu_ = EdgeModifier::apply_inverse_modifier(mu);
 
       // compute the distance matrix
       distanceMatrix_ = _compute_distance_matrix(orderedPoints, distance);
@@ -367,9 +372,9 @@ class Oscillating_rips_edge_range
     std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix_; /**< Distance matrix. */
     Filtration_value nu_;                                                         /**< Lower multiplier. */
     Filtration_value mu_;                                                         /**< Upper multiplier. */
-    Zigzag_edge<Filtration_value> currentEdge_;    /**< Stores the current edge in the range. */
+    Zigzag_edge<Filtration_value> currentEdge_;         /**< Stores the current edge in the range. */
     std::size_t epsilonIndex_, rowIndex_, columnIndex_; /**< Indices indicating the next position in the range. */
-    bool inPositiveDirection_, insertVertex_;      /**< Next direction and indicates if next ''edge'' is a vertex. */
+    bool inPositiveDirection_, insertVertex_;       /**< Next direction and indicates if next ''edge'' is a vertex. */
 
     /**
      * @brief Mandatory for the boost::iterator_facade inheritance. Indicates if to iterators are equal.
@@ -545,13 +550,10 @@ class Oscillating_rips_edge_range
      */
     void _update_edge(std::size_t i, bool direction)
     {
-      if constexpr (EdgeModifier::isActive_)
-        currentEdge_.set(distanceMatrix_[rowIndex_][columnIndex_].first,
-                         rowIndex_,
-                         EdgeModifier::apply_modifier(epsilonValues_[i]),
-                         direction);
-      else
-        currentEdge_.set(distanceMatrix_[rowIndex_][columnIndex_].first, rowIndex_, epsilonValues_[i], direction);
+      currentEdge_.set(distanceMatrix_[rowIndex_][columnIndex_].first,
+                       rowIndex_,
+                       EdgeModifier::apply_modifier(epsilonValues_[i]),
+                       direction);
     }
 
     /**
@@ -559,11 +561,8 @@ class Oscillating_rips_edge_range
      */
     void _update_edge_as_positive_vertex()
     {
-      if constexpr (EdgeModifier::isActive_)
-        currentEdge_.set(
-            epsilonIndex_ + 1, epsilonIndex_ + 1, EdgeModifier::apply_modifier(epsilonValues_[epsilonIndex_]), true);
-      else
-        currentEdge_.set(epsilonIndex_ + 1, epsilonIndex_ + 1, epsilonValues_[epsilonIndex_], true);
+      currentEdge_.set(
+          epsilonIndex_ + 1, epsilonIndex_ + 1, EdgeModifier::apply_modifier(epsilonValues_[epsilonIndex_]), true);
     }
 
     /**
@@ -587,8 +586,10 @@ class Oscillating_rips_edge_range
    * distance function.
    * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
    * and return the distance between those points.
-   * @param orderPolicy Order policy for the points. Can be either @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
-   * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
+   * @param orderPolicy Order policy for the points. Can be either
+   * @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
+   * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
+   * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
    *
    * @return Vector of @ref Zigzag_edge.
    */
@@ -608,6 +609,24 @@ class Oscillating_rips_edge_range
     return _compute_vector_range(nu, mu, distanceMatrix, epsilonValues);
   }
 
+  /**
+   * @brief Computes and return a vector with all edges in order of the oscillating Rips filtration.
+   * See the @ref zigzagrips "introduction page" for more details about the arguments.
+   *
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param nu Lower multiplier.
+   * @param mu Upper multiplier.
+   * @param orderedPoints Point cloud as an ordered range. The format of a point has to correspond to the input
+   * format of the distance function. The order of the points should be in correspondence with the order of
+   * the epsilon values.
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
+   * @param epsilonValues Epsilon values for the oscillating rips filtration. Should be in decreasing order.
+   * And the last value should be 0.
+   *
+   * @return Vector of @ref Zigzag_edge.
+   */
   template <typename PointRange, typename DistanceFunction>
   static std::vector<Zigzag_edge<Filtration_value> > compute_vector_range(
       Filtration_value nu,
@@ -640,8 +659,10 @@ class Oscillating_rips_edge_range
    * distance function.
    * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
    * and return the distance between those points.
-   * @param orderPolicy Order policy for the points. Can be either @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
-   * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
+   * @param orderPolicy Order policy for the points. Can be either
+   * @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
+   * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
+   * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
    *
    * @return boost::iterator_range of @ref Oscillating_rips_edge_iterator.
    *
@@ -709,19 +730,22 @@ class Oscillating_rips_edge_range
    * distance function.
    * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
    * and return the distance between those points.
-   * @param orderPolicy Order policy for the points. Can be either @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
-   * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
+   * @param orderPolicy Order policy for the points. Can be either
+   * @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
+   * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
+   * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
    *
    * @return Instantiation of @ref Oscillating_rips_edge_iterator.
    *
    * @warning Avoid copying the iterator as it is heavier than usual iterators.
    */
   template <typename PointRange, typename DistanceFunction>
-  static Oscillating_rips_edge_iterator begin(Filtration_value nu,
-                                              Filtration_value mu,
-                                              const PointRange& points,
-                                              DistanceFunction&& distance,
-                                              Oscillating_rips_edge_order_policy orderPolicy = Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING)
+  static Oscillating_rips_edge_iterator begin(
+      Filtration_value nu,
+      Filtration_value mu,
+      const PointRange& points,
+      DistanceFunction&& distance,
+      Oscillating_rips_edge_order_policy orderPolicy = Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING)
   {
     return Oscillating_rips_edge_iterator(nu, mu, points, distance, orderPolicy);
   }
@@ -795,16 +819,18 @@ class Oscillating_rips_edge_range
    *
    * @tparam PointRange Point range type.
    * @tparam DistanceFunction Type of the distance function.
-   * @param[out] nu Lower multiplier.
-   * @param[out] mu Upper multiplier.
-   * @param[out] epsilonValues Container for the epsilon values.
-   * @param[out] distanceMatrix Container for the distance matrices.
-   * @param[in] points Point cloud as a range.The format of a point has to correspond to the input format of the
+   * @param nu Lower multiplier.
+   * @param mu Upper multiplier.
+   * @param epsilonValues Container for the epsilon values.
+   * @param distanceMatrix Container for the distance matrices.
+   * @param points Point cloud as a range.The format of a point has to correspond to the input format of the
    * distance function.
-   * @param[in] distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
    * and return the distance between those points.
-   * @param[in] orderPolicy Order policy for the points. Can be either @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
-   * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
+   * @param orderPolicy Order policy for the points. Can be either
+   * @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
+   * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
+   * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
    */
   template <typename PointRange, typename DistanceFunction>
   static void _initialize(Filtration_value& nu,
@@ -821,10 +847,8 @@ class Oscillating_rips_edge_range
     PointRange sortedPoints;
     sortedPoints.reserve(n);
 
-    if constexpr (EdgeModifier::isActive_) {
-      nu = EdgeModifier::apply_inverse_modifier(nu);
-      mu = EdgeModifier::apply_inverse_modifier(mu);
-    }
+    nu = EdgeModifier::apply_inverse_modifier(nu);
+    mu = EdgeModifier::apply_inverse_modifier(mu);
 
     // compute epsilon values
 
@@ -853,6 +877,21 @@ class Oscillating_rips_edge_range
     distanceMatrix = _compute_distance_matrix(sortedPoints, distance);
   }
 
+  /**
+   * @brief Initialize the distance function with already given epsilon values. Updates also the multipliers if
+   * the edge modifier is active.
+   *
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param nu Lower multiplier.
+   * @param mu Upper multiplier.
+   * @param epsilonValues Container for the epsilon values.
+   * @param distanceMatrix Container for the distance matrices.
+   * @param points Point cloud as a range.The format of a point has to correspond to the input format of the
+   * distance function.
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
+   */
   template <typename PointRange, typename DistanceFunction>
   static void _initialize(Filtration_value& nu,
                           Filtration_value& mu,
@@ -863,15 +902,16 @@ class Oscillating_rips_edge_range
   {
     GUDHI_CHECK((nu <= mu) && (nu >= 0), "Invalid parameters mu and nu");
 
-    if constexpr (EdgeModifier::isActive_) {
-      nu = EdgeModifier::apply_inverse_modifier(nu);
-      mu = EdgeModifier::apply_inverse_modifier(mu);
-    }
+    nu = EdgeModifier::apply_inverse_modifier(nu);
+    mu = EdgeModifier::apply_inverse_modifier(mu);
 
     // compute the distance matrix
     distanceMatrix = _compute_distance_matrix(points, distance);
   }
 
+  /**
+   * @brief Computes and return a vector with all edges in order of the oscillating Rips filtration.
+   */
   static std::vector<Zigzag_edge<Filtration_value> > _compute_vector_range(
       Filtration_value nu,
       Filtration_value mu,
@@ -900,14 +940,8 @@ class Oscillating_rips_edge_range
     // epsilonValues[0], true);
 
     for (std::size_t i = 0; i < n - 1; ++i) {  // all ascending arrows eps_i
-      if constexpr (EdgeModifier::isActive_) {
-        edgeFiltration.emplace_back(i + 1,
-                                    i + 1,
-                                    EdgeModifier::apply_modifier(epsilonValues[i]),
-                                    true);  // add p_{i+1},eps_i
-      } else {
-        edgeFiltration.emplace_back(i + 1, i + 1, epsilonValues[i], true);  // add p_{i+1},eps_i
-      }
+      // add p_{i+1},eps_i
+      edgeFiltration.emplace_back(i + 1, i + 1, EdgeModifier::apply_modifier(epsilonValues[i]), true);
       for (auto edgeIt = edgesAdded[i].begin(); edgeIt != edgesAdded[i].end(); ++edgeIt) {
         edgeFiltration.push_back(*edgeIt);
       }
@@ -1092,11 +1126,7 @@ class Oscillating_rips_edge_range
           if (it->second <= nu * epsilonValues[i]) {
             break;
           }
-          if constexpr (EdgeModifier::isActive_) {
-            edgesAdded[i].emplace_back(it->first, j, EdgeModifier::apply_modifier(epsilonValues[i]), true);
-          } else {
-            edgesAdded[i].emplace_back(it->first, j, epsilonValues[i], true);
-          }
+          edgesAdded[i].emplace_back(it->first, j, EdgeModifier::apply_modifier(epsilonValues[i]), true);
           ++number_of_arrows;
         }
       }
@@ -1112,11 +1142,7 @@ class Oscillating_rips_edge_range
 
       while (it != distanceMatrix[i + 1].begin()) {
         --it;
-        if constexpr (EdgeModifier::isActive_) {
-          edgesAdded[i].emplace_back(it->first, i + 1, EdgeModifier::apply_modifier(epsilonValues[i]), true);
-        } else {
-          edgesAdded[i].emplace_back(it->first, i + 1, epsilonValues[i], true);
-        }
+        edgesAdded[i].emplace_back(it->first, i + 1, EdgeModifier::apply_modifier(epsilonValues[i]), true);
         ++number_of_arrows;
       }
 
@@ -1140,11 +1166,7 @@ class Oscillating_rips_edge_range
           if (it->second <= nu * epsilonValues[i + 1]) {
             break;
           }
-          if constexpr (EdgeModifier::isActive_) {
-            edgesRemoved[i].emplace_back(it->first, j, EdgeModifier::apply_modifier(epsilonValues[i]), false);
-          } else {
-            edgesRemoved[i].emplace_back(it->first, j, epsilonValues[i], false);
-          }
+          edgesRemoved[i].emplace_back(it->first, j, EdgeModifier::apply_modifier(epsilonValues[i]), false);
           ++number_of_arrows;
         }
       }
@@ -1174,11 +1196,7 @@ class Oscillating_rips_edge_range
           if (it->second <= nu * epsilonValues[i]) {
             break;
           }
-          if constexpr (EdgeModifier::isActive_) {
-            edgesAdded[i].emplace_back(it->first, j, EdgeModifier::apply_modifier(epsilonValues[i]), true);
-          } else {
-            edgesAdded[i].emplace_back(it->first, j, epsilonValues[i], true);
-          }
+          edgesAdded[i].emplace_back(it->first, j, EdgeModifier::apply_modifier(epsilonValues[i]), true);
           ++number_of_arrows;
         }
       }
@@ -1193,11 +1211,7 @@ class Oscillating_rips_edge_range
                             Point_distance_comp());
       while (it != distanceMatrix[i + 1].begin()) {
         --it;
-        if constexpr (EdgeModifier::isActive_) {
-          edgesAdded[i].emplace_back(it->first, i + 1, EdgeModifier::apply_modifier(epsilonValues[i]), true);
-        } else {
-          edgesAdded[i].emplace_back(it->first, i + 1, epsilonValues[i], true);
-        }
+        edgesAdded[i].emplace_back(it->first, i + 1, EdgeModifier::apply_modifier(epsilonValues[i]), true);
         ++number_of_arrows;
       }
 
@@ -1221,11 +1235,7 @@ class Oscillating_rips_edge_range
           if (it->second <= nu * epsilonValues[i + 1]) {
             break;
           }
-          if constexpr (EdgeModifier::isActive_) {
-            edgesRemoved[i].emplace_back(it->first, j, EdgeModifier::apply_modifier(epsilonValues[i]), false);
-          } else {
-            edgesRemoved[i].emplace_back(it->first, j, epsilonValues[i], false);
-          }
+          edgesRemoved[i].emplace_back(it->first, j, EdgeModifier::apply_modifier(epsilonValues[i]), false);
           ++number_of_arrows;
         }
       }
@@ -1311,7 +1321,7 @@ class Oscillating_rips_edge_range
 };
 
 /**
- * @class Oscillating_rips_simplex_range oscillating_rips_iterators.h
+ * @class Oscillating_rips_simplex_range oscillating_rips_iterators.h \
  * gudhi/Zigzag_persistence/oscillating_rips_iterators.h
  * @brief Gives access to a range of the ordered simplices in an oscillating Rips filtration.
  *

@@ -32,7 +32,7 @@ class StableFilteredComplex {
 
   /**
    * @brief Handle to specify a simplex. The simplex handles have to be stable, that is, they do not invalidate when
-   * a simplex is added or removed from the complex (except for the removed simplices them selves of course).
+   * a simplex is added or removed from the complex (except for the removed simplices them-selves of course).
    */
   typename Simplex_handle;
 
@@ -98,6 +98,12 @@ class StableFilteredComplex {
    * @return A iterable range over the star of @p simplex.
    */
   auto star_simplex_range(const Simplex_handle simplex);
+
+  /**
+   * @brief Returns a range over the vertices of a simplex. The vertices have to be ordered monotonously by their
+   * labels.
+   */
+  auto simplex_vertex_range(Simplex_handle sh) const;
 };
 
 }  // namespace zigzag_persistence

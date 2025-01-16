@@ -32,22 +32,16 @@ class PointRange {
  public:
   /**
    * @brief Returns begin iterator.
-   * 
-   * @return Begin iterator.
    */
   auto begin();
 
   /**
    * @brief Returns end iterator.
-   * 
-   * @return End iterator.
    */
   auto end();
 
   /**
    * @brief Returns size of the range.
-   * 
-   * @return Size of the range.
    */
   std::size_t size();
 

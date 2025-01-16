@@ -66,17 +66,30 @@ struct Simplex_tree_options_oscillating_rips {
   static const bool stable_simplex_handles = true;
 };
 
+/**
+ * @ingroup zigzag_persistence
+ *
+ * @brief Filtered zigzag options such that the class directly uses the simplex handles of the complex of the
+ * oscillating Rips iterator as cell IDs. More or less assumes that the complex is a @ref Gudhi::Simplex_tree on
+ * the way a handle accesses its key.
+ */
 template <class StableFilteredComplex>
 struct Default_oscillating_rips_zigzag_options : Default_filtered_zigzag_options {
-  using Cell_key = typename StableFilteredComplex::Simplex_handle;
-  using Filtration_value = typename StableFilteredComplex::Filtration_value;
-  using Dimension = int;  // it is `int` in the simplex tree
-  struct Hash {
+  using Cell_key = typename StableFilteredComplex::Simplex_handle;            /**< Cell IDs are simplex handles. */
+  using Filtration_value = typename StableFilteredComplex::Filtration_value;  /**< Filtration value type. */
+  using Dimension = int;                                                      /**< As in the @ref Simplex_tree "". */
+  /**
+   * @brief Hash method for simplex handles from the @ref Simplex_tree "".
+   */
+  struct Cell_key_hash {
     std::size_t operator()(const Cell_key& sh) const {
       return sh->second.key();
     }
   };
-  struct KeyEqual {
+  /**
+   * @brief Equality method for simplex handles from the @ref Simplex_tree "".
+   */
+  struct Cell_key_equal {
     bool operator()(const Cell_key& sh1, const Cell_key& sh2) const {
       return sh1->second.key() == sh2->second.key();
     }
@@ -100,7 +113,8 @@ struct Default_oscillating_rips_zigzag_options : Default_filtered_zigzag_options
  * @tparam F Callback method type for the zigzag barcode output.
  * @tparam edge_range_type Either @ref Edge_range_type::BOOST_RANGE or @ref Edge_range_type::VECTOR.
  * Default value: @ref Edge_range_type::BOOST_RANGE.
- * @tparam StableFilteredComplex Data structure to store and build the computed complex at each step.
+ * @tparam StableFilteredComplex A version of the @ref Simplex_tree "". Used to store and build the computed complex
+ * at each step.
  * @param points Point cloud.
  * @param nu Lower multiplier.
  * @param mu Upper multiplier.
@@ -182,7 +196,8 @@ void compute_oscillating_rips_persistence(
  * @tparam PointRange Range containing the point cloud.
  * @tparam edge_range_type Either Edge_range_type::BOOST_RANGE or Edge_range_type::VECTOR.
  * Default value: Edge_range_type::BOOST_RANGE.
- * @tparam StableFilteredComplex Data structure to store and build the computed complex at each step.
+ * @tparam StableFilteredComplex A version of the @ref Simplex_tree "". Used to store and build the computed complex
+ * at each step.
  * @param points Point cloud.
  * @param nu Lower multiplier.
  * @param mu Upper multiplier.

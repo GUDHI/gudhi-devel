@@ -20,16 +20,11 @@ namespace zigzag_persistence {
 
 /**
  * @brief Methods whose purposes are to modify the filtration value of a given edge following a rule.
- * The concept is for example realized by @ref Square_root_edge_modifier.
+ * The concept is for example realized by @ref Identity_edge_modifier or @ref Square_root_edge_modifier "".
  */
 template <typename Filtration_value>
 class EdgeModifier {
  public:
-  /**
-   * @brief Indicates that the modifier should not be ignored.
-   */
-  static constexpr bool isActive_ = true;
-
   /**
    * @brief Applies the modifier to the given value and returns it.
    * 
