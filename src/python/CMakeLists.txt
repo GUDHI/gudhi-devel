@@ -423,9 +423,10 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT)
 find_package(nanobind CONFIG REQUIRED)
 
-add_subdirectory("gudhi/clustering/")
+add_subdirectory("gudhi")
+add_subdirectory("gudhi/clustering")
 if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
-  add_subdirectory("gudhi/datasets/generators/")
+  add_subdirectory("gudhi/datasets/generators")
 endif()
 
 # Path separator management for windows
@@ -475,6 +476,7 @@ add_test(NAME random_cubical_complex_persistence_example_py_test
          10 10 10)
 
 add_gudhi_py_test(test_cubical_complex)
+add_gudhi_py_test(test_cubical_persistence_low_dim)
 
 # Datasets are fetched for these tests
 if(SCIKIT-LEARN_FOUND AND WITH_GUDHI_REMOTE_TEST)

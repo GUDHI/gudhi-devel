@@ -33,6 +33,7 @@ jobs:
           $PYTHON38/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
           $PYTHON38/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON38/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON38/bin/python -m pytest -v src/python/test/test_cubical_persistence_low_dim.py
           $PYTHON38/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.9
         run: |
@@ -55,6 +56,7 @@ jobs:
           $PYTHON39/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON39/bin/python -m pytest -v src/python/test/test_cubical_persistence_low_dim.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.10
         run: |
@@ -73,6 +75,7 @@ jobs:
           $PYTHON310/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
           $PYTHON310/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON310/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON310/bin/python -m pytest -v src/python/test/test_cubical_persistence_low_dim.py
           $PYTHON310/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.11
         run: |
@@ -91,6 +94,7 @@ jobs:
           $PYTHON311/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
           $PYTHON311/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON311/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON311/bin/python -m pytest -v src/python/test/test_cubical_persistence_low_dim.py
           $PYTHON311/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.12
         run: |
@@ -109,6 +113,7 @@ jobs:
           $PYTHON312/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
           $PYTHON312/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON312/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON312/bin/python -m pytest -v src/python/test/test_cubical_persistence_low_dim.py
           $PYTHON312/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.13
         run: |
@@ -127,6 +132,7 @@ jobs:
           $PYTHON313/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
           $PYTHON313/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
           $PYTHON313/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON313/bin/python -m pytest -v src/python/test/test_cubical_persistence_low_dim.py
           $PYTHON313/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Publish on PyPi
         env:
