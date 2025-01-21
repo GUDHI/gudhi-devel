@@ -19,16 +19,18 @@ using Filtration_value = double;
 using Point = std::vector<double>;
 using Barcode = std::vector<Gudhi::persistence_matrix::Persistence_interval<int, Filtration_value> >;
 
-//prints computed zigzag barcode
-void print_barcode(const Barcode& bars) {
+// prints computed zigzag barcode
+void print_barcode(const Barcode& bars)
+{
   std::clog << "Resulting barcode:" << std::endl;
   for (auto& bar : bars) {
     std::clog << bar << std::endl;
   }
 }
 
-//prints initial points
-void print_points(const std::vector<Point>& points) {
+// prints initial points
+void print_points(const std::vector<Point>& points)
+{
   std::clog << "Number of points: " << points.size() << std::endl;
   for (const Point& p : points) {
     std::clog << "(" << p[0] << ", " << p[1] << ")" << std::endl;
@@ -36,8 +38,9 @@ void print_points(const std::vector<Point>& points) {
   std::clog << std::endl;
 }
 
-//computes some random 2-dimensional point cloud
-std::vector<Point> build_point_cloud(unsigned int numberOfPoints, int seed) {
+// computes some random 2-dimensional point cloud
+std::vector<Point> build_point_cloud(unsigned int numberOfPoints, int seed)
+{
   std::vector<Point> finalPoints;
   std::set<Point> points;
   std::random_device dev;
@@ -58,12 +61,14 @@ std::vector<Point> build_point_cloud(unsigned int numberOfPoints, int seed) {
   return finalPoints;
 }
 
-int main(int argc, char* const argv[]) {
-  //nu, mu: lower and upper multiplier, see introduction page.
-  //max_dim: maximal dimension to which the complex should be extended. If -1: no limits.
-  //seed (optional): fixes seed for the randomly computed point cloud.
+int main(int argc, char* const argv[])
+{
+  // nu, mu: lower and upper multiplier, see introduction page.
+  // max_dim: maximal dimension to which the complex should be extended. If -1: no limits.
+  // seed (optional): fixes seed for the randomly computed point cloud.
   if (argc != 5 && argc != 6) {
-    std::clog << "Usage: ./comp nu mu max_dim numberOfPoints [seed]" << std::endl;
+    std::clog << "Usage: ./Zigzag_persistence_example_oscillating_rips_persistence nu mu max_dim numberOfPoints [seed]"
+              << std::endl;
     return 0;
   }
 
@@ -84,7 +89,7 @@ int main(int argc, char* const argv[]) {
   std::vector<Point> points = build_point_cloud(numberOfPoints, seed);
 
   std::clog << "********** Computing oscillating rips filtration and persistence" << std::endl;
-  //with default templates and parameters. See documentation for more information.
+  // with default templates and parameters. See documentation for more information.
   Barcode res = Gudhi::zigzag_persistence::compute_oscillating_rips_persistence(points, nu, mu, maxDim);
   print_barcode(res);
 

@@ -20,7 +20,8 @@
 
 #include <boost/container/map.hpp>
 
-#include <gudhi/Zigzag_persistence/oscillating_rips_iterators.h>
+#include <gudhi/Zigzag_persistence/oscillating_rips_edge_ranges.h>
+#include <gudhi/Zigzag_persistence/oscillating_rips_simplex_ranges.h>
 #include <gudhi/filtered_zigzag_persistence.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/distance_functions.h>
@@ -75,24 +76,22 @@ struct Simplex_tree_options_oscillating_rips {
  */
 template <class StableFilteredComplex>
 struct Default_oscillating_rips_zigzag_options : Default_filtered_zigzag_options {
-  using Cell_key = typename StableFilteredComplex::Simplex_handle;            /**< Cell IDs are simplex handles. */
-  using Filtration_value = typename StableFilteredComplex::Filtration_value;  /**< Filtration value type. */
-  using Dimension = int;                                                      /**< As in the @ref Simplex_tree "". */
+  using Cell_key = typename StableFilteredComplex::Simplex_handle;           /**< Cell IDs are simplex handles. */
+  using Filtration_value = typename StableFilteredComplex::Filtration_value; /**< Filtration value type. */
+  using Dimension = int;                                                     /**< As in the @ref Simplex_tree "". */
+
   /**
    * @brief Hash method for simplex handles from the @ref Simplex_tree "".
    */
   struct Cell_key_hash {
-    std::size_t operator()(const Cell_key& sh) const {
-      return sh->second.key();
-    }
+    std::size_t operator()(const Cell_key& sh) const { return sh->second.key(); }
   };
+
   /**
    * @brief Equality method for simplex handles from the @ref Simplex_tree "".
    */
   struct Cell_key_equal {
-    bool operator()(const Cell_key& sh1, const Cell_key& sh2) const {
-      return sh1->second.key() == sh2->second.key();
-    }
+    bool operator()(const Cell_key& sh1, const Cell_key& sh2) const { return sh1->second.key() == sh2->second.key(); }
   };
 };
 
@@ -146,34 +145,31 @@ void compute_oscillating_rips_persistence(
   using Filtration_value = typename ZPOptions::Filtration_value;
   using Dimension = typename ZPOptions::Dimension;  // always `int` for now
   using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, Filtration_value>;
-  using EdgeRange = Oscillating_rips_edge_range<Filtration_value>;
+  using ItEdgeRange = Oscillating_rips_edge_iterator_range<Filtration_value>;
   using VectorEdgeRange = std::vector<Zigzag_edge<Filtration_value> >;
+  using EdgeRange =
+      typename std::conditional<edge_range_type == Edge_range_type::BOOST_RANGE, ItEdgeRange, VectorEdgeRange>::type;
   using EdgeRangeIterator = typename std::conditional<edge_range_type == Edge_range_type::BOOST_RANGE,
-                                                      typename EdgeRange::Oscillating_rips_edge_iterator,
+                                                      typename ItEdgeRange::Oscillating_rips_edge_iterator,
                                                       typename VectorEdgeRange::const_iterator>::type;
-  using OscillatingRipsSimplexRange = Oscillating_rips_simplex_range<StableFilteredComplex, EdgeRangeIterator>;
+  using OscillatingRipsSimplexRange = Oscillating_rips_simplex_iterator_range<StableFilteredComplex, EdgeRangeIterator>;
 
   StableFilteredComplex st;
   ZP zp(outStream);
 
-  EdgeRangeIterator start, end;
-  VectorEdgeRange vec;
+  EdgeRange edges;
 
   if constexpr (edge_range_type == Edge_range_type::BOOST_RANGE) {
-    start = EdgeRange::begin(nu, mu, points, Gudhi::Euclidean_distance(), p);
-    end = EdgeRange::end();
+    edges = ItEdgeRange(nu, mu, points, Gudhi::Euclidean_distance(), p);
   } else {
-    vec = EdgeRange::compute_vector_range(nu, mu, points, Gudhi::Euclidean_distance(), p);
-    start = vec.begin();
-    end = vec.end();
+    edges = Oscillating_rips_edge_vector_range_constructor<Filtration_value>::make_range(
+        nu, mu, points, Gudhi::Euclidean_distance(), p);
   }
 
-  for (const auto& t : OscillatingRipsSimplexRange::get_iterator_range(start, end, st, maxDim)) {
+  for (const auto& t : OscillatingRipsSimplexRange(edges.begin(), edges.end(), st, maxDim)) {
     if (std::get<2>(t))
-      zp.insert_cell(std::get<0>(t),
-                     st.boundary_simplex_range(std::get<0>(t)),
-                     st.dimension(std::get<0>(t)),
-                     std::get<1>(t));
+      zp.insert_cell(
+          std::get<0>(t), st.boundary_simplex_range(std::get<0>(t)), st.dimension(std::get<0>(t)), std::get<1>(t));
     else
       zp.remove_cell(std::get<0>(t), std::get<1>(t));
   }
@@ -224,34 +220,31 @@ compute_oscillating_rips_persistence(
   using ZPOptions = Default_oscillating_rips_zigzag_options<StableFilteredComplex>;
   using ZP = Filtered_zigzag_persistence_with_storage<ZPOptions>;
   using Filtration_value = typename ZPOptions::Filtration_value;
-  using EdgeRange = Oscillating_rips_edge_range<Filtration_value>;
+  using ItEdgeRange = Oscillating_rips_edge_iterator_range<Filtration_value>;
   using VectorEdgeRange = std::vector<Zigzag_edge<Filtration_value> >;
+  using EdgeRange =
+      typename std::conditional<edge_range_type == Edge_range_type::BOOST_RANGE, ItEdgeRange, VectorEdgeRange>::type;
   using EdgeRangeIterator = typename std::conditional<edge_range_type == Edge_range_type::BOOST_RANGE,
-                                                      typename EdgeRange::Oscillating_rips_edge_iterator,
+                                                      typename ItEdgeRange::Oscillating_rips_edge_iterator,
                                                       typename VectorEdgeRange::const_iterator>::type;
-  using OscillatingRipsSimplexRange = Oscillating_rips_simplex_range<StableFilteredComplex, EdgeRangeIterator>;
+  using OscillatingRipsSimplexRange = Oscillating_rips_simplex_iterator_range<StableFilteredComplex, EdgeRangeIterator>;
 
   StableFilteredComplex st;
   ZP zp;
 
-  EdgeRangeIterator start, end;
-  VectorEdgeRange vec;
+  EdgeRange edges;
 
   if constexpr (edge_range_type == Edge_range_type::BOOST_RANGE) {
-    start = EdgeRange::begin(nu, mu, points, Gudhi::Euclidean_distance(), p);
-    end = EdgeRange::end();
+    edges = ItEdgeRange(nu, mu, points, Gudhi::Euclidean_distance(), p);
   } else {
-    vec = EdgeRange::compute_vector_range(nu, mu, points, Gudhi::Euclidean_distance(), p);
-    start = vec.begin();
-    end = vec.end();
+    edges = Oscillating_rips_edge_vector_range_constructor<Filtration_value>::make_range(
+        nu, mu, points, Gudhi::Euclidean_distance(), p);
   }
 
-  for (const auto& t : OscillatingRipsSimplexRange::get_iterator_range(start, end, st, maxDim)) {
+  for (const auto& t : OscillatingRipsSimplexRange(edges.begin(), edges.end(), st, maxDim)) {
     if (std::get<2>(t))
-      zp.insert_cell(std::get<0>(t),
-                     st.boundary_simplex_range(std::get<0>(t)),
-                     st.dimension(std::get<0>(t)),
-                     std::get<1>(t));
+      zp.insert_cell(
+          std::get<0>(t), st.boundary_simplex_range(std::get<0>(t)), st.dimension(std::get<0>(t)), std::get<1>(t));
     else
       zp.remove_cell(std::get<0>(t), std::get<1>(t));
   }
