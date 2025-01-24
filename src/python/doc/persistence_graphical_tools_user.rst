@@ -50,12 +50,12 @@ This function can display the persistence result as a diagram:
     ax.set_aspect("equal")  # forces to be square shaped
     plt.show()
 
-Note that (as barcode and density) it can also take a simple `np.array` 
+Note that (as barcode and density) it can also take a simple `np.array`
 of shape (N x 2) encoding a persistence diagram (in a given dimension).
 
 .. plot::
     :include-source:
-    
+
     import matplotlib.pyplot as plt
     import gudhi
     import numpy as np
