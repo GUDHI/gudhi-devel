@@ -75,14 +75,16 @@ namespace zigzag_persistence {
  * the current epsilon / filtration value by multiplying it alternatively by two coefficients: \f$ \nu \leqslant \mu \f$.
  * Both multipliers have to be specified by the user.
  *
- * The construction is based on two classes:
- * - @ref Oscillating_rips_edge_range computes the range of inserted and removed vertices and edges in the filtration
- * based on the elements descipted above.
- * - @ref Oscillating_rips_simplex_range infers from @ref Oscillating_rips_edge_range all simplices from higher
- * dimensions (i.e. > 1) of the filtration if necessary. For this purpose, a data structure able to represent a flag
- * complex is additionally needed (such as @ref Gudhi::Simplex_tree). Note that @ref Oscillating_rips_edge_range is
- * passed by template, so the user can potentially pass any other type of edge range as long as the dereferenced format
- * corresponds and the sequence makes sense as a zigzag filtration.
+ * The construction is based on two types of classes:
+ * - @ref Oscillating_rips_edge_iterator_range and @ref Oscillating_rips_edge_vector_range_constructor computes the
+ * range of inserted and removed vertices and edges in the filtration based on the elements descipted above.
+ * - @ref Oscillating_rips_simplex_iterator_range and @ref Oscillating_rips_simplex_vector_range_constructor infers
+ * from @ref Oscillating_rips_edge_iterator_range or @ref Oscillating_rips_edge_vector_range_constructor all simplices
+ * from higher dimensions (i.e. > 1) of the filtration if necessary.
+ * For this purpose, a data structure able to represent a flag complex is additionally needed
+ * (such as @ref Gudhi::Simplex_tree). Note that the edge range is passed by template, so the user
+ * can potentially pass any other type of edge range as long as the dereferenced format corresponds and the sequence
+ * makes sense as a zigzag filtration.
  *
  * If only the barcode of the filtration is of interest and not the filtration it-self, the helper method
  * @ref compute_oscillating_rips_persistence can be used. It will directly feed to the filtration constructed by the

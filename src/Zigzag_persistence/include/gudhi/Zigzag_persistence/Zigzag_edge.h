@@ -23,8 +23,6 @@
 #include <ostream>
 // #include <iomanip>
 
-// #include <gudhi/Debug_utils.h>
-
 namespace Gudhi {
 namespace zigzag_persistence {
 

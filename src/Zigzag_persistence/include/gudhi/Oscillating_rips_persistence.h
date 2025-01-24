@@ -46,7 +46,8 @@ enum Edge_range_type {
 /**
  * @ingroup zigzag_persistence
  *
- * @brief Model of @ref SimplexTreeOptions, as expected from @ref Oscillating_rips_simplex_range.
+ * @brief Model of @ref SimplexTreeOptions, as expected from @ref Oscillating_rips_simplex_iterator_range and
+ * @ref Oscillating_rips_simplex_vector_range_constructor.
  * The values of `stable_simplex_handles`, `store_key` and `store_filtration` are mandatory.
  * `Simplex_key` has to be a signed integer type if @ref Zigzag_persistence is used
  * for the range. Otherwise, the options can be readapted.
@@ -105,7 +106,7 @@ struct Default_oscillating_rips_zigzag_options : Default_filtered_zigzag_options
  * @details It is thought to be a helper function to easily compute oscillating Rips persistence with the
  * possibility to switch out a few common options. But additional options exists for the iterators
  * (e.g. replacing the Euclidean distance by another one, or using your own epsilon values; see
- * the documentation of @ref Oscillating_rips_edge_range and @ref Oscillating_rips_simplex_range for
+ * the documentation of @ref Oscillating_rips_edge_iterator_range and @ref Oscillating_rips_simplex_iterator_range for
  * more information). One can easily create their own method based on this one.
  *
  * @tparam PointRange Range containing the point cloud.
@@ -186,7 +187,7 @@ void compute_oscillating_rips_persistence(
  * @details It is thought to be a helper function to easily compute oscillating Rips persistence with the
  * possibility to switch out a few common options. But additional options exists for the iterators
  * (e.g. replacing the Euclidean distance by another one, or using your own epsilon values; see
- * the documentation of @ref Oscillating_rips_edge_range and @ref Oscillating_rips_simplex_range for
+ * the documentation of @ref Oscillating_rips_edge_iterator_range and @ref Oscillating_rips_simplex_iterator_range for
  * more information). One can easily create their own method based on this one.
  *
  * @tparam PointRange Range containing the point cloud.

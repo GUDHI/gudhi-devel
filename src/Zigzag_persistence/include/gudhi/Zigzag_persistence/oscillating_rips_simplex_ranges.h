@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Clément Maria and Hannah Schreiber
  *
- *    Copyright (C) 2023 Inria
+ *    Copyright (C) 2023-25 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -11,7 +11,7 @@
 /**
  * @file oscillating_rips_simplex_ranges.h
  * @author Clément Maria, Hannah Schreiber
- * @brief Contains the implementation of the @ref Gudhi::zigzag_persistence::Oscillating_rips_edge_order_policy enum,
+ * @brief Contains the implementation of the
  * @ref Gudhi::zigzag_persistence::Oscillating_rips_simplex_iterator_base class,
  * @ref Gudhi::zigzag_persistence::Oscillating_rips_simplex_iterator_range class and
  * @ref Gudhi::zigzag_persistence::Oscillating_rips_simplex_vector_range_constructor class.
@@ -40,9 +40,8 @@ namespace zigzag_persistence {
 
 /**
  * @private
- * @brief
- *
- * @tparam Filtration_value
+ * @ingroup zigzag_persistence
+ * @brief Manages the expansion or the collapse a flag complex if a set of edges is added or respectively removed.
  */
 class Oscillating_rips_edge_expander
 {
@@ -76,6 +75,22 @@ class Oscillating_rips_edge_expander
     StableFilteredComplex* st_;
   };
 
+  /**
+   * @brief Adds necessary simplices in given complex to expand it as a flag complex to whom is added the given edges.
+   * The edges are obtained from the iterator which is incremented until the filtration value changes (or until end
+   * iterator is attained).
+   * 
+   * @tparam StableFilteredComplex Complex type.
+   * @tparam EdgeRangeIterator Edge iterator type. Has to deference into @ref Zigzag_edge "".
+   * @param currentEdgeIt Iterator to the first edge in the range to be added. Then all edges which are following and
+   * and have the same filtration value are also added.
+   * @param edgeEndIterator End iterator of the edge range. Once reached, indicates that the loop should be stopped
+   * even if the filtration value did not change.
+   * @param maxDimension Maximal dimension of the expansion. If -1, it is expanded as much as possible.
+   * @param complex Complex to expand.
+   * @param currentSimplices Vector in which are added the simplex handles of all simplices which are added in
+   * the process.
+   */
   template <class StableFilteredComplex, typename EdgeRangeIterator>
   static void expand_edges_of_same_filtration_value(
       EdgeRangeIterator& currentEdgeIt,
@@ -104,9 +119,19 @@ class Oscillating_rips_edge_expander
   }
 
   /**
-   * @brief Updates @p currentSimplices_ for removals.
-   *
-   * @param fil Current filtration value.
+   * @brief Selects all simplices in the given complex which should be removed if the given set of edges is removed.
+   * The edges are given as a range delimited by two iterators, but only the edges following the first and having the
+   * same filtration value are removed.
+   * 
+   * @tparam StableFilteredComplex Complex type.
+   * @tparam EdgeRangeIterator Edge iterator type. Has to deference into @ref Zigzag_edge "".
+   * @param currentEdgeIt Iterator to the first edge in the range to be removed. Then all edges which are following and
+   * and have the same filtration value are also removed.
+   * @param edgeEndIterator End iterator of the edge range. Once reached, indicates that the loop should be stopped
+   * even if the filtration value did not change.
+   * @param complex Complex to collapse.
+   * @param currentSimplices Vector to which will be added all simplex handles of all simplices which should be
+   * removed.
    */
   template <class StableFilteredComplex, typename EdgeRangeIterator>
   static void collapse_edges_of_same_filtration_value(
@@ -154,28 +179,16 @@ class Oscillating_rips_edge_expander
 };
 
 /**
- * @class Oscillating_rips_simplex_iterator oscillating_rips_simplex_ranges.h \
+ * @class Oscillating_rips_simplex_iterator_base oscillating_rips_simplex_ranges.h \
  * gudhi/Zigzag_persistence/oscillating_rips_simplex_ranges.h
- * @brief Custom iterator over the simplices of an oscillating rips filtration. Is a forward iterator only.
+ * @ingroup zigzag_persistence
  *
- * It inherits from boost::iterator_facade.
+ * @brief Heavy base for a custom iterator over the simplices of an oscillating rips filtration.
  *
- * For each positive edge given by the edge range iterator, the given complex computes and adds all possible
- * cofaces and they respective simplex handle are stored. For each negative edge, the given complex computes
- * the simplex handles of all cofaces and they are stored.
- * The simplex handles induced by an edge are stored only the time needed and are removed when reaching the next edge.
- * That is, we start by storing the possible cofaces of an edge, then at each increment,
- * the next element within the stored simplex handles is retrieved and once the end is reached,
- * the simplex handles are erased and replaced by the possible cofaces of the next edge and so on...
- * If the edge is negative, then a simplex is removed from the complex at the next increment.
- * So, the maximum size of the complex corresponds to the maximum size of a complex in the zigzag filtration.
- *
- * The simplices are returned by the iterator as tuples of three elements:
- * the first is the simplex handle of the simplex in the given complex,
- * the second is the filtration value of the corresponding arrow,
- * the third is the direction of the arrow, i.e., indicates if the simplex is inserted or removed.
- *
- * @warning As the iterator stores possibly large ranges, avoid copying it.
+ * @tparam StableFilteredComplex Filtered complex structure that has stable simplex handles,
+ * that is, they do not invalidates after an insertion or a removal (except for the removed simplices).
+ * @tparam EdgeRangeIterator Type of the edge range iterator. Each element of the range is assumed to have
+ * type @ref Zigzag_edge or at least to be a class with the same public methods than @ref Zigzag_edge.
  */
 template <class StableFilteredComplex, typename EdgeRangeIterator>
 class Oscillating_rips_simplex_iterator_base
@@ -187,13 +200,11 @@ class Oscillating_rips_simplex_iterator_base
   using Simplex_key = typename StableFilteredComplex::Simplex_key;           /**< Key type. */
 
   /**
-   * @brief Constructor. The edge iterators and the complex are not copied, so do not modify or invalidate
-   * them outside as long as this iterator is different from the end iterator.
+   * @brief Constructor. The complex is not copied, so do not modify or invalidate
+   * it outside as long as this iterator is different from the end iterator.
    *
    * @param edgeStartIterator Begin iterator of the oscillating Rips edge range.
-   * Is moved, so the original iterator will probably be invalidated.
    * @param edgeEndIterator End iterator of the oscillating Rips edge range.
-   * Is moved, so the original iterator will probably be invalidated.
    * @param complex Empty complex which will be used to store current simplices.
    * Only the address of the complex is stored, so the state of the complex can be
    * consulted between each increment.
@@ -233,19 +244,14 @@ class Oscillating_rips_simplex_iterator_base
   }
 
   /**
-   * @brief Default constructor. Corresponds to the end iterator.
+   * @brief Default constructor. Equivalent to the end iterator.
    */
   Oscillating_rips_simplex_iterator_base()
       : complex_(nullptr), currentSimplexIndex_(0), currentDirection_(true), maxDimension_(0), currentArrowNumber_(0)
-  {
-  }
+  {}
 
   /**
-   * @brief Mandatory for the boost::iterator_facade inheritance. Indicates if two iterators are equal.
-   *
-   * @param other Iterator to compare.
-   * @return True, if the two iterators point to the same position.
-   * @return False, otherwise.
+   * @brief Indicates if two iterators are equal.
    */
   bool equal(Oscillating_rips_simplex_iterator_base const& other) const
   {
@@ -256,14 +262,17 @@ class Oscillating_rips_simplex_iterator_base
   }
 
   /**
-   * @brief Mandatory for the boost::iterator_facade inheritance. Dereference the iterator.
-   *
-   * @return Value of the current return element.
+   * @brief Dereferences the iterator. Returns a tuple in this order:
+   * - simplex handle of the complex corresponding to the current simplex (use the complex passed by parameter at
+   * the constructor to retrieve information about the simplex)
+   * - Filtration value of the simplex
+   * - Boolean corresponding to the direction of the arrow, i.e., if the simplex was added or removed. The value
+   * is `true` for a forward arrow and `false` for a backward arrow.
    */
   const std::tuple<Simplex_handle, Filtration_value, bool>& dereference() const { return currentArrow_; }
 
   /**
-   * @brief Mandatory for the boost::iterator_facade inheritance. Increments the iterator.
+   * @brief Increments the iterator.
    */
   void increment()
   {
@@ -301,39 +310,13 @@ class Oscillating_rips_simplex_iterator_base
   }
 
  private:
-  /**
-   * @brief Reverse lexicographical order for the simplex handles.
-   */
-  struct reverse_lexicographic_order {
-    explicit reverse_lexicographic_order(StableFilteredComplex* st) : st_(st) {}
-
-    bool operator()(const Simplex_handle sh1, const Simplex_handle sh2) const
-    {
-      auto rg1 = st_->simplex_vertex_range(sh1);
-      auto rg2 = st_->simplex_vertex_range(sh2);
-      auto it1 = rg1.begin();
-      auto it2 = rg2.begin();
-      while (it1 != rg1.end() && it2 != rg2.end()) {
-        if (*it1 == *it2) {
-          ++it1;
-          ++it2;
-        } else {
-          return *it1 < *it2;
-        }
-      }
-      return ((it1 == rg1.end()) && (it2 != rg2.end()));
-    }
-
-    StableFilteredComplex* st_;
-  };
-
-  std::vector<Simplex_handle> currentSimplices_; /**< Stores current simplex handles. */
-  StableFilteredComplex* complex_;               /**< Pointer to the complex. */
-  std::size_t currentSimplexIndex_;              /**< Index to current position in currentSimplices_. */
-  EdgeRangeIterator currentEdgeIt_;              /**< Iterator pointing to the next edge. */
-  EdgeRangeIterator endEdgeIt_;                  /**< End edge iterator. */
-  bool currentDirection_;                        /**< Current direction. */
-  const int maxDimension_;                       /**< Maximal dimension of expansion. */
+  std::vector<Simplex_handle> currentSimplices_;                    /**< Stores current simplex handles. */
+  StableFilteredComplex* complex_;                                  /**< Pointer to the complex. */
+  std::size_t currentSimplexIndex_;                             /**< Index to current position in currentSimplices_. */
+  EdgeRangeIterator currentEdgeIt_;                                 /**< Iterator pointing to the next edge. */
+  EdgeRangeIterator endEdgeIt_;                                     /**< End edge iterator. */
+  bool currentDirection_;                                           /**< Current direction. */
+  const int maxDimension_;                                          /**< Maximal dimension of expansion. */
   std::tuple<Simplex_handle, Filtration_value, bool> currentArrow_; /**< Current return element. */
   Simplex_key currentArrowNumber_;                                  /**< Number of increments. */
 
@@ -346,23 +329,38 @@ class Oscillating_rips_simplex_iterator_base
 /**
  * @class Oscillating_rips_simplex_iterator_range oscillating_rips_simplex_ranges.h
  * gudhi/Zigzag_persistence/oscillating_rips_simplex_ranges.h
- * @brief Gives access to a range of the ordered simplices in an oscillating Rips filtration.
- *
  * @ingroup zigzag_persistence
+ *
+ * @brief Ordered range of tuples corresponding to the simplices of an oscillating Rips filtration generated by
+ * the given range of edges.
  *
  * @details The simplices are returned as tuples of three elements:
  * the first is the simplex handle of the simplex in the given complex,
  * the second is the filtration value of the corresponding arrow,
- * the third is the direction of the arrow, i.e., indicates if the simplex is inserted or removed.
- * For more information, see @ref Oscillating_rips_iterator.
+ * the third is the direction of the arrow, i.e., indicates if the simplex is inserted (`true`) or removed (`false`).
+ *
+ * The range is forward traversal only, as the simplices are computed on the fly at each increment and unecessary
+ * information for the current simplex are not stored. This is useful when the filtration is very long.
+ * Note that each copy of the same iterator will increment simultaneously. That is, for example:
+ * ```
+ * Oscillating_rips_simplex_iterator_range r(edgeBegin, edgeEnd, ...);
+ * auto it1 = r.begin();
+ * auto it2 = r.begin();
+ * auto it3 = it1;
+ * ++it1;
+ * ++it2; ++it2;
+ * // it1 and it2 are independent, so both have different values now: it1 points to the second simplex, where it2 points
+ * // to the third simplex.
+ * // but it3 is the copy of it1 and therefore, even if it3 was not explicitly incremented, it will still point to
+ * // the second simplex and not the first anymore.
+ * ```
+ * If a more flexible range is needed, use @ref Oscillating_rips_simplex_vector_range_constructor::make_range instead.
+ * It will construct a std::vector of the tuples, but with the vertices of the simplex instead of the simplex handles.
  *
  * @tparam StableFilteredComplex Filtered complex structure that has stable simplex handles,
  * that is, they do not invalidates after an insertion or a removal (except for the removed simplices).
  * @tparam EdgeRangeIterator Type of the edge range iterator. Each element of the range is assumed to have
  * type @ref Zigzag_edge or at least to be a class with the same public methods than @ref Zigzag_edge.
- *
- * @warning As the custom iterator stores a possibly large range, avoid copying it.
- * Use @ref get_iterator_range, @ref begin and @ref end wisely.
  */
 template <class StableFilteredComplex, typename EdgeRangeIterator>
 class Oscillating_rips_simplex_iterator_range
@@ -371,14 +369,14 @@ class Oscillating_rips_simplex_iterator_range
   /**
    * @class Oscillating_rips_simplex_iterator oscillating_rips_simplex_ranges.h \
    * gudhi/Zigzag_persistence/oscillating_rips_simplex_ranges.h
-   * @brief Custom iterator over the edges of an oscillating rips filtration.
+   * @brief Custom iterator over the simplices of an oscillating rips filtration.
    *
    * It inherits from boost::iterator_facade.
    *
-   * The iterator stores the distance matrix and epsilon values to compute the current edge on the fly
-   * at each increment.
-   *
-   * @warning As the iterator stores possibly large ranges, avoid copying it.
+   * @warning Each **copy** of the same iterator is pointing to the same base and will therefore update
+   * **simultaneously**. This is to make the iterators copyable in the first place. If each copy would have its own
+   * base, a copy would be too heavy to build without caution. Note that the `begin()` method of
+   * @ref Oscillating_rips_simplex_iterator_range does **not** return copies of the same iterator.
    */
   class Oscillating_rips_simplex_iterator
       : public boost::iterator_facade<Oscillating_rips_simplex_iterator,
@@ -392,26 +390,14 @@ class Oscillating_rips_simplex_iterator_range
     using Simplex_handle = typename StableFilteredComplex::Simplex_handle;     /**< Simplex handle type. */
 
     /**
-     * @brief Constructor. Takes already computed epsilon values as input, but assumes that the points are
-     * already ordered accordingly. Assumes also that the last epsilon value is 0.
-     *
-     * @tparam PointRange Point range type.
-     * @tparam DistanceFunction Type of the distance function.
-     * @param nu Lower multiplier.
-     * @param mu Upper multiplier.
-     * @param orderedPoints Point cloud as an ordered range. The format of a point has to correspond to the input
-     * format of the distance function. The order of the points should be in correspondence with the order of
-     * the epsilon values.
-     * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
-     * and return the distance between those points.
-     * @param epsilonValues Epsilon values for the oscillating rips filtration. Should be in decreasing order.
-     * And the last value should be 0.
+     * @brief Constructor.
+     * 
+     * @param base Pointer to an @ref Oscillating_rips_simplex_iterator_base instantiation.
      */
     Oscillating_rips_simplex_iterator(
         Oscillating_rips_simplex_iterator_base<StableFilteredComplex, EdgeRangeIterator>* base)
         : base_iterator_(base)
-    {
-    }
+    {}
 
    private:
     // mandatory for the boost::iterator_facade inheritance.
@@ -437,7 +423,7 @@ class Oscillating_rips_simplex_iterator_range
     /**
      * @brief Mandatory for the boost::iterator_facade inheritance. Returns the value of the dereferenced iterator.
      *
-     * @return Current edge.
+     * @return Current simplex.
      */
     const std::tuple<Simplex_handle, Filtration_value, bool>& dereference() const
     {
@@ -450,6 +436,18 @@ class Oscillating_rips_simplex_iterator_range
     void increment() { base_iterator_->increment(); }
   };
 
+  /**
+   * @brief Constructor. The complex is not copied, so do not modify or invalidate
+   * it outside as long as this iterator is different from the end iterator.
+   *
+   * @param edgeStartIterator Begin iterator of the oscillating Rips edge range.
+   * @param edgeEndIterator End iterator of the oscillating Rips edge range.
+   * @param complex Empty complex which will be used to store current simplices.
+   * Only the address of the complex is stored, so the state of the complex can be
+   * consulted between each increment.
+   * @param maxDimension Maximal dimension to which to expand the complex. If set to -1, there is no limit.
+   * Default value: -1.
+   */
   Oscillating_rips_simplex_iterator_range(const EdgeRangeIterator& edgeStartIterator,
                                           const EdgeRangeIterator& edgeEndIterator,
                                           StableFilteredComplex& complex,
@@ -458,29 +456,24 @@ class Oscillating_rips_simplex_iterator_range
         edgeEndIterator_(edgeEndIterator),
         complex_(&complex),
         maxDimension_(maxDimension)
-  {
-  }
+  {}
 
   /**
-   * @brief Returns the begin iterator of a the range of edges based on @ref Oscillating_rips_simplex_iterator.
-   * See the @ref zigzagrips "introduction page" for more details about the arguments.
+   * @brief Returns the begin iterator of a the range.
    *
-   * @tparam PointRange Point range type.
-   * @tparam DistanceFunction Type of the distance function.
-   * @param nu Lower multiplier.
-   * @param mu Upper multiplier.
-   * @param points Point cloud as a range.The format of a point has to correspond to the input format of the
-   * distance function.
-   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
-   * and return the distance between those points.
-   * @param orderPolicy Order policy for the points. Can be either
-   * @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
-   * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
-   * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
-   *
-   * @return Instantiation of @ref Oscillating_rips_simplex_iterator.
-   *
-   * @warning Avoid copying the iterator as it is heavier than usual iterators.
+   * @warning Forward traversal only. And each copy of an iterator will increment simultaneously. That is, for example:
+   * ```
+   * Oscillating_rips_simplex_iterator_range r(edgeBegin, edgeEnd, ...);
+   * auto it1 = r.begin();
+   * auto it2 = r.begin();
+   * auto it3 = it1;
+   * ++it1;
+   * ++it2; ++it2;
+   * // it1 and it2 are independent, so both have different values now: it1 points to the second simplex, where it2
+   * // points to the third simplex.
+   * // but it3 is the copy of it1 and therefore, even if it3 was not explicitly incremented, it will still point to
+   * // the second simplex and not the first anymore.
+   * ```
    */
   Oscillating_rips_simplex_iterator begin()
   {
@@ -493,35 +486,66 @@ class Oscillating_rips_simplex_iterator_range
   }
 
   /**
-   * @brief Returns the end iterator of a the range of edges based on @ref Oscillating_rips_simplex_iterator.
-   *
-   * @return Default instantiation of @ref Oscillating_rips_simplex_iterator.
+   * @brief Returns the end iterator of a the range.
    */
   Oscillating_rips_simplex_iterator end() { return endIt_; }
 
  private:
-  EdgeRangeIterator edgeStartIterator_;
-  EdgeRangeIterator edgeEndIterator_;
-  StableFilteredComplex* complex_;
-  int maxDimension_;
+  EdgeRangeIterator edgeStartIterator_; /**< Begin edge iterator. */
+  EdgeRangeIterator edgeEndIterator_;   /**< End edge iterator. */
+  StableFilteredComplex* complex_;      /**< Pointer to the complex storing living simplices. */
+  int maxDimension_;                    /**< Maximal expansion dimension. */
+  /**
+   * @brief End iterator. Does not depend on any parameter and can therefore be shared.
+   */
   inline static const Oscillating_rips_simplex_iterator endIt_ = Oscillating_rips_simplex_iterator(
       new Oscillating_rips_simplex_iterator_base<StableFilteredComplex, EdgeRangeIterator>());
 };
 
+/**
+ * @class Oscillating_rips_simplex_vector_range_constructor oscillating_rips_simplex_ranges.h \
+ * gudhi/Zigzag_persistence/oscillating_rips_simplex_ranges.h
+ * @ingroup zigzag_persistence
+ *
+ * @brief Constructor class for standard vectors of @ref Simplex corresponding to the simplices of an oscillating Rips
+ * filtration generated by the given range of edges.
+ *
+ * @details The simplices are returned as @ref Simplex "", structure of three elements:
+ * the first is the vertex range of the simplex (vertices are labeled by their label used in the given edge range),
+ * the second is the filtration value of the corresponding arrow,
+ * the third is the direction of the arrow, i.e., indicates if the simplex is inserted (`true`) or removed (`false`).
+ * 
+ * @tparam StableFilteredComplex Filtered complex structure that has stable simplex handles,
+ * that is, they do not invalidates after an insertion or a removal (except for the removed simplices).
+ */
 template <class StableFilteredComplex>
 class Oscillating_rips_simplex_vector_range_constructor
 {
  public:
-  using Vertex_handle = typename StableFilteredComplex::Vertex_handle;
-  using Simplex_handle = typename StableFilteredComplex::Simplex_handle;
-  using Filtration_value = typename StableFilteredComplex::Filtration_value; /**< Filtration value type. */
+  using Vertex_handle = typename StableFilteredComplex::Vertex_handle;        /**< Vertex handle type. */
+  using Simplex_handle = typename StableFilteredComplex::Simplex_handle;      /**< Simplex handle type. */
+  using Filtration_value = typename StableFilteredComplex::Filtration_value;  /**< Filtration value type. */
 
+  /**
+   * @brief Simplex structure.
+   */
   struct Simplex {
-    std::vector<Vertex_handle> vertices;
-    Filtration_value filtration_value;
-    bool direction;
+    std::vector<Vertex_handle> vertices;  /**< Vertices of the simplex. */
+    Filtration_value filtration_value;    /**< Filtration value of the simplex. */
+    bool direction;                       /**< True if the simplex is inserted at the filtration value, or false
+                                               if the simplex is removed instead. */
   };
 
+  /**
+   * @brief Builds the oscillating Rips filtration from the given range of edges as a vector of @ref Simplex "".
+   * 
+   * @tparam EdgeRangeIterator Type of the edge range iterator. Each element of the range is assumed to have
+   * type @ref Zigzag_edge or at least to be a class with the same public methods than @ref Zigzag_edge.
+   * @param edgeStartIterator Begin iterator of the oscillating Rips edge range.
+   * @param edgeEndIterator End iterator of the oscillating Rips edge range.
+   * @param maxDimension Maximal dimension to which to expand the complex. If set to -1, there is no limit.
+   * Default value: -1.
+   */
   template <typename EdgeRangeIterator>
   static std::vector<Simplex> make_range(EdgeRangeIterator edgeStartIterator,
                                          EdgeRangeIterator edgeEndIterator,

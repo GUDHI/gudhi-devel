@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Clément Maria and Hannah Schreiber
  *
- *    Copyright (C) 2023 Inria
+ *    Copyright (C) 2023-25 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -55,24 +55,22 @@ enum Oscillating_rips_edge_order_policy {
 
 /**
  * @private
- * @brief
+ * @ingroup zigzag_persistence
+ * @brief Initialize epsilon values and distance matrix from the given parameters and point cloud.
  *
- * @tparam Filtration_value
+ * @tparam Filtration_value Filtration value type.
  */
 template <typename Filtration_value>
 class Oscillating_rips_initializer
 {
  public:
   /**
-   * @brief Initialize the distance function and epsilon values. Updates also the multipliers if
-   * the edge modifier is active.
+   * @brief Initializes the distance matrix and epsilon values.
    *
    * @tparam PointRange Point range type.
    * @tparam DistanceFunction Type of the distance function.
-   * @param nu Lower multiplier.
-   * @param mu Upper multiplier.
    * @param epsilonValues Container for the epsilon values.
-   * @param distanceMatrix Container for the distance matrices.
+   * @param distanceMatrix Container for the distance matrix.
    * @param points Point cloud as a range.The format of a point has to correspond to the input format of the
    * distance function.
    * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
@@ -120,23 +118,16 @@ class Oscillating_rips_initializer
   }
 
   /**
-   * @brief Initialize the distance function and epsilon values. Updates also the multipliers if
-   * the edge modifier is active.
-   *
+   * @brief Initializes the distance matrix.
+   * 
    * @tparam PointRange Point range type.
    * @tparam DistanceFunction Type of the distance function.
-   * @param nu Lower multiplier.
-   * @param mu Upper multiplier.
-   * @param epsilonValues Container for the epsilon values.
-   * @param distanceMatrix Container for the distance matrices.
-   * @param points Point cloud as a range.The format of a point has to correspond to the input format of the
-   * distance function.
+   * @param distanceMatrix Container for the distance matrix. The order will correspond to the order of the given
+   * points.
+   * @param sortedPoints Point cloud as a range.The format of a point has to correspond to the input format of the
+   * distance function. The order of the points will not change.
    * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
    * and return the distance between those points.
-   * @param orderPolicy Order policy for the points. Can be either
-   * @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
-   * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
-   * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
    */
   template <typename PointRange, typename DistanceFunction>
   static void initialize(std::vector<std::vector<std::pair<int, Filtration_value> > >& distanceMatrix,
@@ -174,14 +165,13 @@ class Oscillating_rips_initializer
    * defined as \f$\varepsilon_i = d_H(P_i,P)\f$, the Hausdorff between the points
    * \f$P_i= \{p_0, \ldots, p_{i}\}\f$ and the entire point cloud
    * \f$P = \{p_0, \ldots, p_{n-1}\}\f$.
-   *
+   * 
    * @tparam PointRange Point range type.
    * @tparam DistanceFunction Type of the distance function.
    * @param sortedPoints Point cloud as an ordered range. The format of a point has to correspond to the input
    * format of the distance function.
    * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
    * and return the distance between those points.
-   *
    * @return Vector of decreasing epsilon values ending with 0.
    */
   template <typename PointRange, typename DistanceFunction>
@@ -252,7 +242,6 @@ class Oscillating_rips_initializer
     std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix(sortedPoints.size());
 #ifdef GUDHI_USE_TBB
     tbb::parallel_for(std::size_t(0), sortedPoints.size(), [&](std::size_t i) {
-      // distanceMatrix[i] = std::vector< std::pair<int, Filtration_value> >();
       distanceMatrix[i].resize(i);
       for (std::size_t j = 0; j < i; ++j) {
         distanceMatrix[i][j] = std::make_pair(j, distance(sortedPoints[i], sortedPoints[j]));
@@ -263,7 +252,6 @@ class Oscillating_rips_initializer
     });
 #else
     for (std::size_t i = 0; i < sortedPoints.size(); ++i) {  // for all vertices
-      // distanceMatrix[i] = std::vector< std::pair<int, Filtration_value> >();
       distanceMatrix[i].resize(i);
       for (std::size_t j = 0; j < i; ++j) {
         distanceMatrix[i][j] = std::make_pair(j, distance(sortedPoints[i], sortedPoints[j]));
@@ -277,36 +265,27 @@ class Oscillating_rips_initializer
 };
 
 /**
- * @class Oscillating_rips_edge_iterator oscillating_rips_edge_ranges.h \
+ * @class Oscillating_rips_edge_iterator_base oscillating_rips_edge_ranges.h \
  * gudhi/Zigzag_persistence/oscillating_rips_edge_ranges.h
- * @brief Custom iterator over the edges of an oscillating rips filtration.
+ * @ingroup zigzag_persistence
  *
- * It inherits from boost::iterator_facade.
- *
- * The iterator stores the distance matrix and epsilon values to compute the current edge on the fly
- * at each increment.
- *
- * @warning As the iterator stores possibly large ranges, avoid copying it.
+ * @brief Heavy base for a custom iterator over the edges of an oscillating rips filtration.
+ * 
+ * @tparam Filtration_value Filtration value type. Should be compatible with the edge modifier.
+ * @tparam EdgeModifier Modifier for the edge filtration values. If no modifications are wanted,
+ * use @ref Identity_edge_modifier. Default value: @ref Identity_edge_modifier.
  */
 template <typename Filtration_value, class EdgeModifier = Identity_edge_modifier>
 class Oscillating_rips_edge_iterator_base
 {
  public:
   /**
-   * @brief Constructor. Computes the distance matrix and the epsilon values it-self from the given parameters.
-   *
-   * @tparam PointRange Point range type.
-   * @tparam DistanceFunction Type of the distance function.
+   * @brief Construct.
+   * 
    * @param nu Lower multiplier.
    * @param mu Upper multiplier.
-   * @param points Point cloud as a range.The format of a point has to correspond to the input format of the
-   * distance function.
-   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
-   * and return the distance between those points.
-   * @param orderPolicy Order policy for the points. Can be either
-   * @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING "",
-   * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
-   * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING "".
+   * @param epsilonValues Pointer to the epsilon values.
+   * @param distanceMatrix Pointer to the distance matrix.
    */
   Oscillating_rips_edge_iterator_base(
       Filtration_value nu,
@@ -323,6 +302,14 @@ class Oscillating_rips_edge_iterator_base
         inPositiveDirection_(true),
         insertVertex_(true)
   {
+    GUDHI_CHECK(epsilonValues->size() == distanceMatrix->size(),
+                "Epsilon values and distance matrix are not compatible.");
+
+    if (epsilonValues->empty()) {
+      _set_end();
+      return;
+    }
+
     const auto& row = (*distanceMatrix_)[1];
     auto it = std::upper_bound(
         row.begin(),
@@ -346,15 +333,10 @@ class Oscillating_rips_edge_iterator_base
         columnIndex_(0),
         inPositiveDirection_(true),
         insertVertex_(true)
-  {
-  }
+  {}
 
   /**
-   * @brief Mandatory for the boost::iterator_facade inheritance. Indicates if to iterators are equal.
-   *
-   * @param other Iterator to compare.
-   * @return True, the iterators are pointing to the same position.
-   * @return False, otherwise.
+   * @brief Indicates if two iterators are equal.
    */
   bool equal(Oscillating_rips_edge_iterator_base const& other) const
   {
@@ -362,15 +344,14 @@ class Oscillating_rips_edge_iterator_base
   }
 
   /**
-   * @brief Mandatory for the boost::iterator_facade inheritance. Returns the value of the dereferenced iterator.
+   * @brief Returns the value of the dereferenced iterator.
    *
-   * @return Current edge.
+   * @return Current @ref Zigzag_edge edge.
    */
   const Zigzag_edge<Filtration_value>& dereference() const { return currentEdge_; }
 
   /**
-   * @brief Mandatory for the boost::iterator_facade inheritance. Increments the iterator.
-   *
+   * @brief Increments the iterator.
    */
   void increment()
   {
@@ -469,7 +450,7 @@ class Oscillating_rips_edge_iterator_base
   const Filtration_value mu_;                                                          /**< Upper multiplier. */
   Zigzag_edge<Filtration_value> currentEdge_;         /**< Stores the current edge in the range. */
   std::size_t epsilonIndex_, rowIndex_, columnIndex_; /**< Indices indicating the next position in the range. */
-  bool inPositiveDirection_, insertVertex_;           /**< Next direction and indicates if next ''edge'' is a vertex. */
+  bool inPositiveDirection_, insertVertex_;           /**< Next direction and indicates if next "edge" is a vertex. */
 
   /**
    * @brief Set the iterator as the end iterator.
@@ -561,23 +542,36 @@ class Oscillating_rips_edge_iterator_base
 };
 
 /**
- * @class Oscillating_rips_edge_iterator_range oscillating_rips_edge_ranges.h
+ * @class Oscillating_rips_edge_iterator_range oscillating_rips_edge_ranges.h \
  * gudhi/Zigzag_persistence/oscillating_rips_edge_ranges.h
- * @brief Gives access and computes different edge range types for an oscillating Rips filtration.
- *
  * @ingroup zigzag_persistence
  *
- * @details There are two different kind of ranges: a vector range containing all computed edges and
- * a Boost range made from a custom iterator computing an edge on the fly at each increment.
- * The custom iterator is therefore only a forward iterator and can only be incremented.
+ * @brief Ordered range of @ref Zigzag_edge in the oscillating Rips filtration generated by the given parameters.
+ * Even though it is called "edge", the simplex can also be a vertex if the two ends in @ref Zigzag_edge have the
+ * same value. That means, that the range corresponds in fact to the filtration with maximal dimension 1.
  *
+ * @details The range is forward traversal only, as the value of the edge is computed on the fly at each increment
+ * and information of other edges are not stored. This is useful when the filtration is very long. Note that the
+ * distance matrix and the filtration values are stored however. Note also that each copy of the same iterator will
+ * increment simultaneously. That is, for example:
+ * ```
+ * Oscillating_rips_edge_iterator_range r(nu, mu, ...);
+ * auto it1 = r.begin();
+ * auto it2 = r.begin();
+ * auto it3 = it1;
+ * ++it1;
+ * ++it2; ++it2;
+ * // it1 and it2 are independent, so both have different values now: it1 points to the second edge, where it2 points
+ * // to the third edge.
+ * // but it3 is the copy of it1 and therefore, even if it3 was not explicitly incremented, it will still point to
+ * // the second edge and not the first anymore.
+ * ```
+ * If a more flexible range is needed, use @ref Oscillating_rips_edge_vector_range_constructor::make_range instead.
+ * It will construct a std::vector of @ref Zigzag_edge "".
+ * 
  * @tparam Filtration_value Filtration value type. Should be compatible with the edge modifier.
  * @tparam EdgeModifier Modifier for the edge filtration values. If no modifications are wanted,
  * use @ref Identity_edge_modifier. Default value: @ref Identity_edge_modifier.
- *
- * @warning As the custom iterator used for the Boost ranges stores possibly large ranges, avoid copying it.
- * Use @ref get_iterator_range, @ref begin and @ref end wisely. If one needs to do something else than to simply
- * iterate over the edges in order, then the vector range is for sure the better option.
  */
 template <typename Filtration_value, class EdgeModifier = Identity_edge_modifier>
 class Oscillating_rips_edge_iterator_range
@@ -590,10 +584,10 @@ class Oscillating_rips_edge_iterator_range
    *
    * It inherits from boost::iterator_facade.
    *
-   * The iterator stores the distance matrix and epsilon values to compute the current edge on the fly
-   * at each increment.
-   *
-   * @warning As the iterator stores possibly large ranges, avoid copying it.
+   * @warning Each **copy** of the same iterator is pointing to the same base and will therefore update
+   * **simultaneously**. This is to make the iterators copyable in the first place. If each copy would have its own
+   * base, a copy would be too heavy to build without caution. Note that the `begin()` method of
+   * @ref Oscillating_rips_edge_iterator_range does **not** return copies of the same iterator.
    */
   class Oscillating_rips_edge_iterator : public boost::iterator_facade<Oscillating_rips_edge_iterator,
                                                                        const Zigzag_edge<Filtration_value>&,
@@ -601,26 +595,18 @@ class Oscillating_rips_edge_iterator_range
   {
    public:
     /**
-     * @brief Constructor. Takes already computed epsilon values as input, but assumes that the points are
-     * already ordered accordingly. Assumes also that the last epsilon value is 0.
-     *
-     * @tparam PointRange Point range type.
-     * @tparam DistanceFunction Type of the distance function.
-     * @param nu Lower multiplier.
-     * @param mu Upper multiplier.
-     * @param orderedPoints Point cloud as an ordered range. The format of a point has to correspond to the input
-     * format of the distance function. The order of the points should be in correspondence with the order of
-     * the epsilon values.
-     * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
-     * and return the distance between those points.
-     * @param epsilonValues Epsilon values for the oscillating rips filtration. Should be in decreasing order.
-     * And the last value should be 0.
+     * @brief Constructor.
+     * 
+     * @param base Pointer to an @ref Oscillating_rips_edge_iterator_base instantiation.
      */
     Oscillating_rips_edge_iterator(Oscillating_rips_edge_iterator_base<Filtration_value, EdgeModifier>* base)
         : base_iterator_(base)
-    {
-    }
+    {}
 
+    /**
+     * @brief Default constructor. Equivalent to the end iterator, but has a high chance to seg fault if incremented
+     * or dereferenced.
+     */
     Oscillating_rips_edge_iterator() : base_iterator_(nullptr) {}
 
    private:
@@ -661,10 +647,28 @@ class Oscillating_rips_edge_iterator_range
     void increment() { base_iterator_->increment(); }
   };
 
-  Oscillating_rips_edge_iterator_range()
-      : nu_(0), mu_(0)
-  {}
+  /**
+   * @brief Default constructor. The range will be empty.
+   */
+  Oscillating_rips_edge_iterator_range() : nu_(0), mu_(0) {}
 
+  /**
+   * @brief Constructor. Initializes all necessary data to deduce the vertices and edges of the filtration.
+   * See the @ref zigzagrips "introduction page" for more details about the arguments.
+   * 
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param nu Lower multiplier.
+   * @param mu Upper multiplier.
+   * @param points Point cloud as a range.The format of a point has to correspond to the input format of the
+   * distance function.
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
+   * @param orderPolicy Order policy for the points. Can be either
+   * @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
+   * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
+   * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
+   */
   template <typename PointRange, typename DistanceFunction>
   Oscillating_rips_edge_iterator_range(
       Filtration_value nu,
@@ -679,6 +683,20 @@ class Oscillating_rips_edge_iterator_range
         epsilonValues_, distanceMatrix_, points, distance, orderPolicy);
   }
 
+  /**
+   * @brief Constructor. Initializes all necessary data to deduce the vertices and edges of the filtration.
+   * See the @ref zigzagrips "introduction page" for more details about the arguments.
+   * 
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param nu Lower multiplier.
+   * @param mu Upper multiplier.
+   * @param orderedPoints Point cloud already ordered in filtration order. The format of a point has to correspond to
+   * the input format of the distance function.
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
+   * @param epsilonValues Wanted epsilon values. Should be decreasing and end with 0.
+   */
   template <typename PointRange, typename DistanceFunction>
   Oscillating_rips_edge_iterator_range(Filtration_value nu,
                                        Filtration_value mu,
@@ -692,9 +710,82 @@ class Oscillating_rips_edge_iterator_range
   }
 
   /**
-   * @brief Returns the begin iterator of a the range of edges based on @ref Oscillating_rips_edge_iterator.
-   * See the @ref zigzagrips "introduction page" for more details about the arguments.
+   * @brief Returns the begin iterator of a the range.
    *
+   * @warning Forward traversal only. And each copy of an iterator will increment simultaneously. That is, for example:
+   * ```
+   * Oscillating_rips_edge_iterator_range r(nu, mu, ...);
+   * auto it1 = r.begin();
+   * auto it2 = r.begin();
+   * auto it3 = it1;
+   * ++it1;
+   * ++it2; ++it2;
+   * // it1 and it2 are independent, so both have different values now: it1 points to the second edge, where it2 points
+   * // to the third edge.
+   * // but it3 is the copy of it1 and therefore, even if it3 was not explicitly incremented, it will still point to
+   * // the second edge and not the first anymore.
+   * ```
+   */
+  Oscillating_rips_edge_iterator begin()
+  {
+    // shared pointer on the other side will take ownership
+    // enables begin() to be called several times without invalidating precedent iterators
+    // still have the inconvenience that all copies of a same iterator (sharing the same base) increment simultaneously
+    return Oscillating_rips_edge_iterator(new Oscillating_rips_edge_iterator_base<Filtration_value, EdgeModifier>(
+        nu_, mu_, &epsilonValues_, &distanceMatrix_));
+  }
+
+  /**
+   * @brief Returns the end iterator of a the range.
+   */
+  Oscillating_rips_edge_iterator end() { return endIt_; }
+
+  /**
+   * @brief Sets the multipliers of the range. Old iterators are not invalidated and will still point to the old
+   * filtration. Only new iterators will take into account the changes. Epsilon values and the distance matrix will
+   * remain unchanged.
+   */
+  void set_multipliers(Filtration_value nu, Filtration_value mu)
+  {
+    nu_ = nu;
+    mu_ = mu;
+  }
+
+ private:
+  std::vector<Filtration_value> epsilonValues_;                                 /**< Epsilon values. */
+  std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix_; /**< Distance matrix. */
+  Filtration_value nu_;                                                         /**< Lower multiplier. */
+  Filtration_value mu_;                                                         /**< Upper multiplier. */
+  /**
+   * @brief End iterator. Does not depend on any parameter and can therefore be shared.
+   */
+  inline static const Oscillating_rips_edge_iterator endIt_ =
+      Oscillating_rips_edge_iterator(new Oscillating_rips_edge_iterator_base<Filtration_value, EdgeModifier>());
+};
+
+/**
+ * @class Oscillating_rips_edge_vector_range_constructor oscillating_rips_edge_ranges.h \
+ * gudhi/Zigzag_persistence/oscillating_rips_edge_ranges.h
+ * @ingroup zigzag_persistence
+ *
+ * @brief Constructor class for standard vectors of @ref Zigzag_edge corresponding to the oscillating Rips filtration
+ * generated by the given parameters. Even though it is called "edge", the simplex can also be a vertex if the two ends
+ * in @ref Zigzag_edge have the same value. That means, that the range corresponds in fact to the filtration with
+ * maximal dimension 1.
+ * 
+ * @tparam Filtration_value Filtration value type. Should be compatible with the edge modifier.
+ * @tparam EdgeModifier Modifier for the edge filtration values. If no modifications are wanted,
+ * use @ref Identity_edge_modifier. Default value: @ref Identity_edge_modifier.
+ */
+template <typename Filtration_value, class EdgeModifier = Identity_edge_modifier>
+class Oscillating_rips_edge_vector_range_constructor
+{
+ public:
+  /**
+   * @brief Builds the oscillating Rips filtration generated by the given parameters with maximal dimension 1 as a
+   * standard vector of @ref Zigzag_edge "". A vertex is represented by an edge whose two ends have the same value.
+   * See the @ref zigzagrips "introduction page" for more details about the arguments.
+   * 
    * @tparam PointRange Point range type.
    * @tparam DistanceFunction Type of the distance function.
    * @param nu Lower multiplier.
@@ -707,46 +798,7 @@ class Oscillating_rips_edge_iterator_range
    * @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
    * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
    * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
-   *
-   * @return Instantiation of @ref Oscillating_rips_edge_iterator.
-   *
-   * @warning Avoid copying the iterator as it is heavier than usual iterators.
    */
-  Oscillating_rips_edge_iterator begin()
-  {
-    // shared pointer on the other side will take ownership
-    // enables begin() to be called several times without invalidating precedent iterators
-    // still have the inconvenience that all copies of a same iterator (sharing the same base) increment simultaneously
-    return Oscillating_rips_edge_iterator(new Oscillating_rips_edge_iterator_base<Filtration_value, EdgeModifier>(
-        nu_, mu_, &epsilonValues_, &distanceMatrix_));
-  }
-
-  /**
-   * @brief Returns the end iterator of a the range of edges based on @ref Oscillating_rips_edge_iterator.
-   *
-   * @return Default instantiation of @ref Oscillating_rips_edge_iterator.
-   */
-  Oscillating_rips_edge_iterator end() { return endIt_; }
-
-  void set_multipliers(Filtration_value nu, Filtration_value mu)
-  {
-    nu_ = nu;
-    mu_ = mu;
-  }
-
- private:
-  std::vector<Filtration_value> epsilonValues_;                                 /**< Epsilon values. */
-  std::vector<std::vector<std::pair<int, Filtration_value> > > distanceMatrix_; /**< Distance matrix. */
-  Filtration_value nu_;                                                         /**< Lower multiplier. */
-  Filtration_value mu_;                                                         /**< Upper multiplier. */
-  inline static const Oscillating_rips_edge_iterator endIt_ =
-      Oscillating_rips_edge_iterator(new Oscillating_rips_edge_iterator_base<Filtration_value, EdgeModifier>());
-};
-
-template <typename Filtration_value, class EdgeModifier = Identity_edge_modifier>
-class Oscillating_rips_edge_vector_range_constructor
-{
- public:
   template <typename PointRange, typename DistanceFunction>
   static std::vector<Zigzag_edge<Filtration_value> > make_range(
       Filtration_value nu,
@@ -769,6 +821,21 @@ class Oscillating_rips_edge_vector_range_constructor
                                  epsilonValues);
   }
 
+  /**
+   * @brief Builds the oscillating Rips filtration generated by the given parameters with maximal dimension 1 as a
+   * standard vector of @ref Zigzag_edge "". A vertex is represented by an edge whose two ends have the same value.
+   * See the @ref zigzagrips "introduction page" for more details about the arguments.
+   * 
+   * @tparam PointRange Point range type.
+   * @tparam DistanceFunction Type of the distance function.
+   * @param nu Lower multiplier.
+   * @param mu Upper multiplier.
+   * @param orderedPoints Point cloud already ordered in filtration order. The format of a point has to correspond to
+   * the input format of the distance function.
+   * @param distance Distance function. Has to take two points as it from the range @p points as input parameters
+   * and return the distance between those points.
+   * @param epsilonValues Wanted epsilon values. Should be decreasing and end with 0.
+   */
   template <typename PointRange, typename DistanceFunction>
   static std::vector<Zigzag_edge<Filtration_value> > make_range(Filtration_value nu,
                                                                 Filtration_value mu,
