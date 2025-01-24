@@ -71,7 +71,7 @@ def _format_handler(a):
     # Array
     try:
         first_death_value = a[0][1]
-        if isinstance(first_death_value, (np.floating, float)):
+        if isinstance(first_death_value, (np.floating, float, np.integer, int)):
             return [[0, x] for x in a], 1
     except IndexError:
         pass
@@ -81,7 +81,7 @@ def _format_handler(a):
         fake_dim = 0
         for elt in a:
             first_death_value = elt[0][1]
-            if not isinstance(first_death_value, (np.floating, float)):
+            if not isinstance(first_death_value, (np.floating, float, np.integer, int)):
                 raise TypeError("Should be a list of (birth,death)")
             pers.extend([fake_dim, x] for x in elt)
             fake_dim = fake_dim + 1
