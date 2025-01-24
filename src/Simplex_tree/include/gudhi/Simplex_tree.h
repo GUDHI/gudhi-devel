@@ -188,7 +188,7 @@ class Simplex_tree {
 
  private:
   typedef typename Dictionary::iterator Dictionary_it;
-  typedef typename Dictionary::const_iterator Const_dictionary_it;
+  typedef typename Dictionary::const_iterator Dictionary_const_it;
   typedef typename Dictionary_it::value_type Dit_value_t;
 
   struct return_first {
@@ -245,7 +245,7 @@ class Simplex_tree {
   /** \brief Iterator over the vertices of the simplicial complex.
    *
    * 'value_type' is Vertex_handle. */
-  typedef boost::transform_iterator<return_first, Const_dictionary_it> Complex_vertex_iterator;
+  typedef boost::transform_iterator<return_first, Dictionary_const_it> Complex_vertex_iterator;
   /** \brief Range over the vertices of the simplicial complex. */
   typedef boost::iterator_range<Complex_vertex_iterator> Complex_vertex_range;
   /** \brief Iterator over the vertices of a simplex.
@@ -662,7 +662,7 @@ class Simplex_tree {
     return sh->second.filtration();
   }
 
-  // Transform a Const_dictionary_it into a Dictionary_it
+  // Transform a Dictionary_const_it into a Dictionary_it
   Dictionary_it _to_node_it(Simplex_handle sh) {
     return self_siblings(sh)->to_non_const_it(sh);
   }
@@ -714,7 +714,7 @@ class Simplex_tree {
    *
    * One can call filtration(null_simplex()). */
   static Simplex_handle null_simplex() {
-    return Const_dictionary_it();
+    return Dictionary_const_it();
   }
 
   /** \brief Returns a fixed number not in the interval [0, `num_simplices()`).  */
@@ -881,7 +881,7 @@ class Simplex_tree {
   /** Find function, with a sorted range of vertices. */
   Simplex_handle find_simplex(const std::vector<Vertex_handle> & simplex) const {
     Siblings const* tmp_sib = &root_;
-    Const_dictionary_it tmp_dit;
+    Dictionary_const_it tmp_dit;
     auto vi = simplex.begin();
     if constexpr (Options::contiguous_vertices && !Options::stable_simplex_handles) {
       // Equivalent to the first iteration of the normal loop
@@ -1804,8 +1804,8 @@ class Simplex_tree {
    * and assigns the maximal possible Filtration_value to the Nodes. */
   template<bool force_filtration_value = false>
   static void intersection(std::vector<std::pair<Vertex_handle, Node> >& intersection,
-                           Const_dictionary_it begin1, Const_dictionary_it end1,
-                           Const_dictionary_it begin2, Const_dictionary_it end2,
+                           Dictionary_const_it begin1, Dictionary_const_it end1,
+                           Dictionary_const_it begin2, Dictionary_const_it end2,
                            Filtration_value filtration_) {
     if (begin1 == end1 || begin2 == end2)
       return;  // ----->>
@@ -2442,7 +2442,7 @@ class Simplex_tree {
       //   }
       //Requires an additional parameter "Vertex_handle label" which is the label of the node.
 
-      Const_dictionary_it testIt = node.children()->members().begin();
+      Dictionary_const_it testIt = node.children()->members().begin();
       const Node* testNode = &testIt->second;
       auto testIIt = testIt.get();
       auto testPtr = testIIt.pointed_node();
@@ -2464,7 +2464,7 @@ class Simplex_tree {
       //  false>
       decltype(testIIt) sh_ii;
       sh_ii = sh_ptr;           //creates ``subiterator'' from pointer
-      Const_dictionary_it sh(sh_ii);  //creates iterator from subiterator
+      Dictionary_const_it sh(sh_ii);  //creates iterator from subiterator
 
       return sh;
     } else {

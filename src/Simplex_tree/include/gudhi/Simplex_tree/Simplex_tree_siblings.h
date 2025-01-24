@@ -40,7 +40,7 @@ class Simplex_tree_siblings {
   typedef typename SimplexTree::Node Node;
   typedef MapContainer Dictionary;
   typedef typename MapContainer::iterator Dictionary_it;
-  typedef typename MapContainer::const_iterator Const_dictionary_it;
+  typedef typename MapContainer::const_iterator Dictionary_const_it;
 
   /* Default constructor.*/
   Simplex_tree_siblings()
@@ -72,8 +72,8 @@ class Simplex_tree_siblings {
 
   /** \brief Inserts a Node in the set of siblings nodes.
    *
-   * If already present, assigns the minimal filtration value 
-   * between input filtration_value and the value already 
+   * If already present, assigns the minimal filtration value
+   * between input filtration_value and the value already
    * present in the node.
    */
   void insert(Vertex_handle v, Filtration_value filtration_value) {
@@ -85,7 +85,7 @@ class Simplex_tree_siblings {
   Dictionary_it find(Vertex_handle v) {
     return members_.find(v);
   }
-  Const_dictionary_it find(Vertex_handle v) const {
+  Dictionary_const_it find(Vertex_handle v) const {
     return members_.find(v);
   }
 
@@ -116,7 +116,7 @@ class Simplex_tree_siblings {
     members_.erase(iterator);
   }
 
-  Dictionary_it to_non_const_it(Const_dictionary_it it) {
+  Dictionary_it to_non_const_it(Dictionary_const_it it) {
     return members_.erase(it, it);
   }
 
