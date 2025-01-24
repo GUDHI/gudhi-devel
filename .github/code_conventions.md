@@ -6,6 +6,7 @@
 * The classes and functions of a package should be in a sub-namespace of the `Gudhi` namespace. The sub-namespace names are in lowercase and use underscore separators. E.g. `Gudhi::package_name::`
 * Concepts are named with camel case starting with uppercase. E.g. `PersistentHomology` for the concept of Persitence homology.
 * Classes start with an uppercase letter and use underscore separators. E.g. `Skeleton_blocker_contractor`.
+* Constant iterators are preferably named as `*_const_iterator`. E.g. `Vertex_const_iterator`.
 * Member functions and free functions are in lowercase and use underscore separators. E.g. `int num_vertices()`.
 * Constants and macros are in uppercase.
 * Macros should begin with the prefix `GUDHI_`.
