@@ -140,6 +140,7 @@ def _matplotlib_can_use_tex() -> bool:
         return False
     return True
 
+# TODO: a new homology_dimensions like argument for plot_persistence_barcode and plot_persistence_diagram
 
 def plot_persistence_barcode(
     persistence=[],
