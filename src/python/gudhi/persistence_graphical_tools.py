@@ -68,6 +68,7 @@ def _format_handler(a):
               * int Modification status: 0 if not modified, 1 if input was a (n x 2) np.array, 2 if input was an
                   iterable on (n x 2) np.array
     """
+    # TODO: _format_handler should return a list of numpy arrays as it is close from what matplotlib expects
     # Array
     try:
         first_death_value = a[0][1]
