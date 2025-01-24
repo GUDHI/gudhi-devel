@@ -5,6 +5,7 @@
  *    Copyright (C) 2020 Inria
  *
  *    Modification(s):
+ *      - 2025/01 Vincent Rouvreau: Use nanobind instead of PyBind11 for python bindings
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -14,17 +15,17 @@
 #include <pybind11/stl.h>
 
 // Indices are added internally in bottleneck_distance, they are not needed in the input.
-static auto make_point(double x, double y, py::ssize_t) { return std::pair(x, y); };
+static auto make_point(double x, double y, nb::ssize_t) { return std::pair(x, y); };
 
 // For compatibility with older versions, we want to support e=None.
-double bottleneck(Dgm d1, Dgm d2, std::optional<double> epsilon)
+double bottleneck(const Dgm& d1, const Dgm& d2, std::optional<double> epsilon)
 {
   double e = epsilon.value_or((std::numeric_limits<double>::min)());
-  // I *think* the call to request() in numpy_to_range_of_pairs has to be before releasing the GIL.
+// I *think* the call to request() in numpy_to_range_of_pairs has to be before releasing the GIL.
   auto diag1 = numpy_to_range_of_pairs(d1, make_point);
   auto diag2 = numpy_to_range_of_pairs(d2, make_point);
 
-  py::gil_scoped_release release;
+  nb::gil_scoped_release release;
 
   return Gudhi::persistence_diagram::bottleneck_distance(diag1, diag2, e);
 }
@@ -32,8 +33,8 @@ double bottleneck(Dgm d1, Dgm d2, std::optional<double> epsilon)
 NB_MODULE(bottleneck, m) {
       m.attr("__license__") = "GPL v3";
       m.def("bottleneck_distance", &bottleneck,
-          py::arg("diagram_1"), py::arg("diagram_2"),
-          py::arg("e") = py::none(),
+          nb::arg("diagram_1"), nb::arg("diagram_2"),
+          nb::arg("e") = nb::none(),
           R"pbdoc(
     Compute the Bottleneck distance between two diagrams.
     Points at infinity and on the diagonal are supported.

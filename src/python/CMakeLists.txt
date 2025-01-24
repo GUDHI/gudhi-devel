@@ -357,8 +357,7 @@ if(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
 endif(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
 
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'clustering/_tomato', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'hera/wasserstein', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'hera/bottleneck', ")
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'hera', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_pers_cub_low_dim', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_edge_collapse', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_ripser', ")
@@ -393,7 +392,6 @@ file(COPY "gudhi/dtm_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/g
 file(COPY "gudhi/cover_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 file(COPY "gudhi/_kepler_mapper.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 file(COPY "gudhi/_kepler_mapper.py.COPYRIGHT" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
-file(COPY "gudhi/hera/__init__.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera")
 file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
 file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
@@ -401,13 +399,9 @@ file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi
 # Some files for pip package
 file(COPY "pyproject.toml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
 
-# Symbolic links to cython and Nanobind sources to be built. "MAKE_DIRECTORY gudhi" must be done before
+# Symbolic links to cython sources to be built. "MAKE_DIRECTORY gudhi" must be done before
 add_gudhi_symbolic_links("gudhi/*.pxd")
 add_gudhi_symbolic_links("gudhi/*.pyx")
-add_gudhi_symbolic_links("gudhi/*.cc")
-#add_gudhi_symbolic_links("gudhi/clustering/_tomato.cc")
-add_gudhi_symbolic_links("gudhi/hera/*.cc")
-add_gudhi_symbolic_links("gudhi/datasets/generators/_points.cc")
 
 add_custom_command(
     OUTPUT gudhi.so
@@ -423,8 +417,11 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT)
 find_package(nanobind CONFIG REQUIRED)
 
+# Add src/python/include directory
+include_directories(include)
 add_subdirectory("gudhi")
 add_subdirectory("gudhi/clustering")
+add_subdirectory("gudhi/pouet")
 if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   add_subdirectory("gudhi/datasets/generators")
 endif()
