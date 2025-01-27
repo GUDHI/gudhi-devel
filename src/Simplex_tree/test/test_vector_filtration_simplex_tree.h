@@ -69,7 +69,7 @@ class Vector_filtration_value : public std::vector<int>
     return false;
   }
 
-  friend char* serialize_trivial(const Vector_filtration_value& value, char* start)
+  friend char* serialize_value_to_char_buffer(const Vector_filtration_value& value, char* start)
   {
     const auto length = value.size();
     const std::size_t arg_size = sizeof(int) * length;
@@ -79,7 +79,7 @@ class Vector_filtration_value : public std::vector<int>
     return start + arg_size + type_size;
   }
 
-  friend const char* deserialize_trivial(Vector_filtration_value& value, const char* start)
+  friend const char* deserialize_value_to_char_buffer(Vector_filtration_value& value, const char* start)
   {
     const std::size_t type_size = sizeof(Vector_filtration_value::size_type);
     Vector_filtration_value::size_type length;

@@ -22,7 +22,7 @@
 #include <boost/mpl/list.hpp>
 
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Simplex_tree/serialization_utils.h>  // for de/serialize_trivial
+#include <gudhi/Simplex_tree/serialization_utils.h>  // for de/serialize_value_to_char_buffer
 #include <gudhi/Unitary_tests_utils.h>  // for GUDHI_TEST_FLOAT_EQUALITY_CHECK
 
 #include "test_vector_filtration_simplex_tree.h"
@@ -129,24 +129,24 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   char* buffer = new char[256];
   char* ptr = buffer;
   // 3 simplices ({0}, {1}, {2}) and its filtration values
-  ptr = serialize_trivial(static_cast<Vertex_type>(3)     , ptr);
-  ptr = serialize_trivial(static_cast<Vertex_type>(0)     , ptr);
+  ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(3)     , ptr);
+  ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(0)     , ptr);
   if (Stree::Options::store_filtration)
-    ptr = serialize_trivial(st.filtration(st.find({0}))   , ptr);
-  ptr = serialize_trivial(static_cast<Vertex_type>(1)     , ptr);
+    ptr = serialize_value_to_char_buffer(st.filtration(st.find({0}))   , ptr);
+  ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(1)     , ptr);
   if (Stree::Options::store_filtration)
-    ptr = serialize_trivial(st.filtration(st.find({1}))   , ptr);
-  ptr = serialize_trivial(static_cast<Vertex_type>(2)     , ptr);
+    ptr = serialize_value_to_char_buffer(st.filtration(st.find({1}))   , ptr);
+  ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(2)     , ptr);
   if (Stree::Options::store_filtration)
-    ptr = serialize_trivial(st.filtration(st.find({2}))   , ptr);
+    ptr = serialize_value_to_char_buffer(st.filtration(st.find({2}))   , ptr);
   // 1 simplex (2) from {0, 2} and its filtration values
-  ptr = serialize_trivial(static_cast<Vertex_type>(1)     , ptr);
-  ptr = serialize_trivial(static_cast<Vertex_type>(2)     , ptr);
+  ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(1)     , ptr);
+  ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(2)     , ptr);
   if (Stree::Options::store_filtration)
-    ptr = serialize_trivial(st.filtration(st.find({0, 2})), ptr);
-  ptr = serialize_trivial(static_cast<Vertex_type>(0)     , ptr);  // (0, 2) end of leaf
-  ptr = serialize_trivial(static_cast<Vertex_type>(0)     , ptr);  // (1) end of leaf
-  ptr = serialize_trivial(static_cast<Vertex_type>(0)     , ptr);  // (2) end of leaf
+    ptr = serialize_value_to_char_buffer(st.filtration(st.find({0, 2})), ptr);
+  ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(0)     , ptr);  // (0, 2) end of leaf
+  ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(0)     , ptr);  // (1) end of leaf
+  ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(0)     , ptr);  // (2) end of leaf
 
   const std::size_t buffer_size = (ptr - buffer);
   std::clog << "Serialization size in bytes = " << buffer_size << std::endl;
@@ -162,40 +162,40 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   // Reset position pointer at start
   const char* c_ptr = buffer;
   // 3 simplices ({0}, {1}, {2}) and its filtration values
-  c_ptr = deserialize_trivial(vertex, c_ptr);
+  c_ptr = deserialize_value_to_char_buffer(vertex, c_ptr);
   BOOST_CHECK(vertex == 3);
-  c_ptr = deserialize_trivial(vertex, c_ptr);
+  c_ptr = deserialize_value_to_char_buffer(vertex, c_ptr);
   BOOST_CHECK(vertex == 0);
   if (Stree::Options::store_filtration) {
-    c_ptr = deserialize_trivial(filtration, c_ptr);
+    c_ptr = deserialize_value_to_char_buffer(filtration, c_ptr);
     test_equality(filtration, st.filtration(st.find({0})));
   }
-  c_ptr = deserialize_trivial(vertex, c_ptr);
+  c_ptr = deserialize_value_to_char_buffer(vertex, c_ptr);
   BOOST_CHECK(vertex == 1);
   if (Stree::Options::store_filtration) {
-    c_ptr = deserialize_trivial(filtration, c_ptr);
+    c_ptr = deserialize_value_to_char_buffer(filtration, c_ptr);
     test_equality(filtration, st.filtration(st.find({1})));
   }
-  c_ptr = deserialize_trivial(vertex, c_ptr);
+  c_ptr = deserialize_value_to_char_buffer(vertex, c_ptr);
   BOOST_CHECK(vertex == 2);
   if (Stree::Options::store_filtration) {
-    c_ptr = deserialize_trivial(filtration, c_ptr);
+    c_ptr = deserialize_value_to_char_buffer(filtration, c_ptr);
     test_equality(filtration, st.filtration(st.find({2})));
   }
   // 1 simplex (2) from {0, 2} and its filtration values
-  c_ptr = deserialize_trivial(vertex, c_ptr);
+  c_ptr = deserialize_value_to_char_buffer(vertex, c_ptr);
   BOOST_CHECK(vertex == 1);
-  c_ptr = deserialize_trivial(vertex, c_ptr);
+  c_ptr = deserialize_value_to_char_buffer(vertex, c_ptr);
   BOOST_CHECK(vertex == 2);
   if (Stree::Options::store_filtration) {
-    c_ptr = deserialize_trivial(filtration, c_ptr);
+    c_ptr = deserialize_value_to_char_buffer(filtration, c_ptr);
     test_equality(filtration, st.filtration(st.find({0, 2})));
   }
-  c_ptr = deserialize_trivial(vertex, c_ptr);  // (0, 2) end of leaf
+  c_ptr = deserialize_value_to_char_buffer(vertex, c_ptr);  // (0, 2) end of leaf
   BOOST_CHECK(vertex == 0);
-  c_ptr = deserialize_trivial(vertex, c_ptr);  // (1) end of leaf
+  c_ptr = deserialize_value_to_char_buffer(vertex, c_ptr);  // (1) end of leaf
   BOOST_CHECK(vertex == 0);
-  c_ptr = deserialize_trivial(vertex, c_ptr);  // (2) end of leaf
+  c_ptr = deserialize_value_to_char_buffer(vertex, c_ptr);  // (2) end of leaf
   BOOST_CHECK(vertex == 0);
 
   std::size_t index = static_cast<std::size_t>(c_ptr - buffer);
@@ -390,7 +390,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_custom_deserialization_vec_to_double) {
   auto deserialize_filtration_value = [](typename target_st_type::Filtration_value& fil,
                                          const char* start) -> const char* {
     typename source_st_type::Filtration_value origin_fil;
-    const char* ptr = deserialize_trivial(origin_fil, start); //naive way to do it, but fine enough for a test
+    const char* ptr = deserialize_value_to_char_buffer(origin_fil, start); //naive way to do it, but fine enough for a test
     fil = origin_fil[0];
     return ptr;
   };
@@ -428,7 +428,7 @@ BOOST_AUTO_TEST_CASE(simplex_tree_custom_deserialization_double_to_vec) {
   auto deserialize_filtration_value = [](typename target_st_type::Filtration_value& fil,
                                          const char* start) -> const char* {
     typename source_st_type::Filtration_value origin_fil;
-    const char* ptr = deserialize_trivial(origin_fil, start);
+    const char* ptr = deserialize_value_to_char_buffer(origin_fil, start);
     fil.resize(2, 1);
     fil[0] = origin_fil;
     return ptr;
