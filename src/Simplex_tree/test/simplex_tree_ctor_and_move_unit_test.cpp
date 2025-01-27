@@ -44,7 +44,7 @@ std::string print_filtration_value(std::vector<int> fil){
 }
 
 template<typename Simplex_tree>
-void print_simplex_filtration(Simplex_tree& st, const std::string& msg) {
+void print_simplex_filtration(const Simplex_tree& st, const std::string& msg) {
   // Required before browsing through filtration values
   st.initialize_filtration();
 
@@ -303,7 +303,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_custom_copy_constructor_key, typeST, 
 }
 
 template<typename Simplex_tree>
-std::vector<std::vector<typename Simplex_tree::Vertex_handle>> get_star(Simplex_tree& st) {
+std::vector<std::vector<typename Simplex_tree::Vertex_handle>> get_star(const Simplex_tree& st) {
   std::vector<std::vector<typename Simplex_tree::Vertex_handle>> output;
   auto sh = st.find({0,1});
   if (sh != st.null_simplex())
@@ -324,7 +324,7 @@ std::vector<std::vector<typename Simplex_tree::Vertex_handle>> get_star(Simplex_
 }
 
 BOOST_AUTO_TEST_CASE(simplex_fast_cofaces_rule_of_five) {
-  // Only for fast cofaces version to check the data structure for this feature is up to date 
+  // Only for fast cofaces version to check the data structure for this feature is up to date
   using STree = Simplex_tree<Simplex_tree_options_full_featured>;
   STree st;
 
