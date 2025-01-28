@@ -355,12 +355,12 @@ class Alpha_complex {
    * It also computes the filtration values accordingly to the \ref createcomplexalgorithm if default_filtration_value
    * is not set.
    *
-   * \tparam output_squared_values If false (default value), it assigns to each simplex a filtration value equal to
-   * the squared cicumradius of the simplices, or to the radius when output_squared_values is true.
+   * \tparam output_squared_values If `true` (default value), it assigns to each simplex a filtration value equal to
+   * \f$ \alpha^2 \f$, or to \f$ \alpha \f$ when `output_squared_values` is `false`. cf. \ref createcomplexalgorithm
    * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
    *
    * @param[in] complex SimplicialComplexForAlpha to be created.
-   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$, and there is very
+   * @param[in] max_alpha_square maximum for \f$ \alpha^2 \f$ value. Default value is +\f$\infty\f$, and there is very
    * little point using anything else since it does not save time. Useless if `default_filtration_value` is set to
    * `true`.
    * @param[in] exact Exact filtration values computation. Not exact if `Kernel` is not <a target="_blank"
@@ -369,14 +369,17 @@ class Alpha_complex {
    * (will be set to `NaN`).
    * Default value is `false` (which means compute the filtration values).
    *
-   * @return true if creation succeeds, false otherwise.
+   * @return `true` if creation succeeds, `false` otherwise.
    *
    * @pre Delaunay triangulation must be already constructed with dimension strictly greater than 0.
    * @pre The simplicial complex must be empty (no vertices)
    *
    * Initialization can be launched once.
+   *
+   * \note Weighted Alpha complex can have negative filtration values. If `output_squared_values` is set to `false`,
+   * filtration values will be `NaN` in this case.
    */
-  template <bool output_squared_values = false,
+  template <bool output_squared_values = true,
             typename SimplicialComplexForAlpha,
             typename Filtration_value = typename SimplicialComplexForAlpha::Filtration_value>
   bool create_complex(SimplicialComplexForAlpha& complex,
@@ -464,7 +467,7 @@ class Alpha_complex {
                 if(exact) CGAL::exact(sqrad);
 #endif
                 alpha_complex_filtration = cgal_converter(sqrad);
-                if constexpr (output_squared_values) {
+                if constexpr (!output_squared_values) {
                   alpha_complex_filtration = sqrt(alpha_complex_filtration);
                 }
               }
@@ -489,7 +492,7 @@ class Alpha_complex {
         // Only in not exact version, cf. https://github.com/GUDHI/gudhi-devel/issues/57
         complex.make_filtration_non_decreasing();
       // Remove all simplices that have a filtration value greater than max_alpha_square
-      if constexpr (output_squared_values) {
+      if constexpr (!output_squared_values) {
         complex.prune_above_filtration(sqrt(max_alpha_square));
       } else {
         complex.prune_above_filtration(max_alpha_square);

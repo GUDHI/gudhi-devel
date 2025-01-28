@@ -49,7 +49,8 @@ void compare_delaunay_complex_simplices() {
 
   std::clog << "Alpha complex with square root filtration values\n";
   Simplex_tree stree_from_alpha_sqrt;
-  BOOST_CHECK(alpha_complex.template create_complex<true>(stree_from_alpha_sqrt));
+  // set output_squared_values to false
+  BOOST_CHECK(alpha_complex.template create_complex<false>(stree_from_alpha_sqrt));
 
   std::clog << "Check simplices from alpha complex filtration values when output_squared_values is true\n";
   // Check all the simplices from alpha complex are in the Delaunay complex

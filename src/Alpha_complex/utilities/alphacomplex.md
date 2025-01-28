@@ -22,10 +22,10 @@ Different versions of Alpha complex computation are available:
 
 Default Alpha complex filtrations computation are square of the circumradius of the simplex.
 If you are interested in the circumradius of the simplex as filtration values, pass the
-'-square-root-filtrations' (or '-s') option.
+'--square-root-filtrations' (or '-s') option.
 
 Alpha complex can be, or not, weighted (requires a file containing weights values).
-Weighted Alpha complex can have negative filtration values. If '-square-root-filtrations' is
+Weighted Alpha complex can have negative filtration values. If '--square-root-filtrations' is
 set, filtration values will be Nan in this case.
 
 The output diagram contains one bar per line, written with the convention:
@@ -68,7 +68,7 @@ points (one value per line). Default version is not weighted.
 **Example**
 
 ```
-   alpha_complex_persistence -r 32 -p 2 -m 0.45 ../../data/points/tore3D_300.off
+   alpha_complex_persistence -p 2 -m 0.45 ../../data/points/tore3D_300.off
 ```
 
 N.B.:

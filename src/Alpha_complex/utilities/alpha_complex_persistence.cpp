@@ -80,17 +80,21 @@ Simplex_tree create_simplex_tree(const std::string &off_file_points, const std::
     Gudhi::alpha_complex::Alpha_complex<Kernel, true> alpha_complex_from_file(points, weights);
 
     if (output_squared_values)
-      complex_creation = alpha_complex_from_file.template create_complex<true>(stree, alpha_square_max_value, exact_version);
+      complex_creation = alpha_complex_from_file.template create_complex<true>(stree, alpha_square_max_value,
+                                                                               exact_version);
     else
-      complex_creation = alpha_complex_from_file.create_complex(stree, alpha_square_max_value, exact_version);
+      complex_creation = alpha_complex_from_file.template create_complex<false>(stree, alpha_square_max_value,
+                                                                                exact_version);
   } else {
     // Init of an alpha complex from an OFF file
     Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(points);
 
     if (output_squared_values)
-      complex_creation = alpha_complex_from_file.template create_complex<true>(stree, alpha_square_max_value, exact_version);
+      complex_creation = alpha_complex_from_file.template create_complex<true>(stree, alpha_square_max_value,
+                                                                               exact_version);
     else
-      complex_creation = alpha_complex_from_file.create_complex(stree, alpha_square_max_value, exact_version);
+      complex_creation = alpha_complex_from_file.template create_complex<false>(stree, alpha_square_max_value,
+                                                                                exact_version);
   }
   if (!complex_creation) {
     std::cerr << "Alpha complex simplicial complex creation failed." << std::endl;
@@ -205,9 +209,9 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool 
     std::clog << " * exact: true values rounded to double.\n \n";
     std::clog << "Default Alpha complex filtrations computation are square of the circumradius of the simplex.\n";
     std::clog << "If you are interested in the circumradius of the simplex as filtration values, pass the ";
-    std::clog << "'-square-root-filtrations' (or '-s') option.\n";
+    std::clog << "'--square-root-filtrations' (or '-s') option.\n";
     std::clog << "Alpha complex can be, or not, weighted (requires a file containing weights values).\n\n";
-    std::clog << "Weighted Alpha complex can have negative filtration values. If '-square-root-filtrations' is";
+    std::clog << "Weighted Alpha complex can have negative filtration values. If '--square-root-filtrations' is";
     std::clog << "set, filtration values will be Nan in this case.\n \n";
     std::clog << "The output diagram contains one bar per line, written with the convention: \n";
     std::clog << "   p   dim b d \n";

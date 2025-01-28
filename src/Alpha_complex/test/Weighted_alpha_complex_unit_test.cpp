@@ -156,7 +156,8 @@ BOOST_AUTO_TEST_CASE(Is_weighted_alpha_complex_nan) {
   }
   std::clog << "Weighted alpha complex with output_squared_values\n";
   Gudhi::Simplex_tree<> stree_sqrt;
-  if (alpha_complex_from_weighted_points.create_complex<true>(stree_sqrt)) {
+  // set output_squared_values to false means that negative squared values will be NaN
+  if (alpha_complex_from_weighted_points.create_complex<false>(stree_sqrt)) {
     for (auto f_simplex : stree_sqrt.filtration_simplex_range()) {
         std::clog << "   ( ";
         for (auto vertex : stree_sqrt.simplex_vertex_range(f_simplex)) {

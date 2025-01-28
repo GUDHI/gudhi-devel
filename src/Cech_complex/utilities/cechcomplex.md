@@ -72,7 +72,7 @@ Different versions of Delaunay-Čech complex computation are available:
 
 
 Default Delaunay-Čech complex filtrations computation are squared radius of the MEB.
-If you are interested in radius of the MEB as filtration values, pass the '-square-root-filtrations'
+If you are interested in radius of the MEB as filtration values, pass the '--square-root-filtrations'
 (or '-s') option.
 
 

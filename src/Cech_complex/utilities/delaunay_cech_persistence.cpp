@@ -163,8 +163,8 @@ void program_options(int argc, char* argv[], std::string& off_file_points, bool&
     std::clog << " * safe (default): values can have a relative error at most 1e-5\n";
     std::clog << " * exact: true values rounded to double.\n \n";
     std::clog << "Default Delaunay-Cech complex filtrations computation are squared radius of the MEB.\n";
-    std::clog << "If you are interested in radius of the MEB as filtration values, pass the '-square-root-filtrations'";
-    std::clog << "(or '-s') option.\n \n";
+    std::clog << "If you are interested in radius of the MEB as filtration values, pass the ";
+    std<<clog << "'--square-root-filtrations' (or '-s') option.\n \n";
     std::clog << "The output diagram contains one bar per line, written with the convention: \n";
     std::clog << "   p   dim b d \n";
     std::clog << "where dim is the dimension of the homological feature,\n";
