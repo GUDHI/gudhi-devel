@@ -12,6 +12,9 @@ Below is a list of changes:
           * Delaunay Čech complex (using minimal enclosing ball)
           * Alpha complex (moved in this new section)
 
+- [Persistence graphical tools](https://gudhi.inria.fr/python/latest/persistence_graphical_tools_user.html)
+     - Can now handle scikit-learn like interfaces outputs as inputs
+
 - [Module](link)
      - **...**
 
