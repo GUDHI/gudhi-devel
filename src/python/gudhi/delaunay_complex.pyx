@@ -240,8 +240,8 @@ def delaunay_cech_complex(
         When Delaunay Čech complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
 
     Args:
-        points (Iterable[Iterable[float]]): A list of points in d-Dimension.
-        precision (str): Delaunay Čech complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+        points: A list of points in d-Dimension.
+        precision: Delaunay Čech complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
         max_alpha: The maximum alpha square threshold the simplices shall not exceed. Default is set to infinity, and
             there is very little point using anything else since it does not save time.
         output_squared_values: Square root filtration values when True. Default is True, but computation is faster when
@@ -262,7 +262,7 @@ def delaunay_complex(
     """Delaunay Complex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation. This is the method candidate if filtration values are not needed to be computed (will be set to `NaN`).
 
     Args:
-        points (Iterable[Iterable[float]]): A list of points in d-Dimension.
+        points: A list of points in d-Dimension.
 
     Returns:
         SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th
@@ -297,8 +297,8 @@ def alpha_complex(
         When DelaunayComplex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
 
     Args:
-        points (Iterable[Iterable[float]]): A list of points in d-Dimension.
-        precision (str): Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+        points: A list of points in d-Dimension.
+        precision: Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
         max_alpha: The maximum alpha threshold the simplices shall not exceed. Default is set to infinity, and there is
             very little point using anything else since it does not save time.
         output_squared_values: Square root filtration values when True. Default is True, but computation is faster when
@@ -335,9 +335,10 @@ def weighted_alpha_complex(
         When DelaunayComplex is constructed with an infinite value of power distance, the complex is a Delaunay complex.
 
     Args:
-        points (Iterable[Iterable[float]]): A list of points in d-Dimension.
-        precision (str): Weighted Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
-        max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
+        points: A list of points in d-Dimension.
+        weights: A list of weights. If set, the number of weights must correspond to the number of points.
+        precision: Weighted Alpha complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
+        max_power_distance: The maximum alpha square threshold the simplices shall not exceed. Default is set to
             infinity, and there is very little point using anything else since it does not save time.
     Returns:
         SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th
