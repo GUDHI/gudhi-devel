@@ -30,8 +30,8 @@ namespace Gudhi::cech_complex {
  * Applied on a Čech complex, it recomputes the same values (squared or not in function of `output_squared_values`).
  * Applied on a Delaunay triangulation, it computes the Delaunay-Čech filtration.
  *
- * \tparam output_squared_values If false (default value), it assigns to each simplex a filtration value equal to
- * the squared radius of the MEB, or to the radius when output_squared_values is true.
+ * \tparam output_squared_values If `true` (default value), it assigns to each simplex a filtration value equal to
+ * the squared radius of the MEB, or to the radius when `output_squared_values` is `false`.
  * \tparam Kernel CGAL kernel: either Epick_d or Epeck_d.
  * \tparam PointRange Random access range of `Kernel::Point_d`.
  *
@@ -42,7 +42,7 @@ namespace Gudhi::cech_complex {
  * <a href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>, the filtration values
  * are computed exactly. Default is false.
  */
-template<bool output_squared_values = false, typename Kernel, typename SimplicialComplexForMEB, typename PointRange>
+template<bool output_squared_values = true, typename Kernel, typename SimplicialComplexForMEB, typename PointRange>
 void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRange const& points, bool exact = false) {
   using Point_d = typename Kernel::Point_d;
   using FT = typename Kernel::FT;
@@ -82,7 +82,7 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
       if (exact) CGAL::exact(r);
       complex.assign_key(sh, cache_.size());
       Filtration_value filt{max(cvt(r), Filtration_value(0))};
-      if constexpr (output_squared_values)
+      if constexpr (!output_squared_values)
         filt = sqrt(filt);
       complex.assign_filtration(sh, filt);
       cache_.emplace_back(std::move(m), std::move(r));
@@ -121,9 +121,9 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
         //   int d2 = dim * dim;
         //   Filtration_value max_sanity = maxf * d2 / (d2 - 1);
         // and use min(max_sanity, ...), which would limit how bad numerical errors can be.
-        Filtration_value filt{max(cvt(r), Filtration_value(0))};
-        if constexpr (output_squared_values)
-          filt = sqrt(filt);
+        Filtration_value filt{cvt(r)};
+        if constexpr (!output_squared_values)
+          filt = sqrt(max(filt, Filtration_value(0)));
         // maxf = filt except for rounding errors
         maxf = max(maxf, filt);
         complex.assign_key(sh, cache_.size());
