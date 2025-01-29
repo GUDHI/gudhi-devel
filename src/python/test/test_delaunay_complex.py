@@ -222,9 +222,9 @@ def test_output_squared_values():
             for max_alpha in [float('inf'), math.sqrt(20.)]:
                 pts=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
                 stree = simplicial_complex_helper(points=pts, precision=precision,
-                                                  output_squared_values=False, max_alpha=max_alpha)
+                                                  output_squared_values=True, max_alpha=max_alpha)
                 stree_sqrt = simplicial_complex_helper(points=pts, precision=precision,
-                                                       output_squared_values=True, max_alpha=max_alpha)
+                                                       output_squared_values=False, max_alpha=max_alpha)
                 assert stree.num_simplices() == stree_sqrt.num_simplices()
                 for simplex, filt in stree_sqrt.get_filtration():
                     # np.testing.assert_almost_equal(float('nan'), float('nan')) is ok
