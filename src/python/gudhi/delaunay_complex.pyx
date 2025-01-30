@@ -25,7 +25,6 @@ from collections.abc import Iterable
 
 from gudhi.simplex_tree cimport *
 from gudhi.simplex_tree import SimplexTree
-from gudhi import read_points_from_off_file
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"

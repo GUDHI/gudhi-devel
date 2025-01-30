@@ -23,6 +23,7 @@ Alpha complex reference manual
 .. autofunction:: gudhi.weighted_alpha_complex
 
 .. autoclass:: gudhi.AlphaComplex
+   :exclude-members:  __new__
 
    .. deprecated:: 3.11.0
       Use :py:func:`gudhi.alpha_complex`, :py:func:`gudhi.weighted_alpha_complex` or :py:func:`gudhi.delaunay_complex`
