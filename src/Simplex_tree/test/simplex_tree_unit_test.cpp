@@ -36,7 +36,7 @@ typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_full_featured> > list_of_tested_variants;
 
 template<class typeST>
-void test_empty_simplex_tree(typeST& tst) {
+void test_empty_simplex_tree(const typeST& tst) {
   typedef typename typeST::Vertex_handle Vertex_handle;
   const Vertex_handle DEFAULT_VERTEX_VALUE = Vertex_handle(- 1);
   BOOST_CHECK(tst.null_vertex() == DEFAULT_VERTEX_VALUE);
@@ -44,7 +44,7 @@ void test_empty_simplex_tree(typeST& tst) {
   BOOST_CHECK(tst.num_simplices() == (size_t) 0);
   BOOST_CHECK(tst.is_empty());
   BOOST_CHECK(tst.num_simplices_by_dimension() == std::vector<size_t>());
-  typename typeST::Siblings* STRoot = tst.root();
+  const typename typeST::Siblings* STRoot = tst.root();
   BOOST_CHECK(STRoot != nullptr);
   BOOST_CHECK(STRoot->oncles() == nullptr);
   BOOST_CHECK(STRoot->parent() == DEFAULT_VERTEX_VALUE);
@@ -52,7 +52,7 @@ void test_empty_simplex_tree(typeST& tst) {
 }
 
 template<class typeST>
-void test_iterators_on_empty_simplex_tree(typeST& tst) {
+void test_iterators_on_empty_simplex_tree(const typeST& tst) {
   std::clog << "Iterator on vertices: " << std::endl;
   for (auto vertex : tst.complex_vertex_range()) {
     std::clog << "vertice:" << vertex << std::endl;
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_from_file, typeST, list_of_tested_var
 }
 
 template<class typeST, class typeSimplex>
-void test_simplex_tree_contains(typeST& simplexTree, typeSimplex& simplex, int pos) {
+void test_simplex_tree_contains(const typeST& simplexTree, typeSimplex& simplex, int pos) {
   auto f_simplex = simplexTree.filtration_simplex_range().begin() + pos;
 
   std::clog << "test_simplex_tree_contains - filtration=" << simplexTree.filtration(*f_simplex) << "||" << simplex.second << std::endl;
@@ -593,7 +593,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
 }
 
 template<class typeST, class Vertex_handle>
-void test_cofaces(typeST& st, const std::vector<Vertex_handle>& expected, int dim, const std::vector<typename typeST::Simplex_handle>& res) {
+void test_cofaces(const typeST& st, const std::vector<Vertex_handle>& expected, int dim, const std::vector<typename typeST::Simplex_handle>& res) {
   std::size_t nb_res = 0;
   if (dim == 0) {
     typename typeST::Cofaces_simplex_range stars = st.star_simplex_range(st.find(expected));
