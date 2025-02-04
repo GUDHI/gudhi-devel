@@ -1010,11 +1010,11 @@ void column_test_chain_methods() {
   Column col(&settings);
 
   BOOST_CHECK(!col.is_paired());
-  BOOST_CHECK(col.get_paired_chain_index() == static_cast<typename Column::Index>(-1));
+  BOOST_CHECK(col.get_paired_chain_index() == Column::Master::template get_null_value<typename Column::Index>());
 
   col.unassign_paired_chain();
   BOOST_CHECK(!col.is_paired());
-  BOOST_CHECK(col.get_paired_chain_index() == static_cast<typename Column::Index>(-1));
+  BOOST_CHECK(col.get_paired_chain_index() == Column::Master::template get_null_value<typename Column::Index>());
 
   col.assign_paired_chain(2);
   BOOST_CHECK(col.is_paired());
@@ -1022,7 +1022,7 @@ void column_test_chain_methods() {
 
   col.unassign_paired_chain();
   BOOST_CHECK(!col.is_paired());
-  BOOST_CHECK(col.get_paired_chain_index() == static_cast<typename Column::Index>(-1));
+  BOOST_CHECK(col.get_paired_chain_index() == Column::Master::template get_null_value<typename Column::Index>());
 }
 
 #endif  // PM_COLUMN_TESTS_H
