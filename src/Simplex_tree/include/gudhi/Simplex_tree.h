@@ -111,7 +111,7 @@ class Simplex_tree {
    *
    * When extra data type is defined by the user, the extra data gets a
    * <a target="_blank" href="https://en.cppreference.com/w/cpp/language/default_initialization">default-initialization
-   * </a>, which may mean an indeterminate value. */
+   * </a> behaviour, which may mean an indeterminate value. */
   typedef typename Get_simplex_data_type<Options>::type Simplex_data;
   /** \brief Type for the vertex handle.
    *
