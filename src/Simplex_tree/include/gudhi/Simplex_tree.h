@@ -524,7 +524,7 @@ class Simplex_tree {
     for (auto& map_el : root_.members()) {
       map_el.second.assign_children(&root_);
     }
-    // Specific for optionnal data
+    // Specific for optional data
     if constexpr (!std::is_same_v<Simplex_data, No_simplex_data>) {
       auto dst_iter = root_.members().begin();
       auto src_iter = root_source.members().begin();
@@ -588,7 +588,7 @@ class Simplex_tree {
                                           child.first,
                                           Node(newsib, translate_filtration_value(child.second.filtration())));
           }
-          // Specific for optionnal data
+          // Specific for optional data
           if constexpr (copy_simplex_data && !std::is_same_v<Simplex_data, No_simplex_data>) {
             new_it->second.data() = child.second.data();
           }
