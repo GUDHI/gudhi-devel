@@ -107,7 +107,11 @@ class Simplex_tree {
    *
    * Must be an integer type. */
   typedef typename Options::Simplex_key Simplex_key;
-  /** \brief Extra data stored in each simplex. */
+  /** \brief Extra data stored in each simplex.
+   *
+   * When extra data type is defined by the user, the extra data gets a
+   * <a target="_blank" href="https://en.cppreference.com/w/cpp/language/default_initialization">default-initialization
+   * </a>, which may mean an indeterminate value. */
   typedef typename Get_simplex_data_type<Options>::type Simplex_data;
   /** \brief Type for the vertex handle.
    *
