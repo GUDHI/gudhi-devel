@@ -46,9 +46,9 @@ struct Dummy_chain_properties
  *
  * The columns of a @ref chainmatrix "chain matrix" are partitioned in three sets: \f$ F \f$, \f$ G \f$ and \f$ H \f$
  * with a bijection between \f$ G \f$ and \f$ H \f$. If a column is in \f$ F \f$, the value of
- * `Chain_column_extra_properties::pairedColumn_` is `-1`, while the value corresponds to the @ref MatIdx index of
- * the image of the bijection if the column is in either \f$ G \f$ or \f$ H \f$. See @cite zigzag for
- * more details.
+ * `Chain_column_extra_properties::pairedColumn_` is @ref Matrix::get_null_value "null index", while the value
+ * corresponds to the @ref MatIdx index of the image of the bijection if the column is in either \f$ G \f$ or \f$ H \f$.
+ * See @cite zigzag for more details.
  * 
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
@@ -60,16 +60,21 @@ class Chain_column_extra_properties
   using ID_index = typename Master_matrix::ID_index;  /**< @ref IDIdx index type. */
 
   /**
-   * @brief Default constructor. Sets the pivot and pair to -1, which means "not existing".
+   * @brief Default constructor. Sets the pivot and pair to @ref Matrix::get_null_value "null index", which means
+   * "not existing".
    */
-  Chain_column_extra_properties() : pivot_(-1), pairedColumn_(-1) {}
+  Chain_column_extra_properties()
+      : pivot_(Master_matrix::template get_null_value<ID_index>()),
+        pairedColumn_(Master_matrix::template get_null_value<Index>()) {}
   /**
-   * @brief Constructor setting the pivot at the given value and the pair to -1 (i.e. not paired).
+   * @brief Constructor setting the pivot at the given value and the pair to @ref Matrix::get_null_value "null index"
+   * (i.e. not paired).
    * 
    * @param pivot @ref rowindex "Row index" of the pivot. Corresponds to the @ref IDIdx index of the cell represented
    * by the column.
    */
-  Chain_column_extra_properties(ID_index pivot) : pivot_(pivot), pairedColumn_(-1) {}
+  Chain_column_extra_properties(ID_index pivot)
+      : pivot_(pivot), pairedColumn_(Master_matrix::template get_null_value<Index>()) {}
   /**
    * @brief Constructor setting the pivot and the pair at the given values.
    * 
@@ -91,12 +96,15 @@ class Chain_column_extra_properties
    * @param col Column to move.
    */
   Chain_column_extra_properties(Chain_column_extra_properties&& col)
-      : pivot_(std::exchange(col.pivot_, -1)), pairedColumn_(std::exchange(col.pairedColumn_, -1)) {}
+      : pivot_(std::exchange(col.pivot_, Master_matrix::template get_null_value<ID_index>())),
+        pairedColumn_(std::exchange(col.pairedColumn_, Master_matrix::template get_null_value<Index>())) {}
 
   /**
-   * @brief Returns -1 if the column is not paired, the @ref MatIdx of the pair otherwise.
+   * @brief Returns @ref Matrix::get_null_value "null index" if the column is not paired, the @ref MatIdx of the pair
+   * otherwise.
    * 
-   * @return -1 if the column is not paired, the @ref MatIdx of the pair otherwise.
+   * @return @ref Matrix::get_null_value "null index" if the column is not paired, the @ref MatIdx of the pair
+   * otherwise.
    */
   Index get_paired_chain_index() const { return pairedColumn_; }
   /**
@@ -105,7 +113,7 @@ class Chain_column_extra_properties
    * @return true If the column is paired.
    * @return false Otherwise.
    */
-  bool is_paired() const { return pairedColumn_ != static_cast<Index>(-1); }
+  bool is_paired() const { return pairedColumn_ != Master_matrix::template get_null_value<Index>(); }
   /**
    * @brief Sets the value of the pair.
    * 
@@ -115,7 +123,7 @@ class Chain_column_extra_properties
   /**
    * @brief Un-pairs a column.
    */
-  void unassign_paired_chain() { pairedColumn_ = -1; };
+  void unassign_paired_chain() { pairedColumn_ = Master_matrix::template get_null_value<Index>(); };
 
   /**
    * @brief Assign operator.
@@ -140,8 +148,9 @@ class Chain_column_extra_properties
  private:
   ID_index pivot_;      /**< @ref IDIdx index associated to the chain */
   Index pairedColumn_;  /**< Represents the (F, G x H) partition of the columns.
-                             -1 if in F, @ref MatIdx of image of bijection otherwise. 
-                             The pivot of a column in G will always be smaller than the pivot of its image in H. */
+                             @ref Matrix::get_null_value "null index" if in F, @ref MatIdx of image of bijection
+                             otherwise. The pivot of a column in G will always be smaller than the pivot of its
+                             image in H. */
 };
 
 }  // namespace persistence_matrix

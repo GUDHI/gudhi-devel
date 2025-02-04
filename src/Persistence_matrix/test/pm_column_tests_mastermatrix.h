@@ -57,6 +57,11 @@ struct Column_mini_matrix {
   using Characteristic =
       typename std::conditional<Options::is_z2, unsigned int, typename Field_operators::Characteristic>::type;
 
+  template <typename T>
+  static constexpr const T get_null_value() {
+    return -1;
+  }
+
   struct Matrix_row_tag;
   struct Matrix_column_tag;
 
