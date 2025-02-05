@@ -44,7 +44,6 @@ namespace persistence_matrix {
  * On the other hand, two entries will never have the same row index.
  *
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
- * @tparam Entry_constructor Factory of @ref Entry classes.
  */
 template <class Master_matrix>
 class Vector_column : public Master_matrix::Row_access_option,
