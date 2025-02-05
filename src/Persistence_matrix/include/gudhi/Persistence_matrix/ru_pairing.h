@@ -111,7 +111,7 @@ class RU_pairing : public std::conditional<
   }
 
   void _add_bar(Dimension dim, Pos_index birth) {
-    barcode_.emplace_back(birth, -1, dim);
+    barcode_.emplace_back(birth, Master_matrix::template get_null_value<Pos_index>(), dim);
     if constexpr (Master_matrix::hasFixedBarcode || !Master_matrix::Option_list::has_removable_columns) {
       indexToBar_.push_back(barcode_.size() - 1);
     } else {
@@ -121,23 +121,24 @@ class RU_pairing : public std::conditional<
 
   void _remove_last(Pos_index eventIndex) {
     static_assert(Master_matrix::Option_list::has_removable_columns, "_remove_last not available.");
+    constexpr const Pos_index nullDeath = Master_matrix::template get_null_value<Pos_index>();
 
     if constexpr (Master_matrix::hasFixedBarcode) {
       auto& bar = barcode_[indexToBar_[eventIndex]];
-      if (bar.death == static_cast<Pos_index>(-1)) {  // birth
+      if (bar.death == nullDeath) {  // birth
         barcode_.pop_back();  // sorted by birth and eventIndex has to be the highest one
       } else {                // death
-        bar.death = -1;
+        bar.death = nullDeath;
       };
       indexToBar_.pop_back();
     } else {  // birth order eventually shuffled by vine updates. No sort possible to keep the matchings.
       auto it = indexToBar_.find(eventIndex);
       typename Barcode::iterator bar = it->second;
 
-      if (bar->death == static_cast<Pos_index>(-1))
+      if (bar->death == nullDeath)
         barcode_.erase(bar);
       else
-        bar->death = -1;
+        bar->death = nullDeath;
 
       indexToBar_.erase(it);
     }

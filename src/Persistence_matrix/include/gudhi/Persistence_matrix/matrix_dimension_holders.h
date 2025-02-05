@@ -41,6 +41,8 @@ struct Dummy_matrix_dimension_holder
                    [[maybe_unused]] Dummy_matrix_dimension_holder& d2) {}
 };
 
+// TODO: find an easy way to give access to get_null_value<Dimension>() to replace the -1s
+
 /**
  * @ingroup persistence_matrix
  *

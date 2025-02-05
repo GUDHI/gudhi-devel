@@ -242,18 +242,19 @@ class PersistenceMatrixColumn :
 
   /**
    * @brief Reorders the column with the given map of row indices. Also changes the column index stored in the
-   * entries if row access is enabled and @p columnIndex is not -1.
+   * entries if row access is enabled and @p columnIndex is not the @ref Matrix::get_null_value "null index".
    *
    * Only useful for @ref basematrix "base" and @ref boundarymatrix "boundary matrices" using lazy swaps.
    * 
    * @tparam Row_index_map Map with an %at() method.
    * @param valueMap Map such that `valueMap.at(i)` indicates the new row index of the entry
    * at current row index `i`.
-   * @param columnIndex New @ref MatIdx column index of the column. If -1, the index does not change. Ignored if
-   * the row access is not enabled. Default value: -1.
+   * @param columnIndex New @ref MatIdx column index of the column. If @ref Matrix::get_null_value "null index",
+   * the index does not change. Ignored if the row access is not enabled.
+   * Default value: @ref Matrix::get_null_value "null index".
    */
   template <class Row_index_map>
-  void reorder(const Row_index_map& valueMap, [[maybe_unused]] Index columnIndex = -1);
+  void reorder(const Row_index_map& valueMap, [[maybe_unused]] Index columnIndex = Matrix::get_null_value<Index>());
   /**
    * @brief Zeros/empties the column.
    * 
@@ -275,11 +276,12 @@ class PersistenceMatrixColumn :
   void clear(ID_index rowIndex);
 
   /**
-   * @brief Returns the row index of the pivot. If the column does not have a pivot, returns -1.
+   * @brief Returns the row index of the pivot. If the column does not have a pivot,
+   * returns @ref Matrix::get_null_value "null index".
    *
    * Only useful for @ref boundarymatrix "boundary" and @ref chainmatrix "chain matrices".
    * 
-   * @return Row index of the pivot or -1.
+   * @return Row index of the pivot or @ref Matrix::get_null_value "null index".
    */
   ID_index get_pivot();
   /**
@@ -429,7 +431,7 @@ class PersistenceMatrixColumn :
   /**
    * @brief Adds a copy of the given entry at the end of the column. It is therefore assumed that the row index
    * of the entry is higher than the current pivot of the column. Not available for @ref chainmatrix "chain matrices"
-   * and is only needed for @ref rumatrix "RU matrices".
+   * and is only needed for @ref boundarymatrix "RU matrices".
    * 
    * @param entry Entry to push back.
    */
