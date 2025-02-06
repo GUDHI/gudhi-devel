@@ -321,7 +321,8 @@ class Matrix {
   using Matrix_heap_column = Heap_column<Matrix<PersistenceMatrixOptions> >;
   using Matrix_list_column = List_column<Matrix<PersistenceMatrixOptions> >;
   using Matrix_vector_column = Vector_column<Matrix<PersistenceMatrixOptions> >;
-  using Matrix_naive_vector_column = Naive_vector_column<Matrix<PersistenceMatrixOptions> >;
+  using Matrix_naive_vector_column = Naive_std_vector_column<Matrix<PersistenceMatrixOptions> >;
+  using Matrix_small_vector_column = Naive_small_vector_column<Matrix<PersistenceMatrixOptions> >;
   using Matrix_set_column = Set_column<Matrix<PersistenceMatrixOptions> >;
   using Matrix_unordered_set_column = Unordered_set_column<Matrix<PersistenceMatrixOptions> >;
   using Matrix_intrusive_list_column = Intrusive_list_column<Matrix<PersistenceMatrixOptions> >;
@@ -353,7 +354,11 @@ class Matrix {
                             typename std::conditional<
                                 PersistenceMatrixOptions::column_type == Column_types::NAIVE_VECTOR,
                                 Matrix_naive_vector_column, 
-                                Matrix_intrusive_set_column
+                                typename std::conditional<
+                                    PersistenceMatrixOptions::column_type == Column_types::SMALL_VECTOR,
+                                    Matrix_small_vector_column, 
+                                    Matrix_intrusive_set_column
+                                    >::type
                                 >::type
                             >::type
                         >::type
