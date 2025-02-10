@@ -45,13 +45,18 @@ jobs:
           ls ".\dist\"
           cd ".\dist\"
           Get-ChildItem *.whl | ForEach-Object{python -m pip install --user $_.Name}
+      - name: Upload Windows python wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows python wheel
+          path: build/src/python/dist/*.whl
       # Test ABI compatibility with numpy 1.X
       - name: Test python wheel
         run: |
           $ErrorActionPreference = 'Stop'
           Get-Location
           dir
-          python -m pip install --user numpy~=${{ matrix.numpy-version }}
+          python -m pip install --user "numpy<2"
           python -m pip install --user pytest
           python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest -v ".\src\python\test\test_alpha_complex.py"
@@ -59,8 +64,3 @@ jobs:
           python -m pytest -v ".\src\python\test\test_bottleneck_distance.py"
           python -m pytest -v ".\src\python\test\test_cubical_complex.py"
           python -m pytest -v ".\src\python\test\test_rips_complex.py"
-      - name: Upload Windows python wheel
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows python wheel
-          path: build/src/python/dist/*.whl
