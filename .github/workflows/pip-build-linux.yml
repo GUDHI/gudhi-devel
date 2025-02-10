@@ -12,27 +12,27 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Build wheel for Python 3.9
+      - name: Build wheel for Python 3.13
         run: |
-          mkdir build_39
-          cd build_39
-          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON39/bin/python ..
+          mkdir build_313
+          cd build_313
+          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON313/bin/python ..
           cd src/python
-          $PYTHON39/bin/python -m build -n -w
+          $PYTHON313/bin/python -m build -n -w
           auditwheel repair dist/*.whl
       # NumPy 2.X is installed and guarantees ABI compatibility, test it with the minimal numpy version for python version
-      - name: Install and test wheel for Python 3.9
+      - name: Install and test wheel for Python 3.13
         run: |
-          $PYTHON39/bin/python -m pip install --user pytest build_39/src/python/dist/*.whl
-          $PYTHON39/bin/python -m pip install numpy~=1.19.3
-          $PYTHON39/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_alpha_complex.py
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_cubical_complex.py
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_rips_complex.py
+          $PYTHON313/bin/python -m pip install --user pytest build_313/src/python/dist/*.whl
+          $PYTHON313/bin/python -m pip install numpy~=1.26.0
+          $PYTHON313/bin/python -c "import gudhi; print(gudhi.__version__)"
+          $PYTHON313/bin/python -m pytest -v src/python/test/test_alpha_complex.py
+          $PYTHON313/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
+          $PYTHON313/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
+          $PYTHON313/bin/python -m pytest -v src/python/test/test_cubical_complex.py
+          $PYTHON313/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Upload linux python wheel
         uses: actions/upload-artifact@v4
         with:
           name: linux python wheel
-          path: build_39/src/python/wheelhouse/*.whl
+          path: build_313/src/python/wheelhouse/*.whl
