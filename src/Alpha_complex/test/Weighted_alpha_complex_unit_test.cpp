@@ -125,3 +125,47 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
     ++dD_itr;
   }
 }
+
+BOOST_AUTO_TEST_CASE(Is_weighted_alpha_complex_nan) {
+  using Kernel = CGAL::Epeck_d< CGAL::Dimension_tag<3> >;
+  using Bare_point = Kernel::Point_d;
+  using Weighted_point = Kernel::Weighted_point_d;
+  using Vector_of_points = std::vector<Weighted_point>;
+
+  Vector_of_points points;
+  points.emplace_back(Bare_point(1, -1, -1), 4.);
+  points.emplace_back(Bare_point(-1, 1, -1), 4.);
+  points.emplace_back(Bare_point(-1, -1, 1), 4.);
+  points.emplace_back(Bare_point(1, 1, 1),   4.);
+  points.emplace_back(Bare_point(2, 2, 2),   1.);
+
+  Gudhi::alpha_complex::Alpha_complex<Kernel, true> alpha_complex_from_weighted_points(points);
+
+  std::clog << "Weighted alpha complex\n";
+  Gudhi::Simplex_tree<> stree;
+  if (alpha_complex_from_weighted_points.create_complex(stree)) {
+    for (auto f_simplex : stree.filtration_simplex_range()) {
+      std::clog << "   ( ";
+      for (auto vertex : stree.simplex_vertex_range(f_simplex)) {
+        std::clog << vertex << " ";
+      }
+      std::clog << ") -> " << "[" << stree.filtration(f_simplex) << "]\n";
+
+      BOOST_CHECK(!std::isnan(stree.filtration(f_simplex)));
+    }
+  }
+  std::clog << "Weighted alpha complex with output_squared_values\n";
+  Gudhi::Simplex_tree<> stree_sqrt;
+  // set output_squared_values to false means that negative squared values will be NaN
+  if (alpha_complex_from_weighted_points.create_complex<false>(stree_sqrt)) {
+    for (auto f_simplex : stree_sqrt.filtration_simplex_range()) {
+        std::clog << "   ( ";
+        for (auto vertex : stree_sqrt.simplex_vertex_range(f_simplex)) {
+          std::clog << vertex << " ";
+        }
+        std::clog << ") -> " << "[" << stree_sqrt.filtration(f_simplex) << "]\n";
+
+        BOOST_CHECK(std::isnan(stree_sqrt.filtration(f_simplex)));
+    }
+  }
+}

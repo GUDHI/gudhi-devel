@@ -62,7 +62,7 @@ Beware: this program may use a lot of RAM and take a lot of time if `max-radius`
 
 ## dealaunay_cech_persistence ##
 
-This program Computes the persistent homology with coefficient field *Z/pZ* 
+This program Computes the persistent homology with coefficient field *Z/pZ*
 of a Delaunay-Čech complex defined on a set of input points.
 
 Different versions of Delaunay-Čech complex computation are available:
@@ -70,7 +70,13 @@ Different versions of Delaunay-Čech complex computation are available:
  * safe (default): values can have a relative error at most 1e-5
  * exact: true values rounded to double.
 
-The output diagram contains one bar per line, written with the
+
+Default Delaunay-Čech complex filtrations computation are squared radius of the MEB.
+If you are interested in radius of the MEB as filtration values, pass the '--square-root-filtrations'
+(or '-s') option.
+
+
+ The output diagram contains one bar per line, written with the
 convention:
 
 `p dim birth death`

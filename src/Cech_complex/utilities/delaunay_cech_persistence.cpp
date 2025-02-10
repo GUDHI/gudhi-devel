@@ -5,6 +5,7 @@
  *    Copyright (C) 2024 Inria
  *
  *    Modification(s):
+ *      - 2024/10 Vincent Rouvreau: Add output_squared_root_values argument to enable/disable squared radii computation
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -31,14 +32,17 @@ using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 
 void program_options(int argc, char* argv[], std::string& off_file_points, bool& exact, bool& fast,
-                     std::string& pers_diag_file, Filtration_value& max_radius, int& p,
+                     bool& output_squared_root_values, std::string& pers_diag_file, Filtration_value& max_radius, int& p,
                      Filtration_value& min_persistence);
 
 template<class Kernel>
-Simplex_tree create_simplex_tree(const std::string &off_file_points, bool exact_version, Filtration_value max_radius) {
+Simplex_tree create_simplex_tree(const std::string &off_file_points, bool exact_version, Filtration_value max_radius,
+                                 bool output_squared_root_values) {
   using Point = typename Kernel::Point_d;
   using Points_off_reader = Gudhi::Points_off_reader<Point>;
   using Delaunay_complex = Gudhi::alpha_complex::Alpha_complex<Kernel>;
+
+  using std::sqrt;
 
   Simplex_tree stree;
 
@@ -48,7 +52,12 @@ Simplex_tree create_simplex_tree(const std::string &off_file_points, bool exact_
   delaunay_complex_from_file.create_complex(stree, std::numeric_limits< Filtration_value >::infinity(),
                                             // exact can be false (or true), as default_filtration_value is set to true
                                             false, true);
-  Gudhi::cech_complex::assign_MEB_filtration(Kernel(), stree, point_cloud, exact_version);
+  if (output_squared_root_values) {
+    Gudhi::cech_complex::assign_MEB_filtration<false>(Kernel(), stree, point_cloud, exact_version);
+    max_radius = sqrt(max_radius);
+  } else {
+    Gudhi::cech_complex::assign_MEB_filtration<true>(Kernel(), stree, point_cloud, exact_version);
+  }
   stree.prune_above_filtration(max_radius);
   return stree;
 }
@@ -58,12 +67,13 @@ int main(int argc, char* argv[]) {
   std::string pers_diag_file;
   bool exact_version = false;
   bool fast_version = false;
+  bool output_squared_root_values = false;
   Filtration_value max_radius;
   int p;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, off_file_points, exact_version, fast_version, pers_diag_file, max_radius, p,
-                  min_persistence);
+  program_options(argc, argv, off_file_points, exact_version, fast_version, output_squared_root_values, pers_diag_file,
+                  max_radius, p, min_persistence);
 
   if ((exact_version) && (fast_version)) {
     std::cerr << "You cannot set the exact and the fast version." << std::endl;
@@ -75,11 +85,11 @@ int main(int argc, char* argv[]) {
     // WARNING : CGAL::Epick_d is fast but not safe (unlike CGAL::Epeck_d)
     // (i.e. when the points are on a grid)
     using Fast_kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
-    stree = create_simplex_tree<Fast_kernel>(off_file_points, exact_version, max_radius);
+    stree = create_simplex_tree<Fast_kernel>(off_file_points, exact_version, max_radius, output_squared_root_values);
   } else {
     std::clog << "exact_version = " << exact_version << "\n";
     using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
-    stree = create_simplex_tree<Kernel>(off_file_points, exact_version, max_radius);
+    stree = create_simplex_tree<Kernel>(off_file_points, exact_version, max_radius, output_squared_root_values);
   }
 
   std::clog << "The complex contains " << stree.num_simplices() << " simplices \n";
@@ -108,7 +118,7 @@ int main(int argc, char* argv[]) {
 }
 
 void program_options(int argc, char* argv[], std::string& off_file_points, bool& exact, bool& fast,
-                     std::string& pers_diag_file, Filtration_value& max_radius, int& p,
+                     bool& output_squared_root_values, std::string& pers_diag_file, Filtration_value& max_radius, int& p,
                      Filtration_value& min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
@@ -121,6 +131,8 @@ void program_options(int argc, char* argv[], std::string& off_file_points, bool&
       "To activate exact version of Delaunay-Cech complex (default is false, not available if fast is set)")(
       "fast,f", po::bool_switch(&fast),
       "To activate fast version of Delaunay-Cech complex (default is false, not available if exact is set)")(
+      "square-root-filtrations,s", po::bool_switch(&output_squared_root_values),
+      "To activate square root filtration computations (default is false)")(
       "output-file,o", po::value<std::string>(&pers_diag_file)->default_value(std::string()),
       "Name of file in which the persistence diagram is written. Default print in standard output")(
       "max-radius,r",
@@ -150,6 +162,9 @@ void program_options(int argc, char* argv[], std::string& off_file_points, bool&
     std::clog << " * fast: right combinatorics, values can be arbitrarily bad\n";
     std::clog << " * safe (default): values can have a relative error at most 1e-5\n";
     std::clog << " * exact: true values rounded to double.\n \n";
+    std::clog << "Default Delaunay-Cech complex filtrations computation are squared radius of the MEB.\n";
+    std::clog << "If you are interested in radius of the MEB as filtration values, pass the ";
+    std::clog << "'--square-root-filtrations' (or '-s') option.\n \n";
     std::clog << "The output diagram contains one bar per line, written with the convention: \n";
     std::clog << "   p   dim b d \n";
     std::clog << "where dim is the dimension of the homological feature,\n";

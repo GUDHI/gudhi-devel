@@ -14,13 +14,19 @@ Leave the lines above as it is required by the web site generator 'Jekyll'
 
 This program computes the persistent homology with coefficient field *Z/pZ* of
 the dD alpha complex built from a dD point cloud.
- 
+
 Different versions of Alpha complex computation are available:
  * fast: right combinatorics, values can be arbitrarily bad
  * safe (default): values can have a relative error at most 1e-5
  * exact: true values rounded to double.
- 
+
+Default Alpha complex filtrations computation are square of the circumradius of the simplex.
+If you are interested in the circumradius of the simplex as filtration values, pass the
+'--square-root-filtrations' (or '-s') option.
+
 Alpha complex can be, or not, weighted (requires a file containing weights values).
+Weighted Alpha complex can have negative filtration values. If '--square-root-filtrations' is
+set, filtration values will be Nan in this case.
 
 The output diagram contains one bar per line, written with the convention:
 
@@ -58,11 +64,12 @@ to be recorded. Enter a negative value to see zero length intervals.
 points (one value per line). Default version is not weighted.
 * `-e [ --exact ]` for the exact computation version.
 * `-f [ --fast ]` for the fast computation version.
+* `-s [ --square-root-filtrations ]` for the square root filtration computations
 
 **Example**
 
 ```
-   alpha_complex_persistence -r 32 -p 2 -m 0.45 ../../data/points/tore3D_300.off
+   alpha_complex_persistence -p 2 -m 0.45 ../../data/points/tore3D_300.off
 ```
 
 N.B.:
@@ -72,7 +79,9 @@ N.B.:
 [dD Triangulations](https://doc.cgal.org/latest/Triangulation/index.html)
 and
 [Regular triangulation](https://doc.cgal.org/latest/Triangulation/index.html#TriangulationSecRT) documentation.
-
+In this case, the filtration value of each simplex is computed as the power distance of the smallest power sphere
+passing through all of its vertices. Weighted Alpha complex can have negative filtration values.
+If `--square-root-filtrations` is set, filtration values will be `NaN` in this case.
 
 ## alpha_complex_3d_persistence ##
 This program computes the persistent homology with coefficient field *Z/pZ* of
@@ -82,7 +91,7 @@ Different versions of 3D Alpha complex computation are available:
  * fast: right combinatorics, values can be arbitrarily bad
  * safe (default): values can have a relative error at most 1e-5
  * exact: true values rounded to double.
- 
+
 3D Alpha complex can be, or not, weighted (requires a file containing weights values)
 and/or periodic (requires a file describing the periodic domain).
 
