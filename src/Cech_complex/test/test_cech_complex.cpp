@@ -294,7 +294,7 @@ BOOST_AUTO_TEST_CASE(Cech_create_complex_throw) {
   std::vector<int> simplex = {0, 1, 2};
   stree.insert_simplex_and_subfaces(simplex);
   std::clog << "Check exception throw in debug mode" << std::endl;
-  // throw excpt because stree is not empty
+  // throw exception because stree is not empty
   BOOST_CHECK_THROW(cech_complex_from_file.create_complex(stree, 1), std::invalid_argument);
 }
 #endif

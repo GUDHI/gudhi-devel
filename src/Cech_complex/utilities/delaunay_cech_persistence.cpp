@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
 
   pcoh.compute_persistent_cohomology(min_persistence);
 
-  // Output the persitence diagram in pers_diag_file
+  // Output the persistence diagram in pers_diag_file
   if (pers_diag_file.empty()) {
     pcoh.output_diagram();
   } else {
