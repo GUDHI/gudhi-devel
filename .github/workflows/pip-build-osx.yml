@@ -14,10 +14,10 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.9']
+        python-version: ["3.9"]
         include:
-          - python-version: '3.9'
-            numpy-version: '1.21.4'
+          - python-version: "3.9"
+            numpy-version: "1.21.4"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
@@ -51,6 +51,11 @@ jobs:
           python -m build -n -w
           export PATH="$PATH:`python -m site --user-base`/bin"
           delocate-wheel --require-archs universal2 -v dist/*.whl
+      - name: Upload OSx python wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: osx python wheel
+          path: build/src/python/dist/*.whl
       # Test ABI compatibility with numpy 1.X
       - name: Install and test python wheel
         run: |
@@ -62,8 +67,3 @@ jobs:
           python -m pytest -v src/python/test/test_bottleneck_distance.py
           python -m pytest -v src/python/test/test_cubical_complex.py
           python -m pytest -v src/python/test/test_rips_complex.py
-      - name: Upload OSx python wheel
-        uses: actions/upload-artifact@v4
-        with:
-          name: osx python wheel
-          path: build/src/python/dist/*.whl
