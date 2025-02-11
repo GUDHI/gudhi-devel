@@ -11,8 +11,8 @@
 /**
  * @file boundary_cell_position_to_id_mapper.h
  * @author Hannah Schreiber
- * @brief Contains the @ref Gudhi::persistence_matrix::Cell_position_to_ID_mapper class and
- * @ref Gudhi::persistence_matrix::Dummy_pos_mapper structure.
+ * @brief Contains the Gudhi::persistence_matrix::Cell_position_to_ID_mapper class and
+ * Gudhi::persistence_matrix::Dummy_pos_mapper structure.
  */
 
 #ifndef PM_ID_POS_MAPPER_H

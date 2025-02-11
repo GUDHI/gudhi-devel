@@ -12,6 +12,7 @@
  *      - 2023/08 Hannah Schreiber (& Clément Maria): Add possibility of stable simplex handles.
  *      - 2024/08 Hannah Schreiber: Generalization of the notion of filtration values.
  *      - 2024/08 Hannah Schreiber: Addition of customizable copy constructor.
+ *      - 2024/08 Marc Glisse: Allow storing custom data in simplices.
  *      - 2024/10 Hannah Schreiber: Const version of the Simplex_tree
  *      - YYYY/MM Author: Description of the modification
  */
@@ -107,7 +108,11 @@ class Simplex_tree {
    *
    * Must be an integer type. */
   typedef typename Options::Simplex_key Simplex_key;
-  /** \brief Extra data stored in each simplex. */
+  /** \brief Extra data stored in each simplex.
+   *
+   * When extra data type is defined by the user, the extra data gets a
+   * <a target="_blank" href="https://en.cppreference.com/w/cpp/language/default_initialization">default-initialization
+   * </a> behaviour, which may mean an indeterminate value. */
   typedef typename Get_simplex_data_type<Options>::type Simplex_data;
   /** \brief Type for the vertex handle.
    *
@@ -452,7 +457,9 @@ class Simplex_tree {
     copy_from(complex_source, translate_filtration_value);
   }
 
-  /** \brief User-defined copy constructor reproduces the whole tree structure. */
+  /** \brief User-defined copy constructor reproduces the whole tree structure including extra data (@ref Simplex_data)
+   * stored in the simplices.
+   */
   Simplex_tree(const Simplex_tree& complex_source) {
 #ifdef DEBUG_TRACES
     std::clog << "Simplex_tree copy constructor" << std::endl;
@@ -460,7 +467,8 @@ class Simplex_tree {
     copy_from(complex_source);
   }
 
-  /** \brief User-defined move constructor relocates the whole tree structure.
+  /** \brief User-defined move constructor relocates the whole tree structure including extra data (@ref Simplex_data)
+   * stored in the simplices.
    *  \exception std::invalid_argument In debug mode, if the complex_source is invalid.
    */
   Simplex_tree(Simplex_tree && complex_source) {
@@ -479,7 +487,9 @@ class Simplex_tree {
     root_members_recursive_deletion();
   }
 
-  /** \brief User-defined copy assignment reproduces the whole tree structure. */
+  /** \brief User-defined copy assignment reproduces the whole tree structure including extra data (@ref Simplex_data)
+   * stored in the simplices.
+   */
   Simplex_tree& operator= (const Simplex_tree& complex_source) {
 #ifdef DEBUG_TRACES
     std::clog << "Simplex_tree copy assignment" << std::endl;
@@ -494,7 +504,8 @@ class Simplex_tree {
     return *this;
   }
 
-  /** \brief User-defined move assignment relocates the whole tree structure.
+  /** \brief User-defined move assignment relocates the whole tree structure including extra data (@ref Simplex_data)
+   * stored in the simplices.
    *  \exception std::invalid_argument In debug mode, if the complex_source is invalid.
    */
   Simplex_tree& operator=(Simplex_tree&& complex_source) {
@@ -527,7 +538,21 @@ class Simplex_tree {
     for (auto& map_el : root_.members()) {
       map_el.second.assign_children(&root_);
     }
-    rec_copy<Options::store_key>(
+    // Specific for optional data
+    if constexpr (!std::is_same_v<Simplex_data, No_simplex_data>) {
+      auto dst_iter = root_.members().begin();
+      auto src_iter = root_source.members().begin();
+
+      while(dst_iter != root_.members().end() || src_iter != root_source.members().end()) {
+        dst_iter->second.data() = src_iter->second.data();
+        dst_iter++;
+        src_iter++;
+      }
+      // Check in debug mode members data were copied
+      assert(dst_iter == root_.members().end());
+      assert(src_iter == root_source.members().end());
+    }
+    rec_copy<Options::store_key, true>(
         &root_, &root_source, [](const Filtration_value& fil) -> const Filtration_value& { return fil; });
   }
 
@@ -551,11 +576,11 @@ class Simplex_tree {
       }
     }
 
-    rec_copy<OtherSimplexTreeOptions::store_key>(&root_, &root_source, translate_filtration_value);
+    rec_copy<OtherSimplexTreeOptions::store_key, false>(&root_, &root_source, translate_filtration_value);
   }
 
   /** \brief depth first search, inserts simplices when reaching a leaf. */
-  template<bool store_key, typename OtherSiblings, typename F>
+  template<bool store_key, bool copy_simplex_data, typename OtherSiblings, typename F>
   void rec_copy(Siblings *sib, OtherSiblings *sib_source, F&& translate_filtration_value) {
     auto sh_source = sib_source->members().begin();
     for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh, ++sh_source) {
@@ -566,18 +591,23 @@ class Simplex_tree {
           newsib->members_.reserve(sh_source->second.children()->members().size());
         }
         for (auto & child : sh_source->second.children()->members()){
+          Dictionary_it new_it{};
           if constexpr (store_key && Options::store_key) {
-            newsib->members_.emplace_hint(
+            new_it = newsib->members_.emplace_hint(
                 newsib->members_.end(),
                 child.first,
                 Node(newsib, translate_filtration_value(child.second.filtration()), child.second.key()));
           } else {
-            newsib->members_.emplace_hint(newsib->members_.end(),
+            new_it = newsib->members_.emplace_hint(newsib->members_.end(),
                                           child.first,
                                           Node(newsib, translate_filtration_value(child.second.filtration())));
           }
+          // Specific for optional data
+          if constexpr (copy_simplex_data && !std::is_same_v<Simplex_data, No_simplex_data>) {
+            new_it->second.data() = child.second.data();
+          }
         }
-        rec_copy<store_key>(newsib, sh_source->second.children(), translate_filtration_value);
+        rec_copy<store_key, copy_simplex_data>(newsib, sh_source->second.children(), translate_filtration_value);
         sh->second.assign_children(newsib);
       }
     }
@@ -630,7 +660,9 @@ class Simplex_tree {
  public:
   template<typename> friend class Simplex_tree;
 
-  /** \brief Checks if two simplex trees are equal. */
+  /** \brief Checks if two simplex trees are equal. Any extra data (@ref Simplex_data) stored in the simplices are
+   * ignored in the comparison.
+   */
   template<class OtherSimplexTreeOptions>
   bool operator==(const Simplex_tree<OtherSimplexTreeOptions>& st2) const {
     if ((null_vertex_ != st2.null_vertex_) ||
@@ -2658,6 +2690,8 @@ class Simplex_tree {
    *
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
    * SimplexTreeOptions and on a computer with the same architecture.
+   *
+   * Serialize/Deserialize ignores any extra data (@ref Simplex_data) stored in the simplices for now.
    */
   /* Let's take the following simplicial complex as example:         */
   /* (vertices are represented as letters to ease the understanding) */
@@ -2726,6 +2760,7 @@ class Simplex_tree {
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
    * SimplexTreeOptions and on a computer with the same architecture.
    *
+   * Serialize/Deserialize ignores any extra data (@ref Simplex_data) stored in the simplices for now.
    */
   void deserialize(const char* buffer, const std::size_t buffer_size) {
     deserialize(buffer, buffer_size, [](Filtration_value& filtration, const char* ptr) {
