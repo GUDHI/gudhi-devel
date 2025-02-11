@@ -60,7 +60,7 @@ Beware: this program may use a lot of RAM and take a lot of time if `max-radius`
 `cech_persistence ../../data/points/tore3D_1307.off -r 0.25 -m 0.5 -d 3 -p 3`
 
 
-## dealaunay_cech_persistence ##
+## delaunay_cech_persistence ##
 
 This program Computes the persistent homology with coefficient field *Z/pZ*
 of a Delaunay-Čech complex defined on a set of input points.
@@ -103,6 +103,7 @@ where
 * `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals
 * `-e [ --exact ]` for the exact computation version.
 * `-f [ --fast ]` for the fast computation version.
+* `-s [ --square-root-filtrations ]` for the square root filtration computations
 
 **Example 1 with Z/2Z coefficients**
 
