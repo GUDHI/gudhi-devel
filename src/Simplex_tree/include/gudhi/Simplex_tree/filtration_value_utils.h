@@ -40,7 +40,7 @@ inline struct empty_filtration_value_t {
  * NaN values are not supported.
  */
 template <typename Arithmetic_filtration_value>
-bool unify_lifetimes(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
+bool unify_lifetimes(Arithmetic_filtration_value& f1, const Arithmetic_filtration_value& f2)
 {
   if (f2 < f1){
     f1 = f2;
@@ -57,7 +57,7 @@ bool unify_lifetimes(Arithmetic_filtration_value& f1, Arithmetic_filtration_valu
  * Because the filtration values are totally ordered then, the upper bound is always the maximum of the two values.
  */
 template <typename Arithmetic_filtration_value>
-bool intersect_lifetimes(Arithmetic_filtration_value& f1, Arithmetic_filtration_value f2)
+bool intersect_lifetimes(Arithmetic_filtration_value& f1, const Arithmetic_filtration_value& f2)
 {
   if constexpr (std::numeric_limits<Arithmetic_filtration_value>::has_quiet_NaN) {
     if (std::isnan(f1)) {
@@ -81,10 +81,13 @@ bool intersect_lifetimes(Arithmetic_filtration_value& f1, Arithmetic_filtration_
 }
 
 /**
+ * @private
  * @ingroup simplex_tree
  * @brief Serialize the given value and insert it at start position using
  * @ref Gudhi::simplex_tree::serialize_trivial "".
  * 
+ * @tparam Trivial_filtration_value Type which can trivially be serialized with byte to byte copy of the content
+ * of the holding variable. E.g., native arithmetic types.
  * @param[in] value The value to serialize.
  * @param[in] start Start position where the value is serialized.
  * @return The new position in the array of char for the next serialization.
@@ -97,10 +100,13 @@ char* serialize_value_to_char_buffer(Trivial_filtration_value value, char* start
 }
 
 /**
+ * @private
  * @ingroup simplex_tree
  * @brief Deserialize at the start position in an array of char and sets the value with it using
  * @ref Gudhi::simplex_tree::deserialize_trivial "".
  * 
+ * @tparam Trivial_filtration_value Type which can trivially be serialized with byte to byte copy of the content
+ * of the holding variable. E.g., native arithmetic types.
  * @param[in] value The value where to deserialize based on its type.
  * @param[in] start Start position where the value is serialized.
  * @return The new position in the array of char for the next deserialization.
@@ -108,8 +114,21 @@ char* serialize_value_to_char_buffer(Trivial_filtration_value value, char* start
  * @warning It is the user's responsibility to ensure that the pointer will not go out of bounds.
  */
 template <typename Trivial_filtration_value>
-const char* deserialize_value_to_char_buffer(Trivial_filtration_value& value, const char* start) {
+const char* deserialize_value_from_char_buffer(Trivial_filtration_value& value, const char* start) {
   return Gudhi::simplex_tree::deserialize_trivial(value, start);
+}
+
+/**
+ * @private
+ * @ingroup simplex_tree
+ * @brief Returns the size of the template type `Trivial_filtration_value`.
+ * 
+ * @tparam Trivial_filtration_value Type which can trivially be serialized with byte to byte copy of the content
+ * of the holding variable. E.g., native arithmetic types.
+ */
+template<typename Trivial_filtration_value>
+constexpr std::size_t get_serialization_size_of([[maybe_unused]] Trivial_filtration_value value) {
+  return sizeof(Trivial_filtration_value);
 }
 
 }  // namespace Gudhi

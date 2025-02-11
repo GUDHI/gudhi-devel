@@ -2764,21 +2764,22 @@ class Simplex_tree {
    */
   void deserialize(const char* buffer, const std::size_t buffer_size) {
     deserialize(buffer, buffer_size, [](Filtration_value& filtration, const char* ptr) {
-      return deserialize_value_to_char_buffer(filtration, ptr);
+      return deserialize_value_from_char_buffer(filtration, ptr);
     });
   }
 
   /** @private @brief Deserialize the array of char (flatten version of the tree) to initialize a Simplex tree.
    * It is the user's responsibility to provide an 'empty' Simplex_tree, there is no guarantee otherwise.
    * 
-   * @tparam F Method taking an @ref Filtration_value and a `const char*` as input and returning a
+   * @tparam F Method taking a reference to a @ref Filtration_value and a `const char*` as input and returning a
    * `const char*`.
    * @param[in] buffer A pointer on a buffer that contains a serialized Simplex_tree.
    * @param[in] buffer_size The size of the buffer.
-   * @param[in] deserialize_filtration_value To provide if the type of @ref Filtration_value is not trivially
-   * convertible from the filtration value type of the serialized simplex tree. Takes the filtration value to fill and
-   * a pointer to the current position in the buffer as arguments and returns the new position of the pointer after
-   * reading the filtration value and transforming it into a element of the host's filtration value type.
+   * @param[in] deserialize_filtration_value To provide if the type of @ref Filtration_value does not correspond to
+   * the filtration value type of the serialized simplex tree. The method should be able to read from a buffer
+   * (second argument) the serialized filtration value and turn it into an object of type @ref Filtration_value that is
+   * stored in the first argument of the method. It then returns the new position of the buffer pointer after the
+   * reading.
    * 
    * @exception std::invalid_argument In case the deserialization does not finish at the correct buffer_size.
    * @exception std::logic_error In debug mode, if the Simplex_tree is not 'empty'.
@@ -2793,7 +2794,7 @@ class Simplex_tree {
     const char* ptr = buffer;
     // Needs to read size before recursivity to manage new siblings for children
     Vertex_handle members_size;
-    ptr = deserialize_value_to_char_buffer(members_size, ptr);
+    ptr = deserialize_value_from_char_buffer(members_size, ptr);
     ptr = rec_deserialize(&root_, members_size, ptr, 0, deserialize_filtration_value);
     if (static_cast<std::size_t>(ptr - buffer) != buffer_size) {
       throw std::invalid_argument("Deserialization does not match end of buffer");
@@ -2815,9 +2816,9 @@ class Simplex_tree {
       Vertex_handle vertex;
       // Set explicitly to zero to avoid false positive error raising in debug mode when store_filtration == false
       // and to force array like Filtration_value value to be empty.
-      Filtration_value filtration = Gudhi::simplex_tree::empty_filtration_value;
+      Filtration_value filtration(Gudhi::simplex_tree::empty_filtration_value);
       for (Vertex_handle idx = 0; idx < members_size; idx++) {
-        ptr = deserialize_value_to_char_buffer(vertex, ptr);
+        ptr = deserialize_value_from_char_buffer(vertex, ptr);
         if constexpr (Options::store_filtration) {
           ptr = deserialize_filtration_value(filtration, ptr);
         }
@@ -2828,7 +2829,7 @@ class Simplex_tree {
       Vertex_handle child_size;
       for (auto sh = sib->members().begin(); sh != sib->members().end(); ++sh) {
         update_simplex_tree_after_node_insertion(sh);
-        ptr = deserialize_value_to_char_buffer(child_size, ptr);
+        ptr = deserialize_value_from_char_buffer(child_size, ptr);
         if (child_size > 0) {
           Siblings* child = new Siblings(sib, sh->first);
           sh->second.assign_children(child);

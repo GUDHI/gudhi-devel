@@ -93,13 +93,13 @@ struct FiltrationValue {
    * an array of char, which was previously serialized by @ref Gudhi::serialize_value_to_char_buffer "".
    * Then, sets the value with it.
    * Overloads for native arithmetic types or other simple types are already implemented with
-   * @ref Gudhi::deserialize_value_to_char_buffer "".
+   * @ref Gudhi::deserialize_value_from_char_buffer "".
    * 
    * @param value The value where to deserialize based on its type.
    * @param start Start position where the value is serialized.
    * @return The new position in the array of char for the next deserialization.
    */
-  friend const char* deserialize_value_to_char_buffer(FiltrationValue& value, const char* start);
+  friend const char* deserialize_value_from_char_buffer(FiltrationValue& value, const char* start);
 
   /**
    * @brief Only necessary when serializing the simplex tree. Returns the serialization size of the given object.

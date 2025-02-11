@@ -51,15 +51,6 @@ const char* deserialize_trivial(ArgumentType& value, const char* start) {
   return (start + arg_size);
 }
 
-/**
- * @ingroup simplex_tree
- * @brief Returns the size of the serialization of the given object.
- */
-template<class ArgumentType>
-constexpr std::size_t get_serialization_size_of([[maybe_unused]] ArgumentType value) {
-  return sizeof(ArgumentType);
-}
-
 }  // namespace simplex_tree
 
 }  // namespace Gudhi

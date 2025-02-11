@@ -79,7 +79,7 @@ class Vector_filtration_value : public std::vector<int>
     return start + arg_size + type_size;
   }
 
-  friend const char* deserialize_value_to_char_buffer(Vector_filtration_value& value, const char* start)
+  friend const char* deserialize_value_from_char_buffer(Vector_filtration_value& value, const char* start)
   {
     const std::size_t type_size = sizeof(Vector_filtration_value::size_type);
     Vector_filtration_value::size_type length;
