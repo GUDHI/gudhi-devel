@@ -11,7 +11,7 @@ jobs:
         python-version: ["3.13"]
         include:
           - python-version: "3.13"
-            numpy-version: "1.26.0"
+            numpy-version: "2.1.0"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
@@ -56,7 +56,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           Get-Location
           dir
-          python -m pip install --user "numpy<2"
+          python -m pip install --user numpy~=${{ matrix.numpy-version }}
           python -m pip install --user pytest
           python -c "import gudhi; print(gudhi.__version__)"
           python -m pytest -v ".\src\python\test\test_alpha_complex.py"

@@ -76,7 +76,7 @@ jobs:
           - python-version: "3.12"
             numpy-version: "1.26.0"
           - python-version: "3.13"
-            numpy-version: "1.26.0"
+            numpy-version: "2.1.0"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
