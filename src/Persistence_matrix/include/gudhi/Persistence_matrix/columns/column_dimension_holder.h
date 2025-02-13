@@ -52,9 +52,12 @@ struct Column_dimension_holder
   using Dimension = typename Master_matrix::Dimension;  /**< Dimension value type. */
 
   /**
-   * @brief Default constructor. Sets the dimension to 0 for @ref boundarymatrix "boundary matrices" and to -1 for @ref chainmatrix "chain matrices".
+   * @brief Default constructor. Sets the dimension to 0 for @ref boundarymatrix "boundary matrices" and to
+   * @ref Matrix::get_null_value "null index" for @ref chainmatrix "chain matrices".
    */
-  Column_dimension_holder() : dim_(Master_matrix::Option_list::is_of_boundary_type ? 0 : -1) {}
+  Column_dimension_holder()
+      : dim_(Master_matrix::Option_list::is_of_boundary_type ? 0
+                                                             : Master_matrix::template get_null_value<Dimension>()) {}
   /**
    * @brief Constructor setting the dimension to the given value.
    * 
@@ -72,7 +75,8 @@ struct Column_dimension_holder
    * 
    * @param col Column to move.
    */
-  Column_dimension_holder(Column_dimension_holder&& col) : dim_(std::exchange(col.dim_, -1)) {}
+  Column_dimension_holder(Column_dimension_holder&& col)
+      : dim_(std::exchange(col.dim_, Master_matrix::template get_null_value<Dimension>())) {}
 
   /**
    * @brief Returns the dimension of the column.
