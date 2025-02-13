@@ -77,7 +77,7 @@ namespace zigzag_persistence {
  *
  * The construction is based on two types of classes:
  * - @ref Oscillating_rips_edge_iterator_range and @ref Oscillating_rips_edge_vector_range_constructor computes the
- * range of inserted and removed vertices and edges in the filtration based on the elements descipted above.
+ * range of inserted and removed vertices and edges in the filtration based on the elements described above.
  * - @ref Oscillating_rips_simplex_iterator_range and @ref Oscillating_rips_simplex_vector_range_constructor infers
  * from @ref Oscillating_rips_edge_iterator_range or @ref Oscillating_rips_edge_vector_range_constructor all simplices
  * from higher dimensions (i.e. > 1) of the filtration if necessary.
