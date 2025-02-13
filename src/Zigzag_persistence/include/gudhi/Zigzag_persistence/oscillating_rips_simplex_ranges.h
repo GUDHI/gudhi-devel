@@ -371,7 +371,7 @@ class Oscillating_rips_simplex_iterator_range
    * gudhi/Zigzag_persistence/oscillating_rips_simplex_ranges.h
    * @brief Custom iterator over the simplices of an oscillating rips filtration.
    *
-   * It inherits from boost::iterator_facade.
+   * Category: LegacyInputIterator. And it inherits from boost::iterator_facade.
    *
    * @warning Each **copy** of the same iterator is pointing to the same base and will therefore update
    * **simultaneously**. This is to make the iterators copyable in the first place. If each copy would have its own
