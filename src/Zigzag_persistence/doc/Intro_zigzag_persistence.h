@@ -86,7 +86,7 @@ namespace zigzag_persistence {
  * can potentially pass any other type of edge range as long as the dereferenced format corresponds and the sequence
  * makes sense as a zigzag filtration.
  *
- * If only the barcode of the filtration is of interest and not the filtration it-self, the helper method
+ * If only the barcode of the filtration is of interest and not the filtration itself, the helper method
  * @ref compute_oscillating_rips_persistence can be used. It will directly feed to the filtration constructed by the
  * two classes above into @ref Zigzag_persistence "".
  * 
