@@ -63,7 +63,7 @@ namespace zigzag_persistence {
  * This module implements the construction of such an oscillating Rips filtration as follows:
  * \image html "osc_rips.svg" width=70%
  *
- * If \f$ P \f$ is the set of points generating the rips filtration, \f$ P_i \f$ corresponds to the subset containing
+ * If \f$ P \f$ is the set of points generating the Rips filtration, \f$ P_i \f$ corresponds to the subset containing
  * the \f$ i \f$ first points. So, at each forward inclusion, one vertex is added.
  *
  * The superscript of \f$ \mathcal{R} \f$ corresponds to the filtration values which will be associated to the cycles.
