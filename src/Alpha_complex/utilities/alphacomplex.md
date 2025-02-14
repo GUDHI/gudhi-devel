@@ -62,7 +62,7 @@ to be recorded. Enter a negative value to see zero length intervals.
 points (one value per line). Default version is not weighted.
 * `-e [ --exact ]` for the exact computation version.
 * `-f [ --fast ]` for the fast computation version.
-* `-s [ --squared-filtrations ]` for the squared filtration computations
+* `-s [ --squared-filtrations ]` to activate square filtration computations (default is 'on', can be 'off')
 
 **Example**
 
