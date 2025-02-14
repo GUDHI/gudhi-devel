@@ -22,11 +22,9 @@ Different versions of Alpha complex computation are available:
 
 Default Alpha complex filtrations computation are square of the circumradius of the simplex.
 If you are interested in the circumradius of the simplex as filtration values, pass the
-'--square-root-filtrations' (or '-s') option.
+'--squared-filtrations off' (or '-s off') option.
 
 Alpha complex can be, or not, weighted (requires a file containing weights values).
-Weighted Alpha complex can have negative filtration values. If '--square-root-filtrations' is
-set, filtration values will be Nan in this case.
 
 The output diagram contains one bar per line, written with the convention:
 
@@ -64,7 +62,7 @@ to be recorded. Enter a negative value to see zero length intervals.
 points (one value per line). Default version is not weighted.
 * `-e [ --exact ]` for the exact computation version.
 * `-f [ --fast ]` for the fast computation version.
-* `-s [ --square-root-filtrations ]` for the square root filtration computations
+* `-s [ --squared-filtrations ]` for the squared filtration computations
 
 **Example**
 
@@ -80,8 +78,8 @@ N.B.:
 and
 [Regular triangulation](https://doc.cgal.org/latest/Triangulation/index.html#TriangulationSecRT) documentation.
 In this case, the filtration value of each simplex is computed as the power distance of the smallest power sphere
-passing through all of its vertices. Weighted Alpha complex can have negative filtration values.
-If `--square-root-filtrations` is set, filtration values will be `NaN` in this case.
+passing through all of its vertices. Weighted Alpha complex can have negative filtration values. This is the reason
+why '-s off' or '--square-root-filtrations off' is ignored in this case (filtration values would be `NaN` in this case).
 
 ## alpha_complex_3d_persistence ##
 This program computes the persistent homology with coefficient field *Z/pZ* of

@@ -30,7 +30,7 @@ using Simplex_tree = Gudhi::Simplex_tree<>;
 using Filtration_value = Simplex_tree::Filtration_value;
 
 void program_options(int argc, char *argv[], std::string &off_file_points, bool &exact, bool &fast,
-                     bool& output_squared_root_values, std::string &weight_file, std::string &output_file_diag,
+                     bool& output_squared_values, std::string &weight_file, std::string &output_file_diag,
                      Filtration_value &alpha_square_max_value, int &coeff_field_characteristic,
                      Filtration_value &min_persistence);
 
@@ -64,7 +64,7 @@ std::vector<double> read_weight_file(const std::string &weight_file) {
 template<class Kernel>
 Simplex_tree create_simplex_tree(const std::string &off_file_points, const std::string &weight_file,
                                  bool exact_version, Filtration_value alpha_square_max_value,
-                                 bool output_squared_root_values) {
+                                 bool output_squared_values) {
   Simplex_tree stree;
   auto points = read_off<typename Kernel::Point_d>(off_file_points);
 
@@ -79,21 +79,20 @@ Simplex_tree create_simplex_tree(const std::string &off_file_points, const std::
     // Init of an alpha complex from an OFF file
     Gudhi::alpha_complex::Alpha_complex<Kernel, true> alpha_complex_from_file(points, weights);
 
-    if (output_squared_root_values)
-      complex_creation = alpha_complex_from_file.template create_complex<false>(stree, alpha_square_max_value,
-                                                                               exact_version);
-    else
-      complex_creation = alpha_complex_from_file.template create_complex<true>(stree, alpha_square_max_value,
-                                                                                exact_version);
+    if (!output_squared_values)
+      std::clog << "WARNING: Weighted Alpha complex only accept to output squared values.\n";
+
+    complex_creation = alpha_complex_from_file.template create_complex<true>(stree, alpha_square_max_value,
+                                                                             exact_version);
   } else {
     // Init of an alpha complex from an OFF file
     Gudhi::alpha_complex::Alpha_complex<Kernel> alpha_complex_from_file(points);
 
-    if (output_squared_root_values)
-      complex_creation = alpha_complex_from_file.template create_complex<false>(stree, alpha_square_max_value,
+    if (output_squared_values)
+      complex_creation = alpha_complex_from_file.template create_complex<true>(stree, alpha_square_max_value,
                                                                                exact_version);
     else
-      complex_creation = alpha_complex_from_file.template create_complex<true>(stree, alpha_square_max_value,
+      complex_creation = alpha_complex_from_file.template create_complex<false>(stree, alpha_square_max_value,
                                                                                 exact_version);
   }
   if (!complex_creation) {
@@ -109,16 +108,16 @@ int main(int argc, char **argv) {
   std::string output_file_diag;
   bool exact_version = false;
   bool fast_version = false;
-  bool output_squared_root_values = false;
+  bool output_squared_values;
   Filtration_value alpha_square_max_value;
   int coeff_field_characteristic;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, off_file_points, exact_version, fast_version, output_squared_root_values, weight_file,
+  program_options(argc, argv, off_file_points, exact_version, fast_version, output_squared_values, weight_file,
                   output_file_diag, alpha_square_max_value, coeff_field_characteristic, min_persistence);
 
   if ((exact_version) && (fast_version)) {
-    std::cerr << "You cannot set the exact and the fast version." << std::endl;
+    std::cerr << "Exact and fast version cannot be set together." << std::endl;
     exit(-1);
   }
 
@@ -127,10 +126,12 @@ int main(int argc, char **argv) {
     // WARNING : CGAL::Epick_d is fast but not safe (unlike CGAL::Epeck_d)
     // (i.e. when the points are on a grid)
     using Fast_kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
-    stree = create_simplex_tree<Fast_kernel>(off_file_points, weight_file, exact_version, alpha_square_max_value, output_squared_root_values);
+    stree = create_simplex_tree<Fast_kernel>(off_file_points, weight_file, exact_version, alpha_square_max_value,
+                                             output_squared_values);
   } else {
     using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
-    stree = create_simplex_tree<Kernel>(off_file_points, weight_file, exact_version, alpha_square_max_value, output_squared_root_values);
+    stree = create_simplex_tree<Kernel>(off_file_points, weight_file, exact_version, alpha_square_max_value,
+                                        output_squared_values);
   }
   // ----------------------------------------------------------------------------
   // Display information about the alpha complex
@@ -155,12 +156,12 @@ int main(int argc, char **argv) {
     std::ofstream out(output_file_diag);
     pcoh.output_diagram(out);
     out.close();
-  }
+    }
   return 0;
 }
 
 void program_options(int argc, char *argv[], std::string &off_file_points, bool &exact, bool &fast,
-                     bool& output_squared_root_values, std::string &weight_file, std::string &output_file_diag,
+                     bool& output_squared_values, std::string &weight_file, std::string &output_file_diag,
                      Filtration_value &alpha_square_max_value, int &coeff_field_characteristic,
                      Filtration_value &min_persistence) {
   namespace po = boost::program_options;
@@ -169,13 +170,14 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool 
                        "Name of file containing a point set. Format is one point per line:   X1 ... Xd ");
 
   po::options_description visible("Allowed options", 100);
+  std::string str_output_squared_values;
   visible.add_options()("help,h", "produce help message")(
       "exact,e", po::bool_switch(&exact),
       "To activate exact version of Alpha complex (default is false, not available if fast is set)")(
       "fast,f", po::bool_switch(&fast),
       "To activate fast version of Alpha complex (default is false, not available if exact is set)")(
-      "square-filtrations,s", po::bool_switch(&output_squared_root_values),
-      "To activate square root filtration computations (default is false)")(
+      "squared-filtrations,s", po::value<std::string>(&str_output_squared_values)->default_value(std::string("on")),
+      "To activate square filtration computations (default is 'on', can be 'off')")(
       "weight-file,w", po::value<std::string>(&weight_file)->default_value(std::string()),
       "Name of file containing a point weights. Format is one weight per line:\n  W1\n  ...\n  Wn ")(
       "output-file,o", po::value<std::string>(&output_file_diag)->default_value(std::string()),
@@ -206,13 +208,13 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool 
     std::clog << "Different versions of Alpha complex computation are available:\n";
     std::clog << " * fast: right combinatorics, values can be arbitrarily bad\n";
     std::clog << " * safe (default): values can have a relative error at most 1e-5\n";
-    std::clog << " * exact: true values rounded to double.\n \n";
+    std::clog << " * exact: true values rounded to double.\n\n";
     std::clog << "Default Alpha complex filtrations computation are square of the circumradius of the simplex.\n";
     std::clog << "If you are interested in the circumradius of the simplex as filtration values, pass the ";
-    std::clog << "'--square-root-filtrations' (or '-s') option.\n";
+    std::clog << "'--squared-filtrations off' (or '-s off') option.\n";
     std::clog << "Alpha complex can be, or not, weighted (requires a file containing weights values).\n\n";
-    std::clog << "Weighted Alpha complex can have negative filtration values. If '--square-root-filtrations' is";
-    std::clog << "set, filtration values will be Nan in this case.\n \n";
+    std::clog << "Weighted Alpha complex can have negative filtration values, this is the reason why '-s off' or "; std::clog << "'--square-root-filtrations off' is ignored in this case (filtration values would be Nan in this ";
+    std::clog << "case).\n\n";
     std::clog << "The output diagram contains one bar per line, written with the convention: \n";
     std::clog << "   p   dim b d \n";
     std::clog << "where dim is the dimension of the homological feature,\n";
@@ -221,6 +223,20 @@ void program_options(int argc, char *argv[], std::string &off_file_points, bool 
 
     std::clog << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
     std::clog << visible << std::endl;
+    exit(-1);
+  }
+
+  // To lower case
+  std::transform(str_output_squared_values.begin(), str_output_squared_values.end(), str_output_squared_values.begin(),
+                 [](unsigned char c){ return std::tolower(c); });
+
+  if (str_output_squared_values == "on")
+    output_squared_values = true;
+  else if (str_output_squared_values == "off")
+    output_squared_values = false;
+  else {
+    std::clog << "'--squared-filtrations' (or '-s') option cannot be set with '" << str_output_squared_values;
+    std::clog << "'. Only 'on' or 'off' are accepted.";
     exit(-1);
   }
 }
