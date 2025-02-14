@@ -40,12 +40,13 @@ where
 
 **Allowed options**
 
-* `-h [ --help ]` Produce help message
+* `-h [ --help ]` Produce help message.
 * `-o [ --output-file ]` Name of file in which the persistence diagram is written. Default print in standard output.
 * `-r [ --max-radius ]` (default = inf) Maximal radius for the Čech complex construction.
 * `-d [ --cpx-dimension ]` (default = 1) Maximal dimension of the Čech complex we want to compute.
 * `-p [ --field-charac ]` (default = 11) Characteristic p of the coefficient field Z/pZ for computing homology.
-* `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals.
+* `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value
+    to see zero length intervals.
 * `-e [ --exact ]` for the exact computation version.
 * `-f [ --fast ]` for the fast computation version.
 
@@ -72,8 +73,8 @@ Different versions of Delaunay-Čech complex computation are available:
 
 
 Default Delaunay-Čech complex filtrations computation are squared radius of the MEB.
-If you are interested in radius of the MEB as filtration values, pass the '--square-root-filtrations'
-(or '-s') option.
+If you are interested in the radius of the MEB as filtration values, pass the
+'--squared-filtrations off' (or '-s off') option.
 
 
  The output diagram contains one bar per line, written with the
@@ -96,14 +97,16 @@ where
 
 **Allowed options**
 
-* `-h [ --help ]` Produce help message
-* `-o [ --output-file ]` Name of file in which the persistence diagram is written. Default print in standard output
-* `-r [ --max-radius ]` (default = inf)  Maximal length of an edge for the Delaunay-Čech complex construction.
+* `-h [ --help ]` Produce help message.
+* `-o [ --output-file ]` Name of file in which the persistence diagram is written. Default print in standard output.
+* `-r [ --max-squared-radius ]` (default = inf)  Maximal squared length of an edge for the Delaunay-Čech complex
+    construction.
 * `-p [ --field-charac ]` (default = 11) Characteristic p of the coefficient field Z/pZ for computing homology.
-* `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value to see zero length intervals
+* `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value
+    to see zero length intervals.
 * `-e [ --exact ]` for the exact computation version.
 * `-f [ --fast ]` for the fast computation version.
-* `-s [ --square-root-filtrations ]` for the square root filtration computations
+* `-s [ --squared-filtrations ]` to activate square filtration computations (default is 'on', can be 'off').
 
 **Example 1 with Z/2Z coefficients**
 

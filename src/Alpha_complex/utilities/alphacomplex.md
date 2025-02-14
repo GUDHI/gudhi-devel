@@ -49,20 +49,17 @@ where
 
 **Allowed options**
 
-* `-h [ --help ]` Produce help message
-* `-o [ --output-file ]` Name of file in which the persistence diagram is
-written. Default print in standard output.
-* `-r [ --max-alpha-square-value ]` (default = inf) Maximal alpha square value
-for the Alpha complex construction.
-* `-p [ --field-charac ]` (default = 11)     Characteristic p of the
-coefficient field Z/pZ for computing homology.
-* `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature
-to be recorded. Enter a negative value to see zero length intervals.
-* `-w [ --weight-file ]` is the path to the file containing the weights of the
-points (one value per line). Default version is not weighted.
+* `-h [ --help ]` Produce help message.
+* `-o [ --output-file ]` Name of file in which the persistence diagram is written. Default print in standard output.
+* `-r [ --max-alpha-square-value ]` (default = inf) Maximal alpha square value for the Alpha complex construction.
+* `-p [ --field-charac ]` (default = 11) Characteristic p of the coefficient field Z/pZ for computing homology.
+* `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value
+    to see zero length intervals.
+* `-w [ --weight-file ]` is the path to the file containing the weights of the points (one value per line).
+    Default version is not weighted.
 * `-e [ --exact ]` for the exact computation version.
 * `-f [ --fast ]` for the fast computation version.
-* `-s [ --squared-filtrations ]` to activate square filtration computations (default is 'on', can be 'off')
+* `-s [ --squared-filtrations ]` to activate square filtration computations (default is 'on', can be 'off').
 
 **Example**
 
@@ -116,24 +113,17 @@ where `<input OFF file>` is the path to the input point cloud in
 
 **Allowed options**
 
-* `-h [ --help ]` Produce help message
-* `-o [ --output-file ]` Name of file in which the persistence diagram is
-written. Default print in standard output.
-* `-r [ --max-alpha-square-value ]` (default = inf) Maximal alpha square value
-for the Alpha complex construction.
-* `-p [ --field-charac ]` (default=11) Characteristic p of the coefficient
-field Z/pZ for computing homology.
-* `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature
-to be recorded. Enter a negative value to see zero length intervals.
-* `-c [ --cuboid-file ]` is the path to the file describing the periodic domain.
-It must be in the format described
-[here]({{ site.officialurl }}/doc/latest/fileformats.html#FileFormatsIsoCuboid).
-Default version is not periodic.
-* `-w [ --weight-file ]` is the path to the file containing the weights of the
-points (one value per line).
-Default version is not weighted.
-* `-e [ --exact ]` for the exact computation version (not compatible with
-weight and periodic version).
+* `-h [ --help ]` Produce help message.
+* `-o [ --output-file ]` Name of file in which the persistence diagram is written. Default print in standard output.
+* `-r [ --max-alpha-square-value ]` (default = inf) Maximal alpha square value for the Alpha complex construction.
+* `-p [ --field-charac ]` (default=11) Characteristic p of the coefficient field Z/pZ for computing homology.
+* `-m [ --min-persistence ]` (default = 0) Minimal lifetime of homology feature to be recorded. Enter a negative value
+    to see zero length intervals.
+* `-c [ --cuboid-file ]` is the path to the file describing the periodic domain. It must be in the format described
+    [here]({{ site.officialurl }}/doc/latest/fileformats.html#FileFormatsIsoCuboid). Default version is not periodic.
+* `-w [ --weight-file ]` is the path to the file containing the weights of the points (one value per line).
+    Default version is not weighted.
+* `-e [ --exact ]` for the exact computation version (not compatible with weight and periodic version).
 * `-f [ --fast ]` for the fast computation version.
 
 **Example**
