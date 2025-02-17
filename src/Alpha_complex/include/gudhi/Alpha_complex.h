@@ -377,7 +377,8 @@ class Alpha_complex {
    * Initialization can be launched once.
    *
    * \exception std::invalid_argument In case of a Weighted Alpha complex with `Output_squared_values` set to `false`,
-   * as Weighted Alpha complex can have negative filtration values.
+   * as the filtration values of a Weighted Alpha complex results from a power product and not from an euclidean
+   * distance. Therefore this template argument should be kept to the default value.
    */
   template <bool Output_squared_values = true,
             typename SimplicialComplexForAlpha,
