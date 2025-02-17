@@ -19,6 +19,7 @@
 #include <random>
 #include <array>
 #include <cmath> // for std::fabs
+#include <stdexcept>
 
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Alpha_complex_3d.h>
@@ -141,7 +142,7 @@ BOOST_AUTO_TEST_CASE(Is_weighted_alpha_complex_nan) {
 
   Gudhi::alpha_complex::Alpha_complex<Kernel, true> alpha_complex_from_weighted_points(points);
 
-  std::clog << "Weighted alpha complex with squared filtration values - output_squared_values=true\n";
+  std::clog << "Weighted alpha complex with squared filtration values - Output_squared_values=true\n";
   Gudhi::Simplex_tree<> stree;
   if (alpha_complex_from_weighted_points.create_complex(stree)) {
     for (auto f_simplex : stree.filtration_simplex_range()) {
@@ -156,16 +157,6 @@ BOOST_AUTO_TEST_CASE(Is_weighted_alpha_complex_nan) {
   }
   std::clog << "Weighted alpha complex with square root filtration values - output_squared_values=false\n";
   Gudhi::Simplex_tree<> stree_sqrt;
-  // set output_squared_values to false means that negative squared values will be NaN
-  if (alpha_complex_from_weighted_points.create_complex<false>(stree_sqrt)) {
-    for (auto f_simplex : stree_sqrt.filtration_simplex_range()) {
-        std::clog << "   ( ";
-        for (auto vertex : stree_sqrt.simplex_vertex_range(f_simplex)) {
-          std::clog << vertex << " ";
-        }
-        std::clog << ") -> " << "[" << stree_sqrt.filtration(f_simplex) << "]\n";
-
-        BOOST_CHECK(std::isnan(stree_sqrt.filtration(f_simplex)));
-    }
-  }
+  // set output_squared_values to false on a weighted alpha complex shall throw an exception
+  BOOST_CHECK_THROW(alpha_complex_from_weighted_points.create_complex<false>(stree_sqrt), std::invalid_argument);
 }

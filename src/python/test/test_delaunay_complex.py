@@ -13,6 +13,7 @@ from gudhi import AlphaComplex, DelaunayComplex, DelaunayCechComplex
 import math
 import numpy as np
 import pytest
+import random
 
 try:
     # python3
@@ -214,3 +215,24 @@ def test_duplicated_2d_points_on_a_plane():
     for simplicial_complex in [AlphaComplex, DelaunayComplex, DelaunayCechComplex]:
         for precision in ["fast", "safe", "exact"]:
             _duplicated_2d_points_on_a_plane(simplicial_complex, precision)
+
+def test_weighted_exceptions():
+    points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
+    nb_wgts = len(points)
+    while nb_wgts == len(points):
+      nb_wgts = random.randint(2, 2*len(points))
+    weights = nb_wgts * [1.]
+    print(f"nb points = {len(points)} vs nb weights = {len(weights)}")
+    with pytest.raises(ValueError):
+        # When number of points does not correspond to the number of weights
+        dc = DelaunayComplex(points=points, weights=weights)
+
+    weights = len(points) * [1.]
+    dc = DelaunayComplex(points=points, weights=weights)
+    # No Weighted Delaunay-Cech available
+    with pytest.raises(ValueError):
+        dc.create_simplex_tree(filtration='cech')
+
+    # Weighted Alpha complex cannot output square root values
+    with pytest.raises(ValueError):
+        dc.create_simplex_tree(filtration='alpha', output_squared_values=False)

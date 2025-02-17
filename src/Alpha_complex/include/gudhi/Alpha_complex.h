@@ -355,8 +355,8 @@ class Alpha_complex {
    * It also computes the filtration values accordingly to the \ref createcomplexalgorithm if default_filtration_value
    * is not set.
    *
-   * \tparam output_squared_values If `true` (default value), it assigns to each simplex a filtration value equal to
-   * \f$ \alpha^2 \f$, or to \f$ \alpha \f$ when `output_squared_values` is `false`. cf. \ref createcomplexalgorithm
+   * \tparam Output_squared_values If `true` (default value), it assigns to each simplex a filtration value equal to
+   * \f$ \alpha^2 \f$, or to \f$ \alpha \f$ when `Output_squared_values` is `false`. cf. \ref createcomplexalgorithm
    * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
    *
    * @param[in] complex SimplicialComplexForAlpha to be created.
@@ -376,10 +376,10 @@ class Alpha_complex {
    *
    * Initialization can be launched once.
    *
-   * \note Weighted Alpha complex can have negative filtration values. If `output_squared_values` is set to `false`,
-   * filtration values will be `NaN` in this case.
+   * \exception std::invalid_argument In case of a Weighted Alpha complex with `Output_squared_values` set to `false`,
+   * as Weighted Alpha complex can have negative filtration values.
    */
-  template <bool output_squared_values = true,
+  template <bool Output_squared_values = true,
             typename SimplicialComplexForAlpha,
             typename Filtration_value = typename SimplicialComplexForAlpha::Filtration_value>
   bool create_complex(SimplicialComplexForAlpha& complex,
@@ -388,6 +388,9 @@ class Alpha_complex {
                       bool default_filtration_value = false) {
     // Filtration_value must be capable to represent the special value "Not-A-Number"
     static_assert(std::numeric_limits<Filtration_value>::has_quiet_NaN);
+    // Forbids weighted and output square root filtration values - cannot static_assert for python purpose
+    if constexpr(Weighted && !Output_squared_values)
+      throw std::invalid_argument("Weighted Alpha complex cannot output square root filtration values");
     // To support more general types for Filtration_value
     using std::isnan;
 
@@ -467,7 +470,7 @@ class Alpha_complex {
                 if(exact) CGAL::exact(sqrad);
 #endif
                 alpha_complex_filtration = cgal_converter(sqrad);
-                if constexpr (!output_squared_values) {
+                if constexpr (!Output_squared_values) {
                   alpha_complex_filtration = sqrt(alpha_complex_filtration);
                 }
               }
@@ -492,7 +495,7 @@ class Alpha_complex {
         // Only in not exact version, cf. https://github.com/GUDHI/gudhi-devel/issues/57
         complex.make_filtration_non_decreasing();
       // Remove all simplices that have a filtration value greater than max_alpha_square
-      if constexpr (!output_squared_values) {
+      if constexpr (!Output_squared_values) {
         complex.prune_above_filtration(sqrt(max_alpha_square));
       } else {
         complex.prune_above_filtration(max_alpha_square);

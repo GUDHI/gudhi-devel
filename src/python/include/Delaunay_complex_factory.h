@@ -78,7 +78,7 @@ bool create_complex(Delaunay_complex& delaunay_complex, Simplex_tree_interface* 
                     bool exact_version, Delaunay_filtration filtration, bool output_squared_values) {
   if (filtration == Delaunay_filtration::CECH) {
     if (Weighted)
-      throw std::runtime_error("Weighted Delaunay-Cech complex is not available");
+      throw std::invalid_argument("Weighted Delaunay-Cech complex is not available");
     // Construct the Delaunay complex
     bool result = delaunay_complex.create_complex(*simplex_tree,
                                      std::numeric_limits<Simplex_tree_interface::Filtration_value>::infinity(),

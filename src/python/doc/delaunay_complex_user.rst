@@ -109,7 +109,7 @@ A weighted version for :math:`\alpha`-complex is available. It is like a usual :
 
 In this case, the filtration value of each simplex is computed as the power distance of the smallest power sphere
 passing through all of its vertices. Weighted Alpha complex can have negative filtration values.
-If `output_squared_values` is set to `false`, filtration values will be `NaN` in this case.
+If `output_squared_values` is set to `False`, filtration values will be `NaN` in this case.
 
 This example builds the weighted :math:`\alpha`-complex of a small molecule, where atoms have different sizes.
 It is taken from

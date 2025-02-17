@@ -19,7 +19,6 @@ from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp cimport bool
 from libc.stdint cimport intptr_t
-import warnings
 from typing import Literal, Optional
 from collections.abc import Iterable
 
@@ -125,14 +124,15 @@ cdef class DelaunayComplex:
         """
         if not filtration in [None, 'alpha', 'cech']:
             raise ValueError(f"\'{filtration}\' is not a valid filtration value. Must be None, \'alpha\' or \'cech\'")
-        stree = SimplexTree()
-        cdef intptr_t stree_int_ptr=stree.thisptr
 
         cdef Delaunay_filtration filt = NONE
         if filtration == 'cech':
             filt = CECH
         elif filtration == 'alpha':
             filt = ALPHA
+
+        stree = SimplexTree()
+        cdef intptr_t stree_int_ptr=stree.thisptr
 
         with nogil:
             self.this_ptr.create_simplex_tree(<Simplex_tree_python_interface*>stree_int_ptr,
