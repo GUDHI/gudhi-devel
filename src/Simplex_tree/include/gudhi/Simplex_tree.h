@@ -746,6 +746,44 @@ class Simplex_tree {
     }
   }
 
+  /**
+   * @brief Returns a non-const reference to the filtration value of a simplex.
+   * 
+   * @warning Cannot be called on a null_simplex.
+   * @warning Only available if SimplexTreeOptions::store_filtration is true.
+   */
+  Filtration_value& get_filtration_value(Simplex_handle sh) {
+    static_assert(Options::store_filtration,
+                  "A modifiable reference to a filtration value cannot be returned if no filtration value is stored.");
+
+    if (sh == null_simplex()) {
+      throw std::invalid_argument("Cannot bind reference to filtration value of a null simplex.");
+    }
+    return _to_node_it(sh)->second.filtration();
+  }
+
+  /**
+   * @brief Returns a const reference to the filtration value of a simplex. It is a more strict variant of
+   * @ref filtration, as it will not compile if @ref SimplexTreeOptions::store_filtration is false and it will throw if
+   * the given simplex is a @ref null_simplex.
+   * 
+   * @warning Cannot be called on a null_simplex. If this option is necessary, use @ref filtration instead.
+   * @warning Only available if @ref SimplexTreeOptions::store_filtration is true. If false is necessary,
+   * use @ref filtration instead.
+   */
+  const Filtration_value& get_filtration_value(Simplex_handle sh) const {
+    static_assert(
+        Options::store_filtration,
+        "Filtration values are not stored. If you still want something to be returned, use `filtration(sh)` instead.");
+
+    if (sh == null_simplex()) {
+      throw std::invalid_argument(
+          "Null simplices are not associated to filtration values. If you still want something to be returned, use "
+          "`filtration(sh)` instead.");
+    }
+    return sh->second.filtration();
+  }
+
   /** \brief Sets the filtration value of a simplex.
    * \exception std::invalid_argument In debug mode, if sh is a null_simplex.
    */
@@ -1096,30 +1134,66 @@ class Simplex_tree {
     return insert_simplex_raw(copy, filtration);
   }
 
-    /** \brief Insert a N-simplex and all his subfaces, from a N-simplex represented by a range of
+  /**
+   * @brief List of insertion strategies of a simplex \f$ \sigma \$.
+   */
+  enum class Insertion_strategies {
+    /**
+     * @brief Let \f$ f \f$ be the filtration value given as argument. Inserts the simplex \f$ \sigma \$ as follows:
+     * - to \f$ f \f$, if \f$ \sigma \$ didn't existed yet,
+     * - if \f$ \sigma \$ was already inserted, let \f$ f' \f$ be its filtration value. The new filtration value will
+     * be @ref FiltrationValue::unify_lifetimes (\f$ f \f$, \f$ f' \f$).
+     * Then, the filtration values of all faces of \f$ \sigma \$ are pushed to the union of their old value and of
+     * the new value of \f$ \sigma \$.
+     */
+    LOWEST,
+    /**
+     * @brief Let \f$ f \f$ be the filtration value given as argument. Inserts the simplex \f$ \sigma \$ as follows:
+     * - if \f$ \sigma \$ was not inserted yet, then \f$ \sigma \$ and all its non existing faces are inserted at the
+     * first possible filtration value with minimum filtration value \f$ f \f$.
+     * - if \f$ \sigma \$ existed already, then it and all of its potentially already inserted cofaces are pushed to the
+     * intersection of their old value and \f$ f \$.
+     */
+    HIGHEST,
+    /**
+     * @brief Ignores the filtration value given as argument and inserts the simplex and all its faces as soon as
+     * the already inserted faces allows it. That is, the filtration value of a not already inserted face will be
+     * the "intersection" of the filtration values of all it facets, computed with
+     * @ref FiltrationValue::intersect_lifetimes "". If none of the faces were already inserted, everything will simply
+     * be placed at the default value of @ref Filtration_value "".
+     */
+    FIRST_POSSIBLE
+  };
+
+  /**
+   * @brief Insert a N-simplex and all his subfaces, from a N-simplex represented by a range of
    * Vertex_handles, in the simplicial complex.
-   *
-   * @param[in]  Nsimplex   range of Vertex_handles, representing the vertices of the new N-simplex
-   * @param[in]  filtration the filtration value assigned to the new N-simplex.
+   * 
+   * @tparam InputVertexRange Range of @ref Vertex_handle.
+   * @param[in] Nsimplex Vertices of the new N-simplex.
+   * @param[in] filtration Ignored if @ref SimplexTreeOptions::store_filtration is false.
+   * Otherwise, see `insertion_strategy` below. Default value: default constructor.
+   * @param insertion_strategy Ignored if @ref SimplexTreeOptions::store_filtration is false.
+   * Indicates where to insert the simplex and its faces in the filtration with respect to the value given by
+   * `filtration`. See @ref Insertion_strategies for more details. Default value: @ref Insertion_strategies::LOWEST.
    * @return If the new simplex is inserted successfully (i.e. it was not in the
    * simplicial complex yet) the bool is set to true and the Simplex_handle is the handle assigned
    * to the new simplex.
-   * If the insertion fails (the simplex is already there), the bool is set to false. If the insertion
-   * fails and the simplex already in the complex has a filtration value strictly bigger than 'filtration',
-   * we assign this simplex with the new value 'filtration', and set the Simplex_handle field of the
-   * output pair to the Simplex_handle of the simplex. Otherwise, we set the Simplex_handle part to
-   * null_simplex.
+   * If the insertion fails (the simplex is already there), the bool is set to false. In that case, the Simplex_handle
+   * part is set to: 
+   * - null_simplex, if the filtration value of the simplex is not modified,
+   * - the simplex handle assigned to the simplex, if the filtration value of the simplex is modified.
    */
   template <class InputVertexRange = std::initializer_list<Vertex_handle>>
   std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(
       const InputVertexRange& Nsimplex,
-      const Filtration_value& filtration = Filtration_value())
+      const Filtration_value& filtration = Filtration_value(),
+      Insertion_strategies insertion_strategy = Insertion_strategies::LOWEST)
   {
     auto first = std::begin(Nsimplex);
     auto last = std::end(Nsimplex);
 
-    if (first == last)
-      return { null_simplex(), true }; // FIXME: false would make more sense to me.
+    if (first == last) return {null_simplex(), true};  // FIXME: false would make more sense to me.
 
     thread_local std::vector<Vertex_handle> copy;
     copy.clear();
@@ -1127,38 +1201,97 @@ class Simplex_tree {
     std::sort(copy.begin(), copy.end());
     auto last_unique = std::unique(copy.begin(), copy.end());
     copy.erase(last_unique, copy.end());
-    GUDHI_CHECK_code(
-      for (Vertex_handle v : copy)
-        GUDHI_CHECK(v != null_vertex(), "cannot use the dummy null_vertex() as a real vertex");
-    )
+    GUDHI_CHECK_code(for (Vertex_handle v : copy)
+                         GUDHI_CHECK(v != null_vertex(), "cannot use the dummy null_vertex() as a real vertex"););
     // Update dimension if needed. We could wait to see if the insertion succeeds, but I doubt there is much to gain.
     dimension_ = (std::max)(dimension_, static_cast<int>(std::distance(copy.begin(), copy.end())) - 1);
 
-    return rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
+    if constexpr (Options::store_filtration){
+      if (insertion_strategy == Insertion_strategies::LOWEST)
+        return _rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
+      else if (insertion_strategy == Insertion_strategies::HIGHEST)
+        return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), filtration);
+      else
+        return _insert_simplex_and_subfaces_at_possible(root(), copy.begin(), copy.end());
+    } else {
+      return _rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
+    }
+    
   }
 
  private:
   // To insert {1,2,3,4}, we insert {2,3,4} twice, once at the root, and once below 1.
-  template <class ForwardVertexIterator>
-  std::pair<Simplex_handle, bool> rec_insert_simplex_and_subfaces_sorted(Siblings* sib,
-                                                                         ForwardVertexIterator first,
-                                                                         ForwardVertexIterator last,
-                                                                         const Filtration_value& filt)
-  {
+  template <class ForwardVertexIterator, bool update_fil = true>
+  std::pair<Simplex_handle, bool> _rec_insert_simplex_and_subfaces_sorted(Siblings* sib,
+                                                                          ForwardVertexIterator first,
+                                                                          ForwardVertexIterator last,
+                                                                          const Filtration_value& filt) {
     // An alternative strategy would be:
     // - try to find the complete simplex, if found (and low filtration) exit
     // - insert all the vertices at once in sib
     // - loop over those (new or not) simplices, with a recursive call(++first, last)
     Vertex_handle vertex_one = *first;
 
-    if (++first == last) return insert_node_<true, false, true>(sib, vertex_one, filt);
+    if (++first == last) return insert_node_<update_fil, false, update_fil>(sib, vertex_one, filt);
 
     // TODO: have special code here, we know we are building the whole subtree from scratch.
-    auto insertion_result = insert_node_<true, true, false>(sib, vertex_one, filt);
+    auto insertion_result = insert_node_<update_fil, true, false>(sib, vertex_one, filt);
 
-    auto res = rec_insert_simplex_and_subfaces_sorted(insertion_result.first->second.children(), first, last, filt);
+    auto res = _rec_insert_simplex_and_subfaces_sorted<ForwardVertexIterator, update_fil>(
+        insertion_result.first->second.children(), first, last, filt);
     // No need to continue if the full simplex was already there with a low enough filtration value.
-    if (res.first != null_simplex()) rec_insert_simplex_and_subfaces_sorted(sib, first, last, filt);
+    if (res.first != null_simplex())
+      _rec_insert_simplex_and_subfaces_sorted<ForwardVertexIterator, update_fil>(sib, first, last, filt);
+    return res;
+  }
+
+  void _make_subfiltration_non_decreasing(Simplex_handle sh) {
+    Filtration_value& f = get_filtration_value(sh);
+    for (auto sh_b : boundary_simplex_range(sh)) {
+      _make_subfiltration_non_decreasing(sh_b);
+      intersect_lifetimes(f, filtration(sh_b));
+    }
+  }
+
+  template <class ForwardVertexIterator>
+  std::pair<Simplex_handle, bool> _insert_simplex_and_subfaces_at_possible(Siblings* sib,
+                                                                           ForwardVertexIterator first,
+                                                                           ForwardVertexIterator last) {
+    auto res = _rec_insert_simplex_and_subfaces_sorted<ForwardVertexIterator, false>(sib, first, last, 0);
+    if (res.second){
+      _make_subfiltration_non_decreasing(res.first);
+    } else {
+      res.first = null_simplex();
+    }
+    return res;
+  }
+
+  bool _push_cofaces_up(Simplex_handle sh, const Filtration_value& filt) {
+    if (!intersect_lifetimes(get_filtration_value(sh), filt)) return false;  // all cofaces will already be higher
+
+    for (auto sh_co : cofaces_simplex_range(sh, 1)) {
+      _push_cofaces_up(sh_co, filt);
+    }
+
+    return true;
+  }
+
+  template <class ForwardVertexIterator>
+  std::pair<Simplex_handle, bool> _insert_simplex_and_subfaces_at_highest(Siblings* sib,
+                                                                          ForwardVertexIterator first,
+                                                                          ForwardVertexIterator last,
+                                                                          const Filtration_value& filt) {
+    auto res = _rec_insert_simplex_and_subfaces_sorted<ForwardVertexIterator, false>(sib, first, last, filt);
+
+    if (res.second) {
+      // if true, newly inserted, so no cofaces, but possibly non compatible filtration value
+      _make_subfiltration_non_decreasing(res.first);
+      return res;
+    }
+    // if false, faces have right filtration values, but possible cofaces
+
+    if (!_push_cofaces_up(res.first, filt)) res.first = null_simplex();
+
     return res;
   }
 
@@ -1548,7 +1681,7 @@ class Simplex_tree {
    * This may be faster than inserting the vertices one by one, especially in a random order.
    * The complex does not need to be empty before calling this function. However, if a vertex is
    * already present, its filtration value is not modified, unlike with other insertion functions. */
-  template <class VertexRange>
+  template <class VertexRange = std::initializer_list<Vertex_handle> >
   void insert_batch_vertices(VertexRange const& vertices, const Filtration_value& filt = Filtration_value()) {
     auto verts = vertices | boost::adaptors::transformed([&](auto v){
         return Dit_value_t(v, Node(&root_, filt)); });
