@@ -468,7 +468,7 @@ class Position_to_index_overlay
    *
    * Recall that we assume that the boundaries were inserted in the order of filtration for the barcode to be valid.
    *
-   * @return A reference to the barcode. The barcode is a vector of @ref Matrix::Bar. A bar stores three information:
+   * @return A reference to the barcode. The barcode is a vector of @ref Matrix::Bar. A bar stores three attributes:
    * the @ref PosIdx birth index, the @ref PosIdx death index and the dimension of the bar.
    */
   const Barcode& get_current_barcode() const;
