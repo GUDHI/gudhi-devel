@@ -23,23 +23,43 @@ if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen AND TARGET Boost::program_options
 
   install(TARGETS cech_persistence DESTINATION bin)
 
-  add_test(NAME Delaunay_Cech_complex_utility_from_rips_on_tore_3D_safe COMMAND $<TARGET_FILE:delaunay_cech_persistence>
-      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-r" "0.25" "-m" "0.5" "-p" "3" "-o" "delaunay_safe.pers")
-  add_test(NAME Delaunay_Cech_complex_utility_from_rips_on_tore_3D_fast COMMAND $<TARGET_FILE:delaunay_cech_persistence>
-      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-r" "0.25" "-m" "0.5" "-p" "3" "-o" "delaunay_fast.pers" "-f")
-  add_test(NAME Delaunay_Cech_complex_utility_from_rips_on_tore_3D_exact COMMAND $<TARGET_FILE:delaunay_cech_persistence>
-      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-r" "0.25" "-m" "0.5" "-p" "3" "-o" "delaunay_exact.pers" "-e")
+  # With square filtration values
+  add_test(NAME Delaunay_Cech_complex_utility_on_tore_3D_square_safe COMMAND $<TARGET_FILE:delaunay_cech_persistence>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-r" "0.25" "-m" "0.5" "-p" "3" "-o" "delaunay_square_safe.pers")
+  add_test(NAME Delaunay_Cech_complex_utility_on_tore_3D_square_fast COMMAND $<TARGET_FILE:delaunay_cech_persistence>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-r" "0.25" "-m" "0.5" "-p" "3" "-o" "delaunay_square_fast.pers" "-f")
+  add_test(NAME Delaunay_Cech_complex_utility_on_tore_3D_square_exact COMMAND $<TARGET_FILE:delaunay_cech_persistence>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-r" "0.25" "-m" "0.5" "-p" "3" "-o" "delaunay_square_exact.pers" "-e")
+  # Same without square filtration values - '-s off'
+  add_test(NAME Delaunay_Cech_complex_utility_on_tore_3D_safe COMMAND $<TARGET_FILE:delaunay_cech_persistence>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-s" "off" "-r" "0.25" "-m" "0.5" "-p" "3" "-o" "delaunay_safe.pers")
+  add_test(NAME Delaunay_Cech_complex_utility_on_tore_3D_fast COMMAND $<TARGET_FILE:delaunay_cech_persistence>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-s" "off" "-r" "0.25" "-m" "0.5" "-p" "3" "-o" "delaunay_fast.pers" "-f")
+  add_test(NAME Delaunay_Cech_complex_utility_on_tore_3D_exact COMMAND $<TARGET_FILE:delaunay_cech_persistence>
+      "${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off" "-s" "off" "-r" "0.25" "-m" "0.5" "-p" "3" "-o" "delaunay_exact.pers" "-e")
 
   if (DIFF_PATH)
+    # With square filtration values
+    add_test(Delaunay_Cech_complex_utilities_diff_square_exact ${DIFF_PATH}
+             "delaunay_square_exact.pers" "delaunay_square_safe.pers")
+    set_tests_properties(Delaunay_Cech_complex_utilities_diff_square_exact PROPERTIES DEPENDS
+             "Delaunay_Cech_complex_utility_on_tore_3D_square_safe;Delaunay_Cech_complex_utility_on_tore_3D_square_exact")
+
+    add_test(Delaunay_Cech_complex_utilities_diff_square_fast ${DIFF_PATH}
+             "delaunay_square_fast.pers" "delaunay_square_safe.pers")
+    set_tests_properties(Delaunay_Cech_complex_utilities_diff_square_fast PROPERTIES DEPENDS
+             "Delaunay_Cech_complex_utility_on_tore_3D_square_safe;Delaunay_Cech_complex_utility_on_tore_3D_square_fast")
+
+    # Same without square filtration values - '-s off'
     add_test(Delaunay_Cech_complex_utilities_diff_exact ${DIFF_PATH}
              "delaunay_exact.pers" "delaunay_safe.pers")
     set_tests_properties(Delaunay_Cech_complex_utilities_diff_exact PROPERTIES DEPENDS
-             "Delaunay_Cech_complex_utility_from_rips_on_tore_3D_safe;Delaunay_Cech_complex_utility_from_rips_on_tore_3D_exact")
+             "Delaunay_Cech_complex_utility_on_tore_3D_safe;Delaunay_Cech_complex_utility_on_tore_3D_exact")
 
     add_test(Delaunay_Cech_complex_utilities_diff_fast ${DIFF_PATH}
              "delaunay_fast.pers" "delaunay_safe.pers")
     set_tests_properties(Delaunay_Cech_complex_utilities_diff_fast PROPERTIES DEPENDS
-             "Delaunay_Cech_complex_utility_from_rips_on_tore_3D_safe;Delaunay_Cech_complex_utility_from_rips_on_tore_3D_fast")
+             "Delaunay_Cech_complex_utility_on_tore_3D_safe;Delaunay_Cech_complex_utility_on_tore_3D_fast")
   endif()
 
   install(TARGETS delaunay_cech_persistence DESTINATION bin)

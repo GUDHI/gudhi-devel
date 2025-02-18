@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL and Eigen3
+ *      - 2024/10 Vincent Rouvreau: Add square root filtration values interface
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -65,14 +66,14 @@ template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool val
 /**
  * \class Alpha_complex Alpha_complex.h gudhi/Alpha_complex.h
  * \brief Alpha complex data structure.
- * 
+ *
  * \ingroup alpha_complex
- * 
+ *
  * \details
- * The data structure is constructing a CGAL Delaunay triangulation (for more information on CGAL Delaunay 
+ * The data structure is constructing a CGAL Delaunay triangulation (for more information on CGAL Delaunay
  * triangulation, please refer to the corresponding chapter in page http://doc.cgal.org/latest/Triangulation/) from a
  * range of points or from an OFF file (cf. Points_off_reader).
- * 
+ *
  * Please refer to \ref alpha_complex for examples.
  *
  * The complex is a template class requiring an <a target="_blank"
@@ -84,7 +85,7 @@ template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool val
  * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>
  * < <a target="_blank" href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dynamic__dimension__tag.html">
  * CGAL::Dynamic_dimension_tag </a> >
- * 
+ *
  * \remark
  * - When Alpha_complex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
  * - Using the default `CGAL::Epeck_d` makes the construction safe. If you pass exact=true to create_complex, the
@@ -161,10 +162,10 @@ class Alpha_complex {
 
  public:
   /** \brief Alpha_complex constructor from an OFF file name.
-   * 
-   * Uses the Points_off_reader to construct the Delaunay triangulation required to initialize 
+   *
+   * Uses the Points_off_reader to construct the Delaunay triangulation required to initialize
    * the Alpha_complex.
-   * 
+   *
    * Duplicate points are inserted once in the Alpha_complex. This is the reason why the vertices may be not contiguous.
    *
    * @param[in] off_file_name OFF file [path and] name.
@@ -183,9 +184,9 @@ class Alpha_complex {
    *
    * The vertices may be not contiguous as some points may be discarded in the triangulation (duplicate points,
    * weighted hidden point, ...).
-   * 
+   *
    * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d or Kernel::Weighted_point_d.
-   * 
+   *
    * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
    * Kernel::Point_d or Kernel::Weighted_point_d.
    */
@@ -198,11 +199,11 @@ class Alpha_complex {
    *
    * The vertices may be not contiguous as some points may be discarded in the triangulation (duplicate points,
    * weighted hidden point, ...).
-   * 
+   *
    * @param[in] points Range of points to triangulate. Points must be in Kernel::Point_d.
-   * 
+   *
    * @param[in] weights Range of points weights. Weights must be in Kernel::FT.
-   * 
+   *
    * The type InputPointRange must be a range for which std::begin and std::end return input iterators on a
    * Kernel::Point_d.
    */
@@ -354,10 +355,12 @@ class Alpha_complex {
    * It also computes the filtration values accordingly to the \ref createcomplexalgorithm if default_filtration_value
    * is not set.
    *
+   * \tparam Output_squared_values If `true` (default value), it assigns to each simplex a filtration value equal to
+   * \f$ \alpha^2 \f$, or to \f$ \alpha \f$ when `Output_squared_values` is `false`. cf. \ref createcomplexalgorithm
    * \tparam SimplicialComplexForAlpha must meet `SimplicialComplexForAlpha` concept.
-   * 
+   *
    * @param[in] complex SimplicialComplexForAlpha to be created.
-   * @param[in] max_alpha_square maximum for alpha square value. Default value is +\f$\infty\f$, and there is very
+   * @param[in] max_alpha_square maximum for \f$ \alpha^2 \f$ value. Default value is +\f$\infty\f$, and there is very
    * little point using anything else since it does not save time. Useless if `default_filtration_value` is set to
    * `true`.
    * @param[in] exact Exact filtration values computation. Not exact if `Kernel` is not <a target="_blank"
@@ -366,14 +369,19 @@ class Alpha_complex {
    * (will be set to `NaN`).
    * Default value is `false` (which means compute the filtration values).
    *
-   * @return true if creation succeeds, false otherwise.
-   * 
+   * @return `true` if creation succeeds, `false` otherwise.
+   *
    * @pre Delaunay triangulation must be already constructed with dimension strictly greater than 0.
    * @pre The simplicial complex must be empty (no vertices)
-   * 
+   *
    * Initialization can be launched once.
+   *
+   * \exception std::invalid_argument In case of a Weighted Alpha complex with `Output_squared_values` set to `false`,
+   * as the filtration values of a Weighted Alpha complex results from a power product and not from an euclidean
+   * distance. Therefore this template argument should be kept to the default value.
    */
-  template <typename SimplicialComplexForAlpha,
+  template <bool Output_squared_values = true,
+            typename SimplicialComplexForAlpha,
             typename Filtration_value = typename SimplicialComplexForAlpha::Filtration_value>
   bool create_complex(SimplicialComplexForAlpha& complex,
                       Filtration_value max_alpha_square = std::numeric_limits<Filtration_value>::infinity(),
@@ -381,6 +389,9 @@ class Alpha_complex {
                       bool default_filtration_value = false) {
     // Filtration_value must be capable to represent the special value "Not-A-Number"
     static_assert(std::numeric_limits<Filtration_value>::has_quiet_NaN);
+    // Forbids weighted and output square root filtration values - cannot static_assert for python purpose
+    if constexpr(Weighted && !Output_squared_values)
+      throw std::invalid_argument("Weighted Alpha complex cannot output square root filtration values");
     // To support more general types for Filtration_value
     using std::isnan;
 
@@ -388,6 +399,9 @@ class Alpha_complex {
     using Vertex_handle = typename SimplicialComplexForAlpha::Vertex_handle;
     using Simplex_handle = typename SimplicialComplexForAlpha::Simplex_handle;
     using Vector_vertex = std::vector<Vertex_handle>;
+
+    // For users to be able to define their own sqrt function on their desired Filtration_value type
+    using std::sqrt;
 
     if (triangulation_ == nullptr) {
       std::cerr << "Alpha_complex cannot create_complex from a NULL triangulation\n";
@@ -438,7 +452,6 @@ class Alpha_complex {
       }
     }
     // --------------------------------------------------------------------------------------------
-
     if (!default_filtration_value) {
       CGAL::NT_converter<FT, Filtration_value> cgal_converter;
       // --------------------------------------------------------------------------------------------
@@ -458,6 +471,9 @@ class Alpha_complex {
                 if(exact) CGAL::exact(sqrad);
 #endif
                 alpha_complex_filtration = cgal_converter(sqrad);
+                if constexpr (!Output_squared_values) {
+                  alpha_complex_filtration = sqrt(alpha_complex_filtration);
+                }
               }
               complex.assign_filtration(f_simplex, alpha_complex_filtration);
 #ifdef DEBUG_TRACES
@@ -473,14 +489,18 @@ class Alpha_complex {
         cache_.clear();
       }
       // --------------------------------------------------------------------------------------------
-  
+
       // --------------------------------------------------------------------------------------------
       if (!exact)
         // As Alpha value is an approximation, we have to make filtration non decreasing while increasing the dimension
         // Only in not exact version, cf. https://github.com/GUDHI/gudhi-devel/issues/57
         complex.make_filtration_non_decreasing();
       // Remove all simplices that have a filtration value greater than max_alpha_square
-      complex.prune_above_filtration(max_alpha_square);
+      if constexpr (!Output_squared_values) {
+        complex.prune_above_filtration(sqrt(max_alpha_square));
+      } else {
+        complex.prune_above_filtration(max_alpha_square);
+      }
       // --------------------------------------------------------------------------------------------
     }
     return true;
