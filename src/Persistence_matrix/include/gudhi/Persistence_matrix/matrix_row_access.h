@@ -41,7 +41,7 @@ struct Dummy_matrix_row_access
  * @ingroup persistence_matrix
  *
  * @brief Class managing the row access for the inheriting matrix.
- * 
+ *
  * @tparam Row Either boost::intrusive::list<Matrix_entry,...> if @ref PersistenceMatrixOptions::has_intrusive_rows
  * is true, or std::set<Matrix_entry, RowEntryComp> otherwise.
  * @tparam Row_container Either std::map<Index,Row> if @ref PersistenceMatrixOptions::has_removable_rows is
@@ -50,7 +50,7 @@ struct Dummy_matrix_row_access
  * @tparam ID_index @ref IDIdx index type.
  */
 template <typename Row, typename Row_container, bool has_removable_rows, typename ID_index>
-class Matrix_row_access 
+class Matrix_row_access
 {
  public:
   /**
@@ -61,7 +61,7 @@ class Matrix_row_access
    * @brief Constructor reserving space for the given number of rows.
    *
    * Has only an effect if @ref PersistenceMatrixOptions::has_removable_rows is false.
-   * 
+   *
    * @param numberOfRows Number of rows to reserve space for.
    */
   Matrix_row_access(unsigned int numberOfRows) : rows_(new Row_container()) {
@@ -71,7 +71,7 @@ class Matrix_row_access
   }
   /**
    * @brief Copy constructor.
-   * 
+   *
    * @param toCopy Matrix to copy.
    */
   Matrix_row_access(const Matrix_row_access& toCopy)
@@ -83,7 +83,7 @@ class Matrix_row_access
   }
   /**
    * @brief Move constructor.
-   * 
+   *
    * @param other Matrix to move.
    */
   Matrix_row_access(Matrix_row_access&& other) noexcept : rows_(std::exchange(other.rows_, nullptr)) {}
@@ -94,8 +94,8 @@ class Matrix_row_access
 
   /**
    * @brief Returns the row at the given @ref rowindex "row index".
-   * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
-   * 
+   * The type of the row depends on the chosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
+   *
    * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices"
    * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occurred.
    * @return Reference to the row.
@@ -109,8 +109,8 @@ class Matrix_row_access
   }
   /**
    * @brief Returns the row at the given @ref rowindex "row index".
-   * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
-   * 
+   * The type of the row depends on the chosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
+   *
    * @param rowIndex @ref rowindex "Row index" of the row to return: @ref IDIdx for @ref chainmatrix "chain matrices"
    * or updated @ref IDIdx for @ref boundarymatrix "boundary matrices" if swaps occurred.
    * @return Const reference to the row.
@@ -125,7 +125,7 @@ class Matrix_row_access
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_rows is true. Removes the given row
    * from the row container if the row exists and is empty.
-   * 
+   *
    * @param rowIndex @ref rowindex "Row index" of the row to remove.
    */
   void erase_empty_row(ID_index rowIndex) {
