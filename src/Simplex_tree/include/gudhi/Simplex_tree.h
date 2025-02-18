@@ -1135,24 +1135,25 @@ class Simplex_tree {
   }
 
   /**
-   * @brief List of insertion strategies of a simplex \f$ \sigma \$.
+   * @brief List of insertion strategies of a simplex \f$ \sigma \f$.
    */
   enum class Insertion_strategies {
     /**
-     * @brief Let \f$ f \f$ be the filtration value given as argument. Inserts the simplex \f$ \sigma \$ as follows:
-     * - to \f$ f \f$, if \f$ \sigma \$ didn't existed yet,
-     * - if \f$ \sigma \$ was already inserted, let \f$ f' \f$ be its filtration value. The new filtration value will
+     * @brief Let \f$ f \f$ be the filtration value given as argument. Inserts the simplex \f$ \sigma \f$ as follows:
+     * - to \f$ f \f$, if \f$ \sigma \f$ didn't existed yet,
+     * - if \f$ \sigma \f$ was already inserted, let \f$ f' \f$ be its filtration value. The new filtration value will
      * be @ref FiltrationValue::unify_lifetimes (\f$ f \f$, \f$ f' \f$).
-     * Then, the filtration values of all faces of \f$ \sigma \$ are pushed to the union of their old value and of
-     * the new value of \f$ \sigma \$.
+     *
+     * Then, the filtration values of all faces of \f$ \sigma \f$ are pushed to the union of their old value and of
+     * the new value of \f$ \sigma \f$.
      */
     LOWEST,
     /**
-     * @brief Let \f$ f \f$ be the filtration value given as argument. Inserts the simplex \f$ \sigma \$ as follows:
-     * - if \f$ \sigma \$ was not inserted yet, then \f$ \sigma \$ and all its non existing faces are inserted at the
+     * @brief Let \f$ f \f$ be the filtration value given as argument. Inserts the simplex \f$ \sigma \f$ as follows:
+     * - if \f$ \sigma \f$ was not inserted yet, then \f$ \sigma \f$ and all its non existing faces are inserted at the
      * first possible filtration value with minimum filtration value \f$ f \f$.
-     * - if \f$ \sigma \$ existed already, then it and all of its potentially already inserted cofaces are pushed to the
-     * intersection of their old value and \f$ f \$.
+     * - if \f$ \sigma \f$ existed already, then it and all of its potentially already inserted cofaces are pushed to the
+     * intersection of their old value and \f$ f \f$.
      */
     HIGHEST,
     /**
@@ -1397,7 +1398,7 @@ class Simplex_tree {
   /** \brief Initializes the filtration cache, i.e. sorts the
    * simplices according to their order in the filtration.
    * Assumes that the filtration values have a total order.
-   * If not, please use @ref initialize_filtration(Comparator&&, Ignorer&&) instead.
+   * If not, please use @ref initialize_filtration(Comparator&&, Ignorer&&) const instead.
    * Two simplices with same filtration value are ordered by a reverse lexicographic order.
    *
    * It always recomputes the cache, even if one already exists.
@@ -1428,10 +1429,10 @@ class Simplex_tree {
    * lexicographic order. This would generate a valid 1-parameter filtration which can than be interpreted as a line
    * in the 2-parameter module and used with @ref filtration_simplex_range "". Also, the persistence along this line
    * can than be computed with @ref Gudhi::persistent_cohomology::Persistent_cohomology "Persistent_cohomology".
-   * Just note that it is important to call @ref initialize_filtration(Comparator&&, Ignorer&&) explicitly before call
-   * @ref Gudhi::persistent_cohomology::Persistent_cohomology::compute_persistent_cohomology
+   * Just note that it is important to call @ref initialize_filtration(Comparator&&, Ignorer&&) const explicitly before
+   * call @ref Gudhi::persistent_cohomology::Persistent_cohomology::compute_persistent_cohomology
    * "Persistent_cohomology::compute_persistent_cohomology" in that case, otherwise, the computation of persistence
-   * will fail (if no call to @ref initialize_filtration() or @ref initialize_filtration(Comparator&&, Ignorer&&)
+   * will fail (if no call to @ref initialize_filtration() or @ref initialize_filtration(Comparator&&, Ignorer&&) const
    * was made, it will call it it-self with no arguments and the simplices will be wrongly sorted).
    *
    * It always recomputes the cache, even if one already exists.

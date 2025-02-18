@@ -80,7 +80,7 @@ struct FiltrationValue {
   /**
    * @brief Only necessary when serializing the simplex tree. Serialize the given value and insert it at start position.
    * Overloads for native arithmetic types or other simple types are already implemented with
-   * @ref Gudhi::serialize_value_to_char_buffer "".
+   * Gudhi::serialize_value_to_char_buffer.
    * 
    * @param value The value to serialize.
    * @param start Start position where the value is serialized.
@@ -90,10 +90,10 @@ struct FiltrationValue {
 
   /**
    * @brief Only necessary when deserializing the simplex tree. Deserializes the object at the given start position in
-   * an array of char, which was previously serialized by @ref Gudhi::serialize_value_to_char_buffer "".
+   * an array of char, which was previously serialized by serialize_value_to_char_buffer.
    * Then, sets the value with it.
    * Overloads for native arithmetic types or other simple types are already implemented with
-   * @ref Gudhi::deserialize_value_from_char_buffer "".
+   * deserialize_value_from_char_buffer.
    * 
    * @param value The value where to deserialize based on its type.
    * @param start Start position where the value is serialized.
@@ -104,7 +104,7 @@ struct FiltrationValue {
   /**
    * @brief Only necessary when serializing the simplex tree. Returns the serialization size of the given object.
    * Overloads for native arithmetic types or other simple types are already implemented with
-   * @ref Gudhi::simplex_tree::get_serialization_size_of "".
+   * Gudhi::get_serialization_size_of.
    */
   friend std::size_t get_serialization_size_of(const FiltrationValue& value);
 };
