@@ -540,7 +540,7 @@ class Id_to_index_overlay
    * @warning For simple @ref boundarymatrix "boundary matrices" (only storing \f$ R \f$), we assume that
    * @ref get_current_barcode is only called once, when the matrix is completed.
    *
-   * @return A reference to the barcode. The barcode is a vector of @ref Matrix::Bar. A bar stores three information:
+   * @return A reference to the barcode. The barcode is a vector of @ref Matrix::Bar. A bar stores three attributes:
    * the @ref PosIdx birth index, the @ref PosIdx death index and the dimension of the bar.
    */
   const Barcode& get_current_barcode();
