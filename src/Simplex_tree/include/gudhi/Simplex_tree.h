@@ -14,6 +14,7 @@
  *      - 2024/08 Hannah Schreiber: Addition of customizable copy constructor.
  *      - 2024/08 Marc Glisse: Allow storing custom data in simplices.
  *      - 2024/10 Hannah Schreiber: Const version of the Simplex_tree
+ *      - 2025/02 Hannah Schreiber (& David Loiseaux): Insertion strategies for `insert_simplex_and_subfaces`
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -432,7 +433,8 @@ class Simplex_tree {
       : null_vertex_(-1),
       root_(nullptr, null_vertex_),
       filtration_vect_(),
-      dimension_(-1) { }
+      dimension_(-1),
+      dimension_to_be_lowered_(false) { }
 
   /**
    * @brief Construct the simplex tree as the copy of a given simplex tree with eventually different template
@@ -476,10 +478,6 @@ class Simplex_tree {
     std::clog << "Simplex_tree move constructor" << std::endl;
 #endif  // DEBUG_TRACES
     move_from(complex_source);
-
-    // just need to set dimension_ on source to make it available again
-    // (filtration_vect_ and members are already set from the move)
-    complex_source.dimension_ = -1;
   }
 
   /** \brief Destructor; deallocates the whole tree structure. */
@@ -529,6 +527,7 @@ class Simplex_tree {
     null_vertex_ = complex_source.null_vertex_;
     filtration_vect_.clear();
     dimension_ = complex_source.dimension_;
+    dimension_to_be_lowered_ = complex_source.dimension_to_be_lowered_;
     auto root_source = complex_source.root_;
 
     // root members copy
@@ -562,6 +561,7 @@ class Simplex_tree {
     null_vertex_ = complex_source.null_vertex_;
     filtration_vect_.clear();
     dimension_ = complex_source.dimension_;
+    dimension_to_be_lowered_ = complex_source.dimension_to_be_lowered_;
     auto root_source = complex_source.root_;
 
     // root members copy
@@ -618,7 +618,8 @@ class Simplex_tree {
     null_vertex_ = std::move(complex_source.null_vertex_);
     root_ = std::move(complex_source.root_);
     filtration_vect_ = std::move(complex_source.filtration_vect_);
-    dimension_ = complex_source.dimension_;
+    dimension_ = std::exchange(complex_source.dimension_, -1);
+    dimension_to_be_lowered_ = std::exchange(complex_source.dimension_to_be_lowered_, false);
     if constexpr (Options::link_nodes_by_label) {
       nodes_label_to_list_.swap(complex_source.nodes_label_to_list_);
     }
@@ -1135,9 +1136,10 @@ class Simplex_tree {
   }
 
   /**
-   * @brief List of insertion strategies of a simplex \f$ \sigma \f$.
+   * @brief List of insertion strategies for @ref insert_simplex_and_subfaces, which takes a simplex \f$ \sigma \f$
+   * and a filtration value \f$ f \f$ as argument.
    */
-  enum class Insertion_strategies {
+  enum class Insertion_strategy {
     /**
      * @brief Let \f$ f \f$ be the filtration value given as argument. Inserts the simplex \f$ \sigma \f$ as follows:
      * - to \f$ f \f$, if \f$ \sigma \f$ didn't existed yet,
@@ -1150,8 +1152,9 @@ class Simplex_tree {
     LOWEST,
     /**
      * @brief Let \f$ f \f$ be the filtration value given as argument. Inserts the simplex \f$ \sigma \f$ as follows:
-     * - if \f$ \sigma \f$ was not inserted yet, then \f$ \sigma \f$ and all its non existing faces are inserted at the
-     * first possible filtration value with minimum filtration value \f$ f \f$.
+     * - if \f$ \sigma \f$ was not inserted yet, then \f$ \sigma \f$ and all its faces, which are not already included
+     * in the complex, are inserted at either \f$ f \f$ or at the first possible filtration value when \f$ f \f$ is too
+     * low (to insure the validity of the filtration).
      * - if \f$ \sigma \f$ existed already, then it and all of its potentially already inserted cofaces are pushed to the
      * intersection of their old value and \f$ f \f$.
      */
@@ -1189,7 +1192,7 @@ class Simplex_tree {
   std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(
       const InputVertexRange& Nsimplex,
       const Filtration_value& filtration = Filtration_value(),
-      Insertion_strategies insertion_strategy = Insertion_strategies::LOWEST)
+      Insertion_strategy insertion_strategy = Insertion_strategy::LOWEST)
   {
     auto first = std::begin(Nsimplex);
     auto last = std::end(Nsimplex);
@@ -1208,9 +1211,9 @@ class Simplex_tree {
     dimension_ = (std::max)(dimension_, static_cast<int>(std::distance(copy.begin(), copy.end())) - 1);
 
     if constexpr (Options::store_filtration){
-      if (insertion_strategy == Insertion_strategies::LOWEST)
+      if (insertion_strategy == Insertion_strategy::LOWEST)
         return _rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
-      else if (insertion_strategy == Insertion_strategies::HIGHEST)
+      else if (insertion_strategy == Insertion_strategy::HIGHEST)
         return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), filtration);
       else
         return _insert_simplex_and_subfaces_at_possible(root(), copy.begin(), copy.end());
@@ -2990,7 +2993,7 @@ class Simplex_tree {
   mutable std::vector<Simplex_handle> filtration_vect_;
   /** \brief Upper bound on the dimension of the simplicial complex.*/
   mutable int dimension_;
-  mutable bool dimension_to_be_lowered_ = false;
+  mutable bool dimension_to_be_lowered_;
 };
 
 // Print a Simplex_tree in os.
