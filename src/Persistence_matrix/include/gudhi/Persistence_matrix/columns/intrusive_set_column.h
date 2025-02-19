@@ -42,7 +42,6 @@ namespace persistence_matrix {
  * are stored uniquely in the underlying container.
  *
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
- * @tparam Entry_constructor Factory of @ref Entry classes.
  */
 template <class Master_matrix>
 class Intrusive_set_column : public Master_matrix::Row_access_option,
@@ -61,7 +60,8 @@ class Intrusive_set_column : public Master_matrix::Row_access_option,
  private:
   using Field_operators = typename Master_matrix::Field_operators;
   using Column_support =
-      boost::intrusive::set<Entry, boost::intrusive::constant_time_size<false>,
+      boost::intrusive::set<Entry,
+                            boost::intrusive::constant_time_size<false>,
                             boost::intrusive::base_hook<typename Master_matrix::Base_hook_matrix_set_column> >;
   using Entry_constructor = typename Master_matrix::Entry_constructor;
 
@@ -102,7 +102,8 @@ class Intrusive_set_column : public Master_matrix::Row_access_option,
   std::size_t size() const;
 
   template <class Row_index_map>
-  void reorder(const Row_index_map& valueMap, [[maybe_unused]] Index columnIndex = -1);
+  void reorder(const Row_index_map& valueMap,
+               [[maybe_unused]] Index columnIndex = Master_matrix::template get_null_value<Index>());
   void clear();
   void clear(ID_index rowIndex);
 
@@ -152,6 +153,7 @@ class Intrusive_set_column : public Master_matrix::Row_access_option,
       return true;
     }
   }
+
   friend bool operator<(const Intrusive_set_column& c1, const Intrusive_set_column& c2) {
     if (&c1 == &c2) return false;
 
@@ -263,7 +265,8 @@ inline Intrusive_set_column<Master_matrix>::Intrusive_set_column(Column_settings
       operators_(nullptr),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor))
 {
-  if (operators_ == nullptr && entryPool_ == nullptr) return;  // to allow default constructor which gives a dummy column
+  if (operators_ == nullptr && entryPool_ == nullptr)
+    return;  // to allow default constructor which gives a dummy column
   if constexpr (!Master_matrix::Option_list::is_z2) {
     operators_ = &(colSettings->operators);
   }
@@ -304,9 +307,13 @@ inline Intrusive_set_column<Master_matrix>::Intrusive_set_column(Index columnInd
       Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
       Chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : *std::prev(nonZeroRowIndices.end());
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : *std::prev(nonZeroRowIndices.end());
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : std::prev(nonZeroRowIndices.end())->first;
         }
       }()),
       operators_(nullptr),
@@ -336,9 +343,13 @@ inline Intrusive_set_column<Master_matrix>::Intrusive_set_column(const Container
       Dim_opt(dimension),
       Chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : *std::prev(nonZeroRowIndices.end());
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : *std::prev(nonZeroRowIndices.end());
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : std::prev(nonZeroRowIndices.end())->first;
         }
       }()),
       operators_(nullptr),
@@ -367,9 +378,13 @@ inline Intrusive_set_column<Master_matrix>::Intrusive_set_column(Index columnInd
       Dim_opt(dimension),
       Chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : *std::prev(nonZeroRowIndices.end());
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : *std::prev(nonZeroRowIndices.end());
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : std::prev(nonZeroRowIndices.end())->first;
         }
       }()),
       operators_(nullptr),
@@ -489,7 +504,8 @@ inline std::size_t Intrusive_set_column<Master_matrix>::size() const
 
 template <class Master_matrix>
 template <class Row_index_map>
-inline void Intrusive_set_column<Master_matrix>::reorder(const Row_index_map& valueMap, [[maybe_unused]] Index columnIndex)
+inline void Intrusive_set_column<Master_matrix>::reorder(const Row_index_map& valueMap,
+                                                         [[maybe_unused]] Index columnIndex)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns.");
@@ -499,13 +515,14 @@ inline void Intrusive_set_column<Master_matrix>::reorder(const Row_index_map& va
   if constexpr (Master_matrix::Option_list::has_row_access) {
     for (auto it = column_.begin(); it != column_.end();) {
       Entry* newEntry = entryPool_->construct(
-          columnIndex == static_cast<Index>(-1) ? RA_opt::columnIndex_ : columnIndex, valueMap.at(it->get_row_index()));
+          columnIndex == Master_matrix::template get_null_value<Index>() ? RA_opt::columnIndex_ : columnIndex,
+          valueMap.at(it->get_row_index()));
       if constexpr (!Master_matrix::Option_list::is_z2) {
         newEntry->set_element(it->get_element());
       }
       newSet.insert(newSet.end(), *newEntry);
-      _delete_entry(it);                                              // increases it
-      if constexpr (Master_matrix::Option_list::has_intrusive_rows)  // intrusive list
+      _delete_entry(it);                                          // increases it
+      if constexpr (Master_matrix::Option_list::has_intrusive_rows) // intrusive list
         RA_opt::insert_entry(newEntry->get_row_index(), newEntry);
     }
 
@@ -557,7 +574,7 @@ inline typename Intrusive_set_column<Master_matrix>::ID_index Intrusive_set_colu
                 "Method not available for base columns.");  // could technically be, but is the notion useful then?
 
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
-    if (column_.empty()) return -1;
+    if (column_.empty()) return Master_matrix::template get_null_value<ID_index>();
     return column_.rbegin()->get_row_index();
   } else {
     return Chain_opt::get_pivot();
@@ -578,7 +595,7 @@ Intrusive_set_column<Master_matrix>::get_pivot_value() const
       if (column_.empty()) return 0;
       return column_.rbegin()->get_element();
     } else {
-      if (Chain_opt::get_pivot() == static_cast<ID_index>(-1)) return 0;
+      if (Chain_opt::get_pivot() == Master_matrix::template get_null_value<ID_index>()) return 0;
       auto it = column_.find(Entry(Chain_opt::get_pivot()));
       GUDHI_CHECK(it != column_.end(),
                   "Intrusive_set_column::get_pivot_value - Pivot not found only if the column was misused.");
@@ -710,7 +727,8 @@ inline Intrusive_set_column<Master_matrix>& Intrusive_set_column<Master_matrix>:
 template <class Master_matrix>
 template <class Entry_range>
 inline Intrusive_set_column<Master_matrix>& Intrusive_set_column<Master_matrix>::multiply_target_and_add(
-    const Field_element& val, const Entry_range& column)
+    const Field_element& val,
+    const Entry_range& column)
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Entry_range, Intrusive_set_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
@@ -734,7 +752,8 @@ inline Intrusive_set_column<Master_matrix>& Intrusive_set_column<Master_matrix>:
 
 template <class Master_matrix>
 inline Intrusive_set_column<Master_matrix>& Intrusive_set_column<Master_matrix>::multiply_target_and_add(
-    const Field_element& val, Intrusive_set_column& column)
+    const Field_element& val,
+    Intrusive_set_column& column)
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
@@ -772,7 +791,8 @@ inline Intrusive_set_column<Master_matrix>& Intrusive_set_column<Master_matrix>:
 template <class Master_matrix>
 template <class Entry_range>
 inline Intrusive_set_column<Master_matrix>& Intrusive_set_column<Master_matrix>::multiply_source_and_add(
-    const Entry_range& column, const Field_element& val)
+    const Entry_range& column,
+    const Field_element& val)
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Entry_range, Intrusive_set_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
@@ -793,7 +813,8 @@ inline Intrusive_set_column<Master_matrix>& Intrusive_set_column<Master_matrix>:
 
 template <class Master_matrix>
 inline Intrusive_set_column<Master_matrix>& Intrusive_set_column<Master_matrix>::multiply_source_and_add(
-    Intrusive_set_column& column, const Field_element& val)
+    Intrusive_set_column& column,
+    const Field_element& val)
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
@@ -863,7 +884,9 @@ inline void Intrusive_set_column<Master_matrix>::_delete_entry(iterator& it)
 
 template <class Master_matrix>
 inline typename Intrusive_set_column<Master_matrix>::Entry* Intrusive_set_column<Master_matrix>::_insert_entry(
-    const Field_element& value, ID_index rowIndex, const iterator& position)
+    const Field_element& value,
+    ID_index rowIndex,
+    const iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);

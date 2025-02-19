@@ -474,13 +474,13 @@ void test_boundary_insertion() {
   BOOST_CHECK_EQUAL(m.get_column_dimension(5), 1);
   BOOST_CHECK_EQUAL(m.get_column_dimension(6), 2);
 
-  BOOST_CHECK_EQUAL(m.get_pivot(0), static_cast<typename Matrix::ID_index>(-1));
-  BOOST_CHECK_EQUAL(m.get_pivot(1), static_cast<typename Matrix::ID_index>(-1));
-  BOOST_CHECK_EQUAL(m.get_pivot(2), static_cast<typename Matrix::ID_index>(-1));
+  BOOST_CHECK_EQUAL(m.get_pivot(0), Matrix::template get_null_value<typename Matrix::ID_index>());
+  BOOST_CHECK_EQUAL(m.get_pivot(1), Matrix::template get_null_value<typename Matrix::ID_index>());
+  BOOST_CHECK_EQUAL(m.get_pivot(2), Matrix::template get_null_value<typename Matrix::ID_index>());
   BOOST_CHECK_EQUAL(m.get_pivot(3), 1);
   BOOST_CHECK_EQUAL(m.get_pivot(4), 2);
   if constexpr (is_RU<Matrix>()) {
-    BOOST_CHECK_EQUAL(m.get_pivot(5), static_cast<typename Matrix::ID_index>(-1));  // was reduced
+    BOOST_CHECK_EQUAL(m.get_pivot(5), Matrix::template get_null_value<typename Matrix::ID_index>());  // was reduced
   } else {
     BOOST_CHECK_EQUAL(m.get_pivot(5), 2);  // not reduced
   }
@@ -855,7 +855,7 @@ void test_boundary_maximal_simplex_removal() {
 
   test_content_equality(columns, m);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 7);
-  // pairing always true for boundary for now (only thing differenciating it from base)
+  // pairing always true for boundary for now (only thing differentiating it from base)
   BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, 6);
 
   m.remove_last();
@@ -865,7 +865,7 @@ void test_boundary_maximal_simplex_removal() {
 
   test_content_equality(columns, m);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 6);
-  BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, static_cast<typename Matrix::Pos_index>(-1));
+  BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, Matrix::template get_null_value<typename Matrix::ID_index>());
 }
 
 template <class Matrix>
@@ -891,7 +891,8 @@ void test_ru_maximal_simplex_removal() {
   test_content_equality(columns, m);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 6);
   if constexpr (Matrix::Option_list::has_column_pairings) {
-    BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(m.get_current_barcode().back().death,
+                      Matrix::template get_null_value<typename Matrix::ID_index>());
   }
 }
 
@@ -916,7 +917,8 @@ void test_chain_maximal_simplex_removal(Matrix& m) {
   test_content_equality(columns, m);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 6);
   if constexpr (Matrix::Option_list::has_column_pairings) {
-    BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(m.get_current_barcode().back().death,
+                      Matrix::template get_null_value<typename Matrix::ID_index>());
   }
 }
 
@@ -1109,8 +1111,7 @@ void test_ru_operation() {
     if constexpr (is_indexed_by_position<Matrix>()) {
       i = 0;
       for (auto& b : uColumns) {
-        test_column_equality<typename Matrix::Column>(b,
-                                                           get_column_content_via_iterators(m.get_column(i++, false)));
+        test_column_equality<typename Matrix::Column>(b, get_column_content_via_iterators(m.get_column(i++, false)));
       }
     }
 
@@ -1126,8 +1127,7 @@ void test_ru_operation() {
     if constexpr (is_indexed_by_position<Matrix>()) {
       i = 0;
       for (auto& b : uColumns) {
-        test_column_equality<typename Matrix::Column>(b,
-                                                           get_column_content_via_iterators(m.get_column(i++, false)));
+        test_column_equality<typename Matrix::Column>(b, get_column_content_via_iterators(m.get_column(i++, false)));
       }
     }
   }
@@ -1386,10 +1386,10 @@ void test_barcode() {
   std::set<std::tuple<int, int, int>, BarComp> bars3;
   // bars are not ordered the same for all matrices
   for (auto it = barcode.begin(); it != barcode.end(); ++it) {
-    //three access possibilities
+    // three access possibilities
     bars1.emplace(it->dim, it->birth, it->death);
     bars2.emplace(std::get<2>(*it), std::get<0>(*it), std::get<1>(*it));
-    auto [ x, y, z ] = *it;
+    auto [x, y, z] = *it;
     bars3.emplace(z, x, y);
   }
   auto it = bars1.begin();
@@ -1551,7 +1551,7 @@ void test_shifted_barcode1() {
     }
   }
 
-  if constexpr (Matrix::Option_list::column_indexation_type == Column_indexation_types::IDENTIFIER){
+  if constexpr (Matrix::Option_list::column_indexation_type == Column_indexation_types::IDENTIFIER) {
     test_column_equality<C>(reducedMatrix[0], get_column_content_via_iterators(m.get_column(0)));
     test_column_equality<C>(reducedMatrix[1], get_column_content_via_iterators(m.get_column(1)));
     test_column_equality<C>(reducedMatrix[2], get_column_content_via_iterators(m.get_column(2)));
@@ -1578,10 +1578,10 @@ void test_shifted_barcode1() {
   std::set<std::tuple<int, int, int>, BarComp> bars3;
   // bars are not ordered the same for all matrices
   for (auto it = barcode.begin(); it != barcode.end(); ++it) {
-    //three access possibilities
+    // three access possibilities
     bars1.emplace(it->dim, it->birth, it->death);
     bars2.emplace(std::get<2>(*it), std::get<0>(*it), std::get<1>(*it));
-    auto [ x, y, z ] = *it;
+    auto [x, y, z] = *it;
     bars3.emplace(z, x, y);
   }
   auto it = bars1.begin();
@@ -1709,7 +1709,7 @@ void test_shifted_barcode2() {
       reducedMatrix.push_back({{7, 1}, {13, 1}});
     }
   }
-  if constexpr (Matrix::Option_list::column_indexation_type == Column_indexation_types::IDENTIFIER){
+  if constexpr (Matrix::Option_list::column_indexation_type == Column_indexation_types::IDENTIFIER) {
     test_column_equality<C>(reducedMatrix[0], get_column_content_via_iterators(m.get_column(2)));
     test_column_equality<C>(reducedMatrix[1], get_column_content_via_iterators(m.get_column(3)));
     test_column_equality<C>(reducedMatrix[2], get_column_content_via_iterators(m.get_column(5)));
@@ -1728,10 +1728,10 @@ void test_shifted_barcode2() {
   std::set<std::tuple<int, int, int>, BarComp> bars3;
   // bars are not ordered the same for all matrices
   for (auto it = barcode.begin(); it != barcode.end(); ++it) {
-    //three access possibilities
+    // three access possibilities
     bars1.emplace(it->dim, it->birth, it->death);
     bars2.emplace(std::get<2>(*it), std::get<0>(*it), std::get<1>(*it));
-    auto [ x, y, z ] = *it;
+    auto [x, y, z] = *it;
     bars3.emplace(z, x, y);
   }
   auto it = bars1.begin();
@@ -1812,7 +1812,7 @@ void test_base_swaps() {
   test_content_equality(columns, m);
 }
 
-// assumes matrix was build with `build_longer_boundary_matrix` and was given the right comparision methods for
+// assumes matrix was build with `build_longer_boundary_matrix` and was given the right comparison methods for
 // non-barcode
 template <class Matrix>
 void test_vine_swap_with_position_index(Matrix& m) {
@@ -1850,7 +1850,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -1909,7 +1909,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -1960,7 +1960,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2011,7 +2011,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2062,7 +2062,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2129,7 +2129,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2151,7 +2151,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
   }
 }
 
-// assumes matrix was build with `build_longer_boundary_matrix` and was given the right comparision methods for
+// assumes matrix was build with `build_longer_boundary_matrix` and was given the right comparison methods for
 // non-barcode
 template <class Matrix>
 void test_vine_swap_with_id_index(Matrix& m) {
@@ -2189,7 +2189,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2248,7 +2248,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2299,7 +2299,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2350,7 +2350,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2401,7 +2401,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
@@ -2473,7 +2473,7 @@ void test_vine_swap_with_id_index(Matrix& m) {
     auto it = barcode.begin();
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 0);
-    BOOST_CHECK_EQUAL(it->death, static_cast<typename Matrix::Pos_index>(-1));
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 1);
