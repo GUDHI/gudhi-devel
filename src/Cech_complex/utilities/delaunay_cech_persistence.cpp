@@ -5,6 +5,7 @@
  *    Copyright (C) 2024 Inria
  *
  *    Modification(s):
+ *      - 2024/10 Vincent Rouvreau: Add output_squared_values argument to enable/disable squared radii computation
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -31,14 +32,17 @@ using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
 using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<Simplex_tree, Field_Zp>;
 
 void program_options(int argc, char* argv[], std::string& off_file_points, bool& exact, bool& fast,
-                     std::string& pers_diag_file, Filtration_value& max_radius, int& p,
-                     Filtration_value& min_persistence);
+                     bool& output_squared_values, std::string& pers_diag_file, Filtration_value& max_squared_radius,
+                     int& p, Filtration_value& min_persistence);
 
 template<class Kernel>
-Simplex_tree create_simplex_tree(const std::string &off_file_points, bool exact_version, Filtration_value max_radius) {
+Simplex_tree create_simplex_tree(const std::string &off_file_points, bool exact_version,
+                                 Filtration_value max_squared_radius, bool output_squared_values) {
   using Point = typename Kernel::Point_d;
   using Points_off_reader = Gudhi::Points_off_reader<Point>;
   using Delaunay_complex = Gudhi::alpha_complex::Alpha_complex<Kernel>;
+
+  using std::sqrt;
 
   Simplex_tree stree;
 
@@ -48,8 +52,13 @@ Simplex_tree create_simplex_tree(const std::string &off_file_points, bool exact_
   delaunay_complex_from_file.create_complex(stree, std::numeric_limits< Filtration_value >::infinity(),
                                             // exact can be false (or true), as default_filtration_value is set to true
                                             false, true);
-  Gudhi::cech_complex::assign_MEB_filtration(Kernel(), stree, point_cloud, exact_version);
-  stree.prune_above_filtration(max_radius);
+  if (output_squared_values) {
+    Gudhi::cech_complex::assign_MEB_filtration<true>(Kernel(), stree, point_cloud, exact_version);
+  } else {
+    Gudhi::cech_complex::assign_MEB_filtration<false>(Kernel(), stree, point_cloud, exact_version);
+    max_squared_radius = sqrt(max_squared_radius);
+  }
+  stree.prune_above_filtration(max_squared_radius);
   return stree;
 }
 
@@ -58,15 +67,16 @@ int main(int argc, char* argv[]) {
   std::string pers_diag_file;
   bool exact_version = false;
   bool fast_version = false;
-  Filtration_value max_radius;
+  bool output_squared_values = false;
+  Filtration_value max_squared_radius;
   int p;
   Filtration_value min_persistence;
 
-  program_options(argc, argv, off_file_points, exact_version, fast_version, pers_diag_file, max_radius, p,
-                  min_persistence);
+  program_options(argc, argv, off_file_points, exact_version, fast_version, output_squared_values, pers_diag_file,
+                  max_squared_radius, p, min_persistence);
 
   if ((exact_version) && (fast_version)) {
-    std::cerr << "You cannot set the exact and the fast version." << std::endl;
+      std::cerr << "Exact and fast version cannot be set together." << std::endl;
     exit(-1);
   }
 
@@ -75,11 +85,11 @@ int main(int argc, char* argv[]) {
     // WARNING : CGAL::Epick_d is fast but not safe (unlike CGAL::Epeck_d)
     // (i.e. when the points are on a grid)
     using Fast_kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
-    stree = create_simplex_tree<Fast_kernel>(off_file_points, exact_version, max_radius);
+    stree = create_simplex_tree<Fast_kernel>(off_file_points, exact_version, max_squared_radius, output_squared_values);
   } else {
     std::clog << "exact_version = " << exact_version << "\n";
     using Kernel = CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>;
-    stree = create_simplex_tree<Kernel>(off_file_points, exact_version, max_radius);
+    stree = create_simplex_tree<Kernel>(off_file_points, exact_version, max_squared_radius, output_squared_values);
   }
 
   std::clog << "The complex contains " << stree.num_simplices() << " simplices \n";
@@ -95,7 +105,7 @@ int main(int argc, char* argv[]) {
 
   pcoh.compute_persistent_cohomology(min_persistence);
 
-  // Output the persitence diagram in pers_diag_file
+  // Output the persistence diagram in pers_diag_file
   if (pers_diag_file.empty()) {
     pcoh.output_diagram();
   } else {
@@ -108,7 +118,7 @@ int main(int argc, char* argv[]) {
 }
 
 void program_options(int argc, char* argv[], std::string& off_file_points, bool& exact, bool& fast,
-                     std::string& pers_diag_file, Filtration_value& max_radius, int& p,
+                     bool& output_squared_values, std::string& pers_diag_file, Filtration_value& max_squared_radius, int& p,
                      Filtration_value& min_persistence) {
   namespace po = boost::program_options;
   po::options_description hidden("Hidden options");
@@ -116,16 +126,19 @@ void program_options(int argc, char* argv[], std::string& off_file_points, bool&
                        "Name of an OFF file containing a point set.\n");
 
   po::options_description visible("Allowed options", 100);
+  std::string str_output_squared_values;
+  Filtration_value inf = std::numeric_limits<Filtration_value>::infinity();
   visible.add_options()("help,h", "produce help message")(
       "exact,e", po::bool_switch(&exact),
       "To activate exact version of Delaunay-Cech complex (default is false, not available if fast is set)")(
       "fast,f", po::bool_switch(&fast),
       "To activate fast version of Delaunay-Cech complex (default is false, not available if exact is set)")(
+      "squared-filtrations,s", po::value<std::string>(&str_output_squared_values)->default_value(std::string("on")),
+      "To activate square filtration computations (default is 'on', can be 'off')")(
       "output-file,o", po::value<std::string>(&pers_diag_file)->default_value(std::string()),
       "Name of file in which the persistence diagram is written. Default print in standard output")(
-      "max-radius,r",
-      po::value<Filtration_value>(&max_radius)->default_value(std::numeric_limits<Filtration_value>::infinity()),
-      "Maximal length of an edge for the Delaunay-Cech complex construction.")(
+      "max-squared-radius,r", po::value<Filtration_value>(&max_squared_radius)->default_value(inf),
+      "Maximal squared length of an edge for the Delaunay-Cech complex construction.")(
       "field-charac,p", po::value<int>(&p)->default_value(11),
       "Characteristic p of the coefficient field Z/pZ for computing homology.")(
       "min-persistence,m", po::value<Filtration_value>(&min_persistence),
@@ -150,6 +163,9 @@ void program_options(int argc, char* argv[], std::string& off_file_points, bool&
     std::clog << " * fast: right combinatorics, values can be arbitrarily bad\n";
     std::clog << " * safe (default): values can have a relative error at most 1e-5\n";
     std::clog << " * exact: true values rounded to double.\n \n";
+    std::clog << "Default Delaunay-Cech complex filtrations computation are squared radius of the MEB.\n";
+    std::clog << "If you are interested in the circumradius of the simplex as filtration values, pass the ";
+    std::clog << "'--squared-filtrations off' (or '-s off') option.\n";
     std::clog << "The output diagram contains one bar per line, written with the convention: \n";
     std::clog << "   p   dim b d \n";
     std::clog << "where dim is the dimension of the homological feature,\n";
@@ -158,6 +174,20 @@ void program_options(int argc, char* argv[], std::string& off_file_points, bool&
 
     std::clog << "Usage: " << argv[0] << " [options] input-file" << std::endl << std::endl;
     std::clog << visible << std::endl;
+    exit(-1);
+  }
+
+  // To lower case
+  std::transform(str_output_squared_values.begin(), str_output_squared_values.end(), str_output_squared_values.begin(),
+                 [](unsigned char c){ return std::tolower(c); });
+
+  if (str_output_squared_values == "on")
+    output_squared_values = true;
+  else if (str_output_squared_values == "off")
+    output_squared_values = false;
+  else {
+    std::clog << "'--squared-filtrations' (or '-s') option cannot be set with '" << str_output_squared_values;
+    std::clog << "'. Only 'on' or 'off' are accepted.";
     exit(-1);
   }
 }

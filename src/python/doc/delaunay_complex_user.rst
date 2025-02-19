@@ -60,45 +60,43 @@ This example builds the Delaunay Čech complex from the given points:
     points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
     cpx = DelaunayCechComplex(points=points)
 
-    stree = cpx.create_simplex_tree()
-    print('Complex is of dimension ', stree.dimension(), ' - ',
-      stree.num_simplices(), ' simplices - ', stree.num_vertices(), ' vertices.')
-
-    fmt = '%s -> %.2f'
+    stree = cpx.create_simplex_tree(output_squared_values=False)
+    print(f"Complex is of dimension {stree.dimension()} - {stree.num_simplices()} simplices - ",
+          f"{stree.num_vertices()} vertices.")
     for filtered_value in stree.get_filtration():
-        print(fmt % tuple(filtered_value))
+        print("%s -> %.2f" % tuple(filtered_value))
 
 
 The output is:
 
 .. testoutput::
 
-   Complex is of dimension  2  -  25  simplices -  7  vertices.
-   [0] -> 0.00
-   [1] -> 0.00
-   [2] -> 0.00
-   [3] -> 0.00
-   [4] -> 0.00
-   [5] -> 0.00
-   [6] -> 0.00
-   [2, 3] -> 6.25
-   [4, 5] -> 7.25
-   [0, 2] -> 8.50
-   [0, 1] -> 9.25
-   [1, 3] -> 10.00
-   [1, 2] -> 11.25
-   [1, 2, 3] -> 12.50
-   [0, 1, 2] -> 13.00
-   [5, 6] -> 13.25
-   [2, 4] -> 20.00
-   [4, 6] -> 22.50
-   [4, 5, 6] -> 22.50
-   [3, 6] -> 30.25
-   [2, 6] -> 36.50
-   [2, 3, 6] -> 36.50
-   [2, 4, 6] -> 37.24
-   [0, 4] -> 42.50
-   [0, 2, 4] -> 42.50
+    Complex is of dimension 2 - 25 simplices -  7 vertices.
+    [0] -> 0.00
+    [1] -> 0.00
+    [2] -> 0.00
+    [3] -> 0.00
+    [4] -> 0.00
+    [5] -> 0.00
+    [6] -> 0.00
+    [2, 3] -> 2.50
+    [4, 5] -> 2.69
+    [0, 2] -> 2.92
+    [0, 1] -> 3.04
+    [1, 3] -> 3.16
+    [1, 2] -> 3.35
+    [1, 2, 3] -> 3.54
+    [0, 1, 2] -> 3.60
+    [5, 6] -> 3.64
+    [2, 4] -> 4.47
+    [4, 6] -> 4.74
+    [4, 5, 6] -> 4.74
+    [3, 6] -> 5.50
+    [2, 6] -> 6.04
+    [2, 3, 6] -> 6.04
+    [2, 4, 6] -> 6.10
+    [0, 4] -> 6.52
+    [0, 2, 4] -> 6.52
 
 **Note:** The Delaunay Čech complex can be easily replaced by the :math:`\alpha`-complex, but note that the resulting
 filtration values will be different.
@@ -108,6 +106,10 @@ Weighted version
 
 A weighted version for :math:`\alpha`-complex is available. It is like a usual :math:`\alpha`-complex, but based on a
 `CGAL regular triangulation <https://doc.cgal.org/latest/Triangulation/index.html#TriangulationSecRT>`_.
+
+In this case, the filtration value of each simplex is computed as the power distance of the smallest power sphere
+passing through all of its vertices. Weighted Alpha complex can have negative filtration values.
+If `output_squared_values` is set to `False`, filtration values will be `NaN` in this case.
 
 This example builds the weighted :math:`\alpha`-complex of a small molecule, where atoms have different sizes.
 It is taken from
@@ -125,44 +127,43 @@ Then, it is asked to display information about the :math:`\alpha`-complex.
                                   [ 2.,  2.,  2.]],
                           weights = [4., 4., 4., 4., 1.])
 
-    stree = wgt_ac.create_simplex_tree()
-    print('Weighted alpha complex is of dimension ', stree.dimension(), ' - ',
-          stree.num_simplices(), ' simplices - ', stree.num_vertices(), ' vertices.')
-    fmt = '%s -> %.2f'
+    stree = wgt_ac.create_simplex_tree(output_squared_values=True)
+    print(f"Weighted alpha is of dimension {stree.dimension()} - {stree.num_simplices()} simplices - ",
+          f"{stree.num_vertices()} vertices.")
     for simplex in stree.get_simplices():
-        print(fmt % tuple(simplex))
+        print("%s -> %.2f" % tuple(simplex))
 
 The output is:
 
 .. testoutput::
 
-   Weighted alpha complex is of dimension  3  -  29  simplices -  5  vertices.
-   [0, 1, 2, 3] -> -1.00
-   [0, 1, 2] -> -1.33
-   [0, 1, 3, 4] -> 95.00
-   [0, 1, 3] -> -1.33
-   [0, 1, 4] -> 95.00
-   [0, 1] -> -2.00
-   [0, 2, 3, 4] -> 95.00
-   [0, 2, 3] -> -1.33
-   [0, 2, 4] -> 95.00
-   [0, 2] -> -2.00
-   [0, 3, 4] -> 23.00
-   [0, 3] -> -2.00
-   [0, 4] -> 23.00
-   [0] -> -4.00
-   [1, 2, 3, 4] -> 95.00
-   [1, 2, 3] -> -1.33
-   [1, 2, 4] -> 95.00
-   [1, 2] -> -2.00
-   [1, 3, 4] -> 23.00
-   [1, 3] -> -2.00
-   [1, 4] -> 23.00
-   [1] -> -4.00
-   [2, 3, 4] -> 23.00
-   [2, 3] -> -2.00
-   [2, 4] -> 23.00
-   [2] -> -4.00
-   [3, 4] -> -1.00
-   [3] -> -4.00
-   [4] -> -1.00
+    Weighted alpha is of dimension 3 - 29 simplices -  5 vertices.
+    [0, 1, 2, 3] -> -1.00
+    [0, 1, 2] -> -1.33
+    [0, 1, 3, 4] -> 95.00
+    [0, 1, 3] -> -1.33
+    [0, 1, 4] -> 95.00
+    [0, 1] -> -2.00
+    [0, 2, 3, 4] -> 95.00
+    [0, 2, 3] -> -1.33
+    [0, 2, 4] -> 95.00
+    [0, 2] -> -2.00
+    [0, 3, 4] -> 23.00
+    [0, 3] -> -2.00
+    [0, 4] -> 23.00
+    [0] -> -4.00
+    [1, 2, 3, 4] -> 95.00
+    [1, 2, 3] -> -1.33
+    [1, 2, 4] -> 95.00
+    [1, 2] -> -2.00
+    [1, 3, 4] -> 23.00
+    [1, 3] -> -2.00
+    [1, 4] -> 23.00
+    [1] -> -4.00
+    [2, 3, 4] -> 23.00
+    [2, 3] -> -2.00
+    [2, 4] -> 23.00
+    [2] -> -4.00
+    [3, 4] -> -1.00
+    [3] -> -4.00
+    [4] -> -1.00
