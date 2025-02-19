@@ -1179,7 +1179,7 @@ class Simplex_tree {
    * Otherwise, see `insertion_strategy` below. Default value: default constructor.
    * @param insertion_strategy Ignored if @ref SimplexTreeOptions::store_filtration is false.
    * Indicates where to insert the simplex and its faces in the filtration with respect to the value given by
-   * `filtration`. See @ref Insertion_strategies for more details. Default value: @ref Insertion_strategies::LOWEST.
+   * `filtration`. See @ref Insertion_strategy for more details. Default value: @ref Insertion_strategy::LOWEST.
    * @return If the new simplex is inserted successfully (i.e. it was not in the
    * simplicial complex yet) the bool is set to true and the Simplex_handle is the handle assigned
    * to the new simplex.
