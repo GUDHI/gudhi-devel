@@ -855,7 +855,7 @@ void test_boundary_maximal_simplex_removal() {
 
   test_content_equality(columns, m);
   BOOST_CHECK_EQUAL(m.get_number_of_columns(), 7);
-  // pairing always true for boundary for now (only thing differenciating it from base)
+  // pairing always true for boundary for now (only thing differentiating it from base)
   BOOST_CHECK_EQUAL(m.get_current_barcode().back().death, 6);
 
   m.remove_last();
@@ -1812,7 +1812,7 @@ void test_base_swaps() {
   test_content_equality(columns, m);
 }
 
-// assumes matrix was build with `build_longer_boundary_matrix` and was given the right comparision methods for
+// assumes matrix was build with `build_longer_boundary_matrix` and was given the right comparison methods for
 // non-barcode
 template <class Matrix>
 void test_vine_swap_with_position_index(Matrix& m) {
@@ -2151,7 +2151,7 @@ void test_vine_swap_with_position_index(Matrix& m) {
   }
 }
 
-// assumes matrix was build with `build_longer_boundary_matrix` and was given the right comparision methods for
+// assumes matrix was build with `build_longer_boundary_matrix` and was given the right comparison methods for
 // non-barcode
 template <class Matrix>
 void test_vine_swap_with_id_index(Matrix& m) {
