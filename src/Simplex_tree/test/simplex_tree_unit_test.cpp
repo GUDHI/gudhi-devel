@@ -594,7 +594,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
 }
 
 template<class typeST>
-void build_simplex_tree_with_strategy(typeST& simplexTree, typename typeST::Insertion_strategies s){
+void build_simplex_tree_with_strategy(typeST& simplexTree, typename typeST::Insertion_strategy s){
   simplexTree.insert_simplex_and_subfaces({0,1,2}, 3, s);
   simplexTree.insert_simplex_and_subfaces({1,3}, 4, s);
   simplexTree.insert_simplex_and_subfaces({4,5}, 6, s);
@@ -610,7 +610,7 @@ void build_simplex_tree_with_strategy(typeST& simplexTree, typename typeST::Inse
 template<class typeST>
 void test_lowest_strategy(){
   typeST simplexTree;
-  build_simplex_tree_with_strategy(simplexTree, typeST::Insertion_strategies::LOWEST);
+  build_simplex_tree_with_strategy(simplexTree, typeST::Insertion_strategy::LOWEST);
 
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0})), 2);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1})), 2);
@@ -644,7 +644,7 @@ void test_lowest_strategy(){
 template<class typeST>
 void test_highest_strategy(){
   typeST simplexTree;
-  build_simplex_tree_with_strategy(simplexTree, typeST::Insertion_strategies::HIGHEST);
+  build_simplex_tree_with_strategy(simplexTree, typeST::Insertion_strategy::HIGHEST);
 
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0})), 3);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1})), 3);
@@ -682,7 +682,7 @@ void test_possible_strategy(){
   simplexTree.insert_batch_vertices({4}, 1);
   simplexTree.insert_batch_vertices({5,0,6}, 2);
   simplexTree.insert_simplex({3,6}, 4);
-  build_simplex_tree_with_strategy(simplexTree, typeST::Insertion_strategies::FIRST_POSSIBLE);
+  build_simplex_tree_with_strategy(simplexTree, typeST::Insertion_strategy::FIRST_POSSIBLE);
 
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0})), 2);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1})), 0);
