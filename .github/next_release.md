@@ -10,7 +10,7 @@ From a user point of view, we recommend to download GUDHI user version (gudhi.3.
 
 Below is a list of changes:
 
-- [Delaunay complex](https://gudhi.inria.fr/python/3.11.0rc1/delaunay_complex_user.html)
+- [Delaunay complex](https://gudhi.inria.fr/python/latest/delaunay_complex_user.html)
      - The Delaunay complex can be equipped with different filtrations:
           * Delaunay complex (no filtration values computed)
           * Delaunay-Čech complex (using minimal enclosing ball)
@@ -18,14 +18,14 @@ Below is a list of changes:
      - The Delaunay-Čech and Alpha complex can output square, or not square, filtration values
      - An incremental version of the Delaunay complex (only in C++)
 
-- [Rips complex persistence scikit-learn like interface](https://gudhi.inria.fr/python/3.11.0rc1/rips_complex_sklearn_itf_ref.html)
+- [Rips complex persistence scikit-learn like interface](https://gudhi.inria.fr/python/latest/rips_complex_sklearn_itf_ref.html)
      - A binding to [Ripser](https://github.com/Ripser/ripser) when it accelerates the computation
 
-- [Persistence graphical tools](https://gudhi.inria.fr/python/3.11.0rc1/persistence_graphical_tools_user.html)
+- [Persistence graphical tools](https://gudhi.inria.fr/python/latest/persistence_graphical_tools_user.html)
      - Can now handle scikit-learn like interfaces outputs as inputs
 
-- [Simplex tree](https://gudhi.inria.fr/doc/3.11.0rc1/class_gudhi_1_1_simplex__tree.html)
-     - Can now store additionnal data on each simplices (only in C++)
+- [Simplex tree](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1_simplex__tree.html)
+     - Can now store additionnal data on each simplex (only in C++)
      - Can be const
 
 - Installation
