@@ -14,7 +14,7 @@
 #include <gudhi/Simplex_tree/indexing_tag.h>
 
 #include <cstdint>
-#include <type_traits> // void_t
+#include <type_traits>  // void_t
 
 namespace Gudhi {
 
@@ -98,6 +98,7 @@ struct No_simplex_data {};
 template <class, class=void> struct Get_simplex_data_type { typedef No_simplex_data type; };
 template <class O>
 struct Get_simplex_data_type<O, std::void_t<typename O::Simplex_data>> { typedef typename O::Simplex_data type; };
+
 
 }  // namespace Gudhi
 
