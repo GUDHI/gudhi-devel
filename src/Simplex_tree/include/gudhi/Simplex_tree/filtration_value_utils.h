@@ -25,7 +25,7 @@ namespace simplex_tree {
  * @brief Returns `Filtration_value(0)` when converted to `Filtration_value`.
  */
 inline struct empty_filtration_value_t {
-  template <class T> operator T() const { return T(0); }
+  template <class T> explicit operator T() const { return T(0); }
 } empty_filtration_value;
 
 }  // namespace simplex_tree

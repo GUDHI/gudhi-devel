@@ -191,7 +191,8 @@ class Simplex_tree {
     const Filtration_value& filtration() const { return null_; }
 
    private:
-    inline static const Filtration_value null_ = Gudhi::simplex_tree::empty_filtration_value;
+    inline static const Filtration_value null_ =
+        static_cast<Filtration_value>(Gudhi::simplex_tree::empty_filtration_value);
   };
   typedef typename std::conditional<Options::store_filtration, Filtration_simplex_base_real,
     Filtration_simplex_base_dummy>::type Filtration_simplex_base;
