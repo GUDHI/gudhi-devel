@@ -1154,7 +1154,7 @@ class Simplex_tree {
      * @brief Let \f$ f \f$ be the filtration value given as argument. Inserts the simplex \f$ \sigma \f$ as follows:
      * - if \f$ \sigma \f$ was not inserted yet, then \f$ \sigma \f$ and all its faces, which are not already included
      * in the complex, are inserted at either \f$ f \f$ or at the first possible filtration value when \f$ f \f$ is too
-     * low (to insure the validity of the filtration).
+     * low (to ensure the validity of the filtration).
      * - if \f$ \sigma \f$ existed already, then it and all of its potentially already inserted cofaces are pushed to the
      * intersection of their old value and \f$ f \f$.
      */
