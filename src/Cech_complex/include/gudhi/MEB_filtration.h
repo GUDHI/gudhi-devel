@@ -5,11 +5,18 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
+ *      - 2024/10 Vincent Rouvreau: Add Output_squared_values argument to enable/disable squared radii computation
  *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef MEB_FILTRATION_H_
 #define MEB_FILTRATION_H_
+
+#include <CGAL/NT_converter.h>
+
+#include <vector>
+#include <utility>  // for std::pair
+#include <cmath>  // for std::sqrt
 
 namespace Gudhi::cech_complex {
 
@@ -17,22 +24,25 @@ namespace Gudhi::cech_complex {
  * \ingroup cech_complex
  *
  * \brief
- * Given a simplicial complex and an embedding of its vertices, this assigns to
- * each simplex a filtration value equal to the squared radius of its minimal
- * enclosing ball (MEB).
+ * Given a simplicial complex and an embedding of its vertices, this assigns to each simplex a filtration value equal
+ * to the squared (or not squared in function of `Output_squared_values`) radius of its minimal enclosing ball (MEB).
  *
- * Applied on a Čech complex, it recomputes the same values (squared). Applied on a Delaunay triangulation, it computes the Delaunay-Čech filtration.
+ * Applied on a Čech complex, it recomputes the same values (squared or not in function of `Output_squared_values`).
+ * Applied on a Delaunay triangulation, it computes the Delaunay-Čech filtration.
  *
+ * \tparam Output_squared_values If `true` (default value), it assigns to each simplex a filtration value equal to
+ * the squared radius of the MEB, or to the radius when `Output_squared_values` is `false`.
  * \tparam Kernel CGAL kernel: either Epick_d or Epeck_d.
  * \tparam PointRange Random access range of `Kernel::Point_d`.
  *
  * @param[in] k The geometric kernel.
  * @param[in] complex The simplicial complex.
  * @param[in] points Embedding of the vertices of the complex.
- * @param[in] exact If true and `Kernel` is <a href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>, the filtration values are computed exactly. Default is false.
+ * @param[in] exact If true and `Kernel` is
+ * <a href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>, the filtration values
+ * are computed exactly. Default is false.
  */
-
-template<typename Kernel, typename SimplicialComplexForMEB, typename PointRange>
+template<bool Output_squared_values = true, typename Kernel, typename SimplicialComplexForMEB, typename PointRange>
 void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRange const& points, bool exact = false) {
   using Point_d = typename Kernel::Point_d;
   using FT = typename Kernel::FT;
@@ -41,6 +51,9 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
   using Vertex_handle = typename SimplicialComplexForMEB::Vertex_handle;
   using Simplex_handle = typename SimplicialComplexForMEB::Simplex_handle;
   using Filtration_value = typename SimplicialComplexForMEB::Filtration_value;
+
+  // For users to be able to define their own sqrt function on their desired Filtration_value type
+  using std::sqrt;
 
   std::vector<Sphere> cache_;
   std::vector<Point_d> pts;
@@ -68,7 +81,10 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
       FT r = k.squared_distance_d_object()(m, pu);
       if (exact) CGAL::exact(r);
       complex.assign_key(sh, cache_.size());
-      complex.assign_filtration(sh, max(cvt(r), Filtration_value(0)));
+      Filtration_value filt{max(cvt(r), Filtration_value(0))};
+      if constexpr (!Output_squared_values)
+        filt = sqrt(filt);
+      complex.assign_filtration(sh, filt);
       cache_.emplace_back(std::move(m), std::move(r));
     } else if (dim > ambient_dim) {
       // The sphere is always defined by at most d+1 points
@@ -105,7 +121,11 @@ void assign_MEB_filtration(Kernel&&k, SimplicialComplexForMEB& complex, PointRan
         //   int d2 = dim * dim;
         //   Filtration_value max_sanity = maxf * d2 / (d2 - 1);
         // and use min(max_sanity, ...), which would limit how bad numerical errors can be.
-        maxf = max(maxf, cvt(r)); // maxf = cvt(r) except for rounding errors
+        Filtration_value filt{cvt(r)};
+        if constexpr (!Output_squared_values)
+          filt = sqrt(max(filt, Filtration_value(0)));
+        // maxf = filt except for rounding errors
+        maxf = max(maxf, filt);
         complex.assign_key(sh, cache_.size());
         // We could check if the simplex is maximal and avoiding adding it to the cache in that case.
         cache_.emplace_back(std::move(c), std::move(r));
