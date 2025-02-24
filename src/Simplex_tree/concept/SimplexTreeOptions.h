@@ -19,7 +19,7 @@ struct SimplexTreeOptions {
   typedef IndexingTag Indexing_tag;
   /** @brief Must be a signed integer type. It admits a total order <. */
   typedef VertexHandle Vertex_handle;
-  /** @brief Must be comparable with operator<. */
+  /** @brief Filtration value type which should implement the @ref FiltrationValue concept. */
   typedef FiltrationValue Filtration_value;
   /** @brief Must be an integer type. */
   typedef SimplexKey Simplex_key;
