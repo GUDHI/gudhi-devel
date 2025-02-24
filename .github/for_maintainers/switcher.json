@@ -1,87 +1,92 @@
 [
-    {
-        "name": "v3.10.1 (latest)",
-        "version": "3.10.1",
-        "url": "https://gudhi.inria.fr/python/latest/"
-    },
-    {
-        "name": "v3.10.0",
-        "version": "3.10.0",
-        "url": "https://gudhi.inria.fr/python/3.10.0/"
-    },
-    {
-        "name": "v3.9.0",
-        "version": "3.9.0",
-        "url": "https://gudhi.inria.fr/python/3.9.0/"
-    },
-    {
-        "name": "v3.8.0",
-        "version": "3.8.0",
-        "url": "https://gudhi.inria.fr/python/3.8.0/"
-    },
-    {
-        "name": "v3.7.1",
-        "version": "3.7.1",
-        "url": "https://gudhi.inria.fr/python/3.7.1/"
-    },
-    {
-        "version": "3.7.0",
-        "url": "https://gudhi.inria.fr/python/3.7.0/"
-    },
-    {
-        "version": "3.6.0",
-        "url": "https://gudhi.inria.fr/python/3.6.0/"
-    },
-    {
-        "version": "3.5.0",
-        "url": "https://gudhi.inria.fr/python/3.5.0/"
-    },
-    {
-        "version": "3.4.1",
-        "url": "https://gudhi.inria.fr/python/3.4.1/"
-    },
-    {
-        "version": "3.4.0",
-        "url": "https://gudhi.inria.fr/python/3.4.0/"
-    },
-    {
-        "version": "3.3.0",
-        "url": "https://gudhi.inria.fr/python/3.3.0/"
-    },
-    {
-        "version": "3.2.0",
-        "url": "https://gudhi.inria.fr/python/3.2.0/"
-    },
-    {
-        "version": "3.1.1",
-        "url": "https://gudhi.inria.fr/python/3.1.1/"
-    },
-    {
-        "version": "3.1.0",
-        "url": "https://gudhi.inria.fr/python/3.1.0/"
-    },
-    {
-        "version": "3.0.0",
-        "url": "https://gudhi.inria.fr/python/3.0.0/"
-    },
-    {
-        "version": "2.3.0",
-        "url": "https://gudhi.inria.fr/python/2.3.0/"
-    },
-    {
-        "version": "2.2.0",
-        "url": "https://gudhi.inria.fr/python/2.2.0/"
-    },
-    {
-        "version": "2.1.0",
-        "url": "https://gudhi.inria.fr/python/2.1.0/"
-    },
-    {
-        "version": "2.0.1",
-        "url": "https://gudhi.inria.fr/python/2.0.1/"
-    },
-    {
-        "version": "2.0.0",
-        "url": "https://gudhi.inria.fr/python/2.0.0/"
-    }
+  {
+    "name": "v3.11.0 (latest)",
+    "version": "3.11.0",
+    "url": "https://gudhi.inria.fr/python/latest/"
+  },
+  {
+    "name": "v3.10.1",
+    "version": "3.10.1",
+    "url": "https://gudhi.inria.fr/python/3.10.1/"
+  },
+  {
+    "name": "v3.10.0",
+    "version": "3.10.0",
+    "url": "https://gudhi.inria.fr/python/3.10.0/"
+  },
+  {
+    "name": "v3.9.0",
+    "version": "3.9.0",
+    "url": "https://gudhi.inria.fr/python/3.9.0/"
+  },
+  {
+    "name": "v3.8.0",
+    "version": "3.8.0",
+    "url": "https://gudhi.inria.fr/python/3.8.0/"
+  },
+  {
+    "name": "v3.7.1",
+    "version": "3.7.1",
+    "url": "https://gudhi.inria.fr/python/3.7.1/"
+  },
+  {
+    "version": "3.7.0",
+    "url": "https://gudhi.inria.fr/python/3.7.0/"
+  },
+  {
+    "version": "3.6.0",
+    "url": "https://gudhi.inria.fr/python/3.6.0/"
+  },
+  {
+    "version": "3.5.0",
+    "url": "https://gudhi.inria.fr/python/3.5.0/"
+  },
+  {
+    "version": "3.4.1",
+    "url": "https://gudhi.inria.fr/python/3.4.1/"
+  },
+  {
+    "version": "3.4.0",
+    "url": "https://gudhi.inria.fr/python/3.4.0/"
+  },
+  {
+    "version": "3.3.0",
+    "url": "https://gudhi.inria.fr/python/3.3.0/"
+  },
+  {
+    "version": "3.2.0",
+    "url": "https://gudhi.inria.fr/python/3.2.0/"
+  },
+  {
+    "version": "3.1.1",
+    "url": "https://gudhi.inria.fr/python/3.1.1/"
+  },
+  {
+    "version": "3.1.0",
+    "url": "https://gudhi.inria.fr/python/3.1.0/"
+  },
+  {
+    "version": "3.0.0",
+    "url": "https://gudhi.inria.fr/python/3.0.0/"
+  },
+  {
+    "version": "2.3.0",
+    "url": "https://gudhi.inria.fr/python/2.3.0/"
+  },
+  {
+    "version": "2.2.0",
+    "url": "https://gudhi.inria.fr/python/2.2.0/"
+  },
+  {
+    "version": "2.1.0",
+    "url": "https://gudhi.inria.fr/python/2.1.0/"
+  },
+  {
+    "version": "2.0.1",
+    "url": "https://gudhi.inria.fr/python/2.0.1/"
+  },
+  {
+    "version": "2.0.0",
+    "url": "https://gudhi.inria.fr/python/2.0.0/"
+  }
 ]
