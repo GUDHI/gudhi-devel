@@ -2768,7 +2768,7 @@ class Simplex_tree {
     });
   }
 
-  /** @private @brief Deserialize the array of char (flatten version of the tree) to initialize a Simplex tree.
+  /** @private @brief Deserialize the array of char (flattened version of the tree) to initialize a Simplex tree.
    * It is the user's responsibility to provide an 'empty' Simplex_tree, there is no guarantee otherwise.
    * 
    * @tparam F Method taking a reference to a @ref Filtration_value and a `const char*` as input and returning a
