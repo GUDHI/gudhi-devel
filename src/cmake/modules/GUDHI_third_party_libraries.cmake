@@ -191,6 +191,28 @@ if (WITH_GUDHI_PYTHON)
     if (NOT WIN32)
       find_python_module("pykeops")
     endif()
+    # From setuptools v74.0.0, if CXXFLAGS is set by the user, all default compilation flags from
+    # sysconfig.get_config_vars are removed and only CXXFLAGS is taken into account by setuptools
+    if (NOT WIN32)
+      if(DEFINED ENV{CXXFLAGS} )
+        message("** CXXFLAGS is set to '$ENV{CXXFLAGS}' and will be propagated to setup.py")
+        execute_process(
+          COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/get_python_compilation_flags_for_cmake.py
+          RESULT_VARIABLE PYTHON_SCRIPT_RESULT
+          OUTPUT_VARIABLE PYTHON_SCRIPT_COMPILATION_FLAGS
+          ERROR_VARIABLE  PYTHON_SCRIPT_ERROR)
+        if(PYTHON_SCRIPT_RESULT EQUAL 0)
+          # Remove all carriage returns as it can be multiline
+          string(REGEX REPLACE "\n" " " PYTHON_SCRIPT_COMPILATION_FLAGS "${PYTHON_SCRIPT_COMPILATION_FLAGS}")
+          set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS
+              "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS} ${PYTHON_SCRIPT_COMPILATION_FLAGS} '$ENV{CXXFLAGS}', ")
+        else()
+          message ("PYTHON_SCRIPT_RESULT = ${PYTHON_SCRIPT_RESULT}
+                    PYTHON_SCRIPT_COMPILATION_FLAGS = ${PYTHON_SCRIPT_COMPILATION_FLAGS}
+                    PYTHON_SCRIPT_ERROR = ${PYTHON_SCRIPT_ERROR}")
+        endif()
+      endif()
+    endif()
   endif()
 
 
