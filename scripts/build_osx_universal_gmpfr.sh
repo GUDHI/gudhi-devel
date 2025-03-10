@@ -8,14 +8,26 @@ set -e
 SED_PGM='s/^Downloaded to: |^Already downloaded: //p'
 mkdir deps-amd64
 cd deps-amd64
+# Debug
+brew fetch --bottle-tag=x86_64_monterey gmp
 tar xf "`brew fetch --bottle-tag=x86_64_monterey gmp  | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
+# Debug
+brew fetch --bottle-tag=x86_64_monterey mpfr
 tar xf "`brew fetch --bottle-tag=x86_64_monterey mpfr | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
 cd ..
 mkdir deps-arm64
 cd deps-arm64
+# Debug
+brew fetch --bottle-tag=arm64_monterey gmp
 tar xf "`brew fetch --bottle-tag=arm64_monterey gmp   | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
+# Debug
+brew fetch --bottle-tag=arm64_monterey mpfr
 tar xf "`brew fetch --bottle-tag=arm64_monterey mpfr  | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
 cd ..
+
+# Debug
+ls -l deps-amd64/gmp/*/lib
+ls -l deps-arm64/gmp/*/lib/
 
 # Merging
 mkdir -p deps-uni/lib
