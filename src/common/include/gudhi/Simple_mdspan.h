@@ -48,14 +48,13 @@ class Simple_mdspan
   template <class... IndexTypes>
   constexpr explicit Simple_mdspan(data_handle_type ptr, IndexTypes... exts)
       : Simple_mdspan(ptr, {static_cast<index_type>(exts)...})
-  {
-  }
+  {}
 
   template <class IndexRange = std::initializer_list<index_type> >
   constexpr Simple_mdspan(data_handle_type ptr, const IndexRange& exts) : ptr_(ptr), exts_(exts.begin(), exts.end())
   {
-    GUDHI_CHECK(ptr != nullptr, "Given pointer is not properly initialized.");
-    _initialize_strides();
+    GUDHI_CHECK(ptr != nullptr || exts_.empty() || exts_[0] == 0, "Given pointer is not properly initialized.");
+    if (!exts_.empty()) _initialize_strides();
   }
 
   constexpr Simple_mdspan& operator=(const Simple_mdspan& rhs) = default;
@@ -160,6 +159,11 @@ class Simple_mdspan
     GUDHI_CHECK(r < exts_.size(), "Index out of bound.");
     exts_[r] = new_value;
     _update_strides(r);
+  }
+  //for update_extent to make sense, as resizing the vector can move it in the memory
+  void update_data(data_handle_type ptr){
+    GUDHI_CHECK(ptr != nullptr, "Null pointer not valid input.");
+    ptr_ = ptr;
   }
 
  private:
