@@ -14,6 +14,9 @@ Below is a list of changes:
 - [Module](link)
      - **...**
 
+- Installation
+     - Pip package is now available for OSx &ge; 13.0 (was &ge; 12.0).
+
 - Miscellaneous
      - The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.12.0+is%3Aclosed) is available on GitHub.
 
