@@ -1,12 +1,46 @@
 Release History
 ===============
 
+[Release 3.11.0](https://github.com/GUDHI/gudhi-devel/releases/tag/tags%2Fgudhi-release-3.11.0)
+-----------
+
+Release date: February 2025
+
+Below is a list of changes made since GUDHI 3.10.1:
+
+- [Delaunay complex](https://gudhi.inria.fr/python/latest/delaunay_complex_user.html)
+     - The Delaunay complex can be equipped with different filtrations:
+          * Delaunay complex (no filtration values computed)
+          * Delaunay-Čech complex (using minimal enclosing ball)
+          * Alpha complex (moved in this new section)
+     - The Delaunay-Čech and Alpha complex can output square, or not square, filtration values
+     - An incremental version of the Delaunay complex (only in C++)
+
+- [Rips complex persistence scikit-learn like interface](https://gudhi.inria.fr/python/latest/rips_complex_sklearn_itf_ref.html)
+     - A binding to [Ripser](https://github.com/Ripser/ripser) when it accelerates the computation
+
+- [Persistence graphical tools](https://gudhi.inria.fr/python/latest/persistence_graphical_tools_user.html)
+     - Can now handle scikit-learn like interfaces outputs as inputs
+
+- [Simplex tree](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1_simplex__tree.html)
+     - Can now store additionnal data on each simplex (only in C++)
+     - Can be const
+
+- Installation
+     - CMake &ge; 3.15 is now required (was &ge; 3.8).
+     - Python &ge; 3.8 is now required (was &ge; 3.5), because of `importlib.metadata`.
+     - Support for Python 3.13 is now available
+
+- Miscellaneous
+     - The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.11.0+is%3Aclosed)
+         is available on GitHub.
+
 [Release 3.10.1](https://github.com/GUDHI/gudhi-devel/releases/tag/tags%2Fgudhi-release-3.10.1)
 -----------
 
 Release date: June 2024
 
-Below is a list of changes made since GUDHI 3.10.1:
+Below is a list of changes made since GUDHI 3.10.0:
 
 Only bug fixes have been implemented for this minor version.
 
@@ -22,7 +56,7 @@ Below is a list of changes made since GUDHI 3.9.0:
 - [Persistence matrix](https://gudhi.inria.fr/doc/latest/group__persistence__matrix.html)
      > Matrix API is in a beta version and may change in incompatible ways in the near future.
      - Matrix structure for filtered complexes with multiple functionnalities related to persistence homology, such as
-     representative cycles computation or vineyards. 
+     representative cycles computation or vineyards.
 
 - [Rips complex](https://gudhi.inria.fr/python/latest/rips_complex_sklearn_itf_ref.html)
      - Rips complex persistence scikit-learn like interface
@@ -226,7 +260,7 @@ As a major new feature, the GUDHI library now offers Coxeter triangulations and 
 Below is a list of changes made since GUDHI 3.4.1:
 
 - [Coxeter triangulation](https://gudhi.inria.fr/doc/latest/group__coxeter__triangulation.html)
-     - constructs a piecewise-linear approximation of an m-dimensional smooth manifold embedded in R^d using an ambient triangulation. 
+     - constructs a piecewise-linear approximation of an m-dimensional smooth manifold embedded in R^d using an ambient triangulation.
 
 - [Datasets generators](https://gudhi.inria.fr/python/latest/datasets_generators.html)
      - the python module `points` enables the generation of points on a sphere or a flat torus.
@@ -340,8 +374,8 @@ Below is a list of changes made since Gudhi 3.1.1:
      - Improve computations (cache circumcenters computation and point comparison improvement)
 
 - [Persistence graphical tools](https://gudhi.inria.fr/python/latest/persistence_graphical_tools_user.html)
-     - New rendering option proposed (use LaTeX style, add grey block, improved positioning of labels, etc.). 
-     - Can now handle (N x 2) numpy arrays as input 
+     - New rendering option proposed (use LaTeX style, add grey block, improved positioning of labels, etc.).
+     - Can now handle (N x 2) numpy arrays as input
 
 - Miscellaneous
      - The [list of bugs that were solved since GUDHI-3.1.1](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.2.0+is%3Aclosed) is available on GitHub.
@@ -484,7 +518,7 @@ Below is a list of changes made since Gudhi 2.0.1:
 - [Cubical complex](https://gudhi.inria.fr/doc/latest/group__cubical__complex.html) (bug fix)
      - Perseus file read function.
      - Computations of incidence indices between cubes.
-     - Missing periodic argument for the Python version. 
+     - Missing periodic argument for the Python version.
 
 - Documentation
      - New [file formats](https://gudhi.inria.fr/doc/latest/fileformats.html) section.
