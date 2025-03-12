@@ -192,7 +192,7 @@ class Simplex_tree {
     const Filtration_value& filtration() const { return null_; }
 
    private:
-    inline static const Filtration_value null_ = Gudhi::simplex_tree::empty_filtration_value;
+    inline static const Filtration_value null_{Gudhi::simplex_tree::empty_filtration_value};
   };
   typedef typename std::conditional<Options::store_filtration, Filtration_simplex_base_real,
     Filtration_simplex_base_dummy>::type Filtration_simplex_base;
@@ -2783,7 +2783,7 @@ class Simplex_tree {
     }
   }
 
-  std::size_t num_simplices_and_filtration_size(Siblings const* sib, std::size_t& fv_byte_size) const {
+  std::size_t num_simplices_and_filtration_serialization_size(Siblings const* sib, std::size_t& fv_byte_size) const {
     using namespace Gudhi::simplex_tree;
     
     auto sib_begin = sib->members().begin();
@@ -2793,14 +2793,16 @@ class Simplex_tree {
       if constexpr (SimplexTreeOptions::store_filtration)
         fv_byte_size += get_serialization_size_of(sh->second.filtration());
       if (has_children(sh)) {
-        simplices_number += num_simplices_and_filtration_size(sh->second.children(), fv_byte_size);
+        simplices_number += num_simplices_and_filtration_serialization_size(sh->second.children(), fv_byte_size);
       }
     }
     return simplices_number;
   }
 
  public:
-   /** @private @brief Returns the serialization required buffer size.
+  /**
+   * @private
+   * @brief Returns the serialization required buffer size.
    *
    * @return The exact serialization required size in number of bytes.
    *
@@ -2810,7 +2812,7 @@ class Simplex_tree {
   std::size_t get_serialization_size() const {
     const std::size_t vh_byte_size = sizeof(Vertex_handle);
     std::size_t fv_byte_size = 0;
-    const std::size_t tree_size = num_simplices_and_filtration_size(&root_, fv_byte_size);
+    const std::size_t tree_size = num_simplices_and_filtration_serialization_size(&root_, fv_byte_size);
     const std::size_t buffer_byte_size = vh_byte_size + fv_byte_size + tree_size * 2 * vh_byte_size;
 #ifdef DEBUG_TRACES
       std::clog << "Gudhi::simplex_tree::get_serialization_size - buffer size = " << buffer_byte_size << std::endl;
@@ -2818,7 +2820,9 @@ class Simplex_tree {
     return buffer_byte_size;
   }
 
-  /** @private @brief Serialize the Simplex tree - Flatten it in a user given array of char
+  /**
+   * @private
+   * @brief Serialize the Simplex tree - Flatten it in a user given array of char
    *
    * @param[in] buffer An array of char allocated with enough space (cf. Gudhi::simplex_tree::get_serialization_size)
    * @param[in] buffer_size The buffer size.
@@ -2885,7 +2889,9 @@ class Simplex_tree {
   }
 
  public:
-  /** @private @brief Deserialize the array of char (flatten version of the tree) to initialize a Simplex tree.
+  /**
+   * @private
+   * @brief Deserialize the array of char (flatten version of the tree) to initialize a Simplex tree.
    * It is the user's responsibility to provide an 'empty' Simplex_tree, there is no guarantee otherwise.
    *
    * @param[in] buffer A pointer on a buffer that contains a serialized Simplex_tree.
@@ -2905,7 +2911,9 @@ class Simplex_tree {
     });
   }
 
-  /** @private @brief Deserialize the array of char (flatten version of the tree) to initialize a Simplex tree.
+  /**
+   * @private
+   * @brief Deserialize the array of char (flattened version of the tree) to initialize a Simplex tree.
    * It is the user's responsibility to provide an 'empty' Simplex_tree, there is no guarantee otherwise.
    * 
    * @tparam F Method taking a reference to a @ref Filtration_value and a `const char*` as input and returning a

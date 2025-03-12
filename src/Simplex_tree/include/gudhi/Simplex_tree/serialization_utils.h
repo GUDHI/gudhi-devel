@@ -18,6 +18,7 @@ namespace Gudhi {
 namespace simplex_tree {
 
 /**
+ * @private
  * @ingroup simplex_tree
  * @brief Serialize the given value and insert it at start position.
  * 
@@ -35,6 +36,7 @@ char* serialize_trivial(ArgumentType value, char* start) {
 }
 
 /**
+ * @private
  * @ingroup simplex_tree
  * \brief Deserialize at the start position in an array of char and sets the value with it.
  * 

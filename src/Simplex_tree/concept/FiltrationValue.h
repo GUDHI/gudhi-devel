@@ -37,7 +37,7 @@ struct FiltrationValue {
    * Should construct a representative of what is an "empty" object. E.g., 0 for a numerical value or {} for a vector.
    * Two empty objects should evaluate to true if compared for equality.
    */
-  FiltrationValue(Gudhi::simplex_tree::empty_filtration_value_t e);
+  explicit FiltrationValue(Gudhi::simplex_tree::empty_filtration_value_t e);
 
   // only for default ordering of filtration_vect_ in initialize_filtration and for prune_above_filtration
   /**
@@ -78,9 +78,9 @@ struct FiltrationValue {
   friend bool intersect_lifetimes(FiltrationValue& f1, const FiltrationValue& f2);
 
   /**
+   * @private
    * @brief Only necessary when serializing the simplex tree. Serialize the given value and insert it at start position.
-   * Overloads for native arithmetic types or other simple types are already implemented with
-   * Gudhi::serialize_value_to_char_buffer.
+   * Overloads for native arithmetic types or other simple types are already implemented.
    * 
    * @param value The value to serialize.
    * @param start Start position where the value is serialized.
@@ -89,11 +89,11 @@ struct FiltrationValue {
   friend char* serialize_value_to_char_buffer(const FiltrationValue& value, char* start);
 
   /**
+   * @private
    * @brief Only necessary when deserializing the simplex tree. Deserializes the object at the given start position in
-   * an array of char, which was previously serialized by serialize_value_to_char_buffer.
+   * an array of char, which was previously serialized by @ref serialize_value_to_char_buffer "".
    * Then, sets the value with it.
-   * Overloads for native arithmetic types or other simple types are already implemented with
-   * deserialize_value_from_char_buffer.
+   * Overloads for native arithmetic types or other simple types are already implemented.
    * 
    * @param value The value where to deserialize based on its type.
    * @param start Start position where the value is serialized.
@@ -102,9 +102,9 @@ struct FiltrationValue {
   friend const char* deserialize_value_from_char_buffer(FiltrationValue& value, const char* start);
 
   /**
+   * @private
    * @brief Only necessary when serializing the simplex tree. Returns the serialization size of the given object.
-   * Overloads for native arithmetic types or other simple types are already implemented with
-   * Gudhi::get_serialization_size_of.
+   * Overloads for native arithmetic types or other simple types are already implemented.
    */
   friend std::size_t get_serialization_size_of(const FiltrationValue& value);
 };
