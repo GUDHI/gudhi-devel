@@ -32,7 +32,7 @@
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Simple_mdspan.h>
-#include <gudhi/multi_filtration_utils.h>
+#include <gudhi/Multi_filtration/multi_filtration_utils.h>
 
 namespace Gudhi::multi_filtration {
 

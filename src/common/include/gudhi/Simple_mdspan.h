@@ -169,6 +169,8 @@ class Simple_mdspan
     GUDHI_CHECK(ptr != nullptr || empty() || *(exts.begin()) == 0, "Given pointer is not properly initialized.");
   }
 
+  Simple_mdspan(data_handle_type ptr, const mapping_type& m) : ptr_(ptr), map_(m){}
+
   Simple_mdspan& operator=(const Simple_mdspan& rhs) = default;
   Simple_mdspan& operator=(Simple_mdspan&& rhs) = default;
 

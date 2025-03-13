@@ -32,8 +32,8 @@
 #include <initializer_list>
 
 #include <gudhi/Debug_utils.h>
-#include <gudhi/Multi_parameter_generator.h>
-#include <gudhi/multi_filtration_utils.h>
+#include <gudhi/Multi_filtration/Multi_parameter_generator.h>
+#include <gudhi/Multi_filtration/multi_filtration_utils.h>
 
 namespace Gudhi::multi_filtration {
 
@@ -50,14 +50,14 @@ U compute_norm();
  *
  * @brief Class encoding the different generators, i.e., apparition times, of a \f$ k \f$-critical
  * \f$\mathbb R^n\f$-filtration value. E.g., the filtration value of a simplex, or, of the algebraic generator of a
- * module presentation. The encoding is compacted into a single vector, so if a lot of non trivial modifications are
- * done (that not only consists of simply adding new generators at the end of the vector), it is probably preferable
- * to use @ref Dynamic_multi_parameter_filtration instead.
+ * module presentation. Different from @ref Multi_parameter_filtration, the underlying container is a vector of vectors
+ * and therefore less memory efficient, but much more flexible when modifying the filtration value. So, this class is
+ * preferable if a lot of generators need to be added on the fly or removed. But when the filtration value is more or
+ * less fixed, e.g. for 1-critical filtrations, we recommend @ref Multi_parameter_filtration instead.
  *
  * @details Overloads `std::numeric_limits` such that:
  * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::has_infinity` returns `true`,
- * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::has_quiet_NaN` returns
- * `std::numeric_limits<T>::has_quiet_NaN`,
+ * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::has_quiet_NaN` returns `true`,
  * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::infinity(num_param)` returns
  * @ref Dynamic_multi_parameter_filtration::inf(num_param) "",
  * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::minus_infinity(num_param)` returns
@@ -66,10 +66,9 @@ U compute_norm();
  * Dynamic_multi_parameter_filtration with 1 generators of `num_param` parameters evaluated at value
  * `std::numeric_limits<T>::max()`,
  * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::quiet_NaN(num_param)` returns
- * @ref Dynamic_multi_parameter_filtration::nan(num_param) if
- * `std::numeric_limits<Dynamic_multi_parameter_filtration>::has_quiet_NaN` and throws otherwise.
+ * @ref Dynamic_multi_parameter_filtration::nan(num_param).
  *
- * Multi-critical filtrations are filtrations such that the lifetime of each object is union of positive cones in
+ * Multi-critical filtrations are filtrations such that the lifetime of each object is a union of positive cones in
  * \f$\mathbb R^n\f$, e.g.,
  *  - \f$ \{ x \in \mathbb R^2 : x \ge (1,2)\} \cap \{ x \in \mathbb R^2 : x \ge (2,1)\} \f$ is finitely critical,
  *    and more particularly 2-critical, while
@@ -89,16 +88,16 @@ template <typename T, bool Co = false, bool Ensure1Criticality = false>
 class Dynamic_multi_parameter_filtration
 {
  private:
-  using Generator = Multi_parameter_generator<T, Co>;
+  using Generator = Multi_parameter_generator<T, Co>;   /**< Generator type. */
 
  public:
-  using Underlying_container = std::vector<Generator>; /**< Underlying container for values. */
+  using Underlying_container = std::vector<Generator>;  /**< Underlying container for values. */
 
   // CONSTRUCTORS
 
   /**
    * @brief Default constructor. Builds filtration value with one generator and given number of parameters.
-   * If Co is false, all values are at -inf, if Co is true, all values are at +inf.
+   * If Co is false, initializes at -inf, if Co is true, at +inf.
    *
    * @param number_of_parameters If negative, takes the default value instead. Default value: 2.
    */
@@ -109,6 +108,10 @@ class Dynamic_multi_parameter_filtration
   /**
    * @brief Builds filtration value with one generator and given number of parameters.
    * All values are initialized at the given value.
+   *
+   * @warning The generator `{-inf, -inf, ...}`/`{inf, inf, ...}` with \f$ number_of_parameters > 1 \f$ entries is
+   * valid but will not benefit from possible optimizations. If those values are not planed to be replaced, it is
+   * recommended to use the static methods @ref minus_inf() or @ref inf(), or set `number_of_parameters` to 1, instead.
    *
    * @param number_of_parameters If negative, is set to 2 instead.
    * @param value Initialization value for every value in the generator.
@@ -161,7 +164,7 @@ class Dynamic_multi_parameter_filtration
    */
   template <class Iterator, class = std::enable_if_t<!std::is_arithmetic_v<Iterator> > >
   Dynamic_multi_parameter_filtration(Iterator it_begin, Iterator it_end, int number_of_parameters)
-      : number_of_parameters_(number_of_parameters), generators_()
+      : number_of_parameters_(number_of_parameters < 0 ? 0 : number_of_parameters), generators_()
   {
     // Will discard any value at the end which does not fit into a complete generator.
     const size_type num_gen = std::distance(it_begin, it_end) / number_of_parameters;
@@ -179,18 +182,14 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Builds filtration value with given number of parameters and values from the given range. Lets \f$ p \f$
-   * be the number of parameters. The \f$ p \f$ first elements of the range have to correspond to the first generator,
-   * the \f$ p \f$ next elements to the second generator and so on... So the length of the range has to be a multiple
-   * of \f$ p \f$ and the number of generators will be \f$ length / p \f$. The range is represented by
-   * @ref Dynamic_multi_parameter_filtration::Underlying_container "" and copied into the underlying container of the
-   * class.
+   * @brief Builds filtration value with given number of parameters and values copied from the given
+   * @ref Dynamic_multi_parameter_filtration::Underlying_container container.
    *
    * @param generators Values.
    * @param number_of_parameters Negative values are associated to 0.
    */
   Dynamic_multi_parameter_filtration(const Underlying_container &generators, int number_of_parameters)
-      : number_of_parameters_(number_of_parameters), generators_(generators)
+      : number_of_parameters_(number_of_parameters < 0 ? 0 : number_of_parameters), generators_(generators)
   {
     GUDHI_CHECK(number_of_parameters > 0 || generators_.empty(),
                 "Number of parameters cannot be 0 if the container is not empty.");
@@ -201,18 +200,14 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Builds filtration value with given number of parameters and values from the given range. Lets \f$ p \f$
-   * be the number of parameters. The \f$ p \f$ first elements of the range have to correspond to the first generator,
-   * the \f$ p \f$ next elements to the second generator and so on... So the length of the range has to be a multiple
-   * of \f$ p \f$ and the number of generators will be \f$ length / p \f$. The range is represented by
-   * @ref Dynamic_multi_parameter_filtration::Underlying_container "" and **moved** into the underlying container of the
-   * class.
+   * @brief Builds filtration value with given number of parameters and values moved from the given
+   * @ref Dynamic_multi_parameter_filtration::Underlying_container container.
    *
    * @param generators Values to move.
    * @param number_of_parameters Negative values are associated to 0.
    */
   Dynamic_multi_parameter_filtration(Underlying_container &&generators, int number_of_parameters)
-      : number_of_parameters_(number_of_parameters), generators_(std::move(generators))
+      : number_of_parameters_(number_of_parameters < 0 ? 0 : number_of_parameters), generators_(std::move(generators))
   {
     GUDHI_CHECK(number_of_parameters > 0 || generators_.empty(),
                 "Number of parameters cannot be 0 if the container is not empty.");
@@ -313,6 +308,11 @@ class Dynamic_multi_parameter_filtration
     return generators_[g][n];
   }
 
+  /**
+   * @brief Returns const reference to the requested generator.
+   * 
+   * @param g Index of the generator.
+   */
   const Generator& operator[](size_type g) const
   {
     GUDHI_CHECK(g < generators_.size(), "Out of bound index.");
@@ -331,7 +331,7 @@ class Dynamic_multi_parameter_filtration
             class = std::enable_if_t<RangeTraits<IndexRange>::has_begin> >
   reference operator[](const IndexRange &indices)
   {
-    GUDHI_CHECK(indices.size() == 2,
+    GUDHI_CHECK(indices.size() >= 2,
                 "Exactly 2 indices allowed only: first the generator number, second the parameter number.");
     auto it = indices.begin();
     size_type g = *it;
@@ -350,7 +350,7 @@ class Dynamic_multi_parameter_filtration
             class = std::enable_if_t<RangeTraits<IndexRange>::has_begin> >
   const_reference operator[](const IndexRange &indices) const
   {
-    GUDHI_CHECK(indices.size() == 2,
+    GUDHI_CHECK(indices.size() >= 2,
                 "Exactly 2 indices allowed only: first the generator number, second the parameter number.");
     auto it = indices.begin();
     size_type g = *it;
@@ -358,20 +358,24 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameter first elements
-   * corresponds to the first generator, the @ref num_parameter next to the second and so on.
+   * @brief Returns an iterator pointing the begining of the underlying container. Each element stored is a whole
+   * generator with a size() and a operator[].
+   *
+   * @warning If a generator is modified and the new set of generators is not minimal or not sorted, the behaviour
+   * of most methods is undefined. It is possible to call @ref simplify() after construction if there is a doubt to
+   * ensure this property.
    */
   iterator begin() noexcept { return generators_.begin(); }
 
   /**
-   * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameter first elements
-   * corresponds to the first generator, the @ref num_parameter next to the second and so on.
+   * @brief Returns an iterator pointing the begining of the underlying container. Each element stored is a whole
+   * generator with a size() and a operator[].
    */
   const_iterator begin() const noexcept { return generators_.begin(); }
 
   /**
-   * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameter first elements
-   * corresponds to the first generator, the @ref num_parameter next to the second and so on.
+   * @brief Returns an iterator pointing the begining of the underlying container. Each element stored is a whole
+   * generator with a size() and a operator[].
    */
   const_iterator cbegin() const noexcept { return generators_.cbegin(); }
 
@@ -392,22 +396,23 @@ class Dynamic_multi_parameter_filtration
 
   /**
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
-   * The @ref num_parameter first elements corresponds to the last generator (in parameter reverse order), the
-   * @ref num_parameter next to the second to last and so on.
+   * Each element stored is a whole generator with a size() and a operator[].
+   *
+   * @warning If a generator is modified and the new set of generators is not minimal or not sorted, the behaviour
+   * of most methods is undefined. It is possible to call @ref simplify() after construction if there is a doubt to
+   * ensure this property.
    */
   reverse_iterator rbegin() noexcept { return generators_.rbegin(); }
 
   /**
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
-   * The @ref num_parameter first elements corresponds to the last generator (in parameter reverse order), the
-   * @ref num_parameter next to the second to last and so on.
+   * Each element stored is a whole generator with a size() and a operator[].
    */
   const_reverse_iterator rbegin() const noexcept { return generators_.rbegin(); }
 
   /**
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
-   * The @ref num_parameter first elements corresponds to the last generator (in parameter reverse order), the
-   * @ref num_parameter next to the second to last and so on.
+   * Each element stored is a whole generator with a size() and a operator[].
    */
   const_reverse_iterator crbegin() const noexcept { return generators_.crbegin(); }
 
@@ -427,16 +432,14 @@ class Dynamic_multi_parameter_filtration
   const_reverse_iterator crend() const noexcept { return generators_.crend(); }
 
   /**
-   * @brief Returns the size of the underlying container. Corresponds exactly to @ref num_entries(), but enables to use
-   * the class as a classic range with a `begin`, `end` and `size` method.
+   * @brief Returns the size of the underlying container. Corresponds exactly to @ref num_generators(), but enables to
+   * use the class as a classic range with a `begin`, `end` and `size` method.
    */
   size_type size() const noexcept { return generators_.size(); }
 
   /**
    * @brief Reserves space for the given number of generators in the underlying container. Does nothing if
    * `Ensure1Criticality` is true.
-   *
-   * @param n Number of generators.
    */
   void reserve([[maybe_unused]] size_type number_of_generators)
   {
@@ -510,8 +513,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief If `std::numeric_limits<T>::has_quiet_NaN` is true, returns a filtration value with given number of
-   * parameters for which @ref is_nan() returns `true`. Otherwise, throws.
+   * @brief Returns a filtration value with given number of parameters for which @ref is_nan() returns `true`.
    */
   static Dynamic_multi_parameter_filtration nan(int number_of_parameters)
   {
@@ -728,7 +730,12 @@ class Dynamic_multi_parameter_filtration
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @tparam ValueRange Range with a begin() and end() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `ValueRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam ValueRange Either a range of into `T` convertible elements with a begin() and end() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param f First element of the subtraction.
    * @param r Second element of the subtraction.
    */
@@ -753,7 +760,12 @@ class Dynamic_multi_parameter_filtration
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @tparam ValueRange Range with a begin() and end() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `ValueRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam ValueRange Either a range of into `T` convertible elements with a begin() and end() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param r First element of the subtraction.
    * @param f Second element of the subtraction.
    */
@@ -827,7 +839,12 @@ class Dynamic_multi_parameter_filtration
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @tparam ValueRange Range with a begin() and end() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `ValueRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam ValueRange Either a range of into `T` convertible elements with a begin() and end() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param f First element of the subtraction.
    * @param r Second element of the subtraction.
    */
@@ -878,7 +895,12 @@ class Dynamic_multi_parameter_filtration
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @tparam ValueRange Range with a begin() and end() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `ValueRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam ValueRange Either a range of into `T` convertible elements with a begin() and end() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param f First element of the addition.
    * @param r Second element of the addition.
    */
@@ -903,7 +925,12 @@ class Dynamic_multi_parameter_filtration
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @tparam ValueRange Range with a begin() and end() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `ValueRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam ValueRange Either a range of into `T` convertible elements with a begin() and end() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param r First element of the addition.
    * @param f Second element of the addition.
    */
@@ -972,7 +999,12 @@ class Dynamic_multi_parameter_filtration
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @tparam ValueRange Range with a begin() and end() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `ValueRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam ValueRange Either a range of into `T` convertible elements with a begin() and end() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param f First element of the addition.
    * @param r Second element of the addition.
    */
@@ -1025,7 +1057,12 @@ class Dynamic_multi_parameter_filtration
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @tparam ValueRange Range with a begin() and end() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `ValueRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam ValueRange Either a range of into `T` convertible elements with a begin() and end() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param f First element of the multiplication.
    * @param r Second element of the multiplication.
    */
@@ -1052,7 +1089,12 @@ class Dynamic_multi_parameter_filtration
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @tparam ValueRange Range with a begin() and end() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `ValueRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam ValueRange Either a range of into `T` convertible elements with a begin() and end() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param r First element of the multiplication.
    * @param f Second element of the multiplication.
    */
@@ -1127,7 +1169,12 @@ class Dynamic_multi_parameter_filtration
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @tparam ValueRange Range with a begin() and end() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `ValueRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam ValueRange Either a range of into `T` convertible elements with a begin() and end() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param f First element of the multiplication.
    * @param r Second element of the multiplication.
    */
@@ -1185,7 +1232,12 @@ class Dynamic_multi_parameter_filtration
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @tparam ValueRange Range with a begin() and end() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `ValueRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam ValueRange Either a range of into `T` convertible elements with a begin() and end() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param f First element of the division.
    * @param r Second element of the division.
    */
@@ -1215,7 +1267,12 @@ class Dynamic_multi_parameter_filtration
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @tparam ValueRange Range with a begin() and end() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `ValueRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam ValueRange Either a range of into `T` convertible elements with a begin() and end() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param r First element of the division.
    * @param f Second element of the division.
    */
@@ -1303,7 +1360,12 @@ class Dynamic_multi_parameter_filtration
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @tparam ValueRange Range with a begin() and end() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `ValueRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam ValueRange Either a range of into `T` convertible elements with a begin() and end() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param f First element of the division.
    * @param r Second element of the division.
    */
@@ -1492,9 +1554,7 @@ class Dynamic_multi_parameter_filtration
 
   /**
    * @brief Removes all empty generators from the filtration value. If @p include_infinities is true, it also
-   * removes the generators at infinity or minus infinity. As empty generators are not possible (except if number of
-   * parameters is 0), the method does nothing except sorting the set of generators if @p include_infinities is false.
-   * Exists mostly for interface purposes.
+   * removes the generators at infinity or minus infinity (or with NaN value).
    * If the set of generators is empty after removals, it is set to minus infinity if `Co` is false or to infinity
    * if `Co` is true.
    *
@@ -1531,7 +1591,12 @@ class Dynamic_multi_parameter_filtration
    * originating in \f$ x \f$. The resulting value corresponds to the intersection of both
    * cones: \f$ \mathrm{this} = \min \{ y \in \mathbb R^n : y \ge this \} \cap \{ y \in \mathbb R^n : y \ge x \} \f$.
    *
-   * @tparam GeneratorRange Range of elements convertible to `T`. Must have a begin(), end() and size() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `GeneratorRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam GeneratorRange Either a range of into `T` convertible elements with a begin(), end() and size() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param x Range towards to push. Has to have as many elements than @ref num_parameters().
    * @param exclude_infinite_values If true, values at infinity or minus infinity are not affected.
    * @return true If the filtration value was actually modified.
@@ -1560,7 +1625,12 @@ class Dynamic_multi_parameter_filtration
    * originating in \f$ x \f$. The resulting value corresponds to the intersection of both
    * cones: \f$ \mathrm{this} = \min \{ y \in \mathbb R^n : y \le this \} \cap \{ y \in \mathbb R^n : y \le x \} \f$.
    *
-   * @tparam GeneratorRange Range of elements convertible to `T`. Must have a begin(), end() and size() method.
+   * @warning The operator accepts @ref Dynamic_multi_parameter_filtration with the same or different template
+   * parameters as `GeneratorRange`. But if the number of generators is higher than 1, only the first generator will be
+   * used for the operation.
+   *
+   * @tparam GeneratorRange Either a range of into `T` convertible elements with a begin(), end() and size() method,
+   * or @ref Dynamic_multi_parameter_filtration<U,...> with `U` convertible into `T`.
    * @param x Range towards to pull. Has to have as many elements than @ref num_parameters().
    * @param exclude_infinite_values If true, values at infinity or minus infinity are not affected.
    * @return true If the filtration value was actually modified.
@@ -2101,9 +2171,9 @@ class Dynamic_multi_parameter_filtration
 
   /**
    * @brief Verifies how x can be added as a new generator with respect to an already existing generator, represented
-   * by `indices[curr]`. If x is dominated by or is equal to `indices[curr]`, it cannot be added. If it dominates
-   * `indices[curr]`, it has to replace `indices[curr]`. If there is no relation between both, `indices[curr]` has
-   * no influence on the addition of x.
+   * by `generators_[curr]`. If x is dominated by or is equal to `generators_[curr]`, it cannot be added. If it
+   * dominates `generators_[curr]`, it has to replace `generators_[curr]`. If there is no relation between both,
+   * `generators_[curr]` has no influence on the addition of x.
    *
    * Assumes between 'curr' and 'end' everything is simplified:
    * no nan values and if there is an inf/-inf, then 'end - curr == 1'.

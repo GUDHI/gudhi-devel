@@ -34,7 +34,7 @@
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Simple_mdspan.h>
-#include <gudhi/multi_filtration_utils.h>
+#include <gudhi/Multi_filtration/multi_filtration_utils.h>
 
 namespace Gudhi::multi_filtration {
 
@@ -338,6 +338,10 @@ class Multi_parameter_filtration
   /**
    * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameter first elements
    * corresponds to the first generator, the @ref num_parameter next to the second and so on.
+   *
+   * @warning If a generator is modified and the new set of generators is not minimal or not sorted, the behaviour
+   * of most methods is undefined. It is possible to call @ref simplify() after construction if there is a doubt to
+   * ensure this property.
    */
   iterator begin() noexcept { return generators_.begin(); }
 
@@ -372,6 +376,10 @@ class Multi_parameter_filtration
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
    * The @ref num_parameter first elements corresponds to the last generator (in parameter reverse order), the
    * @ref num_parameter next to the second to last and so on.
+   *
+   * @warning If a generator is modified and the new set of generators is not minimal or not sorted, the behaviour
+   * of most methods is undefined. It is possible to call @ref simplify() after construction if there is a doubt to
+   * ensure this property.
    */
   reverse_iterator rbegin() noexcept { return generators_.rbegin(); }
 
