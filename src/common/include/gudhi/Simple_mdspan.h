@@ -27,38 +27,150 @@
 
 namespace Gudhi {
 
-template <typename T>
+class layout_right
+{
+ public:
+  class mapping
+  {
+   public:
+    using index_type = std::size_t;
+    using extents_type = std::vector<index_type>;
+    using size_type = typename extents_type::size_type;
+    using rank_type = std::size_t;
+    using layout_type = layout_right;
+
+    // constructors
+    mapping() noexcept = default;
+    mapping(const mapping&) noexcept = default;
+
+    mapping(const extents_type& exts) noexcept : exts_(exts)
+    {
+      if (!exts_.empty()) _initialize_strides();
+    }
+
+    mapping& operator=(const mapping&) noexcept = default;
+
+    // observers
+    constexpr const extents_type& extents() const noexcept { return exts_; }
+
+    index_type required_span_size() const noexcept
+    {
+      if (exts_.empty()) return 0;
+      return ext_shifts_[0] * exts_[0];
+    }
+
+    template <class... Indices>
+    constexpr index_type operator()(Indices... indices) const
+    {
+      return operator()({static_cast<index_type>(indices)...});
+    }
+
+    template <class IndexRange = std::initializer_list<index_type> >
+    constexpr index_type operator()(const IndexRange& indices) const
+    {
+      GUDHI_CHECK(indices.size() == exts_.size(), "Wrong number of parameters.");
+
+      index_type newIndex = 0;
+      auto it = indices.begin();
+      GUDHI_CHECK_code(unsigned int i = 0);
+      for (auto stride : ext_shifts_) {
+        GUDHI_CHECK_code(GUDHI_CHECK(*it < exts_[i], "Out of bound index."));
+        newIndex += (stride * (*it));
+        ++it;
+        GUDHI_CHECK_code(++i);
+      }
+
+      return newIndex;
+    }
+
+    static constexpr bool is_always_unique() noexcept { return true; }
+
+    static constexpr bool is_always_exhaustive() noexcept { return true; }
+
+    static constexpr bool is_always_strided() noexcept { return true; }
+
+    static constexpr bool is_unique() noexcept { return true; }
+
+    static constexpr bool is_exhaustive() noexcept { return true; }
+
+    static constexpr bool is_strided() noexcept { return true; }
+
+    index_type stride(rank_type r) const
+    {
+      GUDHI_CHECK(r < ext_shifts_.size(), "Stride out of bound.");
+      return ext_shifts_[r];
+    }
+
+    friend bool operator==(const mapping& m1, const mapping& m2) noexcept { return m1.exts_ == m2.exts_; }
+
+    friend void swap(mapping& m1, mapping& m2) noexcept
+    {
+      m1.exts_.swap(m2.exts_);
+      m1.ext_shifts_.swap(m2.ext_shifts_);
+    }
+
+    //as not everything is computed at compile time as for mdspan, update is usually faster than reconstructing everytime.
+    void update_extent(rank_type r, index_type new_value){
+      GUDHI_CHECK(r < exts_.size(), "Index out of bound.");
+      exts_[r] = new_value;
+      _update_strides(r);
+    }
+
+   private:
+    extents_type exts_;
+    extents_type ext_shifts_;
+
+    void _initialize_strides()
+    {
+      ext_shifts_.resize(exts_.size());
+      ext_shifts_.back() = 1;
+      for (auto i = exts_.size() - 1; i > 0; --i) {
+        ext_shifts_[i - 1] = ext_shifts_[i] * exts_[i];
+      }
+    }
+
+    void _update_strides(rank_type start)
+    {
+      for (auto i = start; i > 0; --i) {
+        ext_shifts_[i - 1] = ext_shifts_[i] * exts_[i];
+      }
+    }
+  };
+};
+
+template <typename T, class LayoutPolicy = layout_right>
 class Simple_mdspan
 {
  public:
-  using index_type = std::size_t;
-  using extents_type = std::vector<index_type>;
+  using layout_type = LayoutPolicy;
+  using mapping_type = typename LayoutPolicy::mapping;
+  using extents_type = typename mapping_type::extents_type;
   using element_type = T;
   using value_type = std::remove_cv_t<T>;
-  using size_type = extents_type::size_type;
-  using rank_type = std::size_t;
+  using index_type = typename mapping_type::index_type;
+  using size_type = typename mapping_type::size_type;
+  using rank_type = typename mapping_type::rank_type;
   using data_handle_type = T*;
   using reference = T&;
 
-  constexpr Simple_mdspan() : ptr_(nullptr) {}
+  Simple_mdspan() : ptr_(nullptr) {}
 
-  constexpr Simple_mdspan(const Simple_mdspan& rhs) = default;
-  constexpr Simple_mdspan(Simple_mdspan&& rhs) = default;
+  Simple_mdspan(const Simple_mdspan& rhs) = default;
+  Simple_mdspan(Simple_mdspan&& rhs) = default;
 
   template <class... IndexTypes>
-  constexpr explicit Simple_mdspan(data_handle_type ptr, IndexTypes... exts)
+  explicit Simple_mdspan(data_handle_type ptr, IndexTypes... exts)
       : Simple_mdspan(ptr, {static_cast<index_type>(exts)...})
   {}
 
   template <class IndexRange = std::initializer_list<index_type> >
-  constexpr Simple_mdspan(data_handle_type ptr, const IndexRange& exts) : ptr_(ptr), exts_(exts.begin(), exts.end())
+  Simple_mdspan(data_handle_type ptr, const IndexRange& exts) : ptr_(ptr), map_(extents_type(exts.begin(), exts.end()))
   {
-    GUDHI_CHECK(ptr != nullptr || exts_.empty() || exts_[0] == 0, "Given pointer is not properly initialized.");
-    if (!exts_.empty()) _initialize_strides();
+    GUDHI_CHECK(ptr != nullptr || empty() || *(exts.begin()) == 0, "Given pointer is not properly initialized.");
   }
 
-  constexpr Simple_mdspan& operator=(const Simple_mdspan& rhs) = default;
-  constexpr Simple_mdspan& operator=(Simple_mdspan&& rhs) = default;
+  Simple_mdspan& operator=(const Simple_mdspan& rhs) = default;
+  Simple_mdspan& operator=(Simple_mdspan&& rhs) = default;
 
   //version with [] not possible before C++23
   template <class... IndexTypes>
@@ -68,97 +180,68 @@ class Simple_mdspan
   }
 
   template <class IndexRange = std::initializer_list<index_type> >
-  constexpr reference operator[](const IndexRange& indices) const
+  reference operator[](const IndexRange& indices) const
   {
-    GUDHI_CHECK(indices.size() == exts_.size(), "Wrong number of parameters.");
-
-    data_handle_type data = ptr_;
-    auto it = indices.begin();
-    GUDHI_CHECK_code(unsigned int i = 0);
-    for (auto stride : ext_shifts_) {
-      GUDHI_CHECK_code(GUDHI_CHECK(*it < exts_[i], "Out of bound index."));
-      data += (stride * (*it));
-      ++it;
-      GUDHI_CHECK_code(++i);
-    }
-
-    return *data;
+    return *(ptr_ + map_(indices));
   }
 
-  //replaces mapping() from the original mdspan
-  template <class... IndexTypes>
-  constexpr index_type get_index(IndexTypes... indices) const
-  {
-    return get_index({static_cast<index_type>(indices)...});
-  }
+  constexpr rank_type rank() noexcept { return map_.extents().size(); }
 
-  template <class IndexRange = std::initializer_list<index_type> >
-  constexpr index_type get_index(const IndexRange& indices) const
-  {
-    data_handle_type data = &operator[](indices);
-    return data - ptr_;
-  }
-
-  constexpr rank_type rank() noexcept { return exts_.size(); }
-
-  constexpr rank_type rank_dynamic() noexcept { return exts_.size(); }
+  constexpr rank_type rank_dynamic() noexcept { return map_.extents().size(); }
 
   static constexpr std::size_t static_extent(rank_type r) noexcept { return std::numeric_limits<std::size_t>::max(); }
 
   constexpr index_type extent(rank_type r) const
   {
-    GUDHI_CHECK(r < exts_.size(), "Out of bound index.");
-    return exts_[r];
+    GUDHI_CHECK(r < map_.extents().size(), "Out of bound index.");
+    return map_.extents()[r];
   }
 
   constexpr size_type size() const noexcept
   {
-    if (exts_.empty()) return 0;
-    return ext_shifts_[0] * exts_[0];
+    return map_.required_span_size();
   }
 
-  constexpr bool empty() const noexcept { return exts_.empty(); }
+  constexpr bool empty() const noexcept { return map_.required_span_size() == 0; }
 
   constexpr index_type stride(rank_type r) const
   {
-    GUDHI_CHECK(r < ext_shifts_.size(), "Stride out of bound.");
-    return ext_shifts_[r];
+    return map_.stride(r);
   }
 
-  constexpr const extents_type& extents() const noexcept { return exts_; }
+  constexpr const extents_type& extents() const noexcept { return map_.extents(); }
 
   constexpr const data_handle_type& data_handle() const noexcept { return ptr_; }
 
+  constexpr const mapping_type& mapping() const noexcept { return map_; }
+
   // if is_unique() is true for all possible instantiations of this class
-  static constexpr bool is_always_unique() { return true; }
+  static constexpr bool is_always_unique() { return mapping_type::is_always_unique(); }
 
   // if is_exhaustive() is true for all possible instantiations of this class
-  static constexpr bool is_always_exhaustive() { return true; }
+  static constexpr bool is_always_exhaustive() { return mapping_type::is_always_exhaustive(); }
 
   // if is_strided() is true for all possible instantiations of this class
-  static constexpr bool is_always_strided() { return true; }
+  static constexpr bool is_always_strided() { return mapping_type::is_always_strided(); }
 
   // unicity of the mapping (i,j,k,...) -> real index
-  constexpr bool is_unique() const { return true; }
+  constexpr bool is_unique() const { return map_.is_unique(); }
 
   // if all real indices have a preimage in form (i,j,k,...)
-  constexpr bool is_exhaustive() const { return true; }
+  constexpr bool is_exhaustive() const { return map_.is_exhaustive(); }
 
   // if distance in memory is constant between two values in same rank
-  constexpr bool is_strided() const { return true; }
+  constexpr bool is_strided() const { return map_.is_strided(); }
 
   friend constexpr void swap(Simple_mdspan& x, Simple_mdspan& y) noexcept
   {
     std::swap(x.ptr_, y.ptr_);
-    x.exts_.swap(y.exts_);
-    x.ext_shifts_.swap(y.ext_shifts_);
+    swap(x.map_, y.map_);
   }
 
   //as not everything is computed at compile time as for mdspan, update is usually faster than reconstructing everytime.
   void update_extent(rank_type r, index_type new_value){
-    GUDHI_CHECK(r < exts_.size(), "Index out of bound.");
-    exts_[r] = new_value;
-    _update_strides(r);
+    map_.update_extent(r, new_value);
   }
   //for update_extent to make sense, as resizing the vector can move it in the memory
   void update_data(data_handle_type ptr){
@@ -168,24 +251,7 @@ class Simple_mdspan
 
  private:
   data_handle_type ptr_;
-  extents_type exts_;
-  extents_type ext_shifts_;
-
-  void _initialize_strides()
-  {
-    ext_shifts_.resize(exts_.size());
-    ext_shifts_.back() = 1;
-    for (auto i = exts_.size() - 1; i > 0; --i) {
-      ext_shifts_[i - 1] = ext_shifts_[i] * exts_[i];
-    }
-  }
-
-  void _update_strides(rank_type start)
-  {
-    for (auto i = start; i > 0; --i) {
-      ext_shifts_[i - 1] = ext_shifts_[i] * exts_[i];
-    }
-  }
+  mapping_type map_;
 };
 
 }  // namespace Gudhi

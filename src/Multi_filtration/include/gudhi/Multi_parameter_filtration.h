@@ -1432,7 +1432,7 @@ class Multi_parameter_filtration
 
       for (std::size_t curr = 0; curr < num_generators(); ++curr) {
         if (_generator_can_be_added(
-                generators_.begin() + generator_view_.get_index(indices[curr], 0), 0, end, indices)) {
+                generators_.begin() + generator_view_.mapping()(indices[curr], 0), 0, end, indices)) {
           std::swap(indices[end], indices[curr]);
           ++end;
         }
@@ -1863,7 +1863,7 @@ class Multi_parameter_filtration
         for (size_type p = 0; p < f.num_parameters(); ++p) {
           const std::vector<U> &filtration = grid[p];
           const T &c = f(g, p);
-          outVec[f.generator_view_.get_index(g, p)] = (c == f.T_inf ? grid_inf : filtration[c]);
+          outVec[f.generator_view_.mapping()(g, p)] = (c == f.T_inf ? grid_inf : filtration[c]);
         }
       }
     }
