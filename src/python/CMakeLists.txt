@@ -371,7 +371,6 @@ endif()
 # Compilation flags are in a string. Transform it to a list and append them to GUDHI_PYTHON_EXTRA_COMPILE_ARGS
 string(REPLACE " " ";" GUDHI_COMPILATION_FLAGS_LIST ${GUDHI_COMPILATION_FLAGS_STRING})
 foreach(FLAG IN LISTS GUDHI_COMPILATION_FLAGS_LIST)
-  message(STATUS "FLAG=${FLAG}")
   set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'${FLAG}', ")
 endforeach()
 

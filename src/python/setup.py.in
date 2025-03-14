@@ -24,22 +24,22 @@ source_dir='gudhi/'
 # When CXXFLAGS environment variable is set, with setuptools >= 74.0.0, python compilation flags are removed
 # Take the ones coming from CFLAGS (as setuptools is doing before overwriting them with the environment variable)
 # get_config_var can be None
-extra_compile_args=(sysconfig.get_config_var("CFLAGS") or '').split()
-extra_compile_args+=[@GUDHI_PYTHON_EXTRA_COMPILE_ARGS@]
-extra_link_args=[@GUDHI_PYTHON_EXTRA_LINK_ARGS@]
-libraries=[@GUDHI_PYTHON_LIBRARIES@]
-library_dirs=[@GUDHI_PYTHON_LIBRARY_DIRS@]
+extra_compile_args = (sysconfig.get_config_var('CFLAGS') or '').split()
+extra_compile_args += [@GUDHI_PYTHON_EXTRA_COMPILE_ARGS@]
+extra_link_args = [@GUDHI_PYTHON_EXTRA_LINK_ARGS@]
+libraries = [@GUDHI_PYTHON_LIBRARIES@]
+library_dirs = [@GUDHI_PYTHON_LIBRARY_DIRS@]
 include_dirs = [numpy_get_include(), '@CMAKE_CURRENT_SOURCE_DIR@/gudhi/', @GUDHI_PYTHON_INCLUDE_DIRS@]
-runtime_library_dirs=[@GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS@]
+runtime_library_dirs = [@GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS@]
 
 # Create ext_modules list from module list
 ext_modules = []
 for module in cython_modules:
     ext_modules.append(Extension(
         'gudhi.' + module,
-        sources = [source_dir + module + '.pyx',],
-        language = 'c++',
-        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
+        sources=[source_dir + module + '.pyx',],
+        language='c++',
+        define_macros=[('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')],
         extra_compile_args=extra_compile_args,
         extra_link_args=extra_link_args,
         libraries=libraries,
@@ -53,9 +53,9 @@ for module in pybind11_modules:
     my_include_dirs = include_dirs + [pybind11.get_include(False), pybind11.get_include(True)]
     ext_modules.append(Extension(
         'gudhi.' + module.replace('/', '.'),
-        sources = [source_dir + module + '.cc'],
-        language = 'c++',
-        include_dirs = my_include_dirs,
+        sources=[source_dir + module + '.cc'],
+        language='c++',
+        include_dirs=my_include_dirs,
         extra_compile_args=extra_compile_args + [@GUDHI_PYBIND11_EXTRA_COMPILE_ARGS@],
         extra_link_args=extra_link_args,
         libraries=libraries,
@@ -64,8 +64,8 @@ for module in pybind11_modules:
         ))
 
 setup(
-    name = 'gudhi',
-    packages=find_packages(), # find_namespace_packages(include=["gudhi*"])
+    name='gudhi',
+    packages=find_packages(), # find_namespace_packages(include=['gudhi*'])
     author='GUDHI Editorial Board <https://gudhi.inria.fr/contact/>',
     version='@GUDHI_VERSION@',
     url='https://gudhi.inria.fr/',
@@ -79,8 +79,8 @@ setup(
         'Computational Topology and Topological Data Analysis (TDA).',
     long_description_content_type='text/x-rst',
     long_description='@GUDHI_LONG_DESCRIPTION@',
-    ext_modules = ext_modules,
+    ext_modules=ext_modules,
     python_requires='>=3.8.0',
-    install_requires = ['numpy >= 1.15.0',],
-    package_data={"": ["*.dll"], },
+    install_requires=['numpy >= 1.15.0',],
+    package_data={'': ['*.dll'], },
 )
