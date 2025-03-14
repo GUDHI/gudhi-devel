@@ -5,12 +5,13 @@
 # Copyright (C) 2021 Inria
 #
 # Modification(s):
-#   - YYYY/MM Author: Description of the modification
+#   - 2025/03 Ziyad Oulhaj: Added parallel processing for the MapperComplex fit method 
 
 import numpy as np
 import itertools
 import matplotlib
 import matplotlib.pyplot as plt
+from joblib import Parallel, delayed
 
 from sklearn.base            import BaseEstimator
 from sklearn.cluster         import DBSCAN, AgglomerativeClustering
@@ -22,6 +23,17 @@ from sklearn.utils.fixes import parse_version
 agglomerative_clustering_metric = parse_version(sklearn_version) >= parse_version('1.2.0')
 
 from . import SimplexTree, CoverComplex
+
+# Takes the Binned data map and the index of a patch and computes the list of clusters in that patch. It is used for parallel processing in the MapperComplex fit method.
+def cluster_patch(Binned_data, p_ind, clustering, X, input_type):
+    data_bin=Binned_data[p_ind]
+    if len(data_bin) > 1:
+        clusters = clustering.fit_predict(X[data_bin,:]) if input_type == "point cloud" \
+        else clustering.fit_predict(X[data_bin,:][:,data_bin])
+    else:
+        clusters = np.array([])
+
+    return clusters
 
 def _save_to_html(dat, lens, color, param, points, edges, html_output_filename):
 
@@ -335,7 +347,7 @@ class MapperComplex(CoverComplexPy):
 
         return delta, np.array(res)
 
-    def fit(self, X, y=None, filters=None, colors=None):
+    def fit(self, X, y=None, filters=None, colors=None, n_jobs=1, backend='loky'):
         """
         Fit the MapperComplex class on a point cloud or a distance matrix: compute the Mapper complex and store it in a simplex tree called `simplex_tree_`.
 
@@ -349,6 +361,8 @@ class MapperComplex(CoverComplexPy):
                 filter functions (sometimes called lenses) used to compute the cover. Each column of the numpy array defines a scalar function defined on the input points.
             colors : list of lists or numpy array of shape (num_points) x (num_colors)
                 functions used to color the nodes of the cover complex. More specifically, coloring is done by computing the means of these functions on the subpopulations corresponding to each node. If None, first coordinate is used if input is point cloud, and eccentricity is used if input is distance matrix.
+            n_jobs :  The maximum number of concurrently running jobs (default 1). See https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for details.
+            backend : Specify the parallelization backend implementation (default 'loky'). See https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for details.
         """
 
         if self.resolutions is not None:
@@ -410,108 +424,75 @@ class MapperComplex(CoverComplexPy):
         # Initialize attributes
         self.simplex_tree_, self.node_info_ = SimplexTree(), {}
 
-        if np.all(self.gains < .5):
+        # Compute the endpoints of the cover intervals for all filters 
+        column_indices=np.indices((num_filters,self.resolutions.max()))[1]
 
-            # Compute which points fall in which patch or patch intersections
-            interval_inds, intersec_inds = np.empty(self.filters.shape), np.empty(self.filters.shape)
-            for i in range(num_filters):
-                f, r, g = self.filters[:,i], self.resolutions[i], self.gains[i]
-                min_f, max_f = self.filter_bnds[i,0], np.nextafter(self.filter_bnds[i,1], np.inf)
-                interval_endpoints, l = np.linspace(min_f, max_f, num=r+1, retstep=True)
-                intersec_endpoints = []
-                for j in range(1, len(interval_endpoints)-1):
-                    intersec_endpoints.append(interval_endpoints[j] - g*l / (2 - 2*g))
-                    intersec_endpoints.append(interval_endpoints[j] + g*l / (2 - 2*g))
-                interval_inds[:,i] = np.digitize(f, interval_endpoints)
-                intersec_inds[:,i] = 0.5 * (np.digitize(f, intersec_endpoints) + 1)
+        steps=np.repeat(((self.filter_bnds[:,1]-self.filter_bnds[:,0])/self.resolutions).reshape((num_filters,1)),self.resolutions.max(),axis=1)
 
-            # Build the binned_data map that takes a patch or a patch intersection and outputs the indices of the points contained in it
-            binned_data = {}
-            for i in range(num_pts):
-                list_preimage = []
-                for j in range(num_filters):
-                    a, b = interval_inds[i,j], intersec_inds[i,j]
-                    list_preimage.append([a])
-                    if b == a:
-                        list_preimage[j].append(a+1)
-                    if b == a-1:
-                        list_preimage[j].append(a-1)
-                list_preimage = list(itertools.product(*list_preimage))
-                for pre_idx in list_preimage:
-                    try:
-                        binned_data[pre_idx].append(i)
-                    except KeyError:
-                        binned_data[pre_idx] = [i]
+        mins=np.repeat(self.filter_bnds[:,0].reshape((num_filters,1)),self.resolutions.max(),axis=1)
 
-        else:
+        gains=np.repeat(self.gains.reshape((num_filters,1)),self.resolutions.max(),axis=1)
 
-            # Compute interval endpoints for each filter
-            l_int, r_int = [], []
-            for i in range(num_filters):
-                L, R = [], []
-                f, r, g = self.filters[:,i], self.resolutions[i], self.gains[i]
-                min_f, max_f = self.filter_bnds[i,0], np.nextafter(self.filter_bnds[i,1], np.inf)
-                interval_endpoints, l = np.linspace(min_f, max_f, num=r+1, retstep=True)
-                for j in range(len(interval_endpoints)-1):
-                    L.append(interval_endpoints[j]   - g*l / (2 - 2*g))
-                    R.append(interval_endpoints[j+1] + g*l / (2 - 2*g))
-                l_int.append(L)
-                r_int.append(R)
+        epsilons=gains/(2-2*gains)*steps
 
-            # Build the binned_data map that takes a patch or a patch intersection and outputs the indices of the points contained in it
-            binned_data = {}
-            for i in range(num_pts):
-                list_preimage = []
-                for j in range(num_filters):
-                    fval = self.filters[i,j]
-                    start, end = int(min(np.argwhere(np.array(r_int[j]) >= fval))), int(max(np.argwhere(np.array(l_int[j]) <= fval)))
-                    list_preimage.append(list(range(start, end+1)))
-                list_preimage = list(itertools.product(*list_preimage))
-                for pre_idx in list_preimage:
-                    try:
-                        binned_data[pre_idx].append(i)
-                    except KeyError:
-                        binned_data[pre_idx] = [i]
+        left_endpoints=mins+steps*column_indices-epsilons
 
-        # Initialize the cover map, that takes a point and outputs the clusters to which it belongs
-        cover, clus_base = [[] for _ in range(num_pts)], 0
+        right_endpoints=mins+steps*(column_indices+1)+epsilons
+        
+        # Find for each point the intervals it is associated to
+        filter_values=np.repeat(self.filters.T.reshape(num_filters,1,num_pts),self.resolutions.max(),axis=1)
 
-        # For each patch
-        for preimage in binned_data:
+        comparison=(filter_values>=np.repeat(left_endpoints.reshape((num_filters,self.resolutions.max(),1)),num_pts,axis=2))*(filter_values<np.repeat(right_endpoints.reshape((num_filters,self.resolutions.max(),1)),num_pts,axis=2))
 
-            # Apply clustering on the corresponding subpopulation
-            idxs = np.array(binned_data[preimage])
-            if len(idxs) > 1:
-                clusters = self.clustering.fit_predict(X[idxs,:]) if self.input_type == "point cloud" else self.clustering.fit_predict(X[idxs,:][:,idxs])
-            elif len(idxs) == 1:
-                clusters = np.array([0])
-            else:
-                continue
+        # Compute the list of possible patches
+        patch_list=[list(range(self.resolutions[f])) for f in range(num_filters)]
+        patches=list(itertools.product(*patch_list))
+        
+        # Initialize the Binned data map that associates each patch to the points that belong to it
+        # Initialize the cover map that associates each point to the clusters it belongs to
+        Binned_data=[np.array([]) for p in patches]
+        cover_map=[[] for pt in range(num_pts)]
+        
+        # Fill the Binned data map
+        for p_ind in range(len(patches)):
 
-            # Collect various information on each cluster
-            num_clus_pre = np.max(clusters) + 1
-            for clus_i in range(num_clus_pre):
-                node_name = clus_base + clus_i
-                subpopulation = idxs[clusters == clus_i]
-                self.node_info_[node_name] = {}
-                self.node_info_[node_name]["indices"] = subpopulation
-                self.node_info_[node_name]["size"] = len(subpopulation)
-                self.node_info_[node_name]["colors"] = np.mean(self.colors[subpopulation,:], axis=0)
-                self.node_info_[node_name]["patch"] = preimage
+            p=patches[p_ind]
+            point_list=[set(np.where(comparison[f,p[f],:])[0]) for f in range(num_filters)]
 
-            # Update the cover map
-            for pt in range(clusters.shape[0]):
-                node_name = clus_base + clusters[pt]
-                if clusters[pt] != -1 and self.node_info_[node_name]["size"] >= self.min_points_per_node:
-                    cover[idxs[pt]].append(node_name)
+            Binned_data_current=point_list[0]
+            for f in range(1,num_filters):
+                Binned_data_current=Binned_data_current.intersection(point_list[f])
+            Binned_data[p_ind]=np.array(list(Binned_data_current))
 
-            clus_base += np.max(clusters) + 1
+        
+        # Compute the clustering in each patch in parallel
+        clusters_list = Parallel(n_jobs=n_jobs,backend=backend)(delayed(cluster_patch)(Binned_data, p_ind, self.clustering, X, self.input_type) for p_ind in range(len(patches)))
+        
+        # Go through the list of clusters
+        current_max=0
+        for clusters_ind in range(len(clusters_list)):
+            # Change the name of the clusters to avoid confusion
+            clusters_list[clusters_ind]=clusters_list[clusters_ind]+current_max
+            clusters=clusters_list[clusters_ind]
+            current_max+=len(np.unique(clusters))
+            
+            # Get information about each individual cluster
+            for clus in np.unique(clusters):
+                subpopulation = Binned_data[clusters_ind][clusters == clus]
+                self.node_info_[clus] = {}
+                self.node_info_[clus]["indices"] = subpopulation
+                self.node_info_[clus]["size"] = len(subpopulation)
+                self.node_info_[clus]["colors"] = np.mean(self.colors[subpopulation,:], axis=0)
+                self.node_info_[clus]["patch"] = patches[clusters_ind]
+            # Fill the cover map
+            [cover_map[pt].append(clus) for pt,clus in zip(Binned_data[clusters_ind], clusters)]
 
-        # Insert the simplices of the Mapper complex
-        for i in range(num_pts):
-            self.simplex_tree_.insert(cover[i])
+        # Insert the simplices into the Mapper
+        for splx in cover_map:
+            self.simplex_tree_.insert(splx)
 
         return self
+
 
 class GraphInducedComplex(CoverComplexPy):
     """
