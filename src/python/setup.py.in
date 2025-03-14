@@ -5,6 +5,7 @@
    Copyright (C) 2019  Inria
 
    Modification(s):
+     - 2025/03 Vincent Rouvreau: Try to propagate correctly CXXFLAGS + '-O3' by default to speed up computation
      - 2021/12 Vincent Rouvreau: Python 3.5 as minimal version
      - YYYY/MM Author: Description of the modification
 """
@@ -13,12 +14,17 @@ from setuptools import setup, Extension, find_packages
 from Cython.Build import cythonize
 from numpy import get_include as numpy_get_include
 import pybind11
+import sysconfig
 
 cython_modules = [@GUDHI_CYTHON_MODULES@]
 pybind11_modules = [@GUDHI_PYBIND11_MODULES@]
 
 source_dir='gudhi/'
-extra_compile_args=[@GUDHI_PYTHON_EXTRA_COMPILE_ARGS@]
+
+# When CXXFLAGS environment variable is set, with setuptools >= 74.0.0, python compilation flags are removed
+# Take the ones coming from CFLAGS (as setuptools is doing before overwriting them with the environment variable)
+extra_compile_args=sysconfig.get_config_var("CFLAGS").split()
+extra_compile_args+=[@GUDHI_PYTHON_EXTRA_COMPILE_ARGS@]
 extra_link_args=[@GUDHI_PYTHON_EXTRA_LINK_ARGS@]
 libraries=[@GUDHI_PYTHON_LIBRARIES@]
 library_dirs=[@GUDHI_PYTHON_LIBRARY_DIRS@]
