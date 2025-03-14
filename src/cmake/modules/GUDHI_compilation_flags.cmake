@@ -44,9 +44,9 @@ if (DEBUG_TRACES)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-  message("++ Debug compilation flags are: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+  message("++ Debug compilation flags are: ${CMAKE_CXX_FLAGS} || ${CMAKE_CXX_FLAGS_DEBUG}")
 else()
-  message("++ Release compilation flags are: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+  message("++ Release compilation flags are: ${CMAKE_CXX_FLAGS} || ${CMAKE_CXX_FLAGS_RELEASE}")
 endif()
 
 option(WITH_GUDHI_BOOST_TEST_COVERAGE "Report xml coverage files on boost tests" OFF)
