@@ -23,7 +23,8 @@ source_dir='gudhi/'
 
 # When CXXFLAGS environment variable is set, with setuptools >= 74.0.0, python compilation flags are removed
 # Take the ones coming from CFLAGS (as setuptools is doing before overwriting them with the environment variable)
-extra_compile_args=sysconfig.get_config_var("CFLAGS").split()
+# get_config_var can be None
+extra_compile_args=(sysconfig.get_config_var("CFLAGS") or '').split()
 extra_compile_args+=[@GUDHI_PYTHON_EXTRA_COMPILE_ARGS@]
 extra_link_args=[@GUDHI_PYTHON_EXTRA_LINK_ARGS@]
 libraries=[@GUDHI_PYTHON_LIBRARIES@]
