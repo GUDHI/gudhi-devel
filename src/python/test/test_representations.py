@@ -6,6 +6,7 @@ import pytest
 import random
 
 from sklearn.cluster import KMeans
+from sklearn.kernel_approximation import RBFSampler
 
 # Vectorization
 from gudhi.representations import (Landscape, Silhouette, BettiCurve, ComplexPolynomial,\
@@ -48,8 +49,11 @@ metrics_dict = { # (class, metric_kwargs, tolerance_pytest_approx)
     "bottleneck": (BottleneckDistance(epsilon=0.00001),
                    dict(e=0.00001),
                    dict(abs=1e-5)),
-    "wasserstein": (WassersteinDistance(order=2, internal_p=2, n_jobs=4),
+    "pot_wasserstein": (WassersteinDistance(order=2, mode="pot", internal_p=2, n_jobs=4),
                     dict(order=2, internal_p=2, n_jobs=4),
+                    dict(rel=1e-3)),
+    "hera_wasserstein": (WassersteinDistance(order=2, mode="hera", delta=0.001, internal_p=2, n_jobs=4),
+                    dict(order=2, internal_p=2, n_jobs=4, delta=0.001,),
                     dict(rel=1e-3)),
     "sliced_wasserstein": (SlicedWassersteinDistance(num_directions=100, n_jobs=4),
                            dict(num_directions=100),
@@ -75,33 +79,47 @@ def test_distance_transform_consistency():
 
 kernel_dict = {
     "sliced_wasserstein": (SlicedWassersteinKernel(num_directions=10, bandwidth=4., n_jobs=4),
-                           dict(num_directions=10), dict(rel=1e-3)),
+                           dict(num_directions=10)),
     "persistence_fisher": (PersistenceFisherKernel(bandwidth_fisher=3., bandwidth=1.),
-                           dict(bandwidth=3.),  # corresponds to bandwidth_fisher in the kernel class
-                           dict(rel=1e-3)),
-    "persistence_weighted_gaussian": (PersistenceWeightedGaussianKernel(bandwidth=4.,
+                           dict(bandwidth=3.),),  # corresponds to bandwidth_fisher in the kernel class
+    "persistence_weighted_gaussian": (PersistenceWeightedGaussianKernel(bandwidth=2.,
                                                                         weight=lambda x: x[1]-x[0]),
-                                      dict(bandwidth=4., weight=lambda x: x[1]-x[0]),
-                                      dict(rel=1e-3)),
-    "persistence_scale_space": (PersistenceScaleSpaceKernel(bandwidth=4.),
-                                      dict(bandwidth=4.),
-                                      dict(rel=1e-3)),
+                                      dict(bandwidth=2., weight=lambda x: x[1]-x[0]),),
+    "persistence_scale_space": (PersistenceScaleSpaceKernel(bandwidth=3.),
+                                      dict(bandwidth=3.)),
 }
+
 def test_kernel_from_distance():
     l1, l2 = _n_diags(9), _n_diags(11)
+    tolerance = dict(rel=1e-3)
     for kernelName in ["sliced_wasserstein", "persistence_fisher"]:
-        kernelClass, kernelParams, tolerance = kernel_dict[kernelName]
+        kernelClass, kernelParams = kernel_dict[kernelName]
         f1 = kernelClass.fit_transform(l1)
         d1 = pairwise_persistence_diagram_distances(l1, metric=kernelName, **kernelParams)
-        assert np.exp(-d1/kernelClass.bandwidth == pytest.approx(f1, **tolerance))
+        assert np.exp(-d1/kernelClass.bandwidth) == pytest.approx(f1, **tolerance)
 
 def test_kernel_distance_consistency():
     l1, l2 = _n_diags(9), _n_diags(11)
-    for kernelName, (kernelClass, kernelParams, tolerance) in kernel_dict.items():
+    tolerance = dict(rel=1e-3)
+    for kernelName, (kernelClass, kernelParams) in kernel_dict.items():
         _ = kernelClass.fit(l1)
         f2 = kernelClass.transform(l2)
         f12 = np.array([[kernelClass(l1_, l2_) for l1_ in l1] for l2_ in l2])
         assert f12 == pytest.approx(f2, **tolerance)
+
+def test_kernel_approximation():
+    l1, l2 = _n_diags(3), _n_diags(3)
+    tolerance_approximate_kernel = dict(rel=1e-1)
+    for kernelName in ["persistence_weighted_gaussian", "persistence_scale_space"]:
+        kernelClass, kernelParams = kernel_dict[kernelName]
+        _ = kernelClass.fit(l1)
+        f2 = kernelClass.transform(l2)
+        gamma = 0.5*1./(kernelParams["bandwidth"]**2)
+        kernel_approx = RBFSampler(gamma=gamma, n_components=1000).fit(np.array([[0., 2.]]))
+        kernelClass.kernel_approx = kernel_approx
+        _ = kernelClass.fit(l1)
+        f2_approx = kernelClass.transform(l2)
+        assert f2_approx == pytest.approx(f2, **tolerance_approximate_kernel)
 
 def test_sliced_wasserstein_distance_value():
     diag1 = np.array([[0., 1.], [0., 2.]])
