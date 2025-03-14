@@ -290,12 +290,12 @@ class Multi_parameter_filtration
   /**
    * @brief Returns reference to value of parameter `p` of generator `g`.
    */
-  reference operator()(size_type g, size_type n) { return generator_view_(g, n); }
+  reference operator()(size_type g, size_type p) { return generator_view_(g, p); }
 
   /**
    * @brief Returns const reference to value of parameter `p` of generator `g`.
    */
-  const_reference operator()(size_type g, size_type n) const { return generator_view_(g, n); }
+  const_reference operator()(size_type g, size_type p) const { return generator_view_(g, p); }
 
   /**
    * @brief Let \f$ g \f$ be the first value in `indices` and \f$ p \f$ the second value.
