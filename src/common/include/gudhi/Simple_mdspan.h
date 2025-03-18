@@ -153,6 +153,8 @@ class layout_right
  * - there is no Extend class, everything is managed by the mapper class instead,
  * - there is no AccessorPolicy template: the container pointed by the stored pointer is assumed to be vector-like,
  * i.e., continuous and, e.g., you can do `ptr_ + 2` to access the third element,
+ * - `object[i,j,k,...]` is replaced by either `object(i,j,k,...)` or `object[{i,j,k,...}]`, as C++17 does not
+ * allow more than one argument for `operator[]`,
  * - two additional methods: `update_extent` and `update_data` to avoid recalculating the helpers in the mapping class
  * at each size modification of the underlying container. In the original `std::mdspan` most of the work is done
  * at compile time, so it is usually fine to reconstruct a view everytime needed. That is not the case here.
