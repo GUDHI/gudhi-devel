@@ -590,6 +590,8 @@ class Dynamic_multi_parameter_filtration
    */
   friend bool operator<(const Dynamic_multi_parameter_filtration &a, const Dynamic_multi_parameter_filtration &b)
   {
+    if (&a == &b) return false;
+
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
                 "Only filtration values with same number of parameters can be compared.");
 
@@ -626,9 +628,11 @@ class Dynamic_multi_parameter_filtration
   friend bool operator<=(const Dynamic_multi_parameter_filtration &a, const Dynamic_multi_parameter_filtration &b)
   {
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
-                "Only filtration values with same number of parameters can be compared.");
-
+    "Only filtration values with same number of parameters can be compared.");
+    
     if (a.num_generators() == 0 || b.num_generators() == 0) return false;
+    if (a.is_nan() || b.is_nan()) return false;
+    if (&a == &b) return true;
 
     // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
     if constexpr (Ensure1Criticality) {
@@ -685,6 +689,8 @@ class Dynamic_multi_parameter_filtration
    */
   friend bool operator==(const Dynamic_multi_parameter_filtration &a, const Dynamic_multi_parameter_filtration &b)
   {
+    if (a.is_nan() || b.is_nan()) return false;
+    if (&a == &b) return true;
     // assumes lexicographical order for both
     return a.generators_ == b.generators_;
   }
@@ -718,9 +724,9 @@ class Dynamic_multi_parameter_filtration
 
   // subtraction
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -748,9 +754,9 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) - f(g,p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ -f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ -f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -783,7 +789,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) - val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) - val \f$.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -804,7 +810,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ val - f(g,p) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val - f(g,p) \f$.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -827,9 +833,9 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$, with
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -859,7 +865,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) - val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) - val \f$.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -883,9 +889,9 @@ class Dynamic_multi_parameter_filtration
 
   // addition
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -913,9 +919,9 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) + f(g,p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -945,7 +951,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) + val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) + val \f$.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -966,7 +972,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ val + f(g,p) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val + f(g,p) \f$.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -987,9 +993,9 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$, with
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -1019,7 +1025,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) + val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) + val \f$.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -1043,9 +1049,9 @@ class Dynamic_multi_parameter_filtration
 
   // multiplication
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1075,9 +1081,9 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) * f(g,p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1109,7 +1115,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) * val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) * val \f$.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1132,7 +1138,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ val * f(g,p) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val * f(g,p) \f$.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1155,9 +1161,9 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$, with
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1189,7 +1195,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) * val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) * val \f$.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1215,9 +1221,9 @@ class Dynamic_multi_parameter_filtration
 
   // division
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1250,9 +1256,9 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) / f(g,p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1289,7 +1295,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) / val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) / val \f$.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1315,7 +1321,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ val / f(g,p) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val / f(g,p) \f$.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1343,9 +1349,9 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$, with
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1380,7 +1386,7 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) / val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) / val \f$.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,

@@ -420,6 +420,7 @@ class Multi_parameter_generator
    */
   friend bool operator<(const Multi_parameter_generator &a, const Multi_parameter_generator &b)
   {
+    if (&a == &b) return false;
     if (a.is_nan() || b.is_nan()) return false;
     if (a.is_minus_inf() || b.is_plus_inf()) return !Co;
     if (b.is_minus_inf() || a.is_plus_inf()) return Co;
@@ -447,6 +448,7 @@ class Multi_parameter_generator
   friend bool operator<=(const Multi_parameter_generator &a, const Multi_parameter_generator &b)
   {
     if (a.is_nan() || b.is_nan()) return false;
+    if (&a == &b) return true;
     const bool aIsMinusInf = a.is_minus_inf();
     const bool aIsPlusInf = a.is_plus_inf();
     const bool bIsMinusInf = b.is_minus_inf();
@@ -492,6 +494,8 @@ class Multi_parameter_generator
    */
   friend bool operator==(const Multi_parameter_generator &a, const Multi_parameter_generator &b)
   {
+    if (a.is_nan() || b.is_nan()) return false;
+    if (&a == &b) return true;
     return a.generator_ == b.generator_;
   }
 
@@ -521,9 +525,9 @@ class Multi_parameter_generator
 
   // subtraction
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -546,9 +550,9 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) - f(g,p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ -f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ -f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -595,7 +599,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) - val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) - val \f$.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -616,7 +620,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ val - f(g,p) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val - f(g,p) \f$.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -640,9 +644,9 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$, with
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -684,7 +688,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) - val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) - val \f$.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -706,9 +710,9 @@ class Multi_parameter_generator
 
   // addition
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -731,9 +735,9 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) + f(g,p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -758,7 +762,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) + val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) + val \f$.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -779,7 +783,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ val + f(g,p) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val + f(g,p) \f$.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -800,9 +804,9 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$, with
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -844,7 +848,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) + val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) + val \f$.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -866,9 +870,9 @@ class Multi_parameter_generator
 
   // multiplication
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -893,9 +897,9 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) * f(g,p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -922,7 +926,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) * val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) * val \f$.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -945,7 +949,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ val * f(g,p) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val * f(g,p) \f$.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -968,9 +972,9 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$, with
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1014,7 +1018,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) * val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) * val \f$.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1038,9 +1042,9 @@ class Multi_parameter_generator
 
   // division
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1068,9 +1072,9 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$, with
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) / f(g,p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1123,7 +1127,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) / val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) / val \f$.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1149,7 +1153,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ g,p \f$ is equal to \f$ val / f(g,p) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val / f(g,p) \f$.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1179,9 +1183,9 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$, with
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
    * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
-   * if \f$ p \leq length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1228,7 +1232,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ g,p \f$ is equal to \f$ f(g,p) / val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) / val \f$.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
