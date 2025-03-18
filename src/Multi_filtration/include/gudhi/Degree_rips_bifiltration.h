@@ -534,7 +534,7 @@ class Degree_rips_bifiltration
   /**
    * @brief Returns `true` if and only if the filtration value is considered as NaN.
    */
-  constexpr bool is_nan()
+  constexpr bool is_nan() const
   {
     return generators_.empty();
   }
@@ -1453,7 +1453,7 @@ class Degree_rips_bifiltration
       GUDHI_CHECK(x.size() == 2, "Wrong range size. Should correspond to the number of parameters.");
     
       auto it = x.begin();
-      GUDHI_CHECK(*it > num_generators(), "First index has to be higher.");
+      GUDHI_CHECK(static_cast<size_type>(*it) > num_generators(), "First index has to be higher.");
       ++it;
       newVal = *it;
     }
@@ -1544,7 +1544,6 @@ class Degree_rips_bifiltration
       }
     }
     if (nan) result[0] = std::numeric_limits<T>::quiet_NaN();
-    result.resize(f.generators_.size(), result[0]);
 
     return Degree_rips_bifiltration(std::move(result), 2);
   }

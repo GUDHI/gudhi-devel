@@ -356,7 +356,7 @@ void test_operators(){
   BOOST_CHECK((f - F::minus_inf(num_param)).is_plus_inf());
   BOOST_CHECK((F::minus_inf(num_param) - f).is_minus_inf());
   if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
-    BOOST_CHECK((f - F::nan(num_param)).is_nan());
+    BOOST_CHECK((f - F::nan(num_param)) == f);
     BOOST_CHECK((F::nan(num_param) - f).is_nan());
   }
 
@@ -389,7 +389,7 @@ void test_operators(){
   BOOST_CHECK((f + F::minus_inf(num_param)).is_minus_inf());
   BOOST_CHECK((F::minus_inf(num_param) + f).is_minus_inf());
   if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
-    BOOST_CHECK((f + F::nan(num_param)).is_nan());
+    BOOST_CHECK((f + F::nan(num_param)) == f);
     BOOST_CHECK((F::nan(num_param) + f).is_nan());
   }
 
@@ -442,10 +442,8 @@ void test_operators(){
   BOOST_CHECK_EQUAL(res(0,1), F::T_inf);
 
   if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
-    res = f * F::nan(num_param);
-    BOOST_CHECK(res.is_nan());
-    res = F::nan(num_param) * f;
-    BOOST_CHECK(res.is_nan());
+    BOOST_CHECK((f * F::nan(num_param)) == f);
+    BOOST_CHECK((F::nan(num_param) * f).is_nan());
   }
 
   res = f3 * f3;
@@ -496,10 +494,8 @@ void test_operators(){
   BOOST_CHECK_EQUAL(res(0,1), f4(0,1));
 
   if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
-    res = f / F::nan(num_param);
-    BOOST_CHECK(res.is_nan());
-    res = F::nan(num_param) / f;
-    BOOST_CHECK(res.is_nan());
+    BOOST_CHECK((f / F::nan(num_param)) == f);
+    BOOST_CHECK((F::nan(num_param) / f).is_nan());
   }
 
   res = f3 / f3;
@@ -593,7 +589,7 @@ void test_modifiers(){
     BOOST_CHECK(f.is_plus_inf());
   }
 
-  f.pull_to_greatest_common_lower_bound({0, 4});
+  f.pull_to_greatest_common_lower_bound({5, 4});
   if constexpr (F::ensures_1_criticality()) {
     BOOST_CHECK_EQUAL(f(0, 0), 0);
     BOOST_CHECK_EQUAL(f(0, 1), 4);
@@ -606,7 +602,7 @@ void test_modifiers(){
     BOOST_CHECK_EQUAL(f(2, 1), 4);
   }
 
-  f.pull_to_greatest_common_lower_bound({0,-1});
+  f.pull_to_greatest_common_lower_bound({5,-1});
   if constexpr (F::ensures_1_criticality()) {
     BOOST_CHECK_EQUAL(f(0, 0), 0);
     BOOST_CHECK_EQUAL(f(0, 1), -1);
@@ -758,8 +754,12 @@ void test_friends(){
   BOOST_CHECK_EQUAL(compute_norm(f), static_cast<T>(std::sqrt(T(6))));
   BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, F({4, 5, 3}, 2)), static_cast<T>(std::sqrt(T(2))));
   BOOST_CHECK_EQUAL(compute_linear_projection(f, {2, 3, 5, 9}), 3);
-  BOOST_CHECK(factorize_below(f) == F({0, 1}));
-  BOOST_CHECK(factorize_above(f) == F({0, 2}));
+  F ff = factorize_below(f);
+  BOOST_CHECK(ff == F({0, 1}));
+  BOOST_CHECK(ff <= f);
+  ff = factorize_above(f);
+  BOOST_CHECK(ff == F({0, 2}));
+  BOOST_CHECK(ff >= f);
 
   f.add_guaranteed_generator({2, 0});
   BOOST_CHECK_EQUAL(f.num_generators(), 3);
@@ -769,8 +769,12 @@ void test_friends(){
   BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, F({4, 5, 3}, 2)),
                     static_cast<T>(std::sqrt(T(2))));
   BOOST_CHECK_EQUAL(compute_linear_projection(f, {2, 3, 5, 9}), 3);
-  BOOST_CHECK(factorize_below(f) == F({0, 0}));
-  BOOST_CHECK(factorize_above(f) == F({0, 2}));
+  ff = factorize_below(f);
+  BOOST_CHECK(ff == F({0, 0}));
+  BOOST_CHECK(ff <= f);
+  ff = factorize_above(f);
+  BOOST_CHECK(ff == F({0, 2}));
+  BOOST_CHECK(ff >= f);
 
   if constexpr (std::numeric_limits<T>::has_quiet_NaN){
     T nan = std::numeric_limits<T>::quiet_NaN();
@@ -780,12 +784,12 @@ void test_friends(){
     BOOST_CHECK(std::isnan(compute_norm(f2)));
     BOOST_CHECK(std::isnan(compute_euclidean_distance_to(f2, std::initializer_list<T>{0, 2})));
     BOOST_CHECK(std::isnan(compute_linear_projection(f2, {0, 3})));
-    F f2b = factorize_below(f2);
-    BOOST_CHECK_EQUAL(f2b(0, 0), 0);
-    BOOST_CHECK_EQUAL(f2b(0, 1), 2);
-    f2b = factorize_above(f2);
-    BOOST_CHECK_EQUAL(f2b(0, 0), 0);
-    BOOST_CHECK_EQUAL(f2b(0, 1), 2);
+    F f2f = factorize_below(f2);
+    BOOST_CHECK_EQUAL(f2f(0, 0), 0);
+    BOOST_CHECK_EQUAL(f2f(0, 1), 2);
+    f2f = factorize_above(f2);
+    BOOST_CHECK_EQUAL(f2f(0, 0), 0);
+    BOOST_CHECK_EQUAL(f2f(0, 1), 2);
   }
 
   f(0,1) = 1;
