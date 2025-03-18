@@ -13,6 +13,8 @@
 
 #include <cstddef>
 #include <type_traits>
+#include <limits>
+#include <cmath>
 
 namespace Gudhi {
 
@@ -36,8 +38,106 @@ class RangeTraits
 
  public:
   static constexpr bool has_begin = decltype(check_begin(std::declval<T>()))::value;
-  static constexpr bool is_dynamic_multi_filtration = decltype(check_filtration(std::declval<T>()))::value &&
-                                                      decltype(check_dynamic_filtration(std::declval<T>()))::value;
+  static constexpr bool is_multi_filtration = decltype(check_filtration(std::declval<T>()))::value;
+  static constexpr bool is_dynamic_multi_filtration =
+      is_multi_filtration && decltype(check_dynamic_filtration(std::declval<T>()))::value;
+};
+
+template <typename T>
+constexpr bool _is_nan(T val)
+{
+  if constexpr (std::is_integral_v<T>) {
+    // to avoid Windows issue which don't know how to cast integers for cmath methods
+    return false;
+  } else {
+    return std::isnan(val);
+  }
+};
+
+/**
+ * @brief Infinity value of an entry of the filtration value.
+ */
+template <typename T>
+constexpr const T MF_T_inf =
+    std::numeric_limits<T>::has_infinity ? std::numeric_limits<T>::infinity() : std::numeric_limits<T>::max();
+
+template <typename T>
+constexpr bool _add(T &v1, T v2)
+{
+  if (_is_nan(v1) || _is_nan(v2) || (v1 == MF_T_inf<T> && v2 == -MF_T_inf<T>) || (v1 == -MF_T_inf<T> && v2 == MF_T_inf<T>)) {
+    v1 = std::numeric_limits<T>::quiet_NaN();
+    return false;
+  }
+  if (v1 == MF_T_inf<T> || v1 == -MF_T_inf<T>) {
+    return true;
+  }
+  if (v2 == MF_T_inf<T> || v2 == -MF_T_inf<T>) {
+    v1 = v2;
+    return true;
+  }
+
+  v1 += v2;
+  return true;
+};
+
+template <typename T>
+constexpr bool _subtract(T &v1, T v2)
+{
+  return _add(v1, -v2);
+};
+
+template <typename T>
+constexpr bool _multiply(T &v1, T v2)
+{
+  bool v1_is_infinite = v1 == MF_T_inf<T> || v1 == -MF_T_inf<T>;
+  bool v2_is_infinite = v2 == MF_T_inf<T> || v2 == -MF_T_inf<T>;
+
+  if (_is_nan(v1) || _is_nan(v2) || (v1_is_infinite && v2 == 0) || (v1 == 0 && v2_is_infinite)) {
+    v1 = std::numeric_limits<T>::quiet_NaN();
+    return false;
+  }
+
+  if ((v1 == MF_T_inf<T> && v2 > 0) || (v1 == -MF_T_inf<T> && v2 < 0) || (v1 < 0 && v2 == -MF_T_inf<T>) ||
+      (v1 > 0 && v2 == MF_T_inf<T>)) {
+    v1 = MF_T_inf<T>;
+    return true;
+  }
+
+  if ((v1 == MF_T_inf<T> && v2 < 0) || (v1 == -MF_T_inf<T> && v2 > 0) || (v1 > 0 && v2 == -MF_T_inf<T>) ||
+      (v1 < 0 && v2 == MF_T_inf<T>)) {
+    v1 = -MF_T_inf<T>;
+    return true;
+  }
+
+  v1 *= v2;
+  return true;
+};
+
+template <typename T>
+constexpr bool _divide(T &v1, T v2)
+{
+  bool v1_is_infinite = v1 == MF_T_inf<T> || v1 == -MF_T_inf<T>;
+  bool v2_is_infinite = v2 == MF_T_inf<T> || v2 == -MF_T_inf<T>;
+
+  if (_is_nan(v1) || _is_nan(v2) || v2 == 0 || (v1_is_infinite && v2_is_infinite)) {
+    v1 = std::numeric_limits<T>::quiet_NaN();
+    return false;
+  }
+
+  if (v1 == 0 || (v1_is_infinite && v2 > 0)) return true;
+
+  if (v1_is_infinite && v2 < 0) {
+    v1 = -v1;
+    return true;
+  }
+
+  if (v2_is_infinite) {
+    v1 = 0;
+    return true;
+  }
+
+  v1 /= v2;
+  return true;
 };
 
 }  // namespace multi_filtration

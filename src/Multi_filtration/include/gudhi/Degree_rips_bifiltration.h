@@ -165,7 +165,7 @@ class Degree_rips_bifiltration
   {
     size_type num_gen = std::distance(it_begin, it_end) / 2;
     if constexpr (Ensure1Criticality) {
-      if (num_gen != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
+      if (num_gen > 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
     generators_.resize(num_gen);
     Iterator it = it_begin;
@@ -193,7 +193,7 @@ class Degree_rips_bifiltration
       : generators_(generators)
   {
     if constexpr (Ensure1Criticality) {
-      if (generators_.size() != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
+      if (generators_.size() > 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
   }
 
@@ -211,7 +211,7 @@ class Degree_rips_bifiltration
       : generators_(std::move(generators))
   {
     if constexpr (Ensure1Criticality) {
-      if (generators_.size() != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
+      if (generators_.size() > 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
   }
 
@@ -232,7 +232,7 @@ class Degree_rips_bifiltration
       : generators_(other.begin(), other.end())
   {
     if constexpr (Ensure1Criticality && !OtherEnsure1Criticality){
-      if (generators_.size() != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
+      if (generators_.size() > 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
   }
 
@@ -254,7 +254,7 @@ class Degree_rips_bifiltration
   Degree_rips_bifiltration &operator=(const Degree_rips_bifiltration<U, OtherCo, OtherEnsure1Criticality> &other)
   {
     if constexpr (Ensure1Criticality && !OtherEnsure1Criticality){
-      if (other.num_generators() != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
+      if (other.num_generators() > 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
     generators_ = Underlying_container(other.begin(), other.end());
     return *this;
@@ -299,7 +299,10 @@ class Degree_rips_bifiltration
    */
   const_reference operator()(size_type g, size_type p) const {
     GUDHI_CHECK(g < generators_.size() && p < 2, std::out_of_range("Out of bound index."));
-    if (p == 0) return g;
+    if (p == 0) {
+      dummy_g_ = g;
+      return dummy_g_;
+    }
     return generators_[g];
   }
 
@@ -692,6 +695,7 @@ class Degree_rips_bifiltration
                                      !std::is_same_v<ValueRange, Degree_rips_bifiltration> > >
   friend Degree_rips_bifiltration operator-(const ValueRange &r, Degree_rips_bifiltration f)
   {
+    if (r.begin() == r.end()) return nan();
     return *(r.begin()) - f;
   }
 
@@ -761,7 +765,8 @@ class Degree_rips_bifiltration
   template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   friend Degree_rips_bifiltration &operator-=(Degree_rips_bifiltration &f, const ValueRange &r)
   {
-    f += *(r.begin());
+    if (r.begin() == r.end()) f = nan();
+    else f -= *(r.begin());
     return f;
   }
 
@@ -902,7 +907,8 @@ class Degree_rips_bifiltration
   template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   friend Degree_rips_bifiltration &operator+=(Degree_rips_bifiltration &f, const ValueRange &r)
   {
-    f += *(r.begin());
+    if (r.begin() == r.end()) f = nan();
+    else f += *(r.begin());
     return f;
   }
 
@@ -1053,7 +1059,8 @@ class Degree_rips_bifiltration
   template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   friend Degree_rips_bifiltration &operator*=(Degree_rips_bifiltration &f, const ValueRange &r)
   {
-    f *= *(r.begin());
+    if (r.begin() == r.end()) f = nan();
+    else f *= *(r.begin());
     return f;
   }
 
@@ -1139,6 +1146,7 @@ class Degree_rips_bifiltration
                                      !std::is_same_v<ValueRange, Degree_rips_bifiltration> > >
   friend Degree_rips_bifiltration operator/(const ValueRange &r, Degree_rips_bifiltration f)
   {
+    if (r.begin() == r.end()) return nan();
     return *(r.begin()) / f;
   }
 
@@ -1224,7 +1232,8 @@ class Degree_rips_bifiltration
   template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   friend Degree_rips_bifiltration &operator/=(Degree_rips_bifiltration &f, const ValueRange &r)
   {
-    f /= *(r.begin());
+    if (r.begin() == r.end()) f = nan();
+    else f /= *(r.begin());
     return f;
   }
 
@@ -1321,6 +1330,8 @@ class Degree_rips_bifiltration
     ++genStart;
     const T val = *genStart;
 
+    if (_is_nan(val)) return false;
+
     if (index < generators_.size()) {
       if (_dominates(val, generators_[index])) return false;
       generators_[index] = val;
@@ -1339,8 +1350,6 @@ class Degree_rips_bifiltration
   /**
    * @brief Adds the given generator to the filtration value without any verifications or simplifications at the end
    * of the set.
-   *
-   * Fails to compile if `Ensure1Criticality` is true.
    *
    * @warning If the resulting set of generators is not minimal or sorted after modification, some methods will have an
    * undefined behaviour. Be sure to call @ref simplify() before using them.
@@ -1400,12 +1409,19 @@ class Degree_rips_bifiltration
             class = std::enable_if_t<RangeTraits<GeneratorRange>::has_begin> >
   bool push_to_least_common_upper_bound(const GeneratorRange &x, bool exclude_infinite_values = false)
   {
-    GUDHI_CHECK(x.size() == 2, "Wrong range size. Should correspond to the number of parameters.");
+    if (x.size() == 0) return false;
+
+    T newVal;
+    if constexpr (RangeTraits<GeneratorRange>::is_multi_filtration){
+      newVal = *(x.begin());
+    } else {
+      GUDHI_CHECK(x.size() == 2, "Wrong range size. Should correspond to the number of parameters.");
     
-    auto it = x.begin();
-    GUDHI_CHECK(*it == 0, "First index has to be 0.");
-    ++it;
-    const T newVal = *it;
+      auto it = x.begin();
+      GUDHI_CHECK(*it == 0, "First index has to be 0.");
+      ++it;
+      newVal = *it;
+    }
 
     if (newVal == -T_inf || _is_nan(newVal)) return false;
 
@@ -1439,12 +1455,19 @@ class Degree_rips_bifiltration
             class = std::enable_if_t<RangeTraits<GeneratorRange>::has_begin> >
   bool pull_to_greatest_common_lower_bound(const GeneratorRange &x, bool exclude_infinite_values = false)
   {
-    GUDHI_CHECK(x.size() == 2, "Wrong range size. Should correspond to the number of parameters.");
+    if (x.size() == 0) return false;
+
+    T newVal;
+    if constexpr (RangeTraits<GeneratorRange>::is_multi_filtration){
+      newVal = *(x.begin());
+    } else {
+      GUDHI_CHECK(x.size() == 2, "Wrong range size. Should correspond to the number of parameters.");
     
-    auto it = x.begin();
-    GUDHI_CHECK(*it == 0, "First index has to be 0.");
-    ++it;
-    const T newVal = *it;
+      auto it = x.begin();
+      GUDHI_CHECK(*it == 0, "First index has to be 0.");
+      ++it;
+      newVal = *it;
+    }
 
     if (newVal == T_inf || _is_nan(newVal)) return false;
 
@@ -1484,7 +1507,7 @@ class Degree_rips_bifiltration
     GUDHI_CHECK_code(const OneDimArray &indices = grid[0]);
     const OneDimArray &values = grid[1];
     for (size_type g = 0; g < num_generators(); ++g) {
-      GUDHI_CHECK_code(GUDHI_CHECK(indices[g] == g, "Unvalid grid."));
+      GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, "Unvalid grid."));
 
       auto d = std::distance(
           values.begin(),
@@ -1627,6 +1650,7 @@ class Degree_rips_bifiltration
       out += g * g;
       out += f.generators_[g] * f.generators_[g];
     }
+
     if constexpr (std::is_integral_v<U>) {
       // to avoid Windows issue that don't know how to cast integers for cmath methods
       return std::sqrt(static_cast<double>(out));
@@ -1690,7 +1714,7 @@ class Degree_rips_bifiltration
     GUDHI_CHECK_code(const std::vector<U> &indices = grid[0]);
     const std::vector<U> &values = grid[1];
     for (size_type g = 0; g < f.num_generators(); ++g) {
-      GUDHI_CHECK_code(GUDHI_CHECK(indices[g] == g, "Unvalid grid."));
+      GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, "Unvalid grid."));
 
       const T &c = f.generators_[g];
       outVec[g] = (c == f.T_inf ? grid_inf : values[c]);
@@ -1761,10 +1785,9 @@ class Degree_rips_bifiltration
     }
 
     bool modified = false;
-    size_type g = 0;
     T threshold1 = f1.generators_[0];
     T threshold2 = f2.generators_[0];
-    for (size_type g = 0; g < std::min(f1.num_generators(), f2.num_generators()); ++g) {
+    for (size_type g = 0; g < std::max(f1.num_generators(), f2.num_generators()); ++g) {
       if (g < f1.num_generators())
         threshold1 = _strictly_dominates(threshold1, f1.generators_[g]) ? f1.generators_[g] : threshold1;
       else {
@@ -1825,37 +1848,25 @@ class Degree_rips_bifiltration
    */
   friend std::size_t get_serialization_size_of(const Degree_rips_bifiltration &value)
   {
-    return sizeof(size_type) + sizeof(T) * value.num_entries();
+    return sizeof(size_type) + sizeof(T) * value.generators_.size();
   }
 
   /**
    * @brief Infinity value of an entry of the filtration value.
    */
-  constexpr static const T T_inf =
-      std::numeric_limits<T>::has_infinity ? std::numeric_limits<T>::infinity() : std::numeric_limits<T>::max();
+  constexpr static const T T_inf = MF_T_inf<T>;
 
  private:
   Underlying_container generators_;         /**< Container of the filtration value elements. */
-  T dummy_g_;
+  mutable T dummy_g_;
 
   /**
    * @brief Default value of an element in the filtration value.
    */
   constexpr static T _get_default_value() { return Co ? T_inf : -T_inf; }
 
-  constexpr static bool _is_nan(T val)
-  {
-    if constexpr (std::is_integral_v<T>) {
-      // to avoid Windows issue which don't know how to cast integers for cmath methods
-      return false;
-    } else {
-      return std::isnan(val);
-    }
-  }
-
   static bool _compare_strict(size_type i, const Underlying_container &a, const Underlying_container &b, T threshold)
   {
-    if (i >= a.size() && i >= b.size()) return false;
     if (i >= b.size()) return true;
     if (_is_nan(b[i])) return false;
 
@@ -1872,7 +1883,6 @@ class Degree_rips_bifiltration
 
   static bool _compare(size_type i, const Underlying_container &a, const Underlying_container &b, T threshold)
   {
-    if (i >= a.size() && i >= b.size()) return true;
     if (i >= b.size()) return true;
     if (_is_nan(b[i])) return false;
 
@@ -1920,76 +1930,6 @@ class Degree_rips_bifiltration
     for (unsigned int i = 0; i < gens.size(); ++i) {
       operate(gens[i], val);
     }
-  }
-
-  constexpr static bool _subtract(T &v1, T v2) { return _add(v1, -v2); }
-
-  constexpr static bool _add(T &v1, T v2)
-  {
-    if (_is_nan(v1) || _is_nan(v2) || (v1 == T_inf && v2 == -T_inf) || (v1 == -T_inf && v2 == T_inf)) {
-      v1 = std::numeric_limits<T>::quiet_NaN();
-      return false;
-    }
-    if (v1 == T_inf || v1 == -T_inf) {
-      return true;
-    }
-    if (v2 == T_inf || v2 == -T_inf) {
-      v1 = v2;
-      return true;
-    }
-
-    v1 += v2;
-    return true;
-  }
-
-  constexpr static bool _multiply(T &v1, T v2)
-  {
-    bool v1_is_infinite = v1 == T_inf || v1 == -T_inf;
-    bool v2_is_infinite = v2 == T_inf || v2 == -T_inf;
-
-    if (_is_nan(v1) || _is_nan(v2) || (v1_is_infinite && v2 == 0) || (v1 == 0 && v2_is_infinite)) {
-      v1 = std::numeric_limits<T>::quiet_NaN();
-      return false;
-    }
-
-    if ((v1 == T_inf && v2 > 0) || (v1 == -T_inf && v2 < 0) || (v1 < 0 && v2 == -T_inf) || (v1 > 0 && v2 == T_inf)) {
-      v1 = T_inf;
-      return true;
-    }
-
-    if ((v1 == T_inf && v2 < 0) || (v1 == -T_inf && v2 > 0) || (v1 > 0 && v2 == -T_inf) || (v1 < 0 && v2 == T_inf)) {
-      v1 = -T_inf;
-      return true;
-    }
-
-    v1 *= v2;
-    return true;
-  }
-
-  constexpr static bool _divide(T &v1, T v2)
-  {
-    bool v1_is_infinite = v1 == T_inf || v1 == -T_inf;
-    bool v2_is_infinite = v2 == T_inf || v2 == -T_inf;
-
-    if (_is_nan(v1) || _is_nan(v2) || v2 == 0 || (v1_is_infinite && v2_is_infinite)) {
-      v1 = std::numeric_limits<T>::quiet_NaN();
-      return false;
-    }
-
-    if (v1 == 0 || (v1_is_infinite && v2 > 0)) return true;
-
-    if (v1_is_infinite && v2 < 0) {
-      v1 = -v1;
-      return true;
-    }
-
-    if (v2_is_infinite) {
-      v1 = 0;
-      return true;
-    }
-
-    v1 /= v2;
-    return true;
   }
 
   template <class F, typename U = T>

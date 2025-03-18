@@ -1577,8 +1577,7 @@ class Multi_parameter_generator
   /**
    * @brief Infinity value of an entry of the filtration value.
    */
-  constexpr static const T T_inf =
-      std::numeric_limits<T>::has_infinity ? std::numeric_limits<T>::infinity() : std::numeric_limits<T>::max();
+  constexpr static const T T_inf = MF_T_inf<T>;
 
  private:
   Underlying_container generator_; /**< Container of the filtration value elements. */
@@ -1587,16 +1586,6 @@ class Multi_parameter_generator
    * @brief Default value of an element in the filtration value.
    */
   constexpr static T _get_default_value() { return Co ? T_inf : -T_inf; }
-
-  constexpr static bool _is_nan(T val)
-  {
-    if constexpr (std::is_integral_v<T>) {
-      // to avoid Windows issue which don't know how to cast integers for cmath methods
-      return false;
-    } else {
-      return std::isnan(val);
-    }
-  }
 
   /**
    * @brief Applies operation on the elements of the filtration value.
@@ -1646,76 +1635,6 @@ class Multi_parameter_generator
     }
 
     if (allNaN) *this = nan();
-  }
-
-  constexpr static bool _subtract(T &v1, T v2) { return _add(v1, -v2); }
-
-  constexpr static bool _add(T &v1, T v2)
-  {
-    if (_is_nan(v1) || _is_nan(v2) || (v1 == T_inf && v2 == -T_inf) || (v1 == -T_inf && v2 == T_inf)) {
-      v1 = std::numeric_limits<T>::quiet_NaN();
-      return false;
-    }
-    if (v1 == T_inf || v1 == -T_inf) {
-      return true;
-    }
-    if (v2 == T_inf || v2 == -T_inf) {
-      v1 = v2;
-      return true;
-    }
-
-    v1 += v2;
-    return true;
-  }
-
-  constexpr static bool _multiply(T &v1, T v2)
-  {
-    bool v1_is_infinite = v1 == T_inf || v1 == -T_inf;
-    bool v2_is_infinite = v2 == T_inf || v2 == -T_inf;
-
-    if (_is_nan(v1) || _is_nan(v2) || (v1_is_infinite && v2 == 0) || (v1 == 0 && v2_is_infinite)) {
-      v1 = std::numeric_limits<T>::quiet_NaN();
-      return false;
-    }
-
-    if ((v1 == T_inf && v2 > 0) || (v1 == -T_inf && v2 < 0) || (v1 < 0 && v2 == -T_inf) || (v1 > 0 && v2 == T_inf)) {
-      v1 = T_inf;
-      return true;
-    }
-
-    if ((v1 == T_inf && v2 < 0) || (v1 == -T_inf && v2 > 0) || (v1 > 0 && v2 == -T_inf) || (v1 < 0 && v2 == T_inf)) {
-      v1 = -T_inf;
-      return true;
-    }
-
-    v1 *= v2;
-    return true;
-  }
-
-  constexpr static bool _divide(T &v1, T v2)
-  {
-    bool v1_is_infinite = v1 == T_inf || v1 == -T_inf;
-    bool v2_is_infinite = v2 == T_inf || v2 == -T_inf;
-
-    if (_is_nan(v1) || _is_nan(v2) || v2 == 0 || (v1_is_infinite && v2_is_infinite)) {
-      v1 = std::numeric_limits<T>::quiet_NaN();
-      return false;
-    }
-
-    if (v1 == 0 || (v1_is_infinite && v2 > 0)) return true;
-
-    if (v1_is_infinite && v2 < 0) {
-      v1 = -v1;
-      return true;
-    }
-
-    if (v2_is_infinite) {
-      v1 = 0;
-      return true;
-    }
-
-    v1 /= v2;
-    return true;
   }
 };
 
