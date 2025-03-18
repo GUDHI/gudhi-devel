@@ -420,8 +420,6 @@ class Degree_rips_bifiltration
   /**
    * @brief Reserves space for the given number of generators in the underlying container. Does nothing if
    * `Ensure1Criticality` is true.
-   *
-   * @param n Number of generators.
    */
   void reserve([[maybe_unused]] size_type number_of_generators)
   {
@@ -1352,7 +1350,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Same as @ref add_generator(const GeneratorRange &x) "".
+   * @brief Same as @ref add_generator "".
    */
   template <class GeneratorRange = std::initializer_list<T>,
             class = std::enable_if_t<RangeTraits<GeneratorRange>::has_begin> >

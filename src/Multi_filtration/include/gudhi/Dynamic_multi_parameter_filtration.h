@@ -58,15 +58,15 @@ U compute_norm();
  * @details Overloads `std::numeric_limits` such that:
  * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::has_infinity` returns `true`,
  * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::has_quiet_NaN` returns `true`,
- * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::infinity(num_param)` returns
- * @ref Dynamic_multi_parameter_filtration::inf(num_param) "",
- * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::minus_infinity(num_param)` returns
- * @ref Dynamic_multi_parameter_filtration::minus_inf(num_param) "",
- * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::max(num_param)` returns a @ref
- * Dynamic_multi_parameter_filtration with 1 generators of `num_param` parameters evaluated at value
+ * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::infinity(int)` returns
+ * @ref Dynamic_multi_parameter_filtration::inf(int) "",
+ * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::minus_infinity(int)` returns
+ * @ref Dynamic_multi_parameter_filtration::minus_inf(int) "",
+ * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::max(int num_param)` returns a @ref
+ * Dynamic_multi_parameter_filtration with one generator of `num_param` parameters evaluated at value
  * `std::numeric_limits<T>::max()`,
- * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::quiet_NaN(num_param)` returns
- * @ref Dynamic_multi_parameter_filtration::nan(num_param).
+ * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::quiet_NaN(int)` returns
+ * @ref Dynamic_multi_parameter_filtration::nan(int).
  *
  * Multi-critical filtrations are filtrations such that the lifetime of each object is a union of positive cones in
  * \f$\mathbb R^n\f$, e.g.,

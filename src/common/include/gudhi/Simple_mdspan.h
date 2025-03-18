@@ -9,9 +9,9 @@
  */
 
 /**
+ * @private
  * @file simple_mdspan.h
  * @author Hannah Schreiber, David Loiseaux
- * @brief Contains the @ref Gudhi::Simple_mdspan class.
  */
 
 #ifndef GUDHI_SIMPLE_MDSPAN_H_
@@ -27,6 +27,10 @@
 
 namespace Gudhi {
 
+/**
+ * @private
+ * @brief Reproduces the behaviour of C++23 `std::layout_right` class.
+ */
 class layout_right
 {
  public:
@@ -109,8 +113,10 @@ class layout_right
       m1.ext_shifts_.swap(m2.ext_shifts_);
     }
 
-    //as not everything is computed at compile time as for mdspan, update is usually faster than reconstructing everytime.
-    void update_extent(rank_type r, index_type new_value){
+    // as not everything is computed at compile time as for mdspan, update is usually faster than reconstructing
+    // everytime.
+    void update_extent(rank_type r, index_type new_value)
+    {
       GUDHI_CHECK(r < exts_.size(), "Index out of bound.");
       exts_[r] = new_value;
       _update_strides(r);
@@ -138,6 +144,19 @@ class layout_right
   };
 };
 
+/**
+ * @private
+ * @brief Simplified version of C++23 `std::mdspan` class that compiles with C++17.
+ *
+ * Main differences:
+ * - extends are all dynamic,
+ * - there is no Extend class, everything is managed by the mapper class instead,
+ * - there is no AccessorPolicy template: the container pointed by the stored pointer is assumed to be vector-like,
+ * i.e., continuous and, e.g., you can do `ptr_ + 2` to access the third element,
+ * - two additional methods: `update_extent` and `update_data` to avoid recalculating the helpers in the mapping class
+ * at each size modification of the underlying container. In the original `std::mdspan` most of the work is done
+ * at compile time, so it is usually fine to reconstruct a view everytime needed. That is not the case here.
+ */
 template <typename T, class LayoutPolicy = layout_right>
 class Simple_mdspan
 {
@@ -169,12 +188,12 @@ class Simple_mdspan
     GUDHI_CHECK(ptr != nullptr || empty() || *(exts.begin()) == 0, "Given pointer is not properly initialized.");
   }
 
-  Simple_mdspan(data_handle_type ptr, const mapping_type& m) : ptr_(ptr), map_(m){}
+  Simple_mdspan(data_handle_type ptr, const mapping_type& m) : ptr_(ptr), map_(m) {}
 
   Simple_mdspan& operator=(const Simple_mdspan& rhs) = default;
   Simple_mdspan& operator=(Simple_mdspan&& rhs) = default;
 
-  //version with [] not possible before C++23
+  // version with [] not possible before C++23
   template <class... IndexTypes>
   constexpr reference operator()(IndexTypes... indices) const
   {
@@ -199,17 +218,11 @@ class Simple_mdspan
     return map_.extents()[r];
   }
 
-  constexpr size_type size() const noexcept
-  {
-    return map_.required_span_size();
-  }
+  constexpr size_type size() const noexcept { return map_.required_span_size(); }
 
   constexpr bool empty() const noexcept { return map_.required_span_size() == 0; }
 
-  constexpr index_type stride(rank_type r) const
-  {
-    return map_.stride(r);
-  }
+  constexpr index_type stride(rank_type r) const { return map_.stride(r); }
 
   constexpr const extents_type& extents() const noexcept { return map_.extents(); }
 
@@ -241,12 +254,13 @@ class Simple_mdspan
     swap(x.map_, y.map_);
   }
 
-  //as not everything is computed at compile time as for mdspan, update is usually faster than reconstructing everytime.
-  void update_extent(rank_type r, index_type new_value){
-    map_.update_extent(r, new_value);
-  }
-  //for update_extent to make sense, as resizing the vector can move it in the memory
-  void update_data(data_handle_type ptr){
+  // as not everything is computed at compile time as for mdspan, update is usually faster than reconstructing
+  // everytime.
+  void update_extent(rank_type r, index_type new_value) { map_.update_extent(r, new_value); }
+
+  // for update_extent to make sense, as resizing the vector can move it in the memory
+  void update_data(data_handle_type ptr)
+  {
     GUDHI_CHECK(ptr != nullptr, "Null pointer not valid input.");
     ptr_ = ptr;
   }

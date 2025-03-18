@@ -8,6 +8,12 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+/**
+ * @private
+ * @file multi_filtration_utils.h
+ * @author Hannah Schreiber
+ */
+
 #ifndef MF_UTILS_H_
 #define MF_UTILS_H_
 
@@ -20,6 +26,9 @@ namespace Gudhi {
 
 namespace multi_filtration {
 
+/**
+ * @private
+ */
 template <typename T>
 class RangeTraits
 {
@@ -43,6 +52,9 @@ class RangeTraits
       is_multi_filtration && decltype(check_dynamic_filtration(std::declval<T>()))::value;
 };
 
+/**
+ * @private
+ */
 template <typename T>
 constexpr bool _is_nan(T val)
 {
@@ -55,16 +67,22 @@ constexpr bool _is_nan(T val)
 };
 
 /**
+ * @private
  * @brief Infinity value of an entry of the filtration value.
  */
 template <typename T>
 constexpr const T MF_T_inf =
     std::numeric_limits<T>::has_infinity ? std::numeric_limits<T>::infinity() : std::numeric_limits<T>::max();
 
+/**
+ * @private
+ * @brief Adds v1 and v2, stores the result in v1 and returns true if and only if v1 was modified.
+ */
 template <typename T>
 constexpr bool _add(T &v1, T v2)
 {
-  if (_is_nan(v1) || _is_nan(v2) || (v1 == MF_T_inf<T> && v2 == -MF_T_inf<T>) || (v1 == -MF_T_inf<T> && v2 == MF_T_inf<T>)) {
+  if (_is_nan(v1) || _is_nan(v2) || (v1 == MF_T_inf<T> && v2 == -MF_T_inf<T>) ||
+      (v1 == -MF_T_inf<T> && v2 == MF_T_inf<T>)) {
     v1 = std::numeric_limits<T>::quiet_NaN();
     return false;
   }
@@ -80,12 +98,20 @@ constexpr bool _add(T &v1, T v2)
   return true;
 };
 
+/**
+ * @private
+ * @brief Subtracts v1 and v2, stores the result in v1 and returns true if and only if v1 was modified.
+ */
 template <typename T>
 constexpr bool _subtract(T &v1, T v2)
 {
   return _add(v1, -v2);
 };
 
+/**
+ * @private
+ * @brief Multiplies v1 and v2, stores the result in v1 and returns true if and only if v1 was modified.
+ */
 template <typename T>
 constexpr bool _multiply(T &v1, T v2)
 {
@@ -113,6 +139,10 @@ constexpr bool _multiply(T &v1, T v2)
   return true;
 };
 
+/**
+ * @private
+ * @brief Divides v1 and v2, stores the result in v1 and returns true if and only if v1 was modified.
+ */
 template <typename T>
 constexpr bool _divide(T &v1, T v2)
 {

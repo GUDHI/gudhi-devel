@@ -57,14 +57,14 @@ U compute_norm();
  * @details Overloads `std::numeric_limits` such that:
  * - `std::numeric_limits<Multi_parameter_filtration>::has_infinity` returns `true`,
  * - `std::numeric_limits<Multi_parameter_filtration>::has_quiet_NaN` returns `std::numeric_limits<T>::has_quiet_NaN`,
- * - `std::numeric_limits<Multi_parameter_filtration>::infinity(num_param)` returns
- * @ref Multi_parameter_filtration::inf(num_param) "",
- * - `std::numeric_limits<Multi_parameter_filtration>::minus_infinity(num_param)` returns
- * @ref Multi_parameter_filtration::minus_inf(num_param) "",
- * - `std::numeric_limits<Multi_parameter_filtration>::max(num_param)` returns a @ref Multi_parameter_filtration with
- * 1 generators of `num_param` parameters evaluated at value `std::numeric_limits<T>::max()`,
- * - `std::numeric_limits<Multi_parameter_filtration>::quiet_NaN(num_param)` returns
- * @ref Multi_parameter_filtration::nan(num_param) if `std::numeric_limits<Multi_parameter_filtration>::has_quiet_NaN`
+ * - `std::numeric_limits<Multi_parameter_filtration>::infinity(int)` returns
+ * @ref Multi_parameter_filtration::inf(int) "",
+ * - `std::numeric_limits<Multi_parameter_filtration>::minus_infinity(int)` returns
+ * @ref Multi_parameter_filtration::minus_inf(int) "",
+ * - `std::numeric_limits<Multi_parameter_filtration>::max(int num_param)` returns a @ref Multi_parameter_filtration
+ * with one generator of `num_param` parameters evaluated at value `std::numeric_limits<T>::max()`,
+ * - `std::numeric_limits<Multi_parameter_filtration>::quiet_NaN(int)` returns
+ * @ref Multi_parameter_filtration::nan(int) if `std::numeric_limits<Multi_parameter_filtration>::has_quiet_NaN`
  * and throws otherwise.
  *
  * Multi-critical filtrations are filtrations such that the lifetime of each object is union of positive cones in
@@ -336,8 +336,8 @@ class Multi_parameter_filtration
   }
 
   /**
-   * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameter first elements
-   * corresponds to the first generator, the @ref num_parameter next to the second and so on.
+   * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameters() first
+   * elements corresponds to the first generator, the @ref num_parameters() next to the second and so on.
    *
    * @warning If a generator is modified and the new set of generators is not minimal or not sorted, the behaviour
    * of most methods is undefined. It is possible to call @ref simplify() after construction if there is a doubt to
@@ -346,14 +346,14 @@ class Multi_parameter_filtration
   iterator begin() noexcept { return generators_.begin(); }
 
   /**
-   * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameter first elements
-   * corresponds to the first generator, the @ref num_parameter next to the second and so on.
+   * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameters() first
+   * elements corresponds to the first generator, the @ref num_parameters() next to the second and so on.
    */
   const_iterator begin() const noexcept { return generators_.begin(); }
 
   /**
-   * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameter first elements
-   * corresponds to the first generator, the @ref num_parameter next to the second and so on.
+   * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameters() first
+   * elements corresponds to the first generator, the @ref num_parameters() next to the second and so on.
    */
   const_iterator cbegin() const noexcept { return generators_.cbegin(); }
 
@@ -374,8 +374,8 @@ class Multi_parameter_filtration
 
   /**
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
-   * The @ref num_parameter first elements corresponds to the last generator (in parameter reverse order), the
-   * @ref num_parameter next to the second to last and so on.
+   * The @ref num_parameters() first elements corresponds to the last generator (in parameter reverse order), the
+   * @ref num_parameters() next to the second to last and so on.
    *
    * @warning If a generator is modified and the new set of generators is not minimal or not sorted, the behaviour
    * of most methods is undefined. It is possible to call @ref simplify() after construction if there is a doubt to
@@ -385,15 +385,15 @@ class Multi_parameter_filtration
 
   /**
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
-   * The @ref num_parameter first elements corresponds to the last generator (in parameter reverse order), the
-   * @ref num_parameter next to the second to last and so on.
+   * The @ref num_parameters() first elements corresponds to the last generator (in parameter reverse order), the
+   * @ref num_parameters() next to the second to last and so on.
    */
   const_reverse_iterator rbegin() const noexcept { return generators_.rbegin(); }
 
   /**
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
-   * The @ref num_parameter first elements corresponds to the last generator (in parameter reverse order), the
-   * @ref num_parameter next to the second to last and so on.
+   * The @ref num_parameters() first elements corresponds to the last generator (in parameter reverse order), the
+   * @ref num_parameters() next to the second to last and so on.
    */
   const_reverse_iterator crbegin() const noexcept { return generators_.crbegin(); }
 
@@ -421,8 +421,6 @@ class Multi_parameter_filtration
   /**
    * @brief Reserves space for the given number of generators in the underlying container. Does nothing if
    * `Ensure1Criticality` is true.
-   *
-   * @param n Number of generators.
    */
   void reserve([[maybe_unused]] size_type number_of_generators)
   {

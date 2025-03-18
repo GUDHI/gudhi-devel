@@ -9,6 +9,7 @@
  */
 
 /**
+ * @private
  * @file Multi_parameter_generator.h
  * @author Hannah Schreiber, David Loiseaux
  * @brief Contains the @ref Gudhi::multi_filtration::Multi_parameter_generator class.
@@ -36,40 +37,18 @@
 
 namespace Gudhi::multi_filtration {
 
-// // declaration needed pre C++20 for friends with templates defined inside a class
-// template <typename U>
-// U compute_euclidean_distance_to();
-// template <typename U>
-// U compute_norm();
+// declaration needed pre C++20 for friends with templates defined inside a class
+template <typename U>
+U compute_euclidean_distance_to();
+template <typename U>
+U compute_norm();
 
 /**
+ * private
  * @class Multi_parameter_generator Multi_parameter_generator.h gudhi/Multi_parameter_generator.h
  * @ingroup multi_filtration
  *
- * @brief Class encoding the different generators, i.e., apparition times, of a \f$ k \f$-critical
- * \f$\mathbb R^n\f$-filtration value. E.g., the filtration value of a simplex, or, of the algebraic generator of a
- * module presentation. The encoding is compacted into a single vector, so if a lot of non trivial modifications are
- * done (that not only consists of simply adding new generators at the end of the vector), it is probably preferable
- * to use @ref Dynamic_multi_parameter_filtration instead.
- *
- * @details Overloads `std::numeric_limits` such that:
- * - `std::numeric_limits<Multi_parameter_generator>::has_infinity` returns `true`,
- * - `std::numeric_limits<Multi_parameter_generator>::has_quiet_NaN` returns `std::numeric_limits<T>::has_quiet_NaN`,
- * - `std::numeric_limits<Multi_parameter_generator>::infinity(num_param)` returns
- * @ref Multi_parameter_generator::inf(num_param) "",
- * - `std::numeric_limits<Multi_parameter_generator>::minus_infinity(num_param)` returns
- * @ref Multi_parameter_generator::minus_inf(num_param) "",
- * - `std::numeric_limits<Multi_parameter_generator>::max(num_param)` returns a @ref Multi_parameter_generator with
- * 1 generators of `num_param` parameters evaluated at value `std::numeric_limits<T>::max()`,
- * - `std::numeric_limits<Multi_parameter_generator>::quiet_NaN(num_param)` returns
- * @ref Multi_parameter_generator::nan(num_param) if `std::numeric_limits<Multi_parameter_generator>::has_quiet_NaN`
- * and throws otherwise.
- *
- * Multi-critical filtrations are filtrations such that the lifetime of each object is union of positive cones in
- * \f$\mathbb R^n\f$, e.g.,
- *  - \f$ \{ x \in \mathbb R^2 : x \ge (1,2)\} \cap \{ x \in \mathbb R^2 : x \ge (2,1)\} \f$ is finitely critical,
- *    and more particularly 2-critical, while
- *  - \f$ \{ x \in \mathbb R^2 : x \ge \mathrm{epigraph}(y \mapsto e^{-y})\} \f$ is not.
+ * @brief Class encoding a single generator of @ref Dynamic_multi_parameter_filtration "".
  *
  * @tparam T Arithmetic type of an entry for one parameter of a filtration value. Has to be **signed** and
  * to implement `std::isnan(T)`, `std::numeric_limits<T>::has_quiet_NaN`, `std::numeric_limits<T>::quiet_NaN()`,
@@ -78,40 +57,37 @@ namespace Gudhi::multi_filtration {
  * can simply throw. Examples are the native types `double`, `float` and `int`.
  * @tparam Co If `true`, reverses the poset order, i.e., the order \f$ \le \f$  in \f$ \mathbb R^n \f$ becomes
  * \f$ \ge \f$. That is, the positive cones representing a lifetime become all negative instead.
- * @tparam Ensure1Criticality If `true`, the methods ensure that the filtration value is always 1-critical by throwing
- * or refusing to compile if a modification increases the number of generators.
  */
 template <typename T, bool Co = false>
 class Multi_parameter_generator
 {
  public:
-  using Underlying_container = std::vector<T>; /**< Underlying container for values. */
+  using Underlying_container = std::vector<T>;  /**< Underlying container for values. */
 
   // CONSTRUCTORS
 
   /**
-   * @brief Default constructor. Builds filtration value with one generator and given number of parameters.
+   * @brief Default constructor. Builds generator with given number of parameters.
    * If Co is false, all values are at -inf, if Co is true, all values are at +inf.
    *
-   * @param number_of_parameters If negative, takes the default value instead. Default value: 2.
+   * @param number_of_parameters If negative, takes the default value instead. Default value: 1.
    */
   Multi_parameter_generator(int number_of_parameters = 1)
       : generator_(number_of_parameters < 0 ? 1 : number_of_parameters, _get_default_value())
   {}
 
   /**
-   * @brief Builds filtration value with one generator and given number of parameters.
-   * All values are initialized at the given value.
+   * @brief Builds generator with given number of parameters. All values are initialized at the given value.
    *
-   * @param number_of_parameters If negative, is set to 2 instead.
+   * @param number_of_parameters If negative, is set to 1 instead.
    * @param value Initialization value for every value in the generator.
    */
   Multi_parameter_generator(int number_of_parameters, T value)
-      : generator_(number_of_parameters < 0 ? 2 : number_of_parameters, value)
+      : generator_(number_of_parameters < 0 ? 1 : number_of_parameters, value)
   {}
 
   /**
-   * @brief Builds filtration value with one generator that is initialized with the given range. The number of
+   * @brief Builds generator that is initialized with the given range. The number of
    * parameters are therefore deduced from the length of the range.
    *
    * @tparam ValueRange Range of types convertible to `T`. Should have a begin() and end() method.
@@ -122,7 +98,7 @@ class Multi_parameter_generator
   {}
 
   /**
-   * @brief Builds filtration value with one generator that is initialized with the given range. The range is
+   * @brief Builds generator that is initialized with the given range. The range is
    * determined from the two given iterators. The number of parameters are therefore deduced from the distance
    * between the two.
    *
@@ -136,14 +112,11 @@ class Multi_parameter_generator
   {}
 
   /**
-   * @brief Builds filtration value with given number of parameters and values from the given range. Lets \f$ p \f$
-   * be the number of parameters. The \f$ p \f$ first elements of the range have to correspond to the first generator,
-   * the \f$ p \f$ next elements to the second generator and so on... So the length of the range has to be a multiple
-   * of \f$ p \f$ and the number of generators will be \f$ length / p \f$. The range is represented by
-   * @ref Multi_parameter_generator::Underlying_container "" and **moved** into the underlying container of the class.
+   * @brief Builds generator with given number of parameters and values from the given range.
+   * The range is represented by @ref Multi_parameter_generator::Underlying_container "" and **moved** into the
+   * underlying container of the class.
    *
    * @param generators Values to move.
-   * @param number_of_parameters Negative values are associated to 0.
    */
   Multi_parameter_generator(Underlying_container &&generators) : generator_(std::move(generators)) {}
 
@@ -185,9 +158,9 @@ class Multi_parameter_generator
   /**
    * @brief Swap operator.
    */
-  friend void swap(Multi_parameter_generator &f1, Multi_parameter_generator &f2) noexcept
+  friend void swap(Multi_parameter_generator &g1, Multi_parameter_generator &g2) noexcept
   {
-    f1.generator_.swap(f2.generator_);
+    g1.generator_.swap(g2.generator_);
   }
 
   // VECTOR-LIKE
@@ -205,12 +178,7 @@ class Multi_parameter_generator
   using const_reverse_iterator = typename Underlying_container::const_reverse_iterator; /**< Const reverse iterator. */
 
   /**
-   * @brief Let \f$ g \f$ be the first value in `indices` and \f$ p \f$ the second value.
-   * Returns reference to value of parameter \f$ p \f$ of generator \f$ g \f$.
-   *
-   * @tparam IndexRange Range with a begin() and size() method.
-   * @param indices Range with at least two elements. The first element should correspond to the generator number and
-   * the second element to the parameter number.
+   * @brief Returns reference to the value of parameter `p`.
    */
   reference operator[](size_type p)
   {
@@ -219,12 +187,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Let \f$ g \f$ be the first value in `indices` and \f$ p \f$ the second value.
-   * Returns reference to value of parameter \f$ p \f$ of generator \f$ g \f$.
-   *
-   * @tparam IndexRange Range with a begin() and size() method.
-   * @param indices Range with at least two elements. The first element should correspond to the generator number and
-   * the second element to the parameter number.
+   * @brief Returns const reference to the value of parameter `p`.
    */
   const_reference operator[](size_type p) const
   {
@@ -233,20 +196,17 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameter first elements
-   * corresponds to the first generator, the @ref num_parameter next to the second and so on.
+   * @brief Returns an iterator pointing the begining of the underlying container.
    */
   iterator begin() noexcept { return generator_.begin(); }
 
   /**
-   * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameter first elements
-   * corresponds to the first generator, the @ref num_parameter next to the second and so on.
+   * @brief Returns an iterator pointing the begining of the underlying container.
    */
   const_iterator begin() const noexcept { return generator_.begin(); }
 
   /**
-   * @brief Returns an iterator pointing the begining of the underlying container. The @ref num_parameter first elements
-   * corresponds to the first generator, the @ref num_parameter next to the second and so on.
+   * @brief Returns an iterator pointing the begining of the underlying container.
    */
   const_iterator cbegin() const noexcept { return generator_.cbegin(); }
 
@@ -267,22 +227,16 @@ class Multi_parameter_generator
 
   /**
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
-   * The @ref num_parameter first elements corresponds to the last generator (in parameter reverse order), the
-   * @ref num_parameter next to the second to last and so on.
    */
   reverse_iterator rbegin() noexcept { return generator_.rbegin(); }
 
   /**
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
-   * The @ref num_parameter first elements corresponds to the last generator (in parameter reverse order), the
-   * @ref num_parameter next to the second to last and so on.
    */
   const_reverse_iterator rbegin() const noexcept { return generator_.rbegin(); }
 
   /**
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
-   * The @ref num_parameter first elements corresponds to the last generator (in parameter reverse order), the
-   * @ref num_parameter next to the second to last and so on.
    */
   const_reverse_iterator crbegin() const noexcept { return generator_.crbegin(); }
 
@@ -302,8 +256,8 @@ class Multi_parameter_generator
   const_reverse_iterator crend() const noexcept { return generator_.crend(); }
 
   /**
-   * @brief Returns the size of the underlying container. Corresponds exactly to @ref num_entries(), but enables to use
-   * the class as a classic range with a `begin`, `end` and `size` method.
+   * @brief Returns the size of the underlying container. Corresponds exactly to @ref num_parameters(), but enables to
+   * use the class as a classic range with a `begin`, `end` and `size` method.
    */
   size_type size() const noexcept { return generator_.size(); }
 
@@ -331,18 +285,18 @@ class Multi_parameter_generator
   size_type num_parameters() const { return generator_.size(); }
 
   /**
-   * @brief Returns a filtration value with given number of parameters for which @ref is_plus_inf() returns `true`.
+   * @brief Returns a generator for which @ref is_plus_inf() returns `true`.
    */
   static Multi_parameter_generator inf() { return Multi_parameter_generator(1, T_inf); }
 
   /**
-   * @brief Returns a filtration value with given number of parameters for which @ref is_minus_inf() returns `true`.
+   * @brief Returns a generator for which @ref is_minus_inf() returns `true`.
    */
   static Multi_parameter_generator minus_inf() { return Multi_parameter_generator(1, -T_inf); }
 
   /**
-   * @brief If `std::numeric_limits<T>::has_quiet_NaN` is true, returns a filtration value with given number of
-   * parameters for which @ref is_nan() returns `true`. Otherwise, throws.
+   * @brief If `std::numeric_limits<T>::has_quiet_NaN` is true, returns a generator for which @ref is_nan() returns
+   * `true`. Otherwise, throws.
    */
   static Multi_parameter_generator nan()
   {
@@ -356,7 +310,7 @@ class Multi_parameter_generator
   // DESCRIPTORS
 
   /**
-   * @brief Returns `true` if and only if the filtration value is considered as plus infinity.
+   * @brief Returns `true` if and only if the generator is considered as plus infinity.
    */
   bool is_plus_inf() const
   {
@@ -367,7 +321,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns `true` if and only if the filtration value is considered as minus infinity.
+   * @brief Returns `true` if and only if the generator is considered as minus infinity.
    */
   bool is_minus_inf() const
   {
@@ -378,7 +332,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns `true` if and only if the filtration value is considered as NaN.
+   * @brief Returns `true` if and only if the generator is considered as NaN.
    */
   bool is_nan() const
   {
@@ -393,7 +347,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns `true` if and only if the filtration value is non-empty and is not considered as plus infinity,
+   * @brief Returns `true` if and only if the generator is non-empty and is not considered as plus infinity,
    * minus infinity or NaN.
    */
   bool is_finite() const
@@ -411,8 +365,8 @@ class Multi_parameter_generator
   // COMPARAISON OPERATORS
 
   /**
-   * @brief Returns `true` if and only if the cones generated by @p b are strictly contained in the
-   * cones generated by @p a (recall that the cones are positive if `Co` is false and negative if `Co` is true).
+   * @brief Returns `true` if and only if the cone generated by @p b is strictly contained in the
+   * cone generated by @p a (recall that the cones are positive if `Co` is false and negative if `Co` is true).
    * Both @p a and @p b  have to have the same number of parameters.
    *
    * Note that not all filtration values are comparable. That is, \f$ a < b \f$ and \f$ b < a \f$ returning both false
@@ -438,8 +392,8 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns `true` if and only if the cones generated by @p a are strictly contained in the
-   * cones generated by @p b (recall that the cones are positive if `Co` is false and negative if `Co` is true).
+   * @brief Returns `true` if and only if the cone generated by @p a is strictly contained in the
+   * cone generated by @p b (recall that the cones are positive if `Co` is false and negative if `Co` is true).
    * Both @p a and @p b  have to have the same number of parameters.
    *
    * Note that not all filtration values are comparable. That is, \f$ a \le b \f$ and \f$ b \le a \f$ can both return
@@ -468,8 +422,8 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Returns `true` if and only if the cones generated by @p b are contained in or are (partially)
-   * equal to the cones generated by @p a (recall that the cones are positive if `Co` is false and negative if `Co` is
+   * @brief Returns `true` if and only if the cone generated by @p b is contained in or are (partially)
+   * equal to the cone generated by @p a (recall that the cones are positive if `Co` is false and negative if `Co` is
    * true).
    * Both @p a and @p b  have to have the same number of parameters.
    *
@@ -479,8 +433,8 @@ class Multi_parameter_generator
   friend bool operator>(const Multi_parameter_generator &a, const Multi_parameter_generator &b) { return b < a; }
 
   /**
-   * @brief Returns `true` if and only if the cones generated by @p a are contained in or are (partially)
-   * equal to the cones generated by @p b (recall that the cones are positive if `Co` is false and negative if `Co` is
+   * @brief Returns `true` if and only if the cone generated by @p a is contained in or are (partially)
+   * equal to the cone generated by @p b (recall that the cones are positive if `Co` is false and negative if `Co` is
    * true).
    * Both @p a and @p b  have to have the same number of parameters.
    *
@@ -508,26 +462,26 @@ class Multi_parameter_generator
 
   // opposite
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ i,j \f$ is equal to \f$ -f(i,j) \f$.
+   * @brief Returns a generator such that an entry at index \f$ i \f$ is equal to \f$ -g(i) \f$.
    *
    * Used conventions:
    * - \f$ -NaN = NaN \f$.
    *
-   * @param f Value to opposite.
+   * @param g Value to opposite.
    * @return The opposite of @p f.
    */
-  friend Multi_parameter_generator operator-(const Multi_parameter_generator &f)
+  friend Multi_parameter_generator operator-(const Multi_parameter_generator &g)
   {
-    std::vector<T> result(f.generator_);
+    std::vector<T> result(g.generator_);
     std::for_each(result.begin(), result.end(), [](T &v) { v = -v; });
     return Multi_parameter_generator(std::move(result));
   }
 
   // subtraction
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
-   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * @brief Returns a generator such that an entry at index \f$ p \f$, with
+   * \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ g(p) - r(p) \f$
+   * if \f$ p < length_r \f$ and to \f$ g(p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -539,20 +493,20 @@ class Multi_parameter_generator
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
    * @tparam ValueRange Range with a begin(), end() and size() method.
-   * @param f First element of the subtraction.
+   * @param g First element of the subtraction.
    * @param r Second element of the subtraction.
    */
   template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
-  friend Multi_parameter_generator operator-(Multi_parameter_generator f, const ValueRange &r)
+  friend Multi_parameter_generator operator-(Multi_parameter_generator g, const ValueRange &r)
   {
-    f -= r;
-    return f;
+    g -= r;
+    return g;
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) - f(g,p) \f$
-   * if \f$ p < length_r \f$ and to \f$ -f(g,p) \f$ otherwise.
+   * @brief Returns a generator such that an entry at index \f$ p \f$, with
+   * \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) - g(p) \f$
+   * if \f$ p < length_r \f$ and to \f$ g(p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -565,26 +519,26 @@ class Multi_parameter_generator
    *
    * @tparam ValueRange Range with a begin(), end() and size() method.
    * @param r First element of the subtraction.
-   * @param f Second element of the subtraction.
+   * @param g Second element of the subtraction.
    */
   template <class ValueRange,
             class = std::enable_if_t<RangeTraits<ValueRange>::has_begin &&
                                      !std::is_same_v<ValueRange, Multi_parameter_generator> > >
-  friend Multi_parameter_generator operator-(const ValueRange &r, const Multi_parameter_generator &f)
+  friend Multi_parameter_generator operator-(const ValueRange &r, const Multi_parameter_generator &g)
   {
-    if (f.num_parameters() == 0) return f;
-    if (f.is_nan()) return nan();
+    if (g.num_parameters() == 0) return g;
+    if (g.is_nan()) return nan();
 
     if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration){
       if (r[0].is_finite()){
-        return f -= r[0];
+        return g -= r[0];
       } else {
         if constexpr (!std::numeric_limits<T>::has_quiet_NaN) if (r[0].size() == 0) return nan();
-        return f -= r[0][0];
+        return g -= r[0][0];
       }
     } else {
-      if (f.is_finite()) {
-        Multi_parameter_generator res = f;
+      if (g.is_finite()) {
+        Multi_parameter_generator res = g;
         res._apply_operation(r, [](T &valF, const T &valR) -> bool {
           valF = -valF;
           return _add(valF, valR);
@@ -592,14 +546,14 @@ class Multi_parameter_generator
         return res;
       } else {
         Multi_parameter_generator res(r.begin(), r.end());
-        res._apply_operation(f[0], [](T &valRes, const T &valF) -> bool { return _subtract(valRes, valF); });
+        res._apply_operation(g[0], [](T &valRes, const T &valF) -> bool { return _subtract(valRes, valF); });
         return res;
       }
     }
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) - val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ p \f$ is equal to \f$ g(p) - val \f$.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -610,17 +564,17 @@ class Multi_parameter_generator
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @param f First element of the subtraction.
+   * @param g First element of the subtraction.
    * @param val Second element of the subtraction.
    */
-  friend Multi_parameter_generator operator-(Multi_parameter_generator f, const T &val)
+  friend Multi_parameter_generator operator-(Multi_parameter_generator g, const T &val)
   {
-    f -= val;
-    return f;
+    g -= val;
+    return g;
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val - f(g,p) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ p \f$ is equal to \f$ val - g(p) \f$.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -632,21 +586,21 @@ class Multi_parameter_generator
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
    * @param val First element of the subtraction.
-   * @param f Second element of the subtraction.
+   * @param g Second element of the subtraction.
    */
-  friend Multi_parameter_generator operator-(const T &val, Multi_parameter_generator f)
+  friend Multi_parameter_generator operator-(const T &val, Multi_parameter_generator g)
   {
-    f._apply_operation(val, [](T &valF, const T &valR) -> bool {
+    g._apply_operation(val, [](T &valF, const T &valR) -> bool {
       valF = -valF;
       return _add(valF, valR);
     });
-    return f;
+    return g;
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
-   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * @brief Modifies the first argument such that an entry at index \f$ p \f$, with
+   * \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ g(p) - r(p) \f$
+   * if \f$ p < length_r \f$ and to \f$ g(p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -658,37 +612,37 @@ class Multi_parameter_generator
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
    * @tparam ValueRange Range with a begin(), end() and size() method.
-   * @param f First element of the subtraction.
+   * @param g First element of the subtraction.
    * @param r Second element of the subtraction.
    */
   template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
-  friend Multi_parameter_generator &operator-=(Multi_parameter_generator &f, const ValueRange &r)
+  friend Multi_parameter_generator &operator-=(Multi_parameter_generator &g, const ValueRange &r)
   {
-    if (f.num_parameters() == 0 || f.is_nan()) return f;
+    if (g.num_parameters() == 0 || g.is_nan()) return g;
 
     if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration){
       if (r[0].is_finite()){
-        return f -= r[0];
+        return g -= r[0];
       } else {
         if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
           if (r[0].size() == 0) {
-            f = nan();
-            return f;
+            g = nan();
+            return g;
           }
-        return f -= r[0][0];
+        return g -= r[0][0];
       }
     } else {
-      if (!f.is_finite()) {
-        f.generator_.resize(r.size(), f[0]);
+      if (!g.is_finite()) {
+        g.generator_.resize(r.size(), g[0]);
       }
-      f._apply_operation(r, [](T &valF, const T &valR) -> bool { return _subtract(valF, valR); });
+      g._apply_operation(r, [](T &valF, const T &valR) -> bool { return _subtract(valF, valR); });
     }
     
-    return f;
+    return g;
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) - val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ p \f$ is equal to \f$ g(p) - val \f$.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -699,20 +653,20 @@ class Multi_parameter_generator
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @param f First element of the subtraction.
+   * @param g First element of the subtraction.
    * @param val Second element of the subtraction.
    */
-  friend Multi_parameter_generator &operator-=(Multi_parameter_generator &f, const T &val)
+  friend Multi_parameter_generator &operator-=(Multi_parameter_generator &g, const T &val)
   {
-    f._apply_operation(val, [](T &valF, const T &valR) -> bool { return _subtract(valF, valR); });
-    return f;
+    g._apply_operation(val, [](T &valF, const T &valR) -> bool { return _subtract(valF, valR); });
+    return g;
   }
 
   // addition
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
-   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * @brief Returns a generator such that an entry at index \f$ p \f$, with
+   * \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ g(p) + r(p) \f$
+   * if \f$ p < length_r \f$ and to \f$ g(p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -724,20 +678,20 @@ class Multi_parameter_generator
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
    * @tparam ValueRange Range with a begin(), end() and size() method.
-   * @param f First element of the addition.
+   * @param g First element of the addition.
    * @param r Second element of the addition.
    */
   template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
-  friend Multi_parameter_generator operator+(Multi_parameter_generator f, const ValueRange &r)
+  friend Multi_parameter_generator operator+(Multi_parameter_generator g, const ValueRange &r)
   {
-    f += r;
-    return f;
+    g += r;
+    return g;
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) + f(g,p) \f$
-   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * @brief Returns a generator such that an entry at index \f$ p \f$, with
+   * \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) + g(p) \f$
+   * if \f$ p < length_r \f$ and to \f$ g(p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -750,19 +704,19 @@ class Multi_parameter_generator
    *
    * @tparam ValueRange Range with a begin(), end() and size() method.
    * @param r First element of the addition.
-   * @param f Second element of the addition.
+   * @param g Second element of the addition.
    */
   template <class ValueRange,
             class = std::enable_if_t<RangeTraits<ValueRange>::has_begin &&
                                      !std::is_same_v<ValueRange, Multi_parameter_generator> > >
-  friend Multi_parameter_generator operator+(const ValueRange &r, Multi_parameter_generator f)
+  friend Multi_parameter_generator operator+(const ValueRange &r, Multi_parameter_generator g)
   {
-    f += r;
-    return f;
+    g += r;
+    return g;
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) + val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ p \f$ is equal to \f$ g(p) + val \f$.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -773,17 +727,17 @@ class Multi_parameter_generator
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @param f First element of the addition.
+   * @param g First element of the addition.
    * @param val Second element of the addition.
    */
-  friend Multi_parameter_generator operator+(Multi_parameter_generator f, const T &val)
+  friend Multi_parameter_generator operator+(Multi_parameter_generator g, const T &val)
   {
-    f += val;
-    return f;
+    g += val;
+    return g;
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val + f(g,p) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ p \f$ is equal to \f$ g(p) + val \f$.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -795,18 +749,18 @@ class Multi_parameter_generator
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
    * @param val First element of the addition.
-   * @param f Second element of the addition.
+   * @param g Second element of the addition.
    */
-  friend Multi_parameter_generator operator+(const T &val, Multi_parameter_generator f)
+  friend Multi_parameter_generator operator+(const T &val, Multi_parameter_generator g)
   {
-    f += val;
-    return f;
+    g += val;
+    return g;
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
-   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * @brief Modifies the first argument such that an entry at index \f$ p \f$, with
+   * \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ g(p) + r(p) \f$
+   * if \f$ p < length_r \f$ and to \f$ g(p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -818,37 +772,37 @@ class Multi_parameter_generator
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
    * @tparam ValueRange Range with a begin(), end() and size() method.
-   * @param f First element of the addition.
+   * @param g First element of the addition.
    * @param r Second element of the addition.
    */
   template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
-  friend Multi_parameter_generator &operator+=(Multi_parameter_generator &f, const ValueRange &r)
+  friend Multi_parameter_generator &operator+=(Multi_parameter_generator &g, const ValueRange &r)
   {
-    if (f.num_parameters() == 0 || f.is_nan()) return f;
+    if (g.num_parameters() == 0 || g.is_nan()) return g;
 
     if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration){
       if (r[0].is_finite()){
-        return f += r[0];
+        return g += r[0];
       } else {
         if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
           if (r[0].size() == 0) {
-            f = nan();
-            return f;
+            g = nan();
+            return g;
           }
-        return f += r[0][0];
+        return g += r[0][0];
       }
     } else {
-      if (!f.is_finite()) {
-        f.generator_.resize(r.size(), f[0]);
+      if (!g.is_finite()) {
+        g.generator_.resize(r.size(), g[0]);
       }
-      f._apply_operation(r, [](T &valF, const T &valR) -> bool { return _add(valF, valR); });
+      g._apply_operation(r, [](T &valF, const T &valR) -> bool { return _add(valF, valR); });
     }
 
-    return f;
+    return g;
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) + val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ p \f$ is equal to \f$ g(p) + val \f$.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -859,20 +813,20 @@ class Multi_parameter_generator
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @param f First element of the addition.
+   * @param g First element of the addition.
    * @param val Second element of the addition.
    */
-  friend Multi_parameter_generator &operator+=(Multi_parameter_generator &f, const T &val)
+  friend Multi_parameter_generator &operator+=(Multi_parameter_generator &g, const T &val)
   {
-    f._apply_operation(val, [](T &valF, const T &valR) -> bool { return _add(valF, valR); });
-    return f;
+    g._apply_operation(val, [](T &valF, const T &valR) -> bool { return _add(valF, valR); });
+    return g;
   }
 
   // multiplication
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
-   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * @brief Returns a generator such that an entry at index \f$ p \f$, with
+   * \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ g(p) * r(p) \f$
+   * if \f$ p < length_r \f$ and to \f$ g(p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -886,20 +840,20 @@ class Multi_parameter_generator
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
    * @tparam ValueRange Range with a begin(), end() and size() method.
-   * @param f First element of the multiplication.
+   * @param g First element of the multiplication.
    * @param r Second element of the multiplication.
    */
   template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
-  friend Multi_parameter_generator operator*(Multi_parameter_generator f, const ValueRange &r)
+  friend Multi_parameter_generator operator*(Multi_parameter_generator g, const ValueRange &r)
   {
-    f *= r;
-    return f;
+    g *= r;
+    return g;
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) * f(g,p) \f$
-   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * @brief Returns a generator such that an entry at index \f$ p \f$, with
+   * \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ g(p) * r(p) \f$
+   * if \f$ p < length_r \f$ and to \f$ g(p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -914,19 +868,19 @@ class Multi_parameter_generator
    *
    * @tparam ValueRange Range with a begin(), end() and size() method.
    * @param r First element of the multiplication.
-   * @param f Second element of the multiplication.
+   * @param g Second element of the multiplication.
    */
   template <class ValueRange,
             class = std::enable_if_t<RangeTraits<ValueRange>::has_begin &&
                                      !std::is_same_v<ValueRange, Multi_parameter_generator> > >
-  friend Multi_parameter_generator operator*(const ValueRange &r, Multi_parameter_generator f)
+  friend Multi_parameter_generator operator*(const ValueRange &r, Multi_parameter_generator g)
   {
-    f *= r;
-    return f;
+    g *= r;
+    return g;
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) * val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ p \f$ is equal to \f$ g(p) * val \f$.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -939,17 +893,17 @@ class Multi_parameter_generator
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @param f First element of the multiplication.
+   * @param g First element of the multiplication.
    * @param val Second element of the multiplication.
    */
-  friend Multi_parameter_generator operator*(Multi_parameter_generator f, const T &val)
+  friend Multi_parameter_generator operator*(Multi_parameter_generator g, const T &val)
   {
-    f *= val;
-    return f;
+    g *= val;
+    return g;
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val * f(g,p) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ p \f$ is equal to \f$ g(p) * val \f$.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -963,18 +917,18 @@ class Multi_parameter_generator
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
    * @param val First element of the multiplication.
-   * @param f Second element of the multiplication.
+   * @param g Second element of the multiplication.
    */
-  friend Multi_parameter_generator operator*(const T &val, Multi_parameter_generator f)
+  friend Multi_parameter_generator operator*(const T &val, Multi_parameter_generator g)
   {
-    f *= val;
-    return f;
+    g *= val;
+    return g;
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
-   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * @brief Modifies the first argument such that an entry at index \f$ p \f$, with
+   * \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ g(p) * r(p) \f$
+   * if \f$ p < length_r \f$ and to \f$ g(p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -988,37 +942,37 @@ class Multi_parameter_generator
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
    * @tparam ValueRange Range with a begin(), end() and size() method.
-   * @param f First element of the multiplication.
+   * @param g First element of the multiplication.
    * @param r Second element of the multiplication.
    */
   template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
-  friend Multi_parameter_generator &operator*=(Multi_parameter_generator &f, const ValueRange &r)
+  friend Multi_parameter_generator &operator*=(Multi_parameter_generator &g, const ValueRange &r)
   {
-    if (f.num_parameters() == 0 || f.is_nan()) return f;
+    if (g.num_parameters() == 0 || g.is_nan()) return g;
 
     if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration){
       if (r[0].is_finite()){
-        return f *= r[0];
+        return g *= r[0];
       } else {
         if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
           if (r[0].size() == 0) {
-            f = nan();
-            return f;
+            g = nan();
+            return g;
           }
-        return f *= r[0][0];
+        return g *= r[0][0];
       }
     } else {
-      if (!f.is_finite()) {
-        f.generator_.resize(r.size(), f[0]);
+      if (!g.is_finite()) {
+        g.generator_.resize(r.size(), g[0]);
       }
-      f._apply_operation(r, [](T &valF, const T &valR) -> bool { return _multiply(valF, valR); });
+      g._apply_operation(r, [](T &valF, const T &valR) -> bool { return _multiply(valF, valR); });
     }
 
-    return f;
+    return g;
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) * val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ p \f$ is equal to \f$ g(p) * val \f$.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1031,20 +985,20 @@ class Multi_parameter_generator
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @param f First element of the multiplication.
+   * @param g First element of the multiplication.
    * @param val Second element of the multiplication.
    */
-  friend Multi_parameter_generator &operator*=(Multi_parameter_generator &f, const T &val)
+  friend Multi_parameter_generator &operator*=(Multi_parameter_generator &g, const T &val)
   {
-    f._apply_operation(val, [](T &valF, const T &valR) -> bool { return _multiply(valF, valR); });
-    return f;
+    g._apply_operation(val, [](T &valF, const T &valR) -> bool { return _multiply(valF, valR); });
+    return g;
   }
 
   // division
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
-   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * @brief Returns a generator such that an entry at index \f$ p \f$, with
+   * \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ g(p) / r(p) \f$
+   * if \f$ p < length_r \f$ and to \f$ g(p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1061,20 +1015,20 @@ class Multi_parameter_generator
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
    * @tparam ValueRange Range with a begin(), end() and size() method.
-   * @param f First element of the division.
+   * @param g First element of the division.
    * @param r Second element of the division.
    */
   template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
-  friend Multi_parameter_generator operator/(Multi_parameter_generator f, const ValueRange &r)
+  friend Multi_parameter_generator operator/(Multi_parameter_generator g, const ValueRange &r)
   {
-    f /= r;
-    return f;
+    g /= r;
+    return g;
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) / f(g,p) \f$
-   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * @brief Returns a generator such that an entry at index \f$ p \f$, with
+   * \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) / g(p) \f$
+   * if \f$ p < length_r \f$ and to \f$ g(p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1092,26 +1046,26 @@ class Multi_parameter_generator
    *
    * @tparam ValueRange Range with a begin(), end() and size() method.
    * @param r First element of the division.
-   * @param f Second element of the division.
+   * @param g Second element of the division.
    */
   template <class ValueRange,
             class = std::enable_if_t<RangeTraits<ValueRange>::has_begin &&
                                      !std::is_same_v<ValueRange, Multi_parameter_generator> > >
-  friend Multi_parameter_generator operator/(const ValueRange &r, const Multi_parameter_generator &f)
+  friend Multi_parameter_generator operator/(const ValueRange &r, const Multi_parameter_generator &g)
   {
-    if (f.num_parameters() == 0) return f;
-    if (f.is_nan()) return nan();
+    if (g.num_parameters() == 0) return g;
+    if (g.is_nan()) return nan();
 
     if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration){
       if (r[0].is_finite()){
-        return r[0] / f;
+        return r[0] / g;
       } else {
         if constexpr (!std::numeric_limits<T>::has_quiet_NaN) if (r[0].size() == 0) return nan();
-        return r[0][0] / f;
+        return r[0][0] / g;
       }
     } else {
-      if (f.is_finite()) {
-        Multi_parameter_generator res = f;
+      if (g.is_finite()) {
+        Multi_parameter_generator res = g;
         res._apply_operation(r, [](T &valF, const T &valR) -> bool {
           T tmp = valF;
           valF = valR;
@@ -1120,14 +1074,14 @@ class Multi_parameter_generator
         return res;
       } else {
         Multi_parameter_generator res(r.begin(), r.end());
-        res._apply_operation(f[0], [](T &valRes, const T &valF) -> bool { return _divide(valRes, valF); });
+        res._apply_operation(g[0], [](T &valRes, const T &valF) -> bool { return _divide(valRes, valF); });
         return res;
       }
     }
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) / val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ p \f$ is equal to \f$ g(p) / val \f$.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1143,17 +1097,17 @@ class Multi_parameter_generator
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @param f First element of the division.
+   * @param g First element of the division.
    * @param val Second element of the division.
    */
-  friend Multi_parameter_generator operator/(Multi_parameter_generator f, const T &val)
+  friend Multi_parameter_generator operator/(Multi_parameter_generator g, const T &val)
   {
-    f /= val;
-    return f;
+    g /= val;
+    return g;
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val / f(g,p) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ p \f$ is equal to \f$ val / g(p) \f$.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1170,22 +1124,22 @@ class Multi_parameter_generator
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
    * @param val First element of the division.
-   * @param f Second element of the division.
+   * @param g Second element of the division.
    */
-  friend Multi_parameter_generator operator/(const T &val, Multi_parameter_generator f)
+  friend Multi_parameter_generator operator/(const T &val, Multi_parameter_generator g)
   {
-    f._apply_operation(val, [](T &valF, const T &valR) -> bool {
+    g._apply_operation(val, [](T &valF, const T &valR) -> bool {
       T tmp = valF;
       valF = valR;
       return _divide(valF, tmp);
     });
-    return f;
+    return g;
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
-   * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
+   * @brief Modifies the first argument such that an entry at index \f$ p \f$, with
+   * \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ g(p) / r(p) \f$
+   * if \f$ p < length_r \f$ and to \f$ g(p) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1202,37 +1156,37 @@ class Multi_parameter_generator
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
    * @tparam ValueRange Range with a begin(), end() and size() method.
-   * @param f First element of the division.
+   * @param g First element of the division.
    * @param r Second element of the division.
    */
   template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
-  friend Multi_parameter_generator &operator/=(Multi_parameter_generator &f, const ValueRange &r)
+  friend Multi_parameter_generator &operator/=(Multi_parameter_generator &g, const ValueRange &r)
   {
-    if (f.num_parameters() == 0 || f.is_nan()) return f;
+    if (g.num_parameters() == 0 || g.is_nan()) return g;
 
     if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration){
       if (r[0].is_finite()){
-        return f /= r[0];
+        return g /= r[0];
       } else {
         if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
           if (r[0].size() == 0) {
-            f = nan();
-            return f;
+            g = nan();
+            return g;
           }
-        return f /= r[0][0];
+        return g /= r[0][0];
       }
     } else {
-      if (!f.is_finite()) {
-        f.generator_.resize(r.size(), f[0]);
+      if (!g.is_finite()) {
+        g.generator_.resize(r.size(), g[0]);
       }
-      f._apply_operation(r, [](T &valF, const T &valR) -> bool { return _divide(valF, valR); });
+      g._apply_operation(r, [](T &valF, const T &valR) -> bool { return _divide(valF, valR); });
     }
 
-    return f;
+    return g;
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) / val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ p \f$ is equal to \f$ g(p) / val \f$.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1248,23 +1202,19 @@ class Multi_parameter_generator
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
    *
-   * @param f First element of the division.
+   * @param g First element of the division.
    * @param val Second element of the division.
    */
-  friend Multi_parameter_generator &operator/=(Multi_parameter_generator &f, const T &val)
+  friend Multi_parameter_generator &operator/=(Multi_parameter_generator &g, const T &val)
   {
-    f._apply_operation(val, [](T &valF, const T &valR) -> bool { return _divide(valF, valR); });
-    return f;
+    g._apply_operation(val, [](T &valF, const T &valR) -> bool { return _divide(valF, valR); });
+    return g;
   }
 
   // MODIFIERS
 
   /**
-   * @brief Sets each generator of the filtration value to the least common upper bound between it and the given value.
-   *
-   * More formally, it pushes the current generator to the cone \f$ \{ y \in \mathbb R^n : y \ge x \} \f$
-   * originating in \f$ x \f$. The resulting value corresponds to the intersection of both
-   * cones: \f$ \mathrm{this} = \min \{ y \in \mathbb R^n : y \ge this \} \cap \{ y \in \mathbb R^n : y \ge x \} \f$.
+   * @brief Sets the generator to the least common upper bound between it and the given value.
    *
    * @tparam GeneratorRange Range of elements convertible to `T`. Must have a begin(), end() and size() method.
    * @param x Range towards to push. Has to have as many elements than @ref num_parameters().
@@ -1313,12 +1263,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Sets each generator of the filtration value to the greatest common lower bound between it and the given
-   * value.
-   *
-   * More formally, it pulls the current generator to the cone \f$ \{ y \in \mathbb R^n : y \le x \} \f$
-   * originating in \f$ x \f$. The resulting value corresponds to the intersection of both
-   * cones: \f$ \mathrm{this} = \min \{ y \in \mathbb R^n : y \le this \} \cap \{ y \in \mathbb R^n : y \le x \} \f$.
+   * @brief Sets each the generator to the greatest common lower bound between it and the given value.
    *
    * @tparam GeneratorRange Range of elements convertible to `T`. Must have a begin(), end() and size() method.
    * @param x Range towards to pull. Has to have as many elements than @ref num_parameters().
@@ -1367,7 +1312,7 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Projects the filtration value into the given grid. If @p coordinate is false, the entries are set to
+   * @brief Projects the generator into the given grid. If @p coordinate is false, the entries are set to
    * the nearest upper bound value with the same parameter in the grid. Otherwise, the entries are set to the indices
    * of those nearest upper bound values.
    * The grid has to be represented as a vector of ordered ranges of values convertible into `T`. An index
@@ -1404,49 +1349,47 @@ class Multi_parameter_generator
   // FONCTIONNALITIES
 
   /**
-   * @brief Computes the smallest (resp. the greatest if `Co` is true) scalar product of the all generators with the
-   * given vector.
+   * @brief Computes the scalar product of the generator with the given vector.
    *
    * @tparam U Arithmetic type of the result. Default value: `T`.
-   * @param f Filtration value.
+   * @param g Filtration value.
    * @param x Vector of coefficients.
    * @return Scalar product of @p f with @p x.
    */
   template <typename U = T>
-  friend U compute_linear_projection(const Multi_parameter_generator &f, const std::vector<U> &x)
+  friend U compute_linear_projection(const Multi_parameter_generator &g, const std::vector<U> &x)
   {
     U projection = 0;
-    std::size_t size = std::min(x.size(), f.num_parameters());
-    for (std::size_t i = 0; i < size; i++) projection += x[i] * static_cast<U>(f[i]);
+    std::size_t size = std::min(x.size(), g.num_parameters());
+    for (std::size_t i = 0; i < size; i++) projection += x[i] * static_cast<U>(g[i]);
     return projection;
   }
 
   /**
-   * @brief Computes the euclidean distance from the first parameter to the second parameter as the minimum of
-   * all Euclidean distances between a generator of @p f and a generator of @p other.
+   * @brief Computes the euclidean distance from the first parameter to the second parameter.
    *
-   * @param f Source filtration value.
+   * @param g Source filtration value.
    * @param other Target filtration value.
    * @return Euclidean distance between @p f and @p other.
    */
   template <typename U = T>
-  friend U compute_euclidean_distance_to(const Multi_parameter_generator &f, const Multi_parameter_generator &other)
+  friend U compute_euclidean_distance_to(const Multi_parameter_generator &g, const Multi_parameter_generator &other)
   {
-    if (!f.is_finite() || !other.is_finite()) {
+    if (!g.is_finite() || !other.is_finite()) {
       if constexpr (std::numeric_limits<T>::has_quiet_NaN)
         return std::numeric_limits<T>::quiet_NaN();
       else
         return T_inf;
     }
 
-    GUDHI_CHECK(f.num_parameters() == other.num_parameters(),
+    GUDHI_CHECK(g.num_parameters() == other.num_parameters(),
                 "We cannot compute the distance between two points of different dimensions.");
 
-    if (f.num_parameters() == 1) return f[0] - other[0];
+    if (g.num_parameters() == 1) return g[0] - other[0];
 
     U out = 0;
-    for (size_type p = 0; p < f.num_parameters(); ++p) {
-      T v = f[p] - other[p];
+    for (size_type p = 0; p < g.num_parameters(); ++p) {
+      T v = g[p] - other[p];
       out += v * v;
     }
     if constexpr (std::is_integral_v<U>) {
@@ -1458,46 +1401,43 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Computes the norm of the given filtration value.
+   * @brief Computes the sum of the squares of all values in the given generator.
    *
-   * The filtration value is seen as a \f$ num_generators x num_parameters \f$ matrix and a standard Frobenius norm
-   * is computed from it: the square root of the sum of the squares of all elements in the matrix.
-   *
-   * @param f Filtration value.
+   * @param g Filtration value.
    * @return The norm of @p f.
    */
   template <typename U = T>
-  friend U compute_squares(const Multi_parameter_generator &f)
+  friend U compute_squares(const Multi_parameter_generator &g)
   {
     U out = 0;
-    for (size_type p = 0; p < f.num_parameters(); ++p) {
-      out += f[p] * f[p];
+    for (size_type p = 0; p < g.num_parameters(); ++p) {
+      out += g[p] * g[p];
     }
     return out;
   }
 
   /**
-   * @brief Computes the values in the given grid corresponding to the coordinates given by the given filtration
-   * value. That is, if \f$ out \f$ is the result, \f$ out(g,p) = grid[p][f(g,p)] \f$. Assumes therefore, that the
+   * @brief Computes the values in the given grid corresponding to the coordinates given by the given generator.
+   * That is, if \f$ out \f$ is the result, \f$ out(g,p) = grid[p][f(g,p)] \f$. Assumes therefore, that the
    * values stored in the filtration value corresponds to indices existing in the given grid.
    *
    * @tparam U Signed arithmetic type.
-   * @param f Filtration value storing coordinates compatible with `grid`.
+   * @param g Filtration value storing coordinates compatible with `grid`.
    * @param grid Vector of vector.
    * @return Filtration value \f$ out \f$ whose entry correspond to \f$ out(g,p) = grid[p][f(g,p)] \f$.
    */
   template <typename U>
-  friend Multi_parameter_generator<U, Co> evaluate_coordinates_in_grid(const Multi_parameter_generator &f,
+  friend Multi_parameter_generator<U, Co> evaluate_coordinates_in_grid(const Multi_parameter_generator &g,
                                                                        const std::vector<std::vector<U> > &grid)
   {
-    GUDHI_CHECK(grid.size() >= f.num_parameters(),
+    GUDHI_CHECK(grid.size() >= g.num_parameters(),
                 "The size of the grid should correspond to the number of parameters in the filtration value.");
 
     U grid_inf = Multi_parameter_generator<U, Co>::T_inf;
-    std::vector<U> outVec(f.num_parameters());
+    std::vector<U> outVec(g.num_parameters());
 
-    for (size_type p = 0; p < f.num_parameters(); ++p) {
-      outVec[p] = (f[p] == f.T_inf ? grid_inf : grid[p][f[p]]);
+    for (size_type p = 0; p < g.num_parameters(); ++p) {
+      outVec[p] = (g[p] == g.T_inf ? grid_inf : grid[p][g[p]]);
     }
 
     return Multi_parameter_generator<U, Co>(std::move(outVec));
@@ -1508,26 +1448,26 @@ class Multi_parameter_generator
   /**
    * @brief Outstream operator.
    */
-  friend std::ostream &operator<<(std::ostream &stream, const Multi_parameter_generator &f)
+  friend std::ostream &operator<<(std::ostream &stream, const Multi_parameter_generator &g)
   {
-    if (f.is_plus_inf()) {
+    if (g.is_plus_inf()) {
       stream << "[inf, ..., inf]";
       return stream;
     }
-    if (f.is_minus_inf()) {
+    if (g.is_minus_inf()) {
       stream << "[-inf, ..., -inf]";
       return stream;
     }
-    if (f.is_nan()) {
+    if (g.is_nan()) {
       stream << "[NaN]";
       return stream;
     }
 
-    const size_type num_param = f.num_parameters();
+    const size_type num_param = g.num_parameters();
 
     stream << "[";
     for (size_type p = 0; p < num_param; ++p) {
-      stream << f[p];
+      stream << g[p];
       if (p < num_param - 1) stream << ", ";
     }
     stream << "]";
