@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(test_simple_mdspan_access)
 
   auto ms2 = Simple_mdspan<int>(v.data(), 2, 6);
   auto ms3 = Simple_mdspan(v.data(), 2, 3, 2);
-  auto ms4 = Simple_mdspan(v.data(), {1, 12});
+  auto ms4 = Simple_mdspan<int>(v.data(), {1, 12});
 
   BOOST_CHECK_EQUAL((ms2[{0, 0}]), 1);
   BOOST_CHECK_EQUAL((ms2[{0, 1}]), 2);
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(test_simple_mdspan_properties)
 
   auto ms2 = Simple_mdspan<int>(v.data(), 2, 6);
   auto ms3 = Simple_mdspan(v.data(), 2, 3, 2);
-  auto ms4 = Simple_mdspan(v.data(), {1, 12});
+  auto ms4 = Simple_mdspan<int>(v.data(), {1, 12});
 
   BOOST_CHECK_EQUAL(ms2.rank(), 2);
   BOOST_CHECK_EQUAL(ms3.rank(), 3);
