@@ -3,4 +3,7 @@ include(GUDHI_boost_test)
 add_executable_with_targets(Multi_filtration_multiparameter_unit_test multifiltration_multiparameter_unit_test.cpp TBB::tbb)
 gudhi_add_boost_test(Multi_filtration_multiparameter_unit_test)
 
+add_executable_with_targets(Multi_filtration_degree_rips_unit_test multifiltration_degree_rips_unit_test.cpp TBB::tbb)
+gudhi_add_boost_test(Multi_filtration_degree_rips_unit_test)
+
 
