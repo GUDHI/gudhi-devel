@@ -34,6 +34,7 @@
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_filtration/Multi_parameter_generator.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
+#include <gudhi/Multi_parameter_filtration.h>
 
 namespace Gudhi::multi_filtration {
 
@@ -468,6 +469,23 @@ class Dynamic_multi_parameter_filtration
       out[g] = generators_[g].template as_type<U>();
     }
     return Dynamic_multi_parameter_filtration<U, Co, Ensure1Criticality>(std::move(out), num_parameters());
+  }
+
+  /**
+   * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
+   */
+   Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_multi_parameter_filtration() const {
+    if (generators_.empty()) return Multi_parameter_filtration<T, Co, Ensure1Criticality>(0);
+
+    std::vector<T> out(num_entries());
+    size_type i = 0;
+    for (size_type g = 0; g < num_generators(); ++g){
+      for (size_type p = 0; p < num_parameters(); ++p){
+        out[i + p] = generators_[g][p];
+      }
+      i += num_parameters();
+    }
+    return Multi_parameter_filtration<T, Co, Ensure1Criticality>(std::move(out), num_parameters());
   }
 
   // ACCESS

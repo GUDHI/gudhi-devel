@@ -14,7 +14,7 @@
 #define BOOST_TEST_MODULE "simplex_mdspan"
 #include <boost/test/unit_test.hpp>
 
-#include <gudhi/Simple_mdspan.h>
+#include <gudhi/simple_mdspan.h>
 
 using Gudhi::Simple_mdspan;
 

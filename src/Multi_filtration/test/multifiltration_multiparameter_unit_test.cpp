@@ -1213,3 +1213,31 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_numerical_limits, T, lis
   test_numerical_limits<Dynamic_multi_parameter_filtration<T, false, true>, T>();
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_converters, T, list_of_tested_variants)
+{
+  std::vector<T> v = {0, 5, 1, 4, 2, 3, 3, 2};
+  Dynamic_multi_parameter_filtration<T> f0(v.begin(), v.end(), 2);
+  BOOST_CHECK(f0.num_parameters() == 2);
+  BOOST_CHECK(f0.num_generators() == 4);
+  BOOST_CHECK_EQUAL(f0(0,0), 0);
+  BOOST_CHECK_EQUAL(f0(0,1), 5);
+  BOOST_CHECK_EQUAL(f0(1,0), 1);
+  BOOST_CHECK_EQUAL(f0(1,1), 4);
+  BOOST_CHECK_EQUAL(f0(2,0), 2);
+  BOOST_CHECK_EQUAL(f0(2,1), 3);
+  BOOST_CHECK_EQUAL(f0(3,0), 3);
+  BOOST_CHECK_EQUAL(f0(3,1), 2);
+
+  Multi_parameter_filtration<T> f1 = f0.convert_to_multi_parameter_filtration();
+  BOOST_CHECK(f1.num_parameters() == 2);
+  BOOST_CHECK(f1.num_generators() == 4);
+  BOOST_CHECK_EQUAL(f1(0,0), 0);
+  BOOST_CHECK_EQUAL(f1(0,1), 5);
+  BOOST_CHECK_EQUAL(f1(1,0), 1);
+  BOOST_CHECK_EQUAL(f1(1,1), 4);
+  BOOST_CHECK_EQUAL(f1(2,0), 2);
+  BOOST_CHECK_EQUAL(f1(2,1), 3);
+  BOOST_CHECK_EQUAL(f1(3,0), 3);
+  BOOST_CHECK_EQUAL(f1(3,1), 2);
+}
+

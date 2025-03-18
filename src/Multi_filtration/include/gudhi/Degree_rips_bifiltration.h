@@ -32,9 +32,11 @@
 #include <initializer_list>
 
 #include <gudhi/Debug_utils.h>
-#include <gudhi/Simple_mdspan.h>
+#include <gudhi/simple_mdspan.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
 #include <gudhi/Simplex_tree/filtration_value_utils.h>
+#include <gudhi/Multi_parameter_filtration.h>
+#include <gudhi/Dynamic_multi_parameter_filtration.h>
 
 namespace Gudhi::multi_filtration {
 
@@ -444,6 +446,114 @@ class Degree_rips_bifiltration
   {
     std::vector<U> out(generators_.begin(), generators_.end());
     return Degree_rips_bifiltration<U, Co, Ensure1Criticality>(std::move(out), num_parameters());
+  }
+
+  /**
+   * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
+   */
+  Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_multi_parameter_filtration() const {
+    if (generators_.empty()) return Multi_parameter_filtration<T, Co, Ensure1Criticality>(0);
+
+    auto gen_index = [&](size_type i){
+      if constexpr (Co){
+        return generators_.size() - 1 - i;
+      } else {
+        return i;
+      }
+    };
+
+    std::vector<T> out;
+    out.reserve(generators_.size() * 2);
+    T threshold = generators_[gen_index(0)];
+    out.push_back(gen_index(0));
+    out.push_back(threshold);
+    for (size_type i = 1; i < generators_.size(); ++i){
+      size_type g = gen_index(i);
+      if (_strictly_dominates(threshold, generators_[g])){
+        threshold = generators_[g];
+        out.push_back(g);
+        out.push_back(threshold);
+      }
+    }
+    if constexpr (Co){
+      //lexicographical order
+      const size_type max_idx = out.size() - 1;
+      for (size_type i = 0; i < out.size() / 2; i += 2){
+        std::swap(out[i], out[max_idx - 1 - i]);
+        std::swap(out[i + 1], out[max_idx - i]);
+      }
+    }
+
+    return Multi_parameter_filtration<T, Co, Ensure1Criticality>(std::move(out), 2);
+  }
+
+  /**
+   * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
+   * @warning The filtration value is converted one to one and is not simplified to a minimal set of generators,
+   * that undefines the behaviour of some methods of the class. Use @ref convert_to_multi_parameter_filtration()
+   * instead if needed.
+   */
+  Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_non_simplified_multi_parameter_filtration() const {
+    std::vector<T> out(generators_.size() * 2);
+    size_type i = 0;
+    for (size_type g = 0; g < generators_.size(); ++g){
+      out[i] = g;
+      out[i+1] = generators_[g];
+      i += 2;
+    }
+    return Multi_parameter_filtration<T, Co, Ensure1Criticality>(std::move(out), 2);
+  }
+
+  /**
+   * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
+   */
+  Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_dynamic_multi_parameter_filtration() const {
+    if (generators_.empty()) return Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>(0);
+
+    auto gen_index = [&](size_type i){
+      if constexpr (Co){
+        return generators_.size() - 1 - i;
+      } else {
+        return i;
+      }
+    };
+
+    std::vector<Multi_parameter_generator<T, Co> > out;
+    out.reserve(generators_.size());
+    T threshold = generators_[gen_index(0)];
+    out.emplace_back(std::vector<T>{static_cast<T>(gen_index(0)), threshold});
+    for (size_type i = 1; i < generators_.size(); ++i){
+      size_type g = gen_index(i);
+      if (_strictly_dominates(threshold, generators_[g])){
+        threshold = generators_[g];
+        std::vector<T> v = {static_cast<T>(g), threshold};
+        out.emplace_back(std::move(v));
+      }
+    }
+    if constexpr (Co){
+      //lexicographical order
+      std::reverse(out.begin(), out.end());
+    }
+
+    return Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>(std::move(out), 2);
+  }
+
+  /**
+   * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
+   * @warning The filtration value is converted one to one and is not simplified to a minimal set of generators,
+   * that undefines the behaviour of some methods of the class. Use @ref convert_to_dynamic_multi_parameter_filtration()
+   * instead if needed.
+   */
+  Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>
+  convert_to_non_simplified_dynamic_multi_parameter_filtration() const
+  {
+    std::vector<Multi_parameter_generator<T, Co> > out;
+    out.reserve(generators_.size());
+    for (size_type g = 0; g < generators_.size(); ++g) {
+      std::vector<T> v = {static_cast<T>(g), generators_[g]};
+      out.emplace_back(std::move(v));
+    }
+    return Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>(std::move(out), 2);
   }
 
   // ACCESS

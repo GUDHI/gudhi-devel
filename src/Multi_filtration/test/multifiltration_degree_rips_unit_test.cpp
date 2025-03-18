@@ -24,8 +24,12 @@
 
 #include <gudhi/Degree_rips_bifiltration.h>
 #include <gudhi/Simplex_tree/filtration_value_utils.h>
+#include <gudhi/Multi_parameter_filtration.h>
+#include <gudhi/Dynamic_multi_parameter_filtration.h>
 
 using Gudhi::multi_filtration::Degree_rips_bifiltration;
+using Gudhi::multi_filtration::Multi_parameter_filtration;
+using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
 
 typedef boost::mpl::list<double, float, int> list_of_tested_variants;
 
@@ -1034,5 +1038,117 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_numerical_limits, T, lis
   test_numerical_limits<Degree_rips_bifiltration<T, false, true>, T, false>();
   test_numerical_limits<Degree_rips_bifiltration<T, true>, T, true>();
   test_numerical_limits<Degree_rips_bifiltration<T, true, true>, T, true>();
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_converters, T, list_of_tested_variants)
+{
+  std::vector<T> v = {5, 6, 3, 4};
+  Degree_rips_bifiltration<T> f(std::move(v), 2);
+  BOOST_CHECK(f.num_parameters() == 2);
+  BOOST_CHECK(f.num_generators() == 4);
+  BOOST_CHECK_EQUAL(f(0,0), 0);
+  BOOST_CHECK_EQUAL(f(0,1), 5);
+  BOOST_CHECK_EQUAL(f(1,0), 1);
+  BOOST_CHECK_EQUAL(f(1,1), 6);
+  BOOST_CHECK_EQUAL(f(2,0), 2);
+  BOOST_CHECK_EQUAL(f(2,1), 3);
+  BOOST_CHECK_EQUAL(f(3,0), 3);
+  BOOST_CHECK_EQUAL(f(3,1), 4);
+
+  Multi_parameter_filtration<T> f11 = f.convert_to_multi_parameter_filtration();
+  BOOST_CHECK(f11.num_parameters() == 2);
+  BOOST_CHECK(f11.num_generators() == 2);
+  BOOST_CHECK_EQUAL(f11(0,0), 0);
+  BOOST_CHECK_EQUAL(f11(0,1), 5);
+  BOOST_CHECK_EQUAL(f11(1,0), 2);
+  BOOST_CHECK_EQUAL(f11(1,1), 3);
+
+  Multi_parameter_filtration<T> f12 = f.convert_to_non_simplified_multi_parameter_filtration();
+  BOOST_CHECK(f12.num_parameters() == 2);
+  BOOST_CHECK(f12.num_generators() == 4);
+  BOOST_CHECK_EQUAL(f12(0,0), 0);
+  BOOST_CHECK_EQUAL(f12(0,1), 5);
+  BOOST_CHECK_EQUAL(f12(1,0), 1);
+  BOOST_CHECK_EQUAL(f12(1,1), 6);
+  BOOST_CHECK_EQUAL(f12(2,0), 2);
+  BOOST_CHECK_EQUAL(f12(2,1), 3);
+  BOOST_CHECK_EQUAL(f12(3,0), 3);
+  BOOST_CHECK_EQUAL(f12(3,1), 4);
+
+  Dynamic_multi_parameter_filtration<T> f21 = f.convert_to_dynamic_multi_parameter_filtration();
+  BOOST_CHECK(f21.num_parameters() == 2);
+  BOOST_CHECK(f21.num_generators() == 2);
+  BOOST_CHECK_EQUAL(f21(0,0), 0);
+  BOOST_CHECK_EQUAL(f21(0,1), 5);
+  BOOST_CHECK_EQUAL(f21(1,0), 2);
+  BOOST_CHECK_EQUAL(f21(1,1), 3);
+
+  Dynamic_multi_parameter_filtration<T> f22 = f.convert_to_non_simplified_dynamic_multi_parameter_filtration();
+  BOOST_CHECK(f22.num_parameters() == 2);
+  BOOST_CHECK(f22.num_generators() == 4);
+  BOOST_CHECK_EQUAL(f22(0,0), 0);
+  BOOST_CHECK_EQUAL(f22(0,1), 5);
+  BOOST_CHECK_EQUAL(f22(1,0), 1);
+  BOOST_CHECK_EQUAL(f22(1,1), 6);
+  BOOST_CHECK_EQUAL(f22(2,0), 2);
+  BOOST_CHECK_EQUAL(f22(2,1), 3);
+  BOOST_CHECK_EQUAL(f22(3,0), 3);
+  BOOST_CHECK_EQUAL(f22(3,1), 4);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_converters_co, T, list_of_tested_variants)
+{
+  std::vector<T> v = {5, 6, 3, 4};
+  Degree_rips_bifiltration<T, true> f(std::move(v), 2);
+  BOOST_CHECK(f.num_parameters() == 2);
+  BOOST_CHECK(f.num_generators() == 4);
+  BOOST_CHECK_EQUAL(f(0,0), 0);
+  BOOST_CHECK_EQUAL(f(0,1), 5);
+  BOOST_CHECK_EQUAL(f(1,0), 1);
+  BOOST_CHECK_EQUAL(f(1,1), 6);
+  BOOST_CHECK_EQUAL(f(2,0), 2);
+  BOOST_CHECK_EQUAL(f(2,1), 3);
+  BOOST_CHECK_EQUAL(f(3,0), 3);
+  BOOST_CHECK_EQUAL(f(3,1), 4);
+
+  Multi_parameter_filtration<T, true> f11 = f.convert_to_multi_parameter_filtration();
+  BOOST_CHECK(f11.num_parameters() == 2);
+  BOOST_CHECK(f11.num_generators() == 2);
+  BOOST_CHECK_EQUAL(f11(0,0), 1);
+  BOOST_CHECK_EQUAL(f11(0,1), 6);
+  BOOST_CHECK_EQUAL(f11(1,0), 3);
+  BOOST_CHECK_EQUAL(f11(1,1), 4);
+
+  Multi_parameter_filtration<T, true> f12 = f.convert_to_non_simplified_multi_parameter_filtration();
+  BOOST_CHECK(f12.num_parameters() == 2);
+  BOOST_CHECK(f12.num_generators() == 4);
+  BOOST_CHECK_EQUAL(f12(0,0), 0);
+  BOOST_CHECK_EQUAL(f12(0,1), 5);
+  BOOST_CHECK_EQUAL(f12(1,0), 1);
+  BOOST_CHECK_EQUAL(f12(1,1), 6);
+  BOOST_CHECK_EQUAL(f12(2,0), 2);
+  BOOST_CHECK_EQUAL(f12(2,1), 3);
+  BOOST_CHECK_EQUAL(f12(3,0), 3);
+  BOOST_CHECK_EQUAL(f12(3,1), 4);
+
+  Dynamic_multi_parameter_filtration<T, true> f21 = f.convert_to_dynamic_multi_parameter_filtration();
+  BOOST_CHECK(f21.num_parameters() == 2);
+  BOOST_CHECK(f21.num_generators() == 2);
+  BOOST_CHECK_EQUAL(f21(0,0), 1);
+  BOOST_CHECK_EQUAL(f21(0,1), 6);
+  BOOST_CHECK_EQUAL(f21(1,0), 3);
+  BOOST_CHECK_EQUAL(f21(1,1), 4);
+
+  Dynamic_multi_parameter_filtration<T, true> f22 = f.convert_to_non_simplified_dynamic_multi_parameter_filtration();
+  BOOST_CHECK(f22.num_parameters() == 2);
+  BOOST_CHECK(f22.num_generators() == 4);
+  BOOST_CHECK_EQUAL(f22(0,0), 0);
+  BOOST_CHECK_EQUAL(f22(0,1), 5);
+  BOOST_CHECK_EQUAL(f22(1,0), 1);
+  BOOST_CHECK_EQUAL(f22(1,1), 6);
+  BOOST_CHECK_EQUAL(f22(2,0), 2);
+  BOOST_CHECK_EQUAL(f22(2,1), 3);
+  BOOST_CHECK_EQUAL(f22(3,0), 3);
+  BOOST_CHECK_EQUAL(f22(3,1), 4);
 }
 
