@@ -22,6 +22,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
+#include <gudhi/Debug_utils.h>
 #include <gudhi/Degree_rips_bifiltration.h>
 #include <gudhi/Simplex_tree/filtration_value_utils.h>
 #include <gudhi/Multi_parameter_filtration.h>
@@ -46,7 +47,7 @@ void test_constructors(){
   BOOST_CHECK_EQUAL(f01.num_entries(), 0);
   BOOST_CHECK_EQUAL(f01.num_generators(), 0);
   BOOST_CHECK_EQUAL(f01.num_parameters(), 2);
-  BOOST_CHECK_THROW((f01[{0,0}]), std::out_of_range);
+  GUDHI_CHECK_code(BOOST_CHECK_THROW((f01[{0,0}]), std::out_of_range));
 
   F f1(3);
   BOOST_CHECK_EQUAL(f1.num_entries(), 2);
@@ -180,7 +181,7 @@ void test_constructors(){
   BOOST_CHECK_EQUAL(f11(0,1), 1);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_constructors, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_constructors, T, list_of_tested_variants)
 {
   test_constructors<Degree_rips_bifiltration<T>, T, Degree_rips_bifiltration<std::int32_t> >();
   test_constructors<Degree_rips_bifiltration<T, false, true>, T, Degree_rips_bifiltration<std::int32_t> >();
@@ -232,7 +233,7 @@ void test_utilities(){
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_utilities, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_utilities, T, list_of_tested_variants)
 {
   test_utilities<Degree_rips_bifiltration<T>, T, Degree_rips_bifiltration<float> >();
   test_utilities<Degree_rips_bifiltration<T, false, true>, T, Degree_rips_bifiltration<float> >();
@@ -313,7 +314,7 @@ void test_comparators(){
   BOOST_CHECK(f1 != F::minus_inf(num_param));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_comparators, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_comparators, T, list_of_tested_variants)
 {
   test_comparators<Degree_rips_bifiltration<T>, T>();
   test_comparators<Degree_rips_bifiltration<T, false, true>, T>();
@@ -516,7 +517,7 @@ void test_operators(){
   else BOOST_CHECK_EQUAL(res(0,1), 0);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_operators, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_operators, T, list_of_tested_variants)
 {
   test_operators<Degree_rips_bifiltration<T>, T>();
   test_operators<Degree_rips_bifiltration<T, false, true>, T>();
@@ -670,7 +671,7 @@ void test_modifiers(){
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_modifiers, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_modifiers, T, list_of_tested_variants)
 {
   test_modifiers<Degree_rips_bifiltration<T>, T>();
   test_modifiers<Degree_rips_bifiltration<T, false, true>, T>();
@@ -743,7 +744,7 @@ void test_add_generators(){
   BOOST_CHECK_EQUAL(f(1, 1), 2);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_add_generators, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_add_generators, T, list_of_tested_variants)
 {
   test_add_generators<Degree_rips_bifiltration<T>, T>();
 
@@ -846,7 +847,7 @@ void test_friends_1_critical(){
   BOOST_CHECK_EQUAL(res(0, 1), 9);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_friends, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_friends, T, list_of_tested_variants)
 {
   test_friends<Degree_rips_bifiltration<T>, T>();
   test_friends_1_critical<Degree_rips_bifiltration<T, false, true>, T>();
@@ -917,7 +918,7 @@ void test_unify_intersect_1_critical(){
   BOOST_CHECK_EQUAL(f1(0,1), 8);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_unify_intersect, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_unify_intersect, T, list_of_tested_variants)
 {
   test_unify_intersect<Degree_rips_bifiltration<T>, T>();
   test_unify_intersect_1_critical<Degree_rips_bifiltration<T, false, true>, T>();
@@ -957,7 +958,7 @@ void test_serialize(){
   BOOST_CHECK_EQUAL(f3(2,1), 2);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_serialize, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_serialize, T, list_of_tested_variants)
 {
   test_serialize<Degree_rips_bifiltration<T>, T>();
 }
@@ -993,7 +994,7 @@ void test_co(){
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_co, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_co, T, list_of_tested_variants)
 {
   test_co<Degree_rips_bifiltration<T, true>, T>();
   test_co<Degree_rips_bifiltration<T, true, true>, T>();
@@ -1032,7 +1033,7 @@ void test_numerical_limits(){
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_numerical_limits, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_numerical_limits, T, list_of_tested_variants)
 {
   test_numerical_limits<Degree_rips_bifiltration<T>, T, false>();
   test_numerical_limits<Degree_rips_bifiltration<T, false, true>, T, false>();
@@ -1040,7 +1041,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_numerical_limits, T, lis
   test_numerical_limits<Degree_rips_bifiltration<T, true, true>, T, true>();
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_converters, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_converters, T, list_of_tested_variants)
 {
   std::vector<T> v = {5, 6, 3, 4};
   Degree_rips_bifiltration<T> f(std::move(v), 2);
@@ -1096,7 +1097,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_converters, T, list_of_t
   BOOST_CHECK_EQUAL(f22(3,1), 4);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_converters_co, T, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_converters_co, T, list_of_tested_variants)
 {
   std::vector<T> v = {5, 6, 3, 4};
   Degree_rips_bifiltration<T, true> f(std::move(v), 2);
