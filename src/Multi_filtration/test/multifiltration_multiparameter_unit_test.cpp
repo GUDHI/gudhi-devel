@@ -1132,6 +1132,8 @@ void test_serialize(){
   BOOST_CHECK_EQUAL(f4(1,0), 3);
   BOOST_CHECK_EQUAL(f4(1,1), 5);
   BOOST_CHECK_EQUAL(f4(1,2), 2);
+
+  delete[] buffer;
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_serialize, T, list_of_tested_variants)
