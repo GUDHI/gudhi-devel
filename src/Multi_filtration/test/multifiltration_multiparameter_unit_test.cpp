@@ -346,12 +346,12 @@ void test_operators(){
   BOOST_CHECK_EQUAL(res(0,1), f3(0,1));
   BOOST_CHECK_EQUAL(res(0,2), f3(0,2));
 
-  res = 5 - f;
+  res = T(5) - f;
   BOOST_CHECK_EQUAL(res(0,0), 15);
   BOOST_CHECK_EQUAL(res(0,1), 5);
   BOOST_CHECK_EQUAL(res(0,2), 4);
 
-  res = f - 5;
+  res = f - T(5);
   BOOST_CHECK_EQUAL(res(0,0), -15);
   BOOST_CHECK_EQUAL(res(0,1), -5);
   BOOST_CHECK_EQUAL(res(0,2), -4);
@@ -387,12 +387,12 @@ void test_operators(){
   BOOST_CHECK_EQUAL(res(0,1), f3(0,1));
   BOOST_CHECK_EQUAL(res(0,2), f3(0,2));
 
-  res = 5 + f;
+  res = T(5) + f;
   BOOST_CHECK_EQUAL(res(0,0), -5);
   BOOST_CHECK_EQUAL(res(0,1), 5);
   BOOST_CHECK_EQUAL(res(0,2), 6);
 
-  res = f + 5;
+  res = f + T(5);
   BOOST_CHECK_EQUAL(res(0,0), -5);
   BOOST_CHECK_EQUAL(res(0,1), 5);
   BOOST_CHECK_EQUAL(res(0,2), 6);
@@ -433,12 +433,12 @@ void test_operators(){
   }
   BOOST_CHECK_EQUAL(res(0,2), f3(0,2));
 
-  res = 5 * f;
+  res = T(5) * f;
   BOOST_CHECK_EQUAL(res(0,0), -50);
   BOOST_CHECK_EQUAL(res(0,1), 0);
   BOOST_CHECK_EQUAL(res(0,2), 5);
 
-  res = f * 5;
+  res = f * T(5);
   BOOST_CHECK_EQUAL(res(0,0), -50);
   BOOST_CHECK_EQUAL(res(0,1),  0);
   BOOST_CHECK_EQUAL(res(0,2), 5);
@@ -510,7 +510,7 @@ void test_operators(){
   }
   BOOST_CHECK_EQUAL(res(0,2), f3(0,2));
 
-  res = 5 / f;
+  res = T(5) / f;
   BOOST_CHECK_EQUAL(res(0,0), static_cast<T>(-0.5));
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
     BOOST_CHECK(std::isnan(res(0,1)));
@@ -519,7 +519,7 @@ void test_operators(){
   }
   BOOST_CHECK_EQUAL(res(0,2), 5);
 
-  res = f / 5;
+  res = f / T(5);
   BOOST_CHECK_EQUAL(res(0,0), -2);
   BOOST_CHECK_EQUAL(res(0,1),  0);
   BOOST_CHECK_EQUAL(res(0,2), static_cast<T>(1) / static_cast<T>(5)); //to avoid precision error
