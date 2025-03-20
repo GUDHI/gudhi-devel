@@ -956,6 +956,8 @@ void test_serialize(){
   BOOST_CHECK_EQUAL(f3(1,1), 3);
   BOOST_CHECK_EQUAL(f3(2,0), 2);
   BOOST_CHECK_EQUAL(f3(2,1), 2);
+
+  delete[] buffer;
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_serialize, T, list_of_tested_variants)
