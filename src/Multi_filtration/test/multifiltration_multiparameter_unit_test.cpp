@@ -1099,12 +1099,12 @@ void test_serialize(){
   
   char* ptr = buffer;
   ptr = serialize_value_to_char_buffer(f1, ptr);
-  BOOST_CHECK_EQUAL(ptr, buffer + serializationSize);
+  BOOST_CHECK_EQUAL((void*)ptr, (void*)(buffer + serializationSize));
 
   const char* c_ptr = buffer;
   F f3(0);
   c_ptr = deserialize_value_from_char_buffer(f3, c_ptr);
-  BOOST_CHECK_EQUAL(c_ptr, buffer + serializationSize);
+  BOOST_CHECK_EQUAL((void*)c_ptr, (void*)(buffer + serializationSize));
   BOOST_CHECK(f3.num_parameters() == 2);
   BOOST_CHECK(f3.num_generators() == 3);
   BOOST_CHECK_EQUAL(f3(0,0), 0);
@@ -1118,12 +1118,12 @@ void test_serialize(){
   
   ptr = buffer;
   ptr = serialize_value_to_char_buffer(f2, ptr);
-  BOOST_CHECK_EQUAL(ptr, buffer + serializationSize);
+  BOOST_CHECK_EQUAL((void*)ptr, (void*)(buffer + serializationSize));
 
   c_ptr = buffer;
   F f4(0);
   c_ptr = deserialize_value_from_char_buffer(f4, c_ptr);
-  BOOST_CHECK_EQUAL(c_ptr, buffer + serializationSize);
+  BOOST_CHECK_EQUAL((void*)c_ptr, (void*)(buffer + serializationSize));
   BOOST_CHECK(f4.num_parameters() == 3);
   BOOST_CHECK(f4.num_generators() == 2);
   BOOST_CHECK_EQUAL(f4(0,0), 0);
