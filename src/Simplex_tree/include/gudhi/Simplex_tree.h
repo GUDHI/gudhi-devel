@@ -14,6 +14,7 @@
  *      - 2024/08 Hannah Schreiber: Addition of customizable copy constructor.
  *      - 2024/08 Marc Glisse: Allow storing custom data in simplices.
  *      - 2024/10 Hannah Schreiber: Const version of the Simplex_tree
+ *      - 2025/03 Hannah Schreiber (& David Loiseaux): add number_of_parameters_ member
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -430,9 +431,11 @@ class Simplex_tree {
   /** \brief Constructs an empty simplex tree. */
   Simplex_tree()
       : null_vertex_(-1),
-      root_(nullptr, null_vertex_),
-      filtration_vect_(),
-      dimension_(-1) { }
+        root_(nullptr, null_vertex_),
+        number_of_parameters_(1),
+        filtration_vect_(),
+        dimension_(-1)
+  {}
 
   /**
    * @brief Construct the simplex tree as the copy of a given simplex tree with eventually different template
@@ -529,6 +532,7 @@ class Simplex_tree {
     null_vertex_ = complex_source.null_vertex_;
     filtration_vect_.clear();
     dimension_ = complex_source.dimension_;
+    number_of_parameters_ = complex_source.number_of_parameters_;
     auto root_source = complex_source.root_;
 
     // root members copy
@@ -562,6 +566,7 @@ class Simplex_tree {
     null_vertex_ = complex_source.null_vertex_;
     filtration_vect_.clear();
     dimension_ = complex_source.dimension_;
+    number_of_parameters_ = complex_source.number_of_parameters_;
     auto root_source = complex_source.root_;
 
     // root members copy
@@ -619,6 +624,7 @@ class Simplex_tree {
     root_ = std::move(complex_source.root_);
     filtration_vect_ = std::move(complex_source.filtration_vect_);
     dimension_ = complex_source.dimension_;
+    number_of_parameters_ = std::exchange(complex_source.number_of_parameters_, 1);
     if constexpr (Options::link_nodes_by_label) {
       nodes_label_to_list_.swap(complex_source.nodes_label_to_list_);
     }
@@ -663,10 +669,11 @@ class Simplex_tree {
   /** \brief Checks if two simplex trees are equal. Any extra data (@ref Simplex_data) stored in the simplices are
    * ignored in the comparison.
    */
-  template<class OtherSimplexTreeOptions>
+  template <class OtherSimplexTreeOptions>
   bool operator==(const Simplex_tree<OtherSimplexTreeOptions>& st2) const {
     if ((null_vertex_ != st2.null_vertex_) ||
-        (dimension_ != st2.dimension_ && !dimension_to_be_lowered_ && !st2.dimension_to_be_lowered_))
+        (dimension_ != st2.dimension_ && !dimension_to_be_lowered_ && !st2.dimension_to_be_lowered_) ||
+        (number_of_parameters_ != st2.number_of_parameters_))
       return false;
     return rec_equal(&root_, &st2.root_);
   }
@@ -880,6 +887,22 @@ class Simplex_tree {
     if (dimension_to_be_lowered_)
       lower_upper_bound_dimension();
     return dimension_;
+  }
+
+  /**
+   * @brief Returns the value stored as the number of parameters of the filtration values.
+   * The default value stored at construction of the simplex tree is 1. The user needs to set it by hand
+   * with @ref set_num_parameters if any other value is needed.
+   */
+  int num_parameters() const {
+    return number_of_parameters_;
+  }
+
+  /**
+   * @brief Stores the given value as number of parameters of the filtration values.
+   */
+  void set_num_parameters(int new_number) {
+    number_of_parameters_ = new_number;
   }
 
   /** \brief Returns true if the node in the simplex tree pointed by
@@ -2673,10 +2696,11 @@ class Simplex_tree {
    *   architecture.
    */
   std::size_t get_serialization_size() const {
+    const std::size_t np_byte_size = sizeof(decltype(number_of_parameters_));
     const std::size_t vh_byte_size = sizeof(Vertex_handle);
     std::size_t fv_byte_size = 0;
     const std::size_t tree_size = num_simplices_and_filtration_serialization_size(&root_, fv_byte_size);
-    const std::size_t buffer_byte_size = vh_byte_size + fv_byte_size + tree_size * 2 * vh_byte_size;
+    const std::size_t buffer_byte_size = np_byte_size + vh_byte_size + fv_byte_size + tree_size * 2 * vh_byte_size;
 #ifdef DEBUG_TRACES
       std::clog << "Gudhi::simplex_tree::get_serialization_size - buffer size = " << buffer_byte_size << std::endl;
 #endif  // DEBUG_TRACES
@@ -2717,7 +2741,9 @@ class Simplex_tree {
   /* Without explanation and with filtration values:                                                                 */
   /* 04 0a F(a) 0b F(b) 0c F(c) 0d F(d) 01 0b F(a,b) 00 02 0c F(b,c) 0d F(b,d) 01 0d F(b,c,d) 00 00 01 0d F(c,d) 00 00 */
   void serialize(char* buffer, const std::size_t buffer_size) const {
-    char* buffer_end = rec_serialize(&root_, buffer);
+    char* buffer_end = buffer;
+    buffer_end = serialize_value_to_char_buffer(number_of_parameters_, buffer_end);
+    buffer_end = rec_serialize(&root_, buffer_end);
     if (static_cast<std::size_t>(buffer_end - buffer) != buffer_size)
       throw std::invalid_argument("Serialization does not match end of buffer");
   }
@@ -2800,6 +2826,7 @@ class Simplex_tree {
   void deserialize(const char* buffer, const std::size_t buffer_size, F&& deserialize_filtration_value) {
     GUDHI_CHECK(num_vertices() == 0, std::logic_error("Simplex_tree::deserialize - Simplex_tree must be empty"));
     const char* ptr = buffer;
+    ptr = deserialize_value_from_char_buffer(number_of_parameters_, ptr);
     // Needs to read size before recursivity to manage new siblings for children
     Vertex_handle members_size;
     ptr = deserialize_value_from_char_buffer(members_size, ptr);
@@ -2854,9 +2881,9 @@ class Simplex_tree {
 
  private:
   Vertex_handle null_vertex_;
-  /** \brief Total number of simplices in the complex, without the empty simplex.*/
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
+  int number_of_parameters_;
 
   // all mutable as their content has no impact on the content of the simplex tree itself
   // they correspond to some kind of cache or helper attributes.
