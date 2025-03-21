@@ -86,6 +86,10 @@ U compute_norm();
 template <typename T, bool Co = false, bool Ensure1Criticality = false>
 class Multi_parameter_filtration
 {
+ private:
+  using view_extents = extents<std::size_t, Gudhi::dynamic_extent, Gudhi::dynamic_extent>;
+  using Viewer = Gudhi::Simple_mdspan<T, view_extents>;
+
  public:
   using Underlying_container = std::vector<T>;  /**< Underlying container for values. */
 
@@ -244,7 +248,7 @@ class Multi_parameter_filtration
   Multi_parameter_filtration &operator=(const Multi_parameter_filtration &other)
   {
     generators_ = other.generators_;
-    generator_view_ = Simple_mdspan<T>(generators_.data(), other.num_generators(), other.num_parameters());
+    generator_view_ = Viewer(generators_.data(), other.num_generators(), other.num_parameters());
     return *this;
   }
 
@@ -260,7 +264,7 @@ class Multi_parameter_filtration
       if (other.num_generators() != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
     generators_ = Underlying_container(other.begin(), other.end());
-    generator_view_ = Simple_mdspan<T>(generators_.data(), other.num_generators(), other.num_parameters());
+    generator_view_ = Viewer(generators_.data(), other.num_generators(), other.num_parameters());
     return *this;
   }
 
@@ -2058,7 +2062,7 @@ class Multi_parameter_filtration
     std::size_t arg_size = sizeof(T) * length;
     value.generators_.resize(length);
     memcpy(value.generators_.data(), start + (type_size * 2), arg_size);
-    value.generator_view_ = Simple_mdspan<T>(
+    value.generator_view_ = Viewer(
         value.generators_.data(), num_param == 0 ? 0 : value.generators_.size() / num_param, num_param);
     return start + arg_size + (type_size * 2);
   }
@@ -2077,8 +2081,8 @@ class Multi_parameter_filtration
   constexpr static const T T_inf = MF_T_inf<T>;
 
  private:
-  Underlying_container generators_;         /**< Container of the filtration value elements. */
-  Gudhi::Simple_mdspan<T> generator_view_;  /**< Matrix view of the container. Has to be created after generators_. */
+  Underlying_container generators_; /**< Container of the filtration value elements. */
+  Viewer generator_view_;           /**< Matrix view of the container. Has to be created after generators_. */
 
   /**
    * @brief Default value of an element in the filtration value.
@@ -2088,10 +2092,7 @@ class Multi_parameter_filtration
   /**
    * @brief Verifies if @p b is strictly contained in the positive cone originating in `a`.
    */
-  static bool _strictly_contains(const Gudhi::Simple_mdspan<T> &a,
-                                 size_type g_a,
-                                 const Gudhi::Simple_mdspan<T> &b,
-                                 size_type g_b)
+  static bool _strictly_contains(const Viewer &a, size_type g_a, const Viewer &b, size_type g_b)
   {
     bool isSame = true;
     for (auto i = 0u; i < a.extent(1); ++i) {
@@ -2112,10 +2113,7 @@ class Multi_parameter_filtration
   /**
    * @brief Verifies if @p b is contained in the positive cone originating in `a`.
    */
-  static bool _contains(const Gudhi::Simple_mdspan<T> &a,
-                        size_type g_a,
-                        const Gudhi::Simple_mdspan<T> &b,
-                        size_type g_b)
+  static bool _contains(const Viewer &a, size_type g_a, const Viewer &b, size_type g_b)
   {
     for (std::size_t i = 0u; i < a.extent(1); ++i) {
       T a_i, b_i;
@@ -2134,10 +2132,7 @@ class Multi_parameter_filtration
   /**
    * @brief Verifies if the first element of @p b strictly dominates the first element of `a`.
    */
-  static bool _first_strictly_dominates(const Gudhi::Simple_mdspan<T> &a,
-                                        size_type g_a,
-                                        const Gudhi::Simple_mdspan<T> &b,
-                                        size_type g_b)
+  static bool _first_strictly_dominates(const Viewer &a, size_type g_a, const Viewer &b, size_type g_b)
   {
     if constexpr (Co) {
       return a(g_a, 0) < b(g_b, 0);
@@ -2149,10 +2144,7 @@ class Multi_parameter_filtration
   /**
    * @brief Verifies if the first element of @p b dominates the first element of `a`.
    */
-  static bool _first_dominates(const Gudhi::Simple_mdspan<T> &a,
-                               size_type g_a,
-                               const Gudhi::Simple_mdspan<T> &b,
-                               size_type g_b)
+  static bool _first_dominates(const Viewer &a, size_type g_a, const Viewer &b, size_type g_b)
   {
     if constexpr (Co) {
       return a(g_a, 0) <= b(g_b, 0);
@@ -2190,7 +2182,7 @@ class Multi_parameter_filtration
   }
 
   template <class GeneratorRange>
-  static void _get_infinity_statuses(const Gudhi::Simple_mdspan<T> &a,
+  static void _get_infinity_statuses(const Viewer &a,
                                      const GeneratorRange &b,
                                      bool &aIsInf,
                                      bool &aIsMinusInf,
@@ -2215,7 +2207,7 @@ class Multi_parameter_filtration
   enum class Rel { EQUAL, DOMINATES, IS_DOMINATED, NONE };
 
   template <class Iterator>
-  static Rel _get_domination_relation(const Gudhi::Simple_mdspan<T> &a, size_type g_a, Iterator itB)
+  static Rel _get_domination_relation(const Viewer &a, size_type g_a, Iterator itB)
   {
     bool equal = true;
     bool allGreater = true;
@@ -2336,7 +2328,7 @@ class Multi_parameter_filtration
       }
     }
     generators_.swap(new_container);
-    generator_view_ = Simple_mdspan<T>(generators_.data(), generators_.size() / num_parameters(), num_parameters());
+    generator_view_ = Viewer(generators_.data(), generators_.size() / num_parameters(), num_parameters());
   }
 
   /**
@@ -2367,7 +2359,7 @@ class Multi_parameter_filtration
       }
     }
     generators_.swap(new_container);
-    generator_view_ = Simple_mdspan<T>(generators_.data(), generators_.size() / num_parameters(), num_parameters());
+    generator_view_ = Viewer(generators_.data(), generators_.size() / num_parameters(), num_parameters());
   }
 
   bool _is_finite(size_type g)
