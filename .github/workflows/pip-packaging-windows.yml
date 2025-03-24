@@ -52,6 +52,7 @@ jobs:
           python -m pytest -v ".\src\python\test\test_delaunay_complex.py"
           python -m pytest -v ".\src\python\test\test_bottleneck_distance.py"
           python -m pytest -v ".\src\python\test\test_cubical_complex.py"
+          python -m pytest -v ".\src\python\test\test_cubical_persistence_low_dim.py"
           python -m pytest -v ".\src\python\test\test_rips_complex.py"
       - name: Publish on PyPi
         env:
@@ -123,6 +124,7 @@ jobs:
           python -m pytest -v ".\src\python\test\test_delaunay_complex.py"
           python -m pytest -v ".\src\python\test\test_bottleneck_distance.py"
           python -m pytest -v ".\src\python\test\test_cubical_complex.py"
+          python -m pytest -v ".\src\python\test\test_cubical_persistence_low_dim.py"
           python -m pytest -v ".\src\python\test\test_rips_complex.py"
       - name: Publish on PyPi
         env:

@@ -12,13 +12,12 @@
 #include <utility>
 #include <stdexcept>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <pybind11/numpy.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 
 #include <gudhi/Flag_complex_edge_collapser.h>
 
-namespace py = pybind11;
+namespace py = nanobind;
 
 template<class Index, class Filtr>
 py::object collapse(py::array_t<Index> is, py::array_t<Index> js, py::array_t<Filtr> fs, int nb_iterations) {
@@ -61,7 +60,7 @@ py::object collapse(py::array_t<Index> is, py::array_t<Index> js, py::array_t<Fi
   return py::make_tuple(std::move(indices), std::move(filtrs));
 }
 
-PYBIND11_MODULE(_edge_collapse, m) {
+NB_MODULE(_edge_collapse, m) {
   m.def("_collapse_edges", collapse<int, float>, py::arg("i").noconvert(), py::arg("j").noconvert(), py::arg("f").noconvert(), py::arg("nb_iterations")=1);
   m.def("_collapse_edges", collapse<py::ssize_t, double>, py::arg("i"), py::arg("j"), py::arg("f"), py::arg("nb_iterations")=1);
 }

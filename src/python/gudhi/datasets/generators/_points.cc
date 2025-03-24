@@ -5,86 +5,76 @@
  *    Copyright (C) 2021 Inria
  *
  *    Modification(s):
+ *      - 2025/01 Vincent Rouvreau: Use nanobind instead of PyBind11 for python bindings
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <pybind11/pybind11.h>
-#include <pybind11/numpy.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
+#include <nanobind/stl/string.h>
 
 #include <gudhi/random_point_generators.h>
 #include <gudhi/Debug_utils.h>
 
 #include <CGAL/Epick_d.h>
 
-namespace py = pybind11;
+#include <vector>
 
+namespace nb = nanobind;
 
 typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > Kern;
 
-py::array_t<double> generate_points_on_sphere(size_t n_samples, int ambient_dim, double radius, std::string sample) {
+auto generate_points_on_sphere(const size_t n_samples, const int ambient_dim, double radius, std::string sample) {
+  if (sample != "random") {
+    throw nb::value_error("This sample type is not supported");
+  }
 
-    if (sample != "random") {
-        throw pybind11::value_error("This sample type is not supported");
-    }
+  std::vector<typename Kern::Point_d> points_generated;
+  {
+    nb::gil_scoped_release release;
+    points_generated = Gudhi::generate_points_on_sphere_d<Kern>(n_samples, ambient_dim, radius);
+  }
 
-    py::array_t<double> points({n_samples, (size_t)ambient_dim});
+  // Reserve sufficient memory space to copy data
+  std::vector<double> points(n_samples * ambient_dim);
+  double *ptr = points.data();
+  for (size_t i = 0; i < n_samples; i++)
+    for (int j = 0; j < ambient_dim; j++)
+      ptr[i*ambient_dim+j] = points_generated[i][j];
 
-    py::buffer_info buf = points.request();
-    double *ptr = static_cast<double *>(buf.ptr);
-
-    GUDHI_CHECK(n_samples == buf.shape[0], "Py array first dimension not matching n_samples on sphere");
-    GUDHI_CHECK(ambient_dim == buf.shape[1], "Py array second dimension not matching the ambient space dimension");
-
-
-    std::vector<typename Kern::Point_d> points_generated;
-
-    {
-        py::gil_scoped_release release;
-        points_generated = Gudhi::generate_points_on_sphere_d<Kern>(n_samples, ambient_dim, radius);
-    }
-
-    for (size_t i = 0; i < n_samples; i++)
-        for (int j = 0; j < ambient_dim; j++)
-            ptr[i*ambient_dim+j] = points_generated[i][j];
-
-    return points;
+  return nb::ndarray<nb::numpy, double>(points.data(), { n_samples, (size_t)ambient_dim }).cast();
 }
 
-py::array_t<double> generate_points_on_torus(size_t n_samples, int dim, std::string sample) {
+auto generate_points_on_torus(size_t n_samples, int dim, std::string sample) {
+  if ( (sample != "random") && (sample != "grid")) {
+    throw nb::value_error("This sample type is not supported");
+  }
 
-    if ( (sample != "random") && (sample != "grid")) {
-        throw pybind11::value_error("This sample type is not supported");
-    }
+  std::vector<typename Kern::Point_d> points_generated;
+  {
+    nb::gil_scoped_release release;
+    points_generated = Gudhi::generate_points_on_torus_d<Kern>(n_samples, dim, sample);
+  }
 
-    std::vector<typename Kern::Point_d> points_generated;
+  size_t npoints = points_generated.size();
+  GUDHI_CHECK(2*dim == points_generated[0].size(), "Py array second dimension not matching the double torus dimension");
 
-    {
-        py::gil_scoped_release release;
-        points_generated = Gudhi::generate_points_on_torus_d<Kern>(n_samples, dim, sample);
-    }
+  // Reserve sufficient memory space to copy data
+  std::vector<double> points(npoints * (size_t)2*dim);
+  double *ptr = points.data();
+  for (size_t i = 0; i < npoints; i++)
+    for (int j = 0; j < 2*dim; j++)
+      ptr[i*(2*dim)+j] = points_generated[i][j];
 
-    size_t npoints = points_generated.size();
-
-    GUDHI_CHECK(2*dim == points_generated[0].size(), "Py array second dimension not matching the double torus dimension");
-
-    py::array_t<double> points({npoints, (size_t)2*dim});
-
-    py::buffer_info buf = points.request();
-    double *ptr = static_cast<double *>(buf.ptr);
-
-    for (size_t i = 0; i < npoints; i++)
-        for (int j = 0; j < 2*dim; j++)
-            ptr[i*(2*dim)+j] = points_generated[i][j];
-
-    return points;
+  return nb::ndarray<nb::numpy, double>(points.data(), { npoints, (size_t)2*dim }).cast();
 }
 
-PYBIND11_MODULE(_points, m) {
+NB_MODULE(_points, m) {
     m.attr("__license__") = "LGPL v3";
 
     m.def("sphere", &generate_points_on_sphere,
-          py::arg("n_samples"), py::arg("ambient_dim"),
-          py::arg("radius") = 1., py::arg("sample") = "random",
+          nb::arg("n_samples"), nb::arg("ambient_dim"),
+          nb::arg("radius") = 1., nb::arg("sample") = "random",
           R"pbdoc(
           Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
 
@@ -100,7 +90,7 @@ PYBIND11_MODULE(_points, m) {
           )pbdoc");
 
     m.def("ctorus", &generate_points_on_torus,
-          py::arg("n_samples"), py::arg("dim"), py::arg("sample") = "random",
+          nb::arg("n_samples"), nb::arg("dim"), nb::arg("sample") = "random",
           R"pbdoc(
           Generate random i.i.d. points on a d-torus in R^2d or as a grid
 

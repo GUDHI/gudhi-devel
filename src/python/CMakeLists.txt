@@ -13,8 +13,8 @@ if(NOT CYTHON_FOUND)
   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")
   return()
 endif()
-if(NOT PYBIND11_FOUND)
-  message("++ Python module will not be compiled because pybind11 was not found")
+if(NOT NANOBIND_FOUND)
+  message("++ Python module will not be compiled because Nanobind was not found")
   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")
   return()
 endif()
@@ -81,14 +81,10 @@ function(disable_python_documentation MISSING_MODULE)
 endfunction( disable_python_documentation )
 
 add_gudhi_debug_info("Python version ${Python_VERSION}")
-add_gudhi_debug_info("Pybind11 version ${PYBIND11_VERSION}")
-# PyBind11 modules
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'bottleneck', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'hera', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'clustering', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'datasets', ")
+add_gudhi_debug_info("Nanobind version ${NANOBIND_VERSION}")
 
-# Cython modules
+# Python modules for __all__ list in __init__.py
+set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'bottleneck', ")
 set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'off_utils', ")
 set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'simplex_tree', ")
 set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'rips_complex', ")
@@ -105,6 +101,9 @@ set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'delaunay_complex', ")
 set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_witness_complex', ")
 set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_strong_witness_complex', ")
 # Modules that should not be auto-imported in __init__.py
+set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'hera', ")
+set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'clustering', ")
+set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'datasets', ")
 set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'representations', ")
 set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'sklearn', ")
 set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'tensorflow', ")
@@ -208,7 +207,7 @@ else(MSVC)
 endif(MSVC)
 if(CMAKE_COMPILER_IS_GNUCXX)
   set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-frounding-math', ")
-  set(GUDHI_PYBIND11_EXTRA_COMPILE_ARGS "${GUDHI_PYBIND11_EXTRA_COMPILE_ARGS}'-fvisibility=hidden', ")
+  set(GUDHI_NANOBIND_EXTRA_COMPILE_ARGS "${GUDHI_NANOBIND_EXTRA_COMPILE_ARGS}'-fvisibility=hidden', ")
 endif(CMAKE_COMPILER_IS_GNUCXX)
 if (CMAKE_CXX_COMPILER_ID MATCHES Intel)
   set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-fp-model strict', ")
@@ -233,24 +232,14 @@ set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'periodic_cubical_complex', ")
 set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'reader_utils', ")
 set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'witness_complex', ")
 set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'strong_witness_complex', ")
-set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'clustering/_tomato', ")
-set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'hera/wasserstein', ")
-set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'hera/bottleneck', ")
 set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'nerve_gic', ")
 set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'subsampling', ")
-if (TARGET CGAL::CGAL)
-  set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'bottleneck', ")
-endif ()
 if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'tangential_complex', ")
   set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_witness_complex', ")
   set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_strong_witness_complex', ")
   set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'delaunay_complex', ")
-  set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'datasets/generators/_points', ")
 endif ()
-set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_pers_cub_low_dim', ")
-set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_edge_collapse', ")
-set(GUDHI_PYBIND11_MODULES "${GUDHI_PYBIND11_MODULES}'_ripser', ")
 
 # from windows vcpkg eigen 3.4.0#2 : build fails with
 # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
@@ -367,6 +356,18 @@ if(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
   set( GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}")
 endif(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
 
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'clustering/_tomato', ")
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'hera', ")
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_pers_cub_low_dim', ")
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_edge_collapse', ")
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_ripser', ")
+if (TARGET CGAL::CGAL)
+  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'bottleneck', ")
+endif ()
+if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
+  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'datasets/generators/_points', ")
+endif ()
+
 # doc/pip_introduction.inc is a restructured text file (extension changed because of sphinx warning) that describes
 # the GUDHI project on https://pypi.org/project/gudhi/
 file(READ "doc/pypi_introduction.inc" GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR)
@@ -391,7 +392,6 @@ file(COPY "gudhi/dtm_rips_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/g
 file(COPY "gudhi/cover_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 file(COPY "gudhi/_kepler_mapper.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 file(COPY "gudhi/_kepler_mapper.py.COPYRIGHT" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
-file(COPY "gudhi/hera/__init__.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera")
 file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
 file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
@@ -399,13 +399,9 @@ file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi
 # Some files for pip package
 file(COPY "pyproject.toml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
 
-# Symbolic links to cython and Pybind11 sources to be built. "MAKE_DIRECTORY gudhi" must be done before
+# Symbolic links to cython sources to be built. "MAKE_DIRECTORY gudhi" must be done before
 add_gudhi_symbolic_links("gudhi/*.pxd")
 add_gudhi_symbolic_links("gudhi/*.pyx")
-add_gudhi_symbolic_links("gudhi/*.cc")
-add_gudhi_symbolic_links("gudhi/clustering/_tomato.cc")
-add_gudhi_symbolic_links("gudhi/hera/*.cc")
-add_gudhi_symbolic_links("gudhi/datasets/generators/_points.cc")
 
 add_custom_command(
     OUTPUT gudhi.so
@@ -414,6 +410,20 @@ add_custom_command(
 
 add_custom_target(python ALL DEPENDS gudhi.so
                   COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
+
+# Detect the installed nanobind package and import it into CMake
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+  OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT)
+find_package(nanobind CONFIG REQUIRED)
+
+# Add src/python/include directory
+include_directories(include)
+add_subdirectory("gudhi")
+add_subdirectory("gudhi/clustering")
+if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
+  add_subdirectory("gudhi/datasets/generators")
+endif()
 
 # Path separator management for windows
 if (WIN32)
@@ -462,6 +472,7 @@ add_test(NAME random_cubical_complex_persistence_example_py_test
          10 10 10)
 
 add_gudhi_py_test(test_cubical_complex)
+add_gudhi_py_test(test_cubical_persistence_low_dim)
 
 # Datasets are fetched for these tests
 if(SCIKIT-LEARN_FOUND AND WITH_GUDHI_REMOTE_TEST)
