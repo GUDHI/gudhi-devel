@@ -10,9 +10,10 @@
  */
 
 #include <gudhi/Bottleneck.h>
-#include <optional>
+//#include <optional>
 #include <pybind11_diagram_utils.h>
-#include <pybind11/stl.h>
+#include <nanobind/stl/optional.h>
+//#include <pybind11/stl.h>
 
 // Indices are added internally in bottleneck_distance, they are not needed in the input.
 static auto make_point(double x, double y, nb::ssize_t) { return std::pair(x, y); };
