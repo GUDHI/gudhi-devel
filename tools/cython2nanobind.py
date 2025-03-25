@@ -42,7 +42,7 @@ def generate_nanobind_bindings(cython_code):
 
         # Process parameters for nb::arg()
         param_ingredients = []
-        for param in re.findall(r'([^\s]+)\s+([^\s,)]+)', params):
+        for param in re.findall(r'([^\s,]+)\s+([^\s,)]+)', params):
             type_, name = param
             if 'vector[' in type_:
                 type_ = type_.replace('vector[', 'std::vector<').replace(']', '>')
