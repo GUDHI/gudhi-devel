@@ -24,7 +24,7 @@ def test_empty_constructor():
 
 def test_non_existing_perseus_file_constructor():
     # Try to open a non existing file
-    with pytest.raises(OSError):
+    with pytest.raises(RuntimeError):
         cub = CubicalComplex(perseus_file="pouetpouettralala.toubiloubabdou")
 
 def test_dimensions_one_cells_type_or_perseus_file_constructor():
