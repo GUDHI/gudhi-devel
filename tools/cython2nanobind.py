@@ -90,22 +90,33 @@ if __name__ == "__main__":
             if re.match(cppclass_regexp, line):
                 #print(f"MATCH {cpt}: {line}")
 
+                # old bloc must be translated
                 if cython_code:
                     bindings = generate_nanobind_bindings(cython_code)
                     print(f"{bindings} \n")
                     #print(f"TRANSLATE {cpt}")
                     cyton_code = None
 
+                # and a new bloc must be recorded
                 #print(f"START {cpt}: {line}")
                 cython_code = line
                 continue
 
+            # ignore empty_lines and lines contening 'pass'
             if re.match(ignore_regexp, line) or re.match(empty_regexp, line):
                 continue
 
             else:
+                # append the new line to the current bloc
                 if cython_code:
                     #print(f"APPEND {cpt}: {line}")
                     cython_code += line
+
+        # must translate the final bloc if necessary
+        if cython_code:
+            bindings = generate_nanobind_bindings(cython_code)
+            print(f"{bindings} \n")
+            #print(f"FINAL TRANSLATE {cpt}")
+            cyton_code = None
 
     sys.exit(0)
