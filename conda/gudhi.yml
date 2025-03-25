@@ -1,0 +1,13 @@
+name: gudhi
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.12
+  - cmake
+  - boost
+  - nanobind
+  - numpy
+  - cython
+  - cgal-cpp
