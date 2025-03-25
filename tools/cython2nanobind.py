@@ -26,7 +26,7 @@ def generate_nanobind_bindings(cython_code):
             if 'cdef cppclass' in line:
                 print(line)
                 match = re.match(r'^\s*cdef cppclass .*?"(.+?)".*$', line)
-                print(match)
+                #print(match)
                 if match:
                     class_name = match.group(1)
             continue
