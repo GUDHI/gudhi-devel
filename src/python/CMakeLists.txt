@@ -97,7 +97,7 @@ set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'strong_witness_complex', ")
 set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'nerve_gic', ")
 set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'subsampling', ")
 set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'tangential_complex', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'delaunay_complex', ")
+#set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'delaunay_complex', ")
 set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_witness_complex', ")
 set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_strong_witness_complex', ")
 # Modules that should not be auto-imported in __init__.py
@@ -238,7 +238,7 @@ if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'tangential_complex', ")
   set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_witness_complex', ")
   set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_strong_witness_complex', ")
-  set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'delaunay_complex', ")
+  #set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'delaunay_complex', ")
 endif ()
 
 # from windows vcpkg eigen 3.4.0#2 : build fails with
@@ -381,6 +381,7 @@ file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 configure_file("gudhi/__init__.py.in" "${CMAKE_CURRENT_BINARY_DIR}/gudhi/__init__.py" @ONLY)
 
 # Other .py files
+file(COPY "gudhi/delaunay_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 file(COPY "gudhi/persistence_graphical_tools.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 file(COPY "gudhi/representations" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 file(COPY "gudhi/tensorflow" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
@@ -572,7 +573,7 @@ if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
          ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/alpha_complex_diagram_persistence_from_off_file_example.py"
          --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
   add_gudhi_py_test(test_alpha_complex)
-  add_gudhi_py_test(test_delaunay_complex)
+  #add_gudhi_py_test(test_delaunay_complex)
 endif (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
 
 if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)

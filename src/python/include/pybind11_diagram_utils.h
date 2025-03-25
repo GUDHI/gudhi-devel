@@ -15,7 +15,7 @@
 #include <boost/range/adaptor/transformed.hpp>
 
 namespace nb = nanobind;
-typedef nb::ndarray<double> Dgm;
+using Dgm = nb::ndarray<double>;
 
 // build_point(double birth, double death, ssize_t index) -> Point
 template<class BuildPoint>

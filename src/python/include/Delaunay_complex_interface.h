@@ -16,7 +16,7 @@
 #include <gudhi/Alpha_complex_options.h>
 #include <gudhi/MEB_filtration.h>
 
-#include "Simplex_tree_interface.h"
+//#include "Simplex_tree_interface.h"
 
 #include <CGAL/Epeck_d.h>
 #include <CGAL/Epick_d.h>
@@ -26,6 +26,8 @@
 #include <cstddef>  // for std::size_t
 
 namespace Gudhi {
+
+class Simplex_tree_interface;
 
 namespace delaunay_complex {
 
