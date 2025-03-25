@@ -58,7 +58,7 @@ def generate_nanobind_bindings(cython_code):
         # Generate nanobind binding code
         binding_code = f'    .def("{method_name}",\n\
           &{class_name}::{method_name},\n{param_str}\
-          {docstring});'
+          {docstring})'
         nanobind_code.append(binding_code)
 
     return '\n'.join(nanobind_code)
