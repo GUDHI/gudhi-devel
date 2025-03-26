@@ -7,7 +7,7 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from gudhi import delaunay_complex_ext as t
+from gudhi import _delaunay_complex_ext as t
 
 from typing import Literal, Optional
 from collections.abc import Iterable

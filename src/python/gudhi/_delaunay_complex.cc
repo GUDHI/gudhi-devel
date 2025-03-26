@@ -160,7 +160,7 @@ namespace nb = nanobind;
 namespace gdc = Gudhi::delaunay_complex;
 using gdci = gdc::Delaunay_complex_interface;
 
-NB_MODULE(delaunay_complex_ext, m) {
+NB_MODULE(_delaunay_complex_ext, m) {
     m.attr("__license__") = "GPL v3";
 
     nb::enum_<gdc::Delaunay_filtration>(m, "Filtration", "")
