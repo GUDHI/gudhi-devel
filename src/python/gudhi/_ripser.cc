@@ -5,89 +5,106 @@
  *    Copyright (C) 2024 Inria
  *
  *    Modification(s):
+ *      - 2025/03 Hannah Schreiber: Use nanobind instead of Pybind11 for python bindings.
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <cassert>
 #include <vector>
-#include <array>
+// #include <array>
 #include <cmath>
 
 #include <nanobind/nanobind.h>
-#include <pybind11/stl.h>
-#include <pybind11/stl_bind.h>
-#include <pybind11/numpy.h>
+#include <nanobind/ndarray.h>
+#include <nanobind/stl/vector.h>
 
+#include <gudhi/Debug_utils.h>
 #include <gudhi/ripser.h>
 
 using namespace Gudhi::ripser;
 
-namespace py = nanobind;
-typedef std::vector<   int> Vi;
-typedef std::vector<double> Vd;
-typedef std::vector<std::array< float, 2>> V2f;
-typedef std::vector<std::array<double, 2>> V2d;
-NB_MAKE_OPAQUE(Vi);
-NB_MAKE_OPAQUE(Vd);
-NB_MAKE_OPAQUE(V2f);
-NB_MAKE_OPAQUE(V2d);
+namespace nb = nanobind;
 
-template<class T>struct Full {
+// typedef std::vector<int> Vi;
+// typedef std::vector<double> Vd;
+// typedef std::vector<std::array<float, 2>> V2f;
+// typedef std::vector<std::array<double, 2>> V2d;
+// NB_MAKE_OPAQUE(Vi);
+// NB_MAKE_OPAQUE(Vd);
+// NB_MAKE_OPAQUE(V2f);
+// NB_MAKE_OPAQUE(V2d);
+
+template <class T>
+struct Full {
   typedef Tag_dense Category;
   typedef int vertex_t;
   typedef T value_t;
-  decltype(std::declval<py::array_t<T>&>().template unchecked<2>()) data;
+  nb::ndarray<T, nb::ndim<2>> data;
+
   int size() const { return data.shape(0); }
-  T operator()(int i, int j) const {
-    return data(i, j);
-  }
+
+  T operator()(int i, int j) const { return data(i, j); }
 };
 
-template<class vertex_t_, class value_t_>struct DParams {
+template <class vertex_t_, class value_t_>
+struct DParams {
   typedef vertex_t_ vertex_t;
   typedef value_t_ value_t;
 };
 
-template<class DistanceMatrix>
-py::list doit(DistanceMatrix&& dist, int max_dimension, typename DistanceMatrix::value_t max_edge_length, unsigned homology_coeff_field) {
-  //static_assert(!std::is_lvalue_reference_v<DistanceMatrix>);
+template <class DistanceMatrix>
+nb::list doit(DistanceMatrix&& dist,
+              int max_dimension,
+              typename DistanceMatrix::value_t max_edge_length,
+              unsigned homology_coeff_field)
+{
+  // static_assert(!std::is_lvalue_reference_v<DistanceMatrix>);
   typedef typename DistanceMatrix::value_t T;
-  // We could put everything in a single vector, and return slices of it, but I don't think there is much advantage.
-  std::vector<std::vector<std::array<T, 2>>> dgms;
+  std::vector<std::vector<T>*> dgms;
   {
-    py::gil_scoped_release release;
-    auto output = [&](T birth, T death){
+    nb::gil_scoped_release release;
+    auto output = [&](T birth, T death) {
       // Skip empty intervals
-      if (birth < death)
-        dgms.back().push_back({birth, death});
+      if (birth < death) {
+        dgms.back()->push_back(birth);
+        dgms.back()->push_back(death);
+      }
     };
-    auto switch_dim = [&](int new_dim){
-      dgms.emplace_back();
-    };
+    auto switch_dim = [&](int new_dim) { dgms.emplace_back(new std::vector<T>()); };
     ripser_auto(std::move(dist), max_dimension, max_edge_length, homology_coeff_field, switch_dim, output);
   }
-  py::list ret;
+  nb::list ret;
   for (auto&& dgm : dgms)
-    ret.append(py::array(py::cast(std::move(dgm))));
+    ret.append(
+        nb::ndarray<T, nanobind::numpy>(dgm->data(), {dgm->size() / 2, 2}, nb::capsule(dgm, [](void* p) noexcept {
+                                          delete reinterpret_cast<std::vector<T>*>(p);
+                                        })));
   return ret;
 }
 
-template<class T>
-py::list full(py::array_t<T> matrix, int max_dimension, T max_edge_length, unsigned homology_coeff_field) {
-  Full<T> dist{matrix.template unchecked<2>()};
-  if(dist.data.ndim() != 2 || dist.data.shape(0) != dist.data.shape(1))
+template <class T>
+nb::list full(nb::ndarray<T, nb::ndim<2>> matrix, int max_dimension, T max_edge_length, unsigned homology_coeff_field)
+{
+  Full<T> dist{matrix};
+  if (dist.data.ndim() != 2 || dist.data.shape(0) != dist.data.shape(1))
     throw std::runtime_error("Distance matrix must be a square 2-dimensional array");
   return doit(std::move(dist), max_dimension, max_edge_length, homology_coeff_field);
 }
 
-py::list lower(py::object low_mat, int max_dimension, double max_edge_length, unsigned homology_coeff_field) {
+nb::list lower(nb::object low_mat, int max_dimension, double max_edge_length, unsigned homology_coeff_field)
+{
   using Dist = Compressed_distance_matrix<DParams<int, double>, LOWER_TRIANGULAR>;
   std::vector<double> distances;
   int rowi = 0;
   for (auto&& row : low_mat) {
-    if (rowi == 0) { ++rowi; continue; }
+    if (rowi == 0) {
+      ++rowi;
+      continue;
+    }
     int coli = 0;
     for (auto&& elem : row) {
-      distances.push_back(elem.cast<double>()); // need a cast?
+      GUDHI_CHECK(PyFloat_Check(elem.ptr()), "Handle is not a PyFloat.");
+      distances.push_back(PyFloat_AsDouble(elem.ptr()));  // need a cast?
       if (++coli == rowi) break;
     }
     if (coli < rowi) throw std::invalid_argument("Not enough elements for a lower triangular matrix");
@@ -95,19 +112,23 @@ py::list lower(py::object low_mat, int max_dimension, double max_edge_length, un
   };
 
   // optional as a trick to allow destruction where I want it
-  std::optional<py::gil_scoped_release> release_local(std::in_place);
+  std::optional<nb::gil_scoped_release> release_local(std::in_place);
   Dist dist(std::move(distances));
   release_local.reset();
 
   return doit(std::move(dist), max_dimension, max_edge_length, homology_coeff_field);
 }
 
-template<class V, class T>
-py::list sparse(py::array_t<V> is_, py::array_t<V> js_, py::array_t<T> fs_, int num_vertices, int max_dimension, T max_edge_length, unsigned homology_coeff_field) {
+template <class V, class T>
+nb::list sparse(nb::ndarray<V, nb::ndim<1>> is,
+                nb::ndarray<V, nb::ndim<1>> js,
+                nb::ndarray<T, nb::ndim<1>> fs,
+                int num_vertices,
+                int max_dimension,
+                T max_edge_length,
+                unsigned homology_coeff_field)
+{
   // Duplicate entries and self loops are forbidden
-  auto is = is_.unchecked();
-  auto js = js_.unchecked();
-  auto fs = fs_.unchecked();
   if (is.ndim() != 1 || js.ndim() != 1 || fs.ndim() != 1)
     throw std::runtime_error("vertices and filtrations must be 1-dimensional arrays");
   if (is.shape(0) != js.shape(0) || is.shape(0) != js.shape(0))
@@ -117,59 +138,77 @@ py::list sparse(py::array_t<V> is_, py::array_t<V> js_, py::array_t<T> fs_, int 
   typedef Sparse_distance_matrix<P> Dist;
   typedef typename Dist::vertex_diameter_t vertex_diameter_t;
 
-  std::optional<py::gil_scoped_release> release_local(std::in_place);
+  std::optional<nb::gil_scoped_release> release_local(std::in_place);
   std::vector<std::vector<vertex_diameter_t>> neighbors(num_vertices);
-  for (py::ssize_t e = 0; e < is.shape(0); ++e) {
+  for (nb::ssize_t e = 0; e < is.shape(0); ++e) {
     neighbors[is(e)].emplace_back(js(e), fs(e));
     neighbors[js(e)].emplace_back(is(e), fs(e));
   }
   // We could easily parallelize this loop, but it is unlikely to be worth it.
-  for (size_t i = 0; i < neighbors.size(); ++i)
-    std::sort(neighbors[i].begin(), neighbors[i].end());
+  for (size_t i = 0; i < neighbors.size(); ++i) std::sort(neighbors[i].begin(), neighbors[i].end());
   Dist dist(std::move(neighbors));
   release_local.reset();
 
   return doit(std::move(dist), max_dimension, max_edge_length, homology_coeff_field);
 }
 
-py::list lower_to_coo(py::object low_mat, double max_edge_length) {
+nb::tuple lower_to_coo(nb::object low_mat, double max_edge_length)
+{
   // Cannot release the GIL since we keep accessing Python objects.
   // TODO: full_to_coo for numpy arrays?
   // Should we compute the cone radius at the same time?
-  std::vector<int> is, js;
-  std::vector<double> fs;
+  std::vector<int>*is = new std::vector<int>(), *js = new std::vector<int>();
+  std::vector<double>* fs = new std::vector<double>();
   int rowi = 0;
   for (auto&& row : low_mat) {
-    if (rowi == 0) { ++rowi; continue; }
+    if (rowi == 0) {
+      ++rowi;
+      continue;
+    }
     int coli = 0;
     for (auto&& elem : row) {
-      double d = elem.cast<double>(); // need a cast?
+      GUDHI_CHECK(PyFloat_Check(elem.ptr()), "Handle is not a PyFloat.");
+      double d = PyFloat_AsDouble(elem.ptr());  // need a cast?
       if (d <= max_edge_length) {
-        is.push_back(rowi);
-        js.push_back(coli);
-        fs.push_back(d);
+        is->push_back(rowi);
+        js->push_back(coli);
+        fs->push_back(d);
       }
       if (++coli == rowi) break;
     }
     if (coli < rowi) throw std::invalid_argument("Not enough elements for a lower triangular matrix");
     ++rowi;
   };
-  return py::make_tuple(
-      py::array(py::cast(std::move(is))),
-      py::array(py::cast(std::move(js))),
-      py::array(py::cast(std::move(fs))));
+
+  return nb::make_tuple(
+      nb::ndarray<int, nanobind::numpy>(
+          is->data(),
+          {is->size()},
+          nb::capsule(is, [](void* p) noexcept { delete reinterpret_cast<std::vector<int>*>(p); })),
+      nb::ndarray<int, nanobind::numpy>(
+          js->data(),
+          {js->size()},
+          nb::capsule(js, [](void* p) noexcept { delete reinterpret_cast<std::vector<int>*>(p); })),
+      nb::ndarray<double, nanobind::numpy>(fs->data(), {fs->size()}, nb::capsule(fs, [](void* p) noexcept {
+                                             delete reinterpret_cast<std::vector<double>*>(p);
+                                           })));
 }
 
-double lower_cone_radius(py::object low_mat) {
+double lower_cone_radius(nb::object low_mat)
+{
   // It would be more efficient to read the matrix only once
-  auto n = py::len(low_mat);
+  auto n = nb::len(low_mat);
   std::vector<double> maxs(n, -std::numeric_limits<double>::infinity());
   int rowi = 0;
   for (auto&& row : low_mat) {
-    if (rowi == 0) { ++rowi; continue; }
+    if (rowi == 0) {
+      ++rowi;
+      continue;
+    }
     int coli = 0;
     for (auto&& elem : row) {
-      double d = elem.cast<double>();
+      GUDHI_CHECK(PyFloat_Check(elem.ptr()), "Handle is not a PyFloat.");
+      double d = PyFloat_AsDouble(elem.ptr());
       maxs[rowi] = std::max(maxs[rowi], d);
       maxs[coli] = std::max(maxs[coli], d);
       if (++coli == rowi) break;
@@ -180,21 +219,54 @@ double lower_cone_radius(py::object low_mat) {
   return *std::min_element(maxs.begin(), maxs.end());
 }
 
-NB_MODULE(_ripser, m) {
-  py::bind_vector<Vi >(m, "VectorInt"       , py::buffer_protocol());
-  py::bind_vector<Vd >(m, "VectorDouble"    , py::buffer_protocol());
-  py::bind_vector<V2f>(m, "VectorPairFloat" , py::buffer_protocol());
-  py::bind_vector<V2d>(m, "VectorPairDouble", py::buffer_protocol());
+NB_MODULE(_ripser_ext, m)
+{
+  // nb::bind_vector<Vi >(m, "VectorInt"       , nb::buffer_protocol());
+  // py::bind_vector<Vd >(m, "VectorDouble"    , py::buffer_protocol());
+  // py::bind_vector<V2f>(m, "VectorPairFloat" , py::buffer_protocol());
+  // py::bind_vector<V2d>(m, "VectorPairDouble", py::buffer_protocol());
   // Remove the default for max_dimension?
-  m.def("_full", full<float>, py::arg("matrix").noconvert(), py::arg("max_dimension") = std::numeric_limits<int>::max(), py::arg("max_edge_length") = std::numeric_limits<double>::infinity(), py::arg("homology_coeff_field") = 2);
-  m.def("_full", full<double>, py::arg("matrix"), py::arg("max_dimension") = std::numeric_limits<int>::max(), py::arg("max_edge_length") = std::numeric_limits<double>::infinity(), py::arg("homology_coeff_field") = 2);
-  m.def("_lower", lower, py::arg("matrix"), py::arg("max_dimension") = std::numeric_limits<int>::max(), py::arg("max_edge_length") = std::numeric_limits<double>::infinity(), py::arg("homology_coeff_field") = 2);
+  m.def("_full",
+        full<float>,
+        nb::arg("matrix").noconvert(),
+        nb::arg("max_dimension") = std::numeric_limits<int>::max(),
+        nb::arg("max_edge_length") = std::numeric_limits<double>::infinity(),
+        nb::arg("homology_coeff_field") = 2);
+  m.def("_full",
+        full<double>,
+        nb::arg("matrix"),
+        nb::arg("max_dimension") = std::numeric_limits<int>::max(),
+        nb::arg("max_edge_length") = std::numeric_limits<double>::infinity(),
+        nb::arg("homology_coeff_field") = 2);
+  m.def("_lower",
+        lower,
+        nb::arg("matrix"),
+        nb::arg("max_dimension") = std::numeric_limits<int>::max(),
+        nb::arg("max_edge_length") = std::numeric_limits<double>::infinity(),
+        nb::arg("homology_coeff_field") = 2);
   // We could do a version with long, but copying the arrays of integers shouldn't be too costly
-  m.def("_sparse", sparse<int, float>, py::arg("row"), py::arg("col"), py::arg("data").noconvert(), py::arg("num_vertices"), py::arg("max_dimension") = std::numeric_limits<int>::max(), py::arg("max_edge_length") = std::numeric_limits<double>::infinity(), py::arg("homology_coeff_field") = 2);
-  m.def("_sparse", sparse<int, double>, py::arg("row"), py::arg("col"), py::arg("data"), py::arg("num_vertices"), py::arg("max_dimension") = std::numeric_limits<int>::max(), py::arg("max_edge_length") = std::numeric_limits<double>::infinity(), py::arg("homology_coeff_field") = 2);
+  m.def("_sparse",
+        sparse<int, float>,
+        nb::arg("row"),
+        nb::arg("col"),
+        nb::arg("data").noconvert(),
+        nb::arg("num_vertices"),
+        nb::arg("max_dimension") = std::numeric_limits<int>::max(),
+        nb::arg("max_edge_length") = std::numeric_limits<double>::infinity(),
+        nb::arg("homology_coeff_field") = 2);
+  m.def("_sparse",
+        sparse<int, double>,
+        nb::arg("row"),
+        nb::arg("col"),
+        nb::arg("data"),
+        nb::arg("num_vertices"),
+        nb::arg("max_dimension") = std::numeric_limits<int>::max(),
+        nb::arg("max_edge_length") = std::numeric_limits<double>::infinity(),
+        nb::arg("homology_coeff_field") = 2);
   // Not directly an interface to Ripser...
-  m.def("_lower_to_coo", lower_to_coo, py::arg("matrix"), py::arg("max_edge_length"));
-  m.def("_lower_cone_radius", lower_cone_radius, py::arg("matrix"));
+  m.def("_lower_to_coo", lower_to_coo, nb::arg("matrix"), nb::arg("max_edge_length"));
+  m.def("_lower_cone_radius", lower_cone_radius, nb::arg("matrix"));
 }
 
-// We could also create a RipsComplex class, that allows looking at a simplex, querying its (co)boundary, etc. But I am not convinced it is worth the effort.
+// We could also create a RipsComplex class, that allows looking at a simplex, querying its (co)boundary, etc. But I am
+// not convinced it is worth the effort.
