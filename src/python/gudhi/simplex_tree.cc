@@ -12,9 +12,10 @@
 
 namespace nb=nanobind;
 
-NB_MODULE(simplex_tree, m) {
+NB_MODULE(simplex_tree_ext, m) {
       m.attr("__license__") = "GPL v3";
-      nb::class_<Gudhi::Simplex_tree_interface>(m, "Simplex_tree")
+
+      nb::class_<Gudhi::Simplex_tree_interface>(m, "Simplex_tree_interface")
           .def(nb::init<>())
           .def("find_simplex",
                &Gudhi::Simplex_tree_interface::find_simplex,

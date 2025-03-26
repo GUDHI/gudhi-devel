@@ -39,12 +39,10 @@ public:
 
     std::vector<double> get_point(int vh);
 
-    Simplex_tree_interface create_simplex_tree(double max_alpha_square,
-                                            const std::string& filtration);
-
     void create_simplex_tree(Simplex_tree_interface* simplex_tree,
                              double max_alpha_square,
-                             Delaunay_filtration filtration);
+                             Delaunay_filtration filtration,
+                             bool output_squared_values);
 
     static void set_float_relative_precision(double precision);
 
@@ -109,27 +107,14 @@ std::vector<double> Delaunay_complex_interface::get_point(int vh)
     return delaunay_ptr_->get_point(vh);
 }
 
-Simplex_tree_interface Delaunay_complex_interface::create_simplex_tree(double max_alpha_square,
-                                                                       const std::string& filtration)
-{
-    Simplex_tree_interface s;
-    Delaunay_filtration df = Delaunay_filtration::NONE;
-    if (filtration == "c") {
-        df =  Delaunay_filtration::CECH;
-    } else if (filtration == "a") {
-        df = Delaunay_filtration::ALPHA;
-    }
-    this->create_simplex_tree(&s, max_alpha_square, df);
-    return s;
-}
-
 void Delaunay_complex_interface::create_simplex_tree(Simplex_tree_interface* simplex_tree,
                                                      double max_alpha_square,
-                                                     Delaunay_filtration filtration)
+                                                     Delaunay_filtration filtration,
+                                                     bool output_squared_values)
 {
     // Nothing to be done in case of an empty point set
     if (delaunay_ptr_->num_vertices() > 0) {
-        delaunay_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, filtration);
+        delaunay_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, filtration, output_squared_values);
     }
 }
 
@@ -163,9 +148,15 @@ using gdci = gdc::Delaunay_complex_interface;
 
 NB_MODULE(delaunay_complex_ext, m) {
     m.attr("__license__") = "GPL v3";
+
+    nb::enum_<gdc::Delaunay_filtration>(m, "Filtration", "")
+            .value("NONE", gdc::Delaunay_filtration::NONE, "Default Delaunay Complex")
+            .value("CECH", gdc::Delaunay_filtration::CECH, "Delaunay Cech Complex")
+            .value("ALPHA", gdc::Delaunay_filtration::ALPHA, "Alpha Complex");
+
     nb::class_<gdci>(m, "Delaunay_complex_interface")
             .def(nb::init<const std::vector<std::vector<double>>&, const std::vector<double>&, bool, bool>(), "Constructor")
-            .def("create_simplex_tree", nb::overload_cast<double, const std::string&>(&gdci::create_simplex_tree), "")
+            .def("create_simplex_tree", nb::overload_cast<Gudhi::Simplex_tree_interface*, double, gdc::Delaunay_filtration, bool>(&gdci::create_simplex_tree), "")
             .def("get_point", &gdci::get_point, "")
             .def_static("set_float_relative_precision", &gdci::set_float_relative_precision, "")
             .def_static("get_float_relative_precision", &gdci::get_float_relative_precision, "");
