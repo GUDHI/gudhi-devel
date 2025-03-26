@@ -5,7 +5,7 @@
  *    Copyright (C) 2024 Inria
  *
  *    Modification(s):
- *      - 2025/03 Hannah Schreiber: Use nanobind instead of Pybind11 for python bindings.
+ *      - 2025/03 Hannah Schreiber: Use nanobind instead of PyBind11 for python bindings.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -103,8 +103,7 @@ nb::list lower(nb::object low_mat, int max_dimension, double max_edge_length, un
     }
     int coli = 0;
     for (auto&& elem : row) {
-      GUDHI_CHECK(PyFloat_Check(elem.ptr()), "Handle is not a PyFloat.");
-      distances.push_back(PyFloat_AsDouble(elem.ptr()));  // need a cast?
+      distances.push_back(nb::cast<double>(elem));  // need a cast?
       if (++coli == rowi) break;
     }
     if (coli < rowi) throw std::invalid_argument("Not enough elements for a lower triangular matrix");
@@ -167,8 +166,7 @@ nb::tuple lower_to_coo(nb::object low_mat, double max_edge_length)
     }
     int coli = 0;
     for (auto&& elem : row) {
-      GUDHI_CHECK(PyFloat_Check(elem.ptr()), "Handle is not a PyFloat.");
-      double d = PyFloat_AsDouble(elem.ptr());  // need a cast?
+      double d = nb::cast<double>(elem);  // need a cast?
       if (d <= max_edge_length) {
         is->push_back(rowi);
         js->push_back(coli);
@@ -207,8 +205,7 @@ double lower_cone_radius(nb::object low_mat)
     }
     int coli = 0;
     for (auto&& elem : row) {
-      GUDHI_CHECK(PyFloat_Check(elem.ptr()), "Handle is not a PyFloat.");
-      double d = PyFloat_AsDouble(elem.ptr());
+      double d = nb::cast<double>(elem);
       maxs[rowi] = std::max(maxs[rowi], d);
       maxs[coli] = std::max(maxs[coli], d);
       if (++coli == rowi) break;

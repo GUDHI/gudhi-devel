@@ -10,7 +10,7 @@
 import numpy
 from ..point_cloud.knn import KNearestNeighbors
 from ..point_cloud.dtm import DTMDensity
-from ._tomato import *
+from ._tomato_ext import _hierarchy, _merge
 
 # The fit/predict interface is not so well suited...
 
@@ -239,7 +239,7 @@ class Tomato:
 
         self.weights_ = weights
         # This is where the main computation happens
-        self.leaf_labels_, self.children_, self.diagram_, self.max_weight_per_cc_ = hierarchy(self.neighbors_, weights)
+        self.leaf_labels_, self.children_, self.diagram_, self.max_weight_per_cc_ = _hierarchy(self.neighbors_, weights)
         self.n_leaves_ = len(self.max_weight_per_cc_) + len(self.children_)
         assert self.leaf_labels_.max() + 1 == len(self.max_weight_per_cc_) + len(self.children_)
         # TODO: deduplicate this code with the setters below
@@ -250,7 +250,7 @@ class Tomato:
             ) + len(self.max_weight_per_cc_)
         if self.__n_clusters:
             # TODO: set corresponding merge_threshold?
-            renaming = merge(self.children_.reshape(-1,2), self.n_leaves_, self.__n_clusters)
+            renaming = _merge(self.children_.reshape(-1,2), self.n_leaves_, self.__n_clusters)
             self.labels_ = renaming[self.leaf_labels_]
             # In case the user asked for something impossible.
             # TODO: check for impossible situations before calling merge.
@@ -303,7 +303,7 @@ class Tomato:
         self.__n_clusters = n_clusters
         self.__merge_threshold = None
         if hasattr(self, "leaf_labels_"):
-            renaming = merge(self.children_.reshape(-1,2), self.n_leaves_, self.__n_clusters)
+            renaming = _merge(self.children_.reshape(-1,2), self.n_leaves_, self.__n_clusters)
             self.labels_ = renaming[self.leaf_labels_]
             # In case the user asked for something impossible
             self.__n_clusters = self.labels_.max() + 1
