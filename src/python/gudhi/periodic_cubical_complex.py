@@ -5,61 +5,38 @@
 # Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2025/03 Hannah Schreiber: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
-
-from __future__ import print_function
-from cython cimport numeric
-from libcpp.vector cimport vector
-from libcpp.utility cimport pair
-from libcpp cimport bool
-import sys
-import os
-import errno
-
-import numpy as np
-cimport numpy as np
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
-# Necessary because of PyArray_SimpleNewFromData
-np.import_array()
 
-cdef extern from "Cubical_complex_interface.h" namespace "Gudhi":
-    cdef cppclass Periodic_cubical_complex_interface "Gudhi::Cubical_complex::Periodic_cubical_complex_interface":
-        Periodic_cubical_complex_interface(vector[unsigned] dimensions, vector[double] cells, vector[bool] periodic_dimensions, bool input_top_cells) nogil except +
-        Periodic_cubical_complex_interface(const char* perseus_file) nogil except +
-        int num_simplices() nogil
-        int dimension() nogil
-        vector[unsigned] shape() nogil
-        vector[bool] periodicities() nogil
-        vector[double] data
+import numpy as np
 
-cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
-    cdef cppclass Periodic_cubical_complex_persistence_interface "Gudhi::Persistent_cohomology_interface<Gudhi::Cubical_complex::Periodic_cubical_complex_interface>":
-        Periodic_cubical_complex_persistence_interface(Periodic_cubical_complex_interface * st, bool persistence_dim_max) nogil
-        void compute_persistence(int homology_coeff_field, double min_persistence) nogil except +
-        vector[pair[int, pair[double, double]]] get_persistence() nogil
-        vector[vector[int]] cofaces_of_cubical_persistence_pairs() nogil
-        vector[vector[int]] vertices_of_cubical_persistence_pairs() nogil
-        vector[int] betti_numbers() nogil
-        vector[int] persistent_betti_numbers(double from_value, double to_value) nogil
-        vector[pair[double,double]] intervals_in_dimension(int dimension) nogil
+
+from gudhi._cubical_complex_ext import (
+    _Periodic_cubical_complex_interface,
+    _Periodic_cubical_complex_persistence_interface,
+)
+
 
 # PeriodicCubicalComplex python interface
-cdef class PeriodicCubicalComplex:
+class PeriodicCubicalComplex:
     """The PeriodicCubicalComplex is an example of a structured complex useful
     in computational mathematics (specially rigorous numerics) and image
     analysis.
     """
-    cdef Periodic_cubical_complex_interface * thisptr
-    cdef Periodic_cubical_complex_persistence_interface * pcohptr
-    cdef bool _built_from_vertices
 
-    # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, dimensions=None, top_dimensional_cells=None,
-                 vertices=None, periodic_dimensions=None, perseus_file=''):
+    def __init__(
+        self,
+        dimensions=None,
+        top_dimensional_cells=None,
+        vertices=None,
+        periodic_dimensions=None,
+        perseus_file="",
+    ):
         """PeriodicCubicalComplex constructor from dimensions and cells
         (either vertices or top dimensional) or from a Perseus-style file name.
 
@@ -105,74 +82,65 @@ cdef class PeriodicCubicalComplex:
             of top-dimensional cells and the periodicity.
         :type perseus_file: string
         """
-
-    # The real cython constructor
-    def __cinit__(self, dimensions=None, top_dimensional_cells=None, vertices=None,
-                  periodic_dimensions=None, perseus_file=''):
-        cdef const char* file
+        self._bitmap_complex = None
+        self._pers = None
         self._built_from_vertices = False
         if perseus_file:
-            if (top_dimensional_cells is not None or vertices is not None or
-                dimensions is not None or periodic_dimensions is not None):
-                raise ValueError("The Perseus file contains all the information, do not specify anything else")
-            perseus_file = perseus_file.encode('utf-8')
-            file = perseus_file
-            self._construct_from_file(file)
+            if (
+                top_dimensional_cells is not None
+                or vertices is not None
+                or dimensions is not None
+                or periodic_dimensions is not None
+            ):
+                raise ValueError(
+                    "The Perseus file contains all the information, do not specify anything else"
+                )
+            self._bitmap_complex = _Periodic_cubical_complex_interface(perseus_file)
             return
         if periodic_dimensions is None:
             raise ValueError("The periodic_dimensions must be specified")
         if top_dimensional_cells is not None:
             if vertices is not None:
-                raise ValueError("Can only specify the top dimensional cells OR the vertices, not both")
+                raise ValueError(
+                    "Can only specify the top dimensional cells OR the vertices, not both"
+                )
             array = top_dimensional_cells
         elif vertices is not None:
             array = vertices
             self._built_from_vertices = True
         else:
-            raise ValueError("Must specify one of top_dimensional_cells, vertices, or perseus_file")
+            raise ValueError(
+                "Must specify one of top_dimensional_cells, vertices, or perseus_file"
+            )
         if dimensions is None:
-            array = np.asarray(array, order='F')
+            array = np.asarray(array, order="F")
             dimensions = array.shape
-            array = array.ravel(order='F')
-        self._construct_from_cells(dimensions, array, periodic_dimensions, vertices is None)
-
-    def _construct_from_cells(self, vector[unsigned] dimensions, vector[double] cells, vector[bool] periodic_dimensions, bool input_top_cells):
-        with nogil:
-            self.thisptr = new Periodic_cubical_complex_interface(dimensions, cells, periodic_dimensions, input_top_cells)
-
-    def _construct_from_file(self, const char* filename):
-        with nogil:
-            self.thisptr = new Periodic_cubical_complex_interface(filename)
-
-    def __dealloc__(self):
-        if self.thisptr != NULL:
-            del self.thisptr
-        if self.pcohptr != NULL:
-            del self.pcohptr
+            array = array.ravel(order="F")
+        self._bitmap_complex = _Periodic_cubical_complex_interface(
+            dimensions, array, periodic_dimensions, vertices is None
+        )
 
     def _is_defined(self):
-        """Returns true if PeriodicCubicalComplex pointer is not NULL.
-         """
-        return self.thisptr != NULL
+        """Returns true if PeriodicCubicalComplex pointer is not None."""
+        return self._bitmap_complex != None
 
     def _is_persistence_defined(self):
-        """Returns true if Persistence pointer is not NULL.
-         """
-        return self.pcohptr != NULL
+        """Returns true if Persistence pointer is not None."""
+        return self._pers != None
 
     def num_simplices(self):
         """This function returns the number of all cubes in the complex.
 
         :returns:  int -- the number of all cubes in the complex.
         """
-        return self.thisptr.num_simplices()
+        return self._bitmap_complex.num_simplices()
 
     def dimension(self):
         """This function returns the dimension of the complex.
 
         :returns:  int -- the complex dimension.
         """
-        return self.thisptr.dimension()
+        return self._bitmap_complex.dimension()
 
     def all_cells(self):
         """Array with the filtration values of all the cells of the complex.
@@ -180,11 +148,16 @@ cdef class PeriodicCubicalComplex:
 
         :returns:  numpy.ndarray
         """
-        cdef np.npy_intp dim = self.thisptr.data.size()
-        a = np.PyArray_SimpleNewFromData(1, &dim, np.NPY_DOUBLE, self.thisptr.data.data())
-        np.set_array_base(a, self)
-        return a.reshape([2 * d + (not p) for (d, p) in zip(self.thisptr.shape(), self.thisptr.periodicities())],
-                         order='F')
+        a = self._bitmap_complex.get_numpy_array()
+        return a.reshape(
+            [
+                2 * d + (not p)
+                for (d, p) in zip(
+                    self._bitmap_complex.shape(), self._bitmap_complex.periodicities()
+                )
+            ],
+            order="F",
+        )
 
     def top_dimensional_cells(self):
         """Array with the filtration values of the top-dimensional cells of the complex.
@@ -192,7 +165,7 @@ cdef class PeriodicCubicalComplex:
 
         :returns:  numpy.ndarray
         """
-        return self.all_cells()[(slice(1, None, 2),) * self.thisptr.dimension()]
+        return self.all_cells()[(slice(1, None, 2),) * self._bitmap_complex.dimension()]
 
     def vertices(self):
         """Array with the filtration values of the vertices of the complex.
@@ -200,7 +173,7 @@ cdef class PeriodicCubicalComplex:
 
         :returns:  numpy.ndarray
         """
-        return self.all_cells()[(slice(0, None, 2),) * self.thisptr.dimension()]
+        return self.all_cells()[(slice(0, None, 2),) * self._bitmap_complex.dimension()]
 
     def compute_persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function computes the persistence of the complex, so it can be
@@ -219,14 +192,11 @@ cdef class PeriodicCubicalComplex:
         :type min_persistence: float.
         :returns: Nothing.
         """
-        if self.pcohptr != NULL:
-            del self.pcohptr
         assert self._is_defined()
-        cdef int field = homology_coeff_field
-        cdef double minp = min_persistence
-        with nogil:
-            self.pcohptr = new Periodic_cubical_complex_persistence_interface(self.thisptr, 1)
-            self.pcohptr.compute_persistence(field, minp)
+        self._pers = _Periodic_cubical_complex_persistence_interface(
+            self._bitmap_complex, True
+        )
+        self._pers.compute_persistence(homology_coeff_field, min_persistence)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function computes and returns the persistence of the complex.
@@ -243,7 +213,7 @@ cdef class PeriodicCubicalComplex:
             persistence of the complex.
         """
         self.compute_persistence(homology_coeff_field, min_persistence)
-        return self.pcohptr.get_persistence()
+        return self._pers.get_persistence()
 
     def cofaces_of_persistence_pairs(self):
         """A persistence interval is described by a pair of cells, one that creates the
@@ -262,7 +232,7 @@ cdef class PeriodicCubicalComplex:
         This function returns a list of pairs of top-dimensional cells corresponding to
         the persistence birth and death cells of the filtration. The cells are represented by
         their indices in the input list of top-dimensional cells (and not their indices in the
-        internal datastructure that includes non-maximal cells). Note that when two adjacent
+        internal data structure that includes non-maximal cells). Note that when two adjacent
         top-dimensional cells have the same filtration value, we arbitrarily return one of the two
         when calling the function on one of their common faces.
 
@@ -278,38 +248,39 @@ cdef class PeriodicCubicalComplex:
             The indices of the arrays in the list correspond to the homological dimensions, and the
             integers of each row in each array correspond to: (index of positive top-dimensional cell).
         """
-        assert self.pcohptr != NULL, "compute_persistence() must be called before cofaces_of_persistence_pairs()"
+        assert (
+            self._pers != None
+        ), "compute_persistence() must be called before cofaces_of_persistence_pairs()"
         assert not self._built_from_vertices, (
-                "cofaces_of_persistence_pairs() only makes sense for a complex"
-                " initialized from the values of the top-dimensional cells"
+            "cofaces_of_persistence_pairs() only makes sense for a complex"
+            " initialized from the values of the top-dimensional cells"
         )
 
-        cdef vector[vector[int]] persistence_result
-        output = [[],[]]
-        with nogil:
-            persistence_result = self.pcohptr.cofaces_of_cubical_persistence_pairs()
-        pr = np.array(persistence_result)
+        output = [[], []]
+        # TODO: verify the return type of cofaces_of_cubical_persistence_pairs() by nanobind
+        # a copy is perhaps avoidable?
+        pr = np.array(self._pers.cofaces_of_cubical_persistence_pairs())
 
-        ess_ind = np.argwhere(pr[:,2] == -1)[:,0]
+        ess_ind = np.argwhere(pr[:, 2] == -1)[:, 0]
         ess = pr[ess_ind]
-        max_h = np.max(ess[:,0])+1 if len(ess) > 0 else 0
+        max_h = np.max(ess[:, 0]) + 1 if len(ess) > 0 else 0
         for h in range(max_h):
-            hidxs = np.argwhere(ess[:,0] == h)[:,0]
-            output[1].append(ess[hidxs][:,1])
+            hidxs = np.argwhere(ess[:, 0] == h)[:, 0]
+            output[1].append(ess[hidxs][:, 1])
 
         reg_ind = np.setdiff1d(np.arange(len(pr)), ess_ind)
         reg = pr[reg_ind]
-        max_h = np.max(reg[:,0])+1 if len(reg) > 0 else 0
+        max_h = np.max(reg[:, 0]) + 1 if len(reg) > 0 else 0
         for h in range(max_h):
-            hidxs = np.argwhere(reg[:,0] == h)[:,0]
-            output[0].append(reg[hidxs][:,1:])
+            hidxs = np.argwhere(reg[:, 0] == h)[:, 0]
+            output[0].append(reg[hidxs][:, 1:])
         return output
 
     def vertices_of_persistence_pairs(self):
         """This function returns a list of pairs of vertices corresponding to
         the persistence birth and death cells of the filtration. The cells are represented by
         their indices in the input list of vertices (and not their indices in the
-        internal datastructure that includes non-minimal cells). Note that when two adjacent
+        internal data structure that includes non-minimal cells). Note that when two adjacent
         vertices have the same filtration value, we arbitrarily return one of the two
         when calling the function on one of their common faces.
 
@@ -330,31 +301,33 @@ cdef class PeriodicCubicalComplex:
             The indices of the arrays in the list correspond to the homological dimensions, and the
             integers of each row in each array correspond to: (index of positive vertex).
         """
-        assert self.pcohptr != NULL, "compute_persistence() must be called before vertices_of_persistence_pairs()"
+        assert (
+            self._pers != None
+        ), "compute_persistence() must be called before vertices_of_persistence_pairs()"
         assert self._built_from_vertices, (
-                "vertices_of_persistence_pairs() only makes sense for a complex"
-                " initialized from the values of the vertices"
+            "vertices_of_persistence_pairs() only makes sense for a complex"
+            " initialized from the values of the vertices"
         )
 
-        cdef vector[vector[int]] persistence_result
-        output = [[],[]]
-        with nogil:
-            persistence_result = self.pcohptr.vertices_of_cubical_persistence_pairs()
-        pr = np.array(persistence_result)
+        output = [[], []]
+        # TODO: verify the return type of cofaces_of_cubical_persistence_pairs() by nanobind
+        # a copy is perhaps avoidable?
+        pr = np.array(self._pers.vertices_of_cubical_persistence_pairs())
 
-        ess_ind = np.argwhere(pr[:,2] == -1)[:,0]
+        # except pr, is there any difference from the method above? If not, factorize?
+        ess_ind = np.argwhere(pr[:, 2] == -1)[:, 0]
         ess = pr[ess_ind]
-        max_h = max(ess[:,0])+1 if len(ess) > 0 else 0
+        max_h = max(ess[:, 0]) + 1 if len(ess) > 0 else 0
         for h in range(max_h):
-            hidxs = np.argwhere(ess[:,0] == h)[:,0]
-            output[1].append(ess[hidxs][:,1])
+            hidxs = np.argwhere(ess[:, 0] == h)[:, 0]
+            output[1].append(ess[hidxs][:, 1])
 
         reg_ind = np.setdiff1d(np.array(range(len(pr))), ess_ind)
         reg = pr[reg_ind]
-        max_h = max(reg[:,0])+1 if len(reg) > 0 else 0
+        max_h = max(reg[:, 0]) + 1 if len(reg) > 0 else 0
         for h in range(max_h):
-            hidxs = np.argwhere(reg[:,0] == h)[:,0]
-            output[0].append(reg[hidxs][:,1:])
+            hidxs = np.argwhere(reg[:, 0] == h)[:, 0]
+            output[0].append(reg[hidxs][:, 1:])
         return output
 
     def betti_numbers(self):
@@ -368,8 +341,10 @@ cdef class PeriodicCubicalComplex:
         :note: This function always returns the Betti numbers of a torus as infinity
             filtration cubes are not removed from the complex.
         """
-        assert self.pcohptr != NULL, "compute_persistence() must be called before betti_numbers()"
-        return self.pcohptr.betti_numbers()
+        assert (
+            self._pers != None
+        ), "compute_persistence() must be called before betti_numbers()"
+        return self._pers.betti_numbers()
 
     def persistent_betti_numbers(self, from_value, to_value):
         """This function returns the persistent Betti numbers of the complex.
@@ -387,8 +362,10 @@ cdef class PeriodicCubicalComplex:
         :note: persistent_betti_numbers function requires :func:`compute_persistence`
             function to be launched first.
         """
-        assert self.pcohptr != NULL, "compute_persistence() must be called before persistent_betti_numbers()"
-        return self.pcohptr.persistent_betti_numbers(<double>from_value, <double>to_value)
+        assert (
+            self._pers != None
+        ), "compute_persistence() must be called before persistent_betti_numbers()"
+        return self._pers.persistent_betti_numbers(from_value, to_value)
 
     def persistence_intervals_in_dimension(self, dimension):
         """This function returns the persistence intervals of the complex in a
@@ -402,9 +379,11 @@ cdef class PeriodicCubicalComplex:
         :note: intervals_in_dim function requires :func:`compute_persistence` function to be
             launched first.
         """
-        assert self.pcohptr != NULL, "compute_persistence() must be called before persistence_intervals_in_dimension()"
-        piid = np.array(self.pcohptr.intervals_in_dimension(dimension))
+        assert (
+            self._pers != None
+        ), "compute_persistence() must be called before persistence_intervals_in_dimension()"
+        piid = np.array(self._pers.intervals_in_dimension(dimension))
         # Workaround https://github.com/GUDHI/gudhi-devel/issues/507
         if len(piid) == 0:
-            return np.empty(shape = [0, 2])
+            return np.empty(shape=[0, 2])
         return piid
