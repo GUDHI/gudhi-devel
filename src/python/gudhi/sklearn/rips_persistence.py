@@ -7,7 +7,7 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from .._ripser import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
+from .._ripser_ext import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
 from ..flag_filtration.edge_collapse import reduce_graph
 from .. import SimplexTree
 import math
