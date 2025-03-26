@@ -45,6 +45,11 @@ jobs:
           ls ".\dist\"
           cd ".\dist\"
           Get-ChildItem *.whl | ForEach-Object{python -m pip install --user $_.Name}
+      - name: Upload Windows python wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows python wheel
+          path: build/src/python/dist/*.whl
       # Test ABI compatibility with numpy 1.X
       - name: Test python wheel
         run: |
@@ -60,8 +65,3 @@ jobs:
           python -m pytest -v ".\src\python\test\test_cubical_complex.py"
           python -m pytest -v ".\src\python\test\test_cubical_persistence_low_dim.py"
           python -m pytest -v ".\src\python\test\test_rips_complex.py"
-      - name: Upload Windows python wheel
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows python wheel
-          path: build/src/python/dist/*.whl

@@ -20,6 +20,11 @@ jobs:
           cd src/python
           $PYTHON39/bin/python -m build -n -w
           auditwheel repair dist/*.whl
+      - name: Upload linux python wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux python wheel
+          path: build_39/src/python/wheelhouse/*.whl
       # NumPy 2.X is installed and guarantees ABI compatibility, test it with the minimal numpy version for python version
       - name: Install and test wheel for Python 3.9
         run: |
@@ -32,8 +37,3 @@ jobs:
           $PYTHON39/bin/python -m pytest -v src/python/test/test_cubical_complex.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_cubical_persistence_low_dim.py
           $PYTHON39/bin/python -m pytest -v src/python/test/test_rips_complex.py
-      - name: Upload linux python wheel
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux python wheel
-          path: build_39/src/python/wheelhouse/*.whl

@@ -3,13 +3,13 @@ name: pip build osx
 on: [push, pull_request]
 
 env:
-  MACOSX_DEPLOYMENT_TARGET: 12.0
-  _PYTHON_HOST_PLATFORM: macosx-12.0-universal2
+  MACOSX_DEPLOYMENT_TARGET: 13.0
+  _PYTHON_HOST_PLATFORM: macosx-13.0-universal2
   ARCHFLAGS: "-arch arm64 -arch x86_64"
 
 jobs:
   build:
-    # Should use macos-latest, but python 3.8 and 3.9 is no more available from macos-14
+    # Should use macos-latest, but python 3.9 is no more available from macos-14
     runs-on: macos-13
     strategy:
       max-parallel: 4
@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-      # For python >=3.9, numpy >= 2.0 for package build and ABI compatibility with numpy 1.X and 2.X
+      # For python>=3.9, numpy>=2.0 for package build and ABI compatibility with numpy 1.X and 2.X
       # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
       - name: Install dependencies
         run: |
@@ -51,6 +51,11 @@ jobs:
           python -m build -n -w
           export PATH="$PATH:`python -m site --user-base`/bin"
           delocate-wheel --require-archs universal2 -v dist/*.whl
+      - name: Upload OSx python wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: osx python wheel
+          path: build/src/python/dist/*.whl
       # Test ABI compatibility with numpy 1.X
       - name: Install and test python wheel
         run: |
@@ -63,8 +68,3 @@ jobs:
           python -m pytest -v src/python/test/test_cubical_complex.py
           python -m pytest -v src/python/test/test_cubical_persistence_low_dim.py
           python -m pytest -v src/python/test/test_rips_complex.py
-      - name: Upload OSx python wheel
-        uses: actions/upload-artifact@v4
-        with:
-          name: osx python wheel
-          path: build/src/python/dist/*.whl

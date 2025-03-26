@@ -42,7 +42,6 @@ namespace persistence_matrix {
  * are stored uniquely in the underlying container.
  *
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
- * @tparam Entry_constructor Factory of @ref Entry classes.
  */
 template <class Master_matrix>
 class Set_column : public Master_matrix::Row_access_option,
@@ -105,7 +104,8 @@ class Set_column : public Master_matrix::Row_access_option,
   std::size_t size() const;
 
   template <class Row_index_map>
-  void reorder(const Row_index_map& valueMap, [[maybe_unused]] Index columnIndex = -1);
+  void reorder(const Row_index_map& valueMap,
+               [[maybe_unused]] Index columnIndex = Master_matrix::template get_null_value<Index>());
   void clear();
   void clear(ID_index rowIndex);
 
@@ -156,6 +156,7 @@ class Set_column : public Master_matrix::Row_access_option,
     }
     return true;
   }
+
   friend bool operator<(const Set_column& c1, const Set_column& c2) {
     if (&c1 == &c2) return false;
 
@@ -225,7 +226,9 @@ class Set_column : public Master_matrix::Row_access_option,
                                                  Column& targetColumn);
 
   void _delete_entry(typename Column_support::iterator& it);
-  Entry* _insert_entry(const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position);
+  Entry* _insert_entry(const Field_element& value,
+                       ID_index rowIndex,
+                       const typename Column_support::iterator& position);
   void _insert_entry(ID_index rowIndex, const typename Column_support::iterator& position);
   template <class Entry_range>
   bool _add(const Entry_range& column);
@@ -243,7 +246,8 @@ inline Set_column<Master_matrix>::Set_column(Column_settings* colSettings)
       operators_(nullptr),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor))
 {
-  if (operators_ == nullptr && entryPool_ == nullptr) return; // to allow default constructor which gives a dummy column
+  if (operators_ == nullptr && entryPool_ == nullptr)
+    return;  // to allow default constructor which gives a dummy column
   if constexpr (!Master_matrix::Option_list::is_z2) {
     operators_ = &(colSettings->operators);
   }
@@ -283,9 +287,13 @@ inline Set_column<Master_matrix>::Set_column(Index columnIndex,
       Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
       Chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : *std::prev(nonZeroRowIndices.end());
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : *std::prev(nonZeroRowIndices.end());
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : std::prev(nonZeroRowIndices.end())->first;
         }
       }()),
       operators_(nullptr),
@@ -315,9 +323,13 @@ inline Set_column<Master_matrix>::Set_column(const Container& nonZeroRowIndices,
       Dim_opt(dimension),
       Chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : *std::prev(nonZeroRowIndices.end());
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : *std::prev(nonZeroRowIndices.end());
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : std::prev(nonZeroRowIndices.end())->first;
         }
       }()),
       operators_(nullptr),
@@ -346,9 +358,13 @@ inline Set_column<Master_matrix>::Set_column(Index columnIndex,
       Dim_opt(dimension),
       Chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : *std::prev(nonZeroRowIndices.end());
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : *std::prev(nonZeroRowIndices.end());
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : std::prev(nonZeroRowIndices.end())->first;
         }
       }()),
       operators_(nullptr),
@@ -487,7 +503,7 @@ inline void Set_column<Master_matrix>::reorder(const Row_index_map& valueMap, [[
   for (Entry* entry : column_) {
     if constexpr (Master_matrix::Option_list::has_row_access) {
       RA_opt::unlink(entry);
-      if (columnIndex != static_cast<Index>(-1)) entry->set_column_index(columnIndex);
+      if (columnIndex != Master_matrix::template get_null_value<Index>()) entry->set_column_index(columnIndex);
     }
     entry->set_row_index(valueMap.at(entry->get_row_index()));
     newSet.insert(entry);
@@ -541,7 +557,7 @@ inline typename Set_column<Master_matrix>::ID_index Set_column<Master_matrix>::g
                 "Method not available for base columns.");  // could technically be, but is the notion useful then?
 
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
-    if (column_.empty()) return -1;
+    if (column_.empty()) return Master_matrix::template get_null_value<ID_index>();
     return (*column_.rbegin())->get_row_index();
   } else {
     return Chain_opt::get_pivot();
@@ -561,7 +577,7 @@ inline typename Set_column<Master_matrix>::Field_element Set_column<Master_matri
       if (column_.empty()) return 0;
       return (*column_.rbegin())->get_element();
     } else {
-      if (Chain_opt::get_pivot() == static_cast<ID_index>(-1)) return Field_element();
+      if (Chain_opt::get_pivot() == Master_matrix::template get_null_value<ID_index>()) return Field_element();
       for (const Entry* entry : column_) {
         if (entry->get_row_index() == Chain_opt::get_pivot()) return entry->get_element();
       }
@@ -851,7 +867,9 @@ inline void Set_column<Master_matrix>::_delete_entry(typename Column_support::it
 
 template <class Master_matrix>
 inline typename Set_column<Master_matrix>::Entry* Set_column<Master_matrix>::_insert_entry(
-    const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position)
+    const Field_element& value,
+    ID_index rowIndex,
+    const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
@@ -869,7 +887,7 @@ inline typename Set_column<Master_matrix>::Entry* Set_column<Master_matrix>::_in
 
 template <class Master_matrix>
 inline void Set_column<Master_matrix>::_insert_entry(ID_index rowIndex,
-                                                    const typename Column_support::iterator& position)
+                                                     const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);

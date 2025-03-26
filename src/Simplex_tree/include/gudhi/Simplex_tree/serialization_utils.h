@@ -12,13 +12,15 @@
 #define SIMPLEX_TREE_SERIALIZATION_UTILS_H_
 
 #include <cstring>  // for memcpy and std::size_t
-#include <iostream>
 
 namespace Gudhi {
 
 namespace simplex_tree {
 
-/** \brief Serialize the given value and insert it at start position.
+/**
+ * @private
+ * @ingroup simplex_tree
+ * @brief Serialize the given value and insert it at start position.
  * 
  * @param[in] value The value to serialize.
  * @param[in] start Start position where the value is serialized.
@@ -33,7 +35,10 @@ char* serialize_trivial(ArgumentType value, char* start) {
   return start + arg_size;
 }
 
-/** \brief Deserialize at the start position in an array of char and sets the value with it.
+/**
+ * @private
+ * @ingroup simplex_tree
+ * \brief Deserialize at the start position in an array of char and sets the value with it.
  * 
  * @param[in] value The value where to deserialize based on its type.
  * @param[in] start Start position where the value is serialized.

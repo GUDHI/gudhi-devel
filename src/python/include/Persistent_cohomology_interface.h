@@ -46,9 +46,12 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
   };
 
  public:
-  Persistent_cohomology_interface(FilteredComplex* stptr, bool persistence_dim_max=false)
-      : Base(*stptr, persistence_dim_max),
-        stptr_(stptr) { }
+  Persistent_cohomology_interface(FilteredComplex& stptr, bool persistence_dim_max = false)
+      : Base(stptr, persistence_dim_max), stptr_(&stptr) {}
+
+  // TODO: remove
+  Persistent_cohomology_interface(FilteredComplex* stptr, bool persistence_dim_max = false)
+      : Base(*stptr, persistence_dim_max), stptr_(stptr) {}
 
   // TODO: move to the constructors?
   void compute_persistence(int homology_coeff_field, double min_persistence) {
@@ -194,10 +197,10 @@ persistent_cohomology::Persistent_cohomology<FilteredComplex, persistent_cohomol
       int dim = stptr_->dimension(s);
       auto v = stptr_->vertex_with_same_filtration(s);
       if(t == stptr_->null_simplex()) {
-        while(diagsinf.size() < dim+1) diagsinf.emplace_back();
+        while(static_cast<int>(diagsinf.size()) < dim+1) diagsinf.emplace_back();
         diagsinf[dim].push_back(v);
       } else {
-        while(diags.size() < dim+1) diags.emplace_back();
+        while(static_cast<int>(diags.size()) < dim+1) diags.emplace_back();
         auto w = stptr_->vertex_with_same_filtration(t);
         auto& d = diags[dim];
         d.insert(d.end(), { v, w });

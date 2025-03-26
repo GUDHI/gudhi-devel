@@ -45,7 +45,6 @@ namespace persistence_matrix {
  * row index. Additionally, the given entry range added into the heap does not need to be somehow ordered.
  *
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
- * @tparam Entry_constructor Factory of @ref Entry classes.
  */
 template <class Master_matrix>
 class Heap_column : public Master_matrix::Column_dimension_option, public Master_matrix::Chain_column_option
@@ -104,7 +103,8 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   std::size_t size() const;
 
   template <class Row_index_map>
-  void reorder(const Row_index_map& valueMap, [[maybe_unused]] Index columnIndex = -1);
+  void reorder(const Row_index_map& valueMap,
+               [[maybe_unused]] Index columnIndex = Master_matrix::template get_null_value<Index>());
   void clear();
   void clear(ID_index rowIndex);
 
@@ -172,6 +172,7 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
     c2.entryPool_->destroy(p2);
     return false;
   }
+
   friend bool operator<(const Heap_column& c1, const Heap_column& c2) {
     if (&c1 == &c2) return false;
 
@@ -307,9 +308,13 @@ inline Heap_column<Master_matrix>::Heap_column(const Container& nonZeroRowIndice
     : Dim_opt(dimension),
       Chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : *std::prev(nonZeroRowIndices.end());
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : *std::prev(nonZeroRowIndices.end());
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : std::prev(nonZeroRowIndices.end())->first;
         }
       }()),
       column_(nonZeroRowIndices.size(), nullptr),
@@ -380,9 +385,13 @@ inline Heap_column<Master_matrix>::Heap_column(Index columnIndex,
     : Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
       Chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : *std::prev(nonZeroRowIndices.end());
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : *std::prev(nonZeroRowIndices.end());
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : std::prev(nonZeroRowIndices.end())->first;
         }
       }()),
       column_(nonZeroRowIndices.size(), nullptr),
@@ -418,9 +427,13 @@ inline Heap_column<Master_matrix>::Heap_column(Index columnIndex,
     : Dim_opt(dimension),
       Chain_opt([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : *std::prev(nonZeroRowIndices.end());
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : *std::prev(nonZeroRowIndices.end());
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end() ? -1 : std::prev(nonZeroRowIndices.end())->first;
+          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                     ? Master_matrix::template get_null_value<ID_index>()
+                     : std::prev(nonZeroRowIndices.end())->first;
         }
       }()),
       column_(nonZeroRowIndices.size(), nullptr),
@@ -609,7 +622,7 @@ inline typename Heap_column<Master_matrix>::ID_index Heap_column<Master_matrix>:
       std::push_heap(column_.begin(), column_.end(), entryPointerComp_);
       return pivot->get_row_index();
     }
-    return -1;
+    return Master_matrix::template get_null_value<ID_index>();
   } else {
     return Chain_opt::get_pivot();
   }
@@ -634,7 +647,7 @@ inline typename Heap_column<Master_matrix>::Field_element Heap_column<Master_mat
       return 0;
     } else {
       Field_element sum(0);
-      if (Chain_opt::get_pivot() == static_cast<ID_index>(-1)) return sum;
+      if (Chain_opt::get_pivot() == Master_matrix::template get_null_value<ID_index>()) return sum;
       for (const Entry* entry : column_) {
         if (entry->get_row_index() == Chain_opt::get_pivot()) operators_->add_inplace(sum, entry->get_element());
       }

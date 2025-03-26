@@ -29,6 +29,8 @@
 // /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
 #include "gudhi/Simplex_tree.h"
 
+#include "test_vector_filtration_simplex_tree.h"
+
 using namespace Gudhi;
 
 typedef boost::mpl::list<Simplex_tree<>,
@@ -36,7 +38,7 @@ typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_full_featured> > list_of_tested_variants;
 
 template<class typeST>
-void test_empty_simplex_tree(typeST& tst) {
+void test_empty_simplex_tree(const typeST& tst) {
   typedef typename typeST::Vertex_handle Vertex_handle;
   const Vertex_handle DEFAULT_VERTEX_VALUE = Vertex_handle(- 1);
   BOOST_CHECK(tst.null_vertex() == DEFAULT_VERTEX_VALUE);
@@ -44,7 +46,7 @@ void test_empty_simplex_tree(typeST& tst) {
   BOOST_CHECK(tst.num_simplices() == (size_t) 0);
   BOOST_CHECK(tst.is_empty());
   BOOST_CHECK(tst.num_simplices_by_dimension() == std::vector<size_t>());
-  typename typeST::Siblings* STRoot = tst.root();
+  const typename typeST::Siblings* STRoot = tst.root();
   BOOST_CHECK(STRoot != nullptr);
   BOOST_CHECK(STRoot->oncles() == nullptr);
   BOOST_CHECK(STRoot->parent() == DEFAULT_VERTEX_VALUE);
@@ -52,7 +54,7 @@ void test_empty_simplex_tree(typeST& tst) {
 }
 
 template<class typeST>
-void test_iterators_on_empty_simplex_tree(typeST& tst) {
+void test_iterators_on_empty_simplex_tree(const typeST& tst) {
   std::clog << "Iterator on vertices: " << std::endl;
   for (auto vertex : tst.complex_vertex_range()) {
     std::clog << "vertice:" << vertex << std::endl;
@@ -137,7 +139,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_from_file, typeST, list_of_tested_var
 }
 
 template<class typeST, class typeSimplex>
-void test_simplex_tree_contains(typeST& simplexTree, typeSimplex& simplex, int pos) {
+void test_simplex_tree_contains(const typeST& simplexTree, typeSimplex& simplex, int pos) {
   auto f_simplex = simplexTree.filtration_simplex_range().begin() + pos;
 
   std::clog << "test_simplex_tree_contains - filtration=" << simplexTree.filtration(*f_simplex) << "||" << simplex.second << std::endl;
@@ -498,7 +500,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
     BOOST_CHECK(vertex == SimplexVector6[position]);
     position++;
   }
-  
+
   /* Inserted simplex:        */
   /*    1   6                 */
   /*    o---o                 */
@@ -593,7 +595,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
 }
 
 template<class typeST, class Vertex_handle>
-void test_cofaces(typeST& st, const std::vector<Vertex_handle>& expected, int dim, const std::vector<typename typeST::Simplex_handle>& res) {
+void test_cofaces(const typeST& st, const std::vector<Vertex_handle>& expected, int dim, const std::vector<typename typeST::Simplex_handle>& res) {
   std::size_t nb_res = 0;
   if (dim == 0) {
     typename typeST::Cofaces_simplex_range stars = st.star_simplex_range(st.find(expected));
@@ -818,7 +820,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(copy_move_on_simplex_tree, typeST, list_of_tested_
 
   std::clog << "Printing st - address = " << &st << std::endl;
 
-  // Copy constructor  
+  // Copy constructor
   typeST st_copy = st;
   std::clog << "Printing a copy of st - address = " << &st_copy << std::endl;
 
@@ -827,7 +829,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(copy_move_on_simplex_tree, typeST, list_of_tested_
   // Check there is a new simplex tree reference
   BOOST_CHECK(&st != &st_copy);
 
-  // Move constructor  
+  // Move constructor
   typeST st_move = std::move(st);
   std::clog << "Printing a move of st - address = " << &st_move << std::endl;
 
@@ -836,14 +838,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(copy_move_on_simplex_tree, typeST, list_of_tested_
   // Check there is a new simplex tree reference
   BOOST_CHECK(&st_move != &st_copy);
   BOOST_CHECK(&st_move != &st);
-  
+
   typeST st_empty;
   // Check st has been emptied by the move
   BOOST_CHECK(st == st_empty);
   BOOST_CHECK(st.dimension() == -1);
   BOOST_CHECK(st.num_simplices() == 0);
   BOOST_CHECK(st.num_vertices() == (size_t)0);
-  
+
   std::clog << "Printing st once again- address = " << &st << std::endl;
 }
 
@@ -1226,19 +1228,4 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(for_each_simplex_skip_iteration, typeST, list_of_t
 
   BOOST_CHECK(num_simplices_by_dim_until_two[0] == num_simplices_by_dim[0]);
   BOOST_CHECK(num_simplices_by_dim_until_two[1] == num_simplices_by_dim[1]);
-}
-
-struct Options_with_int_data : Simplex_tree_options_minimal {
-  typedef int Simplex_data;
-};
-
-BOOST_AUTO_TEST_CASE(simplex_data) {
-  Simplex_tree<Options_with_int_data> st;
-  st.insert_simplex_and_subfaces({0, 1});
-  st.insert_simplex_and_subfaces({2, 1});
-  st.insert_simplex_and_subfaces({0, 2});
-  st.simplex_data(st.find({0, 1})) = 5;
-  st.expansion(3);
-  st.simplex_data(st.find({0, 1, 2})) = 4;
-  BOOST_CHECK(st.simplex_data(st.find({0, 1})) == 5);
 }

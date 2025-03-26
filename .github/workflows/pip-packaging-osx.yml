@@ -5,8 +5,8 @@ on:
     types: [published]
 
 env:
-  MACOSX_DEPLOYMENT_TARGET: 12.0
-  _PYTHON_HOST_PLATFORM: macosx-12.0-universal2
+  MACOSX_DEPLOYMENT_TARGET: 13.0
+  _PYTHON_HOST_PLATFORM: macosx-13.0-universal2
   ARCHFLAGS: "-arch arm64 -arch x86_64"
 
 jobs:
@@ -75,7 +75,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           - python-version: "3.9"
             numpy-version: "1.21.4"
@@ -85,6 +85,8 @@ jobs:
             numpy-version: "1.23.2"
           - python-version: "3.12"
             numpy-version: "1.26.0"
+          - python-version: "3.13"
+            numpy-version: "2.1.0"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
@@ -94,7 +96,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-      # For python >=3.9, numpy >= 2.0 for package build and ABI compatibility with numpy 1.X and 2.X
+      # For python>=3.9, numpy>=2.0 for package build and ABI compatibility with numpy 1.X and 2.X
       # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
       - name: Install dependencies
         run: |

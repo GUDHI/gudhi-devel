@@ -62,7 +62,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * @brief Constructs an empty matrix.
    *
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
-   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
+   * the necessary external classes specifically necessary for the chosen column type, such as custom allocators.
    */
   RU_matrix(Column_settings* colSettings);
   /**
@@ -83,7 +83,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * interest and not everything should be stored, then use the @ref insert_boundary method instead (after creating the
    * matrix with the @ref RU_matrix(unsigned int, Column_settings*) constructor preferably).
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
-   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
+   * the necessary external classes specifically necessary for the chosen column type, such as custom allocators.
    */
   template <class Boundary_range = Boundary>
   RU_matrix(const std::vector<Boundary_range>& orderedBoundaries, Column_settings* colSettings);
@@ -92,7 +92,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    *
    * @param numberOfColumns Number of columns to reserve space for.
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
-   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
+   * the necessary external classes specifically necessary for the chosen column type, such as custom allocators.
    */
   RU_matrix(unsigned int numberOfColumns, Column_settings* colSettings);
   /**
@@ -101,7 +101,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    *
    * @param matrixToCopy Matrix to copy.
    * @param colSettings Either a pointer to an existing setting structure for the columns or a null pointer.
-   * The structure should contain all the necessary external classes specifically necessary for the choosen column type,
+   * The structure should contain all the necessary external classes specifically necessary for the chosen column type,
    * such as custom allocators. If null pointer, the pointer stored in @p matrixToCopy is used instead.
    */
   RU_matrix(const RU_matrix& matrixToCopy, Column_settings* colSettings = nullptr);
@@ -132,7 +132,8 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
+  void insert_boundary(const Boundary_range& boundary,
+                       Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief It does the same as the other version, but allows the boundary cells to be identified without restrictions
    * except that all IDs have to be strictly increasing in the order of filtration. Note that you should avoid then
@@ -151,11 +152,12 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_boundary(ID_index cellIndex, const Boundary_range& boundary, Dimension dim = -1);
+  void insert_boundary(ID_index cellIndex, const Boundary_range& boundary,
+                       Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Returns the column at the given @ref MatIdx index in \f$ R \f$ if @p inR is true and
    * in \f$ U \f$ if @p inR is false.
-   * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
+   * The type of the column depends on the chosen options, see @ref PersistenceMatrixOptions::column_type.
    *
    * Note that before returning the column, all column entries can eventually be reordered, if lazy swaps occurred.
    * It is therefore recommended to avoid calling @ref get_column between vine swaps, otherwise the benefits
@@ -170,7 +172,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   /**
    * @brief Returns the row at the given @ref rowindex "row index" in \f$ R \f$ if @p inR is true and
    * in \f$ U \f$ if @p inR is false.
-   * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
+   * The type of the row depends on the chosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    *
    * Note that before returning the row, all column entries can eventually be reordered, if lazy swaps occurred.
    * It is therefore recommended to avoid calling @ref get_row between vine swaps, otherwise the benefits
@@ -347,7 +349,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * @brief Resets the matrix to an empty matrix.
    *
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
-   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
+   * the necessary external classes specifically necessary for the chosen column type, such as custom allocators.
    */
   void reset(Column_settings* colSettings) {
     reducedMatrixR_.reset(colSettings);
@@ -451,7 +453,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_range>& or
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.reserve(orderedBoundaries.size());
   } else {
-    pivotToColumnIndex_.resize(orderedBoundaries.size(), -1);
+    pivotToColumnIndex_.resize(orderedBoundaries.size(), Master_matrix::template get_null_value<Index>());
   }
 
   _initialize_U();
@@ -475,7 +477,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, Column_
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.reserve(numberOfColumns);
   } else {
-    pivotToColumnIndex_.resize(numberOfColumns, -1);
+    pivotToColumnIndex_.resize(numberOfColumns, Master_matrix::template get_null_value<Index>());
   }
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
     _indexToBar().reserve(numberOfColumns);
@@ -604,7 +606,8 @@ inline void RU_matrix<Master_matrix>::remove_last()
     pivotToColumnIndex_.erase(reducedMatrixR_.remove_last());
   } else {
     ID_index lastPivot = reducedMatrixR_.remove_last();
-    if (lastPivot != static_cast<ID_index>(-1)) pivotToColumnIndex_[lastPivot] = -1;
+    if (lastPivot != Master_matrix::template get_null_value<ID_index>())
+      pivotToColumnIndex_[lastPivot] = Master_matrix::template get_null_value<Index>();
   }
 
   // if has_vine_update and has_column_pairings are both true,
@@ -752,8 +755,8 @@ inline void RU_matrix<Master_matrix>::_insert_boundary(Index currentIndex)
 
   if constexpr (!Master_matrix::Option_list::has_map_column_container) {
     ID_index pivot = reducedMatrixR_.get_column(currentIndex).get_pivot();
-    if (pivot != static_cast<ID_index>(-1) && pivotToColumnIndex_.size() <= pivot)
-      pivotToColumnIndex_.resize((pivot + 1) * 2, -1);
+    if (pivot != Master_matrix::template get_null_value<ID_index>() && pivotToColumnIndex_.size() <= pivot)
+      pivotToColumnIndex_.resize((pivot + 1) * 2, Master_matrix::template get_null_value<Index>());
   }
 
   _reduce_last_column(currentIndex);
@@ -806,11 +809,12 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_reduce_column(Index target, Index eventIndex)
 {
   auto get_column_with_pivot_ = [&](ID_index pivot) -> Index {
-    if (pivot == static_cast<ID_index>(-1)) return -1;
+    if (pivot == Master_matrix::template get_null_value<ID_index>())
+      return Master_matrix::template get_null_value<Index>();
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       auto it = pivotToColumnIndex_.find(pivot);
       if (it == pivotToColumnIndex_.end())
-        return -1;
+        return Master_matrix::template get_null_value<Index>();
       else
         return it->second;
     } else {
@@ -822,13 +826,14 @@ inline void RU_matrix<Master_matrix>::_reduce_column(Index target, Index eventIn
   ID_index pivot = curr.get_pivot();
   Index currIndex = get_column_with_pivot_(pivot);
 
-  while (pivot != static_cast<ID_index>(-1) && currIndex != static_cast<Index>(-1)) {
+  while (pivot != Master_matrix::template get_null_value<ID_index>() &&
+         currIndex != Master_matrix::template get_null_value<Index>()) {
     _reduce_column_by(target, currIndex);
     pivot = curr.get_pivot();
     currIndex = get_column_with_pivot_(pivot);
   }
 
-  if (pivot != static_cast<ID_index>(-1)) {
+  if (pivot != Master_matrix::template get_null_value<ID_index>()) {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       pivotToColumnIndex_.try_emplace(pivot, target);
     } else {
