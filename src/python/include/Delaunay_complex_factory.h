@@ -111,7 +111,7 @@ class Abstract_delaunay_complex {
   virtual std::vector<double> get_point(int vh) = 0;
 
   virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square,
-                                   Delaunay_filtration filtration, bool output_squared_values) = 0;
+                                   Delaunay_filtration filtration, bool output_squared_values = false) = 0;
 
   virtual std::size_t num_vertices() const = 0;
 
