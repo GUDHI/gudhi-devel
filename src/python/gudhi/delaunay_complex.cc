@@ -1,6 +1,6 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       Marc Glisse
+ *    Author(s):       Thibaud Kloczko
  *
  *    Copyright (C) 2025 Inria
  *
@@ -40,7 +40,7 @@ public:
     std::vector<double> get_point(int vh);
 
     Simplex_tree_interface create_simplex_tree(double max_alpha_square,
-                                               Delaunay_filtration filtration);
+                                            const std::string& filtration);
 
     void create_simplex_tree(Simplex_tree_interface* simplex_tree,
                              double max_alpha_square,
@@ -110,10 +110,16 @@ std::vector<double> Delaunay_complex_interface::get_point(int vh)
 }
 
 Simplex_tree_interface Delaunay_complex_interface::create_simplex_tree(double max_alpha_square,
-                                                                       Delaunay_filtration filtration)
+                                                                       const std::string& filtration)
 {
     Simplex_tree_interface s;
-    this->create_simplex_tree(&s, max_alpha_square, filtration);
+    Delaunay_filtration df = Delaunay_filtration::NONE;
+    if (filtration == "c") {
+        df =  Delaunay_filtration::CECH;
+    } else if (filtration == "a") {
+        df = Delaunay_filtration::ALPHA;
+    }
+    this->create_simplex_tree(&s, max_alpha_square, df);
     return s;
 }
 
@@ -148,20 +154,21 @@ double Delaunay_complex_interface::get_float_relative_precision()
 // /////////////////////////////////////////////////////////////////////////////
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 
 namespace nb = nanobind;
-
-using gdci = Gudhi::delaunay_complex::Delaunay_complex_interface;
+namespace gdc = Gudhi::delaunay_complex;
+using gdci = gdc::Delaunay_complex_interface;
 
 NB_MODULE(delaunay_complex_ext, m) {
-      m.attr("__license__") = "GPL v3";
-      nb::class_<gdci>(m, "Delaunay_complex_interface")
-              .def(nb::init<const std::vector<std::vector<double>>&,
-                      const std::vector<double>&,
-                      bool,
-                      bool>(),
-                      R"nbdoc(Constructor)nbdoc");
+    m.attr("__license__") = "GPL v3";
+    nb::class_<gdci>(m, "Delaunay_complex_interface")
+            .def(nb::init<const std::vector<std::vector<double>>&, const std::vector<double>&, bool, bool>(), "Constructor")
+            .def("create_simplex_tree", nb::overload_cast<double, const std::string&>(&gdci::create_simplex_tree), "")
+            .def("get_point", &gdci::get_point, "")
+            .def_static("set_float_relative_precision", &gdci::set_float_relative_precision, "")
+            .def_static("get_float_relative_precision", &gdci::get_float_relative_precision, "");
 }
 
 //
