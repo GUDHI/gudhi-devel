@@ -1,7 +1,5 @@
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
-# which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
-# license details.
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
 #
 # Copyright (C) 2016 Inria
@@ -10,17 +8,17 @@
 #   - 2025/03 Hannah Schreiber: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
 
-import os.path
+__author__ = "Vincent Rouvreau"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
+
+
 import numpy as np
 
 from gudhi._cubical_complex_ext import (
     _Bitmap_cubical_complex_interface,
     _Cubical_complex_persistence_interface,
 )
-
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
 
 
 # CubicalComplex python interface
@@ -175,7 +173,7 @@ class CubicalComplex:
         :type min_persistence: float.
         :returns: Nothing.
         """
-        assert self._is_defined
+        assert self._is_defined()
         self._pers = _Cubical_complex_persistence_interface(self._bitmap_complex, True)
         self._pers.compute_persistence(homology_coeff_field, min_persistence)
 
@@ -213,7 +211,7 @@ class CubicalComplex:
         This function returns a list of pairs of top-dimensional cells corresponding to
         the persistence birth and death cells of the filtration. The cells are represented by
         their indices in the input list of top-dimensional cells (and not their indices in the
-        internal datastructure that includes non-maximal cells). Note that when two adjacent
+        internal data structure that includes non-maximal cells). Note that when two adjacent
         top-dimensional cells have the same filtration value, we arbitrarily return one of the two
         when calling the function on one of their common faces.
 
@@ -263,7 +261,7 @@ class CubicalComplex:
         """This function returns a list of pairs of vertices corresponding to
         the persistence birth and death cells of the filtration. The cells are represented by
         their indices in the input list of vertices (and not their indices in the
-        internal datastructure that includes non-minimal cells). Note that when two adjacent
+        internal data structure that includes non-minimal cells). Note that when two adjacent
         vertices have the same filtration value, we arbitrarily return one of the two
         when calling the function on one of their common faces.
 
