@@ -76,10 +76,7 @@ class DelaunayComplex(t.Delaunay_complex_interface):
         elif filtration == 'alpha':
             filt = t.Filtration.ALPHA
 
-        simplex_tree = Simplex_tree_interface()
-        dir(simplex_tree)
-        super().create_simplex_tree(simplex_tree, max_alpha_square, filt, output_squared_values)
-        return simplex_tree
+        return super().create_simplex_tree(max_alpha_square, filt, output_squared_values)
 
 
 class AlphaComplex(DelaunayComplex):
