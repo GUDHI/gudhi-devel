@@ -61,6 +61,8 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
 
  public:
 
+  void initialize_filtration() const { Base::initialize_filtration(); }
+
   Extended_filtration_data efd;
   
   bool find_simplex(const Simplex& simplex) {
