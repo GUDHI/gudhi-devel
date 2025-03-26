@@ -5,7 +5,7 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
- *      - 2025/03 Hannah Schreiber: Use nanobind instead of Pybind11 for python bindings.
+ *      - 2025/03 Hannah Schreiber: Use nanobind instead of PyBind11 for python bindings.
  *      - YYYY/MM Author: Description of the modification
  */
 
