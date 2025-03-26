@@ -152,7 +152,7 @@ double Delaunay_complex_interface::get_float_relative_precision()
 
 namespace nb = nanobind;
 
-using gdci = Gudhi::delaunay_complex::Delaunay_complex_interface
+using gdci = Gudhi::delaunay_complex::Delaunay_complex_interface;
 
 NB_MODULE(delaunay_complex_ext, m) {
       m.attr("__license__") = "GPL v3";
@@ -161,11 +161,7 @@ NB_MODULE(delaunay_complex_ext, m) {
                       const std::vector<double>&,
                       bool,
                       bool>(),
-                      R"nbdoc(Constructor)nbdoc")
-              .def("create",
-               &gdci::find_simplex,
-               nb::arg("simplex"),
-               R"pbdoc()pbdoc"));
+                      R"nbdoc(Constructor)nbdoc");
 }
 
 //
