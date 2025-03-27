@@ -19,7 +19,7 @@ using Dgm = nb::ndarray<double>;
 
 // build_point(double birth, double death, ssize_t index) -> Point
 template<class BuildPoint>
-inline auto numpy_to_range_of_pairs(const Dgm& dgm, BuildPoint build_point) {
+inline auto array_to_range_of_pairs(const Dgm& dgm, BuildPoint build_point) {
   // shape (n,2) or (0) for empty
   if((dgm.ndim()!=2 || dgm.shape(1)!=2) && (dgm.ndim()!=1 || dgm.shape(0)!=0))
     throw std::runtime_error("Diagram must be an array of size n x 2");

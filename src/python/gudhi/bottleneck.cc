@@ -11,7 +11,7 @@
 
 #include <gudhi/Bottleneck.h>
 //#include <optional>
-#include <pybind11_diagram_utils.h>
+#include <diagram_utils.h>
 #include <nanobind/stl/optional.h>
 //#include <pybind11/stl.h>
 
@@ -22,9 +22,9 @@ static auto make_point(double x, double y, nb::ssize_t) { return std::pair(x, y)
 double bottleneck(const Dgm& d1, const Dgm& d2, std::optional<double> epsilon)
 {
   double e = epsilon.value_or((std::numeric_limits<double>::min)());
-// I *think* the call to request() in numpy_to_range_of_pairs has to be before releasing the GIL.
-  auto diag1 = numpy_to_range_of_pairs(d1, make_point);
-  auto diag2 = numpy_to_range_of_pairs(d2, make_point);
+// I *think* the call to request() in array_to_range_of_pairs has to be before releasing the GIL.
+  auto diag1 = array_to_range_of_pairs(d1, make_point);
+  auto diag2 = array_to_range_of_pairs(d2, make_point);
 
   nb::gil_scoped_release release;
 

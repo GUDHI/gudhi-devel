@@ -13,7 +13,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 
-#include <pybind11_diagram_utils.h>
+#include <diagram_utils.h>
 
 #ifdef _MSC_VER
 // https://github.com/grey-narn/hera/issues/3
@@ -30,9 +30,9 @@ static auto make_point(double x, double y, nb::ssize_t) { return std::pair(x, y)
 
 double bottleneck_distance(const Dgm& d1, const Dgm& d2, double delta)
 {
-  // I *think* the call to request() in numpy_to_range_of_pairs has to be before releasing the GIL.
-  auto diag1 = numpy_to_range_of_pairs(d1, make_point);
-  auto diag2 = numpy_to_range_of_pairs(d2, make_point);
+  // I *think* the call to request() in array_to_range_of_pairs has to be before releasing the GIL.
+  auto diag1 = array_to_range_of_pairs(d1, make_point);
+  auto diag2 = array_to_range_of_pairs(d2, make_point);
 
   nb::gil_scoped_release release;
 
@@ -50,8 +50,8 @@ nb::object wasserstein_distance(
     double wasserstein_power, double internal_p,
     double delta, bool return_matching)
 {
-  auto diag1 = numpy_to_range_of_pairs(d1, make_hera_point);
-  auto diag2 = numpy_to_range_of_pairs(d2, make_hera_point);
+  auto diag1 = array_to_range_of_pairs(d1, make_hera_point);
+  auto diag2 = array_to_range_of_pairs(d2, make_hera_point);
   int n1 = boost::size(diag1);
   int n2 = boost::size(diag2);
   hera::AuctionResult<double> res;
