@@ -11,9 +11,12 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/vector.h>
 
+#include <Persistent_cohomology_interface.h>
+
 namespace nb = nanobind;
 
-using gsti = Gudhi::Simplex_tree_interface;
+using gsti  = Gudhi::Simplex_tree_interface;
+using gpers = Gudhi::Persistent_cohomology_interface<gsti>;
 
 NB_MODULE(_simplex_tree_ext, m) {
     m.attr("__license__") = "GPL v3";
@@ -279,16 +282,14 @@ NB_MODULE(_simplex_tree_ext, m) {
                     R"pbdoc(TODO)pbdoc")
             ;
     
-    nb::class_<gsti>(m, (m, "_Simplex_tree_persistence_interface")
+            nb::class_<gpers>(m, "_Simplex_tree_persistence_interface")
             .def(nb::init<gsti&, bool>())
             .def("compute_persistence",
-                &gsti::compute_persistence,
+                &gpers::compute_persistence,
                 nb::arg("homology_coeff_field"),
                 nb::arg("double min_persistence"))
-            .def("get_persistence", &gsti::get_persistence)
-            .def("cofaces_of_cubical_persistence_pairs", &gsti::cofaces_of_cubical_persistence_pairs)
-            .def("vertices_of_cubical_persistence_pairs", &gsti::vertices_of_cubical_persistence_pairs)
-            .def("betti_numbers", &gsti::betti_numbers)
-            .def("persistent_betti_numbers", &gsti::persistent_betti_numbers, nb::arg("from_value"), nb::arg("to_value"))
-            .def("intervals_in_dimension", &gsti::intervals_in_dimension, nb::arg("dimension"));
+            .def("get_persistence", &gpers::get_persistence)
+            .def("betti_numbers", &gpers::betti_numbers)
+            .def("persistent_betti_numbers", &gpers::persistent_betti_numbers, nb::arg("from_value"), nb::arg("to_value"))
+            .def("intervals_in_dimension", &gpers::intervals_in_dimension, nb::arg("dimension"));
 }
