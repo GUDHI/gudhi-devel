@@ -80,107 +80,7 @@ def class SimplexTree(t.Simplex_tree_interface):
         :returns:  The simplicial complex filtration value.
         :rtype:  float
         """
-        return self.get_ptr().simplex_filtration(simplex)
-
-    def assign_filtration(self, simplex, filtration):
-        """This function assigns a new filtration value to a
-        given N-simplex.
-
-        :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int
-        :param filtration:  The new filtration value.
-        :type filtration:  float
-
-        .. note::
-            Beware that after this operation, the structure may not be a valid
-            filtration anymore, a simplex could have a lower filtration value
-            than one of its faces. Callers are responsible for fixing this
-            (with more :meth:`assign_filtration` or
-            :meth:`make_filtration_non_decreasing` for instance) before calling
-            any function that relies on the filtration property, like
-            :meth:`persistence`.
-        """
-        self.get_ptr().assign_simplex_filtration(simplex, filtration)
-
-    def initialize_filtration(self):
-        """This function initializes and sorts the simplicial complex
-        filtration vector.
-
-        .. deprecated:: 3.2.0
-        """
-        import warnings
-        warnings.warn("Since Gudhi 3.2, calling SimplexTree.initialize_filtration is unnecessary.", DeprecationWarning)
-        self.get_ptr().initialize_filtration()
-
-    def num_vertices(self):
-        """This function returns the number of vertices of the simplicial
-        complex.
-
-        :returns:  The simplicial complex number of vertices.
-        :rtype:  int
-        """
-        return self.get_ptr().num_vertices()
-
-    def num_simplices(self):
-        """This function returns the number of simplices of the simplicial
-        complex.
-
-        :returns:  the simplicial complex number of simplices.
-        :rtype:  int
-        """
-        return self.get_ptr().num_simplices()
-
-    def is_empty(self):
-        """This function returns whether the simplicial complex is empty.
-
-        :returns:  True if the simplicial complex is empty.
-        :rtype:  bool
-        """
-        return self.get_ptr().is_empty()
-
-    def dimension(self):
-        """This function returns the dimension of the simplicial complex.
-
-        :returns:  the simplicial complex dimension.
-        :rtype:  int
-
-        .. note::
-
-            This function is not constant time because it can recompute
-            dimension if required (can be triggered by
-            :func:`remove_maximal_simplex`
-            or
-            :func:`prune_above_filtration`
-            methods).
-        """
-        return self.get_ptr().dimension()
-
-    def upper_bound_dimension(self):
-        """This function returns a valid dimension upper bound of the
-        simplicial complex.
-
-        :returns:  an upper bound on the dimension of the simplicial complex.
-        :rtype:  int
-        """
-        return self.get_ptr().upper_bound_dimension()
-
-    def set_dimension(self, dimension):
-        """This function sets the dimension of the simplicial complex.
-
-        :param dimension: The new dimension value.
-        :type dimension: int
-
-        .. note::
-
-            This function must be used with caution because it disables
-            dimension recomputation when required
-            (this recomputation can be triggered by
-            :func:`remove_maximal_simplex`
-            or
-            :func:`prune_above_filtration`
-            ).
-        """
-        self.get_ptr().set_dimension(<int>dimension)
+        return super().simplex_filtration(simplex)
 
     def find(self, simplex):
         """This function returns if the N-simplex was found in the simplicial
@@ -191,24 +91,7 @@ def class SimplexTree(t.Simplex_tree_interface):
         :returns:  true if the simplex was found, false otherwise.
         :rtype:  bool
         """
-        return self.get_ptr().find_simplex(simplex)
-
-    def insert(self, simplex, filtration=0.0):
-        """This function inserts the given N-simplex and its subfaces with the
-        given filtration value (default value is '0.0'). If some of those
-        simplices are already present with a higher filtration value, their
-        filtration value is lowered.
-
-        :param simplex: The N-simplex to insert, represented by a list of
-            vertex.
-        :type simplex: list of int
-        :param filtration: The filtration value of the simplex.
-        :type filtration: float
-        :returns:  true if the simplex was not yet in the complex, false
-            otherwise (whatever its original filtration value).
-        :rtype:  bool
-        """
-        return self.get_ptr().insert(simplex, <double>filtration)
+        return super().find_simplex(simplex)
 
     @staticmethod
     @cython.boundscheck(False)
