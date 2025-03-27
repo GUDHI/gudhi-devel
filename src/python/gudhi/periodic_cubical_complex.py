@@ -23,7 +23,7 @@ from gudhi._cubical_complex_ext import (
 
 
 # PeriodicCubicalComplex python interface
-class PeriodicCubicalComplex:
+class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
     """The PeriodicCubicalComplex is an example of a structured complex useful
     in computational mathematics (specially rigorous numerics) and image
     analysis.
@@ -82,7 +82,6 @@ class PeriodicCubicalComplex:
             of top-dimensional cells and the periodicity.
         :type perseus_file: string
         """
-        self._bitmap_complex = None
         self._pers = None
         self._built_from_vertices = False
         if perseus_file:
@@ -95,7 +94,7 @@ class PeriodicCubicalComplex:
                 raise ValueError(
                     "The Perseus file contains all the information, do not specify anything else"
                 )
-            self._bitmap_complex = _Periodic_cubical_complex_interface(perseus_file)
+            super().__init__(perseus_file)
             return
         if periodic_dimensions is None:
             raise ValueError("The periodic_dimensions must be specified")
@@ -116,31 +115,11 @@ class PeriodicCubicalComplex:
             array = np.asarray(array, order="F")
             dimensions = array.shape
             array = array.ravel(order="F")
-        self._bitmap_complex = _Periodic_cubical_complex_interface(
-            dimensions, array, periodic_dimensions, vertices is None
-        )
-
-    def _is_defined(self):
-        """Returns true if PeriodicCubicalComplex pointer is not None."""
-        return self._bitmap_complex != None
+        super().__init__(dimensions, array, periodic_dimensions, vertices is None)
 
     def _is_persistence_defined(self):
         """Returns true if Persistence pointer is not None."""
         return self._pers != None
-
-    def num_simplices(self):
-        """This function returns the number of all cubes in the complex.
-
-        :returns:  int -- the number of all cubes in the complex.
-        """
-        return self._bitmap_complex.num_simplices()
-
-    def dimension(self):
-        """This function returns the dimension of the complex.
-
-        :returns:  int -- the complex dimension.
-        """
-        return self._bitmap_complex.dimension()
 
     def all_cells(self):
         """Array with the filtration values of all the cells of the complex.
@@ -148,12 +127,12 @@ class PeriodicCubicalComplex:
 
         :returns:  numpy.ndarray
         """
-        a = self._bitmap_complex.get_numpy_array()
+        a = super().get_numpy_array()
         return a.reshape(
             [
                 2 * d + (not p)
                 for (d, p) in zip(
-                    self._bitmap_complex.shape(), self._bitmap_complex.periodicities()
+                    super().shape(), super().periodicities()
                 )
             ],
             order="F",
@@ -165,7 +144,7 @@ class PeriodicCubicalComplex:
 
         :returns:  numpy.ndarray
         """
-        return self.all_cells()[(slice(1, None, 2),) * self._bitmap_complex.dimension()]
+        return self.all_cells()[(slice(1, None, 2),) * super().dimension()]
 
     def vertices(self):
         """Array with the filtration values of the vertices of the complex.
@@ -173,7 +152,7 @@ class PeriodicCubicalComplex:
 
         :returns:  numpy.ndarray
         """
-        return self.all_cells()[(slice(0, None, 2),) * self._bitmap_complex.dimension()]
+        return self.all_cells()[(slice(0, None, 2),) * super().dimension()]
 
     def compute_persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function computes the persistence of the complex, so it can be
@@ -192,10 +171,7 @@ class PeriodicCubicalComplex:
         :type min_persistence: float.
         :returns: Nothing.
         """
-        assert self._is_defined()
-        self._pers = _Periodic_cubical_complex_persistence_interface(
-            self._bitmap_complex, True
-        )
+        self._pers = _Periodic_cubical_complex_persistence_interface(super(), True)
         self._pers.compute_persistence(homology_coeff_field, min_persistence)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):
