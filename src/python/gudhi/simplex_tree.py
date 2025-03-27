@@ -141,7 +141,7 @@ def class SimplexTree(t.Simplex_tree_interface):
         self.get_ptr().insert_batch_vertices(np.unique(np.stack((edges.row, edges.col))), INFINITY)
         # TODO: optimize this?
         for edge in zip(edges.row, edges.col, edges.data):
-            self.get_ptr().insert((edge[0], edge[1]), edge[2])
+            self().insert((edge[0], edge[1]), edge[2])
 
     @cython.boundscheck(False)
     @cython.wraparound(False)
@@ -284,123 +284,6 @@ def class SimplexTree(t.Simplex_tree_interface):
             yield self.get_ptr().get_simplex_and_filtration(dereference(it.first))
             preincrement(it.first)
 
-    def remove_maximal_simplex(self, simplex):
-        """This function removes a given maximal N-simplex from the simplicial
-        complex.
-
-        :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int
-
-        .. note::
-
-            The dimension of the simplicial complex may be lower after calling
-            remove_maximal_simplex than it was before. However,
-            :func:`upper_bound_dimension`
-            method will return the old value, which
-            remains a valid upper bound. If you care, you can call
-            :func:`dimension`
-            to recompute the exact dimension.
-        """
-        self.get_ptr().remove_maximal_simplex(simplex)
-
-    def prune_above_filtration(self, filtration):
-        """Prune above filtration value given as parameter.
-
-        :param filtration: Maximum threshold value.
-        :type filtration: float
-        :returns: The filtration modification information.
-        :rtype: bool
-
-
-        .. note::
-
-            Note that the dimension of the simplicial complex may be lower
-            after calling
-            :func:`prune_above_filtration`
-            than it was before. However,
-            :func:`upper_bound_dimension`
-            will return the old value, which remains a
-            valid upper bound. If you care, you can call
-            :func:`dimension`
-            method to recompute the exact dimension.
-        """
-        return self.get_ptr().prune_above_filtration(filtration)
-
-    def prune_above_dimension(self, dimension):
-        """Remove all simplices of dimension greater than a given value.
-
-        :param dimension: Maximum dimension value.
-        :type dimension: int
-        :returns: The modification information.
-        :rtype: bool
-        """
-        return self.get_ptr().prune_above_dimension(dimension)
-
-    def expansion(self, max_dimension):
-        """Expands the simplex tree containing only its one skeleton
-        until dimension max_dim.
-
-        The expanded simplicial complex until dimension :math:`d`
-        attached to a graph :math:`G` is the maximal simplicial complex of
-        dimension at most :math:`d` admitting the graph :math:`G` as
-        :math:`1`-skeleton.
-        The filtration value assigned to a simplex is the maximal filtration
-        value of one of its edges.
-
-        The simplex tree must contain no simplex of dimension bigger than
-        1 when calling the method.
-
-        :param max_dimension: The maximal dimension.
-        :type max_dimension: int
-        """
-        cdef int maxdim = max_dimension
-        with nogil:
-            self.get_ptr().expansion(maxdim)
-
-    def make_filtration_non_decreasing(self):
-        """This function ensures that each simplex has a higher filtration
-        value than its faces by increasing the filtration values.
-
-        :returns: True if any filtration value was modified,
-            False if the filtration was already non-decreasing.
-        :rtype: bool
-        """
-        return self.get_ptr().make_filtration_non_decreasing()
-
-    def reset_filtration(self, filtration, min_dim = 0):
-        """This function resets the filtration value of all the simplices of dimension at least min_dim. Resets all the
-        simplex tree when `min_dim = 0`.
-        `reset_filtration` may break the filtration property with `min_dim > 0`, and it is the user's responsibility to
-        make it a valid filtration (using a large enough `filt_value`, or calling `make_filtration_non_decreasing`
-        afterwards for instance).
-
-        :param filtration: New threshold value.
-        :type filtration: float.
-        :param min_dim: The minimal dimension. Default value is 0.
-        :type min_dim: int.
-        """
-        self.get_ptr().reset_filtration(filtration, min_dim)
-
-    def extend_filtration(self):
-        """ Extend filtration for computing extended persistence. This function only uses the filtration values at the
-        0-dimensional simplices, and computes the extended persistence diagram induced by the lower-star filtration
-        computed with these values.
-
-        .. note::
-
-            Note that after calling this function, the filtration values are actually modified within the simplex tree.
-            The function :func:`extended_persistence` retrieves the original values.
-
-        .. note::
-
-            Note that this code creates an extra vertex internally, so you should make sure that the simplex tree does
-            not contain a vertex with the largest possible value (i.e., 4294967295).
-
-        This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
-        explains how to compute an extension of persistence called extended persistence.
-        """
-        self.get_ptr().compute_extended_filtration()
-
     def extended_persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function retrieves good values for extended persistence, and separate the diagrams into the Ordinary,
         Relative, Extended+ and Extended- subdiagrams.
@@ -456,7 +339,7 @@ def class SimplexTree(t.Simplex_tree_interface):
         :param blocker_func: Blocker oracle.
         :type blocker_func: Callable[[List[int]], bool]
         """
-        self.get_ptr().expansion_with_blockers_callback(max_dim, callback, <void*>blocker_func)
+        super().expansion_with_blockers_callback(max_dim, callback, <void*>blocker_func)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function computes and returns the persistence of the simplicial complex.
@@ -477,7 +360,7 @@ def class SimplexTree(t.Simplex_tree_interface):
         :rtype:  list of pairs(dimension, pair(birth, death))
         """
         self.compute_persistence(homology_coeff_field, min_persistence, persistence_dim_max)
-        return self.pcohptr.get_persistence()
+        return self._pers.get_persistence()
 
     def compute_persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function computes the persistence of the simplicial complex, so it can be accessed through
@@ -498,14 +381,13 @@ def class SimplexTree(t.Simplex_tree_interface):
         :type persistence_dim_max: bool
         :returns: Nothing.
         """
-        if self.pcohptr != NULL:
-            del self.pcohptr
-        cdef bool pdm = persistence_dim_max
-        cdef int coef = homology_coeff_field
-        cdef double minp = min_persistence
-        with nogil:
-            self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), pdm)
-            self.pcohptr.compute_persistence(coef, minp)
+        if self._pers != None:
+            del self.ppers
+        pdm = persistence_dim_max
+        coef = homology_coeff_field
+        minp = min_persistence
+        self._pers = Simplex_tree_persistence_interface(self, pdm)
+        self._pers.compute_persistence(coef, minp)
 
     def betti_numbers(self):
         """This function returns the Betti numbers of the simplicial complex.
