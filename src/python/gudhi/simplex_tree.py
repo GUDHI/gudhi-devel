@@ -399,8 +399,8 @@ def class SimplexTree(t.Simplex_tree_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert self.pcohptr != NULL, "compute_persistence() must be called before betti_numbers()"
-        return self.pcohptr.betti_numbers()
+        assert self._pers != None, "compute_persistence() must be called before betti_numbers()"
+        return self._pers.betti_numbers()
 
     def persistent_betti_numbers(self, from_value, to_value):
         """This function returns the persistent Betti numbers of the
@@ -420,8 +420,8 @@ def class SimplexTree(t.Simplex_tree_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert self.pcohptr != NULL, "compute_persistence() must be called before persistent_betti_numbers()"
-        return self.pcohptr.persistent_betti_numbers(<double>from_value, <double>to_value)
+        assert self._pers != None, "compute_persistence() must be called before persistent_betti_numbers()"
+        return self._pers.persistent_betti_numbers((float(from_value), float(to_value))
 
     def persistence_intervals_in_dimension(self, dimension):
         """This function returns the persistence intervals of the simplicial
@@ -436,8 +436,8 @@ def class SimplexTree(t.Simplex_tree_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert self.pcohptr != NULL, "compute_persistence() must be called before persistence_intervals_in_dimension()"
-        piid = np.array(self.pcohptr.intervals_in_dimension(dimension))
+        assert self._pers != None, "compute_persistence() must be called before persistence_intervals_in_dimension()"
+        piid = np.array(self._pers.intervals_in_dimension(dimension))
         # Workaround https://github.com/GUDHI/gudhi-devel/issues/507
         if len(piid) == 0:
             return np.empty(shape = [0, 2])
@@ -453,8 +453,8 @@ def class SimplexTree(t.Simplex_tree_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert self.pcohptr != NULL, "compute_persistence() must be called before persistence_pairs()"
-        return self.pcohptr.persistence_pairs()
+        assert self._pers != None, "compute_persistence() must be called before persistence_pairs()"
+        return self._pers.persistence_pairs()
 
     def write_persistence_diagram(self, persistence_file):
         """This function writes the persistence intervals of the simplicial
@@ -467,8 +467,8 @@ def class SimplexTree(t.Simplex_tree_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert self.pcohptr != NULL, "compute_persistence() must be called before write_persistence_diagram()"
-        self.pcohptr.write_output_diagram(persistence_file.encode('utf-8'))
+        assert self._pers != None, "compute_persistence() must be called before write_persistence_diagram()"
+        self._pers.write_output_diagram(persistence_file.encode('utf-8'))
 
     def lower_star_persistence_generators(self):
         """Assuming this is a lower-star filtration, this function returns the persistence pairs,
@@ -480,8 +480,8 @@ def class SimplexTree(t.Simplex_tree_interface):
 
         :note: lower_star_persistence_generators requires that `persistence()` be called first.
         """
-        assert self.pcohptr != NULL, "lower_star_persistence_generators() requires that persistence() be called first."
-        gen = self.pcohptr.lower_star_generators()
+        assert self._pers != None, "lower_star_persistence_generators() requires that persistence() be called first."
+        gen = self._pers.lower_star_generators()
         normal = [np.array(d).reshape(-1,2) for d in gen.first]
         infinite = [np.array(d) for d in gen.second]
         return (normal, infinite)
@@ -498,8 +498,8 @@ def class SimplexTree(t.Simplex_tree_interface):
 
         :note: flag_persistence_generators requires that `persistence()` be called first.
         """
-        assert self.pcohptr != NULL, "flag_persistence_generators() requires that persistence() be called first."
-        gen = self.pcohptr.flag_generators()
+        assert self._pers != None, "flag_persistence_generators() requires that persistence() be called first."
+        gen = self._pers.flag_generators()
         if len(gen.first) == 0:
             normal0 = np.empty((0,3))
             normals = []
@@ -532,8 +532,7 @@ def class SimplexTree(t.Simplex_tree_interface):
         if nb_iterations < 1:
             return
         cdef int nb_iter = nb_iterations
-        with nogil:
-            self.get_ptr().collapse_edges(nb_iter)
+        super().collapse_edges(nb_iter)
 
     def __eq__(self, other:SimplexTree):
         """:returns: True if the 2 complexes have the same simplices with the same filtration values, False otherwise.
