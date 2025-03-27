@@ -1,37 +1,18 @@
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-# Author(s):       Vincent Rouvreau
+# Author(s):       Alexis Gobé
 #
-# Copyright (C) 2016 Inria
+# Copyright (C) 2025 Inria
 #
 # Modification(s):
-#   - 2023/02 Vincent Rouvreau: Add serialize/deserialize for pickle feature
 #   - YYYY/MM Author: Description of the modification
 
-from cython.operator import dereference, preincrement
-from libc.stdint cimport intptr_t, int32_t, int64_t
+from gudhi import _simplex_tree_ext as t
+
 import numpy as np
-cimport gudhi.simplex_tree
-cimport cython
-from numpy.math cimport INFINITY
-
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
-
-ctypedef fused some_int:
-    int32_t
-    int64_t
-
-ctypedef fused some_float:
-    float
-    double
-
-cdef bool callback(vector[int] simplex, void *blocker_func):
-    return (<object>blocker_func)(simplex)
 
 # SimplexTree python interface
-cdef class SimplexTree:
+def class SimplexTree(t.Simplex_tree_interface):
     """The simplex tree is an efficient and flexible data structure for
     representing general (filtered) simplicial complexes. The data structure
     is described in Jean-Daniel Boissonnat and Clément Maria. The Simplex
@@ -41,15 +22,6 @@ cdef class SimplexTree:
     This class is a filtered, with keys, and non contiguous vertices version
     of the simplex tree.
     """
-    # unfortunately 'cdef public Simplex_tree_python_interface* thisptr' is not possible
-    # Use intptr_t instead to cast the pointer
-    cdef public intptr_t thisptr
-
-    # Get the pointer casted as it should be
-    cdef Simplex_tree_python_interface* get_ptr(self) nogil:
-        return <Simplex_tree_python_interface*>(self.thisptr)
-
-    cdef Simplex_tree_persistence_interface * pcohptr
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, other = None):
@@ -65,23 +37,14 @@ cdef class SimplexTree:
         :note: If the `SimplexTree` is a copy, the persistence information is not copied. If you need it in the clone,
             you have to call :func:`compute_persistence` on it even if you had already computed it in the original.
         """
-
-    # The real cython constructor
-    def __cinit__(self, other = None):
         if other:
             if isinstance(other, SimplexTree):
-                self.thisptr = _get_copy_intptr(other)
+                self = other
+                self._pers = other._pers
             else:
                 raise TypeError("`other` argument requires to be of type `SimplexTree`, or `None`.")
         else:
             self.thisptr = <intptr_t>(new Simplex_tree_python_interface())
-
-    def __dealloc__(self):
-        cdef Simplex_tree_python_interface* ptr = self.get_ptr()
-        if ptr != NULL:
-            del ptr
-        if self.pcohptr != NULL:
-            del self.pcohptr
 
     def _is_defined(self):
         """Returns true if SimplexTree pointer is not NULL.
@@ -89,7 +52,7 @@ cdef class SimplexTree:
         return self.get_ptr() != NULL
 
     def _is_persistence_defined(self):
-        """Returns true if Persistence pointer is not NULL.
+        """Returns true if Persistence pointer is not None.
          """
         return self.pcohptr != NULL
 
