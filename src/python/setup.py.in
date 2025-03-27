@@ -10,11 +10,9 @@
 """
 
 from setuptools import setup, Extension, find_packages
-# from Cython.Build import cythonize
 from numpy import get_include as numpy_get_include
 import nanobind
 
-# cython_modules = [@GUDHI_CYTHON_MODULES@]
 nanobind_modules = [] # [@GUDHI_NANOBIND_MODULES@]
 
 source_dir='gudhi/'
@@ -27,20 +25,6 @@ runtime_library_dirs=[@GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS@]
 
 # Create ext_modules list from module list
 ext_modules = []
-# for module in cython_modules:
-#     ext_modules.append(Extension(
-#         'gudhi.' + module,
-#         sources = [source_dir + module + '.pyx',],
-#         language = 'c++',
-#         define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
-#         extra_compile_args=extra_compile_args,
-#         extra_link_args=extra_link_args,
-#         libraries=libraries,
-#         library_dirs=library_dirs,
-#         include_dirs=include_dirs,
-#         runtime_library_dirs=runtime_library_dirs,))
-
-# ext_modules = cythonize(ext_modules, compiler_directives={'language_level': '3'})
 
 for module in nanobind_modules:
     my_include_dirs = include_dirs + [nanobind.include_dir()]
