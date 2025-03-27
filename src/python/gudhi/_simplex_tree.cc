@@ -33,23 +33,69 @@ NB_MODULE(_simplex_tree_ext, m) {
                     R"pbdoc(TODO)pbdoc")
             .def("num_vertices",
                     &gsti::num_vertices,
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc("""This function returns the number of vertices of the simplicial
+        complex.
+
+        :returns:  The simplicial complex number of vertices.
+        :rtype:  int
+        """)pbdoc")
             .def("num_simplices",
                     nb::overload_cast<>(&gsti::num_simplices, nb::const_),
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc("""This function returns the number of simplices of the simplicial
+        complex.
+
+        :returns:  the simplicial complex number of simplices.
+        :rtype:  int
+        """)pbdoc")
             .def("is_empty",
                     &gsti::is_empty,
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc("""This function returns whether the simplicial complex is empty.
+
+        :returns:  True if the simplicial complex is empty.
+        :rtype:  bool
+        """)pbdoc")
             .def("set_dimension",
                     &gsti::set_dimension,
                     nb::arg("dimension"), nb::arg("exact")=true,
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc("""This function sets the dimension of the simplicial complex.
+
+        :param dimension: The new dimension value.
+        :type dimension: int
+
+        .. note::
+
+            This function must be used with caution because it disables
+            dimension recomputation when required
+            (this recomputation can be triggered by
+            :func:`remove_maximal_simplex`
+            or
+            :func:`prune_above_filtration`
+            ).
+        """)pbdoc")
             .def("dimension",
                     nb::overload_cast<>(&gsti::dimension, nb::const_),
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc("""This function returns the dimension of the simplicial complex.
+
+        :returns:  the simplicial complex dimension.
+        :rtype:  int
+
+        .. note::
+
+            This function is not constant time because it can recompute
+            dimension if required (can be triggered by
+            :func:`remove_maximal_simplex`
+            or
+            :func:`prune_above_filtration`
+            methods).
+        """)pbdoc")
             .def("upper_bound_dimension",
                     &gsti::upper_bound_dimension,
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc("""This function returns a valid dimension upper bound of the
+        simplicial complex.
+
+        :returns:  an upper bound on the dimension of the simplicial complex.
+        :rtype:  int
+        """)pbdoc")
             .def("find_simplex",
                     &gsti::find_simplex,
                     nb::arg("simplex"),
@@ -57,7 +103,20 @@ NB_MODULE(_simplex_tree_ext, m) {
             .def("insert",
                     &gsti::insert,
                     nb::arg("simplex"), nb::arg("filtration"),
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc("""This function inserts the given N-simplex and its subfaces with the
+        given filtration value (default value is '0.0'). If some of those
+        simplices are already present with a higher filtration value, their
+        filtration value is lowered.
+
+        :param simplex: The N-simplex to insert, represented by a list of
+            vertex.
+        :type simplex: list of int
+        :param filtration: The filtration value of the simplex.
+        :type filtration: float
+        :returns:  true if the simplex was not yet in the complex, false
+            otherwise (whatever its original filtration value).
+        :rtype:  bool
+        """)pbdoc")
             .def("insert_matrix",
                     &gsti::insert_matrix,
                     nb::arg("filtrations"), nb::arg("n"), nb::arg("stride0"), nb::arg("stride1"), nb::arg("max_filtration"),
