@@ -135,25 +135,102 @@ NB_MODULE(_simplex_tree_ext, m) {
             .def("expansion",
                     &gsti::expansion,
                     nb::arg("max_dim"),
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc("""Expands the simplex tree containing only its one skeleton
+        until dimension max_dim.
+
+        The expanded simplicial complex until dimension :math:`d`
+        attached to a graph :math:`G` is the maximal simplicial complex of
+        dimension at most :math:`d` admitting the graph :math:`G` as
+        :math:`1`-skeleton.
+        The filtration value assigned to a simplex is the maximal filtration
+        value of one of its edges.
+
+        The simplex tree must contain no simplex of dimension bigger than
+        1 when calling the method.
+
+        :param max_dimension: The maximal dimension.
+        :type max_dimension: int
+        """)pbdoc")
             .def("remove_maximal_simplex",
                     &gsti::remove_maximal_simplex,
                     nb::arg("simplex"),
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc("""This function removes a given maximal N-simplex from the simplicial
+        complex.
+
+        :param simplex: The N-simplex, represented by a list of vertex.
+        :type simplex: list of int
+
+        .. note::
+
+            The dimension of the simplicial complex may be lower after calling
+            remove_maximal_simplex than it was before. However,
+            :func:`upper_bound_dimension`
+            method will return the old value, which
+            remains a valid upper bound. If you care, you can call
+            :func:`dimension`
+            to recompute the exact dimension.
+        """)pbdoc")
             .def("prune_above_filtration",
                     &gsti::prune_above_filtration,
                     nb::arg("filtration"),
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc(        """Prune above filtration value given as parameter.
+
+        :param filtration: Maximum threshold value.
+        :type filtration: float
+        :returns: The filtration modification information.
+        :rtype: bool
+
+
+        .. note::
+
+            Note that the dimension of the simplicial complex may be lower
+            after calling
+            :func:`prune_above_filtration`
+            than it was before. However,
+            :func:`upper_bound_dimension`
+            will return the old value, which remains a
+            valid upper bound. If you care, you can call
+            :func:`dimension`
+            method to recompute the exact dimension.
+        """)pbdoc")
             .def("prune_above_dimension",
                     &gsti::prune_above_dimension,
                     nb::arg("dimension"),
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc("""Remove all simplices of dimension greater than a given value.
+
+        :param dimension: Maximum dimension value.
+        :type dimension: int
+        :returns: The modification information.
+        :rtype: bool
+        """)pbdoc")
             .def("make_filtration_non_decreasing",
                     &gsti::make_filtration_non_decreasing,
-                    R"pbdoc(TODO)pbdoc")
-            .def("compute_extended_filtration",
+                    R"pbdoc(        """This function ensures that each simplex has a higher filtration
+        value than its faces by increasing the filtration values.
+
+        :returns: True if any filtration value was modified,
+            False if the filtration was already non-decreasing.
+        :rtype: bool
+        """)pbdoc")
+            .def("extend_filtration",
                     &gsti::compute_extended_filtration,
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc(""" Extend filtration for computing extended persistence. This function only uses the filtration values at the
+        0-dimensional simplices, and computes the extended persistence diagram induced by the lower-star filtration
+        computed with these values.
+
+        .. note::
+
+            Note that after calling this function, the filtration values are actually modified within the simplex tree.
+            The function :func:`extended_persistence` retrieves the original values.
+
+        .. note::
+
+            Note that this code creates an extra vertex internally, so you should make sure that the simplex tree does
+            not contain a vertex with the largest possible value (i.e., 4294967295).
+
+        This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
+        explains how to compute an extension of persistence called extended persistence.
+        """)pbdoc")
             .def("collapse_edges",
                     &gsti::collapse_edges,
                     nb::arg("nb_collapse_iteration"),
@@ -161,7 +238,17 @@ NB_MODULE(_simplex_tree_ext, m) {
             .def("reset_filtration",
                     &gsti::reset_filtration,
                     nb::arg("filtration"), nb::arg("dimension")=0,
-                    R"pbdoc(TODO)pbdoc")
+                    R"pbdoc("""This function resets the filtration value of all the simplices of dimension at least min_dim. Resets all the
+        simplex tree when `min_dim = 0`.
+        `reset_filtration` may break the filtration property with `min_dim > 0`, and it is the user's responsibility to
+        make it a valid filtration (using a large enough `filt_value`, or calling `make_filtration_non_decreasing`
+        afterwards for instance).
+
+        :param filtration: New threshold value.
+        :type filtration: float.
+        :param min_dim: The minimal dimension. Default value is 0.
+        :type min_dim: int.
+        """)pbdoc")
             .def("get_simplex_and_filtration",
                     &gsti::get_simplex_and_filtration,
                     nb::arg("f_simplex"),
@@ -193,7 +280,7 @@ NB_MODULE(_simplex_tree_ext, m) {
             ;
     
     nb::class_<gsti>(m, (m, "_Simplex_tree_persistence_interface")
-            .def(nb::init<CC&, bool>())
+            .def(nb::init<gsti&, bool>())
             .def("compute_persistence",
                 &gsti::compute_persistence,
                 nb::arg("homology_coeff_field"),
