@@ -15,7 +15,7 @@ namespace nb = nanobind;
 
 using gsti = Gudhi::Simplex_tree_interface;
 
-NB_MODULE(simplex_tree_ext, m) {
+NB_MODULE(_simplex_tree_ext, m) {
     m.attr("__license__") = "GPL v3";
 
     nb::class_<gsti>(m, "Simplex_tree_interface")
@@ -132,4 +132,17 @@ NB_MODULE(simplex_tree_ext, m) {
                     nb::arg("simplex"),
                     R"pbdoc(TODO)pbdoc")
             ;
+    
+    nb::class_<gsti>(m, (m, "_Simplex_tree_persistence_interface")
+            .def(nb::init<CC&, bool>())
+            .def("compute_persistence",
+                &gsti::compute_persistence,
+                nb::arg("homology_coeff_field"),
+                nb::arg("double min_persistence"))
+            .def("get_persistence", &gsti::get_persistence)
+            .def("cofaces_of_cubical_persistence_pairs", &gsti::cofaces_of_cubical_persistence_pairs)
+            .def("vertices_of_cubical_persistence_pairs", &gsti::vertices_of_cubical_persistence_pairs)
+            .def("betti_numbers", &gsti::betti_numbers)
+            .def("persistent_betti_numbers", &gsti::persistent_betti_numbers, nb::arg("from_value"), nb::arg("to_value"))
+            .def("intervals_in_dimension", &gsti::intervals_in_dimension, nb::arg("dimension"));
 }
