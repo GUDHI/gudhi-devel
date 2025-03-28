@@ -12,7 +12,7 @@ from gudhi import _delaunay_complex_ext as t
 from typing import Literal, Optional
 from collections.abc import Iterable
 
-from gudhi.simplex_tree_ext import Simplex_tree_interface
+from gudhi.simplex_tree import SimplexTree
 
 # DelaunayComplex python interface
 class DelaunayComplex(t.Delaunay_complex_interface):
@@ -53,7 +53,7 @@ class DelaunayComplex(t.Delaunay_complex_interface):
 
     def create_simplex_tree(self, max_alpha_square: float = float('inf'),
                             filtration: Optional[Literal['alpha', 'cech']] = None,
-                            output_squared_values: bool = True) -> Simplex_tree_interface:
+                            output_squared_values: bool = True) -> SimplexTree:
         """
         Args:
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
@@ -76,8 +76,9 @@ class DelaunayComplex(t.Delaunay_complex_interface):
         elif filtration == 'alpha':
             filt = t.Filtration.ALPHA
 
-        return super().create_simplex_tree(max_alpha_square, filt, output_squared_values)
-
+        stree = SimplexTree()
+        super().create_simplex_tree(stree, max_alpha_square, filt, output_squared_values)
+        return stree
 
 class AlphaComplex(DelaunayComplex):
     """AlphaComplex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
@@ -97,7 +98,7 @@ class AlphaComplex(DelaunayComplex):
     """
     def create_simplex_tree(self, max_alpha_square: float = float('inf'),
                             default_filtration_value: bool = False,
-                            output_squared_values: bool = True) -> Simplex_tree_interface:
+                            output_squared_values: bool = True) -> SimplexTree:
         """
         Args:
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
@@ -142,7 +143,7 @@ class DelaunayCechComplex(DelaunayComplex):
         super().__init__(points = points, weights = None, precision = precision)
 
     def create_simplex_tree(self, max_alpha_square: float = float('inf'),
-                            output_squared_values: bool = True) -> Simplex_tree_interface:
+                            output_squared_values: bool = True) -> SimplexTree:
         """
         Args:
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
