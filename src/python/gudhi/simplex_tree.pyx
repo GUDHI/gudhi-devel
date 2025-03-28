@@ -30,8 +30,8 @@ ctypedef fused some_float:
 cdef bool callback(vector[int] simplex, void *blocker_func):
     return (<object>blocker_func)(simplex)
 
-# SimplexTree python interface
-cdef class SimplexTree:
+# SimplexTreeCython python interface
+cdef class SimplexTreeCython:
     """The simplex tree is an efficient and flexible data structure for
     representing general (filtered) simplicial complexes. The data structure
     is described in Jean-Daniel Boissonnat and Clément Maria. The Simplex
@@ -53,26 +53,26 @@ cdef class SimplexTree:
 
     # Fake constructor that does nothing but documenting the constructor
     def __init__(self, other = None):
-        """SimplexTree constructor.
+        """SimplexTreeCython constructor.
 
-        :param other: If `other` is `None` (default value), an empty `SimplexTree` is created.
-            If `other` is a `SimplexTree`, the `SimplexTree` is constructed from a deep copy of `other`.
-        :type other: SimplexTree (Optional)
+        :param other: If `other` is `None` (default value), an empty `SimplexTreeCython` is created.
+            If `other` is a `SimplexTreeCython`, the `SimplexTreeCython` is constructed from a deep copy of `other`.
+        :type other: SimplexTreeCython (Optional)
         :returns: An empty or a copy simplex tree.
-        :rtype: SimplexTree
+        :rtype: SimplexTreeCython
 
-        :raises TypeError: In case `other` is neither `None`, nor a `SimplexTree`.
-        :note: If the `SimplexTree` is a copy, the persistence information is not copied. If you need it in the clone,
+        :raises TypeError: In case `other` is neither `None`, nor a `SimplexTreeCython`.
+        :note: If the `SimplexTreeCython` is a copy, the persistence information is not copied. If you need it in the clone,
             you have to call :func:`compute_persistence` on it even if you had already computed it in the original.
         """
 
     # The real cython constructor
     def __cinit__(self, other = None):
         if other:
-            if isinstance(other, SimplexTree):
+            if isinstance(other, SimplexTreeCython):
                 self.thisptr = _get_copy_intptr(other)
             else:
-                raise TypeError("`other` argument requires to be of type `SimplexTree`, or `None`.")
+                raise TypeError("`other` argument requires to be of type `SimplexTreeCython`, or `None`.")
         else:
             self.thisptr = <intptr_t>(new Simplex_tree_python_interface())
 
@@ -84,7 +84,7 @@ cdef class SimplexTree:
             del self.pcohptr
 
     def _is_defined(self):
-        """Returns true if SimplexTree pointer is not NULL.
+        """Returns true if SimplexTreeCython pointer is not NULL.
          """
         return self.get_ptr() != NULL
 
@@ -96,12 +96,12 @@ cdef class SimplexTree:
     def copy(self):
         """ 
         :returns: A simplex tree that is a deep copy of itself.
-        :rtype: SimplexTree
+        :rtype: SimplexTreeCython
 
         :note: The persistence information is not copied. If you need it in the clone, you have to call
             :func:`compute_persistence` on it even if you had already computed it in the original.
         """
-        stree = SimplexTree()
+        stree = SimplexTreeCython()
         stree.thisptr = _get_copy_intptr(self)
         return stree
 
@@ -146,7 +146,7 @@ cdef class SimplexTree:
         .. deprecated:: 3.2.0
         """
         import warnings
-        warnings.warn("Since Gudhi 3.2, calling SimplexTree.initialize_filtration is unnecessary.", DeprecationWarning)
+        warnings.warn("Since Gudhi 3.2, calling SimplexTreeCython.initialize_filtration is unnecessary.", DeprecationWarning)
         self.get_ptr().initialize_filtration()
 
     def num_vertices(self):
@@ -266,12 +266,12 @@ cdef class SimplexTree:
         :param max_filtration: only insert vertices and edges with filtration values no larger than max_filtration
         :type max_filtration: float
         :returns: the new complex
-        :rtype: SimplexTree
+        :rtype: SimplexTreeCython
         """
         # TODO: document which half of the matrix is actually read?
         filtrations = np.asanyarray(filtrations, dtype=float)
         cdef double[:,:] F = filtrations
-        ret = SimplexTree()
+        ret = SimplexTreeCython()
         cdef int n = F.shape[0]
         assert n == F.shape[1], 'create_from_array() expects a square array'
         with nogil:
@@ -807,14 +807,14 @@ cdef class SimplexTree:
         with nogil:
             self.get_ptr().collapse_edges(nb_iter)
 
-    def __eq__(self, other:SimplexTree):
+    def __eq__(self, other:SimplexTreeCython):
         """:returns: True if the 2 complexes have the same simplices with the same filtration values, False otherwise.
         :rtype: bool
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
     
     def __getstate__(self):
-        """:returns: Serialized (or flattened) SimplexTree data structure in order to pickle SimplexTree.
+        """:returns: Serialized (or flattened) SimplexTreeCython data structure in order to pickle SimplexTreeCython.
         :rtype: numpy.array of shape (n,)
         """
         cdef size_t buffer_size = self.get_ptr().get_serialization_size()
@@ -828,21 +828,21 @@ cdef class SimplexTree:
         return np_buffer
 
     def __setstate__(self, state):
-        """Construct the SimplexTree data structure from a Numpy Array (cf. :func:`~gudhi.SimplexTree.__getstate__`)
-        in order to unpickle a SimplexTree.
+        """Construct the SimplexTreeCython data structure from a Numpy Array (cf. :func:`~gudhi.SimplexTreeCython.__getstate__`)
+        in order to unpickle a SimplexTreeCython.
         
-        :param state: Serialized SimplexTree data structure
+        :param state: Serialized SimplexTreeCython data structure
         :type state: numpy.array of shape (n,)
         """
         cdef char[:] buffer = state
         cdef size_t buffer_size = state.shape[0]
         cdef char* buffer_start = &buffer[0]
         with nogil:
-            # deserialization requires an empty SimplexTree
+            # deserialization requires an empty SimplexTreeCython
             self.get_ptr().clear()
             # New pointer is a deserialized simplex tree
             self.get_ptr().deserialize(buffer_start, buffer_size)
 
 
-cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
+cdef intptr_t _get_copy_intptr(SimplexTreeCython stree) nogil:
     return <intptr_t>(new Simplex_tree_python_interface(dereference(stree.get_ptr())))

@@ -154,19 +154,70 @@ namespace gtc = Gudhi::tangential_complex;
 using gtci = gtc::Tangential_complex_interface;
 
 NB_MODULE(_tangential_complex_ext, m) {
-    m.attr("__license__") = "GPL v3";
+  m.attr("__license__") = "GPL v3";
 
-    nb::class_<gtci>(m, "Tangential_complex_interface")
-            .def(nb::init<int, const std::vector<std::vector<double>>&>(), "")
-            .def(nb::init<int, const std::string&, bool>(), "")
-            .def("compute_tangential_complex", &gtci::compute_tangential_complex, "")
-            .def("get_point", &gtci::get_point, "")
-            .def("number_of_vertices", &gtci::number_of_vertices, "")
-            .def("number_of_simplices", &gtci::number_of_simplices, "")
-            .def("number_of_inconsistent_simplices", &gtci::number_of_inconsistent_simplices, "")
-            .def("number_of_inconsistent_stars", &gtci::number_of_inconsistent_stars, "")
-            .def("fix_inconsistencies_using_perturbation", &gtci::fix_inconsistencies_using_perturbation, "")
-            .def("set_max_squared_edge_length", &gtci::set_max_squared_edge_length, "");
+  nb::class_<gtci>(m, "Tangential_complex_interface")
+      .def(nb::init<int, const std::vector<std::vector<double>>&>(), "")
+      .def(nb::init<int, const std::string&, bool>(), "")
+      .def("compute_tangential_complex", &gtci::compute_tangential_complex,
+R"doc(
+    This function computes the tangential complex.
+
+Raises:
+ValueError: In debug mode, if the computed star dimension is too low.
+            Try to set a bigger maximal edge length value with
+            :meth:`set_max_squared_edge_length` if this happens.
+)doc")
+      .def("get_point", &gtci::get_point,
+R"doc(
+    This function returns the point corresponding to a given vertex.
+    Args:
+        arg (int): The vertex id.
+    Returns:
+        list of float: The coordinates of the vertex.
+)doc")
+      .def("number_of_vertices", &gtci::number_of_vertices,
+R"doc(
+    Returns:
+        int: The number of vertices.
+)doc")
+      .def("number_of_simplices", &gtci::number_of_simplices,
+R"doc(
+    Returns:
+        int: Total number of simplices in stars (including duplicates that appear in several stars).
+)doc")
+      .def("number_of_inconsistent_simplices", &gtci::number_of_inconsistent_simplices,
+R"doc(
+    Returns:
+        int: The number of inconsistent simplices.
+)doc")
+      .def("number_of_inconsistent_stars", &gtci::number_of_inconsistent_stars,
+R"doc(
+    Returns:
+        int: The number of stars containing at least one inconsistent simplex.
+)doc")
+      .def("create_simplex_tree", &gtci::create_simplex_tree,
+R"doc(
+    Exports the complex into a simplex tree.
+    Returns:
+        SimplexTree: A simplex tree created from the complex.
+)doc")
+      .def("fix_inconsistencies_using_perturbation", &gtci::fix_inconsistencies_using_perturbation,
+R"doc(
+    Attempts to fix inconsistencies by perturbing the point positions.
+    Args:
+        arg1 (double): Maximum length of the translations used by the perturbation.
+        arg2 (double): Time limit in seconds. If -1, no time limit is set.
+)doc")
+      .def("set_max_squared_edge_length", &gtci::set_max_squared_edge_length,
+R"doc(
+    Sets the maximal possible squared edge length for the edges in the triangulations.
+    Args:
+        arg1 (double): Maximal possible squared edge length.
+                      If the maximal edge length value is too low
+                      :meth:`compute_tangential_complex`
+                      will throw an exception in debug mode.
+)doc");
 }
 
 //

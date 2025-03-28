@@ -20,7 +20,7 @@ import os
 from libc.stdint cimport intptr_t
 
 from gudhi.simplex_tree cimport *
-from gudhi.simplex_tree import SimplexTree
+from gudhi.simplex_tree import SimplexTreeCython
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2018 Inria"
@@ -169,9 +169,9 @@ cdef class CoverComplex:
     def create_simplex_tree(self):
         """
         :returns: A simplex tree created from the Cover complex.
-        :rtype: SimplexTree
+        :rtype: SimplexTreeCython
         """
-        stree = SimplexTree()
+        stree = SimplexTreeCython()
         cdef intptr_t stree_int_ptr=stree.thisptr
         self.thisptr.create_simplex_tree(
             <Simplex_tree_python_interface*>stree_int_ptr)

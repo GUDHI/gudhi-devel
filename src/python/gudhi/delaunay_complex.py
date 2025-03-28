@@ -12,7 +12,7 @@ from gudhi import _delaunay_complex_ext as t
 from typing import Literal, Optional
 from collections.abc import Iterable
 
-from gudhi.simplex_tree import SimplexTree
+from gudhi.simplex_tree_ext import _Simplex_tree_python_interface
 
 # DelaunayComplex python interface
 class DelaunayComplex(t.Delaunay_complex_interface):

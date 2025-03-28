@@ -16,7 +16,7 @@ import errno
 import os
 
 from gudhi._nerve_gic_ext import _Nerve_gic_interface
-from gudhi.simplex_tree import SimplexTree
+from gudhi.simplex_tree import SimplexTreeCython
 
 # CoverComplex python interface
 class CoverComplex(_Nerve_gic_interface):
@@ -40,9 +40,9 @@ class CoverComplex(_Nerve_gic_interface):
     def create_simplex_tree(self):
         """
         :returns: A simplex tree created from the Cover complex.
-        :rtype: SimplexTree
+        :rtype: SimplexTreeCython
         """
-        simplex_tree = SimplexTree()
+        simplex_tree = SimplexTreeCython()
         super().create_simplex_tree(simplex_tree)
         return simplex_tree
 

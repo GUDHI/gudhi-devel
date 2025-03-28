@@ -19,7 +19,7 @@
 #include <nanobind/stl/pair.h>
 #include <nanobind/ndarray.h>
 
-#include "Simplex_tree_interface.h"
+#include "Simplex_tree_interface_cython.h"
 
 #include <CGAL/Epick_d.h>
 

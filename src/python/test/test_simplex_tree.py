@@ -19,7 +19,6 @@ __license__ = "MIT"
 
 def test_insertion():
     st = SimplexTree()
-    assert st._is_defined() == True
     assert st._is_persistence_defined() == False
     assert st.is_empty()
 
@@ -118,7 +117,6 @@ def test_insertion():
 
 def test_expansion():
     st = SimplexTree()
-    assert st._is_defined() == True
     assert st._is_persistence_defined() == False
 
     # insert test
@@ -188,7 +186,6 @@ def test_expansion():
 
 def test_automatic_dimension():
     st = SimplexTree()
-    assert st._is_defined() == True
     assert st._is_persistence_defined() == False
 
     # insert test
@@ -216,7 +213,6 @@ def test_automatic_dimension():
 
 def test_make_filtration_non_decreasing():
     st = SimplexTree()
-    assert st._is_defined() == True
     assert st._is_persistence_defined() == False
 
     # Inserted simplex:

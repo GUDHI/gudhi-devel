@@ -31,7 +31,6 @@ def test_tangential():
     assert tc.num_inconsistent_stars() == 0
 
     st = tc.create_simplex_tree()
-    assert st._is_defined() == True
     assert st._is_persistence_defined() == False
 
     assert st.num_simplices() == 6

@@ -5,16 +5,11 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
- *      - 2025/03 Hannah Schreiber: Use nanobind instead of Cython for python bindings.
  *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef INCLUDE_SIMPLEX_TREE_INTERFACE_H_
 #define INCLUDE_SIMPLEX_TREE_INTERFACE_H_
-
-// #include <nanobind/nanobind.h>
-#include <nanobind/ndarray.h>
-#include <nanobind/make_iterator.h>
 
 #include <gudhi/graph_simplicial_complex.h>
 #include <gudhi/distance_functions.h>
@@ -22,7 +17,6 @@
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Flag_complex_edge_collapser.h>
 
-#include <cstddef>
 #include <iostream>
 #include <vector>
 #include <utility>  // std::pair
@@ -67,8 +61,6 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
 
  public:
 
-  void initialize_filtration() const { Base::initialize_filtration(); }
-
   Extended_filtration_data efd;
   
   bool find_simplex(const Simplex& simplex) {
@@ -90,22 +82,21 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     return (result.second);
   }
 
-  void insert_matrix(const nanobind::ndarray<double, nanobind::ndim<2> >& filtrations, double max_filtration)
-  {
+  void insert_matrix(double* filtrations, int n, int stride0, int stride1, double max_filtration) {
     // We could delegate to insert_graph, but wrapping the matrix in a graph interface is too much work,
     // and this is a bit more efficient.
     auto& rm = this->root()->members_;
-    int n = filtrations.shape(0);
-    for (int i = 0; i < n; ++i) {
-      double fv = filtrations(i, i);
-      if (fv > max_filtration) continue;
+    for(int i=0; i<n; ++i) {
+      char* p = reinterpret_cast<char*>(filtrations) + i * stride0;
+      double fv = *reinterpret_cast<double*>(p + i * stride1);
+      if(fv > max_filtration) continue;
       auto sh = rm.emplace_hint(rm.end(), i, Node(this->root(), fv));
       Siblings* children = nullptr;
       // Should we make a first pass to count the number of edges so we can reserve the right space?
-      for (int j = i + 1; j < n; ++j) {
-        double fe = filtrations(i, j);
-        if (fe > max_filtration) continue;
-        if (!children) {
+      for(int j=i+1; j<n; ++j) {
+        double fe = *reinterpret_cast<double*>(p + j * stride1);
+        if(fe > max_filtration) continue;
+        if(!children) {
           children = new Siblings(this->root(), i);
           sh->second.assign_children(children);
         }
@@ -198,89 +189,44 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     }
   }
 
-  void expansion_with_blockers_callback(int max_dim,
-                                        nanobind::typed<nanobind::callable, bool(Simplex&)> blocker_func)
-  {
-    Base::expansion_with_blockers(max_dim, [&](Simplex_handle sh) -> bool {
+  void expansion_with_blockers_callback(int dimension, blocker_func_t user_func, void *user_data) {
+    Base::expansion_with_blockers(dimension, [&](Simplex_handle sh){
       Simplex simplex(Base::simplex_vertex_range(sh).begin(), Base::simplex_vertex_range(sh).end());
-      return nanobind::cast<bool>(blocker_func(simplex));
+      return user_func(simplex, user_data);
     });
   }
 
-  void serialize(const nanobind::ndarray<char, nanobind::ndim<1> >& buffer, const std::size_t buffer_size)
-  {
-    Base::serialize(buffer.data(), buffer_size);
-  }
-
-  void deserialize(const nanobind::ndarray<char, nanobind::ndim<1> >& buffer, const std::size_t buffer_size)
-  {
-    Base::deserialize(buffer.data(), buffer_size);
-  }
-
-  auto get_simplex_python_iterator()
-  {
-    return nanobind::make_iterator(nanobind::type<Complex_simplex_range>(),
-                                   "simplex_iterator",
-                                   Base::complex_simplex_range().begin(),
-                                   Base::complex_simplex_range().end());
-  }
-
-  auto get_filtration_python_iterator()
-  {
-    return nanobind::make_iterator(nanobind::type<Filtration_simplex_range>(),
-                                   "filtration_iterator",
-                                   Base::filtration_simplex_range().begin(),
-                                   Base::filtration_simplex_range().end());
-  }
-
-  auto get_skeleton_python_iterator(int dimension)
-  {
-    return nanobind::make_iterator(nanobind::type<Skeleton_simplex_range>(),
-                                   "skeleton_iterator",
-                                   Base::skeleton_simplex_range(dimension).begin(),
-                                   Base::skeleton_simplex_range(dimension).end());
-  }
-
-  auto get_boundary_python_iterator(const Simplex& simplex)
-  {
-    auto bd_sh = Base::find(simplex);
-    if (bd_sh == Base::null_simplex()) throw std::runtime_error("simplex not found - cannot find boundaries");
+  // Iterator over the simplex tree
+  Complex_simplex_iterator get_simplices_iterator_begin() {
     // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-    auto boundary_srange = Base::boundary_simplex_range(bd_sh);
-    return nanobind::make_iterator(
-        nanobind::type<Boundary_simplex_range>(), "boundary_iterator", boundary_srange.begin(), boundary_srange.end());
+    return Base::complex_simplex_range().begin();
   }
-  // // Iterator over the simplex tree
-  // Complex_simplex_iterator get_simplices_iterator_begin() {
-  //   // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-  //   return Base::complex_simplex_range().begin();
-  // }
 
-  // Complex_simplex_iterator get_simplices_iterator_end() {
-  //   // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-  //   return Base::complex_simplex_range().end();
-  // }
+  Complex_simplex_iterator get_simplices_iterator_end() {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::complex_simplex_range().end();
+  }
 
-  // typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_begin() {
-  //   // Base::initialize_filtration(); already performed in filtration_simplex_range
-  //   // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-  //   return Base::filtration_simplex_range().begin();
-  // }
+  typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_begin() {
+    // Base::initialize_filtration(); already performed in filtration_simplex_range
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::filtration_simplex_range().begin();
+  }
 
-  // typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_end() {
-  //   // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-  //   return Base::filtration_simplex_range().end();
-  // }
+  typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_end() {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::filtration_simplex_range().end();
+  }
 
-  // Skeleton_simplex_iterator get_skeleton_iterator_begin(int dimension) {
-  //   // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-  //   return Base::skeleton_simplex_range(dimension).begin();
-  // }
+  Skeleton_simplex_iterator get_skeleton_iterator_begin(int dimension) {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::skeleton_simplex_range(dimension).begin();
+  }
 
-  // Skeleton_simplex_iterator get_skeleton_iterator_end(int dimension) {
-  //   // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-  //   return Base::skeleton_simplex_range(dimension).end();
-  // }
+  Skeleton_simplex_iterator get_skeleton_iterator_end(int dimension) {
+    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
+    return Base::skeleton_simplex_range(dimension).end();
+  }
 
   std::pair<Boundary_simplex_iterator, Boundary_simplex_iterator> get_boundary_iterators(const Simplex& simplex) {
     auto bd_sh = Base::find(simplex);

@@ -1574,17 +1574,17 @@ class Simplex_tree {
    *
    * The Simplex_tree must contain no simplex of dimension bigger than
    * 1 when calling the method. */
-  void expansion(int max_dim) {
-    if (max_dim <= 1) return;
+  void expansion(int max_dimension) {
+    if (max_dimension <= 1) return;
     clear_filtration(); // Drop the cache.
-    dimension_ = max_dim;
+    dimension_ = max_dimension;
     for (Dictionary_it root_it = root_.members_.begin();
          root_it != root_.members_.end(); ++root_it) {
       if (has_children(root_it)) {
-        siblings_expansion(root_it->second.children(), max_dim - 1);
+        siblings_expansion(root_it->second.children(), max_dimension - 1);
       }
     }
-    dimension_ = max_dim - dimension_;
+    dimension_ = max_dimension - dimension_;
   }
 
   /**
@@ -2619,13 +2619,13 @@ class Simplex_tree {
   /** \brief This function resets the filtration value of all the simplices of dimension at least min_dim. Resets all
    * the Simplex_tree when `min_dim = 0`.
    * `reset_filtration` may break the filtration property with `min_dim > 0`, and it is the user's responsibility to
-   * make it a valid filtration (using a large enough `filt_value`, or calling `make_filtration_non_decreasing`
+   * make it a valid filtration (using a large enough `filtration`, or calling `make_filtration_non_decreasing`
    * afterwards for instance).
-   * @param[in] filt_value The new filtration value.
+   * @param[in] filtration The new filtration value.
    * @param[in] min_dim The minimal dimension. Default value is 0.
    */
-  void reset_filtration(const Filtration_value& filt_value, int min_dim = 0) {
-    rec_reset_filtration(&root_, filt_value, min_dim);
+  void reset_filtration(const Filtration_value& filtration, int min_dim = 0) {
+    rec_reset_filtration(&root_, filtration, min_dim);
     clear_filtration(); // Drop the cache.
   }
 

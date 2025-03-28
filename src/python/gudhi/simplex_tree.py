@@ -1,18 +1,25 @@
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-# Author(s):       Alexis Gobé
+# Author(s):       Vincent Rouvreau
 #
-# Copyright (C) 2025 Inria
+# Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2023/02 Vincent Rouvreau: Add serialize/deserialize for pickle feature
+#   - 2025/03 Alexis Gobé & Hannah Schreiber: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
+
+__author__ = "Vincent Rouvreau"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
+
 
 from gudhi import _simplex_tree_ext as t
 
 import numpy as np
 
 # SimplexTree python interface
-def class SimplexTree(t.Simplex_tree_interface):
+class SimplexTree(t._Simplex_tree_python_interface):
     """The simplex tree is an efficient and flexible data structure for
     representing general (filtered) simplicial complexes. The data structure
     is described in Jean-Daniel Boissonnat and Clément Maria. The Simplex
@@ -37,24 +44,20 @@ def class SimplexTree(t.Simplex_tree_interface):
         :note: If the `SimplexTree` is a copy, the persistence information is not copied. If you need it in the clone,
             you have to call :func:`compute_persistence` on it even if you had already computed it in the original.
         """
+        self._pers = None
         if other:
             if isinstance(other, SimplexTree):
-                self = other
+                super().__init__(other)
                 self._pers = other._pers
             else:
                 raise TypeError("`other` argument requires to be of type `SimplexTree`, or `None`.")
         else:
-            self.thisptr = <intptr_t>(new Simplex_tree_python_interface())
-
-    def _is_defined(self):
-        """Returns true if SimplexTree pointer is not NULL.
-         """
-        return self.get_ptr() != NULL
+            super().__init__()
 
     def _is_persistence_defined(self):
         """Returns true if Persistence pointer is not None.
-         """
-        return self.pcohptr != NULL
+        """
+        return self._pers != None
 
     def copy(self):
         """ 
@@ -64,38 +67,24 @@ def class SimplexTree(t.Simplex_tree_interface):
         :note: The persistence information is not copied. If you need it in the clone, you have to call
             :func:`compute_persistence` on it even if you had already computed it in the original.
         """
-        stree = SimplexTree()
-        stree.thisptr = _get_copy_intptr(self)
-        return stree
+        simplex_tree = SimplexTree(self)
+        return simplex_tree
 
     def __deepcopy__(self):
         return self.copy()
 
-    def filtration(self, simplex):
-        """This function returns the filtration value for a given N-simplex in
-        this simplicial complex, or +infinity if it is not in the complex.
+    def initialize_filtration(self):
+        """This function initializes and sorts the simplicial complex
+        filtration vector.
 
-        :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int
-        :returns:  The simplicial complex filtration value.
-        :rtype:  float
+        .. deprecated:: 3.2.0
         """
-        return super().simplex_filtration(simplex)
-
-    def find(self, simplex):
-        """This function returns if the N-simplex was found in the simplicial
-        complex or not.
-
-        :param simplex: The N-simplex to find, represented by a list of vertex.
-        :type simplex: list of int
-        :returns:  true if the simplex was found, false otherwise.
-        :rtype:  bool
-        """
-        return super().find_simplex(simplex)
+        import warnings
+        warnings.warn("Since Gudhi 3.2, calling SimplexTree.initialize_filtration is unnecessary.", DeprecationWarning)
+        super().initialize_filtration()
 
     @staticmethod
-    @cython.boundscheck(False)
-    def create_from_array(filtrations, double max_filtration=INFINITY):
+    def create_from_array(filtrations, max_filtration:float = float('inf')):
         """Creates a new, empty complex and inserts vertices and edges. The vertices are numbered from 0 to n-1, and
         the filtration values are encoded in the array, with the diagonal representing the vertices. It is the
         caller's responsibility to ensure that this defines a filtration, which can be achieved with either::
@@ -116,12 +105,9 @@ def class SimplexTree(t.Simplex_tree_interface):
         """
         # TODO: document which half of the matrix is actually read?
         filtrations = np.asanyarray(filtrations, dtype=float)
-        cdef double[:,:] F = filtrations
+        assert filtrations.shape[0] == filtrations.shape[1], 'create_from_array() expects a square array'
         ret = SimplexTree()
-        cdef int n = F.shape[0]
-        assert n == F.shape[1], 'create_from_array() expects a square array'
-        with nogil:
-            ret.get_ptr().insert_matrix(&F[0,0], n, F.strides[0], F.strides[1], max_filtration)
+        super().insert_matrix(filtrations, max_filtration)
         return ret
 
     def insert_edges_from_coo_matrix(self, edges):
@@ -138,14 +124,12 @@ def class SimplexTree(t.Simplex_tree_interface):
         .. seealso:: :func:`insert_batch`
         """
         # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
-        self.get_ptr().insert_batch_vertices(np.unique(np.stack((edges.row, edges.col))), INFINITY)
+        super().insert_batch_vertices(np.unique(np.stack((edges.row, edges.col))), float('inf'))
         # TODO: optimize this?
         for edge in zip(edges.row, edges.col, edges.data):
             self().insert((edge[0], edge[1]), edge[2])
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    def insert_batch(self, some_int[:,:] vertex_array, some_float[:] filtrations):
+    def insert_batch(self, vertex_array: np.ndarray[np.int32] | np.ndarray[np.int64], filtrations: np.ndarray[np.float32] | np.ndarray[np.float64]):
         """Inserts k-simplices given by a sparse array in a format similar
         to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
         The n-th simplex has vertices `vertex_array[0,n]`, ...,
@@ -161,22 +145,19 @@ def class SimplexTree(t.Simplex_tree_interface):
         :param filtrations: the filtration values.
         :type filtrations: numpy.array of shape (n,)
         """
-        cdef vector[int] vertices = np.unique(vertex_array)
-        cdef Py_ssize_t k = vertex_array.shape[0]
-        cdef Py_ssize_t n = vertex_array.shape[1]
+        vertices = np.unique(vertex_array)
+        k = vertex_array.shape[0]
+        n = vertex_array.shape[1]
         assert filtrations.shape[0] == n, 'inconsistent sizes for vertex_array and filtrations'
-        cdef Py_ssize_t i
-        cdef Py_ssize_t j
-        cdef vector[int] v
-        with nogil:
-            # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
-            # NaN currently does the wrong thing
-            self.get_ptr().insert_batch_vertices(vertices, INFINITY)
-            for i in range(n):
-                for j in range(k):
-                    v.push_back(vertex_array[j, i])
-                self.get_ptr().insert(v, filtrations[i])
-                v.clear()
+        v = []
+        # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
+        # NaN currently does the wrong thing
+        super().insert_batch_vertices(vertices, float('inf'))
+        for i in range(n):
+            for j in range(k):
+                v.append(vertex_array[j, i])
+            super().insert(v, filtrations[i])
+            v.clear()
 
     def get_simplices(self):
         """This function returns a generator with simplices and their given
@@ -185,13 +166,8 @@ def class SimplexTree(t.Simplex_tree_interface):
         :returns:  The simplices.
         :rtype:  generator with tuples(simplex, filtration)
         """
-        cdef Simplex_tree_simplices_iterator it = self.get_ptr().get_simplices_iterator_begin()
-        cdef Simplex_tree_simplices_iterator end = self.get_ptr().get_simplices_iterator_end()
-        cdef Simplex_tree_simplex_handle sh = dereference(it)
-
-        while it != end:
-            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
-            preincrement(it)
+        for sh in super().simplex_iter():
+            yield super().get_simplex_and_filtration(sh)
 
     def get_filtration(self):
         """This function returns a generator with simplices and their given
@@ -200,12 +176,8 @@ def class SimplexTree(t.Simplex_tree_interface):
         :returns:  The simplices sorted by increasing filtration values.
         :rtype:  generator with tuples(simplex, filtration)
         """
-        cdef vector[Simplex_tree_simplex_handle].const_iterator it = self.get_ptr().get_filtration_iterator_begin()
-        cdef vector[Simplex_tree_simplex_handle].const_iterator end = self.get_ptr().get_filtration_iterator_end()
-
-        while it != end:
-            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
-            preincrement(it)
+        for sh in super().filtration_iter():
+            yield super().get_simplex_and_filtration(sh)
 
     def get_skeleton(self, dimension):
         """This function returns a generator with the (simplices of the) skeleton of a maximum given dimension.
@@ -215,58 +187,8 @@ def class SimplexTree(t.Simplex_tree_interface):
         :returns:  The (simplices of the) skeleton of a maximum dimension.
         :rtype:  generator with tuples(simplex, filtration)
         """
-        cdef Simplex_tree_skeleton_iterator it = self.get_ptr().get_skeleton_iterator_begin(dimension)
-        cdef Simplex_tree_skeleton_iterator end = self.get_ptr().get_skeleton_iterator_end(dimension)
-
-        while it != end:
-            yield self.get_ptr().get_simplex_and_filtration(dereference(it))
-            preincrement(it)
-
-    def get_star(self, simplex):
-        """This function returns the star of a given N-simplex.
-
-        :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int
-        :returns:  The (simplices of the) star of a simplex.
-        :rtype:  list of tuples(simplex, filtration)
-        """
-        cdef vector[int] csimplex
-        for i in simplex:
-            csimplex.push_back(i)
-        cdef vector[pair[vector[int], double]] star \
-            = self.get_ptr().get_star(csimplex)
-        ct = []
-        for filtered_simplex in star:
-            v = []
-            for vertex in filtered_simplex.first:
-                v.append(vertex)
-            ct.append((v, filtered_simplex.second))
-        return ct
-
-    def get_cofaces(self, simplex, codimension):
-        """This function returns the cofaces of a given N-simplex with a
-        given codimension.
-
-        :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int
-        :param codimension: The codimension. If codimension = 0, all cofaces
-            are returned (equivalent of get_star function)
-        :type codimension: int
-        :returns:  The (simplices of the) cofaces of a simplex
-        :rtype:  list of tuples(simplex, filtration)
-        """
-        cdef vector[int] csimplex
-        for i in simplex:
-            csimplex.push_back(i)
-        cdef vector[pair[vector[int], double]] cofaces \
-            = self.get_ptr().get_cofaces(csimplex, <int>codimension)
-        ct = []
-        for filtered_simplex in cofaces:
-            v = []
-            for vertex in filtered_simplex.first:
-                v.append(vertex)
-            ct.append((v, filtered_simplex.second))
-        return ct
+        for sh in super().skeleton_iter(dimension):
+            yield super().get_simplex_and_filtration(sh)
 
     def get_boundaries(self, simplex):
         """This function returns a generator with the boundaries of a given N-simplex.
@@ -278,11 +200,8 @@ def class SimplexTree(t.Simplex_tree_interface):
         :returns:  The (simplices of the) boundary of a simplex
         :rtype:  generator with tuples(simplex, filtration)
         """
-        cdef pair[Simplex_tree_boundary_iterator, Simplex_tree_boundary_iterator] it =  self.get_ptr().get_boundary_iterators(simplex)
-
-        while it.first != it.second:
-            yield self.get_ptr().get_simplex_and_filtration(dereference(it.first))
-            preincrement(it.first)
+        for sh in super().boundary_iter():
+            yield super().get_simplex_and_filtration(sh)
 
     def extended_persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function retrieves good values for extended persistence, and separate the diagrams into the Ordinary,
@@ -312,34 +231,9 @@ def class SimplexTree(t.Simplex_tree_interface):
         This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
         explains how to compute an extension of persistence called extended persistence.
         """
-        cdef vector[pair[int, pair[double, double]]] persistence_result
-        if self.pcohptr != NULL:
-            del self.pcohptr
-        self.pcohptr = new Simplex_tree_persistence_interface(self.get_ptr(), False)
-        self.pcohptr.compute_persistence(homology_coeff_field, -1.)
-        return self.pcohptr.compute_extended_persistence_subdiagrams(min_persistence)
-
-    def expansion_with_blocker(self, max_dim, blocker_func):
-        """Expands the Simplex_tree containing only a graph. Simplices corresponding to cliques in the graph are added
-        incrementally, faces before cofaces, unless the simplex has dimension larger than `max_dim` or `blocker_func`
-        returns `True` for this simplex.
-
-        The function identifies a candidate simplex whose faces are all already in the complex, inserts it with a
-        filtration value corresponding to the maximum of the filtration values of the faces, then calls `blocker_func`
-        with this new simplex (represented as a list of int). If `blocker_func` returns `True`, the simplex is removed,
-        otherwise it is kept. The algorithm then proceeds with the next candidate.
-
-        .. warning::
-            Several candidates of the same dimension may be inserted simultaneously before calling `blocker_func`, so
-            if you examine the complex in `blocker_func`, you may hit a few simplices of the same dimension that have
-            not been vetted by `blocker_func` yet, or have already been rejected but not yet removed.
-
-        :param max_dim: Expansion maximal dimension value.
-        :type max_dim: int
-        :param blocker_func: Blocker oracle.
-        :type blocker_func: Callable[[List[int]], bool]
-        """
-        super().expansion_with_blockers_callback(max_dim, callback, <void*>blocker_func)
+        self._pers = _Simplex_tree_persistence_interface(self, False)
+        self._pers.compute_persistence(homology_coeff_field, -1.)
+        return self._pers.compute_extended_persistence_subdiagrams(min_persistence)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function computes and returns the persistence of the simplicial complex.
@@ -381,13 +275,8 @@ def class SimplexTree(t.Simplex_tree_interface):
         :type persistence_dim_max: bool
         :returns: Nothing.
         """
-        if self._pers != None:
-            del self.ppers
-        pdm = persistence_dim_max
-        coef = homology_coeff_field
-        minp = min_persistence
-        self._pers = Simplex_tree_persistence_interface(self, pdm)
-        self._pers.compute_persistence(coef, minp)
+        self._pers = _Simplex_tree_persistence_interface(self, persistence_dim_max)
+        self._pers.compute_persistence(homology_coeff_field, min_persistence)
 
     def betti_numbers(self):
         """This function returns the Betti numbers of the simplicial complex.
@@ -421,7 +310,7 @@ def class SimplexTree(t.Simplex_tree_interface):
             function to be launched first.
         """
         assert self._pers != None, "compute_persistence() must be called before persistent_betti_numbers()"
-        return self._pers.persistent_betti_numbers((float(from_value), float(to_value))
+        return self._pers.persistent_betti_numbers(from_value, to_value)
 
     def persistence_intervals_in_dimension(self, dimension):
         """This function returns the persistence intervals of the simplicial
@@ -468,7 +357,7 @@ def class SimplexTree(t.Simplex_tree_interface):
             function to be launched first.
         """
         assert self._pers != None, "compute_persistence() must be called before write_persistence_diagram()"
-        self._pers.write_output_diagram(persistence_file.encode('utf-8'))
+        self._pers.write_output_diagram(persistence_file)
 
     def lower_star_persistence_generators(self):
         """Assuming this is a lower-star filtration, this function returns the persistence pairs,
@@ -531,27 +420,16 @@ def class SimplexTree(t.Simplex_tree_interface):
         """
         if nb_iterations < 1:
             return
-        cdef int nb_iter = nb_iterations
-        super().collapse_edges(nb_iter)
-
-    def __eq__(self, other:SimplexTree):
-        """:returns: True if the 2 complexes have the same simplices with the same filtration values, False otherwise.
-        :rtype: bool
-        """
-        return dereference(self.get_ptr()) == dereference(other.get_ptr())
+        super().collapse_edges(nb_iterations)
     
     def __getstate__(self):
         """:returns: Serialized (or flattened) SimplexTree data structure in order to pickle SimplexTree.
         :rtype: numpy.array of shape (n,)
         """
-        cdef size_t buffer_size = self.get_ptr().get_serialization_size()
+        buffer_size = super().get_serialization_size()
         # Let's use numpy to allocate a buffer. Will be deleted automatically
         np_buffer = np.empty(buffer_size, dtype='B')
-        cdef char[:] buffer = np_buffer
-        cdef char* buffer_start = &buffer[0]
-        with nogil:
-            self.get_ptr().serialize(buffer_start, buffer_size)
-        
+        super().serialize(np_buffer, buffer_size)
         return np_buffer
 
     def __setstate__(self, state):
@@ -561,15 +439,9 @@ def class SimplexTree(t.Simplex_tree_interface):
         :param state: Serialized SimplexTree data structure
         :type state: numpy.array of shape (n,)
         """
-        cdef char[:] buffer = state
-        cdef size_t buffer_size = state.shape[0]
-        cdef char* buffer_start = &buffer[0]
-        with nogil:
-            # deserialization requires an empty SimplexTree
-            self.get_ptr().clear()
-            # New pointer is a deserialized simplex tree
-            self.get_ptr().deserialize(buffer_start, buffer_size)
+        # deserialization requires an empty SimplexTree
+        super().clear()
+        # New pointer is a deserialized simplex tree
+        super().deserialize(state, buffer_size)
 
 
-cdef intptr_t _get_copy_intptr(SimplexTree stree) nogil:
-    return <intptr_t>(new Simplex_tree_python_interface(dereference(stree.get_ptr())))
