@@ -14,6 +14,14 @@ if(TARGET CGAL::CGAL)
         nanobind_add_module(_delaunay_complex_ext _delaunay_complex.cc)
         target_link_libraries(_delaunay_complex_ext PRIVATE Eigen3::Eigen)
         target_link_libraries(_delaunay_complex_ext PRIVATE CGAL::CGAL)
+
+        nanobind_add_module(_tangential_complex_ext _tangential_complex.cc)
+        target_link_libraries(_tangential_complex_ext PRIVATE Eigen3::Eigen)
+        target_link_libraries(_tangential_complex_ext PRIVATE CGAL::CGAL)
+
+        nanobind_add_module(_euclidean_strong_witness_complex_ext _euclidean_strong_witness_complex.cc)
+        target_link_libraries(_euclidean_strong_witness_complex_ext PRIVATE CGAL::CGAL)
+        target_link_libraries(_euclidean_strong_witness_complex_ext PRIVATE Eigen3::Eigen)
     endif()
 endif ()
 
