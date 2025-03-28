@@ -177,4 +177,4 @@ NB_MODULE(_delaunay_complex_ext, m) {
 }
 
 //
-// delaunay_complex.cc ends here
+// _delaunay_complex.cc ends here
