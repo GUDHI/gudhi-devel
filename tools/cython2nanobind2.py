@@ -65,13 +65,11 @@ def generate_nanobind_bindings(cython_code, header_code):
                 if func_name != method_name: continue
                 param_str = match[2].strip()
                 params = re.split(r'[\n,]',param_str.strip())
-                print(params)
                 for param in params:
                     cleaned_param = None
                     if(param):         cleaned_param  = re.sub(r'\s*[//)].*$', '', param)
                     if(cleaned_param): cleaned_param = re.sub(r'^\s+|\s+$',   '', cleaned_param)
                     if(cleaned_param):
-                        print(cleaned_param) 
                         defpattern = r'\b([a-zA-Z_]\w+)\s*=\s*(.+?)\b'
                         defmatch = re.search(defpattern, cleaned_param)
                         if(defmatch==None): continue 
