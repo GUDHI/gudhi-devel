@@ -8,17 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-import gudhi
-
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
-
-
-def test_empty_euclidean_witness_complex():
-    euclidean_witness = gudhi.EuclideanWitnessComplex()
-    assert euclidean_witness._is_defined() == False
-
+from gudhi import EuclideanWitnessComplex, EuclideanStrongWitnessComplex
 
 def test_witness_complex():
     point_cloud = [
@@ -31,7 +21,7 @@ def test_witness_complex():
         [9.0, 17.0],
     ]
     landmarks = [[1.0, 1.0], [7.0, 0.0], [4.0, 6.0]]
-    euclidean_witness_complex = gudhi.EuclideanWitnessComplex(
+    euclidean_witness_complex = EuclideanWitnessComplex(
         landmarks=landmarks, witnesses=point_cloud
     )
     simplex_tree = euclidean_witness_complex.create_simplex_tree(max_alpha_square=4.1)
@@ -51,11 +41,6 @@ def test_witness_complex():
     ]
 
 
-def test_empty_euclidean_strong_witness_complex():
-    euclidean_strong_witness = gudhi.EuclideanStrongWitnessComplex()
-    assert euclidean_strong_witness._is_defined() == False
-
-
 def test_strong_witness_complex():
     point_cloud = [
         [1.0, 1.0],
@@ -67,7 +52,7 @@ def test_strong_witness_complex():
         [9.0, 17.0],
     ]
     landmarks = [[1.0, 1.0], [7.0, 0.0], [4.0, 6.0]]
-    euclidean_strong_witness_complex = gudhi.EuclideanStrongWitnessComplex(
+    euclidean_strong_witness_complex = EuclideanStrongWitnessComplex(
         landmarks=landmarks, witnesses=point_cloud
     )
     simplex_tree = euclidean_strong_witness_complex.create_simplex_tree(

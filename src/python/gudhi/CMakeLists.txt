@@ -18,6 +18,10 @@ if(TARGET CGAL::CGAL)
         nanobind_add_module(_tangential_complex_ext _tangential_complex.cc)
         target_link_libraries(_tangential_complex_ext PRIVATE CGAL::CGAL)
         target_link_libraries(_tangential_complex_ext PRIVATE Eigen3::Eigen)
+
+        nanobind_add_module(_euclidean_witness_complex_ext _euclidean_witness_complex.cc)
+        target_link_libraries(_euclidean_witness_complex_ext PRIVATE CGAL::CGAL)
+        target_link_libraries(_euclidean_witness_complex_ext PRIVATE Eigen3::Eigen)
     endif()
 endif()
 

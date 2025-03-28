@@ -5,23 +5,28 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
+ *      - 2025/03 Vincent Rouvreau: Use nanobind instead of Cython for python bindings.
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef INCLUDE_EUCLIDEAN_WITNESS_COMPLEX_INTERFACE_H_
-#define INCLUDE_EUCLIDEAN_WITNESS_COMPLEX_INTERFACE_H_
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Euclidean_witness_complex.h>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/ndarray.h>
 
 #include "Simplex_tree_interface.h"
 
 #include <CGAL/Epick_d.h>
 
 #include <vector>
-#include <utility>  // std::pair
 #include <iostream>
 #include <cstddef>
+#include <limits>
 
 namespace Gudhi {
 
@@ -32,27 +37,19 @@ class Euclidean_witness_complex_interface {
   using Dynamic_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
   using Point_d = Dynamic_kernel::Point_d;
 
-  typedef typename Simplex_tree<>::Simplex_key Simplex_key;
-
  public:
   Euclidean_witness_complex_interface(const std::vector<std::vector<double>>& landmarks,
                                       const std::vector<std::vector<double>>& witnesses) {
     landmarks_.reserve(landmarks.size());
     for (auto& landmark : landmarks)
       landmarks_.emplace_back(landmark.begin(), landmark.end());
-    witness_complex_ = new Euclidean_witness_complex<Dynamic_kernel>(landmarks_, witnesses);
+    witness_complex_ = std::make_unique<Euclidean_witness_complex<Dynamic_kernel>>(landmarks_, witnesses);
   }
 
-  ~Euclidean_witness_complex_interface() {
-    delete witness_complex_;
-  }
-
-  void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square, std::size_t limit_dimension) {
-    witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
-  }
-
-  void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square) {
-    witness_complex_->create_complex(*simplex_tree, max_alpha_square);
+  void create_simplex_tree(Simplex_tree_interface& simplex_tree,
+                           double max_alpha_square,
+                           std::size_t limit_dimension = std::numeric_limits<std::size_t>::max()) {
+    witness_complex_->create_complex(simplex_tree, max_alpha_square, limit_dimension);
   }
 
   std::vector<double> get_point(unsigned vh) {
@@ -67,12 +64,29 @@ class Euclidean_witness_complex_interface {
 
  private:
   std::vector<Point_d> landmarks_;
-  Euclidean_witness_complex<Dynamic_kernel>* witness_complex_;
+  std::unique_ptr<Euclidean_witness_complex<Dynamic_kernel>> witness_complex_;
 };
 
 }  // namespace witness_complex
 
 }  // namespace Gudhi
 
-#endif  // INCLUDE_EUCLIDEAN_WITNESS_COMPLEX_INTERFACE_H_
 
+namespace nb = nanobind;
+
+using Kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
+using Point_d = Kernel::Point_d;
+
+namespace egwc = Gudhi::witness_complex;
+using egwci = egwc::Euclidean_witness_complex_interface;
+
+
+NB_MODULE(_euclidean_witness_complex_ext, m) {
+    m.attr("__license__") = "GPL v3";
+
+    nb::class_<egwci>(m, "Euclidean_witness_complex_interface")
+        .def(nb::init<const std::vector<std::vector<double>>&,
+                      const std::vector<std::vector<double>>&>(), "Constructor")
+        .def("create_simplex_tree", &egwci::create_simplex_tree, "")
+        .def("get_point", &egwci::get_point, "");
+}
