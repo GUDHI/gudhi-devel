@@ -39,10 +39,6 @@ public:
 
     std::vector<double> get_point(int vh);
 
-    Simplex_tree_interface create_simplex_tree(double max_alpha_square,
-                                               Delaunay_filtration filtration,
-                                               bool output_squared_values);
-
     void create_simplex_tree(Simplex_tree_interface* simplex_tree,
                              double max_alpha_square,
                              Delaunay_filtration filtration,
@@ -111,16 +107,6 @@ std::vector<double> Delaunay_complex_interface::get_point(int vh)
     return delaunay_ptr_->get_point(vh);
 }
 
-
-Simplex_tree_interface Delaunay_complex_interface::create_simplex_tree(double max_alpha_square,
-                                                                       Delaunay_filtration filtration,
-                                                                       bool output_squared_values)
-{
-    Simplex_tree_interface s;
-    this->create_simplex_tree(&s, max_alpha_square, filtration, output_squared_values);
-    return s;
-}
-
 void Delaunay_complex_interface::create_simplex_tree(Simplex_tree_interface* simplex_tree,
                                                      double max_alpha_square,
                                                      Delaunay_filtration filtration,
@@ -170,11 +156,11 @@ NB_MODULE(_delaunay_complex_ext, m) {
 
     nb::class_<gdci>(m, "Delaunay_complex_interface")
             .def(nb::init<const std::vector<std::vector<double>>&, const std::vector<double>&, bool, bool>(), "Constructor")
-            .def("create_simplex_tree", nb::overload_cast<double, gdc::Delaunay_filtration, bool>(&gdci::create_simplex_tree), "")
+            .def("create_simplex_tree", &gdci::create_simplex_tree, "")
             .def("get_point", &gdci::get_point, "")
             .def_static("set_float_relative_precision", &gdci::set_float_relative_precision, "")
             .def_static("get_float_relative_precision", &gdci::get_float_relative_precision, "");
 }
 
 //
-// delaunay_complex.cc ends here
+// _delaunay_complex.cc ends here
