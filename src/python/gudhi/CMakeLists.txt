@@ -6,6 +6,7 @@ nanobind_add_module(_edge_collapse_ext _edge_collapse.cc)
 nanobind_add_module(bottleneck bottleneck.cc)
 nanobind_add_module(hera hera.cc)
 nanobind_add_module(_simplex_tree_ext _simplex_tree.cc)
+nanobind_add_module(_witness_complex_ext _witness_complex.cc)
 
 if(TARGET CGAL::CGAL)
 
