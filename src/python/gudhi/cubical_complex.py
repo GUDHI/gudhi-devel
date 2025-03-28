@@ -152,7 +152,7 @@ class CubicalComplex(_Bitmap_cubical_complex_interface):
         :type min_persistence: float.
         :returns: Nothing.
         """
-        self._pers = _Cubical_complex_persistence_interface(super(), True)
+        self._pers = _Cubical_complex_persistence_interface(self, True)
         self._pers.compute_persistence(homology_coeff_field, min_persistence)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):

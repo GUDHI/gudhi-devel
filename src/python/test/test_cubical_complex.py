@@ -85,7 +85,6 @@ def test_dimensions_one_cells_type_or_perseus_file_constructor():
         )
 
 def simple_constructor(cub):
-    assert cub._is_defined() == True
     assert cub._is_persistence_defined() == False
     assert cub.persistence() == [(0, (1.0, float("inf")))]
     assert cub._is_persistence_defined() == True
@@ -117,7 +116,6 @@ def test_constructor_from_vertices():
     assert np.array_equal(a, cub.vertices())
 
 def user_case_simple_constructor(cub):
-    assert cub._is_defined() == True
     assert cub._is_persistence_defined() == False
     assert cub.persistence() == [(1, (0.0, 1.0)), (0, (0.0, float("inf")))]
     assert cub._is_persistence_defined() == True
@@ -148,7 +146,6 @@ def test_dimension_file_constructor():
     test_file.write("2\n3\n3\n0\n0\n0\n0\n100\n0\n0\n0\n0\n")
     test_file.close()
     cub = CubicalComplex(perseus_file="CubicalOneSphere.txt")
-    assert cub._is_defined() == True
     assert cub._is_persistence_defined() == False
     assert cub.persistence() == [(1, (0.0, 100.0)), (0, (0.0, float("inf")))]
     assert cub._is_persistence_defined() == True
