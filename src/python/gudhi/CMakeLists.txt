@@ -6,11 +6,19 @@ nanobind_add_module(_edge_collapse_ext _edge_collapse.cc)
 nanobind_add_module(bottleneck bottleneck.cc)
 nanobind_add_module(hera hera.cc)
 nanobind_add_module(_simplex_tree_ext _simplex_tree.cc)
+nanobind_add_module(_witness_complex_ext _witness_complex.cc)
 
-if(TARGET Eigen3::Eigen)
-    nanobind_add_module(_delaunay_complex_ext _delaunay_complex.cc)
-    target_link_libraries(_delaunay_complex_ext PRIVATE Eigen3::Eigen)
-    target_link_libraries(_delaunay_complex_ext PRIVATE CGAL::CGAL)
+if(TARGET CGAL::CGAL)
+
+    if(TARGET Eigen3::Eigen)
+        nanobind_add_module(_delaunay_complex_ext _delaunay_complex.cc)
+        target_link_libraries(_delaunay_complex_ext PRIVATE Eigen3::Eigen)
+        target_link_libraries(_delaunay_complex_ext PRIVATE CGAL::CGAL)
+
+        nanobind_add_module(_tangential_complex_ext _tangential_complex.cc)
+        target_link_libraries(_tangential_complex_ext PRIVATE CGAL::CGAL)
+        target_link_libraries(_tangential_complex_ext PRIVATE Eigen3::Eigen)
+    endif()
 endif()
 
 if(TARGET TBB::tbb)
