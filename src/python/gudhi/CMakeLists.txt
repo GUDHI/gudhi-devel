@@ -10,12 +10,12 @@ nanobind_add_module(_reader_utils_ext _reader_utils.cc)
 nanobind_add_module(_witness_complex_ext _witness_complex.cc)
 
 if(TARGET CGAL::CGAL)
-
-if(TARGET Eigen3::Eigen)
-    nanobind_add_module(_delaunay_complex_ext _delaunay_complex.cc)
-    target_link_libraries(_delaunay_complex_ext PRIVATE Eigen3::Eigen)
-    target_link_libraries(_delaunay_complex_ext PRIVATE CGAL::CGAL)
-endif()
+    if(TARGET Eigen3::Eigen)
+        nanobind_add_module(_delaunay_complex_ext _delaunay_complex.cc)
+        target_link_libraries(_delaunay_complex_ext PRIVATE Eigen3::Eigen)
+        target_link_libraries(_delaunay_complex_ext PRIVATE CGAL::CGAL)
+    endif()
+endif ()
 
 if(TARGET TBB::tbb)
     target_link_libraries(_pers_cub_low_dim PRIVATE TBB::tbb)
