@@ -16,7 +16,7 @@
 #include <gudhi/Points_off_io.h>
 #include <CGAL/Epick_d.h>
 
-#include "Simplex_tree_interface.h"
+#include "Simplex_tree_interface_cython.h"
 
 #include <vector>
 #include <utility>  // std::pair

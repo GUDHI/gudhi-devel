@@ -12,7 +12,7 @@ from gudhi import _delaunay_complex_ext as t
 from typing import Literal, Optional
 from collections.abc import Iterable
 
-from gudhi.simplex_tree_ext import Simplex_tree_interface
+from gudhi.simplex_tree_ext import _Simplex_tree_python_interface
 
 # DelaunayComplex python interface
 class DelaunayComplex(t.Delaunay_complex_interface):
@@ -53,7 +53,7 @@ class DelaunayComplex(t.Delaunay_complex_interface):
 
     def create_simplex_tree(self, max_alpha_square: float = float('inf'),
                             filtration: Optional[Literal['alpha', 'cech']] = None,
-                            output_squared_values: bool = True) -> Simplex_tree_interface:
+                            output_squared_values: bool = True) -> _Simplex_tree_python_interface:
         """
         Args:
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
@@ -97,7 +97,7 @@ class AlphaComplex(DelaunayComplex):
     """
     def create_simplex_tree(self, max_alpha_square: float = float('inf'),
                             default_filtration_value: bool = False,
-                            output_squared_values: bool = True) -> Simplex_tree_interface:
+                            output_squared_values: bool = True) -> _Simplex_tree_python_interface:
         """
         Args:
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to
@@ -142,7 +142,7 @@ class DelaunayCechComplex(DelaunayComplex):
         super().__init__(points = points, weights = None, precision = precision)
 
     def create_simplex_tree(self, max_alpha_square: float = float('inf'),
-                            output_squared_values: bool = True) -> Simplex_tree_interface:
+                            output_squared_values: bool = True) -> _Simplex_tree_python_interface:
         """
         Args:
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set to

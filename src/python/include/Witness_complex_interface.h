@@ -14,7 +14,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Witness_complex.h>
 
-#include "Simplex_tree_interface.h"
+#include "Simplex_tree_interface_cython.h"
 
 #include <vector>
 #include <utility>  // std::pair

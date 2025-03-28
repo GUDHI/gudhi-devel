@@ -16,7 +16,7 @@ from libc.stdint cimport intptr_t
 import os
 
 from gudhi.simplex_tree cimport *
-from gudhi.simplex_tree import SimplexTree
+from gudhi.simplex_tree import SimplexTreeCython
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -139,9 +139,9 @@ cdef class TangentialComplex:
         """Exports the complex into a simplex tree.
 
         :returns: A simplex tree created from the complex.
-        :rtype: SimplexTree
+        :rtype: SimplexTreeCython
         """
-        stree = SimplexTree()
+        stree = SimplexTreeCython()
         cdef intptr_t stree_int_ptr=stree.thisptr
         self.thisptr.create_simplex_tree(<Simplex_tree_python_interface*>stree_int_ptr)
         return stree

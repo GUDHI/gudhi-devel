@@ -14,7 +14,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Euclidean_witness_complex.h>
 
-#include "Simplex_tree_interface.h"
+#include "Simplex_tree_interface_cython.h"
 
 #include <CGAL/Epick_d.h>
 

@@ -15,7 +15,7 @@
 #include <gudhi/distance_functions.h>
 #include <gudhi/GIC.h>
 
-#include "Simplex_tree_interface.h"
+#include "Simplex_tree_interface_cython.h"
 
 #include <iostream>
 #include <vector>

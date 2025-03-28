@@ -18,7 +18,7 @@ __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
-cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
+cdef extern from "Simplex_tree_interface_cython.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_simplex_handle "Gudhi::Simplex_tree_interface::Simplex_handle":
         pass
 
