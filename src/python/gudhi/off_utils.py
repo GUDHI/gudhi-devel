@@ -11,10 +11,6 @@
 #   - YYYY/MM Author: Description of the modification
 
 from __future__ import print_function
-from cython cimport numeric
-from libcpp.vector cimport vector
-from libcpp.string cimport string
-cimport cython
 import errno
 import os
 import numpy as np
@@ -22,9 +18,6 @@ import numpy as np
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
-
-cdef extern from "Off_reader_interface.h" namespace "Gudhi":
-    vector[vector[double]] read_points_from_OFF_file(string off_file)
 
 def _get_next_line(file_desc, comment='#'):
     """Return the next line that is not a comment.
@@ -121,7 +114,6 @@ def read_points_from_off_file(off_file=''):
         assert points.shape == (nb_points, dim), f"{points.shape} is different from expected ({nb_points}, {dim})"
         return points
 
-@cython.embedsignature(True)
 def write_points_to_off_file(fname, points):
     """Write points to an `OFF file <fileformats.html#off-file-format>`_.
 
