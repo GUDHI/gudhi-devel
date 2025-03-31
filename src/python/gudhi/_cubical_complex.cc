@@ -101,6 +101,7 @@ NB_MODULE(_cubical_complex_ext, m)
       .def("shape", &CC::shape)
       .def("get_numpy_array", &CC::get_numpy_array, nb::rv_policy::reference_internal)
       .def_rw("data", &CC::data);
+
   nb::class_<CPers>(m, "_Cubical_complex_persistence_interface")
       .def(nb::init<CC&, bool>())
       .def("compute_persistence",
@@ -133,6 +134,7 @@ NB_MODULE(_cubical_complex_ext, m)
       .def("periodicities", &PCC::periodicities)
       .def("get_numpy_array", &PCC::get_numpy_array, nb::rv_policy::reference_internal)
       .def_rw("data", &PCC::data);
+
   nb::class_<PCPers>(m, "_Periodic_cubical_complex_persistence_interface")
       .def(nb::init<PCC&, bool>())
       .def("compute_persistence",

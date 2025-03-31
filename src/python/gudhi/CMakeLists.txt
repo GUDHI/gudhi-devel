@@ -27,6 +27,10 @@ if(TARGET CGAL::CGAL)
         nanobind_add_module(_euclidean_strong_witness_complex_ext _euclidean_strong_witness_complex.cc)
         target_link_libraries(_euclidean_strong_witness_complex_ext PRIVATE CGAL::CGAL)
         target_link_libraries(_euclidean_strong_witness_complex_ext PRIVATE Eigen3::Eigen)
+
+        nanobind_add_module(_strong_witness_complex_ext _strong_witness_complex.cc)
+        target_link_libraries(_strong_witness_complex_ext PRIVATE CGAL::CGAL)
+        target_link_libraries(_strong_witness_complex_ext PRIVATE Eigen3::Eigen)
     endif()
 endif ()
 
