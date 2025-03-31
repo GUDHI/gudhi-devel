@@ -8,6 +8,10 @@
 #   - YYYY/MM Author: Description of the modification
 
 from gudhi import _rips_complex_ext as t
+
+from typing import Literal, Optional
+from collections.abc import Iterable
+
 from gudhi.simplex_tree import SimplexTree
 
 __author__ = "Thibaud Kloczko"
@@ -15,13 +19,14 @@ __copyright__ = "Copyright (C) 2025 Inria"
 __license__ = "MIT"
 
 # RipsComplex python interface
-class RipsComplex(t.Rips_complex_interfcae):
+class RipsComplex(t.Rips_complex_interface):
     """The data structure is a one skeleton graph, or Rips graph, containing edges when the edge length is less or
     equal to a given threshold. Edge length is computed from a user given point cloud with a given distance function,
     or a distance matrix.
     """
 
-    def __init__(self, *, points: Iterable[Iterable[float]] = [], distance_matrix: Iterable[Iterable[float]] = [], max_edge_length: float = float('inf'), sparse: float | None = None):
+    def __init__(self, *, points: Iterable[Iterable[float]] = [], distance_matrix: Iterable[Iterable[float]] = [], max_edge_length: float = float('inf'),
+                          sparse: Optional[float] = None):
         """RipsComplex constructor.
 
         Args:
