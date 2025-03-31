@@ -13,6 +13,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/vector.h>
+#include <nanobind/stl/string.h>
 
 #include <gudhi/distance_functions.h>
 #include <gudhi/GIC.h>
@@ -180,7 +181,7 @@ NB_MODULE(_nerve_gic_ext, m)
         :type g: double
         """
         )pbdoc")
-      .def("set_graph_from_automatic_euclidean_rips",
+      .def("set_graph_from_automatic_rips",
            &NGI::set_graph_from_automatic_euclidean_rips,
            nb::arg("N") = 100,
            R"pbdoc(
@@ -256,7 +257,7 @@ NB_MODULE(_nerve_gic_ext, m)
         :type type: string
         """
         )pbdoc")
-      .def("set_verbose", &NGI::set_verbose, nb::arg("verbose"), nb::arg("verb") = false, R"pbdoc(
+      .def("set_verbose", &NGI::set_verbose, nb::arg("verbose") = false, R"pbdoc(
         """Specifies whether the program should display information or not.
 
         :param verbose: true = display info, false = do not display info.
@@ -290,13 +291,13 @@ NB_MODULE(_nerve_gic_ext, m)
         then be plotted with e.g. KeplerMapper.
         """
         )pbdoc")
-      .def("plot_DOT", &NGI::plot_DOT, R"pbdoc(
+      .def("plot_dot", &NGI::plot_DOT, R"pbdoc(
         """Creates a .dot file called SC.dot for neato (part of the graphviz
         package) once the simplicial complex is computed to get a visualization of
         its 1-skeleton in a .pdf file.
         """
         )pbdoc")
-      .def("plot_OFF", &NGI::plot_OFF, R"pbdoc(
+      .def("plot_off", &NGI::plot_OFF, R"pbdoc(
         """Creates a .off file called SC.off for 3D visualization, which contains
         the 2-skeleton of the GIC. This function assumes that the cover has been
         computed with Voronoi. If data points are in 1D or 2D, the remaining

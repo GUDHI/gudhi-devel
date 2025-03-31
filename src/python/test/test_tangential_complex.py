@@ -18,7 +18,6 @@ __license__ = "MIT"
 def test_tangential():
     point_list = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]]
     tc = TangentialComplex(intrisic_dim=1, points=point_list)
-    assert tc._is_defined() == True
     assert tc.num_vertices() == 4
     assert tc.num_simplices() == 0
     assert tc.num_inconsistent_simplices() == 0

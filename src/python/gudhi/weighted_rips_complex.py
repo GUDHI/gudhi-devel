@@ -7,7 +7,7 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from gudhi import SimplexTreeCython
+from gudhi import SimplexTree
 
 class WeightedRipsComplex:
     """
@@ -44,7 +44,7 @@ class WeightedRipsComplex:
         F = self.weights
         num_pts = len(dist)
         
-        st = SimplexTreeCython()
+        st = SimplexTree()
         
         for i in range(num_pts):
             if 2*F[i] <= self.max_filtration:

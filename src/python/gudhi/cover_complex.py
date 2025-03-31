@@ -21,7 +21,7 @@ from sklearn import __version__ as sklearn_version
 from sklearn.utils.fixes import parse_version
 agglomerative_clustering_metric = parse_version(sklearn_version) >= parse_version('1.2.0')
 
-from . import SimplexTreeCython, CoverComplex
+from . import SimplexTree, CoverComplex
 
 def _save_to_html(dat, lens, color, param, points, edges, html_output_filename):
 
@@ -66,7 +66,7 @@ class CoverComplexPy(BaseEstimator):
     This is a mother class for MapperComplex, GraphInducedComplex and NerveComplex.
 
     Attributes:
-        simplex_tree_ (gudhi SimplexTreeCython): simplicial complex representing the cover complex computed after calling the fit() method.
+        simplex_tree_ (gudhi SimplexTree): simplicial complex representing the cover complex computed after calling the fit() method.
         node_info_ (dictionary): various information associated to the nodes of the cover complex.
     """
     def __init__(self, verbose=False):
@@ -408,7 +408,7 @@ class MapperComplex(CoverComplexPy):
                 self.resolutions = np.array([int( (self.filter_bnds[ir,1]-self.filter_bnds[ir,0])/r) for ir, r in enumerate(self.resolutions)])
 
         # Initialize attributes
-        self.simplex_tree_, self.node_info_ = SimplexTreeCython(), {}
+        self.simplex_tree_, self.node_info_ = SimplexTree(), {}
 
         if np.all(self.gains < .5):
 
@@ -621,7 +621,7 @@ class GraphInducedComplex(CoverComplexPy):
         simplex_tree_ = self.complex.create_simplex_tree()
 
         # Normalize vertex names of simplex tree
-        self.simplex_tree_ = SimplexTreeCython()
+        self.simplex_tree_ = SimplexTree()
         idv, names = 0, {}
         for v,_ in simplex_tree_.get_skeleton(0):
             if len(self.complex.subpopulation(v[0])) > self.min_points_per_node:
@@ -699,7 +699,7 @@ class NerveComplex(CoverComplexPy):
         simplex_tree_ = self.complex.create_simplex_tree()
 
         # Normalize vertex names of simplex tree
-        self.simplex_tree_ = SimplexTreeCython()
+        self.simplex_tree_ = SimplexTree()
         idv, names = 0, {}
         for v,_ in simplex_tree_.get_skeleton(0):
             if len(self.complex.subpopulation(v[0])) > self.min_points_per_node:

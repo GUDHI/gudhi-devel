@@ -1,18 +1,24 @@
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-# Author(s):  Thibaud Kloczko
+# Author(s):  Vincent Rouvreau
 #
-# Copyright (C) 2025 Inria
+# Copyright (C) 2016 Inria
 #
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
+
+__author__ = "Vincent Rouvreau"
+__maintainer__ = "Thibaud Kloczko"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
 
 from gudhi import _delaunay_complex_ext as t
 
 from typing import Literal, Optional
 from collections.abc import Iterable
 
-from gudhi.simplex_tree_ext import _Simplex_tree_python_interface
+from gudhi.simplex_tree import SimplexTree
+
 
 # DelaunayComplex python interface
 class DelaunayComplex(t.Delaunay_complex_interface):
@@ -25,8 +31,12 @@ class DelaunayComplex(t.Delaunay_complex_interface):
     * `'cech'`               - The filtration value of each simplex is computed as a :class:`~gudhi.DelaunayCechComplex`
     """
 
-    def __init__(self, points: Iterable[Iterable[float]] = [], weights: Optional[Iterable[float]] = None,
-                  precision: Literal['fast', 'safe', 'exact'] = 'safe'):
+    def __init__(
+        self,
+        points: Iterable[Iterable[float]] = [],
+        weights: Optional[Iterable[float]] = None,
+        precision: Literal["fast", "safe", "exact"] = "safe",
+    ):
         """Args:
               points (Iterable[Iterable[float]]): A list of points in d-Dimension.
               weights (Optional[Iterable[float]]): A list of weights. If set, the number of weights must correspond to
@@ -40,8 +50,8 @@ class DelaunayComplex(t.Delaunay_complex_interface):
             "safe",
             "exact",
         ], "Delaunay complex precision can only be 'fast', 'safe' or 'exact'"
-        fast = precision == 'fast'
-        exact = precision == 'exact'
+        fast = precision == "fast"
+        exact = precision == "exact"
 
         # weights are set but is inconsistent with the number of points
         if weights is not None and len(weights) != len(points):
@@ -51,9 +61,12 @@ class DelaunayComplex(t.Delaunay_complex_interface):
 
         super().__init__(points, weights, fast, exact)
 
-    def create_simplex_tree(self, max_alpha_square: float = float('inf'),
-                            filtration: Optional[Literal['alpha', 'cech']] = None,
-                            output_squared_values: bool = True) -> SimplexTree:
+    def create_simplex_tree(
+        self,
+        max_alpha_square: float = float("inf"),
+        filtration: Optional[Literal["alpha", "cech"]] = None,
+        output_squared_values: bool = True,
+    ) -> SimplexTree:
         """
         Args:
             max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed. Default is set to
@@ -67,18 +80,21 @@ class DelaunayComplex(t.Delaunay_complex_interface):
                          input point. The vertices may not be numbered contiguously as some points may be discarded in the
                          triangulation (duplicate points, weighted hidden point, ...).
         """
-        if not filtration in [None, 'alpha', 'cech']:
-            raise ValueError(f"\'{filtration}\' is not a valid filtration value. Must be None, \'alpha\' or \'cech\'")
+        if not filtration in [None, "alpha", "cech"]:
+            raise ValueError(
+                f"'{filtration}' is not a valid filtration value. Must be None, 'alpha' or 'cech'"
+            )
 
         filt = t.Filtration.NONE
-        if filtration == 'cech':
+        if filtration == "cech":
             filt = t.Filtration.CECH
-        elif filtration == 'alpha':
+        elif filtration == "alpha":
             filt = t.Filtration.ALPHA
 
         stree = SimplexTree()
         super().create_simplex_tree(stree, max_alpha_square, filt, output_squared_values)
         return stree
+
 
 class AlphaComplex(DelaunayComplex):
     """AlphaComplex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
@@ -96,9 +112,13 @@ class AlphaComplex(DelaunayComplex):
 
         When DelaunayComplex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
     """
-    def create_simplex_tree(self, max_alpha_square: float = float('inf'),
-                            default_filtration_value: bool = False,
-                            output_squared_values: bool = True) -> SimplexTree:
+
+    def create_simplex_tree(
+        self,
+        max_alpha_square: float = float("inf"),
+        default_filtration_value: bool = False,
+        output_squared_values: bool = True,
+    ) -> SimplexTree:
         """
         Args:
             max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed. Default is set to
@@ -113,12 +133,15 @@ class AlphaComplex(DelaunayComplex):
                          input point. The vertices may not be numbered contiguously as some points may be discarded in the
                          triangulation (duplicate points, weighted hidden point, ...).
         """
-        filtration = 'alpha'
+        filtration = "alpha"
         if default_filtration_value:
             filtration = None
-            warnings.warn('''Since Gudhi 3.10, creating an AlphaComplex with default_filtration_value=True is deprecated.
+            warnings.warn(
+                """Since Gudhi 3.10, creating an AlphaComplex with default_filtration_value=True is deprecated.
                           Please consider constructing a DelaunayComplex instead.
-                          ''', DeprecationWarning)
+                          """,
+                DeprecationWarning,
+            )
         return super().create_simplex_tree(max_alpha_square, filtration, output_squared_values)
 
 
@@ -134,16 +157,18 @@ class DelaunayCechComplex(DelaunayComplex):
 
         When DelaunayCechComplex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
     """
-    def __init__(self, points=[], precision='safe'):
+
+    def __init__(self, points=[], precision="safe"):
         """
         Args:
             points (Iterable[Iterable[float]]): A list of points in d-Dimension.
             precision (str): Complex precision can be `'fast'`, `'safe'` or `'exact'`. Default is `'safe'`.
         """
-        super().__init__(points = points, weights = None, precision = precision)
+        super().__init__(points=points, weights=None, precision=precision)
 
-    def create_simplex_tree(self, max_alpha_square: float = float('inf'),
-                            output_squared_values: bool = True) -> SimplexTree:
+    def create_simplex_tree(
+        self, max_alpha_square: float = float("inf"), output_squared_values: bool = True
+    ) -> SimplexTree:
         """
         Args:
             max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed. Default is set to
@@ -154,7 +179,8 @@ class DelaunayCechComplex(DelaunayComplex):
                          k-th input point. The vertices may not be numbered contiguously as some points may be discarded in the
                          triangulation(duplicate points, ...).
         """
-        return super().create_simplex_tree(max_alpha_square, 'cech', output_squared_values)
+        return super().create_simplex_tree(max_alpha_square, "cech", output_squared_values)
+
 
 #
 # delaunay_complex.py ends here

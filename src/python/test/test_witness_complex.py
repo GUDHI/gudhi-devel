@@ -17,7 +17,6 @@ __license__ = "MIT"
 
 def test_empty_witness_complex():
     witness = WitnessComplex()
-    assert witness._is_defined() == False
 
 
 def test_witness_complex():

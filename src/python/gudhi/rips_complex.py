@@ -5,18 +5,20 @@
 # Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2025/03 Thibaud Kloczko: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
 
-from gudhi import _rips_complex_ext as t
+__author__ = "Vincent Rouvreau"
+__maintainer__ = "Thibaud Kloczko"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
 
 from typing import Literal, Optional
 from collections.abc import Iterable
 
+from gudhi import _rips_complex_ext as t
 from gudhi.simplex_tree import SimplexTree
 
-__author__ = "Thibaud Kloczko"
-__copyright__ = "Copyright (C) 2025 Inria"
-__license__ = "MIT"
 
 # RipsComplex python interface
 class RipsComplex(t.Rips_complex_interface):
@@ -25,8 +27,14 @@ class RipsComplex(t.Rips_complex_interface):
     or a distance matrix.
     """
 
-    def __init__(self, *, points: Iterable[Iterable[float]] = [], distance_matrix: Iterable[Iterable[float]] = [], max_edge_length: float = float('inf'),
-                          sparse: Optional[float] = None):
+    def __init__(
+        self,
+        *,
+        points: Iterable[Iterable[float]] = [],
+        distance_matrix: Iterable[Iterable[float]] = [],
+        max_edge_length: float = float("inf"),
+        sparse: Optional[float] = None
+    ):
         """RipsComplex constructor.
 
         Args:

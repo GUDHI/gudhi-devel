@@ -18,7 +18,7 @@ __copyright__ = "Copyright (C) 2025 Inria"
 __license__ = "GPL v3"
 
 # TangentialComplex python interface
-class TangentialComplex(t.Tangential_complex_interface):
+class TangentialComplex(t._Tangential_complex_interface):
     """The class Tangential_complex represents a tangential complex. After the
     computation of the complex, an optional post-processing called perturbation
     can be run to attempt to remove inconsistencies.
@@ -40,7 +40,7 @@ class TangentialComplex(t.Tangential_complex_interface):
         """
         if off_file:
             if os.path.isfile(off_file):
-                super().__init__(intrisic_dim, off_file.encode('utf-8'), True)
+                super().__init__(intrisic_dim, off_file, True)
             else:
                 print("file " + off_file + " not found.")
         else:

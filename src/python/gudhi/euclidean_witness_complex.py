@@ -9,7 +9,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 from gudhi import _euclidean_witness_complex_ext as t
-from gudhi.simplex_tree import SimplexTreeCython
+from gudhi.simplex_tree import SimplexTree
 
 __author__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -45,9 +45,9 @@ class EuclideanWitnessComplex(t.Euclidean_witness_complex_interface):
             simplices shall not exceed. Default is set to infinity.
         :type max_alpha_square: float
         :returns: A simplex tree created from the Delaunay Triangulation.
-        :rtype: SimplexTreeCython
+        :rtype: SimplexTree
         """
-        stree = SimplexTreeCython()
+        stree = SimplexTree()
         if limit_dimension != -1:
             super().create_simplex_tree(stree, max_alpha_square, limit_dimension)
         else:

@@ -25,12 +25,10 @@ except ImportError:
 
 def _empty_complex(simplicial_complex, precision):
     cplx = simplicial_complex(precision=precision)
-    assert cplx._is_defined() == True
 
 
 def _one_2d_point_complex(simplicial_complex, precision):
     cplx = simplicial_complex(points=[[0, 0]], precision=precision)
-    assert cplx._is_defined() == True
 
 
 def test_empty_complex():
@@ -43,7 +41,6 @@ def test_empty_complex():
 def _infinite_threshold(simplicial_complex, precision):
     point_list = [[0, 0], [1, 0], [0, 1], [1, 1]]
     cplx = simplicial_complex(points=point_list, precision=precision)
-    assert cplx._is_defined() == True
 
     simplex_tree = cplx.create_simplex_tree()
     assert simplex_tree._is_persistence_defined() == False

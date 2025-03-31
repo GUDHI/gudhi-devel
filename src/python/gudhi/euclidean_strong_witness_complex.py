@@ -10,7 +10,6 @@
 from gudhi import _euclidean_strong_witness_complex_ext as t
 
 from gudhi.simplex_tree import SimplexTree
-from gudhi.simplex_tree import SimplexTreeCython
 
 __author__ = "Thibaud Kloczko"
 __copyright__ = "Copyright (C) 2025 Inria"
@@ -33,7 +32,7 @@ class EuclideanStrongWitnessComplex(t.Euclidean_strong_witness_complex_interface
         if landmarks is not None and witnesses is not None:
             super().__init__(landmarks, witnesses)
 
-    def create_simplex_tree(self, max_alpha_square: float = float('inf'), limit_dimension: int = -1) -> SimplexTreeCython:
+    def create_simplex_tree(self, max_alpha_square: float = float('inf'), limit_dimension: int = -1) -> SimplexTree:
         """
         Args:
             max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed.
@@ -42,7 +41,7 @@ class EuclideanStrongWitnessComplex(t.Euclidean_strong_witness_complex_interface
         Returns:
             SimplexTree: A simplex tree created from the Delaunay Triangulation.
         """
-        stree = SimplexTreeCython()
+        stree = SimplexTree()
 
         if limit_dimension != -1:
             super().create_simplex_tree(stree, max_alpha_square, limit_dimension)
