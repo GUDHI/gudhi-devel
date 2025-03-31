@@ -14,15 +14,6 @@ __author__ = "Thibaud Kloczko"
 __copyright__ = "Copyright (C) 2025 Inria"
 __license__ = "MIT"
 
-# cdef extern from "Rips_complex_interface.h" namespace "Gudhi":
-#     cdef cppclass Rips_complex_interface "Gudhi::rips_complex::Rips_complex_interface":
-#         Rips_complex_interface() nogil
-#         void init_points(vector[vector[double]] values, double threshold) nogil
-#         void init_matrix(vector[vector[double]] values, double threshold) nogil
-#         void init_points_sparse(vector[vector[double]] values, double threshold, double sparse) nogil
-#         void init_matrix_sparse(vector[vector[double]] values, double threshold, double sparse) nogil
-#         void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, int dim_max) nogil except +
-
 # RipsComplex python interface
 class RipsComplex(t.Rips_complex_interfcae):
     """The data structure is a one skeleton graph, or Rips graph, containing edges when the edge length is less or
@@ -30,52 +21,40 @@ class RipsComplex(t.Rips_complex_interfcae):
     or a distance matrix.
     """
 
-    def __init__(self, *, points=None, distance_matrix=None, max_edge_length=float('inf'), sparse=None):
+    def __init__(self, *, points: Iterable[Iterable[float]] = [], distance_matrix: Iterable[Iterable[float]] = [], max_edge_length: float = float('inf'), sparse: float | None = None):
         """RipsComplex constructor.
 
-        :param points: A list of points in d-Dimension.
-        :type points: List[List[float]]
-
+        Args:
+            points (Iterable[Iterable(float)]): A list of points in d-Dimension.
         Or
-
-        :param distance_matrix: A distance matrix (full square or lower triangular).
-        :type distance_matrix: List[List[float]]
+            distance_matrix (Iterable[Iterable(float)]: A distance matrix (full square or lower triangular).
 
         And in both cases
 
-        :param max_edge_length: Maximal edge length. All edges of the graph strictly greater than `threshold` are not
-            inserted in the graph.
-        :type max_edge_length: float
-        :param sparse: If this is not None, it switches to building a sparse Rips and represents the approximation
-            parameter epsilon.
-        :type sparse: float
+            max_edge_length (float, optional): Maximal edge length. All edges of the graph strictly greater than `threshold` are not
+                                               inserted in the graph.
+            sparse (float, optional): If this is not None, it switches to building a sparse Rips and represents the approximation
+                                      parameter epsilon.
         """
         super().__init__()
         if sparse is not None:
-          if distance_matrix is not None:
-              super().init_matrix_sparse(distance_matrix, max_edge_length, sparse)
-          else:
-              if points is None:
-                  # Empty Rips construction
-                  points=[]
-              super().init_points_sparse(points, max_edge_length, sparse)
+            if len(distance_matrix) == 0:
+                super().init_points_sparse(points, max_edge_length, sparse)
+            else:
+                super().init_matrix_sparse(distance_matrix, max_edge_length, sparse)
         else:
-          if distance_matrix is not None:
-              super().init_matrix(distance_matrix, max_edge_length)
-          else:
-              if points is None:
-                  # Empty Rips construction
-                  points=[]
-              super().init_points(points, max_edge_length)super()
+            if len(distance_matrix) == 0:
+                super().init_points(points, max_edge_length)
+            else:
+                super().init_matrix(distance_matrix, max_edge_length)
 
-
-    def create_simplex_tree(self, max_dimension=1):
+    def create_simplex_tree(self, max_dimension: int = 1):
         """
-        :param max_dimension: graph expansion for Rips until this given maximal dimension.
-        :type max_dimension: int
-        :returns: A simplex tree encoding the Vietoris–Rips filtration.
-        :rtype: SimplexTree
+        Args:
+            max_dimension (int): graph expansion for Rips until this given maximal dimension.
+        Returns:
+            SimplexTree: A simplex tree encoding the Vietoris–Rips filtration.
         """
         stree = SimplexTree()
-        super().create_simplex_tree(stree, maxdim)
+        super().create_simplex_tree(stree, max_dimension)
         return stree
