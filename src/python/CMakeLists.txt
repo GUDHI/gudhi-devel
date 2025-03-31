@@ -388,6 +388,7 @@ configure_file("gudhi/__init__.py.in" "${CMAKE_CURRENT_BINARY_DIR}/gudhi/__init_
 
 # Other .py files
 file(COPY "gudhi/reader_utils.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+file(COPY "gudhi/subsampling.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 file(COPY "gudhi/off_utils.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 file(COPY "gudhi/strong_witness_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 file(COPY "gudhi/delaunay_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
