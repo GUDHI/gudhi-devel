@@ -232,7 +232,7 @@ set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'off_utils', ")
 # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'periodic_cubical_complex', ")
 # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'reader_utils', ")
 # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'witness_complex', ")
-set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'strong_witness_complex', ")
+# set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'strong_witness_complex', ")
 set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'nerve_gic', ")
 #set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'subsampling', ")
 if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
@@ -410,7 +410,9 @@ file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES
 file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 file(COPY "gudhi/witness_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+file(COPY "gudhi/euclidean_witness_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 file(COPY "gudhi/euclidean_strong_witness_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+file(COPY "gudhi/strong_witness_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 
 
 # Some files for pip package
