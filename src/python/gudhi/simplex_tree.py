@@ -48,7 +48,6 @@ class SimplexTree(t._Simplex_tree_python_interface):
         if other:
             if isinstance(other, SimplexTree):
                 super().__init__(other)
-                self._pers = other._pers
             else:
                 raise TypeError("`other` argument requires to be of type `SimplexTree`, or `None`.")
         else:
@@ -107,7 +106,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         filtrations = np.asanyarray(filtrations, dtype=float)
         assert filtrations.shape[0] == filtrations.shape[1], 'create_from_array() expects a square array'
         ret = SimplexTree()
-        super().insert_matrix(filtrations, max_filtration)
+        ret.insert_matrix(filtrations, max_filtration)
         return ret
 
     def insert_edges_from_coo_matrix(self, edges):
@@ -127,7 +126,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         super().insert_batch_vertices(np.unique(np.stack((edges.row, edges.col))), float('inf'))
         # TODO: optimize this?
         for edge in zip(edges.row, edges.col, edges.data):
-            self().insert((edge[0], edge[1]), edge[2])
+            super().insert((edge[0], edge[1]), edge[2])
 
     def insert_batch(self, vertex_array: np.ndarray[np.int32] | np.ndarray[np.int64], filtrations: np.ndarray[np.float32] | np.ndarray[np.float64]):
         """Inserts k-simplices given by a sparse array in a format similar
@@ -200,7 +199,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         :returns:  The (simplices of the) boundary of a simplex
         :rtype:  generator with tuples(simplex, filtration)
         """
-        for sh in super().boundary_iter():
+        for sh in super().boundary_iter(simplex):
             yield super().get_simplex_and_filtration(sh)
 
     def extended_persistence(self, homology_coeff_field=11, min_persistence=0):
@@ -231,7 +230,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
         explains how to compute an extension of persistence called extended persistence.
         """
-        self._pers = _Simplex_tree_persistence_interface(self, False)
+        self._pers = t._Simplex_tree_persistence_interface(self, False)
         self._pers.compute_persistence(homology_coeff_field, -1.)
         return self._pers.compute_extended_persistence_subdiagrams(min_persistence)
 
@@ -275,7 +274,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         :type persistence_dim_max: bool
         :returns: Nothing.
         """
-        self._pers = _Simplex_tree_persistence_interface(self, persistence_dim_max)
+        self._pers = t._Simplex_tree_persistence_interface(self, persistence_dim_max)
         self._pers.compute_persistence(homology_coeff_field, min_persistence)
 
     def betti_numbers(self):
@@ -371,8 +370,8 @@ class SimplexTree(t._Simplex_tree_python_interface):
         """
         assert self._pers != None, "lower_star_persistence_generators() requires that persistence() be called first."
         gen = self._pers.lower_star_generators()
-        normal = [np.array(d).reshape(-1,2) for d in gen.first]
-        infinite = [np.array(d) for d in gen.second]
+        normal = [np.array(d).reshape(-1,2) for d in gen[0]]
+        infinite = [np.array(d) for d in gen[1]]
         return (normal, infinite)
 
     def flag_persistence_generators(self):
@@ -389,18 +388,18 @@ class SimplexTree(t._Simplex_tree_python_interface):
         """
         assert self._pers != None, "flag_persistence_generators() requires that persistence() be called first."
         gen = self._pers.flag_generators()
-        if len(gen.first) == 0:
+        if len(gen[0]) == 0:
             normal0 = np.empty((0,3))
             normals = []
         else:
-            l = iter(gen.first)
+            l = iter(gen[0])
             normal0 = np.array(next(l)).reshape(-1,3)
             normals = [np.array(d).reshape(-1,4) for d in l]
-        if len(gen.second) == 0:
+        if len(gen[1]) == 0:
             infinite0 = np.empty(0)
             infinites = []
         else:
-            l = iter(gen.second)
+            l = iter(gen[1])
             infinite0 = np.array(next(l))
             infinites = [np.array(d).reshape(-1,2) for d in l]
         return (normal0, normals, infinite0, infinites)
@@ -421,27 +420,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         if nb_iterations < 1:
             return
         super().collapse_edges(nb_iterations)
-    
-    def __getstate__(self):
-        """:returns: Serialized (or flattened) SimplexTree data structure in order to pickle SimplexTree.
-        :rtype: numpy.array of shape (n,)
-        """
-        buffer_size = super().get_serialization_size()
-        # Let's use numpy to allocate a buffer. Will be deleted automatically
-        np_buffer = np.empty(buffer_size, dtype='B')
-        super().serialize(np_buffer, buffer_size)
-        return np_buffer
 
-    def __setstate__(self, state):
-        """Construct the SimplexTree data structure from a Numpy Array (cf. :func:`~gudhi.SimplexTree.__getstate__`)
-        in order to unpickle a SimplexTree.
-        
-        :param state: Serialized SimplexTree data structure
-        :type state: numpy.array of shape (n,)
-        """
-        # deserialization requires an empty SimplexTree
-        super().clear()
-        # New pointer is a deserialized simplex tree
-        super().deserialize(state, buffer_size)
+
 
 

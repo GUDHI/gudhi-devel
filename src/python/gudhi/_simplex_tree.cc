@@ -10,25 +10,38 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <vector>
+
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/vector.h>
+#include <nanobind/stl/tuple.h>
 #include <nanobind/operators.h>
+#include <nanobind/ndarray.h>
 
 #include <Persistent_cohomology_interface.h>
 #include <Simplex_tree_interface.h>
 
 namespace nb = nanobind;
 
-using gsti  = Gudhi::Simplex_tree_interface;
+using gsti = Gudhi::Simplex_tree_interface;
 using gpers = Gudhi::Persistent_cohomology_interface<gsti>;
+
+gsti deserialize_from_python(const nb::ndarray<char, nb::ndim<1>, nb::numpy> &state)
+{
+  gsti st;
+  st.deserialize(state.data(), state.shape(0));
+  return st;
+}
 
 NB_MODULE(_simplex_tree_ext, m)
 {
   m.attr("__license__") = "MIT";
 
+  nb::class_<gsti::Simplex_handle>(m, "_Simplex_handle").def(nb::init<>());
+
   nb::class_<gsti>(m, "_Simplex_tree_python_interface")
       .def(nb::init<>())
-      .def(nb::init<gsti&>())
+      .def(nb::init<gsti &>())
       .def("filtration", &gsti::simplex_filtration, nb::arg("simplex"), R"pbdoc(
 """This function returns the filtration value for a given N-simplex in
 this simplicial complex, or +infinity if it is not in the complex.
@@ -162,7 +175,7 @@ complex.
         :rtype:  bool
         """)pbdoc")
       .def("insert_matrix", &gsti::insert_matrix, nb::arg("filtrations"), nb::arg("max_filtration"))
-      .def("insert_batch_vertices", &gsti::insert_batch_vertices<std::vector<int>>, R"pbdoc(TODO)pbdoc")
+      .def("insert_batch_vertices", &gsti::insert_batch_vertices<std::vector<int>>)
       .def("get_star", &gsti::get_star, nb::arg("simplex"), R"pbdoc(
         """This function returns the star of a given N-simplex.
 
@@ -285,7 +298,7 @@ complex.
         This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
         explains how to compute an extension of persistence called extended persistence.
         """)pbdoc")
-      .def("collapse_edges", &gsti::collapse_edges, nb::arg("nb_collapse_iteration"), R"pbdoc(TODO)pbdoc")
+      .def("collapse_edges", &gsti::collapse_edges, nb::arg("nb_collapse_iteration"))
       .def(
           "reset_filtration",
           &gsti::reset_filtration,
@@ -307,19 +320,12 @@ complex.
         :rtype: bool
         """
         )pbdoc")
-      .def("get_simplex_and_filtration", &gsti::get_simplex_and_filtration, nb::arg("f_simplex"), R"pbdoc(TODO)pbdoc")
-      //       .def("get_simplices_iterator_begin", &gsti::get_simplices_iterator_begin, R"pbdoc(TODO)pbdoc")
-      //       .def("get_simplices_iterator_end", &gsti::get_simplices_iterator_end, R"pbdoc(TODO)pbdoc")
-      //       .def("get_filtration_iterator_begin", &gsti::get_filtration_iterator_begin, R"pbdoc(TODO)pbdoc")
-      //       .def("get_filtration_iterator_end", &gsti::get_filtration_iterator_end, R"pbdoc(TODO)pbdoc")
-      //       .def("get_skeleton_iterator_begin", &gsti::get_skeleton_iterator_begin, nb::arg("dimension"),
-      //       R"pbdoc(TODO)pbdoc") .def("get_skeleton_iterator_end", &gsti::get_skeleton_iterator_end,
-      //       nb::arg("dimension"), R"pbdoc(TODO)pbdoc")
+      .def("get_simplex_and_filtration", &gsti::get_simplex_and_filtration, nb::arg("f_simplex"))
       .def("simplex_iter", &gsti::get_simplex_python_iterator)
       .def("filtration_iter", &gsti::get_filtration_python_iterator)
       .def("skeleton_iter", &gsti::get_skeleton_python_iterator)
       .def("boundary_iter", &gsti::get_boundary_python_iterator)
-      .def("get_boundary_iterators", &gsti::get_boundary_iterators, nb::arg("simplex"), R"pbdoc(TODO)pbdoc")
+      .def("get_boundary_iterators", &gsti::get_boundary_iterators, nb::arg("simplex"))
       .def("expansion_with_blocker",
            &gsti::expansion_with_blockers_callback,
            nb::arg("max_dim"),
@@ -345,13 +351,24 @@ complex.
         :type blocker_func: Callable[[List[int]], bool]
         """
         )pbdoc")
-      .def("serialize", &gsti::serialize, nb::arg("buffer"), nb::arg("buffer_size"), R"pbdoc(TODO)pbdoc")
-      .def("deserialize", &gsti::deserialize, nb::arg("buffer"), nb::arg("buffer_size"), R"pbdoc(TODO)pbdoc")
-      .def("get_serialization_size", &gsti::get_serialization_size, R"pbdoc(TODO)pbdoc")
-      .def("clear", &gsti::clear, R"pbdoc(TODO)pbdoc");
+      .def("clear", &gsti::clear)
+      .def("__getstate__",
+           [](const gsti &st) -> nb::ndarray<char, nb::ndim<1>, nb::numpy> {
+             auto buffer_size = st.get_serialization_size();
+             char *buffer = new char[buffer_size];
+             st.serialize(buffer, buffer_size);
+             nb::ndarray<char, nb::ndim<1>, nb::numpy> np_buffer(
+                 buffer, {buffer_size}, nb::capsule(buffer, [](void *p) noexcept {
+                   delete reinterpret_cast<char *>(p);
+                 }));
+             return np_buffer;
+           })
+      .def("__setstate__", [](gsti &st, const nb::ndarray<char, nb::ndim<1>, nb::numpy> &state) -> void {
+        new (&st) gsti(deserialize_from_python(state));
+      });
 
   nb::class_<gpers>(m, "_Simplex_tree_persistence_interface")
-      .def(nb::init<gsti&, bool>())
+      .def(nb::init<gsti &, bool>())
       .def("compute_persistence",
            &gpers::compute_persistence,
            nb::arg("homology_coeff_field"),

@@ -12,7 +12,6 @@
 #ifndef INCLUDE_SIMPLEX_TREE_INTERFACE_H_
 #define INCLUDE_SIMPLEX_TREE_INTERFACE_H_
 
-// #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 #include <nanobind/make_iterator.h>
 
@@ -23,11 +22,9 @@
 #include <gudhi/Flag_complex_edge_collapser.h>
 
 #include <cstddef>
-#include <iostream>
 #include <vector>
 #include <utility>  // std::pair
 #include <tuple>
-#include <iterator>  // for std::distance
 
 namespace Gudhi {
 
@@ -207,16 +204,6 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     });
   }
 
-  void serialize(const nanobind::ndarray<char, nanobind::ndim<1> >& buffer, const std::size_t buffer_size)
-  {
-    Base::serialize(buffer.data(), buffer_size);
-  }
-
-  void deserialize(const nanobind::ndarray<char, nanobind::ndim<1> >& buffer, const std::size_t buffer_size)
-  {
-    Base::deserialize(buffer.data(), buffer_size);
-  }
-
   auto get_simplex_python_iterator()
   {
     return nanobind::make_iterator(nanobind::type<Complex_simplex_range>(),
@@ -250,37 +237,6 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     return nanobind::make_iterator(
         nanobind::type<Boundary_simplex_range>(), "boundary_iterator", boundary_srange.begin(), boundary_srange.end());
   }
-  // // Iterator over the simplex tree
-  // Complex_simplex_iterator get_simplices_iterator_begin() {
-  //   // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-  //   return Base::complex_simplex_range().begin();
-  // }
-
-  // Complex_simplex_iterator get_simplices_iterator_end() {
-  //   // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-  //   return Base::complex_simplex_range().end();
-  // }
-
-  // typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_begin() {
-  //   // Base::initialize_filtration(); already performed in filtration_simplex_range
-  //   // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-  //   return Base::filtration_simplex_range().begin();
-  // }
-
-  // typename std::vector<Simplex_handle>::const_iterator get_filtration_iterator_end() {
-  //   // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-  //   return Base::filtration_simplex_range().end();
-  // }
-
-  // Skeleton_simplex_iterator get_skeleton_iterator_begin(int dimension) {
-  //   // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-  //   return Base::skeleton_simplex_range(dimension).begin();
-  // }
-
-  // Skeleton_simplex_iterator get_skeleton_iterator_end(int dimension) {
-  //   // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-  //   return Base::skeleton_simplex_range(dimension).end();
-  // }
 
   std::pair<Boundary_simplex_iterator, Boundary_simplex_iterator> get_boundary_iterators(const Simplex& simplex) {
     auto bd_sh = Base::find(simplex);
