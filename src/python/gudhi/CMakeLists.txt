@@ -7,6 +7,7 @@ nanobind_add_module(bottleneck bottleneck.cc)
 nanobind_add_module(hera hera.cc)
 nanobind_add_module(_simplex_tree_ext _simplex_tree.cc)
 nanobind_add_module(_reader_utils_ext _reader_utils.cc)
+nanobind_add_module(_subsampling_ext _subsampling.cc)
 nanobind_add_module(_witness_complex_ext _witness_complex.cc)
 
 if(TARGET CGAL::CGAL)
