@@ -57,7 +57,8 @@ class DelaunayComplex(t.Delaunay_complex_interface):
         if weights is not None and len(weights) != len(points):
             raise ValueError("Inconsistency between the number of points and weights")
         else:
-            weights = []
+            if weights is None:
+                weights = []
 
         super().__init__(points, weights, fast, exact)
 
