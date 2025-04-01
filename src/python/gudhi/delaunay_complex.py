@@ -12,6 +12,8 @@ __maintainer__ = "Thibaud Kloczko"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
+import warnings
+
 from gudhi import _delaunay_complex_ext as t
 
 from typing import Literal, Optional

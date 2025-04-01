@@ -121,6 +121,9 @@ void Delaunay_complex_interface::create_simplex_tree(Simplex_tree_interface* sim
 void Delaunay_complex_interface::set_float_relative_precision(double precision)
 {
     // cf. CGAL::Epeck_d kernel type in Delaunay_complex_interface
+    if (precision <= 0 || precision >= 1) {
+        throw std::invalid_argument("Precision must be strictly greater than 0 and lower than 0");
+    }
     CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>::FT::set_relative_precision_of_to_double(precision);
 }
 
