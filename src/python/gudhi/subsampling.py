@@ -51,8 +51,7 @@ def choose_n_farthest_points(points=None, off_file='', nb_points=-1, starting_po
 
     if off_file:
         if os.path.isfile(off_file):
-            return t.subsampling_n_farthest_points_from_file(fast, off_file.encode('utf-8'),
-                                                               nb_points, starting_point)
+            return t.subsampling_n_farthest_points_from_file(fast, off_file, nb_points, starting_point)
         else:
             print("file " + off_file + " not found.")
     else:
@@ -80,8 +79,7 @@ def pick_n_random_points(points=None, off_file='', nb_points=0):
     """
     if off_file:
         if os.path.isfile(off_file):
-            return t.subsampling_n_random_points_from_file(off_file.encode('utf-8'),
-                nb_points)
+            return t.subsampling_n_random_points_from_file(off_file, nb_points)
         else:
             print("file " + off_file + " not found.")
     else:
@@ -115,8 +113,7 @@ def sparsify_point_set(points=None, off_file='', min_squared_dist=0.0):
 
     if off_file:
         if os.path.isfile(off_file):
-            return t.subsampling_sparsify_points_from_file(off_file.encode('utf-8'),
-                                                         min_squared_dist)
+            return t.subsampling_sparsify_points_from_file(off_file, min_squared_dist)
         else:
             print("file " + off_file + " not found.")
     else:
