@@ -18,3 +18,7 @@ data/points/human.off_sc.txt
 
 # macOS metadata
 .DS_Store
+
+# emacs junk
+\#*
+.\#*
