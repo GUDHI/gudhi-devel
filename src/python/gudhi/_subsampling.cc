@@ -42,6 +42,9 @@ namespace Gudhi {
 
 namespace subsampling {
 
+const int gudhi_subsampling_use_cgal = _GUDHI_SUBSAMPLING_USE_CGAL;
+const std::size_t _random_starting_point = random_starting_point;
+
 // ------ choose_n_farthest_points ------
 std::vector<std::vector<double>> subsampling_n_farthest_points(bool metric, const std::vector<std::vector<double>>& points,
                                                                std::size_t nb_points, std::size_t starting_point = random_starting_point) {
@@ -126,7 +129,10 @@ namespace nb = nanobind;
 NB_MODULE(_subsampling_ext, m) {
  m.attr("__license__") = "MIT (GPL v3 for sparsify_point_set)";
 
- m.def("subsampling_n_farthest_points",&Gudhi::subsampling::subsampling_n_farthest_points_from_file, "");
+ m.attr("_GUDHI_SUBSAMPLING_USE_CGAL") = Gudhi::subsampling::gudhi_subsampling_use_cgal;
+ m.attr("RANDOM_STARTING_POINT") = Gudhi::subsampling::_random_starting_point;
+
+ m.def("subsampling_n_farthest_points",&Gudhi::subsampling::subsampling_n_farthest_points, "");
  m.def("subsampling_n_farthest_points_from_file", &Gudhi::subsampling::subsampling_n_farthest_points_from_file, "");
  m.def("subsampling_n_random_points", &Gudhi::subsampling::subsampling_n_random_points, "");
  m.def("subsampling_n_random_points_from_file", &Gudhi::subsampling::subsampling_n_random_points_from_file, "");
