@@ -94,11 +94,14 @@ namespace egwc = Gudhi::witness_complex;
 using egwci = egwc::Euclidean_witness_complex_interface;
 
 NB_MODULE(_euclidean_witness_complex_ext, m) {
-    m.attr("__license__") = "GPL v3";
+  m.attr("__license__") = "GPL v3";
 
-    nb::class_<egwci>(m, "Euclidean_witness_complex_interface")
-        .def(nb::init<const std::vector<std::vector<double>>&,
-                      const std::vector<std::vector<double>>&>(), "Constructor")
-        .def("create_simplex_tree", &egwci::create_simplex_tree, "")
-        .def("get_point", &egwci::get_point, "");
+  nb::class_<egwci>(m, "Euclidean_witness_complex_interface")
+      .def(nb::init<const std::vector<std::vector<double>>&,
+          const std::vector<std::vector<double>>&>(), "Constructor")
+      .def("create_simplex_tree", &egwci::create_simplex_tree,
+          nb::arg("simplex_tree"),
+          nb::arg("max_alpha_square"),
+          nb::arg("limit_dimension") = std::numeric_limits<std::size_t>::max(), "")
+      .def("get_point", &egwci::get_point, "");
 }
