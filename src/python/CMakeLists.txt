@@ -390,14 +390,10 @@ file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 configure_file("gudhi/__init__.py.in" "${CMAKE_CURRENT_BINARY_DIR}/gudhi/__init__.py" @ONLY)
 
 # Other .py files
-file(COPY "gudhi/subsampling.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
-file(COPY "gudhi/tangential_complex.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
-file(COPY "gudhi/nerve_gic.py" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
-
 configure_file("gudhi/simplex_tree.py"                     "${CMAKE_CURRENT_BINARY_DIR}/gudhi/simplex_tree.py"                     COPYONLY)
 configure_file("gudhi/delaunay_complex.py"                 "${CMAKE_CURRENT_BINARY_DIR}/gudhi/delaunay_complex.py"                 COPYONLY)
 configure_file("gudhi/rips_complex.py"                     "${CMAKE_CURRENT_BINARY_DIR}/gudhi/rips_complex.py"                     COPYONLY)
-configure_file("gudhi/witness_complex.py"                  "${CMAKE_CURRENT_BINARY_DIR}/gudhi/witness_complex.py"                   COPYONLY)
+configure_file("gudhi/witness_complex.py"                  "${CMAKE_CURRENT_BINARY_DIR}/gudhi/witness_complex.py"                  COPYONLY)
 configure_file("gudhi/euclidean_witness_complex.py"        "${CMAKE_CURRENT_BINARY_DIR}/gudhi/euclidean_witness_complex.py"        COPYONLY)
 configure_file("gudhi/euclidean_strong_witness_complex.py" "${CMAKE_CURRENT_BINARY_DIR}/gudhi/euclidean_strong_witness_complex.py" COPYONLY)
 configure_file("gudhi/strong_witness_complex.py"           "${CMAKE_CURRENT_BINARY_DIR}/gudhi/strong_witness_complex.py"           COPYONLY)
@@ -405,12 +401,15 @@ configure_file("gudhi/dtm_rips_complex.py"                 "${CMAKE_CURRENT_BINA
 configure_file("gudhi/cover_complex.py"                    "${CMAKE_CURRENT_BINARY_DIR}/gudhi/cover_complex.py"                    COPYONLY)
 configure_file("gudhi/cubical_complex.py"                  "${CMAKE_CURRENT_BINARY_DIR}/gudhi/cubical_complex.py"                  COPYONLY)
 configure_file("gudhi/periodic_cubical_complex.py"         "${CMAKE_CURRENT_BINARY_DIR}/gudhi/periodic_cubical_complex.py"         COPYONLY)
-configure_file("gudhi/_kepler_mapper.py"                   "${CMAKE_CURRENT_BINARY_DIR}/gudhi/_kepler_mapper.py"                   COPYONLY)
-configure_file("gudhi/_kepler_mapper.py.COPYRIGHT"         "${CMAKE_CURRENT_BINARY_DIR}/gudhi/_kepler_mapper.py.COPYRIGHT"         COPYONLY)
 configure_file("gudhi/weighted_rips_complex.py"            "${CMAKE_CURRENT_BINARY_DIR}/gudhi/weighted_rips_complex.py"            COPYONLY)
+configure_file("gudhi/tangential_complex.py"               "${CMAKE_CURRENT_BINARY_DIR}/gudhi/tangential_complex.py"               COPYONLY)
 configure_file("gudhi/persistence_graphical_tools.py"      "${CMAKE_CURRENT_BINARY_DIR}/gudhi/persistence_graphical_tools.py"      COPYONLY)
 configure_file("gudhi/reader_utils.py"                     "${CMAKE_CURRENT_BINARY_DIR}/gudhi/reader_utils.py"                     COPYONLY)
+configure_file("gudhi/subsampling.py"                      "${CMAKE_CURRENT_BINARY_DIR}/gudhi/subsampling.py"                      COPYONLY)
 configure_file("gudhi/off_utils.py"                        "${CMAKE_CURRENT_BINARY_DIR}/gudhi/off_utils.py"                        COPYONLY)
+configure_file("gudhi/nerve_gic.py"                        "${CMAKE_CURRENT_BINARY_DIR}/gudhi/nerve_gic.py"                        COPYONLY)
+configure_file("gudhi/_kepler_mapper.py"                   "${CMAKE_CURRENT_BINARY_DIR}/gudhi/_kepler_mapper.py"                   COPYONLY)
+configure_file("gudhi/_kepler_mapper.py.COPYRIGHT"         "${CMAKE_CURRENT_BINARY_DIR}/gudhi/_kepler_mapper.py.COPYRIGHT"         COPYONLY)
 
 #
 file(COPY "gudhi/representations" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
@@ -424,7 +423,7 @@ file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi
 
 
 # Some files for pip package
-file(COPY "pyproject.toml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/")
+configure_file("pyproject.toml" "${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml" COPYONLY)
 
 # Symbolic links to cython sources to be built. "MAKE_DIRECTORY gudhi" must be done before
 add_gudhi_symbolic_links("gudhi/*.pxd")
