@@ -48,7 +48,7 @@ def _save_to_html(dat, lens, color, param, points, edges, html_output_filename):
     custom_val = custom.values()
     m = min(custom_val)
     M = max(custom_val)
-    
+
     network["nodes"] = nodes
     network["links"] = links
     network["meta"] = lens
@@ -96,7 +96,7 @@ class CoverComplexPy(BaseEstimator):
         import networkx as nx
         st = self.simplex_tree_
         G = nx.Graph()
-        for (splx,_) in st.get_skeleton(1):	
+        for (splx,_) in st.get_skeleton(1):
             if len(splx) == 1:
                 G.add_node(splx[0])
             if len(splx) == 2:
@@ -113,7 +113,7 @@ class CoverComplexPy(BaseEstimator):
         Parameters
         ----------
         file_name : string
-            name for the output .dot file, default "cover_complex" 
+            name for the output .dot file, default "cover_complex"
         color_name : string
             name for the output .pdf showing the colorbar of the color used for the Mapper nodes, default "color"
         eps_color : float
@@ -142,7 +142,7 @@ class CoverComplexPy(BaseEstimator):
                 if len(simplex) == 2:
                     f.write("  " + str(simplex[0]) + " -- " + str(simplex[1]) + " [weight=15];")
             f.write("}")
-        
+
         L = np.linspace(eps_color, 1.-eps_color, 100)
         colsrgb = []
         import colorsys
@@ -155,7 +155,7 @@ class CoverComplexPy(BaseEstimator):
         cb.set_label(color_name)
         fig.savefig("colorbar_" + color_name + ".pdf", format="pdf")
         plt.close()
-        
+
     def save_to_txt(self, file_name="cover_complex", data_name="data", cover_name="cover", color_name="color"):
         """
         Write the cover complex to a TXT file called "{file_name}.txt", that can be processed with the KeplerMapper Python script "KeplerMapperVisuFromTxtFile.py" available under "src/Nerve_GIC/utilities/".
@@ -163,9 +163,9 @@ class CoverComplexPy(BaseEstimator):
         Parameters
         ----------
         file_name : string
-            name for the output .txt file, default "cover_complex" 
+            name for the output .txt file, default "cover_complex"
         data_name : string
-            name to use for the data on which the cover complex was computed, default "data". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py 
+            name to use for the data on which the cover complex was computed, default "data". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py
         cover_name : string
             name to use for the cover used to compute the cover complex, default "cover". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py
         color_name : string
@@ -191,7 +191,7 @@ class CoverComplexPy(BaseEstimator):
             for s,_ in st.get_skeleton(1):
                 if len(s) == 2:
                     f.write(str(name2id[s[0]]) + " " + str(name2id[s[1]]) + "\n")
-    
+
     def save_to_html(self, file_name="cover_complex", data_name="data", cover_name="cover", color_name="color"):
         """
         Write the cover complex to an HTML file called "{file_name}.html", that can be visualized in a browser. This function is based on a fork of https://github.com/MLWave/kepler-mapper
@@ -199,7 +199,7 @@ class CoverComplexPy(BaseEstimator):
         Parameters
         ----------
         file_name : string
-            name for the output .html file, default "cover_complex" 
+            name for the output .html file, default "cover_complex"
         data_name : string
             name to use for the data on which the cover complex was computed, default "data".
         cover_name : string
@@ -256,7 +256,7 @@ class MapperComplex(CoverComplexPy):
             subsampling iterations (default 100) for estimating scale and resolutions. Used only if clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
         beta : float
             exponent parameter (default 0.) for estimating scale and resolutions. Used only if clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
-        C : float 
+        C : float
             constant parameter (default 10.) for estimating scale and resolutions. Used only if clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
         verbose : bool
             whether to display info while computing.
@@ -276,7 +276,7 @@ class MapperComplex(CoverComplexPy):
                 input point cloud or distance matrix.
             N : int
                 subsampling iterations (default 100). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
-            beta : float 
+            beta : float
                 exponent parameter (default 0.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
             C : float
                 constant parameter (default 10.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
@@ -307,7 +307,7 @@ class MapperComplex(CoverComplexPy):
                 input point cloud or distance matrix.
             beta : float
                 exponent parameter (default 0.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
-            C : float 
+            C : float
                 constant parameter (default 10.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
             N : int
                 subsampling iterations (default 100). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
@@ -345,7 +345,7 @@ class MapperComplex(CoverComplexPy):
                 input point cloud or distance matrix.
             y : n x 1 array
                 point labels (unused).
-            filters : list of lists or numpy array of shape (num_points) x (num_filters) 
+            filters : list of lists or numpy array of shape (num_points) x (num_filters)
                 filter functions (sometimes called lenses) used to compute the cover. Each column of the numpy array defines a scalar function defined on the input points.
             colors : list of lists or numpy array of shape (num_points) x (num_colors)
                 functions used to color the nodes of the cover complex. More specifically, coloring is done by computing the means of these functions on the subpopulations corresponding to each node. If None, first coordinate is used if input is point cloud, and eccentricity is used if input is distance matrix.
@@ -386,7 +386,7 @@ class MapperComplex(CoverComplexPy):
             self.filters = np.reshape(self.filters, [len(X),1])
         if len(self.colors.shape) == 1: # if self.colors is a 1D filter, convert it to an array of shape [n,1]
             self.colors = np.reshape(self.colors, [len(X),1])
-      
+
         num_pts, num_filters = self.filters.shape[0], self.filters.shape[1]
 
         # If some filter limits are unspecified, automatically compute them
@@ -579,7 +579,7 @@ class GraphInducedComplex(CoverComplexPy):
         # Set underlying graph
         if self.graph == "rips":
             if self.rips_threshold is not None:
-                self.complex.set_graph_from_rips(self.rips_threshold)
+                self.complex.set_graph_from_euclidean_rips(self.rips_threshold)
             else:
                 self.complex.set_subsampling(self.C, self.beta)
                 self.complex.set_graph_from_automatic_rips(self.N)
