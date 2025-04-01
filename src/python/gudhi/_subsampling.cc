@@ -132,12 +132,34 @@ NB_MODULE(_subsampling_ext, m) {
  m.attr("_GUDHI_SUBSAMPLING_USE_CGAL") = Gudhi::subsampling::gudhi_subsampling_use_cgal;
  m.attr("RANDOM_STARTING_POINT") = Gudhi::subsampling::_random_starting_point;
 
- m.def("subsampling_n_farthest_points",&Gudhi::subsampling::subsampling_n_farthest_points, "");
- m.def("subsampling_n_farthest_points_from_file", &Gudhi::subsampling::subsampling_n_farthest_points_from_file, "");
- m.def("subsampling_n_random_points", &Gudhi::subsampling::subsampling_n_random_points, "");
- m.def("subsampling_n_random_points_from_file", &Gudhi::subsampling::subsampling_n_random_points_from_file, "");
- m.def("subsampling_sparsify_points", &Gudhi::subsampling::subsampling_sparsify_points, "");
- m.def("subsampling_sparsify_points_from_file", &Gudhi::subsampling::subsampling_sparsify_points_from_file, "");
+ m.def("subsampling_n_farthest_points",&Gudhi::subsampling::subsampling_n_farthest_points,
+       nb::arg("metric"),
+       nb::arg("points"),
+       nb::arg("nb_points"),
+       nb::arg("starting_point") = Gudhi::subsampling::_random_starting_point,
+       "");
+ m.def("subsampling_n_farthest_points_from_file", &Gudhi::subsampling::subsampling_n_farthest_points_from_file,
+       nb::arg("metric"),
+       nb::arg("off_file"),
+       nb::arg("nb_points"),
+       nb::arg("starting_point") = Gudhi::subsampling::_random_starting_point,
+       "");
+ m.def("subsampling_n_random_points", &Gudhi::subsampling::subsampling_n_random_points,
+       nb::arg("points"),
+       nb::arg("nb_points"),
+       "");
+ m.def("subsampling_n_random_points_from_file", &Gudhi::subsampling::subsampling_n_random_points_from_file,
+       nb::arg("off_file"),
+       nb::arg("nb_points"),
+       "");
+ m.def("subsampling_sparsify_points", &Gudhi::subsampling::subsampling_sparsify_points,
+       nb::arg("points"),
+       nb::arg("min_squared_dist"),
+       "");
+ m.def("subsampling_sparsify_points_from_file", &Gudhi::subsampling::subsampling_sparsify_points_from_file,
+       nb::arg("off_file"),
+       nb::arg("min_squared_dist"),
+       "");
 }
 
 //
