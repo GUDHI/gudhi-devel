@@ -11,13 +11,11 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Euclidean_strong_witness_complex.h>
 
-#include "Simplex_tree_interface.h"
+#include <Simplex_tree_interface.h>
 
 #include <CGAL/Epick_d.h>
 
 #include <vector>
-#include <utility>  // std::pair
-#include <iostream>
 #include <cstddef>
 
 namespace Gudhi {

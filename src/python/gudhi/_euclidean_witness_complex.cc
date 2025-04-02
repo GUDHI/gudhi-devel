@@ -12,14 +12,12 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Euclidean_witness_complex.h>
 
-#include "Simplex_tree_interface_cython.h"
-
 #include <CGAL/Epick_d.h>
 
 #include <vector>
-#include <iostream>
 #include <cstddef>
 #include <limits>
+#include <Simplex_tree_interface.h>
 
 namespace Gudhi {
 
@@ -59,7 +57,7 @@ Euclidean_witness_complex_interface::Euclidean_witness_complex_interface(const s
     witness_complex_ = std::make_unique<Euclidean_witness_complex<Dynamic_kernel>>(landmarks_, witnesses);
 }
 
-void Euclidean_witness_complex_interface::create_simplex_tree(Simplex_tree_interface& simplex_tree, double max_alpha_square, std::size_t limit_dimension)
+void Euclidean_witness_complex_interface::create_simplex_tree(Gudhi::Simplex_tree_interface& simplex_tree, double max_alpha_square, std::size_t limit_dimension)
 {
     witness_complex_->create_complex(simplex_tree, max_alpha_square, limit_dimension);
 }

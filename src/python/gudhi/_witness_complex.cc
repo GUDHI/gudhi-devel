@@ -18,13 +18,11 @@
 #include <nanobind/stl/pair.h>
 #include <nanobind/ndarray.h>
 
-#include "Simplex_tree_interface.h"
+#include <Simplex_tree_interface.h>
 
 #include <vector>
 #include <utility>  // std::pair
-#include <iostream>
 #include <cstddef>
-#include <memory>  // for std::unique_ptr
 #include <limits>  // for std::numeric_limits
 
 

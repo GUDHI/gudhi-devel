@@ -8,7 +8,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include "Simplex_tree_interface.h"
+#include <Simplex_tree_interface.h>
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Rips_complex.h>
