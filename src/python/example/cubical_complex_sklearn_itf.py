@@ -1,3 +1,21 @@
+#!/usr/bin/env python
+
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+    Author(s):       ???
+
+    Copyright (C) 20?? Inria
+
+    Modification(s):
+      - YYYY/MM Author: Description of the modification
+"""
+
+__author__ = "???"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 20?? Inria"
+__license__ = "MIT"
+
+
 # Standard scientific Python imports
 import numpy as np
 
@@ -35,7 +53,12 @@ pipe = Pipeline(
         ("finite_diags", DiagramSelector(use=True, point_type="finite")),
         (
             "pers_img",
-            PersistenceImage(bandwidth=50, weight=lambda x: x[1] ** 2, im_range=[0, 256, 0, 256], resolution=[20, 20]),
+            PersistenceImage(
+                bandwidth=50,
+                weight=lambda x: x[1] ** 2,
+                im_range=[0, 256, 0, 256],
+                resolution=[20, 20],
+            ),
         ),
         ("svc", SVC()),
     ]
@@ -46,7 +69,10 @@ pipe.fit(X_train, y_train)
 # Predict from the test subset
 predicted = pipe.predict(X_test)
 
-print(f"Classification report for TDA pipeline {pipe}:\n" f"{metrics.classification_report(y_test, predicted)}\n")
+print(
+    f"Classification report for TDA pipeline {pipe}:\n"
+    f"{metrics.classification_report(y_test, predicted)}\n"
+)
 
 report = metrics.classification_report(y_test, predicted, output_dict=True)
 assert report["0"]["f1-score"] > 0.65

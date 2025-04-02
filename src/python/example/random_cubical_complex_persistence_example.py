@@ -1,12 +1,5 @@
 #!/usr/bin/env python
 
-import gudhi
-import numpy
-from functools import reduce
-import argparse
-import operator
-
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -18,8 +11,17 @@ import operator
 """
 
 __author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+
+import numpy
+from functools import reduce
+import argparse
+import operator
+import gudhi
+
 
 parser = argparse.ArgumentParser(
     description="Random cubical complex.",

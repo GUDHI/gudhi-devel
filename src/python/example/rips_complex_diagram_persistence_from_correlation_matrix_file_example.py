@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-import sys
-import argparse
-import gudhi
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -15,8 +11,15 @@ import gudhi
 """
 
 __author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2017 Inria"
 __license__ = "MIT"
+
+
+import sys
+import argparse
+import gudhi
+
 
 parser = argparse.ArgumentParser(
     description="RipsComplex creation from " "a correlation matrix read in a csv file.",
@@ -54,9 +57,7 @@ print("RipsComplex creation from correlation matrix read in a csv file")
 message = "RipsComplex with min_edge_correlation=" + repr(args.min_edge_correlation)
 print(message)
 
-correlation_matrix = gudhi.read_lower_triangular_matrix_from_csv_file(
-    csv_file=args.file
-)
+correlation_matrix = gudhi.read_lower_triangular_matrix_from_csv_file(csv_file=args.file)
 # Given a correlation matrix M, we compute component-wise M'[i,j] = 1-M[i,j] to get a distance matrix:
 distance_matrix = [
     [1.0 - correlation_matrix[i][j] for j in range(len(correlation_matrix[i]))]
@@ -84,5 +85,6 @@ invert_diag = [
 
 if args.no_diagram == False:
     import matplotlib.pyplot as plot
+
     gudhi.plot_persistence_diagram(invert_diag, band=args.band)
     plot.show()

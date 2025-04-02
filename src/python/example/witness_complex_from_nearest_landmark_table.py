@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from gudhi import StrongWitnessComplex, SimplexTree
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -13,8 +11,13 @@ from gudhi import StrongWitnessComplex, SimplexTree
 """
 
 __author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+
+from gudhi import StrongWitnessComplex, SimplexTree
+
 
 print("#####################################################################")
 print("WitnessComplex creation from nearest landmark table")

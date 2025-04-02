@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import argparse
-import gudhi
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -14,8 +11,14 @@ import gudhi
 """
 
 __author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+
+import argparse
+import gudhi
+
 
 parser = argparse.ArgumentParser(
     description="RipsComplex creation from " "a distance matrix read in a csv file.",
@@ -45,7 +48,9 @@ print("RipsComplex creation from distance matrix read in a csv file")
 message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
 print(message)
 
-distance_matrix = gudhi.read_lower_triangular_matrix_from_csv_file(csv_file=args.file, separator=args.separator)
+distance_matrix = gudhi.read_lower_triangular_matrix_from_csv_file(
+    csv_file=args.file, separator=args.separator
+)
 rips_complex = gudhi.RipsComplex(
     distance_matrix=distance_matrix, max_edge_length=args.max_edge_length
 )
@@ -61,5 +66,6 @@ print(simplex_tree.betti_numbers())
 
 if args.no_diagram == False:
     import matplotlib.pyplot as plot
+
     gudhi.plot_persistence_diagram(diag, band=args.band)
     plot.show()
