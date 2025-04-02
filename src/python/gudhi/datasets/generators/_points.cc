@@ -69,7 +69,7 @@ auto generate_points_on_torus(size_t n_samples, int dim, std::string sample) {
   return nb::ndarray<nb::numpy, double>(points.data(), { npoints, (size_t)2*dim }).cast();
 }
 
-NB_MODULE(_points, m) {
+NB_MODULE(_points_ext, m) {
     m.attr("__license__") = "LGPL v3";
 
     m.def("sphere", &generate_points_on_sphere,

@@ -9,8 +9,7 @@
 
 import numpy as np
 
-from ._points import ctorus
-from ._points import sphere
+from ._points_ext import ctorus, sphere
 
 def _generate_random_points_on_torus(n_samples, dim):
 

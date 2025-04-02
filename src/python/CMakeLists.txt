@@ -447,9 +447,7 @@ find_package(nanobind CONFIG REQUIRED)
 include_directories(include)
 add_subdirectory("gudhi")
 add_subdirectory("gudhi/clustering")
-if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
-  add_subdirectory("gudhi/datasets/generators")
-endif()
+add_subdirectory("gudhi/datasets/generators")
 
 # Path separator management for windows
 if (WIN32)
