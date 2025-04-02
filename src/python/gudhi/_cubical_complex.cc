@@ -21,7 +21,7 @@
 #include <gudhi/Bitmap_cubical_complex.h>
 #include <gudhi/Bitmap_cubical_complex_base.h>
 #include <gudhi/Bitmap_cubical_complex_periodic_boundary_conditions_base.h>
-#include <Persistent_cohomology_interface.h>
+#include <python_interfaces/Persistent_cohomology_interface.h>
 
 namespace Gudhi {
 namespace cubical_complex {

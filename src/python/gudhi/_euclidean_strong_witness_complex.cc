@@ -11,7 +11,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Euclidean_strong_witness_complex.h>
 
-#include <Simplex_tree_interface.h>
+#include <python_interfaces/Simplex_tree_interface.h>
 
 #include <CGAL/Epick_d.h>
 

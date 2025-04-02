@@ -13,7 +13,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 
-#include <diagram_utils.h>
+#include <python_interfaces/diagram_utils.h>
 
 #ifdef _MSC_VER
 // https://github.com/grey-narn/hera/issues/3

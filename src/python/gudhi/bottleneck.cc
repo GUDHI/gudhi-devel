@@ -11,7 +11,7 @@
 
 #include <gudhi/Bottleneck.h>
 //#include <optional>
-#include <diagram_utils.h>
+#include <python_interfaces/diagram_utils.h>
 #include <nanobind/stl/optional.h>
 //#include <pybind11/stl.h>
 

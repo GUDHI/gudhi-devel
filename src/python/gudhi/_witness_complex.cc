@@ -18,7 +18,7 @@
 #include <nanobind/stl/pair.h>
 #include <nanobind/ndarray.h>
 
-#include <Simplex_tree_interface.h>
+#include <python_interfaces/Simplex_tree_interface.h>
 
 #include <vector>
 #include <utility>  // std::pair

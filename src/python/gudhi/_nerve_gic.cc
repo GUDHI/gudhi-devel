@@ -18,7 +18,7 @@
 #include <gudhi/distance_functions.h>
 #include <gudhi/GIC.h>
 
-#include <Simplex_tree_interface.h>
+#include <python_interfaces/Simplex_tree_interface.h>
 
 namespace Gudhi {
 

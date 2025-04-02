@@ -26,7 +26,7 @@
 #include <gudhi/Alpha_complex_options.h>
 #include <gudhi/MEB_filtration.h>
 #include <gudhi/Alpha_complex.h>
-#include <Simplex_tree_interface.h>
+#include <python_interfaces/Simplex_tree_interface.h>
 
 namespace Gudhi {
 

@@ -8,7 +8,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <Simplex_tree_interface.h>
+#include <python_interfaces/Simplex_tree_interface.h>
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Rips_complex.h>
@@ -16,11 +16,7 @@
 #include <gudhi/distance_functions.h>
 
 #include <optional>
-
-#include <iostream>
 #include <vector>
-#include <utility>  // std::pair
-#include <string>
 
 namespace Gudhi {
 

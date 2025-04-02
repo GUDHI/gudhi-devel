@@ -17,7 +17,7 @@
 #include <vector>
 #include <cstddef>
 #include <limits>
-#include <Simplex_tree_interface.h>
+#include <python_interfaces/Simplex_tree_interface.h>
 
 namespace Gudhi {
 

@@ -18,7 +18,7 @@
 #include <gudhi/Tangential_complex.h>
 #include <gudhi/Points_off_io.h>
 
-#include <Simplex_tree_interface.h>
+#include <python_interfaces/Simplex_tree_interface.h>
 
 namespace Gudhi {
 

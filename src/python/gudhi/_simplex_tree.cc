@@ -18,8 +18,8 @@
 #include <nanobind/operators.h>
 #include <nanobind/ndarray.h>
 
-#include <Persistent_cohomology_interface.h>
-#include <Simplex_tree_interface.h>
+#include <python_interfaces/Persistent_cohomology_interface.h>
+#include <python_interfaces/Simplex_tree_interface.h>
 
 namespace nb = nanobind;
 
