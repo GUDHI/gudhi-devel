@@ -31,7 +31,6 @@ class EuclideanStrongWitnessComplex(t.Euclidean_strong_witness_complex_interface
             witnesses (Iterable[Iterable[float]]): The point cloud (list of list of double).
         """
 
-        # The real cython constructor
         if landmarks is not None and witnesses is not None:
             super().__init__(landmarks, witnesses)
 

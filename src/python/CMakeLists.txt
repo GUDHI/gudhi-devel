@@ -82,6 +82,8 @@ endfunction( disable_python_documentation )
 
 add_gudhi_debug_info("Python version ${Python_VERSION}")
 add_gudhi_debug_info("Nanobind version ${NANOBIND_VERSION}")
+# add_gudhi_debug_info("Cython version ${CYTHON_VERSION}")
+add_gudhi_debug_info("Numpy version ${NUMPY_VERSION}")
 
 # Python modules for __all__ list in __init__.py
 set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'bottleneck', ")
@@ -114,9 +116,6 @@ set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'dtm_rips_complex',
 set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'cover_complex', ")
 set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'flag_filtration', ")
 
-
-add_gudhi_debug_info("Cython version ${CYTHON_VERSION}")
-add_gudhi_debug_info("Numpy version ${NUMPY_VERSION}")
 
 if(PYTEST_FOUND)
   add_gudhi_debug_info("Pytest version ${PYTEST_VERSION}")
@@ -235,12 +234,12 @@ endif (TARGET Eigen3::Eigen)
 # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'strong_witness_complex', ")
 # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'nerve_gic', ")
 #set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'subsampling', ")
-if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
+# if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'tangential_complex', ")
   # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_witness_complex', ")
   # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_strong_witness_complex', ")
   # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'delaunay_complex', ")
-endif ()
+# endif ()
 
 # from windows vcpkg eigen 3.4.0#2 : build fails with
 # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
@@ -357,24 +356,26 @@ if(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
   set( GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}")
 endif(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
 
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'clustering/_tomato', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'hera', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_pers_cub_low_dim', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_edge_collapse', ")
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_cubical_complex', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_ripser', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_rips_complex', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_tangential_complex', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_cubical_complex', ")
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_edge_collapse', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_simplex_tree', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_reader_utils', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_subsampling', ")
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_witness_complex', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_nerve_gic', ")
-if (TARGET CGAL::CGAL)
-  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'bottleneck', ")
-endif ()
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'bottleneck', ")
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'hera', ")
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'clustering/_tomato', ")
 if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
-  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'datasets/generators/_points', ")
   set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_delaunay_complex', ")
+  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_tangential_complex', ")
+  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_euclidean_witness_complex', ")
+  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_euclidean_strong_witness_complex', ")
+  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_strong_witness_complex', ")
+  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'datasets/generators/_points', ")
 endif ()
 
 # doc/pip_introduction.inc is a restructured text file (extension changed because of sphinx warning) that describes
@@ -382,7 +383,7 @@ endif ()
 file(READ "doc/pypi_introduction.inc" GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR)
 string(REPLACE "\n" "\\n' \\\n        '" GUDHI_LONG_DESCRIPTION ${GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR})
 
-# Generate setup.py file to cythonize Gudhi - This file must be named setup.py by convention
+# Generate setup.py file to bind Gudhi - This file must be named setup.py by convention
 configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
 
 # Generate gudhi/__init__.py
@@ -425,9 +426,9 @@ file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi
 # Some files for pip package
 configure_file("pyproject.toml" "${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml" COPYONLY)
 
-# Symbolic links to cython sources to be built. "MAKE_DIRECTORY gudhi" must be done before
-add_gudhi_symbolic_links("gudhi/*.pxd")
-add_gudhi_symbolic_links("gudhi/*.pyx")
+# # Symbolic links to cython sources to be built. "MAKE_DIRECTORY gudhi" must be done before
+# add_gudhi_symbolic_links("gudhi/*.pxd")
+# add_gudhi_symbolic_links("gudhi/*.pyx")
 
 add_custom_command(
     OUTPUT gudhi.so

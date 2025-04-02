@@ -36,7 +36,6 @@ class Cubical_complex_interface : public Bitmap_cubical_complex<Bitmap_cubical_c
 
   explicit Cubical_complex_interface(const std::string& perseus_style_file) : Base(perseus_style_file.c_str()) {}
 
-  // not const because cython does not handle const very well
   const std::vector<unsigned>& shape() { return this->sizes; };
 
   nanobind::ndarray<double, nanobind::numpy> get_numpy_array()
@@ -55,10 +54,8 @@ class Periodic_cubical_complex_interface
   using Base::data;
 
   explicit Periodic_cubical_complex_interface(const std::string& perseus_style_file) : Base(perseus_style_file.c_str())
-  {
-  }
+  {}
 
-  // not const because cython does not handle const very well
   const std::vector<unsigned>& shape() { return this->sizes; };
 
   const std::vector<bool>& periodicities() { return this->directions_in_which_periodic_b_cond_are_to_be_imposed; }

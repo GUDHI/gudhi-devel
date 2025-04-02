@@ -176,7 +176,6 @@ if (WITH_GUDHI_PYTHON)
     endfunction( find_python_module )
 
     if( TARGET Python::Interpreter )
-        find_python_module("cython")
         find_python_module("pytest")
         find_python_module("matplotlib")
         find_python_module("numpy")
