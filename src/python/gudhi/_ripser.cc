@@ -11,12 +11,12 @@
 
 #include <cassert>
 #include <vector>
-// #include <array>
 #include <cmath>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/vector.h>
+// #include <nanobind/stl/bind_vector.h>
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/ripser.h>
@@ -218,10 +218,11 @@ double lower_cone_radius(nb::object low_mat)
 
 NB_MODULE(_ripser_ext, m)
 {
-  // nb::bind_vector<Vi >(m, "VectorInt"       , nb::buffer_protocol());
-  // py::bind_vector<Vd >(m, "VectorDouble"    , py::buffer_protocol());
-  // py::bind_vector<V2f>(m, "VectorPairFloat" , py::buffer_protocol());
-  // py::bind_vector<V2d>(m, "VectorPairDouble", py::buffer_protocol());
+  // nb::bind_vector<Vi>(m, "VectorInt");
+  // nb::bind_vector<Vd>(m, "VectorDouble");
+  // nb::bind_vector<V2f>(m, "VectorPairFloat");
+  // nb::bind_vector<V2d>(m, "VectorPairDouble");
+
   // Remove the default for max_dimension?
   m.def("_full",
         full<float>,

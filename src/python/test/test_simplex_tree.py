@@ -8,13 +8,16 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import SimplexTree
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
+
+
 import numpy as np
 import pytest
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
+from gudhi import SimplexTree
 
 
 def test_insertion():
@@ -114,6 +117,7 @@ def test_insertion():
     st2.insert([1, 2])
     st2.remove_maximal_simplex([1, 2])
     assert st == st2
+
 
 def test_expansion():
     st = SimplexTree()
@@ -534,10 +538,18 @@ def test_simplex_tree_constructor_exception():
 def test_create_from_array():
     a = np.array([[1, 4, 13, 6], [4, 3, 11, 5], [13, 11, 10, 12], [6, 5, 12, 2]])
     st = SimplexTree.create_from_array(a, max_filtration=5.0)
-    assert list(st.get_filtration()) == [([0], 1.0), ([3], 2.0), ([1], 3.0), ([0, 1], 4.0), ([1, 3], 5.0)]
+    assert list(st.get_filtration()) == [
+        ([0], 1.0),
+        ([3], 2.0),
+        ([1], 3.0),
+        ([0, 1], 4.0),
+        ([1, 3], 5.0),
+    ]
     assert SimplexTree.create_from_array([[0, 10], [10, 1]]).dimension() == 1
     assert SimplexTree.create_from_array([[0, 10], [10, 1]], max_filtration=5).dimension() == 0
-    assert SimplexTree.create_from_array([[0, 10], [10, 1]], max_filtration=-5).dimension() == -1
+    assert (
+        SimplexTree.create_from_array([[0, 10], [10, 1]], max_filtration=-5).dimension() == -1
+    )
 
 
 def test_insert_edges_from_coo_matrix():
@@ -659,6 +671,7 @@ def test_assign_filtration_missing():
     with pytest.raises(ValueError):
         st.assign_filtration([1, 2], 3)
 
+
 def test_prune_above_dimension():
     st = SimplexTree()
 
@@ -693,7 +706,7 @@ def test_prune_above_dimension():
     assert st.prune_above_dimension(-1) == True
     assert st.dimension() == -1
     assert st.upper_bound_dimension() == -1
-    assert st.num_vertices() ==  0
+    assert st.num_vertices() == 0
     assert st.num_simplices() == 0
 
     assert st.prune_above_dimension(-200) == False

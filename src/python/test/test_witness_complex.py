@@ -8,11 +8,13 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import WitnessComplex, StrongWitnessComplex, SimplexTree
-
 __author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+
+from gudhi import WitnessComplex, StrongWitnessComplex, SimplexTree
 
 
 def test_empty_witness_complex():
@@ -32,9 +34,7 @@ def test_witness_complex():
     simplex_tree = witness_complex.create_simplex_tree(max_alpha_square=4.1)
     assert simplex_tree.num_vertices() == 5
     assert simplex_tree.num_simplices() == 31
-    simplex_tree = witness_complex.create_simplex_tree(
-        max_alpha_square=4.1, limit_dimension=2
-    )
+    simplex_tree = witness_complex.create_simplex_tree(max_alpha_square=4.1, limit_dimension=2)
     assert simplex_tree.num_vertices() == 5
     assert simplex_tree.num_simplices() == 25
 

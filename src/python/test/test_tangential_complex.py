@@ -8,11 +8,13 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import TangentialComplex, SimplexTree
-
 __author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+
+from gudhi import TangentialComplex, SimplexTree
 
 
 def test_tangential():

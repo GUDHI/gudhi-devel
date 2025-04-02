@@ -55,7 +55,8 @@ class Periodic_cubical_complex_interface
   using Base::data;
 
   explicit Periodic_cubical_complex_interface(const std::string& perseus_style_file) : Base(perseus_style_file.c_str())
-  {}
+  {
+  }
 
   // not const because cython does not handle const very well
   const std::vector<unsigned>& shape() { return this->sizes; };

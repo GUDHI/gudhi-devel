@@ -8,7 +8,14 @@
       - YYYY/MM Author: Description of the modification
 """
 
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
+
+
 from gudhi import EuclideanWitnessComplex, EuclideanStrongWitnessComplex
+
 
 def test_witness_complex():
     point_cloud = [
@@ -55,9 +62,7 @@ def test_strong_witness_complex():
     euclidean_strong_witness_complex = EuclideanStrongWitnessComplex(
         landmarks=landmarks, witnesses=point_cloud
     )
-    simplex_tree = euclidean_strong_witness_complex.create_simplex_tree(
-        max_alpha_square=14.9
-    )
+    simplex_tree = euclidean_strong_witness_complex.create_simplex_tree(max_alpha_square=14.9)
 
     assert landmarks[0] == euclidean_strong_witness_complex.get_point(0)
     assert landmarks[1] == euclidean_strong_witness_complex.get_point(1)
@@ -65,9 +70,7 @@ def test_strong_witness_complex():
 
     assert list(simplex_tree.get_filtration()) == [([0], 0.0), ([1], 0.0), ([2], 0.0)]
 
-    simplex_tree = euclidean_strong_witness_complex.create_simplex_tree(
-        max_alpha_square=100.0
-    )
+    simplex_tree = euclidean_strong_witness_complex.create_simplex_tree(max_alpha_square=100.0)
 
     assert list(simplex_tree.get_filtration()) == [
         ([0], 0.0),

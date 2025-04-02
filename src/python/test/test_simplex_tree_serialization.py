@@ -8,20 +8,29 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import SimplexTree
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2023 Inria"
+__license__ = "MIT"
+
+
 import numpy as np
 import pickle
 import pytest
+
+from gudhi import SimplexTree
+
 
 def test_pickle_simplex_tree():
     st = SimplexTree.create_from_array(np.random.rand(10, 10))
     for dim in [1, 2, 3]:
         st.expansion(dim)
-        with open('stree.pkl','wb') as f:
+        with open("stree.pkl", "wb") as f:
             pickle.dump(st, f)
-        with open('stree.pkl','rb') as f:
+        with open("stree.pkl", "rb") as f:
             st_copy = pickle.load(f)
         assert st == st_copy
+
 
 def test_simplex_tree_serialization_copy():
     st = SimplexTree()
@@ -32,6 +41,6 @@ def test_simplex_tree_serialization_copy():
     st_copy = st.copy()
     st_data = pickle.dumps(st)
     # Modify the original before reloading it from its dump
-    st.insert([4, 5], 2.)
+    st.insert([4, 5], 2.0)
     st = pickle.loads(st_data)
     assert st == st_copy

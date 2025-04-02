@@ -5,20 +5,22 @@
 # Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2024/03 Vincent Rouvreau: Renamed AlphaComplex as DelaunayComplex. AlphaComplex inherits from it.
+#   - 2024/10 Vincent Rouvreau: Add square root filtration values interface and new function interfaces (instead of
+#                               classes)
+#   - 2025/03 Thibaud Kloczko: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
-__maintainer__ = "Thibaud Kloczko"
+__maintainer__ = "Vincent Rouvreau, Thibaud Kloczko"
 __copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"
 
 import warnings
-
-from gudhi import _delaunay_complex_ext as t
-
 from typing import Literal, Optional
 from collections.abc import Iterable
 
+from gudhi import _delaunay_complex_ext as t
 from gudhi.simplex_tree import SimplexTree
 
 

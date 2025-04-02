@@ -5,9 +5,15 @@
 # Copyright (C) 2021 Inria
 #
 # Modification(s):
-#   - YYYY/MM Author: Description of the modification
 #   - 2022/09 Vincent Rouvreau: factorize _fetch_remote_license
 #                               fetch activities dataset
+#   - YYYY/MM Author: Description of the modification
+
+__author__ = "Hind Montassif"
+__maintainer__ = "Vincent Rouvreau"
+__copyright__ = "Copyright (C) 2021 Inria"
+__license__ = "MIT"
+
 
 from os.path import join, split, exists, expanduser
 from os import makedirs, remove, environ
@@ -18,6 +24,7 @@ import shutil
 from functools import lru_cache
 
 import numpy as np
+
 
 def _get_data_home(data_home=None):
     """
@@ -120,11 +127,15 @@ def _fetch_remote(url, file_path, file_checksum=None):
             raise OSError(
                 "{} has a SHA256 checksum : {}, "
                 "different from expected : {}."
-                "The file may be corrupted or the given url may be wrong !".format(file_path, checksum, file_checksum)
+                "The file may be corrupted or the given url may be wrong !".format(
+                    file_path, checksum, file_checksum
+                )
             )
 
 
-def _fetch_remote_license(license_url, license_path, license_checksum=None, accept_license=False):
+def _fetch_remote_license(
+    license_url, license_path, license_checksum=None, accept_license=False
+):
     """
     Fetch the wanted license from the given url and save it in file_path.
 
@@ -244,7 +255,9 @@ def fetch_bunny(file_path=None, accept_license=False):
 
     file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/bunny.npy"
     file_checksum = "f382482fd89df8d6444152dc8fd454444fe597581b193fd139725a85af4a6c6e"
-    license_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/bunny.LICENSE"
+    license_url = (
+        "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/bunny/bunny.LICENSE"
+    )
     license_checksum = "b763dbe1b2fc6015d05cbf7bcc686412a2eb100a1f2220296e3b4a644c69633a"
 
     archive_path = _get_archive_path(file_path, "points/bunny/bunny.npy")
@@ -314,17 +327,19 @@ def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
 
     file_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities_p1_left_leg.npy"
     file_checksum = "ff813f717dbd3c8f8a95e59a7d8496d0b43c440e85a4db1f2b338cbfa9c02f25"
-    activities_license_url = (
-        "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE"
+    activities_license_url = "https://raw.githubusercontent.com/GUDHI/gudhi-data/main/points/activities/activities.LICENSE"
+    activities_license_checksum = (
+        "f5ce6749fa9d5359d7b0c4c37d0b61e5d9520f9494cd53be94295d3967ee4023"
     )
-    activities_license_checksum = "f5ce6749fa9d5359d7b0c4c37d0b61e5d9520f9494cd53be94295d3967ee4023"
     gudhi_data_set_path = "points/activities/activities_p1_left_leg.npy"
 
     archive_path = _get_archive_path(file_path, gudhi_data_set_path)
     if not exists(archive_path):
         _fetch_remote(file_url, archive_path, file_checksum)
         license_path = join(split(archive_path)[0], "activities.LICENSE")
-        _fetch_remote_license(activities_license_url, license_path, activities_license_checksum, accept_license)
+        _fetch_remote_license(
+            activities_license_url, license_path, activities_license_checksum, accept_license
+        )
 
     ds = _load_and_cache_activity(archive_path)
 

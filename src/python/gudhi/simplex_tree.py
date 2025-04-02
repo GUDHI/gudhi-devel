@@ -10,13 +10,15 @@
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
+__maintainer__ = "Alexis Gobé, Hannah Schreiber"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
+import numpy as np
+
 from gudhi import _simplex_tree_ext as t
 
-import numpy as np
 
 # SimplexTree python interface
 class SimplexTree(t._Simplex_tree_python_interface):
@@ -31,7 +33,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
     """
 
     # Fake constructor that does nothing but documenting the constructor
-    def __init__(self, other = None):
+    def __init__(self, other=None):
         """SimplexTree constructor.
 
         :param other: If `other` is `None` (default value), an empty `SimplexTree` is created.
@@ -49,17 +51,18 @@ class SimplexTree(t._Simplex_tree_python_interface):
             if isinstance(other, SimplexTree):
                 super().__init__(other)
             else:
-                raise TypeError("`other` argument requires to be of type `SimplexTree`, or `None`.")
+                raise TypeError(
+                    "`other` argument requires to be of type `SimplexTree`, or `None`."
+                )
         else:
             super().__init__()
 
     def _is_persistence_defined(self):
-        """Returns true if Persistence pointer is not None.
-        """
+        """Returns true if Persistence pointer is not None."""
         return self._pers != None
 
     def copy(self):
-        """ 
+        """
         :returns: A simplex tree that is a deep copy of itself.
         :rtype: SimplexTree
 
@@ -79,11 +82,15 @@ class SimplexTree(t._Simplex_tree_python_interface):
         .. deprecated:: 3.2.0
         """
         import warnings
-        warnings.warn("Since Gudhi 3.2, calling SimplexTree.initialize_filtration is unnecessary.", DeprecationWarning)
+
+        warnings.warn(
+            "Since Gudhi 3.2, calling SimplexTree.initialize_filtration is unnecessary.",
+            DeprecationWarning,
+        )
         super().initialize_filtration()
 
     @staticmethod
-    def create_from_array(filtrations, max_filtration:float = float('inf')):
+    def create_from_array(filtrations, max_filtration: float = float("inf")):
         """Creates a new, empty complex and inserts vertices and edges. The vertices are numbered from 0 to n-1, and
         the filtration values are encoded in the array, with the diagonal representing the vertices. It is the
         caller's responsibility to ensure that this defines a filtration, which can be achieved with either::
@@ -104,7 +111,9 @@ class SimplexTree(t._Simplex_tree_python_interface):
         """
         # TODO: document which half of the matrix is actually read?
         filtrations = np.asanyarray(filtrations, dtype=float)
-        assert filtrations.shape[0] == filtrations.shape[1], 'create_from_array() expects a square array'
+        assert (
+            filtrations.shape[0] == filtrations.shape[1]
+        ), "create_from_array() expects a square array"
         ret = SimplexTree()
         ret.insert_matrix(filtrations, max_filtration)
         return ret
@@ -123,12 +132,18 @@ class SimplexTree(t._Simplex_tree_python_interface):
         .. seealso:: :func:`insert_batch`
         """
         # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
-        super().insert_batch_vertices(np.unique(np.stack((edges.row, edges.col))), float('inf'))
+        super().insert_batch_vertices(
+            np.unique(np.stack((edges.row, edges.col))), float("inf")
+        )
         # TODO: optimize this?
         for edge in zip(edges.row, edges.col, edges.data):
             super().insert((edge[0], edge[1]), edge[2])
 
-    def insert_batch(self, vertex_array: np.ndarray[np.int32] | np.ndarray[np.int64], filtrations: np.ndarray[np.float32] | np.ndarray[np.float64]):
+    def insert_batch(
+        self,
+        vertex_array: np.ndarray[np.int32] | np.ndarray[np.int64],
+        filtrations: np.ndarray[np.float32] | np.ndarray[np.float64],
+    ):
         """Inserts k-simplices given by a sparse array in a format similar
         to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
         The n-th simplex has vertices `vertex_array[0,n]`, ...,
@@ -147,11 +162,11 @@ class SimplexTree(t._Simplex_tree_python_interface):
         vertices = np.unique(vertex_array)
         k = vertex_array.shape[0]
         n = vertex_array.shape[1]
-        assert filtrations.shape[0] == n, 'inconsistent sizes for vertex_array and filtrations'
+        assert filtrations.shape[0] == n, "inconsistent sizes for vertex_array and filtrations"
         v = []
         # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
         # NaN currently does the wrong thing
-        super().insert_batch_vertices(vertices, float('inf'))
+        super().insert_batch_vertices(vertices, float("inf"))
         for i in range(n):
             for j in range(k):
                 v.append(vertex_array[j, i])
@@ -224,17 +239,19 @@ class SimplexTree(t._Simplex_tree_python_interface):
         .. note::
 
             The coordinates of the persistence diagram points might be a little different than the
-            original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
+            original filtration values due to the internal transformation (scaling to [-2,-1]) that is
             performed on these values during the computation of extended persistence.
 
         This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
         explains how to compute an extension of persistence called extended persistence.
         """
         self._pers = t._Simplex_tree_persistence_interface(self, False)
-        self._pers.compute_persistence(homology_coeff_field, -1.)
+        self._pers.compute_persistence(homology_coeff_field, -1.0)
         return self._pers.compute_extended_persistence_subdiagrams(min_persistence)
 
-    def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
+    def persistence(
+        self, homology_coeff_field=11, min_persistence=0, persistence_dim_max=False
+    ):
         """This function computes and returns the persistence of the simplicial complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
@@ -255,7 +272,9 @@ class SimplexTree(t._Simplex_tree_python_interface):
         self.compute_persistence(homology_coeff_field, min_persistence, persistence_dim_max)
         return self._pers.get_persistence()
 
-    def compute_persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
+    def compute_persistence(
+        self, homology_coeff_field=11, min_persistence=0, persistence_dim_max=False
+    ):
         """This function computes the persistence of the simplicial complex, so it can be accessed through
         :func:`persistent_betti_numbers`, :func:`persistence_pairs`, etc. This function is equivalent to :func:`persistence`
         when you do not want the list :func:`persistence` returns.
@@ -287,7 +306,9 @@ class SimplexTree(t._Simplex_tree_python_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert self._pers != None, "compute_persistence() must be called before betti_numbers()"
+        assert (
+            self._pers != None
+        ), "compute_persistence() must be called before betti_numbers()"
         return self._pers.betti_numbers()
 
     def persistent_betti_numbers(self, from_value, to_value):
@@ -308,7 +329,9 @@ class SimplexTree(t._Simplex_tree_python_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert self._pers != None, "compute_persistence() must be called before persistent_betti_numbers()"
+        assert (
+            self._pers != None
+        ), "compute_persistence() must be called before persistent_betti_numbers()"
         return self._pers.persistent_betti_numbers(from_value, to_value)
 
     def persistence_intervals_in_dimension(self, dimension):
@@ -324,11 +347,13 @@ class SimplexTree(t._Simplex_tree_python_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert self._pers != None, "compute_persistence() must be called before persistence_intervals_in_dimension()"
+        assert (
+            self._pers != None
+        ), "compute_persistence() must be called before persistence_intervals_in_dimension()"
         piid = np.array(self._pers.intervals_in_dimension(dimension))
         # Workaround https://github.com/GUDHI/gudhi-devel/issues/507
         if len(piid) == 0:
-            return np.empty(shape = [0, 2])
+            return np.empty(shape=[0, 2])
         return piid
 
     def persistence_pairs(self):
@@ -341,7 +366,9 @@ class SimplexTree(t._Simplex_tree_python_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert self._pers != None, "compute_persistence() must be called before persistence_pairs()"
+        assert (
+            self._pers != None
+        ), "compute_persistence() must be called before persistence_pairs()"
         return self._pers.persistence_pairs()
 
     def write_persistence_diagram(self, persistence_file):
@@ -355,7 +382,9 @@ class SimplexTree(t._Simplex_tree_python_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert self._pers != None, "compute_persistence() must be called before write_persistence_diagram()"
+        assert (
+            self._pers != None
+        ), "compute_persistence() must be called before write_persistence_diagram()"
         self._pers.write_output_diagram(persistence_file)
 
     def lower_star_persistence_generators(self):
@@ -368,9 +397,11 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
         :note: lower_star_persistence_generators requires that `persistence()` be called first.
         """
-        assert self._pers != None, "lower_star_persistence_generators() requires that persistence() be called first."
+        assert (
+            self._pers != None
+        ), "lower_star_persistence_generators() requires that persistence() be called first."
         gen = self._pers.lower_star_generators()
-        normal = [np.array(d).reshape(-1,2) for d in gen[0]]
+        normal = [np.array(d).reshape(-1, 2) for d in gen[0]]
         infinite = [np.array(d) for d in gen[1]]
         return (normal, infinite)
 
@@ -386,25 +417,27 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
         :note: flag_persistence_generators requires that `persistence()` be called first.
         """
-        assert self._pers != None, "flag_persistence_generators() requires that persistence() be called first."
+        assert (
+            self._pers != None
+        ), "flag_persistence_generators() requires that persistence() be called first."
         gen = self._pers.flag_generators()
         if len(gen[0]) == 0:
-            normal0 = np.empty((0,3))
+            normal0 = np.empty((0, 3))
             normals = []
         else:
             l = iter(gen[0])
-            normal0 = np.array(next(l)).reshape(-1,3)
-            normals = [np.array(d).reshape(-1,4) for d in l]
+            normal0 = np.array(next(l)).reshape(-1, 3)
+            normals = [np.array(d).reshape(-1, 4) for d in l]
         if len(gen[1]) == 0:
             infinite0 = np.empty(0)
             infinites = []
         else:
             l = iter(gen[1])
             infinite0 = np.array(next(l))
-            infinites = [np.array(d).reshape(-1,2) for d in l]
+            infinites = [np.array(d).reshape(-1, 2) for d in l]
         return (normal0, normals, infinite0, infinites)
 
-    def collapse_edges(self, nb_iterations = 1):
+    def collapse_edges(self, nb_iterations=1):
         """Assuming the complex is a graph (simplices of higher dimension are ignored), this method implicitly
         interprets it as the 1-skeleton of a flag complex, and replaces it with another (smaller) graph whose
         expansion has the same persistent homology, using a technique known as edge collapses
@@ -420,7 +453,3 @@ class SimplexTree(t._Simplex_tree_python_interface):
         if nb_iterations < 1:
             return
         super().collapse_edges(nb_iterations)
-
-
-
-

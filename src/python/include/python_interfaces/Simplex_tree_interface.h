@@ -12,6 +12,11 @@
 #ifndef INCLUDE_SIMPLEX_TREE_INTERFACE_H_
 #define INCLUDE_SIMPLEX_TREE_INTERFACE_H_
 
+#include <cstddef>
+#include <vector>
+#include <utility>  // std::pair
+#include <tuple>
+
 #include <nanobind/ndarray.h>
 #include <nanobind/make_iterator.h>
 
@@ -21,15 +26,10 @@
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Flag_complex_edge_collapser.h>
 
-#include <cstddef>
-#include <vector>
-#include <utility>  // std::pair
-#include <tuple>
-
 namespace Gudhi {
 
 /** Model of SimplexTreeOptions.
- * 
+ *
  * Specific to python interfaces of the Simplex_tree */
 struct Simplex_tree_options_for_python {
   typedef linear_indexing_tag Indexing_tag;
@@ -43,8 +43,8 @@ struct Simplex_tree_options_for_python {
   static const bool stable_simplex_handles = false;
 };
 
-
-class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_python> {
+class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_python>
+{
  public:
   using Base = Simplex_tree<Simplex_tree_options_for_python>;
   using Filtration_value = typename Base::Filtration_value;
@@ -60,19 +60,17 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
   using Boundary_simplex_iterator = typename Base::Boundary_simplex_iterator;
   using Siblings = typename Base::Siblings;
   using Node = typename Base::Node;
-  typedef bool (*blocker_func_t)(Simplex simplex, void *user_data);
+  typedef bool (*blocker_func_t)(Simplex simplex, void* user_data);
 
  public:
-
   void initialize_filtration() const { Base::initialize_filtration(); }
 
   Extended_filtration_data efd;
-  
-  bool find_simplex(const Simplex& simplex) {
-    return (Base::find(simplex) != Base::null_simplex());
-  }
 
-  void assign_simplex_filtration(const Simplex& simplex, Filtration_value filtration) {
+  bool find_simplex(const Simplex& simplex) { return (Base::find(simplex) != Base::null_simplex()); }
+
+  void assign_simplex_filtration(const Simplex& simplex, Filtration_value filtration)
+  {
     Simplex_handle sh = Base::find(simplex);
     if (sh == Base::null_simplex())
       throw std::invalid_argument("Cannot assign a filtration to a simplex that is not in the complex");
@@ -80,10 +78,10 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     Base::clear_filtration();
   }
 
-  bool insert(const Simplex& simplex, Filtration_value filtration = 0) {
+  bool insert(const Simplex& simplex, Filtration_value filtration = 0)
+  {
     Insertion_result result = Base::insert_simplex_and_subfaces(simplex, filtration);
-    if (result.first != Base::null_simplex())
-      Base::clear_filtration();
+    if (result.first != Base::null_simplex()) Base::clear_filtration();
     return (result.second);
   }
 
@@ -113,27 +111,29 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
   }
 
   // Do not interface this function, only used in alpha complex interface for complex creation
-  bool insert_simplex(const Simplex& simplex, Filtration_value filtration = 0) {
+  bool insert_simplex(const Simplex& simplex, Filtration_value filtration = 0)
+  {
     Insertion_result result = Base::insert_simplex(simplex, filtration);
     return (result.second);
   }
 
   // Do not interface this function, only used in strong witness interface for complex creation
-  bool insert_simplex(const std::vector<std::size_t>& simplex, Filtration_value filtration = 0) {
+  bool insert_simplex(const std::vector<std::size_t>& simplex, Filtration_value filtration = 0)
+  {
     Insertion_result result = Base::insert_simplex(simplex, filtration);
     return (result.second);
   }
 
-  Filtration_value simplex_filtration(const Simplex& simplex) {
-    return Base::filtration(Base::find(simplex));
-  }
+  Filtration_value simplex_filtration(const Simplex& simplex) { return Base::filtration(Base::find(simplex)); }
 
-  void remove_maximal_simplex(const Simplex& simplex) {
+  void remove_maximal_simplex(const Simplex& simplex)
+  {
     Base::remove_maximal_simplex(Base::find(simplex));
     Base::clear_filtration();
   }
 
-  Simplex_and_filtration get_simplex_and_filtration(Simplex_handle f_simplex) {
+  Simplex_and_filtration get_simplex_and_filtration(Simplex_handle f_simplex)
+  {
     Simplex simplex;
     for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
       simplex.insert(simplex.begin(), vertex);
@@ -141,7 +141,8 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     return std::make_pair(std::move(simplex), Base::filtration(f_simplex));
   }
 
-  Filtered_simplices get_star(const Simplex& simplex) {
+  Filtered_simplices get_star(const Simplex& simplex)
+  {
     Filtered_simplices star;
     for (auto f_simplex : Base::star_simplex_range(Base::find(simplex))) {
       Simplex simplex_star;
@@ -153,7 +154,8 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     return star;
   }
 
-  Filtered_simplices get_cofaces(const Simplex& simplex, int dimension) {
+  Filtered_simplices get_cofaces(const Simplex& simplex, int dimension)
+  {
     Filtered_simplices cofaces;
     for (auto f_simplex : Base::cofaces_simplex_range(Base::find(simplex), dimension)) {
       Simplex simplex_coface;
@@ -165,12 +167,14 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     return cofaces;
   }
 
-  void compute_extended_filtration() {
+  void compute_extended_filtration()
+  {
     this->efd = this->extend_filtration();
     return;
   }
 
-  void collapse_edges(int nb_collapse_iteration) {
+  void collapse_edges(int nb_collapse_iteration)
+  {
     using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
     std::vector<Filtered_edge> edges;
     for (Simplex_handle sh : Base::skeleton_simplex_range(1)) {
@@ -195,8 +199,7 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     }
   }
 
-  void expansion_with_blockers_callback(int max_dim,
-                                        nanobind::typed<nanobind::callable, bool(Simplex&)> blocker_func)
+  void expansion_with_blockers_callback(int max_dim, nanobind::typed<nanobind::callable, bool(Simplex&)> blocker_func)
   {
     Base::expansion_with_blockers(max_dim, [&](Simplex_handle sh) -> bool {
       Simplex simplex(Base::simplex_vertex_range(sh).begin(), Base::simplex_vertex_range(sh).end());
@@ -236,15 +239,6 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     auto boundary_srange = Base::boundary_simplex_range(bd_sh);
     return nanobind::make_iterator(
         nanobind::type<Boundary_simplex_range>(), "boundary_iterator", boundary_srange.begin(), boundary_srange.end());
-  }
-
-  std::pair<Boundary_simplex_iterator, Boundary_simplex_iterator> get_boundary_iterators(const Simplex& simplex) {
-    auto bd_sh = Base::find(simplex);
-    if (bd_sh == Base::null_simplex())
-      throw std::runtime_error("simplex not found - cannot find boundaries");
-    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-    auto boundary_srange = Base::boundary_simplex_range(bd_sh);
-    return std::make_pair(boundary_srange.begin(), boundary_srange.end());
   }
 };
 

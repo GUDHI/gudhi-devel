@@ -5,22 +5,22 @@
 # Copyright (C) 2017 Inria
 #
 # Modification(s):
+#   - 2025/03 Thibaud Kloczko: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
-from gudhi import _reader_utils_ext as t
+
+__author__ = "Vincent Rouvreau"
+__maintainer__ = "Thibaud Kloczko"
+__copyright__ = "Copyright (C) 2017 Inria"
+__license__ = "MIT"
+
 
 from os import path
 from numpy import array as np_array
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2017 Inria"
-__license__ = "MIT"
+from gudhi import _reader_utils_ext as t
 
-# cdef extern from "Reader_utils_interface.h" namespace "Gudhi":
-#     vector[vector[double]] read_matrix_from_csv_file(string off_file, char separator)
-#     map[int, vector[pair[double, double]]] read_pers_intervals_grouped_by_dimension(string filename)
-#     vector[pair[double, double]] read_pers_intervals_in_dimension(string filename, int only_this_dim)
 
-def read_lower_triangular_matrix_from_csv_file(csv_file='', separator=';'):
+def read_lower_triangular_matrix_from_csv_file(csv_file="", separator=";"):
     """Read lower triangular matrix from a CSV style file.
 
     :param csv_file: A CSV file style name.
@@ -37,7 +37,8 @@ def read_lower_triangular_matrix_from_csv_file(csv_file='', separator=';'):
     print("file " + csv_file + " not set or not found.")
     return []
 
-def read_persistence_intervals_grouped_by_dimension(persistence_file=''):
+
+def read_persistence_intervals_grouped_by_dimension(persistence_file=""):
     """Reads a file containing persistence intervals.
     Each line might contain 2, 3 or 4 values: [[field] dimension] birth death
     The return value is a `dict(dim, list(tuple(birth, death)))`
@@ -56,7 +57,8 @@ def read_persistence_intervals_grouped_by_dimension(persistence_file=''):
     print("file " + persistence_file + " not set or not found.")
     return []
 
-def read_persistence_intervals_in_dimension(persistence_file='', only_this_dim=-1):
+
+def read_persistence_intervals_in_dimension(persistence_file="", only_this_dim=-1):
     """Reads a file containing persistence intervals.
     Each line of persistence_file might contain 2, 3 or 4 values:
     [[field] dimension] birth death
@@ -75,6 +77,8 @@ def read_persistence_intervals_in_dimension(persistence_file='', only_this_dim=-
     """
     if persistence_file:
         if path.isfile(persistence_file):
-            return np_array(t.read_pers_intervals_in_dimension(persistence_file, only_this_dim))
+            return np_array(
+                t.read_pers_intervals_in_dimension(persistence_file, only_this_dim)
+            )
     print("file " + persistence_file + " not set or not found.")
     return []

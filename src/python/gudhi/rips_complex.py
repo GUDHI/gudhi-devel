@@ -13,6 +13,7 @@ __maintainer__ = "Thibaud Kloczko"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
+
 from typing import Literal, Optional
 from collections.abc import Iterable
 

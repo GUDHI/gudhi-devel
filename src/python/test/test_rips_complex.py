@@ -8,12 +8,15 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import RipsComplex
-from math import sqrt
-
 __author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+
+from math import sqrt
+
+from gudhi import RipsComplex
 
 
 def test_empty_rips():

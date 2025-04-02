@@ -8,25 +8,22 @@
 #   - 2025/03 Vincent Rouvreau: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
 
-from gudhi import _witness_complex_ext as t
-from gudhi.simplex_tree import SimplexTree
-
 __author__ = "Vincent Rouvreau"
+__maintainer__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
-# cdef extern from "Witness_complex_interface.h" namespace "Gudhi":
-#     cdef cppclass Witness_complex_interface "Gudhi::witness_complex::Witness_complex_interface":
-#         Witness_complex_interface(vector[vector[pair[size_t, double]]] nearest_landmark_table)
-#         void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, double max_alpha_square) except +
-#         void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, double max_alpha_square,
-#             unsigned limit_dimension) except +
+
+from gudhi import _witness_complex_ext as t
+from gudhi.simplex_tree import SimplexTree
+
 
 # WitnessComplex python interface
 class WitnessComplex(t.Witness_complex_interface):
     """Constructs (weak) witness complex for a given table of nearest landmarks
     with respect to witnesses.
     """
+
     def __init__(self, nearest_landmark_table=[]):
         """WitnessComplex constructor.
 
@@ -37,7 +34,7 @@ class WitnessComplex(t.Witness_complex_interface):
         """
         super().__init__(nearest_landmark_table)
 
-    def create_simplex_tree(self, max_alpha_square = float('inf'), limit_dimension = -1):
+    def create_simplex_tree(self, max_alpha_square=float("inf"), limit_dimension=-1):
         """
         :param max_alpha_square: The maximum relaxation parameter.
             Default is set to infinity.

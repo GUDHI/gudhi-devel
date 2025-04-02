@@ -7,14 +7,20 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+__author__ = "Marc Glisse"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2020 Inria"
+__license__ = "MIT"
+
+
 import numpy
+
 from ..point_cloud.knn import KNearestNeighbors
 from ..point_cloud.dtm import DTMDensity
 from ._tomato_ext import _hierarchy, _merge
 
+
 # The fit/predict interface is not so well suited...
-
-
 class Tomato:
     """
     This clustering algorithm needs a neighborhood graph on the points, and an estimation of the density at each point.
@@ -120,12 +126,16 @@ class Tomato:
         else:
             density_type = self.density_type_
             if density_type == "manual":
-                raise ValueError("If density_type is 'manual', you must provide weights to fit()")
+                raise ValueError(
+                    "If density_type is 'manual', you must provide weights to fit()"
+                )
 
         if self.graph_type_ == "manual":
             self.neighbors_ = X
             # FIXME: uniformize "message 'option'" vs 'message "option"'
-            assert density_type == "manual", 'If graph_type is "manual", density_type must be as well'
+            assert (
+                density_type == "manual"
+            ), 'If graph_type is "manual", density_type must be as well'
         else:
             metric = self.params_.get("metric", "minkowski")
             if metric != "precomputed":
@@ -155,9 +165,9 @@ class Tomato:
         if need_knn > 0:
             knn_args = dict(self.params_)
             knn_args["k"] = need_knn
-            knn = KNearestNeighbors(return_index=need_knn_ngb, return_distance=need_knn_dist, **knn_args).fit_transform(
-                X
-            )
+            knn = KNearestNeighbors(
+                return_index=need_knn_ngb, return_distance=need_knn_dist, **knn_args
+            ).fit_transform(X)
             if need_knn_ngb:
                 if need_knn_dist:
                     self.neighbors_ = knn[0][:, 0:k_graph]
@@ -171,7 +181,9 @@ class Tomato:
             if dim is None:
                 dim = len(X[0]) if metric != "precomputed" else 2
             q = self.params_.get("q", dim)
-            weights = DTMDensity(k=k_DTM, metric="neighbors", dim=dim, q=q).fit_transform(knn_dist)
+            weights = DTMDensity(k=k_DTM, metric="neighbors", dim=dim, q=q).fit_transform(
+                knn_dist
+            )
             if self.density_type_ == "logDTM":
                 weights = numpy.log(weights)
 
@@ -183,13 +195,19 @@ class Tomato:
                 # TODO: handle "l1" and "l2" aliases?
                 p = self.params_.get("p")
                 if metric == "euclidean":
-                    assert p is None or p == 2, "p=" + str(p) + " is not consistent with metric='euclidean'"
+                    assert p is None or p == 2, (
+                        "p=" + str(p) + " is not consistent with metric='euclidean'"
+                    )
                     p = 2
                 elif metric == "manhattan":
-                    assert p is None or p == 1, "p=" + str(p) + " is not consistent with metric='manhattan'"
+                    assert p is None or p == 1, (
+                        "p=" + str(p) + " is not consistent with metric='manhattan'"
+                    )
                     p = 1
                 elif metric == "chebyshev":
-                    assert p is None or p == numpy.inf, "p=" + str(p) + " is not consistent with metric='chebyshev'"
+                    assert p is None or p == numpy.inf, (
+                        "p=" + str(p) + " is not consistent with metric='chebyshev'"
+                    )
                     p = numpy.inf
                 elif p is None:
                     p = 2  # the default
@@ -239,9 +257,13 @@ class Tomato:
 
         self.weights_ = weights
         # This is where the main computation happens
-        self.leaf_labels_, self.children_, self.diagram_, self.max_weight_per_cc_ = _hierarchy(self.neighbors_, weights)
+        self.leaf_labels_, self.children_, self.diagram_, self.max_weight_per_cc_ = _hierarchy(
+            self.neighbors_, weights
+        )
         self.n_leaves_ = len(self.max_weight_per_cc_) + len(self.children_)
-        assert self.leaf_labels_.max() + 1 == len(self.max_weight_per_cc_) + len(self.children_)
+        assert self.leaf_labels_.max() + 1 == len(self.max_weight_per_cc_) + len(
+            self.children_
+        )
         # TODO: deduplicate this code with the setters below
         if self.__merge_threshold:
             assert not self.__n_clusters
@@ -250,7 +272,7 @@ class Tomato:
             ) + len(self.max_weight_per_cc_)
         if self.__n_clusters:
             # TODO: set corresponding merge_threshold?
-            renaming = _merge(self.children_.reshape(-1,2), self.n_leaves_, self.__n_clusters)
+            renaming = _merge(self.children_.reshape(-1, 2), self.n_leaves_, self.__n_clusters)
             self.labels_ = renaming[self.leaf_labels_]
             # In case the user asked for something impossible.
             # TODO: check for impossible situations before calling merge.
@@ -268,8 +290,7 @@ class Tomato:
 
     # TODO: add argument k or threshold? Have a version where you can click and it shows the line and the corresponding k?
     def plot_diagram(self):
-        """
-        """
+        """ """
         import matplotlib.pyplot as plt
 
         l = self.max_weight_per_cc_.min()
@@ -287,7 +308,10 @@ class Tomato:
                 l, r = -1.0, 1.0
         plt.plot([l, r], [l, r])
         plt.plot(
-            self.max_weight_per_cc_, numpy.full(self.max_weight_per_cc_.shape, 1.1 * l - 0.1 * r), "o", color="green"
+            self.max_weight_per_cc_,
+            numpy.full(self.max_weight_per_cc_.shape, 1.1 * l - 0.1 * r),
+            "o",
+            color="green",
         )
         plt.show()
 
@@ -303,7 +327,7 @@ class Tomato:
         self.__n_clusters = n_clusters
         self.__merge_threshold = None
         if hasattr(self, "leaf_labels_"):
-            renaming = _merge(self.children_.reshape(-1,2), self.n_leaves_, self.__n_clusters)
+            renaming = _merge(self.children_.reshape(-1, 2), self.n_leaves_, self.__n_clusters)
             self.labels_ = renaming[self.leaf_labels_]
             # In case the user asked for something impossible
             self.__n_clusters = self.labels_.max() + 1
@@ -317,9 +341,9 @@ class Tomato:
         if merge_threshold == self.__merge_threshold:
             return
         if hasattr(self, "leaf_labels_"):
-            self.n_clusters_ = numpy.count_nonzero(self.diagram_[:, 0] - self.diagram_[:, 1] > merge_threshold) + len(
-                self.max_weight_per_cc_
-            )
+            self.n_clusters_ = numpy.count_nonzero(
+                self.diagram_[:, 0] - self.diagram_[:, 1] > merge_threshold
+            ) + len(self.max_weight_per_cc_)
         else:
             self.__n_clusters = None
         self.__merge_threshold = merge_threshold

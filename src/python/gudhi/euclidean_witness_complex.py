@@ -8,26 +8,22 @@
 #   - 2025/03 Vincent Rouvreau: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
 
-from gudhi import _euclidean_witness_complex_ext as t
-from gudhi.simplex_tree import SimplexTree
-
 __author__ = "Vincent Rouvreau"
+__maintainer__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
-# cdef extern from "Euclidean_witness_complex_interface.h" namespace "Gudhi":
-#     cdef cppclass Euclidean_witness_complex_interface "Gudhi::witness_complex::Euclidean_witness_complex_interface":
-#         Euclidean_witness_complex_interface(vector[vector[double]] landmarks, vector[vector[double]] witnesses)
-#         void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, double max_alpha_square) except +
-#         void create_simplex_tree(Simplex_tree_python_interface* simplex_tree, double max_alpha_square,
-#             unsigned limit_dimension) except +
-#         vector[double] get_point(unsigned vertex)
+
+from gudhi import _euclidean_witness_complex_ext as t
+from gudhi.simplex_tree import SimplexTree
+
 
 # EuclideanWitnessComplex python interface
 class EuclideanWitnessComplex(t.Euclidean_witness_complex_interface):
     """Constructs (weak) witness complex for given sets of witnesses and
     landmarks in Euclidean space.
     """
+
     def __init__(self, landmarks, witnesses):
         """WitnessComplex constructor.
 
@@ -39,7 +35,7 @@ class EuclideanWitnessComplex(t.Euclidean_witness_complex_interface):
         """
         super().__init__(landmarks, witnesses)
 
-    def create_simplex_tree(self, max_alpha_square, limit_dimension = -1):
+    def create_simplex_tree(self, max_alpha_square, limit_dimension=-1):
         """
         :param max_alpha_square: The maximum alpha square threshold the
             simplices shall not exceed. Default is set to infinity.

@@ -29,7 +29,6 @@
 #include <python_interfaces/Simplex_tree_interface.h>
 
 namespace Gudhi {
-
 namespace delaunay_complex {
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -167,7 +166,8 @@ class Delaunay_complex_t final : public Abstract_delaunay_complex
         points_(boost::begin(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>)),
                 boost::end(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>))),
         delaunay_complex_(points_)
-  {}
+  {
+  }
 
   Delaunay_complex_t(const std::vector<std::vector<double>>& points,
                      const std::vector<double>& weights,
@@ -176,7 +176,8 @@ class Delaunay_complex_t final : public Abstract_delaunay_complex
         points_(boost::begin(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>)),
                 boost::end(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>))),
         delaunay_complex_(points_, weights)
-  {}
+  {
+  }
 
   virtual std::vector<double> get_point(int vh) override
   {
@@ -293,7 +294,6 @@ double Delaunay_complex_interface::get_float_relative_precision()
 }
 
 }  // namespace delaunay_complex
-
 }  // namespace Gudhi
 
 // /////////////////////////////////////////////////////////////////////////////

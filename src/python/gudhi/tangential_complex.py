@@ -2,20 +2,22 @@
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
 #
-# Copyright (C) 2025 Inria
+# Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2025/03 ???: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
+
+__author__ = "Vincent Rouvreau"
+__maintainer__ = "???"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "GPL v3"
 
 import os
 
 from gudhi import _tangential_complex_ext as t
-
 from gudhi.simplex_tree import SimplexTree
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2025 Inria"
-__license__ = "GPL v3"
 
 # TangentialComplex python interface
 class TangentialComplex(t._Tangential_complex_interface):
@@ -24,7 +26,7 @@ class TangentialComplex(t._Tangential_complex_interface):
     can be run to attempt to remove inconsistencies.
     """
 
-    def __init__(self, intrisic_dim, points=None, off_file=''):
+    def __init__(self, intrisic_dim, points=None, off_file=""):
         """TangentialComplex constructor.
 
         :param intrisic_dim: Intrinsic dimension of the manifold.
@@ -46,9 +48,8 @@ class TangentialComplex(t._Tangential_complex_interface):
         else:
             if points is None:
                 # Empty tangential construction
-                points=[]
+                points = []
             super().__init__(intrisic_dim, points)
-
 
     def create_simplex_tree(self):
         """

@@ -1,7 +1,7 @@
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
-# which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
-# license details.
+from __future__ import print_function
+
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
 #
 # Copyright (C) 2016 Inria
@@ -10,16 +10,18 @@
 #   - 2023/11 Vincent Rouvreau: numpy interface for read_points_from_off_file
 #   - YYYY/MM Author: Description of the modification
 
-from __future__ import print_function
+__author__ = "Vincent Rouvreau"
+__maintainer__ = "Vincent Rouvreau"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
+
+
 import errno
 import os
 import numpy as np
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
 
-def _get_next_line(file_desc, comment='#'):
+def _get_next_line(file_desc, comment="#"):
     """Return the next line that is not a comment.
 
     :param file_desc: An open file in read mode.
@@ -37,6 +39,7 @@ def _get_next_line(file_desc, comment='#'):
         if (not line.startswith(comment)) and len(line.split()) > 0:
             break
     return line
+
 
 def _read_off_file_header(file_desc):
     """Return the information contained in the header of an OFF file.
@@ -71,8 +74,10 @@ def _read_off_file_header(file_desc):
     elif line.lower().find("off") >= 0:
         dim = 3
     else:
-        raise ValueError(f"Inconsistent OFF header, got '{line.rstrip()}', should be 'OFF', '4OFF' or 'nOFF'")
-        
+        raise ValueError(
+            f"Inconsistent OFF header, got '{line.rstrip()}', should be 'OFF', '4OFF' or 'nOFF'"
+        )
+
     # nb_vertices can be already set by "nOFF" case, when 'dim nb_vertices nb_faces nb_edges' on the same line
     if nb_vertices < 0:
         # Number of points is the first number ("OFF" case) or the second one ("nOFF" case) of the second line
@@ -89,7 +94,8 @@ def _read_off_file_header(file_desc):
     file_desc.seek(file_desc.tell() - len(line))
     return dim, nb_vertices
 
-def read_points_from_off_file(off_file=''):
+
+def read_points_from_off_file(off_file=""):
     """Read points from an `OFF file <fileformats.html#off-file-format>`_.
 
     :param off_file: An OFF file style name.
@@ -105,14 +111,19 @@ def read_points_from_off_file(off_file=''):
     """
     # newline='' is required for Windows, otherwise end of line with '\r\n' are only detected as '\n'
     # This is required by _read_off_file_header that needs the exact length of the line (to go backward in the file reading)
-    with open(off_file, newline='') as input_file:
+    with open(off_file, newline="") as input_file:
         dim, nb_points = _read_off_file_header(input_file)
         # usecols=list(range(dim)) stands here to avoid comments at the end of line
         # or colors that can be added in RGB format after the points, the faces, ...
-        points = np.loadtxt(input_file, dtype=np.float64, comments='#',
-                            usecols=range(dim), max_rows=nb_points)
-        assert points.shape == (nb_points, dim), f"{points.shape} is different from expected ({nb_points}, {dim})"
+        points = np.loadtxt(
+            input_file, dtype=np.float64, comments="#", usecols=range(dim), max_rows=nb_points
+        )
+        assert points.shape == (
+            nb_points,
+            dim,
+        ), f"{points.shape} is different from expected ({nb_points}, {dim})"
         return points
+
 
 def write_points_to_off_file(fname, points):
     """Write points to an `OFF file <fileformats.html#off-file-format>`_.
@@ -128,7 +139,7 @@ def write_points_to_off_file(fname, points):
     assert len(points.shape) == 2
     dim = points.shape[1]
     if dim == 3:
-        head = 'OFF\n{} 0 0'.format(points.shape[0])
+        head = "OFF\n{} 0 0".format(points.shape[0])
     else:
-        head = 'nOFF\n{} {} 0 0'.format(dim, points.shape[0])
-    np.savetxt(fname, points, header=head, comments='')
+        head = "nOFF\n{} {} 0 0".format(dim, points.shape[0])
+    np.savetxt(fname, points, header=head, comments="")

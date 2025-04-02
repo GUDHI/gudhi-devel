@@ -1,19 +1,22 @@
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-# Author(s):       Thibaud Kloczko
+# Author(s):       Vincent Rouvreau
 #
-# Copyright (C) 2025 Inria
+# Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2025/03 Thibaud Kloczko: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
 
-from gudhi import _euclidean_strong_witness_complex_ext as t
+__author__ = "Vincent Rouvreau"
+__maintainer__ = "Thibaud Kloczko"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "GPL v3"
 
+
+from gudhi import _euclidean_strong_witness_complex_ext as t
 from gudhi.simplex_tree import SimplexTree
 
-__author__ = "Thibaud Kloczko"
-__copyright__ = "Copyright (C) 2025 Inria"
-__license__ = "GPL v3"
 
 # EuclideanStrongWitnessComplex python interface
 class EuclideanStrongWitnessComplex(t.Euclidean_strong_witness_complex_interface):
@@ -28,11 +31,13 @@ class EuclideanStrongWitnessComplex(t.Euclidean_strong_witness_complex_interface
             witnesses (Iterable[Iterable[float]]): The point cloud (list of list of double).
         """
 
-    # The real cython constructor
+        # The real cython constructor
         if landmarks is not None and witnesses is not None:
             super().__init__(landmarks, witnesses)
 
-    def create_simplex_tree(self, max_alpha_square: float = float('inf'), limit_dimension: int = -1) -> SimplexTree:
+    def create_simplex_tree(
+        self, max_alpha_square: float = float("inf"), limit_dimension: int = -1
+    ) -> SimplexTree:
         """
         Args:
             max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed.
@@ -48,6 +53,7 @@ class EuclideanStrongWitnessComplex(t.Euclidean_strong_witness_complex_interface
         else:
             super().create_simplex_tree(stree, max_alpha_square)
         return stree
+
 
 #
 # euclidean_strong_witness_complex.py ends here

@@ -9,12 +9,12 @@
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
+__maintainer__ = "Hannah Schreiber"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
 import numpy as np
-
 
 from gudhi._cubical_complex_ext import (
     _Periodic_cubical_complex_interface,
@@ -129,12 +129,7 @@ class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
         """
         a = super().get_numpy_array()
         return a.reshape(
-            [
-                2 * d + (not p)
-                for (d, p) in zip(
-                    super().shape(), super().periodicities()
-                )
-            ],
+            [2 * d + (not p) for (d, p) in zip(super().shape(), super().periodicities())],
             order="F",
         )
 

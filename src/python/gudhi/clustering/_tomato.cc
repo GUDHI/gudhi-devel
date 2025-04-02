@@ -10,7 +10,7 @@
  */
 
 #include <vector>
-#include <iostream>   //std::cerr
+#include <iostream>  //std::cerr
 
 #include <boost/container/flat_map.hpp>
 #include <boost/pending/disjoint_sets.hpp>
@@ -80,8 +80,8 @@ auto tomato(Point_index num_points,
       boost::make_transform_value_property_map([](auto& p) -> Cluster_index& { return p.parent; }, ds_data);
   auto ds_rank = boost::make_transform_value_property_map([](auto& p) -> int& { return p.rank; }, ds_data);
   boost::disjoint_sets<decltype(ds_rank), decltype(ds_parent)> ds(
-      ds_rank, ds_parent);                                   // on the clusters, not directly the points
-  std::vector<double>* persistence = new std::vector<double>();   // diagram (finite points)
+      ds_rank, ds_parent);                                       // on the clusters, not directly the points
+  std::vector<double>* persistence = new std::vector<double>();  // diagram (finite points)
   boost::container::flat_map<Cluster_index, Cluster_index>
       adj_clusters;  // first: the merged cluster, second: the raw cluster
   // we only care about the raw cluster, we could use a vector to store the second, store first into a set, and only

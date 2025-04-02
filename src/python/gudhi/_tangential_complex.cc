@@ -12,16 +12,18 @@
 #include <vector>
 #include <string>
 
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+
 #include <CGAL/Epick_d.h>
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Tangential_complex.h>
 #include <gudhi/Points_off_io.h>
-
 #include <python_interfaces/Simplex_tree_interface.h>
 
 namespace Gudhi {
-
 namespace tangential_complex {
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -132,16 +134,11 @@ void Tangential_complex_interface::set_max_squared_edge_length(double max_square
 }
 
 }  // namespace tangential_complex
-
 }  // namespace Gudhi
 
 // /////////////////////////////////////////////////////////////////////////////
 // Tangential_complex_interface wrapping
 // /////////////////////////////////////////////////////////////////////////////
-
-#include <nanobind/nanobind.h>
-#include <nanobind/stl/string.h>
-#include <nanobind/stl/vector.h>
 
 namespace nb = nanobind;
 namespace gtc = Gudhi::tangential_complex;

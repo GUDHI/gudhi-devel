@@ -17,11 +17,9 @@
 
 #include <gudhi/distance_functions.h>
 #include <gudhi/GIC.h>
-
 #include <python_interfaces/Simplex_tree_interface.h>
 
 namespace Gudhi {
-
 namespace cover_complex {
 
 class Nerve_gic_interface : public Cover_complex<std::vector<double>>
@@ -40,7 +38,6 @@ class Nerve_gic_interface : public Cover_complex<std::vector<double>>
 };
 
 }  // namespace cover_complex
-
 }  // namespace Gudhi
 
 namespace nb = nanobind;

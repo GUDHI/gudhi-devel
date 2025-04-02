@@ -2,17 +2,21 @@
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
 #
-# Copyright (C) 2025 Inria
+# Copyright (C) 2016 Inria
 #
 # Modification(s):
+#   - 2025/03 ???: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
+
+__author__ = "Vincent Rouvreau"
+__maintainer__ = "???"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
+
 
 from gudhi import _strong_witness_complex_ext as t
 from gudhi.simplex_tree import SimplexTree
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2025 Inria"
-__license__ = "MIT"
 
 # StrongWitnessComplex python interface
 class StrongWitnessComplex(t.Strong_witness_complex_interface):
@@ -30,7 +34,9 @@ class StrongWitnessComplex(t.Strong_witness_complex_interface):
         if nearest_landmark_table is not None:
             super().__init__(nearest_landmark_table)
 
-    def create_simplex_tree(self, max_alpha_square: float = float('inf'), limit_dimension = -1) -> SimplexTree:
+    def create_simplex_tree(
+        self, max_alpha_square: float = float("inf"), limit_dimension=-1
+    ) -> SimplexTree:
         """
         Args:
             max_alpha_square (float): The maximum relaxation parameter. Default is set to infinity.

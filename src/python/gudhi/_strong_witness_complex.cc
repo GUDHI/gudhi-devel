@@ -5,21 +5,24 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
+ *      - 2025/03 ???: Use nanobind instead of Cython for python bindings.
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Simplex_tree.h>
-#include <gudhi/Strong_witness_complex.h>
-
-#include <python_interfaces/Simplex_tree_interface.h>
-
-#include <utility> // std::pair
+#include <utility>  // std::pair
 #include <vector>
 
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/pair.h>
+#include <nanobind/stl/vector.h>
+
+#include <gudhi/Simplex_tree.h>
+#include <gudhi/Strong_witness_complex.h>
+#include <python_interfaces/Simplex_tree_interface.h>
+
+using Gudhi::Simplex_tree_interface;
+
 namespace Gudhi {
-
-class Simplex_tree_interface;
-
 namespace witness_complex {
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -28,19 +31,19 @@ namespace witness_complex {
 
 class Strong_witness_complex_interface
 {
-public:
-    using Nearest_landmark_range = std::vector<std::pair<std::size_t, double>>;
-    using Nearest_landmark_table = std::vector<Nearest_landmark_range>;
+ public:
+  using Nearest_landmark_range = std::vector<std::pair<std::size_t, double>>;
+  using Nearest_landmark_table = std::vector<Nearest_landmark_range>;
 
-public:
-    Strong_witness_complex_interface(const Nearest_landmark_table& nlt);
-    ~Strong_witness_complex_interface();
+ public:
+  Strong_witness_complex_interface(const Nearest_landmark_table& nlt);
+  ~Strong_witness_complex_interface();
 
-    void create_simplex_tree(Simplex_tree_interface* simplex_tree, double  max_alpha_square, std::size_t limit_dimension);
-    void create_simplex_tree(Simplex_tree_interface* simplex_tree, double  max_alpha_square);
+  void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square, std::size_t limit_dimension);
+  void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square);
 
-private:
-    Strong_witness_complex<Nearest_landmark_table>* witness_complex_;
+ private:
+  Strong_witness_complex<Nearest_landmark_table>* witness_complex_;
 };
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -49,52 +52,46 @@ private:
 
 Strong_witness_complex_interface::Strong_witness_complex_interface(const Nearest_landmark_table& nlt)
 {
-    witness_complex_ = new Strong_witness_complex<Nearest_landmark_table>(nlt);
+  witness_complex_ = new Strong_witness_complex<Nearest_landmark_table>(nlt);
 }
 
-Strong_witness_complex_interface::~Strong_witness_complex_interface()
+Strong_witness_complex_interface::~Strong_witness_complex_interface() { delete witness_complex_; }
+
+void Strong_witness_complex_interface::create_simplex_tree(Simplex_tree_interface* simplex_tree,
+                                                           double max_alpha_square,
+                                                           std::size_t limit_dimension)
 {
-    delete witness_complex_;
+  witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
 }
 
 void Strong_witness_complex_interface::create_simplex_tree(Simplex_tree_interface* simplex_tree,
-                                                           double  max_alpha_square,
-                                                           std::size_t limit_dimension)
+                                                           double max_alpha_square)
 {
-    witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
-}
-
-void Strong_witness_complex_interface::create_simplex_tree(Simplex_tree_interface* simplex_tree, double  max_alpha_square)
-{
-    witness_complex_->create_complex(*simplex_tree, max_alpha_square);
+  witness_complex_->create_complex(*simplex_tree, max_alpha_square);
 }
 
 }  // namespace witness_complex
-
 }  // namespace Gudhi
 
 // /////////////////////////////////////////////////////////////////////////////
 // Strong_witness_complex_interface wrapping
 // /////////////////////////////////////////////////////////////////////////////
 
-#include <nanobind/nanobind.h>
-#include <nanobind/stl/pair.h>
-#include <nanobind/stl/vector.h>
-
 namespace nb = nanobind;
 
 namespace gwc = Gudhi::witness_complex;
 using gwci = gwc::Strong_witness_complex_interface;
 
-
-NB_MODULE(_strong_witness_complex_ext, m) {
+NB_MODULE(_strong_witness_complex_ext, m)
+{
   m.attr("__license__") = "GPL v3";
 
   nb::class_<gwci>(m, "Strong_witness_complex_interface")
       .def(nb::init<const gwci::Nearest_landmark_table&>(), "Constructor")
-      .def("create_simplex_tree", nb::overload_cast<Gudhi::Simplex_tree_interface*, double, std::size_t>(&gwci::create_simplex_tree), "")
-      .def("create_simplex_tree", nb::overload_cast<Gudhi::Simplex_tree_interface*, double>(&gwci::create_simplex_tree), "");
-
+      .def("create_simplex_tree",
+           nb::overload_cast<Simplex_tree_interface*, double, std::size_t>(&gwci::create_simplex_tree),
+           "")
+      .def("create_simplex_tree", nb::overload_cast<Simplex_tree_interface*, double>(&gwci::create_simplex_tree), "");
 }
 
 //

@@ -1,10 +1,11 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-*    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       Jean Luc Szpyrka
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+ *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2025 Inria
+ *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
+ *      - 2025/03 Jean-Luc Szpyrka: Use nanobind instead of Cython for python bindings.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -39,93 +40,101 @@
 #endif
 
 namespace Gudhi {
-
 namespace subsampling {
 
 const int gudhi_subsampling_use_cgal = _GUDHI_SUBSAMPLING_USE_CGAL;
 const std::size_t _random_starting_point = random_starting_point;
 
 // ------ choose_n_farthest_points ------
-std::vector<std::vector<double>> subsampling_n_farthest_points(bool metric, const std::vector<std::vector<double>>& points,
-                                                               std::size_t nb_points, std::size_t starting_point = random_starting_point)
+std::vector<std::vector<double>> subsampling_n_farthest_points(bool metric,
+                                                               const std::vector<std::vector<double>>& points,
+                                                               std::size_t nb_points,
+                                                               std::size_t starting_point = random_starting_point)
 {
-    std::vector<std::vector<double>> landmarks;
-    if (metric)
-        choose_n_farthest_points_metric(Euclidean_distance(), points, nb_points, starting_point, std::back_inserter(landmarks));
-    else
-        choose_n_farthest_points(Euclidean_distance(), points, nb_points, starting_point, std::back_inserter(landmarks));
+  std::vector<std::vector<double>> landmarks;
+  if (metric)
+    choose_n_farthest_points_metric(
+        Euclidean_distance(), points, nb_points, starting_point, std::back_inserter(landmarks));
+  else
+    choose_n_farthest_points(Euclidean_distance(), points, nb_points, starting_point, std::back_inserter(landmarks));
 
-    return landmarks;
+  return landmarks;
 }
 
-std::vector<std::vector<double>> subsampling_n_farthest_points_from_file(bool metric, const std::string& off_file,
-                                                                         std::size_t nb_points, std::size_t starting_point = random_starting_point)
+std::vector<std::vector<double>> subsampling_n_farthest_points_from_file(
+    bool metric,
+    const std::string& off_file,
+    std::size_t nb_points,
+    std::size_t starting_point = random_starting_point)
 {
-    Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
-    std::vector<std::vector<double>> points = off_reader.get_point_cloud();
-    return subsampling_n_farthest_points(metric, points, nb_points, starting_point);
+  Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
+  std::vector<std::vector<double>> points = off_reader.get_point_cloud();
+  return subsampling_n_farthest_points(metric, points, nb_points, starting_point);
 }
 
 // ------ pick_n_random_points ------
-std::vector<std::vector<double>> subsampling_n_random_points(const std::vector<std::vector<double>>& points, unsigned nb_points)
+std::vector<std::vector<double>> subsampling_n_random_points(const std::vector<std::vector<double>>& points,
+                                                             unsigned nb_points)
 {
-    std::vector<std::vector<double>> landmarks;
-    pick_n_random_points(points, nb_points, std::back_inserter(landmarks));
+  std::vector<std::vector<double>> landmarks;
+  pick_n_random_points(points, nb_points, std::back_inserter(landmarks));
 
-    return landmarks;
+  return landmarks;
 }
 
 std::vector<std::vector<double>> subsampling_n_random_points_from_file(const std::string& off_file, unsigned nb_points)
 {
-    Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
-    std::vector<std::vector<double>> points = off_reader.get_point_cloud();
-    return subsampling_n_random_points(points, nb_points);
+  Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
+  std::vector<std::vector<double>> points = off_reader.get_point_cloud();
+  return subsampling_n_random_points(points, nb_points);
 }
 
 #if _GUDHI_SUBSAMPLING_USE_CGAL == 1
 
-using Subsampling_dynamic_kernel = CGAL::Epick_d< CGAL::Dynamic_dimension_tag >;
+using Subsampling_dynamic_kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
 using Subsampling_point_d = Subsampling_dynamic_kernel::Point_d;
 
 // ------ sparsify_point_set ------
-std::vector<std::vector<double>> subsampling_sparsify_points(const std::vector<std::vector<double>>& points, double min_squared_dist)
+std::vector<std::vector<double>> subsampling_sparsify_points(const std::vector<std::vector<double>>& points,
+                                                             double min_squared_dist)
 {
-    std::vector<Subsampling_point_d> input, output;
-    for (auto point : points) {
-        input.push_back(Subsampling_point_d(point.size(), point.begin(), point.end()));
-    }
-    Subsampling_dynamic_kernel k;
-    sparsify_point_set(k, input, min_squared_dist, std::back_inserter(output));
+  std::vector<Subsampling_point_d> input, output;
+  for (auto point : points) {
+    input.push_back(Subsampling_point_d(point.size(), point.begin(), point.end()));
+  }
+  Subsampling_dynamic_kernel k;
+  sparsify_point_set(k, input, min_squared_dist, std::back_inserter(output));
 
-    std::vector<std::vector<double>> landmarks;
-    for (auto point : output) {
-        landmarks.push_back(std::vector<double>(point.cartesian_begin(), point.cartesian_end()));
-    }
-    return landmarks;
+  std::vector<std::vector<double>> landmarks;
+  for (auto point : output) {
+    landmarks.push_back(std::vector<double>(point.cartesian_begin(), point.cartesian_end()));
+  }
+  return landmarks;
 }
 
-std::vector<std::vector<double>> subsampling_sparsify_points_from_file(const std::string& off_file, double min_squared_dist)
+std::vector<std::vector<double>> subsampling_sparsify_points_from_file(const std::string& off_file,
+                                                                       double min_squared_dist)
 {
-    Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
-    std::vector<std::vector<double>> points = off_reader.get_point_cloud();
-    return subsampling_sparsify_points(points, min_squared_dist);
+  Gudhi::Points_off_reader<std::vector<double>> off_reader(off_file);
+  std::vector<std::vector<double>> points = off_reader.get_point_cloud();
+  return subsampling_sparsify_points(points, min_squared_dist);
 }
 
 #else
+
 // ------ sparsify_point_set ------
 std::vector<std::vector<double>> subsampling_sparsify_points(const std::vector<std::vector<double>>&, double)
 {
-    return std::vector<std::vector<double>>{};
+  return std::vector<std::vector<double>>{};
 }
 
 std::vector<std::vector<double>> subsampling_sparsify_points_from_file(const std::string&, double)
 {
-    return std::vector<std::vector<double>>{};
+  return std::vector<std::vector<double>>{};
 }
 #endif
 
 }  // namespace subsampling
-
 }  // namespace Gudhi
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -134,40 +143,47 @@ std::vector<std::vector<double>> subsampling_sparsify_points_from_file(const std
 
 namespace nb = nanobind;
 
-NB_MODULE(_subsampling_ext, m) {
+NB_MODULE(_subsampling_ext, m)
+{
   m.attr("__license__") = "MIT (GPL v3 for sparsify_point_set)";
 
   m.attr("_GUDHI_SUBSAMPLING_USE_CGAL") = Gudhi::subsampling::gudhi_subsampling_use_cgal;
   m.attr("RANDOM_STARTING_POINT") = Gudhi::subsampling::_random_starting_point;
 
- m.def("subsampling_n_farthest_points",&Gudhi::subsampling::subsampling_n_farthest_points,
-       nb::arg("metric"),
-       nb::arg("points"),
-       nb::arg("nb_points"),
-       nb::arg("starting_point") = Gudhi::subsampling::_random_starting_point,
-       "");
- m.def("subsampling_n_farthest_points_from_file", &Gudhi::subsampling::subsampling_n_farthest_points_from_file,
-       nb::arg("metric"),
-       nb::arg("off_file"),
-       nb::arg("nb_points"),
-       nb::arg("starting_point") = Gudhi::subsampling::_random_starting_point,
-       "");
- m.def("subsampling_n_random_points", &Gudhi::subsampling::subsampling_n_random_points,
-       nb::arg("points"),
-       nb::arg("nb_points"),
-       "");
- m.def("subsampling_n_random_points_from_file", &Gudhi::subsampling::subsampling_n_random_points_from_file,
-       nb::arg("off_file"),
-       nb::arg("nb_points"),
-       "");
- m.def("subsampling_sparsify_points", &Gudhi::subsampling::subsampling_sparsify_points,
-       nb::arg("points"),
-       nb::arg("min_squared_dist"),
-       "");
- m.def("subsampling_sparsify_points_from_file", &Gudhi::subsampling::subsampling_sparsify_points_from_file,
-       nb::arg("off_file"),
-       nb::arg("min_squared_dist"),
-       "");
+  m.def("subsampling_n_farthest_points",
+        &Gudhi::subsampling::subsampling_n_farthest_points,
+        nb::arg("metric"),
+        nb::arg("points"),
+        nb::arg("nb_points"),
+        nb::arg("starting_point") = Gudhi::subsampling::_random_starting_point,
+        "");
+  m.def("subsampling_n_farthest_points_from_file",
+        &Gudhi::subsampling::subsampling_n_farthest_points_from_file,
+        nb::arg("metric"),
+        nb::arg("off_file"),
+        nb::arg("nb_points"),
+        nb::arg("starting_point") = Gudhi::subsampling::_random_starting_point,
+        "");
+  m.def("subsampling_n_random_points",
+        &Gudhi::subsampling::subsampling_n_random_points,
+        nb::arg("points"),
+        nb::arg("nb_points"),
+        "");
+  m.def("subsampling_n_random_points_from_file",
+        &Gudhi::subsampling::subsampling_n_random_points_from_file,
+        nb::arg("off_file"),
+        nb::arg("nb_points"),
+        "");
+  m.def("subsampling_sparsify_points",
+        &Gudhi::subsampling::subsampling_sparsify_points,
+        nb::arg("points"),
+        nb::arg("min_squared_dist"),
+        "");
+  m.def("subsampling_sparsify_points_from_file",
+        &Gudhi::subsampling::subsampling_sparsify_points_from_file,
+        nb::arg("off_file"),
+        nb::arg("min_squared_dist"),
+        "");
 }
 
 //

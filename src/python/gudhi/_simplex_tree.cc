@@ -325,7 +325,6 @@ complex.
       .def("filtration_iter", &gsti::get_filtration_python_iterator)
       .def("skeleton_iter", &gsti::get_skeleton_python_iterator)
       .def("boundary_iter", &gsti::get_boundary_python_iterator)
-      .def("get_boundary_iterators", &gsti::get_boundary_iterators, nb::arg("simplex"))
       .def("expansion_with_blocker",
            &gsti::expansion_with_blockers_callback,
            nb::arg("max_dim"),

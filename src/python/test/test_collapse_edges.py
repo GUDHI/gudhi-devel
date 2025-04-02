@@ -8,10 +8,17 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi.flag_filtration.edge_collapse import reduce_graph as collapse_edges
+__author__ = "Marc Glisse"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2023 Inria"
+__license__ = "MIT"
+
+
 import numpy as np
 from scipy.sparse import coo_matrix
 import pytest
+
+from gudhi.flag_filtration.edge_collapse import reduce_graph as collapse_edges
 
 
 def test_collapse_empty():
