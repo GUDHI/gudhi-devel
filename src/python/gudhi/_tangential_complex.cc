@@ -5,7 +5,7 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
- *      - 2025/03 ???: Use nanobind instead of Cython for python bindings.
+ *      - 2025/03 Thibaud Kloczko: Use nanobind instead of Cython for python bindings.
  *      - YYYY/MM Author: Description of the modification
  */
 
