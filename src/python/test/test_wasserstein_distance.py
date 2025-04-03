@@ -170,7 +170,7 @@ def _basic_wasserstein(wasserstein_distance, delta, test_infinity=True, test_mat
     diag2 = np.array([[2.8, 4.45], [9.5, 14.1]])
     diag3 = np.array([[0, 2], [4, 6]])
     diag4 = np.array([[0, 3], [4, 8]])
-    emptydiag = np.array([])
+    emptydiag = np.empty(shape=(0,2))
 
     # We just need to handle positive numbers here
     def approx(x):

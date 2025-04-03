@@ -28,9 +28,9 @@ using nb::ssize_t;
 #endif
 
 // Indices are added internally in bottleneck_distance, they are not needed in the input.
-static auto make_point(double x, double y, nb::ssize_t) { return std::pair(x, y); };
+static auto make_point(double x, double y, std::size_t) { return std::pair(x, y); };
 
-double bottleneck_distance(const Dgm& d1, const Dgm& d2, double delta)
+double bottleneck_distance(const Tensor_dgm& d1, const Tensor_dgm& d2, double delta)
 {
   // I *think* the call to request() in array_to_range_of_pairs has to be before releasing the GIL.
   auto diag1 = array_to_range_of_pairs(d1, make_point);
@@ -45,10 +45,10 @@ double bottleneck_distance(const Dgm& d1, const Dgm& d2, double delta)
 }
 
 // Unlike bottleneck, for wasserstein, we need to add the index ourselves (if we want the matching)
-static auto make_hera_point(double x, double y, nb::ssize_t i) { return hera::DiagramPoint<double>(x, y, i); };
+static auto make_hera_point(double x, double y, std::size_t i) { return hera::DiagramPoint<double>(x, y, i); };
 
-nb::object wasserstein_distance(const Dgm& d1,
-                                const Dgm& d2,
+nb::object wasserstein_distance(const Tensor_dgm& d1,
+                                const Tensor_dgm& d2,
                                 double wasserstein_power,
                                 double internal_p,
                                 double delta,

@@ -22,9 +22,10 @@
 namespace nb = nanobind;
 
 // Indices are added internally in bottleneck_distance, they are not needed in the input.
-static auto make_point(double x, double y, nb::ssize_t) { return std::pair(x, y); };
+static auto make_point(double x, double y, std::size_t) { return std::pair(x, y); };
 
 // For compatibility with older versions, we want to support e=None.
+template <class Dgm>
 double bottleneck(const Dgm& d1, const Dgm& d2, std::optional<double> epsilon)
 {
   double e = epsilon.value_or((std::numeric_limits<double>::min)());
@@ -37,32 +38,22 @@ double bottleneck(const Dgm& d1, const Dgm& d2, std::optional<double> epsilon)
   return Gudhi::persistence_diagram::bottleneck_distance(diag1, diag2, e);
 }
 
-NB_MODULE(bottleneck, m)
+NB_MODULE(_bottleneck_ext, m)
 {
   m.attr("__license__") = "GPL v3";
-  m.def("bottleneck_distance",
-        &bottleneck,
+  m.def("_bottleneck_distance_tensor",
+        &bottleneck<Tensor_dgm>,
         nb::arg("diagram_1"),
         nb::arg("diagram_2"),
-        nb::arg("e") = nb::none(),
-        R"pbdoc(
-    Compute the Bottleneck distance between two diagrams.
-    Points at infinity and on the diagonal are supported.
-
-    :param diagram_1: The first diagram.
-    :type diagram_1: numpy array of shape (m,2)
-    :param diagram_2: The second diagram.
-    :type diagram_2: numpy array of shape (n,2)
-    :param e: If `e` is 0, this uses an expensive algorithm to compute the
-        exact distance.
-        If `e` is not 0, it asks for an additive `e`-approximation, and
-        currently also allows a small multiplicative error (the last 2 or 3
-        bits of the mantissa may be wrong). This version of the algorithm takes
-        advantage of the limited precision of `double` and is usually a lot
-        faster to compute, whatever the value of `e`.
-        Thus, by default (`e=None`), `e` is the smallest positive double.
-    :type e: float
-    :rtype: float
-    :returns: the bottleneck distance.
-    )pbdoc");
+        nb::arg("e") = nb::none())
+      .def("_bottleneck_distance_list",
+           &bottleneck<List_dgm>,
+           nb::arg("diagram_1"),
+           nb::arg("diagram_2"),
+           nb::arg("e") = nb::none())
+      .def("_bottleneck_distance_sequence",
+           &bottleneck<Sequence_dgm>,
+           nb::arg("diagram_1"),
+           nb::arg("diagram_2"),
+           nb::arg("e") = nb::none());
 }
