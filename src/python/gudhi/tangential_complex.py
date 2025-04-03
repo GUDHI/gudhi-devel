@@ -9,7 +9,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
-__maintainer__ = "???"
+__maintainer__ = "Thibaud Kloczko"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
