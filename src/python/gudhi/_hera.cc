@@ -7,6 +7,7 @@
  *    Modification(s):
  *      - 2025/01 Vincent Rouvreau: Use nanobind instead of PyBind11 for python bindings. Merge of bottleneck.cc and
  *          wasserstein.cc, because nanobind doesn't accept 2 modules named hera
+ *      - 2025/04 Hannah Schreiber: Re-add possibility of native Python sequences as input
  *      - YYYY/MM Author: Description of the modification
  */
 

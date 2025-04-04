@@ -9,6 +9,7 @@
 #   - 2024/10 Vincent Rouvreau: Add square root filtration values interface and new function interfaces (instead of
 #                               classes)
 #   - 2025/03 Thibaud Kloczko: Use nanobind instead of Cython for python bindings.
+#   - 2025/04 Hannah Schreiber: Re-add possibility of tensors (numpy, torch etc.) as input.
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
@@ -18,7 +19,7 @@ __license__ = "GPL v3"
 
 import warnings
 from typing import Literal, Optional
-from collections.abc import Iterable
+from collections.abc import Sequence
 
 from gudhi import _delaunay_complex_ext as t
 from gudhi.simplex_tree import SimplexTree
@@ -37,13 +38,13 @@ class DelaunayComplex(t.Delaunay_complex_interface):
 
     def __init__(
         self,
-        points: Iterable[Iterable[float]] = [],
-        weights: Optional[Iterable[float]] = None,
+        points: Sequence[Sequence[float]] = [],
+        weights: Optional[Sequence[float]] = None,
         precision: Literal["fast", "safe", "exact"] = "safe",
     ):
         """Args:
-              points (Iterable[Iterable[float]]): A list of points in d-Dimension.
-              weights (Optional[Iterable[float]]): A list of weights. If set, the number of weights must correspond to
+              points (Sequence[Sequence[float]]): A list of points in d-Dimension.
+              weights (Optional[Sequence[float]]): A list of weights. If set, the number of weights must correspond to
               the number of points.
               precision (str): Complex precision can be `'fast'`, `'safe'` or `'exact'`. Default is `'safe'`.
 
@@ -166,7 +167,7 @@ class DelaunayCechComplex(DelaunayComplex):
     def __init__(self, points=[], precision="safe"):
         """
         Args:
-            points (Iterable[Iterable[float]]): A list of points in d-Dimension.
+            points (Sequence[Sequence[float]]): A list of points in d-Dimension.
             precision (str): Complex precision can be `'fast'`, `'safe'` or `'exact'`. Default is `'safe'`.
         """
         super().__init__(points=points, weights=None, precision=precision)

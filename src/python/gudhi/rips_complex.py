@@ -6,6 +6,7 @@
 #
 # Modification(s):
 #   - 2025/03 Thibaud Kloczko: Use nanobind instead of Cython for python bindings.
+#   - 2025/04 Hannah Schreiber: Re-add possibility of tensors (numpy, torch etc.) as input.
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
@@ -15,7 +16,7 @@ __license__ = "MIT"
 
 
 from typing import Literal, Optional
-from collections.abc import Iterable
+from collections.abc import Sequence
 
 from gudhi import _rips_complex_ext as t
 from gudhi.simplex_tree import SimplexTree
@@ -31,17 +32,17 @@ class RipsComplex(t.Rips_complex_interface):
     def __init__(
         self,
         *,
-        points: Iterable[Iterable[float]] = [],
-        distance_matrix: Iterable[Iterable[float]] = [],
+        points: Sequence[Sequence[float]] = [],
+        distance_matrix: Sequence[Sequence[float]] = [],
         max_edge_length: float = float("inf"),
         sparse: Optional[float] = None
     ):
         """RipsComplex constructor.
 
         Args:
-            points (Iterable[Iterable(float)]): A list of points in d-Dimension.
+            points (Sequence[Sequence(float)] or 2D tensor): A list of points in d-Dimension.
         Or
-            distance_matrix (Iterable[Iterable(float)]: A distance matrix (full square or lower triangular).
+            distance_matrix (Sequence[Sequence(float) or 2D tensor]: A distance matrix (full square or lower triangular).
 
         And in both cases
 
@@ -53,14 +54,26 @@ class RipsComplex(t.Rips_complex_interface):
         super().__init__()
         if sparse is not None:
             if len(distance_matrix) == 0:
-                super().init_points_sparse(points, max_edge_length, sparse)
+                if isinstance(points, Sequence):
+                    super().init_points_sparse(points, max_edge_length, sparse)
+                else:
+                    super().init_points_sparse_with_tensor(points, max_edge_length, sparse)
             else:
-                super().init_matrix_sparse(distance_matrix, max_edge_length, sparse)
+                if isinstance(points, Sequence):
+                    super().init_matrix_sparse(distance_matrix, max_edge_length, sparse)
+                else:
+                    super().init_matrix_sparse_with_tensor(distance_matrix, max_edge_length, sparse)
         else:
             if len(distance_matrix) == 0:
-                super().init_points(points, max_edge_length)
+                if isinstance(points, Sequence):
+                    super().init_points(points, max_edge_length)
+                else:
+                    super().init_points_with_tensor(points, max_edge_length)
             else:
-                super().init_matrix(distance_matrix, max_edge_length)
+                if isinstance(points, Sequence):
+                    super().init_matrix(distance_matrix, max_edge_length)
+                else:
+                    super().init_matrix_with_tensor(distance_matrix, max_edge_length)
 
     def create_simplex_tree(self, max_dimension: int = 1):
         """

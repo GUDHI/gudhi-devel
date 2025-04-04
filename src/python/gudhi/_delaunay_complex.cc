@@ -9,6 +9,7 @@
  *                                  Factorize create_complex
  *      - 2024/10 Vincent Rouvreau: Add square root filtration values interface
  *      - 2025/03 Thibaud Kloczko: Use nanobind instead of Cython for python bindings
+ *      - 2025/04 Hannah Schreiber: Re-add possibility of tensors (numpy, torch etc.) as input
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -27,6 +28,7 @@
 #include <gudhi/MEB_filtration.h>
 #include <gudhi/Alpha_complex.h>
 #include <python_interfaces/Simplex_tree_interface.h>
+#include <python_interfaces/points_utils.h>
 
 namespace Gudhi {
 namespace delaunay_complex {
@@ -132,7 +134,12 @@ class Abstract_delaunay_complex
 class Delaunay_complex_interface
 {
  public:
-  Delaunay_complex_interface(const std::vector<std::vector<double>>& points,
+  Delaunay_complex_interface(const Sequence& points,
+                             const std::vector<double>& weights,
+                             bool fast_version,
+                             bool exact_version);
+
+  Delaunay_complex_interface(const Tensor& points,
                              const std::vector<double>& weights,
                              bool fast_version,
                              bool exact_version);
@@ -161,23 +168,19 @@ class Delaunay_complex_t final : public Abstract_delaunay_complex
   using Delaunay_complex = Gudhi::alpha_complex::Alpha_complex<Kernel, Weighted>;
 
  public:
-  Delaunay_complex_t(const std::vector<std::vector<double>>& points, bool exact_version)
+  Delaunay_complex_t(const Sequence& points, bool exact_version)
       : exact_version_(exact_version),
         points_(boost::begin(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>)),
                 boost::end(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>))),
         delaunay_complex_(points_)
-  {
-  }
+  {}
 
-  Delaunay_complex_t(const std::vector<std::vector<double>>& points,
-                     const std::vector<double>& weights,
-                     bool exact_version)
+  Delaunay_complex_t(const Sequence& points, const std::vector<double>& weights, bool exact_version)
       : exact_version_(exact_version),
         points_(boost::begin(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>)),
                 boost::end(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>))),
         delaunay_complex_(points_, weights)
-  {
-  }
+  {}
 
   virtual std::vector<double> get_point(int vh) override
   {
@@ -206,7 +209,7 @@ class Delaunay_complex_t final : public Abstract_delaunay_complex
 //  Delaunay_complex_interface definition
 // /////////////////////////////////////////////////////////////////////////////
 
-Delaunay_complex_interface::Delaunay_complex_interface(const std::vector<std::vector<double>>& points,
+Delaunay_complex_interface::Delaunay_complex_interface(const Sequence& points,
                                                        const std::vector<double>& weights,
                                                        bool fast_version,
                                                        bool exact_version)
@@ -265,6 +268,13 @@ Delaunay_complex_interface::Delaunay_complex_interface(const std::vector<std::ve
   }
 }
 
+Delaunay_complex_interface::Delaunay_complex_interface(const Tensor& points,
+                                                       const std::vector<double>& weights,
+                                                       bool fast_version,
+                                                       bool exact_version)
+    : Delaunay_complex_interface(_get_sequence_from_tensor(points), weights, fast_version, exact_version)
+{}
+
 std::vector<double> Delaunay_complex_interface::get_point(int vh) { return delaunay_ptr_->get_point(vh); }
 
 void Delaunay_complex_interface::create_simplex_tree(Simplex_tree_interface* simplex_tree,
@@ -314,7 +324,8 @@ NB_MODULE(_delaunay_complex_ext, m)
       .value("ALPHA", gdc::Delaunay_filtration::ALPHA, "Alpha Complex");
 
   nb::class_<gdci>(m, "Delaunay_complex_interface")
-      .def(nb::init<const std::vector<std::vector<double>>&, const std::vector<double>&, bool, bool>(), "Constructor")
+      .def(nb::init<const Sequence&, const std::vector<double>&, bool, bool>(), "Constructor")
+      .def(nb::init<const Tensor&, const std::vector<double>&, bool, bool>(), "Constructor")
       .def("create_simplex_tree", &gdci::create_simplex_tree, "")
       .def("get_point", &gdci::get_point, "")
       .def_static("set_float_relative_precision", &gdci::set_float_relative_precision, "")
