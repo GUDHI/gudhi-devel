@@ -13,7 +13,7 @@
 __author__ = "???"
 __maintainer__ = ""
 __copyright__ = "Copyright (C) 20?? Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"
 
 
 import numpy as np

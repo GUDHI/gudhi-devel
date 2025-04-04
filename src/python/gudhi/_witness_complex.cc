@@ -35,7 +35,7 @@ std::size_t max_size_t = std::numeric_limits<std::size_t>::max();
 
 NB_MODULE(_witness_complex_ext, m)
 {
-  m.attr("__license__") = "GPL v3";
+  m.attr("__license__") = "MIT";
 
   nb::class_<gwci>(m, "Witness_complex_interface")
       .def(nb::init<const Nearest_landmark_table&>(), "Constructor")

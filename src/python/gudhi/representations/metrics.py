@@ -10,7 +10,7 @@
 __author__ = "Mathieu Carrière"
 __maintainer__ = ""
 __copyright__ = "Copyright (C) 2018-2019 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"
 
 
 import numpy as np

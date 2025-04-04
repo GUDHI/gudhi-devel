@@ -25,7 +25,7 @@ namespace nb = nanobind;
 
 NB_MODULE(_reader_utils_ext, m)
 {
-  m.attr("__license__") = "GPL v3";
+  m.attr("__license__") = "MIT";
 
   m.def("read_matrix_from_csv_file",
         &Gudhi::read_lower_triangular_matrix_from_csv_file<double>,

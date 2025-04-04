@@ -84,7 +84,7 @@ using gwci = gwc::Strong_witness_complex_interface;
 
 NB_MODULE(_strong_witness_complex_ext, m)
 {
-  m.attr("__license__") = "GPL v3";
+  m.attr("__license__") = "MIT";
 
   nb::class_<gwci>(m, "Strong_witness_complex_interface")
       .def(nb::init<const gwci::Nearest_landmark_table&>(), "Constructor")

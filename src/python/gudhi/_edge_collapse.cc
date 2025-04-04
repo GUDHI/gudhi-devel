@@ -84,6 +84,7 @@ nb::object collapse(nb::ndarray<Index, nb::ndim<1>> is,
 
 NB_MODULE(_edge_collapse_ext, m)
 {
+  m.attr("__license__") = "MIT";
   m.def("_collapse_edges",
         collapse<int, float>,
         nb::arg("i").noconvert(),

@@ -64,6 +64,7 @@ nb::list wrap_persistence_2d(nb::ndarray<double, nb::ndim<2>, nb::c_contig> data
 
 NB_MODULE(_pers_cub_low_dim_ext, m)
 {
+  m.attr("__license__") = "MIT";
   m.def("_persistence_on_a_line", &wrap_persistence_1d<float>, nb::arg().noconvert());
   m.def("_persistence_on_a_line", &wrap_persistence_1d<double>);
   m.def("_persistence_on_rectangle_from_top_cells", &wrap_persistence_2d);

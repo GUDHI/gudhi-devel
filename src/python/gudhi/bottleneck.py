@@ -10,7 +10,7 @@
 __author__ = "Hannah Schreiber"
 __maintainer__ = ""
 __copyright__ = "Copyright (C) 2025 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"
 
 from collections.abc import Sequence
 import warnings

@@ -223,6 +223,8 @@ NB_MODULE(_ripser_ext, m)
   // nb::bind_vector<V2f>(m, "VectorPairFloat");
   // nb::bind_vector<V2d>(m, "VectorPairDouble");
 
+  m.attr("__license__") = "MIT";
+
   // Remove the default for max_dimension?
   m.def("_full",
         full<float>,

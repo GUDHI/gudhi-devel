@@ -103,7 +103,7 @@ using grci = grc::Rips_complex_interface;
 
 NB_MODULE(_rips_complex_ext, m)
 {
-  m.attr("__license__") = "GPL v3";
+  m.attr("__license__") = "MIT";
 
   nb::class_<grci>(m, "Rips_complex_interface")
       .def(nb::init<>(), "Constructor")

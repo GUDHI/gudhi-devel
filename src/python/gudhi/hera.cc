@@ -161,6 +161,7 @@ nb::object wasserstein_distance(const Tensor_dgm& d1,
 
 NB_MODULE(hera, m)
 {
+  m.attr("__license__") = "BSD 3-Clause";
   m.def("bottleneck_distance",
         &bottleneck_distance,
         nb::arg("X"),
