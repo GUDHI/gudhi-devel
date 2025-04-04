@@ -367,7 +367,7 @@ set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_subsampling', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_witness_complex', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_nerve_gic', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_bottleneck', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'hera', ")
+set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_hera', ")
 set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'clustering/_tomato', ")
 if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_delaunay_complex', ")
@@ -392,6 +392,7 @@ configure_file("gudhi/__init__.py.in" "${CMAKE_CURRENT_BINARY_DIR}/gudhi/__init_
 
 # Other .py files
 configure_file("gudhi/bottleneck.py"                       "${CMAKE_CURRENT_BINARY_DIR}/gudhi/bottleneck.py"                       COPYONLY)
+configure_file("gudhi/hera.py"                             "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera.py"                             COPYONLY)
 configure_file("gudhi/simplex_tree.py"                     "${CMAKE_CURRENT_BINARY_DIR}/gudhi/simplex_tree.py"                     COPYONLY)
 configure_file("gudhi/delaunay_complex.py"                 "${CMAKE_CURRENT_BINARY_DIR}/gudhi/delaunay_complex.py"                 COPYONLY)
 configure_file("gudhi/rips_complex.py"                     "${CMAKE_CURRENT_BINARY_DIR}/gudhi/rips_complex.py"                     COPYONLY)

@@ -28,13 +28,14 @@ using nb::ssize_t;
 #endif
 
 // Indices are added internally in bottleneck_distance, they are not needed in the input.
-static auto make_point(double x, double y, std::size_t) { return std::pair(x, y); };
+static auto _make_point(double x, double y, std::size_t) { return std::pair(x, y); };
 
-double bottleneck_distance(const Tensor_dgm& d1, const Tensor_dgm& d2, double delta)
+template <class Dgm>
+double _bottleneck_distance(const Dgm& d1, const Dgm& d2, double delta)
 {
   // I *think* the call to request() in array_to_range_of_pairs has to be before releasing the GIL.
-  auto diag1 = array_to_range_of_pairs(d1, make_point);
-  auto diag2 = array_to_range_of_pairs(d2, make_point);
+  auto diag1 = array_to_range_of_pairs(d1, _make_point);
+  auto diag2 = array_to_range_of_pairs(d2, _make_point);
 
   nb::gil_scoped_release release;
 
@@ -45,17 +46,18 @@ double bottleneck_distance(const Tensor_dgm& d1, const Tensor_dgm& d2, double de
 }
 
 // Unlike bottleneck, for wasserstein, we need to add the index ourselves (if we want the matching)
-static auto make_hera_point(double x, double y, std::size_t i) { return hera::DiagramPoint<double>(x, y, i); };
+static auto _make_hera_point(double x, double y, std::size_t i) { return hera::DiagramPoint<double>(x, y, i); };
 
-nb::object wasserstein_distance(const Tensor_dgm& d1,
-                                const Tensor_dgm& d2,
-                                double wasserstein_power,
-                                double internal_p,
-                                double delta,
-                                bool return_matching)
+template <class Dgm>
+nb::object _wasserstein_distance(const Dgm& d1,
+                                 const Dgm& d2,
+                                 double wasserstein_power,
+                                 double internal_p,
+                                 double delta,
+                                 bool return_matching)
 {
-  auto diag1 = array_to_range_of_pairs(d1, make_hera_point);
-  auto diag2 = array_to_range_of_pairs(d2, make_hera_point);
+  auto diag1 = array_to_range_of_pairs(d1, _make_hera_point);
+  auto diag2 = array_to_range_of_pairs(d2, _make_hera_point);
   int n1 = boost::size(diag1);
   int n2 = boost::size(diag2);
   hera::AuctionResult<double> res;
@@ -159,55 +161,43 @@ nb::object wasserstein_distance(const Tensor_dgm& d1,
   return nb::make_tuple(dist, ret);
 }
 
-NB_MODULE(hera, m)
+NB_MODULE(_hera_ext, m)
 {
   m.attr("__license__") = "BSD 3-Clause";
-  m.def("bottleneck_distance",
-        &bottleneck_distance,
+  m.def("_bottleneck_distance_tensor",
+        &_bottleneck_distance<Tensor_dgm>,
         nb::arg("X"),
         nb::arg("Y"),
-        nb::arg("delta") = .01,
-        R"pbdoc(
-    Compute the Bottleneck distance between two diagrams.
-    Points at infinity are supported.
-
-    .. note::
-       Points on the diagonal are not supported and must be filtered out before calling this function.
-
-    Parameters:
-        X (n x 2 numpy array): First diagram
-        Y (n x 2 numpy array): Second diagram
-        delta (float): Relative error 1+delta
-
-    Returns:
-        float: (approximate) bottleneck distance d_B(X,Y)
-  )pbdoc");
-  m.def("wasserstein_distance",
-        &wasserstein_distance,
+        nb::arg("delta") = .01);
+  m.def(
+      "_bottleneck_distance_list", &_bottleneck_distance<List_dgm>, nb::arg("X"), nb::arg("Y"), nb::arg("delta") = .01);
+  m.def("_bottleneck_distance_sequence",
+        &_bottleneck_distance<Sequence_dgm>,
+        nb::arg("X"),
+        nb::arg("Y"),
+        nb::arg("delta") = .01);
+  m.def("_wasserstein_distance_tensor",
+        &_wasserstein_distance<Tensor_dgm>,
         nb::arg("X"),
         nb::arg("Y"),
         nb::arg("order") = 1,
         nb::arg("internal_p") = std::numeric_limits<double>::infinity(),
         nb::arg("delta") = .01,
-        nb::arg("matching") = false,
-        R"pbdoc(
-    Compute the Wasserstein distance between two diagrams.
-    Points at infinity are supported.
-
-    Parameters:
-        X (n x 2 numpy array): First diagram
-        Y (n x 2 numpy array): Second diagram
-        order (float): Wasserstein exponent W_q
-        internal_p (float): Internal Minkowski norm L^p in R^2
-        delta (float): Relative error 1+delta
-        matching (bool): if ``True``, computes and returns the optimal matching between X and Y, encoded as a
-            (n x 2) np.array [...[i,j]...], meaning the i-th point in X is matched to the j-th point in Y, with the
-            convention that (-1) represents the diagonal. If the distance between two diagrams is +inf (which happens
-            if the cardinalities of essential parts differ) and the matching is requested, it will be set to ``None``
-            (any matching is optimal).
-
-        Returns:
-            float|Tuple[float,numpy.array|None]: Approximate Wasserstein distance W_q(X,Y), and optionally the
-                corresponding matching
-  )pbdoc");
+        nb::arg("matching") = false);
+  m.def("_wasserstein_distance_list",
+        &_wasserstein_distance<List_dgm>,
+        nb::arg("X"),
+        nb::arg("Y"),
+        nb::arg("order") = 1,
+        nb::arg("internal_p") = std::numeric_limits<double>::infinity(),
+        nb::arg("delta") = .01,
+        nb::arg("matching") = false);
+  m.def("_wasserstein_distance_sequence",
+        &_wasserstein_distance<Sequence_dgm>,
+        nb::arg("X"),
+        nb::arg("Y"),
+        nb::arg("order") = 1,
+        nb::arg("internal_p") = std::numeric_limits<double>::infinity(),
+        nb::arg("delta") = .01,
+        nb::arg("matching") = false);
 }

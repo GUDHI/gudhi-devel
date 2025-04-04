@@ -47,8 +47,8 @@ def test_basic_list_list_bottleneck():
 
     assert gudhi.bottleneck_distance(diag1, diag2) == 0.75
     assert gudhi.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, abs=0.1)
-    # assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
-    # assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
 
 def test_basic_list_tuple_bottleneck():
     diag1 = [(2.7, 3.7), (9.6, 14.0), (34.2, 34.974), (3.0, float("Inf"))]
@@ -56,8 +56,8 @@ def test_basic_list_tuple_bottleneck():
 
     assert gudhi.bottleneck_distance(diag1, diag2) == 0.75
     assert gudhi.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, abs=0.1)
-    # assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
-    # assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
 
 def test_basic_tuple_tuple_bottleneck():
     diag1 = ((2.7, 3.7), (9.6, 14.0), (34.2, 34.974), (3.0, float("Inf")))
@@ -65,8 +65,8 @@ def test_basic_tuple_tuple_bottleneck():
 
     assert gudhi.bottleneck_distance(diag1, diag2) == 0.75
     assert gudhi.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, abs=0.1)
-    # assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
-    # assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
 
 def test_basic_tuple_list_bottleneck():
     diag1 = ([2.7, 3.7], [9.6, 14.0], [34.2, 34.974], [3.0, float("Inf")])
@@ -74,5 +74,5 @@ def test_basic_tuple_list_bottleneck():
 
     assert gudhi.bottleneck_distance(diag1, diag2) == 0.75
     assert gudhi.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, abs=0.1)
-    # assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
-    # assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)

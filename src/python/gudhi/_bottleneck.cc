@@ -22,16 +22,16 @@
 namespace nb = nanobind;
 
 // Indices are added internally in bottleneck_distance, they are not needed in the input.
-static auto make_point(double x, double y, std::size_t) { return std::pair(x, y); };
+static auto _make_point(double x, double y, std::size_t) { return std::pair(x, y); };
 
 // For compatibility with older versions, we want to support e=None.
 template <class Dgm>
-double bottleneck(const Dgm& d1, const Dgm& d2, std::optional<double> epsilon)
+double _bottleneck(const Dgm& d1, const Dgm& d2, std::optional<double> epsilon)
 {
   double e = epsilon.value_or((std::numeric_limits<double>::min)());
   // I *think* the call to request() in array_to_range_of_pairs has to be before releasing the GIL.
-  auto diag1 = array_to_range_of_pairs(d1, make_point);
-  auto diag2 = array_to_range_of_pairs(d2, make_point);
+  auto diag1 = array_to_range_of_pairs(d1, _make_point);
+  auto diag2 = array_to_range_of_pairs(d2, _make_point);
 
   nb::gil_scoped_release release;
 
@@ -42,17 +42,17 @@ NB_MODULE(_bottleneck_ext, m)
 {
   m.attr("__license__") = "GPL v3";
   m.def("_bottleneck_distance_tensor",
-        &bottleneck<Tensor_dgm>,
+        &_bottleneck<Tensor_dgm>,
         nb::arg("diagram_1"),
         nb::arg("diagram_2"),
         nb::arg("e") = nb::none())
       .def("_bottleneck_distance_list",
-           &bottleneck<List_dgm>,
+           &_bottleneck<List_dgm>,
            nb::arg("diagram_1"),
            nb::arg("diagram_2"),
            nb::arg("e") = nb::none())
       .def("_bottleneck_distance_sequence",
-           &bottleneck<Sequence_dgm>,
+           &_bottleneck<Sequence_dgm>,
            nb::arg("diagram_1"),
            nb::arg("diagram_2"),
            nb::arg("e") = nb::none());

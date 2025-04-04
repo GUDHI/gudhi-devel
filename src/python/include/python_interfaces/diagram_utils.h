@@ -9,6 +9,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <cstddef>
 #include <vector>
 
 #include <nanobind/nanobind.h>
@@ -40,7 +41,11 @@ inline auto array_to_range_of_pairs(const Tensor_dgm& dgm, BuildPoint build_poin
 template <class BuildPoint>
 inline auto array_to_range_of_pairs(const Sequence_dgm& dgm, BuildPoint build_point)
 {
-  std::vector<decltype(build_point(0, 0, 0))> cnt;
+  std::size_t size = 0;
+  for (auto it = dgm.begin(); it != dgm.end(); ++it) {
+    ++size;
+  }
+  std::vector<decltype(build_point(0, 0, 0))> cnt(size);
   std::size_t i = 0;
   for (auto it = dgm.begin(); it != dgm.end(); ++it) {
     const auto& p = *it;
@@ -50,7 +55,7 @@ inline auto array_to_range_of_pairs(const Sequence_dgm& dgm, BuildPoint build_po
     double death = nanobind::cast<double>(*itP);
     ++itP;
     if (itP != p.end()) throw std::runtime_error("Diagram must be an array of size n x 2");
-    cnt.push_back(build_point(birth, death, i));
+    cnt[i] = build_point(birth, death, i);
     ++i;
   }
   return cnt;

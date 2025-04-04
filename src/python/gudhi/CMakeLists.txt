@@ -9,7 +9,7 @@ nanobind_add_module(_subsampling_ext _subsampling.cc)
 nanobind_add_module(_witness_complex_ext _witness_complex.cc)
 nanobind_add_module(_nerve_gic_ext _nerve_gic.cc)
 nanobind_add_module(_bottleneck_ext _bottleneck.cc)
-nanobind_add_module(hera hera.cc)
+nanobind_add_module(_hera_ext _hera.cc)
 
 if(TARGET CGAL::CGAL)
     if(TARGET Eigen3::Eigen)
