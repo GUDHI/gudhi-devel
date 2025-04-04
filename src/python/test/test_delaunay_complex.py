@@ -241,3 +241,26 @@ def test_weighted_exceptions():
     # Weighted Alpha complex cannot output square root values
     with pytest.raises(ValueError):
         dc.create_simplex_tree(filtration="alpha", output_squared_values=False)
+
+
+def test_tensors():
+    weights = np.array([4.0, 4.0, 4.0, 4.0, 1.0])
+
+    try:
+        import torch
+
+        print("here")
+        points = (torch.rand((5, 2)) * 2 - 1).requires_grad_()
+        alpha = DelaunayComplex(points=points, weights=weights)
+        alpha = DelaunayCechComplex(points=points)
+    except ImportError:
+        pass
+
+    try:
+        import tensorflow as tf
+
+        points = tf.random.uniform(shape=[5, 2])
+        alpha = DelaunayComplex(points=points, weights=weights)
+        alpha = DelaunayCechComplex(points=points)
+    except ImportError:
+        pass

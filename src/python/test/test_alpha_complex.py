@@ -165,3 +165,24 @@ def test_numpy_arrays():
     )
     weights = np.array([4.0, 4.0, 4.0, 4.0, 1.0])
     alpha = AlphaComplex(points=points, weights=weights)
+
+
+def test_tensors():
+    weights = np.array([4.0, 4.0, 4.0, 4.0, 1.0])
+
+    try:
+        import torch
+
+        print("here")
+        points = (torch.rand((5, 2)) * 2 - 1).requires_grad_()
+        alpha = AlphaComplex(points=points, weights=weights)
+    except ImportError:
+        pass
+
+    try:
+        import tensorflow as tf
+
+        points = tf.random.uniform(shape=[5, 2])
+        alpha = AlphaComplex(points=points, weights=weights)
+    except ImportError:
+        pass

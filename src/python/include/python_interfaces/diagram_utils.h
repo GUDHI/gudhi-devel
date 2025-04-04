@@ -50,8 +50,10 @@ inline auto array_to_range_of_pairs(const Sequence_dgm& dgm, BuildPoint build_po
   for (auto it = dgm.begin(); it != dgm.end(); ++it) {
     const auto& p = *it;
     auto itP = p.begin();
+    if (itP == p.end()) throw std::runtime_error("Diagram must be an array of size n x 2");
     double birth = nanobind::cast<double>(*itP);
     ++itP;
+    if (itP == p.end()) throw std::runtime_error("Diagram must be an array of size n x 2");
     double death = nanobind::cast<double>(*itP);
     ++itP;
     if (itP != p.end()) throw std::runtime_error("Diagram must be an array of size n x 2");
@@ -69,8 +71,10 @@ inline auto array_to_range_of_pairs(const List_dgm& dgm, BuildPoint build_point)
   for (std::size_t i = 0; i < dgm.size(); ++i) {
     const auto& p = dgm[i];
     auto itP = p.begin();
+    if (itP == p.end()) throw std::runtime_error("Diagram must be an array of size n x 2");
     double birth = nanobind::cast<double>(*itP);
     ++itP;
+    if (itP == p.end()) throw std::runtime_error("Diagram must be an array of size n x 2");
     double death = nanobind::cast<double>(*itP);
     ++itP;
     if (itP != p.end()) throw std::runtime_error("Diagram must be an array of size n x 2");
