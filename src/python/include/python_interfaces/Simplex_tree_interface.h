@@ -210,7 +210,7 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
   auto get_simplex_python_iterator()
   {
     return nanobind::make_iterator(nanobind::type<Complex_simplex_range>(),
-                                   "simplex_iterator",
+                                   "gudhi.simplex_tree.simplex_iterator",
                                    Base::complex_simplex_range().begin(),
                                    Base::complex_simplex_range().end());
   }
@@ -218,7 +218,7 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
   auto get_filtration_python_iterator()
   {
     return nanobind::make_iterator(nanobind::type<Filtration_simplex_range>(),
-                                   "filtration_iterator",
+                                   "gudhi.simplex_tree.filtration_iterator",
                                    Base::filtration_simplex_range().begin(),
                                    Base::filtration_simplex_range().end());
   }
@@ -226,7 +226,7 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
   auto get_skeleton_python_iterator(int dimension)
   {
     return nanobind::make_iterator(nanobind::type<Skeleton_simplex_range>(),
-                                   "skeleton_iterator",
+                                   "gudhi.simplex_tree.skeleton_iterator",
                                    Base::skeleton_simplex_range(dimension).begin(),
                                    Base::skeleton_simplex_range(dimension).end());
   }
@@ -237,8 +237,10 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     if (bd_sh == Base::null_simplex()) throw std::runtime_error("simplex not found - cannot find boundaries");
     // this specific case works because the range is just a pair of iterators - won't work if range was a vector
     auto boundary_srange = Base::boundary_simplex_range(bd_sh);
-    return nanobind::make_iterator(
-        nanobind::type<Boundary_simplex_range>(), "boundary_iterator", boundary_srange.begin(), boundary_srange.end());
+    return nanobind::make_iterator(nanobind::type<Boundary_simplex_range>(),
+                                   "gudhi.simplex_tree.boundary_iterator",
+                                   boundary_srange.begin(),
+                                   boundary_srange.end());
   }
 };
 

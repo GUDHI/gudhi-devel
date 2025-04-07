@@ -6,10 +6,11 @@
 #
 # Modification(s):
 #   - 2025/03 Thibaud Kloczko: Use nanobind instead of Cython for python bindings.
+#   - 2025/04 Hannah Schreiber: Re-add possibility of tensors (numpy, torch etc.) as input.
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
-__maintainer__ = "Thibaud Kloczko"
+__maintainer__ = "Thibaud Kloczko, Hannah Schreiber"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
@@ -27,7 +28,7 @@ class StrongWitnessComplex(t.Strong_witness_complex_interface):
     def __init__(self, nearest_landmark_table=None):
         """StrongWitnessComplex constructor.
         Args:
-            param nearest_landmark_table (Iterable[Iterable[Pair[float]]): A list of lists of nearest landmarks and their distances.
+            param nearest_landmark_table (Sequence[Sequence[Pair[float]]): A list of lists of nearest landmarks and their distances.
                                                                           `nearest_landmark_table[w][k]==(l,d)` means that l is the k-th nearest landmark to
                                                                           witness w, and d is the (squared) distance between l and w.
         """

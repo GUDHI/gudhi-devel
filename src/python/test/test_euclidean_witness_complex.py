@@ -5,11 +5,12 @@
     Copyright (C) 2016 Inria
 
     Modification(s):
+      - 2025/04 Hannah Schreiber: Add tests to verify possibility of tensor input
       - YYYY/MM Author: Description of the modification
 """
 
 __author__ = "Vincent Rouvreau"
-__maintainer__ = ""
+__maintainer__ = "Hannah Schreiber"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
@@ -81,3 +82,25 @@ def test_strong_witness_complex():
         ([0, 1], 37.0),
         ([0, 1, 2], 37.0),
     ]
+
+
+def test_tensors():
+    try:
+        import torch
+
+        landmarks = (torch.rand((5, 2))).requires_grad_()
+        witnesses = (torch.rand((5, 2))).requires_grad_()
+        cplex = EuclideanWitnessComplex(landmarks=landmarks, witnesses=witnesses)
+        cplex = EuclideanStrongWitnessComplex(landmarks=landmarks, witnesses=witnesses)
+    except ImportError:
+        pass
+
+    try:
+        import tensorflow as tf
+
+        landmarks = tf.random.uniform(shape=[5, 2])
+        witnesses = tf.random.uniform(shape=[5, 2])
+        cplex = EuclideanWitnessComplex(landmarks=landmarks, witnesses=witnesses)
+        cplex = EuclideanStrongWitnessComplex(landmarks=landmarks, witnesses=witnesses)
+    except ImportError:
+        pass

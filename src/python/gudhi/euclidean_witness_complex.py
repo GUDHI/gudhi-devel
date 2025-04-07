@@ -6,10 +6,11 @@
 #
 # Modification(s):
 #   - 2025/03 Vincent Rouvreau: Use nanobind instead of Cython for python bindings.
+#   - 2025/04 Hannah Schreiber: Re-add possibility of tensors (numpy, torch etc.) as input.
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
-__maintainer__ = "Vincent Rouvreau"
+__maintainer__ = "Vincent Rouvreau, Hannah Schreiber"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
@@ -28,10 +29,10 @@ class EuclideanWitnessComplex(t.Euclidean_witness_complex_interface):
         """WitnessComplex constructor.
 
         :param landmarks: A list of landmarks (in the point cloud).
-        :type landmarks: list of list of double
+        :type landmarks (Sequence[Sequence[float]]): list of list of double
 
         :param witnesses: The point cloud.
-        :type witnesses: list of list of double
+        :type witnesses (Sequence[Sequence[float]]): list of list of double
         """
         super().__init__(landmarks, witnesses)
 

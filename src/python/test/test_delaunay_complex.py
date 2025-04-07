@@ -6,11 +6,12 @@
 
     Modification(s):
       - 2024/07 Vincent Rouvreau: Separate Delaunay and Alpha tests in a different python file
+      - 2025/04 Hannah Schreiber: Add tests to verify possibility of tensor input
       - YYYY/MM Author: Description of the modification
 """
 
 __author__ = "Vincent Rouvreau"
-__maintainer__ = "Vincent Rouvreau"
+__maintainer__ = "Vincent Rouvreau, Hannah Schreiber"
 __copyright__ = "Copyright (C) 2024 Inria"
 __license__ = "GPL v3"
 
@@ -244,13 +245,11 @@ def test_weighted_exceptions():
 
 
 def test_tensors():
-    weights = np.array([4.0, 4.0, 4.0, 4.0, 1.0])
-
     try:
         import torch
 
-        print("here")
-        points = (torch.rand((5, 2)) * 2 - 1).requires_grad_()
+        points = (torch.rand((5, 2))).requires_grad_()
+        weights = (torch.rand((5))).requires_grad_()
         alpha = DelaunayComplex(points=points, weights=weights)
         alpha = DelaunayCechComplex(points=points)
     except ImportError:
@@ -260,6 +259,7 @@ def test_tensors():
         import tensorflow as tf
 
         points = tf.random.uniform(shape=[5, 2])
+        weights = tf.random.uniform(shape=[5])
         alpha = DelaunayComplex(points=points, weights=weights)
         alpha = DelaunayCechComplex(points=points)
     except ImportError:

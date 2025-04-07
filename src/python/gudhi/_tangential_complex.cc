@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2025/03 Thibaud Kloczko: Use nanobind instead of Cython for python bindings.
+ *      - 2025/04 Hannah Schreiber: Re-add possibility of tensors (numpy, torch etc.) as input.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -22,6 +23,7 @@
 #include <gudhi/Tangential_complex.h>
 #include <gudhi/Points_off_io.h>
 #include <python_interfaces/Simplex_tree_interface.h>
+#include <python_interfaces/points_utils.h>
 
 namespace Gudhi {
 namespace tangential_complex {
@@ -37,7 +39,8 @@ class Tangential_complex_interface
   using TC = Tangential_complex<Dynamic_kernel, CGAL::Dynamic_dimension_tag, CGAL::Parallel_tag>;
 
  public:
-  Tangential_complex_interface(int intrisic_dim, const std::vector<std::vector<double>>& points);
+  Tangential_complex_interface(int intrisic_dim, const Sequence2D& points);
+  Tangential_complex_interface(int intrisic_dim, const Tensor2D& points);
   Tangential_complex_interface(int intrisic_dim, const std::string& off_file_name, bool from_file = true);
 
   ~Tangential_complex_interface();
@@ -64,12 +67,15 @@ class Tangential_complex_interface
 // Tangential_complex_interface definition
 // /////////////////////////////////////////////////////////////////////////////
 
-Tangential_complex_interface::Tangential_complex_interface(int intrisic_dim,
-                                                           const std::vector<std::vector<double>>& points)
+Tangential_complex_interface::Tangential_complex_interface(int intrisic_dim, const Sequence2D& points)
 {
   Dynamic_kernel k;
   tangential_complex_ = new TC(points, intrisic_dim, k);
 }
+
+Tangential_complex_interface::Tangential_complex_interface(int intrisic_dim, const Tensor2D& points)
+    : Tangential_complex_interface(intrisic_dim, _get_sequence_from_tensor(points))
+{}
 
 Tangential_complex_interface::Tangential_complex_interface(int intrisic_dim,
                                                            const std::string& off_file_name,
@@ -149,7 +155,8 @@ NB_MODULE(_tangential_complex_ext, m)
   m.attr("__license__") = "GPL v3";
 
   nb::class_<gtci>(m, "_Tangential_complex_interface")
-      .def(nb::init<int, const std::vector<std::vector<double>>&>(), "")
+      .def(nb::init<int, const Sequence2D&>(), "")
+      .def(nb::init<int, const Tensor2D&>(), "")
       .def(nb::init<int, const std::string&, bool>(), "")
       .def("compute_tangential_complex",
            &gtci::compute_tangential_complex,

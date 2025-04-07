@@ -6,10 +6,11 @@
 #
 # Modification(s):
 #   - 2025/03 Vincent Rouvreau: Use nanobind instead of Cython for python bindings.
+#   - 2025/04 Hannah Schreiber: Re-add possibility of tensors (numpy, torch etc.) as input.
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
-__maintainer__ = "Vincent Rouvreau"
+__maintainer__ = "Vincent Rouvreau, Hannah Schreiber"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
@@ -24,7 +25,7 @@ class WitnessComplex(t.Witness_complex_interface):
     with respect to witnesses.
     """
 
-    def __init__(self, nearest_landmark_table=[]):
+    def __init__(self, nearest_landmark_table=None):
         """WitnessComplex constructor.
 
         :param nearest_landmark_table: A list of lists of nearest landmarks and their distances.
@@ -32,7 +33,10 @@ class WitnessComplex(t.Witness_complex_interface):
             witness w, and d is the (squared) distance between l and w.
         :type nearest_landmark_table: list of list of pair of int and float
         """
-        super().__init__(nearest_landmark_table)
+        if nearest_landmark_table == None:
+            super().__init__()
+        else:
+            super().__init__(nearest_landmark_table)
 
     def create_simplex_tree(self, max_alpha_square=float("inf"), limit_dimension=-1):
         """

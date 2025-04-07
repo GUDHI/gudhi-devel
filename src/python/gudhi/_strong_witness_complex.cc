@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2025/03 Thibaud Kloczko: Use nanobind instead of Cython for python bindings.
+ *      - 2025/04 Hannah Schreiber: Re-add possibility of tensors (numpy, torch etc.) as input.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -19,6 +20,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Strong_witness_complex.h>
 #include <python_interfaces/Simplex_tree_interface.h>
+#include <python_interfaces/points_utils.h>
 
 using Gudhi::Simplex_tree_interface;
 
@@ -36,39 +38,30 @@ class Strong_witness_complex_interface
   using Nearest_landmark_table = std::vector<Nearest_landmark_range>;
 
  public:
-  Strong_witness_complex_interface(const Nearest_landmark_table& nlt);
-  ~Strong_witness_complex_interface();
+  Strong_witness_complex_interface(const Nearest_landmark_sequence& nlt)
+  {
+    witness_complex_ = new Strong_witness_complex<Nearest_landmark_table>(nlt);
+  }
 
-  void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square, std::size_t limit_dimension);
-  void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square);
+  Strong_witness_complex_interface(const Nearest_landmark_tensor& nlt)
+      : Strong_witness_complex_interface(_get_sequence_from_tensor(nlt))
+  {}
+
+  ~Strong_witness_complex_interface() { delete witness_complex_; }
+
+  void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square, std::size_t limit_dimension)
+  {
+    witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
+  }
+
+  void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square)
+  {
+    witness_complex_->create_complex(*simplex_tree, max_alpha_square);
+  }
 
  private:
   Strong_witness_complex<Nearest_landmark_table>* witness_complex_;
 };
-
-// /////////////////////////////////////////////////////////////////////////////
-//  Strong_witness_complex_interface definition
-// /////////////////////////////////////////////////////////////////////////////
-
-Strong_witness_complex_interface::Strong_witness_complex_interface(const Nearest_landmark_table& nlt)
-{
-  witness_complex_ = new Strong_witness_complex<Nearest_landmark_table>(nlt);
-}
-
-Strong_witness_complex_interface::~Strong_witness_complex_interface() { delete witness_complex_; }
-
-void Strong_witness_complex_interface::create_simplex_tree(Simplex_tree_interface* simplex_tree,
-                                                           double max_alpha_square,
-                                                           std::size_t limit_dimension)
-{
-  witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
-}
-
-void Strong_witness_complex_interface::create_simplex_tree(Simplex_tree_interface* simplex_tree,
-                                                           double max_alpha_square)
-{
-  witness_complex_->create_complex(*simplex_tree, max_alpha_square);
-}
 
 }  // namespace witness_complex
 }  // namespace Gudhi
@@ -87,7 +80,8 @@ NB_MODULE(_strong_witness_complex_ext, m)
   m.attr("__license__") = "MIT";
 
   nb::class_<gwci>(m, "Strong_witness_complex_interface")
-      .def(nb::init<const gwci::Nearest_landmark_table&>(), "Constructor")
+      .def(nb::init<const Nearest_landmark_sequence&>(), "Constructor")
+      .def(nb::init<const Nearest_landmark_tensor&>(), "Constructor")
       .def("create_simplex_tree",
            nb::overload_cast<Simplex_tree_interface*, double, std::size_t>(&gwci::create_simplex_tree),
            "")

@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2025/03 Vincent Rouvreau: Use nanobind instead of Cython for python bindings.
+ *      - 2025/04 Hannah Schreiber: Re-add possibility of tensors (numpy, torch etc.) as input.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -21,6 +22,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Euclidean_witness_complex.h>
 #include <python_interfaces/Simplex_tree_interface.h>
+#include <python_interfaces/points_utils.h>
 
 namespace Gudhi {
 namespace witness_complex {
@@ -35,53 +37,42 @@ class Euclidean_witness_complex_interface
   using Point_d = Dynamic_kernel::Point_d;
 
  public:
-  Euclidean_witness_complex_interface(const std::vector<std::vector<double>>& landmarks,
-                                      const std::vector<std::vector<double>>& witnesses);
+  Euclidean_witness_complex_interface(const Sequence2D& landmarks, const Sequence2D& witnesses)
+  {
+    landmarks_.reserve(landmarks.size());
+    for (auto& landmark : landmarks) {
+      landmarks_.emplace_back(landmark.begin(), landmark.end());
+    }
+    witness_complex_ = std::make_unique<Euclidean_witness_complex<Dynamic_kernel>>(landmarks_, witnesses);
+  }
+
+  Euclidean_witness_complex_interface(const Tensor2D& landmarks, const Tensor2D& witnesses)
+      : Euclidean_witness_complex_interface(_get_sequence_from_tensor(landmarks), _get_sequence_from_tensor(witnesses))
+  {}
 
   void create_simplex_tree(Simplex_tree_interface& simplex_tree,
                            double max_alpha_square,
-                           std::size_t limit_dimension = std::numeric_limits<std::size_t>::max());
+                           std::size_t limit_dimension = std::numeric_limits<std::size_t>::max())
+  {
+    witness_complex_->create_complex(simplex_tree, max_alpha_square, limit_dimension);
+  }
 
-  std::vector<double> get_point(unsigned vh);
+  std::vector<double> get_point(unsigned vh)
+  {
+    std::vector<double> vd;
+    if (vh < landmarks_.size()) {
+      Point_d ph = witness_complex_->get_point(vh);
+      for (auto coord = ph.cartesian_begin(); coord < ph.cartesian_end(); ++coord) {
+        vd.push_back(*coord);
+      }
+    }
+    return vd;
+  }
 
  private:
   std::vector<Point_d> landmarks_;
   std::unique_ptr<Euclidean_witness_complex<Dynamic_kernel>> witness_complex_;
 };
-
-// /////////////////////////////////////////////////////////////////////////////
-// Euclidean_witness_complex_interface definition
-// /////////////////////////////////////////////////////////////////////////////
-
-Euclidean_witness_complex_interface::Euclidean_witness_complex_interface(
-    const std::vector<std::vector<double>>& landmarks,
-    const std::vector<std::vector<double>>& witnesses)
-{
-  landmarks_.reserve(landmarks.size());
-  for (auto& landmark : landmarks) {
-    landmarks_.emplace_back(landmark.begin(), landmark.end());
-  }
-  witness_complex_ = std::make_unique<Euclidean_witness_complex<Dynamic_kernel>>(landmarks_, witnesses);
-}
-
-void Euclidean_witness_complex_interface::create_simplex_tree(Gudhi::Simplex_tree_interface& simplex_tree,
-                                                              double max_alpha_square,
-                                                              std::size_t limit_dimension)
-{
-  witness_complex_->create_complex(simplex_tree, max_alpha_square, limit_dimension);
-}
-
-std::vector<double> Euclidean_witness_complex_interface::get_point(unsigned vh)
-{
-  std::vector<double> vd;
-  if (vh < landmarks_.size()) {
-    Point_d ph = witness_complex_->get_point(vh);
-    for (auto coord = ph.cartesian_begin(); coord < ph.cartesian_end(); ++coord) {
-      vd.push_back(*coord);
-    }
-  }
-  return vd;
-}
 
 }  // namespace witness_complex
 }  // namespace Gudhi
@@ -100,7 +91,8 @@ NB_MODULE(_euclidean_witness_complex_ext, m)
   m.attr("__license__") = "GPL v3";
 
   nb::class_<egwci>(m, "Euclidean_witness_complex_interface")
-      .def(nb::init<const std::vector<std::vector<double>>&, const std::vector<std::vector<double>>&>(), "Constructor")
+      .def(nb::init<const Sequence2D&, const Sequence2D&>(), "Constructor")
+      .def(nb::init<const Tensor2D&, const Tensor2D&>(), "Constructor")
       .def("create_simplex_tree",
            &egwci::create_simplex_tree,
            nb::arg("simplex_tree"),

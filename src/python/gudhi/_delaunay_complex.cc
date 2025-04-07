@@ -134,13 +134,13 @@ class Abstract_delaunay_complex
 class Delaunay_complex_interface
 {
  public:
-  Delaunay_complex_interface(const Sequence& points,
-                             const std::vector<double>& weights,
+  Delaunay_complex_interface(const Sequence2D& points,
+                             const Sequence1D& weights,
                              bool fast_version,
                              bool exact_version);
 
-  Delaunay_complex_interface(const Tensor& points,
-                             const std::vector<double>& weights,
+  Delaunay_complex_interface(const Tensor2D& points,
+                             const Tensor1D& weights,
                              bool fast_version,
                              bool exact_version);
 
@@ -168,14 +168,14 @@ class Delaunay_complex_t final : public Abstract_delaunay_complex
   using Delaunay_complex = Gudhi::alpha_complex::Alpha_complex<Kernel, Weighted>;
 
  public:
-  Delaunay_complex_t(const Sequence& points, bool exact_version)
+  Delaunay_complex_t(const Sequence2D& points, bool exact_version)
       : exact_version_(exact_version),
         points_(boost::begin(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>)),
                 boost::end(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>))),
         delaunay_complex_(points_)
   {}
 
-  Delaunay_complex_t(const Sequence& points, const std::vector<double>& weights, bool exact_version)
+  Delaunay_complex_t(const Sequence2D& points, const Sequence1D& weights, bool exact_version)
       : exact_version_(exact_version),
         points_(boost::begin(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>)),
                 boost::end(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>))),
@@ -209,8 +209,8 @@ class Delaunay_complex_t final : public Abstract_delaunay_complex
 //  Delaunay_complex_interface definition
 // /////////////////////////////////////////////////////////////////////////////
 
-Delaunay_complex_interface::Delaunay_complex_interface(const Sequence& points,
-                                                       const std::vector<double>& weights,
+Delaunay_complex_interface::Delaunay_complex_interface(const Sequence2D& points,
+                                                       const Sequence1D& weights,
                                                        bool fast_version,
                                                        bool exact_version)
 {
@@ -268,11 +268,14 @@ Delaunay_complex_interface::Delaunay_complex_interface(const Sequence& points,
   }
 }
 
-Delaunay_complex_interface::Delaunay_complex_interface(const Tensor& points,
-                                                       const std::vector<double>& weights,
+Delaunay_complex_interface::Delaunay_complex_interface(const Tensor2D& points,
+                                                       const Tensor1D& weights,
                                                        bool fast_version,
                                                        bool exact_version)
-    : Delaunay_complex_interface(_get_sequence_from_tensor(points), weights, fast_version, exact_version)
+    : Delaunay_complex_interface(_get_sequence_from_tensor(points),
+                                 _get_sequence_from_tensor(weights),
+                                 fast_version,
+                                 exact_version)
 {}
 
 std::vector<double> Delaunay_complex_interface::get_point(int vh) { return delaunay_ptr_->get_point(vh); }
@@ -324,8 +327,8 @@ NB_MODULE(_delaunay_complex_ext, m)
       .value("ALPHA", gdc::Delaunay_filtration::ALPHA, "Alpha Complex");
 
   nb::class_<gdci>(m, "Delaunay_complex_interface")
-      .def(nb::init<const Sequence&, const std::vector<double>&, bool, bool>(), "Constructor")
-      .def(nb::init<const Tensor&, const std::vector<double>&, bool, bool>(), "Constructor")
+      .def(nb::init<const Sequence2D&, const Sequence1D&, bool, bool>(), "Constructor")
+      .def(nb::init<const Tensor2D&, const Tensor1D&, bool, bool>(), "Constructor")
       .def("create_simplex_tree", &gdci::create_simplex_tree, "")
       .def("get_point", &gdci::get_point, "")
       .def_static("set_float_relative_precision", &gdci::set_float_relative_precision, "")

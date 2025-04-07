@@ -13,7 +13,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
-__maintainer__ = "Vincent Rouvreau, Thibaud Kloczko"
+__maintainer__ = "Vincent Rouvreau, Thibaud Kloczko, Hannah Schreiber"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
@@ -63,7 +63,9 @@ class DelaunayComplex(t.Delaunay_complex_interface):
             raise ValueError("Inconsistency between the number of points and weights")
         else:
             if weights is None:
-                weights = []
+                import numpy as np
+                #numpy here instead of list as nanobind understands it both as sequence and as tensor
+                weights = np.empty(shape=(0))
 
         super().__init__(points, weights, fast, exact)
 

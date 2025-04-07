@@ -5,11 +5,12 @@
     Copyright (C) 2016 Inria
 
     Modification(s):
+      - 2025/04 Hannah Schreiber: Add tests to verify possibility of tensor input
       - YYYY/MM Author: Description of the modification
 """
 
 __author__ = "Vincent Rouvreau"
-__maintainer__ = ""
+__maintainer__ = "Hannah Schreiber"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
@@ -369,3 +370,27 @@ def test_array_access():
             ]
         ),
     )
+
+
+def test_tensors():
+    try:
+        import torch
+
+        a = torch.rand((5, 5)) * 2 - 1
+        cplex = CubicalComplex(top_dimensional_cells=a)
+        cplex = PeriodicCubicalComplex(
+            top_dimensional_cells=a, periodic_dimensions=(True, False)
+        )
+    except ImportError:
+        pass
+
+    try:
+        import tensorflow as tf
+
+        a = tf.random.uniform(shape=[5, 5])
+        cplex = CubicalComplex(top_dimensional_cells=a)
+        cplex = PeriodicCubicalComplex(
+            top_dimensional_cells=a, periodic_dimensions=(True, False)
+        )
+    except ImportError:
+        pass
