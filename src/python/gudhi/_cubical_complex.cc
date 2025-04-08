@@ -85,16 +85,14 @@ NB_MODULE(_cubical_complex_ext, m)
       .def(nb::init<const std::vector<unsigned int>&, const std::vector<double>&, bool>())
       .def(nb::init<const std::string&>())
       .def("num_simplices", &CC::num_simplices, R"pbdoc(
-        """This function returns the number of all cubes in the complex.
+This function returns the number of all cubes in the complex.
 
-        :returns:  int -- the number of all cubes in the complex.
-        """
+:returns:  int -- the number of all cubes in the complex.
         )pbdoc")
       .def("dimension", nb::overload_cast<>(&CC::dimension, nb::const_), R"pbdoc(
-        """This function returns the dimension of the complex.
+This function returns the dimension of the complex.
 
-        :returns:  int -- the complex dimension.
-        """
+:returns:  int -- the complex dimension.
         )pbdoc")
       .def("shape", &CC::shape)
       .def("get_numpy_array", &CC::get_numpy_array, nb::rv_policy::reference_internal)
@@ -117,16 +115,14 @@ NB_MODULE(_cubical_complex_ext, m)
       .def(nb::init<const std::vector<unsigned int>&, const std::vector<double>&, const std::vector<bool>&, bool>())
       .def(nb::init<const std::string&>())
       .def("num_simplices", &PCC::num_simplices, R"pbdoc(
-        """This function returns the number of all cubes in the complex.
+This function returns the number of all cubes in the complex.
 
-        :returns:  int -- the number of all cubes in the complex.
-        """
+:returns:  int -- the number of all cubes in the complex.
         )pbdoc")
       .def("dimension", nb::overload_cast<>(&PCC::dimension, nb::const_), R"pbdoc(
-        """This function returns the dimension of the complex.
+This function returns the dimension of the complex.
 
-        :returns:  int -- the complex dimension.
-        """
+:returns:  int -- the complex dimension.
         )pbdoc")
       .def("shape", &PCC::shape)
       .def("periodicities", &PCC::periodicities)
