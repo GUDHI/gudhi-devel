@@ -37,46 +37,35 @@ class Rips_complex_interface
   using Distance_matrix = std::vector<std::vector<Simplex_tree_interface::Filtration_value>>;
 
  public:
-  Rips_complex_interface() = default;
+  // All init methods (see old cythonization strategy) were merged into the constructors, such that nanobind
+  // is the one choosing what is a Sequence and what is a Tensor. Testing this in Python is uselessly tricky.
+
+  Rips_complex_interface(const Sequence2D& array, double threshold, bool isPoints)
+  {
+    if (isPoints)
+      rips_complex_.emplace(array, threshold, Gudhi::Euclidean_distance());
+    else
+      rips_complex_.emplace(array, threshold);
+  }
+
+  Rips_complex_interface(const Tensor2D& array, double threshold, bool isPoints)
+      : Rips_complex_interface(_get_sequence_from_tensor(array), threshold, isPoints)
+  {}
+
+  Rips_complex_interface(const Sequence2D& array, double threshold, double epsilon, bool isPoints)
+  {
+    if (isPoints)
+      sparse_rips_complex_.emplace(
+          array, Gudhi::Euclidean_distance(), epsilon, -std::numeric_limits<double>::infinity(), threshold);
+    else
+      sparse_rips_complex_.emplace(array, epsilon, -std::numeric_limits<double>::infinity(), threshold);
+  }
+
+  Rips_complex_interface(const Tensor2D& array, double threshold, double epsilon, bool isPoints)
+      : Rips_complex_interface(_get_sequence_from_tensor(array), threshold, epsilon, isPoints)
+  {}
+
   ~Rips_complex_interface() = default;
-
-  void init_points(const Sequence2D& points, double threshold)
-  {
-    rips_complex_.emplace(points, threshold, Gudhi::Euclidean_distance());
-  }
-
-  void init_points(const Tensor2D& points, double threshold)
-  {
-    init_points(_get_sequence_from_tensor(points), threshold);
-  }
-
-  void init_matrix(const Sequence2D& matrix, double threshold) { rips_complex_.emplace(matrix, threshold); }
-
-  void init_matrix(const Tensor2D& matrix, double threshold)
-  {
-    init_matrix(_get_sequence_from_tensor(matrix), threshold);
-  }
-
-  void init_points_sparse(const Sequence2D& points, double threshold, double epsilon)
-  {
-    sparse_rips_complex_.emplace(
-        points, Gudhi::Euclidean_distance(), epsilon, -std::numeric_limits<double>::infinity(), threshold);
-  }
-
-  void init_points_sparse(const Tensor2D& points, double threshold, double epsilon)
-  {
-    init_points_sparse(_get_sequence_from_tensor(points), threshold, epsilon);
-  }
-
-  void init_matrix_sparse(const Sequence2D& matrix, double threshold, double epsilon)
-  {
-    sparse_rips_complex_.emplace(matrix, epsilon, -std::numeric_limits<double>::infinity(), threshold);
-  }
-
-  void init_matrix_sparse(const Tensor2D& matrix, double threshold, double epsilon)
-  {
-    init_matrix_sparse(_get_sequence_from_tensor(matrix), threshold, epsilon);
-  }
 
   void create_simplex_tree(Simplex_tree_interface* simplex_tree, int dim_max)
   {
@@ -110,43 +99,10 @@ NB_MODULE(_rips_complex_ext, m)
   m.attr("__license__") = "MIT";
 
   nb::class_<grci>(m, "Rips_complex_interface")
-      .def(nb::init<>(), "Constructor")
-      .def("init_points",
-           nb::overload_cast<const Sequence2D&, double>(&grci::init_points),
-           nb::arg("points"),
-           nb::arg("threshold"))
-      .def("init_matrix",
-           nb::overload_cast<const Sequence2D&, double>(&grci::init_matrix),
-           nb::arg("matrix"),
-           nb::arg("threshold"))
-      .def("init_points_sparse",
-           nb::overload_cast<const Sequence2D&, double, double>(&grci::init_points_sparse),
-           nb::arg("points"),
-           nb::arg("threshold"),
-           nb::arg("epsilon"))
-      .def("init_matrix_sparse",
-           nb::overload_cast<const Sequence2D&, double, double>(&grci::init_matrix_sparse),
-           nb::arg("points"),
-           nb::arg("threshold"),
-           nb::arg("epsilon"))
-      .def("init_points_with_tensor",
-           nb::overload_cast<const Tensor2D&, double>(&grci::init_points),
-           nb::arg("points"),
-           nb::arg("threshold"))
-      .def("init_matrix_with_tensor",
-           nb::overload_cast<const Tensor2D&, double>(&grci::init_matrix),
-           nb::arg("matrix"),
-           nb::arg("threshold"))
-      .def("init_points_sparse_with_tensor",
-           nb::overload_cast<const Tensor2D&, double, double>(&grci::init_points_sparse),
-           nb::arg("points"),
-           nb::arg("threshold"),
-           nb::arg("epsilon"))
-      .def("init_matrix_sparse_with_tensor",
-           nb::overload_cast<const Tensor2D&, double, double>(&grci::init_matrix_sparse),
-           nb::arg("points"),
-           nb::arg("threshold"),
-           nb::arg("epsilon"))
+      .def(nb::init<const Sequence2D&, double, bool>())
+      .def(nb::init<const Tensor2D&, double, bool>())
+      .def(nb::init<const Sequence2D&, double, double, bool>())
+      .def(nb::init<const Tensor2D&, double, double, bool>())
       .def("create_simplex_tree", &grci::create_simplex_tree, "");
 }
 

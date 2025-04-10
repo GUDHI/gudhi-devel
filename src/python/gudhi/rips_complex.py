@@ -51,29 +51,16 @@ class RipsComplex(t.Rips_complex_interface):
             sparse (float, optional): If this is not None, it switches to building a sparse Rips and represents the approximation
                                       parameter epsilon.
         """
-        super().__init__()
         if sparse is not None:
             if len(distance_matrix) == 0:
-                if isinstance(points, Sequence):
-                    super().init_points_sparse(points, max_edge_length, sparse)
-                else:
-                    super().init_points_sparse_with_tensor(points, max_edge_length, sparse)
+                super().__init__(points, max_edge_length, sparse, True)
             else:
-                if isinstance(points, Sequence):
-                    super().init_matrix_sparse(distance_matrix, max_edge_length, sparse)
-                else:
-                    super().init_matrix_sparse_with_tensor(distance_matrix, max_edge_length, sparse)
+                super().__init__(distance_matrix, max_edge_length, sparse, False)
         else:
             if len(distance_matrix) == 0:
-                if isinstance(points, Sequence):
-                    super().init_points(points, max_edge_length)
-                else:
-                    super().init_points_with_tensor(points, max_edge_length)
+                super().__init__(points, max_edge_length, True)
             else:
-                if isinstance(points, Sequence):
-                    super().init_matrix(distance_matrix, max_edge_length)
-                else:
-                    super().init_matrix_with_tensor(distance_matrix, max_edge_length)
+                super().__init__(distance_matrix, max_edge_length, False)
 
     def create_simplex_tree(self, max_dimension: int = 1):
         """
