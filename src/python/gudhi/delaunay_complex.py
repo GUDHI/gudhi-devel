@@ -63,11 +63,9 @@ class DelaunayComplex(t.Delaunay_complex_interface):
             raise ValueError("Inconsistency between the number of points and weights")
         else:
             if weights is None:
-                import numpy as np
-                #numpy here instead of list as nanobind understands it both as sequence and as tensor
-                weights = np.empty(shape=(0))
-
-        super().__init__(points, weights, fast, exact)
+                super().__init__(points, fast, exact)
+            else:
+                super().__init__(points, weights, fast, exact)
 
     def create_simplex_tree(
         self,

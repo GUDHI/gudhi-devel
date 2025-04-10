@@ -144,6 +144,10 @@ class Delaunay_complex_interface
                              bool fast_version,
                              bool exact_version);
 
+  Delaunay_complex_interface(const Sequence2D& points, bool fast_version, bool exact_version);
+
+  Delaunay_complex_interface(const Tensor2D& points, bool fast_version, bool exact_version);
+
   std::vector<double> get_point(int vh);
 
   void create_simplex_tree(Simplex_tree_interface* simplex_tree,
@@ -214,56 +218,29 @@ Delaunay_complex_interface::Delaunay_complex_interface(const Sequence2D& points,
                                                        bool fast_version,
                                                        bool exact_version)
 {
-  const bool weighted = (weights.size() > 0);
   // Specific cases for dimensions 2 and 3
   const std::size_t dimension = ((points.size() > 0) ? points[0].size() : 0);
   if (fast_version) {
-    if (weighted) {
-      if (dimension == 2) {
-        delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<2>>, true>>(
-            points, weights, exact_version);
-      } else if (dimension == 3) {
-        delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<3>>, true>>(
-            points, weights, exact_version);
-      } else {
-        delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>, true>>(
-            points, weights, exact_version);
-      }
+    if (dimension == 2) {
+      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<2>>, true>>(
+          points, weights, exact_version);
+    } else if (dimension == 3) {
+      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<3>>, true>>(
+          points, weights, exact_version);
     } else {
-      if (dimension == 2) {
-        delaunay_ptr_ =
-            std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<2>>, false>>(points, exact_version);
-      } else if (dimension == 3) {
-        delaunay_ptr_ =
-            std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<3>>, false>>(points, exact_version);
-      } else {
-        delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>, false>>(
-            points, exact_version);
-      }
+      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>, true>>(
+          points, weights, exact_version);
     }
   } else {
-    if (weighted) {
-      if (dimension == 2) {
-        delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<2>>, true>>(
-            points, weights, exact_version);
-      } else if (dimension == 3) {
-        delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<3>>, true>>(
-            points, weights, exact_version);
-      } else {
-        delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, true>>(
-            points, weights, exact_version);
-      }
+    if (dimension == 2) {
+      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<2>>, true>>(
+          points, weights, exact_version);
+    } else if (dimension == 3) {
+      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<3>>, true>>(
+          points, weights, exact_version);
     } else {
-      if (dimension == 2) {
-        delaunay_ptr_ =
-            std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<2>>, false>>(points, exact_version);
-      } else if (dimension == 3) {
-        delaunay_ptr_ =
-            std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<3>>, false>>(points, exact_version);
-      } else {
-        delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, false>>(
-            points, exact_version);
-      }
+      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, true>>(
+          points, weights, exact_version);
     }
   }
 }
@@ -276,6 +253,39 @@ Delaunay_complex_interface::Delaunay_complex_interface(const Tensor2D& points,
                                  _get_sequence_from_tensor(weights),
                                  fast_version,
                                  exact_version)
+{}
+
+Delaunay_complex_interface::Delaunay_complex_interface(const Sequence2D& points, bool fast_version, bool exact_version)
+{
+  // Specific cases for dimensions 2 and 3
+  const std::size_t dimension = ((points.size() > 0) ? points[0].size() : 0);
+  if (fast_version) {
+    if (dimension == 2) {
+      delaunay_ptr_ =
+          std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<2>>, false>>(points, exact_version);
+    } else if (dimension == 3) {
+      delaunay_ptr_ =
+          std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<3>>, false>>(points, exact_version);
+    } else {
+      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>, false>>(
+          points, exact_version);
+    }
+  } else {
+    if (dimension == 2) {
+      delaunay_ptr_ =
+          std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<2>>, false>>(points, exact_version);
+    } else if (dimension == 3) {
+      delaunay_ptr_ =
+          std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<3>>, false>>(points, exact_version);
+    } else {
+      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, false>>(
+          points, exact_version);
+    }
+  }
+}
+
+Delaunay_complex_interface::Delaunay_complex_interface(const Tensor2D& points, bool fast_version, bool exact_version)
+    : Delaunay_complex_interface(_get_sequence_from_tensor(points), fast_version, exact_version)
 {}
 
 std::vector<double> Delaunay_complex_interface::get_point(int vh) { return delaunay_ptr_->get_point(vh); }
@@ -327,12 +337,38 @@ NB_MODULE(_delaunay_complex_ext, m)
       .value("ALPHA", gdc::Delaunay_filtration::ALPHA, "Alpha Complex");
 
   nb::class_<gdci>(m, "Delaunay_complex_interface")
-      .def(nb::init<const Sequence2D&, const Sequence1D&, bool, bool>(), "Constructor")
-      .def(nb::init<const Tensor2D&, const Tensor1D&, bool, bool>(), "Constructor")
+      .def(nb::init<const Sequence2D&, const Sequence1D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const Tensor2D&, const Tensor1D&, bool, bool>())
+      .def(nb::init<const Sequence2D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const Tensor2D&, bool, bool>())
       .def("create_simplex_tree", &gdci::create_simplex_tree, "")
-      .def("get_point", &gdci::get_point, "")
-      .def_static("set_float_relative_precision", &gdci::set_float_relative_precision, "")
-      .def_static("get_float_relative_precision", &gdci::get_float_relative_precision, "");
+      .def("get_point", &gdci::get_point, R"pbdoc(
+This function returns the point corresponding to a given vertex from the :class:`~gudhi.SimplexTree` (the
+same as the k-th input point, where `k=vertex`)
+
+Args:
+    vertex: The vertex.
+Returns:
+    the point.
+
+:raises IndexError: In case the point has no associated vertex in the diagram (because of weights or because it
+    is a duplicate).
+        )pbdoc")
+      .def_static("set_float_relative_precision", &gdci::set_float_relative_precision, R"pbdoc(
+Returns:
+    The float relative precision of filtration values computation when constructing with
+    :code:`precision = 'safe'` (the default).
+        )pbdoc")
+      .def_static("get_float_relative_precision", &gdci::get_float_relative_precision, R"pbdoc(
+Args:
+    precision: When constructing :func:`~gudhi.delaunay_cech_complex`, :func:`~gudhi.alpha_complex`, or
+        :func:`~gudhi.weighted_alpha_complex` with :code:`precision = 'safe'` (the default), one can
+        set the float relative precision of filtration values computed. Default is :code:`1e-5` (cf.
+        :func:`~gudhi.DelaunayComplex.get_float_relative_precision`). For more details, please refer to
+        `CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double <https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html>`_
+
+:raises ValueError: If precision is not in (0, 1).
+        )pbdoc");
 }
 
 //
