@@ -99,11 +99,11 @@ NB_MODULE(_rips_complex_ext, m)
   m.attr("__license__") = "MIT";
 
   nb::class_<grci>(m, "Rips_complex_interface")
-      .def(nb::init<const Sequence2D&, double, bool>())
-      .def(nb::init<const Tensor2D&, double, bool>())
-      .def(nb::init<const Sequence2D&, double, double, bool>())
-      .def(nb::init<const Tensor2D&, double, double, bool>())
-      .def("create_simplex_tree", &grci::create_simplex_tree);
+      .def(nb::init<const Sequence2D&, double, bool>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const Tensor2D&, double, bool>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const Sequence2D&, double, double, bool>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const Tensor2D&, double, double, bool>(), nb::call_guard<nb::gil_scoped_release>())
+      .def("create_simplex_tree", &grci::create_simplex_tree, nb::call_guard<nb::gil_scoped_release>());
 }
 
 //

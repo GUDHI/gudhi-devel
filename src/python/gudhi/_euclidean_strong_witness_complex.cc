@@ -94,11 +94,14 @@ NB_MODULE(_euclidean_strong_witness_complex_ext, m)
   m.attr("__license__") = "GPL v3";
 
   nb::class_<gwci>(m, "Euclidean_strong_witness_complex_interface")
-      .def(nb::init<const Sequence2D&, const Sequence2D&>())
-      .def(nb::init<const Tensor2D&, const Tensor2D&>())
-      .def("create_simplex_tree", nb::overload_cast<Gudhi::Simplex_tree_interface*, double>(&gwci::create_simplex_tree))
+      .def(nb::init<const Sequence2D&, const Sequence2D&>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const Tensor2D&, const Tensor2D&>(), nb::call_guard<nb::gil_scoped_release>())
       .def("create_simplex_tree",
-           nb::overload_cast<Gudhi::Simplex_tree_interface*, double, std::size_t>(&gwci::create_simplex_tree))
+           nb::overload_cast<Gudhi::Simplex_tree_interface*, double>(&gwci::create_simplex_tree),
+           nb::call_guard<nb::gil_scoped_release>())
+      .def("create_simplex_tree",
+           nb::overload_cast<Gudhi::Simplex_tree_interface*, double, std::size_t>(&gwci::create_simplex_tree),
+           nb::call_guard<nb::gil_scoped_release>())
       .def("get_point",
            &gwci::get_point,
            R"doc(

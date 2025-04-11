@@ -155,11 +155,15 @@ NB_MODULE(_tangential_complex_ext, m)
   m.attr("__license__") = "GPL v3";
 
   nb::class_<gtci>(m, "_Tangential_complex_interface")
-      .def(nb::init<int, const Sequence2D&>(), nb::arg("intrisic_dim"), nb::arg("points") = Sequence2D())
-      .def(nb::init<int, const Tensor2D&>())
-      .def(nb::init<int, const std::string&, bool>())
+      .def(nb::init<int, const Sequence2D&>(),
+           nb::arg("intrisic_dim"),
+           nb::arg("points") = Sequence2D(),
+           nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<int, const Tensor2D&>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<int, const std::string&, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def("compute_tangential_complex",
            &gtci::compute_tangential_complex,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 This function computes the tangential complex.
 
@@ -180,32 +184,36 @@ This function returns the point corresponding to a given vertex.
            )doc")
       .def("num_vertices",
            &gtci::number_of_vertices,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 :returns:  The number of vertices.
 :rtype: unsigned
            )doc")
       .def("num_simplices",
            &gtci::number_of_simplices,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 :returns:  Total number of simplices in stars (including duplicates that appear in several stars).
 :rtype: unsigned
            )doc")
       .def("num_inconsistent_simplices",
            &gtci::number_of_inconsistent_simplices,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 :returns:  The number of inconsistent simplices.
 :rtype: unsigned
            )doc")
       .def("num_inconsistent_stars",
            &gtci::number_of_inconsistent_stars,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 :returns:  The number of stars containing at least one inconsistent simplex.
 :rtype: unsigned
            )doc")
-      .def("create_simplex_tree",
-           &gtci::create_simplex_tree)
+      .def("create_simplex_tree", &gtci::create_simplex_tree, nb::call_guard<nb::gil_scoped_release>())
       .def("fix_inconsistencies_using_perturbation",
            &gtci::fix_inconsistencies_using_perturbation,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 Attempts to fix inconsistencies by perturbing the point positions.
 
@@ -217,6 +225,7 @@ Attempts to fix inconsistencies by perturbing the point positions.
            )doc")
       .def("set_max_squared_edge_length",
            &gtci::set_max_squared_edge_length,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 Sets the maximal possible squared edge length for the edges in the
 triangulations.
