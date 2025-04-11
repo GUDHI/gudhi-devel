@@ -18,6 +18,8 @@ data/points/human.off_sc.txt
 .idea/
 # VSCode
 .vscode
+.cache
+compile_commands.json
 # Zed
 .zed
 .ropeproject
