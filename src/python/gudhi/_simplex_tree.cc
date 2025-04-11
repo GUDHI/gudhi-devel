@@ -10,6 +10,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <cstddef>
 #include <vector>
 
 #include <nanobind/nanobind.h>
@@ -29,7 +30,10 @@ using gpers = Gudhi::Persistent_cohomology_interface<gsti>;
 gsti deserialize_from_python(const nb::ndarray<char, nb::ndim<1>, nb::numpy> &state)
 {
   gsti st;
-  st.deserialize(state.data(), state.shape(0));
+  {
+    nb::gil_scoped_release release;
+    st.deserialize(state.data(), state.shape(0));
+  }
   return st;
 }
 
@@ -361,9 +365,14 @@ otherwise it is kept. The algorithm then proceeds with the next candidate.
       .def("clear", &gsti::clear, nb::call_guard<nb::gil_scoped_release>())
       .def("__getstate__",
            [](const gsti &st) -> nb::ndarray<char, nb::ndim<1>, nb::numpy> {
-             auto buffer_size = st.get_serialization_size();
-             char *buffer = new char[buffer_size];
-             st.serialize(buffer, buffer_size);
+             std::size_t buffer_size;
+             char *buffer;
+             {
+               nb::gil_scoped_release release;
+               buffer_size = st.get_serialization_size();
+               buffer = new char[buffer_size];
+               st.serialize(buffer, buffer_size);
+             }
              nb::ndarray<char, nb::ndim<1>, nb::numpy> np_buffer(
                  buffer, {buffer_size}, nb::capsule(buffer, [](void *p) noexcept {
                    delete reinterpret_cast<char *>(p);
