@@ -80,12 +80,11 @@ NB_MODULE(_strong_witness_complex_ext, m)
   m.attr("__license__") = "MIT";
 
   nb::class_<gwci>(m, "Strong_witness_complex_interface")
-      .def(nb::init<const Nearest_landmark_sequence&>(), "Constructor")
-      .def(nb::init<const Nearest_landmark_tensor&>(), "Constructor")
+      .def(nb::init<const Nearest_landmark_sequence&>())
+      .def(nb::init<const Nearest_landmark_tensor&>())
       .def("create_simplex_tree",
-           nb::overload_cast<Simplex_tree_interface*, double, std::size_t>(&gwci::create_simplex_tree),
-           "")
-      .def("create_simplex_tree", nb::overload_cast<Simplex_tree_interface*, double>(&gwci::create_simplex_tree), "");
+           nb::overload_cast<Simplex_tree_interface*, double, std::size_t>(&gwci::create_simplex_tree))
+      .def("create_simplex_tree", nb::overload_cast<Simplex_tree_interface*, double>(&gwci::create_simplex_tree));
 }
 
 //

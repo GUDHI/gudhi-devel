@@ -51,12 +51,4 @@ class EuclideanWitnessComplex(t.Euclidean_witness_complex_interface):
             super().create_simplex_tree(stree, max_alpha_square)
         return stree
 
-    def get_point(self, vertex):
-        """This function returns the point corresponding to a given vertex.
 
-        :param vertex: The vertex.
-        :type vertex: int.
-        :returns:  The point.
-        :rtype: list of float
-        """
-        return super().get_point(vertex)

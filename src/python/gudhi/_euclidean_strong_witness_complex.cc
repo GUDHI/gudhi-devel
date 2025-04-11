@@ -94,16 +94,11 @@ NB_MODULE(_euclidean_strong_witness_complex_ext, m)
   m.attr("__license__") = "GPL v3";
 
   nb::class_<gwci>(m, "Euclidean_strong_witness_complex_interface")
-      .def(nb::init<const Sequence2D&, const Sequence2D&>(),
-           "Constructs strong witness complex for given sets of witnesses and landmarks in Euclidean space.")
-      .def(nb::init<const Tensor2D&, const Tensor2D&>(),
-           "Constructs strong witness complex for given sets of witnesses and landmarks in Euclidean space.")
+      .def(nb::init<const Sequence2D&, const Sequence2D&>())
+      .def(nb::init<const Tensor2D&, const Tensor2D&>())
+      .def("create_simplex_tree", nb::overload_cast<Gudhi::Simplex_tree_interface*, double>(&gwci::create_simplex_tree))
       .def("create_simplex_tree",
-           nb::overload_cast<Gudhi::Simplex_tree_interface*, double>(&gwci::create_simplex_tree),
-           "")
-      .def("create_simplex_tree",
-           nb::overload_cast<Gudhi::Simplex_tree_interface*, double, std::size_t>(&gwci::create_simplex_tree),
-           "")
+           nb::overload_cast<Gudhi::Simplex_tree_interface*, double, std::size_t>(&gwci::create_simplex_tree))
       .def("get_point",
            &gwci::get_point,
            R"doc(
@@ -112,7 +107,7 @@ Args:
     arg (int): The vertex id.
 Returns:
     list of float: The coordinates of the vertex.
-)doc");
+           )doc");
 }
 
 //

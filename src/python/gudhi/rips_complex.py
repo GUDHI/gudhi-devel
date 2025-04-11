@@ -39,17 +39,22 @@ class RipsComplex(t.Rips_complex_interface):
     ):
         """RipsComplex constructor.
 
-        Args:
-            points (Sequence[Sequence(float)] or 2D tensor): A list of points in d-Dimension.
+        :param points: A list of points in d-Dimension.
+        :type points: List[List[float]]
+
         Or
-            distance_matrix (Sequence[Sequence(float) or 2D tensor]: A distance matrix (full square or lower triangular).
+
+        :param distance_matrix: A distance matrix (full square or lower triangular).
+        :type distance_matrix: List[List[float]]
 
         And in both cases
 
-            max_edge_length (float, optional): Maximal edge length. All edges of the graph strictly greater than `threshold` are not
-                                               inserted in the graph.
-            sparse (float, optional): If this is not None, it switches to building a sparse Rips and represents the approximation
-                                      parameter epsilon.
+        :param max_edge_length: Maximal edge length. All edges of the graph strictly greater than `threshold` are not
+            inserted in the graph.
+        :type max_edge_length: float
+        :param sparse: If this is not None, it switches to building a sparse Rips and represents the approximation
+            parameter epsilon.
+        :type sparse: float
         """
         if sparse is not None:
             if len(distance_matrix) == 0:
@@ -64,10 +69,10 @@ class RipsComplex(t.Rips_complex_interface):
 
     def create_simplex_tree(self, max_dimension: int = 1):
         """
-        Args:
-            max_dimension (int): graph expansion for Rips until this given maximal dimension.
-        Returns:
-            SimplexTree: A simplex tree encoding the Vietoris–Rips filtration.
+        :param max_dimension: graph expansion for Rips until this given maximal dimension.
+        :type max_dimension: int
+        :returns: A simplex tree encoding the Vietoris–Rips filtration.
+        :rtype: SimplexTree
         """
         stree = SimplexTree()
         super().create_simplex_tree(stree, max_dimension)

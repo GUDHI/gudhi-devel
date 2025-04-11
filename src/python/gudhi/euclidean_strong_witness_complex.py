@@ -27,9 +27,12 @@ class EuclideanStrongWitnessComplex(t.Euclidean_strong_witness_complex_interface
 
     def __init__(self, landmarks=None, witnesses=None):
         """WitnessComplex constructor.
-        Args:
-            landmarks (Sequence[Sequence[float]]): A list of landmarks (in the point cloud).
-            witnesses (Sequence[Sequence[float]]): The point cloud (list of list of double).
+
+        :param landmarks: A list of landmarks (in the point cloud).
+        :type landmarks: list of list of double
+
+        :param witnesses: The point cloud.
+        :type witnesses: list of list of double
         """
 
         if landmarks is not None and witnesses is not None:
@@ -39,12 +42,11 @@ class EuclideanStrongWitnessComplex(t.Euclidean_strong_witness_complex_interface
         self, max_alpha_square: float = float("inf"), limit_dimension: int = -1
     ) -> SimplexTree:
         """
-        Args:
-            max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed.
-                                      Default is set to infinity.
-            limit_dimension (int):
-        Returns:
-            SimplexTree: A simplex tree created from the Delaunay Triangulation.
+        :param max_alpha_square: The maximum alpha square threshold the
+            simplices shall not exceed. Default is set to infinity.
+        :type max_alpha_square: float
+        :returns: A simplex tree created from the Delaunay Triangulation.
+        :rtype: SimplexTree
         """
         stree = SimplexTree()
 

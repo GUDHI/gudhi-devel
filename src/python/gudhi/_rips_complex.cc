@@ -103,7 +103,7 @@ NB_MODULE(_rips_complex_ext, m)
       .def(nb::init<const Tensor2D&, double, bool>())
       .def(nb::init<const Sequence2D&, double, double, bool>())
       .def(nb::init<const Tensor2D&, double, double, bool>())
-      .def("create_simplex_tree", &grci::create_simplex_tree, "");
+      .def("create_simplex_tree", &grci::create_simplex_tree);
 }
 
 //

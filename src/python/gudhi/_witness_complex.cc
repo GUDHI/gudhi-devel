@@ -60,13 +60,12 @@ NB_MODULE(_witness_complex_ext, m)
   m.attr("__license__") = "MIT";
 
   nb::class_<gwci>(m, "Witness_complex_interface")
-      .def(nb::init<const Nearest_landmark_sequence&>(), "Constructor")
-      .def(nb::init<const Nearest_landmark_tensor&>(), "Constructor")
-      .def(nb::init<>(), "Constructor")
+      .def(nb::init<const Nearest_landmark_sequence&>())
+      .def(nb::init<const Nearest_landmark_tensor&>())
+      .def(nb::init<>())
       .def("create_simplex_tree",
            &gwci::create_complex<Gudhi::Simplex_tree_interface>,
            nb::arg("complex"),
            nb::arg("max_alpha_square"),
-           nb::arg("limit_dimension") = max_size_t,
-           "");
+           nb::arg("limit_dimension") = max_size_t);
 }
