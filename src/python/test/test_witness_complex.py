@@ -5,14 +5,17 @@
     Copyright (C) 2016 Inria
 
     Modification(s):
+      - 2025/04 Hannah Schreiber: Add tests to verify possibility of tensor input
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import WitnessComplex, StrongWitnessComplex, SimplexTree
-
 __author__ = "Vincent Rouvreau"
+__maintainer__ = "Hannah Schreiber"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+
+from gudhi import WitnessComplex, StrongWitnessComplex, SimplexTree
 
 
 def test_empty_witness_complex():
@@ -33,9 +36,7 @@ def test_witness_complex():
     simplex_tree = witness_complex.create_simplex_tree(max_alpha_square=4.1)
     assert simplex_tree.num_vertices() == 5
     assert simplex_tree.num_simplices() == 31
-    simplex_tree = witness_complex.create_simplex_tree(
-        max_alpha_square=4.1, limit_dimension=2
-    )
+    simplex_tree = witness_complex.create_simplex_tree(max_alpha_square=4.1, limit_dimension=2)
     assert simplex_tree.num_vertices() == 5
     assert simplex_tree.num_simplices() == 25
 
@@ -60,3 +61,22 @@ def test_strong_witness_complex():
     )
     assert simplex_tree.num_vertices() == 5
     assert simplex_tree.num_simplices() == 25
+
+def test_tensors():
+    try:
+        import torch
+
+        nearest_landmark_table = (torch.rand((5, 5, 2))).requires_grad_()
+        cplex = StrongWitnessComplex(nearest_landmark_table)
+        cplex = WitnessComplex(nearest_landmark_table)
+    except ImportError:
+        pass
+
+    try:
+        import tensorflow as tf
+
+        nearest_landmark_table = tf.random.uniform(shape=[5, 5, 2])
+        cplex = StrongWitnessComplex(nearest_landmark_table)
+        cplex = WitnessComplex(nearest_landmark_table)
+    except ImportError:
+        pass

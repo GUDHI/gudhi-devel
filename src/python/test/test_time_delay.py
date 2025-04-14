@@ -1,5 +1,22 @@
-from gudhi.point_cloud.timedelay import TimeDelayEmbedding
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+    Author(s):       ???
+
+    Copyright (C) 20?? Inria
+
+    Modification(s):
+      - YYYY/MM Author: Description of the modification
+"""
+
+__author__ = "???"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 20?? Inria"
+__license__ = "MIT"
+
+
 import numpy as np
+
+from gudhi.point_cloud.timedelay import TimeDelayEmbedding
 
 
 def test_normal():
@@ -40,4 +57,6 @@ def test_normal():
     ts = np.arange(0, 10).reshape(-1, 2)
     prep = TimeDelayEmbedding(dim=4)
     prep.fit([ts])
-    assert (prep.transform([ts])[0] == [[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7], [6, 7, 8, 9]]).all()
+    assert (
+        prep.transform([ts])[0] == [[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7], [6, 7, 8, 9]]
+    ).all()

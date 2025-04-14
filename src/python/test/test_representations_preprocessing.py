@@ -8,6 +8,12 @@
       - YYYY/MM Author: Description of the modification
 """
 
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2021 Inria"
+__license__ = "MIT"
+
+
 from gudhi.representations.preprocessing import DimensionSelector
 import numpy as np
 import pytest

@@ -8,13 +8,16 @@
       - YYYY/MM Author: Description of the modification
 """
 
-import gudhi
-import gudhi.hera
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "GPL v3"
+
+
 import pytest
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
+import gudhi
+import gudhi.hera
 
 
 def test_basic_bottleneck():

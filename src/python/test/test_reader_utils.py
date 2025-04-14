@@ -8,13 +8,16 @@
       - YYYY/MM Author: Description of the modification
 """
 
-import gudhi as gd
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2017 Inria"
+__license__ = "MIT"
+
+
 import numpy as np
 from pytest import raises
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2017 Inria"
-__license__ = "MIT"
+import gudhi as gd
 
 
 def test_non_existing_csv_file():
@@ -83,9 +86,7 @@ def test_read_persistence_intervals_without_dimension():
     persistence = gd.read_persistence_intervals_grouped_by_dimension(
         persistence_file="persistence_intervals_without_dimension.pers"
     )
-    assert persistence == {
-        -1: [(2.7, 3.7), (9.6, 14.0), (34.2, 34.974), (3.0, float("Inf"))]
-    }
+    assert persistence == {-1: [(2.7, 3.7), (9.6, 14.0), (34.2, 34.974), (3.0, float("Inf"))]}
 
 
 def test_read_persistence_intervals_with_dimension():

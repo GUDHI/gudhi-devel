@@ -1,3 +1,19 @@
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+    Author(s):       ???
+
+    Copyright (C) 20?? Inria
+
+    Modification(s):
+      - YYYY/MM Author: Description of the modification
+"""
+
+__author__ = "???"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 20?? Inria"
+__license__ = "GPL v3"
+
+
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -8,17 +24,41 @@ import random
 from sklearn.cluster import KMeans
 
 # Vectorization
-from gudhi.representations import (Landscape, Silhouette, BettiCurve, ComplexPolynomial,\
-  TopologicalVector, PersistenceImage, Entropy, PersistenceLengths)
+from gudhi.representations import (
+    Landscape,
+    Silhouette,
+    BettiCurve,
+    ComplexPolynomial,
+    TopologicalVector,
+    PersistenceImage,
+    Entropy,
+    PersistenceLengths,
+)
 
 # Preprocessing
-from gudhi.representations import (BirthPersistenceTransform, Clamping, DiagramScaler, Padding, ProminentPoints, \
-  DiagramSelector)
+from gudhi.representations import (
+    BirthPersistenceTransform,
+    Clamping,
+    DiagramScaler,
+    Padding,
+    ProminentPoints,
+    DiagramSelector,
+)
 
 # Kernel
-from gudhi.representations import (PersistenceWeightedGaussianKernel, \
-  PersistenceScaleSpaceKernel, SlicedWassersteinDistance,\
-  SlicedWassersteinKernel, PersistenceFisherKernel, WassersteinDistance)
+from gudhi.representations import (
+    PersistenceWeightedGaussianKernel,
+    PersistenceScaleSpaceKernel,
+    SlicedWassersteinDistance,
+    SlicedWassersteinKernel,
+    PersistenceFisherKernel,
+    WassersteinDistance,
+)
+
+
+from gudhi.representations.vector_methods import Atol
+from gudhi.representations.metrics import *
+from gudhi.representations.kernel_methods import *
 
 
 def test_representations_examples():
@@ -31,11 +71,6 @@ def test_representations_examples():
     return None
 
 
-from gudhi.representations.vector_methods import Atol
-from gudhi.representations.metrics import *
-from gudhi.representations.kernel_methods import *
-
-
 def _n_diags(n):
     l = []
     for _ in range(n):
@@ -44,19 +79,24 @@ def _n_diags(n):
         l.append(a)
     return l
 
-metrics_dict = { # (class, metric_kwargs, tolerance_pytest_approx)
-    "bottleneck": (BottleneckDistance(epsilon=0.00001),
-                   dict(e=0.00001),
-                   dict(abs=1e-5)),
-    "wasserstein": (WassersteinDistance(order=2, internal_p=2, n_jobs=4),
-                    dict(order=2, internal_p=2, n_jobs=4),
-                    dict(rel=1e-3)),
-    "sliced_wasserstein": (SlicedWassersteinDistance(num_directions=100, n_jobs=4),
-                           dict(num_directions=100),
-                           dict(rel=1e-3)),
-    "persistence_fisher": (PersistenceFisherDistance(bandwidth=1., n_jobs=4),
-                           dict(bandwidth=1., n_jobs=4),
-                           dict(abs=1e-5)),
+
+metrics_dict = {  # (class, metric_kwargs, tolerance_pytest_approx)
+    "bottleneck": (BottleneckDistance(epsilon=0.00001), dict(e=0.00001), dict(abs=1e-5)),
+    "wasserstein": (
+        WassersteinDistance(order=2, internal_p=2, n_jobs=4),
+        dict(order=2, internal_p=2, n_jobs=4),
+        dict(rel=1e-3),
+    ),
+    "sliced_wasserstein": (
+        SlicedWassersteinDistance(num_directions=100, n_jobs=4),
+        dict(num_directions=100),
+        dict(rel=1e-3),
+    ),
+    "persistence_fisher": (
+        PersistenceFisherDistance(bandwidth=1.0, n_jobs=4),
+        dict(bandwidth=1.0, n_jobs=4),
+        dict(abs=1e-5),
+    ),
 }
 
 
@@ -74,26 +114,37 @@ def test_distance_transform_consistency():
 
 
 kernel_dict = {
-    "sliced_wasserstein": (SlicedWassersteinKernel(num_directions=10, bandwidth=4., n_jobs=4),
-                           dict(num_directions=10), dict(rel=1e-3)),
-    "persistence_fisher": (PersistenceFisherKernel(bandwidth_fisher=3., bandwidth=1.),
-                           dict(bandwidth=3.),  # corresponds to bandwidth_fisher in the kernel class
-                           dict(rel=1e-3)),
-    "persistence_weighted_gaussian": (PersistenceWeightedGaussianKernel(bandwidth=4.,
-                                                                        weight=lambda x: x[1]-x[0]),
-                                      dict(bandwidth=4., weight=lambda x: x[1]-x[0]),
-                                      dict(rel=1e-3)),
-    "persistence_scale_space": (PersistenceScaleSpaceKernel(bandwidth=4.),
-                                      dict(bandwidth=4.),
-                                      dict(rel=1e-3)),
+    "sliced_wasserstein": (
+        SlicedWassersteinKernel(num_directions=10, bandwidth=4.0, n_jobs=4),
+        dict(num_directions=10),
+        dict(rel=1e-3),
+    ),
+    "persistence_fisher": (
+        PersistenceFisherKernel(bandwidth_fisher=3.0, bandwidth=1.0),
+        dict(bandwidth=3.0),  # corresponds to bandwidth_fisher in the kernel class
+        dict(rel=1e-3),
+    ),
+    "persistence_weighted_gaussian": (
+        PersistenceWeightedGaussianKernel(bandwidth=4.0, weight=lambda x: x[1] - x[0]),
+        dict(bandwidth=4.0, weight=lambda x: x[1] - x[0]),
+        dict(rel=1e-3),
+    ),
+    "persistence_scale_space": (
+        PersistenceScaleSpaceKernel(bandwidth=4.0),
+        dict(bandwidth=4.0),
+        dict(rel=1e-3),
+    ),
 }
+
+
 def test_kernel_from_distance():
     l1, l2 = _n_diags(9), _n_diags(11)
     for kernelName in ["sliced_wasserstein", "persistence_fisher"]:
         kernelClass, kernelParams, tolerance = kernel_dict[kernelName]
         f1 = kernelClass.fit_transform(l1)
         d1 = pairwise_persistence_diagram_distances(l1, metric=kernelName, **kernelParams)
-        assert np.exp(-d1/kernelClass.bandwidth == pytest.approx(f1, **tolerance))
+        assert np.exp(-d1 / kernelClass.bandwidth == pytest.approx(f1, **tolerance))
+
 
 def test_kernel_distance_consistency():
     l1, l2 = _n_diags(9), _n_diags(11)
@@ -103,12 +154,13 @@ def test_kernel_distance_consistency():
         f12 = np.array([[kernelClass(l1_, l2_) for l1_ in l1] for l2_ in l2])
         assert f12 == pytest.approx(f2, **tolerance)
 
+
 def test_sliced_wasserstein_distance_value():
-    diag1 = np.array([[0., 1.], [0., 2.]])
-    diag2 = np.array([[1., 0.]])
+    diag1 = np.array([[0.0, 1.0], [0.0, 2.0]])
+    diag2 = np.array([[1.0, 0.0]])
     SWD = SlicedWassersteinDistance(num_directions=2)
     distance = SWD(diag1, diag2)
-    assert distance == pytest.approx(2., abs=1e-8)
+    assert distance == pytest.approx(2.0, abs=1e-8)
 
 
 # Test sorted values as points order can be inverted, and sorted test is not documentation-friendly
@@ -156,6 +208,7 @@ def test_dummy_atol():
 
 from gudhi.representations.vector_methods import BettiCurve
 
+
 def test_infinity():
     a = np.array([[1.0, 8.0], [2.0, np.inf], [3.0, 4.0]])
     c = BettiCurve(20, [0.0, 10.0])(a)
@@ -163,8 +216,9 @@ def test_infinity():
     assert c[7] == 3
     assert c[9] == 2
 
+
 def test_preprocessing_empty_diagrams():
-    empty_diag = np.empty(shape = [0, 2])
+    empty_diag = np.empty(shape=[0, 2])
     assert not np.any(BirthPersistenceTransform()(empty_diag))
     assert not np.any(Clamping().fit_transform(empty_diag))
     assert not np.any(DiagramScaler()(empty_diag))
@@ -172,16 +226,18 @@ def test_preprocessing_empty_diagrams():
     assert not np.any(ProminentPoints()(empty_diag))
     assert not np.any(DiagramSelector()(empty_diag))
 
+
 def pow(n):
-  return lambda x: np.power(x[1]-x[0],n)
+    return lambda x: np.power(x[1] - x[0], n)
+
 
 def test_vectorization_empty_diagrams():
-    empty_diag = np.empty(shape = [0, 2])
-    random_resolution = random.randint(50,100)*10 # between 500 and 1000
+    empty_diag = np.empty(shape=[0, 2])
+    random_resolution = random.randint(50, 100) * 10  # between 500 and 1000
     print("resolution = ", random_resolution)
     lsc = Landscape(resolution=random_resolution)(empty_diag)
     assert not np.any(lsc)
-    assert lsc.shape[0]%random_resolution == 0
+    assert lsc.shape[0] % random_resolution == 0
     slt = Silhouette(resolution=random_resolution, weight=pow(2))(empty_diag)
     assert not np.any(slt)
     assert slt.shape[0] == random_resolution
@@ -194,7 +250,7 @@ def test_vectorization_empty_diagrams():
     tpv = TopologicalVector(threshold=random_resolution)(empty_diag)
     assert tpv.shape[0] == random_resolution
     assert not np.any(tpv)
-    prmg = PersistenceImage(resolution=[random_resolution,random_resolution])(empty_diag)
+    prmg = PersistenceImage(resolution=[random_resolution, random_resolution])(empty_diag)
     assert not np.any(prmg)
     assert prmg.shape[0] == random_resolution * random_resolution
     sce = Entropy(mode="scalar", resolution=random_resolution)(empty_diag)
@@ -204,33 +260,44 @@ def test_vectorization_empty_diagrams():
     assert not np.any(scv)
     assert scv.shape[0] == random_resolution
 
+
 def test_entropy_miscalculation():
-    diag_ex = np.array([[0.0,1.0], [0.0,1.0], [0.0,2.0]])
+    diag_ex = np.array([[0.0, 1.0], [0.0, 1.0], [0.0, 2.0]])
+
     def pe(pd):
-        l = pd[:,1] - pd[:,0]
-        l = l/sum(l)
+        l = pd[:, 1] - pd[:, 0]
+        l = l / sum(l)
         return -np.dot(l, np.log(l))
+
     sce = Entropy(mode="scalar")
     assert [[pe(diag_ex)]] == sce.fit_transform([diag_ex])
     sce = Entropy(mode="vector", resolution=4, normalized=False, keep_endpoints=True)
-    pef = [-1/4*np.log(1/4)-1/4*np.log(1/4)-1/2*np.log(1/2),
-           -1/4*np.log(1/4)-1/4*np.log(1/4)-1/2*np.log(1/2),
-           -1/2*np.log(1/2),
-           0.0]
+    pef = [
+        -1 / 4 * np.log(1 / 4) - 1 / 4 * np.log(1 / 4) - 1 / 2 * np.log(1 / 2),
+        -1 / 4 * np.log(1 / 4) - 1 / 4 * np.log(1 / 4) - 1 / 2 * np.log(1 / 2),
+        -1 / 2 * np.log(1 / 2),
+        0.0,
+    ]
     assert all(([pef] == sce.fit_transform([diag_ex]))[0])
     sce = Entropy(mode="vector", resolution=4, normalized=True)
     pefN = (sce.fit_transform([diag_ex]))[0]
     area = np.linalg.norm(pefN, ord=1)
-    assert area==pytest.approx(1)
+    assert area == pytest.approx(1)
+
 
 def test_kernel_empty_diagrams():
-    empty_diag = np.empty(shape = [0, 2])
-    assert SlicedWassersteinDistance(num_directions=100)(empty_diag, empty_diag) == 0.
-    assert SlicedWassersteinKernel(num_directions=100, bandwidth=1.)(empty_diag, empty_diag) == 1.
-    assert WassersteinDistance(mode="hera", delta=0.0001)(empty_diag, empty_diag) == 0.
-    assert WassersteinDistance(mode="pot")(empty_diag, empty_diag) == 0.
-    assert BottleneckDistance(epsilon=.001)(empty_diag, empty_diag) == 0.
-    assert BottleneckDistance()(empty_diag, empty_diag) == 0.
+    empty_diag = np.empty(shape=[0, 2])
+    assert SlicedWassersteinDistance(num_directions=100)(empty_diag, empty_diag) == 0.0
+    assert (
+        SlicedWassersteinKernel(num_directions=100, bandwidth=1.0)(empty_diag, empty_diag)
+        == 1.0
+    )
+    assert WassersteinDistance(mode="hera", delta=0.0001)(empty_diag, empty_diag) == 0.0
+    assert WassersteinDistance(mode="pot")(empty_diag, empty_diag) == 0.0
+    assert BottleneckDistance(epsilon=0.001)(empty_diag, empty_diag) == 0.0
+    assert BottleneckDistance()(empty_diag, empty_diag) == 0.0
+
+
 #    PersistenceWeightedGaussianKernel(bandwidth=1., kernel_approx=None, weight=arctan(1.,1.))(empty_diag, empty_diag)
 #    PersistenceWeightedGaussianKernel(kernel_approx=RBFSampler(gamma=1./2, n_components=100000).fit(np.ones([1,2])), weight=arctan(1.,1.))(empty_diag, empty_diag)
 #    PersistenceScaleSpaceKernel(bandwidth=1.)(empty_diag, empty_diag)
@@ -259,18 +326,18 @@ def test_silhouette_multiplication_invariance():
 
 
 def test_silhouette_numeric():
-    dgm = np.array([[2., 3.], [5., 6.]])
-    slt = Silhouette(resolution=9, weight=pow(1), sample_range=[2., 6.])
-    #slt.fit([dgm])
+    dgm = np.array([[2.0, 3.0], [5.0, 6.0]])
+    slt = Silhouette(resolution=9, weight=pow(1), sample_range=[2.0, 6.0])
+    # slt.fit([dgm])
     # x_values = array([2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6.])
 
-    expected_silhouette = np.array([0., 0.5, 0., 0., 0., 0., 0., 0.5, 0.])/np.sqrt(2)
+    expected_silhouette = np.array([0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0]) / np.sqrt(2)
     output_silhouette = slt(dgm)
     assert np.all(np.isclose(output_silhouette, expected_silhouette))
 
 
 def test_landscape_small_persistence_invariance():
-    dgm = np.array([[2., 6.], [2., 5.], [3., 7.]])
+    dgm = np.array([[2.0, 6.0], [2.0, 5.0], [3.0, 7.0]])
     small_persistence_pts = np.random.rand(10, 2)
     small_persistence_pts[:, 1] += small_persistence_pts[:, 0]
     small_persistence_pts += np.min(dgm)
@@ -283,44 +350,86 @@ def test_landscape_small_persistence_invariance():
 
 
 def test_landscape_numeric():
-    dgm = np.array([[2., 6.], [3., 5.]])
-    lds_ref = np.array([
-        0., 0.5, 1., 1.5, 2., 1.5, 1., 0.5, 0.,  # tent of [2, 6]
-        0., 0., 0., 0.5, 1., 0.5, 0., 0., 0.,
-        0., 0., 0., 0., 0., 0., 0., 0., 0.,
-        0., 0., 0., 0., 0., 0., 0., 0., 0.,
-    ])
+    dgm = np.array([[2.0, 6.0], [3.0, 5.0]])
+    lds_ref = np.array(
+        [
+            0.0,
+            0.5,
+            1.0,
+            1.5,
+            2.0,
+            1.5,
+            1.0,
+            0.5,
+            0.0,  # tent of [2, 6]
+            0.0,
+            0.0,
+            0.0,
+            0.5,
+            1.0,
+            0.5,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+        ]
+    )
     lds_ref *= np.sqrt(2)
-    lds = Landscape(num_landscapes=4, resolution=9, sample_range=[2., 6.])
+    lds = Landscape(num_landscapes=4, resolution=9, sample_range=[2.0, 6.0])
     lds_dgm = lds(dgm)
     assert np.all(np.isclose(lds_dgm, lds_ref))
 
 
 def test_landscape_nan_range():
-    dgm = np.array([[2., 6.], [3., 5.]])
-    lds = Landscape(num_landscapes=2, resolution=9, sample_range=[np.nan, 6.])
+    dgm = np.array([[2.0, 6.0], [3.0, 5.0]])
+    lds = Landscape(num_landscapes=2, resolution=9, sample_range=[np.nan, 6.0])
     lds_dgm = lds.fit([dgm])
     assert lds.sample_range_fixed_[0] == 2 and lds.sample_range_fixed_[1] == 6
     assert lds.new_resolution_ == 10
 
+
 def test_endpoints():
-    diags = [ np.array([[2., 3.]]) ]
-    for vec in [ Landscape(), Silhouette(), BettiCurve(), Entropy(mode="vector") ]:
+    diags = [np.array([[2.0, 3.0]])]
+    for vec in [Landscape(), Silhouette(), BettiCurve(), Entropy(mode="vector")]:
         vec.fit(diags)
         assert vec.grid_[0] > 2 and vec.grid_[-1] < 3
-    for vec in [ Landscape(keep_endpoints=True), Silhouette(keep_endpoints=True), BettiCurve(keep_endpoints=True), Entropy(mode="vector", keep_endpoints=True)]:
+    for vec in [
+        Landscape(keep_endpoints=True),
+        Silhouette(keep_endpoints=True),
+        BettiCurve(keep_endpoints=True),
+        Entropy(mode="vector", keep_endpoints=True),
+    ]:
         vec.fit(diags)
         assert vec.grid_[0] == 2 and vec.grid_[-1] == 3
     vec = BettiCurve(resolution=None)
     vec.fit(diags)
-    assert np.equal(vec.grid_, [-np.inf, 2., 3.]).all()
+    assert np.equal(vec.grid_, [-np.inf, 2.0, 3.0]).all()
+
 
 def test_get_params():
-    for vec in [ Landscape(), Silhouette(), BettiCurve(), Entropy(mode="vector") ]:
+    for vec in [Landscape(), Silhouette(), BettiCurve(), Entropy(mode="vector")]:
         vec.get_params()
 
+
 def test_persistence_lengths():
-    diag = np.array([[3., 5.], [0, np.inf], [4., 4.], [2., 6.]])
+    diag = np.array([[3.0, 5.0], [0, np.inf], [4.0, 4.0], [2.0, 6.0]])
     for nl in range(1, 6):
         pl = PersistenceLengths(num_lengths=nl)(diag)
         # test the result is sorted
@@ -330,6 +439,6 @@ def test_persistence_lengths():
         for idx in range(len(pl)):
             if idx >= len(diag):
                 # test it is filled with zeros when going further the input
-                assert pl[idx] == 0.
+                assert pl[idx] == 0.0
     with pytest.raises(ValueError):
         pl = PersistenceLengths(num_lengths=0)(diag)

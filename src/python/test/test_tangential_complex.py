@@ -5,14 +5,17 @@
     Copyright (C) 2016 Inria
 
     Modification(s):
+      - 2025/04 Hannah Schreiber: Add tests to verify possibility of tensor input
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import TangentialComplex, SimplexTree
-
 __author__ = "Vincent Rouvreau"
+__maintainer__ = "Hannah Schreiber"
 __copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"
+
+
+from gudhi import TangentialComplex, SimplexTree
 
 
 def test_tangential():
@@ -54,3 +57,20 @@ def test_tangential():
     assert point_list[3] == tc.get_point(3)
     assert tc.get_point(4) == []
     assert tc.get_point(125) == []
+
+def test_tensors():
+    try:
+        import torch
+
+        point_list = (torch.rand((5, 2))).requires_grad_()
+        cplex = TangentialComplex(intrisic_dim=1, points=point_list)
+    except ImportError:
+        pass
+
+    try:
+        import tensorflow as tf
+
+        point_list = tf.random.uniform(shape=[5, 2])
+        cplex = TangentialComplex(intrisic_dim=1, points=point_list)
+    except ImportError:
+        pass

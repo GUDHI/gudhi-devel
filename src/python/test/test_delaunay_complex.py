@@ -6,14 +6,15 @@
 
     Modification(s):
       - 2024/07 Vincent Rouvreau: Separate Delaunay and Alpha tests in a different python file
+      - 2025/04 Hannah Schreiber: Add tests to verify possibility of tensor input
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import AlphaComplex, DelaunayComplex, DelaunayCechComplex
-import math
-import numpy as np
-import pytest
-import random
+__author__ = "Vincent Rouvreau"
+__maintainer__ = "Vincent Rouvreau, Hannah Schreiber"
+__copyright__ = "Copyright (C) 2024 Inria"
+__license__ = "GPL v3"
+
 
 try:
     # python3
@@ -21,6 +22,13 @@ try:
 except ImportError:
     # python2
     from itertools import izip_longest as zip_longest
+
+import math
+import numpy as np
+import pytest
+import random
+
+from gudhi import AlphaComplex, DelaunayComplex, DelaunayCechComplex
 
 
 def _empty_complex(simplicial_complex, precision):
@@ -216,23 +224,46 @@ def test_duplicated_2d_points_on_a_plane():
         for precision in ["fast", "safe", "exact"]:
             _duplicated_2d_points_on_a_plane(simplicial_complex, precision)
 
+
 def test_weighted_exceptions():
-    points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
+    points = [[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
     nb_wgts = len(points)
     while nb_wgts == len(points):
-      nb_wgts = random.randint(2, 2*len(points))
-    weights = nb_wgts * [1.]
+        nb_wgts = random.randint(2, 2 * len(points))
+    weights = nb_wgts * [1.0]
     print(f"nb points = {len(points)} vs nb weights = {len(weights)}")
     with pytest.raises(ValueError):
         # When number of points does not correspond to the number of weights
         dc = DelaunayComplex(points=points, weights=weights)
 
-    weights = len(points) * [1.]
+    weights = len(points) * [1.0]
     dc = DelaunayComplex(points=points, weights=weights)
     # No Weighted Delaunay-Cech available
     with pytest.raises(ValueError):
-        dc.create_simplex_tree(filtration='cech')
+        dc.create_simplex_tree(filtration="cech")
 
     # Weighted Alpha complex cannot output square root values
     with pytest.raises(ValueError):
-        dc.create_simplex_tree(filtration='alpha', output_squared_values=False)
+        dc.create_simplex_tree(filtration="alpha", output_squared_values=False)
+
+
+def test_tensors():
+    try:
+        import torch
+
+        points = (torch.rand((5, 2))).requires_grad_()
+        weights = (torch.rand((5))).requires_grad_()
+        alpha = DelaunayComplex(points=points, weights=weights)
+        alpha = DelaunayCechComplex(points=points)
+    except ImportError:
+        pass
+
+    try:
+        import tensorflow as tf
+
+        points = tf.random.uniform(shape=[5, 2])
+        weights = tf.random.uniform(shape=[5])
+        alpha = DelaunayComplex(points=points, weights=weights)
+        alpha = DelaunayCechComplex(points=points)
+    except ImportError:
+        pass
