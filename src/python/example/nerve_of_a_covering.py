@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import gudhi
-import argparse
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -14,8 +11,14 @@ import argparse
 """
 
 __author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2018 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"
+
+
+import argparse
+import gudhi
+
 
 parser = argparse.ArgumentParser(
     description="Nerve of a covering creation " "from points read in a OFF file.",

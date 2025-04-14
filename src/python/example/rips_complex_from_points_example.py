@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import gudhi
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -13,8 +11,13 @@ import gudhi
 """
 
 __author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+
+import gudhi
+
 
 print("#####################################################################")
 print("RipsComplex creation from points")

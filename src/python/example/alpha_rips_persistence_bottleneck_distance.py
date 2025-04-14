@@ -1,14 +1,7 @@
 #!/usr/bin/env python
 
-import gudhi as gd
-import argparse
-import math
-import numpy as np
-
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
-    which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
-    license details.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
 
     Copyright (C) 2016 Inria
@@ -18,8 +11,16 @@ import numpy as np
 """
 
 __author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"
+
+
+import argparse
+import math
+import numpy as np
+import gudhi as gd
+
 
 parser = argparse.ArgumentParser(
     description="AlphaComplex and RipsComplex "
@@ -42,12 +43,9 @@ print("RipsComplex creation from points read in a OFF file")
 message = "RipsComplex with max_edge_length=" + repr(args.threshold)
 print(message)
 
-rips_complex = gd.RipsComplex(
-    points=point_cloud, max_edge_length=args.threshold
-)
+rips_complex = gd.RipsComplex(points=point_cloud, max_edge_length=args.threshold)
 
-rips_stree = rips_complex.create_simplex_tree(
-    max_dimension=args.max_dimension)
+rips_stree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
 
 message = "Number of simplices=" + repr(rips_stree.num_simplices())
 print(message)
@@ -77,14 +75,9 @@ for dim in range(args.max_dimension):
     alpha_intervals = np.sqrt(alpha_stree.persistence_intervals_in_dimension(dim))
 
     rips_intervals = rips_stree.persistence_intervals_in_dimension(dim)
-    bottleneck_distance = gd.bottleneck_distance(
-        rips_intervals, alpha_intervals
-    )
+    bottleneck_distance = gd.bottleneck_distance(rips_intervals, alpha_intervals)
     message = (
-        "In dimension "
-        + repr(dim)
-        + ", bottleneck distance = "
-        + repr(bottleneck_distance)
+        "In dimension " + repr(dim) + ", bottleneck distance = " + repr(bottleneck_distance)
     )
     print(message)
     max_b_distance = max(bottleneck_distance, max_b_distance)

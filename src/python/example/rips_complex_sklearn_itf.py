@@ -1,3 +1,21 @@
+#!/usr/bin/env python
+
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+    Author(s):       ???
+
+    Copyright (C) 20?? Inria
+
+    Modification(s):
+      - YYYY/MM Author: Description of the modification
+"""
+
+__author__ = "???"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 20?? Inria"
+__license__ = "MIT"
+
+
 # Standard data science imports
 import numpy as np
 from scipy.stats import bootstrap
@@ -7,6 +25,7 @@ import matplotlib.pyplot as plt
 # Import TDA pipeline requirements
 from gudhi.sklearn.rips_persistence import RipsPersistence
 from gudhi.representations import DiagramSelector, Landscape
+
 # To fetch the dataset
 from gudhi.datasets import remote
 
@@ -14,7 +33,8 @@ no_plot = False
 
 # Mainly for tests purpose - removed from documentation
 import argparse
-parser = argparse.ArgumentParser(description='Plot average landscapes')
+
+parser = argparse.ArgumentParser(description="Plot average landscapes")
 parser.add_argument("--no-plot", default=False, action="store_true")
 args = parser.parse_args()
 no_plot = args.no_plot
@@ -23,6 +43,7 @@ no_plot = args.no_plot
 nb_times = 80
 nb_points = 200
 
+
 def subsample(array):
     sub = []
     # construct a list of nb_times x nb_points
@@ -30,17 +51,27 @@ def subsample(array):
         sub.append(array[np.random.choice(array.shape[0], nb_points, replace=False)])
     return sub
 
+
 # Constant for plot_average_landscape
 landscape_resolution = 600
 # Nothing interesting after 0.4, you can set this filter to 1 (number of landscapes) if you want to check
 filter = int(0.4 * landscape_resolution)
 
+
 def plot_average_landscape(landscapes, color, label):
-    landscapes = landscapes[:,:filter]
+    landscapes = landscapes[:, :filter]
     rng = np.random.default_rng()
-    res = bootstrap((np.transpose(landscapes),), np.std, method='basic', axis=-1, confidence_level=0.95, random_state=rng)
+    res = bootstrap(
+        (np.transpose(landscapes),),
+        np.std,
+        method="basic",
+        axis=-1,
+        confidence_level=0.95,
+        random_state=rng,
+    )
     ci_l, ci_u = res.confidence_interval
-    plt.fill_between(np.arange(0,filter,1), ci_l, ci_u, alpha=.3, color=color, label=label)
+    plt.fill_between(np.arange(0, filter, 1), ci_l, ci_u, alpha=0.3, color=color, label=label)
+
 
 # Fetch datasets and subsample them
 walking = subsample(remote.fetch_daily_activities(subset="walking"))
@@ -52,7 +83,7 @@ pipe = Pipeline(
     [
         ("rips_pers", RipsPersistence(homology_dimensions=1, n_jobs=-2)),
         ("finite_diags", DiagramSelector(use=True, point_type="finite")),
-        ("landscape", Landscape(num_landscapes=1,resolution=landscape_resolution)),
+        ("landscape", Landscape(num_landscapes=1, resolution=landscape_resolution)),
     ]
 )
 
@@ -60,12 +91,12 @@ pipe = Pipeline(
 pipe.fit(walking + stepper + cross + jumping)
 
 # Compute Rips, persistence, landscapes and plot average landscapes
-plot_average_landscape(pipe.transform(walking), 'black', 'walking')
-plot_average_landscape(pipe.transform(stepper), 'green', 'stepper')
-plot_average_landscape(pipe.transform(cross), 'red', 'cross tr.')
-plot_average_landscape(pipe.transform(jumping), 'blue', 'jumping')
+plot_average_landscape(pipe.transform(walking), "black", "walking")
+plot_average_landscape(pipe.transform(stepper), "green", "stepper")
+plot_average_landscape(pipe.transform(cross), "red", "cross tr.")
+plot_average_landscape(pipe.transform(jumping), "blue", "jumping")
 
-plt.title('Average landscapes')
+plt.title("Average landscapes")
 plt.legend()
 if no_plot == False:
     plt.show()

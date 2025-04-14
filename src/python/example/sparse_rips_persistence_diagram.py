@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import matplotlib.pyplot as plot
-import gudhi
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -13,9 +10,15 @@ import gudhi
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Marc Glisse"
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2018 Inria"
 __license__ = "MIT"
+
+
+import matplotlib.pyplot as plot
+import gudhi
+
 
 print("#####################################################################")
 print("Sparse RipsComplex creation from points")

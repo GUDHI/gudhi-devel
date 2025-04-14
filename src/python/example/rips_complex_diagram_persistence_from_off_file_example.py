@@ -1,14 +1,7 @@
 #!/usr/bin/env python
 
-import argparse
-import errno
-import os
-import gudhi
-
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
-    which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
-    license details.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
 
     Copyright (C) 2016 Inria
@@ -18,8 +11,16 @@ import gudhi
 """
 
 __author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+
+import argparse
+import errno
+import os
+import gudhi
+
 
 parser = argparse.ArgumentParser(
     description="RipsComplex creation from " "points read in a OFF file.",
@@ -48,17 +49,14 @@ with open(args.file) as f:
         print("##############################################################")
         print("RipsComplex creation from points read in a OFF file")
 
-        message = "RipsComplex with max_edge_length=" + \
-            repr(args.max_edge_length)
+        message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
         print(message)
 
         point_cloud = gudhi.read_points_from_off_file(off_file=args.file)
         rips_complex = gudhi.RipsComplex(
             points=point_cloud, max_edge_length=args.max_edge_length
         )
-        simplex_tree = rips_complex.create_simplex_tree(
-            max_dimension=args.max_dimension
-        )
+        simplex_tree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
 
         message = "Number of simplices=" + repr(simplex_tree.num_simplices())
         print(message)
@@ -70,10 +68,10 @@ with open(args.file) as f:
 
         if args.no_diagram == False:
             import matplotlib.pyplot as plot
+
             gudhi.plot_persistence_diagram(diag, band=args.band)
             plot.show()
     else:
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
-                                args.file)
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), args.file)
 
     f.close()

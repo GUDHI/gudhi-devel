@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 
-import argparse
-import errno
-import os
-import gudhi
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
     which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
@@ -18,8 +13,16 @@ import gudhi
 """
 
 __author__ = "Vincent Rouvreau"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"
+
+
+import argparse
+import errno
+import os
+import gudhi
+
 
 parser = argparse.ArgumentParser(
     description="TangentialComplex creation from points read in a OFF file.",
@@ -47,8 +50,7 @@ with open(args.file) as f:
         print("##############################################################")
         print("TangentialComplex creation from points read in a OFF file")
 
-        tc = gudhi.TangentialComplex(intrisic_dim=args.intrisic_dim,
-            off_file=args.file)
+        tc = gudhi.TangentialComplex(intrisic_dim=args.intrisic_dim, off_file=args.file)
         tc.compute_tangential_complex()
         st = tc.create_simplex_tree()
 
@@ -62,10 +64,10 @@ with open(args.file) as f:
 
         if args.no_diagram == False:
             import matplotlib.pyplot as plot
+
             gudhi.plot_persistence_diagram(diag, band=args.band)
             plot.show()
     else:
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
-                                args.file)
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), args.file)
 
     f.close()
