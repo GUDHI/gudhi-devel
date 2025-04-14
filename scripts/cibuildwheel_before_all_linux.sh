@@ -9,7 +9,7 @@ if command -v yum 2>&1 >/dev/null
 then
   echo "yum found"
   yum -y update
-  yum -y install curl openssl-devel eigen3-devel
+  yum -y install curl openssl-devel
   # yum install cmake would be 2.8.12
   scripts/install_cmake_from_curl_download.sh
   # eigen3-devel (header only) 3.3.7-1.el7 would be ok here - not available on manylinux2014_i686 nor on aarch
