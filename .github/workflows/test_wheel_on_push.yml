@@ -53,7 +53,7 @@ jobs:
           CIBW_SKIP: "*win32 *i686"
           # Do not install torch, tensorflow, eagerpy, pykeops, hnswlib
           CIBW_TEST_REQUIRES: pytest scipy matplotlib scikit-learn POT
-          CIBW_TEST_COMMAND: "pytest -vv {project}/src/pythontest -k 'not test_wasserstein_distance and not test_wasserstein_with_tensors and not test_diff and not test_perslay and not test_knn and not test_dtm'"
+          CIBW_TEST_COMMAND: "pytest -vv {project}/src/python/test -k 'not test_wasserstein_distance and not test_wasserstein_with_tensors and not test_diff and not test_perslay and not test_knn and not test_dtm'"
           # Linux specific
           CIBW_BEFORE_ALL_LINUX: bash {project}/scripts/cibuildwheel_before_all_linux.sh
           # OSx specific

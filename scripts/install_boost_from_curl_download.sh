@@ -7,6 +7,6 @@ curl -LO "https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz"
 tar xf boost_1_87_0.tar.gz
 cd boost_1_87_0
 ./bootstrap.sh
-./b2 --with-core install
+cp -r boost /usr/local/include/
 cd ..
 rm -rf boost_1_87_0
