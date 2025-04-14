@@ -8,6 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <hera/bottleneck.h>
+
 #include <pybind11_diagram_utils.h>
 
 #ifdef _MSC_VER
@@ -15,8 +17,6 @@
 // ssize_t is a non-standard type (well, posix)
 using py::ssize_t;
 #endif
-
-#include <hera/bottleneck.h>
 
 // Indices are added internally in bottleneck_distance, they are not needed in the input.
 static auto make_point(double x, double y, py::ssize_t) { return std::pair(x, y); };
@@ -35,11 +35,14 @@ double bottleneck_distance(Dgm d1, Dgm d2, double delta)
     return hera::bottleneckDistApprox(diag1, diag2, delta);
 }
 
-PYBIND11_MODULE(bottleneck, m) {
-      m.def("bottleneck_distance", &bottleneck_distance,
-          py::arg("X"), py::arg("Y"),
-          py::arg("delta") = .01,
-          R"pbdoc(
+PYBIND11_MODULE(bottleneck, m)
+{
+  m.def("bottleneck_distance",
+        &bottleneck_distance,
+        py::arg("X"),
+        py::arg("Y"),
+        py::arg("delta") = .01,
+        R"pbdoc(
         Compute the Bottleneck distance between two diagrams.
         Points at infinity are supported.
 
