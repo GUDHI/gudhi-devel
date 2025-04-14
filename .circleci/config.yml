@@ -100,12 +100,11 @@ jobs:
             cd version
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
             cd python
-            python setup.py build_ext --inplace
+            make
             ctest --output-on-failure
             make sphinx
             cp -R sphinx /tmp/sphinx
-            python setup.py install
-            python setup.py clean --all
+            python -m pip install .
             python -B -m pytest test/*.py --cov-report html --cov=gudhi
             cp -R htmlcov /tmp/htmlcov
       - store_artifacts:
@@ -242,7 +241,7 @@ jobs:
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON ..
             cd src/python
-            python setup.py build_ext --inplace
+            make
             ctest --output-on-failure
 
   ### With all third parties, except CGAL
@@ -349,7 +348,7 @@ jobs:
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON ..
             cd src/python
-            python setup.py build_ext --inplace
+            make
             ctest --output-on-failure
 
 workflows:

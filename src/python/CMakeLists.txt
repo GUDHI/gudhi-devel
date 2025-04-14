@@ -404,14 +404,6 @@ file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi
 # Some files for pip package
 configure_file("pyproject.toml" "${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml" COPYONLY)
 
-add_custom_command(
-    OUTPUT gudhi.so
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/setup.py" "build_ext" "--inplace")
-
-add_custom_target(python ALL DEPENDS gudhi.so
-                  COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
-
 # Detect the installed nanobind package and import it into CMake
 execute_process(
   COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
@@ -442,12 +434,13 @@ else()
   if (GUDHI_PYTHON_PATH STREQUAL "src/python")
     set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developer version. Images and biblio will miss")
   endif()
-  # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
+  # sphinx target requires python modules to be built, because conf.py reads gudhi version from it
+  # "DEPENDS _cubical_complex_ext" is sufficient enough to build all nonobind modules when make sphinx
   add_custom_target(sphinx
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
       COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
       ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
-      DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+      DEPENDS _cubical_complex_ext
       COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
   add_test(NAME sphinx_py_test
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
