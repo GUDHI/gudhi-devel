@@ -384,7 +384,7 @@ file(READ "doc/pypi_introduction.inc" GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR)
 string(REPLACE "\n" "\\n' \\\n        '" GUDHI_LONG_DESCRIPTION ${GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR})
 
 # Generate setup.py file to bind Gudhi - This file must be named setup.py by convention
-configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
+# configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
 
 # Generate gudhi/__init__.py
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
@@ -426,19 +426,19 @@ file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi
 
 
 # Some files for pip package
-configure_file("pyproject.toml" "${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml" COPYONLY)
+# configure_file("pyproject.toml" "${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml" COPYONLY)
 
 # # Symbolic links to cython sources to be built. "MAKE_DIRECTORY gudhi" must be done before
 # add_gudhi_symbolic_links("gudhi/*.pxd")
 # add_gudhi_symbolic_links("gudhi/*.pyx")
 
-add_custom_command(
-    OUTPUT gudhi.so
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/setup.py" "build_ext" "--inplace")
-
-add_custom_target(python ALL DEPENDS gudhi.so
-                  COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
+# add_custom_command(
+#     OUTPUT gudhi.so
+#     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+#     COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/setup.py" "build_ext" "--inplace")
+#
+# add_custom_target(python ALL DEPENDS gudhi.so
+#                   COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
 
 # Detect the installed nanobind package and import it into CMake
 execute_process(
@@ -754,3 +754,5 @@ endif()
 
 # Set missing or not modules
 set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")
+
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gudhi" DESTINATION ".")
