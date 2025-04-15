@@ -38,7 +38,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-nerve_complex = gudhi.CoverComplex()
+nerve_complex = CoverComplex()
 nerve_complex.set_verbose(args.verbose)
 
 if nerve_complex.read_point_cloud(args.off_file):
