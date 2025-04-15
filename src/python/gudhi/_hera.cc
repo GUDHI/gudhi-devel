@@ -11,8 +11,16 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <cstdint>  // missing in hera/wasserstein.h
+
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
+
+#ifdef _MSC_VER
+// https://github.com/grey-narn/hera/issues/3
+// ssize_t is a non-standard type (well, posix)
+using nanobind::ssize_t;
+#endif
 
 #include <hera/bottleneck.h>
 #include <hera/wasserstein.h>
@@ -21,12 +29,6 @@
 #include <python_interfaces/diagram_utils.h>
 
 namespace nb = nanobind;
-
-#ifdef _MSC_VER
-// https://github.com/grey-narn/hera/issues/3
-// ssize_t is a non-standard type (well, posix)
-using nb::ssize_t;
-#endif
 
 // Indices are added internally in bottleneck_distance, they are not needed in the input.
 static auto _make_point(double x, double y, std::size_t) { return std::pair(x, y); };

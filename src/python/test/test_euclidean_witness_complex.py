@@ -18,6 +18,12 @@ __license__ = "GPL v3"
 from gudhi import EuclideanWitnessComplex, EuclideanStrongWitnessComplex
 
 
+def test_empty_euclidean_witness_complex():
+    euclidean_witness = EuclideanWitnessComplex()
+    simplex_tree = euclidean_witness.create_simplex_tree(max_alpha_square=4.1)
+    assert simplex_tree.num_simplices() == 0
+
+
 def test_witness_complex():
     point_cloud = [
         [1.0, 1.0],
@@ -47,6 +53,12 @@ def test_witness_complex():
         ([1, 2], 0.0),
         ([0, 1, 2], 0.0),
     ]
+
+
+def test_empty_euclidean_strong_witness_complex():
+    euclidean_strong_witness = EuclideanStrongWitnessComplex()
+    simplex_tree = euclidean_strong_witness.create_simplex_tree(max_alpha_square=4.1)
+    assert simplex_tree.num_simplices() == 0
 
 
 def test_strong_witness_complex():

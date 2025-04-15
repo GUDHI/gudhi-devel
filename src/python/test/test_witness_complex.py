@@ -23,6 +23,10 @@ def test_empty_witness_complex():
     simplex_tree = witness.create_simplex_tree(max_alpha_square=4.1, limit_dimension=2)
     assert simplex_tree.num_simplices() == 0
 
+    witness = StrongWitnessComplex()
+    simplex_tree = witness.create_simplex_tree(max_alpha_square=4.1, limit_dimension=2)
+    assert simplex_tree.num_simplices() == 0
+
 
 def test_witness_complex():
     nearest_landmark_table = [

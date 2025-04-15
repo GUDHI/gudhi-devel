@@ -25,7 +25,7 @@ class EuclideanWitnessComplex(t.Euclidean_witness_complex_interface):
     landmarks in Euclidean space.
     """
 
-    def __init__(self, landmarks, witnesses):
+    def __init__(self, landmarks=None, witnesses=None):
         """WitnessComplex constructor.
 
         :param landmarks: A list of landmarks (in the point cloud).
@@ -34,7 +34,10 @@ class EuclideanWitnessComplex(t.Euclidean_witness_complex_interface):
         :param witnesses: The point cloud.
         :type witnesses (Sequence[Sequence[float]]): list of list of double
         """
-        super().__init__(landmarks, witnesses)
+        if landmarks is None or witnesses is None:
+            super().__init__()
+        else:
+            super().__init__(landmarks, witnesses)
 
     def create_simplex_tree(self, max_alpha_square, limit_dimension=-1):
         """

@@ -63,8 +63,6 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
   typedef bool (*blocker_func_t)(Simplex simplex, void* user_data);
 
  public:
-  void initialize_filtration() const { Base::initialize_filtration(); }
-
   Extended_filtration_data efd;
 
   bool find_simplex(const Simplex& simplex) { return (Base::find(simplex) != Base::null_simplex()); }
@@ -206,6 +204,10 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
       return nanobind::cast<bool>(blocker_func(simplex));
     });
   }
+
+  // nanobind has problems finding the right overload of this method in the simplex tree because
+  // of the templated arguments. Therefore this indirection.
+  void initialize_filtration() const { Base::initialize_filtration(); }
 
   auto get_simplex_python_iterator()
   {

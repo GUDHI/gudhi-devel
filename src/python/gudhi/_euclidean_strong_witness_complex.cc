@@ -37,6 +37,12 @@ class Euclidean_strong_witness_complex_interface
   using Simplex_key = typename Simplex_tree<>::Simplex_key;
 
  public:
+  Euclidean_strong_witness_complex_interface()
+  {
+    landmarks_.emplace_back();  // KDTree seg faults if landmarks is completely empty, simplex tree will still be empty
+    witness_complex_ = new Euclidean_strong_witness_complex<Dynamic_kernel>(landmarks_, Sequence2D());
+  }
+
   Euclidean_strong_witness_complex_interface(const Sequence2D& landmarks, const Sequence2D& witnesses)
   {
     landmarks_.reserve(landmarks.size());
@@ -94,6 +100,7 @@ NB_MODULE(_euclidean_strong_witness_complex_ext, m)
   m.attr("__license__") = "GPL v3";
 
   nb::class_<gwci>(m, "Euclidean_strong_witness_complex_interface")
+      .def(nb::init<>(), nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<const Sequence2D&, const Sequence2D&>(), nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<const Tensor2D&, const Tensor2D&>(), nb::call_guard<nb::gil_scoped_release>())
       .def("create_simplex_tree",

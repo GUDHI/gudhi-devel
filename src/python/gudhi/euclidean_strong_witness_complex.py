@@ -35,7 +35,9 @@ class EuclideanStrongWitnessComplex(t.Euclidean_strong_witness_complex_interface
         :type witnesses: list of list of double
         """
 
-        if landmarks is not None and witnesses is not None:
+        if landmarks is None or witnesses is None:
+            super().__init__()
+        else:
             super().__init__(landmarks, witnesses)
 
     def create_simplex_tree(

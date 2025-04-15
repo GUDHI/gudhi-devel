@@ -38,6 +38,11 @@ class Strong_witness_complex_interface
   using Nearest_landmark_table = std::vector<Nearest_landmark_range>;
 
  public:
+  Strong_witness_complex_interface()
+  {
+    witness_complex_ = new Strong_witness_complex<Nearest_landmark_table>();
+  }
+
   Strong_witness_complex_interface(const Nearest_landmark_sequence& nlt)
   {
     witness_complex_ = new Strong_witness_complex<Nearest_landmark_table>(nlt);
@@ -80,6 +85,7 @@ NB_MODULE(_strong_witness_complex_ext, m)
   m.attr("__license__") = "MIT";
 
   nb::class_<gwci>(m, "Strong_witness_complex_interface")
+      .def(nb::init<>(), nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<const Nearest_landmark_sequence&>(), nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<const Nearest_landmark_tensor&>(), nb::call_guard<nb::gil_scoped_release>())
       .def("create_simplex_tree",

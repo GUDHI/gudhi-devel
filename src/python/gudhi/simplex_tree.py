@@ -10,7 +10,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
-__maintainer__ = "Alexis Gobé, Hannah Schreiber"
+__maintainer__ = "Vincent Rouvreau, Alexis Gobé, Hannah Schreiber"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 

@@ -24,7 +24,7 @@ using List_dgm = nanobind::list;
 
 // build_point(double birth, double death, size_t index) -> Point
 template <class BuildPoint>
-inline auto array_to_range_of_pairs(const Tensor_dgm& dgm, BuildPoint build_point)
+inline auto array_to_range_of_pairs(const Tensor_dgm& dgm, BuildPoint&& build_point)
 {
   auto cnt = boost::counting_range<std::size_t>(0, dgm.shape(0));
   // Get m[i,0] and m[i,1] as a pair
@@ -37,14 +37,10 @@ inline auto array_to_range_of_pairs(const Tensor_dgm& dgm, BuildPoint build_poin
   // Be careful that the returned range cannot contain references to dead temporaries.
 }
 
-// build_point(double birth, double death, size_t index) -> Point
-template <class BuildPoint>
-inline auto array_to_range_of_pairs(const Sequence_dgm& dgm, BuildPoint build_point)
+template <class Array, class BuildPoint>
+inline auto _array_to_range_of_pairs(const Array& dgm, BuildPoint&& build_point)
 {
-  std::size_t size = 0;
-  for (auto it = dgm.begin(); it != dgm.end(); ++it) {
-    ++size;
-  }
+  auto size = nanobind::len(dgm);
   std::vector<decltype(build_point(0, 0, 0))> cnt(size);
   std::size_t i = 0;
   for (auto it = dgm.begin(); it != dgm.end(); ++it) {
@@ -65,20 +61,14 @@ inline auto array_to_range_of_pairs(const Sequence_dgm& dgm, BuildPoint build_po
 
 // build_point(double birth, double death, size_t index) -> Point
 template <class BuildPoint>
-inline auto array_to_range_of_pairs(const List_dgm& dgm, BuildPoint build_point)
+inline auto array_to_range_of_pairs(const Sequence_dgm& dgm, BuildPoint build_point)
 {
-  std::vector<decltype(build_point(0, 0, 0))> cnt(dgm.size());
-  for (std::size_t i = 0; i < dgm.size(); ++i) {
-    const auto& p = dgm[i];
-    auto itP = p.begin();
-    if (itP == p.end()) throw std::runtime_error("Diagram must be an array of size n x 2");
-    double birth = nanobind::cast<double>(*itP);
-    ++itP;
-    if (itP == p.end()) throw std::runtime_error("Diagram must be an array of size n x 2");
-    double death = nanobind::cast<double>(*itP);
-    ++itP;
-    if (itP != p.end()) throw std::runtime_error("Diagram must be an array of size n x 2");
-    cnt[i] = build_point(birth, death, i);
-  }
-  return cnt;
+  return _array_to_range_of_pairs(dgm, std::move(build_point));
+}
+
+// build_point(double birth, double death, size_t index) -> Point
+template <class BuildPoint>
+inline auto array_to_range_of_pairs(const List_dgm& dgm, BuildPoint&& build_point)
+{
+  return _array_to_range_of_pairs(dgm, std::move(build_point));
 }

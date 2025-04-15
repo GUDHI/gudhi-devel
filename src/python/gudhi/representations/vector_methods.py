@@ -32,6 +32,7 @@ except ImportError:
 
 from .preprocessing import DiagramScaler, BirthPersistenceTransform, _maybe_fit_transform
 
+
 #############################################
 # Finite Vectorization methods ##############
 #############################################
