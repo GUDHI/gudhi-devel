@@ -29,6 +29,8 @@ jobs:
           python -m pip uninstall -y pykeops
           brew update || true
           brew install ninja graphviz doxygen boost@1.85 eigen gmp mpfr tbb cgal || true
+          export LDFLAGS="-L/usr/local/opt/boost@1.85/lib"
+          export CPPFLAGS="-I/usr/local/opt/boost@1.85/include"
         displayName: "Install build dependencies"
       - bash: |
           mkdir build
