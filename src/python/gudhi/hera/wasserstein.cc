@@ -8,6 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <pybind11_diagram_utils.h>
+
 #ifdef _MSC_VER
 // https://github.com/grey-narn/hera/issues/3
 // ssize_t is a non-standard type (well, posix)
@@ -18,7 +20,6 @@ using py::ssize_t;
 #include <hera/wasserstein.h>
 
 #include <gudhi/Debug_utils.h>
-#include <pybind11_diagram_utils.h>
 
 // Unlike bottleneck, for wasserstein, we need to add the index ourselves (if we want the matching)
 static auto make_hera_point(double x, double y, py::ssize_t i) { return hera::DiagramPoint<double>(x, y, i); };
