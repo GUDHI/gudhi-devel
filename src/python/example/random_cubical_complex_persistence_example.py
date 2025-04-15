@@ -35,7 +35,7 @@ dimension_multiplication = reduce(operator.mul, args.dimension, 1)
 if dimension_multiplication > 1:
     print("#####################################################################")
     print("CubicalComplex creation")
-    cubical_complex = gudhi.CubicalComplex(
+    cubical_complex = CubicalComplex(
         dimensions=args.dimension,
         top_dimensional_cells=numpy.random.rand(dimension_multiplication),
     )
