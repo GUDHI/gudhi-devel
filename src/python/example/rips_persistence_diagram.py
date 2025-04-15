@@ -10,9 +10,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
@@ -28,7 +25,7 @@ simplex_tree = rips.create_simplex_tree(max_dimension=1)
 
 
 diag = simplex_tree.persistence(homology_coeff_field=2, min_persistence=0)
-print("diag=", diag)
+print(f"diag={diag}")
 
 gudhi.plot_persistence_diagram(diag)
 plot.show()

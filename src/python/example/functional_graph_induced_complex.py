@@ -10,14 +10,11 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2018 Inria"
-__license__ = "GPL v3"
+__license__ = "GPL v3"  # Because of CoverComplex
 
 
 import argparse
-import gudhi
+from gudhi import CoverComplex
 
 
 parser = argparse.ArgumentParser(

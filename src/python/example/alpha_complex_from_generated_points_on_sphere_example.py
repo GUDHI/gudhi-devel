@@ -10,9 +10,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Hind Montassif"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2021 Inria"
+# Because of AlphaComplex - datasets.generators.points.sphere is LGPL v3
 __license__ = "GPL v3"
 
 

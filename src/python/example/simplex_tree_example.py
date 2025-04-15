@@ -10,19 +10,16 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
-import gudhi
+from gudhi import SimplexTree
 
 
 print("#####################################################################")
 print("SimplexTree creation from insertion")
 
-st = gudhi.SimplexTree()
+st = SimplexTree()
 
 if st.insert([0, 1]):
     print("Inserted !!")

@@ -10,9 +10,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
@@ -20,8 +17,7 @@ import numpy
 from functools import reduce
 import argparse
 import operator
-import gudhi
-
+from gudhi import CubicalComplex
 
 parser = argparse.ArgumentParser(
     description="Random cubical complex.",

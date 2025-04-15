@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
-    which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
-    license details.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
 
     Copyright (C) 2016 Inria
@@ -11,17 +9,13 @@
     Modification(s):
       - YYYY/MM Author: Description of the modification
 """
-
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "GPL v3"
+__license__ = "GPL v3"  # Because of TangentialComplex
 
 
 import argparse
 import errno
 import os
-import gudhi
+import gudhi as gd
 
 
 parser = argparse.ArgumentParser(
@@ -50,22 +44,20 @@ with open(args.file) as f:
         print("##############################################################")
         print("TangentialComplex creation from points read in a OFF file")
 
-        tc = gudhi.TangentialComplex(intrisic_dim=args.intrisic_dim, off_file=args.file)
+        tc = gd.TangentialComplex(intrisic_dim=args.intrisic_dim, off_file=args.file)
         tc.compute_tangential_complex()
         st = tc.create_simplex_tree()
 
-        message = "Number of simplices=" + repr(st.num_simplices())
-        print(message)
+        print(f"Number of simplices={st.num_simplices()}")
 
         diag = st.persistence(persistence_dim_max=True)
 
-        print("betti_numbers()=")
-        print(st.betti_numbers())
+        print(f"betti_numbers()={st.betti_numbers()}")
 
         if args.no_diagram == False:
             import matplotlib.pyplot as plot
 
-            gudhi.plot_persistence_diagram(diag, band=args.band)
+            gd.plot_persistence_diagram(diag, band=args.band)
             plot.show()
     else:
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), args.file)
