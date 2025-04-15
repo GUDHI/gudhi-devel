@@ -9,11 +9,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = "Hannah Schreiber"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
-
 
 from gudhi import WitnessComplex, StrongWitnessComplex, SimplexTree
 

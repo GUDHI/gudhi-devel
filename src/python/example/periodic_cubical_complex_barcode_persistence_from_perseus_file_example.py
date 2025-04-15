@@ -10,16 +10,13 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
 import argparse
 import errno
 import os
-import gudhi
+import gudhi as gd
 
 
 def is_file_perseus(file):
@@ -62,7 +59,7 @@ args = parser.parse_args()
 if is_file_perseus(args.file):
     print("##################################################################")
     print("PeriodicCubicalComplex creation")
-    periodic_cubical_complex = gudhi.PeriodicCubicalComplex(perseus_file=args.file)
+    periodic_cubical_complex = gd.PeriodicCubicalComplex(perseus_file=args.file)
 
     print("persistence(homology_coeff_field=3, min_persistence=0)=")
     diag = periodic_cubical_complex.persistence(homology_coeff_field=3, min_persistence=0)
@@ -73,7 +70,7 @@ if is_file_perseus(args.file):
     if args.no_barcode == False:
         import matplotlib.pyplot as plot
 
-        gudhi.plot_persistence_barcode(diag)
+        gd.plot_persistence_barcode(diag)
         plot.show()
 else:
     raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), args.file)

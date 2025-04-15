@@ -8,11 +8,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Theo Lacombe"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2019 Inria"
-__license__ = "MIT"
-
 
 import numpy as np
 

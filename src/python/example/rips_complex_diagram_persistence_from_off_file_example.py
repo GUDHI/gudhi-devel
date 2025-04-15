@@ -10,16 +10,13 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
 import argparse
 import errno
 import os
-import gudhi
+import gudhi as gd
 
 
 parser = argparse.ArgumentParser(
@@ -52,24 +49,22 @@ with open(args.file) as f:
         message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
         print(message)
 
-        point_cloud = gudhi.read_points_from_off_file(off_file=args.file)
-        rips_complex = gudhi.RipsComplex(
+        point_cloud = gd.read_points_from_off_file(off_file=args.file)
+        rips_complex = gd.RipsComplex(
             points=point_cloud, max_edge_length=args.max_edge_length
         )
         simplex_tree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
 
-        message = "Number of simplices=" + repr(simplex_tree.num_simplices())
-        print(message)
+        print(f"Number of simplices={simplex_tree.num_simplices()}")
 
         diag = simplex_tree.persistence()
 
-        print("betti_numbers()=")
-        print(simplex_tree.betti_numbers())
+        print(f"betti_numbers()={simplex_tree.betti_numbers()}")
 
         if args.no_diagram == False:
             import matplotlib.pyplot as plot
 
-            gudhi.plot_persistence_diagram(diag, band=args.band)
+            gd.plot_persistence_diagram(diag, band=args.band)
             plot.show()
     else:
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), args.file)

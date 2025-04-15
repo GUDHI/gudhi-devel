@@ -10,9 +10,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "???"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 20?? Inria"
 __license__ = "GPL v3"
 
 

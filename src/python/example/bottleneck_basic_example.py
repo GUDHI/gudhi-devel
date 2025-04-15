@@ -10,29 +10,23 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Francois Godi, Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2016 Inria"
+# Because of bottleneck_distance
+# Would be "BSD-3-Clause" if using "from gudhi.hera import bottleneck_distance"
 __license__ = "GPL v3"
 
 
-import gudhi
 import numpy as np
+from gudhi import bottleneck_distance
+
 
 diag1 = np.array([[2.7, 3.7], [9.6, 14.0], [34.2, 34.974], [3.0, float("Inf")]])
 
 diag2 = np.array([[2.8, 4.45], [9.5, 14.1], [3.2, float("Inf")]])
 
-message = "diag1=" + repr(diag1)
-print(message)
+print(f"diag1={diag1}")
 
-message = "diag2=" + repr(diag2)
-print(message)
+print(f"diag2={diag2}")
 
-message = "Bottleneck distance approximation=" + repr(
-    gudhi.bottleneck_distance(diag1, diag2, 0.1)
-)
-print(message)
+print(f"Bottleneck distance approximation={bottleneck_distance(diag1, diag2, 0.1)}")
 
-message = "Bottleneck distance exact value=" + repr(gudhi.bottleneck_distance(diag1, diag2))
-print(message)
+print(f"Bottleneck distance exact value={bottleneck_distance(diag1, diag2)}")

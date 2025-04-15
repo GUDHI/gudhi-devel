@@ -10,14 +10,11 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
 import matplotlib.pyplot as plot
-import gudhi
+from gudhi import plot_persistence_barcode, plot_persistence_diagram
 
 
 print("#####################################################################")
@@ -32,25 +29,25 @@ persistence = [
     (0, (0.0, 1.0)),
     (0, (0.0, 1.0)),
 ]
-gudhi.plot_persistence_barcode(persistence)
+plot_persistence_barcode(persistence)
 plot.show()
 
 print("#####################################################################")
 print("Show diagram persistence example")
 
-gudhi.plot_persistence_diagram(persistence)
+plot_persistence_diagram(persistence)
 plot.show()
 
 print("#####################################################################")
 print("Show diagram persistence example with a confidence band")
 
-gudhi.plot_persistence_diagram(persistence, band=0.2)
+plot_persistence_diagram(persistence, band=0.2)
 plot.show()
 
 print("#####################################################################")
 print("Show barcode and diagram persistence side by side example")
 fig, axes = plot.subplots(nrows=1, ncols=2)
-gudhi.plot_persistence_barcode(persistence, axes=axes[0])
-gudhi.plot_persistence_diagram(persistence, axes=axes[1])
+plot_persistence_barcode(persistence, axes=axes[0])
+plot_persistence_diagram(persistence, axes=axes[1])
 fig.suptitle("barcode versus diagram")
 plot.show()
