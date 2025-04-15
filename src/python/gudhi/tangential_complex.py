@@ -45,7 +45,7 @@ class TangentialComplex(t._Tangential_complex_interface):
             if os.path.isfile(off_file):
                 super().__init__(intrisic_dim, off_file, True)
             else:
-                print("file " + off_file + " not found.")
+                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), off_file)
         else:
             if points is None:
                 super().__init__(intrisic_dim)
