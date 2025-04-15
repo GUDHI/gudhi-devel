@@ -28,14 +28,12 @@ jobs:
           python -m pip install --user -r ext/gudhi-deploy/test-requirements.txt
           python -m pip uninstall -y pykeops
           brew update || true
-          brew install ninja graphviz doxygen boost@1.85 eigen gmp mpfr tbb cgal || true
+          brew install ninja graphviz doxygen boost eigen gmp mpfr tbb cgal || true
         displayName: "Install build dependencies"
       - bash: |
           mkdir build
           cd build
           which python
-          export LDFLAGS="-L/usr/local/opt/boost@1.85/lib"
-          export CPPFLAGS="-I/usr/local/opt/boost@1.85/include"
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) $(extraCmakeOptions) -GNinja $(gudhiCmakeOptions) ..
           ninja
           ninja doxygen
