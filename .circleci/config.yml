@@ -5,7 +5,7 @@ jobs:
   examples:
     docker:
       # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image
-      - image: gudhi/ci_for_gudhi:2024.12.01
+      - image: gudhi/ci_for_gudhi:2025.04.01
     steps:
       - checkout
       - run:
@@ -24,7 +24,7 @@ jobs:
 
   tests:
     docker:
-      - image: gudhi/ci_for_gudhi:2024.12.01
+      - image: gudhi/ci_for_gudhi:2025.04.01
     steps:
       - checkout
       - run:
@@ -43,7 +43,7 @@ jobs:
 
   debug_tests:
     docker:
-      - image: gudhi/ci_for_gudhi:2024.12.01
+      - image: gudhi/ci_for_gudhi:2025.04.01
     steps:
       - checkout
       - run:
@@ -62,7 +62,7 @@ jobs:
 
   utils:
     docker:
-      - image: gudhi/ci_for_gudhi:2024.12.01
+      - image: gudhi/ci_for_gudhi:2025.04.01
     steps:
       - checkout
       - run:
@@ -81,7 +81,7 @@ jobs:
 
   python:
     docker:
-      - image: gudhi/ci_for_gudhi:2024.12.01
+      - image: gudhi/ci_for_gudhi:2025.04.01
     resource_class: large # Delaunay complex requires about 5 Gb of RAM to compile
     steps:
       - checkout
@@ -116,7 +116,7 @@ jobs:
 
   doxygen:
     docker:
-      - image: gudhi/doxygen_for_gudhi:2024.12.01
+      - image: gudhi/doxygen_for_gudhi:2025.04.01
     steps:
       - checkout
       - run:
@@ -146,7 +146,7 @@ jobs:
 
   bibliography:
     docker:
-      - image: gudhi/doxygen_for_gudhi:2024.12.01
+      - image: gudhi/doxygen_for_gudhi:2025.04.01
     steps:
       - checkout
       - run:
@@ -169,7 +169,7 @@ jobs:
   examples_without_cgal_eigen:
     docker:
       # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image_without_cgal
-      - image: gudhi/ci_for_gudhi_wo_cgal:2024.12.01
+      - image: gudhi/ci_for_gudhi_wo_cgal:2025.04.01
     steps:
       - checkout
       - run:
@@ -188,7 +188,7 @@ jobs:
 
   tests_without_cgal_eigen:
     docker:
-      - image: gudhi/ci_for_gudhi_wo_cgal:2024.12.01
+      - image: gudhi/ci_for_gudhi_wo_cgal:2025.04.01
     steps:
       - checkout
       - run:
@@ -207,7 +207,7 @@ jobs:
 
   utils_without_cgal_eigen:
     docker:
-      - image: gudhi/ci_for_gudhi_wo_cgal:2024.12.01
+      - image: gudhi/ci_for_gudhi_wo_cgal:2025.04.01
     steps:
       - checkout
       - run:
@@ -226,7 +226,7 @@ jobs:
 
   python_without_cgal_eigen:
     docker:
-      - image: gudhi/ci_for_gudhi_wo_cgal:2024.12.01
+      - image: gudhi/ci_for_gudhi_wo_cgal:2025.04.01
     steps:
       - checkout
       - run:
@@ -248,7 +248,7 @@ jobs:
 
   examples_without_cgal:
     docker:
-      - image: gudhi/ci_for_gudhi_wo_cgal:2024.12.01
+      - image: gudhi/ci_for_gudhi_wo_cgal:2025.04.01
     steps:
       - checkout
       - run:
@@ -274,7 +274,7 @@ jobs:
 
   tests_without_cgal:
     docker:
-      - image: gudhi/ci_for_gudhi_wo_cgal:2024.12.01
+      - image: gudhi/ci_for_gudhi_wo_cgal:2025.04.01
     steps:
       - checkout
       - run:
@@ -300,7 +300,7 @@ jobs:
 
   utils_without_cgal:
     docker:
-      - image: gudhi/ci_for_gudhi_wo_cgal:2024.12.01
+      - image: gudhi/ci_for_gudhi_wo_cgal:2025.04.01
     steps:
       - checkout
       - run:
@@ -326,7 +326,7 @@ jobs:
 
   python_without_cgal:
     docker:
-      - image: gudhi/ci_for_gudhi_wo_cgal:2024.12.01
+      - image: gudhi/ci_for_gudhi_wo_cgal:2025.04.01
     steps:
       - checkout
       - run:
