@@ -9,11 +9,6 @@
 #   - 2022/09 Vincent Rouvreau: Factorize _capture_license_output to be usable by activities
 #                               Test fetch activities (except pandas file) and its license file
 
-__author__ = "Hind Montassif"
-__maintainer__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2021 Inria"
-__license__ = "MIT"
-
 
 import shutil
 import io

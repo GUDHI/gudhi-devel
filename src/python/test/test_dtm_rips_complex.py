@@ -8,11 +8,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Yuichi Ike"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2020 Inria, Copyright (C) 2020 FUjitsu Laboratories Ltd"
-__license__ = "MIT"
-
 
 from gudhi.dtm_rips_complex import DTMRipsComplex
 from gudhi import RipsComplex

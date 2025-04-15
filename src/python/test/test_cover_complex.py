@@ -8,11 +8,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2018 Inria"
-__license__ = "GPL v3"
-
 
 from gudhi import CoverComplex
 from gudhi.cover_complex import MapperComplex, GraphInducedComplex, NerveComplex

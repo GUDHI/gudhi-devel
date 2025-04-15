@@ -8,11 +8,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Yuichi Ike, Masatoshi Takenouchi"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2020 Inria"
-__license__ = "MIT"
-
 
 import numpy as np
 from math import sqrt

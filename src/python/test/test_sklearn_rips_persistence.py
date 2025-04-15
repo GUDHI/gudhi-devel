@@ -8,11 +8,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2023 Inria"
-__license__ = "GPL v3"
-
 
 from scipy.sparse import coo_matrix
 from scipy.spatial.distance import cdist
