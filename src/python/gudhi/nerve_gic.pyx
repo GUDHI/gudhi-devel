@@ -1,7 +1,7 @@
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
-# which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
-# license details.
+from __future__ import print_function
+
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
 #
 # Copyright (C) 2018 Inria
@@ -9,7 +9,12 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from __future__ import print_function
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2018 Inria"
+__license__ = "GPL v3"
+
+
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
@@ -22,9 +27,6 @@ from libc.stdint cimport intptr_t
 from gudhi.simplex_tree cimport *
 from gudhi.simplex_tree import SimplexTree
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2018 Inria"
-__license__ = "GPL v3"
 
 cdef extern from "Nerve_gic_interface.h" namespace "Gudhi":
     cdef cppclass Nerve_gic_interface "Gudhi::cover_complex::Nerve_gic_interface":

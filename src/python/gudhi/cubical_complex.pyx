@@ -1,7 +1,7 @@
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
-# which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
-# license details.
+from __future__ import print_function
+
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
 #
 # Copyright (C) 2016 Inria
@@ -9,7 +9,12 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from __future__ import print_function
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
+
+
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
@@ -21,9 +26,6 @@ import sys
 import numpy as np
 cimport numpy as np
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
 
 # Necessary because of PyArray_SimpleNewFromData
 np.import_array()

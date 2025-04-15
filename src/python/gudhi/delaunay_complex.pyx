@@ -1,8 +1,8 @@
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
-# which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
-# license details.
-# Author(s):       Vincent Rouvreau
+from __future__ import print_function
+
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+# Author(s):  Vincent Rouvreau
 #
 # Copyright (C) 2016 Inria
 #
@@ -12,7 +12,12 @@
 #                               classes)
 #   - YYYY/MM Author: Description of the modification
 
-from __future__ import print_function
+__author__ = "Vincent Rouvreau"
+__maintainer__ = "Vincent Rouvreau"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "GPL v3"
+
+
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
@@ -25,9 +30,6 @@ from collections.abc import Iterable
 from gudhi.simplex_tree cimport *
 from gudhi.simplex_tree import SimplexTree
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "GPL v3"
 
 cdef extern from "Delaunay_complex_interface.h" namespace "Gudhi":
     cdef cppclass Delaunay_filtration "Gudhi::delaunay_complex::Delaunay_filtration":
