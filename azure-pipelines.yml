@@ -28,7 +28,7 @@ jobs:
           python -m pip install --user -r ext/gudhi-deploy/test-requirements.txt
           python -m pip uninstall -y pykeops
           brew update || true
-          brew install ninja graphviz doxygen boost@1.87 eigen gmp mpfr tbb cgal || true
+          brew install ninja graphviz doxygen boost@1.85 eigen gmp mpfr tbb cgal || true
         displayName: "Install build dependencies"
       - bash: |
           mkdir build
