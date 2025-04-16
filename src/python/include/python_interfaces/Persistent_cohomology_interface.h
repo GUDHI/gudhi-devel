@@ -17,6 +17,8 @@
 #include <algorithm>  // for sort
 #include <unordered_map>
 
+#include <nanobind/nanobind.h>
+
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Simplex_tree.h>  // for Extended_simplex_type
 
@@ -95,21 +97,26 @@ class Persistent_cohomology_interface
     }
 
     std::vector<std::vector<int>> persistence_pairs;
-    for (auto pair : pairs) {
-      int h = static_cast<int>(stptr_->dimension(get<0>(pair)));
-      // Recursively get the top-dimensional cell / coface associated to the persistence generator
-      std::size_t face0 = stptr_->get_top_dimensional_coface_of_a_cell(get<0>(pair));
-      // Retrieve the index of the corresponding top-dimensional cell in the input data
-      int splx0 = order[face0];
+    {
+      // mostly just in case the coface methods or others end up using parallel processing one day.
+      nanobind::gil_scoped_release release;
 
-      int splx1 = -1;
-      if (get<1>(pair) != stptr_->null_simplex()) {
+      for (auto pair : pairs) {
+        int h = static_cast<int>(stptr_->dimension(get<0>(pair)));
         // Recursively get the top-dimensional cell / coface associated to the persistence generator
-        std::size_t face1 = stptr_->get_top_dimensional_coface_of_a_cell(get<1>(pair));
+        std::size_t face0 = stptr_->get_top_dimensional_coface_of_a_cell(get<0>(pair));
         // Retrieve the index of the corresponding top-dimensional cell in the input data
-        splx1 = order[face1];
+        int splx0 = order[face0];
+
+        int splx1 = -1;
+        if (get<1>(pair) != stptr_->null_simplex()) {
+          // Recursively get the top-dimensional cell / coface associated to the persistence generator
+          std::size_t face1 = stptr_->get_top_dimensional_coface_of_a_cell(get<1>(pair));
+          // Retrieve the index of the corresponding top-dimensional cell in the input data
+          splx1 = order[face1];
+        }
+        persistence_pairs.push_back({h, splx0, splx1});
       }
-      persistence_pairs.push_back({h, splx0, splx1});
     }
     return persistence_pairs;
   }
@@ -135,21 +142,26 @@ class Persistent_cohomology_interface
     }
 
     std::vector<std::vector<int>> persistence_pairs;
-    for (auto pair : pairs) {
-      int h = static_cast<int>(stptr_->dimension(get<0>(pair)));
-      // Recursively get the vertex associated to the persistence generator
-      std::size_t face0 = stptr_->get_vertex_of_a_cell(get<0>(pair));
-      // Retrieve the index of the corresponding vertex in the input data
-      int splx0 = order[face0];
+    {
+      // mostly just in case the vertex methods or others end up using parallel processing one day.
+      nanobind::gil_scoped_release release;
 
-      int splx1 = -1;
-      if (get<1>(pair) != stptr_->null_simplex()) {
+      for (auto pair : pairs) {
+        int h = static_cast<int>(stptr_->dimension(get<0>(pair)));
         // Recursively get the vertex associated to the persistence generator
-        std::size_t face1 = stptr_->get_vertex_of_a_cell(get<1>(pair));
+        std::size_t face0 = stptr_->get_vertex_of_a_cell(get<0>(pair));
         // Retrieve the index of the corresponding vertex in the input data
-        splx1 = order[face1];
+        int splx0 = order[face0];
+
+        int splx1 = -1;
+        if (get<1>(pair) != stptr_->null_simplex()) {
+          // Recursively get the vertex associated to the persistence generator
+          std::size_t face1 = stptr_->get_vertex_of_a_cell(get<1>(pair));
+          // Retrieve the index of the corresponding vertex in the input data
+          splx1 = order[face1];
+        }
+        persistence_pairs.push_back({h, splx0, splx1});
       }
-      persistence_pairs.push_back({h, splx0, splx1});
     }
     return persistence_pairs;
   }

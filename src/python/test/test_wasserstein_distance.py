@@ -9,11 +9,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Theo Lacombe, Marc Glisse"
-__maintainer__ = "Théo Lacombe"
-__copyright__ = "Copyright (C) 2019 Inria"
-__license__ = "MIT"
-
 
 import numpy as np
 import pytest

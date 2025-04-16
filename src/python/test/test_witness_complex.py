@@ -9,17 +9,16 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = "Hannah Schreiber"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
-
 
 from gudhi import WitnessComplex, StrongWitnessComplex, SimplexTree
 
 
 def test_empty_witness_complex():
     witness = WitnessComplex()
+    simplex_tree = witness.create_simplex_tree(max_alpha_square=4.1, limit_dimension=2)
+    assert simplex_tree.num_simplices() == 0
+
+    witness = StrongWitnessComplex()
     simplex_tree = witness.create_simplex_tree(max_alpha_square=4.1, limit_dimension=2)
     assert simplex_tree.num_simplices() == 0
 

@@ -8,11 +8,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2017 Inria"
-__license__ = "MIT"
-
 
 import numpy as np
 from pytest import raises

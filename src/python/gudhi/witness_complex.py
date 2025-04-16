@@ -33,7 +33,7 @@ class WitnessComplex(t.Witness_complex_interface):
             witness w, and d is the (squared) distance between l and w.
         :type nearest_landmark_table: list of list of pair of int and float
         """
-        if nearest_landmark_table == None:
+        if nearest_landmark_table is None:
             super().__init__()
         else:
             super().__init__(nearest_landmark_table)

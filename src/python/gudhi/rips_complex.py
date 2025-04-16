@@ -10,7 +10,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Vincent Rouvreau"
-__maintainer__ = "Thibaud Kloczko"
+__maintainer__ = "Thibaud Kloczko, Hannah Schreiber"
 __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
@@ -39,48 +39,40 @@ class RipsComplex(t.Rips_complex_interface):
     ):
         """RipsComplex constructor.
 
-        Args:
-            points (Sequence[Sequence(float)] or 2D tensor): A list of points in d-Dimension.
+        :param points: A list of points in d-Dimension.
+        :type points: List[List[float]]
+
         Or
-            distance_matrix (Sequence[Sequence(float) or 2D tensor]: A distance matrix (full square or lower triangular).
+
+        :param distance_matrix: A distance matrix (full square or lower triangular).
+        :type distance_matrix: List[List[float]]
 
         And in both cases
 
-            max_edge_length (float, optional): Maximal edge length. All edges of the graph strictly greater than `threshold` are not
-                                               inserted in the graph.
-            sparse (float, optional): If this is not None, it switches to building a sparse Rips and represents the approximation
-                                      parameter epsilon.
+        :param max_edge_length: Maximal edge length. All edges of the graph strictly greater than `threshold` are not
+            inserted in the graph.
+        :type max_edge_length: float
+        :param sparse: If this is not None, it switches to building a sparse Rips and represents the approximation
+            parameter epsilon.
+        :type sparse: float
         """
-        super().__init__()
         if sparse is not None:
             if len(distance_matrix) == 0:
-                if isinstance(points, Sequence):
-                    super().init_points_sparse(points, max_edge_length, sparse)
-                else:
-                    super().init_points_sparse_with_tensor(points, max_edge_length, sparse)
+                super().__init__(points, max_edge_length, sparse, True)
             else:
-                if isinstance(points, Sequence):
-                    super().init_matrix_sparse(distance_matrix, max_edge_length, sparse)
-                else:
-                    super().init_matrix_sparse_with_tensor(distance_matrix, max_edge_length, sparse)
+                super().__init__(distance_matrix, max_edge_length, sparse, False)
         else:
             if len(distance_matrix) == 0:
-                if isinstance(points, Sequence):
-                    super().init_points(points, max_edge_length)
-                else:
-                    super().init_points_with_tensor(points, max_edge_length)
+                super().__init__(points, max_edge_length, True)
             else:
-                if isinstance(points, Sequence):
-                    super().init_matrix(distance_matrix, max_edge_length)
-                else:
-                    super().init_matrix_with_tensor(distance_matrix, max_edge_length)
+                super().__init__(distance_matrix, max_edge_length, False)
 
     def create_simplex_tree(self, max_dimension: int = 1):
         """
-        Args:
-            max_dimension (int): graph expansion for Rips until this given maximal dimension.
-        Returns:
-            SimplexTree: A simplex tree encoding the Vietoris–Rips filtration.
+        :param max_dimension: graph expansion for Rips until this given maximal dimension.
+        :type max_dimension: int
+        :returns: A simplex tree encoding the Vietoris–Rips filtration.
+        :rtype: SimplexTree
         """
         stree = SimplexTree()
         super().create_simplex_tree(stree, max_dimension)

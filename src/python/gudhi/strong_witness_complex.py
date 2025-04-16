@@ -27,23 +27,26 @@ class StrongWitnessComplex(t.Strong_witness_complex_interface):
 
     def __init__(self, nearest_landmark_table=None):
         """StrongWitnessComplex constructor.
-        Args:
-            param nearest_landmark_table (Sequence[Sequence[Pair[float]]): A list of lists of nearest landmarks and their distances.
-                                                                          `nearest_landmark_table[w][k]==(l,d)` means that l is the k-th nearest landmark to
-                                                                          witness w, and d is the (squared) distance between l and w.
+
+        :param nearest_landmark_table: A list of lists of nearest landmarks and their distances.
+            `nearest_landmark_table[w][k]==(l,d)` means that l is the k-th nearest landmark to
+            witness w, and d is the (squared) distance between l and w.
+        :type nearest_landmark_table: list of list of pair of int and float
         """
-        if nearest_landmark_table is not None:
+        if nearest_landmark_table is None:
+            super().__init__()
+        else:
             super().__init__(nearest_landmark_table)
 
     def create_simplex_tree(
         self, max_alpha_square: float = float("inf"), limit_dimension=-1
     ) -> SimplexTree:
         """
-        Args:
-            max_alpha_square (float): The maximum relaxation parameter. Default is set to infinity.
-            limit_dimension (int):
-        Returns:
-            SimplexTree: A simplex tree created from the Delaunay Triangulation.
+        :param max_alpha_square: The maximum relaxation parameter.
+            Default is set to infinity.
+        :type max_alpha_square: float
+        :returns: A simplex tree created from the Delaunay Triangulation.
+        :rtype: SimplexTree
         """
         stree = SimplexTree()
 

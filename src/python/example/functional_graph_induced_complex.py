@@ -10,14 +10,11 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2018 Inria"
-__license__ = "GPL v3"
+__license__ = "GPL v3"  # Because of CoverComplex
 
 
 import argparse
-import gudhi
+from gudhi import CoverComplex
 
 
 parser = argparse.ArgumentParser(
@@ -41,7 +38,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-nerve_complex = gudhi.CoverComplex()
+nerve_complex = CoverComplex()
 nerve_complex.set_verbose(args.verbose)
 
 if nerve_complex.read_point_cloud(args.off_file):

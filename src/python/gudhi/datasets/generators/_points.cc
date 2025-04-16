@@ -80,7 +80,7 @@ NB_MODULE(_points_ext, m)
         nb::arg("ambient_dim"),
         nb::arg("radius") = 1.,
         nb::arg("sample") = "random",
-        R"pbdoc(
+        R"doc(
 Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
 
 :param n_samples: The number of points to be generated.
@@ -92,14 +92,14 @@ Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
 :param sample: The sample type. Default and only available value is `"random"`.
 :type sample: string
 :returns: the generated points on a sphere.
-          )pbdoc");
+          )doc");
 
   m.def("ctorus",
         &generate_points_on_torus,
         nb::arg("n_samples"),
         nb::arg("dim"),
         nb::arg("sample") = "random",
-        R"pbdoc(
+        R"doc(
 Generate random i.i.d. points on a d-torus in R^2d or as a grid
 
 :param n_samples: The number of points to be generated.
@@ -115,5 +115,5 @@ The shape of returned numpy array is:
 If sample is 'random': (n_samples, 2*dim).
 
 If sample is 'grid': (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
-)pbdoc");
+        )doc");
 }

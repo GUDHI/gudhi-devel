@@ -45,18 +45,18 @@ class TangentialComplex(t._Tangential_complex_interface):
             if os.path.isfile(off_file):
                 super().__init__(intrisic_dim, off_file, True)
             else:
-                print("file " + off_file + " not found.")
+                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), off_file)
         else:
             if points is None:
-                # Empty tangential construction
-                points = []
-            super().__init__(intrisic_dim, points)
+                super().__init__(intrisic_dim)
+            else:
+                super().__init__(intrisic_dim, points)
 
     def create_simplex_tree(self):
-        """
-        Exports the complex into a simplex tree.
-        Returns:
-            SimplexTree: A simplex tree created from the complex
+        """Exports the complex into a simplex tree.
+
+        :returns: A simplex tree created from the complex.
+        :rtype: SimplexTree
         """
         stree = SimplexTree()
         super().create_simplex_tree(stree)

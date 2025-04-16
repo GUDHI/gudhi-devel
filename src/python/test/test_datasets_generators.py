@@ -8,11 +8,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Hind Montassif"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2021 Inria"
-__license__ = "MIT"
-
 
 import pytest
 

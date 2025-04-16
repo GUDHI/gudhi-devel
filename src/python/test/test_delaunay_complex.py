@@ -10,11 +10,6 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = "Vincent Rouvreau, Hannah Schreiber"
-__copyright__ = "Copyright (C) 2024 Inria"
-__license__ = "GPL v3"
-
 
 try:
     # python3

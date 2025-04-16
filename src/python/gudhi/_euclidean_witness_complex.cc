@@ -37,6 +37,12 @@ class Euclidean_witness_complex_interface
   using Point_d = Dynamic_kernel::Point_d;
 
  public:
+  Euclidean_witness_complex_interface()
+  {
+    landmarks_.emplace_back();  // KDTree seg faults if landmarks is completely empty, simplex tree will still be empty
+    witness_complex_ = std::make_unique<Euclidean_witness_complex<Dynamic_kernel>>(landmarks_, Sequence2D());
+  }
+
   Euclidean_witness_complex_interface(const Sequence2D& landmarks, const Sequence2D& witnesses)
   {
     landmarks_.reserve(landmarks.size());
@@ -91,13 +97,21 @@ NB_MODULE(_euclidean_witness_complex_ext, m)
   m.attr("__license__") = "GPL v3";
 
   nb::class_<egwci>(m, "Euclidean_witness_complex_interface")
-      .def(nb::init<const Sequence2D&, const Sequence2D&>(), "Constructor")
-      .def(nb::init<const Tensor2D&, const Tensor2D&>(), "Constructor")
+      .def(nb::init<>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const Sequence2D&, const Sequence2D&>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const Tensor2D&, const Tensor2D&>(), nb::call_guard<nb::gil_scoped_release>())
       .def("create_simplex_tree",
            &egwci::create_simplex_tree,
            nb::arg("simplex_tree"),
            nb::arg("max_alpha_square"),
            nb::arg("limit_dimension") = std::numeric_limits<std::size_t>::max(),
-           "")
-      .def("get_point", &egwci::get_point, "");
+           nb::call_guard<nb::gil_scoped_release>())
+      .def("get_point", &egwci::get_point, R"doc(
+This function returns the point corresponding to a given vertex.
+
+:param vertex: The vertex.
+:type vertex: int.
+:returns:  The point.
+:rtype: list of float
+           )doc");
 }

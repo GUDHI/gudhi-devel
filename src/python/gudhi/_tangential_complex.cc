@@ -67,7 +67,7 @@ class Tangential_complex_interface
 // Tangential_complex_interface definition
 // /////////////////////////////////////////////////////////////////////////////
 
-Tangential_complex_interface::Tangential_complex_interface(int intrisic_dim, const Sequence2D& points)
+Tangential_complex_interface::Tangential_complex_interface(int intrisic_dim, const Sequence2D& points = Sequence2D())
 {
   Dynamic_kernel k;
   tangential_complex_ = new TC(points, intrisic_dim, k);
@@ -155,77 +155,88 @@ NB_MODULE(_tangential_complex_ext, m)
   m.attr("__license__") = "GPL v3";
 
   nb::class_<gtci>(m, "_Tangential_complex_interface")
-      .def(nb::init<int, const Sequence2D&>(), "")
-      .def(nb::init<int, const Tensor2D&>(), "")
-      .def(nb::init<int, const std::string&, bool>(), "")
+      .def(nb::init<int, const Sequence2D&>(),
+           nb::arg("intrisic_dim"),
+           nb::arg("points") = Sequence2D(),
+           nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<int, const Tensor2D&>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<int, const std::string&, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def("compute_tangential_complex",
            &gtci::compute_tangential_complex,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
-    This function computes the tangential complex.
+This function computes the tangential complex.
 
 Raises:
-ValueError: In debug mode, if the computed star dimension is too low.
+    ValueError: In debug mode, if the computed star dimension is too low.
             Try to set a bigger maximal edge length value with
             :meth:`set_max_squared_edge_length` if this happens.
-)doc")
+           )doc")
       .def("get_point",
            &gtci::get_point,
            R"doc(
-    This function returns the point corresponding to a given vertex.
-    Args:
-        arg (int): The vertex id.
-    Returns:
-        list of float: The coordinates of the vertex.
-)doc")
+This function returns the point corresponding to a given vertex.
+
+:param vertex: The vertex.
+:type vertex: int.
+:returns:  The point.
+:rtype: list of float
+           )doc")
       .def("num_vertices",
            &gtci::number_of_vertices,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
-    Returns:
-        int: The number of vertices.
-)doc")
+:returns:  The number of vertices.
+:rtype: unsigned
+           )doc")
       .def("num_simplices",
            &gtci::number_of_simplices,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
-    Returns:
-        int: Total number of simplices in stars (including duplicates that appear in several stars).
-)doc")
+:returns:  Total number of simplices in stars (including duplicates that appear in several stars).
+:rtype: unsigned
+           )doc")
       .def("num_inconsistent_simplices",
            &gtci::number_of_inconsistent_simplices,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
-    Returns:
-        int: The number of inconsistent simplices.
-)doc")
+:returns:  The number of inconsistent simplices.
+:rtype: unsigned
+           )doc")
       .def("num_inconsistent_stars",
            &gtci::number_of_inconsistent_stars,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
-    Returns:
-        int: The number of stars containing at least one inconsistent simplex.
-)doc")
-      .def("create_simplex_tree",
-           &gtci::create_simplex_tree,
-           R"doc(
-    Exports the complex into a simplex tree.
-    Returns:
-        SimplexTree: A simplex tree created from the complex.
-)doc")
+:returns:  The number of stars containing at least one inconsistent simplex.
+:rtype: unsigned
+           )doc")
+      .def("create_simplex_tree", &gtci::create_simplex_tree, nb::call_guard<nb::gil_scoped_release>())
       .def("fix_inconsistencies_using_perturbation",
            &gtci::fix_inconsistencies_using_perturbation,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
-    Attempts to fix inconsistencies by perturbing the point positions.
-    Args:
-        arg1 (double): Maximum length of the translations used by the perturbation.
-        arg2 (double): Time limit in seconds. If -1, no time limit is set.
-)doc")
+Attempts to fix inconsistencies by perturbing the point positions.
+
+:param max_perturb: Maximum length of the translations used by the
+    perturbation.
+:type max_perturb: double
+:param time_limit: Time limit in seconds. If -1, no time limit is set.
+:type time_limit: double
+           )doc")
       .def("set_max_squared_edge_length",
            &gtci::set_max_squared_edge_length,
+           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
-    Sets the maximal possible squared edge length for the edges in the triangulations.
-    Args:
-        arg1 (double): Maximal possible squared edge length.
-                      If the maximal edge length value is too low
-                      :meth:`compute_tangential_complex`
-                      will throw an exception in debug mode.
-)doc");
+Sets the maximal possible squared edge length for the edges in the
+triangulations.
+
+:param max_squared_edge_length: Maximal possible squared edge length.
+:type max_squared_edge_length: double
+
+If the maximal edge length value is too low
+:meth:`compute_tangential_complex`
+will throw an exception in debug mode.
+           )doc");
 }
 
 //

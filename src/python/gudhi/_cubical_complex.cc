@@ -36,6 +36,9 @@ class Cubical_complex_interface : public Bitmap_cubical_complex<Bitmap_cubical_c
 
   explicit Cubical_complex_interface(const std::string& perseus_style_file) : Base(perseus_style_file.c_str()) {}
 
+  // TODO: nanobind is probably making a copy here (to verify), as it is only used privately we could think
+  // at another strategy?
+  // But as the vector is probably very small (number of dimensions), it is perhaps not worth it.
   const std::vector<unsigned>& shape() { return this->sizes; };
 
   nanobind::ndarray<double, nanobind::numpy> get_numpy_array()
@@ -56,8 +59,14 @@ class Periodic_cubical_complex_interface
   explicit Periodic_cubical_complex_interface(const std::string& perseus_style_file) : Base(perseus_style_file.c_str())
   {}
 
+  // TODO: nanobind is probably making a copy here (to verify), as it is only used privately we could think
+  // at another strategy?
+  // But as the vector is probably very small (number of dimensions), it is perhaps not worth it.
   const std::vector<unsigned>& shape() { return this->sizes; };
 
+  // TODO: nanobind is probably making a copy here (to verify), as it is only used privately we could think
+  // at another strategy?
+  // But as the vector is probably very small (number of dimensions), it is perhaps not worth it.
   const std::vector<bool>& periodicities() { return this->directions_in_which_periodic_b_cond_are_to_be_imposed; }
 
   nanobind::ndarray<double, nanobind::numpy> get_numpy_array()
@@ -82,28 +91,32 @@ NB_MODULE(_cubical_complex_ext, m)
   m.attr("__license__") = "MIT";
 
   nb::class_<CC>(m, "_Bitmap_cubical_complex_interface")
-      .def(nb::init<const std::vector<unsigned int>&, const std::vector<double>&, bool>())
-      .def(nb::init<const std::string&>())
-      .def("num_simplices", &CC::num_simplices, R"pbdoc(
+      .def(nb::init<const std::vector<unsigned int>&, const std::vector<double>&, bool>(),
+           nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const std::string&>(), nb::call_guard<nb::gil_scoped_release>())
+      .def("num_simplices", &CC::num_simplices, nb::call_guard<nb::gil_scoped_release>(), R"doc(
 This function returns the number of all cubes in the complex.
 
 :returns:  int -- the number of all cubes in the complex.
-        )pbdoc")
-      .def("dimension", nb::overload_cast<>(&CC::dimension, nb::const_), R"pbdoc(
+           )doc")
+      .def("dimension",
+           nb::overload_cast<>(&CC::dimension, nb::const_),
+           nb::call_guard<nb::gil_scoped_release>(),
+           R"doc(
 This function returns the dimension of the complex.
 
 :returns:  int -- the complex dimension.
-        )pbdoc")
+           )doc")
       .def("shape", &CC::shape)
-      .def("get_numpy_array", &CC::get_numpy_array, nb::rv_policy::reference_internal)
-      .def_rw("data", &CC::data);
+      .def("get_numpy_array", &CC::get_numpy_array, nb::rv_policy::reference_internal);
 
   nb::class_<CPers>(m, "_Cubical_complex_persistence_interface")
-      .def(nb::init<CC&, bool>())
+      .def(nb::init<CC&, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def("compute_persistence",
            &CPers::compute_persistence,
            nb::arg("homology_coeff_field"),
-           nb::arg("double min_persistence"))
+           nb::arg("double min_persistence"),
+           nb::call_guard<nb::gil_scoped_release>())
       .def("get_persistence", &CPers::get_persistence)
       .def("cofaces_of_cubical_persistence_pairs", &CPers::cofaces_of_cubical_persistence_pairs)
       .def("vertices_of_cubical_persistence_pairs", &CPers::vertices_of_cubical_persistence_pairs)
@@ -112,29 +125,33 @@ This function returns the dimension of the complex.
       .def("intervals_in_dimension", &CPers::intervals_in_dimension, nb::arg("dimension"));
 
   nb::class_<PCC>(m, "_Periodic_cubical_complex_interface")
-      .def(nb::init<const std::vector<unsigned int>&, const std::vector<double>&, const std::vector<bool>&, bool>())
-      .def(nb::init<const std::string&>())
-      .def("num_simplices", &PCC::num_simplices, R"pbdoc(
+      .def(nb::init<const std::vector<unsigned int>&, const std::vector<double>&, const std::vector<bool>&, bool>(),
+           nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const std::string&>(), nb::call_guard<nb::gil_scoped_release>())
+      .def("num_simplices", &PCC::num_simplices, nb::call_guard<nb::gil_scoped_release>(), R"doc(
 This function returns the number of all cubes in the complex.
 
 :returns:  int -- the number of all cubes in the complex.
-        )pbdoc")
-      .def("dimension", nb::overload_cast<>(&PCC::dimension, nb::const_), R"pbdoc(
+           )doc")
+      .def("dimension",
+           nb::overload_cast<>(&PCC::dimension, nb::const_),
+           nb::call_guard<nb::gil_scoped_release>(),
+           R"doc(
 This function returns the dimension of the complex.
 
 :returns:  int -- the complex dimension.
-        )pbdoc")
+           )doc")
       .def("shape", &PCC::shape)
       .def("periodicities", &PCC::periodicities)
-      .def("get_numpy_array", &PCC::get_numpy_array, nb::rv_policy::reference_internal)
-      .def_rw("data", &PCC::data);
+      .def("get_numpy_array", &PCC::get_numpy_array, nb::rv_policy::reference_internal);
 
   nb::class_<PCPers>(m, "_Periodic_cubical_complex_persistence_interface")
-      .def(nb::init<PCC&, bool>())
+      .def(nb::init<PCC&, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def("compute_persistence",
            &PCPers::compute_persistence,
            nb::arg("homology_coeff_field"),
-           nb::arg("double min_persistence"))
+           nb::arg("double min_persistence"),
+           nb::call_guard<nb::gil_scoped_release>())
       .def("get_persistence", &PCPers::get_persistence)
       .def("cofaces_of_cubical_persistence_pairs", &PCPers::cofaces_of_cubical_persistence_pairs)
       .def("vertices_of_cubical_persistence_pairs", &PCPers::vertices_of_cubical_persistence_pairs)

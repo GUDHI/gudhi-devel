@@ -8,11 +8,6 @@ if (NOT NUMPY_FOUND)
   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")
   return()
 endif()
-#if(NOT CYTHON_FOUND)
-#  message("++ Python module will not be compiled because cython was not found")
-#  set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")
-#  return()
-#endif()
 if(NOT NANOBIND_FOUND)
   message("++ Python module will not be compiled because Nanobind was not found")
   set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python" CACHE INTERNAL "GUDHI_MISSING_MODULES")
@@ -82,7 +77,6 @@ endfunction( disable_python_documentation )
 
 add_gudhi_debug_info("Python version ${Python_VERSION}")
 add_gudhi_debug_info("Nanobind version ${NANOBIND_VERSION}")
-# add_gudhi_debug_info("Cython version ${CYTHON_VERSION}")
 add_gudhi_debug_info("Numpy version ${NUMPY_VERSION}")
 
 # Python modules for __all__ list in __init__.py
@@ -223,23 +217,6 @@ if (TARGET Eigen3::Eigen)
   set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
   set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${EIGEN3_INCLUDE_DIRS}', ")
 endif (TARGET Eigen3::Eigen)
-
-# set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'off_utils', ")
-# set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'simplex_tree', ")
-# set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'rips_complex', ")
-# set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'cubical_complex', ")
-# set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'periodic_cubical_complex', ")
-# set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'reader_utils', ")
-# set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'witness_complex', ")
-# set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'strong_witness_complex', ")
-# set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'nerve_gic', ")
-#set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'subsampling', ")
-# if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
-  # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'tangential_complex', ")
-  # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_witness_complex', ")
-  # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'euclidean_strong_witness_complex', ")
-  # set(GUDHI_CYTHON_MODULES "${GUDHI_CYTHON_MODULES}'delaunay_complex', ")
-# endif ()
 
 # from windows vcpkg eigen 3.4.0#2 : build fails with
 # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
@@ -424,7 +401,6 @@ file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES
 file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 
-
 # Some files for pip package
 # configure_file("pyproject.toml" "${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml" COPYONLY)
 
@@ -470,12 +446,13 @@ else()
   if (GUDHI_PYTHON_PATH STREQUAL "src/python")
     set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developer version. Images and biblio will miss")
   endif()
-  # sphinx target requires gudhi.so, because conf.py reads gudhi version from it
+  # sphinx target requires python modules to be built, because conf.py reads gudhi version from it
+  # "DEPENDS _cubical_complex_ext" is sufficient enough to build all nonobind modules when make sphinx
   add_custom_target(sphinx
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
       COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
       ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
-      DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gudhi.so"
+      DEPENDS _cubical_complex_ext
       COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
   add_test(NAME sphinx_py_test
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}

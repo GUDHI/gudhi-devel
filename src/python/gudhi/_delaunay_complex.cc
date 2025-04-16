@@ -331,18 +331,18 @@ NB_MODULE(_delaunay_complex_ext, m)
 {
   m.attr("__license__") = "GPL v3";
 
-  nb::enum_<gdc::Delaunay_filtration>(m, "Filtration", "")
+  nb::enum_<gdc::Delaunay_filtration>(m, "Filtration")
       .value("NONE", gdc::Delaunay_filtration::NONE, "Default Delaunay Complex")
       .value("CECH", gdc::Delaunay_filtration::CECH, "Delaunay Cech Complex")
       .value("ALPHA", gdc::Delaunay_filtration::ALPHA, "Alpha Complex");
 
   nb::class_<gdci>(m, "Delaunay_complex_interface")
       .def(nb::init<const Sequence2D&, const Sequence1D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
-      .def(nb::init<const Tensor2D&, const Tensor1D&, bool, bool>())
+      .def(nb::init<const Tensor2D&, const Tensor1D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<const Sequence2D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
-      .def(nb::init<const Tensor2D&, bool, bool>())
-      .def("create_simplex_tree", &gdci::create_simplex_tree, "")
-      .def("get_point", &gdci::get_point, R"pbdoc(
+      .def(nb::init<const Tensor2D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
+      .def("create_simplex_tree", &gdci::create_simplex_tree, nb::call_guard<nb::gil_scoped_release>())
+      .def("get_point", &gdci::get_point, R"doc(
 This function returns the point corresponding to a given vertex from the :class:`~gudhi.SimplexTree` (the
 same as the k-th input point, where `k=vertex`)
 
@@ -353,13 +353,13 @@ Returns:
 
 :raises IndexError: In case the point has no associated vertex in the diagram (because of weights or because it
     is a duplicate).
-        )pbdoc")
-      .def_static("set_float_relative_precision", &gdci::set_float_relative_precision, R"pbdoc(
+        )doc")
+      .def_static("get_float_relative_precision", &gdci::get_float_relative_precision, R"doc(
 Returns:
     The float relative precision of filtration values computation when constructing with
     :code:`precision = 'safe'` (the default).
-        )pbdoc")
-      .def_static("get_float_relative_precision", &gdci::get_float_relative_precision, R"pbdoc(
+        )doc")
+      .def_static("set_float_relative_precision", &gdci::set_float_relative_precision, R"doc(
 Args:
     precision: When constructing :func:`~gudhi.delaunay_cech_complex`, :func:`~gudhi.alpha_complex`, or
         :func:`~gudhi.weighted_alpha_complex` with :code:`precision = 'safe'` (the default), one can
@@ -368,7 +368,7 @@ Args:
         `CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double <https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html>`_
 
 :raises ValueError: If precision is not in (0, 1).
-        )pbdoc");
+        )doc");
 }
 
 //

@@ -10,13 +10,10 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
-from gudhi import StrongWitnessComplex, SimplexTree
+from gudhi import StrongWitnessComplex
 
 
 print("#####################################################################")
@@ -32,8 +29,7 @@ nearest_landmark_table = [
 witness_complex = StrongWitnessComplex(nearest_landmark_table=nearest_landmark_table)
 simplex_tree = witness_complex.create_simplex_tree(max_alpha_square=0.41)
 
-message = "Number of simplices: " + repr(simplex_tree.num_simplices())
-print(message)
+print(f"Number of simplices: {simplex_tree.num_simplices()}")
 
 diag = simplex_tree.persistence(min_persistence=-0.1, homology_coeff_field=11)
 print(diag)

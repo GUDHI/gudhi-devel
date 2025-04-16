@@ -142,12 +142,6 @@ class AlphaComplex(DelaunayComplex):
         filtration = "alpha"
         if default_filtration_value:
             filtration = None
-            warnings.warn(
-                """Since Gudhi 3.10, creating an AlphaComplex with default_filtration_value=True is deprecated.
-                          Please consider constructing a DelaunayComplex instead.
-                          """,
-                DeprecationWarning,
-            )
         return super().create_simplex_tree(max_alpha_square, filtration, output_squared_values)
 
 

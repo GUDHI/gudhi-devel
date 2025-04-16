@@ -12,7 +12,7 @@
 #ifndef MEB_FILTRATION_H_
 #define MEB_FILTRATION_H_
 
-#include <CGAL/Lazy_exact_nt.h>
+#include <CGAL/Lazy_exact_nt.h> // for CGAL::exact
 #include <CGAL/NT_converter.h>
 
 #include <vector>
