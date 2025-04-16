@@ -1,15 +1,15 @@
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-# Author(s):       ???
+# Author(s):       Mathieu Carrière
 #
-# Copyright (C) 20?? Inria
+# Copyright (C) 2021 Inria
 #
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "???"
+__author__ = "Mathieu Carrière"
 __maintainer__ = ""
-__copyright__ = "Copyright (C) 20?? Inria"
+__copyright__ = "Copyright (C) 2021 Inria"
 __license__ = "MIT"
 
 
