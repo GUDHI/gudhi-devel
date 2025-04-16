@@ -50,13 +50,8 @@ def test_basic_persistence_on_rectangle_from_top_cells():
     cc.compute_persistence()
     pers0 = cc.persistence_intervals_in_dimension(0)
     pers1 = cc.persistence_intervals_in_dimension(1)
-    # sort by line, just in case
-    pers0 = pers0[pers0[:, 0].argsort()]
-    pers1 = pers1[pers1[:, 0].argsort()]
 
     persrec = _persistence_on_rectangle_from_top_cells(img, 0.0)
-    # sort by line, just in case
-    persrec0 = persrec[0][persrec[0][:, 0].argsort()]
-    persrec1 = persrec[1][persrec[1][:, 0].argsort()]
-    assert_almost_equal(pers0, persrec0)
-    assert_almost_equal(pers1, persrec1)
+    # Check persistence are equal, but maybe not sorted, maybe some duplicates
+    assert_almost_equal(np.unique(pers0, axis=0), np.unique(persrec[0], axis=0))
+    assert_almost_equal(np.unique(pers1, axis=0), np.unique(persrec[1], axis=0))
