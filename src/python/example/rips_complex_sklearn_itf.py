@@ -1,18 +1,3 @@
-#!/usr/bin/env python
-
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-    Author(s):       ???
-
-    Copyright (C) 20?? Inria
-
-    Modification(s):
-      - YYYY/MM Author: Description of the modification
-"""
-
-__license__ = "MIT"
-
-
 # Standard data science imports
 import numpy as np
 from scipy.stats import bootstrap
