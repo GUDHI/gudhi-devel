@@ -34,7 +34,6 @@ jobs:
           if ! brew install ninja graphviz doxygen boost eigen gmp mpfr tbb cgal; then
             echo "Warning: brew install returned a non-zero exit code."
           fi
-          brew install ninja graphviz doxygen boost eigen gmp mpfr tbb cgal || true
         displayName: "Install build dependencies"
       - bash: |
           mkdir build
