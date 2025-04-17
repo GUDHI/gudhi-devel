@@ -4,7 +4,9 @@ set -eu
 
 brew update
 brew install boost eigen gmp mpfr cgal
-python -m pip install --user numpy~=1.21.4
+# For python>=3.9, numpy>=2.0 for package build and ABI compatibility with numpy 1.X and 2.X
+# cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
+python -m pip install --user numpy>=2.0
 python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
 python -m pip install --user twine delocate
 ./scripts/build_osx_universal_gmpfr.sh

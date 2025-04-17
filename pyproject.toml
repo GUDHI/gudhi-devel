@@ -19,11 +19,6 @@ logging.level = "INFO"
 #sdist.exclude = ["*.cc", "CMakeLists.txt"]
 wheel.packages = []
 
-[tool.pytest.ini_options]
-# Minimal test setup that requires optional pytest scipy matplotlib scikit-learn POT
-# but without tests that requires torch, tensorflow, eagerpy, pykeops, hnswlib
-addopts = "-vv -k 'not test_wasserstein_distance and not test_wasserstein_with_tensors and not test_diff and not test_perslay and not test_knn and not test_dtm and not test_human_off'"
-
 [project]
 name = "gudhi"
 version = "3.12.0a1"
