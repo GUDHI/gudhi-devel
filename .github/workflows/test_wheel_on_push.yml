@@ -50,6 +50,8 @@ jobs:
           CIBW_TEST_REQUIRES: pytest scipy matplotlib scikit-learn POT
           CIBW_TEST_COMMAND: "pytest {project}/src/python/test"
           # Linux specific
+          CIBW_MANYLINUX_X86_64_IMAGE: gudhi/pip_for_gudhi:2025.04.01
+          CIBW_MANYLINUX_AARCH64_IMAGE: gudhi/pip_for_gudhi:2025.04.01
           # CIBW_BEFORE_ALL_LINUX: bash {project}/scripts/cibuildwheel_before_all_linux.sh
           # OSx specific
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: delocate-listdeps --all {wheel} && delocate-wheel --require-archs universal2 -w {dest_dir} -v {wheel}
