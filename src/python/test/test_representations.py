@@ -1,10 +1,15 @@
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-    Author(s):       ???
+    Author(s):       Marc Glisse, Martin Royer, Manuel Soriano Trigueros, Wojtek Reise, Vincent Rouvreau
 
-    Copyright (C) 20?? Inria
+    Copyright (C) 2019 Inria, Copyright (C) 2022 Institute of Science and Technology Austria
 
     Modification(s):
+      - 2024/08 Vincent Rouvreau: Test PersistenceLengths
+      - 2022/11 Wojtek Reise: Test Kernels
+      - 2022/06 Wojtek Reise: Test Landscape and Silhouette
+      - 2022/02 Manuel Soriano Trigueros: Test Entropy
+      - 2020/07 Martin Royer: Test Atol
       - YYYY/MM Author: Description of the modification
 """
 
