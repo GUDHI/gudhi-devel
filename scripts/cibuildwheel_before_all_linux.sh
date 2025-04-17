@@ -9,29 +9,19 @@ if command -v yum 2>&1 >/dev/null
 then
   echo "yum found"
   yum -y update
-  yum -y install curl openssl-devel
-  # yum install cmake would be 2.8.12
-  scripts/install_cmake_from_curl_download.sh
-  # eigen3-devel (header only) 3.3.7-1.el7 would be ok here - not available on manylinux2014_i686 nor on aarch
-  # yum install boost would be 1.53.0
-elif command -v apk 2>&1 >/dev/null
-then
-  echo "apk found"
-  apk update
-  # cmake 3.31.6 is ok here
-  apk add curl cmake
-  # eigen (header only) 3.4.0-r10 would be ok here
-  # boost-dev (header only for python package) 1.84 would be here, but let's go with 1.87
+  # manylinux_2_28 means:
+  #  - cmake is 3.26.5
+  #  - eigen3-devel (header only) 3.3.4-6.el8
+  #  - gmp-devel 6.1.2-11.el8
+  #  - mpfr-devel 3.1.6-1.el8
+  yum -y install curl cmake eigen3-devel gmp-devel mpfr-devel
+  # yum install boost-devel would be 1.66.0
 else
   echo $(uname -a)
-  echo "No apk nor yum available"
+  echo "No yum available"
   exit 1
 fi
 
 scripts/install_boost_from_curl_download.sh
-scripts/install_eigen_from_curl_download.sh
-# Need to compile gmp and mpfr for wheel repair purpose
-scripts/install_gmp_from_curl_download.sh
-scripts/install_mpfr_from_curl_download.sh
 # Install CGAL manually to detect eigen boost gmp and mpfr
 scripts/install_cgal_from_curl_download.sh
