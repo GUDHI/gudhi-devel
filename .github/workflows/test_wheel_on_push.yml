@@ -33,11 +33,6 @@ jobs:
             python: 310
             platform_id: macosx_x86_64
 
-          # MacOS arm64
-          - os: macos-14
-            python: 310
-            platform_id: macosx_arm64
-
     steps:
       - uses: actions/checkout@v4
 
@@ -53,12 +48,12 @@ jobs:
           CIBW_SKIP: "*win32 *i686"
           # Do not install torch, tensorflow, eagerpy, pykeops, hnswlib
           CIBW_TEST_REQUIRES: pytest scipy matplotlib scikit-learn POT
-          CIBW_TEST_COMMAND: 'pytest -k "not test_wasserstein_distance and not test_wasserstein_with_tensors and not test_diff and not test_perslay and not test_knn and not test_dtm and not test_human_off" -vv {project}/src/python/test'
+          CIBW_TEST_COMMAND: "pytest {project}/src/python/test"
           # Linux specific
           # CIBW_BEFORE_ALL_LINUX: bash {project}/scripts/cibuildwheel_before_all_linux.sh
           # OSx specific
-          CIBW_REPAIR_WHEEL_COMMAND_MACOS: delocate-listdeps --all {wheel} && delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
-          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.13"
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: delocate-listdeps --all {wheel} && delocate-wheel --require-archs universal2 -w {dest_dir} -v {wheel}
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.13" _PYTHON_HOST_PLATFORM="macosx-13.0-universal2" ARCHFLAGS="-arch arm64 -arch x86_64"
           CIBW_BEFORE_ALL_MACOS: bash {project}/scripts/cibuildwheel_before_all_macos.sh
           # Windows specific
           SKBUILD_CMAKE_DEFINE: "VCPKG_TARGET_TRIPLET=x64-windows;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake"

@@ -3,10 +3,11 @@
 set -eu
 
 brew update
-brew install curl cmake
-
-scripts/install_eigen_from_curl_download.sh
-scripts/install_boost_from_curl_download.sh
-scripts/install_gmp_from_curl_download.sh
-scripts/install_mpfr_from_curl_download.sh
-scripts/install_cgal_from_curl_download.sh
+brew install boost eigen gmp mpfr cgal
+python -m pip install --user numpy~=1.21.4
+python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
+python -m pip install --user twine delocate
+./scripts/build_osx_universal_gmpfr.sh
+export   GMP_LIB_DIR=$PWD/deps-uni/lib
+export GMPXX_LIB_DIR=$PWD/deps-uni/lib
+export  MPFR_LIB_DIR=$PWD/deps-uni/lib
