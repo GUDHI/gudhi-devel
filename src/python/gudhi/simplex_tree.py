@@ -15,6 +15,7 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
+from typing import Union
 import numpy as np
 
 from gudhi import _simplex_tree_ext as t
@@ -141,8 +142,8 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def insert_batch(
         self,
-        vertex_array: np.ndarray[np.int32] | np.ndarray[np.int64],
-        filtrations: np.ndarray[np.float32] | np.ndarray[np.float64],
+        vertex_array: Union[np.ndarray[np.float32], np.ndarray[np.float64]],
+        filtrations: Union[np.ndarray[np.float32], np.ndarray[np.float64]],
     ):
         """Inserts k-simplices given by a sparse array in a format similar
         to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
