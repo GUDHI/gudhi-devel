@@ -10,7 +10,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-__license__ = "GPL v3"
+__license__ = "GPL v3"  # Because of BottleneckDistance
 
 
 import matplotlib.pyplot as plt
