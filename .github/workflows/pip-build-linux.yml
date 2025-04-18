@@ -1,0 +1,36 @@
+name: pip build linux
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: build pip wheel
+    runs-on: ubuntu-latest
+    # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
+    container: gudhi/pip_for_gudhi:2025.04.01
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Build wheel for Python 3.9
+        env:
+          SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON39/bin/python"
+        run: |
+          $PYTHON39/bin/python -m pip wheel -ve .
+          auditwheel repair --plat manylinux_2_17_x86_64 *.whl
+        # manylinux_2_17_x86_64 (aliased by manylinux2014_x86_64)
+      - name: Upload linux python wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux python wheel
+          path: wheelhouse/*.whl
+      # NumPy 2.X is installed and guarantees ABI compatibility, test it with the minimal numpy version
+      # Minimal test setup that requires optional pytest scipy matplotlib scikit-learn POT
+      # but without tests that requires torch, tensorflow, eagerpy, pykeops, hnswlib
+      # TODO: test_human_off fails because the file is not copied at the right place
+      - name: Install and test wheel for Python 3.9
+        run: |
+          $PYTHON39/bin/python -m pip install numpy~=1.19.3
+          $PYTHON39/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT wheelhouse/*.whl
+          $PYTHON39/bin/python -c "import gudhi; print(gudhi.__version__)"
+          $PYTHON39/bin/python -m pytest -vv -k 'not test_wasserstein_distance and not test_wasserstein_with_tensors and not test_diff and not test_perslay and not test_knn and not test_dtm and not test_human_off'
