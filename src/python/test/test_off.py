@@ -8,10 +8,12 @@
       - YYYY/MM Author: Description of the modification
 """
 
-import gudhi as gd
+
 import numpy as np
 import pytest
 from tempfile import NamedTemporaryFile
+
+import gudhi as gd
 
 
 def test_off_rw():
@@ -94,14 +96,23 @@ def test_off_file_header():
     with open(name) as f:
         assert gd.off_utils._read_off_file_header(f) == (random_dim, random_nb_points)
 
+
 def test_get_next_line():
-    for end_of_line in ['\r\n', '\n']:
-        for comment_char in ['#', '@']:
+    for end_of_line in ["\r\n", "\n"]:
+        for comment_char in ["#", "@"]:
             name = NamedTemporaryFile().name
             print(name)
             with open(name, "w") as f:
-                f.write(f"{comment_char}{end_of_line}{end_of_line}{comment_char}{end_of_line}First{end_of_line}")
-                f.write(f"{end_of_line}{comment_char}{end_of_line}{end_of_line}Second{end_of_line}{end_of_line}")
+                f.write(
+                    f"{comment_char}{end_of_line}{end_of_line}{comment_char}{end_of_line}First{end_of_line}"
+                )
+                f.write(
+                    f"{end_of_line}{comment_char}{end_of_line}{end_of_line}Second{end_of_line}{end_of_line}"
+                )
             with open(name) as f:
-                assert gd.off_utils._get_next_line(f, comment=comment_char).split() == ["First"]
-                assert gd.off_utils._get_next_line(f, comment=comment_char).split() == ["Second"]
+                assert gd.off_utils._get_next_line(f, comment=comment_char).split() == [
+                    "First"
+                ]
+                assert gd.off_utils._get_next_line(f, comment=comment_char).split() == [
+                    "Second"
+                ]

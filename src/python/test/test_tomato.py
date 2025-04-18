@@ -8,10 +8,13 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi.clustering.tomato import Tomato
+
 import numpy as np
 import pytest
 import matplotlib.pyplot as plt
+
+from gudhi.clustering.tomato import Tomato
+
 
 # Disable graphics for testing purposes
 plt.show = lambda: None
@@ -37,13 +40,29 @@ def test_tomato_1():
     t = Tomato(metric="euclidean", graph_type="radius", r=4.7, k=4)
     t.fit(a)
     assert t.max_weight_per_cc_.size == 2
-    assert t.neighbors_ == [[0, 1, 2], [0, 1, 2], [0, 1, 2], [3, 4, 5, 6], [3, 4, 5], [3, 4, 5], [3, 6]]
+    assert t.neighbors_ == [
+        [0, 1, 2],
+        [0, 1, 2],
+        [0, 1, 2],
+        [3, 4, 5, 6],
+        [3, 4, 5],
+        [3, 4, 5],
+        [3, 6],
+    ]
     t.plot_diagram()
 
     t = Tomato(graph_type="radius", r=4.7, k=4, symmetrize_graph=True)
     t.fit(a)
     assert t.max_weight_per_cc_.size == 2
-    assert [set(i) for i in t.neighbors_] == [{1, 2}, {0, 2}, {0, 1}, {4, 5, 6}, {3, 5}, {3, 4}, {3}]
+    assert [set(i) for i in t.neighbors_] == [
+        {1, 2},
+        {0, 2},
+        {0, 1},
+        {4, 5, 6},
+        {3, 5},
+        {3, 4},
+        {3},
+    ]
 
     t = Tomato(n_clusters=2, k=4, symmetrize_graph=True)
     t.fit(a)

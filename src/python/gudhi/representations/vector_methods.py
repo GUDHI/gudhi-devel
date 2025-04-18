@@ -9,32 +9,47 @@
 #   - 2020/12 Gard: A more flexible Betti curve class capable of computing exact curves.
 #   - 2021/11 Vincent Rouvreau: factorize _automatic_sample_range
 
+__author__ = "Mathieu Carrière, Martin Royer, Gard Spreemann"
+__maintainer__ = "Martin Royer, Gard Spreemann, Vincent Rouvreau"
+__copyright__ = "Copyright (C) 2018-2020 Inria"
+__license__ = "MIT"
+
+
 import numpy as np
 from scipy.spatial.distance import cdist
-from sklearn.base          import BaseEstimator, TransformerMixin
-from sklearn.exceptions    import NotFittedError
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
-from sklearn.metrics       import pairwise
+from sklearn.metrics import pairwise
 from sklearn.cluster import KMeans
 
 try:
     # New location since 1.0
-    from sklearn.metrics     import DistanceMetric
+    from sklearn.metrics import DistanceMetric
 except ImportError:
     # Will be removed in 1.3
-    from sklearn.neighbors     import DistanceMetric
+    from sklearn.neighbors import DistanceMetric
 
 from .preprocessing import DiagramScaler, BirthPersistenceTransform, _maybe_fit_transform
+
 
 #############################################
 # Finite Vectorization methods ##############
 #############################################
 
+
 class PersistenceImage(BaseEstimator, TransformerMixin):
     """
     This is a class for computing persistence images from a list of persistence diagrams. A persistence image is a 2D function computed from a persistence diagram by convolving the diagram points with a weighted Gaussian kernel. The plane is then discretized into an image with pixels, which is flattened and returned as a vector. See http://jmlr.org/papers/v18/16-337.html for more details.
     """
-    def __init__(self, bandwidth=1., weight=lambda x: 1, resolution=[20,20], im_range=[np.nan, np.nan, np.nan, np.nan]):
+
+    def __init__(
+        self,
+        bandwidth=1.0,
+        weight=lambda x: 1,
+        resolution=[20, 20],
+        im_range=[np.nan, np.nan, np.nan, np.nan],
+    ):
         """
         Constructor for the PersistenceImage class.
 
@@ -60,9 +75,18 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
                 self.im_range_fixed_ = self.im_range
             else:
                 new_X = BirthPersistenceTransform().fit_transform(X)
-                pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(new_X,y)
-                [mx,my],[Mx,My] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
-                self.im_range_fixed_ = np.where(np.isnan(np.array(self.im_range)), np.array([mx, Mx, my, My]), np.array(self.im_range))
+                pre = DiagramScaler(
+                    use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]
+                ).fit(new_X, y)
+                [mx, my], [Mx, My] = [
+                    pre.scalers[0][1].data_min_[0],
+                    pre.scalers[1][1].data_min_[0],
+                ], [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
+                self.im_range_fixed_ = np.where(
+                    np.isnan(np.array(self.im_range)),
+                    np.array([mx, Mx, my, My]),
+                    np.array(self.im_range),
+                )
         else:
             self.im_range_fixed_ = self.im_range
         return self
@@ -86,13 +110,31 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
 
             w = np.empty(num_pts_in_diag)
             for j in range(num_pts_in_diag):
-                w[j] = self.weight(diagram[j,:])
+                w[j] = self.weight(diagram[j, :])
 
-            x_values, y_values = np.linspace(self.im_range_fixed_[0], self.im_range_fixed_[1], self.resolution[0]), np.linspace(self.im_range_fixed_[2], self.im_range_fixed_[3], self.resolution[1])
-            Xs, Ys = np.tile((diagram[:,0][:,np.newaxis,np.newaxis]-x_values[np.newaxis,np.newaxis,:]),[1,self.resolution[1],1]), np.tile(diagram[:,1][:,np.newaxis,np.newaxis]-y_values[np.newaxis,:,np.newaxis],[1,1,self.resolution[0]])
-            image = np.tensordot(w, np.exp((-np.square(Xs)-np.square(Ys))/(2*np.square(self.bandwidth)))/(np.square(self.bandwidth)*2*np.pi), 1)
+            x_values, y_values = np.linspace(
+                self.im_range_fixed_[0], self.im_range_fixed_[1], self.resolution[0]
+            ), np.linspace(
+                self.im_range_fixed_[2], self.im_range_fixed_[3], self.resolution[1]
+            )
+            Xs, Ys = np.tile(
+                (
+                    diagram[:, 0][:, np.newaxis, np.newaxis]
+                    - x_values[np.newaxis, np.newaxis, :]
+                ),
+                [1, self.resolution[1], 1],
+            ), np.tile(
+                diagram[:, 1][:, np.newaxis, np.newaxis] - y_values[np.newaxis, :, np.newaxis],
+                [1, 1, self.resolution[0]],
+            )
+            image = np.tensordot(
+                w,
+                np.exp((-np.square(Xs) - np.square(Ys)) / (2 * np.square(self.bandwidth)))
+                / (np.square(self.bandwidth) * 2 * np.pi),
+                1,
+            )
 
-            Xfit.append(image.reshape(1,-1))
+            Xfit.append(image.reshape(1, -1))
 
         Xfit = np.concatenate(Xfit, 0)
 
@@ -109,30 +151,33 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (number of pixels = **resolution[0]** x **resolution[1]**):: output persistence image.
         """
-        return _maybe_fit_transform(self, 'im_range_fixed_', diag)
+        return _maybe_fit_transform(self, "im_range_fixed_", diag)
+
 
 def _automatic_sample_range(sample_range, X):
-        """
-        Compute and returns sample range from the persistence diagrams if one of the sample_range values is numpy.nan.
+    """
+    Compute and returns sample range from the persistence diagrams if one of the sample_range values is numpy.nan.
 
-        Parameters:
-            sample_range (a numpy array of 2 float): minimum and maximum of all piecewise-linear function domains, of
-                the form [x_min, x_max].
-            X (list of n x 2 numpy arrays): input persistence diagrams.
-            y (n x 1 array): persistence diagram labels (unused).
-        """
-        nan_in_range = np.isnan(sample_range)
-        if nan_in_range.any():
-            try:
-                pre = DiagramScaler(use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]).fit(X)
-                [mx,my] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]]
-                [Mx,My] = [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
-                return np.where(nan_in_range, np.array([mx, My]), sample_range)
-            except ValueError:
-                b = np.nanmax([sample_range[0], sample_range[1], -np.inf])
-                print(f"Empty list or empty diagrams: sample range is [{b}, {b}]")
-                return np.array([b, b])
-        return sample_range
+    Parameters:
+        sample_range (a numpy array of 2 float): minimum and maximum of all piecewise-linear function domains, of
+            the form [x_min, x_max].
+        X (list of n x 2 numpy arrays): input persistence diagrams.
+        y (n x 1 array): persistence diagram labels (unused).
+    """
+    nan_in_range = np.isnan(sample_range)
+    if nan_in_range.any():
+        try:
+            pre = DiagramScaler(
+                use=True, scalers=[([0], MinMaxScaler()), ([1], MinMaxScaler())]
+            ).fit(X)
+            [mx, my] = [pre.scalers[0][1].data_min_[0], pre.scalers[1][1].data_min_[0]]
+            [Mx, My] = [pre.scalers[0][1].data_max_[0], pre.scalers[1][1].data_max_[0]]
+            return np.where(nan_in_range, np.array([mx, My]), sample_range)
+        except ValueError:
+            b = np.nanmax([sample_range[0], sample_range[1], -np.inf])
+            print(f"Empty list or empty diagrams: sample range is [{b}, {b}]")
+            return np.array([b, b])
+    return sample_range
 
 
 def _trim_endpoints(x, are_endpoints_nan):
@@ -151,10 +196,16 @@ def _grid_from_sample_range(self, X):
         self.new_resolution_ += self.nan_in_range_.sum()
     self.sample_range_fixed_ = _automatic_sample_range(sample_range, X)
     if self.sample_range_fixed_[0] != self.sample_range_fixed_[1]:
-        self.grid_ = np.linspace(self.sample_range_fixed_[0], self.sample_range_fixed_[1], self.new_resolution_)
+        self.grid_ = np.linspace(
+            self.sample_range_fixed_[0], self.sample_range_fixed_[1], self.new_resolution_
+        )
     else:
-        print('First value and second value in range are the same: grid is made of resolution copies of this value')
-        self.grid_ = np.full(shape=[self.new_resolution_], fill_value=self.sample_range_fixed_[0])
+        print(
+            "First value and second value in range are the same: grid is made of resolution copies of this value"
+        )
+        self.grid_ = np.full(
+            shape=[self.new_resolution_], fill_value=self.sample_range_fixed_[0]
+        )
     if not self.keep_endpoints:
         self.grid_ = _trim_endpoints(self.grid_, self.nan_in_range_)
 
@@ -166,7 +217,15 @@ class Landscape(BaseEstimator, TransformerMixin):
     Attributes:
         grid_ (1d array): The grid on which the landscapes are computed.
     """
-    def __init__(self, num_landscapes=5, resolution=100, sample_range=[np.nan, np.nan], *, keep_endpoints=False):
+
+    def __init__(
+        self,
+        num_landscapes=5,
+        resolution=100,
+        sample_range=[np.nan, np.nan],
+        *,
+        keep_endpoints=False,
+    ):
         """
         Constructor for the Landscape class.
 
@@ -176,7 +235,11 @@ class Landscape(BaseEstimator, TransformerMixin):
             sample_range ([double, double]): minimum and maximum of all piecewise-linear function domains, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
             keep_endpoints (bool): when computing `sample_range`, use the exact extremities (where the value is always 0). This is mostly useful for plotting, the default is to use a slightly smaller range.
         """
-        self.num_landscapes, self.resolution, self.sample_range = num_landscapes, resolution, sample_range
+        self.num_landscapes, self.resolution, self.sample_range = (
+            num_landscapes,
+            resolution,
+            sample_range,
+        )
         self.keep_endpoints = keep_endpoints
 
     def fit(self, X, y=None):
@@ -204,17 +267,24 @@ class Landscape(BaseEstimator, TransformerMixin):
         Xfit = []
         x_values = self.grid_
         for diag in X:
-            midpoints, heights = (diag[:, 0] + diag[:, 1]) / 2., (diag[:, 1] - diag[:, 0]) / 2.
-            tent_functions = np.maximum(heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :]), 0)
+            midpoints, heights = (diag[:, 0] + diag[:, 1]) / 2.0, (
+                diag[:, 1] - diag[:, 0]
+            ) / 2.0
+            tent_functions = np.maximum(
+                heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :]), 0
+            )
             n_points = diag.shape[0]
             # Complete the array with zeros to get the right number of landscapes
             if self.num_landscapes > n_points:
                 tent_functions = np.concatenate(
-                    [tent_functions, np.zeros((tent_functions.shape[0], self.num_landscapes-n_points))],
-                    axis=1
+                    [
+                        tent_functions,
+                        np.zeros((tent_functions.shape[0], self.num_landscapes - n_points)),
+                    ],
+                    axis=1,
                 )
-            tent_functions.partition(tent_functions.shape[1]-self.num_landscapes, axis=1)
-            landscapes = np.sort(tent_functions[:, -self.num_landscapes:], axis=1)[:, ::-1].T
+            tent_functions.partition(tent_functions.shape[1] - self.num_landscapes, axis=1)
+            landscapes = np.sort(tent_functions[:, -self.num_landscapes :], axis=1)[:, ::-1].T
 
             landscapes = np.sqrt(2) * np.ravel(landscapes)
             Xfit.append(landscapes)
@@ -232,7 +302,8 @@ class Landscape(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (number of samples = **num_landscapes** x **resolution**): output persistence landscape.
         """
-        return _maybe_fit_transform(self, 'grid_', diag)
+        return _maybe_fit_transform(self, "grid_", diag)
+
 
 class Silhouette(BaseEstimator, TransformerMixin):
     """
@@ -241,7 +312,15 @@ class Silhouette(BaseEstimator, TransformerMixin):
     Attributes:
         grid_ (1d array): The grid on which the silhouette is computed.
     """
-    def __init__(self, weight=lambda x: 1, resolution=100, sample_range=[np.nan, np.nan], *, keep_endpoints=False):
+
+    def __init__(
+        self,
+        weight=lambda x: 1,
+        resolution=100,
+        sample_range=[np.nan, np.nan],
+        *,
+        keep_endpoints=False,
+    ):
         """
         Constructor for the Silhouette class.
 
@@ -279,11 +358,15 @@ class Silhouette(BaseEstimator, TransformerMixin):
         x_values = self.grid_
 
         for diag in X:
-            midpoints, heights = (diag[:, 0] + diag[:, 1]) / 2., (diag[:, 1] - diag[:, 0]) / 2.
+            midpoints, heights = (diag[:, 0] + diag[:, 1]) / 2.0, (
+                diag[:, 1] - diag[:, 0]
+            ) / 2.0
             weights = np.array([self.weight(pt) for pt in diag])
             total_weight = np.sum(weights)
 
-            tent_functions = np.maximum(heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :]), 0)
+            tent_functions = np.maximum(
+                heights[None, :] - np.abs(x_values[:, None] - midpoints[None, :]), 0
+            )
             silhouette = np.sum(weights[None, :] / total_weight * tent_functions, axis=1)
             Xfit.append(silhouette * np.sqrt(2))
 
@@ -300,7 +383,7 @@ class Silhouette(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (**resolution**): output persistence silhouette.
         """
-        return _maybe_fit_transform(self, 'grid_', diag)
+        return _maybe_fit_transform(self, "grid_", diag)
 
 
 class BettiCurve(BaseEstimator, TransformerMixin):
@@ -330,7 +413,14 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         The grid on which the Betti numbers are computed. If predefined_grid was specified, `grid_` will always be that grid, independently of data. If not and resolution is None, the grid is fitted to capture all filtration values at which the Betti numbers change.
     """
 
-    def __init__(self, resolution=100, sample_range=[np.nan, np.nan], predefined_grid=None, *, keep_endpoints=False):
+    def __init__(
+        self,
+        resolution=100,
+        sample_range=[np.nan, np.nan],
+        predefined_grid=None,
+        *,
+        keep_endpoints=False,
+    ):
         """
         Constructor for the BettiCurve class.
 
@@ -352,7 +442,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
     def is_fitted(self):
         return hasattr(self, "grid_")
 
-    def fit(self, X, y = None):
+    def fit(self, X, y=None):
         """
         Fit the BettiCurve class on a list of persistence diagrams: if any of the values in **sample_range** is numpy.nan, replace it with the corresponding value computed on the given list of persistence diagrams. When no predefined grid is provided and resolution set to None, compute a filtration grid that captures all changes in Betti numbers for all the given persistence diagrams.
 
@@ -362,12 +452,14 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         """
 
         if self.predefined_grid is None:
-            if self.resolution is None: # Flexible/exact version
-                self.grid_ = np.unique(np.concatenate([pd.ravel() for pd in X] + [[-np.inf]], axis=0))
+            if self.resolution is None:  # Flexible/exact version
+                self.grid_ = np.unique(
+                    np.concatenate([pd.ravel() for pd in X] + [[-np.inf]], axis=0)
+                )
             else:
                 _grid_from_sample_range(self, X)
         else:
-            self.grid_ = self.predefined_grid # Get the predefined grid from user
+            self.grid_ = self.predefined_grid  # Get the predefined grid from user
 
         return self
 
@@ -398,9 +490,9 @@ class BettiCurve(BaseEstimator, TransformerMixin):
             sorting = np.argsort(events)
             offsets = np.zeros(1 + N, dtype=int)
             for i in range(0, N):
-                offsets[i+1] = offsets[i] + 2*X[i].shape[0]
+                offsets[i + 1] = offsets[i] + 2 * X[i].shape[0]
             starts = offsets[0:N]
-            ends = offsets[1:N + 1] - 1
+            ends = offsets[1 : N + 1] - 1
 
             bettis = [[0] for i in range(0, N)]
 
@@ -416,7 +508,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
             return np.array(bettis, dtype=int)[:, 0:-1]
 
-    def fit_transform(self, X, y = None):
+    def fit_transform(self, X, y=None):
         """
         The result is the same as fit(X) followed by transform(X), but potentially faster.
         """
@@ -426,7 +518,9 @@ class BettiCurve(BaseEstimator, TransformerMixin):
             N = len(X)
 
             if sum([len(x) for x in X]) == 0:
-                print("Empty list or empty diagrams: evaluation grid only contains -infinity and output contains only zeros")
+                print(
+                    "Empty list or empty diagrams: evaluation grid only contains -infinity and output contains only zeros"
+                )
                 self.grid_ = np.array([-np.inf])
                 return np.zeros((N, 1))
 
@@ -436,9 +530,9 @@ class BettiCurve(BaseEstimator, TransformerMixin):
                 sorting = np.argsort(events)
                 offsets = np.zeros(1 + N, dtype=int)
                 for i in range(0, N):
-                    offsets[i+1] = offsets[i] + 2*X[i].shape[0]
+                    offsets[i + 1] = offsets[i] + 2 * X[i].shape[0]
                 starts = offsets[0:N]
-                ends = offsets[1:N + 1] - 1
+                ends = offsets[1 : N + 1] - 1
 
                 xs = [-np.inf]
                 bettis = [[0] for i in range(0, N)]
@@ -453,7 +547,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
                         for k in range(0, j):
                             bettis[k].append(bettis[k][-1])
                         bettis[j].append(bettis[j][-1] + delta)
-                        for k in range(j+1, N):
+                        for k in range(j + 1, N):
                             bettis[k].append(bettis[k][-1])
 
                 self.grid_ = np.array(xs)
@@ -468,8 +562,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
         Shorthand for transform on a single persistence diagram.
         If :func:`fit` hasn't been run, this uses `fit_transform` on a clone of the object and thus does not affect later calls.
         """
-        return _maybe_fit_transform(self, 'grid_', diag)
-
+        return _maybe_fit_transform(self, "grid_", diag)
 
 
 class Entropy(BaseEstimator, TransformerMixin):
@@ -479,7 +572,16 @@ class Entropy(BaseEstimator, TransformerMixin):
     Attributes:
         grid_ (1d array): In vector mode, the grid on which the entropy summary function is computed.
     """
-    def __init__(self, mode="scalar", normalized=True, resolution=100, sample_range=[np.nan, np.nan], *, keep_endpoints=False):
+
+    def __init__(
+        self,
+        mode="scalar",
+        normalized=True,
+        resolution=100,
+        sample_range=[np.nan, np.nan],
+        *,
+        keep_endpoints=False,
+    ):
         """
         Constructor for the Entropy class.
 
@@ -490,7 +592,12 @@ class Entropy(BaseEstimator, TransformerMixin):
             sample_range ([double, double]): minimum and maximum of the entropy summary function domain, of the form [x_min, x_max] (default [numpy.nan, numpy.nan]). It is the interval on which samples will be drawn evenly. If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method. Used only if **mode** = "vector".
             keep_endpoints (bool): when computing `sample_range`, use the exact extremities. This is mostly useful for plotting, the default is to use a slightly smaller range.
         """
-        self.mode, self.normalized, self.resolution, self.sample_range = mode, normalized, resolution, sample_range
+        self.mode, self.normalized, self.resolution, self.sample_range = (
+            mode,
+            normalized,
+            resolution,
+            sample_range,
+        )
         self.keep_endpoints = keep_endpoints
 
     def fit(self, X, y=None):
@@ -506,7 +613,7 @@ class Entropy(BaseEstimator, TransformerMixin):
             if self.sample_range_fixed_[0] != self.sample_range_fixed_[1]:
                 self.step_ = self.grid_[1] - self.grid_[0]
             else:
-                self.step_ = 0.
+                self.step_ = 0.0
         return self
 
     def transform(self, X):
@@ -525,21 +632,29 @@ class Entropy(BaseEstimator, TransformerMixin):
         for i in range(num_diag):
             orig_diagram, new_diagram, num_pts_in_diag = X[i], new_X[i], X[i].shape[0]
 
-            p = new_diagram[:,1]
-            p = p/np.sum(p)
+            p = new_diagram[:, 1]
+            p = p / np.sum(p)
             if self.mode == "scalar":
                 ent = -np.dot(p, np.log(p))
                 Xfit.append(np.array([[ent]]))
             else:
                 ent = np.zeros(self.resolution)
                 for j in range(num_pts_in_diag):
-                    [px,py] = orig_diagram[j,:2]
-                    min_idx = np.clip(np.ceil((px - self.sample_range_fixed_[0]) / self.step_).astype(int), 0, self.resolution)
-                    max_idx = np.clip(np.ceil((py - self.sample_range_fixed_[0]) / self.step_).astype(int), 0, self.resolution)
-                    ent[min_idx:max_idx]-=p[j]*np.log(p[j])
+                    [px, py] = orig_diagram[j, :2]
+                    min_idx = np.clip(
+                        np.ceil((px - self.sample_range_fixed_[0]) / self.step_).astype(int),
+                        0,
+                        self.resolution,
+                    )
+                    max_idx = np.clip(
+                        np.ceil((py - self.sample_range_fixed_[0]) / self.step_).astype(int),
+                        0,
+                        self.resolution,
+                    )
+                    ent[min_idx:max_idx] -= p[j] * np.log(p[j])
                 if self.normalized:
                     ent = ent / np.linalg.norm(ent, ord=1)
-                Xfit.append(np.reshape(ent,[1,-1]))
+                Xfit.append(np.reshape(ent, [1, -1]))
 
         Xfit = np.concatenate(Xfit, axis=0)
         return Xfit
@@ -555,12 +670,14 @@ class Entropy(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (1 if **mode** = "scalar" else **resolution**): output entropy.
         """
-        return _maybe_fit_transform(self, 'grid_', diag)
+        return _maybe_fit_transform(self, "grid_", diag)
+
 
 class TopologicalVector(BaseEstimator, TransformerMixin):
     """
     This is a class for computing topological vectors from a list of persistence diagrams. The topological vector associated to a persistence diagram is the sorted vector of a slight modification of the pairwise distances between the persistence diagram points. See https://diglib.eg.org/handle/10.1111/cgf12692 for more details.
     """
+
     def __init__(self, threshold=10):
         """
         Constructor for the TopologicalVector class.
@@ -601,15 +718,15 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
         for i in range(num_diag):
 
             diagram, num_pts_in_diag = X[i], X[i].shape[0]
-            pers = 0.5 * (diagram[:,1]-diagram[:,0])
-            min_pers = np.minimum(pers,np.transpose(pers))
+            pers = 0.5 * (diagram[:, 1] - diagram[:, 0])
+            min_pers = np.minimum(pers, np.transpose(pers))
             # Works fine with sklearn 1.0, but an ValueError exception is thrown on past versions
             try:
                 distances = DistanceMetric.get_metric("chebyshev").pairwise(diagram)
             except ValueError:
                 # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
                 assert len(diagram) == 0
-                distances = np.empty(shape = [0, 0])
+                distances = np.empty(shape=[0, 0])
             vect = np.flip(np.sort(np.triu(np.minimum(distances, min_pers)), axis=None), 0)
             dim = min(len(vect), thresh)
             Xfit[i, :dim] = vect[:dim]
@@ -626,12 +743,14 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (**threshold**): output topological vector.
         """
-        return self.transform([diag])[0,:]
+        return self.transform([diag])[0, :]
+
 
 class ComplexPolynomial(BaseEstimator, TransformerMixin):
     """
     This is a class for computing complex polynomials from a list of persistence diagrams. The persistence diagram points are seen as the roots of some complex polynomial, whose coefficients are returned in a complex vector. See https://link.springer.com/chapter/10.1007%2F978-3-319-23231-7_27 for more details.
     """
+
     def __init__(self, polynomial_type="R", threshold=10):
         """
         Constructor for the ComplexPolynomial class.
@@ -671,21 +790,27 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
         for d in range(len(X)):
             D, N = X[d], X[d].shape[0]
             if self.polynomial_type == "R":
-                roots = D[:,0] + 1j * D[:,1]
+                roots = D[:, 0] + 1j * D[:, 1]
             elif self.polynomial_type == "S":
                 alpha = np.linalg.norm(D, axis=1)
-                alpha = np.where(alpha==0, np.ones(N), alpha)
-                roots = np.multiply( np.multiply(  (D[:,0]+1j*D[:,1]), (D[:,1]-D[:,0])  ), 1./(np.sqrt(2)*alpha) )
+                alpha = np.where(alpha == 0, np.ones(N), alpha)
+                roots = np.multiply(
+                    np.multiply((D[:, 0] + 1j * D[:, 1]), (D[:, 1] - D[:, 0])),
+                    1.0 / (np.sqrt(2) * alpha),
+                )
             elif self.polynomial_type == "T":
                 alpha = np.linalg.norm(D, axis=1)
-                roots = np.multiply(  (D[:,1]-D[:,0])/2, np.cos(alpha) - np.sin(alpha) + 1j * (np.cos(alpha) + np.sin(alpha))  )
-            coeff = [0] * (N+1)
+                roots = np.multiply(
+                    (D[:, 1] - D[:, 0]) / 2,
+                    np.cos(alpha) - np.sin(alpha) + 1j * (np.cos(alpha) + np.sin(alpha)),
+                )
+            coeff = [0] * (N + 1)
             coeff[N] = 1
-            for i in range(1, N+1):
-                for j in range(N-i-1, N):
-                    coeff[j] += ((-1) * roots[i-1] * coeff[j+1])
+            for i in range(1, N + 1):
+                for j in range(N - i - 1, N):
+                    coeff[j] += (-1) * roots[i - 1] * coeff[j + 1]
             coeff = np.array(coeff[::-1])[1:]
-            Xfit[d, :min(thresh, coeff.shape[0])] = coeff[:min(thresh, coeff.shape[0])]
+            Xfit[d, : min(thresh, coeff.shape[0])] = coeff[: min(thresh, coeff.shape[0])]
         return Xfit
 
     def __call__(self, diag):
@@ -698,31 +823,40 @@ class ComplexPolynomial(BaseEstimator, TransformerMixin):
         Returns:
             numpy array with shape (**threshold**): output complex vector of coefficients.
         """
-        return self.transform([diag])[0,:]
+        return self.transform([diag])[0, :]
+
 
 def _lapl_contrast(measure, centers, inertias):
     """contrast function for vectorising `measure` in ATOL
-    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise"""
+    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise
+    """
     return np.exp(-cdist(XA=measure, XB=centers) / inertias)
+
 
 def _gaus_contrast(measure, centers, inertias):
     """contrast function for vectorising `measure` in ATOL
-    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise"""
+    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise
+    """
     return np.exp(-cdist(XA=measure, XB=centers, metric="sqeuclidean") / inertias**2)
+
 
 def _indicator_contrast(diags, centers, inertias):
     """contrast function for vectorising `measure` in ATOL
-    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise"""
-    robe_curve = np.clip(2-cdist(XA=diags, XB=centers)/inertias, 0, 1)
+    we use cdist so as to accept 'inf' values instead of raising ValueError with sklearn.pairwise
+    """
+    robe_curve = np.clip(2 - cdist(XA=diags, XB=centers) / inertias, 0, 1)
     return robe_curve
+
 
 def _cloud_weighting(measure):
     """automatic uniform weighting with mass 1 for `measure` in ATOL"""
     return np.ones(shape=measure.shape[0])
 
+
 def _iidproba_weighting(measure):
     """automatic uniform weighting with mass 1/N for `measure` in ATOL"""
     return np.ones(shape=measure.shape[0]) / measure.shape[0]
+
 
 class Atol(BaseEstimator, TransformerMixin):
     """
@@ -751,12 +885,13 @@ class Atol(BaseEstimator, TransformerMixin):
            [1.06330156, 0.29861028],
            [1.25157463, 0.02062512]])
     """
+
     # Note the example above must be up to date with the one in tests called test_atol_doc
     def __init__(
-            self,
-            quantiser=KMeans(n_clusters=2, n_init="auto"),
-            weighting_method="cloud",
-            contrast="gaussian",
+        self,
+        quantiser=KMeans(n_clusters=2, n_init="auto"),
+        weighting_method="cloud",
+        contrast="gaussian",
     ):
         """
         Constructor for the Atol measure vectorisation class.
@@ -788,7 +923,7 @@ class Atol(BaseEstimator, TransformerMixin):
 
     def get_weighting_method(self):
         return {
-            "cloud"   : _cloud_weighting,
+            "cloud": _cloud_weighting,
             "iidproba": _iidproba_weighting,
         }.get(self.weighting_method, _cloud_weighting)
 
@@ -817,8 +952,16 @@ class Atol(BaseEstimator, TransformerMixin):
         weights_concat = np.concatenate(sample_weight)
 
         # In fitting we remove infinite birth/death time points so that every center is finite. We do not care about duplicates.
-        filtered_measures_concat = measures_concat[~np.isinf(measures_concat).any(axis=1), :] if len(measures_concat) else measures_concat
-        filtered_weights_concat = weights_concat[~np.isinf(measures_concat).any(axis=1)] if len(measures_concat) else weights_concat
+        filtered_measures_concat = (
+            measures_concat[~np.isinf(measures_concat).any(axis=1), :]
+            if len(measures_concat)
+            else measures_concat
+        )
+        filtered_weights_concat = (
+            weights_concat[~np.isinf(measures_concat).any(axis=1)]
+            if len(measures_concat)
+            else weights_concat
+        )
 
         n_points = len(filtered_measures_concat)
         if not n_points:
@@ -834,20 +977,26 @@ class Atol(BaseEstimator, TransformerMixin):
         if self.quantiser.n_clusters == 1:
             dist_centers = pairwise.pairwise_distances(filtered_measures_concat)
             np.fill_diagonal(dist_centers, 0)
-            best_inertia = np.max(dist_centers)/2 if np.max(dist_centers)/2 > 0 else 1
+            best_inertia = np.max(dist_centers) / 2 if np.max(dist_centers) / 2 > 0 else 1
             self.inertias = np.array([best_inertia])
         else:
             dist_centers = pairwise.pairwise_distances(self.centers)
             dist_centers[dist_centers == 0] = np.inf
-            self.inertias = np.min(dist_centers, axis=0)/2
+            self.inertias = np.min(dist_centers, axis=0) / 2
 
         if n_points < n_clusters:
             # There weren't enough points to fit n_clusters, so we arbitrarily put centers as [-np.inf]^measure_dim.
-            print(f"[Atol] after filtering had only {n_points=} to fit {n_clusters=}, adding meaningless centers.")
+            print(
+                f"[Atol] after filtering had only {n_points=} to fit {n_clusters=}, adding meaningless centers."
+            )
             fill_center = np.repeat(np.inf, repeats=X[0].shape[1])
             fill_inertia = 0
-            self.centers = np.concatenate([self.centers, np.repeat([fill_center], repeats=n_clusters-n_points, axis=0)])
-            self.inertias = np.concatenate([self.inertias, np.repeat(fill_inertia, repeats=n_clusters-n_points)])
+            self.centers = np.concatenate(
+                [self.centers, np.repeat([fill_center], repeats=n_clusters - n_points, axis=0)]
+            )
+            self.inertias = np.concatenate(
+                [self.inertias, np.repeat(fill_inertia, repeats=n_clusters - n_points)]
+            )
             self.quantiser.n_clusters = n_clusters
         return self
 
@@ -863,7 +1012,10 @@ class Atol(BaseEstimator, TransformerMixin):
         """
         if sample_weight is None:
             sample_weight = self.get_weighting_method()(measure)
-        return np.sum(sample_weight * self.get_contrast()(measure, self.centers, self.inertias.T).T, axis=1)
+        return np.sum(
+            sample_weight * self.get_contrast()(measure, self.centers, self.inertias.T).T,
+            axis=1,
+        )
 
     def transform(self, X, sample_weight=None):
         """
@@ -880,11 +1032,16 @@ class Atol(BaseEstimator, TransformerMixin):
         """
         if sample_weight is None:
             sample_weight = [self.get_weighting_method()(measure) for measure in X]
-        self._running_transform_names = [f"Atol Center {i + 1}" for i in range(self.quantiser.n_clusters)]
-        return np.stack([self(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)])
+        self._running_transform_names = [
+            f"Atol Center {i + 1}" for i in range(self.quantiser.n_clusters)
+        ]
+        return np.stack(
+            [self(measure, sample_weight=weight) for measure, weight in zip(X, sample_weight)]
+        )
 
     def get_feature_names_out(self):
         return self._running_transform_names
+
 
 class PersistenceLengths(BaseEstimator, TransformerMixin):
     """
@@ -936,7 +1093,7 @@ class PersistenceLengths(BaseEstimator, TransformerMixin):
             # Sort in reverse order persistence lengths (where length = death - birth)
             pl = np.flip(np.sort(pl))
             # Filled with zeros if not enough values
-            pers_length_array[idx][:len(pl)] = pl
+            pers_length_array[idx][: len(pl)] = pl
 
         return pers_length_array
 

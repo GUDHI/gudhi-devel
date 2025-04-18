@@ -8,6 +8,10 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <vector>
+#include <unordered_map>
+#include <iostream>
+
 #include <boost/container/flat_map.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 #include <boost/property_map/property_map.hpp>
@@ -17,23 +21,24 @@
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/range/adaptor/transformed.hpp>
-#include <vector>
-#include <unordered_map>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#include <iostream>
 
 namespace py = pybind11;
 
 template <class T, class = std::enable_if_t<std::is_integral<T>::value>>
-int getint(int i) {
+int getint(int i)
+{
   return i;
 }
+
 // Gcc-8 has a bug that breaks this version, fixed in gcc-9
 // template<class T, class=decltype(std::declval<T>().template cast<int>())>
 // int getint(T i){return i.template cast<int>();}
 template <class T>
-auto getint(T i) -> decltype(i.template cast<int>()) {
+auto getint(T i) -> decltype(i.template cast<int>())
+{
   return i.template cast<int>();
 }
 
@@ -41,14 +46,19 @@ auto getint(T i) -> decltype(i.template cast<int>()) {
 
 typedef int Point_index;
 typedef int Cluster_index;
+
 struct Merge {
   Cluster_index first, second;
   double persist;
 };
 
 template <class Neighbors, class Density, class Order, class ROrder>
-auto tomato(Point_index num_points, Neighbors const& neighbors, Density const& density, Order const& order,
-            ROrder const& rorder) {
+auto tomato(Point_index num_points,
+            Neighbors const& neighbors,
+            Density const& density,
+            Order const& order,
+            ROrder const& rorder)
+{
   // point index --> index of raw cluster it belongs to
   std::vector<Cluster_index> raw_cluster;
   raw_cluster.reserve(num_points);
@@ -56,11 +66,13 @@ auto tomato(Point_index num_points, Neighbors const& neighbors, Density const& d
   Cluster_index n_raw_clusters = 0;  // current number of raw clusters seen
   //
   std::vector<Merge> merges;
+
   struct Data {
     Cluster_index parent;
     int rank;
     Point_index max;
   };  // information on a cluster
+
   std::vector<Data> ds_base;
   // boost::vector_property_map does resize(size+1) for every new element, don't use it
   auto ds_data =
@@ -161,6 +173,7 @@ auto tomato(Point_index num_points, Neighbors const& neighbors, Density const& d
       int rank;
       Cluster_index name;
     };
+
     std::vector<Dat> ds_bas(2 * n_raw_clusters - 1);
     Cluster_index i;
     auto ds_dat =
@@ -190,14 +203,17 @@ auto tomato(Point_index num_points, Neighbors const& neighbors, Density const& d
   // return raw_cluster, children, persistence
   // TODO avoid copies: https://github.com/pybind/pybind11/issues/1042
   return py::make_tuple(py::array(raw_cluster_ordered.size(), raw_cluster_ordered.data()),
-                        py::array(children.size(), children.data()), py::array(persistence.size(), persistence.data()),
+                        py::array(children.size(), children.data()),
+                        py::array(persistence.size(), persistence.data()),
                         py::array(max_cc.size(), max_cc.data()));
 }
 
-auto merge(py::array_t<Cluster_index, py::array::c_style> children, Cluster_index n_leaves, Cluster_index n_final) {
+auto merge(py::array_t<Cluster_index, py::array::c_style> children, Cluster_index n_leaves, Cluster_index n_final)
+{
   if (n_final > n_leaves) {
-    std::cerr << "The number of clusters required " << n_final << " is larger than the number of mini-clusters " << n_leaves << '\n';
-    n_final = n_leaves; // or return something special and let Tomato use leaf_labels_?
+    std::cerr << "The number of clusters required " << n_final << " is larger than the number of mini-clusters "
+              << n_leaves << '\n';
+    n_final = n_leaves;  // or return something special and let Tomato use leaf_labels_?
   }
   py::buffer_info cbuf = children.request();
   if ((cbuf.ndim != 2 || cbuf.shape[1] != 2) && (cbuf.ndim != 1 || cbuf.shape[0] != 0))
@@ -205,14 +221,17 @@ auto merge(py::array_t<Cluster_index, py::array::c_style> children, Cluster_inde
   const int n_merges = cbuf.shape[0];
   Cluster_index* d = (Cluster_index*)cbuf.ptr;
   if (n_merges + n_final < n_leaves) {
-    std::cerr << "The number of clusters required " << n_final << " is smaller than the number of connected components " << n_leaves - n_merges << '\n';
+    std::cerr << "The number of clusters required " << n_final << " is smaller than the number of connected components "
+              << n_leaves - n_merges << '\n';
     n_final = n_leaves - n_merges;
   }
+
   struct Dat {
     Cluster_index parent;
     int rank;
     int name;
   };
+
   std::vector<Dat> ds_bas(2 * n_leaves - 1);
   auto ds_dat = boost::make_function_property_map<std::size_t>([&ds_bas](std::size_t n) -> Dat& { return ds_bas[n]; });
   auto ds_par = boost::make_transform_value_property_map([](auto& p) -> Cluster_index& { return p.parent; }, ds_dat);
@@ -247,7 +266,8 @@ auto merge(py::array_t<Cluster_index, py::array::c_style> children, Cluster_inde
 // py::isinstance<py::array_t<std::int32_t>> (ou py::isinstance<py::array> et tester dtype) et flags&c_style
 // ou overload (en virant forcecast?)
 // aussi le faire au cas où on n'aurait pas un tableau, mais où chaque liste de voisins serait un tableau ?
-auto hierarchy(py::handle ngb, py::array_t<double, py::array::c_style | py::array::forcecast> density) {
+auto hierarchy(py::handle ngb, py::array_t<double, py::array::c_style | py::array::forcecast> density)
+{
   // used to be py::iterable ngb, but that's inconvenient if it doesn't come pre-sorted
   // use py::handle and check if [] (aka __getitem__) works? But then we need to build an object to pass it to []
   // (I _think_ handle is ok and we don't need object here)
@@ -270,7 +290,8 @@ auto hierarchy(py::handle ngb, py::array_t<double, py::array::c_style | py::arra
   return tomato(n, ngb, d, order, rorder);
 }
 
-PYBIND11_MODULE(_tomato, m) {
+PYBIND11_MODULE(_tomato, m)
+{
   m.doc() = "Internals of tomato clustering";
   m.def("hierarchy", &hierarchy, "does the clustering");
   m.def("merge", &merge, "merge clusters");

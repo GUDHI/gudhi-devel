@@ -7,17 +7,20 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from .knn import KNearestNeighbors
-import numpy as np
-
 __author__ = "Marc Glisse"
+__maintainer__ = ""
 __copyright__ = "Copyright (C) 2020 Inria"
 __license__ = "MIT"
 
 
+import numpy as np
+
+from .knn import KNearestNeighbors
+
+
 class DistanceToMeasure:
     """
-    Class to compute the distance to the empirical measure defined by a point set, 
+    Class to compute the distance to the empirical measure defined by a point set,
     as introduced in :cite:`dtmgeoinference2011`.
     """
 
@@ -44,7 +47,11 @@ class DistanceToMeasure:
         """
         if self.params.setdefault("metric", "euclidean") != "neighbors":
             self.knn = KNearestNeighbors(
-                self.k, return_index=False, return_distance=True, sort_results=False, **self.params
+                self.k,
+                return_index=False,
+                return_distance=True,
+                sort_results=False,
+                **self.params
             )
             self.knn.fit(X)
         return self
@@ -64,7 +71,7 @@ class DistanceToMeasure:
             distances = X[:, : self.k]
         else:
             distances = self.knn.transform(X)
-        distances = distances ** self.q
+        distances = distances**self.q
         dtm = distances.sum(-1) / self.k
         dtm = dtm ** (1.0 / self.q)
         # We compute too many powers, 1/p in knn then q in dtm, 1/q in dtm then q or some log in the caller.
@@ -83,7 +90,9 @@ class DTMDensity:
         have the same nice theoretical properties as the dimension.
     """
 
-    def __init__(self, k=None, weights=None, q=None, dim=None, normalize=False, n_samples=None, **kwargs):
+    def __init__(
+        self, k=None, weights=None, q=None, dim=None, normalize=False, n_samples=None, **kwargs
+    ):
         """
         Args:
             k (int): number of neighbors (possibly including the point itself). Optional if it can be guessed
@@ -103,7 +112,9 @@ class DTMDensity:
         if weights is None:
             self.k = k
             if k is None:
-                assert kwargs.get("metric") == "neighbors", 'Must specify k or weights, unless metric is "neighbors"'
+                assert (
+                    kwargs.get("metric") == "neighbors"
+                ), 'Must specify k or weights, unless metric is "neighbors"'
                 self.weights = None
             else:
                 self.weights = np.full(k, 1.0 / k)
@@ -127,7 +138,11 @@ class DTMDensity:
         """
         if self.params.setdefault("metric", "euclidean") != "neighbors":
             self.knn = KNearestNeighbors(
-                self.k, return_index=False, return_distance=True, sort_results=False, **self.params
+                self.k,
+                return_index=False,
+                return_distance=True,
+                sort_results=False,
+                **self.params
             )
             self.knn.fit(X)
             if self.params["metric"] != "precomputed":
@@ -162,7 +177,7 @@ class DTMDensity:
                 distances = distances[:, :k]
         else:
             distances = self.knn.transform(X)
-        distances = distances ** q
+        distances = distances**q
         dtm = (distances * weights).sum(-1)
         if self.normalize:
             dtm /= (np.arange(1, k + 1) ** (q / dim) * weights).sum()
