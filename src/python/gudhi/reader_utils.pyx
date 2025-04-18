@@ -7,6 +7,12 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2017 Inria"
+__license__ = "MIT"
+
+
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.string cimport string
@@ -16,9 +22,6 @@ from libcpp.pair cimport pair
 from os import path
 from numpy import array as np_array
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2017 Inria"
-__license__ = "MIT"
 
 cdef extern from "Reader_utils_interface.h" namespace "Gudhi":
     vector[vector[double]] read_matrix_from_csv_file(string off_file, char separator)
