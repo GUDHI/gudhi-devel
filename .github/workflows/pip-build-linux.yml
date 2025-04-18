@@ -17,7 +17,7 @@ jobs:
           SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON39/bin/python"
         run: |
           $PYTHON39/bin/python -m pip wheel -ve .
-          auditwheel repair --plat manylinux_2_17_x86_64 *.whl
+          auditwheel repair *.whl
         # manylinux_2_17_x86_64 (aliased by manylinux2014_x86_64)
       - name: Upload linux python wheel
         uses: actions/upload-artifact@v4

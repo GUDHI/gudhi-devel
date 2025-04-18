@@ -19,7 +19,6 @@ jobs:
           SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON39/bin/python"
         run: |
           $PYTHON39/bin/python -m pip wheel -ve .
-          auditwheel repair --plat manylinux_2_17_x86_64 *.whl
       # For python >=3.9, numpy >= 2.0 is used to package and test ABI compatibility with numpy 1.X
       # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
       # gudhi requires numpy >= 1.15.0, but minimal numpy version for python 3.9 is 1.19.3 for instance
@@ -27,7 +26,7 @@ jobs:
       - name: Install and test wheel for Python 3.9
         run: |
           $PYTHON39/bin/python -m pip install numpy~=1.19.3
-          $PYTHON39/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT wheelhouse/*.whl
+          $PYTHON39/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp39-linux_x86_64.whl
           $PYTHON39/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON39/bin/python -m pytest -vv -k 'not test_wasserstein_distance and not test_wasserstein_with_tensors and not test_diff and not test_perslay and not test_knn and not test_dtm and not test_human_off'
 
@@ -36,11 +35,10 @@ jobs:
           SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON310/bin/python"
         run: |
           $PYTHON310/bin/python -m pip wheel -ve .
-          auditwheel repair --plat manylinux_2_17_x86_64 *.whl
       - name: Install and test wheel for Python 3.10
         run: |
           $PYTHON310/bin/python -m pip install numpy~=1.21.6
-          $PYTHON310/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT wheelhouse/*.whl
+          $PYTHON310/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp310-linux_x86_64.whl
           $PYTHON310/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON310/bin/python -m pytest -vv -k 'not test_wasserstein_distance and not test_wasserstein_with_tensors and not test_diff and not test_perslay and not test_knn and not test_dtm and not test_human_off'
       - name: Build wheel for Python 3.11
@@ -48,11 +46,10 @@ jobs:
           SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON311/bin/python"
         run: |
           $PYTHON311/bin/python -m pip wheel -ve .
-          auditwheel repair --plat manylinux_2_17_x86_64 *.whl
       - name: Install and test wheel for Python 3.11
         run: |
           $PYTHON311/bin/python -m pip install numpy~=1.23.2
-          $PYTHON311/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT wheelhouse/*.whl
+          $PYTHON311/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp311-linux_x86_64.whl
           $PYTHON311/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON311/bin/python -m pytest -vv -k 'not test_wasserstein_distance and not test_wasserstein_with_tensors and not test_diff and not test_perslay and not test_knn and not test_dtm and not test_human_off'
       - name: Build wheel for Python 3.12
@@ -60,11 +57,10 @@ jobs:
           SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON312/bin/python"
         run: |
           $PYTHON312/bin/python -m pip wheel -ve .
-          auditwheel repair --plat manylinux_2_17_x86_64 *.whl
       - name: Install and test wheel for Python 3.12
         run: |
           $PYTHON312/bin/python -m pip install numpy~=1.26.0
-          $PYTHON312/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT wheelhouse/*.whl
+          $PYTHON312/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp312-linux_x86_64.whl
           $PYTHON312/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON312/bin/python -m pytest -vv -k 'not test_wasserstein_distance and not test_wasserstein_with_tensors and not test_diff and not test_perslay and not test_knn and not test_dtm and not test_human_off'
       - name: Build wheel for Python 3.13
@@ -72,11 +68,10 @@ jobs:
           SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON313/bin/python"
         run: |
           $PYTHON313/bin/python -m pip wheel -ve .
-          auditwheel repair --plat manylinux_2_17_x86_64 *.whl
       - name: Install and test wheel for Python 3.13
         run: |
           $PYTHON313/bin/python -m pip install numpy~=1.26.0
-          $PYTHON313/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT wheelhouse/*.whl
+          $PYTHON313/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp313-linux_x86_64.whl
           $PYTHON313/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON313/bin/python -m pytest -vv -k 'not test_wasserstein_distance and not test_wasserstein_with_tensors and not test_diff and not test_perslay and not test_knn and not test_dtm and not test_human_off'
       - name: Publish on PyPi
@@ -84,4 +79,5 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
+          auditwheel repair *.whl
           $PYTHON38/bin/python -m twine upload wheelhouse/*.whl
