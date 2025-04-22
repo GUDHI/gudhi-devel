@@ -25,6 +25,8 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 
+#include <python_interfaces/numpy_utils.h>
+
 namespace nb = nanobind;
 
 template <class T, class = std::enable_if_t<std::is_integral<T>::value>>
@@ -87,6 +89,8 @@ auto tomato(Point_index num_points,
   // we only care about the raw cluster, we could use a vector to store the second, store first into a set, and only
   // insert in the vector if merged is absent from the set
 
+  auto density_view = density.view();
+
   for (Point_index i = 0; i < num_points; ++i) {
     // auto&& ngb = neighbors[order[i]];
     // TODO: have a specialization where we don't need python types and py::cast
@@ -134,8 +138,8 @@ auto tomato(Point_index num_points,
       Point_index k = ds_base[ck].max;
       Point_index young = std::max(j, k);
       Point_index old = std::min(j, k);
-      auto d_young = density(order[young]);
-      auto d_i = density(order[i]);
+      auto d_young = density_view(order[young]);
+      auto d_i = density_view(order[i]);
       assert(d_young >= d_i);
       // Always merge (the non-hierarchical algorithm would only conditionally merge here
       persistence->push_back(d_young);
@@ -157,7 +161,7 @@ auto tomato(Point_index num_points,
   // Maximum for each connected component
   std::vector<double>* max_cc = new std::vector<double>();
   for (Cluster_index i = 0; i < n_raw_clusters; ++i) {
-    if (ds_base[i].parent == i) max_cc->push_back(density(order[ds_base[i].max]));
+    if (ds_base[i].parent == i) max_cc->push_back(density_view(order[ds_base[i].max]));
   }
   assert((Cluster_index)(merges.size() + max_cc->size()) == n_raw_clusters);
 
@@ -202,23 +206,10 @@ auto tomato(Point_index num_points,
   std::vector<Cluster_index>* raw_cluster_ordered = new std::vector<Cluster_index>(num_points);
   for (int i = 0; i < num_points; ++i) (*raw_cluster_ordered)[i] = raw_cluster[rorder[i]];
 
-  return nb::make_tuple(
-      nb::ndarray<Cluster_index, nanobind::numpy>(
-          raw_cluster_ordered->data(),
-          {raw_cluster_ordered->size()},
-          nb::capsule(raw_cluster_ordered,
-                      [](void* p) noexcept { delete reinterpret_cast<std::vector<Cluster_index>*>(p); })),
-      nb::ndarray<Cluster_index, nanobind::numpy>(
-          children->data(),
-          {children->size() / 2, 2},
-          nb::capsule(children, [](void* p) noexcept { delete reinterpret_cast<std::vector<Cluster_index>*>(p); })),
-      nb::ndarray<double, nanobind::numpy>(
-          persistence->data(),
-          {persistence->size() / 2, 2},
-          nb::capsule(persistence, [](void* p) noexcept { delete reinterpret_cast<std::vector<double>*>(p); })),
-      nb::ndarray<double, nanobind::numpy>(max_cc->data(), {max_cc->size()}, nb::capsule(max_cc, [](void* p) noexcept {
-                                             delete reinterpret_cast<std::vector<double>*>(p);
-                                           })));
+  return nb::make_tuple(_wrap_as_numpy_array(raw_cluster_ordered, raw_cluster_ordered->size()),
+                        _wrap_as_numpy_array(children, children->size() / 2, 2),
+                        _wrap_as_numpy_array(persistence, persistence->size() / 2, 2),
+                        _wrap_as_numpy_array(max_cc, max_cc->size()));
 }
 
 auto merge(nb::ndarray<Cluster_index, nb::ndim<2>, nb::c_contig> children,
@@ -230,8 +221,11 @@ auto merge(nb::ndarray<Cluster_index, nb::ndim<2>, nb::c_contig> children,
               << n_leaves << '\n';
     n_final = n_leaves;  // or return something special and let Tomato use leaf_labels_?
   }
-  if (children.shape(1) != 2) throw std::runtime_error("internal error: `children` has to be (n,2) shaped.");
-  const int n_merges = children.shape(0);
+
+  auto children_view = children.view();
+
+  if (children_view.shape(1) != 2) throw std::runtime_error("internal error: `children` has to be (n,2) shaped.");
+  const int n_merges = children_view.shape(0);
   if (n_merges + n_final < n_leaves) {
     std::cerr << "The number of clusters required " << n_final << " is smaller than the number of connected components "
               << n_leaves - n_merges << '\n';
@@ -255,8 +249,8 @@ auto merge(nb::ndarray<Cluster_index, nb::ndim<2>, nb::c_contig> children,
     ds_bas[i].name = -1;
   }
   for (Cluster_index m = 0; m < n_leaves - n_final; ++m) {
-    Cluster_index j = ds.find_set(children(m, 0));
-    Cluster_index k = ds.find_set(children(m, 1));
+    Cluster_index j = ds.find_set(children_view(m, 0));
+    Cluster_index k = ds.find_set(children_view(m, 1));
     assert(j != k);
     ds.make_set(i);
     ds.link(i, j);
@@ -271,9 +265,7 @@ auto merge(nb::ndarray<Cluster_index, nb::ndim<2>, nb::c_contig> children,
     if (ds_bas[k].name == -1) ds_bas[k].name = next_cluster_name++;
     ret->push_back(ds_bas[k].name);
   }
-  return nb::ndarray<Cluster_index, nanobind::numpy>(ret->data(), {ret->size()}, nb::capsule(ret, [](void* p) noexcept {
-                                                       delete reinterpret_cast<std::vector<Cluster_index>*>(p);
-                                                     }));
+  return _wrap_as_numpy_array(ret, ret->size());
 }
 
 // TODO: Do a special version when ngb is a numpy array, where we can cast to int[k][n] ?
@@ -286,8 +278,11 @@ auto hierarchy(nb::object ngb, nb::ndarray<double, nb::ndim<1>, nb::c_contig> de
   const int n = density.shape(0);
   // Vector { 0, 1, ..., n-1 }
   std::vector<Point_index> order(boost::counting_iterator<Point_index>(0), boost::counting_iterator<Point_index>(n));
+  auto density_view = density.view();
   // Permutation of the indices to get points in decreasing order of density
-  std::sort(std::begin(order), std::end(order), [=](Point_index i, Point_index j) { return density(i) > density(j); });
+  std::sort(std::begin(order), std::end(order), [&density_view](Point_index i, Point_index j) {
+    return density_view(i) > density_view(j);
+  });
   // Inverse permutation
   std::vector<Point_index> rorder(n);
   for (Point_index i : boost::irange(0, n)) rorder[order[i]] = i;

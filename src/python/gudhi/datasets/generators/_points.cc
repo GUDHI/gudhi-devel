@@ -12,13 +12,13 @@
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/ndarray.h>
 #include <nanobind/stl/string.h>
 
 #include <CGAL/Epick_d.h>
 
 #include <gudhi/random_point_generators.h>
 #include <gudhi/Debug_utils.h>
+#include <python_interfaces/numpy_utils.h>
 
 namespace nb = nanobind;
 
@@ -37,14 +37,11 @@ auto generate_points_on_sphere(const size_t n_samples, const int ambient_dim, do
   }
 
   // Reserve sufficient memory space to copy data
-  std::vector<double> *points = new std::vector<double>(n_samples * ambient_dim);
+  auto points = new double[n_samples * ambient_dim];
   for (size_t i = 0; i < n_samples; i++)
-    for (int j = 0; j < ambient_dim; j++) (*points)[i * ambient_dim + j] = points_generated[i][j];
+    for (int j = 0; j < ambient_dim; j++) points[i * ambient_dim + j] = points_generated[i][j];
 
-  return nb::ndarray<nb::numpy, double>(
-      points->data(), {n_samples, static_cast<size_t>(ambient_dim)}, nb::capsule(points, [](void *p) noexcept {
-        delete reinterpret_cast<std::vector<double> *>(p);
-      }));
+  return _wrap_as_numpy_array(points, n_samples, ambient_dim);
 }
 
 auto generate_points_on_torus(size_t n_samples, int dim, std::string sample)
@@ -64,14 +61,11 @@ auto generate_points_on_torus(size_t n_samples, int dim, std::string sample)
               "Py array second dimension not matching the double torus dimension");
 
   // Reserve sufficient memory space to copy data
-  std::vector<double> *points = new std::vector<double>(npoints * 2 * dim);
+  auto points = new double[npoints * 2 * dim];
   for (size_t i = 0; i < npoints; i++)
-    for (int j = 0; j < 2 * dim; j++) (*points)[i * (2 * dim) + j] = points_generated[i][j];
+    for (int j = 0; j < 2 * dim; j++) points[i * (2 * dim) + j] = points_generated[i][j];
 
-  return nb::ndarray<nb::numpy, double>(
-      points->data(), {npoints, static_cast<size_t>(2 * dim)}, nb::capsule(points, [](void *p) noexcept {
-        delete reinterpret_cast<std::vector<double> *>(p);
-      }));
+  return _wrap_as_numpy_array(points, npoints, 2 * dim);
 }
 
 NB_MODULE(_points_ext, m)

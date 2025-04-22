@@ -18,6 +18,7 @@
 #include <nanobind/ndarray.h>
 
 #include <gudhi/Flag_complex_edge_collapser.h>
+#include <python_interfaces/numpy_utils.h>
 
 namespace nb = nanobind;
 
@@ -40,19 +41,17 @@ nb::object collapse(nb::ndarray<Index, nb::ndim<1>> is,
                           nb::ndarray<Filtr, nanobind::numpy>(nullptr, {0}));
   }
 
+  auto is_view = is.view();
+  auto js_view = js.view();
+  auto fs_view = fs.view();
+
   Edges edges;
   {
     nb::gil_scoped_release release;
     Index n_edges = static_cast<Index>(is.shape(0));
     edges.reserve(n_edges);
-    auto strides_i = is.stride(0);
-    auto strides_j = js.stride(0);
-    auto strides_f = fs.stride(0);
     for (Index k = 0; k < n_edges; ++k) {
-      Index i = *(is.data() + k * strides_i);
-      Index j = *(js.data() + k * strides_j);
-      Filtr f = *(fs.data() + k * strides_f);
-      edges.emplace_back(i, j, f);
+      edges.emplace_back(is_view(k), js_view(k), fs_view(k));
     }
     for (int k = 0; k < nb_iterations; ++k) {
       edges = Gudhi::collapse::flag_complex_collapse_edges(std::move(edges), [](auto const& d) { return d; });
@@ -61,25 +60,18 @@ nb::object collapse(nb::ndarray<Index, nb::ndim<1>> is,
 
   // nanobind needs the strides to be an element count and not a byte size, so every count needs to be of the same size
   // not sure this works with the vector `edges`.
-  std::vector<Index>* indices = new std::vector<Index>(edges.size() * 2);
-  std::vector<Filtr>* filtrs = new std::vector<Filtr>(edges.size());
+  auto indices = new Index[edges.size() * 2];
+  auto filtrs = new Filtr[edges.size()];
 
   std::size_t i = 0;
   for (const Filtered_edge& e : edges) {
-    (*indices)[i] = std::get<0>(e);
-    (*indices)[edges.size() + i] = std::get<1>(e);
-    (*filtrs)[i] = std::get<2>(e);
+    indices[i] = std::get<0>(e);
+    indices[edges.size() + i] = std::get<1>(e);
+    filtrs[i] = std::get<2>(e);
     ++i;
   }
 
-  return nb::make_tuple(
-      nb::ndarray<Index, nanobind::numpy>(
-          indices->data(),
-          {2, edges.size()},
-          nb::capsule(indices, [](void* p) noexcept { delete reinterpret_cast<std::vector<Index>*>(p); })),
-      nb::ndarray<Filtr, nanobind::numpy>(filtrs->data(), {edges.size()}, nb::capsule(filtrs, [](void* p) noexcept {
-                                            delete reinterpret_cast<std::vector<Filtr>*>(p);
-                                          })));
+  return nb::make_tuple(_wrap_as_numpy_array(indices, 2, edges.size()), _wrap_as_numpy_array(filtrs, edges.size()));
 }
 
 NB_MODULE(_edge_collapse_ext, m)

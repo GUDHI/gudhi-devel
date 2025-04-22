@@ -15,7 +15,6 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/vector.h>
-#include <nanobind/ndarray.h>
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Rips_complex.h>
