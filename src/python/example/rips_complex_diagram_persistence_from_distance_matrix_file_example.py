@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import argparse
-import gudhi
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -13,9 +10,12 @@ import gudhi
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+
+import argparse
+import gudhi as gd
+
 
 parser = argparse.ArgumentParser(
     description="RipsComplex creation from " "a distance matrix read in a csv file.",
@@ -42,24 +42,24 @@ args = parser.parse_args()
 print("#####################################################################")
 print("RipsComplex creation from distance matrix read in a csv file")
 
-message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
-print(message)
+print(f"RipsComplex with max_edge_length={args.max_edge_length}")
 
-distance_matrix = gudhi.read_lower_triangular_matrix_from_csv_file(csv_file=args.file, separator=args.separator)
-rips_complex = gudhi.RipsComplex(
+distance_matrix = gd.read_lower_triangular_matrix_from_csv_file(
+    csv_file=args.file, separator=args.separator
+)
+rips_complex = gd.RipsComplex(
     distance_matrix=distance_matrix, max_edge_length=args.max_edge_length
 )
 simplex_tree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
 
-message = "Number of simplices=" + repr(simplex_tree.num_simplices())
-print(message)
+print(f"Number of simplices={simplex_tree.num_simplices()}")
 
 diag = simplex_tree.persistence()
 
-print("betti_numbers()=")
-print(simplex_tree.betti_numbers())
+print(f"betti_numbers()={simplex_tree.betti_numbers()}")
 
 if args.no_diagram == False:
     import matplotlib.pyplot as plot
-    gudhi.plot_persistence_diagram(diag, band=args.band)
+
+    gd.plot_persistence_diagram(diag, band=args.band)
     plot.show()
