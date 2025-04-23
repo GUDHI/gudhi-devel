@@ -8,10 +8,12 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Bottleneck.h>
 #include <optional>
+
 #include <pybind11_diagram_utils.h>
 #include <pybind11/stl.h>
+
+#include <gudhi/Bottleneck.h>
 
 // Indices are added internally in bottleneck_distance, they are not needed in the input.
 static auto make_point(double x, double y, py::ssize_t) { return std::pair(x, y); };
@@ -29,12 +31,15 @@ double bottleneck(Dgm d1, Dgm d2, std::optional<double> epsilon)
   return Gudhi::persistence_diagram::bottleneck_distance(diag1, diag2, e);
 }
 
-PYBIND11_MODULE(bottleneck, m) {
-      m.attr("__license__") = "GPL v3";
-      m.def("bottleneck_distance", &bottleneck,
-          py::arg("diagram_1"), py::arg("diagram_2"),
-          py::arg("e") = py::none(),
-          R"pbdoc(
+PYBIND11_MODULE(bottleneck, m)
+{
+  m.attr("__license__") = "GPL v3";
+  m.def("bottleneck_distance",
+        &bottleneck,
+        py::arg("diagram_1"),
+        py::arg("diagram_2"),
+        py::arg("e") = py::none(),
+        R"pbdoc(
     Compute the Bottleneck distance between two diagrams.
     Points at infinity and on the diagonal are supported.
 

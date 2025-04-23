@@ -7,9 +7,12 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from .._ripser import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
-from ..flag_filtration.edge_collapse import reduce_graph
-from .. import SimplexTree
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2022 Inria"
+__license__ = "MIT"
+
+
 import math
 import numpy as np
 from typing import Union, Iterable, Literal, Optional
@@ -20,6 +23,11 @@ from scipy.spatial.distance import pdist, squareform
 
 # joblib is required by scikit-learn
 from joblib import Parallel, delayed
+
+from .._ripser import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
+from ..flag_filtration.edge_collapse import reduce_graph
+from .. import SimplexTree
+
 
 # Mermaid sequence diagram - https://mermaid-js.github.io/mermaid-live-editor/
 # sequenceDiagram

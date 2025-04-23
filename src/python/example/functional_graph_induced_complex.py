@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import gudhi
-import argparse
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -13,9 +10,12 @@ import argparse
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2018 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"  # Because of CoverComplex
+
+
+import argparse
+from gudhi import CoverComplex
+
 
 parser = argparse.ArgumentParser(
     description="Functional GIC " "from points read in a OFF file.",
@@ -38,7 +38,7 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-nerve_complex = gudhi.CoverComplex()
+nerve_complex = CoverComplex()
 nerve_complex.set_verbose(args.verbose)
 
 if nerve_complex.read_point_cloud(args.off_file):
