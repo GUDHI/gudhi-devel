@@ -20,8 +20,9 @@
 
 namespace py = pybind11;
 
-template<class Index, class Filtr>
-py::object collapse(py::array_t<Index> is, py::array_t<Index> js, py::array_t<Filtr> fs, int nb_iterations) {
+template <class Index, class Filtr>
+py::object collapse(py::array_t<Index> is, py::array_t<Index> js, py::array_t<Filtr> fs, int nb_iterations)
+{
   typedef std::tuple<Index, Index, Filtr> Filtered_edge;
   typedef std::vector<Filtered_edge> Edges;
   py::buffer_info bufi = is.request();
@@ -32,7 +33,7 @@ py::object collapse(py::array_t<Index> is, py::array_t<Index> js, py::array_t<Fi
   if (bufi.shape[0] != bufj.shape[0] || bufi.shape[0] != buff.shape[0])
     throw std::runtime_error("Input arrays must have the same size");
   if (buff.shape[0] == 0) {
-    py::array_t<Index> indices({{ 2, 0 }}, {{ 0, 0 }});
+    py::array_t<Index> indices({{2, 0}}, {{0, 0}});
     py::array_t<Filtr> filtrs;
     return py::make_tuple(std::move(indices), std::move(filtrs));
   }
@@ -51,17 +52,30 @@ py::object collapse(py::array_t<Index> is, py::array_t<Index> js, py::array_t<Fi
       edges.emplace_back(i, j, f);
     }
     for (int k = 0; k < nb_iterations; ++k) {
-      edges = Gudhi::collapse::flag_complex_collapse_edges(std::move(edges), [](auto const&d){return d;});
+      edges = Gudhi::collapse::flag_complex_collapse_edges(std::move(edges), [](auto const& d) { return d; });
     }
   }
-  py::capsule owner(&edges, [](void*p){ delete reinterpret_cast<Edges*>(p); });
+  py::capsule owner(&edges, [](void* p) { delete reinterpret_cast<Edges*>(p); });
   const auto offset = reinterpret_cast<char*>(&std::get<1>(edges[0])) - reinterpret_cast<char*>(&std::get<0>(edges[0]));
-  py::array_t<Index> indices({{ 2, static_cast<py::ssize_t>(edges.size()) }}, {{ offset, sizeof(Filtered_edge) }}, &std::get<0>(edges[0]), owner);
-  py::array_t<Filtr> filtrs ({{    static_cast<py::ssize_t>(edges.size()) }}, {{         sizeof(Filtered_edge) }}, &std::get<2>(edges[0]), owner);
+  py::array_t<Index> indices(
+      {{2, static_cast<py::ssize_t>(edges.size())}}, {{offset, sizeof(Filtered_edge)}}, &std::get<0>(edges[0]), owner);
+  py::array_t<Filtr> filtrs(
+      {{static_cast<py::ssize_t>(edges.size())}}, {{sizeof(Filtered_edge)}}, &std::get<2>(edges[0]), owner);
   return py::make_tuple(std::move(indices), std::move(filtrs));
 }
 
-PYBIND11_MODULE(_edge_collapse, m) {
-  m.def("_collapse_edges", collapse<int, float>, py::arg("i").noconvert(), py::arg("j").noconvert(), py::arg("f").noconvert(), py::arg("nb_iterations")=1);
-  m.def("_collapse_edges", collapse<py::ssize_t, double>, py::arg("i"), py::arg("j"), py::arg("f"), py::arg("nb_iterations")=1);
+PYBIND11_MODULE(_edge_collapse, m)
+{
+  m.def("_collapse_edges",
+        collapse<int, float>,
+        py::arg("i").noconvert(),
+        py::arg("j").noconvert(),
+        py::arg("f").noconvert(),
+        py::arg("nb_iterations") = 1);
+  m.def("_collapse_edges",
+        collapse<py::ssize_t, double>,
+        py::arg("i"),
+        py::arg("j"),
+        py::arg("f"),
+        py::arg("nb_iterations") = 1);
 }

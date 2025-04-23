@@ -8,10 +8,13 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi.sklearn.cubical_persistence import CubicalPersistence
-import gudhi
+
 import numpy as np
 from sklearn import datasets
+
+from gudhi.sklearn.cubical_persistence import CubicalPersistence
+import gudhi
+
 
 CUBICAL_PERSISTENCE_H0_IMG0 = np.array([[0.0, 6.0], [0.0, 8.0], [0.0, np.inf]])
 
@@ -33,7 +36,7 @@ def test_simple_constructor_from_top_cells_list():
 
 def test_simple_constructor_from_top_cells_list():
     digits = datasets.load_digits().images[:10]
-    cp = CubicalPersistence(homology_dimensions=0, input_type='vertices', n_jobs=-2)
+    cp = CubicalPersistence(homology_dimensions=0, input_type="vertices", n_jobs=-2)
     diags = cp.fit_transform(digits)
     assert len(diags) == 10
     np.testing.assert_array_equal(diags[2], [[8, 13], [0, 15], [0, np.inf]])
@@ -52,27 +55,31 @@ def test_1d():
     np.testing.assert_array_equal(r, rf)
     np.testing.assert_array_equal(r, rd)
 
+
 def cmp(a):
     dim_list = list(range(len(a.shape)))
-    d1 = CubicalPersistence(homology_dimensions=dim_list, input_type='top_dimensional_cells').fit_transform([a])[0]
+    d1 = CubicalPersistence(
+        homology_dimensions=dim_list, input_type="top_dimensional_cells"
+    ).fit_transform([a])[0]
     p = gudhi.CubicalComplex(top_dimensional_cells=a).persistence()
     # Ideally we would compare multisets, but length + set should be good enough.
     assert sum(len(d) for d in d1) == len(p)
     d1 = [{(a, b) for [a, b] in d} for d in d1]
     d2 = [set() for _ in dim_list]
-    for (dim, i) in p:
+    for dim, i in p:
         d2[dim].add(i)
     assert d1 == d2
 
+
 def test_compare_top_cells():
-    cmp(np.random.rand(20,15,10))
-    cmp(np.random.rand(20,10))
-    cmp(np.random.rand(20,2))
-    cmp(np.random.rand(2,20))
-    cmp(np.random.rand(20,1))
-    cmp(np.random.rand(1,20))
+    cmp(np.random.rand(20, 15, 10))
+    cmp(np.random.rand(20, 10))
+    cmp(np.random.rand(20, 2))
+    cmp(np.random.rand(2, 20))
+    cmp(np.random.rand(20, 1))
+    cmp(np.random.rand(1, 20))
     cmp(np.random.rand(20))
-    a = np.random.rand(20,10)
-    cmp(np.array(a, order='F'))
+    a = np.random.rand(20, 10)
+    cmp(np.array(a, order="F"))
     cmp(a[0:18])
-    cmp(a[::2,::-1])
+    cmp(a[::2, ::-1])

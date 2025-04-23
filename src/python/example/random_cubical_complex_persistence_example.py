@@ -1,12 +1,5 @@
 #!/usr/bin/env python
 
-import gudhi
-import numpy
-from functools import reduce
-import argparse
-import operator
-
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -17,9 +10,14 @@ import operator
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
+
+
+import numpy
+from functools import reduce
+import argparse
+import operator
+from gudhi import CubicalComplex
 
 parser = argparse.ArgumentParser(
     description="Random cubical complex.",
@@ -37,7 +35,7 @@ dimension_multiplication = reduce(operator.mul, args.dimension, 1)
 if dimension_multiplication > 1:
     print("#####################################################################")
     print("CubicalComplex creation")
-    cubical_complex = gudhi.CubicalComplex(
+    cubical_complex = CubicalComplex(
         dimensions=args.dimension,
         top_dimensional_cells=numpy.random.rand(dimension_multiplication),
     )
