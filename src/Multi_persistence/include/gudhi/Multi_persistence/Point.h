@@ -41,17 +41,17 @@ class Point
  public:
   using Container = std::vector<T>; /**< Type of coordinate container. */
 
-  using value_type = typename Container::value_type;                          /**< Type of coordinates. */
-  using allocator_type = typename Container::allocator_type;                  /**< Allocator type. */
-  using size_type = typename Container::size_type;                            /**< Size type. */
-  using difference_type = typename Container::difference_type;                /**< Difference type. */
-  using reference = typename Container::reference;                            /**< Coordinate reference type. */
-  using const_reference = typename Container::const_reference;                /**< Coordinate const reference type. */
-  using pointer = typename Container::pointer;                                /**< Coordinate pointer type. */
-  using iterator = typename Container::iterator;                              /**< Coordinate iterator type. */
-  using const_iterator = typename Container::const_iterator;                  /**< Coordinate const iterator type. */
-  using reverse_iterator = typename Container::reverse_iterator;              /**< Coordinate reverse iterator type. */
-  using const_reverse_iterator = typename Container::const_reverse_iterator;  /**< Coordinate reverse iterator type. */
+  using value_type = typename Container::value_type;                         /**< Type of coordinates. */
+  using allocator_type = typename Container::allocator_type;                 /**< Allocator type. */
+  using size_type = typename Container::size_type;                           /**< Size type. */
+  using difference_type = typename Container::difference_type;               /**< Difference type. */
+  using reference = typename Container::reference;                           /**< Coordinate reference type. */
+  using const_reference = typename Container::const_reference;               /**< Coordinate const reference type. */
+  using pointer = typename Container::pointer;                               /**< Coordinate pointer type. */
+  using iterator = typename Container::iterator;                             /**< Coordinate iterator type. */
+  using const_iterator = typename Container::const_iterator;                 /**< Coordinate const iterator type. */
+  using reverse_iterator = typename Container::reverse_iterator;             /**< Coordinate reverse iterator type. */
+  using const_reverse_iterator = typename Container::const_reverse_iterator; /**< Coordinate reverse iterator type. */
 
   /**
    * @brief Default constructor.
@@ -66,24 +66,25 @@ class Point
   /**
    * @brief Constructs a new point with given number of coordinates. All values are initialized with given value.
    */
-  Point(size_type count, const T& value) : coordinates_(count, value) {}
+  Point(size_type count, const T &value) : coordinates_(count, value) {}
 
   /**
    * @brief Constructs a new point from the given range.
-   * 
+   *
    * @tparam InputIt Iterator type that must follow the condition of the corresponding vector constructor.
    */
   template <class InputIt>
-  Point(InputIt first, InputIt last) : coordinates_(first, last) {}
+  Point(InputIt first, InputIt last) : coordinates_(first, last)
+  {}
 
   /**
    * @brief Copy constructor.
    */
-  Point(const Point& other) = default;
+  Point(const Point &other) = default;
   /**
    * @brief Move constructor.
    */
-  Point(Point&& other) noexcept = default;
+  Point(Point &&other) noexcept = default;
 
   /**
    * @brief Constructs a new point from the given range.
@@ -103,22 +104,31 @@ class Point
   /**
    * @brief Assign copy operator.
    */
-  Point& operator=(const Point& other) { coordinates_ = other.coordinates_; }
+  Point &operator=(const Point &other)
+  {
+    coordinates_ = other.coordinates_;
+    return *this;
+  }
 
   /**
    * @brief Assign move operator.
    */
-  Point& operator=(Point&& other) noexcept(
+  Point &operator=(Point &&other) noexcept(
       std::allocator_traits<allocator_type>::propagate_on_container_move_assignment::value ||
       std::allocator_traits<allocator_type>::is_always_equal::value)
   {
     coordinates_ = std::move(other.coordinates_);
+    return *this;
   }
 
   /**
    * @brief Assign copy operator.
    */
-  Point& operator=(std::initializer_list<value_type> ilist) { coordinates_ = Container(ilist.begin(), ilist.end()); }
+  Point &operator=(std::initializer_list<value_type> ilist)
+  {
+    coordinates_ = Container(ilist.begin(), ilist.end());
+    return *this;
+  }
 
   /**
    * @brief At operator.
@@ -163,12 +173,12 @@ class Point
   /**
    * @brief Data operator.
    */
-  T* data() noexcept { return coordinates_.data(); }
+  T *data() noexcept { return coordinates_.data(); }
 
   /**
    * @brief Data operator.
    */
-  const T* data() const noexcept { return coordinates_.data(); }
+  const T *data() const noexcept { return coordinates_.data(); }
 
   /**
    * @brief begin.
@@ -238,7 +248,7 @@ class Point
   /**
    * @brief Swap operator.
    */
-  void swap(Point& other) noexcept(std::allocator_traits<allocator_type>::propagate_on_container_swap::value ||
+  void swap(Point &other) noexcept(std::allocator_traits<allocator_type>::propagate_on_container_swap::value ||
                                    std::allocator_traits<allocator_type>::is_always_equal::value)
   {
     coordinates_.swap(other.coordinates_);
@@ -247,18 +257,15 @@ class Point
   /**
    * @brief Swap operator.
    */
-  friend void swap(Point& p1, Point& p2) noexcept
-  {
-    p1.coordinates_.swap(p2.coordinates_);
-  }
+  friend void swap(Point &p1, Point &p2) noexcept { p1.coordinates_.swap(p2.coordinates_); }
 
   /**
    * @brief Outstream operator.
    */
-  friend std::ostream& operator<<(std::ostream& os, const Point<T>& point)
+  friend std::ostream &operator<<(std::ostream &os, const Point<T> &point)
   {
     os << "[ ";
-    for (const T& p : point) os << p << " ";
+    for (const T &p : point) os << p << " ";
     os << " ]";
     return os;
   }
@@ -320,7 +327,7 @@ class Point
   {
     if (&a == &b) return true;
     if (a.size() != b.size()) return false;
-    return a == b;
+    return a.coordinates_ == b.coordinates_;
   }
 
   /**
@@ -840,7 +847,7 @@ class Point
   /**
    * @brief Infinity value of an entry of the filtration value.
    */
-   constexpr static const T T_inf = Gudhi::multi_filtration::MF_T_inf<T>;
+  constexpr static const T T_inf = Gudhi::multi_filtration::MF_T_inf<T>;
 
  private:
   Container coordinates_; /**< Coordinates of the point. */
