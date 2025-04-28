@@ -8,7 +8,8 @@ jobs:
     variables:
       pythonVersion: "3.9"
       cmakeBuildType: Release
-      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON
+      # WITH_GUDHI_PYTHON=OFF on purpose. It is built and installed via pip
+      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
       # On this VM, 2 versions of python are installed. Default Python_FIND_FRAMEWORK is FIRST, which means asks frameworks first
       # LAST means consult frameworks in last resort, use the PATH first
       extraCmakeOptions: -DPython_FIND_FRAMEWORK=LAST
@@ -35,9 +36,9 @@ jobs:
           fi
         displayName: "Install build dependencies"
       - bash: |
-          mkdir build
-          cd build
           which python
+          python -m pip install .
+          cd build
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) $(extraCmakeOptions) -GNinja $(gudhiCmakeOptions) ..
           ninja
           ninja doxygen
@@ -54,7 +55,8 @@ jobs:
       pythonVersion: "3.9"
       cmakeBuildType: Release
       cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
-      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
+      # WITH_GUDHI_PYTHON=OFF on purpose. It is built and installed via pip
+      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
       # On this VM, 2 versions of python are installed. Default Python_FIND_REGISTRY is FIRST, which means asks registry first
       # LAST means consult registry in last resort, use the standard libraries or headers first
       extraCmakeOptions: -DPython_FIND_REGISTRY=LAST
@@ -83,7 +85,7 @@ jobs:
         displayName: "Install build dependencies"
       - script: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          mkdir build
+          python -m pip install .
           cd build
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(cmakeVcpkgFlags) $(gudhiCmakeOptions) ..
           IF %ERRORLEVEL% NEQ 0 EXIT 1
