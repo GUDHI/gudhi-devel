@@ -14,7 +14,7 @@ jobs:
           submodules: true
       - name: Build wheel for Python 3.9
         env:
-          SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON39/bin/python"
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON39/bin/python"
         run: |
           $PYTHON39/bin/python -m pip wheel -ve .
           auditwheel repair *.whl

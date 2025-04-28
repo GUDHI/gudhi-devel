@@ -16,7 +16,7 @@ jobs:
           submodules: true
       - name: Build wheel for Python 3.9
         env:
-          SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON39/bin/python"
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON39/bin/python"
         run: |
           $PYTHON39/bin/python -m pip wheel -ve .
       # For python >=3.9, numpy >= 2.0 is used to package and test ABI compatibility with numpy 1.X
@@ -63,7 +63,7 @@ jobs:
 
       - name: Build wheel for Python 3.10
         env:
-          SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON310/bin/python"
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON310/bin/python"
         run: |
           $PYTHON310/bin/python -m pip wheel -ve .
       - name: Install and test wheel for Python 3.10
@@ -105,7 +105,7 @@ jobs:
           $PYTHON310/bin/python -m pytest src/python/test/test_collapse_edges.py
       - name: Build wheel for Python 3.11
         env:
-          SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON311/bin/python"
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON311/bin/python"
         run: |
           $PYTHON311/bin/python -m pip wheel -ve .
       - name: Install and test wheel for Python 3.11
@@ -146,7 +146,7 @@ jobs:
           $PYTHON311/bin/python -m pytest src/python/test/test_collapse_edges.py
       - name: Build wheel for Python 3.12
         env:
-          SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON312/bin/python"
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON312/bin/python"
         run: |
           $PYTHON312/bin/python -m pip wheel -ve .
       - name: Install and test wheel for Python 3.12
@@ -187,7 +187,7 @@ jobs:
           $PYTHON312/bin/python -m pytest src/python/test/test_collapse_edges.py
       - name: Build wheel for Python 3.13
         env:
-          SKBUILD_CMAKE_DEFINE: "WITH_GUDHI_TEST=OFF;WITH_GUDHI_UTILITIES=OFF;WITH_GUDHI_GUDHUI=OFF;CMAKE_BUILD_TYPE=Release;Python_EXECUTABLE=$PYTHON313/bin/python"
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON313/bin/python"
         run: |
           $PYTHON313/bin/python -m pip wheel -ve .
       - name: Install and test wheel for Python 3.13
