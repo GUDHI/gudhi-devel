@@ -1,28 +1,17 @@
-name: pip packaging windows
+name: pip build windows
 
-on:
-  release:
-    types: [published]
+on: [push, pull_request]
 
 jobs:
-  # Python 3.9+ specific case where NumPy 2.x will be supported
-  wheels:
+  build:
     runs-on: windows-latest
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9"]
         include:
           - python-version: "3.9"
             numpy-version: "1.19.3"
-          - python-version: "3.10"
-            numpy-version: "1.21.6"
-          - python-version: "3.11"
-            numpy-version: "1.23.2"
-          - python-version: "3.12"
-            numpy-version: "1.26.0"
-          - python-version: "3.13"
-            numpy-version: "2.1.0"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +32,7 @@ jobs:
           ls "C:\vcpkg\installed\x64-windows\bin\"
           python -m pip install --user numpy>=2.0
           python -m pip install --user -r .\ext\gudhi-deploy\build-requirements.txt
-          python -m pip install --user twine delvewheel
+          python -m pip install --user delvewheel
           python -m pip list
       - name: Build python wheel and repair it
         env:
@@ -54,6 +43,11 @@ jobs:
           ls ".\"
           delvewheel show *.whl
           delvewheel repair -w wheelhouse -v *.whl
+      - name: Upload Windows python wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows python wheel
+          path: wheelhouse/*.whl
       # Test ABI compatibility with numpy 1.X
       - name: Install and test python wheel
         run: |
@@ -96,8 +90,3 @@ jobs:
           python -m pytest src/python/test/test_wasserstein_barycenter.py
           python -m pytest src/python/test/test_weighted_rips_complex.py
           python -m pytest src/python/test/test_witness_complex.py
-      - name: Publish on PyPi
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: python -m twine upload (Get-ChildItem wheelhouse\*.whl | % FullName)
