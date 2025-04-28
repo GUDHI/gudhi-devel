@@ -1214,6 +1214,27 @@ class Multi_parameter_generator
   // MODIFIERS
 
   /**
+   * @brief If the filtration value is at +/- infinity or NaN, the underlying container will probably only contain
+   * one element, representing the value. This method forces the underlying container to contain explicitly
+   * `number_of_parameters` elements. If the container is empty, it will fill all new elements with the default
+   * value (+inf or -inf depending on `Co`). If the container had more than one element, does nothing
+   * (potentially even fails).
+   */
+  void force_size_to_number_of_parameters(int number_of_parameters)
+  {
+    if (number_of_parameters < 1) return;
+
+    if (generator_.size() > 1) {
+      GUDHI_CHECK(number_of_parameters == generator_.size(),
+                  "Cannot force size to another number of parameters than set.");
+      return;
+    }
+
+    auto val = generator_.empty() ? _get_default_value() : generator_[0];
+    generator_.resize(number_of_parameters, val);
+  }
+
+  /**
    * @brief Sets the generator to the least common upper bound between it and the given value.
    *
    * @tparam GeneratorRange Range of elements convertible to `T`. Must have a begin(), end() and size() method.
