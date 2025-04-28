@@ -85,18 +85,19 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
 
   void insert_matrix(const nanobind::ndarray<double, nanobind::ndim<2> >& filtrations, double max_filtration)
   {
+    auto fil_view = filtrations.view();
     // We could delegate to insert_graph, but wrapping the matrix in a graph interface is too much work,
     // and this is a bit more efficient.
     auto& rm = this->root()->members_;
-    int n = filtrations.shape(0);
+    int n = fil_view.shape(0);
     for (int i = 0; i < n; ++i) {
-      double fv = filtrations(i, i);
+      double fv = fil_view(i, i);
       if (fv > max_filtration) continue;
       auto sh = rm.emplace_hint(rm.end(), i, Node(this->root(), fv));
       Siblings* children = nullptr;
       // Should we make a first pass to count the number of edges so we can reserve the right space?
       for (int j = i + 1; j < n; ++j) {
-        double fe = filtrations(i, j);
+        double fe = fil_view(i, j);
         if (fe > max_filtration) continue;
         if (!children) {
           children = new Siblings(this->root(), i);

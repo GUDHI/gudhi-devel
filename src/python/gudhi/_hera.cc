@@ -14,7 +14,6 @@
 #include <cstdint>  // missing in hera/wasserstein.h
 
 #include <nanobind/nanobind.h>
-#include <nanobind/ndarray.h>
 
 #ifdef _MSC_VER
 // https://github.com/grey-narn/hera/issues/3
@@ -27,6 +26,7 @@ using nanobind::ssize_t;
 
 #include <gudhi/Debug_utils.h>
 #include <python_interfaces/diagram_utils.h>
+#include <python_interfaces/numpy_utils.h>
 
 namespace nb = nanobind;
 
@@ -91,22 +91,24 @@ nb::object _wasserstein_distance(const Dgm& d1,
   // bug in Hera, matching_a_to_b_ is empty if one diagram is empty or both diagrams contain the same points
   if (res.matching_a_to_b_.size() == 0) {
     if (n1 == 0) {  // diag1 is empty
-      std::vector<int> arr(2 * n2);
-      nb::ndarray<int, nb::numpy, nb::ndim<2>> matching(arr.data(), {static_cast<size_t>(n2), 2});
+      auto matching = new int[2 * n2];
+      int i = 0;
       for (int j = 0; j < n2; ++j) {
-        matching(j, 0) = -1;
-        matching(j, 1) = j;
+        matching[i] = -1;
+        matching[i + 1] = j;
+        i += 2;
       }
-      return nb::make_tuple(dist, matching);
+      return nb::make_tuple(dist, _wrap_as_numpy_array(matching, n2, 2));
     }
     if (n2 == 0) {  // diag2 is empty
-      std::vector<int> arr(2 * n1);
-      nb::ndarray<int, nb::numpy, nb::ndim<2>> matching(arr.data(), {static_cast<size_t>(n1), 2});
-      for (int i = 0; i < n1; ++i) {
-        matching(i, 0) = i;
-        matching(i, 1) = -1;
+      auto matching = new int[2 * n1];
+      int i = 0;
+      for (int j = 0; j < n1; ++j) {
+        matching[i] = j;
+        matching[i + 1] = -1;
+        i += 2;
       }
-      return nb::make_tuple(dist, matching);
+      return nb::make_tuple(dist, _wrap_as_numpy_array(matching, n1, 2));
     }
     // The only remaining case should be that the 2 diagrams are identical, but possibly shuffled
     GUDHI_CHECK(n1 == n2, "unexpected bug in Hera?");
@@ -114,14 +116,15 @@ nb::object _wasserstein_distance(const Dgm& d1,
     std::vector v2(boost::begin(diag2), boost::end(diag2));
     std::sort(v1.begin(), v1.end());
     std::sort(v2.begin(), v2.end());
-    std::vector<int> arr(2 * n1);
-    nb::ndarray<int, nb::numpy, nb::ndim<2>> matching(arr.data(), {static_cast<size_t>(n1), 2});
+    auto matching = new int[2 * n1];
+    int j = 0;
     for (int i = 0; i < n1; ++i) {
       GUDHI_CHECK(v1[i][0] == v2[i][0] && v1[i][1] == v2[i][1], "unexpected bug in Hera?");
-      matching(i, 0) = v1[i].get_id();
-      matching(i, 1) = v2[i].get_id();
+      matching[j] = v1[i].get_id();
+      matching[j + 1] = v2[i].get_id();
+      j += 2;
     }
-    return nb::make_tuple(dist, matching);
+    return nb::make_tuple(dist, _wrap_as_numpy_array(matching, n1, 2));
   }
 
   // bug in Hera, diagonal points are ignored and don't appear in matching_a_to_b_
@@ -136,32 +139,30 @@ nb::object _wasserstein_distance(const Dgm& d1,
       res.matching_a_to_b_[-id - 1] = id;
     }
 
-  std::vector<int> arr(2 * (n1 + n2));
+  auto matching = new int[2 * (n1 + n2)];
   int cur = 0;
   for (auto x : res.matching_a_to_b_) {
     if (x.first < 0) {
       if (x.second < 0) {
       } else {
-        arr[2 * cur + 0] = -1;
-        arr[2 * cur + 1] = x.second;
+        matching[2 * cur + 0] = -1;
+        matching[2 * cur + 1] = x.second;
         cur++;
       }
     } else {
       if (x.second < 0) {
-        arr[2 * cur + 0] = x.first;
-        arr[2 * cur + 1] = -1;
+        matching[2 * cur + 0] = x.first;
+        matching[2 * cur + 1] = -1;
         cur++;
       } else {
-        arr[2 * cur + 0] = x.first;
-        arr[2 * cur + 1] = x.second;
+        matching[2 * cur + 0] = x.first;
+        matching[2 * cur + 1] = x.second;
         cur++;
       }
     }
   }
   // n1+n2 was too much, it only happens if everything matches to the diagonal, so we return matching[:cur,:]
-  arr.resize(2 * cur);
-  nb::ndarray<int, nb::numpy, nb::ndim<2>> ret(arr.data(), {static_cast<size_t>(cur), 2});
-  return nb::make_tuple(dist, ret);
+  return nb::make_tuple(dist, _wrap_as_numpy_array(matching, cur, 2));
 }
 
 NB_MODULE(_hera_ext, m)

@@ -20,6 +20,7 @@
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/ripser.h>
+#include <python_interfaces/numpy_utils.h>
 
 using namespace Gudhi::ripser;
 
@@ -74,11 +75,7 @@ nb::list doit(DistanceMatrix&& dist,
     ripser_auto(std::move(dist), max_dimension, max_edge_length, homology_coeff_field, switch_dim, output);
   }
   nb::list ret;
-  for (auto&& dgm : dgms)
-    ret.append(
-        nb::ndarray<T, nanobind::numpy>(dgm->data(), {dgm->size() / 2, 2}, nb::capsule(dgm, [](void* p) noexcept {
-                                          delete reinterpret_cast<std::vector<T>*>(p);
-                                        })));
+  for (auto&& dgm : dgms) ret.append(_wrap_as_numpy_array(dgm, dgm->size() / 2, 2));
   return ret;
 }
 
@@ -127,10 +124,14 @@ nb::list sparse(nb::ndarray<V, nb::ndim<1>> is,
                 T max_edge_length,
                 unsigned homology_coeff_field)
 {
+  auto is_view = is.view();
+  auto js_view = js.view();
+  auto fs_view = fs.view();
+
   // Duplicate entries and self loops are forbidden
-  if (is.ndim() != 1 || js.ndim() != 1 || fs.ndim() != 1)
+  if (is_view.ndim() != 1 || js_view.ndim() != 1 || fs_view.ndim() != 1)
     throw std::runtime_error("vertices and filtrations must be 1-dimensional arrays");
-  if (is.shape(0) != js.shape(0) || is.shape(0) != js.shape(0))
+  if (is_view.shape(0) != js_view.shape(0) || is_view.shape(0) != js_view.shape(0))
     throw std::runtime_error("vertices and filtrations must have the same shape");
 
   typedef DParams<V, T> P;
@@ -139,9 +140,9 @@ nb::list sparse(nb::ndarray<V, nb::ndim<1>> is,
 
   std::optional<nb::gil_scoped_release> release_local(std::in_place);
   std::vector<std::vector<vertex_diameter_t>> neighbors(num_vertices);
-  for (nb::ssize_t e = 0; e < is.shape(0); ++e) {
-    neighbors[is(e)].emplace_back(js(e), fs(e));
-    neighbors[js(e)].emplace_back(is(e), fs(e));
+  for (nb::ssize_t e = 0; e < is_view.shape(0); ++e) {
+    neighbors[is_view(e)].emplace_back(js_view(e), fs_view(e));
+    neighbors[js_view(e)].emplace_back(is_view(e), fs_view(e));
   }
   // We could easily parallelize this loop, but it is unlikely to be worth it.
   for (size_t i = 0; i < neighbors.size(); ++i) std::sort(neighbors[i].begin(), neighbors[i].end());
@@ -179,17 +180,7 @@ nb::tuple lower_to_coo(nb::object low_mat, double max_edge_length)
   };
 
   return nb::make_tuple(
-      nb::ndarray<int, nanobind::numpy>(
-          is->data(),
-          {is->size()},
-          nb::capsule(is, [](void* p) noexcept { delete reinterpret_cast<std::vector<int>*>(p); })),
-      nb::ndarray<int, nanobind::numpy>(
-          js->data(),
-          {js->size()},
-          nb::capsule(js, [](void* p) noexcept { delete reinterpret_cast<std::vector<int>*>(p); })),
-      nb::ndarray<double, nanobind::numpy>(fs->data(), {fs->size()}, nb::capsule(fs, [](void* p) noexcept {
-                                             delete reinterpret_cast<std::vector<double>*>(p);
-                                           })));
+      _wrap_as_numpy_array(is, is->size()), _wrap_as_numpy_array(js, js->size()), _wrap_as_numpy_array(fs, fs->size()));
 }
 
 double lower_cone_radius(nb::object low_mat)

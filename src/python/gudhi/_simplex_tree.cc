@@ -21,6 +21,7 @@
 
 #include <python_interfaces/Persistent_cohomology_interface.h>
 #include <python_interfaces/Simplex_tree_interface.h>
+#include <python_interfaces/numpy_utils.h>
 
 namespace nb = nanobind;
 
@@ -364,7 +365,7 @@ otherwise it is kept. The algorithm then proceeds with the next candidate.
            )doc")
       .def("clear", &gsti::clear, nb::call_guard<nb::gil_scoped_release>())
       .def("__getstate__",
-           [](const gsti &st) -> nb::ndarray<char, nb::ndim<1>, nb::numpy> {
+           [](const gsti &st) -> nb::ndarray<nb::numpy, char> {
              std::size_t buffer_size;
              char *buffer;
              {
@@ -373,11 +374,7 @@ otherwise it is kept. The algorithm then proceeds with the next candidate.
                buffer = new char[buffer_size];
                st.serialize(buffer, buffer_size);
              }
-             nb::ndarray<char, nb::ndim<1>, nb::numpy> np_buffer(
-                 buffer, {buffer_size}, nb::capsule(buffer, [](void *p) noexcept {
-                   delete reinterpret_cast<char *>(p);
-                 }));
-             return np_buffer;
+             return _wrap_as_numpy_array(buffer, buffer_size);
            })
       .def("__setstate__", [](gsti &st, const nb::ndarray<char, nb::ndim<1>, nb::numpy> &state) -> void {
         new (&st) gsti(deserialize_from_python(state));
