@@ -292,6 +292,8 @@ class Dynamic_multi_parameter_filtration
 
   /**
    * @brief Returns reference to value of parameter `p` of generator `g`.
+   * If the value is at +/- inf or NaN and it needs to be modified, @ref force_generator_size_to_number_of_parameters
+   * needs potentially to be called first such that this methods returns the right reference.
    */
   reference operator()(size_type g, size_type p)
   {
@@ -324,6 +326,8 @@ class Dynamic_multi_parameter_filtration
   /**
    * @brief Let \f$ g \f$ be the first value in `indices` and \f$ p \f$ the second value.
    * Returns reference to value of parameter \f$ p \f$ of generator \f$ g \f$.
+   * If the value is at +/- inf or NaN and it needs to be modified, @ref force_generator_size_to_number_of_parameters
+   * needs potentially to be called first such that this methods returns the right reference.
    *
    * @tparam IndexRange Range with a begin() and size() method.
    * @param indices Range with at least two elements. The first element should correspond to the generator number and
@@ -599,12 +603,97 @@ class Dynamic_multi_parameter_filtration
   // COMPARAISON OPERATORS
 
   /**
+   * @brief Returns `true` if and only if the first argument is lexicographically strictly less than the second
+   * argument. The "words" considered for the lexicographical order are all the generators concatenated together
+   * in order of generator index and then in order of parameter index. Different from @ref operator< "", this order
+   * is total.
+   */
+  friend bool is_strict_less_than_lexicographically(const Dynamic_multi_parameter_filtration &a,
+                                                    const Dynamic_multi_parameter_filtration &b)
+  {
+    if (&a == &b) return false;
+
+    GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
+                "Only filtration values with same number of parameters can be compared.");
+
+    //line order matters
+    if (a.is_nan()) return false;
+    if (b.is_nan()) return true;
+    if (a.is_plus_inf() || b.is_minus_inf()) return false;
+    if (a.is_minus_inf() || b.is_plus_inf()) return true;
+
+    // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
+    if constexpr (Ensure1Criticality) {
+      for (std::size_t p = 0u; p < a.num_parameters(); ++p) {
+        if (_is_nan(a.generators_[0][p]) && !_is_nan(b.generators_[0][p])) return false;
+        if (_is_nan(b.generators_[0][p])) return true;
+        if (a.generators_[0][p] < b.generators_[0][p]) return true;
+        if (b.generators_[0][p] < a.generators_[0][p]) return false;
+      }
+      return false;
+    } else {
+      for (std::size_t g = 0u; g < std::min(a.num_generators(), b.num_generators()); ++g) {
+        for (std::size_t p = 0u; p < a.num_parameters(); ++p) {
+          if (_is_nan(a.generators_[g][p]) && !_is_nan(b.generators_[g][p])) return false;
+          if (_is_nan(b.generators_[g][p])) return true;
+          if (a.generators_[g][p] < b.generators_[g][p]) return true;
+          if (b.generators_[g][p] < a.generators_[g][p]) return false;
+        }
+      }
+      return a.num_generators() < b.num_generators();
+    }
+  }
+
+  /**
+   * @brief Returns `true` if and only if the first argument is lexicographically less than or equal to the second
+   * argument. The "words" considered for the lexicographical order are all the generators concatenated together
+   * in order of generator index and then in order of parameter index. Different from @ref operator<= "", this order
+   * is total.
+   */
+  friend bool is_less_or_equal_than_lexicographically(const Dynamic_multi_parameter_filtration &a,
+                                                      const Dynamic_multi_parameter_filtration &b)
+  {
+    if (&a == &b) return true;
+
+    GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
+                "Only filtration values with same number of parameters can be compared.");
+
+    //line order matters
+    if (b.is_nan()) return true;
+    if (a.is_nan()) return false;
+    if (a.is_minus_inf() || b.is_plus_inf()) return true;
+    if (a.is_plus_inf() || b.is_minus_inf()) return false;
+
+    // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
+    if constexpr (Ensure1Criticality) {
+      for (std::size_t p = 0u; p < a.num_parameters(); ++p) {
+        if (_is_nan(a.generators_[0][p]) && !_is_nan(b.generators_[0][p])) return false;
+        if (_is_nan(b.generators_[0][p])) return true;
+        if (a.generators_[0][p] < b.generators_[0][p]) return true;
+        if (b.generators_[0][p] < a.generators_[0][p]) return false;
+      }
+      return true;
+    } else {
+      for (std::size_t g = 0u; g < std::min(a.num_generators(), b.num_generators()); ++g) {
+        for (std::size_t p = 0u; p < a.num_parameters(); ++p) {
+          if (_is_nan(a.generators_[g][p]) && !_is_nan(b.generators_[g][p])) return false;
+          if (_is_nan(b.generators_[g][p])) return true;
+          if (a.generators_[g][p] < b.generators_[g][p]) return true;
+          if (b.generators_[g][p] < a.generators_[g][p]) return false;
+        }
+      }
+      return a.num_generators() <= b.num_generators();
+    }
+  }
+
+  /**
    * @brief Returns `true` if and only if the cones generated by @p b are strictly contained in the
    * cones generated by @p a (recall that the cones are positive if `Co` is false and negative if `Co` is true).
    * Both @p a and @p b  have to have the same number of parameters.
    *
    * Note that not all filtration values are comparable. That is, \f$ a < b \f$ and \f$ b < a \f$ returning both false
-   * does **not** imply \f$ a == b \f$.
+   * does **not** imply \f$ a == b \f$. If a total order is needed, use @ref is_strict_less_than_lexicographically
+   * instead.
    */
   friend bool operator<(const Dynamic_multi_parameter_filtration &a, const Dynamic_multi_parameter_filtration &b)
   {
@@ -641,13 +730,13 @@ class Dynamic_multi_parameter_filtration
    * Both @p a and @p b  have to have the same number of parameters.
    *
    * Note that not all filtration values are comparable. That is, \f$ a \le b \f$ and \f$ b \le a \f$ can both return
-   * `false`.
+   * `false`. If a total order is needed, use @ref is_less_or_equal_than_lexicographically instead.
    */
   friend bool operator<=(const Dynamic_multi_parameter_filtration &a, const Dynamic_multi_parameter_filtration &b)
   {
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
-    "Only filtration values with same number of parameters can be compared.");
-    
+                "Only filtration values with same number of parameters can be compared.");
+
     if (a.num_generators() == 0 || b.num_generators() == 0) return false;
     if (a.is_nan() || b.is_nan()) return false;
     if (&a == &b) return true;
@@ -681,7 +770,8 @@ class Dynamic_multi_parameter_filtration
    * Both @p a and @p b  have to have the same number of parameters.
    *
    * Note that not all filtration values are comparable. That is, \f$ a > b \f$ and \f$ b > a \f$ returning both false
-   * does **not** imply \f$ a == b \f$.
+   * does **not** imply \f$ a == b \f$. If a total order is needed, use @ref is_strict_less_than_lexicographically
+   * instead.
    */
   friend bool operator>(const Dynamic_multi_parameter_filtration &a, const Dynamic_multi_parameter_filtration &b)
   {
@@ -695,7 +785,7 @@ class Dynamic_multi_parameter_filtration
    * Both @p a and @p b  have to have the same number of parameters.
    *
    * Note that not all filtration values are comparable. That is, \f$ a \ge b \f$ and \f$ b \ge a \f$ can both return
-   * `false`.
+   * `false`. If a total order is needed, use @ref is_less_or_equal_than_lexicographically instead.
    */
   friend bool operator>=(const Dynamic_multi_parameter_filtration &a, const Dynamic_multi_parameter_filtration &b)
   {
@@ -1456,6 +1546,18 @@ class Dynamic_multi_parameter_filtration
     if (g == 0) return;
 
     generators_.resize(g);
+  }
+
+  /**
+   * @brief If a generator is at +/- infinity or NaN, the underlying container can potentially (surely if just
+   * constructed with default values) only contain one element, representing the value, instead of number of parameters
+   * elements. This method forces the underlying container of the given generator to contain explicitly
+   * an elements for each parameter, if it was not already the case.
+   */
+  void force_generator_size_to_number_of_parameters(size_type g)
+  {
+    if (g > num_generators()) return;
+    generators_[g].force_size_to_number_of_parameters(number_of_parameters_);
   }
 
   /**

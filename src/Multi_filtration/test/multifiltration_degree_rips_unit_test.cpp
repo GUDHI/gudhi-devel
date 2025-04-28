@@ -314,10 +314,114 @@ void test_comparators(){
   BOOST_CHECK(f1 != F::minus_inf(num_param));
 }
 
+template <class F, typename T>
+void test_lex_comparators(){
+  const int num_param = 3;
+  std::vector<T> v1, v2, v3, v4, v5;
+
+  if constexpr (F::ensures_1_criticality()) {
+    v2 = {0, 0};
+    v3 = {0, 1};
+    v1 = {0, 2};
+    v4 = {0, 3};
+    v5 = {0, 3};
+  } else {
+    v2 = {0, 0, 1, -2, 2, -1, 3, 0};
+    v3 = {0, 2};
+    v1 = {0, 2, 1, 3, 2, 2};
+    v4 = {0, 3, 1, 3, 2, 1};
+    v5 = {0, 3, 1, 3, 2, 1};
+  }
+
+  F f1(v1.begin(), v1.end(), num_param);
+  F f2(v2.begin(), v2.end(), num_param);
+  F f3(v3.begin(), v3.end(), num_param);
+  F f4(v4.begin(), v4.end(), num_param);
+  F f5(v5.begin(), v5.end(), num_param);
+
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f1, f1));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically(f1, f2));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically(f1, f3));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f1, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_less_or_equal_than_lexicographically(f1, F::nan(num_param)));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f1, F::inf(num_param)));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically(f1, F::minus_inf(num_param)));
+
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f1, f1));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f1, f2));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f1, f3));
+  BOOST_CHECK(is_strict_less_than_lexicographically(f1, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_strict_less_than_lexicographically(f1, F::nan(num_param)));
+  BOOST_CHECK(is_strict_less_than_lexicographically(f1, F::inf(num_param)));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f1, F::minus_inf(num_param)));
+
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f2, f1));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f2, f2));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f2, f3));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f2, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_less_or_equal_than_lexicographically(f2, F::nan(num_param)));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f2, F::inf(num_param)));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically(f2, F::minus_inf(num_param)));
+
+  BOOST_CHECK(is_strict_less_than_lexicographically(f2, f1));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f2, f2));
+  BOOST_CHECK(is_strict_less_than_lexicographically(f2, f3));
+  BOOST_CHECK(is_strict_less_than_lexicographically(f2, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_strict_less_than_lexicographically(f2, F::nan(num_param)));
+  BOOST_CHECK(is_strict_less_than_lexicographically(f2, F::inf(num_param)));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f2, F::minus_inf(num_param)));
+
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f3, f1));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically(f3, f2));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f3, f3));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f3, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_less_or_equal_than_lexicographically(f3, F::nan(num_param)));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f3, F::inf(num_param)));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically(f3, F::minus_inf(num_param)));
+
+  BOOST_CHECK(is_strict_less_than_lexicographically(f3, f1));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f3, f2));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f3, f3));
+  BOOST_CHECK(is_strict_less_than_lexicographically(f3, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_strict_less_than_lexicographically(f3, F::nan(num_param)));
+  BOOST_CHECK(is_strict_less_than_lexicographically(f3, F::inf(num_param)));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f3, F::minus_inf(num_param)));
+
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically(f4, f1));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically(f4, f2));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically(f4, f3));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f4, f4));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f4, f5));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f5, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_less_or_equal_than_lexicographically(f4, F::nan(num_param)));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically(f4, F::inf(num_param)));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically(f4, F::minus_inf(num_param)));
+
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f4, f1));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f4, f2));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f4, f3));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f4, f4));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f4, f5));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f5, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_strict_less_than_lexicographically(f4, F::nan(num_param)));
+  BOOST_CHECK(is_strict_less_than_lexicographically(f4, F::inf(num_param)));
+  BOOST_CHECK(!is_strict_less_than_lexicographically(f4, F::minus_inf(num_param)));
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_comparators, T, list_of_tested_variants)
 {
   test_comparators<Degree_rips_bifiltration<T>, T>();
   test_comparators<Degree_rips_bifiltration<T, false, true>, T>();
+  test_lex_comparators<Degree_rips_bifiltration<T>, T>();
+  test_lex_comparators<Degree_rips_bifiltration<T, false, true>, T>();
 }
 
 template <class F, typename T>
