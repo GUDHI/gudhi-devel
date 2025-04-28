@@ -1,8 +1,6 @@
-name: pip packaging osx
+name: pip build osx
 
-on:
-  release:
-    types: [published]
+on: [push, pull_request]
 
 env:
   MACOSX_DEPLOYMENT_TARGET: 13.0
@@ -10,26 +8,16 @@ env:
   ARCHFLAGS: "-arch arm64 -arch x86_64"
 
 jobs:
-  # Python 3.9+ specific case where NumPy 2.x will be supported
-  # NumPy packages for osx x86 and arm are only available from 1.21.2, but stable for both versions from 1.21.4 and python 3.9+
-  wheels:
+  build:
     # Should use macos-latest, but python 3.9 is no more available from macos-14
     runs-on: macos-13
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9"]
         include:
           - python-version: "3.9"
             numpy-version: "1.21.4"
-          - python-version: "3.10"
-            numpy-version: "1.21.6"
-          - python-version: "3.11"
-            numpy-version: "1.23.2"
-          - python-version: "3.12"
-            numpy-version: "1.26.0"
-          - python-version: "3.13"
-            numpy-version: "2.1.0"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
@@ -59,8 +47,12 @@ jobs:
           python -m pip wheel -ve .
           export PATH="$PATH:`python -m site --user-base`/bin"
           delocate-listdeps --depending *.whl
-          mkdir wheelhouse || true
           delocate-wheel --require-archs universal2 -w wheelhouse -v *.whl
+      - name: Upload OSx python wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: osx python wheel
+          path: wheelhouse/*.whl
       # Test ABI compatibility with numpy 1.X
       - name: Install and test python wheel
         run: |
@@ -99,9 +91,3 @@ jobs:
           python -m pytest src/python/test/test_wasserstein_barycenter.py
           python -m pytest src/python/test/test_weighted_rips_complex.py
           python -m pytest src/python/test/test_witness_complex.py
-      - name: Publish on PyPi
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: |
-          python -m twine upload wheelhouse/*.whl
