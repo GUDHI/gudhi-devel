@@ -14,32 +14,6 @@ if(NOT NANOBIND_FOUND)
   return()
 endif()
 
-function( add_GUDHI_PYTHON_lib THE_LIB )
-  if(EXISTS ${THE_LIB})
-    get_filename_component(THE_LIB_FILE_NAME ${THE_LIB} NAME_WE)
-    if(WIN32)
-      message("++ ${THE_LIB} => THE_LIB_FILE_NAME = ${THE_LIB_FILE_NAME}")
-      set(GUDHI_PYTHON_LIBRARIES "${GUDHI_PYTHON_LIBRARIES}'${THE_LIB_FILE_NAME}', " PARENT_SCOPE)
-    else(WIN32)
-      STRING(REGEX REPLACE "lib" "" UNIX_LIB_FILE_NAME ${THE_LIB_FILE_NAME})
-      message("++ ${THE_LIB} => UNIX_LIB_FILE_NAME = ${UNIX_LIB_FILE_NAME}")
-      set(GUDHI_PYTHON_LIBRARIES "${GUDHI_PYTHON_LIBRARIES}'${UNIX_LIB_FILE_NAME}', " PARENT_SCOPE)
-    endif(WIN32)
-  endif(EXISTS ${THE_LIB})
-endfunction( add_GUDHI_PYTHON_lib )
-
-function( add_GUDHI_PYTHON_lib_dir)
-  # Argument may be a list (specifically on windows with release/debug paths)
-  foreach(THE_LIB_DIR IN LISTS ARGN)
-    # deals when it is not set - error on windows
-    if(EXISTS ${THE_LIB_DIR})
-      set(GUDHI_PYTHON_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}'${THE_LIB_DIR}', " PARENT_SCOPE)
-    else()
-      message("add_GUDHI_PYTHON_lib_dir - '${THE_LIB_DIR}' does not exist")
-    endif()
-  endforeach()
-endfunction( add_GUDHI_PYTHON_lib_dir )
-
 # THE_TEST is the python test file name (without .py extension) containing tests functions
 function( add_gudhi_py_test THE_TEST )
   if(PYTEST_FOUND)
@@ -186,182 +160,29 @@ if (NOT TARGET Eigen3::Eigen)
   disable_python_documentation("Eigen3")
 endif()
 
-set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_RESULT_OF_USE_DECLTYPE', ")
-set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_ALL_NO_LIB', ")
-set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DBOOST_SYSTEM_NO_DEPRECATED', ")
-
-# Gudhi and CGAL compilation option
-if(MSVC)
-  set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'/std:c++17', ")
-  set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'/fp:strict', ")
-  # cf. https://github.com/oneapi-src/oneTBB/issues/573
-  set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DNOMINMAX', ")
-else(MSVC)
-  set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-std=c++17', ")
-endif(MSVC)
-if(CMAKE_COMPILER_IS_GNUCXX)
-  set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-frounding-math', ")
-  set(GUDHI_NANOBIND_EXTRA_COMPILE_ARGS "${GUDHI_NANOBIND_EXTRA_COMPILE_ARGS}'-fvisibility=hidden', ")
-endif(CMAKE_COMPILER_IS_GNUCXX)
-if (CMAKE_CXX_COMPILER_ID MATCHES Intel)
-  set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-fp-model strict', ")
-endif(CMAKE_CXX_COMPILER_ID MATCHES Intel)
-if (DEBUG_TRACES)
-  # For programs to be more verbose
-  set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DDEBUG_TRACES', ")
-endif()
-
 if (TARGET Eigen3::Eigen)
   add_gudhi_debug_info("Eigen3 version ${EIGEN3_VERSION_STRING}")
-  # No problem, even if no CGAL found
-  set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_EIGEN3_ENABLED', ")
-  set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${EIGEN3_INCLUDE_DIRS}', ")
 endif (TARGET Eigen3::Eigen)
 
-# from windows vcpkg eigen 3.4.0#2 : build fails with
-# error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
-# cf. https://gitlab.com/libeigen/eigen/-/issues/2476
-# Workaround is to compile with '-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int'
-if (FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT)
-  set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int', ")
-endif()
-
 add_gudhi_debug_info("Boost version ${Boost_VERSION}")
-set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${Boost_INCLUDE_DIRS}', ")
 if(TARGET CGAL::CGAL)
-  foreach(CGAL_INCLUDE_DIR ${CGAL_INCLUDE_DIRS})
-    set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${CGAL_INCLUDE_DIR}', ")
-  endforeach()
-  if(NOT CGAL_VERSION VERSION_LESS 5.3.0)
-    # CGAL_HEADER_ONLY has been dropped for CGAL >= 5.3. Only the header-only version is supported.
-    set(CGAL_HEADER_ONLY True)
-  endif(NOT CGAL_VERSION VERSION_LESS 5.3.0)
-  # Add CGAL compilation args
-  if(CGAL_HEADER_ONLY)
-    add_gudhi_debug_info("CGAL header only version ${CGAL_VERSION}")
-    set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_HEADER_ONLY', ")
-  else(CGAL_HEADER_ONLY)
-    add_gudhi_debug_info("CGAL version ${CGAL_VERSION}")
-    add_GUDHI_PYTHON_lib("${CGAL_LIBRARY}")
-    add_GUDHI_PYTHON_lib_dir(${CGAL_LIBRARIES_DIR})
-    message("** Add CGAL ${CGAL_LIBRARIES_DIR}")
-    # If CGAL is not header only, CGAL library may link with boost system,
-    if(CMAKE_BUILD_TYPE MATCHES Debug)
-      add_GUDHI_PYTHON_lib("${Boost_SYSTEM_LIBRARY_DEBUG}")
-    else()
-      add_GUDHI_PYTHON_lib("${Boost_SYSTEM_LIBRARY_RELEASE}")
-    endif()
-    add_GUDHI_PYTHON_lib_dir(${Boost_LIBRARY_DIRS})
-    message("** Add Boost ${Boost_LIBRARY_DIRS}")
-  endif(CGAL_HEADER_ONLY)
-  # GMP and GMPXX are not required, but if present, CGAL will link with them.
+  add_gudhi_debug_info("CGAL version ${CGAL_VERSION}")
   if(GMP_FOUND)
     add_gudhi_debug_info("GMP_LIBRARIES = ${GMP_LIBRARIES}")
-    set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMP', ")
-    add_GUDHI_PYTHON_lib("${GMP_LIBRARIES}")
-    if(NOT GMP_LIBRARIES_DIR)
-      get_filename_component(GMP_LIBRARIES_DIR ${GMP_LIBRARIES} PATH)
-      message("GMP_LIBRARIES_DIR from GMP_LIBRARIES set to ${GMP_LIBRARIES_DIR}")
-    endif(NOT GMP_LIBRARIES_DIR)
-    add_GUDHI_PYTHON_lib_dir(${GMP_LIBRARIES_DIR})
-    message("** Add gmp ${GMP_LIBRARIES_DIR}")
-    # When FORCE_CGAL_NOT_TO_BUILD_WITH_GMPXX is set, not defining CGAL_USE_GMPXX is sufficient enough
     if(GMPXX_FOUND)
       add_gudhi_debug_info("GMPXX_LIBRARIES = ${GMPXX_LIBRARIES}")
-      set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_GMPXX', ")
-      add_GUDHI_PYTHON_lib("${GMPXX_LIBRARIES}")
-      add_GUDHI_PYTHON_lib_dir(${GMPXX_LIBRARIES_DIR})
-      message("** Add gmpxx ${GMPXX_LIBRARIES_DIR}")
-    endif()
+    endif(GMPXX_FOUND)
   endif(GMP_FOUND)
   if(MPFR_FOUND)
     add_gudhi_debug_info("MPFR_LIBRARIES = ${MPFR_LIBRARIES}")
-    set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DCGAL_USE_MPFR', ")
-    add_GUDHI_PYTHON_lib("${MPFR_LIBRARIES}")
-    # In case CGAL is not header only, all MPFR variables are set except MPFR_LIBRARIES_DIR - Just set it
-    if(NOT MPFR_LIBRARIES_DIR)
-      get_filename_component(MPFR_LIBRARIES_DIR ${MPFR_LIBRARIES} PATH)
-      message("MPFR_LIBRARIES_DIR from MPFR_LIBRARIES set to ${MPFR_LIBRARIES_DIR}")
-    endif(NOT MPFR_LIBRARIES_DIR)
-    add_GUDHI_PYTHON_lib_dir(${MPFR_LIBRARIES_DIR})
-    message("** Add mpfr ${MPFR_LIBRARIES_DIR}")
   endif(MPFR_FOUND)
 endif(TARGET CGAL::CGAL)
-
-# Specific for Mac
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  # CMAKE_OSX_DEPLOYMENT_TARGET is always set on OSx
-  # but it can be modified by the user by setting MACOSX_DEPLOYMENT_TARGET environment variable
-  if(CMAKE_OSX_DEPLOYMENT_TARGET)
-    set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}', ")
-    set(GUDHI_PYTHON_EXTRA_LINK_ARGS "${GUDHI_PYTHON_EXTRA_LINK_ARGS}'-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}', ")
-  endif()
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
-# Strip dynamic libraries in release mode for smaller pip packages under linux
-if(CMAKE_COMPILER_IS_GNUCXX)
-  if(CMAKE_BUILD_TYPE MATCHES Release)
-    set(GUDHI_PYTHON_EXTRA_LINK_ARGS "${GUDHI_PYTHON_EXTRA_LINK_ARGS}'-s', ")
-  endif(CMAKE_BUILD_TYPE MATCHES Release)
-endif(CMAKE_COMPILER_IS_GNUCXX)
-
-# Loop on INCLUDE_DIRECTORIES PROPERTY
-get_property(GUDHI_INCLUDE_DIRECTORIES DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-foreach(GUDHI_INCLUDE_DIRECTORY ${GUDHI_INCLUDE_DIRECTORIES})
-  set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${GUDHI_INCLUDE_DIRECTORY}', ")
-endforeach()
-set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/include', ")
 
 if (TBB_FOUND AND WITH_GUDHI_USE_TBB)
   add_gudhi_debug_info("TBB version ${TBB_VERSION} found and used")
   add_gudhi_debug_info("TBB_LIBRARY = ${TBB_LIBRARY}")
   add_gudhi_debug_info("TBB_MALLOC_LIBRARY = ${TBB_MALLOC_LIBRARY}")
-
-  set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DGUDHI_USE_TBB', ")
-  add_GUDHI_PYTHON_lib("${TBB_LIBRARY}")
-  add_GUDHI_PYTHON_lib("${TBB_MALLOC_LIBRARY}")
-  add_GUDHI_PYTHON_lib_dir(${TBB_LIBRARY_DIRS})
-  message("** Add tbb ${TBB_LIBRARY_DIRS}")
-  set(GUDHI_PYTHON_INCLUDE_DIRS "${GUDHI_PYTHON_INCLUDE_DIRS}'${TBB_INCLUDE_DIRS}', ")
 endif()
-
-if(DEBUG_TRACES)
-  set(GUDHI_PYTHON_EXTRA_COMPILE_ARGS "${GUDHI_PYTHON_EXTRA_COMPILE_ARGS}'-DDEBUG_TRACES', ")
-endif(DEBUG_TRACES)
-
-if(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
-  set( GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS "${GUDHI_PYTHON_LIBRARY_DIRS}")
-endif(UNIX AND WITH_GUDHI_PYTHON_RUNTIME_LIBRARY_DIRS)
-
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_pers_cub_low_dim', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_cubical_complex', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_ripser', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_rips_complex', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_edge_collapse', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_simplex_tree', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_reader_utils', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_subsampling', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_witness_complex', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_nerve_gic', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_bottleneck', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_hera', ")
-set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'clustering/_tomato', ")
-if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
-  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_delaunay_complex', ")
-  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_tangential_complex', ")
-  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_euclidean_witness_complex', ")
-  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_euclidean_strong_witness_complex', ")
-  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'_strong_witness_complex', ")
-  set(GUDHI_NANOBIND_MODULES "${GUDHI_NANOBIND_MODULES}'datasets/generators/_points', ")
-endif ()
-
-# doc/pip_introduction.inc is a restructured text file (extension changed because of sphinx warning) that describes
-# the GUDHI project on https://pypi.org/project/gudhi/
-file(READ "doc/pypi_introduction.inc" GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR)
-string(REPLACE "\n" "\\n' \\\n        '" GUDHI_LONG_DESCRIPTION ${GUDHI_LONG_DESCRIPTION_WITH_UNPROPER_CR})
-
-# Generate setup.py file to bind Gudhi - This file must be named setup.py by convention
-# configure_file(setup.py.in "${CMAKE_CURRENT_BINARY_DIR}/setup.py" @ONLY)
 
 # Generate gudhi/__init__.py
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
@@ -400,21 +221,6 @@ file(COPY "gudhi/clustering" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FIL
 file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
 file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
-
-# Some files for pip package
-# configure_file("pyproject.toml" "${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml" COPYONLY)
-
-# # Symbolic links to cython sources to be built. "MAKE_DIRECTORY gudhi" must be done before
-# add_gudhi_symbolic_links("gudhi/*.pxd")
-# add_gudhi_symbolic_links("gudhi/*.pyx")
-
-# add_custom_command(
-#     OUTPUT gudhi.so
-#     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-#     COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/setup.py" "build_ext" "--inplace")
-#
-# add_custom_target(python ALL DEPENDS gudhi.so
-#                   COMMENT "Do not forget to add ${CMAKE_CURRENT_BINARY_DIR}/ to your PYTHONPATH before using examples or tests")
 
 # Detect the installed nanobind package and import it into CMake
 execute_process(
