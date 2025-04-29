@@ -166,6 +166,8 @@ if (WITH_GUDHI_PYTHON)
             set(${PYTHON_MODULE_NAME_UP}_VERSION ${PYTHON_MODULE_VERSION} PARENT_SCOPE)
             set(${PYTHON_MODULE_NAME_UP}_FOUND TRUE PARENT_SCOPE)
         else()
+            # Remove all carriage returns as it can be multiline
+            string(REGEX REPLACE "\n" " " PYTHON_MODULE_ERROR "${PYTHON_MODULE_ERROR}")
             message ("## Python module ${PYTHON_MODULE_NAME} NOT found [${PYTHON_MODULE_RESULT}]: '${PYTHON_MODULE_ERROR}'")
             unset(${PYTHON_MODULE_NAME_UP}_VERSION PARENT_SCOPE)
             set(${PYTHON_MODULE_NAME_UP}_FOUND FALSE PARENT_SCOPE)
