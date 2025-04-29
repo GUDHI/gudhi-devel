@@ -43,6 +43,10 @@ template <typename U>
 U compute_euclidean_distance_to();
 template <typename U>
 U compute_norm();
+template<bool inverse>
+bool is_strict_less_than_lexicographically();
+template<bool inverse>
+bool is_less_or_equal_than_lexicographically();
 
 /**
  * @class Dynamic_multi_parameter_filtration Dynamic_multi_parameter_filtration.h
@@ -607,7 +611,10 @@ class Dynamic_multi_parameter_filtration
    * argument. The "words" considered for the lexicographical order are all the generators concatenated together
    * in order of generator index and then in order of parameter index. Different from @ref operator< "", this order
    * is total.
+   *
+   * @tparam inverse If true, the parameter index and generator index order is inverted.
    */
+  template <bool inverse = false>
   friend bool is_strict_less_than_lexicographically(const Dynamic_multi_parameter_filtration &a,
                                                     const Dynamic_multi_parameter_filtration &b)
   {
@@ -616,7 +623,7 @@ class Dynamic_multi_parameter_filtration
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
                 "Only filtration values with same number of parameters can be compared.");
 
-    //line order matters
+    // line order matters
     if (a.is_nan()) return false;
     if (b.is_nan()) return true;
     if (a.is_plus_inf() || b.is_minus_inf()) return false;
@@ -625,19 +632,29 @@ class Dynamic_multi_parameter_filtration
     // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
     if constexpr (Ensure1Criticality) {
       for (std::size_t p = 0u; p < a.num_parameters(); ++p) {
+        if constexpr (inverse) p = a.num_parameters() - 1 - p;
         if (_is_nan(a.generators_[0][p]) && !_is_nan(b.generators_[0][p])) return false;
         if (_is_nan(b.generators_[0][p])) return true;
         if (a.generators_[0][p] < b.generators_[0][p]) return true;
         if (b.generators_[0][p] < a.generators_[0][p]) return false;
+        if constexpr (inverse) p = a.num_parameters() - 1 - p;
       }
       return false;
     } else {
       for (std::size_t g = 0u; g < std::min(a.num_generators(), b.num_generators()); ++g) {
+        std::size_t gA = g;
+        std::size_t gB = g;
+        if constexpr (inverse) {
+          gA = a.num_generators() - 1 - g;
+          gB = b.num_generators() - 1 - g;
+        }
         for (std::size_t p = 0u; p < a.num_parameters(); ++p) {
-          if (_is_nan(a.generators_[g][p]) && !_is_nan(b.generators_[g][p])) return false;
-          if (_is_nan(b.generators_[g][p])) return true;
-          if (a.generators_[g][p] < b.generators_[g][p]) return true;
-          if (b.generators_[g][p] < a.generators_[g][p]) return false;
+          if constexpr (inverse) p = a.num_parameters() - 1 - p;
+          if (_is_nan(a.generators_[gA][p]) && !_is_nan(b.generators_[gB][p])) return false;
+          if (_is_nan(b.generators_[gB][p])) return true;
+          if (a.generators_[gA][p] < b.generators_[gB][p]) return true;
+          if (b.generators_[gB][p] < a.generators_[gA][p]) return false;
+          if constexpr (inverse) p = a.num_parameters() - 1 - p;
         }
       }
       return a.num_generators() < b.num_generators();
@@ -649,7 +666,10 @@ class Dynamic_multi_parameter_filtration
    * argument. The "words" considered for the lexicographical order are all the generators concatenated together
    * in order of generator index and then in order of parameter index. Different from @ref operator<= "", this order
    * is total.
+   *
+   * @tparam inverse If true, the parameter index and generator index order is inverted.
    */
+  template <bool inverse = false>
   friend bool is_less_or_equal_than_lexicographically(const Dynamic_multi_parameter_filtration &a,
                                                       const Dynamic_multi_parameter_filtration &b)
   {
@@ -658,7 +678,7 @@ class Dynamic_multi_parameter_filtration
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
                 "Only filtration values with same number of parameters can be compared.");
 
-    //line order matters
+    // line order matters
     if (b.is_nan()) return true;
     if (a.is_nan()) return false;
     if (a.is_minus_inf() || b.is_plus_inf()) return true;
@@ -667,19 +687,29 @@ class Dynamic_multi_parameter_filtration
     // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
     if constexpr (Ensure1Criticality) {
       for (std::size_t p = 0u; p < a.num_parameters(); ++p) {
+        if constexpr (inverse) p = a.num_parameters() - 1 - p;
         if (_is_nan(a.generators_[0][p]) && !_is_nan(b.generators_[0][p])) return false;
         if (_is_nan(b.generators_[0][p])) return true;
         if (a.generators_[0][p] < b.generators_[0][p]) return true;
         if (b.generators_[0][p] < a.generators_[0][p]) return false;
+        if constexpr (inverse) p = a.num_parameters() - 1 - p;
       }
       return true;
     } else {
       for (std::size_t g = 0u; g < std::min(a.num_generators(), b.num_generators()); ++g) {
+        std::size_t gA = g;
+        std::size_t gB = g;
+        if constexpr (inverse) {
+          gA = a.num_generators() - 1 - g;
+          gB = b.num_generators() - 1 - g;
+        }
         for (std::size_t p = 0u; p < a.num_parameters(); ++p) {
-          if (_is_nan(a.generators_[g][p]) && !_is_nan(b.generators_[g][p])) return false;
-          if (_is_nan(b.generators_[g][p])) return true;
-          if (a.generators_[g][p] < b.generators_[g][p]) return true;
-          if (b.generators_[g][p] < a.generators_[g][p]) return false;
+          if constexpr (inverse) p = a.num_parameters() - 1 - p;
+          if (_is_nan(a.generators_[gA][p]) && !_is_nan(b.generators_[gB][p])) return false;
+          if (_is_nan(b.generators_[gB][p])) return true;
+          if (a.generators_[gA][p] < b.generators_[gB][p]) return true;
+          if (b.generators_[gB][p] < a.generators_[gA][p]) return false;
+          if constexpr (inverse) p = a.num_parameters() - 1 - p;
         }
       }
       return a.num_generators() <= b.num_generators();

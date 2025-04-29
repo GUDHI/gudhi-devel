@@ -406,17 +406,125 @@ void test_lex_comparators(){
   BOOST_CHECK(!is_strict_less_than_lexicographically(f4, F::minus_inf(num_param)));
 }
 
+template <class F, typename T>
+void test_co_lex_comparators(){
+  using namespace Gudhi::multi_filtration;
+
+  const int num_param = 3;
+  std::vector<T> v1, v2, v3, v4, v5;
+
+  if constexpr (F::ensures_1_criticality()) {
+    v2 = {-2, 0, 1};
+    v3 = {0, 2, 2};
+    v1 = {0, 2, 3};
+    v4 = {5, -1, 2};
+    v5 = {5, -1, 2};
+  } else {
+    v2 = {-2, 0, 1, -2, -5, -1, -5, 0, 0};
+    v3 = {0, 2, 3};
+    v1 = {0, 2, 3, 0, 1, 2};
+    v4 = {5, -1, 2, 0, 0, 1};
+    v5 = {5, -1, 2, 0, 0, 1};
+  }
+
+  F f1(v1.rbegin(), v1.rend(), num_param);
+  F f2(v2.rbegin(), v2.rend(), num_param);
+  F f3(v3.rbegin(), v3.rend(), num_param);
+  F f4(v4.rbegin(), v4.rend(), num_param);
+  F f5(v5.rbegin(), v5.rend(), num_param);
+
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f1, f1));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically<true>(f1, f2));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically<true>(f1, f3));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f1, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f1, F::nan(num_param)));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f1, F::inf(num_param)));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically<true>(f1, F::minus_inf(num_param)));
+
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f1, f1));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f1, f2));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f1, f3));
+  BOOST_CHECK(is_strict_less_than_lexicographically<true>(f1, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_strict_less_than_lexicographically<true>(f1, F::nan(num_param)));
+  BOOST_CHECK(is_strict_less_than_lexicographically<true>(f1, F::inf(num_param)));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f1, F::minus_inf(num_param)));
+
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f2, f1));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f2, f2));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f2, f3));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f2, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f2, F::nan(num_param)));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f2, F::inf(num_param)));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically<true>(f2, F::minus_inf(num_param)));
+
+  BOOST_CHECK(is_strict_less_than_lexicographically<true>(f2, f1));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f2, f2));
+  BOOST_CHECK(is_strict_less_than_lexicographically<true>(f2, f3));
+  BOOST_CHECK(is_strict_less_than_lexicographically<true>(f2, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_strict_less_than_lexicographically<true>(f2, F::nan(num_param)));
+  BOOST_CHECK(is_strict_less_than_lexicographically<true>(f2, F::inf(num_param)));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f2, F::minus_inf(num_param)));
+
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f3, f1));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically<true>(f3, f2));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f3, f3));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f3, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f3, F::nan(num_param)));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f3, F::inf(num_param)));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically<true>(f3, F::minus_inf(num_param)));
+
+  BOOST_CHECK(is_strict_less_than_lexicographically<true>(f3, f1));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f3, f2));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f3, f3));
+  BOOST_CHECK(is_strict_less_than_lexicographically<true>(f3, f4));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_strict_less_than_lexicographically<true>(f3, F::nan(num_param)));
+  BOOST_CHECK(is_strict_less_than_lexicographically<true>(f3, F::inf(num_param)));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f3, F::minus_inf(num_param)));
+
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically<true>(f4, f1));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically<true>(f4, f2));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically<true>(f4, f3));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f4, f4));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f5, f4));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f4, f5));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f4, F::nan(num_param)));
+  BOOST_CHECK(is_less_or_equal_than_lexicographically<true>(f4, F::inf(num_param)));
+  BOOST_CHECK(!is_less_or_equal_than_lexicographically<true>(f4, F::minus_inf(num_param)));
+
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f4, f1));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f4, f2));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f4, f3));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f4, f4));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f5, f4));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f4, f5));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN)
+    BOOST_CHECK(is_strict_less_than_lexicographically<true>(f4, F::nan(num_param)));
+  BOOST_CHECK(is_strict_less_than_lexicographically<true>(f4, F::inf(num_param)));
+  BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f4, F::minus_inf(num_param)));
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_comparators, T, list_of_tested_variants)
 {
   test_comparators<Multi_parameter_filtration<T>, T>();
   test_comparators<Multi_parameter_filtration<T, false, true>, T>();
   test_lex_comparators<Multi_parameter_filtration<T>, T>();
   test_lex_comparators<Multi_parameter_filtration<T, false, true>, T>();
+  test_co_lex_comparators<Multi_parameter_filtration<T>, T>();
+  test_co_lex_comparators<Multi_parameter_filtration<T, false, true>, T>();
 
   test_comparators<Dynamic_multi_parameter_filtration<T>, T>();
   test_comparators<Dynamic_multi_parameter_filtration<T, false, true>, T>();
   test_lex_comparators<Dynamic_multi_parameter_filtration<T>, T>();
   test_lex_comparators<Dynamic_multi_parameter_filtration<T, false, true>, T>();
+  test_co_lex_comparators<Dynamic_multi_parameter_filtration<T>, T>();
+  test_co_lex_comparators<Dynamic_multi_parameter_filtration<T, false, true>, T>();
 }
 
 template <class F, typename T>
