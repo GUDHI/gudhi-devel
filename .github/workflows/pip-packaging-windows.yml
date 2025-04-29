@@ -35,8 +35,8 @@ jobs:
       # For python >=3.9, numpy >= 2.0 for package build and ABI compatibility with numpy 1.X and 2.X
       # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
       - name: Install dependencies
+        shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           set VCPKG_BUILD_TYPE=release
           vcpkg install eigen3 cgal --triplet x64-windows
           vcpkg version
@@ -48,16 +48,16 @@ jobs:
       - name: Build python wheel and repair it
         env:
           SKBUILD_CMAKE_DEFINE: "FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake;VCPKG_TARGET_TRIPLET=x64-windows"
+        shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           python -m pip wheel -ve .
           ls ".\"
           delvewheel show *.whl
           delvewheel repair -w wheelhouse -v *.whl
       # Test ABI compatibility with numpy 1.X
       - name: Install and test python wheel
+        shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
           Get-Location
           dir
           dir wheelhouse
@@ -100,4 +100,5 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        shell: pwsh
         run: python -m twine upload (Get-ChildItem wheelhouse\*.whl | % FullName)
