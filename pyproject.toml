@@ -24,7 +24,7 @@ name = "gudhi"
 version = "3.12.0a1"
 description = "The Gudhi library is an open source library for Computational Topology and Topological Data Analysis (TDA)."
 # readme = "doc/pypi_introduction.inc"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors = [{ name = "GUDHI Editorial Board <https://gudhi.inria.fr/contact/>" }]
 classifiers = [
     "Programming Language :: Python :: 3.9",

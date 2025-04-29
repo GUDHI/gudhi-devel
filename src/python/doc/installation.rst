@@ -41,8 +41,9 @@ there.
 
 The library uses c++17 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.71.0,
 `CMake <https://www.cmake.org/>`_ :math:`\geq` 3.15,
-Python :math:`\geq` 3.8, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0 and
-`nanobind <https://github.com/wjakob/nanobind>`_ :math:`\geq` 2.4.0 to compile the GUDHI Python module.
+Python :math:`\geq` 3.9, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0,
+`scikit-build-core <https://scikit-build-core.readthedocs.io>`_ :math:`\geq` 0.4.3
+`nanobind <https://nanobind.readthedocs.io>`_ :math:`\geq` 1.3.2 to compile the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2017 or later.
 
 If you have several Python/python installed, you can force it by adding
