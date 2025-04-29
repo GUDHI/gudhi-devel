@@ -130,7 +130,7 @@ struct Flag_complex_edge_collapser {
       if(w > vi->first) { ++vi; continue; }
       // nu and nv are closed, so we need to exclude e here.
       if(w != u && w != v) {
-        Filtration_value f = std::max(ui->second, vi->second);
+        Filtration_value f = (std::max)(ui->second, vi->second);
         if(f > f_event)
           e_ngb_later.emplace_back(f, w);
         else
@@ -194,7 +194,7 @@ struct Flag_complex_edge_collapser {
         if (i > maxi) maxi = i;
         if (j > maxj) maxj = j;
       }
-      num_vertices = std::max(maxi, maxj) + 1;
+      num_vertices = (std::max)(maxi, maxj) + 1;
     }
 
     read_edges(edges);
