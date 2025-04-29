@@ -34,6 +34,10 @@ jobs:
           python -m pip install --user -r .\ext\gudhi-deploy\build-requirements.txt
           python -m pip install --user delvewheel
           python -m pip list
+      # from windows vcpkg eigen 3.4.0#2 : build fails with
+      # error C2440: '<function-style-cast>': cannot convert from 'Eigen::EigenBase<Derived>::Index' to '__gmp_expr<mpq_t,mpq_t>'
+      # cf. https://gitlab.com/libeigen/eigen/-/issues/2476
+      # Workaround is to compile with '-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int'
       - name: Build python wheel and repair it
         env:
           SKBUILD_CMAKE_DEFINE: "FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake;VCPKG_TARGET_TRIPLET=x64-windows"
