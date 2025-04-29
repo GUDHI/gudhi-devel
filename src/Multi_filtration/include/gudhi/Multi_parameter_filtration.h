@@ -40,9 +40,15 @@ namespace Gudhi::multi_filtration {
 
 // declaration needed pre C++20 for friends with templates defined inside a class
 template <typename U>
+U compute_linear_projection();
+template <typename U>
 U compute_euclidean_distance_to();
 template <typename U>
 U compute_norm();
+template <typename OutValue, typename U>
+void compute_coordinates_in_grid();
+template <typename U>
+void evaluate_coordinates_in_grid();
 template<bool inverse>
 bool is_strict_less_than_lexicographically();
 template<bool inverse>
