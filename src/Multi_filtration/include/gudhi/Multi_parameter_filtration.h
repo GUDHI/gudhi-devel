@@ -43,6 +43,10 @@ template <typename U>
 U compute_euclidean_distance_to();
 template <typename U>
 U compute_norm();
+template<bool inverse>
+bool is_strict_less_than_lexicographically();
+template<bool inverse>
+bool is_less_or_equal_than_lexicographically();
 
 /**
  * @class Multi_parameter_filtration Multi_parameter_filtration.h gudhi/Multi_parameter_filtration.h
@@ -571,7 +575,10 @@ class Multi_parameter_filtration
    * argument. The "words" considered for the lexicographical order are all the generators concatenated together
    * in order of generator index and then in order of parameter index. Different from @ref operator< "", this order
    * is total.
+   *
+   * @tparam inverse If true, the parameter index and generator index order is inverted.
    */
+  template <bool inverse = false>
   friend bool is_strict_less_than_lexicographically(const Multi_parameter_filtration &a,
                                                     const Multi_parameter_filtration &b)
   {
@@ -581,10 +588,16 @@ class Multi_parameter_filtration
                 "Only filtration values with same number of parameters can be compared.");
 
     for (std::size_t i = 0u; i < a.num_parameters() * std::min(a.num_generators(), b.num_generators()); ++i) {
-      if (_is_nan(a.generators_[i]) && !_is_nan(b.generators_[i])) return false;
-      if (_is_nan(b.generators_[i])) return true;
-      if (a.generators_[i] < b.generators_[i]) return true;
-      if (b.generators_[i] < a.generators_[i]) return false;
+      std::size_t iA = i;
+      std::size_t iB = i;
+      if constexpr (inverse) {
+        iA = a.generators_.size() - 1 - i;
+        iB = b.generators_.size() - 1 - i;
+      }
+      if (_is_nan(a.generators_[iA]) && !_is_nan(b.generators_[iB])) return false;
+      if (_is_nan(b.generators_[iB])) return true;
+      if (a.generators_[iA] < b.generators_[iB]) return true;
+      if (b.generators_[iB] < a.generators_[iA]) return false;
     }
     return a.num_generators() < b.num_generators();
   }
@@ -594,7 +607,10 @@ class Multi_parameter_filtration
    * argument. The "words" considered for the lexicographical order are all the generators concatenated together
    * in order of generator index and then in order of parameter index. Different from @ref operator<= "", this order
    * is total.
+   *
+   * @tparam inverse If true, the parameter index and generator index order is inverted.
    */
+  template <bool inverse = false>
   friend bool is_less_or_equal_than_lexicographically(const Multi_parameter_filtration &a,
                                                       const Multi_parameter_filtration &b)
   {
@@ -604,10 +620,16 @@ class Multi_parameter_filtration
                 "Only filtration values with same number of parameters can be compared.");
 
     for (std::size_t i = 0u; i < a.num_parameters() * std::min(a.num_generators(), b.num_generators()); ++i) {
-      if (_is_nan(a.generators_[i]) && !_is_nan(b.generators_[i])) return false;
-      if (_is_nan(b.generators_[i])) return true;
-      if (a.generators_[i] < b.generators_[i]) return true;
-      if (b.generators_[i] < a.generators_[i]) return false;
+      std::size_t iA = i;
+      std::size_t iB = i;
+      if constexpr (inverse) {
+        iA = a.generators_.size() - 1 - i;
+        iB = b.generators_.size() - 1 - i;
+      }
+      if (_is_nan(a.generators_[iA]) && !_is_nan(b.generators_[iB])) return false;
+      if (_is_nan(b.generators_[iB])) return true;
+      if (a.generators_[iA] < b.generators_[iB]) return true;
+      if (b.generators_[iB] < a.generators_[iA]) return false;
     }
     return a.num_generators() <= b.num_generators();
   }

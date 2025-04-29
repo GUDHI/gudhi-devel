@@ -45,6 +45,10 @@ template <typename U>
 U compute_euclidean_distance_to();
 template <typename U>
 U compute_norm();
+template<bool inverse>
+bool is_strict_less_than_lexicographically();
+template<bool inverse>
+bool is_less_or_equal_than_lexicographically();
 
 /**
  * @class Degree_rips_bifiltration Degree_rips_bifiltration.h gudhi/Degree_rips_bifiltration.h
@@ -671,7 +675,10 @@ class Degree_rips_bifiltration
    * argument. The "words" considered for the lexicographical order are all the generators concatenated together
    * in order of generator index and then in order of parameter index. Different from @ref operator< "", this order
    * is total.
+   *
+   * @tparam inverse If true, the parameter index and generator index order is inverted.
    */
+  template <bool inverse = false>
   friend bool is_strict_less_than_lexicographically(const Degree_rips_bifiltration &a,
                                                     const Degree_rips_bifiltration &b)
   {
@@ -679,11 +686,23 @@ class Degree_rips_bifiltration
     if (a.is_nan()) return false;
     if (b.is_nan()) return true;
 
+    if constexpr (inverse) {
+      if (a.num_generators() != b.num_generators()) {
+        if (a.num_generators() == 0) return true;
+        if (b.num_generators() == 0) return false;
+        if (a.generators_[0] < b.generators_[0]) return true;
+        if (b.generators_[0] < a.generators_[0]) return false;
+        return a.num_generators() < b.num_generators();
+      }
+    }
+
     for (std::size_t i = 0u; i < std::min(a.num_generators(), b.num_generators()); ++i) {
+      if constexpr (inverse) i = std::min(a.num_generators(), b.num_generators()) - 1 - i;
       if (_is_nan(a.generators_[i]) && !_is_nan(b.generators_[i])) return false;
       if (_is_nan(b.generators_[i])) return true;
       if (a.generators_[i] < b.generators_[i]) return true;
       if (b.generators_[i] < a.generators_[i]) return false;
+      if constexpr (inverse) i = std::min(a.num_generators(), b.num_generators()) - 1 - i;
     }
     return a.num_generators() < b.num_generators();
   }
@@ -693,7 +712,10 @@ class Degree_rips_bifiltration
    * argument. The "words" considered for the lexicographical order are all the generators concatenated together
    * in order of generator index and then in order of parameter index. Different from @ref operator<= "", this order
    * is total.
+   *
+   * @tparam inverse If true, the parameter index and generator index order is inverted.
    */
+  template <bool inverse = false>
   friend bool is_less_or_equal_than_lexicographically(const Degree_rips_bifiltration &a,
                                                       const Degree_rips_bifiltration &b)
   {
@@ -701,11 +723,23 @@ class Degree_rips_bifiltration
     if (b.is_nan()) return true;
     if (a.is_nan()) return false;
 
+    if constexpr (inverse) {
+      if (a.num_generators() != b.num_generators()) {
+        if (a.num_generators() == 0) return true;
+        if (b.num_generators() == 0) return false;
+        if (a.generators_[0] < b.generators_[0]) return true;
+        if (b.generators_[0] < a.generators_[0]) return false;
+        return a.num_generators() < b.num_generators();
+      }
+    }
+
     for (std::size_t i = 0u; i < std::min(a.num_generators(), b.num_generators()); ++i) {
+      if constexpr (inverse) i = std::min(a.num_generators(), b.num_generators()) - 1 - i;
       if (_is_nan(a.generators_[i]) && !_is_nan(b.generators_[i])) return false;
       if (_is_nan(b.generators_[i])) return true;
       if (a.generators_[i] < b.generators_[i]) return true;
       if (b.generators_[i] < a.generators_[i]) return false;
+      if constexpr (inverse) i = std::min(a.num_generators(), b.num_generators()) - 1 - i;
     }
     return a.num_generators() <= b.num_generators();
   }
