@@ -51,6 +51,7 @@ jobs:
         shell: pwsh
         run: |
           python -m pip wheel -ve .
+          Copy-Item -Path "C:\vcpkg\installed\x64-windows\bin\" -Filter *.dll
           ls ".\"
           delvewheel show *.whl
           delvewheel repair -w wheelhouse -v *.whl
