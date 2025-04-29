@@ -241,6 +241,17 @@ else(WIN32)
   set(GUDHI_PYTHON_PATH_ENV "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{PYTHONPATH}")
 endif(WIN32)
 
+# Remove Release, Debug folder mechanism on Windows
+if(MSVC)
+  get_property(current_targets DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
+  foreach(TARGET ${current_targets})
+    set_target_properties(${TARGET} PROPERTIES
+                          RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR}/$<0:>
+                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<0:>
+                          ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<0:>)
+  endforeach()
+endif(MSVC)
+
 # Documentation generation is available through sphinx - requires all modules
 # Make it first as sphinx test is by far the longest test which is nice when testing in parallel
 if(GUDHI_PYTHON_DOCUMENTATION_MISSING_MODULES)
