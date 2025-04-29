@@ -51,10 +51,9 @@ jobs:
         shell: pwsh
         run: |
           python -m pip wheel -ve .
-          Copy-Item -Path "C:\vcpkg\installed\x64-windows\bin\" -Filter *.dll
           ls ".\"
-          delvewheel show *.whl
-          delvewheel repair -w wheelhouse -v *.whl
+          delvewheel show --add-path=C:/vcpkg/installed/x64-windows/bin *.whl
+          delvewheel repair --add-path=C:/vcpkg/installed/x64-windows/bin -w wheelhouse -v *.whl
       # Test ABI compatibility with numpy 1.X
       - name: Install and test python wheel
         shell: pwsh
