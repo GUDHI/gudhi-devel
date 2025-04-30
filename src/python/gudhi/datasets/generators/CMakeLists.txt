@@ -1,6 +1,1 @@
-if(TARGET CGAL::CGAL)
-  if(TARGET Eigen3::Eigen)
-    nanobind_add_module(_points_ext NOMINSIZE _points.cc)
-    target_link_libraries(_points_ext PRIVATE Eigen3::Eigen CGAL::CGAL)
-  endif()
-endif ()
+nanobind_add_module_with_targets(_points_ext _points.cc Eigen3::Eigen CGAL::CGAL)

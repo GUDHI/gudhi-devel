@@ -14,6 +14,40 @@ if(NOT NANOBIND_FOUND)
   return()
 endif()
 
+function(nanobind_add_module_with_targets)
+    if (ARGC LESS 2)
+        message (FATAL_ERROR "add_executable_with_targets requires at least 2 arguments.")
+    endif()
+
+    list(POP_FRONT ARGN EXECUTABLE_NAME EXECUTABLE_SOURCE)
+    message(DEBUG "${EXECUTABLE_NAME} - ${EXECUTABLE_SOURCE}")
+    # Do not add_executable if one of the target is not here, except for TBB that is optional
+    foreach(USER_TARGET IN LISTS ARGN)
+        if(NOT TARGET ${USER_TARGET})
+            if(NOT ${USER_TARGET} STREQUAL "TBB::tbb")
+                return()
+            endif()
+        endif()
+    endforeach()
+    # cf. https://nanobind.readthedocs.io/en/latest/api_cmake.html#high-level-interface
+    nanobind_add_module(${EXECUTABLE_NAME} NB_STATIC NOMINSIZE ${EXECUTABLE_SOURCE})
+    foreach(USER_TARGET IN LISTS ARGN)
+        message(DEBUG "target_link_libraries(${EXECUTABLE_NAME} PRIVATE ${USER_TARGET})")
+        # TARGET_NAME_IF_EXISTS is specific to TBB case (optional)
+        target_link_libraries(${EXECUTABLE_NAME} PRIVATE $<TARGET_NAME_IF_EXISTS:${USER_TARGET}>)
+    endforeach()
+    if(MSVC)
+        # cf. https://nanobind.readthedocs.io/en/latest/faq.html#importing-fails-due-to-missing-lib-nanobind-dylib-so-dll
+        message(DEBUG "${EXECUTABLE_NAME} set LIBRARY_OUTPUT_DIRECTORIES to ${CMAKE_CURRENT_BINARY_DIR}")
+        set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+                              LIBRARY_OUTPUT_DIRECTORY                ${CMAKE_CURRENT_BINARY_DIR}
+                              LIBRARY_OUTPUT_DIRECTORY_RELEASE        ${CMAKE_CURRENT_BINARY_DIR}
+                              LIBRARY_OUTPUT_DIRECTORY_DEBUG          ${CMAKE_CURRENT_BINARY_DIR}
+                              LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_CURRENT_BINARY_DIR}
+                              LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL     ${CMAKE_CURRENT_BINARY_DIR})
+    endif(MSVC)
+endfunction()
+
 # THE_TEST is the python test file name (without .py extension) containing tests functions
 function( add_gudhi_py_test THE_TEST )
   if(PYTEST_FOUND)
@@ -240,17 +274,6 @@ if (WIN32)
 else(WIN32)
   set(GUDHI_PYTHON_PATH_ENV "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{PYTHONPATH}")
 endif(WIN32)
-
-# Remove Release, Debug folder mechanism on Windows
-if(MSVC)
-  get_property(current_targets DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
-  foreach(TARGET ${current_targets})
-    set_target_properties(${TARGET} PROPERTIES
-                          RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR}/$<0:>
-                          LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<0:>
-                          ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<0:>)
-  endforeach()
-endif(MSVC)
 
 # Documentation generation is available through sphinx - requires all modules
 # Make it first as sphinx test is by far the longest test which is nice when testing in parallel
