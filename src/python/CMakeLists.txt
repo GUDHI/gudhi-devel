@@ -479,7 +479,9 @@ if(SCIPY_FOUND)
 endif()
 
 # Subsampling
-add_gudhi_py_test(test_subsampling)
+if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
+  add_gudhi_py_test(test_subsampling)
+endif()
 
 # Witness
 add_test(NAME witness_complex_from_nearest_landmark_table_py_test
