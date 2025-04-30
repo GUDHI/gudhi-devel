@@ -36,6 +36,7 @@
 #include <gudhi/Multi_parameter_filtered_complex.h>
 #include <gudhi/Multi_persistence/Line.h>
 #include <gudhi/Thread_safe_slicer.h>
+#include <gudhi/Projective_cover_kernel.h>
 
 namespace Gudhi {
 namespace multi_persistence {
@@ -278,6 +279,12 @@ class Slicer
   {
     using return_filtration_value = decltype(std::declval<Filtration_value>().template as_type<std::int32_t>());
     return Slicer<return_filtration_value, Persistence>(build_complex_coarsen_on_grid(slicer.complex_, grid));
+  }
+
+  friend Slicer build_slicer_from_projective_cover_kernel(const Slicer& slicer, Dimension dim)
+  {
+    Projective_cover_kernel<Filtration_value> kernel(slicer.complex_, dim);
+    return Slicer(kernel.create_complex());
   }
 
   friend std::ostream& operator<<(std::ostream& stream, const Slicer& slicer)

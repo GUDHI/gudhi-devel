@@ -22,6 +22,7 @@
 #include <cstdint>  //std::uint32_t
 #include <numeric>
 #include <ostream>
+#include <utility>
 #include <vector>
 
 #include <gudhi/Debug_utils.h>
@@ -45,14 +46,14 @@ class Multi_parameter_filtered_complex
   using Dimension_container = std::vector<Dimension>;
 
   Multi_parameter_filtered_complex()
-      : boundaries_(), dimensions_(), filtrationValues_(), maxDimension_(0), isOrderedByDimension_(true)
+      : boundaries_(), dimensions_(), filtrationValues_(), maxDimension_(-1), isOrderedByDimension_(true)
   {}
 
   // assumes boundary Idxs corresponds to container Idxs
   Multi_parameter_filtered_complex(const Boundary_container& boundaries,
                                    const Dimension_container& dimensions,
                                    const Filtration_value_container& filtrationValues)
-      : boundaries_(boundaries), dimensions_(dimensions), filtrationValues_(filtrationValues), maxDimension_(0)
+      : boundaries_(boundaries), dimensions_(dimensions), filtrationValues_(filtrationValues), maxDimension_(-1)
   {
     _initialize_dimension_utils();
   }
@@ -74,7 +75,7 @@ class Multi_parameter_filtered_complex
   Index get_number_of_parameters() const
   {
     if (filtrationValues_.empty()) return 0;
-    filtrationValues_[0].num_parameters();
+    return filtrationValues_[0].num_parameters();
   }
 
   bool is_ordered_by_dimension() const { return isOrderedByDimension_; }
@@ -97,20 +98,20 @@ class Multi_parameter_filtered_complex
 
   void sort_by_dimension_co_lexicographically()
   {
+    using namespace Gudhi::multi_filtration;
+
     sort([&](Index i, Index j) -> bool {
       if (dimensions_[i] == dimensions_[j]) {
-        return multi_filtration::is_strict_less_than_lexicographically<true>(filtrationValues_[i],
-                                                                             filtrationValues_[j]);
+        return is_strict_less_than_lexicographically<true>(filtrationValues_[i], filtrationValues_[j]);
       }
       return dimensions_[i] < dimensions_[j];
     });
-
-    isOrderedByDimension_ = true;
   }
 
   template <typename Comp>
   void sort(Comp&& comparaison)
   {
+    // TODO: test if it is not faster to just reconstruct everything instead of swapping
     std::vector<Index> perm(boundaries_.size());
     std::iota(perm.begin(), perm.end(), 0);
     std::vector<Index> pos = perm;
@@ -118,17 +119,24 @@ class Multi_parameter_filtered_complex
     std::vector<Index> inv(boundaries_.size());
     for (Index i = 0; i < perm.size(); ++i) inv[perm[i]] = i;
 
+    Dimension lastDim = -1;
+    isOrderedByDimension_ = true;
+
     for (Index curr = 0; curr < perm.size(); ++curr) {
       Index p = perm[curr];
       Index i = pos[p];
       if (i != curr) {
         GUDHI_CHECK(curr < i, "Something is wrong");
         std::swap(boundaries_[curr], boundaries_[i]);
-        for (Index& b : boundaries_[curr]) b = inv[b];
         std::swap(dimensions_[curr], dimensions_[i]);
         swap(filtrationValues_[curr], filtrationValues_[i]);
-        std::swap(pos[curr], pos[i]);
+        Index& c = *std::find(pos.begin(), pos.end(), curr);
+        std::swap(c, pos[p]);
       }
+      for (Index& b : boundaries_[curr]) b = inv[b];
+      std::sort(boundaries_[curr].begin(), boundaries_[curr].end());
+      if (lastDim > dimensions_[curr]) isOrderedByDimension_ = false;
+      lastDim = dimensions_[curr];
     }
   }
 
@@ -191,7 +199,8 @@ class Multi_parameter_filtered_complex
       }
       return complex.dimensions_[i] < complex.dimensions_[j];
     });
-    return build_permuted_complex(complex, perm);
+    auto out = build_permuted_complex(complex, perm);
+    return std::make_pair(std::move(out), std::move(perm));
   }
 
   friend auto build_complex_coarsen_on_grid(const Multi_parameter_filtered_complex& complex,

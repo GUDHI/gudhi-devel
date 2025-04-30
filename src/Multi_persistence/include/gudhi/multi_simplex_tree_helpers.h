@@ -91,7 +91,7 @@ Simplex_tree<MultiDimSimplexTreeOptions> make_multi_dimensional(
   };
 
   Simplex_tree<MultiDimSimplexTreeOptions> multi_st(st, translate);
-  multi_st.set_number_of_parameters(num_param);
+  multi_st.set_num_parameters(num_param);
 
   return multi_st;
 }
@@ -131,7 +131,10 @@ Simplex_tree<OneDimSimplexTreeOptions> make_one_dimensional(const MultiDimSimple
     return f(0, dimension);
   };
 
-  return Simplex_tree<OneDimSimplexTreeOptions>(st, translate);
+  Simplex_tree<OneDimSimplexTreeOptions> one_st(st, translate);
+  one_st.set_num_parameters(1);
+
+  return one_st;
 }
 
 }  // namespace multi_persistence

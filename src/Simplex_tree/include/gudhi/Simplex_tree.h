@@ -2900,6 +2900,7 @@ std::ostream& operator<<(std::ostream & os, const Simplex_tree<T...> & st) {
     for (auto v : st.simplex_vertex_range(sh)) {
       os << v << " ";
     }
+    os << " ( p = " << st.num_parameters() << " ) ";
     os << st.filtration(sh) << "\n";  // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
   }
   return os;
