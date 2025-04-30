@@ -2071,6 +2071,14 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
+   * @brief Returns a filtration value at infinity with the same number of parameters than the given value.
+   */
+  friend Dynamic_multi_parameter_filtration get_infinity_value(const Dynamic_multi_parameter_filtration &f)
+  {
+    return Dynamic_multi_parameter_filtration::inf(f.num_parameters());
+  }
+
+  /**
    * @brief Adds the generators of the second argument to the first argument. If `Ensure1Criticality` is true,
    * the method assumes that the two filtration values are comparable, that is, that the result of the union is also
    * 1-critical. A check for this is only done in Debug Mode, as it is costly.
