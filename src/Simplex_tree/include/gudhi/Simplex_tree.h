@@ -171,14 +171,12 @@ class Simplex_tree {
     const Filtration_value& filtration() const { return filt_; }
     Filtration_value& filtration() { return filt_; }
 
-    static const Filtration_value& get_infinity() { return inf_; }
+    static const Filtration_value& get_simple_infinity() { return inf_; }
 
    private:
     Filtration_value filt_;
-
-    inline static const Filtration_value inf_ = std::numeric_limits<Filtration_value>::has_infinity
-                                                    ? std::numeric_limits<Filtration_value>::infinity()
-                                                    : std::numeric_limits<Filtration_value>::max();
+    inline static const Filtration_value inf_ =
+        get_infinity_value(Filtration_value(simplex_tree::empty_filtration_value));
   };
 
   struct Filtration_simplex_base_dummy {
@@ -749,7 +747,7 @@ class Simplex_tree {
     if (sh != null_simplex()) {
       return sh->second.filtration();
     } else {
-      return Filtration_simplex_base_real::get_infinity();
+      return Filtration_simplex_base_real::get_simple_infinity();
     }
   }
 
@@ -1300,7 +1298,7 @@ class Simplex_tree {
   void initialize_filtration(bool ignore_infinite_values = false) const {
     if (ignore_infinite_values){
       initialize_filtration(is_before_in_totally_ordered_filtration(this), [&](Simplex_handle sh) -> bool {
-        return filtration(sh) == Filtration_simplex_base_real::get_infinity();
+        return filtration(sh) == get_infinity_value(filtration(sh));
       });
     } else {
       initialize_filtration(is_before_in_totally_ordered_filtration(this), [](Simplex_handle) -> bool {
@@ -2182,7 +2180,7 @@ class Simplex_tree {
    * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    */
   bool prune_above_filtration(const Filtration_value& filtration) {
-    if (filtration == Filtration_simplex_base_real::get_infinity())
+    if (filtration == get_infinity_value(filtration))
       return false;  // ---->>
     bool modified = rec_prune_above_filtration(root(), filtration);
     if(modified)
@@ -2414,8 +2412,8 @@ class Simplex_tree {
 
     // Compute maximum and minimum of filtration values
     Vertex_handle maxvert = std::numeric_limits<Vertex_handle>::min();
-    Filtration_value minval = Filtration_simplex_base_real::get_infinity();
-    Filtration_value maxval = -Filtration_simplex_base_real::get_infinity();
+    Filtration_value minval = Filtration_simplex_base_real::get_simple_infinity();
+    Filtration_value maxval = -minval;
     for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
       const Filtration_value& f = this->filtration(sh);
       minval = std::min(minval, f);
