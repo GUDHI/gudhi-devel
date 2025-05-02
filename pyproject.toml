@@ -16,7 +16,15 @@ cmake.args = [
 cmake.build-type = "Release"
 build.verbose = true
 logging.level = "INFO"
-#sdist.exclude = ["*.cc", "CMakeLists.txt"]
+wheel.exclude = [
+    "**/*.cc",
+    "**/*.cmake",
+    "**/CMakeFiles",        # Then specific for Windows
+    "**/*.dir",
+    "**/Release",
+    "**/*.vcxproj",
+    "**/*.vcxproj.filters",
+]
 wheel.packages = []
 
 [project]
