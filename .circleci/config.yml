@@ -104,7 +104,6 @@ jobs:
             ctest --output-on-failure
             make sphinx
             cp -R sphinx /tmp/sphinx
-            python -m pip install .
             python -B -m pytest test/*.py --cov-report html --cov=gudhi
             cp -R htmlcov /tmp/htmlcov
       - store_artifacts:
