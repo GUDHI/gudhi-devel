@@ -142,7 +142,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def insert_batch(
         self,
-        vertex_array: Union[np.ndarray[np.float32], np.ndarray[np.float64]],
+        vertex_array: Union[np.ndarray[np.int32], np.ndarray[np.int64]],
         filtrations: Union[np.ndarray[np.float32], np.ndarray[np.float64]],
     ):
         """Inserts k-simplices given by a sparse array in a format similar
