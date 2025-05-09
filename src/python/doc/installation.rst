@@ -41,8 +41,9 @@ there.
 
 The library uses c++17 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.71.0,
 `CMake <https://www.cmake.org/>`_ :math:`\geq` 3.15,
-Python :math:`\geq` 3.8, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0, `Cython <https://www.cython.org/>`_
-:math:`\geq` 0.27 and `pybind11 <https://github.com/pybind/pybind11>`_ to compile the GUDHI Python module.
+Python :math:`\geq` 3.9, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0,
+`scikit-build-core <https://scikit-build-core.readthedocs.io>`_ :math:`\geq` 0.4.3
+`nanobind <https://nanobind.readthedocs.io>`_ :math:`\geq` 1.3.2 to compile the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2017 or later.
 
 If you have several Python/python installed, you can force it by adding
@@ -145,9 +146,8 @@ You shall have something like:
 
 .. code-block:: none
 
-    Pybind11 version 2.8.1
+    Nanobind version 2.4.0
     Python version 3.7.12
-    Cython version 0.29.25
     Numpy version 1.21.4
     Boost version 1.77.0
     + Installed modules are: off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
@@ -166,8 +166,7 @@ A complete configuration would be :
 .. code-block:: none
 
     Python version 3.11.9
-    Pybind11 version 2.12.0
-    Cython version 3.0.10
+    Nanobind version 2.4.0
     Numpy version 1.24.3
     Pytest version 8.2.1
     Matplotlib version 3.9.0
