@@ -20,7 +20,7 @@ import numpy as np
 from joblib import Parallel, delayed
 
 from .. import CubicalComplex
-from .._pers_cub_low_dim import (
+from .._pers_cub_low_dim_ext import (
     _persistence_on_a_line,
     _persistence_on_rectangle_from_top_cells,
 )

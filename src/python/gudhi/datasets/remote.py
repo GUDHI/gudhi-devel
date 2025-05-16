@@ -14,6 +14,7 @@ __maintainer__ = "Vincent Rouvreau"
 __copyright__ = "Copyright (C) 2021 Inria"
 __license__ = "MIT"
 
+
 from os.path import join, split, exists, expanduser
 from os import makedirs, remove, environ
 
