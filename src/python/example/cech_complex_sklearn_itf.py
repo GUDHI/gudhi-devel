@@ -35,9 +35,6 @@ for idx in range(dataset_size):
     ns = noise * target[idx] * np.random.rand(nb_points[idx], 2) - (noise / 2.)
     X.append(pts + ns)
 
-# Cech filtration are squared radius, so transform targets with squared radius values for train/predict purposes
-target = target * target
-
 # Split the dataset for train/predict
 Xtrain, Xtest, ytrain, ytest = train_test_split(X, target, test_size = 0.25)
 
@@ -51,7 +48,7 @@ pipe = Pipeline(
 
 model = pipe.fit(Xtrain, ytrain)
 
-# Let's see how our model is predicting squared radiuses from points on random circles
+# Let's see how our model is predicting radiuses from points on random circles
 predictions = model.predict(Xtest)
 _, ax = plt.subplots()
 ax.set_xlabel('target')
