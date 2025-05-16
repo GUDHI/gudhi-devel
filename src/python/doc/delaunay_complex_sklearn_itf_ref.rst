@@ -51,7 +51,3 @@ regression line of the model when fitting on the other 25% of the dataset.
 .. autoclass:: gudhi.sklearn.cech_persistence.WeightedCechPersistence
    :members:
    :show-inheritance:
-
-.. autoclass:: gudhi.sklearn.rips_persistence.RipsPersistence
-   :members:
-   :show-inheritance:
