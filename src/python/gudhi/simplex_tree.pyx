@@ -8,6 +8,12 @@
 #   - 2023/02 Vincent Rouvreau: Add serialize/deserialize for pickle feature
 #   - YYYY/MM Author: Description of the modification
 
+__author__ = "Vincent Rouvreau"
+__maintainer__ = "Vincent Rouvreau"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
+
+
 from cython.operator import dereference, preincrement
 from libc.stdint cimport intptr_t, int32_t, int64_t
 import numpy as np
@@ -15,9 +21,6 @@ cimport gudhi.simplex_tree
 cimport cython
 from numpy.math cimport INFINITY
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
 
 ctypedef fused some_int:
     int32_t
