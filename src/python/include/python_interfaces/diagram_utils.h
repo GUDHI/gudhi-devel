@@ -18,7 +18,7 @@
 #include <boost/range/counting_range.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 
-using Tensor_dgm = nanobind::ndarray<double, nanobind::shape<-1, 2> >;
+using Tensor_dgm = nanobind::ndarray<const double, nanobind::shape<-1, 2> >;
 using Sequence_dgm = nanobind::sequence;
 using List_dgm = nanobind::list;
 
@@ -61,7 +61,7 @@ inline auto _array_to_range_of_pairs(const Array& dgm, BuildPoint&& build_point)
 
 // build_point(double birth, double death, size_t index) -> Point
 template <class BuildPoint>
-inline auto array_to_range_of_pairs(const Sequence_dgm& dgm, BuildPoint build_point)
+inline auto array_to_range_of_pairs(const Sequence_dgm& dgm, BuildPoint&& build_point)
 {
   return _array_to_range_of_pairs(dgm, std::move(build_point));
 }

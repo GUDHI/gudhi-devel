@@ -31,7 +31,7 @@ auto wrap_persistence_1d(nb::ndarray<T, nb::ndim<1>> data)
 {
   auto data_view = data.view();
   auto cnt = boost::counting_range<nb::ssize_t>(0, data_view.shape(0));
-  auto proj = [&](nb::ssize_t i) { return data_view(i); };
+  auto proj = [&data_view](nb::ssize_t i) { return data_view(i); };
   auto r = boost::adaptors::transform(cnt, proj);
   auto dgm = new T[data_view.shape(0) * 2];
   std::size_t count = 0;
@@ -45,14 +45,14 @@ auto wrap_persistence_1d(nb::ndarray<T, nb::ndim<1>> data)
   }
   return _wrap_as_numpy_array(dgm, count / 2, 2);
   // std::vector<std::array<T, 2> >* dgm = new std::vector<std::array<T, 2> >();
-  // dgm->reserve(data_view.shape(0) * 2);
+  // // dgm->reserve(data_view.shape(0) * 2);
   // {
   //   nb::gil_scoped_release release;
   //   Gudhi::persistent_cohomology::compute_persistence_of_function_on_line(r, [&](T b, T d) {
   //     dgm->emplace_back(std::array<T, 2>{b,d});
   //   });
   // }
-  // dgm->shrink_to_fit();
+  // // dgm->shrink_to_fit();
   // return nb::ndarray<T, nb::numpy>(dgm->data(), {dgm->size(), 2}, nb::capsule(dgm, [](void* p) noexcept {
   //   delete reinterpret_cast<std::vector<std::array<T, 2> >*>(p);
   // }));
