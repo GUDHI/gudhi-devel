@@ -63,7 +63,7 @@ inline auto _array_to_range_of_pairs(const Array& dgm, BuildPoint&& build_point)
 template <class BuildPoint>
 inline auto array_to_range_of_pairs(const Sequence_dgm& dgm, BuildPoint&& build_point)
 {
-  return _array_to_range_of_pairs(dgm, std::move(build_point));
+  return _array_to_range_of_pairs(dgm, std::forward<BuildPoint>(build_point));
 }
 
 // build_point(double birth, double death, size_t index) -> Point
