@@ -70,5 +70,5 @@ inline auto array_to_range_of_pairs(const Sequence_dgm& dgm, BuildPoint&& build_
 template <class BuildPoint>
 inline auto array_to_range_of_pairs(const List_dgm& dgm, BuildPoint&& build_point)
 {
-  return _array_to_range_of_pairs(dgm, std::move(build_point));
+  return _array_to_range_of_pairs(dgm, std::forward<BuildPoint>(build_point));
 }
