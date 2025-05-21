@@ -83,7 +83,7 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     return (result.second);
   }
 
-  void insert_matrix(const nanobind::ndarray<double, nanobind::ndim<2> >& filtrations, double max_filtration)
+  void insert_matrix(const nanobind::ndarray<const double, nanobind::ndim<2> >& filtrations, double max_filtration)
   {
     auto fil_view = filtrations.view();
     // We could delegate to insert_graph, but wrapping the matrix in a graph interface is too much work,

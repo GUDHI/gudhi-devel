@@ -40,7 +40,7 @@ struct Full {
   typedef Tag_dense Category;
   typedef int vertex_t;
   typedef T value_t;
-  nb::ndarray<T, nb::ndim<2>> data;
+  nb::ndarray<const T, nb::ndim<2>> data;
 
   int size() const { return data.shape(0); }
 
@@ -80,7 +80,7 @@ nb::list doit(DistanceMatrix&& dist,
 }
 
 template <class T>
-nb::list full(nb::ndarray<T, nb::ndim<2>> matrix, int max_dimension, T max_edge_length, unsigned homology_coeff_field)
+nb::list full(nb::ndarray<const T, nb::ndim<2>> matrix, int max_dimension, T max_edge_length, unsigned homology_coeff_field)
 {
   Full<T> dist{matrix};
   if (dist.data.ndim() != 2 || dist.data.shape(0) != dist.data.shape(1))
@@ -116,9 +116,9 @@ nb::list lower(nb::object low_mat, int max_dimension, double max_edge_length, un
 }
 
 template <class V, class T>
-nb::list sparse(nb::ndarray<V, nb::ndim<1>> is,
-                nb::ndarray<V, nb::ndim<1>> js,
-                nb::ndarray<T, nb::ndim<1>> fs,
+nb::list sparse(nb::ndarray<const V, nb::ndim<1>> is,
+                nb::ndarray<const V, nb::ndim<1>> js,
+                nb::ndarray<const T, nb::ndim<1>> fs,
                 int num_vertices,
                 int max_dimension,
                 T max_edge_length,

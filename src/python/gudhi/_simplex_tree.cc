@@ -28,7 +28,7 @@ namespace nb = nanobind;
 using gsti = Gudhi::Simplex_tree_interface;
 using gpers = Gudhi::Persistent_cohomology_interface<gsti>;
 
-gsti deserialize_from_python(const nb::ndarray<char, nb::ndim<1>, nb::numpy> &state)
+gsti deserialize_from_python(const nb::ndarray<const char, nb::ndim<1>, nb::numpy> &state)
 {
   gsti st;
   {
@@ -376,7 +376,7 @@ otherwise it is kept. The algorithm then proceeds with the next candidate.
              }
              return _wrap_as_numpy_array(buffer, buffer_size);
            })
-      .def("__setstate__", [](gsti &st, const nb::ndarray<char, nb::ndim<1>, nb::numpy> &state) -> void {
+      .def("__setstate__", [](gsti &st, const nb::ndarray<const char, nb::ndim<1>, nb::numpy> &state) -> void {
         new (&st) gsti(deserialize_from_python(state));
       });
 

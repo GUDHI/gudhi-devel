@@ -27,7 +27,7 @@
 namespace nb = nanobind;
 
 template <class T>
-auto wrap_persistence_1d(nb::ndarray<T, nb::ndim<1>> data)
+auto wrap_persistence_1d(nb::ndarray<const T, nb::ndim<1>> data)
 {
   auto data_view = data.view();
   auto cnt = boost::counting_range<nb::ssize_t>(0, data_view.shape(0));
@@ -69,7 +69,7 @@ auto wrap_persistence_1d(nb::ndarray<T, nb::ndim<1>> data)
   // return _wrap_as_numpy_array(dgm, dgm->size() / 2, 2);
 }
 
-nb::list wrap_persistence_2d(nb::ndarray<double, nb::ndim<2>, nb::c_contig> data, double min_persistence)
+nb::list wrap_persistence_2d(nb::ndarray<const double, nb::ndim<2>, nb::c_contig> data, double min_persistence)
 {
   std::vector<double>* dgm0 = new std::vector<double>();
   std::vector<double>* dgm1 = new std::vector<double>();

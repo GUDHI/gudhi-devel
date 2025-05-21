@@ -23,9 +23,9 @@
 namespace nb = nanobind;
 
 template <class Index, class Filtr>
-nb::object collapse(nb::ndarray<Index, nb::ndim<1>> is,
-                    nb::ndarray<Index, nb::ndim<1>> js,
-                    nb::ndarray<Filtr, nb::ndim<1>> fs,
+nb::object collapse(nb::ndarray<const Index, nb::ndim<1>> is,
+                    nb::ndarray<const Index, nb::ndim<1>> js,
+                    nb::ndarray<const Filtr, nb::ndim<1>> fs,
                     int nb_iterations)
 {
   typedef std::tuple<Index, Index, Filtr> Filtered_edge;

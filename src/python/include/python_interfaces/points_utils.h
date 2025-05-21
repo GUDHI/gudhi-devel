@@ -13,9 +13,9 @@
 #include <nanobind/ndarray.h>
 
 using Sequence1D = std::vector<double>;
-using Tensor1D = nanobind::ndarray<double, nanobind::ndim<1>>;
+using Tensor1D = nanobind::ndarray<const double, nanobind::ndim<1>>;
 using Sequence2D = std::vector<std::vector<double>>;
-using Tensor2D = nanobind::ndarray<double, nanobind::ndim<2>>;
+using Tensor2D = nanobind::ndarray<const double, nanobind::ndim<2>>;
 
 inline Sequence2D _get_sequence_from_tensor(const Tensor2D& tensor)
 {
@@ -36,7 +36,7 @@ inline Sequence1D _get_sequence_from_tensor(const Tensor1D& tensor)
 }
 
 using Nearest_landmark_sequence = std::vector<std::vector<std::pair<std::size_t, double>>>;
-using Nearest_landmark_tensor = nanobind::ndarray<double, nanobind::shape<-1, -1, 2>>;
+using Nearest_landmark_tensor = nanobind::ndarray<const double, nanobind::shape<-1, -1, 2>>;
 
 inline Nearest_landmark_sequence _get_sequence_from_tensor(const Nearest_landmark_tensor& tensor)
 {
