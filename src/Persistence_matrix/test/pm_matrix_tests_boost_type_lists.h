@@ -138,7 +138,7 @@ class matrix_non_validity {
 // users. But in case real changes were made to this module, it would be better to test at least once with all column
 // types as below:
 // using col_type_list = boost::mp11::mp_list<ct_intrusive_list, ct_intrusive_set, ct_list, ct_set, ct_heap,
-//                                            ct_unordered_set, ct_vector, ct_naive_vector>;
+//                                            ct_unordered_set, ct_vector, ct_naive_vector, ct_small_vector>;
 #ifdef PM_TEST_INTR_LIST
 using col_type_list = boost::mp11::mp_list<ct_intrusive_list>;
 #else
@@ -162,7 +162,11 @@ using col_type_list = boost::mp11::mp_list<ct_unordered_set>;
 #ifdef PM_TEST_NAIVE_VECTOR
 using col_type_list = boost::mp11::mp_list<ct_naive_vector>;
 #else
+#ifdef PM_TEST_SMALL_VECTOR
+using col_type_list = boost::mp11::mp_list<ct_small_vector>;
+#else
 using col_type_list = boost::mp11::mp_list<ct_vector>;
+#endif
 #endif
 #endif
 #endif

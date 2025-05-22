@@ -29,3 +29,10 @@ gudhi_add_boost_test(Simplex_tree_edge_expansion_unit_test)
 
 add_executable_with_targets(Simplex_tree_extended_filtration_test_unit simplex_tree_extended_filtration_unit_test.cpp TBB::tbb)
 gudhi_add_boost_test(Simplex_tree_extended_filtration_test_unit)
+
+add_executable_with_targets(Simplex_tree_data_test_unit simplex_tree_data_unit_test.cpp TBB::tbb)
+gudhi_add_boost_test(Simplex_tree_data_test_unit)
+
+add_executable_with_targets(Simplex_tree_constness_test_unit simplex_tree_constness_unit_test.cpp TBB::tbb)
+gudhi_add_boost_test(Simplex_tree_constness_test_unit)
+

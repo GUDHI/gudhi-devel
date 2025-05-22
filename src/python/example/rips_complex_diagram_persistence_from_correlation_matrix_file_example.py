@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-import sys
-import argparse
-import gudhi
-
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
@@ -14,9 +10,13 @@ import gudhi
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2017 Inria"
 __license__ = "MIT"
+
+
+import sys
+import argparse
+import gudhi as gd
+
 
 parser = argparse.ArgumentParser(
     description="RipsComplex creation from " "a correlation matrix read in a csv file.",
@@ -51,30 +51,25 @@ print("properly, this is a known issue.")
 print("#####################################################################")
 print("RipsComplex creation from correlation matrix read in a csv file")
 
-message = "RipsComplex with min_edge_correlation=" + repr(args.min_edge_correlation)
-print(message)
+print(f"RipsComplex with min_edge_correlation={args.min_edge_correlation}")
 
-correlation_matrix = gudhi.read_lower_triangular_matrix_from_csv_file(
-    csv_file=args.file
-)
+correlation_matrix = gd.read_lower_triangular_matrix_from_csv_file(csv_file=args.file)
 # Given a correlation matrix M, we compute component-wise M'[i,j] = 1-M[i,j] to get a distance matrix:
 distance_matrix = [
     [1.0 - correlation_matrix[i][j] for j in range(len(correlation_matrix[i]))]
     for i in range(len(correlation_matrix))
 ]
 
-rips_complex = gudhi.RipsComplex(
+rips_complex = gd.RipsComplex(
     distance_matrix=distance_matrix, max_edge_length=1.0 - args.min_edge_correlation
 )
 simplex_tree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
 
-message = "Number of simplices=" + repr(simplex_tree.num_simplices())
-print(message)
+print(f"Number of simplices={simplex_tree.num_simplices()}")
 
 diag = simplex_tree.persistence()
 
-print("betti_numbers()=")
-print(simplex_tree.betti_numbers())
+print(f"betti_numbers()={simplex_tree.betti_numbers()}")
 
 # invert the persistence diagram
 invert_diag = [
@@ -84,5 +79,6 @@ invert_diag = [
 
 if args.no_diagram == False:
     import matplotlib.pyplot as plot
-    gudhi.plot_persistence_diagram(invert_diag, band=args.band)
+
+    gd.plot_persistence_diagram(invert_diag, band=args.band)
     plot.show()

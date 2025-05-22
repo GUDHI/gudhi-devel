@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# oldest OSx version that brew supports for gmp and mpfr 'bottles'
+OSX_VERSION='ventura'
+
 # In the working directory, creates deps-uni/lib/*
 # Assumes that the user has enough rights to run brew fetch
 
@@ -8,13 +11,13 @@ set -e
 SED_PGM='s/^Downloaded to: |^Already downloaded: //p'
 mkdir deps-amd64
 cd deps-amd64
-tar xf "`brew fetch --bottle-tag=x86_64_monterey gmp  | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
-tar xf "`brew fetch --bottle-tag=x86_64_monterey mpfr | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
+tar xf "`brew fetch --bottle-tag=x86_64_$OSX_VERSION gmp  | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
+tar xf "`brew fetch --bottle-tag=x86_64_$OSX_VERSION mpfr | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
 cd ..
 mkdir deps-arm64
 cd deps-arm64
-tar xf "`brew fetch --bottle-tag=arm64_monterey gmp   | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
-tar xf "`brew fetch --bottle-tag=arm64_monterey mpfr  | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
+tar xf "`brew fetch --bottle-tag=arm64_$OSX_VERSION gmp   | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
+tar xf "`brew fetch --bottle-tag=arm64_$OSX_VERSION mpfr  | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
 cd ..
 
 # Merging

@@ -24,6 +24,8 @@
 // /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
 #include "gudhi/Simplex_tree.h"
 
+#include "test_vector_filtration_simplex_tree.h"
+
 using namespace Gudhi;
 
 typedef boost::mpl::list<Simplex_tree<>,
@@ -42,7 +44,7 @@ std::string print_filtration_value(std::vector<int> fil){
 }
 
 template<typename Simplex_tree>
-void print_simplex_filtration(Simplex_tree& st, const std::string& msg) {
+void print_simplex_filtration(const Simplex_tree& st, const std::string& msg) {
   // Required before browsing through filtration values
   st.initialize_filtration();
 
@@ -177,42 +179,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
 
 }
 
-struct Simplex_tree_options_custom_fil_values_default {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef std::int16_t Vertex_handle;
-  typedef std::vector<int> Filtration_value;
-  typedef std::int32_t Simplex_key;
-  static const bool store_key = false;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = false;
-  static const bool stable_simplex_handles = false;
-};
-
-struct Simplex_tree_options_custom_fil_values_fast_persistence {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef std::int16_t Vertex_handle;
-  typedef std::vector<int> Filtration_value;
-  typedef std::int32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = true;
-  static const bool link_nodes_by_label = false;
-  static const bool stable_simplex_handles = false;
-};
-
-struct Simplex_tree_options_custom_fil_values_full_featured {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef std::int16_t Vertex_handle;
-  typedef std::vector<int> Filtration_value;
-  typedef std::int32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = true;
-  static const bool stable_simplex_handles = true;
-};
-
 typedef boost::mpl::list<Simplex_tree<Simplex_tree_options_custom_fil_values_default>,
                          Simplex_tree<Simplex_tree_options_custom_fil_values_fast_persistence>,
                          Simplex_tree<Simplex_tree_options_custom_fil_values_full_featured> >
@@ -337,7 +303,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_custom_copy_constructor_key, typeST, 
 }
 
 template<typename Simplex_tree>
-std::vector<std::vector<typename Simplex_tree::Vertex_handle>> get_star(Simplex_tree& st) {
+std::vector<std::vector<typename Simplex_tree::Vertex_handle>> get_star(const Simplex_tree& st) {
   std::vector<std::vector<typename Simplex_tree::Vertex_handle>> output;
   auto sh = st.find({0,1});
   if (sh != st.null_simplex())
@@ -358,7 +324,7 @@ std::vector<std::vector<typename Simplex_tree::Vertex_handle>> get_star(Simplex_
 }
 
 BOOST_AUTO_TEST_CASE(simplex_fast_cofaces_rule_of_five) {
-  // Only for fast cofaces version to check the data structure for this feature is up to date 
+  // Only for fast cofaces version to check the data structure for this feature is up to date
   using STree = Simplex_tree<Simplex_tree_options_full_featured>;
   STree st;
 

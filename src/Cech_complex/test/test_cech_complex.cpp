@@ -174,10 +174,36 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   cech5.create_complex(st3, 5);
   BOOST_CHECK(st3.dimension() == 5);
   auto st3_save = st3;
+  std::clog << "Simplex tree from Cech complex\n";
+  for (auto f_simplex : st3.filtration_simplex_range()) {
+    std::clog << "   ( ";
+    for (auto vertex : st3.simplex_vertex_range(f_simplex)) std::clog << vertex << " ";
+    std::clog << ") -> " << "[" << st3.filtration(f_simplex) << "]\n";
+  }
+
   st3.reset_filtration(-1); // unnecessary, but ensures we don't cheat
+  // Means Output_squared_values=true
   Gudhi::cech_complex::assign_MEB_filtration(Kernel(), st3, points);
-  for (auto sh : st3.complex_simplex_range())
-    st3.assign_filtration(sh, std::sqrt(st3.filtration(sh)));
+  // sqrt all filtration values
+  st3.for_each_simplex([&](auto sh, int){
+      st3.assign_filtration(sh, std::sqrt(st3.filtration(sh))); });
+  std::clog << "Simplex tree from assign_MEB_filtration - after std::sqrt on filtration values\n";
+  for (auto f_simplex : st3.filtration_simplex_range()) {
+    std::clog << "   ( ";
+    for (auto vertex : st3.simplex_vertex_range(f_simplex)) std::clog << vertex << " ";
+    std::clog << ") -> " << "[" << st3.filtration(f_simplex) << "]\n";
+  }
+  BOOST_CHECK(st3 == st3_save); // Should only be an approximate test
+
+  // Same test but with Output_squared_values=false
+  st3.reset_filtration(-1); // unnecessary, but ensures we don't cheat
+  Gudhi::cech_complex::assign_MEB_filtration<false>(Kernel(), st3, points);
+  std::clog << "Simplex tree from assign_MEB_filtration with Output_squared_values=false\n";
+  for (auto f_simplex : st3.filtration_simplex_range()) {
+    std::clog << "   ( ";
+    for (auto vertex : st3.simplex_vertex_range(f_simplex)) std::clog << vertex << " ";
+    std::clog << ") -> " << "[" << st3.filtration(f_simplex) << "]\n";
+  }
   BOOST_CHECK(st3 == st3_save); // Should only be an approximate test
 }
 
@@ -268,7 +294,7 @@ BOOST_AUTO_TEST_CASE(Cech_create_complex_throw) {
   std::vector<int> simplex = {0, 1, 2};
   stree.insert_simplex_and_subfaces(simplex);
   std::clog << "Check exception throw in debug mode" << std::endl;
-  // throw excpt because stree is not empty
+  // throw exception because stree is not empty
   BOOST_CHECK_THROW(cech_complex_from_file.create_complex(stree, 1), std::invalid_argument);
 }
 #endif

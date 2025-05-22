@@ -38,11 +38,11 @@ namespace persistence_matrix {
  * identical columns in the matrix are compressed together as the same column. For matrices with a lot of redundant
  * columns, this will save a lot of space. Also, any addition made onto a column will be performed at the same time
  * on all other identical columns, which is an advantage for the cohomology algorithm for example.
- * 
+ *
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
-class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_access_option 
+class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_access_option
 {
  public:
   using Index = typename Master_matrix::Index;                          /**< Container index type. */
@@ -63,7 +63,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    */
   class Column
       : public Master_matrix::Column,
-        public boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link> > 
+        public boost::intrusive::set_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link> >
   {
    public:
     using Base = typename Master_matrix::Column;
@@ -109,49 +109,49 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
 
   /**
    * @brief Constructs an empty matrix.
-   * 
+   *
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
-   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
+   * the necessary external classes specifically necessary for the chosen column type, such as custom allocators.
    */
   Base_matrix_with_column_compression(Column_settings* colSettings);
   /**
    * @brief Constructs a matrix from the given ordered columns. The columns are inserted in the given order.
    * If no identical column already existed, a copy of the column is stored. If an identical one existed, no new
    * column is constructed and the relationship between the two is registered in an union-find structure.
-   * 
+   *
    * @tparam Container Range type for @ref Matrix::Entry_representative ranges.
    * Assumed to have a begin(), end() and size() method.
    * @param columns A vector of @ref Matrix::Entry_representative ranges to construct the columns from.
    * The content of the ranges are assumed to be sorted by increasing ID value.
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
-   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
+   * the necessary external classes specifically necessary for the chosen column type, such as custom allocators.
    */
   template <class Container>
-  Base_matrix_with_column_compression(const std::vector<Container>& columns, 
+  Base_matrix_with_column_compression(const std::vector<Container>& columns,
                                       Column_settings* colSettings);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
-   * 
+   *
    * @param numberOfColumns Number of columns to reserve space for.
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
-   * the necessary external classes specifically necessary for the choosen column type, such as custom allocators.
+   * the necessary external classes specifically necessary for the chosen column type, such as custom allocators.
    */
-  Base_matrix_with_column_compression(unsigned int numberOfColumns, 
+  Base_matrix_with_column_compression(unsigned int numberOfColumns,
                                       Column_settings* colSettings);
   /**
    * @brief Copy constructor. If @p colSettings is not a null pointer, its value is kept
    * instead of the one in the copied matrix.
-   * 
+   *
    * @param matrixToCopy Matrix to copy.
    * @param colSettings Either a pointer to an existing setting structure for the columns or a null pointer.
-   * The structure should contain all the necessary external classes specifically necessary for the choosen column type,
+   * The structure should contain all the necessary external classes specifically necessary for the chosen column type,
    * such as custom allocators. If null pointer, the pointer stored in @p matrixToCopy is used instead.
    */
   Base_matrix_with_column_compression(const Base_matrix_with_column_compression& matrixToCopy,
                                       Column_settings* colSettings = nullptr);
   /**
    * @brief Move constructor.
-   * 
+   *
    * @param other Matrix to move.
    */
   Base_matrix_with_column_compression(Base_matrix_with_column_compression&& other) noexcept;
@@ -162,32 +162,33 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
 
   /**
    * @brief Inserts a new ordered column at the end of the matrix by copying the given range of
-   * @ref Matrix::Entry_representative. The content of the range is assumed to be sorted by increasing ID value. 
-   * 
+   * @ref Matrix::Entry_representative. The content of the range is assumed to be sorted by increasing ID value.
+   *
    * @tparam Container Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size() method.
    * @param column Range of @ref Matrix::Entry_representative from which the column has to be constructed. Assumed to be
-   * ordered by increasing ID value. 
+   * ordered by increasing ID value.
    */
   template <class Container>
   void insert_column(const Container& column);
   /**
    * @brief Same as @ref insert_column, only for interface purposes. The given dimension is ignored and not stored.
-   * 
+   *
    * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
    * method.
    * @param boundary Range of @ref Matrix::Entry_representative from which the column has to be constructed. Assumed to
-   * be ordered by increasing ID value. 
+   * be ordered by increasing ID value.
    * @param dim Ignored.
    */
   template <class Boundary_range>
-  void insert_boundary(const Boundary_range& boundary, Dimension dim = -1);
+  void insert_boundary(const Boundary_range& boundary,
+                       Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Returns the column at the given @ref MatIdx index.
-   * The type of the column depends on the choosen options, see @ref PersistenceMatrixOptions::column_type.
+   * The type of the column depends on the chosen options, see @ref PersistenceMatrixOptions::column_type.
    *
    * Remark: the method it-self is not const, because of the path compression optimization of the union-find structure,
-   * when a column is looked up. 
-   * 
+   * when a column is looked up.
+   *
    * @param columnIndex @ref MatIdx index of the column to return.
    * @return Const reference to the column.
    */
@@ -195,9 +196,9 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_row_access is true.
    * Returns the row at the given @ref rowindex "row index" of the compressed matrix.
-   * The type of the row depends on the choosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
+   * The type of the row depends on the chosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
    * Note that the row will be from the compressed matrix, that is, the one with only unique columns.
-   * 
+   *
    * @param rowIndex @ref rowindex "Row index" of the row to return.
    * @return Const reference to the row.
    */
@@ -207,19 +208,19 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * are true: assumes that the row is empty and removes it. Otherwise, does nothing.
    *
    * @warning The removed rows are always assumed to be empty. If it is not the case, the deleted row entries are not
-   * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when 
+   * removed from their columns. And in the case of intrusive rows, this will generate a segmentation fault when
    * the column entries are destroyed later. The row access is just meant as a "read only" access to the rows and the
    * @ref erase_empty_row method just as a way to specify that a row is empty and can therefore be removed from
    * dictionaries. This allows to avoid testing the emptiness of a row at each column entry removal, what can be
-   * quite frequent. 
-   * 
+   * quite frequent.
+   *
    * @param rowIndex @ref rowindex "Row index" of the empty row.
    */
   void erase_empty_row(Index rowIndex);
 
   /**
    * @brief Returns the current number of columns in the matrix, counting also the redundant columns.
-   * 
+   *
    * @return The number of columns.
    */
   Index get_number_of_columns() const;
@@ -229,7 +230,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    *
    * The representatives of redundant columns are summed together, which means that
    * all column compressed together with the target column are affected by the change, not only the target.
-   * 
+   *
    * @tparam Entry_range_or_column_index Either a range of @ref Entry with a begin() and end() method,
    * or any integer type.
    * @param sourceColumn Either an entry range or the @ref MatIdx index of the column to add.
@@ -243,7 +244,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    *
    * The representatives of redundant columns are summed together, which means that
    * all column compressed together with the target column are affected by the change, not only the target.
-   * 
+   *
    * @tparam Entry_range_or_column_index Either a range of @ref Entry with a begin() and end() method,
    * or any integer type.
    * @param sourceColumn Either a @ref Entry range or the @ref MatIdx index of the column to add.
@@ -251,7 +252,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * @param targetColumnIndex @ref MatIdx index of the target column.
    */
   template <class Entry_range_or_column_index>
-  void multiply_target_and_add_to(const Entry_range_or_column_index& sourceColumn, 
+  void multiply_target_and_add_to(const Entry_range_or_column_index& sourceColumn,
                                   const Field_element& coefficient,
                                   Index targetColumnIndex);
   /**
@@ -260,7 +261,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    *
    * The representatives of redundant columns are summed together, which means that
    * all column compressed together with the target column are affected by the change, not only the target.
-   * 
+   *
    * @tparam Entry_range_or_column_index Either a range of @ref Entry with a begin() and end() method,
    * or any integer type.
    * @param coefficient Value to multiply.
@@ -268,13 +269,13 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * @param targetColumnIndex @ref MatIdx index of the target column.
    */
   template <class Entry_range_or_column_index>
-  void multiply_source_and_add_to(const Field_element& coefficient, 
+  void multiply_source_and_add_to(const Field_element& coefficient,
                                   const Entry_range_or_column_index& sourceColumn,
                                   Index targetColumnIndex);
 
   /**
    * @brief Indicates if the entry at given coordinates has value zero.
-   * 
+   *
    * @param columnIndex @ref MatIdx index of the column of the entry.
    * @param rowIndex @ref rowindex "Row index" of the row of the entry.
    * @return true If the entry has value zero.
@@ -283,7 +284,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   bool is_zero_entry(Index columnIndex, Index rowIndex);
   /**
    * @brief Indicates if the column at given index has value zero.
-   * 
+   *
    * @param columnIndex @ref MatIdx index of the column.
    * @return true If the column has value zero.
    * @return false Otherwise.
@@ -292,7 +293,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
 
   /**
    * @brief Resets the matrix to an empty matrix.
-   * 
+   *
    * @param colSettings Pointer to the entry factory.
    */
   void reset(Column_settings* colSettings) {
@@ -430,14 +431,14 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
 {}
 
 template <class Master_matrix>
-inline Base_matrix_with_column_compression<Master_matrix>::~Base_matrix_with_column_compression() 
+inline Base_matrix_with_column_compression<Master_matrix>::~Base_matrix_with_column_compression()
 {
   columnToRep_.clear_and_dispose(Delete_disposer(this));
 }
 
 template <class Master_matrix>
 template <class Container>
-inline void Base_matrix_with_column_compression<Master_matrix>::insert_column(const Container& column) 
+inline void Base_matrix_with_column_compression<Master_matrix>::insert_column(const Container& column)
 {
   insert_boundary(column);
 }
@@ -445,12 +446,12 @@ inline void Base_matrix_with_column_compression<Master_matrix>::insert_column(co
 template <class Master_matrix>
 template <class Boundary_range>
 inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(const Boundary_range& boundary,
-                                                                                Dimension dim) 
+                                                                                Dimension dim)
 {
   // handles a dimension which is not actually stored.
   // TODO: verify if this is not a problem for the cohomology algorithm and if yes,
-  // change how Column_dimension_option is choosen.
-  if (dim == -1) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
+  // change how Column_dimension_option is chosen.
+  if (dim == Master_matrix::template get_null_value<Dimension>()) dim = boundary.size() == 0 ? 0 : boundary.size() - 1;
 
   if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows) {
     if (boundary.begin() != boundary.end()) {
@@ -488,7 +489,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(
 
 template <class Master_matrix>
 inline const typename Base_matrix_with_column_compression<Master_matrix>::Column&
-Base_matrix_with_column_compression<Master_matrix>::get_column(Index columnIndex) 
+Base_matrix_with_column_compression<Master_matrix>::get_column(Index columnIndex)
 {
   auto col = repToColumn_[columnClasses_.find_set(columnIndex)];
   if (col == nullptr) return empty_column_;
@@ -497,7 +498,7 @@ Base_matrix_with_column_compression<Master_matrix>::get_column(Index columnIndex
 
 template <class Master_matrix>
 inline const typename Base_matrix_with_column_compression<Master_matrix>::Row&
-Base_matrix_with_column_compression<Master_matrix>::get_row(Index rowIndex) const 
+Base_matrix_with_column_compression<Master_matrix>::get_row(Index rowIndex) const
 {
   static_assert(Master_matrix::Option_list::has_row_access, "Row access has to be enabled for this method.");
 
@@ -505,7 +506,7 @@ Base_matrix_with_column_compression<Master_matrix>::get_row(Index rowIndex) cons
 }
 
 template <class Master_matrix>
-inline void Base_matrix_with_column_compression<Master_matrix>::erase_empty_row(Index rowIndex) 
+inline void Base_matrix_with_column_compression<Master_matrix>::erase_empty_row(Index rowIndex)
 {
   if constexpr (Master_matrix::Option_list::has_row_access && Master_matrix::Option_list::has_removable_rows) {
     RA_opt::erase_empty_row(rowIndex);
@@ -514,7 +515,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::erase_empty_row(
 
 template <class Master_matrix>
 inline typename Base_matrix_with_column_compression<Master_matrix>::Index
-Base_matrix_with_column_compression<Master_matrix>::get_number_of_columns() const 
+Base_matrix_with_column_compression<Master_matrix>::get_number_of_columns() const
 {
   return nextColumnIndex_;
 }
@@ -522,7 +523,7 @@ Base_matrix_with_column_compression<Master_matrix>::get_number_of_columns() cons
 template <class Master_matrix>
 template <class Entry_range_or_column_index>
 inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Entry_range_or_column_index& sourceColumn,
-                                                                       Index targetColumnIndex) 
+                                                                       Index targetColumnIndex)
 {
   // handle case where targetRep == sourceRep?
   Index targetRep = columnClasses_.find_set(targetColumnIndex);
@@ -539,7 +540,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::add_to(const Ent
 template <class Master_matrix>
 template <class Entry_range_or_column_index>
 inline void Base_matrix_with_column_compression<Master_matrix>::multiply_target_and_add_to(
-    const Entry_range_or_column_index& sourceColumn, const Field_element& coefficient, Index targetColumnIndex) 
+    const Entry_range_or_column_index& sourceColumn, const Field_element& coefficient, Index targetColumnIndex)
 {
   // handle case where targetRep == sourceRep?
   Index targetRep = columnClasses_.find_set(targetColumnIndex);
@@ -556,7 +557,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::multiply_target_
 template <class Master_matrix>
 template <class Entry_range_or_column_index>
 inline void Base_matrix_with_column_compression<Master_matrix>::multiply_source_and_add_to(
-    const Field_element& coefficient, const Entry_range_or_column_index& sourceColumn, Index targetColumnIndex) 
+    const Field_element& coefficient, const Entry_range_or_column_index& sourceColumn, Index targetColumnIndex)
 {
   // handle case where targetRep == sourceRep?
   Index targetRep = columnClasses_.find_set(targetColumnIndex);
@@ -571,7 +572,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::multiply_source_
 }
 
 template <class Master_matrix>
-inline bool Base_matrix_with_column_compression<Master_matrix>::is_zero_entry(Index columnIndex, Index rowIndex) 
+inline bool Base_matrix_with_column_compression<Master_matrix>::is_zero_entry(Index columnIndex, Index rowIndex)
 {
   auto col = repToColumn_[columnClasses_.find_set(columnIndex)];
   if (col == nullptr) return true;
@@ -579,7 +580,7 @@ inline bool Base_matrix_with_column_compression<Master_matrix>::is_zero_entry(In
 }
 
 template <class Master_matrix>
-inline bool Base_matrix_with_column_compression<Master_matrix>::is_zero_column(Index columnIndex) 
+inline bool Base_matrix_with_column_compression<Master_matrix>::is_zero_column(Index columnIndex)
 {
   auto col = repToColumn_[columnClasses_.find_set(columnIndex)];
   if (col == nullptr) return true;
@@ -588,7 +589,7 @@ inline bool Base_matrix_with_column_compression<Master_matrix>::is_zero_column(I
 
 template <class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>&
-Base_matrix_with_column_compression<Master_matrix>::operator=(const Base_matrix_with_column_compression& other) 
+Base_matrix_with_column_compression<Master_matrix>::operator=(const Base_matrix_with_column_compression& other)
 {
   for (auto col : repToColumn_) {
     if (col != nullptr) {
@@ -617,7 +618,7 @@ Base_matrix_with_column_compression<Master_matrix>::operator=(const Base_matrix_
 }
 
 template <class Master_matrix>
-inline void Base_matrix_with_column_compression<Master_matrix>::print() 
+inline void Base_matrix_with_column_compression<Master_matrix>::print()
 {
   std::cout << "Compressed_matrix:\n";
   for (Column& col : columnToRep_) {
@@ -646,7 +647,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::print()
 }
 
 template <class Master_matrix>
-inline void Base_matrix_with_column_compression<Master_matrix>::_insert_column(Index columnIndex) 
+inline void Base_matrix_with_column_compression<Master_matrix>::_insert_column(Index columnIndex)
 {
   Column& col = *repToColumn_[columnIndex];
 
@@ -665,7 +666,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::_insert_column(I
 
 template <class Master_matrix>
 inline void Base_matrix_with_column_compression<Master_matrix>::_insert_double_column(
-    Index columnIndex, typename Col_dict::iterator& doubleIt) 
+    Index columnIndex, typename Col_dict::iterator& doubleIt)
 {
   Index doubleRep = doubleIt->get_rep();
   columnClasses_.link(columnIndex, doubleRep);  // both should be representatives

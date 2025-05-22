@@ -35,7 +35,12 @@ pipe = Pipeline(
         ("finite_diags", DiagramSelector(use=True, point_type="finite")),
         (
             "pers_img",
-            PersistenceImage(bandwidth=50, weight=lambda x: x[1] ** 2, im_range=[0, 256, 0, 256], resolution=[20, 20]),
+            PersistenceImage(
+                bandwidth=50,
+                weight=lambda x: x[1] ** 2,
+                im_range=[0, 256, 0, 256],
+                resolution=[20, 20],
+            ),
         ),
         ("svc", SVC()),
     ]
@@ -46,7 +51,10 @@ pipe.fit(X_train, y_train)
 # Predict from the test subset
 predicted = pipe.predict(X_test)
 
-print(f"Classification report for TDA pipeline {pipe}:\n" f"{metrics.classification_report(y_test, predicted)}\n")
+print(
+    f"Classification report for TDA pipeline {pipe}:\n"
+    f"{metrics.classification_report(y_test, predicted)}\n"
+)
 
 report = metrics.classification_report(y_test, predicted, output_dict=True)
 assert report["0"]["f1-score"] > 0.65

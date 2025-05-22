@@ -24,7 +24,7 @@ using Simplex_handle = Simplex_tree::Simplex_handle;
 
 template<class CGAL_kernel>
 void compare_delaunay_complex_simplices() {
-  std::cout << "*****************************************************************************************************";
+  std::clog << "***************************************************************************************************\n";
   using Point = typename CGAL_kernel::Point_d;
   std::vector<Point> points;
   // 50 points on a 4-sphere
@@ -40,10 +40,31 @@ void compare_delaunay_complex_simplices() {
   Simplex_tree stree_from_delaunay_complex;
   BOOST_CHECK(alpha_complex.create_complex(stree_from_delaunay_complex, 0., false, true));
 
-  // Check all the simplices from alpha complex are in the Delaunay complex
+  std::clog << "Check all the simplices from alpha complex are in the Delaunay complex\n";
   for (auto f_simplex : stree_from_alpha_complex.complex_simplex_range()) {
     Simplex_handle sh = stree_from_delaunay_complex.find(stree_from_alpha_complex.simplex_vertex_range(f_simplex));
     BOOST_CHECK(std::isnan(stree_from_delaunay_complex.filtration(sh)));
     BOOST_CHECK(sh != stree_from_delaunay_complex.null_simplex());
   }
+
+  std::clog << "Alpha complex with square root filtration values\n";
+  Simplex_tree stree_from_alpha_sqrt;
+  // set Output_squared_values to false
+  BOOST_CHECK(alpha_complex.template create_complex<false>(stree_from_alpha_sqrt));
+
+  std::clog << "Check simplices from alpha complex filtration values when Output_squared_values is true\n";
+  // Check all the simplices from alpha complex are in the Delaunay complex
+  for (auto f_simplex : stree_from_alpha_complex.complex_simplex_range()) {
+    std::clog << "[";
+    for (auto vertex : stree_from_alpha_complex.simplex_vertex_range(f_simplex)) std::clog << vertex << " ";
+    std::clog << "] - ";
+
+    Simplex_handle sh = stree_from_alpha_sqrt.find(stree_from_alpha_complex.simplex_vertex_range(f_simplex));
+    BOOST_CHECK(sh != stree_from_alpha_sqrt.null_simplex());
+    std::clog << "alpha_sqrt = " << stree_from_alpha_sqrt.filtration(sh);
+    std::clog << " vs. sqrt(alpha) = " << std::sqrt(stree_from_alpha_complex.filtration(f_simplex)) << "\n";
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(stree_from_alpha_sqrt.filtration(sh),
+                                    std::sqrt(stree_from_alpha_complex.filtration(f_simplex)));
+  }
+
 }

@@ -11,12 +11,10 @@
 #ifndef SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
 #define SIMPLEX_TREE_SIMPLEX_TREE_SIBLINGS_H_
 
+#include <gudhi/Simplex_tree/simplex_tree_options.h>
 #include <gudhi/Simplex_tree/Simplex_tree_node_explicit_storage.h>
 
 #include <boost/container/flat_map.hpp>
-
-#include <utility>
-#include <vector>
 
 namespace Gudhi {
 
@@ -43,6 +41,7 @@ class Simplex_tree_siblings {
   typedef typename SimplexTree::Node Node;
   typedef MapContainer Dictionary;
   typedef typename MapContainer::iterator Dictionary_it;
+  typedef typename MapContainer::const_iterator Dictionary_const_it;
 
   /* Default constructor.*/
   Simplex_tree_siblings()
@@ -72,23 +71,17 @@ class Simplex_tree_siblings {
     }
   }
 
-  /** \brief Inserts a Node in the set of siblings nodes.
-   *
-   * If already present, assigns the minimal filtration value 
-   * between input filtration_value and the value already 
-   * present in the node.
-   */
-  void insert(Vertex_handle v, Filtration_value filtration_value) {
-    auto ins = members_.emplace(v, Node(this, filtration_value));
-    if (!ins.second && filtration(ins.first) > filtration_value)
-      ins.first->second.assign_filtration(filtration_value);
-  }
-
   Dictionary_it find(Vertex_handle v) {
+    return members_.find(v);
+  }
+  Dictionary_const_it find(Vertex_handle v) const {
     return members_.find(v);
   }
 
   Simplex_tree_siblings * oncles() {
+    return oncles_;
+  }
+  const Simplex_tree_siblings * oncles() const {
     return oncles_;
   }
 
@@ -100,12 +93,20 @@ class Simplex_tree_siblings {
     return members_;
   }
 
+  const Dictionary & members() const {
+    return members_;
+  }
+
   size_t size() const {
     return members_.size();
   }
 
   void erase(const Dictionary_it iterator) {
     members_.erase(iterator);
+  }
+
+  Dictionary_it to_non_const_it(Dictionary_const_it it) {
+    return members_.erase(it, it);
   }
 
   Simplex_tree_siblings * oncles_;

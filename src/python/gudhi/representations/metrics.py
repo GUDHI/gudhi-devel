@@ -8,17 +8,26 @@
 #   - 2025/01 Vincent Rouvreau: BottleneckDistance(epsilon=...) is deprecated. Consider using BottleneckDistance(e=...)
 #   - YYYY/MM Author: Description of the modification
 
+__author__ = "Mathieu Carrière"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2018-2019 Inria"
+__license__ = "GPL v3"
+
+
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import pairwise_distances
-from gudhi.hera import wasserstein_distance as hera_wasserstein_distance
-from .preprocessing import Padding
 from joblib import Parallel, delayed
 import warnings
+
+from gudhi.hera import wasserstein_distance as hera_wasserstein_distance
+from .preprocessing import Padding
+
 
 #############################################
 # Metrics ###################################
 #############################################
+
 
 def _sliced_wasserstein_distance(D1, D2, num_directions):
     """
@@ -32,16 +41,23 @@ def _sliced_wasserstein_distance(D1, D2, num_directions):
     Returns:
         float: the sliced Wasserstein distance between persistence diagrams.
     """
-    thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions, endpoint=False)[np.newaxis,:-1]
+    thetas = np.linspace(-np.pi / 2, np.pi / 2, num=num_directions, endpoint=False)[
+        np.newaxis, :-1
+    ]
     lines = np.concatenate([np.cos(thetas), np.sin(thetas)], axis=0)
     approx1 = np.matmul(D1, lines)
-    approx_diag1 = np.matmul(np.broadcast_to(D1.sum(-1,keepdims=True)/2,(len(D1),2)), lines)
+    approx_diag1 = np.matmul(
+        np.broadcast_to(D1.sum(-1, keepdims=True) / 2, (len(D1), 2)), lines
+    )
     approx2 = np.matmul(D2, lines)
-    approx_diag2 = np.matmul(np.broadcast_to(D2.sum(-1,keepdims=True)/2,(len(D2),2)), lines)
+    approx_diag2 = np.matmul(
+        np.broadcast_to(D2.sum(-1, keepdims=True) / 2, (len(D2), 2)), lines
+    )
     A = np.sort(np.concatenate([approx1, approx_diag2], axis=0), axis=0)
     B = np.sort(np.concatenate([approx2, approx_diag1], axis=0), axis=0)
-    L1 = np.sum(np.abs(A-B), axis=0)
+    L1 = np.sum(np.abs(A - B), axis=0)
     return np.mean(L1)
+
 
 def _compute_persistence_diagram_projections(X, num_directions):
     """
@@ -54,10 +70,16 @@ def _compute_persistence_diagram_projections(X, num_directions):
     Returns:
         list of n numpy arrays of shape (2*num,num_directions): list of projected persistence diagrams.
     """
-    thetas = np.linspace(-np.pi/2, np.pi/2, num=num_directions, endpoint=False)[np.newaxis,:-1]
+    thetas = np.linspace(-np.pi / 2, np.pi / 2, num=num_directions, endpoint=False)[
+        np.newaxis, :-1
+    ]
     lines = np.concatenate([np.cos(thetas), np.sin(thetas)], axis=0)
-    XX = [np.vstack([np.matmul(D, lines), np.matmul(np.matmul(D, .5 * np.ones((2,2))), lines)]) for D in X]
+    XX = [
+        np.vstack([np.matmul(D, lines), np.matmul(np.matmul(D, 0.5 * np.ones((2, 2))), lines)])
+        for D in X
+    ]
     return XX
+
 
 def _sliced_wasserstein_distance_on_projections(D1, D2):
     """
@@ -70,14 +92,15 @@ def _sliced_wasserstein_distance_on_projections(D1, D2):
     Returns:
         float: the sliced Wasserstein distance between the projected persistence diagrams.
     """
-    lim1, lim2 = int(len(D1)/2), int(len(D2)/2)
+    lim1, lim2 = int(len(D1) / 2), int(len(D2) / 2)
     approx1, approx_diag1, approx2, approx_diag2 = D1[:lim1], D1[lim1:], D2[:lim2], D2[lim2:]
     A = np.sort(np.concatenate([approx1, approx_diag2], axis=0), axis=0)
     B = np.sort(np.concatenate([approx2, approx_diag1], axis=0), axis=0)
-    L1 = np.sum(np.abs(A-B), axis=0)
+    L1 = np.sum(np.abs(A - B), axis=0)
     return np.mean(L1)
 
-def _persistence_fisher_distance(D1, D2, kernel_approx=None, bandwidth=1.):
+
+def _persistence_fisher_distance(D1, D2, kernel_approx=None, bandwidth=1.0):
     """
     This is a function for computing the persistence Fisher distance from two persistence diagrams. The persistence Fisher distance is obtained by computing the original Fisher distance between the probability distributions associated to the persistence diagrams given by convolving them with a Gaussian kernel. See http://papers.nips.cc/paper/8205-persistence-fisher-kernel-a-riemannian-manifold-kernel-for-persistence-diagrams for more details.
 
@@ -90,7 +113,7 @@ def _persistence_fisher_distance(D1, D2, kernel_approx=None, bandwidth=1.):
     Returns:
         float: the persistence Fisher distance between persistence diagrams.
     """
-    projection = (1./2) * np.ones((2,2))
+    projection = (1.0 / 2) * np.ones((2, 2))
     diagonal_projections1 = np.matmul(D1, projection)
     diagonal_projections2 = np.matmul(D2, projection)
     if kernel_approx is not None:
@@ -99,25 +122,38 @@ def _persistence_fisher_distance(D1, D2, kernel_approx=None, bandwidth=1.):
         approx2 = kernel_approx.transform(D2)
         approx_diagonal2 = kernel_approx.transform(diagonal_projections2)
         Z = np.concatenate([approx1, approx_diagonal1, approx2, approx_diagonal2], axis=0)
-        U, V = np.sum(np.concatenate([approx1, approx_diagonal2], axis=0), axis=0), np.sum(np.concatenate([approx2, approx_diagonal1], axis=0), axis=0)
+        U, V = np.sum(np.concatenate([approx1, approx_diagonal2], axis=0), axis=0), np.sum(
+            np.concatenate([approx2, approx_diagonal1], axis=0), axis=0
+        )
         vectori, vectorj = np.abs(np.matmul(Z, U.T)), np.abs(np.matmul(Z, V.T))
         vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
         if vectori_sum != 0:
-            vectori = vectori/vectori_sum
+            vectori = vectori / vectori_sum
         if vectorj_sum != 0:
-            vectorj = vectorj/vectorj_sum
-        return np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
+            vectorj = vectorj / vectorj_sum
+        return np.arccos(min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.0))
     else:
         Z = np.concatenate([D1, diagonal_projections1, D2, diagonal_projections2], axis=0)
-        U, V = np.concatenate([D1, diagonal_projections2], axis=0), np.concatenate([D2, diagonal_projections1], axis=0)
-        vectori = np.sum(np.exp(-np.square(pairwise_distances(Z,U))/(2 * np.square(bandwidth)))/(bandwidth * np.sqrt(2*np.pi)), axis=1)
-        vectorj = np.sum(np.exp(-np.square(pairwise_distances(Z,V))/(2 * np.square(bandwidth)))/(bandwidth * np.sqrt(2*np.pi)), axis=1)
+        U, V = np.concatenate([D1, diagonal_projections2], axis=0), np.concatenate(
+            [D2, diagonal_projections1], axis=0
+        )
+        vectori = np.sum(
+            np.exp(-np.square(pairwise_distances(Z, U)) / (2 * np.square(bandwidth)))
+            / (bandwidth * np.sqrt(2 * np.pi)),
+            axis=1,
+        )
+        vectorj = np.sum(
+            np.exp(-np.square(pairwise_distances(Z, V)) / (2 * np.square(bandwidth)))
+            / (bandwidth * np.sqrt(2 * np.pi)),
+            axis=1,
+        )
         vectori_sum, vectorj_sum = np.sum(vectori), np.sum(vectorj)
         if vectori_sum != 0:
-            vectori = vectori/vectori_sum
+            vectori = vectori / vectori_sum
         if vectorj_sum != 0:
-            vectorj = vectorj/vectorj_sum
-        return np.arccos(  min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.)  )
+            vectorj = vectorj / vectorj_sum
+        return np.arccos(min(np.dot(np.sqrt(vectori), np.sqrt(vectorj)), 1.0))
+
 
 def _pairwise(fallback, skipdiag, X, Y, metric, n_jobs):
     if Y is not None:
@@ -133,17 +169,23 @@ def _pairwise(fallback, skipdiag, X, Y, metric, n_jobs):
         np.fill_diagonal(m, 0)
     return m
 
+
 def _sklearn_wrapper(metric, X, Y, **kwargs):
     """
     This function is a wrapper for any metric between two persistence diagrams that takes two numpy arrays of shapes (nx2) and (mx2) as arguments.
     """
     if Y is None:
+
         def flat_metric(a, b):
             return metric(X[int(a[0])], X[int(b[0])], **kwargs)
+
     else:
+
         def flat_metric(a, b):
             return metric(X[int(a[0])], Y[int(b[0])], **kwargs)
+
     return flat_metric
+
 
 PAIRWISE_DISTANCE_FUNCTIONS = {
     "wasserstein": hera_wasserstein_distance,
@@ -151,7 +193,10 @@ PAIRWISE_DISTANCE_FUNCTIONS = {
     "persistence_fisher": _persistence_fisher_distance,
 }
 
-def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_jobs=None, **kwargs):
+
+def pairwise_persistence_diagram_distances(
+    X, Y=None, metric="bottleneck", n_jobs=None, **kwargs
+):
     """
     This function computes the distance matrix between two lists of persistence diagrams given as numpy arrays of shape (nx2).
 
@@ -165,35 +210,76 @@ def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_job
     Returns:
         numpy array of shape (nxm): distance matrix
     """
-    XX = np.reshape(np.arange(len(X)), [-1,1])
-    YY = None if Y is None or Y is X else np.reshape(np.arange(len(Y)), [-1,1])
+    XX = np.reshape(np.arange(len(X)), [-1, 1])
+    YY = None if Y is None or Y is X else np.reshape(np.arange(len(Y)), [-1, 1])
     if metric == "bottleneck":
         try:
             from .. import bottleneck_distance
-            return _pairwise(pairwise_distances, True, XX, YY, metric=_sklearn_wrapper(bottleneck_distance, X, Y, **kwargs), n_jobs=n_jobs)
+
+            return _pairwise(
+                pairwise_distances,
+                True,
+                XX,
+                YY,
+                metric=_sklearn_wrapper(bottleneck_distance, X, Y, **kwargs),
+                n_jobs=n_jobs,
+            )
         except ImportError:
             print("Gudhi built without CGAL")
             raise
     elif metric == "pot_wasserstein":
         try:
             from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
-            return _pairwise(pairwise_distances, True, XX, YY, metric=_sklearn_wrapper(pot_wasserstein_distance,  X, Y, **kwargs), n_jobs=n_jobs)
+
+            return _pairwise(
+                pairwise_distances,
+                True,
+                XX,
+                YY,
+                metric=_sklearn_wrapper(pot_wasserstein_distance, X, Y, **kwargs),
+                n_jobs=n_jobs,
+            )
         except ImportError:
-            print("POT (Python Optimal Transport) is not installed. Please install POT or use metric='wasserstein' or metric='hera_wasserstein'")
+            print(
+                "POT (Python Optimal Transport) is not installed. Please install POT or use metric='wasserstein' or metric='hera_wasserstein'"
+            )
             raise
     elif metric == "sliced_wasserstein":
         Xproj = _compute_persistence_diagram_projections(X, **kwargs)
         Yproj = None if Y is None else _compute_persistence_diagram_projections(Y, **kwargs)
-        return _pairwise(pairwise_distances, True, XX, YY, metric=_sklearn_wrapper(_sliced_wasserstein_distance_on_projections, Xproj, Yproj), n_jobs=n_jobs)
+        return _pairwise(
+            pairwise_distances,
+            True,
+            XX,
+            YY,
+            metric=_sklearn_wrapper(_sliced_wasserstein_distance_on_projections, Xproj, Yproj),
+            n_jobs=n_jobs,
+        )
     elif type(metric) == str:
-        return _pairwise(pairwise_distances, True, XX, YY, metric=_sklearn_wrapper(PAIRWISE_DISTANCE_FUNCTIONS[metric], X, Y, **kwargs), n_jobs=n_jobs)
+        return _pairwise(
+            pairwise_distances,
+            True,
+            XX,
+            YY,
+            metric=_sklearn_wrapper(PAIRWISE_DISTANCE_FUNCTIONS[metric], X, Y, **kwargs),
+            n_jobs=n_jobs,
+        )
     else:
-        return _pairwise(pairwise_distances, True, XX, YY, metric=_sklearn_wrapper(metric, X, Y, **kwargs), n_jobs=n_jobs)
+        return _pairwise(
+            pairwise_distances,
+            True,
+            XX,
+            YY,
+            metric=_sklearn_wrapper(metric, X, Y, **kwargs),
+            n_jobs=n_jobs,
+        )
+
 
 class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
     """
     This is a class for computing the sliced Wasserstein distance matrix from a list of persistence diagrams. The Sliced Wasserstein distance is computed by projecting the persistence diagrams onto lines, comparing the projections with the 1-norm, and finally integrating over all possible lines. See http://proceedings.mlr.press/v70/carriere17a.html for more details.
     """
+
     def __init__(self, num_directions=10, n_jobs=None):
         """
         Constructor for the SlicedWassersteinDistance class.
@@ -226,7 +312,13 @@ class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise sliced Wasserstein distances.
         """
-        return pairwise_persistence_diagram_distances(X, self.diagrams_, metric="sliced_wasserstein", num_directions=self.num_directions, n_jobs=self.n_jobs)
+        return pairwise_persistence_diagram_distances(
+            X,
+            self.diagrams_,
+            metric="sliced_wasserstein",
+            num_directions=self.num_directions,
+            n_jobs=self.n_jobs,
+        )
 
     def __call__(self, diag1, diag2):
         """
@@ -241,12 +333,14 @@ class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
         """
         return _sliced_wasserstein_distance(diag1, diag2, num_directions=self.num_directions)
 
+
 class BottleneckDistance(BaseEstimator, TransformerMixin):
     r"""
     This is a class for computing the bottleneck distance matrix from a list of persistence diagrams.
 
     :Requires: `CGAL <installation.html#cgal>`_
     """
+
     def __init__(self, e=None, n_jobs=None, epsilon=None):
         """
         Constructor for the BottleneckDistance class.
@@ -256,10 +350,12 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
             e (double): absolute (additive) error tolerated on the distance (default is the smallest positive float), see :func:`gudhi.bottleneck_distance`.
             n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
         """
+        self.e = None
         if epsilon is not None:
             warnings.warn("epsilon is a deprecated argument, please consider using e", DeprecationWarning)
             self.e = epsilon
-        self.e = e
+        if e is not None:
+            self.e = e
         self.n_jobs = n_jobs
 
     def fit(self, X, y=None):
@@ -283,7 +379,9 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise bottleneck distances.
         """
-        Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="bottleneck", e=self.e, n_jobs=self.n_jobs)
+        Xfit = pairwise_persistence_diagram_distances(
+            X, self.diagrams_, metric="bottleneck", e=self.e, n_jobs=self.n_jobs
+        )
         return Xfit
 
     def __call__(self, diag1, diag2):
@@ -299,16 +397,19 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         """
         try:
             from .. import bottleneck_distance
+
             return bottleneck_distance(diag1, diag2, e=self.e)
         except ImportError:
             print("Gudhi built without CGAL")
             raise
 
+
 class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
     """
     This is a class for computing the persistence Fisher distance matrix from a list of persistence diagrams. The persistence Fisher distance is obtained by computing the original Fisher distance between the probability distributions associated to the persistence diagrams given by convolving them with a Gaussian kernel. See http://papers.nips.cc/paper/8205-persistence-fisher-kernel-a-riemannian-manifold-kernel-for-persistence-diagrams for more details.
     """
-    def __init__(self, bandwidth=1., kernel_approx=None, n_jobs=None):
+
+    def __init__(self, bandwidth=1.0, kernel_approx=None, n_jobs=None):
         """
         Constructor for the PersistenceFisherDistance class.
 
@@ -341,7 +442,14 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
         Returns:
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise persistence Fisher distances.
         """
-        return pairwise_persistence_diagram_distances(X, self.diagrams_, metric="persistence_fisher", bandwidth=self.bandwidth, kernel_approx=self.kernel_approx, n_jobs=self.n_jobs)
+        return pairwise_persistence_diagram_distances(
+            X,
+            self.diagrams_,
+            metric="persistence_fisher",
+            bandwidth=self.bandwidth,
+            kernel_approx=self.kernel_approx,
+            n_jobs=self.n_jobs,
+        )
 
     def __call__(self, diag1, diag2):
         """
@@ -354,7 +462,9 @@ class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
         Returns:
             float: persistence Fisher distance.
         """
-        return _persistence_fisher_distance(diag1, diag2, bandwidth=self.bandwidth, kernel_approx=self.kernel_approx)
+        return _persistence_fisher_distance(
+            diag1, diag2, bandwidth=self.bandwidth, kernel_approx=self.kernel_approx
+        )
 
 
 class WassersteinDistance(BaseEstimator, TransformerMixin):
@@ -386,7 +496,9 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         if self.mode not in ("pot", "hera"):
-            raise NameError("Unknown mode. Current available values for mode are 'hera' and 'pot'")
+            raise NameError(
+                "Unknown mode. Current available values for mode are 'hera' and 'pot'"
+            )
         self.diagrams_ = X
         return self
 
@@ -401,9 +513,25 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise Wasserstein distances.
         """
         if self.mode == "hera":
-            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="hera_wasserstein", order=self.order, internal_p=self.internal_p, delta=self.delta, n_jobs=self.n_jobs)
+            Xfit = pairwise_persistence_diagram_distances(
+                X,
+                self.diagrams_,
+                metric="hera_wasserstein",
+                order=self.order,
+                internal_p=self.internal_p,
+                delta=self.delta,
+                n_jobs=self.n_jobs,
+            )
         else:
-            Xfit = pairwise_persistence_diagram_distances(X, self.diagrams_, metric="pot_wasserstein", order=self.order, internal_p=self.internal_p, matching=False, n_jobs=self.n_jobs)
+            Xfit = pairwise_persistence_diagram_distances(
+                X,
+                self.diagrams_,
+                metric="pot_wasserstein",
+                order=self.order,
+                internal_p=self.internal_p,
+                matching=False,
+                n_jobs=self.n_jobs,
+            )
         return Xfit
 
     def __call__(self, diag1, diag2):
@@ -418,13 +546,22 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
             float: Wasserstein distance.
         """
         if self.mode == "hera":
-            return hera_wasserstein_distance(diag1, diag2, order=self.order, internal_p=self.internal_p, delta=self.delta)
+            return hera_wasserstein_distance(
+                diag1, diag2, order=self.order, internal_p=self.internal_p, delta=self.delta
+            )
         elif self.mode == "pot":
             try:
                 from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
-                return pot_wasserstein_distance(diag1, diag2, order=self.order, internal_p=self.internal_p, matching=False)
+
+                return pot_wasserstein_distance(
+                    diag1, diag2, order=self.order, internal_p=self.internal_p, matching=False
+                )
             except ImportError:
-                print("POT (Python Optimal Transport) is not installed. Please install POT or use mode='hera'")
+                print(
+                    "POT (Python Optimal Transport) is not installed. Please install POT or use mode='hera'"
+                )
                 raise
         else:
-            raise NameError("Unknown mode. Current available values for mode are 'hera' and 'pot'")
+            raise NameError(
+                "Unknown mode. Current available values for mode are 'hera' and 'pot'"
+            )
