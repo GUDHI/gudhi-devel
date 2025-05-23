@@ -8,6 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
+
 from gudhi.representations.preprocessing import DimensionSelector
 import numpy as np
 import pytest
