@@ -28,6 +28,8 @@ class Hasse_diagram;
  * \class Hasse_diagram_cell
  * \brief Data structure to store a cell in a Hasse diagram.
  *
+ * \ingroup coxeter_triangulation
+ *
  * \details
  * The use and interfaces of this Hasse diagram cell is limited to the \ref coxeter_triangulation implementation.
  *
