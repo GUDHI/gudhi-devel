@@ -19,8 +19,7 @@ from libc.stdint cimport intptr_t, int32_t, int64_t
 import numpy as np
 cimport gudhi.simplex_tree
 cimport cython
-from numpy.math cimport INFINITY
-
+from libc.math cimport INFINITY
 
 ctypedef fused some_int:
     int32_t
@@ -97,7 +96,7 @@ cdef class SimplexTree:
         return self.pcohptr != NULL
 
     def copy(self):
-        """ 
+        """
         :returns: A simplex tree that is a deep copy of itself.
         :rtype: SimplexTree
 
@@ -580,7 +579,7 @@ cdef class SimplexTree:
         .. note::
 
             The coordinates of the persistence diagram points might be a little different than the
-            original filtration values due to the internal transformation (scaling to [-2,-1]) that is 
+            original filtration values due to the internal transformation (scaling to [-2,-1]) that is
             performed on these values during the computation of extended persistence.
 
         This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
@@ -815,7 +814,7 @@ cdef class SimplexTree:
         :rtype: bool
         """
         return dereference(self.get_ptr()) == dereference(other.get_ptr())
-    
+
     def __getstate__(self):
         """:returns: Serialized (or flattened) SimplexTree data structure in order to pickle SimplexTree.
         :rtype: numpy.array of shape (n,)
@@ -827,13 +826,13 @@ cdef class SimplexTree:
         cdef char* buffer_start = &buffer[0]
         with nogil:
             self.get_ptr().serialize(buffer_start, buffer_size)
-        
+
         return np_buffer
 
     def __setstate__(self, state):
         """Construct the SimplexTree data structure from a Numpy Array (cf. :func:`~gudhi.SimplexTree.__getstate__`)
         in order to unpickle a SimplexTree.
-        
+
         :param state: Serialized SimplexTree data structure
         :type state: numpy.array of shape (n,)
         """
