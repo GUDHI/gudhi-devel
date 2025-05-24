@@ -14,6 +14,9 @@ Below is a list of changes:
 - [Module](link)
      - **...**
 
+- [Representations](https://gudhi.inria.fr/python/latest/representations.html)
+     - in metrics, `BottleneckDistance` argument `epsilon` is deprecrated and renamed `e` to be consistent with `bottleneck_distance` and `pairwise_persistence_diagram_distances`
+
 - Installation
      - Pip package is now available for OSx &ge; 13.0 (was &ge; 12.0).
 

@@ -81,7 +81,7 @@ def _n_diags(n):
 
 
 metrics_dict = {  # (class, metric_kwargs, tolerance_pytest_approx)
-    "bottleneck": (BottleneckDistance(epsilon=0.00001), dict(e=0.00001), dict(abs=1e-5)),
+    "bottleneck": (BottleneckDistance(e=0.00001), dict(e=0.00001), dict(abs=1e-5)),
     "wasserstein": (
         WassersteinDistance(order=2, internal_p=2, n_jobs=4),
         dict(order=2, internal_p=2, n_jobs=4),
@@ -284,6 +284,12 @@ def test_entropy_miscalculation():
     area = np.linalg.norm(pefN, ord=1)
     assert area == pytest.approx(1)
 
+def test_bottleneck_distance_deprecated_argument():
+    empty_diag = np.empty(shape = [0, 2])
+    with pytest.warns(DeprecationWarning):
+        bdist = BottleneckDistance(epsilon=.001)
+        assert bdist.e == .001
+        assert bdist(empty_diag, empty_diag) == 0.
 
 def test_kernel_empty_diagrams():
     empty_diag = np.empty(shape=[0, 2])
@@ -294,7 +300,7 @@ def test_kernel_empty_diagrams():
     )
     assert WassersteinDistance(mode="hera", delta=0.0001)(empty_diag, empty_diag) == 0.0
     assert WassersteinDistance(mode="pot")(empty_diag, empty_diag) == 0.0
-    assert BottleneckDistance(epsilon=0.001)(empty_diag, empty_diag) == 0.0
+    assert BottleneckDistance(e=0.001)(empty_diag, empty_diag) == 0.0
     assert BottleneckDistance()(empty_diag, empty_diag) == 0.0
 
 
