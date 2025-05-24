@@ -165,6 +165,7 @@ class Persistent_cohomology {
    *
    * Assumes that the filtration provided by the simplicial complex is
    * valid. Undefined behavior otherwise. */
+  template<bool optimizations_possible = true>
   void compute_persistent_cohomology(Filtration_value min_interval_length = 0) {
     if (dim_max_ <= 0)
       return;  // --------->>
@@ -177,16 +178,20 @@ class Persistent_cohomology {
       cpx_->assign_key(sh, ++idx_fil);
       dsets_.make_set(cpx_->key(sh));
       int dim_simplex = cpx_->dimension(sh);
-      switch (dim_simplex) {
-        case 0:
-          vertices.push_back(idx_fil);
-          break;
-        case 1:
-          update_cohomology_groups_edge(sh);
-          break;
-        default:
-          update_cohomology_groups(sh, dim_simplex);
-          break;
+      if constexpr (optimizations_possible) {
+        switch (dim_simplex) {
+          case 0:
+            vertices.push_back(idx_fil);
+            break;
+          case 1:
+            update_cohomology_groups_edge(sh);
+            break;
+          default:
+            update_cohomology_groups(sh, dim_simplex);
+            break;
+        }
+      } else {
+        update_cohomology_groups(sh, dim_simplex);
       }
     }
     // Compute infinite intervals of dimension 0
