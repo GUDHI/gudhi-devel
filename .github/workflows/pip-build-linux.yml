@@ -7,32 +7,61 @@ jobs:
     name: build pip wheel
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
-    container: gudhi/pip_for_gudhi:2024.12.02
+    container: gudhi/pip_for_gudhi:2025.04.01
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Build wheel for Python 3.9
+        env:
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON39/bin/python"
         run: |
-          mkdir build_39
-          cd build_39
-          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON39/bin/python ..
-          cd src/python
-          $PYTHON39/bin/python -m build -n -w
-          auditwheel repair dist/*.whl
+          $PYTHON39/bin/python -m pip wheel -ve .
+          auditwheel repair *.whl
+        # manylinux_2_17_x86_64 (aliased by manylinux2014_x86_64)
       - name: Upload linux python wheel
         uses: actions/upload-artifact@v4
         with:
           name: linux python wheel
-          path: build_39/src/python/wheelhouse/*.whl
-      # NumPy 2.X is installed and guarantees ABI compatibility, test it with the minimal numpy version for python version
+          path: wheelhouse/*.whl
+      # NumPy 2.X is installed and guarantees ABI compatibility, test it with the minimal numpy version
+      # Minimal test setup that requires optional pytest scipy matplotlib scikit-learn POT
+      # but without tests that requires torch, tensorflow, eagerpy, pykeops, hnswlib
+      # TODO: test_human_off fails because the file is not copied at the right place
       - name: Install and test wheel for Python 3.9
         run: |
-          $PYTHON39/bin/python -m pip install --user pytest build_39/src/python/dist/*.whl
           $PYTHON39/bin/python -m pip install numpy~=1.19.3
+          $PYTHON39/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT wheelhouse/*.whl
           $PYTHON39/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_alpha_complex.py
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_cubical_complex.py
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_rips_complex.py
+          cp data/points/human.off .
+          $PYTHON39/bin/python -m pytest src/python/test/test_alpha_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_betti_curve_representations.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_bottleneck_distance.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_collapse_edges.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_cover_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_cubical_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_cubical_persistence_low_dim.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_datasets_generators.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_delaunay_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_dtm_rips_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_euclidean_witness_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_off.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_persistence_graphical_tools.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_reader_utils.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_remote_datasets.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_representations_interface.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_representations_preprocessing.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_representations.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_simplex_generators.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_simplex_tree.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_simplex_tree_serialization.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_sklearn_cubical_persistence.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_sklearn_rips_persistence.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_subsampling.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_tangential_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_time_delay.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_tomato.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_wasserstein_barycenter.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_weighted_rips_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_witness_complex.py

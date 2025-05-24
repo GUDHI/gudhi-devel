@@ -9,133 +9,227 @@ jobs:
     name: build pip wheel
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
-    container: gudhi/pip_for_gudhi:2024.12.02
+    container: gudhi/pip_for_gudhi:2025.04.01
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      # Python 3.8 specific case where NumPy 2.x will not be supported
-      # numpy~=1.21.4 means any numpy=1.21.*, but also numpy>=1.21.4 (numpy~=1.21 do not work as it means any numpy==1.*)
-      - name: Build wheel for Python 3.8
-        run: |
-          mkdir build_38
-          cd build_38
-          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON38/bin/python ..
-          cd src/python
-          $PYTHON38/bin/python -m build -n -w
-          auditwheel repair dist/*.whl
-      - name: Install and test wheel for Python 3.8
-        run: |
-          $PYTHON38/bin/python -m pip install --user pytest build_38/src/python/dist/*.whl
-          $PYTHON38/bin/python -m pip install numpy --upgrade
-          $PYTHON38/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON38/bin/python -m pytest -v src/python/test/test_alpha_complex.py
-          $PYTHON38/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
-          $PYTHON38/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
-          $PYTHON38/bin/python -m pytest -v src/python/test/test_cubical_complex.py
-          $PYTHON38/bin/python -m pytest -v src/python/test/test_rips_complex.py
       - name: Build wheel for Python 3.9
+        env:
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON39/bin/python"
         run: |
-          mkdir build_39
-          cd build_39
-          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON39/bin/python ..
-          cd src/python
-          $PYTHON39/bin/python -m build -n -w
-          auditwheel repair dist/*.whl
+          $PYTHON39/bin/python -m pip wheel -ve .
       # For python >=3.9, numpy >= 2.0 is used to package and test ABI compatibility with numpy 1.X
       # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
       # gudhi requires numpy >= 1.15.0, but minimal numpy version for python 3.9 is 1.19.3 for instance
       # numpy~=1.19.3 means any numpy=1.19.*, but also numpy>=1.19.3 (numpy~=1.19 do not work as it means any numpy==1.*)
       - name: Install and test wheel for Python 3.9
         run: |
-          $PYTHON39/bin/python -m pip install --user pytest build_39/src/python/dist/*.whl
           $PYTHON39/bin/python -m pip install numpy~=1.19.3
+          $PYTHON39/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp39-linux_x86_64.whl
           $PYTHON39/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_alpha_complex.py
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_cubical_complex.py
-          $PYTHON39/bin/python -m pytest -v src/python/test/test_rips_complex.py
+          cp data/points/human.off .
+          $PYTHON39/bin/python -m pytest src/python/test/test_off.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_weighted_rips_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_tomato.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_betti_curve_representations.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_witness_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_simplex_tree_serialization.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_cover_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_time_delay.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_sklearn_cubical_persistence.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_tangential_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_subsampling.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_bottleneck_distance.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_delaunay_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_sklearn_rips_persistence.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_persistence_graphical_tools.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_datasets_generators.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_euclidean_witness_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_cubical_persistence_low_dim.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_cubical_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_representations_preprocessing.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_dtm_rips_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_representations.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_wasserstein_barycenter.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_remote_datasets.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_simplex_tree.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_representations_interface.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_simplex_generators.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_reader_utils.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_alpha_complex.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_collapse_edges.py
+
       - name: Build wheel for Python 3.10
+        env:
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON310/bin/python"
         run: |
-          mkdir build_310
-          cd build_310
-          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON310/bin/python ..
-          cd src/python
-          $PYTHON310/bin/python -m build -n -w
-          auditwheel repair dist/*.whl
+          $PYTHON310/bin/python -m pip wheel -ve .
       - name: Install and test wheel for Python 3.10
         run: |
-          $PYTHON310/bin/python -m pip install --user pytest build_310/src/python/dist/*.whl
           $PYTHON310/bin/python -m pip install numpy~=1.21.6
+          $PYTHON310/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp310-linux_x86_64.whl
           $PYTHON310/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON310/bin/python -m pytest -v src/python/test/test_alpha_complex.py
-          $PYTHON310/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
-          $PYTHON310/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
-          $PYTHON310/bin/python -m pytest -v src/python/test/test_cubical_complex.py
-          $PYTHON310/bin/python -m pytest -v src/python/test/test_rips_complex.py
+          cp data/points/human.off .
+          $PYTHON310/bin/python -m pytest src/python/test/test_off.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_weighted_rips_complex.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_tomato.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_betti_curve_representations.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_witness_complex.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_simplex_tree_serialization.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_cover_complex.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_time_delay.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_sklearn_cubical_persistence.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_tangential_complex.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_subsampling.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_bottleneck_distance.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_delaunay_complex.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_sklearn_rips_persistence.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_persistence_graphical_tools.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_datasets_generators.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_euclidean_witness_complex.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_cubical_persistence_low_dim.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_cubical_complex.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_representations_preprocessing.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_dtm_rips_complex.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_representations.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_wasserstein_barycenter.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_remote_datasets.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_simplex_tree.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_representations_interface.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_simplex_generators.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_reader_utils.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_alpha_complex.py
+          $PYTHON310/bin/python -m pytest src/python/test/test_collapse_edges.py
       - name: Build wheel for Python 3.11
+        env:
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON311/bin/python"
         run: |
-          mkdir build_311
-          cd build_311
-          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON311/bin/python ..
-          cd src/python
-          $PYTHON311/bin/python -m build -n -w
-          auditwheel repair dist/*.whl
+          $PYTHON311/bin/python -m pip wheel -ve .
       - name: Install and test wheel for Python 3.11
         run: |
-          $PYTHON311/bin/python -m pip install --user pytest build_311/src/python/dist/*.whl
           $PYTHON311/bin/python -m pip install numpy~=1.23.2
+          $PYTHON311/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp311-linux_x86_64.whl
           $PYTHON311/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON311/bin/python -m pytest -v src/python/test/test_alpha_complex.py
-          $PYTHON311/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
-          $PYTHON311/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
-          $PYTHON311/bin/python -m pytest -v src/python/test/test_cubical_complex.py
-          $PYTHON311/bin/python -m pytest -v src/python/test/test_rips_complex.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_off.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_weighted_rips_complex.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_tomato.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_betti_curve_representations.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_witness_complex.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_simplex_tree_serialization.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_cover_complex.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_time_delay.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_sklearn_cubical_persistence.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_tangential_complex.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_subsampling.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_bottleneck_distance.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_delaunay_complex.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_sklearn_rips_persistence.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_persistence_graphical_tools.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_datasets_generators.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_euclidean_witness_complex.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_cubical_persistence_low_dim.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_cubical_complex.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_representations_preprocessing.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_dtm_rips_complex.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_representations.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_wasserstein_barycenter.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_remote_datasets.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_simplex_tree.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_representations_interface.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_simplex_generators.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_reader_utils.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_alpha_complex.py
+          $PYTHON311/bin/python -m pytest src/python/test/test_collapse_edges.py
       - name: Build wheel for Python 3.12
+        env:
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON312/bin/python"
         run: |
-          mkdir build_312
-          cd build_312
-          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON312/bin/python ..
-          cd src/python
-          $PYTHON312/bin/python -m build -n -w
-          auditwheel repair dist/*.whl
+          $PYTHON312/bin/python -m pip wheel -ve .
       - name: Install and test wheel for Python 3.12
         run: |
-          $PYTHON312/bin/python -m pip install --user pytest build_312/src/python/dist/*.whl
           $PYTHON312/bin/python -m pip install numpy~=1.26.0
+          $PYTHON312/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp312-linux_x86_64.whl
           $PYTHON312/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON312/bin/python -m pytest -v src/python/test/test_alpha_complex.py
-          $PYTHON312/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
-          $PYTHON312/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
-          $PYTHON312/bin/python -m pytest -v src/python/test/test_cubical_complex.py
-          $PYTHON312/bin/python -m pytest -v src/python/test/test_rips_complex.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_off.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_weighted_rips_complex.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_tomato.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_betti_curve_representations.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_witness_complex.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_simplex_tree_serialization.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_cover_complex.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_time_delay.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_sklearn_cubical_persistence.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_tangential_complex.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_subsampling.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_bottleneck_distance.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_delaunay_complex.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_sklearn_rips_persistence.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_persistence_graphical_tools.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_datasets_generators.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_euclidean_witness_complex.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_cubical_persistence_low_dim.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_cubical_complex.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_representations_preprocessing.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_dtm_rips_complex.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_representations.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_wasserstein_barycenter.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_remote_datasets.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_simplex_tree.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_representations_interface.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_simplex_generators.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_reader_utils.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_alpha_complex.py
+          $PYTHON312/bin/python -m pytest src/python/test/test_collapse_edges.py
       - name: Build wheel for Python 3.13
+        env:
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON313/bin/python"
         run: |
-          mkdir build_313
-          cd build_313
-          cmake -DCMAKE_BUILD_TYPE=Release -DPython_EXECUTABLE=$PYTHON313/bin/python ..
-          cd src/python
-          $PYTHON313/bin/python -m build -n -w
-          auditwheel repair dist/*.whl
+          $PYTHON313/bin/python -m pip wheel -ve .
       - name: Install and test wheel for Python 3.13
         run: |
-          $PYTHON313/bin/python -m pip install --user pytest build_313/src/python/dist/*.whl
           $PYTHON313/bin/python -m pip install numpy~=1.26.0
+          $PYTHON313/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp313-linux_x86_64.whl
           $PYTHON313/bin/python -c "import gudhi; print(gudhi.__version__)"
-          $PYTHON313/bin/python -m pytest -v src/python/test/test_alpha_complex.py
-          $PYTHON313/bin/python -m pytest -v src/python/test/test_delaunay_complex.py
-          $PYTHON313/bin/python -m pytest -v src/python/test/test_bottleneck_distance.py
-          $PYTHON313/bin/python -m pytest -v src/python/test/test_cubical_complex.py
-          $PYTHON313/bin/python -m pytest -v src/python/test/test_rips_complex.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_off.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_weighted_rips_complex.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_tomato.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_betti_curve_representations.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_witness_complex.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_simplex_tree_serialization.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_cover_complex.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_time_delay.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_sklearn_cubical_persistence.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_tangential_complex.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_subsampling.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_bottleneck_distance.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_delaunay_complex.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_sklearn_rips_persistence.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_persistence_graphical_tools.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_datasets_generators.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_euclidean_witness_complex.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_cubical_persistence_low_dim.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_cubical_complex.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_representations_preprocessing.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_dtm_rips_complex.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_representations.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_wasserstein_barycenter.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_remote_datasets.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_simplex_tree.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_representations_interface.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_simplex_generators.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_reader_utils.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_alpha_complex.py
+          $PYTHON313/bin/python -m pytest src/python/test/test_collapse_edges.py
       - name: Publish on PyPi
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          $PYTHON38/bin/python -m twine upload build_38/src/python/wheelhouse/*.whl
-          $PYTHON38/bin/python -m twine upload build_39/src/python/wheelhouse/*.whl
-          $PYTHON38/bin/python -m twine upload build_310/src/python/wheelhouse/*.whl
-          $PYTHON38/bin/python -m twine upload build_311/src/python/wheelhouse/*.whl
-          $PYTHON38/bin/python -m twine upload build_312/src/python/wheelhouse/*.whl
-          $PYTHON38/bin/python -m twine upload build_313/src/python/wheelhouse/*.whl
+          auditwheel repair *.whl
+          $PYTHON38/bin/python -m twine upload wheelhouse/*.whl

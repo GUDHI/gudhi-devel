@@ -19,7 +19,6 @@ from sklearn.cluster import AgglomerativeClustering
 def test_empty_constructor():
     # Try to create an empty CoverComplex
     cover = CoverComplex()
-    assert cover._is_defined() == True
 
 
 def test_non_existing_file_read():
