@@ -7,12 +7,11 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from .. import DelaunayCechComplex, AlphaComplex
 from typing import Union, Iterable, Literal, Optional, Any
 from sklearn.base import BaseEstimator, TransformerMixin
-
-# joblib is required by scikit-learn
 from joblib import Parallel, delayed
+
+from .. import DelaunayCechComplex, AlphaComplex
 
 # Mermaid sequence diagram - https://mermaid-js.github.io/mermaid-live-editor/
 # sequenceDiagram
