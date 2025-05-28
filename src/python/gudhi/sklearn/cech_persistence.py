@@ -151,7 +151,8 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
                 Short circuit the use of :class:`~gudhi.representations.preprocessing.DimensionSelector` when only
                 one dimension matters (in other words, when `homology_dimensions` is an int).
             precision: Complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
-            output_squared_values: Square filtration values when `True`. Default is `True`.
+            output_squared_values: Square filtration values when `True`. Default is `True`  (contrary to the unweighted
+                version :class:`~gudhi.sklearn.cech_persistence.CechPersistence`).
             max_alpha_square: The maximum alpha square threshold the simplices shall not exceed. Default is set
                 to infinity, and there is very little point using anything else since it does not save time.
             homology_coeff_field: The homology coefficient field. Must be a prime number. Default value is 11.
