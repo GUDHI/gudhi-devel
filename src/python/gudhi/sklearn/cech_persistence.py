@@ -141,11 +141,11 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
         homology_dimensions: Union[int, Iterable[int]],
         precision: Literal["fast", "safe", "exact"] = "safe",
         output_squared_values: bool = True,
-        max_alpha_square: float = float("inf"),
+        max_filtration: float = float("inf"),
         homology_coeff_field: int = 11,
         n_jobs: Optional[int] = None,
     ):
-        """Constructor for the CechPersistence class.
+        """Constructor for the WeightedCechPersistence class.
 
         Parameters:
             homology_dimensions: The returned persistence diagrams dimension(s).
