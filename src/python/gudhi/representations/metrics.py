@@ -5,6 +5,7 @@
 # Copyright (C) 2018-2019 Inria
 #
 # Modification(s):
+#   - 2025/01 Vincent Rouvreau: BottleneckDistance(epsilon=...) is deprecated. Consider using BottleneckDistance(e=...)
 #   - YYYY/MM Author: Description of the modification
 
 __author__ = "Mathieu Carrière"
@@ -17,6 +18,7 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import pairwise_distances
 from joblib import Parallel, delayed
+import warnings
 
 from gudhi.hera import wasserstein_distance as hera_wasserstein_distance
 from .preprocessing import Padding
@@ -339,15 +341,21 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
     :Requires: `CGAL <installation.html#cgal>`_
     """
 
-    def __init__(self, epsilon=None, n_jobs=None):
+    def __init__(self, e=None, n_jobs=None, epsilon=None):
         """
         Constructor for the BottleneckDistance class.
 
         Parameters:
-            epsilon (double): absolute (additive) error tolerated on the distance (default is the smallest positive float), see :func:`gudhi.bottleneck_distance`.
+            epsilon (double): **[deprecated]** consider using `e` instead.
+            e (double): absolute (additive) error tolerated on the distance (default is the smallest positive float), see :func:`gudhi.bottleneck_distance`.
             n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
         """
-        self.epsilon = epsilon
+        self.e = None
+        if epsilon is not None:
+            warnings.warn("epsilon is a deprecated argument, please consider using e", DeprecationWarning)
+            self.e = epsilon
+        if e is not None:
+            self.e = e
         self.n_jobs = n_jobs
 
     def fit(self, X, y=None):
@@ -372,7 +380,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise bottleneck distances.
         """
         Xfit = pairwise_persistence_diagram_distances(
-            X, self.diagrams_, metric="bottleneck", e=self.epsilon, n_jobs=self.n_jobs
+            X, self.diagrams_, metric="bottleneck", e=self.e, n_jobs=self.n_jobs
         )
         return Xfit
 
@@ -390,7 +398,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         try:
             from .. import bottleneck_distance
 
-            return bottleneck_distance(diag1, diag2, e=self.epsilon)
+            return bottleneck_distance(diag1, diag2, e=self.e)
         except ImportError:
             print("Gudhi built without CGAL")
             raise

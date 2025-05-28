@@ -59,8 +59,10 @@ namespace Persistence_representations {
  * The first method is usually much more accurate but also
  * much slower. For more details, please see \cite pmlr-v70-carriere17a .
  *
+ * This class implements the following concepts: Topological_data_with_distances, Real_valued_topological_data,
+ * Topological_data_with_scalar_product
+ *
  **/
-
 class Sliced_Wasserstein {
  protected:
   Persistence_diagram diagram;
@@ -398,8 +400,6 @@ class Sliced_Wasserstein {
 
  public:
   /** \brief Sliced Wasserstein kernel constructor.
-   * \implements Topological_data_with_distances, Real_valued_topological_data, Topological_data_with_scalar_product
-   * \ingroup Sliced_Wasserstein
    *
    * @param[in] _diagram  persistence diagram.
    * @param[in] _sigma    bandwidth parameter.
@@ -414,7 +414,6 @@ class Sliced_Wasserstein {
   }
 
   /** \brief Evaluation of the kernel on a pair of diagrams.
-   * \ingroup Sliced_Wasserstein
    *
    * @pre       approx and sigma attributes need to be the same for both instances.
    * @param[in] second other instance of class Sliced_Wasserstein.
@@ -427,7 +426,6 @@ class Sliced_Wasserstein {
   }
 
   /** \brief Evaluation of the distance between images of diagrams in the Hilbert space of the kernel.
-   * \ingroup Sliced_Wasserstein
    *
    * @pre       approx and sigma attributes need to be the same for both instances.
    * @param[in] second  other instance of class Sliced_Wasserstein.
