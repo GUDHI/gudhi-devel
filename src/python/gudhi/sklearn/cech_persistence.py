@@ -85,9 +85,10 @@ class CechPersistence(BaseEstimator, TransformerMixin):
         return self
 
     def __transform(self, inputs):
-        max_dimension = max(self.dim_list_) + 1
+        max_dimension = np.max(self.dim_list_) + 1
 
-        pts = inputs
+        # alpha complex points take floats
+        pts = np.asarray(inputs, dtype=np.float64)
         delaunay_cech = DelaunayCechComplex(points=pts, precision=self.precision)
         stree = delaunay_cech.create_simplex_tree(
             max_alpha_square=(self.max_alpha * self.max_alpha), output_squared_values=self.output_squared_values
@@ -184,10 +185,11 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
         return self
 
     def __transform(self, inputs):
-        max_dimension = max(self.dim_list_) + 1
+        max_dimension = np.max(self.dim_list_) + 1
 
-        wgts = inputs[:, -1]
-        pts = inputs[:, :-1]
+        # alpha complex weights and points take floats
+        wgts = np.asarray(inputs[:, -1], dtype=np.float64)
+        pts = np.asarray(inputs[:, :-1], dtype=np.float64)
         weighted_alpha = AlphaComplex(points=pts, weights=wgts, precision=self.precision)
 
         stree = weighted_alpha.create_simplex_tree(
