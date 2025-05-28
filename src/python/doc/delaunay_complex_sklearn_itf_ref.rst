@@ -36,8 +36,7 @@ regression line of the model when fitting on the other 25% of the dataset.
    :lines: 1-15,22-
    :language: python
 
-.. figure:: ./img/cech_persistence_sklearn_itf.png
-     :figclass: align-center
+.. plot:: ../../python/example/cech_complex_sklearn_itf.py
 
      Regression line of the model
 
