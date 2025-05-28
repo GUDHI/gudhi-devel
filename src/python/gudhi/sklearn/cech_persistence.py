@@ -8,6 +8,7 @@
 #   - YYYY/MM Author: Description of the modification
 
 from typing import Union, Iterable, Literal, Optional, Any
+import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
 
@@ -60,15 +61,22 @@ class CechPersistence(BaseEstimator, TransformerMixin):
                 joblib.parallel_backend context. `-1` means using all processors. cf.
                 https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for more details.
         """
-        self.homology_dimensions = homology_dimensions
         self.precision = precision
         self.output_squared_values = output_squared_values
-        # As DelaunayCechComplex requires max_alpha_square as parameter
-        self.max_alpha_square = max_alpha * max_alpha
+        self.max_alpha = max_alpha
         self.homology_coeff_field = homology_coeff_field
         self.n_jobs = n_jobs
+
         if self.precision not in ["safe", "fast", "exact"]:
             raise ValueError("Unknown precision")
+
+        self.dim_list_ = np.asarray(homology_dimensions, dtype=int)
+        self.unwrap_ = False
+        if self.dim_list_.ndim == 0:
+            self.unwrap_ = True
+            self.dim_list_ = self.dim_list_.reshape(1)
+        if self.dim_list_.ndim != 1:
+            raise ValueError(f"Invalid dimension. Got {self.dim_list_=}, expected type=int|Iterable[int].")
 
     def fit(self, X, Y=None):
         """
@@ -82,7 +90,7 @@ class CechPersistence(BaseEstimator, TransformerMixin):
         pts = inputs
         delaunay_cech = DelaunayCechComplex(points=pts, precision=self.precision)
         stree = delaunay_cech.create_simplex_tree(
-            max_alpha_square=self.max_alpha_square, output_squared_values=self.output_squared_values
+            max_alpha_square=(self.max_alpha * self.max_alpha), output_squared_values=self.output_squared_values
         )
 
         persistence_dim_max = False
@@ -109,18 +117,10 @@ class CechPersistence(BaseEstimator, TransformerMixin):
                 `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
         :rtype: list of numpy ndarray of shape (,2) or list of list of numpy ndarray of shape (,2)
         """
-        # Depends on homology_dimensions is an integer or a list of integer (else case)
-        if isinstance(self.homology_dimensions, int):
-            unwrap = True
-            self.dim_list_ = [self.homology_dimensions]
-        else:
-            unwrap = False
-            self.dim_list_ = self.homology_dimensions
-
-        # threads is preferred as Rips construction and persistence computation releases the GIL
+        # threads is preferred as Delaunay-Cech construction and persistence computation releases the GIL
         res = Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(inputs) for inputs in X)
 
-        if unwrap:
+        if self.unwrap_:
             res = [d[0] for d in res]
         return res
 
@@ -160,14 +160,22 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
                 joblib.parallel_backend context. `-1` means using all processors. cf.
                 https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for more details.
         """
-        self.homology_dimensions = homology_dimensions
         self.precision = precision
         self.output_squared_values = output_squared_values
         self.max_alpha_square = max_alpha_square
         self.homology_coeff_field = homology_coeff_field
         self.n_jobs = n_jobs
+
         if self.precision not in ["safe", "fast", "exact"]:
             raise ValueError("Unknown precision")
+
+        self.dim_list_ = np.asarray(homology_dimensions, dtype=int)
+        self.unwrap_ = False
+        if self.dim_list_.ndim == 0:
+            self.unwrap_ = True
+            self.dim_list_ = self.dim_list_.reshape(1)
+        if self.dim_list_.ndim != 1:
+            raise ValueError(f"Invalid dimension. Got {self.dim_list_=}, expected type=int|Iterable[int].")
 
     def fit(self, X, Y=None):
         """
@@ -211,18 +219,10 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
                 `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
         :rtype: list of numpy ndarray of shape (,2) or list of list of numpy ndarray of shape (,2)
         """
-        # Depends on homology_dimensions is an integer or a list of integer (else case)
-        if isinstance(self.homology_dimensions, int):
-            unwrap = True
-            self.dim_list_ = [self.homology_dimensions]
-        else:
-            unwrap = False
-            self.dim_list_ = self.homology_dimensions
-
-        # threads is preferred as Rips construction and persistence computation releases the GIL
+        # threads is preferred as Alpha complex construction and persistence computation releases the GIL
         res = Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(inputs) for inputs in X)
 
-        if unwrap:
+        if self.unwrap_:
             res = [d[0] for d in res]
         return res
 

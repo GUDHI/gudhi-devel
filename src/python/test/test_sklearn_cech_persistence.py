@@ -47,7 +47,7 @@ def test_cech_persistence_of_points_on_a_circle():
         # H1 - can have some [1., 1.] - Maybe points on a circle is not the best test case
         assert 1 <= len(diags[idx][1]) <= 5
 
-def test_h1_only_rips_persistence_of_points_on_a_circle():
+def test_h1_only_cech_persistence_of_points_on_a_circle():
     pts = [points.sphere(n_samples=150, ambient_dim=2)]
     diags = CechPersistence(homology_dimensions=1, n_jobs=1).fit_transform(pts)[0]
     assert_almost_equal(np.array([[0.1, 1.]]), diags, decimal=1)
@@ -84,3 +84,10 @@ def test_set_output():
 
     except ImportError:
         print("Missing pandas, skipping set_output test")
+
+def test_cech_persistence_constructor_exception():
+    for CechConstructor in [CechPersistence, WeightedCechPersistence]:
+        with pytest.raises(ValueError):
+            cech = CechConstructor(homology_dimensions=[[0], [2]])
+        with pytest.raises(ValueError):
+            cech = CechConstructor(homology_dimensions=0, precision="some unvalid precision")
