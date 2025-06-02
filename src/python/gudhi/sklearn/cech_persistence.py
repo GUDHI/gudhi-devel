@@ -61,6 +61,7 @@ class CechPersistence(BaseEstimator, TransformerMixin):
                 joblib.parallel_backend context. `-1` means using all processors. cf.
                 https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for more details.
         """
+        self.homology_dimensions = homology_dimensions
         self.precision = precision
         self.output_squared_values = output_squared_values
         self.max_filtration = max_filtration
@@ -70,22 +71,26 @@ class CechPersistence(BaseEstimator, TransformerMixin):
         if self.precision not in ["safe", "fast", "exact"]:
             raise ValueError("Unknown precision")
 
-        self.dim_list_ = np.asarray(homology_dimensions, dtype=int)
-        self.unwrap_ = False
-        if self.dim_list_.ndim == 0:
-            self.unwrap_ = True
-            self.dim_list_ = self.dim_list_.reshape(1)
-        if self.dim_list_.ndim != 1:
-            raise ValueError(f"Invalid dimension. Got {self.dim_list_=}, expected type=int|Iterable[int].")
+        # Done twice (in __init__ and fit), but exception is better the sooner
+        dim_list = np.asarray(self.homology_dimensions, dtype=int)
+        if dim_list.ndim not in [0, 1]:
+            raise ValueError(f"Invalid dimension. Got {self.homology_dimensions=}, expected type=int|Iterable[int].")
 
     def fit(self, X, Y=None):
         """
-        Nothing to be done, but useful when included in a scikit-learn Pipeline.
+        Fit the `CechPersistence` class in function of `homology_dimensions` type.
         """
+        # Must be in the `fit` part, as `transform` should be const and as `__init__` is not called on a parallel grid
+        # search for instance
+        self._dim_list = np.asarray(self.homology_dimensions, dtype=int)
+        self._unwrap = False
+        if self._dim_list.ndim == 0:
+            self._unwrap = True
+            self._dim_list = self._dim_list.reshape(1)
         return self
 
     def __transform(self, inputs):
-        max_dimension = np.max(self.dim_list_) + 1
+        max_dimension = np.max(self._dim_list) + 1
 
         # alpha complex points take floats
         pts = np.asarray(inputs, dtype=np.float64)
@@ -103,7 +108,7 @@ class CechPersistence(BaseEstimator, TransformerMixin):
             homology_coeff_field=self.homology_coeff_field, persistence_dim_max=persistence_dim_max
         )
 
-        return [stree.persistence_intervals_in_dimension(dim) for dim in self.dim_list_]
+        return [stree.persistence_intervals_in_dimension(dim) for dim in self._dim_list]
 
     def transform(self, X, Y=None):
         """Compute all the Čech complexes and their associated persistence diagrams.
@@ -121,13 +126,14 @@ class CechPersistence(BaseEstimator, TransformerMixin):
         # threads is preferred as Delaunay-Cech construction and persistence computation releases the GIL
         res = Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(inputs) for inputs in X)
 
-        if self.unwrap_:
+        # cf. `fit`
+        if self._unwrap:
             res = [d[0] for d in res]
         return res
 
     def get_feature_names_out(self):
         """Provide column names for implementing sklearn's set_output API."""
-        return [f"H{i}" for i in self.dim_list_]
+        return [f"H{i}" for i in self._dim_list]
 
 
 class WeightedCechPersistence(BaseEstimator, TransformerMixin):
@@ -162,6 +168,7 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
                 joblib.parallel_backend context. `-1` means using all processors. cf.
                 https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html for more details.
         """
+        self.homology_dimensions = homology_dimensions
         self.precision = precision
         self.output_squared_values = output_squared_values
         self.max_filtration = max_filtration
@@ -171,22 +178,27 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
         if self.precision not in ["safe", "fast", "exact"]:
             raise ValueError("Unknown precision")
 
-        self.dim_list_ = np.asarray(homology_dimensions, dtype=int)
-        self.unwrap_ = False
-        if self.dim_list_.ndim == 0:
-            self.unwrap_ = True
-            self.dim_list_ = self.dim_list_.reshape(1)
-        if self.dim_list_.ndim != 1:
-            raise ValueError(f"Invalid dimension. Got {self.dim_list_=}, expected type=int|Iterable[int].")
+        # Done twice (in __init__ and fit), but exception is better the sooner
+        dim_list = np.asarray(self.homology_dimensions, dtype=int)
+        if dim_list.ndim not in [0, 1]:
+            raise ValueError(f"Invalid dimension. Got {self.homology_dimensions=}, expected type=int|Iterable[int].")
+
 
     def fit(self, X, Y=None):
         """
-        Nothing to be done, but useful when included in a scikit-learn Pipeline.
+        Fit the `WeightedCechPersistence` class in function of `homology_dimensions` type.
         """
+        # Must be in the `fit` part, as `transform` should be const and as `__init__` is not called on a parallel grid
+        # search for instance
+        self._dim_list = np.asarray(self.homology_dimensions, dtype=int)
+        self._unwrap = False
+        if self._dim_list.ndim == 0:
+            self._unwrap = True
+            self._dim_list = self._dim_list.reshape(1)
         return self
 
     def __transform(self, inputs):
-        max_dimension = np.max(self.dim_list_) + 1
+        max_dimension = np.max(self._dim_list) + 1
 
         # alpha complex weights and points take floats
         wgts = np.asarray(inputs[:, -1], dtype=np.float64)
@@ -206,7 +218,7 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
             homology_coeff_field=self.homology_coeff_field, persistence_dim_max=persistence_dim_max
         )
 
-        return [stree.persistence_intervals_in_dimension(dim) for dim in self.dim_list_]
+        return [stree.persistence_intervals_in_dimension(dim) for dim in self._dim_list]
 
     def transform(self, X, Y=None):
         """Compute all the Weighted Čech complexes and their associated persistence diagrams.
@@ -224,10 +236,11 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
         # threads is preferred as Alpha complex construction and persistence computation releases the GIL
         res = Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(inputs) for inputs in X)
 
-        if self.unwrap_:
+        # cf. `fit`
+        if self._unwrap:
             res = [d[0] for d in res]
         return res
 
     def get_feature_names_out(self):
         """Provide column names for implementing sklearn's set_output API."""
-        return [f"H{i}" for i in self.dim_list_]
+        return [f"H{i}" for i in self._dim_list]
