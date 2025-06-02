@@ -40,7 +40,7 @@ class CechPersistence(BaseEstimator, TransformerMixin):
         homology_dimensions: Union[int, Iterable[int]],
         precision: Literal["fast", "safe", "exact"] = "safe",
         output_squared_values: bool = False,
-        max_filtration: float = float("inf"),
+        threshold: float = float("inf"),
         homology_coeff_field: int = 11,
         n_jobs: Optional[int] = None,
     ):
@@ -53,9 +53,10 @@ class CechPersistence(BaseEstimator, TransformerMixin):
             precision: Complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
             output_squared_values: Square filtration values when `True`. Default is `False` (contrary to its
                 default value in :class:`~gudhi.DelaunayCechComplex`).
-            max_filtration: The maximum filtration the simplices shall not exceed. Default is set to infinity, and
-                there is very little point using anything else since it does not save time. Notice that the filtration
-                values will be different in function of `output_squared_values` value.
+            threshold: The maximum filtration value the simplices shall not exceed. Default is set to infinity, and
+                there is very little point using anything else since it does not save time.
+                Notice that the filtration values (equal to radii, by default, or squared radii) will be different in
+                function of `output_squared_values` value (when `False`, by default, or `True`).
             homology_coeff_field: The homology coefficient field. Must be a prime number. Default value is 11.
             n_jobs: Number of jobs to run in parallel. `None` (default value) means `n_jobs = 1` unless in a
                 joblib.parallel_backend context. `-1` means using all processors. cf.
@@ -64,7 +65,7 @@ class CechPersistence(BaseEstimator, TransformerMixin):
         self.homology_dimensions = homology_dimensions
         self.precision = precision
         self.output_squared_values = output_squared_values
-        self.max_filtration = max_filtration
+        self.threshold = threshold
         self.homology_coeff_field = homology_coeff_field
         self.n_jobs = n_jobs
 
@@ -96,7 +97,7 @@ class CechPersistence(BaseEstimator, TransformerMixin):
         pts = np.asarray(inputs, dtype=np.float64)
         delaunay_cech = DelaunayCechComplex(points=pts, precision=self.precision)
         stree = delaunay_cech.create_simplex_tree(
-            max_alpha_square=self.max_filtration, output_squared_values=self.output_squared_values
+            max_alpha_square=self.threshold, output_squared_values=self.output_squared_values
         )
 
         persistence_dim_max = False
@@ -147,7 +148,7 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
         homology_dimensions: Union[int, Iterable[int]],
         precision: Literal["fast", "safe", "exact"] = "safe",
         output_squared_values: bool = True,
-        max_filtration: float = float("inf"),
+        threshold: float = float("inf"),
         homology_coeff_field: int = 11,
         n_jobs: Optional[int] = None,
     ):
@@ -160,9 +161,10 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
             precision: Complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
             output_squared_values: Square filtration values when `True`. Default is `True`  (contrary to the unweighted
                 version :class:`~gudhi.sklearn.cech_persistence.CechPersistence`).
-            max_filtration: The maximum filtration the simplices shall not exceed. Default is set to infinity, and
-                there is very little point using anything else since it does not save time. Notice that the filtration
-                values will be different in function of `output_squared_values` value.
+            threshold: The maximum filtration value the simplices shall not exceed. Default is set to infinity, and
+                there is very little point using anything else since it does not save time.
+                Notice that the filtration values (equal to squared radii, by default, or radii) will be different in
+                function of `output_squared_values` value (when `True`, by default, or `False`).
             homology_coeff_field: The homology coefficient field. Must be a prime number. Default value is 11.
             n_jobs: Number of jobs to run in parallel. `None` (default value) means `n_jobs = 1` unless in a
                 joblib.parallel_backend context. `-1` means using all processors. cf.
@@ -171,7 +173,7 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
         self.homology_dimensions = homology_dimensions
         self.precision = precision
         self.output_squared_values = output_squared_values
-        self.max_filtration = max_filtration
+        self.threshold = threshold
         self.homology_coeff_field = homology_coeff_field
         self.n_jobs = n_jobs
 
@@ -206,7 +208,7 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
         weighted_alpha = AlphaComplex(points=pts, weights=wgts, precision=self.precision)
 
         stree = weighted_alpha.create_simplex_tree(
-            max_alpha_square=self.max_filtration, output_squared_values=self.output_squared_values
+            max_alpha_square=self.threshold, output_squared_values=self.output_squared_values
         )
 
         persistence_dim_max = False
