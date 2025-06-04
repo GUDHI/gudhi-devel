@@ -96,6 +96,7 @@ cdef extern from "Persistent_cohomology_interface.h" namespace "Gudhi":
         vector[int] betti_numbers() nogil
         vector[int] persistent_betti_numbers(double from_value, double to_value) nogil
         vector[pair[double,double]] intervals_in_dimension(int dimension) nogil
+        vector[vector[pair[double,double]]] intervals_by_dimension() nogil
         void write_output_diagram(string diagram_file_name) nogil except +
         vector[pair[vector[int], vector[int]]] persistence_pairs() nogil
         pair[vector[vector[int]], vector[vector[int]]] lower_star_generators() nogil

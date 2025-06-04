@@ -614,7 +614,7 @@ cdef class SimplexTree:
         """
         self.get_ptr().expansion_with_blockers_callback(max_dim, callback, <void*>blocker_func)
 
-    def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
+    def persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False, output_type = 'old'):
         """This function computes and returns the persistence of the simplicial complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
@@ -629,11 +629,18 @@ cdef class SimplexTree:
             maximal dimension in the complex is computed. If false, it is
             ignored. Default is false.
         :type persistence_dim_max: bool
+        :param output_type: Format of the output. 'old' for the legacy list of (dim,(birth,death)),
+            'array by dimension' for a list of nx2 numpy arrays (one per dimension).
+        :type output_type: str
         :returns: The persistence of the simplicial complex.
         :rtype:  list of pairs(dimension, pair(birth, death))
         """
         self.compute_persistence(homology_coeff_field, min_persistence, persistence_dim_max)
-        return self.pcohptr.get_persistence()
+        if output_type == 'array by dimension':
+            v = self.pcohptr.intervals_by_dimension()
+            return [ np.asarray(dgm) for dgm in v ] # std::move(dgm)?
+        else:
+            return self.pcohptr.get_persistence()
 
     def compute_persistence(self, homology_coeff_field=11, min_persistence=0, persistence_dim_max = False):
         """This function computes the persistence of the simplicial complex, so it can be accessed through
