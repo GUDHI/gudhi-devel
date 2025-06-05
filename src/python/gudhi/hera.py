@@ -14,10 +14,12 @@ __license__ = "BSD 3-Clause"
 
 from collections.abc import Sequence
 import warnings
+import numpy as np
+from numpy.typing import ArrayLike
 
 from gudhi import _hera_ext as t
 
-def bottleneck_distance(X, Y, delta = .01):
+def bottleneck_distance(X:ArrayLike, Y:ArrayLike, delta:float = .01) -> float:
     """Compute the Bottleneck distance between two diagrams.
     Points at infinity are supported.
 
@@ -32,15 +34,27 @@ def bottleneck_distance(X, Y, delta = .01):
     Returns:
         float: (approximate) bottleneck distance d_B(X,Y)
     """
-    if isinstance(X, list):
-      warnings.warn("Using a list will produce a copy. We recommend using a numpy array instead", RuntimeWarning)
-      return t._bottleneck_distance_list(X, Y, delta)
-    if isinstance(X, Sequence):
-      warnings.warn("Using a sequence will produce a copy. We recommend using a numpy array instead", RuntimeWarning)
-      return t._bottleneck_distance_sequence(X, Y, delta)
-    return t._bottleneck_distance_tensor(X, Y, delta)
+    if len(X) == 0: # to allow empty diagrams, but I am not sure if every ArrayLike object works with `len`?
+        dgm1 = np.empty((0,2))
+    else:
+        # delegates some format errors to numpy and assures single C++ format
+        # a copy is unavoidable for sequences like lists etc. anyway with the C++ bindings
+        dgm1 = np.asarray(X)
+    if len(Y) == 0:
+        dgm2 = np.empty((0,2))
+    else:
+        dgm2 = np.asarray(Y)
+    return t._bottleneck_distance(dgm1, dgm2, delta)
 
-def wasserstein_distance(X, Y, order = 1, internal_p = float('Inf'), delta = .01, matching = False):
+
+def wasserstein_distance(
+    X: ArrayLike,
+    Y: ArrayLike,
+    order: float = 1,
+    internal_p: float = float("Inf"),
+    delta: float = 0.01,
+    matching: bool = False,
+):
     """Compute the Wasserstein distance between two diagrams.
     Points at infinity are supported.
 
@@ -60,13 +74,15 @@ def wasserstein_distance(X, Y, order = 1, internal_p = float('Inf'), delta = .01
             float|Tuple[float,numpy.array|None]: Approximate Wasserstein distance W_q(X,Y), and optionally the
                 corresponding matching
     """
-    if isinstance(X, list):
-      warnings.warn("Using a list will produce a copy. We recommend using a numpy array instead", RuntimeWarning)
-      return t._wasserstein_distance_list(X, Y, order, internal_p, delta, matching)
-    if isinstance(X, Sequence):
-      warnings.warn("Using a sequence will produce a copy. We recommend using a numpy array instead", RuntimeWarning)
-      return t._wasserstein_distance_sequence(X, Y, order, internal_p, delta, matching)
-    return t._wasserstein_distance_tensor(X, Y, order, internal_p, delta, matching)
-
-
-
+    # mirrors bottleneck_distance, but non numpy inputs are not used anywhere, so perhaps it is not necessary?
+    if len(X) == 0: # to allow empty diagrams, but I am not sure if every ArrayLike object works with `len`?
+        dgm1 = np.empty((0,2))
+    else:
+        # delegates some format errors to numpy and assures single C++ format
+        # a copy is unavoidable for sequences like lists etc. anyway with the C++ bindings
+        dgm1 = np.asarray(X)
+    if len(Y) == 0:
+        dgm2 = np.empty((0,2))
+    else:
+        dgm2 = np.asarray(Y)
+    return t._wasserstein_distance(dgm1, dgm2, order, internal_p, delta, matching)

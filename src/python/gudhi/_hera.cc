@@ -33,12 +33,13 @@ namespace nb = nanobind;
 // Indices are added internally in bottleneck_distance, they are not needed in the input.
 static auto _make_point(double x, double y, std::size_t) { return std::pair(x, y); };
 
-template <class Dgm>
-double _bottleneck_distance(const Dgm& d1, const Dgm& d2, double delta)
+double _bottleneck_distance(const Tensor_dgm& d1, const Tensor_dgm& d2, double delta)
 {
+  auto d1_view = d1.view(); // views have to live until the end of the method, as not copied in
+  auto d2_view = d2.view(); // the iterator of array_to_range_of_pairs
   // I *think* the call to request() in array_to_range_of_pairs has to be before releasing the GIL.
-  auto diag1 = array_to_range_of_pairs(d1, _make_point);
-  auto diag2 = array_to_range_of_pairs(d2, _make_point);
+  auto diag1 = array_to_range_of_pairs(d1_view, _make_point);
+  auto diag2 = array_to_range_of_pairs(d2_view, _make_point);
 
   nb::gil_scoped_release release;
 
@@ -51,16 +52,17 @@ double _bottleneck_distance(const Dgm& d1, const Dgm& d2, double delta)
 // Unlike bottleneck, for wasserstein, we need to add the index ourselves (if we want the matching)
 static auto _make_hera_point(double x, double y, std::size_t i) { return hera::DiagramPoint<double>(x, y, i); };
 
-template <class Dgm>
-nb::object _wasserstein_distance(const Dgm& d1,
-                                 const Dgm& d2,
+nb::object _wasserstein_distance(const Tensor_dgm& d1,
+                                 const Tensor_dgm& d2,
                                  double wasserstein_power,
                                  double internal_p,
                                  double delta,
                                  bool return_matching)
 {
-  auto diag1 = array_to_range_of_pairs(d1, _make_hera_point);
-  auto diag2 = array_to_range_of_pairs(d2, _make_hera_point);
+  auto d1_view = d1.view(); // views have to live until the end of the method, as not copied in
+  auto d2_view = d2.view(); // the iterator of array_to_range_of_pairs
+  auto diag1 = array_to_range_of_pairs(d1_view, _make_hera_point);
+  auto diag2 = array_to_range_of_pairs(d2_view, _make_hera_point);
   int n1 = boost::size(diag1);
   int n2 = boost::size(diag2);
   hera::AuctionResult<double> res;
@@ -168,36 +170,13 @@ nb::object _wasserstein_distance(const Dgm& d1,
 NB_MODULE(_hera_ext, m)
 {
   m.attr("__license__") = "BSD 3-Clause";
-  m.def("_bottleneck_distance_tensor",
-        &_bottleneck_distance<Tensor_dgm>,
+  m.def("_bottleneck_distance",
+        &_bottleneck_distance,
         nb::arg("X"),
         nb::arg("Y"),
         nb::arg("delta") = .01);
-  m.def(
-      "_bottleneck_distance_list", &_bottleneck_distance<List_dgm>, nb::arg("X"), nb::arg("Y"), nb::arg("delta") = .01);
-  m.def("_bottleneck_distance_sequence",
-        &_bottleneck_distance<Sequence_dgm>,
-        nb::arg("X"),
-        nb::arg("Y"),
-        nb::arg("delta") = .01);
-  m.def("_wasserstein_distance_tensor",
-        &_wasserstein_distance<Tensor_dgm>,
-        nb::arg("X"),
-        nb::arg("Y"),
-        nb::arg("order") = 1,
-        nb::arg("internal_p") = std::numeric_limits<double>::infinity(),
-        nb::arg("delta") = .01,
-        nb::arg("matching") = false);
-  m.def("_wasserstein_distance_list",
-        &_wasserstein_distance<List_dgm>,
-        nb::arg("X"),
-        nb::arg("Y"),
-        nb::arg("order") = 1,
-        nb::arg("internal_p") = std::numeric_limits<double>::infinity(),
-        nb::arg("delta") = .01,
-        nb::arg("matching") = false);
-  m.def("_wasserstein_distance_sequence",
-        &_wasserstein_distance<Sequence_dgm>,
+  m.def("_wasserstein_distance",
+        &_wasserstein_distance,
         nb::arg("X"),
         nb::arg("Y"),
         nb::arg("order") = 1,

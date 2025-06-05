@@ -14,10 +14,12 @@ __license__ = "GPL v3"
 
 from collections.abc import Sequence
 import warnings
+import numpy as np
+from numpy.typing import ArrayLike
 
 from gudhi import _bottleneck_ext as t
 
-def bottleneck_distance(diagram_1, diagram_2, e = None):
+def bottleneck_distance(diagram_1:ArrayLike, diagram_2:ArrayLike, e:float = None) -> float:
     """Compute the Bottleneck distance between two diagrams.
     Points at infinity and on the diagonal are supported.
 
@@ -37,11 +39,16 @@ def bottleneck_distance(diagram_1, diagram_2, e = None):
     :rtype: float
     :returns: the bottleneck distance.
     """
-    if isinstance(diagram_1, list):
-      warnings.warn("Using a list will produce a copy. We recommend using a numpy array instead", RuntimeWarning)
-      return t._bottleneck_distance_list(diagram_1, diagram_2, e)
-    if isinstance(diagram_1, Sequence):
-      warnings.warn("Using a sequence will produce a copy. We recommend using a numpy array instead", RuntimeWarning)
-      return t._bottleneck_distance_sequence(diagram_1, diagram_2, e)
-    return t._bottleneck_distance_tensor(diagram_1, diagram_2, e)
+    if len(diagram_1) == 0: # to allow empty diagrams, but I am not sure if every ArrayLike object works with `len`?
+      dgm1 = np.empty((0,2))
+    else:
+      # delegates some format errors to numpy and assures single C++ format
+      # a copy is unavoidable for sequences like lists etc. anyway with the C++ bindings
+      dgm1 = np.asarray(diagram_1)
+    if len(diagram_2) == 0:
+      dgm2 = np.empty((0,2))
+    else:
+      dgm2 = np.asarray(diagram_2)
+    
+    return t._bottleneck_distance(dgm1, dgm2, e)
 

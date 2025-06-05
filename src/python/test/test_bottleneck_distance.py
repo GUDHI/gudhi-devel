@@ -76,10 +76,10 @@ def test_invalid_format_bottleneck():
     diag1 = [[], [], [], []]
     diag2 = []  #this one should be valid, as it can be an empty list of pairs
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(TypeError):
         gudhi.bottleneck_distance(diag1, diag1)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(TypeError):
         gudhi.hera.bottleneck_distance(diag1, diag1, 0)
 
     assert gudhi.bottleneck_distance(diag2, diag2) == 0
@@ -88,16 +88,16 @@ def test_invalid_format_bottleneck():
     diag1 = [[2.7], [9.6, 14.0], [34.2, 34.974], [3.0, float("Inf")]]
     diag2 = [[2.8, 4.45], [9.5, 14.1, 5.7], [3.2, float("Inf")]]
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError):
         gudhi.bottleneck_distance(diag1, diag1)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError):
         gudhi.hera.bottleneck_distance(diag1, diag1, 0)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError):
         gudhi.bottleneck_distance(diag2, diag2)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError):
         gudhi.hera.bottleneck_distance(diag2, diag2, 0)
 
     import numpy as np
