@@ -6,11 +6,9 @@ from gudhi.datasets.generators import points
 
 try:
     from gudhi._pers_cub_low_dim import _persistence_on_a_line as persistence_on_a_line
-
     print("Cython/Pybind11 version")
 except ImportError:
     from gudhi._pers_cub_low_dim_ext import _persistence_on_a_line as persistence_on_a_line
-
     print("Nanobind version")
 
 
