@@ -21,300 +21,117 @@
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 
-#include <CGAL/Epeck_d.h>
-#include <CGAL/Epick_d.h>
-
-#include <gudhi/Alpha_complex_options.h>
-#include <gudhi/MEB_filtration.h>
-#include <gudhi/Alpha_complex.h>
 #include <python_interfaces/Simplex_tree_interface.h>
 #include <python_interfaces/points_utils.h>
+#include <python_interfaces/delaunay_complex_interface.h>
 
 namespace Gudhi {
 namespace delaunay_complex {
 
-// /////////////////////////////////////////////////////////////////////////////
-//  Delaunay_complex_factory
-// /////////////////////////////////////////////////////////////////////////////
-
-enum class Delaunay_filtration : char {
-  NONE = 'n',   ///< Delaunay complex
-  CECH = 'c',   ///< Delaunay Cech complex
-  ALPHA = 'a',  ///< Alpha complex
-};
-
-// template Functor that transforms a CGAL point to a vector of double as expected by python bindings
-template <typename CgalPointType, bool Weighted>
-struct Point_cgal_to_python;
-
-// Specialized Unweighted Functor
-template <typename CgalPointType>
-struct Point_cgal_to_python<CgalPointType, false> {
-  std::vector<double> operator()(CgalPointType const& point) const
-  {
-    std::vector<double> vd;
-    vd.reserve(point.dimension());
-    for (auto coord = point.cartesian_begin(); coord != point.cartesian_end(); coord++)
-      vd.push_back(CGAL::to_double(*coord));
-    return vd;
-  }
-};
-
-// Specialized Weighted Functor
-template <typename CgalPointType>
-struct Point_cgal_to_python<CgalPointType, true> {
-  std::vector<double> operator()(CgalPointType const& weighted_point) const
-  {
-    const auto& point = weighted_point.point();
-    return Point_cgal_to_python<decltype(point), false>()(point);
-  }
-};
-
-// Function that transforms a vector of double point to a CGAL point
-template <typename CgalPointType>
-static CgalPointType pt_python_to_cgal(std::vector<double> const& vec)
-{
-  return CgalPointType(vec.size(), vec.begin(), vec.end());
-}
-
-template <typename Delaunay_complex, typename Kernel, bool Weighted, typename Point_cloud>
-bool create_complex(Delaunay_complex& delaunay_complex,
-                    Simplex_tree_interface* simplex_tree,
-                    const Point_cloud& points,
-                    double max_alpha_square,
-                    bool exact_version,
-                    Delaunay_filtration filtration,
-                    bool output_squared_values)
-{
-  if (filtration == Delaunay_filtration::CECH) {
-    if (Weighted) throw std::invalid_argument("Weighted Delaunay-Cech complex is not available");
-    // Construct the Delaunay complex
-    bool result = delaunay_complex.create_complex(
-        *simplex_tree, std::numeric_limits<Simplex_tree_interface::Filtration_value>::infinity(), exact_version, true);
-    if (result == true) {
-      // Construct the Delaunay-Cech complex by assigning filtration values with MEB
-      if (!output_squared_values) {
-        Gudhi::cech_complex::assign_MEB_filtration<false>(Kernel(), *simplex_tree, points);
-        simplex_tree->prune_above_filtration(std::sqrt(max_alpha_square));
-      } else {
-        Gudhi::cech_complex::assign_MEB_filtration<true>(Kernel(), *simplex_tree, points);
-        simplex_tree->prune_above_filtration(max_alpha_square);
-      }
-    }
-    return result;
-  } else {
-    if (output_squared_values)
-      return delaunay_complex.template create_complex<true>(
-          *simplex_tree, max_alpha_square, exact_version, filtration == Delaunay_filtration::NONE);
-    else
-      return delaunay_complex.template create_complex<false>(
-          *simplex_tree, max_alpha_square, exact_version, filtration == Delaunay_filtration::NONE);
-  }
-}
-
-class Abstract_delaunay_complex
-{
- public:
-  virtual std::vector<double> get_point(int vh) = 0;
-
-  virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree,
-                                   double max_alpha_square,
-                                   Delaunay_filtration filtration,
-                                   bool output_squared_values = false) = 0;
-
-  virtual std::size_t num_vertices() const = 0;
-
-  virtual ~Abstract_delaunay_complex() = default;
-};
-
-// /////////////////////////////////////////////////////////////////////////////
-//  Delaunay_complex_interface declaration
-// /////////////////////////////////////////////////////////////////////////////
+std::unique_ptr<Abstract_delaunay_complex> make_2d_epick_complex_ptr(const Sequence2D&, const Sequence1D&, bool);
+std::unique_ptr<Abstract_delaunay_complex> make_2d_epeck_complex_ptr(const Sequence2D&, const Sequence1D&, bool);
+std::unique_ptr<Abstract_delaunay_complex> make_2d_epick_complex_ptr(const Sequence2D&, bool);
+std::unique_ptr<Abstract_delaunay_complex> make_2d_epeck_complex_ptr(const Sequence2D&, bool);
+std::unique_ptr<Abstract_delaunay_complex> make_3d_epick_complex_ptr(const Sequence2D&, const Sequence1D&, bool);
+std::unique_ptr<Abstract_delaunay_complex> make_3d_epeck_complex_ptr(const Sequence2D&, const Sequence1D&, bool);
+std::unique_ptr<Abstract_delaunay_complex> make_3d_epick_complex_ptr(const Sequence2D&, bool);
+std::unique_ptr<Abstract_delaunay_complex> make_3d_epeck_complex_ptr(const Sequence2D&, bool);
+std::unique_ptr<Abstract_delaunay_complex> make_dynamic_d_epick_complex_ptr(const Sequence2D&, const Sequence1D&, bool);
+std::unique_ptr<Abstract_delaunay_complex> make_dynamic_d_epeck_complex_ptr(const Sequence2D&, const Sequence1D&, bool);
+std::unique_ptr<Abstract_delaunay_complex> make_dynamic_d_epick_complex_ptr(const Sequence2D&, bool);
+std::unique_ptr<Abstract_delaunay_complex> make_dynamic_d_epeck_complex_ptr(const Sequence2D&, bool);
 
 class Delaunay_complex_interface
 {
  public:
-  Delaunay_complex_interface(const Sequence2D& points,
-                             const Sequence1D& weights,
-                             bool fast_version,
-                             bool exact_version);
+  Delaunay_complex_interface(const Sequence2D& points, const Sequence1D& weights, bool fast_version, bool exact_version)
+  {
+    // Specific cases for dimensions 2 and 3
+    const std::size_t dimension = ((points.size() > 0) ? points[0].size() : 0);
+    if (fast_version) {
+      if (dimension == 2) {
+        delaunay_ptr_ = make_2d_epick_complex_ptr(points, weights, exact_version);
+      } else if (dimension == 3) {
+        delaunay_ptr_ = make_3d_epick_complex_ptr(points, weights, exact_version);
+      } else {
+        delaunay_ptr_ = make_dynamic_d_epick_complex_ptr(points, weights, exact_version);
+      }
+    } else {
+      if (dimension == 2) {
+        delaunay_ptr_ = make_2d_epeck_complex_ptr(points, weights, exact_version);
+      } else if (dimension == 3) {
+        delaunay_ptr_ = make_3d_epeck_complex_ptr(points, weights, exact_version);
+      } else {
+        delaunay_ptr_ = make_dynamic_d_epeck_complex_ptr(points, weights, exact_version);
+      }
+    }
+  }
 
-  Delaunay_complex_interface(const Tensor2D& points,
-                             const Tensor1D& weights,
-                             bool fast_version,
-                             bool exact_version);
+  Delaunay_complex_interface(const Tensor2D& points, const Tensor1D& weights, bool fast_version, bool exact_version)
+      : Delaunay_complex_interface(_get_sequence_from_tensor(points),
+                                   _get_sequence_from_tensor(weights),
+                                   fast_version,
+                                   exact_version)
+  {}
 
-  Delaunay_complex_interface(const Sequence2D& points, bool fast_version, bool exact_version);
+  Delaunay_complex_interface(const Sequence2D& points, bool fast_version, bool exact_version)
+  {
+    // Specific cases for dimensions 2 and 3
+    const std::size_t dimension = ((points.size() > 0) ? points[0].size() : 0);
+    if (fast_version) {
+      if (dimension == 2) {
+        delaunay_ptr_ = make_2d_epick_complex_ptr(points, exact_version);
+      } else if (dimension == 3) {
+        delaunay_ptr_ = make_3d_epick_complex_ptr(points, exact_version);
+      } else {
+        delaunay_ptr_ = make_dynamic_d_epick_complex_ptr(points, exact_version);
+      }
+    } else {
+      if (dimension == 2) {
+        delaunay_ptr_ = make_2d_epeck_complex_ptr(points, exact_version);
+      } else if (dimension == 3) {
+        delaunay_ptr_ = make_3d_epeck_complex_ptr(points, exact_version);
+      } else {
+        delaunay_ptr_ = make_dynamic_d_epeck_complex_ptr(points, exact_version);
+      }
+    }
+  }
 
-  Delaunay_complex_interface(const Tensor2D& points, bool fast_version, bool exact_version);
+  Delaunay_complex_interface(const Tensor2D& points, bool fast_version, bool exact_version)
+      : Delaunay_complex_interface(_get_sequence_from_tensor(points), fast_version, exact_version)
+  {}
 
-  std::vector<double> get_point(int vh);
+  std::vector<double> get_point(int vh) { return delaunay_ptr_->get_point(vh); }
 
   void create_simplex_tree(Simplex_tree_interface* simplex_tree,
                            double max_alpha_square,
                            Delaunay_filtration filtration,
-                           bool output_squared_values);
+                           bool output_squared_values)
+  {
+    // Nothing to be done in case of an empty point set
+    if (delaunay_ptr_->num_vertices() > 0) {
+      delaunay_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, filtration, output_squared_values);
+    }
+  }
 
-  static void set_float_relative_precision(double precision);
+  static void set_float_relative_precision(double precision)
+  {
+    // cf. CGAL::Epeck_d kernel type in Delaunay_complex_interface
+    if (precision <= 0 || precision >= 1) {
+      throw std::invalid_argument("Precision must be strictly greater than 0 and lower than 0");
+    }
+    CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>::FT::set_relative_precision_of_to_double(precision);
+  }
 
-  static double get_float_relative_precision();
+  static double get_float_relative_precision()
+  {
+    // cf. CGAL::Epeck_d kernel type in Delaunay_complex_interface
+    return CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>::FT::get_relative_precision_of_to_double();
+  }
 
  private:
   std::unique_ptr<Abstract_delaunay_complex> delaunay_ptr_;
 };
-
-template <typename Kernel, bool Weighted = false>
-class Delaunay_complex_t final : public Abstract_delaunay_complex
-{
- private:
-  using Bare_point = typename Kernel::Point_d;
-  using Point = std::conditional_t<Weighted, typename Kernel::Weighted_point_d, typename Kernel::Point_d>;
-  using Delaunay_complex = Gudhi::alpha_complex::Alpha_complex<Kernel, Weighted>;
-
- public:
-  Delaunay_complex_t(const Sequence2D& points, bool exact_version)
-      : exact_version_(exact_version),
-        points_(boost::begin(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>)),
-                boost::end(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>))),
-        delaunay_complex_(points_)
-  {}
-
-  Delaunay_complex_t(const Sequence2D& points, const Sequence1D& weights, bool exact_version)
-      : exact_version_(exact_version),
-        points_(boost::begin(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>)),
-                boost::end(boost::adaptors::transform(points, pt_python_to_cgal<Bare_point>))),
-        delaunay_complex_(points_, weights)
-  {}
-
-  virtual std::vector<double> get_point(int vh) override
-  {
-    // Can be a Weighted or a Bare point in function of Weighted
-    return Point_cgal_to_python<Point, Weighted>()(delaunay_complex_.get_point(vh));
-  }
-
-  virtual bool create_simplex_tree(Simplex_tree_interface* simplex_tree,
-                                   double max_alpha_square,
-                                   Delaunay_filtration filtration,
-                                   bool output_squared_values) override
-  {
-    return create_complex<Delaunay_complex, Kernel, Weighted, std::vector<Bare_point>>(
-        delaunay_complex_, simplex_tree, points_, max_alpha_square, exact_version_, filtration, output_squared_values);
-  }
-
-  virtual std::size_t num_vertices() const override { return delaunay_complex_.num_vertices(); }
-
- private:
-  bool exact_version_;
-  std::vector<Bare_point> points_;
-  Delaunay_complex delaunay_complex_;
-};
-
-// /////////////////////////////////////////////////////////////////////////////
-//  Delaunay_complex_interface definition
-// /////////////////////////////////////////////////////////////////////////////
-
-Delaunay_complex_interface::Delaunay_complex_interface(const Sequence2D& points,
-                                                       const Sequence1D& weights,
-                                                       bool fast_version,
-                                                       bool exact_version)
-{
-  // Specific cases for dimensions 2 and 3
-  const std::size_t dimension = ((points.size() > 0) ? points[0].size() : 0);
-  if (fast_version) {
-    if (dimension == 2) {
-      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<2>>, true>>(
-          points, weights, exact_version);
-    } else if (dimension == 3) {
-      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<3>>, true>>(
-          points, weights, exact_version);
-    } else {
-      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>, true>>(
-          points, weights, exact_version);
-    }
-  } else {
-    if (dimension == 2) {
-      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<2>>, true>>(
-          points, weights, exact_version);
-    } else if (dimension == 3) {
-      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<3>>, true>>(
-          points, weights, exact_version);
-    } else {
-      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, true>>(
-          points, weights, exact_version);
-    }
-  }
-}
-
-Delaunay_complex_interface::Delaunay_complex_interface(const Tensor2D& points,
-                                                       const Tensor1D& weights,
-                                                       bool fast_version,
-                                                       bool exact_version)
-    : Delaunay_complex_interface(_get_sequence_from_tensor(points),
-                                 _get_sequence_from_tensor(weights),
-                                 fast_version,
-                                 exact_version)
-{}
-
-Delaunay_complex_interface::Delaunay_complex_interface(const Sequence2D& points, bool fast_version, bool exact_version)
-{
-  // Specific cases for dimensions 2 and 3
-  const std::size_t dimension = ((points.size() > 0) ? points[0].size() : 0);
-  if (fast_version) {
-    if (dimension == 2) {
-      delaunay_ptr_ =
-          std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<2>>, false>>(points, exact_version);
-    } else if (dimension == 3) {
-      delaunay_ptr_ =
-          std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dimension_tag<3>>, false>>(points, exact_version);
-    } else {
-      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epick_d<CGAL::Dynamic_dimension_tag>, false>>(
-          points, exact_version);
-    }
-  } else {
-    if (dimension == 2) {
-      delaunay_ptr_ =
-          std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<2>>, false>>(points, exact_version);
-    } else if (dimension == 3) {
-      delaunay_ptr_ =
-          std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dimension_tag<3>>, false>>(points, exact_version);
-    } else {
-      delaunay_ptr_ = std::make_unique<Delaunay_complex_t<CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>, false>>(
-          points, exact_version);
-    }
-  }
-}
-
-Delaunay_complex_interface::Delaunay_complex_interface(const Tensor2D& points, bool fast_version, bool exact_version)
-    : Delaunay_complex_interface(_get_sequence_from_tensor(points), fast_version, exact_version)
-{}
-
-std::vector<double> Delaunay_complex_interface::get_point(int vh) { return delaunay_ptr_->get_point(vh); }
-
-void Delaunay_complex_interface::create_simplex_tree(Simplex_tree_interface* simplex_tree,
-                                                     double max_alpha_square,
-                                                     Delaunay_filtration filtration,
-                                                     bool output_squared_values)
-{
-  // Nothing to be done in case of an empty point set
-  if (delaunay_ptr_->num_vertices() > 0) {
-    delaunay_ptr_->create_simplex_tree(simplex_tree, max_alpha_square, filtration, output_squared_values);
-  }
-}
-
-void Delaunay_complex_interface::set_float_relative_precision(double precision)
-{
-  // cf. CGAL::Epeck_d kernel type in Delaunay_complex_interface
-  if (precision <= 0 || precision >= 1) {
-    throw std::invalid_argument("Precision must be strictly greater than 0 and lower than 0");
-  }
-  CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>::FT::set_relative_precision_of_to_double(precision);
-}
-
-double Delaunay_complex_interface::get_float_relative_precision()
-{
-  // cf. CGAL::Epeck_d kernel type in Delaunay_complex_interface
-  return CGAL::Epeck_d<CGAL::Dynamic_dimension_tag>::FT::get_relative_precision_of_to_double();
-}
 
 }  // namespace delaunay_complex
 }  // namespace Gudhi

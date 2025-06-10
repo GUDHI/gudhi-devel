@@ -9,9 +9,17 @@ nanobind_add_module_with_targets(_witness_complex_ext _witness_complex.cc TBB::t
 nanobind_add_module_with_targets(_strong_witness_complex_ext _strong_witness_complex.cc TBB::tbb)
 nanobind_add_module_with_targets(_nerve_gic_ext _nerve_gic.cc TBB::tbb)
 nanobind_add_module_with_targets(_hera_ext _hera.cc)
-
 nanobind_add_module_with_targets(_bottleneck_ext _bottleneck.cc CGAL::CGAL TBB::tbb)
-nanobind_add_module_with_targets(_delaunay_complex_ext _delaunay_complex.cc Eigen3::Eigen CGAL::CGAL TBB::tbb)
+add_library(_delaunay_complex_ext_2d SHARED _delaunay_complex_2d.cc)
+add_library(_delaunay_complex_ext_3d SHARED _delaunay_complex_3d.cc)
+add_library(_delaunay_complex_ext_dynd SHARED _delaunay_complex_dyn.cc)
+# works only because nanobind-static was already build by a call of `nanobind_add_module`
+# if we change NB_STATIC to something else, the name "nanobind-static" also needs to be changed,
+# as `nanobind_add_module` renames the executable depending on the compile options.
+target_link_libraries(_delaunay_complex_ext_2d CGAL::CGAL Eigen3::Eigen TBB::tbb nanobind-static)
+target_link_libraries(_delaunay_complex_ext_3d CGAL::CGAL Eigen3::Eigen TBB::tbb nanobind-static)
+target_link_libraries(_delaunay_complex_ext_dynd CGAL::CGAL Eigen3::Eigen TBB::tbb nanobind-static)
+nanobind_add_module_with_targets(_delaunay_complex_ext _delaunay_complex.cc Eigen3::Eigen CGAL::CGAL TBB::tbb _delaunay_complex_ext_2d _delaunay_complex_ext_3d _delaunay_complex_ext_dynd)
 nanobind_add_module_with_targets(_tangential_complex_ext _tangential_complex.cc Eigen3::Eigen CGAL::CGAL TBB::tbb)
 nanobind_add_module_with_targets(_euclidean_witness_complex_ext _euclidean_witness_complex.cc
                                  Eigen3::Eigen CGAL::CGAL TBB::tbb)

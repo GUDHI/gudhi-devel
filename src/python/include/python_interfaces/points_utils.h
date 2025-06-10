@@ -8,6 +8,9 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#ifndef INCLUDE_POINT_UTILS_PYTHON_H_
+#define INCLUDE_POINT_UTILS_PYTHON_H_
+
 #include <vector>
 
 #include <nanobind/ndarray.h>
@@ -49,3 +52,5 @@ inline Nearest_landmark_sequence _get_sequence_from_tensor(const Nearest_landmar
   }
   return vec;
 }
+
+#endif  // INCLUDE_POINT_UTILS_PYTHON_H_

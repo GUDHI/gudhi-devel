@@ -9,6 +9,9 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#ifndef INCLUDE_DIAGRAM_UTILS_PYTHON_H_
+#define INCLUDE_DIAGRAM_UTILS_PYTHON_H_
+
 #include <cstddef>  //std::size_t
 
 #include <nanobind/nanobind.h>
@@ -34,4 +37,6 @@ inline auto array_to_range_of_pairs(const Tensor_dgm_view& dgm, BuildPoint&& bui
   return boost::adaptors::transform(cnt, pairify);
   // Be careful that the returned range cannot contain references to dead temporaries.
 }
+
+#endif  // INCLUDE_DIAGRAM_UTILS_PYTHON_H_
 

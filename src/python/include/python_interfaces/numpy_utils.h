@@ -8,6 +8,9 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#ifndef INCLUDE_NUMPY_UTILS_PYTHON_H_
+#define INCLUDE_NUMPY_UTILS_PYTHON_H_
+
 #include <cstddef>
 #include <vector>
 
@@ -31,3 +34,5 @@ inline auto _wrap_as_numpy_array(T *tensor, Shape... shapes)
         delete[] reinterpret_cast<T *>(p);
       }));
 }
+
+#endif  // INCLUDE_NUMPY_UTILS_PYTHON_H_
