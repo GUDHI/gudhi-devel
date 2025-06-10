@@ -48,6 +48,10 @@ function(nanobind_add_module_with_targets)
     endif(MSVC)
 endfunction()
 
+# if we change NB_STATIC to something else, the name "nanobind-static" also needs to be changed,
+# as `nanobind_add_module` renames the executable depending on the compile options.
+set(NANOBIND_exec nanobind-static)
+
 # THE_TEST is the python test file name (without .py extension) containing tests functions
 function( add_gudhi_py_test THE_TEST )
   if(PYTEST_FOUND)
