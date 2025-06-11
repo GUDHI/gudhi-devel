@@ -37,10 +37,11 @@ namespace nb = nanobind;
 
 template <class T>
 struct Full {
+  using Data = decltype(std::declval<nb::ndarray<const T, nb::ndim<2>>>().view());
   typedef Tag_dense Category;
   typedef int vertex_t;
   typedef T value_t;
-  nb::ndarray<const T, nb::ndim<2>> data;
+  Data data;
 
   int size() const { return data.shape(0); }
 
@@ -82,7 +83,7 @@ nb::list doit(DistanceMatrix&& dist,
 template <class T>
 nb::list full(nb::ndarray<const T, nb::ndim<2>> matrix, int max_dimension, T max_edge_length, unsigned homology_coeff_field)
 {
-  Full<T> dist{matrix};
+  Full<T> dist{matrix.view()};
   if (dist.data.ndim() != 2 || dist.data.shape(0) != dist.data.shape(1))
     throw std::runtime_error("Distance matrix must be a square 2-dimensional array");
   return doit(std::move(dist), max_dimension, max_edge_length, homology_coeff_field);
@@ -140,12 +141,12 @@ nb::list sparse(nb::ndarray<const V, nb::ndim<1>> is,
 
   std::optional<nb::gil_scoped_release> release_local(std::in_place);
   std::vector<std::vector<vertex_diameter_t>> neighbors(num_vertices);
-  for (nb::ssize_t e = 0; e < is_view.shape(0); ++e) {
+  for (std::size_t e = 0; e < is_view.shape(0); ++e) {
     neighbors[is_view(e)].emplace_back(js_view(e), fs_view(e));
     neighbors[js_view(e)].emplace_back(is_view(e), fs_view(e));
   }
   // We could easily parallelize this loop, but it is unlikely to be worth it.
-  for (size_t i = 0; i < neighbors.size(); ++i) std::sort(neighbors[i].begin(), neighbors[i].end());
+  for (std::size_t i = 0; i < neighbors.size(); ++i) std::sort(neighbors[i].begin(), neighbors[i].end());
   Dist dist(std::move(neighbors));
   release_local.reset();
 
