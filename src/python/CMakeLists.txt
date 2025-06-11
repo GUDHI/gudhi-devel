@@ -20,7 +20,13 @@ function(nanobind_add_module_with_targets)
     endif()
 
     list(POP_FRONT ARGN EXECUTABLE_NAME EXECUTABLE_SOURCE)
-    message(DEBUG "${EXECUTABLE_NAME} - ${EXECUTABLE_SOURCE}")
+    # while loop also ends if EXECUTABLE_SOURCE is empty
+    while(NOT ${EXECUTABLE_SOURCE} STREQUAL "TARGETS")
+      list(APPEND EXE_SOURCES "${EXECUTABLE_SOURCE}")
+      list(POP_FRONT ARGN EXECUTABLE_SOURCE)
+    endwhile()
+    
+    message(DEBUG "${EXECUTABLE_NAME} - ${EXE_SOURCES}")
     # Do not add_executable if one of the target is not here, except for TBB that is optional
     foreach(USER_TARGET IN LISTS ARGN)
         if(NOT TARGET ${USER_TARGET})
@@ -30,7 +36,7 @@ function(nanobind_add_module_with_targets)
         endif()
     endforeach()
     # cf. https://nanobind.readthedocs.io/en/latest/api_cmake.html#high-level-interface
-    nanobind_add_module(${EXECUTABLE_NAME} NB_STATIC NOMINSIZE ${EXECUTABLE_SOURCE})
+    nanobind_add_module(${EXECUTABLE_NAME} NB_STATIC NOMINSIZE ${EXE_SOURCES})
     foreach(USER_TARGET IN LISTS ARGN)
         message(DEBUG "target_link_libraries(${EXECUTABLE_NAME} PRIVATE ${USER_TARGET})")
         # TARGET_NAME_IF_EXISTS is specific to TBB case (optional)
@@ -48,9 +54,9 @@ function(nanobind_add_module_with_targets)
     endif(MSVC)
 endfunction()
 
-# if we change NB_STATIC to something else, the name "nanobind-static" also needs to be changed,
-# as `nanobind_add_module` renames the executable depending on the compile options.
-set(NANOBIND_exec nanobind-static)
+# # if we change NB_STATIC to something else, the name "nanobind-static" also needs to be changed,
+# # as `nanobind_add_module` renames the executable depending on the compile options.
+# set(NANOBIND_exec nanobind-static)
 
 # THE_TEST is the python test file name (without .py extension) containing tests functions
 function( add_gudhi_py_test THE_TEST )
