@@ -156,7 +156,10 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
                 input_type = "distance coo_matrix"
 
         if num_collapses > 0:
-            assert input_type == "distance coo_matrix"
+            if input_type != "distance coo_matrix":
+                raise ValueError(
+                    "Input type has to be 'distance coo_matrix' when 'num_collapses' is not 0"
+                )
             inp = reduce_graph(inp, num_collapses)
 
         if use_simplex_tree:

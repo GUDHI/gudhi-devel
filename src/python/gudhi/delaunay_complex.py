@@ -50,11 +50,11 @@ class DelaunayComplex(t.Delaunay_complex_interface):
 
         :raises ValueError: In case of inconsistency between the number of points and weights.
         """
-        assert precision in [
-            "fast",
-            "safe",
-            "exact",
-        ], "Delaunay complex precision can only be 'fast', 'safe' or 'exact'"
+        if precision not in ["fast", "safe", "exact"]:
+            raise ValueError(
+                "Delaunay complex precision can only be 'fast', 'safe' or 'exact'"
+            )
+
         fast = precision == "fast"
         exact = precision == "exact"
 

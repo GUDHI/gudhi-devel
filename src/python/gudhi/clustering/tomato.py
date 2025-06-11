@@ -65,7 +65,7 @@ class Tomato:
         merge_threshold=None,
         #       eliminate_threshold=None,
         #           eliminate_threshold (float): minimum max weight of a cluster so it doesn't get eliminated
-        **params
+        **params,
     ):
         """
         Args:
@@ -132,10 +132,8 @@ class Tomato:
 
         if self.graph_type_ == "manual":
             self.neighbors_ = X
-            # FIXME: uniformize "message 'option'" vs 'message "option"'
-            assert (
-                density_type == "manual"
-            ), 'If graph_type is "manual", density_type must be as well'
+            if density_type != "manual":
+                raise ValueError("If graph_type is 'manual', density_type must be as well")
         else:
             metric = self.params_.get("metric", "minkowski")
             if metric != "precomputed":
@@ -195,19 +193,22 @@ class Tomato:
                 # TODO: handle "l1" and "l2" aliases?
                 p = self.params_.get("p")
                 if metric == "euclidean":
-                    assert p is None or p == 2, (
-                        "p=" + str(p) + " is not consistent with metric='euclidean'"
-                    )
+                    if p is not None and p != 2:
+                        raise ValueError(
+                            "p=" + str(p) + " is not consistent with metric='euclidean'"
+                        )
                     p = 2
                 elif metric == "manhattan":
-                    assert p is None or p == 1, (
-                        "p=" + str(p) + " is not consistent with metric='manhattan'"
-                    )
+                    if p is not None and p != 1:
+                        raise ValueError(
+                            "p=" + str(p) + " is not consistent with metric='manhattan'"
+                        )
                     p = 1
                 elif metric == "chebyshev":
-                    assert p is None or p == numpy.inf, (
-                        "p=" + str(p) + " is not consistent with metric='chebyshev'"
-                    )
+                    if p is not None and p != numpy.inf:
+                        raise ValueError(
+                            "p=" + str(p) + " is not consistent with metric='chebyshev'"
+                        )
                     p = numpy.inf
                 elif p is None:
                     p = 2  # the default
@@ -230,9 +231,8 @@ class Tomato:
 
         if self.density_type_ in {"KDE", "logKDE"}:
             # Slow...
-            assert (
-                self.graph_type_ != "manual" and metric != "precomputed"
-            ), "Scikit-learn's KernelDensity requires point coordinates"
+            if self.graph_type_ == "manual" or metric == "precomputed":
+                raise ValueError("Scikit-learn's KernelDensity requires point coordinates")
             kde_params = dict(self.params_.get("kde_params", dict()))
             kde_params.setdefault("metric", metric)
             r = self.params_.get("r")
@@ -261,12 +261,14 @@ class Tomato:
             self.neighbors_, weights
         )
         self.n_leaves_ = len(self.max_weight_per_cc_) + len(self.children_)
-        assert self.leaf_labels_.max() + 1 == len(self.max_weight_per_cc_) + len(
-            self.children_
-        )
+        if self.leaf_labels_.max() + 1 != len(self.max_weight_per_cc_) + len(self.children_):
+            raise RuntimeError(
+                "Wrong values were calculated for leaf_labels_, max_weight_per_cc_ and children_"
+            )
         # TODO: deduplicate this code with the setters below
         if self.__merge_threshold:
-            assert not self.__n_clusters
+            if self.__n_clusters:
+                raise ValueError("__n_clusters should be 0")
             self.__n_clusters = numpy.count_nonzero(
                 self.diagram_[:, 0] - self.diagram_[:, 1] > self.__merge_threshold
             ) + len(self.max_weight_per_cc_)

@@ -15,7 +15,7 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
-from typing import Union
+from typing import Union, Self
 import numpy as np
 
 from gudhi import _simplex_tree_ext as t
@@ -62,7 +62,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         """Returns true if Persistence pointer is not None."""
         return self._pers != None
 
-    def copy(self) -> SimplexTree:
+    def copy(self) -> Self:
         """
         :returns: A simplex tree that is a deep copy of itself.
         :rtype: SimplexTree
@@ -73,7 +73,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         simplex_tree = SimplexTree(self)
         return simplex_tree
 
-    def __deepcopy__(self) -> SimplexTree:
+    def __deepcopy__(self) -> Self:
         return self.copy()
 
     def initialize_filtration(self):
@@ -91,7 +91,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         super().initialize_filtration()
 
     @staticmethod
-    def create_from_array(filtrations, max_filtration: float = float("inf")) -> SimplexTree:
+    def create_from_array(filtrations, max_filtration: float = float("inf")) -> Self:
         """Creates a new, empty complex and inserts vertices and edges. The vertices are numbered from 0 to n-1, and
         the filtration values are encoded in the array, with the diagonal representing the vertices. It is the
         caller's responsibility to ensure that this defines a filtration, which can be achieved with either::
@@ -112,9 +112,10 @@ class SimplexTree(t._Simplex_tree_python_interface):
         """
         # TODO: document which half of the matrix is actually read?
         filtrations = np.asanyarray(filtrations, dtype=float)
-        assert (
-            filtrations.shape[0] == filtrations.shape[1]
-        ), "create_from_array() expects a square array"
+        if filtrations.ndim != 2:
+            raise ValueError(f"`filtrations` has to be a 2d array. Got {filtrations.ndim=}")
+        if filtrations.shape[0] != filtrations.shape[1]:
+            raise ValueError(f"`filtrations` has to be a square array. Got {filtrations.shape=}")
         ret = SimplexTree()
         ret.insert_matrix(filtrations, max_filtration)
         return ret
@@ -163,7 +164,8 @@ class SimplexTree(t._Simplex_tree_python_interface):
         vertices = np.unique(vertex_array)
         k = vertex_array.shape[0]
         n = vertex_array.shape[1]
-        assert filtrations.shape[0] == n, "inconsistent sizes for vertex_array and filtrations"
+        if filtrations.shape[0] != n:
+            raise ValueError("inconsistent sizes for vertex_array and filtrations")
         v = []
         # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
         # NaN currently does the wrong thing
@@ -220,7 +222,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def extended_persistence(
         self, homology_coeff_field=11, min_persistence=0
-    ) -> list[list[tuple[int, tuple[double, double]]]]:
+    ) -> list[list[tuple[int, tuple[float, float]]]]:
         """This function retrieves good values for extended persistence, and separate the diagrams into the Ordinary,
         Relative, Extended+ and Extended- subdiagrams.
 
@@ -254,7 +256,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def persistence(
         self, homology_coeff_field=11, min_persistence=0, persistence_dim_max=False
-    ) -> list[tuple[int, tuple[double, double]]]:
+    ) -> list[tuple[int, tuple[float, float]]]:
         """This function computes and returns the persistence of the simplicial complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
@@ -309,9 +311,8 @@ class SimplexTree(t._Simplex_tree_python_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert (
-            self._pers != None
-        ), "compute_persistence() must be called before betti_numbers()"
+        if self._pers == None:
+            raise RuntimeError("compute_persistence() must be called before betti_numbers()")
         return self._pers.betti_numbers()
 
     def persistent_betti_numbers(self, from_value, to_value) -> list[int]:
@@ -332,9 +333,10 @@ class SimplexTree(t._Simplex_tree_python_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert (
-            self._pers != None
-        ), "compute_persistence() must be called before persistent_betti_numbers()"
+        if self._pers == None:
+            raise RuntimeError(
+                "compute_persistence() must be called before persistent_betti_numbers()"
+            )
         return self._pers.persistent_betti_numbers(from_value, to_value)
 
     def persistence_intervals_in_dimension(self, dimension) -> np.ndarray:
@@ -350,9 +352,10 @@ class SimplexTree(t._Simplex_tree_python_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert (
-            self._pers != None
-        ), "compute_persistence() must be called before persistence_intervals_in_dimension()"
+        if self._pers == None:
+            raise RuntimeError(
+                "compute_persistence() must be called before persistence_intervals_in_dimension()"
+            )
         piid = np.array(self._pers.intervals_in_dimension(dimension))
         # Workaround https://github.com/GUDHI/gudhi-devel/issues/507
         if len(piid) == 0:
@@ -369,9 +372,10 @@ class SimplexTree(t._Simplex_tree_python_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert (
-            self._pers != None
-        ), "compute_persistence() must be called before persistence_pairs()"
+        if self._pers == None:
+            raise RuntimeError(
+                "compute_persistence() must be called before persistence_pairs()"
+            )
         return self._pers.persistence_pairs()
 
     def write_persistence_diagram(self, persistence_file):
@@ -385,12 +389,13 @@ class SimplexTree(t._Simplex_tree_python_interface):
             :func:`compute_persistence`
             function to be launched first.
         """
-        assert (
-            self._pers != None
-        ), "compute_persistence() must be called before write_persistence_diagram()"
+        if self._pers == None:
+            raise RuntimeError(
+                "compute_persistence() must be called before write_persistence_diagram()"
+            )
         self._pers.write_output_diagram(persistence_file)
 
-    def lower_star_persistence_generators(self) -> tuple[list[np.ndarray],list[np.ndarray]]:
+    def lower_star_persistence_generators(self) -> tuple[list[np.ndarray], list[np.ndarray]]:
         """Assuming this is a lower-star filtration, this function returns the persistence pairs,
         where each simplex is replaced with the vertex that gave it its filtration value.
 
@@ -400,15 +405,18 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
         :note: lower_star_persistence_generators requires that `persistence()` be called first.
         """
-        assert (
-            self._pers != None
-        ), "lower_star_persistence_generators() requires that persistence() be called first."
+        if self._pers == None:
+            raise RuntimeError(
+                "lower_star_persistence_generators() requires that persistence() be called first"
+            )
         gen = self._pers.lower_star_generators()
         normal = [np.array(d).reshape(-1, 2) for d in gen[0]]
         infinite = [np.array(d) for d in gen[1]]
         return (normal, infinite)
 
-    def flag_persistence_generators(self) -> tuple[np.ndarray,list[np.ndarray],np.ndarray,list[np.ndarray]]:
+    def flag_persistence_generators(
+        self,
+    ) -> tuple[np.ndarray, list[np.ndarray], np.ndarray, list[np.ndarray]]:
         """Assuming this is a flag complex, this function returns the persistence pairs,
         where each simplex is replaced with the vertices of the edges that gave it its filtration value.
 
@@ -420,9 +428,10 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
         :note: flag_persistence_generators requires that `persistence()` be called first.
         """
-        assert (
-            self._pers != None
-        ), "flag_persistence_generators() requires that persistence() be called first."
+        if self._pers == None:
+            raise RuntimeError(
+                "flag_persistence_generators() requires that persistence() be called first"
+            )
         gen = self._pers.flag_generators()
         if len(gen[0]) == 0:
             normal0 = np.empty((0, 3))

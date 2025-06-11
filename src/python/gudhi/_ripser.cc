@@ -9,7 +9,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <cassert>
+// #include <cassert>
 #include <vector>
 #include <cmath>
 

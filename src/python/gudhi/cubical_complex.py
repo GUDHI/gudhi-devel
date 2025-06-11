@@ -35,7 +35,7 @@ class CubicalComplex(_Bitmap_cubical_complex_interface):
         top_dimensional_cells=None,
         vertices=None,
         dimensions=None,
-        perseus_file: str = ""
+        perseus_file: str = "",
     ):
         """CubicalComplex constructor from the filtration values of either
         the top-dimensional cells, or the vertices.
@@ -207,13 +207,15 @@ class CubicalComplex(_Bitmap_cubical_complex_interface):
             integers of each row in each array correspond to: (index of positive top-dimensional cell).
         """
 
-        assert (
-            self._pers != None
-        ), "compute_persistence() must be called before cofaces_of_persistence_pairs()"
-        assert not self._built_from_vertices, (
-            "cofaces_of_persistence_pairs() only makes sense for a complex"
-            " initialized from the values of the top-dimensional cells"
-        )
+        if self._pers == None:
+            raise RuntimeError(
+                "compute_persistence() must be called before cofaces_of_persistence_pairs()"
+            )
+        if self._built_from_vertices:
+            raise RuntimeError(
+                "cofaces_of_persistence_pairs() only makes sense for a complex initialized "
+                "from the values of the top-dimensional cells"
+            )
 
         output = [[], []]
         # TODO: verify the return type of cofaces_of_cubical_persistence_pairs() by nanobind
@@ -262,13 +264,15 @@ class CubicalComplex(_Bitmap_cubical_complex_interface):
             integers of each row in each array correspond to: (index of positive vertex).
         """
 
-        assert (
-            self._pers != None
-        ), "compute_persistence() must be called before vertices_of_persistence_pairs()"
-        assert self._built_from_vertices, (
-            "vertices_of_persistence_pairs() only makes sense for a complex"
-            " initialized from the values of the vertices"
-        )
+        if self._pers == None:
+            raise RuntimeError(
+                "compute_persistence() must be called before vertices_of_persistence_pairs()"
+            )
+        if not self._built_from_vertices:
+            raise RuntimeError(
+                "vertices_of_persistence_pairs() only makes sense for a complex"
+                " initialized from the values of the vertices"
+            )
 
         output = [[], []]
         # TODO: verify the return type of cofaces_of_cubical_persistence_pairs() by nanobind
@@ -303,9 +307,8 @@ class CubicalComplex(_Bitmap_cubical_complex_interface):
         :note: betti_numbers function always returns [1, 0, 0, ...] as infinity
             filtration cubes are not removed from the complex.
         """
-        assert (
-            self._pers != None
-        ), "compute_persistence() must be called before betti_numbers()"
+        if self._pers == None:
+            raise RuntimeError("compute_persistence() must be called before betti_numbers()")
         return self._pers.betti_numbers()
 
     def persistent_betti_numbers(self, from_value, to_value):
@@ -324,9 +327,10 @@ class CubicalComplex(_Bitmap_cubical_complex_interface):
         :note: persistent_betti_numbers function requires :func:`compute_persistence`
             function to be launched first.
         """
-        assert (
-            self._pers != None
-        ), "compute_persistence() must be called before persistent_betti_numbers()"
+        if self._pers == None:
+            raise RuntimeError(
+                "compute_persistence() must be called before persistent_betti_numbers()"
+            )
         return self._pers.persistent_betti_numbers(from_value, to_value)
 
     def persistence_intervals_in_dimension(self, dimension):
@@ -341,9 +345,10 @@ class CubicalComplex(_Bitmap_cubical_complex_interface):
         :note: intervals_in_dim function requires :func:`compute_persistence` function to be
             launched first.
         """
-        assert (
-            self._pers != None
-        ), "compute_persistence() must be called before persistence_intervals_in_dimension()"
+        if self._pers == None:
+            raise RuntimeError(
+                "compute_persistence() must be called before persistence_intervals_in_dimension()"
+            )
         piid = np.array(self._pers.intervals_in_dimension(dimension))
         # Workaround https://github.com/GUDHI/gudhi-devel/issues/507
         if len(piid) == 0:

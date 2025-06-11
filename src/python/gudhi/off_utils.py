@@ -72,7 +72,9 @@ def _read_off_file_header(file_desc):
     elif line.lower().find("off") >= 0:
         dim = 3
     else:
-        raise ValueError(f"Inconsistent OFF header, got '{line.rstrip()}', should be 'OFF', '4OFF' or 'nOFF'")
+        raise ValueError(
+            f"Inconsistent OFF header, got '{line.rstrip()}', should be 'OFF', '4OFF' or 'nOFF'"
+        )
 
     # nb_vertices can be already set by "nOFF" case, when 'dim nb_vertices nb_faces nb_edges' on the same line
     if nb_vertices < 0:
@@ -114,10 +116,8 @@ def read_points_from_off_file(off_file=""):
         points = np.loadtxt(
             input_file, dtype=np.float64, comments="#", usecols=range(dim), max_rows=nb_points
         )
-        assert points.shape == (
-            nb_points,
-            dim,
-        ), f"{points.shape} is different from expected ({nb_points}, {dim})"
+        if points.shape != (nb_points, dim):
+            raise ValueError(f"{points.shape} is different from expected ({nb_points}, {dim})")
         return points
 
 
@@ -132,7 +132,8 @@ def write_points_to_off_file(fname, points):
     :type points: numpy array of shape (n, dim)
     """
     points = np.asarray(points)
-    assert len(points.shape) == 2
+    if len(points.shape) != 2:
+        raise ValueError(f"{points.shape} has different length from expected length 2")
     dim = points.shape[1]
     if dim == 3:
         head = "OFF\n{} 0 0".format(points.shape[0])

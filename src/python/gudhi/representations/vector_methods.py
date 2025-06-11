@@ -725,7 +725,11 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
                 distances = DistanceMetric.get_metric("chebyshev").pairwise(diagram)
             except ValueError:
                 # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
-                assert len(diagram) == 0
+                if len(diagram) != 0:
+                    raise RuntimeError(
+                        "DistanceMetric.get_metric('chebyshev').pairwise(diagram) raised a ValueError"
+                        " even though the input diagram is not empty"
+                    )
                 distances = np.empty(shape=[0, 0])
             vect = np.flip(np.sort(np.triu(np.minimum(distances, min_pers)), axis=None), 0)
             dim = min(len(vect), thresh)
