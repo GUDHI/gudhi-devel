@@ -120,7 +120,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         ret.insert_matrix(filtrations, max_filtration)
         return ret
 
-    def insert_edges_from_coo_matrix(self, edges):
+    def insert_edges_from_coo_matrix(self, edges) -> Self:
         """Inserts edges given by a sparse matrix in `COOrdinate format
         <https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_matrix.html>`_.
         If an edge is repeated, the smallest filtration value is used. Missing entries are not inserted.
@@ -140,12 +140,13 @@ class SimplexTree(t._Simplex_tree_python_interface):
         # TODO: optimize this?
         for edge in zip(edges.row, edges.col, edges.data):
             super().insert((edge[0], edge[1]), edge[2])
+        return self
 
     def insert_batch(
         self,
         vertex_array: Union[np.ndarray[np.int32], np.ndarray[np.int64]],
         filtrations: Union[np.ndarray[np.float32], np.ndarray[np.float64]],
-    ):
+    ) -> Self:
         """Inserts k-simplices given by a sparse array in a format similar
         to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
         The n-th simplex has vertices `vertex_array[0,n]`, ...,
@@ -175,6 +176,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
                 v.append(vertex_array[j, i])
             super().insert(v, filtrations[i])
             v.clear()
+        return self
 
     def get_simplices(self):
         """This function returns a generator with simplices and their given
@@ -279,7 +281,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def compute_persistence(
         self, homology_coeff_field=11, min_persistence=0, persistence_dim_max=False
-    ):
+    ) -> Self:
         """This function computes the persistence of the simplicial complex, so it can be accessed through
         :func:`persistent_betti_numbers`, :func:`persistence_pairs`, etc. This function is equivalent to :func:`persistence`
         when you do not want the list :func:`persistence` returns.
@@ -300,6 +302,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         """
         self._pers = t._Simplex_tree_persistence_interface(self, persistence_dim_max)
         self._pers.compute_persistence(homology_coeff_field, min_persistence)
+        return self
 
     def betti_numbers(self) -> list[int]:
         """This function returns the Betti numbers of the simplicial complex.
@@ -378,7 +381,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             )
         return self._pers.persistence_pairs()
 
-    def write_persistence_diagram(self, persistence_file):
+    def write_persistence_diagram(self, persistence_file) -> Self:
         """This function writes the persistence intervals of the simplicial
         complex in a user given file name.
 
@@ -394,6 +397,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
                 "compute_persistence() must be called before write_persistence_diagram()"
             )
         self._pers.write_output_diagram(persistence_file)
+        return self
 
     def lower_star_persistence_generators(self) -> tuple[list[np.ndarray], list[np.ndarray]]:
         """Assuming this is a lower-star filtration, this function returns the persistence pairs,
@@ -449,7 +453,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             infinites = [np.array(d).reshape(-1, 2) for d in l]
         return (normal0, normals, infinite0, infinites)
 
-    def collapse_edges(self, nb_iterations=1):
+    def collapse_edges(self, nb_iterations=1) -> Self:
         """Assuming the complex is a graph (simplices of higher dimension are ignored), this method implicitly
         interprets it as the 1-skeleton of a flag complex, and replaces it with another (smaller) graph whose
         expansion has the same persistent homology, using a technique known as edge collapses
@@ -465,3 +469,4 @@ class SimplexTree(t._Simplex_tree_python_interface):
         if nb_iterations < 1:
             return
         super().collapse_edges(nb_iterations)
+        return self
