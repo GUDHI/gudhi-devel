@@ -58,11 +58,11 @@ class SimplexTree(t._Simplex_tree_python_interface):
         else:
             super().__init__()
 
-    def _is_persistence_defined(self):
+    def _is_persistence_defined(self) -> bool:
         """Returns true if Persistence pointer is not None."""
         return self._pers != None
 
-    def copy(self):
+    def copy(self) -> Self:
         """
         :returns: A simplex tree that is a deep copy of itself.
         :rtype: SimplexTree
@@ -73,7 +73,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         simplex_tree = SimplexTree(self)
         return simplex_tree
 
-    def __deepcopy__(self):
+    def __deepcopy__(self) -> Self:
         return self.copy()
 
     def initialize_filtration(self):
@@ -91,7 +91,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         super().initialize_filtration()
 
     @staticmethod
-    def create_from_array(filtrations, max_filtration: float = float("inf")):
+    def create_from_array(filtrations, max_filtration: float = float("inf")) -> Self:
         """Creates a new, empty complex and inserts vertices and edges. The vertices are numbered from 0 to n-1, and
         the filtration values are encoded in the array, with the diagonal representing the vertices. It is the
         caller's responsibility to ensure that this defines a filtration, which can be achieved with either::
@@ -120,7 +120,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         ret.insert_matrix(filtrations, max_filtration)
         return ret
 
-    def insert_edges_from_coo_matrix(self, edges):
+    def insert_edges_from_coo_matrix(self, edges) -> Self:
         """Inserts edges given by a sparse matrix in `COOrdinate format
         <https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_matrix.html>`_.
         If an edge is repeated, the smallest filtration value is used. Missing entries are not inserted.
@@ -146,7 +146,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         self,
         vertex_array: Union[np.ndarray[np.int32], np.ndarray[np.int64]],
         filtrations: Union[np.ndarray[np.float32], np.ndarray[np.float64]],
-    ):
+    ) -> Self:
         """Inserts k-simplices given by a sparse array in a format similar
         to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
         The n-th simplex has vertices `vertex_array[0,n]`, ...,
@@ -224,7 +224,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def extended_persistence(
         self, homology_coeff_field=11, min_persistence=0
-    ):
+    ) -> list[list[tuple[int, tuple[float, float]]]]:
         """This function retrieves good values for extended persistence, and separate the diagrams into the Ordinary,
         Relative, Extended+ and Extended- subdiagrams.
 
@@ -258,7 +258,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def persistence(
         self, homology_coeff_field=11, min_persistence=0, persistence_dim_max=False
-    ):
+    ) -> list[tuple[int, tuple[float, float]]]:
         """This function computes and returns the persistence of the simplicial complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
@@ -281,7 +281,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def compute_persistence(
         self, homology_coeff_field=11, min_persistence=0, persistence_dim_max=False
-    ):
+    ) -> Self:
         """This function computes the persistence of the simplicial complex, so it can be accessed through
         :func:`persistent_betti_numbers`, :func:`persistence_pairs`, etc. This function is equivalent to :func:`persistence`
         when you do not want the list :func:`persistence` returns.
@@ -304,7 +304,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         self._pers.compute_persistence(homology_coeff_field, min_persistence)
         return self
 
-    def betti_numbers(self):
+    def betti_numbers(self) -> list[int]:
         """This function returns the Betti numbers of the simplicial complex.
 
         :returns: The Betti numbers ([B0, B1, ..., Bn]).
@@ -318,7 +318,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             raise RuntimeError("compute_persistence() must be called before betti_numbers()")
         return self._pers.betti_numbers()
 
-    def persistent_betti_numbers(self, from_value, to_value):
+    def persistent_betti_numbers(self, from_value, to_value) -> list[int]:
         """This function returns the persistent Betti numbers of the
         simplicial complex.
 
@@ -342,7 +342,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             )
         return self._pers.persistent_betti_numbers(from_value, to_value)
 
-    def persistence_intervals_in_dimension(self, dimension):
+    def persistence_intervals_in_dimension(self, dimension) -> np.ndarray:
         """This function returns the persistence intervals of the simplicial
         complex in a specific dimension.
 
@@ -365,7 +365,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             return np.empty(shape=[0, 2])
         return piid
 
-    def persistence_pairs(self):
+    def persistence_pairs(self) -> list[tuple[list[int], list[int]]]:
         """This function returns a list of persistence birth and death simplices pairs.
 
         :returns: A list of persistence simplices intervals.
@@ -381,7 +381,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             )
         return self._pers.persistence_pairs()
 
-    def write_persistence_diagram(self, persistence_file):
+    def write_persistence_diagram(self, persistence_file) -> Self:
         """This function writes the persistence intervals of the simplicial
         complex in a user given file name.
 
@@ -399,7 +399,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         self._pers.write_output_diagram(persistence_file)
         return self
 
-    def lower_star_persistence_generators(self):
+    def lower_star_persistence_generators(self) -> tuple[list[np.ndarray], list[np.ndarray]]:
         """Assuming this is a lower-star filtration, this function returns the persistence pairs,
         where each simplex is replaced with the vertex that gave it its filtration value.
 
@@ -420,7 +420,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def flag_persistence_generators(
         self,
-    ):
+    ) -> tuple[np.ndarray, list[np.ndarray], np.ndarray, list[np.ndarray]]:
         """Assuming this is a flag complex, this function returns the persistence pairs,
         where each simplex is replaced with the vertices of the edges that gave it its filtration value.
 
@@ -453,7 +453,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             infinites = [np.array(d).reshape(-1, 2) for d in l]
         return (normal0, normals, infinite0, infinites)
 
-    def collapse_edges(self, nb_iterations=1):
+    def collapse_edges(self, nb_iterations=1) -> Self:
         """Assuming the complex is a graph (simplices of higher dimension are ignored), this method implicitly
         interprets it as the 1-skeleton of a flag complex, and replaces it with another (smaller) graph whose
         expansion has the same persistent homology, using a technique known as edge collapses
