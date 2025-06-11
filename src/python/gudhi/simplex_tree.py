@@ -224,7 +224,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def extended_persistence(
         self, homology_coeff_field=11, min_persistence=0
-    ) -> list[list[tuple[int, tuple[float, float]]]]:
+    ):
         """This function retrieves good values for extended persistence, and separate the diagrams into the Ordinary,
         Relative, Extended+ and Extended- subdiagrams.
 
@@ -258,7 +258,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def persistence(
         self, homology_coeff_field=11, min_persistence=0, persistence_dim_max=False
-    ) -> list[tuple[int, tuple[float, float]]]:
+    ):
         """This function computes and returns the persistence of the simplicial complex.
 
         :param homology_coeff_field: The homology coefficient field. Must be a
@@ -304,7 +304,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         self._pers.compute_persistence(homology_coeff_field, min_persistence)
         return self
 
-    def betti_numbers(self) -> list[int]:
+    def betti_numbers(self):
         """This function returns the Betti numbers of the simplicial complex.
 
         :returns: The Betti numbers ([B0, B1, ..., Bn]).
@@ -318,7 +318,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             raise RuntimeError("compute_persistence() must be called before betti_numbers()")
         return self._pers.betti_numbers()
 
-    def persistent_betti_numbers(self, from_value, to_value) -> list[int]:
+    def persistent_betti_numbers(self, from_value, to_value):
         """This function returns the persistent Betti numbers of the
         simplicial complex.
 
@@ -342,7 +342,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             )
         return self._pers.persistent_betti_numbers(from_value, to_value)
 
-    def persistence_intervals_in_dimension(self, dimension) -> np.ndarray:
+    def persistence_intervals_in_dimension(self, dimension):
         """This function returns the persistence intervals of the simplicial
         complex in a specific dimension.
 
@@ -365,7 +365,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             return np.empty(shape=[0, 2])
         return piid
 
-    def persistence_pairs(self) -> list[tuple[list[int], list[int]]]:
+    def persistence_pairs(self):
         """This function returns a list of persistence birth and death simplices pairs.
 
         :returns: A list of persistence simplices intervals.
@@ -399,7 +399,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         self._pers.write_output_diagram(persistence_file)
         return self
 
-    def lower_star_persistence_generators(self) -> tuple[list[np.ndarray], list[np.ndarray]]:
+    def lower_star_persistence_generators(self):
         """Assuming this is a lower-star filtration, this function returns the persistence pairs,
         where each simplex is replaced with the vertex that gave it its filtration value.
 
@@ -420,7 +420,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def flag_persistence_generators(
         self,
-    ) -> tuple[np.ndarray, list[np.ndarray], np.ndarray, list[np.ndarray]]:
+    ):
         """Assuming this is a flag complex, this function returns the persistence pairs,
         where each simplex is replaced with the vertices of the edges that gave it its filtration value.
 
