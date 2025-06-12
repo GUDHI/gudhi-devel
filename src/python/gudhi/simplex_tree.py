@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
@@ -15,7 +17,7 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
-from typing import Union, Self
+from typing import Union
 import numpy as np
 
 from gudhi import _simplex_tree_ext as t
@@ -62,7 +64,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         """Returns true if Persistence pointer is not None."""
         return self._pers != None
 
-    def copy(self) -> Self:
+    def copy(self) -> SimplexTree:
         """
         :returns: A simplex tree that is a deep copy of itself.
         :rtype: SimplexTree
@@ -73,7 +75,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         simplex_tree = SimplexTree(self)
         return simplex_tree
 
-    def __deepcopy__(self) -> Self:
+    def __deepcopy__(self) -> SimplexTree:
         return self.copy()
 
     def initialize_filtration(self):
@@ -91,7 +93,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         super().initialize_filtration()
 
     @staticmethod
-    def create_from_array(filtrations, max_filtration: float = float("inf")) -> Self:
+    def create_from_array(filtrations, max_filtration: float = float("inf")) -> SimplexTree:
         """Creates a new, empty complex and inserts vertices and edges. The vertices are numbered from 0 to n-1, and
         the filtration values are encoded in the array, with the diagonal representing the vertices. It is the
         caller's responsibility to ensure that this defines a filtration, which can be achieved with either::
@@ -120,7 +122,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         ret.insert_matrix(filtrations, max_filtration)
         return ret
 
-    def insert_edges_from_coo_matrix(self, edges) -> Self:
+    def insert_edges_from_coo_matrix(self, edges) -> SimplexTree:
         """Inserts edges given by a sparse matrix in `COOrdinate format
         <https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_matrix.html>`_.
         If an edge is repeated, the smallest filtration value is used. Missing entries are not inserted.
@@ -146,7 +148,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         self,
         vertex_array: Union[np.ndarray[np.int32], np.ndarray[np.int64]],
         filtrations: Union[np.ndarray[np.float32], np.ndarray[np.float64]],
-    ) -> Self:
+    ) -> SimplexTree:
         """Inserts k-simplices given by a sparse array in a format similar
         to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
         The n-th simplex has vertices `vertex_array[0,n]`, ...,
@@ -281,7 +283,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def compute_persistence(
         self, homology_coeff_field=11, min_persistence=0, persistence_dim_max=False
-    ) -> Self:
+    ) -> SimplexTree:
         """This function computes the persistence of the simplicial complex, so it can be accessed through
         :func:`persistent_betti_numbers`, :func:`persistence_pairs`, etc. This function is equivalent to :func:`persistence`
         when you do not want the list :func:`persistence` returns.
@@ -381,7 +383,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             )
         return self._pers.persistence_pairs()
 
-    def write_persistence_diagram(self, persistence_file) -> Self:
+    def write_persistence_diagram(self, persistence_file) -> SimplexTree:
         """This function writes the persistence intervals of the simplicial
         complex in a user given file name.
 
@@ -453,7 +455,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             infinites = [np.array(d).reshape(-1, 2) for d in l]
         return (normal0, normals, infinite0, infinites)
 
-    def collapse_edges(self, nb_iterations=1) -> Self:
+    def collapse_edges(self, nb_iterations=1) -> SimplexTree:
         """Assuming the complex is a graph (simplices of higher dimension are ignored), this method implicitly
         interprets it as the 1-skeleton of a flag complex, and replaces it with another (smaller) graph whose
         expansion has the same persistent homology, using a technique known as edge collapses
