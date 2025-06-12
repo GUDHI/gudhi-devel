@@ -467,6 +467,11 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
         :param nb_iterations: The number of edge collapse iterations to perform. Default is 1.
         :type nb_iterations: int
+
+        .. warning::
+            The current simplex tree is assumed to be a graph, that is of maximal dimension 1.
+            If it is not the case, all higher dimensional simplices will get lost during the
+            reduction process and not be reinserted. To regain them, call `expansion(max_dim)` afterwards.
         """
         if nb_iterations < 1:
             return
