@@ -56,3 +56,16 @@ for dtype in ["float32", "float64"]:
             stmt="persistence_on_a_line(filt)", globals=globals(), min_number=5
         )
         print(f"persistence_on_a_line; {nb_filt}; {dtype}; {result * 1000:.4f}; {nb_it};")
+
+# Set some seed to be fair
+np.random.seed(42)
+
+VERTEX_MAX = 150000
+NB_SIMPLICES = 100000
+for dim in range(1, 5):
+    st = SimplexTree()
+    for simplex in np.random.randint(VERTEX_MAX, size=(NB_SIMPLICES, dim)):
+        _ = st.insert(simplex)
+
+    result, nb_it = auto_timeit(stmt="simp = list(st.get_simplices())", globals=globals(), min_number=5)
+    print(f"get_simplices; {dim}; {result * 1000:.4f}; {nb_it};")
