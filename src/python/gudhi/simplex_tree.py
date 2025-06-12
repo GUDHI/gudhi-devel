@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 # This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
@@ -10,6 +8,9 @@ from __future__ import annotations
 #   - 2023/02 Vincent Rouvreau: Add serialize/deserialize for pickle feature
 #   - 2025/03 Alexis Gobé & Hannah Schreiber: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
+
+from __future__ import annotations
+
 
 __author__ = "Vincent Rouvreau"
 __maintainer__ = "Vincent Rouvreau, Alexis Gobé, Hannah Schreiber"

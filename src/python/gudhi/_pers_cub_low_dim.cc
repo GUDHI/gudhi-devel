@@ -33,7 +33,7 @@ auto wrap_persistence_1d(nb::ndarray<const T, nb::ndim<1>> data)
   auto cnt = boost::counting_range<nb::ssize_t>(0, data_view.shape(0));
   auto proj = [&data_view](nb::ssize_t i) { return data_view(i); };
   auto r = boost::adaptors::transform(cnt, proj);
-  auto dgm = new T[data_view.shape(0) * 2];
+  auto dgm = new T[data_view.shape(0) + 1];
   std::size_t count = 0;
   {
     nb::gil_scoped_release release;
@@ -57,7 +57,7 @@ auto wrap_persistence_1d(nb::ndarray<const T, nb::ndim<1>> data)
   //   delete reinterpret_cast<std::vector<std::array<T, 2> >*>(p);
   // }));
   // std::vector<T>* dgm = new std::vector<T>();
-  // // dgm->reserve(data_view.shape(0) * 2);  // rough upper bound, but it makes a difference in performance
+  // // dgm->reserve(data_view.shape(0) + 1);  // rough upper bound, but it makes a difference in performance
   // {
   //   nb::gil_scoped_release release;
   //   Gudhi::persistent_cohomology::compute_persistence_of_function_on_line(r, [&](T b, T d) {

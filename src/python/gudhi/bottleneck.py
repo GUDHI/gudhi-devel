@@ -19,7 +19,16 @@ from numpy.typing import ArrayLike
 
 from gudhi import _bottleneck_ext as t
 
-def bottleneck_distance(diagram_1:ArrayLike, diagram_2:ArrayLike, e:float = None) -> float:
+
+def _diagram_as_numpy_array(diagram: ArrayLike) -> np.ndarray:
+    dgm = np.asarray(diagram, dtype=np.double)
+    # to allow empty diagrams (invalid shapes will be deled with by nanobind later)
+    if dgm.size == 0 and dgm.ndim == 1:
+        dgm = np.empty((0, 2))
+    return dgm
+
+
+def bottleneck_distance(diagram_1: ArrayLike, diagram_2: ArrayLike, e: float = None) -> float:
     """Compute the Bottleneck distance between two diagrams.
     Points at infinity and on the diagonal are supported.
 
@@ -39,16 +48,6 @@ def bottleneck_distance(diagram_1:ArrayLike, diagram_2:ArrayLike, e:float = None
     :rtype: float
     :returns: the bottleneck distance.
     """
-    if len(diagram_1) == 0: # to allow empty diagrams, but I am not sure if every ArrayLike object works with `len`?
-      dgm1 = np.empty((0,2))
-    else:
-      # delegates some format errors to numpy and assures single C++ format
-      # a copy is unavoidable for sequences like lists etc. anyway with the C++ bindings
-      dgm1 = np.asarray(diagram_1)
-    if len(diagram_2) == 0:
-      dgm2 = np.empty((0,2))
-    else:
-      dgm2 = np.asarray(diagram_2)
-    
-    return t._bottleneck_distance(dgm1, dgm2, e)
-
+    return t._bottleneck_distance(
+        _diagram_as_numpy_array(diagram_1), _diagram_as_numpy_array(diagram_2), e
+    )

@@ -18,8 +18,10 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from gudhi import _hera_ext as t
+from gudhi.bottleneck import _diagram_as_numpy_array
 
-def bottleneck_distance(X:ArrayLike, Y:ArrayLike, delta:float = .01) -> float:
+
+def bottleneck_distance(X: ArrayLike, Y: ArrayLike, delta: float = 0.01) -> float:
     """Compute the Bottleneck distance between two diagrams.
     Points at infinity are supported.
 
@@ -34,17 +36,9 @@ def bottleneck_distance(X:ArrayLike, Y:ArrayLike, delta:float = .01) -> float:
     Returns:
         float: (approximate) bottleneck distance d_B(X,Y)
     """
-    if len(X) == 0: # to allow empty diagrams, but I am not sure if every ArrayLike object works with `len`?
-        dgm1 = np.empty((0,2))
-    else:
-        # delegates some format errors to numpy and assures single C++ format
-        # a copy is unavoidable for sequences like lists etc. anyway with the C++ bindings
-        dgm1 = np.asarray(X)
-    if len(Y) == 0:
-        dgm2 = np.empty((0,2))
-    else:
-        dgm2 = np.asarray(Y)
-    return t._bottleneck_distance(dgm1, dgm2, delta)
+    return t._bottleneck_distance(
+        _diagram_as_numpy_array(X), _diagram_as_numpy_array(Y), delta
+    )
 
 
 def wasserstein_distance(
@@ -74,15 +68,11 @@ def wasserstein_distance(
             float|Tuple[float,numpy.array|None]: Approximate Wasserstein distance W_q(X,Y), and optionally the
                 corresponding matching
     """
-    # mirrors bottleneck_distance, but non numpy inputs are not used anywhere, so perhaps it is not necessary?
-    if len(X) == 0: # to allow empty diagrams, but I am not sure if every ArrayLike object works with `len`?
-        dgm1 = np.empty((0,2))
-    else:
-        # delegates some format errors to numpy and assures single C++ format
-        # a copy is unavoidable for sequences like lists etc. anyway with the C++ bindings
-        dgm1 = np.asarray(X)
-    if len(Y) == 0:
-        dgm2 = np.empty((0,2))
-    else:
-        dgm2 = np.asarray(Y)
-    return t._wasserstein_distance(dgm1, dgm2, order, internal_p, delta, matching)
+    return t._wasserstein_distance(
+        _diagram_as_numpy_array(X),
+        _diagram_as_numpy_array(Y),
+        order,
+        internal_p,
+        delta,
+        matching,
+    )
