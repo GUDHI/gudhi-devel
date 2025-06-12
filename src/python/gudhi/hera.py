@@ -18,7 +18,14 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from gudhi import _hera_ext as t
-from gudhi.bottleneck import _diagram_as_numpy_array
+
+
+def _diagram_as_numpy_array(diagram: ArrayLike) -> np.ndarray:
+    dgm = np.asarray(diagram, dtype=np.double)
+    # to allow empty diagrams (invalid shapes will be deled with by nanobind later)
+    if dgm.size == 0 and dgm.ndim == 1:
+        dgm = np.empty((0, 2))
+    return dgm
 
 
 def bottleneck_distance(X: ArrayLike, Y: ArrayLike, delta: float = 0.01) -> float:

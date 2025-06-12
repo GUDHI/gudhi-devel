@@ -72,23 +72,25 @@ class Numpy_2d_span
   using value_type = const T;
   using difference_type = std::ptrdiff_t;
   using size_type = std::size_t;
+  using const_reference = value_type *;
 
-  class iterator : public boost::iterator_facade<iterator, value_type *, boost::forward_traversal_tag, value_type *>
+  class const_iterator
+      : public boost::iterator_facade<const_iterator, const_reference, boost::forward_traversal_tag, const_reference>
   {
    public:
-    iterator(T *curr, T *end, std::size_t stride) : curr_(curr), end_(end), stride_(stride)
+    const_iterator(T *curr, T *end, std::size_t stride) : curr_(curr), end_(end), stride_(stride)
     {
       if (curr_ > end_) curr_ = end_;
     }
 
-    iterator(T *end) : curr_(end), end_(end), stride_(0) {}
+    const_iterator(T *end) : curr_(end), end_(end), stride_(0) {}
 
    private:
     friend class boost::iterator_core_access;
 
-    bool equal(iterator const &other) const { return curr_ == other.curr_ && end_ == other.end_; }
+    bool equal(const_iterator const &other) const { return curr_ == other.curr_ && end_ == other.end_; }
 
-    T const *dereference() const { return curr_; }
+    const_reference dereference() const { return curr_; }
 
     void increment()
     {
@@ -100,7 +102,8 @@ class Numpy_2d_span
     value_type *end_;
     const std::size_t stride_;
   };
-  using const_iterator = iterator;
+
+  using iterator = const_iterator;
 
   Numpy_2d_span(const nanobind::ndarray<const T, nanobind::ndim<2> > &array)
       : begin_(array.data()), end_(begin_ + (array.shape(0) * array.shape(1))), stride_(array.shape(1)) {};
@@ -114,6 +117,8 @@ class Numpy_2d_span
   size_type size() const { return (end_ - begin_) / stride_; }
 
   bool empty() const { return end_ == begin_; }
+
+  const_reference operator[](size_type pos) const { return begin_ + (pos * stride_); }
 
  private:
   value_type *begin_;
