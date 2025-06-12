@@ -35,7 +35,6 @@ class SimplexTree(t._Simplex_tree_python_interface):
     of the simplex tree.
     """
 
-    # Fake constructor that does nothing but documenting the constructor
     def __init__(self, other=None):
         """SimplexTree constructor.
 
