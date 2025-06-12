@@ -13,6 +13,8 @@
 #define INCLUDE_SIMPLEX_TREE_INTERFACE_H_
 
 #include <cstddef>
+#include <limits>
+#include <stdexcept>
 #include <vector>
 #include <utility>  // std::pair
 #include <tuple>
@@ -25,6 +27,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Points_off_io.h>
 #include <gudhi/Flag_complex_edge_collapser.h>
+#include <python_interfaces/numpy_utils.h>
 
 namespace Gudhi {
 
@@ -107,6 +110,31 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
       }
     }
     this->set_dimension(1, false);
+  }
+
+  void insert_batch(const nanobind::ndarray<const int, nanobind::ndim<1> >& vertices,
+                    const nanobind::ndarray<const int, nanobind::ndim<2> >& vertex_array,
+                    const nanobind::ndarray<const double, nanobind::ndim<1> >& filtrations)
+  {
+    auto v_view = vertex_array.view();
+    auto f_view = filtrations.view();
+
+    const std::size_t d = v_view.shape(0);
+    const std::size_t n = v_view.shape(1);
+
+    if (f_view.shape(0) != n)
+      throw std::invalid_argument("The number of filtration values is not coherent with the number of simplices.");
+
+    insert_batch_vertices(Numpy_span<int>(vertices), std::numeric_limits<double>::infinity());
+
+    // copy necessary, as simplices are not necessarily stored continuously in memory
+    std::vector<Vertex_handle> v(d);
+    for (std::size_t i = 0; i < n; ++i) {
+      for (std::size_t j = 0; j < d; ++j) {
+        v[j] = v_view(j, i);
+      }
+      Base::insert_simplex_and_subfaces(v, f_view(i));
+    }
   }
 
   // Do not interface this function, only used in alpha complex interface for complex creation

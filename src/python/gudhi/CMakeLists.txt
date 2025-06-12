@@ -10,6 +10,7 @@ nanobind_add_module_with_targets(_strong_witness_complex_ext _strong_witness_com
 nanobind_add_module_with_targets(_nerve_gic_ext _nerve_gic.cc TARGETS TBB::tbb)
 nanobind_add_module_with_targets(_hera_ext _hera.cc)
 nanobind_add_module_with_targets(_bottleneck_ext _bottleneck.cc TARGETS CGAL::CGAL TBB::tbb)
+# delaunay complex is split in several files to avoid to much memory consumption during compilation
 nanobind_add_module_with_targets(_delaunay_complex_ext _delaunay_complex.cc _delaunay_complex_2d.cc _delaunay_complex_3d.cc _delaunay_complex_dyn.cc TARGETS Eigen3::Eigen CGAL::CGAL TBB::tbb)
 nanobind_add_module_with_targets(_tangential_complex_ext _tangential_complex.cc TARGETS Eigen3::Eigen CGAL::CGAL TBB::tbb)
 nanobind_add_module_with_targets(_euclidean_witness_complex_ext _euclidean_witness_complex.cc TARGETS Eigen3::Eigen CGAL::CGAL TBB::tbb)

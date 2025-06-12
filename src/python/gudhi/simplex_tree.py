@@ -18,8 +18,8 @@ __copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
-from typing import Union
 import numpy as np
+from numpy.typing import ArrayLike
 
 from gudhi import _simplex_tree_ext as t
 
@@ -117,7 +117,9 @@ class SimplexTree(t._Simplex_tree_python_interface):
         if filtrations.ndim != 2:
             raise ValueError(f"`filtrations` has to be a 2d array. Got {filtrations.ndim=}")
         if filtrations.shape[0] != filtrations.shape[1]:
-            raise ValueError(f"`filtrations` has to be a square array. Got {filtrations.shape=}")
+            raise ValueError(
+                f"`filtrations` has to be a square array. Got {filtrations.shape=}"
+            )
         ret = SimplexTree()
         ret.insert_matrix(filtrations, max_filtration)
         return ret
@@ -144,11 +146,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             super().insert((edge[0], edge[1]), edge[2])
         return self
 
-    def insert_batch(
-        self,
-        vertex_array: Union[np.ndarray[np.int32], np.ndarray[np.int64]],
-        filtrations: Union[np.ndarray[np.float32], np.ndarray[np.float64]],
-    ) -> SimplexTree:
+    def insert_batch(self, vertex_array: ArrayLike, filtrations: ArrayLike) -> SimplexTree:
         """Inserts k-simplices given by a sparse array in a format similar
         to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
         The n-th simplex has vertices `vertex_array[0,n]`, ...,
@@ -164,20 +162,10 @@ class SimplexTree(t._Simplex_tree_python_interface):
         :param filtrations: the filtration values.
         :type filtrations: numpy.array of shape (n,)
         """
-        vertices = np.unique(vertex_array)
-        k = vertex_array.shape[0]
-        n = vertex_array.shape[1]
-        if filtrations.shape[0] != n:
-            raise ValueError("inconsistent sizes for vertex_array and filtrations")
-        v = []
-        # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
-        # NaN currently does the wrong thing
-        super().insert_batch_vertices(vertices, float("inf"))
-        for i in range(n):
-            for j in range(k):
-                v.append(vertex_array[j, i])
-            super().insert(v, filtrations[i])
-            v.clear()
+        simplices = np.asarray(vertex_array, dtype=np.int64)
+        vertices = np.unique(simplices)
+        fil = np.asarray(filtrations, dtype=np.double)
+        super()._insert_batch(vertices, simplices, fil)
         return self
 
     def get_simplices(self):

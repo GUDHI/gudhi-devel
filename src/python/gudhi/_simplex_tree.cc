@@ -184,6 +184,12 @@ otherwise (whatever its original filtration value).
            nb::arg("filtrations"),
            nb::arg("max_filtration"),
            nb::call_guard<nb::gil_scoped_release>())
+      .def("_insert_batch",
+           &gsti::insert_batch,
+           nb::arg("vertices"),
+           nb::arg("vertex_array"),
+           nb::arg("filtrations"),
+           nb::call_guard<nb::gil_scoped_release>())
       .def("insert_batch_vertices",
            &gsti::insert_batch_vertices<std::vector<int>>,
            nb::call_guard<nb::gil_scoped_release>())
