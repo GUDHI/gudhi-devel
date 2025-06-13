@@ -18,7 +18,7 @@ import pytest
 from gudhi.datasets.generators import points
 from gudhi.sklearn.rips_persistence import RipsPersistence
 from gudhi import RipsComplex, SimplexTree
-from gudhi._ripser import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
+from gudhi._ripser_ext import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
 from gudhi import bottleneck_distance
 
 

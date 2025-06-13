@@ -73,7 +73,10 @@ class CubicalLayer(tf.keras.layers.Layer):
             min_persistence if min_persistence is not None else [0.0] * len(self.dimensions)
         )
         self.hcf = homology_coeff_field
-        assert len(self.min_persistence) == len(self.dimensions)
+        if len(self.min_persistence) != len(self.dimensions):
+            raise ValueError(
+                "'homology_dimensions' and 'min_persistence' do not have coherent sizes"
+            )
 
     def call(self, X):
         """

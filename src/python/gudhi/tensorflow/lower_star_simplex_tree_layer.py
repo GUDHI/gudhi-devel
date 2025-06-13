@@ -77,7 +77,7 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
         min_persistence=None,
         homology_coeff_field=11,
         persistence_dim_max=False,
-        **kwargs
+        **kwargs,
     ):
         """
         Constructor for the LowerStarSimplexTreeLayer class
@@ -99,7 +99,10 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
         )
         self.hcf = homology_coeff_field
         self.pdm = persistence_dim_max
-        assert len(self.min_persistence) == len(self.dimensions)
+        if len(self.min_persistence) != len(self.dimensions):
+            raise ValueError(
+                "'homology_dimensions' and 'min_persistence' do not have coherent sizes"
+            )
 
     def call(self, filtration):
         """
