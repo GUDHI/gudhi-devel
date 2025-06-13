@@ -17,6 +17,7 @@ __license__ = "MIT"
 
 from typing import Literal, Optional
 from collections.abc import Sequence
+from numpy.typing import ArrayLike
 
 from gudhi import _rips_complex_ext as t
 from gudhi.simplex_tree import SimplexTree
@@ -32,7 +33,7 @@ class RipsComplex(t.Rips_complex_interface):
     def __init__(
         self,
         *,
-        points: Sequence[Sequence[float]] = [],
+        points: ArrayLike = [],
         distance_matrix: Sequence[Sequence[float]] = [],
         max_edge_length: float = float("inf"),
         sparse: Optional[float] = None
@@ -40,12 +41,12 @@ class RipsComplex(t.Rips_complex_interface):
         """RipsComplex constructor.
 
         :param points: A list of points in d-Dimension.
-        :type points: List[List[float]]
+        :type points: Sequence[Sequence[float]] or any array like object of ndim 2 and dtype convertible to float.
 
         Or
 
         :param distance_matrix: A distance matrix (full square or lower triangular).
-        :type distance_matrix: List[List[float]]
+        :type distance_matrix: Sequence[Sequence[float]]
 
         And in both cases
 
