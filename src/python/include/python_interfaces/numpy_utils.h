@@ -129,7 +129,7 @@ class Numpy_array_element_iterator
 
   value_type *curr_;
   value_type *end_;
-  const size_type stride_;
+  size_type stride_;
 };
 
 #endif  // INCLUDE_NUMPY_UTILS_PYTHON_H_
