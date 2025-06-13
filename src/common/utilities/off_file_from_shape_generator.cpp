@@ -5,10 +5,12 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
+ *      - 2025/06 Vincent Rouvreau: Add seed mechanism
  *      - YYYY/MM Author: Description of the modification
  */
 
 #include <gudhi/random_point_generators.h>
+#include <gudhi/CGAL_Random_Singleton.h>
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/algorithm.h>
@@ -24,14 +26,14 @@ typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > K;
 typedef K::Point_d Point;
 
 void usage(char * const progName) {
-  std::cerr << "Usage: " << progName << " in|on sphere|cube off_file_name points_number[integer > 0] " <<
-      "dimension[integer > 1] radius[double > 0.0 | default = 1.0]" << std::endl;
+  std::cerr << "Usage: " << progName << " in|on sphere|cube off_file_name points_number(integer > 0) " <<
+      "dimension(integer > 1) [radius(double > 0.0, default = 1.0) [seed(unsigned integer)]" << std::endl;
   exit(-1);
 }
 
 int main(int argc, char **argv) {
   // program args management
-  if ((argc != 6) && (argc != 7)) {
+  if ((argc != 6) && (argc != 7) && (argc != 8)) {
     std::cerr << "Error: Number of arguments (" << argc << ") is not correct" << std::endl;
     usage(argv[0]);
   }
@@ -55,6 +57,10 @@ int main(int argc, char **argv) {
       std::cerr << "Error: " << argv[6] << " is not correct" << std::endl;
       usage(argv[0]);
     }
+  }
+
+  if (argc == 8) {
+    Gudhi::CGAL_Random_Singleton::set_seed(atoi(argv[7]));
   }
 
   bool in = false;
@@ -174,4 +180,3 @@ int main(int argc, char **argv) {
 
   return 0;
 }
-
