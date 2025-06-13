@@ -116,13 +116,10 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
                     const nanobind::ndarray<const int, nanobind::ndim<2> >& vertex_array,
                     const nanobind::ndarray<const double, nanobind::ndim<1> >& filtrations)
   {
-    using Simplex_iterator = Numpy_array_element_iterator<int>;
-    using Simplex = boost::iterator_range<Simplex_iterator>;
-
     auto v_view = vertex_array.view();
     auto f_view = filtrations.view();
 
-    const std::size_t d = v_view.shape(0);
+    // const std::size_t d = v_view.shape(0);
     const std::size_t n = v_view.shape(1);
 
     if (f_view.shape(0) != n)
@@ -130,7 +127,7 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
 
     insert_batch_vertices(Numpy_span<int>(vertices), std::numeric_limits<double>::infinity());
 
-    // copy version, benchmark?
+    // // copy version, benchmark?
     // std::vector<Vertex_handle> v(d);
     // for (std::size_t i = 0; i < n; ++i) {
     //   for (std::size_t j = 0; j < d; ++j) {
@@ -140,10 +137,7 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     // }
 
     for (std::size_t i = 0; i < n; ++i) {
-      auto start = &v_view(0, i);
-      auto end = start + d * v_view.stride(0);
-      auto s = Simplex(Simplex_iterator(start, end, v_view.stride(0)), Simplex_iterator(end));
-      Base::insert_simplex_and_subfaces(s, f_view(i));
+      Base::insert_simplex_and_subfaces(make_element_range(&v_view(0, i), v_view, false), f_view(i));
     }
   }
 

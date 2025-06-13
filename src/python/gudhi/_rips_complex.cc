@@ -12,7 +12,6 @@
 
 #include <optional>
 
-#include <boost/range/iterator_range_core.hpp>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/vector.h>
 
@@ -52,11 +51,7 @@ class Rips_complex_interface
     if (isPoints) {
       auto view = array.view();
       auto distance = [&view](const double& p1, const double& p2) -> Simplex_tree_interface::Filtration_value {
-        auto end1 = &p1 + view.shape(1) * view.stride(1);
-        auto r1 = Tensor_point(Tensor_point_iterator(&p1, end1, view.stride(1)), Tensor_point_iterator(end1));
-        auto end2 = &p2 + view.shape(1) * view.stride(1);
-        auto r2 = Tensor_point(Tensor_point_iterator(&p2, end2, view.stride(1)), Tensor_point_iterator(end2));
-        return Gudhi::Euclidean_distance()(r1, r2);
+        return Gudhi::Euclidean_distance()(make_element_range(&p1, view), make_element_range(&p2, view));
       };
       rips_complex_.emplace(Numpy_2d_span<double>(array), threshold, distance);
     } else {
@@ -78,11 +73,7 @@ class Rips_complex_interface
     if (isPoints) {
       auto view = array.view();
       auto distance = [&view](const double* p1, const double* p2) -> Simplex_tree_interface::Filtration_value {
-        auto end1 = p1 + view.shape(1) * view.stride(1);
-        auto r1 = Tensor_point(Tensor_point_iterator(p1, end1, view.stride(1)), Tensor_point_iterator(end1));
-        auto end2 = p2 + view.shape(1) * view.stride(1);
-        auto r2 = Tensor_point(Tensor_point_iterator(p2, end2, view.stride(1)), Tensor_point_iterator(end2));
-        return Gudhi::Euclidean_distance()(r1, r2);
+        return Gudhi::Euclidean_distance()(make_element_range(p1, view), make_element_range(p2, view));
       };
       sparse_rips_complex_.emplace(
           Numpy_2d_span<double>(array), distance, epsilon, -std::numeric_limits<double>::infinity(), threshold);
