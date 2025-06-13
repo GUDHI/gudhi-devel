@@ -17,12 +17,10 @@ import math
 import numpy as np
 from typing import Union, Iterable, Literal, Optional
 from sklearn.base import BaseEstimator, TransformerMixin
+from joblib import Parallel, delayed
 from scipy.sparse import coo_matrix
 from scipy.spatial import cKDTree
 from scipy.spatial.distance import pdist, squareform
-
-# joblib is required by scikit-learn
-from joblib import Parallel, delayed
 
 from .._ripser import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
 from ..flag_filtration.edge_collapse import reduce_graph
