@@ -615,6 +615,38 @@ def test_insert_batch():
     ]
 
 
+def test_insert_batch_transposed():
+    st = SimplexTree()
+    # vertices
+    s = np.array([[6], [1], [5]])
+    st.insert_batch(s.transpose(), np.array([-5.0, 2.0, -3.0]))
+    # triangles
+    s = np.array([[2, 5, 6], [10, 0, 11]])
+    st.insert_batch(s.transpose(), np.array([4.0, 0.0]))
+    # edges
+    s = np.array([[1, 2], [5, 5]])
+    st.insert_batch(s.transpose(), np.array([1.0, 3.0]))
+
+    assert list(st.get_filtration()) == [
+        ([6], -5.0),
+        ([5], -3.0),
+        ([0], 0.0),
+        ([10], 0.0),
+        ([0, 10], 0.0),
+        ([11], 0.0),
+        ([0, 11], 0.0),
+        ([10, 11], 0.0),
+        ([0, 10, 11], 0.0),
+        ([1], 1.0),
+        ([2], 1.0),
+        ([1, 2], 1.0),
+        ([2, 5], 4.0),
+        ([2, 6], 4.0),
+        ([5, 6], 4.0),
+        ([2, 5, 6], 4.0),
+    ]
+
+
 def test_expansion_with_blocker():
     st = SimplexTree()
     st.insert([0, 1], 0)
