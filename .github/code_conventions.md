@@ -4,7 +4,7 @@
 
 ### In the code:
 * The classes and functions of a package should be in a sub-namespace of the `Gudhi` namespace. The sub-namespace names are in lowercase and use underscore separators. E.g. `Gudhi::package_name::`
-* Concepts are named with camel case starting with uppercase. E.g. `PersistentHomology` for the concept of Persitence homology.
+* Concepts are named with camel case starting with uppercase. E.g. `PersistentHomology` for the concept of Persistence homology.
 * Classes start with an uppercase letter and use underscore separators. E.g. `Skeleton_blocker_contractor`.
 * Constant iterators are preferably named as `*_const_iterator`. E.g. `Vertex_const_iterator`.
 * Member functions and free functions are in lowercase and use underscore separators. E.g. `int num_vertices()`.
@@ -32,6 +32,12 @@ clang-format -style=file -i Simplex_tree/include/gudhi/Simplex_tree.h # -i means
 ### Template
 Please use the file [following template](copyright_template.h).
 
+### Exceptions
+
+There is no need to create a GUDHI dedicated exception class, we are using the
+[C++ standard exceptions (cf. `<stdexcept>`)](https://en.cppreference.com/w/cpp/header/stdexcept.html) that can be
+constructed from a string, which is suitable for user feedback.
+
 ## Python
 
 In progress...
@@ -45,3 +51,9 @@ black -l 120 src/python/example/bottleneck_basic_example.py
 
 ### Template
 Please use the file [following template](copyright_template.py).
+
+### Exceptions
+
+There is no need to create a GUDHI dedicated exception class, we are using the
+[Python built-in exceptions](https://docs.python.org/3/library/exceptions.html). If the error comes from a C++ binding,
+there is no need to convert it, the binding tool is trusted to provide a proper exception conversion, but it is the charge of the developer to document properly the exceptions that can happen.
