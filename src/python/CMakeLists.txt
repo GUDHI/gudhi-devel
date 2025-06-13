@@ -425,6 +425,16 @@ if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
          --no-diagram -f ${CMAKE_SOURCE_DIR}/data/points/tore3D_300.off)
   add_gudhi_py_test(test_alpha_complex)
   add_gudhi_py_test(test_delaunay_complex)
+
+  # Cech scikit-learn like interface
+  if(SCIKIT-LEARN_FOUND)
+    add_test(NAME cech_complex_sklearn_itf_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
+             ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/example/cech_complex_sklearn_itf.py" "--no-plot")
+
+    add_gudhi_py_test(test_sklearn_cech_persistence)
+  endif()
 endif (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
 
 if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
