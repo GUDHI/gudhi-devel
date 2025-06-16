@@ -119,11 +119,10 @@ The result can be obtained after the computation of the Tangential complex
 itself and/or after the perturbation process.
 
 
-Simple example with perturbation
---------------------------------
+Simple example
+--------------
 
-This example builds the Tangential complex of a point set, then tries to solve inconsistencies by perturbing the
-positions of points involved in inconsistent simplices.
+This example builds the Tangential complex of point set.
 
 .. testcode::
 
@@ -135,16 +134,9 @@ positions of points involved in inconsistent simplices.
            [0., 14.],
            [2., 19.],
            [9., 17.]]
-    tc = TangentialComplex(intrisic_dim = 1, points=pts)
+    tc = TangentialComplex(intrisic_dim = 1, points = pts)
     tc.compute_tangential_complex()
     print(f'Tangential contains {tc.num_simplices()} simplices - {tc.num_vertices()} vertices.')
-
-    if tc.num_inconsistent_simplices() > 0:
-        print('Tangential contains inconsistencies.')
-
-    tc.fix_inconsistencies_using_perturbation(10, 60)
-    if tc.num_inconsistent_simplices() == 0:
-        print('Inconsistencies has been fixed.')
 
     st = tc.create_simplex_tree()
     print(f'Simplex tree is of dimension {st.dimension()} - {st.num_simplices()} simplices - {st.num_vertices()} vertices.')
@@ -156,19 +148,48 @@ The output is:
 .. testoutput::
 
     Tangential contains 12 simplices - 7 vertices.
-    Tangential contains inconsistencies.
-    Inconsistencies has been fixed.
-    Simplex tree is of dimension 1 - 13 simplices - 7 vertices.
+    Simplex tree is of dimension 1 - 15 simplices - 7 vertices.
     [0]
     [1]
+    [0, 1]
     [2]
     [0, 2]
+    [1, 2]
     [3]
     [1, 3]
-    [2, 3]
     [4]
-    [0, 4]
+    [2, 4]
     [5]
     [4, 5]
     [6]
+    [3, 6]
     [5, 6]
+
+
+Example with perturbation
+-------------------------
+
+This example builds the Tangential complex of a point set, then tries to solve
+inconsistencies by perturbing the positions of points involved in inconsistent
+simplices.
+
+.. testcode::
+
+    from gudhi import TangentialComplex
+    tc = TangentialComplex(intrisic_dim = 1, points = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+    tc.compute_tangential_complex()
+    print(f'Tangential contains {tc.num_vertices()} vertices.')
+
+    if tc.num_inconsistent_simplices() > 0:
+        print('Tangential contains inconsistencies.')
+
+    tc.fix_inconsistencies_using_perturbation(10, 60)
+    if tc.num_inconsistent_simplices() == 0:
+        print('Inconsistencies has been fixed.')
+
+The output is:
+
+.. testoutput::
+
+    Tangential contains 4 vertices.
+    Inconsistencies has been fixed.
