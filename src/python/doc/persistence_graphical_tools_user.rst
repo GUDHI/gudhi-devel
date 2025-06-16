@@ -22,9 +22,9 @@ This function can display the persistence result as a barcode:
     import gudhi
 
     points.seed(0)
-    pts = points.c3dtorus(300, 4, 1)
+    pts = points.c3dtorus(n_samples = 300, R = 2, r = 1)
 
-    rips = gudhi.RipsComplex(points=pts, max_edge_length=1.3)
+    rips = gudhi.RipsComplex(points=pts, max_edge_length=0.7)
     stree = rips.create_simplex_tree(max_dimension=3)
     diag = stree.persistence(min_persistence=0.4)
 
@@ -44,8 +44,8 @@ This function can display the persistence result as a diagram:
     import gudhi
 
     points.seed(0)
-    pts = points.c3dtorus(1500, 4, 1)
-    rips = gudhi.RipsComplex(points=pts, max_edge_length=1.3)
+    pts = points.c3dtorus(n_samples = 1300, R = 2, r = 1)
+    rips = gudhi.RipsComplex(points=pts, max_edge_length=1.)
     stree = rips.create_simplex_tree(max_dimension=3)
     diag = stree.persistence()
     ax = gudhi.plot_persistence_diagram(diag)
@@ -82,8 +82,8 @@ If you want more information on a specific dimension, for instance:
     import gudhi
 
     points.seed(0)
-    pts = points.c3dtorus(1500, 4, 1)
-    rips = gudhi.RipsComplex(points=pts, max_edge_length=1.3)
+    pts = points.c3dtorus(n_samples = 1300, R = 2, r = 1)
+    rips = gudhi.RipsComplex(points=pts, max_edge_length=1.)
     stree = rips.create_simplex_tree(max_dimension=3)
     stree.compute_persistence()
     birth_death = stree.persistence_intervals_in_dimension(1)
