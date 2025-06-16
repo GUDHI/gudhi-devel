@@ -55,32 +55,18 @@ class Rips_complex_interface
       };
       rips_complex_.emplace(Numpy_2d_span<double>(array), threshold, distance);
     } else {
-      rips_complex_.emplace(_get_sequence_from_tensor(array), threshold);
+      rips_complex_.emplace(Numpy_2d_span<double>(array), threshold);
     }
   }
 
   Rips_complex_interface(const Sequence2D& array, double threshold, double epsilon, bool isPoints)
   {
-    if (isPoints)
-      sparse_rips_complex_.emplace(
-          array, Gudhi::Euclidean_distance(), epsilon, -std::numeric_limits<double>::infinity(), threshold);
-    else
-      sparse_rips_complex_.emplace(array, epsilon, -std::numeric_limits<double>::infinity(), threshold);
+    _initialize_sparse(array, threshold, epsilon, isPoints);
   }
 
   Rips_complex_interface(const Tensor2D& array, double threshold, double epsilon, bool isPoints)
   {
-    if (isPoints) {
-      auto view = array.view();
-      auto distance = [&view](const double* p1, const double* p2) -> Simplex_tree_interface::Filtration_value {
-        return Gudhi::Euclidean_distance()(make_element_range(p1, view), make_element_range(p2, view));
-      };
-      sparse_rips_complex_.emplace(
-          Numpy_2d_span<double>(array), distance, epsilon, -std::numeric_limits<double>::infinity(), threshold);
-    } else {
-      sparse_rips_complex_.emplace(
-          _get_sequence_from_tensor(array), epsilon, -std::numeric_limits<double>::infinity(), threshold);
-    }
+    _initialize_sparse(Numpy_2d_span<double>(array), threshold, epsilon, isPoints);
   }
 
   ~Rips_complex_interface() = default;
@@ -99,6 +85,17 @@ class Rips_complex_interface
   // Anyway, storing a graph would make more sense. Or changing the interface completely so there is no such storage.
   std::optional<Rips_complex<Simplex_tree_interface::Filtration_value>> rips_complex_;
   std::optional<Sparse_rips_complex<Simplex_tree_interface::Filtration_value>> sparse_rips_complex_;
+
+  template <class Array>
+  void _initialize_sparse(const Array& array, double threshold, double epsilon, bool isPoints)
+  {
+    if (isPoints) {
+      sparse_rips_complex_.emplace(
+          array, Gudhi::Euclidean_distance(), epsilon, -std::numeric_limits<double>::infinity(), threshold);
+    } else {
+      sparse_rips_complex_.emplace(array, epsilon, -std::numeric_limits<double>::infinity(), threshold);
+    }
+  }
 };
 
 }  // namespace rips_complex

@@ -34,7 +34,7 @@ class RipsComplex(t.Rips_complex_interface):
         self,
         *,
         points: ArrayLike = [],
-        distance_matrix: Sequence[Sequence[float]] = [],
+        distance_matrix: ArrayLike = [],
         max_edge_length: float = float("inf"),
         sparse: Optional[float] = None
     ):
@@ -46,7 +46,8 @@ class RipsComplex(t.Rips_complex_interface):
         Or
 
         :param distance_matrix: A distance matrix (full square or lower triangular).
-        :type distance_matrix: Sequence[Sequence[float]]
+        :type distance_matrix: Sequence[Sequence[float]] (square or just the lower triangle) or any square array like
+            object of dtype convertible to float.
 
         And in both cases
 
