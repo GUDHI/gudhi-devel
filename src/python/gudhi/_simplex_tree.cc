@@ -44,7 +44,7 @@ NB_MODULE(_simplex_tree_ext, m)
 
   nb::class_<gsti>(m, "_Simplex_tree_python_interface")
       .def(nb::init<>(), nb::call_guard<nb::gil_scoped_release>())
-      .def(nb::init<gsti &>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const gsti &>(), nb::call_guard<nb::gil_scoped_release>())
       .def("filtration", &gsti::simplex_filtration, nb::arg("simplex"), R"doc(
 This function returns the filtration value for a given N-simplex in
 this simplicial complex, or +infinity if it is not in the complex.
