@@ -14,6 +14,7 @@
 #include <CGAL/Epick_d.h>
 
 #include <gudhi/random_point_generators.h>
+#include <gudhi/CGAL_Random_Singleton.h>
 #include <gudhi/Debug_utils.h>
 
 namespace py = pybind11;
@@ -76,6 +77,36 @@ py::array_t<double> generate_points_on_torus(size_t n_samples, int dim, std::str
   return points;
 }
 
+py::array_t<double> generate_points_on_3d_torus(size_t n_samples, double R, double r)
+{
+  std::vector<typename Kern::Point_d> points_generated;
+
+  {
+    py::gil_scoped_release release;
+    points_generated = Gudhi::generate_points_on_torus_3D<Kern>(n_samples, R, r, false);
+  }
+
+  size_t npoints = points_generated.size();
+
+  GUDHI_CHECK(3 == points_generated[0].size(),
+              "Py array second dimension not matching the double torus dimension");
+
+  py::array_t<double> points({npoints, (size_t)3});
+
+  py::buffer_info buf = points.request();
+  double *ptr = static_cast<double *>(buf.ptr);
+
+  for (size_t i = 0; i < npoints; i++)
+    for (int j = 0; j < 3; j++) ptr[i * 3 + j] = points_generated[i][j];
+
+  return points;
+}
+
+void set_seed(size_t seed)
+{
+  Gudhi::CGAL_Random_Singleton::set_seed(seed);
+}
+
 PYBIND11_MODULE(_points, m)
 {
   m.attr("__license__") = "LGPL v3";
@@ -121,5 +152,35 @@ PYBIND11_MODULE(_points, m)
           If sample is 'random': (n_samples, 2*dim).
 
           If sample is 'grid': (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
+          )pbdoc");
+
+  m.def("c3dtorus",
+        &generate_points_on_3d_torus,
+        py::arg("n_samples"),
+        py::arg("R"),
+        py::arg("r"),
+        R"pbdoc(
+          Generate random i.i.d. points on a d-torus in R^2d or as a grid
+
+          :param n_samples: The number of points to be generated.
+          :type n_samples: integer
+          :param R: The big radius.
+          :type R: float
+          :param r: The small radius.
+          :type r: float
+          :returns: the generated points on a torus.
+
+          The typical donut shape is obtained with an aspect ratio (R/r) of the torus equal to 3/2.
+          )pbdoc");
+
+  m.def("seed",
+        &set_seed,
+        py::arg("seed"),
+        R"pbdoc(
+          Set the seed for the random `generators` methods, except for `torus` which is based on `numpy` (consider
+          using `numpy.random.seed` for this specific method)
+
+          :param seed: The new seed value.
+          :type seed: integer
           )pbdoc");
 }
