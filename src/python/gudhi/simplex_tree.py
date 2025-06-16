@@ -168,50 +168,6 @@ class SimplexTree(t._Simplex_tree_python_interface):
         super()._insert_batch(vertices, simplices, fil)
         return self
 
-    def get_simplices(self):
-        """This function returns a generator with simplices and their given
-        filtration values.
-
-        :returns:  The simplices.
-        :rtype:  generator with tuples(simplex, filtration)
-        """
-        for sh in super().simplex_iter():
-            yield super().get_simplex_and_filtration(sh)
-
-    def get_filtration(self):
-        """This function returns a generator with simplices and their given
-        filtration values sorted by increasing filtration values.
-
-        :returns:  The simplices sorted by increasing filtration values.
-        :rtype:  generator with tuples(simplex, filtration)
-        """
-        for sh in super().filtration_iter():
-            yield super().get_simplex_and_filtration(sh)
-
-    def get_skeleton(self, dimension):
-        """This function returns a generator with the (simplices of the) skeleton of a maximum given dimension.
-
-        :param dimension: The skeleton dimension value.
-        :type dimension: int
-        :returns:  The (simplices of the) skeleton of a maximum dimension.
-        :rtype:  generator with tuples(simplex, filtration)
-        """
-        for sh in super().skeleton_iter(dimension):
-            yield super().get_simplex_and_filtration(sh)
-
-    def get_boundaries(self, simplex):
-        """This function returns a generator with the boundaries of a given N-simplex.
-        If you do not need the filtration values, the boundary can also be obtained as
-        :code:`itertools.combinations(simplex,len(simplex)-1)`.
-
-        :param simplex: The N-simplex, represented by a list of vertex.
-        :type simplex: list of int.
-        :returns:  The (simplices of the) boundary of a simplex
-        :rtype:  generator with tuples(simplex, filtration)
-        """
-        for sh in super().boundary_iter(simplex):
-            yield super().get_simplex_and_filtration(sh)
-
     def extended_persistence(
         self, homology_coeff_field=11, min_persistence=0
     ) -> list[list[tuple[int, tuple[float, float]]]]:

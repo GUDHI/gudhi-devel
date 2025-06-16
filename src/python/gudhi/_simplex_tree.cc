@@ -42,8 +42,6 @@ NB_MODULE(_simplex_tree_ext, m)
 {
   m.attr("__license__") = "MIT";
 
-  nb::class_<gsti::Simplex_handle>(m, "_Simplex_handle").def(nb::init<>());
-
   nb::class_<gsti>(m, "_Simplex_tree_python_interface")
       .def(nb::init<>(), nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<gsti &>(), nb::call_guard<nb::gil_scoped_release>())
@@ -340,11 +338,42 @@ afterwards for instance).
 :returns: True if the 2 complexes have the same simplices with the same filtration values, False otherwise.
 :rtype: bool
            )doc")
-      .def("get_simplex_and_filtration", &gsti::get_simplex_and_filtration, nb::arg("f_simplex"))
-      .def("simplex_iter", &gsti::get_simplex_python_iterator)
-      .def("filtration_iter", &gsti::get_filtration_python_iterator)
-      .def("skeleton_iter", &gsti::get_skeleton_python_iterator)
-      .def("boundary_iter", &gsti::get_boundary_python_iterator)
+      .def("get_simplices", &gsti::get_simplex_python_iterator, R"doc(
+"""This function returns a generator with simplices and their given
+filtration values.
+
+:returns:  The simplices.
+:rtype:  generator with tuples(simplex, filtration)
+"""
+          )doc")
+      .def("get_filtration", &gsti::get_filtration_python_iterator, R"doc(
+"""This function returns a generator with simplices and their given
+filtration values sorted by increasing filtration values.
+
+:returns:  The simplices sorted by increasing filtration values.
+:rtype:  generator with tuples(simplex, filtration)
+"""
+          )doc")
+      .def("get_skeleton", &gsti::get_skeleton_python_iterator, nb::arg("dimension"), R"doc(
+"""This function returns a generator with the (simplices of the) skeleton of a maximum given dimension.
+
+:param dimension: The skeleton dimension value.
+:type dimension: int
+:returns:  The (simplices of the) skeleton of a maximum dimension.
+:rtype:  generator with tuples(simplex, filtration)
+"""
+          )doc")
+      .def("get_boundaries", &gsti::get_boundary_python_iterator, R"doc(
+"""This function returns a generator with the boundaries of a given N-simplex.
+If you do not need the filtration values, the boundary can also be obtained as
+:code:`itertools.combinations(simplex,len(simplex)-1)`.
+
+:param simplex: The N-simplex, represented by a list of vertex.
+:type simplex: list of int.
+:returns:  The (simplices of the) boundary of a simplex
+:rtype:  generator with tuples(simplex, filtration)
+"""
+          )doc")
       .def("expansion_with_blocker",
            &gsti::expansion_with_blockers_callback,
            nb::arg("max_dim"),

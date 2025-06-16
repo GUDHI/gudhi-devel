@@ -163,15 +163,6 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     Base::clear_filtration();
   }
 
-  Simplex_and_filtration get_simplex_and_filtration(Simplex_handle f_simplex)
-  {
-    Simplex simplex;
-    for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
-      simplex.insert(simplex.begin(), vertex);
-    }
-    return std::make_pair(std::move(simplex), Base::filtration(f_simplex));
-  }
-
   Filtered_simplices get_star(const Simplex& simplex)
   {
     Filtered_simplices star;
@@ -242,40 +233,87 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
   // of the templated arguments. Therefore this indirection.
   void initialize_filtration() const { Base::initialize_filtration(); }
 
+  template <class Iterator>
+  class Simplex_filtration_iterator : public boost::iterator_facade<Simplex_filtration_iterator<Iterator>,
+                                                                    const Simplex_and_filtration&,
+                                                                    boost::forward_traversal_tag,
+                                                                    const Simplex_and_filtration&>
+  {
+   public:
+    Simplex_filtration_iterator(const Iterator& end) : curr_(end), end_(end), tree_(nullptr) {}
+
+    Simplex_filtration_iterator(const Iterator& start, const Iterator& end, Simplex_tree_interface* tree)
+        : curr_(start), end_(end), tree_(tree)
+    {
+      if (curr_ != end_) _retrieve_value();
+    }
+
+   private:
+    friend class boost::iterator_core_access;
+
+    bool equal(Simplex_filtration_iterator const& other) const { return curr_ == other.curr_; }
+
+    const Simplex_and_filtration& dereference() const { return value_; }
+
+    void increment()
+    {
+      ++curr_;
+      if (curr_ != end_) _retrieve_value();
+    }
+
+    void _retrieve_value()
+    {
+      Simplex& simplex = value_.first;
+      simplex.clear();
+      for (auto vertex : tree_->simplex_vertex_range(*curr_)) {
+        simplex.push_back(vertex);
+      }
+      std::reverse(simplex.begin(), simplex.end());
+      value_.second = tree_->filtration(*curr_);
+    }
+
+    Iterator curr_;
+    Iterator end_;
+    Simplex_tree_interface* tree_;
+    Simplex_and_filtration value_;
+  };
+
   auto get_simplex_python_iterator()
   {
-    return nanobind::make_iterator(nanobind::type<Complex_simplex_range>(),
-                                   "gudhi.simplex_tree.simplex_iterator",
-                                   Base::complex_simplex_range().begin(),
-                                   Base::complex_simplex_range().end());
+    return nanobind::make_iterator(
+        nanobind::type<Simplex_tree_interface>(),
+        "simplex_iterator",
+        Simplex_filtration_iterator(Complex_simplex_iterator(this), Complex_simplex_iterator(), this),
+        Simplex_filtration_iterator(Complex_simplex_iterator()));
   }
 
   auto get_filtration_python_iterator()
   {
-    return nanobind::make_iterator(nanobind::type<Filtration_simplex_range>(),
-                                   "gudhi.simplex_tree.filtration_iterator",
-                                   Base::filtration_simplex_range().begin(),
-                                   Base::filtration_simplex_range().end());
+    auto& r = Base::filtration_simplex_range();
+    return nanobind::make_iterator(nanobind::type<Simplex_tree_interface>(),
+                                   "filtration_iterator",
+                                   Simplex_filtration_iterator(r.begin(), r.end(), this),
+                                   Simplex_filtration_iterator(r.end()));
   }
 
   auto get_skeleton_python_iterator(int dimension)
   {
-    return nanobind::make_iterator(nanobind::type<Skeleton_simplex_range>(),
-                                   "gudhi.simplex_tree.skeleton_iterator",
-                                   Base::skeleton_simplex_range(dimension).begin(),
-                                   Base::skeleton_simplex_range(dimension).end());
+    return nanobind::make_iterator(
+        nanobind::type<Simplex_tree_interface>(),
+        "skeleton_iterator",
+        Simplex_filtration_iterator(Skeleton_simplex_iterator(this, dimension), Skeleton_simplex_iterator(), this),
+        Simplex_filtration_iterator(Skeleton_simplex_iterator()));
   }
 
   auto get_boundary_python_iterator(const Simplex& simplex)
   {
     auto bd_sh = Base::find(simplex);
     if (bd_sh == Base::null_simplex()) throw std::runtime_error("simplex not found - cannot find boundaries");
-    // this specific case works because the range is just a pair of iterators - won't work if range was a vector
-    auto boundary_srange = Base::boundary_simplex_range(bd_sh);
-    return nanobind::make_iterator(nanobind::type<Boundary_simplex_range>(),
-                                   "gudhi.simplex_tree.boundary_iterator",
-                                   boundary_srange.begin(),
-                                   boundary_srange.end());
+    return nanobind::make_iterator(
+        nanobind::type<Simplex_tree_interface>(),
+        "boundary_iterator",
+        Simplex_filtration_iterator(Boundary_simplex_iterator(this, bd_sh), Boundary_simplex_iterator(this), this),
+        Simplex_filtration_iterator(Boundary_simplex_iterator(this)));
   }
 };
 
