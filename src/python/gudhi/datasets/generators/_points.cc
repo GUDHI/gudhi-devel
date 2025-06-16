@@ -160,7 +160,7 @@ PYBIND11_MODULE(_points, m)
         py::arg("R"),
         py::arg("r"),
         R"pbdoc(
-          Generate random i.i.d. points on a d-torus in R^2d or as a grid
+          Generate random i.i.d. points on a 2-torus in R^3
 
           :param n_samples: The number of points to be generated.
           :type n_samples: integer
