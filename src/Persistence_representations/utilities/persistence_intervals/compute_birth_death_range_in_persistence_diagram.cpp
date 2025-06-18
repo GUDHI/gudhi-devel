@@ -45,7 +45,7 @@ int main(int argc, char** argv)
   double min_ = std::numeric_limits<double>::max();
   double max_ = -std::numeric_limits<double>::max();
 
-  for (size_t file_no = 0; file_no != filenames.size(); ++file_no) {
+  for (std::size_t file_no = 0; file_no != filenames.size(); ++file_no) {
     std::clog << "Creating diagram based on a file : " << filenames[file_no] << std::endl;
     Persistence_intervals p(filenames[file_no], dimension);
     std::pair<double, double> min_max_ = p.get_x_range();

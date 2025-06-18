@@ -39,7 +39,7 @@ namespace Persistence_representations {
 
 // pre declaration needed before C++20 for friends with templates defined inside a class
 class Persistence_landscape_on_grid;
-template <typename operation>
+template <typename Operation>
 Persistence_landscape_on_grid operation_on_pair_of_landscapes_on_grid(const Persistence_landscape_on_grid& land1,
                                                                       const Persistence_landscape_on_grid& land2);
 
@@ -423,7 +423,7 @@ class Persistence_landscape_on_grid
   /**
    * \private A function applying the F operator on the two landscapes
    **/
-  template <typename operation>
+  template <typename Operation>
   friend Persistence_landscape_on_grid operation_on_pair_of_landscapes_on_grid(
       const Persistence_landscape_on_grid& land1,
       const Persistence_landscape_on_grid& land2)
@@ -432,7 +432,7 @@ class Persistence_landscape_on_grid
     // first we need to check if the domains are the same:
     if (!check_if_defined_on_the_same_domain(land1, land2)) throw std::invalid_argument("Two grids are not compatible");
 
-    operation oper;
+    Operation oper;
     Persistence_landscape_on_grid result;
     result.values_of_landscapes_ = std::vector<std::vector<double> >(land1.values_of_landscapes_.size());
     result.grid_min_ = land1.grid_min_;

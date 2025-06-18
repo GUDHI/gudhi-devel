@@ -38,7 +38,7 @@ namespace Persistence_representations {
 
 // pre declaration needed before C++20 for friends with templates defined inside a class
 class Persistence_landscape;
-template <typename operation>
+template <typename Operation>
 Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscape& land1,
                                                       const Persistence_landscape& land2);
 
@@ -158,7 +158,7 @@ class Persistence_landscape
     return out;
   }
 
-  template <typename operation>
+  template <typename Operation>
   friend Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscape& land1,
                                                                const Persistence_landscape& land2)
   {
@@ -168,7 +168,7 @@ class Persistence_landscape
     Persistence_landscape result;
     std::vector<std::vector<std::pair<double, double> > > land(std::max(land1.land_.size(), land2.land_.size()));
     result.land_ = land;
-    operation oper;
+    Operation oper;
 
 #ifdef GUDHI_DEBUG
     for (std::size_t i = 0; i != std::min(land1.land_.size(), land2.land_.size()); ++i) {

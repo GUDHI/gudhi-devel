@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  size_t size_of_grid = (size_t)atoi(argv[1]);
+  std::size_t size_of_grid = (std::size_t)atoi(argv[1]);
   double min_ = atof(argv[2]);
   double max_ = atof(argv[3]);
   int dim = atoi(argv[4]);
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     filenames.push_back(argv[i]);
   }
 
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     std::clog << "Creating persistence landscape on a grid based on a file : " << filenames[i] << std::endl;
     Persistence_landscape_on_grid l;
     if ((min_ != -1) || (max_ != -1)) {
