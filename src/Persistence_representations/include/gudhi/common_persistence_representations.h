@@ -94,6 +94,9 @@ inline constexpr bool compare_points_sorting(const std::pair<double, double>& f,
   }
 }
 
+// TODO: the following methods are mostly used with `std::make_pair` as argument in `Persistence_landscape(_on_grid)".
+// If called often, it would be more effective to have a (double, double, double, double) version instead.
+
 // landscapes
 /**
  * Given two points in \f$ R^2 \f$, the procedure compute the parameters \f$ A \f$ and \f$ B \f$ of the line

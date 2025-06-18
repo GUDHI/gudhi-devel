@@ -20,10 +20,24 @@
 
 #include <gudhi/Persistence_intervals.h>
 #include <gudhi/Bottleneck.h>
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 namespace Persistence_representations {
 
+// TODO: it would have been better to have this file in a subfolder "Persistence_representations"
+// to avoid including it with "<gudhi/Persistence_intervals_with_distances.h>" which makes it sound universal within
+// gudhi even though it is only used in this format within this module.
+// How critical would it be for retro-compatibility to change that? It does not seem to appear in the documentation.
+
+/**
+ * @class Persistence_intervals_with_distances Persistence_intervals_with_distances.h \
+ * gudhi/Persistence_intervals_with_distances.h
+ * @brief This class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances,
+ * Real_valued_topological_data
+ *
+ * @ingroup Persistence_representations
+ **/
 class Persistence_intervals_with_distances : public Persistence_intervals
 {
  public:
