@@ -8,16 +8,17 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_intervals.h>
-
 #include <iostream>
 #include <limits>
 #include <vector>
 #include <utility>
 
+#include <gudhi/Persistence_intervals.h>
+
 using Persistence_intervals = Gudhi::Persistence_representations::Persistence_intervals;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program compute the dominant intervals. A number of intervals to be displayed is a parameter of "
                "this program. \n";
   if (argc != 4) {

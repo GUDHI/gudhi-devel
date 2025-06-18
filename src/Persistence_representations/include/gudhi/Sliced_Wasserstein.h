@@ -11,11 +11,7 @@
 #ifndef SLICED_WASSERSTEIN_H_
 #define SLICED_WASSERSTEIN_H_
 
-// gudhi include
-#include <gudhi/read_persistence_from_file.h>
-#include <gudhi/common_persistence_representations.h>
-#include <gudhi/Debug_utils.h>
-
+// standard include
 #include <vector>     // for std::vector<>
 #include <utility>    // for std::pair<>, std::move
 #include <algorithm>  // for std::sort, std::max, std::merge
@@ -24,6 +20,11 @@
 #include <random>     // for std::random_device
 #include <math.h>     // for nextafter
 #include <climits>
+
+// gudhi include
+#include <gudhi/read_persistence_from_file.h>
+#include <gudhi/common_persistence_representations.h>
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -43,8 +44,8 @@ namespace Persistence_representations {
  * used for comparison is the Sliced Wasserstein distance \f$SW\f$ between persistence diagrams, defined as the
  * integral of the 1-norm between the sorted projections of the diagrams onto all lines passing through the origin:
  *
- * \f$ SW(D_1,D_2)=\int_{\theta\in\mathbb{S}}\,\|\pi_\theta(D_1\cup\pi_\Delta(D_2))-\pi_\theta(D_2\cup\pi_\Delta(D_1))\
- * |_1{\rm d}\theta\f$,
+ * \f$ SW(D_1,D_2)=\int_{\theta\in\mathbb{S}}\,\|\pi_\theta(D_1\cup\pi_\Delta(D_2))-
+ * \pi_\theta(D_2\cup\pi_\Delta(D_1))\|_1{\rm d}\theta\f$,
  *
  * where \f$\pi_\theta\f$ is the projection onto the line defined with angle \f$\theta\f$ in the unit circle
  * \f$\mathbb{S}\f$, and \f$\pi_\Delta\f$ is the projection onto the diagonal.
@@ -60,10 +61,10 @@ namespace Persistence_representations {
  * much slower. For more details, please see \cite pmlr-v70-carriere17a .
  *
  * This class implements the following concepts: Topological_data_with_distances, Real_valued_topological_data,
- * Topological_data_with_scalar_product
- *
+ * Topological_data_with_scalar_product.
  **/
-class Sliced_Wasserstein {
+class Sliced_Wasserstein
+{
  protected:
   Persistence_diagram diagram;
   int approx;
@@ -75,7 +76,8 @@ class Sliced_Wasserstein {
   // Utils.
   // **********************************
 
-  void build_rep() {
+  void build_rep()
+  {
     if (approx > 0) {
       int n = diagram.size();
       double step = pi / this->approx;
@@ -98,7 +100,8 @@ class Sliced_Wasserstein {
   }
 
   // Compute the angle formed by two points of a PD
-  double compute_angle(const Persistence_diagram& diag, int i, int j) const {
+  double compute_angle(const Persistence_diagram& diag, int i, int j) const
+  {
     if (diag[i].second == diag[j].second)
       return pi / 2;
     else
@@ -177,7 +180,8 @@ class Sliced_Wasserstein {
   }
 
   // Evaluation of the Sliced Wasserstein Distance between a pair of diagrams.
-  double compute_sliced_wasserstein_distance(const Sliced_Wasserstein& second) const {
+  double compute_sliced_wasserstein_distance(const Sliced_Wasserstein& second) const
+  {
     GUDHI_CHECK(this->approx == second.approx,
                 std::invalid_argument("Error: different approx values for representations"));
 
@@ -382,10 +386,16 @@ class Sliced_Wasserstein {
       for (int i = 0; i < this->approx; i++) {
         v1.clear();
         v2.clear();
-        std::merge(this->projections[i].begin(), this->projections[i].end(), second.projections_diagonal[i].begin(),
-                   second.projections_diagonal[i].end(), std::back_inserter(v1));
-        std::merge(second.projections[i].begin(), second.projections[i].end(), this->projections_diagonal[i].begin(),
-                   this->projections_diagonal[i].end(), std::back_inserter(v2));
+        std::merge(this->projections[i].begin(),
+                   this->projections[i].end(),
+                   second.projections_diagonal[i].begin(),
+                   second.projections_diagonal[i].end(),
+                   std::back_inserter(v1));
+        std::merge(second.projections[i].begin(),
+                   second.projections[i].end(),
+                   this->projections_diagonal[i].begin(),
+                   this->projections_diagonal[i].end(),
+                   std::back_inserter(v2));
 
         int n = v1.size();
         double f = 0;
@@ -399,39 +409,42 @@ class Sliced_Wasserstein {
   }
 
  public:
-  /** \brief Sliced Wasserstein kernel constructor.
+  /**
+   * \brief Sliced Wasserstein kernel constructor.
    *
    * @param[in] _diagram  persistence diagram.
    * @param[in] _sigma    bandwidth parameter.
    * @param[in] _approx   number of directions used to approximate the integral in the Sliced Wasserstein distance, set
    *                      to -1 for random perturbation. If positive, then projections of the diagram points on all
    *                      directions are stored in memory to reduce computation time.
-   *
    */
+
   Sliced_Wasserstein(const Persistence_diagram& _diagram, double _sigma = 1.0, int _approx = 10, double _genericity_factor=10)
       : diagram(_diagram), approx(_approx), sigma(_sigma), genericity_factor(_genericity_factor) {
     build_rep();
   }
 
-  /** \brief Evaluation of the kernel on a pair of diagrams.
+  /**
+   * \brief Evaluation of the kernel on a pair of diagrams.
    *
    * @pre       approx and sigma attributes need to be the same for both instances.
    * @param[in] second other instance of class Sliced_Wasserstein.
-   *
    */
-  double compute_scalar_product(const Sliced_Wasserstein& second) const {
+  double compute_scalar_product(const Sliced_Wasserstein& second) const
+  {
     GUDHI_CHECK(this->sigma == second.sigma,
                 std::invalid_argument("Error: different sigma values for representations"));
     return std::exp(-compute_sliced_wasserstein_distance(second) / (2 * this->sigma * this->sigma));
   }
 
-  /** \brief Evaluation of the distance between images of diagrams in the Hilbert space of the kernel.
+  /**
+   * \brief Evaluation of the distance between images of diagrams in the Hilbert space of the kernel.
    *
    * @pre       approx and sigma attributes need to be the same for both instances.
    * @param[in] second  other instance of class Sliced_Wasserstein.
-   *
    */
-  double distance(const Sliced_Wasserstein& second) const {
+  double distance(const Sliced_Wasserstein& second) const
+  {
     GUDHI_CHECK(this->sigma == second.sigma,
                 std::invalid_argument("Error: different sigma values for representations"));
     return std::sqrt(this->compute_scalar_product(*this) + second.compute_scalar_product(second) -
@@ -443,6 +456,7 @@ class Sliced_Wasserstein {
   }
 
 };  // class Sliced_Wasserstein
+
 }  // namespace Persistence_representations
 }  // namespace Gudhi
 

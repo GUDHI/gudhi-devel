@@ -8,17 +8,18 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_vectors.h>
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
 
+#include <gudhi/Persistence_vectors.h>
+
 using Euclidean_distance = Gudhi::Euclidean_distance;
 using Vector_distances_in_diagram = Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program creates persistence vectors files (*.vect) of persistence diagrams files (*.pers) "
             << "provided as an input.\n"
             << "The first parameter of this program is a dimension of persistence that will be used in creation of "

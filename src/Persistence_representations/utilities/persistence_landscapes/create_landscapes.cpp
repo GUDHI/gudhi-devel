@@ -8,16 +8,17 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_landscape.h>
-
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <limits>
 
+#include <gudhi/Persistence_landscape.h>
+
 using Persistence_landscape = Gudhi::Persistence_representations::Persistence_landscape;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program creates persistence landscapes files (*.land) of persistence diagrams files (*.pers) "
             << "provided as an input.\n"
             << "The first parameter of this program is a dimension of persistence that will be used in creation of "
