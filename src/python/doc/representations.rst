@@ -20,7 +20,7 @@ diagrams at once. In that case, the diagrams are provided as a list of numpy arr
 the diagrams to have the same number of points, i.e., for the corresponding arrays to have the same number of rows: all
 classes can handle arrays with different shapes.
 
-This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-representations.ipynb>`__ explains how to
+This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tutos/Tuto-GUDHI-representations.ipynb>`__ explains how to
 efficiently combine machine learning and topological data analysis with the
 :doc:`representations module<representations>` in a scikit-learn fashion.
 
@@ -41,7 +41,7 @@ This example computes the first two Landscapes associated to a persistence diagr
     D = np.array([[0.,4.],[1.,2.],[3.,8.],[6.,8.]])
     diags = [D]
     l=Landscape(num_landscapes=2,resolution=10).fit_transform(diags)
-    print(l) 
+    print(l)
 
 .. testoutput::
 

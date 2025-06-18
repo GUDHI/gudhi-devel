@@ -93,7 +93,7 @@ who want to use the code directly. They can be found in the :doc:`cubical_comple
 the program output is:
 
 .. testoutput::
-    
+
     Cubical complex is of dimension 2 - 49 simplices.
 
 Periodic boundary conditions
@@ -131,5 +131,5 @@ End user programs are available in python/example/ folder.
 Tutorial
 --------
 
-This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cubical-complexes.ipynb>`_
+This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tutos/Tuto-GUDHI-cubical-complexes.ipynb>`_
 explains how to represent sublevels sets of functions using cubical complexes.
