@@ -4,15 +4,10 @@
  *
  *    Copyright (C) 2019 Inria
  *
- *    Modifications:
- *      - 2018/04 MC: Add persistence heat maps computation
- *
  *    Modification(s):
+ *      - 2018/04 MC: Add persistence heat maps computation
  *      - YYYY/MM Author: Description of the modification
  */
-
-#include <gudhi/Persistence_heat_maps.h>
-#include <gudhi/common_persistence_representations.h>
 
 #include <iostream>
 #include <vector>
@@ -20,7 +15,11 @@
 #include <functional>
 #include <cmath>
 
-std::function<double(std::pair<double, double>, std::pair<double, double>)> Gaussian_function(double sigma) {
+#include <gudhi/Persistence_heat_maps.h>
+#include <gudhi/common_persistence_representations.h>
+
+std::function<double(std::pair<double, double>, std::pair<double, double>)> Gaussian_function(double sigma)
+{
   return [=](std::pair<double, double> p, std::pair<double, double> q) {
     return std::exp(-((p.first - q.first) * (p.first - q.first) + (p.second - q.second) * (p.second - q.second)) /
                     (sigma));
@@ -30,7 +29,8 @@ std::function<double(std::pair<double, double>, std::pair<double, double>)> Gaus
 using constant_scaling_function = Gudhi::Persistence_representations::constant_scaling_function;
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   // create two simple vectors with birth--death pairs:
 
   std::vector<std::pair<double, double> > persistence1;

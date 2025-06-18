@@ -8,21 +8,23 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <iostream>
+
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "Persistence_heat_maps_test"
 #include <boost/test/unit_test.hpp>
+
 #include <gudhi/reader_utils.h>
 #include <gudhi/Persistence_heat_maps.h>
 #include <gudhi/Unitary_tests_utils.h>
-
-#include <iostream>
 
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
 
 double epsilon = 0.0005;
 
-BOOST_AUTO_TEST_CASE(check_construction_of_heat_maps) {
+BOOST_AUTO_TEST_CASE(check_construction_of_heat_maps)
+{
   std::vector<std::vector<double> > filter = create_Gaussian_filter(100, 1);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   p.print_to_file("data/persistence_heat_map_from_file_with_diagram");
@@ -33,7 +35,8 @@ BOOST_AUTO_TEST_CASE(check_construction_of_heat_maps) {
   BOOST_CHECK(p == q);
 }
 
-BOOST_AUTO_TEST_CASE(check_averages_of_heat_maps) {
+BOOST_AUTO_TEST_CASE(check_averages_of_heat_maps)
+{
   std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 10);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 10);
@@ -48,7 +51,8 @@ BOOST_AUTO_TEST_CASE(check_averages_of_heat_maps) {
   BOOST_CHECK(av == template_average);
 }
 
-BOOST_AUTO_TEST_CASE(check_median_of_heat_maps) {
+BOOST_AUTO_TEST_CASE(check_median_of_heat_maps)
+{
   std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
@@ -67,7 +71,8 @@ BOOST_AUTO_TEST_CASE(check_median_of_heat_maps) {
   BOOST_CHECK(median == template_median);
 }
 
-BOOST_AUTO_TEST_CASE(check_compute_percentage_of_active_of_heat_maps) {
+BOOST_AUTO_TEST_CASE(check_compute_percentage_of_active_of_heat_maps)
+{
   std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
@@ -86,7 +91,8 @@ BOOST_AUTO_TEST_CASE(check_compute_percentage_of_active_of_heat_maps) {
   BOOST_CHECK(percentage_of_active == template_percentage_of_active);
 }
 
-BOOST_AUTO_TEST_CASE(check_vectorize_for_heat_maps) {
+BOOST_AUTO_TEST_CASE(check_vectorize_for_heat_maps)
+{
   std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 5, 0, 1);
 
@@ -124,7 +130,8 @@ BOOST_AUTO_TEST_CASE(check_vectorize_for_heat_maps) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(check_distance_for_heat_maps) {
+BOOST_AUTO_TEST_CASE(check_distance_for_heat_maps)
+{
   std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
@@ -141,7 +148,8 @@ BOOST_AUTO_TEST_CASE(check_distance_for_heat_maps) {
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.distance(r), 0., epsilon);
 }
 
-BOOST_AUTO_TEST_CASE(check_projections_to_R_for_heat_maps) {
+BOOST_AUTO_TEST_CASE(check_projections_to_R_for_heat_maps)
+{
   std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
@@ -152,7 +160,8 @@ BOOST_AUTO_TEST_CASE(check_projections_to_R_for_heat_maps) {
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.project_to_R(0), 429.287, epsilon);
 }
 
-BOOST_AUTO_TEST_CASE(check_scalar_products_for_heat_maps) {
+BOOST_AUTO_TEST_CASE(check_scalar_products_for_heat_maps)
+{
   std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
@@ -169,7 +178,8 @@ BOOST_AUTO_TEST_CASE(check_scalar_products_for_heat_maps) {
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(r.compute_scalar_product(r), 0.672907, epsilon);
 }
 
-BOOST_AUTO_TEST_CASE(check_arythmetic_operations_for_heat_maps) {
+BOOST_AUTO_TEST_CASE(check_arythmetic_operations_for_heat_maps)
+{
   std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
@@ -192,7 +202,8 @@ BOOST_AUTO_TEST_CASE(check_arythmetic_operations_for_heat_maps) {
   BOOST_CHECK(sum == sum_template);
 }
 
-BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters) {
+BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters)
+{
   std::vector<std::vector<double> > filter = create_Gaussian_filter(100, 1);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
 

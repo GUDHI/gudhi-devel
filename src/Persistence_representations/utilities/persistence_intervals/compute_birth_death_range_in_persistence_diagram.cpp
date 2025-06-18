@@ -8,16 +8,17 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_intervals.h>
-
 #include <iostream>
 #include <vector>
 #include <limits>
 #include <utility>
 
+#include <gudhi/Persistence_intervals.h>
+
 using Persistence_intervals = Gudhi::Persistence_representations::Persistence_intervals;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program computes the range of birth and death times of persistence pairs in diagrams provided as "
             << "an input.\n"
             << "The first parameter is the dimension of persistence to be used to create persistence intervals. "

@@ -8,16 +8,17 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_intervals.h>
-
 #include <iostream>
 #include <vector>
 #include <limits>
 #include <utility>
 
+#include <gudhi/Persistence_intervals.h>
+
 using Persistence_intervals = Gudhi::Persistence_representations::Persistence_intervals;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program computes a histogram of barcode's length. A number of bins in the histogram is a "
             << "parameter of this program. \n";
   if ((argc != 3) && (argc != 4)) {
