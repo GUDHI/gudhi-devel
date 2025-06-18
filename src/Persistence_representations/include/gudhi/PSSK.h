@@ -110,13 +110,13 @@ void PSSK::construct(const std::vector<std::pair<double, double> >& intervals_,
   this->min_ = min_;
   this->max_ = max_;
 
-  // initialization of the structure heat_map
+  // initialization of the structure heat_map_
   std::vector<std::vector<double> > heat_map_;
   for (size_t i = 0; i != number_of_pixels; ++i) {
     std::vector<double> v(number_of_pixels, 0);
     heat_map_.push_back(v);
   }
-  this->heat_map = heat_map_;
+  this->heat_map_ = heat_map_;
 
   if (dbg) std::cerr << "Done creating of the heat map, now we will fill in the structure \n";
 
@@ -150,13 +150,13 @@ void PSSK::construct(const std::vector<std::pair<double, double> >& intervals_,
     for (size_t i = 0; i != filter.size(); ++i) {
       for (size_t j = 0; j != filter.size(); ++j) {
         // if the point (x_grid+i,y_grid+j) is the correct point in the grid.
-        if (((x_grid + i) >= 0) && (x_grid + i < this->heat_map.size()) && ((y_grid + j) >= 0) &&
-            (y_grid + j < this->heat_map.size())) {
+        if (((x_grid + i) >= 0) && (x_grid + i < this->heat_map_.size()) && ((y_grid + j) >= 0) &&
+            (y_grid + j < this->heat_map_.size())) {
           if (dbg) {
             std::cerr << y_grid + j << " " << x_grid + i << std::endl;
           }
-          this->heat_map[y_grid + j][x_grid + i] += filter[i][j];
-          this->heat_map[x_grid + i][y_grid + j] += -filter[i][j];
+          this->heat_map_[y_grid + j][x_grid + i] += filter[i][j];
+          this->heat_map_[x_grid + i][y_grid + j] += -filter[i][j];
         }
       }
     }
