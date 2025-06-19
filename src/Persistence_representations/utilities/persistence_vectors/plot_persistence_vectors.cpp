@@ -8,15 +8,16 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_vectors.h>
-
 #include <iostream>
 #include <sstream>
+
+#include <gudhi/Persistence_vectors.h>
 
 using Euclidean_distance = Gudhi::Euclidean_distance;
 using Vector_distances_in_diagram = Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program create a Gnuplot script to plot persistence vector. Please call this program with the "
                "name of file with persistence vector. \n";
   if (argc != 2) {

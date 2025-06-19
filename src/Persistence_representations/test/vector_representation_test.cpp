@@ -8,23 +8,25 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_vectors.h>
-#include <gudhi/common_persistence_representations.h>
-#include <gudhi/read_persistence_from_file.h>
 #include <iostream>
-
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE "vector_representation_test"
-#include <boost/test/unit_test.hpp>
-#include <gudhi/reader_utils.h>
 #include <vector>
 #include <cmath>
 #include <iomanip>
 
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE "vector_representation_test"
+#include <boost/test/unit_test.hpp>
+
+#include <gudhi/reader_utils.h>
+#include <gudhi/Persistence_vectors.h>
+#include <gudhi/common_persistence_representations.h>
+#include <gudhi/read_persistence_from_file.h>
+
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
 
-BOOST_AUTO_TEST_CASE(check_read_write_to_files) {
+BOOST_AUTO_TEST_CASE(check_read_write_to_files)
+{
   std::vector<std::pair<double, double> > intervals;
   intervals.push_back(std::make_pair(2, 3));
   intervals.push_back(std::make_pair(4, 7));
@@ -39,7 +41,8 @@ BOOST_AUTO_TEST_CASE(check_read_write_to_files) {
   BOOST_CHECK(p == q);
 }
 
-BOOST_AUTO_TEST_CASE(check_sortev_vector_distances_template) {
+BOOST_AUTO_TEST_CASE(check_sortev_vector_distances_template)
+{
   Vector_distances_in_diagram<Euclidean_distance> p("data/file_with_diagram", 100);
   std::vector<double> sortev_vector_distances_template;
 
@@ -152,7 +155,8 @@ BOOST_AUTO_TEST_CASE(check_sortev_vector_distances_template) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(check_projections_to_R) {
+BOOST_AUTO_TEST_CASE(check_projections_to_R)
+{
   Vector_distances_in_diagram<Euclidean_distance> p("data/file_with_diagram", 100);
   std::vector<double> proj;
   proj.push_back(0);
@@ -262,7 +266,8 @@ BOOST_AUTO_TEST_CASE(check_projections_to_R) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(check_distance_computations) {
+BOOST_AUTO_TEST_CASE(check_distance_computations)
+{
   Vector_distances_in_diagram<Euclidean_distance> p("data/file_with_diagram", 100);
   Vector_distances_in_diagram<Euclidean_distance> p_prime("data/file_with_diagram", 10);
   std::vector<std::pair<double, double> > intervals(10);
@@ -282,7 +287,8 @@ BOOST_AUTO_TEST_CASE(check_distance_computations) {
   BOOST_CHECK(almost_equal(p_prime.distance(p_bis, 1), 1.86428));
 }
 
-BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances) {
+BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances)
+{
   std::vector<std::pair<double, double> > diag = read_persistence_intervals_in_dimension("data/file_with_diagram");
   Vector_distances_in_diagram<Euclidean_distance> p(diag, 100);
 
@@ -295,7 +301,8 @@ BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances) {
   BOOST_CHECK(dist_numeric_limit_max == dist_infinity);
 }
 
-BOOST_AUTO_TEST_CASE(check_compute_average) {
+BOOST_AUTO_TEST_CASE(check_compute_average)
+{
   Vector_distances_in_diagram<Euclidean_distance> p("data/file_with_diagram", 100);
   // compute average
   std::vector<std::pair<double, double> > i1(3);
@@ -320,7 +327,8 @@ BOOST_AUTO_TEST_CASE(check_compute_average) {
   BOOST_CHECK(template_average == average);
 }
 
-BOOST_AUTO_TEST_CASE(check_arythmetic_operations) {
+BOOST_AUTO_TEST_CASE(check_arythmetic_operations)
+{
   std::vector<std::pair<double, double> > i1(3);
   i1[0] = std::pair<double, double>(1, 2);
   i1[1] = std::pair<double, double>(3, 8);

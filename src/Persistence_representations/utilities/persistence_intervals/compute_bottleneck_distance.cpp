@@ -8,16 +8,17 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_intervals_with_distances.h>
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
 
+#include <gudhi/Persistence_intervals_with_distances.h>
+
 using Persistence_intervals_with_distances = Gudhi::Persistence_representations::Persistence_intervals_with_distances;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program computes the bottleneck distance of persistence pairs in diagrams provided as "
             << "an input.\n"
             << "The first parameter is the dimension of persistence to be used to create persistence intervals. "

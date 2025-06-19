@@ -11,41 +11,48 @@
 #ifndef PSSK_H_
 #define PSSK_H_
 
-// gudhi include
-#include <gudhi/Persistence_heat_maps.h>
-
+// standard include
 #include <limits>
 #include <utility>
 #include <vector>
+
+// gudhi include
+#include <gudhi/Persistence_heat_maps.h>
 
 namespace Gudhi {
 namespace Persistence_representations {
 
 /**
-* This is a version of a representation presented in https://arxiv.org/abs/1412.6821
-* In that paper the authors are using the representation just to compute kernel. Over here, we extend the usability by
-*far.
-* Note that the version presented here is not exact, since we are discretizing the kernel.
-* The only difference with respect to the original class is the method of creation. We have full (square) image, and for
-*every point (p,q), we add a kernel at (p,q) and the negative kernel
-* at (q,p)
-**/
-
-class PSSK : public Persistence_heat_maps<constant_scaling_function> {
+ * This is a version of a representation presented in https://arxiv.org/abs/1412.6821
+ * In that paper the authors are using the representation just to compute kernel. Over here, we extend the usability by
+ * far.
+ * Note that the version presented here is not exact, since we are discretizing the kernel.
+ * The only difference with respect to the original class is the method of creation. We have full (square) image, and
+ * f or every point (p,q), we add a kernel at (p,q) and the negative kernel at (q,p)
+ **/
+class PSSK : public Persistence_heat_maps<constant_scaling_function>
+{
  public:
   PSSK() : Persistence_heat_maps() {}
 
   PSSK(const std::vector<std::pair<double, double> >& interval,
-       std::vector<std::vector<double> > filter = create_Gaussian_filter(5, 1), size_t number_of_pixels = 1000,
-       double min_ = -1, double max_ = -1)
-      : Persistence_heat_maps() {
+       std::vector<std::vector<double> > filter = create_Gaussian_filter(5, 1),
+       size_t number_of_pixels = 1000,
+       double min_ = -1,
+       double max_ = -1)
+      : Persistence_heat_maps()
+  {
     this->construct(interval, filter, number_of_pixels, min_, max_);
   }
 
-  PSSK(const char* filename, std::vector<std::vector<double> > filter = create_Gaussian_filter(5, 1),
-       size_t number_of_pixels = 1000, double min_ = -1, double max_ = -1,
+  PSSK(const char* filename,
+       std::vector<std::vector<double> > filter = create_Gaussian_filter(5, 1),
+       size_t number_of_pixels = 1000,
+       double min_ = -1,
+       double max_ = -1,
        unsigned dimension = std::numeric_limits<unsigned>::max())
-      : Persistence_heat_maps() {
+      : Persistence_heat_maps()
+  {
     std::vector<std::pair<double, double> > intervals_;
     if (dimension == std::numeric_limits<unsigned>::max()) {
       intervals_ = read_persistence_intervals_in_one_dimension_from_file(filename);
@@ -58,12 +65,18 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function> {
  protected:
   void construct(const std::vector<std::pair<double, double> >& intervals_,
                  std::vector<std::vector<double> > filter = create_Gaussian_filter(5, 1),
-                 size_t number_of_pixels = 1000, double min_ = -1, double max_ = -1);
+                 size_t number_of_pixels = 1000,
+                 double min_ = -1,
+                 double max_ = -1);
 };
 
 // if min_ == max_, then the program is requested to set up the values itself based on persistence intervals
 void PSSK::construct(const std::vector<std::pair<double, double> >& intervals_,
-                     std::vector<std::vector<double> > filter, size_t number_of_pixels, double min_, double max_) {
+                     std::vector<std::vector<double> > filter,
+                     size_t number_of_pixels,
+                     double min_,
+                     double max_)
+{
   bool dbg = false;
   if (dbg) {
     std::cerr << "Entering construct procedure \n";
