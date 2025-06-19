@@ -36,7 +36,9 @@ namespace Persistence_representations {
  * far.
  * Note that the version presented here is not exact, since we are discretizing the kernel.
  * The only difference with respect to the original class is the method of creation. We have full (square) image, and
- * f or every point (p,q), we add a kernel at (p,q) and the negative kernel at (q,p)
+ * f or every point (p,q), we add a kernel at (p,q) and the negative kernel at (q,p).
+ *
+ * @ingroup Persistence_representations
  **/
 class PSSK : public Persistence_heat_maps<constant_scaling_function>
 {

@@ -38,6 +38,8 @@ namespace Persistence_representations {
  * over which persistence was computed, dimension and birth/death coordinates.
  * The 'inf' string can appear only as a last element of a line.
  * The procedure returns vector of persistence pairs.
+ *
+ * @ingroup Persistence_representations
  **/
 inline std::vector<std::pair<double, double> > read_persistence_intervals_in_one_dimension_from_file(
     std::string const& filename,
