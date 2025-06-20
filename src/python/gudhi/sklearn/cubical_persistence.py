@@ -13,10 +13,8 @@ __copyright__ = "Copyright (C) 2021 Inria"
 __license__ = "MIT"
 
 
-from sklearn.base import BaseEstimator, TransformerMixin
 import numpy as np
-
-# joblib is required by scikit-learn
+from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
 
 from .. import CubicalComplex

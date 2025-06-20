@@ -11,10 +11,6 @@
 #ifndef PERSISTENCE_LANDSCAPE_ON_GRID_H_
 #define PERSISTENCE_LANDSCAPE_ON_GRID_H_
 
-// gudhi include
-#include <gudhi/read_persistence_from_file.h>
-#include <gudhi/common_persistence_representations.h>
-
 // standard include
 #include <iostream>
 #include <vector>
@@ -27,6 +23,10 @@
 #include <utility>
 #include <string>
 #include <cstdint>
+
+// gudhi include
+#include <gudhi/read_persistence_from_file.h>
+#include <gudhi/common_persistence_representations.h>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -52,92 +52,105 @@ Persistence_landscape_on_grid operation_on_pair_of_landscapes_on_grid(const Pers
  * Note that at the moment, due to rounding errors during the construction of persistence landscapes on a grid,
  * elements which are different by 0.000005 are considered the same. If the scale in your persistence diagrams
  * is comparable to this value, please rescale them before use this code.
-**/
-
-// this class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances,
-// Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product
-class Persistence_landscape_on_grid {
+ **/
+class Persistence_landscape_on_grid
+{
  public:
   /**
    * Default constructor.
-  **/
-  Persistence_landscape_on_grid() {
+   **/
+  Persistence_landscape_on_grid()
+  {
     this->set_up_numbers_of_functions_for_vectorization_and_projections_to_reals();
     this->grid_min = this->grid_max = 0;
   }
 
   /**
-       * Constructor that takes as an input a vector of birth-death pairs.
-      **/
-  Persistence_landscape_on_grid(const std::vector<std::pair<double, double> >& p, double grid_min_, double grid_max_,
+   * Constructor that takes as an input a vector of birth-death pairs.
+   **/
+  Persistence_landscape_on_grid(const std::vector<std::pair<double, double> >& p,
+                                double grid_min_,
+                                double grid_max_,
                                 size_t number_of_points_);
 
   /**
-       * Constructor that takes as an input a vector of birth-death pairs, parameters of the grid and number of
-    *landscape function to be created.
-      **/
-  Persistence_landscape_on_grid(const std::vector<std::pair<double, double> >& p, double grid_min_, double grid_max_,
-                                size_t number_of_points_, unsigned number_of_levels_of_landscape);
+   * Constructor that takes as an input a vector of birth-death pairs, parameters of the grid and number of
+   * landscape function to be created.
+   **/
+  Persistence_landscape_on_grid(const std::vector<std::pair<double, double> >& p,
+                                double grid_min_,
+                                double grid_max_,
+                                size_t number_of_points_,
+                                unsigned number_of_levels_of_landscape);
 
   /**
-       * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the
-    *input file is the following: in each line we put birth-death pair. Last line is assumed
-       * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read.
-    *The additional parameters of this procedure are: ranges of grid, resolution of a grid
-       * number of landscape functions to be created and the dimension of intervals that are need to be read from a file
-    *(in case of Gudhi format files).
-      **/
-  Persistence_landscape_on_grid(const char* filename, double grid_min_, double grid_max_, size_t number_of_points_,
+   * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the
+   * input file is the following: in each line we put birth-death pair. Last line is assumed to be empty. Even if
+   * the points within a line are not ordered, they will be ordered while the input is read.
+   * The additional parameters of this procedure are: ranges of grid, resolution of a grid number of landscape
+   * functions to be created and the dimension of intervals that are need to be read from a file (in case of Gudhi
+   * format files).
+   **/
+  Persistence_landscape_on_grid(const char* filename,
+                                double grid_min_,
+                                double grid_max_,
+                                size_t number_of_points_,
                                 unsigned number_of_levels_of_landscape,
                                 uint16_t dimension_ = std::numeric_limits<uint16_t>::max());
 
   /**
-      * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the
-    *input file is the following: in each line we put birth-death pair. Last line is assumed
-      * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read. The
-    *additional parameters of this procedure are: ranges of grid, resolution of a grid
-      * and the dimension of intervals that are need to be read from a file (in case of Gudhi format files).
-     **/
-  Persistence_landscape_on_grid(const char* filename, double grid_min_, double grid_max_, size_t number_of_points_,
+   * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the
+   * input file is the following: in each line we put birth-death pair. Last line is assumed to be empty. Even if
+   * the points within a line are not ordered, they will be ordered while the input is read. The additional parameters
+   * of this procedure are: ranges of grid, resolution of a grid and the dimension of intervals that are need to be
+   * read from a file (in case of Gudhi format files).
+   **/
+  Persistence_landscape_on_grid(const char* filename,
+                                double grid_min_,
+                                double grid_max_,
+                                size_t number_of_points_,
                                 uint16_t dimension_ = std::numeric_limits<uint16_t>::max());
 
   /**
-       * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the
-    *input file is the following: in each line we put birth-death pair. Last line is assumed
-       * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read.
-    *The additional parameter is the resolution of a grid and the number of landscape
-       * functions to be created. The remaining parameters are calculated based on data.
-      **/
-  Persistence_landscape_on_grid(const char* filename, size_t number_of_points, unsigned number_of_levels_of_landscape,
+   * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the
+   * input file is the following: in each line we put birth-death pair. Last line is assumed to be empty. Even if the
+   * points within a line are not ordered, they will be ordered while the input is read.
+   * The additional parameter is the resolution of a grid and the number of landscape functions to be created.
+   * The remaining parameters are calculated based on data.
+   **/
+  Persistence_landscape_on_grid(const char* filename,
+                                size_t number_of_points,
+                                unsigned number_of_levels_of_landscape,
                                 uint16_t dimension = std::numeric_limits<uint16_t>::max());
 
   /**
-     * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the input
-    *file is the following: in each line we put birth-death pair. Last line is assumed
-     * to be empty. Even if the points within a line are not ordered, they will be ordered while the input is read. The
-    *additional parameter is the resolution of a grid. The last parameter is the dimension
-     * of a persistence to read from the file. If your file contains only persistence pair in a single dimension, please
-    *set it up to std::numeric_limits<unsigned>::max().
-     * The remaining parameters are calculated based on data.
-    **/
-  Persistence_landscape_on_grid(const char* filename, size_t number_of_points,
+   * Constructor that reads persistence intervals from file and creates persistence landscape. The format of the input
+   * file is the following: in each line we put birth-death pair. Last line is assumed to be empty. Even if the points
+   * within a line are not ordered, they will be ordered while the input is read. The additional parameter is the
+   * resolution of a grid. The last parameter is the dimension of a persistence to read from the file. If your file
+   * contains only persistence pair in a single dimension, please set it up to std::numeric_limits<unsigned>::max().
+   * The remaining parameters are calculated based on data.
+   **/
+  Persistence_landscape_on_grid(const char* filename,
+                                size_t number_of_points,
                                 uint16_t dimension = std::numeric_limits<uint16_t>::max());
 
   /**
    * This procedure loads a landscape from file. It erase all the data that was previously stored in this landscape.
-  **/
+   **/
   void load_landscape_from_file(const char* filename);
 
   /**
    * The procedure stores a landscape to a file. The file can be later used by a procedure load_landscape_from_file.
-  **/
+   **/
   void print_to_file(const char* filename) const;
 
   /**
    * This function compute integral of the landscape (defined formally as sum of integrals on R of all landscape
-   *functions)
-  **/
-  double compute_integral_of_landscape() const {
+   * functions)
+   **/
+  double compute_integral_of_landscape() const
+  {
     size_t maximal_level = this->number_of_nonzero_levels();
     double result = 0;
     for (size_t i = 0; i != maximal_level; ++i) {
@@ -147,9 +160,10 @@ class Persistence_landscape_on_grid {
   }
 
   /**
-       * This function compute integral of the 'level'-level of a landscape.
-      **/
-  double compute_integral_of_landscape(size_t level) const {
+   * This function compute integral of the 'level'-level of a landscape.
+   **/
+  double compute_integral_of_landscape(size_t level) const
+  {
     bool dbg = false;
     double result = 0;
     double dx = (this->grid_max - this->grid_min) / static_cast<double>(this->values_of_landscapes.size() - 1);
@@ -188,9 +202,10 @@ class Persistence_landscape_on_grid {
 
   /**
    * This function compute integral of the landscape p-th power of a landscape (defined formally as sum of integrals on
-   *R of p-th powers of all landscape functions)
-  **/
-  double compute_integral_of_landscape(double p) const {
+   * R of p-th powers of all landscape functions).
+   **/
+  double compute_integral_of_landscape(double p) const
+  {
     size_t maximal_level = this->number_of_nonzero_levels();
     double result = 0;
     for (size_t i = 0; i != maximal_level; ++i) {
@@ -200,10 +215,11 @@ class Persistence_landscape_on_grid {
   }
 
   /**
-       * This function compute integral of the landscape p-th power of a level of a landscape (defined formally as sum
-    *of integrals on R of p-th powers of all landscape functions)
-      **/
-  double compute_integral_of_landscape(double p, size_t level) const {
+   * This function compute integral of the landscape p-th power of a level of a landscape (defined formally as sum
+   * of integrals on R of p-th powers of all landscape functions).
+   **/
+  double compute_integral_of_landscape(double p, size_t level) const
+  {
     bool dbg = false;
 
     double result = 0;
@@ -261,11 +277,12 @@ class Persistence_landscape_on_grid {
   }
 
   /**
-* Writing landscape into a stream. A i-th level landscape starts with a string "lambda_i". Then the discontinuity points
-*of the landscapes follows.
-* Shall those points be joined with lines, we will obtain the i-th landscape function.
-**/
-  friend std::ostream& operator<<(std::ostream& out, const Persistence_landscape_on_grid& land) {
+   * Writing landscape into a stream. A i-th level landscape starts with a string "lambda_i". Then the discontinuity
+   * points of the landscapes follows. Shall those points be joined with lines, we will obtain the i-th landscape
+   * function.
+   **/
+  friend std::ostream& operator<<(std::ostream& out, const Persistence_landscape_on_grid& land)
+  {
     double dx = (land.grid_max - land.grid_min) / static_cast<double>(land.values_of_landscapes.size() - 1);
     double x = land.grid_min;
     for (size_t i = 0; i != land.values_of_landscapes.size(); ++i) {
@@ -281,14 +298,16 @@ class Persistence_landscape_on_grid {
 
   template <typename oper>
   friend Persistence_landscape_on_grid operation_on_pair_of_landscapes_on_grid(
-      const Persistence_landscape_on_grid& land1, const Persistence_landscape_on_grid& land2);
+      const Persistence_landscape_on_grid& land1,
+      const Persistence_landscape_on_grid& land2);
 
   /**
    * A function that computes the value of a landscape at a given point. The parameters of the function are: unsigned
-   *level and double x.
+   * level and double x.
    * The procedure will compute the value of the level-landscape at the point x.
-  **/
-  double compute_value_at_a_given_point(unsigned level, double x) const {
+   **/
+  double compute_value_at_a_given_point(unsigned level, double x) const
+  {
     bool dbg = false;
     if ((x < this->grid_min) || (x > this->grid_max)) return 0;
 
@@ -339,53 +358,60 @@ class Persistence_landscape_on_grid {
 
  public:
   /**
-   *\private A function that compute sum of two landscapes.
-  **/
+   * \private A function that compute sum of two landscapes.
+   **/
   friend Persistence_landscape_on_grid add_two_landscapes(const Persistence_landscape_on_grid& land1,
-                                                          const Persistence_landscape_on_grid& land2) {
+                                                          const Persistence_landscape_on_grid& land2)
+  {
     return operation_on_pair_of_landscapes_on_grid<std::plus<double> >(land1, land2);
   }
 
   /**
-       *\private A function that compute difference of two landscapes.
-      **/
+   * \private A function that compute difference of two landscapes.
+   **/
   friend Persistence_landscape_on_grid subtract_two_landscapes(const Persistence_landscape_on_grid& land1,
-                                                               const Persistence_landscape_on_grid& land2) {
+                                                               const Persistence_landscape_on_grid& land2)
+  {
     return operation_on_pair_of_landscapes_on_grid<std::minus<double> >(land1, land2);
   }
 
   /**
    * An operator +, that compute sum of two landscapes.
-  **/
+   **/
   friend Persistence_landscape_on_grid operator+(const Persistence_landscape_on_grid& first,
-                                                 const Persistence_landscape_on_grid& second) {
+                                                 const Persistence_landscape_on_grid& second)
+  {
     return add_two_landscapes(first, second);
   }
 
   /**
    * An operator -, that compute difference of two landscapes.
-  **/
+   **/
   friend Persistence_landscape_on_grid operator-(const Persistence_landscape_on_grid& first,
-                                                 const Persistence_landscape_on_grid& second) {
+                                                 const Persistence_landscape_on_grid& second)
+  {
     return subtract_two_landscapes(first, second);
   }
 
   /**
    * An operator * that allows multiplication of a landscape by a real number.
-  **/
-  friend Persistence_landscape_on_grid operator*(const Persistence_landscape_on_grid& first, double con) {
+   **/
+  friend Persistence_landscape_on_grid operator*(const Persistence_landscape_on_grid& first, double con)
+  {
     return first.multiply_lanscape_by_real_number_not_overwrite(con);
   }
 
   /**
    * An operator * that allows multiplication of a landscape by a real number (order of parameters swapped).
-  **/
-  friend Persistence_landscape_on_grid operator*(double con, const Persistence_landscape_on_grid& first) {
+   **/
+  friend Persistence_landscape_on_grid operator*(double con, const Persistence_landscape_on_grid& first)
+  {
     return first.multiply_lanscape_by_real_number_not_overwrite(con);
   }
 
   friend bool check_if_defined_on_the_same_domain(const Persistence_landscape_on_grid& land1,
-                                                  const Persistence_landscape_on_grid& land2) {
+                                                  const Persistence_landscape_on_grid& land2)
+  {
     if (land1.values_of_landscapes.size() != land2.values_of_landscapes.size()) return false;
     if (land1.grid_min != land2.grid_min) return false;
     if (land1.grid_max != land2.grid_max) return false;
@@ -394,33 +420,37 @@ class Persistence_landscape_on_grid {
 
   /**
    * Operator +=. The second parameter is persistence landscape.
-  **/
-  Persistence_landscape_on_grid operator+=(const Persistence_landscape_on_grid& rhs) {
+   **/
+  Persistence_landscape_on_grid operator+=(const Persistence_landscape_on_grid& rhs)
+  {
     *this = *this + rhs;
     return *this;
   }
 
   /**
    * Operator -=. The second parameter is persistence landscape.
-  **/
-  Persistence_landscape_on_grid operator-=(const Persistence_landscape_on_grid& rhs) {
+   **/
+  Persistence_landscape_on_grid operator-=(const Persistence_landscape_on_grid& rhs)
+  {
     *this = *this - rhs;
     return *this;
   }
 
   /**
    * Operator *=. The second parameter is a real number by which the y values of all landscape functions are multiplied.
-   *The x-values remain unchanged.
-  **/
-  Persistence_landscape_on_grid operator*=(double x) {
+   * The x-values remain unchanged.
+   **/
+  Persistence_landscape_on_grid operator*=(double x)
+  {
     *this = *this * x;
     return *this;
   }
 
   /**
    * Operator /=. The second parameter is a real number.
-  **/
-  Persistence_landscape_on_grid operator/=(double x) {
+   **/
+  Persistence_landscape_on_grid operator/=(double x)
+  {
     if (x == 0) throw("In operator /=, division by 0. Program terminated.");
     *this = *this * (1 / x);
     return *this;
@@ -428,8 +458,9 @@ class Persistence_landscape_on_grid {
 
   /**
    * An operator to compare two persistence landscapes.
-  **/
-  bool operator==(const Persistence_landscape_on_grid& rhs) const {
+   **/
+  bool operator==(const Persistence_landscape_on_grid& rhs) const
+  {
     bool dbg = true;
     if (this->values_of_landscapes.size() != rhs.values_of_landscapes.size()) {
       if (dbg) std::clog << "values_of_landscapes of incompatible sizes\n";
@@ -458,14 +489,15 @@ class Persistence_landscape_on_grid {
   }
 
   /**
-       * An operator to compare two persistence landscapes.
-      **/
+   * An operator to compare two persistence landscapes.
+   **/
   bool operator!=(const Persistence_landscape_on_grid& rhs) const { return !((*this) == rhs); }
 
   /**
    * Computations of maximum (y) value of landscape.
-  **/
-  double compute_maximum() const {
+   **/
+  double compute_maximum() const
+  {
     // since the function can only be entirely positive or negative, the maximal value will be an extremal value in the
     // arrays:
     double max_value = -std::numeric_limits<double>::max();
@@ -480,9 +512,10 @@ class Persistence_landscape_on_grid {
   }
 
   /**
-       * Computations of minimum and maximum value of landscape.
-      **/
-  std::pair<double, double> compute_minimum_maximum() const {
+   * Computations of minimum and maximum value of landscape.
+   **/
+  std::pair<double, double> compute_minimum_maximum() const
+  {
     // since the function can only be entirely positive or negative, the maximal value will be an extremal value in the
     // arrays:
     double max_value = -std::numeric_limits<double>::max();
@@ -502,23 +535,25 @@ class Persistence_landscape_on_grid {
   }
 
   /**
-       * This procedure returns x-range of a given level persistence landscape. If a default value is used, the x-range
-       * of 0th level landscape is given (and this range contains the ranges of all other landscapes).
-      **/
-  std::pair<double, double> get_x_range(size_t level = 0) const {
+   * This procedure returns x-range of a given level persistence landscape. If a default value is used, the x-range
+   * of 0th level landscape is given (and this range contains the ranges of all other landscapes).
+   **/
+  std::pair<double, double> get_x_range(size_t level = 0) const
+  {
     return std::make_pair(this->grid_min, this->grid_max);
   }
 
   /**
    * This procedure returns y-range of a persistence landscape. If a default value is used, the y-range
    * of 0th level landscape is given (and this range contains the ranges of all other landscapes).
-  **/
+   **/
   std::pair<double, double> get_y_range(size_t level = 0) const { return this->compute_minimum_maximum(); }
 
   /**
    * This function computes maximal lambda for which lambda-level landscape is nonzero.
-  **/
-  size_t number_of_nonzero_levels() const {
+   **/
+  size_t number_of_nonzero_levels() const
+  {
     size_t result = 0;
     for (size_t i = 0; i != this->values_of_landscapes.size(); ++i) {
       if (this->values_of_landscapes[i].size() > result) result = this->values_of_landscapes[i].size();
@@ -528,8 +563,9 @@ class Persistence_landscape_on_grid {
 
   /**
    * Computations of a \f$L^i\f$ norm of landscape, where i is the input parameter.
-  **/
-  double compute_norm_of_landscape(double i) const {
+   **/
+  double compute_norm_of_landscape(double i) const
+  {
     std::vector<std::pair<double, double> > p;
     Persistence_landscape_on_grid l(p, this->grid_min, this->grid_max, this->values_of_landscapes.size() - 1);
 
@@ -542,22 +578,23 @@ class Persistence_landscape_on_grid {
 
   /**
    * An operator to compute the value of a landscape in the level 'level' at the argument 'x'.
-  **/
+   **/
   double operator()(unsigned level, double x) const { return this->compute_value_at_a_given_point(level, x); }
 
   /**
    * Computations of \f$L^{\infty}\f$ distance between two landscapes.
-  **/
+   **/
   friend double compute_max_norm_distance_of_landscapes(const Persistence_landscape_on_grid& first,
                                                         const Persistence_landscape_on_grid& second);
 
   /**
    * Function to compute absolute value of a PL function. The representation of persistence landscapes allow to store
-   *general PL-function. When computing distance between two landscapes, we compute difference between
+   * general PL-function. When computing distance between two landscapes, we compute difference between
    * them. In this case, a general PL-function with negative value can appear as a result. Then in order to compute
-   *distance, we need to take its absolute value. This is the purpose of this procedure.
-  **/
-  void abs() {
+   * distance, we need to take its absolute value. This is the purpose of this procedure.
+   **/
+  void abs()
+  {
     for (size_t i = 0; i != this->values_of_landscapes.size(); ++i) {
       for (size_t j = 0; j != this->values_of_landscapes[i].size(); ++j) {
         this->values_of_landscapes[i][j] = std::abs(this->values_of_landscapes[i][j]);
@@ -567,13 +604,14 @@ class Persistence_landscape_on_grid {
 
   /**
    * Computes the number of landscape functions.
-  **/
+   **/
   size_t size() const { return this->number_of_nonzero_levels(); }
 
   /**
-   *  Compute maximal value of lambda-level landscape.
-  **/
-  double find_max(unsigned lambda) const {
+   * Compute maximal value of lambda-level landscape.
+   **/
+  double find_max(unsigned lambda) const
+  {
     double max_value = -std::numeric_limits<double>::max();
     for (size_t i = 0; i != this->values_of_landscapes.size(); ++i) {
       if (this->values_of_landscapes[i].size() > lambda) {
@@ -585,9 +623,9 @@ class Persistence_landscape_on_grid {
 
   /**
    * Function to compute inner (scalar) product of two landscapes.
-  **/
-  friend double compute_inner_product(const Persistence_landscape_on_grid& l1,
-                                      const Persistence_landscape_on_grid& l2) {
+   **/
+  friend double compute_inner_product(const Persistence_landscape_on_grid& l1, const Persistence_landscape_on_grid& l2)
+  {
     if (!check_if_defined_on_the_same_domain(l1, l2))
       throw "Landscapes are not defined on the same grid, the program will now terminate";
     size_t maximal_level = l1.number_of_nonzero_levels();
@@ -600,9 +638,11 @@ class Persistence_landscape_on_grid {
 
   /**
    * Function to compute inner (scalar) product of given levels of two landscapes.
-  **/
-  friend double compute_inner_product(const Persistence_landscape_on_grid& l1, const Persistence_landscape_on_grid& l2,
-                                      size_t level) {
+   **/
+  friend double compute_inner_product(const Persistence_landscape_on_grid& l1,
+                                      const Persistence_landscape_on_grid& l2,
+                                      size_t level)
+  {
     bool dbg = false;
 
     if (!check_if_defined_on_the_same_domain(l1, l2))
@@ -691,16 +731,17 @@ class Persistence_landscape_on_grid {
   /**
    * Computations of \f$L^{p}\f$ distance between two landscapes on a grid. p is the parameter of the procedure.
    * FIXME: Note that, due to the grid representation, the method below may give non--accurate results in case when the
-   *landscape P and Q the difference of which we want to compute
-   * are intersecting. This is a consequence of a general way they are computed. In the future, an integral of absolute
-   *value of a difference of P and Q will be given as a separated
-   * function to fix that inaccuracy.
-  **/
+   * landscape P and Q the difference of which we want to compute are intersecting. This is a consequence of a general
+   * way they are computed. In the future, an integral of absolute value of a difference of P and Q will be given as a
+   * separated function to fix that inaccuracy.
+   **/
   friend double compute_distance_of_landscapes_on_grid(const Persistence_landscape_on_grid& first,
-                                                       const Persistence_landscape_on_grid& second, double p) {
+                                                       const Persistence_landscape_on_grid& second,
+                                                       double p)
+  {
     bool dbg = false;
-    // This is what we want to compute: (\int_{- \infty}^{+\infty}| first-second |^p)^(1/p). We will do it one step at a
-    // time:
+    // This is what we want to compute: (\int_{- \infty}^{+\infty}| first-second |^p)^(1/p).
+    // We will do it one step at a time:
 
     if (dbg) {
       std::clog << "first : " << first << std::endl;
@@ -754,27 +795,28 @@ class Persistence_landscape_on_grid {
 
   /**
    * The number of projections to R is defined to the number of nonzero landscape functions. I-th projection is an
-   *integral of i-th landscape function over whole R.
+   * integral of i-th landscape function over whole R.
    * This function is required by the Real_valued_topological_data concept.
    * At the moment this function is not tested, since it is quite likely to be changed in the future. Given this, when
-   *using it, keep in mind that it
-   * will be most likely changed in the next versions.
-  **/
-  double project_to_R(int number_of_function) const {
+   * using it, keep in mind that it will be most likely changed in the next versions.
+   **/
+  double project_to_R(int number_of_function) const
+  {
     return this->compute_integral_of_landscape((size_t)number_of_function);
   }
 
   /**
    * The function gives the number of possible projections to R. This function is required by the
-   *Real_valued_topological_data concept.
-  **/
+   * Real_valued_topological_data concept.
+   **/
   size_t number_of_projections_to_R() const { return number_of_functions_for_projections_to_reals; }
 
   /**
    * This function produce a vector of doubles based on a landscape. It is required in a concept
    * Vectorized_topological_data
-  */
-  std::vector<double> vectorize(int number_of_function) const {
+   */
+  std::vector<double> vectorize(int number_of_function) const
+  {
     // TODO(PD) think of something smarter over here
     if ((number_of_function < 0) || ((size_t)number_of_function >= this->values_of_landscapes.size())) {
       throw "Wrong number of function\n";
@@ -791,15 +833,16 @@ class Persistence_landscape_on_grid {
 
   /**
    * This function return the number of functions that allows vectorization of persistence landscape. It is required in
-   *a concept Vectorized_topological_data.
+   * a concept Vectorized_topological_data.
    **/
   size_t number_of_vectorize_functions() const { return number_of_functions_for_vectorization; }
 
   /**
    * A function to compute averaged persistence landscape on a grid, based on vector of persistence landscapes on grid.
    * This function is required by Topological_data_with_averages concept.
-  **/
-  void compute_average(const std::vector<Persistence_landscape_on_grid*>& to_average) {
+   **/
+  void compute_average(const std::vector<Persistence_landscape_on_grid*>& to_average)
+  {
     bool dbg = false;
     // After execution of this procedure, the average is supposed to be in the current object. To make sure that this is
     // the case, we need to do some cleaning first.
@@ -856,12 +899,13 @@ class Persistence_landscape_on_grid {
   }  // compute_average
 
   /**
-  * A function to compute distance between persistence landscape on a grid.
-  * The parameter of this function is a Persistence_landscape_on_grid.
-  * This function is required in Topological_data_with_distances concept.
-  * For max norm distance, set power to std::numeric_limits<double>::max()
-  **/
-  double distance(const Persistence_landscape_on_grid& second, double power = 1) const {
+   * A function to compute distance between persistence landscape on a grid.
+   * The parameter of this function is a Persistence_landscape_on_grid.
+   * This function is required in Topological_data_with_distances concept.
+   * For max norm distance, set power to std::numeric_limits<double>::max()
+   **/
+  double distance(const Persistence_landscape_on_grid& second, double power = 1) const
+  {
     if (power < std::numeric_limits<double>::max()) {
       return compute_distance_of_landscapes_on_grid(*this, second, power);
     } else {
@@ -870,42 +914,51 @@ class Persistence_landscape_on_grid {
   }
 
   /**
-  * A function to compute scalar product of persistence landscape on a grid.
-  * The parameter of this function is a Persistence_landscape_on_grid.
-  * This function is required in Topological_data_with_scalar_product concept.
-  **/
-  double compute_scalar_product(const Persistence_landscape_on_grid& second) {
+   * A function to compute scalar product of persistence landscape on a grid.
+   * The parameter of this function is a Persistence_landscape_on_grid.
+   * This function is required in Topological_data_with_scalar_product concept.
+   **/
+  double compute_scalar_product(const Persistence_landscape_on_grid& second)
+  {
     return compute_inner_product((*this), second);
   }
 
   // end of implementation of functions needed for concepts.
 
   /**
-  * A function that returns values of landscapes. It can be used for visualization
-  **/
+   * A function that returns values of landscapes. It can be used for visualization
+   **/
   std::vector<std::vector<double> > output_for_visualization() const { return this->values_of_landscapes; }
 
   /**
-  * function used to create a gnuplot script for visualization of landscapes. Over here we need to specify which
-  *landscapes do we want to plot.
-  * In addition, the user may specify the range (min and max) where landscape is plot. The default values for min and
-  *max are std::numeric_limits<double>::max(). If the procedure detect those
-  * values, it will determine the range so that the whole landscape is supported there. If at least one min or max value
-  *is different from std::numeric_limits<double>::max(), then the values
-  * provided by the user will be used.
-  **/
-  void plot(const char* filename, size_t from_, size_t to_) const {
-    this->plot(filename, std::numeric_limits<double>::max(), std::numeric_limits<double>::max(),
-               std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), from_, to_);
+   * function used to create a gnuplot script for visualization of landscapes. Over here we need to specify which
+   * landscapes do we want to plot.
+   * In addition, the user may specify the range (min and max) where landscape is plot. The default values for min and
+   * max are std::numeric_limits<double>::max(). If the procedure detect those values, it will determine the range
+   * so that the whole landscape is supported there. If at least one min or max value is different from
+   * std::numeric_limits<double>::max(), then the values provided by the user will be used.
+   **/
+  void plot(const char* filename, size_t from_, size_t to_) const
+  {
+    this->plot(filename,
+               std::numeric_limits<double>::max(),
+               std::numeric_limits<double>::max(),
+               std::numeric_limits<double>::max(),
+               std::numeric_limits<double>::max(),
+               from_,
+               to_);
   }
 
   /**
-  * function used to create a gnuplot script for visualization of landscapes. Over here we can restrict also x and y
-  *range of the landscape.
-  **/
-  void plot(const char* filename, double min_x = std::numeric_limits<double>::max(),
-            double max_x = std::numeric_limits<double>::max(), double min_y = std::numeric_limits<double>::max(),
-            double max_y = std::numeric_limits<double>::max(), size_t from_ = std::numeric_limits<size_t>::max(),
+   * function used to create a gnuplot script for visualization of landscapes. Over here we can restrict also x and y
+   * range of the landscape.
+   **/
+  void plot(const char* filename,
+            double min_x = std::numeric_limits<double>::max(),
+            double max_x = std::numeric_limits<double>::max(),
+            double min_y = std::numeric_limits<double>::max(),
+            double max_y = std::numeric_limits<double>::max(),
+            size_t from_ = std::numeric_limits<size_t>::max(),
             size_t to_ = std::numeric_limits<size_t>::max()) const;
 
  protected:
@@ -915,20 +968,27 @@ class Persistence_landscape_on_grid {
   size_t number_of_functions_for_vectorization;
   size_t number_of_functions_for_projections_to_reals;
 
-  void set_up_numbers_of_functions_for_vectorization_and_projections_to_reals() {
+  void set_up_numbers_of_functions_for_vectorization_and_projections_to_reals()
+  {
     // warning, this function can be only called after filling in the values_of_landscapes vector.
     this->number_of_functions_for_vectorization = this->values_of_landscapes.size();
     this->number_of_functions_for_projections_to_reals = this->values_of_landscapes.size();
   }
-  void set_up_values_of_landscapes(const std::vector<std::pair<double, double> >& p, double grid_min_, double grid_max_,
+
+  void set_up_values_of_landscapes(const std::vector<std::pair<double, double> >& p,
+                                   double grid_min_,
+                                   double grid_max_,
                                    size_t number_of_points_,
                                    unsigned number_of_levels = std::numeric_limits<unsigned>::max());
   Persistence_landscape_on_grid multiply_lanscape_by_real_number_not_overwrite(double x) const;
 };
 
 void Persistence_landscape_on_grid::set_up_values_of_landscapes(const std::vector<std::pair<double, double> >& p,
-                                                                double grid_min_, double grid_max_,
-                                                                size_t number_of_points_, unsigned number_of_levels) {
+                                                                double grid_min_,
+                                                                double grid_max_,
+                                                                size_t number_of_points_,
+                                                                unsigned number_of_levels)
+{
   bool dbg = false;
   if (dbg) {
     std::clog << "Here is the procedure : set_up_values_of_landscapes. The parameters are : grid_min_ : " << grid_min_
@@ -1070,20 +1130,28 @@ void Persistence_landscape_on_grid::set_up_values_of_landscapes(const std::vecto
 }  // set_up_values_of_landscapes
 
 Persistence_landscape_on_grid::Persistence_landscape_on_grid(const std::vector<std::pair<double, double> >& p,
-                                                             double grid_min_, double grid_max_,
-                                                             size_t number_of_points_) {
+                                                             double grid_min_,
+                                                             double grid_max_,
+                                                             size_t number_of_points_)
+{
   this->set_up_values_of_landscapes(p, grid_min_, grid_max_, number_of_points_);
 }  // Persistence_landscape_on_grid
 
 Persistence_landscape_on_grid::Persistence_landscape_on_grid(const std::vector<std::pair<double, double> >& p,
-                                                             double grid_min_, double grid_max_,
+                                                             double grid_min_,
+                                                             double grid_max_,
                                                              size_t number_of_points_,
-                                                             unsigned number_of_levels_of_landscape) {
+                                                             unsigned number_of_levels_of_landscape)
+{
   this->set_up_values_of_landscapes(p, grid_min_, grid_max_, number_of_points_, number_of_levels_of_landscape);
 }
 
-Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename, double grid_min_, double grid_max_,
-                                                             size_t number_of_points_, uint16_t dimension) {
+Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename,
+                                                             double grid_min_,
+                                                             double grid_max_,
+                                                             size_t number_of_points_,
+                                                             uint16_t dimension)
+{
   std::vector<std::pair<double, double> > p;
   if (dimension == std::numeric_limits<uint16_t>::max()) {
     p = read_persistence_intervals_in_one_dimension_from_file(filename);
@@ -1093,10 +1161,13 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filenam
   this->set_up_values_of_landscapes(p, grid_min_, grid_max_, number_of_points_);
 }
 
-Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename, double grid_min_, double grid_max_,
+Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename,
+                                                             double grid_min_,
+                                                             double grid_max_,
                                                              size_t number_of_points_,
                                                              unsigned number_of_levels_of_landscape,
-                                                             uint16_t dimension) {
+                                                             uint16_t dimension)
+{
   std::vector<std::pair<double, double> > p;
   if (dimension == std::numeric_limits<uint16_t>::max()) {
     p = read_persistence_intervals_in_one_dimension_from_file(filename);
@@ -1106,8 +1177,10 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filenam
   this->set_up_values_of_landscapes(p, grid_min_, grid_max_, number_of_points_, number_of_levels_of_landscape);
 }
 
-Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename, size_t number_of_points_,
-                                                             uint16_t dimension) {
+Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename,
+                                                             size_t number_of_points_,
+                                                             uint16_t dimension)
+{
   std::vector<std::pair<double, double> > p;
   if (dimension == std::numeric_limits<uint16_t>::max()) {
     p = read_persistence_intervals_in_one_dimension_from_file(filename);
@@ -1123,9 +1196,11 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filenam
   this->set_up_values_of_landscapes(p, grid_min_, grid_max_, number_of_points_);
 }
 
-Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename, size_t number_of_points_,
+Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filename,
+                                                             size_t number_of_points_,
                                                              unsigned number_of_levels_of_landscape,
-                                                             uint16_t dimension) {
+                                                             uint16_t dimension)
+{
   std::vector<std::pair<double, double> > p;
   if (dimension == std::numeric_limits<uint16_t>::max()) {
     p = read_persistence_intervals_in_one_dimension_from_file(filename);
@@ -1141,7 +1216,8 @@ Persistence_landscape_on_grid::Persistence_landscape_on_grid(const char* filenam
   this->set_up_values_of_landscapes(p, grid_min_, grid_max_, number_of_points_, number_of_levels_of_landscape);
 }
 
-void Persistence_landscape_on_grid::load_landscape_from_file(const char* filename) {
+void Persistence_landscape_on_grid::load_landscape_from_file(const char* filename)
+{
   std::ifstream in;
   in.open(filename);
   // check if the file exist.
@@ -1171,7 +1247,8 @@ void Persistence_landscape_on_grid::load_landscape_from_file(const char* filenam
   in.close();
 }
 
-void Persistence_landscape_on_grid::print_to_file(const char* filename) const {
+void Persistence_landscape_on_grid::print_to_file(const char* filename) const
+{
   std::ofstream out;
   out.open(filename);
 
@@ -1189,8 +1266,14 @@ void Persistence_landscape_on_grid::print_to_file(const char* filename) const {
   out.close();
 }
 
-void Persistence_landscape_on_grid::plot(const char* filename, double min_x, double max_x, double min_y, double max_y,
-                                         size_t from_, size_t to_) const {
+void Persistence_landscape_on_grid::plot(const char* filename,
+                                         double min_x,
+                                         double max_x,
+                                         double min_y,
+                                         double max_y,
+                                         size_t from_,
+                                         size_t to_) const
+{
   // this program create a gnuplot script file that allows to plot persistence diagram.
   std::ofstream out;
 
@@ -1252,7 +1335,8 @@ void Persistence_landscape_on_grid::plot(const char* filename, double min_x, dou
 
 template <typename T>
 Persistence_landscape_on_grid operation_on_pair_of_landscapes_on_grid(const Persistence_landscape_on_grid& land1,
-                                                                      const Persistence_landscape_on_grid& land2) {
+                                                                      const Persistence_landscape_on_grid& land2)
+{
   // first we need to check if the domains are the same:
   if (!check_if_defined_on_the_same_domain(land1, land2)) throw "Two grids are not compatible";
 
@@ -1283,7 +1367,8 @@ Persistence_landscape_on_grid operation_on_pair_of_landscapes_on_grid(const Pers
 }
 
 Persistence_landscape_on_grid Persistence_landscape_on_grid::multiply_lanscape_by_real_number_not_overwrite(
-    double x) const {
+    double x) const
+{
   Persistence_landscape_on_grid result;
   result.values_of_landscapes = std::vector<std::vector<double> >(this->values_of_landscapes.size());
   result.grid_min = this->grid_min;
@@ -1300,7 +1385,8 @@ Persistence_landscape_on_grid Persistence_landscape_on_grid::multiply_lanscape_b
 }
 
 double compute_max_norm_distance_of_landscapes(const Persistence_landscape_on_grid& first,
-                                               const Persistence_landscape_on_grid& second) {
+                                               const Persistence_landscape_on_grid& second)
+{
   double result = 0;
 
   // first we need to check if first and second is defined on the same domain"

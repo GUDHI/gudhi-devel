@@ -8,16 +8,17 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/PSSK.h>
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
 
+#include <gudhi/PSSK.h>
+
 using PSSK = Gudhi::Persistence_representations::PSSK;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program creates PSSK files (*.pssk) of persistence diagrams files (*.pers) "
             << "provided as an input.\n"
             << "The first parameter of a program is an integer, a size of a grid.\n"

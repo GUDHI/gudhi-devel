@@ -8,15 +8,16 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_vectors.h>
-
 #include <iostream>
 #include <vector>
+
+#include <gudhi/Persistence_vectors.h>
 
 using Euclidean_distance = Gudhi::Euclidean_distance;
 using Vector_distances_in_diagram = Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program computes average of persistence vectors stored in files (the files needs to "
             << "be created beforehand).\n"
             << "The parameters of this programs are names of files with persistence vectors.\n";
