@@ -22,6 +22,8 @@
 #include <algorithm>  //std::sort
 #include <vector>
 
+#include <gudhi/persistence_matrix_options.h>
+
 namespace Gudhi {
 namespace persistence_matrix {
 
@@ -150,8 +152,7 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
       for (auto& c : col) {
         cycle.push_back(c.get_row_index());
       }
-      if constexpr (std::is_same_v<typename Master_matrix::Column, typename Master_matrix::Matrix_heap_column> ||
-                    std::is_same_v<typename Master_matrix::Column, typename Master_matrix::Matrix_unordered_set_column>)
+      if constexpr (!is_well_behaved<Master_matrix::Option_list::column_type>::value)
         std::sort(cycle.begin(), cycle.end());
       representativeCycles_.push_back(cycle);
       birthToCycle_[i] = representativeCycles_.size() - 1;
