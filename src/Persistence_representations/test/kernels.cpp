@@ -102,4 +102,5 @@ BOOST_AUTO_TEST_CASE(check_generic_SW) {
   std::cout << sw1.compute_scalar_product(sw2) << std::endl;
   std::cout << swex1.compute_scalar_product(swex2) << std::endl;
   BOOST_CHECK(std::abs(sw1.compute_scalar_product(sw2) - swex1.compute_scalar_product(swex2)) <= 1e-3);
+
 }
