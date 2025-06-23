@@ -14,7 +14,7 @@ training time. Its parameters allow to reproduce most of the known finite-dimens
 landscapes and images), and can be combined to create even new ones, that are best suited for a given supervised
 machine learning task with persistence diagrams. PersLay is implemented in TensorFlow.
 
-This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tutos/Tuto-GUDHI-perslay-visu.ipynb>`__ explains how to use
+This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-perslay-visu.ipynb>`__ explains how to use
 PersLay.
 
 Example

@@ -131,5 +131,5 @@ End user programs are available in python/example/ folder.
 Tutorial
 --------
 
-This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tutos/Tuto-GUDHI-cubical-complexes.ipynb>`_
+This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-cubical-complexes.ipynb>`_
 explains how to represent sublevels sets of functions using cubical complexes.

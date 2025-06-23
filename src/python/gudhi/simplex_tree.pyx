@@ -552,7 +552,7 @@ cdef class SimplexTree:
             Note that this code creates an extra vertex internally, so you should make sure that the simplex tree does
             not contain a vertex with the largest possible value (i.e., 4294967295).
 
-        This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tutos/Tuto-GUDHI-extended-persistence.ipynb>`_
+        This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-extended-persistence.ipynb>`_
         explains how to compute an extension of persistence called extended persistence.
         """
         self.get_ptr().compute_extended_filtration()
@@ -582,7 +582,7 @@ cdef class SimplexTree:
             original filtration values due to the internal transformation (scaling to [-2,-1]) that is
             performed on these values during the computation of extended persistence.
 
-        This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tutos/Tuto-GUDHI-extended-persistence.ipynb>`_
+        This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-extended-persistence.ipynb>`_
         explains how to compute an extension of persistence called extended persistence.
         """
         cdef vector[pair[int, pair[double, double]]] persistence_result
