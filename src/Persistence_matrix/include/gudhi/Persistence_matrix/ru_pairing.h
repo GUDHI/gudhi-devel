@@ -20,8 +20,6 @@
 
 #include <unordered_map>
 
-#include "boundary_cell_position_to_id_mapper.h"
-
 namespace Gudhi {
 namespace persistence_matrix {
 
@@ -46,20 +44,11 @@ struct Dummy_ru_pairing
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
-class RU_pairing : public std::conditional<
-                       Master_matrix::Option_list::has_removable_columns,
-                       Cell_position_to_ID_mapper<typename Master_matrix::ID_index, typename Master_matrix::Pos_index>,
-                       Dummy_pos_mapper
-                    >::type
+class RU_pairing
 {
  protected:
   using Pos_index = typename Master_matrix::Pos_index;
   using ID_index = typename Master_matrix::ID_index;
-  //PIDM = Position to ID Map
-  using PIDM = typename std::conditional<Master_matrix::Option_list::has_removable_columns,
-                                          Cell_position_to_ID_mapper<ID_index, Pos_index>,
-                                          Dummy_pos_mapper
-                                        >::type;
 
  public:
   using Barcode = typename Master_matrix::Barcode;  /**< Barcode type. */
@@ -67,7 +56,7 @@ class RU_pairing : public std::conditional<
   /**
    * @brief Default constructor.
    */
-  RU_pairing() : PIDM() {}
+  RU_pairing() {}
 
   /**
    * @brief Returns the current barcode which is maintained at any insertion, removal or vine swap.
@@ -80,7 +69,6 @@ class RU_pairing : public std::conditional<
    * @brief Swap operator.
    */
   friend void swap(RU_pairing& pairing1, RU_pairing& pairing2) {
-    swap(static_cast<PIDM&>(pairing1), static_cast<PIDM&>(pairing2));
     pairing1.barcode_.swap(pairing2.barcode_);
     pairing1.indexToBar_.swap(pairing2.indexToBar_);
     pairing1.idToPosition_.swap(pairing2.idToPosition_);
@@ -143,10 +131,11 @@ class RU_pairing : public std::conditional<
       indexToBar_.erase(it);
     }
 
-    auto it = PIDM::map_.find(eventIndex);
-    if (it != PIDM::map_.end()){
+    auto& map = static_cast<typename Master_matrix::Master_RU_matrix*>(this)->positionToID_;
+    auto it = map.find(eventIndex);
+    if (it != map.end()){
       idToPosition_.erase(it->second);
-      PIDM::map_.erase(it);
+      map.erase(it);
     }
   }
 };

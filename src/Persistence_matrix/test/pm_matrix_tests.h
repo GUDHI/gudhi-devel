@@ -2478,37 +2478,43 @@ void test_representative_cycles(Matrix& mb) {
   const auto& cycles = mb.get_representative_cycles();
   BOOST_CHECK_EQUAL(cycles.size(), 5);
 
+  using Cy = decltype(cycles[0]);
+
   if constexpr (Matrix::Option_list::is_of_boundary_type) {
-    std::vector<unsigned int> tmp;
-    tmp.push_back(0);
-    BOOST_CHECK(cycles[0] == tmp);
-    tmp[0] = 1;
-    BOOST_CHECK(cycles[1] == tmp);
-    tmp[0] = 2;
-    BOOST_CHECK(cycles[2] == tmp);
-    tmp[0] = 3;
-    tmp.push_back(4);
-    tmp.push_back(5);
-    BOOST_CHECK(cycles[3] == tmp);
-    tmp.clear();
-    tmp.push_back(7);
-    BOOST_CHECK(cycles[4] == tmp);
+    if constexpr (Matrix::Option_list::is_z2){
+      BOOST_CHECK((cycles[0] == Cy{0}));
+      BOOST_CHECK((cycles[1] == Cy{0, 1}));
+      BOOST_CHECK((cycles[2] == Cy{1, 2}));
+      BOOST_CHECK((cycles[3] == Cy{3, 4, 5}));
+      BOOST_CHECK((cycles[4] == Cy{1, 7}));
+    } else {
+      BOOST_CHECK((cycles[0] == Cy{{0, 1}}));
+      BOOST_CHECK((cycles[1] == Cy{{0, 1}, {1, 4}}));
+      BOOST_CHECK((cycles[2] == Cy{{1, 1}, {2, 4}}));
+      BOOST_CHECK((cycles[3] == Cy{{3, 1}, {4, 1}, {5, 4}}));
+      BOOST_CHECK((cycles[4] == Cy{{1, 1}, {7, 4}}));
+    }
   } else {
-    std::vector<unsigned int> tmp;
-    tmp.push_back(0);
-    BOOST_CHECK(cycles[0] == tmp);
-    tmp.push_back(1);
-    BOOST_CHECK(cycles[1] == tmp);
-    tmp[1] = 2;
-    BOOST_CHECK(cycles[2] == tmp);
-    tmp[0] = 3;
-    tmp[1] = 4;
-    tmp.push_back(5);
-    BOOST_CHECK(cycles[3] == tmp);
-    tmp[0] = 0;
-    tmp[1] = 7;
-    tmp.pop_back();
-    BOOST_CHECK(cycles[4] == tmp);
+    if constexpr (Matrix::Option_list::is_z2){
+      std::vector<unsigned int> tmp;
+      tmp.push_back(0);
+      BOOST_CHECK(cycles[0] == tmp);
+      tmp.push_back(1);
+      BOOST_CHECK(cycles[1] == tmp);
+      tmp[1] = 2;
+      BOOST_CHECK(cycles[2] == tmp);
+      tmp[0] = 3;
+      tmp[1] = 4;
+      tmp.push_back(5);
+      BOOST_CHECK(cycles[3] == tmp);
+      tmp[0] = 0;
+      tmp[1] = 7;
+      tmp.pop_back();
+      BOOST_CHECK(cycles[4] == tmp);
+    } else {
+
+    }
+    
   }
 
   if constexpr (Matrix::Option_list::has_column_pairings) {

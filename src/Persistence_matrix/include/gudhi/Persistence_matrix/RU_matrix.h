@@ -17,9 +17,11 @@
 #ifndef PM_RU_MATRIX_H
 #define PM_RU_MATRIX_H
 
+#include <type_traits>  //std::conditional
+#include <utility>      //std::swap, std::move & std::exchange
+#include <iostream>     //print() only
 #include <vector>
-#include <utility>   //std::swap, std::move & std::exchange
-#include <iostream>  //print() only
+#include <unordered_map>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -379,6 +381,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
     swap(matrix1.mirrorMatrixU_, matrix2.mirrorMatrixU_);
     matrix1.pivotToColumnIndex_.swap(matrix2.pivotToColumnIndex_);
     std::swap(matrix1.nextEventIndex_, matrix2.nextEventIndex_);
+    matrix1.positionToID_.swap(matrix2.positionToID_);
     std::swap(matrix1.operators_, matrix2.operators_);
   }
 
@@ -388,23 +391,30 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   using Swap_opt = typename Master_matrix::RU_vine_swap_option;
   using Pair_opt = typename Master_matrix::RU_pairing_option;
   using Rep_opt = typename Master_matrix::RU_representative_cycles_option;
-  using Dictionary = typename Master_matrix::template Dictionary<Index>;
+  using Real_pair_opt =
+      std::conditional_t<Master_matrix::Option_list::has_column_pairings && Master_matrix::Option_list::has_vine_update,
+                         typename Swap_opt::RUP,
+                         Pair_opt>;
+  using Pivot_dictionary = typename Master_matrix::template Dictionary<Index>;
+  using Position_dictionary = std::unordered_map<Pos_index,ID_index>; // TODO: try other type of maps?
   using Barcode = typename Master_matrix::Barcode;
   using Bar_dictionary = typename Master_matrix::Bar_dictionary;
   using R_matrix = typename Master_matrix::Master_boundary_matrix;
   using U_matrix = typename Master_matrix::Master_base_matrix;
 
-  friend Rep_opt;   // direct access to the two matrices
-  friend Swap_opt;  // direct access to the two matrices
+  friend Rep_opt;       // direct access to the two matrices
+  friend Swap_opt;      // direct access to the two matrices
+  friend Real_pair_opt; // direct access to pivotToColumnIndex_
 
-  R_matrix reducedMatrixR_;       /**< R. */
+  R_matrix reducedMatrixR_;             /**< R. */
   // TODO: make U not accessible by default and add option to enable access? Inaccessible, it
   // needs less options and we could avoid some ifs.
-  U_matrix mirrorMatrixU_;        /**< U. */
-  Dictionary pivotToColumnIndex_; /**< Map from pivot row index to column @ref MatIdx index. */
-  Pos_index nextEventIndex_;      /**< Next birth or death index. */
-  Field_operators* operators_;    /**< Field operators,
-                                       can be nullptr if @ref PersistenceMatrixOptions::is_z2 is true. */
+  U_matrix mirrorMatrixU_;              /**< U. */
+  Pivot_dictionary pivotToColumnIndex_; /**< Map from pivot row index to column @ref MatIdx index. */
+  Pos_index nextEventIndex_;            /**< Next birth or death index. */
+  Position_dictionary positionToID_; /**< Map from @ref MatIdx to @ref IDIdx. */
+  Field_operators* operators_;          /**< Field operators, can be nullptr if
+                                             @ref PersistenceMatrixOptions::is_z2 is true. */
 
   void _insert_boundary(Index currentIndex);
   void _initialize_U();
@@ -412,11 +422,10 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   void _reduce_last_column(Index lastIndex);
   void _reduce_column(Index target, Index eventIndex);
   void _reduce_column_by(Index target, Index source);
+  Index _get_column_with_pivot(ID_index pivot) const;
   void _update_barcode(ID_index birthPivot, Pos_index death);
   void _add_bar(Dimension dim, Pos_index birth);
   void _remove_last_in_barcode(Pos_index eventIndex);
-
-  constexpr Bar_dictionary& _indexToBar();
 };
 
 template <class Master_matrix>
@@ -468,6 +477,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, Column_
       reducedMatrixR_(numberOfColumns, colSettings),
       mirrorMatrixU_(numberOfColumns, colSettings),
       nextEventIndex_(0),
+      positionToID_(numberOfColumns),
       operators_(nullptr)
 {
   if constexpr (!Master_matrix::Option_list::is_z2) {
@@ -480,10 +490,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, Column_
     pivotToColumnIndex_.resize(numberOfColumns, Master_matrix::template get_null_value<Index>());
   }
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _indexToBar().reserve(numberOfColumns);
-  }
-  if constexpr (Master_matrix::Option_list::has_vine_update) {
-    Swap_opt::_positionToRowIdx().reserve(numberOfColumns);
+    Real_pair_opt::indexToBar_.reserve(numberOfColumns);
   }
 }
 
@@ -496,6 +503,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(const RU_matrix& matrixToCopy, Column
       mirrorMatrixU_(matrixToCopy.mirrorMatrixU_, colSettings),
       pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
       nextEventIndex_(matrixToCopy.nextEventIndex_),
+      positionToID_(matrixToCopy.positionToID_),
       operators_(colSettings == nullptr ? matrixToCopy.operators_ : nullptr)
 {
   if constexpr (!Master_matrix::Option_list::is_z2) {
@@ -512,6 +520,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(RU_matrix&& other) noexcept
       mirrorMatrixU_(std::move(other.mirrorMatrixU_)),
       pivotToColumnIndex_(std::move(other.pivotToColumnIndex_)),
       nextEventIndex_(std::exchange(other.nextEventIndex_, 0)),
+      positionToID_(std::move(other.positionToID_)),
       operators_(std::exchange(other.operators_, nullptr))
 {}
 
@@ -529,22 +538,13 @@ inline void RU_matrix<Master_matrix>::insert_boundary(ID_index cellIndex,
                                                       Dimension dim)
 {
   // maps for possible shifting between column content and position indices used for birth events
-  if constexpr (Master_matrix::Option_list::has_column_pairings && !Master_matrix::Option_list::has_vine_update) {
-    if (cellIndex != nextEventIndex_) {
-      Pair_opt::idToPosition_.emplace(cellIndex, nextEventIndex_);
-      if constexpr (Master_matrix::Option_list::has_removable_columns) {
-        Pair_opt::PIDM::map_.emplace(nextEventIndex_, cellIndex);
-      }
+  if (cellIndex != nextEventIndex_) {
+    positionToID_.emplace(nextEventIndex_, cellIndex);
+    if constexpr (Master_matrix::Option_list::has_column_pairings) {
+      Real_pair_opt::idToPosition_.emplace(cellIndex, nextEventIndex_);
     }
   }
-  if constexpr (Master_matrix::Option_list::has_vine_update) {
-    if (cellIndex != nextEventIndex_) {
-      Swap_opt::_positionToRowIdx().emplace(nextEventIndex_, cellIndex);
-      if constexpr (Master_matrix::Option_list::has_column_pairings) {
-        Swap_opt::template RU_pairing<Master_matrix>::idToPosition_.emplace(cellIndex, nextEventIndex_);
-      }
-    }
-  }
+  
   _insert_boundary(reducedMatrixR_.insert_boundary(cellIndex, boundary, dim));
 }
 
@@ -610,10 +610,10 @@ inline void RU_matrix<Master_matrix>::remove_last()
       pivotToColumnIndex_[lastPivot] = Master_matrix::template get_null_value<Index>();
   }
 
-  // if has_vine_update and has_column_pairings are both true,
-  // then the element is already removed in _remove_last_in_barcode
-  if constexpr (Master_matrix::Option_list::has_vine_update && !Master_matrix::Option_list::has_column_pairings) {
-    Swap_opt::_positionToRowIdx().erase(nextEventIndex_);
+  // if has_column_pairings is true, then the element is already removed in _remove_last_in_barcode
+  // to avoid a second "find"
+  if constexpr (!Master_matrix::Option_list::has_column_pairings) {
+    positionToID_.erase(nextEventIndex_);
   }
 }
 
@@ -789,7 +789,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_reduce()
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _indexToBar().reserve(reducedMatrixR_.get_number_of_columns());
+    Real_pair_opt::indexToBar_.reserve(reducedMatrixR_.get_number_of_columns());
   }
 
   for (Index i = 0; i < reducedMatrixR_.get_number_of_columns(); i++) {
@@ -815,29 +815,15 @@ inline void RU_matrix<Master_matrix>::_reduce_last_column(Index lastIndex)
 template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_reduce_column(Index target, Index eventIndex)
 {
-  auto get_column_with_pivot_ = [&](ID_index pivot) -> Index {
-    if (pivot == Master_matrix::template get_null_value<ID_index>())
-      return Master_matrix::template get_null_value<Index>();
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      auto it = pivotToColumnIndex_.find(pivot);
-      if (it == pivotToColumnIndex_.end())
-        return Master_matrix::template get_null_value<Index>();
-      else
-        return it->second;
-    } else {
-      return pivotToColumnIndex_[pivot];
-    }
-  };
-
   Column& curr = reducedMatrixR_.get_column(target);
   ID_index pivot = curr.get_pivot();
-  Index currIndex = get_column_with_pivot_(pivot);
+  Index currIndex = _get_column_with_pivot(pivot);
 
   while (pivot != Master_matrix::template get_null_value<ID_index>() &&
          currIndex != Master_matrix::template get_null_value<Index>()) {
     _reduce_column_by(target, currIndex);
     pivot = curr.get_pivot();
-    currIndex = get_column_with_pivot_(pivot);
+    currIndex = _get_column_with_pivot(pivot);
   }
 
   if (pivot != Master_matrix::template get_null_value<ID_index>()) {
@@ -877,13 +863,26 @@ inline void RU_matrix<Master_matrix>::_reduce_column_by(Index target, Index sour
 }
 
 template <class Master_matrix>
+inline typename RU_matrix<Master_matrix>::Index RU_matrix<Master_matrix>::_get_column_with_pivot(ID_index pivot) const
+{
+  if (pivot == Master_matrix::template get_null_value<ID_index>())
+    return Master_matrix::template get_null_value<Index>();
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    auto it = pivotToColumnIndex_.find(pivot);
+    if (it == pivotToColumnIndex_.end())
+      return Master_matrix::template get_null_value<Index>();
+    else
+      return it->second;
+  } else {
+    return pivotToColumnIndex_[pivot];
+  }
+}
+
+template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_update_barcode(ID_index birthPivot, Pos_index death)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    if constexpr (Master_matrix::Option_list::has_vine_update)
-      Swap_opt::template RU_pairing<Master_matrix>::_update_barcode(birthPivot, death);
-    else
-      Pair_opt::_update_barcode(birthPivot, death);
+    Real_pair_opt::_update_barcode(birthPivot, death);
   }
 }
 
@@ -891,10 +890,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_add_bar(Dimension dim, Pos_index birth)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    if constexpr (Master_matrix::Option_list::has_vine_update)
-      Swap_opt::template RU_pairing<Master_matrix>::_add_bar(dim, birth);
-    else
-      Pair_opt::_add_bar(dim, birth);
+    Real_pair_opt::_add_bar(dim, birth);
   }
 }
 
@@ -902,20 +898,8 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_remove_last_in_barcode(Pos_index eventIndex)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    if constexpr (Master_matrix::Option_list::has_vine_update)
-      Swap_opt::template RU_pairing<Master_matrix>::_remove_last(eventIndex);
-    else
-      Pair_opt::_remove_last(eventIndex);
+    Real_pair_opt::_remove_last(eventIndex);
   }
-}
-
-template <class Master_matrix>
-inline constexpr typename RU_matrix<Master_matrix>::Bar_dictionary& RU_matrix<Master_matrix>::_indexToBar()
-{
-  if constexpr (Master_matrix::Option_list::has_vine_update)
-    return Swap_opt::template RU_pairing<Master_matrix>::indexToBar_;
-  else
-    return Pair_opt::indexToBar_;
 }
 
 }  // namespace persistence_matrix

@@ -142,20 +142,22 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
   birthToCycle_.resize(_matrix()->get_number_of_columns(), -1);
   representativeCycles_.clear();
 
-  // for birthToCycle_, assumes that @ref PosIdx == @ref IDIdx, ie pivot == birth index... which is not true with
-  // vineyards
-  // TODO: with vineyard, there is a @ref IDIdx --> @ref PosIdx map stored. somehow get access to it here
-  for (typename Master_matrix::ID_index i = 0; i < _matrix()->get_number_of_columns(); i++) {
-    auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
-    if (!col.is_paired() || i < col.get_paired_chain_index()) {
-      Cycle cycle;
-      for (auto& c : col) {
-        cycle.push_back(c.get_row_index());
+  if constexpr (Master_matrix::Option_list::is_z2){
+    // for birthToCycle_, assumes that @ref PosIdx == @ref IDIdx, ie pivot == birth index... which is not true with
+    // vineyards
+    // TODO: with vineyard, there is a @ref IDIdx --> @ref PosIdx map stored. somehow get access to it here
+    for (typename Master_matrix::ID_index i = 0; i < _matrix()->get_number_of_columns(); i++) {
+      auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
+      if (!col.is_paired() || i < col.get_paired_chain_index()) {
+        Cycle cycle;
+        for (auto& c : col) {
+          cycle.push_back(c.get_row_index());
+        }
+        if constexpr (!is_well_behaved<Master_matrix::Option_list::column_type>::value)
+          std::sort(cycle.begin(), cycle.end());
+        representativeCycles_.push_back(cycle);
+        birthToCycle_[i] = representativeCycles_.size() - 1;
       }
-      if constexpr (!is_well_behaved<Master_matrix::Option_list::column_type>::value)
-        std::sort(cycle.begin(), cycle.end());
-      representativeCycles_.push_back(cycle);
-      birthToCycle_[i] = representativeCycles_.size() - 1;
     }
   }
 }
