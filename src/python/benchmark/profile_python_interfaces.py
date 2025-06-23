@@ -67,5 +67,11 @@ for dim in range(1, 5):
     for simplex in np.random.randint(VERTEX_MAX, size=(NB_SIMPLICES, dim)):
         _ = st.insert(simplex)
 
+    result, nb_it = auto_timeit(stmt="simp = list(st.get_filtration())", globals=globals(), min_number=5)
+    print(f"get_filtration; {dim}; {result * 1000:.4f}; {nb_it};")
     result, nb_it = auto_timeit(stmt="simp = list(st.get_simplices())", globals=globals(), min_number=5)
     print(f"get_simplices; {dim}; {result * 1000:.4f}; {nb_it};")
+    result, nb_it = auto_timeit(stmt="simp = list(st.get_skeleton(1))", globals=globals(), min_number=5)
+    print(f"get_skeleton(1); {dim}; {result * 1000:.4f}; {nb_it};")
+    result, nb_it = auto_timeit(stmt="simp = list(st.get_skeleton(2))", globals=globals(), min_number=5)
+    print(f"get_skeleton(2); {dim}; {result * 1000:.4f}; {nb_it};")
