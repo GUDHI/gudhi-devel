@@ -6,7 +6,7 @@
  *
  *    Modification(s):
  *      - 2018/04 MC: Add discrete/non-discrete mechanism and non-discrete version
- *      - 2025/06 Hannah Schreiber: Divers small bug fixes (missing `inline`s, `GUDHI_DEBUG`s etc.)
+ *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `GUDHI_DEBUG`s etc.)
  *      - YYYY/MM Author: Description of the modification
  */
 
