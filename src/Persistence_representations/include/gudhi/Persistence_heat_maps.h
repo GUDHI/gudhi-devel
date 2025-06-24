@@ -944,7 +944,7 @@ inline std::vector<double> Persistence_heat_maps<Scalling_of_kernels>::vectorize
 
   if (!discrete_) {
 #ifdef GUDHI_DEBUG
-    std::cerr << "No vectorize method in case of infinite dimensional vectorization" << std::endl;
+    std::clog << "No vectorize method in case of infinite dimensional vectorization" << std::endl;
 #endif
     return result;
   }

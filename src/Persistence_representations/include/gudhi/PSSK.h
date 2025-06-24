@@ -14,7 +14,7 @@
 
 // standard include
 #ifdef GUDHI_DEBUG
-#include <iostream> // std::cerr, std::clog
+#include <iostream> // std::clog
 #endif
 #include <cmath>    // std::fabs
 #include <limits>   // std::numeric_limits
@@ -83,7 +83,7 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
                   double max = -1)
   {
 #ifdef GUDHI_DEBUG
-    std::cerr << "Entering construct procedure \n";
+    std::clog << "Entering construct procedure \n";
 #endif
 
     if (min == max) {
@@ -104,9 +104,9 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
     }
 
 #ifdef GUDHI_DEBUG
-    std::cerr << "min : " << min << std::endl;
-    std::cerr << "max : " << max << std::endl;
-    std::cerr << "number_of_pixels : " << number_of_pixels << std::endl;
+    std::clog << "min : " << min << std::endl;
+    std::clog << "max : " << max << std::endl;
+    std::clog << "number_of_pixels : " << number_of_pixels << std::endl;
 #endif
 
     Base::min_ = min;
@@ -121,7 +121,7 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
     Base::heat_map_.swap(heat_map);
 
 #ifdef GUDHI_DEBUG
-    std::cerr << "Done creating of the heat map, now we will fill in the structure \n";
+    std::clog << "Done creating of the heat map, now we will fill in the structure \n";
 #endif
 
     for (std::size_t pt_nr = 0; pt_nr != intervals.size(); ++pt_nr) {
@@ -132,9 +132,9 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
           static_cast<int>((intervals[pt_nr].second - Base::min_) / (Base::max_ - Base::min_) * number_of_pixels);
 
 #ifdef GUDHI_DEBUG
-      std::cerr << "point : " << intervals[pt_nr].first << " , " << intervals[pt_nr].second << std::endl;
-      std::cerr << "x_grid : " << x_grid << std::endl;
-      std::cerr << "y_grid : " << y_grid << std::endl;
+      std::clog << "point : " << intervals[pt_nr].first << " , " << intervals[pt_nr].second << std::endl;
+      std::clog << "x_grid : " << x_grid << std::endl;
+      std::clog << "y_grid : " << y_grid << std::endl;
 #endif
 
       // x_grid and y_grid gives a center of the kernel. We want to have its lower left corner. To get this, we need to
@@ -144,10 +144,10 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
       // note that the numbers x_grid and y_grid may be negative.
 
 #ifdef GUDHI_DEBUG
-      std::cerr << "After shift : \n";
-      std::cerr << "x_grid : " << x_grid << std::endl;
-      std::cerr << "y_grid : " << y_grid << std::endl;
-      std::cerr << "filter.size() : " << filter.size() << std::endl;
+      std::clog << "After shift : \n";
+      std::clog << "x_grid : " << x_grid << std::endl;
+      std::clog << "y_grid : " << y_grid << std::endl;
+      std::clog << "filter.size() : " << filter.size() << std::endl;
 #endif
 
       for (std::size_t i = 0; i != filter.size(); ++i) {
@@ -156,7 +156,7 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
           if (((x_grid + i) >= 0) && (x_grid + i < Base::heat_map_.size()) && ((y_grid + j) >= 0) &&
               (y_grid + j < Base::heat_map_.size())) {
 #ifdef GUDHI_DEBUG
-            std::cerr << y_grid + j << " " << x_grid + i << std::endl;
+            std::clog << y_grid + j << " " << x_grid + i << std::endl;
 #endif
             Base::heat_map_[y_grid + j][x_grid + i] += filter[i][j];
             Base::heat_map_[x_grid + i][y_grid + j] += -filter[i][j];

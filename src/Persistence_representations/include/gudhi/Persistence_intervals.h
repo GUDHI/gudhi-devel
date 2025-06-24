@@ -16,7 +16,7 @@
 
 // standard include
 #ifdef GUDHI_DEBUG
-#include <iostream>   // std::cerr, std::clog
+#include <iostream>   // std::clog
 #endif
 #include <cstddef>    // std::size_t
 #include <ostream>    // std::ostream

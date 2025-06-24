@@ -49,7 +49,7 @@ int main(int argc, char** argv)
   }
 
   for (std::size_t i = 0; i != filenames.size(); ++i) {
-    std::cerr << "Creating persistence vectors based on a file : " << filenames[i] << std::endl;
+    std::clog << "Creating persistence vectors based on a file : " << filenames[i] << std::endl;
     Vector_distances_in_diagram l(filenames[i], dimension);
     std::stringstream ss;
     ss << filenames[i] << ".vect";
