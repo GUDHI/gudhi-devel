@@ -84,7 +84,6 @@ class Chain_pairing
   friend void swap(Chain_pairing& pairing1, Chain_pairing& pairing2) {
     pairing1.barcode_.swap(pairing2.barcode_);
     pairing1.indexToBar_.swap(pairing2.indexToBar_);
-    std::swap(pairing1.nextPosition_, pairing2.nextPosition_);
   }
 
  protected:
@@ -93,25 +92,21 @@ class Chain_pairing
 
   Barcode barcode_;         /**< Bar container. */
   Dictionary indexToBar_;   /**< Map from @ref MatIdx index to bar index. */
-  Pos_index nextPosition_;  /**< Next relative position in the filtration. */
 };
 
 template <class Master_matrix>
-inline Chain_pairing<Master_matrix>::Chain_pairing() : nextPosition_(0) 
-{}
+inline Chain_pairing<Master_matrix>::Chain_pairing() {}
 
 template <class Master_matrix>
 inline Chain_pairing<Master_matrix>::Chain_pairing(const Chain_pairing& matrixToCopy)
     : barcode_(matrixToCopy.barcode_),
-      indexToBar_(matrixToCopy.indexToBar_),
-      nextPosition_(matrixToCopy.nextPosition_) 
+      indexToBar_(matrixToCopy.indexToBar_)
 {}
 
 template <class Master_matrix>
 inline Chain_pairing<Master_matrix>::Chain_pairing(Chain_pairing<Master_matrix>&& other) noexcept
     : barcode_(std::move(other.barcode_)),
-      indexToBar_(std::move(other.indexToBar_)),
-      nextPosition_(std::exchange(other.nextPosition_, 0)) 
+      indexToBar_(std::move(other.indexToBar_))
 {}
 
 template <class Master_matrix>
@@ -126,7 +121,6 @@ inline Chain_pairing<Master_matrix>& Chain_pairing<Master_matrix>::operator=(Cha
 {
   barcode_.swap(other.barcode_);
   indexToBar_.swap(other.indexToBar_);
-  std::swap(nextPosition_, other.nextPosition_);
   return *this;
 }
 
