@@ -40,8 +40,8 @@ int main(int argc, char** argv)
   }
 
   std::size_t size_of_grid = (std::size_t)atoi(argv[1]);
-  double min_ = atof(argv[2]);
-  double max_ = atof(argv[3]);
+  double min = atof(argv[2]);
+  double max = atof(argv[3]);
   std::size_t stdiv = atof(argv[4]);
 
   unsigned dimension = std::numeric_limits<unsigned>::max();
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
   std::vector<std::vector<double> > filter = Gudhi::Persistence_representations::create_Gaussian_filter(stdiv, 1);
   for (std::size_t i = 0; i != filenames.size(); ++i) {
     std::clog << "Creating a PSSK based on a file : " << filenames[i] << std::endl;
-    PSSK l(filenames[i], filter, size_of_grid, min_, max_, dimension);
+    PSSK l(filenames[i], filter, size_of_grid, min, max, dimension);
 
     std::stringstream ss;
     ss << filenames[i] << ".pssk";

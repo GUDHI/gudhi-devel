@@ -225,11 +225,11 @@ class Persistence_heat_maps
    * or not. Default value: false (it will not be erased).
    * @param number_of_pixels The number of pixels in each direction. Default value: 1000.
    * @param min The minimal x and y value of points that are to be taken into account. If set to the same value than
-   * `max_`, its value is re-inferred from the minimal point in the given interval. Assumed to be less or equal to
-   * `max_`. Default value: `std::numeric_limits<double>::max()`.
+   * `max`, its value is re-inferred from the minimal point in the given interval. Assumed to be less or equal to
+   * `max`. Default value: `std::numeric_limits<double>::max()`.
    * @param max The maximal x and y value of points that are to be taken into account. If set to the same value than
-   * `min_`, its value is re-inferred from the maximal point in the given interval. Assumed to be greater or equal to
-   * `min_`. Default value: `std::numeric_limits<double>::max()`.
+   * `min`, its value is re-inferred from the maximal point in the given interval. Assumed to be greater or equal to
+   * `min`. Default value: `std::numeric_limits<double>::max()`.
    */
   Persistence_heat_maps(const std::vector<std::pair<double, double> >& interval,
                         const std::vector<std::vector<double> >& filter = create_Gaussian_filter(5, 1),
@@ -253,11 +253,11 @@ class Persistence_heat_maps
    * or not. Default value: false (it will not be erased).
    * @param number_of_pixels The number of pixels in each direction. Default value: 1000.
    * @param min The minimal x and y value of points that are to be taken into account. If set to the same value than
-   * `max_`, its value is re-inferred from the minimal point in the given interval. Assumed to be less or equal to
-   * `max_`. Default value: `std::numeric_limits<double>::max()`.
+   * `max`, its value is re-inferred from the minimal point in the given interval. Assumed to be less or equal to
+   * `max`. Default value: `std::numeric_limits<double>::max()`.
    * @param max The maximal x and y value of points that are to be taken into account. If set to the same value than
-   * `min_`, its value is re-inferred from the maximal point in the given interval. Assumed to be greater or equal to
-   * `min_`. Default value: `std::numeric_limits<double>::max()`.
+   * `min`, its value is re-inferred from the maximal point in the given interval. Assumed to be greater or equal to
+   * `min`. Default value: `std::numeric_limits<double>::max()`.
    * @param dimension If anything other than `std::numeric_limits<unsigned int>::max()`, only the intervals in
    * this given dimension are token into account. Default value: `std::numeric_limits<double>::max()`.
    */
@@ -363,7 +363,7 @@ class Persistence_heat_maps
 
   // TODO: replace all use of this method with a GUDHI_CHECK?
   /**
-   * The procedure checks if min_, max_ and this->heat_maps sizes are the same.
+   * The procedure checks if min_, max_ and this->heat_maps_ sizes are the same.
    **/
   inline bool check_if_the_same(const Persistence_heat_maps& second) const
   {
@@ -648,7 +648,7 @@ class Persistence_heat_maps
   bool erase_below_diagonal_;
 };
 
-// if min_ == max_, then the program is requested to set up the values itself based on persistence intervals
+// if min == max, then the program is requested to set up the values itself based on persistence intervals
 template <typename Scalling_of_kernels>
 inline void Persistence_heat_maps<Scalling_of_kernels>::_construct(
     const std::vector<std::pair<double, double> >& intervals,
@@ -673,7 +673,7 @@ inline void Persistence_heat_maps<Scalling_of_kernels>::_construct(
 #ifdef GUDHI_DEBUG
     std::clog << "min and max parameters will be determined based on intervals \n";
 #endif
-    // in this case, we want the program to set up the min_ and max_ values by itself.
+    // in this case, we want the program to set up the min and max values by itself.
     min = std::numeric_limits<int>::max();
     max = -std::numeric_limits<int>::max();
 
@@ -681,7 +681,7 @@ inline void Persistence_heat_maps<Scalling_of_kernels>::_construct(
       if (intervals[i].first < min) min = intervals[i].first;
       if (intervals[i].second > max) max = intervals[i].second;
     }
-    // now we have the structure filled in, and moreover we know min_ and max_ values of the interval, so we know the
+    // now we have the structure filled in, and moreover we know min and max values of the interval, so we know the
     // range.
 
     // add some more space:

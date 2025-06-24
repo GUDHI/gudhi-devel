@@ -86,13 +86,13 @@ class Persistence_intervals
    **/
   std::pair<double, double> get_x_range() const
   {
-    double min_ = std::numeric_limits<int>::max();
-    double max_ = -std::numeric_limits<int>::max();
+    double min = std::numeric_limits<int>::max();
+    double max = -std::numeric_limits<int>::max();
     for (std::size_t i = 0; i != this->intervals_.size(); ++i) {
-      if (this->intervals_[i].first < min_) min_ = this->intervals_[i].first;
-      if (this->intervals_[i].second > max_) max_ = this->intervals_[i].second;
+      if (this->intervals_[i].first < min) min = this->intervals_[i].first;
+      if (this->intervals_[i].second > max) max = this->intervals_[i].second;
     }
-    return std::make_pair(min_, max_);
+    return std::make_pair(min, max);
   }
 
   /**
@@ -100,13 +100,13 @@ class Persistence_intervals
    **/
   std::pair<double, double> get_y_range() const
   {
-    double min_ = std::numeric_limits<int>::max();
-    double max_ = -std::numeric_limits<int>::max();
+    double min = std::numeric_limits<int>::max();
+    double max = -std::numeric_limits<int>::max();
     for (std::size_t i = 0; i != this->intervals_.size(); ++i) {
-      if (this->intervals_[i].second < min_) min_ = this->intervals_[i].second;
-      if (this->intervals_[i].second > max_) max_ = this->intervals_[i].second;
+      if (this->intervals_[i].second < min) min = this->intervals_[i].second;
+      if (this->intervals_[i].second > max) max = this->intervals_[i].second;
     }
-    return std::make_pair(min_, max_);
+    return std::make_pair(min, max);
   }
 
   /**

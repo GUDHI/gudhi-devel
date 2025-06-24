@@ -89,7 +89,7 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
     if (min == max) {
       // in this case, we want the program to set up the min and max values by itself.
       min = std::numeric_limits<int>::max();
-      max = -std::numeric_limits<int>::max();
+      max = std::numeric_limits<int>::min();
 
       for (std::size_t i = 0; i != intervals.size(); ++i) {
         if (intervals[i].first < min) min = intervals[i].first;
