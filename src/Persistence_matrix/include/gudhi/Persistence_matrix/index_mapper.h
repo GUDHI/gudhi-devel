@@ -11,14 +11,12 @@
 /**
  * @file index_mapper.h
  * @author Hannah Schreiber
- * @brief Contains the Gudhi::persistence_matrix::Cell_position_to_ID_mapper class and
- * Gudhi::persistence_matrix::Dummy_pos_mapper structure.
+ * @brief Contains the Gudhi::persistence_matrix::Index_mapper class and
+ * Gudhi::persistence_matrix::Dummy_index_mapper structure.
  */
 
-#ifndef PM_ID_POS_MAPPER_H
-#define PM_ID_POS_MAPPER_H
-
-#include <unordered_map>
+#ifndef PM_INDEX_MAPPER_H
+#define PM_INDEX_MAPPER_H
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -28,28 +26,27 @@ namespace persistence_matrix {
  * @ingroup persistence_matrix
  *
  * @brief Empty structure.
- * Inherited instead of @ref Cell_position_to_ID_mapper.
+ * Inherited instead of @ref Index_mapper.
  */
-struct Dummy_pos_mapper {
-  friend void swap([[maybe_unused]] Dummy_pos_mapper& d1, [[maybe_unused]] Dummy_pos_mapper& d2) {}
+struct Dummy_index_mapper {
+  friend void swap([[maybe_unused]] Dummy_index_mapper& d1, [[maybe_unused]] Dummy_index_mapper& d2) {}
 };
 
 /**
  * @private
  * @ingroup persistence_matrix
  *
- * @brief Map from cell position to cell ID. Only stores a pair if ID != position and has_removable_column is true.
+ * @brief Map container. Though for translation between different index types.
  * 
- * @tparam ID_index @ref IDIdx index type
- * @tparam Pos_index @ref PosIdx index type
+ * @tparam Map Map type
  */
-template<typename ID_index, typename Pos_index>
-struct Cell_position_to_ID_mapper {
-  using Index_map = std::unordered_map<Pos_index,ID_index>; //TODO: test other map types
+template<class Map>
+struct Index_mapper {
+  using Index_map = Map;
 
   Index_map map_;
 
-  friend void swap(Cell_position_to_ID_mapper& mapper1, Cell_position_to_ID_mapper& mapper2) {
+  friend void swap(Index_mapper& mapper1, Index_mapper& mapper2) {
     mapper1.map_.swap(mapper2.map_);
   }
 };
@@ -57,4 +54,4 @@ struct Cell_position_to_ID_mapper {
 }  // namespace persistence_matrix
 }  // namespace Gudhi
 
-#endif  // PM_ID_POS_MAPPER_H
+#endif  // PM_INDEX_MAPPER_H

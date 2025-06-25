@@ -48,12 +48,23 @@ struct Dummy_base_pairing {
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
-class Base_pairing : public std::conditional<
-                       Master_matrix::Option_list::has_removable_columns,
-                       Cell_position_to_ID_mapper<typename Master_matrix::ID_index, typename Master_matrix::Pos_index>,
-                       Dummy_pos_mapper
-                    >::type
+class Base_pairing
+    : public std::conditional<
+          Master_matrix::Option_list::has_removable_columns,
+          Index_mapper<std::unordered_map<typename Master_matrix::Pos_index, typename Master_matrix::ID_index> >,
+          Dummy_index_mapper
+        >::type
 {
+ protected:
+  using Pos_index = typename Master_matrix::Pos_index;
+  using ID_index = typename Master_matrix::ID_index;
+  // PIDM = Position to ID Map
+  using PIDM =
+      typename std::conditional<Master_matrix::Option_list::has_removable_columns,
+                                Index_mapper<std::unordered_map<Pos_index, ID_index> >,
+                                Dummy_index_mapper
+                               >::type;
+
  public:
   using Bar = typename Master_matrix::Bar;                            /**< Bar type. */
   using Barcode = typename Master_matrix::Barcode;                    /**< Barcode type. */
@@ -82,8 +93,7 @@ class Base_pairing : public std::conditional<
    */
   friend void swap(Base_pairing& pairing1, Base_pairing& pairing2) {
     if constexpr (Master_matrix::Option_list::has_removable_columns) {
-      swap(static_cast<Cell_position_to_ID_mapper<ID_index, Pos_index>&>(pairing1),
-           static_cast<Cell_position_to_ID_mapper<ID_index, Pos_index>&>(pairing2));
+      swap(static_cast<PIDM&>(pairing1), static_cast<PIDM&>(pairing2));
     }
     pairing1.barcode_.swap(pairing2.barcode_);
     pairing1.deathToBar_.swap(pairing2.deathToBar_);
@@ -92,15 +102,8 @@ class Base_pairing : public std::conditional<
   }
 
  protected:
-  using Pos_index = typename Master_matrix::Pos_index;
-  using ID_index = typename Master_matrix::ID_index;
   using Dictionary = typename Master_matrix::Bar_dictionary;
   using Base_matrix = typename Master_matrix::Master_boundary_matrix;
-  //PIDM = Position to ID Map
-  using PIDM = typename std::conditional<Master_matrix::Option_list::has_removable_columns,
-                                         Cell_position_to_ID_mapper<ID_index, Pos_index>,
-                                         Dummy_pos_mapper
-                                        >::type;
 
   Barcode barcode_;       /**< Bar container. */
   Dictionary deathToBar_; /**< Map from death index to bar index. */
