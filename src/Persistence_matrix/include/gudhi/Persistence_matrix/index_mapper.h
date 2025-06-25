@@ -9,7 +9,7 @@
  */
 
 /**
- * @file boundary_cell_position_to_id_mapper.h
+ * @file index_mapper.h
  * @author Hannah Schreiber
  * @brief Contains the Gudhi::persistence_matrix::Cell_position_to_ID_mapper class and
  * Gudhi::persistence_matrix::Dummy_pos_mapper structure.

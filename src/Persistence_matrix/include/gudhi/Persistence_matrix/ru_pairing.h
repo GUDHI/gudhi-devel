@@ -20,7 +20,7 @@
 
 #include <unordered_map>
 
-#include "boundary_cell_position_to_id_mapper.h"
+#include "index_mapper.h"
 
 namespace Gudhi {
 namespace persistence_matrix {

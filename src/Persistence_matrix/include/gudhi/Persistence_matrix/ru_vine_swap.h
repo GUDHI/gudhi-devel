@@ -25,7 +25,7 @@
 #include <stdexcept>    //std::invalid_argument
 
 #include "ru_pairing.h"
-#include "boundary_cell_position_to_id_mapper.h"
+#include "index_mapper.h"
 
 namespace Gudhi {
 namespace persistence_matrix {
