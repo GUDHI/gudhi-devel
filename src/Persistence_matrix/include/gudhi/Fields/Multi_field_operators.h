@@ -37,10 +37,12 @@ class Multi_field_operators
   using Element = mpz_class;             /**< Type for the elements in the field. */
   using Characteristic = Element;   /**< Type for the field characteristic. */
 
+  inline static const Characteristic nullCharacteristic = 0;
+
   /**
    * @brief Default constructor, sets the product of all characteristics to 0.
    */
-  Multi_field_operators() : productOfAllCharacteristics_(0) /* , multiplicativeID_(1) */ 
+  Multi_field_operators() : productOfAllCharacteristics_(nullCharacteristic) /* , multiplicativeID_(1) */ 
   {}
   /**
    * @brief Constructor setting the characteristics to all prime numbers between the two given integers.
@@ -49,7 +51,7 @@ class Multi_field_operators
    * @param maxCharacteristic Highest value of a prime.
    */
   Multi_field_operators(int minCharacteristic, int maxCharacteristic)
-      : productOfAllCharacteristics_(0)  //, multiplicativeID_(1)
+      : productOfAllCharacteristics_(nullCharacteristic)  //, multiplicativeID_(1)
   {
     set_characteristic(minCharacteristic, maxCharacteristic);
   }
@@ -396,7 +398,7 @@ class Multi_field_operators
    * @return The partial multiplicative identity of the multi-field.
    */
   Element get_partial_multiplicative_identity(const Characteristic& productOfCharacteristics) const {
-    if (productOfCharacteristics == 0) {
+    if (productOfCharacteristics == nullCharacteristic) {
       return get_multiplicative_identity();
     }
     Element multIdentity(0);

@@ -45,14 +45,16 @@ class Zp_field_operators
   template <class T>
   using isSignedInteger = std::enable_if_t<std::is_signed_v<T> >;
 
+  inline constexpr static const Characteristic nullCharacteristic = 0;
+
   /**
    * @brief Default constructor. If a non-zero characteristic is given, initializes the field with it.
    * The characteristic can later be changed again or initialized with @ref set_characteristic.
    *
    * @param characteristic Prime number corresponding to the desired characteristic of the field.
    */
-  Zp_field_operators(Characteristic characteristic = 0) : characteristic_(0) {
-    if (characteristic != 0) set_characteristic(characteristic);
+  Zp_field_operators(Characteristic characteristic = nullCharacteristic) : characteristic_(nullCharacteristic) {
+    if (characteristic != nullCharacteristic) set_characteristic(characteristic);
   }
   /**
    * @brief Copy constructor.
@@ -75,7 +77,7 @@ class Zp_field_operators
    * @param characteristic Prime number corresponding to the desired characteristic of the field.
    */
   void set_characteristic(Characteristic characteristic) {
-    if (characteristic <= 1)
+    if (characteristic == nullCharacteristic)
       throw std::invalid_argument("Characteristic must be strictly positive and a prime number.");
 
     inverse_.resize(characteristic);

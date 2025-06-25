@@ -56,6 +56,8 @@ class Chain_representative_cycles
   using Bar = typename Master_matrix::Bar;                            /**< Bar type. */
   using Cycle = typename Master_matrix::Cycle;                        /**< Cycle type. */
   using Column_container = typename Master_matrix::Column_container;  /**< Column container type. */
+  using Index = typename Master_matrix::Index;                        /**< @ref MatIdx index type. */
+  using ID_index = typename Master_matrix::ID_index;                  /**< @ref IDIdx index type. */
 
   /**
    * @brief Default constructor.
@@ -112,7 +114,7 @@ class Chain_representative_cycles
   using Master_chain_matrix = typename Master_matrix::Master_chain_matrix;
 
   std::vector<Cycle> representativeCycles_;                 /**< Cycle container. */
-  std::vector<typename Master_matrix::Index> birthToCycle_; /**< Map from birth index to cycle index. */
+  std::vector<Index> birthToCycle_; /**< Map from birth index to cycle index. */
 
   //access to inheriting Chain_matrix class
   constexpr Master_chain_matrix* _matrix() { return static_cast<Master_chain_matrix*>(this); }
@@ -138,26 +140,50 @@ inline Chain_representative_cycles<Master_matrix>::Chain_representative_cycles(
 template <class Master_matrix>
 inline void Chain_representative_cycles<Master_matrix>::update_representative_cycles()
 {
+  auto nberColumns = _matrix()->get_number_of_columns();
+  auto get_position = [&](ID_index pivot) {
+    if constexpr (Master_matrix::Option_list::has_vine_update) {
+      if constexpr (Master_matrix::Option_list::has_map_column_container) {
+        return _matrix()->map_.at(pivot);
+      } else {
+        return _matrix()->map_[pivot];
+      }
+    } else {
+      return pivot;
+    }
+  };
+
   birthToCycle_.clear();
-  birthToCycle_.resize(_matrix()->get_number_of_columns(), -1);
+  birthToCycle_.resize(nberColumns, Master_matrix::template get_null_value<Index>());
   representativeCycles_.clear();
 
-  if constexpr (Master_matrix::Option_list::is_z2){
-    // for birthToCycle_, assumes that @ref PosIdx == @ref IDIdx, ie pivot == birth index... which is not true with
-    // vineyards
-    // TODO: with vineyard, there is a @ref IDIdx --> @ref PosIdx map stored. somehow get access to it here
-    for (typename Master_matrix::ID_index i = 0; i < _matrix()->get_number_of_columns(); i++) {
-      auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
-      if (!col.is_paired() || i < col.get_paired_chain_index()) {
-        Cycle cycle;
-        for (auto& c : col) {
-          cycle.push_back(c.get_row_index());
+  for (ID_index i = 0; i < nberColumns; i++) {
+    auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
+    if (!col.is_paired() || get_position(i) < get_position(_matrix()->get_pivot(col.get_paired_chain_index()))) {
+      Cycle cycle;
+      if constexpr (is_well_behaved<Master_matrix::Option_list::column_type>::value) {
+        cycle.reserve(col.size());
+        for (const auto& c : col) {
+          if constexpr (Master_matrix::Option_list::is_z2) {
+            cycle.push_back(c.get_row_index());
+          } else {
+            cycle.push_back({c.get_row_index(), c.get_element()});
+          }
         }
-        if constexpr (!is_well_behaved<Master_matrix::Option_list::column_type>::value)
-          std::sort(cycle.begin(), cycle.end());
-        representativeCycles_.push_back(cycle);
-        birthToCycle_[i] = representativeCycles_.size() - 1;
+      } else {
+        auto cont = col.get_content();
+        for (Index j = 0; j < cont.size(); ++j) {
+          if (cont[j] != 0) {
+            if constexpr (Master_matrix::Option_list::is_z2) {
+              cycle.push_back(j);
+            } else {
+              cycle.push_back({j, cont[j]});
+            }
+          }
+        }
       }
+      representativeCycles_.push_back(std::move(cycle));
+      birthToCycle_[get_position(i)] = representativeCycles_.size() - 1;
     }
   }
 }

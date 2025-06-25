@@ -513,7 +513,8 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
                                                std::map<ID_index, Field_element>
                                               >::type;
 
-  friend typename Swap_opt::CP;   // direct access to index mapper
+  friend typename Swap_opt::CP; // direct access to index mapper
+  friend Rep_opt;               // direct access to index mapper
 
   Column_container matrix_;       /**< Column container. */
   Dictionary pivotToColumnIndex_; /**< Map from @ref IDIdx to @ref MatIdx index. */
