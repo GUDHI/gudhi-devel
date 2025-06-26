@@ -100,11 +100,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
             # Wasteful if dim_list_ does not contain 0, but that seems unlikely.
             return [res if i == 0 else np.empty((0, 2)) for i in self._dim_list]
 
-        if (
-            len(cells.shape) == 2
-            and self.input_type == "top_dimensional_cells"
-            and self.min_persistence >= 0
-        ):
+        if len(cells.shape) == 2 and self.input_type == "top_dimensional_cells" and self.min_persistence >= 0:
             if cells.size == 0:
                 diags = [np.empty((0, 2)), np.empty((0, 2))]
             elif cells.shape[0] == 1 or cells.shape[1] == 1:
@@ -127,9 +123,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
             homology_coeff_field=self.homology_coeff_field,
             min_persistence=self.min_persistence,
         )
-        return [
-            cubical_complex.persistence_intervals_in_dimension(dim) for dim in self._dim_list
-        ]
+        return [cubical_complex.persistence_intervals_in_dimension(dim) for dim in self._dim_list]
 
     def transform(self, X, Y=None):
         """Compute all the cubical complexes and their associated persistence diagrams.
@@ -145,9 +139,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         :rtype: list of (,2) array_like or list of list of (,2) array_like
         """
         # threads is preferred as cubical construction and persistence computation releases the GIL
-        res = Parallel(n_jobs=self.n_jobs, prefer="threads")(
-            delayed(self.__transform)(cells) for cells in X
-        )
+        res = Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(cells) for cells in X)
         # cf. `fit`
         if self._unwrap:
             res = [d[0] for d in res]
