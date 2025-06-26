@@ -116,12 +116,12 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
   }
 
  protected:
-  bool _is_negative_in_pair(ID_index pivot) const {
+  bool _is_negative_in_bar(ID_index pivot) const {
     Pos_index pos = _get_pivot_position(pivot);
     return _death_val(pivot) == pos;
   }
 
-  void _positive_transpose(ID_index pivot1, ID_index pivot2) {
+  void _positive_transpose_barcode(ID_index pivot1, ID_index pivot2) {
     Pos_index pos1 = _get_pivot_position(pivot1);
     Pos_index pos2 = _get_pivot_position(pivot2);
 
@@ -130,7 +130,7 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
     std::swap(CP::indexToBar_.at(pos1), CP::indexToBar_.at(pos2));
   }
 
-  void _negative_transpose(ID_index pivot1, ID_index pivot2) {
+  void _negative_transpose_barcode(ID_index pivot1, ID_index pivot2) {
     Pos_index pos1 = _get_pivot_position(pivot1);
     Pos_index pos2 = _get_pivot_position(pivot2);
 
@@ -139,7 +139,7 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
     std::swap(CP::indexToBar_.at(pos1), CP::indexToBar_.at(pos2));
   }
 
-  void _positive_negative_transpose(ID_index pivot1, ID_index pivot2) {
+  void _positive_negative_transpose_barcode(ID_index pivot1, ID_index pivot2) {
     Pos_index pos1 = _get_pivot_position(pivot1);
     Pos_index pos2 = _get_pivot_position(pivot2);
 
@@ -148,7 +148,7 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
     std::swap(CP::indexToBar_.at(pos1), CP::indexToBar_.at(pos2));
   }
 
-  void _negative_positive_transpose(ID_index pivot1, ID_index pivot2) {
+  void _negative_positive_transpose_barcode(ID_index pivot1, ID_index pivot2) {
     Pos_index pos1 = _get_pivot_position(pivot1);
     Pos_index pos2 = _get_pivot_position(pivot2);
 
@@ -216,10 +216,7 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
-class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_column_pairings,
-                                                Chain_barcode_swap<Master_matrix>,
-                                                Dummy_chain_vine_pairing
-                                               >::type
+class Chain_vine_swap
 {
  public:
   using Index = typename Master_matrix::Index;                       /**< @ref MatIdx index type. */
@@ -297,22 +294,8 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
    * @brief Swap operator.
    */
   friend void swap(Chain_vine_swap& swap1, Chain_vine_swap& swap2) {
-    if constexpr (Master_matrix::Option_list::has_column_pairings) {
-      swap(static_cast<Chain_barcode_swap<Master_matrix>&>(swap1),
-           static_cast<Chain_barcode_swap<Master_matrix>&>(swap2));
-    }
     std::swap(swap1.birthComp_, swap2.birthComp_);
     std::swap(swap1.deathComp_, swap2.deathComp_);
-  }
-
- protected:
-  using CP = typename std::conditional<Master_matrix::Option_list::has_column_pairings,
-                                       Chain_barcode_swap<Master_matrix>,
-                                       Dummy_chain_vine_pairing
-                                      >::type;
-
-  void _reset() {
-    if constexpr (Master_matrix::Option_list::has_column_pairings) CP::_reset();
   }
 
  private:
@@ -333,7 +316,7 @@ class Chain_vine_swap : public std::conditional<Master_matrix::Option_list::has_
 };
 
 template <class Master_matrix>
-inline Chain_vine_swap<Master_matrix>::Chain_vine_swap() : CP(), birthComp_(), deathComp_()
+inline Chain_vine_swap<Master_matrix>::Chain_vine_swap() : birthComp_(), deathComp_()
 {
   static_assert(Master_matrix::Option_list::has_column_pairings,
                 "If barcode is not stored, at least a birth comparator has to be specified.");
@@ -342,18 +325,17 @@ inline Chain_vine_swap<Master_matrix>::Chain_vine_swap() : CP(), birthComp_(), d
 template <class Master_matrix>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(std::function<bool(Pos_index, Pos_index)> birthComparator,
                                                        std::function<bool(Pos_index, Pos_index)> deathComparator)
-    : CP(), birthComp_(std::move(birthComparator)), deathComp_(std::move(deathComparator))
+    : birthComp_(std::move(birthComparator)), deathComp_(std::move(deathComparator))
 {}
 
 template <class Master_matrix>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(const Chain_vine_swap& matrixToCopy)
-    : CP(static_cast<const CP&>(matrixToCopy)), birthComp_(matrixToCopy.birthComp_), deathComp_(matrixToCopy.deathComp_)
+    : birthComp_(matrixToCopy.birthComp_), deathComp_(matrixToCopy.deathComp_)
 {}
 
 template <class Master_matrix>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(Chain_vine_swap<Master_matrix>&& other) noexcept
-    : CP(std::move(static_cast<CP&>(other))),
-      birthComp_(std::move(other.birthComp_)),
+    : birthComp_(std::move(other.birthComp_)),
       deathComp_(std::move(other.deathComp_))
 {}
 
@@ -379,7 +361,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
                                                                                                 Index columnIndex2)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    GUDHI_CHECK(CP::_are_adjacent(_matrix()->get_pivot(columnIndex1), _matrix()->get_pivot(columnIndex2)),
+    GUDHI_CHECK(_matrix()->_are_adjacent(_matrix()->get_pivot(columnIndex1), _matrix()->get_pivot(columnIndex2)),
                 std::invalid_argument(
                     "Chain_vine_swap::vine_swap - Columns to be swapped need to be adjacent in the 'real' matrix."));
   }
@@ -392,7 +374,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
       ID_index pivot1 = _matrix()->get_pivot(columnIndex1);
       ID_index pivot2 = _matrix()->get_pivot(columnIndex2);
       if constexpr (Master_matrix::Option_list::has_column_pairings) {
-        CP::_negative_transpose(pivot1, pivot2);
+        _matrix()->_negative_transpose_barcode(pivot1, pivot2);
       }
       _swap_positions(pivot1, pivot2);
       return columnIndex1;
@@ -405,7 +387,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
       ID_index pivot1 = _matrix()->get_pivot(columnIndex1);
       ID_index pivot2 = _matrix()->get_pivot(columnIndex2);
       if constexpr (Master_matrix::Option_list::has_column_pairings) {
-        CP::_negative_positive_transpose(pivot1, pivot2);
+        _matrix()->_negative_positive_transpose_barcode(pivot1, pivot2);
       }
       _swap_positions(pivot1, pivot2);
       return columnIndex1;
@@ -418,7 +400,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
       ID_index pivot1 = _matrix()->get_pivot(columnIndex1);
       ID_index pivot2 = _matrix()->get_pivot(columnIndex2);
       if constexpr (Master_matrix::Option_list::has_column_pairings) {
-        CP::_positive_negative_transpose(pivot1, pivot2);
+        _matrix()->_positive_negative_transpose_barcode(pivot1, pivot2);
       }
       _swap_positions(pivot1, pivot2);
       return columnIndex1;
@@ -430,7 +412,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
     ID_index pivot1 = _matrix()->get_pivot(columnIndex1);
     ID_index pivot2 = _matrix()->get_pivot(columnIndex2);
     if constexpr (Master_matrix::Option_list::has_column_pairings) {
-      CP::_positive_transpose(pivot1, pivot2);
+      _matrix()->_positive_transpose_barcode(pivot1, pivot2);
     }
     _swap_positions(pivot1, pivot2);
     return columnIndex1;
@@ -441,7 +423,6 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
 template <class Master_matrix>
 inline Chain_vine_swap<Master_matrix>& Chain_vine_swap<Master_matrix>::operator=(Chain_vine_swap<Master_matrix> other)
 {
-  CP::operator=(other);
   std::swap(birthComp_, other.birthComp_);
   std::swap(deathComp_, other.deathComp_);
   return *this;
@@ -451,7 +432,7 @@ template <class Master_matrix>
 inline bool Chain_vine_swap<Master_matrix>::_is_negative_in_pair(Index columnIndex)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    return CP::_is_negative_in_pair(_matrix()->get_pivot(columnIndex));
+    return _matrix()->_is_negative_in_bar(_matrix()->get_pivot(columnIndex));
   } else {
     auto& col = _matrix()->get_column(columnIndex);
     if (!col.is_paired()) return false;
@@ -474,7 +455,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
     bool hasSmallerBirth;
     if constexpr (Master_matrix::Option_list::has_column_pairings) {
       // this order because position were swapped with swap_positions
-      hasSmallerBirth = (CP::_birth_val(col2.get_pivot()) < CP::_birth_val(col1.get_pivot()));
+      hasSmallerBirth = (_matrix()->_birth_val(col2.get_pivot()) < _matrix()->_birth_val(col1.get_pivot()));
     } else {
       hasSmallerBirth = birthComp_(columnIndex1, columnIndex2);
     }
@@ -482,7 +463,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
     if (!col2.is_paired() && hasSmallerBirth) {
       _matrix()->add_to(columnIndex1, columnIndex2);
       if constexpr (Master_matrix::Option_list::has_column_pairings) {
-        CP::_positive_transpose(col1.get_pivot(), col2.get_pivot());
+        _matrix()->_positive_transpose_barcode(col1.get_pivot(), col2.get_pivot());
       }
       return columnIndex1;
     }
@@ -494,7 +475,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
   if (!col2.is_paired()) {  // G x F
     static_cast<Master_chain_matrix*>(this)->add_to(columnIndex1, columnIndex2);
     if constexpr (Master_matrix::Option_list::has_column_pairings) {
-      CP::_positive_transpose(col1.get_pivot(), col2.get_pivot());
+      _matrix()->_positive_transpose_barcode(col1.get_pivot(), col2.get_pivot());
     }
     return columnIndex1;
   }
@@ -502,7 +483,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
   bool hasSmallerDeath;
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
     // this order because position were swapped with swap_positions
-    hasSmallerDeath = (CP::_death_val(col2.get_pivot()) < CP::_death_val(col1.get_pivot()));
+    hasSmallerDeath = (_matrix()->_death_val(col2.get_pivot()) < _matrix()->_death_val(col1.get_pivot()));
   } else {
     hasSmallerDeath = deathComp_(columnIndex1, columnIndex2);
   }
@@ -512,7 +493,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
     _matrix()->add_to(col1.get_paired_chain_index(), col2.get_paired_chain_index());
     _matrix()->add_to(columnIndex1, columnIndex2);
     if constexpr (Master_matrix::Option_list::has_column_pairings) {
-      CP::_positive_transpose(col1.get_pivot(), col2.get_pivot());
+      _matrix()->_positive_transpose_barcode(col1.get_pivot(), col2.get_pivot());
     }
     return columnIndex1;
   }
@@ -533,7 +514,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
   ID_index pivot1 = _matrix()->get_pivot(columnIndex1);
   ID_index pivot2 = _matrix()->get_pivot(columnIndex2);
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    CP::_positive_negative_transpose(pivot1, pivot2);
+    _matrix()->_positive_negative_transpose_barcode(pivot1, pivot2);
   }
   _swap_positions(pivot1, pivot2);
 
@@ -565,7 +546,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
 
   bool hasSmallerBirth;
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    hasSmallerBirth = (CP::_birth_val(col1.get_pivot()) < CP::_birth_val(col2.get_pivot()));
+    hasSmallerBirth = (_matrix()->_birth_val(col1.get_pivot()) < _matrix()->_birth_val(col2.get_pivot()));
   } else {
     hasSmallerBirth = birthComp_(pairedIndex1, pairedIndex2);
   }
@@ -577,7 +558,7 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
     _matrix()->add_to(columnIndex1, columnIndex2);
 
     if constexpr (Master_matrix::Option_list::has_column_pairings) {
-      CP::_negative_transpose(col1.get_pivot(), col2.get_pivot());
+      _matrix()->_negative_transpose_barcode(col1.get_pivot(), col2.get_pivot());
     }
 
     return columnIndex1;

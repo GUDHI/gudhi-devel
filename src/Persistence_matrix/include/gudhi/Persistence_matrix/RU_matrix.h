@@ -362,9 +362,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * the necessary external classes specifically necessary for the chosen column type, such as custom allocators.
    */
   void reset(Column_settings* colSettings) {
-    if constexpr (Master_matrix::Option_list::has_column_pairings && !Master_matrix::Option_list::has_vine_update)
-      Pair_opt::_reset();
-    if constexpr (Master_matrix::Option_list::has_vine_update) Swap_opt::_reset();
+    if constexpr (Master_matrix::Option_list::has_column_pairings) Pair_opt::_reset();
     if constexpr (Master_matrix::Option_list::can_retrieve_representative_cycles) Rep_opt::_reset();
     reducedMatrixR_.reset(colSettings);
     mirrorMatrixU_.reset(colSettings);
@@ -398,10 +396,6 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   void print();  // for debug
 
  private:
-  using Real_pair_opt =
-      std::conditional_t<Master_matrix::Option_list::has_column_pairings && Master_matrix::Option_list::has_vine_update,
-                         typename Swap_opt::RUP,
-                         Pair_opt>;
   using Pivot_dictionary = typename Master_matrix::template Dictionary<Index>;
   using Position_dictionary = std::unordered_map<Pos_index,ID_index>; // TODO: try other type of maps?
   using Barcode = typename Master_matrix::Barcode;
@@ -410,8 +404,8 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   using U_matrix = typename Master_matrix::Master_base_matrix;
 
   friend Rep_opt;                   // direct access to the two matrices
-  friend Swap_opt;                  // direct access to the two matrices
-  friend RU_pairing<Master_matrix>; // direct access to pivotToColumnIndex_, positionToID_
+  friend Swap_opt;                  // direct access to the two matrices, pivotToColumnIndex_
+  friend RU_pairing<Master_matrix>; // direct access to positionToID_
 
   R_matrix reducedMatrixR_;             /**< R. */
   // TODO: make U not accessible by default and add option to enable access? Inaccessible, it
@@ -497,7 +491,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, Column_
     pivotToColumnIndex_.resize(numberOfColumns, Master_matrix::template get_null_value<Index>());
   }
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    Real_pair_opt::_reserve(numberOfColumns);
+    Pair_opt::_reserve(numberOfColumns);
   }
 }
 
@@ -548,7 +542,7 @@ inline void RU_matrix<Master_matrix>::insert_boundary(ID_index cellIndex,
   if (cellIndex != nextEventIndex_) {
     positionToID_.emplace(nextEventIndex_, cellIndex);
     if constexpr (Master_matrix::Option_list::has_column_pairings) {
-      Real_pair_opt::_insert_id_position(cellIndex, nextEventIndex_);
+      Pair_opt::_insert_id_position(cellIndex, nextEventIndex_);
     }
   }
   
@@ -797,7 +791,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_reduce()
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    Real_pair_opt::_reserve(reducedMatrixR_.get_number_of_columns());
+    Pair_opt::_reserve(reducedMatrixR_.get_number_of_columns());
   }
 
   for (Index i = 0; i < reducedMatrixR_.get_number_of_columns(); i++) {
@@ -890,7 +884,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_update_barcode(ID_index birthPivot, Pos_index death)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    Real_pair_opt::_update_barcode(birthPivot, death);
+    Pair_opt::_update_barcode(birthPivot, death);
   }
 }
 
@@ -898,7 +892,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_add_bar(Dimension dim, Pos_index birth)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    Real_pair_opt::_add_bar(dim, birth);
+    Pair_opt::_add_bar(dim, birth);
   }
 }
 
@@ -906,7 +900,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_remove_last_in_barcode(Pos_index eventIndex)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    Real_pair_opt::_remove_last(eventIndex);
+    Pair_opt::_remove_last(eventIndex);
   }
 }
 

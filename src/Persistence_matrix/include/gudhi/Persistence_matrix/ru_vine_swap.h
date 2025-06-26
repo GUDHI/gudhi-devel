@@ -20,7 +20,6 @@
 #define PM_RU_VINE_SWAP_H
 
 #include <utility>      //std::move
-#include <type_traits>  //std::conditional
 #include <cassert>
 #include <stdexcept>    //std::invalid_argument
 
@@ -93,25 +92,25 @@ class RU_barcode_swap : public RU_pairing<Master_matrix>
   }
 
  protected:
-  void _positive_transpose(Index columnIndex) {
+  void _positive_transpose_barcode(Index columnIndex) {
     _birth(columnIndex) = columnIndex + 1;
     _birth(columnIndex + 1) = columnIndex;
     std::swap(RUP::indexToBar_.at(columnIndex), RUP::indexToBar_.at(columnIndex + 1));
   }
 
-  void _negative_transpose(Index columnIndex) {
+  void _negative_transpose_barcode(Index columnIndex) {
     _death(columnIndex) = columnIndex + 1;
     _death(columnIndex + 1) = columnIndex;
     std::swap(RUP::indexToBar_.at(columnIndex), RUP::indexToBar_.at(columnIndex + 1));
   }
 
-  void _positive_negative_transpose(Index columnIndex) {
+  void _positive_negative_transpose_barcode(Index columnIndex) {
     _birth(columnIndex) = columnIndex + 1;
     _death(columnIndex + 1) = columnIndex;
     std::swap(RUP::indexToBar_.at(columnIndex), RUP::indexToBar_.at(columnIndex + 1));
   }
 
-  void _negative_positive_transpose(Index columnIndex) {
+  void _negative_positive_transpose_barcode(Index columnIndex) {
     _death(columnIndex) = columnIndex + 1;
     _birth(columnIndex + 1) = columnIndex;
     std::swap(RUP::indexToBar_.at(columnIndex), RUP::indexToBar_.at(columnIndex + 1));
@@ -166,18 +165,8 @@ class RU_barcode_swap : public RU_pairing<Master_matrix>
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
-class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_column_pairings, 
-                                             RU_barcode_swap<Master_matrix>,
-                                             Dummy_ru_vine_pairing
-                                            >::type
+class RU_vine_swap
 {
- protected:
-  //RUP = RU matrix Pairing
-  using RUP = typename std::conditional<Master_matrix::Option_list::has_column_pairings, 
-                                        RU_barcode_swap<Master_matrix>,
-                                        Dummy_ru_vine_pairing
-                                       >::type;
-
  public:
   using Index = typename Master_matrix::Index;          /**< @ref MatIdx index type. */
   using ID_index = typename Master_matrix::ID_index;    /**< @ref IDIdx index type. */
@@ -230,16 +219,8 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
   /**
    * @brief Swap operator.
    */
-  friend void swap(RU_vine_swap& swap1, RU_vine_swap& swap2) {
-    if constexpr (Master_matrix::Option_list::has_column_pairings) {
-      swap(static_cast<RUP&>(swap1), static_cast<RUP&>(swap2));
-    }
-  }
+  friend void swap(RU_vine_swap& swap1, RU_vine_swap& swap2) {}
 
- protected:
-  void _reset() {
-    if constexpr (Master_matrix::Option_list::has_column_pairings) RUP::_reset();
-  }
 
  private:
   using Master_RU_matrix = typename Master_matrix::Master_RU_matrix;
@@ -264,17 +245,15 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
 };
 
 template <class Master_matrix>
-inline RU_vine_swap<Master_matrix>::RU_vine_swap() : RUP()
+inline RU_vine_swap<Master_matrix>::RU_vine_swap()
 {}
 
 template <class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(const RU_vine_swap& matrixToCopy)
-    : RUP(static_cast<const RUP&>(matrixToCopy))
 {}
 
 template <class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(RU_vine_swap<Master_matrix>&& other) noexcept
-    : RUP(std::move(static_cast<RUP&>(other)))
 {}
 
 template <class Master_matrix>
@@ -351,7 +330,6 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap(Pos_index index)
 template <class Master_matrix>
 inline RU_vine_swap<Master_matrix>& RU_vine_swap<Master_matrix>::operator=(RU_vine_swap<Master_matrix> other) 
 {
-  RUP::operator=(other);
   return *this;
 }
 
@@ -411,7 +389,7 @@ inline void RU_vine_swap<Master_matrix>::_positive_transpose(Index columnIndex)
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    RUP::_positive_transpose(columnIndex);
+    _matrix()->_positive_transpose_barcode(columnIndex);
   }
 }
 
@@ -419,7 +397,7 @@ template <class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_negative_transpose(Index columnIndex) 
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    RUP::_negative_transpose(columnIndex);
+    _matrix()->_negative_transpose_barcode(columnIndex);
   }
   std::swap(_matrix()->pivotToColumnIndex_.at(_get_birth(columnIndex)),
             _matrix()->pivotToColumnIndex_.at(_get_birth(columnIndex + 1)));
@@ -440,7 +418,7 @@ inline void RU_vine_swap<Master_matrix>::_positive_negative_transpose(Index colu
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    RUP::_positive_negative_transpose(columnIndex);
+    _matrix()->_positive_negative_transpose_barcode(columnIndex);
   }
 }
 
@@ -459,7 +437,7 @@ inline void RU_vine_swap<Master_matrix>::_negative_positive_transpose(Index colu
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    RUP::_negative_positive_transpose(columnIndex);
+    _matrix()->_negative_positive_transpose_barcode(columnIndex);
   }
 }
 
@@ -539,7 +517,7 @@ template <class Master_matrix>
 inline typename RU_vine_swap<Master_matrix>::Pos_index RU_vine_swap<Master_matrix>::_get_death(Index simplexIndex)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    return RUP::_death_val(simplexIndex);
+    return _matrix()->_death_val(simplexIndex);
   } else {
     if (!_matrix()->reducedMatrixR_.is_zero_column(simplexIndex))
       return _matrix()->reducedMatrixR_.get_column(simplexIndex).get_pivot();
@@ -559,7 +537,7 @@ inline typename RU_vine_swap<Master_matrix>::Pos_index RU_vine_swap<Master_matri
     Index negativeSimplexIndex)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    return RUP::_birth_val(negativeSimplexIndex);
+    return _matrix()->_birth_val(negativeSimplexIndex);
   } else {
     return _matrix()->reducedMatrixR_.get_pivot(negativeSimplexIndex);
   }

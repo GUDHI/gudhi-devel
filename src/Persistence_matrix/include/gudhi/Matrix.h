@@ -500,9 +500,11 @@ class Matrix {
                                >::type;
 
   using RU_pairing_option =
-      typename std::conditional<PersistenceMatrixOptions::has_column_pairings &&
-                                    !PersistenceMatrixOptions::has_vine_update,
-                                RU_pairing<Matrix<PersistenceMatrixOptions> >,
+      typename std::conditional<PersistenceMatrixOptions::has_column_pairings,
+                                typename std::conditional<PersistenceMatrixOptions::has_vine_update,
+                                                          RU_barcode_swap<Matrix<PersistenceMatrixOptions> >,
+                                                          RU_pairing<Matrix<PersistenceMatrixOptions> >
+                                                         >::type,
                                 Dummy_ru_pairing
                                >::type;
   using RU_vine_swap_option =
@@ -517,9 +519,11 @@ class Matrix {
                                >::type;
 
   using Chain_pairing_option =
-      typename std::conditional<PersistenceMatrixOptions::has_column_pairings &&
-                                    !PersistenceMatrixOptions::has_vine_update,
-                                Chain_pairing<Matrix<PersistenceMatrixOptions> >,
+      typename std::conditional<PersistenceMatrixOptions::has_column_pairings,
+                                typename std::conditional<PersistenceMatrixOptions::has_vine_update,
+                                                          Chain_barcode_swap<Matrix<PersistenceMatrixOptions> >,
+                                                          Chain_pairing<Matrix<PersistenceMatrixOptions> >
+                                                         >::type,
                                 Dummy_chain_pairing
                                >::type;
   using Chain_vine_swap_option = typename std::conditional<PersistenceMatrixOptions::has_vine_update,

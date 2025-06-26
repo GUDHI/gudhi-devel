@@ -469,9 +469,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    */
   void reset(Column_settings* colSettings) {
     if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access) Dim_opt::_reset();
-    if constexpr (Master_matrix::Option_list::has_column_pairings && !Master_matrix::Option_list::has_vine_update)
-      Pair_opt::_reset();
-    if constexpr (Master_matrix::Option_list::has_vine_update) Swap_opt::_reset();
+    if constexpr (Master_matrix::Option_list::has_column_pairings) Pair_opt::_reset();
     if constexpr (Master_matrix::Option_list::can_retrieve_representative_cycles) Rep_opt::_reset();
     if constexpr (hasPivotToPosMap_) Pivot_to_pos_mapper_opt::map_.clear();
     matrix_.clear();
@@ -519,7 +517,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
                                               >::type;
 
   friend Swap_opt;              // direct access to index mapper
-  friend typename Swap_opt::CP; // direct access to index mapper
+  friend Pair_opt;              // direct access to index mapper
   friend Rep_opt;               // direct access to index mapper
 
   Column_container matrix_;       /**< Column container. */
@@ -1270,16 +1268,10 @@ inline void Chain_matrix<Master_matrix>::_remove_last(Index lastIndex)
 
   --nextPosition_;
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    if constexpr (Master_matrix::Option_list::has_vine_update) {
-      Swap_opt::CP::CP::_erase_bar(nextPosition_);
-      Pivot_to_pos_mapper_opt::map_.erase(pivot);
-    } else {
-      Pair_opt::_erase_bar(nextPosition_);
-    }
-  } else {
-    if constexpr (Master_matrix::Option_list::has_vine_update &&
-                  Master_matrix::Option_list::can_retrieve_representative_cycles)
-      Pivot_to_pos_mapper_opt::map_.erase(pivot);
+    Pair_opt::_erase_bar(nextPosition_);
+  }
+  if constexpr (hasPivotToPosMap_) {
+    Pivot_to_pos_mapper_opt::map_.erase(pivot);
   }
 
   if constexpr (Master_matrix::Option_list::has_row_access) {
@@ -1297,10 +1289,7 @@ template <class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_update_barcode(Pos_index birth)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    if constexpr (Master_matrix::Option_list::has_vine_update)
-      Swap_opt::CP::CP::_update_barcode(birth, nextPosition_);
-    else
-      Pair_opt::_update_barcode(birth, nextPosition_);
+    Pair_opt::_update_barcode(birth, nextPosition_);
   }
   ++nextPosition_;
 }
@@ -1309,10 +1298,7 @@ template <class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_add_bar(Dimension dim)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    if constexpr (Master_matrix::Option_list::has_vine_update)
-      Swap_opt::CP::CP::_add_bar(dim, nextPosition_);
-    else
-      Pair_opt::_add_bar(dim, nextPosition_);
+    Pair_opt::_add_bar(dim, nextPosition_);
   }
   ++nextPosition_;
 }

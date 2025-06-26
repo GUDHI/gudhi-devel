@@ -509,7 +509,7 @@ class Id_to_index_overlay
    */
   void reset(Column_settings* colSettings) {
     matrix_.reset(colSettings);
-    if constexpr (Master_matrix::Option_list::is_of_boundary_type) idToIndex_->clear();
+    if constexpr (Master_matrix::Option_list::is_of_boundary_type) if (idToIndex_ != nullptr) idToIndex_->clear();
     nextIndex_ = 0;
   }
 
