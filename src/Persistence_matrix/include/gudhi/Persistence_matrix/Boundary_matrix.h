@@ -40,7 +40,7 @@ template <class Master_matrix>
 class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
                         public Master_matrix::template Base_swap_option<Boundary_matrix<Master_matrix> >,
                         public Master_matrix::Base_pairing_option,
-                        public Master_matrix::Matrix_row_access_option
+                        protected Master_matrix::Matrix_row_access_option
 {
  private:
   using Dim_opt = typename Master_matrix::Matrix_dimension_option;

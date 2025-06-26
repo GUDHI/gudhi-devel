@@ -564,7 +564,7 @@ inline typename Naive_vector_column<Master_matrix,Support>::ID_index Naive_vecto
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
     return column_.empty() ? Master_matrix::template get_null_value<ID_index>() : column_.back()->get_row_index();
   } else {
-    return Chain_opt::get_pivot();
+    return Chain_opt::_get_pivot();
   }
 }
 
@@ -581,9 +581,9 @@ inline typename Naive_vector_column<Master_matrix,Support>::Field_element Naive_
     if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
       return column_.empty() ? Field_element() : column_.back()->get_element();
     } else {
-      if (Chain_opt::get_pivot() == Master_matrix::template get_null_value<ID_index>()) return Field_element();
+      if (Chain_opt::_get_pivot() == Master_matrix::template get_null_value<ID_index>()) return Field_element();
       for (const Entry* entry : column_) {
-        if (entry->get_row_index() == Chain_opt::get_pivot()) return entry->get_element();
+        if (entry->get_row_index() == Chain_opt::_get_pivot()) return entry->get_element();
       }
       return Field_element();  // should never happen if chain column is used properly
     }
@@ -665,8 +665,8 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
     if (_add(column)) {
-      Chain_opt::swap_pivots(column);
-      Dim_opt::swap_dimension(column);
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
     _add(column);
@@ -743,16 +743,16 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
     if constexpr (Master_matrix::Option_list::is_z2) {
       if (val) {
         if (_add(column)) {
-          Chain_opt::swap_pivots(column);
-          Dim_opt::swap_dimension(column);
+          Chain_opt::_swap_pivots(column);
+          Dim_opt::_swap_dimension(column);
         }
       } else {
         throw std::invalid_argument("A chain column should not be multiplied by 0.");
       }
     } else {
       if (_multiply_target_and_add(val, column)) {
-        Chain_opt::swap_pivots(column);
-        Dim_opt::swap_dimension(column);
+        Chain_opt::_swap_pivots(column);
+        Dim_opt::_swap_dimension(column);
       }
     }
   } else {
@@ -802,14 +802,14 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
     if constexpr (Master_matrix::Option_list::is_z2) {
       if (val) {
         if (_add(column)) {
-          Chain_opt::swap_pivots(column);
-          Dim_opt::swap_dimension(column);
+          Chain_opt::_swap_pivots(column);
+          Dim_opt::_swap_dimension(column);
         }
       }
     } else {
       if (_multiply_source_and_add(column, val)) {
-        Chain_opt::swap_pivots(column);
-        Dim_opt::swap_dimension(column);
+        Chain_opt::_swap_pivots(column);
+        Dim_opt::_swap_dimension(column);
       }
     }
   } else {

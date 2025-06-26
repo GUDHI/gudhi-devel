@@ -49,7 +49,7 @@ struct Dummy_base_pairing {
  */
 template <class Master_matrix>
 class Base_pairing
-    : public std::conditional<
+    : protected std::conditional<
           Master_matrix::Option_list::has_removable_columns,
           Index_mapper<std::unordered_map<typename Master_matrix::Pos_index, typename Master_matrix::ID_index> >,
           Dummy_index_mapper

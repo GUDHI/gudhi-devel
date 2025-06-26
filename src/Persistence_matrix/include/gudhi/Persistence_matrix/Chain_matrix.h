@@ -48,7 +48,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
                      public Master_matrix::Chain_vine_swap_option,
                      public Master_matrix::Chain_representative_cycles_option,
                      public Master_matrix::Matrix_row_access_option,
-                     public std::conditional<
+                     protected std::conditional<
                          Master_matrix::Option_list::has_vine_update &&
                              (Master_matrix::Option_list::has_column_pairings ||
                               Master_matrix::Option_list::can_retrieve_representative_cycles),
@@ -518,6 +518,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
                                                std::map<ID_index, Field_element>
                                               >::type;
 
+  friend Swap_opt;              // direct access to index mapper
   friend typename Swap_opt::CP; // direct access to index mapper
   friend Rep_opt;               // direct access to index mapper
 

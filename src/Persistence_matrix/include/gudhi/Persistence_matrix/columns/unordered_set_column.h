@@ -580,7 +580,7 @@ inline typename Unordered_set_column<Master_matrix>::ID_index Unordered_set_colu
     // the max, so not clear how much it is worth it.
     return (*std::max_element(column_.begin(), column_.end(), EntryPointerComp()))->get_row_index();
   } else {
-    return Chain_opt::get_pivot();
+    return Chain_opt::_get_pivot();
   }
 }
 
@@ -598,9 +598,9 @@ Unordered_set_column<Master_matrix>::get_pivot_value() const
       if (column_.empty()) return 0;
       return (*std::max_element(column_.begin(), column_.end(), EntryPointerComp()))->get_element();
     } else {
-      if (Chain_opt::get_pivot() == Master_matrix::template get_null_value<ID_index>()) return Field_element();
+      if (Chain_opt::_get_pivot() == Master_matrix::template get_null_value<ID_index>()) return Field_element();
       for (const Entry* entry : column_) {
-        if (entry->get_row_index() == Chain_opt::get_pivot()) return entry->get_element();
+        if (entry->get_row_index() == Chain_opt::_get_pivot()) return entry->get_element();
       }
       return Field_element();  // should never happen if chain column is used properly
     }
@@ -655,8 +655,8 @@ inline Unordered_set_column<Master_matrix>& Unordered_set_column<Master_matrix>:
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
     if (_add(column)) {
-      Chain_opt::swap_pivots(column);
-      Dim_opt::swap_dimension(column);
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
     _add(column);
@@ -735,16 +735,16 @@ inline Unordered_set_column<Master_matrix>& Unordered_set_column<Master_matrix>:
     if constexpr (Master_matrix::Option_list::is_z2) {
       if (val) {
         if (_add(column)) {
-          Chain_opt::swap_pivots(column);
-          Dim_opt::swap_dimension(column);
+          Chain_opt::_swap_pivots(column);
+          Dim_opt::_swap_dimension(column);
         }
       } else {
         throw std::invalid_argument("A chain column should not be multiplied by 0.");
       }
     } else {
       if (_multiply_target_and_add(val, column)) {
-        Chain_opt::swap_pivots(column);
-        Dim_opt::swap_dimension(column);
+        Chain_opt::_swap_pivots(column);
+        Dim_opt::_swap_dimension(column);
       }
     }
   } else {
@@ -796,14 +796,14 @@ inline Unordered_set_column<Master_matrix>& Unordered_set_column<Master_matrix>:
     if constexpr (Master_matrix::Option_list::is_z2) {
       if (val) {
         if (_add(column)) {
-          Chain_opt::swap_pivots(column);
-          Dim_opt::swap_dimension(column);
+          Chain_opt::_swap_pivots(column);
+          Dim_opt::_swap_dimension(column);
         }
       }
     } else {
       if (_multiply_source_and_add(column, val)) {
-        Chain_opt::swap_pivots(column);
-        Dim_opt::swap_dimension(column);
+        Chain_opt::_swap_pivots(column);
+        Dim_opt::_swap_dimension(column);
       }
     }
   } else {
@@ -986,14 +986,14 @@ inline bool Unordered_set_column<Master_matrix>::_generic_add(const Entry_range&
       entryPool_->destroy(newEntry);
       if constexpr (Master_matrix::Option_list::is_z2) {
         if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-          if (entry.get_row_index() == Chain_opt::get_pivot()) pivotIsZeroed = true;
+          if (entry.get_row_index() == Chain_opt::_get_pivot()) pivotIsZeroed = true;
         }
         _delete_entry(res.first);
       } else {
         update_target(*res.first, entry);
         if ((*res.first)->get_element() == Field_operators::get_additive_identity()) {
           if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-            if ((*res.first)->get_row_index() == Chain_opt::get_pivot()) pivotIsZeroed = true;
+            if ((*res.first)->get_row_index() == Chain_opt::_get_pivot()) pivotIsZeroed = true;
           }
           _delete_entry(res.first);
         } else {

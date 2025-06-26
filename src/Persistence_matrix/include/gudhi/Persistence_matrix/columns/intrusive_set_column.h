@@ -577,7 +577,7 @@ inline typename Intrusive_set_column<Master_matrix>::ID_index Intrusive_set_colu
     if (column_.empty()) return Master_matrix::template get_null_value<ID_index>();
     return column_.rbegin()->get_row_index();
   } else {
-    return Chain_opt::get_pivot();
+    return Chain_opt::_get_pivot();
   }
 }
 
@@ -595,8 +595,8 @@ Intrusive_set_column<Master_matrix>::get_pivot_value() const
       if (column_.empty()) return 0;
       return column_.rbegin()->get_element();
     } else {
-      if (Chain_opt::get_pivot() == Master_matrix::template get_null_value<ID_index>()) return 0;
-      auto it = column_.find(Entry(Chain_opt::get_pivot()));
+      if (Chain_opt::_get_pivot() == Master_matrix::template get_null_value<ID_index>()) return 0;
+      auto it = column_.find(Entry(Chain_opt::_get_pivot()));
       GUDHI_CHECK(it != column_.end(),
                   "Intrusive_set_column::get_pivot_value - Pivot not found only if the column was misused.");
       return it->get_element();
@@ -680,8 +680,8 @@ inline Intrusive_set_column<Master_matrix>& Intrusive_set_column<Master_matrix>:
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
     if (_add(column)) {
-      Chain_opt::swap_pivots(column);
-      Dim_opt::swap_dimension(column);
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
     _add(column);
@@ -760,16 +760,16 @@ inline Intrusive_set_column<Master_matrix>& Intrusive_set_column<Master_matrix>:
     if constexpr (Master_matrix::Option_list::is_z2) {
       if (val) {
         if (_add(column)) {
-          Chain_opt::swap_pivots(column);
-          Dim_opt::swap_dimension(column);
+          Chain_opt::_swap_pivots(column);
+          Dim_opt::_swap_dimension(column);
         }
       } else {
         throw std::invalid_argument("A chain column should not be multiplied by 0.");
       }
     } else {
       if (_multiply_target_and_add(val, column)) {
-        Chain_opt::swap_pivots(column);
-        Dim_opt::swap_dimension(column);
+        Chain_opt::_swap_pivots(column);
+        Dim_opt::_swap_dimension(column);
       }
     }
   } else {
@@ -821,14 +821,14 @@ inline Intrusive_set_column<Master_matrix>& Intrusive_set_column<Master_matrix>:
     if constexpr (Master_matrix::Option_list::is_z2) {
       if (val) {
         if (_add(column)) {
-          Chain_opt::swap_pivots(column);
-          Dim_opt::swap_dimension(column);
+          Chain_opt::_swap_pivots(column);
+          Dim_opt::_swap_dimension(column);
         }
       }
     } else {
       if (_multiply_source_and_add(column, val)) {
-        Chain_opt::swap_pivots(column);
-        Dim_opt::swap_dimension(column);
+        Chain_opt::_swap_pivots(column);
+        Dim_opt::_swap_dimension(column);
       }
     }
   } else {
