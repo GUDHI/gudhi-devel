@@ -56,7 +56,7 @@ struct Merge {
 
 auto tomato(Point_index num_points,
             nb::object const& neighbors,
-            nb::ndarray<const double, nb::ndim<1>, nb::c_contig> density,
+            nb::ndarray<const double, nb::ndim<1> > density,
             std::vector<Point_index> const& order,
             std::vector<Point_index> const& rorder)
 {
@@ -212,7 +212,7 @@ auto tomato(Point_index num_points,
                         _wrap_as_numpy_array(max_cc, max_cc->size()));
 }
 
-auto merge(nb::ndarray<const Cluster_index, nb::ndim<2>, nb::c_contig> children,
+auto merge(nb::ndarray<const Cluster_index, nb::ndim<2> > children,
            Cluster_index n_leaves,
            Cluster_index n_final)
 {
@@ -270,7 +270,7 @@ auto merge(nb::ndarray<const Cluster_index, nb::ndim<2>, nb::c_contig> children,
 
 // TODO: Do a special version when ngb is a numpy array, where we can cast to int[k][n] ?
 // also do this in the case where we don't have an array, but each list of neighbours is an array ?
-auto hierarchy(nb::object ngb, nb::ndarray<const double, nb::ndim<1>, nb::c_contig> density)
+auto hierarchy(nb::object ngb, nb::ndarray<const double, nb::ndim<1> > density)
 {
   // used to be py::iterable ngb, but that's inconvenient if it doesn't come pre-sorted
   // use py::handle and check if [] (aka __getitem__) works? But then we need to build an object to pass it to []
