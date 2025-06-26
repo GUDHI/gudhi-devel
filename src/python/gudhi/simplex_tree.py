@@ -12,9 +12,6 @@
 from __future__ import annotations
 
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = "Vincent Rouvreau, Alexis Gobé, Hannah Schreiber"
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 

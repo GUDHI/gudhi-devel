@@ -9,9 +9,6 @@
 #   - 2025/04 Hannah Schreiber: Re-add possibility of tensors (numpy, torch etc.) as input.
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = "Vincent Rouvreau, Hannah Schreiber"
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 
@@ -53,5 +50,3 @@ class EuclideanWitnessComplex(t.Euclidean_witness_complex_interface):
         else:
             super().create_simplex_tree(stree, max_alpha_square)
         return stree
-
-

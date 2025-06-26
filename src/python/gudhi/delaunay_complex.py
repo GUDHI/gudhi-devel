@@ -12,9 +12,6 @@
 #   - 2025/04 Hannah Schreiber: Re-add possibility of tensors (numpy, torch etc.) as input.
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = "Vincent Rouvreau, Thibaud Kloczko, Hannah Schreiber"
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "GPL v3"
 
 import warnings

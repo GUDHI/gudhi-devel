@@ -7,9 +7,6 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Hannah Schreiber"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2025 Inria"
 __license__ = "BSD 3-Clause"
 
 from collections.abc import Sequence

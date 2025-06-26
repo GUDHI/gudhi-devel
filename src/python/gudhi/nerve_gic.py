@@ -8,9 +8,6 @@
 #   - 2025/03 Hannah Schreiber: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = "Hannah Schreiber"
-__copyright__ = "Copyright (C) 2018 Inria"
 __license__ = "GPL v3"
 
 import errno
@@ -108,4 +105,3 @@ class CoverComplex(_Nerve_gic_interface):
             super().set_graph_from_file(graph_file_name)
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), graph_file_name)
-

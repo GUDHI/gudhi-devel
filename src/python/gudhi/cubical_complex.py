@@ -8,9 +8,6 @@
 #   - 2025/03 Hannah Schreiber: Use nanobind instead of Cython for python bindings.
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = "Hannah Schreiber"
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 

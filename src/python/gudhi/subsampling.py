@@ -8,9 +8,6 @@
 #   - 2025/03 Jean-Luc Szpyrka: cython to nanobind translation
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = "Jean-Luc Szpyrka"
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT (GPL v3 for sparsify_point_set)"
 
 

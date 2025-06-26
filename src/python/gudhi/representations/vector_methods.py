@@ -9,9 +9,6 @@
 #   - 2020/12 Gard: A more flexible Betti curve class capable of computing exact curves.
 #   - 2021/11 Vincent Rouvreau: factorize _automatic_sample_range
 
-__author__ = "Mathieu Carrière, Martin Royer, Gard Spreemann"
-__maintainer__ = "Martin Royer, Gard Spreemann, Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2018-2020 Inria"
 __license__ = "MIT"
 
 

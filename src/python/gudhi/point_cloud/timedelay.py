@@ -6,9 +6,6 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Martin Royer, Yuichi Ike, Masatoshi Takenouchi"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2020 Inria, Copyright (C) 2020 Fujitsu Laboratories Ltd"
 __license__ = "MIT"
 
 

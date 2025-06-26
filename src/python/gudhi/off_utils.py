@@ -8,9 +8,6 @@
 #   - 2023/11 Vincent Rouvreau: numpy interface for read_points_from_off_file
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 

@@ -12,9 +12,6 @@
 #                               enhances former _array_handler function.
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Vincent Rouvreau, Bertrand Michel"
-__maintainer__ = "Theo Lacombe, Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
