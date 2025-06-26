@@ -197,8 +197,6 @@ class Model {
     std::clog << "Num edges : " << complex_.num_edges() << std::endl;
     std::clog << "Num connected components : " << complex_.num_connected_components() << std::endl;
     std::clog << "Min/avg/max degree : " << min_degree() << "/" << avg_degree() << "/" << max_degree() << std::endl;
-    std::clog << "Num connected components : " << complex_.num_connected_components() << std::endl;
-    std::clog << "Num connected components : " << complex_.num_connected_components() << std::endl;
     std::clog << "+++++++++++++++++++++++++" << std::endl;
   }
 
