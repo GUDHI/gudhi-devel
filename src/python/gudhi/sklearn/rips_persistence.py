@@ -86,10 +86,22 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         self.homology_coeff_field = homology_coeff_field
         self.n_jobs = n_jobs
 
+        # Done twice (in __init__ and fit), but exception is better the sooner
+        dim_list = np.asarray(self.homology_dimensions, dtype=int)
+        if dim_list.ndim not in [0, 1]:
+            raise ValueError(f"Invalid dimension. Got {self.homology_dimensions=}, expected type=int|Iterable[int].")
+
     def fit(self, X, Y=None):
         """
-        Nothing to be done, but useful when included in a scikit-learn Pipeline.
+        Fit the `RipsPersistence` class in function of `homology_dimensions` type.
         """
+        # Must be in the `fit` part, as `transform` should be const and as `__init__` is not called on a parallel grid
+        # search for instance
+        self._dim_list = np.asarray(self.homology_dimensions, dtype=int)
+        self._unwrap = False
+        if self._dim_list.ndim == 0:
+            self._unwrap = True
+            self._dim_list = self._dim_list.reshape(1)
         return self
 
     def __transform(self, inp):
@@ -99,7 +111,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
         input_type = self.input_type
         threshold = self.threshold
         n = inp.shape[0] if input_type == 'distance coo_matrix' else len(inp)
-        max_dimension = min(max(self.dim_list_), max(0, n-3))
+        max_dimension = min(max(self._dim_list), max(0, n-3))
         # Ripser needs to encode simplices and coefficients in 128 bits, which may not always fit
         # Instead of a 256 bit version which may not always suffice either, fall back to SimplexTree
         use_simplex_tree = math.comb(n, min(n // 2, max_dimension + 2)) >= (1 << (128 - (self.homology_coeff_field - 2).bit_length()))
@@ -158,7 +170,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             st.insert_edges_from_coo_matrix(inp)
             st.expansion(max_dimension + 1)
             st.compute_persistence(homology_coeff_field=self.homology_coeff_field, persistence_dim_max=max_dimension>=st.dimension())
-            return [ st.persistence_intervals_in_dimension(dim) for dim in self.dim_list_ ]
+            return [ st.persistence_intervals_in_dimension(dim) for dim in self._dim_list ]
 
         if input_type == 'full distance matrix':
             ## Possibly transpose for performance?
@@ -174,7 +186,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
             raise ValueError("Only 'point cloud', 'lower distance matrix', 'full distance matrix' and 'distance coo_matrix' are valid input_type") # move to __init__?
 
         # dgm stops at n-2
-        return [dgm[dim] if dim < len(dgm) else np.empty((0,2)) for dim in self.dim_list_]
+        return [dgm[dim] if dim < len(dgm) else np.empty((0,2)) for dim in self._dim_list]
 
     def transform(self, X, Y=None):
         """Compute all the Vietoris-Rips complexes and their associated persistence diagrams.
@@ -189,21 +201,14 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
                 `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
         :rtype: list of numpy ndarray of shape (,2) or list of list of numpy ndarray of shape (,2)
         """
-        # Depends if homology_dimensions is an integer or a list of integers (else case)
-        if isinstance(self.homology_dimensions, int):
-            unwrap = True
-            self.dim_list_ = [ self.homology_dimensions ]
-        else:
-            unwrap = False
-            self.dim_list_ = self.homology_dimensions
-
         # threads is preferred as Rips construction and persistence computation releases the GIL
         res = Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(inputs) for inputs in X)
 
-        if unwrap:
+        # cf. `fit`
+        if self._unwrap:
             res = [d[0] for d in res]
         return res
 
     def get_feature_names_out(self):
         """Provide column names for implementing sklearn's set_output API."""
-        return [f"H{i}" for i in self.dim_list_]
+        return [f"H{i}" for i in self._dim_list]
