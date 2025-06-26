@@ -21,6 +21,9 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
+// Note: this would be a good candidate for std::optional instead of a mixin as its only role for now
+// is to store a map. If this does not change later.
+
 /**
  * @private
  * @ingroup persistence_matrix

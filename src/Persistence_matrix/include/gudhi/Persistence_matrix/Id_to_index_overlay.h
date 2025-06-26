@@ -509,6 +509,7 @@ class Id_to_index_overlay
    */
   void reset(Column_settings* colSettings) {
     matrix_.reset(colSettings);
+    if constexpr (Master_matrix::Option_list::is_of_boundary_type) idToIndex_->clear();
     nextIndex_ = 0;
   }
 
@@ -523,7 +524,7 @@ class Id_to_index_overlay
    */
   friend void swap(Id_to_index_overlay& matrix1, Id_to_index_overlay& matrix2) {
     swap(matrix1.matrix_, matrix2.matrix_);
-    if (Master_matrix::Option_list::is_of_boundary_type) std::swap(matrix1.idToIndex_, matrix2.idToIndex_);
+    std::swap(matrix1.idToIndex_, matrix2.idToIndex_);
     std::swap(matrix1.nextIndex_, matrix2.nextIndex_);
   }
 
@@ -965,10 +966,12 @@ inline Id_to_index_overlay<Underlying_matrix, Master_matrix>&
 Id_to_index_overlay<Underlying_matrix, Master_matrix>::operator=(const Id_to_index_overlay& other)
 {
   matrix_ = other.matrix_;
-  if (Master_matrix::Option_list::is_of_boundary_type)
+  if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
+    if (idToIndex_ != nullptr) delete idToIndex_;
     idToIndex_ = other.idToIndex_;
-  else
+  } else {
     idToIndex_ = &matrix_.pivotToColumnIndex_;
+  }
   nextIndex_ = other.nextIndex_;
 
   return *this;

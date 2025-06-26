@@ -8,7 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-/** @file Matrix.h
+/**
+ * @file Matrix.h
  * @author Hannah Schreiber
  * @brief Contains @ref Gudhi::persistence_matrix::Matrix class.
  */
@@ -1512,7 +1513,7 @@ inline Matrix<PersistenceMatrixOptions>::Matrix(Matrix&& other) noexcept
 template <class PersistenceMatrixOptions>
 inline Matrix<PersistenceMatrixOptions>::~Matrix()
 {
-  matrix_.reset(colSettings_);
+  matrix_.reset(colSettings_);  // to avoid crashes at destruction, all columns have to be destroyed first
   delete colSettings_;
 }
 

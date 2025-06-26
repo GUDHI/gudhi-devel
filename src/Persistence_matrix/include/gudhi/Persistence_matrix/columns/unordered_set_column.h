@@ -878,7 +878,7 @@ inline typename Unordered_set_column<Master_matrix>::Entry* Unordered_set_column
     ID_index rowIndex)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     newEntry->set_element(value);
     column_.insert(newEntry);
     RA_opt::insert_entry(rowIndex, newEntry);
@@ -895,7 +895,7 @@ template <class Master_matrix>
 inline void Unordered_set_column<Master_matrix>::_insert_entry(ID_index rowIndex)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     column_.insert(newEntry);
     RA_opt::insert_entry(rowIndex, newEntry);
   } else {
@@ -974,7 +974,7 @@ inline bool Unordered_set_column<Master_matrix>::_generic_add(const Entry_range&
   for (const Entry& entry : source) {
     Entry* newEntry;
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      newEntry = entryPool_->construct(RA_opt::columnIndex_, entry.get_row_index());
+      newEntry = entryPool_->construct(RA_opt::get_column_index(), entry.get_row_index());
     } else {
       newEntry = entryPool_->construct(entry.get_row_index());
     }

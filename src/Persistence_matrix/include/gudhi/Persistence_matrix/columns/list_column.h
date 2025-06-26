@@ -891,7 +891,7 @@ inline typename List_column<Master_matrix>::Entry* List_column<Master_matrix>::_
     const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     newEntry->set_element(value);
     column_.insert(position, newEntry);
     RA_opt::insert_entry(rowIndex, newEntry);
@@ -909,7 +909,7 @@ inline void List_column<Master_matrix>::_insert_entry(ID_index rowIndex,
                                                       const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     column_.insert(position, newEntry);
     RA_opt::insert_entry(rowIndex, newEntry);
   } else {
@@ -924,7 +924,7 @@ inline void List_column<Master_matrix>::_update_entry(const Field_element& value
                                                       const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    *position = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    *position = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     (*position)->set_element(value);
     RA_opt::insert_entry(rowIndex, *position);
   } else {
@@ -938,7 +938,7 @@ inline void List_column<Master_matrix>::_update_entry(ID_index rowIndex,
                                                       const typename Column_support::iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    *position = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    *position = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     RA_opt::insert_entry(rowIndex, *position);
   } else {
     *position = entryPool_->construct(rowIndex);

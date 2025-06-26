@@ -884,7 +884,7 @@ inline typename Intrusive_list_column<Master_matrix>::Entry* Intrusive_list_colu
     const iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     newEntry->set_element(value);
     column_.insert(position, *newEntry);
     RA_opt::insert_entry(rowIndex, newEntry);
@@ -901,7 +901,7 @@ template <class Master_matrix>
 inline void Intrusive_list_column<Master_matrix>::_insert_entry(ID_index rowIndex, const iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     column_.insert(position, *newEntry);
     RA_opt::insert_entry(rowIndex, newEntry);
   } else {
