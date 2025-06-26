@@ -8,17 +8,17 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Sliced_Wasserstein.h>
-
 #include <iostream>
 #include <vector>
 #include <utility>
 
+#include <gudhi/Sliced_Wasserstein.h>
+
 using Persistence_diagram = Gudhi::Persistence_representations::Persistence_diagram;
 using SW = Gudhi::Persistence_representations::Sliced_Wasserstein;
 
-int main(int argc, char** argv) {
-
+int main(int argc, char** argv)
+{
   Persistence_diagram persistence1, persistence2;
 
   persistence1.push_back(std::make_pair(1, 2));
@@ -30,7 +30,6 @@ int main(int argc, char** argv) {
   persistence2.push_back(std::make_pair(1, 6));
   persistence2.push_back(std::make_pair(3, 5));
   persistence2.push_back(std::make_pair(6, 10));
-
 
   SW sw1(persistence1, 1, 100);
   SW sw2(persistence2, 1, 100);

@@ -8,17 +8,18 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_heat_maps.h>
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
 
+#include <gudhi/Persistence_heat_maps.h>
+
 using distance_from_diagonal_scaling = Gudhi::Persistence_representations::distance_from_diagonal_scaling;
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<distance_from_diagonal_scaling>;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program creates persistence heat map files (*.mps) of persistence diagrams files (*.pers) "
             << "provided as an input.The Gaussian kernels are weighted by the distance of a center from the "
             << "diagonal.\n"
