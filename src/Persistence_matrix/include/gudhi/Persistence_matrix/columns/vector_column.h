@@ -1003,7 +1003,7 @@ inline typename Vector_column<Master_matrix>::Entry*
 Vector_column<Master_matrix>::_insert_entry(const Field_element& value, ID_index rowIndex, Column_support& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     newEntry->set_element(value);
     column.push_back(newEntry);
     RA_opt::insert_entry(rowIndex, newEntry);
@@ -1020,7 +1020,7 @@ template <class Master_matrix>
 inline void Vector_column<Master_matrix>::_insert_entry(ID_index rowIndex, Column_support& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     column.push_back(newEntry);
     RA_opt::insert_entry(rowIndex, newEntry);
   } else {
@@ -1033,7 +1033,7 @@ template <class Master_matrix>
 inline void Vector_column<Master_matrix>::_update_entry(const Field_element& value, ID_index rowIndex, Index position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     newEntry->set_element(value);
     column_[position] = newEntry;
     RA_opt::insert_entry(rowIndex, newEntry);
@@ -1047,7 +1047,7 @@ template <class Master_matrix>
 inline void Vector_column<Master_matrix>::_update_entry(ID_index rowIndex, Index position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     column_[position] = newEntry;
     RA_opt::insert_entry(rowIndex, newEntry);
   } else {
