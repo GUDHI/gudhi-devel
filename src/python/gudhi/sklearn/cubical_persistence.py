@@ -7,9 +7,6 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2021 Inria"
 __license__ = "MIT"
 
 
@@ -18,7 +15,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
 
 from .. import CubicalComplex
-from .._pers_cub_low_dim import (
+from .._pers_cub_low_dim_ext import (
     _persistence_on_a_line,
     _persistence_on_rectangle_from_top_cells,
 )

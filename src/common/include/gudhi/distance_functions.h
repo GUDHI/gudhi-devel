@@ -17,7 +17,7 @@
 #include <boost/range/size.hpp>
 
 #include <cmath>  // for std::sqrt
-#include <type_traits>  // for std::decay
+#include <type_traits>  // for std::decay, std::remove_const_t
 #include <iterator>  // for std::begin, std::end
 #include <utility>
 
@@ -37,7 +37,7 @@ class Euclidean_distance {
   operator()(const Point& p1, const Point& p2) const {
     auto it1 = std::begin(p1);
     auto it2 = std::begin(p2);
-    typedef typename boost::range_value<Point>::type NT;
+    typedef std::remove_const_t<typename boost::range_value<Point>::type> NT;
     NT dist = 0;
     for (; it1 != std::end(p1); ++it1, ++it2) {
       GUDHI_CHECK(it2 != std::end(p2), "inconsistent point dimensions");

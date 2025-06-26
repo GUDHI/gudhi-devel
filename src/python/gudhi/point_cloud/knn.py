@@ -7,9 +7,6 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Marc Glisse"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2020 Inria"
 __license__ = "MIT"
 
 
@@ -81,9 +78,13 @@ class KNearestNeighbors:
         elif metric == "minkowski":
             self.params["p"] = kwargs.get("p", 2)
         if self.params.get("implementation") in {"keops", "ckdtree"}:
-            assert self.metric == "minkowski"
+            if self.metric != "minkowski":
+                raise ValueError("metric has to be minkowski for the given parameters")
         if self.params.get("implementation") == "hnsw":
-            assert self.metric == "minkowski" and self.params["p"] == 2
+            if self.metric != "minkowski" or self.params["p"] != 2:
+                raise ValueError(
+                    "metric has to be minkowski and p set to 2 for the given parameters"
+                )
         if not self.params.get("implementation"):
             if self.metric == "minkowski":
                 self.params["implementation"] = "ckdtree"
@@ -185,7 +186,8 @@ class KNearestNeighbors:
                 self.return_distance = True
                 self.params["enable_autodiff"] = True
             # We can implement more later as needed
-            assert self.metric == "minkowski"
+            if self.metric != "minkowski":
+                raise ValueError("metric has to be minkowski for the given parameters")
             p = self.params["p"]
             Y = ep.astensor(self.ref_points)
             neighbor_pts = Y[neighbors,]
@@ -369,7 +371,9 @@ class KNearestNeighbors:
                 return distances
             return None
 
-        assert self.params["implementation"] == "sklearn"
+        # sklearn is the last valid value possible for "implementation"
+        if self.params["implementation"] != "sklearn":
+            raise ValueError("implementation method has no known value")
         if self.return_distance:
             distances, neighbors = self.nn.kneighbors(X, return_distance=True)
             if self.return_index:
