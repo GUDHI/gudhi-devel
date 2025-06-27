@@ -9,8 +9,6 @@
 
 __license__ = "BSD 3-Clause"
 
-from collections.abc import Sequence
-import warnings
 import numpy as np
 from numpy.typing import ArrayLike
 

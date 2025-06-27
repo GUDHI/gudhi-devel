@@ -14,7 +14,6 @@
 
 __license__ = "GPL v3"
 
-import warnings
 from typing import Literal, Optional
 from collections.abc import Sequence
 

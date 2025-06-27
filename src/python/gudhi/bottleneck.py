@@ -10,8 +10,6 @@
 __license__ = "GPL v3"
 
 from collections.abc import Sequence
-import warnings
-import numpy as np
 from numpy.typing import ArrayLike
 
 from gudhi import _bottleneck_ext as t
