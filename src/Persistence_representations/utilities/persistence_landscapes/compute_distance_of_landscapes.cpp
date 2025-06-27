@@ -9,7 +9,6 @@
  */
 
 #include <iostream>
-#include <sstream>
 #include <limits>
 #include <vector>
 
@@ -42,7 +41,7 @@ int main(int argc, char** argv)
   }
   std::vector<Persistence_landscape> landscaspes;
   landscaspes.reserve(filenames.size());
-  for (size_t file_no = 0; file_no != filenames.size(); ++file_no) {
+  for (std::size_t file_no = 0; file_no != filenames.size(); ++file_no) {
     Persistence_landscape l;
     l.load_landscape_from_file(filenames[file_no]);
     landscaspes.push_back(l);
@@ -52,14 +51,14 @@ int main(int argc, char** argv)
 
   // first we prepare an array:
   std::vector<std::vector<double> > distance(filenames.size());
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     std::vector<double> v(filenames.size(), 0);
     distance[i] = v;
   }
 
   // and now we can compute the distances:
-  for (size_t i = 0; i != landscaspes.size(); ++i) {
-    for (size_t j = i; j != landscaspes.size(); ++j) {
+  for (std::size_t i = 0; i != landscaspes.size(); ++i) {
+    for (std::size_t j = i; j != landscaspes.size(); ++j) {
       distance[i][j] = distance[j][i] = compute_distance_of_landscapes(landscaspes[i], landscaspes[j], p);
     }
   }
@@ -67,8 +66,8 @@ int main(int argc, char** argv)
   // and now output the result to the screen and a file:
   std::ofstream out;
   out.open("distance.land");
-  for (size_t i = 0; i != distance.size(); ++i) {
-    for (size_t j = 0; j != distance.size(); ++j) {
+  for (std::size_t i = 0; i != distance.size(); ++i) {
+    for (std::size_t j = 0; j != distance.size(); ++j) {
       std::clog << distance[i][j] << " ";
       out << distance[i][j] << " ";
     }

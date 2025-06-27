@@ -9,7 +9,6 @@
  */
 
 #include <iostream>
-#include <sstream>
 
 #include <gudhi/Persistence_landscape.h>
 

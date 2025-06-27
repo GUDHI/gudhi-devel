@@ -35,7 +35,7 @@ int main(int argc, char** argv)
   Persistence_intervals p(argv[1], dimension);
   std::vector<std::pair<double, double> > dominant_intervals = p.dominant_intervals(atoi(argv[3]));
   std::clog << "Here are the dominant intervals : " << std::endl;
-  for (size_t i = 0; i != dominant_intervals.size(); ++i) {
+  for (std::size_t i = 0; i != dominant_intervals.size(); ++i) {
     std::clog << " " << dominant_intervals[i].first << "," << dominant_intervals[i].second << " " << std::endl;
   }
 

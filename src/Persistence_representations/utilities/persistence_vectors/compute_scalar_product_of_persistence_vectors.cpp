@@ -9,11 +9,10 @@
  */
 
 #include <iostream>
-#include <sstream>
-#include <limits>
 #include <vector>
 
 #include <gudhi/Persistence_vectors.h>
+#include <gudhi/distance_functions.h>
 
 using Euclidean_distance = Gudhi::Euclidean_distance;
 using Vector_distances_in_diagram = Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
@@ -35,7 +34,7 @@ int main(int argc, char** argv)
   }
   std::vector<Vector_distances_in_diagram> vectors;
   vectors.reserve(filenames.size());
-  for (size_t file_no = 0; file_no != filenames.size(); ++file_no) {
+  for (std::size_t file_no = 0; file_no != filenames.size(); ++file_no) {
     Vector_distances_in_diagram l;
     l.load_from_file(filenames[file_no]);
     vectors.push_back(l);
@@ -45,14 +44,14 @@ int main(int argc, char** argv)
 
   // first we prepare an array:
   std::vector<std::vector<double> > scalar_product(filenames.size());
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     std::vector<double> v(filenames.size(), 0);
     scalar_product[i] = v;
   }
 
   // and now we can compute the scalar product:
-  for (size_t i = 0; i != vectors.size(); ++i) {
-    for (size_t j = i; j != vectors.size(); ++j) {
+  for (std::size_t i = 0; i != vectors.size(); ++i) {
+    for (std::size_t j = i; j != vectors.size(); ++j) {
       scalar_product[i][j] = scalar_product[j][i] = vectors[i].compute_scalar_product(vectors[j]);
     }
   }
@@ -60,8 +59,8 @@ int main(int argc, char** argv)
   // and now output the result to the screen and a file:
   std::ofstream out;
   out.open("scalar_product.vect");
-  for (size_t i = 0; i != scalar_product.size(); ++i) {
-    for (size_t j = 0; j != scalar_product.size(); ++j) {
+  for (std::size_t i = 0; i != scalar_product.size(); ++i) {
+    for (std::size_t j = 0; j != scalar_product.size(); ++j) {
       std::clog << scalar_product[i][j] << " ";
       out << scalar_product[i][j] << " ";
     }
