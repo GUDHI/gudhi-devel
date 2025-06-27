@@ -239,6 +239,7 @@ class Sliced_Wasserstein
       }
 
       // Sort angles.
+
       std::sort(angles1.begin(), angles1.end(),
                 [](const std::pair<double, std::pair<std::pair<int,double>, std::pair<int,double>> >& p1,
                    const std::pair<double, std::pair<std::pair<int,double>, std::pair<int,double>> >& p2) {
