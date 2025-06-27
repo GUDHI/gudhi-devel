@@ -38,6 +38,8 @@ class Z2_field_operators
   template <class T>
   using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
+  inline constexpr static const Characteristic nullCharacteristic = 2;
+
   /**
    * @brief Default constructor.
    */

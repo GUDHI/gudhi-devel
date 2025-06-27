@@ -17,7 +17,7 @@
 #ifndef PM_OPTIONS_INCLUDED
 #define PM_OPTIONS_INCLUDED
 
-#include "Fields/Zp_field_operators.h"
+#include <gudhi/Fields/Zp_field_operators.h>
 
 namespace Gudhi {
 namespace persistence_matrix {

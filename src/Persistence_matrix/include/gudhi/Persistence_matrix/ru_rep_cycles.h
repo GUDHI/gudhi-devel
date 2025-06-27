@@ -106,6 +106,9 @@ class RU_representative_cycles
     base1.birthToCycle_.swap(base2.birthToCycle_);
   }
 
+ protected:
+  void _reset();
+
  private:
   using Master_RU_matrix = typename Master_matrix::Master_RU_matrix;
 
@@ -179,6 +182,13 @@ inline RU_representative_cycles<Master_matrix>& RU_representative_cycles<Master_
   representativeCycles_.swap(other.representativeCycles_);
   birthToCycle_.swap(other.birthToCycle_);
   return *this;
+}
+
+template <class Master_matrix>
+inline void RU_representative_cycles<Master_matrix>::_reset()
+{
+  representativeCycles_.clear();
+  birthToCycle_.clear();
 }
 
 }  // namespace persistence_matrix
