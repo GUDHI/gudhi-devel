@@ -27,6 +27,7 @@
 #include <utility>  //std::swap, std::move & std::exchange
 
 #include <boost/iterator/indirect_iterator.hpp>
+
 #include <gudhi/Persistence_matrix/columns/column_utilities.h>
 
 namespace Gudhi {

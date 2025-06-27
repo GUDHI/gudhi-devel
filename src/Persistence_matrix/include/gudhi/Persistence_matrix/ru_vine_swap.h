@@ -23,7 +23,7 @@
 #include <cassert>
 #include <stdexcept>    //std::invalid_argument
 
-#include "ru_pairing.h"
+#include <gudhi/Persistence_matrix/ru_pairing.h>
 
 namespace Gudhi {
 namespace persistence_matrix {

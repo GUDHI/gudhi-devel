@@ -26,7 +26,7 @@
 #include <algorithm>  //std::sort
 
 #include <gudhi/Persistence_matrix/Id_to_index_overlay.h> //friend
-#include "index_mapper.h"
+#include <gudhi/Persistence_matrix/index_mapper.h>
 
 namespace Gudhi {
 namespace persistence_matrix {

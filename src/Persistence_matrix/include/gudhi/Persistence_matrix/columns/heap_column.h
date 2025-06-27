@@ -25,8 +25,8 @@
 #include <utility>    //std::swap, std::move & std::exchange
 
 #include <boost/iterator/indirect_iterator.hpp>
-#include "gudhi/Debug_utils.h"
 
+#include <gudhi/Debug_utils.h>
 #include <gudhi/Persistence_matrix/allocators/entry_constructors.h>
 
 namespace Gudhi {

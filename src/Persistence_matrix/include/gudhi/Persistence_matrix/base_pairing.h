@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <vector>
 
-#include "index_mapper.h"
+#include <gudhi/Persistence_matrix/index_mapper.h>
 
 namespace Gudhi {
 namespace persistence_matrix {

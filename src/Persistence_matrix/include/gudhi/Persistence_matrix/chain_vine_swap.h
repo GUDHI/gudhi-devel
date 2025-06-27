@@ -25,7 +25,7 @@
 #include <functional>  //std::function
 #include <stdexcept>   //std::invalid_argument
 
-#include "chain_pairing.h"
+#include <gudhi/Persistence_matrix/chain_pairing.h>
 
 namespace Gudhi {
 namespace persistence_matrix {
