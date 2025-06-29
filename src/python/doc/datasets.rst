@@ -17,6 +17,21 @@ Points generators
 
 The module **points** enables the generation of random points on a sphere, random points on a torus and as a grid.
 
+Seed for the generators
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: gudhi.datasets.generators.points.seed
+
+Example
+"""""""
+
+.. code-block:: python
+
+    from gudhi.datasets.generators import points
+
+    # Set the seed for reproductibility
+    points.seed(42)
+
 Points on sphere
 ^^^^^^^^^^^^^^^^
 
@@ -32,16 +47,43 @@ Example
 
 .. code-block:: python
 
-   from gudhi.datasets.generators import points
-   from gudhi import AlphaComplex
+    from gudhi.datasets.generators import points
+    from gudhi import AlphaComplex
 
-   # Generate 50 points on a sphere in R^2
-   gen_points = points.sphere(n_samples = 50, ambient_dim = 2, radius = 1, sample = "random")
+    # Generate 50 points on a sphere in R^2
+    gen_points = points.sphere(n_samples = 50, ambient_dim = 2, radius = 1, sample = "random")
 
-   # Create an alpha complex from the generated points
-   alpha_complex = AlphaComplex(points = gen_points)
-   
+    # Create an alpha complex from the generated points
+    alpha_complex = AlphaComplex(points = gen_points)
+
 .. autofunction:: gudhi.datasets.generators.points.sphere
+
+Points on a 2-torus
+^^^^^^^^^^^^^^^^^^^
+
+A function that depends on **CGAL** generates i.i.d. points *randomly* on a 2-torus in :math:`R^{3}`.
+
+Example
+"""""""
+.. plot::
+    :include-source:
+
+    import matplotlib.pyplot as plt
+    from gudhi.datasets.generators import points
+
+    # Set the seed for reproductibility
+    points.seed(42)
+    # Generate 300 points randomly on a 2-torus in R^3
+    pts = points.c3dtorus(n_samples = 300, R = 4, r = 1)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    ax.scatter(pts[:,0], pts[:,1], pts[:,2])
+    ax.set_aspect("equal")
+    plt.show()
+
+
+.. autofunction:: gudhi.datasets.generators.points.c3dtorus
 
 Points on a flat torus
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -72,13 +114,13 @@ Example
 """""""
 .. code-block:: python
 
-   from gudhi.datasets.generators import points
+    from gudhi.datasets.generators import points
 
-   # Generate 50 points randomly on a torus in R^6
-   gen_points = points.ctorus(n_samples = 50, dim = 3)
-   
-   # Generate 27 points on a torus as a grid in R^6
-   gen_points = points.ctorus(n_samples = 50, dim = 3, sample = 'grid')
+    # Generate 50 points randomly on a torus in R^6
+    gen_points = points.ctorus(n_samples = 50, dim = 3)
+
+    # Generate 27 points on a torus as a grid in R^6
+    gen_points = points.ctorus(n_samples = 50, dim = 3, sample = 'grid')
 
 .. autofunction:: gudhi.datasets.generators.points.ctorus
 
@@ -89,19 +131,22 @@ The user should provide the number of points to be generated on the torus :code:
 The :code:`sample` argument is optional and is set to **'random'** by default.
 The other allowed value of sample type is **'grid'**.
 
-**Note:** This version is recommended when the user wishes to use **'random'** as sample type with a great number of samples and a low dimension.
+**Note 1:** This version is recommended when the user wishes to use **'random'** as sample type with a great number of samples and a low dimension.
+
+**Note 2:** The `points.seed()` function does not set the seed for this particular function. Please consider using
+`numpy.random.seed()` to set the seed for this function.
 
 Example
 """""""
 .. code-block:: python
 
-   from gudhi.datasets.generators import points
+    from gudhi.datasets.generators import points
 
-   # Generate 50 points randomly on a torus in R^6
-   gen_points = points.torus(n_samples = 50, dim = 3)
-   
-   # Generate 27 points on a torus as a grid in R^6
-   gen_points = points.torus(n_samples = 50, dim = 3, sample = 'grid')
+    # Generate 50 points randomly on a torus in R^6
+    gen_points = points.torus(n_samples = 50, dim = 3)
+
+    # Generate 27 points on a torus as a grid in R^6
+    gen_points = points.torus(n_samples = 50, dim = 3, sample = 'grid')
 
 
 .. autofunction:: gudhi.datasets.generators.points.torus
@@ -118,17 +163,17 @@ Alternatively, it can be set using the **'GUDHI_DATA'** environment variable.
 .. autofunction:: gudhi.datasets.remote.fetch_bunny
 
 .. figure:: ./img/bunny.png
-     :figclass: align-center
+    :figclass: align-center
 
-     3D Stanford bunny with 35947 vertices.
+    3D Stanford bunny with 35947 vertices.
 
 
 .. autofunction:: gudhi.datasets.remote.fetch_spiral_2d
 
 .. figure:: ./img/spiral_2d.png
-     :figclass: align-center
+    :figclass: align-center
 
-     2D spiral with 114562 vertices.
+    2D spiral with 114562 vertices.
 
 .. autofunction:: gudhi.datasets.remote.fetch_daily_activities
 

@@ -15,17 +15,18 @@ Show persistence as a barcode
 This function can display the persistence result as a barcode:
 
 .. plot::
-   :include-source:
+    :include-source:
 
     import matplotlib.pyplot as plt
+    from gudhi.datasets.generators import points
     import gudhi
 
-    off_file = gudhi.__root_source_dir__ + '/data/points/tore3D_300.off'
-    point_cloud = gudhi.read_points_from_off_file(off_file=off_file)
+    points.seed(0)
+    pts = points.c3dtorus(n_samples = 300, R = 2, r = 1)
 
-    rips_complex = gudhi.RipsComplex(points=point_cloud, max_edge_length=0.7)
-    simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
-    diag = simplex_tree.persistence(min_persistence=0.4)
+    rips = gudhi.RipsComplex(points=pts, max_edge_length=0.7)
+    stree = rips.create_simplex_tree(max_dimension=3)
+    diag = stree.persistence(min_persistence=0.4)
 
     gudhi.plot_persistence_barcode(diag)
     plt.show()
@@ -36,15 +37,18 @@ Show persistence as a diagram
 This function can display the persistence result as a diagram:
 
 .. plot::
-   :include-source:
+    :include-source:
 
     import matplotlib.pyplot as plt
+    from gudhi.datasets.generators import points
     import gudhi
 
-    # rips_on_tore3D_1307.pers obtained from write_persistence_diagram method
-    persistence_file=gudhi.__root_source_dir__ + \
-        '/data/persistence_diagram/rips_on_tore3D_1307.pers'
-    ax = gudhi.plot_persistence_diagram(persistence_file=persistence_file)
+    points.seed(0)
+    pts = points.c3dtorus(n_samples = 1300, R = 2, r = 1)
+    rips = gudhi.RipsComplex(points=pts, max_edge_length=1.)
+    stree = rips.create_simplex_tree(max_dimension=3)
+    diag = stree.persistence()
+    ax = gudhi.plot_persistence_diagram(diag)
     # We can modify the title, aspect, etc.
     ax.set_title("Persistence diagram of a torus")
     ax.set_aspect("equal")  # forces to be square shaped
@@ -71,20 +75,25 @@ Persistence density
 If you want more information on a specific dimension, for instance:
 
 .. plot::
-   :include-source:
+    :include-source:
 
     import matplotlib.pyplot as plt
+    from gudhi.datasets.generators import points
     import gudhi
-    # rips_on_tore3D_1307.pers obtained from write_persistence_diagram method
-    persistence_file=gudhi.__root_source_dir__ + \
-        '/data/persistence_diagram/rips_on_tore3D_1307.pers'
-    birth_death = gudhi.read_persistence_intervals_in_dimension(
-        persistence_file=persistence_file, only_this_dim=1)
+
+    points.seed(0)
+    pts = points.c3dtorus(n_samples = 1300, R = 2, r = 1)
+    rips = gudhi.RipsComplex(points=pts, max_edge_length=1.)
+    stree = rips.create_simplex_tree(max_dimension=3)
+    stree.compute_persistence()
+    birth_death = stree.persistence_intervals_in_dimension(1)
+
     # Use subplots to display diagram and density side by side
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
     gudhi.plot_persistence_diagram(persistence=birth_death, axes=axes[0])
     gudhi.plot_persistence_density(persistence=birth_death, axes=axes[1])
     plt.show()
+
 
 LaTeX support
 -------------
