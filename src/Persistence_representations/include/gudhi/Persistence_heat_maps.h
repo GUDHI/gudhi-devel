@@ -365,7 +365,7 @@ class Persistence_heat_maps
   /**
    * The procedure checks if min_, max_ and this->heat_maps_ sizes are the same.
    **/
-  inline bool check_if_the_same(const Persistence_heat_maps& second) const
+  bool check_if_the_same(const Persistence_heat_maps& second) const
   {
     if (this->heat_map_.size() != second.heat_map_.size()) {
 #ifdef GUDHI_DEBUG
@@ -393,12 +393,12 @@ class Persistence_heat_maps
   /**
    * Return minimal range value of persistent image.
    **/
-  inline double get_min() const { return this->min_; }
+  double get_min() const { return this->min_; }
 
   /**
    * Return maximal range value of persistent image.
    **/
-  inline double get_max() const { return this->max_; }
+  double get_max() const { return this->max_; }
 
   /**
    * Operator == to check if to persistence heat maps are the same.
@@ -650,7 +650,7 @@ class Persistence_heat_maps
 
 // if min == max, then the program is requested to set up the values itself based on persistence intervals
 template <typename Scalling_of_kernels>
-inline void Persistence_heat_maps<Scalling_of_kernels>::_construct(
+void Persistence_heat_maps<Scalling_of_kernels>::_construct(
     const std::vector<std::pair<double, double> >& intervals,
     const std::vector<std::vector<double> >& filter,
     bool erase_below_diagonal,
@@ -766,7 +766,7 @@ inline void Persistence_heat_maps<Scalling_of_kernels>::_construct(
 }  // construct
 
 template <typename Scalling_of_kernels>
-inline std::vector<std::vector<double> > Persistence_heat_maps<Scalling_of_kernels>::_check_and_initialize_maps(
+std::vector<std::vector<double> > Persistence_heat_maps<Scalling_of_kernels>::_check_and_initialize_maps(
     const std::vector<Persistence_heat_maps*>& maps)
 {
   // checking if all the heat maps are of the same size:
@@ -784,7 +784,7 @@ inline std::vector<std::vector<double> > Persistence_heat_maps<Scalling_of_kerne
 }
 
 template <typename Scalling_of_kernels>
-inline void Persistence_heat_maps<Scalling_of_kernels>::compute_median(const std::vector<Persistence_heat_maps*>& maps)
+void Persistence_heat_maps<Scalling_of_kernels>::compute_median(const std::vector<Persistence_heat_maps*>& maps)
 {
   std::vector<std::vector<double> > heat_maps = this->_check_and_initialize_maps(maps);
 
@@ -805,7 +805,7 @@ inline void Persistence_heat_maps<Scalling_of_kernels>::compute_median(const std
 }
 
 template <typename Scalling_of_kernels>
-inline void Persistence_heat_maps<Scalling_of_kernels>::compute_mean(const std::vector<Persistence_heat_maps*>& maps)
+void Persistence_heat_maps<Scalling_of_kernels>::compute_mean(const std::vector<Persistence_heat_maps*>& maps)
 {
   std::vector<std::vector<double> > heat_maps = this->_check_and_initialize_maps(maps);
   for (std::size_t i = 0; i != heat_maps.size(); ++i) {
@@ -823,7 +823,7 @@ inline void Persistence_heat_maps<Scalling_of_kernels>::compute_mean(const std::
 }
 
 template <typename Scalling_of_kernels>
-inline void Persistence_heat_maps<Scalling_of_kernels>::compute_percentage_of_active(
+void Persistence_heat_maps<Scalling_of_kernels>::compute_percentage_of_active(
     const std::vector<Persistence_heat_maps*>& maps,
     std::size_t cutoff)
 {
@@ -848,7 +848,7 @@ inline void Persistence_heat_maps<Scalling_of_kernels>::compute_percentage_of_ac
 }
 
 template <typename Scalling_of_kernels>
-inline void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filename) const
+void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filename) const
 {
   std::ofstream out;
   std::stringstream gnuplot_script;
@@ -870,7 +870,7 @@ inline void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filenam
 }
 
 template <typename Scalling_of_kernels>
-inline void Persistence_heat_maps<Scalling_of_kernels>::print_to_file(const char* filename) const
+void Persistence_heat_maps<Scalling_of_kernels>::print_to_file(const char* filename) const
 {
   std::ofstream out;
   out.open(filename);
@@ -887,7 +887,7 @@ inline void Persistence_heat_maps<Scalling_of_kernels>::print_to_file(const char
 }
 
 template <typename Scalling_of_kernels>
-inline void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* filename)
+void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* filename)
 {
   std::ifstream in;
   in.open(filename);
@@ -938,7 +938,7 @@ inline void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const cha
 
 // Implementation of virtual methods:
 template <typename Scalling_of_kernels>
-inline std::vector<double> Persistence_heat_maps<Scalling_of_kernels>::vectorize(int number_of_function) const
+std::vector<double> Persistence_heat_maps<Scalling_of_kernels>::vectorize(int number_of_function) const
 {
   std::vector<double> result;
 
@@ -967,7 +967,7 @@ inline std::vector<double> Persistence_heat_maps<Scalling_of_kernels>::vectorize
 }
 
 template <typename Scalling_of_kernels>
-inline double Persistence_heat_maps<Scalling_of_kernels>::distance(const Persistence_heat_maps& second,
+double Persistence_heat_maps<Scalling_of_kernels>::distance(const Persistence_heat_maps& second,
                                                                    double power) const
 {
   if (this->discrete_) {
@@ -1007,7 +1007,7 @@ inline double Persistence_heat_maps<Scalling_of_kernels>::distance(const Persist
 }
 
 template <typename Scalling_of_kernels>
-inline double Persistence_heat_maps<Scalling_of_kernels>::project_to_R(int number_of_function) const
+double Persistence_heat_maps<Scalling_of_kernels>::project_to_R(int number_of_function) const
 {
   double result = 0;
   for (std::size_t i = 0; i != this->heat_map_.size(); ++i) {
@@ -1019,14 +1019,14 @@ inline double Persistence_heat_maps<Scalling_of_kernels>::project_to_R(int numbe
 }
 
 template <typename Scalling_of_kernels>
-inline void Persistence_heat_maps<Scalling_of_kernels>::compute_average(
+void Persistence_heat_maps<Scalling_of_kernels>::compute_average(
     const std::vector<Persistence_heat_maps*>& to_average)
 {
   this->compute_mean(to_average);
 }
 
 template <typename Scalling_of_kernels>
-inline double Persistence_heat_maps<Scalling_of_kernels>::compute_scalar_product(
+double Persistence_heat_maps<Scalling_of_kernels>::compute_scalar_product(
     const Persistence_heat_maps& second) const
 {
   if (discrete_) {
