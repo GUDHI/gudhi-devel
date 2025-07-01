@@ -32,7 +32,6 @@ class Cubical_complex_interface : public Bitmap_cubical_complex<Bitmap_cubical_c
 
  public:
   using Base::Base;  // inheriting constructors
-  using Base::data;
 
   explicit Cubical_complex_interface(const std::string& perseus_style_file) : Base(perseus_style_file.c_str()) {}
 
@@ -54,18 +53,17 @@ class Periodic_cubical_complex_interface
 
  public:
   using Base::Base;  // inheriting constructors
-  using Base::data;
 
   explicit Periodic_cubical_complex_interface(const std::string& perseus_style_file) : Base(perseus_style_file.c_str())
   {}
 
   // TODO: nanobind is probably making a copy here (to verify), as it is only used privately we could think
-  // at another strategy?
+  // of another strategy?
   // But as the vector is probably very small (number of dimensions), it is perhaps not worth it.
   const std::vector<unsigned>& shape() { return this->sizes; };
 
   // TODO: nanobind is probably making a copy here (to verify), as it is only used privately we could think
-  // at another strategy?
+  // of another strategy?
   // But as the vector is probably very small (number of dimensions), it is perhaps not worth it.
   const std::vector<bool>& periodicities() { return this->directions_in_which_periodic_b_cond_are_to_be_imposed; }
 
