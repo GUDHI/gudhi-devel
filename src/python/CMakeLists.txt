@@ -295,7 +295,7 @@ else()
     set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developer version. Images and biblio will miss")
   endif()
   # sphinx target requires python modules to be built, because conf.py reads gudhi version from it
-  # "DEPENDS _cubical_complex_ext" is sufficient enough to build all nonobind modules when make sphinx
+  # "DEPENDS _cubical_complex_ext" is sufficient to build all nanobind modules when make sphinx
   add_custom_target(sphinx
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
       COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
