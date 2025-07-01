@@ -36,7 +36,7 @@ The following example explains how the distance is computed:
     import gudhi
     import numpy as np
 
-    message = "Bottleneck distance = " + '%.1f' % gudhi.bottleneck_distance(np.array([[0., 0.]]), np.array([[0., 13.]]))
+    message = "Bottleneck distance = " + '%.1f' % gudhi.bottleneck_distance([[0., 0.]], [[0., 13.]])
     print(message)
 
 .. testoutput::
