@@ -243,7 +243,8 @@ class SimplexTree(t._Simplex_tree_python_interface):
         :type persistence_dim_max: bool
         :returns: Nothing.
         """
-        self._pers = t._Simplex_tree_persistence_interface(self, persistence_dim_max)
+        # bool(persistence_dim_max) because of numpy bool_ is not recognized as the right type
+        self._pers = t._Simplex_tree_persistence_interface(self, bool(persistence_dim_max))
         self._pers.compute_persistence(homology_coeff_field, min_persistence)
         return self
 

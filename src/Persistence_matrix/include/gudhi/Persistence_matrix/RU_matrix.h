@@ -644,7 +644,9 @@ inline void RU_matrix<Master_matrix>::add_to(Index sourceColumnIndex, Index targ
   if constexpr (Master_matrix::Option_list::is_z2)
     mirrorMatrixU_.add_to(targetColumnIndex, sourceColumnIndex);
   else
-    mirrorMatrixU_.add_to(sourceColumnIndex, targetColumnIndex);
+    mirrorMatrixU_.multiply_source_and_add_to(operators_->get_characteristic() - 1,
+                                              targetColumnIndex,
+                                              sourceColumnIndex);
 }
 
 template <class Master_matrix>
@@ -652,10 +654,10 @@ inline void RU_matrix<Master_matrix>::multiply_target_and_add_to(Index sourceCol
                                                                  const Field_element& coefficient,
                                                                  Index targetColumnIndex)
 {
-  static_assert(!Master_matrix::Option_list::is_z2,
-                "Multiplication with something else than the identity is not allowed with Z2 coefficients.");
   reducedMatrixR_.multiply_target_and_add_to(sourceColumnIndex, coefficient, targetColumnIndex);
-  mirrorMatrixU_.multiply_target_and_add_to(sourceColumnIndex, coefficient, targetColumnIndex);
+  // U transposed to avoid row operations
+  mirrorMatrixU_.get_column(targetColumnIndex) *= coefficient;
+  mirrorMatrixU_.multiply_source_and_add_to(operators_->get_characteristic() - 1, targetColumnIndex, sourceColumnIndex);
 }
 
 template <class Master_matrix>
@@ -663,10 +665,15 @@ inline void RU_matrix<Master_matrix>::multiply_source_and_add_to(const Field_ele
                                                                  Index sourceColumnIndex,
                                                                  Index targetColumnIndex)
 {
-  static_assert(!Master_matrix::Option_list::is_z2,
-                "Multiplication with something else than the identity is not allowed with Z2 coefficients.");
   reducedMatrixR_.multiply_source_and_add_to(coefficient, sourceColumnIndex, targetColumnIndex);
-  mirrorMatrixU_.multiply_source_and_add_to(coefficient, sourceColumnIndex, targetColumnIndex);
+  // U transposed to avoid row operations
+  if constexpr (Master_matrix::Option_list::is_z2) {
+    if (coefficient) mirrorMatrixU_.add_to(targetColumnIndex, sourceColumnIndex);
+  } else {
+    mirrorMatrixU_.multiply_source_and_add_to(operators_->get_characteristic() - coefficient,
+                                              targetColumnIndex,
+                                              sourceColumnIndex);
+  }
 }
 
 template <class Master_matrix>
@@ -851,7 +858,7 @@ inline void RU_matrix<Master_matrix>::_reduce_column_by(Index target, Index sour
   Column& curr = reducedMatrixR_.get_column(target);
   if constexpr (Master_matrix::Option_list::is_z2) {
     curr += reducedMatrixR_.get_column(source);
-    // to avoid having to do line operations during vineyards, U is transposed
+    // to avoid having to do line operations, U is transposed
     // TODO: explain this somewhere in the documentation...
     mirrorMatrixU_.get_column(source).push_back(*mirrorMatrixU_.get_column(target).begin());
   } else {
@@ -861,9 +868,11 @@ inline void RU_matrix<Master_matrix>::_reduce_column_by(Index target, Index sour
     operators_->multiply_inplace(coef, operators_->get_characteristic() - curr.get_pivot_value());
 
     curr.multiply_source_and_add(toadd, coef);
-    // but no transposition for Zp, careful if there will be vineyard or rep cycles in Zp one day
+    auto entry = *mirrorMatrixU_.get_column(target).begin();
+    operators_->multiply_inplace(entry.get_element(), operators_->get_characteristic() - coef);
+    // to avoid having to do line operations, U is transposed
     // TODO: explain this somewhere in the documentation...
-    mirrorMatrixU_.multiply_source_and_add_to(coef, source, target);
+    mirrorMatrixU_.get_column(source).push_back(entry);
   }
 }
 
