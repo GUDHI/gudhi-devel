@@ -114,7 +114,7 @@ class CubicalComplex(_Bitmap_cubical_complex_interface):
 
         :returns:  numpy.ndarray
         """
-        a = super().get_numpy_array()
+        a = super()._get_numpy_array()
         return a.reshape([2 * d + 1 for d in super().shape()], order="F")
 
     def top_dimensional_cells(self):

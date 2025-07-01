@@ -124,7 +124,7 @@ class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
 
         :returns:  numpy.ndarray
         """
-        a = super().get_numpy_array()
+        a = super()._get_numpy_array()
         return a.reshape(
             [2 * d + (not p) for (d, p) in zip(super().shape(), super().periodicities())],
             order="F",

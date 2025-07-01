@@ -108,7 +108,7 @@ This function returns the dimension of the complex.
 :returns:  int -- the complex dimension.
            )doc")
       .def("shape", &CC::shape)
-      .def("get_numpy_array", &CC::get_numpy_array, nb::rv_policy::reference_internal);
+      .def("_get_numpy_array", &CC::get_numpy_array, nb::rv_policy::reference_internal);
 
   nb::class_<CPers>(m, "_Cubical_complex_persistence_interface")
       .def(nb::init<CC&, bool>(), nb::call_guard<nb::gil_scoped_release>())
@@ -143,7 +143,7 @@ This function returns the dimension of the complex.
            )doc")
       .def("shape", &PCC::shape)
       .def("periodicities", &PCC::periodicities)
-      .def("get_numpy_array", &PCC::get_numpy_array, nb::rv_policy::reference_internal);
+      .def("_get_numpy_array", &PCC::get_numpy_array, nb::rv_policy::reference_internal);
 
   nb::class_<PCPers>(m, "_Periodic_cubical_complex_persistence_interface")
       .def(nb::init<PCC&, bool>(), nb::call_guard<nb::gil_scoped_release>())
