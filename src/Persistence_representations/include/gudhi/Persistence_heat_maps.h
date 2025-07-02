@@ -674,8 +674,8 @@ void Persistence_heat_maps<Scalling_of_kernels>::_construct(
     std::clog << "min and max parameters will be determined based on intervals \n";
 #endif
     // in this case, we want the program to set up the min and max values by itself.
-    min = std::numeric_limits<int>::max();
-    max = -std::numeric_limits<int>::max();
+    min = std::numeric_limits<double>::max();
+    max = -std::numeric_limits<double>::max();
 
     for (std::size_t i = 0; i != intervals.size(); ++i) {
       if (intervals[i].first < min) min = intervals[i].first;
