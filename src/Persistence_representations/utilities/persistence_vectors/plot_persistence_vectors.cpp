@@ -9,9 +9,9 @@
  */
 
 #include <iostream>
-#include <sstream>
 
 #include <gudhi/Persistence_vectors.h>
+#include <gudhi/distance_functions.h>
 
 using Euclidean_distance = Gudhi::Euclidean_distance;
 using Vector_distances_in_diagram = Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;

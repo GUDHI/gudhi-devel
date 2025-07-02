@@ -9,7 +9,6 @@
  */
 
 #include <iostream>
-#include <sstream>
 
 #include <gudhi/Persistence_landscape_on_grid.h>
 
