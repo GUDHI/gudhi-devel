@@ -25,7 +25,7 @@ function(nanobind_add_module_with_targets)
       list(APPEND EXE_SOURCES "${EXECUTABLE_SOURCE}")
       list(POP_FRONT ARGN EXECUTABLE_SOURCE)
     endwhile()
-    
+
     message(DEBUG "${EXECUTABLE_NAME} - ${EXE_SOURCES}")
     # Do not add_executable if one of the target is not here, except for TBB that is optional
     foreach(USER_TARGET IN LISTS ARGN)
@@ -226,43 +226,20 @@ if (TBB_FOUND AND WITH_GUDHI_USE_TBB)
   add_gudhi_debug_info("TBB_MALLOC_LIBRARY = ${TBB_MALLOC_LIBRARY}")
 endif()
 
+# Do not remove last trailing slash in "gudhi/", it is on purpose
+file(COPY "gudhi/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
+
+# configure all python files from sources to binary dir forces CMake to copy them when modified
+file(GLOB_RECURSE GUDHI_PYTHON_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "gudhi/*.py")
+foreach(GUDHI_PYTHON_FILE ${GUDHI_PYTHON_FILES})
+  if(NOT GUDHI_PYTHON_FILE MATCHES "gudhi/__init__.py")
+    configure_file("${GUDHI_PYTHON_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/${GUDHI_PYTHON_FILE}" COPYONLY)
+    message(DEBUG "Python configure_file ${GUDHI_PYTHON_FILE}")
+  endif()
+endforeach()
+
 # Generate gudhi/__init__.py
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
 configure_file("gudhi/__init__.py.in" "${CMAKE_CURRENT_BINARY_DIR}/gudhi/__init__.py" @ONLY)
-
-# Other .py files
-configure_file("gudhi/bottleneck.py"                       "${CMAKE_CURRENT_BINARY_DIR}/gudhi/bottleneck.py"                       COPYONLY)
-configure_file("gudhi/hera.py"                             "${CMAKE_CURRENT_BINARY_DIR}/gudhi/hera.py"                             COPYONLY)
-configure_file("gudhi/simplex_tree.py"                     "${CMAKE_CURRENT_BINARY_DIR}/gudhi/simplex_tree.py"                     COPYONLY)
-configure_file("gudhi/delaunay_complex.py"                 "${CMAKE_CURRENT_BINARY_DIR}/gudhi/delaunay_complex.py"                 COPYONLY)
-configure_file("gudhi/rips_complex.py"                     "${CMAKE_CURRENT_BINARY_DIR}/gudhi/rips_complex.py"                     COPYONLY)
-configure_file("gudhi/witness_complex.py"                  "${CMAKE_CURRENT_BINARY_DIR}/gudhi/witness_complex.py"                  COPYONLY)
-configure_file("gudhi/euclidean_witness_complex.py"        "${CMAKE_CURRENT_BINARY_DIR}/gudhi/euclidean_witness_complex.py"        COPYONLY)
-configure_file("gudhi/euclidean_strong_witness_complex.py" "${CMAKE_CURRENT_BINARY_DIR}/gudhi/euclidean_strong_witness_complex.py" COPYONLY)
-configure_file("gudhi/strong_witness_complex.py"           "${CMAKE_CURRENT_BINARY_DIR}/gudhi/strong_witness_complex.py"           COPYONLY)
-configure_file("gudhi/dtm_rips_complex.py"                 "${CMAKE_CURRENT_BINARY_DIR}/gudhi/dtm_rips_complex.py"                 COPYONLY)
-configure_file("gudhi/cover_complex.py"                    "${CMAKE_CURRENT_BINARY_DIR}/gudhi/cover_complex.py"                    COPYONLY)
-configure_file("gudhi/cubical_complex.py"                  "${CMAKE_CURRENT_BINARY_DIR}/gudhi/cubical_complex.py"                  COPYONLY)
-configure_file("gudhi/periodic_cubical_complex.py"         "${CMAKE_CURRENT_BINARY_DIR}/gudhi/periodic_cubical_complex.py"         COPYONLY)
-configure_file("gudhi/weighted_rips_complex.py"            "${CMAKE_CURRENT_BINARY_DIR}/gudhi/weighted_rips_complex.py"            COPYONLY)
-configure_file("gudhi/tangential_complex.py"               "${CMAKE_CURRENT_BINARY_DIR}/gudhi/tangential_complex.py"               COPYONLY)
-configure_file("gudhi/persistence_graphical_tools.py"      "${CMAKE_CURRENT_BINARY_DIR}/gudhi/persistence_graphical_tools.py"      COPYONLY)
-configure_file("gudhi/reader_utils.py"                     "${CMAKE_CURRENT_BINARY_DIR}/gudhi/reader_utils.py"                     COPYONLY)
-configure_file("gudhi/subsampling.py"                      "${CMAKE_CURRENT_BINARY_DIR}/gudhi/subsampling.py"                      COPYONLY)
-configure_file("gudhi/off_utils.py"                        "${CMAKE_CURRENT_BINARY_DIR}/gudhi/off_utils.py"                        COPYONLY)
-configure_file("gudhi/nerve_gic.py"                        "${CMAKE_CURRENT_BINARY_DIR}/gudhi/nerve_gic.py"                        COPYONLY)
-configure_file("gudhi/_kepler_mapper.py"                   "${CMAKE_CURRENT_BINARY_DIR}/gudhi/_kepler_mapper.py"                   COPYONLY)
-configure_file("gudhi/_kepler_mapper.py.COPYRIGHT"         "${CMAKE_CURRENT_BINARY_DIR}/gudhi/_kepler_mapper.py.COPYRIGHT"         COPYONLY)
-
-#
-file(COPY "gudhi/representations" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
-file(COPY "gudhi/tensorflow" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
-file(COPY "gudhi/wasserstein" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
-file(COPY "gudhi/point_cloud" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
-file(COPY "gudhi/clustering" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
-file(COPY "gudhi/datasets" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi" FILES_MATCHING PATTERN "*.py")
-file(COPY "gudhi/sklearn" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
-file(COPY "gudhi/flag_filtration" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi/")
 
 # Detect the installed nanobind package and import it into CMake
 execute_process(

@@ -19,6 +19,7 @@ logging.level = "INFO"
 wheel.exclude = [
     "**/*.cc",
     "**/*.cmake",
+    "**/*.in",
     "**/CMakeFiles",        # Then specific for Windows
     "**/*.dir",
     "**/Release",
