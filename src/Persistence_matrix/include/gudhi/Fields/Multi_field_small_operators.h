@@ -40,10 +40,12 @@ class Multi_field_operators_with_small_characteristics
   using Element = unsigned int;          /**< Type for the elements in the field. */
   using Characteristic = Element;   /**< Type for the field characteristic. */
 
+  inline static const Characteristic nullCharacteristic = 0;  /**< Value of a non initialized characteristic. */
+
   /**
    * @brief Default constructor, sets the product of all characteristics to 0.
    */
-  Multi_field_operators_with_small_characteristics() : productOfAllCharacteristics_(0) /* , multiplicativeID_(1) */ 
+  Multi_field_operators_with_small_characteristics() : productOfAllCharacteristics_(nullCharacteristic) /* , multiplicativeID_(1) */ 
   {}
   /**
    * @brief Constructor setting the characteristics to all prime numbers between the two given integers.
@@ -53,7 +55,7 @@ class Multi_field_operators_with_small_characteristics
    * @param maxCharacteristic Highest value of a prime.
    */
   Multi_field_operators_with_small_characteristics(int minCharacteristic, int maxCharacteristic)
-      : productOfAllCharacteristics_(0)  //, multiplicativeID_(1)
+      : productOfAllCharacteristics_(nullCharacteristic)  //, multiplicativeID_(1)
   {
     set_characteristic(minCharacteristic, maxCharacteristic);
   }
@@ -369,7 +371,7 @@ class Multi_field_operators_with_small_characteristics
    * @return The partial multiplicative identity of the multi-field.
    */
   Element get_partial_multiplicative_identity(const Characteristic& productOfCharacteristics) const {
-    if (productOfCharacteristics == 0) {
+    if (productOfCharacteristics == nullCharacteristic) {
       return get_multiplicative_identity();
     }
     Element multIdentity = 0;

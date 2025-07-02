@@ -74,7 +74,7 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
     Column(const Container& nonZeroRowIndices, Column_settings* colSettings)
         : Base(nonZeroRowIndices, colSettings) {}
     template <class Container, class Row_container>
-    Column(Index columnIndex, const Container& nonZeroRowIndices, Row_container& rowContainer,
+    Column(Index columnIndex, const Container& nonZeroRowIndices, Row_container* rowContainer,
                 Column_settings* colSettings)
         : Base(columnIndex, nonZeroRowIndices, rowContainer, colSettings) {}
     template <class Container>
@@ -82,12 +82,12 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
         : Base(nonZeroRowIndices, dimension, colSettings) {}
     template <class Container, class Row_container>
     Column(Index columnIndex, const Container& nonZeroRowIndices, Dimension dimension,
-                Row_container& rowContainer, Column_settings* colSettings)
+                Row_container* rowContainer, Column_settings* colSettings)
         : Base(columnIndex, nonZeroRowIndices, dimension, rowContainer, colSettings) {}
     Column(const Column& column, Column_settings* colSettings = nullptr)
         : Base(static_cast<const Base&>(column), colSettings) {}
     template <class Row_container>
-    Column(const Column& column, Index columnIndex, Row_container& rowContainer,
+    Column(const Column& column, Index columnIndex, Row_container* rowContainer,
                 Column_settings* colSettings = nullptr)
         : Base(static_cast<const Base&>(column), columnIndex, rowContainer, colSettings) {}
     Column(Column&& column) noexcept : Base(std::move(static_cast<Base&>(column))) {}
@@ -407,7 +407,7 @@ inline Base_matrix_with_column_compression<Master_matrix>::Base_matrix_with_colu
     if (col != nullptr) {
       if constexpr (Master_matrix::Option_list::has_row_access) {
         repToColumn_[nextColumnIndex_] =
-            columnPool_->construct(*col, col->get_column_index(), RA_opt::rows_, colSettings_);
+            columnPool_->construct(*col, col->get_column_index(), RA_opt::_get_rows_ptr(), colSettings_);
       } else {
         repToColumn_[nextColumnIndex_] = columnPool_->construct(*col, colSettings_);
       }
@@ -461,7 +461,7 @@ inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(
       } else {
         pivot = std::prev(boundary.end())->first;
       }
-      if (RA_opt::rows_->size() <= pivot) RA_opt::rows_->resize(pivot + 1);
+      RA_opt::_resize(pivot);
     }
   }
 
@@ -470,14 +470,14 @@ inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(
     columnClasses_.link(nextColumnIndex_, nextColumnIndex_);
     if constexpr (Master_matrix::Option_list::has_row_access) {
       repToColumn_.push_back(
-          columnPool_->construct(nextColumnIndex_, boundary, dim, RA_opt::rows_, colSettings_));
+          columnPool_->construct(nextColumnIndex_, boundary, dim, RA_opt::_get_rows_ptr(), colSettings_));
     } else {
       repToColumn_.push_back(columnPool_->construct(boundary, dim, colSettings_));
     }
   } else {
     if constexpr (Master_matrix::Option_list::has_row_access) {
       repToColumn_[nextColumnIndex_] =
-          columnPool_->construct(nextColumnIndex_, boundary, dim, RA_opt::rows_, colSettings_);
+          columnPool_->construct(nextColumnIndex_, boundary, dim, RA_opt::_get_rows_ptr(), colSettings_);
     } else {
       repToColumn_[nextColumnIndex_] = columnPool_->construct(boundary, dim, colSettings_);
     }
@@ -606,7 +606,7 @@ Base_matrix_with_column_compression<Master_matrix>::operator=(const Base_matrix_
   for (const Column* col : other.repToColumn_) {
     if constexpr (Master_matrix::Option_list::has_row_access) {
       repToColumn_[nextColumnIndex_] =
-          columnPool_->construct(*col, col->get_column_index(), RA_opt::rows_, colSettings_);
+          columnPool_->construct(*col, col->get_column_index(), RA_opt::_get_rows_ptr(), colSettings_);
     } else {
       repToColumn_[nextColumnIndex_] = columnPool_->construct(*col, colSettings_);
     }
@@ -636,8 +636,8 @@ inline void Base_matrix_with_column_compression<Master_matrix>::print()
   }
   std::cout << "\n";
   std::cout << "Row Matrix:\n";
-  for (Index i = 0; i < RA_opt::rows_->size(); ++i) {
-    const Row& row = RA_opt::rows_[i];
+  for (Index i = 0; i < RA_opt::_get_rows_ptr()->size(); ++i) {
+    const Row& row = RA_opt::get_row(i);
     for (const auto& entry : row) {
       std::cout << entry.get_column_index() << " ";
     }

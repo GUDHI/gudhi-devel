@@ -20,12 +20,10 @@
 #define PM_RU_VINE_SWAP_H
 
 #include <utility>      //std::move
-#include <type_traits>  //std::conditional
 #include <cassert>
 #include <stdexcept>    //std::invalid_argument
 
-#include "ru_pairing.h"
-#include "boundary_cell_position_to_id_mapper.h"
+#include <gudhi/Persistence_matrix/ru_pairing.h>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -38,6 +36,7 @@ namespace persistence_matrix {
  */
 struct Dummy_ru_vine_swap
 {
+  using RUP = void;
   friend void swap([[maybe_unused]] Dummy_ru_vine_swap& d1, [[maybe_unused]] Dummy_ru_vine_swap& d2) {}
 };
 
@@ -53,6 +52,111 @@ struct Dummy_ru_vine_pairing
 };
 
 /**
+ * @ingroup persistence_matrix
+ *
+ * @brief Class managing the barcode for @ref RU_vine_swap.
+ *
+ * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ */
+template <typename Master_matrix>
+class RU_barcode_swap : public RU_pairing<Master_matrix>
+{
+ public:
+  using Index = typename Master_matrix::Index;   /**< @ref MatIdx index type. */
+  using ID_index = typename Master_matrix::ID_index;   /**< @ref IDIdx index type. */
+  using Pos_index = typename Master_matrix::Pos_index; /**< @ref PosIdx index type. */
+  // RUP = RU Pairing
+  using RUP = RU_pairing<Master_matrix>;
+
+  /**
+   * @brief Default constructor.
+   */
+  RU_barcode_swap() {};
+  /**
+   * @brief Copy constructor.
+   *
+   * @param toCopy Matrix to copy.
+   */
+  RU_barcode_swap(const RU_barcode_swap& toCopy) : RUP(static_cast<const RUP&>(toCopy)) {};
+  /**
+   * @brief Move constructor.
+   *
+   * @param other Matrix to move.
+   */
+  RU_barcode_swap(RU_barcode_swap&& other) : RUP(std::move(static_cast<RUP&>(other))) {};
+
+  RU_barcode_swap& operator=(RU_barcode_swap other) { RUP::operator=(other); }
+
+  friend void swap(RU_barcode_swap& swap1, RU_barcode_swap& swap2) {
+    swap(static_cast<RUP&>(swap1), static_cast<RUP&>(swap2));
+  }
+
+ protected:
+  void _positive_transpose_barcode(Index columnIndex) {
+    _birth(columnIndex) = columnIndex + 1;
+    _birth(columnIndex + 1) = columnIndex;
+    std::swap(RUP::indexToBar_.at(columnIndex), RUP::indexToBar_.at(columnIndex + 1));
+  }
+
+  void _negative_transpose_barcode(Index columnIndex) {
+    _death(columnIndex) = columnIndex + 1;
+    _death(columnIndex + 1) = columnIndex;
+    std::swap(RUP::indexToBar_.at(columnIndex), RUP::indexToBar_.at(columnIndex + 1));
+  }
+
+  void _positive_negative_transpose_barcode(Index columnIndex) {
+    _birth(columnIndex) = columnIndex + 1;
+    _death(columnIndex + 1) = columnIndex;
+    std::swap(RUP::indexToBar_.at(columnIndex), RUP::indexToBar_.at(columnIndex + 1));
+  }
+
+  void _negative_positive_transpose_barcode(Index columnIndex) {
+    _death(columnIndex) = columnIndex + 1;
+    _birth(columnIndex + 1) = columnIndex;
+    std::swap(RUP::indexToBar_.at(columnIndex), RUP::indexToBar_.at(columnIndex + 1));
+  }
+
+  Pos_index _death_val(Pos_index index) const {
+    if constexpr (Master_matrix::Option_list::has_removable_columns) {
+      return RUP::indexToBar_.at(index)->death;
+    } else {
+      return RUP::barcode_.at(RUP::indexToBar_.at(index)).death;
+    }
+  }
+
+  Pos_index _birth_val(Pos_index index) const {
+    if constexpr (Master_matrix::Option_list::has_removable_columns) {
+      return RUP::indexToBar_.at(index)->birth;
+    } else {
+      return RUP::barcode_.at(RUP::indexToBar_.at(index)).birth;
+    }
+  }
+  
+  void _reset() {
+    RUP::_reset();
+  }
+
+ private:
+  Pos_index& _death(Pos_index index)
+  {
+    if constexpr (Master_matrix::Option_list::has_removable_columns) {
+      return RUP::indexToBar_.at(index)->death;
+    } else {
+      return RUP::barcode_.at(RUP::indexToBar_.at(index)).death;
+    }
+  }
+
+  Pos_index& _birth(Pos_index index)
+  {
+    if constexpr (Master_matrix::Option_list::has_removable_columns) {
+      return RUP::indexToBar_.at(index)->birth;
+    } else {
+      return RUP::barcode_.at(RUP::indexToBar_.at(index)).birth;
+    }
+  }
+};
+
+/**
  * @class RU_vine_swap ru_vine_swap.h gudhi/Persistence_matrix/ru_vine_swap.h
  * @ingroup persistence_matrix
  *
@@ -61,16 +165,7 @@ struct Dummy_ru_vine_pairing
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
-class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_column_pairings, 
-                                             RU_pairing<Master_matrix>,
-                                             Dummy_ru_vine_pairing
-                                            >::type,
-                     public std::conditional<Master_matrix::Option_list::has_column_pairings &&
-                                                Master_matrix::Option_list::has_removable_columns, 
-                                             Dummy_pos_mapper,
-                                             Cell_position_to_ID_mapper<typename Master_matrix::ID_index,
-                                                                        typename Master_matrix::Pos_index>
-                                            >::type
+class RU_vine_swap
 {
  public:
   using Index = typename Master_matrix::Index;          /**< @ref MatIdx index type. */
@@ -124,35 +219,12 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
   /**
    * @brief Swap operator.
    */
-  friend void swap(RU_vine_swap& swap1, RU_vine_swap& swap2) {
-    if constexpr (Master_matrix::Option_list::has_column_pairings) {
-      swap(static_cast<RU_pairing<Master_matrix>&>(swap1), static_cast<RU_pairing<Master_matrix>&>(swap2));
-    }
-    if (!Master_matrix::Option_list::has_column_pairings || !Master_matrix::Option_list::has_removable_columns) {
-      swap(static_cast<Cell_position_to_ID_mapper<ID_index, Pos_index>&>(swap1),
-           static_cast<Cell_position_to_ID_mapper<ID_index, Pos_index>&>(swap2));
-    }
-  }
-
- protected:
-  //RUP = RU matrix Pairing
-  using RUP = typename std::conditional<Master_matrix::Option_list::has_column_pairings, 
-                                        RU_pairing<Master_matrix>,
-                                        Dummy_ru_vine_pairing
-                                       >::type;
-  //RUM = RU matrix position to id Map
-  using RUM = typename std::conditional<Master_matrix::Option_list::has_column_pairings &&
-                                            Master_matrix::Option_list::has_removable_columns,
-                                        Dummy_pos_mapper,
-                                        Cell_position_to_ID_mapper<ID_index, Pos_index>
-                                       >::type;
-  constexpr auto& _positionToRowIdx();
+  friend void swap(RU_vine_swap& swap1, RU_vine_swap& swap2) {}
 
  private:
   using Master_RU_matrix = typename Master_matrix::Master_RU_matrix;
 
   bool _is_paired(Index columnIndex);
-
   void _swap_at_index(Index columnIndex);
   void _add_to(Index sourceIndex, Index targetIndex);
   void _positive_transpose(Index columnIndex);
@@ -163,32 +235,24 @@ class RU_vine_swap : public std::conditional<Master_matrix::Option_list::has_col
   bool _negative_vine_swap(Index columnIndex);
   bool _positive_negative_vine_swap(Index columnIndex);
   bool _negative_positive_vine_swap(Index columnIndex);
-
-  Pos_index& _death(Pos_index simplexIndex);
-  Pos_index& _birth(Pos_index simplexIndex);
   Pos_index _get_death(Index simplexIndex);
   Pos_index _get_birth(Index simplexIndex);
-
-  ID_index _get_row_id_from_position(Pos_index position);
+  ID_index _get_row_id_from_position(Pos_index position) const;
 
   constexpr Master_RU_matrix* _matrix() { return static_cast<Master_RU_matrix*>(this); }
   constexpr const Master_RU_matrix* _matrix() const { return static_cast<const Master_RU_matrix*>(this); }
 };
 
 template <class Master_matrix>
-inline RU_vine_swap<Master_matrix>::RU_vine_swap() : RUP(), RUM()
+inline RU_vine_swap<Master_matrix>::RU_vine_swap()
 {}
 
 template <class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(const RU_vine_swap& matrixToCopy)
-    : RUP(static_cast<const RUP&>(matrixToCopy)),
-      RUM(static_cast<const RUM&>(matrixToCopy))
 {}
 
 template <class Master_matrix>
 inline RU_vine_swap<Master_matrix>::RU_vine_swap(RU_vine_swap<Master_matrix>&& other) noexcept
-    : RUP(std::move(static_cast<RUP&>(other))),
-      RUM(std::move(static_cast<RUM&>(other)))
 {}
 
 template <class Master_matrix>
@@ -265,13 +329,11 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap(Pos_index index)
 template <class Master_matrix>
 inline RU_vine_swap<Master_matrix>& RU_vine_swap<Master_matrix>::operator=(RU_vine_swap<Master_matrix> other) 
 {
-  RUP::operator=(other);
-  RUM::operator=(other);
   return *this;
 }
 
 template <class Master_matrix>
-inline bool RU_vine_swap<Master_matrix>::_is_paired(Index columnIndex) 
+inline bool RU_vine_swap<Master_matrix>::_is_paired(Index columnIndex)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
     return _get_death(columnIndex) != Master_matrix::template get_null_value<Pos_index>();
@@ -326,9 +388,7 @@ inline void RU_vine_swap<Master_matrix>::_positive_transpose(Index columnIndex)
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _birth(columnIndex) = columnIndex + 1;
-    _birth(columnIndex + 1) = columnIndex;
-    std::swap(RUP::indexToBar_.at(columnIndex), RUP::indexToBar_.at(columnIndex + 1));
+    _matrix()->_positive_transpose_barcode(columnIndex);
   }
 }
 
@@ -336,9 +396,7 @@ template <class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_negative_transpose(Index columnIndex) 
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _death(columnIndex) = columnIndex + 1;
-    _death(columnIndex + 1) = columnIndex;
-    std::swap(RUP::indexToBar_.at(columnIndex), RUP::indexToBar_.at(columnIndex + 1));
+    _matrix()->_negative_transpose_barcode(columnIndex);
   }
   std::swap(_matrix()->pivotToColumnIndex_.at(_get_birth(columnIndex)),
             _matrix()->pivotToColumnIndex_.at(_get_birth(columnIndex + 1)));
@@ -359,9 +417,7 @@ inline void RU_vine_swap<Master_matrix>::_positive_negative_transpose(Index colu
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _birth(columnIndex) = columnIndex + 1;
-    _death(columnIndex + 1) = columnIndex;
-    std::swap(RUP::indexToBar_.at(columnIndex), RUP::indexToBar_.at(columnIndex + 1));
+    _matrix()->_positive_negative_transpose_barcode(columnIndex);
   }
 }
 
@@ -380,9 +436,7 @@ inline void RU_vine_swap<Master_matrix>::_negative_positive_transpose(Index colu
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _death(columnIndex) = columnIndex + 1;
-    _birth(columnIndex + 1) = columnIndex;
-    std::swap(RUP::indexToBar_.at(columnIndex), RUP::indexToBar_.at(columnIndex + 1));
+    _matrix()->_negative_positive_transpose_barcode(columnIndex);
   }
 }
 
@@ -459,38 +513,10 @@ inline bool RU_vine_swap<Master_matrix>::_negative_positive_vine_swap(Index colu
 }
 
 template <class Master_matrix>
-inline typename RU_vine_swap<Master_matrix>::Pos_index& RU_vine_swap<Master_matrix>::_death(Pos_index simplexIndex) 
-{
-  static_assert(Master_matrix::Option_list::has_column_pairings, "Pairing necessary to modify death value.");
-
-  if constexpr (Master_matrix::Option_list::has_removable_columns) {
-    return RUP::indexToBar_.at(simplexIndex)->death;
-  } else {
-    return RUP::barcode_.at(RUP::indexToBar_.at(simplexIndex)).death;
-  }
-}
-
-template <class Master_matrix>
-inline typename RU_vine_swap<Master_matrix>::Pos_index& RU_vine_swap<Master_matrix>::_birth(Pos_index simplexIndex) 
-{
-  static_assert(Master_matrix::Option_list::has_column_pairings, "Pairing necessary to modify birth value.");
-
-  if constexpr (Master_matrix::Option_list::has_removable_columns) {
-    return RUP::indexToBar_.at(simplexIndex)->birth;
-  } else {
-    return RUP::barcode_.at(RUP::indexToBar_.at(simplexIndex)).birth;
-  }
-}
-
-template <class Master_matrix>
-inline typename RU_vine_swap<Master_matrix>::Pos_index RU_vine_swap<Master_matrix>::_get_death(Index simplexIndex) 
+inline typename RU_vine_swap<Master_matrix>::Pos_index RU_vine_swap<Master_matrix>::_get_death(Index simplexIndex)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    if constexpr (Master_matrix::Option_list::has_removable_columns) {
-      return RUP::indexToBar_.at(simplexIndex)->death;
-    } else {
-      return RUP::barcode_.at(RUP::indexToBar_.at(simplexIndex)).death;
-    }
+    return _matrix()->_death_val(simplexIndex);
   } else {
     if (!_matrix()->reducedMatrixR_.is_zero_column(simplexIndex))
       return _matrix()->reducedMatrixR_.get_column(simplexIndex).get_pivot();
@@ -507,14 +533,10 @@ inline typename RU_vine_swap<Master_matrix>::Pos_index RU_vine_swap<Master_matri
 
 template <class Master_matrix>
 inline typename RU_vine_swap<Master_matrix>::Pos_index RU_vine_swap<Master_matrix>::_get_birth(
-    Index negativeSimplexIndex) 
+    Index negativeSimplexIndex)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    if constexpr (Master_matrix::Option_list::has_removable_columns) {
-      return RUP::indexToBar_.at(negativeSimplexIndex)->birth;
-    } else {
-      return RUP::barcode_.at(RUP::indexToBar_.at(negativeSimplexIndex)).birth;
-    }
+    return _matrix()->_birth_val(negativeSimplexIndex);
   } else {
     return _matrix()->reducedMatrixR_.get_pivot(negativeSimplexIndex);
   }
@@ -522,19 +544,11 @@ inline typename RU_vine_swap<Master_matrix>::Pos_index RU_vine_swap<Master_matri
 
 template <class Master_matrix>
 inline typename RU_vine_swap<Master_matrix>::ID_index RU_vine_swap<Master_matrix>::_get_row_id_from_position(
-    Pos_index position)
+    Pos_index position) const
 {
-  auto it = _positionToRowIdx().find(position);
-  return it == _positionToRowIdx().end() ? position : it->second;
-}
-
-template <class Master_matrix>
-inline constexpr auto& RU_vine_swap<Master_matrix>::_positionToRowIdx()
-{
-  if constexpr (Master_matrix::Option_list::has_column_pairings && Master_matrix::Option_list::has_removable_columns)
-    return RUP::PIDM::map_;
-  else
-    return RUM::map_;
+  const auto& map = _matrix()->positionToID_;
+  auto it = map.find(position);
+  return it == map.end() ? position : it->second;
 }
 
 }  // namespace persistence_matrix

@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine, Matrix, full_matrices) {
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_representative_cycles, Matrix, rep_matrices) {
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
+  auto columns = build_longer_boundary_matrix2<typename Matrix::Column>();
   Matrix m(columns);
   test_representative_cycles<Matrix>(m);
 }
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_without_barcode, Matrix, full
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_representative_cycles, Matrix, rep_matrices) {
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
+  auto columns = build_longer_boundary_matrix2<typename Matrix::Column>();
   Matrix m(columns, birth_comparator, Gudhi::persistence_matrix::_no_G_death_comparator);
   test_representative_cycles<Matrix>(m);
 }

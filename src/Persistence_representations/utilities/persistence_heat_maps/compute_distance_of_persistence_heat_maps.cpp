@@ -8,17 +8,18 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_heat_maps.h>
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
 
+#include <gudhi/Persistence_heat_maps.h>
+
 using constant_scaling_function = Gudhi::Persistence_representations::constant_scaling_function;
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program computes distance of persistence heat maps stored in files (the files needs to be "
             << "created beforehand).\n"
             << "The first parameter of a program is an integer p. The program compute L^p distance of the two heat "

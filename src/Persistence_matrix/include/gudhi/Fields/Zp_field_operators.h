@@ -40,10 +40,15 @@ template <typename Unsigned_integer_type = unsigned int,
 class Zp_field_operators
 {
  public:
-  using Element = Unsigned_integer_type; /**< Type for the elements in the field. */
-  using Characteristic = Element;   /**< Type for the field characteristic. */
+  using Element = Unsigned_integer_type;  /**< Type for the elements in the field. */
+  using Characteristic = Element;         /**< Type for the field characteristic. */
   template <class T>
   using isSignedInteger = std::enable_if_t<std::is_signed_v<T> >;
+
+  /**
+   * @brief Value of a non initialized characteristic.
+   */
+  inline constexpr static const Characteristic nullCharacteristic = 0;
 
   /**
    * @brief Default constructor. If a non-zero characteristic is given, initializes the field with it.
@@ -51,8 +56,8 @@ class Zp_field_operators
    *
    * @param characteristic Prime number corresponding to the desired characteristic of the field.
    */
-  Zp_field_operators(Characteristic characteristic = 0) : characteristic_(0) {
-    if (characteristic != 0) set_characteristic(characteristic);
+  Zp_field_operators(Characteristic characteristic = nullCharacteristic) : characteristic_(nullCharacteristic) {
+    if (characteristic != nullCharacteristic) set_characteristic(characteristic);
   }
   /**
    * @brief Copy constructor.
@@ -67,7 +72,8 @@ class Zp_field_operators
    * @param toMove Operators to move.
    */
   Zp_field_operators(Zp_field_operators&& toMove) noexcept
-      : characteristic_(std::exchange(toMove.characteristic_, 0)), inverse_(std::move(toMove.inverse_)) {}
+      : characteristic_(std::exchange(toMove.characteristic_, nullCharacteristic)),
+        inverse_(std::move(toMove.inverse_)) {}
 
   /**
    * @brief Sets the characteristic of the field.
@@ -75,7 +81,7 @@ class Zp_field_operators
    * @param characteristic Prime number corresponding to the desired characteristic of the field.
    */
   void set_characteristic(Characteristic characteristic) {
-    if (characteristic <= 1)
+    if (characteristic == nullCharacteristic)
       throw std::invalid_argument("Characteristic must be strictly positive and a prime number.");
 
     inverse_.resize(characteristic);

@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_barcode, Matrix, full_matrices) {
 #endif
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_rep_representative_cycles, Matrix, full_matrices) {
-  auto columns = build_longer_boundary_matrix<typename Matrix::Column>();
+  auto columns = build_longer_boundary_matrix2<typename Matrix::Column>();
   Matrix m(columns);
   test_representative_cycles<Matrix>(m);
 }
