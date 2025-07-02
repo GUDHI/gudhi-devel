@@ -142,8 +142,8 @@ class Chain_column_extra_properties
   }
 
  protected:
-  ID_index get_pivot() const { return pivot_; }
-  void swap_pivots(Chain_column_extra_properties& other) { std::swap(pivot_, other.pivot_); }
+  ID_index _get_pivot() const { return pivot_; }
+  void _swap_pivots(Chain_column_extra_properties& other) { std::swap(pivot_, other.pivot_); }
 
  private:
   ID_index pivot_;      /**< @ref IDIdx index associated to the chain */
