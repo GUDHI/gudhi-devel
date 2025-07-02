@@ -15,11 +15,14 @@
  * Gudhi::persistence_matrix::Dummy_index_mapper structure.
  */
 
-#ifndef PM_ID_POS_MAPPER_H
-#define PM_ID_POS_MAPPER_H
+#ifndef PM_INDEX_MAPPER_H
+#define PM_INDEX_MAPPER_H
 
 namespace Gudhi {
 namespace persistence_matrix {
+
+// Note: this would be a good candidate for std::optional instead of a mixin as its only role for now
+// is to store a map. If this does not change later.
 
 /**
  * @private
@@ -54,4 +57,4 @@ struct Index_mapper {
 }  // namespace persistence_matrix
 }  // namespace Gudhi
 
-#endif  // PM_ID_POS_MAPPER_H
+#endif  // PM_INDEX_MAPPER_H

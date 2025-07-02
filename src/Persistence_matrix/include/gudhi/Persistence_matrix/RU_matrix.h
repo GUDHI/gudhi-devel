@@ -26,6 +26,9 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
+template <class Master_matrix>
+class RU_pairing;
+
 /**
  * @class RU_matrix RU_matrix.h gudhi/Persistence_matrix/RU_matrix.h
  * @ingroup persistence_matrix
@@ -42,6 +45,11 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
                   public Master_matrix::RU_vine_swap_option,
                   public Master_matrix::RU_representative_cycles_option
 {
+ private:
+  using Pair_opt = typename Master_matrix::RU_pairing_option;
+  using Swap_opt = typename Master_matrix::RU_vine_swap_option;
+  using Rep_opt = typename Master_matrix::RU_representative_cycles_option;
+
  public:
   /**
    * @brief Field operators class. Necessary only if @ref PersistenceMatrixOptions::is_z2 is false.
@@ -354,10 +362,13 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * the necessary external classes specifically necessary for the chosen column type, such as custom allocators.
    */
   void reset(Column_settings* colSettings) {
+    if constexpr (Master_matrix::Option_list::has_column_pairings) Pair_opt::_reset();
+    if constexpr (Master_matrix::Option_list::can_retrieve_representative_cycles) Rep_opt::_reset();
     reducedMatrixR_.reset(colSettings);
     mirrorMatrixU_.reset(colSettings);
     pivotToColumnIndex_.clear();
     nextEventIndex_ = 0;
+    positionToID_.clear();
     if constexpr (!Master_matrix::Option_list::is_z2) {
       operators_ = &(colSettings->operators);
     }
@@ -371,12 +382,9 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * @brief Swap operator.
    */
   friend void swap(RU_matrix& matrix1, RU_matrix& matrix2) {
-    swap(static_cast<typename Master_matrix::RU_pairing_option&>(matrix1),
-         static_cast<typename Master_matrix::RU_pairing_option&>(matrix2));
-    swap(static_cast<typename Master_matrix::RU_vine_swap_option&>(matrix1),
-         static_cast<typename Master_matrix::RU_vine_swap_option&>(matrix2));
-    swap(static_cast<typename Master_matrix::RU_representative_cycles_option&>(matrix1),
-         static_cast<typename Master_matrix::RU_representative_cycles_option&>(matrix2));
+    swap(static_cast<Pair_opt&>(matrix1), static_cast<Pair_opt&>(matrix2));
+    swap(static_cast<Swap_opt&>(matrix1), static_cast<Swap_opt&>(matrix2));
+    swap(static_cast<Rep_opt&>(matrix1), static_cast<Rep_opt&>(matrix2));
     swap(matrix1.reducedMatrixR_, matrix2.reducedMatrixR_);
     swap(matrix1.mirrorMatrixU_, matrix2.mirrorMatrixU_);
     matrix1.pivotToColumnIndex_.swap(matrix2.pivotToColumnIndex_);
@@ -388,13 +396,6 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   void print();  // for debug
 
  private:
-  using Swap_opt = typename Master_matrix::RU_vine_swap_option;
-  using Pair_opt = typename Master_matrix::RU_pairing_option;
-  using Rep_opt = typename Master_matrix::RU_representative_cycles_option;
-  using Real_pair_opt =
-      std::conditional_t<Master_matrix::Option_list::has_column_pairings && Master_matrix::Option_list::has_vine_update,
-                         typename Swap_opt::RUP,
-                         Pair_opt>;
   using Pivot_dictionary = typename Master_matrix::template Dictionary<Index>;
   using Position_dictionary = std::unordered_map<Pos_index,ID_index>; // TODO: try other type of maps?
   using Barcode = typename Master_matrix::Barcode;
@@ -402,9 +403,9 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   using R_matrix = typename Master_matrix::Master_boundary_matrix;
   using U_matrix = typename Master_matrix::Master_base_matrix;
 
-  friend Rep_opt;       // direct access to the two matrices
-  friend Swap_opt;      // direct access to the two matrices
-  friend Real_pair_opt; // direct access to pivotToColumnIndex_
+  friend Rep_opt;                   // direct access to the two matrices
+  friend Swap_opt;                  // direct access to the two matrices, pivotToColumnIndex_
+  friend RU_pairing<Master_matrix>; // direct access to positionToID_
 
   R_matrix reducedMatrixR_;             /**< R. */
   // TODO: make U not accessible by default and add option to enable access? Inaccessible, it
@@ -412,7 +413,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   U_matrix mirrorMatrixU_;              /**< U. */
   Pivot_dictionary pivotToColumnIndex_; /**< Map from pivot row index to column @ref MatIdx index. */
   Pos_index nextEventIndex_;            /**< Next birth or death index. */
-  Position_dictionary positionToID_; /**< Map from @ref MatIdx to @ref IDIdx. */
+  Position_dictionary positionToID_;    /**< Map from @ref MatIdx to @ref IDIdx. */
   Field_operators* operators_;          /**< Field operators, can be nullptr if
                                              @ref PersistenceMatrixOptions::is_z2 is true. */
 
@@ -490,7 +491,7 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, Column_
     pivotToColumnIndex_.resize(numberOfColumns, Master_matrix::template get_null_value<Index>());
   }
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    Real_pair_opt::indexToBar_.reserve(numberOfColumns);
+    Pair_opt::_reserve(numberOfColumns);
   }
 }
 
@@ -541,7 +542,7 @@ inline void RU_matrix<Master_matrix>::insert_boundary(ID_index cellIndex,
   if (cellIndex != nextEventIndex_) {
     positionToID_.emplace(nextEventIndex_, cellIndex);
     if constexpr (Master_matrix::Option_list::has_column_pairings) {
-      Real_pair_opt::idToPosition_.emplace(cellIndex, nextEventIndex_);
+      Pair_opt::_insert_id_position(cellIndex, nextEventIndex_);
     }
   }
   
@@ -738,6 +739,7 @@ inline RU_matrix<Master_matrix>& RU_matrix<Master_matrix>::operator=(const RU_ma
   mirrorMatrixU_ = other.mirrorMatrixU_;
   pivotToColumnIndex_ = other.pivotToColumnIndex_;
   nextEventIndex_ = other.nextEventIndex_;
+  positionToID_ = other.positionToID_;
   operators_ = other.operators_;
   return *this;
 }
@@ -789,7 +791,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_reduce()
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    Real_pair_opt::indexToBar_.reserve(reducedMatrixR_.get_number_of_columns());
+    Pair_opt::_reserve(reducedMatrixR_.get_number_of_columns());
   }
 
   for (Index i = 0; i < reducedMatrixR_.get_number_of_columns(); i++) {
@@ -882,7 +884,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_update_barcode(ID_index birthPivot, Pos_index death)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    Real_pair_opt::_update_barcode(birthPivot, death);
+    Pair_opt::_update_barcode(birthPivot, death);
   }
 }
 
@@ -890,7 +892,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_add_bar(Dimension dim, Pos_index birth)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    Real_pair_opt::_add_bar(dim, birth);
+    Pair_opt::_add_bar(dim, birth);
   }
 }
 
@@ -898,7 +900,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_remove_last_in_barcode(Pos_index eventIndex)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    Real_pair_opt::_remove_last(eventIndex);
+    Pair_opt::_remove_last(eventIndex);
   }
 }
 

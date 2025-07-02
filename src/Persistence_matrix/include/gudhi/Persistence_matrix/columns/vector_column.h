@@ -27,6 +27,7 @@
 #include <utility>  //std::swap, std::move & std::exchange
 
 #include <boost/iterator/indirect_iterator.hpp>
+
 #include <gudhi/Persistence_matrix/columns/column_utilities.h>
 
 namespace Gudhi {
@@ -652,7 +653,7 @@ inline typename Vector_column<Master_matrix>::ID_index Vector_column<Master_matr
     if (column_.empty()) return Master_matrix::template get_null_value<ID_index>();
     return column_.back()->get_row_index();
   } else {
-    return Chain_opt::get_pivot();
+    return Chain_opt::_get_pivot();
   }
 }
 
@@ -680,9 +681,9 @@ inline typename Vector_column<Master_matrix>::Field_element Vector_column<Master
       if (column_.empty()) return 0;
       return column_.back()->get_element();
     } else {
-      if (Chain_opt::get_pivot() == Master_matrix::template get_null_value<ID_index>()) return Field_element();
+      if (Chain_opt::_get_pivot() == Master_matrix::template get_null_value<ID_index>()) return Field_element();
       for (const Entry* entry : column_) {
-        if (entry->get_row_index() == Chain_opt::get_pivot()) return entry->get_element();
+        if (entry->get_row_index() == Chain_opt::_get_pivot()) return entry->get_element();
       }
       return Field_element();  // should never happen if chain column is used properly
     }
@@ -759,8 +760,8 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::operator+=(Ve
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
     if (_add(column)) {
-      Chain_opt::swap_pivots(column);
-      Dim_opt::swap_dimension(column);
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
     _add(column);
@@ -837,16 +838,16 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_targ
     if constexpr (Master_matrix::Option_list::is_z2) {
       if (val) {
         if (_add(column)) {
-          Chain_opt::swap_pivots(column);
-          Dim_opt::swap_dimension(column);
+          Chain_opt::_swap_pivots(column);
+          Dim_opt::_swap_dimension(column);
         }
       } else {
         throw std::invalid_argument("A chain column should not be multiplied by 0.");
       }
     } else {
       if (_multiply_target_and_add(val, column)) {
-        Chain_opt::swap_pivots(column);
-        Dim_opt::swap_dimension(column);
+        Chain_opt::_swap_pivots(column);
+        Dim_opt::_swap_dimension(column);
       }
     }
   } else {
@@ -896,14 +897,14 @@ inline Vector_column<Master_matrix>& Vector_column<Master_matrix>::multiply_sour
     if constexpr (Master_matrix::Option_list::is_z2) {
       if (val) {
         if (_add(column)) {
-          Chain_opt::swap_pivots(column);
-          Dim_opt::swap_dimension(column);
+          Chain_opt::_swap_pivots(column);
+          Dim_opt::_swap_dimension(column);
         }
       }
     } else {
       if (_multiply_source_and_add(column, val)) {
-        Chain_opt::swap_pivots(column);
-        Dim_opt::swap_dimension(column);
+        Chain_opt::_swap_pivots(column);
+        Dim_opt::_swap_dimension(column);
       }
     }
   } else {
@@ -1003,7 +1004,7 @@ inline typename Vector_column<Master_matrix>::Entry*
 Vector_column<Master_matrix>::_insert_entry(const Field_element& value, ID_index rowIndex, Column_support& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     newEntry->set_element(value);
     column.push_back(newEntry);
     RA_opt::insert_entry(rowIndex, newEntry);
@@ -1020,7 +1021,7 @@ template <class Master_matrix>
 inline void Vector_column<Master_matrix>::_insert_entry(ID_index rowIndex, Column_support& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     column.push_back(newEntry);
     RA_opt::insert_entry(rowIndex, newEntry);
   } else {
@@ -1033,7 +1034,7 @@ template <class Master_matrix>
 inline void Vector_column<Master_matrix>::_update_entry(const Field_element& value, ID_index rowIndex, Index position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     newEntry->set_element(value);
     column_[position] = newEntry;
     RA_opt::insert_entry(rowIndex, newEntry);
@@ -1047,7 +1048,7 @@ template <class Master_matrix>
 inline void Vector_column<Master_matrix>::_update_entry(ID_index rowIndex, Index position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     column_[position] = newEntry;
     RA_opt::insert_entry(rowIndex, newEntry);
   } else {

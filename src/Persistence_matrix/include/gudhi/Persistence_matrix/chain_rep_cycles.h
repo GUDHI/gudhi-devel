@@ -110,6 +110,9 @@ class Chain_representative_cycles
     base1.birthToCycle_.swap(base2.birthToCycle_);
   }
 
+ protected:
+  void _reset();
+
  private:
   using Master_chain_matrix = typename Master_matrix::Master_chain_matrix;
 
@@ -211,6 +214,13 @@ inline Chain_representative_cycles<Master_matrix>& Chain_representative_cycles<M
   representativeCycles_.swap(other.representativeCycles_);
   birthToCycle_.swap(other.birthToCycle_);
   return *this;
+}
+
+template <class Master_matrix>
+inline void Chain_representative_cycles<Master_matrix>::_reset()
+{
+  representativeCycles_.clear();
+  birthToCycle_.clear();
 }
 
 }  // namespace persistence_matrix

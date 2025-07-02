@@ -25,8 +25,8 @@
 #include <utility>    //std::swap, std::move & std::exchange
 
 #include <boost/iterator/indirect_iterator.hpp>
-#include "gudhi/Debug_utils.h"
 
+#include <gudhi/Debug_utils.h>
 #include <gudhi/Persistence_matrix/allocators/entry_constructors.h>
 
 namespace Gudhi {
@@ -624,7 +624,7 @@ inline typename Heap_column<Master_matrix>::ID_index Heap_column<Master_matrix>:
     }
     return Master_matrix::template get_null_value<ID_index>();
   } else {
-    return Chain_opt::get_pivot();
+    return Chain_opt::_get_pivot();
   }
 }
 
@@ -647,9 +647,9 @@ inline typename Heap_column<Master_matrix>::Field_element Heap_column<Master_mat
       return 0;
     } else {
       Field_element sum(0);
-      if (Chain_opt::get_pivot() == Master_matrix::template get_null_value<ID_index>()) return sum;
+      if (Chain_opt::_get_pivot() == Master_matrix::template get_null_value<ID_index>()) return sum;
       for (const Entry* entry : column_) {
-        if (entry->get_row_index() == Chain_opt::get_pivot()) operators_->add_inplace(sum, entry->get_element());
+        if (entry->get_row_index() == Chain_opt::_get_pivot()) operators_->add_inplace(sum, entry->get_element());
       }
       return sum;  // should not be 0 if properly used.
     }
@@ -725,8 +725,8 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator+=(Heap_c
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
     if (_add(column)) {
-      Chain_opt::swap_pivots(column);
-      Dim_opt::swap_dimension(column);
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
     _add(column);
@@ -802,16 +802,16 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_target_a
     if constexpr (Master_matrix::Option_list::is_z2) {
       if (val) {
         if (_add(column)) {
-          Chain_opt::swap_pivots(column);
-          Dim_opt::swap_dimension(column);
+          Chain_opt::_swap_pivots(column);
+          Dim_opt::_swap_dimension(column);
         }
       } else {
         throw std::invalid_argument("A chain column should not be multiplied by 0.");
       }
     } else {
       if (_multiply_target_and_add(val, column)) {
-        Chain_opt::swap_pivots(column);
-        Dim_opt::swap_dimension(column);
+        Chain_opt::_swap_pivots(column);
+        Dim_opt::_swap_dimension(column);
       }
     }
   } else {
@@ -861,14 +861,14 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_source_a
     if constexpr (Master_matrix::Option_list::is_z2) {
       if (val) {
         if (_add(column)) {
-          Chain_opt::swap_pivots(column);
-          Dim_opt::swap_dimension(column);
+          Chain_opt::_swap_pivots(column);
+          Dim_opt::_swap_dimension(column);
         }
       }
     } else {
       if (_multiply_source_and_add(column, val)) {
-        Chain_opt::swap_pivots(column);
-        Dim_opt::swap_dimension(column);
+        Chain_opt::_swap_pivots(column);
+        Dim_opt::_swap_dimension(column);
       }
     }
   } else {
@@ -1023,12 +1023,12 @@ inline bool Heap_column<Master_matrix>::_add(const Entry_range& column)
     ++insertsSinceLastPrune_;
     if constexpr (Master_matrix::Option_list::is_z2) {
       if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        if (entry.get_row_index() == Chain_opt::get_pivot()) pivotVal = !pivotVal;
+        if (entry.get_row_index() == Chain_opt::_get_pivot()) pivotVal = !pivotVal;
       }
       column_.push_back(entryPool_->construct(entry.get_row_index()));
     } else {
       if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        if (entry.get_row_index() == Chain_opt::get_pivot()) operators_->add_inplace(pivotVal, entry.get_element());
+        if (entry.get_row_index() == Chain_opt::_get_pivot()) operators_->add_inplace(pivotVal, entry.get_element());
       }
       column_.push_back(entryPool_->construct(entry.get_row_index()));
       column_.back()->set_element(entry.get_element());
@@ -1072,14 +1072,14 @@ inline bool Heap_column<Master_matrix>::_multiply_target_and_add(const Field_ele
   for (Entry* entry : column_) {
     operators_->multiply_inplace(entry->get_element(), val);
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-      if (entry->get_row_index() == Chain_opt::get_pivot()) operators_->add_inplace(pivotVal, entry->get_element());
+      if (entry->get_row_index() == Chain_opt::_get_pivot()) operators_->add_inplace(pivotVal, entry->get_element());
     }
   }
 
   for (const Entry& entry : column) {
     ++insertsSinceLastPrune_;
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-      if (entry.get_row_index() == Chain_opt::get_pivot()) operators_->add_inplace(pivotVal, entry.get_element());
+      if (entry.get_row_index() == Chain_opt::_get_pivot()) operators_->add_inplace(pivotVal, entry.get_element());
     }
     column_.push_back(entryPool_->construct(entry.get_row_index()));
     column_.back()->set_element(entry.get_element());
@@ -1123,7 +1123,7 @@ inline bool Heap_column<Master_matrix>::_multiply_source_and_add(const Entry_ran
     column_.back()->set_element(entry.get_element());
     operators_->multiply_inplace(column_.back()->get_element(), val);
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-      if (entry.get_row_index() == Chain_opt::get_pivot()) {
+      if (entry.get_row_index() == Chain_opt::_get_pivot()) {
         operators_->add_inplace(pivotVal, column_.back()->get_element());
       }
     }

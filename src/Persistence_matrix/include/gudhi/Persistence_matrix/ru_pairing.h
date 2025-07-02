@@ -23,6 +23,9 @@
 namespace Gudhi {
 namespace persistence_matrix {
 
+template <typename Master_matrix>
+class RU_barcode_swap;
+
 /**
  * @ingroup persistence_matrix
  *
@@ -46,10 +49,6 @@ struct Dummy_ru_pairing
 template <class Master_matrix>
 class RU_pairing
 {
- protected:
-  using Pos_index = typename Master_matrix::Pos_index;
-  using ID_index = typename Master_matrix::ID_index;
-
  public:
   using Barcode = typename Master_matrix::Barcode;  /**< Barcode type. */
 
@@ -75,15 +74,11 @@ class RU_pairing
   }
 
  protected:
+  using Pos_index = typename Master_matrix::Pos_index;
+  using ID_index = typename Master_matrix::ID_index;
   using Dimension = typename Master_matrix::Dimension;
-  using Dictionary = typename Master_matrix::Bar_dictionary;
 
-  Barcode barcode_;       /**< Bar container. */
-  Dictionary indexToBar_; /**< Map from @ref MatIdx index to bar index. */
-  /**
-   * @brief Map from cell ID to cell position. Only stores a pair if ID != position.
-   */
-  std::unordered_map<ID_index, Pos_index> idToPosition_;  //TODO: test other map types
+  void _reserve(unsigned int numberOfColumns) { indexToBar_.reserve(numberOfColumns); }
 
   void _update_barcode(ID_index birthPivot, Pos_index death) {
     auto it = idToPosition_.find(birthPivot);
@@ -138,6 +133,29 @@ class RU_pairing
       map.erase(it);
     }
   }
+
+  void _insert_id_position(ID_index id, Pos_index pos) {
+    idToPosition_.emplace(id, pos);
+  }
+
+  void _reset() {
+    barcode_.clear();
+    indexToBar_.clear();
+  }
+
+ private:
+  using Dictionary = typename Master_matrix::Bar_dictionary;
+
+  // could also just mark everything as protected as RU_barcode_swap inherits from RU_pairing
+  // but this way, it marks a better difference between "class using this mixin" with "class extending this mixin"
+  friend RU_barcode_swap<Master_matrix>;
+
+  Barcode barcode_;       /**< Bar container. */
+  Dictionary indexToBar_; /**< Map from @ref MatIdx index to bar index. */
+  /**
+   * @brief Map from cell ID to cell position. Only stores a pair if ID != position.
+   */
+  std::unordered_map<ID_index, Pos_index> idToPosition_;  //TODO: test other map types
 };
 
 }  // namespace persistence_matrix

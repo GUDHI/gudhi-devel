@@ -26,7 +26,7 @@
 #include <algorithm>  //std::sort
 
 #include <gudhi/Persistence_matrix/Id_to_index_overlay.h> //friend
-#include "index_mapper.h"
+#include <gudhi/Persistence_matrix/index_mapper.h>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -48,7 +48,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
                      public Master_matrix::Chain_vine_swap_option,
                      public Master_matrix::Chain_representative_cycles_option,
                      public Master_matrix::Matrix_row_access_option,
-                     public std::conditional<
+                     protected std::conditional<
                          Master_matrix::Option_list::has_vine_update &&
                              (Master_matrix::Option_list::has_column_pairings ||
                               Master_matrix::Option_list::can_retrieve_representative_cycles),
@@ -57,9 +57,18 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
                         >::type
 {
  private:
-  using Pivot_to_pos_mapper_opt = typename std::conditional<
+  using Dim_opt = typename Master_matrix::Matrix_dimension_option;
+  using Pair_opt = typename Master_matrix::Chain_pairing_option;
+  using Swap_opt = typename Master_matrix::Chain_vine_swap_option;
+  using Rep_opt = typename Master_matrix::Chain_representative_cycles_option;
+  using RA_opt = typename Master_matrix::Matrix_row_access_option;
+
+  static constexpr bool hasPivotToPosMap_ =
       Master_matrix::Option_list::has_vine_update && (Master_matrix::Option_list::has_column_pairings ||
-                                                      Master_matrix::Option_list::can_retrieve_representative_cycles),
+                                                      Master_matrix::Option_list::can_retrieve_representative_cycles);
+
+  using Pivot_to_pos_mapper_opt = typename std::conditional<
+      hasPivotToPosMap_,
       Index_mapper<typename Master_matrix::template Dictionary<typename Master_matrix::Pos_index>>,
       Dummy_index_mapper
     >::type;
@@ -459,9 +468,14 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * the necessary external classes specifically necessary for the chosen column type, such as custom allocators.
    */
   void reset(Column_settings* colSettings) {
+    if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access) Dim_opt::_reset();
+    if constexpr (Master_matrix::Option_list::has_column_pairings) Pair_opt::_reset();
+    if constexpr (Master_matrix::Option_list::can_retrieve_representative_cycles) Rep_opt::_reset();
+    if constexpr (hasPivotToPosMap_) Pivot_to_pos_mapper_opt::map_.clear();
     matrix_.clear();
     pivotToColumnIndex_.clear();
     nextIndex_ = 0;
+    nextPosition_ = 0;
     colSettings_ = colSettings;
   }
 
@@ -473,24 +487,18 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * @brief Swap operator.
    */
   friend void swap(Chain_matrix& matrix1, Chain_matrix& matrix2) {
-    swap(static_cast<typename Master_matrix::Matrix_dimension_option&>(matrix1),
-         static_cast<typename Master_matrix::Matrix_dimension_option&>(matrix2));
-    swap(static_cast<typename Master_matrix::Chain_pairing_option&>(matrix1),
-         static_cast<typename Master_matrix::Chain_pairing_option&>(matrix2));
-    swap(static_cast<typename Master_matrix::Chain_vine_swap_option&>(matrix1),
-         static_cast<typename Master_matrix::Chain_vine_swap_option&>(matrix2));
-    swap(static_cast<typename Master_matrix::Chain_representative_cycles_option&>(matrix1),
-         static_cast<typename Master_matrix::Chain_representative_cycles_option&>(matrix2));
-    swap(static_cast<Pivot_to_pos_mapper_opt&>(matrix1),
-         static_cast<Pivot_to_pos_mapper_opt&>(matrix2));
+    swap(static_cast<Dim_opt&>(matrix1), static_cast<Dim_opt&>(matrix2));
+    swap(static_cast<Pair_opt&>(matrix1), static_cast<Pair_opt&>(matrix2));
+    swap(static_cast<Swap_opt&>(matrix1), static_cast<Swap_opt&>(matrix2));
+    swap(static_cast<Rep_opt&>(matrix1), static_cast<Rep_opt&>(matrix2));
+    swap(static_cast<Pivot_to_pos_mapper_opt&>(matrix1), static_cast<Pivot_to_pos_mapper_opt&>(matrix2));
     matrix1.matrix_.swap(matrix2.matrix_);
     matrix1.pivotToColumnIndex_.swap(matrix2.pivotToColumnIndex_);
     std::swap(matrix1.nextIndex_, matrix2.nextIndex_);
     std::swap(matrix1.colSettings_, matrix2.colSettings_);
 
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      swap(static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix1),
-           static_cast<typename Master_matrix::Matrix_row_access_option&>(matrix2));
+      swap(static_cast<RA_opt&>(matrix1), static_cast<RA_opt&>(matrix2));
     }
   }
 
@@ -499,11 +507,6 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   friend class Id_to_index_overlay<Chain_matrix<Master_matrix>, Master_matrix>;
 
  private:
-  using Dim_opt = typename Master_matrix::Matrix_dimension_option;
-  using Swap_opt = typename Master_matrix::Chain_vine_swap_option;
-  using Pair_opt = typename Master_matrix::Chain_pairing_option;
-  using Rep_opt = typename Master_matrix::Chain_representative_cycles_option;
-  using RA_opt = typename Master_matrix::Matrix_row_access_option;
   using Column_container = typename Master_matrix::Column_container;
   using Dictionary = typename Master_matrix::template Dictionary<Index>;
   using Barcode = typename Master_matrix::Barcode;
@@ -513,7 +516,8 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
                                                std::map<ID_index, Field_element>
                                               >::type;
 
-  friend typename Swap_opt::CP; // direct access to index mapper
+  friend Swap_opt;              // direct access to index mapper
+  friend Pair_opt;              // direct access to index mapper
   friend Rep_opt;               // direct access to index mapper
 
   Column_container matrix_;       /**< Column container. */
@@ -539,9 +543,6 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   template <class Container>
   void _container_insert(const Container& column, Index pos, Dimension dim);
   void _container_insert(const Column& column, [[maybe_unused]] Index pos = 0);
-
-  constexpr Barcode& _barcode();
-  constexpr Bar_dictionary& _indexToBar();
 };
 
 template <class Master_matrix>
@@ -728,9 +729,7 @@ inline std::vector<typename Master_matrix::Entry_representative> Chain_matrix<Ma
     }
   }
 
-  if constexpr (Master_matrix::Option_list::has_vine_update &&
-                (Master_matrix::Option_list::has_column_pairings ||
-                 Master_matrix::Option_list::can_retrieve_representative_cycles)) {
+  if constexpr (hasPivotToPosMap_) {
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       Pivot_to_pos_mapper_opt::map_.try_emplace(cellID, nextPosition_);
     } else {
@@ -742,7 +741,7 @@ inline std::vector<typename Master_matrix::Entry_representative> Chain_matrix<Ma
   }
 
   if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access) {
-    Dim_opt::update_up(dim == Master_matrix::template get_null_value<Dimension>()
+    Dim_opt::_update_up(dim == Master_matrix::template get_null_value<Dimension>()
                            ? (boundary.size() == 0 ? 0 : boundary.size() - 1)
                            : dim);
   }
@@ -1240,7 +1239,7 @@ inline void Chain_matrix<Master_matrix>::_remove_last(Index lastIndex)
     pivot = colToErase.get_pivot();
 
     if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access) {
-      Dim_opt::update_down(colToErase.get_dimension());
+      Dim_opt::_update_down(colToErase.get_dimension());
     }
 
     if (colToErase.is_paired()) matrix_.at(colToErase.get_paired_chain_index()).unassign_paired_chain();
@@ -1254,7 +1253,7 @@ inline void Chain_matrix<Master_matrix>::_remove_last(Index lastIndex)
     pivot = colToErase.get_pivot();
 
     if constexpr (Master_matrix::Option_list::has_matrix_maximal_dimension_access) {
-      Dim_opt::update_down(colToErase.get_dimension());
+      Dim_opt::_update_down(colToErase.get_dimension());
     }
 
     if (colToErase.is_paired()) matrix_.at(colToErase.get_paired_chain_index()).unassign_paired_chain();
@@ -1269,20 +1268,10 @@ inline void Chain_matrix<Master_matrix>::_remove_last(Index lastIndex)
 
   --nextPosition_;
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    auto it = _indexToBar().find(nextPosition_);
-    typename Barcode::iterator bar = it->second;
-
-    if (bar->death == Master_matrix::template get_null_value<Pos_index>())
-      _barcode().erase(bar);
-    else
-      bar->death = Master_matrix::template get_null_value<Pos_index>();
-
-    _indexToBar().erase(it);
-    if constexpr (Master_matrix::Option_list::has_vine_update) Pivot_to_pos_mapper_opt::map_.erase(pivot);
-  } else {
-    if constexpr (Master_matrix::Option_list::has_vine_update &&
-                  Master_matrix::Option_list::can_retrieve_representative_cycles)
-      Pivot_to_pos_mapper_opt::map_.erase(pivot);
+    Pair_opt::_erase_bar(nextPosition_);
+  }
+  if constexpr (hasPivotToPosMap_) {
+    Pivot_to_pos_mapper_opt::map_.erase(pivot);
   }
 
   if constexpr (Master_matrix::Option_list::has_row_access) {
@@ -1300,14 +1289,7 @@ template <class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_update_barcode(Pos_index birth)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    if constexpr (Master_matrix::Option_list::has_removable_columns) {
-      auto& barIt = _indexToBar().at(birth);
-      barIt->death = nextPosition_;
-      _indexToBar().try_emplace(nextPosition_, barIt);  // list so iterators are stable
-    } else {
-      _barcode()[_indexToBar()[birth]].death = nextPosition_;
-      _indexToBar().push_back(_indexToBar()[birth]);
-    }
+    Pair_opt::_update_barcode(birth, nextPosition_);
   }
   ++nextPosition_;
 }
@@ -1316,12 +1298,7 @@ template <class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_add_bar(Dimension dim)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    _barcode().emplace_back(nextPosition_, Master_matrix::template get_null_value<Pos_index>(), dim);
-    if constexpr (Master_matrix::Option_list::has_removable_columns) {
-      _indexToBar().try_emplace(nextPosition_, --_barcode().end());
-    } else {
-      _indexToBar().push_back(_barcode().size() - 1);
-    }
+    Pair_opt::_add_bar(dim, nextPosition_);
   }
   ++nextPosition_;
 }
@@ -1339,13 +1316,13 @@ inline void Chain_matrix<Master_matrix>::_container_insert(const Container& colu
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.try_emplace(pivot, pos);
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.try_emplace(pos, Column(pos, column, dim, RA_opt::rows_, colSettings_));
+      matrix_.try_emplace(pos, Column(pos, column, dim, RA_opt::_get_rows_ptr(), colSettings_));
     } else {
       matrix_.try_emplace(pos, Column(column, dim, colSettings_));
     }
   } else {
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.emplace_back(pos, column, dim, RA_opt::rows_, colSettings_);
+      matrix_.emplace_back(pos, column, dim, RA_opt::_get_rows_ptr(), colSettings_);
     } else {
       matrix_.emplace_back(column, dim, colSettings_);
     }
@@ -1358,36 +1335,17 @@ inline void Chain_matrix<Master_matrix>::_container_insert(const Column& column,
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.try_emplace(pos, Column(column, column.get_column_index(), RA_opt::rows_, colSettings_));
+      matrix_.try_emplace(pos, Column(column, column.get_column_index(), RA_opt::_get_rows_ptr(), colSettings_));
     } else {
       matrix_.try_emplace(pos, Column(column, colSettings_));
     }
   } else {
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.emplace_back(column, column.get_column_index(), RA_opt::rows_, colSettings_);
+      matrix_.emplace_back(column, column.get_column_index(), RA_opt::_get_rows_ptr(), colSettings_);
     } else {
       matrix_.emplace_back(column, colSettings_);
     }
   }
-}
-
-template <class Master_matrix>
-inline constexpr typename Chain_matrix<Master_matrix>::Barcode& Chain_matrix<Master_matrix>::_barcode()
-{
-  if constexpr (Master_matrix::Option_list::has_vine_update)
-    return Swap_opt::CP::CP::barcode_;
-  else
-    return Pair_opt::barcode_;
-}
-
-template <class Master_matrix>
-inline constexpr typename Chain_matrix<Master_matrix>::Bar_dictionary&
-Chain_matrix<Master_matrix>::_indexToBar()
-{
-  if constexpr (Master_matrix::Option_list::has_vine_update)
-    return Swap_opt::CP::CP::indexToBar_;
-  else
-    return Pair_opt::indexToBar_;
 }
 
 }  // namespace persistence_matrix

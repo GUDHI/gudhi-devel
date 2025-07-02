@@ -34,10 +34,10 @@ namespace persistence_fields {
 class Multi_field_operators
 {
  public:
-  using Element = mpz_class;             /**< Type for the elements in the field. */
-  using Characteristic = Element;   /**< Type for the field characteristic. */
+  using Element = mpz_class;      /**< Type for the elements in the field. */
+  using Characteristic = Element; /**< Type for the field characteristic. */
 
-  inline static const Characteristic nullCharacteristic = 0;
+  inline static const Characteristic nullCharacteristic = 0;  /**< Value of a non initialized characteristic. */
 
   /**
    * @brief Default constructor, sets the product of all characteristics to 0.

@@ -8,7 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-/** @file Matrix.h
+/**
+ * @file Matrix.h
  * @author Hannah Schreiber
  * @brief Contains @ref Gudhi::persistence_matrix::Matrix class.
  */
@@ -499,9 +500,11 @@ class Matrix {
                                >::type;
 
   using RU_pairing_option =
-      typename std::conditional<PersistenceMatrixOptions::has_column_pairings &&
-                                    !PersistenceMatrixOptions::has_vine_update,
-                                RU_pairing<Matrix<PersistenceMatrixOptions> >,
+      typename std::conditional<PersistenceMatrixOptions::has_column_pairings,
+                                typename std::conditional<PersistenceMatrixOptions::has_vine_update,
+                                                          RU_barcode_swap<Matrix<PersistenceMatrixOptions> >,
+                                                          RU_pairing<Matrix<PersistenceMatrixOptions> >
+                                                         >::type,
                                 Dummy_ru_pairing
                                >::type;
   using RU_vine_swap_option =
@@ -516,9 +519,11 @@ class Matrix {
                                >::type;
 
   using Chain_pairing_option =
-      typename std::conditional<PersistenceMatrixOptions::has_column_pairings &&
-                                    !PersistenceMatrixOptions::has_vine_update,
-                                Chain_pairing<Matrix<PersistenceMatrixOptions> >,
+      typename std::conditional<PersistenceMatrixOptions::has_column_pairings,
+                                typename std::conditional<PersistenceMatrixOptions::has_vine_update,
+                                                          Chain_barcode_swap<Matrix<PersistenceMatrixOptions> >,
+                                                          Chain_pairing<Matrix<PersistenceMatrixOptions> >
+                                                         >::type,
                                 Dummy_chain_pairing
                                >::type;
   using Chain_vine_swap_option = typename std::conditional<PersistenceMatrixOptions::has_vine_update,
@@ -1512,7 +1517,7 @@ inline Matrix<PersistenceMatrixOptions>::Matrix(Matrix&& other) noexcept
 template <class PersistenceMatrixOptions>
 inline Matrix<PersistenceMatrixOptions>::~Matrix()
 {
-  matrix_.reset(colSettings_);
+  matrix_.reset(colSettings_);  // to avoid crashes at destruction, all columns have to be destroyed first
   delete colSettings_;
 }
 

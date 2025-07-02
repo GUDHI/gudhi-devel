@@ -572,7 +572,7 @@ inline typename Intrusive_list_column<Master_matrix>::ID_index Intrusive_list_co
     if (column_.empty()) return Master_matrix::template get_null_value<ID_index>();
     return column_.back().get_row_index();
   } else {
-    return Chain_opt::get_pivot();
+    return Chain_opt::_get_pivot();
   }
 }
 
@@ -590,9 +590,9 @@ Intrusive_list_column<Master_matrix>::get_pivot_value() const
       if (column_.empty()) return 0;
       return column_.back().get_element();
     } else {
-      if (Chain_opt::get_pivot() == Master_matrix::template get_null_value<ID_index>()) return Field_element();
+      if (Chain_opt::_get_pivot() == Master_matrix::template get_null_value<ID_index>()) return Field_element();
       for (const Entry& entry : column_) {
-        if (entry.get_row_index() == Chain_opt::get_pivot()) return entry.get_element();
+        if (entry.get_row_index() == Chain_opt::_get_pivot()) return entry.get_element();
       }
       return Field_element();  // should never happen if chain column is used properly
     }
@@ -675,8 +675,8 @@ inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
     if (_add(column)) {
-      Chain_opt::swap_pivots(column);
-      Dim_opt::swap_dimension(column);
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
     _add(column);
@@ -755,16 +755,16 @@ inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix
     if constexpr (Master_matrix::Option_list::is_z2) {
       if (val) {
         if (_add(column)) {
-          Chain_opt::swap_pivots(column);
-          Dim_opt::swap_dimension(column);
+          Chain_opt::_swap_pivots(column);
+          Dim_opt::_swap_dimension(column);
         }
       } else {
         throw std::invalid_argument("A chain column should not be multiplied by 0.");
       }
     } else {
       if (_multiply_target_and_add(val, column)) {
-        Chain_opt::swap_pivots(column);
-        Dim_opt::swap_dimension(column);
+        Chain_opt::_swap_pivots(column);
+        Dim_opt::_swap_dimension(column);
       }
     }
   } else {
@@ -816,14 +816,14 @@ inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix
     if constexpr (Master_matrix::Option_list::is_z2) {
       if (val) {
         if (_add(column)) {
-          Chain_opt::swap_pivots(column);
-          Dim_opt::swap_dimension(column);
+          Chain_opt::_swap_pivots(column);
+          Dim_opt::_swap_dimension(column);
         }
       }
     } else {
       if (_multiply_source_and_add(column, val)) {
-        Chain_opt::swap_pivots(column);
-        Dim_opt::swap_dimension(column);
+        Chain_opt::_swap_pivots(column);
+        Dim_opt::_swap_dimension(column);
       }
     }
   } else {
@@ -884,7 +884,7 @@ inline typename Intrusive_list_column<Master_matrix>::Entry* Intrusive_list_colu
     const iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     newEntry->set_element(value);
     column_.insert(position, *newEntry);
     RA_opt::insert_entry(rowIndex, newEntry);
@@ -901,7 +901,7 @@ template <class Master_matrix>
 inline void Intrusive_list_column<Master_matrix>::_insert_entry(ID_index rowIndex, const iterator& position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::columnIndex_, rowIndex);
+    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
     column_.insert(position, *newEntry);
     RA_opt::insert_entry(rowIndex, newEntry);
   } else {

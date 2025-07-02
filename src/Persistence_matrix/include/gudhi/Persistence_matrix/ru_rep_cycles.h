@@ -108,6 +108,9 @@ class RU_representative_cycles
     base1.birthToCycle_.swap(base2.birthToCycle_);
   }
 
+ protected:
+  void _reset();
+
  private:
   using Master_RU_matrix = typename Master_matrix::Master_RU_matrix;
   using Inverse_column = Cycle;
@@ -348,6 +351,13 @@ RU_representative_cycles<Master_matrix>::_get_inverse(Index c)
   }
 
   return res;
+}
+
+template <class Master_matrix>
+inline void RU_representative_cycles<Master_matrix>::_reset()
+{
+  representativeCycles_.clear();
+  birthToCycle_.clear();
 }
 
 }  // namespace persistence_matrix

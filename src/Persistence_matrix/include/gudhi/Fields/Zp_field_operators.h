@@ -40,11 +40,14 @@ template <typename Unsigned_integer_type = unsigned int,
 class Zp_field_operators
 {
  public:
-  using Element = Unsigned_integer_type; /**< Type for the elements in the field. */
-  using Characteristic = Element;   /**< Type for the field characteristic. */
+  using Element = Unsigned_integer_type;  /**< Type for the elements in the field. */
+  using Characteristic = Element;         /**< Type for the field characteristic. */
   template <class T>
   using isSignedInteger = std::enable_if_t<std::is_signed_v<T> >;
 
+  /**
+   * @brief Value of a non initialized characteristic.
+   */
   inline constexpr static const Characteristic nullCharacteristic = 0;
 
   /**
@@ -69,7 +72,8 @@ class Zp_field_operators
    * @param toMove Operators to move.
    */
   Zp_field_operators(Zp_field_operators&& toMove) noexcept
-      : characteristic_(std::exchange(toMove.characteristic_, 0)), inverse_(std::move(toMove.inverse_)) {}
+      : characteristic_(std::exchange(toMove.characteristic_, nullCharacteristic)),
+        inverse_(std::move(toMove.inverse_)) {}
 
   /**
    * @brief Sets the characteristic of the field.
