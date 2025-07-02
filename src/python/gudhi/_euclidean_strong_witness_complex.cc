@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <cstddef>
+#include <limits>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/vector.h>
@@ -57,14 +58,11 @@ class Euclidean_strong_witness_complex_interface
 
   ~Euclidean_strong_witness_complex_interface() { delete witness_complex_; }
 
-  void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square, std::size_t limit_dimension)
+  void create_simplex_tree(Simplex_tree_interface* simplex_tree,
+                           double max_alpha_square,
+                           std::size_t limit_dimension = std::numeric_limits<std::size_t>::max())
   {
     witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
-  }
-
-  void create_simplex_tree(Simplex_tree_interface* simplex_tree, double max_alpha_square)
-  {
-    witness_complex_->create_complex(*simplex_tree, max_alpha_square);
   }
 
   std::vector<double> get_point(unsigned vh)
@@ -104,10 +102,10 @@ NB_MODULE(_euclidean_strong_witness_complex_ext, m)
       .def(nb::init<const Sequence2D&, const Sequence2D&>(), nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<const Tensor2D&, const Tensor2D&>(), nb::call_guard<nb::gil_scoped_release>())
       .def("create_simplex_tree",
-           nb::overload_cast<Gudhi::Simplex_tree_interface*, double>(&gwci::create_simplex_tree),
-           nb::call_guard<nb::gil_scoped_release>())
-      .def("create_simplex_tree",
-           nb::overload_cast<Gudhi::Simplex_tree_interface*, double, std::size_t>(&gwci::create_simplex_tree),
+           &gwci::create_simplex_tree,
+           nb::arg("simplex_tree"),
+           nb::arg("max_alpha_square"),
+           nb::arg("limit_dimension") = std::numeric_limits<std::size_t>::max(),
            nb::call_guard<nb::gil_scoped_release>())
       .def("get_point",
            &gwci::get_point,
