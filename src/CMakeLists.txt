@@ -8,6 +8,7 @@ include(GUDHI_options)
 
 set(GUDHI_MODULES "" CACHE INTERNAL "GUDHI_MODULES")
 set(GUDHI_MISSING_MODULES "" CACHE INTERNAL "GUDHI_MISSING_MODULES")
+set(GUDHI_NANOBIND_MODULES "" CACHE INTERNAL "GUDHI_NANOBIND_MODULES")
 
 # This variable is used by Python CMakeLists.txt and by GUDHI_third_party_libraries to know its path
 set(GUDHI_PYTHON_PATH "python")

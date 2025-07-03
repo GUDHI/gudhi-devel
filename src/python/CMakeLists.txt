@@ -26,7 +26,6 @@ function(nanobind_add_module_with_targets)
       list(POP_FRONT ARGN EXECUTABLE_SOURCE)
     endwhile()
 
-    message(DEBUG "${EXECUTABLE_NAME} - ${EXE_SOURCES}")
     # Do not add_executable if one of the target is not here, except for TBB that is optional
     foreach(USER_TARGET IN LISTS ARGN)
         if(NOT TARGET ${USER_TARGET})
@@ -35,10 +34,12 @@ function(nanobind_add_module_with_targets)
             endif()
         endif()
     endforeach()
+    message(DEBUG "nanobind_add_module(${EXECUTABLE_NAME} ${EXE_SOURCES}) + target_link_libraries(${ARGN})")
+    # Maintain a list of nanobind modules - Mainly for sphinx purposes to know when the documentation is "buildable"
+    set(GUDHI_NANOBIND_MODULES ${GUDHI_NANOBIND_MODULES} ${EXECUTABLE_NAME} CACHE INTERNAL "GUDHI_NANOBIND_MODULES")
     # cf. https://nanobind.readthedocs.io/en/latest/api_cmake.html#high-level-interface
     nanobind_add_module(${EXECUTABLE_NAME} NB_STATIC NOMINSIZE ${EXE_SOURCES})
     foreach(USER_TARGET IN LISTS ARGN)
-        message(DEBUG "target_link_libraries(${EXECUTABLE_NAME} PRIVATE ${USER_TARGET})")
         # TARGET_NAME_IF_EXISTS is specific to TBB case (optional)
         target_link_libraries(${EXECUTABLE_NAME} PRIVATE $<TARGET_NAME_IF_EXISTS:${USER_TARGET}>)
     endforeach()
@@ -272,12 +273,11 @@ else()
     set (GUDHI_SPHINX_MESSAGE "${GUDHI_SPHINX_MESSAGE} \n WARNING : Sphinx is configured for user version, you run it on developer version. Images and biblio will miss")
   endif()
   # sphinx target requires python modules to be built, because conf.py reads gudhi version from it
-  # "DEPENDS _cubical_complex_ext" is sufficient to build all nanobind modules when make sphinx
   add_custom_target(sphinx
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
       COMMAND ${CMAKE_COMMAND} -E env "${GUDHI_PYTHON_PATH_ENV}"
       ${SPHINX_PATH} -b html ${CMAKE_CURRENT_SOURCE_DIR}/doc ${CMAKE_CURRENT_BINARY_DIR}/sphinx
-      DEPENDS _cubical_complex_ext
+      DEPENDS "${GUDHI_NANOBIND_MODULES}"
       COMMENT "${GUDHI_SPHINX_MESSAGE}" VERBATIM)
   add_test(NAME sphinx_py_test
            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
