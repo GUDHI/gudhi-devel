@@ -47,7 +47,7 @@ nb::list wrap_persistence_2d(nb::ndarray<const double, nb::ndim<2>, nb::c_contig
 {
   std::vector<std::array<double, 2> >* dgm0 = new std::vector<std::array<double, 2> >();
   std::vector<std::array<double, 2> >* dgm1 = new std::vector<std::array<double, 2> >();
-  dgm0->reserve(data.shape(0) * data.shape(1) + 1);  // rough upper bound
+  dgm0->reserve(data.shape(0) * data.shape(1) + data.shape(0) + data.shape(1) + 1);  // rough upper bound
   dgm1->reserve(data.shape(0) * data.shape(1) + 1);  // rough upper bound
   {
     nb::gil_scoped_release release;
