@@ -9,8 +9,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-// #include <array>
-#include <cstddef>
+#include <array>
 #include <vector>
 #include <limits>
 
@@ -27,80 +26,52 @@
 namespace nb = nanobind;
 
 template <class T>
-auto wrap_persistence_1d(nb::ndarray<const T, nb::ndim<1>> data)
+auto wrap_persistence_1d(nb::ndarray<const T, nb::ndim<1> > data)
 {
   auto data_view = data.view();
   auto cnt = boost::counting_range<nb::ssize_t>(0, data_view.shape(0));
   auto proj = [&data_view](nb::ssize_t i) { return data_view(i); };
   auto r = boost::adaptors::transform(cnt, proj);
-  auto dgm = new T[data_view.shape(0) + 1];
-  std::size_t count = 0;
+  std::vector<std::array<T, 2> >* dgm = new std::vector<std::array<T, 2> >();
+  dgm->reserve(data_view.shape(0) + 1);  // rough upper bound
   {
     nb::gil_scoped_release release;
-    Gudhi::persistent_cohomology::compute_persistence_of_function_on_line(r, [&](T b, T d) {
-      dgm[count] = b;
-      dgm[count + 1] = d;
-      count += 2;
-    });
+    Gudhi::persistent_cohomology::compute_persistence_of_function_on_line(
+        r, [&](T b, T d) { dgm->emplace_back(std::array<T, 2>{b, d}); });
   }
-  return _wrap_as_numpy_array(dgm, count / 2, 2);
-  // std::vector<std::array<T, 2> >* dgm = new std::vector<std::array<T, 2> >();
-  // // dgm->reserve(data_view.shape(0) * 2);
-  // {
-  //   nb::gil_scoped_release release;
-  //   Gudhi::persistent_cohomology::compute_persistence_of_function_on_line(r, [&](T b, T d) {
-  //     dgm->emplace_back(std::array<T, 2>{b,d});
-  //   });
-  // }
-  // // dgm->shrink_to_fit();
-  // return nb::ndarray<T, nb::numpy>(dgm->data(), {dgm->size(), 2}, nb::capsule(dgm, [](void* p) noexcept {
-  //   delete reinterpret_cast<std::vector<std::array<T, 2> >*>(p);
-  // }));
-  // std::vector<T>* dgm = new std::vector<T>();
-  // // dgm->reserve(data_view.shape(0) + 1);  // rough upper bound, but it makes a difference in performance
-  // {
-  //   nb::gil_scoped_release release;
-  //   Gudhi::persistent_cohomology::compute_persistence_of_function_on_line(r, [&](T b, T d) {
-  //     dgm->push_back(b);
-  //     dgm->push_back(d);
-  //   });
-  // }
-  // // dgm->shrink_to_fit();
-  // return _wrap_as_numpy_array(dgm, dgm->size() / 2, 2);
+  if (dgm->size() < data_view.shape(0) / 2) dgm->shrink_to_fit();
+  return _wrap_as_numpy_array(dgm);
 }
 
 nb::list wrap_persistence_2d(nb::ndarray<const double, nb::ndim<2>, nb::c_contig> data, double min_persistence)
 {
-  std::vector<double>* dgm0 = new std::vector<double>();
-  std::vector<double>* dgm1 = new std::vector<double>();
-  // dgm0->reserve(data.shape(0) * data.shape(1) * 2);  // rough upper bound
-  // dgm1->reserve(data.shape(0) * data.shape(1) * 2);  // rough upper bound
+  std::vector<std::array<double, 2> >* dgm0 = new std::vector<std::array<double, 2> >();
+  std::vector<std::array<double, 2> >* dgm1 = new std::vector<std::array<double, 2> >();
+  dgm0->reserve(data.shape(0) * data.shape(1) + 1);  // rough upper bound
+  dgm1->reserve(data.shape(0) * data.shape(1) + 1);  // rough upper bound
   {
     nb::gil_scoped_release release;
     double mini = Gudhi::cubical_complex::persistence_on_rectangle_from_top_cells(
         static_cast<double const*>(data.data()),
-        static_cast<unsigned>(data.shape(0)),
-        static_cast<unsigned>(data.shape(1)),
+        static_cast<unsigned int>(data.shape(0)),
+        static_cast<unsigned int>(data.shape(1)),
         [&](double b, double d) {
           if (d - b > min_persistence) {
-            dgm0->push_back(b);
-            dgm0->push_back(d);
+            dgm0->emplace_back(std::array<double, 2>{b, d});
           }
         },
         [&](double b, double d) {
           if (d - b > min_persistence) {
-            dgm1->push_back(b);
-            dgm1->push_back(d);
+            dgm1->emplace_back(std::array<double, 2>{b, d});
           }
         });
-    dgm0->push_back(mini);
-    dgm0->push_back(std::numeric_limits<double>::infinity());
+    dgm0->emplace_back(std::array<double, 2>{mini, std::numeric_limits<double>::infinity()});
   }
-  // if (dgm0->size() < dgm0->capacity() / 2) dgm0->shrink_to_fit();
-  // if (dgm1->size() < dgm1->capacity() / 2) dgm1->shrink_to_fit();
+  if (dgm0->size() < dgm0->capacity() / 2) dgm0->shrink_to_fit();
+  if (dgm1->size() < dgm1->capacity() / 2) dgm1->shrink_to_fit();
   nb::list ret;
-  ret.append(_wrap_as_numpy_array(dgm0, dgm0->size() / 2, 2));
-  ret.append(_wrap_as_numpy_array(dgm1, dgm1->size() / 2, 2));
+  ret.append(_wrap_as_numpy_array(dgm0));
+  ret.append(_wrap_as_numpy_array(dgm1));
   return ret;
 }
 

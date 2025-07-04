@@ -38,6 +38,15 @@ inline auto _wrap_as_numpy_array(T *tensor, Shape... shapes)
       }));
 }
 
+template <class T, std::size_t I>
+inline auto _wrap_as_numpy_array(std::vector<std::array<T, I> > *tensor)
+{
+  return nanobind::ndarray<nanobind::numpy, T>(
+      tensor->data(), {tensor->size(), I}, nanobind::capsule(tensor, [](void *p) noexcept {
+        delete reinterpret_cast<std::vector<std::array<T, I> > *>(p);
+      }));
+}
+
 template <typename T, class = std::enable_if<std::is_arithmetic_v<T> > >
 class Numpy_span
 {
