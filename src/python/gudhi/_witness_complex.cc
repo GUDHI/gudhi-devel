@@ -25,24 +25,34 @@
 #include <python_interfaces/Simplex_tree_interface.h>
 #include <python_interfaces/points_utils.h>
 
-using Nearest_landmark_range = std::vector<std::pair<std::size_t, double>>;
-using Nearest_landmark_table = std::vector<Nearest_landmark_range>;
-
 namespace Gudhi {
 namespace witness_complex {
 
-class Witness_complex_interface : public Gudhi::witness_complex::Witness_complex<Nearest_landmark_table>
+class Witness_complex_interface
 {
  public:
-  Witness_complex_interface() : Gudhi::witness_complex::Witness_complex<Nearest_landmark_table>() {}
+  using Nearest_landmark_range = std::vector<std::pair<std::size_t, double>>;
+  using Nearest_landmark_table = std::vector<Nearest_landmark_range>;
 
-  Witness_complex_interface(const Nearest_landmark_sequence& nlt)
-      : Gudhi::witness_complex::Witness_complex<Nearest_landmark_table>(nlt)
-  {}
+ public:
+  Witness_complex_interface() {}
 
+  Witness_complex_interface(const Nearest_landmark_sequence& nlt) { witness_complex_.emplace(nlt); }
+
+  // TODO: remove one copy by directly constructing std::vector<Point_d> instead of std::vector<std::vector<double>>
   Witness_complex_interface(const Nearest_landmark_tensor& nlt)
-      : Gudhi::witness_complex::Witness_complex<Nearest_landmark_table>(_get_sequence_from_tensor(nlt))
+      : Witness_complex_interface(_get_sequence_from_tensor(nlt))
   {}
+
+  void create_simplex_tree(Simplex_tree_interface* simplex_tree,
+                           double max_alpha_square,
+                           std::size_t limit_dimension = std::numeric_limits<std::size_t>::max())
+  {
+    if (witness_complex_) witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
+  }
+
+ private:
+  std::optional<Witness_complex<Nearest_landmark_table>> witness_complex_;
 };
 
 }  // namespace witness_complex
@@ -51,8 +61,6 @@ class Witness_complex_interface : public Gudhi::witness_complex::Witness_complex
 namespace nb = nanobind;
 namespace gwc = Gudhi::witness_complex;
 using gwci = gwc::Witness_complex_interface;
-
-std::size_t max_size_t = std::numeric_limits<std::size_t>::max();
 
 NB_MODULE(_witness_complex_ext, m)
 {
@@ -63,9 +71,9 @@ NB_MODULE(_witness_complex_ext, m)
       .def(nb::init<const Nearest_landmark_tensor&>(), nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<>(), nb::call_guard<nb::gil_scoped_release>())
       .def("create_simplex_tree",
-           &gwci::create_complex<Gudhi::Simplex_tree_interface>,
-           nb::arg("complex"),
+           &gwci::create_simplex_tree,
+           nb::arg("simplex_tree"),
            nb::arg("max_alpha_square"),
-           nb::arg("limit_dimension") = max_size_t,
+           nb::arg("limit_dimension") = std::numeric_limits<std::size_t>::max(),
            nb::call_guard<nb::gil_scoped_release>());
 }

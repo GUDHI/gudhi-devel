@@ -10,6 +10,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <optional>
 #include <vector>
 #include <cstddef>
 #include <limits>
@@ -27,10 +28,6 @@
 namespace Gudhi {
 namespace witness_complex {
 
-// /////////////////////////////////////////////////////////////////////////////
-// Euclidean_strong_witness_complex_interface declaration
-// /////////////////////////////////////////////////////////////////////////////
-
 class Euclidean_strong_witness_complex_interface
 {
   using Dynamic_kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
@@ -38,37 +35,39 @@ class Euclidean_strong_witness_complex_interface
   using Simplex_key = typename Simplex_tree<>::Simplex_key;
 
  public:
-  Euclidean_strong_witness_complex_interface()
-  {
-    landmarks_.emplace_back();  // KDTree seg faults if landmarks is completely empty, simplex tree will still be empty
-    witness_complex_ = new Euclidean_strong_witness_complex<Dynamic_kernel>(landmarks_, Sequence2D());
-  }
+  Euclidean_strong_witness_complex_interface() : number_of_landmarks_(0) {}
 
   Euclidean_strong_witness_complex_interface(const Sequence2D& landmarks, const Sequence2D& witnesses)
+      : number_of_landmarks_(landmarks.size())
   {
-    landmarks_.reserve(landmarks.size());
-    for (auto& landmark : landmarks) landmarks_.emplace_back(landmark.begin(), landmark.end());
-    witness_complex_ = new Euclidean_strong_witness_complex<Dynamic_kernel>(landmarks_, witnesses);
+    // Cannot build an Euclidean_strong_witness_complex with empty landmarks, as it segfaults
+    if (number_of_landmarks_ != 0) {
+      // TODO: copy could be avoided here with custom iterator or some transform (boost::adaptors::transform?)
+      // witness complex just needs a begin/end method deferrenceating in a Point_d
+      std::vector<Point_d> lm;
+      lm.reserve(landmarks.size());
+      for (auto& landmark : landmarks) lm.emplace_back(landmark.begin(), landmark.end());
+      witness_complex_.emplace(lm, witnesses);
+    }
   }
 
+  // TODO: remove one copy by directly constructing std::vector<Point_d> instead of std::vector<std::vector<double>>
   Euclidean_strong_witness_complex_interface(const Tensor2D& landmarks, const Tensor2D& witnesses)
       : Euclidean_strong_witness_complex_interface(_get_sequence_from_tensor(landmarks),
                                                    _get_sequence_from_tensor(witnesses))
   {}
 
-  ~Euclidean_strong_witness_complex_interface() { delete witness_complex_; }
-
   void create_simplex_tree(Simplex_tree_interface* simplex_tree,
                            double max_alpha_square,
                            std::size_t limit_dimension = std::numeric_limits<std::size_t>::max())
   {
-    witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
+    if (witness_complex_) witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
   }
 
-  std::vector<double> get_point(unsigned vh)
+  std::vector<double> get_point(unsigned int vh)
   {
     std::vector<double> vd;
-    if (vh < landmarks_.size()) {
+    if (vh < number_of_landmarks_) {
       Point_d ph = witness_complex_->get_point(vh);
       for (auto coord = ph.cartesian_begin(); coord < ph.cartesian_end(); ++coord) {
         vd.push_back(*coord);
@@ -78,16 +77,12 @@ class Euclidean_strong_witness_complex_interface
   }
 
  private:
-  std::vector<Point_d> landmarks_;
-  Euclidean_strong_witness_complex<Dynamic_kernel>* witness_complex_;
+  unsigned int number_of_landmarks_;
+  std::optional<Euclidean_strong_witness_complex<Dynamic_kernel> > witness_complex_;
 };
 
 }  // namespace witness_complex
 }  // namespace Gudhi
-
-// /////////////////////////////////////////////////////////////////////////////
-// Euclidean_strong_witness_complex_interface wrapping
-// /////////////////////////////////////////////////////////////////////////////
 
 namespace nb = nanobind;
 namespace gwc = Gudhi::witness_complex;
@@ -120,4 +115,3 @@ Returns:
 
 //
 // _euclidean_strong_witness_complex.cc ends here
-

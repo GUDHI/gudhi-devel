@@ -10,6 +10,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <optional>
 #include <utility>  // std::pair
 #include <vector>
 
@@ -27,10 +28,6 @@ using Gudhi::Simplex_tree_interface;
 namespace Gudhi {
 namespace witness_complex {
 
-// /////////////////////////////////////////////////////////////////////////////
-//  Strong_witness_complex_interface declaration
-// /////////////////////////////////////////////////////////////////////////////
-
 class Strong_witness_complex_interface
 {
  public:
@@ -38,39 +35,28 @@ class Strong_witness_complex_interface
   using Nearest_landmark_table = std::vector<Nearest_landmark_range>;
 
  public:
-  Strong_witness_complex_interface()
-  {
-    witness_complex_ = new Strong_witness_complex<Nearest_landmark_table>();
-  }
+  Strong_witness_complex_interface() {}
 
-  Strong_witness_complex_interface(const Nearest_landmark_sequence& nlt)
-  {
-    witness_complex_ = new Strong_witness_complex<Nearest_landmark_table>(nlt);
-  }
+  Strong_witness_complex_interface(const Nearest_landmark_sequence& nlt) { witness_complex_.emplace(nlt); }
 
+  // TODO: remove one copy by directly constructing std::vector<Point_d> instead of std::vector<std::vector<double>>
   Strong_witness_complex_interface(const Nearest_landmark_tensor& nlt)
       : Strong_witness_complex_interface(_get_sequence_from_tensor(nlt))
   {}
-
-  ~Strong_witness_complex_interface() { delete witness_complex_; }
 
   void create_simplex_tree(Simplex_tree_interface* simplex_tree,
                            double max_alpha_square,
                            std::size_t limit_dimension = std::numeric_limits<std::size_t>::max())
   {
-    witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
+    if (witness_complex_) witness_complex_->create_complex(*simplex_tree, max_alpha_square, limit_dimension);
   }
 
  private:
-  Strong_witness_complex<Nearest_landmark_table>* witness_complex_;
+  std::optional<Strong_witness_complex<Nearest_landmark_table> > witness_complex_;
 };
 
 }  // namespace witness_complex
 }  // namespace Gudhi
-
-// /////////////////////////////////////////////////////////////////////////////
-// Strong_witness_complex_interface wrapping
-// /////////////////////////////////////////////////////////////////////////////
 
 namespace nb = nanobind;
 
