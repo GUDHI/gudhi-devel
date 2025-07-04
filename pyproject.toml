@@ -5,8 +5,6 @@ build-backend = "scikit_build_core.build"
 [tool.scikit-build]
 minimum-version = "0.10"
 build-dir = "build/{wheel_tag}"
-# Build stable ABI wheels for CPython 3.12+
-wheel.py-api = "cp312"
 
 cmake.args = [
     "-DWITH_GUDHI_TEST=OFF",
