@@ -260,12 +260,13 @@ class Tomato:
         self.n_leaves_ = len(self.max_weight_per_cc_) + len(self.children_)
         if self.leaf_labels_.max() + 1 != len(self.max_weight_per_cc_) + len(self.children_):
             raise RuntimeError(
-                "Wrong values were calculated for leaf_labels_, max_weight_per_cc_ and children_"
+                "Internal consistency check: Wrong values were calculated for leaf_labels_, max_weight_per_cc_ and children_"
             )
         # TODO: deduplicate this code with the setters below
         if self.__merge_threshold:
             if self.__n_clusters:
-                raise ValueError("__n_clusters should be 0")
+                # should not happen if nothing got broken, as the constructor ensures it
+                raise ValueError("Internal consistency check: __n_clusters should be 0")
             self.__n_clusters = numpy.count_nonzero(
                 self.diagram_[:, 0] - self.diagram_[:, 1] > self.__merge_threshold
             ) + len(self.max_weight_per_cc_)
