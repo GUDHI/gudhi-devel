@@ -56,8 +56,9 @@ template <typename T, class = std::enable_if<std::is_arithmetic_v<T> > >
 class Numpy_span
 {
  public:
-  using value_type = const T;
-  using const_iterator = value_type *;
+  using value_type = T;
+  using const_pointer = value_type const *;
+  using const_iterator = const_pointer;
   using iterator = const_iterator;
   using difference_type = std::ptrdiff_t;
   using size_type = std::size_t;
@@ -65,19 +66,19 @@ class Numpy_span
   Numpy_span(const nanobind::ndarray<const T, nanobind::ndim<1>, nanobind::any_contig> &array)
       : begin_(array.data()), end_(begin_ + array.shape(0)) {};
 
-  Numpy_span(value_type *begin, value_type *end) : begin_(begin), end_(end) {};
+  Numpy_span(const_pointer begin, const_pointer end) : begin_(begin), end_(end) {};
 
-  iterator begin() const noexcept { return begin_; }
+  const_iterator begin() const noexcept { return begin_; }
 
-  iterator end() const noexcept { return end_; }
+  const_iterator end() const noexcept { return end_; }
 
   size_type size() const { return end_ - begin_; }
 
   bool empty() const { return end_ == begin_; }
 
  private:
-  value_type *begin_;
-  value_type *end_;
+  const_pointer begin_;
+  const_pointer end_;
 };
 
 template <typename T, class = std::enable_if<std::is_arithmetic_v<T> > >
@@ -157,6 +158,7 @@ class Numpy_2d_span
 {
  public:
   using Array = nanobind::ndarray<const T, nanobind::ndim<2> >;
+  using value_type = T;
   using const_pointer = T const *;
   using difference_type = std::ptrdiff_t;
   using size_type = std::size_t;
@@ -166,9 +168,9 @@ class Numpy_2d_span
 
   Numpy_2d_span(const Array &array) : array_view_(array.view()) {};
 
-  iterator begin() const noexcept { return iterator(get_start_ptr(), get_end_ptr(), array_view_.stride(0)); }
+  const_iterator begin() const noexcept { return iterator(get_start_ptr(), get_end_ptr(), array_view_.stride(0)); }
 
-  iterator end() const noexcept { return iterator(get_end_ptr(), array_view_.stride(0)); }
+  const_iterator end() const noexcept { return iterator(get_end_ptr(), array_view_.stride(0)); }
 
   size_type size() const { return array_view_.shape(0); }
 
