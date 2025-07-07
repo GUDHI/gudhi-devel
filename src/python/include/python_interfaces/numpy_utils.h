@@ -88,18 +88,18 @@ class Numpy_array_element_iterator
   using Base = boost::iterator_facade<Numpy_array_element_iterator<T>, const T, boost::random_access_traversal_tag>;
 
  public:
-  using value_type = const T;
-  using difference_type = typename Base::difference_type;
+  using const_pointer = T const *;
+  using const_reference = typename Base::reference;        // T const&
+  using difference_type = typename Base::difference_type;  // std::ptrdiff_t
   using size_type = std::size_t;
-  using const_reference = value_type &;
 
-  Numpy_array_element_iterator(value_type *curr, value_type *end, std::size_t stride)
+  Numpy_array_element_iterator(const_pointer curr, const_pointer end, std::size_t stride)
       : curr_(curr), end_(end), stride_(stride)
   {
     if (curr_ > end_) curr_ = end_;
   }
 
-  Numpy_array_element_iterator(value_type *end, std::size_t stride) : curr_(end), end_(end), stride_(stride) {}
+  Numpy_array_element_iterator(const_pointer end, std::size_t stride) : curr_(end), end_(end), stride_(stride) {}
 
   // necessary for boost::iterator_range to be able to use operator[].
   // Seg fails otherwise for some reasons
@@ -136,8 +136,8 @@ class Numpy_array_element_iterator
     return (other.curr_ - curr_) / static_cast<difference_type>(stride_);
   }
 
-  value_type *curr_;
-  value_type *end_;
+  const_pointer curr_;
+  const_pointer end_;
   size_type stride_;
 };
 
@@ -157,7 +157,7 @@ class Numpy_2d_span
 {
  public:
   using Array = nanobind::ndarray<const T, nanobind::ndim<2> >;
-  using value_type = const T;
+  using const_pointer = T const *;
   using difference_type = std::ptrdiff_t;
   using size_type = std::size_t;
   using const_iterator = Numpy_array_element_iterator<T>;
@@ -181,9 +181,9 @@ class Numpy_2d_span
 
   View array_view_;
 
-  value_type *get_start_ptr() const { return &array_view_(0, 0); }
+  const_pointer get_start_ptr() const { return &array_view_(0, 0); }
 
-  value_type *get_end_ptr() const { return get_start_ptr() + array_view_.shape(0) * array_view_.shape(1); }
+  const_pointer get_end_ptr() const { return get_start_ptr() + array_view_.shape(0) * array_view_.shape(1); }
 };
 
 #endif  // INCLUDE_NUMPY_UTILS_PYTHON_H_
