@@ -77,6 +77,7 @@ jobs:
           modifyEnvironment: true
       - powershell: |
           git submodule update --init
+          python --version
           python -m pip install -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install -r ext/gudhi-deploy/test-requirements.txt
           # Only vcpkg release libs for CI
@@ -91,6 +92,7 @@ jobs:
           Write-Host "cmakeVcpkgFlags == $(cmakeVcpkgFlags)"
           Write-Host "gudhiCmakeOptions == $(gudhiCmakeOptions)"
           Write-Host "extraCmakeOptions == $(extraCmakeOptions)"
+          python --version
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(cmakeVcpkgFlags) $(gudhiCmakeOptions) $(extraCmakeOptions) --log-level=DEBUG ..
           ninja
           ctest --output-on-failure -C Release -E diff_files
