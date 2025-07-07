@@ -20,10 +20,11 @@
 #include <nanobind/ndarray.h>
 
 template <class T, typename... Shape>
-inline auto _wrap_as_numpy_array(std::vector<T> *tensor, Shape... shapes)
+inline auto _wrap_as_numpy_array(std::vector<T> &&tensor, Shape... shapes)
 {
+  std::vector<T> *tensor_ptr = new std::vector<T>(std::move(tensor));
   return nanobind::ndarray<nanobind::numpy, T>(
-      tensor->data(), {static_cast<std::size_t>(shapes)...}, nanobind::capsule(tensor, [](void *p) noexcept {
+      tensor_ptr->data(), {static_cast<std::size_t>(shapes)...}, nanobind::capsule(tensor_ptr, [](void *p) noexcept {
         delete reinterpret_cast<std::vector<T> *>(p);
       }));
 }
@@ -39,10 +40,11 @@ inline auto _wrap_as_numpy_array(T *tensor, Shape... shapes)
 }
 
 template <class T, std::size_t I>
-inline auto _wrap_as_numpy_array(std::vector<std::array<T, I> > *tensor)
+inline auto _wrap_as_numpy_array(std::vector<std::array<T, I> > &&tensor)
 {
+  std::vector<std::array<T, I> > *tensor_ptr = new std::vector<std::array<T, I> >(std::move(tensor));
   return nanobind::ndarray<nanobind::numpy, T>(
-      tensor->data(), {tensor->size(), I}, nanobind::capsule(tensor, [](void *p) noexcept {
+      tensor_ptr->data(), {tensor_ptr->size(), I}, nanobind::capsule(tensor_ptr, [](void *p) noexcept {
         delete reinterpret_cast<std::vector<std::array<T, I> > *>(p);
       }));
 }

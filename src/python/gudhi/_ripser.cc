@@ -62,21 +62,21 @@ nb::list doit(DistanceMatrix&& dist,
 {
   // static_assert(!std::is_lvalue_reference_v<DistanceMatrix>);
   typedef typename DistanceMatrix::value_t T;
-  std::vector<std::vector<T>*> dgms;
+  std::vector<std::vector<T> > dgms;
   {
     nb::gil_scoped_release release;
     auto output = [&](T birth, T death) {
       // Skip empty intervals
       if (birth < death) {
-        dgms.back()->push_back(birth);
-        dgms.back()->push_back(death);
+        dgms.back().push_back(birth);
+        dgms.back().push_back(death);
       }
     };
-    auto switch_dim = [&](int new_dim) { dgms.emplace_back(new std::vector<T>()); };
+    auto switch_dim = [&](int new_dim) { dgms.emplace_back(); };
     ripser_auto(std::move(dist), max_dimension, max_edge_length, homology_coeff_field, switch_dim, output);
   }
   nb::list ret;
-  for (auto&& dgm : dgms) ret.append(_wrap_as_numpy_array(dgm, dgm->size() / 2, 2));
+  for (auto&& dgm : dgms) ret.append(_wrap_as_numpy_array(std::move(dgm), dgm.size() / 2, 2));
   return ret;
 }
 
@@ -158,8 +158,8 @@ nb::tuple lower_to_coo(nb::object low_mat, double max_edge_length)
   // Cannot release the GIL since we keep accessing Python objects.
   // TODO: full_to_coo for numpy arrays?
   // Should we compute the cone radius at the same time?
-  std::vector<int>*is = new std::vector<int>(), *js = new std::vector<int>();
-  std::vector<double>* fs = new std::vector<double>();
+  std::vector<int> is, js;
+  std::vector<double> fs;
   int rowi = 0;
   for (auto&& row : low_mat) {
     if (rowi == 0) {
@@ -170,9 +170,9 @@ nb::tuple lower_to_coo(nb::object low_mat, double max_edge_length)
     for (auto&& elem : row) {
       double d = nb::cast<double>(elem);  // need a cast?
       if (d <= max_edge_length) {
-        is->push_back(rowi);
-        js->push_back(coli);
-        fs->push_back(d);
+        is.push_back(rowi);
+        js.push_back(coli);
+        fs.push_back(d);
       }
       if (++coli == rowi) break;
     }
@@ -180,8 +180,9 @@ nb::tuple lower_to_coo(nb::object low_mat, double max_edge_length)
     ++rowi;
   };
 
-  return nb::make_tuple(
-      _wrap_as_numpy_array(is, is->size()), _wrap_as_numpy_array(js, js->size()), _wrap_as_numpy_array(fs, fs->size()));
+  return nb::make_tuple(_wrap_as_numpy_array(std::move(is), is.size()),
+                        _wrap_as_numpy_array(std::move(js), js.size()),
+                        _wrap_as_numpy_array(std::move(fs), fs.size()));
 }
 
 double lower_cone_radius(nb::object low_mat)

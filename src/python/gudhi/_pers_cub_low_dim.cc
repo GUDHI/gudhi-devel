@@ -32,23 +32,23 @@ auto wrap_persistence_1d(nb::ndarray<const T, nb::ndim<1> > data)
   auto cnt = boost::counting_range<nb::ssize_t>(0, data_view.shape(0));
   auto proj = [&data_view](nb::ssize_t i) { return data_view(i); };
   auto r = boost::adaptors::transform(cnt, proj);
-  std::vector<std::array<T, 2> >* dgm = new std::vector<std::array<T, 2> >();
-  dgm->reserve(data_view.shape(0) + 1);  // rough upper bound
+  std::vector<std::array<T, 2> > dgm;
+  dgm.reserve(data_view.shape(0) + 1);  // rough upper bound
   {
     nb::gil_scoped_release release;
     Gudhi::persistent_cohomology::compute_persistence_of_function_on_line(
-        r, [&](T b, T d) { dgm->emplace_back(std::array<T, 2>{b, d}); });
+        r, [&](T b, T d) { dgm.emplace_back(std::array<T, 2>{b, d}); });
   }
-  if (dgm->size() < data_view.shape(0) / 2) dgm->shrink_to_fit();
-  return _wrap_as_numpy_array(dgm);
+  if (dgm.size() < data_view.shape(0) / 2) dgm.shrink_to_fit();
+  return _wrap_as_numpy_array(std::move(dgm));
 }
 
 nb::list wrap_persistence_2d(nb::ndarray<const double, nb::ndim<2>, nb::c_contig> data, double min_persistence)
 {
-  std::vector<std::array<double, 2> >* dgm0 = new std::vector<std::array<double, 2> >();
-  std::vector<std::array<double, 2> >* dgm1 = new std::vector<std::array<double, 2> >();
-  dgm0->reserve(data.shape(0) * data.shape(1) + data.shape(0) + data.shape(1) + 1);  // rough upper bound
-  dgm1->reserve(data.shape(0) * data.shape(1) + 1);  // rough upper bound
+  std::vector<std::array<double, 2> > dgm0;
+  std::vector<std::array<double, 2> > dgm1;
+  dgm0.reserve(data.shape(0) * data.shape(1) + data.shape(0) + data.shape(1) + 1);  // rough upper bound
+  dgm1.reserve(data.shape(0) * data.shape(1) + 1);  // rough upper bound
   {
     nb::gil_scoped_release release;
     double mini = Gudhi::cubical_complex::persistence_on_rectangle_from_top_cells(
@@ -57,21 +57,21 @@ nb::list wrap_persistence_2d(nb::ndarray<const double, nb::ndim<2>, nb::c_contig
         static_cast<unsigned int>(data.shape(1)),
         [&](double b, double d) {
           if (d - b > min_persistence) {
-            dgm0->emplace_back(std::array<double, 2>{b, d});
+            dgm0.emplace_back(std::array<double, 2>{b, d});
           }
         },
         [&](double b, double d) {
           if (d - b > min_persistence) {
-            dgm1->emplace_back(std::array<double, 2>{b, d});
+            dgm1.emplace_back(std::array<double, 2>{b, d});
           }
         });
-    dgm0->emplace_back(std::array<double, 2>{mini, std::numeric_limits<double>::infinity()});
+    dgm0.emplace_back(std::array<double, 2>{mini, std::numeric_limits<double>::infinity()});
   }
-  if (dgm0->size() < dgm0->capacity() / 2) dgm0->shrink_to_fit();
-  if (dgm1->size() < dgm1->capacity() / 2) dgm1->shrink_to_fit();
+  if (dgm0.size() < dgm0.capacity() / 2) dgm0.shrink_to_fit();
+  if (dgm1.size() < dgm1.capacity() / 2) dgm1.shrink_to_fit();
   nb::list ret;
-  ret.append(_wrap_as_numpy_array(dgm0));
-  ret.append(_wrap_as_numpy_array(dgm1));
+  ret.append(_wrap_as_numpy_array(std::move(dgm0)));
+  ret.append(_wrap_as_numpy_array(std::move(dgm1)));
   return ret;
 }
 

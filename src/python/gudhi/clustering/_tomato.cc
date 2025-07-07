@@ -83,7 +83,7 @@ auto tomato(Point_index num_points,
   auto ds_rank = boost::make_transform_value_property_map([](auto& p) -> int& { return p.rank; }, ds_data);
   boost::disjoint_sets<decltype(ds_rank), decltype(ds_parent)> ds(
       ds_rank, ds_parent);                                       // on the clusters, not directly the points
-  std::vector<double>* persistence = new std::vector<double>();  // diagram (finite points)
+  std::vector<double> persistence;  // diagram (finite points)
   boost::container::flat_map<Cluster_index, Cluster_index>
       adj_clusters;  // first: the merged cluster, second: the raw cluster
   // we only care about the raw cluster, we could use a vector to store the second, store first into a set, and only
@@ -142,8 +142,8 @@ auto tomato(Point_index num_points,
       auto d_i = density_view(order[i]);
       assert(d_young >= d_i);
       // Always merge (the non-hierarchical algorithm would only conditionally merge here
-      persistence->push_back(d_young);
-      persistence->push_back(d_i);
+      persistence.push_back(d_young);
+      persistence.push_back(d_i);
       assert(ds.find_set(rj) != ds.find_set(rk));
       ds.link(cj, ck);
       cj = ds.find_set(cj);
@@ -159,18 +159,18 @@ auto tomato(Point_index num_points,
     // rank is reused to rename clusters contiguously 0, 1, etc
   }
   // Maximum for each connected component
-  std::vector<double>* max_cc = new std::vector<double>();
+  std::vector<double> max_cc;
   for (Cluster_index i = 0; i < n_raw_clusters; ++i) {
-    if (ds_base[i].parent == i) max_cc->push_back(density_view(order[ds_base[i].max]));
+    if (ds_base[i].parent == i) max_cc.push_back(density_view(order[ds_base[i].max]));
   }
-  assert((Cluster_index)(merges.size() + max_cc->size()) == n_raw_clusters);
+  assert((Cluster_index)(merges.size() + max_cc.size()) == n_raw_clusters);
 
   // TODO: create a "noise" cluster, merging all those not prominent enough?
 
   // Replay the merges, in increasing order of prominence, to build the hierarchy
   std::sort(merges.begin(), merges.end(), [](Merge const& a, Merge const& b) { return a.persist < b.persist; });
-  std::vector<Cluster_index>* children = new std::vector<Cluster_index>();
-  children->reserve(merges.size() * 2);
+  std::vector<Cluster_index> children;
+  children.reserve(merges.size() * 2);
   {
     struct Dat {
       Cluster_index parent;
@@ -193,8 +193,8 @@ auto tomato(Point_index num_points,
       Cluster_index j = ds.find_set(m.first);
       Cluster_index k = ds.find_set(m.second);
       assert(j != k);
-      children->push_back(ds_bas[j].name);
-      children->push_back(ds_bas[k].name);
+      children.push_back(ds_bas[j].name);
+      children.push_back(ds_bas[k].name);
       ds.make_set(i);
       ds.link(i, j);
       ds.link(ds.find_set(i), k);
@@ -203,13 +203,13 @@ auto tomato(Point_index num_points,
     }
   }
 
-  std::vector<Cluster_index>* raw_cluster_ordered = new std::vector<Cluster_index>(num_points);
-  for (int i = 0; i < num_points; ++i) (*raw_cluster_ordered)[i] = raw_cluster[rorder[i]];
+  std::vector<Cluster_index> raw_cluster_ordered(num_points);
+  for (int i = 0; i < num_points; ++i) raw_cluster_ordered[i] = raw_cluster[rorder[i]];
 
-  return nb::make_tuple(_wrap_as_numpy_array(raw_cluster_ordered, raw_cluster_ordered->size()),
-                        _wrap_as_numpy_array(children, children->size() / 2, 2),
-                        _wrap_as_numpy_array(persistence, persistence->size() / 2, 2),
-                        _wrap_as_numpy_array(max_cc, max_cc->size()));
+  return nb::make_tuple(_wrap_as_numpy_array(std::move(raw_cluster_ordered), raw_cluster_ordered.size()),
+                        _wrap_as_numpy_array(std::move(children), children.size() / 2, 2),
+                        _wrap_as_numpy_array(std::move(persistence), persistence.size() / 2, 2),
+                        _wrap_as_numpy_array(std::move(max_cc), max_cc.size()));
 }
 
 auto merge(nb::ndarray<const Cluster_index, nb::ndim<2> > children,
@@ -258,14 +258,14 @@ auto merge(nb::ndarray<const Cluster_index, nb::ndim<2> > children,
     ++i;
   }
   Cluster_index next_cluster_name = 0;
-  std::vector<Cluster_index>* ret = new std::vector<Cluster_index>();
-  ret->reserve(n_leaves);
+  std::vector<Cluster_index> ret;
+  ret.reserve(n_leaves);
   for (Cluster_index j = 0; j < n_leaves; ++j) {
     Cluster_index k = ds.find_set(j);
     if (ds_bas[k].name == -1) ds_bas[k].name = next_cluster_name++;
-    ret->push_back(ds_bas[k].name);
+    ret.push_back(ds_bas[k].name);
   }
-  return _wrap_as_numpy_array(ret, ret->size());
+  return _wrap_as_numpy_array(std::move(ret), ret.size());
 }
 
 // TODO: Do a special version when ngb is a numpy array, where we can cast to int[k][n] ?
