@@ -60,7 +60,6 @@ jobs:
       # On this VM, 2 versions of python are installed. Default Python_FIND_REGISTRY is FIRST, which means asks registry first
       # LAST means consult registry in last resort, use the standard libraries or headers first
       extraCmakeOptions: -DPython_FIND_REGISTRY=LAST
-      SKBUILD_CMAKE_DEFINE: "FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake;VCPKG_TARGET_TRIPLET=x64-windows"
 
     steps:
       # Use a specific Python version
@@ -86,7 +85,7 @@ jobs:
         displayName: "Install build dependencies"
       - script: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          python -m pip install .
+          mkdir build
           cd build
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(cmakeVcpkgFlags) $(gudhiCmakeOptions) ..
           IF %ERRORLEVEL% NEQ 0 EXIT 1
