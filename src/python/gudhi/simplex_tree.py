@@ -87,7 +87,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             "Since Gudhi 3.2, calling SimplexTree.initialize_filtration is unnecessary.",
             DeprecationWarning,
         )
-        super().initialize_filtration()
+        super()._initialize_filtration()
 
     @staticmethod
     def create_from_array(filtrations, max_filtration: float = float("inf")) -> SimplexTree:
@@ -118,7 +118,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
                 f"`filtrations` has to be a square array. Got {filtrations.shape=}"
             )
         ret = SimplexTree()
-        ret.insert_matrix(filtrations, max_filtration)
+        ret._insert_matrix(filtrations, max_filtration)
         return ret
 
     def insert_edges_from_coo_matrix(self, edges) -> SimplexTree:
@@ -135,7 +135,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         .. seealso:: :func:`insert_batch`
         """
         # Without this, it could be slow if we end up inserting vertices in a bad order (flat_map).
-        super().insert_batch_vertices(
+        super()._insert_batch_vertices(
             np.unique(np.stack((edges.row, edges.col))), float("inf")
         )
         # TODO: optimize this?
@@ -196,8 +196,8 @@ class SimplexTree(t._Simplex_tree_python_interface):
         explains how to compute an extension of persistence called extended persistence.
         """
         self._pers = t._Simplex_tree_persistence_interface(self, False)
-        self._pers.compute_persistence(homology_coeff_field, -1.0)
-        return self._pers.compute_extended_persistence_subdiagrams(min_persistence)
+        self._pers._compute_persistence(homology_coeff_field, -1.0)
+        return self._pers._compute_extended_persistence_subdiagrams(min_persistence)
 
     def persistence(
         self, homology_coeff_field=11, min_persistence=0, persistence_dim_max=False
@@ -220,7 +220,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         :rtype:  list of pairs(dimension, pair(birth, death))
         """
         self.compute_persistence(homology_coeff_field, min_persistence, persistence_dim_max)
-        return self._pers.get_persistence()
+        return self._pers._get_persistence()
 
     def compute_persistence(
         self, homology_coeff_field=11, min_persistence=0, persistence_dim_max=False
@@ -245,7 +245,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         """
         # bool(persistence_dim_max) because of numpy bool_ is not recognized as the right type
         self._pers = t._Simplex_tree_persistence_interface(self, bool(persistence_dim_max))
-        self._pers.compute_persistence(homology_coeff_field, min_persistence)
+        self._pers._compute_persistence(homology_coeff_field, min_persistence)
         return self
 
     def betti_numbers(self) -> list[int]:
@@ -260,7 +260,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         """
         if self._pers == None:
             raise RuntimeError("compute_persistence() must be called before betti_numbers()")
-        return self._pers.betti_numbers()
+        return self._pers._betti_numbers()
 
     def persistent_betti_numbers(self, from_value, to_value) -> list[int]:
         """This function returns the persistent Betti numbers of the
@@ -284,7 +284,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             raise RuntimeError(
                 "compute_persistence() must be called before persistent_betti_numbers()"
             )
-        return self._pers.persistent_betti_numbers(from_value, to_value)
+        return self._pers._persistent_betti_numbers(from_value, to_value)
 
     def persistence_intervals_in_dimension(self, dimension) -> np.ndarray:
         """This function returns the persistence intervals of the simplicial
@@ -303,7 +303,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             raise RuntimeError(
                 "compute_persistence() must be called before persistence_intervals_in_dimension()"
             )
-        piid = np.array(self._pers.intervals_in_dimension(dimension))
+        piid = np.array(self._pers._intervals_in_dimension(dimension))
         # Workaround https://github.com/GUDHI/gudhi-devel/issues/507
         if len(piid) == 0:
             return np.empty(shape=[0, 2])
@@ -323,7 +323,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             raise RuntimeError(
                 "compute_persistence() must be called before persistence_pairs()"
             )
-        return self._pers.persistence_pairs()
+        return self._pers._persistence_pairs()
 
     def write_persistence_diagram(self, persistence_file) -> SimplexTree:
         """This function writes the persistence intervals of the simplicial
@@ -340,7 +340,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             raise RuntimeError(
                 "compute_persistence() must be called before write_persistence_diagram()"
             )
-        self._pers.write_output_diagram(persistence_file)
+        self._pers._write_output_diagram(persistence_file)
         return self
 
     def lower_star_persistence_generators(self) -> tuple[list[np.ndarray], list[np.ndarray]]:
@@ -357,7 +357,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             raise RuntimeError(
                 "lower_star_persistence_generators() requires that persistence() be called first"
             )
-        gen = self._pers.lower_star_generators()
+        gen = self._pers._lower_star_generators()
         normal = [np.array(d).reshape(-1, 2) for d in gen[0]]
         infinite = [np.array(d) for d in gen[1]]
         return (normal, infinite)
@@ -380,7 +380,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             raise RuntimeError(
                 "flag_persistence_generators() requires that persistence() be called first"
             )
-        gen = self._pers.flag_generators()
+        gen = self._pers._flag_generators()
         if len(gen[0]) == 0:
             normal0 = np.empty((0, 3))
             normals = []
@@ -417,5 +417,5 @@ class SimplexTree(t._Simplex_tree_python_interface):
         """
         if nb_iterations < 1:
             return
-        super().collapse_edges(nb_iterations)
+        super()._collapse_edges(nb_iterations)
         return self

@@ -76,10 +76,9 @@ given N-simplex.
         any function that relies on the filtration property, like
         :meth:`persistence`.
            )doc")
-      .def("initialize_filtration", &gsti::initialize_filtration, nb::call_guard<nb::gil_scoped_release>())
+      .def("_initialize_filtration", &gsti::initialize_filtration, nb::call_guard<nb::gil_scoped_release>())
       .def("num_vertices",
            &gsti::num_vertices,
-           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 This function returns the number of vertices of the simplicial
 complex.
@@ -99,16 +98,14 @@ complex.
            )doc")
       .def("is_empty",
            &gsti::is_empty,
-           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 This function returns whether the simplicial complex is empty.
 
 :returns:  True if the simplicial complex is empty.
 :rtype:  bool
-)doc")
+           )doc")
       .def("set_dimension",
            &gsti::set_dimension,
-           nb::call_guard<nb::gil_scoped_release>(),
            nb::arg("dimension"),
            nb::arg("exact") = true,
            R"doc(
@@ -141,7 +138,6 @@ This function returns the dimension of the simplicial complex.
            )doc")
       .def("upper_bound_dimension",
            &gsti::upper_bound_dimension,
-           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 This function returns a valid dimension upper bound of the
 simplicial complex.
@@ -177,18 +173,13 @@ filtration value is lowered.
 otherwise (whatever its original filtration value).
 :rtype:  bool
            )doc")
-      .def("insert_matrix",
+      .def("_insert_matrix",
            &gsti::insert_matrix,
-           nb::arg("filtrations"),
-           nb::arg("max_filtration"),
            nb::call_guard<nb::gil_scoped_release>())
       .def("_insert_batch",
            &gsti::insert_batch,
-           nb::arg("vertices"),
-           nb::arg("vertex_array"),
-           nb::arg("filtrations"),
            nb::call_guard<nb::gil_scoped_release>())
-      .def("insert_batch_vertices",
+      .def("_insert_batch_vertices",
            &gsti::insert_batch_vertices<std::vector<int>>,
            nb::call_guard<nb::gil_scoped_release>())
       .def("get_star", &gsti::get_star, nb::arg("simplex"), R"doc(
@@ -313,9 +304,8 @@ computed with these values.
 This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
 explains how to compute an extension of persistence called extended persistence.
            )doc")
-      .def("collapse_edges",
+      .def("_collapse_edges",
            &gsti::collapse_edges,
-           nb::arg("nb_collapse_iteration"),
            nb::call_guard<nb::gil_scoped_release>())
       .def("reset_filtration",
            &gsti::reset_filtration,
@@ -417,23 +407,14 @@ otherwise it is kept. The algorithm then proceeds with the next candidate.
 
   nb::class_<gpers>(m, "_Simplex_tree_persistence_interface")
       .def(nb::init<gsti &, bool>(), nb::call_guard<nb::gil_scoped_release>())
-      .def("compute_persistence",
-           &gpers::compute_persistence,
-           nb::arg("homology_coeff_field"),
-           nb::arg("double min_persistence"),
-           nb::call_guard<nb::gil_scoped_release>())
-      .def("get_persistence", &gpers::get_persistence)
-      .def("betti_numbers", &gpers::betti_numbers)
-      .def("persistent_betti_numbers", &gpers::persistent_betti_numbers, nb::arg("from_value"), nb::arg("to_value"))
-      .def("intervals_in_dimension", &gpers::intervals_in_dimension, nb::arg("dimension"))
-      .def("write_output_diagram",
-           &gpers::write_output_diagram,
-           nb::arg("diagram_file_name"),
-           nb::call_guard<nb::gil_scoped_release>())
-      .def("persistence_pairs", &gpers::persistence_pairs)
-      .def("lower_star_generators", &gpers::lower_star_generators)
-      .def("flag_generators", &gpers::flag_generators)
-      .def("compute_extended_persistence_subdiagrams",
-           &gpers::compute_extended_persistence_subdiagrams,
-           nb::arg("min_persistence"));
+      .def("_compute_persistence", &gpers::compute_persistence, nb::call_guard<nb::gil_scoped_release>())
+      .def("_get_persistence", &gpers::get_persistence)
+      .def("_betti_numbers", &gpers::betti_numbers)
+      .def("_persistent_betti_numbers", &gpers::persistent_betti_numbers)
+      .def("_intervals_in_dimension", &gpers::intervals_in_dimension)
+      .def("_write_output_diagram", &gpers::write_output_diagram, nb::call_guard<nb::gil_scoped_release>())
+      .def("_persistence_pairs", &gpers::persistence_pairs)
+      .def("_lower_star_generators", &gpers::lower_star_generators)
+      .def("_flag_generators", &gpers::flag_generators)
+      .def("_compute_extended_persistence_subdiagrams", &gpers::compute_extended_persistence_subdiagrams);
 }

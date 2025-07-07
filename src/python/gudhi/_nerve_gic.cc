@@ -66,7 +66,6 @@ Computes the confidence level of a specific bottleneck distance threshold.
       .def("compute_distance_from_confidence_level",
            &NGI::compute_distance_from_confidence_level,
            nb::arg("alpha"),
-           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 Computes the bottleneck distance threshold corresponding to a
 specific confidence level.
@@ -95,19 +94,17 @@ persistence diagram of the output simplicial complex.
 :rtype: double
 :returns: p-value.
         )doc")
-      .def("compute_PD", &NGI::compute_PD, R"doc(
+      .def("compute_PD", &NGI::compute_PD, nb::call_guard<nb::gil_scoped_release>(), R"doc(
 Computes the extended persistence diagram of the complex.
         )doc")
       .def("find_simplices", &NGI::find_simplices, nb::call_guard<nb::gil_scoped_release>(), R"doc(
 Computes the simplices of the simplicial complex.
         )doc")
-      .def("create_simplex_tree",
+      .def("_create_simplex_tree",
            &NGI::create_simplex_tree,
-           nb::arg("simplex_tree"),
            nb::call_guard<nb::gil_scoped_release>())
-      .def("read_point_cloud",
+      .def("_read_point_cloud",
            &NGI::read_point_cloud,
-           nb::arg("off_file_name"),
            nb::call_guard<nb::gil_scoped_release>())
       .def("set_automatic_resolution", &NGI::set_automatic_resolution, nb::call_guard<nb::gil_scoped_release>(), R"doc(
 Computes the optimal length of intervals (i.e. the smallest interval
@@ -119,7 +116,6 @@ functional cover.
         )doc")
       .def("set_color_from_coordinate",
            &NGI::set_color_from_coordinate,
-           nb::call_guard<nb::gil_scoped_release>(),
            nb::arg("k") = 0,
            R"doc(
 Computes the function used to color the nodes of the simplicial
@@ -128,13 +124,11 @@ complex from the k-th coordinate.
 :param k: Coordinate to use (start at 0). Default value is 0.
 :type k: int
         )doc")
-      .def("set_color_from_file",
+      .def("_set_color_from_file",
            &NGI::set_color_from_file,
-           nb::call_guard<nb::gil_scoped_release>(),
-           nb::arg("color_file_name"))
+           nb::call_guard<nb::gil_scoped_release>())
       .def("set_color_from_range",
            &NGI::set_color_from_range,
-           nb::call_guard<nb::gil_scoped_release>(),
            nb::arg("color"),
            R"doc(
 Computes the function used to color the nodes of the simplicial
@@ -143,10 +137,9 @@ complex from a vector stored in memory.
 :param color: Input vector of values.
 :type color: vector[double]
         )doc")
-      .def("set_cover_from_file",
+      .def("_set_cover_from_file",
            &NGI::set_cover_from_file,
-           nb::call_guard<nb::gil_scoped_release>(),
-           nb::arg("cover_file_name"))
+           nb::call_guard<nb::gil_scoped_release>())
       .def("set_cover_from_range",
            &NGI::set_cover_from_range<std::vector<std::vector<int>>>,
            nb::arg("assignments"),
@@ -179,9 +172,8 @@ Creates the function f from the k-th coordinate of the point cloud.
 :param k: Coordinate to use (start at 0).
 :type k: int
         )doc")
-      .def("set_function_from_file",
+      .def("_set_function_from_file",
            &NGI::set_function_from_file,
-           nb::arg("func_file_name"),
            nb::call_guard<nb::gil_scoped_release>())
       .def("set_function_from_range",
            &NGI::set_function_from_range<std::vector<double>>,
@@ -193,7 +185,7 @@ Creates the function f from a vector stored in memory.
 :param function: Input vector of values.
 :type function: vector[double]
         )doc")
-      .def("set_gain", &NGI::set_gain, nb::arg("g") = 0.3, nb::call_guard<nb::gil_scoped_release>(), R"doc(
+      .def("set_gain", &NGI::set_gain, nb::arg("g") = 0.3, R"doc(
 Sets a gain from a value stored in memory.
 
 :param g: Gain (default value is 0.3).
@@ -212,9 +204,8 @@ automatically tuned with subsampling - see :cite:`Carriere17c`.
 :rtype: double
 :returns: Delta threshold used for computing the Rips complex.
         )doc")
-      .def("set_graph_from_file",
+      .def("_set_graph_from_file",
            &NGI::set_graph_from_file,
-           nb::arg("graph_file_name"),
            nb::call_guard<nb::gil_scoped_release>())
       .def("set_graph_from_OFF", &NGI::set_graph_from_OFF, nb::call_guard<nb::gil_scoped_release>(), R"doc(
 Creates a graph G from the triangulation given by the input OFF file.
@@ -228,7 +219,7 @@ Creates a graph G from a Rips complex.
 :param threshold: Threshold value for the Rips complex.
 :type threshold: double
         )doc")
-      .def("set_mask", &NGI::set_mask, nb::arg("nodemask"), nb::call_guard<nb::gil_scoped_release>(), R"doc(
+      .def("set_mask", &NGI::set_mask, nb::arg("nodemask"), R"doc(
 Sets the mask, which is a threshold integer such that nodes in the
 complex that contain a number of data points which is less than or
 equal to this threshold are not displayed.
@@ -239,7 +230,6 @@ equal to this threshold are not displayed.
       .def("set_resolution_with_interval_length",
            &NGI::set_resolution_with_interval_length,
            nb::arg("resolution"),
-           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 Sets a length of intervals from a value stored in memory.
 
@@ -249,7 +239,6 @@ Sets a length of intervals from a value stored in memory.
       .def("set_resolution_with_interval_number",
            &NGI::set_resolution_with_interval_number,
            nb::arg("resolution"),
-           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 "Sets a number of intervals from a value stored in memory.
 
@@ -260,7 +249,6 @@ Sets a length of intervals from a value stored in memory.
            &NGI::set_subsampling,
            nb::arg("constant"),
            nb::arg("power"),
-           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 Sets the constants used to subsample the data set. These constants
 are explained in :cite:`Carriere17c`.
@@ -271,14 +259,14 @@ are explained in :cite:`Carriere17c`.
 :param power: Power.
 :type resolution: double
         )doc")
-      .def("set_type", &NGI::set_type, nb::arg("type"), nb::call_guard<nb::gil_scoped_release>(), R"doc(
+      .def("set_type", &NGI::set_type, nb::arg("type"), R"doc(
 Specifies whether the type of the output simplicial complex.
 
 :param type: either "GIC" or "Nerve".
 :type type: string
         )doc")
       .def(
-          "set_verbose", &NGI::set_verbose, nb::arg("verbose") = false, nb::call_guard<nb::gil_scoped_release>(), R"doc(
+          "set_verbose", &NGI::set_verbose, nb::arg("verbose") = false, R"doc(
 Specifies whether the program should display information or not.
 
 :param verbose: true = display info, false = do not display info.
@@ -294,7 +282,7 @@ created complex.
 :rtype: vector[int]
 :returns: Vector of IDs of data points.
         )doc")
-      .def("subcolor", &NGI::subcolor, nb::arg("c"), nb::call_guard<nb::gil_scoped_release>(), R"doc(
+      .def("subcolor", &NGI::subcolor, nb::arg("c"), R"doc(
 Returns the mean color value corresponding to a specific node of the
 created complex.
 

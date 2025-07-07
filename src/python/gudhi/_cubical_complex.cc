@@ -110,17 +110,13 @@ This function returns the dimension of the complex.
 
   nb::class_<CPers>(m, "_Cubical_complex_persistence_interface")
       .def(nb::init<CC&, bool>(), nb::call_guard<nb::gil_scoped_release>())
-      .def("compute_persistence",
-           &CPers::compute_persistence,
-           nb::arg("homology_coeff_field"),
-           nb::arg("double min_persistence"),
-           nb::call_guard<nb::gil_scoped_release>())
-      .def("get_persistence", &CPers::get_persistence)
-      .def("cofaces_of_cubical_persistence_pairs", &CPers::cofaces_of_cubical_persistence_pairs)
-      .def("vertices_of_cubical_persistence_pairs", &CPers::vertices_of_cubical_persistence_pairs)
-      .def("betti_numbers", &CPers::betti_numbers)
-      .def("persistent_betti_numbers", &CPers::persistent_betti_numbers, nb::arg("from_value"), nb::arg("to_value"))
-      .def("intervals_in_dimension", &CPers::intervals_in_dimension, nb::arg("dimension"));
+      .def("_compute_persistence", &CPers::compute_persistence, nb::call_guard<nb::gil_scoped_release>())
+      .def("_get_persistence", &CPers::get_persistence)
+      .def("_cofaces_of_cubical_persistence_pairs", &CPers::cofaces_of_cubical_persistence_pairs)
+      .def("_vertices_of_cubical_persistence_pairs", &CPers::vertices_of_cubical_persistence_pairs)
+      .def("_betti_numbers", &CPers::betti_numbers)
+      .def("_persistent_betti_numbers", &CPers::persistent_betti_numbers)
+      .def("_intervals_in_dimension", &CPers::intervals_in_dimension);
 
   nb::class_<PCC>(m, "_Periodic_cubical_complex_interface")
       .def(nb::init<const std::vector<unsigned int>&, const std::vector<double>&, const std::vector<bool>&, bool>(),
@@ -145,15 +141,11 @@ This function returns the dimension of the complex.
 
   nb::class_<PCPers>(m, "_Periodic_cubical_complex_persistence_interface")
       .def(nb::init<PCC&, bool>(), nb::call_guard<nb::gil_scoped_release>())
-      .def("compute_persistence",
-           &PCPers::compute_persistence,
-           nb::arg("homology_coeff_field"),
-           nb::arg("double min_persistence"),
-           nb::call_guard<nb::gil_scoped_release>())
-      .def("get_persistence", &PCPers::get_persistence)
-      .def("cofaces_of_cubical_persistence_pairs", &PCPers::cofaces_of_cubical_persistence_pairs)
-      .def("vertices_of_cubical_persistence_pairs", &PCPers::vertices_of_cubical_persistence_pairs)
-      .def("betti_numbers", &PCPers::betti_numbers)
-      .def("persistent_betti_numbers", &PCPers::persistent_betti_numbers, nb::arg("from_value"), nb::arg("to_value"))
-      .def("intervals_in_dimension", &PCPers::intervals_in_dimension, nb::arg("dimension"));
+      .def("_compute_persistence", &PCPers::compute_persistence, nb::call_guard<nb::gil_scoped_release>())
+      .def("_get_persistence", &PCPers::get_persistence)
+      .def("_cofaces_of_cubical_persistence_pairs", &PCPers::cofaces_of_cubical_persistence_pairs)
+      .def("_vertices_of_cubical_persistence_pairs", &PCPers::vertices_of_cubical_persistence_pairs)
+      .def("_betti_numbers", &PCPers::betti_numbers)
+      .def("_persistent_betti_numbers", &PCPers::persistent_betti_numbers)
+      .def("_intervals_in_dimension", &PCPers::intervals_in_dimension);
 }

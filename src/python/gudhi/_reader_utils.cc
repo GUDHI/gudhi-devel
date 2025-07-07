@@ -9,10 +9,6 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-// /////////////////////////////////////////////////////////////////////////////
-// Reader_utils_interface wrapping
-// /////////////////////////////////////////////////////////////////////////////
-
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
@@ -21,23 +17,13 @@
 
 #include <gudhi/reader_utils.h>
 
-namespace nb = nanobind;
-
 NB_MODULE(_reader_utils_ext, m)
 {
   m.attr("__license__") = "MIT";
 
-  m.def("read_matrix_from_csv_file",
-        &Gudhi::read_lower_triangular_matrix_from_csv_file<double>,
-        nb::arg("filename"),
-        nb::arg("separator") = ';');
-  m.def("read_pers_intervals_grouped_by_dimension",
-        &Gudhi::read_persistence_intervals_grouped_by_dimension,
-        nb::arg("filename"));
-  m.def("read_pers_intervals_in_dimension",
-        &Gudhi::read_persistence_intervals_in_dimension,
-        nb::arg("filename"),
-        nb::arg("only_this_dim") = -1);
+  m.def("_read_matrix_from_csv_file", &Gudhi::read_lower_triangular_matrix_from_csv_file<double>);
+  m.def("_read_pers_intervals_grouped_by_dimension", &Gudhi::read_persistence_intervals_grouped_by_dimension);
+  m.def("_read_pers_intervals_in_dimension", &Gudhi::read_persistence_intervals_in_dimension);
 }
 
 //

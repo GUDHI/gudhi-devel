@@ -256,8 +256,8 @@ NB_MODULE(_ripser_ext, m)
         nb::arg("max_edge_length") = std::numeric_limits<double>::infinity(),
         nb::arg("homology_coeff_field") = 2);
   // Not directly an interface to Ripser...
-  m.def("_lower_to_coo", lower_to_coo, nb::arg("matrix"), nb::arg("max_edge_length"));
-  m.def("_lower_cone_radius", lower_cone_radius, nb::arg("matrix"));
+  m.def("_lower_to_coo", lower_to_coo);
+  m.def("_lower_cone_radius", lower_cone_radius);
 }
 
 // We could also create a RipsComplex class, that allows looking at a simplex, querying its (co)boundary, etc. But I am

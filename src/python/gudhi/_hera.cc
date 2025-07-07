@@ -170,17 +170,6 @@ nb::object _wasserstein_distance(const Tensor_dgm& d1,
 NB_MODULE(_hera_ext, m)
 {
   m.attr("__license__") = "BSD 3-Clause";
-  m.def("_bottleneck_distance",
-        &_bottleneck_distance,
-        nb::arg("X"),
-        nb::arg("Y"),
-        nb::arg("delta") = .01);
-  m.def("_wasserstein_distance",
-        &_wasserstein_distance,
-        nb::arg("X"),
-        nb::arg("Y"),
-        nb::arg("order") = 1,
-        nb::arg("internal_p") = std::numeric_limits<double>::infinity(),
-        nb::arg("delta") = .01,
-        nb::arg("matching") = false);
+  m.def("_bottleneck_distance", &_bottleneck_distance);
+  m.def("_wasserstein_distance", &_wasserstein_distance);
 }

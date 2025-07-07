@@ -298,6 +298,6 @@ NB_MODULE(_tomato_ext, m)
 {
   m.attr("__license__") = "MIT";
   m.doc() = "Internals of tomato clustering";
-  m.def("_hierarchy", &hierarchy, nb::arg("ngb"), nb::arg("density"), "does the clustering");
-  m.def("_merge", &merge, nb::arg("children"), nb::arg("n_leaves"), nb::arg("n_final"), "merge clusters");
+  m.def("_hierarchy", &hierarchy);  // does the clustering
+  m.def("_merge", &merge);          // merge clusters
 }

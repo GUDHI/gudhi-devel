@@ -9,17 +9,9 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-// /////////////////////////////////////////////////////////////////////////////
-// Subsampling_interface wrapping
-// /////////////////////////////////////////////////////////////////////////////
-
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
-
-// /////////////////////////////////////////////////////////////////////////////
-// migrated from ../include/Subsampling_interface.h
-// /////////////////////////////////////////////////////////////////////////////
 
 #include <gudhi/distance_functions.h>
 #include <gudhi/choose_n_farthest_points.h>
@@ -42,8 +34,8 @@
 namespace Gudhi {
 namespace subsampling {
 
-const int gudhi_subsampling_use_cgal = _GUDHI_SUBSAMPLING_USE_CGAL;
-const std::size_t _random_starting_point = random_starting_point;
+const int gudhi_subsampling_use_cgal_ = _GUDHI_SUBSAMPLING_USE_CGAL;
+const std::size_t random_starting_point_ = random_starting_point;
 
 // ------ choose_n_farthest_points ------
 std::vector<std::vector<double>> subsampling_n_farthest_points(bool metric,
@@ -132,52 +124,25 @@ std::vector<std::vector<double>> subsampling_sparsify_points_from_file(const std
 {
   return std::vector<std::vector<double>>{};
 }
+
 #endif
 
 }  // namespace subsampling
 }  // namespace Gudhi
 
-// /////////////////////////////////////////////////////////////////////////////
-// end of ../include/Subsampling_interface.h inclusion
-// /////////////////////////////////////////////////////////////////////////////
-
-namespace nb = nanobind;
-
 NB_MODULE(_subsampling_ext, m)
 {
   m.attr("__license__") = "MIT (GPL v3 for sparsify_point_set)";
 
-  m.attr("_GUDHI_SUBSAMPLING_USE_CGAL") = Gudhi::subsampling::gudhi_subsampling_use_cgal;
-  m.attr("RANDOM_STARTING_POINT") = Gudhi::subsampling::_random_starting_point;
+  m.attr("_GUDHI_SUBSAMPLING_USE_CGAL") = Gudhi::subsampling::gudhi_subsampling_use_cgal_;
+  m.attr("_random_starting_point") = Gudhi::subsampling::random_starting_point_;
 
-  m.def("subsampling_n_farthest_points",
-        &Gudhi::subsampling::subsampling_n_farthest_points,
-        nb::arg("metric"),
-        nb::arg("points"),
-        nb::arg("nb_points"),
-        nb::arg("starting_point") = Gudhi::subsampling::_random_starting_point);
-  m.def("subsampling_n_farthest_points_from_file",
-        &Gudhi::subsampling::subsampling_n_farthest_points_from_file,
-        nb::arg("metric"),
-        nb::arg("off_file"),
-        nb::arg("nb_points"),
-        nb::arg("starting_point") = Gudhi::subsampling::_random_starting_point);
-  m.def("subsampling_n_random_points",
-        &Gudhi::subsampling::subsampling_n_random_points,
-        nb::arg("points"),
-        nb::arg("nb_points"));
-  m.def("subsampling_n_random_points_from_file",
-        &Gudhi::subsampling::subsampling_n_random_points_from_file,
-        nb::arg("off_file"),
-        nb::arg("nb_points"));
-  m.def("subsampling_sparsify_points",
-        &Gudhi::subsampling::subsampling_sparsify_points,
-        nb::arg("points"),
-        nb::arg("min_squared_dist"));
-  m.def("subsampling_sparsify_points_from_file",
-        &Gudhi::subsampling::subsampling_sparsify_points_from_file,
-        nb::arg("off_file"),
-        nb::arg("min_squared_dist"));
+  m.def("_subsampling_n_farthest_points", &Gudhi::subsampling::subsampling_n_farthest_points);
+  m.def("_subsampling_n_farthest_points_from_file", &Gudhi::subsampling::subsampling_n_farthest_points_from_file);
+  m.def("_subsampling_n_random_points", &Gudhi::subsampling::subsampling_n_random_points);
+  m.def("_subsampling_n_random_points_from_file", &Gudhi::subsampling::subsampling_n_random_points_from_file);
+  m.def("_subsampling_sparsify_points", &Gudhi::subsampling::subsampling_sparsify_points);
+  m.def("_subsampling_sparsify_points_from_file", &Gudhi::subsampling::subsampling_sparsify_points_from_file);
 }
 
 //

@@ -49,11 +49,11 @@ def choose_n_farthest_points(
     :rtype: List[List[float]]
     """
     if starting_point is None:
-        starting_point = t.RANDOM_STARTING_POINT
+        starting_point = t._random_starting_point
 
     if off_file:
         if os.path.isfile(off_file):
-            return t.subsampling_n_farthest_points_from_file(
+            return t._subsampling_n_farthest_points_from_file(
                 fast, off_file, nb_points, starting_point
             )
         else:
@@ -61,7 +61,7 @@ def choose_n_farthest_points(
     else:
         if points is None:
             points = []
-        return t.subsampling_n_farthest_points(fast, points, nb_points, starting_point)
+        return t._subsampling_n_farthest_points(fast, points, nb_points, starting_point)
 
 
 def pick_n_random_points(points=None, off_file="", nb_points=0):
@@ -84,14 +84,14 @@ def pick_n_random_points(points=None, off_file="", nb_points=0):
     """
     if off_file:
         if os.path.isfile(off_file):
-            return t.subsampling_n_random_points_from_file(off_file, nb_points)
+            return t._subsampling_n_random_points_from_file(off_file, nb_points)
         else:
             print("file " + off_file + " not found.")
     else:
         if points is None:
             # Empty points
             points = []
-        return t.subsampling_n_random_points(points, nb_points)
+        return t._subsampling_n_random_points(points, nb_points)
 
 
 def sparsify_point_set(points=None, off_file="", min_squared_dist=0.0):
@@ -121,11 +121,11 @@ def sparsify_point_set(points=None, off_file="", min_squared_dist=0.0):
 
     if off_file:
         if os.path.isfile(off_file):
-            return t.subsampling_sparsify_points_from_file(off_file, min_squared_dist)
+            return t._subsampling_sparsify_points_from_file(off_file, min_squared_dist)
         else:
             print("file " + off_file + " not found.")
     else:
         if points is None:
             # Empty points
             points = []
-        return t.subsampling_sparsify_points(points, min_squared_dist)
+        return t._subsampling_sparsify_points(points, min_squared_dist)

@@ -164,7 +164,7 @@ class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
         :returns: Nothing.
         """
         self._pers = _Periodic_cubical_complex_persistence_interface(self, True)
-        self._pers.compute_persistence(homology_coeff_field, min_persistence)
+        self._pers._compute_persistence(homology_coeff_field, min_persistence)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):
         """This function computes and returns the persistence of the complex.
@@ -181,7 +181,7 @@ class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
             persistence of the complex.
         """
         self.compute_persistence(homology_coeff_field, min_persistence)
-        return self._pers.get_persistence()
+        return self._pers._get_persistence()
 
     def cofaces_of_persistence_pairs(self):
         """A persistence interval is described by a pair of cells, one that creates the
@@ -229,7 +229,7 @@ class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
         output = [[], []]
         # TODO: verify the return type of cofaces_of_cubical_persistence_pairs() by nanobind
         # a copy is perhaps avoidable?
-        pr = np.array(self._pers.cofaces_of_cubical_persistence_pairs())
+        pr = np.array(self._pers._cofaces_of_cubical_persistence_pairs())
 
         ess_ind = np.argwhere(pr[:, 2] == -1)[:, 0]
         ess = pr[ess_ind]
@@ -284,7 +284,7 @@ class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
         output = [[], []]
         # TODO: verify the return type of cofaces_of_cubical_persistence_pairs() by nanobind
         # a copy is perhaps avoidable?
-        pr = np.array(self._pers.vertices_of_cubical_persistence_pairs())
+        pr = np.array(self._pers._vertices_of_cubical_persistence_pairs())
 
         # except pr, is there any difference from the method above? If not, factorize?
         ess_ind = np.argwhere(pr[:, 2] == -1)[:, 0]
@@ -315,7 +315,7 @@ class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
         """
         if self._pers == None:
             raise RuntimeError("compute_persistence() must be called before betti_numbers()")
-        return self._pers.betti_numbers()
+        return self._pers._betti_numbers()
 
     def persistent_betti_numbers(self, from_value, to_value):
         """This function returns the persistent Betti numbers of the complex.
@@ -337,7 +337,7 @@ class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
             raise RuntimeError(
                 "compute_persistence() must be called before persistent_betti_numbers()"
             )
-        return self._pers.persistent_betti_numbers(from_value, to_value)
+        return self._pers._persistent_betti_numbers(from_value, to_value)
 
     def persistence_intervals_in_dimension(self, dimension):
         """This function returns the persistence intervals of the complex in a
@@ -355,7 +355,7 @@ class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
             raise RuntimeError(
                 "compute_persistence() must be called before persistence_intervals_in_dimension()"
             )
-        piid = np.array(self._pers.intervals_in_dimension(dimension))
+        piid = np.array(self._pers._intervals_in_dimension(dimension))
         # Workaround https://github.com/GUDHI/gudhi-devel/issues/507
         if len(piid) == 0:
             return np.empty(shape=[0, 2])

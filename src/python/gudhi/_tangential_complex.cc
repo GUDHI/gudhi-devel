@@ -141,28 +141,24 @@ This function returns the point corresponding to a given vertex.
            )doc")
       .def("num_vertices",
            &gtci::number_of_vertices,
-           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 :returns:  The number of vertices.
 :rtype: unsigned
            )doc")
       .def("num_simplices",
            &gtci::number_of_simplices,
-           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 :returns:  Total number of simplices in stars (including duplicates that appear in several stars).
 :rtype: unsigned
            )doc")
       .def("num_inconsistent_simplices",
            &gtci::number_of_inconsistent_simplices,
-           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 :returns:  The number of inconsistent simplices.
 :rtype: unsigned
            )doc")
       .def("num_inconsistent_stars",
            &gtci::number_of_inconsistent_stars,
-           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 :returns:  The number of stars containing at least one inconsistent simplex.
 :rtype: unsigned
@@ -182,7 +178,6 @@ Attempts to fix inconsistencies by perturbing the point positions.
            )doc")
       .def("set_max_squared_edge_length",
            &gtci::set_max_squared_edge_length,
-           nb::call_guard<nb::gil_scoped_release>(),
            R"doc(
 Sets the maximal possible squared edge length for the edges in the
 triangulations.

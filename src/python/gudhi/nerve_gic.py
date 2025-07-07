@@ -41,7 +41,7 @@ class CoverComplex(_Nerve_gic_interface):
         :rtype: SimplexTree
         """
         simplex_tree = SimplexTree()
-        super().create_simplex_tree(simplex_tree)
+        super()._create_simplex_tree(simplex_tree)
         return simplex_tree
 
     def read_point_cloud(self, off_file):
@@ -54,7 +54,7 @@ class CoverComplex(_Nerve_gic_interface):
         :returns: Read file status.
         """
         if os.path.isfile(off_file):
-            return super().read_point_cloud(off_file)
+            return super()._read_point_cloud(off_file)
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), off_file)
 
@@ -66,7 +66,7 @@ class CoverComplex(_Nerve_gic_interface):
         :type color_file_name: string
         """
         if os.path.isfile(color_file_name):
-            super().set_color_from_file(color_file_name)
+            super()._set_color_from_file(color_file_name)
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), color_file_name)
 
@@ -78,7 +78,7 @@ class CoverComplex(_Nerve_gic_interface):
         :type cover_file_name: string
         """
         if os.path.isfile(cover_file_name):
-            super().set_cover_from_file(cover_file_name)
+            super()._set_cover_from_file(cover_file_name)
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), cover_file_name)
 
@@ -89,7 +89,7 @@ class CoverComplex(_Nerve_gic_interface):
         :type func_file_name: string
         """
         if os.path.isfile(func_file_name):
-            super().set_function_from_file(func_file_name)
+            super()._set_function_from_file(func_file_name)
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), func_file_name)
 
@@ -102,6 +102,6 @@ class CoverComplex(_Nerve_gic_interface):
         :type graph_file_name: string
         """
         if os.path.isfile(graph_file_name):
-            super().set_graph_from_file(graph_file_name)
+            super()._set_graph_from_file(graph_file_name)
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), graph_file_name)

@@ -83,10 +83,5 @@ NB_MODULE(_edge_collapse_ext, m)
         nb::arg("j").noconvert(),
         nb::arg("f").noconvert(),
         nb::arg("nb_iterations") = 1);
-  m.def("_collapse_edges",
-        collapse<nb::ssize_t, double>,
-        nb::arg("i"),
-        nb::arg("j"),
-        nb::arg("f"),
-        nb::arg("nb_iterations") = 1);
+  m.def("_collapse_edges", collapse<nb::ssize_t, double>);
 }

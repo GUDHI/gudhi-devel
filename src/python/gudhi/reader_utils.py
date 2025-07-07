@@ -30,7 +30,7 @@ def read_lower_triangular_matrix_from_csv_file(csv_file="", separator=";"):
     """
     if csv_file:
         if path.isfile(csv_file):
-            return t.read_matrix_from_csv_file(csv_file, separator[0])
+            return t._read_matrix_from_csv_file(csv_file, separator[0])
     print("file " + csv_file + " not set or not found.")
     return []
 
@@ -50,7 +50,7 @@ def read_persistence_intervals_grouped_by_dimension(persistence_file=""):
     """
     if persistence_file:
         if path.isfile(persistence_file):
-            return t.read_pers_intervals_grouped_by_dimension(persistence_file)
+            return t._read_pers_intervals_grouped_by_dimension(persistence_file)
     print("file " + persistence_file + " not set or not found.")
     return []
 
@@ -75,7 +75,7 @@ def read_persistence_intervals_in_dimension(persistence_file="", only_this_dim=-
     if persistence_file:
         if path.isfile(persistence_file):
             return np_array(
-                t.read_pers_intervals_in_dimension(persistence_file, only_this_dim)
+                t._read_pers_intervals_in_dimension(persistence_file, only_this_dim)
             )
     print("file " + persistence_file + " not set or not found.")
     return []
