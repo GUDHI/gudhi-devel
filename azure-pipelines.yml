@@ -87,7 +87,11 @@ jobs:
       - powershell: |
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(cmakeVcpkgFlags) $(gudhiCmakeOptions) $(extraCmakeOptions) ..
+          Write-Host "cmakeBuildType == $(cmakeBuildType)"
+          Write-Host "cmakeVcpkgFlags == $(cmakeVcpkgFlags)"
+          Write-Host "gudhiCmakeOptions == $(gudhiCmakeOptions)"
+          Write-Host "extraCmakeOptions == $(extraCmakeOptions)"
+          cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(cmakeVcpkgFlags) $(gudhiCmakeOptions) $(extraCmakeOptions) --log-level=DEBUG ..
           ninja
           ctest --output-on-failure -C Release -E diff_files
         displayName: "Build and test"
