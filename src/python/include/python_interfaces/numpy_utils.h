@@ -15,9 +15,12 @@
 #include <type_traits>
 #include <vector>
 
+#include <nanobind/ndarray.h>
+
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/range/iterator_range_core.hpp>
-#include <nanobind/ndarray.h>
+
+#include <gudhi/Debug_utils.h>
 
 template <class T, typename... Shape>
 inline auto _wrap_as_numpy_array(std::vector<T> &&tensor, Shape... shapes)
@@ -59,7 +62,7 @@ class Numpy_span
   using difference_type = std::ptrdiff_t;
   using size_type = std::size_t;
 
-  Numpy_span(const nanobind::ndarray<const T, nanobind::ndim<1> > &array)
+  Numpy_span(const nanobind::ndarray<const T, nanobind::ndim<1>, nanobind::any_contig> &array)
       : begin_(array.data()), end_(begin_ + array.shape(0)) {};
 
   Numpy_span(value_type *begin, value_type *end) : begin_(begin), end_(end) {};
@@ -81,9 +84,12 @@ template <typename T, class = std::enable_if<std::is_arithmetic_v<T> > >
 class Numpy_array_element_iterator
     : public boost::iterator_facade<Numpy_array_element_iterator<T>, const T, boost::random_access_traversal_tag>
 {
+ private:
+  using Base = boost::iterator_facade<Numpy_array_element_iterator<T>, const T, boost::random_access_traversal_tag>;
+
  public:
   using value_type = const T;
-  using difference_type = std::ptrdiff_t;
+  using difference_type = typename Base::difference_type;
   using size_type = std::size_t;
   using const_reference = value_type &;
 
@@ -97,21 +103,23 @@ class Numpy_array_element_iterator
 
   // necessary for boost::iterator_range to be able to use operator[].
   // Seg fails otherwise for some reasons
-  const_reference operator[](difference_type n) const {
-    return *(curr_ + n * stride_);
-  }
+  const_reference operator[](difference_type n) const { return *(curr_ + n * stride_); }
 
  private:
   friend class boost::iterator_core_access;
 
-  bool equal(Numpy_array_element_iterator const &other) const { return curr_ == other.curr_ && end_ == other.end_; }
+  bool equal(Numpy_array_element_iterator const &other) const
+  {
+    GUDHI_CHECK(end_ == other.end_, "The two iterators are not set on the same range and are therefore not comparable");
+    return curr_ == other.curr_;
+  }
 
   const_reference dereference() const { return *curr_; }
 
   void increment()
   {
     curr_ += stride_;
-    if (curr_ > end_) curr_ = end_;
+    GUDHI_CHECK(curr_ <= end_, "Incrementation went out of bound.");
   }
 
   void decrement() { curr_ -= stride_; }
@@ -119,7 +127,7 @@ class Numpy_array_element_iterator
   void advance(difference_type n)
   {
     curr_ += n * stride_;
-    if (curr_ > end_) curr_ = end_;
+    GUDHI_CHECK(curr_ <= end_, "Incrementation went out of bound.");
   }
 
   difference_type distance_to(const Numpy_array_element_iterator &other) const

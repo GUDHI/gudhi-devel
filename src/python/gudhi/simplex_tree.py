@@ -159,7 +159,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         :param filtrations: the filtration values.
         :type filtrations: numpy.array of shape (n,)
         """
-        simplices = np.asarray(vertex_array, dtype=np.int64)
+        simplices = np.asarray(vertex_array, dtype=np.intc)
         vertices = np.unique(simplices)
         fil = np.asarray(filtrations, dtype=np.double)
         super()._insert_batch(vertices, simplices, fil)

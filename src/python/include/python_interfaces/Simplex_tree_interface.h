@@ -112,7 +112,7 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     this->set_dimension(1, false);
   }
 
-  void insert_batch(const nanobind::ndarray<const int, nanobind::ndim<1> >& vertices,
+  void insert_batch(const nanobind::ndarray<const int, nanobind::ndim<1>, nanobind::any_contig>& vertices,
                     const nanobind::ndarray<const int, nanobind::ndim<2> >& vertex_array,
                     const nanobind::ndarray<const double, nanobind::ndim<1> >& filtrations)
   {
