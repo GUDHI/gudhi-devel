@@ -47,8 +47,12 @@ nb::list wrap_persistence_2d(nb::ndarray<const double, nb::ndim<2>, nb::c_contig
 {
   std::vector<std::array<double, 2> > dgm0;
   std::vector<std::array<double, 2> > dgm1;
-  dgm0.reserve(data.shape(0) * data.shape(1) / 4);  // rough upper bound
-  dgm1.reserve(data.shape(0) * data.shape(1) / 2);  // rough upper bound
+  // rough upper bound: a bar for each possible square that do not touch anything else
+  // + the rows and columns on the boundary are implicitly collapsed
+  dgm0.reserve((data.shape(0) + 1) * (data.shape(1) + 1) / 4);
+  // rough upper bound: checkerboard with only one color filled has the highest number of 1-cycle possible
+  // + the rows and columns on the boundary are implicitly collapsed
+  dgm1.reserve(((data.shape(0) - 2) * (data.shape(1) - 2) + 1) / 2);
   {
     nb::gil_scoped_release release;
     double mini = Gudhi::cubical_complex::persistence_on_rectangle_from_top_cells(
