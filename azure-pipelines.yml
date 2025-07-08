@@ -86,12 +86,12 @@ jobs:
           choco install -y ninja --force --force-dependencies
         displayName: "Install build dependencies"
       - powershell: |
+          dir c:\vcpkg\scripts\buildsystems
+          Get-Content C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+          dir C:\vcpkg\triplets
+          Get-Content C:\vcpkg\triplets\x64-windows.cmake
           mkdir build
           cd build
-          Write-Host "cmakeBuildType == $(cmakeBuildType)"
-          Write-Host "cmakeVcpkgFlags == $(cmakeVcpkgFlags)"
-          Write-Host "gudhiCmakeOptions == $(gudhiCmakeOptions)"
-          Write-Host "extraCmakeOptions == $(extraCmakeOptions)"
           python --version
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(cmakeVcpkgFlags) $(gudhiCmakeOptions) $(extraCmakeOptions) --log-level=DEBUG ..
           ninja
