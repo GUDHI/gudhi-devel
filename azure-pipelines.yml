@@ -70,10 +70,10 @@ jobs:
           addToPath: true
           architecture: "x64"
       - powershell: |
-          git submodule update --init
+          git submodule update --init --recursive
           python --version
           python -m pip install -r ext/gudhi-deploy/build-requirements.txt
-          python -m pip install -r ext/gudhi-deploy/test-requirements.txt
+          python -m pip install --use-pep517 -r ext/gudhi-deploy/test-requirements.txt
           choco install -y ninja --force --force-dependencies
           # Only vcpkg release libs for CI
           Add-Content -Path "C:\vcpkg\triplets\x64-windows.cmake" -Value "set(VCPKG_BUILD_TYPE release)"
