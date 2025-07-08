@@ -41,12 +41,12 @@
 namespace Gudhi {
 namespace multi_persistence {
 
-template <class Multi_filtration_value, class Persistence_algorithm>
+template <class MultiFiltrationValue, class PersistenceAlgorithm>
 class Slicer
 {
  public:
-  using Persistence = Persistence_algorithm;
-  using Filtration_value = Multi_filtration_value;
+  using Persistence = PersistenceAlgorithm;
+  using Filtration_value = MultiFiltrationValue;
   using T = typename Filtration_value::value_type;
   using Complex = Multi_parameter_filtered_complex<Filtration_value>;
   using Index = typename Complex::Index;
@@ -79,6 +79,22 @@ class Slicer
         persistence_()
   {}
 
+  Slicer(const Slicer& other)
+      : complex_(other.complex_),
+        slice_(other.slice_),
+        generatorOrder_(other.generatorOrder_),
+        persistence_(other.persistence_, generatorOrder_)
+  {}
+
+  Slicer(Slicer&& other)
+      : complex_(std::move(other.complex_)),
+        slice_(std::move(other.slice_)),
+        generatorOrder_(std::move(other.generatorOrder_)),
+        persistence_(std::move(other.persistence_), generatorOrder_)
+  {}
+
+  // TODO: swap + assign operator?
+
   // ACCESS
 
   Thread_safe weak_copy() const { return Thread_safe(*this); }
@@ -90,6 +106,8 @@ class Slicer
   // only used for scc io TODO: see if still necessary
   const Complex& get_chain_complex() const { return complex_; }
 
+  // initialized with `initialize_persistence_computation`
+  // if ignoreInf was true, indices at inf are not contained in the vector
   const std::vector<Index>& get_current_order() const { return generatorOrder_; }
 
   const std::vector<T>& get_slice() const { return slice_; }
@@ -127,7 +145,7 @@ class Slicer
 
   // Complex::Boundary_container& get_boundaries() { return complex_.get_boundaries(); }
 
-  Dimension get_dimension(Index i) const { return complex_.get_dimension(i); }
+  Dimension get_dimension(Index i) const { return complex_.get_dimensions()[i]; }
 
   // TODO: only used to print info in python, so put in some interface instead
   std::string to_str() const
@@ -153,10 +171,12 @@ class Slicer
     _push_to(this, line);
   }
 
+  // Warning: initialize_persistence_computation needs to be recalled if barcode was and is still needed
   void prune_above_dimension(int maxDim)
   {
     int idx = complex_.prune_above_dimension(maxDim);
     generatorOrder_.resize(idx);
+    generatorOrder_.shrink_to_fit();
     slice_.resize(idx);
   }
 
@@ -176,13 +196,13 @@ class Slicer
 
   void vineyard_update()
   {
-    for (std::size_t i = 0; i < get_number_of_cycle_generators(); i++) {
-      auto j = i;
-      while (j > 0 && persistence_.get_dimension(j) == persistence_.get_dimension(j - 1) &&
-             slice_[generatorOrder_[j]] < slice_[generatorOrder_[j - 1]]) {
-        persistence_.vine_swap(j - 1);
-        std::swap(generatorOrder_[j - 1], generatorOrder_[j]);
-        j--;
+    for (Index i = 0; i < generatorOrder_.size(); i++) {
+      int curr = i;
+      while (curr > 0 && persistence_.get_dimension(curr) == persistence_.get_dimension(curr - 1) &&
+             slice_[generatorOrder_[curr]] < slice_[generatorOrder_[curr - 1]]) {
+        persistence_.vine_swap(curr - 1);
+        std::swap(generatorOrder_[curr - 1], generatorOrder_[curr]);
+        --curr;
       }
     }
   }
@@ -196,11 +216,10 @@ class Slicer
     // Hannah: not sure what this comment means ?
     Barcode<Value> out(maxDim + 1);
     const Value inf = Gudhi::multi_filtration::MF_T_inf<Value>;
-    const auto null_death = Persistence::nullDeath;
     for (const auto& bar : barcode_indices) {
       Value birth_filtration = slice_[bar.birth];
       Value death_filtration = inf;
-      if (bar.death != null_death) death_filtration = slice_[bar.death];
+      if (bar.death != Persistence::nullDeath) death_filtration = slice_[bar.death];
       if (birth_filtration <= death_filtration)
         out[bar.dim].emplace_back({birth_filtration, death_filtration});
       else {
@@ -216,12 +235,11 @@ class Slicer
     auto barcode_indices = persistence_.get_barcode();
     Flat_barcode<Value> out(barcode_indices.size() * (withDim ? 3 : 2));
     const Value inf = Gudhi::multi_filtration::MF_T_inf<Value>;
-    const auto null_death = Persistence::nullDeath;
     Index i = 0;
     for (const auto& bar : barcode_indices) {
       Value birth_filtration = slice_[bar.birth];
       Value death_filtration = inf;
-      if (bar.death != null_death) death_filtration = slice_[bar.death];
+      if (bar.death != Persistence::nullDeath) death_filtration = slice_[bar.death];
       if (birth_filtration > death_filtration) {
         birth_filtration = inf;
         death_filtration = inf;
@@ -255,9 +273,9 @@ class Slicer
         ignoreInf);
   }
 
-  std::vector<std::vector<Cycle>> get_representative_cycles(bool update = true, bool detailed = false)
+  std::vector<std::vector<Cycle>> get_representative_cycles(bool update = true)
   {
-    return _get_representative_cycles(this, update, detailed);
+    return _get_representative_cycles(this, update);
   }
 
   // FRIENDS
@@ -314,53 +332,40 @@ class Slicer
  protected:
   // For ThreadSafe version
   Slicer(const std::vector<T>& slice, const std::vector<Index>& generatorOrder, const Persistence& persistence)
-      : complex_(), slice_(slice), generatorOrder_(generatorOrder), persistence_(persistence)
-  {
-    persistence_.update_permutation_pointer(&generatorOrder_);
-  }
+      : complex_(), slice_(slice), generatorOrder_(generatorOrder), persistence_(persistence, generatorOrder_)
+  {}
 
   template <class Line>
   void _push_to(const Slicer* slicer, const Line& line)
   {
     const auto& filtrationValues = slicer->complex_.get_filtration_values();
-    for (std::size_t i = 0u; i < filtrationValues.size(); i++) {
+    for (Index i = 0u; i < filtrationValues.size(); i++) {
       slice_[i] = line.template compute_forward_intersection<T>(filtrationValues[i]);
     }
   }
 
-  void _initialize_persistence_computation(const Slicer* slicer, [[maybe_unused]] const bool ignoreInf = true)
+  void _initialize_persistence_computation(const Slicer* slicer, const bool ignoreInf = true)
   {
-    _initialize_order();
-    // if is_vine is true, ignoring the inf values causes an indexation problem when translating back the barcode values
-    // can be corrected by storing additional data, but does not seem to be worth it
-    if constexpr (!Persistence::is_vine) {
-      if (ignoreInf) {
-        for (Index& i : generatorOrder_) {
-          if (slice_[i] == Filtration_value::T_inf) {
-            i = std::numeric_limits<Index>::max();
-          }
-        }
-      }
-    }
+    _initialize_order(ignoreInf);
     persistence_ = Persistence(slicer->complex_, generatorOrder_);
   }
 
   std::vector<std::vector<Cycle>> _get_representative_cycles(const Slicer* slicer,
-                                                             bool update = true,
-                                                             bool detailed = false)
+                                                             bool update = true)
   {
     static_assert(Persistence::has_rep_cycles, "Representative cycles not enabled.");
 
     // iterable iterable simplex key
-    auto cycles_key = persistence_.get_representative_cycles(update, detailed);
+    auto cycles_key = persistence_.get_representative_cycles(update);
     auto num_cycles = cycles_key.size();
     std::vector<std::vector<Cycle>> out(slicer->complex_.get_max_dimension() + 1);
     for (auto& cycles_of_dim : out) cycles_of_dim.reserve(num_cycles);
     for (const auto& cycle : cycles_key) {
-      int cycle_dim = 0;        // for more generality, should be minimal dimension instead
+      int cycle_dim = 0;        // TODO: for more generality, should be minimal dimension instead
       if (!cycle[0].empty()) {  // if empty, cycle has no border -> assumes dimension 0 even if it could be min dim
         cycle_dim = slicer->complex_.dimension(cycle[0][0]) + 1;  // all faces have the same dim
       }
+      // TODO: move cycle instead of copy?
       out[cycle_dim].push_back(cycle);
     }
     return out;
@@ -372,14 +377,27 @@ class Slicer
   std::vector<Index> generatorOrder_;
   Persistence persistence_;
 
-  void _initialize_order()
+  void _initialize_order(const bool ignoreInf = true)
   {
+    const auto& boundaries = complex_.get_boundaries();
+    generatorOrder_.resize(complex_.get_number_of_cycle_generators());
     std::iota(generatorOrder_.begin(), generatorOrder_.end(), 0);
     std::sort(generatorOrder_.begin(), generatorOrder_.end(), [&](Index i, Index j) {
-      if (complex_.get_dimension(i) > complex_.get_dimension(j)) return false;
-      if (complex_.get_dimension(i) < complex_.get_dimension(j)) return true;
+      if (ignoreInf) {
+        if (slice_[i] != Filtration_value::T_inf && slice_[j] == Filtration_value::T_inf) return true;
+        // all elements at inf are considered equal
+        if (slice_[i] == Filtration_value::T_inf) return false;
+      }
+      if (get_dimension(i) > get_dimension(j)) return false;
+      if (get_dimension(i) < get_dimension(j)) return true;
+      // if filtration values are equal, we don't care about order, so considered the same object
       return slice_[i] < slice_[j];
     });
+    if (ignoreInf) {
+      Index end = generatorOrder_.size();
+      while (end > 0 && slice_[generatorOrder_[end - 1]] == Filtration_value::T_inf) --end;
+      generatorOrder_.resize(end);
+    }
   }
 
   template <typename F, typename F_arg>
@@ -404,7 +422,7 @@ class Slicer
 #ifdef GUDHI_USE_TBB
       Thread_safe local_template = weak_copy();
       tbb::enumerable_thread_specific<Thread_safe> thread_locals(local_template);
-      tbb::parallel_for(static_cast<std::size_t>(0), basePoints.size(), [&](const std::size_t& i) {
+      tbb::parallel_for(static_cast<Index>(0), basePoints.size(), [&](const Index& i) {
         Thread_safe& s = thread_locals.local();
         s.push_to(get_line(basePoints[i]));
         s.compute_persistence(ignoreInf);

@@ -32,12 +32,12 @@ namespace Gudhi {
 namespace multi_persistence {
 
 // TODO: better name
-template <class Multi_filtration_value>
+template <class MultiFiltrationValue>
 class Multi_parameter_filtered_complex
 {
  public:
   using Index = std::uint32_t;
-  using Filtration_value = Multi_filtration_value;
+  using Filtration_value = MultiFiltrationValue;
   using T = typename Filtration_value::value_type;
   using Filtration_value_container = std::vector<Filtration_value>;
   using Boundary = std::vector<Index>;
@@ -50,6 +50,7 @@ class Multi_parameter_filtered_complex
   {}
 
   // assumes boundary Idxs corresponds to container Idxs
+  // also assumes that a boundary is ordered
   Multi_parameter_filtered_complex(const Boundary_container& boundaries,
                                    const Dimension_container& dimensions,
                                    const Filtration_value_container& filtrationValues)
@@ -92,10 +93,12 @@ class Multi_parameter_filtered_complex
 
   Boundary_container& get_boundaries() { return boundaries_; }
 
-  Dimension get_dimension(Index i) const { return dimensions_[i]; }
+  // Dimension get_dimension(Index i) const { return dimensions_[i]; }
 
   Dimension get_max_dimension() const { return maxDimension_; }
 
+  // assumes that no two cells can have exactly the same filtration values
+  // or that two cells with same filtration values can be considered equal in the order
   void sort_by_dimension_co_lexicographically()
   {
     using namespace Gudhi::multi_filtration;
@@ -112,12 +115,20 @@ class Multi_parameter_filtered_complex
   void sort(Comp&& comparaison)
   {
     // TODO: test if it is not faster to just reconstruct everything instead of swapping
+    // Note: perm and inv have to be build in any case
+    // if we reconstruct, we additionally build three containers of vector of Index, of Index
+    // and of Filtration_value, which will be swapped respectively with boundaries_, dimensions_
+    // and filtrationValues_
+    // in this version (swapping), we additionally build two containers of Index instead
+    // so should theoretically be better, but not so sure if we replace the containers with 
+    // completely flat containers one day, i.e. with no cheap swap method
     std::vector<Index> perm(boundaries_.size());
     std::iota(perm.begin(), perm.end(), 0);
     std::vector<Index> pos = perm;
+    std::vector<Index> invPos = perm;
     std::sort(perm.begin(), perm.end(), comparaison);
-    std::vector<Index> inv(boundaries_.size());
-    for (Index i = 0; i < perm.size(); ++i) inv[perm[i]] = i;
+    std::vector<Index> invPerm(boundaries_.size());
+    for (Index i = 0; i < perm.size(); ++i) invPerm[perm[i]] = i;
 
     Dimension lastDim = -1;
     isOrderedByDimension_ = true;
@@ -130,10 +141,10 @@ class Multi_parameter_filtered_complex
         std::swap(boundaries_[curr], boundaries_[i]);
         std::swap(dimensions_[curr], dimensions_[i]);
         swap(filtrationValues_[curr], filtrationValues_[i]);
-        Index& c = *std::find(pos.begin(), pos.end(), curr);
-        std::swap(c, pos[p]);
+        std::swap(pos[invPos[curr]], pos[p]);
+        std::swap(invPos[curr], invPos[pos[invPos[curr]]]);
       }
-      for (Index& b : boundaries_[curr]) b = inv[b];
+      for (Index& b : boundaries_[curr]) b = invPerm[b];
       std::sort(boundaries_[curr].begin(), boundaries_[curr].end());
       if (lastDim > dimensions_[curr]) isOrderedByDimension_ = false;
       lastDim = dimensions_[curr];
@@ -141,7 +152,7 @@ class Multi_parameter_filtered_complex
   }
 
   // warning: shuffles order if not ordered by dimension
-  int prune_above_dimension(int maxDim)
+  Index prune_above_dimension(int maxDim)
   {
     if (!isOrderedByDimension_) sort_by_dimension_co_lexicographically();
     Index i = 0;
@@ -150,6 +161,7 @@ class Multi_parameter_filtered_complex
     dimensions_.resize(i);
     filtrationValues_.resize(i);
     maxDimension_ = dimensions_.empty() ? -1 : dimensions_.back();
+    return i;
   }
 
   void coarsen_on_grid(const std::vector<std::vector<T> >& grid, bool coordinate = true)
@@ -178,6 +190,7 @@ class Multi_parameter_filtered_complex
     for (Index i : permutation) {
       Boundary boundary(complex.boundaries_[i]);
       for (Index& b : boundary) b = inv[b];
+      std::sort(boundary.begin(), boundary.end());
       newBoundaries.emplace_back(std::move(boundary));
       newDimensions.push_back(complex.dimensions_[i]);
       newFiltrationValues.emplace_back(complex.filtrationValues_[i]);
@@ -190,12 +203,13 @@ class Multi_parameter_filtered_complex
   friend std::pair<Multi_parameter_filtered_complex, std::vector<Index> > build_permuted_complex(
       const Multi_parameter_filtered_complex& complex)
   {
+    using namespace Gudhi::multi_filtration;
+
     std::vector<Index> perm(complex.get_number_of_cycle_generators());
     std::iota(perm.begin(), perm.end(), 0);
     std::sort(perm.begin(), perm.end(), [&](Index i, Index j) -> bool {
       if (complex.dimensions_[i] == complex.dimensions_[j]) {
-        return multi_filtration::is_strict_less_than_lexicographically<true>(complex.filtrationValues_[i],
-                                                                             complex.filtrationValues_[j]);
+        return is_strict_less_than_lexicographically<true>(complex.filtrationValues_[i], complex.filtrationValues_[j]);
       }
       return complex.dimensions_[i] < complex.dimensions_[j];
     });
@@ -206,13 +220,30 @@ class Multi_parameter_filtered_complex
   friend auto build_complex_coarsen_on_grid(const Multi_parameter_filtered_complex& complex,
                                             const std::vector<std::vector<T> >& grid)
   {
+    using namespace Gudhi::multi_filtration;
     using Return_filtration_value = decltype(std::declval<Filtration_value>().template as_type<std::int32_t>());
     using Return_complex = Multi_parameter_filtered_complex<Return_filtration_value>;
+
     typename Return_complex::Filtration_value_container coords(complex.get_number_of_cycle_generators());
-    for (std::size_t gen = 0u; gen < coords.size(); ++gen) {
-      coords[gen] = multi_filtration::compute_coordinates_in_grid<std::int32_t>(complex.filtrationValues_[gen], grid);
+    for (Index gen = 0u; gen < coords.size(); ++gen) {
+      coords[gen] = compute_coordinates_in_grid<std::int32_t>(complex.filtrationValues_[gen], grid);
     }
     return Return_complex(complex.boundaries_, complex.dimensions_, coords);
+  }
+
+  static bool boundary_is_strictly_smaller_than(const Boundary& b1, const Boundary& b2) {
+    // we want faces to be smaller than proper cofaces
+    if (b1.size() < b2.size()) return true;
+    if (b1.size() > b2.size()) return false;
+
+    // lexico for others
+    for (Index i = 0; i < b2.size(); ++i){
+      if (b1[i] < b2[i]) return true;
+      if (b1[i] > b2[i]) return false;
+    }
+
+    // equal
+    return false;
   }
 
   friend std::ostream& operator<<(std::ostream& stream, const Multi_parameter_filtered_complex& complex)

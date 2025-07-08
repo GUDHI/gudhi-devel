@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2024 Inria
+ *    Copyright (C) 2024-25 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification

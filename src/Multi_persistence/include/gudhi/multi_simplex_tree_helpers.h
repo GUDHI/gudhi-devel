@@ -36,11 +36,11 @@ namespace multi_persistence {
  * @brief Model of @ref SimplexTreeOptions. Same as @ref Gudhi::Simplex_tree_options_default but with a custom
  * filtration value type.
  *
- * @tparam Filtration Has to respect the @ref FiltrationValue concept.
+ * @tparam MultiFiltrationValue Has to respect the @ref MultiFiltrationValue concept.
  */
-template <typename Filtration>
+template <typename MultiFiltrationValue>
 struct Simplex_tree_options_multidimensional_filtration : Simplex_tree_options_default {
-  using Filtration_value = Filtration;
+  using Filtration_value = MultiFiltrationValue;
 };
 
 /**

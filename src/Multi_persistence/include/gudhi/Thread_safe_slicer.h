@@ -131,9 +131,9 @@ class Thread_safe_slicer : private Slicer
     return Slicer::persistence_on_lines(basePointsWithDirections, ignoreInf);
   }
 
-  std::vector<std::vector<Cycle>> get_representative_cycles(bool update = true, bool detailed = false)
+  std::vector<std::vector<Cycle>> get_representative_cycles(bool update = true)
   {
-    return Slicer::_get_representative_cycles(slicer_, update, detailed);
+    return Slicer::_get_representative_cycles(slicer_, update);
   }
 
   // FRIENDS

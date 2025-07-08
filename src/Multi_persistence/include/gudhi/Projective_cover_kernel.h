@@ -18,21 +18,18 @@
 #ifndef MP_PROJECTIVE_COVER_KERNEL_H_INCLUDED
 #define MP_PROJECTIVE_COVER_KERNEL_H_INCLUDED
 
-// #include <utility>  //std::move
+#include <utility>  //std::move
 #include <vector>
 #include <set>
-#include "gudhi/Multi_parameter_filtration.h"
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_parameter_filtered_complex.h>
 #include <gudhi/Matrix.h>
 
-// #include <gudhi/Multi_parameter_filtration.h>
-
 namespace Gudhi {
 namespace multi_persistence {
 
-template <class Multi_filtration_value,
+template <class MultiFiltrationValue,
           Gudhi::persistence_matrix::Column_types columnType = Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR>
 class Projective_cover_kernel
 {
@@ -42,7 +39,7 @@ class Projective_cover_kernel
   };
 
  public:
-  using Filtration_value = Multi_filtration_value;
+  using Filtration_value = MultiFiltrationValue;
   using Complex = Multi_parameter_filtered_complex<Filtration_value>;
   using Index = typename Complex::Index;
   using Dimension = typename Complex::Dimension;
@@ -55,6 +52,8 @@ class Projective_cover_kernel
   // filtration values are assumed to be dim + co-lexicographically sorted
   Projective_cover_kernel(const Complex &complex, Dimension dim)
   {
+    using namespace Gudhi::multi_filtration;
+
     if (complex.get_number_of_parameters() != 2) throw std::invalid_argument("Only available for 2-parameter modules.");
 
     const auto &boundaries = complex.get_boundaries();
@@ -67,7 +66,7 @@ class Projective_cover_kernel
         GUDHI_CHECK(filtValues[i].num_generators() == 1, "Only available for 1-critical modules.");
         GUDHI_CHECK(dimensions[i] <= dimensions[i+1], "Cells have to be ordered by dimension.");
         if (dimensions[i] == dimensions[i + 1])
-          GUDHI_CHECK(multi_filtration::is_less_or_equal_than_lexicographically<true>(filtValues[i], filtValues[i + 1]),
+          GUDHI_CHECK(is_less_or_equal_than_lexicographically<true>(filtValues[i], filtValues[i + 1]),
                       "Cells with same dimension have to be ordered co-lexicographically.");
       }
       GUDHI_CHECK(filtValues[i].num_generators() == 1, "Only available for 1-critical modules.");
@@ -94,7 +93,7 @@ class Projective_cover_kernel
     SmallQueue lexicoIt = _initialize_lex_queue(nberDim, nberGen, shift, filtValues, pivotCache, get_pivot);
 
     while (!lexicoIt.empty()) {
-      Filtration_value gridValue = std::move(lexicoIt.pop());
+      Filtration_value gridValue = lexicoIt.pop();
       for (int i : lexicoIt.get_current_cols()) {
         while (_reduce_column(complex, i, isReduced, pivotCache, M, N, gridValue, get_pivot));
         _update_after_new_pivot(i, lexicoIt, pivotCache, filtValues, gridValue, get_pivot);
@@ -182,24 +181,25 @@ class Projective_cover_kernel
                                    Index &startDim2,
                                    Index &end)
   {
+    const auto& dims = complex.get_dimensions();
     startDim1 = 0;
     startDim2 = 0;
     end = 0;
 
     Index i = 0;
     auto size = complex.get_number_of_cycle_generators();
-    for (; i < size && complex.get_dimension(i) < dim; ++i);
-    if (i == size || complex.get_dimension(i) > dim) throw std::invalid_argument("Given dimension has no generators.");
+    for (; i < size && dims[i] < dim; ++i);
+    if (i == size) throw std::invalid_argument("Given dimension has no generators.");
     startDim1 = i;
-    for (; i < size && complex.get_dimension(i) == dim; ++i);
-    if (i == size || complex.get_dimension(i) > dim + 1)
-      throw std::invalid_argument("Given dimension + 1 has no generators.");
+    for (; i < size && dims[i] == dim; ++i);
+    if (i == size || dims[i] > dim + 1)
+      throw std::invalid_argument("Given dimension has no generators.");
     startDim2 = i;
-    for (; i < size && complex.get_dimension(i) == dim + 1; ++i);
+    for (; i < size && dims[i] == dim + 1; ++i);
     end = i;
   }
 
-  static int _get_pivot(const Matrix &M, Index i, Index shift)
+  static int _get_pivot(Matrix &M, Index i, Index shift)
   {
     const auto &col = M.get_column(i);
     return col.size() > 0 ? (*col.rbegin()).get_row_index() - shift : -1;
@@ -207,7 +207,7 @@ class Projective_cover_kernel
 
   static void _initialize_matrices(Index start, Index end, const Boundary_container &boundaries, Matrix &M, Matrix &N)
   {
-    for (int i = start; i < end; i++) {
+    for (Index i = start; i < end; i++) {
       M.insert_boundary(boundaries[i]);
       N.insert_boundary({i - start});
     }
@@ -231,7 +231,7 @@ class Projective_cover_kernel
         it++;
         for (; it != pivotCache[pivot].end(); ++it) {
           int colIdx = *it;
-          GUDHI_CHECK(colIdx > i, "Column not registered in the right order.");
+          GUDHI_CHECK(static_cast<Index>(colIdx) > i, "Column not registered in the right order.");
           auto prev = filtValues[colIdx + shift];
           prev.push_to_least_common_upper_bound(filtValues[i + shift]);
           lexicoIt.insert(std::move(prev), colIdx);
@@ -257,7 +257,7 @@ class Projective_cover_kernel
     it++;
     for (; it != pivotCache[pivot].end(); ++it) {
       int colIdx = *it;
-      GUDHI_CHECK(colIdx > i, "(update) Column not registered in the right order.");
+      GUDHI_CHECK(static_cast<Index>(colIdx) > i, "(update) Column not registered in the right order.");
       auto prev = filtValues[colIdx];
       if (prev < filtValues[i]) {
         prev.push_to_least_common_upper_bound(filtValues[i]);
@@ -313,7 +313,7 @@ class Projective_cover_kernel
         const auto &col = N.get_column(i);
         boundaries_.emplace_back(col.begin(), col.end());
         filtrationValues_.emplace_back(gridValue);
-        dimensions_.emplace_back(complex.get_dimension(i) + 1);
+        dimensions_.emplace_back(complex.get_dimensions()[i] + 1);
         isReduced[i] = true;
       }
       return false;
@@ -323,7 +323,7 @@ class Projective_cover_kernel
       return false;
     }
     const auto &filtValues = complex.get_filtration_values();
-    for (int k : pivotCache[pivot]) {
+    for (Index k : pivotCache[pivot]) {
       if (k >= i) {  // cannot reduce more here. this is a (local) pivot.
         return false;
       }
