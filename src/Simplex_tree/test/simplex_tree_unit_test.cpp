@@ -658,19 +658,19 @@ void test_highest_strategy(){
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4})), 6);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({5})), 6);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({6})), 5);
-  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4})), 8);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4})), 6);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,5})), 6);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,6})), 5);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,5})), 6);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,6})), 6);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({5,6})), 6);
-  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,5})), 8);
-  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,6})), 8);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,5})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,6})), 6);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,5,6})), 6);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,5,6})), 6);
-  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,5,6})), 8);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,5,6})), 6);
 
-  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1,3})), 8);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1,3})), 4);
 
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({2,6})), 7);
 }

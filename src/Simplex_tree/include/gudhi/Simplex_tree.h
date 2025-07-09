@@ -1161,8 +1161,7 @@ class Simplex_tree {
      * - if \f$ \sigma \f$ was not inserted yet, then \f$ \sigma \f$ and all its faces, which are not already included
      * in the complex, are inserted at either \f$ f \f$ or at the first possible filtration value when \f$ f \f$ is too
      * low (to insure the validity of the filtration).
-     * - if \f$ \sigma \f$ existed already, then it and all of its potentially already inserted cofaces are pushed to
-     * the intersection of their old value and \f$ f \f$.
+     * - if \f$ \sigma \f$ existed already, then nothing is done.
      */
     HIGHEST,
     /**
@@ -1222,7 +1221,7 @@ class Simplex_tree {
       else if (insertion_strategy == Insertion_strategy::HIGHEST)
         return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), filtration);
       else
-        return _insert_simplex_and_subfaces_at_possible(root(), copy.begin(), copy.end());
+        return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), 0);
     } else {
       return _rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
     }
@@ -1264,44 +1263,16 @@ class Simplex_tree {
   }
 
   template <class ForwardVertexIterator>
-  std::pair<Simplex_handle, bool> _insert_simplex_and_subfaces_at_possible(Siblings* sib,
-                                                                           ForwardVertexIterator first,
-                                                                           ForwardVertexIterator last) {
-    auto res = _rec_insert_simplex_and_subfaces_sorted<ForwardVertexIterator, false>(sib, first, last, 0);
-    if (res.second){
-      _make_subfiltration_non_decreasing(res.first);
-    } else {
-      res.first = null_simplex();
-    }
-    return res;
-  }
-
-  bool _push_cofaces_up(Simplex_handle sh, const Filtration_value& filt) {
-    if (!intersect_lifetimes(get_filtration_value(sh), filt)) return false;  // all cofaces will already be higher
-
-    for (auto sh_co : cofaces_simplex_range(sh, 1)) {
-      _push_cofaces_up(sh_co, filt);
-    }
-
-    return true;
-  }
-
-  template <class ForwardVertexIterator>
   std::pair<Simplex_handle, bool> _insert_simplex_and_subfaces_at_highest(Siblings* sib,
                                                                           ForwardVertexIterator first,
                                                                           ForwardVertexIterator last,
                                                                           const Filtration_value& filt) {
     auto res = _rec_insert_simplex_and_subfaces_sorted<ForwardVertexIterator, false>(sib, first, last, filt);
-
-    if (res.second) {
-      // if true, newly inserted, so no cofaces, but possibly non compatible filtration value
+    if (res.second){
       _make_subfiltration_non_decreasing(res.first);
-      return res;
+    } else {
+      res.first = null_simplex();
     }
-    // if false, faces have right filtration values, but possible cofaces
-
-    if (!_push_cofaces_up(res.first, filt)) res.first = null_simplex();
-
     return res;
   }
 
