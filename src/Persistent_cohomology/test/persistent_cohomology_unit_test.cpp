@@ -24,7 +24,11 @@ std::string get_persistence_string(typeST& st, int coefficient, int min_persiste
   Persistent_cohomology<typeST, Field_Zp> pcoh(st);
   pcoh.init_coefficients( coefficient );  // initializes the coefficient field for homology
   // Compute the persistent homology of the complex, with given minimal lifetime of homology feature to be recorded.
-  pcoh.compute_persistent_cohomology<with_optimizations>( min_persistence );
+  if constexpr (with_optimizations){
+    pcoh.compute_persistent_cohomology( min_persistence );
+  } else {
+    pcoh.compute_persistent_cohomology_without_optimizations( min_persistence );
+  }
   std::ostringstream ossPers;
 
   pcoh.output_diagram(ossPers);
@@ -53,6 +57,7 @@ std::string test_persistence(int coefficient, int min_persistence) {
 
   // Compute the persistence diagram of the complex
   auto strPers = get_persistence_string<true>(st, coefficient, min_persistence);
+  // tests that with or without optimizations, we have the same result
   BOOST_CHECK_EQUAL(strPers, get_persistence_string<false>(st, coefficient, min_persistence));
   return strPers;
 }
