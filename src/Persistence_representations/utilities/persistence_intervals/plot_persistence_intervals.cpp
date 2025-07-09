@@ -8,16 +8,17 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_intervals.h>
-
 #include <iostream>
 #include <limits>
 #include <vector>
 #include <utility>
 
+#include <gudhi/Persistence_intervals.h>
+
 using Persistence_intervals = Gudhi::Persistence_representations::Persistence_intervals;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   if ((argc != 3) && (argc != 2)) {
     std::clog << "This program creates a gnuplot script from a single persistence diagram file (*.pers).\n"
               << "To run this program, please provide the name of a file with persistence diagram.\n"

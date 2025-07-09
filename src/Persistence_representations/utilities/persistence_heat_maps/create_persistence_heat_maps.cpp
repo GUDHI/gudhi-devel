@@ -8,17 +8,18 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_heat_maps.h>
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
 
+#include <gudhi/Persistence_heat_maps.h>
+
 using constant_scaling_function = Gudhi::Persistence_representations::constant_scaling_function;
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program creates persistence heat map files (*.mps) of persistence diagrams files (*.pers) "
             << "provided as an input.\n"
             << "The first parameter of a program is an integer, a size of a grid.\n"

@@ -10,7 +10,6 @@
 
 #include "MainWindow.h"
 #include <QApplication>
-#include <CGAL/Qt/resources.h>
 
 int main(int argc, char** argv) {
   QApplication application(argc, argv);

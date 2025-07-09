@@ -26,6 +26,7 @@
 #include <vector>
 
 #include <boost/iterator/indirect_iterator.hpp>
+#include <boost/version.hpp>
 #if BOOST_VERSION >= 108100
 #include <boost/unordered/unordered_flat_map.hpp>   //don't exist for lower versions of boost
 // #include <boost/unordered/unordered_map.hpp>
@@ -312,9 +313,9 @@ class Zigzag_persistence
   Index apply_identity() { return ++numArrow_; }
 
   /**
-   * @brief Outputs through the given callback method all birth indices which are currently not paired with 
+   * @brief Outputs through the given callback method all birth indices which are currently not paired with
    * a death index.
-   * 
+   *
    * @tparam F Type of the callback method. Takes two arguments: the dimension of the cycle and the birth index
    * of the cycle.
    * @param stream_infinite_interval Method processing the unpaired birth indices.

@@ -8,16 +8,17 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_landscape.h>
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
 
+#include <gudhi/Persistence_landscape.h>
+
 using Persistence_landscape = Gudhi::Persistence_representations::Persistence_landscape;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program computes distance of persistence landscapes stored in files (the files needs to be "
             << "created beforehand).\n"
             << "The first parameter of a program is an integer p. The program compute L^p distance of the two heat "
