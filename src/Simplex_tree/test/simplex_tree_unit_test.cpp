@@ -29,8 +29,6 @@
 // /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
 #include "gudhi/Simplex_tree.h"
 
-#include "test_vector_filtration_simplex_tree.h"
-
 using namespace Gudhi;
 
 typedef boost::mpl::list<Simplex_tree<>,
@@ -592,6 +590,140 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion, typeST, list_o
     }
     std::clog << std::endl;
   }
+}
+
+template<class typeST>
+void build_simplex_tree_with_strategy(typeST& simplexTree, typename typeST::Insertion_strategy s){
+  simplexTree.insert_simplex_and_subfaces({0,1,2}, 3, s);
+  simplexTree.insert_simplex_and_subfaces({1,3}, 4, s);
+  simplexTree.insert_simplex_and_subfaces({4,5}, 6, s);
+  simplexTree.insert_simplex_and_subfaces({3,4,5,6}, 5, s);
+  simplexTree.insert_simplex_and_subfaces({2,6}, 7, s);
+  simplexTree.insert_simplex_and_subfaces({3,4}, 8, s);
+  simplexTree.insert_simplex_and_subfaces({0,1,2}, 2, s);
+  simplexTree.insert_simplex_and_subfaces({4,5,6}, 4, s);
+  simplexTree.insert_simplex_and_subfaces({2,6}, 1, s);
+  simplexTree.insert_simplex_and_subfaces({1,3}, 8, s);
+}
+
+template<class typeST>
+void test_lowest_strategy(){
+  typeST simplexTree;
+  build_simplex_tree_with_strategy(simplexTree, typeST::Insertion_strategy::LOWEST);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({2})), 1);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0,1})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0,2})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1,2})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0,1,2})), 2);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({5})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({6})), 1);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,5})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,6})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,5})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,6})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({5,6})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,5})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,6})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,5,6})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,5,6})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,5,6})), 5);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1,3})), 4);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({2,6})), 1);
+}
+
+template<class typeST>
+void test_highest_strategy(){
+  typeST simplexTree;
+  build_simplex_tree_with_strategy(simplexTree, typeST::Insertion_strategy::HIGHEST);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0})), 3);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1})), 3);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({2})), 3);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0,1})), 3);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0,2})), 3);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1,2})), 3);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0,1,2})), 3);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({5})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({6})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,5})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,6})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,5})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,6})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({5,6})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,5})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,6})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,5,6})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,5,6})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,5,6})), 6);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1,3})), 4);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({2,6})), 7);
+}
+
+template<class typeST>
+void test_possible_strategy(){
+  typeST simplexTree;
+  simplexTree.insert_batch_vertices({3,2,1}, 0);
+  simplexTree.insert_batch_vertices({4}, 1);
+  simplexTree.insert_batch_vertices({5,0,6}, 2);
+  simplexTree.insert_simplex({3,6}, 4);
+  build_simplex_tree_with_strategy(simplexTree, typeST::Insertion_strategy::FIRST_POSSIBLE);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1})), 0);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({2})), 0);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0,1})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0,2})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1,2})), 0);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0,1,2})), 2);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3})), 0);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4})), 1);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({5})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({6})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4})), 1);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,5})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,6})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,5})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,6})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({5,6})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,5})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,6})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,5,6})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,5,6})), 2);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,5,6})), 4);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1,3})), 0);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({2,6})), 2);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion_with_strategy, typeST, list_of_tested_variants) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF INSERTION WITH STRATEGY" << std::endl;
+
+  std::clog << "************** STRATEGY: LOWEST\n";
+  test_lowest_strategy<typeST>();
+
+  std::clog << "************** STRATEGY: HIGHEST\n";
+  test_highest_strategy<typeST>();
+
+  std::clog << "************** STRATEGY: WHEN POSSIBLE\n";
+  test_possible_strategy<typeST>();
 }
 
 template<class typeST, class Vertex_handle>

@@ -11,8 +11,9 @@
 #ifndef SIMPLEX_TREE_FILTRATION_VALUE_UTILS_H_
 #define SIMPLEX_TREE_FILTRATION_VALUE_UTILS_H_
 
-#include <limits> //std::numeric_limits
-#include <cmath>  //std::isnan
+#include <cstddef>  // std::size_t
+#include <limits>   // std::numeric_limits
+#include <cmath>    // std::isnan
 
 #include <gudhi/Simplex_tree/serialization_utils.h>
 
