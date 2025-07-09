@@ -7,57 +7,85 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+__author__ = "Mathieu Carrière"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2021 Inria"
+__license__ = "GPL v3"
+
+
 import numpy as np
 import itertools
 import matplotlib
 import matplotlib.pyplot as plt
 
-from sklearn.base            import BaseEstimator
-from sklearn.cluster         import DBSCAN, AgglomerativeClustering
-from sklearn.metrics         import pairwise_distances
-from scipy.spatial.distance  import directed_hausdorff
+from sklearn.base import BaseEstimator
+from sklearn.cluster import DBSCAN, AgglomerativeClustering
+from sklearn.metrics import pairwise_distances
+from scipy.spatial.distance import directed_hausdorff
 
 from sklearn import __version__ as sklearn_version
 from sklearn.utils.fixes import parse_version
-agglomerative_clustering_metric = parse_version(sklearn_version) >= parse_version('1.2.0')
+
+agglomerative_clustering_metric = parse_version(sklearn_version) >= parse_version("1.2.0")
 
 from . import SimplexTree, CoverComplex
+
 
 def _save_to_html(dat, lens, color, param, points, edges, html_output_filename):
 
     from ._kepler_mapper import KeplerMapper
+
     network = {}
     mapper = KeplerMapper(verbose=0)
-    data = np.zeros((3,3))
-    projected_data = mapper.fit_transform( data, projection="sum", scaler=None )
+    data = np.zeros((3, 3))
+    projected_data = mapper.fit_transform(data, projection="sum", scaler=None)
 
     from collections import defaultdict
+
     nodes = defaultdict(list)
     links = defaultdict(list)
     custom = defaultdict(list)
 
     for point in points:
-        nodes[  str(int(point[0]))  ] = [  int(point[0]), point[1], int(point[2])  ]
-        links[  str(int(point[0]))  ] = []
-        custom[  int(point[0])  ] = point[1]
+        nodes[str(int(point[0]))] = [int(point[0]), point[1], int(point[2])]
+        links[str(int(point[0]))] = []
+        custom[int(point[0])] = point[1]
 
     for edge in edges:
-        links[  str(edge[0])  ].append(  str(edge[1])  )
-        links[  str(edge[1])  ].append(  str(edge[0])  )
+        links[str(edge[0])].append(str(edge[1]))
+        links[str(edge[1])].append(str(edge[0]))
 
     custom_val = custom.values()
     m = min(custom_val)
     M = max(custom_val)
-    
+
     network["nodes"] = nodes
     network["links"] = links
     network["meta"] = lens
 
-
-    mapper.visualize(network, color_function=color, path_html=html_output_filename, title=dat,
-    graph_link_distance=30, graph_gravity=0.1, graph_charge=-120, custom_tooltips=custom, width_html=0,
-    height_html=0, show_tooltips=True, show_title=True, show_meta=True, res=param[0], gain=param[1], minimum=m, maximum=M)
-    message = repr(html_output_filename) + " is generated. You can now use your favorite web browser to visualize it."
+    mapper.visualize(
+        network,
+        color_function=color,
+        path_html=html_output_filename,
+        title=dat,
+        graph_link_distance=30,
+        graph_gravity=0.1,
+        graph_charge=-120,
+        custom_tooltips=custom,
+        width_html=0,
+        height_html=0,
+        show_tooltips=True,
+        show_title=True,
+        show_meta=True,
+        res=param[0],
+        gain=param[1],
+        minimum=m,
+        maximum=M,
+    )
+    message = (
+        repr(html_output_filename)
+        + " is generated. You can now use your favorite web browser to visualize it."
+    )
     print(message)
 
 
@@ -69,6 +97,7 @@ class CoverComplexPy(BaseEstimator):
         simplex_tree_ (gudhi SimplexTree): simplicial complex representing the cover complex computed after calling the fit() method.
         node_info_ (dictionary): various information associated to the nodes of the cover complex.
     """
+
     def __init__(self, verbose=False):
         """
         Constructor for the CoverComplexPy class.
@@ -94,9 +123,10 @@ class CoverComplexPy(BaseEstimator):
             graph representing the 1-skeleton of the cover complex.
         """
         import networkx as nx
+
         st = self.simplex_tree_
         G = nx.Graph()
-        for (splx,_) in st.get_skeleton(1):	
+        for splx, _ in st.get_skeleton(1):
             if len(splx) == 1:
                 G.add_node(splx[0])
             if len(splx) == 2:
@@ -106,14 +136,16 @@ class CoverComplexPy(BaseEstimator):
             nx.set_node_attributes(G, attrs)
         return G
 
-    def save_to_dot(self, file_name="cover_complex", color_name="color", eps_color=.1, eps_size=.1):
+    def save_to_dot(
+        self, file_name="cover_complex", color_name="color", eps_color=0.1, eps_size=0.1
+    ):
         """
         Write the 0-skeleton of the cover complex in a DOT file called "{file_name}.dot", that can be processed with, e.g., neato. The vertices of the cover complex are colored with the first color function, ie, the first column of self.colors.  This function also produces an extra pdf file "colorbar_{color_name}.pdf" containing a colorbar corresponding to the node colors in the DOT file.
 
         Parameters
         ----------
         file_name : string
-            name for the output .dot file, default "cover_complex" 
+            name for the output .dot file, default "cover_complex"
         color_name : string
             name for the output .pdf showing the colorbar of the color used for the Mapper nodes, default "color"
         eps_color : float
@@ -124,8 +156,12 @@ class CoverComplexPy(BaseEstimator):
         st = self.simplex_tree_
         node_info_ = self.node_info_
 
-        maxv, minv = max(node_info_[k]["colors"][0] for k in node_info_.keys()), min(node_info_[k]["colors"][0] for k in node_info_.keys())
-        maxs, mins = max(node_info_[k]["size"]      for k in node_info_.keys()), min(node_info_[k]["size"]      for k in node_info_.keys())
+        maxv, minv = max(node_info_[k]["colors"][0] for k in node_info_.keys()), min(
+            node_info_[k]["colors"][0] for k in node_info_.keys()
+        )
+        maxs, mins = max(node_info_[k]["size"] for k in node_info_.keys()), min(
+            node_info_[k]["size"] for k in node_info_.keys()
+        )
 
         if not file_name.lower().endswith(".dot"):
             file_name += ".dot"
@@ -133,39 +169,75 @@ class CoverComplexPy(BaseEstimator):
         with open(file_name, "w") as f:
             f.write("graph MAP{")
             cols = []
-            for (simplex,_) in st.get_skeleton(0):
-                cnode = (1.-2*eps_color) * (node_info_[simplex[0]]["colors"][0] - minv)/(maxv-minv) + eps_color if maxv != minv else 0
-                snode = (1.-2*eps_size) * (node_info_[simplex[0]]["size"]-mins)/(maxs-mins) + eps_size if maxs != mins else 1
-                f.write(  str(simplex[0]) + "[shape=circle width=" + str(snode) + " fontcolor=black color=black label=\""  + "\" style=filled fillcolor=\"" + str(cnode) + ", 1, 1\"]")
+            for simplex, _ in st.get_skeleton(0):
+                cnode = (
+                    (1.0 - 2 * eps_color)
+                    * (node_info_[simplex[0]]["colors"][0] - minv)
+                    / (maxv - minv)
+                    + eps_color
+                    if maxv != minv
+                    else 0
+                )
+                snode = (
+                    (1.0 - 2 * eps_size)
+                    * (node_info_[simplex[0]]["size"] - mins)
+                    / (maxs - mins)
+                    + eps_size
+                    if maxs != mins
+                    else 1
+                )
+                f.write(
+                    str(simplex[0])
+                    + "[shape=circle width="
+                    + str(snode)
+                    + ' fontcolor=black color=black label="'
+                    + '" style=filled fillcolor="'
+                    + str(cnode)
+                    + ', 1, 1"]'
+                )
                 cols.append(cnode)
-            for (simplex,_) in st.get_simplices():
+            for simplex, _ in st.get_simplices():
                 if len(simplex) == 2:
-                    f.write("  " + str(simplex[0]) + " -- " + str(simplex[1]) + " [weight=15];")
+                    f.write(
+                        "  " + str(simplex[0]) + " -- " + str(simplex[1]) + " [weight=15];"
+                    )
             f.write("}")
-        
-        L = np.linspace(eps_color, 1.-eps_color, 100)
+
+        L = np.linspace(eps_color, 1.0 - eps_color, 100)
         colsrgb = []
         import colorsys
+
         for c in L:
-            colsrgb.append(colorsys.hsv_to_rgb(c,1,1))
+            colsrgb.append(colorsys.hsv_to_rgb(c, 1, 1))
         fig, ax = plt.subplots(figsize=(6, 1))
         fig.subplots_adjust(bottom=0.5)
         my_cmap = matplotlib.colors.ListedColormap(colsrgb, name=color_name)
-        cb = matplotlib.colorbar.ColorbarBase(ax, cmap=my_cmap, norm=matplotlib.colors.Normalize(vmin=minv, vmax=maxv), orientation="horizontal")
+        cb = matplotlib.colorbar.ColorbarBase(
+            ax,
+            cmap=my_cmap,
+            norm=matplotlib.colors.Normalize(vmin=minv, vmax=maxv),
+            orientation="horizontal",
+        )
         cb.set_label(color_name)
         fig.savefig("colorbar_" + color_name + ".pdf", format="pdf")
         plt.close()
-        
-    def save_to_txt(self, file_name="cover_complex", data_name="data", cover_name="cover", color_name="color"):
+
+    def save_to_txt(
+        self,
+        file_name="cover_complex",
+        data_name="data",
+        cover_name="cover",
+        color_name="color",
+    ):
         """
         Write the cover complex to a TXT file called "{file_name}.txt", that can be processed with the KeplerMapper Python script "KeplerMapperVisuFromTxtFile.py" available under "src/Nerve_GIC/utilities/".
 
         Parameters
         ----------
         file_name : string
-            name for the output .txt file, default "cover_complex" 
+            name for the output .txt file, default "cover_complex"
         data_name : string
-            name to use for the data on which the cover complex was computed, default "data". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py 
+            name to use for the data on which the cover complex was computed, default "data". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py
         cover_name : string
             name to use for the cover used to compute the cover complex, default "cover". It will be used when generating an html visualization with KeplerMapperVisuFromTxtFile.py
         color_name : string
@@ -181,25 +253,43 @@ class CoverComplexPy(BaseEstimator):
             f.write(cover_name + "\n")
             f.write(color_name + "\n")
             f.write(str(self.resolutions[0]) + " " + str(self.gains[0]) + "\n")
-            f.write(str(st.num_vertices()) + " " + str(len(list(st.get_skeleton(1)))-st.num_vertices()) + "\n")
+            f.write(
+                str(st.num_vertices())
+                + " "
+                + str(len(list(st.get_skeleton(1))) - st.num_vertices())
+                + "\n"
+            )
             name2id = {}
             idv = 0
-            for s,_ in st.get_skeleton(0):
-                f.write(str(idv) + " " + str(self.node_info_[s[0]]["colors"][0]) + " " + str(self.node_info_[s[0]]["size"]) + "\n")
+            for s, _ in st.get_skeleton(0):
+                f.write(
+                    str(idv)
+                    + " "
+                    + str(self.node_info_[s[0]]["colors"][0])
+                    + " "
+                    + str(self.node_info_[s[0]]["size"])
+                    + "\n"
+                )
                 name2id[s[0]] = idv
                 idv += 1
-            for s,_ in st.get_skeleton(1):
+            for s, _ in st.get_skeleton(1):
                 if len(s) == 2:
                     f.write(str(name2id[s[0]]) + " " + str(name2id[s[1]]) + "\n")
-    
-    def save_to_html(self, file_name="cover_complex", data_name="data", cover_name="cover", color_name="color"):
+
+    def save_to_html(
+        self,
+        file_name="cover_complex",
+        data_name="data",
+        cover_name="cover",
+        color_name="color",
+    ):
         """
         Write the cover complex to an HTML file called "{file_name}.html", that can be visualized in a browser. This function is based on a fork of https://github.com/MLWave/kepler-mapper
 
         Parameters
         ----------
         file_name : string
-            name for the output .html file, default "cover_complex" 
+            name for the output .html file, default "cover_complex"
         data_name : string
             name to use for the data on which the cover complex was computed, default "data".
         cover_name : string
@@ -214,18 +304,27 @@ class CoverComplexPy(BaseEstimator):
             file_name += ".html"
 
         points, edges, name2id, idv = [], [], {}, 0
-        for s,_ in st.get_skeleton(0):
-            points.append([ idv, self.node_info_[s[0]]["colors"][0], self.node_info_[s[0]]["size"] ])
+        for s, _ in st.get_skeleton(0):
+            points.append(
+                [idv, self.node_info_[s[0]]["colors"][0], self.node_info_[s[0]]["size"]]
+            )
             name2id[s[0]] = idv
             idv += 1
-        for s,_ in st.get_skeleton(1):
+        for s, _ in st.get_skeleton(1):
             if len(s) == 2:
-                edges.append([ name2id[s[0]] , name2id[s[1]] ])
+                edges.append([name2id[s[0]], name2id[s[1]]])
 
-        _save_to_html(data_name, cover_name, color_name, [self.resolutions[0], self.gains[0]], points, edges, file_name)
+        _save_to_html(
+            data_name,
+            cover_name,
+            color_name,
+            [self.resolutions[0], self.gains[0]],
+            points,
+            edges,
+            file_name,
+        )
 
-
-    class _constant_clustering():
+    class _constant_clustering:
         def fit_predict(X):
             return np.zeros([len(X)], dtype=np.int32)
 
@@ -234,7 +333,22 @@ class MapperComplex(CoverComplexPy):
     """
     This is a class for computing Mapper simplicial complexes on point clouds or distance matrices.
     """
-    def __init__(self, *, input_type="point cloud", colors=None, min_points_per_node=0, filter_bnds=None, resolutions=None, gains=None, clustering=DBSCAN(), N=100, beta=0., C=10., verbose=False):
+
+    def __init__(
+        self,
+        *,
+        input_type="point cloud",
+        colors=None,
+        min_points_per_node=0,
+        filter_bnds=None,
+        resolutions=None,
+        gains=None,
+        clustering=DBSCAN(),
+        N=100,
+        beta=0.0,
+        C=10.0,
+        verbose=False
+    ):
         """
         Constructor for the MapperComplex class.
 
@@ -256,17 +370,28 @@ class MapperComplex(CoverComplexPy):
             subsampling iterations (default 100) for estimating scale and resolutions. Used only if clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
         beta : float
             exponent parameter (default 0.) for estimating scale and resolutions. Used only if clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
-        C : float 
+        C : float
             constant parameter (default 10.) for estimating scale and resolutions. Used only if clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
         verbose : bool
             whether to display info while computing.
         """
 
-        self.filter_bnds, self.resolutions, self.gains, self.clustering = filter_bnds, resolutions, gains, clustering
-        self.input_type, self.min_points_per_node, self.N, self.beta, self.C = input_type, min_points_per_node, N, beta, C
+        self.filter_bnds, self.resolutions, self.gains, self.clustering = (
+            filter_bnds,
+            resolutions,
+            gains,
+            clustering,
+        )
+        self.input_type, self.min_points_per_node, self.N, self.beta, self.C = (
+            input_type,
+            min_points_per_node,
+            N,
+            beta,
+            C,
+        )
         CoverComplexPy.__init__(self, verbose)
 
-    def estimate_scale(self, X, N=100, beta=0., C=10.):
+    def estimate_scale(self, X, N=100, beta=0.0, C=10.0):
         """
         Compute estimated scale of a point cloud or a distance matrix.
 
@@ -276,7 +401,7 @@ class MapperComplex(CoverComplexPy):
                 input point cloud or distance matrix.
             N : int
                 subsampling iterations (default 100). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
-            beta : float 
+            beta : float
                 exponent parameter (default 0.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
             C : float
                 constant parameter (default 10.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
@@ -287,17 +412,17 @@ class MapperComplex(CoverComplexPy):
             estimated scale that can be used with, e.g., agglomerative clustering.
         """
         num_pts = X.shape[0]
-        delta, m = 0., int(  num_pts / np.exp((1+beta) * np.log(np.log(num_pts)/np.log(C)))  )
+        delta, m = 0.0, int(num_pts / np.exp((1 + beta) * np.log(np.log(num_pts) / np.log(C))))
         for _ in range(N):
             subpop = np.random.choice(num_pts, size=m, replace=False)
             if self.input_type == "point cloud":
-                d, _, _ = directed_hausdorff(X, X[subpop,:])
+                d, _, _ = directed_hausdorff(X, X[subpop, :])
             if self.input_type == "distance matrix":
-                d = np.max(np.min(X[:,subpop], axis=1), axis=0)
-            delta += d/N
+                d = np.max(np.min(X[:, subpop], axis=1), axis=0)
+            delta += d / N
         return delta
 
-    def get_optimal_parameters_for_agglomerative_clustering(self, X, beta=0., C=10., N=100):
+    def get_optimal_parameters_for_agglomerative_clustering(self, X, beta=0.0, C=10.0, N=100):
         """
         Compute optimal scale and resolutions for a point cloud or a distance matrix.
 
@@ -307,7 +432,7 @@ class MapperComplex(CoverComplexPy):
                 input point cloud or distance matrix.
             beta : float
                 exponent parameter (default 0.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
-            C : float 
+            C : float
                 constant parameter (default 10.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
             N : int
                 subsampling iterations (default 100). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
@@ -322,15 +447,19 @@ class MapperComplex(CoverComplexPy):
         num_filt, delta = self.filters.shape[1], 0
         delta = self.estimate_scale(X=X, N=N, C=C, beta=beta)
 
-        pairwise = pairwise_distances(X, metric="euclidean") if self.input_type == "point cloud" else X
+        pairwise = (
+            pairwise_distances(X, metric="euclidean")
+            if self.input_type == "point cloud"
+            else X
+        )
         pairs = np.argwhere(pairwise <= delta)
         num_pairs = pairs.shape[0]
         res = []
         for f in range(num_filt):
-            F = self.filters[:,f]
+            F = self.filters[:, f]
             resf = 0
             for p in range(num_pairs):
-                resf = max(resf, abs(F[pairs[p,0]] - F[pairs[p,1]]))
+                resf = max(resf, abs(F[pairs[p, 0]] - F[pairs[p, 1]]))
             res.append(resf)
 
         return delta, np.array(res)
@@ -345,7 +474,7 @@ class MapperComplex(CoverComplexPy):
                 input point cloud or distance matrix.
             y : n x 1 array
                 point labels (unused).
-            filters : list of lists or numpy array of shape (num_points) x (num_filters) 
+            filters : list of lists or numpy array of shape (num_points) x (num_filters)
                 filter functions (sometimes called lenses) used to compute the cover. Each column of the numpy array defines a scalar function defined on the input points.
             colors : list of lists or numpy array of shape (num_points) x (num_colors)
                 functions used to color the nodes of the cover complex. More specifically, coloring is done by computing the means of these functions on the subpopulations corresponding to each node. If None, first coordinate is used if input is point cloud, and eccentricity is used if input is distance matrix.
@@ -366,76 +495,102 @@ class MapperComplex(CoverComplexPy):
 
         if self.filters is None:
             if self.input_type == "point cloud":
-                self.filters = X[:,0:1]
+                self.filters = X[:, 0:1]
             elif self.input_type == "distance matrix":
-                self.filters = X.max(axis=0)[:,None]
+                self.filters = X.max(axis=0)[:, None]
         else:
             if isinstance(self.filters, np.ndarray) == False:
                 self.filters = np.array(self.filters).T
 
         if self.colors is None:
             if self.input_type == "point cloud":
-                self.colors = X[:,0:1]
+                self.colors = X[:, 0:1]
             elif self.input_type == "distance matrix":
-                self.colors = X.max(axis=0)[:,None]
+                self.colors = X.max(axis=0)[:, None]
         else:
             if isinstance(self.colors, np.ndarray) == False:
                 self.colors = np.array(self.colors).T
 
-        if len(self.filters.shape) == 1: # if self.filters is a 1D filter, convert it to an array of shape [n,1]
-            self.filters = np.reshape(self.filters, [len(X),1])
-        if len(self.colors.shape) == 1: # if self.colors is a 1D filter, convert it to an array of shape [n,1]
-            self.colors = np.reshape(self.colors, [len(X),1])
-      
+        if (
+            len(self.filters.shape) == 1
+        ):  # if self.filters is a 1D filter, convert it to an array of shape [n,1]
+            self.filters = np.reshape(self.filters, [len(X), 1])
+        if (
+            len(self.colors.shape) == 1
+        ):  # if self.colors is a 1D filter, convert it to an array of shape [n,1]
+            self.colors = np.reshape(self.colors, [len(X), 1])
+
         num_pts, num_filters = self.filters.shape[0], self.filters.shape[1]
 
         # If some filter limits are unspecified, automatically compute them
         if self.filter_bnds is None:
-            self.filter_bnds = np.hstack([np.min(self.filters, axis=0)[:,np.newaxis], np.max(self.filters, axis=0)[:,np.newaxis]])
+            self.filter_bnds = np.hstack(
+                [
+                    np.min(self.filters, axis=0)[:, np.newaxis],
+                    np.max(self.filters, axis=0)[:, np.newaxis],
+                ]
+            )
 
         # If some resolutions are not specified, automatically compute them
         if self.gains is None:
-            self.gains = np.broadcast_to(1/3, num_filters)
+            self.gains = np.broadcast_to(1 / 3, num_filters)
         if self.resolutions is None or self.clustering is None:
-            delta, resolutions = self.get_optimal_parameters_for_agglomerative_clustering(X=X, beta=self.beta, C=self.C, N=self.N)
+            delta, resolutions = self.get_optimal_parameters_for_agglomerative_clustering(
+                X=X, beta=self.beta, C=self.C, N=self.N
+            )
             if self.clustering is None:
-                self.clustering = AgglomerativeClustering(n_clusters=None, linkage="single", distance_threshold=delta, **{
-        "metric" if agglomerative_clustering_metric else "affinity":
-        "euclidean" if self.input_type == "point cloud" else "precomputed"
-                                                        })
+                self.clustering = AgglomerativeClustering(
+                    n_clusters=None,
+                    linkage="single",
+                    distance_threshold=delta,
+                    **{
+                        "metric" if agglomerative_clustering_metric else "affinity": (
+                            "euclidean" if self.input_type == "point cloud" else "precomputed"
+                        )
+                    }
+                )
             if self.resolutions is None:
-                self.resolutions = np.multiply(resolutions, 1./self.gains)
-                self.resolutions = np.array([int( (self.filter_bnds[ir,1]-self.filter_bnds[ir,0])/r) for ir, r in enumerate(self.resolutions)])
+                self.resolutions = np.multiply(resolutions, 1.0 / self.gains)
+                self.resolutions = np.array(
+                    [
+                        int((self.filter_bnds[ir, 1] - self.filter_bnds[ir, 0]) / r)
+                        for ir, r in enumerate(self.resolutions)
+                    ]
+                )
 
         # Initialize attributes
         self.simplex_tree_, self.node_info_ = SimplexTree(), {}
 
-        if np.all(self.gains < .5):
+        if np.all(self.gains < 0.5):
 
             # Compute which points fall in which patch or patch intersections
-            interval_inds, intersec_inds = np.empty(self.filters.shape), np.empty(self.filters.shape)
+            interval_inds, intersec_inds = np.empty(self.filters.shape), np.empty(
+                self.filters.shape
+            )
             for i in range(num_filters):
-                f, r, g = self.filters[:,i], self.resolutions[i], self.gains[i]
-                min_f, max_f = self.filter_bnds[i,0], np.nextafter(self.filter_bnds[i,1], np.inf)
-                interval_endpoints, l = np.linspace(min_f, max_f, num=r+1, retstep=True)
+                f, r, g = self.filters[:, i], self.resolutions[i], self.gains[i]
+                min_f, max_f = self.filter_bnds[i, 0], np.nextafter(
+                    self.filter_bnds[i, 1], np.inf
+                )
+                interval_endpoints, l = np.linspace(min_f, max_f, num=r + 1, retstep=True)
                 intersec_endpoints = []
-                for j in range(1, len(interval_endpoints)-1):
-                    intersec_endpoints.append(interval_endpoints[j] - g*l / (2 - 2*g))
-                    intersec_endpoints.append(interval_endpoints[j] + g*l / (2 - 2*g))
-                interval_inds[:,i] = np.digitize(f, interval_endpoints)
-                intersec_inds[:,i] = 0.5 * (np.digitize(f, intersec_endpoints) + 1)
+                for j in range(1, len(interval_endpoints) - 1):
+                    intersec_endpoints.append(interval_endpoints[j] - g * l / (2 - 2 * g))
+                    intersec_endpoints.append(interval_endpoints[j] + g * l / (2 - 2 * g))
+                interval_inds[:, i] = np.digitize(f, interval_endpoints)
+                intersec_inds[:, i] = 0.5 * (np.digitize(f, intersec_endpoints) + 1)
 
             # Build the binned_data map that takes a patch or a patch intersection and outputs the indices of the points contained in it
             binned_data = {}
             for i in range(num_pts):
                 list_preimage = []
                 for j in range(num_filters):
-                    a, b = interval_inds[i,j], intersec_inds[i,j]
+                    a, b = interval_inds[i, j], intersec_inds[i, j]
                     list_preimage.append([a])
                     if b == a:
-                        list_preimage[j].append(a+1)
-                    if b == a-1:
-                        list_preimage[j].append(a-1)
+                        list_preimage[j].append(a + 1)
+                    if b == a - 1:
+                        list_preimage[j].append(a - 1)
                 list_preimage = list(itertools.product(*list_preimage))
                 for pre_idx in list_preimage:
                     try:
@@ -449,12 +604,14 @@ class MapperComplex(CoverComplexPy):
             l_int, r_int = [], []
             for i in range(num_filters):
                 L, R = [], []
-                f, r, g = self.filters[:,i], self.resolutions[i], self.gains[i]
-                min_f, max_f = self.filter_bnds[i,0], np.nextafter(self.filter_bnds[i,1], np.inf)
-                interval_endpoints, l = np.linspace(min_f, max_f, num=r+1, retstep=True)
-                for j in range(len(interval_endpoints)-1):
-                    L.append(interval_endpoints[j]   - g*l / (2 - 2*g))
-                    R.append(interval_endpoints[j+1] + g*l / (2 - 2*g))
+                f, r, g = self.filters[:, i], self.resolutions[i], self.gains[i]
+                min_f, max_f = self.filter_bnds[i, 0], np.nextafter(
+                    self.filter_bnds[i, 1], np.inf
+                )
+                interval_endpoints, l = np.linspace(min_f, max_f, num=r + 1, retstep=True)
+                for j in range(len(interval_endpoints) - 1):
+                    L.append(interval_endpoints[j] - g * l / (2 - 2 * g))
+                    R.append(interval_endpoints[j + 1] + g * l / (2 - 2 * g))
                 l_int.append(L)
                 r_int.append(R)
 
@@ -463,9 +620,11 @@ class MapperComplex(CoverComplexPy):
             for i in range(num_pts):
                 list_preimage = []
                 for j in range(num_filters):
-                    fval = self.filters[i,j]
-                    start, end = int(min(np.argwhere(np.array(r_int[j]) >= fval))), int(max(np.argwhere(np.array(l_int[j]) <= fval)))
-                    list_preimage.append(list(range(start, end+1)))
+                    fval = self.filters[i, j]
+                    start, end = int(min(np.argwhere(np.array(r_int[j]) >= fval))), int(
+                        max(np.argwhere(np.array(l_int[j]) <= fval))
+                    )
+                    list_preimage.append(list(range(start, end + 1)))
                 list_preimage = list(itertools.product(*list_preimage))
                 for pre_idx in list_preimage:
                     try:
@@ -482,7 +641,11 @@ class MapperComplex(CoverComplexPy):
             # Apply clustering on the corresponding subpopulation
             idxs = np.array(binned_data[preimage])
             if len(idxs) > 1:
-                clusters = self.clustering.fit_predict(X[idxs,:]) if self.input_type == "point cloud" else self.clustering.fit_predict(X[idxs,:][:,idxs])
+                clusters = (
+                    self.clustering.fit_predict(X[idxs, :])
+                    if self.input_type == "point cloud"
+                    else self.clustering.fit_predict(X[idxs, :][:, idxs])
+                )
             elif len(idxs) == 1:
                 clusters = np.array([0])
             else:
@@ -496,13 +659,18 @@ class MapperComplex(CoverComplexPy):
                 self.node_info_[node_name] = {}
                 self.node_info_[node_name]["indices"] = subpopulation
                 self.node_info_[node_name]["size"] = len(subpopulation)
-                self.node_info_[node_name]["colors"] = np.mean(self.colors[subpopulation,:], axis=0)
+                self.node_info_[node_name]["colors"] = np.mean(
+                    self.colors[subpopulation, :], axis=0
+                )
                 self.node_info_[node_name]["patch"] = preimage
 
             # Update the cover map
             for pt in range(clusters.shape[0]):
                 node_name = clus_base + clusters[pt]
-                if clusters[pt] != -1 and self.node_info_[node_name]["size"] >= self.min_points_per_node:
+                if (
+                    clusters[pt] != -1
+                    and self.node_info_[node_name]["size"] >= self.min_points_per_node
+                ):
                     cover[idxs[pt]].append(node_name)
 
             clus_base += np.max(clusters) + 1
@@ -513,13 +681,30 @@ class MapperComplex(CoverComplexPy):
 
         return self
 
+
 class GraphInducedComplex(CoverComplexPy):
     """
     This is a class for computing graph induced simplicial complexes on point clouds or distance matrices.
     """
-    def __init__(self, *, input_type="point cloud", cover="functional", min_points_per_node=0,
-                          voronoi_samples=100, assignments=None,  filter_bnds=None, resolution=None, gain=None, N=100, beta=0., C=10.,
-                          graph="rips", rips_threshold=None, verbose=False):
+
+    def __init__(
+        self,
+        *,
+        input_type="point cloud",
+        cover="functional",
+        min_points_per_node=0,
+        voronoi_samples=100,
+        assignments=None,
+        filter_bnds=None,
+        resolution=None,
+        gain=None,
+        N=100,
+        beta=0.0,
+        C=10.0,
+        graph="rips",
+        rips_threshold=None,
+        verbose=False
+    ):
         """
         Constructor for the GraphInducedComplex class.
 
@@ -540,9 +725,25 @@ class GraphInducedComplex(CoverComplexPy):
             verbose (bool): whether to display info while computing.
         """
 
-        self.input_type, self.cover, self.min_points_per_node = input_type, cover, min_points_per_node
-        self.voronoi_samples, self.assignments, self.filter_bnds, self.resolution, self.gain = voronoi_samples, assignments, filter_bnds, resolution, gain
-        self.graph, self.rips_threshold, self.N, self.beta, self.C = graph, rips_threshold, N, beta, C
+        self.input_type, self.cover, self.min_points_per_node = (
+            input_type,
+            cover,
+            min_points_per_node,
+        )
+        (
+            self.voronoi_samples,
+            self.assignments,
+            self.filter_bnds,
+            self.resolution,
+            self.gain,
+        ) = (voronoi_samples, assignments, filter_bnds, resolution, gain)
+        self.graph, self.rips_threshold, self.N, self.beta, self.C = (
+            graph,
+            rips_threshold,
+            N,
+            beta,
+            C,
+        )
         CoverComplexPy.__init__(self, verbose)
 
     def fit(self, X, y=None, filter=None, color=None):
@@ -568,7 +769,7 @@ class GraphInducedComplex(CoverComplexPy):
         # Set vertex color
         if self.color is None:
             if self.input_type == "point cloud":
-                self.color = X[:,0]
+                self.color = X[:, 0]
             elif self.input_type == "distance matrix":
                 self.color = X.max(axis=0)
         else:
@@ -592,7 +793,7 @@ class GraphInducedComplex(CoverComplexPy):
 
             if self.filter is None:
                 if self.input_type == "point cloud":
-                    self.filter = X[:,0]
+                    self.filter = X[:, 0]
                 elif self.input_type == "distance matrix":
                     self.filter = X.max(axis=0)
             else:
@@ -606,7 +807,7 @@ class GraphInducedComplex(CoverComplexPy):
                 self.complex.set_resolution_with_interval_number(self.resolution)
 
             if self.gain is None:
-                self.complex.set_gain(.33)
+                self.complex.set_gain(0.33)
             else:
                 self.complex.set_gain(self.gain)
 
@@ -623,29 +824,37 @@ class GraphInducedComplex(CoverComplexPy):
         # Normalize vertex names of simplex tree
         self.simplex_tree_ = SimplexTree()
         idv, names = 0, {}
-        for v,_ in simplex_tree_.get_skeleton(0):
+        for v, _ in simplex_tree_.get_skeleton(0):
             if len(self.complex.subpopulation(v[0])) > self.min_points_per_node:
                 names[v[0]] = idv
                 self.simplex_tree_.insert([idv])
                 idv += 1
-        for s,_ in simplex_tree_.get_simplices():
-            if len(s) >= 2 and np.all([len(self.complex.subpopulation(v)) > self.min_points_per_node for v in s]):
+        for s, _ in simplex_tree_.get_simplices():
+            if len(s) >= 2 and np.all(
+                [len(self.complex.subpopulation(v)) > self.min_points_per_node for v in s]
+            ):
                 self.simplex_tree_.insert([names[v] for v in s])
 
         # Store vertex info
         self.node_info_ = {}
-        for v,_ in simplex_tree_.get_skeleton(0):
+        for v, _ in simplex_tree_.get_skeleton(0):
             if len(self.complex.subpopulation(v[0])) > self.min_points_per_node:
                 node = names[v[0]]
                 pop = self.complex.subpopulation(v[0])
-                self.node_info_[node] = {"indices": pop, "size": len(pop), "colors": [self.complex.subcolor(v[0])]}
+                self.node_info_[node] = {
+                    "indices": pop,
+                    "size": len(pop),
+                    "colors": [self.complex.subcolor(v[0])],
+                }
 
         return self
+
 
 class NerveComplex(CoverComplexPy):
     """
     This is a class for computing nerve simplicial complexes on point clouds or distance matrices.
     """
+
     def __init__(self, *, input_type="point cloud", min_points_per_node=0, verbose=False):
         """
         Constructor for the NerveComplex class.
@@ -683,7 +892,7 @@ class NerveComplex(CoverComplexPy):
         # Set vertex color
         if self.color is None:
             if self.input_type == "point cloud":
-                self.color = X[:,0]
+                self.color = X[:, 0]
             elif self.input_type == "distance matrix":
                 self.color = X.max(axis=0)
         else:
@@ -701,21 +910,27 @@ class NerveComplex(CoverComplexPy):
         # Normalize vertex names of simplex tree
         self.simplex_tree_ = SimplexTree()
         idv, names = 0, {}
-        for v,_ in simplex_tree_.get_skeleton(0):
+        for v, _ in simplex_tree_.get_skeleton(0):
             if len(self.complex.subpopulation(v[0])) > self.min_points_per_node:
                 names[v[0]] = idv
                 self.simplex_tree_.insert([idv])
                 idv += 1
-        for s,_ in simplex_tree_.get_simplices():
-            if len(s) >= 2 and np.all([len(self.complex.subpopulation(v)) > self.min_points_per_node for v in s]):
+        for s, _ in simplex_tree_.get_simplices():
+            if len(s) >= 2 and np.all(
+                [len(self.complex.subpopulation(v)) > self.min_points_per_node for v in s]
+            ):
                 self.simplex_tree_.insert([names[v] for v in s])
 
         # Store vertex info
         self.node_info_ = {}
-        for v,_ in simplex_tree_.get_skeleton(0):
+        for v, _ in simplex_tree_.get_skeleton(0):
             if len(self.complex.subpopulation(v[0])) > self.min_points_per_node:
                 node = names[v[0]]
                 pop = self.complex.subpopulation(v[0])
-                self.node_info_[node] = {"indices": pop, "size": len(pop), "colors": [self.complex.subcolor(v[0])]}
+                self.node_info_[node] = {
+                    "indices": pop,
+                    "size": len(pop),
+                    "colors": [self.complex.subcolor(v[0])],
+                }
 
         return self

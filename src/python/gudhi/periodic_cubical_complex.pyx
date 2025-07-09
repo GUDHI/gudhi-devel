@@ -7,7 +7,12 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-from __future__ import print_function
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
+
+
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
@@ -19,9 +24,6 @@ import errno
 import numpy as np
 cimport numpy as np
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
 
 # Necessary because of PyArray_SimpleNewFromData
 np.import_array()

@@ -1,7 +1,5 @@
-# This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
-# which is released under MIT.
-# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
-# license details.
+# This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+# See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Vincent Rouvreau
 #
 # Copyright (C) 2016 Inria
@@ -10,7 +8,12 @@
 #   - 2023/11 Vincent Rouvreau: numpy interface for read_points_from_off_file
 #   - YYYY/MM Author: Description of the modification
 
-from __future__ import print_function
+__author__ = "Vincent Rouvreau"
+__maintainer__ = "Vincent Rouvreau"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
+
+
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.string cimport string
@@ -19,9 +22,6 @@ import errno
 import os
 import numpy as np
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
 
 cdef extern from "Off_reader_interface.h" namespace "Gudhi":
     vector[vector[double]] read_points_from_OFF_file(string off_file)
@@ -79,7 +79,7 @@ def _read_off_file_header(file_desc):
         dim = 3
     else:
         raise ValueError(f"Inconsistent OFF header, got '{line.rstrip()}', should be 'OFF', '4OFF' or 'nOFF'")
-        
+
     # nb_vertices can be already set by "nOFF" case, when 'dim nb_vertices nb_faces nb_edges' on the same line
     if nb_vertices < 0:
         # Number of points is the first number ("OFF" case) or the second one ("nOFF" case) of the second line

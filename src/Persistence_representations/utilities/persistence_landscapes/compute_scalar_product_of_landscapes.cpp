@@ -8,15 +8,16 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_landscape.h>
-
 #include <iostream>
 #include <sstream>
 #include <vector>
 
+#include <gudhi/Persistence_landscape.h>
+
 using Persistence_landscape = Gudhi::Persistence_representations::Persistence_landscape;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program computes scalar product of persistence landscapes stored in a file (the file needs to be "
             << "created beforehand). \n"
             << "The parameters of this programs are names of files with persistence landscapes.\n";

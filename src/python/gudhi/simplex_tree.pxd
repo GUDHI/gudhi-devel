@@ -8,15 +8,18 @@
 #   - 2023/02 Vincent Rouvreau: Add serialize/deserialize for pickle feature
 #   - YYYY/MM Author: Description of the modification
 
+__author__ = "Vincent Rouvreau"
+__maintainer__ = "Vincent Rouvreau"
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT"
+
+
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp cimport bool
 from libcpp.string cimport string
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
 
 cdef extern from "Simplex_tree_interface.h" namespace "Gudhi":
     cdef cppclass Simplex_tree_simplex_handle "Gudhi::Simplex_tree_interface::Simplex_handle":

@@ -8,12 +8,14 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi.point_cloud.dtm import DistanceToMeasure, DTMDensity
+
 import numpy
 import pytest
 import torch
 import math
 import warnings
+
+from gudhi.point_cloud.dtm import DistanceToMeasure, DTMDensity
 
 
 def test_dtm_compare_euclidean():
@@ -73,7 +75,7 @@ def test_dtm_precomputed():
 def test_density_normalized():
     sample = numpy.random.normal(0, 1, (1000000, 2))
     queries = numpy.array([[0.0, 0.0], [-0.5, 0.7], [0.4, 1.7]])
-    expected = numpy.exp(-(queries ** 2).sum(-1) / 2) / (2 * math.pi)
+    expected = numpy.exp(-(queries**2).sum(-1) / 2) / (2 * math.pi)
     estimated = DTMDensity(k=150, normalize=True).fit(sample).transform(queries)
     assert estimated == pytest.approx(expected, rel=0.4)
 
@@ -86,11 +88,16 @@ def test_density():
     distances = [[0, 1], [2, 0], [1, 3]]
     density = DTMDensity(metric="neighbors", dim=1).fit_transform(distances)
     assert density == pytest.approx(expected)
-    density = DTMDensity(weights=[0.5, 0.5], metric="neighbors", dim=1).fit_transform(distances)
+    density = DTMDensity(weights=[0.5, 0.5], metric="neighbors", dim=1).fit_transform(
+        distances
+    )
     assert density == pytest.approx(expected)
 
+
 def test_dtm_overflow_warnings():
-    pts = numpy.array([[10., 100000000000000000000000000000.], [1000., 100000000000000000000000000.]])
+    pts = numpy.array(
+        [[10.0, 100000000000000000000000000000.0], [1000.0, 100000000000000000000000000.0]]
+    )
     impl_warn = ["keops", "hnsw"]
     for impl in impl_warn:
         with warnings.catch_warnings(record=True) as w:

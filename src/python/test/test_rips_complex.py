@@ -5,15 +5,14 @@
     Copyright (C) 2016 Inria
 
     Modification(s):
+      - 2025/04 Hannah Schreiber: Add tests to verify possibility of tensor input
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import RipsComplex
+
 from math import sqrt
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
+from gudhi import RipsComplex
 
 
 def test_empty_rips():
@@ -154,3 +153,21 @@ def test_sparse_with_multiplicity():
     simplex_tree = rips.create_simplex_tree(max_dimension=2)
     assert simplex_tree.num_simplices() == 7
     diag = simplex_tree.persistence()
+
+
+def test_tensors():
+    try:
+        import torch
+
+        points = (torch.rand((5, 2)) * 2 - 1).requires_grad_()
+        rips = RipsComplex(points=points)
+    except ImportError:
+        pass
+
+    try:
+        import tensorflow as tf
+
+        points = tf.random.uniform(shape=[5, 2])
+        rips = RipsComplex(points=points)
+    except ImportError:
+        pass

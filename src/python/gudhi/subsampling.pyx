@@ -7,15 +7,18 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+__author__ = "Vincent Rouvreau"
+__maintainer__ = ""
+__copyright__ = "Copyright (C) 2016 Inria"
+__license__ = "MIT (GPL v3 for sparsify_point_set)"
+
+
 from cython cimport numeric
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp cimport bool
 import os
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT (GPL v3 for sparsify_point_set)"
 
 cdef extern from "Subsampling_interface.h" namespace "Gudhi::subsampling":
     vector[vector[double]] subsampling_n_farthest_points(bool, vector[vector[double]] points, size_t nb_points)

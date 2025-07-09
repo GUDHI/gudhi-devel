@@ -47,7 +47,7 @@ activities performed while wearing only magnetic sensor unit on the left leg.
      Average Landscapes of 4 different activities.
 
 Rips complex persistence scikit-learn like interface reference
------------------------------------------------------------------
+--------------------------------------------------------------
 
 .. autoclass:: gudhi.sklearn.rips_persistence.RipsPersistence
    :members:
