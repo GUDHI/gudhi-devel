@@ -15,7 +15,6 @@
  *      - 2024/08 Marc Glisse: Allow storing custom data in simplices.
  *      - 2024/10 Hannah Schreiber: Const version of the Simplex_tree
  *      - 2025/02 Hannah Schreiber (& David Loiseaux): Insertion strategies for `insert_simplex_and_subfaces`
- *      - 2025/02 David Loiseaux: Addition of number of parameters
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -435,8 +434,7 @@ class Simplex_tree {
         root_(nullptr, null_vertex_),
         filtration_vect_(),
         dimension_(-1),
-        dimension_to_be_lowered_(false),
-        number_of_parameters_(1) {}
+        dimension_to_be_lowered_(false) {}
 
   /**
    * @brief Construct the simplex tree as the copy of a given simplex tree with eventually different template
@@ -530,7 +528,6 @@ class Simplex_tree {
     filtration_vect_.clear();
     dimension_ = complex_source.dimension_;
     dimension_to_be_lowered_ = complex_source.dimension_to_be_lowered_;
-    number_of_parameters_ = complex_source.number_of_parameters_;
     auto root_source = complex_source.root_;
 
     // root members copy
@@ -565,7 +562,6 @@ class Simplex_tree {
     filtration_vect_.clear();
     dimension_ = complex_source.dimension_;
     dimension_to_be_lowered_ = complex_source.dimension_to_be_lowered_;
-    number_of_parameters_ = complex_source.number_of_parameters_;
     auto root_source = complex_source.root_;
 
     // root members copy
@@ -624,7 +620,6 @@ class Simplex_tree {
     filtration_vect_ = std::move(complex_source.filtration_vect_);
     dimension_ = std::exchange(complex_source.dimension_, -1);
     dimension_to_be_lowered_ = std::exchange(complex_source.dimension_to_be_lowered_, false);
-    number_of_parameters_ = std::exchange(complex_source.number_of_parameters_, 1);
     if constexpr (Options::link_nodes_by_label) {
       nodes_label_to_list_.swap(complex_source.nodes_label_to_list_);
     }
@@ -672,8 +667,7 @@ class Simplex_tree {
   template<class OtherSimplexTreeOptions>
   bool operator==(const Simplex_tree<OtherSimplexTreeOptions>& st2) const {
     if ((null_vertex_ != st2.null_vertex_) ||
-        (dimension_ != st2.dimension_ && !dimension_to_be_lowered_ && !st2.dimension_to_be_lowered_) ||
-        (number_of_parameters_ != st2.number_of_parameters_))
+        (dimension_ != st2.dimension_ && !dimension_to_be_lowered_ && !st2.dimension_to_be_lowered_))
       return false;
     return rec_equal(&root_, &st2.root_);
   }
@@ -2966,17 +2960,6 @@ class Simplex_tree {
     return ptr;
   }
 
- public:
-  /**
-   * @brief Sets the number of parameters of the filtrations if SimplexTreeOptions::is_multi_parameter.
-   */
-  void set_number_of_parameters(int num) { number_of_parameters_ = num; }
-
-  /**
-   * @brief Gets the number of parameters of the filtrations if SimplexTreeOptions::is_multi_parameter.
-   */
-  int get_number_of_parameters() const { return number_of_parameters_; }
-
  private:
   Vertex_handle null_vertex_;
   /** \brief Total number of simplices in the complex, without the empty simplex.*/
@@ -2990,7 +2973,6 @@ class Simplex_tree {
   /** \brief Upper bound on the dimension of the simplicial complex.*/
   mutable int dimension_;
   mutable bool dimension_to_be_lowered_;
-  int number_of_parameters_;
 };
 
 // Print a Simplex_tree in os.
