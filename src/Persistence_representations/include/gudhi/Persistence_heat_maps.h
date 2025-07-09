@@ -2,21 +2,15 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Pawel Dlotko and Mathieu Carriere
  *
- *    Modifications:
- *      - 2018/04 MC: Add discrete/non-discrete mechanism and non-discrete version
- *
  *    Copyright (C) 2019 Inria
  *
  *    Modification(s):
+ *      - 2018/04 MC: Add discrete/non-discrete mechanism and non-discrete version
  *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef PERSISTENCE_HEAT_MAPS_H_
 #define PERSISTENCE_HEAT_MAPS_H_
-
-// gudhi include
-#include <gudhi/read_persistence_from_file.h>
-#include <gudhi/common_persistence_representations.h>
 
 // standard include
 #include <vector>
@@ -29,14 +23,19 @@
 #include <string>
 #include <functional>
 
+// gudhi include
+#include <gudhi/read_persistence_from_file.h>
+#include <gudhi/common_persistence_representations.h>
+
 namespace Gudhi {
 namespace Persistence_representations {
 
 /**
- * This is a simple procedure to create n by n (or 2*pixel_radius times 2*pixel_radius cubical approximation of a
- *Gaussian kernel.
+ * This is a simple procedure to create n by n (or 2*pixel_radius times 2*pixel_radius) cubical approximation of a
+ * Gaussian kernel.
  **/
-std::vector<std::vector<double> > create_Gaussian_filter(size_t pixel_radius, double sigma) {
+std::vector<std::vector<double> > create_Gaussian_filter(size_t pixel_radius, double sigma)
+{
   bool dbg = false;
   // we are computing the kernel mask to 2 standard deviations away from the center. We discretize it in a grid of a
   // size 2*pixel_radius times 2*pixel_radius.
@@ -100,22 +99,25 @@ std::vector<std::vector<double> > create_Gaussian_filter(size_t pixel_radius, do
 
 /**
  * This is one of a scaling functions used to weight points depending on their persistence and/or location in the
- *diagram.
+ * diagram.
  * This particular functionality is a function which always assign value 1 to a point in the diagram.
  **/
-class constant_scaling_function {
+class constant_scaling_function
+{
  public:
   double operator()(const std::pair<double, double>& point_in_diagram) { return 1; }
 };
 
 /**
  * This is one of a scaling functions used to weight points depending on their persistence and/or location in the
- *diagram.
+ * diagram.
  * The scaling given by this function to a point (b,d) is Euclidean distance of (b,d) from diagonal.
  **/
-class distance_from_diagonal_scaling {
+class distance_from_diagonal_scaling
+{
  public:
-  double operator()(const std::pair<double, double>& point_in_diagram) {
+  double operator()(const std::pair<double, double>& point_in_diagram)
+  {
     // (point_in_diagram.first+point_in_diagram.second)/2.0
     return std::sqrt(std::pow((point_in_diagram.first - (point_in_diagram.first + point_in_diagram.second) / 2.0), 2) +
                      std::pow((point_in_diagram.second - (point_in_diagram.first + point_in_diagram.second) / 2.0), 2));
@@ -124,12 +126,14 @@ class distance_from_diagonal_scaling {
 
 /**
  * This is one of a scaling functions used to weight points depending on their persistence and/or location in the
- *diagram.
+ * diagram.
  * The scaling given by this function to a point (b,d) is a square of Euclidean distance of (b,d) from diagonal.
  **/
-class squared_distance_from_diagonal_scaling {
+class squared_distance_from_diagonal_scaling
+{
  public:
-  double operator()(const std::pair<double, double>& point_in_diagram) {
+  double operator()(const std::pair<double, double>& point_in_diagram)
+  {
     return std::pow((point_in_diagram.first - (point_in_diagram.first + point_in_diagram.second) / 2.0), 2) +
            std::pow((point_in_diagram.second - (point_in_diagram.first + point_in_diagram.second) / 2.0), 2);
   }
@@ -137,27 +141,32 @@ class squared_distance_from_diagonal_scaling {
 
 /**
  * This is one of a scaling functions used to weight points depending on their persistence and/or location in the
- *diagram.
- * The scaling given by this function to a point (b,d) is an arctan of a persistence of a point (i.e. arctan( b-d ).
+ * diagram.
+ * The scaling given by this function to a point (b,d) is an arctan of a persistence of a point (i.e. arctan( b-d )).
  **/
-class arc_tan_of_persistence_of_point {
+class arc_tan_of_persistence_of_point
+{
  public:
-  double operator()(const std::pair<double, double>& point_in_diagram) {
+  double operator()(const std::pair<double, double>& point_in_diagram)
+  {
     return atan(point_in_diagram.second - point_in_diagram.first);
   }
 };
 
 /**
  * This is one of a scaling functions used to weight points depending on their persistence and/or location in the
- *diagram.
+ * diagram.
  * This scaling function do not only depend on a point (p,d) in the diagram, but it depends on the whole diagram.
  * The longest persistence pair get a scaling 1. Any other pair get a scaling belong to [0,1], which is proportional
  * to the persistence of that pair.
  **/
-class weight_by_setting_maximal_interval_to_have_length_one {
+class weight_by_setting_maximal_interval_to_have_length_one
+{
  public:
   weight_by_setting_maximal_interval_to_have_length_one(double len) : length_of_maximal_interval(len) {}
-  double operator()(const std::pair<double, double>& point_in_diagram) {
+
+  double operator()(const std::pair<double, double>& point_in_diagram)
+  {
     return (point_in_diagram.second - point_in_diagram.first) / this->length_of_maximal_interval;
   }
 
@@ -170,18 +179,20 @@ class weight_by_setting_maximal_interval_to_have_length_one {
  * \brief A class implementing persistence heat maps.
  *
  * \ingroup Persistence_representations
+ *
+ * This class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances,
+ * Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product
  **/
-
-// This class implements the following concepts: Vectorized_topological_data, Topological_data_with_distances,
-// Real_valued_topological_data, Topological_data_with_averages, Topological_data_with_scalar_product
 template <typename Scalling_of_kernels = constant_scaling_function>
-class Persistence_heat_maps {
+class Persistence_heat_maps
+{
  public:
   /**
    * The default constructor. A scaling function from the diagonal is set up to a constant function. The image is not
-   *erased below the diagonal. The Gaussian have diameter 5.
+   * erased below the diagonal. The Gaussian have diameter 5.
    **/
-  Persistence_heat_maps() {
+  Persistence_heat_maps()
+  {
     Scalling_of_kernels f;
     this->f = f;
     this->erase_below_diagonal = false;
@@ -193,44 +204,48 @@ class Persistence_heat_maps {
    * Construction that takes at the input the following parameters:
    * (1) A vector of pairs of doubles (representing persistence intervals). All other parameters are optional. They are:
    * (2) a Gaussian filter generated by create_Gaussian_filter filter (the default value of this variable is a Gaussian
-   *filter of a radius 5),
+   * filter of a radius 5),
    * (3) a boolean value which determines if the area of image below diagonal should, or should not be erased (it will
-   *be erased by default).
+   * be erased by default).
    * (4) a number of pixels in each direction (set to 1000 by default).
    * (5) a min x and y value of points that are to be taken into account. By default it is set to
-   *std::numeric_limits<double>::max(), in which case the program compute the values based on the data,
+   * std::numeric_limits<double>::max(), in which case the program compute the values based on the data,
    * (6) a max x and y value of points that are to be taken into account. By default it is set to
-   *std::numeric_limits<double>::max(), in which case the program compute the values based on the data.
+   * std::numeric_limits<double>::max(), in which case the program compute the values based on the data.
    **/
   Persistence_heat_maps(const std::vector<std::pair<double, double> >& interval,
                         std::vector<std::vector<double> > filter = create_Gaussian_filter(5, 1),
-                        bool erase_below_diagonal = false, size_t number_of_pixels = 1000,
+                        bool erase_below_diagonal = false,
+                        size_t number_of_pixels = 1000,
                         double min_ = std::numeric_limits<double>::max(),
                         double max_ = std::numeric_limits<double>::max());
 
   /**
    * Construction that takes at the input a name of a file with persistence intervals, a filter (radius 5 by
-   *default), a scaling function (constant by default), a boolean value which determines if the area of image below
-   *diagonal should, or should not be erased (should by default). The next parameter is the number of pixels in each
-   *direction (set to 1000 by default) and min and max values of images (both set to std::numeric_limits<double>::max()
-   *by default. If this is the case, the program will pick the right values based on the data).
+   * default), a scaling function (constant by default), a boolean value which determines if the area of image below
+   * diagonal should, or should not be erased (should by default). The next parameter is the number of pixels in each
+   * direction (set to 1000 by default) and min and max values of images (both set to std::numeric_limits<double>::max()
+   * by default. If this is the case, the program will pick the right values based on the data).
    **/
+
   /**
    * Construction that takes at the input the following parameters:
    * (1) A name of a file with persistence intervals. The file should be readable by the function
-   *read_persistence_intervals_in_one_dimension_from_file. All other parameters are optional. They are:
+   * read_persistence_intervals_in_one_dimension_from_file. All other parameters are optional. They are:
    * (2) a Gaussian filter generated by create_Gaussian_filter filter (the default value of this variable is a Gaussian
-   *filter of a radius 5),
+   * filter of a radius 5),
    * (3) a boolean value which determines if the area of image below diagonal should, or should not be erased (it will
-   *be erased by default).
+   * be erased by default).
    * (4) a number of pixels in each direction (set to 1000 by default).
    * (5) a min x and y value of points that are to be taken into account. By default it is set to
-   *std::numeric_limits<double>::max(), in which case the program compute the values based on the data,
+   * std::numeric_limits<double>::max(), in which case the program compute the values based on the data,
    * (6) a max x and y value of points that are to be taken into account. By default it is set to
-   *std::numeric_limits<double>::max(), in which case the program compute the values based on the data.
+   * std::numeric_limits<double>::max(), in which case the program compute the values based on the data.
    **/
-  Persistence_heat_maps(const char* filename, std::vector<std::vector<double> > filter = create_Gaussian_filter(5, 1),
-                        bool erase_below_diagonal = false, size_t number_of_pixels = 1000,
+  Persistence_heat_maps(const char* filename,
+                        std::vector<std::vector<double> > filter = create_Gaussian_filter(5, 1),
+                        bool erase_below_diagonal = false,
+                        size_t number_of_pixels = 1000,
                         double min_ = std::numeric_limits<double>::max(),
                         double max_ = std::numeric_limits<double>::max(),
                         unsigned dimension = std::numeric_limits<unsigned>::max());
@@ -241,8 +256,12 @@ class Persistence_heat_maps {
    **/
   Persistence_heat_maps(const std::vector<std::pair<double, double> >& interval,
                         const std::function<double(std::pair<double, double>, std::pair<double, double>)>& kernel,
-                        size_t number_of_x_pixels, size_t number_of_y_pixels, double min_x = 0, double max_x = 1,
-                        double min_y = 0, double max_y = 1);
+                        size_t number_of_x_pixels,
+                        size_t number_of_y_pixels,
+                        double min_x = 0,
+                        double max_x = 1,
+                        double min_y = 0,
+                        double max_y = 1);
 
   /**
    * Construction that takes only the diagram as input (weight and 2D kernel are template parameters)
@@ -252,14 +271,14 @@ class Persistence_heat_maps {
 
   /**
    * Compute a mean value of a collection of heat maps and store it in the current object. Note that all the persistence
-   *maps send in a vector to this procedure need to have the same parameters.
+   * maps send in a vector to this procedure need to have the same parameters.
    * If this is not the case, the program will throw an exception.
    **/
   void compute_mean(const std::vector<Persistence_heat_maps*>& maps);
 
   /**
    * Compute a median value of a collection of heat maps and store it in the current object. Note that all the
-   *persistence maps send in a vector to this procedure need to have the same parameters.
+   * persistence maps send in a vector to this procedure need to have the same parameters.
    * If this is not the case, the program will throw an exception.
    **/
   void compute_median(const std::vector<Persistence_heat_maps*>& maps);
@@ -279,14 +298,15 @@ class Persistence_heat_maps {
 
   /**
    * A function that load a heat map from file to the current object (and erase whatever was stored in the current
-   *object before).
+   * object before).
    **/
   void load_from_file(const char* filename);
 
   /**
    * The procedure checks if min_, max_ and this->heat_maps sizes are the same.
    **/
-  inline bool check_if_the_same(const Persistence_heat_maps& second) const {
+  inline bool check_if_the_same(const Persistence_heat_maps& second) const
+  {
     bool dbg = false;
     if (this->heat_map.size() != second.heat_map.size()) {
       if (dbg)
@@ -319,7 +339,8 @@ class Persistence_heat_maps {
   /**
    * Operator == to check if to persistence heat maps are the same.
    **/
-  bool operator==(const Persistence_heat_maps& rhs) const {
+  bool operator==(const Persistence_heat_maps& rhs) const
+  {
     bool dbg = false;
     if (!this->check_if_the_same(rhs)) {
       if (dbg) std::clog << "The domains are not the same \n";
@@ -352,7 +373,8 @@ class Persistence_heat_maps {
   template <typename Operation_type>
   friend Persistence_heat_maps operation_on_pair_of_heat_maps(const Persistence_heat_maps& first,
                                                               const Persistence_heat_maps& second,
-                                                              Operation_type operation) {
+                                                              Operation_type operation)
+  {
     // first check if the heat maps are compatible
     if (!first.check_if_the_same(second)) {
       std::cerr << "Sizes of the heat maps are not compatible. The program will now terminate \n";
@@ -375,9 +397,10 @@ class Persistence_heat_maps {
 
   /**
    * Multiplication of Persistence_heat_maps by scalar (so that all values of the heat map gets multiplied by that
-   *scalar).
+   * scalar).
    **/
-  Persistence_heat_maps multiply_by_scalar(double scalar) const {
+  Persistence_heat_maps multiply_by_scalar(double scalar) const
+  {
     Persistence_heat_maps result;
     result.min_ = this->min_;
     result.max_ = this->max_;
@@ -396,56 +419,72 @@ class Persistence_heat_maps {
   /**
    * This function computes a sum of two objects of a type Persistence_heat_maps.
    **/
-  friend Persistence_heat_maps operator+(const Persistence_heat_maps& first, const Persistence_heat_maps& second) {
+  friend Persistence_heat_maps operator+(const Persistence_heat_maps& first, const Persistence_heat_maps& second)
+  {
     return operation_on_pair_of_heat_maps(first, second, std::plus<double>());
   }
+
   /**
    * This function computes a difference of two objects of a type Persistence_heat_maps.
    **/
-  friend Persistence_heat_maps operator-(const Persistence_heat_maps& first, const Persistence_heat_maps& second) {
+  friend Persistence_heat_maps operator-(const Persistence_heat_maps& first, const Persistence_heat_maps& second)
+  {
     return operation_on_pair_of_heat_maps(first, second, std::minus<double>());
   }
+
   /**
    * This function computes a product of an object of a type Persistence_heat_maps with real number.
    **/
-  friend Persistence_heat_maps operator*(double scalar, const Persistence_heat_maps& A) {
+  friend Persistence_heat_maps operator*(double scalar, const Persistence_heat_maps& A)
+  {
     return A.multiply_by_scalar(scalar);
   }
+
   /**
    * This function computes a product of an object of a type Persistence_heat_maps with real number.
    **/
-  friend Persistence_heat_maps operator*(const Persistence_heat_maps& A, double scalar) {
+  friend Persistence_heat_maps operator*(const Persistence_heat_maps& A, double scalar)
+  {
     return A.multiply_by_scalar(scalar);
   }
+
   /**
    * This function computes a product of an object of a type Persistence_heat_maps with real number.
    **/
   Persistence_heat_maps operator*(double scalar) { return this->multiply_by_scalar(scalar); }
+
   /**
    * += operator for Persistence_heat_maps.
    **/
-  Persistence_heat_maps operator+=(const Persistence_heat_maps& rhs) {
+  Persistence_heat_maps operator+=(const Persistence_heat_maps& rhs)
+  {
     *this = *this + rhs;
     return *this;
   }
+
   /**
    * -= operator for Persistence_heat_maps.
    **/
-  Persistence_heat_maps operator-=(const Persistence_heat_maps& rhs) {
+  Persistence_heat_maps operator-=(const Persistence_heat_maps& rhs)
+  {
     *this = *this - rhs;
     return *this;
   }
+
   /**
    * *= operator for Persistence_heat_maps.
    **/
-  Persistence_heat_maps operator*=(double x) {
+  Persistence_heat_maps operator*=(double x)
+  {
     *this = *this * x;
     return *this;
   }
+
   /**
    * /= operator for Persistence_heat_maps.
    **/
-  Persistence_heat_maps operator/=(double x) {
+  Persistence_heat_maps operator/=(double x)
+  {
     if (x == 0) throw("In operator /=, division by 0. Program terminated.");
     *this = *this * (1 / x);
     return *this;
@@ -458,23 +497,24 @@ class Persistence_heat_maps {
    * Vectorized_topological_data
    */
   std::vector<double> vectorize(int number_of_function) const;
+
   /**
    * This function return the number of functions that allows vectorization of persistence heat map. It is required
-   *in a concept Vectorized_topological_data.
+   * in a concept Vectorized_topological_data.
    **/
   size_t number_of_vectorize_functions() const { return this->number_of_functions_for_vectorization; }
 
   /**
    * This function is required by the Real_valued_topological_data concept. It returns various projections on the
-   *persistence heat map to a real line.
+   * persistence heat map to a real line.
    * At the moment this function is not tested, since it is quite likely to be changed in the future. Given this, when
-   *using it, keep in mind that it
-   * will be most likely changed in the next versions.
+   * using it, keep in mind that it will be most likely changed in the next versions.
    **/
   double project_to_R(int number_of_function) const;
+
   /**
    * The function gives the number of possible projections to R. This function is required by the
-   *Real_valued_topological_data concept.
+   * Real_valued_topological_data concept.
    **/
   size_t number_of_projections_to_R() const { return this->number_of_functions_for_projections_to_reals; }
 
@@ -518,10 +558,13 @@ class Persistence_heat_maps {
   size_t number_of_functions_for_projections_to_reals;
   void construct(const std::vector<std::pair<double, double> >& intervals_,
                  std::vector<std::vector<double> > filter = create_Gaussian_filter(5, 1),
-                 bool erase_below_diagonal = false, size_t number_of_pixels = 1000,
-                 double min_ = std::numeric_limits<double>::max(), double max_ = std::numeric_limits<double>::max());
+                 bool erase_below_diagonal = false,
+                 size_t number_of_pixels = 1000,
+                 double min_ = std::numeric_limits<double>::max(),
+                 double max_ = std::numeric_limits<double>::max());
 
-  void set_up_parameters_for_basic_classes() {
+  void set_up_parameters_for_basic_classes()
+  {
     this->number_of_functions_for_vectorization = 1;
     this->number_of_functions_for_projections_to_reals = 1;
   }
@@ -544,7 +587,13 @@ template <typename Scalling_of_kernels>
 Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(
     const std::vector<std::pair<double, double> >& interval,
     const std::function<double(std::pair<double, double>, std::pair<double, double>)>& kernel,
-    size_t number_of_x_pixels, size_t number_of_y_pixels, double min_x, double max_x, double min_y, double max_y) {
+    size_t number_of_x_pixels,
+    size_t number_of_y_pixels,
+    double min_x,
+    double max_x,
+    double min_y,
+    double max_y)
+{
   this->discrete = true;
   this->min_ = min_x;
   this->max_ = max_x;
@@ -570,7 +619,8 @@ Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(
 template <typename Scalling_of_kernels>
 Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(
     const std::vector<std::pair<double, double> >& interval,
-    const std::function<double(std::pair<double, double>, std::pair<double, double>)>& kernel) {
+    const std::function<double(std::pair<double, double>, std::pair<double, double>)>& kernel)
+{
   this->discrete = false;
   this->interval = interval;
   this->kernel = kernel;
@@ -583,8 +633,11 @@ Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(
 template <typename Scalling_of_kernels>
 void Persistence_heat_maps<Scalling_of_kernels>::construct(const std::vector<std::pair<double, double> >& intervals_,
                                                            std::vector<std::vector<double> > filter,
-                                                           bool erase_below_diagonal, size_t number_of_pixels,
-                                                           double min_, double max_) {
+                                                           bool erase_below_diagonal,
+                                                           size_t number_of_pixels,
+                                                           double min_,
+                                                           double max_)
+{
   bool dbg = false;
   if (dbg) std::clog << "Entering construct procedure \n";
   Scalling_of_kernels f;
@@ -687,8 +740,13 @@ void Persistence_heat_maps<Scalling_of_kernels>::construct(const std::vector<std
 
 template <typename Scalling_of_kernels>
 Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(
-    const std::vector<std::pair<double, double> >& interval, std::vector<std::vector<double> > filter,
-    bool erase_below_diagonal, size_t number_of_pixels, double min_, double max_) {
+    const std::vector<std::pair<double, double> >& interval,
+    std::vector<std::vector<double> > filter,
+    bool erase_below_diagonal,
+    size_t number_of_pixels,
+    double min_,
+    double max_)
+{
   this->construct(interval, filter, erase_below_diagonal, number_of_pixels, min_, max_);
   this->set_up_parameters_for_basic_classes();
 }
@@ -696,8 +754,12 @@ Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(
 template <typename Scalling_of_kernels>
 Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(const char* filename,
                                                                   std::vector<std::vector<double> > filter,
-                                                                  bool erase_below_diagonal, size_t number_of_pixels,
-                                                                  double min_, double max_, unsigned dimension) {
+                                                                  bool erase_below_diagonal,
+                                                                  size_t number_of_pixels,
+                                                                  double min_,
+                                                                  double max_,
+                                                                  unsigned dimension)
+{
   std::vector<std::pair<double, double> > intervals_;
   if (dimension == std::numeric_limits<unsigned>::max()) {
     intervals_ = read_persistence_intervals_in_one_dimension_from_file(filename);
@@ -710,7 +772,8 @@ Persistence_heat_maps<Scalling_of_kernels>::Persistence_heat_maps(const char* fi
 
 template <typename Scalling_of_kernels>
 std::vector<std::vector<double> > Persistence_heat_maps<Scalling_of_kernels>::check_and_initialize_maps(
-    const std::vector<Persistence_heat_maps*>& maps) {
+    const std::vector<Persistence_heat_maps*>& maps)
+{
   // checking if all the heat maps are of the same size:
   for (size_t i = 0; i != maps.size(); ++i) {
     if (maps[i]->heat_map.size() != maps[0]->heat_map.size()) {
@@ -731,7 +794,8 @@ std::vector<std::vector<double> > Persistence_heat_maps<Scalling_of_kernels>::ch
 }
 
 template <typename Scalling_of_kernels>
-void Persistence_heat_maps<Scalling_of_kernels>::compute_median(const std::vector<Persistence_heat_maps*>& maps) {
+void Persistence_heat_maps<Scalling_of_kernels>::compute_median(const std::vector<Persistence_heat_maps*>& maps)
+{
   std::vector<std::vector<double> > heat_maps = this->check_and_initialize_maps(maps);
 
   std::vector<double> to_compute_median(maps.size());
@@ -740,8 +804,8 @@ void Persistence_heat_maps<Scalling_of_kernels>::compute_median(const std::vecto
       for (size_t map_no = 0; map_no != maps.size(); ++map_no) {
         to_compute_median[map_no] = maps[map_no]->heat_map[i][j];
       }
-      std::nth_element(to_compute_median.begin(), to_compute_median.begin() + to_compute_median.size() / 2,
-                       to_compute_median.end());
+      std::nth_element(
+          to_compute_median.begin(), to_compute_median.begin() + to_compute_median.size() / 2, to_compute_median.end());
       heat_maps[i][j] = to_compute_median[to_compute_median.size() / 2];
     }
   }
@@ -751,7 +815,8 @@ void Persistence_heat_maps<Scalling_of_kernels>::compute_median(const std::vecto
 }
 
 template <typename Scalling_of_kernels>
-void Persistence_heat_maps<Scalling_of_kernels>::compute_mean(const std::vector<Persistence_heat_maps*>& maps) {
+void Persistence_heat_maps<Scalling_of_kernels>::compute_mean(const std::vector<Persistence_heat_maps*>& maps)
+{
   std::vector<std::vector<double> > heat_maps = this->check_and_initialize_maps(maps);
   for (size_t i = 0; i != heat_maps.size(); ++i) {
     for (size_t j = 0; j != heat_maps[i].size(); ++j) {
@@ -769,7 +834,9 @@ void Persistence_heat_maps<Scalling_of_kernels>::compute_mean(const std::vector<
 
 template <typename Scalling_of_kernels>
 void Persistence_heat_maps<Scalling_of_kernels>::compute_percentage_of_active(
-    const std::vector<Persistence_heat_maps*>& maps, size_t cutoff) {
+    const std::vector<Persistence_heat_maps*>& maps,
+    size_t cutoff)
+{
   std::vector<std::vector<double> > heat_maps = this->check_and_initialize_maps(maps);
 
   for (size_t i = 0; i != heat_maps.size(); ++i) {
@@ -791,7 +858,8 @@ void Persistence_heat_maps<Scalling_of_kernels>::compute_percentage_of_active(
 }
 
 template <typename Scalling_of_kernels>
-void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filename) const {
+void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filename) const
+{
   std::ofstream out;
   std::stringstream gnuplot_script;
   gnuplot_script << filename << "_GnuplotScript";
@@ -810,7 +878,8 @@ void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filename) cons
 }
 
 template <typename Scalling_of_kernels>
-void Persistence_heat_maps<Scalling_of_kernels>::print_to_file(const char* filename) const {
+void Persistence_heat_maps<Scalling_of_kernels>::print_to_file(const char* filename) const
+{
   std::ofstream out;
   out.open(filename);
 
@@ -826,7 +895,8 @@ void Persistence_heat_maps<Scalling_of_kernels>::print_to_file(const char* filen
 }
 
 template <typename Scalling_of_kernels>
-void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* filename) {
+void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* filename)
+{
   bool dbg = false;
 
   std::ifstream in;
@@ -875,7 +945,8 @@ void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* file
 
 // Concretizations of virtual methods:
 template <typename Scalling_of_kernels>
-std::vector<double> Persistence_heat_maps<Scalling_of_kernels>::vectorize(int number_of_function) const {
+std::vector<double> Persistence_heat_maps<Scalling_of_kernels>::vectorize(int number_of_function) const
+{
   std::vector<double> result;
   if (!discrete) {
     std::cerr << "No vectorize method in case of infinite dimensional vectorization" << std::endl;
@@ -900,7 +971,8 @@ std::vector<double> Persistence_heat_maps<Scalling_of_kernels>::vectorize(int nu
 }
 
 template <typename Scalling_of_kernels>
-double Persistence_heat_maps<Scalling_of_kernels>::distance(const Persistence_heat_maps& second, double power) const {
+double Persistence_heat_maps<Scalling_of_kernels>::distance(const Persistence_heat_maps& second, double power) const
+{
   if (this->discrete) {
     // first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
     if (!this->check_if_the_same(second)) {
@@ -937,7 +1009,8 @@ double Persistence_heat_maps<Scalling_of_kernels>::distance(const Persistence_he
 }
 
 template <typename Scalling_of_kernels>
-double Persistence_heat_maps<Scalling_of_kernels>::project_to_R(int number_of_function) const {
+double Persistence_heat_maps<Scalling_of_kernels>::project_to_R(int number_of_function) const
+{
   double result = 0;
   for (size_t i = 0; i != this->heat_map.size(); ++i) {
     for (size_t j = 0; j != this->heat_map[i].size(); ++j) {
@@ -948,13 +1021,14 @@ double Persistence_heat_maps<Scalling_of_kernels>::project_to_R(int number_of_fu
 }
 
 template <typename Scalling_of_kernels>
-void Persistence_heat_maps<Scalling_of_kernels>::compute_average(
-    const std::vector<Persistence_heat_maps*>& to_average) {
+void Persistence_heat_maps<Scalling_of_kernels>::compute_average(const std::vector<Persistence_heat_maps*>& to_average)
+{
   this->compute_mean(to_average);
 }
 
 template <typename Scalling_of_kernels>
-double Persistence_heat_maps<Scalling_of_kernels>::compute_scalar_product(const Persistence_heat_maps& second) const {
+double Persistence_heat_maps<Scalling_of_kernels>::compute_scalar_product(const Persistence_heat_maps& second) const
+{
   if (discrete) {
     // first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
     if (!this->check_if_the_same(second)) {

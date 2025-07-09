@@ -8,16 +8,17 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_landscape_on_grid.h>
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
 
+#include <gudhi/Persistence_landscape_on_grid.h>
+
 using Persistence_landscape_on_grid = Gudhi::Persistence_representations::Persistence_landscape_on_grid;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program creates persistence landscapes on grid files (*.g_land) of persistence diagrams files "
             << "(*.pers) provided as an input.\n"
             << "The first parameter of a program is an integer, a size of a grid.\n"

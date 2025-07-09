@@ -8,15 +8,16 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_intervals.h>
-
 #include <iostream>
 #include <utility>
 #include <vector>
 
+#include <gudhi/Persistence_intervals.h>
+
 using Persistence_intervals = Gudhi::Persistence_representations::Persistence_intervals;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   if (argc != 2) {
     std::clog << "To run this program, please provide the name of a file with persistence diagram \n";
     return 1;
