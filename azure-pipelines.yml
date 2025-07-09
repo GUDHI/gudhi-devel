@@ -74,7 +74,6 @@ jobs:
           addToPath: true
           architecture: "x64"
       - powershell: |
-          git submodule update --init --recursive
           python --version
           python -m pip install -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --use-pep517 -r ext/gudhi-deploy/test-requirements.txt
@@ -83,7 +82,6 @@ jobs:
           Add-Content -Path "C:\vcpkg\triplets\x64-windows.cmake" -Value "set(VCPKG_BUILD_TYPE release)"
           vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
         displayName: "Install build dependencies"
-        failOnStderr: true
         errorActionPreference: "stop"
       - task: BatchScript@1
         inputs:
@@ -93,9 +91,9 @@ jobs:
           mkdir build
           cd build
           python --version
+          whoami -xzzyyzy
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(cmakeVcpkgFlags) $(gudhiCmakeOptions) $(extraCmakeOptions) --log-level=DEBUG ..
           ninja
           ctest --output-on-failure -C Release -E diff_files
         displayName: "Build and test"
-        failOnStderr: true
         errorActionPreference: "stop"
