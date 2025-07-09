@@ -14,6 +14,8 @@ jobs:
       extraCmakeOptions: -DPython_FIND_FRAMEWORK=LAST
 
     steps:
+      - checkout: self
+        submodules: true
       # Use a specific Python version
       - task: UsePythonVersion@0
         displayName: Use Python $(pythonVersion)
@@ -62,6 +64,8 @@ jobs:
       extraCmakeOptions: -DPython_FIND_REGISTRY=LAST
 
     steps:
+      - checkout: self
+        submodules: true
       # Use a specific Python version
       - task: UsePythonVersion@0
         displayName: Use Python $(pythonVersion)
