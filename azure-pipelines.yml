@@ -72,7 +72,9 @@ jobs:
           versionSpec: $(pythonVersion)
           addToPath: true
           architecture: "x64"
-      - powershell: |
+      - pwsh: |
+          $ErrorActionPreference = "stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           python --version
           python -m pip install -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install -r ext/gudhi-deploy/test-requirements.txt
@@ -81,12 +83,13 @@ jobs:
           Add-Content -Path "C:\vcpkg\triplets\x64-windows.cmake" -Value "set(VCPKG_BUILD_TYPE release)"
           vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
         displayName: "Install build dependencies"
-        errorActionPreference: "stop"
       - task: BatchScript@1
         inputs:
           filename: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat'
           modifyEnvironment: true
-      - powershell: |
+      - pwsh: |
+          $ErrorActionPreference = "stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           mkdir build
           cd build
           python --version
@@ -94,4 +97,3 @@ jobs:
           ninja
           ctest --output-on-failure -C Release -E diff_files
         displayName: "Build and test"
-        errorActionPreference: "stop"
