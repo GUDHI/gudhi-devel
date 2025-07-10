@@ -83,14 +83,14 @@ class Slicer
       : complex_(other.complex_),
         slice_(other.slice_),
         generatorOrder_(other.generatorOrder_),
-        persistence_(other.persistence_, generatorOrder_)
+        persistence_()
   {}
 
   Slicer(Slicer&& other)
       : complex_(std::move(other.complex_)),
         slice_(std::move(other.slice_)),
         generatorOrder_(std::move(other.generatorOrder_)),
-        persistence_(std::move(other.persistence_), generatorOrder_)
+        persistence_()
   {}
 
   // TODO: swap + assign operator?

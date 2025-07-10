@@ -40,18 +40,20 @@ class PersistenceAlgorithm
 
   PersistenceAlgorithm(const PersistenceAlgorithm& other) = delete;
 
+  // for thread safe slicer, where cpx is guaranteed to remain its address
   // permutation is assumed to be the same than from the copied object, just its address can change
   PersistenceAlgorithm(const PersistenceAlgorithm& other, const Map& permutation);
 
   PersistenceAlgorithm(PersistenceAlgorithm&& other) = delete;
 
+  // for thread safe slicer, where cpx is guaranteed to remain its address
   // permutation is assumed to be the same than from the moved object, just its address can change
   PersistenceAlgorithm(PersistenceAlgorithm&& other, const Map& permutation);
 
   // TODO: swap?
 
-  bool is_initialized();
-  Dimension get_dimension(Index i);
+  bool is_initialized() const;
+  Dimension get_dimension(Index i) const;
   Barcode get_barcode();
   void vine_swap(Index i);
   Cycles get_representative_cycles(bool update);

@@ -294,7 +294,7 @@ class Persistence_interface_matrix
 
   Dimension get_dimension(Index i) const
   {
-    GUDHI_CHECK(is_initialized(), "Barcode can not be computed uninitialized.");
+    GUDHI_CHECK(is_initialized(), "Dimension can not be computed uninitialized.");
     return matrix_.get_column_dimension(i);
   }
 
@@ -309,6 +309,7 @@ class Persistence_interface_matrix
 
   void vine_swap(Index i)
   {
+    static_assert(is_vine, "`vine_swap` is not enabled with the given options.");
     GUDHI_CHECK(is_initialized(), "Vineyard can not be computed uninitialized.");
 
     if constexpr (!Options::is_of_boundary_type) {
@@ -321,6 +322,7 @@ class Persistence_interface_matrix
 
   Cycles get_representative_cycles(bool update)
   {
+    static_assert(has_rep_cycles, "`get_representative_cycles` is not enabled with the given options.");
     GUDHI_CHECK(is_initialized(), "Representative cycles can not be computed uninitialized.");
 
     if (update) matrix_.update_representative_cycles();

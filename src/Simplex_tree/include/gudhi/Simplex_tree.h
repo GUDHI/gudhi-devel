@@ -898,6 +898,10 @@ class Simplex_tree {
 
   /**
    * @brief Stores the given value as number of parameters of the filtration values.
+   * At construction, the default number of parameters is set to 1.
+   *
+   * Note that there will not be any verification to ensure that the filtration values stored have this amount
+   * of parameters.
    */
   void set_num_parameters(int new_number) {
     number_of_parameters_ = new_number;
@@ -2881,7 +2885,7 @@ class Simplex_tree {
   Vertex_handle null_vertex_;
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
-  int number_of_parameters_;
+  int number_of_parameters_;  /**< Stores the number of parameters set by the user. */
 
   // all mutable as their content has no impact on the content of the simplex tree itself
   // they correspond to some kind of cache or helper attributes.
@@ -2895,27 +2899,44 @@ class Simplex_tree {
 // Print a Simplex_tree in os.
 template<typename...T>
 std::ostream& operator<<(std::ostream & os, const Simplex_tree<T...> & st) {
+  if (st.num_parameters() > 1) os << st.num_parameters() << "\n";
   for (auto sh : st.filtration_simplex_range()) {
     os << st.dimension(sh) << " ";
     for (auto v : st.simplex_vertex_range(sh)) {
       os << v << " ";
     }
-    os << " ( p = " << st.num_parameters() << " ) ";
     os << st.filtration(sh) << "\n";  // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
   }
   return os;
 }
 
-template<typename...T>
-std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
+template <typename... T>
+std::istream& operator>>(std::istream& is, Simplex_tree<T...>& st) {
   typedef Simplex_tree<T...> ST;
   std::vector<typename ST::Vertex_handle> simplex;
   typename ST::Filtration_value fil;
   int max_dim = -1;
+
+  // searching for number of parameters which are potentially specified in the first line
+  // if nothing is specified, the value is assumed to be 1
+  std::string first_line;
+  auto pos = is.tellg();
+  getline(is, first_line);
+  std::stringstream fl_stream;
+  fl_stream << first_line;
+  int num_param, dummy;
+  fl_stream >> num_param; // tries to retrieve first numerical value
+  if (fl_stream.fail()) throw std::invalid_argument("Incoming stream should not start with a non integer.");
+  fl_stream >> dummy;     // if number of parameters were specified, this should fail
+  if (!fl_stream.fail()) {
+    num_param = 1;
+    is.seekg(pos, std::ios_base::beg);
+  }
+
   while (read_simplex(is, simplex, fil)) {
     // read all simplices in the file as a list of vertices
     // Warning : simplex_size needs to be casted in int - Can be 0
-    int dim = static_cast<int> (simplex.size() - 1);
+    int dim = static_cast<int>(simplex.size() - 1);
     if (max_dim < dim) {
       max_dim = dim;
     }
@@ -2924,6 +2945,7 @@ std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
     simplex.clear();
   }
   st.set_dimension(max_dim);
+  st.set_num_parameters(num_param);
 
   return is;
 }

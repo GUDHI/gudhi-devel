@@ -16,12 +16,14 @@
 #include <boost/mpl/list.hpp>
 
 #include <gudhi/Multi_persistence/Persistence_interface_matrix.h>
+#include <gudhi/Multi_persistence/Persistence_interface_cohomology.h>
 #include <gudhi/Multi_parameter_filtered_complex.h>
 #include <gudhi/Multi_parameter_filtration.h>
 
 using Gudhi::multi_filtration::Multi_parameter_filtration;
 using Gudhi::multi_persistence::Multi_parameter_filtered_complex;
 using Gudhi::multi_persistence::Persistence_interface_matrix;
+using Gudhi::multi_persistence::Persistence_interface_cohomology;
 
 using Fil = Multi_parameter_filtration<double>;
 using Complex = Multi_parameter_filtered_complex<Fil>;
@@ -48,7 +50,8 @@ struct Multi_persistence_chain_options : Multi_persistence_ru_options {
 
 typedef boost::mpl::list<Persistence_interface_matrix<Multi_persistence_r_options>,
                          Persistence_interface_matrix<Multi_persistence_ru_options>,
-                         Persistence_interface_matrix<Multi_persistence_chain_options>>
+                         Persistence_interface_matrix<Multi_persistence_chain_options>,
+                         Persistence_interface_cohomology<Fil>>
     list_of_tested_variants;
 
 Complex build_complex()
@@ -142,29 +145,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(interface_constructors, Interface, list_of_tested_
   }
 }
 
-// template <class Barcode>
-// void print_barcode(const Barcode& barcode)
-// {
-//   for (const auto& b : barcode) {
-//     std::cout << b << "\n";
-//   }
-//   std::cout << "\n";
-// }
-
-template <class Barcode1, class Barcode2>
-void test_barcode_equality(const Barcode1& barcode1, const Barcode2& barcode2)
+template <class Barcode, class Bar>
+void test_barcode_equality(const Barcode& barcode1, const std::vector<Bar>& barcode2)
 {
-  print_barcode(barcode1);
-  print_barcode(barcode2);
   BOOST_CHECK_EQUAL(barcode1.size(), barcode2.size());
-  auto it1 = barcode1.begin();
+  std::vector<Bar> sorted;
+  for (const Bar& b : barcode1) sorted.push_back(b);
+  std::sort(sorted.begin(), sorted.end(), [](const Bar& b1, const Bar& b2){
+    return b1.birth < b2.birth;
+  });
   for (unsigned int i = 0; i < barcode2.size(); ++i) {
-    const auto& b1 = *it1;
+    const auto& b1 = sorted[i];
     const auto& b2 = barcode2[i];
     BOOST_CHECK_EQUAL(b1.dim, b2.dim);
     BOOST_CHECK_EQUAL(b1.birth, b2.birth);
     BOOST_CHECK_EQUAL(b1.death, b2.death);
-    ++it1;
   }
 }
 
@@ -177,26 +172,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(interface_barcode, Interface, list_of_tested_varia
   Map permutation = {0, 5, 2, 3, 4, 6, 8, 1, 10, 11, 9, 7, 12, 13};
   std::vector<Bar> realBarcode;
 
-  // barcode is the same in both, but not the order
-  if constexpr (Interface::is_vine) {
-    realBarcode = {Bar(0, Bar::inf, 0),
-                   Bar(5, 8, 0),
-                   Bar(2, 10, 0),
-                   Bar(3, 11, 0),
-                   Bar(4, 6, 0),
-                   Bar(1, 12, 1),
-                   Bar(9, 13, 1),
-                   Bar(7, Bar::inf, 1)};
-  } else {
-    realBarcode = {Bar(1, 12, 1),
-                   Bar(9, 13, 1),
-                   Bar(4, 6, 0),
-                   Bar(5, 8, 0),
-                   Bar(2, 10, 0),
-                   Bar(3, 11, 0),
-                   Bar(7, Bar::inf, 1),
-                   Bar(0, Bar::inf, 0)};
-  }
+  realBarcode = {Bar(0, Bar::inf, 0),
+                 Bar(1, 12, 1),
+                 Bar(2, 10, 0),
+                 Bar(3, 11, 0),
+                 Bar(4, 6, 0),
+                 Bar(5, 8, 0),
+                 Bar(7, Bar::inf, 1),
+                 Bar(9, 13, 1)};
 
   Interface inter(cpx, permutation);
   auto barcode = inter.get_barcode();
@@ -235,6 +218,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(interface_vine, Interface, list_of_tested_variants
     std::swap(permutation[0], permutation[1]);
     realBarcode[0].birth = 1;
     realBarcode[1].birth = 0;
+    std::swap(realBarcode[0], realBarcode[1]);  // reorder by birth
     barcode = inter.get_barcode();
     test_barcode_equality(barcode, realBarcode);
 
@@ -245,7 +229,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(interface_vine, Interface, list_of_tested_variants
 
     inter.vine_swap(5);
     std::swap(permutation[5], permutation[6]);
-    realBarcode[1].death = 5;
+    realBarcode[0].death = 5;
     realBarcode[3].birth = 3;
     barcode = inter.get_barcode();
     test_barcode_equality(barcode, realBarcode);
@@ -260,9 +244,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(interface_vine, Interface, list_of_tested_variants
 BOOST_AUTO_TEST_CASE_TEMPLATE(interface_rep_cycles, Interface, list_of_tested_variants)
 {
   using Map = typename Interface::Map;
-  using Cy = typename Interface::Cycle;
 
   if constexpr (Interface::has_rep_cycles) {
+    using Cy = typename Interface::Cycle;
+
     Complex cpx = build_complex();
     Map permutation = {0, 5, 2, 3, 4, 6, 8, 1, 10, 11, 9, 7, 12, 13};
 
