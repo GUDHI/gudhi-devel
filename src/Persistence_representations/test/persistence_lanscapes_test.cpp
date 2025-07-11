@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product)
 // Below I am storing the code used to generate tests for that functionality.
 
 /* if (argc != 2) {
-  std::cerr << "To run this program, please provide a name of a file with persistence landscape \n";
+  std::clog << "To run this program, please provide a name of a file with persistence landscape \n";
   // return 1;
 }
 Persistence_landscape p("data/file_with_diagram");

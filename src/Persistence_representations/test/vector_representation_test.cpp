@@ -21,6 +21,7 @@
 #include <gudhi/Persistence_vectors.h>
 #include <gudhi/common_persistence_representations.h>
 #include <gudhi/read_persistence_from_file.h>
+#include <gudhi/distance_functions.h>
 
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;

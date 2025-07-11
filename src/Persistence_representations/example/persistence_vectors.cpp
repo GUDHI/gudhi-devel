@@ -11,11 +11,11 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <iomanip>
 #include <limits>
 #include <utility>
 
 #include <gudhi/Persistence_vectors.h>
+#include <gudhi/distance_functions.h>
 
 using Vector_distances_in_diagram =
     Gudhi::Persistence_representations::Vector_distances_in_diagram<Gudhi::Euclidean_distance>;
@@ -38,8 +38,8 @@ int main(int argc, char** argv)
   persistence2.push_back(std::make_pair(6, 10));
 
   // create two persistence vectors based on persistence1 and persistence2:
-  Vector_distances_in_diagram v1(persistence1, std::numeric_limits<size_t>::max());
-  Vector_distances_in_diagram v2(persistence2, std::numeric_limits<size_t>::max());
+  Vector_distances_in_diagram v1(persistence1, std::numeric_limits<std::size_t>::max());
+  Vector_distances_in_diagram v2(persistence2, std::numeric_limits<std::size_t>::max());
 
   // writing to a stream:
   std::clog << "v1 : " << v1 << std::endl;

@@ -38,14 +38,14 @@ int main(int argc, char** argv)
   }
 
   Persistence_intervals p(argv[1], dimension);
-  std::vector<std::pair<double, size_t> > pbns = p.compute_persistent_betti_numbers();
+  std::vector<std::pair<double, std::size_t> > pbns = p.compute_persistent_betti_numbers();
 
   // set up the ranges so that we see the image well.
   double xRangeBegin = pbns[0].first;
   double xRangeEnd = pbns[pbns.size() - 1].first;
   double yRangeBegin = 0;
   double yRangeEnd = 0;
-  for (size_t i = 0; i != pbns.size(); ++i) {
+  for (std::size_t i = 0; i != pbns.size(); ++i) {
     if (pbns[i].second > yRangeEnd) yRangeEnd = pbns[i].second;
   }
   xRangeBegin -= (xRangeEnd - xRangeBegin) / 100.0;
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
   out << "set yrange [" << yRangeBegin << " : " << yRangeEnd << "]" << std::endl;
   out << "plot '-' using 1:2 notitle with lp " << std::endl;
   double previous_y = 0;
-  for (size_t i = 0; i != pbns.size(); ++i) {
+  for (std::size_t i = 0; i != pbns.size(); ++i) {
     out << pbns[i].first << " " << previous_y << std::endl;
     out << pbns[i].first << " " << pbns[i].second << std::endl;
     previous_y = pbns[i].second;

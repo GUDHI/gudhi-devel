@@ -37,9 +37,9 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  size_t size_of_grid = (size_t)atoi(argv[1]);
-  double min_ = atof(argv[2]);
-  double max_ = atof(argv[3]);
+  std::size_t size_of_grid = (std::size_t)atoi(argv[1]);
+  double min = atof(argv[2]);
+  double max = atof(argv[3]);
   int dim = atoi(argv[4]);
   unsigned dimension = std::numeric_limits<unsigned>::max();
   if (dim >= 0) {
@@ -51,13 +51,13 @@ int main(int argc, char** argv)
     filenames.push_back(argv[i]);
   }
 
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     std::clog << "Creating persistence landscape on a grid based on a file : " << filenames[i] << std::endl;
     Persistence_landscape_on_grid l;
-    if ((min_ != -1) || (max_ != -1)) {
-      l = Persistence_landscape_on_grid(filenames[i], min_, max_, size_of_grid, dimension);
+    if ((min != -1) || (max != -1)) {
+      l = Persistence_landscape_on_grid(filenames[i], min, max, size_of_grid, dimension);
     } else {
-      // (min_ == -1) && (max_ == -1), in this case the program will find min_ and max_ based on the data.
+      // (min == -1) && (max == -1), in this case the program will find min and max based on the data.
       l = Persistence_landscape_on_grid(filenames[i], size_of_grid, dimension);
     }
     std::stringstream ss;
