@@ -15,7 +15,12 @@ from gudhi import WitnessComplex, StrongWitnessComplex, SimplexTree
 
 def test_empty_witness_complex():
     witness = WitnessComplex()
-    assert witness._is_defined() == False
+    simplex_tree = witness.create_simplex_tree(max_alpha_square=4.1, limit_dimension=2)
+    assert simplex_tree.num_simplices() == 0
+
+    witness = StrongWitnessComplex()
+    simplex_tree = witness.create_simplex_tree(max_alpha_square=4.1, limit_dimension=2)
+    assert simplex_tree.num_simplices() == 0
 
 
 def test_witness_complex():

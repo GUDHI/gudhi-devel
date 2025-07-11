@@ -34,6 +34,7 @@ The following example explains how the distance is computed:
 .. testcode::
 
     import gudhi
+    import numpy as np
 
     message = "Bottleneck distance = " + '%.1f' % gudhi.bottleneck_distance([[0., 0.]], [[0., 13.]])
     print(message)
@@ -58,9 +59,10 @@ This other example computes the bottleneck distance from 2 persistence diagrams:
 .. testcode::
 
     import gudhi
+    import numpy as np
 
-    diag1 = [[2.7, 3.7],[9.6, 14.],[34.2, 34.974], [3.,float('Inf')]]
-    diag2 = [[2.8, 4.45],[9.5, 14.1],[3.2,float('Inf')]]
+    diag1 = np.array([[2.7, 3.7],[9.6, 14.],[34.2, 34.974], [3.,float('Inf')]])
+    diag2 = np.array([[2.8, 4.45],[9.5, 14.1],[3.2,float('Inf')]])
 
     message = "Bottleneck distance approximation = " + '%.2f' % gudhi.bottleneck_distance(diag1, diag2, 0.1)
     print(message)
