@@ -8,16 +8,17 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_heat_maps.h>
-
 #include <iostream>
 #include <sstream>
 #include <vector>
 
+#include <gudhi/Persistence_heat_maps.h>
+
 using constant_scaling_function = Gudhi::Persistence_representations::constant_scaling_function;
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program computes scalar product of persistence heat maps stored in a file (the file needs to be "
             << "created beforehand). \n"
             << "The parameters of this programs are names of files with persistence heat maps.\n";

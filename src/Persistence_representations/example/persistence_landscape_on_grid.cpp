@@ -8,15 +8,16 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_landscape_on_grid.h>
-
 #include <iostream>
 #include <utility>
 #include <vector>
 
+#include <gudhi/Persistence_landscape_on_grid.h>
+
 using Persistence_landscape_on_grid = Gudhi::Persistence_representations::Persistence_landscape_on_grid;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   // create two simple vectors with birth--death pairs:
 
   std::vector<std::pair<double, double> > persistence1;

@@ -8,8 +8,6 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_vectors.h>
-
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -17,10 +15,13 @@
 #include <limits>
 #include <utility>
 
+#include <gudhi/Persistence_vectors.h>
+
 using Vector_distances_in_diagram =
     Gudhi::Persistence_representations::Vector_distances_in_diagram<Gudhi::Euclidean_distance>;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   // create two simple vectors with birth--death pairs:
 
   std::vector<std::pair<double, double> > persistence1;
