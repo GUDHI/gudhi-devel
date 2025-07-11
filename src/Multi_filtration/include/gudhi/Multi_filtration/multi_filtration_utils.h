@@ -18,6 +18,8 @@
 #define MF_UTILS_H_
 
 #include <cstddef>
+#include <istream>
+#include <stdexcept>
 #include <type_traits>
 #include <limits>
 #include <cmath>
@@ -168,6 +170,44 @@ constexpr bool _divide(T &v1, T v2)
 
   v1 /= v2;
   return true;
+};
+
+template <class T>
+T _get_value(std::istream &stream)
+{
+  if constexpr (std::numeric_limits<T>::has_infinity) {
+    auto pos = stream.tellg();
+    char first;
+    stream >> first;
+    if (first == 'i') {
+      stream >> first;  // n
+      stream >> first;  // f
+      return std::numeric_limits<T>::infinity();
+    }
+    if (first == '-') {
+      stream >> first;  // i
+      if (first == 'i') {
+        stream >> first;  // n
+        stream >> first;  // f
+        return -std::numeric_limits<T>::infinity();
+      } // else could be a negative number
+    }
+    if (first == 'n') {
+      if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
+        stream >> first;  // a
+        stream >> first;  // n
+        return std::numeric_limits<T>::quiet_NaN();
+      } else {
+        throw std::invalid_argument("Wrong input stream format for value, no nan values allowed.");
+      }
+    }
+    stream.seekg(pos, std::ios_base::beg);
+  }
+
+  T val;
+  stream >> val;
+  if (stream.fail()) throw std::invalid_argument("Wrong input stream format for value.");
+  return val;
 };
 
 }  // namespace multi_filtration

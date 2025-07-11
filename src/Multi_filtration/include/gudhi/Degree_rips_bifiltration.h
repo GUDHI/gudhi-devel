@@ -1930,6 +1930,42 @@ class Degree_rips_bifiltration
   }
 
   /**
+   * @brief Instream operator.
+   */
+  friend std::istream &operator>>(std::istream &stream, Degree_rips_bifiltration &f)
+  {
+    size_type num_gen;
+    char delimiter;
+    stream >> delimiter;  // (
+    stream >> delimiter;  // k
+    stream >> delimiter;  // =
+    if (delimiter != '=') throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
+    stream >> num_gen;
+    if (!stream.good()) throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
+    f.generators_.resize(num_gen);
+    stream >> delimiter;  // )
+    stream >> delimiter;  // [
+    if (delimiter != '[') throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
+    if (num_gen == 0) return stream;
+    T val;
+    for (size_type i = 0; i < num_gen; ++i) {
+      stream >> delimiter;  // [
+      stream >> val;
+      if (val != static_cast<T>(i))
+        std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
+      stream >> delimiter;  // ,
+      val = _get_value<T>(stream);
+      if (!stream.good()) throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
+      f.generators_[i] = val;
+      stream >> delimiter;  // ]
+      stream >> delimiter;  // ; or last ]
+    }
+    if (delimiter != ']') throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
+
+    return stream;
+  }
+
+  /**
    * @brief Returns a filtration value at infinity. Fails if `Co` is true.
    */
   friend Degree_rips_bifiltration get_infinity_value([[maybe_unused]] const Degree_rips_bifiltration &f)

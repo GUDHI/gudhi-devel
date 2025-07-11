@@ -588,6 +588,7 @@ class Dynamic_multi_parameter_filtration
    */
   bool is_nan() const
   {
+    if (generators_.empty()) return false;
     for (const Generator &g : generators_) {
       if (!g.is_nan()) return false;
     }
@@ -835,6 +836,7 @@ class Dynamic_multi_parameter_filtration
   {
     if (a.is_nan() || b.is_nan()) return false;
     if (&a == &b) return true;
+    if (a.number_of_parameters_ != b.number_of_parameters_) return false;
     // assumes lexicographical order for both
     return a.generators_ == b.generators_;
   }
@@ -2059,13 +2061,52 @@ class Dynamic_multi_parameter_filtration
   friend std::ostream &operator<<(std::ostream &stream, const Dynamic_multi_parameter_filtration &f)
   {
     const size_type num_gen = f.num_generators();
+    const size_type num_param = f.num_parameters();
 
-    stream << "( k = " << num_gen << " ) [ ";
+    stream << "( k = " << num_gen << " ) ( p = " << num_param << " ) [ ";
     for (size_type g = 0; g < num_gen; ++g) {
       stream << f.generators_[g];
       if (g < num_gen - 1) stream << "; ";
     }
     stream << " ]";
+
+    return stream;
+  }
+
+  /**
+   * @brief Instream operator.
+   */
+  friend std::istream &operator>>(std::istream &stream, Dynamic_multi_parameter_filtration &f)
+  {
+    size_type num_gen;
+    size_type num_param;
+    char delimiter;
+    stream >> delimiter;  // (
+    stream >> delimiter;  // k
+    stream >> delimiter;  // =
+    stream >> num_gen;
+    if (!stream.good())
+      throw std::invalid_argument("Invalid incoming stream format for Dynamic_multi_parameter_filtration (num_gen).");
+    f.generators_.resize(num_gen);
+    stream >> delimiter;  // )
+    stream >> delimiter;  // (
+    stream >> delimiter;  // p
+    stream >> delimiter;  // =
+    stream >> num_param;
+    if (!stream.good())
+      throw std::invalid_argument("Invalid incoming stream format for Dynamic_multi_parameter_filtration (num_param).");
+    f.number_of_parameters_ = num_param;
+    stream >> delimiter;  // )
+    stream >> delimiter;  // [
+    if (delimiter != '[')
+      throw std::invalid_argument("Invalid incoming stream format for Dynamic_multi_parameter_filtration ([).");
+    if (num_gen == 0) return stream;
+    for (size_type i = 0; i < num_gen; ++i) {
+      stream >> f.generators_[i];
+      stream >> delimiter;  // ; or last ]
+    }
+    if (delimiter != ']')
+      throw std::invalid_argument("Invalid incoming stream format for Dynamic_multi_parameter_filtration (]).");
 
     return stream;
   }
@@ -2241,7 +2282,7 @@ class Dynamic_multi_parameter_filtration
   constexpr static const T T_inf = Generator::T_inf;
 
  private:
-  size_type number_of_parameters_;  /**< Matrix view of the container. Has to be created after generators_. */
+  size_type number_of_parameters_;  /**< Number of parameters. */
   Underlying_container generators_; /**< Container of the filtration value elements. */
 
   constexpr static bool _is_nan(T val)

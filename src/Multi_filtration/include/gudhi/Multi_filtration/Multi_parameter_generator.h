@@ -1497,6 +1497,55 @@ class Multi_parameter_generator
   }
 
   /**
+   * @brief Instream operator.
+   */
+  friend std::istream &operator>>(std::istream &stream, Multi_parameter_generator &g)
+  {
+    char firstCharacter;
+    stream >> firstCharacter;
+    if (firstCharacter != '[')
+      throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
+    g.generator_.clear();
+    auto pos = stream.tellg();
+    stream >> firstCharacter;
+    if (firstCharacter == ']') return stream;
+    if (firstCharacter == 'i') {
+      while (firstCharacter != ']') {
+        stream >> firstCharacter;
+      }
+      g = Multi_parameter_generator::inf();
+      return stream;
+    }
+    if (firstCharacter == '-') {
+      stream >> firstCharacter;
+      if (firstCharacter == 'i') {
+        while (firstCharacter != ']') {
+          stream >> firstCharacter;
+        }
+        g = Multi_parameter_generator::minus_inf();
+        return stream;
+      } // else could be a negative number
+    }
+    if (firstCharacter == 'N') {
+      while (firstCharacter != ']') {
+        stream >> firstCharacter;
+      }
+      g = Multi_parameter_generator::nan();
+      return stream;
+    }
+
+    stream.seekg(pos, std::ios_base::beg);
+    char delimiter = '\0';
+    while (delimiter != ']') {
+      g.generator_.push_back(_get_value<T>(stream));
+      if (!stream.good()) throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
+      stream >> delimiter;
+    }
+
+    return stream;
+  }
+
+  /**
    * @brief Serialize given value into the buffer at given pointer.
    *
    * @param value Value to serialize.
