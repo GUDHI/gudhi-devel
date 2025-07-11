@@ -30,9 +30,15 @@ class Vector_filtration_value : public std::vector<int>
 
   Vector_filtration_value() : Base() {}
   Vector_filtration_value(std::size_t count) : Base(count) {}
+  Vector_filtration_value(std::size_t count, int val) : Base(count, val) {}
   Vector_filtration_value(std::initializer_list<int> init) : Base(init) {}
   Vector_filtration_value(const_iterator start, const_iterator end) : Base(start, end) {}
   // Vector_filtration_value(const Gudhi::simplex_tree::empty_filtration_value_t& e) : Base(0) {}
+
+  friend Vector_filtration_value get_infinity_value(const Vector_filtration_value &f)
+  {
+    return Vector_filtration_value(f.size(), std::numeric_limits<int>::max());
+  }
 
   friend bool unify_lifetimes(Vector_filtration_value& f1, const Vector_filtration_value& f2) {
     int max = std::numeric_limits<int>::max();
