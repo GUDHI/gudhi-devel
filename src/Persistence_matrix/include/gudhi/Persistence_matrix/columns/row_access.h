@@ -29,11 +29,11 @@ namespace persistence_matrix {
  * @brief Empty structure.
  * Inherited instead of @ref Row_access, if the row access is not enabled.
  */
-struct Dummy_row_access 
-{
+struct Dummy_row_access {
   friend void swap([[maybe_unused]] Dummy_row_access& d1, [[maybe_unused]] Dummy_row_access& d2) {}
 
   Dummy_row_access() {}
+
   template <typename Index, class Row_container>
   Dummy_row_access([[maybe_unused]] Index columnIndex, [[maybe_unused]] Row_container& rows) {}
 };
@@ -43,17 +43,17 @@ struct Dummy_row_access
  * @ingroup persistence_matrix
  *
  * @brief Class managing the row access for the columns.
- * 
+ *
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
-class Row_access 
+class Row_access
 {
  public:
-  using Index = typename Master_matrix::Index;                  /**< @ref MatIdx index type. */
-  using ID_index = typename Master_matrix::ID_index;            /**< @ref IDIdx index type. */
-  using Matrix_entry = typename Master_matrix::Matrix_entry;    /**< @ref Entry. */
-  using Row_container = typename Master_matrix::Row_container;  /**< Type of the row container. */
+  using Index = typename Master_matrix::Index;                 /**< @ref MatIdx index type. */
+  using ID_index = typename Master_matrix::ID_index;           /**< @ref IDIdx index type. */
+  using Matrix_entry = typename Master_matrix::Matrix_entry;   /**< @ref Entry. */
+  using Row_container = typename Master_matrix::Row_container; /**< Type of the row container. */
 
   /**
    * @brief Default constructor. Sets the column index to @ref Matrix::get_null_value "null index" and the row
@@ -62,44 +62,47 @@ class Row_access
   Row_access();
   /**
    * @brief Constructor setting the column index and the row container by the given values.
-   * 
+   *
    * @param columnIndex Column index to store.
    * @param rows Pointer to the row container.
    */
   Row_access(Index columnIndex, Row_container* rows);
   /**
    * @brief Move constructor.
-   * 
+   *
    * @param other Column to move.
    */
   Row_access(Row_access&& other) noexcept;
 
   /**
    * @brief Inserts the given entry at the given row index.
-   * 
+   *
    * @param rowIndex @ref rowindex "Row index" of the entry.
    * @param entry Pointer to the entry to insert.
    */
   void insert_entry(ID_index rowIndex, Matrix_entry* entry);
+
   /**
    * @brief Removes the given entry from its row.
-   * 
+   *
    * @param entry Pointer to the entry to remove.
    */
   void unlink(Matrix_entry* entry);
+
   /**
-   * @brief If @ref PersistenceMatrixOptions::has_intrusive_rows is false, updates the copy of the entry in its row. 
+   * @brief If @ref PersistenceMatrixOptions::has_intrusive_rows is false, updates the copy of the entry in its row.
    * Otherwise does nothing.
    *
    * If the rows are intrusive, only a pointer of the entry is stored and therefore any update on the entry (value
    * or column index) is automatically forwarded. But for non intrusive rows, any update has to be pushed explicitly.
-   * 
+   *
    * @param entry Entry to update.
    */
   void update_entry(const Matrix_entry& entry);
+
   /**
    * @brief Returns the @ref MatIdx column index.
-   * 
+   *
    * @return The @ref MatIdx column index.
    */
   Index get_column_index() const;
@@ -112,11 +115,10 @@ class Row_access
     std::swap(r1.columnIndex_, r2.columnIndex_);
   }
 
- protected:
-  Index columnIndex_;         /**< Column index. */
-  Row_container* rows_;  /**< Row container. Be careful to not destroy before the columns. */
-
  private:
+  Index columnIndex_;   /**< Column index. */
+  Row_container* rows_; /**< Row container. Be careful to not destroy before the columns. */
+
   using Base_hook_matrix_row = typename Master_matrix::Base_hook_matrix_row;
 };
 
@@ -127,16 +129,16 @@ inline Row_access<Master_matrix>::Row_access()
 
 template <class Master_matrix>
 inline Row_access<Master_matrix>::Row_access(Index columnIndex, Row_container* rows)
-    : columnIndex_(columnIndex), rows_(rows) 
+    : columnIndex_(columnIndex), rows_(rows)
 {}
 
 template <class Master_matrix>
 inline Row_access<Master_matrix>::Row_access(Row_access&& other) noexcept
-    : columnIndex_(std::exchange(other.columnIndex_, 0)), rows_(other.rows_) 
+    : columnIndex_(std::exchange(other.columnIndex_, 0)), rows_(other.rows_)
 {}
 
 template <class Master_matrix>
-inline void Row_access<Master_matrix>::insert_entry(ID_index rowIndex, Matrix_entry* entry) 
+inline void Row_access<Master_matrix>::insert_entry(ID_index rowIndex, Matrix_entry* entry)
 {
   if (rows_ == nullptr) return;
 
@@ -153,7 +155,7 @@ inline void Row_access<Master_matrix>::insert_entry(ID_index rowIndex, Matrix_en
 }
 
 template <class Master_matrix>
-inline void Row_access<Master_matrix>::unlink(Matrix_entry* entry) 
+inline void Row_access<Master_matrix>::unlink(Matrix_entry* entry)
 {
   if (rows_ == nullptr) return;
 
@@ -170,7 +172,7 @@ inline void Row_access<Master_matrix>::unlink(Matrix_entry* entry)
 }
 
 template <class Master_matrix>
-inline void Row_access<Master_matrix>::update_entry(const Matrix_entry& entry) 
+inline void Row_access<Master_matrix>::update_entry(const Matrix_entry& entry)
 {
   if constexpr (!Master_matrix::Option_list::has_intrusive_rows) {
     if (rows_ == nullptr) return;
@@ -182,7 +184,7 @@ inline void Row_access<Master_matrix>::update_entry(const Matrix_entry& entry)
 }
 
 template <class Master_matrix>
-inline typename Row_access<Master_matrix>::Index Row_access<Master_matrix>::get_column_index() const 
+inline typename Row_access<Master_matrix>::Index Row_access<Master_matrix>::get_column_index() const
 {
   return columnIndex_;
 }

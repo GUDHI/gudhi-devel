@@ -98,7 +98,7 @@ struct Column_dimension_holder
   friend void swap(Column_dimension_holder& col1, Column_dimension_holder& col2) { std::swap(col1.dim_, col2.dim_); }
 
  protected:
-  void swap_dimension(Column_dimension_holder& other) { std::swap(dim_, other.dim_); }
+  void _swap_dimension(Column_dimension_holder& other) { std::swap(dim_, other.dim_); }
 
  private:
   Dimension dim_;  /**< Dimension of the column. */
