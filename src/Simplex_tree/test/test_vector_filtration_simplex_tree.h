@@ -108,6 +108,26 @@ class Vector_filtration_value : public std::vector<int>
     stream << "]";
     return stream;
   }
+
+  friend std::istream &operator>>(std::istream &stream, Vector_filtration_value &f) {
+    char firstCharacter;
+    stream >> firstCharacter;
+    if (firstCharacter != '[') throw std::invalid_argument("Invalid incoming stream format for Vector_filtration_value.");
+    f.clear();
+    auto pos = stream.tellg();
+    stream >> firstCharacter;
+    if (firstCharacter == ']') return stream;
+    stream.seekg(pos, std::ios_base::beg);
+    int val;
+    char delimiter = '\0';
+    while (delimiter != ']') {
+      stream >> val;
+      if (!stream.good()) throw std::invalid_argument("Invalid incoming stream format for Vector_filtration_value.");
+      f.push_back(val);
+      stream >> delimiter;
+    }
+    return stream;
+  }
 };
 
 struct Simplex_tree_options_custom_fil_values_default {
