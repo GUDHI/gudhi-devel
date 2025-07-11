@@ -1975,7 +1975,7 @@ class Multi_parameter_filtration
     const size_type num_gen = f.num_generators();
     const size_type num_param = f.num_parameters();
 
-    stream << "( k = " << num_gen << " ) [ ";
+    stream << "( k = " << num_gen << " ) ( p = " << num_param << " ) [ ";
     for (size_type g = 0; g < num_gen; ++g) {
       stream << "[";
       for (size_type p = 0; p < num_param; ++p) {
@@ -1986,6 +1986,46 @@ class Multi_parameter_filtration
       if (g < num_gen - 1) stream << "; ";
     }
     stream << " ]";
+
+    return stream;
+  }
+
+  /**
+   * @brief Instream operator.
+   */
+  friend std::istream &operator>>(std::istream &stream, Multi_parameter_filtration &f)
+  {
+    size_type num_gen;
+    size_type num_param;
+    char delimiter;
+    stream >> delimiter;  // (
+    stream >> delimiter;  // k
+    stream >> delimiter;  // =
+    stream >> num_gen;
+    if (!stream.good()) throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_filtration.");
+    stream >> delimiter;  // )
+    stream >> delimiter;  // (
+    stream >> delimiter;  // p
+    stream >> delimiter;  // =
+    stream >> num_param;
+    if (!stream.good()) throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_filtration.");
+    f.generators_.resize(num_gen * num_param);
+    f.generator_view_ = Viewer(f.generators_.data(), num_gen, num_param);
+    stream >> delimiter;  // )
+    stream >> delimiter;  // [
+    if (delimiter != '[') throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_filtration.");
+    if (num_gen == 0) return stream;
+    for (size_type i = 0; i < num_gen; ++i) {
+      stream >> delimiter;  // [
+      for (size_type j = 0; j < num_param; ++j) {
+        f(i, j) = _get_value<T>(stream);
+        if (!stream.good())
+          throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_filtration.");
+        stream >> delimiter;  // , or last ]
+      }
+      stream >> delimiter;  // ; or last ]
+    }
+    if (delimiter != ']') throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_filtration.");
 
     return stream;
   }
