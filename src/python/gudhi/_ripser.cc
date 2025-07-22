@@ -62,21 +62,20 @@ nb::list doit(DistanceMatrix&& dist,
 {
   // static_assert(!std::is_lvalue_reference_v<DistanceMatrix>);
   typedef typename DistanceMatrix::value_t T;
-  std::vector<std::vector<T> > dgms;
+  std::vector<std::vector<std::array<T, 2> > > dgms;
   {
     nb::gil_scoped_release release;
     auto output = [&](T birth, T death) {
       // Skip empty intervals
       if (birth < death) {
-        dgms.back().push_back(birth);
-        dgms.back().push_back(death);
+        dgms.back().push_back({birth, death});
       }
     };
     auto switch_dim = [&](int new_dim) { dgms.emplace_back(); };
     ripser_auto(std::move(dist), max_dimension, max_edge_length, homology_coeff_field, switch_dim, output);
   }
   nb::list ret;
-  for (auto&& dgm : dgms) ret.append(_wrap_as_numpy_array(std::move(dgm), dgm.size() / 2, 2));
+  for (auto&& dgm : dgms) ret.append(_wrap_as_numpy_array(std::move(dgm)));
   return ret;
 }
 

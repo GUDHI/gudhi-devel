@@ -54,9 +54,10 @@ struct Merge {
   double persist;
 };
 
+template <class Density_view>
 auto tomato(Point_index num_points,
             nb::object const& neighbors,
-            nb::ndarray<const double, nb::ndim<1> > density,
+            const Density_view& density,
             std::vector<Point_index> const& order,
             std::vector<Point_index> const& rorder)
 {
@@ -81,15 +82,14 @@ auto tomato(Point_index num_points,
   auto ds_parent =
       boost::make_transform_value_property_map([](auto& p) -> Cluster_index& { return p.parent; }, ds_data);
   auto ds_rank = boost::make_transform_value_property_map([](auto& p) -> int& { return p.rank; }, ds_data);
-  boost::disjoint_sets<decltype(ds_rank), decltype(ds_parent)> ds(
-      ds_rank, ds_parent);                                       // on the clusters, not directly the points
-  std::vector<double> persistence;  // diagram (finite points)
-  boost::container::flat_map<Cluster_index, Cluster_index>
-      adj_clusters;  // first: the merged cluster, second: the raw cluster
+  // on the clusters, not directly the points
+  boost::disjoint_sets<decltype(ds_rank), decltype(ds_parent)> ds(ds_rank, ds_parent);
+  // diagram (finite points)
+  std::vector<std::array<double, 2> > persistence;
+  // first: the merged cluster, second: the raw cluster
   // we only care about the raw cluster, we could use a vector to store the second, store first into a set, and only
   // insert in the vector if merged is absent from the set
-
-  auto density_view = density.view();
+  boost::container::flat_map<Cluster_index, Cluster_index> adj_clusters;
 
   for (Point_index i = 0; i < num_points; ++i) {
     // auto&& ngb = neighbors[order[i]];
@@ -138,12 +138,11 @@ auto tomato(Point_index num_points,
       Point_index k = ds_base[ck].max;
       Point_index young = std::max(j, k);
       Point_index old = std::min(j, k);
-      auto d_young = density_view(order[young]);
-      auto d_i = density_view(order[i]);
+      auto d_young = density(order[young]);
+      auto d_i = density(order[i]);
       assert(d_young >= d_i);
       // Always merge (the non-hierarchical algorithm would only conditionally merge here
-      persistence.push_back(d_young);
-      persistence.push_back(d_i);
+      persistence.push_back({d_young, d_i});
       assert(ds.find_set(rj) != ds.find_set(rk));
       ds.link(cj, ck);
       cj = ds.find_set(cj);
@@ -161,7 +160,7 @@ auto tomato(Point_index num_points,
   // Maximum for each connected component
   std::vector<double> max_cc;
   for (Cluster_index i = 0; i < n_raw_clusters; ++i) {
-    if (ds_base[i].parent == i) max_cc.push_back(density_view(order[ds_base[i].max]));
+    if (ds_base[i].parent == i) max_cc.push_back(density(order[ds_base[i].max]));
   }
   assert((Cluster_index)(merges.size() + max_cc.size()) == n_raw_clusters);
 
@@ -169,7 +168,7 @@ auto tomato(Point_index num_points,
 
   // Replay the merges, in increasing order of prominence, to build the hierarchy
   std::sort(merges.begin(), merges.end(), [](Merge const& a, Merge const& b) { return a.persist < b.persist; });
-  std::vector<Cluster_index> children;
+  std::vector<std::array<Cluster_index, 2> > children;
   children.reserve(merges.size() * 2);
   {
     struct Dat {
@@ -193,8 +192,7 @@ auto tomato(Point_index num_points,
       Cluster_index j = ds.find_set(m.first);
       Cluster_index k = ds.find_set(m.second);
       assert(j != k);
-      children.push_back(ds_bas[j].name);
-      children.push_back(ds_bas[k].name);
+      children.push_back({ds_bas[j].name, ds_bas[k].name});
       ds.make_set(i);
       ds.link(i, j);
       ds.link(ds.find_set(i), k);
@@ -207,8 +205,8 @@ auto tomato(Point_index num_points,
   for (int i = 0; i < num_points; ++i) raw_cluster_ordered[i] = raw_cluster[rorder[i]];
 
   return nb::make_tuple(_wrap_as_numpy_array(std::move(raw_cluster_ordered), raw_cluster_ordered.size()),
-                        _wrap_as_numpy_array(std::move(children), children.size() / 2, 2),
-                        _wrap_as_numpy_array(std::move(persistence), persistence.size() / 2, 2),
+                        _wrap_as_numpy_array(std::move(children)),
+                        _wrap_as_numpy_array(std::move(persistence)),
                         _wrap_as_numpy_array(std::move(max_cc), max_cc.size()));
 }
 
@@ -291,7 +289,7 @@ auto hierarchy(nb::object ngb, nb::ndarray<const double, nb::ndim<1> > density)
   // rorder[i] is the rank of the i-th point in order of decreasing density
   // TODO: put a wrapper on ngb and density so we don't need to pass (r)order (there is still the issue of reordering
   // the output)
-  return tomato(n, ngb, density, order, rorder);
+  return tomato(n, ngb, density_view, order, rorder);
 }
 
 NB_MODULE(_tomato_ext, m)
