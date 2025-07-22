@@ -112,8 +112,12 @@ This function returns the dimension of the complex.
       .def(nb::init<CC&, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def("_compute_persistence", &CPers::compute_persistence, nb::call_guard<nb::gil_scoped_release>())
       .def("_get_persistence", &CPers::get_persistence)
-      .def("_cofaces_of_cubical_persistence_pairs", &CPers::cofaces_of_cubical_persistence_pairs)
-      .def("_vertices_of_cubical_persistence_pairs", &CPers::vertices_of_cubical_persistence_pairs)
+      .def("_cofaces_of_cubical_persistence_pairs",
+           &CPers::cofaces_of_cubical_persistence_pairs,
+           nb::call_guard<nb::gil_scoped_release>())
+      .def("_vertices_of_cubical_persistence_pairs",
+           &CPers::vertices_of_cubical_persistence_pairs,
+           nb::call_guard<nb::gil_scoped_release>())
       .def("_betti_numbers", &CPers::betti_numbers)
       .def("_persistent_betti_numbers", &CPers::persistent_betti_numbers)
       .def("_intervals_in_dimension", &CPers::intervals_in_dimension);
@@ -143,8 +147,12 @@ This function returns the dimension of the complex.
       .def(nb::init<PCC&, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def("_compute_persistence", &PCPers::compute_persistence, nb::call_guard<nb::gil_scoped_release>())
       .def("_get_persistence", &PCPers::get_persistence)
-      .def("_cofaces_of_cubical_persistence_pairs", &PCPers::cofaces_of_cubical_persistence_pairs)
-      .def("_vertices_of_cubical_persistence_pairs", &PCPers::vertices_of_cubical_persistence_pairs)
+      .def("_cofaces_of_cubical_persistence_pairs",
+           &PCPers::cofaces_of_cubical_persistence_pairs,
+           nb::call_guard<nb::gil_scoped_release>())
+      .def("_vertices_of_cubical_persistence_pairs",
+           &PCPers::vertices_of_cubical_persistence_pairs,
+           nb::call_guard<nb::gil_scoped_release>())
       .def("_betti_numbers", &PCPers::betti_numbers)
       .def("_persistent_betti_numbers", &PCPers::persistent_betti_numbers)
       .def("_intervals_in_dimension", &PCPers::intervals_in_dimension);
