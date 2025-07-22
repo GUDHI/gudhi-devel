@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <iostream>  //std::cerr
+#include <array>
 
 #include <boost/container/flat_map.hpp>
 #include <boost/pending/disjoint_sets.hpp>
