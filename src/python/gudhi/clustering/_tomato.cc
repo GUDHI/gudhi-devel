@@ -142,7 +142,7 @@ auto tomato(Point_index num_points,
       auto d_i = density(order[i]);
       assert(d_young >= d_i);
       // Always merge (the non-hierarchical algorithm would only conditionally merge here
-      persistence.push_back({d_young, d_i});
+      persistence.emplace_back(std::array<double, 2>{d_young, d_i});
       assert(ds.find_set(rj) != ds.find_set(rk));
       ds.link(cj, ck);
       cj = ds.find_set(cj);
@@ -192,7 +192,7 @@ auto tomato(Point_index num_points,
       Cluster_index j = ds.find_set(m.first);
       Cluster_index k = ds.find_set(m.second);
       assert(j != k);
-      children.push_back({ds_bas[j].name, ds_bas[k].name});
+      children.emplace_back(std::array<Cluster_index, 2>{ds_bas[j].name, ds_bas[k].name});
       ds.make_set(i);
       ds.link(i, j);
       ds.link(ds.find_set(i), k);

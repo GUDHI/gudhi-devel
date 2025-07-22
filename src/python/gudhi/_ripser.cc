@@ -68,7 +68,7 @@ nb::list doit(DistanceMatrix&& dist,
     auto output = [&](T birth, T death) {
       // Skip empty intervals
       if (birth < death) {
-        dgms.back().push_back({birth, death});
+        dgms.back().emplace_back(std::array<T, 2>{birth, death});
       }
     };
     auto switch_dim = [&](int new_dim) { dgms.emplace_back(); };
