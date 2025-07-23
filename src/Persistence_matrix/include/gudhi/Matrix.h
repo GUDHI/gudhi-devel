@@ -371,7 +371,7 @@ class Matrix {
   struct Column_z2_settings{
     Column_z2_settings() : entryConstructor() {}
     Column_z2_settings([[maybe_unused]] Characteristic characteristic) : entryConstructor() {}
-    Column_z2_settings(const Column_z2_settings& toCopy) : entryConstructor() {}
+    Column_z2_settings([[maybe_unused]] const Column_z2_settings& toCopy) : entryConstructor() {}
 
     Entry_constructor entryConstructor;   //will be replaced by more specific allocators depending on the column type.
   };

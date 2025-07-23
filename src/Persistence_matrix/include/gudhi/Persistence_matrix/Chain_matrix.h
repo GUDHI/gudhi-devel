@@ -495,6 +495,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
     matrix1.matrix_.swap(matrix2.matrix_);
     matrix1.pivotToColumnIndex_.swap(matrix2.pivotToColumnIndex_);
     std::swap(matrix1.nextIndex_, matrix2.nextIndex_);
+    std::swap(matrix1.nextPosition_, matrix2.nextPosition_);
     std::swap(matrix1.colSettings_, matrix2.colSettings_);
 
     if constexpr (Master_matrix::Option_list::has_row_access) {
@@ -682,7 +683,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const Chain_matrix& matrixToCop
       Pivot_to_pos_mapper_opt(static_cast<const Pivot_to_pos_mapper_opt&>(matrixToCopy)),
       pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
       nextIndex_(matrixToCopy.nextIndex_),
-      nextPosition_(matrixToCopy.nextIndex_),
+      nextPosition_(matrixToCopy.nextPosition_),
       colSettings_(colSettings == nullptr ? matrixToCopy.colSettings_ : colSettings)
 {
   matrix_.reserve(matrixToCopy.matrix_.size());
@@ -938,6 +939,7 @@ inline Chain_matrix<Master_matrix>& Chain_matrix<Master_matrix>::operator=(const
   matrix_.clear();
   pivotToColumnIndex_ = other.pivotToColumnIndex_;
   nextIndex_ = other.nextIndex_;
+  nextPosition_ = other.nextPosition_;
   colSettings_ = other.colSettings_;
 
   matrix_.reserve(other.matrix_.size());
