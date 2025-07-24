@@ -81,8 +81,8 @@ class Zp_field_operators
    * @param characteristic Prime number corresponding to the desired characteristic of the field.
    */
   void set_characteristic(Characteristic characteristic) {
-    if (characteristic == nullCharacteristic)
-      throw std::invalid_argument("Characteristic must be strictly positive and a prime number.");
+    if (characteristic <= 1)
+      throw std::invalid_argument("Characteristic must be a strictly positive prime number.");
 
     inverse_.resize(characteristic);
     inverse_[0] = 0;

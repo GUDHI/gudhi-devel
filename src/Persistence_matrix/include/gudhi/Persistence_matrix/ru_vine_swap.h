@@ -85,7 +85,11 @@ class RU_barcode_swap : public RU_pairing<Master_matrix>
    */
   RU_barcode_swap(RU_barcode_swap&& other) : RUP(std::move(static_cast<RUP&>(other))) {};
 
-  RU_barcode_swap& operator=(RU_barcode_swap other) { RUP::operator=(other); }
+  RU_barcode_swap& operator=(RU_barcode_swap other)
+  {
+    RUP::operator=(other);
+    return *this;
+  }
 
   friend void swap(RU_barcode_swap& swap1, RU_barcode_swap& swap2) {
     swap(static_cast<RUP&>(swap1), static_cast<RUP&>(swap2));
@@ -215,7 +219,7 @@ class RU_vine_swap
   /**
    * @brief Assign operator.
    */
-  RU_vine_swap& operator=(RU_vine_swap other);
+  RU_vine_swap& operator=(const RU_vine_swap& other);
   /**
    * @brief Swap operator.
    */
@@ -327,7 +331,8 @@ inline bool RU_vine_swap<Master_matrix>::vine_swap(Pos_index index)
 }
 
 template <class Master_matrix>
-inline RU_vine_swap<Master_matrix>& RU_vine_swap<Master_matrix>::operator=(RU_vine_swap<Master_matrix> other) 
+inline RU_vine_swap<Master_matrix>& RU_vine_swap<Master_matrix>::operator=(
+    [[maybe_unused]] const RU_vine_swap<Master_matrix>& other)
 {
   return *this;
 }

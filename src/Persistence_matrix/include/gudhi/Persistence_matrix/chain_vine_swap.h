@@ -109,7 +109,11 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
    */
   Chain_barcode_swap(Chain_barcode_swap&& other) : CP(std::move(static_cast<CP&>(other))) {};
 
-  Chain_barcode_swap& operator=(Chain_barcode_swap other) { CP::operator=(other); }
+  Chain_barcode_swap& operator=(Chain_barcode_swap other)
+  {
+    CP::operator=(other);
+    return *this;
+  }
 
   friend void swap(Chain_barcode_swap& swap1, Chain_barcode_swap& swap2) {
     swap(static_cast<CP&>(swap1), static_cast<CP&>(swap2));
