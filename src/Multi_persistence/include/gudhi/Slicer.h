@@ -20,8 +20,8 @@
 
 #include <cstddef>
 #include <initializer_list>
-#include <numeric>  //std::iota
 #include <type_traits>
+#include <numeric>  //std::iota
 #include <utility>  //std::move
 #include <cstdint>  //std::int32_t
 #include <vector>
