@@ -244,38 +244,16 @@ class Persistence_interface_matrix
              Options::column_indexation_type == Gudhi::persistence_matrix::Column_indexation_types::CONTAINER),
         "Matrix has a non supported index scheme.");
 
-    if constexpr (Options::has_vine_update && !Options::is_of_boundary_type) {
-      idToPos_.emplace();
-      idToPos_->reserve(permutation.size());
-    }
-    const auto& boundaries = cpx.get_boundaries();
-    const auto& dimensions = cpx.get_dimensions();
-    // simplex IDs need to be increasing in order, so the original ones cannot be used
-    Map permutationInv(permutation.size());
-    Map translated_boundary;
-    std::size_t id = 0;
-    for (auto i : permutation) {
-      permutationInv[i] = id;  // permutation is assumed to be a valid filtration
-      translated_boundary.resize(boundaries[i].size());
-      for (std::size_t j = 0; j < boundaries[i].size(); ++j) {
-        translated_boundary[j] = permutationInv[boundaries[i][j]];
-      }
-      std::sort(translated_boundary.begin(), translated_boundary.end());
-      matrix_.insert_boundary(id, translated_boundary, dimensions[i]);
-      if constexpr (Options::has_vine_update && !Options::is_of_boundary_type) {
-        idToPos_->push_back(id);
-      }
-      ++id;  // IDs corresponds to the indices in permutation_
-    }
+    _initialize(cpx);
   }
 
   Persistence_interface_matrix(const Persistence_interface_matrix& other) = delete;
 
   // permutation is assumed to be the same than from the copied object, just its address can change
   Persistence_interface_matrix(const Persistence_interface_matrix& other, const Map& permutation)
-      : matrix_(other.matrix_), permutation_(&permutation)
+      : matrix_(other.matrix_), permutation_(other.is_initialized() ? &permutation : nullptr), idToPos_(other.idToPos_)
   {
-    GUDHI_CHECK(permutation == *other.permutation_,
+    GUDHI_CHECK(!other.is_initialized() || permutation == *other.permutation_,
                 "Only the address of the permutation vector is allowed to change, not its content.");
   }
 
@@ -283,12 +261,22 @@ class Persistence_interface_matrix
 
   // permutation is assumed to be the same than from the moved object, just its address can change
   Persistence_interface_matrix(Persistence_interface_matrix&& other, const Map& permutation)
-      : matrix_(std::move(other.matrix_)), permutation_(&permutation), idToPos_(std::move(other.idToPos_))
+      : matrix_(std::move(other.matrix_)),
+        permutation_(other.is_initialized() ? &permutation : nullptr),
+        idToPos_(std::move(other.idToPos_))
   {
     other.permutation_ = nullptr;
   }
 
   // TODO: swap?
+
+  template <class Complex>
+  void reinitialize(const Complex& cpx, const Map& permutation)
+  {
+    matrix_ = Matrix(permutation.size());
+    permutation_ = &permutation;
+    _initialize(cpx);
+  }
 
   bool is_initialized() const { return permutation_ != nullptr; }
 
@@ -340,6 +328,34 @@ class Persistence_interface_matrix
   Matrix matrix_;
   Map const* permutation_;
   std::optional<Map> idToPos_;
+
+  template <class Complex>
+  void _initialize(const Complex& cpx)
+  {
+    if constexpr (Options::has_vine_update && !Options::is_of_boundary_type) {
+      idToPos_.emplace();
+      idToPos_->reserve(permutation_->size());
+    }
+    const auto& boundaries = cpx.get_boundaries();
+    const auto& dimensions = cpx.get_dimensions();
+    // simplex IDs need to be increasing in order, so the original ones cannot be used
+    Map permutationInv(permutation_->size());
+    Map translated_boundary;
+    std::size_t id = 0;
+    for (auto i : *permutation_) {
+      permutationInv[i] = id;  // permutation is assumed to be a valid filtration
+      translated_boundary.resize(boundaries[i].size());
+      for (std::size_t j = 0; j < boundaries[i].size(); ++j) {
+        translated_boundary[j] = permutationInv[boundaries[i][j]];
+      }
+      std::sort(translated_boundary.begin(), translated_boundary.end());
+      matrix_.insert_boundary(id, translated_boundary, dimensions[i]);
+      if constexpr (Options::has_vine_update && !Options::is_of_boundary_type) {
+        idToPos_->push_back(id);
+      }
+      ++id;  // IDs corresponds to the indices in permutation_
+    }
+  }
 };
 
 }  // namespace multi_persistence

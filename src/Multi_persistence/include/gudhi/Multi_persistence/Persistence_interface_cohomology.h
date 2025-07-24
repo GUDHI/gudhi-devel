@@ -52,20 +52,7 @@ class Persistence_interface_cohomology
   Persistence_interface_cohomology(const Complex& cpx, const Map& permutation)
       : interface_(cpx, permutation)
   {
-    Persistent_cohomology pcoh(interface_, true);
-    pcoh.init_coefficients(2);
-    pcoh.compute_persistent_cohomology(0);
-    const auto& pairs = pcoh.get_persistent_pairs();
-
-    barcode_ = Barcode(pairs.size());
-    Index i = 0;
-    for (const auto &p : pairs) {
-      auto &b = barcode_[i];
-      b.dim = interface_.dimension(get<0>(p));
-      b.birth = get<0>(p);
-      b.death = get<1>(p) == PCOH_complex::null_simplex() ? Bar::inf : get<1>(p);
-      ++i;
-    }
+    _initialize();
   }
 
   Persistence_interface_cohomology(const Persistence_interface_cohomology& other) = delete;
@@ -84,6 +71,13 @@ class Persistence_interface_cohomology
 
   // TODO: swap?
 
+  template <class Complex>
+  void reinitialize(const Complex& cpx, const Map& permutation)
+  {
+    interface_.reinitialize(cpx, permutation);
+    _initialize();
+  }
+
   bool is_initialized() const { return interface_.is_initialized(); }
 
   Dimension get_dimension(Index i) const
@@ -101,6 +95,24 @@ class Persistence_interface_cohomology
  private:
   PCOH_complex interface_;
   Barcode barcode_;
+
+  void _initialize()
+  {
+    Persistent_cohomology pcoh(interface_, true);
+    pcoh.init_coefficients(2);
+    pcoh.compute_persistent_cohomology(0);
+    const auto& pairs = pcoh.get_persistent_pairs();
+
+    barcode_ = Barcode(pairs.size());
+    Index i = 0;
+    for (const auto& p : pairs) {
+      auto& b = barcode_[i];
+      b.dim = interface_.dimension(get<0>(p));
+      b.birth = get<0>(p);
+      b.death = get<1>(p) == PCOH_complex::null_simplex() ? Bar::inf : get<1>(p);
+      ++i;
+    }
+  }
 };
 
 }  // namespace multi_persistence

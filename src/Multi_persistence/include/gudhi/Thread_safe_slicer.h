@@ -35,10 +35,15 @@ class Thread_safe_slicer : private Slicer
   using Index = typename Slicer::Index;
   using Dimension = typename Slicer::Dimension;
   template <typename Value = T>
+  using Bar = typename Slicer::template Bar<Value>;
+  template <typename Value = T>
   using Barcode = typename Slicer::template Barcode<Value>;
   template <typename Value = T>
   using Flat_barcode = typename Slicer::template Flat_barcode<Value>;
-  using Boundary = typename Slicer::Boundary;
+  template <typename Value = T>
+  using Multi_dimensional_barcode = typename Slicer::template Multi_dimensional_barcode<Value>;
+  template <typename Value = T>
+  using Multi_dimensional_flat_barcode = typename Slicer::template Multi_dimensional_flat_barcode<Value>;
   using Cycle = typename Slicer::Cycle;
   using Thread_safe = Thread_safe_slicer;
 
@@ -91,7 +96,7 @@ class Thread_safe_slicer : private Slicer
   template <class Line>
   void push_to(const Line& line)
   {
-    Slicer::_push_to(slicer_, line);
+    Slicer::_push_to(slicer_->complex_, line);
   }
 
   // PERSISTENCE
@@ -100,13 +105,13 @@ class Thread_safe_slicer : private Slicer
 
   void initialize_persistence_computation(const bool ignoreInf = true)
   {
-    Slicer::_initialize_persistence_computation(slicer_, ignoreInf);
+    Slicer::_initialize_persistence_computation(slicer_->complex_, ignoreInf);
   }
 
   void vineyard_update() { Slicer::vineyard_update(); }
 
   template <typename Value = T>
-  Barcode<Value> get_barcode(int maxDim = -1)
+  auto get_barcode(int maxDim = -1)
   {
     // complex in parent is empty, so maxDim needs to be initialized from the outside.
     if (maxDim < 0) maxDim = slicer_->get_max_dimension();
@@ -114,17 +119,20 @@ class Thread_safe_slicer : private Slicer
   }
 
   template <bool withDim = false, typename Value = T>
-  Flat_barcode<Value> get_flat_barcode()
+  auto get_flat_barcode(int maxDim = -1)
   {
-    return Slicer::get_flat_barcode();
+    // complex in parent is empty, so maxDim needs to be initialized from the outside.
+    if (maxDim < 0) maxDim = slicer_->get_max_dimension();
+    return Slicer::get_flat_barcode(maxDim);
   }
 
-  std::vector<Barcode<T>> persistence_on_lines(const std::vector<std::vector<T>>& basePoints, bool ignoreInf)
+  std::vector<Multi_dimensional_barcode<T>> persistence_on_lines(const std::vector<std::vector<T>>& basePoints,
+                                                                 bool ignoreInf)
   {
     return Slicer::persistence_on_lines(basePoints, ignoreInf);
   }
 
-  std::vector<Barcode<T>> persistence_on_lines(
+  std::vector<Multi_dimensional_barcode<T>> persistence_on_lines(
       const std::vector<std::pair<std::vector<T>, std::vector<T>>>& basePointsWithDirections,
       bool ignoreInf)
   {
@@ -133,7 +141,7 @@ class Thread_safe_slicer : private Slicer
 
   std::vector<std::vector<Cycle>> get_representative_cycles(bool update = true)
   {
-    return Slicer::_get_representative_cycles(slicer_, update);
+    return Slicer::_get_representative_cycles(slicer_->complex_, update);
   }
 
   // FRIENDS
@@ -163,7 +171,7 @@ class Thread_safe_slicer : private Slicer
   }
 
  private:
-  Slicer* slicer_;
+  Slicer const* slicer_;
 };
 
 }  // namespace multi_persistence

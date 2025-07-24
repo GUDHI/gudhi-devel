@@ -56,10 +56,10 @@ class Multi_parameter_filtered_complex_pcoh_interface
   // permutation and boundaries is assumed to be the same than from the copied object, just its address can change
   Multi_parameter_filtered_complex_pcoh_interface(const Multi_parameter_filtered_complex_pcoh_interface &other,
                                                   const Map &permutation)
-      : boundaries_(other.boundaries_), newToOldPerm_(&permutation), keys_(other.keys_) /* ,
+      : boundaries_(other.boundaries_), newToOldPerm_(other.is_initialized() ? &permutation : nullptr), keys_(other.keys_) /* ,
                                                                 keysToSH_(other.keysToSH_) */
   {
-    GUDHI_CHECK(permutation == *other.newToOldPerm_,
+    GUDHI_CHECK(!other.is_initialized() || permutation == *other.newToOldPerm_,
                 "Only the address of the permutation vector is allowed to change, not its content.");
   }
 
@@ -67,12 +67,12 @@ class Multi_parameter_filtered_complex_pcoh_interface
   Multi_parameter_filtered_complex_pcoh_interface(const Multi_parameter_filtered_complex_pcoh_interface &other,
                                                   const Complex &boundaries,
                                                   const Map &permutation)
-      : boundaries_(&boundaries), newToOldPerm_(&permutation), keys_(other.keys_) /* ,
+      : boundaries_(other.is_initialized() ? &boundaries : nullptr), newToOldPerm_(other.is_initialized() ? &permutation : nullptr), keys_(other.keys_) /* ,
                                                                 keysToSH_(other.keysToSH_) */
   {
-    GUDHI_CHECK(permutation == *other.newToOldPerm_,
+    GUDHI_CHECK(!other.is_initialized() || permutation == *other.newToOldPerm_,
                 "Only the address of the permutation vector is allowed to change, not its content.");
-    GUDHI_CHECK(boundaries.get_boundaries() == *other.boundaries_->get_boundaries(),
+    GUDHI_CHECK(!other.is_initialized() || boundaries.get_boundaries() == *other.boundaries_->get_boundaries(),
                 "Only the address of the complex is allowed to change, not its content.");
   }
 
@@ -82,7 +82,7 @@ class Multi_parameter_filtered_complex_pcoh_interface
   Multi_parameter_filtered_complex_pcoh_interface(Multi_parameter_filtered_complex_pcoh_interface &&other,
                                                   const Map &permutation)
       : boundaries_(std::exchange(other.boundaries_, nullptr)),
-        newToOldPerm_(&permutation),
+        newToOldPerm_(other.is_initialized() ? &permutation : nullptr),
         keys_(std::move(other.keys_)) /* ,
 keysToSH_(std::move(other.keysToSH_)) */
   {
@@ -93,7 +93,7 @@ keysToSH_(std::move(other.keysToSH_)) */
   Multi_parameter_filtered_complex_pcoh_interface(Multi_parameter_filtered_complex_pcoh_interface &&other,
                                                   const Complex &boundaries,
                                                   const Map &permutation)
-      : boundaries_(&boundaries), newToOldPerm_(&permutation), keys_(std::move(other.keys_)) /* ,
+      : boundaries_(other.is_initialized() ? &boundaries : nullptr), newToOldPerm_(other.is_initialized() ? &permutation : nullptr), keys_(std::move(other.keys_)) /* ,
                                                                 keysToSH_(std::move(other.keysToSH_)) */
   {
     other.boundaries_ = nullptr;
@@ -107,6 +107,14 @@ keysToSH_(std::move(other.keysToSH_)) */
     std::swap(be1.newToOldPerm_, be2.newToOldPerm_);
     be1.keys_.swap(be2.keys_);
     // be1.keysToSH_.swap(be2.keysToSH_);
+  }
+
+  void reinitialize(const Complex &boundaries, const Map &permutation)
+  {
+    boundaries_ = &boundaries;
+    newToOldPerm_ = &permutation;
+    keys_ = Map(boundaries.get_number_of_cycle_generators(), -1);
+    // keysToSH_ = Map(permutation.size(), -1);
   }
 
   bool is_initialized() const { return boundaries_ != nullptr && newToOldPerm_ != nullptr; }

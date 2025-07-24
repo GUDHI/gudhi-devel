@@ -18,13 +18,15 @@
 #ifndef MP_SLICER_H_INCLUDED
 #define MP_SLICER_H_INCLUDED
 
+#include <cstddef>
 #include <initializer_list>
 #include <numeric>  //std::iota
+#include <type_traits>
 #include <utility>  //std::move
 #include <cstdint>  //std::int32_t
 #include <vector>
 #include <ostream>
-#include <sstream>  //std::stringstream, to remove when to_str gets removed
+// #include <sstream>  //std::stringstream, to remove when to_str gets removed
 
 #ifdef GUDHI_USE_TBB
 #include <oneapi/tbb/enumerable_thread_specific.h>
@@ -37,6 +39,7 @@
 #include <gudhi/Multi_persistence/Line.h>
 #include <gudhi/Thread_safe_slicer.h>
 #include <gudhi/Projective_cover_kernel.h>
+#include <gudhi/persistence_interval.h>
 
 namespace Gudhi {
 namespace multi_persistence {
@@ -51,14 +54,18 @@ class Slicer
   using Complex = Multi_parameter_filtered_complex<Filtration_value>;
   using Index = typename Complex::Index;
   using Dimension = typename Complex::Dimension;
-  // TODO: again another barcode type...
-  // Homogenize with other barcode types and use the flat barcode for Python instead?
   template <typename Value = T>
-  using Barcode = std::vector<std::vector<std::pair<Value, Value>>>;
+  using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, Value>;
+  template <typename Value = T>
+  using Barcode = std::vector<Bar<Value>>;
+  // TODO: replace by std::vector<std::array<Value,2> > to avoid double push_back for multi dim version?
   template <typename Value = T>
   using Flat_barcode = std::vector<Value>;
-  using Boundary = std::vector<Index>;
-  using Cycle = std::vector<Boundary>;
+  template <typename Value = T>
+  using Multi_dimensional_barcode = std::vector<Barcode<Value>>;
+  template <typename Value = T>
+  using Multi_dimensional_flat_barcode = std::vector<Flat_barcode<Value>>;
+  using Cycle = std::vector<Index>;
   using Thread_safe = Thread_safe_slicer<Slicer>;
 
   // CONSTRUCTORS
@@ -74,16 +81,13 @@ class Slicer
 
   Slicer(Complex&& complex)
       : complex_(std::move(complex)),
-        slice_(complex.get_number_of_cycle_generators()),
-        generatorOrder_(complex.get_number_of_cycle_generators()),
+        slice_(complex_.get_number_of_cycle_generators()),
+        generatorOrder_(complex_.get_number_of_cycle_generators()),
         persistence_()
   {}
 
   Slicer(const Slicer& other)
-      : complex_(other.complex_),
-        slice_(other.slice_),
-        generatorOrder_(other.generatorOrder_),
-        persistence_()
+      : complex_(other.complex_), slice_(other.slice_), generatorOrder_(other.generatorOrder_), persistence_()
   {}
 
   Slicer(Slicer&& other)
@@ -103,8 +107,8 @@ class Slicer
 
   Index get_number_of_parameters() const { return complex_.get_number_of_parameters(); }
 
-  // only used for scc io TODO: see if still necessary
-  const Complex& get_chain_complex() const { return complex_; }
+  // // only used for scc io TODO: see if still necessary
+  // const Complex& get_chain_complex() const { return complex_; }
 
   // initialized with `initialize_persistence_computation`
   // if ignoreInf was true, indices at inf are not contained in the vector
@@ -137,23 +141,27 @@ class Slicer
 
   typename Complex::Filtration_value_container& get_filtration_values() { return complex_.get_filtration_values(); }
 
+  const Filtration_value& get_filtration_value(Index i) const { return complex_.get_filtration_values()[i]; }
+
+  Filtration_value& get_filtration_value(Index i) { return complex_.get_filtration_values()[i]; }
+
   const std::vector<Dimension>& get_dimensions() const { return complex_.get_dimensions(); }
-
-  // std::vector<Dimension>& get_dimensions() { return complex_.get_dimensions(); }
-
-  const typename Complex::Boundary_container& get_boundaries() const { return complex_.get_boundaries(); }
-
-  // Complex::Boundary_container& get_boundaries() { return complex_.get_boundaries(); }
 
   Dimension get_dimension(Index i) const { return complex_.get_dimensions()[i]; }
 
-  // TODO: only used to print info in python, so put in some interface instead
-  std::string to_str() const
-  {
-    std::stringstream stream;
-    stream << *this;
-    return stream.str();
-  }
+  Dimension get_max_dimension() const { return complex_.get_max_dimension(); }
+
+  const typename Complex::Boundary_container& get_boundaries() const { return complex_.get_boundaries(); }
+
+  const typename Complex::Boundary& get_boundary(Index i) const { return complex_.get_boundaries()[i]; }
+
+  // // TODO: only used to print info in python, so put in some interface instead
+  // std::string to_str() const
+  // {
+  //   std::stringstream stream;
+  //   stream << *this;
+  //   return stream.str();
+  // }
 
   // MODIFIERS
 
@@ -168,10 +176,11 @@ class Slicer
   template <class Line>
   void push_to(const Line& line)
   {
-    _push_to(this, line);
+    _push_to(complex_, line);
   }
 
   // Warning: initialize_persistence_computation needs to be recalled if barcode was and is still needed
+  // warning: shuffles order if not ordered by dimension
   void prune_above_dimension(int maxDim)
   {
     int idx = complex_.prune_above_dimension(maxDim);
@@ -191,9 +200,11 @@ class Slicer
 
   void initialize_persistence_computation(const bool ignoreInf = true)
   {
-    _initialize_persistence_computation(this, ignoreInf);
+    _initialize_persistence_computation(complex_, ignoreInf);
   }
 
+  // if ignoreInf was used when initializing the persistence computation, any update of slice has to keep at inf
+  // the boundaries which were before, otherwise the behaviour is undefined (will throw with high probability)
   void vineyard_update()
   {
     for (Index i = 0; i < generatorOrder_.size(); i++) {
@@ -207,63 +218,36 @@ class Slicer
     }
   }
 
-  template <typename Value = T>
-  Barcode<Value> get_barcode(int maxDim = -1)
+  template <bool byDim = true, typename Value = T>
+  std::conditional_t<byDim, Multi_dimensional_barcode<Value>, Barcode<Value>> get_barcode(int maxDim = -1)
   {
-    if (maxDim < 0) maxDim = complex_.get_max_dimension();
-    auto barcode_indices = persistence_.get_barcode();
-    // TODO : This doesn't allow for negative dimensions
-    // Hannah: not sure what this comment means ?
-    Barcode<Value> out(maxDim + 1);
-    const Value inf = Gudhi::multi_filtration::MF_T_inf<Value>;
-    for (const auto& bar : barcode_indices) {
-      Value birth_filtration = slice_[bar.birth];
-      Value death_filtration = inf;
-      if (bar.death != Persistence::nullDeath) death_filtration = slice_[bar.death];
-      if (birth_filtration <= death_filtration)
-        out[bar.dim].emplace_back({birth_filtration, death_filtration});
-      else {
-        out[bar.dim].emplace_back({inf, inf});
-      }
+    if (maxDim < 0) maxDim = get_max_dimension();
+    if constexpr (byDim) {
+      return _get_barcode_by_dim<Value>(maxDim);
+    } else {
+      return _get_barcode<Value>(maxDim);
     }
-    return out;
   }
 
-  template <bool withDim = false, typename Value = T>
-  Flat_barcode<Value> get_flat_barcode()
+  template <bool byDim = false, typename Value = T>
+  std::conditional_t<byDim, Multi_dimensional_flat_barcode<Value>, Flat_barcode<Value>> get_flat_barcode(
+      int maxDim = -1)
   {
-    auto barcode_indices = persistence_.get_barcode();
-    Flat_barcode<Value> out(barcode_indices.size() * (withDim ? 3 : 2));
-    const Value inf = Gudhi::multi_filtration::MF_T_inf<Value>;
-    Index i = 0;
-    for (const auto& bar : barcode_indices) {
-      Value birth_filtration = slice_[bar.birth];
-      Value death_filtration = inf;
-      if (bar.death != Persistence::nullDeath) death_filtration = slice_[bar.death];
-      if (birth_filtration > death_filtration) {
-        birth_filtration = inf;
-        death_filtration = inf;
-      }
-      if constexpr (withDim) {
-        out[i] = bar.dim;
-        out[i + 1] = birth_filtration;
-        out[i + 2] = death_filtration;
-        i += 3;
-      } else {
-        out[i] = birth_filtration;
-        out[i + 1] = death_filtration;
-        i += 2;
-      }
+    if (maxDim < 0) maxDim = get_max_dimension();
+    if constexpr (byDim) {
+      return _get_flat_barcode_by_dim<Value>(maxDim);
+    } else {
+      return _get_flat_barcode<Value>(maxDim);
     }
-    return out;
   }
 
-  std::vector<Barcode<T>> persistence_on_lines(const std::vector<std::vector<T>>& basePoints, bool ignoreInf)
+  std::vector<Multi_dimensional_barcode<T>> persistence_on_lines(const std::vector<std::vector<T>>& basePoints,
+                                                                 bool ignoreInf)
   {
     return _batch_persistence_on_lines([](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints, ignoreInf);
   }
 
-  std::vector<Barcode<T>> persistence_on_lines(
+  std::vector<Multi_dimensional_barcode<T>> persistence_on_lines(
       const std::vector<std::pair<std::vector<T>, std::vector<T>>>& basePointsWithDirections,
       bool ignoreInf)
   {
@@ -275,7 +259,7 @@ class Slicer
 
   std::vector<std::vector<Cycle>> get_representative_cycles(bool update = true)
   {
-    return _get_representative_cycles(this, update);
+    return _get_representative_cycles(complex_, update);
   }
 
   // FRIENDS
@@ -330,43 +314,41 @@ class Slicer
   }
 
  protected:
+  friend Thread_safe;
+
   // For ThreadSafe version
   Slicer(const std::vector<T>& slice, const std::vector<Index>& generatorOrder, const Persistence& persistence)
       : complex_(), slice_(slice), generatorOrder_(generatorOrder), persistence_(persistence, generatorOrder_)
   {}
 
   template <class Line>
-  void _push_to(const Slicer* slicer, const Line& line)
+  void _push_to(const Complex& complex, const Line& line)
   {
-    const auto& filtrationValues = slicer->complex_.get_filtration_values();
+    const auto& filtrationValues = complex.get_filtration_values();
     for (Index i = 0u; i < filtrationValues.size(); i++) {
       slice_[i] = line.template compute_forward_intersection<T>(filtrationValues[i]);
     }
   }
 
-  void _initialize_persistence_computation(const Slicer* slicer, const bool ignoreInf = true)
+  void _initialize_persistence_computation(const Complex& complex, const bool ignoreInf = true)
   {
-    _initialize_order(ignoreInf);
-    persistence_ = Persistence(slicer->complex_, generatorOrder_);
+    _initialize_order(complex, ignoreInf);
+    persistence_.reinitialize(complex, generatorOrder_);
   }
 
-  std::vector<std::vector<Cycle>> _get_representative_cycles(const Slicer* slicer,
-                                                             bool update = true)
+  std::vector<std::vector<Cycle>> _get_representative_cycles(const Complex& complex, bool update = true)
   {
     static_assert(Persistence::has_rep_cycles, "Representative cycles not enabled.");
 
-    // iterable iterable simplex key
-    auto cycles_key = persistence_.get_representative_cycles(update);
-    auto num_cycles = cycles_key.size();
-    std::vector<std::vector<Cycle>> out(slicer->complex_.get_max_dimension() + 1);
-    for (auto& cycles_of_dim : out) cycles_of_dim.reserve(num_cycles);
-    for (const auto& cycle : cycles_key) {
-      int cycle_dim = 0;        // TODO: for more generality, should be minimal dimension instead
-      if (!cycle[0].empty()) {  // if empty, cycle has no border -> assumes dimension 0 even if it could be min dim
-        cycle_dim = slicer->complex_.dimension(cycle[0][0]) + 1;  // all faces have the same dim
-      }
-      // TODO: move cycle instead of copy?
-      out[cycle_dim].push_back(cycle);
+    const auto& dimensions = complex.get_dimensions();
+    auto cycleKeys = persistence_.get_representative_cycles(update);
+    auto numCycles = cycleKeys.size();
+    std::vector<std::vector<Cycle>> out(complex.get_max_dimension() + 1);
+    for (auto& cyclesDim : out) cyclesDim.reserve(numCycles);
+    for (const auto& cycle : cycleKeys) {
+      GUDHI_CHECK(!cycle.empty(), "A cycle should not be empty...");
+      // assumes cycle to be never empty & all faces have same dimension
+      out[dimensions[cycle[0]]].push_back(cycle);
     }
     return out;
   }
@@ -377,10 +359,10 @@ class Slicer
   std::vector<Index> generatorOrder_;
   Persistence persistence_;
 
-  void _initialize_order(const bool ignoreInf = true)
+  void _initialize_order(const Complex& complex, const bool ignoreInf = true)
   {
-    const auto& boundaries = complex_.get_boundaries();
-    generatorOrder_.resize(complex_.get_number_of_cycle_generators());
+    const auto& dimensions = complex.get_dimensions();
+    generatorOrder_.resize(complex.get_number_of_cycle_generators());
     std::iota(generatorOrder_.begin(), generatorOrder_.end(), 0);
     std::sort(generatorOrder_.begin(), generatorOrder_.end(), [&](Index i, Index j) {
       if (ignoreInf) {
@@ -388,8 +370,8 @@ class Slicer
         // all elements at inf are considered equal
         if (slice_[i] == Filtration_value::T_inf) return false;
       }
-      if (get_dimension(i) > get_dimension(j)) return false;
-      if (get_dimension(i) < get_dimension(j)) return true;
+      if (dimensions[i] > dimensions[j]) return false;
+      if (dimensions[i] < dimensions[j]) return true;
       // if filtration values are equal, we don't care about order, so considered the same object
       return slice_[i] < slice_[j];
     });
@@ -400,14 +382,94 @@ class Slicer
     }
   }
 
+  template <class Interval, typename Value>
+  void _retrieve_interval(const Interval& bar, Dimension& dim, Value& birth, Value& death)
+  {
+    const Value inf = Gudhi::multi_filtration::MF_T_inf<Value>;
+    dim = bar.dim;
+    birth = slice_[bar.birth];
+    death = inf;
+    if (bar.death != Persistence::nullDeath) death = slice_[bar.death];
+    if (!(birth <= death)) {
+      birth = inf;
+      death = inf;
+    }
+  }
+
+  template <typename Value>
+  Barcode<Value> _get_barcode(int maxDim)
+  {
+    auto barcode_indices = persistence_.get_barcode();
+    Barcode<Value> out(barcode_indices.size());
+    Index i = 0;
+    for (const auto& bar : barcode_indices) {
+      if (bar.dim <= maxDim) {
+        _retrieve_interval(bar, out[i].dim, out[i].birth, out[i].death);
+        ++i;
+      }
+    }
+    out.resize(i);
+    return out;
+  }
+
+  template <typename Value>
+  Multi_dimensional_barcode<Value> _get_barcode_by_dim(int maxDim)
+  {
+    // TODO: This doesn't allow for negative dimensions
+    // Hannah: not sure what this comment means ?
+    Multi_dimensional_barcode<Value> out(maxDim + 1);
+    Value birth, death;
+    Dimension dim;
+    for (const auto& bar : persistence_.get_barcode()) {
+      if (bar.dim <= maxDim) {
+        _retrieve_interval(bar, dim, birth, death);
+        out[dim].emplace_back(birth, death, dim);
+      }
+    }
+    return out;
+  }
+
+  template <typename Value>
+  Flat_barcode<Value> _get_flat_barcode(int maxDim)
+  {
+    auto barcode_indices = persistence_.get_barcode();
+    Flat_barcode<Value> out(barcode_indices.size() * 2);
+    Index i = 0;
+    Dimension dim;  // dummy
+    for (const auto& bar : barcode_indices) {
+      if (bar.dim <= maxDim) {
+        _retrieve_interval(bar, dim, out[i], out[i + 1]);
+        i += 2;
+      }
+    }
+    out.resize(i);
+    return out;
+  }
+
+  template <typename Value>
+  Multi_dimensional_flat_barcode<Value> _get_flat_barcode_by_dim(int maxDim)
+  {
+    Multi_dimensional_flat_barcode<Value> out(maxDim + 1);
+    Value birth, death;
+    Dimension dim;
+    for (const auto& bar : persistence_.get_barcode()) {
+      if (bar.dim <= maxDim) {
+        _retrieve_interval(bar, dim, birth, death);
+        out[dim].push_back(birth);
+        out[dim].push_back(death);
+      }
+    }
+    return out;
+  }
+
   template <typename F, typename F_arg>
-  std::vector<Barcode<T>> _batch_persistence_on_lines(F&& get_line,
-                                                      const std::vector<F_arg>& basePoints,
-                                                      [[maybe_unused]] const bool ignoreInf = true)
+  std::vector<Multi_dimensional_barcode<T>> _batch_persistence_on_lines(F&& get_line,
+                                                                        const std::vector<F_arg>& basePoints,
+                                                                        [[maybe_unused]] const bool ignoreInf = true)
   {
     if (basePoints.size() == 0) return {};
 
-    std::vector<Barcode<T>> out(basePoints.size());
+    std::vector<Multi_dimensional_barcode<T>> out(basePoints.size());
 
     if constexpr (Persistence::is_vine) {
       push_to(get_line(basePoints[0]));
@@ -422,10 +484,10 @@ class Slicer
 #ifdef GUDHI_USE_TBB
       Thread_safe local_template = weak_copy();
       tbb::enumerable_thread_specific<Thread_safe> thread_locals(local_template);
-      tbb::parallel_for(static_cast<Index>(0), basePoints.size(), [&](const Index& i) {
+      tbb::parallel_for(static_cast<std::size_t>(0), basePoints.size(), [&](const Index& i) {
         Thread_safe& s = thread_locals.local();
         s.push_to(get_line(basePoints[i]));
-        s.compute_persistence(ignoreInf);
+        s.initialize_persistence_computation(ignoreInf);
         out[i] = s.get_barcode();
       });
 #else

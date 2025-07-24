@@ -52,6 +52,8 @@ class PersistenceAlgorithm
 
   // TODO: swap?
 
+  template <class Complex>
+  void reinitialize(const Complex& cpx, const Map& permutation);
   bool is_initialized() const;
   Dimension get_dimension(Index i) const;
   Barcode get_barcode();
