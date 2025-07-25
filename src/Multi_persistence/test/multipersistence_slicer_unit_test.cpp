@@ -20,6 +20,7 @@
 
 #include <gudhi/Multi_parameter_filtered_complex.h>
 #include <gudhi/Slicer.h>
+#include <gudhi/Thread_safe_slicer.h>
 #include <gudhi/Multi_parameter_filtration.h>
 #include <gudhi/Dynamic_multi_parameter_filtration.h>
 #include <gudhi/Multi_persistence/Persistence_interface_matrix.h>
@@ -33,6 +34,7 @@ using Gudhi::multi_persistence::Multi_parameter_filtered_complex;
 using Gudhi::multi_persistence::Persistence_interface_cohomology;
 using Gudhi::multi_persistence::Persistence_interface_matrix;
 using Gudhi::multi_persistence::Slicer;
+using Gudhi::multi_persistence::Thread_safe_slicer;
 
 using T = double;
 using Bar = Gudhi::persistence_matrix::Persistence_interval<int, T>;
@@ -127,62 +129,67 @@ Multi_parameter_filtered_complex<Fil> build_simple_input_complex()
   return Complex(bc, dc, fc);
 }
 
+template <class Slicer>
+void test_slicer_constructors(const Slicer& s)
+{
+  BOOST_CHECK_EQUAL(s.get_number_of_cycle_generators(), 9);
+  BOOST_CHECK_EQUAL(s.get_number_of_parameters(), 3);
+  BOOST_CHECK_EQUAL(s.get_current_order().size(), 9);
+  BOOST_CHECK_EQUAL(s.get_slice().size(), 9);
+  BOOST_CHECK(!s.get_persistence_algorithm().is_initialized());
+}
+
+template <class Slicer>
+void test_slicer_constructors_empty(const Slicer& s)
+{
+  BOOST_CHECK_EQUAL(s.get_number_of_cycle_generators(), 0);
+  BOOST_CHECK_EQUAL(s.get_number_of_parameters(), 0);
+  BOOST_CHECK(s.get_current_order().empty());
+  BOOST_CHECK(s.get_slice().empty());
+  BOOST_CHECK(!s.get_persistence_algorithm().is_initialized());
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_constructors, Slicer, list_of_tested_variants)
 {
   using Fil = typename Slicer::Filtration_value;
 
   Slicer empty;
-  BOOST_CHECK_EQUAL(empty.get_number_of_cycle_generators(), 0);
-  BOOST_CHECK_EQUAL(empty.get_number_of_parameters(), 0);
-  BOOST_CHECK(empty.get_current_order().empty());
-  BOOST_CHECK(empty.get_slice().empty());
-  BOOST_CHECK(!empty.get_persistence_algorithm().is_initialized());
+  test_slicer_constructors_empty(empty);
+  test_slicer_constructors_empty(empty.weak_copy());
 
   auto cpx = build_simple_input_complex<Fil>();
 
   Slicer s1(cpx);
-  BOOST_CHECK_EQUAL(s1.get_number_of_cycle_generators(), 9);
-  BOOST_CHECK_EQUAL(s1.get_number_of_parameters(), 3);
-  BOOST_CHECK_EQUAL(s1.get_current_order().size(), 9);
-  BOOST_CHECK_EQUAL(s1.get_slice().size(), 9);
-  BOOST_CHECK(!s1.get_persistence_algorithm().is_initialized());
+  test_slicer_constructors(s1);
+  test_slicer_constructors(s1.weak_copy());
 
   Slicer s2(std::move(cpx));
   BOOST_CHECK_EQUAL(cpx.get_number_of_cycle_generators(), 0);
-  BOOST_CHECK_EQUAL(s2.get_number_of_cycle_generators(), 9);
-  BOOST_CHECK_EQUAL(s2.get_number_of_parameters(), 3);
-  BOOST_CHECK_EQUAL(s2.get_current_order().size(), 9);
-  BOOST_CHECK_EQUAL(s2.get_slice().size(), 9);
-  BOOST_CHECK(!s2.get_persistence_algorithm().is_initialized());
+  test_slicer_constructors(s2);
+  test_slicer_constructors(s2.weak_copy());
 
   Slicer copy(s1);
-  BOOST_CHECK_EQUAL(copy.get_number_of_cycle_generators(), 9);
-  BOOST_CHECK_EQUAL(copy.get_number_of_parameters(), 3);
-  BOOST_CHECK_EQUAL(copy.get_current_order().size(), 9);
-  BOOST_CHECK_EQUAL(copy.get_slice().size(), 9);
-  BOOST_CHECK(!copy.get_persistence_algorithm().is_initialized());
+  test_slicer_constructors(copy);
+  test_slicer_constructors(copy.weak_copy());
 
   Slicer move(std::move(s2));
-  BOOST_CHECK_EQUAL(s2.get_number_of_cycle_generators(), 0);
-  BOOST_CHECK_EQUAL(s2.get_number_of_parameters(), 0);
-  BOOST_CHECK(s2.get_current_order().empty());
-  BOOST_CHECK(s2.get_slice().empty());
-  BOOST_CHECK(!s2.get_persistence_algorithm().is_initialized());
-  BOOST_CHECK_EQUAL(move.get_number_of_cycle_generators(), 9);
-  BOOST_CHECK_EQUAL(move.get_number_of_parameters(), 3);
-  BOOST_CHECK_EQUAL(move.get_current_order().size(), 9);
-  BOOST_CHECK_EQUAL(move.get_slice().size(), 9);
-  BOOST_CHECK(!move.get_persistence_algorithm().is_initialized());
+  test_slicer_constructors_empty(s2);
+  test_slicer_constructors_empty(s2.weak_copy());
+  test_slicer_constructors(move);
+  test_slicer_constructors(move.weak_copy());
+
+  Thread_safe_slicer tss(s1);
+  test_slicer_constructors(tss);
+  Thread_safe_slicer tssCopy(tss);
+  test_slicer_constructors(tssCopy);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_accessors, Slicer, list_of_tested_variants)
+template <class Slicer>
+void test_slicer_accessors(const Slicer& s)
 {
   using Fil = typename Slicer::Filtration_value;
   using B = std::vector<typename Slicer::Index>;
 
-  auto cpx = build_simple_input_complex<Fil>();
-
-  Slicer s(cpx);
   auto box = s.get_bounding_box();
   BOOST_CHECK(box.first == Fil({0, 1, 1}));
   BOOST_CHECK(box.second == Fil({6, 7, 8}));
@@ -215,6 +222,28 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_accessors, Slicer, list_of_tested_variants)
   BOOST_CHECK(s.get_boundary(8) == (B{1, 7}));
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_accessors, Slicer, list_of_tested_variants)
+{
+  using Fil = typename Slicer::Filtration_value;
+
+  auto cpx = build_simple_input_complex<Fil>();
+
+  Slicer s(cpx);
+  test_slicer_accessors(s);
+  test_slicer_accessors(s.weak_copy());
+  test_slicer_accessors(Thread_safe_slicer(s));
+}
+
+template <class Slicer>
+void test_slicer_slice_modifiers(Slicer& s)
+{
+  BOOST_CHECK_EQUAL(s.get_slice().size(), 9);
+  s.set_slice({0, 0, 0, 2, 3, 3, 5, 5, 5});
+  BOOST_CHECK(s.get_slice() == (std::vector<T>{0, 0, 0, 2, 3, 3, 5, 5, 5}));
+  s.push_to(Line<T>({0, 1, 1}));
+  BOOST_CHECK(s.get_slice() == (std::vector<T>{1, 1, 2, 3, 4, 6, 6, 7, 7}));
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_modifiers, Slicer, list_of_tested_variants)
 {
   using Fil = typename Slicer::Filtration_value;
@@ -222,11 +251,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_modifiers, Slicer, list_of_tested_variants)
   auto cpx = build_simple_input_complex<Fil>();
 
   Slicer s(cpx);
-  BOOST_CHECK(s.get_slice() == std::vector<T>(9));
-  s.set_slice({0, 0, 0, 2, 3, 3, 5, 5, 5});
-  BOOST_CHECK(s.get_slice() == (std::vector<T>{0, 0, 0, 2, 3, 3, 5, 5, 5}));
-  s.push_to(Line<T>({0, 1, 1}));
-  BOOST_CHECK(s.get_slice() == (std::vector<T>{1, 1, 2, 3, 4, 6, 6, 7, 7}));
+  test_slicer_slice_modifiers(s);
+  Thread_safe_slicer wc = s.weak_copy();
+  test_slicer_slice_modifiers(wc);
+  Thread_safe_slicer tss(s);
+  test_slicer_slice_modifiers(tss);
 
   std::vector<std::vector<T>> grid = {{0, 2, 4, 8}, {0, 3, 6, 9}, {0, 4, 8, 16}};
   s.coarsen_on_grid(grid, false);
@@ -377,15 +406,12 @@ void test_barcode_ignore_inf(const Flat_barcode& barcode)
   BOOST_CHECK(bc[3] == (std::pair<T, T>(6, inf)));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_persistence, Slicer, list_of_tested_variants)
+template <class Slicer>
+void test_slicer_persistence(Slicer& s)
 {
-  using Fil = typename Slicer::Filtration_value;
   using Index = typename Slicer::Index;
   T inf = std::numeric_limits<T>::infinity();
 
-  auto cpx = build_simple_input_complex<Fil>();
-
-  Slicer s(cpx);
   s.set_slice({1, 2, 1, 6, 4, 3, inf, inf, inf});
   s.initialize_persistence_computation(false);
 
@@ -408,15 +434,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_persistence, Slicer, list_of_tested_variant
   test_barcode_ignore_inf(s.template get_flat_barcode<false>());
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_batch_persistence, Slicer, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_persistence, Slicer, list_of_tested_variants)
 {
   using Fil = typename Slicer::Filtration_value;
-  using Index = typename Slicer::Index;
-  auto inf = std::numeric_limits<T>::infinity();
 
   auto cpx = build_simple_input_complex<Fil>();
 
   Slicer s(cpx);
+  test_slicer_persistence(s);
+  Thread_safe_slicer wc = s.weak_copy();
+  test_slicer_persistence(wc);
+  Thread_safe_slicer tss(s);
+  test_slicer_persistence(tss);
+}
+
+template <class Slicer>
+void test_slicer_batch_persistence(Slicer& s)
+{
+  using Index = typename Slicer::Index;
+  T inf = std::numeric_limits<T>::infinity();
+
   auto barcodes = s.persistence_on_lines({{0, 1, 1}, {2, 4, 2}, {2, 1, 0}}, false);
   std::vector<Test_multi_dimensional_barcode> orderedBarcodes(barcodes.size());
   Index i = 0;
@@ -468,6 +505,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_batch_persistence, Slicer, list_of_tested_v
   BOOST_CHECK(orderedBarcodes == orderedBarcodes2);
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_batch_persistence, Slicer, list_of_tested_variants)
+{
+  using Fil = typename Slicer::Filtration_value;
+
+  auto cpx = build_simple_input_complex<Fil>();
+
+  Slicer s(cpx);
+  test_slicer_batch_persistence(s);
+  Thread_safe_slicer wc = s.weak_copy();
+  test_slicer_batch_persistence(wc);
+  Thread_safe_slicer tss(s);
+  test_slicer_batch_persistence(tss);
+}
+
 typedef boost::mpl::list<
     Slicer<Multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_ru_options>>,
     Slicer<Multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_chain_options>>,
@@ -475,14 +526,11 @@ typedef boost::mpl::list<
     Slicer<Dynamic_multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_chain_options>>>
     list_of_tested_variants2;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_vineyard, Slicer, list_of_tested_variants2)
+template <class Slicer>
+void test_slicer_vineyard(Slicer& s)
 {
-  using Fil = typename Slicer::Filtration_value;
   auto inf = std::numeric_limits<T>::infinity();
 
-  auto cpx = build_simple_input_complex<Fil>();
-
-  Slicer s(cpx);
   s.set_slice({1, 2, 1, 6, 4, 3, inf, inf, inf});
   s.initialize_persistence_computation(false);
 
@@ -540,14 +588,25 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_vineyard, Slicer, list_of_tested_variants2)
   BOOST_CHECK_EQUAL(bc[2].size(), 0);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_rep_cycles, Slicer, list_of_tested_variants2)
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_vineyard, Slicer, list_of_tested_variants2)
 {
   using Fil = typename Slicer::Filtration_value;
-  using Cycle = typename Slicer::Cycle;
 
-  auto cpx = build_rep_cycle_input_complex<Fil>();
+  auto cpx = build_simple_input_complex<Fil>();
 
   Slicer s(cpx);
+  test_slicer_vineyard(s);
+  Thread_safe_slicer wc = s.weak_copy();
+  test_slicer_vineyard(wc);
+  Thread_safe_slicer tss(s);
+  test_slicer_vineyard(tss);
+}
+
+template <class Slicer>
+void test_slicer_rep_cycles(Slicer& s)
+{
+  using Cycle = typename Slicer::Cycle;
+
   s.set_slice({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13});
   s.initialize_persistence_computation(false);
 
@@ -568,4 +627,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_rep_cycles, Slicer, list_of_tested_variants
   BOOST_CHECK(cycles[1][2] == Cycle({6, 9, 11}));
 
   BOOST_CHECK_EQUAL(cycles[2].size(), 0);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_rep_cycles, Slicer, list_of_tested_variants2)
+{
+  using Fil = typename Slicer::Filtration_value;
+
+  auto cpx = build_rep_cycle_input_complex<Fil>();
+
+  Slicer s(cpx);
+  test_slicer_rep_cycles(s);
+  Thread_safe_slicer wc = s.weak_copy();
+  test_slicer_rep_cycles(wc);
+  Thread_safe_slicer tss(s);
+  test_slicer_rep_cycles(tss);
 }

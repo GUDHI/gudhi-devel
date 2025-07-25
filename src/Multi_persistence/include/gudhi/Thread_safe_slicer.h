@@ -21,6 +21,8 @@
 #include <ostream>
 #include <vector>
 
+#include <gudhi/Multi_persistence/Line.h>
+
 namespace Gudhi {
 namespace multi_persistence {
 
@@ -79,11 +81,17 @@ class Thread_safe_slicer : private Slicer
     return slicer_->get_filtration_values();
   }
 
+  const Filtration_value& get_filtration_value(Index i) const { return slicer_->get_filtration_value(i); }
+
   const std::vector<Dimension>& get_dimensions() const { return slicer_->get_dimensions(); }
+
+  Dimension get_dimension(Index i) const { return slicer_->get_dimension(i); }
+
+  Dimension get_max_dimension() const { return slicer_->get_max_dimension(); }
 
   const typename Complex::Boundary_container& get_boundaries() const { return slicer_->get_boundaries(); }
 
-  Dimension get_dimension(Index i) const { return slicer_->get_dimension(i); }
+  const typename Complex::Boundary& get_boundary(Index i) const { return slicer_->get_boundary(i); }
 
   // MODIFIERS
 
@@ -110,33 +118,67 @@ class Thread_safe_slicer : private Slicer
 
   void vineyard_update() { Slicer::vineyard_update(); }
 
-  template <typename Value = T>
+  template <bool byDim = true, typename Value = T>
   auto get_barcode(int maxDim = -1)
   {
     // complex in parent is empty, so maxDim needs to be initialized from the outside.
     if (maxDim < 0) maxDim = slicer_->get_max_dimension();
-    return Slicer::get_barcode(maxDim);
+    return Slicer::template get_barcode<byDim, Value>(maxDim);
   }
 
-  template <bool withDim = false, typename Value = T>
+  template <bool byDim = false, typename Value = T>
   auto get_flat_barcode(int maxDim = -1)
   {
     // complex in parent is empty, so maxDim needs to be initialized from the outside.
     if (maxDim < 0) maxDim = slicer_->get_max_dimension();
-    return Slicer::get_flat_barcode(maxDim);
+    return Slicer::template get_flat_barcode<byDim, Value>(maxDim);
   }
 
   std::vector<Multi_dimensional_barcode<T>> persistence_on_lines(const std::vector<std::vector<T>>& basePoints,
-                                                                 bool ignoreInf)
+                                                                 [[maybe_unused]] bool ignoreInf = true)
   {
-    return Slicer::persistence_on_lines(basePoints, ignoreInf);
+    // TODO: Thread_safe has to use his own version of weak_copy(), so I had to decompose everything to factorize
+    // but it is quite ugly. Does someone has a more elegant solution?
+    if constexpr (Persistence::is_vine) {
+      return Slicer::_batch_persistence_on_lines_with_vine(
+          slicer_->complex_, [](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints);
+    } else {
+#ifdef GUDHI_USE_TBB
+      return Slicer::_batch_persistence_on_lines(
+          weak_copy(), [](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints, ignoreInf);
+#else
+      return Slicer::_batch_persistence_on_lines(
+          slicer_->complex_, [](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints, ignoreInf);
+#endif
+    }
   }
 
   std::vector<Multi_dimensional_barcode<T>> persistence_on_lines(
       const std::vector<std::pair<std::vector<T>, std::vector<T>>>& basePointsWithDirections,
-      bool ignoreInf)
+      [[maybe_unused]] bool ignoreInf = true)
   {
-    return Slicer::persistence_on_lines(basePointsWithDirections, ignoreInf);
+    // TODO: Thread_safe has to use his own version of weak_copy(), so I had to decompose everything to factorize
+    // but it is quite ugly. Does someone has a more elegant solution?
+    if constexpr (Persistence::is_vine) {
+      return Slicer::_batch_persistence_on_lines_with_vine(
+          slicer_->complex_,
+          [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
+          basePointsWithDirections);
+    } else {
+#ifdef GUDHI_USE_TBB
+      return Slicer::_batch_persistence_on_lines(
+          weak_copy(),
+          [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
+          basePointsWithDirections,
+          ignoreInf);
+#else
+      return Slicer::_batch_persistence_on_lines(
+          slicer_->complex_,
+          [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
+          basePointsWithDirections,
+          ignoreInf);
+#endif
+    }
   }
 
   std::vector<std::vector<Cycle>> get_representative_cycles(bool update = true)

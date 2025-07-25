@@ -122,13 +122,13 @@ class Slicer
   {
     Filtration_value a = Filtration_value::inf(get_number_of_parameters());
     Filtration_value b = -a;
-    for (const Filtration_value& filtration_value : complex_.get_filtration_values()) {
-      if (filtration_value.num_generators() > 1) {
-        a.pull_to_greatest_common_lower_bound(factorize_below(filtration_value));
-        b.push_to_least_common_upper_bound(factorize_above(filtration_value));
+    for (const Filtration_value& fil : complex_.get_filtration_values()) {
+      if (fil.num_generators() > 1) {
+        a.pull_to_greatest_common_lower_bound(factorize_below(fil));
+        b.push_to_least_common_upper_bound(factorize_above(fil));
       } else {
-        a.pull_to_greatest_common_lower_bound(filtration_value);
-        b.push_to_least_common_upper_bound(filtration_value);
+        a.pull_to_greatest_common_lower_bound(fil);
+        b.push_to_least_common_upper_bound(fil);
       }
     }
     return std::make_pair(std::move(a), std::move(b));
@@ -168,8 +168,6 @@ class Slicer
   template <class Array = std::initializer_list<T>>
   void set_slice(const Array& slice)
   {
-    // TODO: resize with inf values instead of gudhi_check ?
-    GUDHI_CHECK(slice.size() == get_number_of_cycle_generators(), "The given slice does not have the right size.");
     slice_ = slice;
   }
 
@@ -242,19 +240,50 @@ class Slicer
   }
 
   std::vector<Multi_dimensional_barcode<T>> persistence_on_lines(const std::vector<std::vector<T>>& basePoints,
-                                                                 bool ignoreInf)
+                                                                 [[maybe_unused]] bool ignoreInf = true)
   {
-    return _batch_persistence_on_lines([](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints, ignoreInf);
+    // TODO: Thread_safe has to use his own version of weak_copy(), so I had to decompose everything to factorize
+    // but it is quite ugly. Does someone has a more elegant solution?
+    if constexpr (Persistence::is_vine) {
+      return _batch_persistence_on_lines_with_vine(
+          complex_, [](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints);
+    } else {
+#ifdef GUDHI_USE_TBB
+      return _batch_persistence_on_lines(
+          weak_copy(), [](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints, ignoreInf);
+#else
+      return _batch_persistence_on_lines(
+          complex_, [](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints, ignoreInf);
+#endif
+    }
   }
 
   std::vector<Multi_dimensional_barcode<T>> persistence_on_lines(
       const std::vector<std::pair<std::vector<T>, std::vector<T>>>& basePointsWithDirections,
-      bool ignoreInf)
+      [[maybe_unused]] bool ignoreInf = true)
   {
-    return _batch_persistence_on_lines(
-        [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
-        basePointsWithDirections,
-        ignoreInf);
+    // TODO: Thread_safe has to use his own version of weak_copy(), so I had to decompose everything to factorize
+    // but it is quite ugly. Does someone has a more elegant solution?
+    if constexpr (Persistence::is_vine) {
+      return _batch_persistence_on_lines_with_vine(
+          complex_,
+          [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
+          basePointsWithDirections);
+    } else {
+#ifdef GUDHI_USE_TBB
+      return _batch_persistence_on_lines(
+          weak_copy(),
+          [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
+          basePointsWithDirections,
+          ignoreInf);
+#else
+      return _batch_persistence_on_lines(
+          complex_,
+          [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
+          basePointsWithDirections,
+          ignoreInf);
+#endif
+    }
   }
 
   std::vector<std::vector<Cycle>> get_representative_cycles(bool update = true)
@@ -353,6 +382,69 @@ class Slicer
     return out;
   }
 
+  template <typename F, typename F_arg>
+  std::vector<Multi_dimensional_barcode<T>> _batch_persistence_on_lines_with_vine(const Complex& complex,
+                                                                                  F&& get_line,
+                                                                                  const std::vector<F_arg>& basePoints)
+  {
+    if (basePoints.size() == 0) return {};
+
+    std::vector<Multi_dimensional_barcode<T>> out(basePoints.size());
+
+    _push_to(complex, get_line(basePoints[0]));
+    _initialize_persistence_computation(complex, false);
+    out[0] = _get_barcode_by_dim<T>(complex.get_max_dimension());
+    for (auto i = 1u; i < basePoints.size(); ++i) {
+      _push_to(complex, get_line(basePoints[i]));
+      vineyard_update();
+      out[i] = _get_barcode_by_dim<T>(complex.get_max_dimension());
+    }
+
+    return out;
+  }
+
+#ifdef GUDHI_USE_TBB
+  template <typename F, typename F_arg>
+  std::vector<Multi_dimensional_barcode<T>> _batch_persistence_on_lines(const Thread_safe& localTemplate,
+                                                                        F&& get_line,
+                                                                        const std::vector<F_arg>& basePoints,
+                                                                        const bool ignoreInf)
+  {
+    if (basePoints.size() == 0) return {};
+
+    std::vector<Multi_dimensional_barcode<T>> out(basePoints.size());
+
+    tbb::enumerable_thread_specific<Thread_safe> threadLocals(localTemplate);
+    tbb::parallel_for(static_cast<std::size_t>(0), basePoints.size(), [&](const Index& i) {
+      Thread_safe& s = threadLocals.local();
+      s.push_to(get_line(basePoints[i]));
+      s.initialize_persistence_computation(ignoreInf);
+      out[i] = s.get_barcode();
+    });
+
+    return out;
+  }
+#else
+  template <typename F, typename F_arg>
+  std::vector<Multi_dimensional_barcode<T>> _batch_persistence_on_lines(const Complex& complex,
+                                                                        F&& get_line,
+                                                                        const std::vector<F_arg>& basePoints,
+                                                                        const bool ignoreInf)
+  {
+    if (basePoints.size() == 0) return {};
+
+    std::vector<Multi_dimensional_barcode<T>> out(basePoints.size());
+
+    for (auto i = 0u; i < basePoints.size(); ++i) {
+      _push_to(complex, get_line(basePoints[i]));
+      _initialize_persistence_computation(complex, ignoreInf);
+      out[i] = _get_barcode_by_dim<T>(complex.get_max_dimension());
+    }
+
+    return out;
+  }
+#endif
+
  private:
   Complex complex_;
   std::vector<T> slice_;  // filtration of the current slice
@@ -399,10 +491,10 @@ class Slicer
   template <typename Value>
   Barcode<Value> _get_barcode(int maxDim)
   {
-    auto barcode_indices = persistence_.get_barcode();
-    Barcode<Value> out(barcode_indices.size());
+    auto barcodeIndices = persistence_.get_barcode();
+    Barcode<Value> out(barcodeIndices.size());
     Index i = 0;
-    for (const auto& bar : barcode_indices) {
+    for (const auto& bar : barcodeIndices) {
       if (bar.dim <= maxDim) {
         _retrieve_interval(bar, out[i].dim, out[i].birth, out[i].death);
         ++i;
@@ -432,11 +524,11 @@ class Slicer
   template <typename Value>
   Flat_barcode<Value> _get_flat_barcode(int maxDim)
   {
-    auto barcode_indices = persistence_.get_barcode();
-    Flat_barcode<Value> out(barcode_indices.size() * 2);
+    auto barcodeIndices = persistence_.get_barcode();
+    Flat_barcode<Value> out(barcodeIndices.size() * 2);
     Index i = 0;
     Dimension dim;  // dummy
-    for (const auto& bar : barcode_indices) {
+    for (const auto& bar : barcodeIndices) {
       if (bar.dim <= maxDim) {
         _retrieve_interval(bar, dim, out[i], out[i + 1]);
         i += 2;
@@ -458,45 +550,6 @@ class Slicer
         out[dim].push_back(birth);
         out[dim].push_back(death);
       }
-    }
-    return out;
-  }
-
-  template <typename F, typename F_arg>
-  std::vector<Multi_dimensional_barcode<T>> _batch_persistence_on_lines(F&& get_line,
-                                                                        const std::vector<F_arg>& basePoints,
-                                                                        [[maybe_unused]] const bool ignoreInf = true)
-  {
-    if (basePoints.size() == 0) return {};
-
-    std::vector<Multi_dimensional_barcode<T>> out(basePoints.size());
-
-    if constexpr (Persistence::is_vine) {
-      push_to(get_line(basePoints[0]));
-      initialize_persistence_computation();
-      out[0] = get_barcode();
-      for (auto i = 1u; i < basePoints.size(); ++i) {
-        push_to(get_line(basePoints[i]));
-        vineyard_update();
-        out[i] = get_barcode();
-      }
-    } else {
-#ifdef GUDHI_USE_TBB
-      Thread_safe local_template = weak_copy();
-      tbb::enumerable_thread_specific<Thread_safe> thread_locals(local_template);
-      tbb::parallel_for(static_cast<std::size_t>(0), basePoints.size(), [&](const Index& i) {
-        Thread_safe& s = thread_locals.local();
-        s.push_to(get_line(basePoints[i]));
-        s.initialize_persistence_computation(ignoreInf);
-        out[i] = s.get_barcode();
-      });
-#else
-      for (auto i = 0u; i < basePoints.size(); ++i) {
-        push_to(get_line(basePoints[i]));
-        initialize_persistence_computation(ignoreInf);
-        out[i] = get_barcode();
-      }
-#endif
     }
     return out;
   }
