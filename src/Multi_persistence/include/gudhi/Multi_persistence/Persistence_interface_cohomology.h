@@ -28,23 +28,33 @@
 namespace Gudhi {
 namespace multi_persistence {
 
+/**
+ * @class Persistence_interface_cohomology Persistence_interface_cohomology.h \
+ * gudhi/Multi_persistence/Persistence_interface_cohomology.h
+ * @ingroup multi_persistence
+ *
+ * @brief Interface respecting the @ref PersistenceAlgorithm concept to use @ref Slicer with the cohomology
+ * algorithm implemented in @ref Gudhi::persistent_cohomology::Persistent_cohomology.
+ * 
+ * @tparam MultiFiltrationValue Filtration value type used in @ref Slicer.
+ */
 template <class MultiFiltrationValue>
 class Persistence_interface_cohomology
 {
  public:
   using PCOH_complex = Multi_parameter_filtered_complex_pcoh_interface<MultiFiltrationValue>;
-  using Complex = typename PCOH_complex::Complex;
-  using Dimension = typename PCOH_complex::Dimension;
-  using Index = typename PCOH_complex::Simplex_key;
-  using Map = typename PCOH_complex::Map;
-  using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, Index>;
+  using Complex = typename PCOH_complex::Complex;                                /**< Complex type */
+  using Dimension = typename PCOH_complex::Dimension;                            /**< Dimension type */
+  using Index = typename PCOH_complex::Simplex_key;                              /**< Index type */
+  using Map = typename PCOH_complex::Map;                                        /**< Map type */
+  using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, Index>; /**< Bar type */
   using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
   using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<PCOH_complex, Field_Zp>;
-  using Barcode = std::vector<Bar>;
+  using Barcode = std::vector<Bar>;                                              /**< Barcode type */
 
   static constexpr const auto nullDeath = Bar::inf;
-  static constexpr const bool is_vine = false;
-  static constexpr const bool has_rep_cycles = false;
+  static constexpr const bool is_vine = false;        /** False. */
+  static constexpr const bool has_rep_cycles = false; /** False. */
 
   Persistence_interface_cohomology() : interface_(), barcode_() {}
 

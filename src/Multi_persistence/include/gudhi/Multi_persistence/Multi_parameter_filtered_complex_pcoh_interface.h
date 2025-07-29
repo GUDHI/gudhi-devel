@@ -26,22 +26,47 @@
 namespace Gudhi {
 namespace multi_persistence {
 
+/**
+ * @class Multi_parameter_filtered_complex_pcoh_interface Multi_parameter_filtered_complex_pcoh_interface.h \
+ * gudhi/Multi_persistence/Multi_parameter_filtered_complex_pcoh_interface.h
+ * @ingroup multi_persistence
+ *
+ * @brief Interface respecting the @ref Gudhi::FilteredComplex concept to use
+ * @ref Gudhi::persistent_cohomology::Persistent_cohomology with an instantiation of
+ * @ref Multi_parameter_filtered_complex.
+ *
+ * @tparam MultiFiltrationValue Filtration value type used in @ref Multi_parameter_filtered_complex.
+ */
 template <class MultiFiltrationValue>
 class Multi_parameter_filtered_complex_pcoh_interface
 {
  public:
-  using Complex = Multi_parameter_filtered_complex<MultiFiltrationValue>;
-  using Simplex_key = std::uint32_t;
-  using Simplex_handle = Simplex_key;
-  using Filtration_value = Simplex_key;
-  using Dimension = int;
-  using Map = std::vector<Simplex_handle>;
-  using Filtration_simplex_range = Map;
-  using Boundary_simplex_range = Map;
+  using Complex = Multi_parameter_filtered_complex<MultiFiltrationValue>; /**< Complex type */
+  using Simplex_key = std::uint32_t;                                      /**< Simplex_key type */
+  using Simplex_handle = Simplex_key;                                     /**< Simplex_handle type */
+  using Filtration_value = Simplex_key;                                   /**< Internal filtration value type */
+  using Dimension = int;                                                  /**< Internal dimension type */
+  using Map = std::vector<Simplex_handle>;                                /**< Map type */
+  using Filtration_simplex_range = Map;                                   /**< Filtration_simplex_range type */
+  using Boundary_simplex_range = Map;                                     /**< Boundary_simplex_range type */
 
+  /**
+   * @brief Default constructor, storing null pointers.Can be tested with @ref is_initialized(), but any other method
+   * should not be used with this constructor.
+   */
   Multi_parameter_filtered_complex_pcoh_interface() : boundaries_(nullptr), newToOldPerm_(nullptr) {}
 
-  // `boundaries` and `permutation` are assumed to have stable size, i.e., their address never changes
+  /**
+   * @brief Constructs the interface and stores a pointer to the given complex and the given permutation. Assumes that
+   * the pointers remain valid through the whole life of the instance. If they get invalidated, they can be updated
+   * via the copy/move constructors if the content did not change (otherwise, reconstruct from scratch with
+   * @ref reinitialize).
+   *
+   * @param boundaries Complex to interface.
+   * @param permutation Permutation map indicating the order of the cells stored in @p boundaries as a standard
+   * 1-dimensional filtration. I.e., `permutation[i]` corresponds to the index in `boundaries` which should be
+   * used as the i-th cell in the filtration.
+   */
   Multi_parameter_filtered_complex_pcoh_interface(const Complex &boundaries, const Map &permutation)
       : boundaries_(&boundaries), newToOldPerm_(&permutation), keys_(boundaries.get_number_of_cycle_generators(), -1)
   {}
@@ -49,7 +74,14 @@ class Multi_parameter_filtered_complex_pcoh_interface
   Multi_parameter_filtered_complex_pcoh_interface(const Multi_parameter_filtered_complex_pcoh_interface &other) =
       delete;
 
-  // permutation and boundaries is assumed to be the same than from the copied object, just its address can change
+  /**
+   * @brief Copy constructor. Copies the complex pointer from @p other and updates the permutation pointer with the
+   * given map if the complex was initialized.
+   *
+   * @param other Interface to copy.
+   * @param permutation Permutation map. Has to correspond to the same map than in @p other, except that its address
+   * does not have to be the same.
+   */
   Multi_parameter_filtered_complex_pcoh_interface(const Multi_parameter_filtered_complex_pcoh_interface &other,
                                                   const Map &permutation)
       : boundaries_(other.boundaries_),
@@ -60,7 +92,15 @@ class Multi_parameter_filtered_complex_pcoh_interface
                 "Only the address of the permutation vector is allowed to change, not its content.");
   }
 
-  // permutation and boundaries is assumed to be the same than from the copied object, just its address can change
+  /**
+   * @brief Copy constructor. Updates the pointers with the given complex and map if @p other was initialized.
+   *
+   * @param other Interface to copy.
+   * @param boundaries Complex. Has to correspond to the same complex than in @p other, except that its address
+   * does not have to be the same.
+   * @param permutation Permutation map. Has to correspond to the same map than in @p other, except that its address
+   * does not have to be the same.
+   */
   Multi_parameter_filtered_complex_pcoh_interface(const Multi_parameter_filtered_complex_pcoh_interface &other,
                                                   const Complex &boundaries,
                                                   const Map &permutation)
@@ -76,7 +116,14 @@ class Multi_parameter_filtered_complex_pcoh_interface
 
   Multi_parameter_filtered_complex_pcoh_interface(Multi_parameter_filtered_complex_pcoh_interface &&other) = delete;
 
-  // permutation is assumed to be the same than from the moved object, just its address can change
+  /**
+   * @brief Move constructor. Moves the complex pointer from @p other and updates the permutation pointer with the
+   * given map if the complex was initialized.
+   *
+   * @param other Interface to move.
+   * @param permutation Permutation map. Has to correspond to the same map than in @p other, except that its address
+   * does not have to be the same.
+   */
   Multi_parameter_filtered_complex_pcoh_interface(Multi_parameter_filtered_complex_pcoh_interface &&other,
                                                   const Map &permutation)
       : boundaries_(std::exchange(other.boundaries_, nullptr)),
@@ -86,7 +133,15 @@ class Multi_parameter_filtered_complex_pcoh_interface
     other.newToOldPerm_ = nullptr;
   }
 
-  // permutation is assumed to be the same than from the moved object, just its address can change
+  /**
+   * @brief Move constructor. Updates the pointers with the given complex and map if @p other was initialized.
+   *
+   * @param other Interface to move.
+   * @param boundaries Complex. Has to correspond to the same complex than in @p other, except that its address
+   * does not have to be the same.
+   * @param permutation Permutation map. Has to correspond to the same map than in @p other, except that its address
+   * does not have to be the same.
+   */
   Multi_parameter_filtered_complex_pcoh_interface(Multi_parameter_filtered_complex_pcoh_interface &&other,
                                                   const Complex &boundaries,
                                                   const Map &permutation)
@@ -98,6 +153,9 @@ class Multi_parameter_filtered_complex_pcoh_interface
     other.newToOldPerm_ = nullptr;
   }
 
+  /**
+   * @brief Swap operator.
+   */
   friend void swap(Multi_parameter_filtered_complex_pcoh_interface &be1,
                    Multi_parameter_filtered_complex_pcoh_interface &be2)
   {
@@ -106,6 +164,10 @@ class Multi_parameter_filtered_complex_pcoh_interface
     be1.keys_.swap(be2.keys_);
   }
 
+  /**
+   * @brief Reinitializes the interface with the new given complex and permutation.
+   * To use instead of the classical assign operator `operator=`.
+   */
   void reinitialize(const Complex &boundaries, const Map &permutation)
   {
     boundaries_ = &boundaries;
@@ -113,6 +175,9 @@ class Multi_parameter_filtered_complex_pcoh_interface
     keys_ = Map(boundaries.get_number_of_cycle_generators(), -1);
   }
 
+  /**
+   * @brief Returns `true` if and only if all pointers are not null.
+   */
   bool is_initialized() const { return boundaries_ != nullptr && newToOldPerm_ != nullptr; }
 
   std::size_t num_simplices() const { return newToOldPerm_->size(); }
@@ -163,7 +228,7 @@ class Multi_parameter_filtered_complex_pcoh_interface
     stream << "[\n";
     for (auto i : interface.filtration_simplex_range()) {
       stream << "[";
-      for (const auto &stuff : interface.boundary_simplex_range(i)) stream << interface.keys_[stuff] << ", ";
+      for (const auto &idx : interface.boundary_simplex_range(i)) stream << interface.keys_[idx] << ", ";
       stream << "]\n";
     }
 
@@ -172,9 +237,9 @@ class Multi_parameter_filtered_complex_pcoh_interface
   }
 
  private:
-  Complex const *boundaries_;
-  Map const *newToOldPerm_;
-  Map keys_;
+  Complex const *boundaries_; /**< Pointer to complex. */
+  Map const *newToOldPerm_;   /**< Pointer to filtration position to complex position map. */
+  Map keys_;                  /**< Keys assigned to a cell. TODO: potentially the identity. If yes, to remove. */
 };
 
 }  // namespace multi_persistence
