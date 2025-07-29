@@ -40,6 +40,7 @@
 #include <gudhi/Thread_safe_slicer.h>
 #include <gudhi/Projective_cover_kernel.h>
 #include <gudhi/persistence_interval.h>
+#include <gudhi/slicer_helpers.h>
 
 namespace Gudhi {
 namespace multi_persistence {
@@ -107,7 +108,7 @@ class Slicer
 
   Index get_number_of_parameters() const { return complex_.get_number_of_parameters(); }
 
-  // // only used for scc io TODO: see if still necessary
+  // // only used for scc io for now
   // const Complex& get_chain_complex() const { return complex_; }
 
   // initialized with `initialize_persistence_computation`
@@ -203,12 +204,20 @@ class Slicer
 
   // if ignoreInf was used when initializing the persistence computation, any update of slice has to keep at inf
   // the boundaries which were before, otherwise the behaviour is undefined (will throw with high probability)
+  // preferable with complex ordered by dim
   void vineyard_update()
   {
-    for (Index i = 0; i < generatorOrder_.size(); i++) {
+    const bool is_ordered_by_dim = complex_.is_ordered_by_dimension();
+    // speed up when ordered by dim, to avoid unnecessary swaps
+    auto dim_condition = [&](int curr) {
+      if (is_ordered_by_dim) {
+        return persistence_.get_dimension(curr) == persistence_.get_dimension(curr - 1);
+      }
+      return true;
+    };
+    for (Index i = 1; i < generatorOrder_.size(); i++) {
       int curr = i;
-      while (curr > 0 && persistence_.get_dimension(curr) == persistence_.get_dimension(curr - 1) &&
-             slice_[generatorOrder_[curr]] < slice_[generatorOrder_[curr - 1]]) {
+      while (curr > 0 && dim_condition(curr) && slice_[generatorOrder_[curr]] < slice_[generatorOrder_[curr - 1]]) {
         persistence_.vine_swap(curr - 1);
         std::swap(generatorOrder_[curr - 1], generatorOrder_[curr]);
         --curr;
@@ -317,6 +326,21 @@ class Slicer
     Projective_cover_kernel<Filtration_value> kernel(slicer.complex_, dim);
     return Slicer(kernel.create_complex());
   }
+
+  friend void write_slicer_to_scc_file(const std::string& outFilePath,
+                                       const Slicer& slicer,
+                                       int numberOfParameters = -1,
+                                       int degree = -1,
+                                       bool rivetCompatible = false,
+                                       bool ignoreLastGenerators = false,
+                                       bool stripComments = false,
+                                       bool reverse = false)
+  {
+    const Complex& cpx =
+        slicer.complex_.is_ordered_by_dimension() ? slicer.complex_ : build_permuted_complex(slicer.complex_).first;
+    write_complex_to_scc_file<typename Slicer::Filtration_value>(
+        outFilePath, cpx, numberOfParameters, degree, rivetCompatible, ignoreLastGenerators, stripComments, reverse);
+  };
 
   friend std::ostream& operator<<(std::ostream& stream, const Slicer& slicer)
   {

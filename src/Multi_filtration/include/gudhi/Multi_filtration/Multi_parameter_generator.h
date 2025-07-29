@@ -1225,7 +1225,7 @@ class Multi_parameter_generator
     if (number_of_parameters < 1) return;
 
     if (generator_.size() > 1) {
-      GUDHI_CHECK(number_of_parameters == generator_.size(),
+      GUDHI_CHECK(static_cast<std::size_t>(number_of_parameters) == generator_.size(),
                   "Cannot force size to another number of parameters than set.");
       return;
     }
