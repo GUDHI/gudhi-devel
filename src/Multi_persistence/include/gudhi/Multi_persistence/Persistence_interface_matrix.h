@@ -30,17 +30,33 @@
 namespace Gudhi {
 namespace multi_persistence {
 
+/**
+ * @class Persistence_interface_matrix Persistence_interface_matrix.h \
+ * gudhi/Multi_persistence/Persistence_interface_matrix.h
+ * @ingroup multi_persistence
+ *
+ * @brief Interface respecting the @ref PersistenceAlgorithm concept to use @ref Slicer with the homology, vineyard
+ * and representative cycle algorithms implemented in @ref Gudhi::persistence_matrix::Matrix.
+ * 
+ * @tparam PosIdxPersistenceMatrixOptions Options respecting the
+ * @ref Gudhi::persistence_matrix::PersistenceMatrixOptions concept such that, either
+ * @ref Gudhi::persistence_matrix::PersistenceMatrixOptions::column_indexation_type "column_indexation_type" is
+ * @ref Gudhi::persistence_matrix::Column_indexation_types::POSITION "POSITION", or,
+ * @ref Gudhi::persistence_matrix::PersistenceMatrixOptions::is_of_boundary_type "is_of_boundary_type" is true and
+ * @ref Gudhi::persistence_matrix::PersistenceMatrixOptions::column_indexation_type "column_indexation_type" is
+ * @ref Gudhi::persistence_matrix::Column_indexation_types::CONTAINER "CONTAINER".
+ */
 template <class PosIdxPersistenceMatrixOptions>
 class Persistence_interface_matrix
 {
  public:
   using Options = PosIdxPersistenceMatrixOptions;
-  using Matrix = Gudhi::persistence_matrix::Matrix<Options>;
-  using Dimension = typename Options::Dimension;
-  using Index = typename Options::Index;
-  using Map = std::vector<Index>;
-  using Bar = typename Matrix::Bar;
-  using Cycle = typename Matrix::Cycle;
+  using Matrix = Gudhi::persistence_matrix::Matrix<Options>; /**< Complex type */
+  using Dimension = typename Options::Dimension;             /**< Dimension type */
+  using Index = typename Options::Index;                     /**< Index type */
+  using Map = std::vector<Index>;                            /**< Map type */
+  using Bar = typename Matrix::Bar;                          /**< Bar type */
+  using Cycle = typename Matrix::Cycle;                      /**< Cycle type */
 
   class Barcode_iterator
       : public boost::iterator_facade<Barcode_iterator, const Bar, boost::random_access_traversal_tag>
@@ -224,11 +240,17 @@ class Persistence_interface_matrix
     Cycle currCycle_;
   };
 
-  using Barcode = boost::iterator_range<Barcode_iterator>;
-  using Cycles = boost::iterator_range<Cycles_iterator>;
+  using Barcode = boost::iterator_range<Barcode_iterator>;  /**< Barcode type */
+  using Cycles = boost::iterator_range<Cycles_iterator>;    /**< Cycle container type */
 
   static constexpr const auto nullDeath = Bar::inf;
+  /**
+   * @brief True if and only if PosIdxPersistenceMatrixOptions::has_vine_update is true.
+   */
   static constexpr const bool is_vine = Options::has_vine_update;
+  /**
+   * @brief True if and only if PosIdxPersistenceMatrixOptions::can_retrieve_representative_cycles is true.
+   */
   static constexpr const bool has_rep_cycles = Options::can_retrieve_representative_cycles;
 
   Persistence_interface_matrix() : permutation_(nullptr) {}

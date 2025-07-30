@@ -5,7 +5,7 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
- *      - 2024/08 Hannah Schreiber: doc
+ *      - 2024/08 Hannah Schreiber: documentation
  *      - 2025/03 Hannah Schreiber: Change of point types.
  *      - YYYY/MM Author: Description of the modification
  */
