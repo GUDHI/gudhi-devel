@@ -5,7 +5,7 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
- *      - 2025/04 Hannah Schreiber: Reorganization.
+ *      - 2025/04 Hannah Schreiber: Reorganization + documentation.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -41,38 +41,58 @@
 #include <gudhi/Projective_cover_kernel.h>
 #include <gudhi/persistence_interval.h>
 #include <gudhi/slicer_helpers.h>
+#include <gudhi/Multi_persistence/Line.h>
 
 namespace Gudhi {
 namespace multi_persistence {
 
+/**
+ * @class Slicer Slicer.h gudhi/Slicer.h
+ * @ingroup multi_persistence
+ *
+ * @brief Class slicing a multi-parameter persistence module. TODO: more details
+ * 
+ * @tparam MultiFiltrationValue Filtration value class respecting the @ref MultiFiltrationValue concept.
+ * @tparam PersistenceAlgorithm Class respecting the @ref PersistenceAlgorithm concept. Used to compute persistence,
+ * eventually vineyards and representative cycles.
+ */
 template <class MultiFiltrationValue, class PersistenceAlgorithm>
 class Slicer
 {
  public:
-  using Persistence = PersistenceAlgorithm;
-  using Filtration_value = MultiFiltrationValue;
-  using T = typename Filtration_value::value_type;
-  using Complex = Multi_parameter_filtered_complex<Filtration_value>;
-  using Index = typename Complex::Index;
-  using Dimension = typename Complex::Dimension;
+  using Persistence = PersistenceAlgorithm;                           /**< Persistence algorithm type. */
+  using Filtration_value = MultiFiltrationValue;                      /**< Filtration value type. */
+  using T = typename Filtration_value::value_type;                    /**< Numerical filtration value element type. */
+  using Complex = Multi_parameter_filtered_complex<Filtration_value>; /**< Complex type. */
+  using Index = typename Complex::Index;                              /**< Complex index type. */
+  using Dimension = typename Complex::Dimension;                      /**< Dimension type. */
   template <typename Value = T>
-  using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, Value>;
+  using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, Value>;  /**< Bar type. */
   template <typename Value = T>
-  using Barcode = std::vector<Bar<Value>>;
+  using Barcode = std::vector<Bar<Value>>;                                 /**< Barcode type. */
   // TODO: replace by std::vector<std::array<Value,2> > to avoid double push_back for multi dim version?
   template <typename Value = T>
-  using Flat_barcode = std::vector<Value>;
+  using Flat_barcode = std::vector<Value>;                                 /**< Flat barcode type. */
   template <typename Value = T>
-  using Multi_dimensional_barcode = std::vector<Barcode<Value>>;
+  using Multi_dimensional_barcode = std::vector<Barcode<Value>>;           /**< Barcode ordered by dimension type. */
   template <typename Value = T>
-  using Multi_dimensional_flat_barcode = std::vector<Flat_barcode<Value>>;
-  using Cycle = std::vector<Index>;
-  using Thread_safe = Thread_safe_slicer<Slicer>;
+  using Multi_dimensional_flat_barcode = std::vector<Flat_barcode<Value>>; /**< Flat barcode ord. by dimension type. */
+  using Cycle = std::vector<Index>;                                        /**< Cycle type. */
+  using Thread_safe = Thread_safe_slicer<Slicer>;                          /**< Thread safe slicer type. */
 
   // CONSTRUCTORS
 
+  /**
+   * @brief Default constructor. Constructs an empty slicer.
+   */
   Slicer() {}
 
+  /**
+   * @brief Constructs the slicer by copying the given complex. The current slice is not initialized to a default
+   * value, it can be set with @ref set_slice or @ref push_to.
+   *
+   * It is recommended to use a complex which is ordered by dimension for better performance.
+   */
   Slicer(const Complex& complex)
       : complex_(complex),
         slice_(complex.get_number_of_cycle_generators()),
@@ -80,6 +100,12 @@ class Slicer
         persistence_()
   {}
 
+  /**
+   * @brief Constructs the slicer by moving the given complex. The current slice is not initialized to a default
+   * value, it can be set with @ref set_slice or @ref push_to.
+   *
+   * It is recommended to use a complex which is ordered by dimension for better performance.
+   */
   Slicer(Complex&& complex)
       : complex_(std::move(complex)),
         slice_(complex_.get_number_of_cycle_generators()),
@@ -87,10 +113,16 @@ class Slicer
         persistence_()
   {}
 
+  /**
+   * @brief Copy constructor.
+   */
   Slicer(const Slicer& other)
       : complex_(other.complex_), slice_(other.slice_), generatorOrder_(other.generatorOrder_), persistence_()
   {}
 
+  /**
+   * @brief Move constructor.
+   */
   Slicer(Slicer&& other)
       : complex_(std::move(other.complex_)),
         slice_(std::move(other.slice_)),
@@ -102,23 +134,54 @@ class Slicer
 
   // ACCESS
 
+  /**
+   * @brief Returns a thread safe copy of this object. The copy is lighter than a real copy, as the complex is passed
+   * by pointer and gives access to all const method and persistence related methods. But the returned object will be
+   * invalidated if this object is destroyed.
+   */
   Thread_safe weak_copy() const { return Thread_safe(*this); }
 
+  /**
+   * @brief Returns the number of generators in the stored module.
+   */
   Index get_number_of_cycle_generators() const { return complex_.get_number_of_cycle_generators(); }
 
+  /**
+   * @brief Returns the number of parameters of the stored filtration. If the module is empty, the number returned is 0.
+   */
   Index get_number_of_parameters() const { return complex_.get_number_of_parameters(); }
 
   // // only used for scc io for now
   // const Complex& get_chain_complex() const { return complex_; }
 
-  // initialized with `initialize_persistence_computation`
-  // if ignoreInf was true, indices at inf are not contained in the vector
+  /**
+   * @brief Returns a const reference to the current permutation map, indicating in which order are the generators
+   * with respect to the current slice (i.e., \$f order[i] \$f corresponds to the index in the complex of the
+   * \$f i^{th} \$f generator in the filtration represented by the slice). It will be initialized with
+   * @ref initialize_persistence_computation.
+   *
+   * If `ignoreInf` was true when calling @ref initialize_persistence_computation, indices of generators at infinity
+   * are not stored in the container. That means that the size can be smaller than what
+   * @ref get_number_of_cycle_generators returns.
+   */
   const std::vector<Index>& get_current_order() const { return generatorOrder_; }
 
+  /**
+   * @brief Returns a const reference to the current slice. It can be initialized or updated with @ref set_slice
+   * and @ref push_to.
+   */
   const std::vector<T>& get_slice() const { return slice_; }
 
+  /**
+   * @brief Returns a const reference to the class computing the persistence of the current slice. It will be
+   * initialized with @ref initialize_persistence_computation.
+   */
   const Persistence& get_persistence_algorithm() const { return persistence_; }
 
+  /**
+   * @brief Returns two filtration values representing respectively the greatest common lower bound of all filtration
+   * values in the filtration and the lowest common upper bound of them.
+   */
   std::pair<Filtration_value, Filtration_value> get_bounding_box() const
   {
     Filtration_value a = Filtration_value::inf(get_number_of_parameters());
@@ -135,25 +198,62 @@ class Slicer
     return std::make_pair(std::move(a), std::move(b));
   }
 
+  /**
+   * @brief Returns a const reference to the filtration value container. A filtration value at index \$f i \$f 
+   * correspond to the filtration value associated to the generators at index \$f i \$f.
+   */
   const typename Complex::Filtration_value_container& get_filtration_values() const
   {
     return complex_.get_filtration_values();
   }
 
+  /**
+   * @brief Returns a reference to the filtration value container. A filtration value at index \$f i \$f 
+   * correspond to the filtration value associated to the generators at index \$f i \$f.
+   *
+   * @warning The container is not const such that the user can easily modify/update a filtration value. But do not
+   * modify the size of the container, nor the number of parameters.
+   */
   typename Complex::Filtration_value_container& get_filtration_values() { return complex_.get_filtration_values(); }
 
+  /**
+   * @brief Returns a const reference to the filtration value associated to the generator at index \$f i \$f.
+   */
   const Filtration_value& get_filtration_value(Index i) const { return complex_.get_filtration_values()[i]; }
 
+  /**
+   * @brief Returns a reference to the filtration value associated to the generator at index \$f i \$f.
+   *
+   * @warning The value is not const such that the user can easily modify/update the filtration value. But do not
+   * modify the number of parameters.
+   */
   Filtration_value& get_filtration_value(Index i) { return complex_.get_filtration_values()[i]; }
 
+  /**
+   * @brief Returns a const reference to the dimension container. A value at index \$f i \$f corresponds to the
+   * dimension of the generator at index \$f i \$f.
+   */
   const std::vector<Dimension>& get_dimensions() const { return complex_.get_dimensions(); }
 
+  /**
+   * @brief Returns the dimension of the generator at index \$f i \$f.
+   */
   Dimension get_dimension(Index i) const { return complex_.get_dimensions()[i]; }
 
+  /**
+   * @brief Returns the maximal dimension of a generator in the module.
+   */
   Dimension get_max_dimension() const { return complex_.get_max_dimension(); }
 
+  /**
+   * @brief Returns a const reference to the boundary container. The element at index \$f i \$f corresponds to the
+   * boundary of the generator at index \$f i \$f.
+   */
   const typename Complex::Boundary_container& get_boundaries() const { return complex_.get_boundaries(); }
 
+  /**
+   * @brief Returns the boundary of the generator at index \$f i \$f.
+   */
   const typename Complex::Boundary& get_boundary(Index i) const { return complex_.get_boundaries()[i]; }
 
   // // TODO: only used to print info in python, so put in some interface instead
@@ -166,20 +266,50 @@ class Slicer
 
   // MODIFIERS
 
+  /**
+   * @brief Sets the current slice, that is the 1-parameter filtration values associated to each generator on that line.
+   * The value at \$f slice[i] \$f has to corresponds to the value for the generator at index \$f i \$f.
+   * One can also sets the slice directly from the line with @ref push_to.
+   * 
+   * @tparam Array Container which can be converted into a vector of `T`.
+   */
   template <class Array = std::initializer_list<T>>
   void set_slice(const Array& slice)
   {
     slice_ = slice;
   }
 
-  template <class Line>
-  void push_to(const Line& line)
+  /**
+   * @brief Sets the current slice by computing the 1-parameter filtration values fo each generator on the given line.
+   * 
+   * @tparam Line_like Any type convertible to a @ref Line class. Default value: `std::initializer_list<T>`.
+   */
+  template <class Line_like = std::initializer_list<T>>
+  void push_to(const Line_like& line)
+  {
+    _push_to(complex_, Line<typename Line_like::value_type>(line));
+  }
+
+  /**
+   * @brief Sets the current slice by computing the 1-parameter filtration values fo each generator on the given line.
+   * 
+   * @tparam U Template parameter of the given line.
+   */
+  template <class U>
+  void push_to(const Line<U>& line)
   {
     _push_to(complex_, line);
   }
 
-  // Warning: initialize_persistence_computation needs to be recalled if barcode was and is still needed
-  // warning: shuffles order if not ordered by dimension
+  /**
+   * @brief Removes completely from the module all generator of dimension strictly higher than given. All
+   * initializations are invalidated, so the slice has to be reset and @ref initialize_persistence_computation recalled.
+   *
+   * @warning If the internal complex was not ordered by dimension, the complex is sorted before pruning.
+   * So, the indexing changes afterwards.
+   * 
+   * @param maxDim Maximal dimension to keep.
+   */
   void prune_above_dimension(int maxDim)
   {
     int idx = complex_.prune_above_dimension(maxDim);
@@ -329,7 +459,6 @@ class Slicer
 
   friend void write_slicer_to_scc_file(const std::string& outFilePath,
                                        const Slicer& slicer,
-                                       int numberOfParameters = -1,
                                        int degree = -1,
                                        bool rivetCompatible = false,
                                        bool ignoreLastGenerators = false,
@@ -339,7 +468,7 @@ class Slicer
     const Complex& cpx =
         slicer.complex_.is_ordered_by_dimension() ? slicer.complex_ : build_permuted_complex(slicer.complex_).first;
     write_complex_to_scc_file<typename Slicer::Filtration_value>(
-        outFilePath, cpx, numberOfParameters, degree, rivetCompatible, ignoreLastGenerators, stripComments, reverse);
+        outFilePath, cpx, degree, rivetCompatible, ignoreLastGenerators, stripComments, reverse);
   };
 
   friend std::ostream& operator<<(std::ostream& stream, const Slicer& slicer)
@@ -374,8 +503,8 @@ class Slicer
       : complex_(), slice_(slice), generatorOrder_(generatorOrder), persistence_(persistence, generatorOrder_)
   {}
 
-  template <class Line>
-  void _push_to(const Complex& complex, const Line& line)
+  template <class U>
+  void _push_to(const Complex& complex, const Line<U>& line)
   {
     const auto& filtrationValues = complex.get_filtration_values();
     for (Index i = 0u; i < filtrationValues.size(); i++) {

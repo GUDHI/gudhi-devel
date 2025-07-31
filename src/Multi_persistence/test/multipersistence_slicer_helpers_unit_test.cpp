@@ -84,10 +84,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants)
   int dimShift = 0;
 
   Complex in_cpx = build_input_complex<Fil>();
-  write_complex_to_scc_file(filePath, in_cpx, -1, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
   auto out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
 
-  write_slicer_to_scc_file(filePath, Slicer(in_cpx), -1, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  write_slicer_to_scc_file(filePath, Slicer(in_cpx), degree, rivetCompatible, ignoreLastGenerators, false, reverse);
   Slicer out_slicer = build_slicer_from_scc_file<Slicer>(filePath, rivetCompatible, reverse, dimShift);
 
   BOOST_CHECK(out_slicer.get_boundaries() == out_cpx.get_boundaries());
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants)
 
   rivetCompatible = true;
 
-  write_complex_to_scc_file(filePath, in_cpx, -1, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
   out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
 
   BOOST_CHECK(bc == out_cpx.get_boundaries());
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants)
   rivetCompatible = false;
   reverse = true;
 
-  write_complex_to_scc_file(filePath, in_cpx, -1, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
   out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
 
   BOOST_CHECK(in_cpx.get_boundaries() == out_cpx.get_boundaries());
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants)
         ini{0.82801, 0.226328},
         ini{0.639283, 0.226328}};
 
-  write_complex_to_scc_file(filePath, in_cpx, -1, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
   out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
 
   BOOST_CHECK(bc == out_cpx.get_boundaries());
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants)
         ini{0.454557, 0.226328},
         ini{0.635158, 0.226328}};
 
-  write_complex_to_scc_file(filePath, in_cpx, -1, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
   out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
 
   BOOST_CHECK(bc == out_cpx.get_boundaries());
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants)
         ini{0.82801, 0.226328},
         ini{0.639283, 0.226328}};
 
-  write_complex_to_scc_file(filePath, in_cpx, -1, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
   out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
 
   BOOST_CHECK(bc == out_cpx.get_boundaries());
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants)
 
   reverse = true;
 
-  write_complex_to_scc_file(filePath, in_cpx, -1, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
   out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
 
   BOOST_CHECK(in_cpx.get_boundaries() == out_cpx.get_boundaries());
@@ -247,9 +247,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_bitmap_io, Fil, list_of_tested_variants)
                                    ini{0.29683, 0.2130471},
                                    ini{0.232049, 0.226328}};
   std::vector<unsigned int> shape = {3, 3};
-  int numberOfParameters = 2;
 
-  auto cpx = build_complex_from_bitmap(vertexValues, shape, numberOfParameters);
+  auto cpx = build_complex_from_bitmap(vertexValues, shape);
 
   BC bc = {{},
            {},
@@ -305,7 +304,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_bitmap_io, Fil, list_of_tested_variants)
   BOOST_CHECK(fc == cpx.get_filtration_values());
   BOOST_CHECK_EQUAL(2, cpx.get_max_dimension());
 
-  auto slicer = build_slicer_from_bitmap<Slicer>(vertexValues, shape, numberOfParameters);
+  auto slicer = build_slicer_from_bitmap<Slicer>(vertexValues, shape);
 
   BOOST_CHECK(bc == slicer.get_boundaries());
   BOOST_CHECK(dc == slicer.get_dimensions());

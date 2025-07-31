@@ -101,8 +101,14 @@ class Thread_safe_slicer : private Slicer
     Slicer::set_slice(slice);
   }
 
-  template <class Line>
-  void push_to(const Line& line)
+  template <class Line_like = std::initializer_list<T>>
+  void push_to(const Line_like& line)
+  {
+    Slicer::_push_to(slicer_->complex_, Line<typename Line_like::value_type>(line));
+  }
+
+  template <class U>
+  void push_to(const Line<U>& line)
   {
     Slicer::_push_to(slicer_->complex_, line);
   }

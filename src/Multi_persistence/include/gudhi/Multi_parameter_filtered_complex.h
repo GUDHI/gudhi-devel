@@ -348,6 +348,9 @@ class Multi_parameter_filtered_complex
   //   return false;
   // }
 
+  /**
+   * @brief Outstream operator.
+   */
   friend std::ostream& operator<<(std::ostream& stream, const Multi_parameter_filtered_complex& complex)
   {
     stream << "Boundary:\n";
@@ -378,12 +381,15 @@ class Multi_parameter_filtered_complex
   }
 
  private:
-  Boundary_container boundaries_;
-  Dimension_container dimensions_;
-  Filtration_value_container filtrationValues_;
-  Dimension maxDimension_;
-  bool isOrderedByDimension_;
+  Boundary_container boundaries_;               /**< Boundary container. */
+  Dimension_container dimensions_;              /**< Dimension container. */
+  Filtration_value_container filtrationValues_; /**< Filtration value container. */
+  Dimension maxDimension_;                      /**< Maximal dimension of a cell. */
+  bool isOrderedByDimension_;                   /**< True if and only if the containers are ordered by dimension. */
 
+  /**
+   * @brief Initializes maxDimension_ and isOrderedByDimension_
+   */
   void _initialize_dimension_utils()
   {
     isOrderedByDimension_ = true;

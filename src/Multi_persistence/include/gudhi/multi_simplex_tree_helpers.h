@@ -44,6 +44,8 @@ struct Simplex_tree_options_multidimensional_filtration : Simplex_tree_options_d
 };
 
 /**
+ * @ingroup multi_persistence
+ *
  * @brief Constructs a multi-dimensional simplex tree from the given one-dimensional simplex tree.
  *
  * All simplices are copied from the one-dimensional simplex tree \f$ st \f$ to the multi-dimensional simplex tree
@@ -97,6 +99,8 @@ Simplex_tree<MultiDimSimplexTreeOptions> make_multi_dimensional(
 }
 
 /**
+ * @ingroup multi_persistence
+ *
  * @brief Constructs a one-dimensional simplex tree from the given multi-dimensional simplex tree.
  *
  * All simplices are copied from the multi-dimensional simplex tree \f$ st \f$ to the one-dimensional simplex tree

@@ -5,7 +5,7 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
- *      - 2025/04 Hannah Schreiber: Reorganization.
+ *      - 2025/04 Hannah Schreiber: Reorganization + documentation.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -29,32 +29,52 @@
 namespace Gudhi {
 namespace multi_persistence {
 
+/**
+ * @class Projective_cover_kernel Projective_cover_kernel.h gudhi/Projective_cover_kernel.h
+ * @ingroup multi_persistence
+ *
+ * @brief TODO (what it is + mention that it only works for 2 parameters)
+ * 
+ * @tparam MultiFiltrationValue Filtration value class respecting the @ref MultiFiltrationValue concept.
+ * @tparam columnType Column type to use for the matrix used internally. Default value:
+ * @ref Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR "NAIVE_VECTOR".
+ */
 template <class MultiFiltrationValue,
           Gudhi::persistence_matrix::Column_types columnType = Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR>
 class Projective_cover_kernel
 {
  private:
+  /**
+   * @brief Options for matrix type.
+   */
   struct Matrix_options : Gudhi::persistence_matrix::Default_options<columnType, true> {
     using Index = std::uint32_t;
   };
 
  public:
-  using Filtration_value = MultiFiltrationValue;
-  using Complex = Multi_parameter_filtered_complex<Filtration_value>;
-  using Index = typename Complex::Index;
-  using Dimension = typename Complex::Dimension;
-  using Filtration_value_container = typename Complex::Filtration_value_container;
-  using Boundary_container = typename Complex::Boundary_container;
-  using Dimension_container = typename Complex::Dimension_container;
-  using Matrix = Gudhi::persistence_matrix::Matrix<Matrix_options>;
+  using Filtration_value = MultiFiltrationValue;                                   /**< Filtration value type. */
+  using Complex = Multi_parameter_filtered_complex<Filtration_value>;              /**< Complex data type. */
+  using Index = typename Complex::Index;                                           /**< Index type. */
+  using Dimension = typename Complex::Dimension;                                   /**< Dimension type. */
+  using Filtration_value_container = typename Complex::Filtration_value_container; /**< Filt. value container type. */
+  using Boundary_container = typename Complex::Boundary_container;                 /**< Boundary container type. */
+  using Dimension_container = typename Complex::Dimension_container;               /**< Dimension container type. */
+  using Matrix = Gudhi::persistence_matrix::Matrix<Matrix_options>;                /**< Matrix type. */
 
-  // TODO : this only works for 2 parameter modules. Optimize w.r.t. this.
-  // filtration values are assumed to be dim + co-lexicographically sorted
+  // TODO: this only works for 2 parameter modules. Optimize w.r.t. this.
+  /**
+   * @brief Constructor.
+   * 
+   * @param complex Complex containing the boundaries, dimensions and 2-parameter filtration values necessary,
+   * ordered by dimension and then co-lexicographically with respect to the filtration values.
+   * @param dim Dimension for which to compute the kernel.
+   */
   Projective_cover_kernel(const Complex &complex, Dimension dim)
   {
     using namespace Gudhi::multi_filtration;
 
     if (complex.get_number_of_parameters() != 2) throw std::invalid_argument("Only available for 2-parameter modules.");
+    if (!complex.is_ordered_by_dimension()) throw std::invalid_argument("Complex has to be ordered by dimension.");
 
     const auto &boundaries = complex.get_boundaries();
     const auto &filtValues = complex.get_filtration_values();
@@ -101,6 +121,9 @@ class Projective_cover_kernel
     }
   }
 
+  /**
+   * @brief Returns the kernel generators. (? TODO)
+   */
   Boundary_container build_generators()
   {
     Index start = 0;
@@ -108,28 +131,34 @@ class Projective_cover_kernel
     return Boundary_container(boundaries_.begin() + start, boundaries_.end());
   }
 
+  /**
+   * @brief Returns a complex representing the projective cover kernel.
+   */
   Complex create_complex() { return Complex(boundaries_, dimensions_, filtrationValues_); }
 
  private:
+  /**
+   * @brief Lexicographically ordered queue. Each filtration value is represented once and contains the list of indices
+   * of the columns with this filtration value.
+   */
   struct SmallQueue {
     SmallQueue() {};
 
     struct MFWrapper {
       MFWrapper(const Filtration_value &g) : g(g) {};
 
-      MFWrapper(const Filtration_value &g, int col) : g(g) { some_cols.insert(col); }
+      MFWrapper(const Filtration_value &g, int col) : g(g) { someCols.insert(col); }
 
-      MFWrapper(const Filtration_value &g, std::initializer_list<int> cols) : g(g), some_cols(cols.begin(), cols.end())
-      {
-      }
+      MFWrapper(const Filtration_value &g, std::initializer_list<int> cols) : g(g), someCols(cols.begin(), cols.end())
+      {}
 
-      inline void insert(int col) const { some_cols.insert(col); }
+      inline void insert(int col) const { someCols.insert(col); }
 
       inline bool operator<(const MFWrapper &other) const { return is_strict_less_than_lexicographically(g, other.g); }
 
      public:
       Filtration_value g;
-      mutable std::set<int> some_cols;
+      mutable std::set<int> someCols;
     };
 
     inline void insert(const Filtration_value &g, int col)
@@ -160,20 +189,20 @@ class Projective_cover_kernel
 
       auto out = std::move(*queue.begin());
       queue.erase(queue.begin());
-      std::swap(last_cols, out.some_cols);
+      std::swap(lastCols, out.someCols);
       return out.g;
     }
 
-    const auto &get_current_cols() const { return last_cols; }
+    const auto &get_current_cols() const { return lastCols; }
 
    private:
     std::set<MFWrapper> queue;
-    std::set<int> last_cols;
+    std::set<int> lastCols;
   };
 
-  Boundary_container boundaries_;
-  Dimension_container dimensions_;
-  Filtration_value_container filtrationValues_;
+  Boundary_container boundaries_;               /** Boundary container. */
+  Dimension_container dimensions_;              /** Dimension container. */
+  Filtration_value_container filtrationValues_; /** Filtration value container. */
 
   static void _get_complex_indices(const Complex &complex,
                                    Dimension dim,
