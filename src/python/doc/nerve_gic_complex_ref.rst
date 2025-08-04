@@ -9,4 +9,3 @@
 .. autoclass:: gudhi.CoverComplex
    :members:
    :undoc-members:
-   :show-inheritance:

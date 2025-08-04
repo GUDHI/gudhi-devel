@@ -8,4 +8,3 @@ Periodic cubical complex reference manual
 .. autoclass:: gudhi.PeriodicCubicalComplex
    :members:
    :undoc-members:
-   :show-inheritance:

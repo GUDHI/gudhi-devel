@@ -9,4 +9,3 @@ Tangential complex reference manual
 .. autoclass:: gudhi.TangentialComplex
    :members:
    :undoc-members:
-   :show-inheritance:
