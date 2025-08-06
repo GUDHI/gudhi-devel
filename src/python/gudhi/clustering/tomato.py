@@ -290,7 +290,9 @@ class Tomato:
 
     # TODO: add argument k or threshold? Have a version where you can click and it shows the line and the corresponding k?
     def plot_diagram(self):
-        """ """
+        """
+        :Requires: `Matplotlib <installation.html#matplotlib>`_
+        """
         import matplotlib.pyplot as plt
 
         l = self.max_weight_per_cc_.min()
