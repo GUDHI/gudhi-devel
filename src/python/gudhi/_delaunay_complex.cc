@@ -172,11 +172,16 @@ Returns:
     is a duplicate).
         )doc")
       .def_static("get_float_relative_precision", &gdci::get_float_relative_precision, R"doc(
+Get the float relative precision of filtration values computation when constructing with :code:`precision = 'safe'`
+(the default).
+
 Returns:
-    The float relative precision of filtration values computation when constructing with
-    :code:`precision = 'safe'` (the default).
+    The float relative precision.
         )doc")
       .def_static("set_float_relative_precision", &gdci::set_float_relative_precision, R"doc(
+Set the float relative precision of filtration values computation when constructing with :code:`precision = 'safe'`
+(the default).
+
 Args:
     precision: When constructing :func:`~gudhi.delaunay_cech_complex`, :func:`~gudhi.alpha_complex`, or
         :func:`~gudhi.weighted_alpha_complex` with :code:`precision = 'safe'` (the default), one can

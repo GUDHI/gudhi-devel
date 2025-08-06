@@ -69,3 +69,4 @@ Since the algorithm essentially computes basins of attraction, it is also encour
 
 .. autoclass:: gudhi.clustering.tomato.Tomato
    :members:
+   :undoc-members:

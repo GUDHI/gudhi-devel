@@ -8,4 +8,5 @@ Tangential complex reference manual
 
 .. autoclass:: gudhi.TangentialComplex
    :members:
-   :undoc-members:
+   :inherited-members:
+   :exclude-members: __new__

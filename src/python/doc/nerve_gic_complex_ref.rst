@@ -8,4 +8,5 @@
 
 .. autoclass:: gudhi.CoverComplex
    :members:
-   :undoc-members:
+   :inherited-members:
+   :exclude-members: __new__

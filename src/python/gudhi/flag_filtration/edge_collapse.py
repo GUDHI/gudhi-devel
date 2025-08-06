@@ -26,6 +26,8 @@ def reduce_graph(input_edges, nb_iterations=1):
     The output has the same shape as the input, which is presumed to be (N, N) where all vertices have index
     less than N, since the simplification does not affect vertices.
 
+    :Requires: `SciPy <installation.html#scipy>`_
+
     :param input_edges: Input weighted graph.
     :type input_edges: scipy.sparse.coo_matrix
     :param nb_iterations: The number of times we apply the algorithm. Default is 1.

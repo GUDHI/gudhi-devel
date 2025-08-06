@@ -210,7 +210,7 @@ automatically tuned with subsampling - see :cite:`Carriere17c`.
       .def("set_graph_from_OFF", &NGI::set_graph_from_OFF, nb::call_guard<nb::gil_scoped_release>(), R"doc(
 Creates a graph G from the triangulation given by the input OFF file.
         )doc")
-      .def("set_graph_from_euclidean_rips",
+      .def("set_graph_from_rips",
            &NGI::set_graph_from_euclidean_rips,
            nb::arg("threshold"),
            R"doc(

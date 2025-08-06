@@ -7,16 +7,18 @@ Delaunay complex reference manual
 =================================
 
 .. autoclass:: gudhi.DelaunayComplex
-   :exclude-members:  __new__
    :members:
+   :inherited-members:
+   :exclude-members: __new__, get_point
 
 ==============================
 Alpha complex reference manual
 ==============================
 
 .. autoclass:: gudhi.AlphaComplex
-   :exclude-members:  __new__
    :members:
+   :inherited-members:
+   :exclude-members: __new__, get_float_relative_precision, set_float_relative_precision
    :show-inheritance:
 
 ======================================
@@ -24,6 +26,7 @@ Delaunay Čech complex reference manual
 ======================================
 
 .. autoclass:: gudhi.DelaunayCechComplex
-   :exclude-members:  __new__
    :members:
+   :inherited-members:
+   :exclude-members: __new__, get_point, get_float_relative_precision, set_float_relative_precision
    :show-inheritance:

@@ -777,7 +777,7 @@ class GraphInducedComplex(CoverComplexPy):
         # Set underlying graph
         if self.graph == "rips":
             if self.rips_threshold is not None:
-                self.complex.set_graph_from_euclidean_rips(self.rips_threshold)
+                self.complex.set_graph_from_rips(self.rips_threshold)
             else:
                 self.complex.set_subsampling(self.C, self.beta)
                 self.complex.set_graph_from_automatic_rips(self.N)

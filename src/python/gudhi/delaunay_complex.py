@@ -41,7 +41,7 @@ class DelaunayComplex(t.Delaunay_complex_interface):
         """Args:
               points (Sequence[Sequence[float]]): A list of points in d-Dimension.
               weights (Optional[Sequence[float]]): A list of weights. If set, the number of weights must correspond to
-              the number of points.
+                  the number of points.
               precision (str): Complex precision can be `'fast'`, `'safe'` or `'exact'`. Default is `'safe'`.
 
         :raises ValueError: In case of inconsistency between the number of points and weights.
@@ -71,16 +71,16 @@ class DelaunayComplex(t.Delaunay_complex_interface):
     ) -> SimplexTree:
         """
         Args:
-            max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed. Default is set to
-                                      infinity, and there is very little point using anything else since it does not save time.
-            filtration (Literal): Set this value to `None` (default value) if filtration values are not needed to be computed
-                                  (will be set to `NaN`). Set it to `alpha` to compute the filtration values with the Alpha complex, or
-                                  to `cech` to compute the Delaunay Cech complex.
+            max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed. Default is set
+                to infinity, and there is very little point using anything else since it does not save time.
+            filtration (Literal): Set this value to `None` (default value) if filtration values are not needed to be
+                computed (will be set to `NaN`). Set it to `alpha` to compute the filtration values with the Alpha
+                complex, or to `cech` to compute the Delaunay Cech complex.
             output_squared_values (bool): Square filtration values when `True`. Default is `True`.
         Returns:
             SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th
-                         input point. The vertices may not be numbered contiguously as some points may be discarded in the
-                         triangulation (duplicate points, weighted hidden point, ...).
+                input point. The vertices may not be numbered contiguously as some points may be discarded in the
+                triangulation (duplicate points, weighted hidden point, ...).
         """
         if not filtration in [None, "alpha", "cech"]:
             raise ValueError(
@@ -123,17 +123,17 @@ class AlphaComplex(DelaunayComplex):
     ) -> SimplexTree:
         """
         Args:
-            max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed. Default is set to
-                                      infinity, and there is very little point using anything else since it does not save time.
-            default_filtration_value (bool): Default value is `False` (which means compute the filtration values). Set this
-                                             value to `True` if filtration values are not needed to be computed (will be set to `NaN`), but please
-                                             consider constructing a :class:`~gudhi.DelaunayComplex` instead.
+            max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed. Default is set
+                to infinity, and there is very little point using anything else since it does not save time.
+            default_filtration_value (bool): Default value is `False` (which means compute the filtration values). Set
+                this value to `True` if filtration values are not needed to be computed (will be set to `NaN`), but
+                please consider constructing a :class:`~gudhi.DelaunayComplex` instead.
             output_squared_values (bool): Square filtration values when `True`. Default is `True` to keep backward
-                                          compatibility.
+                compatibility.
         Returns:
             SimplexTree: A simplex tree created from the Delaunay Triangulation. The vertex `k` corresponds to the k-th
-                         input point. The vertices may not be numbered contiguously as some points may be discarded in the
-                         triangulation (duplicate points, weighted hidden point, ...).
+                input point. The vertices may not be numbered contiguously as some points may be discarded in the
+                triangulation (duplicate points, weighted hidden point, ...).
         """
         filtration = "alpha"
         if default_filtration_value:
@@ -167,13 +167,13 @@ class DelaunayCechComplex(DelaunayComplex):
     ) -> SimplexTree:
         """
         Args:
-            max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed. Default is set to
-                                      infinity, and there is very little point using anything else since it does not save time.
+            max_alpha_square (float): The maximum alpha square threshold the simplices shall not exceed. Default is set
+                to infinity, and there is very little point using anything else since it does not save time.
             output_squared_values (bool): Square filtration values when `True`. Default is `True`.
         Returns:
             SimplexTree: A simplex tree created from the Delaunay Čech Triangulation. The vertex `k` corresponds to the
-                         k-th input point. The vertices may not be numbered contiguously as some points may be discarded in the
-                         triangulation(duplicate points, ...).
+                k-th input point. The vertices may not be numbered contiguously as some points may be discarded in the
+                triangulation(duplicate points, ...).
         """
         return super().create_simplex_tree(max_alpha_square, "cech", output_squared_values)
 

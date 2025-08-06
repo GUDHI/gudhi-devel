@@ -8,4 +8,3 @@ Witness complex reference manual
 
 .. autoclass:: gudhi.WitnessComplex
    :members:
-   :undoc-members:

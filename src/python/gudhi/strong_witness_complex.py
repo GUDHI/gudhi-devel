@@ -42,6 +42,9 @@ class StrongWitnessComplex(t.Strong_witness_complex_interface):
         :param max_alpha_square: The maximum relaxation parameter.
             Default is set to infinity.
         :type max_alpha_square: float
+        :param limit_dimension: Represents the maximal dimension of the simplicial complex.
+            Default value (-1) means no limit.
+        :type limit_dimension: int
         :returns: A simplex tree created from the Delaunay Triangulation.
         :rtype: SimplexTree
         """

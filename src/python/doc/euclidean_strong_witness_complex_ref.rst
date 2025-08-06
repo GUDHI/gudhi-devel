@@ -8,4 +8,5 @@ Euclidean strong witness complex reference manual
 
 .. autoclass:: gudhi.EuclideanStrongWitnessComplex
    :members:
-   :undoc-members:
+   :inherited-members:
+   :exclude-members: __new__
