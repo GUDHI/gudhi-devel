@@ -52,8 +52,8 @@ If you have several Python/python installed, you can force it by adding
 GUDHI Python module compilation
 ===============================
 
-After making sure that the `Compilation dependencies`_ are properly installed,
-one can build the GUDHI Python module, by running the following commands in a terminal:
+After making sure that the `Compilation dependencies`_ are properly installed, one can build the GUDHI Python module,
+by running the following commands in a terminal:
 
 .. code-block:: bash
 
@@ -61,22 +61,12 @@ one can build the GUDHI Python module, by running the following commands in a te
     mkdir build
     cd build/
     cmake -DCMAKE_BUILD_TYPE=Release ..
-    cd python
+    cd python # Change directory to avoid to compile C++ stuff
+    # Unnecessary C++ compilation can also be avoided with the following cmake command:
+    # cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_GUDHUI=OFF -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF ..
     make
 
-.. note::
-
-    :code:`make python` (or :code:`make` in python directory) is only a
-    `CMake custom targets <https://cmake.org/cmake/help/latest/command/add_custom_target.html>`_
-    to shortcut :code:`python setup.py build_ext --inplace` command.
-    No specific other options  (:code:`-j8` for parallel, or even :code:`make clean`, ...) are
-    available.
-    But one can use :code:`python setup.py ...` specific options in the python directory:
-
-.. code-block:: bash
-
-    python setup.py clean --all               # Clean former compilation
-    python setup.py build_ext -j 8 --inplace  # Build in parallel
+.. seealso:: In `GUDHI Python module installation`_ section, the `pip install` part also compiles the Python module before installing it.
 
 GUDHI Python module installation
 ================================
@@ -89,19 +79,18 @@ PYTHONPATH:
     # For windows, you have to set PYTHONPATH environment variable
     export PYTHONPATH='$PYTHONPATH:/path-to-gudhi/build/python'
 
-Or install it definitely in your Python packages folder:
+Or install GUDHI in your Python packages folder with the
+`scikit-build-core editable mode <https://scikit-build-core.readthedocs.io/en/latest/configuration/index.html#editable-installs>`_:
 
 .. code-block:: bash
 
-    cd /path-to-gudhi/build/python
-    python setup.py install # add --user to the command if you do not have the permission
-    # Or 'pip install .'
+    cd /path-to-gudhi/
+    pip install --no-build-isolation --config-settings=editable.rebuild=true -Cbuild-dir=build -ve.
+    # Note that this command will also recompile the C++ binded modules, when modified, required by the Python project
 
 .. note::
 
     It does not take into account :code:`CMAKE_INSTALL_PREFIX`.
-    But one can use
-    `alternate location installation <https://docs.python.org/3/install/#alternate-installation>`_.
 
 Test suites
 ===========
