@@ -62,7 +62,8 @@ bool is_less_or_equal_than_lexicographically();
  * \f$\mathbb R^n\f$-filtration value. E.g., the filtration value of a simplex, or, of the algebraic generator of a
  * module presentation. The encoding is compacted into a single vector, so if a lot of non trivial modifications are
  * done (that not only consists of simply adding new generators at the end of the vector), it is probably preferable
- * to use @ref Dynamic_multi_parameter_filtration instead.
+ * to use @ref Dynamic_multi_parameter_filtration instead. Implements the concept @ref FiltrationValue of the
+ * @ref Gudhi::Simplex_tree and the concept @ref Gudhi::multi_persistence::MultiFiltrationValue.
  *
  * @details Overloads `std::numeric_limits` such that:
  * - `std::numeric_limits<Multi_parameter_filtration>::has_infinity` returns `true`,
@@ -251,6 +252,8 @@ class Multi_parameter_filtration
       if (generator_view_.extent(0) != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
   }
+
+  // TODO: move constructor?
 
   /**
    * @brief Assign operator.

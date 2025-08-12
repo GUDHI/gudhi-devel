@@ -68,6 +68,8 @@ bool is_less_or_equal_than_lexicographically();
  * edge is \f$ k \f$-critical if one of its end vertices is \f$ k \f$-critical and the other one \f$ j \f$-critical,
  * \f$ j \geq k \f$. The second parameter is the more standard radius parameter of a Rips filtration.
  * Note that the set of generators does not have to be minimal (contrary to @ref Multi_parameter_filtration e.g.).
+ * Implements the concept @ref FiltrationValue of the @ref Gudhi::Simplex_tree and the concept
+ * @ref Gudhi::multi_persistence::MultiFiltrationValue.
  *
  * @details Overloads `std::numeric_limits` such that:
  * - `std::numeric_limits<Degree_rips_bifiltration>::has_infinity` returns `true` if and only if `Co` is false,
