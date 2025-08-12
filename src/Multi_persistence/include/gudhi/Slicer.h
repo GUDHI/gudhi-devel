@@ -331,7 +331,6 @@ class Slicer
     generatorOrder_.resize(idx);
     generatorOrder_.shrink_to_fit();
     slice_.resize(idx);
-    persistence_ = PersistenceAlgorithm();
   }
 
   /**
