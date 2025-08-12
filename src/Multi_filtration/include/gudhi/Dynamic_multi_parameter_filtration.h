@@ -64,7 +64,9 @@ bool is_less_or_equal_than_lexicographically();
  * module presentation. Different from @ref Multi_parameter_filtration, the underlying container is a vector of vectors
  * and therefore less memory efficient, but much more flexible when modifying the filtration value. So, this class is
  * preferable if a lot of generators need to be added on the fly or removed. But when the filtration value is more or
- * less fixed, e.g. for 1-critical filtrations, we recommend @ref Multi_parameter_filtration instead.
+ * less fixed, e.g. for 1-critical filtrations, we recommend @ref Multi_parameter_filtration instead. Implements
+ * the concept @ref FiltrationValue of the @ref Gudhi::Simplex_tree and the concept
+ * @ref Gudhi::multi_persistence::MultiFiltrationValue.
  *
  * @details Overloads `std::numeric_limits` such that:
  * - `std::numeric_limits<Dynamic_multi_parameter_filtration>::has_infinity` returns `true`,
