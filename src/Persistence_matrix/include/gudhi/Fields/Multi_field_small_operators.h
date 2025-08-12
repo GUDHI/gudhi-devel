@@ -80,7 +80,7 @@ class Multi_field_operators_with_small_characteristics
     productOfAllCharacteristics_ = 1;
     primes_.clear();
     for (unsigned int i = minimum; i <= static_cast<unsigned int>(maximum); ++i) {
-      if (_is_prime(i)) {
+      if (_is_prime(static_cast<int>(i))) {
         primes_.push_back(i);
         productOfAllCharacteristics_ *= i;
       }

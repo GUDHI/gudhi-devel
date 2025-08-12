@@ -417,7 +417,7 @@ class Shared_multi_field_element
   static inline std::vector<Element> partials_;                  /**< Partial products of the characteristics. */
   static inline const Element multiplicativeID_ = 1;             /**< Multiplicative identity. */
 
-  static constexpr bool _is_prime(const int p)
+  static constexpr bool _is_prime(const unsigned int p)
   {
     if (p <= 1) return false;
     if (p <= 3) return true;
