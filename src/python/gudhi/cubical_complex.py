@@ -115,7 +115,7 @@ class CubicalComplex(_Bitmap_cubical_complex_interface):
         :returns:  numpy.ndarray
         """
         a = super()._get_numpy_array()
-        return a.reshape([2 * d + 1 for d in super().shape()], order="F")
+        return a.reshape([2 * d + 1 for d in super()._shape()], order="F")
 
     def top_dimensional_cells(self):
         """Array with the filtration values of the top-dimensional cells of the complex.

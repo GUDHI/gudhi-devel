@@ -126,7 +126,7 @@ class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
         """
         a = super()._get_numpy_array()
         return a.reshape(
-            [2 * d + (not p) for (d, p) in zip(super().shape(), super().periodicities())],
+            [2 * d + (not p) for (d, p) in zip(super()._shape(), super()._periodicities())],
             order="F",
         )
 

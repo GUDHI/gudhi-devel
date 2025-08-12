@@ -105,7 +105,7 @@ This function returns the dimension of the complex.
 
 :returns:  int -- the complex dimension.
            )doc")
-      .def("shape", &CC::shape)
+      .def("_shape", &CC::shape)
       .def("_get_numpy_array", &CC::get_numpy_array, nb::rv_policy::reference_internal);
 
   nb::class_<CPers>(m, "_Cubical_complex_persistence_interface")
@@ -139,8 +139,8 @@ This function returns the dimension of the complex.
 
 :returns:  int -- the complex dimension.
            )doc")
-      .def("shape", &PCC::shape)
-      .def("periodicities", &PCC::periodicities)
+      .def("_shape", &PCC::shape)
+      .def("_periodicities", &PCC::periodicities)
       .def("_get_numpy_array", &PCC::get_numpy_array, nb::rv_policy::reference_internal);
 
   nb::class_<PCPers>(m, "_Periodic_cubical_complex_persistence_interface")
