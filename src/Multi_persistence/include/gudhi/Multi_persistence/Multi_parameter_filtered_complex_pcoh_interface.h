@@ -31,7 +31,7 @@ namespace multi_persistence {
  * gudhi/Multi_persistence/Multi_parameter_filtered_complex_pcoh_interface.h
  * @ingroup multi_persistence
  *
- * @brief Interface respecting the @ref Gudhi::FilteredComplex concept to use
+ * @brief Interface respecting the @ref FilteredComplex concept to use
  * @ref Gudhi::persistent_cohomology::Persistent_cohomology with an instantiation of
  * @ref Multi_parameter_filtered_complex.
  *

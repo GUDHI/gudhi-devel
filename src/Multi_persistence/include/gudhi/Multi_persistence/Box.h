@@ -34,8 +34,7 @@ namespace multi_persistence {
  *
  * @brief Simple box in \f$\mathbb R^n\f$ defined by two diametrically opposite corners.
  *
- * @tparam T Type of the coordinates of the Box. Has to follow the conditions of the template parameter of
- * @ref One_critical_filtration "".
+ * @tparam T Type of the coordinates of the Box.
  */
 template <typename T>
 class Box

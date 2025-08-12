@@ -13,8 +13,7 @@
  * @author David Loiseaux, Hannah Schreiber
  * @brief Contains the helper methods @ref Gudhi::multi_persistence::build_complex_from_scc_file,
  * @ref Gudhi::multi_persistence::write_complex_to_scc_file, @ref Gudhi::multi_persistence::build_slicer_from_scc_file,
- * @ref Gudhi::multi_persistence::write_slicer_to_scc_file, @ref Gudhi::multi_persistence::build_complex_from_bitmap
- * and @ref Gudhi::multi_persistence::build_slicer_from_bitmap.
+ * @ref Gudhi::multi_persistence::build_complex_from_bitmap and @ref Gudhi::multi_persistence::build_slicer_from_bitmap.
  */
 
 #ifndef MP_SLICER_HELPERS_H_
@@ -461,7 +460,7 @@ inline Multi_parameter_filtered_complex<OneCriticalMultiFiltrationValue> build_c
  *
  * @brief Builds a slicer for the scc format file given. Assumes that every index appearing in a boundary in the file
  * corresponds to a real line in the file (for example, the lowest dimension has always empty boundaries).
- * See @ref write_slicer_to_scc_file to write a slicer into a scc format file.
+ * See @ref Slicer::write_slicer_to_scc_file "write_slicer_to_scc_file" to write a slicer into a scc format file.
  * 
  * @tparam Slicer The @ref Slicer class with any valid template combination.
  * @param inFilePath Path to scc file.

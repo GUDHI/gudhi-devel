@@ -15,16 +15,19 @@
 namespace Gudhi {
 namespace multi_persistence {
 
-/** \defgroup multi_persistence Multi-parameter Persistence
+/** 
+ * \defgroup multi_persistence Multi-parameter Persistence
  * @{
  * \author    David Loiseaux
  *
  * \section multiparameterintro Multi-parameter Persistence
  *
+ * TODO:
  * To come: a Multi-parameter Persistence module, with, for the beginnings, an interface mostly in Python.
  * 
  * @}
  */
+
 }  // namespace persistence_fields
 }  // namespace Gudhi
 

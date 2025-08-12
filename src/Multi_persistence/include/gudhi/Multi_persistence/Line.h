@@ -37,8 +37,7 @@ namespace multi_persistence {
  *
  * @brief A line in \f$\mathbb R^n\f$, with some helpers to project points on it.
  *
- * @tparam T Type of the coordinate values. Has to follow the conditions of the template parameter of
- * @ref One_critical_filtration "".
+ * @tparam T Type of the coordinate values.
  */
 template <typename T>
 class Line
@@ -166,7 +165,7 @@ class Line
    * @tparam U Type of the time parameter.
    * @tparam FiltrationValue Type of a multi-parameter filtration value. Has to implement the following methods:
    * `num_parameters`, `num_generators`, `operator()(generator_index, parameter_index)`.
-   * See @ref Multi_parameter_filtration for an example.
+   * See @ref Gudhi::multi_filtration::Multi_parameter_filtration for an example.
    * @param x Origin of the closed positive cones.
    */
   template <typename U = T, class FiltrationValue>
