@@ -17,17 +17,17 @@
 #ifndef MF_DEGREE_RIPS_BIFILTRATION_H_
 #define MF_DEGREE_RIPS_BIFILTRATION_H_
 
-#include <algorithm>        //std::lower_bound
-#include <cmath>            //std::isnan, std::min
-#include <cstddef>          //std::size_t
-#include <cstdint>          //std::int32_t
-#include <cstring>          //memcpy
-#include <iterator>         //std::distance
-#include <ostream>          //std::ostream
-#include <limits>           //std::numerical_limits
-#include <stdexcept>        //std::logic_error
-#include <type_traits>      //std::is_arithmetic
-#include <utility>          //std::swap, std::move
+#include <algorithm>    //std::lower_bound
+#include <cmath>        //std::isnan, std::min
+#include <cstddef>      //std::size_t
+#include <cstdint>      //std::int32_t
+#include <cstring>      //memcpy
+#include <iterator>     //std::distance
+#include <ostream>      //std::ostream
+#include <limits>       //std::numerical_limits
+#include <stdexcept>    //std::logic_error
+#include <type_traits>  //std::is_arithmetic
+#include <utility>      //std::swap, std::move
 #include <vector>
 #include <initializer_list>
 
@@ -39,22 +39,6 @@
 #include <gudhi/Dynamic_multi_parameter_filtration.h>
 
 namespace Gudhi::multi_filtration {
-
-// declaration needed pre C++20 for friends with templates defined inside a class
-template <typename U>
-U compute_linear_projection();
-template <typename U>
-U compute_euclidean_distance_to();
-template <typename U>
-U compute_norm();
-template <typename OutValue, typename U>
-void compute_coordinates_in_grid();
-template <typename U>
-void evaluate_coordinates_in_grid();
-template<bool inverse>
-bool is_strict_less_than_lexicographically();
-template<bool inverse>
-bool is_less_or_equal_than_lexicographically();
 
 /**
  * @class Degree_rips_bifiltration Degree_rips_bifiltration.h gudhi/Degree_rips_bifiltration.h
@@ -79,10 +63,10 @@ bool is_less_or_equal_than_lexicographically();
  * - `std::numeric_limits<Degree_rips_bifiltration>::minus_infinity()` returns
  * @ref Degree_rips_bifiltration::minus_inf() "",
  * - `std::numeric_limits<Degree_rips_bifiltration>::max(num_param)` throws if `Co` is true and otherwise returns a
- * @ref Degree_rips_bifiltration with 1 generators with first parameter 0 and second parameter 
+ * @ref Degree_rips_bifiltration with 1 generators with first parameter 0 and second parameter
  *`std::numeric_limits<T>::max()`,
  * - `std::numeric_limits<Degree_rips_bifiltration>::quiet_NaN()` returns @ref Degree_rips_bifiltration::nan().
- * 
+ *
  * @tparam T Arithmetic type of an entry of the second parameter of a filtration value. Has to be **signed** and
  * to implement `std::isnan(T)`, `std::numeric_limits<T>::has_quiet_NaN`, `std::numeric_limits<T>::quiet_NaN()`,
  * `std::numeric_limits<T>::has_infinity`, `std::numeric_limits<T>::infinity()` and `std::numeric_limits<T>::max()`.
@@ -90,51 +74,44 @@ bool is_less_or_equal_than_lexicographically();
  * can simply throw. Examples are the native types `double`, `float` and `int`.
  * @tparam Co If `true`, reverses the poset order, i.e., the order \f$ \le \f$  in \f$ \mathbb R^n \f$ becomes
  * \f$ \ge \f$. That is, the positive cones representing a lifetime become all negative instead.
- * @tparam Ensure1Criticality If `true`, the methods ensure that the filtration value is always 1-critical by throwing 
+ * @tparam Ensure1Criticality If `true`, the methods ensure that the filtration value is always 1-critical by throwing
  * or refusing to compile if a modification increases the number of generators.
  */
 template <typename T, bool Co = false, bool Ensure1Criticality = false>
 class Degree_rips_bifiltration
 {
  public:
-  using Underlying_container = std::vector<T>;  /**< Underlying container for values. */
+  using Underlying_container = std::vector<T>; /**< Underlying container for values. */
 
   // CONSTRUCTORS
 
   /**
    * @brief Default constructor. Builds filtration value with one generator `(0, val)`.
    * If Co is false, `val` is -inf, if Co is true, `val` is at +inf.
-   * 
+   *
    * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
    */
-  Degree_rips_bifiltration([[maybe_unused]] int number_of_parameters = 2)
-      : generators_(1, _get_default_value())
-  {}
+  Degree_rips_bifiltration([[maybe_unused]] int number_of_parameters = 2) : generators_(1, _get_default_value()) {}
 
-  explicit Degree_rips_bifiltration(Gudhi::simplex_tree::empty_filtration_value_t)
-      : generators_(0)
-  {}
+  explicit Degree_rips_bifiltration(Gudhi::simplex_tree::empty_filtration_value_t /*e*/) : generators_(0) {}
 
   /**
    * @brief Builds a filtration value with one generator `(0, value)`.
-   * 
+   *
    * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
    * @param value Initialization value for the second parameter.
    */
-  Degree_rips_bifiltration([[maybe_unused]] int number_of_parameters, T value)
-      : generators_(1, value)
-  {}
+  Degree_rips_bifiltration([[maybe_unused]] int number_of_parameters, T value) : generators_(1, value) {}
 
   /**
    * @brief Builds filtration value with one generator `(i, val)`, where `i` and `val` are the two first elements
    * of the given range. Note that `i` has to be 0.
-   * 
+   *
    * @tparam ValueRange Range of types convertible to `T`. Should have a begin() method.
    * @param range Values of the generator. The range has to have at east two elements.
    */
   template <class ValueRange = std::initializer_list<T>, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
-  Degree_rips_bifiltration(const ValueRange &range)
-      : generators_(1, *(range.begin() + 1))
+  Degree_rips_bifiltration(const ValueRange &range) : generators_(1, *(range.begin() + 1))
   {
     GUDHI_CHECK(*(range.begin()) == 0, "First value of the range has to be 0");
   }
@@ -142,15 +119,14 @@ class Degree_rips_bifiltration
   /**
    * @brief Builds filtration value with one generator `(i, val)`, where `i` and `val` are the two first elements
    * of the given range. Note that `i` has to be 0.
-   * 
+   *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyInputIterator and
    * dereferenced elements have to be convertible to `T`.
    * @param it_begin Iterator pointing to the start of the range.
    * @param it_end Iterator pointing to the end of the range.
    */
   template <class Iterator, class = std::enable_if_t<!std::is_arithmetic_v<Iterator> > >
-  Degree_rips_bifiltration(Iterator it_begin, Iterator it_end)
-      : generators_(1, *(it_begin + 1))
+  Degree_rips_bifiltration(Iterator it_begin, Iterator it_end) : generators_(1, *(it_begin + 1))
   {
     GUDHI_CHECK(*it_begin == 0, "First value of the range has to be 0");
   }
@@ -161,7 +137,7 @@ class Degree_rips_bifiltration
    * the range has to be a multiple of 2 and the number of generators will be \f$ k = length / 2 \f$. Note that starting
    * from the first element, every second element has to represent the continuous sequence from 0 to \f$ k \f$.
    * The range is represented by two iterators.
-   * 
+   *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyForwardIterator and
    * dereferenced elements have to be convertible to `T`.
    * @param it_begin Iterator pointing to the start of the range.
@@ -178,7 +154,7 @@ class Degree_rips_bifiltration
     }
     generators_.resize(num_gen);
     Iterator it = it_begin;
-    for (size_type i = 0; i < num_gen; ++i){
+    for (size_type i = 0; i < num_gen; ++i) {
       GUDHI_CHECK(
           static_cast<size_type>(*it) == i,
           "Every second value of the range has to correspond to a contiguous sequence of integers starting at 0.");
@@ -193,7 +169,7 @@ class Degree_rips_bifiltration
    * second parameter. So `(0, generators[0])` is the first generator, `(1, generators[1])` is the second generator and
    * so on... The range is represented by @ref Degree_rips_bifiltration::Underlying_container "" and copied into the
    * underlying container of the class.
-   * 
+   *
    * @param generators Values for the second parameter.
    * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
    */
@@ -210,7 +186,7 @@ class Degree_rips_bifiltration
    * second parameter. So `(0, generators[0])` is the first generator, `(1, generators[1])` is the second generator and
    * so on... The range is represented by @ref Degree_rips_bifiltration::Underlying_container "" and **moved** into
    * the underlying container of the class.
-   * 
+   *
    * @param generators Values to move.
    * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
    */
@@ -225,42 +201,48 @@ class Degree_rips_bifiltration
   /**
    * @brief Copy constructor.
    */
-  Degree_rips_bifiltration(const Degree_rips_bifiltration &other)
-      : generators_(other.generators_)
-  {}
+  Degree_rips_bifiltration(const Degree_rips_bifiltration &other) = default;
+
+  /**
+   * @brief Move constructor.
+   */
+  Degree_rips_bifiltration(Degree_rips_bifiltration &&other) noexcept = default;
 
   /**
    * @brief Copy constructor.
-   * 
+   *
    * @tparam U Type convertible into `T`.
    */
-  template<typename U, bool OtherCo, bool OtherEnsure1Criticality>
+  template <typename U, bool OtherCo, bool OtherEnsure1Criticality>
   Degree_rips_bifiltration(const Degree_rips_bifiltration<U, OtherCo, OtherEnsure1Criticality> &other)
       : generators_(other.begin(), other.end())
   {
-    if constexpr (Ensure1Criticality && !OtherEnsure1Criticality){
+    if constexpr (Ensure1Criticality && !OtherEnsure1Criticality) {
       if (generators_.size() > 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
   }
 
-  /**
-   * @brief Assign operator.
-   */
-  Degree_rips_bifiltration &operator=(const Degree_rips_bifiltration &other)
-  {
-    generators_ = other.generators_;
-    return *this;
-  }
+  ~Degree_rips_bifiltration() = default;
 
   /**
    * @brief Assign operator.
-   * 
+   */
+  Degree_rips_bifiltration &operator=(const Degree_rips_bifiltration &other) = default;
+
+  /**
+   * @brief Move assign operator.
+   */
+  Degree_rips_bifiltration &operator=(Degree_rips_bifiltration &&other) noexcept = default;
+
+  /**
+   * @brief Assign operator.
+   *
    * @tparam U Type convertible into `T`.
    */
-  template<typename U, bool OtherCo, bool OtherEnsure1Criticality>
+  template <typename U, bool OtherCo, bool OtherEnsure1Criticality>
   Degree_rips_bifiltration &operator=(const Degree_rips_bifiltration<U, OtherCo, OtherEnsure1Criticality> &other)
   {
-    if constexpr (Ensure1Criticality && !OtherEnsure1Criticality){
+    if constexpr (Ensure1Criticality && !OtherEnsure1Criticality) {
       if (other.num_generators() > 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
     generators_ = Underlying_container(other.begin(), other.end());
@@ -296,7 +278,8 @@ class Degree_rips_bifiltration
    * represented on the class and is shared by the first parameter of all generators. If there is a need to store this
    * value, a copy should be stored instead.
    */
-  reference operator()(size_type g, size_type p) { 
+  reference operator()(size_type g, size_type p)
+  {
     GUDHI_CHECK(g < generators_.size() && p < 2, std::out_of_range("Out of bound index."));
     if (p == 0) {
       dummy_g_ = g;
@@ -308,7 +291,8 @@ class Degree_rips_bifiltration
   /**
    * @brief Returns const reference to value of parameter `p` of generator `g`.
    */
-  const_reference operator()(size_type g, size_type p) const {
+  const_reference operator()(size_type g, size_type p) const
+  {
     GUDHI_CHECK(g < generators_.size() && p < 2, std::out_of_range("Out of bound index."));
     if (p == 0) {
       dummy_g_ = g;
@@ -324,7 +308,7 @@ class Degree_rips_bifiltration
    * The reference returned when `p` is 0 can be modified but will have no impact on the value of the first parameter
    * represented on the class and is shared by the first parameter of all generators. If there is a need to store this
    * value, a copy should be stored instead.
-   * 
+   *
    * @tparam IndexRange Range with a begin() and size() method.
    * @param indices Range with at least two elements. The first element should correspond to the generator number and
    * the second element to the parameter number.
@@ -343,7 +327,7 @@ class Degree_rips_bifiltration
   /**
    * @brief Let \f$ g \f$ be the first value in `indices` and \f$ p \f$ the second value.
    * Returns reference to value of parameter \f$ p \f$ of generator \f$ g \f$.
-   * 
+   *
    * @tparam IndexRange Range with a begin() and size() method.
    * @param indices Range with at least two elements. The first element should correspond to the generator number and
    * the second element to the parameter number.
@@ -463,11 +447,12 @@ class Degree_rips_bifiltration
   /**
    * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
    */
-  Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_multi_parameter_filtration() const {
+  Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_multi_parameter_filtration() const
+  {
     if (generators_.empty()) return Multi_parameter_filtration<T, Co, Ensure1Criticality>(0);
 
-    auto gen_index = [&](size_type i){
-      if constexpr (Co){
+    auto gen_index = [&](size_type i) {
+      if constexpr (Co) {
         return generators_.size() - 1 - i;
       } else {
         return i;
@@ -479,18 +464,18 @@ class Degree_rips_bifiltration
     T threshold = generators_[gen_index(0)];
     out.push_back(gen_index(0));
     out.push_back(threshold);
-    for (size_type i = 1; i < generators_.size(); ++i){
+    for (size_type i = 1; i < generators_.size(); ++i) {
       size_type g = gen_index(i);
-      if (_strictly_dominates(threshold, generators_[g])){
+      if (_strictly_dominates(threshold, generators_[g])) {
         threshold = generators_[g];
         out.push_back(g);
         out.push_back(threshold);
       }
     }
-    if constexpr (Co){
-      //lexicographical order
+    if constexpr (Co) {
+      // lexicographical order
       const size_type max_idx = out.size() - 1;
-      for (size_type i = 0; i < out.size() / 2; i += 2){
+      for (size_type i = 0; i < out.size() / 2; i += 2) {
         std::swap(out[i], out[max_idx - 1 - i]);
         std::swap(out[i + 1], out[max_idx - i]);
       }
@@ -505,12 +490,13 @@ class Degree_rips_bifiltration
    * that undefines the behaviour of some methods of the class. Use @ref convert_to_multi_parameter_filtration()
    * instead if needed.
    */
-  Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_non_simplified_multi_parameter_filtration() const {
+  Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_non_simplified_multi_parameter_filtration() const
+  {
     std::vector<T> out(generators_.size() * 2);
     size_type i = 0;
-    for (size_type g = 0; g < generators_.size(); ++g){
+    for (size_type g = 0; g < generators_.size(); ++g) {
       out[i] = g;
-      out[i+1] = generators_[g];
+      out[i + 1] = generators_[g];
       i += 2;
     }
     return Multi_parameter_filtration<T, Co, Ensure1Criticality>(std::move(out), 2);
@@ -519,11 +505,12 @@ class Degree_rips_bifiltration
   /**
    * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
    */
-  Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_dynamic_multi_parameter_filtration() const {
+  Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_dynamic_multi_parameter_filtration() const
+  {
     if (generators_.empty()) return Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>(0);
 
-    auto gen_index = [&](size_type i){
-      if constexpr (Co){
+    auto gen_index = [&](size_type i) {
+      if constexpr (Co) {
         return generators_.size() - 1 - i;
       } else {
         return i;
@@ -534,16 +521,16 @@ class Degree_rips_bifiltration
     out.reserve(generators_.size());
     T threshold = generators_[gen_index(0)];
     out.emplace_back(std::vector<T>{static_cast<T>(gen_index(0)), threshold});
-    for (size_type i = 1; i < generators_.size(); ++i){
+    for (size_type i = 1; i < generators_.size(); ++i) {
       size_type g = gen_index(i);
-      if (_strictly_dominates(threshold, generators_[g])){
+      if (_strictly_dominates(threshold, generators_[g])) {
         threshold = generators_[g];
         std::vector<T> v = {static_cast<T>(g), threshold};
         out.emplace_back(std::move(v));
       }
     }
-    if constexpr (Co){
-      //lexicographical order
+    if constexpr (Co) {
+      // lexicographical order
       std::reverse(out.begin(), out.end());
     }
 
@@ -578,9 +565,7 @@ class Degree_rips_bifiltration
   /**
    * @brief Returns the number of generators in the filtration value, i.e. the criticality of the element.
    */
-  size_type num_generators() const { 
-    return generators_.size(); 
-  }
+  size_type num_generators() const { return generators_.size(); }
 
   /**
    * @brief Returns the total number of values in the filtration value, that is,
@@ -632,7 +617,7 @@ class Degree_rips_bifiltration
       return false;
     } else {
       if (generators_.empty()) return false;
-      for (const T& v : generators_){
+      for (const T &v : generators_) {
         if (v != T_inf) return false;
       }
       return true;
@@ -654,10 +639,7 @@ class Degree_rips_bifiltration
   /**
    * @brief Returns `true` if and only if the filtration value is considered as NaN.
    */
-  constexpr bool is_nan() const
-  {
-    return generators_.empty();
-  }
+  constexpr bool is_nan() const { return generators_.empty(); }
 
   /**
    * @brief Returns `true` if and only if the filtration value is non-empty and is not considered as plus infinity,
@@ -669,7 +651,7 @@ class Degree_rips_bifiltration
       return !generators_.empty() && (generators_.size() != 1 || generators_[0] != -T_inf);
     } else {
       if (generators_.empty() || generators_[0] == -T_inf) return false;
-      for (const T& v : generators_){
+      for (const T &v : generators_) {
         if (v != T_inf) return true;
       }
       return false;
@@ -704,7 +686,7 @@ class Degree_rips_bifiltration
       }
     }
 
-    for (std::size_t i = 0u; i < std::min(a.num_generators(), b.num_generators()); ++i) {
+    for (std::size_t i = 0U; i < std::min(a.num_generators(), b.num_generators()); ++i) {
       if constexpr (inverse) i = std::min(a.num_generators(), b.num_generators()) - 1 - i;
       if (_is_nan(a.generators_[i]) && !_is_nan(b.generators_[i])) return false;
       if (_is_nan(b.generators_[i])) return true;
@@ -741,7 +723,7 @@ class Degree_rips_bifiltration
       }
     }
 
-    for (std::size_t i = 0u; i < std::min(a.num_generators(), b.num_generators()); ++i) {
+    for (std::size_t i = 0U; i < std::min(a.num_generators(), b.num_generators()); ++i) {
       if constexpr (inverse) i = std::min(a.num_generators(), b.num_generators()) - 1 - i;
       if (_is_nan(a.generators_[i]) && !_is_nan(b.generators_[i])) return false;
       if (_is_nan(b.generators_[i])) return true;
@@ -836,7 +818,7 @@ class Degree_rips_bifiltration
   {
     Underlying_container result(f.generators_);
     std::for_each(result.begin(), result.end(), [](T &v) { v = -v; });
-    return Degree_rips_bifiltration(std::move(result), f.num_parameters());
+    return Degree_rips_bifiltration(std::move(result), Degree_rips_bifiltration::num_parameters());
   }
 
   // subtraction
@@ -878,13 +860,13 @@ class Degree_rips_bifiltration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param r First element of the subtraction.
    * @param f Second element of the subtraction.
    */
   template <class ValueRange,
-            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin&&
+            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin &&
                                      !std::is_same_v<ValueRange, Degree_rips_bifiltration> > >
   friend Degree_rips_bifiltration operator-(const ValueRange &r, Degree_rips_bifiltration f)
   {
@@ -950,7 +932,7 @@ class Degree_rips_bifiltration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param f First element of the subtraction.
    * @param r Second element of the subtraction.
@@ -974,7 +956,7 @@ class Degree_rips_bifiltration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @param f First element of the subtraction.
    * @param val Second element of the subtraction.
    */
@@ -1023,13 +1005,13 @@ class Degree_rips_bifiltration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param r First element of the addition.
    * @param f Second element of the addition.
    */
   template <class ValueRange,
-            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin&&
+            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin &&
                                      !std::is_same_v<ValueRange, Degree_rips_bifiltration> > >
   friend Degree_rips_bifiltration operator+(const ValueRange &r, Degree_rips_bifiltration f)
   {
@@ -1092,7 +1074,7 @@ class Degree_rips_bifiltration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param f First element of the addition.
    * @param r Second element of the addition.
@@ -1116,7 +1098,7 @@ class Degree_rips_bifiltration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @param f First element of the addition.
    * @param val Second element of the addition.
    */
@@ -1169,13 +1151,13 @@ class Degree_rips_bifiltration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param r First element of the multiplication.
    * @param f Second element of the multiplication.
    */
   template <class ValueRange,
-            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin&&
+            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin &&
                                      !std::is_same_v<ValueRange, Degree_rips_bifiltration> > >
   friend Degree_rips_bifiltration operator*(const ValueRange &r, Degree_rips_bifiltration f)
   {
@@ -1244,7 +1226,7 @@ class Degree_rips_bifiltration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param f First element of the multiplication.
    * @param r Second element of the multiplication.
@@ -1270,7 +1252,7 @@ class Degree_rips_bifiltration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @param f First element of the multiplication.
    * @param val Second element of the multiplication.
    */
@@ -1329,13 +1311,13 @@ class Degree_rips_bifiltration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param r First element of the division.
    * @param f Second element of the division.
    */
   template <class ValueRange,
-            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin&&
+            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin &&
                                      !std::is_same_v<ValueRange, Degree_rips_bifiltration> > >
   friend Degree_rips_bifiltration operator/(const ValueRange &r, Degree_rips_bifiltration f)
   {
@@ -1417,7 +1399,7 @@ class Degree_rips_bifiltration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param f First element of the division.
    * @param r Second element of the division.
@@ -1446,7 +1428,7 @@ class Degree_rips_bifiltration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @param f First element of the division.
    * @param val Second element of the division.
    */
@@ -1486,7 +1468,7 @@ class Degree_rips_bifiltration
    * strictly higher than \f$ max_idx + 1 \$f, all possible values between \f$ max_idx \$f and \f$ i \$f will also
    * be added and the corresponding second parameter will be initialized with -inf if `Co` is false and with +inf
    * if `Co` is true.
-   * 
+   *
    * @tparam GeneratorRange Range of elements convertible to `T`. Must have a begin(), end() method and the iterator
    * type should satisfy the requirements of the standard `LegacyForwardIterator`.
    * @param x New generator to add. Has to have the 2 parameters.
@@ -1511,7 +1493,7 @@ class Degree_rips_bifiltration
    * strictly higher than \f$ max_idx + 1 \$f, all possible values between \f$ max_idx \$f and \f$ i \$f will also
    * be added and the corresponding second parameter will be initialized with -inf if `Co` is false and with +inf
    * if `Co` is true.
-   * 
+   *
    * @tparam Iterator Iterator class satisfying the requirements of the standard `LegacyForwardIterator`.
    * The dereferenced type has to be convertible to `T`.
    * @param genStart Iterator pointing to the begining of the range of two elements.
@@ -1560,18 +1542,12 @@ class Degree_rips_bifiltration
   /**
    * @brief Does nothing, only for interface purposes.
    */
-  void simplify()
-  {
-    return;
-  }
+  void simplify() {}
 
   /**
    * @brief Does nothing, only for interface purposes.
    */
-  void remove_empty_generators([[maybe_unused]] bool include_infinities = false)
-  {
-    return;
-  }
+  void remove_empty_generators([[maybe_unused]] bool include_infinities = false) {}
 
   /**
    * @brief Pushes each generator of the filtration value to the border of the positive cone generated by the given
@@ -1580,7 +1556,7 @@ class Degree_rips_bifiltration
    * @warning The operator accepts @ref Degree_rips_bifiltration with the same or different template
    * parameters as `GeneratorRange`. But if the number of generators is higher than 1, only the first generator will be
    * used for the operation.
-   * 
+   *
    * @tparam GeneratorRange Either a range of into `T` convertible elements with a begin(), end() and size() method,
    * or @ref Degree_rips_bifiltration<U,...> with `U` convertible into `T`.
    * @param x Range towards to push. Has to have 2 elements and start with 0.
@@ -1595,11 +1571,11 @@ class Degree_rips_bifiltration
     if (x.size() == 0) return false;
 
     T newVal;
-    if constexpr (RangeTraits<GeneratorRange>::is_multi_filtration){
+    if constexpr (RangeTraits<GeneratorRange>::is_multi_filtration) {
       newVal = *(x.begin());
     } else {
       GUDHI_CHECK(x.size() == 2, "Wrong range size. Should correspond to the number of parameters.");
-    
+
       auto it = x.begin();
       GUDHI_CHECK(*it == 0, "First index has to be 0.");
       ++it;
@@ -1610,7 +1586,7 @@ class Degree_rips_bifiltration
 
     bool modified = false;
 
-    for (T& v : generators_){
+    for (T &v : generators_) {
       if (!_is_nan(v) && v < newVal && (!exclude_infinite_values || (v != T_inf && v != -T_inf))) {
         modified = true;
         v = newVal;
@@ -1628,7 +1604,7 @@ class Degree_rips_bifiltration
    * @warning The operator accepts @ref Degree_rips_bifiltration with the same or different template
    * parameters as `GeneratorRange`. In that case, the value of the second parameter of the first generator will be
    * chosen as `val`.
-   * 
+   *
    * @tparam GeneratorRange Either a range of into `T` convertible elements with a begin(), end() and size() method,
    * or @ref Degree_rips_bifiltration<U,...> with `U` convertible into `T`.
    * @param x Range towards to push. Has to have 2 elements and start with a value higher than @ref num_generators().
@@ -1643,11 +1619,11 @@ class Degree_rips_bifiltration
     if (x.size() == 0) return false;
 
     T newVal;
-    if constexpr (RangeTraits<GeneratorRange>::is_multi_filtration){
+    if constexpr (RangeTraits<GeneratorRange>::is_multi_filtration) {
       newVal = *(x.begin());
     } else {
       GUDHI_CHECK(x.size() == 2, "Wrong range size. Should correspond to the number of parameters.");
-    
+
       auto it = x.begin();
       GUDHI_CHECK(static_cast<size_type>(*it) > num_generators(), "First index has to be higher.");
       ++it;
@@ -1658,7 +1634,7 @@ class Degree_rips_bifiltration
 
     bool modified = false;
 
-    for (T& v : generators_){
+    for (T &v : generators_) {
       if (!_is_nan(v) && v > newVal && (!exclude_infinite_values || (v != T_inf && v != -T_inf))) {
         modified = true;
         v = newVal;
@@ -1713,8 +1689,8 @@ class Degree_rips_bifiltration
 
     bool nan = true;
     Underlying_container result(1, T_inf);
-    for (const T& v : f.generators_){
-      if (!_is_nan(v)){
+    for (const T &v : f.generators_) {
+      if (!_is_nan(v)) {
         nan = false;
         result[0] = v < result[0] ? v : result[0];
       }
@@ -1733,8 +1709,8 @@ class Degree_rips_bifiltration
 
     bool nan = true;
     Underlying_container result(1, -T_inf);
-    for (const T& v : f.generators_){
-      if (!_is_nan(v)){
+    for (const T &v : f.generators_) {
+      if (!_is_nan(v)) {
         nan = false;
         result[0] = v > result[0] ? v : result[0];
       }
@@ -1758,7 +1734,7 @@ class Degree_rips_bifiltration
   {
     auto project_generator = [&](size_type g) -> U {
       U projection = 0;
-      std::size_t size = std::min(x.size(), f.num_parameters());
+      std::size_t size = std::min(x.size(), Degree_rips_bifiltration::num_parameters());
       for (std::size_t i = 0; i < size; i++) projection += x[i] * static_cast<U>(f(g, i));
       return projection;
     };
@@ -1795,7 +1771,7 @@ class Degree_rips_bifiltration
   {
     // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
     if constexpr (Ensure1Criticality) {
-      return _compute_frobenius_norm(f.num_parameters(),
+      return _compute_frobenius_norm(Degree_rips_bifiltration::num_parameters(),
                                      [&](size_type p) -> T { return f(0, p) - other(0, p); });
     } else {
       U res = std::numeric_limits<U>::max();
@@ -1803,9 +1779,9 @@ class Degree_rips_bifiltration
         for (size_type g2 = 0; g2 < other.num_generators(); ++g2) {
           // Euclidean distance as a Frobenius norm with matrix 1 x p and values 'f(g1, p) - other(g2, p)'
           // Order in the min important to spread possible NaNs
-          res = std::min(
-              _compute_frobenius_norm(f.num_parameters(), [&](size_type p) -> T { return f(g1, p) - other(g2, p); }),
-              res);
+          res = std::min(_compute_frobenius_norm(Degree_rips_bifiltration::num_parameters(),
+                                                 [&](size_type p) -> T { return f(g1, p) - other(g2, p); }),
+                         res);
         }
       }
       return res;
@@ -1900,10 +1876,11 @@ class Degree_rips_bifiltration
       GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, "Unvalid grid."));
 
       const T &c = f.generators_[g];
-      outVec[g] = (c == f.T_inf ? grid_inf : values[c]);
+      outVec[g] = (c == T_inf ? grid_inf : values[c]);
     }
 
-    return Degree_rips_bifiltration<U, Co, Ensure1Criticality>(std::move(outVec), f.num_parameters());
+    return Degree_rips_bifiltration<U, Co, Ensure1Criticality>(std::move(outVec),
+                                                               Degree_rips_bifiltration::num_parameters());
   }
 
   // UTILITIES
@@ -1914,7 +1891,7 @@ class Degree_rips_bifiltration
   friend std::ostream &operator<<(std::ostream &stream, const Degree_rips_bifiltration &f)
   {
     const size_type num_gen = f.num_generators();
-    const size_type num_param = f.num_parameters();
+    const size_type num_param = Degree_rips_bifiltration::num_parameters();
 
     stream << "( k = " << num_gen << " ) [ ";
     for (size_type g = 0; g < num_gen; ++g) {
@@ -1954,7 +1931,7 @@ class Degree_rips_bifiltration
       stream >> delimiter;  // [
       stream >> val;
       if (val != static_cast<T>(i))
-        std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
+        throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
       stream >> delimiter;  // ,
       val = _get_value<T>(stream);
       if (!stream.good()) throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
@@ -1977,7 +1954,7 @@ class Degree_rips_bifiltration
 
   /**
    * @brief Adds the generators of the second argument to the first argument.
-   * 
+   *
    * @param f1 Filtration value to modify.
    * @param f2 Filtration value to merge with the first one. Should have the same number of parameters than the other.
    * @return true If the first argument was actually modified.
@@ -1995,7 +1972,7 @@ class Degree_rips_bifiltration
   /**
    * @brief Stores in the first argument the origins of the cones in the intersection of the positive
    * (negative if `Co` is true) cones generated by the two arguments.
-   * 
+   *
    * @param f1 First set of cones which will be modified.
    * @param f2 Second set of cones. Should have the same number of parameters than the first one.
    * @return true If the first argument was actually modified.
@@ -2035,7 +2012,7 @@ class Degree_rips_bifiltration
 
   /**
    * @brief Serialize given value into the buffer at given pointer.
-   * 
+   *
    * @param value Value to serialize.
    * @param start Pointer to the start of the space in the buffer where to store the serialization.
    * @return End position of the serialization in the buffer.
@@ -2052,7 +2029,7 @@ class Degree_rips_bifiltration
 
   /**
    * @brief Deserialize the value from a buffer at given pointer and stores it in given value.
-   * 
+   *
    * @param value Value to fill with the deserialized filtration value.
    * @param start Pointer to the start of the space in the buffer where the serialization is stored.
    * @return End position of the serialization in the buffer.
@@ -2073,7 +2050,7 @@ class Degree_rips_bifiltration
    */
   friend std::size_t get_serialization_size_of(const Degree_rips_bifiltration &value)
   {
-    return sizeof(size_type) + sizeof(T) * value.generators_.size();
+    return sizeof(size_type) + (sizeof(T) * value.generators_.size());
   }
 
   /**
@@ -2149,7 +2126,7 @@ class Degree_rips_bifiltration
   {
     auto &gens = generators_;
     for (unsigned int i = 0; i < gens.size(); ++i) {
-      operate(gens[i], val);
+      std::forward<F>(operate)(gens[i], val);
     }
   }
 
@@ -2160,7 +2137,7 @@ class Degree_rips_bifiltration
 
     U out = 0;
     for (size_type p = 0; p < number_of_elements; ++p) {
-      T v = norm(p);
+      T v = std::forward<F>(norm)(p);
       out += v * v;
     }
     if constexpr (std::is_integral_v<U>) {

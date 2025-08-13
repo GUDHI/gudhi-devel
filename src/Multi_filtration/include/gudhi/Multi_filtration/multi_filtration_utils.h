@@ -190,7 +190,7 @@ T _get_value(std::istream &stream)
         stream >> first;  // n
         stream >> first;  // f
         return -std::numeric_limits<T>::infinity();
-      } // else could be a negative number
+      }  // else could be a negative number
     }
     if (first == 'n') {
       if constexpr (std::numeric_limits<T>::has_quiet_NaN) {

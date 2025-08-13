@@ -62,7 +62,7 @@ template <typename T, bool Co = false>
 class Multi_parameter_generator
 {
  public:
-  using Underlying_container = std::vector<T>;  /**< Underlying container for values. */
+  using Underlying_container = std::vector<T>; /**< Underlying container for values. */
 
   // CONSTRUCTORS
 
@@ -123,7 +123,7 @@ class Multi_parameter_generator
   /**
    * @brief Copy constructor.
    */
-  Multi_parameter_generator(const Multi_parameter_generator &other) : generator_(other.generator_) {}
+  Multi_parameter_generator(const Multi_parameter_generator &other) = default;
 
   /**
    * @brief Copy constructor.
@@ -135,13 +135,21 @@ class Multi_parameter_generator
   {}
 
   /**
+   * @brief Move constructor.
+   */
+  Multi_parameter_generator(Multi_parameter_generator &&other) noexcept = default;
+
+  ~Multi_parameter_generator() = default;
+
+  /**
    * @brief Assign operator.
    */
-  Multi_parameter_generator &operator=(const Multi_parameter_generator &other)
-  {
-    generator_ = other.generator_;
-    return *this;
-  }
+  Multi_parameter_generator &operator=(const Multi_parameter_generator &other) = default;
+
+  /**
+   * @brief Move assign operator.
+   */
+  Multi_parameter_generator &operator=(Multi_parameter_generator &&other) noexcept = default;
 
   /**
    * @brief Assign operator.
@@ -312,7 +320,7 @@ class Multi_parameter_generator
   /**
    * @brief Returns `true` if and only if the generator is considered as plus infinity.
    */
-  bool is_plus_inf() const
+  [[nodiscard]] bool is_plus_inf() const
   {
     for (const T &v : generator_) {
       if (v != T_inf) return false;
@@ -323,7 +331,7 @@ class Multi_parameter_generator
   /**
    * @brief Returns `true` if and only if the generator is considered as minus infinity.
    */
-  bool is_minus_inf() const
+  [[nodiscard]] bool is_minus_inf() const
   {
     for (const T &v : generator_) {
       if (v != -T_inf) return false;
@@ -334,7 +342,7 @@ class Multi_parameter_generator
   /**
    * @brief Returns `true` if and only if the generator is considered as NaN.
    */
-  bool is_nan() const
+  [[nodiscard]] bool is_nan() const
   {
     if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
       for (const T &v : generator_) {
@@ -350,7 +358,7 @@ class Multi_parameter_generator
    * @brief Returns `true` if and only if the generator is non-empty and is not considered as plus infinity,
    * minus infinity or NaN.
    */
-  bool is_finite() const
+  [[nodiscard]] bool is_finite() const
   {
     bool isInf = true, isMinusInf = true, isNan = true;
     for (const auto &v : generator_) {
@@ -384,7 +392,7 @@ class Multi_parameter_generator
 
     bool isSame = true;
     auto n = a.size();
-    for (size_type i = 0u; i < n; ++i) {
+    for (size_type i = 0U; i < n; ++i) {
       if (a[i] > b[i]) return false;
       if (isSame && a[i] != b[i]) isSame = false;
     }
@@ -415,7 +423,7 @@ class Multi_parameter_generator
                 "Only filtration values with same number of parameters can be compared.");
 
     auto n = a.size();
-    for (std::size_t i = 0u; i < n; ++i) {
+    for (std::size_t i = 0U; i < n; ++i) {
       if (a[i] > b[i]) return false;
     }
     return true;
@@ -529,13 +537,13 @@ class Multi_parameter_generator
     if (g.num_parameters() == 0) return g;
     if (g.is_nan()) return nan();
 
-    if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration){
-      if (r[0].is_finite()){
+    if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration) {
+      if (r[0].is_finite()) {
         return g -= r[0];
-      } else {
-        if constexpr (!std::numeric_limits<T>::has_quiet_NaN) if (r[0].size() == 0) return nan();
-        return g -= r[0][0];
       }
+      if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
+        if (r[0].size() == 0) return nan();
+      return g -= r[0][0];
     } else {
       if (g.is_finite()) {
         Multi_parameter_generator res = g;
@@ -544,11 +552,10 @@ class Multi_parameter_generator
           return _add(valF, valR);
         });
         return res;
-      } else {
-        Multi_parameter_generator res(r.begin(), r.end());
-        res._apply_operation(g[0], [](T &valRes, const T &valF) -> bool { return _subtract(valRes, valF); });
-        return res;
       }
+      Multi_parameter_generator res(r.begin(), r.end());
+      res._apply_operation(g[0], [](T &valRes, const T &valF) -> bool { return _subtract(valRes, valF); });
+      return res;
     }
   }
 
@@ -620,24 +627,23 @@ class Multi_parameter_generator
   {
     if (g.num_parameters() == 0 || g.is_nan()) return g;
 
-    if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration){
-      if (r[0].is_finite()){
+    if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration) {
+      if (r[0].is_finite()) {
         return g -= r[0];
-      } else {
-        if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
-          if (r[0].size() == 0) {
-            g = nan();
-            return g;
-          }
-        return g -= r[0][0];
       }
+      if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
+        if (r[0].size() == 0) {
+          g = nan();
+          return g;
+        }
+      return g -= r[0][0];
     } else {
       if (!g.is_finite()) {
         g.generator_.resize(r.size(), g[0]);
       }
       g._apply_operation(r, [](T &valF, const T &valR) -> bool { return _subtract(valF, valR); });
     }
-    
+
     return g;
   }
 
@@ -780,17 +786,16 @@ class Multi_parameter_generator
   {
     if (g.num_parameters() == 0 || g.is_nan()) return g;
 
-    if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration){
-      if (r[0].is_finite()){
+    if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration) {
+      if (r[0].is_finite()) {
         return g += r[0];
-      } else {
-        if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
-          if (r[0].size() == 0) {
-            g = nan();
-            return g;
-          }
-        return g += r[0][0];
       }
+      if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
+        if (r[0].size() == 0) {
+          g = nan();
+          return g;
+        }
+      return g += r[0][0];
     } else {
       if (!g.is_finite()) {
         g.generator_.resize(r.size(), g[0]);
@@ -950,17 +955,16 @@ class Multi_parameter_generator
   {
     if (g.num_parameters() == 0 || g.is_nan()) return g;
 
-    if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration){
-      if (r[0].is_finite()){
+    if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration) {
+      if (r[0].is_finite()) {
         return g *= r[0];
-      } else {
-        if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
-          if (r[0].size() == 0) {
-            g = nan();
-            return g;
-          }
-        return g *= r[0][0];
       }
+      if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
+        if (r[0].size() == 0) {
+          g = nan();
+          return g;
+        }
+      return g *= r[0][0];
     } else {
       if (!g.is_finite()) {
         g.generator_.resize(r.size(), g[0]);
@@ -1056,13 +1060,13 @@ class Multi_parameter_generator
     if (g.num_parameters() == 0) return g;
     if (g.is_nan()) return nan();
 
-    if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration){
-      if (r[0].is_finite()){
+    if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration) {
+      if (r[0].is_finite()) {
         return r[0] / g;
-      } else {
-        if constexpr (!std::numeric_limits<T>::has_quiet_NaN) if (r[0].size() == 0) return nan();
-        return r[0][0] / g;
       }
+      if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
+        if (r[0].size() == 0) return nan();
+      return r[0][0] / g;
     } else {
       if (g.is_finite()) {
         Multi_parameter_generator res = g;
@@ -1072,11 +1076,10 @@ class Multi_parameter_generator
           return _divide(valF, tmp);
         });
         return res;
-      } else {
-        Multi_parameter_generator res(r.begin(), r.end());
-        res._apply_operation(g[0], [](T &valRes, const T &valF) -> bool { return _divide(valRes, valF); });
-        return res;
       }
+      Multi_parameter_generator res(r.begin(), r.end());
+      res._apply_operation(g[0], [](T &valRes, const T &valF) -> bool { return _divide(valRes, valF); });
+      return res;
     }
   }
 
@@ -1164,17 +1167,16 @@ class Multi_parameter_generator
   {
     if (g.num_parameters() == 0 || g.is_nan()) return g;
 
-    if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration){
-      if (r[0].is_finite()){
+    if constexpr (RangeTraits<ValueRange>::is_dynamic_multi_filtration) {
+      if (r[0].is_finite()) {
         return g /= r[0];
-      } else {
-        if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
-          if (r[0].size() == 0) {
-            g = nan();
-            return g;
-          }
-        return g /= r[0][0];
       }
+      if constexpr (!std::numeric_limits<T>::has_quiet_NaN)
+        if (r[0].size() == 0) {
+          g = nan();
+          return g;
+        }
+      return g /= r[0][0];
     } else {
       if (!g.is_finite()) {
         g.generator_.resize(r.size(), g[0]);
@@ -1225,7 +1227,7 @@ class Multi_parameter_generator
     if (number_of_parameters < 1) return;
 
     if (generator_.size() > 1) {
-      GUDHI_CHECK(number_of_parameters == generator_.size(),
+      GUDHI_CHECK(static_cast<std::size_t>(number_of_parameters) == generator_.size(),
                   "Cannot force size to another number of parameters than set.");
       return;
     }
@@ -1248,12 +1250,12 @@ class Multi_parameter_generator
   bool push_to_least_common_upper_bound(const GeneratorRange &x, bool exclude_infinite_values = false)
   {
     if (is_nan() || is_plus_inf()) return false;
-    if (x.size() == 0){
+    if (x.size() == 0) {
       *this = nan();
       return true;
     }
 
-    if constexpr (RangeTraits<GeneratorRange>::is_dynamic_multi_filtration){
+    if constexpr (RangeTraits<GeneratorRange>::is_dynamic_multi_filtration) {
       return push_to_least_common_upper_bound(x[0], exclude_infinite_values);
     } else {
       if (is_minus_inf()) {
@@ -1266,9 +1268,9 @@ class Multi_parameter_generator
         if (is_plus_inf()) *this = inf();
         return true;
       }
-  
+
       bool modified = false;
-  
+
       auto it = x.begin();
       for (size_type p = 0; p < generator_.size(); ++p) {
         T valX = *it;
@@ -1278,7 +1280,7 @@ class Multi_parameter_generator
         }
         if (it + 1 != x.end()) ++it;
       }
-  
+
       return modified;
     }
   }
@@ -1297,12 +1299,12 @@ class Multi_parameter_generator
   bool pull_to_greatest_common_lower_bound(const GeneratorRange &x, bool exclude_infinite_values = false)
   {
     if (is_nan() || is_minus_inf()) return false;
-    if (x.size() == 0){
+    if (x.size() == 0) {
       *this = nan();
       return true;
     }
 
-    if constexpr (RangeTraits<GeneratorRange>::is_dynamic_multi_filtration){
+    if constexpr (RangeTraits<GeneratorRange>::is_dynamic_multi_filtration) {
       return pull_to_greatest_common_lower_bound(x[0], exclude_infinite_values);
     } else {
       if (is_plus_inf()) {
@@ -1315,9 +1317,9 @@ class Multi_parameter_generator
         if (is_minus_inf()) *this = minus_inf();
         return true;
       }
-  
+
       bool modified = false;
-  
+
       auto it = x.begin();
       for (size_type p = 0; p < generator_.size() && it != x.end(); ++p) {
         T valX = *it;
@@ -1327,7 +1329,7 @@ class Multi_parameter_generator
         }
         if (it + 1 != x.end()) ++it;
       }
-  
+
       return modified;
     }
   }
@@ -1458,7 +1460,7 @@ class Multi_parameter_generator
     std::vector<U> outVec(g.num_parameters());
 
     for (size_type p = 0; p < g.num_parameters(); ++p) {
-      outVec[p] = (g[p] == g.T_inf ? grid_inf : grid[p][g[p]]);
+      outVec[p] = (g[p] == T_inf ? grid_inf : grid[p][g[p]]);
     }
 
     return Multi_parameter_generator<U, Co>(std::move(outVec));
@@ -1524,7 +1526,7 @@ class Multi_parameter_generator
         }
         g = Multi_parameter_generator::minus_inf();
         return stream;
-      } // else could be a negative number
+      }  // else could be a negative number
     }
     if (firstCharacter == 'N') {
       while (firstCharacter != ']') {
@@ -1585,7 +1587,7 @@ class Multi_parameter_generator
    */
   friend std::size_t get_serialization_size_of(const Multi_parameter_generator &value)
   {
-    return sizeof(size_type) + sizeof(T) * value.generator_.size();
+    return sizeof(size_type) + (sizeof(T) * value.generator_.size());
   }
 
   /**
@@ -1607,10 +1609,10 @@ class Multi_parameter_generator
   template <class ValueRange, class F>
   void _apply_operation(const ValueRange &range, F &&operate)
   {
-    if (range.size() < generator_.size()){
+    if (range.size() < generator_.size()) {
       auto it = range.begin();
       for (size_type p = 0; p < generator_.size() && it != range.end(); ++p) {
-        operate(generator_[p], *it);
+        std::forward<F>(operate)(generator_[p], *it);
         ++it;
       }
     } else {
@@ -1620,7 +1622,7 @@ class Multi_parameter_generator
 
       auto it = range.begin();
       for (size_type p = 0; p < generator_.size() && it != range.end(); ++p) {
-        bool isNotNaN = operate(generator_[p], *it);
+        bool isNotNaN = std::forward<F>(operate)(generator_[p], *it);
         if (generator_[p] != T_inf) allPlusInf = false;
         if (generator_[p] != -T_inf) allMinusInf = false;
         if (isNotNaN) allNaN = false;
@@ -1645,7 +1647,7 @@ class Multi_parameter_generator
     bool allNaN = true;
 
     for (auto &p : generator_) {
-      if (operate(p, val)) allNaN = false;
+      if (std::forward<F>(operate)(p, val)) allNaN = false;
     }
 
     if (allNaN) *this = nan();
