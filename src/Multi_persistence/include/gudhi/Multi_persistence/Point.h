@@ -56,7 +56,7 @@ class Point
   /**
    * @brief Default constructor.
    */
-  Point() {}
+  Point() = default;
 
   /**
    * @brief Constructs a new point with given number of coordinates. All values are default initialized.
@@ -78,15 +78,6 @@ class Point
   {}
 
   /**
-   * @brief Copy constructor.
-   */
-  Point(const Point &other) = default;
-  /**
-   * @brief Move constructor.
-   */
-  Point(Point &&other) noexcept = default;
-
-  /**
    * @brief Constructs a new point from the given range.
    */
   Point(std::initializer_list<T> init) : coordinates_(init.begin(), init.end()) {}
@@ -100,26 +91,6 @@ class Point
    * @brief Constructs a new point by moving the given container.
    */
   Point(Container &&init) : coordinates_(std::move(init)) {}
-
-  /**
-   * @brief Assign copy operator.
-   */
-  Point &operator=(const Point &other)
-  {
-    coordinates_ = other.coordinates_;
-    return *this;
-  }
-
-  /**
-   * @brief Assign move operator.
-   */
-  Point &operator=(Point &&other) noexcept(
-      std::allocator_traits<allocator_type>::propagate_on_container_move_assignment::value ||
-      std::allocator_traits<allocator_type>::is_always_equal::value)
-  {
-    coordinates_ = std::move(other.coordinates_);
-    return *this;
-  }
 
   /**
    * @brief Assign copy operator.
@@ -281,7 +252,7 @@ class Point
     if (&a == &b) return false;
     GUDHI_CHECK(a.size() == b.size(), "Cannot compare two points with different number of coordinates.");
     bool isSame = true;
-    for (size_type i = 0u; i < a.size(); ++i) {
+    for (size_type i = 0U; i < a.size(); ++i) {
       if (a[i] > b[i] || Gudhi::multi_filtration::_is_nan(a[i]) || Gudhi::multi_filtration::_is_nan(b[i])) return false;
       if (isSame && a[i] != b[i]) isSame = false;
     }
@@ -298,7 +269,7 @@ class Point
   {
     if (&a == &b) return true;
     GUDHI_CHECK(a.size() == b.size(), "Cannot compare two points with different number of coordinates.");
-    for (size_type i = 0u; i < a.size(); ++i) {
+    for (size_type i = 0U; i < a.size(); ++i) {
       if (a[i] > b[i] || Gudhi::multi_filtration::_is_nan(a[i]) || Gudhi::multi_filtration::_is_nan(b[i])) return false;
     }
     return true;
@@ -856,7 +827,7 @@ class Point
   void _apply_operation(const Point<U> &range, F &&operate)
   {
     for (unsigned int p = 0; p < coordinates_.size(); ++p) {
-      operate(coordinates_[p], range[p]);
+      std::forward<F>(operate)(coordinates_[p], range[p]);
     }
   }
 
@@ -864,7 +835,7 @@ class Point
   void _apply_operation(const T &val, F &&operate)
   {
     for (unsigned int i = 0; i < coordinates_.size(); ++i) {
-      operate(coordinates_[i], val);
+      std::forward<F>(operate)(coordinates_[i], val);
     }
   }
 };

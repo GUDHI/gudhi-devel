@@ -45,7 +45,7 @@ namespace multi_persistence {
  *
  * @brief Builds a complex for the scc format file given. Assumes that every index appearing in a boundary in the file
  * corresponds to a real line in the file (for example, the lowest dimension has always empty boundaries).
- * 
+ *
  * @tparam MultiFiltrationValue Filtration value class respecting the @ref MultiFiltrationValue concept. It will be
  * used as filtration value type of the new complex.
  * @param inFilePath Path to scc file.
@@ -75,12 +75,12 @@ inline Multi_parameter_filtered_complex<MultiFiltrationValue> build_complex_from
 
   if (!file.is_open()) {
     // TODO: throw instead?
-    std::cerr << "Unable to open input file: " << inFilePath << std::endl;
+    std::cerr << "Unable to open input file: " << inFilePath << '\n';
     file.setstate(std::ios::failbit);
     return Complex();
   }
 
-  auto error = [&file](std::string msg) {
+  auto error = [&file](const std::string& msg) {
     file.close();
     throw std::invalid_argument(msg);
   };
@@ -94,8 +94,8 @@ inline Multi_parameter_filtered_complex<MultiFiltrationValue> build_complex_from
   while (getline(file, line, '\n') && is_comment_or_empty_line(line));
   if (!file) error("Empty file!");
 
-  if (isRivetCompatible && line.compare("firep") != 0) error("Wrong file format. Should start with 'firep'.");
-  if (!isRivetCompatible && line.compare("scc2020") != 0) error("Wrong file format. Should start with 'scc2020'.");
+  if (isRivetCompatible && line != "firep") error("Wrong file format. Should start with 'firep'.");
+  if (!isRivetCompatible && line != "scc2020") error("Wrong file format. Should start with 'scc2020'.");
 
   while (getline(file, line, '\n') && is_comment_or_empty_line(line));
   if (!file) error("Premature ending of the file. Stops before numbers of parameters.");
@@ -221,7 +221,7 @@ inline Multi_parameter_filtered_complex<MultiFiltrationValue> build_complex_from
  * @brief Writes the given complex into a file with scc format. Assumes that every index appearing in a boundary of
  * the complex corresponds to an existing index in the complex (for example, the lowest dimension has always empty
  * boundaries).
- * 
+ *
  * @tparam MultiFiltrationValue Filtration value of the given complex.
  * @param outFilePath Path with file name into which to write.
  * @param complex Complex to write. Every index appearing in a boundary of the complex has to correspond to an existing
@@ -297,7 +297,7 @@ inline void write_complex_to_scc_file(const std::string& outFilePath,
   if (degree < 0) degree = minDim;
   int minIndex = reverse ? degree - 1 : 0;
   int maxIndex = reverse ? maxDim : maxDim - degree + 1;
-  if (maxIndex < -1) maxIndex = -1;
+  maxIndex = std::max(maxIndex, -1);
   if (ignoreLastGenerators) maxIndex--;
   if (rivetCompatible) minIndex = maxIndex - 2;
 
@@ -307,8 +307,7 @@ inline void write_complex_to_scc_file(const std::string& outFilePath,
 #endif
 
   auto print_fil_values = [&](const Fil& fil) {
-    GUDHI_CHECK(fil.num_parameters() == numberOfParameters,
-                "Filtration value has wrong number of parameters.");
+    GUDHI_CHECK(fil.num_parameters() == numberOfParameters, "Filtration value has wrong number of parameters.");
     for (unsigned int g = 0; g < fil.num_generators(); ++g) {
       for (unsigned int p = 0; p < fil.num_parameters(); ++p) {
         file << fil(g, p) << " ";
@@ -382,7 +381,7 @@ inline void write_complex_to_scc_file(const std::string& outFilePath,
  *
  * Note that for the bitmap to represent a valid multi-parameter filtration, all filtration values have to have the
  * same number of parameters. The behaviour is undefined otherwise.
- * 
+ *
  * @tparam OneCriticalMultiFiltrationValue Filtration value class respecting the @ref MultiFiltrationValue concept.
  * It will be used as filtration value type of the new complex.
  * @param vertexValues Bitmap with 1-critical filtration values. Represented as a single vector, the next input
@@ -461,7 +460,7 @@ inline Multi_parameter_filtered_complex<OneCriticalMultiFiltrationValue> build_c
  * @brief Builds a slicer for the scc format file given. Assumes that every index appearing in a boundary in the file
  * corresponds to a real line in the file (for example, the lowest dimension has always empty boundaries).
  * See @ref Slicer::write_slicer_to_scc_file "write_slicer_to_scc_file" to write a slicer into a scc format file.
- * 
+ *
  * @tparam Slicer The @ref Slicer class with any valid template combination.
  * @param inFilePath Path to scc file.
  * @param isRivetCompatible Set to true if the file is written such that Rivet can read it. See TODO ref.
@@ -493,7 +492,7 @@ inline Slicer build_slicer_from_scc_file(const std::string& inFilePath,
  *
  * Note that for the bitmap to represent a valid multi-parameter filtration, all filtration values have to have the
  * same number of parameters. The behaviour is undefined otherwise.
- * 
+ *
  * @tparam Slicer The @ref Slicer class with any valid template combination.
  * @param vertexValues Bitmap with 1-critical filtration values. Represented as a single vector, the next input
  * parameter @p shape indicates the shape of the real bitmap.

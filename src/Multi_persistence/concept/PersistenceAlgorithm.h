@@ -111,6 +111,11 @@ class PersistenceAlgorithm
   void reinitialize(const Complex& cpx, const Map& permutation);
 
   /**
+   * @brief Empties the class such that @ref is_initialized returns false.
+   */
+  void reset();
+
+  /**
    * @brief Returns `true` if and only if all stored pointers are not null.
    */
   bool is_initialized() const;

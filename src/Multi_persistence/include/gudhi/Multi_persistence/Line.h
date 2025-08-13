@@ -51,7 +51,7 @@ class Line
   /**
    * @brief Default constructor. Sets the number of coordinates to 0.
    */
-  Line() {}
+  Line() = default;
 
   /**
    * @brief Constructs a line going through the given point with slope 1.

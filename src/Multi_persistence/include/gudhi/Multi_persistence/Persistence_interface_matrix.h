@@ -37,7 +37,7 @@ namespace multi_persistence {
  *
  * @brief Interface respecting the @ref PersistenceAlgorithm concept to use @ref Slicer with the homology, vineyard
  * and representative cycle algorithms implemented in @ref Gudhi::persistence_matrix::Matrix.
- * 
+ *
  * @tparam PosIdxPersistenceMatrixOptions Options respecting the
  * @ref Gudhi::persistence_matrix::PersistenceMatrixOptions concept such that, either
  * @ref Gudhi::persistence_matrix::PersistenceMatrixOptions::column_indexation_type "column_indexation_type" is
@@ -69,7 +69,7 @@ class Persistence_interface_matrix
 
     using difference_type = typename Base::difference_type;
     using size_type = std::size_t;
-    using const_reference = const Bar &;
+    using const_reference = const Bar&;
 
     Barcode_iterator(const Barcode& barcode, const Map& permutation, size_type pos)
         : barcode_(&barcode),
@@ -148,7 +148,7 @@ class Persistence_interface_matrix
 
     using difference_type = typename Base::difference_type;
     using size_type = std::size_t;
-    using const_reference = const Cycle &;
+    using const_reference = const Cycle&;
 
     Cycles_iterator(const Cycles& cycles, const Map& permutation, Map const* idToPos, size_type pos)
         : cycles_(&cycles),
@@ -171,9 +171,9 @@ class Persistence_interface_matrix
       Cycle res((*cycles_)[currPos_ + n]);
       for (auto& id : res) {
         if constexpr (PosIdxPersistenceMatrixOptions::is_z2) {
-          id = _IDToIndex(id);
+          id = _id_to_index(id);
         } else {
-          id.first = _IDToIndex(id.first);
+          id.first = _id_to_index(id.first);
         }
       }
       return res;
@@ -209,7 +209,7 @@ class Persistence_interface_matrix
 
     difference_type distance_to(const Cycles_iterator& other) const { return other.currPos_ - currPos_; }
 
-    Index _IDToIndex(Index id) const
+    Index _id_to_index(Index id) const
     {
       if constexpr (Options::is_of_boundary_type || !Options::has_vine_update) {
         // works for RU because id == pos, but does not work for chain with vine
@@ -226,9 +226,9 @@ class Persistence_interface_matrix
       currCycle_.resize(c.size());
       for (size_type i = 0; i < c.size(); ++i) {
         if constexpr (PosIdxPersistenceMatrixOptions::is_z2) {
-          currCycle_[i] = _IDToIndex(c[i]);
+          currCycle_[i] = _id_to_index(c[i]);
         } else {
-          currCycle_[i].first = _IDToIndex(c[i]);
+          currCycle_[i].first = _id_to_index(c[i]);
         }
       }
     }
@@ -240,8 +240,8 @@ class Persistence_interface_matrix
     Cycle currCycle_;
   };
 
-  using Barcode = boost::iterator_range<Barcode_iterator>;  /**< Barcode type */
-  using Cycles = boost::iterator_range<Cycles_iterator>;    /**< Cycle container type */
+  using Barcode = boost::iterator_range<Barcode_iterator>; /**< Barcode type */
+  using Cycles = boost::iterator_range<Cycles_iterator>;   /**< Cycle container type */
 
   static constexpr const auto nullDeath = Bar::inf;
   /**
@@ -290,6 +290,11 @@ class Persistence_interface_matrix
     other.permutation_ = nullptr;
   }
 
+  ~Persistence_interface_matrix() = default;
+
+  Persistence_interface_matrix& operator=(const Persistence_interface_matrix& other) = delete;
+  Persistence_interface_matrix& operator=(Persistence_interface_matrix&& other) noexcept = delete;
+
   // TODO: swap?
 
   template <class Complex>
@@ -300,7 +305,16 @@ class Persistence_interface_matrix
     _initialize(cpx);
   }
 
-  bool is_initialized() const { return permutation_ != nullptr; }
+  void reset()
+  {
+    matrix_ = Matrix();
+    permutation_ = nullptr;
+    if constexpr (Options::has_vine_update && !Options::is_of_boundary_type) {
+      idToPos_->clear();
+    }
+  }
+
+  [[nodiscard]] bool is_initialized() const { return permutation_ != nullptr; }
 
   Dimension get_dimension(Index i) const
   {

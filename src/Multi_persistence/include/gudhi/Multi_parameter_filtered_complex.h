@@ -18,8 +18,8 @@
 #ifndef MP_FILTERED_COMPLEX_H_INCLUDED
 #define MP_FILTERED_COMPLEX_H_INCLUDED
 
-#include <algorithm>
 #include <cstdint>  //std::uint32_t
+#include <algorithm>
 #include <numeric>
 #include <ostream>
 #include <utility>
@@ -37,7 +37,7 @@ namespace multi_persistence {
  * @ingroup multi_persistence
  *
  * @brief Class storing the boundaries, the dimensions and the filtration values of all cells composing a complex.
- * 
+ *
  * @tparam MultiFiltrationValue Filtration value class respecting the @ref MultiFiltrationValue concept.
  */
 template <class MultiFiltrationValue>
@@ -56,13 +56,11 @@ class Multi_parameter_filtered_complex
   /**
    * @brief Default constructor. Constructs an empty complex.
    */
-  Multi_parameter_filtered_complex()
-      : boundaries_(), dimensions_(), filtrationValues_(), maxDimension_(-1), isOrderedByDimension_(true)
-  {}
+  Multi_parameter_filtered_complex() : filtrationValues_(), maxDimension_(-1), isOrderedByDimension_(true) {}
 
   /**
    * @brief Constructs the complex by copying all three given containers into the class.
-   * 
+   *
    * @param boundaries Container of boundaries. A boundary has to be described by the indices of its faces in this
    * container. E.g., if a vertex \f$ v \f$ is stored at index \f$ i \f$ and another vertex at index \f$ j \f$, then
    * `boundaries[i]` and `boundaries[j]` are both empty and if the edge \f$ (v,u) \f$ is at index \f$ k \f$, then
@@ -75,14 +73,18 @@ class Multi_parameter_filtered_complex
   Multi_parameter_filtered_complex(const Boundary_container& boundaries,
                                    const Dimension_container& dimensions,
                                    const Filtration_value_container& filtrationValues)
-      : boundaries_(boundaries), dimensions_(dimensions), filtrationValues_(filtrationValues), maxDimension_(-1)
+      : boundaries_(boundaries),
+        dimensions_(dimensions),
+        filtrationValues_(filtrationValues),
+        maxDimension_(-1),
+        isOrderedByDimension_(false)
   {
     _initialize_dimension_utils();
   }
 
   /**
    * @brief Constructs the complex by moving all three given containers to the class.
-   * 
+   *
    * @param boundaries Container of boundaries. A boundary has to be described by the indices of its faces in this
    * container. E.g., if a vertex \f$ v \f$ is stored at index \f$ i \f$ and another vertex at index \f$ j \f$, then
    * `boundaries[i]` and `boundaries[j]` are both empty and if the edge \f$ (v,u) \f$ is at index \f$ k \f$, then
@@ -98,7 +100,8 @@ class Multi_parameter_filtered_complex
       : boundaries_(std::move(boundaries)),
         dimensions_(std::move(dimensions)),
         filtrationValues_(std::move(filtrationValues)),
-        maxDimension_(0)
+        maxDimension_(0),
+        isOrderedByDimension_(false)
   {
     _initialize_dimension_utils();
   }
@@ -106,12 +109,12 @@ class Multi_parameter_filtered_complex
   /**
    * @brief Returns the number of cells in the complex.
    */
-  Index get_number_of_cycle_generators() const { return boundaries_.size(); }
+  [[nodiscard]] Index get_number_of_cycle_generators() const { return boundaries_.size(); }
 
   /**
    * @brief Returns the number of parameters in the filtration.
    */
-  Index get_number_of_parameters() const
+  [[nodiscard]] Index get_number_of_parameters() const
   {
     if (filtrationValues_.empty()) return 0;
     return filtrationValues_[0].num_parameters();
@@ -121,7 +124,7 @@ class Multi_parameter_filtered_complex
    * @brief Returns true if and only if the boundaries are ordered by dimension. That is, if an index increases,
    * the represented cell at the new index can only have same or higher dimension than the cell at the index before.
    */
-  bool is_ordered_by_dimension() const { return isOrderedByDimension_; }
+  [[nodiscard]] bool is_ordered_by_dimension() const { return isOrderedByDimension_; }
 
   /**
    * @brief Returns a const reference to the filtration value container.
@@ -138,17 +141,17 @@ class Multi_parameter_filtered_complex
   /**
    * @brief Returns a const reference to the dimension container.
    */
-  const Dimension_container& get_dimensions() const { return dimensions_; }
+  [[nodiscard]] const Dimension_container& get_dimensions() const { return dimensions_; }
 
   /**
    * @brief Returns a const reference to the boundary container.
    */
-  const Boundary_container& get_boundaries() const { return boundaries_; }
+  [[nodiscard]] const Boundary_container& get_boundaries() const { return boundaries_; }
 
   /**
    * @brief Returns the maximal dimension of a cell in the complex.
    */
-  Dimension get_max_dimension() const { return maxDimension_; }
+  [[nodiscard]] Dimension get_max_dimension() const { return maxDimension_; }
 
   /**
    * @brief Sorts the container internally such that the cells are ordered first by dimension and then
@@ -171,7 +174,7 @@ class Multi_parameter_filtered_complex
   /**
    * @brief Sorts the internal containers using the given comparaison method.
    * Note that the indices of the cells changes therefore.
-   * 
+   *
    * @tparam Comp Method type with signature (Index, Index)->bool.
    * @param comparaison Method taking two complex indices (those before the sort) as input and returns true if and
    * only if the cell at the first index is supposed to be placed before the cell at the second index.
@@ -185,13 +188,13 @@ class Multi_parameter_filtered_complex
     // and of Filtration_value, which will be swapped respectively with boundaries_, dimensions_
     // and filtrationValues_
     // in this version (swapping), we additionally build two containers of Index instead
-    // so should theoretically be better, but not so sure if we replace the containers with 
+    // so should theoretically be better, but not so sure if we replace the containers with
     // completely flat containers one day, i.e. with no cheap swap method
     std::vector<Index> perm(boundaries_.size());
     std::iota(perm.begin(), perm.end(), 0);
     std::vector<Index> pos = perm;
     std::vector<Index> invPos = perm;
-    std::sort(perm.begin(), perm.end(), comparaison);
+    std::sort(perm.begin(), perm.end(), std::forward<Comp>(comparaison));
     std::vector<Index> invPerm(boundaries_.size());
     for (Index i = 0; i < perm.size(); ++i) invPerm[perm[i]] = i;
 
@@ -221,7 +224,7 @@ class Multi_parameter_filtered_complex
    *
    * @warning If @ref is_ordered_by_dimension does not return true, the complex is sorted by dimension before pruning.
    * So, the indexing changes afterwards.
-   * 
+   *
    * @param maxDim Maximal dimension to keep.
    * @return Number of remaining cells in the complex.
    */
@@ -251,7 +254,7 @@ class Multi_parameter_filtered_complex
    */
   void coarsen_on_grid(const std::vector<std::vector<T> >& grid, bool coordinate = true)
   {
-    for (auto gen = 0u; gen < filtrationValues_.size(); ++gen) {
+    for (auto gen = 0U; gen < filtrationValues_.size(); ++gen) {
       filtrationValues_[gen].project_onto_grid(grid, coordinate);
     }
   }
@@ -322,14 +325,15 @@ class Multi_parameter_filtered_complex
     using Return_complex = Multi_parameter_filtered_complex<Return_filtration_value>;
 
     typename Return_complex::Filtration_value_container coords(complex.get_number_of_cycle_generators());
-    for (Index gen = 0u; gen < coords.size(); ++gen) {
+    for (Index gen = 0U; gen < coords.size(); ++gen) {
       coords[gen] = compute_coordinates_in_grid<std::int32_t>(complex.filtrationValues_[gen], grid);
     }
     return Return_complex(complex.boundaries_, complex.dimensions_, coords);
   }
 
   // /**
-  //  * @brief Compares two boundaries and returns true if and only if the size of the first is strictly smaller than the
+  //  * @brief Compares two boundaries and returns true if and only if the size of the first is strictly smaller than
+  //  the
   //  * second, or, if the two sizes are the same, the first is lexicographically strictly smaller than the second.
   //  * The boundaries are assumed to be ordered by increasing values.
   //  */

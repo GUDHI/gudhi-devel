@@ -45,7 +45,7 @@ class Box
   /**
    * @brief Default constructor. Constructs a trivial box with corners at minus infinity.
    */
-  Box() {}
+  Box() = default;
 
   /**
    * @brief Constructs a box from the two given corners. Assumes that \f$ lowerCorner \le @p upperCorner \f$ and
@@ -106,7 +106,7 @@ class Box
    * - both corners have value minus infinity
    * - both corners don't have the same dimension.
    */
-  bool is_trivial() const
+  [[nodiscard]] bool is_trivial() const
   {
     if (lowerCorner_.size() == 0 || upperCorner_.size() == 0) return true;
     if (lowerCorner_.size() != upperCorner_.size()) return false;  // should not happen?
@@ -150,7 +150,7 @@ class Box
   /**
    * @brief Returns the dimension of the box.
    */
-  std::size_t dimension() const { return lowerCorner_.size(); }
+  [[nodiscard]] std::size_t dimension() const { return lowerCorner_.size(); }
 
   /**
    * @brief Inflates the box by delta.

@@ -41,7 +41,6 @@
 #include <gudhi/Projective_cover_kernel.h>
 #include <gudhi/persistence_interval.h>
 #include <gudhi/slicer_helpers.h>
-#include <gudhi/Multi_persistence/Line.h>
 
 namespace Gudhi {
 namespace multi_persistence {
@@ -51,7 +50,7 @@ namespace multi_persistence {
  * @ingroup multi_persistence
  *
  * @brief Class slicing a multi-parameter persistence module. TODO: more details
- * 
+ *
  * @tparam MultiFiltrationValue Filtration value class respecting the @ref MultiFiltrationValue concept.
  * @tparam PersistenceAlgorithm Class respecting the @ref PersistenceAlgorithm concept. Used to compute persistence,
  * eventually vineyards and representative cycles.
@@ -67,7 +66,7 @@ class Slicer
   using Index = typename Complex::Index;                              /**< Complex index type. */
   using Dimension = typename Complex::Dimension;                      /**< Dimension type. */
   template <typename Value = T>
-  using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, Value>;  /**< Bar type. */
+  using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, Value>; /**< Bar type. */
   /**
    * @brief Barcode type. A vector of @ref Bar, a tuple like structure containing birth, death and dimension of a bar.
    */
@@ -92,15 +91,15 @@ class Slicer
    */
   template <typename Value = T>
   using Multi_dimensional_flat_barcode = std::vector<Flat_barcode<Value>>;
-  using Cycle = std::vector<Index>;                                     /**< Cycle type. */
-  using Thread_safe = Thread_safe_slicer<Slicer>;                       /**< Thread safe slicer type. */
+  using Cycle = std::vector<Index>;               /**< Cycle type. */
+  using Thread_safe = Thread_safe_slicer<Slicer>; /**< Thread safe slicer type. */
 
   // CONSTRUCTORS
 
   /**
    * @brief Default constructor. Constructs an empty slicer.
    */
-  Slicer() {}
+  Slicer() = default;
 
   /**
    * @brief Constructs the slicer by copying the given complex. The current slice is not initialized to a default
@@ -129,23 +128,51 @@ class Slicer
   {}
 
   /**
-   * @brief Copy constructor.
+   * @brief Copy constructor. Persistence computation initialization is not updated.
    */
   Slicer(const Slicer& other)
       : complex_(other.complex_), slice_(other.slice_), generatorOrder_(other.generatorOrder_), persistence_()
   {}
 
   /**
-   * @brief Move constructor.
+   * @brief Move constructor. Persistence computation initialization is not updated.
    */
-  Slicer(Slicer&& other)
+  Slicer(Slicer&& other) noexcept
       : complex_(std::move(other.complex_)),
         slice_(std::move(other.slice_)),
         generatorOrder_(std::move(other.generatorOrder_)),
         persistence_()
   {}
 
-  // TODO: swap + assign operator?
+  ~Slicer() = default;
+
+  /**
+   * @brief Assign operator. Persistence computation initialization is not updated.
+   */
+  Slicer& operator=(const Slicer& other)
+  {
+    complex_ = other.complex_;
+    slice_ = other.slice_;
+    generatorOrder_ = other.generatorOrder_;
+    persistence_.reset();
+
+    return *this;
+  }
+
+  /**
+   * @brief Move assign operator. Persistence computation initialization is not updated.
+   */
+  Slicer& operator=(Slicer&& other) noexcept
+  {
+    complex_ = std::move(other.complex_);
+    slice_ = std::move(other.slice_);
+    generatorOrder_ = std::move(other.generatorOrder_);
+    persistence_.reset();
+
+    return *this;
+  }
+
+  // TODO: swap ?
 
   // ACCESS
 
@@ -214,7 +241,7 @@ class Slicer
   }
 
   /**
-   * @brief Returns a const reference to the filtration value container. A filtration value at index \$f i \$f 
+   * @brief Returns a const reference to the filtration value container. A filtration value at index \$f i \$f
    * correspond to the filtration value associated to the generators at index \$f i \$f.
    */
   const typename Complex::Filtration_value_container& get_filtration_values() const
@@ -223,7 +250,7 @@ class Slicer
   }
 
   /**
-   * @brief Returns a reference to the filtration value container. A filtration value at index \$f i \$f 
+   * @brief Returns a reference to the filtration value container. A filtration value at index \$f i \$f
    * correspond to the filtration value associated to the generators at index \$f i \$f.
    *
    * @warning The container is not const such that the user can easily modify/update a filtration value. But do not
@@ -285,7 +312,7 @@ class Slicer
    * @brief Sets the current slice, that is the 1-parameter filtration values associated to each generator on that line.
    * The value at \$f slice[i] \$f has to corresponds to the value for the generator at index \$f i \$f.
    * One can also sets the slice directly from the line with @ref push_to.
-   * 
+   *
    * @tparam Array Container which can be converted into a vector of `T`.
    */
   template <class Array = std::initializer_list<T>>
@@ -296,7 +323,7 @@ class Slicer
 
   /**
    * @brief Sets the current slice by computing the 1-parameter filtration values fo each generator on the given line.
-   * 
+   *
    * @tparam Line_like Any type convertible to a @ref Line class. Default value: `std::initializer_list<T>`.
    */
   template <class Line_like = std::initializer_list<T>>
@@ -307,7 +334,7 @@ class Slicer
 
   /**
    * @brief Sets the current slice by computing the 1-parameter filtration values fo each generator on the given line.
-   * 
+   *
    * @tparam U Template parameter of the given line.
    */
   template <class U>
@@ -322,7 +349,7 @@ class Slicer
    *
    * @warning If the internal complex was not ordered by dimension, the complex is sorted before pruning.
    * So, the indexing changes afterwards.
-   * 
+   *
    * @param maxDim Maximal dimension to keep.
    */
   void prune_above_dimension(int maxDim)
@@ -331,6 +358,7 @@ class Slicer
     generatorOrder_.resize(idx);
     generatorOrder_.shrink_to_fit();
     slice_.resize(idx);
+    persistence_.reset();
   }
 
   /**
@@ -355,12 +383,12 @@ class Slicer
   /**
    * @brief Returns true if and only if @ref initialize_persistence_computation was properly called.
    */
-  bool persistence_computation_is_initialized() const { return persistence_.is_initialized(); }
+  [[nodiscard]] bool persistence_computation_is_initialized() const { return persistence_.is_initialized(); }
 
   /**
    * @brief Initializes the persistence computation of the current slice. If the slice was not set properly as
    * a valid 1-dimensional filtration, the behaviour is undefined.
-   * 
+   *
    * @param ignoreInf If true, all cells at infinity filtration values are ignored for the initialization, resulting
    * potentially in less storage use and better performance. But note that this can be problematic with the use of
    * @ref vineyard_update. Default value: true.
@@ -380,7 +408,7 @@ class Slicer
    * Only available if PersistenceAlgorithm::is_vine is true.
    *
    * @pre @ref initialize_persistence_computation has to be called at least once before.
-   * 
+   *
    * @warning If `ignoreInf` was set to true when initializing the persistence computation, any update of the slice has
    * to keep at infinity the boundaries which were before, otherwise the behaviour is undefined (it will throw with
    * high probability).
@@ -411,7 +439,7 @@ class Slicer
    * @brief Returns the barcode of the current slice. The barcode format will change depending on the template values.
    *
    * @pre @ref initialize_persistence_computation has to be called at some point before.
-   * 
+   *
    * @tparam byDim If true, the barcode is returned as @ref Multi_dimensional_barcode, otherwise as @ref Barcode.
    * @tparam Value Type of the birth and death values.
    * @param maxDim Maximal dimension to be included in the barcode. If negative, all dimensions are included.
@@ -432,7 +460,7 @@ class Slicer
    * @brief Returns the barcode of the current slice. The barcode format will change depending on the template values.
    *
    * @pre @ref initialize_persistence_computation has to be called at some point before.
-   * 
+   *
    * @tparam byDim If true, the barcode is returned as @ref Multi_dimensional_flat_barcode, otherwise as
    * @ref Flat_barcode.
    * @tparam Value Type of the birth and death values.
@@ -453,7 +481,7 @@ class Slicer
 
   /**
    * @brief Returns the barcodes of all the given lines. A line is represented as a point and the slope 1.
-   * 
+   *
    * @param basePoints Vector of base points for the lines.
    * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
    * potentially in less storage use and better performance. But the parameter will be ignored if
@@ -481,7 +509,7 @@ class Slicer
   /**
    * @brief Returns the barcodes of all the given lines. A line is represented as a pair with the first element being
    * a point on the line and the second element a vector giving the positive direction of the line.
-   * 
+   *
    * @param basePointsWithDirections Vector of pair of base points and direction vectors.
    * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
    * potentially in less storage use and better performance. But the parameter will be ignored if
@@ -523,7 +551,7 @@ class Slicer
    * Only available if PersistenceAlgorithm::has_rep_cycles is true.
    *
    * @pre @ref initialize_persistence_computation has to be called at least once before.
-   * 
+   *
    * @param update If true, updates the stored representative cycles, otherwise just returns the container in its
    * current state. So should be true at least the first time the method is used.
    */
@@ -621,13 +649,13 @@ class Slicer
     stream << "--- Order \n";
     stream << "{";
     for (const auto& idx : slicer.generatorOrder_) stream << idx << ", ";
-    stream << "}" << std::endl;
+    stream << "}" << '\n';
 
     stream << "--- Current slice filtration\n";
     stream << "{";
     for (const auto& val : slicer.slice_) stream << val << ", ";
     stream << "\b" << "\b";
-    stream << "}" << std::endl;
+    stream << "}" << '\n';
 
     stream << "--- PersBackend \n";
     stream << slicer.persistence_;
@@ -636,18 +664,25 @@ class Slicer
   }
 
  protected:
-  friend Thread_safe; // Thread_safe will use the "_*" methods below instead of "*".
+  friend Thread_safe;  // Thread_safe will use the "_*" methods below instead of "*".
 
   // For ThreadSafe version
   Slicer(const std::vector<T>& slice, const std::vector<Index>& generatorOrder, const Persistence& persistence)
       : complex_(), slice_(slice), generatorOrder_(generatorOrder), persistence_(persistence, generatorOrder_)
   {}
 
+  Slicer(std::vector<T>&& slice, std::vector<Index>&& generatorOrder, Persistence&& persistence)
+      : complex_(),
+        slice_(std::move(slice)),
+        generatorOrder_(std::move(generatorOrder)),
+        persistence_(std::move(persistence), generatorOrder_)
+  {}
+
   template <class U>
   void _push_to(const Complex& complex, const Line<U>& line)
   {
     const auto& filtrationValues = complex.get_filtration_values();
-    for (Index i = 0u; i < filtrationValues.size(); i++) {
+    for (Index i = 0U; i < filtrationValues.size(); i++) {
       slice_[i] = line.template compute_forward_intersection<T>(filtrationValues[i]);
     }
   }
@@ -685,11 +720,11 @@ class Slicer
 
     std::vector<Multi_dimensional_barcode<T>> out(basePoints.size());
 
-    _push_to(complex, get_line(basePoints[0]));
+    _push_to(complex, std::forward<F>(get_line)(basePoints[0]));
     _initialize_persistence_computation(complex, false);
     out[0] = _get_barcode_by_dim<T>(complex.get_max_dimension());
-    for (auto i = 1u; i < basePoints.size(); ++i) {
-      _push_to(complex, get_line(basePoints[i]));
+    for (auto i = 1U; i < basePoints.size(); ++i) {
+      _push_to(complex, std::forward<F>(get_line)(basePoints[i]));
       vineyard_update();
       out[i] = _get_barcode_by_dim<T>(complex.get_max_dimension());
     }
@@ -711,7 +746,7 @@ class Slicer
     tbb::enumerable_thread_specific<Thread_safe> threadLocals(localTemplate);
     tbb::parallel_for(static_cast<std::size_t>(0), basePoints.size(), [&](const Index& i) {
       Thread_safe& s = threadLocals.local();
-      s.push_to(get_line(basePoints[i]));
+      s.push_to(std::forward<F>(get_line)(basePoints[i]));
       s.initialize_persistence_computation(ignoreInf);
       out[i] = s.get_barcode();
     });
@@ -729,8 +764,8 @@ class Slicer
 
     std::vector<Multi_dimensional_barcode<T>> out(basePoints.size());
 
-    for (auto i = 0u; i < basePoints.size(); ++i) {
-      _push_to(complex, get_line(basePoints[i]));
+    for (auto i = 0U; i < basePoints.size(); ++i) {
+      _push_to(complex, std::forward<F>(get_line)(basePoints[i]));
       _initialize_persistence_computation(complex, ignoreInf);
       out[i] = _get_barcode_by_dim<T>(complex.get_max_dimension());
     }

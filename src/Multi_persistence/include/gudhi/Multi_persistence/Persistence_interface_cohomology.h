@@ -35,7 +35,7 @@ namespace multi_persistence {
  *
  * @brief Interface respecting the @ref PersistenceAlgorithm concept to use @ref Slicer with the cohomology
  * algorithm implemented in @ref Gudhi::persistent_cohomology::Persistent_cohomology.
- * 
+ *
  * @tparam MultiFiltrationValue Filtration value type used in @ref Slicer.
  */
 template <class MultiFiltrationValue>
@@ -59,8 +59,7 @@ class Persistence_interface_cohomology
   Persistence_interface_cohomology() : interface_(), barcode_() {}
 
   // `permutation` is assumed to have stable size, i.e., its address never changes
-  Persistence_interface_cohomology(const Complex& cpx, const Map& permutation)
-      : interface_(cpx, permutation)
+  Persistence_interface_cohomology(const Complex& cpx, const Map& permutation) : interface_(cpx, permutation)
   {
     _initialize();
   }
@@ -79,6 +78,11 @@ class Persistence_interface_cohomology
       : interface_(std::move(other.interface_), permutation), barcode_(std::move(other.barcode_))
   {}
 
+  ~Persistence_interface_cohomology() = default;
+
+  Persistence_interface_cohomology& operator=(const Persistence_interface_cohomology& other) = delete;
+  Persistence_interface_cohomology& operator=(Persistence_interface_cohomology&& other) noexcept = delete;
+
   // TODO: swap?
 
   template <class Complex>
@@ -88,7 +92,13 @@ class Persistence_interface_cohomology
     _initialize();
   }
 
-  bool is_initialized() const { return interface_.is_initialized(); }
+  void reset()
+  {
+    interface_.reset();
+    barcode_.clear();
+  }
+
+  [[nodiscard]] bool is_initialized() const { return interface_.is_initialized(); }
 
   Dimension get_dimension(Index i) const
   {

@@ -19,6 +19,7 @@
 #define MP_THREAD_SAFE_SLICER_H_INCLUDED
 
 #include <ostream>
+#include <utility>
 #include <vector>
 
 #include <gudhi/Multi_persistence/Line.h>
@@ -33,7 +34,7 @@ namespace multi_persistence {
  * @brief A more or less "thread safe version" of @ref Slicer. Gives access to all its const methods and persistence
  * related methods. Each instance will store a pointer to the original slicer, but will have its own copies of all
  * persistence related containers. It corresponds therefore more to a "light/week copy" of a slicer.
- * 
+ *
  * @tparam Slicer Underlying @ref Slicer type.
  */
 template <class Slicer>
@@ -71,14 +72,14 @@ class Thread_safe_slicer : private Slicer
    */
   template <typename Value = T>
   using Multi_dimensional_flat_barcode = typename Slicer::template Multi_dimensional_flat_barcode<Value>;
-  using Cycle = typename Slicer::Cycle;                       /**< Cycle type. */
-  using Thread_safe = Thread_safe_slicer;                     /**< Thread safe slicer type. */
+  using Cycle = typename Slicer::Cycle;   /**< Cycle type. */
+  using Thread_safe = Thread_safe_slicer; /**< Thread safe slicer type. */
 
   // CONSTRUCTORS
 
   /**
    * @brief Constructor. Will store a pointer to the given slicer and copy all persistence related container.
-   * 
+   *
    * @param slicer Original slicer.
    */
   Thread_safe_slicer(const Slicer& slicer)
@@ -92,6 +93,36 @@ class Thread_safe_slicer : private Slicer
       : Slicer(slicer.get_slice(), slicer.get_current_order(), slicer.get_persistence_algorithm()),
         slicer_(slicer.slicer_)
   {}
+
+  /**
+   * @brief Move constructor.
+   */
+  Thread_safe_slicer(Thread_safe_slicer&& slicer) noexcept
+      : Slicer(std::move(slicer.slice_), std::move(slicer.generatorOrder_), std::move(slicer.persistence_)),
+        slicer_(slicer.slicer_)
+  {}
+
+  ~Thread_safe_slicer() = default;
+
+  /**
+   * @brief Assign operator.
+   */
+  Thread_safe_slicer& operator=(const Thread_safe_slicer& other)
+  {
+    if (this == &other) return *this;
+
+    Slicer::slice_ = other.slice_;
+    Slicer::generatorOrder_ = other.generatorOrder_;
+    Slicer::persistence_.reinitialize(slicer_->complex_, Slicer::generatorOrder_);
+    slicer_ = other.slicer_;
+
+    return *this;
+  }
+
+  /**
+   * @brief Move assign operator.
+   */
+  Thread_safe_slicer& operator=(Thread_safe_slicer&& other) noexcept = delete;
 
   // ACCESS
 
@@ -141,7 +172,7 @@ class Thread_safe_slicer : private Slicer
   std::pair<Filtration_value, Filtration_value> get_bounding_box() const { return slicer_->get_bounding_box(); }
 
   /**
-   * @brief Returns a const reference to the filtration value container. A filtration value at index \$f i \$f 
+   * @brief Returns a const reference to the filtration value container. A filtration value at index \$f i \$f
    * correspond to the filtration value associated to the generators at index \$f i \$f.
    */
   const typename Complex::Filtration_value_container& get_filtration_values() const
@@ -187,7 +218,7 @@ class Thread_safe_slicer : private Slicer
    * @brief Sets the current slice, that is the 1-parameter filtration values associated to each generator on that line.
    * The value at \$f slice[i] \$f has to corresponds to the value for the generator at index \$f i \$f.
    * One can also sets the slice directly from the line with @ref push_to.
-   * 
+   *
    * @tparam Array Container which can be converted into a vector of `T`.
    */
   template <class Array = std::initializer_list<T>>
@@ -198,7 +229,7 @@ class Thread_safe_slicer : private Slicer
 
   /**
    * @brief Sets the current slice by computing the 1-parameter filtration values fo each generator on the given line.
-   * 
+   *
    * @tparam Line_like Any type convertible to a @ref Line class. Default value: `std::initializer_list<T>`.
    */
   template <class Line_like = std::initializer_list<T>>
@@ -209,7 +240,7 @@ class Thread_safe_slicer : private Slicer
 
   /**
    * @brief Sets the current slice by computing the 1-parameter filtration values fo each generator on the given line.
-   * 
+   *
    * @tparam U Template parameter of the given line.
    */
   template <class U>
@@ -223,12 +254,15 @@ class Thread_safe_slicer : private Slicer
   /**
    * @brief Returns true if and only if @ref initialize_persistence_computation was properly called.
    */
-  bool persistence_computation_is_initialized() const { return Slicer::persistence_computation_is_initialized(); }
+  [[nodiscard]] bool persistence_computation_is_initialized() const
+  {
+    return Slicer::persistence_computation_is_initialized();
+  }
 
   /**
    * @brief Initializes the persistence computation of the current slice. If the slice was not set properly as
    * a valid 1-dimensional filtration, the behaviour is undefined.
-   * 
+   *
    * @param ignoreInf If true, all cells at infinity filtration values are ignored for the initialization, resulting
    * potentially in less storage use and better performance. But note that this can be problematic with the use of
    * @ref vineyard_update. Default value: true.
@@ -248,7 +282,7 @@ class Thread_safe_slicer : private Slicer
    * Only available if PersistenceAlgorithm::is_vine is true.
    *
    * @pre @ref initialize_persistence_computation has to be called at least once before.
-   * 
+   *
    * @warning If `ignoreInf` was set to true when initializing the persistence computation, any update of the slice has
    * to keep at infinity the boundaries which were before, otherwise the behaviour is undefined (it will throw with
    * high probability).
@@ -259,7 +293,7 @@ class Thread_safe_slicer : private Slicer
    * @brief Returns the barcode of the current slice. The barcode format will change depending on the template values.
    *
    * @pre @ref initialize_persistence_computation has to be called at some point before.
-   * 
+   *
    * @tparam byDim If true, the barcode is returned as @ref Multi_dimensional_barcode, otherwise as @ref Barcode.
    * @tparam Value Type of the birth and death values.
    * @param maxDim Maximal dimension to be included in the barcode. If negative, all dimensions are included.
@@ -277,7 +311,7 @@ class Thread_safe_slicer : private Slicer
    * @brief Returns the barcode of the current slice. The barcode format will change depending on the template values.
    *
    * @pre @ref initialize_persistence_computation has to be called at some point before.
-   * 
+   *
    * @tparam byDim If true, the barcode is returned as @ref Multi_dimensional_flat_barcode, otherwise as
    * @ref Flat_barcode.
    * @tparam Value Type of the birth and death values.
@@ -294,7 +328,7 @@ class Thread_safe_slicer : private Slicer
 
   /**
    * @brief Returns the barcodes of all the given lines. A line is represented as a point and the slope 1.
-   * 
+   *
    * @param basePoints Vector of base points for the lines.
    * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
    * potentially in less storage use and better performance. But the parameter will be ignored if
@@ -322,7 +356,7 @@ class Thread_safe_slicer : private Slicer
   /**
    * @brief Returns the barcodes of all the given lines. A line is represented as a pair with the first element being
    * a point on the line and the second element a vector giving the positive direction of the line.
-   * 
+   *
    * @param basePointsWithDirections Vector of pair of base points and direction vectors.
    * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
    * potentially in less storage use and better performance. But the parameter will be ignored if
@@ -364,7 +398,7 @@ class Thread_safe_slicer : private Slicer
    * Only available if PersistenceAlgorithm::has_rep_cycles is true.
    *
    * @pre @ref initialize_persistence_computation has to be called at least once before.
-   * 
+   *
    * @param update If true, updates the stored representative cycles, otherwise just returns the container in its
    * current state. So should be true at least the first time the method is used.
    */
@@ -388,13 +422,13 @@ class Thread_safe_slicer : private Slicer
     stream << "--- Order \n";
     stream << "{";
     for (const auto& idx : slicer.get_current_order()) stream << idx << ", ";
-    stream << "}" << std::endl;
+    stream << "}" << '\n';
 
     stream << "--- Current slice filtration\n";
     stream << "{";
     for (const auto& val : slicer.get_slice()) stream << val << ", ";
     stream << "\b" << "\b";
-    stream << "}" << std::endl;
+    stream << "}" << '\n';
 
     stream << "--- PersBackend \n";
     stream << slicer.get_persistence_algorithm();
@@ -403,7 +437,7 @@ class Thread_safe_slicer : private Slicer
   }
 
  private:
-  Slicer const* slicer_;  /**< Original slicer. */
+  Slicer const* slicer_; /**< Original slicer. */
 };
 
 }  // namespace multi_persistence

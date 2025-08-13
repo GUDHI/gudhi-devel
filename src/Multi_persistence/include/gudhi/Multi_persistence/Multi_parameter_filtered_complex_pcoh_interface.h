@@ -153,11 +153,18 @@ class Multi_parameter_filtered_complex_pcoh_interface
     other.newToOldPerm_ = nullptr;
   }
 
+  ~Multi_parameter_filtered_complex_pcoh_interface() = default;
+
+  Multi_parameter_filtered_complex_pcoh_interface &operator=(
+      const Multi_parameter_filtered_complex_pcoh_interface &other) = delete;
+  Multi_parameter_filtered_complex_pcoh_interface &operator=(
+      Multi_parameter_filtered_complex_pcoh_interface &&other) noexcept = delete;
+
   /**
    * @brief Swap operator.
    */
   friend void swap(Multi_parameter_filtered_complex_pcoh_interface &be1,
-                   Multi_parameter_filtered_complex_pcoh_interface &be2)
+                   Multi_parameter_filtered_complex_pcoh_interface &be2) noexcept
   {
     std::swap(be1.boundaries_, be2.boundaries_);
     std::swap(be1.newToOldPerm_, be2.newToOldPerm_);
@@ -175,21 +182,31 @@ class Multi_parameter_filtered_complex_pcoh_interface
     keys_ = Map(boundaries.get_number_of_cycle_generators(), -1);
   }
 
+  void reset()
+  {
+    boundaries_ = nullptr;
+    newToOldPerm_ = nullptr;
+    keys_.clear();
+  }
+
   /**
    * @brief Returns `true` if and only if all pointers are not null.
    */
-  bool is_initialized() const { return boundaries_ != nullptr && newToOldPerm_ != nullptr; }
+  [[nodiscard]] bool is_initialized() const { return boundaries_ != nullptr && newToOldPerm_ != nullptr; }
 
-  std::size_t num_simplices() const { return newToOldPerm_->size(); }
+  [[nodiscard]] std::size_t num_simplices() const { return newToOldPerm_->size(); }
 
-  Filtration_value filtration(Simplex_handle sh) const
+  [[nodiscard]] Filtration_value filtration(Simplex_handle sh) const
   {
     return sh == null_simplex() ? std::numeric_limits<Filtration_value>::max() : keys_[sh];
   }
 
-  Dimension dimension() const { return boundaries_->get_max_dimension(); }
+  [[nodiscard]] Dimension dimension() const { return boundaries_->get_max_dimension(); }
 
-  Dimension dimension(Simplex_handle sh) const { return sh == null_simplex() ? -1 : boundaries_->get_dimensions()[sh]; }
+  [[nodiscard]] Dimension dimension(Simplex_handle sh) const
+  {
+    return sh == null_simplex() ? -1 : boundaries_->get_dimensions()[sh];
+  }
 
   // assumes that pcoh will assign the keys from 0 to n in order of filtrations
   void assign_key(Simplex_handle sh, Simplex_key key)
@@ -197,16 +214,19 @@ class Multi_parameter_filtered_complex_pcoh_interface
     if (sh != null_simplex()) keys_[sh] = key;
   }
 
-  Simplex_key key(Simplex_handle sh) const { return sh == null_simplex() ? null_key() : keys_[sh]; }
+  [[nodiscard]] Simplex_key key(Simplex_handle sh) const { return sh == null_simplex() ? null_key() : keys_[sh]; }
 
   static constexpr Simplex_key null_key() { return static_cast<Simplex_key>(-1); }
 
-  Simplex_handle simplex(Simplex_key key) const { return key == null_key() ? null_simplex() : (*newToOldPerm_)[key]; }
+  [[nodiscard]] Simplex_handle simplex(Simplex_key key) const
+  {
+    return key == null_key() ? null_simplex() : (*newToOldPerm_)[key];
+  }
 
   static constexpr Simplex_handle null_simplex() { return static_cast<Simplex_handle>(-1); }
 
   // only used in update_cohomology_groups_edge, so not used without optimizations
-  std::pair<Simplex_handle, Simplex_handle> endpoints(Simplex_handle sh) const
+  [[nodiscard]] std::pair<Simplex_handle, Simplex_handle> endpoints(Simplex_handle sh) const
   {
     if (sh == null_simplex()) return {null_simplex(), null_simplex()};
     GUDHI_CHECK(dimension(sh) == 1, "Endpoints only available for edges.");
@@ -215,9 +235,9 @@ class Multi_parameter_filtered_complex_pcoh_interface
     return {col[0], col[1]};
   }
 
-  const Filtration_simplex_range &filtration_simplex_range() const { return *newToOldPerm_; }
+  [[nodiscard]] const Filtration_simplex_range &filtration_simplex_range() const { return *newToOldPerm_; }
 
-  const Boundary_simplex_range &boundary_simplex_range(Simplex_handle sh) const
+  [[nodiscard]] const Boundary_simplex_range &boundary_simplex_range(Simplex_handle sh) const
   {
     return boundaries_->get_boundaries()[sh];
   }

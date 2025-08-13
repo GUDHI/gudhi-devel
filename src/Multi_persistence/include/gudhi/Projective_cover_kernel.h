@@ -34,7 +34,7 @@ namespace multi_persistence {
  * @ingroup multi_persistence
  *
  * @brief TODO (what it is + mention that it only works for 2 parameters)
- * 
+ *
  * @tparam MultiFiltrationValue Filtration value class respecting the @ref MultiFiltrationValue concept.
  * @tparam columnType Column type to use for the matrix used internally. Default value:
  * @ref Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR "NAIVE_VECTOR".
@@ -64,7 +64,7 @@ class Projective_cover_kernel
   // TODO: this only works for 2 parameter modules. Optimize w.r.t. this.
   /**
    * @brief Constructor.
-   * 
+   *
    * @param complex Complex containing the boundaries, dimensions and 2-parameter filtration values necessary,
    * ordered by dimension and then co-lexicographically with respect to the filtration values.
    * @param dim Dimension for which to compute the kernel.
@@ -82,9 +82,9 @@ class Projective_cover_kernel
 
     GUDHI_CHECK_code(
       Index i = 0;
-      for (; i < complex.get_number_of_cycle_generators() - 1; ++i){
+      for (; i < complex.get_number_of_cycle_generators() - 1; ++i) {
         GUDHI_CHECK(filtValues[i].num_generators() == 1, "Only available for 1-critical modules.");
-        GUDHI_CHECK(dimensions[i] <= dimensions[i+1], "Cells have to be ordered by dimension.");
+        GUDHI_CHECK(dimensions[i] <= dimensions[i + 1], "Cells have to be ordered by dimension.");
         if (dimensions[i] == dimensions[i + 1])
           GUDHI_CHECK(is_less_or_equal_than_lexicographically<true>(filtValues[i], filtValues[i + 1]),
                       "Cells with same dimension have to be ordered co-lexicographically.");
@@ -142,7 +142,7 @@ class Projective_cover_kernel
    * of the columns with this filtration value.
    */
   struct SmallQueue {
-    SmallQueue() {};
+    SmallQueue() = default;
 
     struct MFWrapper {
       MFWrapper(const Filtration_value &g) : g(g) {};
@@ -152,16 +152,16 @@ class Projective_cover_kernel
       MFWrapper(const Filtration_value &g, std::initializer_list<int> cols) : g(g), someCols(cols.begin(), cols.end())
       {}
 
-      inline void insert(int col) const { someCols.insert(col); }
+      void insert(int col) const { someCols.insert(col); }
 
-      inline bool operator<(const MFWrapper &other) const { return is_strict_less_than_lexicographically(g, other.g); }
+      bool operator<(const MFWrapper &other) const { return is_strict_less_than_lexicographically(g, other.g); }
 
      public:
       Filtration_value g;
       mutable std::set<int> someCols;
     };
 
-    inline void insert(const Filtration_value &g, int col)
+    void insert(const Filtration_value &g, int col)
     {
       auto it = queue.find(g);
       if (it != queue.end()) {
@@ -171,7 +171,7 @@ class Projective_cover_kernel
       }
     };
 
-    inline void insert(const Filtration_value &g, const std::initializer_list<int> &cols)
+    void insert(const Filtration_value &g, const std::initializer_list<int> &cols)
     {
       auto it = queue.find(g);
       if (it != queue.end()) {
@@ -181,9 +181,9 @@ class Projective_cover_kernel
       }
     };
 
-    inline bool empty() const { return queue.empty(); }
+    [[nodiscard]] bool empty() const { return queue.empty(); }
 
-    inline Filtration_value pop()
+    Filtration_value pop()
     {
       if (queue.empty()) throw std::runtime_error("Queue is empty");
 
@@ -210,7 +210,7 @@ class Projective_cover_kernel
                                    Index &startDim2,
                                    Index &end)
   {
-    const auto& dims = complex.get_dimensions();
+    const auto &dims = complex.get_dimensions();
     startDim1 = 0;
     startDim2 = 0;
     end = 0;
@@ -221,8 +221,7 @@ class Projective_cover_kernel
     if (i == size) throw std::invalid_argument("Given dimension has no generators.");
     startDim1 = i;
     for (; i < size && dims[i] == dim; ++i);
-    if (i == size || dims[i] > dim + 1)
-      throw std::invalid_argument("Given dimension has no generators.");
+    if (i == size || dims[i] > dim + 1) throw std::invalid_argument("Given dimension has no generators.");
     startDim2 = i;
     for (; i < size && dims[i] == dim + 1; ++i);
     end = i;
@@ -252,7 +251,7 @@ class Projective_cover_kernel
   {
     SmallQueue lexicoIt;
     for (Index i = nberDim; i < nberGen; ++i) {
-      int pivot = get_pivot(i);
+      int pivot = std::forward<F>(get_pivot)(i);
       if (pivot >= 0) {
         lexicoIt.insert(filtValues[i + shift], i);
         auto it = pivotCache[pivot].find(i);
@@ -278,7 +277,7 @@ class Projective_cover_kernel
                                       const Filtration_value &gridValue,
                                       F &&get_pivot)
   {
-    int pivot = get_pivot(i);
+    int pivot = std::forward<F>(get_pivot)(i);
 
     if (pivot < 0) return;
 
@@ -316,7 +315,7 @@ class Projective_cover_kernel
       boundaries_.emplace_back();
       filtrationValues_.push_back(filtValues[i + shift]);
       dimensions_.push_back(dimensions[i + shift]);
-      int pivot = get_pivot(i);
+      int pivot = std::forward<F>(get_pivot)(i);
       if (pivot < 0) {
         isReduced[i] = true;
       } else {
@@ -336,7 +335,7 @@ class Projective_cover_kernel
                       const Filtration_value &gridValue,
                       F &&get_pivot)
   {
-    int pivot = get_pivot(i);
+    int pivot = std::forward<F>(get_pivot)(i);
     if (pivot < 0) {
       if (!isReduced[i]) {
         const auto &col = N.get_column(i);
@@ -361,7 +360,7 @@ class Projective_cover_kernel
         N.add_to(k, i);
         pivotCache[pivot].erase(i);
         // WARN : we update the pivot cache after the update loop
-        GUDHI_CHECK(get_pivot(i) < pivot, "Column addition failed.");
+        GUDHI_CHECK(std::forward<F>(get_pivot)(i) < pivot, "Column addition failed.");
         return true;  // pivot has changed
       }
     }
