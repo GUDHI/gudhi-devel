@@ -40,7 +40,6 @@ struct Dummy_chain_representative_cycles
                    [[maybe_unused]] Dummy_chain_representative_cycles& d2) {}
 };
 
-// TODO: add coefficients ? Only Z2 token into account for now.
 /**
  * @class Chain_representative_cycles chain_rep_cycles.h gudhi/Persistence_matrix/chain_rep_cycles.h
  * @ingroup persistence_matrix
