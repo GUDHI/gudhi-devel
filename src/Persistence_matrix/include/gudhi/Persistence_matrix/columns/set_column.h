@@ -82,10 +82,10 @@ class Set_column : public Master_matrix::Row_access_option,
              Row_container* rowContainer,
              Column_settings* colSettings);
   template <class Container = typename Master_matrix::Boundary>
-  Set_column(const Container& nonZeroChainRowIndices, Dimension dimension, Column_settings* colSettings);
+  Set_column(const Container& nonZeroRowIndices, Dimension dimension, Column_settings* colSettings);
   template <class Container = typename Master_matrix::Boundary, class Row_container>
   Set_column(Index columnIndex,
-             const Container& nonZeroChainRowIndices,
+             const Container& nonZeroRowIndices,
              Dimension dimension,
              Row_container* rowContainer,
              Column_settings* colSettings);
@@ -100,8 +100,8 @@ class Set_column : public Master_matrix::Row_access_option,
 
   std::vector<Field_element> get_content(int columnLength = -1) const;
   bool is_non_zero(ID_index rowIndex) const;
-  bool is_empty() const;
-  std::size_t size() const;
+  [[nodiscard]] bool is_empty() const;
+  [[nodiscard]] std::size_t size() const;
 
   template <class Row_index_map>
   void reorder(const Row_index_map& valueMap,
@@ -138,7 +138,8 @@ class Set_column : public Master_matrix::Row_access_option,
 
   void push_back(const Entry& entry);
 
-  friend bool operator==(const Set_column& c1, const Set_column& c2) {
+  friend bool operator==(const Set_column& c1, const Set_column& c2)
+  {
     if (&c1 == &c2) return true;
 
     auto it1 = c1.column_.begin();
@@ -157,7 +158,8 @@ class Set_column : public Master_matrix::Row_access_option,
     return true;
   }
 
-  friend bool operator<(const Set_column& c1, const Set_column& c2) {
+  friend bool operator<(const Set_column& c1, const Set_column& c2)
+  {
     if (&c1 == &c2) return false;
 
     auto it1 = c1.column_.begin();
@@ -175,8 +177,10 @@ class Set_column : public Master_matrix::Row_access_option,
 
   // Disabled with row access.
   Set_column& operator=(const Set_column& other);
+  Set_column& operator=(Set_column&& other) noexcept;
 
-  friend void swap(Set_column& col1, Set_column& col2) {
+  friend void swap(Set_column& col1, Set_column& col2) noexcept
+  {
     swap(static_cast<typename Master_matrix::Row_access_option&>(col1),
          static_cast<typename Master_matrix::Row_access_option&>(col2));
     swap(static_cast<typename Master_matrix::Column_dimension_option&>(col1),
@@ -440,7 +444,8 @@ inline Set_column<Master_matrix>::Set_column(Set_column&& column) noexcept
       column_(std::move(column.column_)),
       operators_(std::exchange(column.operators_, nullptr)),
       entryPool_(std::exchange(column.entryPool_, nullptr))
-{}
+{
+}
 
 template <class Master_matrix>
 inline Set_column<Master_matrix>::~Set_column()
@@ -834,11 +839,13 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::operator=(const Set
 {
   static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
 
+  // to avoid destroying the column when building from it-self in the for loop below...
+  if (this == &other) return *this;
+
   Dim_opt::operator=(other);
   Chain_opt::operator=(other);
 
   for (auto* entry : column_) {
-    if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(entry);
     entryPool_->destroy(entry);
   }
   column_.clear();
@@ -853,6 +860,28 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::operator=(const Set
       _insert_entry(entry->get_element(), entry->get_row_index(), column_.end());
     }
   }
+
+  return *this;
+}
+
+template <class Master_matrix>
+inline Set_column<Master_matrix>& Set_column<Master_matrix>::operator=(Set_column&& other) noexcept
+{
+  static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
+
+  // to avoid destroying the column before building from it-self...
+  if (&column_ == &(other.column_)) return *this;
+
+  Dim_opt::operator=(std::move(other));
+  Chain_opt::operator=(std::move(other));
+
+  for (auto* entry : column_) {
+    if (entry != nullptr) entryPool_->destroy(entry);
+  }
+
+  column_ = std::move(other.column_);
+  operators_ = std::exchange(other.operators_, nullptr);
+  entryPool_ = std::exchange(other.entryPool_, nullptr);
 
   return *this;
 }
@@ -933,7 +962,8 @@ inline bool Set_column<Master_matrix>::_multiply_source_and_add(const Entry_rang
  */
 template <class Master_matrix>
 struct std::hash<Gudhi::persistence_matrix::Set_column<Master_matrix> > {
-  std::size_t operator()(const Gudhi::persistence_matrix::Set_column<Master_matrix>& column) const {
+  std::size_t operator()(const Gudhi::persistence_matrix::Set_column<Master_matrix>& column) const
+  {
     return Gudhi::persistence_matrix::hash_column(column);
   }
 };

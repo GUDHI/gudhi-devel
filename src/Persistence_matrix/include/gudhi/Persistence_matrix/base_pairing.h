@@ -36,7 +36,7 @@ namespace persistence_matrix {
  * is already managed by the vine update classes.
  */
 struct Dummy_base_pairing {
-  friend void swap([[maybe_unused]] Dummy_base_pairing& d1, [[maybe_unused]] Dummy_base_pairing& d2) {}
+  friend void swap([[maybe_unused]] Dummy_base_pairing& d1, [[maybe_unused]] Dummy_base_pairing& d2) noexcept {}
 };
 
 /**
@@ -49,20 +49,18 @@ struct Dummy_base_pairing {
  */
 template <class Master_matrix>
 class Base_pairing
-    : protected std::conditional<
+    : protected std::conditional_t<
           Master_matrix::Option_list::has_removable_columns,
           Index_mapper<std::unordered_map<typename Master_matrix::Pos_index, typename Master_matrix::ID_index> >,
-          Dummy_index_mapper
-        >::type
+          Dummy_index_mapper>
 {
  protected:
   using Pos_index = typename Master_matrix::Pos_index;
   using ID_index = typename Master_matrix::ID_index;
   // PIDM = Position to ID Map
-  using PIDM = typename std::conditional<Master_matrix::Option_list::has_removable_columns,
-                                         Index_mapper<std::unordered_map<Pos_index, ID_index> >,
-                                         Dummy_index_mapper
-                                        >::type;
+  using PIDM = std::conditional_t<Master_matrix::Option_list::has_removable_columns,
+                                  Index_mapper<std::unordered_map<Pos_index, ID_index> >,
+                                  Dummy_index_mapper>;
 
  public:
   using Bar = typename Master_matrix::Bar;                           /**< Bar type. */
@@ -90,7 +88,8 @@ class Base_pairing
   /**
    * @brief Swap operator.
    */
-  friend void swap(Base_pairing& pairing1, Base_pairing& pairing2) {
+  friend void swap(Base_pairing& pairing1, Base_pairing& pairing2) noexcept
+  {
     if constexpr (Master_matrix::Option_list::has_removable_columns) {
       swap(static_cast<PIDM&>(pairing1), static_cast<PIDM&>(pairing2));
     }

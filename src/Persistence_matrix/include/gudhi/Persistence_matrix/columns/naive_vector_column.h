@@ -78,10 +78,10 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
                       Row_container* rowContainer,
                       Column_settings* colSettings);
   template <class Container = typename Master_matrix::Boundary>
-  Naive_vector_column(const Container& nonZeroChainRowIndices, Dimension dimension, Column_settings* colSettings);
+  Naive_vector_column(const Container& nonZeroRowIndices, Dimension dimension, Column_settings* colSettings);
   template <class Container = typename Master_matrix::Boundary, class Row_container>
   Naive_vector_column(Index columnIndex,
-                      const Container& nonZeroChainRowIndices,
+                      const Container& nonZeroRowIndices,
                       Dimension dimension,
                       Row_container* rowContainer,
                       Column_settings* colSettings);
@@ -96,8 +96,8 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
 
   std::vector<Field_element> get_content(int columnLength = -1) const;
   bool is_non_zero(ID_index rowIndex) const;
-  bool is_empty() const;
-  std::size_t size() const;
+  [[nodiscard]] bool is_empty() const;
+  [[nodiscard]] std::size_t size() const;
 
   template <class Row_index_map>
   void reorder(const Row_index_map& valueMap,
@@ -134,7 +134,8 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
 
   void push_back(const Entry& entry);
 
-  friend bool operator==(const Naive_vector_column& c1, const Naive_vector_column& c2) {
+  friend bool operator==(const Naive_vector_column& c1, const Naive_vector_column& c2)
+  {
     if (&c1 == &c2) return true;
     if (c1.column_.size() != c2.column_.size()) return false;
 
@@ -153,7 +154,8 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
     return true;
   }
 
-  friend bool operator<(const Naive_vector_column& c1, const Naive_vector_column& c2) {
+  friend bool operator<(const Naive_vector_column& c1, const Naive_vector_column& c2)
+  {
     if (&c1 == &c2) return false;
 
     auto it1 = c1.column_.begin();
@@ -171,8 +173,10 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
 
   // Disabled with row access.
   Naive_vector_column& operator=(const Naive_vector_column& other);
+  Naive_vector_column& operator=(Naive_vector_column&& other) noexcept;
 
-  friend void swap(Naive_vector_column& col1, Naive_vector_column& col2) {
+  friend void swap(Naive_vector_column& col1, Naive_vector_column& col2) noexcept
+  {
     swap(static_cast<typename Master_matrix::Row_access_option&>(col1),
          static_cast<typename Master_matrix::Row_access_option&>(col2));
     swap(static_cast<typename Master_matrix::Column_dimension_option&>(col1),
@@ -232,7 +236,7 @@ using Naive_small_vector_column =
     Naive_vector_column<Master_matrix, boost::container::small_vector<typename Master_matrix::Matrix_entry*, 8> >;
 
 template <class Master_matrix, class Support>
-inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(Column_settings* colSettings)
+inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Column_settings* colSettings)
     : RA_opt(),
       Dim_opt(),
       Chain_opt(),
@@ -248,8 +252,8 @@ inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(Column_se
 
 template <class Master_matrix, class Support>
 template <class Container>
-inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(const Container& nonZeroRowIndices,
-                                                               Column_settings* colSettings)
+inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Container& nonZeroRowIndices,
+                                                                        Column_settings* colSettings)
     : RA_opt(),
       Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
       Chain_opt(),
@@ -275,10 +279,10 @@ inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(const Con
 
 template <class Master_matrix, class Support>
 template <class Container, class Row_container>
-inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(Index columnIndex,
-                                                               const Container& nonZeroRowIndices,
-                                                               Row_container* rowContainer,
-                                                               Column_settings* colSettings)
+inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Index columnIndex,
+                                                                        const Container& nonZeroRowIndices,
+                                                                        Row_container* rowContainer,
+                                                                        Column_settings* colSettings)
     : RA_opt(columnIndex, rowContainer),
       Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
       Chain_opt([&] {
@@ -314,9 +318,9 @@ inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(Index col
 
 template <class Master_matrix, class Support>
 template <class Container>
-inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(const Container& nonZeroRowIndices,
-                                                               Dimension dimension,
-                                                               Column_settings* colSettings)
+inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Container& nonZeroRowIndices,
+                                                                        Dimension dimension,
+                                                                        Column_settings* colSettings)
     : RA_opt(),
       Dim_opt(dimension),
       Chain_opt([&] {
@@ -349,11 +353,11 @@ inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(const Con
 
 template <class Master_matrix, class Support>
 template <class Container, class Row_container>
-inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(Index columnIndex,
-                                                               const Container& nonZeroRowIndices,
-                                                               Dimension dimension,
-                                                               Row_container* rowContainer,
-                                                               Column_settings* colSettings)
+inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Index columnIndex,
+                                                                        const Container& nonZeroRowIndices,
+                                                                        Dimension dimension,
+                                                                        Row_container* rowContainer,
+                                                                        Column_settings* colSettings)
     : RA_opt(columnIndex, rowContainer),
       Dim_opt(dimension),
       Chain_opt([&] {
@@ -385,8 +389,8 @@ inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(Index col
 }
 
 template <class Master_matrix, class Support>
-inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(const Naive_vector_column& column,
-                                                               Column_settings* colSettings)
+inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Naive_vector_column& column,
+                                                                        Column_settings* colSettings)
     : RA_opt(),
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
@@ -414,10 +418,10 @@ inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(const Nai
 
 template <class Master_matrix, class Support>
 template <class Row_container>
-inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(const Naive_vector_column& column,
-                                                               Index columnIndex,
-                                                               Row_container* rowContainer,
-                                                               Column_settings* colSettings)
+inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Naive_vector_column& column,
+                                                                        Index columnIndex,
+                                                                        Row_container* rowContainer,
+                                                                        Column_settings* colSettings)
     : RA_opt(columnIndex, rowContainer),
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
@@ -440,17 +444,18 @@ inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(const Nai
 }
 
 template <class Master_matrix, class Support>
-inline Naive_vector_column<Master_matrix,Support>::Naive_vector_column(Naive_vector_column&& column) noexcept
+inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Naive_vector_column&& column) noexcept
     : RA_opt(std::move(static_cast<RA_opt&>(column))),
       Dim_opt(std::move(static_cast<Dim_opt&>(column))),
       Chain_opt(std::move(static_cast<Chain_opt&>(column))),
       column_(std::move(column.column_)),
       operators_(std::exchange(column.operators_, nullptr)),
       entryPool_(std::exchange(column.entryPool_, nullptr))
-{}
+{
+}
 
 template <class Master_matrix, class Support>
-inline Naive_vector_column<Master_matrix,Support>::~Naive_vector_column()
+inline Naive_vector_column<Master_matrix, Support>::~Naive_vector_column()
 {
   for (auto* entry : column_) {
     _delete_entry(entry);
@@ -458,8 +463,8 @@ inline Naive_vector_column<Master_matrix,Support>::~Naive_vector_column()
 }
 
 template <class Master_matrix, class Support>
-inline std::vector<typename Naive_vector_column<Master_matrix,Support>::Field_element>
-Naive_vector_column<Master_matrix,Support>::get_content(int columnLength) const
+inline std::vector<typename Naive_vector_column<Master_matrix, Support>::Field_element>
+Naive_vector_column<Master_matrix, Support>::get_content(int columnLength) const
 {
   if (columnLength < 0 && column_.size() > 0)
     columnLength = column_.back()->get_row_index() + 1;
@@ -479,7 +484,7 @@ Naive_vector_column<Master_matrix,Support>::get_content(int columnLength) const
 }
 
 template <class Master_matrix, class Support>
-inline bool Naive_vector_column<Master_matrix,Support>::is_non_zero(ID_index rowIndex) const
+inline bool Naive_vector_column<Master_matrix, Support>::is_non_zero(ID_index rowIndex) const
 {
   Entry entry(rowIndex);
   return std::binary_search(column_.begin(), column_.end(), &entry, [](const Entry* a, const Entry* b) {
@@ -488,21 +493,21 @@ inline bool Naive_vector_column<Master_matrix,Support>::is_non_zero(ID_index row
 }
 
 template <class Master_matrix, class Support>
-inline bool Naive_vector_column<Master_matrix,Support>::is_empty() const
+inline bool Naive_vector_column<Master_matrix, Support>::is_empty() const
 {
   return column_.empty();
 }
 
 template <class Master_matrix, class Support>
-inline std::size_t Naive_vector_column<Master_matrix,Support>::size() const
+inline std::size_t Naive_vector_column<Master_matrix, Support>::size() const
 {
   return column_.size();
 }
 
 template <class Master_matrix, class Support>
 template <class Row_index_map>
-inline void Naive_vector_column<Master_matrix,Support>::reorder(const Row_index_map& valueMap,
-                                                        [[maybe_unused]] Index columnIndex)
+inline void Naive_vector_column<Master_matrix, Support>::reorder(const Row_index_map& valueMap,
+                                                                 [[maybe_unused]] Index columnIndex)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns.");
@@ -528,7 +533,7 @@ inline void Naive_vector_column<Master_matrix,Support>::reorder(const Row_index_
 }
 
 template <class Master_matrix, class Support>
-inline void Naive_vector_column<Master_matrix,Support>::clear()
+inline void Naive_vector_column<Master_matrix, Support>::clear()
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns as a base element should not be empty.");
@@ -542,7 +547,7 @@ inline void Naive_vector_column<Master_matrix,Support>::clear()
 }
 
 template <class Master_matrix, class Support>
-inline void Naive_vector_column<Master_matrix,Support>::clear(ID_index rowIndex)
+inline void Naive_vector_column<Master_matrix, Support>::clear(ID_index rowIndex)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Method not available for chain columns.");
@@ -556,7 +561,8 @@ inline void Naive_vector_column<Master_matrix,Support>::clear(ID_index rowIndex)
 }
 
 template <class Master_matrix, class Support>
-inline typename Naive_vector_column<Master_matrix,Support>::ID_index Naive_vector_column<Master_matrix,Support>::get_pivot() const
+inline typename Naive_vector_column<Master_matrix, Support>::ID_index
+Naive_vector_column<Master_matrix, Support>::get_pivot() const
 {
   static_assert(Master_matrix::isNonBasic,
                 "Method not available for base columns.");  // could technically be, but is the notion useful then?
@@ -569,8 +575,8 @@ inline typename Naive_vector_column<Master_matrix,Support>::ID_index Naive_vecto
 }
 
 template <class Master_matrix, class Support>
-inline typename Naive_vector_column<Master_matrix,Support>::Field_element Naive_vector_column<Master_matrix,Support>::get_pivot_value()
-    const
+inline typename Naive_vector_column<Master_matrix, Support>::Field_element
+Naive_vector_column<Master_matrix, Support>::get_pivot_value() const
 {
   static_assert(Master_matrix::isNonBasic,
                 "Method not available for base columns.");  // could technically be, but is the notion useful then?
@@ -591,62 +597,65 @@ inline typename Naive_vector_column<Master_matrix,Support>::Field_element Naive_
 }
 
 template <class Master_matrix, class Support>
-inline typename Naive_vector_column<Master_matrix,Support>::iterator Naive_vector_column<Master_matrix,Support>::begin() noexcept
+inline typename Naive_vector_column<Master_matrix, Support>::iterator
+Naive_vector_column<Master_matrix, Support>::begin() noexcept
 {
   return column_.begin();
 }
 
 template <class Master_matrix, class Support>
-inline typename Naive_vector_column<Master_matrix,Support>::const_iterator Naive_vector_column<Master_matrix,Support>::begin()
-    const noexcept
+inline typename Naive_vector_column<Master_matrix, Support>::const_iterator
+Naive_vector_column<Master_matrix, Support>::begin() const noexcept
 {
   return column_.begin();
 }
 
 template <class Master_matrix, class Support>
-inline typename Naive_vector_column<Master_matrix,Support>::iterator Naive_vector_column<Master_matrix,Support>::end() noexcept
+inline typename Naive_vector_column<Master_matrix, Support>::iterator
+Naive_vector_column<Master_matrix, Support>::end() noexcept
 {
   return column_.end();
 }
 
 template <class Master_matrix, class Support>
-inline typename Naive_vector_column<Master_matrix,Support>::const_iterator Naive_vector_column<Master_matrix,Support>::end()
-    const noexcept
+inline typename Naive_vector_column<Master_matrix, Support>::const_iterator
+Naive_vector_column<Master_matrix, Support>::end() const noexcept
 {
   return column_.end();
 }
 
 template <class Master_matrix, class Support>
-inline typename Naive_vector_column<Master_matrix,Support>::reverse_iterator
-Naive_vector_column<Master_matrix,Support>::rbegin() noexcept
+inline typename Naive_vector_column<Master_matrix, Support>::reverse_iterator
+Naive_vector_column<Master_matrix, Support>::rbegin() noexcept
 {
   return column_.rbegin();
 }
 
 template <class Master_matrix, class Support>
-inline typename Naive_vector_column<Master_matrix,Support>::const_reverse_iterator Naive_vector_column<Master_matrix,Support>::rbegin()
-    const noexcept
+inline typename Naive_vector_column<Master_matrix, Support>::const_reverse_iterator
+Naive_vector_column<Master_matrix, Support>::rbegin() const noexcept
 {
   return column_.rbegin();
 }
 
 template <class Master_matrix, class Support>
-inline typename Naive_vector_column<Master_matrix,Support>::reverse_iterator
-Naive_vector_column<Master_matrix,Support>::rend() noexcept
+inline typename Naive_vector_column<Master_matrix, Support>::reverse_iterator
+Naive_vector_column<Master_matrix, Support>::rend() noexcept
 {
   return column_.rend();
 }
 
 template <class Master_matrix, class Support>
-inline typename Naive_vector_column<Master_matrix,Support>::const_reverse_iterator Naive_vector_column<Master_matrix,Support>::rend()
-    const noexcept
+inline typename Naive_vector_column<Master_matrix, Support>::const_reverse_iterator
+Naive_vector_column<Master_matrix, Support>::rend() const noexcept
 {
   return column_.rend();
 }
 
 template <class Master_matrix, class Support>
 template <class Entry_range>
-inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_matrix,Support>::operator+=(const Entry_range& column)
+inline Naive_vector_column<Master_matrix, Support>& Naive_vector_column<Master_matrix, Support>::operator+=(
+    const Entry_range& column)
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Entry_range, Naive_vector_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
@@ -660,7 +669,8 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
 }
 
 template <class Master_matrix, class Support>
-inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_matrix,Support>::operator+=(Naive_vector_column& column)
+inline Naive_vector_column<Master_matrix, Support>& Naive_vector_column<Master_matrix, Support>::operator+=(
+    Naive_vector_column& column)
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
@@ -676,7 +686,8 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
 }
 
 template <class Master_matrix, class Support>
-inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_matrix,Support>::operator*=(unsigned int v)
+inline Naive_vector_column<Master_matrix, Support>& Naive_vector_column<Master_matrix, Support>::operator*=(
+    unsigned int v)
 {
   if constexpr (Master_matrix::Option_list::is_z2) {
     if (v % 2 == 0) {
@@ -711,8 +722,9 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
 
 template <class Master_matrix, class Support>
 template <class Entry_range>
-inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_matrix,Support>::multiply_target_and_add(
-    const Field_element& val, const Entry_range& column)
+inline Naive_vector_column<Master_matrix, Support>&
+Naive_vector_column<Master_matrix, Support>::multiply_target_and_add(const Field_element& val,
+                                                                     const Entry_range& column)
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Entry_range, Naive_vector_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
@@ -735,8 +747,9 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
 }
 
 template <class Master_matrix, class Support>
-inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_matrix,Support>::multiply_target_and_add(
-    const Field_element& val, Naive_vector_column& column)
+inline Naive_vector_column<Master_matrix, Support>&
+Naive_vector_column<Master_matrix, Support>::multiply_target_and_add(const Field_element& val,
+                                                                     Naive_vector_column& column)
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
@@ -773,8 +786,9 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
 
 template <class Master_matrix, class Support>
 template <class Entry_range>
-inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_matrix,Support>::multiply_source_and_add(
-    const Entry_range& column, const Field_element& val)
+inline Naive_vector_column<Master_matrix, Support>&
+Naive_vector_column<Master_matrix, Support>::multiply_source_and_add(const Entry_range& column,
+                                                                     const Field_element& val)
 {
   static_assert((!Master_matrix::isNonBasic || std::is_same_v<Entry_range, Naive_vector_column>),
                 "For boundary columns, the range has to be a column of same type to help ensure the validity of the "
@@ -794,8 +808,9 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
 }
 
 template <class Master_matrix, class Support>
-inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_matrix,Support>::multiply_source_and_add(
-    Naive_vector_column& column, const Field_element& val)
+inline Naive_vector_column<Master_matrix, Support>&
+Naive_vector_column<Master_matrix, Support>::multiply_source_and_add(Naive_vector_column& column,
+                                                                     const Field_element& val)
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
@@ -826,7 +841,7 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
 }
 
 template <class Master_matrix, class Support>
-inline void Naive_vector_column<Master_matrix,Support>::push_back(const Entry& entry)
+inline void Naive_vector_column<Master_matrix, Support>::push_back(const Entry& entry)
 {
   static_assert(Master_matrix::Option_list::is_of_boundary_type, "`push_back` is not available for Chain matrices.");
 
@@ -840,10 +855,13 @@ inline void Naive_vector_column<Master_matrix,Support>::push_back(const Entry& e
 }
 
 template <class Master_matrix, class Support>
-inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_matrix,Support>::operator=(
+inline Naive_vector_column<Master_matrix, Support>& Naive_vector_column<Master_matrix, Support>::operator=(
     const Naive_vector_column& other)
 {
   static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
+
+  // to avoid destroying the column when building from it-self in the for loop below...
+  if (this == &other) return *this;
 
   Dim_opt::operator=(other);
   Chain_opt::operator=(other);
@@ -853,7 +871,6 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
 
   while (column_.size() > other.column_.size()) {
     if (column_.back() == nullptr) {
-      if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(column_.back());
       tmpPool->destroy(column_.back());
     }
     column_.pop_back();
@@ -863,7 +880,6 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
   Index i = 0;
   for (const Entry* entry : other.column_) {
     if (column_[i] != nullptr) {
-      if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(column_[i]);
       tmpPool->destroy(column_[i]);
     }
     if constexpr (Master_matrix::Option_list::is_z2) {
@@ -879,22 +895,47 @@ inline Naive_vector_column<Master_matrix,Support>& Naive_vector_column<Master_ma
 }
 
 template <class Master_matrix, class Support>
-inline void Naive_vector_column<Master_matrix,Support>::_delete_entry(Entry* entry)
+inline Naive_vector_column<Master_matrix, Support>& Naive_vector_column<Master_matrix, Support>::operator=(
+    Naive_vector_column&& other) noexcept
+{
+  static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
+
+  // to avoid destroying the column before building from it-self...
+  if (&column_ == &(other.column_)) return *this;
+
+  Dim_opt::operator=(std::move(other));
+  Chain_opt::operator=(std::move(other));
+
+  for (auto* entry : column_) {
+    if (entry != nullptr) _delete_entry(entry);
+  }
+
+  column_ = std::move(other.column_);
+  operators_ = std::exchange(other.operators_, nullptr);
+  entryPool_ = std::exchange(other.entryPool_, nullptr);
+
+  return *this;
+}
+
+template <class Master_matrix, class Support>
+inline void Naive_vector_column<Master_matrix, Support>::_delete_entry(Entry* entry)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::unlink(entry);
   entryPool_->destroy(entry);
 }
 
 template <class Master_matrix, class Support>
-inline void Naive_vector_column<Master_matrix,Support>::_delete_entry(typename Column_support::iterator& it)
+inline void Naive_vector_column<Master_matrix, Support>::_delete_entry(typename Column_support::iterator& it)
 {
   _delete_entry(*it);
   ++it;
 }
 
 template <class Master_matrix, class Support>
-inline typename Naive_vector_column<Master_matrix,Support>::Entry* Naive_vector_column<Master_matrix,Support>::_insert_entry(
-    const Field_element& value, ID_index rowIndex, Column_support& column)
+inline typename Naive_vector_column<Master_matrix, Support>::Entry*
+Naive_vector_column<Master_matrix, Support>::_insert_entry(const Field_element& value,
+                                                           ID_index rowIndex,
+                                                           Column_support& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
@@ -911,7 +952,7 @@ inline typename Naive_vector_column<Master_matrix,Support>::Entry* Naive_vector_
 }
 
 template <class Master_matrix, class Support>
-inline void Naive_vector_column<Master_matrix,Support>::_insert_entry(ID_index rowIndex, Column_support& column)
+inline void Naive_vector_column<Master_matrix, Support>::_insert_entry(ID_index rowIndex, Column_support& column)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
@@ -939,7 +980,7 @@ inline void Naive_vector_column<Master_matrix, Support>::_update_entry(const Fie
 }
 
 template <class Master_matrix, class Support>
-inline void Naive_vector_column<Master_matrix,Support>::_update_entry(ID_index rowIndex, Index position)
+inline void Naive_vector_column<Master_matrix, Support>::_update_entry(ID_index rowIndex, Index position)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
@@ -952,7 +993,7 @@ inline void Naive_vector_column<Master_matrix,Support>::_update_entry(ID_index r
 
 template <class Master_matrix, class Support>
 template <class Entry_range>
-inline bool Naive_vector_column<Master_matrix,Support>::_add(const Entry_range& column)
+inline bool Naive_vector_column<Master_matrix, Support>::_add(const Entry_range& column)
 {
   if (column.begin() == column.end()) return false;
   if (column_.empty()) {  // chain should never enter here.
@@ -1002,10 +1043,10 @@ inline bool Naive_vector_column<Master_matrix,Support>::_add(const Entry_range& 
 
 template <class Master_matrix, class Support>
 template <class Entry_range>
-inline bool Naive_vector_column<Master_matrix,Support>::_multiply_target_and_add(const Field_element& val,
-                                                                         const Entry_range& column)
+inline bool Naive_vector_column<Master_matrix, Support>::_multiply_target_and_add(const Field_element& val,
+                                                                                  const Entry_range& column)
 {
-  if (val == 0u) {
+  if (val == 0U) {
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
       throw std::invalid_argument("A chain column should not be multiplied by 0.");
       // this would not only mess up the base, but also the pivots stored.
@@ -1060,10 +1101,10 @@ inline bool Naive_vector_column<Master_matrix,Support>::_multiply_target_and_add
 
 template <class Master_matrix, class Support>
 template <class Entry_range>
-inline bool Naive_vector_column<Master_matrix,Support>::_multiply_source_and_add(const Entry_range& column,
-                                                                         const Field_element& val)
+inline bool Naive_vector_column<Master_matrix, Support>::_multiply_source_and_add(const Entry_range& column,
+                                                                                  const Field_element& val)
 {
-  if (val == 0u || column.begin() == column.end()) {
+  if (val == 0U || column.begin() == column.end()) {
     return false;
   }
 
@@ -1107,8 +1148,9 @@ inline bool Naive_vector_column<Master_matrix,Support>::_multiply_source_and_add
  * @tparam Entry_constructor Template parameter of @ref Gudhi::persistence_matrix::Naive_vector_column.
  */
 template <class Master_matrix, class Support>
-struct std::hash<Gudhi::persistence_matrix::Naive_vector_column<Master_matrix,Support> > {
-  std::size_t operator()(const Gudhi::persistence_matrix::Naive_vector_column<Master_matrix,Support>& column) const {
+struct std::hash<Gudhi::persistence_matrix::Naive_vector_column<Master_matrix, Support> > {
+  std::size_t operator()(const Gudhi::persistence_matrix::Naive_vector_column<Master_matrix, Support>& column) const
+  {
     return Gudhi::persistence_matrix::hash_column(column);
   }
 };

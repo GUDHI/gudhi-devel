@@ -34,10 +34,11 @@ namespace persistence_matrix {
  * Inherited instead of @ref Entry_column_index, when the row access is disabled.
  */
 struct Dummy_entry_column_index_mixin {
-  Dummy_entry_column_index_mixin() {}
+  Dummy_entry_column_index_mixin() = default;
 
   template <typename Index>
-  Dummy_entry_column_index_mixin([[maybe_unused]] Index columnIndex) {}
+  Dummy_entry_column_index_mixin([[maybe_unused]] Index columnIndex)
+  {}
 };
 
 /**
@@ -47,10 +48,11 @@ struct Dummy_entry_column_index_mixin {
  * Inherited instead of @ref Entry_field_element, when @ref PersistenceMatrixOptions::is_z2 is true.
  */
 struct Dummy_entry_field_element_mixin {
-  Dummy_entry_field_element_mixin() {}
+  Dummy_entry_field_element_mixin() = default;
 
   template <class Field_element>
-  Dummy_entry_field_element_mixin([[maybe_unused]] Field_element t) {}
+  Dummy_entry_field_element_mixin([[maybe_unused]] Field_element t)
+  {}
 };
 
 /**
@@ -74,18 +76,6 @@ class Entry_column_index
    * @param columnIndex Column index of the entry.
    */
   Entry_column_index(Index columnIndex) : columnIndex_(columnIndex) {};
-  /**
-   * @brief Copy constructor.
-   *
-   * @param entry Entry to copy.
-   */
-  Entry_column_index(const Entry_column_index& entry) : columnIndex_(entry.columnIndex_) {};
-  /**
-   * @brief Move constructor.
-   *
-   * @param entry Entry to move.
-   */
-  Entry_column_index(Entry_column_index&& entry) noexcept : columnIndex_(std::exchange(entry.columnIndex_, 0)) {};
 
   /**
    * @brief Returns the @ref MatIdx column index stored in the entry.
@@ -100,14 +90,6 @@ class Entry_column_index
    * @param columnIndex Column index of the entry.
    */
   void set_column_index(Index columnIndex) { columnIndex_ = columnIndex; }
-
-  /**
-   * @brief Assign operator.
-   */
-  Entry_column_index& operator=(Entry_column_index other) {
-    std::swap(columnIndex_, other.columnIndex_);
-    return *this;
-  };
 
  private:
   Index columnIndex_; /**< Column index. */
@@ -133,19 +115,7 @@ class Entry_field_element
    *
    * @param element Value to store.
    */
-  Entry_field_element(Field_element element) : element_(element) {};
-  /**
-   * @brief Copy constructor.
-   *
-   * @param entry Entry to copy.
-   */
-  Entry_field_element(const Entry_field_element& entry) : element_(entry.element_) {};
-  /**
-   * @brief Move constructor.
-   *
-   * @param entry Entry to move.
-   */
-  Entry_field_element(Entry_field_element&& entry) noexcept : element_(std::move(entry.element_)) {};
+  Entry_field_element(Field_element element) : element_(std::move(element)) {};
 
   /**
    * @brief Returns the value stored in the entry.
@@ -167,14 +137,6 @@ class Entry_field_element
    * @param element Value to store.
    */
   void set_element(const Field_element& element) { element_ = element; }
-
-  /**
-   * @brief Assign operator.
-   */
-  Entry_field_element& operator=(Entry_field_element other) {
-    std::swap(element_, other.element_);
-    return *this;
-  };
 
  private:
   Field_element element_; /**< Value of the entry. */
@@ -209,7 +171,7 @@ class Entry : public Master_matrix::Entry_column_index_option,
   /**
    * @brief Constructs an entry with all attributes at default values.
    */
-  Entry() {};
+  Entry() = default;
   /**
    * @brief Constructs an entry with given row index. Other possible attributes are set at default values.
    *
@@ -242,6 +204,8 @@ class Entry : public Master_matrix::Entry_column_index_option,
         field_opt(std::move(static_cast<field_opt&>(entry))),
         rowIndex_(std::exchange(entry.rowIndex_, 0)) {};
 
+  ~Entry() = default;
+
   /**
    * @brief Returns the row index stored in the entry.
    *
@@ -259,10 +223,22 @@ class Entry : public Master_matrix::Entry_column_index_option,
   /**
    * @brief Assign operator.
    */
-  Entry& operator=(Entry other) {
-    col_opt::operator=(other);
-    field_opt::operator=(other);
+  Entry& operator=(Entry other) &
+  {
+    col_opt::operator=(std::move(other));
+    field_opt::operator=(std::move(other));
     std::swap(rowIndex_, other.rowIndex_);
+    return *this;
+  };
+
+  /**
+   * @brief Move assign operator.
+   */
+  Entry& operator=(Entry&& other) && noexcept
+  {
+    col_opt::operator=(std::move(other));
+    field_opt::operator=(std::move(other));
+    rowIndex_ = std::exchange(other.rowIndex_, 0);
     return *this;
   };
 
@@ -298,7 +274,8 @@ class Entry : public Master_matrix::Entry_column_index_option,
    *
    * @return A std::pair with first element the row index and second element the value.
    */
-  operator std::pair<ID_index, Field_element>() const {
+  operator std::pair<ID_index, Field_element>() const
+  {
     if constexpr (Master_matrix::Option_list::is_z2) {
       return {rowIndex_, 1};
     } else {
@@ -325,7 +302,8 @@ class Entry : public Master_matrix::Entry_column_index_option,
  */
 template <class Master_matrix>
 struct std::hash<Gudhi::persistence_matrix::Entry<Master_matrix> > {
-  std::size_t operator()(const Gudhi::persistence_matrix::Entry<Master_matrix>& entry) const {
+  std::size_t operator()(const Gudhi::persistence_matrix::Entry<Master_matrix>& entry) const
+  {
     return std::hash<unsigned int>()(entry.get_row_index());
   }
 };

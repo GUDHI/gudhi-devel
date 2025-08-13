@@ -29,13 +29,16 @@ namespace persistence_matrix {
  * @brief Empty structure.
  * Inherited instead of @ref Column_dimension_holder, when the columns are not storing a dimension.
  */
-struct Dummy_dimension_holder 
-{
-  Dummy_dimension_holder() {}
-  template <typename Dimension>
-  Dummy_dimension_holder([[maybe_unused]] Dimension dim) {}
+struct Dummy_dimension_holder {
+  Dummy_dimension_holder() = default;
 
-  friend void swap([[maybe_unused]] Dummy_dimension_holder& col1, [[maybe_unused]] Dummy_dimension_holder& col2) {}
+  template <typename Dimension>
+  Dummy_dimension_holder([[maybe_unused]] Dimension dim)
+  {}
+
+  friend void swap([[maybe_unused]] Dummy_dimension_holder& col1,
+                   [[maybe_unused]] Dummy_dimension_holder& col2) noexcept
+  {}
 };
 
 /**
@@ -43,44 +46,49 @@ struct Dummy_dimension_holder
  * @ingroup persistence_matrix
  *
  * @brief Class managing the dimension access of a column.
- * 
+ *
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
-struct Column_dimension_holder 
-{
-  using Dimension = typename Master_matrix::Dimension;  /**< Dimension value type. */
+struct Column_dimension_holder {
+  using Dimension = typename Master_matrix::Dimension; /**< Dimension value type. */
 
   /**
    * @brief Default constructor. Sets the dimension to 0 for @ref boundarymatrix "boundary matrices" and to
    * @ref Matrix::get_null_value "null index" for @ref chainmatrix "chain matrices".
    */
   Column_dimension_holder()
-      : dim_(Master_matrix::Option_list::is_of_boundary_type ? 0
-                                                             : Master_matrix::template get_null_value<Dimension>()) {}
+      : dim_(Master_matrix::Option_list::is_of_boundary_type ? 0 : Master_matrix::template get_null_value<Dimension>())
+  {}
+
   /**
    * @brief Constructor setting the dimension to the given value.
-   * 
+   *
    * @param dim Dimension of the column.
    */
   Column_dimension_holder(Dimension dim) : dim_(dim) {}
+
   /**
    * @brief Copy constructor.
-   * 
+   *
    * @param col Column to copy.
    */
-  Column_dimension_holder(const Column_dimension_holder& col) : dim_(col.dim_) {}
+  Column_dimension_holder(const Column_dimension_holder& col) = default;
+
   /**
    * @brief Move constructor.
-   * 
+   *
    * @param col Column to move.
    */
-  Column_dimension_holder(Column_dimension_holder&& col)
-      : dim_(std::exchange(col.dim_, Master_matrix::template get_null_value<Dimension>())) {}
+  Column_dimension_holder(Column_dimension_holder&& col) noexcept
+      : dim_(std::exchange(col.dim_, Master_matrix::template get_null_value<Dimension>()))
+  {}
+
+  ~Column_dimension_holder() = default;
 
   /**
    * @brief Returns the dimension of the column.
-   * 
+   *
    * @return The dimension of the column.
    */
   Dimension get_dimension() const { return dim_; }
@@ -88,20 +96,30 @@ struct Column_dimension_holder
   /**
    * @brief Assign operator.
    */
-  Column_dimension_holder& operator=(const Column_dimension_holder& other) {
-    dim_ = other.dim_;
+  Column_dimension_holder& operator=(const Column_dimension_holder& other) = default;
+
+  /**
+   * @brief Move assign operator.
+   */
+  Column_dimension_holder& operator=(Column_dimension_holder&& other) noexcept
+  {
+    dim_ = std::exchange(other.dim_, Master_matrix::template get_null_value<Dimension>());
     return *this;
   }
+
   /**
    * @brief Swap operator.
    */
-  friend void swap(Column_dimension_holder& col1, Column_dimension_holder& col2) { std::swap(col1.dim_, col2.dim_); }
+  friend void swap(Column_dimension_holder& col1, Column_dimension_holder& col2) noexcept
+  {
+    std::swap(col1.dim_, col2.dim_);
+  }
 
  protected:
   void _swap_dimension(Column_dimension_holder& other) { std::swap(dim_, other.dim_); }
 
  private:
-  Dimension dim_;  /**< Dimension of the column. */
+  Dimension dim_; /**< Dimension of the column. */
 };
 
 }  // namespace persistence_matrix
