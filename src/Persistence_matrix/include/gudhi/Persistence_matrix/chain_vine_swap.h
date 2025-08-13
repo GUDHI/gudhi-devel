@@ -55,9 +55,9 @@ constexpr bool _no_G_death_comparator([[maybe_unused]] unsigned int columnIndex1
 struct Dummy_chain_vine_swap {
   using CP = void;
 
-  friend void swap([[maybe_unused]] Dummy_chain_vine_swap& d1, [[maybe_unused]] Dummy_chain_vine_swap& d2) {}
+  friend void swap([[maybe_unused]] Dummy_chain_vine_swap& d1, [[maybe_unused]] Dummy_chain_vine_swap& d2) noexcept {}
 
-  Dummy_chain_vine_swap() {}
+  Dummy_chain_vine_swap() = default;
 
   template <typename BirthComparatorFunction, typename DeathComparatorFunction>
   Dummy_chain_vine_swap([[maybe_unused]] const BirthComparatorFunction& birthComparator,
@@ -71,9 +71,10 @@ struct Dummy_chain_vine_swap {
  * @brief Empty structure.
  * Inherited instead of @ref Chain_barcode_swap, when the barcode is not stored.
  */
-struct Dummy_chain_vine_pairing
-{
-  friend void swap([[maybe_unused]] Dummy_chain_vine_pairing& d1, [[maybe_unused]] Dummy_chain_vine_pairing& d2) {}
+struct Dummy_chain_vine_pairing {
+  friend void swap([[maybe_unused]] Dummy_chain_vine_pairing& d1,
+                   [[maybe_unused]] Dummy_chain_vine_pairing& d2) noexcept
+  {}
 };
 
 /**
@@ -95,7 +96,7 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
   /**
    * @brief Default constructor.
    */
-  Chain_barcode_swap() {};
+  Chain_barcode_swap() = default;
   /**
    * @brief Copy constructor.
    *
@@ -107,7 +108,9 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
    *
    * @param other Matrix to move.
    */
-  Chain_barcode_swap(Chain_barcode_swap&& other) : CP(std::move(static_cast<CP&>(other))) {};
+  Chain_barcode_swap(Chain_barcode_swap&& other) noexcept : CP(std::move(static_cast<CP&>(other))) {};
+
+  ~Chain_barcode_swap() = default;
 
   Chain_barcode_swap& operator=(Chain_barcode_swap other)
   {
@@ -115,17 +118,26 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
     return *this;
   }
 
-  friend void swap(Chain_barcode_swap& swap1, Chain_barcode_swap& swap2) {
+  Chain_barcode_swap& operator=(Chain_barcode_swap&& other) noexcept
+  {
+    CP::operator=(std::move(other));
+    return *this;
+  }
+
+  friend void swap(Chain_barcode_swap& swap1, Chain_barcode_swap& swap2) noexcept
+  {
     swap(static_cast<CP&>(swap1), static_cast<CP&>(swap2));
   }
 
  protected:
-  bool _is_negative_in_bar(ID_index pivot) const {
+  bool _is_negative_in_bar(ID_index pivot) const
+  {
     Pos_index pos = _get_pivot_position(pivot);
     return _death_val(pivot) == pos;
   }
 
-  void _positive_transpose_barcode(ID_index pivot1, ID_index pivot2) {
+  void _positive_transpose_barcode(ID_index pivot1, ID_index pivot2)
+  {
     Pos_index pos1 = _get_pivot_position(pivot1);
     Pos_index pos2 = _get_pivot_position(pivot2);
 
@@ -134,7 +146,8 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
     std::swap(CP::indexToBar_.at(pos1), CP::indexToBar_.at(pos2));
   }
 
-  void _negative_transpose_barcode(ID_index pivot1, ID_index pivot2) {
+  void _negative_transpose_barcode(ID_index pivot1, ID_index pivot2)
+  {
     Pos_index pos1 = _get_pivot_position(pivot1);
     Pos_index pos2 = _get_pivot_position(pivot2);
 
@@ -143,7 +156,8 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
     std::swap(CP::indexToBar_.at(pos1), CP::indexToBar_.at(pos2));
   }
 
-  void _positive_negative_transpose_barcode(ID_index pivot1, ID_index pivot2) {
+  void _positive_negative_transpose_barcode(ID_index pivot1, ID_index pivot2)
+  {
     Pos_index pos1 = _get_pivot_position(pivot1);
     Pos_index pos2 = _get_pivot_position(pivot2);
 
@@ -152,7 +166,8 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
     std::swap(CP::indexToBar_.at(pos1), CP::indexToBar_.at(pos2));
   }
 
-  void _negative_positive_transpose_barcode(ID_index pivot1, ID_index pivot2) {
+  void _negative_positive_transpose_barcode(ID_index pivot1, ID_index pivot2)
+  {
     Pos_index pos1 = _get_pivot_position(pivot1);
     Pos_index pos2 = _get_pivot_position(pivot2);
 
@@ -161,28 +176,24 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
     std::swap(CP::indexToBar_.at(pos1), CP::indexToBar_.at(pos2));
   }
 
-  bool _are_adjacent(ID_index pivot1, ID_index pivot2) const {
+  bool _are_adjacent(ID_index pivot1, ID_index pivot2) const
+  {
     Pos_index pos1 = _get_pivot_position(pivot1);
     Pos_index pos2 = _get_pivot_position(pivot2);
     return pos1 < pos2 ? (pos2 - pos1) == 1 : (pos1 - pos2) == 1;
   }
 
-  Pos_index _death_val(ID_index pivot) const {
-    return CP::_death(_get_pivot_position(pivot));
-  }
+  Pos_index _death_val(ID_index pivot) const { return CP::_death(_get_pivot_position(pivot)); }
 
-  Pos_index _birth_val(ID_index pivot) const {
-    return CP::_birth(_get_pivot_position(pivot));
-  }
+  Pos_index _birth_val(ID_index pivot) const { return CP::_birth(_get_pivot_position(pivot)); }
 
-  void _reset() {
-    CP::_reset();
-  }
+  void _reset() { CP::_reset(); }
 
  private:
   using Master_chain_matrix = typename Master_matrix::Master_chain_matrix;
 
-  Pos_index _get_pivot_position(ID_index pivot) const {
+  Pos_index _get_pivot_position(ID_index pivot) const
+  {
     const auto& map = static_cast<const Master_chain_matrix*>(this)->map_;
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       // TODO: quite often called, make public and pass position instead of pivot to avoid find() every time?
@@ -228,7 +239,7 @@ class Chain_vine_swap
   using Pos_index = typename Master_matrix::Pos_index;               /**< @ref PosIdx index type. */
   using Column_container = typename Master_matrix::Column_container; /**< Column container type. */
   using Column = typename Master_matrix::Column;                     /**< Column type. */
-  typedef bool (*EventCompFuncPointer)(Pos_index, Pos_index);        /**< Pointer type for birth/death comparators. */
+  using EventCompFuncPointer = bool (*)(Pos_index, Pos_index);       /**< Pointer type for birth/death comparators. */
 
   /**
    * @brief Default constructor. Only available if @ref PersistenceMatrixOptions::has_column_pairings is true.
@@ -248,18 +259,6 @@ class Chain_vine_swap
    */
   Chain_vine_swap(std::function<bool(Pos_index, Pos_index)> birthComparator,
                   std::function<bool(Pos_index, Pos_index)> deathComparator = _no_G_death_comparator);
-  /**
-   * @brief Copy constructor.
-   *
-   * @param matrixToCopy Matrix to copy.
-   */
-  Chain_vine_swap(const Chain_vine_swap& matrixToCopy);
-  /**
-   * @brief Move constructor.
-   *
-   * @param other Matrix to move.
-   */
-  Chain_vine_swap(Chain_vine_swap&& other) noexcept;
 
   /**
    * @brief Does the same than @ref vine_swap, but assumes that the swap is non trivial and
@@ -290,14 +289,10 @@ class Chain_vine_swap
   Index vine_swap(Index columnIndex1, Index columnIndex2);
 
   /**
-   * @brief Assign operator.
-   */
-  Chain_vine_swap& operator=(Chain_vine_swap other);
-
-  /**
    * @brief Swap operator.
    */
-  friend void swap(Chain_vine_swap& swap1, Chain_vine_swap& swap2) {
+  friend void swap(Chain_vine_swap& swap1, Chain_vine_swap& swap2) noexcept
+  {
     std::swap(swap1.birthComp_, swap2.birthComp_);
     std::swap(swap1.deathComp_, swap2.deathComp_);
   }
@@ -316,6 +311,7 @@ class Chain_vine_swap
   void _swap_positions(ID_index pivot1, ID_index pivot2);
 
   constexpr Master_chain_matrix* _matrix() { return static_cast<Master_chain_matrix*>(this); }
+
   constexpr const Master_chain_matrix* _matrix() const { return static_cast<const Master_chain_matrix*>(this); }
 };
 
@@ -330,17 +326,6 @@ template <class Master_matrix>
 inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(std::function<bool(Pos_index, Pos_index)> birthComparator,
                                                        std::function<bool(Pos_index, Pos_index)> deathComparator)
     : birthComp_(std::move(birthComparator)), deathComp_(std::move(deathComparator))
-{}
-
-template <class Master_matrix>
-inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(const Chain_vine_swap& matrixToCopy)
-    : birthComp_(matrixToCopy.birthComp_), deathComp_(matrixToCopy.deathComp_)
-{}
-
-template <class Master_matrix>
-inline Chain_vine_swap<Master_matrix>::Chain_vine_swap(Chain_vine_swap<Master_matrix>&& other) noexcept
-    : birthComp_(std::move(other.birthComp_)),
-      deathComp_(std::move(other.deathComp_))
 {}
 
 template <class Master_matrix>
@@ -422,14 +407,6 @@ inline typename Chain_vine_swap<Master_matrix>::Index Chain_vine_swap<Master_mat
     return columnIndex1;
   }
   return _positive_vine_swap(columnIndex1, columnIndex2);
-}
-
-template <class Master_matrix>
-inline Chain_vine_swap<Master_matrix>& Chain_vine_swap<Master_matrix>::operator=(Chain_vine_swap<Master_matrix> other)
-{
-  std::swap(birthComp_, other.birthComp_);
-  std::swap(deathComp_, other.deathComp_);
-  return *this;
 }
 
 template <class Master_matrix>

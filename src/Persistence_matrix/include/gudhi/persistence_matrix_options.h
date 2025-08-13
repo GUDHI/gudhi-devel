@@ -17,6 +17,8 @@
 #ifndef PM_OPTIONS_INCLUDED
 #define PM_OPTIONS_INCLUDED
 
+#include <cstdint>
+
 #include <gudhi/Fields/Zp_field_operators.h>
 
 namespace Gudhi {
@@ -27,7 +29,7 @@ namespace persistence_matrix {
  *
  * @brief List of column types.
  */
-enum class Column_types { 
+enum class Column_types : std::uint8_t {
   LIST,           /**< @ref List_column "": Underlying container is a std::list<@ref Entry*>. */
   SET,            /**< @ref Set_column "": Underlying container is a std::set<@ref Entry*>. */
   HEAP,           /**< @ref Heap_column "": Underlying container is a std::vector<@ref Entry*> ordered as a heap.
@@ -48,10 +50,10 @@ enum class Column_types {
  * @brief List if indexation schemes. See @ref mp_indexation "description of indexation schemes" for more details
  * about the meaning of the indexation types.
  */
-enum class Column_indexation_types { 
-  CONTAINER,  /**< Default use of @ref MatIdx indices. */
-  POSITION,   /**< All input and output @ref MatIdx indices are replaced with @ref PosIdx indices. */
-  IDENTIFIER  /**< All input and output @ref MatIdx indices are replaced with @ref IDIdx indices. */
+enum class Column_indexation_types : std::uint8_t {
+  CONTAINER, /**< Default use of @ref MatIdx indices. */
+  POSITION,  /**< All input and output @ref MatIdx indices are replaced with @ref PosIdx indices. */
+  IDENTIFIER /**< All input and output @ref MatIdx indices are replaced with @ref IDIdx indices. */
 };
 
 /**
@@ -64,19 +66,18 @@ enum class Column_indexation_types {
  *
  * To create other matrix types, the easiest is to simply inherit from this structure and overwrite only the options
  * one is interested in.
- * 
+ *
  * @tparam col_type Column type for the matrix. Default value: @ref Column_types::INTRUSIVE_SET
  * @tparam is_z2_only Flag indicating if only \f$Z_2\f$ coefficient will be used with the matrix. Set to true if it
  * is the case, false otherwise. Default value: true.
  * @tparam FieldOperators Field operators used by the matrix, see FieldOperators concept.
- * Only necessary if @p is_z2_only is false. 
+ * Only necessary if @p is_z2_only is false.
  * Default value: @ref Gudhi::persistence_fields::Zp_field_operators<>.
  */
-template <Column_types col_type = Column_types::INTRUSIVE_SET, 
+template <Column_types col_type = Column_types::INTRUSIVE_SET,
           bool is_z2_only = true,
           class FieldOperators = persistence_fields::Zp_field_operators<> >
-struct Default_options 
-{
+struct Default_options {
   using Field_coeff_operators = FieldOperators;
   using Dimension = int;
   using Index = unsigned int;
@@ -104,17 +105,16 @@ struct Default_options
   static const bool can_retrieve_representative_cycles = false;
 };
 
-//TODO: The following structures are the one used by the other modules or debug tests.
-// They will probably be removed once the module was properly integrated.
+// TODO: The following structures are the one used by the other modules or debug tests.
+//  They will probably be removed once the module was properly integrated.
 
 /**
  * @brief Options used for the Zigzag persistence module.
- * 
+ *
  * @tparam column_type Column type for the matrix.
  */
 template <Column_types column_type = Column_types::INTRUSIVE_LIST>
-struct Zigzag_options : Default_options<column_type, true> 
-{
+struct Zigzag_options : Default_options<column_type, true> {
   static const bool has_row_access = true;
   static const bool has_column_pairings = false;
   static const bool has_vine_update = true;
@@ -126,40 +126,37 @@ struct Zigzag_options : Default_options<column_type, true>
 
 /**
  * @brief Options needed to use the representative cycles.
- * 
+ *
  * @tparam col_type Column type for the matrix.
  */
 template <Column_types col_type = Column_types::INTRUSIVE_SET>
-struct Representative_cycles_options : Default_options<col_type, true> 
-{
+struct Representative_cycles_options : Default_options<col_type, true> {
   static const bool has_column_pairings = true;
   static const bool can_retrieve_representative_cycles = true;
 };
 
 /**
  * @brief Options used by the Multipersistence module.
- * 
+ *
  * @tparam column_type Column type for the matrix.
  */
 template <Column_types column_type = Column_types::INTRUSIVE_SET>
-struct Multi_persistence_options : Default_options<column_type, true> 
-{
+struct Multi_persistence_options : Default_options<column_type, true> {
   static const bool has_column_pairings = true;
   static const bool has_vine_update = true;
 };
 
 /**
  * @brief Options used by the cohomology module.
- * 
+ *
  * @tparam column_type Column type for the matrix.
  * @tparam is_z2_only True if Z2.
  * @tparam FieldOperators Field operator.
  */
-template <Column_types column_type = Column_types::INTRUSIVE_LIST, 
+template <Column_types column_type = Column_types::INTRUSIVE_LIST,
           bool is_z2_only = true,
           class FieldOperators = persistence_fields::Zp_field_operators<> >
-struct Cohomology_persistence_options : Default_options<column_type, is_z2_only, FieldOperators> 
-{
+struct Cohomology_persistence_options : Default_options<column_type, is_z2_only, FieldOperators> {
   static const bool has_row_access = true;
   static const bool has_column_compression = true;
   static const bool has_removable_rows = true;

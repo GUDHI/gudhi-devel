@@ -41,25 +41,25 @@ template <class Underlying_matrix, class Master_matrix>
 class Id_to_index_overlay
 {
  public:
-  using Index = typename Master_matrix::Index;                          /**< @ref MatIdx index type. */
-  using ID_index = typename Master_matrix::ID_index;                    /**< @ref IDIdx index type. */
-  using Pos_index = typename Master_matrix::Pos_index;                  /**< @ref PosIdx index type. */
-  using Dimension = typename Master_matrix::Dimension;                  /**< Dimension value type. */
+  using Index = typename Master_matrix::Index;         /**< @ref MatIdx index type. */
+  using ID_index = typename Master_matrix::ID_index;   /**< @ref IDIdx index type. */
+  using Pos_index = typename Master_matrix::Pos_index; /**< @ref PosIdx index type. */
+  using Dimension = typename Master_matrix::Dimension; /**< Dimension value type. */
   /**
    * @brief Field operators class. Necessary only if @ref PersistenceMatrixOptions::is_z2 is false.
    */
   using Field_operators = typename Master_matrix::Field_operators;
-  using Field_element = typename Master_matrix::Element;                /**< Type of an field element. */
-  using Boundary = typename Master_matrix::Boundary;                    /**< Type of an input column. */
-  using Column = typename Master_matrix::Column;                        /**< Column type. */
-  using Row = typename Master_matrix::Row;                              /**< Row type,
-                                                                             only necessary with row access option. */
-  using Bar = typename Master_matrix::Bar;                              /**< Bar type. */
-  using Barcode = typename Master_matrix::Barcode;                      /**< Barcode type. */
-  using Cycle = typename Master_matrix::Cycle;                          /**< Cycle type. */
-  using Entry_constructor = typename Master_matrix::Entry_constructor;  /**< Factory of @ref Entry classes. */
-  using Column_settings = typename Master_matrix::Column_settings;      /**< Structure giving access to the columns to
-                                                                             necessary external classes. */
+  using Field_element = typename Master_matrix::Element;               /**< Type of an field element. */
+  using Boundary = typename Master_matrix::Boundary;                   /**< Type of an input column. */
+  using Column = typename Master_matrix::Column;                       /**< Column type. */
+  using Row = typename Master_matrix::Row;                             /**< Row type,
+                                                                            only necessary with row access option. */
+  using Bar = typename Master_matrix::Bar;                             /**< Bar type. */
+  using Barcode = typename Master_matrix::Barcode;                     /**< Barcode type. */
+  using Cycle = typename Master_matrix::Cycle;                         /**< Cycle type. */
+  using Entry_constructor = typename Master_matrix::Entry_constructor; /**< Factory of @ref Entry classes. */
+  using Column_settings = typename Master_matrix::Column_settings;     /**< Structure giving access to the columns to
+                                                                            necessary external classes. */
 
   /**
    * @brief Constructs an empty matrix.
@@ -90,8 +90,7 @@ class Id_to_index_overlay
    * the necessary external classes specifically necessary for the chosen column type, such as custom allocators.
    */
   template <class Boundary_range = Boundary>
-  Id_to_index_overlay(const std::vector<Boundary_range>& orderedBoundaries,
-                      Column_settings* colSettings);
+  Id_to_index_overlay(const std::vector<Boundary_range>& orderedBoundaries, Column_settings* colSettings);
   /**
    * @brief Constructs a new empty matrix and reserves space for the given number of columns.
    *
@@ -204,8 +203,7 @@ class Id_to_index_overlay
    * The structure should contain all the necessary external classes specifically necessary for the chosen column type,
    * such as custom allocators. If null pointer, the pointer stored in @p matrixToCopy is used instead.
    */
-  Id_to_index_overlay(const Id_to_index_overlay& matrixToCopy,
-                      Column_settings* colSettings = nullptr);
+  Id_to_index_overlay(const Id_to_index_overlay& matrixToCopy, Column_settings* colSettings = nullptr);
   /**
    * @brief Move constructor.
    *
@@ -265,7 +263,8 @@ class Id_to_index_overlay
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_boundary(ID_index cellIndex, const Boundary_range& boundary,
+  void insert_boundary(ID_index cellIndex,
+                       const Boundary_range& boundary,
                        Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Returns the column at the given @ref IDIdx index.
@@ -507,22 +506,28 @@ class Id_to_index_overlay
    * @param colSettings Pointer to an existing setting structure for the columns. The structure should contain all
    * the necessary external classes specifically necessary for the chosen column type, such as custom allocators.
    */
-  void reset(Column_settings* colSettings) {
+  void reset(Column_settings* colSettings)
+  {
     matrix_.reset(colSettings);
-    if constexpr (Master_matrix::Option_list::is_of_boundary_type) if (idToIndex_ != nullptr) idToIndex_->clear();
+    if constexpr (Master_matrix::Option_list::is_of_boundary_type)
+      if (idToIndex_ != nullptr) idToIndex_->clear();
     nextIndex_ = 0;
   }
-
-  // void set_operators(Field_operators* operators) { matrix_.set_operators(operators); }
 
   /**
    * @brief Assign operator.
    */
   Id_to_index_overlay& operator=(const Id_to_index_overlay& other);
   /**
+   * @brief Assign operator.
+   */
+  Id_to_index_overlay& operator=(Id_to_index_overlay&& other) noexcept;
+
+  /**
    * @brief Swap operator.
    */
-  friend void swap(Id_to_index_overlay& matrix1, Id_to_index_overlay& matrix2) {
+  friend void swap(Id_to_index_overlay& matrix1, Id_to_index_overlay& matrix2) noexcept
+  {
     swap(matrix1.matrix_, matrix2.matrix_);
     std::swap(matrix1.idToIndex_, matrix2.idToIndex_);
     std::swap(matrix1.nextIndex_, matrix2.nextIndex_);
@@ -622,9 +627,9 @@ class Id_to_index_overlay
  private:
   using Dictionary = typename Master_matrix::template Dictionary<Index>;
 
-  Underlying_matrix matrix_;  /**< Interfaced matrix. */
-  Dictionary* idToIndex_;     /**< Map from @ref IDIdx index to @ref MatIdx index. */
-  Index nextIndex_;           /**< Next unused index. */
+  Underlying_matrix matrix_; /**< Interfaced matrix. */
+  Dictionary* idToIndex_;    /**< Map from @ref IDIdx index to @ref MatIdx index. */
+  Index nextIndex_;          /**< Next unused index. */
 
   void _initialize_map(unsigned int size);
   Index _id_to_index(ID_index id) const;
@@ -641,7 +646,8 @@ inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::Id_to_index_overla
 template <class Underlying_matrix, class Master_matrix>
 template <class Boundary_range>
 inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::Id_to_index_overlay(
-    const std::vector<Boundary_range>& orderedBoundaries, Column_settings* colSettings)
+    const std::vector<Boundary_range>& orderedBoundaries,
+    Column_settings* colSettings)
     : matrix_(orderedBoundaries, colSettings), idToIndex_(nullptr), nextIndex_(orderedBoundaries.size())
 {
   _initialize_map(orderedBoundaries.size());
@@ -654,7 +660,7 @@ inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::Id_to_index_overla
 
 template <class Underlying_matrix, class Master_matrix>
 inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::Id_to_index_overlay(unsigned int numberOfColumns,
-                                                                                 Column_settings* colSettings)
+                                                                                  Column_settings* colSettings)
     : matrix_(numberOfColumns, colSettings), idToIndex_(nullptr), nextIndex_(0)
 {
   _initialize_map(numberOfColumns);
@@ -697,19 +703,16 @@ inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::Id_to_index_overla
     Column_settings* colSettings,
     const BirthComparatorFunction& birthComparator,
     const DeathComparatorFunction& deathComparator)
-    : matrix_(numberOfColumns, colSettings, birthComparator, deathComparator),
-      idToIndex_(nullptr),
-      nextIndex_(0)
+    : matrix_(numberOfColumns, colSettings, birthComparator, deathComparator), idToIndex_(nullptr), nextIndex_(0)
 {
   _initialize_map(numberOfColumns);
 }
 
 template <class Underlying_matrix, class Master_matrix>
 inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::Id_to_index_overlay(
-    const Id_to_index_overlay& matrixToCopy, Column_settings* colSettings)
-    : matrix_(matrixToCopy.matrix_, colSettings),
-      idToIndex_(nullptr),
-      nextIndex_(matrixToCopy.nextIndex_)
+    const Id_to_index_overlay& matrixToCopy,
+    Column_settings* colSettings)
+    : matrix_(matrixToCopy.matrix_, colSettings), idToIndex_(nullptr), nextIndex_(matrixToCopy.nextIndex_)
 {
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
     idToIndex_ = new Dictionary(*matrixToCopy.idToIndex_);
@@ -723,20 +726,21 @@ inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::Id_to_index_overla
     : matrix_(std::move(other.matrix_)),
       idToIndex_(std::exchange(other.idToIndex_, nullptr)),
       nextIndex_(std::exchange(other.nextIndex_, 0))
-{}
+{
+}
 
 template <class Underlying_matrix, class Master_matrix>
 inline Id_to_index_overlay<Underlying_matrix, Master_matrix>::~Id_to_index_overlay()
 {
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
-    if (idToIndex_ != nullptr) delete idToIndex_;
+    delete idToIndex_;
   }
 }
 
 template <class Underlying_matrix, class Master_matrix>
 template <class Boundary_range>
 inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_boundary(const Boundary_range& boundary,
-                                                                                  Dimension dim)
+                                                                                   Dimension dim)
 {
   matrix_.insert_boundary(boundary, dim);
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
@@ -756,8 +760,8 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_bounda
 template <class Underlying_matrix, class Master_matrix>
 template <class Boundary_range>
 inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_boundary(ID_index cellIndex,
-                                                                                  const Boundary_range& boundary,
-                                                                                  Dimension dim)
+                                                                                   const Boundary_range& boundary,
+                                                                                   Dimension dim)
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     GUDHI_CHECK(idToIndex_->find(cellIndex) == idToIndex_->end(),
@@ -836,20 +840,22 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maxima
 
 template <class Underlying_matrix, class Master_matrix>
 inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maximal_cell(
-    ID_index cellID, const std::vector<ID_index>& columnsToSwap)
+    ID_index cellID,
+    const std::vector<ID_index>& columnsToSwap)
 {
   static_assert(!Master_matrix::Option_list::is_of_boundary_type,
                 "'remove_maximal_cell(ID_index,const std::vector<Index>&)' is not available for the chosen options.");
   std::vector<Index> translatedIndices;
-  std::transform(columnsToSwap.cbegin(), columnsToSwap.cend(), std::back_inserter(translatedIndices),
-                 [&](ID_index id) { return _id_to_index(id); });
+  std::transform(columnsToSwap.cbegin(), columnsToSwap.cend(), std::back_inserter(translatedIndices), [&](ID_index id) {
+    return _id_to_index(id);
+  });
   matrix_.remove_maximal_cell(cellID, translatedIndices);
 }
 
 template <class Underlying_matrix, class Master_matrix>
 inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_last()
 {
-  if (idToIndex_->empty()) return;  //empty matrix
+  if (idToIndex_->empty()) return;  // empty matrix
 
   matrix_.remove_last();
 
@@ -857,7 +863,7 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_last()
     --nextIndex_;
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       auto it = idToIndex_->begin();
-      while (it->second != nextIndex_) ++it;   //should never reach idToIndex_->end()
+      while (it->second != nextIndex_) ++it;  // should never reach idToIndex_->end()
       idToIndex_->erase(it);
     } else {
       Index id = idToIndex_->size() - 1;
@@ -899,14 +905,18 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::add_to(ID_ind
 
 template <class Underlying_matrix, class Master_matrix>
 inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::multiply_target_and_add_to(
-    ID_index sourceCellID, const Field_element& coefficient, ID_index targetCellID)
+    ID_index sourceCellID,
+    const Field_element& coefficient,
+    ID_index targetCellID)
 {
   return matrix_.multiply_target_and_add_to(_id_to_index(sourceCellID), coefficient, _id_to_index(targetCellID));
 }
 
 template <class Underlying_matrix, class Master_matrix>
 inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::multiply_source_and_add_to(
-    const Field_element& coefficient, ID_index sourceCellID, ID_index targetCellID)
+    const Field_element& coefficient,
+    ID_index sourceCellID,
+    ID_index targetCellID)
 {
   return matrix_.multiply_source_and_add_to(coefficient, _id_to_index(sourceCellID), _id_to_index(targetCellID));
 }
@@ -925,7 +935,7 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::zero_column(I
 
 template <class Underlying_matrix, class Master_matrix>
 inline bool Id_to_index_overlay<Underlying_matrix, Master_matrix>::is_zero_entry(ID_index cellID,
-                                                                               ID_index rowIndex) const
+                                                                                 ID_index rowIndex) const
 {
   return matrix_.is_zero_entry(_id_to_index(cellID), rowIndex);
 }
@@ -938,15 +948,15 @@ inline bool Id_to_index_overlay<Underlying_matrix, Master_matrix>::is_zero_colum
 
 template <class Underlying_matrix, class Master_matrix>
 inline typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::ID_index
-Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_column_with_pivot(ID_index simplexIndex) const
+Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_column_with_pivot(ID_index cellIndex) const
 {
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
-    Index pos = matrix_.get_column_with_pivot(simplexIndex);
+    Index pos = matrix_.get_column_with_pivot(cellIndex);
     ID_index i = 0;
     while (_id_to_index(i) != pos) ++i;
     return i;
   } else {
-    return simplexIndex;
+    return cellIndex;
   }
 }
 
@@ -965,14 +975,30 @@ template <class Underlying_matrix, class Master_matrix>
 inline Id_to_index_overlay<Underlying_matrix, Master_matrix>&
 Id_to_index_overlay<Underlying_matrix, Master_matrix>::operator=(const Id_to_index_overlay& other)
 {
+  if (this == &other) return *this;
+
   matrix_ = other.matrix_;
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
-    if (idToIndex_ != nullptr) delete idToIndex_;
+    delete idToIndex_;
     idToIndex_ = other.idToIndex_;
   } else {
     idToIndex_ = &matrix_.pivotToColumnIndex_;
   }
   nextIndex_ = other.nextIndex_;
+
+  return *this;
+}
+
+template <class Underlying_matrix, class Master_matrix>
+inline Id_to_index_overlay<Underlying_matrix, Master_matrix>&
+Id_to_index_overlay<Underlying_matrix, Master_matrix>::operator=(Id_to_index_overlay&& other) noexcept
+{
+  matrix_ = std::move(other.matrix_);
+  if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
+    delete idToIndex_;
+  }
+  idToIndex_ = std::exchange(other.idToIndex_, nullptr);
+  nextIndex_ = std::exchange(other.nextIndex_, 0);
 
   return *this;
 }
@@ -1103,7 +1129,7 @@ template <class Underlying_matrix, class Master_matrix>
 inline typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::Index&
 Id_to_index_overlay<Underlying_matrix, Master_matrix>::_id_to_index(ID_index id)
 {
-  return idToIndex_->operator[](id);  //for maps, the entry is created if not existing as needed in the constructors
+  return idToIndex_->operator[](id);  // for maps, the entry is created if not existing as needed in the constructors
 }
 
 }  // namespace persistence_matrix

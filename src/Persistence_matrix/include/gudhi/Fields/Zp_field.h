@@ -76,6 +76,8 @@ class Zp_field_element
    */
   Zp_field_element(Zp_field_element&& toMove) noexcept : element_(std::exchange(toMove.element_, 0)) {}
 
+  ~Zp_field_element() = default;
+
   /**
    * @brief operator+=
    */

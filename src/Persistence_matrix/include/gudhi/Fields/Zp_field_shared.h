@@ -76,6 +76,8 @@ class Shared_Zp_field_element
    */
   Shared_Zp_field_element(Shared_Zp_field_element&& toMove) noexcept : element_(std::exchange(toMove.element_, 0)) {}
 
+  ~Shared_Zp_field_element() = default;
+
   /**
    * @brief Initialize the field to the given characteristic.
    * Should be called first before constructing the field elements.
@@ -355,7 +357,10 @@ class Shared_Zp_field_element
   /**
    * @brief Swap operator.
    */
-  friend void swap(Shared_Zp_field_element& f1, Shared_Zp_field_element& f2)  noexcept { std::swap(f1.element_, f2.element_); }
+  friend void swap(Shared_Zp_field_element& f1, Shared_Zp_field_element& f2) noexcept
+  {
+    std::swap(f1.element_, f2.element_);
+  }
 
   /**
    * @brief Casts the element into an unsigned int.

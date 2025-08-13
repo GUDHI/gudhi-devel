@@ -64,6 +64,8 @@ class Z2_field_element
    */
   Z2_field_element(Z2_field_element&& toMove) noexcept : element_(std::exchange(toMove.element_, false)) {}
 
+  ~Z2_field_element() = default;
+
   /**
    * @brief operator+=
    */
@@ -307,7 +309,7 @@ class Z2_field_element
   /**
    * @brief Casts the element into an unsigned int.
    */
-  operator unsigned int() const { return element_; }
+  operator unsigned int() const { return static_cast<unsigned int>(element_); }
 
   /**
    * @brief Returns the inverse of the element.

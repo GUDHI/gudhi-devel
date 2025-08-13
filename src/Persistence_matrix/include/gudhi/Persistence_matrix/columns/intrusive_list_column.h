@@ -79,10 +79,10 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
                         Row_container* rowContainer,
                         Column_settings* colSettings);
   template <class Container = typename Master_matrix::Boundary>
-  Intrusive_list_column(const Container& nonZeroChainRowIndices, Dimension dimension, Column_settings* colSettings);
+  Intrusive_list_column(const Container& nonZeroRowIndices, Dimension dimension, Column_settings* colSettings);
   template <class Container = typename Master_matrix::Boundary, class Row_container>
   Intrusive_list_column(Index columnIndex,
-                        const Container& nonZeroChainRowIndices,
+                        const Container& nonZeroRowIndices,
                         Dimension dimension,
                         Row_container* rowContainer,
                         Column_settings* colSettings);
@@ -97,8 +97,8 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
 
   std::vector<Field_element> get_content(int columnLength = -1) const;
   bool is_non_zero(ID_index rowIndex) const;
-  bool is_empty() const;
-  std::size_t size() const;
+  [[nodiscard]] bool is_empty() const;
+  [[nodiscard]] std::size_t size() const;
 
   template <class Row_index_map>
   void reorder(const Row_index_map& valueMap,
@@ -135,7 +135,8 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
 
   void push_back(const Entry& entry);
 
-  friend bool operator==(const Intrusive_list_column& c1, const Intrusive_list_column& c2) {
+  friend bool operator==(const Intrusive_list_column& c1, const Intrusive_list_column& c2)
+  {
     if (&c1 == &c2) return true;
 
     if constexpr (Master_matrix::Option_list::is_z2) {
@@ -153,7 +154,8 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
     }
   }
 
-  friend bool operator<(const Intrusive_list_column& c1, const Intrusive_list_column& c2) {
+  friend bool operator<(const Intrusive_list_column& c1, const Intrusive_list_column& c2)
+  {
     if (&c1 == &c2) return false;
 
     if constexpr (Master_matrix::Option_list::is_z2) {
@@ -173,8 +175,10 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
 
   // Disabled with row access.
   Intrusive_list_column& operator=(const Intrusive_list_column& other);
+  Intrusive_list_column& operator=(Intrusive_list_column&& other) noexcept;
 
-  friend void swap(Intrusive_list_column& col1, Intrusive_list_column& col2) {
+  friend void swap(Intrusive_list_column& col1, Intrusive_list_column& col2) noexcept
+  {
     swap(static_cast<typename Master_matrix::Row_access_option&>(col1),
          static_cast<typename Master_matrix::Row_access_option&>(col2));
     swap(static_cast<typename Master_matrix::Column_dimension_option&>(col1),
@@ -202,10 +206,11 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
 
   // The disposer object function for boost intrusive container
   struct Delete_disposer {
-    Delete_disposer() {};
+    Delete_disposer() = default;
     Delete_disposer(Intrusive_list_column* col) : col_(col) {};
 
-    void operator()(Entry* delete_this) {
+    void operator()(Entry* delete_this)
+    {
       if constexpr (Master_matrix::Option_list::has_row_access) col_->unlink(delete_this);
       col_->entryPool_->destroy(delete_this);
     }
@@ -459,7 +464,8 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Intrusive_lis
       operators_(std::exchange(column.operators_, nullptr)),
       entryPool_(std::exchange(column.entryPool_, nullptr)),
       column_(std::move(column.column_))
-{}
+{
+}
 
 template <class Master_matrix>
 inline Intrusive_list_column<Master_matrix>::~Intrusive_list_column()
@@ -859,6 +865,9 @@ inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix
 {
   static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
 
+  // otherwise the column will be destroyed before copying itself...
+  if (this == &other) return *this;
+
   Dim_opt::operator=(other);
   Chain_opt::operator=(other);
 
@@ -867,6 +876,27 @@ inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix
   operators_ = other.operators_;
   entryPool_ = other.entryPool_;
   column_.clone_from(other.column_, New_cloner(entryPool_), Delete_disposer(this));
+
+  return *this;
+}
+
+template <class Master_matrix>
+inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix>::operator=(
+    Intrusive_list_column&& other) noexcept
+{
+  static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
+
+  // to avoid destroying the column before building from it-self...
+  if (&column_ == &(other.column_)) return *this;
+
+  Dim_opt::operator=(std::move(other));
+  Chain_opt::operator=(std::move(other));
+
+  column_.clear_and_dispose(Delete_disposer(this));
+
+  operators_ = std::exchange(other.operators_, nullptr);
+  entryPool_ = std::exchange(other.entryPool_, nullptr);
+  column_ = std::move(other.column_);
 
   return *this;
 }
@@ -946,7 +976,8 @@ inline bool Intrusive_list_column<Master_matrix>::_multiply_source_and_add(const
  */
 template <class Master_matrix>
 struct std::hash<Gudhi::persistence_matrix::Intrusive_list_column<Master_matrix> > {
-  std::size_t operator()(const Gudhi::persistence_matrix::Intrusive_list_column<Master_matrix>& column) const {
+  std::size_t operator()(const Gudhi::persistence_matrix::Intrusive_list_column<Master_matrix>& column) const
+  {
     return Gudhi::persistence_matrix::hash_column(column);
   }
 };
