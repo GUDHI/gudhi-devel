@@ -20,7 +20,7 @@
 #include <algorithm>    //std::lower_bound
 #include <cmath>        //std::isnan, std::min
 #include <cstddef>      //std::size_t
-#include <cstdint>      //std::int32_t
+#include <cstdint>      //std::int32_t, std::uint8_t
 #include <cstring>      //memcpy
 #include <iterator>     //std::distance
 #include <ostream>      //std::ostream
@@ -37,22 +37,6 @@
 #include <gudhi/Multi_parameter_filtration.h>
 
 namespace Gudhi::multi_filtration {
-
-// declaration needed pre C++20 for friends with templates defined inside a class
-template <typename U>
-U compute_linear_projection();
-template <typename U>
-U compute_euclidean_distance_to();
-template <typename U>
-U compute_norm();
-template <typename OutValue, typename U>
-void compute_coordinates_in_grid();
-template <typename U>
-void evaluate_coordinates_in_grid();
-template<bool inverse>
-bool is_strict_less_than_lexicographically();
-template<bool inverse>
-bool is_less_or_equal_than_lexicographically();
 
 /**
  * @class Dynamic_multi_parameter_filtration Dynamic_multi_parameter_filtration.h
@@ -101,10 +85,10 @@ template <typename T, bool Co = false, bool Ensure1Criticality = false>
 class Dynamic_multi_parameter_filtration
 {
  private:
-  using Generator = Multi_parameter_generator<T, Co>;   /**< Generator type. */
+  using Generator = Multi_parameter_generator<T, Co>; /**< Generator type. */
 
  public:
-  using Underlying_container = std::vector<Generator>;  /**< Underlying container for values. */
+  using Underlying_container = std::vector<Generator>; /**< Underlying container for values. */
 
   // CONSTRUCTORS
 
@@ -234,9 +218,7 @@ class Dynamic_multi_parameter_filtration
   /**
    * @brief Copy constructor.
    */
-  Dynamic_multi_parameter_filtration(const Dynamic_multi_parameter_filtration &other)
-      : number_of_parameters_(other.number_of_parameters_), generators_(other.generators_)
-  {}
+  Dynamic_multi_parameter_filtration(const Dynamic_multi_parameter_filtration &other) = default;
 
   /**
    * @brief Copy constructor.
@@ -244,23 +226,31 @@ class Dynamic_multi_parameter_filtration
    * @tparam U Type convertible into `T`.
    */
   template <typename U, bool OtherCo, bool OtherEnsure1Criticality>
-  Dynamic_multi_parameter_filtration(const Dynamic_multi_parameter_filtration<U, OtherCo, OtherEnsure1Criticality> &other)
+  Dynamic_multi_parameter_filtration(
+      const Dynamic_multi_parameter_filtration<U, OtherCo, OtherEnsure1Criticality> &other)
       : number_of_parameters_(other.num_parameters()), generators_(other.begin(), other.end())
   {
-    if constexpr (Ensure1Criticality && !OtherEnsure1Criticality){
+    if constexpr (Ensure1Criticality && !OtherEnsure1Criticality) {
       if (generators_.size() != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
   }
 
   /**
+   * @brief Move constructor.
+   */
+  Dynamic_multi_parameter_filtration(Dynamic_multi_parameter_filtration &&other) noexcept = default;
+
+  ~Dynamic_multi_parameter_filtration() = default;
+
+  /**
    * @brief Assign operator.
    */
-  Dynamic_multi_parameter_filtration &operator=(const Dynamic_multi_parameter_filtration &other)
-  {
-    generators_ = other.generators_;
-    number_of_parameters_ = other.number_of_parameters_;
-    return *this;
-  }
+  Dynamic_multi_parameter_filtration &operator=(const Dynamic_multi_parameter_filtration &other) = default;
+
+  /**
+   * @brief Move assign operator.
+   */
+  Dynamic_multi_parameter_filtration &operator=(Dynamic_multi_parameter_filtration &&other) noexcept = default;
 
   /**
    * @brief Assign operator.
@@ -271,7 +261,7 @@ class Dynamic_multi_parameter_filtration
   Dynamic_multi_parameter_filtration &operator=(
       const Dynamic_multi_parameter_filtration<U, OtherCo, OtherEnsure1Criticality> &other)
   {
-    if constexpr (Ensure1Criticality && !OtherEnsure1Criticality){
+    if constexpr (Ensure1Criticality && !OtherEnsure1Criticality) {
       if (other.num_generators() != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
     generators_ = Underlying_container(other.begin(), other.end());
@@ -326,10 +316,10 @@ class Dynamic_multi_parameter_filtration
 
   /**
    * @brief Returns const reference to the requested generator.
-   * 
+   *
    * @param g Index of the generator.
    */
-  const Generator& operator[](size_type g) const
+  const Generator &operator[](size_type g) const
   {
     GUDHI_CHECK(g < generators_.size(), "Out of bound index.");
     return generators_[g];
@@ -490,13 +480,14 @@ class Dynamic_multi_parameter_filtration
   /**
    * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
    */
-   Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_multi_parameter_filtration() const {
+  Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_multi_parameter_filtration() const
+  {
     if (generators_.empty()) return Multi_parameter_filtration<T, Co, Ensure1Criticality>(0);
 
     std::vector<T> out(num_entries());
     size_type i = 0;
-    for (size_type g = 0; g < num_generators(); ++g){
-      for (size_type p = 0; p < num_parameters(); ++p){
+    for (size_type g = 0; g < num_generators(); ++g) {
+      for (size_type p = 0; p < num_parameters(); ++p) {
         out[i + p] = generators_[g][p];
       }
       i += num_parameters();
@@ -566,7 +557,7 @@ class Dynamic_multi_parameter_filtration
   /**
    * @brief Returns `true` if and only if the filtration value is considered as plus infinity.
    */
-  bool is_plus_inf() const
+  [[nodiscard]] bool is_plus_inf() const
   {
     for (const Generator &g : generators_) {
       if (!g.is_plus_inf()) return false;
@@ -577,7 +568,7 @@ class Dynamic_multi_parameter_filtration
   /**
    * @brief Returns `true` if and only if the filtration value is considered as minus infinity.
    */
-  bool is_minus_inf() const
+  [[nodiscard]] bool is_minus_inf() const
   {
     for (const Generator &g : generators_) {
       if (!g.is_minus_inf()) return false;
@@ -588,7 +579,7 @@ class Dynamic_multi_parameter_filtration
   /**
    * @brief Returns `true` if and only if the filtration value is considered as NaN.
    */
-  bool is_nan() const
+  [[nodiscard]] bool is_nan() const
   {
     if (generators_.empty()) return false;
     for (const Generator &g : generators_) {
@@ -601,7 +592,7 @@ class Dynamic_multi_parameter_filtration
    * @brief Returns `true` if and only if the filtration value is non-empty and is not considered as plus infinity,
    * minus infinity or NaN.
    */
-  bool is_finite() const
+  [[nodiscard]] bool is_finite() const
   {
     bool isInf = true, isMinusInf = true, isNan = true;
     for (const Generator &g : generators_) {
@@ -640,7 +631,7 @@ class Dynamic_multi_parameter_filtration
 
     // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
     if constexpr (Ensure1Criticality) {
-      for (std::size_t p = 0u; p < a.num_parameters(); ++p) {
+      for (std::size_t p = 0U; p < a.num_parameters(); ++p) {
         if constexpr (inverse) p = a.num_parameters() - 1 - p;
         if (_is_nan(a.generators_[0][p]) && !_is_nan(b.generators_[0][p])) return false;
         if (_is_nan(b.generators_[0][p])) return true;
@@ -650,14 +641,14 @@ class Dynamic_multi_parameter_filtration
       }
       return false;
     } else {
-      for (std::size_t g = 0u; g < std::min(a.num_generators(), b.num_generators()); ++g) {
+      for (std::size_t g = 0U; g < std::min(a.num_generators(), b.num_generators()); ++g) {
         std::size_t gA = g;
         std::size_t gB = g;
         if constexpr (inverse) {
           gA = a.num_generators() - 1 - g;
           gB = b.num_generators() - 1 - g;
         }
-        for (std::size_t p = 0u; p < a.num_parameters(); ++p) {
+        for (std::size_t p = 0U; p < a.num_parameters(); ++p) {
           if constexpr (inverse) p = a.num_parameters() - 1 - p;
           if (_is_nan(a.generators_[gA][p]) && !_is_nan(b.generators_[gB][p])) return false;
           if (_is_nan(b.generators_[gB][p])) return true;
@@ -695,7 +686,7 @@ class Dynamic_multi_parameter_filtration
 
     // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
     if constexpr (Ensure1Criticality) {
-      for (std::size_t p = 0u; p < a.num_parameters(); ++p) {
+      for (std::size_t p = 0U; p < a.num_parameters(); ++p) {
         if constexpr (inverse) p = a.num_parameters() - 1 - p;
         if (_is_nan(a.generators_[0][p]) && !_is_nan(b.generators_[0][p])) return false;
         if (_is_nan(b.generators_[0][p])) return true;
@@ -705,14 +696,14 @@ class Dynamic_multi_parameter_filtration
       }
       return true;
     } else {
-      for (std::size_t g = 0u; g < std::min(a.num_generators(), b.num_generators()); ++g) {
+      for (std::size_t g = 0U; g < std::min(a.num_generators(), b.num_generators()); ++g) {
         std::size_t gA = g;
         std::size_t gB = g;
         if constexpr (inverse) {
           gA = a.num_generators() - 1 - g;
           gB = b.num_generators() - 1 - g;
         }
-        for (std::size_t p = 0u; p < a.num_parameters(); ++p) {
+        for (std::size_t p = 0U; p < a.num_parameters(); ++p) {
           if constexpr (inverse) p = a.num_parameters() - 1 - p;
           if (_is_nan(a.generators_[gA][p]) && !_is_nan(b.generators_[gB][p])) return false;
           if (_is_nan(b.generators_[gB][p])) return true;
@@ -748,10 +739,10 @@ class Dynamic_multi_parameter_filtration
       if (_first_dominates(a.generators_[0], b.generators_[0])) return false;
       return _strictly_contains(a.generators_[0], b.generators_[0]);
     } else {
-      for (std::size_t i = 0u; i < b.num_generators(); ++i) {
+      for (std::size_t i = 0U; i < b.num_generators(); ++i) {
         // for each generator in b, verify if it is strictly in the cone of at least one generator of a
         bool isContained = false;
-        for (std::size_t j = 0u; j < a.num_generators() && !isContained; ++j) {
+        for (std::size_t j = 0U; j < a.num_generators() && !isContained; ++j) {
           // lexicographical order, so if a[j][0] dom b[j][0], than a[j'] can never strictly contain b[i] for all
           // j' > j.
           if (_first_dominates(a.generators_[j], b.generators_[i])) return false;
@@ -787,10 +778,10 @@ class Dynamic_multi_parameter_filtration
     } else {
       // check if this curves is below other's curve
       //  ie for each guy in this, check if there is a guy in other that dominates him
-      for (std::size_t i = 0u; i < b.num_generators(); ++i) {
+      for (std::size_t i = 0U; i < b.num_generators(); ++i) {
         // for each generator in b, verify if it is in the cone of at least one generator of a
         bool isContained = false;
-        for (std::size_t j = 0u; j < a.num_generators() && !isContained; ++j) {
+        for (std::size_t j = 0U; j < a.num_generators() && !isContained; ++j) {
           // lexicographical order, so if a[j][0] strictly dom b[j][0], than a[j'] can never contain b[i] for all
           // j' > j.
           if (_first_strictly_dominates(a.generators_[j], b.generators_[i])) return false;
@@ -932,7 +923,7 @@ class Dynamic_multi_parameter_filtration
     for (Generator &g : f.generators_) {
       g = r - g;
     }
-    
+
     return f;
   }
 
@@ -1333,7 +1324,7 @@ class Dynamic_multi_parameter_filtration
    * @param f First element of the multiplication.
    * @param r Second element of the multiplication.
    */
-  template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin > >
+  template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   friend Dynamic_multi_parameter_filtration &operator*=(Dynamic_multi_parameter_filtration &f, const ValueRange &r)
   {
     for (Generator &g : f.generators_) {
@@ -1396,7 +1387,7 @@ class Dynamic_multi_parameter_filtration
    * @param f First element of the division.
    * @param r Second element of the division.
    */
-  template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin > >
+  template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   friend Dynamic_multi_parameter_filtration operator/(Dynamic_multi_parameter_filtration f, const ValueRange &r)
   {
     f /= r;
@@ -1524,7 +1515,7 @@ class Dynamic_multi_parameter_filtration
    * @param f First element of the division.
    * @param r Second element of the division.
    */
-  template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin > >
+  template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   friend Dynamic_multi_parameter_filtration &operator/=(Dynamic_multi_parameter_filtration &f, const ValueRange &r)
   {
     for (Generator &g : f.generators_) {
@@ -1862,13 +1853,15 @@ class Dynamic_multi_parameter_filtration
     for (size_type p = 0; p < f.num_parameters(); ++p) {
       for (size_type g = 0; g < f.num_generators(); ++g) {
         T val = f(g, p);
-        if (!_is_nan(val)){
+        if (!_is_nan(val)) {
           nan = false;
           result[0][p] = val < result[0][p] ? val : result[0][p];
         }
       }
-      if (nan) result[0][p] = std::numeric_limits<T>::quiet_NaN();
-      else nan = true;
+      if (nan)
+        result[0][p] = std::numeric_limits<T>::quiet_NaN();
+      else
+        nan = true;
       if (result[0][p] != -T_inf) isMinusInf = false;
     }
 
@@ -1891,13 +1884,15 @@ class Dynamic_multi_parameter_filtration
     for (size_type p = 0; p < f.num_parameters(); ++p) {
       for (size_type g = 0; g < f.num_generators(); ++g) {
         T val = f(g, p);
-        if (!_is_nan(val)){
+        if (!_is_nan(val)) {
           nan = false;
           result[0][p] = val > result[0][p] ? val : result[0][p];
         }
       }
-      if (nan) result[0][p] = std::numeric_limits<T>::quiet_NaN();
-      else nan = true;
+      if (nan)
+        result[0][p] = std::numeric_limits<T>::quiet_NaN();
+      else
+        nan = true;
       if (result[0][p] != T_inf) isPlusInf = false;
     }
 
@@ -2345,7 +2340,7 @@ class Dynamic_multi_parameter_filtration
     }
   }
 
-  enum class Rel { EQUAL, DOMINATES, IS_DOMINATED, NONE };
+  enum class Rel : std::uint8_t { EQUAL, DOMINATES, IS_DOMINATED, NONE };
 
   template <class Iterator>
   static Rel _get_domination_relation(const Generator &a, Iterator itB)

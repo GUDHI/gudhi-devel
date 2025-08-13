@@ -17,18 +17,18 @@
 #ifndef MF_MULTI_PARAMETER_FILTRATION_H_
 #define MF_MULTI_PARAMETER_FILTRATION_H_
 
-#include <algorithm>        //std::lower_bound
-#include <cmath>            //std::isnan, std::min
-#include <cstddef>          //std::size_t
-#include <cstdint>          //std::int32_t
-#include <cstring>          //memcpy
-#include <iterator>         //std::distance
-#include <ostream>          //std::ostream
-#include <limits>           //std::numerical_limits
-#include <stdexcept>        //std::logic_error
-#include <type_traits>      //std::is_arithmetic
-#include <utility>          //std::swap, std::move
-#include <numeric>          //std::iota
+#include <algorithm>    //std::lower_bound
+#include <cmath>        //std::isnan, std::min
+#include <cstddef>      //std::size_t
+#include <cstdint>      //std::int32_t, std::uint8_t
+#include <cstring>      //memcpy
+#include <iterator>     //std::distance
+#include <ostream>      //std::ostream
+#include <limits>       //std::numerical_limits
+#include <stdexcept>    //std::logic_error
+#include <type_traits>  //std::is_arithmetic
+#include <utility>      //std::swap, std::move
+#include <numeric>      //std::iota
 #include <vector>
 #include <initializer_list>
 
@@ -49,9 +49,9 @@ template <typename OutValue, typename U>
 void compute_coordinates_in_grid();
 template <typename U>
 void evaluate_coordinates_in_grid();
-template<bool inverse>
+template <bool inverse>
 bool is_strict_less_than_lexicographically();
-template<bool inverse>
+template <bool inverse>
 bool is_less_or_equal_than_lexicographically();
 
 /**
@@ -83,7 +83,7 @@ bool is_less_or_equal_than_lexicographically();
  *  - \f$ \{ x \in \mathbb R^2 : x \ge (1,2)\} \cap \{ x \in \mathbb R^2 : x \ge (2,1)\} \f$ is finitely critical,
  *    and more particularly 2-critical, while
  *  - \f$ \{ x \in \mathbb R^2 : x \ge \mathrm{epigraph}(y \mapsto e^{-y})\} \f$ is not.
- * 
+ *
  * @tparam T Arithmetic type of an entry for one parameter of a filtration value. Has to be **signed** and
  * to implement `std::isnan(T)`, `std::numeric_limits<T>::has_quiet_NaN`, `std::numeric_limits<T>::quiet_NaN()`,
  * `std::numeric_limits<T>::has_infinity`, `std::numeric_limits<T>::infinity()` and `std::numeric_limits<T>::max()`.
@@ -91,7 +91,7 @@ bool is_less_or_equal_than_lexicographically();
  * can simply throw. Examples are the native types `double`, `float` and `int`.
  * @tparam Co If `true`, reverses the poset order, i.e., the order \f$ \le \f$  in \f$ \mathbb R^n \f$ becomes
  * \f$ \ge \f$. That is, the positive cones representing a lifetime become all negative instead.
- * @tparam Ensure1Criticality If `true`, the methods ensure that the filtration value is always 1-critical by throwing 
+ * @tparam Ensure1Criticality If `true`, the methods ensure that the filtration value is always 1-critical by throwing
  * or refusing to compile if a modification increases the number of generators.
  */
 template <typename T, bool Co = false, bool Ensure1Criticality = false>
@@ -102,14 +102,14 @@ class Multi_parameter_filtration
   using Viewer = Gudhi::Simple_mdspan<T, view_extents>;
 
  public:
-  using Underlying_container = std::vector<T>;  /**< Underlying container for values. */
+  using Underlying_container = std::vector<T>; /**< Underlying container for values. */
 
   // CONSTRUCTORS
 
   /**
    * @brief Default constructor. Builds filtration value with one generator and given number of parameters.
    * If Co is false, all values are at -inf, if Co is true, all values are at +inf.
-   * 
+   *
    * @param number_of_parameters If negative, takes the default value instead. Default value: 2.
    */
   Multi_parameter_filtration(int number_of_parameters = 2)
@@ -120,7 +120,7 @@ class Multi_parameter_filtration
   /**
    * @brief Builds filtration value with one generator and given number of parameters.
    * All values are initialized at the given value.
-   * 
+   *
    * @param number_of_parameters If negative, is set to 2 instead.
    * @param value Initialization value for every value in the generator.
    */
@@ -132,7 +132,7 @@ class Multi_parameter_filtration
   /**
    * @brief Builds filtration value with one generator that is initialized with the given range. The number of
    * parameters are therefore deduced from the length of the range.
-   * 
+   *
    * @tparam ValueRange Range of types convertible to `T`. Should have a begin() and end() method.
    * @param range Values of the generator.
    */
@@ -146,7 +146,7 @@ class Multi_parameter_filtration
    * @brief Builds filtration value with one generator that is initialized with the given range. The range is
    * determined from the two given iterators. The number of parameters are therefore deduced from the distance
    * between the two.
-   * 
+   *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyInputIterator and
    * dereferenced elements have to be convertible to `T`.
    * @param it_begin Iterator pointing to the start of the range.
@@ -163,7 +163,7 @@ class Multi_parameter_filtration
    * be the number of parameters. The \f$ p \f$ first elements of the range have to correspond to the first generator,
    * the \f$ p \f$ next elements to the second generator and so on... So the length of the range has to be a multiple
    * of \f$ p \f$ and the number of generators will be \f$ length / p \f$. The range is represented by two iterators.
-   * 
+   *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyInputIterator and
    * dereferenced elements have to be convertible to `T`.
    * @param it_begin Iterator pointing to the start of the range.
@@ -188,7 +188,7 @@ class Multi_parameter_filtration
    * the \f$ p \f$ next elements to the second generator and so on... So the length of the range has to be a multiple
    * of \f$ p \f$ and the number of generators will be \f$ length / p \f$. The range is represented by
    * @ref Multi_parameter_filtration::Underlying_container "" and copied into the underlying container of the class.
-   * 
+   *
    * @param generators Values.
    * @param number_of_parameters Negative values are associated to 0.
    */
@@ -212,7 +212,7 @@ class Multi_parameter_filtration
    * the \f$ p \f$ next elements to the second generator and so on... So the length of the range has to be a multiple
    * of \f$ p \f$ and the number of generators will be \f$ length / p \f$. The range is represented by
    * @ref Multi_parameter_filtration::Underlying_container "" and **moved** into the underlying container of the class.
-   * 
+   *
    * @param generators Values to move.
    * @param number_of_parameters Negative values are associated to 0.
    */
@@ -240,20 +240,28 @@ class Multi_parameter_filtration
 
   /**
    * @brief Copy constructor.
-   * 
+   *
    * @tparam U Type convertible into `T`.
    */
-  template<typename U, bool OtherCo, bool OtherEnsure1Criticality>
+  template <typename U, bool OtherCo, bool OtherEnsure1Criticality>
   Multi_parameter_filtration(const Multi_parameter_filtration<U, OtherCo, OtherEnsure1Criticality> &other)
       : generators_(other.begin(), other.end()),
         generator_view_(generators_.data(), other.num_generators(), other.num_parameters())
   {
-    if constexpr (Ensure1Criticality && !OtherEnsure1Criticality){
+    if constexpr (Ensure1Criticality && !OtherEnsure1Criticality) {
       if (generator_view_.extent(0) != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
   }
 
-  // TODO: move constructor?
+  /**
+   * @brief Move constructor.
+   */
+  Multi_parameter_filtration(Multi_parameter_filtration &&other) noexcept
+      : generators_(std::move(other.generators_)),
+        generator_view_(generators_.data(), other.num_generators(), other.num_parameters())
+  {}
+
+  ~Multi_parameter_filtration() = default;
 
   /**
    * @brief Assign operator.
@@ -267,16 +275,26 @@ class Multi_parameter_filtration
 
   /**
    * @brief Assign operator.
-   * 
+   *
    * @tparam U Type convertible into `T`.
    */
-  template<typename U, bool OtherCo, bool OtherEnsure1Criticality>
+  template <typename U, bool OtherCo, bool OtherEnsure1Criticality>
   Multi_parameter_filtration &operator=(const Multi_parameter_filtration<U, OtherCo, OtherEnsure1Criticality> &other)
   {
-    if constexpr (Ensure1Criticality && !OtherEnsure1Criticality){
+    if constexpr (Ensure1Criticality && !OtherEnsure1Criticality) {
       if (other.num_generators() != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
     generators_ = Underlying_container(other.begin(), other.end());
+    generator_view_ = Viewer(generators_.data(), other.num_generators(), other.num_parameters());
+    return *this;
+  }
+
+  /**
+   * @brief Move assign operator.
+   */
+  Multi_parameter_filtration &operator=(Multi_parameter_filtration &&other) noexcept
+  {
+    generators_ = std::move(other.generators_);
     generator_view_ = Viewer(generators_.data(), other.num_generators(), other.num_parameters());
     return *this;
   }
@@ -317,7 +335,7 @@ class Multi_parameter_filtration
   /**
    * @brief Let \f$ g \f$ be the first value in `indices` and \f$ p \f$ the second value.
    * Returns reference to value of parameter \f$ p \f$ of generator \f$ g \f$.
-   * 
+   *
    * @tparam IndexRange Range with a begin() and size() method.
    * @param indices Range with at least two elements. The first element should correspond to the generator number and
    * the second element to the parameter number.
@@ -336,7 +354,7 @@ class Multi_parameter_filtration
   /**
    * @brief Let \f$ g \f$ be the first value in `indices` and \f$ p \f$ the second value.
    * Returns reference to value of parameter \f$ p \f$ of generator \f$ g \f$.
-   * 
+   *
    * @tparam IndexRange Range with a begin() and size() method.
    * @param indices Range with at least two elements. The first element should correspond to the generator number and
    * the second element to the parameter number.
@@ -474,11 +492,12 @@ class Multi_parameter_filtration
   /**
    * @brief Returns the number of generators in the filtration value, i.e. the criticality of the element.
    */
-  size_type num_generators() const { 
+  size_type num_generators() const
+  {
     if constexpr (Ensure1Criticality) {
-      return 1; //for possible optimizations? If there is none, we can just keep the other version
+      return 1;  // for possible optimizations? If there is none, we can just keep the other version
     } else {
-      return generator_view_.extent(0); 
+      return generator_view_.extent(0);
     }
   }
 
@@ -527,7 +546,7 @@ class Multi_parameter_filtration
   /**
    * @brief Returns `true` if and only if the filtration value is considered as plus infinity.
    */
-  bool is_plus_inf() const
+  [[nodiscard]] bool is_plus_inf() const
   {
     for (const T &v : generators_) {
       if (v != T_inf) return false;
@@ -538,7 +557,7 @@ class Multi_parameter_filtration
   /**
    * @brief Returns `true` if and only if the filtration value is considered as minus infinity.
    */
-  bool is_minus_inf() const
+  [[nodiscard]] bool is_minus_inf() const
   {
     for (const T &v : generators_) {
       if (v != -T_inf) return false;
@@ -549,7 +568,7 @@ class Multi_parameter_filtration
   /**
    * @brief Returns `true` if and only if the filtration value is considered as NaN.
    */
-  bool is_nan() const
+  [[nodiscard]] bool is_nan() const
   {
     if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
       for (const auto &v : generators_) {
@@ -565,7 +584,7 @@ class Multi_parameter_filtration
    * @brief Returns `true` if and only if the filtration value is non-empty and is not considered as plus infinity,
    * minus infinity or NaN.
    */
-  bool is_finite() const
+  [[nodiscard]] bool is_finite() const
   {
     bool isInf = true, isMinusInf = true, isNan = true;
     for (const auto &v : generators_) {
@@ -596,7 +615,7 @@ class Multi_parameter_filtration
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
                 "Only filtration values with same number of parameters can be compared.");
 
-    for (std::size_t i = 0u; i < a.num_parameters() * std::min(a.num_generators(), b.num_generators()); ++i) {
+    for (std::size_t i = 0U; i < a.num_parameters() * std::min(a.num_generators(), b.num_generators()); ++i) {
       std::size_t iA = i;
       std::size_t iB = i;
       if constexpr (inverse) {
@@ -628,7 +647,7 @@ class Multi_parameter_filtration
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
                 "Only filtration values with same number of parameters can be compared.");
 
-    for (std::size_t i = 0u; i < a.num_parameters() * std::min(a.num_generators(), b.num_generators()); ++i) {
+    for (std::size_t i = 0U; i < a.num_parameters() * std::min(a.num_generators(), b.num_generators()); ++i) {
       std::size_t iA = i;
       std::size_t iB = i;
       if constexpr (inverse) {
@@ -668,10 +687,10 @@ class Multi_parameter_filtration
       if (_first_dominates(view_a, 0, view_b, 0)) return false;
       return _strictly_contains(view_a, 0, view_b, 0);
     } else {
-      for (std::size_t i = 0u; i < b.num_generators(); ++i) {
+      for (std::size_t i = 0U; i < b.num_generators(); ++i) {
         // for each generator in b, verify if it is strictly in the cone of at least one generator of a
         bool isContained = false;
-        for (std::size_t j = 0u; j < a.num_generators() && !isContained; ++j) {
+        for (std::size_t j = 0U; j < a.num_generators() && !isContained; ++j) {
           // lexicographical order, so if a[j][0] dom b[j][0], than a[j'] can never strictly contain b[i] for all
           // j' > j.
           if (_first_dominates(view_a, j, view_b, i)) return false;
@@ -709,10 +728,10 @@ class Multi_parameter_filtration
     } else {
       // check if this curves is below other's curve
       //  ie for each guy in this, check if there is a guy in other that dominates him
-      for (std::size_t i = 0u; i < b.num_generators(); ++i) {
+      for (std::size_t i = 0U; i < b.num_generators(); ++i) {
         // for each generator in b, verify if it is in the cone of at least one generator of a
         bool isContained = false;
-        for (std::size_t j = 0u; j < a.num_generators() && !isContained; ++j) {
+        for (std::size_t j = 0U; j < a.num_generators() && !isContained; ++j) {
           // lexicographical order, so if a[j][0] strictly dom b[j][0], than a[j'] can never contain b[i] for all
           // j' > j.
           if (_first_strictly_dominates(view_a, j, view_b, i)) return false;
@@ -820,13 +839,13 @@ class Multi_parameter_filtration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param r First element of the subtraction.
    * @param f Second element of the subtraction.
    */
   template <class ValueRange,
-            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin&&
+            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin &&
                                      !std::is_same_v<ValueRange, Multi_parameter_filtration> > >
   friend Multi_parameter_filtration operator-(const ValueRange &r, Multi_parameter_filtration f)
   {
@@ -895,7 +914,7 @@ class Multi_parameter_filtration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param f First element of the subtraction.
    * @param r Second element of the subtraction.
@@ -918,7 +937,7 @@ class Multi_parameter_filtration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @param f First element of the subtraction.
    * @param val Second element of the subtraction.
    */
@@ -967,13 +986,13 @@ class Multi_parameter_filtration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param r First element of the addition.
    * @param f Second element of the addition.
    */
   template <class ValueRange,
-            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin&&
+            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin &&
                                      !std::is_same_v<ValueRange, Multi_parameter_filtration> > >
   friend Multi_parameter_filtration operator+(const ValueRange &r, Multi_parameter_filtration f)
   {
@@ -1036,7 +1055,7 @@ class Multi_parameter_filtration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param f First element of the addition.
    * @param r Second element of the addition.
@@ -1059,7 +1078,7 @@ class Multi_parameter_filtration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @param f First element of the addition.
    * @param val Second element of the addition.
    */
@@ -1112,13 +1131,13 @@ class Multi_parameter_filtration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param r First element of the multiplication.
    * @param f Second element of the multiplication.
    */
   template <class ValueRange,
-            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin&&
+            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin &&
                                      !std::is_same_v<ValueRange, Multi_parameter_filtration> > >
   friend Multi_parameter_filtration operator*(const ValueRange &r, Multi_parameter_filtration f)
   {
@@ -1187,7 +1206,7 @@ class Multi_parameter_filtration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param f First element of the multiplication.
    * @param r Second element of the multiplication.
@@ -1212,7 +1231,7 @@ class Multi_parameter_filtration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @param f First element of the multiplication.
    * @param val Second element of the multiplication.
    */
@@ -1271,13 +1290,13 @@ class Multi_parameter_filtration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param r First element of the division.
    * @param f Second element of the division.
    */
   template <class ValueRange,
-            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin&&
+            class = std::enable_if_t<RangeTraits<ValueRange>::has_begin &&
                                      !std::is_same_v<ValueRange, Multi_parameter_filtration> > >
   friend Multi_parameter_filtration operator/(const ValueRange &r, Multi_parameter_filtration f)
   {
@@ -1363,7 +1382,7 @@ class Multi_parameter_filtration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @tparam ValueRange Range with a begin() and end() method.
    * @param f First element of the division.
    * @param r Second element of the division.
@@ -1391,7 +1410,7 @@ class Multi_parameter_filtration
    *
    * All NaN values are represented by `std::numeric_limits<T>::quiet_NaN()` independently if
    * `std::numeric_limits<T>::has_quiet_NaN` is true or not.
-   * 
+   *
    * @param f First element of the division.
    * @param val Second element of the division.
    */
@@ -1433,7 +1452,7 @@ class Multi_parameter_filtration
    * @brief Adds the given generator to the filtration value such that the set remains minimal and sorted.
    * It is therefore possible that the generator is ignored if it does not generated any new lifetime or that
    * old generators disappear if they are overshadowed by the new one.
-   * 
+   *
    * @tparam GeneratorRange Range of elements convertible to `T`. Must have a begin(), end() method and the iterator
    * type should satisfy the requirements of the standard `LegacyForwardIterator`.
    * @param x New generator to add. Has to have the same number of parameters than @ref num_parameters().
@@ -1451,7 +1470,7 @@ class Multi_parameter_filtration
    * @brief Adds the given generator to the filtration value such that the set remains minimal and sorted.
    * It is therefore possible that the generator is ignored if it does not generated any new lifetime or that
    * old generators disappear if they are overshadowed by the new one.
-   * 
+   *
    * @tparam Iterator Iterator class satisfying the requirements of the standard `LegacyForwardIterator`.
    * The dereferenced type has to be convertible to `T`.
    * @param genStart Iterator pointing to the begining of the range.
@@ -1493,7 +1512,7 @@ class Multi_parameter_filtration
    *
    * @warning If the resulting set of generators is not minimal or sorted after modification, some methods will have an
    * undefined behaviour. Be sure to call @ref simplify() before using them.
-   * 
+   *
    * @tparam GeneratorRange Range of elements convertible to `T`. Must have a begin(), end() and size() method.
    * @param x New generator to add. Must have the same number of parameters than @ref num_parameters().
    */
@@ -1506,7 +1525,7 @@ class Multi_parameter_filtration
     GUDHI_CHECK(x.size() == num_parameters(), "Wrong range size. Should correspond to the number of parameters.");
 
     generators_.insert(generators_.end(), x.begin(), x.end());
-    generator_view_.update_data(generators_.data());  //in case it was relocated
+    generator_view_.update_data(generators_.data());  // in case it was relocated
     generator_view_.update_extent(0, num_generators() + 1);
   }
 
@@ -1570,7 +1589,7 @@ class Multi_parameter_filtration
     } else {
       std::vector<int> indices;
       indices.reserve(num_generators());
-      for (unsigned int i = 0; i < num_generators(); ++i) {
+      for (int i = 0; i < static_cast<int>(num_generators()); ++i) {
         if (!include_infinities || _is_finite(i)) indices.push_back(i);
       }
       _build_from(indices);  // sorts
@@ -1589,7 +1608,7 @@ class Multi_parameter_filtration
    * More formally, it pushes the current generator to the cone \f$ \{ y \in \mathbb R^n : y \ge x \} \f$
    * originating in \f$ x \f$. The resulting value corresponds to the intersection of both
    * cones: \f$ \mathrm{this} = \min \{ y \in \mathbb R^n : y \ge this \} \cap \{ y \in \mathbb R^n : y \ge x \} \f$.
-   * 
+   *
    * @tparam GeneratorRange Range of elements convertible to `T`. Must have a begin(), end() and size() method.
    * @param x Range towards to push. Has to have as many elements than @ref num_parameters().
    * @param exclude_infinite_values If true, values at infinity or minus infinity are not affected.
@@ -1612,7 +1631,7 @@ class Multi_parameter_filtration
 
     if (xIsInf || thisIsMinusInf) {
       generators_ = Underlying_container(x.begin(), x.end());
-      generator_view_.update_data(generators_.data());  //in case it was relocated
+      generator_view_.update_data(generators_.data());  // in case it was relocated
       generator_view_.update_extent(0, 1);
       return true;
     }
@@ -1654,7 +1673,7 @@ class Multi_parameter_filtration
    * More formally, it pulls the current generator to the cone \f$ \{ y \in \mathbb R^n : y \le x \} \f$
    * originating in \f$ x \f$. The resulting value corresponds to the intersection of both
    * cones: \f$ \mathrm{this} = \min \{ y \in \mathbb R^n : y \le this \} \cap \{ y \in \mathbb R^n : y \le x \} \f$.
-   * 
+   *
    * @tparam GeneratorRange Range of elements convertible to `T`. Must have a begin(), end() and size() method.
    * @param x Range towards to pull. Has to have as many elements than @ref num_parameters().
    * @param exclude_infinite_values If true, values at infinity or minus infinity are not affected.
@@ -1677,7 +1696,7 @@ class Multi_parameter_filtration
 
     if (thisIsInf || xIsMinusInf) {
       generators_ = Underlying_container(x.begin(), x.end());
-      generator_view_.update_data(generators_.data());  //in case it was relocated
+      generator_view_.update_data(generators_.data());  // in case it was relocated
       generator_view_.update_extent(0, 1);
       return true;
     }
@@ -1771,13 +1790,15 @@ class Multi_parameter_filtration
     for (size_type p = 0; p < f.num_parameters(); ++p) {
       for (size_type g = 0; g < f.num_generators(); ++g) {
         T val = f(g, p);
-        if (!_is_nan(val)){
+        if (!_is_nan(val)) {
           nan = false;
           result[p] = val < result[p] ? val : result[p];
         }
       }
-      if (nan) result[p] = std::numeric_limits<T>::quiet_NaN();
-      else nan = true;
+      if (nan)
+        result[p] = std::numeric_limits<T>::quiet_NaN();
+      else
+        nan = true;
     }
     return Multi_parameter_filtration(std::move(result), f.num_parameters());
   }
@@ -1795,13 +1816,15 @@ class Multi_parameter_filtration
     for (size_type p = 0; p < f.num_parameters(); ++p) {
       for (size_type g = 0; g < f.num_generators(); ++g) {
         T val = f(g, p);
-        if (!_is_nan(val)){
+        if (!_is_nan(val)) {
           nan = false;
           result[p] = val > result[p] ? val : result[p];
         }
       }
-      if (nan) result[p] = std::numeric_limits<T>::quiet_NaN();
-      else nan = true;
+      if (nan)
+        result[p] = std::numeric_limits<T>::quiet_NaN();
+      else
+        nan = true;
     }
     return Multi_parameter_filtration(std::move(result), f.num_parameters());
   }
@@ -1950,14 +1973,14 @@ class Multi_parameter_filtration
       for (size_type p = 0; p < f.num_parameters(); ++p) {
         const std::vector<U> &filtration = grid[p];
         const T &c = f.generators_[p];
-        outVec[p] = (c == f.T_inf ? grid_inf : filtration[c]);
+        outVec[p] = (c == T_inf ? grid_inf : filtration[c]);
       }
     } else {
       for (size_type g = 0; g < f.num_generators(); ++g) {
         for (size_type p = 0; p < f.num_parameters(); ++p) {
           const std::vector<U> &filtration = grid[p];
           const T &c = f(g, p);
-          outVec[f.generator_view_.mapping()(g, p)] = (c == f.T_inf ? grid_inf : filtration[c]);
+          outVec[f.generator_view_.mapping()(g, p)] = (c == T_inf ? grid_inf : filtration[c]);
         }
       }
     }
@@ -2045,7 +2068,7 @@ class Multi_parameter_filtration
    * @brief Adds the generators of the second argument to the first argument. If `Ensure1Criticality` is true,
    * the method assumes that the two filtration values are comparable, that is, that the result of the union is also
    * 1-critical. A check for this is only done in Debug Mode, as it is costly.
-   * 
+   *
    * @param f1 Filtration value to modify.
    * @param f2 Filtration value to merge with the first one. Should have the same number of parameters than the other.
    * @return true If the first argument was actually modified.
@@ -2083,7 +2106,7 @@ class Multi_parameter_filtration
   /**
    * @brief Stores in the first argument the origins of the cones in the intersection of the positive
    * (negative if `Co` is true) cones generated by the two arguments.
-   * 
+   *
    * @param f1 First set of cones which will be modified.
    * @param f2 Second set of cones. Should have the same number of parameters than the first one.
    * @return true If the first argument was actually modified.
@@ -2155,7 +2178,7 @@ class Multi_parameter_filtration
 
   /**
    * @brief Serialize given value into the buffer at given pointer.
-   * 
+   *
    * @param value Value to serialize.
    * @param start Pointer to the start of the space in the buffer where to store the serialization.
    * @return End position of the serialization in the buffer.
@@ -2174,7 +2197,7 @@ class Multi_parameter_filtration
 
   /**
    * @brief Deserialize the value from a buffer at given pointer and stores it in given value.
-   * 
+   *
    * @param value Value to fill with the deserialized filtration value.
    * @param start Pointer to the start of the space in the buffer where the serialization is stored.
    * @return End position of the serialization in the buffer.
@@ -2189,8 +2212,8 @@ class Multi_parameter_filtration
     std::size_t arg_size = sizeof(T) * length;
     value.generators_.resize(length);
     memcpy(value.generators_.data(), start + (type_size * 2), arg_size);
-    value.generator_view_ = Viewer(
-        value.generators_.data(), num_param == 0 ? 0 : value.generators_.size() / num_param, num_param);
+    value.generator_view_ =
+        Viewer(value.generators_.data(), num_param == 0 ? 0 : value.generators_.size() / num_param, num_param);
     return start + arg_size + (type_size * 2);
   }
 
@@ -2199,7 +2222,7 @@ class Multi_parameter_filtration
    */
   friend std::size_t get_serialization_size_of(const Multi_parameter_filtration &value)
   {
-    return sizeof(size_type) * 2 + sizeof(T) * value.num_entries();
+    return (sizeof(size_type) * 2) + (sizeof(T) * value.num_entries());
   }
 
   /**
@@ -2222,7 +2245,7 @@ class Multi_parameter_filtration
   static bool _strictly_contains(const Viewer &a, size_type g_a, const Viewer &b, size_type g_b)
   {
     bool isSame = true;
-    for (auto i = 0u; i < a.extent(1); ++i) {
+    for (auto i = 0U; i < a.extent(1); ++i) {
       T a_i, b_i;
       if constexpr (Co) {
         a_i = b(g_b, i);
@@ -2242,7 +2265,7 @@ class Multi_parameter_filtration
    */
   static bool _contains(const Viewer &a, size_type g_a, const Viewer &b, size_type g_b)
   {
-    for (std::size_t i = 0u; i < a.extent(1); ++i) {
+    for (std::size_t i = 0U; i < a.extent(1); ++i) {
       T a_i, b_i;
       if constexpr (Co) {
         a_i = b(g_b, i);
@@ -2290,7 +2313,7 @@ class Multi_parameter_filtration
     for (unsigned int g = 0; g < num_generators(); ++g) {
       auto it = range.begin();
       for (unsigned int p = 0; p < num_parameters() && it != range.end(); ++p) {
-        operate(view(g, p), *it);
+        std::forward<F>(operate)(view(g, p), *it);
         ++it;
       }
     }
@@ -2304,7 +2327,7 @@ class Multi_parameter_filtration
   {
     auto &gens = generators_;
     for (unsigned int i = 0; i < gens.size(); ++i) {
-      operate(gens[i], val);
+      std::forward<F>(operate)(gens[i], val);
     }
   }
 
@@ -2331,7 +2354,7 @@ class Multi_parameter_filtration
     }
   }
 
-  enum class Rel { EQUAL, DOMINATES, IS_DOMINATED, NONE };
+  enum class Rel : std::uint8_t { EQUAL, DOMINATES, IS_DOMINATED, NONE };
 
   template <class Iterator>
   static Rel _get_domination_relation(const Viewer &a, size_type g_a, Iterator itB)
@@ -2505,11 +2528,11 @@ class Multi_parameter_filtration
   template <class F, typename U = T>
   static U _compute_frobenius_norm(size_type number_of_elements, F &&norm)
   {
-    if (number_of_elements == 1) return norm(0);
+    if (number_of_elements == 1) return std::forward<F>(norm)(0);
 
     U out = 0;
     for (size_type p = 0; p < number_of_elements; ++p) {
-      T v = norm(p);
+      T v = std::forward<F>(norm)(p);
       out += v * v;
     }
     if constexpr (std::is_integral_v<U>) {
