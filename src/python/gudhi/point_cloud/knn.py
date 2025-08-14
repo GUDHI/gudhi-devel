@@ -100,9 +100,22 @@ class KNearestNeighbors:
         Args:
             X (numpy.array): coordinates for reference points.
         """
-        if self.k > len(X):
+        # Handle TensorFlow tensors before using len()
+        if self.params.get("enable_autodiff", False):
+            try:
+                import tensorflow as tf
+                if hasattr(tf, 'is_tensor') and tf.is_tensor(X):
+                    n_samples = int(X.shape[0])
+                else:
+                    n_samples = len(X)
+            except (ImportError, AttributeError):
+                n_samples = len(X)
+        else:
+            n_samples = len(X)
+            
+        if self.k > n_samples:
             raise ValueError(
-                f"Expected number of neighbors (aka. 'k') <= number of samples, but k={self.k} and number of samples={len(X)}"
+                f"Expected number of neighbors (aka. 'k') <= number of samples, but k={self.k} and number of samples={n_samples}"
             )
         self.ref_points = X
         if self.params.get("enable_autodiff", False):
