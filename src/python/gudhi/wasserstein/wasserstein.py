@@ -275,8 +275,31 @@ def wasserstein_distance(
     """
 
     # First step: handle empty diagrams
-    n = len(X)
-    m = len(Y)
+    # Handle TensorFlow tensors before using len()
+    if enable_autodiff:
+        try:
+            # Try to get shape from tensor if it's a TensorFlow tensor
+            import tensorflow as tf
+            if hasattr(X, 'shape') and hasattr(Y, 'shape'):
+                # For TensorFlow tensors, use shape[0] instead of len()
+                if hasattr(tf, 'is_tensor') and tf.is_tensor(X):
+                    n = int(X.shape[0])
+                else:
+                    n = len(X)
+                if hasattr(tf, 'is_tensor') and tf.is_tensor(Y):
+                    m = int(Y.shape[0])
+                else:
+                    m = len(Y)
+            else:
+                n = len(X)
+                m = len(Y)
+        except (ImportError, AttributeError):
+            # Fallback if TensorFlow not available or tensor doesn't have shape
+            n = len(X)
+            m = len(Y)
+    else:
+        n = len(X)
+        m = len(Y)
 
     if n == 0:
         if m == 0:
