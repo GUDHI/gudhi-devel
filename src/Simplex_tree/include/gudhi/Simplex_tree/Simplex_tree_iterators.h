@@ -480,16 +480,15 @@ class Simplex_tree_dimension_simplex_iterator : public boost::iterator_facade<
         st_(st),
         dim_(dim),
         curr_dim_(0) {
-    if (st == nullptr || st->root() == nullptr || st->root()->members().empty()) {
+    if (st == nullptr || st->root() == nullptr || st->root()->members().empty() || st->dimension() < dim) {
       st_ = nullptr;
     } else {
       sh_ = st->root()->members().begin();
       sib_ = st->root();
       until_leaf_or_dim();
-    }
-    if (curr_dim_ != dim_) {
-      // we reached a leaf that does not respect the required dimension - call increment
-      increment();
+      // if we reached a leaf that does not respect the required dimension - call increment
+      if (curr_dim_ != dim_)
+        increment();
     }
   }
  private:
@@ -510,7 +509,7 @@ class Simplex_tree_dimension_simplex_iterator : public boost::iterator_facade<
     return sh_;
   }
 
-  void until_leaf_or_dim() {
+  inline void until_leaf_or_dim() {
     while (st_->has_children(sh_) && curr_dim_ != dim_) {
       sib_ = sh_->second.children();
       sh_ = sib_->members().begin();
@@ -524,7 +523,7 @@ class Simplex_tree_dimension_simplex_iterator : public boost::iterator_facade<
     std::clog << ")\n";
 #endif  // DEBUG_TRACES
   }
-  // Depth first traversal of the skeleton.
+  // Depth first traversal of the tree structure. Returns when reaching a simplex with a given dimension
   void increment() {
     ++sh_;
     while (sh_ == sib_->members().end()) {
@@ -540,10 +539,9 @@ class Simplex_tree_dimension_simplex_iterator : public boost::iterator_facade<
     }
     // It seems we do it twice here, but necessary when coming from the constructor
     until_leaf_or_dim();
-    if (curr_dim_ != dim_) {
-      // we reached a leaf that does not respect the dimension - recall increment
+    // if we reached a leaf that does not respect the dimension - recall increment
+    if (curr_dim_ != dim_)
       increment();
-    }
   }
 
   Simplex_handle sh_;
