@@ -1229,3 +1229,48 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(for_each_simplex_skip_iteration, typeST, list_of_t
   BOOST_CHECK(num_simplices_by_dim_until_two[0] == num_simplices_by_dim[0]);
   BOOST_CHECK(num_simplices_by_dim_until_two[1] == num_simplices_by_dim[1]);
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_dimension_vertex_iterator, typeST, list_of_tested_variants) {
+  std::clog << "********************************************************************" << std::endl;
+  std::clog << "TEST OF DIMENSION VERTEX ITERATORS" << std::endl;
+  typeST st;
+
+  st.insert_simplex_and_subfaces({0});
+  st.insert_simplex_and_subfaces({1,2});
+  st.insert_simplex_and_subfaces({2,3,4});
+  st.insert_simplex_and_subfaces({5,6,7,8});
+  st.insert_simplex_and_subfaces({9});
+
+  for(int dim = 0; dim < 5; dim++) {
+    using Simplex = std::vector<typename typeST::Vertex_handle>;
+    std::vector<Simplex> skeleton_simplices;
+    for(auto sh : st.skeleton_simplex_range(dim)) {
+      // Get only the simplices with the exact dimension
+      if (st.dimension(sh) == dim) {
+        Simplex output;
+        std::clog << "skeleton_simplex_range (";
+        for (auto vertex : st.simplex_vertex_range(sh)) {
+          std::clog << vertex << ", ";
+          output.emplace_back(vertex);
+        }
+        skeleton_simplices.emplace_back(output);
+        std::clog << ")\n";
+      }
+    }
+
+    std::vector<Simplex> dimension_simplices;
+    for(auto sh : st.dimension_simplex_range(dim)) {
+      BOOST_CHECK(st.dimension(sh) == dim);
+      Simplex output;
+      std::clog << "dimension_simplex_range (";
+      for (auto vertex : st.simplex_vertex_range(sh)) {
+        std::clog << vertex << ", ";
+        output.emplace_back(vertex);
+      }
+      dimension_simplices.emplace_back(output);
+      std::clog << ")\n";
+    }
+    // Order is important, but should be guaranteed by construction
+    BOOST_CHECK(dimension_simplices == skeleton_simplices);
+  }
+}
