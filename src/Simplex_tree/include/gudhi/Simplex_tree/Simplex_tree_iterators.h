@@ -439,6 +439,7 @@ class Simplex_tree_skeleton_simplex_iterator : public boost::iterator_facade<
       sh_ = sib_->oncles()->members().find(sib_->parent());
       sib_ = sib_->oncles();
       --curr_dim_;
+      return;
     }
     while (st_->has_children(sh_) && curr_dim_ < dim_skel_) {
       sib_ = sh_->second.children();
