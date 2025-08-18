@@ -1231,8 +1231,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(for_each_simplex_skip_iteration, typeST, list_of_t
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_dimension_vertex_iterator, typeST, list_of_tested_variants) {
-  std::clog << "********************************************************************" << std::endl;
-  std::clog << "TEST OF DIMENSION VERTEX ITERATORS" << std::endl;
+  std::clog << "********************************************************************\n";
+  std::clog << "TEST OF DIMENSION VERTEX ITERATORS\n";
   typeST st;
 
   st.insert_simplex_and_subfaces({0});
@@ -1241,7 +1241,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_dimension_vertex_iterator, typeST, li
   st.insert_simplex_and_subfaces({5,6,7,8});
   st.insert_simplex_and_subfaces({9});
 
-  for(int dim = 0; dim < 5; dim++) {
+  for(int dim = 0; dim < 6; dim++) {
+    std::clog << " - For dimension = " << dim << "\n";
     using Simplex = std::vector<typename typeST::Vertex_handle>;
     std::vector<Simplex> skeleton_simplices;
     for(auto sh : st.skeleton_simplex_range(dim)) {
