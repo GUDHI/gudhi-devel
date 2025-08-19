@@ -13,7 +13,7 @@ Leave the lines above as it is required by the web site generator 'Jekyll'
 Generates a pointset and save it in an OFF file. Command-line is:
 
 ```
-off_file_from_shape_generator on|in sphere|cube|curve|torus|klein <filename> <num_points> <dimension> <parameter1> <parameter2>...
+off_file_from_shape_generator on|in sphere|cube|curve|torus|klein <filename> <num_points> <dimension> [radius=1.0] [seed] ...
 ```
 
 Warning: "on cube" generator is not available!
@@ -21,10 +21,10 @@ Warning: "on cube" generator is not available!
 **Examples**
 
 ```
-off_file_from_shape_generator on sphere onSphere.off 1000 3 15.2
+off_file_from_shape_generator on sphere onSphere.off 1000 3 15.2 42
 ```
 
-* Generates an onSphere.off file with 1000 points randomized on a sphere of dimension 3 and radius 15.2.
+* Generates an onSphere.off file with 1000 points randomized on a sphere of dimension 3, radius 15.2. The seed of the random generator has been set to 42 for reproducibility.
 
 ```
 off_file_from_shape_generator in sphere inSphere.off 100 2
