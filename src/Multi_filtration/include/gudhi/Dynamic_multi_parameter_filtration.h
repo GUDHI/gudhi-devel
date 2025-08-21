@@ -84,10 +84,8 @@ namespace Gudhi::multi_filtration {
 template <typename T, bool Co = false, bool Ensure1Criticality = false>
 class Dynamic_multi_parameter_filtration
 {
- private:
-  using Generator = Multi_parameter_generator<T, Co>; /**< Generator type. */
-
  public:
+  using Generator = Multi_parameter_generator<T>; /**< Generator type. */
   using Underlying_container = std::vector<Generator>; /**< Underlying container for values. */
 
   // CONSTRUCTORS
@@ -99,7 +97,8 @@ class Dynamic_multi_parameter_filtration
    * @param number_of_parameters If negative, takes the default value instead. Default value: 2.
    */
   Dynamic_multi_parameter_filtration(int number_of_parameters = 2)
-      : number_of_parameters_(number_of_parameters < 0 ? 2 : number_of_parameters), generators_(1)
+      : number_of_parameters_(number_of_parameters < 0 ? 2 : number_of_parameters),
+        generators_(1, Generator(1, Co ? T_inf : -T_inf))
   {}
 
   /**
@@ -326,6 +325,17 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
+   * @brief Returns reference to the requested generator.
+   *
+   * @param g Index of the generator.
+   */
+  Generator &operator[](size_type g)
+  {
+    GUDHI_CHECK(g < generators_.size(), "Out of bound index.");
+    return generators_[g];
+  }
+
+  /**
    * @brief Let \f$ g \f$ be the first value in `indices` and \f$ p \f$ the second value.
    * Returns reference to value of parameter \f$ p \f$ of generator \f$ g \f$.
    * If the value is at +/- inf or NaN and it needs to be modified, @ref force_generator_size_to_number_of_parameters
@@ -470,7 +480,7 @@ class Dynamic_multi_parameter_filtration
   template <typename U>
   Dynamic_multi_parameter_filtration<U, Co, Ensure1Criticality> as_type() const
   {
-    std::vector<Multi_parameter_generator<U, Co> > out(num_generators());
+    std::vector<Multi_parameter_generator<U> > out(num_generators());
     for (size_type g = 0; g < num_generators(); ++g) {
       out[g] = generators_[g].template as_type<U>();
     }
@@ -1738,7 +1748,7 @@ class Dynamic_multi_parameter_filtration
     }
 
     if (generators_.empty()) {
-      generators_ = {Generator()};
+      generators_ = {Generator(1, Co ? T_inf : -T_inf)};
     }
   }
 
@@ -2036,7 +2046,7 @@ class Dynamic_multi_parameter_filtration
     GUDHI_CHECK(grid.size() >= f.num_parameters(),
                 "The size of the grid should correspond to the number of parameters in the filtration value.");
 
-    std::vector<Multi_parameter_generator<U, Co> > outVec(f.num_generators());
+    std::vector<Multi_parameter_generator<U> > outVec(f.num_generators());
 
     size_type i = 0;
     for (const Generator &g : f.generators_) {

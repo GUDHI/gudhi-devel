@@ -517,7 +517,7 @@ class Degree_rips_bifiltration
       }
     };
 
-    std::vector<Multi_parameter_generator<T, Co> > out;
+    std::vector<Multi_parameter_generator<T> > out;
     out.reserve(generators_.size());
     T threshold = generators_[gen_index(0)];
     out.emplace_back(std::vector<T>{static_cast<T>(gen_index(0)), threshold});
@@ -546,7 +546,7 @@ class Degree_rips_bifiltration
   Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>
   convert_to_non_simplified_dynamic_multi_parameter_filtration() const
   {
-    std::vector<Multi_parameter_generator<T, Co> > out;
+    std::vector<Multi_parameter_generator<T> > out;
     out.reserve(generators_.size());
     for (size_type g = 0; g < generators_.size(); ++g) {
       std::vector<T> v = {static_cast<T>(g), generators_[g]};
