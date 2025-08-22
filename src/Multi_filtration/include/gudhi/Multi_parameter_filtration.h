@@ -199,7 +199,7 @@ class Multi_parameter_filtration
                         number_of_parameters)
   {
     GUDHI_CHECK(number_of_parameters > 0 || generators_.empty(),
-                "Number of parameters cannot be 0 if the container is not empty.");
+                std::invalid_argument("Number of parameters cannot be 0 if the container is not empty."));
 
     if constexpr (Ensure1Criticality) {
       if (generator_view_.extent(0) != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
@@ -223,7 +223,7 @@ class Multi_parameter_filtration
                         number_of_parameters)
   {
     GUDHI_CHECK(number_of_parameters > 0 || generators_.empty(),
-                "Number of parameters cannot be 0 if the container is not empty.");
+                std::invalid_argument("Number of parameters cannot be 0 if the container is not empty."));
 
     if constexpr (Ensure1Criticality) {
       if (generator_view_.extent(0) != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
@@ -345,7 +345,8 @@ class Multi_parameter_filtration
   reference operator[](const IndexRange &indices)
   {
     GUDHI_CHECK(indices.size() == 2,
-                "Exactly 2 indices allowed only: first the generator number, second the parameter number.");
+                std::invalid_argument(
+                    "Exactly 2 indices allowed only: first the generator number, second the parameter number."));
     auto it = indices.begin();
     size_type g = *it;
     return generator_view_(g, *(++it));
@@ -364,7 +365,8 @@ class Multi_parameter_filtration
   const_reference operator[](const IndexRange &indices) const
   {
     GUDHI_CHECK(indices.size() == 2,
-                "Exactly 2 indices allowed only: first the generator number, second the parameter number.");
+                std::invalid_argument(
+                    "Exactly 2 indices allowed only: first the generator number, second the parameter number."));
     auto it = indices.begin();
     size_type g = *it;
     return generator_view_(g, *(++it));
@@ -613,7 +615,7 @@ class Multi_parameter_filtration
     if (&a == &b) return false;
 
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
-                "Only filtration values with same number of parameters can be compared.");
+                std::invalid_argument("Only filtration values with same number of parameters can be compared."));
 
     for (std::size_t i = 0U; i < a.num_parameters() * std::min(a.num_generators(), b.num_generators()); ++i) {
       std::size_t iA = i;
@@ -645,7 +647,7 @@ class Multi_parameter_filtration
     if (&a == &b) return true;
 
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
-                "Only filtration values with same number of parameters can be compared.");
+                std::invalid_argument("Only filtration values with same number of parameters can be compared."));
 
     for (std::size_t i = 0U; i < a.num_parameters() * std::min(a.num_generators(), b.num_generators()); ++i) {
       std::size_t iA = i;
@@ -676,7 +678,7 @@ class Multi_parameter_filtration
     if (&a == &b) return false;
 
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
-                "Only filtration values with same number of parameters can be compared.");
+                std::invalid_argument("Only filtration values with same number of parameters can be compared."));
 
     if (a.num_generators() == 0 || b.num_generators() == 0) return false;
 
@@ -713,7 +715,7 @@ class Multi_parameter_filtration
   friend bool operator<=(const Multi_parameter_filtration &a, const Multi_parameter_filtration &b)
   {
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
-                "Only filtration values with same number of parameters can be compared.");
+                std::invalid_argument("Only filtration values with same number of parameters can be compared."));
 
     if (a.num_generators() == 0 || b.num_generators() == 0) return false;
     if (a.is_nan() || b.is_nan()) return false;
@@ -1482,7 +1484,7 @@ class Multi_parameter_filtration
   bool add_generator(Iterator genStart, Iterator genEnd)
   {
     GUDHI_CHECK(std::distance(genStart, genEnd) == static_cast<int>(num_parameters()),
-                "Wrong range size. Should correspond to the number of parameters.");
+                std::invalid_argument("Wrong range size. Should correspond to the number of parameters."));
 
     const int newIndex = -1;
 
@@ -1522,7 +1524,8 @@ class Multi_parameter_filtration
   {
     static_assert(!Ensure1Criticality, "Cannot add additional generator to a 1-critical only filtration value.");
 
-    GUDHI_CHECK(x.size() == num_parameters(), "Wrong range size. Should correspond to the number of parameters.");
+    GUDHI_CHECK(x.size() == num_parameters(),
+                std::invalid_argument("Wrong range size. Should correspond to the number of parameters."));
 
     generators_.insert(generators_.end(), x.begin(), x.end());
     generator_view_.update_data(generators_.data());  // in case it was relocated
@@ -1619,7 +1622,8 @@ class Multi_parameter_filtration
             class = std::enable_if_t<RangeTraits<GeneratorRange>::has_begin> >
   bool push_to_least_common_upper_bound(const GeneratorRange &x, bool exclude_infinite_values = false)
   {
-    GUDHI_CHECK(x.size() == num_parameters(), "Wrong range size. Should correspond to the number of parameters.");
+    GUDHI_CHECK(x.size() == num_parameters(),
+                std::invalid_argument("Wrong range size. Should correspond to the number of parameters."));
 
     bool xIsInf = true, xIsMinusInf = true, xIsNaN = true;
     bool thisIsInf = true, thisIsMinusInf = true, thisIsNaN = true;
@@ -1684,7 +1688,8 @@ class Multi_parameter_filtration
             class = std::enable_if_t<RangeTraits<GeneratorRange>::has_begin> >
   bool pull_to_greatest_common_lower_bound(const GeneratorRange &x, bool exclude_infinite_values = false)
   {
-    GUDHI_CHECK(x.size() == num_parameters(), "Wrong range size. Should correspond to the number of parameters.");
+    GUDHI_CHECK(x.size() == num_parameters(),
+                std::invalid_argument("Wrong range size. Should correspond to the number of parameters."));
 
     bool xIsInf = true, xIsMinusInf = true, xIsNaN = true;
     bool thisIsInf = true, thisIsMinusInf = true, thisIsNaN = true;
@@ -1749,8 +1754,9 @@ class Multi_parameter_filtration
   template <typename OneDimArray>
   void project_onto_grid(const std::vector<OneDimArray> &grid, bool coordinate = true)
   {
-    GUDHI_CHECK(grid.size() >= num_parameters(),
-                "The grid should not be smaller than the number of parameters in the filtration value.");
+    GUDHI_CHECK(
+        grid.size() >= num_parameters(),
+        std::invalid_argument("The grid should not be smaller than the number of parameters in the filtration value."));
 
     auto project_generator_value = [&](T &val, const OneDimArray &filtration) {
       auto d = std::distance(
@@ -1879,7 +1885,7 @@ class Multi_parameter_filtration
   friend U compute_euclidean_distance_to(const Multi_parameter_filtration &f, const Multi_parameter_filtration &other)
   {
     GUDHI_CHECK(f.num_parameters() == other.num_parameters(),
-                "We cannot compute the distance between two points of different dimensions.");
+                std::invalid_argument("We cannot compute the distance between two points of different dimensions."));
 
     // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
     if constexpr (Ensure1Criticality) {
@@ -1963,7 +1969,8 @@ class Multi_parameter_filtration
       const std::vector<std::vector<U> > &grid)
   {
     GUDHI_CHECK(grid.size() >= f.num_parameters(),
-                "The size of the grid should correspond to the number of parameters in the filtration value.");
+                std::invalid_argument(
+                    "The size of the grid should correspond to the number of parameters in the filtration value."));
 
     U grid_inf = Multi_parameter_filtration<U, Co, Ensure1Criticality>::T_inf;
     std::vector<U> outVec(f.num_entries());
@@ -2077,14 +2084,15 @@ class Multi_parameter_filtration
   friend bool unify_lifetimes(Multi_parameter_filtration &f1, const Multi_parameter_filtration &f2)
   {
     GUDHI_CHECK(f1.num_parameters() == f2.num_parameters(),
-                "Cannot unify two filtration values with different number of parameters.");
+                std::invalid_argument("Cannot unify two filtration values with different number of parameters."));
 
     // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
     // if general case is kept: add (num_gen == 1) test to throw if unification is not 1-critical anymore.
     if constexpr (Ensure1Criticality) {
       // WARNING: costly check
-      GUDHI_CHECK(f1 <= f2 || f2 <= f1,
-                  "When 1-critical only, two non-comparable filtration values cannot be unified.");
+      GUDHI_CHECK(
+          f1 <= f2 || f2 <= f1,
+          std::invalid_argument("When 1-critical only, two non-comparable filtration values cannot be unified."));
 
       if constexpr (Co) {
         return f1.push_to_least_common_upper_bound(f2);
@@ -2115,7 +2123,7 @@ class Multi_parameter_filtration
   friend bool intersect_lifetimes(Multi_parameter_filtration &f1, const Multi_parameter_filtration &f2)
   {
     GUDHI_CHECK(f1.num_parameters() == f2.num_parameters(),
-                "Cannot intersect two filtration values with different number of parameters.");
+                std::invalid_argument("Cannot intersect two filtration values with different number of parameters."));
 
     if constexpr (Ensure1Criticality) {
       if constexpr (Co) {

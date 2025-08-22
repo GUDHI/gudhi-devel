@@ -188,7 +188,7 @@ class Multi_parameter_generator
    */
   reference operator[](size_type p)
   {
-    GUDHI_CHECK(p < generator_.size(), "Out of bound parameter.");
+    GUDHI_CHECK(p < generator_.size(), std::out_of_range("Out of bound parameter."));
     return generator_[p];
   }
 
@@ -197,7 +197,7 @@ class Multi_parameter_generator
    */
   const_reference operator[](size_type p) const
   {
-    GUDHI_CHECK(p < generator_.size(), "Out of bound parameter.");
+    GUDHI_CHECK(p < generator_.size(), std::out_of_range("Out of bound parameter."));
     return generator_[p];
   }
 
@@ -301,8 +301,7 @@ class Multi_parameter_generator
   static Multi_parameter_generator minus_inf() { return Multi_parameter_generator(1, -T_inf); }
 
   /**
-   * @brief If `std::numeric_limits<T>::has_quiet_NaN` is true, returns a generator for which @ref is_nan() returns
-   * `true`. Otherwise, throws.
+   * @brief Returns a generator for which @ref is_nan() returns `true`.
    */
   static Multi_parameter_generator nan()
   {
@@ -385,7 +384,7 @@ class Multi_parameter_generator
     if (b.is_minus_inf() || a.is_plus_inf()) return false;
 
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
-                "Only generators with same number of parameters can be compared.");
+                std::invalid_argument("Only generators with same number of parameters can be compared."));
 
     bool isSame = true;
     auto n = a.size();
@@ -416,7 +415,7 @@ class Multi_parameter_generator
     if (bIsMinusInf || aIsPlusInf) return false;
 
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
-                "Only filtration values with same number of parameters can be compared.");
+                std::invalid_argument("Only generators with same number of parameters can be compared."));
 
     auto n = a.size();
     for (std::size_t i = 0U; i < n; ++i) {
@@ -452,6 +451,14 @@ class Multi_parameter_generator
   {
     if (a.is_nan() || b.is_nan()) return false;
     if (&a == &b) return true;
+    if (a.is_plus_inf()) {
+      if (b.is_plus_inf()) return true;
+      return false;
+    }
+    if (a.is_minus_inf()) {
+      if (b.is_minus_inf()) return true;
+      return false;
+    }
     return a.generator_ == b.generator_;
   }
 
@@ -1222,7 +1229,7 @@ class Multi_parameter_generator
 
     if (generator_.size() > 1) {
       GUDHI_CHECK(static_cast<std::size_t>(number_of_parameters) == generator_.size(),
-                  "Cannot force size to another number of parameters than set.");
+                  std::invalid_argument("Cannot force size to another number of parameters than set."));
       return;
     }
 
@@ -1346,8 +1353,9 @@ class Multi_parameter_generator
   template <typename OneDimArray>
   void project_onto_grid(const std::vector<OneDimArray> &grid, bool coordinate = true)
   {
-    GUDHI_CHECK(grid.size() >= generator_.size(),
-                "The grid should not be smaller than the number of parameters in the filtration value.");
+    GUDHI_CHECK(
+        grid.size() >= generator_.size(),
+        std::invalid_argument("The grid should not be smaller than the number of parameters in the filtration value."));
 
     if (is_nan() || generator_.empty()) return;
 
@@ -1400,7 +1408,7 @@ class Multi_parameter_generator
     }
 
     GUDHI_CHECK(g.num_parameters() == other.num_parameters(),
-                "We cannot compute the distance between two points of different dimensions.");
+                std::invalid_argument("We cannot compute the distance between two points of different dimensions."));
 
     if (g.num_parameters() == 1) return g[0] - other[0];
 
@@ -1448,7 +1456,8 @@ class Multi_parameter_generator
                                                                    const std::vector<std::vector<U> > &grid)
   {
     GUDHI_CHECK(grid.size() >= g.num_parameters(),
-                "The size of the grid should correspond to the number of parameters in the filtration value.");
+                std::invalid_argument(
+                    "The size of the grid should correspond to the number of parameters in the filtration value."));
 
     U grid_inf = Multi_parameter_generator<U>::T_inf;
     std::vector<U> outVec(g.num_parameters());
