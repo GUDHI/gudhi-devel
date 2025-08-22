@@ -14,6 +14,7 @@
  *      - 2024/08 Hannah Schreiber: Addition of customizable copy constructor.
  *      - 2024/08 Marc Glisse: Allow storing custom data in simplices.
  *      - 2024/10 Hannah Schreiber: Const version of the Simplex_tree
+ *      - 2025/03 Hannah Schreiber (& David Loiseaux): add number_of_parameters_ member
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -170,14 +171,12 @@ class Simplex_tree {
     const Filtration_value& filtration() const { return filt_; }
     Filtration_value& filtration() { return filt_; }
 
-    static const Filtration_value& get_infinity() { return inf_; }
+    static const Filtration_value& get_simple_infinity() { return inf_; }
 
    private:
     Filtration_value filt_;
-
-    inline static const Filtration_value inf_ = std::numeric_limits<Filtration_value>::has_infinity
-                                                    ? std::numeric_limits<Filtration_value>::infinity()
-                                                    : std::numeric_limits<Filtration_value>::max();
+    inline static const Filtration_value inf_ =
+        get_infinity_value(Filtration_value(simplex_tree::empty_filtration_value));
   };
 
   struct Filtration_simplex_base_dummy {
@@ -430,9 +429,11 @@ class Simplex_tree {
   /** \brief Constructs an empty simplex tree. */
   Simplex_tree()
       : null_vertex_(-1),
-      root_(nullptr, null_vertex_),
-      filtration_vect_(),
-      dimension_(-1) { }
+        root_(nullptr, null_vertex_),
+        number_of_parameters_(1),
+        filtration_vect_(),
+        dimension_(-1)
+  {}
 
   /**
    * @brief Construct the simplex tree as the copy of a given simplex tree with eventually different template
@@ -529,6 +530,7 @@ class Simplex_tree {
     null_vertex_ = complex_source.null_vertex_;
     filtration_vect_.clear();
     dimension_ = complex_source.dimension_;
+    number_of_parameters_ = complex_source.number_of_parameters_;
     auto root_source = complex_source.root_;
 
     // root members copy
@@ -562,6 +564,7 @@ class Simplex_tree {
     null_vertex_ = complex_source.null_vertex_;
     filtration_vect_.clear();
     dimension_ = complex_source.dimension_;
+    number_of_parameters_ = complex_source.number_of_parameters_;
     auto root_source = complex_source.root_;
 
     // root members copy
@@ -619,6 +622,7 @@ class Simplex_tree {
     root_ = std::move(complex_source.root_);
     filtration_vect_ = std::move(complex_source.filtration_vect_);
     dimension_ = complex_source.dimension_;
+    number_of_parameters_ = std::exchange(complex_source.number_of_parameters_, 1);
     if constexpr (Options::link_nodes_by_label) {
       nodes_label_to_list_.swap(complex_source.nodes_label_to_list_);
     }
@@ -663,10 +667,11 @@ class Simplex_tree {
   /** \brief Checks if two simplex trees are equal. Any extra data (@ref Simplex_data) stored in the simplices are
    * ignored in the comparison.
    */
-  template<class OtherSimplexTreeOptions>
+  template <class OtherSimplexTreeOptions>
   bool operator==(const Simplex_tree<OtherSimplexTreeOptions>& st2) const {
     if ((null_vertex_ != st2.null_vertex_) ||
-        (dimension_ != st2.dimension_ && !dimension_to_be_lowered_ && !st2.dimension_to_be_lowered_))
+        (dimension_ != st2.dimension_ && !dimension_to_be_lowered_ && !st2.dimension_to_be_lowered_) ||
+        (number_of_parameters_ != st2.number_of_parameters_))
       return false;
     return rec_equal(&root_, &st2.root_);
   }
@@ -742,7 +747,7 @@ class Simplex_tree {
     if (sh != null_simplex()) {
       return sh->second.filtration();
     } else {
-      return Filtration_simplex_base_real::get_infinity();
+      return Filtration_simplex_base_real::get_simple_infinity();
     }
   }
 
@@ -880,6 +885,22 @@ class Simplex_tree {
     if (dimension_to_be_lowered_)
       lower_upper_bound_dimension();
     return dimension_;
+  }
+
+  /**
+   * @brief Returns the value stored as the number of parameters of the filtration values.
+   * The default value stored at construction of the simplex tree is 1. The user needs to set it by hand
+   * with @ref set_num_parameters if any other value is needed.
+   */
+  int num_parameters() const {
+    return number_of_parameters_;
+  }
+
+  /**
+   * @brief Stores the given value as number of parameters of the filtration values.
+   */
+  void set_num_parameters(int new_number) {
+    number_of_parameters_ = new_number;
   }
 
   /** \brief Returns true if the node in the simplex tree pointed by
@@ -1277,7 +1298,7 @@ class Simplex_tree {
   void initialize_filtration(bool ignore_infinite_values = false) const {
     if (ignore_infinite_values){
       initialize_filtration(is_before_in_totally_ordered_filtration(this), [&](Simplex_handle sh) -> bool {
-        return filtration(sh) == Filtration_simplex_base_real::get_infinity();
+        return filtration(sh) == get_infinity_value(filtration(sh));
       });
     } else {
       initialize_filtration(is_before_in_totally_ordered_filtration(this), [](Simplex_handle) -> bool {
@@ -2159,7 +2180,7 @@ class Simplex_tree {
    * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    */
   bool prune_above_filtration(const Filtration_value& filtration) {
-    if (filtration == Filtration_simplex_base_real::get_infinity())
+    if (filtration == get_infinity_value(filtration))
       return false;  // ---->>
     bool modified = rec_prune_above_filtration(root(), filtration);
     if(modified)
@@ -2391,8 +2412,8 @@ class Simplex_tree {
 
     // Compute maximum and minimum of filtration values
     Vertex_handle maxvert = std::numeric_limits<Vertex_handle>::min();
-    Filtration_value minval = Filtration_simplex_base_real::get_infinity();
-    Filtration_value maxval = -Filtration_simplex_base_real::get_infinity();
+    Filtration_value minval = Filtration_simplex_base_real::get_simple_infinity();
+    Filtration_value maxval = -minval;
     for (auto sh = root_.members().begin(); sh != root_.members().end(); ++sh) {
       const Filtration_value& f = this->filtration(sh);
       minval = std::min(minval, f);
@@ -2673,10 +2694,11 @@ class Simplex_tree {
    *   architecture.
    */
   std::size_t get_serialization_size() const {
+    const std::size_t np_byte_size = sizeof(decltype(number_of_parameters_));
     const std::size_t vh_byte_size = sizeof(Vertex_handle);
     std::size_t fv_byte_size = 0;
     const std::size_t tree_size = num_simplices_and_filtration_serialization_size(&root_, fv_byte_size);
-    const std::size_t buffer_byte_size = vh_byte_size + fv_byte_size + tree_size * 2 * vh_byte_size;
+    const std::size_t buffer_byte_size = np_byte_size + vh_byte_size + fv_byte_size + tree_size * 2 * vh_byte_size;
 #ifdef DEBUG_TRACES
       std::clog << "Gudhi::simplex_tree::get_serialization_size - buffer size = " << buffer_byte_size << std::endl;
 #endif  // DEBUG_TRACES
@@ -2717,7 +2739,9 @@ class Simplex_tree {
   /* Without explanation and with filtration values:                                                                 */
   /* 04 0a F(a) 0b F(b) 0c F(c) 0d F(d) 01 0b F(a,b) 00 02 0c F(b,c) 0d F(b,d) 01 0d F(b,c,d) 00 00 01 0d F(c,d) 00 00 */
   void serialize(char* buffer, const std::size_t buffer_size) const {
-    char* buffer_end = rec_serialize(&root_, buffer);
+    char* buffer_end = buffer;
+    buffer_end = serialize_value_to_char_buffer(number_of_parameters_, buffer_end);
+    buffer_end = rec_serialize(&root_, buffer_end);
     if (static_cast<std::size_t>(buffer_end - buffer) != buffer_size)
       throw std::invalid_argument("Serialization does not match end of buffer");
   }
@@ -2800,6 +2824,7 @@ class Simplex_tree {
   void deserialize(const char* buffer, const std::size_t buffer_size, F&& deserialize_filtration_value) {
     GUDHI_CHECK(num_vertices() == 0, std::logic_error("Simplex_tree::deserialize - Simplex_tree must be empty"));
     const char* ptr = buffer;
+    ptr = deserialize_value_from_char_buffer(number_of_parameters_, ptr);
     // Needs to read size before recursivity to manage new siblings for children
     Vertex_handle members_size;
     ptr = deserialize_value_from_char_buffer(members_size, ptr);
@@ -2854,9 +2879,9 @@ class Simplex_tree {
 
  private:
   Vertex_handle null_vertex_;
-  /** \brief Total number of simplices in the complex, without the empty simplex.*/
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
+  int number_of_parameters_;
 
   // all mutable as their content has no impact on the content of the simplex tree itself
   // they correspond to some kind of cache or helper attributes.
@@ -2870,6 +2895,30 @@ class Simplex_tree {
 // Print a Simplex_tree in os.
 template<typename...T>
 std::ostream& operator<<(std::ostream & os, const Simplex_tree<T...> & st) {
+  using handle = typename Simplex_tree<T...>::Simplex_handle;
+  // lexicographical order to ensure total order even with custom filtration values
+  st.initialize_filtration(
+      [&](handle sh1, handle sh2) {
+        if (st.dimension(sh1) < st.dimension(sh2)) return true;
+        if (st.dimension(sh1) > st.dimension(sh2)) return false;
+
+        auto rg1 = st.simplex_vertex_range(sh1);
+        auto rg2 = st.simplex_vertex_range(sh2);
+        auto it1 = rg1.begin();
+        auto it2 = rg2.begin();
+        // same size
+        while (it1 != rg1.end()) {
+          if (*it1 == *it2) {
+            ++it1;
+            ++it2;
+          } else {
+            return *it1 < *it2;
+          }
+        }
+        return false;
+      },
+      [](handle) -> bool { return false; });
+
   for (auto sh : st.filtration_simplex_range()) {
     os << st.dimension(sh) << " ";
     for (auto v : st.simplex_vertex_range(sh)) {
@@ -2877,6 +2926,7 @@ std::ostream& operator<<(std::ostream & os, const Simplex_tree<T...> & st) {
     }
     os << st.filtration(sh) << "\n";  // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
   }
+  st.clear_filtration();
   return os;
 }
 

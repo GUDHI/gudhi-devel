@@ -128,6 +128,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
 
   char* buffer = new char[256];
   char* ptr = buffer;
+  // number of parameters
+  ptr = serialize_value_to_char_buffer(static_cast<int>(1)     , ptr);
   // 3 simplices ({0}, {1}, {2}) and its filtration values
   ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(3)     , ptr);
   ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(0)     , ptr);
@@ -151,16 +153,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   const std::size_t buffer_size = (ptr - buffer);
   std::clog << "Serialization size in bytes = " << buffer_size << std::endl;
   // Sizes are expressed in bytes
+  const std::size_t param_size = sizeof(int);
   const std::size_t vertex_size = sizeof(Vertex_type);
   const std::size_t filtration_size =
       Stree::Options::store_filtration ? get_serialization_size_of(random_filtration<Filtration_type>()) : 0;
-  const std::size_t serialization_size = vertex_size + st.num_simplices() * (2 * vertex_size + filtration_size);
+  const std::size_t serialization_size =
+      param_size + vertex_size + st.num_simplices() * (2 * vertex_size + filtration_size);
   BOOST_CHECK_EQUAL(serialization_size, buffer_size);
 
   Vertex_type vertex = 0;
+  int num_param = 0;
   Filtration_type filtration(0);
   // Reset position pointer at start
   const char* c_ptr = buffer;
+  // number of parameters
+  c_ptr = deserialize_value_from_char_buffer(num_param, c_ptr);
   // 3 simplices ({0}, {1}, {2}) and its filtration values
   c_ptr = deserialize_value_from_char_buffer(vertex, c_ptr);
   BOOST_CHECK(vertex == 3);
