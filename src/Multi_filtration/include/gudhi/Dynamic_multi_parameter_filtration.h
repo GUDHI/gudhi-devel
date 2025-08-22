@@ -189,7 +189,7 @@ class Dynamic_multi_parameter_filtration
       : number_of_parameters_(number_of_parameters < 0 ? 0 : number_of_parameters), generators_(generators)
   {
     GUDHI_CHECK(number_of_parameters > 0 || generators_.empty(),
-                "Number of parameters cannot be 0 if the container is not empty.");
+                std::invalid_argument("Number of parameters cannot be 0 if the container is not empty."));
 
     if constexpr (Ensure1Criticality) {
       if (generators_.size() != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
@@ -207,7 +207,7 @@ class Dynamic_multi_parameter_filtration
       : number_of_parameters_(number_of_parameters < 0 ? 0 : number_of_parameters), generators_(std::move(generators))
   {
     GUDHI_CHECK(number_of_parameters > 0 || generators_.empty(),
-                "Number of parameters cannot be 0 if the container is not empty.");
+                std::invalid_argument("Number of parameters cannot be 0 if the container is not empty."));
 
     if constexpr (Ensure1Criticality) {
       if (generators_.size() != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
@@ -298,7 +298,7 @@ class Dynamic_multi_parameter_filtration
    */
   reference operator()(size_type g, size_type p)
   {
-    GUDHI_CHECK(g < generators_.size() && p < number_of_parameters_, "Out of bound index.");
+    GUDHI_CHECK(g < generators_.size() && p < number_of_parameters_, std::out_of_range("Out of bound index."));
     if (generators_[g].size() < number_of_parameters_) return generators_[g][0];
     return generators_[g][p];
   }
@@ -308,7 +308,7 @@ class Dynamic_multi_parameter_filtration
    */
   const_reference operator()(size_type g, size_type p) const
   {
-    GUDHI_CHECK(g < generators_.size() && p < number_of_parameters_, "Out of bound index.");
+    GUDHI_CHECK(g < generators_.size() && p < number_of_parameters_, std::out_of_range("Out of bound index."));
     if (generators_[g].size() < number_of_parameters_) return generators_[g][0];
     return generators_[g][p];
   }
@@ -320,7 +320,7 @@ class Dynamic_multi_parameter_filtration
    */
   const Generator &operator[](size_type g) const
   {
-    GUDHI_CHECK(g < generators_.size(), "Out of bound index.");
+    GUDHI_CHECK(g < generators_.size(), std::out_of_range("Out of bound index."));
     return generators_[g];
   }
 
@@ -331,7 +331,7 @@ class Dynamic_multi_parameter_filtration
    */
   Generator &operator[](size_type g)
   {
-    GUDHI_CHECK(g < generators_.size(), "Out of bound index.");
+    GUDHI_CHECK(g < generators_.size(), std::out_of_range("Out of bound index."));
     return generators_[g];
   }
 
@@ -350,7 +350,8 @@ class Dynamic_multi_parameter_filtration
   reference operator[](const IndexRange &indices)
   {
     GUDHI_CHECK(indices.size() >= 2,
-                "Exactly 2 indices allowed only: first the generator number, second the parameter number.");
+                std::invalid_argument(
+                    "Exactly 2 indices allowed only: first the generator number, second the parameter number."));
     auto it = indices.begin();
     size_type g = *it;
     return this->operator()(g, *(++it));
@@ -369,7 +370,8 @@ class Dynamic_multi_parameter_filtration
   const_reference operator[](const IndexRange &indices) const
   {
     GUDHI_CHECK(indices.size() >= 2,
-                "Exactly 2 indices allowed only: first the generator number, second the parameter number.");
+                std::invalid_argument(
+                    "Exactly 2 indices allowed only: first the generator number, second the parameter number."));
     auto it = indices.begin();
     size_type g = *it;
     return this->operator()(g, *(++it));
@@ -531,28 +533,34 @@ class Dynamic_multi_parameter_filtration
   size_type num_entries() const { return generators_.size() * number_of_parameters_; }
 
   /**
-   * @brief Returns a filtration value with given number of parameters for which @ref is_plus_inf() returns `true`.
+   * @brief Returns a filtration value with given number of parameters for which @ref is_plus_inf() returns `true`
+   * or an empty filtration value if `number_of_parameters` is 0.
    */
   static Dynamic_multi_parameter_filtration inf(int number_of_parameters)
   {
+    if (number_of_parameters == 0) return Dynamic_multi_parameter_filtration();
     Underlying_container out(1, Generator::inf());
     return Dynamic_multi_parameter_filtration(std::move(out), number_of_parameters);
   }
 
   /**
-   * @brief Returns a filtration value with given number of parameters for which @ref is_minus_inf() returns `true`.
+   * @brief Returns a filtration value with given number of parameters for which @ref is_minus_inf() returns `true`
+   * or an empty filtration value if `number_of_parameters` is 0.
    */
   static Dynamic_multi_parameter_filtration minus_inf(int number_of_parameters)
   {
+    if (number_of_parameters == 0) return Dynamic_multi_parameter_filtration();
     Underlying_container out(1, Generator::minus_inf());
     return Dynamic_multi_parameter_filtration(std::move(out), number_of_parameters);
   }
 
   /**
-   * @brief Returns a filtration value with given number of parameters for which @ref is_nan() returns `true`.
+   * @brief Returns a filtration value with given number of parameters for which @ref is_nan() returns `true`
+   * or an empty filtration value if `number_of_parameters` is 0.
    */
   static Dynamic_multi_parameter_filtration nan(int number_of_parameters)
   {
+    if (number_of_parameters == 0) return Dynamic_multi_parameter_filtration();
     Underlying_container out(1, Generator::nan());
     return Dynamic_multi_parameter_filtration(std::move(out), number_of_parameters);
   }
@@ -631,7 +639,7 @@ class Dynamic_multi_parameter_filtration
     if (&a == &b) return false;
 
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
-                "Only filtration values with same number of parameters can be compared.");
+                std::invalid_argument("Only filtration values with same number of parameters can be compared."));
 
     // line order matters
     if (a.is_nan()) return false;
@@ -686,7 +694,7 @@ class Dynamic_multi_parameter_filtration
     if (&a == &b) return true;
 
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
-                "Only filtration values with same number of parameters can be compared.");
+                std::invalid_argument("Only filtration values with same number of parameters can be compared."));
 
     // line order matters
     if (b.is_nan()) return true;
@@ -740,7 +748,7 @@ class Dynamic_multi_parameter_filtration
     if (&a == &b) return false;
 
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
-                "Only filtration values with same number of parameters can be compared.");
+                std::invalid_argument("Only filtration values with same number of parameters can be compared."));
 
     if (a.num_generators() == 0 || b.num_generators() == 0) return false;
 
@@ -775,7 +783,7 @@ class Dynamic_multi_parameter_filtration
   friend bool operator<=(const Dynamic_multi_parameter_filtration &a, const Dynamic_multi_parameter_filtration &b)
   {
     GUDHI_CHECK(a.num_parameters() == b.num_parameters(),
-                "Only filtration values with same number of parameters can be compared.");
+                std::invalid_argument("Only filtration values with same number of parameters can be compared."));
 
     if (a.num_generators() == 0 || b.num_generators() == 0) return false;
     if (a.is_nan() || b.is_nan()) return false;
@@ -1652,7 +1660,7 @@ class Dynamic_multi_parameter_filtration
   bool add_generator(Iterator genStart, Iterator genEnd)
   {
     GUDHI_CHECK(std::distance(genStart, genEnd) == static_cast<int>(num_parameters()),
-                "Wrong range size. Should correspond to the number of parameters.");
+                std::invalid_argument("Wrong range size. Should correspond to the number of parameters."));
 
     size_type end = num_generators();
 
@@ -1691,7 +1699,8 @@ class Dynamic_multi_parameter_filtration
     if constexpr (std::is_same_v<GeneratorRange, Generator>) {
       generators_.push_back(x);
     } else {
-      GUDHI_CHECK(x.size() == num_parameters(), "Wrong range size. Should correspond to the number of parameters.");
+      GUDHI_CHECK(x.size() == num_parameters(),
+                  std::invalid_argument("Wrong range size. Should correspond to the number of parameters."));
       generators_.emplace_back(x.begin(), x.end());
     }
   }
@@ -1837,8 +1846,9 @@ class Dynamic_multi_parameter_filtration
   template <typename OneDimArray>
   void project_onto_grid(const std::vector<OneDimArray> &grid, bool coordinate = true)
   {
-    GUDHI_CHECK(grid.size() >= num_parameters(),
-                "The grid should not be smaller than the number of parameters in the filtration value.");
+    GUDHI_CHECK(
+        grid.size() >= num_parameters(),
+        std::invalid_argument("The grid should not be smaller than the number of parameters in the filtration value."));
 
     for (Generator &g : generators_) {
       g.project_onto_grid(grid, coordinate);
@@ -1955,7 +1965,7 @@ class Dynamic_multi_parameter_filtration
                                          const Dynamic_multi_parameter_filtration &other)
   {
     GUDHI_CHECK(f.num_parameters() == other.num_parameters(),
-                "We cannot compute the distance between two points of different dimensions.");
+                std::invalid_argument("We cannot compute the distance between two points of different dimensions."));
 
     // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
     if constexpr (Ensure1Criticality) {
@@ -2044,7 +2054,8 @@ class Dynamic_multi_parameter_filtration
       const std::vector<std::vector<U> > &grid)
   {
     GUDHI_CHECK(grid.size() >= f.num_parameters(),
-                "The size of the grid should correspond to the number of parameters in the filtration value.");
+                std::invalid_argument(
+                    "The size of the grid should correspond to the number of parameters in the filtration value."));
 
     std::vector<Multi_parameter_generator<U> > outVec(f.num_generators());
 

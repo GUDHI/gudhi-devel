@@ -113,7 +113,7 @@ class Degree_rips_bifiltration
   template <class ValueRange = std::initializer_list<T>, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   Degree_rips_bifiltration(const ValueRange &range) : generators_(1, *(range.begin() + 1))
   {
-    GUDHI_CHECK(*(range.begin()) == 0, "First value of the range has to be 0");
+    GUDHI_CHECK(*(range.begin()) == 0, std::invalid_argument("First value of the range has to be 0"));
   }
 
   /**
@@ -128,7 +128,7 @@ class Degree_rips_bifiltration
   template <class Iterator, class = std::enable_if_t<!std::is_arithmetic_v<Iterator> > >
   Degree_rips_bifiltration(Iterator it_begin, Iterator it_end) : generators_(1, *(it_begin + 1))
   {
-    GUDHI_CHECK(*it_begin == 0, "First value of the range has to be 0");
+    GUDHI_CHECK(*it_begin == 0, std::invalid_argument("First value of the range has to be 0"));
   }
 
   /**
@@ -157,7 +157,8 @@ class Degree_rips_bifiltration
     for (size_type i = 0; i < num_gen; ++i) {
       GUDHI_CHECK(
           static_cast<size_type>(*it) == i,
-          "Every second value of the range has to correspond to a contiguous sequence of integers starting at 0.");
+          std::invalid_argument(
+              "Every second value of the range has to correspond to a contiguous sequence of integers starting at 0."));
       ++it;
       generators_[i] = *it;
       ++it;
@@ -318,7 +319,8 @@ class Degree_rips_bifiltration
   reference operator[](const IndexRange &indices)
   {
     GUDHI_CHECK(indices.size() == 2,
-                "Exactly 2 indices allowed only: first the generator number, second the parameter number.");
+                std::invalid_argument(
+                    "Exactly 2 indices allowed only: first the generator number, second the parameter number."));
     auto it = indices.begin();
     size_type g = *it;
     return this->operator()(g, *(++it));
@@ -337,7 +339,8 @@ class Degree_rips_bifiltration
   const_reference operator[](const IndexRange &indices) const
   {
     GUDHI_CHECK(indices.size() == 2,
-                "Exactly 2 indices allowed only: first the generator number, second the parameter number.");
+                std::invalid_argument(
+                    "Exactly 2 indices allowed only: first the generator number, second the parameter number."));
     auto it = indices.begin();
     size_type g = *it;
     return this->operator()(g, *(++it));
@@ -1505,8 +1508,8 @@ class Degree_rips_bifiltration
   bool add_generator(Iterator genStart, Iterator genEnd)
   {
     GUDHI_CHECK(std::distance(genStart, genEnd) == 2,
-                "Wrong range size. Should correspond to the number of parameters.");
-    GUDHI_CHECK(*genStart >= 0, "First value has to be a positive index.");
+                std::invalid_argument("Wrong range size. Should correspond to the number of parameters."));
+    GUDHI_CHECK(*genStart >= 0, std::invalid_argument("First value has to be a positive index."));
 
     const size_type index = *genStart;
     ++genStart;
@@ -1574,10 +1577,11 @@ class Degree_rips_bifiltration
     if constexpr (RangeTraits<GeneratorRange>::is_multi_filtration) {
       newVal = *(x.begin());
     } else {
-      GUDHI_CHECK(x.size() == 2, "Wrong range size. Should correspond to the number of parameters.");
+      GUDHI_CHECK(x.size() == 2,
+                  std::invalid_argument("Wrong range size. Should correspond to the number of parameters."));
 
       auto it = x.begin();
-      GUDHI_CHECK(*it == 0, "First index has to be 0.");
+      GUDHI_CHECK(*it == 0, std::invalid_argument("First index has to be 0."));
       ++it;
       newVal = *it;
     }
@@ -1622,10 +1626,12 @@ class Degree_rips_bifiltration
     if constexpr (RangeTraits<GeneratorRange>::is_multi_filtration) {
       newVal = *(x.begin());
     } else {
-      GUDHI_CHECK(x.size() == 2, "Wrong range size. Should correspond to the number of parameters.");
+      GUDHI_CHECK(x.size() == 2,
+                  std::invalid_argument("Wrong range size. Should correspond to the number of parameters."));
 
       auto it = x.begin();
-      GUDHI_CHECK(static_cast<size_type>(*it) > num_generators(), "First index has to be higher.");
+      GUDHI_CHECK(static_cast<size_type>(*it) > num_generators(),
+                  std::invalid_argument("First index has to be higher."));
       ++it;
       newVal = *it;
     }
@@ -1662,13 +1668,14 @@ class Degree_rips_bifiltration
   template <typename OneDimArray>
   void project_onto_grid(const std::vector<OneDimArray> &grid, bool coordinate = true)
   {
-    GUDHI_CHECK(grid.size() >= 2,
-                "The grid should not be smaller than the number of parameters in the filtration value.");
+    GUDHI_CHECK(
+        grid.size() >= 2,
+        std::invalid_argument("The grid should not be smaller than the number of parameters in the filtration value."));
 
     GUDHI_CHECK_code(const OneDimArray &indices = grid[0]);
     const OneDimArray &values = grid[1];
     for (size_type g = 0; g < num_generators(); ++g) {
-      GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, "Unvalid grid."));
+      GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, std::invalid_argument("Unvalid grid.")));
 
       auto d = std::distance(
           values.begin(),
@@ -1865,7 +1872,8 @@ class Degree_rips_bifiltration
       const std::vector<std::vector<U> > &grid)
   {
     GUDHI_CHECK(grid.size() >= f.num_parameters(),
-                "The size of the grid should correspond to the number of parameters in the filtration value.");
+                std::invalid_argument(
+                    "The size of the grid should correspond to the number of parameters in the filtration value."));
 
     U grid_inf = Degree_rips_bifiltration<U, Co, Ensure1Criticality>::T_inf;
     std::vector<U> outVec(f.num_generators());
@@ -1873,7 +1881,7 @@ class Degree_rips_bifiltration
     GUDHI_CHECK_code(const std::vector<U> &indices = grid[0]);
     const std::vector<U> &values = grid[1];
     for (size_type g = 0; g < f.num_generators(); ++g) {
-      GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, "Unvalid grid."));
+      GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, std::invalid_argument("Unvalid grid.")));
 
       const T &c = f.generators_[g];
       outVec[g] = (c == T_inf ? grid_inf : values[c]);
