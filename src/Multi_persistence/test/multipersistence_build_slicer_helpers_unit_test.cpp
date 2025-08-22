@@ -15,23 +15,29 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
+#include <gudhi/Simplex_tree.h>
 #include <gudhi/Multi_parameter_filtered_complex.h>
 #include <gudhi/Multi_parameter_filtration.h>
 #include <gudhi/Dynamic_multi_parameter_filtration.h>
 #include <gudhi/slicer_helpers.h>
 #include <gudhi/Slicer.h>
 #include <gudhi/Multi_persistence/Persistence_interface_cohomology.h>
+#include <gudhi/multi_simplex_tree_helpers.h>
 
 using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
 using Gudhi::multi_filtration::Multi_parameter_filtration;
 using Gudhi::multi_persistence::build_complex_from_bitmap;
 using Gudhi::multi_persistence::build_complex_from_scc_file;
+using Gudhi::multi_persistence::build_complex_from_simplex_tree;
 using Gudhi::multi_persistence::build_slicer_from_bitmap;
 using Gudhi::multi_persistence::build_slicer_from_scc_file;
+using Gudhi::multi_persistence::build_slicer_from_simplex_tree;
 using Gudhi::multi_persistence::Multi_parameter_filtered_complex;
 using Gudhi::multi_persistence::Persistence_interface_cohomology;
 using Gudhi::multi_persistence::Slicer;
 using Gudhi::multi_persistence::write_complex_to_scc_file;
+using Gudhi::multi_persistence::Simplex_tree_options_multidimensional_filtration;
+using Gudhi::multi_persistence::Persistence_interface_cohomology;
 
 typedef boost::mpl::list<Multi_parameter_filtration<double>, Dynamic_multi_parameter_filtration<double> >
     list_of_tested_variants;
@@ -311,3 +317,50 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_bitmap_io, Fil, list_of_tested_variants)
   BOOST_CHECK(fc == slicer.get_filtration_values());
   BOOST_CHECK_EQUAL(2, slicer.get_max_dimension());
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_simplex_tree_io, Fil, list_of_tested_variants)
+{
+  using ST = Gudhi::Simplex_tree<Simplex_tree_options_multidimensional_filtration<Fil>>;
+  using Complex = Multi_parameter_filtered_complex<Fil>;
+  using FC = typename Complex::Filtration_value_container;
+  using BC = typename Complex::Boundary_container;
+  using DC = typename Complex::Dimension_container;
+  using ini = std::initializer_list<typename Fil::value_type>;
+  using Slicer = Slicer<Fil, Persistence_interface_cohomology<Fil> >;
+
+  ST simplexTree;
+
+  simplexTree.insert_simplex_and_subfaces({0,1,2}, ini{0, 3});
+  simplexTree.insert_simplex_and_subfaces({1,3}, ini{0, 4});
+  simplexTree.insert_simplex_and_subfaces({4,5}, ini{0, 6});
+  simplexTree.insert_simplex_and_subfaces({3,4,5,6}, ini{0, 5});
+  simplexTree.insert_simplex_and_subfaces({2,6}, ini{0, 7});
+  simplexTree.insert_simplex_and_subfaces({3,4}, ini{0, 8});
+  simplexTree.insert_simplex_and_subfaces({0,1,2}, ini{0, 2});
+  simplexTree.insert_simplex_and_subfaces({4,5,6}, ini{0, 4});
+  simplexTree.insert_simplex_and_subfaces({2,6}, ini{0, 1});
+  simplexTree.insert_simplex_and_subfaces({1,3}, ini{0, 8});
+
+  auto cpx = build_complex_from_simplex_tree(simplexTree);
+
+  BC bc = {{},     {},     {},          {},           {},         {},          {},         {3, 6},
+           {0, 1}, {0, 3}, {1, 3},      {0, 6},       {1, 6},     {0, 5},      {4, 6},     {4, 5},
+           {2, 5}, {2, 4}, {8, 11, 12}, {15, 16, 17}, {7, 9, 11}, {7, 10, 12}, {8, 9, 10}, {18, 20, 21, 22}};
+  DC dc = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3};
+  FC fc = {ini{0, 1}, ini{0, 4}, ini{0, 2}, ini{0, 4}, ini{0, 2}, ini{0, 1}, ini{0, 4}, ini{0, 5},
+           ini{0, 4}, ini{0, 4}, ini{0, 4}, ini{0, 5}, ini{0, 5}, ini{0, 1}, ini{0, 4}, ini{0, 2},
+           ini{0, 2}, ini{0, 2}, ini{0, 5}, ini{0, 2}, ini{0, 5}, ini{0, 5}, ini{0, 4}, ini{0, 5}};
+
+  BOOST_CHECK(bc == cpx.get_boundaries());
+  BOOST_CHECK(dc == cpx.get_dimensions());
+  BOOST_CHECK(fc == cpx.get_filtration_values());
+  BOOST_CHECK_EQUAL(3, cpx.get_max_dimension());
+
+  auto slicer = build_slicer_from_simplex_tree<Slicer>(simplexTree);
+
+  BOOST_CHECK(bc == slicer.get_boundaries());
+  BOOST_CHECK(dc == slicer.get_dimensions());
+  BOOST_CHECK(fc == slicer.get_filtration_values());
+  BOOST_CHECK_EQUAL(3, slicer.get_max_dimension());
+}
+

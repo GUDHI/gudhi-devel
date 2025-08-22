@@ -29,6 +29,9 @@ class PersistenceAlgorithm
   using Index = undefined;     /**< Index type. */
   using Map = undefined;       /**< Map type. */
   using Bar = undefined;       /**< Bar type. Has to have public members `dim`, `birth` and `death`. */
+  template<class Complex>
+  using As_type = undefined;   /**< Type of the class for the given template Complex type to be used. */
+
   /**
    * @brief Barcode type. Has to have a `begin`, `end` and `size` method. When dereferenced, the iterators have
    * to return a object of type @ref Bar.
@@ -143,6 +146,11 @@ class PersistenceAlgorithm
    * current state. So should be true at least the first time the method is used.
    */
   Cycles get_representative_cycles(bool update);
+
+  /**
+   * @brief Only necessary if the `operator<<` method of the Slicer is needed.
+   */
+  friend std::ostream& operator<<(std::ostream& stream, PersistenceAlgorithm& pers);
 };
 
 }  // namespace multi_persistence

@@ -51,6 +51,8 @@ class Persistence_interface_cohomology
   using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
   using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomology<PCOH_complex, Field_Zp>;
   using Barcode = std::vector<Bar>;                                              /**< Barcode type */
+  template<class Complex>
+  using As_type = Persistence_interface_cohomology<typename Complex::Filtration_value>; /**< This type. */
 
   static constexpr const auto nullDeath = Bar::inf;
   static constexpr const bool is_vine = false;        /** False. */
@@ -110,6 +112,22 @@ class Persistence_interface_cohomology
   {
     GUDHI_CHECK(is_initialized(), "Barcode can not be computed uninitialized.");
     return barcode_;
+  }
+
+  /**
+   * @brief Outstream operator.
+   */
+  friend std::ostream& operator<<(std::ostream& stream, const Persistence_interface_cohomology& pers)
+  {
+    stream << "Complex:\n";
+    stream << pers.interface_ << "\n";
+    stream << "Barcode:\n";
+    for (const auto bar : pers.barcode_) {
+      stream << bar << "\n";
+    }
+    stream << "\n";
+
+    return stream;
   }
 
  private:

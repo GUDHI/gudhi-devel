@@ -57,6 +57,8 @@ class Persistence_interface_matrix
   using Map = std::vector<Index>;                            /**< Map type */
   using Bar = typename Matrix::Bar;                          /**< Bar type */
   using Cycle = typename Matrix::Cycle;                      /**< Cycle type */
+  template<class Complex>
+  using As_type = Persistence_interface_matrix<PosIdxPersistenceMatrixOptions>; /**< This type. */
 
   class Barcode_iterator
       : public boost::iterator_facade<Barcode_iterator, const Bar, boost::random_access_traversal_tag>
@@ -358,6 +360,35 @@ class Persistence_interface_matrix
     }
     return Cycles(Cycles_iterator(cycles, *permutation_, idToPosPtr, 0),
                   Cycles_iterator(cycles, *permutation_, idToPosPtr, cycles.size()));
+  }
+
+  /**
+   * @brief Outstream operator.
+   */
+  friend std::ostream& operator<<(std::ostream& stream, Persistence_interface_matrix& pers)
+  {
+    stream << "Matrix:\n";
+    stream << "[\n";
+    for (auto i = 0U; i < pers.matrix_.get_number_of_columns(); i++) {
+      stream << "[";
+      for (const auto& v : pers.matrix_.get_column(i)) stream << v << ", ";
+      stream << "]\n";
+    }
+    stream << "]\n";
+    stream << "Permutation:\n";
+    for (auto v : *pers.permutation_) {
+      stream << v << " ";
+    }
+    stream << "\n";
+    if constexpr (Options::has_vine_update && !Options::is_of_boundary_type) {
+      stream << "ID to position map:\n";
+      for (auto v : *pers.idToPos_) {
+        stream << v << " ";
+      }
+      stream << "\n";
+    }
+
+    return stream;
   }
 
  private:

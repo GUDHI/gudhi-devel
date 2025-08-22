@@ -18,7 +18,7 @@
 #ifndef MP_SLICER_H_INCLUDED
 #define MP_SLICER_H_INCLUDED
 
-#include <cstddef>
+#include <array>
 #include <initializer_list>
 #include <type_traits>
 #include <numeric>  //std::iota
@@ -27,11 +27,6 @@
 #include <vector>
 #include <ostream>
 // #include <sstream>  //std::stringstream, to remove when to_str gets removed
-
-#ifdef GUDHI_USE_TBB
-#include <oneapi/tbb/enumerable_thread_specific.h>
-#include <oneapi/tbb/parallel_for.h>
-#endif
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
@@ -72,13 +67,11 @@ class Slicer
    */
   template <typename Value = T>
   using Barcode = std::vector<Bar<Value>>;
-  // TODO: replace by std::vector<std::array<Value,2> > to avoid double push_back for multi dim version?
   /**
-   * @brief Flat barcode type. All bars are represented by a birth and a death value stored respectively at even and
-   * odd indices of the vector.
+   * @brief Flat barcode type. All bars are represented by a birth and a death value stored in arrays of size 2.
    */
   template <typename Value = T>
-  using Flat_barcode = std::vector<Value>;
+  using Flat_barcode = std::vector<std::array<Value,2> >;
   /**
    * @brief Barcode ordered by dimension type. A vector which has at index \f$ d \f$ the @ref Barcode of dimension
    * \f$ d \f$.
@@ -215,6 +208,12 @@ class Slicer
   const std::vector<T>& get_slice() const { return slice_; }
 
   /**
+   * @brief Returns a reference to the current slice. It can also be initialized or updated with @ref set_slice
+   * and @ref push_to.
+   */
+  std::vector<T>& get_slice() { return slice_; }
+
+  /**
    * @brief Returns a const reference to the class computing the persistence of the current slice. It will be
    * initialized with @ref initialize_persistence_computation.
    */
@@ -313,12 +312,12 @@ class Slicer
    * The value at \$f slice[i] \$f has to corresponds to the value for the generator at index \$f i \$f.
    * One can also sets the slice directly from the line with @ref push_to.
    *
-   * @tparam Array Container which can be converted into a vector of `T`.
+   * @tparam Array Container with a begin() and end() method and whose element can be converted into `T`.
    */
   template <class Array = std::initializer_list<T>>
   void set_slice(const Array& slice)
   {
-    slice_ = slice;
+    slice_ = std::vector<T>(slice.begin(), slice.end());
   }
 
   /**
@@ -445,14 +444,14 @@ class Slicer
    * @param maxDim Maximal dimension to be included in the barcode. If negative, all dimensions are included.
    * Default value: -1.
    */
-  template <bool byDim = true, typename Value = T>
+  template <bool byDim = true, typename Value = T, bool idx = false>
   std::conditional_t<byDim, Multi_dimensional_barcode<Value>, Barcode<Value>> get_barcode(int maxDim = -1)
   {
     if (maxDim < 0) maxDim = get_max_dimension();
     if constexpr (byDim) {
-      return _get_barcode_by_dim<Value>(maxDim);
+      return _get_barcode_by_dim<idx, Value>(maxDim);
     } else {
-      return _get_barcode<Value>(maxDim);
+      return _get_barcode<idx, Value>(maxDim);
     }
   }
 
@@ -467,79 +466,15 @@ class Slicer
    * @param maxDim Maximal dimension to be included in the barcode. If negative, all dimensions are included.
    * Default value: -1.
    */
-  template <bool byDim = false, typename Value = T>
+  template <bool byDim = false, typename Value = T, bool idx = false>
   std::conditional_t<byDim, Multi_dimensional_flat_barcode<Value>, Flat_barcode<Value>> get_flat_barcode(
       int maxDim = -1)
   {
     if (maxDim < 0) maxDim = get_max_dimension();
     if constexpr (byDim) {
-      return _get_flat_barcode_by_dim<Value>(maxDim);
+      return _get_flat_barcode_by_dim<idx, Value>(maxDim);
     } else {
-      return _get_flat_barcode<Value>(maxDim);
-    }
-  }
-
-  /**
-   * @brief Returns the barcodes of all the given lines. A line is represented as a point and the slope 1.
-   *
-   * @param basePoints Vector of base points for the lines.
-   * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
-   * potentially in less storage use and better performance. But the parameter will be ignored if
-   * PersistenceAlgorithm::is_vine is true.
-   */
-  std::vector<Multi_dimensional_barcode<T>> persistence_on_lines(const std::vector<std::vector<T>>& basePoints,
-                                                                 [[maybe_unused]] bool ignoreInf = true)
-  {
-    // TODO: Thread_safe has to use his own version of weak_copy(), so I had to decompose everything to factorize
-    // but it is quite ugly. Does someone has a more elegant solution?
-    if constexpr (Persistence::is_vine) {
-      return _batch_persistence_on_lines_with_vine(
-          complex_, [](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints);
-    } else {
-#ifdef GUDHI_USE_TBB
-      return _batch_persistence_on_lines(
-          weak_copy(), [](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints, ignoreInf);
-#else
-      return _batch_persistence_on_lines(
-          complex_, [](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints, ignoreInf);
-#endif
-    }
-  }
-
-  /**
-   * @brief Returns the barcodes of all the given lines. A line is represented as a pair with the first element being
-   * a point on the line and the second element a vector giving the positive direction of the line.
-   *
-   * @param basePointsWithDirections Vector of pair of base points and direction vectors.
-   * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
-   * potentially in less storage use and better performance. But the parameter will be ignored if
-   * PersistenceAlgorithm::is_vine is true.
-   */
-  std::vector<Multi_dimensional_barcode<T>> persistence_on_lines(
-      const std::vector<std::pair<std::vector<T>, std::vector<T>>>& basePointsWithDirections,
-      [[maybe_unused]] bool ignoreInf = true)
-  {
-    // TODO: Thread_safe has to use his own version of weak_copy(), so I had to decompose everything to factorize
-    // but it is quite ugly. Does someone has a more elegant solution?
-    if constexpr (Persistence::is_vine) {
-      return _batch_persistence_on_lines_with_vine(
-          complex_,
-          [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
-          basePointsWithDirections);
-    } else {
-#ifdef GUDHI_USE_TBB
-      return _batch_persistence_on_lines(
-          weak_copy(),
-          [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
-          basePointsWithDirections,
-          ignoreInf);
-#else
-      return _batch_persistence_on_lines(
-          complex_,
-          [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
-          basePointsWithDirections,
-          ignoreInf);
-#endif
+      return _get_flat_barcode<idx, Value>(maxDim);
     }
   }
 
@@ -591,7 +526,9 @@ class Slicer
   friend auto build_slicer_coarsen_on_grid(const Slicer& slicer, const std::vector<std::vector<T>> grid)
   {
     using return_filtration_value = decltype(std::declval<Filtration_value>().template as_type<std::int32_t>());
-    return Slicer<return_filtration_value, Persistence>(build_complex_coarsen_on_grid(slicer.complex_, grid));
+    using return_complex = decltype(build_complex_coarsen_on_grid(slicer.complex_, grid));
+    using return_pers = typename Persistence::template As_type<return_complex>;
+    return Slicer<return_filtration_value, return_pers>(build_complex_coarsen_on_grid(slicer.complex_, grid));
   }
 
   /**
@@ -639,7 +576,7 @@ class Slicer
   /**
    * @brief Outstream operator.
    */
-  friend std::ostream& operator<<(std::ostream& stream, const Slicer& slicer)
+  friend std::ostream& operator<<(std::ostream& stream, Slicer& slicer)
   {
     stream << "-------------------- Slicer \n";
 
@@ -711,69 +648,6 @@ class Slicer
     return out;
   }
 
-  template <typename F, typename F_arg>
-  std::vector<Multi_dimensional_barcode<T>> _batch_persistence_on_lines_with_vine(const Complex& complex,
-                                                                                  F&& get_line,
-                                                                                  const std::vector<F_arg>& basePoints)
-  {
-    if (basePoints.size() == 0) return {};
-
-    std::vector<Multi_dimensional_barcode<T>> out(basePoints.size());
-
-    _push_to(complex, std::forward<F>(get_line)(basePoints[0]));
-    _initialize_persistence_computation(complex, false);
-    out[0] = _get_barcode_by_dim<T>(complex.get_max_dimension());
-    for (auto i = 1U; i < basePoints.size(); ++i) {
-      _push_to(complex, std::forward<F>(get_line)(basePoints[i]));
-      vineyard_update();
-      out[i] = _get_barcode_by_dim<T>(complex.get_max_dimension());
-    }
-
-    return out;
-  }
-
-#ifdef GUDHI_USE_TBB
-  template <typename F, typename F_arg>
-  std::vector<Multi_dimensional_barcode<T>> _batch_persistence_on_lines(const Thread_safe& localTemplate,
-                                                                        F&& get_line,
-                                                                        const std::vector<F_arg>& basePoints,
-                                                                        const bool ignoreInf)
-  {
-    if (basePoints.size() == 0) return {};
-
-    std::vector<Multi_dimensional_barcode<T>> out(basePoints.size());
-
-    tbb::enumerable_thread_specific<Thread_safe> threadLocals(localTemplate);
-    tbb::parallel_for(static_cast<std::size_t>(0), basePoints.size(), [&](const Index& i) {
-      Thread_safe& s = threadLocals.local();
-      s.push_to(std::forward<F>(get_line)(basePoints[i]));
-      s.initialize_persistence_computation(ignoreInf);
-      out[i] = s.get_barcode();
-    });
-
-    return out;
-  }
-#else
-  template <typename F, typename F_arg>
-  std::vector<Multi_dimensional_barcode<T>> _batch_persistence_on_lines(const Complex& complex,
-                                                                        F&& get_line,
-                                                                        const std::vector<F_arg>& basePoints,
-                                                                        const bool ignoreInf)
-  {
-    if (basePoints.size() == 0) return {};
-
-    std::vector<Multi_dimensional_barcode<T>> out(basePoints.size());
-
-    for (auto i = 0U; i < basePoints.size(); ++i) {
-      _push_to(complex, std::forward<F>(get_line)(basePoints[i]));
-      _initialize_persistence_computation(complex, ignoreInf);
-      out[i] = _get_barcode_by_dim<T>(complex.get_max_dimension());
-    }
-
-    return out;
-  }
-#endif
-
  private:
   Complex complex_;      /**< Complex storing all boundaries, filtration values and dimensions. */
   std::vector<T> slice_; /**< Filtration values of the current slice. The indices corresponds to those in complex_. */
@@ -803,21 +677,27 @@ class Slicer
     }
   }
 
-  template <class Interval, typename Value>
+  template <bool idx, class Interval, typename Value>
   void _retrieve_interval(const Interval& bar, Dimension& dim, Value& birth, Value& death)
   {
     const Value inf = Gudhi::multi_filtration::MF_T_inf<Value>;
     dim = bar.dim;
-    birth = slice_[bar.birth];
-    death = inf;
-    if (bar.death != Persistence::nullDeath) death = slice_[bar.death];
-    if (!(birth <= death)) {
-      birth = inf;
+    if constexpr (idx) {
+      birth = bar.birth;
+      death = -1;
+      if (bar.death != Persistence::nullDeath) death = bar.death;
+    } else {
+      birth = slice_[bar.birth];
       death = inf;
+      if (bar.death != Persistence::nullDeath) death = slice_[bar.death];
+      if (!(birth <= death)) {
+        birth = inf;
+        death = inf;
+      }
     }
   }
 
-  template <typename Value>
+  template <bool idx, typename Value>
   Barcode<Value> _get_barcode(int maxDim)
   {
     auto barcodeIndices = persistence_.get_barcode();
@@ -825,7 +705,7 @@ class Slicer
     Index i = 0;
     for (const auto& bar : barcodeIndices) {
       if (bar.dim <= maxDim) {
-        _retrieve_interval(bar, out[i].dim, out[i].birth, out[i].death);
+        _retrieve_interval<idx>(bar, out[i].dim, out[i].birth, out[i].death);
         ++i;
       }
     }
@@ -833,7 +713,7 @@ class Slicer
     return out;
   }
 
-  template <typename Value>
+  template <bool idx, typename Value>
   Multi_dimensional_barcode<Value> _get_barcode_by_dim(int maxDim)
   {
     // TODO: This doesn't allow for negative dimensions
@@ -843,31 +723,31 @@ class Slicer
     Dimension dim;
     for (const auto& bar : persistence_.get_barcode()) {
       if (bar.dim <= maxDim) {
-        _retrieve_interval(bar, dim, birth, death);
+        _retrieve_interval<idx>(bar, dim, birth, death);
         out[dim].emplace_back(birth, death, dim);
       }
     }
     return out;
   }
 
-  template <typename Value>
+  template <bool idx, typename Value>
   Flat_barcode<Value> _get_flat_barcode(int maxDim)
   {
     auto barcodeIndices = persistence_.get_barcode();
-    Flat_barcode<Value> out(barcodeIndices.size() * 2);
+    Flat_barcode<Value> out(barcodeIndices.size());
     Index i = 0;
     Dimension dim;  // dummy
     for (const auto& bar : barcodeIndices) {
       if (bar.dim <= maxDim) {
-        _retrieve_interval(bar, dim, out[i], out[i + 1]);
-        i += 2;
+        _retrieve_interval<idx>(bar, dim, out[i][0], out[i][1]);
+        ++i;
       }
     }
     out.resize(i);
     return out;
   }
 
-  template <typename Value>
+  template <bool idx, typename Value>
   Multi_dimensional_flat_barcode<Value> _get_flat_barcode_by_dim(int maxDim)
   {
     Multi_dimensional_flat_barcode<Value> out(maxDim + 1);
@@ -875,9 +755,8 @@ class Slicer
     Dimension dim;
     for (const auto& bar : persistence_.get_barcode()) {
       if (bar.dim <= maxDim) {
-        _retrieve_interval(bar, dim, birth, death);
-        out[dim].push_back(birth);
-        out[dim].push_back(death);
+        _retrieve_interval<idx>(bar, dim, birth, death);
+        out[dim].emplace_back(std::array<Value, 2>{birth, death});
       }
     }
     return out;

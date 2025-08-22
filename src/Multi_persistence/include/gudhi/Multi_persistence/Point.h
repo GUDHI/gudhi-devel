@@ -101,6 +101,8 @@ class Point
     return *this;
   }
 
+  operator std::vector<T>() const { return coordinates_; }
+
   /**
    * @brief At operator.
    */

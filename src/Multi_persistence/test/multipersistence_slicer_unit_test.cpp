@@ -8,6 +8,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <array>
 #include <initializer_list>
 #include <limits>
 #include <utility>
@@ -39,7 +40,7 @@ using Gudhi::multi_persistence::Thread_safe_slicer;
 using T = double;
 using Bar = Gudhi::persistence_matrix::Persistence_interval<int, T>;
 using Barcode = std::vector<Bar>;
-using Flat_barcode = std::vector<T>;
+using Flat_barcode = std::vector<std::array<T, 2>>;
 using Multi_dimensional_barcode = std::vector<Barcode>;
 using Multi_dimensional_flat_barcode = std::vector<Flat_barcode>;
 using Test_barcode = std::vector<std::pair<T, T>>;
@@ -331,10 +332,10 @@ Test_multi_dimensional_barcode get_barcode(const Multi_dimensional_flat_barcode&
 {
   Test_multi_dimensional_barcode out(barcode.size());
   for (unsigned int i = 0; i < barcode.size(); ++i) {
-    out[i].resize(barcode[i].size() / 2);
+    out[i].resize(barcode[i].size());
     for (unsigned int j = 0; j < out[i].size(); ++j) {
-      out[i][j].first = barcode[i][j * 2];
-      out[i][j].second = barcode[i][j * 2 + 1];
+      out[i][j].first = barcode[i][j][0];
+      out[i][j].second = barcode[i][j][1];
     }
   }
   for (auto& dgm : out) std::sort(dgm.begin(), dgm.end());
@@ -343,10 +344,10 @@ Test_multi_dimensional_barcode get_barcode(const Multi_dimensional_flat_barcode&
 
 Test_barcode get_barcode(const Flat_barcode& barcode)
 {
-  Test_barcode out(barcode.size() / 2);
+  Test_barcode out(barcode.size());
   for (unsigned int i = 0; i < out.size(); ++i) {
-    out[i].first = barcode[i * 2];
-    out[i].second = barcode[i * 2 + 1];
+    out[i].first = barcode[i][0];
+    out[i].second = barcode[i][1];
   }
   std::sort(out.begin(), out.end());
   return out;
@@ -448,77 +449,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_persistence, Slicer, list_of_tested_variant
   test_slicer_persistence(wc);
   Thread_safe_slicer tss(s);
   test_slicer_persistence(tss);
-}
-
-template <class Slicer>
-void test_slicer_batch_persistence(Slicer& s)
-{
-  using Index = typename Slicer::Index;
-  T inf = std::numeric_limits<T>::infinity();
-
-  auto barcodes = s.persistence_on_lines({{0, 1, 1}, {2, 4, 2}, {2, 1, 0}}, false);
-  std::vector<Test_multi_dimensional_barcode> orderedBarcodes(barcodes.size());
-  Index i = 0;
-  for (const auto& dgm : barcodes) {
-    orderedBarcodes[i] = get_barcode(dgm);
-    ++i;
-  }
-
-  BOOST_CHECK_EQUAL(orderedBarcodes.size(), 3);
-
-  BOOST_CHECK_EQUAL(orderedBarcodes[0].size(), 3);
-  BOOST_CHECK_EQUAL(orderedBarcodes[0][0].size(), 4);
-  BOOST_CHECK(orderedBarcodes[0][0][0] == (std::pair<T, T>(1, 3)));
-  BOOST_CHECK(orderedBarcodes[0][0][1] == (std::pair<T, T>(1, inf)));
-  BOOST_CHECK(orderedBarcodes[0][0][2] == (std::pair<T, T>(2, 4)));
-  BOOST_CHECK(orderedBarcodes[0][0][3] == (std::pair<T, T>(7, 7)));
-  BOOST_CHECK_EQUAL(orderedBarcodes[0][1].size(), 1);
-  BOOST_CHECK(orderedBarcodes[0][1][0] == (std::pair<T, T>(6, 6)));
-  BOOST_CHECK_EQUAL(orderedBarcodes[0][2].size(), 0);
-
-  BOOST_CHECK_EQUAL(orderedBarcodes[1].size(), 3);
-  BOOST_CHECK_EQUAL(orderedBarcodes[1][0].size(), 4);
-  BOOST_CHECK(orderedBarcodes[1][0][0] == (std::pair<T, T>(-1, inf)));
-  BOOST_CHECK(orderedBarcodes[1][0][1] == (std::pair<T, T>(0, 1)));
-  BOOST_CHECK(orderedBarcodes[1][0][2] == (std::pair<T, T>(1, 3)));
-  BOOST_CHECK(orderedBarcodes[1][0][3] == (std::pair<T, T>(6, 6)));
-  BOOST_CHECK_EQUAL(orderedBarcodes[1][1].size(), 1);
-  BOOST_CHECK(orderedBarcodes[1][1][0] == (std::pair<T, T>(4, 4)));
-  BOOST_CHECK_EQUAL(orderedBarcodes[1][2].size(), 0);
-
-  BOOST_CHECK_EQUAL(orderedBarcodes[2].size(), 3);
-  BOOST_CHECK_EQUAL(orderedBarcodes[2][0].size(), 4);
-  BOOST_CHECK(orderedBarcodes[2][0][0] == (std::pair<T, T>(1, inf)));
-  BOOST_CHECK(orderedBarcodes[2][0][1] == (std::pair<T, T>(2, 3)));
-  BOOST_CHECK(orderedBarcodes[2][0][2] == (std::pair<T, T>(3, 5)));
-  BOOST_CHECK(orderedBarcodes[2][0][3] == (std::pair<T, T>(8, 8)));
-  BOOST_CHECK_EQUAL(orderedBarcodes[2][1].size(), 1);
-  BOOST_CHECK(orderedBarcodes[2][1][0] == (std::pair<T, T>(5, 6)));
-  BOOST_CHECK_EQUAL(orderedBarcodes[2][2].size(), 0);
-
-  barcodes = s.persistence_on_lines({{{0, 1, 1}, {1, 1, 1}}, {{2, 4, 2}, {1, 1, 1}}, {{2, 1, 0}, {1, 1, 1}}}, false);
-  std::vector<Test_multi_dimensional_barcode> orderedBarcodes2(barcodes.size());
-  i = 0;
-  for (const auto& dgm : barcodes) {
-    orderedBarcodes2[i] = get_barcode(dgm);
-    ++i;
-  }
-
-  BOOST_CHECK(orderedBarcodes == orderedBarcodes2);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_batch_persistence, Slicer, list_of_tested_variants)
-{
-  using Fil = typename Slicer::Filtration_value;
-
-  auto cpx = build_simple_input_complex<Fil>();
-
-  Slicer s(cpx);
-  test_slicer_batch_persistence(s);
-  Thread_safe_slicer wc = s.weak_copy();
-  test_slicer_batch_persistence(wc);
-  Thread_safe_slicer tss(s);
-  test_slicer_batch_persistence(tss);
 }
 
 typedef boost::mpl::list<

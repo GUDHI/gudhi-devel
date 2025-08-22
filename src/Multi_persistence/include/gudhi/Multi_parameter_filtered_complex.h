@@ -377,7 +377,7 @@ class Multi_parameter_filtered_complex
     stream << "}\n";
 
     stream << "Filtration values:\n";
-    stream << "{";
+    stream << "{\n";
     for (auto f : complex.filtrationValues_) stream << f << "\n";
     stream << "}\n";
 

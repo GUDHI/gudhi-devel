@@ -164,9 +164,22 @@ class Box
   }
 
   /**
+   * @brief Equality operator. Two boxes are equal if and only if both defining corners are equal.
+   */
+  friend bool operator==(const Box &a, const Box &b)
+  {
+    return a.upperCorner_ == b.upperCorner_ && a.lowerCorner_ == b.lowerCorner_;
+  }
+
+  /**
+   * @brief Unequality operator. Two boxes are equal if and only if both defining corners are equal.
+   */
+  friend bool operator!=(const Box &a, const Box &b) { return !(a == b); }
+
+  /**
    * @brief Outstream operator.
    */
-  friend std::ostream &operator<<(std::ostream &os, const Box<T> &box)
+  friend std::ostream &operator<<(std::ostream &os, const Box &box)
   {
     os << "Box -- Bottom corner : ";
     os << box.get_lower_corner();

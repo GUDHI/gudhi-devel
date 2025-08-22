@@ -160,6 +160,12 @@ class Thread_safe_slicer : private Slicer
   const std::vector<T>& get_slice() const { return Slicer::get_slice(); }
 
   /**
+   * @brief Returns a reference to the current slice. It can also be initialized or updated with @ref set_slice
+   * and @ref push_to.
+   */
+  std::vector<T>& get_slice() { return Slicer::get_slice(); }
+
+  /**
    * @brief Returns a const reference to the class computing the persistence of the current slice. It will be
    * initialized with @ref initialize_persistence_computation.
    */
@@ -299,12 +305,12 @@ class Thread_safe_slicer : private Slicer
    * @param maxDim Maximal dimension to be included in the barcode. If negative, all dimensions are included.
    * Default value: -1.
    */
-  template <bool byDim = true, typename Value = T>
+  template <bool byDim = true, typename Value = T, bool idx = false>
   auto get_barcode(int maxDim = -1)
   {
     // complex in parent is empty, so maxDim needs to be initialized from the outside.
     if (maxDim < 0) maxDim = slicer_->get_max_dimension();
-    return Slicer::template get_barcode<byDim, Value>(maxDim);
+    return Slicer::template get_barcode<byDim, Value, idx>(maxDim);
   }
 
   /**
@@ -318,76 +324,12 @@ class Thread_safe_slicer : private Slicer
    * @param maxDim Maximal dimension to be included in the barcode. If negative, all dimensions are included.
    * Default value: -1.
    */
-  template <bool byDim = false, typename Value = T>
+  template <bool byDim = false, typename Value = T, bool idx = false>
   auto get_flat_barcode(int maxDim = -1)
   {
     // complex in parent is empty, so maxDim needs to be initialized from the outside.
     if (maxDim < 0) maxDim = slicer_->get_max_dimension();
-    return Slicer::template get_flat_barcode<byDim, Value>(maxDim);
-  }
-
-  /**
-   * @brief Returns the barcodes of all the given lines. A line is represented as a point and the slope 1.
-   *
-   * @param basePoints Vector of base points for the lines.
-   * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
-   * potentially in less storage use and better performance. But the parameter will be ignored if
-   * PersistenceAlgorithm::is_vine is true.
-   */
-  std::vector<Multi_dimensional_barcode<T>> persistence_on_lines(const std::vector<std::vector<T>>& basePoints,
-                                                                 [[maybe_unused]] bool ignoreInf = true)
-  {
-    // TODO: Thread_safe has to use his own version of weak_copy(), so I had to decompose everything to factorize
-    // but it is quite ugly. Does someone has a more elegant solution?
-    if constexpr (Persistence::is_vine) {
-      return Slicer::_batch_persistence_on_lines_with_vine(
-          slicer_->complex_, [](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints);
-    } else {
-#ifdef GUDHI_USE_TBB
-      return Slicer::_batch_persistence_on_lines(
-          weak_copy(), [](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints, ignoreInf);
-#else
-      return Slicer::_batch_persistence_on_lines(
-          slicer_->complex_, [](const std::vector<T>& bp) { return Line<T>(bp); }, basePoints, ignoreInf);
-#endif
-    }
-  }
-
-  /**
-   * @brief Returns the barcodes of all the given lines. A line is represented as a pair with the first element being
-   * a point on the line and the second element a vector giving the positive direction of the line.
-   *
-   * @param basePointsWithDirections Vector of pair of base points and direction vectors.
-   * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
-   * potentially in less storage use and better performance. But the parameter will be ignored if
-   * PersistenceAlgorithm::is_vine is true.
-   */
-  std::vector<Multi_dimensional_barcode<T>> persistence_on_lines(
-      const std::vector<std::pair<std::vector<T>, std::vector<T>>>& basePointsWithDirections,
-      [[maybe_unused]] bool ignoreInf = true)
-  {
-    // TODO: Thread_safe has to use his own version of weak_copy(), so I had to decompose everything to factorize
-    // but it is quite ugly. Does someone has a more elegant solution?
-    if constexpr (Persistence::is_vine) {
-      return Slicer::_batch_persistence_on_lines_with_vine(
-          slicer_->complex_,
-          [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
-          basePointsWithDirections);
-    } else {
-#ifdef GUDHI_USE_TBB
-      return Slicer::_batch_persistence_on_lines(
-          weak_copy(),
-          [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
-          basePointsWithDirections,
-          ignoreInf);
-#else
-      return Slicer::_batch_persistence_on_lines(
-          slicer_->complex_,
-          [](const std::pair<std::vector<T>, std::vector<T>>& bpwd) { return Line<T>(bpwd.first, bpwd.second); },
-          basePointsWithDirections,
-          ignoreInf);
-#endif
-    }
+    return Slicer::template get_flat_barcode<byDim, Value, idx>(maxDim);
   }
 
   /**

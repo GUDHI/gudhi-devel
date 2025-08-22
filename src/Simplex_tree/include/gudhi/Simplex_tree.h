@@ -1236,10 +1236,9 @@ class Simplex_tree {
     if constexpr (Options::store_filtration){
       if (insertion_strategy == Insertion_strategy::LOWEST)
         return _rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
-      else if (insertion_strategy == Insertion_strategy::HIGHEST)
+      if (insertion_strategy == Insertion_strategy::HIGHEST)
         return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), filtration);
-      else
-        return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), 0);
+      return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), 0);
     } else {
       return _rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
     }
