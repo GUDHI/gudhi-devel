@@ -65,42 +65,85 @@ namespace Persistence_representations {
  **/
 class Sliced_Wasserstein
 {
- protected:
-  Persistence_diagram diagram;
-  int approx;
-  double sigma;
-  double genericity_factor;
-  std::vector<std::vector<double> > projections, projections_diagonal;
+ public:
+  /**
+   * \brief Sliced Wasserstein kernel constructor.
+   *
+   * @param[in] diagram  persistence diagram.
+   * @param[in] sigma    bandwidth parameter.
+   * @param[in] approx   number of directions used to approximate the integral in the Sliced Wasserstein distance, set
+   *                     to -1 for random perturbation. If positive, then projections of the diagram points on all
+   *                     directions are stored in memory to reduce computation time.
+   */
+  Sliced_Wasserstein(const Persistence_diagram& diagram, double sigma = 1.0, int approx = 10)
+      : diagram_(diagram), approx_(approx), sigma_(sigma)
+  {
+    _build_rep();
+  }
+
+  /**
+   * \brief Evaluation of the kernel on a pair of diagrams.
+   *
+   * @pre       approx and sigma attributes need to be the same for both instances.
+   * @param[in] second other instance of class Sliced_Wasserstein.
+   */
+  double compute_scalar_product(const Sliced_Wasserstein& second) const
+  {
+    GUDHI_CHECK(this->sigma_ == second.sigma_,
+                std::invalid_argument("Error: different sigma values for representations"));
+    return std::exp(-_compute_sliced_wasserstein_distance(second) / (2 * this->sigma_ * this->sigma_));
+  }
+
+  /**
+   * \brief Evaluation of the distance between images of diagrams in the Hilbert space of the kernel.
+   *
+   * @pre       approx and sigma attributes need to be the same for both instances.
+   * @param[in] second  other instance of class Sliced_Wasserstein.
+   */
+  double distance(const Sliced_Wasserstein& second) const
+  {
+    GUDHI_CHECK(this->sigma_ == second.sigma_,
+                std::invalid_argument("Error: different sigma values for representations"));
+    return std::sqrt(this->compute_scalar_product(*this) + second.compute_scalar_product(second) -
+                     2 * this->compute_scalar_product(second));
+  }
+
+ private:
+  Persistence_diagram diagram_;
+  int approx_;
+  double sigma_;
+  std::vector<std::vector<double> > projections_, projections_diagonal_;
 
   // **********************************
   // Utils.
   // **********************************
 
-  void build_rep()
+  void _build_rep()
   {
-    if (approx > 0) {
-      int n = diagram.size();
-      double step = pi / this->approx;
-      for (int i = 0; i < this->approx; i++) {
+    if (approx_ > 0) {
+      double step = pi / this->approx_;
+      int n = diagram_.size();
+
+      for (int i = 0; i < this->approx_; i++) {
         std::vector<double> l, l_diag;
         for (int j = 0; j < n; j++) {
-          double px = diagram[j].first;
-          double py = diagram[j].second;
+          double px = diagram_[j].first;
+          double py = diagram_[j].second;
           double proj_diag = (px + py) / 2;
           l.push_back(px * cos(-pi / 2 + i * step) + py * sin(-pi / 2 + i * step));
           l_diag.push_back(proj_diag * cos(-pi / 2 + i * step) + proj_diag * sin(-pi / 2 + i * step));
         }
         std::sort(l.begin(), l.end());
         std::sort(l_diag.begin(), l_diag.end());
-        projections.push_back(std::move(l));
-        projections_diagonal.push_back(std::move(l_diag));
+        projections_.push_back(std::move(l));
+        projections_diagonal_.push_back(std::move(l_diag));
       }
-      diagram.clear();
+      diagram_.clear();
     }
   }
 
   // Compute the angle formed by two points of a PD
-  double compute_angle(const Persistence_diagram& diag, int i, int j) const
+  double _compute_angle(const Persistence_diagram& diag, int i, int j) const
   {
     if (diag[i].second == diag[j].second)
       return pi / 2;
@@ -180,17 +223,18 @@ class Sliced_Wasserstein
   }
 
   // Evaluation of the Sliced Wasserstein Distance between a pair of diagrams.
-  double compute_sliced_wasserstein_distance(const Sliced_Wasserstein& second) const
+  // TODO: decompose it in smaller methods if some modifications have to be done one day?
+  double _compute_sliced_wasserstein_distance(const Sliced_Wasserstein& second) const
   {
-    GUDHI_CHECK(this->approx == second.approx,
+    GUDHI_CHECK(this->approx_ == second.approx_,
                 std::invalid_argument("Error: different approx values for representations"));
 
-    Persistence_diagram diagram1 = this->diagram;
-    Persistence_diagram diagram2 = second.diagram;
-
+    Persistence_diagram diagram1 = this->diagram_;
+    Persistence_diagram diagram2 = second.diagram_;
     double sw = 0;
 
-    if (this->approx == -1) {
+    if (this->approx_ == -1) {
+      // Add projections onto diagonal.
 
       int n1, n2;
       n1 = diagram1.size();
@@ -382,20 +426,20 @@ class Sliced_Wasserstein
 //      std::cout << "int = " << integral_value << std::endl;
 
     } else {
-      double step = pi / this->approx;
+      double step = pi / this->approx_;
       std::vector<double> v1, v2;
-      for (int i = 0; i < this->approx; i++) {
+      for (int i = 0; i < this->approx_; i++) {
         v1.clear();
         v2.clear();
-        std::merge(this->projections[i].begin(),
-                   this->projections[i].end(),
-                   second.projections_diagonal[i].begin(),
-                   second.projections_diagonal[i].end(),
+        std::merge(this->projections_[i].begin(),
+                   this->projections_[i].end(),
+                   second.projections_diagonal_[i].begin(),
+                   second.projections_diagonal_[i].end(),
                    std::back_inserter(v1));
-        std::merge(second.projections[i].begin(),
-                   second.projections[i].end(),
-                   this->projections_diagonal[i].begin(),
-                   this->projections_diagonal[i].end(),
+        std::merge(second.projections_[i].begin(),
+                   second.projections_[i].end(),
+                   this->projections_diagonal_[i].begin(),
+                   this->projections_diagonal_[i].end(),
                    std::back_inserter(v2));
 
         int n = v1.size();

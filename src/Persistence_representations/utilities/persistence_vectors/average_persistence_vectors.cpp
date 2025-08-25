@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <gudhi/Persistence_vectors.h>
+#include <gudhi/distance_functions.h>
 
 using Euclidean_distance = Gudhi::Euclidean_distance;
 using Vector_distances_in_diagram = Gudhi::Persistence_representations::Vector_distances_in_diagram<Euclidean_distance>;
@@ -33,7 +34,7 @@ int main(int argc, char** argv)
   }
 
   std::vector<Vector_distances_in_diagram*> lands;
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     Vector_distances_in_diagram* l = new Vector_distances_in_diagram;
     l->load_from_file(filenames[i]);
     lands.push_back(l);
@@ -44,7 +45,7 @@ int main(int argc, char** argv)
 
   av.print_to_file("average.vect");
 
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     delete lands[i];
   }
 
