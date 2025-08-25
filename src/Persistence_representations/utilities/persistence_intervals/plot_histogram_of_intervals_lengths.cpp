@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 
   Persistence_intervals p(argv[1], dominant_interval_number);
   std::vector<std::pair<double, double> > dominant_intervals = p.dominant_intervals(persistence_dimension);
-  std::vector<size_t> histogram = p.histogram_of_lengths(10);
+  std::vector<std::size_t> histogram = p.histogram_of_lengths(10);
 
   std::stringstream gnuplot_script;
   gnuplot_script << argv[1] << "_GnuplotScript";
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
   out << "set style histogram cluster gap 1" << std::endl;
   out << "set style fill solid border -1" << std::endl;
   out << "plot '-' notitle" << std::endl;
-  for (size_t i = 0; i != histogram.size(); ++i) {
+  for (std::size_t i = 0; i != histogram.size(); ++i) {
     out << histogram[i] << std::endl;
   }
   out << std::endl;

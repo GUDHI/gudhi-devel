@@ -25,7 +25,7 @@ class Vectorized_topological_data
    * There are various ways data can be vectorized. This function give us the number of functions for vectorization
    * provided by a given class.
    **/
-  size_t number_of_vectorize_functions();
+  std::size_t number_of_vectorize_functions();
   /**
    * This is a function to vectorize given container. The parameter of a function have to be between 0 and the value
    * returned by number_of_vectorize_functions().
