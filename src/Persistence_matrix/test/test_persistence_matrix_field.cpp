@@ -31,7 +31,7 @@ using Gudhi::persistence_fields::Z2_field_element;
 using Gudhi::persistence_fields::Zp_field_element;
 
 template <class Z2>
-void test_z2_standart_field_constructors() {
+void test_z2_standard_field_constructors() {
   // default constructor
   Z2 z2_d;
   BOOST_CHECK_EQUAL(z2_d, 0);
@@ -63,7 +63,7 @@ void test_z2_standart_field_constructors() {
 }
 
 template <class Z5>
-void test_z5_standart_field_constructors() {
+void test_z5_standard_field_constructors() {
   // default constructor
   Z5 z5_d;
   BOOST_CHECK_EQUAL(z5_d, 0);
@@ -96,7 +96,7 @@ void test_z5_standart_field_constructors() {
 }
 
 template <class Z13>
-void test_z13_standart_field_constructors() {
+void test_z13_standard_field_constructors() {
   // default constructor
   Z13 z13_d;
   BOOST_CHECK_EQUAL(z13_d, 0);
@@ -129,7 +129,7 @@ void test_z13_standart_field_constructors() {
 }
 
 template <class Z2>
-void test_z2_standart_field_operators() {
+void test_z2_standard_field_operators() {
   Z2 z21(7);
   Z2 z22(2);
 
@@ -179,7 +179,7 @@ void test_z2_standart_field_operators() {
 }
 
 template <class Z5>
-void test_z5_standart_field_operators() {
+void test_z5_standard_field_operators() {
   Z5 z51(7);
   Z5 z52(3);
 
@@ -229,7 +229,7 @@ void test_z5_standart_field_operators() {
 }
 
 template <class Z2>
-void test_z2_standart_field_properties() {
+void test_z2_standard_field_properties() {
   Z2 z21(7);
   Z2 z22(2);
 
@@ -254,7 +254,7 @@ void test_z2_standart_field_properties() {
 }
 
 template <class Z5>
-void test_z5_standart_field_properties() {
+void test_z5_standard_field_properties() {
   Z5 z51(7);
   Z5 z52(3);
 
@@ -279,7 +279,7 @@ void test_z5_standart_field_properties() {
 }
 
 template <class Z7>
-void test_z7_standart_field_properties() {
+void test_z7_standard_field_properties() {
   Z7 z71(8);
   Z7 z72(3);
 
@@ -304,53 +304,53 @@ void test_z7_standart_field_properties() {
 }
 
 BOOST_AUTO_TEST_CASE(Field_constructors) {
-  test_z2_standart_field_constructors<Z2_field_element>();
-  test_z2_standart_field_constructors<Zp_field_element<2> >();
-  test_z5_standart_field_constructors<Zp_field_element<5> >();
-  test_z13_standart_field_constructors<Zp_field_element<13> >();
+  test_z2_standard_field_constructors<Z2_field_element>();
+  test_z2_standard_field_constructors<Zp_field_element<2> >();
+  test_z5_standard_field_constructors<Zp_field_element<5> >();
+  test_z13_standard_field_constructors<Zp_field_element<13> >();
 }
 
 BOOST_AUTO_TEST_CASE(Field_operators) {
-  test_z2_standart_field_operators<Z2_field_element>();
-  test_z2_standart_field_operators<Zp_field_element<2> >();
-  test_z5_standart_field_operators<Zp_field_element<5> >();
+  test_z2_standard_field_operators<Z2_field_element>();
+  test_z2_standard_field_operators<Zp_field_element<2> >();
+  test_z5_standard_field_operators<Zp_field_element<5> >();
 }
 
 BOOST_AUTO_TEST_CASE(Field_properties) {
-  test_z2_standart_field_properties<Z2_field_element>();
-  test_z2_standart_field_properties<Zp_field_element<2> >();
-  test_z5_standart_field_properties<Zp_field_element<5> >();
-  test_z7_standart_field_properties<Zp_field_element<7> >();
+  test_z2_standard_field_properties<Z2_field_element>();
+  test_z2_standard_field_properties<Zp_field_element<2> >();
+  test_z5_standard_field_properties<Zp_field_element<5> >();
+  test_z7_standard_field_properties<Zp_field_element<7> >();
 }
 
 BOOST_AUTO_TEST_CASE(Shared_Field_constructors) {
   Shared_Zp_field_element<>::initialize(2);
-  test_z2_standart_field_constructors<Shared_Zp_field_element<> >();
+  test_z2_standard_field_constructors<Shared_Zp_field_element<> >();
 
   Shared_Zp_field_element<>::initialize(5);
-  test_z5_standart_field_constructors<Shared_Zp_field_element<> >();
+  test_z5_standard_field_constructors<Shared_Zp_field_element<> >();
 
   Shared_Zp_field_element<>::initialize(13);
-  test_z13_standart_field_constructors<Shared_Zp_field_element<> >();
+  test_z13_standard_field_constructors<Shared_Zp_field_element<> >();
 }
 
 BOOST_AUTO_TEST_CASE(Shared_Field_operators) {
   Shared_Zp_field_element<>::initialize(2);
-  test_z2_standart_field_operators<Shared_Zp_field_element<> >();
+  test_z2_standard_field_operators<Shared_Zp_field_element<> >();
 
   Shared_Zp_field_element<>::initialize(5);
-  test_z5_standart_field_operators<Shared_Zp_field_element<> >();
+  test_z5_standard_field_operators<Shared_Zp_field_element<> >();
 }
 
 BOOST_AUTO_TEST_CASE(Shared_Field_properties) {
   Shared_Zp_field_element<>::initialize(2);
-  test_z2_standart_field_properties<Shared_Zp_field_element<> >();
+  test_z2_standard_field_properties<Shared_Zp_field_element<> >();
 
   Shared_Zp_field_element<>::initialize(5);
-  test_z5_standart_field_properties<Shared_Zp_field_element<> >();
+  test_z5_standard_field_properties<Shared_Zp_field_element<> >();
 
   Shared_Zp_field_element<>::initialize(7);
-  test_z7_standart_field_properties<Shared_Zp_field_element<> >();
+  test_z7_standard_field_properties<Shared_Zp_field_element<> >();
 }
 
 template <class MF>
@@ -371,6 +371,8 @@ void test_multi_field_constructors() {
   BOOST_CHECK_EQUAL(m_c2, T(1));
   MF m_c3(m_c2);
   BOOST_CHECK_EQUAL(m_c3, T(1));
+  MF m_c4 = T(5006);
+  BOOST_CHECK_EQUAL(m_c4, T(1));
 
   // move constructor
   MF m_m1(5006);

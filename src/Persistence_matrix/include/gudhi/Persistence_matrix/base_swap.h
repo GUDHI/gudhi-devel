@@ -31,7 +31,7 @@ namespace persistence_matrix {
  * Inherited instead of @ref Base_swap, when the column and row swaps are not enabled.
  */
 struct Dummy_base_swap {
-  friend void swap([[maybe_unused]] Dummy_base_swap& d1, [[maybe_unused]] Dummy_base_swap& d2) {}
+  friend void swap([[maybe_unused]] Dummy_base_swap& d1, [[maybe_unused]] Dummy_base_swap& d2) noexcept {}
 
   Dummy_base_swap([[maybe_unused]] unsigned int numberOfColumns = 0) {}
 };
@@ -41,16 +41,17 @@ struct Dummy_base_swap {
  * @ingroup persistence_matrix
  *
  * @brief Class managing the column and row swaps in @ref Base_matrix and @ref Boundary_matrix.
- * 
+ *
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  * @tparam Base_matrix Either @ref Base_matrix or @ref Boundary_matrix.
  */
 template <class Master_matrix, class Base_matrix>
-class Base_swap {
+class Base_swap
+{
  public:
-  using Column_container = typename Master_matrix::Column_container;  /**< Column container type. */
-  using Index = typename Master_matrix::Index;                        /**< Container index type. */
-  using ID_index = typename Master_matrix::ID_index;                  /**< @ref IDIdx index type. */
+  using Column_container = typename Master_matrix::Column_container; /**< Column container type. */
+  using Index = typename Master_matrix::Index;                       /**< Container index type. */
+  using ID_index = typename Master_matrix::ID_index;                 /**< @ref IDIdx index type. */
 
   /**
    * @brief Default constructor.
@@ -58,27 +59,29 @@ class Base_swap {
   Base_swap();
   /**
    * @brief As default constructor, but reserves spaces for @p numberOfColumns columns.
-   * 
+   *
    * @param numberOfColumns Number of columns to reserve space for.
    */
   Base_swap(unsigned int numberOfColumns);
   /**
    * @brief Copy constructor.
-   * 
+   *
    * @param matrixToCopy Matrix to copy.
    */
   Base_swap(const Base_swap& matrixToCopy) = default;
   /**
    * @brief Move constructor.
-   * 
+   *
    * @param other Matrix to move.
    */
   Base_swap(Base_swap&& other) noexcept;
 
+  ~Base_swap() = default;
+
   /**
    * @brief Swaps the two columns at given indices in the column container. Does not updates the column index value,
    * potentially stored in the entries. This will be done when calling `_orderRows()`.
-   * 
+   *
    * @param columnIndex1 First @ref MatIdx column index.
    * @param columnIndex2 Second @ref MatIdx column index.
    */
@@ -86,7 +89,7 @@ class Base_swap {
   /**
    * @brief Swaps the two rows at the given indices, but in a lazy manner. That is, the swap is registered but not
    * executed. The reordering will be done when calling `_orderRows()`.
-   * 
+   *
    * @param rowIndex1 First row index.
    * @param rowIndex2 Second row index.
    */
@@ -95,17 +98,31 @@ class Base_swap {
   /**
    * @brief Assign operator.
    */
-  Base_swap& operator=(Base_swap other);
+  Base_swap& operator=(const Base_swap& other) = default;
+  /**
+   * @brief Move assign operator.
+   */
+  Base_swap& operator=(Base_swap&& other) noexcept;
+
   /**
    * @brief Swap operator.
    */
-  friend void swap(Base_swap& base1, Base_swap& base2) {
+  friend void swap(Base_swap& base1, Base_swap& base2) noexcept
+  {
     base1.indexToRow_.swap(base2.indexToRow_);
     base1.rowToIndex_.swap(base2.rowToIndex_);
     std::swap(base1.rowSwapped_, base2.rowSwapped_);
   }
 
  protected:
+  void _orderRows();
+  void _initialize_row_index(Index index);
+  Index _erase_row(Index index);
+  Index _get_row_index(Index index) const;
+  bool _row_were_swapped() const;
+  void _reset();
+
+ private:
   using Index_dictionary = typename Master_matrix::template Dictionary<Index>;
   using Row_dictionary = typename Master_matrix::template Dictionary<ID_index>;
 
@@ -113,16 +130,16 @@ class Base_swap {
   Row_dictionary rowToIndex_;   /**< Map from index in row container to "public" row index. */
   bool rowSwapped_;             /**< True if any rows were swapped since last call to `_orderRows()`. */
 
-  void _orderRows();
-
-  //access to inheriting matrix class
+  // access to inheriting matrix class
   constexpr Base_matrix* _matrix() { return static_cast<Base_matrix*>(this); }
+
   constexpr const Base_matrix* _matrix() const { return static_cast<const Base_matrix*>(this); }
 };
 
 template <class Master_matrix, class Base_matrix>
 inline Base_swap<Master_matrix, Base_matrix>::Base_swap() : rowSwapped_(false)
-{}
+{
+}
 
 template <class Master_matrix, class Base_matrix>
 inline Base_swap<Master_matrix, Base_matrix>::Base_swap(unsigned int numberOfColumns)
@@ -138,14 +155,15 @@ template <class Master_matrix, class Base_matrix>
 inline Base_swap<Master_matrix, Base_matrix>::Base_swap(Base_swap&& other) noexcept
     : indexToRow_(std::move(other.indexToRow_)),
       rowToIndex_(std::move(other.rowToIndex_)),
-      rowSwapped_(std::exchange(other.rowSwapped_, 0))
-{}
+      rowSwapped_(std::exchange(other.rowSwapped_, false))
+{
+}
 
 template <class Master_matrix, class Base_matrix>
 inline void Base_swap<Master_matrix, Base_matrix>::swap_columns(Index columnIndex1, Index columnIndex2)
 {
   swap(_matrix()->matrix_.at(columnIndex1), _matrix()->matrix_.at(columnIndex2));
-  if constexpr (Master_matrix::Option_list::has_row_access) rowSwapped_ = true; //to update column index in entries.
+  if constexpr (Master_matrix::Option_list::has_row_access) rowSwapped_ = true;  // to update column index in entries.
 }
 
 template <class Master_matrix, class Base_matrix>
@@ -184,11 +202,12 @@ inline void Base_swap<Master_matrix, Base_matrix>::swap_rows(ID_index rowIndex1,
 }
 
 template <class Master_matrix, class Base_matrix>
-inline Base_swap<Master_matrix, Base_matrix>& Base_swap<Master_matrix, Base_matrix>::operator=(Base_swap other)
+inline Base_swap<Master_matrix, Base_matrix>& Base_swap<Master_matrix, Base_matrix>::operator=(
+    Base_swap&& other) noexcept
 {
-  indexToRow_.swap(other.indexToRow_);
-  rowToIndex_.swap(other.rowToIndex_);
-  std::swap(rowSwapped_, other.rowSwapped_);
+  indexToRow_ = std::move(other.indexToRow_);
+  rowToIndex_ = std::move(other.rowToIndex_);
+  rowSwapped_ = std::exchange(other.rowSwapped_, false);
   return *this;
 }
 
@@ -202,6 +221,62 @@ inline void Base_swap<Master_matrix, Base_matrix>::_orderRows()
     indexToRow_[i] = i;
     rowToIndex_[i] = i;
   }
+  rowSwapped_ = false;
+}
+
+template <class Master_matrix, class Base_matrix>
+inline void Base_swap<Master_matrix, Base_matrix>::_initialize_row_index(Index index)
+{
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    indexToRow_.emplace(index, index);
+    rowToIndex_.emplace(index, index);
+  } else {
+    indexToRow_.reserve(index + 1);
+    rowToIndex_.reserve(index + 1);
+    for (Index i = indexToRow_.size(); i <= index; ++i) {
+      indexToRow_.push_back(i);
+      rowToIndex_.push_back(i);
+    }
+  }
+}
+
+template <class Master_matrix, class Base_matrix>
+inline typename Base_swap<Master_matrix, Base_matrix>::Index Base_swap<Master_matrix, Base_matrix>::_erase_row(
+    Index index)
+{
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    auto it = indexToRow_.find(index);
+    auto rowID = it->second;
+    rowToIndex_.erase(rowID);
+    indexToRow_.erase(it);
+    return rowID;
+  } else {
+    return indexToRow_[index];
+  }
+}
+
+template <class Master_matrix, class Base_matrix>
+inline typename Base_swap<Master_matrix, Base_matrix>::Index Base_swap<Master_matrix, Base_matrix>::_get_row_index(
+    Index index) const
+{
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    return indexToRow_.at(index);
+  } else {
+    return indexToRow_[index];
+  }
+}
+
+template <class Master_matrix, class Base_matrix>
+inline bool Base_swap<Master_matrix, Base_matrix>::_row_were_swapped() const
+{
+  return rowSwapped_;
+}
+
+template <class Master_matrix, class Base_matrix>
+inline void Base_swap<Master_matrix, Base_matrix>::_reset()
+{
+  indexToRow_.clear();
+  rowToIndex_.clear();
   rowSwapped_ = false;
 }
 
