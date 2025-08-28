@@ -12,11 +12,12 @@
 /** \brief Value type for a filtration function on a cell complex.
  *
  * Needs to implement `std::numeric_limits<FiltrationValue>::has_infinity`,
- * `std::numeric_limits<FiltrationValue>::infinity()` and `std::numeric_limits<FiltrationValue>::max()`.
+ * `std::numeric_limits<FiltrationValue>::infinity()`, `std::numeric_limits<FiltrationValue>::max()` and
+ * `std::numeric_limits<FiltrationValue>::lowest()`.
  * But when `std::numeric_limits<FiltrationValue>::has_infinity` returns `true`,
- * `std::numeric_limits<FiltrationValue>::max()` can simply throw when called, as well as,
- * `std::numeric_limits<FiltrationValue>::infinity()` if `std::numeric_limits<FiltrationValue>::has_infinity`
- * returns `false`.
+ * `std::numeric_limits<FiltrationValue>::max()` and `std::numeric_limits<FiltrationValue>::lowest()` can both simply
+ * throw when called, as well as, `std::numeric_limits<FiltrationValue>::infinity()` if
+ * `std::numeric_limits<FiltrationValue>::has_infinity` returns `false`.
  *
  * A <EM>filtration</EM> of a cell complex (see FilteredComplex) is
  * a function \f$f:\mathbf{K} \rightarrow \mathbb{R}\f$ satisfying \f$f(\tau)\leq
@@ -50,7 +51,8 @@ struct FiltrationValue {
   friend bool operator==(const FiltrationValue& f1, const FiltrationValue& f2);
 
   /**
-   * @brief Inverse the value. Only used on the infinity / maximal filtration value to obtain minus infinity / minimal.
+   * @brief Only necessary if `std::numeric_limits<FiltrationValue>::has_infinity` returns `true`.
+   * Inverses the value. Only used on the infinity filtration value to obtain minus infinity.
    */
   friend FiltrationValue operator-(const FiltrationValue& f);
 

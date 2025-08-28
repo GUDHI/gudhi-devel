@@ -173,6 +173,13 @@ class Simplex_tree {
     Filtration_value& filtration() { return filt_; }
 
     static const Filtration_value& get_infinity() { return inf_; }
+    static Filtration_value get_minus_infinity() {
+      if constexpr (std::numeric_limits<Filtration_value>::has_infinity) {
+        return -inf_;
+      } else {
+        return std::numeric_limits<Filtration_value>::lowest();
+      }
+    }
 
    private:
     Filtration_value filt_;
@@ -1193,7 +1200,7 @@ class Simplex_tree {
           return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), filtration);
         case Insertion_strategy::FIRST_POSSIBLE:
           return _insert_simplex_and_subfaces_at_highest(
-              root(), copy.begin(), copy.end(), -Filtration_simplex_base_real::get_infinity());
+              root(), copy.begin(), copy.end(), Filtration_simplex_base_real::get_minus_infinity());
         case Insertion_strategy::FORCE:
           return _insert_simplex_and_subfaces_forcing_filtration_value(root(), copy.begin(), copy.end(), filtration);
         default:
