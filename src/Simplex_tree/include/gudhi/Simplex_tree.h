@@ -357,7 +357,7 @@ class Simplex_tree {
                                   Skeleton_simplex_iterator());
   }
 
-  /** \brief Returns a range over the simplices the simplicial complex that match the dimension specified by the
+  /** \brief Returns a range over the simplices of the simplicial complex that match the dimension specified by the
    * parameter.
    *
    * @param[in] dim The exact dimension of the simplices.
