@@ -16,13 +16,21 @@
 
 std::random_device rd;
 
+/** \brief Returns a random simplex.
+ *
+ * @param[in] subset_min_size The minimal size of the subset.
+ * @param[in] subset_max_size The maximal size of the subset.
+ * @param[in] range_max_value The maximal vertex value.
+ *
+ * @return A random simplex (for example, random_simplex(2, 5, 50) may return {1, 9, 13, 19} as the subset length
+ * is in between 2 and 5, and the maximal vertex value is less than 50) */
 template <class Vertex_handle>
-std::vector<Vertex_handle> rand_int_range(int subset_min_size,
+std::vector<Vertex_handle> random_simplex(int subset_min_size,
                                           int subset_max_size,
                                           Vertex_handle range_max_value)
 {
 #ifdef DEBUG_TRACES
-  std::clog << "rand_int_range - subset_min_size = " << subset_min_size << " - subset_max_size = " << subset_max_size
+  std::clog << "random_simplex - subset_min_size = " << subset_min_size << " - subset_max_size = " << subset_max_size
             << " - range_max_value = " << range_max_value << std::endl;
 #endif  // DEBUG_TRACES
 

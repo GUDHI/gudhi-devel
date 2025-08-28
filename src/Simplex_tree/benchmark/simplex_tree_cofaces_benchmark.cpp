@@ -5,7 +5,7 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
- *      - 2025/08 Vincent Rouvreau: externalize rand_int_range in random_simplces.h for DRY purposes
+ *      - 2025/08 Vincent Rouvreau: externalize rand_int_range in random_simplices.h for DRY purposes
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -29,7 +29,7 @@ void benchmark_stars_computation(int nb_vertices) {
   Stree st;
   // Insert 'nb_vertices' random simplices, of size in between [2; 5] and vertices in between [0; nb_vertices]
   for (Vertex_handle v=0; v < nb_vertices; v++)
-    st.insert_simplex_and_subfaces(rand_int_range<Vertex_handle>(2, 5, nb_vertices));
+    st.insert_simplex_and_subfaces(random_simplex<Vertex_handle>(2, 5, nb_vertices));
   std::cout << "... " << st.num_vertices() << " vertices and " << st.num_simplices() << " simplices." << std::endl;
 
   Gudhi::Clock benchmark_search("... Looking for random existing simplices");
