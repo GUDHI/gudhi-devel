@@ -33,7 +33,7 @@ int main(int argc, char** argv)
   }
 
   std::vector<Persistence_heat_maps*> maps;
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     Persistence_heat_maps* l = new Persistence_heat_maps;
     l->load_from_file(filenames[i]);
     maps.push_back(l);
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
   av.compute_average(maps);
   av.print_to_file("average.mps");
 
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     delete maps[i];
   }
 
