@@ -31,8 +31,9 @@ nb_points = np.random.randint(100,high=300, size=dataset_size)
 X = []
 
 for idx in range(dataset_size):
-    pts = points.sphere(nb_points[idx], 2, radius=target[idx])
-    ns = noise * target[idx] * np.random.rand(nb_points[idx], 2) - (noise / 2.)
+    radius = target[idx][0]
+    pts = points.sphere(nb_points[idx], 2, radius=radius)
+    ns = noise * radius * np.random.rand(nb_points[idx], 2) - (noise / 2.)
     X.append(pts + ns)
 
 # Split the dataset for train/predict
