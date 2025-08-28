@@ -1275,3 +1275,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_dimension_vertex_iterator, typeST, li
     BOOST_CHECK(dimension_simplices == skeleton_simplices);
   }
 }
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(empty_simplex_tree_dimension_vertex_iterator, typeST, list_of_tested_variants) {
+  std::clog << "********************************************************************\n";
+  std::clog << "TEST OF DIMENSION VERTEX ITERATORS ON AN EMPTY SIMPLEX TREE\n";
+  typeST st;
+
+  for(int dim = -1; dim <= 1; dim++) {
+    std::clog << " - For dimension = " << dim << "\n";
+    for([[maybe_unused]] auto sh : st.dimension_simplex_range(dim)) {
+      BOOST_CHECK(false);  // Shall not happen
+    }
+  }
+}

@@ -480,7 +480,8 @@ class Simplex_tree_dimension_simplex_iterator : public boost::iterator_facade<
         st_(st),
         dim_(dim),
         curr_dim_(0) {
-    if (st == nullptr || st->root() == nullptr || st->root()->members().empty() || st->upper_bound_dimension() < dim) {
+    if (st == nullptr || st->root() == nullptr || st->root()->members().empty() ||
+        st->upper_bound_dimension() < dim || dim < 0) {
       st_ = nullptr;
     } else {
       sh_ = st->root()->members().begin();
