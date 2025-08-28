@@ -1126,7 +1126,7 @@ class Simplex_tree {
      * the already inserted faces allows it. That is, the filtration value of a not already inserted face will be
      * the "intersection" of the filtration values of all it facets, computed with
      * @ref FiltrationValue::intersect_lifetimes "". If none of the faces were already inserted, everything will simply
-     * be placed at the default value of @ref Filtration_value "".
+     * be placed at minus infinity.
      */
     FIRST_POSSIBLE,
     /**
@@ -1192,7 +1192,8 @@ class Simplex_tree {
         case Insertion_strategy::HIGHEST:
           return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), filtration);
         case Insertion_strategy::FIRST_POSSIBLE:
-          return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), 0);
+          return _insert_simplex_and_subfaces_at_highest(
+              root(), copy.begin(), copy.end(), -Filtration_simplex_base_real::get_infinity());
         case Insertion_strategy::FORCE:
           return _insert_simplex_and_subfaces_forcing_filtration_value(root(), copy.begin(), copy.end(), filtration);
         default:

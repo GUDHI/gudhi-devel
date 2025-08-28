@@ -50,6 +50,11 @@ struct FiltrationValue {
   friend bool operator==(const FiltrationValue& f1, const FiltrationValue& f2);
 
   /**
+   * @brief Inverse the value. Only used on the infinity / maximal filtration value to obtain minus infinity / minimal.
+   */
+  friend FiltrationValue operator-(const FiltrationValue& f);
+
+  /**
    * @brief Given two filtration values at which a simplex exists, computes the minimal union of births generating
    * a lifetime including those two values. The result is stored in the first parameter.
    * The overload for arithmetic types like `double` or `int` is already implemented as the minimum of the
