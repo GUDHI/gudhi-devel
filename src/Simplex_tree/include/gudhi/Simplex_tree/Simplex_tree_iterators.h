@@ -509,7 +509,7 @@ class Simplex_tree_dimension_simplex_iterator : public boost::iterator_facade<
     return sh_;
   }
 
-  inline void until_leaf_or_dim() {
+  void until_leaf_or_dim() {
     while (st_->has_children(sh_) && curr_dim_ != dim_) {
       sib_ = sh_->second.children();
       sh_ = sib_->members().begin();
