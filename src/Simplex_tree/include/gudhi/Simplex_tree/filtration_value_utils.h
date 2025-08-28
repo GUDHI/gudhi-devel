@@ -41,6 +41,25 @@ inline struct empty_filtration_value_t {
  * NaN values are not supported.
  */
 template <typename Arithmetic_filtration_value>
+bool is_positive_infinity(const Arithmetic_filtration_value& f)
+{
+  if constexpr (std::numeric_limits<Arithmetic_filtration_value>::has_infinity) {
+    return f == std::numeric_limits<Arithmetic_filtration_value>::infinity();
+  } else {
+    return f == std::numeric_limits<Arithmetic_filtration_value>::max();
+  }
+}
+
+/**
+ * @ingroup simplex_tree
+ * @brief Given two filtration values at which a simplex exists, stores in the first value the minimal union of births
+ * generating a lifetime including those two values.
+ * This is the overload for when @ref FiltrationValue is an arithmetic type, like double, int etc.
+ * Because the filtration values are totally ordered then, the union is simply the minimum of the two values.
+ *
+ * NaN values are not supported.
+ */
+template <typename Arithmetic_filtration_value>
 bool unify_lifetimes(Arithmetic_filtration_value& f1, const Arithmetic_filtration_value& f2)
 {
   if (f2 < f1){

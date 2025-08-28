@@ -51,6 +51,11 @@ struct FiltrationValue {
   friend bool operator==(const FiltrationValue& f1, const FiltrationValue& f2);
 
   /**
+   * @brief Returns true if and only if the given filtration value is at infinity.
+   */
+  friend bool is_positive_infinity(const FiltrationValue& f);
+
+  /**
    * @brief Only necessary if `std::numeric_limits<FiltrationValue>::has_infinity` returns `true`.
    * Inverses the value. Only used on the infinity filtration value to obtain minus infinity.
    */

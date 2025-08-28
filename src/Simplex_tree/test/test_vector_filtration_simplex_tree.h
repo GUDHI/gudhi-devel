@@ -39,6 +39,10 @@ class Vector_filtration_value : public std::vector<int>
     return f;
   }
 
+  friend bool is_positive_infinity(const Vector_filtration_value& f) {
+    return f.size() == 1 && f[0] == std::numeric_limits<int>::max();
+  }
+
   friend bool unify_lifetimes(Vector_filtration_value& f1, const Vector_filtration_value& f2) {
     int max = std::numeric_limits<int>::max();
     bool f1_is_inf = f1.size() == 1 && f1[0] == max;

@@ -1394,7 +1394,7 @@ class Simplex_tree {
   void initialize_filtration(bool ignore_infinite_values = false) const {
     if (ignore_infinite_values){
       initialize_filtration(is_before_in_totally_ordered_filtration(this), [&](Simplex_handle sh) -> bool {
-        return filtration(sh) == Filtration_simplex_base_real::get_infinity();
+        return is_positive_infinity(filtration(sh));
       });
     } else {
       initialize_filtration(is_before_in_totally_ordered_filtration(this), [](Simplex_handle) -> bool {
@@ -2276,7 +2276,7 @@ class Simplex_tree {
    * bound. If you care, you can call `dimension()` to recompute the exact dimension.
    */
   bool prune_above_filtration(const Filtration_value& filtration) {
-    if (filtration == Filtration_simplex_base_real::get_infinity())
+    if (is_positive_infinity(filtration))
       return false;  // ---->>
     bool modified = rec_prune_above_filtration(root(), filtration);
     if(modified)
