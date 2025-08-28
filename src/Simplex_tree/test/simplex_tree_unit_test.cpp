@@ -712,6 +712,40 @@ void test_possible_strategy(){
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({2,6})), 2);
 }
 
+template<class typeST>
+void test_force_strategy(){
+  typeST simplexTree;
+  build_simplex_tree_with_strategy(simplexTree, typeST::Insertion_strategy::FORCE);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0})), 3);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1})), 3);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({2})), 3);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0,1})), 3);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0,2})), 3);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1,2})), 3);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0,1,2})), 2);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({5})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({6})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4})), 8);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,5})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,6})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,5})), 6);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,6})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({5,6})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,5})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,6})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,5,6})), 5);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({4,5,6})), 4);
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({3,4,5,6})), 5);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1,3})), 8);
+
+  BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({2,6})), 1);
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion_with_strategy, typeST, list_of_tested_variants) {
   std::clog << "********************************************************************" << std::endl;
   std::clog << "TEST OF INSERTION WITH STRATEGY" << std::endl;
@@ -724,6 +758,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NSimplexAndSubfaces_tree_insertion_with_strategy, 
 
   std::clog << "************** STRATEGY: WHEN POSSIBLE\n";
   test_possible_strategy<typeST>();
+
+  std::clog << "************** STRATEGY: FORCED VALUE\n";
+  test_force_strategy<typeST>();
 }
 
 template<class typeST, class Vertex_handle>

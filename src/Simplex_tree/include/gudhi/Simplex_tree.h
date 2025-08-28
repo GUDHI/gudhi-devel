@@ -45,12 +45,13 @@
 
 #include <boost/intrusive/list.hpp>
 #include <boost/intrusive/parent_from_member.hpp>
-#include <cstddef>
 
 #ifdef GUDHI_USE_TBB
 #include <tbb/parallel_sort.h>
 #endif
 
+#include <cstddef>
+#include <cstdint>  // std::uint8_t
 #include <utility>  // for std::move
 #include <vector>
 #include <functional>  // for greater<>
@@ -747,44 +748,6 @@ class Simplex_tree {
     }
   }
 
-  /**
-   * @brief Returns a non-const reference to the filtration value of a simplex.
-   * 
-   * @warning Cannot be called on a null_simplex.
-   * @warning Only available if SimplexTreeOptions::store_filtration is true.
-   */
-  Filtration_value& get_filtration_value(Simplex_handle sh) {
-    static_assert(Options::store_filtration,
-                  "A modifiable reference to a filtration value cannot be returned if no filtration value is stored.");
-
-    if (sh == null_simplex()) {
-      throw std::invalid_argument("Cannot bind reference to filtration value of a null simplex.");
-    }
-    return _to_node_it(sh)->second.filtration();
-  }
-
-  /**
-   * @brief Returns a const reference to the filtration value of a simplex. It is a more strict variant of
-   * @ref filtration, as it will not compile if @ref SimplexTreeOptions::store_filtration is false and it will throw if
-   * the given simplex is a @ref null_simplex.
-   * 
-   * @warning Cannot be called on a null_simplex. If this option is necessary, use @ref filtration instead.
-   * @warning Only available if @ref SimplexTreeOptions::store_filtration is true. If false is necessary,
-   * use @ref filtration instead.
-   */
-  const Filtration_value& get_filtration_value(Simplex_handle sh) const {
-    static_assert(
-        Options::store_filtration,
-        "Filtration values are not stored. If you still want something to be returned, use `filtration(sh)` instead.");
-
-    if (sh == null_simplex()) {
-      throw std::invalid_argument(
-          "Null simplices are not associated to filtration values. If you still want something to be returned, use "
-          "`filtration(sh)` instead.");
-    }
-    return sh->second.filtration();
-  }
-
   /** \brief Sets the filtration value of a simplex.
    * \exception std::invalid_argument In debug mode, if sh is a null_simplex.
    */
@@ -1139,7 +1102,7 @@ class Simplex_tree {
    * @brief List of insertion strategies for @ref insert_simplex_and_subfaces, which takes a simplex \f$ \sigma \f$
    * and a filtration value \f$ f \f$ as argument.
    */
-  enum class Insertion_strategy {
+  enum class Insertion_strategy : std::uint8_t {
     /**
      * @brief Let \f$ f \f$ be the filtration value given as argument. Inserts the simplex \f$ \sigma \f$ as follows:
      * - to \f$ f \f$, if \f$ \sigma \f$ didn't existed yet,
@@ -1165,7 +1128,20 @@ class Simplex_tree {
      * @ref FiltrationValue::intersect_lifetimes "". If none of the faces were already inserted, everything will simply
      * be placed at the default value of @ref Filtration_value "".
      */
-    FIRST_POSSIBLE
+    FIRST_POSSIBLE,
+    /**
+     * @brief If the simplex to insert:
+     * - already exists in the simplex tree, its filtration value is replaced by the new given one,
+     * - does not exists yet, it and all its non-existing faces are inserted at the given filtration value,
+     * none of the already inserted faces are touched.
+     *
+     * This option is mainly usefull when the methods @ref FiltrationValue::intersect_lifetimes or
+     * @ref FiltrationValue::unify_lifetimes are heavy for the associated filtration value class and the user
+     * wants to avoid calling them just to ensure a valid filtration. It is therefore **responsibility of the user to
+     * ensure a valid filtration** at the end of the construction, before any filtration related method is used
+     * (@ref filtration_simplex_range for example).
+     */
+    FORCE
   };
 
   /**
@@ -1210,16 +1186,21 @@ class Simplex_tree {
     dimension_ = (std::max)(dimension_, static_cast<int>(std::distance(copy.begin(), copy.end())) - 1);
 
     if constexpr (Options::store_filtration){
-      if (insertion_strategy == Insertion_strategy::LOWEST)
-        return _rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
-      else if (insertion_strategy == Insertion_strategy::HIGHEST)
-        return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), filtration);
-      else
-        return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), 0);
+      switch (insertion_strategy) {
+        case Insertion_strategy::LOWEST:
+          return _rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
+        case Insertion_strategy::HIGHEST:
+          return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), filtration);
+        case Insertion_strategy::FIRST_POSSIBLE:
+          return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), 0);
+        case Insertion_strategy::FORCE:
+          return _insert_simplex_and_subfaces_forcing_filtration_value(root(), copy.begin(), copy.end(), filtration);
+        default:
+          throw std::invalid_argument("Given insertion strategy is not available.");
+      }
     } else {
       return _rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
     }
-    
   }
 
  private:
@@ -1235,6 +1216,11 @@ class Simplex_tree {
     // - loop over those (new or not) simplices, with a recursive call(++first, last)
     Vertex_handle vertex_one = *first;
 
+    // insert_node_<bool update_fil, bool update_children, bool set_to_null>(sib, ...)
+    // update_fil: if true, calls `unify_lifetimes` on the new and old filtration value of the node
+    // update_children: if true, assign a child to the node if he didn't had one
+    // set_to_null: if true, sets returned iterator to null simplex
+    
     if (++first == last) return insert_node_<update_fil, false, update_fil>(sib, vertex_one, filt);
 
     // TODO: have special code here, we know we are building the whole subtree from scratch.
@@ -1249,7 +1235,7 @@ class Simplex_tree {
   }
 
   void _make_subfiltration_non_decreasing(Simplex_handle sh) {
-    Filtration_value& f = get_filtration_value(sh);
+    Filtration_value& f = _to_node_it(sh)->second.filtration();
     for (auto sh_b : boundary_simplex_range(sh)) {
       _make_subfiltration_non_decreasing(sh_b);
       intersect_lifetimes(f, filtration(sh_b));
@@ -1262,10 +1248,25 @@ class Simplex_tree {
                                                                           ForwardVertexIterator last,
                                                                           const Filtration_value& filt) {
     auto res = _rec_insert_simplex_and_subfaces_sorted<ForwardVertexIterator, false>(sib, first, last, filt);
-    if (res.second){
+    if (res.second) {
       _make_subfiltration_non_decreasing(res.first);
     } else {
       res.first = null_simplex();
+    }
+    return res;
+  }
+
+  template <class ForwardVertexIterator>
+  std::pair<Simplex_handle, bool> _insert_simplex_and_subfaces_forcing_filtration_value(Siblings* sib,
+                                                                                        ForwardVertexIterator first,
+                                                                                        ForwardVertexIterator last,
+                                                                                        const Filtration_value& filt) {
+    auto res = _rec_insert_simplex_and_subfaces_sorted<ForwardVertexIterator, false>(sib, first, last, filt);
+    if (!res.second) {
+      Filtration_value& f = _to_node_it(res.first)->second.filtration();
+      // could handle the case were f == filt to set res.first to null_simplex, but I don't think it the point of
+      // this strategy and it seems better to avoid `operator==` which is also not trivial for vectors etc.
+      f = filt;
     }
     return res;
   }
