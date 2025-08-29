@@ -458,32 +458,29 @@ class Alpha_complex {
       // ### For i : d -> 0
       for (int decr_dim = triangulation_->maximal_dimension(); decr_dim >= 0; decr_dim--) {
         // ### Foreach Sigma of dim i
-        for (Simplex_handle f_simplex : complex.skeleton_simplex_range(decr_dim)) {
-          int f_simplex_dim = complex.dimension(f_simplex);
-          if (decr_dim == f_simplex_dim) {
-            // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
-            if (isnan(complex.filtration(f_simplex))) {
-              Filtration_value alpha_complex_filtration = 0.0;
-              // No need to compute squared_radius on a non-weighted single point - alpha is 0.0
-              if (Weighted || f_simplex_dim > 0) {
-                auto const& sqrad = radius(complex, f_simplex);
+        for (Simplex_handle f_simplex : complex.dimension_simplex_range(decr_dim)) {
+          // ### If filt(Sigma) is NaN : filt(Sigma) = alpha(Sigma)
+          if (isnan(complex.filtration(f_simplex))) {
+            Filtration_value alpha_complex_filtration = 0.0;
+            // No need to compute squared_radius on a non-weighted single point - alpha is 0.0
+            if (Weighted || decr_dim > 0) {
+              auto const& sqrad = radius(complex, f_simplex);
 #if CGAL_VERSION_NR >= 1050000000
-                if(exact) CGAL::exact(sqrad);
+              if(exact) CGAL::exact(sqrad);
 #endif
-                alpha_complex_filtration = cgal_converter(sqrad);
-                if constexpr (!Output_squared_values) {
-                  alpha_complex_filtration = sqrt(alpha_complex_filtration);
-                }
+              alpha_complex_filtration = cgal_converter(sqrad);
+              if constexpr (!Output_squared_values) {
+                alpha_complex_filtration = sqrt(alpha_complex_filtration);
               }
-              complex.assign_filtration(f_simplex, alpha_complex_filtration);
-#ifdef DEBUG_TRACES
-              std::clog << "filt(Sigma) is NaN : filt(Sigma) =" << complex.filtration(f_simplex) << std::endl;
-#endif  // DEBUG_TRACES
             }
-            // No need to propagate further, unweighted points all have value 0
-            if (decr_dim > !Weighted)
-              propagate_alpha_filtration(complex, f_simplex);
+            complex.assign_filtration(f_simplex, alpha_complex_filtration);
+#ifdef DEBUG_TRACES
+            std::clog << "filt(Sigma) is NaN : filt(Sigma) =" << complex.filtration(f_simplex) << std::endl;
+#endif  // DEBUG_TRACES
           }
+          // No need to propagate further, unweighted points all have value 0
+          if (decr_dim > !Weighted)
+            propagate_alpha_filtration(complex, f_simplex);
         }
         old_cache_ = std::move(cache_);
         cache_.clear();

@@ -63,24 +63,22 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
   BOOST_CHECK(st.num_simplices() == 18);
 
   // Check filtration values of vertices is 0.0
-  for (auto f_simplex : st.skeleton_simplex_range(0)) {
+  for (auto f_simplex : st.dimension_simplex_range(0)) {
     BOOST_CHECK(st.filtration(f_simplex) == 0.0);
   }
 
   // Check filtration values of edges
-  for (auto f_simplex : st.skeleton_simplex_range(DIMENSION_1)) {
-    if (DIMENSION_1 == st.dimension(f_simplex)) {
-      std::vector<Point> vp;
-      std::clog << "vertex = (";
-      for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-        std::clog << vertex << ",";
-        vp.push_back(off_reader.get_point_cloud().at(vertex));
-      }
-      std::clog << ") - distance =" << Gudhi::Euclidean_distance()(vp.at(0), vp.at(1)) <<
-          " - filtration =" << st.filtration(f_simplex) << std::endl;
-      BOOST_CHECK(vp.size() == 2);
-      GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), Gudhi::Euclidean_distance()(vp.at(0), vp.at(1)));
+  for (auto f_simplex : st.dimension_simplex_range(DIMENSION_1)) {
+    std::vector<Point> vp;
+    std::clog << "vertex = (";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      std::clog << vertex << ",";
+      vp.push_back(off_reader.get_point_cloud().at(vertex));
     }
+    std::clog << ") - distance =" << Gudhi::Euclidean_distance()(vp.at(0), vp.at(1))
+              << " - filtration =" << st.filtration(f_simplex) << std::endl;
+    BOOST_CHECK(vp.size() == 2);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), Gudhi::Euclidean_distance()(vp.at(0), vp.at(1)));
   }
 
   const int DIMENSION_2 = 2;
@@ -88,7 +86,7 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
   rips_complex_from_file.create_complex(st2, DIMENSION_2);
   std::clog << "st2.dimension()=" << st2.dimension() << std::endl;
   BOOST_CHECK(st2.dimension() == DIMENSION_2);
-  
+
   std::clog << "st2.num_vertices()=" << st2.num_vertices() << std::endl;
   BOOST_CHECK(st2.num_vertices() == NUMBER_OF_VERTICES);
 
@@ -101,7 +99,7 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
   Simplex_tree::Filtration_value f012 = st2.filtration(st2.find({0, 1, 2}));
   std::clog << "f012= " << f012 << " | f01= " << f01 << " - f02= " << f02 << " - f12= " << f12 << std::endl;
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f012, std::max(f01, std::max(f02,f12)));
-  
+
   Simplex_tree::Filtration_value f45 = st2.filtration(st2.find({4, 5}));
   Simplex_tree::Filtration_value f56 = st2.filtration(st2.find({5, 6}));
   Simplex_tree::Filtration_value f46 = st2.filtration(st2.find({4, 6}));
@@ -114,7 +112,7 @@ BOOST_AUTO_TEST_CASE(RIPS_DOC_OFF_file) {
   rips_complex_from_file.create_complex(st3, DIMENSION_3);
   std::clog << "st3.dimension()=" << st3.dimension() << std::endl;
   BOOST_CHECK(st3.dimension() == DIMENSION_3);
-  
+
   std::clog << "st3.num_vertices()=" << st3.num_vertices() << std::endl;
   BOOST_CHECK(st3.num_vertices() == NUMBER_OF_VERTICES);
 
@@ -313,23 +311,21 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   BOOST_CHECK(st.num_simplices() == 18);
 
   // Check filtration values of vertices is 0.0
-  for (auto f_simplex : st.skeleton_simplex_range(0)) {
+  for (auto f_simplex : st.dimension_simplex_range(0)) {
     BOOST_CHECK(st.filtration(f_simplex) == 0.0);
   }
 
   // Check filtration values of edges
-  for (auto f_simplex : st.skeleton_simplex_range(DIMENSION_1)) {
-    if (DIMENSION_1 == st.dimension(f_simplex)) {
-      std::vector<Simplex_tree::Vertex_handle> vvh;
-      std::clog << "vertex = (";
-      for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-        std::clog << vertex << ",";
-        vvh.push_back(vertex);
-      }
-      std::clog << ") - filtration =" << st.filtration(f_simplex) << std::endl;
-      BOOST_CHECK(vvh.size() == 2);
-      GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), distances[vvh.at(0)][vvh.at(1)]);
+  for (auto f_simplex : st.dimension_simplex_range(DIMENSION_1)) {
+    std::vector<Simplex_tree::Vertex_handle> vvh;
+    std::clog << "vertex = (";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      std::clog << vertex << ",";
+      vvh.push_back(vertex);
     }
+    std::clog << ") - filtration =" << st.filtration(f_simplex) << std::endl;
+    BOOST_CHECK(vvh.size() == 2);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex), distances[vvh.at(0)][vvh.at(1)]);
   }
 
   const int DIMENSION_2 = 2;
@@ -337,7 +333,7 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   rips_complex_from_file.create_complex(st2, DIMENSION_2);
   std::clog << "st2.dimension()=" << st2.dimension() << std::endl;
   BOOST_CHECK(st2.dimension() == DIMENSION_2);
-  
+
   std::clog << "st2.num_vertices()=" << st2.num_vertices() << std::endl;
   BOOST_CHECK(st2.num_vertices() == NUMBER_OF_VERTICES);
 
@@ -350,7 +346,7 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   Simplex_tree::Filtration_value f012 = st2.filtration(st2.find({0, 1, 2}));
   std::clog << "f012= " << f012 << " | f01= " << f01 << " - f02= " << f02 << " - f12= " << f12 << std::endl;
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(f012, std::max(f01, std::max(f02,f12)));
-  
+
   Simplex_tree::Filtration_value f45 = st2.filtration(st2.find({4, 5}));
   Simplex_tree::Filtration_value f56 = st2.filtration(st2.find({5, 6}));
   Simplex_tree::Filtration_value f46 = st2.filtration(st2.find({4, 6}));
@@ -363,7 +359,7 @@ BOOST_AUTO_TEST_CASE(Rips_doc_csv_file) {
   rips_complex_from_file.create_complex(st3, DIMENSION_3);
   std::clog << "st3.dimension()=" << st3.dimension() << std::endl;
   BOOST_CHECK(st3.dimension() == DIMENSION_3);
-  
+
   std::clog << "st3.num_vertices()=" << st3.num_vertices() << std::endl;
   BOOST_CHECK(st3.num_vertices() == NUMBER_OF_VERTICES);
 

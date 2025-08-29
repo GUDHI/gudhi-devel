@@ -20,7 +20,7 @@
 
 namespace Gudhi {
 
-/** \addtogroup simplex_tree 
+/** \addtogroup simplex_tree
  * Iterators and range types for the Simplex_tree.
  *  @{
  */
@@ -452,6 +452,103 @@ class Simplex_tree_skeleton_simplex_iterator : public boost::iterator_facade<
   Siblings const* sib_;
   SimplexTree const* st_;
   int dim_skel_;
+  int curr_dim_;
+};
+
+/** \brief Iterator over the simplices of the simplicial complex that match the dimension specified by the parameter.
+ *
+ * Forward iterator, value_type is SimplexTree::Simplex_handle.*/
+template<class SimplexTree>
+class Simplex_tree_dimension_simplex_iterator : public boost::iterator_facade<
+    Simplex_tree_dimension_simplex_iterator<SimplexTree>,
+    typename SimplexTree::Simplex_handle const, boost::forward_traversal_tag> {
+ public:
+  typedef typename SimplexTree::Simplex_handle Simplex_handle;
+  typedef typename SimplexTree::Siblings Siblings;
+  typedef typename SimplexTree::Vertex_handle Vertex_handle;
+
+// any end() iterator
+  Simplex_tree_dimension_simplex_iterator()
+      : sib_(nullptr),
+        st_(nullptr),
+        dim_(0),
+        curr_dim_(0) {
+  }
+
+  Simplex_tree_dimension_simplex_iterator(SimplexTree const* st, int dim)
+      : sib_(nullptr),
+        st_(st),
+        dim_(dim),
+        curr_dim_(0) {
+    if (st == nullptr || st->root() == nullptr || st->root()->members().empty() ||
+        st->upper_bound_dimension() < dim || dim < 0) {
+      st_ = nullptr;
+    } else {
+      sh_ = st->root()->members().begin();
+      sib_ = st->root();
+      until_leaf_or_dim();
+      // if we reached a leaf that does not respect the required dimension - call increment
+      if (curr_dim_ != dim_)
+        increment();
+    }
+  }
+ private:
+  friend class boost::iterator_core_access;
+
+// valid when iterating along the SAME boundary.
+  bool equal(Simplex_tree_dimension_simplex_iterator const& other) const {
+    if (other.st_ == nullptr) {
+      return (st_ == nullptr);
+    }
+    if (st_ == nullptr) {
+      return false;
+    }
+    return (&(sh_->second) == &(other.sh_->second));
+  }
+
+  Simplex_handle const& dereference() const {
+    return sh_;
+  }
+
+  void until_leaf_or_dim() {
+    while (st_->has_children(sh_) && curr_dim_ != dim_) {
+      sib_ = sh_->second.children();
+      sh_ = sib_->members().begin();
+      ++curr_dim_;
+    }
+#ifdef DEBUG_TRACES
+    std::clog << "Simplex_tree::dimension_simplex_range until_leaf_or_dim reached (";
+    for (auto vertex : st_->simplex_vertex_range(sh_)) {
+      std::clog << vertex << ",";
+    }
+    std::clog << ")\n";
+#endif  // DEBUG_TRACES
+  }
+  // Depth first traversal of the tree structure. Returns when reaching a simplex with a given dimension
+  void increment() {
+    ++sh_;
+    while (sh_ == sib_->members().end()) {
+      if (sib_->oncles() == nullptr) {
+        st_ = nullptr;
+        return;
+      }  // reach the end
+      sh_ = sib_->oncles()->members().find(sib_->parent());
+      sib_ = sib_->oncles();
+      --curr_dim_;
+      ++sh_;
+      until_leaf_or_dim();
+    }
+    // It seems we do it twice here, but necessary when coming from the constructor
+    until_leaf_or_dim();
+    // if we reached a leaf that does not respect the dimension - recall increment
+    if (curr_dim_ != dim_)
+      increment();
+  }
+
+  Simplex_handle sh_;
+  Siblings const* sib_;
+  SimplexTree const* st_;
+  int dim_;
   int curr_dim_;
 };
 

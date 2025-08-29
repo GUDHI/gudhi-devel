@@ -95,25 +95,25 @@ BOOST_AUTO_TEST_CASE(Cech_complex_for_documentation) {
   BOOST_CHECK(st.num_simplices() == 27);
 
   // Check filtration values of vertices is 0.0
-  for (auto f_simplex : st.skeleton_simplex_range(0)) {
+  for (auto f_simplex : st.dimension_simplex_range(0)) {
     BOOST_CHECK(st.filtration(f_simplex) == 0.0);
   }
 
   // Check filtration values of edges
-  for (auto f_simplex : st.skeleton_simplex_range(DIMENSION_1)) {
-    if (DIMENSION_1 == st.dimension(f_simplex)) {
-      std::vector<Point> vp;
-      std::clog << "vertex = (";
-      for (auto vertex : st.simplex_vertex_range(f_simplex)) {
-        std::clog << vertex << ",";
-        vp.push_back(points.at(vertex));
-      }
-      std::clog << ") - distance =" << Gudhi::cech_complex::Sphere_circumradius<Kernel, Filtration_value>()(vp.at(0), vp.at(1))
-                << " - filtration =" << st.filtration(f_simplex) << std::endl;
-      BOOST_CHECK(vp.size() == 2);
-      GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex),
-                                      Gudhi::cech_complex::Sphere_circumradius<Kernel, Filtration_value>()(vp.at(0), vp.at(1)));
+  for (auto f_simplex : st.dimension_simplex_range(DIMENSION_1)) {
+    std::vector<Point> vp;
+    std::clog << "vertex = (";
+    for (auto vertex : st.simplex_vertex_range(f_simplex)) {
+      std::clog << vertex << ",";
+      vp.push_back(points.at(vertex));
     }
+    std::clog << ") - distance ="
+              << Gudhi::cech_complex::Sphere_circumradius<Kernel, Filtration_value>()(vp.at(0), vp.at(1))
+              << " - filtration =" << st.filtration(f_simplex) << std::endl;
+    BOOST_CHECK(vp.size() == 2);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(st.filtration(f_simplex),
+                                    Gudhi::cech_complex::Sphere_circumradius<Kernel, Filtration_value>()(vp.at(0),
+                                                                                                         vp.at(1)));
   }
 
   const int DIMENSION_2 = 2;
