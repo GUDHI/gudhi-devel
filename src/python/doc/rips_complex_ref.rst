@@ -9,7 +9,6 @@ Rips complex reference manual
 .. autoclass:: gudhi.RipsComplex
    :members:
    :undoc-members:
-   :show-inheritance:
 
 ======================================
 Weighted Rips complex reference manual
@@ -18,7 +17,6 @@ Weighted Rips complex reference manual
 .. autoclass:: gudhi.weighted_rips_complex.WeightedRipsComplex
    :members:
    :undoc-members:
-   :show-inheritance:
 
 =================================
 DTM Rips complex reference manual

@@ -7,12 +7,10 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Marc Glisse"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2023 Inria"
 __license__ = "MIT"
 
-from .._edge_collapse import _collapse_edges
+
+from .._edge_collapse_ext import _collapse_edges
 
 
 def reduce_graph(input_edges, nb_iterations=1):
@@ -27,6 +25,8 @@ def reduce_graph(input_edges, nb_iterations=1):
     Note that this simplification is independent of the filtration values of the vertices.
     The output has the same shape as the input, which is presumed to be (N, N) where all vertices have index
     less than N, since the simplification does not affect vertices.
+
+    :Requires: `SciPy <installation.html#scipy>`_
 
     :param input_edges: Input weighted graph.
     :type input_edges: scipy.sparse.coo_matrix

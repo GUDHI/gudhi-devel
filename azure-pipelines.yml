@@ -8,12 +8,14 @@ jobs:
     variables:
       pythonVersion: "3.9"
       cmakeBuildType: Release
-      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON
+      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_REMOTE_TEST=ON
       # On this VM, 2 versions of python are installed. Default Python_FIND_FRAMEWORK is FIRST, which means asks frameworks first
       # LAST means consult frameworks in last resort, use the PATH first
       extraCmakeOptions: -DPython_FIND_FRAMEWORK=LAST
 
     steps:
+      - checkout: self
+        submodules: true
       # Use a specific Python version
       - task: UsePythonVersion@0
         displayName: Use Python $(pythonVersion)
@@ -23,20 +25,24 @@ jobs:
           architecture: "x64"
 
       - bash: |
-          git submodule update --init
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user -r ext/gudhi-deploy/test-requirements.txt
           python -m pip uninstall -y pykeops
-          brew update || true
-          brew install ninja graphviz doxygen boost eigen gmp mpfr tbb cgal || true
+          if ! brew update; then
+            echo "Warning: brew update returned a non-zero exit code."
+          fi
+          if ! brew install ninja graphviz doxygen boost eigen gmp mpfr tbb cgal; then
+            echo "Warning: brew install returned a non-zero exit code."
+          fi
         displayName: "Install build dependencies"
       - bash: |
-          mkdir build
-          cd build
           which python
+          python -m pip install .
+          cd build
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) $(extraCmakeOptions) -GNinja $(gudhiCmakeOptions) ..
           ninja
           ninja doxygen
+
           ctest --output-on-failure
         displayName: "Build, test and documentation generation"
 
@@ -48,14 +54,17 @@ jobs:
       vmImage: windows-latest
     variables:
       pythonVersion: "3.9"
+      cmakeBuildType: Release
       cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
-      # WITH_GUDHI_PYTHON=OFF on purpose. It is set to ON on a second cmake call
-      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=OFF
+      # WITH_GUDHI_PYTHON=OFF on purpose. It is built and installed via pip
+      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
       # On this VM, 2 versions of python are installed. Default Python_FIND_REGISTRY is FIRST, which means asks registry first
       # LAST means consult registry in last resort, use the standard libraries or headers first
       extraCmakeOptions: -DPython_FIND_REGISTRY=LAST
 
     steps:
+      - checkout: self
+        submodules: true
       # Use a specific Python version
       - task: UsePythonVersion@0
         displayName: Use Python $(pythonVersion)
@@ -63,43 +72,28 @@ jobs:
           versionSpec: $(pythonVersion)
           addToPath: true
           architecture: "x64"
-
-      - script: |
-          git submodule update --init
-          python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
-          python -m pip install --user -r ext/gudhi-deploy/test-requirements.txt
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
-          # Only vcpkg release libs for CI
-          echo.set(VCPKG_BUILD_TYPE release)>> C:\vcpkg\triplets\x64-windows.cmake
-          vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
+      - pwsh: |
+          $ErrorActionPreference = "stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+          python --version
+          python -m pip install -r ext/gudhi-deploy/build-requirements.txt
+          python -m pip install -r ext/gudhi-deploy/test-requirements.txt
           choco install -y ninja --force --force-dependencies
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
+          # Only vcpkg release libs for CI
+          Add-Content -Path "C:\vcpkg\triplets\x64-windows.cmake" -Value "set(VCPKG_BUILD_TYPE release)"
+          vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
         displayName: "Install build dependencies"
-      - script: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+      - task: BatchScript@1
+        inputs:
+          filename: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat'
+          modifyEnvironment: true
+      - pwsh: |
+          $ErrorActionPreference = "stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON $(cmakeVcpkgFlags) $(gudhiCmakeOptions) ..
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
+          python --version
+          cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(cmakeVcpkgFlags) $(gudhiCmakeOptions) $(extraCmakeOptions) --log-level=DEBUG ..
           ninja
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
           ctest --output-on-failure -C Release -E diff_files
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
-          cmake $(extraCmakeOptions) -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
-          cd src\python
-          copy "C:\vcpkg\installed\x64-windows\bin\mpfr*.dll" ".\gudhi\"
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
-          copy "C:\vcpkg\installed\x64-windows\bin\gmp*.dll" ".\gudhi\"
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
-          copy "C:\vcpkg\installed\x64-windows\bin\tbb*.dll" ".\gudhi\"
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
-          python setup.py build_ext --inplace
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
-          SET PYTHONPATH=%CD%;%PYTHONPATH%
-          echo %PYTHONPATH%
-          ctest --output-on-failure -C Release
-          IF %ERRORLEVEL% NEQ 0 EXIT 1
         displayName: "Build and test"

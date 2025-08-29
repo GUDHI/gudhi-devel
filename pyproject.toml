@@ -1,0 +1,66 @@
+[build-system]
+requires = ["numpy>=1.15.0", "scikit-build-core >=0.4.3", "nanobind >=1.3.2"]
+build-backend = "scikit_build_core.build"
+
+[tool.scikit-build]
+minimum-version = "0.10"
+build-dir = "build/{wheel_tag}"
+
+cmake.args = [
+    "-DWITH_GUDHI_TEST=OFF",
+    "-DWITH_GUDHI_UTILITIES=OFF",
+    "-DWITH_GUDHI_GUDHUI=OFF",
+]
+cmake.build-type = "Release"
+build.verbose = true
+logging.level = "INFO"
+wheel.exclude = [
+    "**/*.cc",
+    "**/*.cmake",
+    "**/*.in",
+    "**/CMakeFiles",        # Then specific for Windows
+    "**/*.dir",
+    "**/Release",
+    "**/*.vcxproj",
+    "**/*.vcxproj.filters",
+]
+wheel.packages = []
+
+[project]
+name = "gudhi"
+version = "3.12.0a1"
+description = "The Gudhi library is an open source library for Computational Topology and Topological Data Analysis (TDA)."
+# readme = "doc/pypi_introduction.inc"
+requires-python = ">=3.9"
+authors = [{ name = "GUDHI Editorial Board <https://gudhi.inria.fr/contact/>" }]
+classifiers = [
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+]
+
+keywords = [
+    "topological data analysis",
+    "persistent homology",
+    "persistence diagrams",
+    "mapper",
+    "simplicial complex",
+    "manifold reconstruction",
+    "machine learning",
+    "classification",
+    "deep-learning",
+]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/GUDHI/gudhi-devel/issues"
+"Documentation" = "https://gudhi.inria.fr/python/latest/"
+"Source Code" = "https://github.com/GUDHI/gudhi-devel"
+"License" = "https://gudhi.inria.fr/licensing/"

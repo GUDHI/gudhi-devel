@@ -13,8 +13,6 @@ from gudhi.cover_complex import _save_to_html
      - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Mathieu Carriere"
-__copyright__ = "Copyright (C) 2017 Inria"
 __license__ = "GPL v3"
 
 parser = argparse.ArgumentParser(description='Creates an html Keppler Mapper '

@@ -7,5 +7,5 @@ Cubical complex reference manual
 
 .. autoclass:: gudhi.CubicalComplex
    :members:
-   :undoc-members:
-   :show-inheritance:
+   :inherited-members:
+   :exclude-members: __new__

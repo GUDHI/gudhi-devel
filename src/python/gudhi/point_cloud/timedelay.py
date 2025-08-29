@@ -6,9 +6,6 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Martin Royer, Yuichi Ike, Masatoshi Takenouchi"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2020 Inria, Copyright (C) 2020 Fujitsu Laboratories Ltd"
 __license__ = "MIT"
 
 
@@ -76,7 +73,8 @@ class TimeDelayEmbedding:
         if ts.ndim == 1:
             repeat = self._dim
         else:
-            assert self._dim % ts.shape[1] == 0
+            if self._dim % ts.shape[1] != 0:
+                raise ValueError("Input shape is not a multiple of _dim.")
             repeat = self._dim // ts.shape[1]
         end = len(ts) - self._delay * (repeat - 1)
         short = np.arange(0, end, self._skip)
