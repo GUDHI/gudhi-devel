@@ -11,8 +11,9 @@
 #ifndef SIMPLEX_TREE_FILTRATION_VALUE_UTILS_H_
 #define SIMPLEX_TREE_FILTRATION_VALUE_UTILS_H_
 
-#include <limits> //std::numeric_limits
-#include <cmath>  //std::isnan
+#include <cstddef>  // std::size_t
+#include <limits>   // std::numeric_limits
+#include <cmath>    // std::isnan
 
 #include <gudhi/Simplex_tree/serialization_utils.h>
 
@@ -29,6 +30,25 @@ inline struct empty_filtration_value_t {
 } empty_filtration_value;
 
 }  // namespace simplex_tree
+
+/**
+ * @ingroup simplex_tree
+ * @brief Given two filtration values at which a simplex exists, stores in the first value the minimal union of births
+ * generating a lifetime including those two values.
+ * This is the overload for when @ref FiltrationValue is an arithmetic type, like double, int etc.
+ * Because the filtration values are totally ordered then, the union is simply the minimum of the two values.
+ *
+ * NaN values are not supported.
+ */
+template <typename Arithmetic_filtration_value>
+bool is_positive_infinity(const Arithmetic_filtration_value& f)
+{
+  if constexpr (std::numeric_limits<Arithmetic_filtration_value>::has_infinity) {
+    return f == std::numeric_limits<Arithmetic_filtration_value>::infinity();
+  } else {
+    return f == std::numeric_limits<Arithmetic_filtration_value>::max();
+  }
+}
 
 /**
  * @ingroup simplex_tree
