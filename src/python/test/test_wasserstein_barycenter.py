@@ -10,6 +10,7 @@
 
 
 import numpy as np
+import warnings
 
 from gudhi.wasserstein.barycenter import lagrangian_barycenter
 
@@ -66,4 +67,6 @@ def test_lagrangian_barycenter():
         )
         < eps
     )
-    assert lagrangian_barycenter(pdiagset=[]) is None
+    with warnings.catch_warnings(record=True) as w:
+        assert lagrangian_barycenter(pdiagset=[]) is None
+        assert issubclass(w[0].category, UserWarning)
