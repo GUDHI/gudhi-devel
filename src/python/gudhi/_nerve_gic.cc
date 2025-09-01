@@ -11,6 +11,11 @@
 
 #include <vector>
 
+// Nanobind/Sphinx bug hack: Required to remove collections.abc.* in the documentation
+#include <nanobind/nb_defs.h>
+#undef NB_TYPING_ABC
+#define NB_TYPING_ABC ""
+
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/vector.h>
 #include <nanobind/stl/string.h>
