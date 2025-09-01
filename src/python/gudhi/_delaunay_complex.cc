@@ -183,9 +183,9 @@ Set the float relative precision of filtration values computation when construct
 (the default).
 
 Args:
-    precision: When constructing :func:`~gudhi.delaunay_cech_complex`, :func:`~gudhi.alpha_complex`, or
-        :func:`~gudhi.weighted_alpha_complex` with :code:`precision = 'safe'` (the default), one can
-        set the float relative precision of filtration values computed. Default is :code:`1e-5` (cf.
+    precision: When constructing :class:`~gudhi.AlphaComplex`, :class:`~gudhi.DelaunayCechComplex`, or
+        :class:`~gudhi.DelaunayComplex` with :code:`precision = 'safe'` (the default), one can set the float relative
+        precision of filtration values computed. Default is :code:`1e-5` (cf.
         :func:`~gudhi.DelaunayComplex.get_float_relative_precision`). For more details, please refer to
         `CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double <https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html>`_
 
