@@ -108,6 +108,7 @@ NB_MODULE(_euclidean_strong_witness_complex_ext, m)
 This function returns the point corresponding to a given vertex.
 Args:
     arg (int): The vertex id.
+    
 Returns:
     list of float: The coordinates of the vertex.
            )doc");
