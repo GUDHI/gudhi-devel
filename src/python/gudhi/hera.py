@@ -66,9 +66,9 @@ def wasserstein_distance(
             if the cardinalities of essential parts differ) and the matching is requested, it will be set to ``None``
             (any matching is optimal).
 
-        Returns:
-            float|Tuple[float,numpy.array|None]: Approximate Wasserstein distance W_q(X,Y), and optionally the
-                corresponding matching
+    Returns:
+        float|Tuple[float,numpy.array|None]: Approximate Wasserstein distance W_q(X,Y), and optionally the 
+            corresponding matching
     """
     return t._wasserstein_distance(
         _diagram_as_numpy_array(X),
