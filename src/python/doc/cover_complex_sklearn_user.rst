@@ -41,7 +41,7 @@ Class for cover complexes
      - :Requires: `Scikit-learn <installation.html#scikit-learn>`_
 
 We provide classes for computing cover complexes, i.e., Nerve, Graph Induced and Mapper complexes. Detailed examples on how to use these classes in practice are available
-in the following `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cover-complex.ipynb>`_.
+in the following `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-cover-complex.ipynb>`_.
 
 Example of Mapper cover complex computed from a point cloud
 -----------------------------------------------------------
