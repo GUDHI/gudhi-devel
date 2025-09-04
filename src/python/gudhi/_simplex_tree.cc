@@ -312,35 +312,35 @@ Equality operator in order to compare 2 SimplexTree data structures.
 :rtype: bool
            )doc")
       .def("get_simplices", &gsti::get_simplex_python_iterator, R"doc(
-This function returns a generator with simplices and their given filtration values.
+This function returns an iterator over simplices and their given filtration values.
 
 :returns:  The simplices.
-:rtype:  generator with tuples(simplex, filtration)
+:rtype:  Iterator over tuples(simplex, filtration)
           )doc")
       .def("get_filtration", &gsti::get_filtration_python_iterator, R"doc(
-This function returns a generator with simplices and their given
+This function returns an iterator over simplices and their given
 filtration values sorted by increasing filtration values.
 
 :returns:  The simplices sorted by increasing filtration values.
-:rtype:  generator with tuples(simplex, filtration)
+:rtype:  Iterator over tuples(simplex, filtration)
           )doc")
       .def("get_skeleton", &gsti::get_skeleton_python_iterator, nb::arg("dimension"), R"doc(
-This function returns a generator with the (simplices of the) skeleton of a maximum given dimension.
+This function returns an iterator over the (simplices of the) skeleton of a maximum given dimension.
 
 :param dimension: The skeleton dimension value.
 :type dimension: int
 :returns:  The (simplices of the) skeleton of a maximum dimension.
-:rtype:  generator with tuples(simplex, filtration)
+:rtype:  Iterator over tuples(simplex, filtration)
           )doc")
       .def("get_boundaries", &gsti::get_boundary_python_iterator, nb::arg("simplex"), R"doc(
-This function returns a generator with the boundaries of a given N-simplex.
+This function returns an iterator over the boundaries of a given N-simplex.
 If you do not need the filtration values, the boundary can also be obtained as
 :code:`itertools.combinations(simplex,len(simplex)-1)`.
 
 :param simplex: The N-simplex, represented by a list of vertex.
 :type simplex: list of int.
 :returns:  The (simplices of the) boundary of a simplex
-:rtype:  generator with tuples(simplex, filtration)
+:rtype:  Iterator over tuples(simplex, filtration)
           )doc")
       .def("expansion_with_blocker",
            &gsti::expansion_with_blockers_callback,
