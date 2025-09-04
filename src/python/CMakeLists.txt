@@ -230,9 +230,6 @@ if (TBB_FOUND AND WITH_GUDHI_USE_TBB)
   add_gudhi_debug_info("TBB_MALLOC_LIBRARY = ${TBB_MALLOC_LIBRARY}")
 endif()
 
-# Do not remove last trailing slash in "gudhi/", it is on purpose
-file(COPY "gudhi/" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/gudhi")
-
 # configure all python files from sources to binary dir forces CMake to copy them when modified
 file(GLOB_RECURSE GUDHI_PYTHON_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "gudhi/*.py")
 foreach(GUDHI_PYTHON_FILE ${GUDHI_PYTHON_FILES})
