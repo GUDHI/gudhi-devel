@@ -42,16 +42,16 @@ int main(int argc, char** argv)
     filenames.push_back(argv[i]);
   }
 
-  double min_ = std::numeric_limits<double>::max();
-  double max_ = -std::numeric_limits<double>::max();
+  double min = std::numeric_limits<double>::max();
+  double max = -std::numeric_limits<double>::max();
 
-  for (size_t file_no = 0; file_no != filenames.size(); ++file_no) {
+  for (std::size_t file_no = 0; file_no != filenames.size(); ++file_no) {
     std::clog << "Creating diagram based on a file : " << filenames[file_no] << std::endl;
     Persistence_intervals p(filenames[file_no], dimension);
-    std::pair<double, double> min_max_ = p.get_x_range();
-    if (min_max_.first < min_) min_ = min_max_.first;
-    if (min_max_.second > max_) max_ = min_max_.second;
+    std::pair<double, double> min_max = p.get_x_range();
+    if (min_max.first < min) min = min_max.first;
+    if (min_max.second > max) max = min_max.second;
   }
-  std::clog << "Birth-death range : min: " << min_ << ", max: " << max_ << std::endl;
+  std::clog << "Birth-death range : min: " << min << ", max: " << max << std::endl;
   return 0;
 }
