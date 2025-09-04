@@ -102,7 +102,7 @@ NB_MODULE(_euclidean_witness_complex_ext, m)
            nb::arg("max_alpha_square"),
            nb::arg("limit_dimension") = std::numeric_limits<std::size_t>::max(),
            nb::call_guard<nb::gil_scoped_release>())
-      .def("get_point", &egwci::get_point, R"doc(
+      .def("get_point", &egwci::get_point, nb::arg("vertex"), R"doc(
 This function returns the point corresponding to a given vertex.
 
 :param vertex: The vertex.

@@ -129,9 +129,7 @@ Raises:
             Try to set a bigger maximal edge length value with
             :meth:`set_max_squared_edge_length` if this happens.
            )doc")
-      .def("get_point",
-           &gtci::get_point,
-           R"doc(
+      .def("get_point", &gtci::get_point, nb::arg("vertex"), R"doc(
 This function returns the point corresponding to a given vertex.
 
 :param vertex: The vertex.
@@ -164,9 +162,8 @@ This function returns the point corresponding to a given vertex.
 :rtype: unsigned
            )doc")
       .def("create_simplex_tree", &gtci::create_simplex_tree, nb::call_guard<nb::gil_scoped_release>())
-      .def("fix_inconsistencies_using_perturbation",
-           &gtci::fix_inconsistencies_using_perturbation,
-           nb::call_guard<nb::gil_scoped_release>(),
+      .def("fix_inconsistencies_using_perturbation", &gtci::fix_inconsistencies_using_perturbation,
+           nb::call_guard<nb::gil_scoped_release>(), nb::arg("max_perturb"), nb::arg("time_limit"),
            R"doc(
 Attempts to fix inconsistencies by perturbing the point positions.
 
@@ -176,8 +173,7 @@ Attempts to fix inconsistencies by perturbing the point positions.
 :param time_limit: Time limit in seconds. If -1, no time limit is set.
 :type time_limit: double
            )doc")
-      .def("set_max_squared_edge_length",
-           &gtci::set_max_squared_edge_length,
+      .def("set_max_squared_edge_length", &gtci::set_max_squared_edge_length, nb::arg("max_squared_edge_length"),
            R"doc(
 Sets the maximal possible squared edge length for the edges in the
 triangulations.

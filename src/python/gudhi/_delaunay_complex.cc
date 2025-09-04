@@ -159,7 +159,7 @@ NB_MODULE(_delaunay_complex_ext, m)
       .def(nb::init<const Sequence2D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<const Tensor2D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def("create_simplex_tree", &gdci::create_simplex_tree, nb::call_guard<nb::gil_scoped_release>())
-      .def("get_point", &gdci::get_point, R"doc(
+      .def("get_point", &gdci::get_point, nb::arg("vertex"), R"doc(
 This function returns the point corresponding to a given vertex from the :class:`~gudhi.SimplexTree` (the
 same as the k-th input point, where `k=vertex`)
 
@@ -178,7 +178,7 @@ Get the float relative precision of filtration values computation when construct
 Returns:
     The float relative precision.
         )doc")
-      .def_static("set_float_relative_precision", &gdci::set_float_relative_precision, R"doc(
+      .def_static("set_float_relative_precision", &gdci::set_float_relative_precision, nb::arg("precision"), R"doc(
 Set the float relative precision of filtration values computation when constructing with :code:`precision = 'safe'`
 (the default).
 

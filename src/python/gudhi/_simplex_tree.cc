@@ -305,7 +305,7 @@ instance).
 :param min_dim: The minimal dimension. Default value is 0.
 :type min_dim: int.
            )doc")
-      .def(nb::self == nb::self, R"doc(
+      .def(nb::self == nb::self, nb::arg("other"), R"doc(
 Equality operator in order to compare 2 SimplexTree data structures.
 
 :returns: `True` if the 2 complexes have the same simplices with the same filtration values, `False` otherwise.
@@ -332,7 +332,7 @@ This function returns a generator with the (simplices of the) skeleton of a maxi
 :returns:  The (simplices of the) skeleton of a maximum dimension.
 :rtype:  generator with tuples(simplex, filtration)
           )doc")
-      .def("get_boundaries", &gsti::get_boundary_python_iterator, R"doc(
+      .def("get_boundaries", &gsti::get_boundary_python_iterator, nb::arg("simplex"), R"doc(
 This function returns a generator with the boundaries of a given N-simplex.
 If you do not need the filtration values, the boundary can also be obtained as
 :code:`itertools.combinations(simplex,len(simplex)-1)`.
@@ -392,7 +392,7 @@ Serialize (or flatten) the SimplexTree data structure in order to pickle Simplex
       .def("__setstate__", [](gsti &st, const nb::ndarray<const char, nb::ndim<1>, nb::numpy> &state) -> void {
              new (&st) gsti(deserialize_from_python(state));
            },
-           R"doc(
+           nb::arg("state"), R"doc(
 Construct the SimplexTree data structure from a Numpy Array (cf. :func:`~gudhi.SimplexTree.__getstate__`) in order to
 unpickle a SimplexTree.
 
