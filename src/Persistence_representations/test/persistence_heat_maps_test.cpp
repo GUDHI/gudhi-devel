@@ -213,8 +213,8 @@ BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters)
   double distance_max_double_parameter = p.distance(q, std::numeric_limits<double>::max());
   double distance_inf_double_parameter = p.distance(q, std::numeric_limits<double>::infinity());
 
-  // std::cerr << "distance_max_double_parameter: " << distance_max_double_parameter << std::endl;
-  // std::cerr << "distance_inf_double_parameter: " << distance_inf_double_parameter << std::endl;
+  // std::clog << "distance_max_double_parameter: " << distance_max_double_parameter << std::endl;
+  // std::clog << "distance_inf_double_parameter: " << distance_inf_double_parameter << std::endl;
 
   BOOST_CHECK(distance_max_double_parameter == distance_inf_double_parameter);
 }
