@@ -117,7 +117,7 @@ struct Basis {
     m_vectors.reserve(s);
   }
 
-  Basis() { }
+  Basis() : m_origin() { }
 
   Basis(std::size_t origin) : m_origin(origin) { }
 

@@ -85,12 +85,6 @@ class Simplex_tree_boundary_simplex_iterator : public boost::iterator_facade<
   using Siblings = typename SimplexTree::Siblings;
   using Static_vertex_vector = typename SimplexTree::Static_vertex_vector;
 
-  // For cython purpose only. The object it initializes should be overwritten ASAP and never used before it is overwritten.
-  Simplex_tree_boundary_simplex_iterator()
-      : sib_(nullptr),
-        st_(nullptr)  {
-  }
-
 // any end() iterator
   explicit Simplex_tree_boundary_simplex_iterator(SimplexTree const* st)
       : last_(st->null_vertex()),
@@ -196,13 +190,6 @@ class Simplex_tree_boundary_opposite_vertex_simplex_iterator : public boost::ite
   using Vertex_handle = typename SimplexTree::Vertex_handle;
   using Siblings = typename SimplexTree::Siblings;
   using Static_vertex_vector = typename SimplexTree::Static_vertex_vector;
-
-  // For cython purpose only. The object it initializes should be overwritten ASAP and never used before it is
-  // overwritten.
-  Simplex_tree_boundary_opposite_vertex_simplex_iterator()
-      : sib_(nullptr),
-        st_(nullptr)  {
-  }
 
   // any end() iterator
   explicit Simplex_tree_boundary_opposite_vertex_simplex_iterator(SimplexTree const* st)

@@ -7,9 +7,6 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Raphaël Tinarrage, Yuichi Ike, Masatoshi Takenouchi"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2020 Inria"
 __license__ = "MIT"
 
 

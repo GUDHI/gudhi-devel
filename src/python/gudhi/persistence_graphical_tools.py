@@ -12,9 +12,6 @@
 #                               enhances former _array_handler function.
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Vincent Rouvreau, Bertrand Michel"
-__maintainer__ = "Theo Lacombe, Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
 __license__ = "MIT"
 
 
@@ -298,7 +295,7 @@ def plot_persistence_diagram(
     :type persistence_file: string
     :param alpha: plot transparency value (0.0 transparent through 1.0 opaque - default is 0.6).
     :type alpha: float
-    :param band: band (not displayed if :math:`\leq` 0. - default is 0.)
+    :param band: band (not displayed if ≤ 0. - default is 0.)
     :type band: float
     :param max_intervals: maximal number of intervals to display. Selected intervals are those with the longest life
         time. Set it to 0 to see all. Default value is 1000000.

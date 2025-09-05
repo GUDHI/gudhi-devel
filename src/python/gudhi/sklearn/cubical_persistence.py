@@ -7,19 +7,17 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Vincent Rouvreau"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2021 Inria"
 __license__ = "MIT"
 
 
 import numpy as np
-from typing import Union, Iterable, Literal, Optional
+from numpy.typing import ArrayLike
+from typing import Union, Literal, Optional
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
 
 from .. import CubicalComplex
-from .._pers_cub_low_dim import (
+from .._pers_cub_low_dim_ext import (
     _persistence_on_a_line,
     _persistence_on_rectangle_from_top_cells,
 )
@@ -46,7 +44,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        homology_dimensions: Union[int, Iterable[int]],
+        homology_dimensions: Union[int, ArrayLike],
         input_type: Literal["top_dimensional_cells", "vertices"] = "top_dimensional_cells",
         homology_coeff_field: int = 11,
         min_persistence: float = 0.0,
@@ -75,7 +73,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         # Done twice (in __init__ and fit), but exception is better the sooner
         dim_list = np.asarray(self.homology_dimensions, dtype=int)
         if dim_list.ndim not in [0, 1]:
-            raise ValueError(f"Invalid dimension. Got {self.homology_dimensions=}, expected type=int|Iterable[int].")
+            raise ValueError(f"Invalid dimension. Got {self.homology_dimensions=}, expected type=int|ArrayLike[int].")
 
     def fit(self, X, Y=None):
         """
