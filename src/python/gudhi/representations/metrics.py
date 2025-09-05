@@ -8,9 +8,6 @@
 #   - 2025/01 Vincent Rouvreau: BottleneckDistance(epsilon=...) is deprecated. Consider using BottleneckDistance(e=...)
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Mathieu Carrière"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2018-2019 Inria"
 __license__ = "GPL v3"
 
 
