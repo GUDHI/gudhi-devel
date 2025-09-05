@@ -226,11 +226,7 @@ class Persistent_cohomology {
       int dim_simplex = cpx_->dimension(sh);
       update_cohomology_groups(sh, dim_simplex);
     }
-    for (auto zero_idx : zero_cocycles_) {
-      persistent_pairs_.emplace_back(
-          cpx_->simplex(zero_idx.second), cpx_->null_simplex(), coeff_field_.characteristic());
-    }
-    // Compute infinite interval of dimension > 0
+
     for (auto cocycle : transverse_idx_) {
       persistent_pairs_.emplace_back(
           cpx_->simplex(cocycle.first), cpx_->null_simplex(), cocycle.second.characteristics_);
