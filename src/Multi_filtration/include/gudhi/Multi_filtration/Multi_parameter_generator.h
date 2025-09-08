@@ -452,12 +452,10 @@ class Multi_parameter_generator
     if (a.is_nan() || b.is_nan()) return false;
     if (&a == &b) return true;
     if (a.is_plus_inf()) {
-      if (b.is_plus_inf()) return true;
-      return false;
+      return b.is_plus_inf();
     }
     if (a.is_minus_inf()) {
-      if (b.is_minus_inf()) return true;
-      return false;
+      return b.is_minus_inf();
     }
     return a.generator_ == b.generator_;
   }

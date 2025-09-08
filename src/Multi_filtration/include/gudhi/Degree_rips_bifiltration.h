@@ -1961,6 +1961,14 @@ class Degree_rips_bifiltration
   }
 
   /**
+   * @brief Returns a filtration value at minus infinity.
+   */
+  friend Degree_rips_bifiltration get_minus_infinity_value([[maybe_unused]] const Degree_rips_bifiltration &f)
+  {
+    return Degree_rips_bifiltration::minus_inf(2);
+  }
+
+  /**
    * @brief Adds the generators of the second argument to the first argument.
    *
    * @param f1 Filtration value to modify.

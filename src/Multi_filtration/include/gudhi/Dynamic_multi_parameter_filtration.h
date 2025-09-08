@@ -1718,9 +1718,24 @@ class Dynamic_multi_parameter_filtration
       size_type end = 0;
 
       for (std::size_t curr = 0; curr < generators_.size(); ++curr) {
-        if (_generator_can_be_added(generators_[curr].begin(), 0, end)) {
-          swap(generators_[end], generators_[curr]);
-          ++end;
+        if (!generators_[curr].is_finite()) {
+          if constexpr (Co) {
+            if (generators_[curr].is_plus_inf()) {
+              *this = inf(number_of_parameters_);
+              return;
+            }
+          } else {
+            if (generators_[curr].is_minus_inf()) {
+              *this = minus_inf(number_of_parameters_);
+              return;
+            }
+          }
+          if (end == 0) ++end;  // if first element is +/-inf or nan, it should be kept at first
+        } else {
+          if (_generator_can_be_added(generators_[curr].begin(), 0, end)) {
+            swap(generators_[end], generators_[curr]);
+            ++end;
+          }
         }
       }
 
@@ -2135,6 +2150,14 @@ class Dynamic_multi_parameter_filtration
   friend Dynamic_multi_parameter_filtration get_infinity_value(const Dynamic_multi_parameter_filtration &f)
   {
     return Dynamic_multi_parameter_filtration::inf(f.num_parameters());
+  }
+
+  /**
+   * @brief Returns a filtration value at minus infinity with the same number of parameters than the given value.
+   */
+  friend Dynamic_multi_parameter_filtration get_minus_infinity_value(const Dynamic_multi_parameter_filtration &f)
+  {
+    return Dynamic_multi_parameter_filtration::minus_inf(f.num_parameters());
   }
 
   /**
