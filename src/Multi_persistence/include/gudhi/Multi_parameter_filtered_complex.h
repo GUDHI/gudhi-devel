@@ -397,6 +397,8 @@ class Multi_parameter_filtered_complex
   void _initialize_dimension_utils()
   {
     isOrderedByDimension_ = true;
+    if (dimensions_.empty()) return;
+
     for (Index i = 0; i < dimensions_.size() - 1; ++i) {
       maxDimension_ = std::max(dimensions_[i], maxDimension_);
       if (dimensions_[i] > dimensions_[i + 1]) isOrderedByDimension_ = false;

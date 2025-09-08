@@ -243,12 +243,12 @@ class Multi_parameter_filtered_complex_pcoh_interface
   }
 
   friend std::ostream &operator<<(std::ostream &stream,
-                                  const Multi_parameter_filtered_complex_pcoh_interface &interface)
+                                  const Multi_parameter_filtered_complex_pcoh_interface &complex)
   {
     stream << "[\n";
-    for (auto i : interface.filtration_simplex_range()) {
+    for (auto i : complex.filtration_simplex_range()) {
       stream << "[";
-      for (const auto &idx : interface.boundary_simplex_range(i)) stream << interface.keys_[idx] << ", ";
+      for (const auto &idx : complex.boundary_simplex_range(i)) stream << complex.keys_[idx] << ", ";
       stream << "]\n";
     }
 

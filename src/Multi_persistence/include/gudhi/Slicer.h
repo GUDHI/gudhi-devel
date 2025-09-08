@@ -591,7 +591,7 @@ class Slicer
     stream << "--- Current slice filtration\n";
     stream << "{";
     for (const auto& val : slicer.slice_) stream << val << ", ";
-    stream << "\b" << "\b";
+    if (!slicer.slice_.empty()) stream << "\b" << "\b";
     stream << "}" << '\n';
 
     stream << "--- PersBackend \n";

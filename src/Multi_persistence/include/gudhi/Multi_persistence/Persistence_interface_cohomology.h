@@ -138,7 +138,7 @@ class Persistence_interface_cohomology
   {
     Persistent_cohomology pcoh(interface_, true);
     pcoh.init_coefficients(2);
-    pcoh.compute_persistent_cohomology(0);
+    pcoh.compute_persistent_cohomology_without_optimizations(0);
     const auto& pairs = pcoh.get_persistent_pairs();
 
     barcode_ = Barcode(pairs.size());

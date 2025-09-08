@@ -354,7 +354,7 @@ class Thread_safe_slicer : private Slicer
   /**
    * @brief Outstream operator.
    */
-  friend std::ostream& operator<<(std::ostream& stream, const Thread_safe_slicer& slicer)
+  friend std::ostream& operator<<(std::ostream& stream, Thread_safe_slicer& slicer)
   {
     stream << "-------------------- Thread_safe_slicer \n";
 
@@ -373,7 +373,7 @@ class Thread_safe_slicer : private Slicer
     stream << "}" << '\n';
 
     stream << "--- PersBackend \n";
-    stream << slicer.get_persistence_algorithm();
+    stream << slicer.persistence_;
 
     return stream;
   }

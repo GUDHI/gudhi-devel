@@ -624,7 +624,7 @@ persistence_on_slices_(Slicer& slicer, F&& ini_slicer, unsigned int size, [[mayb
   if constexpr (Slicer::Persistence::is_vine) {
     std::forward<F>(ini_slicer)(slicer, 0);
     slicer.initialize_persistence_computation(false);
-    out[0] = slicer.template get_flat_barcode<true, U>();
+    out[0] = slicer.template get_flat_barcode<true, U, idx>();
     for (auto i = 1U; i < size; ++i) {
       std::forward<F>(ini_slicer)(slicer, i);
       slicer.vineyard_update();
