@@ -219,7 +219,6 @@ class Persistent_cohomology {
 
     interval_length_policy.set_length(min_interval_length);
     Simplex_key idx_fil = -1;
-    std::vector<Simplex_key> vertices; // so we can check the connected components at the end
     // Compute all finite intervals
     for (auto sh : cpx_->filtration_simplex_range()) {
       cpx_->assign_key(sh, ++idx_fil);
@@ -227,19 +226,7 @@ class Persistent_cohomology {
       int dim_simplex = cpx_->dimension(sh);
       update_cohomology_groups(sh, dim_simplex);
     }
-    // Compute infinite intervals of dimension 0
-    for (Simplex_key key : vertices) {  // for all 0-dimensional simplices
-      if (ds_parent_[key] == key  // root of its tree
-      && zero_cocycles_.find(key) == zero_cocycles_.end()) {
-        persistent_pairs_.emplace_back(
-            cpx_->simplex(key), cpx_->null_simplex(), coeff_field_.characteristic());
-      }
-    }
-    for (auto zero_idx : zero_cocycles_) {
-      persistent_pairs_.emplace_back(
-          cpx_->simplex(zero_idx.second), cpx_->null_simplex(), coeff_field_.characteristic());
-    }
-    // Compute infinite interval of dimension > 0
+
     for (auto cocycle : transverse_idx_) {
       persistent_pairs_.emplace_back(
           cpx_->simplex(cocycle.first), cpx_->null_simplex(), cocycle.second.characteristics_);
