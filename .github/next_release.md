@@ -1,8 +1,6 @@
-We are pleased to announce the release 3.11.0 of the GUDHI library.
+We are pleased to announce the release 3.12.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers Delaunay, Delaunay-Čech and Alpha complex classes in Python with
-the ability to output the square, or not, filtration values and an interface to Ripser to enhance the Rips scikit-learn
-like interface.
+As a major new feature, the GUDHI library now offers  **...**
 
 The GUDHI library is mainly developped using GitHub, do not hesitate to
 [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel).
@@ -10,36 +8,31 @@ From a user point of view, we recommend to download GUDHI user version (gudhi.3.
 
 Below is a list of changes:
 
-- [Delaunay complex](https://gudhi.inria.fr/python/3.11.0rc1/delaunay_complex_user.html)
-     - The Delaunay complex can be equipped with different filtrations:
-          * Delaunay complex (no filtration values computed)
-          * Delaunay-Čech complex (using minimal enclosing ball)
-          * Alpha complex (moved in this new section)
-     - The Delaunay-Čech and Alpha complex can output square, or not square, filtration values
-     - An incremental version of the Delaunay complex (only in C++)
+- [Module](link)
+     - **...**
 
-- [Rips complex persistence scikit-learn like interface](https://gudhi.inria.fr/python/3.11.0rc1/rips_complex_sklearn_itf_ref.html)
-     - A binding to [Ripser](https://github.com/Ripser/ripser) when it accelerates the computation
+- [Module](link)
+     - **...**
 
-- [Persistence graphical tools](https://gudhi.inria.fr/python/3.11.0rc1/persistence_graphical_tools_user.html)
-     - Can now handle scikit-learn like interfaces outputs as inputs
+- [Alpha complex dD](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1alpha__complex_1_1_alpha__complex.html)
+     - **API break:** The simplicial complex for the Alpha complex concept has been changed to
+       `dimension_simplex_range` (that must returns a range of simplices of a given dimension) instead of
+       `skeleton_simplex_range` (that was returning a range of simplices lower or equal to a given dimension)
 
-- [Simplex tree](https://gudhi.inria.fr/doc/3.11.0rc1/class_gudhi_1_1_simplex__tree.html)
-     - Can now store additionnal data on each simplices (only in C++)
-     - Can be const
+- [Simplex_tree](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1_simplex__tree.html)
+     - A new iterator over the simplices of the simplicial complex that match a given dimension
+
+- [Representations](https://gudhi.inria.fr/python/latest/representations.html)
+     - in metrics, `BottleneckDistance` argument `epsilon` is deprecrated and renamed `e` to be consistent with `bottleneck_distance` and `pairwise_persistence_diagram_distances`
 
 - Installation
-     - CMake &ge; 3.15 is now required (was &ge; 3.8).
-     - Python &ge; 3.8 is now required (was &ge; 3.5), because of `importlib.metadata`.
-     - Support for Python 3.13 is now available
+     - Pip package is now available for OSx &ge; 13.0 (was &ge; 12.0).
 
 - Miscellaneous
-     - The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.11.0+is%3Aclosed)
-         is available on GitHub.
+     - The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.12.0+is%3Aclosed) is available on GitHub.
 
 All modules are distributed under the terms of the MIT license.
-However, there are still GPL dependencies for many modules. We invite you to check our
-[license dedicated web page](https://gudhi.inria.fr/licensing/) for further details.
+However, there are still GPL dependencies for many modules. We invite you to check our [license dedicated web page](https://gudhi.inria.fr/licensing/) for further details.
 
 We kindly ask users to cite the GUDHI library as appropriately as possible in their papers, and to mention the use of
 the GUDHI library on the web pages of their projects using GUDHI and provide us with links to these web pages.
@@ -56,7 +49,5 @@ For further information about downloading and installing the library
 
 ## Contributors
 
-- @hschreiber
-- @martinroyer
-- @mglisse
-- @VincentRouvreau
+- **...**
+- **...**
