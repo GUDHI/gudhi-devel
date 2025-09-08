@@ -648,6 +648,7 @@ class Simplex_tree {
     null_vertex_ = std::move(complex_source.null_vertex_);
     root_ = std::move(complex_source.root_);
     filtration_vect_ = std::move(complex_source.filtration_vect_);
+    number_of_parameters_ = std::exchange(complex_source.number_of_parameters_, 1);
     dimension_ = std::exchange(complex_source.dimension_, -1);
     dimension_to_be_lowered_ = std::exchange(complex_source.dimension_to_be_lowered_, false);
     if constexpr (Options::link_nodes_by_label) {
@@ -3015,7 +3016,6 @@ class Simplex_tree {
 
  private:
   Vertex_handle null_vertex_;
-  /** \brief Total number of simplices in the complex, without the empty simplex.*/
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
   int number_of_parameters_;
