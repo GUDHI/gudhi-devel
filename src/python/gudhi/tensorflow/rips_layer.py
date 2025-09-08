@@ -7,9 +7,6 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Mathieu Carrière"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2021 Inria"
 __license__ = "MIT"
 
 
@@ -74,7 +71,7 @@ class RipsLayer(tf.keras.layers.Layer):
         maximum_edge_length=np.inf,
         min_persistence=None,
         homology_coeff_field=11,
-        **kwargs
+        **kwargs,
     ):
         """
         Constructor for the RipsLayer class
@@ -94,7 +91,10 @@ class RipsLayer(tf.keras.layers.Layer):
             else [0.0 for _ in range(len(self.dimensions))]
         )
         self.hcf = homology_coeff_field
-        assert len(self.min_persistence) == len(self.dimensions)
+        if len(self.min_persistence) != len(self.dimensions):
+            raise ValueError(
+                "'homology_dimensions' and 'min_persistence' do not have coherent sizes"
+            )
 
     def call(self, X):
         """

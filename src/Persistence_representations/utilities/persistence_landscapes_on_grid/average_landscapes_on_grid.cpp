@@ -32,7 +32,7 @@ int main(int argc, char** argv)
   }
 
   std::vector<Persistence_landscape_on_grid*> lands;
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     Persistence_landscape_on_grid* l = new Persistence_landscape_on_grid;
     l->load_landscape_from_file(filenames[i]);
     lands.push_back(l);
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 
   av.print_to_file("average.g_land");
 
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     delete lands[i];
   }
 

@@ -9,9 +9,6 @@
 #   - 2020/12 Gard: A more flexible Betti curve class capable of computing exact curves.
 #   - 2021/11 Vincent Rouvreau: factorize _automatic_sample_range
 
-__author__ = "Mathieu Carrière, Martin Royer, Gard Spreemann"
-__maintainer__ = "Martin Royer, Gard Spreemann, Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2018-2020 Inria"
 __license__ = "MIT"
 
 
@@ -725,7 +722,11 @@ class TopologicalVector(BaseEstimator, TransformerMixin):
                 distances = DistanceMetric.get_metric("chebyshev").pairwise(diagram)
             except ValueError:
                 # Empty persistence diagram case - https://github.com/GUDHI/gudhi-devel/issues/507
-                assert len(diagram) == 0
+                if len(diagram) != 0:
+                    raise RuntimeError(
+                        "DistanceMetric.get_metric('chebyshev').pairwise(diagram) raised a ValueError"
+                        " even though the input diagram is not empty"
+                    )
                 distances = np.empty(shape=[0, 0])
             vect = np.flip(np.sort(np.triu(np.minimum(distances, min_pers)), axis=None), 0)
             dim = min(len(vect), thresh)
