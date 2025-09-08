@@ -7,9 +7,6 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Theo Lacombe"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2019 Inria"
 __license__ = "MIT"
 
 
@@ -348,7 +345,8 @@ def wasserstein_distance(
     b[-1] = n
 
     if matching:
-        assert not enable_autodiff, "matching and enable_autodiff are currently incompatible"
+        if enable_autodiff:
+            raise ValueError("matching and enable_autodiff are currently incompatible")
         P = ot.emd(a=a, b=b, M=M, numItermax=2000000)
         ot_cost = np.sum(np.multiply(P, M))
         P[-1, -1] = 0  # Remove matching corresponding to the diagonal

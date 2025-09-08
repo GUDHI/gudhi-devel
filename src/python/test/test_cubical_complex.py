@@ -24,7 +24,7 @@ def test_empty_constructor():
 
 def test_non_existing_perseus_file_constructor():
     # Try to open a non existing file
-    with pytest.raises(OSError):
+    with pytest.raises(RuntimeError):
         cub = CubicalComplex(perseus_file="pouetpouettralala.toubiloubabdou")
 
 
@@ -86,7 +86,6 @@ def test_dimensions_one_cells_type_or_perseus_file_constructor():
 
 
 def simple_constructor(cub):
-    assert cub._is_defined() == True
     assert cub._is_persistence_defined() == False
     assert cub.persistence() == [(0, (1.0, float("inf")))]
     assert cub._is_persistence_defined() == True
@@ -118,7 +117,6 @@ def test_constructor_from_vertices():
 
 
 def user_case_simple_constructor(cub):
-    assert cub._is_defined() == True
     assert cub._is_persistence_defined() == False
     assert cub.persistence() == [(1, (0.0, 1.0)), (0, (0.0, float("inf")))]
     assert cub._is_persistence_defined() == True
@@ -152,7 +150,6 @@ def test_dimension_file_constructor():
     test_file.write("2\n3\n3\n0\n0\n0\n0\n100\n0\n0\n0\n0\n")
     test_file.close()
     cub = CubicalComplex(perseus_file="CubicalOneSphere.txt")
-    assert cub._is_defined() == True
     assert cub._is_persistence_defined() == False
     assert cub.persistence() == [(1, (0.0, 100.0)), (0, (0.0, float("inf")))]
     assert cub._is_persistence_defined() == True

@@ -7,9 +7,6 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
-__author__ = "Marc Glisse"
-__maintainer__ = ""
-__copyright__ = "Copyright (C) 2020 Inria"
 __license__ = "MIT"
 
 
@@ -51,7 +48,7 @@ class DistanceToMeasure:
                 return_index=False,
                 return_distance=True,
                 sort_results=False,
-                **self.params
+                **self.params,
             )
             self.knn.fit(X)
         return self
@@ -112,16 +109,16 @@ class DTMDensity:
         if weights is None:
             self.k = k
             if k is None:
-                assert (
-                    kwargs.get("metric") == "neighbors"
-                ), 'Must specify k or weights, unless metric is "neighbors"'
+                if kwargs.get("metric") != "neighbors":
+                    raise ValueError("Must specify k or weights, unless metric is 'neighbors'")
                 self.weights = None
             else:
                 self.weights = np.full(k, 1.0 / k)
         else:
             self.weights = weights
             self.k = len(weights)
-            assert k is None or k == self.k, "k differs from the length of weights"
+            if k is not None and k != self.k:
+                raise ValueError("k differs from the length of weights")
         self.q = q
         self.dim = dim
         self.params = kwargs
@@ -142,7 +139,7 @@ class DTMDensity:
                 return_index=False,
                 return_distance=True,
                 sort_results=False,
-                **self.params
+                **self.params,
             )
             self.knn.fit(X)
             if self.params["metric"] != "precomputed":
@@ -159,10 +156,8 @@ class DTMDensity:
         q = self.q
         dim = self.dim
         if dim is None:
-            assert self.params["metric"] not in {
-                "neighbors",
-                "precomputed",
-            }, "dim not specified and cannot guess the dimension"
+            if self.params["metric"] in ["neighbors", "precomputed"]:
+                raise ValueError("dim not specified and cannot guess the dimension")
             dim = len(X[0])
         if q is None:
             q = dim

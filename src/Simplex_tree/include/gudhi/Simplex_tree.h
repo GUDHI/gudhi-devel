@@ -318,6 +318,12 @@ class Simplex_tree {
   /** \brief Range over the simplices of the skeleton of the simplicial complex, for a given
    * dimension. */
   typedef boost::iterator_range<Skeleton_simplex_iterator> Skeleton_simplex_range;
+  /** \brief Iterator over the simplices of the simplicial complex that match the dimension specified by the parameter.
+   *
+   * 'value_type' is Simplex_handle. */
+  typedef Simplex_tree_dimension_simplex_iterator<Simplex_tree> Dimension_simplex_iterator;
+  /** \brief Range over the simplices of the simplicial complex that match a given dimension. */
+  typedef boost::iterator_range<Dimension_simplex_iterator> Dimension_simplex_range;
   /** \brief Range over the simplices of the simplicial complex, ordered by the filtration. */
   typedef std::vector<Simplex_handle> Filtration_simplex_range;
   /** \brief Iterator over the simplices of the simplicial complex, ordered by the filtration.
@@ -358,6 +364,18 @@ class Simplex_tree {
   Skeleton_simplex_range skeleton_simplex_range(int dim) const {
     return Skeleton_simplex_range(Skeleton_simplex_iterator(this, dim),
                                   Skeleton_simplex_iterator());
+  }
+
+  /** \brief Returns a range over the simplices of the simplicial complex that match the dimension specified by the
+   * parameter.
+   *
+   * @param[in] dim The exact dimension of the simplices.
+   *
+   * The simplices are ordered according to lexicographic order on the list of
+   * Vertex_handles of a simplex, read in increasing < order for Vertex_handles. */
+  Dimension_simplex_range dimension_simplex_range(int dim) const {
+    return Dimension_simplex_range(Dimension_simplex_iterator(this, dim),
+                                   Dimension_simplex_iterator());
   }
 
   /** \brief Returns a range over the simplices of the simplicial complex,
@@ -987,7 +1005,7 @@ class Simplex_tree {
   /**
    * @brief Inserts a Node in the set of siblings nodes. Calls `update_simplex_tree_after_node_insertion`
    * if the insertion succeeded.
-   * 
+   *
    * @tparam update_fil If true, as well as Options::store_filtration, and the node is already present, assigns
    * the "union" of the input filtration_value and the value already present in the node as filtration value.
    * @tparam update_children If true and the node has no children, create a child with sib as uncle.
@@ -1422,7 +1440,7 @@ class Simplex_tree {
    *
    * Any insertion, deletion or change of filtration value invalidates this cache,
    * which can be cleared with @ref clear_filtration().
-   * 
+   *
    * @tparam Comparator Method type taking two Simplex_handle as input and returns a bool.
    * @tparam Ignorer Method type taking one Simplex_handle as input and returns a bool.
    * @param is_before_in_filtration Method used to compare two simplices with respect to their position in the
@@ -1691,17 +1709,17 @@ class Simplex_tree {
    *
    * The Simplex_tree must contain no simplex of dimension bigger than
    * 1 when calling the method. */
-  void expansion(int max_dim) {
-    if (max_dim <= 1) return;
+  void expansion(int max_dimension) {
+    if (max_dimension <= 1) return;
     clear_filtration(); // Drop the cache.
-    dimension_ = max_dim;
+    dimension_ = max_dimension;
     for (Dictionary_it root_it = root_.members_.begin();
          root_it != root_.members_.end(); ++root_it) {
       if (has_children(root_it)) {
-        siblings_expansion(root_it->second.children(), max_dim - 1);
+        siblings_expansion(root_it->second.children(), max_dimension - 1);
       }
     }
-    dimension_ = max_dim - dimension_;
+    dimension_ = max_dimension - dimension_;
   }
 
   /**
@@ -2486,12 +2504,12 @@ class Simplex_tree {
   };
 
   //TODO: externalize this method and `decode_extended_filtration`
-  /** \brief Extend filtration for computing extended persistence. 
-   * This function only uses the filtration values at the 0-dimensional simplices, 
-   * and computes the extended persistence diagram induced by the lower-star filtration 
-   * computed with these values. 
-   * \post Note that after calling this function, the filtration 
-   * values are actually modified. The function `decode_extended_filtration()` 
+  /** \brief Extend filtration for computing extended persistence.
+   * This function only uses the filtration values at the 0-dimensional simplices,
+   * and computes the extended persistence diagram induced by the lower-star filtration
+   * computed with these values.
+   * \post Note that after calling this function, the filtration
+   * values are actually modified. The function `decode_extended_filtration()`
    * retrieves the original values and outputs the extended simplex type.
    *
    * @warning Currently only works for @ref SimplexTreeOptions::Filtration_value which are
@@ -2736,13 +2754,13 @@ class Simplex_tree {
   /** \brief This function resets the filtration value of all the simplices of dimension at least min_dim. Resets all
    * the Simplex_tree when `min_dim = 0`.
    * `reset_filtration` may break the filtration property with `min_dim > 0`, and it is the user's responsibility to
-   * make it a valid filtration (using a large enough `filt_value`, or calling `make_filtration_non_decreasing`
+   * make it a valid filtration (using a large enough `filtration`, or calling `make_filtration_non_decreasing`
    * afterwards for instance).
-   * @param[in] filt_value The new filtration value.
+   * @param[in] filtration The new filtration value.
    * @param[in] min_dim The minimal dimension. Default value is 0.
    */
-  void reset_filtration(const Filtration_value& filt_value, int min_dim = 0) {
-    rec_reset_filtration(&root_, filt_value, min_dim);
+  void reset_filtration(const Filtration_value& filtration, int min_dim = 0) {
+    rec_reset_filtration(&root_, filtration, min_dim);
     clear_filtration(); // Drop the cache.
   }
 
@@ -2765,7 +2783,7 @@ class Simplex_tree {
 
   std::size_t num_simplices_and_filtration_serialization_size(Siblings const* sib, std::size_t& fv_byte_size) const {
     using namespace Gudhi::simplex_tree;
-    
+
     auto sib_begin = sib->members().begin();
     auto sib_end = sib->members().end();
     size_t simplices_number = sib->members().size();
@@ -2895,7 +2913,7 @@ class Simplex_tree {
    * @private
    * @brief Deserialize the array of char (flattened version of the tree) to initialize a Simplex tree.
    * It is the user's responsibility to provide an 'empty' Simplex_tree, there is no guarantee otherwise.
-   * 
+   *
    * @tparam F Method taking a reference to a @ref Filtration_value and a `const char*` as input and returning a
    * `const char*`.
    * @param[in] buffer A pointer on a buffer that contains a serialized Simplex_tree.
@@ -2905,13 +2923,13 @@ class Simplex_tree {
    * (second argument) the serialized filtration value and turn it into an object of type @ref Filtration_value that is
    * stored in the first argument of the method. It then returns the new position of the buffer pointer after the
    * reading.
-   * 
+   *
    * @exception std::invalid_argument In case the deserialization does not finish at the correct buffer_size.
    * @exception std::logic_error In debug mode, if the Simplex_tree is not 'empty'.
-   * 
+   *
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
    * SimplexTreeOptions (except for the @ref Filtration_value type) and on a computer with the same architecture.
-   * 
+   *
    */
   template <class F>
   void deserialize(const char* buffer, const std::size_t buffer_size, F&& deserialize_filtration_value) {
