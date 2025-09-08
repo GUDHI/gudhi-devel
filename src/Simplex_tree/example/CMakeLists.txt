@@ -10,10 +10,6 @@ add_test(NAME Simplex_tree_example_simple_simplex_tree COMMAND $<TARGET_FILE:Sim
 add_executable_with_targets(Simplex_tree_example_mini_simplex_tree mini_simplex_tree.cpp TBB::tbb)
 add_test(NAME Simplex_tree_example_mini_simplex_tree COMMAND $<TARGET_FILE:Simplex_tree_example_mini_simplex_tree>)
 
-add_executable_with_targets ( Simplex_tree_multi_example simplex_tree_multi.cpp TBB::tbb)
-add_test(NAME Simplex_tree_multi_example COMMAND $<TARGET_FILE:Simplex_tree_multi_example>)
-
-
 # An example with Simplex-tree using CGAL alpha_shapes_3
 if(GMP_FOUND AND TARGET CGAL::CGAL)
   add_executable ( Simplex_tree_example_alpha_shapes_3_from_off example_alpha_shapes_3_simplex_tree_from_off_file.cpp )

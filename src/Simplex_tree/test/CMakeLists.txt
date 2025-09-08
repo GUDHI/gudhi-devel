@@ -6,9 +6,6 @@ file(COPY "simplex_tree_for_unit_test.txt" DESTINATION ${CMAKE_CURRENT_BINARY_DI
 add_executable_with_targets(Simplex_tree_test_unit simplex_tree_unit_test.cpp TBB::tbb)
 gudhi_add_boost_test(Simplex_tree_test_unit)
 
-add_executable_with_targets(Simplex_tree_multi_test_unit simplex_tree_multi_unit_test.cpp TBB::tbb)
-gudhi_add_boost_test(Simplex_tree_multi_test_unit)
-
 add_executable_with_targets(Simplex_tree_remove_test_unit simplex_tree_remove_unit_test.cpp TBB::tbb)
 gudhi_add_boost_test(Simplex_tree_remove_test_unit)
 

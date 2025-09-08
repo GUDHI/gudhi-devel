@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2024 Inria
+ *    Copyright (C) 2024-25 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -13,21 +13,25 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
+#include <gudhi/Multi_persistence/Point.h>
 #include <gudhi/Multi_persistence/Line.h>
+#include <gudhi/Multi_parameter_filtration.h>
 
+using Gudhi::multi_filtration::Multi_parameter_filtration;
 using Gudhi::multi_persistence::Line;
+using Gudhi::multi_persistence::Point;
 
 typedef boost::mpl::list<double, float, int> list_of_tested_variants;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(line_constructors, T, list_of_tested_variants)
 {
-  using P = typename Line<T>::Point;
+  using P = typename Line<T>::Point_t;
 
   Line<T> l;
-  BOOST_CHECK(l.base_point().empty());
-  BOOST_CHECK(l.direction().empty());
+  BOOST_CHECK(l.base_point().size() == 0);
+  BOOST_CHECK(l.direction().size() == 0);
 
-  P x({1,2,3});
+  P x({1, 2, 3});
 
   Line<T> l2(x);
   auto bp = l2.base_point();
@@ -35,7 +39,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_constructors, T, list_of_tested_variants)
   BOOST_CHECK_EQUAL(bp[0], 1);
   BOOST_CHECK_EQUAL(bp[1], 2);
   BOOST_CHECK_EQUAL(bp[2], 3);
-  BOOST_CHECK(l2.direction().empty());
+  BOOST_CHECK(l2.direction().size() == 0);
 
   Line<T> l3(std::move(x));
   bp = l3.base_point();
@@ -43,9 +47,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_constructors, T, list_of_tested_variants)
   BOOST_CHECK_EQUAL(bp[0], 1);
   BOOST_CHECK_EQUAL(bp[1], 2);
   BOOST_CHECK_EQUAL(bp[2], 3);
-  BOOST_CHECK(l3.direction().empty());
+  BOOST_CHECK(l3.direction().size() == 0);
 
-  Line<T> l4({1,2,3}, {4,5,6});
+  Line<T> l4({1, 2, 3}, {4, 5, 6});
   bp = l4.base_point();
   auto dir = l4.direction();
   BOOST_CHECK(bp.size() == 3);
@@ -57,34 +61,35 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_constructors, T, list_of_tested_variants)
   BOOST_CHECK_EQUAL(dir[1], 5);
   BOOST_CHECK_EQUAL(dir[2], 6);
 
-  BOOST_CHECK_THROW(Line<T> l5({1,2,3}, {4,-5,6}), std::invalid_argument);
-  BOOST_CHECK_THROW(Line<T> l6({1,2,3}, {0,0,0}), std::invalid_argument);
-  BOOST_CHECK_THROW(Line<T> l7({1,2,3}, {1,2,3,4}), std::invalid_argument);
+  BOOST_CHECK_THROW(Line<T> l5({1, 2, 3}, {4, -5, 6}), std::invalid_argument);
+  BOOST_CHECK_THROW(Line<T> l6({1, 2, 3}, {0, 0, 0}), std::invalid_argument);
+  BOOST_CHECK_THROW(Line<T> l7({1, 2, 3}, {1, 2, 3, 4}), std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(line_intersections, T, list_of_tested_variants)
 {
-  using P = typename Line<T>::Point;
-  using KP = typename Line<T>::K_critical_point;
+  using F = Multi_parameter_filtration<T>;
+  Point<T> p_inf = {Point<T>::T_inf, Point<T>::T_inf, Point<T>::T_inf};
+  Point<T> p_minus_inf = {-Point<T>::T_inf, -Point<T>::T_inf, -Point<T>::T_inf};
 
   const double inf = std::numeric_limits<double>::infinity();
 
-  Line<T> l({1,2,3}, {4,0,6});
+  Line<T> l({1, 2, 3}, {4, 0, 6});
 
-  double t = l.template compute_forward_intersection<double>(P{2,1,3});
+  double t = l.template compute_forward_intersection<double>(F({2, 1, 3}));
   BOOST_CHECK_EQUAL(t, 0.25);
-  t = l.template compute_forward_intersection<double>(P{2,3,3});
+  t = l.template compute_forward_intersection<double>(F({2, 3, 3}));
   BOOST_CHECK_EQUAL(t, inf);
 
-  t = l.template compute_forward_intersection<double>(KP({P{2,1,3}, P{2,3,3}}));
+  t = l.template compute_forward_intersection<double>(F({2, 1, 3, 2, 3, 3}, 3));
   BOOST_CHECK_EQUAL(t, 0.25);
 
-  t = l.template compute_backward_intersection<double>(P{2,3,3});
+  t = l.template compute_backward_intersection<double>(F({2, 3, 3}));
   BOOST_CHECK_EQUAL(t, 0);
-  t = l.template compute_backward_intersection<double>(P{2,1,3});
+  t = l.template compute_backward_intersection<double>(F({2, 1, 3}));
   BOOST_CHECK_EQUAL(t, -inf);
 
-  t = l.template compute_backward_intersection<double>(KP({P{2,1,3}, P{2,3,3}}));
+  t = l.template compute_backward_intersection<double>(F({2, 1, 3, 2, 3, 3}, 3));
   BOOST_CHECK_EQUAL(t, 0);
 
   std::pair<T, T> bounds = l.get_bounds({{-10, 0, 10}, {10, 4, 10}});
@@ -100,17 +105,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_intersections, T, list_of_tested_variants)
   BOOST_CHECK_EQUAL(top[2], T(3. + T(7. / 6.) * 6.));
 
   bounds = l.get_bounds({{-10, 0, 10}, {10, 1, 10}});
-  BOOST_CHECK_EQUAL(bounds.first, P::T_inf);
-  BOOST_CHECK_EQUAL(bounds.second, -P::T_inf);
-  BOOST_CHECK(l[bounds.first].is_plus_inf());
-  BOOST_CHECK(l[bounds.second].is_minus_inf());
+  BOOST_CHECK_EQUAL(bounds.first, F::T_inf);
+  BOOST_CHECK_EQUAL(bounds.second, -F::T_inf);
+  BOOST_CHECK(l[bounds.first] == p_inf);
+  BOOST_CHECK(l[bounds.second] == p_minus_inf);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(line_other, T, list_of_tested_variants)
 {
-  using P = typename Line<T>::Point;
+  using P = typename Line<T>::Point_t;
 
-  Line<T> l({1,2,3}, {4,0,6});
+  Line<T> l({1, 2, 3}, {4, 0, 6});
 
   P x = l[1.25];
   BOOST_CHECK_EQUAL(x.size(), 3);
@@ -149,6 +154,3 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_other, T, list_of_tested_variants)
   BOOST_CHECK_EQUAL(x[1], 7);
   BOOST_CHECK_EQUAL(x[2], 9. + T(-3.25) * 6.);
 }
-
-
-

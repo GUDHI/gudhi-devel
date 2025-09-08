@@ -19,13 +19,30 @@ $mathjax
 <link rel="stylesheet" type="text/css" href="https://gudhi.inria.fr/assets/css/styles_feeling_responsive.css" />
 <!-- GUDHI website css for header END -->
 $extrastylesheet
+
+<!-- Matomo -->
+<script>
+  var _paq = window._paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="https://piwik.inria.fr/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '105']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Matomo Code -->
+
 </head>
 <body>
 
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
 <!-- GUDHI website header BEGIN -->
 <div id="navigation" class="sticky">
-  <nav class="top-bar" role="navigation" data-topbar="true">
+  <nav class="top-bar" role="navigation" data-topbar>
     <ul class="title-area">
       <li class="name">
       <h1 class="show-for-small-only"><a href="" class="icon-tree"> GUDHI library</a></h1>
@@ -39,7 +56,7 @@ $extrastylesheet
               <li><a  href="/contact/">Contact</a></li>
       </ul>
       <ul class="left">
-              <li><a  href="/"> <img src="/assets/img/home.png" alt="  GUDHI"/>  GUDHI </a></li>
+              <li><a  href="/"> <img src="/assets/img/home.png" alt="  GUDHI">  GUDHI </a></li>
               <li class="divider"></li>
               <li class="has-dropdown">
                 <a  href="#">Project</a>

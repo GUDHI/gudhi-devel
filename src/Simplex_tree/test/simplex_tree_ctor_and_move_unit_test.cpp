@@ -24,6 +24,8 @@
 // /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
 #include "gudhi/Simplex_tree.h"
 
+#include "test_vector_filtration_simplex_tree.h"
+
 using namespace Gudhi;
 
 typedef boost::mpl::list<Simplex_tree<>,
@@ -176,45 +178,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_copy_constructor, Simplex_tree, list_of_te
   BOOST_CHECK(st7 == st);
 
 }
-
-struct Simplex_tree_options_custom_fil_values_default {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef std::int16_t Vertex_handle;
-  typedef std::vector<int> Filtration_value;
-  typedef std::int32_t Simplex_key;
-  static const bool store_key = false;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = false;
-  static const bool stable_simplex_handles = false;
-  static const bool is_multi_parameter = false;
-};
-
-struct Simplex_tree_options_custom_fil_values_fast_persistence {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef std::int16_t Vertex_handle;
-  typedef std::vector<int> Filtration_value;
-  typedef std::int32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = true;
-  static const bool link_nodes_by_label = false;
-  static const bool stable_simplex_handles = false;
-  static const bool is_multi_parameter = false;
-};
-
-struct Simplex_tree_options_custom_fil_values_full_featured {
-  typedef linear_indexing_tag Indexing_tag;
-  typedef std::int16_t Vertex_handle;
-  typedef std::vector<int> Filtration_value;
-  typedef std::int32_t Simplex_key;
-  static const bool store_key = true;
-  static const bool store_filtration = true;
-  static const bool contiguous_vertices = false;
-  static const bool link_nodes_by_label = true;
-  static const bool stable_simplex_handles = true;
-  static const bool is_multi_parameter = false;
-};
 
 typedef boost::mpl::list<Simplex_tree<Simplex_tree_options_custom_fil_values_default>,
                          Simplex_tree<Simplex_tree_options_custom_fil_values_fast_persistence>,

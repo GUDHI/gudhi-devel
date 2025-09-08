@@ -14,7 +14,7 @@
 #include <gudhi/Simplex_tree/indexing_tag.h>
 
 #include <cstdint>
-#include <type_traits> // void_t
+#include <type_traits>  // void_t
 
 namespace Gudhi {
 
@@ -39,7 +39,6 @@ struct Simplex_tree_options_default {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
   static const bool stable_simplex_handles = false;
-  static const bool is_multi_parameter = false;
 };
 
 /** Model of SimplexTreeOptions.
@@ -56,7 +55,6 @@ struct Simplex_tree_options_full_featured {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = true;
   static const bool stable_simplex_handles = true;
-  static const bool is_multi_parameter = false;
 };
 
 /** Model of SimplexTreeOptions.
@@ -73,7 +71,6 @@ struct Simplex_tree_options_minimal {
   static const bool contiguous_vertices = false;
   static const bool link_nodes_by_label = false;
   static const bool stable_simplex_handles = false;
-  static const bool is_multi_parameter = false;
 };
 
 /** @private @brief Model of SimplexTreeOptions, faster than `Simplex_tree_options_default` but note the unsafe
@@ -91,7 +88,6 @@ struct Simplex_tree_options_fast_persistence {
   static const bool contiguous_vertices = true;
   static const bool link_nodes_by_label = false;
   static const bool stable_simplex_handles = false;
-  static const bool is_multi_parameter = false;
 };
 
 /** @}*/  // end addtogroup simplex_tree
@@ -102,6 +98,7 @@ struct No_simplex_data {};
 template <class, class=void> struct Get_simplex_data_type { typedef No_simplex_data type; };
 template <class O>
 struct Get_simplex_data_type<O, std::void_t<typename O::Simplex_data>> { typedef typename O::Simplex_data type; };
+
 
 }  // namespace Gudhi
 

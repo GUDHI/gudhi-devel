@@ -122,23 +122,24 @@ itself and/or after the perturbation process.
 Simple example
 --------------
 
-This example builds the Tangential complex of point set read in an OFF file.
+This example builds the Tangential complex of point set.
 
 .. testcode::
 
-    import gudhi
-    tc = gudhi.TangentialComplex(intrisic_dim = 1,
-        off_file=gudhi.__root_source_dir__ + '/data/points/alphacomplexdoc.off')
+    from gudhi import TangentialComplex
+    pts = [[1., 1. ],
+           [7., 0. ],
+           [4., 6. ],
+           [9., 6. ],
+           [0., 14.],
+           [2., 19.],
+           [9., 17.]]
+    tc = TangentialComplex(intrisic_dim = 1, points = pts)
     tc.compute_tangential_complex()
-    result_str = 'Tangential contains ' + repr(tc.num_simplices()) + \
-        ' simplices - ' + repr(tc.num_vertices()) + ' vertices.'
-    print(result_str)
+    print(f'Tangential contains {tc.num_simplices()} simplices - {tc.num_vertices()} vertices.')
 
     st = tc.create_simplex_tree()
-    result_str = 'Simplex tree is of dimension ' + repr(st.dimension()) + \
-        ' - ' + repr(st.num_simplices()) + ' simplices - ' + \
-        repr(st.num_vertices()) + ' vertices.'
-    print(result_str)
+    print(f'Simplex tree is of dimension {st.dimension()} - {st.num_simplices()} simplices - {st.num_vertices()} vertices.')
     for filtered_value in st.get_filtration():
         print(filtered_value[0])
 
@@ -174,23 +175,21 @@ simplices.
 
 .. testcode::
 
-   import gudhi
-   tc = gudhi.TangentialComplex(intrisic_dim = 1,
-       points=[[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
-   tc.compute_tangential_complex()
-   result_str = 'Tangential contains ' + repr(tc.num_vertices()) + ' vertices.'
-   print(result_str)
+    from gudhi import TangentialComplex
+    tc = TangentialComplex(intrisic_dim = 1, points = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+    tc.compute_tangential_complex()
+    print(f'Tangential contains {tc.num_vertices()} vertices.')
 
-   if tc.num_inconsistent_simplices() > 0:
-       print('Tangential contains inconsistencies.')
+    if tc.num_inconsistent_simplices() > 0:
+        print('Tangential contains inconsistencies.')
 
-   tc.fix_inconsistencies_using_perturbation(10, 60)
-   if tc.num_inconsistent_simplices() == 0:
-       print('Inconsistencies has been fixed.')
+    tc.fix_inconsistencies_using_perturbation(10, 60)
+    if tc.num_inconsistent_simplices() == 0:
+        print('Inconsistencies have been fixed.')
 
 The output is:
 
 .. testoutput::
 
     Tangential contains 4 vertices.
-    Inconsistencies has been fixed.
+    Inconsistencies have been fixed.

@@ -29,9 +29,8 @@ namespace persistence_matrix {
  * @brief Empty structure.
  * Inherited instead of @ref Matrix_row_access, when the the row access is not enabled.
  */
-struct Dummy_matrix_row_access
-{
-  Dummy_matrix_row_access([[maybe_unused]] unsigned int numberOfRows = 0){};
+struct Dummy_matrix_row_access {
+  Dummy_matrix_row_access([[maybe_unused]] unsigned int numberOfRows = 0) {};
 
   friend void swap([[maybe_unused]] Dummy_matrix_row_access& d1, [[maybe_unused]] Dummy_matrix_row_access& d2) {}
 };
@@ -56,7 +55,8 @@ class Matrix_row_access
   /**
    * @brief Default constructor.
    */
-  Matrix_row_access() : rows_(new Row_container()){};
+  Matrix_row_access() : rows_(new Row_container()) {};
+
   /**
    * @brief Constructor reserving space for the given number of rows.
    *
@@ -64,11 +64,13 @@ class Matrix_row_access
    *
    * @param numberOfRows Number of rows to reserve space for.
    */
-  Matrix_row_access(unsigned int numberOfRows) : rows_(new Row_container()) {
+  Matrix_row_access(unsigned int numberOfRows) : rows_(new Row_container())
+ {
     if constexpr (!has_removable_rows) {
       rows_->resize(numberOfRows);
     }
   }
+
   /**
    * @brief Copy constructor.
    *
@@ -81,12 +83,14 @@ class Matrix_row_access
       rows_->resize(toCopy.rows_->size());
     }
   }
+
   /**
    * @brief Move constructor.
    *
    * @param other Matrix to move.
    */
   Matrix_row_access(Matrix_row_access&& other) noexcept : rows_(std::exchange(other.rows_, nullptr)) {}
+
   /**
    * @brief Destructor.
    */
@@ -107,6 +111,7 @@ class Matrix_row_access
       return rows_->operator[](rowIndex);
     }
   }
+
   /**
    * @brief Returns the row at the given @ref rowindex "row index".
    * The type of the row depends on the chosen options, see @ref PersistenceMatrixOptions::has_intrusive_rows.
@@ -122,6 +127,7 @@ class Matrix_row_access
       return rows_->operator[](rowIndex);
     }
   }
+
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_rows is true. Removes the given row
    * from the row container if the row exists and is empty.
@@ -145,12 +151,24 @@ class Matrix_row_access
       rows_->resize(other.rows_->size());
     return *this;
   }
+
   /**
    * @brief Swap operator.
    */
   friend void swap(Matrix_row_access& matrix1, Matrix_row_access& matrix2) { std::swap(matrix1.rows_, matrix2.rows_); }
 
  protected:
+  Row_container* _get_rows_ptr() { return rows_; }
+
+  Row_container* const _get_rows_ptr() const { return rows_; }
+
+  void _resize(ID_index size) {
+    static_assert(!has_removable_rows, "'_resize' is not implemented for the chosen options.");
+
+    if (rows_->size() <= size) rows_->resize(size + 1);
+  }
+
+ private:
   /**
    * @brief Row container. A pointer to facilitate column swaps when two matrices are swapped.
    * Has to be destroyed after matrix_, therefore has to be inherited.

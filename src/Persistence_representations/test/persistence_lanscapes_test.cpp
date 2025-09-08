@@ -8,22 +8,24 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <iostream>
+#include <limits>
+
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "Persistence_landscapes_test"
 #include <boost/test/unit_test.hpp>
+
 #include <gudhi/reader_utils.h>
 #include <gudhi/Persistence_landscape.h>
 #include <gudhi/Unitary_tests_utils.h>
-
-#include <iostream>
-#include <limits>
 
 using namespace Gudhi;
 using namespace Gudhi::Persistence_representations;
 
 double epsilon = 0.0005;
 
-BOOST_AUTO_TEST_CASE(check_construction_of_landscape) {
+BOOST_AUTO_TEST_CASE(check_construction_of_landscape)
+{
   std::vector<std::pair<double, double> > diag =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
@@ -32,7 +34,8 @@ BOOST_AUTO_TEST_CASE(check_construction_of_landscape) {
   BOOST_CHECK(p == q);
 }
 
-BOOST_AUTO_TEST_CASE(check_construction_of_landscape_form_gudhi_style_file) {
+BOOST_AUTO_TEST_CASE(check_construction_of_landscape_form_gudhi_style_file)
+{
   Persistence_landscape p("data/persistence_file_with_four_entries_per_line", 1);
   // p.print_to_file("persistence_file_with_four_entries_per_line_landscape");
   Persistence_landscape q;
@@ -40,14 +43,16 @@ BOOST_AUTO_TEST_CASE(check_construction_of_landscape_form_gudhi_style_file) {
   BOOST_CHECK(p == q);
 }
 
-BOOST_AUTO_TEST_CASE(check_computations_of_integrals) {
+BOOST_AUTO_TEST_CASE(check_computations_of_integrals)
+{
   std::vector<std::pair<double, double> > diag =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_integral_of_landscape(), 2.34992, epsilon);
 }
 
-BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly) {
+BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly)
+{
   std::vector<std::pair<double, double> > diag =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
@@ -81,12 +86,13 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_for_each_level_separatelly)
   integrals_for_different_levels.push_back(0.000195296);
 
   for (size_t level = 0; level != p.size(); ++level) {
-    GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_integral_of_a_level_of_a_landscape(level),
-                                    integrals_for_different_levels[level], epsilon);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(
+        p.compute_integral_of_a_level_of_a_landscape(level), integrals_for_different_levels[level], epsilon);
   }
 }
 
-BOOST_AUTO_TEST_CASE(check_computations_of_integrals_of_powers_of_landscape) {
+BOOST_AUTO_TEST_CASE(check_computations_of_integrals_of_powers_of_landscape)
+{
   std::vector<std::pair<double, double> > diag =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
@@ -99,12 +105,13 @@ BOOST_AUTO_TEST_CASE(check_computations_of_integrals_of_powers_of_landscape) {
   integrals_for_different_powers.push_back(0.0355235);
 
   for (size_t power = 0; power != 5; ++power) {
-    GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_integral_of_landscape((double)power),
-                                    integrals_for_different_powers[power], epsilon);
+    GUDHI_TEST_FLOAT_EQUALITY_CHECK(
+        p.compute_integral_of_landscape((double)power), integrals_for_different_powers[power], epsilon);
   }
 }
 
-BOOST_AUTO_TEST_CASE(check_computations_of_values_on_different_points) {
+BOOST_AUTO_TEST_CASE(check_computations_of_values_on_different_points)
+{
   std::vector<std::pair<double, double> > diag =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
@@ -123,7 +130,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_values_on_different_points) {
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_value_at_a_given_point(3, 0.3), 0.185282, epsilon);
 }
 
-BOOST_AUTO_TEST_CASE(check_computations_sum_differences_and_multiplications) {
+BOOST_AUTO_TEST_CASE(check_computations_sum_differences_and_multiplications)
+{
   std::vector<std::pair<double, double> > diag =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
@@ -148,7 +156,8 @@ BOOST_AUTO_TEST_CASE(check_computations_sum_differences_and_multiplications) {
   BOOST_CHECK(multiply_by_scalar == template_multiply_by_scalar);
 }
 
-BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms) {
+BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms)
+{
   std::vector<std::pair<double, double> > diag =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
@@ -162,11 +171,12 @@ BOOST_AUTO_TEST_CASE(check_computations_of_maxima_and_norms) {
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.compute_norm_of_landscape(3), 0.501867, epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(compute_distance_of_landscapes(p, sum, 1), 27.9323, epsilon);
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(compute_distance_of_landscapes(p, sum, 2), 2.35199, epsilon);
-  GUDHI_TEST_FLOAT_EQUALITY_CHECK(compute_distance_of_landscapes(p, sum, std::numeric_limits<double>::max()), 0.464478,
-                                  epsilon);
+  GUDHI_TEST_FLOAT_EQUALITY_CHECK(
+      compute_distance_of_landscapes(p, sum, std::numeric_limits<double>::max()), 0.464478, epsilon);
 }
 
-BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances) {
+BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances)
+{
   std::vector<std::pair<double, double> > diag =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
@@ -181,7 +191,8 @@ BOOST_AUTO_TEST_CASE(check_default_parameters_of_distances) {
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(dist_numeric_limit_max, dist_infinity);
 }
 
-BOOST_AUTO_TEST_CASE(check_computations_of_averages) {
+BOOST_AUTO_TEST_CASE(check_computations_of_averages)
+{
   std::vector<std::pair<double, double> > diag =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
@@ -196,7 +207,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_averages) {
   BOOST_CHECK(template_average == av);
 }
 
-BOOST_AUTO_TEST_CASE(check_computations_of_distances) {
+BOOST_AUTO_TEST_CASE(check_computations_of_distances)
+{
   std::vector<std::pair<double, double> > diag =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
@@ -208,7 +220,8 @@ BOOST_AUTO_TEST_CASE(check_computations_of_distances) {
   GUDHI_TEST_FLOAT_EQUALITY_CHECK(p.distance(q, std::numeric_limits<double>::max()), 0.359068, epsilon);
 }
 
-BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product) {
+BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product)
+{
   std::vector<std::pair<double, double> > diag =
       read_persistence_intervals_in_one_dimension_from_file("data/file_with_diagram");
   Persistence_landscape p(diag);
@@ -219,128 +232,110 @@ BOOST_AUTO_TEST_CASE(check_computations_of_scalar_product) {
 }
 
 // Below I am storing the code used to generate tests for that functionality.
-/*
-if ( argc != 2 )
-        {
-                std::cerr << "To run this program, please provide a name of a file with persistence landscape \n";
-                //return 1;
-        }
-        Persistence_landscape p("data/file_with_diagram");
 
-        Persistence_landscape q;
-        q.load_landscape_from_file( "file_with_landscape_from_file_with_diagram" );
+/* if (argc != 2) {
+  std::clog << "To run this program, please provide a name of a file with persistence landscape \n";
+  // return 1;
+}
+Persistence_landscape p("data/file_with_diagram");
 
-        if ( p != q )
-        {
-                cout << "Not equal \n";
-        }
+Persistence_landscape q;
+q.load_landscape_from_file("file_with_landscape_from_file_with_diagram");
 
-        double integral = p.compute_integral_of_landscape();
-        cout << "integral : " << integral <<endl;
+if (p != q) {
+  cout << "Not equal \n";
+}
 
-        //compute integral for each level separately
-        for ( size_t level = 0 ; level != p.size() ; ++level )
-        {
-                cout << p.compute_integral_of_landscape( level ) << endl;
-        }
+double integral = p.compute_integral_of_landscape();
+cout << "integral : " << integral << endl;
 
-        //compute integral of p-th power of landscspe
-        for ( size_t power = 0 ; power != 5 ; ++power )
-        {
-                cout << p.compute_integral_of_landscape( power ) << endl;
-        }
+// compute integral for each level separately
+for (size_t level = 0; level != p.size(); ++level) {
+  cout << p.compute_integral_of_landscape(level) << endl;
+}
 
-        cout << "Value of level 1 at 0 : " <<  p.compute_value_at_a_given_point(1,0.0) << endl;
-        cout << "Value of level 1  at 1 : " <<  p.compute_value_at_a_given_point(1,0.1) << endl;
-        cout << "Value of level 1  at 2 : " <<  p.compute_value_at_a_given_point(1,0.2) << endl;
-        cout << "Value of level 1  at 3 : " <<  p.compute_value_at_a_given_point(1,0.3) << endl;
+// compute integral of p-th power of landscspe
+for (size_t power = 0; power != 5; ++power) {
+  cout << p.compute_integral_of_landscape(power) << endl;
+}
 
+cout << "Value of level 1 at 0 : " << p.compute_value_at_a_given_point(1, 0.0) << endl;
+cout << "Value of level 1  at 1 : " << p.compute_value_at_a_given_point(1, 0.1) << endl;
+cout << "Value of level 1  at 2 : " << p.compute_value_at_a_given_point(1, 0.2) << endl;
+cout << "Value of level 1  at 3 : " << p.compute_value_at_a_given_point(1, 0.3) << endl;
 
-        cout << "Value of level 2 at 0 : " <<  p.compute_value_at_a_given_point(2,0.0) << endl;
-        cout << "Value of level 2  at 1 : " <<  p.compute_value_at_a_given_point(2,0.1) << endl;
-        cout << "Value of level 2  at 2 : " <<  p.compute_value_at_a_given_point(2,0.2) << endl;
-        cout << "Value of level 2  at 3 : " <<  p.compute_value_at_a_given_point(2,0.3) << endl;
+cout << "Value of level 2 at 0 : " << p.compute_value_at_a_given_point(2, 0.0) << endl;
+cout << "Value of level 2  at 1 : " << p.compute_value_at_a_given_point(2, 0.1) << endl;
+cout << "Value of level 2  at 2 : " << p.compute_value_at_a_given_point(2, 0.2) << endl;
+cout << "Value of level 2  at 3 : " << p.compute_value_at_a_given_point(2, 0.3) << endl;
 
+cout << "Value of level 3 at 0 : " << p.compute_value_at_a_given_point(3, 0.0) << endl;
+cout << "Value of level 3  at 1 : " << p.compute_value_at_a_given_point(3, 0.1) << endl;
+cout << "Value of level 3  at 2 : " << p.compute_value_at_a_given_point(3, 0.2) << endl;
+cout << "Value of level 3  at 3 : " << p.compute_value_at_a_given_point(3, 0.3) << endl;
 
-        cout << "Value of level 3 at 0 : " <<  p.compute_value_at_a_given_point(3,0.0) << endl;
-        cout << "Value of level 3  at 1 : " <<  p.compute_value_at_a_given_point(3,0.1) << endl;
-        cout << "Value of level 3  at 2 : " <<  p.compute_value_at_a_given_point(3,0.2) << endl;
-        cout << "Value of level 3  at 3 : " <<  p.compute_value_at_a_given_point(3,0.3) << endl;
+Persistence_landscape second;
+second.load_landscape_from_file("file_with_landscape_from_file_with_diagram_1");
 
+Persistence_landscape sum = p + second;
+Persistence_landscape difference = p - second;
+Persistence_landscape multiply_by_scalar = 10 * p;
 
+// sum.print_to_file("sum");
+// difference.print_to_file("difference");
+// multiply_by_scalar.print_to_file("multiply_by_scalar");
 
-        Persistence_landscape second;
-        second.load_landscape_from_file("file_with_landscape_from_file_with_diagram_1" );
+Persistence_landscape template_sum;
+template_sum.load_landscape_from_file("sum");
+Persistence_landscape template_difference;
+template_difference.load_landscape_from_file("difference");
+Persistence_landscape template_multiply_by_scalar;
+template_multiply_by_scalar.load_landscape_from_file("multiply_by_scalar");
 
-        Persistence_landscape sum = p + second;
-        Persistence_landscape difference = p - second;
-        Persistence_landscape multiply_by_scalar = 10*p;
+if (sum != template_sum) {
+  cerr << "Problem with sums \n";
+}
+if (difference != template_difference) {
+  cerr << "Problem with differences \n";
+}
+if (multiply_by_scalar != template_multiply_by_scalar) {
+  cerr << "Problem with multiplication by scalar \n";
+}
 
-        //sum.print_to_file("sum");
-        //difference.print_to_file("difference");
-        //multiply_by_scalar.print_to_file("multiply_by_scalar");
+cout << "Maximum : " << p.compute_maximum() << endl;
 
-        Persistence_landscape template_sum;
-        template_sum.load_landscape_from_file( "sum" );
-        Persistence_landscape template_difference;
-        template_difference.load_landscape_from_file( "difference" );
-        Persistence_landscape template_multiply_by_scalar;
-        template_multiply_by_scalar.load_landscape_from_file( "multiply_by_scalar" );
+cout << "L^1 norm : " << p.compute_norm_of_landscape(1) << endl;
+cout << "L^2 norm : " << p.compute_norm_of_landscape(2) << endl;
+cout << "L^3 norm : " << p.compute_norm_of_landscape(3) << endl;
 
-        if ( sum != template_sum )
-        {
-                cerr << "Problem with sums \n";
-        }
-        if ( difference != template_difference )
-        {
-                cerr << "Problem with differences \n";
-        }
-        if ( multiply_by_scalar != template_multiply_by_scalar )
-        {
-                cerr << "Problem with multiplication by scalar \n";
-        }
+cout << "L^1 distance : " << compute_distance_of_landscapes(p, sum, 1) << endl;
+cout << "L^2 distance : " << compute_distance_of_landscapes(p, sum, 2) << endl;
+cout << "L^infty distance : " << compute_distance_of_landscapes(p, sum, std::numeric_limits<double>::max()) << endl;
 
+{
+  Persistence_landscape p("data/file_with_diagram");
+  Persistence_landscape q("data/file_with_diagram_1");
+  Persistence_landscape av;
+  av.compute_average({&p, &q});
 
+  Persistence_landscape template_average;
+  template_average.load_landscape_from_file("average");
+  if (template_average != av) {
+    cerr << "We have a problem with average \n";
+  }
+}
 
-        cout << "Maximum : " << p.compute_maximum() << endl;
+{
+  Persistence_landscape p("data/file_with_diagram");
+  Persistence_landscape q("data/file_with_diagram_1");
+  cout << "L^1 distance : " << p.distance(&q) << endl;
+  cout << "L^2 distance : " << p.distance(&q, 2) << endl;
+  cout << "L^infty distance : " << p.distance(&q, std::numeric_limits<double>::max()) << endl;
+}
 
-        cout << "L^1 norm : " << p.compute_norm_of_landscape(1) << endl;
-        cout << "L^2 norm : " << p.compute_norm_of_landscape(2) << endl;
-        cout << "L^3 norm : " << p.compute_norm_of_landscape(3) << endl;
-
-
-        cout << "L^1 distance : " << compute_distance_of_landscapes(p,sum,1) << endl;
-        cout << "L^2 distance : " << compute_distance_of_landscapes(p,sum,2) << endl;
-        cout << "L^infty distance : " << compute_distance_of_landscapes(p,sum,std::numeric_limits<double>::max() ) <<
-endl;
-
-        {
-                Persistence_landscape p( "data/file_with_diagram" );
-                Persistence_landscape q( "data/file_with_diagram_1" );
-                Persistence_landscape av;
-                av.compute_average( {&p,&q} );
-
-                Persistence_landscape template_average;
-                template_average.load_landscape_from_file( "average" );
-                if ( template_average != av )
-                {
-                        cerr << "We have a problem with average \n";
-                }
-        }
-
-
-        {
-                Persistence_landscape p( "data/file_with_diagram" );
-                Persistence_landscape q( "data/file_with_diagram_1" );
-                cout << "L^1 distance : " <<  p.distance( &q ) << endl;
-                cout << "L^2 distance : " <<  p.distance( &q , 2) << endl;
-                cout << "L^infty distance : " <<  p.distance( &q , std::numeric_limits<double>::max() ) << endl;
-        }
-
-
-        {
-                Persistence_landscape p( "data/file_with_diagram" );
-                Persistence_landscape q( "data/file_with_diagram_1" );
-                cout << "Scalar product : " <<  p.compute_scalar_product( &q ) << endl;
-        }
-*/
+{
+  Persistence_landscape p("data/file_with_diagram");
+  Persistence_landscape q("data/file_with_diagram_1");
+  cout << "Scalar product : " << p.compute_scalar_product(&q) << endl;
+}
+ */

@@ -19,8 +19,6 @@ struct MiniSTOptions : Gudhi::Simplex_tree_options_minimal {
   static const bool store_key = true;
   // I have few vertices
   typedef short Vertex_handle;
-  
-  static const bool is_multi_parameter = false;
 };
 
 using Mini_simplex_tree = Gudhi::Simplex_tree<MiniSTOptions>;

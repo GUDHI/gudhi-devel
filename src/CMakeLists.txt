@@ -8,8 +8,9 @@ include(GUDHI_options)
 
 set(GUDHI_MODULES "" CACHE INTERNAL "GUDHI_MODULES")
 set(GUDHI_MISSING_MODULES "" CACHE INTERNAL "GUDHI_MISSING_MODULES")
+set(GUDHI_NANOBIND_MODULES "" CACHE INTERNAL "GUDHI_NANOBIND_MODULES")
 
-# This variable is used by Cython CMakeLists.txt and by GUDHI_third_party_libraries to know its path
+# This variable is used by Python CMakeLists.txt and by GUDHI_third_party_libraries to know its path
 set(GUDHI_PYTHON_PATH "python")
 
 include(GUDHI_submodules)
@@ -47,8 +48,8 @@ add_gudhi_module(Witness_complex)
 add_gudhi_module(Nerve_GIC)
 add_gudhi_module(Persistence_matrix)
 add_gudhi_module(Zigzag_persistence)
-add_gudhi_module(Multi_persistence)
 add_gudhi_module(Multi_filtration)
+add_gudhi_module(Multi_persistence)
 
 set(GUDHI_BIBLIO_DIR ${CMAKE_SOURCE_DIR})
 # For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set
@@ -62,7 +63,7 @@ include_directories(include)
 # Include module CMake subdirectories
 # GUDHI_SUB_DIRECTORIES is managed in CMAKE_MODULE_PATH/GUDHI_modules.cmake
 if (WITH_GUDHI_PYTHON)
-  # specific for cython module
+  # specific for python module
   add_subdirectory(${GUDHI_PYTHON_PATH})
 else()
   message("++ Python module will not be compiled because WITH_GUDHI_PYTHON is set to OFF")

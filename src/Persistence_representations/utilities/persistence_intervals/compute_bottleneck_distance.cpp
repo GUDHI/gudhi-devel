@@ -8,16 +8,16 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_intervals_with_distances.h>
-
 #include <iostream>
-#include <sstream>
 #include <limits>
 #include <vector>
 
+#include <gudhi/Persistence_intervals_with_distances.h>
+
 using Persistence_intervals_with_distances = Gudhi::Persistence_representations::Persistence_intervals_with_distances;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program computes the bottleneck distance of persistence pairs in diagrams provided as "
             << "an input.\n"
             << "The first parameter is the dimension of persistence to be used to create persistence intervals. "
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
 
   // reading the persistence intervals:
   std::vector<Persistence_intervals_with_distances> persistence_intervals;
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     Persistence_intervals_with_distances pers(filenames[i], dimension);
     persistence_intervals.push_back(pers);
   }
@@ -53,14 +53,14 @@ int main(int argc, char** argv) {
 
   // first we prepare an array:
   std::vector<std::vector<double> > distance(filenames.size());
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     std::vector<double> v(filenames.size(), 0);
     distance[i] = v;
   }
 
   // and now we can compute the distances:
-  for (size_t i = 0; i != persistence_intervals.size(); ++i) {
-    for (size_t j = i + 1; j != persistence_intervals.size(); ++j) {
+  for (std::size_t i = 0; i != persistence_intervals.size(); ++i) {
+    for (std::size_t j = i + 1; j != persistence_intervals.size(); ++j) {
       distance[i][j] = distance[j][i] = persistence_intervals[i].distance(persistence_intervals[j]);
     }
   }
@@ -68,8 +68,8 @@ int main(int argc, char** argv) {
   // and now output the result to the screen and a file:
   std::ofstream out;
   out.open("distance.itv");
-  for (size_t i = 0; i != distance.size(); ++i) {
-    for (size_t j = 0; j != distance.size(); ++j) {
+  for (std::size_t i = 0; i != distance.size(); ++i) {
+    for (std::size_t j = 0; j != distance.size(); ++j) {
       std::clog << distance[i][j] << " ";
       out << distance[i][j] << " ";
     }

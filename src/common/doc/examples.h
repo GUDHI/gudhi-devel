@@ -18,7 +18,6 @@
  * @example simple_simplex_tree.cpp
  * @example simplex_tree_from_cliques_of_graph.cpp
  * @example example_alpha_shapes_3_simplex_tree_from_off_file.cpp
- * @example simplex_tree_multi.cpp
  * \section Persistent_cohomology_example_section Persistent_cohomology
  * @example custom_persistence_sort.cpp
  * @example rips_persistence_step_by_step.cpp
@@ -141,4 +140,7 @@
  * @example example_simplex_tree_to_matrix.cpp
  * \section Persistence_fields_example_section Persistence_field
  * @example example_field_operations.cpp
+ * \section Multi_filtration_example_section multi_filtration
+ * @example example_multi_simplex_tree.cpp
  */
+ 

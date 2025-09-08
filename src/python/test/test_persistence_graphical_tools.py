@@ -8,11 +8,13 @@
       - YYYY/MM Author: Description of the modification
 """
 
-import gudhi as gd
+
 import numpy as np
 import matplotlib as mplt
 import pytest
 import warnings
+
+import gudhi as gd
 
 
 def test_array_handler():
@@ -121,7 +123,11 @@ def _limit_plot_persistence(function):
 
 
 def test_limit_plot_persistence():
-    for function in [gd.plot_persistence_barcode, gd.plot_persistence_diagram, gd.plot_persistence_density]:
+    for function in [
+        gd.plot_persistence_barcode,
+        gd.plot_persistence_diagram,
+        gd.plot_persistence_density,
+    ]:
         _limit_plot_persistence(function)
 
 
@@ -131,7 +137,11 @@ def _non_existing_persistence_file(function):
 
 
 def test_non_existing_persistence_file():
-    for function in [gd.plot_persistence_barcode, gd.plot_persistence_diagram, gd.plot_persistence_density]:
+    for function in [
+        gd.plot_persistence_barcode,
+        gd.plot_persistence_diagram,
+        gd.plot_persistence_density,
+    ]:
         _non_existing_persistence_file(function)
 
 
@@ -156,8 +166,14 @@ def _sklearn_several_homology_dim_plot_persistence(function):
     # diag = RipsPersistence(homology_dimensions=[1,0]).fit_transform([X])
     # plot_persistence_diagram(diag[0]) # should work
     diags = [
-        [np.array([[11.0, 12.0], [6.0, 7.0]]), np.array([[0.0, 5.0], [0.0, 6.0], [0.0, float("inf")]])],
-        [np.array([[11.0, 12.0], [6.0, 7.0]]), np.array([[0.0, 5.0], [0.0, 6.0], [0.0, float("inf")]])],
+        [
+            np.array([[11.0, 12.0], [6.0, 7.0]]),
+            np.array([[0.0, 5.0], [0.0, 6.0], [0.0, float("inf")]]),
+        ],
+        [
+            np.array([[11.0, 12.0], [6.0, 7.0]]),
+            np.array([[0.0, 5.0], [0.0, 6.0], [0.0, float("inf")]]),
+        ],
     ]
     for diag in diags:
         ax = function(diag)

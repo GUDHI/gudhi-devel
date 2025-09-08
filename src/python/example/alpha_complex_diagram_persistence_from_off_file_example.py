@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 
-import argparse
-import gudhi as gd
-
-""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ -
-    which is released under MIT.
-    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full
-    license details.
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
     Author(s):       Vincent Rouvreau
 
     Copyright (C) 2016 Inria
@@ -15,9 +10,12 @@ import gudhi as gd
       - YYYY/MM Author: Description of the modification
 """
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
+__license__ = "GPL v3"  # Because of AlphaComplex
+
+
+import argparse
+import gudhi as gd
+
 
 parser = argparse.ArgumentParser(
     description="AlphaComplex creation from " "points read in a OFF file.",
@@ -42,13 +40,11 @@ args = parser.parse_args()
 print("##############################################################")
 print("AlphaComplex creation from points read in a OFF file")
 
-points = gd.read_points_from_off_file(off_file = args.file)
-alpha_complex = gd.AlphaComplex(points = points)
+points = gd.read_points_from_off_file(off_file=args.file)
+alpha_complex = gd.AlphaComplex(points=points)
 if args.max_alpha_square is not None:
     print("with max_edge_length=", args.max_alpha_square)
-    simplex_tree = alpha_complex.create_simplex_tree(
-        max_alpha_square=args.max_alpha_square
-    )
+    simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=args.max_alpha_square)
 else:
     simplex_tree = alpha_complex.create_simplex_tree()
 
@@ -58,5 +54,6 @@ diag = simplex_tree.persistence()
 print("betti_numbers()=", simplex_tree.betti_numbers())
 if args.no_diagram == False:
     import matplotlib.pyplot as plot
+
     gd.plot_persistence_diagram(diag, band=args.band)
     plot.show()

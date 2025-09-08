@@ -6,6 +6,9 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+__license__ = "MIT"
+
+
 import numpy as np
 
 
@@ -64,13 +67,14 @@ class TimeDelayEmbedding:
 
     def fit(self, ts, y=None):
         return self
-    
+
     def _transform(self, ts):
         """Guts of transform method."""
         if ts.ndim == 1:
             repeat = self._dim
         else:
-            assert self._dim % ts.shape[1] == 0
+            if self._dim % ts.shape[1] != 0:
+                raise ValueError("Input shape is not a multiple of _dim.")
             repeat = self._dim // ts.shape[1]
         end = len(ts) - self._delay * (repeat - 1)
         short = np.arange(0, end, self._skip)

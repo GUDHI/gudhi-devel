@@ -17,7 +17,9 @@
 #ifndef PM_OPTIONS_INCLUDED
 #define PM_OPTIONS_INCLUDED
 
-#include "Fields/Zp_field_operators.h"
+#include <type_traits>
+
+#include <gudhi/Fields/Zp_field_operators.h>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -41,6 +43,17 @@ enum class Column_types {
   INTRUSIVE_LIST, /**< @ref Intrusive_list_column "": Underlying container is a boost::intrusive::list<@ref Entry>. */
   INTRUSIVE_SET   /**< @ref Intrusive_set_column "": Underlying container is a boost::intrusive::set<@ref Entry>. */
 };
+
+// a column is said to behave well if its underlying content is alway ordered by increasing row index
+// and iterators cannot iterate over zero cells.
+template <Column_types column_type>
+struct is_well_behaved : std::true_type {};
+template <>
+struct is_well_behaved<Column_types::HEAP> : std::false_type {};          // non ordered
+template <>
+struct is_well_behaved<Column_types::VECTOR> : std::false_type {};        // lazy row clear
+template <>
+struct is_well_behaved<Column_types::UNORDERED_SET> : std::false_type {}; // non ordered
 
 /**
  * @ingroup persistence_matrix

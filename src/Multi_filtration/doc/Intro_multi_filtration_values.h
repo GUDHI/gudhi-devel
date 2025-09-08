@@ -1,8 +1,8 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       Hannah Schreiber
+ *    Author(s):       Hannah Schreiber, David Loiseaux
  *
- *    Copyright (C) 2024 Inria
+ *    Copyright (C) 2024-25 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -17,11 +17,11 @@ namespace multi_filtration {
 
 /** \defgroup multi_filtration Multi-parameter Filtration Values
  * @{
- * \author    David Loiseaux
+ * \author    Hannah Schreiber, David Loiseaux
  *
  * \section multifiltrationintro Multi-parameter Filtration Values
  *
- * TODO: introduction to @ref One_critical_filtration and @ref Multi_critical_filtration
+ * TODO: introduction 
  * 
  * \subsection multifiltrationexamples Examples
  * 

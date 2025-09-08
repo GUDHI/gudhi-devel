@@ -8,18 +8,19 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_heat_maps.h>
-
 #include <iostream>
 #include <sstream>
 #include <limits>
 #include <vector>
 
+#include <gudhi/Persistence_heat_maps.h>
+
 using arc_tan_of_persistence_of_point = Gudhi::Persistence_representations::arc_tan_of_persistence_of_point;
 using Persistence_heat_maps =
     Gudhi::Persistence_representations::Persistence_heat_maps<arc_tan_of_persistence_of_point>;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program creates persistence heat map files (*.mps) of persistence diagrams files (*.pers) "
             << "provided as an input.The Gaussian kernels are weighted by the arc tangential of their persistence.\n"
             << "The first parameter of a program is an integer, a size of a grid.\n"
@@ -40,10 +41,10 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  size_t size_of_grid = (size_t)atoi(argv[1]);
-  double min_ = atof(argv[2]);
-  double max_ = atof(argv[3]);
-  size_t stdiv = atof(argv[4]);
+  std::size_t size_of_grid = (std::size_t)atoi(argv[1]);
+  double min = atof(argv[2]);
+  double max = atof(argv[3]);
+  std::size_t stdiv = atof(argv[4]);
 
   unsigned dimension = std::numeric_limits<unsigned>::max();
   int dim = atoi(argv[5]);
@@ -57,9 +58,9 @@ int main(int argc, char** argv) {
   }
 
   std::vector<std::vector<double> > filter = Gudhi::Persistence_representations::create_Gaussian_filter(stdiv, 1);
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     std::clog << "Creating a heat map based on a file : " << filenames[i] << std::endl;
-    Persistence_heat_maps l(filenames[i], filter, false, size_of_grid, min_, max_, dimension);
+    Persistence_heat_maps l(filenames[i], filter, false, size_of_grid, min, max, dimension);
 
     std::stringstream ss;
     ss << filenames[i] << ".mps";
