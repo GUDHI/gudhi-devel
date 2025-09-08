@@ -2064,11 +2064,11 @@ class Multi_parameter_filtration
   }
 
   /**
-   * @brief Returns a filtration value at infinity with the same number of parameters than the given value.
+   * @brief Returns true if and only if the given filtration value is at plus infinity.
    */
-  friend Multi_parameter_filtration get_infinity_value(const Multi_parameter_filtration &f)
+  friend bool is_positive_infinity(const Multi_parameter_filtration &f)
   {
-    return Multi_parameter_filtration::inf(f.num_parameters());
+    return f.is_plus_inf();
   }
 
   /**
@@ -2565,24 +2565,13 @@ class numeric_limits<Gudhi::multi_filtration::Multi_parameter_filtration<T, Co, 
   static constexpr bool has_infinity = true;
   static constexpr bool has_quiet_NaN = std::numeric_limits<T>::has_quiet_NaN;
 
-  static constexpr Filtration_value infinity() noexcept(false)
-  {
-    throw std::logic_error(
-        "The infinite value cannot be represented with no finite numbers of parameters."
-        "Use `infinity(number_of_parameters)` instead");
-  };
-
-  static constexpr Filtration_value infinity(std::size_t p) noexcept { return Filtration_value::inf(p); };
+  static constexpr Filtration_value infinity(std::size_t p = 1) noexcept { return Filtration_value::inf(p); };
 
   // non-standard
-  static constexpr Filtration_value minus_infinity() noexcept(false)
+  static constexpr Filtration_value minus_infinity(std::size_t p = 1) noexcept
   {
-    throw std::logic_error(
-        "The infinite value cannot be represented with no finite numbers of parameters."
-        "Use `minus_infinity(number_of_parameters)` instead");
+    return Filtration_value::minus_inf(p);
   };
-
-  static constexpr Filtration_value minus_infinity(std::size_t p) noexcept { return Filtration_value::minus_inf(p); };
 
   static constexpr Filtration_value max() noexcept(false)
   {
@@ -2596,14 +2585,9 @@ class numeric_limits<Gudhi::multi_filtration::Multi_parameter_filtration<T, Co, 
     return Filtration_value(p, std::numeric_limits<T>::max());
   };
 
-  static constexpr Filtration_value quiet_NaN() noexcept(false)
-  {
-    throw std::logic_error(
-        "The NaN value cannot be represented with no finite numbers of parameters."
-        "Use `quiet_NaN(number_of_parameters)` instead");
-  };
+  static constexpr Filtration_value lowest(std::size_t p = 1) noexcept { return Filtration_value::minus_inf(p); };
 
-  static constexpr Filtration_value quiet_NaN(std::size_t p) noexcept(false)
+  static constexpr Filtration_value quiet_NaN(std::size_t p = 1) noexcept(false)
   {
     if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
       return Filtration_value::nan(p);

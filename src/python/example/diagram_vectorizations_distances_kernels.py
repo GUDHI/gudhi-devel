@@ -146,7 +146,7 @@ print("Wasserstein distance (hera) is " + str(W(D1, D2)))
 try:
     from gudhi.representations import BottleneckDistance
 
-    W = BottleneckDistance(epsilon=0.001)
+    W = BottleneckDistance(e=0.001)
     print("Bottleneck distance is " + str(W(D1, D2)))
 except ImportError:
     print("BottleneckDistance is not available, you may be missing CGAL.")

@@ -1953,11 +1953,11 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value at infinity. Fails if `Co` is true.
+   * @brief Returns true if and only if the given filtration value is at plus infinity.
    */
-  friend Degree_rips_bifiltration get_infinity_value([[maybe_unused]] const Degree_rips_bifiltration &f)
+  friend bool is_positive_infinity(const Degree_rips_bifiltration &f)
   {
-    return Degree_rips_bifiltration::inf(2);
+    return f.is_plus_inf();
   }
 
   /**
@@ -2186,6 +2186,8 @@ class numeric_limits<Gudhi::multi_filtration::Degree_rips_bifiltration<T, Co, En
       return Filtration_value(p, std::numeric_limits<T>::max());
     }
   };
+
+  static constexpr Filtration_value lowest(std::size_t p = 2) noexcept { return Filtration_value::minus_inf(p); };
 
   static constexpr Filtration_value quiet_NaN(std::size_t p = 2) noexcept { return Filtration_value::nan(p); };
 };

@@ -9,8 +9,9 @@ include(GUDHI_options)
 # Reset cache
 set(GUDHI_MODULES "" CACHE INTERNAL "GUDHI_MODULES")
 set(GUDHI_MISSING_MODULES "" CACHE INTERNAL "GUDHI_MISSING_MODULES")
+set(GUDHI_NANOBIND_MODULES "" CACHE INTERNAL "GUDHI_NANOBIND_MODULES")
 
-# This variable is used by Cython CMakeLists.txt and by GUDHI_third_party_libraries to know its path
+# This variable is used by Python CMakeLists.txt and by GUDHI_third_party_libraries to know its path
 set(GUDHI_PYTHON_PATH "src/python")
 
 include(GUDHI_submodules)
@@ -66,7 +67,7 @@ if (WITH_GUDHI_GUDHUI)
 endif()
 
 if (WITH_GUDHI_PYTHON)
-  # specific for cython module
+  # specific for python module
   add_subdirectory(${GUDHI_PYTHON_PATH})
 else()
   message("++ Python module will not be compiled because WITH_GUDHI_PYTHON is set to OFF")

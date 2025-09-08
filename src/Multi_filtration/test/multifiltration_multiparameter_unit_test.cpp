@@ -1401,9 +1401,6 @@ void test_numerical_limits(){
 
   BOOST_CHECK(std::numeric_limits<F>::has_infinity);
 
-  BOOST_CHECK_THROW(std::numeric_limits<F>::infinity(), std::logic_error);
-  BOOST_CHECK_THROW(std::numeric_limits<F>::minus_infinity(), std::logic_error);
-  BOOST_CHECK_THROW(std::numeric_limits<F>::quiet_NaN(), std::logic_error);
   BOOST_CHECK_THROW(std::numeric_limits<F>::max(), std::logic_error);
 
   BOOST_CHECK(std::numeric_limits<F>::infinity(num_param).is_plus_inf());

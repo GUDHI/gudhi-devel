@@ -33,18 +33,20 @@ inline struct empty_filtration_value_t {
 
 /**
  * @ingroup simplex_tree
- * @brief Returns a filtration value at infinity such that it would be equal to the given value if the given value
- * is also at infinity.
- * This is the overload for when @ref FiltrationValue is an arithmetic type, like double, int etc.
- * and simply returns either `std::numeric_limits<Arithmetic_filtration_value>::infinity()` or
- * `std::numeric_limits<Arithmetic_filtration_value>::max()`.
+ * @brief Returns true if and only if the given filtration value is at infinity.
+ * This is the overload for when @ref FiltrationValue is an arithmetic type, like double, int etc. It simply
+ * tests equality with `std::numeric_limits<FiltrationValue>::infinity()` if defined or with
+ * `std::numeric_limits<FiltrationValue>::max()` otherwise. Can therefore be also used with other classes
+ * as long as infinity is defined that way.
  */
 template <typename Arithmetic_filtration_value>
-constexpr Arithmetic_filtration_value get_infinity_value([[maybe_unused]] const Arithmetic_filtration_value& f)
+bool is_positive_infinity(const Arithmetic_filtration_value& f)
 {
-  return std::numeric_limits<Arithmetic_filtration_value>::has_infinity
-             ? std::numeric_limits<Arithmetic_filtration_value>::infinity()
-             : std::numeric_limits<Arithmetic_filtration_value>::max();
+  if constexpr (std::numeric_limits<Arithmetic_filtration_value>::has_infinity) {
+    return f == std::numeric_limits<Arithmetic_filtration_value>::infinity();
+  } else {
+    return f == std::numeric_limits<Arithmetic_filtration_value>::max();
+  }
 }
 
 /**

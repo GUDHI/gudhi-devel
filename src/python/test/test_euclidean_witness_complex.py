@@ -15,7 +15,8 @@ from gudhi import EuclideanWitnessComplex, EuclideanStrongWitnessComplex
 
 def test_empty_euclidean_witness_complex():
     euclidean_witness = EuclideanWitnessComplex()
-    assert euclidean_witness._is_defined() == False
+    simplex_tree = euclidean_witness.create_simplex_tree(max_alpha_square=4.1)
+    assert simplex_tree.num_simplices() == 0
 
 
 def test_witness_complex():
@@ -51,7 +52,8 @@ def test_witness_complex():
 
 def test_empty_euclidean_strong_witness_complex():
     euclidean_strong_witness = EuclideanStrongWitnessComplex()
-    assert euclidean_strong_witness._is_defined() == False
+    simplex_tree = euclidean_strong_witness.create_simplex_tree(max_alpha_square=4.1)
+    assert simplex_tree.num_simplices() == 0
 
 
 def test_strong_witness_complex():

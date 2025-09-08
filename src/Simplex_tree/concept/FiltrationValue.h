@@ -11,6 +11,14 @@
 
 /** \brief Value type for a filtration function on a cell complex.
  *
+ * Needs to implement `std::numeric_limits<FiltrationValue>::has_infinity`,
+ * `std::numeric_limits<FiltrationValue>::infinity()`, `std::numeric_limits<FiltrationValue>::max()` and
+ * `std::numeric_limits<FiltrationValue>::lowest()`.
+ * But when `std::numeric_limits<FiltrationValue>::has_infinity` returns `true`,
+ * `std::numeric_limits<FiltrationValue>::max()` and `std::numeric_limits<FiltrationValue>::lowest()` can both simply
+ * throw when called, as well as, `std::numeric_limits<FiltrationValue>::infinity()` if
+ * `std::numeric_limits<FiltrationValue>::has_infinity` returns `false`.
+ *
  * Note that all native types like `int`, `double` etc. are already respecting this concept and can be used as
  * filtration value types without any wrapper.
  *
@@ -44,14 +52,18 @@ struct FiltrationValue {
    * @brief Equality operator
    */
   friend bool operator==(const FiltrationValue& f1, const FiltrationValue& f2);
+  
+  /**
+  * @brief Only necessary if `std::numeric_limits<FiltrationValue>::has_infinity` returns `true`.
+  * Negates the value. Only used on the infinity filtration value to obtain minus infinity.
+  */
+  friend FiltrationValue operator-(const FiltrationValue& f);
 
   /**
-   * @brief Returns a filtration value at infinity such that it would be equal to the given value if the given value
-   * is also at infinity. Overloads for native arithmetic types or other simple types (that is, types where the
-   * infinity value is either `std::numeric_limits<FiltrationValue>::infinity()` or
-   * `std::numeric_limits<FiltrationValue>::max()`) are already implemented.
+   * @brief Returns true if and only if the given filtration value is at infinity.
+   * Overloads for native arithmetic types are already implemented using `std::numeric_limits`.
    */
-  friend FiltrationValue get_infinity_value(const FiltrationValue &f);
+  friend bool is_positive_infinity(const FiltrationValue& f);
 
   /**
    * @brief Given two filtration values at which a simplex exists, computes the minimal union of births generating

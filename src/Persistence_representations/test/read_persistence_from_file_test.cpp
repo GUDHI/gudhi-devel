@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(test_read_file_with_four_elements_per_line)
       "data/persistence_file_with_four_entries_per_line", 1, 1000);
 
   // for (size_t i = 0; i != what_we_get.size(); ++i) {
-  //   std::cerr << what_we_get[i].first << " , " << what_we_get[i].second << std::endl;
+  //   std::clog << what_we_get[i].first << " , " << what_we_get[i].second << std::endl;
   // }
 
   BOOST_CHECK(what_we_should_get.size() == what_we_get.size());
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_read_file_with_three_elements_per_line)
       "data/persistence_file_with_three_entries_per_line", 1, 9999);
 
   // for (size_t i = 0; i != what_we_get.size(); ++i) {
-  //   std::cerr << what_we_get[i].first << " , " << what_we_get[i].second << std::endl;
+  //   std::clog << what_we_get[i].first << " , " << what_we_get[i].second << std::endl;
   // }
 
   BOOST_CHECK(what_we_should_get.size() == what_we_get.size());

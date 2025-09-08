@@ -66,10 +66,9 @@ struct SimplicialComplexForAlpha {
   /** \brief Iterator over the simplices of the skeleton of the complex, for a given dimension.
    *
    * 'value_type' must be 'Simplex_handle'. */
-  typedef unspecified Skeleton_simplex_range;
-  /** \brief Returns a range over the simplices of the skeleton of the simplicial complex, for a given
-   * dimension. */
-  Skeleton_simplex_range skeleton_simplex_range;
+  typedef unspecified Dimension_simplex_range;
+  /** \brief Returns a range over the the simplices of the simplicial complex for a given dimension. */
+  Dimension_simplex_range dimension_simplex_range(int dimension);
 
   /** \brief Return type of an insertion of a simplex
    */
