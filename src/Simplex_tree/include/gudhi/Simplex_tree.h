@@ -1142,7 +1142,7 @@ class Simplex_tree {
      * @brief Let \f$ f \f$ be the filtration value given as argument. Inserts the simplex \f$ \sigma \f$ as follows:
      * - if \f$ \sigma \f$ was not inserted yet, then \f$ \sigma \f$ and all its faces, which are not already included
      * in the complex, are inserted at either \f$ f \f$ or at the first possible filtration value when \f$ f \f$ is too
-     * low (to insure the validity of the filtration).
+     * low (to insure the validity of the filtration). This is computed with @ref FiltrationValue::intersect_lifetimes.
      * - if \f$ \sigma \f$ existed already, then nothing is done.
      */
     HIGHEST,
@@ -1151,7 +1151,8 @@ class Simplex_tree {
      * the already inserted faces allows it. That is, the filtration value of a not already inserted face will be
      * the "intersection" of the filtration values of all it facets, computed with
      * @ref FiltrationValue::intersect_lifetimes "". If none of the faces were already inserted, everything will simply
-     * be placed at minus infinity.
+     * be placed at minus infinity. Therefore, this strategy is equivalent to @ref Insertion_strategy::HIGHEST with
+     * the given filtration value as minus infinity.
      */
     FIRST_POSSIBLE,
     /**
