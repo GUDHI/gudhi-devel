@@ -33,12 +33,11 @@ inline struct empty_filtration_value_t {
 
 /**
  * @ingroup simplex_tree
- * @brief Given two filtration values at which a simplex exists, stores in the first value the minimal union of births
- * generating a lifetime including those two values.
- * This is the overload for when @ref FiltrationValue is an arithmetic type, like double, int etc.
- * Because the filtration values are totally ordered then, the union is simply the minimum of the two values.
- *
- * NaN values are not supported.
+ * @brief Returns true if and only if the given filtration value is at infinity.
+ * This is the overload for when @ref FiltrationValue is an arithmetic type, like double, int etc. It simply
+ * tests equality with `std::numeric_limits<FiltrationValue>::infinity()` if defined or with
+ * `std::numeric_limits<FiltrationValue>::max()` otherwise. Can therefore be also used with other classes
+ * as long as infinity is defined that way.
  */
 template <typename Arithmetic_filtration_value>
 bool is_positive_infinity(const Arithmetic_filtration_value& f)

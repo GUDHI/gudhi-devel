@@ -49,17 +49,18 @@ struct FiltrationValue {
    * @brief Equality operator
    */
   friend bool operator==(const FiltrationValue& f1, const FiltrationValue& f2);
+  
+  /**
+  * @brief Only necessary if `std::numeric_limits<FiltrationValue>::has_infinity` returns `true`.
+  * Negates the value. Only used on the infinity filtration value to obtain minus infinity.
+  */
+  friend FiltrationValue operator-(const FiltrationValue& f);
 
   /**
    * @brief Returns true if and only if the given filtration value is at infinity.
+   * Overloads for native arithmetic types are already implemented using `std::numeric_limits`.
    */
   friend bool is_positive_infinity(const FiltrationValue& f);
-
-  /**
-   * @brief Only necessary if `std::numeric_limits<FiltrationValue>::has_infinity` returns `true`.
-   * Inverses the value. Only used on the infinity filtration value to obtain minus infinity.
-   */
-  friend FiltrationValue operator-(const FiltrationValue& f);
 
   /**
    * @brief Given two filtration values at which a simplex exists, computes the minimal union of births generating
