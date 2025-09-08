@@ -5,6 +5,7 @@
 # Copyright (C) 2020 Inria
 #
 # Modification(s):
+#   - 2025/09 Vincent Rouvreau: Move `len` test in fit as it may not be defined until eagerpy modify its format
 #   - YYYY/MM Author: Description of the modification
 
 __license__ = "MIT"
@@ -101,10 +102,6 @@ class KNearestNeighbors:
         Args:
             X (numpy.array): coordinates for reference points.
         """
-        if self.k > len(X):
-            raise ValueError(
-                f"Expected number of neighbors (aka. 'k') <= number of samples, but k={self.k} and number of samples={len(X)}"
-            )
         self.ref_points = X
         if self.params.get("enable_autodiff", False):
             import eagerpy as ep
@@ -114,6 +111,13 @@ class KNearestNeighbors:
                 # I don't know a clever way to reuse a GPU tensor from tensorflow in pytorch
                 # without copying to/from the CPU.
                 X = X.numpy()
+        # In case of enable_autodiff, `len(X)` may not be defined until `ep.astensor(X)` and/or `X = X.numpy()` above
+        if self.k > len(X):
+            raise ValueError(
+                f"Expected number of neighbors (aka. 'k') <= number of samples, but k={self.k}"
+                f" and number of samples={len(X)}"
+            )
+
         if self.params["implementation"] == "ckdtree":
             # sklearn could handle this, but it is much slower
             from scipy.spatial import cKDTree
