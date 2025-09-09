@@ -15,7 +15,6 @@ import numpy as np
 import scipy.spatial.distance as sc
 import warnings
 import ot
-from collections.abc import Sequence
 
 
 # Currently unused, but Théo says it is likely to be used again.
@@ -274,13 +273,13 @@ def wasserstein_distance(
     """
 
     # First step: handle empty diagrams
-    if isinstance(X, Sequence):
+    try:
         n = len(X)
-    else:
+    except TypeError:
         n = X.shape[0]
-    if isinstance(Y, Sequence):
+    try:
         m = len(Y)
-    else:
+    except TypeError:
         m = Y.shape[0]
 
     if n == 0:
