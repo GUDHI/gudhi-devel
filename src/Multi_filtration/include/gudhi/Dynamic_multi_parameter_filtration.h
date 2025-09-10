@@ -34,7 +34,6 @@
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_filtration/Multi_parameter_generator.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
-#include <gudhi/Multi_parameter_filtration.h>
 
 namespace Gudhi::multi_filtration {
 
@@ -98,7 +97,7 @@ class Dynamic_multi_parameter_filtration
    */
   Dynamic_multi_parameter_filtration(int number_of_parameters = 2)
       : number_of_parameters_(number_of_parameters < 0 ? 2 : number_of_parameters),
-        generators_(1, Generator(1, Co ? T_inf : -T_inf))
+        generators_(1, Generator(1, Co ? T_inf : T_m_inf))
   {}
 
   /**
@@ -477,34 +476,19 @@ class Dynamic_multi_parameter_filtration
    * @brief Returns a copy with entries casted into the type given as template parameter.
    *
    * @tparam U New type for the entries.
+   * @tparam OCo New value for `Co`. Default value: `Co`.
+   * @tparam OEns New value for `Ensure1Criticality`. Note that if `OEns` is set to true and the value is not
+   * 1-critical, the method will throw. Default value: `Ensure1Criticality`.
    * @return Copy with new entry type.
    */
-  template <typename U>
-  Dynamic_multi_parameter_filtration<U, Co, Ensure1Criticality> as_type() const
+  template <typename U, bool OCo = Co, bool OEns = Ensure1Criticality>
+  Dynamic_multi_parameter_filtration<U, OCo, OEns> as_type() const
   {
     std::vector<Multi_parameter_generator<U> > out(num_generators());
     for (size_type g = 0; g < num_generators(); ++g) {
       out[g] = generators_[g].template as_type<U>();
     }
-    return Dynamic_multi_parameter_filtration<U, Co, Ensure1Criticality>(std::move(out), num_parameters());
-  }
-
-  /**
-   * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
-   */
-  Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_multi_parameter_filtration() const
-  {
-    if (generators_.empty()) return Multi_parameter_filtration<T, Co, Ensure1Criticality>(0);
-
-    std::vector<T> out(num_entries());
-    size_type i = 0;
-    for (size_type g = 0; g < num_generators(); ++g) {
-      for (size_type p = 0; p < num_parameters(); ++p) {
-        out[i + p] = generators_[g][p];
-      }
-      i += num_parameters();
-    }
-    return Multi_parameter_filtration<T, Co, Ensure1Criticality>(std::move(out), num_parameters());
+    return Dynamic_multi_parameter_filtration<U, OCo, OEns>(std::move(out), num_parameters());
   }
 
   // ACCESS
@@ -571,6 +555,11 @@ class Dynamic_multi_parameter_filtration
    * @brief Returns value of `Ensure1Criticality`.
    */
   static constexpr bool ensures_1_criticality() { return Ensure1Criticality; }
+
+  /**
+   * @brief Returns value of `Co`.
+   */
+  static constexpr bool has_negative_cones() { return Co; }
 
   /**
    * @brief Returns `true` if and only if the filtration value is considered as plus infinity.
@@ -1772,7 +1761,7 @@ class Dynamic_multi_parameter_filtration
     }
 
     if (generators_.empty()) {
-      generators_ = {Generator(1, Co ? T_inf : -T_inf)};
+      generators_ = {Generator(1, Co ? T_inf : T_m_inf)};
     }
   }
 
@@ -1897,7 +1886,7 @@ class Dynamic_multi_parameter_filtration
         result[0][p] = std::numeric_limits<T>::quiet_NaN();
       else
         nan = true;
-      if (result[0][p] != -T_inf) isMinusInf = false;
+      if (result[0][p] != T_m_inf) isMinusInf = false;
     }
 
     if (isMinusInf) result = {Generator::minus_inf()};
@@ -1915,7 +1904,7 @@ class Dynamic_multi_parameter_filtration
 
     bool isPlusInf = true;
     bool nan = true;
-    Underlying_container result(1, Generator(f.num_parameters(), -T_inf));
+    Underlying_container result(1, Generator(f.num_parameters(), T_m_inf));
     for (size_type p = 0; p < f.num_parameters(); ++p) {
       for (size_type g = 0; g < f.num_generators(); ++g) {
         T val = f(g, p);
@@ -2310,9 +2299,14 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Infinity value of an entry of the filtration value.
+   * @brief Plus infinity value of an entry of the filtration value.
    */
   constexpr static const T T_inf = Generator::T_inf;
+
+  /**
+   * @brief Minus infinity value of an entry of the filtration value.
+   */
+  constexpr static const T T_m_inf = Generator::T_m_inf;
 
  private:
   size_type number_of_parameters_;  /**< Number of parameters. */

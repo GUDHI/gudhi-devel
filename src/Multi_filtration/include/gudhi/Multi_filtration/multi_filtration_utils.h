@@ -78,20 +78,28 @@ constexpr const T MF_T_inf =
 
 /**
  * @private
+ * @brief Minus infinity value of an entry of the filtration value.
+ */
+template <typename T>
+constexpr const T MF_T_m_inf =
+    std::numeric_limits<T>::has_infinity ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::lowest();
+
+/**
+ * @private
  * @brief Adds v1 and v2, stores the result in v1 and returns true if and only if v1 was modified.
  */
 template <typename T>
 constexpr bool _add(T &v1, T v2)
 {
-  if (_is_nan(v1) || _is_nan(v2) || (v1 == MF_T_inf<T> && v2 == -MF_T_inf<T>) ||
-      (v1 == -MF_T_inf<T> && v2 == MF_T_inf<T>)) {
+  if (_is_nan(v1) || _is_nan(v2) || (v1 == MF_T_inf<T> && v2 == MF_T_m_inf<T>) ||
+      (v1 == MF_T_m_inf<T> && v2 == MF_T_inf<T>)) {
     v1 = std::numeric_limits<T>::quiet_NaN();
     return false;
   }
-  if (v1 == MF_T_inf<T> || v1 == -MF_T_inf<T>) {
+  if (v1 == MF_T_inf<T> || v1 == MF_T_m_inf<T>) {
     return true;
   }
-  if (v2 == MF_T_inf<T> || v2 == -MF_T_inf<T>) {
+  if (v2 == MF_T_inf<T> || v2 == MF_T_m_inf<T>) {
     v1 = v2;
     return true;
   }
@@ -107,7 +115,7 @@ constexpr bool _add(T &v1, T v2)
 template <typename T>
 constexpr bool _subtract(T &v1, T v2)
 {
-  return _add(v1, -v2);
+  return _add(v1, v2 == MF_T_inf<T> ? MF_T_m_inf<T> : (v2 == MF_T_m_inf<T> ? MF_T_inf<T> : -v2));
 };
 
 /**
@@ -117,23 +125,23 @@ constexpr bool _subtract(T &v1, T v2)
 template <typename T>
 constexpr bool _multiply(T &v1, T v2)
 {
-  bool v1_is_infinite = v1 == MF_T_inf<T> || v1 == -MF_T_inf<T>;
-  bool v2_is_infinite = v2 == MF_T_inf<T> || v2 == -MF_T_inf<T>;
+  bool v1_is_infinite = v1 == MF_T_inf<T> || v1 == MF_T_m_inf<T>;
+  bool v2_is_infinite = v2 == MF_T_inf<T> || v2 == MF_T_m_inf<T>;
 
   if (_is_nan(v1) || _is_nan(v2) || (v1_is_infinite && v2 == 0) || (v1 == 0 && v2_is_infinite)) {
     v1 = std::numeric_limits<T>::quiet_NaN();
     return false;
   }
 
-  if ((v1 == MF_T_inf<T> && v2 > 0) || (v1 == -MF_T_inf<T> && v2 < 0) || (v1 < 0 && v2 == -MF_T_inf<T>) ||
+  if ((v1 == MF_T_inf<T> && v2 > 0) || (v1 == MF_T_m_inf<T> && v2 < 0) || (v1 < 0 && v2 == MF_T_m_inf<T>) ||
       (v1 > 0 && v2 == MF_T_inf<T>)) {
     v1 = MF_T_inf<T>;
     return true;
   }
 
-  if ((v1 == MF_T_inf<T> && v2 < 0) || (v1 == -MF_T_inf<T> && v2 > 0) || (v1 > 0 && v2 == -MF_T_inf<T>) ||
+  if ((v1 == MF_T_inf<T> && v2 < 0) || (v1 == MF_T_m_inf<T> && v2 > 0) || (v1 > 0 && v2 == MF_T_m_inf<T>) ||
       (v1 < 0 && v2 == MF_T_inf<T>)) {
-    v1 = -MF_T_inf<T>;
+    v1 = MF_T_m_inf<T>;
     return true;
   }
 
@@ -148,8 +156,8 @@ constexpr bool _multiply(T &v1, T v2)
 template <typename T>
 constexpr bool _divide(T &v1, T v2)
 {
-  bool v1_is_infinite = v1 == MF_T_inf<T> || v1 == -MF_T_inf<T>;
-  bool v2_is_infinite = v2 == MF_T_inf<T> || v2 == -MF_T_inf<T>;
+  bool v1_is_infinite = v1 == MF_T_inf<T> || v1 == MF_T_m_inf<T>;
+  bool v2_is_infinite = v2 == MF_T_inf<T> || v2 == MF_T_m_inf<T>;
 
   if (_is_nan(v1) || _is_nan(v2) || v2 == 0 || (v1_is_infinite && v2_is_infinite)) {
     v1 = std::numeric_limits<T>::quiet_NaN();
@@ -159,7 +167,7 @@ constexpr bool _divide(T &v1, T v2)
   if (v1 == 0 || (v1_is_infinite && v2 > 0)) return true;
 
   if (v1_is_infinite && v2 < 0) {
-    v1 = -v1;
+    v1 = v1 == MF_T_inf<T> ? MF_T_m_inf<T> : (v1 == MF_T_m_inf<T> ? MF_T_inf<T> : -v1);
     return true;
   }
 

@@ -438,59 +438,22 @@ class Degree_rips_bifiltration
    * @brief Returns a copy with entries casted into the type given as template parameter.
    *
    * @tparam U New type for the entries.
+   * @tparam OCo New value for `Co`. Default value: `Co`.
+   * @tparam OEns New value for `Ensure1Criticality`. Note that if `OEns` is set to true and the value is not
+   * 1-critical, the method will throw. Default value: `Ensure1Criticality`.
    * @return Copy with new entry type.
    */
-  template <typename U>
-  Degree_rips_bifiltration<U, Co, Ensure1Criticality> as_type() const
+  template <typename U, bool OCo = Co, bool OEns = Ensure1Criticality>
+  Degree_rips_bifiltration<U, OCo, OEns> as_type() const
   {
     std::vector<U> out(generators_.begin(), generators_.end());
-    return Degree_rips_bifiltration<U, Co, Ensure1Criticality>(std::move(out), num_parameters());
+    return Degree_rips_bifiltration<U, OCo, OEns>(std::move(out), num_parameters());
   }
 
   /**
-   * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
-   */
-  Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_multi_parameter_filtration() const
-  {
-    if (generators_.empty()) return Multi_parameter_filtration<T, Co, Ensure1Criticality>(0);
-
-    auto gen_index = [&](size_type i) {
-      if constexpr (Co) {
-        return generators_.size() - 1 - i;
-      } else {
-        return i;
-      }
-    };
-
-    std::vector<T> out;
-    out.reserve(generators_.size() * 2);
-    T threshold = generators_[gen_index(0)];
-    out.push_back(gen_index(0));
-    out.push_back(threshold);
-    for (size_type i = 1; i < generators_.size(); ++i) {
-      size_type g = gen_index(i);
-      if (_strictly_dominates(threshold, generators_[g])) {
-        threshold = generators_[g];
-        out.push_back(g);
-        out.push_back(threshold);
-      }
-    }
-    if constexpr (Co) {
-      // lexicographical order
-      const size_type max_idx = out.size() - 1;
-      for (size_type i = 0; i < out.size() / 2; i += 2) {
-        std::swap(out[i], out[max_idx - 1 - i]);
-        std::swap(out[i + 1], out[max_idx - i]);
-      }
-    }
-
-    return Multi_parameter_filtration<T, Co, Ensure1Criticality>(std::move(out), 2);
-  }
-
-  /**
-   * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
+   * @brief Converts the filtration value to @ref Multi_parameter_filtration without any set simplification.
    * @warning The filtration value is converted one to one and is not simplified to a minimal set of generators,
-   * that undefines the behaviour of some methods of the class. Use @ref convert_to_multi_parameter_filtration()
+   * that undefines the behaviour of some methods of the class. Use @ref as_type(const Degree_rips_bifiltration&)
    * instead if needed.
    */
   Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_non_simplified_multi_parameter_filtration() const
@@ -506,44 +469,9 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
-   */
-  Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_dynamic_multi_parameter_filtration() const
-  {
-    if (generators_.empty()) return Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>(0);
-
-    auto gen_index = [&](size_type i) {
-      if constexpr (Co) {
-        return generators_.size() - 1 - i;
-      } else {
-        return i;
-      }
-    };
-
-    std::vector<Multi_parameter_generator<T> > out;
-    out.reserve(generators_.size());
-    T threshold = generators_[gen_index(0)];
-    out.emplace_back(std::vector<T>{static_cast<T>(gen_index(0)), threshold});
-    for (size_type i = 1; i < generators_.size(); ++i) {
-      size_type g = gen_index(i);
-      if (_strictly_dominates(threshold, generators_[g])) {
-        threshold = generators_[g];
-        std::vector<T> v = {static_cast<T>(g), threshold};
-        out.emplace_back(std::move(v));
-      }
-    }
-    if constexpr (Co) {
-      // lexicographical order
-      std::reverse(out.begin(), out.end());
-    }
-
-    return Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>(std::move(out), 2);
-  }
-
-  /**
-   * @brief Converts the filtration value to @ref Multi_parameter_filtration "".
+   * @brief Converts the filtration value to @ref Dynamic_multi_parameter_filtration without any set simplification.
    * @warning The filtration value is converted one to one and is not simplified to a minimal set of generators,
-   * that undefines the behaviour of some methods of the class. Use @ref convert_to_dynamic_multi_parameter_filtration()
+   * that undefines the behaviour of some methods of the class. Use @ref as_type(const Degree_rips_bifiltration&)
    * instead if needed.
    */
   Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>
@@ -593,7 +521,7 @@ class Degree_rips_bifiltration
    */
   static Degree_rips_bifiltration minus_inf(int number_of_parameters = 2)
   {
-    return Degree_rips_bifiltration(number_of_parameters, -T_inf);
+    return Degree_rips_bifiltration(number_of_parameters, T_m_inf);
   }
 
   /**
@@ -610,6 +538,11 @@ class Degree_rips_bifiltration
    * @brief Returns value of `Ensure1Criticality`.
    */
   static constexpr bool ensures_1_criticality() { return Ensure1Criticality; }
+
+  /**
+   * @brief Returns value of `Co`.
+   */
+  static constexpr bool has_negative_cones() { return Co; }
 
   /**
    * @brief Returns `true` if and only if the filtration value is considered as plus infinity.
@@ -633,9 +566,9 @@ class Degree_rips_bifiltration
   constexpr bool is_minus_inf() const
   {
     if constexpr (Co) {
-      return generators_.size() == 1 && generators_[0] == -T_inf;
+      return generators_.size() == 1 && generators_[0] == T_m_inf;
     } else {
-      return !generators_.empty() && generators_[0] == -T_inf;
+      return !generators_.empty() && generators_[0] == T_m_inf;
     }
   }
 
@@ -651,9 +584,9 @@ class Degree_rips_bifiltration
   bool is_finite() const
   {
     if constexpr (Co) {
-      return !generators_.empty() && (generators_.size() != 1 || generators_[0] != -T_inf);
+      return !generators_.empty() && (generators_.size() != 1 || generators_[0] != T_m_inf);
     } else {
-      if (generators_.empty() || generators_[0] == -T_inf) return false;
+      if (generators_.empty() || generators_[0] == T_m_inf) return false;
       for (const T &v : generators_) {
         if (v != T_inf) return true;
       }
@@ -819,8 +752,17 @@ class Degree_rips_bifiltration
    */
   friend Degree_rips_bifiltration operator-(const Degree_rips_bifiltration &f)
   {
+    using F = Degree_rips_bifiltration;
+
     Underlying_container result(f.generators_);
-    std::for_each(result.begin(), result.end(), [](T &v) { v = -v; });
+    std::for_each(result.begin(), result.end(), [](T &v) {
+      if (v == F::T_inf)
+        v = F::T_m_inf;
+      else if (v == F::T_m_inf)
+        v = F::T_inf;
+      else
+        v = -v;
+    });
     return Degree_rips_bifiltration(std::move(result), Degree_rips_bifiltration::num_parameters());
   }
 
@@ -1586,12 +1528,12 @@ class Degree_rips_bifiltration
       newVal = *it;
     }
 
-    if (newVal == -T_inf || _is_nan(newVal)) return false;
+    if (newVal == T_m_inf || _is_nan(newVal)) return false;
 
     bool modified = false;
 
     for (T &v : generators_) {
-      if (!_is_nan(v) && v < newVal && (!exclude_infinite_values || (v != T_inf && v != -T_inf))) {
+      if (!_is_nan(v) && v < newVal && (!exclude_infinite_values || (v != T_inf && v != T_m_inf))) {
         modified = true;
         v = newVal;
       }
@@ -1641,7 +1583,7 @@ class Degree_rips_bifiltration
     bool modified = false;
 
     for (T &v : generators_) {
-      if (!_is_nan(v) && v > newVal && (!exclude_infinite_values || (v != T_inf && v != -T_inf))) {
+      if (!_is_nan(v) && v > newVal && (!exclude_infinite_values || (v != T_inf && v != T_m_inf))) {
         modified = true;
         v = newVal;
       }
@@ -1715,7 +1657,7 @@ class Degree_rips_bifiltration
     if (f.num_generators() <= 1) return f;
 
     bool nan = true;
-    Underlying_container result(1, -T_inf);
+    Underlying_container result(1, T_m_inf);
     for (const T &v : f.generators_) {
       if (!_is_nan(v)) {
         nan = false;
@@ -2062,9 +2004,14 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Infinity value of an entry of the filtration value.
+   * @brief plus infinity value of an entry of the filtration value.
    */
   constexpr static const T T_inf = MF_T_inf<T>;
+
+  /**
+   * @brief Minus infinity value of an entry of the filtration value.
+   */
+  constexpr static const T T_m_inf = MF_T_m_inf<T>;
 
  private:
   Underlying_container generators_; /**< Container of the filtration value elements. */
@@ -2073,7 +2020,7 @@ class Degree_rips_bifiltration
   /**
    * @brief Default value of an element in the filtration value.
    */
-  constexpr static T _get_default_value() { return Co ? T_inf : -T_inf; }
+  constexpr static T _get_default_value() { return Co ? T_inf : T_m_inf; }
 
   // <
   static bool _compare_strict(size_type i, const Underlying_container &a, const Underlying_container &b, T threshold)

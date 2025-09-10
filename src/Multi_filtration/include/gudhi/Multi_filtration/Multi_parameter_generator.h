@@ -298,7 +298,7 @@ class Multi_parameter_generator
   /**
    * @brief Returns a generator for which @ref is_minus_inf() returns `true`.
    */
-  static Multi_parameter_generator minus_inf() { return Multi_parameter_generator(1, -T_inf); }
+  static Multi_parameter_generator minus_inf() { return Multi_parameter_generator(1, T_m_inf); }
 
   /**
    * @brief Returns a generator for which @ref is_nan() returns `true`.
@@ -331,7 +331,7 @@ class Multi_parameter_generator
   [[nodiscard]] bool is_minus_inf() const
   {
     for (const T &v : generator_) {
-      if (v != -T_inf) return false;
+      if (v != T_m_inf) return false;
     }
     return !generator_.empty();
   }
@@ -360,7 +360,7 @@ class Multi_parameter_generator
     bool isInf = true, isMinusInf = true, isNan = true;
     for (const auto &v : generator_) {
       if (v != T_inf) isInf = false;
-      if (v != -T_inf) isMinusInf = false;
+      if (v != T_m_inf) isMinusInf = false;
       if (!_is_nan(v)) isNan = false;
       if (!isInf && !isMinusInf && !isNan) return true;
     }
@@ -479,8 +479,17 @@ class Multi_parameter_generator
    */
   friend Multi_parameter_generator operator-(const Multi_parameter_generator &g)
   {
+    using F = Multi_parameter_generator;
+
     std::vector<T> result(g.generator_);
-    std::for_each(result.begin(), result.end(), [](T &v) { v = -v; });
+    std::for_each(result.begin(), result.end(), [](T &v) {
+      if (v == F::T_inf)
+        v = F::T_m_inf;
+      else if (v == F::T_m_inf)
+        v = F::T_inf;
+      else
+        v = -v;
+    });
     return Multi_parameter_generator(std::move(result));
   }
 
@@ -1273,7 +1282,7 @@ class Multi_parameter_generator
       auto it = x.begin();
       for (size_type p = 0; p < generator_.size(); ++p) {
         T valX = *it;
-        if (!exclude_infinite_values || (valX != T_inf && valX != -T_inf)) {
+        if (!exclude_infinite_values || (valX != T_inf && valX != T_m_inf)) {
           modified |= generator_[p] < valX;
           generator_[p] = valX > generator_[p] ? valX : generator_[p];
         }
@@ -1322,7 +1331,7 @@ class Multi_parameter_generator
       auto it = x.begin();
       for (size_type p = 0; p < generator_.size() && it != x.end(); ++p) {
         T valX = *it;
-        if (!exclude_infinite_values || (valX != T_inf && valX != -T_inf)) {
+        if (!exclude_infinite_values || (valX != T_inf && valX != T_m_inf)) {
           modified |= generator_[p] > valX;
           generator_[p] = valX < generator_[p] ? valX : generator_[p];
         }
@@ -1592,9 +1601,14 @@ class Multi_parameter_generator
   }
 
   /**
-   * @brief Infinity value of an entry of the filtration value.
+   * @brief Plus infinity value of an entry of the filtration value.
    */
   constexpr static const T T_inf = MF_T_inf<T>;
+
+  /**
+   * @brief Minus infinity value of an entry of the filtration value.
+   */
+  constexpr static const T T_m_inf = MF_T_m_inf<T>;
 
  private:
   Underlying_container generator_; /**< Container of the filtration value elements. */
@@ -1602,7 +1616,7 @@ class Multi_parameter_generator
   /**
    * @brief Default value of an element in the filtration value.
    */
-  constexpr static T _get_default_value() { return -T_inf; }
+  constexpr static T _get_default_value() { return T_m_inf; }
 
   /**
    * @brief Applies operation on the elements of the filtration value.
@@ -1625,7 +1639,7 @@ class Multi_parameter_generator
       for (size_type p = 0; p < generator_.size() && it != range.end(); ++p) {
         bool isNotNaN = std::forward<F>(operate)(generator_[p], *it);
         if (generator_[p] != T_inf) allPlusInf = false;
-        if (generator_[p] != -T_inf) allMinusInf = false;
+        if (generator_[p] != T_m_inf) allMinusInf = false;
         if (isNotNaN) allNaN = false;
         ++it;
       }
