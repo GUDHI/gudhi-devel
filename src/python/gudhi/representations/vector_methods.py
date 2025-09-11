@@ -1023,7 +1023,7 @@ class Atol(BaseEstimator, TransformerMixin):
         Apply measure vectorisation on a list of measures.
 
         Parameters:
-            X (list N x d numpy arrays): input measures in R^d from which to learn center locations and inertias
+            X (list N x d numpy arrays): input measures in R^d to be vectorized,
                 (measures can have different N).
             sample_weight (list of numpy arrays): weights for each measure point in X, optional.
                 If None, the object's weighting_method will be used.
