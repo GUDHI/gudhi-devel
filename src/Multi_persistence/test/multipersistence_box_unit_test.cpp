@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
   P nan = {
       std::numeric_limits<T>::quiet_NaN(), std::numeric_limits<T>::quiet_NaN(), std::numeric_limits<T>::quiet_NaN()};
   P inf = {P::T_inf, P::T_inf, P::T_inf};
-  P minus_inf = {-P::T_inf, -P::T_inf, -P::T_inf};
+  P minus_inf = {P::T_m_inf, P::T_m_inf, P::T_m_inf};
 
   Box<T> b({0, 1, 2}, {4, 5, 6});
 

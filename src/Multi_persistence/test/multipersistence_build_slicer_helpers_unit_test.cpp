@@ -343,13 +343,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_simplex_tree_io, Fil, list_of_tested_varian
 
   auto cpx = build_complex_from_simplex_tree(simplexTree);
 
-  BC bc = {{},     {},     {},          {},           {},         {},          {},         {3, 6},
-           {0, 1}, {0, 3}, {1, 3},      {0, 6},       {1, 6},     {0, 5},      {4, 6},     {4, 5},
-           {2, 5}, {2, 4}, {8, 11, 12}, {15, 16, 17}, {7, 9, 11}, {7, 10, 12}, {8, 9, 10}, {18, 20, 21, 22}};
+  BC bc = {{},     {},     {},        {},           {},           {},           {},           {0, 1},
+           {0, 2}, {1, 2}, {1, 3},    {2, 6},       {3, 4},       {3, 5},       {3, 6},       {4, 5},
+           {4, 6}, {5, 6}, {7, 8, 9}, {12, 13, 15}, {12, 14, 16}, {13, 14, 17}, {15, 16, 17}, {19, 20, 21, 22}};
   DC dc = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3};
-  FC fc = {ini{0, 1}, ini{0, 4}, ini{0, 2}, ini{0, 4}, ini{0, 2}, ini{0, 1}, ini{0, 4}, ini{0, 5},
-           ini{0, 4}, ini{0, 4}, ini{0, 4}, ini{0, 5}, ini{0, 5}, ini{0, 1}, ini{0, 4}, ini{0, 2},
-           ini{0, 2}, ini{0, 2}, ini{0, 5}, ini{0, 2}, ini{0, 5}, ini{0, 5}, ini{0, 4}, ini{0, 5}};
+  FC fc = {ini{0, 2}, ini{0, 2}, ini{0, 1}, ini{0, 4}, ini{0, 4}, ini{0, 4}, ini{0, 1}, ini{0, 2},
+           ini{0, 2}, ini{0, 2}, ini{0, 4}, ini{0, 1}, ini{0, 5}, ini{0, 5}, ini{0, 5}, ini{0, 4},
+           ini{0, 4}, ini{0, 4}, ini{0, 2}, ini{0, 5}, ini{0, 5}, ini{0, 5}, ini{0, 4}, ini{0, 5}};
 
   BOOST_CHECK(bc == cpx.get_boundaries());
   BOOST_CHECK(dc == cpx.get_dimensions());
