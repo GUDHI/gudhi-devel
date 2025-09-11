@@ -345,7 +345,6 @@ workflows:
       - python_without_cgal
       - examples
       - tests
-      - debug_tests
       - utils
       - python
       - doxygen
