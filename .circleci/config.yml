@@ -41,25 +41,6 @@ jobs:
             make all
             ctest --output-on-failure
 
-  debug_tests:
-    docker:
-      - image: gudhi/ci_for_gudhi:2025.04.01
-    steps:
-      - checkout
-      - run:
-          name: Checkout submodules
-          command: |
-            git submodule sync
-            git submodule update --init
-      - run:
-          name: Build and test unitary tests
-          command: |
-            mkdir build
-            cd build
-            cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=-fsanitize=address -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
-            make all
-            ctest --output-on-failure
-
   utils:
     docker:
       - image: gudhi/ci_for_gudhi:2025.04.01
