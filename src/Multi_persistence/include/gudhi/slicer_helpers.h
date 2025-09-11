@@ -181,7 +181,7 @@ inline Multi_parameter_filtered_complex<MultiFiltrationValue> build_complex_from
       std::size_t next = line.find_first_of(' ', current);
       res.push_back(std::stod(line.substr(current, next - current)));
       if (isPlusInf && res.back() != Fil::T_inf) isPlusInf = false;
-      if (isMinusInf && res.back() != -Fil::T_inf) isMinusInf = false;
+      if (isMinusInf && res.back() != Fil::T_m_inf) isMinusInf = false;
       current = line.find_first_not_of(' ', next);
     }
     if (isPlusInf) return Fil::inf(numberOfParameters);
@@ -512,7 +512,8 @@ inline Multi_parameter_filtered_complex<typename SimplexTreeOptions::Filtration_
   std::vector<unsigned int> newToOldIndex(numberOfSimplices);
   std::vector<unsigned int> oldToNewIndex(numberOfSimplices);
   std::iota(newToOldIndex.begin(), newToOldIndex.end(), 0);
-  std::sort(newToOldIndex.begin(), newToOldIndex.end(), [&dimensions](unsigned int i, unsigned int j) {
+  // stable sort to make the new complex more predicable and closer to a lexicographical sort in addition to dimension
+  std::stable_sort(newToOldIndex.begin(), newToOldIndex.end(), [&dimensions](unsigned int i, unsigned int j) {
     return dimensions[i] < dimensions[j];
   });
   // Is there a way to directly get oldToNewIndex without constructing newToOldIndex?

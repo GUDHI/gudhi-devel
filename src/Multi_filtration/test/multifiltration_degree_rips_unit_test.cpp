@@ -27,10 +27,12 @@
 #include <gudhi/Simplex_tree/filtration_value_utils.h>
 #include <gudhi/Multi_parameter_filtration.h>
 #include <gudhi/Dynamic_multi_parameter_filtration.h>
+#include <gudhi/Multi_filtration/multi_filtration_conversions.h>
 
 using Gudhi::multi_filtration::Degree_rips_bifiltration;
 using Gudhi::multi_filtration::Multi_parameter_filtration;
 using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
+using Gudhi::multi_filtration::as_type;
 
 typedef boost::mpl::list<double, float, int> list_of_tested_variants;
 
@@ -41,7 +43,7 @@ void test_constructors(){
   BOOST_CHECK_EQUAL(f0.num_generators(), 1);
   BOOST_CHECK_EQUAL(f0.num_parameters(), 2);
   BOOST_CHECK_EQUAL(f0(0,0), 0);
-  BOOST_CHECK_EQUAL(f0(0,1), -F::T_inf);
+  BOOST_CHECK_EQUAL(f0(0,1), F::T_m_inf);
 
   F f01(Gudhi::simplex_tree::empty_filtration_value_t{});
   BOOST_CHECK_EQUAL(f01.num_entries(), 0);
@@ -54,7 +56,7 @@ void test_constructors(){
   BOOST_CHECK_EQUAL(f1.num_generators(), 1);
   BOOST_CHECK_EQUAL(f1.num_parameters(), 2);
   BOOST_CHECK_EQUAL((f1[{0,0}]), 0);
-  BOOST_CHECK_EQUAL((f1[{0,1}]), -F::T_inf);
+  BOOST_CHECK_EQUAL((f1[{0,1}]), F::T_m_inf);
   
   F f2(3, 0);
   BOOST_CHECK_EQUAL(f2.num_entries(), 2);
@@ -160,7 +162,7 @@ void test_constructors(){
     BOOST_CHECK_EQUAL(f8.num_generators(), 1);
     BOOST_CHECK_EQUAL(f8.num_parameters(), 2);
     BOOST_CHECK_EQUAL(f8(0,0), 0);
-    BOOST_CHECK_EQUAL(f8(0,1), -F::T_inf);
+    BOOST_CHECK_EQUAL(f8(0,1), F::T_m_inf);
     BOOST_CHECK_EQUAL(f0.num_entries(), 6);
     BOOST_CHECK_EQUAL(f0.num_generators(), 3);
     BOOST_CHECK_EQUAL(f0.num_parameters(), 2);
@@ -536,7 +538,7 @@ void test_operators(){
 
   F f({0, -1});
   F f2({0, 2});
-  F f3({0, -F::T_inf});
+  F f3({0, F::T_m_inf});
   F f4({0, F::T_inf});
   // TODO: tests with more than 1 generator
 
@@ -642,11 +644,11 @@ void test_operators(){
 
   res = f * F::inf(num_param);
   BOOST_CHECK_EQUAL(res(0,0), 0);
-  BOOST_CHECK_EQUAL(res(0,1), -F::T_inf);
+  BOOST_CHECK_EQUAL(res(0,1), F::T_m_inf);
 
   res = F::inf(num_param) * f;
   BOOST_CHECK_EQUAL(res(0,0), 0);
-  BOOST_CHECK_EQUAL(res(0,1), -F::T_inf);
+  BOOST_CHECK_EQUAL(res(0,1), F::T_m_inf);
 
   res = f * F::minus_inf(num_param);
   BOOST_CHECK_EQUAL(res(0,0), 0);
@@ -875,9 +877,9 @@ void test_modifiers(){
     BOOST_CHECK_EQUAL(f(2, 0), 2);
     BOOST_CHECK_EQUAL(f(2, 1), 9);
     BOOST_CHECK_EQUAL(f(3, 0), 3);
-    BOOST_CHECK_EQUAL(f(3, 1), -F::T_inf);
+    BOOST_CHECK_EQUAL(f(3, 1), F::T_m_inf);
     BOOST_CHECK_EQUAL(f(4, 0), 4);
-    BOOST_CHECK_EQUAL(f(4, 1), -F::T_inf);
+    BOOST_CHECK_EQUAL(f(4, 1), F::T_m_inf);
   }
 }
 
@@ -944,12 +946,12 @@ void test_add_generators(){
     BOOST_CHECK_EQUAL(f(1, 1), 2);
   }
 
-  res = f.add_generator({0, -F::T_inf});
+  res = f.add_generator({0, F::T_m_inf});
   BOOST_CHECK(res);
   BOOST_CHECK_EQUAL(f.num_generators(), 2);
   BOOST_CHECK_EQUAL(f.num_parameters(), num_param);
   BOOST_CHECK_EQUAL(f(0, 0), 0);
-  BOOST_CHECK_EQUAL(f(0, 1), -F::T_inf);
+  BOOST_CHECK_EQUAL(f(0, 1), F::T_m_inf);
   BOOST_CHECK_EQUAL(f(1, 0), 1);
   BOOST_CHECK_EQUAL(f(1, 1), 2);
 }
@@ -1255,6 +1257,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_numerical_limits, T, list
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_converters, T, list_of_tested_variants)
 {
+  T inf = Degree_rips_bifiltration<T>::T_inf;
+
   std::vector<T> v = {5, 6, 3, 4};
   Degree_rips_bifiltration<T> f(std::move(v), 2);
   BOOST_CHECK(f.num_parameters() == 2);
@@ -1268,7 +1272,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_converters, T, list_of_te
   BOOST_CHECK_EQUAL(f(3,0), 3);
   BOOST_CHECK_EQUAL(f(3,1), 4);
 
-  Multi_parameter_filtration<T> f11 = f.convert_to_multi_parameter_filtration();
+  Multi_parameter_filtration<T> f11 = as_type<Multi_parameter_filtration<T> >(f);
   BOOST_CHECK(f11.num_parameters() == 2);
   BOOST_CHECK(f11.num_generators() == 2);
   BOOST_CHECK_EQUAL(f11(0,0), 0);
@@ -1288,7 +1292,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_converters, T, list_of_te
   BOOST_CHECK_EQUAL(f12(3,0), 3);
   BOOST_CHECK_EQUAL(f12(3,1), 4);
 
-  Dynamic_multi_parameter_filtration<T> f21 = f.convert_to_dynamic_multi_parameter_filtration();
+  Degree_rips_bifiltration<T> f13 = as_type<Degree_rips_bifiltration<T> >(f11);
+  BOOST_CHECK(f13.num_parameters() == 2);
+  BOOST_CHECK(f13.num_generators() == 3);
+  BOOST_CHECK_EQUAL(f13(0,0), 0);
+  BOOST_CHECK_EQUAL(f13(0,1), 5);
+  BOOST_CHECK_EQUAL(f13(1,0), 1);
+  BOOST_CHECK_EQUAL(f13(1,1), inf);
+  BOOST_CHECK_EQUAL(f13(2,0), 2);
+  BOOST_CHECK_EQUAL(f13(2,1), 3);
+
+  Dynamic_multi_parameter_filtration<T> f21 = as_type<Dynamic_multi_parameter_filtration<T> >(f);
   BOOST_CHECK(f21.num_parameters() == 2);
   BOOST_CHECK(f21.num_generators() == 2);
   BOOST_CHECK_EQUAL(f21(0,0), 0);
@@ -1307,10 +1321,22 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_converters, T, list_of_te
   BOOST_CHECK_EQUAL(f22(2,1), 3);
   BOOST_CHECK_EQUAL(f22(3,0), 3);
   BOOST_CHECK_EQUAL(f22(3,1), 4);
+
+  Degree_rips_bifiltration<T> f23 = as_type<Degree_rips_bifiltration<T> >(f21);
+  BOOST_CHECK(f23.num_parameters() == 2);
+  BOOST_CHECK(f23.num_generators() == 3);
+  BOOST_CHECK_EQUAL(f23(0,0), 0);
+  BOOST_CHECK_EQUAL(f23(0,1), 5);
+  BOOST_CHECK_EQUAL(f23(1,0), 1);
+  BOOST_CHECK_EQUAL(f23(1,1), inf);
+  BOOST_CHECK_EQUAL(f23(2,0), 2);
+  BOOST_CHECK_EQUAL(f23(2,1), 3);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_converters_co, T, list_of_tested_variants)
 {
+  T inf = Degree_rips_bifiltration<T>::T_m_inf;
+
   std::vector<T> v = {5, 6, 3, 4};
   Degree_rips_bifiltration<T, true> f(std::move(v), 2);
   BOOST_CHECK(f.num_parameters() == 2);
@@ -1324,7 +1350,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_converters_co, T, list_of
   BOOST_CHECK_EQUAL(f(3,0), 3);
   BOOST_CHECK_EQUAL(f(3,1), 4);
 
-  Multi_parameter_filtration<T, true> f11 = f.convert_to_multi_parameter_filtration();
+  Multi_parameter_filtration<T, true> f11 = as_type<Multi_parameter_filtration<T, true> >(f);
   BOOST_CHECK(f11.num_parameters() == 2);
   BOOST_CHECK(f11.num_generators() == 2);
   BOOST_CHECK_EQUAL(f11(0,0), 1);
@@ -1344,7 +1370,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_converters_co, T, list_of
   BOOST_CHECK_EQUAL(f12(3,0), 3);
   BOOST_CHECK_EQUAL(f12(3,1), 4);
 
-  Dynamic_multi_parameter_filtration<T, true> f21 = f.convert_to_dynamic_multi_parameter_filtration();
+  Degree_rips_bifiltration<T, true> f13 = as_type<Degree_rips_bifiltration<T, true> >(f11);
+  BOOST_CHECK(f13.num_parameters() == 2);
+  BOOST_CHECK(f13.num_generators() == 4);
+  BOOST_CHECK_EQUAL(f13(0,0), 0);
+  BOOST_CHECK_EQUAL(f13(0,1), inf);
+  BOOST_CHECK_EQUAL(f13(1,0), 1);
+  BOOST_CHECK_EQUAL(f13(1,1), 6);
+  BOOST_CHECK_EQUAL(f13(2,0), 2);
+  BOOST_CHECK_EQUAL(f13(2,1), inf);
+  BOOST_CHECK_EQUAL(f13(3,0), 3);
+  BOOST_CHECK_EQUAL(f13(3,1), 4);
+
+  Dynamic_multi_parameter_filtration<T, true> f21 = as_type<Dynamic_multi_parameter_filtration<T, true> >(f);
   BOOST_CHECK(f21.num_parameters() == 2);
   BOOST_CHECK(f21.num_generators() == 2);
   BOOST_CHECK_EQUAL(f21(0,0), 1);
@@ -1363,5 +1401,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_converters_co, T, list_of
   BOOST_CHECK_EQUAL(f22(2,1), 3);
   BOOST_CHECK_EQUAL(f22(3,0), 3);
   BOOST_CHECK_EQUAL(f22(3,1), 4);
+
+  Degree_rips_bifiltration<T, true> f23 = as_type<Degree_rips_bifiltration<T, true> >(f21);
+  BOOST_CHECK(f23.num_parameters() == 2);
+  BOOST_CHECK(f23.num_generators() == 4);
+  BOOST_CHECK_EQUAL(f23(0,0), 0);
+  BOOST_CHECK_EQUAL(f23(0,1), inf);
+  BOOST_CHECK_EQUAL(f23(1,0), 1);
+  BOOST_CHECK_EQUAL(f23(1,1), 6);
+  BOOST_CHECK_EQUAL(f23(2,0), 2);
+  BOOST_CHECK_EQUAL(f23(2,1), inf);
+  BOOST_CHECK_EQUAL(f23(3,0), 3);
+  BOOST_CHECK_EQUAL(f23(3,1), 4);
 }
 

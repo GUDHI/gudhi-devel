@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_intersections, T, list_of_tested_variants)
 {
   using F = Multi_parameter_filtration<T>;
   Point<T> p_inf = {Point<T>::T_inf, Point<T>::T_inf, Point<T>::T_inf};
-  Point<T> p_minus_inf = {-Point<T>::T_inf, -Point<T>::T_inf, -Point<T>::T_inf};
+  Point<T> p_minus_inf = {Point<T>::T_m_inf, Point<T>::T_m_inf, Point<T>::T_m_inf};
 
   const double inf = std::numeric_limits<double>::infinity();
 
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_intersections, T, list_of_tested_variants)
 
   bounds = l.get_bounds({{-10, 0, 10}, {10, 1, 10}});
   BOOST_CHECK_EQUAL(bounds.first, F::T_inf);
-  BOOST_CHECK_EQUAL(bounds.second, -F::T_inf);
+  BOOST_CHECK_EQUAL(bounds.second, F::T_m_inf);
   BOOST_CHECK(l[bounds.first] == p_inf);
   BOOST_CHECK(l[bounds.second] == p_minus_inf);
 }

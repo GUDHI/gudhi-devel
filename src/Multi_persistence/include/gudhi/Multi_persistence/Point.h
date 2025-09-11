@@ -818,9 +818,14 @@ class Point
   }
 
   /**
-   * @brief Infinity value of an entry of the filtration value.
+   * @brief Plus infinity value of an entry of the filtration value.
    */
   constexpr static const T T_inf = Gudhi::multi_filtration::MF_T_inf<T>;
+
+  /**
+   * @brief Minus infinity value of an entry of the filtration value.
+   */
+  constexpr static const T T_m_inf = Gudhi::multi_filtration::MF_T_m_inf<T>;
 
  private:
   Container coordinates_; /**< Coordinates of the point. */

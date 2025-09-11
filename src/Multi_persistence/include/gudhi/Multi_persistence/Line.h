@@ -87,7 +87,7 @@ class Line
     GUDHI_CHECK(direction_.size() == 0 || direction_.size() == basePoint_.size(),
                 "Direction and base point do not have the same dimension.");
 
-    if (Gudhi::multi_filtration::_is_nan(t) || t == Point_t::T_inf || t == -Point_t::T_inf)
+    if (Gudhi::multi_filtration::_is_nan(t) || t == Point_t::T_inf || t == Point_t::T_m_inf)
       return Point_t(basePoint_.size(), t);
 
     Point_t x(basePoint_.size());
@@ -143,7 +143,7 @@ class Line
 
     constexpr const U inf = Point<U>::T_inf;
 
-    U t = -inf;
+    U t = Point<U>::T_m_inf;
     for (unsigned int p = 0; p < x.size(); ++p) {
       if (Gudhi::multi_filtration::_is_nan(x[p])) return inf;
       auto div = direction_.size() == 0 ? 1 : direction_[p];
@@ -177,7 +177,7 @@ class Line
 
     U t = inf;
     for (unsigned int g = 0; g < x.num_generators(); ++g) {
-      U tmp = -inf;
+      U tmp = Point<U>::T_m_inf;
       for (unsigned int p = 0; p < x.num_parameters(); ++p) {
         if (Gudhi::multi_filtration::_is_nan(x(g, p))) return inf;
         auto div = direction_.size() == 0 ? 1 : direction_[p];
@@ -205,14 +205,14 @@ class Line
   {
     GUDHI_CHECK(basePoint_.size() == x.size(), "x has not as many parameters as the line.");
 
-    constexpr const U inf = Point<U>::T_inf;
+    constexpr const U m_inf = Point<U>::T_m_inf;
 
-    U t = inf;
+    U t = Point<U>::T_inf;
     for (unsigned int p = 0; p < x.size(); ++p) {
-      if (Gudhi::multi_filtration::_is_nan(x[p])) return -inf;
+      if (Gudhi::multi_filtration::_is_nan(x[p])) return m_inf;
       auto div = direction_.size() == 0 ? 1 : direction_[p];
       if (div == 0) {
-        if (x[p] <= basePoint_[p]) return -inf;
+        if (x[p] <= basePoint_[p]) return m_inf;
       } else {
         t = std::min(t, (static_cast<U>(x[p]) - static_cast<U>(basePoint_[p])) / static_cast<U>(div));
       }
@@ -236,16 +236,16 @@ class Line
   {
     GUDHI_CHECK(basePoint_.size() == x.num_parameters(), "x has not as many parameters as the line.");
 
-    constexpr const U inf = Point<U>::T_inf;
+    constexpr const U m_inf = Point<U>::T_m_inf;
 
-    U t = -inf;
+    U t = m_inf;
     for (unsigned int g = 0; g < x.num_generators(); ++g) {
-      U tmp = inf;
+      U tmp = Point<U>::T_inf;
       for (unsigned int p = 0; p < x.num_parameters(); ++p) {
-        if (Gudhi::multi_filtration::_is_nan(x(g, p))) return -inf;
+        if (Gudhi::multi_filtration::_is_nan(x(g, p))) return m_inf;
         auto div = direction_.size() == 0 ? 1 : direction_[p];
         if (div == 0) {
-          if (x(g, p) <= basePoint_[p]) tmp = -inf;
+          if (x(g, p) <= basePoint_[p]) tmp = m_inf;
         } else {
           tmp = std::min(tmp, (static_cast<U>(x(g, p)) - static_cast<U>(basePoint_[p])) / static_cast<U>(div));
         }
@@ -265,12 +265,12 @@ class Line
    */
   std::pair<T, T> get_bounds(const Box<T> &box) const
   {
-    if (box.is_trivial()) return {Point_t::T_inf, -Point_t::T_inf};
+    if (box.is_trivial()) return {Point_t::T_inf, Point_t::T_m_inf};
 
     T bottom = compute_forward_intersection(box.get_lower_corner());
     T top = compute_backward_intersection(box.get_upper_corner());
 
-    if (bottom > top) return {Point_t::T_inf, -Point_t::T_inf};  // no intersection
+    if (bottom > top) return {Point_t::T_inf, Point_t::T_m_inf};  // no intersection
 
     return {bottom, top};
   }

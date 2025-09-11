@@ -113,6 +113,7 @@ class Box
     if (lowerCorner_.size() != upperCorner_.size()) return false;  // should not happen?
 
     T inf = Point_t::T_inf;
+    T m_inf = Point_t::T_m_inf;
 
     bool lowerIsInf = true, lowerIsMinusInf = true;
     bool upperIsInf = true, upperIsMinusInf = true;
@@ -121,9 +122,9 @@ class Box
       T uc = upperCorner_[i];
       if (Gudhi::multi_filtration::_is_nan(lc) || Gudhi::multi_filtration::_is_nan(uc)) return true;
       if (lc != inf) lowerIsInf = false;
-      if (lc != -inf) lowerIsMinusInf = false;
+      if (lc != m_inf) lowerIsMinusInf = false;
       if (uc != inf) upperIsInf = false;
-      if (uc != -inf) upperIsMinusInf = false;
+      if (uc != m_inf) upperIsMinusInf = false;
       if ((!lowerIsInf && !lowerIsMinusInf) || (!upperIsInf && !upperIsMinusInf)) return false;
     }
     return (lowerIsInf && upperIsInf) || (lowerIsMinusInf && upperIsMinusInf);
