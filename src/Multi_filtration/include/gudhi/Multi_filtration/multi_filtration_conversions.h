@@ -143,16 +143,16 @@ Out_multi_filtration as_type(const Degree_rips_bifiltration<T, Co, Ensure1Critic
   if constexpr (std::is_same_v<Out_multi_filtration, Degree_rips_bifiltration<U, co, one_crit> >) {
     return f.template as_type<U, co, one_crit>();
   } else {
-    auto gen_index = [&f, co](std::size_t i) {
-      if constexpr (co) {
+    auto gen_index = [&f](std::size_t i) {
+      if constexpr (Out_multi_filtration::has_negative_cones()) {
         return f.num_generators() - 1 - i;
       } else {
         return i;
       }
     };
 
-    auto strictly_dominates = [co](T a, T b) {
-      if constexpr (co) {
+    auto strictly_dominates = [](T a, T b) {
+      if constexpr (Out_multi_filtration::has_negative_cones()) {
         return a < b;
       } else {
         return a > b;
