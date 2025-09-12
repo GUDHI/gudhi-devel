@@ -2004,7 +2004,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief plus infinity value of an entry of the filtration value.
+   * @brief Plus infinity value of an entry of the filtration value.
    */
   constexpr static const T T_inf = MF_T_inf<T>;
 
