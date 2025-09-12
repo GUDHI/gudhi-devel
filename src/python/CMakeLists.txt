@@ -61,11 +61,15 @@ endfunction()
 # THE_TEST is the python test file name (without .py extension) containing tests functions
 function( add_gudhi_py_test THE_TEST )
   if(PYTEST_FOUND)
+    if(CMAKE_BUILD_TYPE MATCHES Debug)
+      # Because of https://github.com/anigmetov/hera/issues/14 hera with test_matching is failing in debug mode
+      set(GUDHI_PYTEST_OPTIONS "-m" "not hera_test_matching")
+    endif()
     # use ${Python_EXECUTABLE} -B, otherwise a __pycache__ directory is created in sources by python
     # use py.test no cache provider, otherwise a .cache file is created in sources by py.test
     add_test(NAME ${THE_TEST}_py_test
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-             COMMAND ${Python_EXECUTABLE} -B -m pytest -p no:cacheprovider ${CMAKE_CURRENT_SOURCE_DIR}/test/${THE_TEST}.py)
+             COMMAND ${Python_EXECUTABLE} -B -m pytest -p no:cacheprovider ${GUDHI_PYTEST_OPTIONS} ${CMAKE_CURRENT_SOURCE_DIR}/test/${THE_TEST}.py)
   endif()
 endfunction( add_gudhi_py_test )
 

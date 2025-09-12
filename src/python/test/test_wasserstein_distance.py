@@ -302,6 +302,7 @@ def test_wasserstein_distance_pot():
     )
 
 
+@pytest.mark.hera_test_matching
 def test_wasserstein_distance_hera():
     _basic_wasserstein(hera_wrap(delta=1e-12), 1e-12, test_matching=True)
     _basic_wasserstein(hera_wrap(delta=0.1), 0.1, test_matching=True)
