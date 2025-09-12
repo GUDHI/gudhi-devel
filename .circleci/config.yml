@@ -89,7 +89,7 @@ jobs:
       - run:
           name: Test python module and generate coverage report. Finaly test python examples
           command: |
-            pwd
+            cd build/version/python
             python -B -m pytest test/*.py --cov-report html --cov=gudhi
             cp -R htmlcov /tmp/htmlcov
             ctest --output-on-failure -E test_
