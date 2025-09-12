@@ -263,5 +263,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(interface_rep_cycles, Interface, list_of_tested_va
     BOOST_CHECK((cycles(5) == Cy{6, 8, 1}));
     BOOST_CHECK((cycles(6) == Cy{10, 11, 9}));
     BOOST_CHECK((cycles(7) == Cy{8, 11, 7}));
+
+    BOOST_CHECK((inter.get_representative_cycle(0, false) == Cy{0}));
+    BOOST_CHECK((inter.get_representative_cycle(1, false) == Cy{0, 5}));
+    BOOST_CHECK((inter.get_representative_cycle(2, false) == Cy{0, 2}));
+    BOOST_CHECK((inter.get_representative_cycle(3, false) == Cy{0, 3}));
+    BOOST_CHECK((inter.get_representative_cycle(4, false) == Cy{0, 4}));
+    BOOST_CHECK((inter.get_representative_cycle(5, false) == Cy{6, 8, 1}));
+    BOOST_CHECK((inter.get_representative_cycle(6, false) == Cy{10, 11, 9}));
+    BOOST_CHECK((inter.get_representative_cycle(7, false) == Cy{8, 11, 7}));
   }
 }

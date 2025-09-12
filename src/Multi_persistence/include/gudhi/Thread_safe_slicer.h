@@ -349,6 +349,11 @@ class Thread_safe_slicer : private Slicer
     return Slicer::_get_representative_cycles(slicer_->complex_, update);
   }
 
+  Cycle get_most_persistent_cycle(Dimension dim = 1, bool update = true)
+  {
+    return Slicer::get_most_persistent_cycle(dim, update);
+  }
+
   // FRIENDS
 
   /**

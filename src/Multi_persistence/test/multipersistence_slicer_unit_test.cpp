@@ -107,6 +107,39 @@ Multi_parameter_filtered_complex<Fil> build_rep_cycle_input_complex()
 }
 
 template <class Fil>
+Multi_parameter_filtered_complex<Fil> build_rep_cycle_input_complex2()
+{
+  using Complex = Multi_parameter_filtered_complex<Fil>;
+  using FC = typename Complex::Filtration_value_container;
+  using BC = typename Complex::Boundary_container;
+  using DC = typename Complex::Dimension_container;
+  using ini = std::initializer_list<T>;
+
+  BC bc = {
+      {}, {}, {}, {}, {}, {0, 4}, {1, 4}, {0, 1}, {2, 4}, {3, 4}, {2, 3}, {1, 3}, {5, 6, 7}, {6, 9, 11}, {8, 9, 10}};
+
+  DC dc = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2};
+
+  FC fc = {ini{0, 0},
+           ini{1, 1},
+           ini{2, 2},
+           ini{3, 3},
+           ini{4, 4},
+           ini{5, 5},
+           ini{6, 6},
+           ini{7, 7},
+           ini{8, 8},
+           ini{9, 9},
+           ini{10, 10},
+           ini{11, 11},
+           ini{12, 12},
+           ini{13, 13},
+           ini{14, 14}};
+
+  return Complex(bc, dc, fc);
+}
+
+template <class Fil>
 Multi_parameter_filtered_complex<Fil> build_simple_input_complex()
 {
   using Complex = Multi_parameter_filtered_complex<Fil>;
@@ -559,6 +592,23 @@ void test_slicer_rep_cycles(Slicer& s)
   BOOST_CHECK(cycles[1][2] == Cycle({6, 9, 11}));
 
   BOOST_CHECK_EQUAL(cycles[2].size(), 0);
+
+  BOOST_CHECK((s.get_most_persistent_cycle(0, false) == Cycle({0})));
+  BOOST_CHECK((s.get_most_persistent_cycle(1, false) == Cycle({6, 9, 11})));
+  BOOST_CHECK((s.get_most_persistent_cycle(2, false) == Cycle()));
+}
+
+template <class Slicer>
+void test_slicer_rep_cycles2(Slicer& s)
+{
+  using Cycle = typename Slicer::Cycle;
+
+  s.set_slice({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14});
+  s.initialize_persistence_computation(false);
+
+  BOOST_CHECK((s.get_most_persistent_cycle(0, true) == Cycle({0})));
+  BOOST_CHECK((s.get_most_persistent_cycle(1, false) == Cycle({5, 6, 7})));
+  BOOST_CHECK((s.get_most_persistent_cycle(2, false) == Cycle()));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_rep_cycles, Slicer, list_of_tested_variants2)
@@ -573,4 +623,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_rep_cycles, Slicer, list_of_tested_variants
   test_slicer_rep_cycles(wc);
   Thread_safe_slicer tss(s);
   test_slicer_rep_cycles(tss);
+
+  cpx = build_rep_cycle_input_complex2<Fil>();
+
+  Slicer s2(cpx);
+  test_slicer_rep_cycles2(s2);
+  Thread_safe_slicer wc2 = s2.weak_copy();
+  test_slicer_rep_cycles2(wc2);
+  Thread_safe_slicer tss2(s2);
+  test_slicer_rep_cycles2(tss2);
 }

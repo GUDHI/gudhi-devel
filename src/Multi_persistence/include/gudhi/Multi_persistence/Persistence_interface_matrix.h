@@ -362,6 +362,36 @@ class Persistence_interface_matrix
                   Cycles_iterator(cycles, *permutation_, idToPosPtr, cycles.size()));
   }
 
+  Cycle get_representative_cycle(Index barcodeIndex, bool update)
+  {
+    static_assert(has_rep_cycles, "`get_representative_cycle` is not enabled with the given options.");
+    GUDHI_CHECK(is_initialized(), "Representative cycles can not be computed uninitialized.");
+
+    auto id_to_index = [&](Index id) -> Index {
+      if constexpr (Options::is_of_boundary_type || !Options::has_vine_update) {
+        // works for RU because id == pos, but does not work for chain with vine
+        // we need a id to pos map in that case
+        return (*permutation_)[id];
+      } else {
+        return (*permutation_)[(*idToPos_)[id]];
+      }
+    };
+
+    if (update) matrix_.update_representative_cycles();
+
+    const auto& c = matrix_.get_representative_cycle(matrix_.get_current_barcode()[barcodeIndex]);
+
+    Cycle cycle(c.size());
+    for (Index i = 0; i < c.size(); ++i) {
+      if constexpr (PosIdxPersistenceMatrixOptions::is_z2) {
+        cycle[i] = id_to_index(c[i]);
+      } else {
+        cycle[i].first = id_to_index(c[i]);
+      }
+    }
+    return cycle;
+  }
+
   /**
    * @brief Outstream operator.
    */
