@@ -1167,7 +1167,7 @@ class Simplex_tree {
      * ensure a valid filtration** at the end of the construction, before any filtration related method is used
      * (@ref filtration_simplex_range for example).
      */
-    IGNORE
+    IGNORE_VALIDITY
   };
 
   // Retro-compatibility
@@ -1204,7 +1204,7 @@ class Simplex_tree {
    * value assigned depends on the choosen strategy:
    * - for @ref Filtration_maintenance::LOWER_EXISTING "": +infinity
    * - for @ref Filtration_maintenance::INCREASE_NEW "": -infinity
-   * - for @ref Filtration_maintenance::IGNORE "": default constructor
+   * - for @ref Filtration_maintenance::IGNORE_VALIDITY "": default constructor
    *
    * See also @ref insert_simplex_and_subfaces(const InputVertexRange&, const Filtration_value&) and
    * @ref insert_simplex_and_subfaces(Filtration_maintenance, const InputVertexRange&, const Filtration_value&).
@@ -1232,7 +1232,7 @@ class Simplex_tree {
           return Filtration_simplex_base_real::get_infinity();
         case Filtration_maintenance::INCREASE_NEW:
           return Filtration_simplex_base_real::get_minus_infinity();
-        case Filtration_maintenance::IGNORE:
+        case Filtration_maintenance::IGNORE_VALIDITY:
           return Filtration_value();
         default:
           throw std::invalid_argument("Given insertion strategy is not available.");
@@ -1290,7 +1290,7 @@ class Simplex_tree {
           return _rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
         case Filtration_maintenance::INCREASE_NEW:
           return _insert_simplex_and_subfaces_at_highest(root(), copy.begin(), copy.end(), filtration);
-        case Filtration_maintenance::IGNORE:
+        case Filtration_maintenance::IGNORE_VALIDITY:
           return _insert_simplex_and_subfaces_forcing_filtration_value(root(), copy.begin(), copy.end(), filtration);
         default:
           throw std::invalid_argument("Given insertion strategy is not available.");

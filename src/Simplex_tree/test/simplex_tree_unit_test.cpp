@@ -754,7 +754,7 @@ void test_possible_strategy(){
 template<class typeST>
 void test_force_strategy(){
   typeST simplexTree;
-  build_simplex_tree_with_strategy(simplexTree, typeST::Filtration_maintenance::IGNORE);
+  build_simplex_tree_with_strategy(simplexTree, typeST::Filtration_maintenance::IGNORE_VALIDITY);
 
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({0})), 3);
   BOOST_CHECK_EQUAL(simplexTree.filtration(simplexTree.find({1})), 3);
