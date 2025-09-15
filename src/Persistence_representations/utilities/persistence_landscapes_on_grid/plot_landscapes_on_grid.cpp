@@ -8,14 +8,14 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_landscape_on_grid.h>
-
 #include <iostream>
-#include <sstream>
+
+#include <gudhi/Persistence_landscape_on_grid.h>
 
 using Persistence_landscape_on_grid = Gudhi::Persistence_representations::Persistence_landscape_on_grid;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program creates a gnuplot script from a persistence landscape on grid stored in a file (the file "
             << "needs to be created beforehand). Please call the code with the name of a single landscape on grid file"
             << ".\n";

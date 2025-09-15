@@ -8,15 +8,16 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_heat_maps.h>
-
 #include <iostream>
 #include <vector>
+
+#include <gudhi/Persistence_heat_maps.h>
 
 using constant_scaling_function = Gudhi::Persistence_representations::constant_scaling_function;
 using Persistence_heat_maps = Gudhi::Persistence_representations::Persistence_heat_maps<constant_scaling_function>;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program computes average of persistence heat maps stored in files (the files needs to be "
             << "created beforehand).\n"
             << "The parameters of this programs are names of files with persistence heat maps.\n";
@@ -32,7 +33,7 @@ int main(int argc, char** argv) {
   }
 
   std::vector<Persistence_heat_maps*> maps;
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     Persistence_heat_maps* l = new Persistence_heat_maps;
     l->load_from_file(filenames[i]);
     maps.push_back(l);
@@ -42,7 +43,7 @@ int main(int argc, char** argv) {
   av.compute_average(maps);
   av.print_to_file("average.mps");
 
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     delete maps[i];
   }
 

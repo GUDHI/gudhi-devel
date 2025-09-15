@@ -7,36 +7,39 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+__license__ = "MIT"
+
+
 import numpy as np
 import scipy.spatial.distance as sc
 import warnings
-
 import ot
+
 
 # Currently unused, but Théo says it is likely to be used again.
 def _proj_on_diag(X):
-    '''
+    """
     :param X: (n x 2) array encoding the points of a persistent diagram.
     :returns: (n x 2) array encoding the (respective orthogonal) projections of the points onto the diagonal
-    '''
-    Z = (X[:,0] + X[:,1]) / 2.
-    return np.array([Z , Z]).T
+    """
+    Z = (X[:, 0] + X[:, 1]) / 2.0
+    return np.array([Z, Z]).T
 
 
 def _dist_to_diag(X, internal_p):
-    '''
+    """
     :param X: (n x 2) array encoding the points of a persistent diagram.
     :param internal_p: Ground metric (i.e. norm L^p).
     :returns: (n) array encoding the (respective orthogonal) distances of the points to the diagonal
 
     .. note::
         Assumes that the points are above the diagonal.
-    '''
+    """
     return (X[:, 1] - X[:, 0]) * 2 ** (1.0 / internal_p - 1)
 
 
 def _build_dist_matrix(X, Y, order, internal_p):
-    '''
+    """
     :param X: (n x 2) numpy.array encoding the (points of the) first diagram.
     :param Y: (m x 2) numpy.array encoding the second diagram.
     :param order: exponent for the Wasserstein metric.
@@ -46,30 +49,30 @@ def _build_dist_matrix(X, Y, order, internal_p):
                 while C[i, m] (resp. C[n, j]) encodes the distance (to the p) between X[i] (resp Y[j])
                 and its orthogonal projection onto the diagonal.
                 note also that C[n, m] = 0  (it costs nothing to move from the diagonal to the diagonal).
-    '''
-    Cxd = _dist_to_diag(X, internal_p)**order
-    Cdy = _dist_to_diag(Y, internal_p)**order
+    """
+    Cxd = _dist_to_diag(X, internal_p) ** order
+    Cdy = _dist_to_diag(Y, internal_p) ** order
     if np.isinf(internal_p):
-        C = sc.cdist(X,Y, metric='chebyshev')**order
+        C = sc.cdist(X, Y, metric="chebyshev") ** order
     else:
-        C = sc.cdist(X,Y, metric='minkowski', p=internal_p)**order
-    Cf = np.hstack((C, Cxd[:,None]))
+        C = sc.cdist(X, Y, metric="minkowski", p=internal_p) ** order
+    Cf = np.hstack((C, Cxd[:, None]))
     Cdy = np.append(Cdy, 0)
 
-    Cf = np.vstack((Cf, Cdy[None,:]))
+    Cf = np.vstack((Cf, Cdy[None, :]))
 
     return Cf
 
 
 def _perstot_autodiff(X, order, internal_p):
-    '''
+    """
     Version of _perstot that works on eagerpy tensors.
-    '''
+    """
     return _dist_to_diag(X, internal_p).norms.lp(order)
 
 
 def _perstot(X, order, internal_p, enable_autodiff):
-    '''
+    """
     :param X: (n x 2) numpy.array (points of a given diagram).
     :param order: exponent for Wasserstein.
     :param internal_p: Ground metric on the (upper-half) plane (i.e. norm L^p in R^2).
@@ -80,7 +83,7 @@ def _perstot(X, order, internal_p, enable_autodiff):
 
     .. note::
         Can be +inf if the diagram has an essential part (points with infinite coordinates).
-    '''
+    """
     if enable_autodiff:
         import eagerpy as ep
 
@@ -90,7 +93,7 @@ def _perstot(X, order, internal_p, enable_autodiff):
 
 
 def _get_essential_parts(a):
-    '''
+    """
     :param a: (n x 2) numpy.array (point of a diagram)
     :returns: five lists of indices (between 0 and len(a)) accounting for the five types of points with infinite
     coordinates that can occur in a diagram, namely:
@@ -104,32 +107,38 @@ def _get_essential_parts(a):
         Note also that points with (+inf, -inf) are not handled (points (x,y) in dgm satisfy by assumption (y >= x)).
 
         Finally, we consider that points with coordinates (-inf,-inf) and (+inf, +inf) belong to the diagonal.
-    '''
+    """
     if len(a):
-        first_coord_finite = np.isfinite(a[:,0])
-        second_coord_finite = np.isfinite(a[:,1])
-        first_coord_infinite_positive = (a[:,0] == np.inf)
-        second_coord_infinite_positive = (a[:,1] == np.inf)
-        first_coord_infinite_negative = (a[:,0] == -np.inf)
-        second_coord_infinite_negative = (a[:,1] == -np.inf)
+        first_coord_finite = np.isfinite(a[:, 0])
+        second_coord_finite = np.isfinite(a[:, 1])
+        first_coord_infinite_positive = a[:, 0] == np.inf
+        second_coord_infinite_positive = a[:, 1] == np.inf
+        first_coord_infinite_negative = a[:, 0] == -np.inf
+        second_coord_infinite_negative = a[:, 1] == -np.inf
 
         # coord (-inf, x)
-        ess_first_type  = np.where(second_coord_finite & first_coord_infinite_negative)[0]
+        ess_first_type = np.where(second_coord_finite & first_coord_infinite_negative)[0]
         # coord (x, +inf)
         ess_second_type = np.where(first_coord_finite & second_coord_infinite_positive)[0]
         # coord (-inf, +inf)
-        ess_third_type  = np.where(first_coord_infinite_negative & second_coord_infinite_positive)[0]
+        ess_third_type = np.where(
+            first_coord_infinite_negative & second_coord_infinite_positive
+        )[0]
         # coord (-inf, -inf)
-        ess_fourth_type = np.where(first_coord_infinite_negative & second_coord_infinite_negative)[0]
+        ess_fourth_type = np.where(
+            first_coord_infinite_negative & second_coord_infinite_negative
+        )[0]
         # coord (+inf, +inf)
-        ess_fifth_type  = np.where(first_coord_infinite_positive  & second_coord_infinite_positive)[0]
+        ess_fifth_type = np.where(
+            first_coord_infinite_positive & second_coord_infinite_positive
+        )[0]
         return ess_first_type, ess_second_type, ess_third_type, ess_fourth_type, ess_fifth_type
     else:
         return [], [], [], [], []
 
 
 def _cost_and_match_essential_parts(X, Y, idX, idY, order, axis):
-    '''
+    """
     :param X: (n x 2) numpy.array (dgm points)
     :param Y: (n x 2) numpy.array (dgm points)
     :param idX: indices to consider for this one dimensional OT problem (in X)
@@ -140,11 +149,11 @@ def _cost_and_match_essential_parts(X, Y, idX, idY, order, axis):
 
     .. note::
         Assume idX, idY come when calling _handle_essential_parts, thus have same length.
-    '''
+    """
     u = X[idX, axis]
     v = Y[idY, axis]
 
-    cost = np.sum(np.abs(np.sort(u) - np.sort(v))**(order))  # OT cost in 1D
+    cost = np.sum(np.abs(np.sort(u) - np.sort(v)) ** (order))  # OT cost in 1D
 
     sortidX = idX[np.argsort(u)]
     sortidY = idY[np.argsort(v)]
@@ -155,24 +164,30 @@ def _cost_and_match_essential_parts(X, Y, idX, idY, order, axis):
 
 
 def _handle_essential_parts(X, Y, order):
-    '''
+    """
     :param X: (n x 2) numpy array, first diagram.
     :param Y: (n x 2) numpy array, second diagram.
     :order: Wasserstein order for cost computation.
     :returns: cost and matching due to essential parts. If cost is +inf, matching will be set to None.
-    '''
+    """
     ess_parts_X = _get_essential_parts(X)
     ess_parts_Y = _get_essential_parts(Y)
 
     # Treats the case of infinite cost (cardinalities of essential parts differ).
-    for u, v in list(zip(ess_parts_X, ess_parts_Y))[:3]: # ignore types 4 and 5 as they belong to the diagonal
+    for u, v in list(zip(ess_parts_X, ess_parts_Y))[
+        :3
+    ]:  # ignore types 4 and 5 as they belong to the diagonal
         if len(u) != len(v):
             return np.inf, None
 
     # Now we know each essential part has the same number of points in both diagrams.
     # Handle type 0 and type 1 essential parts (those with one finite coordinates)
-    c1, m1 = _cost_and_match_essential_parts(X, Y, ess_parts_X[0], ess_parts_Y[0], axis=1, order=order)
-    c2, m2 = _cost_and_match_essential_parts(X, Y, ess_parts_X[1], ess_parts_Y[1], axis=0, order=order)
+    c1, m1 = _cost_and_match_essential_parts(
+        X, Y, ess_parts_X[0], ess_parts_Y[0], axis=1, order=order
+    )
+    c2, m2 = _cost_and_match_essential_parts(
+        X, Y, ess_parts_X[1], ess_parts_Y[1], axis=0, order=order
+    )
 
     c = c1 + c2
     m = m1 + m2
@@ -182,38 +197,47 @@ def _handle_essential_parts(X, Y, order):
 
     # Handle type 4 and 5, considered as belonging to the diagonal so matched to (-1) with cost 0.
     for z in ess_parts_X[3:]:
-        m += [(u, -1) for u in z] # points in X are matched to -1
+        m += [(u, -1) for u in z]  # points in X are matched to -1
     for z in ess_parts_Y[3:]:
-        m += [(-1, v) for v in z] # -1 is match to points in Y
+        m += [(-1, v) for v in z]  # -1 is match to points in Y
 
     return c, np.array(m)
 
 
 def _finite_part(X):
-    '''
+    """
     :param X: (n x 2) numpy array encoding a persistence diagram.
     :returns: The finite part of a diagram `X` (points with finite coordinates).
-    '''
-    return X[np.where(np.isfinite(X[:,0]) & np.isfinite(X[:,1]))]
+    """
+    return X[np.where(np.isfinite(X[:, 0]) & np.isfinite(X[:, 1]))]
 
 
 def _warn_infty(matching):
-    '''
+    """
     Handle essential parts with different cardinalities. Warn the user about cost being infinite and (if
     `matching=True`) about the returned matching being `None`.
-    '''
-    user_warning = 'Cardinality of essential parts differs.'
+    """
+    user_warning = "Cardinality of essential parts differs."
     if matching:
-        warnings.warn(f'{user_warning} Distance (cost) is +inf, and the returned matching is None.')
+        warnings.warn(
+            f"{user_warning} Distance (cost) is +inf, and the returned matching is None."
+        )
         return np.inf, None
     else:
-        warnings.warn(f'{user_warning} Distance (cost) is +inf.')
+        warnings.warn(f"{user_warning} Distance (cost) is +inf.")
         return np.inf
 
 
-def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enable_autodiff=False,
-                         keep_essential_parts=True):
-    '''
+def wasserstein_distance(
+    X,
+    Y,
+    matching=False,
+    order=1.0,
+    internal_p=np.inf,
+    enable_autodiff=False,
+    keep_essential_parts=True,
+):
+    """
     Compute the Wasserstein distance between persistence diagram using Python Optimal Transport backend.
     Diagrams can contain points with infinity coordinates (essential parts).
     Points with (-inf,-inf) and (+inf,+inf) coordinates are considered as belonging to the diagonal.
@@ -245,7 +269,7 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
               respect to the internal_p-norm as ground metric.
               If matching is set to True, also returns the optimal matching between X and Y.
               If cost is +inf, any matching is optimal and thus it returns `None` instead.
-    '''
+    """
 
     # First step: handle empty diagrams
     n = len(X)
@@ -255,9 +279,9 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
         if m == 0:
             if not matching:
                 # What if enable_autodiff?
-                return 0.
+                return 0.0
             else:
-                return 0., np.array([])
+                return 0.0, np.array([])
         else:
             cost = _perstot(Y, order, internal_p, enable_autodiff)
             if cost == np.inf:
@@ -277,20 +301,23 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
             else:
                 return cost, np.array([[i, -1] for i in range(n)])
 
-
     # Check essential part and enable autodiff together
     if enable_autodiff and keep_essential_parts:
-        warnings.warn('''enable_autodiff=True and keep_essential_parts=True are incompatible together.
+        warnings.warn(
+            """enable_autodiff=True and keep_essential_parts=True are incompatible together.
                       keep_essential_parts is set to False: only points with finite coordinates are considered
                       in the following.
-                      ''')
+                      """
+        )
         keep_essential_parts = False
 
     # Second step: handle essential parts if needed.
     if keep_essential_parts:
         essential_cost, essential_matching = _handle_essential_parts(X, Y, order=order)
-        if (essential_cost == np.inf):
-            return _warn_infty(matching)  # Tells the user that cost is infty and matching (if True) is None.
+        if essential_cost == np.inf:
+            return _warn_infty(
+                matching
+            )  # Tells the user that cost is infty and matching (if True) is None.
             # avoid computing transport cost between the finite parts if essential parts
             # cardinalities do not match (saves time)
     else:
@@ -306,30 +333,35 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
         X = X_orig.numpy()
         Y = Y_orig.numpy()
 
-    # Extract finite points of the diagrams. 
+    # Extract finite points of the diagrams.
     X, Y = _finite_part(X), _finite_part(Y)
     n = len(X)
     m = len(Y)
 
     M = _build_dist_matrix(X, Y, order=order, internal_p=internal_p)
-    a = np.ones(n+1) # weight vector of the input diagram. Uniform here.
+    a = np.ones(n + 1)  # weight vector of the input diagram. Uniform here.
     a[-1] = m
-    b = np.ones(m+1) # weight vector of the input diagram. Uniform here.
+    b = np.ones(m + 1)  # weight vector of the input diagram. Uniform here.
     b[-1] = n
 
     if matching:
-        assert not enable_autodiff, "matching and enable_autodiff are currently incompatible"
-        P = ot.emd(a=a,b=b,M=M, numItermax=2000000)
-        ot_cost = np.sum(np.multiply(P,M))
+        if enable_autodiff:
+            raise ValueError("matching and enable_autodiff are currently incompatible")
+        P = ot.emd(a=a, b=b, M=M, numItermax=2000000)
+        ot_cost = np.sum(np.multiply(P, M))
         P[-1, -1] = 0  # Remove matching corresponding to the diagonal
         match = np.argwhere(P)
         # Now we turn to -1 points encoding the diagonal
-        match[:,0][match[:,0] >= n] = -1
-        match[:,1][match[:,1] >= m] = -1
+        match[:, 0][match[:, 0] >= n] = -1
+        match[:, 1][match[:, 1] >= m] = -1
         # Finally incorporate the essential part matching
         if essential_matching is not None:
-            match = np.concatenate([match, essential_matching]) if essential_matching.size else match
-        return (ot_cost + essential_cost) ** (1./order) , match
+            match = (
+                np.concatenate([match, essential_matching])
+                if essential_matching.size
+                else match
+            )
+        return (ot_cost + essential_cost) ** (1.0 / order), match
 
     if enable_autodiff:
         P = ot.emd(a=a, b=b, M=M, numItermax=2000000)
@@ -339,8 +371,11 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
         dists = []
         # empty arrays are not handled properly by the helpers, so we avoid calling them
         if len(pairs_X_Y):
-            dists.append((Y_orig[pairs_X_Y[:, 1]] -
-                          X_orig[pairs_X_Y[:, 0]]).norms.lp(internal_p, axis=-1).norms.lp(order))
+            dists.append(
+                (Y_orig[pairs_X_Y[:, 1]] - X_orig[pairs_X_Y[:, 0]])
+                .norms.lp(internal_p, axis=-1)
+                .norms.lp(order)
+            )
         if len(pairs_X_diag[0]):
             dists.append(_perstot_autodiff(X_orig[pairs_X_diag], order, internal_p))
         if len(pairs_Y_diag[0]):
@@ -354,4 +389,4 @@ def wasserstein_distance(X, Y, matching=False, order=1., internal_p=np.inf, enab
     # The default numItermax=100000 is not sufficient for some examples with 5000 points, what is a good value?
     ot_cost = ot.emd2(a, b, M, numItermax=2000000)
 
-    return (ot_cost + essential_cost) ** (1./order)
+    return (ot_cost + essential_cost) ** (1.0 / order)

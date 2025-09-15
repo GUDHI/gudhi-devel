@@ -7,10 +7,13 @@
 # Modification(s):
 #   - 2020/02 Theo Lacombe: Added more options for improved rendering and more flexibility.
 #   - 2022/11 Vincent Rouvreau: "Automatic" legend display detected by _array_handler that returns if the persistence
-#                               was a nx2 array.
+#                               was a n x 2 array.
 #   - 2024/11 Vincent Rouvreau: Support for sklearn like persistence feedback: New _format_handler function that
 #                               enhances former _array_handler function.
 #   - YYYY/MM Author: Description of the modification
+
+__license__ = "MIT"
+
 
 from os import path
 import numpy as np
@@ -22,10 +25,6 @@ import shutil
 
 from gudhi.reader_utils import read_persistence_intervals_in_dimension
 from gudhi.reader_utils import read_persistence_intervals_grouped_by_dimension
-
-__author__ = "Vincent Rouvreau, Bertrand Michel, Theo Lacombe"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
 
 _gudhi_matplotlib_use_tex = True
 
@@ -140,7 +139,9 @@ def _matplotlib_can_use_tex() -> bool:
         return False
     return True
 
+
 # TODO: a new homology_dimensions like argument for plot_persistence_barcode and plot_persistence_diagram
+
 
 def plot_persistence_barcode(
     persistence=[],
@@ -201,7 +202,9 @@ def plot_persistence_barcode(
         if path.isfile(persistence_file):
             # Reset persistence
             persistence = []
-            diag = read_persistence_intervals_grouped_by_dimension(persistence_file=persistence_file)
+            diag = read_persistence_intervals_grouped_by_dimension(
+                persistence_file=persistence_file
+            )
             for key in diag.keys():
                 for persistence_interval in diag[key]:
                     persistence.append((key, persistence_interval))
@@ -230,7 +233,10 @@ def plot_persistence_barcode(
         colormap = plt.cm.Set1.colors
 
     x = [birth for (dim, (birth, death)) in persistence]
-    y = [(death - birth) if death != float("inf") else (infinity - birth) for (dim, (birth, death)) in persistence]
+    y = [
+        (death - birth) if death != float("inf") else (infinity - birth)
+        for (dim, (birth, death)) in persistence
+    ]
     c = [colormap[dim] for (dim, (birth, death)) in persistence]
 
     axes.barh(range(len(x)), y, left=x, alpha=alpha, color=c, linewidth=0)
@@ -246,7 +252,9 @@ def plot_persistence_barcode(
             title = "Range"
         dimensions = {item[0] for item in persistence}
         axes.legend(
-            handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions],
+            handles=[
+                mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions
+            ],
             title=title,
             loc="best",
         )
@@ -287,7 +295,7 @@ def plot_persistence_diagram(
     :type persistence_file: string
     :param alpha: plot transparency value (0.0 transparent through 1.0 opaque - default is 0.6).
     :type alpha: float
-    :param band: band (not displayed if :math:`\leq` 0. - default is 0.)
+    :param band: band (not displayed if ≤ 0. - default is 0.)
     :type band: float
     :param max_intervals: maximal number of intervals to display. Selected intervals are those with the longest life
         time. Set it to 0 to see all. Default value is 1000000.
@@ -325,7 +333,9 @@ def plot_persistence_diagram(
         if path.isfile(persistence_file):
             # Reset persistence
             persistence = []
-            diag = read_persistence_intervals_grouped_by_dimension(persistence_file=persistence_file)
+            diag = read_persistence_intervals_grouped_by_dimension(
+                persistence_file=persistence_file
+            )
             for key in diag.keys():
                 for persistence_interval in diag[key]:
                     persistence.append((key, persistence_interval))
@@ -376,7 +386,9 @@ def plot_persistence_diagram(
     axes.scatter(x, y, alpha=alpha, color=c)
     if float("inf") in (death for (dim, (birth, death)) in persistence):
         # infinity line and text
-        axes.plot([axis_start, axis_end], [infinity, infinity], linewidth=1.0, color="k", alpha=alpha)
+        axes.plot(
+            [axis_start, axis_end], [infinity, infinity], linewidth=1.0, color="k", alpha=alpha
+        )
         # Infinity label
         yt = axes.get_yticks()
         yt = yt[np.where(yt < axis_end)]  # to avoid plotting ticklabel higher than infinity
@@ -397,7 +409,9 @@ def plot_persistence_diagram(
             title = "Range"
         dimensions = list({item[0] for item in persistence})
         axes.legend(
-            handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions],
+            handles=[
+                mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions
+            ],
             title=title,
             loc="lower right",
         )
@@ -504,7 +518,11 @@ def plot_persistence_density(
         )
         persistence_dim = persistence_dim[np.isfinite(persistence_dim[:, 1])]
         persistence_dim = np.array(
-            _limit_to_max_intervals(persistence_dim, max_intervals, key=lambda life_time: life_time[1] - life_time[0])
+            _limit_to_max_intervals(
+                persistence_dim,
+                max_intervals,
+                key=lambda life_time: life_time[1] - life_time[0],
+            )
         )
 
         # Set as numpy array birth and death (remove undefined values - inf and NaN)

@@ -14,6 +14,17 @@ Below is a list of changes:
 - [Module](link)
      - **...**
 
+- [Alpha complex dD](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1alpha__complex_1_1_alpha__complex.html)
+     - **API break:** The simplicial complex for the Alpha complex concept has been changed to
+       `dimension_simplex_range` (that must returns a range of simplices of a given dimension) instead of
+       `skeleton_simplex_range` (that was returning a range of simplices lower or equal to a given dimension)
+
+- [Simplex_tree](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1_simplex__tree.html)
+     - A new iterator over the simplices of the simplicial complex that match a given dimension
+
+- [Representations](https://gudhi.inria.fr/python/latest/representations.html)
+     - in metrics, `BottleneckDistance` argument `epsilon` is deprecrated and renamed `e` to be consistent with `bottleneck_distance` and `pairwise_persistence_diagram_distances`
+
 - Installation
      - Pip package is now available for OSx &ge; 13.0 (was &ge; 12.0).
 

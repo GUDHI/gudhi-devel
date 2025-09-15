@@ -8,22 +8,26 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi.datasets.generators import points
-from gudhi.sklearn.rips_persistence import RipsPersistence
-from gudhi import RipsComplex, SimplexTree
-from gudhi._ripser import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
-from gudhi import bottleneck_distance
+
 from scipy.sparse import coo_matrix
 from scipy.spatial.distance import cdist
 import numpy as np
 import random
 import pytest
 
+from gudhi.datasets.generators import points
+from gudhi.sklearn.rips_persistence import RipsPersistence
+from gudhi import RipsComplex, SimplexTree
+from gudhi._ripser_ext import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
+from gudhi import bottleneck_distance
+
 
 def test_rips_persistence_of_points_on_a_circle():
     # Let's test with 5 point clouds
     NB_PC = 5
-    point_clouds = [points.sphere(n_samples=random.randint(100, 150), ambient_dim=2) for _ in range(NB_PC)]
+    point_clouds = [
+        points.sphere(n_samples=random.randint(100, 150), ambient_dim=2) for _ in range(NB_PC)
+    ]
 
     rips = RipsPersistence(homology_dimensions=[0, 1], n_jobs=-2)
     diags = rips.fit_transform(point_clouds)
@@ -72,7 +76,10 @@ def test_set_output():
         import pandas
 
         NB_PC = 5
-        point_clouds = [points.sphere(n_samples=random.randint(100, 150), ambient_dim=2) for _ in range(NB_PC)]
+        point_clouds = [
+            points.sphere(n_samples=random.randint(100, 150), ambient_dim=2)
+            for _ in range(NB_PC)
+        ]
 
         rips = RipsPersistence(homology_dimensions=[0, 2], n_jobs=-2)
         diags_pandas = rips.set_output(transform="pandas").fit_transform(point_clouds)
@@ -114,12 +121,16 @@ def cmp_rips(point_cloud):
     dgm1 = stree.persistence_intervals_in_dimension(1)
 
     # Compute with Ripser
-    dgm = _full(dists, max_dimension=1, max_edge_length=float("inf"), homology_coeff_field=field)
+    dgm = _full(
+        dists, max_dimension=1, max_edge_length=float("inf"), homology_coeff_field=field
+    )
     # The order of the intervals may differ, so we cannot compare the arrays with np.testing.assert_almost_equal
     assert bottleneck_distance(dgm0, dgm[0]) < 1e-8
     assert bottleneck_distance(dgm1, dgm[1]) < 1e-8
 
-    dgm = _lower(dists, max_dimension=1, max_edge_length=float("inf"), homology_coeff_field=field)
+    dgm = _lower(
+        dists, max_dimension=1, max_edge_length=float("inf"), homology_coeff_field=field
+    )
     assert bottleneck_distance(dgm0, dgm[0]) < 1e-8
     assert bottleneck_distance(dgm1, dgm[1]) < 1e-8
 

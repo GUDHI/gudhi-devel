@@ -8,9 +8,11 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi.point_cloud.knn import KNearestNeighbors
+
 import numpy as np
 import pytest
+
+from gudhi.point_cloud.knn import KNearestNeighbors
 
 
 def test_knn_explicit():
@@ -27,7 +29,13 @@ def test_knn_explicit():
     r = knn.transform(query)
     assert r == pytest.approx(np.array([[0.0, 1], [1, 1], [1, 2]]))
     r = (
-        KNearestNeighbors(2, metric="chebyshev", return_distance=True, return_index=False, implementation="keops")
+        KNearestNeighbors(
+            2,
+            metric="chebyshev",
+            return_distance=True,
+            return_index=False,
+            implementation="keops",
+        )
         .fit(base)
         .transform(query)
     )
@@ -46,12 +54,21 @@ def test_knn_explicit():
     )
     assert r == pytest.approx(np.array([[0.0, 1], [1, 1], [1, 2]]))
 
-    knn = KNearestNeighbors(2, metric="minkowski", p=3, return_distance=False, return_index=True)
+    knn = KNearestNeighbors(
+        2, metric="minkowski", p=3, return_distance=False, return_index=True
+    )
     knn.fit(base)
     r = knn.transform(query)
     assert np.array_equal(r, [[0, 1], [1, 0], [3, 2]])
     r = (
-        KNearestNeighbors(2, metric="minkowski", p=3, return_distance=False, return_index=True, implementation="keops")
+        KNearestNeighbors(
+            2,
+            metric="minkowski",
+            p=3,
+            return_distance=False,
+            return_index=True,
+            implementation="keops",
+        )
         .fit(base)
         .transform(query)
     )
@@ -61,17 +78,26 @@ def test_knn_explicit():
     knn = KNearestNeighbors(2, metric="precomputed", return_index=True, return_distance=False)
     r = knn.fit_transform(dist)
     assert np.array_equal(r, [[0, 1], [1, 0], [2, 0]])
-    knn = KNearestNeighbors(2, metric="precomputed", return_index=True, return_distance=True, sort_results=True)
+    knn = KNearestNeighbors(
+        2, metric="precomputed", return_index=True, return_distance=True, sort_results=True
+    )
     r = knn.fit_transform(dist)
     assert np.array_equal(r[0], [[0, 1], [1, 0], [2, 0]])
     assert np.array_equal(r[1], [[0, 3], [0, 1], [0, 1]])
     # Second time in parallel
     knn = KNearestNeighbors(
-        2, metric="precomputed", return_index=True, return_distance=False, n_jobs=2, sort_results=True
+        2,
+        metric="precomputed",
+        return_index=True,
+        return_distance=False,
+        n_jobs=2,
+        sort_results=True,
     )
     r = knn.fit_transform(dist)
     assert np.array_equal(r, [[0, 1], [1, 0], [2, 0]])
-    knn = KNearestNeighbors(2, metric="precomputed", return_index=True, return_distance=True, n_jobs=2)
+    knn = KNearestNeighbors(
+        2, metric="precomputed", return_index=True, return_distance=True, n_jobs=2
+    )
     r = knn.fit_transform(dist)
     assert np.array_equal(r[0], [[0, 1], [1, 0], [2, 0]])
     assert np.array_equal(r[1], [[0, 3], [0, 1], [0, 1]])
@@ -81,17 +107,23 @@ def test_knn_compare():
     base = np.array([[1.0, 1], [1, 2], [4, 2], [4, 3]])
     query = np.array([[1.0, 1], [2, 2], [4, 4]])
     r0 = (
-        KNearestNeighbors(2, implementation="ckdtree", return_index=True, return_distance=False)
+        KNearestNeighbors(
+            2, implementation="ckdtree", return_index=True, return_distance=False
+        )
         .fit(base)
         .transform(query)
     )
     r1 = (
-        KNearestNeighbors(2, implementation="sklearn", return_index=True, return_distance=False)
+        KNearestNeighbors(
+            2, implementation="sklearn", return_index=True, return_distance=False
+        )
         .fit(base)
         .transform(query)
     )
     r2 = (
-        KNearestNeighbors(2, implementation="hnsw", return_index=True, return_distance=False).fit(base).transform(query)
+        KNearestNeighbors(2, implementation="hnsw", return_index=True, return_distance=False)
+        .fit(base)
+        .transform(query)
     )
     r3 = (
         KNearestNeighbors(2, implementation="keops", return_index=True, return_distance=False)
@@ -110,11 +142,21 @@ def test_knn_compare():
         .fit(base)
         .transform(query)
     )
-    r2 = KNearestNeighbors(2, implementation="hnsw", return_index=True, return_distance=True).fit(base).transform(query)
-    r3 = (
-        KNearestNeighbors(2, implementation="keops", return_index=True, return_distance=True).fit(base).transform(query)
+    r2 = (
+        KNearestNeighbors(2, implementation="hnsw", return_index=True, return_distance=True)
+        .fit(base)
+        .transform(query)
     )
-    assert np.array_equal(r0[0], r1[0]) and np.array_equal(r0[0], r2[0]) and np.array_equal(r0[0], r3[0])
+    r3 = (
+        KNearestNeighbors(2, implementation="keops", return_index=True, return_distance=True)
+        .fit(base)
+        .transform(query)
+    )
+    assert (
+        np.array_equal(r0[0], r1[0])
+        and np.array_equal(r0[0], r2[0])
+        and np.array_equal(r0[0], r3[0])
+    )
     d0 = pytest.approx(r0[1])
     assert r1[1] == d0 and r2[1] == d0 and r3[1] == d0
 
@@ -145,9 +187,17 @@ def test_knn_k_limits():
         data = np.random.rand(nb_sample, 4)
         with pytest.raises(ValueError):
             KNearestNeighbors(
-                k=0, return_index=False, return_distance=True, sort_results=False, implementation=impl
+                k=0,
+                return_index=False,
+                return_distance=True,
+                sort_results=False,
+                implementation=impl,
             ).fit_transform(data)
         with pytest.raises(ValueError):
             KNearestNeighbors(
-                k=nb_sample + 1, return_index=False, return_distance=True, sort_results=False, implementation=impl
+                k=nb_sample + 1,
+                return_index=False,
+                return_distance=True,
+                sort_results=False,
+                implementation=impl,
             ).fit_transform(data)

@@ -7,11 +7,14 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+__license__ = "MIT"
+
+
+from scipy.spatial.distance import cdist
+import numpy as np
 
 from gudhi.weighted_rips_complex import WeightedRipsComplex
 from gudhi.point_cloud.dtm import DistanceToMeasure
-from scipy.spatial.distance import cdist
-import numpy as np
 
 
 class DTMRipsComplex(WeightedRipsComplex):
@@ -20,11 +23,13 @@ class DTMRipsComplex(WeightedRipsComplex):
     in the way described in :cite:`dtmfiltrations`.
     Remark that all the filtration values are doubled compared to the definition in the paper
     for the consistency with RipsComplex.
-    
+
     :Requires: `SciPy <installation.html#scipy>`_
     """
 
-    def __init__(self, points=None, distance_matrix=None, k=1, q=2, max_filtration=float("inf")):
+    def __init__(
+        self, points=None, distance_matrix=None, k=1, q=2, max_filtration=float("inf")
+    ):
         """
         Args:
             points (numpy.ndarray): array of points.
@@ -39,7 +44,7 @@ class DTMRipsComplex(WeightedRipsComplex):
                 distance_matrix = cdist(points, points)
             else:
                 # Empty Rips construction
-                distance_matrix = np.ndarray((0,0))
+                distance_matrix = np.ndarray((0, 0))
         self.distance_matrix = distance_matrix
 
         # TODO: address the error when k is too large

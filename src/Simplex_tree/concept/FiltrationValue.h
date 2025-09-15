@@ -107,4 +107,18 @@ struct FiltrationValue {
    * Overloads for native arithmetic types or other simple types are already implemented.
    */
   friend std::size_t get_serialization_size_of(const FiltrationValue& value);
+
+  /**
+   * @brief Outputs the filtration value into the stream. Only necessary if the `operator<<` of the simplex tree
+   * needs to be used. If also the simplex tree's `operator>>` is necessary, the output has to correspond to
+   * what the filtration value's @ref operator>> can reed.
+   */
+  friend std::ostream& operator<<(std::ostream& os, const FiltrationValue& fil);
+
+  /**
+   * @brief Inputs the content of the stream into the filtration value. Only necessary if the `operator>>` of the
+   * simplex tree needs to be used. If also the simplex tree's `operator<<` is necessary, the intput format has to
+   * correspond to the one used by the filtration value's @ref operator<< "".
+   */
+  friend std::istream& operator>>(std::istream& os, FiltrationValue& fil);
 };

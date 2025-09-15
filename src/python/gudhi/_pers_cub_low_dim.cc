@@ -5,78 +5,84 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
+ *      - 2025/01 Vincent Rouvreau: Use nanobind instead of PyBind11 for python bindings
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <vector>
 #include <array>
+#include <vector>
 #include <limits>
-#include <stdexcept>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <pybind11/stl_bind.h>
-#include <pybind11/numpy.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 
 #include <boost/range/counting_range.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 
 #include <gudhi/Persistence_on_a_line.h>
 #include <gudhi/Persistence_on_rectangle.h>
-#include <gudhi/Debug_utils.h>
+#include <python_interfaces/numpy_utils.h>
 
-namespace py = pybind11;
-typedef std::vector<std::array< float, 2>> Vf;
-typedef std::vector<std::array<double, 2>> Vd;
-PYBIND11_MAKE_OPAQUE(Vf);
-PYBIND11_MAKE_OPAQUE(Vd);
+namespace nb = nanobind;
 
-template<class T>
-py::array wrap_persistence_1d(py::array_t<T> data) {
-  py::buffer_info buf = data.request();
-  if(buf.ndim!=1)
-    throw std::runtime_error("Data must be a 1-dimensional array");
-  auto cnt = boost::counting_range<py::ssize_t>(0, buf.shape[0]);
-  char* p = static_cast<char*>(buf.ptr);
-  auto h = buf.strides[0];
-  auto proj = [=](py::ssize_t i){ return *reinterpret_cast<T*>(p + i * h); };
+template <class T>
+auto wrap_persistence_1d(nb::ndarray<const T, nb::ndim<1> > data)
+{
+  auto data_view = data.view();
+  auto cnt = boost::counting_range<nb::ssize_t>(0, data_view.shape(0));
+  auto proj = [&data_view](nb::ssize_t i) { return data_view(i); };
   auto r = boost::adaptors::transform(cnt, proj);
-  std::vector<std::array<T, 2>> dgm;
+  std::vector<std::array<T, 2> > dgm;
+  dgm.reserve(data_view.shape(0) + 1);  // rough upper bound
   {
-    py::gil_scoped_release release;
-    Gudhi::persistent_cohomology::compute_persistence_of_function_on_line(r, [&](T b, T d){ dgm.push_back({b, d}); });
+    nb::gil_scoped_release release;
+    Gudhi::persistent_cohomology::compute_persistence_of_function_on_line(
+        r, [&](T b, T d) { dgm.emplace_back(std::array<T, 2>{b, d}); });
   }
-  return py::array(py::cast(std::move(dgm)));
+  if (dgm.size() < data_view.shape(0) / 2) dgm.shrink_to_fit();
+  return _wrap_as_numpy_array(std::move(dgm));
 }
 
-py::list wrap_persistence_2d(py::array_t<double, py::array::c_style | py::array::forcecast> data, double min_persistence) {
-  py::buffer_info buf = data.request();
-  if(buf.ndim!=2)
-    throw std::runtime_error("Data must be a 2-dimensional array");
-  // If we make this function public, it should probably be enhanced to handle these cases.
-  if(buf.shape[0] < 2 || buf.shape[1] < 2)
-    throw std::runtime_error("The Python caller is supposed to ensure that shape[i]>=2");
-  std::vector<std::array<double, 2>> dgm0, dgm1;
+nb::list wrap_persistence_2d(nb::ndarray<const double, nb::ndim<2>, nb::c_contig> data, double min_persistence)
+{
+  std::vector<std::array<double, 2> > dgm0;
+  std::vector<std::array<double, 2> > dgm1;
+  // rough upper bound: a bar for each possible square that do not touch anything else
+  // + the rows and columns on the boundary are implicitly collapsed
+  dgm0.reserve((data.shape(0) + 1) * (data.shape(1) + 1) / 4);
+  // rough upper bound: checkerboard with only one color filled has the highest number of 1-cycle possible
+  // + the rows and columns on the boundary are implicitly collapsed
+  dgm1.reserve(((data.shape(0) - 2) * (data.shape(1) - 2) + 1) / 2);
   {
-    py::gil_scoped_release release;
+    nb::gil_scoped_release release;
     double mini = Gudhi::cubical_complex::persistence_on_rectangle_from_top_cells(
-        static_cast<double const*>(buf.ptr),
-        static_cast<unsigned>(buf.shape[0]),
-        static_cast<unsigned>(buf.shape[1]),
-        [&](double b, double d){ if (d - b > min_persistence) dgm0.push_back({b, d}); },
-        [&](double b, double d){ if (d - b > min_persistence) dgm1.push_back({b, d}); });
-    dgm0.push_back({mini, std::numeric_limits<double>::infinity()});
+        static_cast<double const*>(data.data()),
+        static_cast<unsigned int>(data.shape(0)),
+        static_cast<unsigned int>(data.shape(1)),
+        [&](double b, double d) {
+          if (d - b > min_persistence) {
+            dgm0.emplace_back(std::array<double, 2>{b, d});
+          }
+        },
+        [&](double b, double d) {
+          if (d - b > min_persistence) {
+            dgm1.emplace_back(std::array<double, 2>{b, d});
+          }
+        });
+    dgm0.emplace_back(std::array<double, 2>{mini, std::numeric_limits<double>::infinity()});
   }
-  py::list ret;
-  ret.append(py::array(py::cast(std::move(dgm0))));
-  ret.append(py::array(py::cast(std::move(dgm1))));
+  if (dgm0.size() < dgm0.capacity() / 2) dgm0.shrink_to_fit();
+  if (dgm1.size() < dgm1.capacity() / 2) dgm1.shrink_to_fit();
+  nb::list ret;
+  ret.append(_wrap_as_numpy_array(std::move(dgm0)));
+  ret.append(_wrap_as_numpy_array(std::move(dgm1)));
   return ret;
 }
 
-PYBIND11_MODULE(_pers_cub_low_dim, m) {
-  py::bind_vector<Vf>(m, "VectorPairFloat" , py::buffer_protocol());
-  py::bind_vector<Vd>(m, "VectorPairDouble", py::buffer_protocol());
-  m.def("_persistence_on_a_line", wrap_persistence_1d<float>, py::arg().noconvert());
-  m.def("_persistence_on_a_line", wrap_persistence_1d<double>);
-  m.def("_persistence_on_rectangle_from_top_cells", wrap_persistence_2d);
+NB_MODULE(_pers_cub_low_dim_ext, m)
+{
+  m.attr("__license__") = "MIT";
+  m.def("_persistence_on_a_line", &wrap_persistence_1d<float>, nb::arg().noconvert());
+  m.def("_persistence_on_a_line", &wrap_persistence_1d<double>);
+  m.def("_persistence_on_rectangle_from_top_cells", &wrap_persistence_2d);
 }

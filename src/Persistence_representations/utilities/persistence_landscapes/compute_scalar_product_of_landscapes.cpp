@@ -8,15 +8,15 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Persistence_landscape.h>
-
 #include <iostream>
-#include <sstream>
 #include <vector>
+
+#include <gudhi/Persistence_landscape.h>
 
 using Persistence_landscape = Gudhi::Persistence_representations::Persistence_landscape;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   std::clog << "This program computes scalar product of persistence landscapes stored in a file (the file needs to be "
             << "created beforehand). \n"
             << "The parameters of this programs are names of files with persistence landscapes.\n";
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
   }
   std::vector<Persistence_landscape> landscaspes;
   landscaspes.reserve(filenames.size());
-  for (size_t file_no = 0; file_no != filenames.size(); ++file_no) {
+  for (std::size_t file_no = 0; file_no != filenames.size(); ++file_no) {
     Persistence_landscape l;
     l.load_landscape_from_file(filenames[file_no]);
     landscaspes.push_back(l);
@@ -42,14 +42,14 @@ int main(int argc, char** argv) {
 
   // first we prepare an array:
   std::vector<std::vector<double> > scalar_product(filenames.size());
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     std::vector<double> v(filenames.size(), 0);
     scalar_product[i] = v;
   }
 
   // and now we can compute the scalar product:
-  for (size_t i = 0; i != landscaspes.size(); ++i) {
-    for (size_t j = i; j != landscaspes.size(); ++j) {
+  for (std::size_t i = 0; i != landscaspes.size(); ++i) {
+    for (std::size_t j = i; j != landscaspes.size(); ++j) {
       scalar_product[i][j] = scalar_product[j][i] = compute_inner_product(landscaspes[i], landscaspes[j]);
     }
   }
@@ -57,8 +57,8 @@ int main(int argc, char** argv) {
   // and now output the result to the screen and a file:
   std::ofstream out;
   out.open("scalar_product.land");
-  for (size_t i = 0; i != scalar_product.size(); ++i) {
-    for (size_t j = 0; j != scalar_product.size(); ++j) {
+  for (std::size_t i = 0; i != scalar_product.size(); ++i) {
+    for (std::size_t j = 0; j != scalar_product.size(); ++j) {
       std::clog << scalar_product[i][j] << " ";
       out << scalar_product[i][j] << " ";
     }

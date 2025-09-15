@@ -9,6 +9,7 @@
  */
 
 #include <iostream>
+#include <type_traits>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_iostream_operator"
@@ -18,6 +19,7 @@
 //  ^
 // /!\ Nothing else from Simplex_tree shall be included to test includes are well defined.
 #include "gudhi/Simplex_tree.h"
+#include "test_vector_filtration_simplex_tree.h"
 
 using namespace Gudhi;
 
@@ -37,7 +39,10 @@ struct MyStableOptions : Simplex_tree_options_default {
 typedef boost::mpl::list<Simplex_tree<>,
                          Simplex_tree<Simplex_tree_options_fast_persistence>,
                          Simplex_tree<Simplex_tree_options_full_featured>,
-                         Simplex_tree<MyStableOptions> > list_of_tested_variants;
+                         Simplex_tree<MyStableOptions>,
+                         Simplex_tree<Simplex_tree_options_custom_fil_values_default>,
+                         Simplex_tree<Simplex_tree_options_custom_fil_values_fast_persistence>,
+                         Simplex_tree<Simplex_tree_options_custom_fil_values_full_featured> > list_of_tested_variants;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(iostream_operator, Stree_type, list_of_tested_variants) {
   std::clog << "********************************************************************" << std::endl;
@@ -45,10 +50,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(iostream_operator, Stree_type, list_of_tested_vari
 
   Stree_type st;
 
-  st.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.0);
-  st.insert_simplex_and_subfaces({3, 4, 5}, 3.0);
-  st.insert_simplex_and_subfaces({3, 0}, 2.0);
-  st.insert_simplex_and_subfaces({2, 1, 0}, 3.0);
+  if constexpr (std::is_arithmetic_v<typename Stree_type::Filtration_value>){
+    st.insert_simplex_and_subfaces({0, 1, 6, 7}, 4.0);
+    st.insert_simplex_and_subfaces({3, 4, 5}, 3.0);
+    st.insert_simplex_and_subfaces({3, 0}, 2.0);
+    st.insert_simplex_and_subfaces({2, 1, 0}, 3.0);
+  } else {
+    st.insert_simplex_and_subfaces({0, 1, 6, 7}, {4, 5, 6});
+    st.insert_simplex_and_subfaces({3, 4, 5}, {3, 4, 5});
+    st.insert_simplex_and_subfaces({3, 0}, {2, 3, 4});
+    st.insert_simplex_and_subfaces({2, 1, 0}, {3, 4, 5});
+  }
 
   st.initialize_filtration();
   // Display the Simplex_tree

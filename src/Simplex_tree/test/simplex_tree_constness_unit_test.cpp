@@ -67,6 +67,13 @@ void test_simplex_tree_constness(const Simplex_tree& const_stree) {
     for (auto vertex : const_stree.simplex_vertex_range(sh)) std::clog << "(" << vertex << ")";
     std::clog << std::endl;
   }
+  std::clog << "* dimension_simplex_range in dim " << const_stree.dimension() << "\n";
+  for (auto sh : const_stree.dimension_simplex_range(const_stree.dimension())) {
+    std::clog << "   "
+              << "[" << const_stree.filtration(sh) << "] ";
+    for (auto vertex : const_stree.simplex_vertex_range(sh)) std::clog << "(" << vertex << ")";
+    std::clog << std::endl;
+  }
   std::clog << "* star_simplex_range of {0, 1, 6}\n";
   for (auto sh : const_stree.star_simplex_range(const_stree.find({0, 1, 6}))) {
     std::clog << "   "

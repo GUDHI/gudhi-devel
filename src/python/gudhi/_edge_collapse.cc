@@ -5,63 +5,83 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
+ *      - 2025/03 Hannah Schreiber: Use nanobind instead of PyBind11 for python bindings.
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <cstddef>    //std::size_t
+#include <stdexcept>  //std::runtime_error
 #include <vector>
-#include <utility>
-#include <stdexcept>
+#include <tuple>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <pybind11/numpy.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 
 #include <gudhi/Flag_complex_edge_collapser.h>
+#include <python_interfaces/numpy_utils.h>
 
-namespace py = pybind11;
+namespace nb = nanobind;
 
-template<class Index, class Filtr>
-py::object collapse(py::array_t<Index> is, py::array_t<Index> js, py::array_t<Filtr> fs, int nb_iterations) {
+template <class Index, class Filtr>
+nb::object collapse(nb::ndarray<const Index, nb::ndim<1>> is,
+                    nb::ndarray<const Index, nb::ndim<1>> js,
+                    nb::ndarray<const Filtr, nb::ndim<1>> fs,
+                    int nb_iterations)
+{
   typedef std::tuple<Index, Index, Filtr> Filtered_edge;
   typedef std::vector<Filtered_edge> Edges;
-  py::buffer_info bufi = is.request();
-  py::buffer_info bufj = js.request();
-  py::buffer_info buff = fs.request();
-  if (bufi.ndim != 1 || bufj.ndim != 1 || buff.ndim != 1)
+
+  if (is.ndim() != 1 || js.ndim() != 1 || fs.ndim() != 1)
     throw std::runtime_error("Input must be 1-dimensional arrays");
-  if (bufi.shape[0] != bufj.shape[0] || bufi.shape[0] != buff.shape[0])
+  if (is.shape(0) != js.shape(0) || is.shape(0) != fs.shape(0))
     throw std::runtime_error("Input arrays must have the same size");
-  if (buff.shape[0] == 0) {
-    py::array_t<Index> indices({{ 2, 0 }}, {{ 0, 0 }});
-    py::array_t<Filtr> filtrs;
-    return py::make_tuple(std::move(indices), std::move(filtrs));
+
+  if (fs.shape(0) == 0) {
+    return nb::make_tuple(nb::ndarray<Index, nanobind::numpy>(nullptr, {2, 0}),
+                          nb::ndarray<Filtr, nanobind::numpy>(nullptr, {0}));
   }
-  auto& edges = *new Edges();
+
+  auto is_view = is.view();
+  auto js_view = js.view();
+  auto fs_view = fs.view();
+
+  Edges edges;
   {
-    py::gil_scoped_release release;
-    Index n_edges = static_cast<Index>(bufi.shape[0]);
+    nb::gil_scoped_release release;
+    Index n_edges = static_cast<Index>(is.shape(0));
     edges.reserve(n_edges);
-    auto strides_i = bufi.strides[0];
-    auto strides_j = bufj.strides[0];
-    auto strides_f = buff.strides[0];
     for (Index k = 0; k < n_edges; ++k) {
-      Index i = *reinterpret_cast<Index*>(static_cast<char*>(bufi.ptr) + k * strides_i);
-      Index j = *reinterpret_cast<Index*>(static_cast<char*>(bufj.ptr) + k * strides_j);
-      Filtr f = *reinterpret_cast<Filtr*>(static_cast<char*>(buff.ptr) + k * strides_f);
-      edges.emplace_back(i, j, f);
+      edges.emplace_back(is_view(k), js_view(k), fs_view(k));
     }
     for (int k = 0; k < nb_iterations; ++k) {
-      edges = Gudhi::collapse::flag_complex_collapse_edges(std::move(edges), [](auto const&d){return d;});
+      edges = Gudhi::collapse::flag_complex_collapse_edges(std::move(edges), [](auto const& d) { return d; });
     }
   }
-  py::capsule owner(&edges, [](void*p){ delete reinterpret_cast<Edges*>(p); });
-  const auto offset = reinterpret_cast<char*>(&std::get<1>(edges[0])) - reinterpret_cast<char*>(&std::get<0>(edges[0]));
-  py::array_t<Index> indices({{ 2, static_cast<py::ssize_t>(edges.size()) }}, {{ offset, sizeof(Filtered_edge) }}, &std::get<0>(edges[0]), owner);
-  py::array_t<Filtr> filtrs ({{    static_cast<py::ssize_t>(edges.size()) }}, {{         sizeof(Filtered_edge) }}, &std::get<2>(edges[0]), owner);
-  return py::make_tuple(std::move(indices), std::move(filtrs));
+
+  // nanobind needs the strides to be an element count and not a byte size, so every count needs to be of the same size
+  // not sure this works with the vector `edges`.
+  auto indices = new Index[edges.size() * 2];
+  auto filtrs = new Filtr[edges.size()];
+
+  std::size_t i = 0;
+  for (const Filtered_edge& e : edges) {
+    indices[i] = std::get<0>(e);
+    indices[edges.size() + i] = std::get<1>(e);
+    filtrs[i] = std::get<2>(e);
+    ++i;
+  }
+
+  return nb::make_tuple(_wrap_as_numpy_array(indices, 2, edges.size()), _wrap_as_numpy_array(filtrs, edges.size()));
 }
 
-PYBIND11_MODULE(_edge_collapse, m) {
-  m.def("_collapse_edges", collapse<int, float>, py::arg("i").noconvert(), py::arg("j").noconvert(), py::arg("f").noconvert(), py::arg("nb_iterations")=1);
-  m.def("_collapse_edges", collapse<py::ssize_t, double>, py::arg("i"), py::arg("j"), py::arg("f"), py::arg("nb_iterations")=1);
+NB_MODULE(_edge_collapse_ext, m)
+{
+  m.attr("__license__") = "MIT";
+  m.def("_collapse_edges",
+        collapse<int, float>,
+        nb::arg("i").noconvert(),
+        nb::arg("j").noconvert(),
+        nb::arg("f").noconvert(),
+        nb::arg("nb_iterations") = 1);
+  m.def("_collapse_edges", collapse<nb::ssize_t, double>);
 }

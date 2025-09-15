@@ -8,16 +8,35 @@
       - YYYY/MM Author: Description of the modification
 """
 
-import gudhi
-import gudhi.hera
+
 import pytest
 
-__author__ = "Vincent Rouvreau"
-__copyright__ = "Copyright (C) 2016 Inria"
-__license__ = "MIT"
+import gudhi
+import gudhi.hera
 
 
 def test_basic_bottleneck():
+    import numpy as np
+
+    diag1 = np.array([[2.7, 3.7], [9.6, 14.0], [34.2, 34.974], [3.0, float("Inf")]])
+    diag2 = np.array([[2.8, 4.45], [9.5, 14.1], [3.2, float("Inf")]])
+
+    assert gudhi.bottleneck_distance(diag1, diag2) == 0.75
+    assert gudhi.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, abs=0.1)
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
+
+    # Translating both diagrams along the diagonal should not affect the distance,
+    # checks that negative numbers are not an issue
+    diag1 = diag1 - 100
+    diag2 = diag2 - 100
+
+    assert gudhi.bottleneck_distance(diag1, diag2) == 0.75
+    assert gudhi.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, abs=0.1)
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
+
+def test_basic_list_list_bottleneck():
     diag1 = [[2.7, 3.7], [9.6, 14.0], [34.2, 34.974], [3.0, float("Inf")]]
     diag2 = [[2.8, 4.45], [9.5, 14.1], [3.2, float("Inf")]]
 
@@ -26,14 +45,74 @@ def test_basic_bottleneck():
     assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
     assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
 
-    import numpy as np
-
-    # Translating both diagrams along the diagonal should not affect the distance,
-    # checks that negative numbers are not an issue
-    diag1 = np.array(diag1) - 100
-    diag2 = np.array(diag2) - 100
+def test_basic_list_tuple_bottleneck():
+    diag1 = [(2.7, 3.7), (9.6, 14.0), (34.2, 34.974), (3.0, float("Inf"))]
+    diag2 = [(2.8, 4.45), (9.5, 14.1), (3.2, float("Inf"))]
 
     assert gudhi.bottleneck_distance(diag1, diag2) == 0.75
     assert gudhi.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, abs=0.1)
     assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
     assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
+
+def test_basic_tuple_tuple_bottleneck():
+    diag1 = ((2.7, 3.7), (9.6, 14.0), (34.2, 34.974), (3.0, float("Inf")))
+    diag2 = ((2.8, 4.45), (9.5, 14.1), (3.2, float("Inf")))
+
+    assert gudhi.bottleneck_distance(diag1, diag2) == 0.75
+    assert gudhi.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, abs=0.1)
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
+
+def test_basic_tuple_list_bottleneck():
+    diag1 = ([2.7, 3.7], [9.6, 14.0], [34.2, 34.974], [3.0, float("Inf")])
+    diag2 = ([2.8, 4.45], [9.5, 14.1], [3.2, float("Inf")])
+
+    assert gudhi.bottleneck_distance(diag1, diag2) == 0.75
+    assert gudhi.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, abs=0.1)
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0) == 0.75
+    assert gudhi.hera.bottleneck_distance(diag1, diag2, 0.1) == pytest.approx(0.75, rel=0.1)
+
+def test_invalid_format_bottleneck():
+    diag1 = [[], [], [], []]
+    diag2 = []  #this one should be valid, as it can be an empty list of pairs
+
+    with pytest.raises(TypeError):
+        gudhi.bottleneck_distance(diag1, diag1)
+
+    with pytest.raises(TypeError):
+        gudhi.hera.bottleneck_distance(diag1, diag1, 0)
+
+    assert gudhi.bottleneck_distance(diag2, diag2) == 0
+    assert gudhi.hera.bottleneck_distance(diag2, diag2) == 0
+
+    diag1 = [[2.7], [9.6, 14.0], [34.2, 34.974], [3.0, float("Inf")]]
+    diag2 = [[2.8, 4.45], [9.5, 14.1, 5.7], [3.2, float("Inf")]]
+
+    with pytest.raises(ValueError):
+        gudhi.bottleneck_distance(diag1, diag1)
+
+    with pytest.raises(ValueError):
+        gudhi.hera.bottleneck_distance(diag1, diag1, 0)
+
+    with pytest.raises(ValueError):
+        gudhi.bottleneck_distance(diag2, diag2)
+
+    with pytest.raises(ValueError):
+        gudhi.hera.bottleneck_distance(diag2, diag2, 0)
+
+    import numpy as np
+
+    diag1 = np.array([[2.7], [9.6], [34.2], [3.0]])
+    diag2 = np.array([[2.8, 4.45, 5.7], [9.5, 14.1, 5.7], [3.2, float("Inf"), 5.7]])
+
+    with pytest.raises(TypeError):
+        gudhi.bottleneck_distance(diag1, diag1)
+
+    with pytest.raises(TypeError):
+        gudhi.hera.bottleneck_distance(diag1, diag1, 0)
+
+    with pytest.raises(TypeError):
+        gudhi.bottleneck_distance(diag2, diag2)
+
+    with pytest.raises(TypeError):
+        gudhi.hera.bottleneck_distance(diag2, diag2, 0)

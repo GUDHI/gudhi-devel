@@ -7,6 +7,8 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+__license__ = "MIT"
+
 
 import numpy as np
 import warnings
@@ -15,22 +17,22 @@ from gudhi.wasserstein import wasserstein_distance
 
 
 def _mean(x, m):
-    '''
+    """
     :param x: a list of 2D-points, off diagonal, x_0... x_{k-1}
     :param m: total amount of points taken into account, that is we have (m-k) copies of diagonal
     :returns: the weighted mean of x with (m-k) copies of the diagonal
-    '''
+    """
     k = len(x)
     if k > 0:
         w = np.mean(x, axis=0)
         w_delta = (w[0] + w[1]) / 2 * np.ones(2)
-        return (k * w + (m-k) * w_delta) / m
+        return (k * w + (m - k) * w_delta) / m
     else:
         return np.array([0, 0])
 
 
 def lagrangian_barycenter(pdiagset, init=None, verbose=False):
-    '''
+    """
     :param pdiagset: a list of ``numpy.array`` of shape `(n x 2)` (`n` can variate), encoding a set of persistence
         diagrams with only finite coordinates.
     :param init: The initial value for barycenter estimate.
@@ -54,7 +56,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
           observations to the output.
 
         - `"nb_iter"`, ``int`` number of iterations performed before convergence of the algorithm.
-    '''
+    """
     X = pdiagset  # to shorten notations, not a copy
     m = len(X)  # number of diagrams we are averaging
     if m == 0:
@@ -78,20 +80,22 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
         nb_iter += 1
         K = len(Y)  # current nb of points in Y (some might be on diagonal)
         G = np.full((K, m), -1, dtype=int)  # will store for each j, the (index)
-                              # point matched in each other diagram
-                              #(might be the diagonal).
-                              # that is G[j, i] = k <=> y_j is matched to
-                              # x_k in the diagram i-th diagram X[i]
+        # point matched in each other diagram
+        # (might be the diagonal).
+        # that is G[j, i] = k <=> y_j is matched to
+        # x_k in the diagram i-th diagram X[i]
         updated_points = np.zeros((K, 2))  # will store the new positions of
-                                           # the points of Y.
-                                           # If points disappear, there thrown
-                                           # on [0,0] by default.
+        # the points of Y.
+        # If points disappear, there thrown
+        # on [0,0] by default.
         new_created_points = []  # will store potential new points.
 
         # Step 1 : compute optimal matching (Y, X_i) for each X_i
         #          and create new points in Y if needed
         for i in range(m):
-            _, indices = wasserstein_distance(Y, X[i], matching=True, order=2., internal_p=2.)
+            _, indices = wasserstein_distance(
+                Y, X[i], matching=True, order=2.0, internal_p=2.0
+            )
             for y_j, x_i_j in indices:
                 if y_j >= 0:  # we matched an off diagonal point to x_i_j...
                     if x_i_j >= 0:  # ...which is also an off-diagonal point.
@@ -100,7 +104,7 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
                         G[y_j, i] = -1  # -1 stands for the diagonal (mask)
                 else:  # We matched a diagonal point to x_i_j...
                     if x_i_j >= 0:  # which is a off-diag point !
-                                                # need to create new point in Y
+                        # need to create new point in Y
                         new_y = _mean(np.array([X[i][x_i_j]]), m)
                         # Average this point with (m-1) copies of Delta
                         new_created_points.append(new_y)
@@ -110,9 +114,9 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
         for j in range(K):
             matched_points = [X[i][G[j, i]] for i in range(m) if G[j, i] > -1]
             new_y_j = _mean(matched_points, m)
-            if not np.array_equal(new_y_j, np.array([0,0])):
+            if not np.array_equal(new_y_j, np.array([0, 0])):
                 updated_points[j] = new_y_j
-            else: # this points is no longer of any use.
+            else:  # this points is no longer of any use.
                 to_delete.append(j)
         # we remove the point to be deleted now.
         updated_points = np.delete(updated_points, to_delete, axis=0)
@@ -126,17 +130,18 @@ def lagrangian_barycenter(pdiagset, init=None, verbose=False):
                 converged = True
             Y = updated_points
 
-
     if verbose:
         groupings = []
         energy = 0
         log = {}
         for i in range(m):
-            cost, edges = wasserstein_distance(Y, X[i], matching=True, order=2., internal_p=2.)
+            cost, edges = wasserstein_distance(
+                Y, X[i], matching=True, order=2.0, internal_p=2.0
+            )
             groupings.append(edges)
             energy += cost
             log["groupings"] = groupings
-        energy = energy/m
+        energy = energy / m
         log["energy"] = energy
         log["nb_iter"] = nb_iter
 

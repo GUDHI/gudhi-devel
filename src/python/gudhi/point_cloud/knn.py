@@ -7,14 +7,13 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+__license__ = "MIT"
+
+
 import numpy
 import warnings
 
 # TODO: https://github.com/facebookresearch/faiss
-
-__author__ = "Marc Glisse"
-__copyright__ = "Copyright (C) 2020 Inria"
-__license__ = "MIT"
 
 
 class KNearestNeighbors:
@@ -26,7 +25,9 @@ class KNearestNeighbors:
         in function of the selected `implementation`.
     """
 
-    def __init__(self, k, return_index=True, return_distance=False, metric="euclidean", **kwargs):
+    def __init__(
+        self, k, return_index=True, return_distance=False, metric="euclidean", **kwargs
+    ):
         """
         Args:
             k (int): number of neighbors (possibly including the point itself).
@@ -77,9 +78,13 @@ class KNearestNeighbors:
         elif metric == "minkowski":
             self.params["p"] = kwargs.get("p", 2)
         if self.params.get("implementation") in {"keops", "ckdtree"}:
-            assert self.metric == "minkowski"
+            if self.metric != "minkowski":
+                raise ValueError("metric has to be minkowski for the given parameters")
         if self.params.get("implementation") == "hnsw":
-            assert self.metric == "minkowski" and self.params["p"] == 2
+            if self.metric != "minkowski" or self.params["p"] != 2:
+                raise ValueError(
+                    "metric has to be minkowski and p set to 2 for the given parameters"
+                )
         if not self.params.get("implementation"):
             if self.metric == "minkowski":
                 self.params["implementation"] = "ckdtree"
@@ -120,7 +125,9 @@ class KNearestNeighbors:
             from sklearn.neighbors import NearestNeighbors
 
             nargs = {
-                k: v for k, v in self.params.items() if k in {"p", "n_jobs", "metric_params", "algorithm", "leaf_size"}
+                k: v
+                for k, v in self.params.items()
+                if k in {"p", "n_jobs", "metric_params", "algorithm", "leaf_size"}
             }
             self.nn = NearestNeighbors(n_neighbors=self.k, metric=self.metric, **nargs)
             self.nn.fit(X)
@@ -130,7 +137,12 @@ class KNearestNeighbors:
 
             self.graph = hnswlib.Index("l2", len(X[0]))  # Actually returns squared distances
             self.graph.init_index(
-                len(X), **{k: v for k, v in self.params.items() if k in {"ef_construction", "M", "random_seed"}}
+                len(X),
+                **{
+                    k: v
+                    for k, v in self.params.items()
+                    if k in {"ef_construction", "M", "random_seed"}
+                },
             )
             n = self.params.get("num_threads")
             if n is None:
@@ -162,7 +174,8 @@ class KNearestNeighbors:
             try:
                 newX = ep.astensor(X)
                 if self.params["implementation"] != "keops" or (
-                    not isinstance(newX, ep.PyTorchTensor) and not isinstance(newX, ep.NumPyTensor)
+                    not isinstance(newX, ep.PyTorchTensor)
+                    and not isinstance(newX, ep.NumPyTensor)
                 ):
                     newX = newX.numpy()
                 else:
@@ -173,7 +186,8 @@ class KNearestNeighbors:
                 self.return_distance = True
                 self.params["enable_autodiff"] = True
             # We can implement more later as needed
-            assert self.metric == "minkowski"
+            if self.metric != "minkowski":
+                raise ValueError("metric has to be minkowski for the given parameters")
             p = self.params["p"]
             Y = ep.astensor(self.ref_points)
             neighbor_pts = Y[neighbors,]
@@ -229,7 +243,9 @@ class KNearestNeighbors:
                         def func(M):
                             return numpy.argpartition(M, k - 1)[:, 0:k]
 
-                    neighbors = numpy.concatenate(parallel(delayed(func)(X[s]) for s in slices))
+                    neighbors = numpy.concatenate(
+                        parallel(delayed(func)(X[s]) for s in slices)
+                    )
                     if self.return_distance:
                         distances = numpy.take_along_axis(X, neighbors, axis=-1)
                         return neighbors, distances
@@ -258,7 +274,9 @@ class KNearestNeighbors:
                         func = lambda M: numpy.partition(M, k - 1)[:, 0:k]
                     slices = gen_even_slices(len(X), effective_n_jobs(n_jobs))
                     parallel = Parallel(prefer="threads", n_jobs=n_jobs)
-                    distances = numpy.concatenate(parallel(delayed(func)(X[s]) for s in slices))
+                    distances = numpy.concatenate(
+                        parallel(delayed(func)(X[s]) for s in slices)
+                    )
                 return distances
             return None
 
@@ -266,10 +284,15 @@ class KNearestNeighbors:
             ef = self.params.get("ef")
             if ef is not None:
                 self.graph.set_ef(ef)
-            neighbors, distances = self.graph.knn_query(X, k, num_threads=self.params["num_threads"])
+            neighbors, distances = self.graph.knn_query(
+                X, k, num_threads=self.params["num_threads"]
+            )
             with warnings.catch_warnings():
                 if not (numpy.all(numpy.isfinite(distances))):
-                    warnings.warn("Overflow/infinite value encountered while computing 'distances'", RuntimeWarning)
+                    warnings.warn(
+                        "Overflow/infinite value encountered while computing 'distances'",
+                        RuntimeWarning,
+                    )
             # The k nearest neighbors are always sorted. I couldn't find it in the doc, but the code calls searchKnn,
             # which returns a priority_queue, and then fills the return array backwards with top/pop on the queue.
             if self.return_index:
@@ -298,15 +321,19 @@ class KNearestNeighbors:
             elif p == 2:  # Any even integer?
                 mat = ((LazyTensor(XX[:, None, :]) - LazyTensor(YY[None, :, :])) ** p).sum(-1)
             else:
-                mat = ((LazyTensor(XX[:, None, :]) - LazyTensor(YY[None, :, :])).abs() ** p).sum(-1)
+                mat = (
+                    (LazyTensor(XX[:, None, :]) - LazyTensor(YY[None, :, :])).abs() ** p
+                ).sum(-1)
 
             if self.return_index:
                 if self.return_distance:
                     distances, neighbors = mat.Kmin_argKmin(k, dim=1)
                     with warnings.catch_warnings():
                         if not (torch.isfinite(distances).all()):
-                            warnings.warn("Overflow/infinite value encountered while computing 'distances'",
-                                          RuntimeWarning)
+                            warnings.warn(
+                                "Overflow/infinite value encountered while computing 'distances'",
+                                RuntimeWarning,
+                            )
                     if p != numpy.inf:
                         distances = distances ** (1.0 / p)
                     return neighbors, distances
@@ -317,8 +344,10 @@ class KNearestNeighbors:
                 distances = mat.Kmin(k, dim=1)
                 with warnings.catch_warnings():
                     if not (torch.isfinite(distances).all()):
-                        warnings.warn("Overflow/infinite value encountered while computing 'distances'",
-                                      RuntimeWarning)
+                        warnings.warn(
+                            "Overflow/infinite value encountered while computing 'distances'",
+                            RuntimeWarning,
+                        )
                 if p != numpy.inf:
                     distances = distances ** (1.0 / p)
                 return distances
@@ -342,7 +371,9 @@ class KNearestNeighbors:
                 return distances
             return None
 
-        assert self.params["implementation"] == "sklearn"
+        # sklearn is the last valid value possible for "implementation"
+        if self.params["implementation"] != "sklearn":
+            raise ValueError("implementation method has no known value")
         if self.return_distance:
             distances, neighbors = self.nn.kneighbors(X, return_distance=True)
             if self.return_index:
