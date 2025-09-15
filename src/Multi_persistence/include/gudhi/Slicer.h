@@ -505,11 +505,11 @@ class Slicer
     Index maxIndex = -1;
     Index maxBirth = std::numeric_limits<Index>::max();
     T maxLength = 0;
-    for (Index i = 0; i < barcodeIndices.size(); ++i){
+    for (Index i = 0; i < barcodeIndices.size(); ++i) {
       // barcodeIndices[i] does not work
       const auto& bar = barcodeIndices(i);
-      if (bar.dim == dim){
-        if (bar.death == Persistence::nullDeath){
+      if (bar.dim == dim) {
+        if (bar.death == Persistence::nullDeath) {
           if (maxBirth > bar.birth) {
             maxBirth = bar.birth;
             maxIndex = i;
@@ -517,7 +517,7 @@ class Slicer
           }
         } else {
           T length = slice_[bar.death] - slice_[bar.birth];
-          if (maxLength < length){
+          if (maxLength < length) {
             maxLength = length;
             maxIndex = i;
           }

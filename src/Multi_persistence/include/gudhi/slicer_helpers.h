@@ -47,6 +47,7 @@
 #include <gudhi/Bitmap_cubical_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
+#include <gudhi/Multi_filtration/multi_filtration_conversions.h>
 #include <gudhi/Multi_persistence/Line.h>
 
 namespace Gudhi {
@@ -473,23 +474,30 @@ inline Multi_parameter_filtered_complex<OneCriticalMultiFiltrationValue> build_c
  *
  * @note The key values in the simplex tree nodes will be overwritten.
  *
- * @tparam SimplexTreeOptions Class following the @ref SimplexTreeOptions concept such that
- * @ref SimplexTreeOptions::Filtration_value follows the @ref MultiFiltrationValue concept.
+ * @tparam MultiFiltrationValue Class following the @ref MultiFiltrationValue concept.
+ * @tparam SimplexTreeOptions Class following the @ref SimplexTreeOptions concept. Additionally, if
+ * `SimplexTreeOptions::Filtration_value` and `MultiFiltrationValue` are not the same type, there must
+ * be a method `as_type` taking `SimplexTreeOptions::Filtration_value` as argument and returning the value as an
+ * `MultiFiltrationValue` type. See @ref Gudhi::multi_filtration::as_type for implementations for
+ * @ref Gudhi::multi_filtration::Multi_parameter_filtration,
+ * @ref Gudhi::multi_filtration::Dynamic_multi_parameter_filtration and
+ * @ref Gudhi::multi_filtration::Degree_rips_bifiltration.
  * @param simplexTree Simplex tree to convert. The key values of the simplex tree will be overwritten.
  */
-template <class SimplexTreeOptions>
-inline Multi_parameter_filtered_complex<typename SimplexTreeOptions::Filtration_value> build_complex_from_simplex_tree(
+template <class MultiFiltrationValue, class SimplexTreeOptions>
+inline Multi_parameter_filtered_complex<MultiFiltrationValue> build_complex_from_simplex_tree(
     Simplex_tree<SimplexTreeOptions>& simplexTree)
 {
-  using Fil = typename SimplexTreeOptions::Filtration_value;
+  // declared here to enable custom `as_type` methods which are not in this namespace.
+  using namespace Gudhi::multi_filtration;
 
   // TODO: is_multi_filtration will discriminate all pre-made multi filtration classes, but not any user made
   // class following the MultiFiltrationValue concept (as it was more thought for inner use). The tests should be
   // re-thought or this one just removed.
-  static_assert(Gudhi::multi_filtration::RangeTraits<Fil>::is_multi_filtration,
-                "Filtration value of the simplex tree has to correspond to the MultiFiltrationValue concept.");
+  static_assert(RangeTraits<MultiFiltrationValue>::is_multi_filtration,
+                "Target filtration value type has to correspond to the MultiFiltrationValue concept.");
 
-  using Complex = Multi_parameter_filtered_complex<Fil>;
+  using Complex = Multi_parameter_filtered_complex<MultiFiltrationValue>;
 
   const unsigned int numberOfSimplices = simplexTree.num_simplices();
 
@@ -524,7 +532,11 @@ inline Multi_parameter_filtered_complex<typename SimplexTreeOptions::Filtration_
   for (auto sh : simplexTree.complex_simplex_range()) {
     auto index = oldToNewIndex[simplexTree.key(sh)];
     dimensions[index] = simplexTree.dimension(sh);
-    filtrationValues[index] = simplexTree.filtration(sh);
+    if constexpr (std::is_same_v<MultiFiltrationValue, typename SimplexTreeOptions::Filtration_value>) {
+      filtrationValues[index] = simplexTree.filtration(sh);
+    } else {
+      filtrationValues[index] = as_type<MultiFiltrationValue>(simplexTree.filtration(sh));
+    }
     typename Complex::Boundary boundary(dimensions[index] == 0 ? 0 : dimensions[index] + 1);
     unsigned int j = 0;
     for (auto b : simplexTree.boundary_simplex_range(sh)) {
@@ -605,7 +617,7 @@ inline Slicer build_slicer_from_bitmap(const std::vector<typename Slicer::Filtra
 template <class Slicer, class SimplexTreeOptions>
 inline Slicer build_slicer_from_simplex_tree(Simplex_tree<SimplexTreeOptions>& simplexTree)
 {
-  auto cpx = build_complex_from_simplex_tree<SimplexTreeOptions>(simplexTree);
+  auto cpx = build_complex_from_simplex_tree<typename Slicer::Filtration_value, SimplexTreeOptions>(simplexTree);
   return Slicer(std::move(cpx));
 }
 

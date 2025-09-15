@@ -326,7 +326,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_simplex_tree_io, Fil, list_of_tested_varian
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;
   using ini = std::initializer_list<typename Fil::value_type>;
-  using Slicer = Slicer<Fil, Persistence_interface_cohomology<Fil> >;
+  using Slicer1 = Slicer<Fil, Persistence_interface_cohomology<Fil> >;
+  using Fil2 = Multi_parameter_filtration<int>; // Will always be different from ST::Filtration_value
+  using Slicer2 = Slicer<Fil2, Persistence_interface_cohomology<Fil2> >;
 
   ST simplexTree;
 
@@ -341,7 +343,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_simplex_tree_io, Fil, list_of_tested_varian
   simplexTree.insert_simplex_and_subfaces({2,6}, ini{0, 1});
   simplexTree.insert_simplex_and_subfaces({1,3}, ini{0, 8});
 
-  auto cpx = build_complex_from_simplex_tree(simplexTree);
+  auto cpx = build_complex_from_simplex_tree<Fil>(simplexTree);
 
   BC bc = {{},     {},     {},        {},           {},           {},           {},           {0, 1},
            {0, 2}, {1, 2}, {1, 3},    {2, 6},       {3, 4},       {3, 5},       {3, 6},       {4, 5},
@@ -356,11 +358,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_simplex_tree_io, Fil, list_of_tested_varian
   BOOST_CHECK(fc == cpx.get_filtration_values());
   BOOST_CHECK_EQUAL(3, cpx.get_max_dimension());
 
-  auto slicer = build_slicer_from_simplex_tree<Slicer>(simplexTree);
+  auto slicer = build_slicer_from_simplex_tree<Slicer1>(simplexTree);
 
   BOOST_CHECK(bc == slicer.get_boundaries());
   BOOST_CHECK(dc == slicer.get_dimensions());
   BOOST_CHECK(fc == slicer.get_filtration_values());
   BOOST_CHECK_EQUAL(3, slicer.get_max_dimension());
+
+  auto slicer2 = build_slicer_from_simplex_tree<Slicer2>(simplexTree);
+
+  BOOST_CHECK(bc == slicer2.get_boundaries());
+  BOOST_CHECK(dc == slicer2.get_dimensions());
+  BOOST_CHECK_EQUAL(slicer.get_filtration_values().size(), slicer2.get_filtration_values().size());
+  BOOST_CHECK_EQUAL(3, slicer2.get_max_dimension());
 }
 
