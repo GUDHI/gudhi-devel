@@ -20,12 +20,13 @@ namespace zigzag_persistence {
 
 /**
  * @brief Data structure representing a point of fixed dimension. The structure of the point does not matter
- * it-self as long as it corresponds to the input type of the @ref DistanceFunction concept.
+ * it-self as long as it corresponds to the input type of the distance function usually given as argument together
+ * with the points.
  */
 class Point{};
 
 /**
- * @brief Range of @ref Point. If used with @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING
+ * @brief Range of @ref Point. If used with @ref Oscillating_rips_vertex_order_policy::FARTHEST_POINT_ORDERING
  * order policy, it has to be a random access range.
  */
 class PointRange {
@@ -46,7 +47,7 @@ class PointRange {
   std::size_t size();
 
   /**
-   * @brief Necessary only if used with @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING.
+   * @brief Necessary only if used with @ref Oscillating_rips_vertex_order_policy::FARTHEST_POINT_ORDERING.
    * Returns the element at the given index.
    * 
    * @param index Index of the element to return.

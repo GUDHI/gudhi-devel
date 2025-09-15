@@ -20,7 +20,10 @@ namespace zigzag_persistence {
 
 /**
  * @brief Data structure storing the simplices and their filtration values in the current complex. 
- * The concept is realized for example by
+ * The concept can be fulfilled by the @ref Gudhi::Simplex_tree if @ref SimplexTreeOptions::store_filtration is set to
+ * `true` as well as @ref SimplexTreeOptions::stable_simplex_handles. Also think to define
+ * @ref SimplexTreeOptions::Simplex_key with an integer type with enough range.
+ * For example, the concept is realized by
  * @ref Gudhi::Simplex_tree < Gudhi::zigzag_persistence::Simplex_tree_options_oscillating_rips >.
  */
 class StableFilteredComplex {

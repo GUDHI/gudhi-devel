@@ -38,9 +38,9 @@ namespace zigzag_persistence {
  * They mostly differ by their memory management, so it can be worth it to try both out.
  */
 enum Edge_range_type {
-  VECTOR,     /**< The edges are computed all at once and stored in a vector. */
-  BOOST_RANGE /**< The edges are computed one by one at each increment of the
-                   range iterator and therefore not stored. */
+  ALL_AT_ONCE,  /**< The edges are computed all at once and stored in a vector. */
+  ONE_BY_ONE    /**< The edges are computed one by one at each increment of the
+                     range iterator and therefore not stored. */
 };
 
 /**
@@ -103,7 +103,7 @@ struct Default_oscillating_rips_zigzag_options : Default_filtered_zigzag_options
  *
  * @ingroup zigzag_persistence
  *
- * @details It is thought to be a helper function to easily compute oscillating Rips persistence with the
+ * @details It is thought to be a convenience function to easily compute oscillating Rips persistence with the
  * possibility to switch out a few common options. But additional options exists for the iterators
  * (e.g. replacing the Euclidean distance by another one, or using your own epsilon values; see
  * the documentation of @ref Oscillating_rips_edge_iterator_range and @ref Oscillating_rips_simplex_iterator_range for
@@ -111,11 +111,11 @@ struct Default_oscillating_rips_zigzag_options : Default_filtered_zigzag_options
  *
  * @tparam PointRange Range containing the point cloud.
  * @tparam F Callback method type for the zigzag barcode output.
- * @tparam edge_range_type Either @ref Edge_range_type::BOOST_RANGE or @ref Edge_range_type::VECTOR.
- * Default value: @ref Edge_range_type::BOOST_RANGE.
+ * @tparam edge_range_type Either @ref Edge_range_type::ONE_BY_ONE or @ref Edge_range_type::ALL_AT_ONCE.
+ * Default value: @ref Edge_range_type::ONE_BY_ONE.
  * @tparam StableFilteredComplex A version of the @ref Simplex_tree "". Used to store and build the computed complex
  * at each step.
- * @param points Point cloud.
+ * @param points Point cloud. Will be used with @ref Gudhi::Euclidean_distance, so the type has to be compatible.
  * @param nu Lower multiplier.
  * @param mu Upper multiplier.
  * @param maxDim Maximum dimension to which to expand the Rips complex. If set to -1, there is no limit.
@@ -124,14 +124,14 @@ struct Default_oscillating_rips_zigzag_options : Default_filtered_zigzag_options
  * and third the death value of the cycle. The values corresponds to the filtration values which were given at
  * insertions or removals. Note that bars of length 0 will not be token into account.
  * @param p Order policy for the points.
- * Can be either @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
- * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
- * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
- * Default value: @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING.
+ * Can be either @ref Oscillating_rips_vertex_order_policy::FARTHEST_POINT_ORDERING,
+ * @ref Oscillating_rips_vertex_order_policy::ALREADY_ORDERED or
+ * @ref Oscillating_rips_vertex_order_policy::RANDOM_POINT_ORDERING.
+ * Default value: @ref Oscillating_rips_vertex_order_policy::FARTHEST_POINT_ORDERING.
  */
 template <typename PointRange,
           typename F,
-          Edge_range_type edge_range_type = Edge_range_type::BOOST_RANGE,
+          Edge_range_type edge_range_type = Edge_range_type::ONE_BY_ONE,
           class StableFilteredComplex = Gudhi::Simplex_tree<Simplex_tree_options_oscillating_rips> >
 void compute_oscillating_rips_persistence(
     const PointRange& points,
@@ -139,7 +139,7 @@ void compute_oscillating_rips_persistence(
     double mu,
     int maxDim,
     F&& outStream,
-    Oscillating_rips_edge_order_policy p = Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING)
+    Oscillating_rips_vertex_order_policy p = Oscillating_rips_vertex_order_policy::FARTHEST_POINT_ORDERING)
 {
   using ZPOptions = Default_oscillating_rips_zigzag_options<StableFilteredComplex>;
   using ZP = Filtered_zigzag_persistence<ZPOptions>;
@@ -149,8 +149,8 @@ void compute_oscillating_rips_persistence(
   using ItEdgeRange = Oscillating_rips_edge_iterator_range<Filtration_value>;
   using VectorEdgeRange = std::vector<Zigzag_edge<Filtration_value> >;
   using EdgeRange =
-      typename std::conditional<edge_range_type == Edge_range_type::BOOST_RANGE, ItEdgeRange, VectorEdgeRange>::type;
-  using EdgeRangeIterator = typename std::conditional<edge_range_type == Edge_range_type::BOOST_RANGE,
+      typename std::conditional<edge_range_type == Edge_range_type::ONE_BY_ONE, ItEdgeRange, VectorEdgeRange>::type;
+  using EdgeRangeIterator = typename std::conditional<edge_range_type == Edge_range_type::ONE_BY_ONE,
                                                       typename ItEdgeRange::Oscillating_rips_edge_iterator,
                                                       typename VectorEdgeRange::const_iterator>::type;
   using OscillatingRipsSimplexRange = Oscillating_rips_simplex_iterator_range<StableFilteredComplex, EdgeRangeIterator>;
@@ -160,7 +160,7 @@ void compute_oscillating_rips_persistence(
 
   EdgeRange edges;
 
-  if constexpr (edge_range_type == Edge_range_type::BOOST_RANGE) {
+  if constexpr (edge_range_type == Edge_range_type::ONE_BY_ONE) {
     edges = ItEdgeRange(nu, mu, points, Gudhi::Euclidean_distance(), p);
   } else {
     edges = Oscillating_rips_edge_vector_range_constructor<Filtration_value>::make_range(
@@ -184,31 +184,31 @@ void compute_oscillating_rips_persistence(
  *
  * @ingroup zigzag_persistence
  *
- * @details It is thought to be a helper function to easily compute oscillating Rips persistence with the
+ * @details It is thought to be a convenience function to easily compute oscillating Rips persistence with the
  * possibility to switch out a few common options. But additional options exists for the iterators
  * (e.g. replacing the Euclidean distance by another one, or using your own epsilon values; see
  * the documentation of @ref Oscillating_rips_edge_iterator_range and @ref Oscillating_rips_simplex_iterator_range for
  * more information). One can easily create their own method based on this one.
  *
  * @tparam PointRange Range containing the point cloud.
- * @tparam edge_range_type Either Edge_range_type::BOOST_RANGE or Edge_range_type::VECTOR.
- * Default value: Edge_range_type::BOOST_RANGE.
+ * @tparam edge_range_type Either Edge_range_type::ONE_BY_ONE or Edge_range_type::ALL_AT_ONCE.
+ * Default value: Edge_range_type::ONE_BY_ONE.
  * @tparam StableFilteredComplex A version of the @ref Simplex_tree "". Used to store and build the computed complex
  * at each step.
- * @param points Point cloud.
+ * @param points Point cloud. Will be used with @ref Gudhi::Euclidean_distance, so the type has to be compatible.
  * @param nu Lower multiplier.
  * @param mu Upper multiplier.
  * @param maxDim Maximum dimension to which to expand the Rips complex. If set to -1, there is no limit.
  * @param p Order policy for the points.
- * Can be either @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING,
- * @ref Oscillating_rips_edge_order_policy::ALREADY_ORDERED or
- * @ref Oscillating_rips_edge_order_policy::RANDOM_POINT_ORDERING.
- * Default value: @ref Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING.
+ * Can be either @ref Oscillating_rips_vertex_order_policy::FARTHEST_POINT_ORDERING,
+ * @ref Oscillating_rips_vertex_order_policy::ALREADY_ORDERED or
+ * @ref Oscillating_rips_vertex_order_policy::RANDOM_POINT_ORDERING.
+ * Default value: @ref Oscillating_rips_vertex_order_policy::FARTHEST_POINT_ORDERING.
  * @return The persistence diagram of the oscillating Rips filtration as vector of
  * @ref Gudhi::persistence_matrix::Persistence_interval "".
  */
 template <typename PointRange,
-          Edge_range_type edge_range_type = Edge_range_type::BOOST_RANGE,
+          Edge_range_type edge_range_type = Edge_range_type::ONE_BY_ONE,
           class StableFilteredComplex = Gudhi::Simplex_tree<Simplex_tree_options_oscillating_rips> >
 std::vector<Gudhi::persistence_matrix::Persistence_interval<int, typename StableFilteredComplex::Filtration_value> >
 compute_oscillating_rips_persistence(
@@ -216,7 +216,7 @@ compute_oscillating_rips_persistence(
     double nu,
     double mu,
     int maxDim,
-    Oscillating_rips_edge_order_policy p = Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING)
+    Oscillating_rips_vertex_order_policy p = Oscillating_rips_vertex_order_policy::FARTHEST_POINT_ORDERING)
 {
   using ZPOptions = Default_oscillating_rips_zigzag_options<StableFilteredComplex>;
   using ZP = Filtered_zigzag_persistence_with_storage<ZPOptions>;
@@ -224,8 +224,8 @@ compute_oscillating_rips_persistence(
   using ItEdgeRange = Oscillating_rips_edge_iterator_range<Filtration_value>;
   using VectorEdgeRange = std::vector<Zigzag_edge<Filtration_value> >;
   using EdgeRange =
-      typename std::conditional<edge_range_type == Edge_range_type::BOOST_RANGE, ItEdgeRange, VectorEdgeRange>::type;
-  using EdgeRangeIterator = typename std::conditional<edge_range_type == Edge_range_type::BOOST_RANGE,
+      typename std::conditional<edge_range_type == Edge_range_type::ONE_BY_ONE, ItEdgeRange, VectorEdgeRange>::type;
+  using EdgeRangeIterator = typename std::conditional<edge_range_type == Edge_range_type::ONE_BY_ONE,
                                                       typename ItEdgeRange::Oscillating_rips_edge_iterator,
                                                       typename VectorEdgeRange::const_iterator>::type;
   using OscillatingRipsSimplexRange = Oscillating_rips_simplex_iterator_range<StableFilteredComplex, EdgeRangeIterator>;
@@ -235,7 +235,7 @@ compute_oscillating_rips_persistence(
 
   EdgeRange edges;
 
-  if constexpr (edge_range_type == Edge_range_type::BOOST_RANGE) {
+  if constexpr (edge_range_type == Edge_range_type::ONE_BY_ONE) {
     edges = ItEdgeRange(nu, mu, points, Gudhi::Euclidean_distance(), p);
   } else {
     edges = Oscillating_rips_edge_vector_range_constructor<Filtration_value>::make_range(

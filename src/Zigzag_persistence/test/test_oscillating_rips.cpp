@@ -32,7 +32,7 @@ struct Simplex_tree_options_oscillating_rips {
   static const bool stable_simplex_handles = true;
 };
 
-using Gudhi::zigzag_persistence::Oscillating_rips_edge_order_policy;
+using Gudhi::zigzag_persistence::Oscillating_rips_vertex_order_policy;
 using Gudhi::zigzag_persistence::Oscillating_rips_edge_iterator_range;
 using Gudhi::zigzag_persistence::Oscillating_rips_edge_vector_range_constructor;
 using Gudhi::zigzag_persistence::Oscillating_rips_simplex_iterator_range;
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(oscillating_rips_edge_range22)
 {
   double nu = 1.76, mu = 2;
   std::vector<Point> points = get_point_cloud();
-  Oscillating_rips_edge_order_policy p = Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING;
+  Oscillating_rips_vertex_order_policy p = Oscillating_rips_vertex_order_policy::FARTHEST_POINT_ORDERING;
   std::vector<double> eps = get_epsilons(points);
 
   ItEdgeRange r1(nu, mu, points, Gudhi::Euclidean_distance(), p);
@@ -390,7 +390,7 @@ BOOST_AUTO_TEST_CASE(oscillating_rips_simplex_range22)
   double nu = 1.76, mu = 2;
   int maxDim = 2;
   std::vector<Point> points = get_point_cloud();
-  Oscillating_rips_edge_order_policy p = Oscillating_rips_edge_order_policy::FARTHEST_POINT_ORDERING;
+  Oscillating_rips_vertex_order_policy p = Oscillating_rips_vertex_order_policy::FARTHEST_POINT_ORDERING;
   std::vector<double> eps = get_epsilons(points);
   StableFilteredComplex st;
 

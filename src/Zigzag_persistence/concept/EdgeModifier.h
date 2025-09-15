@@ -11,8 +11,8 @@
 #ifndef CONCEPT_ZZ_EDGE_MODIFIER_H_
 #define CONCEPT_ZZ_EDGE_MODIFIER_H_
 
-/** @file EdgeModifier.h
- * @brief Contains @ref Gudhi::zigzag_persistence::EdgeModifier concept.
+/** @file EdgeFiltrationTransformer.h
+ * @brief Contains @ref Gudhi::zigzag_persistence::EdgeFiltrationTransformer concept.
  */
 
 namespace Gudhi {
@@ -23,7 +23,7 @@ namespace zigzag_persistence {
  * The concept is for example realized by @ref Identity_edge_modifier or @ref Square_root_edge_modifier "".
  */
 template <typename Filtration_value>
-class EdgeModifier {
+class EdgeFiltrationTransformer {
  public:
   /**
    * @brief Applies the modifier to the given value and returns it.
