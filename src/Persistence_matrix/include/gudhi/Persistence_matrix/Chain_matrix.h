@@ -958,6 +958,8 @@ inline Chain_matrix<Master_matrix>& Chain_matrix<Master_matrix>::operator=(const
 template <class Master_matrix>
 inline Chain_matrix<Master_matrix>& Chain_matrix<Master_matrix>::operator=(Chain_matrix&& other) noexcept
 {
+  if (this == &other) return *this;
+
   Dim_opt::operator=(std::move(other));
   Pair_opt::operator=(std::move(other));
   Swap_opt::operator=(std::move(other));

@@ -604,6 +604,8 @@ inline Base_matrix<Master_matrix>& Base_matrix<Master_matrix>::operator=(const B
 template <class Master_matrix>
 inline Base_matrix<Master_matrix>& Base_matrix<Master_matrix>::operator=(Base_matrix&& other) noexcept
 {
+  if (this == &other) return *this;
+
   Swap_opt::operator=(std::move(other));
   RA_opt::operator=(std::move(other));
 

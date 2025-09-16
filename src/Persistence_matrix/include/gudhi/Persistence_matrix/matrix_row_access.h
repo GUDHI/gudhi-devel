@@ -162,6 +162,8 @@ class Matrix_row_access
    */
   Matrix_row_access& operator=(Matrix_row_access&& other) noexcept
   {
+    if (this == &other) return *this;
+
     rows_ = std::exchange(other.rows_, nullptr);
     return *this;
   }

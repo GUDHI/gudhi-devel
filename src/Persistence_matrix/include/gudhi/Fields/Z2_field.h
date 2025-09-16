@@ -287,6 +287,8 @@ class Z2_field_element
    */
   Z2_field_element& operator=(Z2_field_element&& other) noexcept
   {
+    if (this == &other) return *this;
+
     element_ = std::exchange(other.element_, false);
     return *this;
   }

@@ -103,6 +103,8 @@ struct Column_dimension_holder {
    */
   Column_dimension_holder& operator=(Column_dimension_holder&& other) noexcept
   {
+    if (this == &other) return *this;
+
     dim_ = std::exchange(other.dim_, Master_matrix::template get_null_value<Dimension>());
     return *this;
   }
