@@ -7,7 +7,7 @@ jobs:
     name: debug_tests
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image
-    container: gudhi/ci_for_gudhi:2025.04.01
+    container: gudhi/ci_for_gudhi:2025.09.01
     steps:
       - uses: actions/checkout@v4
         with:
@@ -16,7 +16,6 @@ jobs:
       # Sanitizer is more complicated to launch on Python and some known memory leaks for NanoBind on purpose
       - name: Build and test unitary tests
         run: |
-          cat /proc/cpuinfo
           mkdir build
           cd build
           cmake -DCMAKE_BUILD_TYPE=Debug -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_GUDHUI=OFF ..
