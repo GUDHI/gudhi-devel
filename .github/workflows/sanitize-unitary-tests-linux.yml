@@ -14,12 +14,12 @@ jobs:
           submodules: true
       # Check python tests in debug mode and check adress sanitizer for the c++ unitary tests
       # Sanitizer is more complicated to launch on Python and some known memory leaks for NanoBind on purpose
+      # Requires to force architecture ("-march=x86-64") for the CI on GitHub
       - name: Build and test unitary tests
         run: |
-          python -c "import numpy; print(numpy.__config__.show())"
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Debug -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_GUDHUI=OFF ..
+          cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-march=x86-64" -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_GUDHUI=OFF ..
           make
           ctest --output-on-failure
           cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=-fsanitize=address -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_PYTHON=OFF .
