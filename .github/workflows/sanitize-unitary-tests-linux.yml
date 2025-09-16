@@ -7,7 +7,7 @@ jobs:
     name: debug_tests
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image
-    container: gudhi/ci_for_gudhi:2025.09.01
+    container: gudhi/ci_for_gudhi:2025.04.01
     steps:
       - uses: actions/checkout@v4
         with:
