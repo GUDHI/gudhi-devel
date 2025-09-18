@@ -5,14 +5,14 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
- *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `GUDHI_DEBUG`s etc.)
+ *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `DEBUG_TRACES`s etc.)
  *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef READ_PERSISTENCE_FROM_FILE_H_
 #define READ_PERSISTENCE_FROM_FILE_H_
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
 #include <iostream> // std::clog
 #endif
 #include <utility>  // std::pair
@@ -58,7 +58,7 @@ inline std::vector<std::pair<double, double> > read_persistence_intervals_in_one
   Barcode final_barcode;
   final_barcode.reserve(barcode_initial.size());
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Here are the intervals that we read from the file : \n";
   for (std::size_t i = 0; i != barcode_initial.size(); ++i) {
     std::clog << barcode_initial[i].first << " " << barcode_initial[i].second << std::endl;
@@ -66,20 +66,20 @@ inline std::vector<std::pair<double, double> > read_persistence_intervals_in_one
 #endif
 
   for (std::size_t i = 0; i != barcode_initial.size(); ++i) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "Considering interval : " << barcode_initial[i].first << " " << barcode_initial[i].second << std::endl;
 #endif
 
     if (barcode_initial[i].first > barcode_initial[i].second) {
       // note that in this case barcode_initial[i].second != std::numeric_limits<double>::infinity()
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "Swap and enter \n";
 #endif
       // swap them to make sure that birth < death
       final_barcode.push_back(Bar(barcode_initial[i].second, barcode_initial[i].first));
     } else {
       if (barcode_initial[i].second != std::numeric_limits<double>::infinity()) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "Simply enters\n";
 #endif
         // in this case, due to the previous conditions we know that
@@ -95,7 +95,7 @@ inline std::vector<std::pair<double, double> > read_persistence_intervals_in_one
     }
   }
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Here are the final bars that we are sending further : \n";
   for (std::size_t i = 0; i != final_barcode.size(); ++i) {
     std::clog << final_barcode[i].first << " " << final_barcode[i].second << std::endl;
