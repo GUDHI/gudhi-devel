@@ -5,14 +5,14 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
- *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `GUDHI_DEBUG`s etc.)
+ *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `DEBUG_TRACES`s etc.)
  *      - YYYY/MM Author: Description of the modification
  */
 
 #ifndef PERSISTENCE_INTERVALS_WITH_DISTANCES_H_
 #define PERSISTENCE_INTERVALS_WITH_DISTANCES_H_
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
 #include <iostream>  // std::cerr
 #endif
 #include <limits>     // std::numeric_limits
@@ -61,7 +61,7 @@ class Persistence_intervals_with_distances : public Persistence_intervals
     if (power >= std::numeric_limits<double>::max()) {
       return Gudhi::persistence_diagram::bottleneck_distance(Base::intervals_, second.intervals_, tolerance);
     } else {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::cerr << "At the moment Gudhi do not support Wasserstein distances. We only support Bottleneck distance."
                 << std::endl;
 #endif
