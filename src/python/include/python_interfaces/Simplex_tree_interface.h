@@ -203,14 +203,12 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
   {
     using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
     std::vector<Filtered_edge> edges;
-    for (Simplex_handle sh : st.skeleton_simplex_range(1)) {
-      if (st.dimension(sh) == 1) {
-        auto rg = st.simplex_vertex_range(sh);
-        auto vit = rg.begin();
-        Vertex_handle v = *vit;
-        Vertex_handle w = *++vit;
-        edges.emplace_back(v, w, st.filtration(sh));
-      }
+    for (Simplex_handle sh : st.dimension_simplex_range(1)) {
+      auto rg = st.simplex_vertex_range(sh);
+      auto vit = rg.begin();
+      Vertex_handle v = *vit;
+      Vertex_handle w = *++vit;
+      edges.emplace_back(v, w, st.filtration(sh));
     }
 
     for (int iteration = 0; iteration < nb_collapse_iteration; iteration++) {
