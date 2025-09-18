@@ -372,10 +372,7 @@ def test_collapse_edges_as_graph():
         assert simplex[1] == 1.0
 
     st.collapse_edges_as_graph()
-    assert st.num_simplices() == 9
-    assert st.find([0, 2]) == False  # [1, 3] would be fine as well
-    for simplex in st.get_skeleton(0):
-        assert simplex[1] == 1.0
+    assert st == st2
 
 
 def test_collapse_edges_as_flag_complex():
@@ -402,10 +399,7 @@ def test_collapse_edges_as_flag_complex():
         assert simplex[1] == 1.0
 
     st.collapse_edges_as_flag_complex()
-    assert st.num_simplices() == 11
-    assert st.find([0, 2]) == False  # [1, 3] would be fine as well
-    for simplex in st.get_skeleton(0):
-        assert simplex[1] == 1.0
+    assert st == st2
 
 
 def test_reset_filtration():
