@@ -5,7 +5,7 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
- *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `GUDHI_DEBUG`s etc.)
+ *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `DEBUG_TRACES`s etc.)
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -13,7 +13,7 @@
 #define PSSK_H_
 
 // standard include
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
 #include <iostream> // std::clog
 #endif
 #include <cmath>    // std::fabs
@@ -82,7 +82,7 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
                   double min = -1,
                   double max = -1)
   {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "Entering construct procedure \n";
 #endif
 
@@ -104,7 +104,7 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
       max += pad;
     }
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "min : " << min << std::endl;
     std::clog << "max : " << max << std::endl;
     std::clog << "number_of_pixels : " << number_of_pixels << std::endl;
@@ -121,7 +121,7 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
     }
     Base::heat_map_.swap(heat_map);
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "Done creating of the heat map, now we will fill in the structure \n";
 #endif
 
@@ -132,7 +132,7 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
       int y_grid =
           static_cast<int>((intervals[pt_nr].second - Base::min_) / (Base::max_ - Base::min_) * number_of_pixels);
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "point : " << intervals[pt_nr].first << " , " << intervals[pt_nr].second << std::endl;
       std::clog << "x_grid : " << x_grid << std::endl;
       std::clog << "y_grid : " << y_grid << std::endl;
@@ -144,7 +144,7 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
       y_grid -= filter.size() / 2;
       // note that the numbers x_grid and y_grid may be negative.
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "After shift : \n";
       std::clog << "x_grid : " << x_grid << std::endl;
       std::clog << "y_grid : " << y_grid << std::endl;
@@ -156,7 +156,7 @@ class PSSK : public Persistence_heat_maps<constant_scaling_function>
           // if the point (x_grid+i,y_grid+j) is the correct point in the grid.
           if (((x_grid + i) >= 0) && (x_grid + i < Base::heat_map_.size()) && ((y_grid + j) >= 0) &&
               (y_grid + j < Base::heat_map_.size())) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
             std::clog << y_grid + j << " " << x_grid + i << std::endl;
 #endif
             Base::heat_map_[y_grid + j][x_grid + i] += filter[i][j];

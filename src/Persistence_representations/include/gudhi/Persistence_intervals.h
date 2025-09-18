@@ -7,7 +7,7 @@
  *    Modification(s):
  *      - 2019/12 Vincent Rouvreau: Fix #118 - Make histogram_of_lengths and cumulative_histogram_of_lengths
  *          return the exact number_of_bins (was failing on x86)
- *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `GUDHI_DEBUG`s etc.)
+ *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `DEBUG_TRACES`s etc.)
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -15,7 +15,7 @@
 #define PERSISTENCE_INTERVALS_H_
 
 // standard include
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
 #include <iostream>   // std::clog
 #endif
 #include <cstddef>    // std::size_t
@@ -221,7 +221,7 @@ class Persistence_intervals
 
     out.close();
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
               << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 #endif
@@ -317,7 +317,7 @@ inline std::vector<std::pair<double, double> > Persistence_intervals::dominant_i
 
   for (std::size_t i = 0; i != std::min(where_to_cut, position_length_vector.size()); ++i) {
     result.push_back(this->intervals_[position_length_vector[i].first]);
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "Position : " << position_length_vector[i].first << " length : " << position_length_vector[i].second
               << std::endl;
 #endif
@@ -328,7 +328,7 @@ inline std::vector<std::pair<double, double> > Persistence_intervals::dominant_i
 
 inline std::vector<std::size_t> Persistence_intervals::histogram_of_lengths(std::size_t number_of_bins) const
 {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "this->intervals.size() : " << this->intervals_.size() << std::endl;
 #endif
 
@@ -340,7 +340,7 @@ inline std::vector<std::size_t> Persistence_intervals::histogram_of_lengths(std:
     }
   }
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "lengthOfLongest : " << lengthOfLongest << std::endl;
 #endif
 
@@ -358,7 +358,7 @@ inline std::vector<std::size_t> Persistence_intervals::histogram_of_lengths(std:
 
     ++result[position];
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "i : " << i << std::endl;
     std::clog << "Interval : [" << this->intervals_[i].first << " , " << this->intervals_[i].second << " ] \n";
     std::clog << "relative_length_of_this_interval : " << relative_length_of_this_interval << std::endl;
@@ -369,7 +369,7 @@ inline std::vector<std::size_t> Persistence_intervals::histogram_of_lengths(std:
   result[number_of_bins - 1] += result[number_of_bins];
   result.resize(number_of_bins);
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   for (std::size_t i = 0; i != result.size(); ++i) std::clog << result[i] << std::endl;
 #endif
   return result;
@@ -396,7 +396,7 @@ inline std::vector<double> Persistence_intervals::characteristic_function_of_dia
   std::fill(result.begin(), result.end(), 0);
 
   for (std::size_t i = 0; i != this->intervals_.size(); ++i) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "Interval : " << this->intervals_[i].first << " , " << this->intervals_[i].second << std::endl;
 #endif
 
@@ -418,7 +418,7 @@ inline std::vector<double> Persistence_intervals::characteristic_function_of_dia
       beginIt = endIt;
     }
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "beginIt : " << beginIt << std::endl;
     std::clog << "endIt : " << endIt << std::endl;
 #endif
@@ -427,7 +427,7 @@ inline std::vector<double> Persistence_intervals::characteristic_function_of_dia
       result[pos] += ((x_max - x_min) / static_cast<double>(number_of_bins)) *
                      (this->intervals_[i].second - this->intervals_[i].first);
     }
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "Result at this stage \n";
     for (std::size_t aa = 0; aa != result.size(); ++aa) {
       std::clog << result[aa] << " ";
@@ -482,7 +482,7 @@ inline std::vector<std::pair<double, std::size_t> > Persistence_intervals::compu
 
 inline std::vector<double> Persistence_intervals::k_n_n(std::size_t k, std::size_t where_to_cut) const
 {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Here are the intervals : \n";
   for (std::size_t i = 0; i != this->intervals_.size(); ++i) {
     std::clog << "[ " << this->intervals_[i].first << " , " << this->intervals_[i].second << "] \n";
@@ -518,7 +518,7 @@ inline std::vector<double> Persistence_intervals::k_n_n(std::size_t k, std::size
                                                   0.5 * (this->intervals_[i].first + this->intervals_[i].second)));
     distances_from_diagonal[i] = distanceToDiagonal;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "Here are the distances form the point : [" << this->intervals_[i].first << " , "
               << this->intervals_[i].second << "] in the diagram \n";
     for (std::size_t aa = 0; aa != distancesFromI.size(); ++aa) {
@@ -534,7 +534,7 @@ inline std::vector<double> Persistence_intervals::k_n_n(std::size_t k, std::size
     }
   }
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Here is the distance matrix : \n";
   for (std::size_t i = 0; i != distances.size(); ++i) {
     for (std::size_t j = 0; j != distances.size(); ++j) {
@@ -557,13 +557,13 @@ inline std::vector<double> Persistence_intervals::k_n_n(std::size_t k, std::size
     std::sort(distancesFromI.begin(), distancesFromI.end(), std::greater<double>());
 
     if (k > distancesFromI.size()) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "There are not enough neighbors in your set. We set the result to plus infty \n";
 #endif
       result.push_back(std::numeric_limits<double>::max());
     } else {
       if (distances_from_diagonal[i] > distancesFromI[k]) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "The k-th n.n. is on a diagonal. Therefore we set up a distance to diagonal \n";
 #endif
         result.push_back(distances_from_diagonal[i]);
