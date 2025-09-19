@@ -83,8 +83,6 @@ class SimplexTree(t._Simplex_tree_python_interface):
         This function initializes and sorts the simplicial complex
         filtration vector.
         """
-        import warnings
-
         warnings.warn(
             "Since Gudhi 3.2, calling SimplexTree.initialize_filtration is unnecessary.",
             DeprecationWarning,
@@ -415,7 +413,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         :type nb_iterations: int
         :param inplace: If `True`, the collapse is done on this simplex tree. Otherwise, the collapse is done on a new
             tree which is then returned. Default is `True`.
-        :type nb_iterations: bool
+        :type inplace: bool
 
         .. warning::
             The current simplex tree is assumed to be a graph, that is of maximal dimension 1.
@@ -445,10 +443,10 @@ class SimplexTree(t._Simplex_tree_python_interface):
         :param max_expansion_dim: The maximal dimension to which the new complex has to be expended to. If `None`, the
             current dimension is chosen. Note that the final dimension of the new complex can be smaller if no
             higher-dimensional simplex can exist. Default is `None`.
-        :type nb_iterations: int
+        :type max_expansion_dim: int
         :param inplace: If `True`, the collapse is done on this simplex tree. Otherwise, the collapse is done on a new
             tree which is then returned. Default is `True`.
-        :type nb_iterations: bool
+        :type inplace: bool
 
         .. warning::
             The current simplex tree is assumed to be a flag complex. If it is not the case, some information may be
