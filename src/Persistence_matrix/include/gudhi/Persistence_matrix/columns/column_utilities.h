@@ -50,10 +50,10 @@ void _generic_merge_entry_to_column(Column& targetColumn,
   typename Column::Entry* targetEntry = _get_entry<typename Column::Entry>(itTarget);
 
   if (targetEntry->get_row_index() < itSource->get_row_index()) {
-    process_target(targetEntry);
+    std::forward<F1>(process_target)(targetEntry);
     ++itTarget;
   } else if (targetEntry->get_row_index() > itSource->get_row_index()) {
-    process_source(itSource, itTarget);
+    std::forward<F2>(process_source)(itSource, itTarget);
     ++itSource;
   } else {
     if constexpr (Column::Master::Option_list::is_z2) {
@@ -63,14 +63,14 @@ void _generic_merge_entry_to_column(Column& targetColumn,
       }
       targetColumn._delete_entry(itTarget);
     } else {
-      update_target1(targetEntry->get_element(), itSource);
+      std::forward<F3>(update_target1)(targetEntry->get_element(), itSource);
       if (targetEntry->get_element() == Column::Field_operators::get_additive_identity()) {
         if constexpr (Column::Master::isNonBasic && !Column::Master::Option_list::is_of_boundary_type) {
           if (targetEntry->get_row_index() == targetColumn.get_pivot()) pivotIsZeroed = true;
         }
         targetColumn._delete_entry(itTarget);
       } else {
-        update_target2(targetEntry);
+        std::forward<F4>(update_target2)(targetEntry);
         if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_entry(*targetEntry);
         ++itTarget;
       }
@@ -95,15 +95,20 @@ bool _generic_add_to_column(const Entry_range& source,
   auto itTarget = target.begin();
   auto itSource = source.begin();
   while (itTarget != target.end() && itSource != source.end()) {
-    _generic_merge_entry_to_column(targetColumn, itSource, itTarget,
-                                   process_target, process_source, update_target1, update_target2,
+    _generic_merge_entry_to_column(targetColumn,
+                                   itSource,
+                                   itTarget,
+                                   std::forward<F1>(process_target),
+                                   std::forward<F2>(process_source),
+                                   std::forward<F3>(update_target1),
+                                   std::forward<F4>(update_target2),
                                    pivotIsZeroed);
   }
 
-  finish_target(itTarget);
+  std::forward<F5>(finish_target)(itTarget);
 
   while (itSource != source.end()) {
-    process_source(itSource, target.end());
+    std::forward<F2>(process_source)(itSource, target.end());
     ++itSource;
   }
 
@@ -129,8 +134,7 @@ bool _add_to_column(const Entry_range& source, Column& targetColumn)
           targetColumn.operators_->add_inplace(targetElement, itSource->get_element());
       },
       [&]([[maybe_unused]] typename Column::Entry* entryTarget) {},
-      [&]([[maybe_unused]] typename Column::Column_support::iterator& itTarget) {}
-    );
+      [&]([[maybe_unused]] typename Column::Column_support::iterator& itTarget) {});
 }
 
 template <class Column, class Entry_range>
@@ -138,7 +142,7 @@ bool _multiply_target_and_add_to_column(const typename Column::Field_element& va
                                         const Entry_range& source,
                                         Column& targetColumn)
 {
-  if (val == 0u) {
+  if (val == 0U) {
     if constexpr (Column::Master::isNonBasic && !Column::Master::Option_list::is_of_boundary_type) {
       throw std::invalid_argument("A chain column should not be multiplied by 0.");
       // this would not only mess up the base, but also the pivots stored.
@@ -170,8 +174,7 @@ bool _multiply_target_and_add_to_column(const typename Column::Field_element& va
           if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_entry(*targetEntry);
           itTarget++;
         }
-      }
-    );
+      });
 }
 
 template <class Column, class Entry_range>
@@ -179,7 +182,7 @@ bool _multiply_source_and_add_to_column(const typename Column::Field_element& va
                                         const Entry_range& source,
                                         Column& targetColumn)
 {
-  if (val == 0u) {
+  if (val == 0U) {
     return false;
   }
 

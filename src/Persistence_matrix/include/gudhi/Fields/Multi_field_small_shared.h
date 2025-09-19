@@ -19,7 +19,7 @@
 
 #include <utility>
 #include <vector>
-#include <limits.h>
+#include <climits>
 #include <stdexcept>
 #include <numeric>
 
@@ -42,10 +42,11 @@ namespace persistence_fields {
  */
 template <typename Unsigned_integer_type = unsigned int,
           class = std::enable_if_t<std::is_unsigned_v<Unsigned_integer_type> > >
-class Shared_multi_field_element_with_small_characteristics {
+class Shared_multi_field_element_with_small_characteristics
+{
  public:
   using Element = Unsigned_integer_type; /**< Type for the elements in the field. */
-  using Characteristic = Element;   /**< Type for the field characteristic. */
+  using Characteristic = Element;        /**< Type for the field characteristic. */
   template <class T>
   using isInteger = std::enable_if_t<std::is_integral_v<T> >;
 
@@ -53,6 +54,7 @@ class Shared_multi_field_element_with_small_characteristics {
    * @brief Default constructor. Sets the element to 0.
    */
   Shared_multi_field_element_with_small_characteristics() : element_(0) {}
+
   /**
    * @brief Constructor setting the element to the given value.
    *
@@ -60,23 +62,8 @@ class Shared_multi_field_element_with_small_characteristics {
    * @param element Value of the element.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  Shared_multi_field_element_with_small_characteristics(Integer_type element) : element_(_get_value(element)) {}
-  /**
-   * @brief Copy constructor.
-   *
-   * @param toCopy Element to copy.
-   */
-  Shared_multi_field_element_with_small_characteristics(
-      const Shared_multi_field_element_with_small_characteristics& toCopy)
-      : element_(toCopy.element_) {}
-  /**
-   * @brief Move constructor.
-   *
-   * @param toMove Element to move.
-   */
-  Shared_multi_field_element_with_small_characteristics(
-      Shared_multi_field_element_with_small_characteristics&& toMove) noexcept
-      : element_(std::exchange(toMove.element_, 0)) {}
+  Shared_multi_field_element_with_small_characteristics(Integer_type element) : element_(_get_value(element))
+  {}
 
   /**
    * @brief Initialize the multi-field to the characteristics (primes) contained in the given interval.
@@ -86,7 +73,8 @@ class Shared_multi_field_element_with_small_characteristics {
    * @param minimum Lowest value in the interval.
    * @param maximum Highest value in the interval.
    */
-  static void initialize(unsigned int minimum, unsigned int maximum) {
+  static void initialize(unsigned int minimum, unsigned int maximum)
+  {
     if (maximum < 2) throw std::invalid_argument("Characteristic must be strictly positive");
     if (minimum > maximum) throw std::invalid_argument("The given interval is not valid.");
     if (minimum == maximum && !_is_prime(minimum))
@@ -130,45 +118,55 @@ class Shared_multi_field_element_with_small_characteristics {
    * @brief operator+=
    */
   friend void operator+=(Shared_multi_field_element_with_small_characteristics& f1,
-                         Shared_multi_field_element_with_small_characteristics const& f2) {
+                         Shared_multi_field_element_with_small_characteristics const& f2)
+  {
     f1.element_ = _add(f1.element_, f2.element_);
   }
+
   /**
    * @brief operator+
    */
   friend Shared_multi_field_element_with_small_characteristics operator+(
       Shared_multi_field_element_with_small_characteristics f1,
-      Shared_multi_field_element_with_small_characteristics const& f2) {
+      Shared_multi_field_element_with_small_characteristics const& f2)
+  {
     f1 += f2;
     return f1;
   }
+
   /**
    * @brief operator+=
-   * 
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend void operator+=(Shared_multi_field_element_with_small_characteristics& f, const Integer_type& v) {
+  friend void operator+=(Shared_multi_field_element_with_small_characteristics& f, const Integer_type& v)
+  {
     f.element_ = _add(f.element_, _get_value(v));
   }
+
   /**
    * @brief operator+
-   * 
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend Shared_multi_field_element_with_small_characteristics operator+(
-      Shared_multi_field_element_with_small_characteristics f, const Integer_type& v) {
+      Shared_multi_field_element_with_small_characteristics f,
+      const Integer_type& v)
+  {
     f += v;
     return f;
   }
+
   /**
    * @brief operator+
-   * 
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend Integer_type operator+(const Integer_type& v, Shared_multi_field_element_with_small_characteristics f) {
+  friend Integer_type operator+(const Integer_type& v, Shared_multi_field_element_with_small_characteristics f)
+  {
     f += v;
     return f.element_;
   }
@@ -177,45 +175,55 @@ class Shared_multi_field_element_with_small_characteristics {
    * @brief operator-=
    */
   friend void operator-=(Shared_multi_field_element_with_small_characteristics& f1,
-                         Shared_multi_field_element_with_small_characteristics const& f2) {
+                         Shared_multi_field_element_with_small_characteristics const& f2)
+  {
     f1.element_ = _subtract(f1.element_, f2.element_);
   }
+
   /**
    * @brief operator-
    */
   friend Shared_multi_field_element_with_small_characteristics operator-(
       Shared_multi_field_element_with_small_characteristics f1,
-      Shared_multi_field_element_with_small_characteristics const& f2) {
+      Shared_multi_field_element_with_small_characteristics const& f2)
+  {
     f1 -= f2;
     return f1;
   }
+
   /**
    * @brief operator-=
-   * 
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend void operator-=(Shared_multi_field_element_with_small_characteristics& f, const Integer_type& v) {
+  friend void operator-=(Shared_multi_field_element_with_small_characteristics& f, const Integer_type& v)
+  {
     f.element_ = _subtract(f.element_, _get_value(v));
   }
+
   /**
    * @brief operator-
-   * 
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend Shared_multi_field_element_with_small_characteristics operator-(
-      Shared_multi_field_element_with_small_characteristics f, const Integer_type& v) {
+      Shared_multi_field_element_with_small_characteristics f,
+      const Integer_type& v)
+  {
     f -= v;
     return f;
   }
+
   /**
    * @brief operator-
-   * 
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend Integer_type operator-(const Integer_type& v, const Shared_multi_field_element_with_small_characteristics& f) {
+  friend Integer_type operator-(const Integer_type& v, const Shared_multi_field_element_with_small_characteristics& f)
+  {
     return _subtract(_get_value(v), f.element_);
   }
 
@@ -223,45 +231,55 @@ class Shared_multi_field_element_with_small_characteristics {
    * @brief operator*=
    */
   friend void operator*=(Shared_multi_field_element_with_small_characteristics& f1,
-                         Shared_multi_field_element_with_small_characteristics const& f2) {
+                         Shared_multi_field_element_with_small_characteristics const& f2)
+  {
     f1.element_ = _multiply(f1.element_, f2.element_);
   }
+
   /**
    * @brief operator*
    */
   friend Shared_multi_field_element_with_small_characteristics operator*(
       Shared_multi_field_element_with_small_characteristics f1,
-      Shared_multi_field_element_with_small_characteristics const& f2) {
+      Shared_multi_field_element_with_small_characteristics const& f2)
+  {
     f1 *= f2;
     return f1;
   }
+
   /**
    * @brief operator*=
-   * 
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend void operator*=(Shared_multi_field_element_with_small_characteristics& f, const Integer_type& v) {
+  friend void operator*=(Shared_multi_field_element_with_small_characteristics& f, const Integer_type& v)
+  {
     f.element_ = _multiply(f.element_, _get_value(v));
   }
+
   /**
    * @brief operator*
-   * 
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
   friend Shared_multi_field_element_with_small_characteristics operator*(
-      Shared_multi_field_element_with_small_characteristics f, const Integer_type& v) {
+      Shared_multi_field_element_with_small_characteristics f,
+      const Integer_type& v)
+  {
     f *= v;
     return f;
   }
+
   /**
    * @brief operator*
-   * 
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend Integer_type operator*(const Integer_type& v, Shared_multi_field_element_with_small_characteristics f) {
+  friend Integer_type operator*(const Integer_type& v, Shared_multi_field_element_with_small_characteristics f)
+  {
     f *= v;
     return f.element_;
   }
@@ -270,76 +288,82 @@ class Shared_multi_field_element_with_small_characteristics {
    * @brief operator==
    */
   friend bool operator==(const Shared_multi_field_element_with_small_characteristics& f1,
-                         const Shared_multi_field_element_with_small_characteristics& f2) {
+                         const Shared_multi_field_element_with_small_characteristics& f2)
+  {
     return f1.element_ == f2.element_;
   }
+
   /**
    * @brief operator==
-   * 
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend bool operator==(const Integer_type& v, const Shared_multi_field_element_with_small_characteristics& f) {
+  friend bool operator==(const Integer_type& v, const Shared_multi_field_element_with_small_characteristics& f)
+  {
     return _get_value(v) == f.element_;
   }
+
   /**
    * @brief operator==
-   * 
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend bool operator==(const Shared_multi_field_element_with_small_characteristics& f, const Integer_type& v) {
+  friend bool operator==(const Shared_multi_field_element_with_small_characteristics& f, const Integer_type& v)
+  {
     return _get_value(v) == f.element_;
   }
+
   /**
    * @brief operator!=
    */
   friend bool operator!=(const Shared_multi_field_element_with_small_characteristics& f1,
-                         const Shared_multi_field_element_with_small_characteristics& f2) {
+                         const Shared_multi_field_element_with_small_characteristics& f2)
+  {
     return !(f1 == f2);
   }
+
   /**
    * @brief operator!=
-   * 
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  friend bool operator!=(const Integer_type v, const Shared_multi_field_element_with_small_characteristics& f) {
-    return !(v == f);
-  }
-  /**
-   * @brief operator!=
-   * 
-   * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
-   */
-  template <typename Integer_type, class = isInteger<Integer_type> >
-  friend bool operator!=(const Shared_multi_field_element_with_small_characteristics& f, const Integer_type v) {
+  friend bool operator!=(const Integer_type v, const Shared_multi_field_element_with_small_characteristics& f)
+  {
     return !(v == f);
   }
 
   /**
-   * @brief Assign operator.
-   */
-  Shared_multi_field_element_with_small_characteristics& operator=(
-      Shared_multi_field_element_with_small_characteristics other) {
-    std::swap(element_, other.element_);
-    return *this;
-  }
-  /**
-   * @brief Assign operator.
-   * 
+   * @brief operator!=
+   *
    * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
    */
   template <typename Integer_type, class = isInteger<Integer_type> >
-  Shared_multi_field_element_with_small_characteristics& operator=(const Integer_type& value) {
-    element_ = _get_value(value);
-    return *this;
+  friend bool operator!=(const Shared_multi_field_element_with_small_characteristics& f, const Integer_type v)
+  {
+    return !(v == f);
   }
+
+  // /**
+  //  * @brief Assign operator.
+  //  *
+  //  * @tparam Integer_type A native integer type. Should be able to contain the characteristic if signed.
+  //  */
+  // template <typename Integer_type, class = isInteger<Integer_type> >
+  // Shared_multi_field_element_with_small_characteristics& operator=(const Integer_type& value)
+  // {
+  //   element_ = _get_value(value);
+  //   return *this;
+  // }
+
   /**
    * @brief Swap operator.
    */
   friend void swap(Shared_multi_field_element_with_small_characteristics& f1,
-                   Shared_multi_field_element_with_small_characteristics& f2) {
+                   Shared_multi_field_element_with_small_characteristics& f2) noexcept
+  {
     std::swap(f1.element_, f2.element_);
   }
 
@@ -353,9 +377,11 @@ class Shared_multi_field_element_with_small_characteristics {
    *
    * @return The inverse.
    */
-  Shared_multi_field_element_with_small_characteristics get_inverse() const {
+  Shared_multi_field_element_with_small_characteristics get_inverse() const
+  {
     return get_partial_inverse(productOfAllCharacteristics_).first;
   }
+
   /**
    * @brief Returns the inverse of the element with respect to a sub-product of the characteristics in the multi-field,
    * see @cite boissonnat:hal-00922572.
@@ -363,8 +389,9 @@ class Shared_multi_field_element_with_small_characteristics {
    * @param productOfCharacteristics Sub-product of the characteristics.
    * @return Pair of the inverse and the characteristic the inverse corresponds to.
    */
-  std::pair<Shared_multi_field_element_with_small_characteristics,Characteristic> get_partial_inverse(
-      Characteristic productOfCharacteristics) const {
+  std::pair<Shared_multi_field_element_with_small_characteristics, Characteristic> get_partial_inverse(
+      Characteristic productOfCharacteristics) const
+  {
     Characteristic gcd = std::gcd(element_, productOfAllCharacteristics_);
 
     if (gcd == productOfCharacteristics)
@@ -385,17 +412,21 @@ class Shared_multi_field_element_with_small_characteristics {
    *
    * @return The additive identity of a field.
    */
-  static Shared_multi_field_element_with_small_characteristics get_additive_identity() {
+  static Shared_multi_field_element_with_small_characteristics get_additive_identity()
+  {
     return Shared_multi_field_element_with_small_characteristics();
   }
+
   /**
    * @brief Returns the multiplicative identity of a field.
    *
    * @return The multiplicative identity of a field.
    */
-  static Shared_multi_field_element_with_small_characteristics get_multiplicative_identity() {
+  static Shared_multi_field_element_with_small_characteristics get_multiplicative_identity()
+  {
     return Shared_multi_field_element_with_small_characteristics(multiplicativeID_);
   }
+
   /**
    * @brief Returns the partial multiplicative identity of the multi-field from the given product.
    * See @cite boissonnat:hal-00922572 for more details.
@@ -404,7 +435,8 @@ class Shared_multi_field_element_with_small_characteristics {
    * @return The partial multiplicative identity of the multi-field.
    */
   static Shared_multi_field_element_with_small_characteristics get_partial_multiplicative_identity(
-      const Characteristic& productOfCharacteristics) {
+      const Characteristic& productOfCharacteristics)
+  {
     if (productOfCharacteristics == 0) {
       return Shared_multi_field_element_with_small_characteristics(multiplicativeID_);
     }
@@ -416,6 +448,7 @@ class Shared_multi_field_element_with_small_characteristics {
     }
     return mult;
   }
+
   /**
    * @brief Returns the product of all characteristics.
    *
@@ -430,10 +463,9 @@ class Shared_multi_field_element_with_small_characteristics {
    */
   Element get_value() const { return element_; }
 
-  // static constexpr bool handles_only_z2() { return false; }
-
  private:
-  static constexpr bool _is_prime(const unsigned int p) {
+  static constexpr bool _is_prime(const unsigned int p)
+  {
     if (p <= 1) return false;
     if (p <= 3) return true;
     if (p % 2 == 0 || p % 3 == 0) return false;
@@ -443,7 +475,9 @@ class Shared_multi_field_element_with_small_characteristics {
 
     return true;
   }
-  static Element _multiply(Element a, Element b) {
+
+  static Element _multiply(Element a, Element b)
+  {
     Element res = 0;
     Element temp_b = 0;
 
@@ -464,7 +498,9 @@ class Shared_multi_field_element_with_small_characteristics {
     }
     return res;
   }
-  static Element _add(Element element, Element v) {
+
+  static Element _add(Element element, Element v)
+  {
     if (UINT_MAX - element < v) {
       // automatic unsigned integer overflow behaviour will make it work
       element += v;
@@ -477,7 +513,9 @@ class Shared_multi_field_element_with_small_characteristics {
 
     return element;
   }
-  static Element _subtract(Element element, Element v) {
+
+  static Element _subtract(Element element, Element v)
+  {
     if (element < v) {
       element += productOfAllCharacteristics_;
     }
@@ -485,7 +523,9 @@ class Shared_multi_field_element_with_small_characteristics {
 
     return element;
   }
-  static constexpr int _get_inverse(Element element, const Characteristic mod) {
+
+  static constexpr int _get_inverse(Element element, const Characteristic mod)
+  {
     // to solve: Ax + My = 1
     int M = mod;
     int A = element;
@@ -508,8 +548,9 @@ class Shared_multi_field_element_with_small_characteristics {
   }
 
   template <typename Integer_type, class = isInteger<Integer_type> >
-  static constexpr Element _get_value(Integer_type e) {
-    if constexpr (std::is_signed_v<Integer_type>){
+  static constexpr Element _get_value(Integer_type e)
+  {
+    if constexpr (std::is_signed_v<Integer_type>) {
       if (e < -static_cast<Integer_type>(productOfAllCharacteristics_)) e = e % productOfAllCharacteristics_;
       if (e < 0) return e += productOfAllCharacteristics_;
       return e < static_cast<Integer_type>(productOfAllCharacteristics_) ? e : e % productOfAllCharacteristics_;
@@ -522,7 +563,7 @@ class Shared_multi_field_element_with_small_characteristics {
   static inline std::vector<Characteristic> primes_;         /**< All characteristics. */
   static inline Characteristic productOfAllCharacteristics_; /**< Product of all characteristics. */
   static inline std::vector<Characteristic> partials_;       /**< Partial products of the characteristics. */
-  static inline constexpr Element multiplicativeID_ = 1;     /**< Multiplicative identity. */
+  static constexpr Element multiplicativeID_ = 1;            /**< Multiplicative identity. */
 };
 
 }  // namespace persistence_fields
