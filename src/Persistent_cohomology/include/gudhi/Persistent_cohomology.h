@@ -208,6 +208,31 @@ class Persistent_cohomology {
     }
   }
 
+  /**
+   * @private
+   * Temporary patch to make the computation of more general FilteredComplex possible
+   * Will be removed when a better solution was agreed on.
+   */
+  void compute_persistent_cohomology_without_optimizations(Filtration_value min_interval_length = 0) {
+    if (dim_max_ <= 0)
+      return;  // --------->>
+
+    interval_length_policy.set_length(min_interval_length);
+    Simplex_key idx_fil = -1;
+    // Compute all finite intervals
+    for (auto sh : cpx_->filtration_simplex_range()) {
+      cpx_->assign_key(sh, ++idx_fil);
+      dsets_.make_set(cpx_->key(sh));
+      int dim_simplex = cpx_->dimension(sh);
+      update_cohomology_groups(sh, dim_simplex);
+    }
+
+    for (auto cocycle : transverse_idx_) {
+      persistent_pairs_.emplace_back(
+          cpx_->simplex(cocycle.first), cpx_->null_simplex(), cocycle.second.characteristics_);
+    }
+  }
+
  private:
   /** \brief Update the cohomology groups under the insertion of an edge.
    *
