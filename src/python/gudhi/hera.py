@@ -69,6 +69,10 @@ def wasserstein_distance(
     Returns:
         float|Tuple[float,numpy.array|None]: Approximate Wasserstein distance W_q(X,Y), and optionally the 
             corresponding matching
+    
+    .. warning::
+    
+        In debug mode, when matching is ``True``, there is a known bug and code will assert
     """
     return t._wasserstein_distance(
         _diagram_as_numpy_array(X),
