@@ -399,8 +399,9 @@ requested.
 SciPy
 -----
 
-The :doc:`persistence graphical tools </persistence_graphical_tools_user>` and
-:doc:`Wasserstein distance </wasserstein_distance_user>` modules require `SciPy
+The :doc:`persistence graphical tools </persistence_graphical_tools_user>`,
+`Wasserstein distance (POT version) <wasserstein_distance_user.html#optimal-transport>`_ and
+`Wasserstein barycenters <wasserstein_distance_user.html#barycenters>`_ modules require `SciPy
 <http://scipy.org>`_, a Python-based ecosystem of open-source software for
 mathematics, science, and engineering.
 
