@@ -106,14 +106,20 @@ class Base_swap {
   }
 
  protected:
+  void _orderRows();
+  void _initialize_row_index(Index index);
+  Index _erase_row(Index index);
+  Index _get_row_index(Index index) const;
+  bool _row_were_swapped() const;
+  void _reset();
+
+ private:
   using Index_dictionary = typename Master_matrix::template Dictionary<Index>;
   using Row_dictionary = typename Master_matrix::template Dictionary<ID_index>;
 
   Index_dictionary indexToRow_; /**< Map from row index to actual index in row container. */
   Row_dictionary rowToIndex_;   /**< Map from index in row container to "public" row index. */
   bool rowSwapped_;             /**< True if any rows were swapped since last call to `_orderRows()`. */
-
-  void _orderRows();
 
   //access to inheriting matrix class
   constexpr Base_matrix* _matrix() { return static_cast<Base_matrix*>(this); }
@@ -202,6 +208,62 @@ inline void Base_swap<Master_matrix, Base_matrix>::_orderRows()
     indexToRow_[i] = i;
     rowToIndex_[i] = i;
   }
+  rowSwapped_ = false;
+}
+
+template <class Master_matrix, class Base_matrix>
+inline void Base_swap<Master_matrix, Base_matrix>::_initialize_row_index(Index index)
+{
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    indexToRow_.emplace(index, index);
+    rowToIndex_.emplace(index, index);
+  } else {
+    indexToRow_.reserve(index + 1);
+    rowToIndex_.reserve(index + 1);
+    for (Index i = indexToRow_.size(); i <= index; ++i) {
+      indexToRow_.push_back(i);
+      rowToIndex_.push_back(i);
+    }
+  }
+}
+
+template <class Master_matrix, class Base_matrix>
+inline typename Base_swap<Master_matrix, Base_matrix>::Index Base_swap<Master_matrix, Base_matrix>::_erase_row(
+    Index index)
+{
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    auto it = indexToRow_.find(index);
+    auto rowID = it->second;
+    rowToIndex_.erase(rowID);
+    indexToRow_.erase(it);
+    return rowID;
+  } else {
+    return indexToRow_[index];
+  }
+}
+
+template <class Master_matrix, class Base_matrix>
+inline typename Base_swap<Master_matrix, Base_matrix>::Index Base_swap<Master_matrix, Base_matrix>::_get_row_index(
+    Index index) const
+{
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    return indexToRow_.at(index);
+  } else {
+    return indexToRow_[index];
+  }
+}
+
+template <class Master_matrix, class Base_matrix>
+inline bool Base_swap<Master_matrix, Base_matrix>::_row_were_swapped() const
+{
+  return rowSwapped_;
+}
+
+template <class Master_matrix, class Base_matrix>
+inline void Base_swap<Master_matrix, Base_matrix>::_reset()
+{
+  indexToRow_.clear();
+  rowToIndex_.clear();
   rowSwapped_ = false;
 }
 
