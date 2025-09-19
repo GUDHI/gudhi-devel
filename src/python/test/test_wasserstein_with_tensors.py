@@ -57,3 +57,18 @@ def test_wasserstein_distance_grad_tensorflow():
     grads = tape.gradient(dist45, [diag4, diag5])
     assert np.array_equal(grads[0].values, [[-1.0, -1.0]])
     assert np.array_equal(grads[1].values, [[1.0, 1.0], [-1.0, 1.0]])
+
+
+def test_wasserstein_distance_as_loss_function_tensorflow():
+    def wloss(y_true, y_pred):
+        loss = pot(y_true, y_pred, order=2, internal_p=2, enable_autodiff=True, keep_essential_parts=False)**2
+        return loss
+
+    X = np.random.rand(100, 50)  # 100 obs in dim 50
+    Y = np.random.rand(100, 10, 2)  # 100 diagrams with 10 points each. 
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Dense(20),
+        tf.keras.layers.Reshape((10,2))])
+    # Remark: cannot work with 'run_eagerly=False', EagerPy in the backend is strictly for eager execution
+    model.compile(optimizer='SGD', loss=wloss, run_eagerly=True)
+    model.fit(X,Y, epochs=10)
