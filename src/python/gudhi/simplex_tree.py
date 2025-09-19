@@ -17,6 +17,7 @@ __license__ = "MIT"
 
 import numpy as np
 from numpy.typing import ArrayLike
+import warnings
 
 from gudhi import _simplex_tree_ext as t
 
@@ -58,7 +59,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             super().__init__()
 
     def _is_persistence_defined(self) -> bool:
-        """Returns true if Persistence pointer is not None."""
+        """Returns `True` if Persistence pointer is not `None`."""
         return self._pers != None
 
     def copy(self) -> SimplexTree:
@@ -76,13 +77,12 @@ class SimplexTree(t._Simplex_tree_python_interface):
         return self.copy()
 
     def initialize_filtration(self):
-        """This function initializes and sorts the simplicial complex
+        """.. deprecated:: 3.2.0 The initialization is done automatically if necessary; there is no need
+        to call this method since.
+        
+        This function initializes and sorts the simplicial complex
         filtration vector.
-
-        .. deprecated:: 3.2.0
         """
-        import warnings
-
         warnings.warn(
             "Since Gudhi 3.2, calling SimplexTree.initialize_filtration is unnecessary.",
             DeprecationWarning,
@@ -212,9 +212,9 @@ class SimplexTree(t._Simplex_tree_python_interface):
             0.0.
             Set min_persistence to -1.0 to see all values.
         :type min_persistence: float
-        :param persistence_dim_max: If true, the persistent homology for the
-            maximal dimension in the complex is computed. If false, it is
-            ignored. Default is false.
+        :param persistence_dim_max: If `True`, the persistent homology for the
+            maximal dimension in the complex is computed. If `False`, it is
+            ignored. Default is `False`.
         :type persistence_dim_max: bool
         :returns: The persistence of the simplicial complex.
         :rtype:  list of pairs(dimension, pair(birth, death))
@@ -237,9 +237,9 @@ class SimplexTree(t._Simplex_tree_python_interface):
             0.0.
             Sets min_persistence to -1.0 to see all values.
         :type min_persistence: float
-        :param persistence_dim_max: If true, the persistent homology for the
-            maximal dimension in the complex is computed. If false, it is
-            ignored. Default is false.
+        :param persistence_dim_max: If `True`, the persistent homology for the
+            maximal dimension in the complex is computed. If `False`, it is
+            ignored. Default is `False`.
         :type persistence_dim_max: bool
         :returns: Nothing.
         """
@@ -397,8 +397,79 @@ class SimplexTree(t._Simplex_tree_python_interface):
             infinites = [np.array(d).reshape(-1, 2) for d in l]
         return (normal0, normals, infinite0, infinites)
 
-    def collapse_edges(self, nb_iterations=1) -> SimplexTree:
+    def collapse_edges_as_graph(
+        self, nb_iterations: int = 1, inplace: bool = True
+    ) -> SimplexTree:
         """Assuming the complex is a graph (simplices of higher dimension are ignored), this method implicitly
+        interprets it as the 1-skeleton of a flag complex, and replaces it with another (smaller) graph whose
+        expansion has the same persistent homology, using a technique known as edge collapses
+        (see :cite:`edgecollapsearxiv`).
+
+        A natural application is to get a simplex tree of dimension 1 from :class:`~gudhi.RipsComplex`,
+        then collapse edges, perform :meth:`expansion()` and finally compute persistence
+        (cf. :download:`rips_complex_edge_collapse_example.py <../example/rips_complex_edge_collapse_example.py>`).
+
+        :param nb_iterations: The number of edge collapse iterations to perform. Default is 1.
+        :type nb_iterations: int
+        :param inplace: If `True`, the collapse is done on this simplex tree. Otherwise, the collapse is done on a new
+            tree which is then returned. Default is `True`.
+        :type inplace: bool
+
+        .. warning::
+            The current simplex tree is assumed to be a graph, that is of maximal dimension 1.
+            If it is not the case, all higher dimensional simplices will get lost during the
+            reduction process and not be reinserted. To regain them, call `expansion(max_dim)` afterwards.
+        """
+        if nb_iterations < 1:
+            return
+        if inplace:
+            super()._collapse_edges_inplace(nb_iterations)
+            return self
+        return super()._collapse_edges(nb_iterations)
+
+    def collapse_edges_as_flag_complex(
+        self, nb_iterations: int = 1, max_expansion_dim: int = None, inplace: bool = True
+    ) -> SimplexTree:
+        """Assuming the complex is a flag complex (e.g. a Rips complex), applies the edge collapses technique
+        (see :cite:`edgecollapsearxiv`) to the 1-skeleton of the complex and rebuilds it by extending the skeleton to a
+        new flag complex (with the given maximal dimension). The new complex will be smaller but with same persistent
+        homology than the original one (at least in the existing dimensions: all cycle classes with higher dimension
+        than `max_expansion_dim` will be ignored even if they existed before).
+
+        If `max_expansion_dim` is set to `1` or less, the method is equivalent to :meth:`collapse_edges_as_graph()`.
+
+        :param nb_iterations: The number of edge collapse iterations to perform. Default is 1.
+        :type nb_iterations: int
+        :param max_expansion_dim: The maximal dimension to which the new complex has to be expended to. If `None`, the
+            current dimension is chosen. Note that the final dimension of the new complex can be smaller if no
+            higher-dimensional simplex can exist. Default is `None`.
+        :type max_expansion_dim: int
+        :param inplace: If `True`, the collapse is done on this simplex tree. Otherwise, the collapse is done on a new
+            tree which is then returned. Default is `True`.
+        :type inplace: bool
+
+        .. warning::
+            The current simplex tree is assumed to be a flag complex. If it is not the case, some information may be
+            lost during the re-expansion, i.e., the persistent homology may differ from before.
+        """
+        if nb_iterations < 1:
+            return
+        if max_expansion_dim is None:
+            max_expansion_dim = self.dimension()
+        if inplace:
+            super()._collapse_edges_inplace(nb_iterations)
+            if max_expansion_dim > 1:
+                super().expansion(max_expansion_dim)
+            return self
+        collapsed_complex = super()._collapse_edges(nb_iterations)
+        if max_expansion_dim > 1:
+            collapsed_complex.expansion(max_expansion_dim)
+        return collapsed_complex
+
+    def collapse_edges(self, nb_iterations=1) -> SimplexTree:
+        """.. deprecated:: 3.12.0 Please use :meth:`collapse_edges_as_graph()` instead.
+        
+        Assuming the complex is a graph (simplices of higher dimension are ignored), this method implicitly
         interprets it as the 1-skeleton of a flag complex, and replaces it with another (smaller) graph whose
         expansion has the same persistent homology, using a technique known as edge collapses
         (see :cite:`edgecollapsearxiv`).
@@ -415,7 +486,10 @@ class SimplexTree(t._Simplex_tree_python_interface):
             If it is not the case, all higher dimensional simplices will get lost during the
             reduction process and not be reinserted. To regain them, call `expansion(max_dim)` afterwards.
         """
-        if nb_iterations < 1:
-            return
-        super()._collapse_edges(nb_iterations)
-        return self
+        warnings.warn(
+            "Since Gudhi 3.12, `collapse_edges_as_graph(nb_iterations)` should be called instead of"
+            + " `collapse_edges(nb_iterations)`. Note also the existence of the new method"
+            + " `collapse_edges_as_flag_complex`.",
+            DeprecationWarning,
+        )
+        return self.collapse_edges_as_graph(nb_iterations, inplace=True)
