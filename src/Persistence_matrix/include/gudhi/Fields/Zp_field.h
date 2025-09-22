@@ -295,6 +295,8 @@ class Zp_field_element
    */
   Zp_field_element& operator=(Zp_field_element&& other) noexcept
   {
+    if (this == &other) return *this;
+
     element_ = std::exchange(other.element_, 0);
     return *this;
   }

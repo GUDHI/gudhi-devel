@@ -236,6 +236,8 @@ class Entry : public Master_matrix::Entry_column_index_option,
    */
   Entry& operator=(Entry&& other) && noexcept
   {
+    if (this == &other) return *this;
+
     col_opt::operator=(std::move(other));
     field_opt::operator=(std::move(other));
     rowIndex_ = std::exchange(other.rowIndex_, 0);

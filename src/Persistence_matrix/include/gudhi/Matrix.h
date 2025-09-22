@@ -359,6 +359,8 @@ class Matrix
     }
     Column_zp_settings& operator=(Column_zp_settings&& other) noexcept
     {
+      if (this == &other) return *this;
+
       operators = std::move(other.operators);
       return *this;
     }
@@ -1900,6 +1902,8 @@ inline Matrix<PersistenceMatrixOptions>& Matrix<PersistenceMatrixOptions>::opera
 template <class PersistenceMatrixOptions>
 inline Matrix<PersistenceMatrixOptions>& Matrix<PersistenceMatrixOptions>::operator=(Matrix&& other) && noexcept
 {
+  if (this == &other) return *this;
+
   matrix_ = std::move(other.matrix_);
   colSettings_ = std::exchange(other.colSettings_, nullptr);
 

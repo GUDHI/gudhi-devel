@@ -1,0 +1,322 @@
+/*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+ *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+ *    Author(s):       Vincent Rouvreau
+ *
+ *    Copyright (C) 2016 Inria
+ *
+ *    Modification(s):
+ *      - 2025/03 Hannah Schreiber: Use nanobind instead of Cython for python bindings.
+ *      - YYYY/MM Author: Description of the modification
+ */
+
+#ifndef INCLUDE_SIMPLEX_TREE_INTERFACE_H_
+#define INCLUDE_SIMPLEX_TREE_INTERFACE_H_
+
+#include <cstddef>
+#include <limits>
+#include <stdexcept>
+#include <vector>
+#include <utility>  // std::pair
+#include <tuple>
+
+#include <nanobind/ndarray.h>
+#include <nanobind/make_iterator.h>
+
+#include <gudhi/graph_simplicial_complex.h>
+#include <gudhi/distance_functions.h>
+#include <gudhi/Simplex_tree.h>
+#include <gudhi/Points_off_io.h>
+#include <gudhi/Flag_complex_edge_collapser.h>
+#include <python_interfaces/numpy_utils.h>
+
+namespace Gudhi {
+
+/** Model of SimplexTreeOptions.
+ *
+ * Specific to python interfaces of the Simplex_tree */
+struct Simplex_tree_options_for_python {
+  typedef linear_indexing_tag Indexing_tag;
+  typedef int Vertex_handle;
+  typedef double Filtration_value;
+  typedef std::uint32_t Simplex_key;
+  static const bool store_key = true;
+  static const bool store_filtration = true;
+  static const bool contiguous_vertices = false;
+  static const bool link_nodes_by_label = false;
+  static const bool stable_simplex_handles = false;
+};
+
+class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_python>
+{
+ public:
+  using Base = Simplex_tree<Simplex_tree_options_for_python>;
+  using Filtration_value = typename Base::Filtration_value;
+  using Vertex_handle = typename Base::Vertex_handle;
+  using Simplex_handle = typename Base::Simplex_handle;
+  using Insertion_result = typename std::pair<Simplex_handle, bool>;
+  using Simplex = std::vector<Vertex_handle>;
+  using Simplex_and_filtration = std::pair<Simplex, Filtration_value>;
+  using Filtered_simplices = std::vector<Simplex_and_filtration>;
+  using Skeleton_simplex_iterator = typename Base::Skeleton_simplex_iterator;
+  using Complex_simplex_iterator = typename Base::Complex_simplex_iterator;
+  using Extended_filtration_data = typename Base::Extended_filtration_data;
+  using Boundary_simplex_iterator = typename Base::Boundary_simplex_iterator;
+  using Siblings = typename Base::Siblings;
+  using Node = typename Base::Node;
+  typedef bool (*blocker_func_t)(Simplex simplex, void* user_data);
+
+ public:
+  Extended_filtration_data efd;
+
+  bool find_simplex(const Simplex& simplex) { return (Base::find(simplex) != Base::null_simplex()); }
+
+  void assign_simplex_filtration(const Simplex& simplex, Filtration_value filtration)
+  {
+    Simplex_handle sh = Base::find(simplex);
+    if (sh == Base::null_simplex())
+      throw std::invalid_argument("Cannot assign a filtration to a simplex that is not in the complex");
+    Base::assign_filtration(sh, filtration);
+    Base::clear_filtration();
+  }
+
+  bool insert(const Simplex& simplex, Filtration_value filtration = 0)
+  {
+    Insertion_result result = Base::insert_simplex_and_subfaces(simplex, filtration);
+    if (result.first != Base::null_simplex()) Base::clear_filtration();
+    return (result.second);
+  }
+
+  void insert_matrix(const nanobind::ndarray<const double, nanobind::ndim<2> >& filtrations, double max_filtration)
+  {
+    auto fil_view = filtrations.view();
+    // We could delegate to insert_graph, but wrapping the matrix in a graph interface is too much work,
+    // and this is a bit more efficient.
+    auto& rm = this->root()->members_;
+    int n = fil_view.shape(0);
+    for (int i = 0; i < n; ++i) {
+      double fv = fil_view(i, i);
+      if (fv > max_filtration) continue;
+      auto sh = rm.emplace_hint(rm.end(), i, Node(this->root(), fv));
+      Siblings* children = nullptr;
+      // Should we make a first pass to count the number of edges so we can reserve the right space?
+      for (int j = i + 1; j < n; ++j) {
+        double fe = fil_view(i, j);
+        if (fe > max_filtration) continue;
+        if (!children) {
+          children = new Siblings(this->root(), i);
+          sh->second.assign_children(children);
+        }
+        children->members().emplace_hint(children->members().end(), j, Node(children, fe));
+      }
+    }
+    this->set_dimension(1, false);
+  }
+
+  void insert_batch(const nanobind::ndarray<const int, nanobind::ndim<1>, nanobind::any_contig>& vertices,
+                    const nanobind::ndarray<const int, nanobind::ndim<2> >& vertex_array,
+                    const nanobind::ndarray<const double, nanobind::ndim<1> >& filtrations)
+  {
+    auto v_view = vertex_array.view();
+    auto f_view = filtrations.view();
+
+    // const std::size_t d = v_view.shape(0);
+    const std::size_t n = v_view.shape(1);
+
+    if (f_view.shape(0) != n)
+      throw std::invalid_argument("The number of filtration values is not coherent with the number of simplices.");
+
+    insert_batch_vertices(Numpy_span<int>(vertices), std::numeric_limits<double>::infinity());
+
+    // // copy version, benchmark?
+    // std::vector<Vertex_handle> v(d);
+    // for (std::size_t i = 0; i < n; ++i) {
+    //   for (std::size_t j = 0; j < d; ++j) {
+    //     v[j] = v_view(j, i);
+    //   }
+    //   Base::insert_simplex_and_subfaces(v, f_view(i));
+    // }
+
+    for (std::size_t i = 0; i < n; ++i) {
+      Base::insert_simplex_and_subfaces(make_element_range(&v_view(0, i), v_view, false), f_view(i));
+    }
+  }
+
+  // Do not interface this function, only used in alpha complex interface for complex creation
+  bool insert_simplex(const Simplex& simplex, Filtration_value filtration = 0)
+  {
+    Insertion_result result = Base::insert_simplex(simplex, filtration);
+    return (result.second);
+  }
+
+  // Do not interface this function, only used in strong witness interface for complex creation
+  bool insert_simplex(const std::vector<std::size_t>& simplex, Filtration_value filtration = 0)
+  {
+    Insertion_result result = Base::insert_simplex(simplex, filtration);
+    return (result.second);
+  }
+
+  Filtration_value simplex_filtration(const Simplex& simplex) { return Base::filtration(Base::find(simplex)); }
+
+  void remove_maximal_simplex(const Simplex& simplex)
+  {
+    Base::remove_maximal_simplex(Base::find(simplex));
+    Base::clear_filtration();
+  }
+
+  Filtered_simplices get_star(const Simplex& simplex)
+  {
+    Filtered_simplices star;
+    for (auto f_simplex : Base::star_simplex_range(Base::find(simplex))) {
+      Simplex simplex_star;
+      for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
+        simplex_star.insert(simplex_star.begin(), vertex);
+      }
+      star.push_back(std::make_pair(simplex_star, Base::filtration(f_simplex)));
+    }
+    return star;
+  }
+
+  Filtered_simplices get_cofaces(const Simplex& simplex, int dimension)
+  {
+    Filtered_simplices cofaces;
+    for (auto f_simplex : Base::cofaces_simplex_range(Base::find(simplex), dimension)) {
+      Simplex simplex_coface;
+      for (auto vertex : Base::simplex_vertex_range(f_simplex)) {
+        simplex_coface.insert(simplex_coface.begin(), vertex);
+      }
+      cofaces.push_back(std::make_pair(simplex_coface, Base::filtration(f_simplex)));
+    }
+    return cofaces;
+  }
+
+  void compute_extended_filtration()
+  {
+    this->efd = this->extend_filtration();
+    return;
+  }
+
+  void collapse_edges(int nb_collapse_iteration)
+  {
+    using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
+    std::vector<Filtered_edge> edges;
+    for (Simplex_handle sh : Base::skeleton_simplex_range(1)) {
+      if (Base::dimension(sh) == 1) {
+        typename Base::Simplex_vertex_range rg = Base::simplex_vertex_range(sh);
+        auto vit = rg.begin();
+        Vertex_handle v = *vit;
+        Vertex_handle w = *++vit;
+        edges.emplace_back(v, w, Base::filtration(sh));
+      }
+    }
+
+    // Keep only the vertices
+    prune_above_dimension(0);
+
+    for (int iteration = 0; iteration < nb_collapse_iteration; iteration++) {
+      edges = Gudhi::collapse::flag_complex_collapse_edges(std::move(edges));
+    }
+    // Insert remaining edges
+    for (auto remaining_edge : edges) {
+      insert({std::get<0>(remaining_edge), std::get<1>(remaining_edge)}, std::get<2>(remaining_edge));
+    }
+  }
+
+  void expansion_with_blockers_callback(int max_dim, nanobind::typed<nanobind::callable, bool(Simplex&)> blocker_func)
+  {
+    Base::expansion_with_blockers(max_dim, [&](Simplex_handle sh) -> bool {
+      Simplex simplex(Base::simplex_vertex_range(sh).begin(), Base::simplex_vertex_range(sh).end());
+      return nanobind::cast<bool>(blocker_func(simplex));
+    });
+  }
+
+  // nanobind has problems finding the right overload of this method in the simplex tree because
+  // of the templated arguments. Therefore this indirection.
+  void initialize_filtration() const { Base::initialize_filtration(); }
+
+  template <class Iterator>
+  class Simplex_filtration_iterator : public boost::iterator_facade<Simplex_filtration_iterator<Iterator>,
+                                                                    const Simplex_and_filtration&,
+                                                                    boost::forward_traversal_tag,
+                                                                    const Simplex_and_filtration&>
+  {
+   public:
+    Simplex_filtration_iterator(const Iterator& end) : curr_(end), end_(end), tree_(nullptr) {}
+
+    Simplex_filtration_iterator(const Iterator& start, const Iterator& end, Simplex_tree_interface* tree)
+        : curr_(start), end_(end), tree_(tree)
+    {
+      if (curr_ != end_) _retrieve_value();
+    }
+
+   private:
+    friend class boost::iterator_core_access;
+
+    bool equal(Simplex_filtration_iterator const& other) const { return curr_ == other.curr_; }
+
+    const Simplex_and_filtration& dereference() const { return value_; }
+
+    void increment()
+    {
+      ++curr_;
+      if (curr_ != end_) _retrieve_value();
+    }
+
+    void _retrieve_value()
+    {
+      Simplex& simplex = value_.first;
+      simplex.clear();
+      for (auto vertex : tree_->simplex_vertex_range(*curr_)) {
+        simplex.push_back(vertex);
+      }
+      std::reverse(simplex.begin(), simplex.end());
+      value_.second = tree_->filtration(*curr_);
+    }
+
+    Iterator curr_;
+    Iterator end_;
+    Simplex_tree_interface* tree_;
+    Simplex_and_filtration value_;
+  };
+
+  auto get_simplex_python_iterator()
+  {
+    return nanobind::make_iterator(
+        nanobind::type<Simplex_tree_interface>(),
+        "simplex_iterator",
+        Simplex_filtration_iterator(Complex_simplex_iterator(this), Complex_simplex_iterator(), this),
+        Simplex_filtration_iterator(Complex_simplex_iterator()));
+  }
+
+  auto get_filtration_python_iterator()
+  {
+    auto& r = Base::filtration_simplex_range();
+    return nanobind::make_iterator(nanobind::type<Simplex_tree_interface>(),
+                                   "filtration_iterator",
+                                   Simplex_filtration_iterator(r.begin(), r.end(), this),
+                                   Simplex_filtration_iterator(r.end()));
+  }
+
+  auto get_skeleton_python_iterator(int dimension)
+  {
+    return nanobind::make_iterator(
+        nanobind::type<Simplex_tree_interface>(),
+        "skeleton_iterator",
+        Simplex_filtration_iterator(Skeleton_simplex_iterator(this, dimension), Skeleton_simplex_iterator(), this),
+        Simplex_filtration_iterator(Skeleton_simplex_iterator()));
+  }
+
+  auto get_boundary_python_iterator(const Simplex& simplex)
+  {
+    auto bd_sh = Base::find(simplex);
+    if (bd_sh == Base::null_simplex()) throw std::runtime_error("simplex not found - cannot find boundaries");
+    return nanobind::make_iterator(
+        nanobind::type<Simplex_tree_interface>(),
+        "boundary_iterator",
+        Simplex_filtration_iterator(Boundary_simplex_iterator(this, bd_sh), Boundary_simplex_iterator(this), this),
+        Simplex_filtration_iterator(Boundary_simplex_iterator(this)));
+  }
+};
+
+}  // namespace Gudhi
+
+#endif  // INCLUDE_SIMPLEX_TREE_INTERFACE_H_

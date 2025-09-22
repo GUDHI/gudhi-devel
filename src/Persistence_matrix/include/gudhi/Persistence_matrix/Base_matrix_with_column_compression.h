@@ -668,7 +668,7 @@ template <class Master_matrix>
 inline Base_matrix_with_column_compression<Master_matrix>&
 Base_matrix_with_column_compression<Master_matrix>::operator=(Base_matrix_with_column_compression&& other) noexcept
 {
-  if (repToColumn_ == &(other.repToColumn_)) return *this;
+  if (&repToColumn_ == &(other.repToColumn_)) return *this;
 
   RA_opt::operator=(std::move(other));
 

@@ -704,6 +704,8 @@ inline Boundary_matrix<Master_matrix>& Boundary_matrix<Master_matrix>::operator=
 template <class Master_matrix>
 inline Boundary_matrix<Master_matrix>& Boundary_matrix<Master_matrix>::operator=(Boundary_matrix&& other) noexcept
 {
+  if (this == &other) return *this;
+
   Dim_opt::operator=(std::move(other));
   Swap_opt::operator=(std::move(other));
   Pair_opt::operator=(std::move(other));

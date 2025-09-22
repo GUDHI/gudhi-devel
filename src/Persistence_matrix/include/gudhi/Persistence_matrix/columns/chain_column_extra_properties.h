@@ -147,6 +147,8 @@ class Chain_column_extra_properties
    */
   Chain_column_extra_properties& operator=(Chain_column_extra_properties&& other) noexcept
   {
+    if (this == &other) return *this;
+
     pivot_ = std::exchange(other.pivot_, Master_matrix::template get_null_value<ID_index>());
     pairedColumn_ = std::exchange(other.pairedColumn_, Master_matrix::template get_null_value<Index>());
     return *this;

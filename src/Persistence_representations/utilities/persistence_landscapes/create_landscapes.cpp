@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     filenames.push_back(argv[i]);
   }
 
-  for (size_t i = 0; i != filenames.size(); ++i) {
+  for (std::size_t i = 0; i != filenames.size(); ++i) {
     std::clog << "Creating a landscape based on file : " << filenames[i] << std::endl;
     Persistence_landscape l(filenames[i], dimension);
     std::stringstream ss;

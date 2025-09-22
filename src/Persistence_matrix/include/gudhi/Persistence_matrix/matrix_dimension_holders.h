@@ -96,6 +96,8 @@ class Matrix_max_dimension_holder
    */
   Matrix_max_dimension_holder& operator=(Matrix_max_dimension_holder&& other) noexcept
   {
+    if (this == &other) return *this;
+
     maxDim_ = std::exchange(other.maxDim_, -1);
     return *this;
   };
@@ -177,6 +179,8 @@ class Matrix_all_dimension_holder
    */
   Matrix_all_dimension_holder& operator=(Matrix_all_dimension_holder&& other) noexcept
   {
+    if (this == &other) return *this;
+
     dimensions_ = std::move(other.dimensions_);
     maxDim_ = std::exchange(other.maxDim_, -1);
     return *this;

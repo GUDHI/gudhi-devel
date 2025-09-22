@@ -7,6 +7,9 @@
 # Modification(s):
 #   - YYYY/MM Author: Description of the modification
 
+__license__ = "GPL v3"
+
+
 from typing import Union, Iterable, Literal, Optional, Any
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin

@@ -993,6 +993,8 @@ template <class Underlying_matrix, class Master_matrix>
 inline Id_to_index_overlay<Underlying_matrix, Master_matrix>&
 Id_to_index_overlay<Underlying_matrix, Master_matrix>::operator=(Id_to_index_overlay&& other) noexcept
 {
+  if (this == &other) return *this;
+
   matrix_ = std::move(other.matrix_);
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
     delete idToIndex_;

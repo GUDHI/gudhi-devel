@@ -21,8 +21,8 @@ def test_wasserstein_distance_grad():
     diag2 = torch.tensor([[2.8, 4.45], [9.5, 14.1]], requires_grad=True)
     diag3 = torch.tensor([[2.8, 4.45], [9.5, 14.1]], requires_grad=True)
     assert diag1.grad is None and diag2.grad is None and diag3.grad is None
-    dist12 = pot(diag1, diag2, internal_p=2, order=2, enable_autodiff=True)
-    dist30 = pot(diag3, torch.tensor([]), internal_p=2, order=2, enable_autodiff=True)
+    dist12 = pot(diag1, diag2, internal_p=2, order=2, enable_autodiff=True, keep_essential_parts=False)
+    dist30 = pot(diag3, torch.tensor([]), internal_p=2, order=2, enable_autodiff=True, keep_essential_parts=False)
     dist12.backward()
     dist30.backward()
     assert (
@@ -32,13 +32,13 @@ def test_wasserstein_distance_grad():
     )
     diag4 = torch.tensor([[0.0, 10.0]], requires_grad=True)
     diag5 = torch.tensor([[1.0, 11.0], [3.0, 4.0]], requires_grad=True)
-    dist45 = pot(diag4, diag5, internal_p=1, order=1, enable_autodiff=True)
+    dist45 = pot(diag4, diag5, internal_p=1, order=1, enable_autodiff=True, keep_essential_parts=False)
     assert dist45 == 3.0
     dist45.backward()
     assert np.array_equal(diag4.grad, [[-1.0, -1.0]])
     assert np.array_equal(diag5.grad, [[1.0, 1.0], [-1.0, 1.0]])
     diag6 = torch.tensor([[5.0, 10.0]], requires_grad=True)
-    pot(diag6, diag6, internal_p=2, order=2, enable_autodiff=True).backward()
+    pot(diag6, diag6, internal_p=2, order=2, enable_autodiff=True, keep_essential_parts=False).backward()
     # https://github.com/jonasrauber/eagerpy/issues/6
     # assert np.array_equal(diag6.grad, [[0., 0.]])
 
@@ -51,7 +51,7 @@ def test_wasserstein_distance_grad_tensorflow():
         diag5 = tf.convert_to_tensor(
             tf.Variable(initial_value=np.array([[1.0, 11.0], [3.0, 4.0]]), trainable=True)
         )
-        dist45 = pot(diag4, diag5, internal_p=1, order=1, enable_autodiff=True)
+        dist45 = pot(diag4, diag5, internal_p=1, order=1, enable_autodiff=True, keep_essential_parts=False)
         assert dist45 == 3.0
 
     grads = tape.gradient(dist45, [diag4, diag5])

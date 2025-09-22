@@ -48,8 +48,7 @@ def test_compatibility_with_filtered_rips():
     distance_matrix = [[0], [1, 0], [1, sqrt(2), 0], [sqrt(2), 1, 1, 0]]
     w_rips = WeightedRipsComplex(distance_matrix=distance_matrix, max_filtration=1.0)
     st = w_rips.create_simplex_tree(max_dimension=1)
-    
-    assert st._is_defined() == True
+
     assert st._is_persistence_defined() == False
 
     assert st.num_simplices() == 8

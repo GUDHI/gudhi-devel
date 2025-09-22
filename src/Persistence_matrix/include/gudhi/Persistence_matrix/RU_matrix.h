@@ -756,6 +756,8 @@ inline RU_matrix<Master_matrix>& RU_matrix<Master_matrix>::operator=(const RU_ma
 template <class Master_matrix>
 inline RU_matrix<Master_matrix>& RU_matrix<Master_matrix>::operator=(RU_matrix&& other) noexcept
 {
+  if (this == &other) return *this;
+
   Pair_opt::operator=(std::move(other));
   Swap_opt::operator=(std::move(other));
   Rep_opt::operator=(std::move(other));

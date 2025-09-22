@@ -205,6 +205,8 @@ template <class Master_matrix, class Base_matrix>
 inline Base_swap<Master_matrix, Base_matrix>& Base_swap<Master_matrix, Base_matrix>::operator=(
     Base_swap&& other) noexcept
 {
+  if (this == &other) return *this;
+
   indexToRow_ = std::move(other.indexToRow_);
   rowToIndex_ = std::move(other.rowToIndex_);
   rowSwapped_ = std::exchange(other.rowSwapped_, false);
