@@ -34,6 +34,11 @@ class FieldOperators
   using Characteristic = unspecified;  /**< Type for the field characteristic. */
 
   /**
+   * @brief Indicates the value of the characteristic when not initialized.
+   */
+  inline static const Characteristic nullCharacteristic;
+
+  /**
    * @brief Default constructor. If a non-zero characteristic is given, initializes the field with it.
    * The characteristic can later be changed again or initialized with @ref set_characteristic.
    *

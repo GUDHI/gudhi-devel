@@ -5,7 +5,7 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
- *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `GUDHI_DEBUG`s etc.)
+ *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `DEBUG_TRACES`s etc.)
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -13,7 +13,7 @@
 #define PERSISTENCE_LANDSCAPE_ON_GRID_H_
 
 // standard include
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
 #include <iostream>   // std::cerr, std::clog
 #endif
 #include <cstddef>    // std::size_t
@@ -228,7 +228,7 @@ class Persistence_landscape_on_grid
     double result = 0;
     double dx = (this->grid_max_ - this->grid_min_) / static_cast<double>(this->values_of_landscapes_.size() - 1);
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "this->grid_max : " << this->grid_max_ << std::endl;
     std::clog << "this->grid_min : " << this->grid_min_ << std::endl;
     std::clog << "this->values_of_landscapes.size() : " << this->values_of_landscapes_.size() << std::endl;
@@ -241,7 +241,7 @@ class Persistence_landscape_on_grid
       double current_y = 0;
       if (this->values_of_landscapes_[i].size() > level) current_y = this->values_of_landscapes_[i][level];
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "this->values_of_landscapes[i].size() : " << this->values_of_landscapes_[i].size()
                 << " , level : " << level << std::endl;
       if (this->values_of_landscapes_[i].size() > level)
@@ -285,7 +285,7 @@ class Persistence_landscape_on_grid
     double previous_y = 0;
     if (this->values_of_landscapes_[0].size() > level) previous_y = this->values_of_landscapes_[0][level];
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "dx : " << dx << std::endl;
     std::clog << "previous_x : " << previous_x << std::endl;
     std::clog << "previous_y : " << previous_y << std::endl;
@@ -297,7 +297,7 @@ class Persistence_landscape_on_grid
       double current_y = 0;
       if (this->values_of_landscapes_[i].size() > level) current_y = this->values_of_landscapes_[i][level];
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "current_y : " << current_y << std::endl;
 #endif
 
@@ -308,7 +308,7 @@ class Persistence_landscape_on_grid
       double a = coef.first;
       double b = coef.second;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "A line passing through points : (" << previous_x << "," << previous_y << ") and (" << current_x
                 << "," << current_y << ") is : " << a << "x+" << b << std::endl;
 #endif
@@ -323,14 +323,14 @@ class Persistence_landscape_on_grid
         value_to_add = (current_x - previous_x) * (std::pow(b, p));
       }
       result += value_to_add;
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "Increasing result by : " << value_to_add << std::endl;
       std::clog << "result : " << result << std::endl;
 #endif
       previous_x = current_x;
       previous_y = current_y;
     }
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "The total result is : " << result << std::endl;
 #endif
     return result;
@@ -369,7 +369,7 @@ class Persistence_landscape_on_grid
     double dx = (this->grid_max_ - this->grid_min_) / static_cast<double>(this->values_of_landscapes_.size() - 1);
     std::size_t position = std::size_t((x - this->grid_min_) / dx);
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "This is a procedure compute_value_at_a_given_point \n";
     std::clog << "level : " << level << std::endl;
     std::clog << "x : " << x << std::endl;
@@ -558,19 +558,19 @@ class Persistence_landscape_on_grid
   bool operator==(const Persistence_landscape_on_grid& rhs) const
   {
     if (this->values_of_landscapes_.size() != rhs.values_of_landscapes_.size()) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "values_of_landscapes of incompatible sizes\n";
 #endif
       return false;
     }
     if (!almost_equal(this->grid_min_, rhs.grid_min_)) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "grid_min not equal\n";
 #endif
       return false;
     }
     if (!almost_equal(this->grid_max_, rhs.grid_max_)) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "grid_max not equal\n";
 #endif
       return false;
@@ -578,7 +578,7 @@ class Persistence_landscape_on_grid
     for (std::size_t i = 0; i != this->values_of_landscapes_.size(); ++i) {
       for (std::size_t aa = 0; aa != this->values_of_landscapes_[i].size(); ++aa) {
         if (!almost_equal(this->values_of_landscapes_[i][aa], rhs.values_of_landscapes_[i][aa])) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << "Problem in the position : " << i << " of values_of_landscapes. \n";
           std::clog << this->values_of_landscapes_[i][aa] << " " << rhs.values_of_landscapes_[i][aa] << std::endl;
 #endif
@@ -786,7 +786,7 @@ class Persistence_landscape_on_grid
     double previous_y_l1 = 0;
     double previous_y_l2 = 0;
     for (std::size_t i = 0; i != l1.values_of_landscapes_.size(); ++i) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "i : " << i << std::endl;
 #endif
 
@@ -797,7 +797,7 @@ class Persistence_landscape_on_grid
       double current_y_l2 = 0;
       if (l2.values_of_landscapes_[i].size() > level) current_y_l2 = l2.values_of_landscapes_[i][level];
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "previous_x  : " << previous_x << std::endl;
       std::clog << "previous_y_l1 : " << previous_y_l1 << std::endl;
       std::clog << "current_y_l1 : " << current_y_l1 << std::endl;
@@ -818,7 +818,7 @@ class Persistence_landscape_on_grid
       double c = l2_coords.first;
       double d = l2_coords.second;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "Here are the formulas for a line: \n";
       std::clog << "a : " << a << std::endl;
       std::clog << "b : " << b << std::endl;
@@ -835,7 +835,7 @@ class Persistence_landscape_on_grid
                            (a * c / 3 * previous_x * previous_x * previous_x +
                             (a * d + b * c) / 2 * previous_x * previous_x + b * d * previous_x);
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "Value of the integral on the left end i.e. : " << previous_x << " is : "
                 << a * c / 3 * previous_x * previous_x * previous_x + (a * d + b * c) / 2 * previous_x * previous_x +
                        b * d * previous_x
@@ -848,7 +848,7 @@ class Persistence_landscape_on_grid
 
       result += added_value;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "added_value : " << added_value << std::endl;
       std::clog << "result : " << result << std::endl;
 #endif
@@ -876,7 +876,7 @@ class Persistence_landscape_on_grid
     // This is what we want to compute: (\int_{- \infty}^{+\infty}| first-second |^p)^(1/p).
     // We will do it one step at a time:
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "first : " << first << std::endl;
     std::clog << "second : " << second << std::endl;
 #endif
@@ -884,14 +884,14 @@ class Persistence_landscape_on_grid
     // first-second :
     Persistence_landscape_on_grid lan = first - second;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "Difference : " << lan << std::endl;
 #endif
 
     //| first-second |:
     lan.abs();
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "Abs : " << lan << std::endl;
 #endif
 
@@ -899,16 +899,16 @@ class Persistence_landscape_on_grid
       // \int_{- \infty}^{+\infty}| first-second |^p
       double result;
       if (p != 1) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "p : " << p << std::endl;
 #endif
         result = lan.compute_integral_of_landscape(p);
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "integral : " << result << std::endl;
 #endif
       } else {
         result = lan.compute_integral_of_landscape();
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "integral, without power : " << result << std::endl;
 #endif
       }
@@ -991,7 +991,7 @@ class Persistence_landscape_on_grid
     this->grid_min_ = (to_average[0])->grid_min_;
     this->grid_max_ = (to_average[0])->grid_max_;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "Computations of average. The data from the current landscape have been cleared. We are ready to do "
                  "the computations. \n";
 #endif
@@ -1006,7 +1006,7 @@ class Persistence_landscape_on_grid
       }
       this->values_of_landscapes_[grid_point] = std::vector<double>(maximal_size_of_vector);
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "We are considering the point : " << grid_point
                 << " of the grid. In this point, there are at most : " << maximal_size_of_vector
                 << " nonzero landscape functions \n";
@@ -1112,7 +1112,7 @@ inline void Persistence_landscape_on_grid::_set_up_values_of_landscapes(
     std::size_t number_of_points,
     unsigned number_of_levels)
 {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Here is the procedure : set_up_values_of_landscapes. The parameters are : grid_min_ : " << grid_min
             << ", grid_max_ : " << grid_max << ", number_of_points_ : " << number_of_points
             << ", number_of_levels: " << number_of_levels << std::endl;
@@ -1158,7 +1158,7 @@ inline void Persistence_landscape_on_grid::_set_up_values_of_landscapes(
     std::size_t grid_interval_end = (p[int_no].second - grid_min) / dx;
     std::size_t grid_interval_midpoint = (std::size_t)(0.5 * (grid_interval_begin + grid_interval_end));
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "Considering an interval : " << p[int_no].first << "," << p[int_no].second << std::endl;
 
     std::clog << "grid_interval_begin : " << grid_interval_begin << std::endl;
@@ -1168,7 +1168,7 @@ inline void Persistence_landscape_on_grid::_set_up_values_of_landscapes(
 
     double landscape_value = dx;
     for (std::size_t i = grid_interval_begin + 1; i < grid_interval_midpoint; ++i) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "Adding landscape value (going up) for a point : " << i << " equal : " << landscape_value
                 << std::endl;
 #endif
@@ -1226,7 +1226,7 @@ inline void Persistence_landscape_on_grid::_set_up_values_of_landscapes(
           this->values_of_landscapes_[i].push_back(landscape_value);
         }
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "Adding landscape value (going down) for a point : " << i << " equal : " << landscape_value
                   << std::endl;
 #endif
@@ -1258,7 +1258,7 @@ inline void Persistence_landscape_on_grid::load_landscape_from_file(const char* 
   in.open(filename);
   // check if the file exist.
   if (!in.good()) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 #endif
     throw std::invalid_argument("The persistence landscape file do not exist.");
@@ -1365,7 +1365,7 @@ inline void Persistence_landscape_on_grid::plot(const char* filename,
     }
     out << "EOF" << std::endl;
   }
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
             << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 #endif
