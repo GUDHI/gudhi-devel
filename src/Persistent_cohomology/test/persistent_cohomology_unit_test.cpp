@@ -1,7 +1,5 @@
 #include <iostream>
 #include <string>
-#include <algorithm>
-#include <utility> // std::pair, std::make_pair
 #include <cmath> // float comparison
 #include <limits>
 #include <cstdint>  // for std::uint8_t
@@ -20,6 +18,23 @@ using namespace Gudhi::persistent_cohomology;
 using namespace boost::unit_test;
 
 typedef Simplex_tree<> typeST;
+
+template<bool with_optimizations>
+std::string get_persistence_string(typeST& st, int coefficient, int min_persistence){
+  Persistent_cohomology<typeST, Field_Zp> pcoh(st);
+  pcoh.init_coefficients( coefficient );  // initializes the coefficient field for homology
+  // Compute the persistent homology of the complex, with given minimal lifetime of homology feature to be recorded.
+  if constexpr (with_optimizations){
+    pcoh.compute_persistent_cohomology( min_persistence );
+  } else {
+    pcoh.compute_persistent_cohomology_without_optimizations( min_persistence );
+  }
+  std::ostringstream ossPers;
+
+  pcoh.output_diagram(ossPers);
+  std::string strPers = ossPers.str();
+  return strPers;
+}
 
 std::string test_persistence(int coefficient, int min_persistence) {
   // file is copied in CMakeLists.txt
@@ -41,15 +56,9 @@ std::string test_persistence(int coefficient, int min_persistence) {
   st.initialize_filtration();
 
   // Compute the persistence diagram of the complex
-  Persistent_cohomology<Simplex_tree<>, Field_Zp> pcoh(st);
-
-  pcoh.init_coefficients( coefficient );  // initializes the coefficient field for homology
-  // Compute the persistent homology of the complex
-  pcoh.compute_persistent_cohomology( min_persistence );  // Minimal lifetime of homology feature to be recorded.
-  std::ostringstream ossPers;
-
-  pcoh.output_diagram(ossPers);
-  std::string strPers = ossPers.str();
+  auto strPers = get_persistence_string<true>(st, coefficient, min_persistence);
+  // tests that with or without optimizations, we have the same result
+  BOOST_CHECK_EQUAL(strPers, get_persistence_string<false>(st, coefficient, min_persistence));
   return strPers;
 }
 
