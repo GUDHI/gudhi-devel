@@ -304,6 +304,7 @@ def test_wasserstein_distance_pot():
 
 def test_wasserstein_distance_hera():
     # Because of https://github.com/anigmetov/hera/issues/14 hera with test_matching is failing in debug mode
+    # Workarounds in the GUDHI python wrapper to hera are bogus as well.
     # TODO: Replace with test_matching=True when it will be fixed
     _basic_wasserstein(hera_wrap(delta=1e-12), 1e-12, test_matching=False)
     _basic_wasserstein(hera_wrap(delta=0.1), 0.1, test_matching=False)
