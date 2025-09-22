@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      # Check python tests in debug mode and check adress sanitizer for the c++ unitary tests
+      # Check python tests in debug mode and check address sanitizer only for the c++ unitary tests
       # Sanitizer is more complicated to launch on Python and some known memory leaks for NanoBind on purpose
       - name: Build and test unitary tests
         run: |
