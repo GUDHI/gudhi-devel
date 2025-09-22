@@ -11,6 +11,7 @@ __license__ = "BSD 3-Clause"
 
 import numpy as np
 from numpy.typing import ArrayLike
+import warnings
 
 from gudhi import _hera_ext as t
 
@@ -65,15 +66,24 @@ def wasserstein_distance(
             convention that (-1) represents the diagonal. If the distance between two diagrams is +inf (which happens
             if the cardinalities of essential parts differ) and the matching is requested, it will be set to ``None``
             (any matching is optimal).
+            
+            .. warning::
+            
+                For matching request, please consider using :func:`~gudhi.wasserstein.wasserstein_distance` (POT
+                version) instead. This version is known to have bugs and also asserts in debug mode.
 
     Returns:
         float|Tuple[float,numpy.array|None]: Approximate Wasserstein distance W_q(X,Y), and optionally the 
             corresponding matching
     
-    .. warning::
-    
-        In debug mode, when matching is ``True``, there is a known bug and code will assert
     """
+    if matching:
+        warnings.warn(
+            """
+            The Hera background used by the method when `matching` is set to `True` is known to have bugs.
+            We recommend using `gudhi.wasserstein.wasserstein_distance` instead.
+            """, UserWarning)
+        
     return t._wasserstein_distance(
         _diagram_as_numpy_array(X),
         _diagram_as_numpy_array(Y),
