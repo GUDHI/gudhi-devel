@@ -70,7 +70,7 @@ def wasserstein_distance(
             .. warning::
             
                 For matching request, please consider using :func:`~gudhi.wasserstein.wasserstein_distance` (POT
-                version) instead. This version is known to have bugs and also asserts in debug mode.
+                version) instead. This version with ``matching=True`` is known to have bugs.
 
     Returns:
         float|Tuple[float,numpy.array|None]: Approximate Wasserstein distance W_q(X,Y), and optionally the 
