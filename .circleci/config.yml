@@ -72,7 +72,7 @@ jobs:
             git submodule sync
             git submodule update --init
       - run:
-          name: Build and test python module. Generates and tests the python documentation
+          name: Build python module and the python documentation
           command: |
             mkdir build
             cd build
@@ -81,15 +81,18 @@ jobs:
             cd version
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
             cd python
-            make
-            ctest --output-on-failure
             make sphinx
             cp -R sphinx /tmp/sphinx
-            python -B -m pytest test/*.py --cov-report html --cov=gudhi
-            cp -R htmlcov /tmp/htmlcov
       - store_artifacts:
           path: /tmp/sphinx
           destination: sphinx
+      - run:
+          name: Test python module and generate coverage report. Finaly test python examples
+          command: |
+            cd build/version/python
+            python -B -m pytest test/*.py --cov-report html --cov=gudhi
+            cp -R htmlcov /tmp/htmlcov
+            ctest --output-on-failure -E test_
       - store_artifacts:
           path: /tmp/htmlcov
           destination: htmlcov
