@@ -16,6 +16,9 @@ import warnings
 
 import gudhi as gd
 
+# Workaround - On CI, sometimes Tcl/Tk is not well installed, use Agg backend instead of default TkAgg
+# Thus, mplt.show() is not available
+mplt.use('Agg')
 
 def test_array_handler():
     diags = np.array([[1, 2], [3, 4], [5, 6]], float)
