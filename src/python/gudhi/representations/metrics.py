@@ -237,12 +237,14 @@ def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_job
         if metric == "bottleneck" or metric == "cgal_bottleneck":
             # Import here as it can fail if GUDHI is built without CGAL - Will throw ImportError
             from .. import bottleneck_distance as cgal_bottleneck_distance
+
             PAIRWISE_DISTANCE_FUNCTIONS["bottleneck"] = cgal_bottleneck_distance
             PAIRWISE_DISTANCE_FUNCTIONS["cgal_bottleneck"] = cgal_bottleneck_distance
 
         elif metric == "pot_wasserstein":
             # Import here as it can fail if POT is not installed - Will throw ImportError
             from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
+
             PAIRWISE_DISTANCE_FUNCTIONS["pot_wasserstein"] = pot_wasserstein_distance
 
         return _pairwise(
@@ -407,10 +409,13 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         """
         if self.mode == "cgal":
             if self.delta is not None:
-                raise ValueError("'mode=cgal' and set 'delta' is contradictory, as 'delta' only applies for mode='hera'")
-            
+                raise ValueError(
+                    "'mode=cgal' and set 'delta' is contradictory, as 'delta' only applies for mode='hera'"
+                )
+
             # Import here as it can fail if GUDHI is built without CGAL - Will throw ImportError
             from .. import bottleneck_distance
+
             return bottleneck_distance(diag1, diag2, e=self.e)
         elif self.mode == "hera":
             if self.e is not None:
@@ -512,9 +517,7 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         if self.mode not in ("pot", "hera"):
-            raise NameError(
-                "Unknown mode. Current available values for mode are 'hera' and 'pot'"
-            )
+            raise NameError("Unknown mode. Current available values for mode are 'hera' and 'pot'")
         self.diagrams_ = X
         return self
 
@@ -568,8 +571,7 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
         elif self.mode == "pot":
             # Import here as it can fail if POT is not installed - Will throw ImportError
             from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
+
             return pot_wasserstein_distance(diag1, diag2, order=self.order, internal_p=self.internal_p, matching=False)
         else:
-            raise NameError(
-                "Unknown mode. Current available values for mode are 'hera' and 'pot'"
-            )
+            raise NameError("Unknown mode. Current available values for mode are 'hera' and 'pot'")
