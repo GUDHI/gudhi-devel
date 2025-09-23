@@ -336,11 +336,12 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         Constructor for the BottleneckDistance class.
 
         Parameters:
-            mode (str): method for computing bottleneck distance. Either "cgal" or "hera". Default set to "cgal".
+            mode (str): method for computing bottleneck distance. Either ``'cgal'`` or ``'hera'``. Default set to
+                ``'cgal'``.
             epsilon (double): **[deprecated]** consider using `e` instead.
             e (double): absolute (additive) error tolerated on the distance (default is the smallest positive float),
-                see :func:`gudhi.bottleneck_distance`.
-            delta (double): delta (float): Relative error 1+delta. Used only if mode == "hera",
+                Used only if ``mode == 'cgal'``, see :func:`gudhi.bottleneck_distance`.
+            delta (double): delta (float): Relative error 1+delta. Used only if ``mode == 'hera'``,
                 see :func:`gudhi.hera.bottleneck_distance`.
             n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances`
                 for details.
@@ -497,11 +498,16 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
         Constructor for the WassersteinDistance class.
 
         Parameters:
-            order (int): exponent for Wasserstein, default value is 1., see :func:`gudhi.wasserstein.wasserstein_distance`.
-            internal_p (int): ground metric on the (upper-half) plane (i.e. norm l_p in R^2), default value is `np.inf`, see :func:`gudhi.wasserstein.wasserstein_distance`.
-            mode (str): method for computing Wasserstein distance. Either "pot" or "hera". Default set to "hera".
-            delta (float): relative error 1+delta. Used only if mode == "hera".
-            n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
+            order (int): exponent for Wasserstein, default value is 1., see
+                :func:`gudhi.wasserstein.wasserstein_distance`.
+            internal_p (int): ground metric on the (upper-half) plane (i.e. norm l_p in R^2), default value is
+                ``np.inf``, see :func:`gudhi.wasserstein.wasserstein_distance`.
+            mode (str): method for computing Wasserstein distance. Either ``'pot'`` or ``'hera'``. Default set to
+                ``'hera'``.
+            delta (float): relative error 1+delta. Used only if ``mode == 'hera'``, see
+                :func:`gudhi.hera.wasserstein_distance`.
+            n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances`
+                for details.
         """
         self.order, self.internal_p, self.mode = order, internal_p, mode
         self.delta = delta
