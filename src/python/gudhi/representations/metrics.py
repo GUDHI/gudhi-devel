@@ -20,7 +20,6 @@ import warnings
 
 from gudhi.hera import wasserstein_distance as hera_wasserstein_distance
 from gudhi.hera import bottleneck_distance as hera_bottleneck_distance
-from .preprocessing import Padding
 
 
 #############################################
@@ -233,7 +232,7 @@ def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_job
             metric=_sklearn_wrapper(_sliced_wasserstein_distance_on_projections, Xproj, Yproj),
             n_jobs=n_jobs,
         )
-    elif type(metric) == str:
+    elif isinstance(metric, str):
         if metric == "bottleneck" or metric == "cgal_bottleneck":
             # Import here as it can fail if GUDHI is built without CGAL - Will throw ImportError
             from .. import bottleneck_distance as cgal_bottleneck_distance
