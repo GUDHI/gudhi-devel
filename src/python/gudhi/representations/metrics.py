@@ -204,10 +204,10 @@ def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_job
             If None, pairwise distances are computed from the first list only.
         metric: distance to use. It can be either a string ("sliced_wasserstein", "wasserstein", "hera_wasserstein"
             (Wasserstein distance computed with Hera - note that Hera is also used for the default option
-            "wasserstein"), "pot_wasserstein" (Wasserstein distance computed with POT), "bottleneck", "cgal_bottleneck"
-            (bottleneck distance computed with CGAL - note that CGAL is also used for the default option "bottleneck"),
-            "hera_bottleneck" (bottleneck distance computed with Hera), "persistence_fisher" or a function taking two
-            numpy arrays of shape (nx2) and (mx2) as inputs.
+            "wasserstein"), "pot_wasserstein" (Wasserstein distance computed with POT), "bottleneck",
+            "gudhi_bottleneck" (bottleneck distance computed with GUDHI - note that GUDHI is also used for the default
+            option "bottleneck"), "hera_bottleneck" (bottleneck distance computed with Hera), "persistence_fisher" or a
+            function taking two numpy arrays of shape (nx2) and (mx2) as inputs.
             If it is a function, make sure that it is symmetric and that it outputs 0 if called on the same two arrays.
         n_jobs (int): number of jobs to use for the computation. This uses joblib.Parallel(prefer="threads"), so
             metrics that do not release the GIL may not scale unless run inside a
@@ -233,12 +233,12 @@ def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_job
             n_jobs=n_jobs,
         )
     elif isinstance(metric, str):
-        if metric == "bottleneck" or metric == "cgal_bottleneck":
+        if metric == "bottleneck" or metric == "gudhi_bottleneck":
             # Import here as it can fail if GUDHI is built without CGAL - Will throw ImportError
-            from .. import bottleneck_distance as cgal_bottleneck_distance
+            from .. import bottleneck_distance as gudhi_bottleneck_distance
 
-            PAIRWISE_DISTANCE_FUNCTIONS["bottleneck"] = cgal_bottleneck_distance
-            PAIRWISE_DISTANCE_FUNCTIONS["cgal_bottleneck"] = cgal_bottleneck_distance
+            PAIRWISE_DISTANCE_FUNCTIONS["bottleneck"] = gudhi_bottleneck_distance
+            PAIRWISE_DISTANCE_FUNCTIONS["gudhi_bottleneck"] = gudhi_bottleneck_distance
 
         elif metric == "pot_wasserstein":
             # Import here as it can fail if POT is not installed - Will throw ImportError
@@ -328,19 +328,19 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
     r"""
     This is a class for computing the bottleneck distance matrix from a list of persistence diagrams.
 
-    :Requires: `CGAL <installation.html#cgal>`_ for ``mode='cgal'``.
+    :Requires: `CGAL <installation.html#cgal>`_ for ``mode='gudhi'``.
     """
 
-    def __init__(self, mode="cgal", e=None, delta=None, n_jobs=None, epsilon=None):
+    def __init__(self, mode="gudhi", e=None, delta=None, n_jobs=None, epsilon=None):
         """
         Constructor for the BottleneckDistance class.
 
         Parameters:
-            mode (str): method for computing bottleneck distance. Either ``'cgal'`` or ``'hera'``. Default set to
-                ``'cgal'``.
+            mode (str): method for computing bottleneck distance. Either ``'gudhi'`` or ``'hera'``. Default set to
+                ``'gudhi'``.
             epsilon (double): **[deprecated]** consider using `e` instead.
             e (double): absolute (additive) error tolerated on the distance (default is the smallest positive float),
-                Used only if ``mode == 'cgal'``, see :func:`gudhi.bottleneck_distance`.
+                Used only if ``mode == 'gudhi'``, see :func:`gudhi.bottleneck_distance`.
             delta (double): delta (float): Relative error 1+delta. Used only if ``mode == 'hera'``,
                 see :func:`gudhi.hera.bottleneck_distance`.
             n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances`
@@ -365,12 +365,12 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
-        if self.mode not in ("cgal", "hera"):
-            raise ValueError("Unknown mode. Current available values for mode are 'cgal' and 'hera'")
-        if self.mode == "cgal" and self.delta is not None:
-            raise ValueError("'mode=cgal' and set 'delta' is contradictory, as 'delta' only applies for mode='hera'")
+        if self.mode not in ("gudhi", "hera"):
+            raise ValueError("Unknown mode. Current available values for mode are 'gudhi' and 'hera'")
+        if self.mode == "gudhi" and self.delta is not None:
+            raise ValueError("mode='gudhi' and set 'delta' is contradictory, as 'delta' only applies for mode='hera'")
         if self.mode == "hera" and self.e is not None:
-            raise ValueError("'mode=hera' and set 'e' is contradictory, as 'e' only applies for mode='cgal'")
+            raise ValueError("mode='hera' and set 'e' is contradictory, as 'e' only applies for mode='gudhi'")
         self.diagrams_ = X
         return self
 
@@ -386,7 +386,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise
             bottleneck distances.
         """
-        if self.mode == "cgal":
+        if self.mode == "gudhi":
             Xfit = pairwise_persistence_diagram_distances(
                 X, self.diagrams_, metric="bottleneck", e=self.e, n_jobs=self.n_jobs
             )
@@ -407,10 +407,10 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         Returns:
             float: bottleneck distance.
         """
-        if self.mode == "cgal":
+        if self.mode == "gudhi":
             if self.delta is not None:
                 raise ValueError(
-                    "'mode=cgal' and set 'delta' is contradictory, as 'delta' only applies for mode='hera'"
+                    "mode='gudhi' and set 'delta' is contradictory, as 'delta' only applies for mode='hera'"
                 )
 
             # Import here as it can fail if GUDHI is built without CGAL - Will throw ImportError
@@ -419,10 +419,10 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
             return bottleneck_distance(diag1, diag2, e=self.e)
         elif self.mode == "hera":
             if self.e is not None:
-                raise ValueError("'mode=hera' and set 'e' is contradictory, as 'e' only applies for mode='cgal'")
+                raise ValueError("mode=hera' and set 'e' is contradictory, as 'e' only applies for mode='gudhi'")
             return hera_bottleneck_distance(diag1, diag2, delta=self.delta)
         else:
-            raise ValueError("Unknown mode. Current available values for mode are 'hera' and 'cgal'")
+            raise ValueError("Unknown mode. Current available values for mode are 'hera' and 'gudhi'")
 
 
 class PersistenceFisherDistance(BaseEstimator, TransformerMixin):

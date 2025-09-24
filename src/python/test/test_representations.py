@@ -85,8 +85,8 @@ metrics_dict = {  # (class, metric_kwargs, tolerance_pytest_approx)
         BottleneckDistance(e=0.00001),
         dict(e=0.00001),
         dict(abs=1e-5)),
-    "cgal_bottleneck": (
-        BottleneckDistance(mode='cgal', e=0.00001),
+    "gudhi_bottleneck": (
+        BottleneckDistance(mode='gudhi', e=0.00001),
         dict(e=0.00001),
         dict(abs=1e-5)),
     "hera_bottleneck": (
@@ -482,10 +482,10 @@ def test_bottleneck_distance_exceptions():
         _ = BottleneckDistance(mode="hera", e=0.001)(empty_diag, empty_diag)
     with pytest.raises(ValueError):
         # Test exception for fit method
-        bdist = BottleneckDistance(mode="cgal", delta=0.001)
+        bdist = BottleneckDistance(mode="gudhi", delta=0.001)
         _ = bdist.fit_transform(empty_diag, empty_diag)
     with pytest.raises(ValueError):
-        bdist = BottleneckDistance(mode="cgal", delta=0.001)
+        bdist = BottleneckDistance(mode="gudhi", delta=0.001)
         _ = bdist(empty_diag, empty_diag)
     with pytest.raises(ValueError):
         # Test exception for fit method
