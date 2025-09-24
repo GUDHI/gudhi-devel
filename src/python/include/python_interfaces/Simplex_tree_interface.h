@@ -245,7 +245,7 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
       // keeping the vertices
       // vertices have possibility different filtration values, so insert_batch not possible
       for (int v : Base::complex_vertex_range()) {
-        st.insert_simplex(std::initializer_list<int>{v}, Base::filtration(Base::find({v})));
+        st.insert_simplex(std::initializer_list<int>{v}, Base::filtration(Base::find_vertex(v)));
       }
 
       // Insert remaining edges
