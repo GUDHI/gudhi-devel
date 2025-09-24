@@ -80,8 +80,8 @@ def wasserstein_distance(
     if matching:
         warnings.warn(
             """
-            There is known bug (https://github.com/GUDHI/gudhi-devel/issues/881) when `matching` is set to `True` with
-            the Hera backend. We recommend using `gudhi.wasserstein.wasserstein_distance` instead.
+            There is known bug (https://github.com/GUDHI/gudhi-devel/issues/1245) when `matching` is set to `True` with
+            the Hera backend. For the moment, we recommend using `gudhi.wasserstein.wasserstein_distance` instead.
             """, UserWarning)
         
     return t._wasserstein_distance(
