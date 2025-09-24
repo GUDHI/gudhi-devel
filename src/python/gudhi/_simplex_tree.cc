@@ -286,11 +286,10 @@ This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-ext
 explains how to compute an extension of persistence called extended persistence.
            )doc")
       .def("_collapse_edges_inplace",
-           &gsti::collapse_edges,
+           &gsti::collapse_edges_inplace,
            nb::call_guard<nb::gil_scoped_release>())
       .def("_collapse_edges",
-           &gsti::build_with_collapse_edges,
-           nb::call_guard<nb::gil_scoped_release>())
+           &gsti::collapse_edges)
       .def("reset_filtration",
            &gsti::reset_filtration,
            nb::arg("filtration"),

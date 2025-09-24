@@ -219,7 +219,7 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
   }
 
  public:
-  void collapse_edges(int nb_collapse_iteration)
+  void collapse_edges_inplace(int nb_collapse_iteration)
   {
     auto edges = get_collapse_edges(*this, nb_collapse_iteration);
 
@@ -232,23 +232,29 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     }
   }
 
-  Simplex_tree_interface build_with_collapse_edges(int nb_collapse_iteration)
+  nanobind::object collapse_edges(int nb_collapse_iteration)
   {
     auto edges = get_collapse_edges(*this, nb_collapse_iteration);
 
-    // Keep only the vertices
-    Simplex_tree_interface st;
-    // vertices have possibility different filtration values, so insert_batch not possible
-    for (int v : Base::complex_vertex_range()) {
-      st.insert_simplex(std::initializer_list<int>{v}, Base::filtration(Base::find({v})));
+    nanobind::object inst = nanobind::module_::import_("gudhi.simplex_tree").attr("SimplexTree")();
+    Simplex_tree_interface &st = nanobind::cast<Simplex_tree_interface &>(inst);
+
+    {
+      nanobind::gil_scoped_release release;
+
+      // keeping the vertices
+      // vertices have possibility different filtration values, so insert_batch not possible
+      for (int v : Base::complex_vertex_range()) {
+        st.insert_simplex(std::initializer_list<int>{v}, Base::filtration(Base::find({v})));
+      }
+
+      // Insert remaining edges
+      for (const auto& remaining_edge : edges) {
+        st.insert({std::get<0>(remaining_edge), std::get<1>(remaining_edge)}, std::get<2>(remaining_edge));
+      }
     }
 
-    // Insert remaining edges
-    for (const auto& remaining_edge : edges) {
-      st.insert({std::get<0>(remaining_edge), std::get<1>(remaining_edge)}, std::get<2>(remaining_edge));
-    }
-
-    return st;
+    return inst;
   }
 
   void expansion_with_blockers_callback(int max_dim, nanobind::typed<nanobind::callable, bool(Simplex&)> blocker_func)

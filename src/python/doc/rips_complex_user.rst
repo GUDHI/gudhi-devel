@@ -54,7 +54,7 @@ regular Rips complex.
 
 Another option which is especially useful if you want to compute persistent homology in "high" dimension (2 or more,
 sometimes even 1), is to build the Rips complex only up to dimension 1 (a graph), then use
-:func:`~gudhi.SimplexTree.collapse_edges_as_graph` to reduce the size of this graph, and finally call
+:func:`~gudhi.SimplexTree.collapse_edges_of_graph` to reduce the size of this graph, and finally call
 :func:`~gudhi.SimplexTree.expansion` to get a simplicial complex of a suitable dimension to compute its homology. This
 trick gives the same persistence diagram as one would get with a plain use of `RipsComplex`, with a complex that is
 often significantly smaller and thus faster to process.
