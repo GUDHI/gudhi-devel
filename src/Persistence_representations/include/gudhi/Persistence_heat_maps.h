@@ -6,7 +6,7 @@
  *
  *    Modification(s):
  *      - 2018/04 MC: Add discrete/non-discrete mechanism and non-discrete version
- *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `GUDHI_DEBUG`s etc.)
+ *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `DEBUG_TRACES`s etc.)
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -14,7 +14,7 @@
 #define PERSISTENCE_HEAT_MAPS_H_
 
 // standard include
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
 #include <iostream>   // std::clog, std::cerr
 #endif
 #include <fstream>    // std::ofstream, std::ifstream
@@ -57,7 +57,7 @@ inline std::vector<std::vector<double> > create_Gaussian_filter(std::size_t pixe
   // initialization of a kernel:
   std::vector<std::vector<double> > kernel(2 * pixel_radius + 1, std::vector<double>(2 * pixel_radius + 1, 0));
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Kernel initialize \n";
   std::clog << "pixel_radius : " << pixel_radius << std::endl;
   std::clog << "kernel.size() : " << kernel.size() << std::endl;
@@ -80,7 +80,7 @@ inline std::vector<std::vector<double> > create_Gaussian_filter(std::size_t pixe
     }
   }
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Here is the kernel : \n";
   for (std::size_t i = 0; i != kernel.size(); ++i) {
     for (std::size_t j = 0; j != kernel[i].size(); ++j) {
@@ -368,20 +368,20 @@ class Persistence_heat_maps
   bool check_if_the_same(const Persistence_heat_maps& second) const
   {
     if (this->heat_map_.size() != second.heat_map_.size()) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "this->heat_map_.size() : " << this->heat_map_.size()
                 << " \n second.heat_map_.size() : " << second.heat_map_.size() << std::endl;
 #endif
       return false;
     }
     if (this->min_ != second.min_) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "this->min_ : " << this->min_ << ", second.min_ : " << second.min_ << std::endl;
 #endif
       return false;
     }
     if (this->max_ != second.max_) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "this->max_ : " << this->max_ << ", second.max_ : " << second.max_ << std::endl;
 #endif
       return false;
@@ -406,7 +406,7 @@ class Persistence_heat_maps
   bool operator==(const Persistence_heat_maps& rhs) const
   {
     if (!this->check_if_the_same(rhs)) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "The domains are not the same \n";
 #endif
       return false;  // in this case, the domains are not the same, so the maps cannot be the same.
@@ -414,7 +414,7 @@ class Persistence_heat_maps
     for (std::size_t i = 0; i != this->heat_map_.size(); ++i) {
       for (std::size_t j = 0; j != this->heat_map_[i].size(); ++j) {
         if (!almost_equal(this->heat_map_[i][j], rhs.heat_map_[i][j])) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << "this->heat_map_[" << i << "][" << j << "] = " << this->heat_map_[i][j] << std::endl;
           std::clog << "rhs.heat_map_[" << i << "][" << j << "] = " << rhs.heat_map_[i][j] << std::endl;
 #endif
@@ -442,7 +442,7 @@ class Persistence_heat_maps
   {
     // first check if the heat maps are compatible
     if (!first.check_if_the_same(second)) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::cerr << "Sizes of the heat maps are not compatible. The program will now terminate \n";
 #endif
       throw std::invalid_argument("Sizes of the heat maps are not compatible. The program will now terminate \n");
@@ -658,19 +658,19 @@ void Persistence_heat_maps<Scalling_of_kernels>::_construct(
     double min,
     double max)
 {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Entering construct procedure \n";
 #endif
 
   Scalling_of_kernels f;
   this->f_ = f;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "min and max passed to construct() procedure: " << min << " " << max << std::endl;
 #endif
 
   if (min == max) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "min and max parameters will be determined based on intervals \n";
 #endif
     // in this case, we want the program to set up the min and max values by itself.
@@ -689,7 +689,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::_construct(
     max += fabs(max - min) / 100;
   }
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "min_ : " << min << std::endl;
   std::clog << "max_ : " << max << std::endl;
   std::clog << "number_of_pixels : " << number_of_pixels << std::endl;
@@ -706,7 +706,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::_construct(
   }
   this->heat_map_ = heat_map_;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Done creating of the heat map, now we will fill in the structure \n";
 #endif
 
@@ -717,7 +717,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::_construct(
     int y_grid =
         static_cast<int>((intervals[pt_nr].second - this->min_) / (this->max_ - this->min_) * number_of_pixels);
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "point : " << intervals[pt_nr].first << " , " << intervals[pt_nr].second << std::endl;
     std::clog << "x_grid : " << x_grid << std::endl;
     std::clog << "y_grid : " << y_grid << std::endl;
@@ -729,7 +729,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::_construct(
     y_grid -= filter.size() / 2;
     // note that the numbers x_grid and y_grid may be negative.
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "After shift : \n";
     std::clog << "x_grid : " << x_grid << std::endl;
     std::clog << "y_grid : " << y_grid << std::endl;
@@ -742,11 +742,11 @@ void Persistence_heat_maps<Scalling_of_kernels>::_construct(
         // if the point (x_grid+i,y_grid+j) is the correct point in the grid.
         if (((x_grid + i) >= 0) && (x_grid + i < this->heat_map_.size()) && ((y_grid + j) >= 0) &&
             (y_grid + j < this->heat_map_.size())) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << y_grid + j << " " << x_grid + i << std::endl;
 #endif
           this->heat_map_[y_grid + j][x_grid + i] += scaling_value * filter[i][j];
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << "Position : (" << x_grid + i << "," << y_grid + j
                     << ") got increased by the value : " << filter[i][j] << std::endl;
 #endif
@@ -863,7 +863,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::plot(const char* filename) cons
     out << std::endl;
   }
   out.close();
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
             << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 #endif
@@ -894,7 +894,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* file
 
   // checking if the file exist / if it was open.
   if (!in.good()) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 #endif
     throw std::invalid_argument("The persistence landscape file do not exist.");
@@ -903,7 +903,7 @@ void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* file
   // now we read the file one by one.
 
   in >> this->min_ >> this->max_;
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Reading the following values of min and max : " << this->min_ << " , " << this->max_ << std::endl;
 #endif
 
@@ -920,18 +920,18 @@ void Persistence_heat_maps<Scalling_of_kernels>::load_from_file(const char* file
 
       lineSS >> point;
       line_of_heat_map.push_back(point);
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << point << " ";
 #endif
     }
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << std::endl;
 #endif
 
     if (in.good()) this->heat_map_.push_back(line_of_heat_map);
   }
   in.close();
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Done \n";
 #endif
 }
@@ -943,7 +943,7 @@ std::vector<double> Persistence_heat_maps<Scalling_of_kernels>::vectorize(int nu
   std::vector<double> result;
 
   if (!discrete_) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "No vectorize method in case of infinite dimensional vectorization" << std::endl;
 #endif
     return result;
@@ -973,7 +973,7 @@ double Persistence_heat_maps<Scalling_of_kernels>::distance(const Persistence_he
   if (this->discrete_) {
     // first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
     if (!this->check_if_the_same(second)) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::cerr << "The persistence images are of non compatible sizes. We cannot therefore compute distance between "
                    "them. The program will now terminate";
 #endif
@@ -1032,7 +1032,7 @@ double Persistence_heat_maps<Scalling_of_kernels>::compute_scalar_product(
   if (discrete_) {
     // first we need to check if (*this) and second are defined on the same domain and have the same dimensions:
     if (!this->check_if_the_same(second)) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::cerr << "The persistence images are of non compatible sizes. We cannot therefore compute distance between "
                    "them. The program will now terminate";
 #endif

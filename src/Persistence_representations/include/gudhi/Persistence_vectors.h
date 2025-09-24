@@ -5,7 +5,7 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
- *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `GUDHI_DEBUG`s etc.)
+ *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `DEBUG_TRACES`s etc.)
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -13,7 +13,7 @@
 #define PERSISTENCE_VECTORS_H_
 
 // standard include
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
 #include <iostream>   // std::cerr, std::clog
 #endif
 #include <ostream>    // std::ostream
@@ -213,7 +213,7 @@ class Vector_distances_in_diagram
     }
     out << std::endl;
     out.close();
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
               << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 #endif
@@ -383,7 +383,7 @@ class Vector_distances_in_diagram
 template <typename F>
 void Vector_distances_in_diagram<F>::_compute_sorted_vector_of_distances_via_heap()
 {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Here are the intervals : \n";
   for (std::size_t i = 0; i != this->intervals_.size(); ++i) {
     std::clog << this->intervals_[i].first << " , " << this->intervals_[i].second << std::endl;
@@ -411,13 +411,13 @@ void Vector_distances_in_diagram<F>::_compute_sorted_vector_of_distances_via_hea
                               std::make_pair(0.5 * (this->intervals_[j].first + this->intervals_[j].second),
                                              0.5 * (this->intervals_[j].first + this->intervals_[j].second)))));
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "Value : " << value << std::endl;
       std::clog << "heap.front() : " << heap.front() << std::endl;
 #endif
 
       if (-value < heap.front()) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "Replacing : " << heap.front() << " with : " << -value << std::endl;
 #endif
         // remove the first element from the heap
@@ -452,7 +452,7 @@ void Vector_distances_in_diagram<F>::_compute_sorted_vector_of_distances_via_hea
     }
   }
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "This is the heap after all the operations :\n";
   for (std::size_t i = 0; i != heap.size(); ++i) {
     std::clog << heap[i] << " ";
@@ -546,7 +546,7 @@ void Vector_distances_in_diagram<F>::compute_average(const std::vector<Vector_di
 template <typename F>
 double Vector_distances_in_diagram<F>::distance(const Vector_distances_in_diagram& second_, double power) const
 {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Entering double Vector_distances_in_diagram<F>::distance( const Abs_Topological_data_with_distances* "
                "second , double power ) procedure \n";
   std::clog << "Power : " << power << std::endl;
@@ -559,7 +559,7 @@ double Vector_distances_in_diagram<F>::distance(const Vector_distances_in_diagra
        i != std::min(this->sorted_vector_of_distances_.size(), second_.sorted_vector_of_distances_.size());
        ++i) {
     if (power == 1) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "|" << this->sorted_vector_of_distances_[i] << " -  " << second_.sorted_vector_of_distances_[i]
                 << " |  : " << std::fabs(this->sorted_vector_of_distances_[i] - second_.sorted_vector_of_distances_[i])
                 << std::endl;
@@ -574,7 +574,7 @@ double Vector_distances_in_diagram<F>::distance(const Vector_distances_in_diagra
         if (result < std::fabs(this->sorted_vector_of_distances_[i] - second_.sorted_vector_of_distances_[i]))
           result = std::fabs(this->sorted_vector_of_distances_[i] - second_.sorted_vector_of_distances_[i]);
       }
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "| " << this->sorted_vector_of_distances_[i] << " - " << second_.sorted_vector_of_distances_[i]
                 << " : " << std::fabs(this->sorted_vector_of_distances_[i] - second_.sorted_vector_of_distances_[i])
                 << std::endl;
@@ -642,7 +642,7 @@ void Vector_distances_in_diagram<F>::load_from_file(const char* filename)
   in.open(filename);
   // check if the file exist.
   if (!in.good()) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 #endif
     throw std::invalid_argument("The persistence landscape file do not exist.");
