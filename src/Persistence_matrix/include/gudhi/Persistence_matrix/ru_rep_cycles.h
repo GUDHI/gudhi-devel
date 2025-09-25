@@ -98,6 +98,7 @@ class RU_representative_cycles
  private:
   using Master_RU_matrix = typename Master_matrix::Master_RU_matrix;
   using Inverse_column = Cycle;
+  using Content_range = typename Master_matrix::Column::Content_range;
 
   std::vector<Cycle> representativeCycles_; /**< Cycle container. */
   std::vector<Index> birthToCycle_;         /**< Map from birth index to cycle index. */
@@ -159,29 +160,16 @@ RU_representative_cycles<Master_matrix>::get_representative_cycle(const Bar& bar
 template <class Master_matrix>
 inline void RU_representative_cycles<Master_matrix>::_retrieve_cycle_from_r(Index colIdx, Index repIdx)
 {
-  if constexpr (is_well_behaved<Master_matrix::Option_list::column_type>::value) {
-    const auto& col = _matrix()->reducedMatrixR_.get_column(colIdx);
-    representativeCycles_[repIdx].resize(col.size());
-    Index j = 0;
-    for (const auto& cell : col) {
-      if constexpr (Master_matrix::Option_list::is_z2) {
-        representativeCycles_[repIdx][j] = cell.get_row_index();
-      } else {
-        representativeCycles_[repIdx][j].first = cell.get_row_index();
-        representativeCycles_[repIdx][j].second = cell.get_element();
-      }
-      ++j;
-    }
-  } else {
-    auto col = _matrix()->reducedMatrixR_.get_column(colIdx).get_content();
-    for (Index j = 0; j < col.size(); ++j) {
-      if (col[j] != 0) {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          representativeCycles_[repIdx].push_back(j);
-        } else {
-          representativeCycles_[repIdx].push_back({j, col[j]});
-        }
-      }
+  auto& col = _matrix()->reducedMatrixR_.get_column(colIdx);
+  Content_range r = col.get_non_zero_content_range();
+  if constexpr (RangeTraits<Content_range>::has_size) {
+    representativeCycles_[repIdx].reserve(r.size());
+  }
+  for (const auto& c : r) {
+    if constexpr (Master_matrix::Option_list::is_z2) {
+      representativeCycles_[repIdx].push_back(c.get_row_index());
+    } else {
+      representativeCycles_[repIdx].push_back({c.get_row_index(), c.get_element()});
     }
   }
 }
@@ -231,14 +219,6 @@ RU_representative_cycles<Master_matrix>::_get_inverse(Index c)
     }
   };
 
-  auto _substract_vec = [&](E& e, auto p, auto line) -> void {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (line[p]) e = !e;
-    } else {
-      if (line[p.first]) op->subtract_inplace_front(e, line[p.first] * p.second);
-    }
-  };
-
   auto _multiply = [&](E& e, E m) -> void {
     if constexpr (Master_matrix::Option_list::is_z2) {
       e = m && e;  // just in case, but m is only possibly 0 if the user multiplied by 0 a column in R
@@ -277,29 +257,21 @@ RU_representative_cycles<Master_matrix>::_get_inverse(Index c)
   if (c == size - 1) _push_cell(size - 1, _last_diagonal_value());
   for (int i = size - 2; i >= 0; --i) {
     E e = static_cast<int>(c) == i;
-    // ugly......
-    if constexpr (is_well_behaved<Master_matrix::Option_list::column_type>::value) {
-      const auto& line = matrix.get_column(i);
-      auto resIt = res.rbegin();
-      auto lineIt = line.begin();
-      E diag(0);
-      if (static_cast<int>(lineIt->get_row_index()) == i) {
-        _assign(diag, *lineIt);
-        ++lineIt;
-      }
-      while (lineIt != line.end() && resIt != res.rend()) {
-        while (resIt != res.rend() && _get_index(resIt) < lineIt->get_row_index()) ++resIt;
-        _substract(e, resIt, *lineIt);
-        ++lineIt;
-      }
-      _multiply(e, diag);
-    } else {
-      auto line = matrix.get_column(i).get_content(size);  // linear...
-      for (const auto& p : res) {
-        _substract_vec(e, p, line);
-      }
-      _multiply(e, line[i]);
+    auto& line = matrix.get_column(i);
+    Content_range r = line.get_non_zero_content_range();
+    auto resIt = res.rbegin();
+    auto lineIt = r.begin();
+    E diag(0);
+    if (static_cast<int>(lineIt->get_row_index()) == i) {
+      _assign(diag, *lineIt);
+      ++lineIt;
     }
+    while (lineIt != r.end() && resIt != res.rend()) {
+      while (resIt != res.rend() && _get_index(resIt) < lineIt->get_row_index()) ++resIt;
+      _substract(e, resIt, *lineIt);
+      ++lineIt;
+    }
+    _multiply(e, diag);
     _push_cell(i, e);
   }
 

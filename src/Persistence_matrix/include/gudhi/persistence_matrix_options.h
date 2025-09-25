@@ -17,8 +17,7 @@
 #ifndef PM_OPTIONS_INCLUDED
 #define PM_OPTIONS_INCLUDED
 
-#include <cstdint>
-#include <type_traits>
+#include <cstdint>  // std::uint8_t
 
 #include <gudhi/Fields/Zp_field_operators.h>
 
@@ -44,20 +43,6 @@ enum class Column_types : std::uint8_t {
   INTRUSIVE_LIST, /**< @ref Intrusive_list_column "": Underlying container is a boost::intrusive::list<@ref Entry>. */
   INTRUSIVE_SET   /**< @ref Intrusive_set_column "": Underlying container is a boost::intrusive::set<@ref Entry>. */
 };
-
-// a column is said to behave well if its underlying content is alway ordered by increasing row index
-// and iterators cannot iterate over zero cells.
-template <Column_types column_type>
-struct is_well_behaved : std::true_type {};
-
-template <>
-struct is_well_behaved<Column_types::HEAP> : std::false_type {};  // non ordered
-
-template <>
-struct is_well_behaved<Column_types::VECTOR> : std::false_type {};  // lazy row clear
-
-template <>
-struct is_well_behaved<Column_types::UNORDERED_SET> : std::false_type {};  // non ordered
 
 /**
  * @ingroup persistence_matrix
@@ -175,6 +160,26 @@ struct Cohomology_persistence_options : Default_options<column_type, is_z2_only,
   static const bool has_row_access = true;
   static const bool has_column_compression = true;
   static const bool has_removable_rows = true;
+};
+
+/**
+ * @private
+ */
+template <typename T>
+class RangeTraits
+{
+ private:
+  static auto check_begin(...) -> std::false_type;
+  template <typename U>
+  static auto check_begin(const U& x) -> decltype(x.begin(), std::true_type{});
+
+  static auto check_size(...) -> std::false_type;
+  template <typename U>
+  static auto check_size(const U& x) -> decltype(x.size(), std::true_type{});
+
+ public:
+  static constexpr bool has_begin = decltype(check_begin(std::declval<T>()))::value;
+  static constexpr bool has_size = decltype(check_size(std::declval<T>()))::value;
 };
 
 }  // namespace persistence_matrix

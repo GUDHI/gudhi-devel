@@ -25,6 +25,7 @@
 #include <utility>  //std::swap, std::move & std::exchange
 
 #include <boost/iterator/indirect_iterator.hpp>
+#include <boost/range/iterator_range_core.hpp>
 
 #include <gudhi/Persistence_matrix/allocators/entry_constructors.h>
 #include <gudhi/Persistence_matrix/columns/column_utilities.h>
@@ -72,6 +73,7 @@ class Set_column : public Master_matrix::Row_access_option,
   using const_iterator = boost::indirect_iterator<typename Column_support::const_iterator>;
   using reverse_iterator = boost::indirect_iterator<typename Column_support::reverse_iterator>;
   using const_reverse_iterator = boost::indirect_iterator<typename Column_support::const_reverse_iterator>;
+  using Content_range = boost::iterator_range<const_iterator>;
 
   Set_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -120,6 +122,8 @@ class Set_column : public Master_matrix::Row_access_option,
   const_reverse_iterator rbegin() const noexcept;
   reverse_iterator rend() noexcept;
   const_reverse_iterator rend() const noexcept;
+
+  Content_range get_non_zero_content_range() const;
 
   template <class Entry_range>
   Set_column& operator+=(const Entry_range& column);
@@ -637,6 +641,12 @@ template <class Master_matrix>
 inline typename Set_column<Master_matrix>::const_reverse_iterator Set_column<Master_matrix>::rend() const noexcept
 {
   return column_.rend();
+}
+
+template <class Master_matrix>
+inline typename Set_column<Master_matrix>::Content_range Set_column<Master_matrix>::get_non_zero_content_range() const
+{
+  return Content_range(column_.begin(), column_.end());
 }
 
 template <class Master_matrix>

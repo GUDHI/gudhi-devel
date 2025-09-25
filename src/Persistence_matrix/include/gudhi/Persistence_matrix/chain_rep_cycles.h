@@ -112,6 +112,9 @@ class Chain_representative_cycles
 template <class Master_matrix>
 inline void Chain_representative_cycles<Master_matrix>::update_representative_cycles()
 {
+  using Column = typename Master_matrix::Column;
+  using Content_range = typename Column::Content_range;
+
   auto nberColumns = _matrix()->get_number_of_columns();
   auto get_position = [&](ID_index pivot) {
     if constexpr (Master_matrix::Option_list::has_vine_update) {
@@ -133,25 +136,15 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
     auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
     if (!col.is_paired() || get_position(i) < get_position(_matrix()->get_pivot(col.get_paired_chain_index()))) {
       Cycle cycle;
-      if constexpr (is_well_behaved<Master_matrix::Option_list::column_type>::value) {
-        cycle.reserve(col.size());
-        for (const auto& c : col) {
-          if constexpr (Master_matrix::Option_list::is_z2) {
-            cycle.push_back(c.get_row_index());
-          } else {
-            cycle.push_back({c.get_row_index(), c.get_element()});
-          }
-        }
-      } else {
-        auto cont = col.get_content();
-        for (Index j = 0; j < cont.size(); ++j) {
-          if (cont[j] != 0) {
-            if constexpr (Master_matrix::Option_list::is_z2) {
-              cycle.push_back(j);
-            } else {
-              cycle.push_back({j, cont[j]});
-            }
-          }
+      Content_range r = col.get_non_zero_content_range();
+      if constexpr (RangeTraits<Content_range>::has_size){
+        cycle.reserve(r.size());
+      }
+      for (const auto& c : r) {
+        if constexpr (Master_matrix::Option_list::is_z2) {
+          cycle.push_back(c.get_row_index());
+        } else {
+          cycle.push_back({c.get_row_index(), c.get_element()});
         }
       }
       representativeCycles_.push_back(std::move(cycle));

@@ -24,6 +24,7 @@
 #include <algorithm>  //binary_search
 #include <utility>    //std::swap, std::move & std::exchange
 
+#include <boost/range/iterator_range_core.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/container/small_vector.hpp>
 
@@ -68,6 +69,7 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
   using const_iterator = boost::indirect_iterator<typename Column_support::const_iterator>;
   using reverse_iterator = boost::indirect_iterator<typename Column_support::reverse_iterator>;
   using const_reverse_iterator = boost::indirect_iterator<typename Column_support::const_reverse_iterator>;
+  using Content_range = boost::iterator_range<const_iterator>;
 
   Naive_vector_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -116,6 +118,8 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
   const_reverse_iterator rbegin() const noexcept;
   reverse_iterator rend() noexcept;
   const_reverse_iterator rend() const noexcept;
+
+  Content_range get_non_zero_content_range() const;
 
   template <class Entry_range>
   Naive_vector_column& operator+=(const Entry_range& column);
@@ -650,6 +654,13 @@ inline typename Naive_vector_column<Master_matrix, Support>::const_reverse_itera
 Naive_vector_column<Master_matrix, Support>::rend() const noexcept
 {
   return column_.rend();
+}
+
+template <class Master_matrix, class Support>
+inline typename Naive_vector_column<Master_matrix, Support>::Content_range
+Naive_vector_column<Master_matrix, Support>::get_non_zero_content_range() const
+{
+  return Content_range(column_.begin(), column_.end());
 }
 
 template <class Master_matrix, class Support>
