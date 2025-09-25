@@ -810,7 +810,7 @@ void Bitmap_cubical_complex_base<T>::read_perseus_style_file(const char* perseus
 
 template <typename T>
 Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const char* perseus_style_file,
-                                                            const std::vector<bool>& directions) {
+                                                            [[maybe unused]] const std::vector<bool>& directions) {
   // this constructor is here just for compatibility with a class that creates cubical complexes with periodic boundary
   // conditions.
   // It ignores the last parameter of the function.
@@ -819,7 +819,7 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const char* perseus_
 
 template <typename T>
 Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<unsigned>& sizes,
-                                                            const std::vector<bool>& directions) {
+                                                            [[maybe unused]] const std::vector<bool>& directions) {
   // this constructor is here just for compatibility with a class that creates cubical complexes with periodic boundary
   // conditions.
   // It ignores the last parameter of the function.
@@ -829,7 +829,7 @@ Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<un
 template <typename T>
 Bitmap_cubical_complex_base<T>::Bitmap_cubical_complex_base(const std::vector<unsigned>& dimensions,
                                                             const std::vector<T>& cells,
-                                                            const std::vector<bool>& directions,
+                                                            [[maybe unused]] const std::vector<bool>& directions,
                                                             bool input_top_cells) {
   // this constructor is here just for compatibility with a class that creates cubical complexes with periodic boundary
   // conditions.

@@ -173,7 +173,7 @@ class extents
     e1.dynamic_extent_shifts_.swap(e2.dynamic_extent_shifts_);
   }
 
-  friend std::ostream &operator<<(std::ostream &stream, const extents &e)
+  friend std::ostream &operator<<(std::ostream &stream, [[maybe_unused]] const extents &e)
   {
     stream << "[ " << sizeof...(Extents) << " ] ";
     ((stream << Extents << ' '), ...);
@@ -395,7 +395,7 @@ class Simple_mdspan
 
   constexpr rank_type rank_dynamic() noexcept { return map_.extents().rank_dynamic(); }
 
-  static constexpr std::size_t static_extent(rank_type r) noexcept { return std::numeric_limits<std::size_t>::max(); }
+  static constexpr std::size_t static_extent([[maybe_unused]] rank_type r) noexcept { return std::numeric_limits<std::size_t>::max(); }
 
   constexpr index_type extent(rank_type r) const
   {

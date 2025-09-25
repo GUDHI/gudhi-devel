@@ -586,10 +586,10 @@ class Simplex_tree {
     if constexpr (!Options::stable_simplex_handles) root_.members().reserve(root_source.size());
     for (auto& p : root_source.members()){
       if constexpr (Options::store_key && OtherSimplexTreeOptions::store_key) {
-        auto it = root_.members().try_emplace(
+        [[maybe_unused]] auto it = root_.members().try_emplace(
             root_.members().end(), p.first, &root_, translate_filtration_value(p.second.filtration()), p.second.key());
       } else {
-        auto it = root_.members().try_emplace(
+        [[maybe_unused]] auto it = root_.members().try_emplace(
             root_.members().end(), p.first, &root_, translate_filtration_value(p.second.filtration()));
       }
     }
