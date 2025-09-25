@@ -5,6 +5,7 @@
 # Copyright (C) 2019 Inria
 #
 # Modification(s):
+#   - 2025/09 Vincent Rouvreau: Use `len` when input is a Sequence, else use `.shape[0]` (numpy or tensors)
 #   - YYYY/MM Author: Description of the modification
 
 __license__ = "MIT"
@@ -272,8 +273,14 @@ def wasserstein_distance(
     """
 
     # First step: handle empty diagrams
-    n = len(X)
-    m = len(Y)
+    try:
+        n = len(X)
+    except TypeError:
+        n = X.shape[0]
+    try:
+        m = len(Y)
+    except TypeError:
+        m = Y.shape[0]
 
     if n == 0:
         if m == 0:
