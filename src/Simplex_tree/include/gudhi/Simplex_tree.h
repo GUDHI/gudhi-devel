@@ -589,7 +589,7 @@ class Simplex_tree {
         root_.members().try_emplace(
             root_.members().end(), p.first, &root_, translate_filtration_value(p.second.filtration()), p.second.key());
       } else {
-        it = root_.members().try_emplace(
+        root_.members().try_emplace(
             root_.members().end(), p.first, &root_, translate_filtration_value(p.second.filtration()));
       }
     }
