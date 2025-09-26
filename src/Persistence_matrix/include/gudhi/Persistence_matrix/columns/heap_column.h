@@ -383,9 +383,9 @@ inline Heap_column<Master_matrix>::Heap_column(Heap_column&& column) noexcept
 
 template <class Master_matrix>
 template <class Container, class Row_container>
-inline Heap_column<Master_matrix>::Heap_column(Index columnIndex,
+inline Heap_column<Master_matrix>::Heap_column([[maybe_unused]] Index columnIndex,
                                                const Container& nonZeroRowIndices,
-                                               Row_container* rowContainer,
+                                               [[maybe_unused]] Row_container* rowContainer,
                                                Column_settings* colSettings)
     : Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
       Chain_opt([&] {
@@ -424,10 +424,10 @@ inline Heap_column<Master_matrix>::Heap_column(Index columnIndex,
 
 template <class Master_matrix>
 template <class Container, class Row_container>
-inline Heap_column<Master_matrix>::Heap_column(Index columnIndex,
+inline Heap_column<Master_matrix>::Heap_column([[maybe_unused]] Index columnIndex,
                                                const Container& nonZeroRowIndices,
                                                Dimension dimension,
-                                               Row_container* rowContainer,
+                                               [[maybe_unused]] Row_container* rowContainer,
                                                Column_settings* colSettings)
     : Dim_opt(dimension),
       Chain_opt([&] {
@@ -464,8 +464,8 @@ inline Heap_column<Master_matrix>::Heap_column(Index columnIndex,
 template <class Master_matrix>
 template <class Row_container>
 inline Heap_column<Master_matrix>::Heap_column(const Heap_column& column,
-                                               Index columnIndex,
-                                               Row_container* rowContainer,
+                                               [[maybe_unused]] Index columnIndex,
+                                               [[maybe_unused]] Row_container* rowContainer,
                                                Column_settings* colSettings)
     : Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
