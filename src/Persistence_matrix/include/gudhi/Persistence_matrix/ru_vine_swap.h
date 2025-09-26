@@ -19,8 +19,8 @@
 #ifndef PM_RU_VINE_SWAP_H
 #define PM_RU_VINE_SWAP_H
 
-#include <utility>  //std::move
 #include <cassert>
+#include <utility>    //std::move
 #include <stdexcept>  //std::invalid_argument
 
 #include <gudhi/Persistence_matrix/ru_pairing.h>

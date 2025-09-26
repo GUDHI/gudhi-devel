@@ -69,6 +69,7 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
   using const_iterator = typename Column_support::const_iterator;
   using reverse_iterator = typename Column_support::reverse_iterator;
   using const_reverse_iterator = typename Column_support::const_reverse_iterator;
+  using Content_range = const Column_support&;
 
   Intrusive_list_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -117,6 +118,8 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
   const_reverse_iterator rbegin() const noexcept;
   reverse_iterator rend() noexcept;
   const_reverse_iterator rend() const noexcept;
+
+  Content_range get_non_zero_content_range() const;
 
   template <class Entry_range>
   Intrusive_list_column& operator+=(const Entry_range& column);
@@ -657,6 +660,13 @@ inline typename Intrusive_list_column<Master_matrix>::const_reverse_iterator
 Intrusive_list_column<Master_matrix>::rend() const noexcept
 {
   return column_.rend();
+}
+
+template <class Master_matrix>
+inline typename Intrusive_list_column<Master_matrix>::Content_range
+Intrusive_list_column<Master_matrix>::get_non_zero_content_range() const
+{
+  return column_;
 }
 
 template <class Master_matrix>

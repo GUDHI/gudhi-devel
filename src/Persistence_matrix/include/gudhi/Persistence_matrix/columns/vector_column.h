@@ -18,14 +18,15 @@
 #ifndef PM_VECTOR_COLUMN_H
 #define PM_VECTOR_COLUMN_H
 
-#include <cstddef>
-#include <vector>
-#include <stdexcept>
-#include <type_traits>
-#include <algorithm>  //binary_search
+#include <cstddef>      // std::size_t
+#include <stdexcept>    // std::invalid_argument
+#include <type_traits>  // std::is_same_v
+#include <algorithm>    // std::binary_search, std::sort
+#include <utility>      // std::swap, std::move & std::exchange
 #include <unordered_set>
-#include <utility>  //std::swap, std::move & std::exchange
+#include <vector>
 
+#include <boost/range/iterator_range_core.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 
 #include <gudhi/Persistence_matrix/columns/column_utilities.h>
@@ -65,11 +66,50 @@ class Vector_column : public Master_matrix::Row_access_option,
   using Column_support = std::vector<Entry*>;
   using Entry_constructor = typename Master_matrix::Entry_constructor;
 
+  class Non_zero_element_iterator
+      : public boost::iterator_facade<Non_zero_element_iterator, const Entry, boost::forward_traversal_tag>
+  {
+   public:
+    Non_zero_element_iterator(std::size_t curr,
+                              Column_support const* column,
+                              std::unordered_set<ID_index> const* erasedValues)
+        : curr_(curr), column_(column), erasedValues_(erasedValues)
+    {}
+
+    Non_zero_element_iterator(Column_support const* column)
+        : curr_(column->size()), column_(column), erasedValues_(nullptr)
+    {}
+
+   private:
+    friend class boost::iterator_core_access;
+
+    bool equal(Non_zero_element_iterator const& other) const
+    {
+      return curr_ == other.curr_ && column_ == other.column_;
+    }
+
+    const Entry& dereference() const { return *(*column_)[curr_]; }
+
+    void increment()
+    {
+      ++curr_;
+      while (curr_ < column_->size() &&
+             erasedValues_->find((*column_)[curr_]->get_row_index()) != erasedValues_->end()) {
+        ++curr_;
+      }
+    }
+
+    std::size_t curr_;
+    Column_support const* column_;
+    std::unordered_set<ID_index> const* erasedValues_;
+  };
+
  public:
   using iterator = boost::indirect_iterator<typename Column_support::iterator>;
   using const_iterator = boost::indirect_iterator<typename Column_support::const_iterator>;
   using reverse_iterator = boost::indirect_iterator<typename Column_support::reverse_iterator>;
   using const_reverse_iterator = boost::indirect_iterator<typename Column_support::const_reverse_iterator>;
+  using Content_range = boost::iterator_range<Non_zero_element_iterator>;
 
   Vector_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -119,6 +159,8 @@ class Vector_column : public Master_matrix::Row_access_option,
   const_reverse_iterator rbegin() const noexcept;
   reverse_iterator rend() noexcept;
   const_reverse_iterator rend() const noexcept;
+
+  Content_range get_non_zero_content_range() const;
 
   template <class Entry_range>
   Vector_column& operator+=(const Entry_range& column);
@@ -742,6 +784,13 @@ template <class Master_matrix>
 inline typename Vector_column<Master_matrix>::const_reverse_iterator Vector_column<Master_matrix>::rend() const noexcept
 {
   return column_.rend();
+}
+
+template <class Master_matrix>
+inline typename Vector_column<Master_matrix>::Content_range Vector_column<Master_matrix>::get_non_zero_content_range()
+    const
+{
+  return Content_range(Non_zero_element_iterator(0, &column_, &erasedValues_), Non_zero_element_iterator(&column_));
 }
 
 template <class Master_matrix>
