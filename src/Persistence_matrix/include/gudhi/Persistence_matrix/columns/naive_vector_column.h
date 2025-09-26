@@ -79,11 +79,32 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
                       const Container& nonZeroRowIndices,
                       Row_container* rowContainer,
                       Column_settings* colSettings);
-  template <class Container = typename Master_matrix::Boundary>
+  template <class Container = typename Master_matrix::Boundary,
+            class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   Naive_vector_column(const Container& nonZeroRowIndices, Dimension dimension, Column_settings* colSettings);
-  template <class Container = typename Master_matrix::Boundary, class Row_container>
+  template <class Container = typename Master_matrix::Boundary,
+            class Row_container,
+            class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   Naive_vector_column(Index columnIndex,
                       const Container& nonZeroRowIndices,
+                      Dimension dimension,
+                      Row_container* rowContainer,
+                      Column_settings* colSettings);
+  Naive_vector_column(ID_index idx, Dimension dimension, Column_settings* colSettings);
+  Naive_vector_column(ID_index idx,
+                      Field_element e,
+                      Dimension dimension,
+                      Column_settings* colSettings);
+  template <class Row_container>
+  Naive_vector_column(Index columnIndex,
+                      ID_index idx,
+                      Dimension dimension,
+                      Row_container* rowContainer,
+                      Column_settings* colSettings);
+  template <class Row_container>
+  Naive_vector_column(Index columnIndex,
+                      ID_index idx,
+                      Field_element e,
                       Dimension dimension,
                       Row_container* rowContainer,
                       Column_settings* colSettings);
@@ -258,27 +279,12 @@ template <class Master_matrix, class Support>
 template <class Container>
 inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Container& nonZeroRowIndices,
                                                                         Column_settings* colSettings)
-    : RA_opt(),
-      Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
-      Chain_opt(),
-      column_(nonZeroRowIndices.size(), nullptr),
-      operators_(nullptr),
-      entryPool_(&(colSettings->entryConstructor))
+    : Naive_vector_column(nonZeroRowIndices,
+                          nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1,
+                          colSettings)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
-
-  Index i = 0;
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _update_entry(id, i++);
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      _update_entry(operators_->get_value(p.second), p.first, i++);
-    }
-  }
 }
 
 template <class Master_matrix, class Support>
@@ -287,41 +293,18 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Index co
                                                                         const Container& nonZeroRowIndices,
                                                                         Row_container* rowContainer,
                                                                         Column_settings* colSettings)
-    : RA_opt(columnIndex, rowContainer),
-      Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
-      Chain_opt([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
-        } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
-        }
-      }()),
-      column_(nonZeroRowIndices.size(), nullptr),
-      operators_(nullptr),
-      entryPool_(&(colSettings->entryConstructor))
+    : Naive_vector_column(columnIndex,
+                          nonZeroRowIndices,
+                          nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1,
+                          rowContainer,
+                          colSettings)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
-
-  Index i = 0;
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _update_entry(id, i++);
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      _update_entry(operators_->get_value(p.second), p.first, i++);
-    }
-  }
 }
 
 template <class Master_matrix, class Support>
-template <class Container>
+template <class Container, class>
 inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Container& nonZeroRowIndices,
                                                                         Dimension dimension,
                                                                         Column_settings* colSettings)
@@ -356,7 +339,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Co
 }
 
 template <class Master_matrix, class Support>
-template <class Container, class Row_container>
+template <class Container, class Row_container, class>
 inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Index columnIndex,
                                                                         const Container& nonZeroRowIndices,
                                                                         Dimension dimension,
@@ -390,6 +373,78 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Index co
       _update_entry(operators_->get_value(p.second), p.first, i++);
     }
   }
+}
+
+template <class Master_matrix, class Support>
+inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(ID_index idx,
+                                                                        Dimension dimension,
+                                                                        Column_settings* colSettings)
+    : RA_opt(),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      column_(1, nullptr),
+      operators_(nullptr),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp != Z2. Please specify the coefficient.");
+  _update_entry(idx, 0);
+}
+
+template <class Master_matrix, class Support>
+inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(ID_index idx,
+                                                                        Field_element e,
+                                                                        Dimension dimension,
+                                                                        Column_settings* colSettings)
+    : RA_opt(),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      column_(1, nullptr),
+      operators_(&(colSettings->operators)),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(!Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
+  _update_entry(operators_->get_value(e), idx, 0);
+}
+
+template <class Master_matrix, class Support>
+template <class Row_container>
+inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Index columnIndex,
+                                                                        ID_index idx,
+                                                                        Dimension dimension,
+                                                                        Row_container* rowContainer,
+                                                                        Column_settings* colSettings)
+    : RA_opt(columnIndex, rowContainer),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      column_(1, nullptr),
+      operators_(nullptr),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp != Z2. Please specify the coefficient.");
+  _update_entry(idx, 0);
+}
+
+template <class Master_matrix, class Support>
+template <class Row_container>
+inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Index columnIndex,
+                                                                        ID_index idx,
+                                                                        Field_element e,
+                                                                        Dimension dimension,
+                                                                        Row_container* rowContainer,
+                                                                        Column_settings* colSettings)
+    : RA_opt(columnIndex, rowContainer),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      column_(1, nullptr),
+      operators_(&(colSettings->operators)),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(!Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
+  _update_entry(operators_->get_value(e), idx, 0);
 }
 
 template <class Master_matrix, class Support>

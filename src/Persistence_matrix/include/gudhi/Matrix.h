@@ -675,7 +675,7 @@ class Matrix
    * @tparam Container Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
    * @param column Column to be inserted.
    */
-  template <class Container>
+  template <class Container, class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   void insert_column(const Container& column);
   /**
    * @brief Inserts a new ordered column at the given index by copying the given range of @ref Entry_representative.
@@ -688,8 +688,15 @@ class Matrix
    * @param column Column to be inserted.
    * @param columnIndex @ref MatIdx index to which the column has to be inserted.
    */
-  template <class Container>
+  template <class Container, class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   void insert_column(const Container& column, Index columnIndex);
+  /**
+   * @brief Inserts a new column at the end of the matrix. The column will consist of the given index only.
+   * 
+   * @param idx Entry ID.
+   * @param e Entry coefficient. Ignored if the coefficient field is Z2. Default value: 0.
+   */
+  void insert_column(ID_index idx, Element e = 0);
   // TODO: for simple boundary matrices, add an index pointing to the first column inserted after the last call of
   // get_current_barcode to enable several calls to get_current_barcode
   /**
@@ -1477,7 +1484,7 @@ inline void Matrix<PersistenceMatrixOptions>::set_characteristic(Characteristic 
 }
 
 template <class PersistenceMatrixOptions>
-template <class Container>
+template <class Container, class>
 inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container& column)
 {
   if constexpr (!PersistenceMatrixOptions::is_z2) {
@@ -1493,7 +1500,7 @@ inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container& col
 }
 
 template <class PersistenceMatrixOptions>
-template <class Container>
+template <class Container, class>
 inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container& column, Index columnIndex)
 {
   if constexpr (!PersistenceMatrixOptions::is_z2) {
@@ -1507,6 +1514,23 @@ inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container& col
   static_assert(!PersistenceMatrixOptions::has_row_access,
                 "Columns have to be inserted at the end of the matrix when row access is enabled.");
   matrix_.insert_column(column, columnIndex);
+}
+
+template <class PersistenceMatrixOptions>
+inline void Matrix<PersistenceMatrixOptions>::insert_column(ID_index idx, [[maybe_unused]] Element e)
+{
+  static_assert(
+      !isNonBasic,
+      "'insert_column' not available for the chosen options. The input has to be in the form of a cell boundary.");
+
+  if constexpr (PersistenceMatrixOptions::is_z2) {
+    matrix_.insert_column(idx);
+  } else {
+    GUDHI_CHECK(colSettings_->operators.get_characteristic() != Field_operators::nullCharacteristic,
+                std::logic_error("Matrix::insert_column - Columns cannot be initialized if the coefficient field "
+                                 "characteristic is not specified."));
+    matrix_.insert_column(idx, e);
+  }
 }
 
 template <class PersistenceMatrixOptions>

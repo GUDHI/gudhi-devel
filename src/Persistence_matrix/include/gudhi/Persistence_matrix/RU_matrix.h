@@ -783,9 +783,9 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_insert_boundary(Index currentIndex)
 {
   if constexpr (Master_matrix::Option_list::is_z2) {
-    mirrorMatrixU_.insert_column({currentIndex});
+    mirrorMatrixU_.insert_column(currentIndex);
   } else {
-    mirrorMatrixU_.insert_column({{currentIndex, 1}});
+    mirrorMatrixU_.insert_column(currentIndex, 1);
   }
 
   if constexpr (!Master_matrix::Option_list::has_map_column_container) {
@@ -801,15 +801,11 @@ inline void RU_matrix<Master_matrix>::_insert_boundary(Index currentIndex)
 template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_initialize_U()
 {
-  typename std::conditional<Master_matrix::Option_list::is_z2, Index, std::pair<Index, Field_element> >::type id;
-  if constexpr (!Master_matrix::Option_list::is_z2) id.second = 1;
-
   for (ID_index i = 0; i < reducedMatrixR_.get_number_of_columns(); i++) {
     if constexpr (Master_matrix::Option_list::is_z2)
-      id = i;
+      mirrorMatrixU_.insert_column(i);
     else
-      id.first = i;
-    mirrorMatrixU_.insert_column({id});
+      mirrorMatrixU_.insert_column(i, 1);
   }
 }
 

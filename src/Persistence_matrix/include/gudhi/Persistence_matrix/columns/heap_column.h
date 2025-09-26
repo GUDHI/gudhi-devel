@@ -74,8 +74,11 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   Heap_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
   Heap_column(const Container& nonZeroRowIndices, Column_settings* colSettings);
-  template <class Container = typename Master_matrix::Boundary>
+  template <class Container = typename Master_matrix::Boundary,
+            class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   Heap_column(const Container& nonZeroRowIndices, Dimension dimension, Column_settings* colSettings);
+  Heap_column(ID_index idx, Dimension dimension, Column_settings* colSettings);
+  Heap_column(ID_index idx, Field_element e, Dimension dimension, Column_settings* colSettings);
   Heap_column(const Heap_column& column, Column_settings* colSettings = nullptr);
   Heap_column(Heap_column&& column) noexcept;
   ~Heap_column();
@@ -87,9 +90,24 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
               const Container& nonZeroRowIndices,
               Row_container* rowContainer,
               Column_settings* colSettings);
-  template <class Container = typename Master_matrix::Boundary, class Row_container>
+  template <class Container = typename Master_matrix::Boundary,
+            class Row_container,
+            class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   Heap_column(Index columnIndex,
               const Container& nonZeroRowIndices,
+              Dimension dimension,
+              Row_container* rowContainer,
+              Column_settings* colSettings);
+  template <class Row_container>
+  Heap_column(Index columnIndex,
+              ID_index idx,
+              Dimension dimension,
+              Row_container* rowContainer,
+              Column_settings* colSettings);
+  template <class Row_container>
+  Heap_column(Index columnIndex,
+              ID_index idx,
+              Field_element e,
               Dimension dimension,
               Row_container* rowContainer,
               Column_settings* colSettings);
@@ -280,36 +298,14 @@ inline Heap_column<Master_matrix>::Heap_column(Column_settings* colSettings)
 template <class Master_matrix>
 template <class Container>
 inline Heap_column<Master_matrix>::Heap_column(const Container& nonZeroRowIndices, Column_settings* colSettings)
-    : Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
-      Chain_opt(),
-      column_(nonZeroRowIndices.size(), nullptr),
-      insertsSinceLastPrune_(0),
-      operators_(nullptr),
-      entryPool_(&(colSettings->entryConstructor))
+    : Heap_column(nonZeroRowIndices, nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1, colSettings)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
-
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-
-  Index i = 0;
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      column_[i++] = entryPool_->construct(id);
-    }
-  } else {
-    for (const auto& p : nonZeroRowIndices) {
-      column_[i] = entryPool_->construct(p.first);
-      column_[i++]->set_element(operators_->get_value(p.second));
-    }
-  }
-  std::make_heap(column_.begin(), column_.end(), entryPointerComp_);
 }
 
 template <class Master_matrix>
-template <class Container>
+template <class Container, class>
 inline Heap_column<Master_matrix>::Heap_column(const Container& nonZeroRowIndices,
                                                Dimension dimension,
                                                Column_settings* colSettings)
@@ -343,6 +339,38 @@ inline Heap_column<Master_matrix>::Heap_column(const Container& nonZeroRowIndice
     }
   }
   std::make_heap(column_.begin(), column_.end(), entryPointerComp_);
+}
+
+template <class Master_matrix>
+inline Heap_column<Master_matrix>::Heap_column(ID_index idx, Dimension dimension, Column_settings* colSettings)
+    : Dim_opt(dimension),
+      Chain_opt(idx),
+      column_(1, nullptr),
+      insertsSinceLastPrune_(0),
+      operators_(nullptr),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp != Z2. Please specify the coefficient.");
+  column_[0] = entryPool_->construct(idx);
+}
+
+template <class Master_matrix>
+inline Heap_column<Master_matrix>::Heap_column(ID_index idx,
+                                               Field_element e,
+                                               Dimension dimension,
+                                               Column_settings* colSettings)
+    : Dim_opt(dimension),
+      Chain_opt(idx),
+      column_(1, nullptr),
+      insertsSinceLastPrune_(0),
+      operators_(&(colSettings->operators)),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(!Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
+  column_[0] = entryPool_->construct(idx);
+  column_[0]->set_element(operators_->get_value(e));
 }
 
 template <class Master_matrix>
@@ -382,117 +410,59 @@ inline Heap_column<Master_matrix>::Heap_column(Heap_column&& column) noexcept
       insertsSinceLastPrune_(std::exchange(column.insertsSinceLastPrune_, 0)),
       operators_(std::exchange(column.operators_, nullptr)),
       entryPool_(std::exchange(column.entryPool_, nullptr))
-{
-}
+{}
 
 template <class Master_matrix>
 template <class Container, class Row_container>
-inline Heap_column<Master_matrix>::Heap_column(Index columnIndex,
+inline Heap_column<Master_matrix>::Heap_column(Index /* columnIndex */,
                                                const Container& nonZeroRowIndices,
                                                Row_container* rowContainer,
                                                Column_settings* colSettings)
-    : Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
-      Chain_opt([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
-        } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
-        }
-      }()),
-      column_(nonZeroRowIndices.size(), nullptr),
-      insertsSinceLastPrune_(0),
-      operators_(nullptr),
-      entryPool_(&(colSettings->entryConstructor))
+    : Heap_column(nonZeroRowIndices, colSettings)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
-
-  Index i = 0;
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      column_[i++] = entryPool_->construct(id);
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      column_[i] = entryPool_->construct(p.first);
-      column_[i++]->set_element(operators_->get_value(p.second));
-    }
-  }
-  std::make_heap(column_.begin(), column_.end(), entryPointerComp_);
 }
 
 template <class Master_matrix>
-template <class Container, class Row_container>
-inline Heap_column<Master_matrix>::Heap_column(Index columnIndex,
+template <class Container, class Row_container, class>
+inline Heap_column<Master_matrix>::Heap_column(Index /* columnIndex */,
                                                const Container& nonZeroRowIndices,
                                                Dimension dimension,
-                                               Row_container* rowContainer,
+                                               Row_container* /* rowContainer */,
                                                Column_settings* colSettings)
-    : Dim_opt(dimension),
-      Chain_opt([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
-        } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
-        }
-      }()),
-      column_(nonZeroRowIndices.size(), nullptr),
-      insertsSinceLastPrune_(0),
-      operators_(nullptr),
-      entryPool_(&(colSettings->entryConstructor))
-{
-  Index i = 0;
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      column_[i++] = entryPool_->construct(id);
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      column_[i] = entryPool_->construct(p.first);
-      column_[i++]->set_element(operators_->get_value(p.second));
-    }
-  }
-  std::make_heap(column_.begin(), column_.end(), entryPointerComp_);
-}
+    : Heap_column(nonZeroRowIndices, dimension, colSettings)
+{}
 
 template <class Master_matrix>
 template <class Row_container>
 inline Heap_column<Master_matrix>::Heap_column(const Heap_column& column,
-                                               Index columnIndex,
-                                               Row_container* rowContainer,
+                                               Index /* columnIndex */,
+                                               Row_container* /* rowContainer */,
                                                Column_settings* colSettings)
-    : Dim_opt(static_cast<const Dim_opt&>(column)),
-      Chain_opt(static_cast<const Chain_opt&>(column)),
-      column_(column.column_.size(), nullptr),
-      insertsSinceLastPrune_(0),
-      operators_(colSettings == nullptr ? column.operators_ : nullptr),
-      entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
-{
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    if (colSettings != nullptr) operators_ = &(colSettings->operators);
-  }
+    : Heap_column(column, colSettings)
+{}
 
-  Index i = 0;
-  for (const Entry* entry : column.column_) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      column_[i++] = entryPool_->construct(entry->get_row_index());
-    } else {
-      column_[i] = entryPool_->construct(entry->get_row_index());
-      column_[i++]->set_element(entry->get_element());
-    }
-  }
-  // column.column_ already ordered as a heap, so no need of make_heap.
-}
+template <class Master_matrix>
+template <class Row_container>
+inline Heap_column<Master_matrix>::Heap_column(Index /* columnIndex */,
+                                               ID_index idx,
+                                               Dimension dimension,
+                                               Row_container* /* rowContainer */,
+                                               Column_settings* colSettings)
+    : Heap_column(idx, dimension, colSettings)
+{}
+
+template <class Master_matrix>
+template <class Row_container>
+inline Heap_column<Master_matrix>::Heap_column(Index /* columnIndex */,
+                                               ID_index idx,
+                                               Field_element e,
+                                               Dimension dimension,
+                                               Row_container* /* rowContainer */,
+                                               Column_settings* colSettings)
+    : Heap_column(idx, e, dimension, colSettings)
+{}
 
 template <class Master_matrix>
 inline Heap_column<Master_matrix>::~Heap_column()

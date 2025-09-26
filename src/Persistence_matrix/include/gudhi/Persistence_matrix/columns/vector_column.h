@@ -119,11 +119,29 @@ class Vector_column : public Master_matrix::Row_access_option,
                 const Container& nonZeroRowIndices,
                 Row_container* rowContainer,
                 Column_settings* colSettings);
-  template <class Container = typename Master_matrix::Boundary>
+  template <class Container = typename Master_matrix::Boundary,
+            class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   Vector_column(const Container& nonZeroRowIndices, Dimension dimension, Column_settings* colSettings);
-  template <class Container = typename Master_matrix::Boundary, class Row_container>
+  template <class Container = typename Master_matrix::Boundary,
+            class Row_container,
+            class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   Vector_column(Index columnIndex,
                 const Container& nonZeroRowIndices,
+                Dimension dimension,
+                Row_container* rowContainer,
+                Column_settings* colSettings);
+  Vector_column(ID_index idx, Dimension dimension, Column_settings* colSettings);
+  Vector_column(ID_index idx, Field_element e, Dimension dimension, Column_settings* colSettings);
+  template <class Row_container>
+  Vector_column(Index columnIndex,
+                ID_index idx,
+                Dimension dimension,
+                Row_container* rowContainer,
+                Column_settings* colSettings);
+  template <class Row_container>
+  Vector_column(Index columnIndex,
+                ID_index idx,
+                Field_element e,
                 Dimension dimension,
                 Row_container* rowContainer,
                 Column_settings* colSettings);
@@ -321,30 +339,10 @@ inline Vector_column<Master_matrix>::Vector_column(Column_settings* colSettings)
 template <class Master_matrix>
 template <class Container>
 inline Vector_column<Master_matrix>::Vector_column(const Container& nonZeroRowIndices, Column_settings* colSettings)
-    : RA_opt(),
-      Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
-      Chain_opt(),
-      column_(nonZeroRowIndices.size(), nullptr),
-      operators_(nullptr),
-      entryPool_(&(colSettings->entryConstructor))
+    : Vector_column(nonZeroRowIndices, nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1, colSettings)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
-
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-
-  Index i = 0;
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _update_entry(id, i++);
-    }
-  } else {
-    for (const auto& p : nonZeroRowIndices) {
-      _update_entry(operators_->get_value(p.second), p.first, i++);
-    }
-  }
 }
 
 template <class Master_matrix>
@@ -353,44 +351,18 @@ inline Vector_column<Master_matrix>::Vector_column(Index columnIndex,
                                                    const Container& nonZeroRowIndices,
                                                    Row_container* rowContainer,
                                                    Column_settings* colSettings)
-    : RA_opt(columnIndex, rowContainer),
-      Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
-      Chain_opt([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
-        } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
-        }
-      }()),
-      column_(nonZeroRowIndices.size(), nullptr),
-      operators_(nullptr),
-      entryPool_(&(colSettings->entryConstructor))
+    : Vector_column(columnIndex,
+                    nonZeroRowIndices,
+                    nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1,
+                    rowContainer,
+                    colSettings)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
-
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-
-  Index i = 0;
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _update_entry(id, i++);
-    }
-  } else {
-    for (const auto& p : nonZeroRowIndices) {
-      _update_entry(operators_->get_value(p.second), p.first, i++);
-    }
-  }
 }
 
 template <class Master_matrix>
-template <class Container>
+template <class Container, class>
 inline Vector_column<Master_matrix>::Vector_column(const Container& nonZeroRowIndices,
                                                    Dimension dimension,
                                                    Column_settings* colSettings)
@@ -411,16 +383,13 @@ inline Vector_column<Master_matrix>::Vector_column(const Container& nonZeroRowIn
       operators_(nullptr),
       entryPool_(&(colSettings->entryConstructor))
 {
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-
   Index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (ID_index id : nonZeroRowIndices) {
       _update_entry(id, i++);
     }
   } else {
+    operators_ = &(colSettings->operators);
     for (const auto& p : nonZeroRowIndices) {
       _update_entry(operators_->get_value(p.second), p.first, i++);
     }
@@ -428,7 +397,7 @@ inline Vector_column<Master_matrix>::Vector_column(const Container& nonZeroRowIn
 }
 
 template <class Master_matrix>
-template <class Container, class Row_container>
+template <class Container, class Row_container, class>
 inline Vector_column<Master_matrix>::Vector_column(Index columnIndex,
                                                    const Container& nonZeroRowIndices,
                                                    Dimension dimension,
@@ -451,20 +420,87 @@ inline Vector_column<Master_matrix>::Vector_column(Index columnIndex,
       operators_(nullptr),
       entryPool_(&(colSettings->entryConstructor))
 {
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-
   Index i = 0;
   if constexpr (Master_matrix::Option_list::is_z2) {
     for (ID_index id : nonZeroRowIndices) {
       _update_entry(id, i++);
     }
   } else {
+    operators_ = &(colSettings->operators);
     for (const auto& p : nonZeroRowIndices) {
       _update_entry(operators_->get_value(p.second), p.first, i++);
     }
   }
+}
+
+template <class Master_matrix>
+inline Vector_column<Master_matrix>::Vector_column(ID_index idx, Dimension dimension, Column_settings* colSettings)
+    : RA_opt(),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      column_(1, nullptr),
+      operators_(nullptr),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp != Z2. Please specify the coefficient.");
+  _update_entry(idx, 0);
+}
+
+template <class Master_matrix>
+inline Vector_column<Master_matrix>::Vector_column(ID_index idx,
+                                                   Field_element e,
+                                                   Dimension dimension,
+                                                   Column_settings* colSettings)
+    : RA_opt(),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      column_(1, nullptr),
+      operators_(&(colSettings->operators)),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(!Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
+  _update_entry(operators_->get_value(e), idx, 0);
+}
+
+template <class Master_matrix>
+template <class Row_container>
+inline Vector_column<Master_matrix>::Vector_column(Index columnIndex,
+                                                   ID_index idx,
+                                                   Dimension dimension,
+                                                   Row_container* rowContainer,
+                                                   Column_settings* colSettings)
+    : RA_opt(columnIndex, rowContainer),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      column_(1, nullptr),
+      operators_(nullptr),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp != Z2. Please specify the coefficient.");
+  _update_entry(idx, 0);
+}
+
+template <class Master_matrix>
+template <class Row_container>
+inline Vector_column<Master_matrix>::Vector_column(Index columnIndex,
+                                                   ID_index idx,
+                                                   Field_element e,
+                                                   Dimension dimension,
+                                                   Row_container* rowContainer,
+                                                   Column_settings* colSettings)
+    : RA_opt(columnIndex, rowContainer),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      column_(1, nullptr),
+      operators_(&(colSettings->operators)),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(!Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
+  _update_entry(operators_->get_value(e), idx, 0);
 }
 
 template <class Master_matrix>
