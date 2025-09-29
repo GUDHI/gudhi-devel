@@ -25,22 +25,18 @@ As all the third parties are already installed (thanks to docker), the compilati
 
 These build categories are done with and without CGAL, and, with and without Eigen to be sure the users won't be annoyed if a third party is missing.
 
-With CGAL and with Eigen builds are performed inside the docker image `gudhi/ci_for_gudhi` based on `Dockerfile_for_circleci_image` file.
-Without CGAL, and, with or without Eigen builds are performed inside the docker image `gudhi/ci_for_gudhi_wo_cgal` based on `Dockerfile_for_circleci_image_without_cgal` file.
+With CGAL and with Eigen builds are performed inside the docker image `ghcr.io/gudhi/gudhi-deploy/gudhi/ci_for_gudhi` based on `https://github.com/GUDHI/gudhi-deploy/Dockerfile_for_circleci_image` file.
+Without CGAL, and, with or without Eigen builds are performed inside the docker image `ghcr.io/gudhi/gudhi-deploy/gudhi/ci_for_gudhi_wo_cgal` based on `https://github.com/GUDHI/gudhi-deploy/Dockerfile_for_circleci_image_without_cgal` file.
 
 #### Update docker images
 
 C++ third parties installation is done thanks to apt on Ubuntu latest LTS.
 
-Docker images need to be rebuilt and pushed each time `.github/build-requirements`, `.github/test-requirements`, when a new third party is added, when a new CGAL version improves gudhi performances, ...
+Docker images need to be rebuilt and pushed each time `https://github.com/GUDHI/gudhi-deploy/build-requirements`, `https://github.com/GUDHI/gudhi-deploy/test-requirements`, when a new third party is added, when a new CGAL version improves gudhi performances, ...
 
-```bash
-docker build -f Dockerfile_for_circleci_image -t gudhi/ci_for_gudhi:latest .
-docker build -f Dockerfile_for_circleci_image_without_cgal -t gudhi/ci_for_gudhi_wo_cgal:latest .
-docker login # requires some specific rights on https://hub.docker.com/u/gudhi/repository/docker/gudhi
-docker push gudhi/ci_for_gudhi:latest
-docker push gudhi/ci_for_gudhi_wo_cgal:latest
-```
+To update these docker images, make a pull request on `https://github.com/GUDHI/gudhi-deploy/`, and once it is merged, make a new release (in the `YYYY.MM.NB` format where `YYYY` is the year, `MM` is the month and `NB` is an incremental number).
+The docker images will be built on GitHub docker registry, triggered by the given tag, and will be available at `ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi[_wo_cgal]:YYYY.MM.NB`.
+Once this is done, it is up to the developper to update `.circleci/config.yml` (on `https://github.com/GUDHI/gudhi-devel/` to use the new tag).
 
 ### Windows
 
@@ -81,17 +77,14 @@ Pip packaging is done in 2 parts:
 * on push and pull requests, the wheels are built (pip package dry-run)
 * on releases, the wheels are built and sent to pypi.org (package)
 
-Only the Linux pip package is based on a docker image (`gudhi/pip_for_gudhi` based on `Dockerfile_for_pip` file) to make it faster.
+Only the Linux pip package is based on a docker image (`ghcr.io/gudhi/gudhi-deploy/pip_for_gudhi` based on `https://github.com/GUDHI/gudhi-deploy/Dockerfile_for_pip` file) to make it faster.
 
 ### Update docker image
 
-C++ third parties installation is done thanks to yum on an image based on `quay.io/pypa/manylinux2014_x86_64`.
+C++ third parties installation is done thanks to yum on an image based on `quay.io/pypa/manylinux_2_28_x86_64`.
 
-Docker image needs to be rebuilt and pushed each time `.github/build-requirements`, when a new third party is added, when a new CGAL version improves gudhi performances, ...
-As `.github/test-requirements` is not installed, no need to rebuild image when this file is modified.
+Docker image needs to be rebuilt and pushed each time `https://github.com/GUDHI/gudhi-deploy/build-requirements`, `https://github.com/GUDHI/gudhi-deploy/test-requirements`, when a new third party is added, when a new CGAL version improves gudhi performances, ...
 
-```bash
-docker build -f Dockerfile_for_pip -t gudhi/pip_for_gudhi:latest .
-docker login # requires some specific rights on https://hub.docker.com/u/gudhi/repository/docker/gudhi
-docker push gudhi/pip_for_gudhi:latest
-```
+To update this docker image, make a pull request on `https://github.com/GUDHI/gudhi-deploy/`, and once it is merged, make a new release (in the `YYYY.MM.NB` format where `YYYY` is the year, `MM` is the month and `NB` is an incremental number).
+The docker images will be built on GitHub docker registry, triggered by the given tag, and will be available at `ghcr.io/gudhi/gudhi-deploy/pip_for_gudhi:YYYY.MM.NB`.
+Once this is done, it is up to the developper to update `.github/workflows/pip-build-linux.yml` and `.github/workflows/pip-packaging-linux.yml` (on `https://github.com/GUDHI/gudhi-devel/` to use the new tag).
