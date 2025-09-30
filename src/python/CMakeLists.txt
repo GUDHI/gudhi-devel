@@ -127,6 +127,7 @@ set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'weighted_rips_comp
 set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'dtm_rips_complex', ")
 set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'cover_complex', ")
 set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'flag_filtration', ")
+set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'random', ")
 
 
 if(PYTEST_FOUND)
@@ -564,6 +565,11 @@ endif()
 # persistence graphical tools
 if(MATPLOTLIB_FOUND)
   add_gudhi_py_test(test_persistence_graphical_tools)
+endif()
+
+# random
+if (TARGET CGAL::CGAL)
+  add_gudhi_py_test(test_random)
 endif()
 
 # Set missing or not modules
