@@ -243,6 +243,58 @@ class Matrix
       std::conditional_t<PersistenceMatrixOptions::is_z2, ID_index, std::pair<ID_index, Element> >;
 
   /**
+   * @private
+   */
+  static ID_index get_row_index(const Matrix_entry& e)
+  {
+    return e.get_row_index();
+  }
+  /**
+   * @private
+   */
+  static ID_index get_row_index(const Entry_representative& e)
+  {
+    if constexpr (PersistenceMatrixOptions::is_z2) {
+      return e;
+    } else {
+      return e.first;
+    }
+  }
+  /**
+   * @private
+   */
+  static ID_index& get_row_index(Entry_representative& e)
+  {
+    if constexpr (PersistenceMatrixOptions::is_z2) {
+      return e;
+    } else {
+      return e.first;
+    }
+  }
+  /**
+   * @private
+   */
+  static Element get_element(const Matrix_entry& e)
+  {
+    if constexpr (PersistenceMatrixOptions::is_z2) {
+      return Field_operators::get_multiplicative_identity();
+    } else {
+      return e.get_element();
+    }
+  }
+  /**
+   * @private
+   */
+  static Element get_element(const Entry_representative& e)
+  {
+    if constexpr (PersistenceMatrixOptions::is_z2) {
+      return Field_operators::get_multiplicative_identity();
+    } else {
+      return e.second;
+    }
+  }
+
+  /**
    * @brief Compares two entries by their position in the row. They are assume to be in the same row.
    */
   struct RowEntryComp {
@@ -390,6 +442,23 @@ class Matrix
 
   // To prepare a more flexible use of the column types later (custom allocators depending on the column type etc.)
   using Column_settings = std::conditional_t<PersistenceMatrixOptions::is_z2, Column_z2_settings, Column_zp_settings>;
+
+  /**
+   * @private
+   */
+  template <typename T>
+  static Element get_coefficient_value(T v, [[maybe_unused]] Field_operators* operators)
+  {
+    if constexpr (PersistenceMatrixOptions::is_z2) {
+      return Field_operators::get_value(v);
+    } else {
+      return operators->get_value(v);
+    }
+  }
+  /**
+   * @private
+   */
+  static Element get_coefficient_value(bool v, [[maybe_unused]] Field_operators* operators) { return v; }
 
   // using Column_settings = typename std::conditional<
   //     PersistenceMatrixOptions::is_z2,
@@ -1371,6 +1440,8 @@ class Matrix
   Underlying_matrix matrix_;
 
   static constexpr void _assert_options();
+
+  Element _get_value(int coefficient) const;
 };
 
 template <class PersistenceMatrixOptions>
@@ -1748,13 +1819,7 @@ Matrix<PersistenceMatrixOptions>::multiply_target_and_add_to(Integer_index sourc
                                                              int coefficient,
                                                              Integer_index targetColumnIndex)
 {
-  if constexpr (PersistenceMatrixOptions::is_z2) {
-    // coef will be converted to bool, because of Element
-    matrix_.multiply_target_and_add_to(sourceColumnIndex, coefficient % 2, targetColumnIndex);
-  } else {
-    matrix_.multiply_target_and_add_to(
-        sourceColumnIndex, colSettings_->operators.get_value(coefficient), targetColumnIndex);
-  }
+  matrix_.multiply_target_and_add_to(sourceColumnIndex, _get_value(coefficient), targetColumnIndex);
 }
 
 template <class PersistenceMatrixOptions>
@@ -1768,12 +1833,7 @@ inline std::enable_if_t<!std::is_integral_v<Entry_range> > Matrix<PersistenceMat
                 "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain "
                 "algebraic consistency.");
 
-  if constexpr (PersistenceMatrixOptions::is_z2) {
-    // coef will be converted to bool, because of Element
-    matrix_.multiply_target_and_add_to(sourceColumn, coefficient % 2, targetColumnIndex);
-  } else {
-    matrix_.multiply_target_and_add_to(sourceColumn, colSettings_->operators.get_value(coefficient), targetColumnIndex);
-  }
+  matrix_.multiply_target_and_add_to(sourceColumn, _get_value(coefficient), targetColumnIndex);
 }
 
 template <class PersistenceMatrixOptions>
@@ -1783,13 +1843,7 @@ Matrix<PersistenceMatrixOptions>::multiply_source_and_add_to(int coefficient,
                                                              Integer_index sourceColumnIndex,
                                                              Integer_index targetColumnIndex)
 {
-  if constexpr (PersistenceMatrixOptions::is_z2) {
-    // coef will be converted to bool, because of Element
-    matrix_.multiply_source_and_add_to(coefficient % 2, sourceColumnIndex, targetColumnIndex);
-  } else {
-    matrix_.multiply_source_and_add_to(
-        colSettings_->operators.get_value(coefficient), sourceColumnIndex, targetColumnIndex);
-  }
+  matrix_.multiply_source_and_add_to(_get_value(coefficient), sourceColumnIndex, targetColumnIndex);
 }
 
 template <class PersistenceMatrixOptions>
@@ -1803,12 +1857,7 @@ inline std::enable_if_t<!std::is_integral_v<Entry_range> > Matrix<PersistenceMat
                 "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain "
                 "algebraic consistency.");
 
-  if constexpr (PersistenceMatrixOptions::is_z2) {
-    // coef will be converted to bool, because of Element
-    matrix_.multiply_source_and_add_to(coefficient % 2, sourceColumn, targetColumnIndex);
-  } else {
-    matrix_.multiply_source_and_add_to(colSettings_->operators.get_value(coefficient), sourceColumn, targetColumnIndex);
-  }
+  matrix_.multiply_source_and_add_to(_get_value(coefficient), sourceColumn, targetColumnIndex);
 }
 
 template <class PersistenceMatrixOptions>
@@ -2088,6 +2137,15 @@ constexpr void Matrix<PersistenceMatrixOptions>::_assert_options()
   // static_assert(
   //     !PersistenceMatrixOptions::has_column_compression || !PersistenceMatrixOptions::has_map_column_container,
   //     "When column compression is used, the removal of columns is not implemented yet.");
+}
+
+template <class PersistenceMatrixOptions>
+inline typename Matrix<PersistenceMatrixOptions>::Element Matrix<PersistenceMatrixOptions>::_get_value(
+    int coefficient) const
+{
+  Field_operators* op = nullptr;
+  if constexpr (!PersistenceMatrixOptions::is_z2) op = &colSettings_->operators;
+  return get_coefficient_value(coefficient, op);
 }
 
 }  // namespace persistence_matrix

@@ -146,7 +146,7 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   Heap_column& operator+=(const Entry_range& column);
   Heap_column& operator+=(Heap_column& column);
 
-  Heap_column& operator*=(unsigned int v);
+  Heap_column& operator*=(const Field_element& v);
 
   // this = v * this + column
   template <class Entry_range>
@@ -169,31 +169,31 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
     Entry* p1 = cc1._pop_pivot();
     Entry* p2 = cc2._pop_pivot();
     while (p1 != nullptr && p2 != nullptr) {
-      if (p1->get_row_index() != p2->get_row_index()) {
-        c1.entryPool_->destroy(p1);
-        c2.entryPool_->destroy(p2);
-        return false;
-      }
-      if constexpr (!Master_matrix::Option_list::is_z2) {
-        if (p1->get_element() != p2->get_element()) {
-          c1.entryPool_->destroy(p1);
-          c2.entryPool_->destroy(p2);
-          return false;
-        }
-      }
+      Index r1 = Master_matrix::get_row_index(*p1);
+      Index r2 = Master_matrix::get_row_index(*p2);
+      Field_element e1 = Master_matrix::get_element(*p1);
+      Field_element e2 = Master_matrix::get_element(*p2);
       c1.entryPool_->destroy(p1);
       c2.entryPool_->destroy(p2);
+
+      if (r1 != r2 || e1 != e2) {
+        return false;
+      }
+
       p1 = cc1._pop_pivot();
       p2 = cc2._pop_pivot();
     }
 
-    if (p1 == nullptr && p2 == nullptr) return true;
     if (p1 != nullptr) {
       c1.entryPool_->destroy(p1);
       return false;
     }
-    c2.entryPool_->destroy(p2);
-    return false;
+    if (p2 != nullptr) {
+      c1.entryPool_->destroy(p2);
+      return false;
+    }
+
+    return true;
   }
 
   friend bool operator<(const Heap_column& c1, const Heap_column& c2)
@@ -205,30 +205,16 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
     Entry* p1 = cc1._pop_pivot();
     Entry* p2 = cc2._pop_pivot();
     while (p1 != nullptr && p2 != nullptr) {
-      if (p1->get_row_index() > p2->get_row_index()) {
-        c1.entryPool_->destroy(p1);
-        c2.entryPool_->destroy(p2);
-        return false;
-      }
-      if (p1->get_row_index() < p2->get_row_index()) {
-        c1.entryPool_->destroy(p1);
-        c2.entryPool_->destroy(p2);
-        return true;
-      }
-      if constexpr (!Master_matrix::Option_list::is_z2) {
-        if (p1->get_element() > p2->get_element()) {
-          c1.entryPool_->destroy(p1);
-          c2.entryPool_->destroy(p2);
-          return false;
-        }
-        if (p1->get_element() < p2->get_element()) {
-          c1.entryPool_->destroy(p1);
-          c2.entryPool_->destroy(p2);
-          return true;
-        }
-      }
+      Index r1 = Master_matrix::get_row_index(*p1);
+      Index r2 = Master_matrix::get_row_index(*p2);
+      Field_element e1 = Master_matrix::get_element(*p1);
+      Field_element e2 = Master_matrix::get_element(*p2);
       c1.entryPool_->destroy(p1);
       c2.entryPool_->destroy(p2);
+
+      if (r1 != r2) return r1 < r2;
+      if (e1 != e2) return e1 < e2;
+
       p1 = cc1._pop_pivot();
       p2 = cc2._pop_pivot();
     }
@@ -273,7 +259,9 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   void _prune();
   Entry* _pop_pivot();
   template <class Entry_range>
-  bool _add(const Entry_range& column);
+  void _add(const Entry_range& column, Field_element& pivotVal);
+  template<bool computePivotVal>
+  std::conditional_t<computePivotVal, Field_element, void> _multiply(const Field_element& val);
   template <class Entry_range>
   bool _multiply_target_and_add(const Field_element& val, const Entry_range& column);
   template <class Entry_range>
@@ -285,15 +273,16 @@ inline Heap_column<Master_matrix>::Heap_column(Column_settings* colSettings)
     : Dim_opt(),
       Chain_opt(),
       insertsSinceLastPrune_(0),
-      operators_(nullptr),
+      operators_([&]() -> Field_operators* {
+        if constexpr (Master_matrix::Option_list::is_z2) {
+          return nullptr;
+        } else {
+          if (colSettings == nullptr) return nullptr;  // for construction of dummy column
+          return &(colSettings->operators);
+        }
+      }()),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor))
-{
-  if (colSettings == nullptr) return;  // to allow default constructor which gives a dummy column
-
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-}
+{}
 
 template <class Master_matrix>
 template <class Container>
@@ -310,34 +299,30 @@ inline Heap_column<Master_matrix>::Heap_column(const Container& nonZeroRowIndice
                                                Dimension dimension,
                                                Column_settings* colSettings)
     : Dim_opt(dimension),
-      Chain_opt([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
-        } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
-        }
-      }()),
+      Chain_opt(nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                    ? Master_matrix::template get_null_value<ID_index>()
+                    : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
       column_(nonZeroRowIndices.size(), nullptr),
       insertsSinceLastPrune_(0),
-      operators_(nullptr),
+      operators_([&] {
+        if constexpr (Master_matrix::Option_list::is_z2) {
+          return nullptr;
+        } else {
+          return &(colSettings->operators);
+        }
+      }()),
       entryPool_(&(colSettings->entryConstructor))
 {
   Index i = 0;
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      column_[i++] = entryPool_->construct(id);
+
+  for (const auto& id : nonZeroRowIndices) {
+    column_[i] = entryPool_->construct(Master_matrix::get_row_index(id));
+    if constexpr (!Master_matrix::Option_list::is_z2) {
+      column_[i]->set_element(operators_->get_value(Master_matrix::get_element(id)));
     }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      column_[i] = entryPool_->construct(p.first);
-      column_[i++]->set_element(operators_->get_value(p.second));
-    }
+    ++i;
   }
+
   std::make_heap(column_.begin(), column_.end(), entryPointerComp_);
 }
 
@@ -379,25 +364,26 @@ inline Heap_column<Master_matrix>::Heap_column(const Heap_column& column, Column
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
       insertsSinceLastPrune_(0),
-      operators_(colSettings == nullptr ? column.operators_ : nullptr),
+      operators_(colSettings == nullptr ? column.operators_ : [&] {
+        if constexpr (Master_matrix::Option_list::is_z2) {
+          return nullptr;
+        } else {
+          return &(colSettings->operators);
+        }
+      }()),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   static_assert(!Master_matrix::Option_list::has_row_access,
                 "Simple copy constructor not available when row access option enabled. Please specify the new column "
                 "index and the row container.");
 
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    if (colSettings != nullptr) operators_ = &(colSettings->operators);
-  }
-
   Index i = 0;
   for (const Entry* entry : column.column_) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      column_[i++] = entryPool_->construct(entry->get_row_index());
-    } else {
-      column_[i] = entryPool_->construct(entry->get_row_index());
-      column_[i++]->set_element(entry->get_element());
+    column_[i] = entryPool_->construct(entry->get_row_index());
+    if constexpr (!Master_matrix::Option_list::is_z2) {
+      column_[i]->set_element(entry->get_element());
     }
+    ++i;
   }
   // column.column_ already ordered as a heap, so no need of make_heap.
 }
@@ -484,11 +470,12 @@ inline std::vector<typename Heap_column<Master_matrix>::Field_element> Heap_colu
 
   std::vector<Field_element> container(columnLength, 0);
   for (auto it = column_.begin(); it != column_.end(); ++it) {
-    if ((*it)->get_row_index() < static_cast<ID_index>(columnLength)) {
+    auto idx = (*it)->get_row_index();
+    if (idx < static_cast<ID_index>(columnLength)) {
       if constexpr (Master_matrix::Option_list::is_z2) {
-        container[(*it)->get_row_index()] = !container[(*it)->get_row_index()];
+        container[idx] = !container[idx];
       } else {
-        operators_->add_inplace(container[(*it)->get_row_index()], (*it)->get_element());
+        operators_->add_inplace(container[idx], (*it)->get_element());
       }
     }
   }
@@ -703,7 +690,8 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator+=(const 
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
-  _add(column);
+  Field_element dummy(0);
+  _add(column, dummy);
 
   return *this;
 }
@@ -712,47 +700,25 @@ template <class Master_matrix>
 inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator+=(Heap_column& column)
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
+    Field_element v = get_pivot_value();
+    _add(column, v);
     // assumes that the addition never zeros out this column.
-    if (_add(column)) {
+    if (v == Field_operators::get_additive_identity()) {
       Chain_opt::_swap_pivots(column);
       Dim_opt::_swap_dimension(column);
     }
   } else {
-    _add(column);
+    Field_element dummy(0);
+    _add(column, dummy);
   }
 
   return *this;
 }
 
 template <class Master_matrix>
-inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator*=(unsigned int v)
+inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator*=(const Field_element& v)
 {
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    if (v % 2 == 0) {
-      if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      } else {
-        clear();
-      }
-    }
-  } else {
-    Field_element val = operators_->get_value(v);
-
-    if (val == Field_operators::get_additive_identity()) {
-      if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      } else {
-        clear();
-      }
-      return *this;
-    }
-
-    if (val == Field_operators::get_multiplicative_identity()) return *this;
-
-    for (Entry* entry : column_) {
-      operators_->multiply_inplace(entry->get_element(), val);
-    }
-  }
+  _multiply<false>(Master_matrix::get_coefficient_value(v, operators_));
 
   return *this;
 }
@@ -768,16 +734,7 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_target_a
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    if (val) {
-      _add(column);
-    } else {
-      clear();
-      _add(column);
-    }
-  } else {
-    _multiply_target_and_add(val, column);
-  }
+  _multiply_target_and_add(Master_matrix::get_coefficient_value(val, operators_), column);
 
   return *this;
 }
@@ -788,32 +745,12 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_target_a
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        if (_add(column)) {
-          Chain_opt::_swap_pivots(column);
-          Dim_opt::_swap_dimension(column);
-        }
-      } else {
-        throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      }
-    } else {
-      if (_multiply_target_and_add(val, column)) {
-        Chain_opt::_swap_pivots(column);
-        Dim_opt::_swap_dimension(column);
-      }
+    if (_multiply_target_and_add(Master_matrix::get_coefficient_value(val, operators_), column)) {
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        _add(column);
-      } else {
-        clear();
-        _add(column);
-      }
-    } else {
-      _multiply_target_and_add(val, column);
-    }
+    _multiply_target_and_add(Master_matrix::get_coefficient_value(val, operators_), column);
   }
 
   return *this;
@@ -830,13 +767,7 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_source_a
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    if (val) {
-      _add(column);
-    }
-  } else {
-    _multiply_source_and_add(column, val);
-  }
+  _multiply_source_and_add(column, Master_matrix::get_coefficient_value(val, operators_));
 
   return *this;
 }
@@ -847,27 +778,12 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::multiply_source_a
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        if (_add(column)) {
-          Chain_opt::_swap_pivots(column);
-          Dim_opt::_swap_dimension(column);
-        }
-      }
-    } else {
-      if (_multiply_source_and_add(column, val)) {
-        Chain_opt::_swap_pivots(column);
-        Dim_opt::_swap_dimension(column);
-      }
+    if (_multiply_source_and_add(column, Master_matrix::get_coefficient_value(val, operators_))) {
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        _add(column);
-      }
-    } else {
-      _multiply_source_and_add(column, val);
-    }
+    _multiply_source_and_add(column, Master_matrix::get_coefficient_value(val, operators_));
   }
 
   return *this;
@@ -1012,9 +928,10 @@ inline typename Heap_column<Master_matrix>::Entry* Heap_column<Master_matrix>::_
 
 template <class Master_matrix>
 template <class Entry_range>
-inline bool Heap_column<Master_matrix>::_add(const Entry_range& column)
+inline void Heap_column<Master_matrix>::_add(const Entry_range& column, [[maybe_unused]] Field_element& pivotVal)
 {
-  if (column.begin() == column.end()) return false;
+  if (column.begin() == column.end()) return;
+
   if (column_.empty()) {  // chain should never enter here.
     column_.resize(column.size());
     Index i = 0;
@@ -1026,57 +943,115 @@ inline bool Heap_column<Master_matrix>::_add(const Entry_range& column)
       ++i;
     }
     insertsSinceLastPrune_ = column_.size();
-    return true;
+    return;
   }
-
-  Field_element pivotVal(1);
-
-  if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type)
-    pivotVal = get_pivot_value();
 
   for (const Entry& entry : column) {
     ++insertsSinceLastPrune_;
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        if (entry.get_row_index() == Chain_opt::_get_pivot()) pivotVal = !pivotVal;
+
+    if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
+      if (entry.get_row_index() == Chain_opt::_get_pivot()) {
+        if constexpr (Master_matrix::Option_list::is_z2) {
+          pivotVal = !pivotVal;
+        } else {
+          operators_->add_inplace(pivotVal, entry.get_element());
+        }
       }
-      column_.push_back(entryPool_->construct(entry.get_row_index()));
-    } else {
-      if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        if (entry.get_row_index() == Chain_opt::_get_pivot()) operators_->add_inplace(pivotVal, entry.get_element());
-      }
-      column_.push_back(entryPool_->construct(entry.get_row_index()));
+    }
+
+    column_.push_back(entryPool_->construct(entry.get_row_index()));
+    if constexpr (!Master_matrix::Option_list::is_z2) {
       column_.back()->set_element(entry.get_element());
     }
+
     std::push_heap(column_.begin(), column_.end(), entryPointerComp_);
   }
 
   if (2 * insertsSinceLastPrune_ > column_.size()) _prune();
+}
 
-  if constexpr (Master_matrix::Option_list::is_z2)
-    return !pivotVal;
+template <class Master_matrix>
+template <bool computePivotVal>
+inline std::conditional_t<computePivotVal, typename Heap_column<Master_matrix>::Field_element, void>
+Heap_column<Master_matrix>::_multiply(const Field_element& val)
+{
+  Field_element pivotVal(0);
+
+  if (val == Field_operators::get_additive_identity()) {
+    if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
+      // this would not only mess up the base, but also the pivots stored.
+      throw std::invalid_argument("A chain column should not be multiplied by 0.");
+    } else {
+      clear();
+      if constexpr (computePivotVal)
+        return pivotVal;
+      else
+        return;
+    }
+  }
+
+  if (val == Field_operators::get_multiplicative_identity()) {
+    if constexpr (computePivotVal)
+      return get_pivot_value();
+    else
+      return;
+  }
+
+  // multiply_inplace needs a non-const reference to element, so even if Z2 never reaches here, it won't compile
+  // without the constexpr, as we are not storing a dummy value just for this purpose.
+  if constexpr (!Master_matrix::Option_list::is_z2) {
+    for (Entry* entry : column_) {
+      operators_->multiply_inplace(entry->get_element(), val);
+      if constexpr (computePivotVal) {
+        // computePivotVal is only true for chain columns, so Chain_opt is not a dummy for sure
+        if (entry->get_row_index() == Chain_opt::_get_pivot()) {
+          operators_->add_inplace(pivotVal, entry->get_element());
+        }
+      }
+    }
+  }
+
+  if constexpr (computePivotVal)
+    return pivotVal;
   else
-    return pivotVal == Field_operators::get_additive_identity();
+    return;
 }
 
 template <class Master_matrix>
 template <class Entry_range>
 inline bool Heap_column<Master_matrix>::_multiply_target_and_add(const Field_element& val, const Entry_range& column)
 {
-  if (val == 0U) {
-    if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-      throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      // this would not only mess up the base, but also the pivots stored.
-    } else {
-      clear();
-    }
+  Field_element pivotVal(0);
+
+  if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
+    pivotVal = _multiply<true>(val);
+  } else {
+    _multiply<false>(val);
   }
+
+  _add(column, pivotVal);
+
+  return pivotVal == Field_operators::get_additive_identity();
+}
+
+// TODO: could be factorized with _add
+template <class Master_matrix>
+template <class Entry_range>
+inline bool Heap_column<Master_matrix>::_multiply_source_and_add(const Entry_range& column, const Field_element& val)
+{
+  if (val == Field_operators::get_additive_identity() || column.begin() == column.end()) {
+    return false;
+  }
+
   if (column_.empty()) {  // chain should never enter here.
     column_.resize(column.size());
     Index i = 0;
     for (const Entry& entry : column) {
       column_[i] = entryPool_->construct(entry.get_row_index());
-      column_[i++]->set_element(entry.get_element());
+      if constexpr (!Master_matrix::Option_list::is_z2) {
+        column_[i]->set_element(operators_->multiply(entry.get_element(), val));
+      }
+      ++i;
     }
     insertsSinceLastPrune_ = column_.size();
     return true;
@@ -1084,70 +1059,33 @@ inline bool Heap_column<Master_matrix>::_multiply_target_and_add(const Field_ele
 
   Field_element pivotVal(0);
 
-  for (Entry* entry : column_) {
-    operators_->multiply_inplace(entry->get_element(), val);
-    if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-      if (entry->get_row_index() == Chain_opt::_get_pivot()) operators_->add_inplace(pivotVal, entry->get_element());
-    }
-  }
-
-  for (const Entry& entry : column) {
-    ++insertsSinceLastPrune_;
-    if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-      if (entry.get_row_index() == Chain_opt::_get_pivot()) operators_->add_inplace(pivotVal, entry.get_element());
-    }
-    column_.push_back(entryPool_->construct(entry.get_row_index()));
-    column_.back()->set_element(entry.get_element());
-    std::push_heap(column_.begin(), column_.end(), entryPointerComp_);
-  }
-
-  if (2 * insertsSinceLastPrune_ > column_.size()) _prune();
-
-  if constexpr (Master_matrix::Option_list::is_z2)
-    return !pivotVal;
-  else
-    return pivotVal == Field_operators::get_additive_identity();
-}
-
-template <class Master_matrix>
-template <class Entry_range>
-inline bool Heap_column<Master_matrix>::_multiply_source_and_add(const Entry_range& column, const Field_element& val)
-{
-  if (val == 0U || column.begin() == column.end()) {
-    return false;
-  }
-  if (column_.empty()) {  // chain should never enter here.
-    column_.resize(column.size());
-    Index i = 0;
-    for (const Entry& entry : column) {
-      column_[i] = entryPool_->construct(entry.get_row_index());
-      column_[i++]->set_element(entry.get_element());
-    }
-    insertsSinceLastPrune_ = column_.size();
-    return true;
-  }
-
-  Field_element pivotVal(1);
-
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type)
     pivotVal = get_pivot_value();
 
   for (const Entry& entry : column) {
     ++insertsSinceLastPrune_;
+
     column_.push_back(entryPool_->construct(entry.get_row_index()));
-    column_.back()->set_element(entry.get_element());
-    operators_->multiply_inplace(column_.back()->get_element(), val);
+    if constexpr (!Master_matrix::Option_list::is_z2) {
+      column_.back()->set_element(operators_->multiply(entry.get_element(), val));
+    }
+
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
       if (entry.get_row_index() == Chain_opt::_get_pivot()) {
-        operators_->add_inplace(pivotVal, column_.back()->get_element());
+        if constexpr (Master_matrix::Option_list::is_z2) {
+          pivotVal = !pivotVal;
+        } else {
+          operators_->add_inplace(pivotVal, column_.back()->get_element());
+        }
       }
     }
+
     std::push_heap(column_.begin(), column_.end(), entryPointerComp_);
   }
 
   if (2 * insertsSinceLastPrune_ > column_.size()) _prune();
 
-  return pivotVal == 0U;
+  return pivotVal == Field_operators::get_additive_identity();
 }
 
 }  // namespace persistence_matrix

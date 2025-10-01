@@ -146,7 +146,7 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
   Naive_vector_column& operator+=(const Entry_range& column);
   Naive_vector_column& operator+=(Naive_vector_column& column);
 
-  Naive_vector_column& operator*=(unsigned int v);
+  Naive_vector_column& operator*=(const Field_element& v);
 
   // this = v * this + column
   template <class Entry_range>
@@ -167,12 +167,9 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
     auto it1 = c1.column_.begin();
     auto it2 = c2.column_.begin();
     while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
-      if constexpr (Master_matrix::Option_list::is_z2) {
-        if ((*it1)->get_row_index() != (*it2)->get_row_index()) return false;
-      } else {
-        if ((*it1)->get_row_index() != (*it2)->get_row_index() || (*it1)->get_element() != (*it2)->get_element())
-          return false;
-      }
+      if (Master_matrix::get_row_index(**it1) != Master_matrix::get_row_index(**it2) ||
+          Master_matrix::get_element(**it1) != Master_matrix::get_element(**it2))
+        return false;
       ++it1;
       ++it2;
     }
@@ -186,10 +183,14 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
     auto it1 = c1.column_.begin();
     auto it2 = c2.column_.begin();
     while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
-      if ((*it1)->get_row_index() != (*it2)->get_row_index()) return (*it1)->get_row_index() < (*it2)->get_row_index();
-      if constexpr (!Master_matrix::Option_list::is_z2) {
-        if ((*it1)->get_element() != (*it2)->get_element()) return (*it1)->get_element() < (*it2)->get_element();
-      }
+      Index r1 = Master_matrix::get_row_index(**it1);
+      Index r2 = Master_matrix::get_row_index(**it2);
+      Field_element e1 = Master_matrix::get_element(**it1);
+      Field_element e2 = Master_matrix::get_element(**it2);
+
+      if (r1 != r2) return r1 < r2;
+      if (e1 != e2) return e1 < e2;
+
       ++it1;
       ++it2;
     }
@@ -265,15 +266,16 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Column_s
     : RA_opt(),
       Dim_opt(),
       Chain_opt(),
-      operators_(nullptr),
+      operators_([&]() -> Field_operators* {
+        if constexpr (Master_matrix::Option_list::is_z2) {
+          return nullptr;
+        } else {
+          if (colSettings == nullptr) return nullptr;  // for construction of dummy column
+          return &(colSettings->operators);
+        }
+      }()),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor))
-{
-  if (operators_ == nullptr && entryPool_ == nullptr)
-    return;  // to allow default constructor which gives a dummy column
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-}
+{}
 
 template <class Master_matrix, class Support>
 template <class Container>
@@ -310,30 +312,25 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Co
                                                                         Column_settings* colSettings)
     : RA_opt(),
       Dim_opt(dimension),
-      Chain_opt([&] {
+      Chain_opt(nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                    ? Master_matrix::template get_null_value<ID_index>()
+                    : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
+      column_(nonZeroRowIndices.size(), nullptr),
+      operators_([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
+          return nullptr;
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
+          return &(colSettings->operators);
         }
       }()),
-      column_(nonZeroRowIndices.size(), nullptr),
-      operators_(nullptr),
       entryPool_(&(colSettings->entryConstructor))
 {
   Index i = 0;
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _update_entry(id, i++);
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      _update_entry(operators_->get_value(p.second), p.first, i++);
+  for (const auto& id : nonZeroRowIndices) {
+    if constexpr (Master_matrix::Option_list::is_z2) {
+      _update_entry(Master_matrix::get_row_index(id), i++);
+    } else {
+      _update_entry(operators_->get_value(Master_matrix::get_element(id)), Master_matrix::get_row_index(id), i++);
     }
   }
 }
@@ -347,30 +344,25 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Index co
                                                                         Column_settings* colSettings)
     : RA_opt(columnIndex, rowContainer),
       Dim_opt(dimension),
-      Chain_opt([&] {
+      Chain_opt(nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                    ? Master_matrix::template get_null_value<ID_index>()
+                    : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
+      column_(nonZeroRowIndices.size(), nullptr),
+      operators_([&] {
         if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
+          return nullptr;
         } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
+          return &(colSettings->operators);
         }
       }()),
-      column_(nonZeroRowIndices.size(), nullptr),
-      operators_(nullptr),
       entryPool_(&(colSettings->entryConstructor))
 {
   Index i = 0;
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _update_entry(id, i++);
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      _update_entry(operators_->get_value(p.second), p.first, i++);
+  for (const auto& id : nonZeroRowIndices) {
+    if constexpr (Master_matrix::Option_list::is_z2) {
+      _update_entry(Master_matrix::get_row_index(id), i++);
+    } else {
+      _update_entry(operators_->get_value(Master_matrix::get_element(id)), Master_matrix::get_row_index(id), i++);
     }
   }
 }
@@ -454,16 +446,18 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Na
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
-      operators_(colSettings == nullptr ? column.operators_ : nullptr),
+      operators_(colSettings == nullptr ? column.operators_ : [&] {
+        if constexpr (Master_matrix::Option_list::is_z2) {
+          return nullptr;
+        } else {
+          return &(colSettings->operators);
+        }
+      }()),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   static_assert(!Master_matrix::Option_list::has_row_access,
                 "Simple copy constructor not available when row access option enabled. Please specify the new column "
                 "index and the row container.");
-
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    if (colSettings != nullptr) operators_ = &(colSettings->operators);
-  }
 
   Index i = 0;
   for (const Entry* entry : column.column_) {
@@ -485,13 +479,15 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Na
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
-      operators_(colSettings == nullptr ? column.operators_ : nullptr),
+      operators_(colSettings == nullptr ? column.operators_ : [&] {
+        if constexpr (Master_matrix::Option_list::is_z2) {
+          return nullptr;
+        } else {
+          return &(colSettings->operators);
+        }
+      }()),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    if (colSettings != nullptr) operators_ = &(colSettings->operators);
-  }
-
   Index i = 0;
   for (const Entry* entry : column.column_) {
     if constexpr (Master_matrix::Option_list::is_z2) {
@@ -533,11 +529,7 @@ Naive_vector_column<Master_matrix, Support>::get_content(int columnLength) const
   std::vector<Field_element> container(columnLength, 0);
   for (auto it = column_.begin(); it != column_.end() && (*it)->get_row_index() < static_cast<ID_index>(columnLength);
        ++it) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      container[(*it)->get_row_index()] = 1;
-    } else {
-      container[(*it)->get_row_index()] = (*it)->get_element();
-    }
+    container[(*it)->get_row_index()] = Master_matrix::get_element(**it);
   }
   return container;
 }
@@ -753,30 +745,24 @@ inline Naive_vector_column<Master_matrix, Support>& Naive_vector_column<Master_m
 
 template <class Master_matrix, class Support>
 inline Naive_vector_column<Master_matrix, Support>& Naive_vector_column<Master_matrix, Support>::operator*=(
-    unsigned int v)
+    const Field_element& v)
 {
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    if (v % 2 == 0) {
-      if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      } else {
-        clear();
-      }
+  Field_element val = Master_matrix::get_coefficient_value(v, operators_);
+
+  if (val == Field_operators::get_additive_identity()) {
+    if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
+      throw std::invalid_argument("A chain column should not be multiplied by 0.");
+    } else {
+      clear();
     }
-  } else {
-    Field_element val = operators_->get_value(v);
+    return *this;
+  }
 
-    if (val == Field_operators::get_additive_identity()) {
-      if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      } else {
-        clear();
-      }
-      return *this;
-    }
+  if (val == Field_operators::get_multiplicative_identity()) return *this;
 
-    if (val == Field_operators::get_multiplicative_identity()) return *this;
-
+  // multiply_inplace needs a non-const reference to element, so even if Z2 never reaches here, it won't compile
+  // without the constexpr, as we are not storing a dummy value just for this purpose.
+  if constexpr (!Master_matrix::Option_list::is_z2) {
     for (Entry* entry : column_) {
       operators_->multiply_inplace(entry->get_element(), val);
       if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(*entry);
@@ -798,16 +784,7 @@ Naive_vector_column<Master_matrix, Support>::multiply_target_and_add(const Field
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    if (val) {
-      _add(column);
-    } else {
-      clear();
-      _add(column);
-    }
-  } else {
-    _multiply_target_and_add(val, column);
-  }
+  _multiply_target_and_add(Master_matrix::get_coefficient_value(val, operators_), column);
 
   return *this;
 }
@@ -819,32 +796,12 @@ Naive_vector_column<Master_matrix, Support>::multiply_target_and_add(const Field
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        if (_add(column)) {
-          Chain_opt::_swap_pivots(column);
-          Dim_opt::_swap_dimension(column);
-        }
-      } else {
-        throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      }
-    } else {
-      if (_multiply_target_and_add(val, column)) {
-        Chain_opt::_swap_pivots(column);
-        Dim_opt::_swap_dimension(column);
-      }
+    if (_multiply_target_and_add(Master_matrix::get_coefficient_value(val, operators_), column)) {
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        _add(column);
-      } else {
-        clear();
-        _add(column);
-      }
-    } else {
-      _multiply_target_and_add(val, column);
-    }
+    _multiply_target_and_add(Master_matrix::get_coefficient_value(val, operators_), column);
   }
 
   return *this;
@@ -862,13 +819,7 @@ Naive_vector_column<Master_matrix, Support>::multiply_source_and_add(const Entry
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    if (val) {
-      _add(column);
-    }
-  } else {
-    _multiply_source_and_add(column, val);
-  }
+  _multiply_source_and_add(column, Master_matrix::get_coefficient_value(val, operators_));
 
   return *this;
 }
@@ -880,27 +831,12 @@ Naive_vector_column<Master_matrix, Support>::multiply_source_and_add(Naive_vecto
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        if (_add(column)) {
-          Chain_opt::_swap_pivots(column);
-          Dim_opt::_swap_dimension(column);
-        }
-      }
-    } else {
-      if (_multiply_source_and_add(column, val)) {
-        Chain_opt::_swap_pivots(column);
-        Dim_opt::_swap_dimension(column);
-      }
+    if (_multiply_source_and_add(column, Master_matrix::get_coefficient_value(val, operators_))) {
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        _add(column);
-      }
-    } else {
-      _multiply_source_and_add(column, val);
-    }
+    _multiply_source_and_add(column, Master_matrix::get_coefficient_value(val, operators_));
   }
 
   return *this;
@@ -1112,7 +1048,7 @@ template <class Entry_range>
 inline bool Naive_vector_column<Master_matrix, Support>::_multiply_target_and_add(const Field_element& val,
                                                                                   const Entry_range& column)
 {
-  if (val == 0U) {
+  if (val == Field_operators::get_additive_identity()) {
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
       throw std::invalid_argument("A chain column should not be multiplied by 0.");
       // this would not only mess up the base, but also the pivots stored.
@@ -1120,49 +1056,47 @@ inline bool Naive_vector_column<Master_matrix, Support>::_multiply_target_and_ad
       clear();
     }
   }
-  if (column_.empty()) {  // chain should never enter here.
-    column_.resize(column.size());
-    Index i = 0;
-    for (const Entry& entry : column) {
-      if constexpr (Master_matrix::Option_list::is_z2) {
-        _update_entry(entry.get_row_index(), i++);
-      } else {
-        _update_entry(entry.get_element(), entry.get_row_index(), i++);
-      }
-    }
-    return true;
+
+  if (column_.empty() || val == Field_operators::get_multiplicative_identity()) {
+    return _add(column);
   }
 
-  Column_support newColumn;
-  newColumn.reserve(column_.size() + column.size());  // safe upper bound
+  // multiply_inplace needs a non-const reference to element, so even if Z2 never reaches here, it won't compile
+  // without the constexpr, as we are not storing a dummy value just for this purpose.
+  if constexpr (!Master_matrix::Option_list::is_z2) {
+    Column_support newColumn;
+    newColumn.reserve(column_.size() + column.size());  // safe upper bound
 
-  auto pivotIsZeroed = _generic_add_to_column(
-      column,
-      *this,
-      [&](Entry* entryTarget) {
-        operators_->multiply_inplace(entryTarget->get_element(), val);
-        if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(*entryTarget);
-        newColumn.push_back(entryTarget);
-      },
-      [&](typename Entry_range::const_iterator& itSource, const typename Column_support::iterator& itTarget) {
-        _insert_entry(itSource->get_element(), itSource->get_row_index(), newColumn);
-      },
-      [&](Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
-        operators_->multiply_and_add_inplace_front(targetElement, val, itSource->get_element());
-      },
-      [&](Entry* entryTarget) { newColumn.push_back(entryTarget); },
-      [&](typename Column_support::iterator& itTarget) {
-        while (itTarget != column_.end()) {
-          operators_->multiply_inplace((*itTarget)->get_element(), val);
-          if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(**itTarget);
-          newColumn.push_back(*itTarget);
-          itTarget++;
-        }
-      });
+    auto pivotIsZeroed = _generic_add_to_column(
+        column,
+        *this,
+        [&](Entry* entryTarget) {
+          operators_->multiply_inplace(entryTarget->get_element(), val);
+          if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(*entryTarget);
+          newColumn.push_back(entryTarget);
+        },
+        [&](typename Entry_range::const_iterator& itSource, const typename Column_support::iterator& itTarget) {
+          _insert_entry(itSource->get_element(), itSource->get_row_index(), newColumn);
+        },
+        [&](Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
+          operators_->multiply_and_add_inplace_front(targetElement, val, itSource->get_element());
+        },
+        [&](Entry* entryTarget) { newColumn.push_back(entryTarget); },
+        [&](typename Column_support::iterator& itTarget) {
+          while (itTarget != column_.end()) {
+            operators_->multiply_inplace((*itTarget)->get_element(), val);
+            if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(**itTarget);
+            newColumn.push_back(*itTarget);
+            itTarget++;
+          }
+        });
 
-  column_.swap(newColumn);
+    column_.swap(newColumn);
 
-  return pivotIsZeroed;
+    return pivotIsZeroed;
+  } else {
+    return false;  // we should never arrive here, just to suppress the warning
+  }
 }
 
 template <class Master_matrix, class Support>
@@ -1170,36 +1104,46 @@ template <class Entry_range>
 inline bool Naive_vector_column<Master_matrix, Support>::_multiply_source_and_add(const Entry_range& column,
                                                                                   const Field_element& val)
 {
-  if (val == 0U || column.begin() == column.end()) {
+  if (val == Field_operators::get_additive_identity() || column.begin() == column.end()) {
     return false;
   }
 
-  Column_support newColumn;
-  newColumn.reserve(column_.size() + column.size());  // safe upper bound
+  if (val == Field_operators::get_multiplicative_identity()) {
+    return _add(column);
+  }
 
-  auto pivotIsZeroed = _generic_add_to_column(
-      column,
-      *this,
-      [&](Entry* entryTarget) { newColumn.push_back(entryTarget); },
-      [&](typename Entry_range::const_iterator& itSource, const typename Column_support::iterator& itTarget) {
-        Entry* newEntry = _insert_entry(itSource->get_element(), itSource->get_row_index(), newColumn);
-        operators_->multiply_inplace(newEntry->get_element(), val);
-        if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(*newEntry);
-      },
-      [&](Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
-        operators_->multiply_and_add_inplace_back(itSource->get_element(), val, targetElement);
-      },
-      [&](Entry* entryTarget) { newColumn.push_back(entryTarget); },
-      [&](typename Column_support::iterator& itTarget) {
-        while (itTarget != column_.end()) {
-          newColumn.push_back(*itTarget);
-          itTarget++;
-        }
-      });
+  // multiply_inplace needs a non-const reference to element, so even if Z2 never reaches here, it won't compile
+  // without the constexpr, as we are not storing a dummy value just for this purpose.
+  if constexpr (!Master_matrix::Option_list::is_z2) {
+    Column_support newColumn;
+    newColumn.reserve(column_.size() + column.size());  // safe upper bound
 
-  column_.swap(newColumn);
+    auto pivotIsZeroed = _generic_add_to_column(
+        column,
+        *this,
+        [&](Entry* entryTarget) { newColumn.push_back(entryTarget); },
+        [&](typename Entry_range::const_iterator& itSource, const typename Column_support::iterator& itTarget) {
+          Entry* newEntry = _insert_entry(itSource->get_element(), itSource->get_row_index(), newColumn);
+          operators_->multiply_inplace(newEntry->get_element(), val);
+          if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(*newEntry);
+        },
+        [&](Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
+          operators_->multiply_and_add_inplace_back(itSource->get_element(), val, targetElement);
+        },
+        [&](Entry* entryTarget) { newColumn.push_back(entryTarget); },
+        [&](typename Column_support::iterator& itTarget) {
+          while (itTarget != column_.end()) {
+            newColumn.push_back(*itTarget);
+            itTarget++;
+          }
+        });
 
-  return pivotIsZeroed;
+    column_.swap(newColumn);
+
+    return pivotIsZeroed;
+  } else {
+    return false;  // we should never arrive here, just to suppress the warning
+  }
 }
 
 }  // namespace persistence_matrix

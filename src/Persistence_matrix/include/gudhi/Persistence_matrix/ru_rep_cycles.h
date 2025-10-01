@@ -211,11 +211,12 @@ RU_representative_cycles<Master_matrix>::_get_inverse(Index c)
   };
 
   auto _substract = [&](E& e, auto resIt, const auto& cell) -> void {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (resIt != res.rend() && *resIt == cell.get_row_index()) e = !e;
-    } else {
-      if (resIt != res.rend() && resIt->first == cell.get_row_index())
-        op->subtract_inplace_front(e, cell.get_element() * resIt->second);
+    if (resIt != res.rend() && Master_matrix::get_row_index(*resIt) == cell.get_row_index()) {
+      if constexpr (Master_matrix::Option_list::is_z2) {
+        e = !e;
+      } else {
+        op->subtract_inplace_front(e, cell.get_element() * Master_matrix::get_element(*resIt));
+      }
     }
   };
 
@@ -235,23 +236,11 @@ RU_representative_cycles<Master_matrix>::_get_inverse(Index c)
     }
   };
 
-  auto _get_index = [&](auto resIt) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      return *resIt;
-    } else {
-      return resIt->first;
-    }
-  };
-
   auto _translate = [&](std::size_t i) -> void {
     const auto& map = _matrix()->positionToID_;
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      auto it = map.find(res[i]);
-      if (it != map.end()) res[i] = it->second;
-    } else {
-      auto it = map.find(res[i].first);
-      if (it != map.end()) res[i].first = it->second;
-    }
+    auto& idx = Master_matrix::get_row_index(res[i]);
+    auto it = map.find(idx);
+    if (it != map.end()) idx = it->second;
   };
 
   if (c == size - 1) _push_cell(size - 1, _last_diagonal_value());
@@ -267,7 +256,7 @@ RU_representative_cycles<Master_matrix>::_get_inverse(Index c)
       ++lineIt;
     }
     while (lineIt != r.end() && resIt != res.rend()) {
-      while (resIt != res.rend() && _get_index(resIt) < lineIt->get_row_index()) ++resIt;
+      while (resIt != res.rend() && Master_matrix::get_row_index(*resIt) < lineIt->get_row_index()) ++resIt;
       _substract(e, resIt, *lineIt);
       ++lineIt;
     }

@@ -782,11 +782,7 @@ inline void RU_matrix<Master_matrix>::print()
 template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_insert_boundary(Index currentIndex)
 {
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    mirrorMatrixU_.insert_column(currentIndex);
-  } else {
-    mirrorMatrixU_.insert_column(currentIndex, 1);
-  }
+  mirrorMatrixU_.insert_column(currentIndex, 1);
 
   if constexpr (!Master_matrix::Option_list::has_map_column_container) {
     ID_index pivot = reducedMatrixR_.get_column(currentIndex).get_pivot();
@@ -802,10 +798,7 @@ template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_initialize_U()
 {
   for (ID_index i = 0; i < reducedMatrixR_.get_number_of_columns(); i++) {
-    if constexpr (Master_matrix::Option_list::is_z2)
-      mirrorMatrixU_.insert_column(i);
-    else
-      mirrorMatrixU_.insert_column(i, 1);
+    mirrorMatrixU_.insert_column(i, 1);
   }
 }
 

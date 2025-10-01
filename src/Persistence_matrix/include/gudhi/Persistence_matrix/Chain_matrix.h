@@ -1087,10 +1087,7 @@ Chain_matrix<Master_matrix>::_reduce_boundary(ID_index cellID, const Boundary_ra
   _build_from_H(cellID, column, chainsInH);
 
   // Create and insert (\sum col_h) + sigma (in H, paired with chain_fp) in matrix_
-  if constexpr (Master_matrix::Option_list::is_z2)
-    _insert_chain(column, dim, chainsInF[0]);
-  else
-    _insert_chain(column, dim, chainsInF[0].first);
+  _insert_chain(column, dim, Master_matrix::get_row_index(chainsInF[0]));
 
   return chainsInF;
 }
@@ -1142,30 +1139,28 @@ inline void Chain_matrix<Master_matrix>::_build_from_H(ID_index cellID,
 {
   if constexpr (Master_matrix::Option_list::is_z2) {
     column.insert(cellID);
-    for (Index idx_h : chainsInH) {
-      _add_to(get_column(idx_h), column, 1U);
-    }
   } else {
     column.emplace(cellID, 1);
-    for (std::pair<Index, Field_element>& idx_h : chainsInH) {
-      _add_to(get_column(idx_h.first), column, idx_h.second);
-    }
+  }
+
+  for (const auto& idx_h : chainsInH) {
+    _add_to(get_column(Master_matrix::get_row_index(idx_h)), column, Master_matrix::get_element(idx_h));
   }
 }
 
 template <class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_update_largest_death_in_F(const std::vector<Entry_representative>& chainsInF)
 {
+  Index toUpdate = Master_matrix::get_row_index(chainsInF[0]);
   if constexpr (Master_matrix::Option_list::is_z2) {
-    Index toUpdate = chainsInF[0];
     for (auto other_col_it = chainsInF.begin() + 1; other_col_it != chainsInF.end(); ++other_col_it) {
       add_to(*other_col_it, toUpdate);
     }
   } else {
-    Index toUpdate = chainsInF[0].first;
-    get_column(toUpdate) *= chainsInF[0].second;
+    get_column(toUpdate) *= Master_matrix::get_element(chainsInF[0]);
     for (auto other_col_it = chainsInF.begin() + 1; other_col_it != chainsInF.end(); ++other_col_it) {
-      multiply_source_and_add_to(other_col_it->second, other_col_it->first, toUpdate);
+      multiply_source_and_add_to(
+          Master_matrix::get_element(*other_col_it), Master_matrix::get_row_index(*other_col_it), toUpdate);
     }
   }
 }
@@ -1330,12 +1325,8 @@ template <class Master_matrix>
 template <class Container>
 inline void Chain_matrix<Master_matrix>::_container_insert(const Container& column, Index pos, Dimension dim)
 {
-  ID_index pivot;
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    pivot = *(column.rbegin());
-  } else {
-    pivot = column.rbegin()->first;
-  }
+  ID_index pivot = Master_matrix::get_row_index(*(column.rbegin()));
+
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.try_emplace(pivot, pos);
     if constexpr (Master_matrix::Option_list::has_row_access) {

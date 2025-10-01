@@ -672,11 +672,7 @@ inline void Base_matrix<Master_matrix>::_insert(const Container& column, Index c
   Index pivot = 0;
   if (column.begin() != column.end()) {
     // first, compute pivot of `column`
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      pivot = *std::prev(column.end());
-    } else {
-      pivot = std::prev(column.end())->first;
-    }
+    pivot = Master_matrix::get_row_index(*std::prev(column.end()));
     // row container
     if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows)
       RA_opt::_resize(pivot);
@@ -685,14 +681,8 @@ inline void Base_matrix<Master_matrix>::_insert(const Container& column, Index c
   // row swap map containers
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     if constexpr (Master_matrix::Option_list::has_column_and_row_swaps || Master_matrix::Option_list::has_vine_update) {
-      for (auto id : column) {
-        Index idx;
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          idx = id;
-        } else {
-          idx = id.first;
-        }
-        Swap_opt::_initialize_row_index(idx);
+      for (const auto& id : column) {
+        Swap_opt::_initialize_row_index(Master_matrix::get_row_index(id));
       }
     }
   } else {
