@@ -276,11 +276,7 @@ class Matrix
    */
   static Element get_element(const Matrix_entry& e)
   {
-    if constexpr (PersistenceMatrixOptions::is_z2) {
-      return Field_operators::get_multiplicative_identity();
-    } else {
-      return e.get_element();
-    }
+    return e.get_element();
   }
   /**
    * @private

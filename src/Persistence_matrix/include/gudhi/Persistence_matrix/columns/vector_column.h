@@ -206,18 +206,9 @@ class Vector_column : public Master_matrix::Row_access_option,
 
     auto r1 = c1.get_non_zero_content_range();
     auto r2 = c2.get_non_zero_content_range();
-    auto it1 = r1.begin();
-    auto it2 = r2.begin();
-    while (it1 != r1.end() && it2 != r2.end()) {
-      if (Master_matrix::get_row_index(*it1) != Master_matrix::get_row_index(*it2) ||
-          Master_matrix::get_element(*it1) != Master_matrix::get_element(*it2))
-        return false;
-
-      ++it1;
-      ++it2;
-    }
-
-    return it2 == r2.end() && it1 == r1.end();
+    return std::equal(r1.begin(), r1.end(), r2.begin(), r2.end(), [](const Entry& e1, const Entry& e2) {
+      return e1.get_row_index() == e2.get_row_index() && e1.get_element() == e2.get_element();
+    });
   }
 
   friend bool operator<(const Vector_column& c1, const Vector_column& c2)
@@ -226,22 +217,12 @@ class Vector_column : public Master_matrix::Row_access_option,
 
     auto r1 = c1.get_non_zero_content_range();
     auto r2 = c2.get_non_zero_content_range();
-    auto it1 = r1.begin();
-    auto it2 = r2.begin();
-    while (it1 != r1.end() && it2 != r2.end()) {
-      Index r1 = Master_matrix::get_row_index(*it1);
-      Index r2 = Master_matrix::get_row_index(*it2);
-      Field_element e1 = Master_matrix::get_element(*it1);
-      Field_element e2 = Master_matrix::get_element(*it2);
-
-      if (r1 != r2) return r1 < r2;
-      if (e1 != e2) return e1 < e2;
-
-      ++it1;
-      ++it2;
-    }
-
-    return it2 != r2.end();
+    return std::lexicographical_compare(
+        r1.begin(), r1.end(), r2.begin(), r2.end(), [](const Entry& e1, const Entry& e2) {
+          if (e1.get_row_index() != e2.get_row_index()) return e1.get_row_index() < e2.get_row_index();
+          if (e1.get_element() != e2.get_element()) return e1.get_element() < e2.get_element();
+          return false;
+        });
   }
 
   // Disabled with row access.

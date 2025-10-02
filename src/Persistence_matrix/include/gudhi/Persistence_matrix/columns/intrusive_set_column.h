@@ -164,38 +164,30 @@ class Intrusive_set_column : public Master_matrix::Row_access_option,
   {
     if (&c1 == &c2) return true;
 
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      return c1.column_ == c2.column_;
-    } else {
-      auto it1 = c1.column_.begin();
-      auto it2 = c2.column_.begin();
-      if (c1.column_.size() != c2.column_.size()) return false;
-      while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
-        if (it1->get_row_index() != it2->get_row_index() || it1->get_element() != it2->get_element()) return false;
-        ++it1;
-        ++it2;
-      }
-      return true;
-    }
+    return std::equal(c1.column_.begin(),
+                      c1.column_.end(),
+                      c2.column_.begin(),
+                      c2.column_.end(),
+                      [](const Entry& e1, const Entry& e2) {
+                        return e1.get_row_index() == e2.get_row_index() && e1.get_element() == e2.get_element();
+                      });
   }
 
   friend bool operator<(const Intrusive_set_column& c1, const Intrusive_set_column& c2)
   {
     if (&c1 == &c2) return false;
 
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      return c1.column_ < c2.column_;
-    } else {
-      auto it1 = c1.column_.begin();
-      auto it2 = c2.column_.begin();
-      while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
-        if (it1->get_row_index() != it2->get_row_index()) return it1->get_row_index() < it2->get_row_index();
-        if (it1->get_element() != it2->get_element()) return it1->get_element() < it2->get_element();
-        ++it1;
-        ++it2;
-      }
-      return it2 != c2.column_.end();
-    }
+    return std::lexicographical_compare(c1.column_.begin(),
+                                        c1.column_.end(),
+                                        c2.column_.begin(),
+                                        c2.column_.end(),
+                                        [](const Entry& e1, const Entry& e2) {
+                                          if (e1.get_row_index() != e2.get_row_index())
+                                            return e1.get_row_index() < e2.get_row_index();
+                                          if (e1.get_element() != e2.get_element())
+                                            return e1.get_element() < e2.get_element();
+                                          return false;
+                                        });
   }
 
   // Disabled with row access.
@@ -538,9 +530,7 @@ inline void Intrusive_set_column<Master_matrix>::reorder(const Row_index_map& va
       Entry* newEntry = entryPool_->construct(
           columnIndex == Master_matrix::template get_null_value<Index>() ? RA_opt::get_column_index() : columnIndex,
           valueMap.at(it->get_row_index()));
-      if constexpr (!Master_matrix::Option_list::is_z2) {
-        newEntry->set_element(it->get_element());
-      }
+      newEntry->set_element(it->get_element());
       newSet.insert(newSet.end(), *newEntry);
       _delete_entry(it);                                             // increases it
       if constexpr (Master_matrix::Option_list::has_intrusive_rows)  // intrusive list
@@ -556,9 +546,7 @@ inline void Intrusive_set_column<Master_matrix>::reorder(const Row_index_map& va
   } else {
     for (auto it = column_.begin(); it != column_.end();) {
       Entry* newEntry = entryPool_->construct(valueMap.at(it->get_row_index()));
-      if constexpr (!Master_matrix::Option_list::is_z2) {
-        newEntry->set_element(it->get_element());
-      }
+      newEntry->set_element(it->get_element());
       newSet.insert(newSet.end(), *newEntry);
       _delete_entry(it);  // increases it
     }

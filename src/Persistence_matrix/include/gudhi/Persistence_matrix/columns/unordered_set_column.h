@@ -907,7 +907,7 @@ inline bool Unordered_set_column<Master_matrix>::_add(const Entry_range& column)
   return _generic_add(
       column,
       [&](const Entry& oldEntry, Entry* newEntry) {
-        if constexpr (!Master_matrix::Option_list::is_z2) newEntry->set_element(oldEntry.get_element());
+        newEntry->set_element(oldEntry.get_element());
       },
       [&](Entry* targetEntry, const Entry& sourceEntry) {
         if constexpr (!Master_matrix::Option_list::is_z2)

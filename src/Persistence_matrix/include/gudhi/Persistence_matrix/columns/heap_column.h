@@ -266,6 +266,7 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   bool _multiply_target_and_add(const Field_element& val, const Entry_range& column);
   template <class Entry_range>
   bool _multiply_source_and_add(const Entry_range& column, const Field_element& val);
+  void _add_coefficient(Field_element& e, const Field_element& a) const;
 };
 
 template <class Master_matrix>
@@ -304,9 +305,7 @@ inline Heap_column<Master_matrix>::Heap_column(const Container& nonZeroRowIndice
 
   for (const auto& id : nonZeroRowIndices) {
     column_[i] = entryPool_->construct(Master_matrix::get_row_index(id));
-    if constexpr (!Master_matrix::Option_list::is_z2) {
-      column_[i]->set_element(operators_->get_value(Master_matrix::get_element(id)));
-    }
+    column_[i]->set_element(Master_matrix::get_coefficient_value(Master_matrix::get_element(id), operators_));
     ++i;
   }
 
@@ -361,9 +360,7 @@ inline Heap_column<Master_matrix>::Heap_column(const Heap_column& column, Column
   Index i = 0;
   for (const Entry* entry : column.column_) {
     column_[i] = entryPool_->construct(entry->get_row_index());
-    if constexpr (!Master_matrix::Option_list::is_z2) {
-      column_[i]->set_element(entry->get_element());
-    }
+    column_[i]->set_element(entry->get_element());
     ++i;
   }
   // column.column_ already ordered as a heap, so no need of make_heap.
@@ -453,6 +450,8 @@ inline std::vector<typename Heap_column<Master_matrix>::Field_element> Heap_colu
   for (auto it = column_.begin(); it != column_.end(); ++it) {
     auto idx = (*it)->get_row_index();
     if (idx < static_cast<ID_index>(columnLength)) {
+      // Cannot use _add_coefficient because of vector<bool>
+      // I would have to do a special case for it, but it only happens here, so...
       if constexpr (Master_matrix::Option_list::is_z2) {
         container[idx] = !container[idx];
       } else {
@@ -474,10 +473,7 @@ inline bool Heap_column<Master_matrix>::is_non_zero(ID_index rowIndex) const
   Field_element c(0);
   for (const Entry* entry : column_) {
     if (entry->get_row_index() == rowIndex) {
-      if constexpr (Master_matrix::Option_list::is_z2)
-        c = !c;
-      else
-        operators_->add_inplace(c, entry->get_element());
+      _add_coefficient(c, entry->get_element());
     }
   }
   return c != Field_operators::get_additive_identity();
@@ -778,9 +774,7 @@ inline void Heap_column<Master_matrix>::push_back(const Entry& entry)
   GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
 
   Entry* newEntry = entryPool_->construct(entry.get_row_index());
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    newEntry->set_element(operators_->get_value(entry.get_element()));
-  }
+  newEntry->set_element(Master_matrix::get_coefficient_value(entry.get_element(), operators_));
   column_.push_back(newEntry);
   std::push_heap(column_.begin(), column_.end(), entryPointerComp_);
 }
@@ -808,9 +802,7 @@ inline Heap_column<Master_matrix>& Heap_column<Master_matrix>::operator=(const H
       entryPool_->destroy(column_[i]);
     }
     column_[i] = other.entryPool_->construct(entry->get_row_index());
-    if constexpr (!Master_matrix::Option_list::is_z2) {
-      column_[i]->set_element(entry->get_element());
-    }
+    column_[i]->set_element(entry->get_element());
     ++i;
   }
   insertsSinceLastPrune_ = other.insertsSinceLastPrune_;
@@ -918,9 +910,7 @@ inline void Heap_column<Master_matrix>::_add(const Entry_range& column, [[maybe_
     Index i = 0;
     for (const Entry& entry : column) {
       column_[i] = entryPool_->construct(entry.get_row_index());
-      if constexpr (!Master_matrix::Option_list::is_z2) {
-        column_[i]->set_element(entry.get_element());
-      }
+      column_[i]->set_element(entry.get_element());
       ++i;
     }
     insertsSinceLastPrune_ = column_.size();
@@ -932,18 +922,12 @@ inline void Heap_column<Master_matrix>::_add(const Entry_range& column, [[maybe_
 
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
       if (entry.get_row_index() == Chain_opt::_get_pivot()) {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          pivotVal = !pivotVal;
-        } else {
-          operators_->add_inplace(pivotVal, entry.get_element());
-        }
+        _add_coefficient(pivotVal, entry.get_element());
       }
     }
 
     column_.push_back(entryPool_->construct(entry.get_row_index()));
-    if constexpr (!Master_matrix::Option_list::is_z2) {
-      column_.back()->set_element(entry.get_element());
-    }
+    column_.back()->set_element(entry.get_element());
 
     std::push_heap(column_.begin(), column_.end(), entryPointerComp_);
   }
@@ -1053,11 +1037,7 @@ inline bool Heap_column<Master_matrix>::_multiply_source_and_add(const Entry_ran
 
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
       if (entry.get_row_index() == Chain_opt::_get_pivot()) {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          pivotVal = !pivotVal;
-        } else {
-          operators_->add_inplace(pivotVal, column_.back()->get_element());
-        }
+        _add_coefficient(pivotVal, column_.back()->get_element());
       }
     }
 
@@ -1067,6 +1047,18 @@ inline bool Heap_column<Master_matrix>::_multiply_source_and_add(const Entry_ran
   if (2 * insertsSinceLastPrune_ > column_.size()) _prune();
 
   return pivotVal == Field_operators::get_additive_identity();
+}
+
+template <class Master_matrix>
+inline void Heap_column<Master_matrix>::_add_coefficient(Field_element& e,
+                                                         [[maybe_unused]] const Field_element& a) const
+{
+  if constexpr (Master_matrix::Option_list::is_z2) {
+    // a has to be 1
+    e = !e;
+  } else {
+    operators_->add_inplace(e, a);
+  }
 }
 
 }  // namespace persistence_matrix

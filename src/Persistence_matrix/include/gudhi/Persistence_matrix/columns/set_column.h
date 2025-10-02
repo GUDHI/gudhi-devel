@@ -163,39 +163,32 @@ class Set_column : public Master_matrix::Row_access_option,
   friend bool operator==(const Set_column& c1, const Set_column& c2)
   {
     if (&c1 == &c2) return true;
-
-    auto it1 = c1.column_.begin();
-    auto it2 = c2.column_.begin();
     if (c1.column_.size() != c2.column_.size()) return false;
-    while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
-      if (Master_matrix::get_row_index(**it1) != Master_matrix::get_row_index(**it2) ||
-          Master_matrix::get_element(**it1) != Master_matrix::get_element(**it2))
-        return false;
-      ++it1;
-      ++it2;
-    }
-    return true;
+
+    return std::equal(c1.column_.begin(),
+                      c1.column_.end(),
+                      c2.column_.begin(),
+                      c2.column_.end(),
+                      [](const Entry* e1, const Entry* e2) {
+                        return e1->get_row_index() == e2->get_row_index() && e1->get_element() == e2->get_element();
+                      });
   }
 
   friend bool operator<(const Set_column& c1, const Set_column& c2)
   {
     if (&c1 == &c2) return false;
 
-    auto it1 = c1.column_.begin();
-    auto it2 = c2.column_.begin();
-    while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
-      Index r1 = Master_matrix::get_row_index(**it1);
-      Index r2 = Master_matrix::get_row_index(**it2);
-      Field_element e1 = Master_matrix::get_element(**it1);
-      Field_element e2 = Master_matrix::get_element(**it2);
-
-      if (r1 != r2) return r1 < r2;
-      if (e1 != e2) return e1 < e2;
-
-      ++it1;
-      ++it2;
-    }
-    return it2 != c2.column_.end();
+    return std::lexicographical_compare(c1.column_.begin(),
+                                        c1.column_.end(),
+                                        c2.column_.begin(),
+                                        c2.column_.end(),
+                                        [](const Entry* e1, const Entry* e2) {
+                                          if (e1->get_row_index() != e2->get_row_index())
+                                            return e1->get_row_index() < e2->get_row_index();
+                                          if (e1->get_element() != e2->get_element())
+                                            return e1->get_element() < e2->get_element();
+                                          return false;
+                                        });
   }
 
   // Disabled with row access.

@@ -228,14 +228,6 @@ RU_representative_cycles<Master_matrix>::_get_inverse(Index c)
     }
   };
 
-  auto _assign = [&](E& e, const auto& cell) -> void {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      e = !e;
-    } else {
-      e = cell.get_element();
-    }
-  };
-
   auto _translate = [&](std::size_t i) -> void {
     const auto& map = _matrix()->positionToID_;
     auto& idx = Master_matrix::get_row_index(res[i]);
@@ -252,7 +244,7 @@ RU_representative_cycles<Master_matrix>::_get_inverse(Index c)
     auto lineIt = r.begin();
     E diag(0);
     if (static_cast<int>(lineIt->get_row_index()) == i) {
-      _assign(diag, *lineIt);
+      diag = lineIt->get_element();
       ++lineIt;
     }
     while (lineIt != r.end() && resIt != res.rend()) {
