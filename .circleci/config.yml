@@ -25,6 +25,7 @@ jobs:
   tests:
     docker:
       - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2025.10.02
+    resource_class: large # Sometimes takes a long time to build matrices - Timeout is 1h
     steps:
       - checkout
       - run:
