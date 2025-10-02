@@ -220,7 +220,7 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
   using Chain_opt = typename Master_matrix::Chain_column_option;
 
   Column_support column_;
-  Field_operators* operators_;
+  Field_operators const* operators_;
   Entry_constructor* entryPool_;
 
   template <class Column, class Entry_iterator, typename F1, typename F2, typename F3, typename F4>
@@ -266,14 +266,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Column_s
     : RA_opt(),
       Dim_opt(),
       Chain_opt(),
-      operators_([&]() -> Field_operators* {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          if (colSettings == nullptr) return nullptr;  // for construction of dummy column
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor))
 {}
 
@@ -316,13 +309,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Co
                     ? Master_matrix::template get_null_value<ID_index>()
                     : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
       column_(nonZeroRowIndices.size(), nullptr),
-      operators_([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor))
 {
   Index i = 0;
@@ -348,13 +335,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Index co
                     ? Master_matrix::template get_null_value<ID_index>()
                     : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
       column_(nonZeroRowIndices.size(), nullptr),
-      operators_([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor))
 {
   Index i = 0;
@@ -446,13 +427,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Na
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
-      operators_(colSettings == nullptr ? column.operators_ : [&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   static_assert(!Master_matrix::Option_list::has_row_access,
@@ -479,13 +454,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Na
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
-      operators_(colSettings == nullptr ? column.operators_ : [&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   Index i = 0;
@@ -506,8 +475,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Naive_ve
       column_(std::move(column.column_)),
       operators_(std::exchange(column.operators_, nullptr)),
       entryPool_(std::exchange(column.entryPool_, nullptr))
-{
-}
+{}
 
 template <class Master_matrix, class Support>
 inline Naive_vector_column<Master_matrix, Support>::~Naive_vector_column()

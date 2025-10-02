@@ -242,7 +242,7 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
     Intrusive_list_column* col_;
   };
 
-  Field_operators* operators_;
+  Field_operators const* operators_;
   Entry_constructor* entryPool_;
   Column_support column_;
 
@@ -290,14 +290,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Column_settin
     : RA_opt(),
       Dim_opt(),
       Chain_opt(),
-      operators_([&]() -> Field_operators* {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          if (colSettings == nullptr) return nullptr;  // for construction of dummy column
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor)),
       column_()
 {}
@@ -340,13 +333,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(const Contain
       Chain_opt(nonZeroRowIndices.begin() == nonZeroRowIndices.end()
                     ? Master_matrix::template get_null_value<ID_index>()
                     : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
-      operators_([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor)),
       column_()
 {
@@ -372,13 +359,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Index columnI
       Chain_opt(nonZeroRowIndices.begin() == nonZeroRowIndices.end()
                     ? Master_matrix::template get_null_value<ID_index>()
                     : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
-      operators_([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor)),
       column_()
 {
@@ -470,13 +451,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(const Intrusi
     : RA_opt(),
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
-      operators_(colSettings == nullptr ? column.operators_ : [&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor)),
       column_()
 {
@@ -496,13 +471,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(const Intrusi
     : RA_opt(columnIndex, rowContainer),
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
-      operators_(colSettings == nullptr ? column.operators_ : [&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor)),
       column_()
 {

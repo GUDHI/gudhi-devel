@@ -237,7 +237,7 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
   using Chain_opt = typename Master_matrix::Chain_column_option;
 
   Column_support column_;
-  Field_operators* operators_;
+  Field_operators const* operators_;
   Entry_constructor* entryPool_;
 
   void _delete_entry(typename Column_support::iterator& it);
@@ -258,14 +258,7 @@ inline Unordered_set_column<Master_matrix>::Unordered_set_column(Column_settings
     : RA_opt(),
       Dim_opt(),
       Chain_opt(),
-      operators_([&]() -> Field_operators* {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          if (colSettings == nullptr) return nullptr;  // for construction of dummy column
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor))
 {}
 
@@ -308,13 +301,7 @@ inline Unordered_set_column<Master_matrix>::Unordered_set_column(const Container
                     ? Master_matrix::template get_null_value<ID_index>()
                     : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
       column_(nonZeroRowIndices.size()),
-      operators_([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor))
 {
   for (const auto& id : nonZeroRowIndices) {
@@ -339,13 +326,7 @@ inline Unordered_set_column<Master_matrix>::Unordered_set_column(Index columnInd
                     ? Master_matrix::template get_null_value<ID_index>()
                     : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
       column_(nonZeroRowIndices.size()),
-      operators_([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor))
 {
   for (const auto& id : nonZeroRowIndices) {
@@ -436,13 +417,7 @@ inline Unordered_set_column<Master_matrix>::Unordered_set_column(const Unordered
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.bucket_count()),
-      operators_(colSettings == nullptr ? column.operators_ : [&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   static_assert(!Master_matrix::Option_list::has_row_access,
@@ -468,13 +443,7 @@ inline Unordered_set_column<Master_matrix>::Unordered_set_column(const Unordered
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.bucket_count()),
-      operators_(colSettings == nullptr ? column.operators_ : [&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   for (const Entry* entry : column.column_) {

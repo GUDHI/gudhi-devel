@@ -446,8 +446,20 @@ class Matrix
   /**
    * @private
    */
+  static Field_operators const* get_operator_ptr(Column_settings const* colSettings)
+  {
+    if constexpr (PersistenceMatrixOptions::is_z2) {
+      return nullptr;
+    } else {
+      if (colSettings == nullptr) return nullptr; // used for dummy columns
+      return &(colSettings->operators);
+    }
+  }
+  /**
+   * @private
+   */
   template <typename T>
-  static Element get_coefficient_value(T v, [[maybe_unused]] Field_operators* operators)
+  static Element get_coefficient_value(T v, [[maybe_unused]] Field_operators const* operators)
   {
     if constexpr (PersistenceMatrixOptions::is_z2) {
       return Field_operators::get_value(v);
@@ -458,7 +470,7 @@ class Matrix
   /**
    * @private
    */
-  static Element get_coefficient_value(bool v, [[maybe_unused]] Field_operators* operators) { return v; }
+  static Element get_coefficient_value(bool v, [[maybe_unused]] Field_operators const* operators) { return v; }
 
   // using Column_settings = typename std::conditional<
   //     PersistenceMatrixOptions::is_z2,
@@ -763,9 +775,9 @@ class Matrix
    * @brief Inserts a new column at the end of the matrix. The column will consist of the given index only.
    * 
    * @param idx Entry ID.
-   * @param e Entry coefficient. Ignored if the coefficient field is Z2. Default value: 0.
+   * @param e Entry coefficient. Ignored if the coefficient field is Z2. Default value: 1.
    */
-  void insert_column(ID_index idx, Element e = 0);
+  void insert_column(ID_index idx, Element e = 1U);
   // TODO: for simple boundary matrices, add an index pointing to the first column inserted after the last call of
   // get_current_barcode to enable several calls to get_current_barcode
   /**
@@ -2143,9 +2155,7 @@ template <class PersistenceMatrixOptions>
 inline typename Matrix<PersistenceMatrixOptions>::Element Matrix<PersistenceMatrixOptions>::_get_value(
     int coefficient) const
 {
-  Field_operators* op = nullptr;
-  if constexpr (!PersistenceMatrixOptions::is_z2) op = &colSettings_->operators;
-  return get_coefficient_value(coefficient, op);
+  return get_coefficient_value(coefficient, get_operator_ptr(colSettings_));
 }
 
 }  // namespace persistence_matrix

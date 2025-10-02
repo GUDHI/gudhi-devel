@@ -253,7 +253,7 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
 
   Column_support column_;
   unsigned int insertsSinceLastPrune_;
-  Field_operators* operators_;
+  Field_operators const* operators_;
   Entry_constructor* entryPool_;
 
   void _prune();
@@ -273,14 +273,7 @@ inline Heap_column<Master_matrix>::Heap_column(Column_settings* colSettings)
     : Dim_opt(),
       Chain_opt(),
       insertsSinceLastPrune_(0),
-      operators_([&]() -> Field_operators* {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          if (colSettings == nullptr) return nullptr;  // for construction of dummy column
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor))
 {}
 
@@ -304,13 +297,7 @@ inline Heap_column<Master_matrix>::Heap_column(const Container& nonZeroRowIndice
                     : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
       column_(nonZeroRowIndices.size(), nullptr),
       insertsSinceLastPrune_(0),
-      operators_([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor))
 {
   Index i = 0;
@@ -364,13 +351,7 @@ inline Heap_column<Master_matrix>::Heap_column(const Heap_column& column, Column
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
       insertsSinceLastPrune_(0),
-      operators_(colSettings == nullptr ? column.operators_ : [&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   static_assert(!Master_matrix::Option_list::has_row_access,

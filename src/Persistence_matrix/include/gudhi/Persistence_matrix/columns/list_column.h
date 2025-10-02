@@ -216,7 +216,7 @@ class List_column : public Master_matrix::Row_access_option,
   using Chain_opt = typename Master_matrix::Chain_column_option;
 
   Column_support column_;
-  Field_operators* operators_;
+  Field_operators const* operators_;
   Entry_constructor* entryPool_;
 
   template <class Column, class Entry_iterator, typename F1, typename F2, typename F3, typename F4>
@@ -267,14 +267,7 @@ inline List_column<Master_matrix>::List_column(Column_settings* colSettings)
     : RA_opt(),
       Dim_opt(),
       Chain_opt(),
-      operators_([&]() -> Field_operators* {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          if (colSettings == nullptr) return nullptr;  // for construction of dummy column
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor))
 {}
 
@@ -314,13 +307,7 @@ inline List_column<Master_matrix>::List_column(const Container& nonZeroRowIndice
                     ? Master_matrix::template get_null_value<ID_index>()
                     : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
       column_(nonZeroRowIndices.size()),
-      operators_([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor))
 {
   auto it = column_.begin();
@@ -346,13 +333,7 @@ inline List_column<Master_matrix>::List_column(Index columnIndex,
                     ? Master_matrix::template get_null_value<ID_index>()
                     : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
       column_(nonZeroRowIndices.size()),
-      operators_([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor))
 {
   auto it = column_.begin();
@@ -441,13 +422,7 @@ inline List_column<Master_matrix>::List_column(const List_column& column, Column
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.size()),
-      operators_(colSettings == nullptr ? column.operators_ : [&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   static_assert(!Master_matrix::Option_list::has_row_access,
@@ -474,13 +449,7 @@ inline List_column<Master_matrix>::List_column(const List_column& column,
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.size()),
-      operators_(colSettings == nullptr ? column.operators_ : [&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   auto it = column_.begin();

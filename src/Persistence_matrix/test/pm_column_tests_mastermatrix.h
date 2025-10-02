@@ -164,7 +164,18 @@ struct Column_mini_matrix {
 
   using Entry_representative = std::conditional_t<Options::is_z2, ID_index, std::pair<ID_index, Element> >;
 
-  static Element get_coefficient_value(unsigned int v, [[maybe_unused]] Field_operators* operators)
+  static Field_operators const* get_operator_ptr(Column_settings const* colSettings)
+  {
+    if constexpr (Options::is_z2) {
+      return nullptr;
+    } else {
+      if (colSettings == nullptr) return nullptr; // used for dummy columns
+      return &(colSettings->operators);
+    }
+  }
+
+  template <typename T>
+  static Element get_coefficient_value(T v, [[maybe_unused]] Field_operators const* operators)
   {
     if constexpr (Options::is_z2) {
       return Field_operators::get_value(v);
@@ -172,6 +183,8 @@ struct Column_mini_matrix {
       return operators->get_value(v);
     }
   }
+
+  static Element get_coefficient_value(bool v, [[maybe_unused]] Field_operators const* operators) { return v; }
 
   static ID_index get_row_index(const Matrix_entry& e)
   {

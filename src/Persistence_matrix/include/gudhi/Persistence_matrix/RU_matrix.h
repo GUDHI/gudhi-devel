@@ -17,7 +17,6 @@
 #ifndef PM_RU_MATRIX_H
 #define PM_RU_MATRIX_H
 
-#include <type_traits>  //std::conditional
 #include <utility>      //std::swap, std::move & std::exchange
 #include <iostream>     //print() only
 #include <vector>
@@ -373,9 +372,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
     pivotToColumnIndex_.clear();
     nextEventIndex_ = 0;
     positionToID_.clear();
-    if constexpr (!Master_matrix::Option_list::is_z2) {
-      operators_ = &(colSettings->operators);
-    }
+    operators_ = Master_matrix::get_operator_ptr(colSettings);
   }
 
   /**
@@ -424,7 +421,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   Pivot_dictionary pivotToColumnIndex_; /**< Map from pivot row index to column @ref MatIdx index. */
   Pos_index nextEventIndex_;            /**< Next birth or death index. */
   Position_dictionary positionToID_;    /**< Map from @ref MatIdx to @ref IDIdx. */
-  Field_operators* operators_;          /**< Field operators, can be nullptr if
+  Field_operators const* operators_;    /**< Field operators, can be nullptr if
                                              @ref PersistenceMatrixOptions::is_z2 is true. */
 
   void _insert_boundary(Index currentIndex);
@@ -447,12 +444,8 @@ inline RU_matrix<Master_matrix>::RU_matrix(Column_settings* colSettings)
       reducedMatrixR_(colSettings),
       mirrorMatrixU_(colSettings),
       nextEventIndex_(0),
-      operators_(nullptr)
-{
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-}
+      operators_(Master_matrix::get_operator_ptr(colSettings))
+{}
 
 template <class Master_matrix>
 template <class Boundary_range>
@@ -464,12 +457,8 @@ inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_range>& or
       reducedMatrixR_(orderedBoundaries, colSettings),
       mirrorMatrixU_(orderedBoundaries.size(), colSettings),
       nextEventIndex_(orderedBoundaries.size()),
-      operators_(nullptr)
+      operators_(Master_matrix::get_operator_ptr(colSettings))
 {
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.reserve(orderedBoundaries.size());
   } else {
@@ -489,12 +478,8 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, Column_
       mirrorMatrixU_(numberOfColumns, colSettings),
       nextEventIndex_(0),
       positionToID_(numberOfColumns),
-      operators_(nullptr)
+      operators_(Master_matrix::get_operator_ptr(colSettings))
 {
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.reserve(numberOfColumns);
   } else {
@@ -515,12 +500,8 @@ inline RU_matrix<Master_matrix>::RU_matrix(const RU_matrix& matrixToCopy, Column
       pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
       nextEventIndex_(matrixToCopy.nextEventIndex_),
       positionToID_(matrixToCopy.positionToID_),
-      operators_(colSettings == nullptr ? matrixToCopy.operators_ : nullptr)
-{
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    if (colSettings != nullptr) operators_ = &(colSettings->operators);
-  }
-}
+      operators_(colSettings == nullptr ? matrixToCopy.operators_ : Master_matrix::get_operator_ptr(colSettings))
+{}
 
 template <class Master_matrix>
 inline RU_matrix<Master_matrix>::RU_matrix(RU_matrix&& other) noexcept

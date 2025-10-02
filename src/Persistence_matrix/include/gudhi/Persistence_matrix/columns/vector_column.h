@@ -270,7 +270,7 @@ class Vector_column : public Master_matrix::Row_access_option,
   Column_support column_;
   // TODO: test other containers? Useless when clear(Index) is never called, how much is it worth it?
   std::unordered_set<ID_index> erasedValues_;
-  Field_operators* operators_;
+  Field_operators const* operators_;
   Entry_constructor* entryPool_;
 
   template <class Column, class Entry_iterator, typename F1, typename F2, typename F3, typename F4>
@@ -310,14 +310,7 @@ inline Vector_column<Master_matrix>::Vector_column(Column_settings* colSettings)
     : RA_opt(),
       Dim_opt(),
       Chain_opt(),
-      operators_([&]() -> Field_operators* {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          if (colSettings == nullptr) return nullptr;  // for construction of dummy column
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor))
 {}
 
@@ -357,13 +350,7 @@ inline Vector_column<Master_matrix>::Vector_column(const Container& nonZeroRowIn
                     ? Master_matrix::template get_null_value<ID_index>()
                     : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
       column_(nonZeroRowIndices.size(), nullptr),
-      operators_([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor))
 {
   Index i = 0;
@@ -389,13 +376,7 @@ inline Vector_column<Master_matrix>::Vector_column(Index columnIndex,
                     ? Master_matrix::template get_null_value<ID_index>()
                     : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
       column_(nonZeroRowIndices.size(), nullptr),
-      operators_([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor))
 {
   Index i = 0;
@@ -485,13 +466,7 @@ inline Vector_column<Master_matrix>::Vector_column(const Vector_column& column, 
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
       erasedValues_(column.erasedValues_),
-      operators_(colSettings == nullptr ? column.operators_ : [&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   static_assert(!Master_matrix::Option_list::has_row_access,
@@ -519,13 +494,7 @@ inline Vector_column<Master_matrix>::Vector_column(const Vector_column& column,
       Chain_opt(static_cast<const Chain_opt&>(column)),
       column_(column.column_.size(), nullptr),
       erasedValues_(column.erasedValues_),
-      operators_(colSettings == nullptr ? column.operators_ : [&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nullptr;
-        } else {
-          return &(colSettings->operators);
-        }
-      }()),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   Index i = 0;
