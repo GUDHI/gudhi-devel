@@ -19,6 +19,7 @@
 #include <numpy/random/bitgen.h>  // for bitgen_t
 
 #include <CGAL/Random.h>  // for CGAL::get_default_random()
+#include <thread>
 
 namespace nb = nanobind;
 
@@ -28,9 +29,13 @@ namespace random {
 class RandomGenerator {
  public:
   RandomGenerator() { std::cout << "CGAL::get_default_random: " << &(CGAL::get_default_random()) << std::endl; }
-  RandomGenerator(uint64_t seed) { std::cout << "CGAL::get_default_random: " << &(CGAL::get_default_random()) << std::endl; CGAL::get_default_random() = CGAL::Random(seed); }
-
-  CGAL::Random& get_default_random() { return CGAL::get_default_random(); }
+  RandomGenerator(uint64_t seed) { CGAL::get_default_random() = CGAL::Random(seed); std::cout << "seed = " << seed << " - thread id " << std::this_thread::get_id() << " - CGAL::get_default_random: " << &(CGAL::get_default_random()) << std::endl; }
+  RandomGenerator(RandomGenerator& other) = delete;
+  RandomGenerator(RandomGenerator&& other) = delete;
+  RandomGenerator& operator=(const RandomGenerator& other) = delete;
+  RandomGenerator& operator=(RandomGenerator&& other) = delete;
+  
+  CGAL::Random* get_default_random() { return &(CGAL::get_default_random()); }
   uint32_t next_uint32() { return CGAL::get_default_random().get_int(0, UINT32_MAX); }
   uint64_t next_uint64() { return CGAL::get_default_random().get_int(0, UINT64_MAX); }
   double   next_double() { return CGAL::get_default_random().get_double(); }

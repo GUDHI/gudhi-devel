@@ -19,6 +19,7 @@
 
 #include <vector>  // for vector<>
 #include <boost/math/constants/constants.hpp> // for pi constant
+#include <thread>
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
 #if CGAL_VERSION_NR < 1041101000
@@ -256,17 +257,18 @@ std::vector<typename Kernel::Point_d> generate_points_on_torus_d(std::size_t num
 
 template <typename Kernel>
 std::vector<typename Kernel::Point_d> generate_points_on_sphere_d(std::size_t num_points, int dim, double radius,
-                                                                  double radius_noise_percentage = 0.) {
+                                                                  double radius_noise_percentage,
+                                                                  CGAL::Random* rng) {
   typedef typename Kernel::Point_d Point;
   Kernel k;
-  CGAL::Random rng;
+  std::cout << "generate_points_on_sphere_d rng = " << rng << " - thread id " << std::this_thread::get_id() << std::endl;
   CGAL::Random_points_on_sphere_d<Point> generator(dim, radius);
   std::vector<Point> points;
   points.reserve(num_points);
   for (std::size_t i = 0; i < num_points;) {
     Point p = *generator++;
     if (radius_noise_percentage > 0.) {
-      double radius_noise_ratio = rng.get_double(
+      double radius_noise_ratio = rng->get_double(
                                                  (100. - radius_noise_percentage) / 100.,
                                                  (100. + radius_noise_percentage) / 100.);
 
