@@ -430,7 +430,9 @@ class SimplexTree(t._Simplex_tree_python_interface):
         if inplace:
             super()._collapse_edges_inplace(nb_iterations)
             return self
-        return super()._collapse_edges(nb_iterations)
+        st = SimplexTree()
+        super()._collapse_edges(st, nb_iterations)
+        return st
 
     def collapse_edges_of_flag_complex(
         self, nb_iterations: int = 1, max_expansion_dim: int = None, inplace: bool = True
@@ -470,10 +472,11 @@ class SimplexTree(t._Simplex_tree_python_interface):
             if max_expansion_dim > 1:
                 super().expansion(max_expansion_dim)
             return self
-        collapsed_complex = super()._collapse_edges(nb_iterations)
+        st = SimplexTree()
+        super()._collapse_edges(st, nb_iterations)
         if max_expansion_dim > 1:
-            collapsed_complex.expansion(max_expansion_dim)
-        return collapsed_complex
+            st.expansion(max_expansion_dim)
+        return st
 
     def collapse_edges(self, nb_iterations: int = 1) -> SimplexTree:
         """.. deprecated:: 3.12.0 

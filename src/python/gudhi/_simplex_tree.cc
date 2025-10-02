@@ -289,7 +289,8 @@ explains how to compute an extension of persistence called extended persistence.
            &gsti::collapse_edges_inplace,
            nb::call_guard<nb::gil_scoped_release>())
       .def("_collapse_edges",
-           &gsti::collapse_edges)
+           &gsti::collapse_edges,
+           nb::call_guard<nb::gil_scoped_release>())
       .def("reset_filtration",
            &gsti::reset_filtration,
            nb::arg("filtration"),
