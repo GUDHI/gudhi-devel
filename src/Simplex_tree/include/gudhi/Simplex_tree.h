@@ -1137,8 +1137,8 @@ class Simplex_tree {
      * Then, the filtration values of all faces of \f$ \sigma \f$ are pushed to the union of their old value and of
      * the new value of \f$ \sigma \f$.
      *
-     * So, this strategy can be interpreted as "insert the new simplices at the requested value \f$ f \f$ and insert
-     * already existing faces sooner in the filtration if necessary to maintain a valid filtration".
+     * So, this strategy can be interpreted as: insert the new simplices at the requested value \f$ f \f$ and insert
+     * already existing faces sooner in the filtration if necessary to maintain a valid filtration.
      */
     LOWER_EXISTING,
     /**
@@ -1148,8 +1148,8 @@ class Simplex_tree {
      * low (to insure the validity of the filtration). This is computed with @ref FiltrationValue::intersect_lifetimes.
      * - if \f$ \sigma \f$ existed already, then nothing is done.
      *
-     * So, this strategy can be interpreted as "insert the new simplices as soon as the current filtration allows,
-     * with a lower bound at \f$ f \f$". If no lower bound is desired, \f$ f \f$ should be set to -inf or not specified
+     * So, this strategy can be interpreted as: insert the new simplices as soon as the current filtration allows,
+     * with a lower bound at \f$ f \f$. If no lower bound is desired, \f$ f \f$ should be set to -inf or not specified
      * at all.
      */
     INCREASE_NEW,
