@@ -1,20 +1,21 @@
 name: pip packaging osx
 
-on:
-  release:
-    types: [published]
+# on:
+#   release:
+#     types: [published]
+on: [push, pull_request]
 
 env:
-  MACOSX_DEPLOYMENT_TARGET: 13.0
-  _PYTHON_HOST_PLATFORM: macosx-13.0-universal2
+  MACOSX_DEPLOYMENT_TARGET: 14.0
+  _PYTHON_HOST_PLATFORM: macosx-14.0-universal2
   ARCHFLAGS: "-arch arm64 -arch x86_64"
 
 jobs:
   # Python 3.9+ specific case where NumPy 2.x will be supported
   # NumPy packages for osx x86 and arm are only available from 1.21.2, but stable for both versions from 1.21.4 and python 3.9+
   wheels:
-    # Should use macos-latest, but python 3.9 is no more available from macos-14
-    runs-on: macos-13
+    # Python 3.9 is only available for MacOS Intel version (not the ARM one) cf. https://github.com/actions/runner-images
+    runs-on: macos-14-large
     strategy:
       max-parallel: 4
       matrix:
@@ -99,9 +100,14 @@ jobs:
           python -m pytest src/python/test/test_wasserstein_barycenter.py
           python -m pytest src/python/test/test_weighted_rips_complex.py
           python -m pytest src/python/test/test_witness_complex.py
-      - name: Publish on PyPi
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: |
-          python -m twine upload wheelhouse/*.whl
+      - name: Upload OSx python wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: osx python wheel
+          path: wheelhouse/*.whl
+#      - name: Publish on PyPi
+#        env:
+#          TWINE_USERNAME: __token__
+#          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+#        run: |
+#          python -m twine upload wheelhouse/*.whl

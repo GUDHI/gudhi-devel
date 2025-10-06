@@ -3,14 +3,14 @@ name: pip build osx
 on: [push, pull_request]
 
 env:
-  MACOSX_DEPLOYMENT_TARGET: 13.0
-  _PYTHON_HOST_PLATFORM: macosx-13.0-universal2
+  MACOSX_DEPLOYMENT_TARGET: 14.0
+  _PYTHON_HOST_PLATFORM: macosx-14.0-universal2
   ARCHFLAGS: "-arch arm64 -arch x86_64"
 
 jobs:
   build:
-    # Should use macos-latest, but python 3.9 is no more available from macos-14
-    runs-on: macos-13
+    # Python 3.9 is only available for MacOS Intel version (not the ARM one) cf. https://github.com/actions/runner-images
+    runs-on: macos-14-large
     strategy:
       max-parallel: 4
       matrix:
