@@ -236,10 +236,8 @@ class Naive_vector_column : public Master_matrix::Row_access_option,
 
   void _delete_entry(Entry* entry);
   void _delete_entry(typename Column_support::iterator& it);
-  Entry* _insert_entry(const Field_element& value, ID_index rowIndex, Column_support& column);
-  void _insert_entry(ID_index rowIndex, Column_support& column);
-  void _update_entry(const Field_element& value, ID_index rowIndex, Index position);
-  void _update_entry(ID_index rowIndex, Index position);
+  Entry* _insert_entry(Column_support& column, ID_index rowIndex, const Field_element& value);
+  void _update_entry(Index position, ID_index rowIndex, const Field_element& value);
   template <class Entry_range>
   bool _add(const Entry_range& column);
   template <class Entry_range>
@@ -307,11 +305,9 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Co
 {
   Index i = 0;
   for (const auto& id : nonZeroRowIndices) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_entry(Master_matrix::get_row_index(id), i++);
-    } else {
-      _update_entry(operators_->get_value(Master_matrix::get_element(id)), Master_matrix::get_row_index(id), i++);
-    }
+    _update_entry(i++,
+                  Master_matrix::get_row_index(id),
+                  Master_matrix::get_coefficient_value(Master_matrix::get_element(id), operators_));
   }
 }
 
@@ -333,11 +329,9 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Index co
 {
   Index i = 0;
   for (const auto& id : nonZeroRowIndices) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_entry(Master_matrix::get_row_index(id), i++);
-    } else {
-      _update_entry(operators_->get_value(Master_matrix::get_element(id)), Master_matrix::get_row_index(id), i++);
-    }
+    _update_entry(i++,
+                  Master_matrix::get_row_index(id),
+                  Master_matrix::get_coefficient_value(Master_matrix::get_element(id), operators_));
   }
 }
 
@@ -354,7 +348,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(ID_index
 {
   static_assert(Master_matrix::Option_list::is_z2,
                 "Constructor not available for Zp != Z2. Please specify the coefficient.");
-  _update_entry(idx, 0);
+  _update_entry(0, idx, 1);
 }
 
 template <class Master_matrix, class Support>
@@ -371,7 +365,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(ID_index
 {
   static_assert(!Master_matrix::Option_list::is_z2,
                 "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
-  _update_entry(operators_->get_value(e), idx, 0);
+  _update_entry(0, idx, operators_->get_value(e));
 }
 
 template <class Master_matrix, class Support>
@@ -390,7 +384,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Index co
 {
   static_assert(Master_matrix::Option_list::is_z2,
                 "Constructor not available for Zp != Z2. Please specify the coefficient.");
-  _update_entry(idx, 0);
+  _update_entry(0, idx, 1);
 }
 
 template <class Master_matrix, class Support>
@@ -410,7 +404,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(Index co
 {
   static_assert(!Master_matrix::Option_list::is_z2,
                 "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
-  _update_entry(operators_->get_value(e), idx, 0);
+  _update_entry(0, idx, operators_->get_value(e));
 }
 
 template <class Master_matrix, class Support>
@@ -429,11 +423,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Na
 
   Index i = 0;
   for (const Entry* entry : column.column_) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_entry(entry->get_row_index(), i++);
-    } else {
-      _update_entry(entry->get_element(), entry->get_row_index(), i++);
-    }
+    _update_entry(i++, entry->get_row_index(), entry->get_element());
   }
 }
 
@@ -452,11 +442,7 @@ inline Naive_vector_column<Master_matrix, Support>::Naive_vector_column(const Na
 {
   Index i = 0;
   for (const Entry* entry : column.column_) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_entry(entry->get_row_index(), i++);
-    } else {
-      _update_entry(entry->get_element(), entry->get_row_index(), i++);
-    }
+    _update_entry(i++, entry->get_row_index(), entry->get_element());
   }
 }
 
@@ -810,11 +796,7 @@ inline void Naive_vector_column<Master_matrix, Support>::push_back(const Entry& 
 
   GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    _insert_entry(entry.get_row_index(), column_);
-  } else {
-    _insert_entry(entry.get_element(), entry.get_row_index(), column_);
-  }
+  _insert_entry(column_, entry.get_row_index(), entry.get_element());
 }
 
 template <class Master_matrix, class Support>
@@ -845,11 +827,7 @@ inline Naive_vector_column<Master_matrix, Support>& Naive_vector_column<Master_m
     if (column_[i] != nullptr) {
       tmpPool->destroy(column_[i]);
     }
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_entry(entry->get_row_index(), i++);
-    } else {
-      _update_entry(entry->get_element(), entry->get_row_index(), i++);
-    }
+    _update_entry(i++, entry->get_row_index(), entry->get_element());
   }
 
   operators_ = other.operators_;
@@ -896,62 +874,34 @@ inline void Naive_vector_column<Master_matrix, Support>::_delete_entry(typename 
 
 template <class Master_matrix, class Support>
 inline typename Naive_vector_column<Master_matrix, Support>::Entry*
-Naive_vector_column<Master_matrix, Support>::_insert_entry(const Field_element& value,
+Naive_vector_column<Master_matrix, Support>::_insert_entry(Column_support& column,
                                                            ID_index rowIndex,
-                                                           Column_support& column)
+                                                           const Field_element& value)
 {
+  Entry* newEntry;
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    newEntry->set_element(value);
-    column.push_back(newEntry);
-    RA_opt::insert_entry(rowIndex, newEntry);
-    return newEntry;
+    newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
   } else {
-    Entry* newEntry = entryPool_->construct(rowIndex);
-    column.push_back(newEntry);
-    newEntry->set_element(value);
-    return newEntry;
+    newEntry = entryPool_->construct(rowIndex);
   }
+  column.push_back(newEntry);
+  newEntry->set_element(value);
+  if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::insert_entry(rowIndex, newEntry);
+  return newEntry;
 }
 
 template <class Master_matrix, class Support>
-inline void Naive_vector_column<Master_matrix, Support>::_insert_entry(ID_index rowIndex, Column_support& column)
-{
-  if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    column.push_back(newEntry);
-    RA_opt::insert_entry(rowIndex, newEntry);
-  } else {
-    column.push_back(entryPool_->construct(rowIndex));
-  }
-}
-
-template <class Master_matrix, class Support>
-inline void Naive_vector_column<Master_matrix, Support>::_update_entry(const Field_element& value,
+inline void Naive_vector_column<Master_matrix, Support>::_update_entry(Index position,
                                                                        ID_index rowIndex,
-                                                                       Index position)
+                                                                       const Field_element& value)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    newEntry->set_element(value);
-    column_[position] = newEntry;
-    RA_opt::insert_entry(rowIndex, newEntry);
-  } else {
-    column_[position] = entryPool_->construct(rowIndex);
-    column_[position]->set_element(value);
-  }
-}
-
-template <class Master_matrix, class Support>
-inline void Naive_vector_column<Master_matrix, Support>::_update_entry(ID_index rowIndex, Index position)
-{
-  if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    column_[position] = newEntry;
-    RA_opt::insert_entry(rowIndex, newEntry);
+    column_[position] = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
   } else {
     column_[position] = entryPool_->construct(rowIndex);
   }
+  column_[position]->set_element(value);
+  if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::insert_entry(rowIndex, column_[position]);
 }
 
 template <class Master_matrix, class Support>
@@ -963,11 +913,7 @@ inline bool Naive_vector_column<Master_matrix, Support>::_add(const Entry_range&
     column_.resize(column.size());
     Index i = 0;
     for (const Entry& entry : column) {
-      if constexpr (Master_matrix::Option_list::is_z2) {
-        _update_entry(entry.get_row_index(), i++);
-      } else {
-        _update_entry(entry.get_element(), entry.get_row_index(), i++);
-      }
+      _update_entry(i++, entry.get_row_index(), entry.get_element());
     }
     return true;
   }
@@ -981,11 +927,7 @@ inline bool Naive_vector_column<Master_matrix, Support>::_add(const Entry_range&
       [&](Entry* entryTarget) { newColumn.push_back(entryTarget); },
       [&](typename Entry_range::const_iterator& itSource,
           [[maybe_unused]] const typename Column_support::iterator& itTarget) {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          _insert_entry(itSource->get_row_index(), newColumn);
-        } else {
-          _insert_entry(itSource->get_element(), itSource->get_row_index(), newColumn);
-        }
+        _insert_entry(newColumn, itSource->get_row_index(), itSource->get_element());
       },
       [&](Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
         if constexpr (!Master_matrix::Option_list::is_z2)
@@ -1037,7 +979,7 @@ inline bool Naive_vector_column<Master_matrix, Support>::_multiply_target_and_ad
           newColumn.push_back(entryTarget);
         },
         [&](typename Entry_range::const_iterator& itSource, const typename Column_support::iterator& itTarget) {
-          _insert_entry(itSource->get_element(), itSource->get_row_index(), newColumn);
+          _insert_entry(newColumn, itSource->get_row_index(), itSource->get_element());
         },
         [&](Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
           operators_->multiply_and_add_inplace_front(targetElement, val, itSource->get_element());
@@ -1084,7 +1026,7 @@ inline bool Naive_vector_column<Master_matrix, Support>::_multiply_source_and_ad
         *this,
         [&](Entry* entryTarget) { newColumn.push_back(entryTarget); },
         [&](typename Entry_range::const_iterator& itSource, const typename Column_support::iterator& itTarget) {
-          Entry* newEntry = _insert_entry(itSource->get_element(), itSource->get_row_index(), newColumn);
+          Entry* newEntry = _insert_entry(newColumn, itSource->get_row_index(), itSource->get_element());
           operators_->multiply_inplace(newEntry->get_element(), val);
           if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(*newEntry);
         },

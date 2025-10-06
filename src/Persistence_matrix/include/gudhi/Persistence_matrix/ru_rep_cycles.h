@@ -161,17 +161,7 @@ template <class Master_matrix>
 inline void RU_representative_cycles<Master_matrix>::_retrieve_cycle_from_r(Index colIdx, Index repIdx)
 {
   auto& col = _matrix()->reducedMatrixR_.get_column(colIdx);
-  Content_range r = col.get_non_zero_content_range();
-  if constexpr (RangeTraits<Content_range>::has_size) {
-    representativeCycles_[repIdx].reserve(r.size());
-  }
-  for (const auto& c : r) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      representativeCycles_[repIdx].push_back(c.get_row_index());
-    } else {
-      representativeCycles_[repIdx].push_back({c.get_row_index(), c.get_element()});
-    }
-  }
+  representativeCycles_[repIdx] = Master_matrix::build_cycle_from_range(col.get_non_zero_content_range());
 }
 
 template <class Master_matrix>

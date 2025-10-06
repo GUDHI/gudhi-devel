@@ -267,6 +267,7 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   template <class Entry_range>
   bool _multiply_source_and_add(const Entry_range& column, const Field_element& val);
   void _add_coefficient(Field_element& e, const Field_element& a) const;
+  Field_element _multiply_coefficient(const Field_element& e, const Field_element& a) const;
 };
 
 template <class Master_matrix>
@@ -1013,9 +1014,7 @@ inline bool Heap_column<Master_matrix>::_multiply_source_and_add(const Entry_ran
     Index i = 0;
     for (const Entry& entry : column) {
       column_[i] = entryPool_->construct(entry.get_row_index());
-      if constexpr (!Master_matrix::Option_list::is_z2) {
-        column_[i]->set_element(operators_->multiply(entry.get_element(), val));
-      }
+      column_[i]->set_element(_multiply_coefficient(entry.get_element(), val));
       ++i;
     }
     insertsSinceLastPrune_ = column_.size();
@@ -1031,9 +1030,7 @@ inline bool Heap_column<Master_matrix>::_multiply_source_and_add(const Entry_ran
     ++insertsSinceLastPrune_;
 
     column_.push_back(entryPool_->construct(entry.get_row_index()));
-    if constexpr (!Master_matrix::Option_list::is_z2) {
-      column_.back()->set_element(operators_->multiply(entry.get_element(), val));
-    }
+    column_.back()->set_element(_multiply_coefficient(entry.get_element(), val));
 
     if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
       if (entry.get_row_index() == Chain_opt::_get_pivot()) {
@@ -1058,6 +1055,18 @@ inline void Heap_column<Master_matrix>::_add_coefficient(Field_element& e,
     e = !e;
   } else {
     operators_->add_inplace(e, a);
+  }
+}
+
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::Field_element Heap_column<Master_matrix>::_multiply_coefficient(
+    const Field_element& e,
+    [[maybe_unused]] const Field_element& a) const
+{
+  if constexpr (Master_matrix::Option_list::is_z2) {
+    return e;  // a has to be 1
+  } else {
+    return operators_->multiply(e, a);
   }
 }
 

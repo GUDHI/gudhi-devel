@@ -241,12 +241,10 @@ class List_column : public Master_matrix::Row_access_option,
                                                  Column& targetColumn);
 
   void _delete_entry(typename Column_support::iterator& it);
-  Entry* _insert_entry(const Field_element& value,
+  Entry* _insert_entry(const typename Column_support::iterator& position,
                        ID_index rowIndex,
-                       const typename Column_support::iterator& position);
-  void _insert_entry(ID_index rowIndex, const typename Column_support::iterator& position);
-  void _update_entry(const Field_element& value, ID_index rowIndex, const typename Column_support::iterator& position);
-  void _update_entry(ID_index rowIndex, const typename Column_support::iterator& position);
+                       const Field_element& value);
+  void _update_entry(const typename Column_support::iterator& position, ID_index rowIndex, const Field_element& value);
   template <class Entry_range>
   bool _add(const Entry_range& column);
   template <class Entry_range>
@@ -305,11 +303,9 @@ inline List_column<Master_matrix>::List_column(const Container& nonZeroRowIndice
 {
   auto it = column_.begin();
   for (const auto& id : nonZeroRowIndices) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_entry(Master_matrix::get_row_index(id), it++);
-    } else {
-      _update_entry(operators_->get_value(Master_matrix::get_element(id)), Master_matrix::get_row_index(id), it++);
-    }
+    _update_entry(it++,
+                  Master_matrix::get_row_index(id),
+                  Master_matrix::get_coefficient_value(Master_matrix::get_element(id), operators_));
   }
 }
 
@@ -331,11 +327,9 @@ inline List_column<Master_matrix>::List_column(Index columnIndex,
 {
   auto it = column_.begin();
   for (const auto& id : nonZeroRowIndices) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_entry(Master_matrix::get_row_index(id), it++);
-    } else {
-      _update_entry(operators_->get_value(Master_matrix::get_element(id)), Master_matrix::get_row_index(id), it++);
-    }
+    _update_entry(it++,
+                  Master_matrix::get_row_index(id),
+                  Master_matrix::get_coefficient_value(Master_matrix::get_element(id), operators_));
   }
 }
 
@@ -350,7 +344,7 @@ inline List_column<Master_matrix>::List_column(ID_index idx, Dimension dimension
 {
   static_assert(Master_matrix::Option_list::is_z2,
                 "Constructor not available for Zp != Z2. Please specify the coefficient.");
-  _update_entry(idx, column_.begin());
+  _update_entry(column_.begin(), idx, 1);
 }
 
 template <class Master_matrix>
@@ -367,7 +361,7 @@ inline List_column<Master_matrix>::List_column(ID_index idx,
 {
   static_assert(!Master_matrix::Option_list::is_z2,
                 "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
-  _update_entry(operators_->get_value(e), idx, column_.begin());
+  _update_entry(column_.begin(), idx, operators_->get_value(e));
 }
 
 template <class Master_matrix>
@@ -386,7 +380,7 @@ inline List_column<Master_matrix>::List_column(Index columnIndex,
 {
   static_assert(Master_matrix::Option_list::is_z2,
                 "Constructor not available for Zp != Z2. Please specify the coefficient.");
-  _update_entry(idx, column_.begin());
+  _update_entry(column_.begin(), idx, 1);
 }
 
 template <class Master_matrix>
@@ -406,7 +400,7 @@ inline List_column<Master_matrix>::List_column(Index columnIndex,
 {
   static_assert(!Master_matrix::Option_list::is_z2,
                 "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
-  _update_entry(operators_->get_value(e), idx, column_.begin());
+  _update_entry(column_.begin(), idx, operators_->get_value(e));
 }
 
 template <class Master_matrix>
@@ -424,11 +418,7 @@ inline List_column<Master_matrix>::List_column(const List_column& column, Column
 
   auto it = column_.begin();
   for (const Entry* entry : column.column_) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_entry(entry->get_row_index(), it++);
-    } else {
-      _update_entry(entry->get_element(), entry->get_row_index(), it++);
-    }
+    _update_entry(it++, entry->get_row_index(), entry->get_element());
   }
 }
 
@@ -447,11 +437,7 @@ inline List_column<Master_matrix>::List_column(const List_column& column,
 {
   auto it = column_.begin();
   for (const Entry* entry : column.column_) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_entry(entry->get_row_index(), it++);
-    } else {
-      _update_entry(entry->get_element(), entry->get_row_index(), it++);
-    }
+    _update_entry(it++, entry->get_row_index(), entry->get_element());
   }
 }
 
@@ -791,11 +777,7 @@ inline void List_column<Master_matrix>::push_back(const Entry& entry)
 
   GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    _insert_entry(entry.get_row_index(), column_.end());
-  } else {
-    _insert_entry(entry.get_element(), entry.get_row_index(), column_.end());
-  }
+  _insert_entry(column_.end(), entry.get_row_index(), entry.get_element());
 }
 
 template <class Master_matrix>
@@ -825,11 +807,7 @@ inline List_column<Master_matrix>& List_column<Master_matrix>::operator=(const L
     if (*it != nullptr) {
       tmpPool->destroy(*it);
     }
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _update_entry(entry->get_row_index(), it++);
-    } else {
-      _update_entry(entry->get_element(), entry->get_row_index(), it++);
-    }
+    _update_entry(it++, entry->get_row_index(), entry->get_element());
   }
 
   operators_ = other.operators_;
@@ -869,63 +847,34 @@ inline void List_column<Master_matrix>::_delete_entry(typename Column_support::i
 
 template <class Master_matrix>
 inline typename List_column<Master_matrix>::Entry* List_column<Master_matrix>::_insert_entry(
-    const Field_element& value,
+    const typename Column_support::iterator& position,
     ID_index rowIndex,
-    const typename Column_support::iterator& position)
+    const Field_element& value)
 {
+  Entry* newEntry;
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    newEntry->set_element(value);
-    column_.insert(position, newEntry);
-    RA_opt::insert_entry(rowIndex, newEntry);
-    return newEntry;
+    newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
   } else {
-    Entry* newEntry = entryPool_->construct(rowIndex);
-    newEntry->set_element(value);
-    column_.insert(position, newEntry);
-    return newEntry;
+    newEntry = entryPool_->construct(rowIndex);
   }
+  newEntry->set_element(value);
+  column_.insert(position, newEntry);
+  if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::insert_entry(rowIndex, newEntry);
+  return newEntry;
 }
 
 template <class Master_matrix>
-inline void List_column<Master_matrix>::_insert_entry(ID_index rowIndex,
-                                                      const typename Column_support::iterator& position)
-{
-  if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    column_.insert(position, newEntry);
-    RA_opt::insert_entry(rowIndex, newEntry);
-  } else {
-    Entry* newEntry = entryPool_->construct(rowIndex);
-    column_.insert(position, newEntry);
-  }
-}
-
-template <class Master_matrix>
-inline void List_column<Master_matrix>::_update_entry(const Field_element& value,
+inline void List_column<Master_matrix>::_update_entry(const typename Column_support::iterator& position,
                                                       ID_index rowIndex,
-                                                      const typename Column_support::iterator& position)
+                                                      const Field_element& value)
 {
   if constexpr (Master_matrix::Option_list::has_row_access) {
     *position = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    (*position)->set_element(value);
-    RA_opt::insert_entry(rowIndex, *position);
-  } else {
-    *position = entryPool_->construct(rowIndex);
-    (*position)->set_element(value);
-  }
-}
-
-template <class Master_matrix>
-inline void List_column<Master_matrix>::_update_entry(ID_index rowIndex,
-                                                      const typename Column_support::iterator& position)
-{
-  if constexpr (Master_matrix::Option_list::has_row_access) {
-    *position = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    RA_opt::insert_entry(rowIndex, *position);
   } else {
     *position = entryPool_->construct(rowIndex);
   }
+  (*position)->set_element(value);
+  if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::insert_entry(rowIndex, *position);
 }
 
 template <class Master_matrix>
@@ -937,11 +886,7 @@ inline bool List_column<Master_matrix>::_add(const Entry_range& column)
     column_.resize(column.size());
     auto it = column_.begin();
     for (const Entry& entry : column) {
-      if constexpr (Master_matrix::Option_list::is_z2) {
-        _update_entry(entry.get_row_index(), it++);
-      } else {
-        _update_entry(entry.get_element(), entry.get_row_index(), it++);
-      }
+      _update_entry(it++, entry.get_row_index(), entry.get_element());
     }
     return true;
   }

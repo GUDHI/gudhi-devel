@@ -268,8 +268,7 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
                                                  Column& targetColumn);
 
   void _delete_entry(iterator& it);
-  Entry* _insert_entry(const Field_element& value, ID_index rowIndex, const iterator& position);
-  void _insert_entry(ID_index rowIndex, const iterator& position);
+  Entry* _insert_entry(const iterator& position, ID_index rowIndex, const Field_element& value);
   template <class Entry_range>
   bool _add(const Entry_range& column);
   template <class Entry_range>
@@ -331,12 +330,9 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(const Contain
       column_()
 {
   for (const auto& id : nonZeroRowIndices) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _insert_entry(Master_matrix::get_row_index(id), column_.end());
-    } else {
-      _insert_entry(
-          operators_->get_value(Master_matrix::get_element(id)), Master_matrix::get_row_index(id), column_.end());
-    }
+    _insert_entry(column_.end(),
+                  Master_matrix::get_row_index(id),
+                  Master_matrix::get_coefficient_value(Master_matrix::get_element(id), operators_));
   }
 }
 
@@ -357,12 +353,9 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Index columnI
       column_()
 {
   for (const auto& id : nonZeroRowIndices) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _insert_entry(Master_matrix::get_row_index(id), column_.end());
-    } else {
-      _insert_entry(
-          operators_->get_value(Master_matrix::get_element(id)), Master_matrix::get_row_index(id), column_.end());
-    }
+    _insert_entry(column_.end(),
+                  Master_matrix::get_row_index(id),
+                  Master_matrix::get_coefficient_value(Master_matrix::get_element(id), operators_));
   }
 }
 
@@ -379,7 +372,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(ID_index idx,
 {
   static_assert(Master_matrix::Option_list::is_z2,
                 "Constructor not available for Zp != Z2. Please specify the coefficient.");
-  _insert_entry(idx, column_.end());
+  _insert_entry(column_.end(), idx, 1);
 }
 
 template <class Master_matrix>
@@ -396,7 +389,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(ID_index idx,
 {
   static_assert(!Master_matrix::Option_list::is_z2,
                 "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
-  _insert_entry(operators_->get_value(e), idx, column_.end());
+  _insert_entry(column_.end(), idx, operators_->get_value(e));
 }
 
 template <class Master_matrix>
@@ -415,7 +408,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Index columnI
 {
   static_assert(Master_matrix::Option_list::is_z2,
                 "Constructor not available for Zp != Z2. Please specify the coefficient.");
-  _insert_entry(idx, column_.end());
+  _insert_entry(column_.end(), idx, 1);
 }
 
 template <class Master_matrix>
@@ -435,7 +428,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Index columnI
 {
   static_assert(!Master_matrix::Option_list::is_z2,
                 "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
-  _insert_entry(operators_->get_value(e), idx, column_.end());
+  _insert_entry(column_.end(), idx, operators_->get_value(e));
 }
 
 template <class Master_matrix>
@@ -469,11 +462,7 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(const Intrusi
       column_()
 {
   for (const Entry& entry : column.column_) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _insert_entry(entry.get_row_index(), column_.end());
-    } else {
-      _insert_entry(entry.get_element(), entry.get_row_index(), column_.end());
-    }
+    _insert_entry(column_.end(), entry.get_row_index(), entry.get_element());
   }
 }
 
@@ -820,11 +809,7 @@ inline void Intrusive_list_column<Master_matrix>::push_back(const Entry& entry)
 
   GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    _insert_entry(entry.get_row_index(), column_.end());
-  } else {
-    _insert_entry(entry.get_element(), entry.get_row_index(), column_.end());
-  }
+  _insert_entry(column_.end(), entry.get_row_index(), entry.get_element());
 }
 
 template <class Master_matrix>
@@ -877,35 +862,20 @@ inline void Intrusive_list_column<Master_matrix>::_delete_entry(iterator& it)
 
 template <class Master_matrix>
 inline typename Intrusive_list_column<Master_matrix>::Entry* Intrusive_list_column<Master_matrix>::_insert_entry(
-    const Field_element& value,
+    const iterator& position,
     ID_index rowIndex,
-    const iterator& position)
+    const Field_element& value)
 {
+  Entry* newEntry;
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    newEntry->set_element(value);
-    column_.insert(position, *newEntry);
-    RA_opt::insert_entry(rowIndex, newEntry);
-    return newEntry;
+    newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
   } else {
-    Entry* newEntry = entryPool_->construct(rowIndex);
-    newEntry->set_element(value);
-    column_.insert(position, *newEntry);
-    return newEntry;
+    newEntry = entryPool_->construct(rowIndex);
   }
-}
-
-template <class Master_matrix>
-inline void Intrusive_list_column<Master_matrix>::_insert_entry(ID_index rowIndex, const iterator& position)
-{
-  if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    column_.insert(position, *newEntry);
-    RA_opt::insert_entry(rowIndex, newEntry);
-  } else {
-    Entry* newEntry = entryPool_->construct(rowIndex);
-    column_.insert(position, *newEntry);
-  }
+  newEntry->set_element(value);
+  column_.insert(position, *newEntry);
+  if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::insert_entry(rowIndex, newEntry);
+  return newEntry;
 }
 
 template <class Master_matrix>

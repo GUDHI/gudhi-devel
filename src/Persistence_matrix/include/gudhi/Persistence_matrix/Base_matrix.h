@@ -358,7 +358,8 @@ class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<
   template <class Container>
   void _container_insert(const Container& column, Index pos, Dimension dim);
   void _container_insert(Index idx, Field_element e, Index pos, Dimension dim);
-  void _container_insert(const Column& column, [[maybe_unused]] Index pos = 0);
+  template <class ColumnIterator>
+  void _container_insert(const ColumnIterator& rep);
 };
 
 template <class Master_matrix>
@@ -409,11 +410,7 @@ inline Base_matrix<Master_matrix>::Base_matrix(const Base_matrix& matrixToCopy, 
 {
   matrix_.reserve(matrixToCopy.matrix_.size());
   for (const auto& cont : matrixToCopy.matrix_) {
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      _container_insert(cont.second, cont.first);
-    } else {
-      _container_insert(cont);
-    }
+    _container_insert(cont);
   }
 }
 
@@ -608,11 +605,7 @@ inline Base_matrix<Master_matrix>& Base_matrix<Master_matrix>::operator=(const B
 
   matrix_.reserve(other.matrix_.size());
   for (const auto& cont : other.matrix_) {
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      _container_insert(cont.second, cont.first);
-    } else {
-      _container_insert(cont);
-    }
+    _container_insert(cont);
   }
 
   return *this;
@@ -816,19 +809,21 @@ inline void Base_matrix<Master_matrix>::_container_insert(Index idx, [[maybe_unu
 }
 
 template <class Master_matrix>
-inline void Base_matrix<Master_matrix>::_container_insert(const Column& column, [[maybe_unused]] Index pos)
+template <class ColumnIterator> // Pair (pos,Column) if has_map_column_container, Column otherwise
+inline void Base_matrix<Master_matrix>::_container_insert(const ColumnIterator& rep)
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    const auto& col = rep.second;
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.try_emplace(pos, Column(column, column.get_column_index(), RA_opt::_get_rows_ptr(), colSettings_));
+      matrix_.try_emplace(rep.first, Column(col, col.get_column_index(), RA_opt::_get_rows_ptr(), colSettings_));
     } else {
-      matrix_.try_emplace(pos, Column(column, colSettings_));
+      matrix_.try_emplace(rep.first, Column(col, colSettings_));
     }
   } else {
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.emplace_back(column, column.get_column_index(), RA_opt::_get_rows_ptr(), colSettings_);
+      matrix_.emplace_back(rep, rep.get_column_index(), RA_opt::_get_rows_ptr(), colSettings_);
     } else {
-      matrix_.emplace_back(column, colSettings_);
+      matrix_.emplace_back(rep, colSettings_);
     }
   }
 }

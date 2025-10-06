@@ -43,8 +43,8 @@ void _generic_merge_entry_to_column(Column& targetColumn,
                                     typename Column::Column_support::iterator& itTarget,
                                     F1&& process_target,
                                     F2&& process_source,
-                                    F3&& update_target1,
-                                    F4&& update_target2,
+                                    [[maybe_unused]] F3&& update_target1,
+                                    [[maybe_unused]] F4&& update_target2,
                                     bool& pivotIsZeroed)
 {
   typename Column::Entry* targetEntry = _get_entry<typename Column::Entry>(itTarget);
@@ -123,11 +123,7 @@ bool _add_to_column(const Entry_range& source, Column& targetColumn)
       targetColumn,
       [&]([[maybe_unused]] typename Column::Entry* entryTarget) {},
       [&](typename Entry_range::const_iterator& itSource, const typename Column::Column_support::iterator& itTarget) {
-        if constexpr (Column::Master::Option_list::is_z2) {
-          targetColumn._insert_entry(itSource->get_row_index(), itTarget);
-        } else {
-          targetColumn._insert_entry(itSource->get_element(), itSource->get_row_index(), itTarget);
-        }
+        targetColumn._insert_entry(itTarget, itSource->get_row_index(), itSource->get_element());
       },
       [&](typename Column::Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
         if constexpr (!Column::Master::Option_list::is_z2)
@@ -167,7 +163,7 @@ bool _multiply_target_and_add_to_column(const typename Column::Field_element& va
           if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_entry(*entryTarget);
         },
         [&](typename Entry_range::const_iterator& itSource, const typename Column::Column_support::iterator& itTarget) {
-          targetColumn._insert_entry(itSource->get_element(), itSource->get_row_index(), itTarget);
+          targetColumn._insert_entry(itTarget, itSource->get_row_index(), itSource->get_element());
         },
         [&](typename Column::Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
           targetColumn.operators_->multiply_and_add_inplace_front(targetElement, val, itSource->get_element());
@@ -206,7 +202,7 @@ bool _multiply_source_and_add_to_column(const typename Column::Field_element& va
         []([[maybe_unused]] typename Column::Entry* entryTarget) {},
         [&](typename Entry_range::const_iterator& itSource, const typename Column::Column_support::iterator& itTarget) {
           typename Column::Entry* entry =
-              targetColumn._insert_entry(itSource->get_element(), itSource->get_row_index(), itTarget);
+              targetColumn._insert_entry(itTarget, itSource->get_row_index(), itSource->get_element());
           targetColumn.operators_->multiply_inplace(entry->get_element(), val);
           if constexpr (Column::Master::Option_list::has_row_access) targetColumn.update_entry(*entry);
         },

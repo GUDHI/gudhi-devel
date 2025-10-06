@@ -571,6 +571,26 @@ class Matrix
    */
   using Cycle = std::vector<Entry_representative>;
 
+  /**
+   * @private
+   */
+  template <class EntryRange>
+  static Cycle build_cycle_from_range(const EntryRange& entries)
+  {
+    Cycle cycle;
+    if constexpr (RangeTraits<EntryRange>::has_size) {
+      cycle.reserve(entries.size());
+    }
+    for (const auto& c : entries) {
+      if constexpr (PersistenceMatrixOptions::is_z2) {
+        cycle.push_back(c.get_row_index());
+      } else {
+        cycle.push_back({c.get_row_index(), c.get_element()});
+      }
+    }
+    return cycle;
+  }
+
   // Return types to factorize the corresponding methods
 
   // The returned column is `const` if the matrix uses column compression
