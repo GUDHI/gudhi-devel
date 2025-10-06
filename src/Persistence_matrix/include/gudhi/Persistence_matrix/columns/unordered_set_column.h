@@ -18,10 +18,10 @@
 #ifndef PM_UNORDERED_SET_COLUMN_H
 #define PM_UNORDERED_SET_COLUMN_H
 
-#include <vector>
 #include <stdexcept>
 #include <type_traits>
 #include <set>
+#include <vector>
 #include <utility>  //std::swap, std::move & std::exchange
 
 #include <boost/iterator/indirect_iterator.hpp>
@@ -91,6 +91,7 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
  public:
   using iterator = boost::indirect_iterator<typename Column_support::iterator>;
   using const_iterator = boost::indirect_iterator<typename Column_support::const_iterator>;
+  using Content_range = std::vector<Entry>;
 
   Unordered_set_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -135,6 +136,8 @@ class Unordered_set_column : public Master_matrix::Row_access_option,
   const_iterator begin() const noexcept;
   iterator end() noexcept;
   const_iterator end() const noexcept;
+
+  Content_range get_non_zero_content_range() const;
 
   template <class Entry_range>
   Unordered_set_column& operator+=(const Entry_range& column);
@@ -633,6 +636,17 @@ inline typename Unordered_set_column<Master_matrix>::const_iterator Unordered_se
     const noexcept
 {
   return column_.end();
+}
+
+template <class Master_matrix>
+inline typename Unordered_set_column<Master_matrix>::Content_range
+Unordered_set_column<Master_matrix>::get_non_zero_content_range() const
+{
+  Content_range res(column_.size());
+  std::size_t i = 0;
+  for (const auto& entry : column_) res[i++] = *entry;
+  std::sort(res.begin(), res.end());
+  return res;
 }
 
 template <class Master_matrix>

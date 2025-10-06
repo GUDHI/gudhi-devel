@@ -18,11 +18,12 @@
 #ifndef PM_HEAP_COLUMN_H
 #define PM_HEAP_COLUMN_H
 
-#include <vector>
 #include <stdexcept>
 #include <type_traits>
-#include <algorithm>  //binary_search
-#include <utility>    //std::swap, std::move & std::exchange
+#include <cstddef>    // std::size_t
+#include <algorithm>  // std::make_heap
+#include <utility>    // std::swap, std::move & std::exchange
+#include <vector>
 
 #include <boost/iterator/indirect_iterator.hpp>
 
@@ -68,6 +69,7 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   using const_iterator = boost::indirect_iterator<typename Column_support::const_iterator>;
   using reverse_iterator = boost::indirect_iterator<typename Column_support::reverse_iterator>;
   using const_reverse_iterator = boost::indirect_iterator<typename Column_support::const_reverse_iterator>;
+  using Content_range = std::vector<Entry>;
 
   Heap_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -119,6 +121,8 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   const_reverse_iterator rbegin() const noexcept;
   reverse_iterator rend() noexcept;
   const_reverse_iterator rend() const noexcept;
+
+  Content_range get_non_zero_content_range();
 
   template <class Entry_range>
   Heap_column& operator+=(const Entry_range& column);
@@ -707,6 +711,16 @@ template <class Master_matrix>
 inline typename Heap_column<Master_matrix>::const_reverse_iterator Heap_column<Master_matrix>::rend() const noexcept
 {
   return column_.rend();
+}
+
+template <class Master_matrix>
+inline typename Heap_column<Master_matrix>::Content_range Heap_column<Master_matrix>::get_non_zero_content_range()
+{
+  _prune();
+  Content_range res(column_.size());
+  for (std::size_t i = 0; i < column_.size(); ++i) res[i] = *column_[i];
+  std::sort(res.begin(), res.end());
+  return res;
 }
 
 template <class Master_matrix>

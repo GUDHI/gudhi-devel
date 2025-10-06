@@ -25,6 +25,7 @@ jobs:
   tests:
     docker:
       - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2025.10.02
+    resource_class: large # Sometimes takes a long time to build matrices - Timeout is 1h
     steps:
       - checkout
       - run:
@@ -38,7 +39,7 @@ jobs:
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
-            make all
+            make -j 2 all
             ctest --output-on-failure
 
   utils:
