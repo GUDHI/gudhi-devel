@@ -492,7 +492,7 @@ class Matrix
   /**
    * @brief Type of a representative cycle. Vector of @ref rowindex "row indices".
    */
-  using Cycle = std::vector<ID_index>; //TODO: add coefficients
+  using Cycle = std::vector<Entry_representative>;
 
   // Return types to factorize the corresponding methods
 
