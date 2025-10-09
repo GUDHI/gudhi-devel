@@ -29,7 +29,7 @@ print(f"1. Rips complex has {simplex_tree.num_simplices()} simplices - {simplex_
 
 # Expansion of this one-skeleton would require a lot of memory. Let's collapse it
 start = time.process_time()
-simplex_tree.collapse_edges_of_graph()
+simplex_tree.collapse_edges_of_flag_complex(max_expansion_dim=1)
 print(f"2. Rips complex has {simplex_tree.num_simplices()} simplices - {simplex_tree.num_vertices()} vertices.")
 
 simplex_tree.expansion(3)
@@ -43,7 +43,7 @@ axes[0].set_title("Persistence after 1 collapse")
 
 # Collapse can be performed several times. Let's collapse it 3 times
 start = time.process_time()
-simplex_tree.collapse_edges_of_graph(nb_iterations=3)
+simplex_tree.collapse_edges_of_flag_complex(nb_iterations=3, max_expansion_dim=1)
 print(f"3. Rips complex has {simplex_tree.num_simplices()} simplices - {simplex_tree.num_vertices()} vertices.")
 
 simplex_tree.expansion(3)

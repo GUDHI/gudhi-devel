@@ -365,13 +365,13 @@ def test_collapse_edges_of_graph():
 
     assert st.num_simplices() == 10
 
-    st2 = st.collapse_edges_of_graph(inplace=False)
+    st2 = st.collapse_edges_of_flag_complex(max_expansion_dim=1, inplace=False)
     assert st2.num_simplices() == 9
     assert st2.find([0, 2]) == False  # [1, 3] would be fine as well
     for simplex in st2.get_skeleton(0):
         assert simplex[1] == 1.0
 
-    st.collapse_edges_of_graph()
+    st.collapse_edges_of_flag_complex(max_expansion_dim=1)
     assert st == st2
 
 
