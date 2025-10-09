@@ -9,15 +9,15 @@ env:
 
 jobs:
   build:
-    # Python 3.9 is only available for MacOS Intel version (not the ARM one) cf. https://github.com/actions/runner-images
-    runs-on: macos-14-large
+    # Python 3.11+ is only available for MacOS free version cf. https://github.com/actions/runner-images
+    runs-on: macos-14
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.9"]
+        python-version: ["3.11"]
         include:
-          - python-version: "3.9"
-            numpy-version: "1.21.4"
+          - python-version: "3.11"
+            numpy-version: "1.23.2"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4

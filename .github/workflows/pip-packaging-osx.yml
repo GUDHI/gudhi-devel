@@ -14,17 +14,13 @@ jobs:
   # Python 3.9+ specific case where NumPy 2.x will be supported
   # NumPy packages for osx x86 and arm are only available from 1.21.2, but stable for both versions from 1.21.4 and python 3.9+
   wheels:
-    # Python 3.9 is only available for MacOS Intel version (not the ARM one) cf. https://github.com/actions/runner-images
-    runs-on: macos-14-large
+    # Python 3.11+ is only available for MacOS free version cf. https://github.com/actions/runner-images
+    runs-on: macos-14
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13"]
         include:
-          - python-version: "3.9"
-            numpy-version: "1.21.4"
-          - python-version: "3.10"
-            numpy-version: "1.21.6"
           - python-version: "3.11"
             numpy-version: "1.23.2"
           - python-version: "3.12"
