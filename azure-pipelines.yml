@@ -86,7 +86,7 @@ jobs:
           Set-Location $originalDir
           # Only vcpkg release libs for CI
           Add-Content -Path "C:\vcpkg\triplets\x64-windows.cmake" -Value "set(VCPKG_BUILD_TYPE release)"
-          vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows@3.4.0 cgal:x64-windows
+          vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
         displayName: "Install build dependencies"
       - task: BatchScript@1
         inputs:
