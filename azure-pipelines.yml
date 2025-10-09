@@ -81,6 +81,7 @@ jobs:
           choco install -y ninja --force --force-dependencies
           # Only vcpkg release libs for CI
           Add-Content -Path "C:\vcpkg\triplets\x64-windows.cmake" -Value "set(VCPKG_BUILD_TYPE release)"
+          vcpkg update
           vcpkg install boost-filesystem:x64-windows boost-test:x64-windows boost-program-options:x64-windows tbb:x64-windows eigen3:x64-windows cgal:x64-windows
         displayName: "Install build dependencies"
       - task: BatchScript@1
