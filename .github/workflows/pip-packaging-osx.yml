@@ -1,9 +1,8 @@
 name: pip packaging osx
 
-# on:
-#   release:
-#     types: [published]
-on: [push, pull_request]
+on:
+  release:
+    types: [published]
 
 env:
   MACOSX_DEPLOYMENT_TARGET: 14.0
@@ -96,14 +95,9 @@ jobs:
           python -m pytest src/python/test/test_wasserstein_barycenter.py
           python -m pytest src/python/test/test_weighted_rips_complex.py
           python -m pytest src/python/test/test_witness_complex.py
-      - name: Upload OSx python wheel
-        uses: actions/upload-artifact@v4
-        with:
-          name: osx python wheel
-          path: wheelhouse/*.whl
-#      - name: Publish on PyPi
-#        env:
-#          TWINE_USERNAME: __token__
-#          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-#        run: |
-#          python -m twine upload wheelhouse/*.whl
+      - name: Publish on PyPi
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          python -m twine upload wheelhouse/*.whl
