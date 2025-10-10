@@ -19,6 +19,68 @@ __debug_info__ = @GUDHI_PYTHON_DEBUG_INFO@
 
 __all__ = [@GUDHI_PYTHON_MODULES@ @GUDHI_PYTHON_MODULES_EXTRA@]
 
+# __all__ += ['datasets', 'hera'] ?
+from ._cubical_complex import CubicalComplex
+
+from ._file_utils import (
+    read_points_from_off_file,
+    write_points_to_off_file,
+    read_lower_triangular_matrix_from_csv_file,
+    read_persistence_intervals_grouped_by_dimension,
+    read_persistence_intervals_in_dimension,
+)
+
+from ._persistence_graphical_tools import (
+    plot_persistence_barcode,
+    plot_persistence_diagram,
+    plot_persistence_density
+)
+
+__all__ += [
+    'CubicalComplex',
+    'read_points_from_off_file',
+    'write_points_to_off_file',
+    'read_lower_triangular_matrix_from_csv_file',
+    'read_persistence_intervals_grouped_by_dimension',
+    'read_persistence_intervals_in_dimension',
+    'plot_persistence_barcode',
+    'plot_persistence_diagram',
+    'plot_persistence_density',
+]
+
+try:
+    # if no CGAL
+    from ._bottleneck import bottleneck_distance
+
+    __all__ += [
+        'bottleneck_distance',
+    ]
+except ModuleNotFoundError:
+    pass
+
+try:
+    # if no CGAL or no Eigen
+    from ._delaunay_complex import DelaunayComplex
+    from ._delaunay_complex import AlphaComplex
+    from ._delaunay_complex import DelaunayCechComplex
+
+    from ._euclidean_strong_witness_complex import EuclideanStrongWitnessComplex
+    from ._euclidean_witness_complex import EuclideanWitnessComplex
+
+    from ._tangential_complex import TangentialComplex
+
+    __all__ += [
+        'DelaunayComplex',
+        'AlphaComplex',
+        'DelaunayCechComplex',
+        'EuclideanStrongWitnessComplex',
+        'EuclideanWitnessComplex',
+        'TangentialComplex',
+    ]
+except ModuleNotFoundError:
+    pass
+
+
 __available_modules = ''
 __missing_modules = ''
 
