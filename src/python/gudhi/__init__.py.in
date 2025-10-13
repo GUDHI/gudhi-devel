@@ -5,9 +5,8 @@
 # Copyright (C) 2016  Inria
 #
 # Modification(s):
+#   - 2025/10 Vincent Rouvreau: Remove import_module, __available_modules and __mechanism_modules mechanism
 #   - YYYY/MM Author: Description of the modification
-
-from importlib import import_module
 
 __author__ = "GUDHI Editorial Board"
 __copyright__ = "Copyright (C) 2016 Inria"
@@ -17,20 +16,26 @@ __version__ = "@GUDHI_VERSION@"
 __root_source_dir__ = "@CMAKE_SOURCE_DIR@"
 __debug_info__ = @GUDHI_PYTHON_DEBUG_INFO@
 
-__all__ = [@GUDHI_PYTHON_MODULES@ @GUDHI_PYTHON_MODULES_EXTRA@]
+from .cubical_complex import CubicalComplex
+from .periodic_cubical_complex import PeriodicCubicalComplex
+from .simplex_tree import SimplexTree
+from .rips_complex import RipsComplex
+from .witness_complex import WitnessComplex
+from .strong_witness_complex import StrongWitnessComplex
+from .nerve_gic import CoverComplex
 
-# __all__ += ['datasets', 'hera'] ?
-from ._cubical_complex import CubicalComplex
-
-from ._file_utils import (
-    read_points_from_off_file,
-    write_points_to_off_file,
+from .reader_utils import (
     read_lower_triangular_matrix_from_csv_file,
     read_persistence_intervals_grouped_by_dimension,
     read_persistence_intervals_in_dimension,
 )
 
-from ._persistence_graphical_tools import (
+from .off_utils import (
+    read_points_from_off_file,
+    write_points_to_off_file,
+)
+
+from .persistence_graphical_tools import (
     plot_persistence_barcode,
     plot_persistence_diagram,
     plot_persistence_density
@@ -38,11 +43,17 @@ from ._persistence_graphical_tools import (
 
 __all__ += [
     'CubicalComplex',
-    'read_points_from_off_file',
-    'write_points_to_off_file',
+    'PeriodicCubicalComplex',
+    'SimplexTree',
+    'RipsComplex',
+    'WitnessComplex',
+    'StrongWitnessComplex',
+    'CoverComplex',
     'read_lower_triangular_matrix_from_csv_file',
     'read_persistence_intervals_grouped_by_dimension',
     'read_persistence_intervals_in_dimension',
+    'read_points_from_off_file',
+    'write_points_to_off_file',
     'plot_persistence_barcode',
     'plot_persistence_diagram',
     'plot_persistence_density',
@@ -50,24 +61,29 @@ __all__ += [
 
 try:
     # if no CGAL
-    from ._bottleneck import bottleneck_distance
+    from .bottleneck import bottleneck_distance
 
     __all__ += [
         'bottleneck_distance',
     ]
-except ModuleNotFoundError:
+except ImportError:
     pass
 
 try:
     # if no CGAL or no Eigen
-    from ._delaunay_complex import DelaunayComplex
-    from ._delaunay_complex import AlphaComplex
-    from ._delaunay_complex import DelaunayCechComplex
+    from .delaunay_complex import DelaunayComplex, DelaunayCechComplex, AlphaComplex
 
-    from ._euclidean_strong_witness_complex import EuclideanStrongWitnessComplex
-    from ._euclidean_witness_complex import EuclideanWitnessComplex
+    from .euclidean_strong_witness_complex import EuclideanStrongWitnessComplex
+    from .euclidean_witness_complex import EuclideanWitnessComplex
 
-    from ._tangential_complex import TangentialComplex
+    from .tangential_complex import TangentialComplex
+    
+    from .subsampling import (
+        choose_n_farthest_points,
+        pick_n_random_points,
+        sparsify_point_set,
+        GUDHI_SUBSAMPLING_USE_CGAL,
+    )
 
     __all__ += [
         'DelaunayComplex',
@@ -76,26 +92,9 @@ try:
         'EuclideanStrongWitnessComplex',
         'EuclideanWitnessComplex',
         'TangentialComplex',
+        'choose_n_farthest_points',
+        'pick_n_random_points',
+        'sparsify_point_set',
     ]
-except ModuleNotFoundError:
+except ImportError:
     pass
-
-
-__available_modules = ''
-__missing_modules = ''
-
-# Try to import * from gudhi.__module_name for default modules.
-# Extra modules require an explicit import by the user (mostly because of
-# unusual dependencies, but also to avoid cluttering namespace gudhi and
-# speed up the basic import)
-for __module_name in [@GUDHI_PYTHON_MODULES@]:
-    try:
-        __module = import_module('gudhi.' + __module_name)
-        try:
-            __to_import = __module.__all__
-        except AttributeError:
-            __to_import = [name for name in __module.__dict__ if not name.startswith('_')]
-        globals().update({name: __module.__dict__[name] for name in __to_import})
-        __available_modules += __module_name + ";"
-    except:
-        __missing_modules += __module_name + ";"

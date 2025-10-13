@@ -23,8 +23,8 @@ import errno
 import os
 import shutil
 
-from gudhi.reader_utils import read_persistence_intervals_in_dimension
-from gudhi.reader_utils import read_persistence_intervals_grouped_by_dimension
+from gudhi import read_persistence_intervals_in_dimension
+from gudhi import read_persistence_intervals_grouped_by_dimension
 
 _gudhi_matplotlib_use_tex = True
 
