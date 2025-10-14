@@ -41,7 +41,7 @@ from .persistence_graphical_tools import (
     plot_persistence_density
 )
 
-__all__ += [
+__all__ = [
     'CubicalComplex',
     'PeriodicCubicalComplex',
     'SimplexTree',
