@@ -90,7 +90,6 @@ endfunction( add_gudhi_debug_info )
 
 function(disable_python_documentation MISSING_MODULE)
   set(GUDHI_PYTHON_DOCUMENTATION_MISSING_MODULES "${GUDHI_PYTHON_DOCUMENTATION_MISSING_MODULES}'${MISSING_MODULE}', " PARENT_SCOPE)
-  set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
 endfunction( disable_python_documentation )
 
 add_gudhi_debug_info("Python version ${Python_VERSION}")
@@ -232,6 +231,8 @@ endif(WIN32)
 # Documentation generation is available through sphinx - requires all modules
 # Make it first as sphinx test is by far the longest test which is nice when testing in parallel
 if(GUDHI_PYTHON_DOCUMENTATION_MISSING_MODULES)
+  # set GUDHI_MISSING_MODULES once and not for each GUDHI_PYTHON_DOCUMENTATION_MISSING_MODULES
+  set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
   message("++ Python documentation will not be compilable because of the following missing modules: ${GUDHI_PYTHON_DOCUMENTATION_MISSING_MODULES}")
 else()
   set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")
