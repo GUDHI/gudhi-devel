@@ -33,7 +33,7 @@ if (TARGET CGAL::CGAL)
     message("++ CGAL version: ${CGAL_VERSION}. Includes found in ${CGAL_INCLUDE_DIRS}")
 endif ()
 
-find_package(Eigen3 3.3 NO_MODULE)
+find_package(Eigen3 3.3...5 NO_MODULE) # Any version >=3.3.0 but <6.0.0
 if(TARGET Eigen3::Eigen)
     # Not mandatory as it is set by Eigen3Config.cmake
     get_target_property(EIGEN3_INCLUDE_DIRS Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
