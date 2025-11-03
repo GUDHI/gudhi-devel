@@ -400,14 +400,17 @@ class SimplexTree(t._Simplex_tree_python_interface):
     def collapse_edges_of_flag_complex(
         self, nb_iterations: int = 1, max_expansion_dim: int = None, inplace: bool = True
     ) -> SimplexTree:
-        """Assuming the complex is a flag complex (e.g. a Rips complex), applies the edge collapses technique
-        (see :cite:`edgecollapsearxiv`) to the 1-skeleton of the complex and rebuilds it by extending the skeleton to a
-        new flag complex (with the given maximal dimension). The new complex will be smaller but with same persistent
-        homology as the original one (at least in the existing dimensions: all cycle classes with higher or equal
-        dimension than `max_expansion_dim` will be ignored even if they existed before).
+        """Assuming the complex is a flag complex (e.g. a Rips complex), possibly not expanded (in fact preferably, as
+        only the 1-skeleton is necessary and therefore there is no need to explicitly store higher dimensional simplices
+        just for this purpose), applies the edge collapses technique (see :cite:`edgecollapsearxiv`) to the 1-skeleton
+        of the complex and rebuilds it by extending the new skeleton to a new flag complex (with the given maximal
+        dimension). The new complex will be smaller but with same persistent homology as the original one (just note
+        that if :meth:`persistence()` is called directly on the new simplex tree, all cycle classes with
+        higher or equal dimension than `max_expansion_dim` will be ignored even if they existed before).
 
         If `max_expansion_dim` is set to `1` or less, the method is equivalent to the deprecated method
-        :meth:`collapse_edges()`.
+        :meth:`collapse_edges()`. As a flag complex can be completely deduced from its 1-skeleton, there are lot of
+        purposes where keeping the maximal dimension to 1 is much more efficient than explicitly expand it.
 
         :param nb_iterations: The number of edge collapse iterations to perform. If `nb_iterations` is strictly less
             than 1, the method does nothing and returns `self` (independently of the value of `inplace`). Default is 1.
@@ -418,15 +421,16 @@ class SimplexTree(t._Simplex_tree_python_interface):
             Default is `None`.
         :type max_expansion_dim: int
         :param inplace: If `True`, the collapse is done on this simplex tree. Otherwise, the collapse is done on a new
-            tree which is then returned. Default is `True`.
+            tree which is then returned. Note that this parameter is ignored if `nb_iterations` is strictly less than 1.
+            Default is `True`.
         :type inplace: bool
-        :returns: `self` (after modifications from collapses) if `inplace` is set to `True` and a new tree resulting
-            from the collapses otherwise.
+        :returns: `self` (after modifications from collapses) if `inplace` is set to `True` or `nb_iterations` is
+            strictly less than 1, or, a new tree resulting from the collapses otherwise.
         :rtype: SimplexTree
 
         .. warning::
-            The current simplex tree is assumed to be a flag complex. If it is not the case, some information may be
-            lost during the re-expansion, i.e., the persistent homology may differ from before.
+            The current simplex tree is assumed to be a flag complex (possibly not expanded). If it is not the case,
+            some information may be lost during the re-expansion, i.e., the persistent homology may differ from before.
         """
         if nb_iterations < 1:
             return self
@@ -446,7 +450,8 @@ class SimplexTree(t._Simplex_tree_python_interface):
     def collapse_edges(self, nb_iterations: int = 1) -> SimplexTree:
         """.. deprecated:: 3.12.0 
             The method was renamed :meth:`collapse_edges_of_flag_complex()` to clarify the expected
-            pre-conditions. Please use this with argument `max_expansion_dim` set to 1 instead.
+            pre-conditions (the simplex tree has to represent a flag complex. Note that this complex does not need to
+            be expanded.). Please use the new method with argument `max_expansion_dim` set to 1 instead.
 
         :param nb_iterations: The number of edge collapse iterations to perform. If `nb_iterations` is strictly less
             than 1, the method does nothing. Default is 1.
@@ -457,9 +462,9 @@ class SimplexTree(t._Simplex_tree_python_interface):
         warnings.warn(
             "Since Gudhi 3.12, `collapse_edges_of_flag_complex(nb_iterations, 1)` should be called instead of"
             + " `collapse_edges(nb_iterations)`. The method was renamed to clarify the pre-condition that the used"
-            + " simplex tree should be the 1-skeleton of a flag complex. Note that it is now also possible to return"
-            + " the flag complex expended to any dimension by specifying the `max_expansion_dim` parameter of the new"
-            + " method.",
+            + " simplex tree should be a flag complex or at least represent a flag complex (i.e., the 1-skeleton is"
+            + " sufficient, when not even preferable). Note that it is now also possible to return the flag complex"
+            + " expended to any dimension by specifying the `max_expansion_dim` parameter of the new method.",
             DeprecationWarning,
         )
         return self.collapse_edges_of_flag_complex(nb_iterations, max_expansion_dim=1, inplace=True)
