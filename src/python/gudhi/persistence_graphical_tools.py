@@ -80,10 +80,11 @@ def _format_handler(a):
         pers = []
         fake_dim = 0
         for elt in a:
-            first_death_value = elt[0][1]
-            if not isinstance(first_death_value, (np.floating, float, np.integer, int)):
-                raise TypeError("Should be a list of (birth,death)")
-            pers.extend([fake_dim, x] for x in elt)
+            if len(elt) != 0:
+                first_death_value = elt[0][1]
+                if not isinstance(first_death_value, (np.floating, float, np.integer, int)):
+                    raise TypeError("Should be a list of (birth,death)")
+                pers.extend([fake_dim, x] for x in elt)
             fake_dim = fake_dim + 1
         return pers, 2
     except TypeError:
