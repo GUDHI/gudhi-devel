@@ -22,6 +22,8 @@
 #include <gmpxx.h>
 #include <stdexcept>
 
+#include <gudhi/Debug_utils.h>
+
 namespace Gudhi {
 namespace persistence_fields {
 
@@ -363,6 +365,9 @@ class Multi_field_operators
       const Element& e,
       const Characteristic& productOfCharacteristics) const
   {
+    GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
+                "The given product is not the product of a subset of the current Multi-field characteristics.");
+
     Characteristic QR;
     mpz_gcd(QR.get_mpz_t(), e.get_mpz_t(), productOfCharacteristics.get_mpz_t());  // QR <- gcd(x,QS)
 
@@ -403,7 +408,10 @@ class Multi_field_operators
    */
   [[nodiscard]] Element get_partial_multiplicative_identity(const Characteristic& productOfCharacteristics) const
   {
-    if (productOfCharacteristics == nullCharacteristic) {
+    GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
+                "The given product is not the product of a subset of the current Multi-field characteristics.");
+
+    if (productOfCharacteristics == nullCharacteristic || productOfCharacteristics == productOfAllCharacteristics_) {
       return get_multiplicative_identity();
     }
     Element multIdentity(0);
