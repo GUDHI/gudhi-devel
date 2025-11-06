@@ -80,8 +80,8 @@ def _format_handler(a):
     try:
         for elt in a:  # check that death values have correct type
             if not isinstance(elt[0][1], (np.floating, float, np.integer, int)):
-                raise TypeError("Should be a list of (birth,death)")
-        pers = [[[fake_dim, x] for x in elt] for fake_dim, elt in enumerate(a)]
+                raise TypeError("Should be a list of (birth, death)")
+        pers = [[fake_dim, x] for fake_dim, elt in enumerate(a) for x in elt]
         return pers, 2
     except TypeError:
         pass
