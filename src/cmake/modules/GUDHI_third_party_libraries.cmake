@@ -41,7 +41,8 @@ endif()
 if(TARGET Eigen3::Eigen)
     # Not mandatory as it is set by Eigen3Config.cmake
     get_target_property(EIGEN3_INCLUDE_DIRS Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
-    message("++ Eigen 3 version ${EIGEN3_VERSION_STRING}. Includes found in ${EIGEN3_INCLUDE_DIRS}")
+    # EIGEN_VERSION_STRING for Eigen 5.X, and EIGEN3_VERSION_STRING otherwise
+    message("++ Eigen 3 version ${EIGEN3_VERSION_STRING}${EIGEN_VERSION_STRING}. Includes found in ${EIGEN3_INCLUDE_DIRS}")
 endif()
 
 option(WITH_GUDHI_USE_TBB "Build with Intel TBB parallelization" ON)
