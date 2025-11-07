@@ -34,7 +34,7 @@ if (TARGET CGAL::CGAL)
 endif ()
 
 find_package(Eigen3 3.3 NO_MODULE)
-if(TARGET Eigen3::Eigen)
+if(NOT TARGET Eigen3::Eigen)
   find_package(Eigen3 5.0 NO_MODULE)
 endif()
 
