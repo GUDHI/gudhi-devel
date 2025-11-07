@@ -33,9 +33,9 @@ if (TARGET CGAL::CGAL)
     message("++ CGAL version: ${CGAL_VERSION}. Includes found in ${CGAL_INCLUDE_DIRS}")
 endif ()
 
-find_package(Eigen3 3.3 NO_MODULE)
+find_package(Eigen3 5.0 QUIET NO_MODULE)
 if(NOT TARGET Eigen3::Eigen)
-  find_package(Eigen3 5.0 NO_MODULE)
+  find_package(Eigen3 3.3 NO_MODULE)
 endif()
 
 if(TARGET Eigen3::Eigen)
