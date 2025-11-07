@@ -22,6 +22,7 @@ import warnings
 import errno
 import os
 import shutil
+from collections import Counter
 
 from gudhi.reader_utils import read_persistence_intervals_in_dimension
 from gudhi.reader_utils import read_persistence_intervals_grouped_by_dimension
@@ -91,6 +92,30 @@ def _format_handler(a):
         pass
     # Nothing to be done otherwise
     return a, 0
+
+
+# only necessary because _format_handler does not directly decompose everything into xd, yd arrays for plotting
+def _get_number_of_pairs_by_dimension(barcode):
+    if len(barcode) == 0:
+        return []
+
+    try:
+        if isinstance(barcode[0][1], (np.floating, float, np.integer, int)):
+            # array of (b,d)
+            return [len(barcode)]
+    except IndexError:
+        pass
+
+    try:
+        if len(barcode[0]) == 0 or isinstance(barcode[0][0][1], (np.floating, float, np.integer, int)) :
+            # array of array of (b,d)
+            return [len(barcode[d]) for d in range(len(barcode))]
+    except TypeError:
+        pass
+
+    # array of (dim, (b,d))
+    counts = Counter(bar[0] for bar in barcode)
+    return [counts[i] for i in range(barcode[-1][0] + 1)]
 
 
 def _limit_to_max_intervals(persistence, max_intervals, key):
@@ -343,6 +368,7 @@ def plot_persistence_diagram(
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), persistence_file)
 
+    sizes = _get_number_of_pairs_by_dimension(persistence)
     try:
         persistence, input_type = _format_handler(persistence)
         persistence = _limit_to_max_intervals(
@@ -382,9 +408,25 @@ def plot_persistence_diagram(
 
     x = [birth for (dim, (birth, death)) in persistence]
     y = [death if death != float("inf") else infinity for (dim, (birth, death)) in persistence]
-    c = [colormap[dim] for (dim, (birth, death)) in persistence]
 
-    axes.scatter(x, y, alpha=alpha, color=c)
+    i = 0
+    for d in range(len(sizes)):
+        if sizes[d] != 0:
+            j = i + sizes[d]
+            xd = x[i:j]
+            yd = y[i:j]
+            i = j
+            c = colormap[d]
+            axes.plot(
+                xd,
+                yd,
+                linestyle="none",
+                markersize=6,
+                marker="o",
+                color=c,
+                alpha=alpha,
+            )
+
     if float("inf") in (death for (dim, (birth, death)) in persistence):
         # infinity line and text
         axes.plot(
