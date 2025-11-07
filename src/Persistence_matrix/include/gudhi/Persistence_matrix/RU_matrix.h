@@ -870,6 +870,7 @@ inline typename RU_matrix<Master_matrix>::Index RU_matrix<Master_matrix>::_get_c
     if (it == pivotToColumnIndex_.end()) return Master_matrix::template get_null_value<Index>();
     return it->second;
   } else {
+    if (pivot >= pivotToColumnIndex_.size()) return Master_matrix::template get_null_value<Index>();
     return pivotToColumnIndex_[pivot];
   }
 }
