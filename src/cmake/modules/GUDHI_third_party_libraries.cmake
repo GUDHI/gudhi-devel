@@ -35,6 +35,10 @@ endif ()
 
 find_package(Eigen3 3.3 NO_MODULE)
 if(TARGET Eigen3::Eigen)
+  find_package(Eigen3 5.0 NO_MODULE)
+endif()
+
+if(TARGET Eigen3::Eigen)
     # Not mandatory as it is set by Eigen3Config.cmake
     get_target_property(EIGEN3_INCLUDE_DIRS Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
     message("++ Eigen 3 version ${EIGEN3_VERSION_STRING}. Includes found in ${EIGEN3_INCLUDE_DIRS}")
