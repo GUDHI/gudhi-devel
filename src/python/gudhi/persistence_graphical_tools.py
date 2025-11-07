@@ -73,20 +73,17 @@ def _format_handler(a):
     try:
         first_death_value = a[0][1]
         if isinstance(first_death_value, (np.floating, float, np.integer, int)):
-            return [[0, x] for x in a], 1
+            pers = [[0, x] for x in a]
+            return pers, 1
     except IndexError:
         pass
     # Iterable of array
     try:
-        pers = []
-        fake_dim = 0
-        for elt in a:
+        for elt in a:  # check that death values have correct type
             if len(elt) != 0:
-                first_death_value = elt[0][1]
-                if not isinstance(first_death_value, (np.floating, float, np.integer, int)):
-                    raise TypeError("Should be a list of (birth,death)")
-                pers.extend([fake_dim, x] for x in elt)
-            fake_dim = fake_dim + 1
+                if not isinstance(elt[0][1], (np.floating, float, np.integer, int)):
+                    raise TypeError("Should be a list of (birth, death)")
+        pers = [[fake_dim, x] for fake_dim, elt in enumerate(a) for x in elt]
         return pers, 2
     except TypeError:
         pass
