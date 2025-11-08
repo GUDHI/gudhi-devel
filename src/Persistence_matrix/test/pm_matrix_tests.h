@@ -474,6 +474,19 @@ void test_general_insertion() {
   BOOST_CHECK(!m.is_zero_column(10));
   BOOST_CHECK(!m.is_zero_column(11));
   BOOST_CHECK(!m.is_zero_entry(3, 1));
+
+  if constexpr (is_z2<typename Matrix::Column>()) {
+    m.insert_column(3);
+  } else {
+    m.insert_column(3, 7);
+  }
+  BOOST_CHECK_EQUAL(m.get_number_of_columns(), 13);
+  const auto& col = m.get_column(12);
+  auto it = col.begin();
+  BOOST_CHECK_EQUAL(it->get_row_index(), 3);
+  if constexpr (!is_z2<typename Matrix::Column>()) BOOST_CHECK_EQUAL(it->get_element(), 2);
+  ++it;
+  BOOST_CHECK(it == col.end());
 }
 
 // for boundary and ru
