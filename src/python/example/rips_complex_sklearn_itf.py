@@ -5,7 +5,7 @@ from sklearn.pipeline import Pipeline
 import matplotlib.pyplot as plt
 
 # Import TDA pipeline requirements
-from gudhi.sklearn.rips_persistence import RipsPersistence
+from gudhi.sklearn import RipsPersistence
 from gudhi.representations import DiagramSelector, Landscape
 
 # To fetch the dataset

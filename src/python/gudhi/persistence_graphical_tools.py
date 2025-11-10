@@ -199,9 +199,7 @@ def plot_persistence_barcode(
         if path.isfile(persistence_file):
             # Reset persistence
             persistence = []
-            diag = read_persistence_intervals_grouped_by_dimension(
-                persistence_file=persistence_file
-            )
+            diag = read_persistence_intervals_grouped_by_dimension(persistence_file=persistence_file)
             for key in diag.keys():
                 for persistence_interval in diag[key]:
                     persistence.append((key, persistence_interval))
@@ -230,10 +228,7 @@ def plot_persistence_barcode(
         colormap = plt.cm.Set1.colors
 
     x = [birth for (dim, (birth, death)) in persistence]
-    y = [
-        (death - birth) if death != float("inf") else (infinity - birth)
-        for (dim, (birth, death)) in persistence
-    ]
+    y = [(death - birth) if death != float("inf") else (infinity - birth) for (dim, (birth, death)) in persistence]
     c = [colormap[dim] for (dim, (birth, death)) in persistence]
 
     axes.barh(range(len(x)), y, left=x, alpha=alpha, color=c, linewidth=0)
@@ -249,9 +244,7 @@ def plot_persistence_barcode(
             title = "Range"
         dimensions = {item[0] for item in persistence}
         axes.legend(
-            handles=[
-                mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions
-            ],
+            handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions],
             title=title,
             loc="best",
         )
@@ -330,9 +323,7 @@ def plot_persistence_diagram(
         if path.isfile(persistence_file):
             # Reset persistence
             persistence = []
-            diag = read_persistence_intervals_grouped_by_dimension(
-                persistence_file=persistence_file
-            )
+            diag = read_persistence_intervals_grouped_by_dimension(persistence_file=persistence_file)
             for key in diag.keys():
                 for persistence_interval in diag[key]:
                     persistence.append((key, persistence_interval))
@@ -383,9 +374,7 @@ def plot_persistence_diagram(
     axes.scatter(x, y, alpha=alpha, color=c)
     if float("inf") in (death for (dim, (birth, death)) in persistence):
         # infinity line and text
-        axes.plot(
-            [axis_start, axis_end], [infinity, infinity], linewidth=1.0, color="k", alpha=alpha
-        )
+        axes.plot([axis_start, axis_end], [infinity, infinity], linewidth=1.0, color="k", alpha=alpha)
         # Infinity label
         yt = axes.get_yticks()
         yt = yt[np.where(yt < axis_end)]  # to avoid plotting ticklabel higher than infinity
@@ -406,9 +395,7 @@ def plot_persistence_diagram(
             title = "Range"
         dimensions = list({item[0] for item in persistence})
         axes.legend(
-            handles=[
-                mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions
-            ],
+            handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions],
             title=title,
             loc="lower right",
         )
