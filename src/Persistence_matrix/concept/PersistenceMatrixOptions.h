@@ -72,7 +72,7 @@ struct PersistenceMatrixOptions
    * by a same column.
    *
    * Note that some methods of the @ref basematrix "base matrix" are not available when true:
-   * - @ref Matrix::insert_column(const Container&, Index) "insert_column(const Container&, Index)",
+   * - @ref Matrix::insert_column,
    * - @ref Matrix::zero_column(Index) "zero_column(Index)",
    * - @ref Matrix::zero_entry(Index, Index) "zero_entry(Index, ID_index)",
    * - @ref Matrix::swap_columns(Index, Index) "swap_columns(Index, Index)",
