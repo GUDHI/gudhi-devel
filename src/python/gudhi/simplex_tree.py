@@ -419,7 +419,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         if nb_iterations < 1:
             return
         if self.dimension() > 1:
-            message = "collapse_edges() ignores all the simplices of dimension 2 or more in this complex"
+            message = "collapse_edges() ignores all the simplices of dimension 2 or more in this complex."
             # Always print this specific warning
             warnings.filterwarnings("always", category=RuntimeWarning, message=message)
             warnings.warn(message, RuntimeWarning)
