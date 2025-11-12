@@ -22,6 +22,8 @@
 #include <gmpxx.h>
 #include <stdexcept>
 
+#include <gudhi/Debug_utils.h>
+
 namespace Gudhi {
 namespace persistence_fields {
 
@@ -344,6 +346,9 @@ class Shared_multi_field_element
   [[nodiscard]] std::pair<Shared_multi_field_element, Characteristic> get_partial_inverse(
       const Characteristic& productOfCharacteristics) const
   {
+    GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
+                "The given product is not the product of a subset of the current Multi-field characteristics.");
+
     Element QR;
     mpz_gcd(QR.get_mpz_t(), element_.get_mpz_t(), productOfCharacteristics.get_mpz_t());  // QR <- gcd(x,QS)
 
@@ -384,8 +389,11 @@ class Shared_multi_field_element
    */
   static Shared_multi_field_element get_partial_multiplicative_identity(const Characteristic& productOfCharacteristics)
   {
-    if (productOfCharacteristics == 0) {
-      return {multiplicativeID_};
+    GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
+                "The given product is not the product of a subset of the current Multi-field characteristics.");
+
+    if (productOfCharacteristics == 0 || productOfCharacteristics == productOfAllCharacteristics_) {
+      return get_multiplicative_identity();
     }
     Shared_multi_field_element mult;
     for (unsigned int idx = 0; idx < primes_.size(); ++idx) {

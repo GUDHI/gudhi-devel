@@ -439,8 +439,6 @@ class Position_to_index_overlay
     nextIndex_ = 0;
   }
 
-  // void set_operators(Field_operators* operators) { matrix_.set_operators(operators); }
-
   /**
    * @brief Assign operator.
    */

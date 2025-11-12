@@ -60,7 +60,7 @@ trick gives the same persistence diagram as one would get with a plain use of `R
 often significantly smaller and thus faster to process.
 
 Finally, if you are only interested in the persistence diagram of a Rips complex, you should consider using
-:class:`~gudhi.sklearn.rips_persistence.RipsPersistence` instead, which directly returns the diagram and can be faster
+:class:`~gudhi.sklearn.RipsPersistence` instead, which directly returns the diagram and can be faster
 than explicitly building the complex before computing its persistence.
 
 Point cloud

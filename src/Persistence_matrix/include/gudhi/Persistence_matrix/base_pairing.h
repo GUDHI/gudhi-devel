@@ -65,9 +65,8 @@ class Base_pairing
  public:
   using Bar = typename Master_matrix::Bar;                           /**< Bar type. */
   using Barcode = typename Master_matrix::Barcode;                   /**< Barcode type. */
-  using Column_container = typename Master_matrix::Column_container; /**< Column container type. */
+  using Column = typename Master_matrix::Column;                     /**< Column type. */
   using Index = typename Master_matrix::Index;                       /**< Container index type. */
-  using Dimension = typename Master_matrix::Dimension;               /**< Dimension value type. */
 
   /**
    * @brief Default constructor.
@@ -117,6 +116,7 @@ class Base_pairing
   std::unordered_map<ID_index, Pos_index> idToPosition_;  // TODO: test other map types
 
   void _reduce();
+  void _reduce_column_with(Column& toReduce, Column& toAdd);
 
   // access to inheriting Boundary_matrix class
   constexpr Base_matrix* _matrix() { return static_cast<Base_matrix*>(this); }
@@ -140,6 +140,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
 {
   constexpr const Pos_index nullDeath = Master_matrix::template get_null_value<Pos_index>();
   constexpr const Index nullIndex = Master_matrix::template get_null_value<Index>();
+  constexpr const ID_index nullPivot = Master_matrix::template get_null_value<ID_index>();
 
   std::unordered_map<Index, Index> negativeColumns(_matrix()->get_number_of_columns());
 
@@ -164,19 +165,8 @@ inline void Base_pairing<Master_matrix>::_reduce()
         auto itNeg = negativeColumns.find(pivotColumnNumber);
         Index pivotKiller = itNeg == negativeColumns.end() ? nullIndex : itNeg->second;
 
-        while (pivot != Master_matrix::template get_null_value<ID_index>() &&
-               pivotKiller != Master_matrix::template get_null_value<Index>()) {
-          if constexpr (Master_matrix::Option_list::is_z2) {
-            curr += _matrix()->get_column(pivotKiller);
-          } else {
-            auto& toadd = _matrix()->get_column(pivotKiller);
-            typename Master_matrix::Element coef = toadd.get_pivot_value();
-            auto& operators = _matrix()->colSettings_->operators;
-            coef = operators.get_inverse(coef);
-            operators.multiply_inplace(coef, operators.get_characteristic() - curr.get_pivot_value());
-            curr.multiply_source_and_add(toadd, coef);
-          }
-
+        while (pivot != nullPivot && pivotKiller != nullIndex) {
+          _reduce_column_with(curr, _matrix()->get_column(pivotKiller));
           pivot = curr.get_pivot();
           it = idToPosition_.find(pivot);
           pivotColumnNumber = it == idToPosition_.end() ? pivot : it->second;
@@ -184,7 +174,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
           pivotKiller = itNeg == negativeColumns.end() ? nullIndex : itNeg->second;
         }
 
-        if (pivot != Master_matrix::template get_null_value<ID_index>()) {
+        if (pivot != nullPivot) {
           negativeColumns.emplace(pivotColumnNumber, i);
           _matrix()->get_column(pivotColumnNumber).clear();
           barcode_.emplace_back(pivotColumnNumber, i, dim - 1);
@@ -210,6 +200,20 @@ inline void Base_pairing<Master_matrix>::_reduce()
   }
 
   isReduced_ = true;
+}
+
+template <class Master_matrix>
+inline void Base_pairing<Master_matrix>::_reduce_column_with(Column& toReduce, Column& toAdd)
+{
+  if constexpr (Master_matrix::Option_list::is_z2) {
+    toReduce += toAdd;
+  } else {
+    typename Master_matrix::Element coeff = toAdd.get_pivot_value();
+    auto& operators = _matrix()->colSettings_->operators;
+    coeff = operators.get_inverse(coeff);
+    operators.multiply_inplace(coeff, operators.get_characteristic() - toReduce.get_pivot_value());
+    toReduce.multiply_source_and_add(toAdd, coeff);
+  }
 }
 
 template <class Master_matrix>

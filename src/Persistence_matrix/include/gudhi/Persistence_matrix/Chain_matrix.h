@@ -543,7 +543,10 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   void _add_bar(Dimension dim);
   template <class Container>
   void _container_insert(const Container& column, Index pos, Dimension dim);
-  void _container_insert(const Column& column, [[maybe_unused]] Index pos = 0);
+  template <class ColumnIterator>
+  void _container_insert(const ColumnIterator& rep);
+
+  static void _insert_in(ID_index cellID, Tmp_column& column);
 };
 
 template <class Master_matrix>
@@ -687,11 +690,7 @@ inline Chain_matrix<Master_matrix>::Chain_matrix(const Chain_matrix& matrixToCop
 {
   matrix_.reserve(matrixToCopy.matrix_.size());
   for (const auto& cont : matrixToCopy.matrix_) {
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      _container_insert(cont.second, cont.first);
-    } else {
-      _container_insert(cont);
-    }
+    _container_insert(cont);
   }
 }
 
@@ -945,11 +944,7 @@ inline Chain_matrix<Master_matrix>& Chain_matrix<Master_matrix>::operator=(const
 
   matrix_.reserve(other.matrix_.size());
   for (const auto& cont : other.matrix_) {
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      _container_insert(cont.second, cont.first);
-    } else {
-      _container_insert(cont);
-    }
+    _container_insert(cont);
   }
 
   return *this;
@@ -1046,10 +1041,7 @@ Chain_matrix<Master_matrix>::_reduce_boundary(ID_index cellID, const Boundary_ra
   };
 
   if (boundary.begin() == boundary.end()) {
-    if constexpr (Master_matrix::Option_list::is_z2)
-      column.insert(cellID);
-    else
-      column.emplace(cellID, 1);
+    _insert_in(cellID, column);
     _insert_chain(column, dim);
     return chainsInF;
   }
@@ -1087,10 +1079,7 @@ Chain_matrix<Master_matrix>::_reduce_boundary(ID_index cellID, const Boundary_ra
   _build_from_H(cellID, column, chainsInH);
 
   // Create and insert (\sum col_h) + sigma (in H, paired with chain_fp) in matrix_
-  if constexpr (Master_matrix::Option_list::is_z2)
-    _insert_chain(column, dim, chainsInF[0]);
-  else
-    _insert_chain(column, dim, chainsInF[0].first);
+  _insert_chain(column, dim, Master_matrix::get_row_index(chainsInF[0]));
 
   return chainsInF;
 }
@@ -1140,32 +1129,26 @@ inline void Chain_matrix<Master_matrix>::_build_from_H(ID_index cellID,
                                                        Tmp_column& column,
                                                        std::vector<Entry_representative>& chainsInH)
 {
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    column.insert(cellID);
-    for (Index idx_h : chainsInH) {
-      _add_to(get_column(idx_h), column, 1U);
-    }
-  } else {
-    column.emplace(cellID, 1);
-    for (std::pair<Index, Field_element>& idx_h : chainsInH) {
-      _add_to(get_column(idx_h.first), column, idx_h.second);
-    }
+  _insert_in(cellID, column);
+
+  for (const auto& idx_h : chainsInH) {
+    _add_to(get_column(Master_matrix::get_row_index(idx_h)), column, Master_matrix::get_element(idx_h));
   }
 }
 
 template <class Master_matrix>
 inline void Chain_matrix<Master_matrix>::_update_largest_death_in_F(const std::vector<Entry_representative>& chainsInF)
 {
+  Index toUpdate = Master_matrix::get_row_index(chainsInF[0]);
   if constexpr (Master_matrix::Option_list::is_z2) {
-    Index toUpdate = chainsInF[0];
     for (auto other_col_it = chainsInF.begin() + 1; other_col_it != chainsInF.end(); ++other_col_it) {
       add_to(*other_col_it, toUpdate);
     }
   } else {
-    Index toUpdate = chainsInF[0].first;
-    get_column(toUpdate) *= chainsInF[0].second;
+    get_column(toUpdate) *= Master_matrix::get_element(chainsInF[0]);
     for (auto other_col_it = chainsInF.begin() + 1; other_col_it != chainsInF.end(); ++other_col_it) {
-      multiply_source_and_add_to(other_col_it->second, other_col_it->first, toUpdate);
+      multiply_source_and_add_to(
+          Master_matrix::get_element(*other_col_it), Master_matrix::get_row_index(*other_col_it), toUpdate);
     }
   }
 }
@@ -1330,12 +1313,8 @@ template <class Master_matrix>
 template <class Container>
 inline void Chain_matrix<Master_matrix>::_container_insert(const Container& column, Index pos, Dimension dim)
 {
-  ID_index pivot;
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    pivot = *(column.rbegin());
-  } else {
-    pivot = column.rbegin()->first;
-  }
+  ID_index pivot = Master_matrix::get_row_index(*(column.rbegin()));
+
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.try_emplace(pivot, pos);
     if constexpr (Master_matrix::Option_list::has_row_access) {
@@ -1354,21 +1333,32 @@ inline void Chain_matrix<Master_matrix>::_container_insert(const Container& colu
 }
 
 template <class Master_matrix>
-inline void Chain_matrix<Master_matrix>::_container_insert(const Column& column, [[maybe_unused]] Index pos)
+template <class ColumnIterator> // Pair (pos,Column) if has_map_column_container, Column otherwise
+inline void Chain_matrix<Master_matrix>::_container_insert(const ColumnIterator& rep)
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    const auto& col = rep.second;
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.try_emplace(pos, Column(column, column.get_column_index(), RA_opt::_get_rows_ptr(), colSettings_));
+      matrix_.try_emplace(rep.first, Column(col, col.get_column_index(), RA_opt::_get_rows_ptr(), colSettings_));
     } else {
-      matrix_.try_emplace(pos, Column(column, colSettings_));
+      matrix_.try_emplace(rep.first, Column(col, colSettings_));
     }
   } else {
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      matrix_.emplace_back(column, column.get_column_index(), RA_opt::_get_rows_ptr(), colSettings_);
+      matrix_.emplace_back(rep, rep.get_column_index(), RA_opt::_get_rows_ptr(), colSettings_);
     } else {
-      matrix_.emplace_back(column, colSettings_);
+      matrix_.emplace_back(rep, colSettings_);
     }
   }
+}
+
+template <class Master_matrix>
+inline void Chain_matrix<Master_matrix>::_insert_in(ID_index cellID, Tmp_column& column)
+{
+  if constexpr (Master_matrix::Option_list::is_z2)
+    column.insert(cellID);
+  else
+    column.emplace(cellID, 1);
 }
 
 }  // namespace persistence_matrix
