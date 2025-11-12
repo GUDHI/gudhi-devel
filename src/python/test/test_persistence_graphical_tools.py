@@ -186,3 +186,50 @@ def _sklearn_several_homology_dim_plot_persistence(function):
 def test_sklearn_several_homology_dim_plot_persistence():
     for function in [gd.plot_persistence_barcode, gd.plot_persistence_diagram]:
         _sklearn_several_homology_dim_plot_persistence(function)
+
+
+def _empty_input_diagram(function):
+    ax = function([])
+    diags = [
+        [
+            np.empty((0, 2)),
+            np.array([[11.0, 12.0], [6.0, 7.0]]),
+            np.array([[0.0, 5.0], [0.0, 6.0], [0.0, float("inf")]]),
+        ],
+        [
+            np.array([[11.0, 12.0], [6.0, 7.0]]),
+            np.empty((0, 2)),
+            np.array([[0.0, 5.0], [0.0, 6.0], [0.0, float("inf")]]),
+        ],
+        [
+            np.array([[11.0, 12.0], [6.0, 7.0]]),
+            np.array([[0.0, 5.0], [0.0, 6.0], [0.0, float("inf")]]),
+            np.empty((0, 2)),
+        ],
+    ]
+    for diag in diags:
+        ax = function(diag)
+
+    diags = [
+        [
+            (1, (11.0, 12.0)),
+            (1, (6.0, 7.0)),
+            (2, (0.0, 5.0)),
+            (2, (0.0, 6.0)),
+            (2, (0.0, float("inf"))),
+        ],
+        [
+            (0, (11.0, 12.0)),
+            (0, (6.0, 7.0)),
+            (2, (0.0, 5.0)),
+            (2, (0.0, 6.0)),
+            (2, (0.0, float("inf"))),
+        ],
+    ]
+    for diag in diags:
+        ax = function(diag)
+
+
+def test_empty_input_diagram():
+    for function in [gd.plot_persistence_barcode, gd.plot_persistence_diagram]:
+        _empty_input_diagram(function)
