@@ -68,7 +68,7 @@ make -j 16  # 16 is the number of CPU that are used to compile the python module
 # make clean
 ```
 
-In order to use freshly compiled gudhi python module:
+In order to use the gudhi python module you just compiled as explained above:
 ```bash
 PYTHONPATH=/workdir/gudhi-devel/build/src/python python # or ipython, jupyter, ...
 ```
