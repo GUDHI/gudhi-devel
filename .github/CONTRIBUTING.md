@@ -21,18 +21,24 @@ There is a label **enhancement** in the [new issue](https://github.com/GUDHI/gud
 
 Please take some time to read our [how to use GitHub to contribute to GUDHI](how_to_use_github_to_contribute_to_gudhi.md).
 
+## You don't know how to set up a development environment ?
+
+You should read [how to compile GUDHI in a conda environment](how_to_compile_gudhi_in_a_conda_env.md).
+It may be the easiest way to install what is needed, and you just have to erase the main conda installation folder if
+you are not happy with it.
+
 ## Something you want to improve in the documentation
 
 For C++ documentation, you can find it in the directories:
 * *src/common/doc* for the main page and installation instructions
 * *src/NAME_OF_THE_MODULE/doc* for the main page of a module
 * *src/NAME_OF_THE_MODULE/include/gudhi* for the documentation generated from the code.
-We use Doxygen to generate the code and you will be able to verify the result in CircleCI Doxygen target in the artifacts.
+We use Doxygen to generate the documentation from the code and you will be able to verify the result in CircleCI Doxygen target in the artifacts.
 
 For Python documentation, you can find it in the directories:
-* *src/python/doc* for the main page, installation instructionsand for the main pages of the modules
-* *src/python/gudhi/NAME_OF_THE_MODULE.pyx* for the documentation generated from the code.
-We use Sphinx to generate the code and you will be able to verify the result in CircleCI Sphinx target in the artifacts.
+* *src/python/doc* for the main page, installation instructions and for the main pages of the modules
+* *src/python/gudhi/NAME_OF_THE_MODULE.py* and/or *src/python/gudhi/NAME_OF_THE_MODULE.cc* for the documentation generated from the code.
+We use Sphinx to generate the documentation from the code and you will be able to verify the result in CircleCI Sphinx target in the artifacts.
 
 ## Something you want to improve in the code
 
