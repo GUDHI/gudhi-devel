@@ -403,6 +403,8 @@ def plot_persistence_diagram(
     # line display of equation : birth = death
     axes.plot([axis_start, axis_end], [axis_start, axis_end], linewidth=1.0, color="k")
 
+    if input_type == 0:
+        sorted(persistence, key=lambda x: x[0])
     x = [birth for (dim, (birth, death)) in persistence]
     y = [death if death != float("inf") else infinity for (dim, (birth, death)) in persistence]
 
