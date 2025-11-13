@@ -12,8 +12,8 @@ and you can skip all `-c conda-forge` as it is the default channel with Miniforg
 
 ```bash
 conda install -c conda-forge mamba  # installation with mamba is faster
-conda create --name gudhi
-conda activate gudhi
+mamba create --name gudhi
+mamba activate gudhi
 mamba install -c conda-forge python cmake eigen cgal-cpp
 ```
 
