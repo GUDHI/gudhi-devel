@@ -33,12 +33,12 @@ For C++ documentation, you can find it in the directories:
 * *src/common/doc* for the main page and installation instructions
 * *src/NAME_OF_THE_MODULE/doc* for the main page of a module
 * *src/NAME_OF_THE_MODULE/include/gudhi* for the documentation generated from the code.
-We use Doxygen to generate the code and you will be able to verify the result in CircleCI Doxygen target in the artifacts.
+We use Doxygen to generate the documentation from the code and you will be able to verify the result in CircleCI Doxygen target in the artifacts.
 
 For Python documentation, you can find it in the directories:
 * *src/python/doc* for the main page, installation instructions and for the main pages of the modules
 * *src/python/gudhi/NAME_OF_THE_MODULE.py* and/or *src/python/gudhi/NAME_OF_THE_MODULE.cc* for the documentation generated from the code.
-We use Sphinx to generate the code and you will be able to verify the result in CircleCI Sphinx target in the artifacts.
+We use Sphinx to generate the documentation from the code and you will be able to verify the result in CircleCI Sphinx target in the artifacts.
 
 ## Something you want to improve in the code
 
