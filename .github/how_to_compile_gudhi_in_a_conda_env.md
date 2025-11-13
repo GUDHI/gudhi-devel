@@ -1,10 +1,14 @@
 # Install a conda development environment to compile GUDHI
 
-## Install miniconda
+## Install a conda distribution
 
-Download the [installer](https://docs.conda.io/en/latest/miniconda.html) required by your system and follow the [instructions](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
+Install one of the [conda distribution](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
+Miniforge is the preferred version, [here is its installation guide](https://conda-forge.org/download/)
 
 ## Create a dedicated environment
+
+If you went with Miniforge, `conda install -c conda-forge mamba` can be skipped as it is already installed,
+and you can skip all `-c conda-forge` as it is the default channel with Miniforge.
 
 ```bash
 conda install -c conda-forge mamba  # installation with mamba is faster
