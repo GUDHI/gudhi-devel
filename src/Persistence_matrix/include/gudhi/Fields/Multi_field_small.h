@@ -22,6 +22,8 @@
 #include <limits.h>
 #include <numeric>
 
+#include <gudhi/Debug_utils.h>
+
 namespace Gudhi {
 namespace persistence_fields {
 
@@ -350,6 +352,9 @@ class Multi_field_element_with_small_characteristics
   std::pair<Multi_field_element_with_small_characteristics, Characteristic> get_partial_inverse(
       Characteristic productOfCharacteristics) const
   {
+    GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
+                "The given product is not the product of a subset of the current Multi-field characteristics.");
+
     Characteristic gcd = std::gcd(element_, productOfAllCharacteristics_);
 
     if (gcd == productOfCharacteristics)
@@ -395,8 +400,11 @@ class Multi_field_element_with_small_characteristics
   static Multi_field_element_with_small_characteristics get_partial_multiplicative_identity(
       const Characteristic& productOfCharacteristics)
   {
-    if (productOfCharacteristics == 0) {
-      return Multi_field_element_with_small_characteristics<minimum, maximum>(multiplicativeID_);
+    GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
+                "The given product is not the product of a subset of the current Multi-field characteristics.");
+
+    if (productOfCharacteristics == 0 || productOfCharacteristics == productOfAllCharacteristics_) {
+      return get_multiplicative_identity();
     }
     Multi_field_element_with_small_characteristics<minimum, maximum> mult;
     for (Characteristic idx = 0; idx < primes_.size(); ++idx) {
