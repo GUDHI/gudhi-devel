@@ -40,8 +40,8 @@ pip install -r ext/gudhi-deploy/test-requirements.txt  # pytorch can be painful 
 
 ## Compilation
 
-It is not mandatory, and it can be quite long to compile everything, but in order to compile all c++ utilities, examples,
-benchmarks, unitary tests, and python module:
+It is not mandatory, and it can be quite long to compile everything ([ccache](https://ccache.dev/) can help here),
+but in order to compile all c++ utilities, examples, benchmarks, unitary tests, and python module:
 ```bash
 cd /workdir/gudhi-devel
 rm -rf build; mkdir build  # /!\ any existing build folder will be removed
