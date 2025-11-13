@@ -54,7 +54,7 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_BENCHMARK=ON ..
 ```
 
-### Specific python compilation
+### Compile only the python module
 
 In order to compile only the python module, it is the same process, but just change to `src/python` directory:
 ```bash
@@ -73,7 +73,7 @@ In order to use freshly compiled gudhi python module:
 PYTHONPATH=/workdir/gudhi-devel/build/src/python python # or ipython, jupyter, ...
 ```
 
-### Specific C++ documentation generation
+### Generating the C++ documentation only
 
 ```bash
 cd /workdir/gudhi-devel
@@ -93,7 +93,7 @@ grep warning doxygen.log # Warnings can be lost with parallel doxygen
 firefox html/index.html # [optional] To display the c++ documentation. Anything else than firefox can be used.
 ```
 
-### Specific python documentation generation
+### Generating the python documentation only
 
 ```bash
 cd /workdir/gudhi-devel
