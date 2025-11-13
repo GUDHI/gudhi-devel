@@ -2163,6 +2163,92 @@ void test_vine_swap_with_position_index(Matrix& m) {
   }
 }
 
+// does not work for non-barcode chains
+template <class Matrix>
+void test_vine_swap_with_position_index2() {
+  // tests swaps with bars at infinity
+  Matrix m({{}, {}, {}, {}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {4, 6, 7}, {2, 3}});
+  bool change;
+  m.insert_boundary({1, 2}, 1);
+
+  if constexpr (Matrix::Option_list::has_column_pairings) {
+    const auto& barcode = m.get_current_barcode();
+    auto it = barcode.begin();
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 0);
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 1);
+    BOOST_CHECK_EQUAL(it->death, 4);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 2);
+    BOOST_CHECK_EQUAL(it->death, 5);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 3);
+    BOOST_CHECK_EQUAL(it->death, 6);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 1);
+    BOOST_CHECK_EQUAL(it->birth, 7);
+    BOOST_CHECK_EQUAL(it->death, 8);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 1);
+    BOOST_CHECK_EQUAL(it->birth, 9);
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 1);
+    BOOST_CHECK_EQUAL(it->birth, 10);
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
+    ++it;
+    BOOST_CHECK(it == barcode.end());
+  }
+
+  change = m.vine_swap(9);
+  BOOST_CHECK(change);
+  change = m.vine_swap(8);
+  BOOST_CHECK(change);
+  change = m.vine_swap(7);
+  BOOST_CHECK(change);
+  change = m.vine_swap(6);
+  BOOST_CHECK(change);
+
+  if constexpr (Matrix::Option_list::has_column_pairings) {
+    const auto& barcode = m.get_current_barcode();
+    auto it = barcode.begin();
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 0);
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 1);
+    BOOST_CHECK_EQUAL(it->death, 4);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 2);
+    BOOST_CHECK_EQUAL(it->death, 5);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 3);
+    BOOST_CHECK_EQUAL(it->death, 7);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 1);
+    BOOST_CHECK_EQUAL(it->birth, 8);
+    BOOST_CHECK_EQUAL(it->death, 9);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 1);
+    BOOST_CHECK_EQUAL(it->birth, 10);
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 1);
+    BOOST_CHECK_EQUAL(it->birth, 6);
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
+    ++it;
+    BOOST_CHECK(it == barcode.end());
+  }
+}
+
 // assumes matrix was build with `build_longer_boundary_matrix` and was given the right comparison methods for
 // non-barcode
 template <class Matrix>
@@ -2502,6 +2588,92 @@ void test_vine_swap_with_id_index(Matrix& m) {
     BOOST_CHECK_EQUAL(it->dim, 0);
     BOOST_CHECK_EQUAL(it->birth, 3);
     BOOST_CHECK_EQUAL(it->death, 6);
+    ++it;
+    BOOST_CHECK(it == barcode.end());
+  }
+}
+
+// does not work for non-barcode chains
+template <class Matrix>
+void test_vine_swap_with_id_index2() {
+  // tests swaps with bars at infinity
+  Matrix m({{}, {}, {}, {}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {4, 6, 7}, {2, 3}});
+  unsigned int next;
+  m.insert_boundary({1, 2}, 1);
+
+  if constexpr (Matrix::Option_list::has_column_pairings) {
+    const auto& barcode = m.get_current_barcode();
+    auto it = barcode.begin();
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 0);
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 1);
+    BOOST_CHECK_EQUAL(it->death, 4);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 2);
+    BOOST_CHECK_EQUAL(it->death, 5);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 3);
+    BOOST_CHECK_EQUAL(it->death, 6);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 1);
+    BOOST_CHECK_EQUAL(it->birth, 7);
+    BOOST_CHECK_EQUAL(it->death, 8);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 1);
+    BOOST_CHECK_EQUAL(it->birth, 9);
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 1);
+    BOOST_CHECK_EQUAL(it->birth, 10);
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
+    ++it;
+    BOOST_CHECK(it == barcode.end());
+  }
+
+  next = m.vine_swap(9, 10);
+  BOOST_CHECK_EQUAL(next, 9);
+  next = m.vine_swap(8, 10);
+  BOOST_CHECK_EQUAL(next, 8);
+  next = m.vine_swap(7, 10);
+  BOOST_CHECK_EQUAL(next, 7);
+  next = m.vine_swap(6, 10);
+  BOOST_CHECK_EQUAL(next, 6);
+
+  if constexpr (Matrix::Option_list::has_column_pairings) {
+    const auto& barcode = m.get_current_barcode();
+    auto it = barcode.begin();
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 0);
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 1);
+    BOOST_CHECK_EQUAL(it->death, 4);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 2);
+    BOOST_CHECK_EQUAL(it->death, 5);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 0);
+    BOOST_CHECK_EQUAL(it->birth, 3);
+    BOOST_CHECK_EQUAL(it->death, 7);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 1);
+    BOOST_CHECK_EQUAL(it->birth, 8);
+    BOOST_CHECK_EQUAL(it->death, 9);
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 1);
+    BOOST_CHECK_EQUAL(it->birth, 10);
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
+    ++it;
+    BOOST_CHECK_EQUAL(it->dim, 1);
+    BOOST_CHECK_EQUAL(it->birth, 6);
+    BOOST_CHECK_EQUAL(it->death, Matrix::template get_null_value<typename Matrix::ID_index>());
     ++it;
     BOOST_CHECK(it == barcode.end());
   }

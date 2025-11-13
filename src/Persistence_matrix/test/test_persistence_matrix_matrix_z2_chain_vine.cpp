@@ -114,8 +114,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine, Matrix, full_matrices) {
   Matrix m(columns);
 #ifdef PM_TEST_ID_IDX
   test_vine_swap_with_id_index(m);
+  test_vine_swap_with_id_index2<Matrix>();
 #else
   test_vine_swap_with_position_index(m);
+  test_vine_swap_with_position_index2<Matrix>();
 #endif
 }
 
