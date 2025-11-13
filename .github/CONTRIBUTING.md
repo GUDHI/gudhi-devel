@@ -23,7 +23,7 @@ Please take some time to read our [how to use GitHub to contribute to GUDHI](how
 
 ## You don't know how to set up a development environment ?
 
-You should read [how to compile GUDHI in a conda environment](how_to_use_github_to_contribute_to_gudhi.md).
+You should read [how to compile GUDHI in a conda environment](how_to_compile_gudhi_in_a_conda_env.md).
 It may be the easiest way to install what is needed, and you just have to erase the main conda installation folder if
 you are not happy with it.
 
