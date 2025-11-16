@@ -972,6 +972,7 @@ class Simplex_tree {
     }
   }
 
+ public:
   /** \brief Returns the Simplex_handle corresponding to the 0-simplex
    * representing the vertex with Vertex_handle v. */
   Simplex_handle find_vertex(Vertex_handle v) const {
@@ -983,7 +984,6 @@ class Simplex_tree {
     }
   }
 
- public:
   /** \private \brief Test if the vertices have contiguous numbering: 0, 1, etc.  */
   bool contiguous_vertices() const {
     if (root_.members_.empty()) return true;
