@@ -5,7 +5,7 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
- *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `GUDHI_DEBUG`s etc.)
+ *      - 2025/06 Hannah Schreiber: Various small bug fixes (missing `inline`s, `DEBUG_TRACES`s etc.)
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -13,7 +13,7 @@
 #define PERSISTENCE_LANDSCAPE_H_
 
 // standard include
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
 #include <iostream>   // std::cerr, std::clog
 #endif
 #include <ostream>    // std::ostream
@@ -162,7 +162,7 @@ class Persistence_landscape
   friend Persistence_landscape operation_on_pair_of_landscapes(const Persistence_landscape& land1,
                                                                const Persistence_landscape& land2)
   {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "operation_on_pair_of_landscapes\n";
 #endif
     Persistence_landscape result;
@@ -170,7 +170,7 @@ class Persistence_landscape
     result.land_ = land;
     Operation oper;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     for (std::size_t i = 0; i != std::min(land1.land_.size(), land2.land_.size()); ++i) {
       std::clog << "land1.land[" << i << "].size() : " << land1.land_[i].size() << std::endl;
       std::clog << "land2.land[" << i << "].size() : " << land2.land_[i].size() << std::endl;
@@ -182,7 +182,7 @@ class Persistence_landscape
       std::size_t p = 0;
       std::size_t q = 0;
       while ((p + 1 < land1.land_[i].size()) && (q + 1 < land2.land_[i].size())) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "p : " << p << "\n";
         std::clog << "q : " << q << "\n";
         std::clog << "land1.land.size() : " << land1.land_.size() << std::endl;
@@ -194,7 +194,7 @@ class Persistence_landscape
 #endif
 
         if (land1.land_[i][p].first < land2.land_[i][q].first) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << "first \n";
           std::clog << " function_value(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) : "
                     << function_value(land2.land_[i][q - 1], land2.land_[i][q], land1.land_[i][p].first) << "\n";
@@ -207,7 +207,7 @@ class Persistence_landscape
           continue;
         }
         if (land1.land_[i][p].first > land2.land_[i][q].first) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << "Second \n";
           std::clog << "function_value(" << land1.land_[i][p - 1].first << " " << land1.land_[i][p - 1].second << " ,"
                     << land1.land_[i][p].first << " " << land1.land_[i][p].second << ", " << land2.land_[i][q].first
@@ -227,7 +227,7 @@ class Persistence_landscape
           continue;
         }
         if (land1.land_[i][p].first == land2.land_[i][q].first) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << "Third \n";
 #endif
           lambda_n.push_back(
@@ -235,12 +235,12 @@ class Persistence_landscape
           ++p;
           ++q;
         }
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "Next iteration \n";
 #endif
       }
       while ((p + 1 < land1.land_[i].size()) && (q + 1 >= land2.land_[i].size())) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "New point : " << land1.land_[i][p].first
                   << "  oper(land1.land[i][p].second,0) : " << oper(land1.land_[i][p].second, 0) << std::endl;
 #endif
@@ -248,7 +248,7 @@ class Persistence_landscape
         ++p;
       }
       while ((p + 1 >= land1.land_[i].size()) && (q + 1 < land2.land_[i].size())) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "New point : " << land2.land_[i][q].first
                   << " oper(0,land2.land[i][q].second) : " << oper(0, land2.land_[i][q].second) << std::endl;
 #endif
@@ -261,7 +261,7 @@ class Persistence_landscape
       result.land_[i].swap(lambda_n);
     }
     if (land1.land_.size() > std::min(land1.land_.size(), land2.land_.size())) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "land1.land.size() > std::min( land1.land.size() , land2.land.size() )" << std::endl;
 #endif
       for (std::size_t i = std::min(land1.land_.size(), land2.land_.size());
@@ -277,7 +277,7 @@ class Persistence_landscape
       }
     }
     if (land2.land_.size() > std::min(land1.land_.size(), land2.land_.size())) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "( land2.land.size() > std::min( land1.land.size() , land2.land.size() ) ) " << std::endl;
 #endif
       for (std::size_t i = std::min(land1.land_.size(), land2.land_.size());
@@ -292,7 +292,7 @@ class Persistence_landscape
         result.land_[i].swap(lambda_n);
       }
     }
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "operation_on_pair_of_landscapes END\n";
 #endif
     return result;
@@ -474,7 +474,7 @@ class Persistence_landscape
     //| first-second |:
     lan = lan.abs();
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "Abs of difference ; " << lan << std::endl;
 #endif
 
@@ -482,12 +482,12 @@ class Persistence_landscape
       // \int_{- \infty}^{+\infty}| first-second |^p
       double result;
       if (p != 1) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "Power != 1, compute integral to the power p\n";
 #endif
         result = lan.compute_integral_of_landscape(p);
       } else {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "Power = 1, compute integral \n";
 #endif
         result = lan.compute_integral_of_landscape();
@@ -496,7 +496,7 @@ class Persistence_landscape
       return std::pow(result, 1.0 / p);
     } else {
       // p == infty
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "Power = infty, compute maximum \n";
 #endif
       return lan.compute_maximum();
@@ -532,7 +532,7 @@ class Persistence_landscape
     double result = 0;
 
     for (std::size_t level = 0; level != std::min(l1.size(), l2.size()); ++level) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "Computing inner product for a level : " << level << std::endl;
 #endif
       auto&& l1_land_level = l1.land_[level];
@@ -578,7 +578,7 @@ class Persistence_landscape
 
         result += contributionFromThisPart;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "[l1_land_level[l1It].first,l1_land_level[l1It+1].first] : " << l1_land_level[l1It].first << " , "
                   << l1_land_level[l1It + 1].first << std::endl;
         std::clog << "[l2_land_level[l2It].first,l2_land_level[l2It+1].first] : " << l2_land_level[l2It].first << " , "
@@ -599,11 +599,11 @@ class Persistence_landscape
           if (x2 == l2_land_level[l2It + 1].first) {
             // in this case, we increment both:
             ++l2It;
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
             std::clog << "Incrementing both \n";
 #endif
           } else {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
             std::clog << "Incrementing first \n";
 #endif
           }
@@ -611,7 +611,7 @@ class Persistence_landscape
         } else {
           // in this case we increment l2It
           ++l2It;
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << "Incrementing second \n";
 #endif
         }
@@ -681,7 +681,7 @@ class Persistence_landscape
    **/
   void compute_average(const std::vector<Persistence_landscape*>& to_average)
   {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "to_average.size() : " << to_average.size() << std::endl;
 #endif
 
@@ -696,13 +696,13 @@ class Persistence_landscape
     bool is_this_first_level = true;
 
     while (nextLevelMerge.size() != 1) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "nextLevelMerge.size() : " << nextLevelMerge.size() << std::endl;
 #endif
       std::vector<Persistence_landscape*> nextNextLevelMerge;
       nextNextLevelMerge.reserve(to_average.size());
       for (std::size_t i = 0; i < nextLevelMerge.size(); i = i + 2) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "i : " << i << std::endl;
 #endif
         Persistence_landscape* l = new Persistence_landscape;
@@ -713,7 +713,7 @@ class Persistence_landscape
         }
         nextNextLevelMerge.push_back(l);
       }
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "After this iteration \n";
 #endif
 
@@ -788,14 +788,14 @@ class Persistence_landscape
   friend double compute_maximal_distance_non_symmetric(const Persistence_landscape& pl1,
                                                        const Persistence_landscape& pl2)
   {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << " compute_maximal_distance_non_symmetric \n";
 #endif
     // this distance is not symmetric. It compute ONLY distance between inflection points of pl1 and pl2.
     double maxDist = 0;
     std::size_t minimalNumberOfLevels = std::min(pl1.land_.size(), pl2.land_.size());
     for (std::size_t level = 0; level != minimalNumberOfLevels; ++level) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "Level : " << level << std::endl;
       std::clog << "PL1 : \n";
       for (std::size_t i = 0; i != pl1.land_[level].size(); ++i) {
@@ -821,7 +821,7 @@ class Persistence_landscape
             pl1.land_[level][i].second);
         if (maxDist <= val) maxDist = val;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << pl1.land_[level][i].first << "in [" << pl2.land_[level][p2Count].first << ","
                   << pl2.land_[level][p2Count + 1].first << "] \n";
         std::clog << "pl1[level][i].second : " << pl1.land_[level][i].second << std::endl;
@@ -833,14 +833,14 @@ class Persistence_landscape
       }
     }
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "minimalNumberOfLevels : " << minimalNumberOfLevels << std::endl;
 #endif
 
     if (minimalNumberOfLevels < pl1.land_.size()) {
       for (std::size_t level = minimalNumberOfLevels; level != pl1.land_.size(); ++level) {
         for (std::size_t i = 0; i != pl1.land_[level].size(); ++i) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << "pl1[level][i].second  : " << pl1.land_[level][i].second << std::endl;
 #endif
           if (maxDist < pl1.land_[level][i].second) maxDist = pl1.land_[level][i].second;
@@ -871,14 +871,14 @@ class Persistence_landscape
 inline bool Persistence_landscape::operator==(const Persistence_landscape& rhs) const
 {
   if (this->land_.size() != rhs.land_.size()) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "1\n";
 #endif
     return false;
   }
   for (std::size_t level = 0; level != this->land_.size(); ++level) {
     if (this->land_[level].size() != rhs.land_[level].size()) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "this->land[level].size() : " << this->land_[level].size() << "\n";
       std::clog << "rhs.land[level].size() : " << rhs.land_[level].size() << "\n";
       std::clog << "2\n";
@@ -888,7 +888,7 @@ inline bool Persistence_landscape::operator==(const Persistence_landscape& rhs) 
     for (std::size_t i = 0; i != this->land_[level].size(); ++i) {
       if (!(almost_equal(this->land_[level][i].first, rhs.land_[level][i].first) &&
             almost_equal(this->land_[level][i].second, rhs.land_[level][i].second))) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "this->land[level][i] : " << this->land_[level][i].first << " " << this->land_[level][i].second
                   << "\n";
         std::clog << "rhs.land[level][i] : " << rhs.land_[level][i].first << " " << rhs.land_[level][i].second << "\n";
@@ -905,7 +905,7 @@ inline void Persistence_landscape::_construct_persistence_landscape_from_barcode
     const std::vector<std::pair<double, double> >& p,
     std::size_t number_of_levels)
 {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Persistence_landscape::Persistence_landscape( const std::vector< std::pair< double , double > >& p )"
             << std::endl;
 #endif
@@ -915,7 +915,7 @@ inline void Persistence_landscape::_construct_persistence_landscape_from_barcode
   bars.insert(bars.begin(), p.begin(), p.end());
   std::sort(bars.begin(), bars.end(), compare_points_sorting);
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Bars : \n";
   for (std::size_t i = 0; i != bars.size(); ++i) {
     std::clog << bars[i].first << " " << bars[i].second << "\n";
@@ -930,7 +930,7 @@ inline void Persistence_landscape::_construct_persistence_landscape_from_barcode
   std::vector<std::vector<std::pair<double, double> > > Persistence_landscape;
   std::size_t number_of_levels_in_the_landscape = 0;
   while (!characteristicPoints.empty()) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     for (std::size_t i = 0; i != characteristicPoints.size(); ++i) {
       std::clog << "(" << characteristicPoints[i].first << " " << characteristicPoints[i].second << ")\n";
     }
@@ -941,7 +941,7 @@ inline void Persistence_landscape::_construct_persistence_landscape_from_barcode
     lambda_n.push_back(std::make_pair(minus_length(characteristicPoints[0]), 0));
     lambda_n.push_back(characteristicPoints[0]);
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "1 Adding to lambda_n : (" << -std::numeric_limits<int>::max() << " " << 0 << ") , ("
               << minus_length(characteristicPoints[0]) << " " << 0 << ") , (" << characteristicPoints[0].first << " "
               << characteristicPoints[0].second << ") \n";
@@ -958,11 +958,11 @@ inline void Persistence_landscape::_construct_persistence_landscape_from_barcode
               (minus_length(characteristicPoints[i]) + birth_plus_deaths(lambda_n[lambda_n.size() - 1])) / 2,
               (birth_plus_deaths(lambda_n[lambda_n.size() - 1]) - minus_length(characteristicPoints[i])) / 2);
           lambda_n.push_back(point);
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << "2 Adding to lambda_n : (" << point.first << " " << point.second << ")\n";
 #endif
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << "characteristicPoints[i+p] : " << characteristicPoints[i + p].first << " "
                     << characteristicPoints[i + p].second << "\n";
           std::clog << "point : " << point.first << " " << point.second << "\n";
@@ -972,7 +972,7 @@ inline void Persistence_landscape::_construct_persistence_landscape_from_barcode
                  (almost_equal(minus_length(point), minus_length(characteristicPoints[i + p]))) &&
                  (birth_plus_deaths(point) <= birth_plus_deaths(characteristicPoints[i + p]))) {
             newCharacteristicPoints.push_back(characteristicPoints[i + p]);
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
             std::clog << "3.5 Adding to newCharacteristicPoints : (" << characteristicPoints[i + p].first << " "
                       << characteristicPoints[i + p].second << ")\n";
 #endif
@@ -980,7 +980,7 @@ inline void Persistence_landscape::_construct_persistence_landscape_from_barcode
           }
 
           newCharacteristicPoints.push_back(point);
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << "4 Adding to newCharacteristicPoints : (" << point.first << " " << point.second << ")\n";
 #endif
 
@@ -988,7 +988,7 @@ inline void Persistence_landscape::_construct_persistence_landscape_from_barcode
                  (minus_length(point) <= minus_length(characteristicPoints[i + p])) &&
                  (birth_plus_deaths(point) >= birth_plus_deaths(characteristicPoints[i + p]))) {
             newCharacteristicPoints.push_back(characteristicPoints[i + p]);
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
             std::clog << "characteristicPoints[i+p] : " << characteristicPoints[i + p].first << " "
                       << characteristicPoints[i + p].second << "\n";
             std::clog << "point : " << point.first << " " << point.second << "\n";
@@ -1005,20 +1005,20 @@ inline void Persistence_landscape::_construct_persistence_landscape_from_barcode
         } else {
           lambda_n.push_back(std::make_pair(birth_plus_deaths(lambda_n[lambda_n.size() - 1]), 0));
           lambda_n.push_back(std::make_pair(minus_length(characteristicPoints[i]), 0));
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
           std::clog << "5 Adding to lambda_n : (" << birth_plus_deaths(lambda_n[lambda_n.size() - 1]) << " " << 0
                     << ")\n";
           std::clog << "5 Adding to lambda_n : (" << minus_length(characteristicPoints[i]) << " " << 0 << ")\n";
 #endif
         }
         lambda_n.push_back(characteristicPoints[i]);
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "6 Adding to lambda_n : (" << characteristicPoints[i].first << " "
                   << characteristicPoints[i].second << ")\n";
 #endif
       } else {
         newCharacteristicPoints.push_back(characteristicPoints[i]);
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "7 Adding to newCharacteristicPoints : (" << characteristicPoints[i].first << " "
                   << characteristicPoints[i].second << ")\n";
 #endif
@@ -1088,14 +1088,14 @@ inline double Persistence_landscape::compute_integral_of_landscape(double p) con
   double result = 0;
   for (std::size_t i = 0; i != this->land_.size(); ++i) {
     for (std::size_t nr = 2; nr != this->land_[i].size() - 1; ++nr) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "nr : " << nr << "\n";
 #endif
       // In this interval, the landscape has a form f(x) = ax+b. We want to compute integral of (ax+b)^p = 1/a *
       // (ax+b)^{p+1}/(p+1)
       auto [a, b] = compute_parameters_of_a_line(this->land_[i][nr], this->land_[i][nr - 1]);
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "(" << this->land_[i][nr].first << "," << this->land_[i][nr].second << ") , "
                 << this->land_[i][nr - 1].first << "," << this->land_[i][nr].second << ")" << std::endl;
 #endif
@@ -1107,7 +1107,7 @@ inline double Persistence_landscape::compute_integral_of_landscape(double p) con
       } else {
         result += (this->land_[i][nr].first - this->land_[i][nr - 1].first) * (std::pow(this->land_[i][nr].second, p));
       }
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "a : " << a << " , b : " << b << std::endl;
       std::clog << "result : " << result << std::endl;
 #endif
@@ -1127,7 +1127,7 @@ inline double Persistence_landscape::compute_value_at_a_given_point(unsigned int
   unsigned int coordBegin = 1;
   unsigned int coordEnd = this->land_[level].size() - 2;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Here \n";
   std::clog << "x : " << x << "\n";
   std::clog << "this->land[level][coordBegin].first : " << this->land_[level][coordBegin].first << "\n";
@@ -1138,12 +1138,12 @@ inline double Persistence_landscape::compute_value_at_a_given_point(unsigned int
   if (x <= this->land_[level][coordBegin].first) return 0;
   if (x >= this->land_[level][coordEnd].first) return 0;
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "Entering to the while loop \n";
 #endif
 
   while (coordBegin + 1 != coordEnd) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "coordBegin : " << coordBegin << "\n";
     std::clog << "coordEnd : " << coordEnd << "\n";
     std::clog << "this->land[level][coordBegin].first : " << this->land_[level][coordBegin].first << "\n";
@@ -1152,7 +1152,7 @@ inline double Persistence_landscape::compute_value_at_a_given_point(unsigned int
 
     unsigned int newCord = (unsigned int)floor((coordEnd + coordBegin) / 2.0);
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "newCord : " << newCord << "\n";
     std::clog << "this->land[level][newCord].first : " << this->land_[level][newCord].first << "\n";
 #endif
@@ -1165,7 +1165,7 @@ inline double Persistence_landscape::compute_value_at_a_given_point(unsigned int
     }
   }
 
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "x : " << x << " is between : " << this->land_[level][coordBegin].first << " a  "
             << this->land_[level][coordEnd].first << "\n";
   std::clog << "the y coords are : " << this->land_[level][coordBegin].second << " a  "
@@ -1189,13 +1189,13 @@ inline Persistence_landscape Persistence_landscape::abs()
 {
   Persistence_landscape result;
   for (std::size_t level = 0; level != this->land_.size(); ++level) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "level: " << level << std::endl;
 #endif
     std::vector<std::pair<double, double> > lambda_n;
     lambda_n.push_back(std::make_pair(-std::numeric_limits<int>::max(), 0));
     for (std::size_t i = 1; i != this->land_[level].size(); ++i) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "this->land[" << level << "][" << i << "] : " << this->land_[level][i].first << " "
                 << this->land_[level][i].second << std::endl;
 #endif
@@ -1207,14 +1207,14 @@ inline Persistence_landscape Persistence_landscape::abs()
 
         lambda_n.push_back(std::make_pair(zero, 0));
         lambda_n.push_back(std::make_pair(this->land_[level][i].first, std::fabs(this->land_[level][i].second)));
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "Adding pair : (" << zero << ",0)" << std::endl;
         std::clog << "In the same step adding pair : (" << this->land_[level][i].first << ","
                   << std::fabs(this->land_[level][i].second) << ") " << std::endl;
 #endif
       } else {
         lambda_n.push_back(std::make_pair(this->land_[level][i].first, std::fabs(this->land_[level][i].second)));
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "Adding pair : (" << this->land_[level][i].first << "," << std::fabs(this->land_[level][i].second)
                   << ") " << std::endl;
 #endif
@@ -1229,13 +1229,13 @@ inline Persistence_landscape* Persistence_landscape::new_abs()
 {
   Persistence_landscape* result = new Persistence_landscape(*this);
   for (std::size_t level = 0; level != this->land_.size(); ++level) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::clog << "level: " << level << std::endl;
 #endif
     std::vector<std::pair<double, double> > lambda_n;
     lambda_n.push_back(std::make_pair(-std::numeric_limits<int>::max(), 0));
     for (std::size_t i = 1; i != this->land_[level].size(); ++i) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "this->land[" << level << "][" << i << "] : " << this->land_[level][i].first << " "
                 << this->land_[level][i].second << std::endl;
 #endif
@@ -1247,14 +1247,14 @@ inline Persistence_landscape* Persistence_landscape::new_abs()
 
         lambda_n.push_back(std::make_pair(zero, 0));
         lambda_n.push_back(std::make_pair(this->land_[level][i].first, std::fabs(this->land_[level][i].second)));
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "Adding pair : (" << zero << ",0)" << std::endl;
         std::clog << "In the same step adding pair : (" << this->land_[level][i].first << ","
                   << std::fabs(this->land_[level][i].second) << ") " << std::endl;
 #endif
       } else {
         lambda_n.push_back(std::make_pair(this->land_[level][i].first, std::fabs(this->land_[level][i].second)));
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
         std::clog << "Adding pair : (" << this->land_[level][i].first << "," << std::fabs(this->land_[level][i].second)
                   << ") " << std::endl;
 #endif
@@ -1304,7 +1304,7 @@ inline void Persistence_landscape::load_landscape_from_file(const char* filename
   std::ifstream in;
   in.open(filename);
   if (!in.good()) {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
     std::cerr << "The file : " << filename << " do not exist. The program will now terminate \n";
 #endif
     throw std::invalid_argument("The persistence landscape file do not exist.");
@@ -1323,11 +1323,11 @@ inline void Persistence_landscape::load_landscape_from_file(const char* filename
       lineSS >> begin;
       lineSS >> end;
       landscapeAtThisLevel.push_back(std::make_pair(begin, end));
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "Reading a point : " << begin << " , " << end << std::endl;
 #endif
     } else {
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
       std::clog << "IGNORE LINE\n";
 #endif
       if (!isThisAFirsLine) {
@@ -1398,7 +1398,7 @@ inline void Persistence_landscape::plot(const char* filename,
     }
     out << "EOF" << std::endl;
   }
-#ifdef GUDHI_DEBUG
+#ifdef DEBUG_TRACES
   std::clog << "To visualize, install gnuplot and type the command: gnuplot -persist -e \"load \'"
             << gnuplot_script.str().c_str() << "\'\"" << std::endl;
 #endif

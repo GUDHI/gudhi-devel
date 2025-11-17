@@ -5,25 +5,20 @@ on:
     types: [published]
 
 env:
-  MACOSX_DEPLOYMENT_TARGET: 13.0
-  _PYTHON_HOST_PLATFORM: macosx-13.0-universal2
+  MACOSX_DEPLOYMENT_TARGET: 14.0
+  _PYTHON_HOST_PLATFORM: macosx-14.0-universal2
   ARCHFLAGS: "-arch arm64 -arch x86_64"
 
 jobs:
-  # Python 3.9+ specific case where NumPy 2.x will be supported
-  # NumPy packages for osx x86 and arm are only available from 1.21.2, but stable for both versions from 1.21.4 and python 3.9+
+  # Build with minimal supported version of NumPy 1.X with ABI compatibility feature
   wheels:
-    # Should use macos-latest, but python 3.9 is no more available from macos-14
-    runs-on: macos-13
+    # Python 3.11+ is only available for MacOS free version cf. https://github.com/actions/runner-images
+    runs-on: macos-14
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13"]
         include:
-          - python-version: "3.9"
-            numpy-version: "1.21.4"
-          - python-version: "3.10"
-            numpy-version: "1.21.6"
           - python-version: "3.11"
             numpy-version: "1.23.2"
           - python-version: "3.12"
@@ -39,7 +34,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-      # For python>=3.9, numpy>=2.0 for package build and ABI compatibility with numpy 1.X and 2.X
+      # For python>=3.11, numpy>=2.0 for package build and ABI compatibility with numpy 1.X and 2.X
       # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
       - name: Install dependencies
         run: |

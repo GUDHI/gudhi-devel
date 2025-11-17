@@ -33,10 +33,19 @@ if (TARGET CGAL::CGAL)
     message("++ CGAL version: ${CGAL_VERSION}. Includes found in ${CGAL_INCLUDE_DIRS}")
 endif ()
 
-find_package(Eigen3 3.3 NO_MODULE)
+find_package(Eigen3 5.0 QUIET NO_MODULE)
+if(NOT TARGET Eigen3::Eigen)
+  find_package(Eigen3 3.3 NO_MODULE)
+endif()
+
 if(TARGET Eigen3::Eigen)
     # Not mandatory as it is set by Eigen3Config.cmake
     get_target_property(EIGEN3_INCLUDE_DIRS Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
+    # Eigen3_VERSION for Eigen 5.X, and EIGEN3_VERSION_STRING otherwise
+    # EIGEN3_VERSION_STRING also used by src/python/CMakeLists.txt
+    if(NOT EIGEN3_VERSION_STRING)
+      set(EIGEN3_VERSION_STRING ${Eigen3_VERSION})
+    endif()
     message("++ Eigen 3 version ${EIGEN3_VERSION_STRING}. Includes found in ${EIGEN3_INCLUDE_DIRS}")
 endif()
 

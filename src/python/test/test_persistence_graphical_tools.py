@@ -16,6 +16,9 @@ import warnings
 
 import gudhi as gd
 
+# Workaround - On CI, sometimes Tcl/Tk is not well installed, use Agg backend instead of default TkAgg
+# Thus, mplt.show() is not available
+mplt.use('Agg')
 
 def test_array_handler():
     diags = np.array([[1, 2], [3, 4], [5, 6]], float)
@@ -146,7 +149,7 @@ def test_non_existing_persistence_file():
 
 
 def _sklearn_one_homology_dim_plot_persistence(function):
-    # from gudhi.sklearn.rips_persistence import RipsPersistence
+    # from gudhi.sklearn import RipsPersistence
     # X = [[1., 1.], [7., 0.], [4., 6.], [9., 6.], [0., 14.], [2., 19.], [9., 17.]]
     # diag = RipsPersistence(homology_dimensions=1).fit_transform([X])
     # plot_persistence_diagram(diag[0]) # should work
@@ -161,7 +164,7 @@ def test_sklearn_one_homology_dim_plot_persistence():
 
 
 def _sklearn_several_homology_dim_plot_persistence(function):
-    # from gudhi.sklearn.rips_persistence import RipsPersistence
+    # from gudhi.sklearn import RipsPersistence
     # X = [[1., 1.], [7., 0.], [4., 6.], [9., 6.], [0., 14.], [2., 19.], [9., 17.]]
     # diag = RipsPersistence(homology_dimensions=[1,0]).fit_transform([X])
     # plot_persistence_diagram(diag[0]) # should work

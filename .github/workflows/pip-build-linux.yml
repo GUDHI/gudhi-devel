@@ -7,7 +7,7 @@ jobs:
     name: build pip wheel
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
-    container: gudhi/pip_for_gudhi:2025.04.01
+    container: ghcr.io/gudhi/gudhi-deploy/pip_for_gudhi:2025.10.02
     steps:
       - uses: actions/checkout@v4
         with:
