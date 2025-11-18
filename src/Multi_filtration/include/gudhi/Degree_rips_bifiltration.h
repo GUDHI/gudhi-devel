@@ -46,12 +46,13 @@ namespace Gudhi::multi_filtration {
  *
  * @brief Class encoding the different generators, i.e., apparition times, of a \f$ k \f$-critical
  * \f$\mathbb R^2\f$-filtration value in a degree-Rips filtration. That is, a \f$ k \f$-critical filtration value is
- * always of the form: \f$ [(0,v_0), (1,v_1), (2,v_2), ..., (k-1,v_{k-1})] \f$, where all pairs \f$ (i, v_i) \f$
- * represent a generator with two parameters: the degree and the radius. More precisely: let \f$ d \f$ be the max
+ * always of the form: \f$ [(v_0,0), (v_1,1), (v_2,2), ..., (v_{k-1},k-1)] \f$, where all pairs \f$ (v_i,i) \f$
+ * represent a generator with two parameters: the radius and the degree. More precisely: let \f$ d \f$ be the max
  * degree of a vertex in the complex. A vertex will be \f$ k \f$-critical if it has degree \f$ d - k + 1 \f$ and an
  * edge is \f$ k \f$-critical if one of its end vertices is \f$ k \f$-critical and the other one \f$ j \f$-critical,
- * \f$ j \geq k \f$. The second parameter is the more standard radius parameter of a Rips filtration.
- * Note that the set of generators does not have to be minimal (contrary to @ref Multi_parameter_filtration e.g.).
+ * \f$ j \geq k \f$. The first parameter is the more standard radius parameter of a Rips filtration.
+ * Note that the set of generators does not have to be minimal (contrary to @ref Multi_parameter_filtration e.g.),
+ * neither ordered lexicographically.
  * Implements the concept @ref FiltrationValue of the @ref Gudhi::Simplex_tree and the concept
  * @ref Gudhi::multi_persistence::MultiFiltrationValue.
  *
@@ -86,7 +87,7 @@ class Degree_rips_bifiltration
   // CONSTRUCTORS
 
   /**
-   * @brief Default constructor. Builds filtration value with one generator `(0, val)`.
+   * @brief Default constructor. Builds filtration value with one generator `(val, 0)`.
    * If Co is false, `val` is -inf, if Co is true, `val` is at +inf.
    *
    * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
@@ -96,7 +97,7 @@ class Degree_rips_bifiltration
   explicit Degree_rips_bifiltration(Gudhi::simplex_tree::empty_filtration_value_t /*e*/) : generators_(0) {}
 
   /**
-   * @brief Builds a filtration value with one generator `(0, value)`.
+   * @brief Builds a filtration value with one generator `(value, 0)`.
    *
    * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
    * @param value Initialization value for the second parameter.
@@ -104,20 +105,20 @@ class Degree_rips_bifiltration
   Degree_rips_bifiltration([[maybe_unused]] int number_of_parameters, T value) : generators_(1, value) {}
 
   /**
-   * @brief Builds filtration value with one generator `(i, val)`, where `i` and `val` are the two first elements
+   * @brief Builds filtration value with one generator `(val, i)`, where `val` and `i` are the two first elements
    * of the given range. Note that `i` has to be 0.
    *
    * @tparam ValueRange Range of types convertible to `T`. Should have a begin() method.
-   * @param range Values of the generator. The range has to have at east two elements.
+   * @param range Values of the generator. The range has to have at least two elements.
    */
   template <class ValueRange = std::initializer_list<T>, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
-  Degree_rips_bifiltration(const ValueRange &range) : generators_(1, *(range.begin() + 1))
+  Degree_rips_bifiltration(const ValueRange &range) : generators_(1, *(range.begin()))
   {
-    GUDHI_CHECK(*(range.begin()) == 0, std::invalid_argument("First value of the range has to be 0"));
+    GUDHI_CHECK(*(range.begin() + 1) == 0, std::invalid_argument("Second value of the range has to be 0"));
   }
 
   /**
-   * @brief Builds filtration value with one generator `(i, val)`, where `i` and `val` are the two first elements
+   * @brief Builds filtration value with one generator `(val, i)`, where `val` and `i` are the two first elements
    * of the given range. Note that `i` has to be 0.
    *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyInputIterator and
@@ -126,16 +127,16 @@ class Degree_rips_bifiltration
    * @param it_end Iterator pointing to the end of the range.
    */
   template <class Iterator, class = std::enable_if_t<!std::is_arithmetic_v<Iterator> > >
-  Degree_rips_bifiltration(Iterator it_begin, Iterator it_end) : generators_(1, *(it_begin + 1))
+  Degree_rips_bifiltration(Iterator it_begin, [[maybe_unused]] Iterator it_end) : generators_(1, *it_begin)
   {
-    GUDHI_CHECK(*it_begin == 0, std::invalid_argument("First value of the range has to be 0"));
+    GUDHI_CHECK(*(it_begin + 1) == 0, std::invalid_argument("Second value of the range has to be 0"));
   }
 
   /**
    * @brief Builds a filtration value with given values from the given range. The two first elements of the range have
    * to correspond to the first generator, the two next elements to the second generator and so on... So the length of
    * the range has to be a multiple of 2 and the number of generators will be \f$ k = length / 2 \f$. Note that starting
-   * from the first element, every second element has to represent the continuous sequence from 0 to \f$ k \f$.
+   * from the second element, every second element has to represent the continuous sequence from 0 to \f$ k \f$.
    * The range is represented by two iterators.
    *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyForwardIterator and
@@ -155,19 +156,19 @@ class Degree_rips_bifiltration
     generators_.resize(num_gen);
     Iterator it = it_begin;
     for (size_type i = 0; i < num_gen; ++i) {
+      generators_[i] = *it;
+      ++it;
       GUDHI_CHECK(
           static_cast<size_type>(*it) == i,
           std::invalid_argument(
               "Every second value of the range has to correspond to a contiguous sequence of integers starting at 0."));
-      ++it;
-      generators_[i] = *it;
       ++it;
     }
   }
 
   /**
    * @brief Builds filtration value with given values from the given range. The range only represent the values of the
-   * second parameter. So `(0, generators[0])` is the first generator, `(1, generators[1])` is the second generator and
+   * first parameter. So `(generators[0], 0)` is the first generator, `(generators[1], 1)` is the second generator and
    * so on... The range is represented by @ref Degree_rips_bifiltration::Underlying_container "" and copied into the
    * underlying container of the class.
    *
@@ -184,7 +185,7 @@ class Degree_rips_bifiltration
 
   /**
    * @brief Builds filtration value with given values from the given range. The range only represent the values of the
-   * second parameter. So `(0, generators[0])` is the first generator, `(1, generators[1])` is the second generator and
+   * first parameter. So `(generators[0], 0)` is the first generator, `(generators[1], 1)` is the second generator and
    * so on... The range is represented by @ref Degree_rips_bifiltration::Underlying_container "" and **moved** into
    * the underlying container of the class.
    *
@@ -199,15 +200,17 @@ class Degree_rips_bifiltration
     }
   }
 
+  // cannot use = default as it triggers "dummy_g_ may be used uninitialized" compiler warning for nothing
   /**
    * @brief Copy constructor.
    */
-  Degree_rips_bifiltration(const Degree_rips_bifiltration &other) = default;
+  Degree_rips_bifiltration(const Degree_rips_bifiltration &other) : generators_(other.generators_) {}
 
+  // cannot use = default as it triggers "dummy_g_ may be used uninitialized" compiler warning for nothing
   /**
    * @brief Move constructor.
    */
-  Degree_rips_bifiltration(Degree_rips_bifiltration &&other) noexcept = default;
+  Degree_rips_bifiltration(Degree_rips_bifiltration &&other) noexcept : generators_(std::move(other.generators_)) {}
 
   /**
    * @brief Copy constructor.
@@ -225,15 +228,23 @@ class Degree_rips_bifiltration
 
   ~Degree_rips_bifiltration() = default;
 
+  // cannot use = default as it triggers "dummy_g_ may be used uninitialized" compiler warning for nothing
   /**
    * @brief Assign operator.
    */
-  Degree_rips_bifiltration &operator=(const Degree_rips_bifiltration &other) = default;
+  Degree_rips_bifiltration &operator=(const Degree_rips_bifiltration &other) {
+    generators_ = other.generators_;
+    return *this;
+  }
 
+  // cannot use = default as it triggers "dummy_g_ may be used uninitialized" compiler warning for nothing
   /**
    * @brief Move assign operator.
    */
-  Degree_rips_bifiltration &operator=(Degree_rips_bifiltration &&other) noexcept = default;
+  Degree_rips_bifiltration &operator=(Degree_rips_bifiltration &&other) noexcept {
+    generators_ = std::move(other.generators_);
+    return *this;
+  }
 
   /**
    * @brief Assign operator.
@@ -275,14 +286,14 @@ class Degree_rips_bifiltration
   /**
    * @brief Returns reference to value of parameter `p` of generator `g`.
    *
-   * The reference returned when `p` is 0 can be modified but will have no impact on the value of the first parameter
-   * represented on the class and is shared by the first parameter of all generators. If there is a need to store this
+   * The reference returned when `p` is 1 can be modified but will have no impact on the value of the second parameter
+   * represented on the class and is shared by the second parameter of all generators. If there is a need to store this
    * value, a copy should be stored instead.
    */
   reference operator()(size_type g, size_type p)
   {
     GUDHI_CHECK(g < generators_.size() && p < 2, std::out_of_range("Out of bound index."));
-    if (p == 0) {
+    if (p == 1) {
       dummy_g_ = g;
       return dummy_g_;
     }
@@ -295,7 +306,7 @@ class Degree_rips_bifiltration
   const_reference operator()(size_type g, size_type p) const
   {
     GUDHI_CHECK(g < generators_.size() && p < 2, std::out_of_range("Out of bound index."));
-    if (p == 0) {
+    if (p == 1) {
       dummy_g_ = g;
       return dummy_g_;
     }
@@ -306,8 +317,8 @@ class Degree_rips_bifiltration
    * @brief Let \f$ g \f$ be the first value in `indices` and \f$ p \f$ the second value.
    * Returns reference to value of parameter \f$ p \f$ of generator \f$ g \f$.
    *
-   * The reference returned when `p` is 0 can be modified but will have no impact on the value of the first parameter
-   * represented on the class and is shared by the first parameter of all generators. If there is a need to store this
+   * The reference returned when `p` is 1 can be modified but will have no impact on the value of the second parameter
+   * represented on the class and is shared by the second parameter of all generators. If there is a need to store this
    * value, a copy should be stored instead.
    *
    * @tparam IndexRange Range with a begin() and size() method.
@@ -348,19 +359,19 @@ class Degree_rips_bifiltration
 
   /**
    * @brief Returns an iterator pointing the begining of the underlying container. The element `val_i` at index `i`
-   * corresponds to the second parameter of the generator `(i, val_i)`.
+   * corresponds to the first parameter of the generator `(val_i, i)`.
    */
   iterator begin() noexcept { return generators_.begin(); }
 
   /**
    * @brief Returns an iterator pointing the begining of the underlying container. The element `val_i` at index `i`
-   * corresponds to the second parameter of the generator `(i, val_i)`.
+   * corresponds to the first parameter of the generator `(val_i, i)`.
    */
   const_iterator begin() const noexcept { return generators_.begin(); }
 
   /**
    * @brief Returns an iterator pointing the begining of the underlying container. The element `val_i` at index `i`
-   * corresponds to the second parameter of the generator `(i, val_i)`.
+   * corresponds to the first parameter of the generator `(val_i, i)`.
    */
   const_iterator cbegin() const noexcept { return generators_.cbegin(); }
 
@@ -381,19 +392,19 @@ class Degree_rips_bifiltration
 
   /**
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
-   * The element `val_i` at index `i` corresponds to the second parameter of the generator `(i, val_i)`.
+   * The element `val_i` at index `i` corresponds to the first parameter of the generator `(val_i, i)`.
    */
   reverse_iterator rbegin() noexcept { return generators_.rbegin(); }
 
   /**
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
-   * The element `val_i` at index `i` corresponds to the second parameter of the generator `(i, val_i)`.
+   * The element `val_i` at index `i` corresponds to the first parameter of the generator `(val_i, i)`.
    */
   const_reverse_iterator rbegin() const noexcept { return generators_.rbegin(); }
 
   /**
    * @brief Returns a reverse iterator pointing to the first element from the back of the underlying container.
-   * The element `val_i` at index `i` corresponds to the second parameter of the generator `(i, val_i)`.
+   * The element `val_i` at index `i` corresponds to the first parameter of the generator `(val_i, i)`.
    */
   const_reverse_iterator crbegin() const noexcept { return generators_.crbegin(); }
 
@@ -452,17 +463,17 @@ class Degree_rips_bifiltration
 
   /**
    * @brief Converts the filtration value to @ref Multi_parameter_filtration without any set simplification.
-   * @warning The filtration value is converted one to one and is not simplified to a minimal set of generators,
-   * that undefines the behaviour of some methods of the class. Use @ref as_type(const Degree_rips_bifiltration&)
-   * instead if needed.
+   * @warning The filtration value is converted one to one and is not simplified to a minimal set of generators or
+   * ordered by lexicographical order, that undefines the behaviour of some methods of the class.
+   * Use @ref as_type(const Degree_rips_bifiltration&) instead if needed.
    */
   Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_non_simplified_multi_parameter_filtration() const
   {
     std::vector<T> out(generators_.size() * 2);
     size_type i = 0;
     for (size_type g = 0; g < generators_.size(); ++g) {
-      out[i] = g;
-      out[i + 1] = generators_[g];
+      out[i] = generators_[g];
+      out[i + 1] = g;
       i += 2;
     }
     return Multi_parameter_filtration<T, Co, Ensure1Criticality>(std::move(out), 2);
@@ -470,9 +481,9 @@ class Degree_rips_bifiltration
 
   /**
    * @brief Converts the filtration value to @ref Dynamic_multi_parameter_filtration without any set simplification.
-   * @warning The filtration value is converted one to one and is not simplified to a minimal set of generators,
-   * that undefines the behaviour of some methods of the class. Use @ref as_type(const Degree_rips_bifiltration&)
-   * instead if needed.
+   * @warning The filtration value is converted one to one and is not simplified to a minimal set of generators or
+   * ordered by lexicographical order, that undefines the behaviour of some methods of the class.
+   * Use @ref as_type(const Degree_rips_bifiltration&) instead if needed.
    */
   Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>
   convert_to_non_simplified_dynamic_multi_parameter_filtration() const
@@ -480,7 +491,7 @@ class Degree_rips_bifiltration
     std::vector<Multi_parameter_generator<T> > out;
     out.reserve(generators_.size());
     for (size_type g = 0; g < generators_.size(); ++g) {
-      std::vector<T> v = {static_cast<T>(g), generators_[g]};
+      std::vector<T> v = {generators_[g], static_cast<T>(g)};
       out.emplace_back(std::move(v));
     }
     return Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>(std::move(out), 2);
@@ -742,7 +753,7 @@ class Degree_rips_bifiltration
 
   // opposite
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ i,j \f$ is equal to \f$ -f(i,j) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ i,0 \f$ is equal to \f$ -f(i,0) \f$.
    *
    * Used conventions:
    * - \f$ -NaN = NaN \f$.
@@ -768,9 +779,9 @@ class Degree_rips_bifiltration
 
   // subtraction
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,1) - r(0) \f$
-   * if \f$ 0 < length_r \f$ and to \f$ f(g,1) \f$ otherwise.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$, with
+   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,0) - r(0) \f$
+   * if \f$ 0 < length_r \f$ and to \f$ f(g,0) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -793,9 +804,9 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ r(0) - f(g,1) \f$
-   * if \f$ 0 < length_r \f$ and to -\f$ f(g,1) \f$ otherwise.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$, with
+   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ r(0) - f(g,0) \f$
+   * if \f$ 0 < length_r \f$ and to -\f$ f(g,0) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -820,7 +831,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$ is equal to \f$ f(g,1) - val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$ is equal to \f$ f(g,0) - val \f$.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -841,7 +852,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$ is equal to \f$ val - f(g,1) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$ is equal to \f$ val - f(g,0) \f$.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -865,9 +876,9 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,1) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,1) - r(0) \f$
-   * if \f$ 0 < length_r \f$ and to \f$ f(g,1) \f$ otherwise.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,0) \f$, with
+   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,0) - r(0) \f$
+   * if \f$ 0 < length_r \f$ and to \f$ f(g,0) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -891,7 +902,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,1) \f$ is equal to \f$ f(g,1) - val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,0) \f$ is equal to \f$ f(g,0) - val \f$.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -913,9 +924,9 @@ class Degree_rips_bifiltration
 
   // addition
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,1) + r(0) \f$
-   * if \f$ 0 < length_r \f$ and to \f$ f(g,1) \f$ otherwise.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$, with
+   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,0) + r(0) \f$
+   * if \f$ 0 < length_r \f$ and to \f$ f(g,0) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -938,9 +949,9 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ r(0) + f(g,1) \f$
-   * if \f$ 0 < length_r \f$ and to \f$ f(g,1) \f$ otherwise.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$, with
+   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ r(0) + f(g,0) \f$
+   * if \f$ 0 < length_r \f$ and to \f$ f(g,0) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -965,7 +976,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$ is equal to \f$ f(g,1) + val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$ is equal to \f$ f(g,0) + val \f$.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -986,7 +997,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$ is equal to \f$ val + f(g,1) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$ is equal to \f$ val + f(g,0) \f$.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -1007,9 +1018,9 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,1) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,1) + r(0) \f$
-   * if \f$ 0 < length_r \f$ and to \f$ f(g,1) \f$ otherwise.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,0) \f$, with
+   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,0) + r(0) \f$
+   * if \f$ 0 < length_r \f$ and to \f$ f(g,0) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -1033,7 +1044,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,1) \f$ is equal to \f$ f(g,1) + val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,0) \f$ is equal to \f$ f(g,0) + val \f$.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -1055,9 +1066,9 @@ class Degree_rips_bifiltration
 
   // multiplication
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,1) * r(0) \f$
-   * if \f$ 0 < length_r \f$ and to \f$ f(g,1) \f$ otherwise.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$, with
+   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,0) * r(0) \f$
+   * if \f$ 0 < length_r \f$ and to \f$ f(g,0) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1082,9 +1093,9 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ r(0) * f(g,1) \f$
-   * if \f$ 0 < length_r \f$ and to \f$ f(g,1) \f$ otherwise.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$, with
+   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ r(0) * f(g,0) \f$
+   * if \f$ 0 < length_r \f$ and to \f$ f(g,0) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1111,7 +1122,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$ is equal to \f$ f(g,1) * val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$ is equal to \f$ f(g,0) * val \f$.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1134,7 +1145,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$ is equal to \f$ val * f(g,1) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$ is equal to \f$ val * f(g,0) \f$.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1157,9 +1168,9 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,1) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,1) + r(0) \f$
-   * if \f$ 0 < length_r \f$ and to \f$ f(g,1) \f$ otherwise.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,0) \f$, with
+   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,0) + r(0) \f$
+   * if \f$ 0 < length_r \f$ and to \f$ f(g,0) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1185,7 +1196,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,1) \f$ is equal to \f$ f(g,1) * val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,0) \f$ is equal to \f$ f(g,0) * val \f$.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1209,9 +1220,9 @@ class Degree_rips_bifiltration
 
   // division
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,1) / r(0) \f$
-   * if \f$ 0 < length_r \f$ and to \f$ f(g,1) \f$ otherwise.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$, with
+   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,0) / r(0) \f$
+   * if \f$ 0 < length_r \f$ and to \f$ f(g,0) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1239,9 +1250,9 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ r(0) / f(g,1) \f$
-   * if \f$ 0 < length_r \f$ and to \f$ 1 / f(g,1) \f$ otherwise.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$, with
+   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ r(0) / f(g,0) \f$
+   * if \f$ 0 < length_r \f$ and to \f$ 1 / f(g,0) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1271,7 +1282,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$ is equal to \f$ f(g,1) / val \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$ is equal to \f$ f(g,0) / val \f$.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1297,7 +1308,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Returns a filtration value such that an entry at index \f$ (g,1) \f$ is equal to \f$ val / f(g,1) \f$.
+   * @brief Returns a filtration value such that an entry at index \f$ (g,0) \f$ is equal to \f$ val / f(g,0) \f$.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1327,9 +1338,9 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,1) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,1) / r(0) \f$
-   * if \f$ 0 < length_r \f$ and to \f$ f(g,1) \f$ otherwise.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,0) \f$, with
+   * \f$ 0 \leq g \leq num_generators \f$ is equal to \f$ f(g,0) / r(0) \f$
+   * if \f$ 0 < length_r \f$ and to \f$ f(g,0) \f$ otherwise.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1358,7 +1369,7 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Modifies the first parameter such that an entry at index \f$ (g,1) \f$ is equal to \f$ f(g,1) / val \f$.
+   * @brief Modifies the first parameter such that an entry at index \f$ (g,0) \f$ is equal to \f$ f(g,0) / val \f$.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1405,13 +1416,13 @@ class Degree_rips_bifiltration
   /**
    * @brief Adds the given generator to the filtration value.
    *
-   * It is possible that the generator is ignored if the second parameter is overshadowed by an already existing
-   * generator with same first parameter. This would mean that adding the given generator will not span more
+   * It is possible that the generator is ignored if the first parameter is overshadowed by an already existing
+   * generator with same second parameter. This would mean that adding the given generator will not span more
    * "lifetime" and therefore there is no need to store it.
    *
-   * Let \f$ max_idx \$f be the highest first parameter stored so far. If the given first parameter \f$ i \$f to add is
-   * strictly higher than \f$ max_idx + 1 \$f, all possible values between \f$ max_idx \$f and \f$ i \$f will also
-   * be added and the corresponding second parameter will be initialized with -inf if `Co` is false and with +inf
+   * Let \f$ max_idx \$f be the highest second parameter stored so far. If the given second parameter \f$ i \$f to add
+   * is strictly higher than \f$ max_idx + 1 \$f, all possible values between \f$ max_idx \$f and \f$ i \$f will also
+   * be added and the corresponding first parameters will be initialized with -inf if `Co` is false and with +inf
    * if `Co` is true.
    *
    * @tparam GeneratorRange Range of elements convertible to `T`. Must have a begin(), end() method and the iterator
@@ -1430,13 +1441,13 @@ class Degree_rips_bifiltration
   /**
    * @brief Adds the given generator to the filtration value.
    *
-   * It is possible that the generator is ignored if the second parameter is overshadowed by an already existing
-   * generator with same first parameter. This would mean that adding the given generator will not span more
+   * It is possible that the generator is ignored if the first parameter is overshadowed by an already existing
+   * generator with same second parameter. This would mean that adding the given generator will not span more
    * "lifetime" and therefore there is no need to store it.
    *
-   * Let \f$ max_idx \$f be the highest first parameter stored so far. If the given first parameter \f$ i \$f to add is
-   * strictly higher than \f$ max_idx + 1 \$f, all possible values between \f$ max_idx \$f and \f$ i \$f will also
-   * be added and the corresponding second parameter will be initialized with -inf if `Co` is false and with +inf
+   * Let \f$ max_idx \$f be the highest second parameter stored so far. If the given second parameter \f$ i \$f to add
+   * is strictly higher than \f$ max_idx + 1 \$f, all possible values between \f$ max_idx \$f and \f$ i \$f will also
+   * be added and the corresponding first parameters will be initialized with -inf if `Co` is false and with +inf
    * if `Co` is true.
    *
    * @tparam Iterator Iterator class satisfying the requirements of the standard `LegacyForwardIterator`.
@@ -1447,15 +1458,16 @@ class Degree_rips_bifiltration
    * @return false Otherwise.
    */
   template <class Iterator>
-  bool add_generator(Iterator genStart, Iterator genEnd)
+  bool add_generator(Iterator genStart, [[maybe_unused]] Iterator genEnd)
   {
     GUDHI_CHECK(std::distance(genStart, genEnd) == 2,
                 std::invalid_argument("Wrong range size. Should correspond to the number of parameters."));
-    GUDHI_CHECK(*genStart >= 0, std::invalid_argument("First value has to be a positive index."));
 
-    const size_type index = *genStart;
-    ++genStart;
     const T val = *genStart;
+    ++genStart;
+    const size_type index = *genStart;
+
+    GUDHI_CHECK(index >= 0, std::invalid_argument("Second parameter has to be a positive index."));
 
     if (_is_nan(val)) return false;
 
@@ -1496,7 +1508,7 @@ class Degree_rips_bifiltration
 
   /**
    * @brief Pushes each generator of the filtration value to the border of the positive cone generated by the given
-   * generator `(0,val)` if the second parameter is lower than `val`.
+   * generator `(val,0)` if the second parameter is lower than `val`.
    *
    * @warning The operator accepts @ref Degree_rips_bifiltration with the same or different template
    * parameters as `GeneratorRange`. But if the number of generators is higher than 1, only the first generator will be
@@ -1523,9 +1535,9 @@ class Degree_rips_bifiltration
                   std::invalid_argument("Wrong range size. Should correspond to the number of parameters."));
 
       auto it = x.begin();
-      GUDHI_CHECK(*it == 0, std::invalid_argument("First index has to be 0."));
-      ++it;
       newVal = *it;
+      ++it;
+      GUDHI_CHECK(*it == 0, std::invalid_argument("Second parameter has to be 0."));
     }
 
     if (newVal == T_m_inf || _is_nan(newVal)) return false;
@@ -1544,7 +1556,7 @@ class Degree_rips_bifiltration
 
   /**
    * @brief Pulls each generator of the filtration value to the border of the negative cone generated by the given
-   * generator `(+inf,val)` if the second parameter is higher than `val`. The first parameter does not have to be
+   * generator `(val,+inf)` if the second parameter is higher than `val`. The first parameter does not have to be
    * +inf, it can be any value strictly higher than @ref num_generators().
    *
    * @warning The operator accepts @ref Degree_rips_bifiltration with the same or different template
@@ -1572,10 +1584,10 @@ class Degree_rips_bifiltration
                   std::invalid_argument("Wrong range size. Should correspond to the number of parameters."));
 
       auto it = x.begin();
-      GUDHI_CHECK(static_cast<size_type>(*it) > num_generators(),
-                  std::invalid_argument("First index has to be higher."));
-      ++it;
       newVal = *it;
+      ++it;
+      GUDHI_CHECK(static_cast<size_type>(*it) > num_generators(),
+                  std::invalid_argument("Second parameter has to be higher."));
     }
 
     if (newVal == T_inf || _is_nan(newVal)) return false;
@@ -1599,7 +1611,7 @@ class Degree_rips_bifiltration
    * The grid has to be represented as a vector of ordered ranges of values convertible into `T`. An index
    * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
-   * therefore all together a 2D grid. The range of the first parameter has to start at 0 and continue continuously.
+   * therefore all together a 2D grid. The range of the second parameter has to start at 0 and continue continuously.
    *
    * @tparam OneDimArray A range of values convertible into `T` ordered by increasing value. Has to implement
    * a begin, end and operator[] method.
@@ -1614,8 +1626,8 @@ class Degree_rips_bifiltration
         grid.size() >= 2,
         std::invalid_argument("The grid should not be smaller than the number of parameters in the filtration value."));
 
-    GUDHI_CHECK_code(const OneDimArray &indices = grid[0]);
-    const OneDimArray &values = grid[1];
+    GUDHI_CHECK_code(const OneDimArray &indices = grid[1]);
+    const OneDimArray &values = grid[0];
     for (size_type g = 0; g < num_generators(); ++g) {
       GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, std::invalid_argument("Unvalid grid.")));
 
@@ -1773,7 +1785,7 @@ class Degree_rips_bifiltration
    * The grid has to be represented as a vector of vectors of ordered values convertible into `OutValue`. An index
    * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
-   * therefore all together a 2D grid. The range of the first parameter has to start at 0 and continue continuously.
+   * therefore all together a 2D grid. The range of the second parameter has to start at 0 and continue continuously.
    *
    * @tparam OutValue Signed arithmetic type. Default value: std::int32_t.
    * @tparam U Type which is convertible into `OutValue`.
@@ -1820,8 +1832,8 @@ class Degree_rips_bifiltration
     U grid_inf = Degree_rips_bifiltration<U, Co, Ensure1Criticality>::T_inf;
     std::vector<U> outVec(f.num_generators());
 
-    GUDHI_CHECK_code(const std::vector<U> &indices = grid[0]);
-    const std::vector<U> &values = grid[1];
+    GUDHI_CHECK_code(const std::vector<U> &indices = grid[1]);
+    const std::vector<U> &values = grid[0];
     for (size_type g = 0; g < f.num_generators(); ++g) {
       GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, std::invalid_argument("Unvalid grid.")));
 
@@ -1879,13 +1891,13 @@ class Degree_rips_bifiltration
     T val;
     for (size_type i = 0; i < num_gen; ++i) {
       stream >> delimiter;  // [
+      val = _get_value<T>(stream);
+      f.generators_[i] = val;
+      stream >> delimiter;  // ,
       stream >> val;
       if (val != static_cast<T>(i))
         throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
-      stream >> delimiter;  // ,
-      val = _get_value<T>(stream);
       if (!stream.good()) throw std::invalid_argument("Invalid incoming stream format for Multi_parameter_generator.");
-      f.generators_[i] = val;
       stream >> delimiter;  // ]
       stream >> delimiter;  // ; or last ]
     }
@@ -1914,7 +1926,7 @@ class Degree_rips_bifiltration
   {
     bool modified = false;
     for (size_type g = 0; g < f2.num_generators(); ++g) {
-      modified |= f1.add_generator({static_cast<T>(g), f2.generators_[g]});
+      modified |= f1.add_generator({f2.generators_[g], static_cast<T>(g)});
     }
     return modified;
   }

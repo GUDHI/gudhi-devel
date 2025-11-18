@@ -41,7 +41,7 @@ template <class F, typename T>
 void test_io()
 {
   const int num_param = 2;
-  std::vector<T> v1, v2 = {0, 0, 1, -2, 2, -1, 3, 0};
+  std::vector<T> v1, v2 = {0, 0, -2, 1, -1, 2, 0, 3};
 
   F f1(v1.begin(), v1.end(), num_param);
   F f2(v2.begin(), v2.end(), num_param);
