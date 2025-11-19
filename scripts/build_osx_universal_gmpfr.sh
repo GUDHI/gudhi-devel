@@ -29,10 +29,8 @@ GMPXX=`basename $GMPXX1`
 MPFR1=deps-amd64/mpfr/*/lib/libmpfr.*.dylib
 MPFR=`basename $MPFR1`
 
-ls -l .
-ls -l deps-amd64/
-ls -l deps-amd64/gmp
-ls -l deps-amd64/gmp/*/lib
+find deps-amd64
+find deps-arm64
 
 lipo -create $GMP1 deps-arm64/gmp/*/lib/$GMP -output deps-uni/lib/$GMP
 lipo -create $GMPXX1 deps-arm64/gmp/*/lib/$GMPXX -output deps-uni/lib/$GMPXX
