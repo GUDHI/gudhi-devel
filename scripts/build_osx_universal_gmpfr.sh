@@ -20,29 +20,6 @@ tar xf "`brew fetch --bottle-tag=arm64_$OSX_VERSION gmp   | grep -F bottle.tar.g
 tar xf "`brew fetch --bottle-tag=arm64_$OSX_VERSION mpfr  | grep -F bottle.tar.gz | sed -Ene "$SED_PGM"`"
 cd ..
 
-check_file() {
-    local dir="$1"
-    local pattern="$2"
-
-    # Ensure directory exists
-    if [[ ! -d "$dir" ]]; then
-        echo "Directory '$dir' does not exist."
-        exit 2
-    fi
-
-    # Enable glob expansion that returns empty if no match
-    shopt -s nullglob
-    local matches=("$dir"/$pattern)
-    shopt -u nullglob
-
-    if ! (( ${#matches[@]} > 0 )); then
-        echo "No file matching '$pattern' found in '$dir'."
-        echo "Listing contents of '$dir':"
-        ls -l "$dir"
-        exit 2
-    fi
-}
-
 # Merging
 mkdir -p deps-uni/lib
 GMP1=deps-amd64/gmp/*/lib/libgmp.*.dylib
@@ -52,13 +29,10 @@ GMPXX=`basename $GMPXX1`
 MPFR1=deps-amd64/mpfr/*/lib/libmpfr.*.dylib
 MPFR=`basename $MPFR1`
 
-check_file "deps-amd64/gmp/*/lib" "libgmp.*.dylib"
-check_file "deps-amd64/gmp/*/lib" "libgmpxx.*.dylib"
-check_file "deps-amd64/mpfr/*/lib" "libmpfr.*.dylib"
-
-check_file "deps-arm64/gmp/*/lib" $GMP
-check_file "deps-arm64/gmp/*/lib" $GMPXX
-check_file "deps-arm64/mpfr/*/lib" $MPFR
+ls -l .
+ls -l deps-amd64/
+ls -l deps-amd64/gmp
+ls -l deps-amd64/gmp/*/lib
 
 lipo -create $GMP1 deps-arm64/gmp/*/lib/$GMP -output deps-uni/lib/$GMP
 lipo -create $GMPXX1 deps-arm64/gmp/*/lib/$GMPXX -output deps-uni/lib/$GMPXX
