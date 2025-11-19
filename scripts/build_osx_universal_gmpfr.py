@@ -36,8 +36,8 @@ cwd = Path.cwd()
 for arch in ["x86_64", "arm64"]:
     Path(f"deps-{arch}").mkdir(exist_ok=True)
     os.chdir(f"deps-{arch}")
-    fetch_and_extract("x86_64", "gmp")
-    fetch_and_extract("x86_64", "mpfr")
+    fetch_and_extract(arch, "gmp")
+    fetch_and_extract(arch, "mpfr")
     os.chdir(cwd)
 
 # Merge libraries in a universal directory: deps-uni
