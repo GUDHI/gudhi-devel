@@ -20,15 +20,15 @@ def fetch_and_extract(arch: str, pkg: str):
     if not arch in ['x86_64', 'arm64']:
         raise RuntimeError(f"Unknown architecture {arch}")
     cmd = f"brew fetch --bottle-tag={arch}_{OSX_VERSION} {pkg}"
+    subprocess.check_call(cmd, shell=True)
     # Get tar name from brew fetch message
-    cmd_output = subprocess.check_output(cmd, shell=True, text=True).split()
-    print(f"cmd_output ={cmd_output}")
-    tarball = [value for value in cmd_output if "bottle.tar.gz" in value]
+    cmd = f"brew --cache --bottle-tag={arch}_{OSX_VERSION} {pkg}"
+    tarball = subprocess.check_output(cmd, shell=True, text=True)
     print(f"tarball ={tarball}")
-    # Here we should only find one "*bottle.tar.gz" in cmd_output
-    assert len(tarball) == 1
-    print(f"extract tarball {tarball[0]} in {Path.cwd()}")
-    subprocess.check_call(f"tar xf {tarball[0]}", shell=True)
+    # Here we should only find "bottle.tar.gz" in the command output
+    assert "bottle.tar.gz" in tarball
+    print(f"extract tarball {tarball} in {Path.cwd()}")
+    subprocess.check_call(f"tar xf {tarball}", shell=True)
 
 cwd = Path.cwd()
 
