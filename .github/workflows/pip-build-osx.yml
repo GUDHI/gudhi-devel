@@ -36,7 +36,7 @@ jobs:
           python -m pip install --user numpy>=2.0
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user delocate
-          ./scripts/build_osx_universal_gmpfr.sh
+          python scripts/build_osx_universal_gmpfr.py
           # Now the universal libraries are in $PWD/deps-uni/lib
       - name: Build python wheel
         run: |
