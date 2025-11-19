@@ -23,6 +23,7 @@ def fetch_and_extract(arch: str, pkg: str):
     # Get tar name from brew fetch message
     cmd_output = subprocess.check_output(cmd, shell=True, text=True).split()
     tarball = [value for value in cmd_output if "bottle.tar.gz" in value]
+    print(f"tarball ={tarball}")
     # Here we should only find one "*bottle.tar.gz" in cmd_output
     assert len(tarball) == 1
     print(f"extract tarball {tarball[0]} in {Path.cwd()}")
