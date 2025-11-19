@@ -22,6 +22,7 @@ def fetch_and_extract(arch: str, pkg: str):
     cmd = f"brew fetch --bottle-tag={arch}_{OSX_VERSION} {pkg}"
     # Get tar name from brew fetch message
     cmd_output = subprocess.check_output(cmd, shell=True, text=True).split()
+    print(f"cmd_output ={cmd_output}")
     tarball = [value for value in cmd_output if "bottle.tar.gz" in value]
     print(f"tarball ={tarball}")
     # Here we should only find one "*bottle.tar.gz" in cmd_output
