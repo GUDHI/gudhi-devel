@@ -970,6 +970,11 @@ void test_modifiers1()
       BOOST_CHECK_EQUAL(f1(3, 1), 3);
     }
   }
+
+  F b = F::minus_inf();
+  b.push_to_least_common_upper_bound({3, 0});
+  BOOST_CHECK_EQUAL(b(0, 0), 3);
+  BOOST_CHECK_EQUAL(b(0, 1), 0);
 }
 
 template <class F, typename T>
@@ -1116,6 +1121,13 @@ void test_modifiers2()
     f1.pull_to_greatest_common_lower_bound(F::nan());
     BOOST_CHECK(f1.is_minus_inf());
   }
+
+  if constexpr (!F::has_negative_cones()) {
+    F a = F::inf();
+    a.pull_to_greatest_common_lower_bound({3, 0});
+    BOOST_CHECK_EQUAL(a(0, 0), 3);
+    BOOST_CHECK_EQUAL(a(0, 1), 0);
+  }
 }
 
 template <class F, typename T>
@@ -1250,6 +1262,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_add_generators, T, list_o
 template <class F, typename T>
 void test_friends()
 {
+  T inf = F::has_negative_cones() ? F::T_m_inf : F::T_inf;
   F f({1, 2}, 2);
 
   BOOST_CHECK_EQUAL(compute_norm(f), static_cast<T>(std::sqrt(T(6))));
@@ -1259,7 +1272,11 @@ void test_friends()
   BOOST_CHECK(ff == F({1, 0}));
   BOOST_CHECK(ff <= f);
   ff = factorize_above(f);
-  BOOST_CHECK(ff == F({2, 0}));
+  BOOST_CHECK_EQUAL(ff.num_generators(), 2);
+  BOOST_CHECK_EQUAL(ff(0, 0), inf);
+  BOOST_CHECK_EQUAL(ff(0, 1), 0);
+  BOOST_CHECK_EQUAL(ff(1, 0), 2);
+  BOOST_CHECK_EQUAL(ff(1, 1), 1);
   BOOST_CHECK(ff >= f);
 
   f.add_guaranteed_generator({0, 2});
@@ -1273,7 +1290,13 @@ void test_friends()
   BOOST_CHECK(ff == F({0, 0}));
   BOOST_CHECK(ff <= f);
   ff = factorize_above(f);
-  BOOST_CHECK(ff == F({2, 0}));
+  BOOST_CHECK_EQUAL(ff.num_generators(), 3);
+  BOOST_CHECK_EQUAL(ff(0, 0), inf);
+  BOOST_CHECK_EQUAL(ff(0, 1), 0);
+  BOOST_CHECK_EQUAL(ff(1, 0), inf);
+  BOOST_CHECK_EQUAL(ff(1, 1), 1);
+  BOOST_CHECK_EQUAL(ff(2, 0), 2);
+  BOOST_CHECK_EQUAL(ff(2, 1), 2);
   BOOST_CHECK(ff >= f);
 
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
@@ -1288,8 +1311,11 @@ void test_friends()
     BOOST_CHECK_EQUAL(f2f(0, 0), 2);
     BOOST_CHECK_EQUAL(f2f(0, 1), 0);
     f2f = factorize_above(f2);
-    BOOST_CHECK_EQUAL(f2f(0, 0), 2);
+    BOOST_CHECK_EQUAL(f2f.num_generators(), 2);
+    BOOST_CHECK_EQUAL(f2f(0, 0), inf);
     BOOST_CHECK_EQUAL(f2f(0, 1), 0);
+    BOOST_CHECK_EQUAL(f2f(1, 0), 2);
+    BOOST_CHECK_EQUAL(f2f(1, 1), 1);
   }
 
   f(0, 0) = 1;

@@ -1728,15 +1728,40 @@ class Degree_rips_bifiltration
     if (f.num_generators() <= 1) return f;
 
     bool nan = true;
-    Underlying_container result(1, T_inf);
-    for (const T &v : f.generators_) {
-      if (!_is_nan(v)) {
-        nan = false;
-        result[0] = v < result[0] ? v : result[0];
+    size_type idx = f.num_generators();
+    T val = T_inf;
+
+    if constexpr (Co) {
+      // -inf are "non existing" generators if not all of them are at -inf
+      bool inf = true;
+      for (size_type g = 0; g < f.num_generators(); ++g) {
+        T v = f.generators_[g];
+        if (!_is_nan(v) && v != T_m_inf) {
+          nan = false;
+          inf = false;
+          val = v < val ? v : val;
+          idx = g < idx ? g : idx;
+        } else if (_is_nan(v)) {
+          inf = false;
+        } else {
+          nan = false;
+        }
+      }
+      if (inf) return Degree_rips_bifiltration::minus_inf();
+    } else {
+      idx = 0;
+      for (const T &v : f.generators_) {
+        if (!_is_nan(v)) {
+          nan = false;
+          val = v < val ? v : val;
+        }
       }
     }
-    if (nan) result[0] = std::numeric_limits<T>::quiet_NaN();
 
+    if (nan) return Degree_rips_bifiltration::nan();
+
+    Underlying_container result(idx + 1, _get_default_minus_value());
+    result[idx] = val;
     return Degree_rips_bifiltration(std::move(result), 2);
   }
 
@@ -1748,15 +1773,40 @@ class Degree_rips_bifiltration
     if (f.num_generators() <= 1) return f;
 
     bool nan = true;
-    Underlying_container result(1, T_m_inf);
-    for (const T &v : f.generators_) {
-      if (!_is_nan(v)) {
-        nan = false;
-        result[0] = v > result[0] ? v : result[0];
-      }
-    }
-    if (nan) result[0] = std::numeric_limits<T>::quiet_NaN();
+    size_type idx = 0;
+    T val = T_m_inf;
 
+    if constexpr (Co) {
+      idx = f.num_generators() - 1;
+      for (const T &v : f.generators_) {
+        if (!_is_nan(v)) {
+          nan = false;
+          val = v > val ? v : val;
+        }
+      }
+    } else {
+      // inf are "non existing" generators if not all of them are at inf
+      bool inf = true;
+      for (size_type g = 0; g < f.num_generators(); ++g) {
+        T v = f.generators_[g];
+        if (!_is_nan(v) && v != T_inf) {
+          nan = false;
+          inf = false;
+          val = v > val ? v : val;
+          idx = g > idx ? g : idx;
+        } else if (_is_nan(v)) {
+          inf = false;
+        } else {
+          nan = false;
+        }
+      }
+      if (inf) return Degree_rips_bifiltration::inf();
+    }
+
+    if (nan) return Degree_rips_bifiltration::nan();
+
+    Underlying_container result(idx + 1, _get_default_minus_value());
+    result[idx] = val;
     return Degree_rips_bifiltration(std::move(result), 2);
   }
 
