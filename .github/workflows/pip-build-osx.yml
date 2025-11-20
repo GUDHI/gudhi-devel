@@ -40,11 +40,13 @@ jobs:
           # Now the universal libraries are in $PWD/deps-uni/lib
       - name: Build python wheel
         env:
-          SKBUILD_CMAKE_DEFINE: "GMP_LIB_DIR=$PWD/deps-uni/lib;GMPXX_LIB_DIR=$PWD/deps-uni/lib;MPFR_LIB_DIR=$PWD/deps-uni/lib"
+          SKBUILD_CMAKE_DEFINE: "GMP_LIB_DIR=${{ env.PWD }}/deps-uni/lib;GMPXX_LIB_DIR=${{ env.PWD }}/deps-uni/lib;MPFR_LIB_DIR=${{ env.PWD }}/deps-uni/lib"
+          GMP_LIB_DIR: "${{ env.PWD }}/deps-uni/lib"
+          GMPXX_LIB_DIR: "${{ env.PWD }}/deps-uni/lib"
+          MPFR_LIB_DIR: "${{ env.PWD }}/deps-uni/lib"
         run: |
-          export   GMP_LIB_DIR=$PWD/deps-uni/lib
-          export GMPXX_LIB_DIR=$PWD/deps-uni/lib
-          export  MPFR_LIB_DIR=$PWD/deps-uni/lib
+          echo "SKBUILD_CMAKE_DEFINE: $SKBUILD_CMAKE_DEFINE"
+          echo "GMP_LIB_DIR: $GMP_LIB_DIR"
           python --version
           python -m pip wheel -ve .
           export PATH="$PATH:`python -m site --user-base`/bin"
