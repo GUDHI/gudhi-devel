@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew update || echo "brew update failed, continuing..."
-          brew install boost eigen gmp mpfr cgal || echo "brew install failed, continuing..."
+          brew install boost eigen cgal || echo "brew install failed, continuing..."
           python -m pip install --user numpy>=2.0
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user delocate
