@@ -39,6 +39,8 @@ jobs:
           python scripts/build_osx_universal_gmpfr.py
           # Now the universal libraries are in $PWD/deps-uni/lib
       - name: Build python wheel
+        env:
+          SKBUILD_CMAKE_DEFINE: "GMP_LIB_DIR=$PWD/deps-uni/lib;GMPXX_LIB_DIR=$PWD/deps-uni/lib;MPFR_LIB_DIR=$PWD/deps-uni/lib"
         run: |
           export   GMP_LIB_DIR=$PWD/deps-uni/lib
           export GMPXX_LIB_DIR=$PWD/deps-uni/lib
