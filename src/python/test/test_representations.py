@@ -5,6 +5,7 @@
     Copyright (C) 2019 Inria, Copyright (C) 2022 Institute of Science and Technology Austria
 
     Modification(s):
+      - 2025/09 Vincent Rouvreau: test_bottleneck_distance_exceptions and complete metrics_dict tests
       - 2024/08 Vincent Rouvreau: Test PersistenceLengths
       - 2022/11 Wojtek Reise: Test Kernels
       - 2022/06 Wojtek Reise: Test Landscape and Silhouette
@@ -12,7 +13,6 @@
       - 2020/07 Martin Royer: Test Atol
       - YYYY/MM Author: Description of the modification
 """
-
 
 import os
 import sys
@@ -81,9 +81,31 @@ def _n_diags(n):
 
 
 metrics_dict = {  # (class, metric_kwargs, tolerance_pytest_approx)
-    "bottleneck": (BottleneckDistance(e=0.00001), dict(e=0.00001), dict(abs=1e-5)),
+    "bottleneck": (
+        BottleneckDistance(e=0.00001),
+        dict(e=0.00001),
+        dict(abs=1e-5)),
+    "gudhi_bottleneck": (
+        BottleneckDistance(mode='gudhi', e=0.00001),
+        dict(e=0.00001),
+        dict(abs=1e-5)),
+    "hera_bottleneck": (
+        BottleneckDistance(mode='hera', delta=0.00001), 
+        dict(delta=0.00001), 
+        dict(abs=1e-5),
+    ),
     "wasserstein": (
         WassersteinDistance(order=2, internal_p=2, n_jobs=4),
+        dict(order=2, internal_p=2, n_jobs=4),
+        dict(rel=1e-3),
+    ),
+    "hera_wasserstein": (
+        WassersteinDistance(order=2, internal_p=2, mode="hera", n_jobs=4),
+        dict(order=2, internal_p=2, n_jobs=4),
+        dict(rel=1e-3),
+    ),
+    "pot_wasserstein": (
+        WassersteinDistance(order=2, internal_p=2, mode="pot", n_jobs=4),
         dict(order=2, internal_p=2, n_jobs=4),
         dict(rel=1e-3),
     ),
@@ -284,20 +306,19 @@ def test_entropy_miscalculation():
     area = np.linalg.norm(pefN, ord=1)
     assert area == pytest.approx(1)
 
+
 def test_bottleneck_distance_deprecated_argument():
-    empty_diag = np.empty(shape = [0, 2])
+    empty_diag = np.empty(shape=[0, 2])
     with pytest.warns(DeprecationWarning):
-        bdist = BottleneckDistance(epsilon=.001)
-        assert bdist.e == .001
-        assert bdist(empty_diag, empty_diag) == 0.
+        bdist = BottleneckDistance(epsilon=0.001)
+        assert bdist.e == 0.001
+        assert bdist(empty_diag, empty_diag) == 0.0
+
 
 def test_kernel_empty_diagrams():
     empty_diag = np.empty(shape=[0, 2])
     assert SlicedWassersteinDistance(num_directions=100)(empty_diag, empty_diag) == 0.0
-    assert (
-        SlicedWassersteinKernel(num_directions=100, bandwidth=1.0)(empty_diag, empty_diag)
-        == 1.0
-    )
+    assert SlicedWassersteinKernel(num_directions=100, bandwidth=1.0)(empty_diag, empty_diag) == 1.0
     assert WassersteinDistance(mode="hera", delta=0.0001)(empty_diag, empty_diag) == 0.0
     assert WassersteinDistance(mode="pot")(empty_diag, empty_diag) == 0.0
     assert BottleneckDistance(e=0.001)(empty_diag, empty_diag) == 0.0
@@ -448,3 +469,48 @@ def test_persistence_lengths():
                 assert pl[idx] == 0.0
     with pytest.raises(ValueError):
         pl = PersistenceLengths(num_lengths=0)(diag)
+
+
+def test_bottleneck_distance_exceptions():
+    empty_diag = np.empty(shape=[0, 2])
+    with pytest.raises(ValueError):
+        # Test exception for fit method
+        bdist = BottleneckDistance(mode="hera", e=0.001)
+        _ = bdist.fit_transform(empty_diag, empty_diag)
+    with pytest.raises(ValueError):
+        # Test exception for __call__ method
+        _ = BottleneckDistance(mode="hera", e=0.001)(empty_diag, empty_diag)
+    with pytest.raises(ValueError):
+        # Test exception for fit method
+        bdist = BottleneckDistance(mode="gudhi", delta=0.001)
+        _ = bdist.fit_transform(empty_diag, empty_diag)
+    with pytest.raises(ValueError):
+        bdist = BottleneckDistance(mode="gudhi", delta=0.001)
+        _ = bdist(empty_diag, empty_diag)
+    with pytest.raises(ValueError):
+        # Test exception for fit method
+        bdist = BottleneckDistance(mode="some_weird_value")
+        _ = bdist.fit_transform(empty_diag, empty_diag)
+    with pytest.raises(ValueError):
+        bdist = BottleneckDistance(mode="some_weird_value")
+        _ = bdist(empty_diag, empty_diag)
+
+
+def test_herabottleneck_distance_call():
+    l1 = _n_diags(9)
+    l1b = l1.copy()
+
+    bd = BottleneckDistance(mode="hera", delta=0.001)
+    d1 = [bd(l1_value, l1b_value) for l1_value, l1b_value in zip(l1, l1b)]
+    np.allclose(d1, 0.0, atol=1.0e-5)
+
+
+def test_pairwise_persistence_diagram_distances_custom_function():
+    l1 = _n_diags(9)
+    l1b = l1.copy()
+
+    # Dummy function that returns sum(Y-X)
+    def minus(X, Y, **kwargs):
+        return np.sum(np.array(Y) - np.array(X))
+
+    d2 = pairwise_persistence_diagram_distances(l1, l1b, metric=minus)
