@@ -353,7 +353,7 @@ def test_simplices_iterator():
         assert st.filtration(simplex[0]) == simplex[1]
 
 
-def test_collapse_edges():
+def test_collapse_edges_of_graph():
     st = SimplexTree()
 
     assert st.insert([0, 1], filtration=1.0) == True
@@ -365,11 +365,41 @@ def test_collapse_edges():
 
     assert st.num_simplices() == 10
 
-    st.collapse_edges()
-    assert st.num_simplices() == 9
-    assert st.find([0, 2]) == False  # [1, 3] would be fine as well
-    for simplex in st.get_skeleton(0):
+    st2 = st.collapse_edges_of_flag_complex(max_expansion_dim=1, inplace=False)
+    assert st2.num_simplices() == 9
+    assert st2.find([0, 2]) == False  # [1, 3] would be fine as well
+    for simplex in st2.get_skeleton(0):
         assert simplex[1] == 1.0
+
+    st.collapse_edges_of_flag_complex(max_expansion_dim=1)
+    assert st == st2
+
+
+def test_collapse_edges_of_flag_complex():
+    st = SimplexTree()
+
+    assert st.insert([0, 1], filtration=1.0) == True
+    assert st.insert([1, 2], filtration=1.0) == True
+    assert st.insert([2, 3], filtration=1.0) == True
+    assert st.insert([0, 3], filtration=1.0) == True
+    assert st.insert([0, 1, 2, 3], filtration=2.0) == True
+
+    assert st.num_simplices() == 15
+
+    st2 = st.collapse_edges_of_flag_complex(inplace=False)
+    assert st2.num_simplices() == 11
+    assert st2.find([0, 2]) == False  # [1, 3] would be fine as well
+    for simplex in st2.get_skeleton(0):
+        assert simplex[1] == 1.0
+
+    st3 = st.collapse_edges_of_flag_complex(max_expansion_dim=1, inplace=False)
+    assert st3.num_simplices() == 9
+    assert st3.find([0, 2]) == False  # [1, 3] would be fine as well
+    for simplex in st3.get_skeleton(0):
+        assert simplex[1] == 1.0
+
+    st.collapse_edges_of_flag_complex()
+    assert st == st2
 
 
 def test_reset_filtration():

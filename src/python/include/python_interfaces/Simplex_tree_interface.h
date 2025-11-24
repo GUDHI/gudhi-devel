@@ -13,6 +13,7 @@
 #define INCLUDE_SIMPLEX_TREE_INTERFACE_H_
 
 #include <cstddef>
+#include <initializer_list>
 #include <limits>
 #include <stdexcept>
 #include <vector>
@@ -195,29 +196,55 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     return;
   }
 
-  void collapse_edges(int nb_collapse_iteration)
+ private:
+  static std::vector<std::tuple<Vertex_handle, Vertex_handle, Filtration_value> > get_collapse_edges(
+      const Simplex_tree_interface& st,
+      int nb_collapse_iteration)
   {
     using Filtered_edge = std::tuple<Vertex_handle, Vertex_handle, Filtration_value>;
     std::vector<Filtered_edge> edges;
-    for (Simplex_handle sh : Base::skeleton_simplex_range(1)) {
-      if (Base::dimension(sh) == 1) {
-        typename Base::Simplex_vertex_range rg = Base::simplex_vertex_range(sh);
-        auto vit = rg.begin();
-        Vertex_handle v = *vit;
-        Vertex_handle w = *++vit;
-        edges.emplace_back(v, w, Base::filtration(sh));
-      }
+    for (Simplex_handle sh : st.dimension_simplex_range(1)) {
+      auto rg = st.simplex_vertex_range(sh);
+      auto vit = rg.begin();
+      Vertex_handle v = *vit;
+      Vertex_handle w = *++vit;
+      edges.emplace_back(v, w, st.filtration(sh));
     }
-
-    // Keep only the vertices
-    prune_above_dimension(0);
 
     for (int iteration = 0; iteration < nb_collapse_iteration; iteration++) {
       edges = Gudhi::collapse::flag_complex_collapse_edges(std::move(edges));
     }
+
+    return edges;
+  }
+
+ public:
+  void collapse_edges_inplace(int nb_collapse_iteration)
+  {
+    auto edges = get_collapse_edges(*this, nb_collapse_iteration);
+
+    // Keep only the vertices
+    prune_above_dimension(0);
+
     // Insert remaining edges
-    for (auto remaining_edge : edges) {
+    for (const auto& remaining_edge : edges) {
       insert({std::get<0>(remaining_edge), std::get<1>(remaining_edge)}, std::get<2>(remaining_edge));
+    }
+  }
+
+  void collapse_edges(Simplex_tree_interface& st, int nb_collapse_iteration)
+  {
+    auto edges = get_collapse_edges(*this, nb_collapse_iteration);
+
+    // keeping the vertices
+    // vertices have possibility different filtration values, so insert_batch not possible
+    for (int v : Base::complex_vertex_range()) {
+      st.insert_simplex(std::initializer_list<int>{v}, Base::filtration(Base::find_vertex(v)));
+    }
+
+    // Insert remaining edges
+    for (const auto& remaining_edge : edges) {
+      st.insert({std::get<0>(remaining_edge), std::get<1>(remaining_edge)}, std::get<2>(remaining_edge));
     }
   }
 
