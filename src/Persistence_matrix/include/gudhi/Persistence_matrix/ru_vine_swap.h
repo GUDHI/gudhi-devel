@@ -499,8 +499,8 @@ inline bool RU_vine_swap<Master_matrix>::_positive_negative_vine_swap(Index colu
 {
   _matrix()->mirrorMatrixU_.zero_entry(columnIndex, _get_row_id_from_position(columnIndex + 1));
 
-  _swap_at_index(columnIndex);
   _positive_negative_transpose(columnIndex);
+  _swap_at_index(columnIndex);
 
   return true;
 }
