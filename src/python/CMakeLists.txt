@@ -216,7 +216,7 @@ execute_process(
 find_package(nanobind CONFIG REQUIRED)
 
 # Add src/python/include directory
-include_directories(include)
+include_directories(BEFORE include)
 add_subdirectory("gudhi")
 add_subdirectory("gudhi/clustering")
 add_subdirectory("gudhi/datasets/generators")
