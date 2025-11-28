@@ -18,7 +18,6 @@
 #define GUDHI_VINEYARD_HELPER_H_
 
 #include <algorithm>
-#include <stdexcept>
 #include <vector>
 
 #include <gudhi/Debug_utils.h>
@@ -59,6 +58,24 @@ inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
     }
     std::sort(boundary.begin(), boundary.end());
     boundaries[index] = std::move(boundary);
+  }
+}
+
+template <class FilteredComplex, typename Filtration_value = typename FilteredComplex::Filtration_value>
+inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
+                                               std::vector<Filtration_value>& filtrationValues)
+{
+  auto numberOfSimplices = filtrationValues.size();
+
+  for (auto sh : complex.complex_simplex_range()) {
+    complex.assign_key(sh, numberOfSimplices);
+    ++numberOfSimplices;
+  }
+
+  filtrationValues.resize(numberOfSimplices);
+
+  for (auto sh : complex.complex_simplex_range()) {
+    filtrationValues[complex.key(sh)] = complex.filtration(sh);
   }
 }
 

@@ -73,9 +73,9 @@ class Vineyard_builder
   using Dimension = typename Base::Dimension;                                /**< Dimension type. */
   using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, T>; /**< Bar type. */
   // using Cycle = typename Base::Cycle;         /**< Cycle type. */
-  using Vine = Vine<T, Dimension>;
+  using Vine_t = Vine<T, Dimension>;
   using Flat_vines = std::vector<std::array<T, 2> >;
-  using Vineyard = std::conditional_t<flat, std::vector<Flat_vines>, std::vector<Vine> >;
+  using Vineyard = std::conditional_t<flat, std::vector<Flat_vines>, std::vector<Vine_t> >;
 
   Vineyard_builder() {}
 
@@ -91,15 +91,17 @@ class Vineyard_builder
     numberOfBars_.clear();
     if constexpr (flat) {
       for (const auto& bar : barcode) {
-        if (bar.dim >= vineyard_.size()) {
+        if (bar.dim >= static_cast<Dimension>(vineyard_.size())) {
           vineyard_.resize(bar.dim + 1);
-          vineyard_[bar.dim].reserve(numberOfUpdates + 1);
         }
         vineyard_[bar.dim].push_back(
             {filtrationValues[bar.birth], bar.death == Base::Bar::inf ? Bar::inf : filtrationValues[bar.death]});
       }
       numberOfBars_.resize(vineyard_.size());
-      for (Index i = 0; i < vineyard_.size(); ++i) numberOfBars_[i] = vineyard_[i].size();
+      for (Index i = 0; i < vineyard_.size(); ++i) {
+        numberOfBars_[i] = vineyard_[i].size();
+        vineyard_[i].reserve(numberOfBars_[i] * (numberOfUpdates + 1));
+      }
     } else {
       for (const auto& bar : barcode) {
         vineyard_.emplace_back(bar.dim, numberOfUpdates + 1);

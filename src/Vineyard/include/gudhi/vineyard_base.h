@@ -84,6 +84,8 @@ class Vineyard_base
   using Cycle = typename Matrix::Cycle; /**< Cycle type. */
   using Permutation = std::vector<Index>;
 
+  Vineyard_base() {}
+
   template <class Boundary_range, class Dimension_range, class Filtration_range>
   Vineyard_base(const Boundary_range& boundaryMatrix,
                 const Dimension_range& dimensions,
@@ -139,11 +141,10 @@ class Vineyard_base
   {
     GUDHI_CHECK(filtrationValues.size() == order_.size(),
                 std::invalid_argument("Filtration value container size is not matching."));
-
     for (Index i = 1; i < order_.size(); i++) {
       int curr = i;
       // speed up when ordered by dim, to avoid unnecessary swaps
-      while (curr > 0 && matrix_.get_dimension(curr) == matrix_.get_dimension(curr - 1) &&
+      while (curr > 0 && matrix_.get_column_dimension(curr) == matrix_.get_column_dimension(curr - 1) &&
              filtrationValues[order_[curr]] < filtrationValues[order_[curr - 1]]) {
         if constexpr (!Matrix_options::is_of_boundary_type) {
           auto id1 = matrix_.get_pivot(curr - 1);
