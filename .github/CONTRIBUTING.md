@@ -15,6 +15,9 @@ If the problem you are facing is not referenced, do not hesitate to open a [new 
 This place is also a good place if you have some enhancement you want to propose.
 There is a label **enhancement** in the [new issue](https://github.com/GUDHI/gudhi-devel/issues/new) page.
 
+And if you want to discuss about your proposal, feel free to open a [new discussion](https://github.com/GUDHI/gudhi-devel/discussions/new/choose)
+with your topic (maybe check first in the opened discussions that your subject is not already discussed).
+
 # In case you want to contribute to GUDHI
 
 ## You are not familiar with GitHub ?
