@@ -16,6 +16,7 @@ from gudhi._random_ext import GudhiRandomGenerator
 
 import numpy as np
 
+
 class GudhiBitGenerator(np.random.BitGenerator):
     def __init__(self, seed: Optional[int] = None):
         super().__init__(0)

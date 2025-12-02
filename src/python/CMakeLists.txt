@@ -37,8 +37,29 @@ function(nanobind_add_module_with_targets)
     message(DEBUG "nanobind_add_module(${EXECUTABLE_NAME} ${EXE_SOURCES}) + target_link_libraries(${ARGN})")
     # Maintain a list of nanobind modules - Mainly for sphinx purposes to know when the documentation is "buildable"
     set(GUDHI_NANOBIND_MODULES ${GUDHI_NANOBIND_MODULES} ${EXECUTABLE_NAME} CACHE INTERNAL "GUDHI_NANOBIND_MODULES")
+
     # cf. https://nanobind.readthedocs.io/en/latest/api_cmake.html#high-level-interface
-    nanobind_add_module(${EXECUTABLE_NAME} NB_STATIC NOMINSIZE ${EXE_SOURCES})
+    # could be:
+    # nanobind_add_module(${EXECUTABLE_NAME} NB_STATIC NOMINSIZE ${EXE_SOURCES})
+    # but
+    # cf. https://nanobind.readthedocs.io/en/latest/api_cmake.html#low-level-interface
+    # To avoid nanobind_set_visibility(my_ext) for the "random" package
+    nanobind_build_library(nanobind STATIC)
+    add_library(${EXECUTABLE_NAME} MODULE ${EXE_SOURCES})
+    target_link_libraries(${EXECUTABLE_NAME} PRIVATE nanobind)
+    # .. strip unneeded symbols and debug info from the binary (only active in release builds)
+    nanobind_strip(${EXECUTABLE_NAME})
+    # .. disable the stack protector
+    nanobind_disable_stack_protector(${EXECUTABLE_NAME})
+    # .. set the Python extension suffix
+    nanobind_extension(${EXECUTABLE_NAME})
+    # .. set important compilation flags
+    nanobind_compile_options(${EXECUTABLE_NAME})
+    # .. set important linker flags
+    nanobind_link_options(${EXECUTABLE_NAME})
+    # Statically link against libstdc++/libgcc when targeting musllinux
+    nanobind_musl_static_libcpp(${EXECUTABLE_NAME})
+
     if(MSVC)
       target_compile_options(${EXECUTABLE_NAME} PRIVATE "-DNOMINMAX")
     endif()

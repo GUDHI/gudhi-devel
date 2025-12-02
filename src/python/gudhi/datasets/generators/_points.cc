@@ -74,13 +74,16 @@ NB_MODULE(_points_ext, m)
 {
   m.attr("__license__") = "LGPL v3";
 
+  // Required to get a default rng from the random module (another nanobind module)
+  nb::object GudhiRandomGenerator = nb::module_::import_("gudhi.random").attr("GudhiRandomGenerator");
+  nb::object default_rng = GudhiRandomGenerator();
   m.def("sphere",
         &generate_points_on_sphere,
         nb::arg("n_samples"),
         nb::arg("ambient_dim"),
         nb::arg("radius") = 1.,
         nb::arg("sample") = "random",
-        nb::arg("rng"),
+        nb::arg("rng") = default_rng,
         R"doc(
 Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
 
