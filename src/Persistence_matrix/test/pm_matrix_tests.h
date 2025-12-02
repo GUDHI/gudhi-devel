@@ -314,6 +314,29 @@ std::vector<witness_content<Column> > build_longer_chain_row_matrix() {
   return rows;
 }
 
+template <class Column>
+std::vector<witness_content<Column> > build_longer_boundary_matrix2()
+{
+  if constexpr (is_z2<Column>()) {
+    return {{}, {}, {}, {}, {}, {0, 4}, {1, 4}, {0, 1}, {2, 4}, {3, 4}, {2, 3}, {1, 3}, {5, 6, 7}, {8, 9, 10}};
+  } else {
+    return {{},
+            {},
+            {},
+            {},
+            {},
+            {{0, 1}, {4, 4}},
+            {{1, 4}, {4, 1}},
+            {{0, 4}, {1, 1}},
+            {{2, 4}, {4, 1}},
+            {{3, 1}, {4, 4}},
+            {{2, 1}, {3, 4}},
+            {{1, 4}, {3, 1}},
+            {{5, 1}, {6, 1}, {7, 1}},
+            {{8, 1}, {9, 1}, {10, 1}}};
+  }
+}
+
 template <class Matrix>
 void test_constructors() {
   std::vector<witness_content<typename Matrix::Column> > empty;
@@ -451,6 +474,19 @@ void test_general_insertion() {
   BOOST_CHECK(!m.is_zero_column(10));
   BOOST_CHECK(!m.is_zero_column(11));
   BOOST_CHECK(!m.is_zero_entry(3, 1));
+
+  if constexpr (is_z2<typename Matrix::Column>()) {
+    m.insert_column(3);
+  } else {
+    m.insert_column(3, 7);
+  }
+  BOOST_CHECK_EQUAL(m.get_number_of_columns(), 13);
+  const auto& col = m.get_column(12);
+  auto it = col.begin();
+  BOOST_CHECK_EQUAL(it->get_row_index(), 3);
+  if constexpr (!is_z2<typename Matrix::Column>()) BOOST_CHECK_EQUAL(it->get_element(), 2);
+  ++it;
+  BOOST_CHECK(it == col.end());
 }
 
 // for boundary and ru
@@ -2476,39 +2512,28 @@ void test_representative_cycles(Matrix& mb) {
   mb.update_representative_cycles();
 
   const auto& cycles = mb.get_representative_cycles();
-  BOOST_CHECK_EQUAL(cycles.size(), 5);
+  BOOST_CHECK_EQUAL(cycles.size(), 8);
 
-  if constexpr (Matrix::Option_list::is_of_boundary_type) {
-    std::vector<unsigned int> tmp;
-    tmp.push_back(0);
-    BOOST_CHECK(cycles[0] == tmp);
-    tmp[0] = 1;
-    BOOST_CHECK(cycles[1] == tmp);
-    tmp[0] = 2;
-    BOOST_CHECK(cycles[2] == tmp);
-    tmp[0] = 3;
-    tmp.push_back(4);
-    tmp.push_back(5);
-    BOOST_CHECK(cycles[3] == tmp);
-    tmp.clear();
-    tmp.push_back(7);
-    BOOST_CHECK(cycles[4] == tmp);
+  using Cy = decltype(cycles[0]);
+
+  if constexpr (Matrix::Option_list::is_z2){
+    BOOST_CHECK((cycles[0] == Cy{0}));
+    BOOST_CHECK((cycles[1] == Cy{0, 1}));
+    BOOST_CHECK((cycles[2] == Cy{0, 2}));
+    BOOST_CHECK((cycles[3] == Cy{0, 3}));
+    BOOST_CHECK((cycles[4] == Cy{0, 4}));
+    BOOST_CHECK((cycles[5] == Cy{5, 6, 7}));
+    BOOST_CHECK((cycles[6] == Cy{8, 9, 10}));
+    BOOST_CHECK((cycles[7] == Cy{6, 9, 11}));
   } else {
-    std::vector<unsigned int> tmp;
-    tmp.push_back(0);
-    BOOST_CHECK(cycles[0] == tmp);
-    tmp.push_back(1);
-    BOOST_CHECK(cycles[1] == tmp);
-    tmp[1] = 2;
-    BOOST_CHECK(cycles[2] == tmp);
-    tmp[0] = 3;
-    tmp[1] = 4;
-    tmp.push_back(5);
-    BOOST_CHECK(cycles[3] == tmp);
-    tmp[0] = 0;
-    tmp[1] = 7;
-    tmp.pop_back();
-    BOOST_CHECK(cycles[4] == tmp);
+    BOOST_CHECK((cycles[0] == Cy{{0, 1}}));
+    BOOST_CHECK((cycles[1] == Cy{{0, 1}, {1, 4}}));
+    BOOST_CHECK((cycles[2] == Cy{{0, 1}, {2, 4}}));
+    BOOST_CHECK((cycles[3] == Cy{{0, 4}, {3, 1}}));
+    BOOST_CHECK((cycles[4] == Cy{{0, 1}, {4, 4}}));
+    BOOST_CHECK((cycles[5] == Cy{{5, 1}, {6, 1}, {7, 1}}));
+    BOOST_CHECK((cycles[6] == Cy{{8, 1}, {9, 1}, {10, 1}}));
+    BOOST_CHECK((cycles[7] == Cy{{6, 4}, {9, 4}, {11, 1}}));
   }
 
   if constexpr (Matrix::Option_list::has_column_pairings) {

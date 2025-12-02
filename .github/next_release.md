@@ -30,7 +30,8 @@ Below is a list of changes:
 
 - Installation
      - Pip package is now available for OSx &ge; 13.0 (was &ge; 12.0).
-
+     - Support Eigen 3.4.1 and 5.X.X
+     
 - Miscellaneous
      - The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.12.0+is%3Aclosed) is available on GitHub.
 

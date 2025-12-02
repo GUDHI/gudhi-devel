@@ -81,18 +81,39 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
         : Base(columnIndex, nonZeroRowIndices, rowContainer, colSettings)
     {}
 
-    template <class Container>
+    template <class Container, class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
     Column(const Container& nonZeroRowIndices, Dimension dimension, Column_settings* colSettings)
         : Base(nonZeroRowIndices, dimension, colSettings)
     {}
 
-    template <class Container, class Row_container>
+    template <class Container, class Row_container, class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
     Column(Index columnIndex,
            const Container& nonZeroRowIndices,
            Dimension dimension,
            Row_container* rowContainer,
            Column_settings* colSettings)
         : Base(columnIndex, nonZeroRowIndices, dimension, rowContainer, colSettings)
+    {}
+
+    Column(Index idx, Dimension dimension, Column_settings* colSettings) : Base(idx, dimension, colSettings) {}
+
+    Column(Index idx, Field_element e, Dimension dimension, Column_settings* colSettings)
+        : Base(idx, e, dimension, colSettings)
+    {}
+
+    template <class Row_container>
+    Column(Index columnIndex, Index idx, Dimension dimension, Row_container* rowContainer, Column_settings* colSettings)
+        : Base(columnIndex, idx, dimension, rowContainer, colSettings)
+    {}
+
+    template <class Row_container>
+    Column(Index columnIndex,
+           Index idx,
+           Field_element e,
+           Dimension dimension,
+           Row_container* rowContainer,
+           Column_settings* colSettings)
+        : Base(columnIndex, idx, e, dimension, rowContainer, colSettings)
     {}
 
     Column(const Column& column, Column_settings* colSettings = nullptr)
@@ -196,8 +217,23 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
    * @param column Range of @ref Matrix::Entry_representative from which the column has to be constructed. Assumed to be
    * ordered by increasing ID value.
    */
-  template <class Container>
+  template <class Container, class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   void insert_column(const Container& column);
+  /**
+   * @brief Inserts a new column at the end of the matrix. The column will consist of the given index only.
+   * Only available for Z2 coefficients. Otherwise, add the entry coefficient to the arguments.
+   * 
+   * @param idx Entry ID.
+   */
+  void insert_column(Index idx);
+  /**
+   * @brief Inserts a new column at the end of the matrix. The column will consist of the given index only.
+   * Only available for Zp coefficients. For Z2, do not specify the last argument.
+   * 
+   * @param idx Entry ID.
+   * @param e Entry coefficient.
+   */
+  void insert_column(Index idx, Field_element e);
   /**
    * @brief Same as @ref insert_column, only for interface purposes. The given dimension is ignored and not stored.
    *
@@ -391,6 +427,8 @@ class Base_matrix_with_column_compression : protected Master_matrix::Matrix_row_
   std::unique_ptr<Simple_object_pool<Column> > columnPool_;
   inline static const Column empty_column_; /**< Representative for empty columns. */
 
+  template <class F>
+  void _initialize_column(F&& get_column);
   void _insert_column(Index columnIndex);
   void _insert_double_column(Index columnIndex, typename Col_dict::iterator& doubleIt);
 };
@@ -478,10 +516,57 @@ inline Base_matrix_with_column_compression<Master_matrix>::~Base_matrix_with_col
 }
 
 template <class Master_matrix>
-template <class Container>
+template <class Container, class>
 inline void Base_matrix_with_column_compression<Master_matrix>::insert_column(const Container& column)
 {
   insert_boundary(column);
+}
+
+template <class Master_matrix>
+inline void Base_matrix_with_column_compression<Master_matrix>::insert_column(Index idx)
+{
+  static_assert(Master_matrix::Option_list::is_z2,
+                "Insertion method not available for Zp != Z2. Please specify the coefficient.");
+
+  if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows) {
+    RA_opt::_resize(idx);
+  }
+
+  _initialize_column([&]() -> Column* {
+    if constexpr (Master_matrix::Option_list::has_row_access) {
+      return columnPool_->construct(nextColumnIndex_, idx, 0, RA_opt::_get_rows_ptr(), colSettings_);
+    } else {
+      return columnPool_->construct(idx, 0, colSettings_);
+    }
+  });
+
+  _insert_column(nextColumnIndex_);
+
+  nextColumnIndex_++;
+}
+
+template <class Master_matrix>
+inline void Base_matrix_with_column_compression<Master_matrix>::insert_column(Index idx,
+                                                                              Field_element e)
+{
+  static_assert(!Master_matrix::Option_list::is_z2,
+                "Insertion method not available for Zp == Z2. Please do not specify any coefficient.");
+
+  if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows) {
+    RA_opt::_resize(idx);
+  }
+
+  _initialize_column([&]() -> Column* {
+    if constexpr (Master_matrix::Option_list::has_row_access) {
+      return columnPool_->construct(nextColumnIndex_, idx, e, 0, RA_opt::_get_rows_ptr(), colSettings_);
+    } else {
+      return columnPool_->construct(idx, e, 0, colSettings_);
+    }
+  });
+
+  _insert_column(nextColumnIndex_);
+
+  nextColumnIndex_++;
 }
 
 template <class Master_matrix>
@@ -496,33 +581,18 @@ inline void Base_matrix_with_column_compression<Master_matrix>::insert_boundary(
 
   if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows) {
     if (boundary.begin() != boundary.end()) {
-      Index pivot;
-      if constexpr (Master_matrix::Option_list::is_z2) {
-        pivot = *std::prev(boundary.end());
-      } else {
-        pivot = std::prev(boundary.end())->first;
-      }
-      RA_opt::_resize(pivot);
+      RA_opt::_resize(Master_matrix::get_row_index(*std::prev(boundary.end())));
     }
   }
 
-  if (repToColumn_.size() == nextColumnIndex_) {
-    // could perhaps be avoided, if find_set returns something special when it does not find
-    columnClasses_.link(nextColumnIndex_, nextColumnIndex_);
+  _initialize_column([&]() -> Column* {
     if constexpr (Master_matrix::Option_list::has_row_access) {
-      repToColumn_.push_back(
-          columnPool_->construct(nextColumnIndex_, boundary, dim, RA_opt::_get_rows_ptr(), colSettings_));
+      return columnPool_->construct(nextColumnIndex_, boundary, dim, RA_opt::_get_rows_ptr(), colSettings_);
     } else {
-      repToColumn_.push_back(columnPool_->construct(boundary, dim, colSettings_));
+      return columnPool_->construct(boundary, dim, colSettings_);
     }
-  } else {
-    if constexpr (Master_matrix::Option_list::has_row_access) {
-      repToColumn_[nextColumnIndex_] =
-          columnPool_->construct(nextColumnIndex_, boundary, dim, RA_opt::_get_rows_ptr(), colSettings_);
-    } else {
-      repToColumn_[nextColumnIndex_] = columnPool_->construct(boundary, dim, colSettings_);
-    }
-  }
+  });
+
   _insert_column(nextColumnIndex_);
 
   nextColumnIndex_++;
@@ -711,6 +781,19 @@ inline void Base_matrix_with_column_compression<Master_matrix>::print()
     std::cout << "(" << i << ")\n";
   }
   std::cout << "\n";
+}
+
+template <class Master_matrix>
+template <class F>
+inline void Base_matrix_with_column_compression<Master_matrix>::_initialize_column(F&& get_column)
+{
+  if (repToColumn_.size() == nextColumnIndex_) {
+    // could perhaps be avoided, if find_set returns something special when it does not find
+    columnClasses_.link(nextColumnIndex_, nextColumnIndex_);
+    repToColumn_.push_back(std::forward<F>(get_column)());
+  } else {
+    repToColumn_[nextColumnIndex_] = std::forward<F>(get_column)();
+  }
 }
 
 template <class Master_matrix>

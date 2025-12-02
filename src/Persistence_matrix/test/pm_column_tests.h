@@ -283,6 +283,26 @@ void column_test_common_content_access(Column& col,
                                        const std::set<entry_type>& setcont,
                                        const std::vector<typename Column::Field_element>& veccont) {
   BOOST_CHECK(get_column_content_via_iterators(col) == setcont);
+
+  // TODO: get_non_zero_content_range could replace get_column_content_via_iterators in other tests
+  typename Column::Content_range rcont = col.get_non_zero_content_range();
+  auto itr = rcont.begin();
+  auto its = setcont.begin();
+  unsigned int c = 0;
+  while (c < setcont.size() && itr != rcont.end() && its != setcont.end()){
+    ++c;
+    if constexpr (is_z2<Column>()){
+      BOOST_CHECK_EQUAL(itr->get_row_index(), *its);
+    } else {
+      BOOST_CHECK_EQUAL(itr->get_row_index(), its->first);
+      BOOST_CHECK_EQUAL(itr->get_element(), its->second);
+    }
+    ++itr;
+    ++its;
+  }
+  BOOST_CHECK(itr == rcont.end());
+  BOOST_CHECK(its == setcont.end());
+
   BOOST_CHECK(col.get_content(veccont.size()) == veccont);
   if constexpr (Column::Master::Option_list::column_type != Column_types::HEAP) {
     BOOST_CHECK_EQUAL(col.size(), setcont.size());
