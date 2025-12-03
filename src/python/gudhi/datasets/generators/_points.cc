@@ -26,7 +26,7 @@ namespace nb = nanobind;
 typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> Kern;
 
 auto generate_points_on_sphere(const size_t n_samples, const int ambient_dim, double radius, std::string sample,
-                               Gudhi::random::RandomGenerator& rng) {
+                               Gudhi::random::Random_generator& rng) {
   if (sample != "random") {
     throw nb::value_error("This sample type is not supported");
   }

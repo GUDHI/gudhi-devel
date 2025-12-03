@@ -18,7 +18,7 @@ NB_MODULE(_random_ext, m) {
   // Based on https://doc.cgal.org/latest/Generator/index.html
   m.attr("__license__") = "LGPL v3";
   
-  nb::class_<Gudhi::random::RandomGenerator> (m, "GudhiRandomGenerator")
+  nb::class_<Gudhi::random::Random_generator> (m, "GudhiRandomGenerator")
       .def(nb::init<>())
       .def(nb::init<long>())
       .def("setup_bitgen", &Gudhi::random::setup_bitgen);
