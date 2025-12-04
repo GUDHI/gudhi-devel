@@ -36,8 +36,11 @@ class Random_generator {
  public:
   // CGAL::Random() default constructor sets the seed with std::time which is not convenient.
   // Sets it with std::random_device is more advised
-  Random_generator() { CGAL::get_default_random() = Random(rand_dev()); }
-  Random_generator(uint64_t seed) { CGAL::get_default_random() = Random(seed); }
+  Random_generator() {
+    unsigned int random_seed = rand_dev();
+    CGAL::get_default_random() = Random(random_seed);
+  }
+  Random_generator(unsigned int seed) { CGAL::get_default_random() = Random(seed); }
   Random_generator(Random_generator& other) = delete;
   Random_generator(Random_generator&& other) = delete;
   Random_generator& operator=(const Random_generator& other) = delete;
