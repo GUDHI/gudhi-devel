@@ -10,13 +10,13 @@
 
 #include <cstddef>
 #include <vector>
-#include "python_interfaces/Simplex_tree_interface.h"
 
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 
 #include <gudhi/vineyard_builder.h>
 #include <gudhi/vineyard_helper.h>
+#include <python_interfaces/Simplex_tree_interface.h>
 #include <python_interfaces/numpy_utils.h>
 
 namespace nb = nanobind;
@@ -26,10 +26,6 @@ namespace vineyard {
 
 class Vineyard_interface
 {
-  using value_type = double;
-  using Index = Default_vineyard_options::Index;
-  using Dimension = Default_vineyard_options::Dimension;
-
   template <typename T>
   struct Range {
     using value_type = T;
@@ -55,7 +51,11 @@ class Vineyard_interface
   };
 
  public:
-  Vineyard_interface() {}
+  using value_type = double;
+  using Index = Default_vineyard_options::Index;
+  using Dimension = Default_vineyard_options::Dimension;
+
+  Vineyard_interface(bool storeRepCycles, Dimension repCyclesDim) : vineyard_(storeRepCycles, repCyclesDim) {}
 
   template <typename F, typename I>
   void initialize(nb::list boundaryMatrix,
@@ -74,8 +74,7 @@ class Vineyard_interface
       boundaries[i] = Range<I>(numpy_b[i]);
     }
 
-    vineyard_.initialize(
-        boundaries, Range<I>(dimensions), Range<F>(filtrationValues), numberOfUpdates);
+    vineyard_.initialize(boundaries, Range<I>(dimensions), Range<F>(filtrationValues), numberOfUpdates);
   }
 
   template <class FilteredComplex>
@@ -120,9 +119,34 @@ class Vineyard_interface
     return ret;
   }
 
+  nb::list get_latest_representative_cycles()
+  {
+    nb::list ret;
+    for (auto cycle : vineyard_.get_latest_representative_cycles()) {
+      ret.append(_wrap_as_numpy_array(std::move(cycle), cycle.size()));
+    }
+    return ret;
+  }
+
  private:
   Vineyard_builder<value_type, Default_vineyard_options, true> vineyard_;
 };
+
+template <class FilteredComplex>
+inline nb::tuple build_python_boundary_matrix_from_complex(FilteredComplex& complex)
+{
+  std::vector<std::vector<typename FilteredComplex::Simplex_key>> boundaries;
+  std::vector<int> dimensions;
+  std::vector<typename FilteredComplex::Filtration_value> filtrationValues;
+
+  build_boundary_matrix_from_complex(complex, boundaries, dimensions, filtrationValues);
+
+  nb::list b;
+  for (auto& boundary : boundaries) {
+    b.append(_wrap_as_numpy_array(std::move(boundary), boundary.size()));
+  }
+  return nb::make_tuple(std::move(b), _wrap_as_numpy_array(std::move(dimensions), dimensions.size()));
+}
 
 }  // namespace vineyard
 }  // namespace Gudhi
@@ -135,7 +159,7 @@ NB_MODULE(_vineyard_ext, m)
   m.attr("__license__") = "MIT";
 
   nb::class_<gvyi>(m, "Vineyard_interface")
-      .def(nb::init<>())
+      .def(nb::init<bool,typename gvyi::Dimension>())
       .def("_initialize", &gvyi::initialize<double, int>)
       .def("_initialize", &gvyi::initialize<float, int>)
       // TODO: also for Cubical complex
@@ -143,5 +167,10 @@ NB_MODULE(_vineyard_ext, m)
       .def("_update", &gvyi::update)
       // TODO: also for Cubical complex
       .def("_update_from_complex", &gvyi::update_from_complex<Gudhi::Simplex_tree_interface>)
-      .def("_get_current_vineyard_view", &gvyi::get_current_vineyard_view);
+      .def("_get_current_vineyard_view", &gvyi::get_current_vineyard_view)
+      .def("get_latest_representative_cycles", &gvyi::get_latest_representative_cycles);
+
+  // TODO: also for Cubical complex
+  m.def("_build_boundary_matrix_from_complex",
+        &gvy::build_python_boundary_matrix_from_complex<Gudhi::Simplex_tree_interface>);
 }

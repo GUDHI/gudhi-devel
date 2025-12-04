@@ -18,7 +18,6 @@
 #define GUDHI_VINEYARD_BASE_H_
 
 #include <numeric>
-#include <stdexcept>
 #include <vector>
 
 #include <boost/range/adaptor/transformed.hpp>
@@ -166,12 +165,13 @@ class Vineyard_base
     });
   }
 
-  auto get_current_representative_cycles(bool update = true)
+  auto get_current_representative_cycles(Dimension dim = Matrix::template get_null_value<Dimension>(),
+                                         bool update = true)
   {
     static_assert(Matrix_options::can_retrieve_representative_cycles,
                   "Underlying matrix has to support representative cycles.");
 
-    if (update) matrix_.update_representative_cycles();
+    if (update) matrix_.update_representative_cycles(dim);
     const auto& cycles = matrix_.get_representative_cycles();
     return boost::adaptors::transform(cycles, [&](const Cycle& cycle) -> Cycle {
       Cycle c(cycle.size());
@@ -193,15 +193,16 @@ class Vineyard_base
     static_assert(Matrix_options::can_retrieve_representative_cycles,
                   "Underlying matrix has to support representative cycles.");
 
-    if (update) matrix_.update_representative_cycles();
-    const auto& cycle = matrix_.get_representative_cycle(matrix_.get_current_barcode()[barcodeIndex]);
+    const auto& bar = matrix_.get_current_barcode()[barcodeIndex];
+    if (update) matrix_.update_representative_cycle(bar);
+    const auto& cycle = matrix_.get_representative_cycle(bar);
     return boost::adaptors::transform(cycle, [&](const Index& i) -> Index {
       if constexpr (Matrix_options::is_of_boundary_type) {
         // works for RU because id == pos, but does not work for chain with vine
         // we need a id to pos map in that case
-        return order_[cycle[i]];
+        return order_[i];
       } else {
-        return order_[(*idToPos_)[cycle[i]]];
+        return order_[(*idToPos_)[i]];
       }
     });
   }

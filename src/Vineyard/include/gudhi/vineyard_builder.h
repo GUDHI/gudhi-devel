@@ -18,8 +18,10 @@
 #define GUDHI_VINEYARD_BUILDER_H_
 
 #include <array>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
+#include <optional>
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/simple_mdspan.h>
@@ -72,12 +74,18 @@ class Vineyard_builder
   using Index = typename Base::Index;                                        /**< Complex index type. */
   using Dimension = typename Base::Dimension;                                /**< Dimension type. */
   using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, T>; /**< Bar type. */
-  // using Cycle = typename Base::Cycle;         /**< Cycle type. */
+  using Cycle = typename Base::Cycle;                                        /**< Cycle type. */
   using Vine_t = Vine<T, Dimension>;
   using Flat_vines = std::vector<std::array<T, 2> >;
   using Vineyard = std::conditional_t<flat, std::vector<Flat_vines>, std::vector<Vine_t> >;
 
-  Vineyard_builder() {}
+  Vineyard_builder(bool storeRepCycles = false, Dimension repCyclesDim = -1)
+  {
+    if (storeRepCycles) {
+      latest_representative_cycles_.emplace();
+      repCyclesDim_.emplace(repCyclesDim);
+    }
+  }
 
   template <class Boundary_range, class Dimension_range, class Filtration_range>
   void initialize(const Boundary_range& boundaryMatrix,
@@ -89,6 +97,10 @@ class Vineyard_builder
     const auto& barcode = base_.get_current_barcode();  // forward only range
     vineyard_.clear();
     numberOfBars_.clear();
+    if (latest_representative_cycles_) {
+      latest_representative_cycles_->clear();
+    }
+    Index idx = 0;
     if constexpr (flat) {
       for (const auto& bar : barcode) {
         if (bar.dim >= static_cast<Dimension>(vineyard_.size())) {
@@ -96,6 +108,11 @@ class Vineyard_builder
         }
         vineyard_[bar.dim].push_back(
             {filtrationValues[bar.birth], bar.death == Base::Bar::inf ? Bar::inf : filtrationValues[bar.death]});
+        if (_store_cycle(bar, filtrationValues)) {
+          auto cycle = base_.get_current_representative_cycle(idx, true);
+          latest_representative_cycles_->emplace_back(cycle.begin(), cycle.end());
+        }
+        ++idx;
       }
       numberOfBars_.resize(vineyard_.size());
       for (Index i = 0; i < vineyard_.size(); ++i) {
@@ -109,6 +126,11 @@ class Vineyard_builder
                                   bar.death == Base::Bar::inf ? Bar::inf : filtrationValues[bar.death]);
         if (bar.dim >= numberOfBars_.size()) numberOfBars_.resize(bar.dim + 1, 0);
         ++numberOfBars_[bar.dim];
+        if (_store_cycle(bar, filtrationValues)) {
+          auto cycle = base_.get_current_representative_cycle(idx, true);
+          latest_representative_cycles_->emplace_back(cycle.begin(), cycle.end());
+        }
+        ++idx;
       }
     }
   }
@@ -118,18 +140,23 @@ class Vineyard_builder
   {
     base_.update(filtrationValues);
     const auto& barcode = base_.get_current_barcode();  // forward only range + order is preserved
-    if constexpr (flat) {
-      for (const auto& bar : barcode) {
+    Index idx = 0;
+    if (latest_representative_cycles_) {
+      latest_representative_cycles_->clear();
+    }
+    for (const auto& bar : barcode) {
+      if constexpr (flat) {
         vineyard_[bar.dim].push_back(
             {filtrationValues[bar.birth], bar.death == Base::Bar::inf ? Bar::inf : filtrationValues[bar.death]});
+      } else {
+        vineyard_[idx].add_pair(filtrationValues[bar.birth],
+                                bar.death == Base::Bar::inf ? Bar::inf : filtrationValues[bar.death]);
       }
-    } else {
-      Index i = 0;
-      for (const auto& bar : barcode) {
-        vineyard_[i].add_pair(filtrationValues[bar.birth],
-                              bar.death == Base::Bar::inf ? Bar::inf : filtrationValues[bar.death]);
-        ++i;
+      if (_store_cycle(bar, filtrationValues)) {
+        const auto& cycle = base_.get_current_representative_cycle(idx, true);
+        latest_representative_cycles_->emplace_back(cycle.begin(), cycle.end());
       }
+      ++idx;
     }
   }
 
@@ -137,10 +164,27 @@ class Vineyard_builder
 
   const std::vector<Index>& get_number_of_vines_by_dimension() const { return numberOfBars_; }
 
+  const std::vector<Cycle>& get_latest_representative_cycles()
+  {
+    if (latest_representative_cycles_) return *latest_representative_cycles_;
+    throw std::invalid_argument("Representative cycles were not stored.");
+  }
+
  private:
   Base base_;
   Vineyard vineyard_;
   std::vector<Index> numberOfBars_;
+  std::optional<Dimension> repCyclesDim_;
+  std::optional<std::vector<Cycle> > latest_representative_cycles_;
+
+  template <class Filtration_range>
+  bool _store_cycle(const typename Base::Bar& bar, const Filtration_range& filtrationValues) const
+  {
+    if (!repCyclesDim_) return false;
+    if (*repCyclesDim_ >= 0 && bar.dim != *repCyclesDim_) return false;
+    if (filtrationValues[bar.birth] == Bar::inf) return false;
+    return bar.death == Base::Bar::inf || filtrationValues[bar.death] - filtrationValues[bar.birth] > 0;
+  }
 };
 
 }  // namespace vineyard

@@ -39,9 +39,16 @@ inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
 
   Index numberOfSimplices = boundaries.size();
 
-  for (auto sh : complex.complex_simplex_range()) {
+  // Vertex ID should correspond to position in the original point cloud if there was one.
+  for (auto sh : complex.skeleton_simplex_range(0)) {
     complex.assign_key(sh, numberOfSimplices);
     ++numberOfSimplices;
+  }
+  for (auto sh : complex.complex_simplex_range()) {
+    if (complex.dimension(sh) != 0) {
+      complex.assign_key(sh, numberOfSimplices);
+      ++numberOfSimplices;
+    }
   }
 
   boundaries.resize(numberOfSimplices);
@@ -67,9 +74,16 @@ inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
 {
   auto numberOfSimplices = filtrationValues.size();
 
-  for (auto sh : complex.complex_simplex_range()) {
+  // Vertex ID should correspond to position in the original point cloud if there was one.
+  for (auto sh : complex.skeleton_simplex_range(0)) {
     complex.assign_key(sh, numberOfSimplices);
     ++numberOfSimplices;
+  }
+  for (auto sh : complex.complex_simplex_range()) {
+    if (complex.dimension(sh) != 0) {
+      complex.assign_key(sh, numberOfSimplices);
+      ++numberOfSimplices;
+    }
   }
 
   filtrationValues.resize(numberOfSimplices);
