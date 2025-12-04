@@ -20,6 +20,6 @@ NB_MODULE(_random_ext, m) {
   
   nb::class_<Gudhi::random::Random_generator> (m, "GudhiRandomGenerator")
       .def(nb::init<>())
-      .def(nb::init<long>())
+      .def(nb::init<unsigned int>())
       .def("setup_bitgen", &Gudhi::random::setup_bitgen);
 }
