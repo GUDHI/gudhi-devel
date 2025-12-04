@@ -18,7 +18,12 @@
 namespace CGAL {
   class Random;
 #ifdef _WIN32
-  __declspec(dllimport) Random& get_default_random();
+  #if defined RANDOM_DLL_IMPORT
+    extern __declspec(dllimport) Random& get_default_random();
+  #endif
+  #if defined RANDOM_DLL_EXPORT
+    __declspec(dllexport) Random& get_default_random();
+  #endif
 #else
   Random& get_default_random() __attribute__((visibility("default")));
 #endif

@@ -16,4 +16,8 @@ nanobind_add_module_with_targets(_tangential_complex_ext _tangential_complex.cc 
 nanobind_add_module_with_targets(_euclidean_witness_complex_ext _euclidean_witness_complex.cc TARGETS Eigen3::Eigen CGAL::CGAL TBB::tbb)
 nanobind_add_module_with_targets(_euclidean_strong_witness_complex_ext _euclidean_strong_witness_complex.cc TARGETS Eigen3::Eigen CGAL::CGAL TBB::tbb)
 nanobind_add_module_with_targets(_subsampling_ext _subsampling.cc TARGETS Eigen3::Eigen CGAL::CGAL TBB::tbb)
+
 nanobind_add_module_with_targets(_random_ext _random.cc TARGETS Python::NumPy CGAL::CGAL)
+if(TARGET CGAL::CGAL)
+  target_compile_definitions(_random_ext PUBLIC RANDOM_DLL_EXPORT)
+endif()
