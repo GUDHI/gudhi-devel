@@ -16,7 +16,10 @@
 
 #include <CGAL/Epick_d.h>
 
+// For Windows, where points is a client of Random_generator here (_random_ext is the provider)
+#define RANDOM_DLL_IMPORT
 #include <gudhi/random_point_generators.h>
+
 #include <gudhi/Debug_utils.h>
 #include <python_interfaces/numpy_utils.h>
 #include <python_interfaces/random_utils.h>
