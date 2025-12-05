@@ -855,6 +855,14 @@ class Matrix
                                    Dimension dim = Matrix::get_null_value<Dimension>());
 
   /**
+   * @brief Only available for @ref boundarymatrix "RU matrices".
+   * 
+   * See also @ref remove_maximal_cell (for the complementary action) and @ref insert_boundary (for insertion at the highest index).
+   */
+  template <class Boundary_range = Boundary>
+  void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim);
+
+  /**
    * @brief Returns the column at the given @ref MatIdx index.
    * For @ref boundarymatrix "RU matrices", is equivalent to
    * @ref get_column(Index columnIndex, bool inR) "get_column(columnIndex, true)".
@@ -995,7 +1003,7 @@ class Matrix
    * @ref remove_maximal_cell(ID_index cellIndex, const std::vector<ID_index>& columnsToSwap)
    * "remove_maximal_cell(cellID, {})" will be faster than @ref remove_last().
    *
-   * See also @ref remove_last.
+   * See also @ref remove_last, @ref insert_maximal_cell.
    *
    * @param cellIndex @ref IDIdx index of the cell to remove
    * @param columnsToSwap Vector of @ref IDIdx indices of the cells coming after @p cellIndex in the filtration.
@@ -1668,6 +1676,18 @@ Matrix<PersistenceMatrixOptions>::insert_boundary(ID_index cellIndex, const Boun
     return matrix_.insert_boundary(cellIndex, boundary, dim);
   else
     matrix_.insert_boundary(cellIndex, boundary, dim);
+}
+
+template <class PersistenceMatrixOptions>
+template <class Boundary_range>
+inline void Matrix<PersistenceMatrixOptions>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim)
+{
+  static_assert(isNonBasic && PersistenceMatrixOptions::has_vine_update,
+                "'insert_maximal_cell' is not available for the chosen options.");
+  static_assert(PersistenceMatrixOptions::is_of_boundary_type || (PersistenceMatrixOptions::has_map_column_container &&
+                                                                  PersistenceMatrixOptions::has_column_pairings),
+                "'insert_maximal_cell' is not available for the chosen options.");
+  matrix_.insert_maximal_cell(columnIndex, boundary, dim);
 }
 
 template <class PersistenceMatrixOptions>
