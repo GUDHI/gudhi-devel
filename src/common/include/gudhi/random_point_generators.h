@@ -265,6 +265,7 @@ std::vector<typename Kernel::Point_d>
 generate_points_on_sphere_d(std::size_t num_points, int dim, double radius, double radius_noise_percentage = 0.,
                             Gudhi::random::Random* rng = Gudhi::random::Random_generator().get_default_random()) {
   assert(rng);
+  std::cout << "generate_points_on_sphere_d rng = " << rng << std::endl;
   typedef typename Kernel::Point_d Point;
   Kernel k;
   CGAL::Random_points_on_sphere_d<Point> generator(dim, radius, *rng);

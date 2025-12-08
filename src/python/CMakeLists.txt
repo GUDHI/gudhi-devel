@@ -45,7 +45,8 @@ function(nanobind_add_module_with_targets)
     # cf. https://nanobind.readthedocs.io/en/latest/api_cmake.html#low-level-interface
     # To avoid nanobind_set_visibility(my_ext) for the "random" package
     nanobind_build_library(nanobind STATIC)
-    add_library(${EXECUTABLE_NAME} MODULE ${EXE_SOURCES})
+    # Replaced MODULE (from nanobind code) to SHARED as points_ext requires to link against random_ext
+    add_library(${EXECUTABLE_NAME} SHARED ${EXE_SOURCES})
     target_link_libraries(${EXECUTABLE_NAME} PRIVATE nanobind)
     # .. strip unneeded symbols and debug info from the binary (only active in release builds)
     nanobind_strip(${EXECUTABLE_NAME})

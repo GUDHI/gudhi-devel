@@ -44,8 +44,10 @@ class Random_generator {
   Random_generator() {
     unsigned int random_seed = rand_dev();
     CGAL::get_default_random() = Random(random_seed);
+    std::cout << "CGAL::get_default_random: " << &(CGAL::get_default_random()) << std::endl;
   }
-  Random_generator(unsigned int seed) { CGAL::get_default_random() = Random(seed); }
+  Random_generator(unsigned int seed) { CGAL::get_default_random() = Random(seed);
+      std::cout << "seed=" << seed << " - CGAL::get_default_random: " << &(CGAL::get_default_random()) << std::endl; }
   Random_generator(Random_generator& other) = delete;
   Random_generator(Random_generator&& other) = delete;
   Random_generator& operator=(const Random_generator& other) = delete;
