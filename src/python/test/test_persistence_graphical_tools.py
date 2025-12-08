@@ -233,3 +233,29 @@ def _empty_input_diagram(function):
 def test_empty_input_diagram():
     for function in [gd.plot_persistence_barcode, gd.plot_persistence_diagram]:
         _empty_input_diagram(function)
+
+
+def _shuffled_diagram(function):
+    diags = [
+        [
+            (1, (11.0, 12.0)),
+            (0, (6.0, 7.0)),
+            (2, (0.0, 5.0)),
+            (1, (0.0, 6.0)),
+            (2, (0.0, float("inf"))),
+        ],
+        [
+            (3, (11.0, 12.0)),
+            (1, (6.0, 7.0)),
+            (2, (0.0, 5.0)),
+            (1, (0.0, 6.0)),
+            (3, (0.0, float("inf"))),
+        ],
+    ]
+    for diag in diags:
+        ax = function(diag)
+
+
+def test_shuffled_input_diagram():
+    for function in [gd.plot_persistence_barcode, gd.plot_persistence_diagram]:
+        _shuffled_diagram(function)
