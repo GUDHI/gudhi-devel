@@ -17,6 +17,7 @@ __license__ = "MIT"
 
 import numpy as np
 from numpy.typing import ArrayLike
+import warnings
 
 from gudhi import _simplex_tree_ext as t
 
@@ -417,5 +418,10 @@ class SimplexTree(t._Simplex_tree_python_interface):
         """
         if nb_iterations < 1:
             return
+        if self.dimension() > 1:
+            message = "collapse_edges() ignores all the simplices of dimension 2 or more in this complex."
+            # Always print this specific warning
+            warnings.filterwarnings("always", category=RuntimeWarning, message=message)
+            warnings.warn(message, RuntimeWarning)
         super()._collapse_edges(nb_iterations)
         return self

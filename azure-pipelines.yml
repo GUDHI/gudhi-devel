@@ -12,8 +12,18 @@ jobs:
       # On this VM, 2 versions of python are installed. Default Python_FIND_FRAMEWORK is FIRST, which means asks frameworks first
       # LAST means consult frameworks in last resort, use the PATH first
       extraCmakeOptions: -DPython_FIND_FRAMEWORK=LAST
+      # To cache scikit_learn_data - no need to always download it and fails sometimes
+      SCIKIT_LEARN_DATA: $(Agent.BuildDirectory)/scikit_learn_data
 
     steps:
+      - task: Cache@2
+        inputs:
+          key: 'scikit-learn-data | "$(Agent.OS)"'
+          restoreKeys: |
+            scikit-learn-data | "$(Agent.OS)"
+          path: |
+            $(Agent.BuildDirectory)/scikit_learn_data
+        displayName: "Cache scikit-learn data"
       - checkout: self
         submodules: true
       # Use a specific Python version
@@ -56,13 +66,22 @@ jobs:
       pythonVersion: "3.9"
       cmakeBuildType: Release
       cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
-      # WITH_GUDHI_PYTHON=OFF on purpose. It is built and installed via pip
-      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=ON -DWITH_GUDHI_PYTHON=ON -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
+      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_REMOTE_TEST=ON -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
       # On this VM, 2 versions of python are installed. Default Python_FIND_REGISTRY is FIRST, which means asks registry first
       # LAST means consult registry in last resort, use the standard libraries or headers first
       extraCmakeOptions: -DPython_FIND_REGISTRY=LAST
+      # To cache scikit_learn_data - no need to always download it and fails sometimes
+      SCIKIT_LEARN_DATA: $(Agent.BuildDirectory)/scikit_learn_data
 
     steps:
+      - task: Cache@2
+        inputs:
+          key: 'scikit-learn-data | "$(Agent.OS)"'
+          restoreKeys: |
+            scikit-learn-data | "$(Agent.OS)"
+          path: |
+            $(Agent.BuildDirectory)/scikit_learn_data
+        displayName: "Cache scikit-learn data"
       - checkout: self
         submodules: true
       # Use a specific Python version
