@@ -87,7 +87,40 @@ class Vineyard(t.Vineyard_interface):
 
         return np.swapaxes(vineyard[dim], 0, 1)
 
-    def plot_vineyards(self, dim: int = None, max_dim: int = None):
+    def _gray_on_diagonal(self, ax, x, y, z):
+        gray = (0.75, 0.75, 0.75)
+        mask = np.concatenate(([0], np.asarray(x == y), [0]))
+        diff = np.diff(mask)
+        starts = np.where(diff == 1)[0]
+        ends = np.where(diff == -1)[0]
+        for s, e in zip(starts, ends):
+            ax.plot3D(x[s:e], y[s:e], z[s:e], c=gray)
+
+    def _plot_vines(
+        self, ax, vines, inf_v, min_bar_length, gray_diagonal, c=None, c_step=None
+    ):
+        for i in range(vines.shape[0]):
+            x = vines[i, :, 0]
+            y = vines[i, :, 1]
+            y[y >= np.inf] = inf_v
+            x[x >= np.inf] = inf_v
+            z = np.asarray(range(vines.shape[1]))
+            diff = y - x
+            diff[diff < min_bar_length] = 0
+            if np.any(diff):
+                ax.plot3D(x, y, z, c=c)
+                if gray_diagonal:
+                    self._gray_on_diagonal(ax, x, y, z)
+                if c_step is not None:
+                    c = c - c_step
+
+    def plot_vineyards(
+        self,
+        dim: int = None,
+        max_dim: int = None,
+        min_bar_length: np.number = -1,
+        gray_diagonal: bool = True,
+    ):
         fig = plt.figure()
         ax = fig.add_subplot(projection="3d")
 
@@ -101,32 +134,21 @@ class Vineyard(t.Vineyard_interface):
                     for vines in vineyard
                 ]
             )
+            # arbitrary, just to distance them a bit from the finite bars
+            inf_v = max_death + 10
 
             for d, vines in enumerate(vineyard):
-                c = np.random.rand(3)  # very naive and non robust way to manage colors...
-                num_vines = vines.shape[0]
-                step = np.min(c / num_vines)
-                for i in range(num_vines):
-                    x = vines[i, :, 0]
-                    y = vines[i, :, 1]
-                    # arbitrary, just to distance them a bit from the finite bars
-                    y[y >= np.inf] = max_death + 10
-                    z = np.asarray(range(vines.shape[1]))
-                    if np.any(y - x):
-                        ax.plot3D(x, y, z, c=c)
-                        c = c - step
+                # very naive and non robust way to manage colors...
+                c = np.random.rand(3)
+                step = np.min(c / vines.shape[1])
+                self._plot_vines(ax, vines, inf_v, min_bar_length, gray_diagonal, c, step)
         else:
             vines = self.get_current_vineyard_view(dim=dim)
             max_death = np.max(vines[:, :, 1], where=~np.isinf(vines[:, :, 1]), initial=-1)
+            # arbitrary, just to distance them a bit from the finite bars
+            inf_v = max_death + 10
 
-            for i in range(vines.shape[0]):
-                x = vines[i, :, 0]
-                y = vines[i, :, 1]
-                # arbitrary, just to distance them a bit from the finite bars
-                y[y >= np.inf] = max_death * 10
-                z = np.asarray(range(vines.shape[1]))
-                if np.any(y - x):
-                    ax.plot3D(x, y, z)
+            self._plot_vines(ax, vines, inf_v, min_bar_length, gray_diagonal)
 
         plt.show()
         return
@@ -164,7 +186,9 @@ class PointCloudRipsVineyard:
         path_prefix = path[: -len("0" + path_suffix)]
 
         if number_of_updates is None:
-            number_of_updates = len(glob.glob(path_prefix + "*" + path_suffix)) - first_index - 1
+            number_of_updates = (
+                len(glob.glob(path_prefix + "*" + path_suffix)) - first_index - 1
+            )
 
         res.initialize(
             path=path_prefix + str(first_index) + path_suffix,
@@ -317,7 +341,7 @@ class PointCloudRipsVineyard:
 
     def get_1D_representative_cycles(
         self, step: int = None
-    ) -> list[list[np.ndarray]] | list[np.ndarray]:
+    ) -> list[tuple[list[np.ndarray], np.number]] | tuple[list[np.ndarray], np.number]:
         if not self._store_cycles:
             raise NotImplementedError(
                 "Cycles cannot be retrieved if the store options is at False."
@@ -327,13 +351,25 @@ class PointCloudRipsVineyard:
             return self._cycles
         return self._cycles[step]
 
-    def plot_vineyards(self, dim: int = None, max_dim: int = None):
-        self._vineyard.plot_vineyards(dim, max_dim)
+    def plot_vineyards(
+        self, dim: int = None, max_dim: int = None, min_bar_length: np.number = -1
+    ):
+        self._vineyard.plot_vineyards(dim, max_dim, min_bar_length)
 
-    def plot_1D_representative_cycles(self, step: int):
+    def _plot_cycle(self, axes, cycle, points, cpx):
+        c = np.random.rand(3)
+        for u, v in [(points[cpx[idx][0]], points[cpx[idx][1]]) for idx in cycle]:
+            if points.shape[1] == 2:
+                axes.plot([u[0], v[0]], [u[1], v[1]], color=c)
+            else:
+                axes.plot([u[0], v[0]], [u[1], v[1]], [u[2], v[2]], color=c)
+
+    def plot_1D_representative_cycles(
+        self, step: int, index: int = None, min_bar_length: np.number = -1
+    ):
         points = self.get_points(step)
         cycles = self.get_1D_representative_cycles(step)
-        cpx, dims = self.get_complex()
+        cpx, _ = self.get_complex()
 
         fig = plt.figure()
         if points.shape[1] == 2:
@@ -343,23 +379,24 @@ class PointCloudRipsVineyard:
         else:
             raise ValueError("Plotting only possible in 2D and 3D.")
 
-        for cycle in cycles:
-            # cycle should never be empty
-            assert cycle.shape[0] != 0
-            if dims[cycle[0]] == 1:
-                c = np.random.rand(3)
-                for u, v in [(points[cpx[idx][0]], points[cpx[idx][1]]) for idx in cycle]:
-                    if points.shape[1] == 2:
-                        axes.plot([u[0], v[0]], [u[1], v[1]], color=c)
-                    else:
-                        axes.plot([u[0], v[0]], [u[1], v[1]], [u[2], v[2]], color=c)
+        if index is None:
+            for cycle in cycles:
+                if cycle[1] >= min_bar_length:
+                    self._plot_cycle(axes, cycle[0], points, cpx)
+        else:
+            if min_bar_length != -1:
+                warnings.warn(
+                    "Specified argument `min_length` is ignored.",
+                    UserWarning,
+                )
+            self._plot_cycle(axes, cycles[index][0], points, cpx)
 
         x = points[:, 0]
         y = points[:, 1]
         if points.shape[1] == 2:
             axes.plot(x, y, linestyle="none", markersize=3, marker="o")
         else:
-            axes.plot(x, y, points[:,2], linestyle="none", markersize=3, marker="o")
+            axes.plot(x, y, points[:, 2], linestyle="none", markersize=3, marker="o")
 
         plt.show()
         return

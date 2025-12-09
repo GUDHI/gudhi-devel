@@ -9,6 +9,7 @@
  */
 
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>
@@ -54,6 +55,7 @@ class Vineyard_interface
   using value_type = double;
   using Index = Default_vineyard_options::Index;
   using Dimension = Default_vineyard_options::Dimension;
+  using VB = Vineyard_builder<value_type, Default_vineyard_options, true>;
 
   Vineyard_interface(bool storeRepCycles, Dimension repCyclesDim) : vineyard_(storeRepCycles, repCyclesDim) {}
 
@@ -123,13 +125,13 @@ class Vineyard_interface
   {
     nb::list ret;
     for (auto cycle : vineyard_.get_latest_representative_cycles()) {
-      ret.append(_wrap_as_numpy_array(std::move(cycle), cycle.size()));
+      ret.append(nb::make_tuple(_wrap_as_numpy_array(std::move(cycle.first), cycle.first.size()), cycle.second));
     }
     return ret;
   }
 
  private:
-  Vineyard_builder<value_type, Default_vineyard_options, true> vineyard_;
+  VB vineyard_;
 };
 
 template <class FilteredComplex>
@@ -159,7 +161,7 @@ NB_MODULE(_vineyard_ext, m)
   m.attr("__license__") = "MIT";
 
   nb::class_<gvyi>(m, "Vineyard_interface")
-      .def(nb::init<bool,typename gvyi::Dimension>())
+      .def(nb::init<bool, typename gvyi::Dimension>())
       .def("_initialize", &gvyi::initialize<double, int>)
       .def("_initialize", &gvyi::initialize<float, int>)
       // TODO: also for Cubical complex

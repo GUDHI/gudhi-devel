@@ -110,7 +110,8 @@ class Vineyard_builder
             {filtrationValues[bar.birth], bar.death == Base::Bar::inf ? Bar::inf : filtrationValues[bar.death]});
         if (_store_cycle(bar, filtrationValues)) {
           auto cycle = base_.get_current_representative_cycle(idx, true);
-          latest_representative_cycles_->emplace_back(cycle.begin(), cycle.end());
+          const auto& p = vineyard_[bar.dim].back();
+          latest_representative_cycles_->emplace_back(Cycle(cycle.begin(), cycle.end()), p[1] - p[0]);
         }
         ++idx;
       }
@@ -128,7 +129,8 @@ class Vineyard_builder
         ++numberOfBars_[bar.dim];
         if (_store_cycle(bar, filtrationValues)) {
           auto cycle = base_.get_current_representative_cycle(idx, true);
-          latest_representative_cycles_->emplace_back(cycle.begin(), cycle.end());
+          const auto& p = vineyard_.back().get_pairs().back();
+          latest_representative_cycles_->emplace_back(Cycle(cycle.begin(), cycle.end()), p[1] - p[0]);
         }
         ++idx;
       }
@@ -145,16 +147,16 @@ class Vineyard_builder
       latest_representative_cycles_->clear();
     }
     for (const auto& bar : barcode) {
+      T birth = filtrationValues[bar.birth];
+      T death = bar.death == Base::Bar::inf ? Bar::inf : filtrationValues[bar.death];
       if constexpr (flat) {
-        vineyard_[bar.dim].push_back(
-            {filtrationValues[bar.birth], bar.death == Base::Bar::inf ? Bar::inf : filtrationValues[bar.death]});
+        vineyard_[bar.dim].push_back({birth, death});
       } else {
-        vineyard_[idx].add_pair(filtrationValues[bar.birth],
-                                bar.death == Base::Bar::inf ? Bar::inf : filtrationValues[bar.death]);
+        vineyard_[idx].add_pair(birth, death);
       }
       if (_store_cycle(bar, filtrationValues)) {
         const auto& cycle = base_.get_current_representative_cycle(idx, true);
-        latest_representative_cycles_->emplace_back(cycle.begin(), cycle.end());
+        latest_representative_cycles_->emplace_back(Cycle(cycle.begin(), cycle.end()), death - birth);
       }
       ++idx;
     }
@@ -164,7 +166,7 @@ class Vineyard_builder
 
   const std::vector<Index>& get_number_of_vines_by_dimension() const { return numberOfBars_; }
 
-  const std::vector<Cycle>& get_latest_representative_cycles()
+  const std::vector<std::pair<Cycle, T> >& get_latest_representative_cycles()
   {
     if (latest_representative_cycles_) return *latest_representative_cycles_;
     throw std::invalid_argument("Representative cycles were not stored.");
@@ -175,7 +177,7 @@ class Vineyard_builder
   Vineyard vineyard_;
   std::vector<Index> numberOfBars_;
   std::optional<Dimension> repCyclesDim_;
-  std::optional<std::vector<Cycle> > latest_representative_cycles_;
+  std::optional<std::vector<std::pair<Cycle, T> > > latest_representative_cycles_;
 
   template <class Filtration_range>
   bool _store_cycle(const typename Base::Bar& bar, const Filtration_range& filtrationValues) const
