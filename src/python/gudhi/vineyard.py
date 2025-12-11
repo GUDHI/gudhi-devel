@@ -23,6 +23,71 @@ from gudhi.rips_complex import RipsComplex
 from gudhi.reader_utils import read_lower_triangular_matrix_from_csv_file
 
 
+# for debug only
+def _verify_validity(
+    vineyard: list[np.ndarray],
+    path_prefix: str,
+    path_suffix: str = ".txt",
+    first_index: int = 0,
+    delimiter: str = None,
+    number_of_updates: int = None,
+) -> bool:
+    # assumes counting starts with 0
+    # will fail with "file not found" if not
+    path = os.path.realpath(path_prefix + "0" + path_suffix, strict=True)
+    path_prefix = path[: -len("0" + path_suffix)]
+
+    if number_of_updates is None:
+        number_of_updates = len(glob.glob(path_prefix + "*" + path_suffix)) - first_index - 1
+
+    if len(vineyard) == 0:
+        print("Empty vineyard. There should be at least one connected component.")
+        return False
+
+    if vineyard[0].shape[1] != number_of_updates + 1:
+        print(
+            "Number of updates does not correspond.",
+            vineyard[0].shape[1],
+            number_of_updates + 1,
+        )
+        return False
+
+    print("Comparing step:", end=" ")
+    for step in range(0, number_of_updates + 1):
+        print(step, end=" ")
+        points = np.loadtxt(
+            path_prefix + str(step + first_index) + path_suffix, delimiter=delimiter
+        )
+        st = RipsComplex(points=points).create_simplex_tree(max_dimension=2)
+        pers = st.persistence(homology_coeff_field=2, min_persistence=-1)
+        pers = [bar[1] for bar in pers if bar[0] == 1]
+        if len(vineyard) == 1 and len(pers) != 0:
+            print("\nNo 1-dimensional bars in vineyard while there should be some.", pers)
+            return False
+        v_pers = [(b, d) for b, d in vineyard[1][:, step, :]]
+        if len(pers) != len(v_pers):
+            print(
+                "\nThere are not as many bars in the vineyard then there should be.",
+                len(v_pers),
+                len(pers),
+            )
+            return False
+        pers.sort()
+        v_pers.sort()
+        if pers != v_pers:
+            pers = np.asarray(pers)
+            v_pers = np.asarray(v_pers)
+            mask = ~(pers == v_pers)
+            mask = np.any(mask, axis=1)
+            print()
+            print(pers[mask])
+            print(v_pers[mask])
+            return False
+
+    print("\nBarcodes are valid.")
+    return True
+
+
 class Vineyard(t.Vineyard_interface):
     # TODO: representative cycles
 
@@ -140,7 +205,7 @@ class Vineyard(t.Vineyard_interface):
             for d, vines in enumerate(vineyard):
                 # very naive and non robust way to manage colors...
                 c = np.random.rand(3)
-                step = np.min(c / vines.shape[1])
+                step = np.min(c / (vines.shape[1] + 1))
                 self._plot_vines(ax, vines, inf_v, min_bar_length, gray_diagonal, c, step)
         else:
             vines = self.get_current_vineyard_view(dim=dim)
@@ -197,7 +262,7 @@ class PointCloudRipsVineyard:
             data_type=file_type,
         )
 
-        for step in range(first_index + 1, number_of_updates + 1):
+        for step in range(first_index + 1, first_index + number_of_updates + 1):
             res.update(
                 path=path_prefix + str(step) + path_suffix,
                 delimiter=delimiter,

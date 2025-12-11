@@ -168,8 +168,12 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
     }
   };
 
+  Index nullValue = Master_matrix::template get_null_value<Index>();
+
   if (birthToCycle_.size() <= bar.birth) {
-    birthToCycle_.resize(bar.birth + 1, Master_matrix::template get_null_value<Index>());
+    birthToCycle_.resize(bar.birth + 1, nullValue);
+  }
+  if (birthToCycle_[bar.birth] == nullValue) {
     birthToCycle_[bar.birth] = representativeCycles_.size();
     representativeCycles_.resize(representativeCycles_.size() + 1);
   }

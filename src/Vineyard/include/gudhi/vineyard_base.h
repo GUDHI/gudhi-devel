@@ -40,7 +40,10 @@ struct Vineyard_matrix_options : Gudhi::persistence_matrix::Default_options<colu
   using Dimension = D;
   using Index = I;
 
-  static const bool is_of_boundary_type = true;  // TODO: benchmark the other one too
+  // static const bool is_of_boundary_type = true;  // TODO: benchmark the other one too
+  static const bool is_of_boundary_type = false;  // TODO: benchmark the other one too
+  static const Gudhi::persistence_matrix::Column_indexation_types column_indexation_type =
+      Gudhi::persistence_matrix::Column_indexation_types::POSITION;
   static const bool has_column_pairings = true;
   static const bool has_vine_update = true;
   static const bool can_retrieve_representative_cycles = true;
@@ -106,7 +109,7 @@ class Vineyard_base
 
     if constexpr (!Matrix_options::is_of_boundary_type) {
       idToPos_.emplace();
-      idToPos_->reserve(order_->size());
+      idToPos_->reserve(order_.size());
     }
 
     std::iota(order_.begin(), order_.end(), 0);
