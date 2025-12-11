@@ -18,7 +18,11 @@
 #ifndef PM_RU_REP_CYCLES_H
 #define PM_RU_REP_CYCLES_H
 
+#include <utility>    //std::move
+#include <algorithm>  //std::sort
 #include <vector>
+
+#include <gudhi/persistence_matrix_options.h>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -36,7 +40,6 @@ struct Dummy_ru_representative_cycles {
   {}
 };
 
-// TODO: add coefficients ? Only Z2 token into account for now.
 /**
  * @class RU_representative_cycles ru_rep_cycles.h gudhi/Persistence_matrix/ru_rep_cycles.h
  * @ingroup persistence_matrix
@@ -94,34 +97,45 @@ class RU_representative_cycles
 
  private:
   using Master_RU_matrix = typename Master_matrix::Master_RU_matrix;
+  using Inverse_column = Cycle;
+  using Content_range = typename Master_matrix::Column::Content_range;
 
   std::vector<Cycle> representativeCycles_; /**< Cycle container. */
   std::vector<Index> birthToCycle_;         /**< Map from birth index to cycle index. */
 
   constexpr Master_RU_matrix* _matrix() { return static_cast<Master_RU_matrix*>(this); }
-
   constexpr const Master_RU_matrix* _matrix() const { return static_cast<const Master_RU_matrix*>(this); }
+
+  void _retrieve_cycle_from_r(Index colIdx, Index repIdx);
+  void _retrieve_cycle_from_u(Index colIdx, Index repIdx);
+  Inverse_column _get_inverse(Index c);
 };
 
 template <class Master_matrix>
 inline void RU_representative_cycles<Master_matrix>::update_representative_cycles()
 {
+  auto nberColumns = _matrix()->reducedMatrixR_.get_number_of_columns();
+  Index nullValue = Master_matrix::template get_null_value<Index>();
+  representativeCycles_.clear();
   birthToCycle_.clear();
-  birthToCycle_.resize(_matrix()->reducedMatrixR_.get_number_of_columns(), -1);
+  birthToCycle_.resize(nberColumns, nullValue);
+
   Index c = 0;
-  for (Index i = 0; i < _matrix()->reducedMatrixR_.get_number_of_columns(); i++) {
+  for (Index i = 0; i < nberColumns; i++) {
     if (_matrix()->reducedMatrixR_.is_zero_column(i)) {
       birthToCycle_[i] = c;
       ++c;
     }
   }
-  representativeCycles_.clear();
+
   representativeCycles_.resize(c);
-  for (Index i = 0; i < _matrix()->mirrorMatrixU_.get_number_of_columns(); i++) {
-    for (const auto& entry : _matrix()->mirrorMatrixU_.get_column(i)) {
-      auto idx = birthToCycle_[entry.get_row_index()];
-      if (idx != Master_matrix::template get_null_value<Index>()) {
-        representativeCycles_[idx].push_back(i);
+  for (Index i = 0; i < nberColumns; ++i) {
+    if (birthToCycle_[i] != nullValue) {
+      Index colIdx = _matrix()->_get_column_with_pivot(i);
+      if (colIdx == nullValue) {
+        _retrieve_cycle_from_u(i, birthToCycle_[i]);
+      } else {
+        _retrieve_cycle_from_r(colIdx, birthToCycle_[i]);
       }
     }
   }
@@ -141,6 +155,105 @@ RU_representative_cycles<Master_matrix>::get_representative_cycle(const Bar& bar
 {
   if (representativeCycles_.empty()) update_representative_cycles();
   return representativeCycles_[birthToCycle_[bar.birth]];
+}
+
+template <class Master_matrix>
+inline void RU_representative_cycles<Master_matrix>::_retrieve_cycle_from_r(Index colIdx, Index repIdx)
+{
+  auto& col = _matrix()->reducedMatrixR_.get_column(colIdx);
+  representativeCycles_[repIdx] = Master_matrix::build_cycle_from_range(col.get_non_zero_content_range());
+}
+
+template <class Master_matrix>
+inline void RU_representative_cycles<Master_matrix>::_retrieve_cycle_from_u(Index colIdx, Index repIdx)
+{
+  // TODO: if rep_cycles true but not vineyards, this could be avoided by directly computing V instead of U
+  representativeCycles_[repIdx] = _get_inverse(colIdx);
+}
+
+template <class Master_matrix>
+inline typename RU_representative_cycles<Master_matrix>::Inverse_column
+RU_representative_cycles<Master_matrix>::_get_inverse(Index c)
+{
+  using E = typename Master_matrix::Element;
+  auto& matrix = _matrix()->mirrorMatrixU_;
+  auto size = matrix.get_number_of_columns();
+  [[maybe_unused]] const auto& op = _matrix()->operators_;
+  Inverse_column res;
+
+  auto _last_diagonal_value = [&]() -> E {
+    auto& col = matrix.get_column(size - 1);
+    if (col.is_empty()) return 0;  // happens only if the user multiplied by 0 a column in R
+    // if column not empty, pivot has to be on the diagonal
+    if constexpr (Master_matrix::Option_list::is_z2) {
+      return 1;
+    } else {
+      return op->get_inverse(matrix.get_column(size - 1).get_pivot_value());
+    }
+  };
+
+  auto _push_cell = [&](auto i, E e) -> void {
+    if constexpr (Master_matrix::Option_list::is_z2) {
+      if (e) res.push_back(i);
+    } else {
+      if (e != op->get_additive_identity()) res.push_back({i, e});
+    }
+  };
+
+  auto _substract = [&](E& e, auto resIt, const auto& cell) -> void {
+    if (resIt != res.rend() && Master_matrix::get_row_index(*resIt) == cell.get_row_index()) {
+      if constexpr (Master_matrix::Option_list::is_z2) {
+        e = !e;
+      } else {
+        op->subtract_inplace_front(e, cell.get_element() * Master_matrix::get_element(*resIt));
+      }
+    }
+  };
+
+  auto _multiply = [&](E& e, E m) -> void {
+    if constexpr (Master_matrix::Option_list::is_z2) {
+      e = m && e;  // just in case, but m is only possibly 0 if the user multiplied by 0 a column in R
+    } else {
+      op->multiply_inplace(e, op->get_inverse(m));
+    }
+  };
+
+  auto _translate = [&](std::size_t i) -> void {
+    const auto& map = _matrix()->positionToID_;
+    auto& idx = Master_matrix::get_row_index(res[i]);
+    auto it = map.find(idx);
+    if (it != map.end()) idx = it->second;
+  };
+
+  if (c == size - 1) _push_cell(size - 1, _last_diagonal_value());
+  for (int i = size - 2; i >= 0; --i) {
+    E e = static_cast<int>(c) == i;
+    auto& line = matrix.get_column(i);
+    Content_range r = line.get_non_zero_content_range();
+    auto resIt = res.rbegin();
+    auto lineIt = r.begin();
+    E diag(0);
+    if (static_cast<int>(lineIt->get_row_index()) == i) {
+      diag = lineIt->get_element();
+      ++lineIt;
+    }
+    while (lineIt != r.end() && resIt != res.rend()) {
+      while (resIt != res.rend() && Master_matrix::get_row_index(*resIt) < lineIt->get_row_index()) ++resIt;
+      _substract(e, resIt, *lineIt);
+      ++lineIt;
+    }
+    _multiply(e, diag);
+    _push_cell(i, e);
+  }
+
+  // reverse order + PosIdx to IDIdx translation
+  for (std::size_t incr = 0, decr = res.size() - 1; incr < decr; ++incr, --decr) {
+    _translate(incr);
+    _translate(decr);
+    std::swap(res[incr], res[decr]);
+  }
+
+  return res;
 }
 
 template <class Master_matrix>

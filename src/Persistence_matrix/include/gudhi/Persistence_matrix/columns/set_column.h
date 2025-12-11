@@ -25,6 +25,7 @@
 #include <utility>  //std::swap, std::move & std::exchange
 
 #include <boost/iterator/indirect_iterator.hpp>
+#include <boost/range/iterator_range_core.hpp>
 
 #include <gudhi/Persistence_matrix/allocators/entry_constructors.h>
 #include <gudhi/Persistence_matrix/columns/column_utilities.h>
@@ -72,6 +73,7 @@ class Set_column : public Master_matrix::Row_access_option,
   using const_iterator = boost::indirect_iterator<typename Column_support::const_iterator>;
   using reverse_iterator = boost::indirect_iterator<typename Column_support::reverse_iterator>;
   using const_reverse_iterator = boost::indirect_iterator<typename Column_support::const_reverse_iterator>;
+  using Content_range = boost::iterator_range<const_iterator>;
 
   Set_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -81,11 +83,29 @@ class Set_column : public Master_matrix::Row_access_option,
              const Container& nonZeroRowIndices,
              Row_container* rowContainer,
              Column_settings* colSettings);
-  template <class Container = typename Master_matrix::Boundary>
+  template <class Container = typename Master_matrix::Boundary,
+            class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   Set_column(const Container& nonZeroRowIndices, Dimension dimension, Column_settings* colSettings);
-  template <class Container = typename Master_matrix::Boundary, class Row_container>
+  template <class Container = typename Master_matrix::Boundary,
+            class Row_container,
+            class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   Set_column(Index columnIndex,
              const Container& nonZeroRowIndices,
+             Dimension dimension,
+             Row_container* rowContainer,
+             Column_settings* colSettings);
+  Set_column(ID_index idx, Dimension dimension, Column_settings* colSettings);
+  Set_column(ID_index idx, Field_element e, Dimension dimension, Column_settings* colSettings);
+  template <class Row_container>
+  Set_column(Index columnIndex,
+             ID_index idx,
+             Dimension dimension,
+             Row_container* rowContainer,
+             Column_settings* colSettings);
+  template <class Row_container>
+  Set_column(Index columnIndex,
+             ID_index idx,
+             Field_element e,
              Dimension dimension,
              Row_container* rowContainer,
              Column_settings* colSettings);
@@ -121,11 +141,13 @@ class Set_column : public Master_matrix::Row_access_option,
   reverse_iterator rend() noexcept;
   const_reverse_iterator rend() const noexcept;
 
+  Content_range get_non_zero_content_range() const;
+
   template <class Entry_range>
   Set_column& operator+=(const Entry_range& column);
   Set_column& operator+=(Set_column& column);
 
-  Set_column& operator*=(unsigned int v);
+  Set_column& operator*=(const Field_element& v);
 
   // this = v * this + column
   template <class Entry_range>
@@ -141,38 +163,32 @@ class Set_column : public Master_matrix::Row_access_option,
   friend bool operator==(const Set_column& c1, const Set_column& c2)
   {
     if (&c1 == &c2) return true;
-
-    auto it1 = c1.column_.begin();
-    auto it2 = c2.column_.begin();
     if (c1.column_.size() != c2.column_.size()) return false;
-    while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
-      if constexpr (Master_matrix::Option_list::is_z2) {
-        if ((*it1)->get_row_index() != (*it2)->get_row_index()) return false;
-      } else {
-        if ((*it1)->get_row_index() != (*it2)->get_row_index() || (*it1)->get_element() != (*it2)->get_element())
-          return false;
-      }
-      ++it1;
-      ++it2;
-    }
-    return true;
+
+    return std::equal(c1.column_.begin(),
+                      c1.column_.end(),
+                      c2.column_.begin(),
+                      c2.column_.end(),
+                      [](const Entry* e1, const Entry* e2) {
+                        return e1->get_row_index() == e2->get_row_index() && e1->get_element() == e2->get_element();
+                      });
   }
 
   friend bool operator<(const Set_column& c1, const Set_column& c2)
   {
     if (&c1 == &c2) return false;
 
-    auto it1 = c1.column_.begin();
-    auto it2 = c2.column_.begin();
-    while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
-      if ((*it1)->get_row_index() != (*it2)->get_row_index()) return (*it1)->get_row_index() < (*it2)->get_row_index();
-      if constexpr (!Master_matrix::Option_list::is_z2) {
-        if ((*it1)->get_element() != (*it2)->get_element()) return (*it1)->get_element() < (*it2)->get_element();
-      }
-      ++it1;
-      ++it2;
-    }
-    return it2 != c2.column_.end();
+    return std::lexicographical_compare(c1.column_.begin(),
+                                        c1.column_.end(),
+                                        c2.column_.begin(),
+                                        c2.column_.end(),
+                                        [](const Entry* e1, const Entry* e2) {
+                                          if (e1->get_row_index() != e2->get_row_index())
+                                            return e1->get_row_index() < e2->get_row_index();
+                                          if (e1->get_element() != e2->get_element())
+                                            return e1->get_element() < e2->get_element();
+                                          return false;
+                                        });
   }
 
   // Disabled with row access.
@@ -198,7 +214,7 @@ class Set_column : public Master_matrix::Row_access_option,
   using Chain_opt = typename Master_matrix::Chain_column_option;
 
   Column_support column_;
-  Field_operators* operators_;
+  Field_operators const* operators_;
   Entry_constructor* entryPool_;
 
   template <class Column, class Entry_iterator, typename F1, typename F2, typename F3, typename F4>
@@ -230,10 +246,9 @@ class Set_column : public Master_matrix::Row_access_option,
                                                  Column& targetColumn);
 
   void _delete_entry(typename Column_support::iterator& it);
-  Entry* _insert_entry(const Field_element& value,
+  Entry* _insert_entry(const typename Column_support::iterator& position,
                        ID_index rowIndex,
-                       const typename Column_support::iterator& position);
-  void _insert_entry(ID_index rowIndex, const typename Column_support::iterator& position);
+                       const Field_element& value);
   template <class Entry_range>
   bool _add(const Entry_range& column);
   template <class Entry_range>
@@ -247,38 +262,17 @@ inline Set_column<Master_matrix>::Set_column(Column_settings* colSettings)
     : RA_opt(),
       Dim_opt(),
       Chain_opt(),
-      operators_(nullptr),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor))
-{
-  if (operators_ == nullptr && entryPool_ == nullptr)
-    return;  // to allow default constructor which gives a dummy column
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-}
+{}
 
 template <class Master_matrix>
 template <class Container>
 inline Set_column<Master_matrix>::Set_column(const Container& nonZeroRowIndices, Column_settings* colSettings)
-    : RA_opt(),
-      Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
-      Chain_opt(),
-      operators_(nullptr),
-      entryPool_(&(colSettings->entryConstructor))
+    : Set_column(nonZeroRowIndices, nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1, colSettings)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
-
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _insert_entry(id, column_.end());
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      _insert_entry(operators_->get_value(p.second), p.first, column_.end());
-    }
-  }
 }
 
 template <class Master_matrix>
@@ -287,72 +281,38 @@ inline Set_column<Master_matrix>::Set_column(Index columnIndex,
                                              const Container& nonZeroRowIndices,
                                              Row_container* rowContainer,
                                              Column_settings* colSettings)
-    : RA_opt(columnIndex, rowContainer),
-      Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
-      Chain_opt([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
-        } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
-        }
-      }()),
-      operators_(nullptr),
-      entryPool_(&(colSettings->entryConstructor))
+    : Set_column(columnIndex,
+                 nonZeroRowIndices,
+                 nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1,
+                 rowContainer,
+                 colSettings)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
-
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _insert_entry(id, column_.end());
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      _insert_entry(operators_->get_value(p.second), p.first, column_.end());
-    }
-  }
 }
 
 template <class Master_matrix>
-template <class Container>
+template <class Container, class>
 inline Set_column<Master_matrix>::Set_column(const Container& nonZeroRowIndices,
                                              Dimension dimension,
                                              Column_settings* colSettings)
     : RA_opt(),
       Dim_opt(dimension),
-      Chain_opt([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
-        } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
-        }
-      }()),
-      operators_(nullptr),
+      Chain_opt(nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                    ? Master_matrix::template get_null_value<ID_index>()
+                    : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor))
 {
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _insert_entry(id, column_.end());
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      _insert_entry(operators_->get_value(p.second), p.first, column_.end());
-    }
+  for (const auto& id : nonZeroRowIndices) {
+    _insert_entry(column_.end(),
+                  Master_matrix::get_row_index(id),
+                  Master_matrix::get_coefficient_value(Master_matrix::get_element(id), operators_));
   }
 }
 
 template <class Master_matrix>
-template <class Container, class Row_container>
+template <class Container, class Row_container, class>
 inline Set_column<Master_matrix>::Set_column(Index columnIndex,
                                              const Container& nonZeroRowIndices,
                                              Dimension dimension,
@@ -360,30 +320,79 @@ inline Set_column<Master_matrix>::Set_column(Index columnIndex,
                                              Column_settings* colSettings)
     : RA_opt(columnIndex, rowContainer),
       Dim_opt(dimension),
-      Chain_opt([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
-        } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
-        }
-      }()),
+      Chain_opt(nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                    ? Master_matrix::template get_null_value<ID_index>()
+                    : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  for (const auto& id : nonZeroRowIndices) {
+    _insert_entry(column_.end(),
+                  Master_matrix::get_row_index(id),
+                  Master_matrix::get_coefficient_value(Master_matrix::get_element(id), operators_));
+  }
+}
+
+template <class Master_matrix>
+inline Set_column<Master_matrix>::Set_column(ID_index idx, Dimension dimension, Column_settings* colSettings)
+    : RA_opt(), Dim_opt(dimension), Chain_opt(idx), operators_(nullptr), entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp != Z2. Please specify the coefficient.");
+  _insert_entry(column_.end(), idx, 1);
+}
+
+template <class Master_matrix>
+inline Set_column<Master_matrix>::Set_column(ID_index idx,
+                                             Field_element e,
+                                             Dimension dimension,
+                                             Column_settings* colSettings)
+    : RA_opt(),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      operators_(&(colSettings->operators)),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(!Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
+  _insert_entry(column_.end(), idx, operators_->get_value(e));
+}
+
+template <class Master_matrix>
+template <class Row_container>
+inline Set_column<Master_matrix>::Set_column(Index columnIndex,
+                                             ID_index idx,
+                                             Dimension dimension,
+                                             Row_container* rowContainer,
+                                             Column_settings* colSettings)
+    : RA_opt(columnIndex, rowContainer),
+      Dim_opt(dimension),
+      Chain_opt(idx),
       operators_(nullptr),
       entryPool_(&(colSettings->entryConstructor))
 {
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _insert_entry(id, column_.end());
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      _insert_entry(operators_->get_value(p.second), p.first, column_.end());
-    }
-  }
+  static_assert(Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp != Z2. Please specify the coefficient.");
+  _insert_entry(column_.end(), idx, 1);
+}
+
+template <class Master_matrix>
+template <class Row_container>
+inline Set_column<Master_matrix>::Set_column(Index columnIndex,
+                                             ID_index idx,
+                                             Field_element e,
+                                             Dimension dimension,
+                                             Row_container* rowContainer,
+                                             Column_settings* colSettings)
+    : RA_opt(columnIndex, rowContainer),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      operators_(&(colSettings->operators)),
+      entryPool_(&(colSettings->entryConstructor))
+{
+  static_assert(!Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
+  _insert_entry(column_.end(), idx, operators_->get_value(e));
 }
 
 template <class Master_matrix>
@@ -391,23 +400,15 @@ inline Set_column<Master_matrix>::Set_column(const Set_column& column, Column_se
     : RA_opt(),
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
-      operators_(colSettings == nullptr ? column.operators_ : nullptr),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
   static_assert(!Master_matrix::Option_list::has_row_access,
                 "Simple copy constructor not available when row access option enabled. Please specify the new column "
                 "index and the row container.");
 
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    if (colSettings != nullptr) operators_ = &(colSettings->operators);
-  }
-
   for (const Entry* entry : column.column_) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _insert_entry(entry->get_row_index(), column_.end());
-    } else {
-      _insert_entry(entry->get_element(), entry->get_row_index(), column_.end());
-    }
+    _insert_entry(column_.end(), entry->get_row_index(), entry->get_element());
   }
 }
 
@@ -420,19 +421,11 @@ inline Set_column<Master_matrix>::Set_column(const Set_column& column,
     : RA_opt(columnIndex, rowContainer),
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
-      operators_(colSettings == nullptr ? column.operators_ : nullptr),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor))
 {
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    if (colSettings != nullptr) operators_ = &(colSettings->operators);
-  }
-
   for (const Entry* entry : column.column_) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _insert_entry(entry->get_row_index(), column_.end());
-    } else {
-      _insert_entry(entry->get_element(), entry->get_row_index(), column_.end());
-    }
+    _insert_entry(column_.end(), entry->get_row_index(), entry->get_element());
   }
 }
 
@@ -468,11 +461,7 @@ inline std::vector<typename Set_column<Master_matrix>::Field_element> Set_column
   std::vector<Field_element> container(columnLength, 0);
   for (auto it = column_.begin(); it != column_.end() && (*it)->get_row_index() < static_cast<ID_index>(columnLength);
        ++it) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      container[(*it)->get_row_index()] = 1;
-    } else {
-      container[(*it)->get_row_index()] = (*it)->get_element();
-    }
+    container[(*it)->get_row_index()] = Master_matrix::get_element(**it);
   }
   return container;
 }
@@ -640,6 +629,12 @@ inline typename Set_column<Master_matrix>::const_reverse_iterator Set_column<Mas
 }
 
 template <class Master_matrix>
+inline typename Set_column<Master_matrix>::Content_range Set_column<Master_matrix>::get_non_zero_content_range() const
+{
+  return Content_range(column_.begin(), column_.end());
+}
+
+template <class Master_matrix>
 template <class Entry_range>
 inline Set_column<Master_matrix>& Set_column<Master_matrix>::operator+=(const Entry_range& column)
 {
@@ -671,30 +666,24 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::operator+=(Set_colu
 }
 
 template <class Master_matrix>
-inline Set_column<Master_matrix>& Set_column<Master_matrix>::operator*=(unsigned int v)
+inline Set_column<Master_matrix>& Set_column<Master_matrix>::operator*=(const Field_element& v)
 {
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    if (v % 2 == 0) {
-      if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      } else {
-        clear();
-      }
+  Field_element val = Master_matrix::get_coefficient_value(v, operators_);
+
+  if (val == Field_operators::get_additive_identity()) {
+    if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
+      throw std::invalid_argument("A chain column should not be multiplied by 0.");
+    } else {
+      clear();
     }
-  } else {
-    Field_element val = operators_->get_value(v);
+    return *this;
+  }
 
-    if (val == Field_operators::get_additive_identity()) {
-      if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      } else {
-        clear();
-      }
-      return *this;
-    }
+  if (val == Field_operators::get_multiplicative_identity()) return *this;
 
-    if (val == Field_operators::get_multiplicative_identity()) return *this;
-
+  // multiply_inplace needs a non-const reference to element, so even if Z2 never reaches here, it won't compile
+  // without the constexpr, as we are not storing a dummy value just for this purpose.
+  if constexpr (!Master_matrix::Option_list::is_z2) {
     for (Entry* entry : column_) {
       operators_->multiply_inplace(entry->get_element(), val);
       if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(*entry);
@@ -715,16 +704,7 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::multiply_target_and
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    if (val) {
-      _add(column);
-    } else {
-      clear();
-      _add(column);
-    }
-  } else {
-    _multiply_target_and_add(val, column);
-  }
+  _multiply_target_and_add(Master_matrix::get_coefficient_value(val, operators_), column);
 
   return *this;
 }
@@ -735,32 +715,12 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::multiply_target_and
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        if (_add(column)) {
-          Chain_opt::_swap_pivots(column);
-          Dim_opt::_swap_dimension(column);
-        }
-      } else {
-        throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      }
-    } else {
-      if (_multiply_target_and_add(val, column)) {
-        Chain_opt::_swap_pivots(column);
-        Dim_opt::_swap_dimension(column);
-      }
+    if (_multiply_target_and_add(Master_matrix::get_coefficient_value(val, operators_), column)) {
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        _add(column);
-      } else {
-        clear();
-        _add(column);
-      }
-    } else {
-      _multiply_target_and_add(val, column);
-    }
+    _multiply_target_and_add(Master_matrix::get_coefficient_value(val, operators_), column);
   }
 
   return *this;
@@ -777,13 +737,7 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::multiply_source_and
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    if (val) {
-      _add(column);
-    }
-  } else {
-    _multiply_source_and_add(column, val);
-  }
+  _multiply_source_and_add(column, Master_matrix::get_coefficient_value(val, operators_));
 
   return *this;
 }
@@ -794,27 +748,12 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::multiply_source_and
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        if (_add(column)) {
-          Chain_opt::_swap_pivots(column);
-          Dim_opt::_swap_dimension(column);
-        }
-      }
-    } else {
-      if (_multiply_source_and_add(column, val)) {
-        Chain_opt::_swap_pivots(column);
-        Dim_opt::_swap_dimension(column);
-      }
+    if (_multiply_source_and_add(column, Master_matrix::get_coefficient_value(val, operators_))) {
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        _add(column);
-      }
-    } else {
-      _multiply_source_and_add(column, val);
-    }
+    _multiply_source_and_add(column, Master_matrix::get_coefficient_value(val, operators_));
   }
 
   return *this;
@@ -827,11 +766,7 @@ inline void Set_column<Master_matrix>::push_back(const Entry& entry)
 
   GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    _insert_entry(entry.get_row_index(), column_.end());
-  } else {
-    _insert_entry(entry.get_element(), entry.get_row_index(), column_.end());
-  }
+  _insert_entry(column_.end(), entry.get_row_index(), entry.get_element());
 }
 
 template <class Master_matrix>
@@ -854,11 +789,7 @@ inline Set_column<Master_matrix>& Set_column<Master_matrix>::operator=(const Set
   operators_ = other.operators_;
 
   for (const Entry* entry : other.column_) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _insert_entry(entry->get_row_index(), column_.end());
-    } else {
-      _insert_entry(entry->get_element(), entry->get_row_index(), column_.end());
-    }
+    _insert_entry(column_.end(), entry->get_row_index(), entry->get_element());
   }
 
   return *this;
@@ -896,36 +827,20 @@ inline void Set_column<Master_matrix>::_delete_entry(typename Column_support::it
 
 template <class Master_matrix>
 inline typename Set_column<Master_matrix>::Entry* Set_column<Master_matrix>::_insert_entry(
-    const Field_element& value,
+    const typename Column_support::iterator& position,
     ID_index rowIndex,
-    const typename Column_support::iterator& position)
+    const Field_element& value)
 {
+  Entry* newEntry;
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    newEntry->set_element(value);
-    column_.insert(position, newEntry);
-    RA_opt::insert_entry(rowIndex, newEntry);
-    return newEntry;
+    newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
   } else {
-    Entry* newEntry = entryPool_->construct(rowIndex);
-    newEntry->set_element(value);
-    column_.insert(position, newEntry);
-    return newEntry;
+    newEntry = entryPool_->construct(rowIndex);
   }
-}
-
-template <class Master_matrix>
-inline void Set_column<Master_matrix>::_insert_entry(ID_index rowIndex,
-                                                     const typename Column_support::iterator& position)
-{
-  if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    column_.insert(position, newEntry);
-    RA_opt::insert_entry(rowIndex, newEntry);
-  } else {
-    Entry* newEntry = entryPool_->construct(rowIndex);
-    column_.insert(position, newEntry);
-  }
+  newEntry->set_element(value);
+  column_.insert(position, newEntry);
+  if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::insert_entry(rowIndex, newEntry);
+  return newEntry;
 }
 
 template <class Master_matrix>
