@@ -66,6 +66,9 @@ jobs:
       - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2025.10.02
     resource_class: large # Delaunay complex requires about 5 Gb of RAM to compile
     steps:
+      - restore_cache:
+          keys:
+            - scikit_learn_data
       - checkout
       - run:
           name: Checkout submodules
@@ -97,6 +100,10 @@ jobs:
       - store_artifacts:
           path: /tmp/htmlcov
           destination: htmlcov
+      - save_cache:
+          key: scikit_learn_data
+          paths:
+            - ~/scikit_learn_data
 
   doxygen:
     docker:
