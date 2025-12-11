@@ -177,6 +177,9 @@ class extents
   {
     stream << "[ " << sizeof...(Extents) << " ] ";
     ((stream << Extents << ' '), ...);
+    stream << " [";
+    for (rank_type r = 0; r < e.rank(); ++r) stream << e.extent(r) << " ";
+    stream << "]";
 
     return stream;
   }
