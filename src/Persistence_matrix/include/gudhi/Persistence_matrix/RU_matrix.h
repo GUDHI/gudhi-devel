@@ -184,7 +184,9 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim);
+  void insert_maximal_cell(Index columnIndex, 
+                           const Boundary_range& boundary, 
+                           Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Returns the column at the given @ref MatIdx index in \f$ R \f$ if @p inR is true and
    * in \f$ U \f$ if @p inR is false.

@@ -860,7 +860,9 @@ class Matrix
    * See also @ref remove_maximal_cell (for the complementary action) and @ref insert_boundary (for insertion at the highest index).
    */
   template <class Boundary_range = Boundary>
-  void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim);
+  void insert_maximal_cell(Index columnIndex, 
+                           const Boundary_range& boundary, 
+                           Dimension dim = Matrix::get_null_value<Dimension>());
 
   /**
    * @brief Returns the column at the given @ref MatIdx index.
