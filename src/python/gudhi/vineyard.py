@@ -152,6 +152,21 @@ class Vineyard(t.Vineyard_interface):
 
         return np.swapaxes(vineyard[dim], 0, 1)
 
+    def _denoise_vineyard(self, vineyard: np.ndarray, min_bar_length: np.number):
+        mask = (vineyard[:, :, 1] - vineyard[:, :, 0]) >= min_bar_length
+        mask = np.any(mask, axis=1)
+        return vineyard[mask]
+
+    def get_current_vineyard(
+        self, dim: int = None, min_bar_length: np.number = -1
+    ) -> list[np.ndarray] | np.ndarray:
+        vineyard = self.get_current_vineyard_view(dim=dim)
+
+        if dim is None:
+            return [self._denoise_vineyard(v, min_bar_length) for v in vineyard]
+
+        return self._denoise_vineyard(vineyard, min_bar_length)
+
     def _gray_on_diagonal(self, ax, x, y, z):
         gray = (0.75, 0.75, 0.75)
         mask = np.concatenate(([0], np.asarray(x == y), [0]))
@@ -391,6 +406,11 @@ class PointCloudRipsVineyard:
     def get_current_vineyard_view(self, dim: int = None) -> list[np.ndarray] | np.ndarray:
         return self._vineyard.get_current_vineyard_view(dim)
 
+    def get_current_vineyard(
+        self, dim: int = None, min_bar_length: np.number = -1
+    ) -> list[np.ndarray] | np.ndarray:
+        return self._vineyard.get_current_vineyard(dim, min_bar_length)
+
     def get_complex(self) -> tuple[list[np.ndarray], np.ndarray]:
         return t._build_boundary_matrix_from_complex(self._complex)
 
@@ -404,17 +424,27 @@ class PointCloudRipsVineyard:
             return np.asarray(self._points)
         return self._points[step]
 
+    def _denoise_cycle(
+        self, cycle: tuple[list[np.ndarray], np.number], min_bar_length: np.number
+    ):
+        return [c for c in cycle if c[1] >= min_bar_length]
+
     def get_1D_representative_cycles(
-        self, step: int = None
+        self, step: int = None, min_bar_length: np.number = 0
     ) -> list[tuple[list[np.ndarray], np.number]] | tuple[list[np.ndarray], np.number]:
         if not self._store_cycles:
             raise NotImplementedError(
                 "Cycles cannot be retrieved if the store options is at False."
             )
 
+        if min_bar_length <= 0:
+            if step is None:
+                return self._cycles
+            return self._cycles[step]
+
         if step is None:
-            return self._cycles
-        return self._cycles[step]
+            return [self._denoise_cycle(cycle, min_bar_length) for cycle in self._cycles]
+        return self._denoise_cycle(self._cycles[step], min_bar_length)
 
     def plot_vineyards(
         self, dim: int = None, max_dim: int = None, min_bar_length: np.number = -1
