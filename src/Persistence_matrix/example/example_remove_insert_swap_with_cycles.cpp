@@ -1,11 +1,11 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       Hannah Schreiber
+ *    Author(s): Jānis Lazovskis
  *
- *    Copyright (C) 2024 Inria
+ *    Copyright (C) 2025 Inria
  *
  *    Modification(s):
- *      - 2025/11 Jānis Lazovskis: Modified from example_representative_cycles_from_matrix
+ *      - YYYY/MM Author: Description of the modification
  */
 
 #include <iostream>
@@ -26,7 +26,18 @@ struct RU_rep_cycles_options : Default_options<Column_types::INTRUSIVE_LIST, tru
 using RU_matrix = Gudhi::persistence_matrix::Matrix<RU_rep_cycles_options>;
 
 template <class Matrix>
-void print_representative_cycles_example()
+void print_current_representative_cycles(Matrix M){
+  auto rc = M.get_representative_cycles();
+  for (auto cycle : rc) {
+    std::cout << M.get_column_dimension(cycle[0]);
+    std::cout << "-cycle: ";
+    for (auto index : cycle) { std::cout << index << ", "; }
+    std::cout << "\n";
+  } 
+}
+
+template <class Matrix>
+void remove_insert_swap_with_cycles()
 {
   Matrix mp({ { },
               { },
@@ -40,60 +51,30 @@ void print_representative_cycles_example()
             });
 
   std::cout << "Representative cycles at input:\n";
-  auto rc = mp.get_representative_cycles();
-  for (auto cycle : rc) {
-    std::cout << mp.get_column_dimension(cycle[0]);
-    std::cout << "-cycle: ";
-    for (auto index : cycle) { std::cout << index << ", "; }
-    std::cout << "\n";
-  }
+  print_current_representative_cycles<RU_matrix>(mp);
 
   std::cout << "Representative cycles after swapping 6 and 7:\n";
   mp.vine_swap(6);
   mp.update_representative_cycles();
-  rc = mp.get_representative_cycles();
-  for (auto cycle : rc) {
-    std::cout << mp.get_column_dimension(cycle[0]);
-    std::cout << "-cycle: ";
-    for (auto index : cycle) { std::cout << index << ", "; }
-    std::cout << "\n";
-  }
+  print_current_representative_cycles<RU_matrix>(mp);
 
   std::cout << "Representative cycles after inserting {1,3} at position 7:\n";
-  mp.insert_maximal_cell( 7, {1,3}, 1);
+  mp.insert_maximal_cell( 4, {});
   mp.update_representative_cycles();
-  rc = mp.get_representative_cycles();
-  for (auto cycle : rc) {
-    std::cout << mp.get_column_dimension(cycle[0]);
-    std::cout << "-cycle: ";
-    for (auto index : cycle) { std::cout << index << ", "; }
-    std::cout << "\n";
-  }
+  print_current_representative_cycles<RU_matrix>(mp);
 
   std::cout << "Representative cycles after swapping 8 and 9:\n";
   mp.vine_swap(8);
   mp.update_representative_cycles();
-  rc = mp.get_representative_cycles();
-  for (auto cycle : rc) {
-    std::cout << mp.get_column_dimension(cycle[0]);
-    std::cout << "-cycle: ";
-    for (auto index : cycle) { std::cout << index << ", "; }
-    std::cout << "\n";
-  }
+  print_current_representative_cycles<RU_matrix>(mp);
 
   std::cout << "Representative cycles after removing 5:\n";
   mp.remove_maximal_cell(5);
   mp.update_representative_cycles();
-  rc = mp.get_representative_cycles();
-  for (auto cycle : rc) {
-    std::cout << mp.get_column_dimension(cycle[0]);
-    std::cout << "-cycle: ";
-    for (auto index : cycle) { std::cout << index << ", "; }
-    std::cout << "\n";
-  }
+  print_current_representative_cycles<RU_matrix>(mp);
 
 }
 
 int main() {
-  print_representative_cycles_example<RU_matrix>();
+  remove_insert_swap_with_cycles<RU_matrix>();
 }
