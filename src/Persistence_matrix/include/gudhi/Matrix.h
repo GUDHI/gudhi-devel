@@ -1,10 +1,11 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       Hannah Schreiber
+ *    Author(s): Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022-25 Inria
  *
  *    Modification(s):
+ *      - 2025/11 Jānis Lazovskis: Added insert_maximal_cell method
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -1686,8 +1687,7 @@ inline void Matrix<PersistenceMatrixOptions>::insert_maximal_cell(Index columnIn
 {
   static_assert(isNonBasic && PersistenceMatrixOptions::has_vine_update,
                 "'insert_maximal_cell' is not available for the chosen options.");
-  static_assert(PersistenceMatrixOptions::is_of_boundary_type || (PersistenceMatrixOptions::has_map_column_container &&
-                                                                  PersistenceMatrixOptions::has_column_pairings),
+  static_assert(PersistenceMatrixOptions::is_of_boundary_type,
                 "'insert_maximal_cell' is not available for the chosen options.");
   matrix_.insert_maximal_cell(columnIndex, boundary, dim);
 }

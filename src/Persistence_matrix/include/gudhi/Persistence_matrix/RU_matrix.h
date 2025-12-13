@@ -1,10 +1,11 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       Hannah Schreiber
+ *    Author(s): Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022-25 Inria
  *
  *    Modification(s):
+ *      - 2025/11 Jānis Lazovskis: Added insert_maximal_cell method
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -568,8 +569,11 @@ inline void RU_matrix<Master_matrix>::insert_maximal_cell(Index columnIndex, con
 
   insert_boundary(boundary, dim);
 
-  for (Index curr = get_number_of_columns()-2; curr > columnIndex-1; --curr) {
-    Swap_opt::vine_swap(curr);
+  // If started with 0 columns, no swaps are needed
+  if ( get_number_of_columns()==1 ) return;
+
+  for (Index curr = get_number_of_columns()-1; curr > columnIndex; --curr) {
+    Swap_opt::vine_swap(curr-1);
   }
 
 }
