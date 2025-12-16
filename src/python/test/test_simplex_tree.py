@@ -11,6 +11,7 @@
 
 import numpy as np
 import pytest
+import warnings
 
 from gudhi import SimplexTree
 
@@ -371,6 +372,19 @@ def test_collapse_edges():
     for simplex in st.get_skeleton(0):
         assert simplex[1] == 1.0
 
+def test_collapse_edges_warning():
+    st = SimplexTree()
+
+    assert st.insert([0, 1, 2], filtration=1.0) == True
+    assert st.insert([2, 3, 4], filtration=2.0) == True
+    assert st.dimension() == 2
+
+    with warnings.catch_warnings(record=True) as w:
+        st.collapse_edges()
+        assert len(w) == 1
+        assert issubclass(w[0].category, RuntimeWarning)
+        assert "collapse_edges()" in str(w[0].message)
+        assert st.dimension() == 1
 
 def test_reset_filtration():
     st = SimplexTree()
