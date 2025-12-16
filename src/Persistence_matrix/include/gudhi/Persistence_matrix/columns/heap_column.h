@@ -86,35 +86,35 @@ class Heap_column : public Master_matrix::Column_dimension_option, public Master
   // just for the sake of the interface
   // row containers and column index are ignored as row access is not implemented for heap columns
   template <class Container = typename Master_matrix::Boundary, class Row_container>
-  Heap_column(Index columnIndex,
+  Heap_column([[maybe_unused]] Index columnIndex,
               const Container& nonZeroRowIndices,
-              Row_container* rowContainer,
+              [[maybe_unused]] Row_container* rowContainer,
               Column_settings* colSettings);
   template <class Container = typename Master_matrix::Boundary,
             class Row_container,
             class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
-  Heap_column(Index columnIndex,
+  Heap_column([[maybe_unused]] Index columnIndex,
               const Container& nonZeroRowIndices,
               Dimension dimension,
-              Row_container* rowContainer,
+              [[maybe_unused]] Row_container* rowContainer,
               Column_settings* colSettings);
   template <class Row_container>
-  Heap_column(Index columnIndex,
+  Heap_column([[maybe_unused]] Index columnIndex,
               ID_index idx,
               Dimension dimension,
-              Row_container* rowContainer,
+              [[maybe_unused]] Row_container* rowContainer,
               Column_settings* colSettings);
   template <class Row_container>
-  Heap_column(Index columnIndex,
+  Heap_column([[maybe_unused]] Index columnIndex,
               ID_index idx,
               Field_element e,
               Dimension dimension,
-              Row_container* rowContainer,
+              [[maybe_unused]] Row_container* rowContainer,
               Column_settings* colSettings);
   template <class Row_container>
   Heap_column(const Heap_column& column,
-              Index columnIndex,
-              Row_container* rowContainer,
+              [[maybe_unused]] Index columnIndex,
+              [[maybe_unused]] Row_container* rowContainer,
               Column_settings* colSettings = nullptr);
 
   std::vector<Field_element> get_content(int columnLength = -1) const;
@@ -379,9 +379,9 @@ inline Heap_column<Master_matrix>::Heap_column(Heap_column&& column) noexcept
 
 template <class Master_matrix>
 template <class Container, class Row_container>
-inline Heap_column<Master_matrix>::Heap_column(Index /* columnIndex */,
+inline Heap_column<Master_matrix>::Heap_column([[maybe_unused]] Index columnIndex,
                                                const Container& nonZeroRowIndices,
-                                               Row_container* rowContainer,
+                                               [[maybe_unused]] Row_container* rowContainer,
                                                Column_settings* colSettings)
     : Heap_column(nonZeroRowIndices, colSettings)
 {
@@ -391,10 +391,10 @@ inline Heap_column<Master_matrix>::Heap_column(Index /* columnIndex */,
 
 template <class Master_matrix>
 template <class Container, class Row_container, class>
-inline Heap_column<Master_matrix>::Heap_column(Index /* columnIndex */,
+inline Heap_column<Master_matrix>::Heap_column([[maybe_unused]] Index columnIndex,
                                                const Container& nonZeroRowIndices,
                                                Dimension dimension,
-                                               Row_container* /* rowContainer */,
+                                               [[maybe_unused]] Row_container* rowContainer,
                                                Column_settings* colSettings)
     : Heap_column(nonZeroRowIndices, dimension, colSettings)
 {}
@@ -402,29 +402,29 @@ inline Heap_column<Master_matrix>::Heap_column(Index /* columnIndex */,
 template <class Master_matrix>
 template <class Row_container>
 inline Heap_column<Master_matrix>::Heap_column(const Heap_column& column,
-                                               Index /* columnIndex */,
-                                               Row_container* /* rowContainer */,
+                                               [[maybe_unused]] Index columnIndex,
+                                               [[maybe_unused]] Row_container* rowContainer,
                                                Column_settings* colSettings)
     : Heap_column(column, colSettings)
 {}
 
 template <class Master_matrix>
 template <class Row_container>
-inline Heap_column<Master_matrix>::Heap_column(Index /* columnIndex */,
+inline Heap_column<Master_matrix>::Heap_column([[maybe_unused]] Index columnIndex,
                                                ID_index idx,
                                                Dimension dimension,
-                                               Row_container* /* rowContainer */,
+                                               [[maybe_unused]] Row_container* rowContainer,
                                                Column_settings* colSettings)
     : Heap_column(idx, dimension, colSettings)
 {}
 
 template <class Master_matrix>
 template <class Row_container>
-inline Heap_column<Master_matrix>::Heap_column(Index /* columnIndex */,
+inline Heap_column<Master_matrix>::Heap_column([[maybe_unused]] Index columnIndex,
                                                ID_index idx,
                                                Field_element e,
                                                Dimension dimension,
-                                               Row_container* /* rowContainer */,
+                                               [[maybe_unused]] Row_container* rowContainer,
                                                Column_settings* colSettings)
     : Heap_column(idx, e, dimension, colSettings)
 {}
