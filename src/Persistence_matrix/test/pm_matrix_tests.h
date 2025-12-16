@@ -2681,9 +2681,51 @@ void test_vine_swap_with_id_index2() {
 
 template <class Matrix>
 void test_representative_cycles(Matrix& mb) {
-  mb.update_representative_cycles();
+  mb.update_representative_cycle(typename Matrix::Bar(7, 12, 1));
 
   const auto& cycles = mb.get_representative_cycles();
+  BOOST_CHECK_EQUAL(cycles.size(), 1);
+
+  using Cy = decltype(cycles[0]);
+
+  if constexpr (Matrix::Option_list::is_z2){
+    BOOST_CHECK((cycles[0] == Cy{5, 6, 7}));
+  } else {
+    BOOST_CHECK((cycles[0] == Cy{{5, 1}, {6, 1}, {7, 1}}));
+  }
+
+  BOOST_CHECK(cycles[0] == mb.get_representative_cycle(typename Matrix::Bar(7, 12, 1)));
+
+  mb.update_representative_cycles(1);
+
+  // cycles = mb.get_representative_cycles();
+  BOOST_CHECK_EQUAL(cycles.size(), 3);
+
+  using Cy = decltype(cycles[0]);
+
+  if constexpr (Matrix::Option_list::is_z2){
+    BOOST_CHECK((cycles[0] == Cy{5, 6, 7}));
+    BOOST_CHECK((cycles[1] == Cy{8, 9, 10}));
+    BOOST_CHECK((cycles[2] == Cy{6, 9, 11}));
+  } else {
+    BOOST_CHECK((cycles[0] == Cy{{5, 1}, {6, 1}, {7, 1}}));
+    BOOST_CHECK((cycles[1] == Cy{{8, 1}, {9, 1}, {10, 1}}));
+    BOOST_CHECK((cycles[2] == Cy{{6, 4}, {9, 4}, {11, 1}}));
+  }
+
+  if constexpr (Matrix::Option_list::has_column_pairings) {
+    const auto& barcode = mb.get_current_barcode();
+    auto it = barcode.begin();
+    while (it->dim == 0) ++it;
+    for (auto& cycle : cycles) {
+      BOOST_CHECK(cycle == mb.get_representative_cycle(*it));
+      ++it;
+    }
+  }
+
+  mb.update_representative_cycles();
+
+  // cycles = mb.get_representative_cycles();
   BOOST_CHECK_EQUAL(cycles.size(), 8);
 
   using Cy = decltype(cycles[0]);

@@ -22,6 +22,10 @@
 #include <algorithm>  //std::sort
 #include <vector>
 
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_for.h>
+#endif
+
 #include <gudhi/persistence_matrix_options.h>
 
 namespace Gudhi {
@@ -52,9 +56,10 @@ template <class Master_matrix>
 class RU_representative_cycles
 {
  public:
-  using Index = typename Master_matrix::Index; /**< @ref MatIdx index type. */
-  using Bar = typename Master_matrix::Bar;     /**< Bar type. */
-  using Cycle = typename Master_matrix::Cycle; /**< Cycle type. */
+  using Index = typename Master_matrix::Index;         /**< @ref MatIdx index type. */
+  using Bar = typename Master_matrix::Bar;             /**< Bar type. */
+  using Cycle = typename Master_matrix::Cycle;         /**< Cycle type. */
+  using Dimension = typename Master_matrix::Dimension; /**< Dimension type. */
 
   /**
    * @brief Default constructor.
@@ -63,11 +68,22 @@ class RU_representative_cycles
 
   /**
    * @brief Computes the current representative cycles of the matrix.
+   *
+   * @param dim If different from default value, only the cycles of the given dimension are updated.
+   * All others are erased.
    */
-  void update_representative_cycles();
+  void update_representative_cycles(Dimension dim = Master_matrix::template get_null_value<Dimension>());
 
   /**
-   * @brief Returns the current representative cycles. If the matrix is modified later after the first call,
+   * @brief Computes the current representative cycle of the given bar. All other cycles already computed are left
+   * untouched (and therefore they could be unvalid for the current matrix).
+   *
+   * @param bar Bar corresponding to the wanted representative cycle.
+   */
+  void update_representative_cycle(const Bar& bar);
+
+  /**
+   * @brief Returns the current representative cycles. If the matrix was modified since the last call,
    * @ref update_representative_cycles has to be called to update the returned cycles.
    *
    * @return A const reference to a vector of @ref Matrix::Cycle containing all representative cycles.
@@ -75,8 +91,8 @@ class RU_representative_cycles
   const std::vector<Cycle>& get_representative_cycles();
   /**
    * @brief Returns the representative cycle corresponding to the given bar.
-   * If the matrix is modified later after the first call,
-   * @ref update_representative_cycles has to be called to update the returned cycles.
+   * If the matrix was modified since the last call, @ref update_representative_cycles or
+   * @ref update_representative_cycle has to be called to update the returned cycle.
    *
    * @param bar Bar corresponding to the wanted representative cycle.
    * @return A const reference to the representative cycle.
@@ -112,9 +128,9 @@ class RU_representative_cycles
 };
 
 template <class Master_matrix>
-inline void RU_representative_cycles<Master_matrix>::update_representative_cycles()
+inline void RU_representative_cycles<Master_matrix>::update_representative_cycles(Dimension dim)
 {
-  auto nberColumns = _matrix()->reducedMatrixR_.get_number_of_columns();
+  Index nberColumns = _matrix()->reducedMatrixR_.get_number_of_columns();
   Index nullValue = Master_matrix::template get_null_value<Index>();
   representativeCycles_.clear();
   birthToCycle_.clear();
@@ -122,13 +138,27 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
 
   Index c = 0;
   for (Index i = 0; i < nberColumns; i++) {
-    if (_matrix()->reducedMatrixR_.is_zero_column(i)) {
+    if ((dim == Master_matrix::template get_null_value<Dimension>() ||
+         _matrix()->reducedMatrixR_.get_column_dimension(i) == dim) &&
+        _matrix()->reducedMatrixR_.is_zero_column(i)) {
       birthToCycle_[i] = c;
       ++c;
     }
   }
 
   representativeCycles_.resize(c);
+#ifdef GUDHI_USE_TBB
+  tbb::parallel_for(static_cast<Index>(0), nberColumns, [&](Index i) {
+    if (birthToCycle_[i] != nullValue) {
+      Index colIdx = _matrix()->_get_column_with_pivot(i);
+      if (colIdx == nullValue) {
+        _retrieve_cycle_from_u(i, birthToCycle_[i]);
+      } else {
+        _retrieve_cycle_from_r(colIdx, birthToCycle_[i]);
+      }
+    }
+  });
+#else
   for (Index i = 0; i < nberColumns; ++i) {
     if (birthToCycle_[i] != nullValue) {
       Index colIdx = _matrix()->_get_column_with_pivot(i);
@@ -139,13 +169,34 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
       }
     }
   }
+#endif
+}
+
+template <class Master_matrix>
+inline void RU_representative_cycles<Master_matrix>::update_representative_cycle(const Bar& bar)
+{
+  Index nullValue = Master_matrix::template get_null_value<Index>();
+
+  if (birthToCycle_.size() <= bar.birth) {
+    birthToCycle_.resize(bar.birth + 1, nullValue);
+  }
+  if (birthToCycle_[bar.birth] == nullValue) {
+    birthToCycle_[bar.birth] = representativeCycles_.size();
+    representativeCycles_.resize(representativeCycles_.size() + 1);
+  }
+
+  Index colIdx = _matrix()->_get_column_with_pivot(bar.birth);
+  if (colIdx == nullValue) {
+    _retrieve_cycle_from_u(bar.birth, birthToCycle_[bar.birth]);
+  } else {
+    _retrieve_cycle_from_r(colIdx, birthToCycle_[bar.birth]);
+  }
 }
 
 template <class Master_matrix>
 inline const std::vector<typename RU_representative_cycles<Master_matrix>::Cycle>&
 RU_representative_cycles<Master_matrix>::get_representative_cycles()
 {
-  if (representativeCycles_.empty()) update_representative_cycles();
   return representativeCycles_;
 }
 
@@ -153,7 +204,6 @@ template <class Master_matrix>
 inline const typename RU_representative_cycles<Master_matrix>::Cycle&
 RU_representative_cycles<Master_matrix>::get_representative_cycle(const Bar& bar)
 {
-  if (representativeCycles_.empty()) update_representative_cycles();
   return representativeCycles_[birthToCycle_[bar.birth]];
 }
 
