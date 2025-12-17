@@ -1,6 +1,6 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s): Jānis Lazovskis
+ *    Author(s):       Jānis Lazovskis
  *
  *    Copyright (C) 2025 Inria
  *
