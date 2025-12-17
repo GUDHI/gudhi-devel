@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2025 Inria
+ *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
  *      - 2025/12 Jānis Lazovskis: Added maximal simplex insertion test, formatting

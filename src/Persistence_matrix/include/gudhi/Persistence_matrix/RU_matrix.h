@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022-25 Inria
+ *    Copyright (C) 2022-24 Inria
  *
  *    Modification(s):
  *      - 2025/11 Jānis Lazovskis: Added insert_maximal_cell method
