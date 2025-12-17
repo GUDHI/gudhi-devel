@@ -5,6 +5,7 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
+ *      - 2025/12 Jānis Lazovskis: Added maximal simplex insertion test, formatting
  *      - YYYY/MM Author: Description of the modification
  */
 #define BOOST_TEST_DYN_LINK
@@ -50,11 +51,18 @@ using removable_rows_matrices = matrices_list<boost::mp11::mp_apply<opt_ru_vine_
 using removable_columns_matrices = matrices_list<boost::mp11::mp_apply<opt_ru_vine_z2_r, opts> >;
 using rep_matrices = matrices_list<boost::mp11::mp_apply<opt_ru_vine_z2_rep, opts> >;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_constructors, Matrix, full_matrices) { test_constructors<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_constructors, Matrix, full_matrices) {
+  test_constructors<Matrix>();
+}
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_insertion, Matrix, full_matrices) { test_boundary_insertion<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_insertion, Matrix, full_matrices) { 
+  test_boundary_insertion<Matrix>(); 
+  test_ru_maximal_simplex_insertion<Matrix>(); 
+}
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_zeroing, Matrix, full_matrices) { test_zeroing<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_zeroing, Matrix, full_matrices) {
+  test_zeroing<Matrix>(); 
+}
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_row_removal, Matrix, removable_rows_matrices) {
   test_row_removal<Matrix>();
@@ -72,7 +80,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_max_dimension, Matrix, full_matr
 }
 #endif
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_operation, Matrix, full_matrices) { test_ru_operation<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_operation, Matrix, full_matrices) {
+  test_ru_operation<Matrix>(); 
+}
 
 #ifdef PM_TEST_BARCODE
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_barcode, Matrix, full_matrices) {
@@ -88,7 +98,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_representative_cycles, Matrix, r
 }
 
 #ifdef PM_TEST_ID_IDX
-BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_access, Matrix, full_matrices) { test_boundary_access<Matrix>(); }
+BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_access, Matrix, full_matrices) {
+  test_boundary_access<Matrix>(); 
+}
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(RU_matrix_z2_vine_row_access, Matrix, row_access_matrices) {
   auto columns = build_simple_boundary_matrix<typename Matrix::Column>();
