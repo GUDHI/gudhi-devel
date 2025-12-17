@@ -851,33 +851,33 @@ class Matrix
    * chains used to reduce the boundary. Otherwise, nothing.
    */
   template <class Boundary_range = Boundary>
-  Insertion_return insert_boundary(ID_index cellIndex,
-                                   const Boundary_range& boundary,
+  Insertion_return insert_boundary(ID_index cellIndex, const Boundary_range& boundary,
                                    Dimension dim = Matrix::get_null_value<Dimension>());
 
   /**
-   * @brief Appends the input column to the end of the matrix using the @ref insert_boundary "insert boundary" method,
+   * @brief Inserts the given cell boundary at the given position in the matrix/filtration such that the matrix remains
+   * consistent. Requires @ref PersistenceMatrixOptions::has_vine_update to be true. Only available for
+   * @ref boundarymatrix "RU matrices", but not if @ref PersistenceMatrixOptions::column_indexation_type is set to
+   * @ref Column_indexation_types::IDENTIFIER.
+   *
+   * Appends the input column to the end of the matrix using the @ref insert_boundary "insert boundary" method,
    * and moves the column using the @ref vine_swap "vine swaps" method to the requested position, which maintains a
-   * reduced decomposition. As a result, the input column (and other columns) may have a different boundary when it 
-   * is finally in the requested position `columnIndex`, compared with the boundary `boundary` upon input. No check 
+   * reduced decomposition. As a result, the input column (and other columns) may have a different boundary when it
+   * is finally in the requested position `columnIndex`, compared with the boundary `boundary` upon input. No check
    * is made as to whether the order of cells, after the function has finished, will correspond to a valid filtration.
-   * 
-   * Only available for @ref boundarymatrix "RU matrices". Not available for RU matrices
-   * if @ref PersistenceMatrixOptions::column_indexation_type is set to @ref Column_indexation_types::IDENTIFIER.
-   * 
-   * See also @ref remove_maximal_cell (for the complementary action) and @ref insert_boundary (for inserting at the 
+   *
+   * See also @ref remove_maximal_cell (for the complementary action) and @ref insert_boundary (for inserting at the
    * highest index).
-   * 
-   * @param columnIndex @ref MatIdx Index where the column should be inserted. This will be the index of the input column 
-   * `boundary` after the function has finished.
+   *
+   * @param columnIndex @ref MatIdx Index where the column should be inserted. This will be the index of the input
+   * column `boundary` after the function has finished.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
    * @p cellIndex values of the matrix and should be ordered in increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted, in which case it will be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_maximal_cell(Index columnIndex, 
-                           const Boundary_range& boundary, 
+  void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary,
                            Dimension dim = Matrix::get_null_value<Dimension>());
 
   /**
@@ -1698,8 +1698,8 @@ Matrix<PersistenceMatrixOptions>::insert_boundary(ID_index cellIndex, const Boun
 
 template <class PersistenceMatrixOptions>
 template <class Boundary_range>
-inline void Matrix<PersistenceMatrixOptions>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim)
-{
+inline void Matrix<PersistenceMatrixOptions>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary,
+                                                                  Dimension dim) {
   static_assert(isNonBasic && PersistenceMatrixOptions::has_vine_update,
                 "'insert_maximal_cell' is not available for the chosen options.");
   static_assert(PersistenceMatrixOptions::is_of_boundary_type,

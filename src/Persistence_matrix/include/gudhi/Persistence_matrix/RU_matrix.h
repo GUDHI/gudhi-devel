@@ -164,8 +164,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_boundary(ID_index cellIndex,
-                       const Boundary_range& boundary,
+  void insert_boundary(ID_index cellIndex, const Boundary_range& boundary,
                        Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
@@ -173,20 +172,21 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * (i.e., RU is still an upper triangular decomposition of the @ref boundarymatrix "boundary matrix").
    * Updates the barcode if it is stored.
    *
-   * See also @ref remove_maximal_cell (for the complementary action) and @ref insert_boundary (for insertion at the highest index).
+   * See also @ref remove_maximal_cell (for the complementary action) and @ref insert_boundary (for insertion at the
+   * highest index).
    *
    * @param columnIndex @ref MatIdx index of the cell to remove.
    * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
    * method.
-   * @param boundary Boundary generating the column to be inserted. The indices of the boundary have to correspond to the
+   * @param boundary Boundary generating the column to be inserted. The indices of the boundary have to correspond to
+   * the
    * @p cellIndex values of precedent calls of the method for the corresponding cells and should be ordered in
    * increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_maximal_cell(Index columnIndex, 
-                           const Boundary_range& boundary, 
+  void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary,
                            Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Returns the column at the given @ref MatIdx index in \f$ R \f$ if @p inR is true and
@@ -562,20 +562,19 @@ inline void RU_matrix<Master_matrix>::insert_boundary(ID_index cellIndex, const 
 
 template <class Master_matrix>
 template <class Boundary_range>
-inline void RU_matrix<Master_matrix>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim)
-{
+inline void RU_matrix<Master_matrix>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary,
+                                                          Dimension dim) {
   static_assert(Master_matrix::Option_list::has_vine_update,
                 "'insert_maximal_cell' is not implemented for the chosen options.");
 
   insert_boundary(boundary, dim);
 
   // If started with 0 columns, no swaps are needed
-  if ( get_number_of_columns()==1 ) return;
+  if (get_number_of_columns() == 1) return;
 
-  for (Index curr = get_number_of_columns()-1; curr > columnIndex; --curr) {
-    Swap_opt::vine_swap(curr-1);
+  for (Index curr = get_number_of_columns() - 1; curr > columnIndex; --curr) {
+    Swap_opt::vine_swap(curr - 1);
   }
-
 }
 
 template <class Master_matrix>
