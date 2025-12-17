@@ -114,8 +114,6 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           python --version
           python -m pip install .
-          dir
-          mkdir build
           cd build
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(gudhiCmakeOptions) --log-level=DEBUG ..
           ninja
