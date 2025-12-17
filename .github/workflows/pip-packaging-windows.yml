@@ -70,8 +70,6 @@ jobs:
           $ErrorActionPreference = "stop"
           $PSNativeCommandUseErrorActionPreference = $true
           Get-Location
-          dir
-          dir wheelhouse
           python -m pip install --user numpy~=${{ matrix.numpy-version }}
           python -m pip install --user pytest scipy matplotlib scikit-learn POT
           Get-ChildItem wheelhouse\*.whl | % FullName

@@ -68,12 +68,11 @@ jobs:
           $ErrorActionPreference = "stop"
           $PSNativeCommandUseErrorActionPreference = $true
           Get-Location
-          dir
-          dir wheelhouse
           python -m pip install --user numpy~=${{ matrix.numpy-version }}
           python -m pip install --user pytest scipy matplotlib scikit-learn POT
           Get-ChildItem wheelhouse\*.whl | % FullName
           python -m pip install --user (Get-ChildItem wheelhouse\*.whl | % FullName)
+          dir C:\Users\runneradmin\AppData\Roaming\Python\Python39\site-packages\gudhi\
           python -c "import gudhi; print(gudhi.__version__)"
           cp data/points/human.off .
           python -m pytest src/python/test/test_alpha_complex.py

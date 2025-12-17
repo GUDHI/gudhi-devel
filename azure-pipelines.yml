@@ -64,9 +64,6 @@ jobs:
     variables:
       pythonVersion: "3.9"
       cmakeBuildType: Release
-      # On this VM, 2 versions of python are installed. Default Python_FIND_REGISTRY is FIRST, which means asks registry first
-      # LAST means consult registry in last resort, use the standard libraries or headers first
-      SKBUILD_CMAKE_DEFINE: "FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake;VCPKG_TARGET_TRIPLET=x64-windows;Python_FIND_REGISTRY=LAST"
       gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_REMOTE_TEST=ON -DWITH_GUDHI_PYTHON=OFF -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
       # To cache scikit_learn_data - no need to always download it and fails sometimes
       SCIKIT_LEARN_DATA: $(Agent.BuildDirectory)/scikit_learn_data
@@ -112,6 +109,7 @@ jobs:
       - pwsh: |
           $ErrorActionPreference = "stop"
           $PSNativeCommandUseErrorActionPreference = $true
+          $env:SKBUILD_CMAKE_DEFINE="FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake;VCPKG_TARGET_TRIPLET=x64-windows;Python_FIND_REGISTRY=LAST"
           python --version
           python -m pip install .
           cd build
