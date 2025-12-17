@@ -119,5 +119,7 @@ jobs:
           python --version
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(cmakeVcpkgFlags) $(gudhiCmakeOptions) $(extraCmakeOptions) --log-level=DEBUG ..
           ninja
+          $env:path += ';' + $PWD + '\src\python'
+          echo $env:path
           ctest --output-on-failure -C Release -E diff_files
         displayName: "Build and test"
