@@ -170,7 +170,13 @@ NB_MODULE(_vineyard_ext, m)
       // TODO: also for Cubical complex
       .def("_update_from_complex", &gvyi::update_from_complex<Gudhi::Simplex_tree_interface>)
       .def("_get_current_vineyard_view", &gvyi::get_current_vineyard_view)
-      .def("get_latest_representative_cycles", &gvyi::get_latest_representative_cycles);
+      .def("get_latest_representative_cycles", &gvyi::get_latest_representative_cycles, R"doc(
+Returns a list of (cycle, pers) pairs representing the current representative cycles in the complex.
+The first half `cycle` is the set of cell indices in the cycle and `pers` is the length of the bar
+associated to the cycle.
+
+:rtype:  list[tuple[np.ndarray, np.number]]
+           )doc");
 
   // TODO: also for Cubical complex
   m.def("_build_boundary_matrix_from_complex",
