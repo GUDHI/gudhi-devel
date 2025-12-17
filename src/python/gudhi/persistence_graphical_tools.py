@@ -22,6 +22,7 @@ import warnings
 import errno
 import os
 import shutil
+from collections import Counter
 
 from gudhi.reader_utils import read_persistence_intervals_in_dimension
 from gudhi.reader_utils import read_persistence_intervals_grouped_by_dimension
@@ -71,7 +72,7 @@ def _format_handler(a):
     # Array
     try:
         first_death_value = a[0][1]
-        if isinstance(first_death_value, (np.floating, float, np.integer, int)):
+        if np.issubdtype(type(first_death_value), np.number):
             pers = [[0, x] for x in a]
             return pers, 1
     except IndexError:
@@ -79,14 +80,39 @@ def _format_handler(a):
     # Iterable of array
     try:
         for elt in a:  # check that death values have correct type
-            if not isinstance(elt[0][1], (np.floating, float, np.integer, int)):
-                raise TypeError("Should be a list of (birth, death)")
+            if len(elt) != 0:
+                if not np.issubdtype(type(elt[0][1]), np.number):
+                    raise TypeError("Should be a list of (birth, death)")
         pers = [[fake_dim, x] for fake_dim, elt in enumerate(a) for x in elt]
         return pers, 2
     except TypeError:
         pass
     # Nothing to be done otherwise
     return a, 0
+
+
+# only necessary because _format_handler does not directly decompose everything into xd, yd arrays for plotting
+def _get_number_of_pairs_by_dimension(barcode):
+    if len(barcode) == 0:
+        return []
+
+    try:
+        if np.issubdtype(type(barcode[0][1]), np.number):
+            # array of (b,d)
+            return [len(barcode)]
+    except IndexError:
+        pass
+
+    try:
+        if len(barcode[0]) == 0 or np.issubdtype(type(barcode[0][0][1]), np.number):
+            # array of array of (b,d)
+            return [len(barcode[d]) for d in range(len(barcode))]
+    except TypeError:
+        pass
+
+    # array of (dim, (b,d))
+    counts = Counter(bar[0] for bar in barcode)
+    return [counts[i] for i in range(barcode[-1][0] + 1)]
 
 
 def _limit_to_max_intervals(persistence, max_intervals, key):
@@ -199,7 +225,9 @@ def plot_persistence_barcode(
         if path.isfile(persistence_file):
             # Reset persistence
             persistence = []
-            diag = read_persistence_intervals_grouped_by_dimension(persistence_file=persistence_file)
+            diag = read_persistence_intervals_grouped_by_dimension(
+                persistence_file=persistence_file
+            )
             for key in diag.keys():
                 for persistence_interval in diag[key]:
                     persistence.append((key, persistence_interval))
@@ -228,7 +256,10 @@ def plot_persistence_barcode(
         colormap = plt.cm.Set1.colors
 
     x = [birth for (dim, (birth, death)) in persistence]
-    y = [(death - birth) if death != float("inf") else (infinity - birth) for (dim, (birth, death)) in persistence]
+    y = [
+        (death - birth) if death != float("inf") else (infinity - birth)
+        for (dim, (birth, death)) in persistence
+    ]
     c = [colormap[dim] for (dim, (birth, death)) in persistence]
 
     axes.barh(range(len(x)), y, left=x, alpha=alpha, color=c, linewidth=0)
@@ -244,7 +275,9 @@ def plot_persistence_barcode(
             title = "Range"
         dimensions = {item[0] for item in persistence}
         axes.legend(
-            handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions],
+            handles=[
+                mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions
+            ],
             title=title,
             loc="best",
         )
@@ -323,13 +356,16 @@ def plot_persistence_diagram(
         if path.isfile(persistence_file):
             # Reset persistence
             persistence = []
-            diag = read_persistence_intervals_grouped_by_dimension(persistence_file=persistence_file)
+            diag = read_persistence_intervals_grouped_by_dimension(
+                persistence_file=persistence_file
+            )
             for key in diag.keys():
                 for persistence_interval in diag[key]:
                     persistence.append((key, persistence_interval))
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), persistence_file)
 
+    sizes = _get_number_of_pairs_by_dimension(persistence)
     try:
         persistence, input_type = _format_handler(persistence)
         persistence = _limit_to_max_intervals(
@@ -367,14 +403,34 @@ def plot_persistence_diagram(
     # line display of equation : birth = death
     axes.plot([axis_start, axis_end], [axis_start, axis_end], linewidth=1.0, color="k")
 
+    if input_type == 0:
+        persistence = sorted(persistence, key=lambda x: x[0])
     x = [birth for (dim, (birth, death)) in persistence]
     y = [death if death != float("inf") else infinity for (dim, (birth, death)) in persistence]
-    c = [colormap[dim] for (dim, (birth, death)) in persistence]
 
-    axes.scatter(x, y, alpha=alpha, color=c)
+    i = 0
+    for d in range(len(sizes)):
+        if sizes[d] != 0:
+            j = i + sizes[d]
+            xd = x[i:j]
+            yd = y[i:j]
+            i = j
+            c = colormap[d]
+            axes.plot(
+                xd,
+                yd,
+                linestyle="none",
+                markersize=6,
+                marker="o",
+                color=c,
+                alpha=alpha,
+            )
+
     if float("inf") in (death for (dim, (birth, death)) in persistence):
         # infinity line and text
-        axes.plot([axis_start, axis_end], [infinity, infinity], linewidth=1.0, color="k", alpha=alpha)
+        axes.plot(
+            [axis_start, axis_end], [infinity, infinity], linewidth=1.0, color="k", alpha=alpha
+        )
         # Infinity label
         yt = axes.get_yticks()
         yt = yt[np.where(yt < axis_end)]  # to avoid plotting ticklabel higher than infinity
@@ -395,7 +451,9 @@ def plot_persistence_diagram(
             title = "Range"
         dimensions = list({item[0] for item in persistence})
         axes.legend(
-            handles=[mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions],
+            handles=[
+                mpatches.Patch(color=colormap[dim], label=str(dim)) for dim in dimensions
+            ],
             title=title,
             loc="lower right",
         )
