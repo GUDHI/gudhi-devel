@@ -1012,8 +1012,7 @@ inline bool Vector_column<Master_matrix>::_add(const Entry_range& column)
   auto pivotIsZeroed = _generic_add(
       column,
       [&](Entry* entryTarget) { newColumn.push_back(entryTarget); },
-      [&](typename Entry_range::const_iterator& itSource,
-          [[maybe_unused]] const typename Column_support::iterator& itTarget) {
+      [&](typename Entry_range::const_iterator& itSource, const typename Column_support::iterator&) {
         _insert_entry(newColumn, itSource->get_row_index(), itSource->get_element());
       },
       [&](Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
@@ -1057,7 +1056,7 @@ inline bool Vector_column<Master_matrix>::_multiply_target_and_add(const Field_e
           if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(*entryTarget);
           newColumn.push_back(entryTarget);
         },
-        [&](typename Entry_range::const_iterator& itSource, const typename Column_support::iterator& itTarget) {
+        [&](typename Entry_range::const_iterator& itSource, const typename Column_support::iterator&) {
           _insert_entry(newColumn, itSource->get_row_index(), itSource->get_element());
         },
         [&](Field_element& targetElement, typename Entry_range::const_iterator& itSource) {
@@ -1094,7 +1093,7 @@ inline bool Vector_column<Master_matrix>::_multiply_source_and_add(const Entry_r
     auto pivotIsZeroed = _generic_add(
         column,
         [&](Entry* entryTarget) { newColumn.push_back(entryTarget); },
-        [&](typename Entry_range::const_iterator& itSource, const typename Column_support::iterator& itTarget) {
+        [&](typename Entry_range::const_iterator& itSource, const typename Column_support::iterator&) {
           Entry* newEntry = _insert_entry(newColumn, itSource->get_row_index(), itSource->get_element());
           operators_->multiply_inplace(newEntry->get_element(), val);
           if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(*newEntry);
