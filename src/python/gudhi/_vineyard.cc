@@ -121,11 +121,12 @@ class Vineyard_interface
     return ret;
   }
 
-  nb::list get_latest_representative_cycles()
+  nb::dict get_latest_representative_cycles()
   {
-    nb::list ret;
+    nb::dict ret;
     for (auto cycle : vineyard_.get_latest_representative_cycles()) {
-      ret.append(nb::make_tuple(_wrap_as_numpy_array(std::move(cycle.first), cycle.first.size()), cycle.second));
+      ret[nb::make_tuple(get<1>(cycle), get<2>(cycle))] =
+          _wrap_as_numpy_array(std::move(get<0>(cycle)), get<0>(cycle).size());
     }
     return ret;
   }

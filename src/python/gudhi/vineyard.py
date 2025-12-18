@@ -836,16 +836,20 @@ class PointCloudRipsVineyard:
         return self._points[step]
 
     def _denoise_cycle(
-        self, cycle: list[tuple[np.ndarray, np.number]], min_bar_length: np.number
-    ) -> list[tuple[np.ndarray, np.number]]:
-        return [c for c in cycle if c[1] >= min_bar_length]
+        self, step: int, cycle: dict[tuple[np.number, np.number], np.ndarray], min_bar_length: np.number
+    ) -> dict[tuple[np.number, np.number], np.ndarray]:
+        vineyard = self.get_current_vineyard_view(dim=1)
+        return {k: v for k, v in cycle.items() if vineyard[k[1]][step][1] - vineyard[k[1]][step][0] >= min_bar_length}
 
-    # TODO: replacing (cycle, length) array with map {bar index, cycle} to match cycles and bars
     def get_1D_representative_cycles(
         self, step: int = None, min_bar_length: np.number = 0
-    ) -> list[list[tuple[np.ndarray, np.number]]] | list[tuple[np.ndarray, np.number]]:
+    ) -> list[dict[tuple[np.number, np.number], np.ndarray]] | dict[tuple[np.number, np.number], np.ndarray]:
         """If `store_cycles` was set to `True` at construction, returns the stored non-trivial representative 1-cycles.
-        The format is `step x cycle number x (cycle, bar length)`.
+        The output is a list of dictionaries of the form `step x {(dim, idx) : cycle}`, such that:
+            - if `vy` = :meth:`get_current_vineyard_view()`, then `vy[dim][idx]` is the bar corresponding to `cycle`,
+            - if `vy` = :meth:`get_current_vineyard_view(dim=dim)`, then `vy[idx]` is the bar corresponding to `cycle`,
+            - the edges contained in `cycle` are represented by their index in the complex which can be retrieved
+                with :meth:`get_complex`.
 
         :param step: Optional. If provided, only the cycles at given step are returned (first axis of the format
             is lost). Defaults to `None`.
@@ -854,8 +858,9 @@ class PointCloudRipsVineyard:
             `min_bar_length` are returned. Defaults to 0.
         :type min_bar_length: np.number, optional
         :raises NotImplementedError: If `store_cycles` was set to `False` at construction.
-        :return: Stored 1-cycles with bar length.
-        :rtype: list[list[tuple[np.ndarray, np.number]]] (default) or list[tuple[np.ndarray, np.number]]
+        :return: Stored 1-cycles.
+        :rtype: list[dict[tuple[np.number, np.number], np.ndarray]] (default) or
+            dict[tuple[np.number, np.number], np.ndarray]
             (if `step` was provided)
         """
         if not self._store_cycles:
@@ -869,8 +874,8 @@ class PointCloudRipsVineyard:
             return self._cycles[step]
 
         if step is None:
-            return [self._denoise_cycle(cycle, min_bar_length) for cycle in self._cycles]
-        return self._denoise_cycle(self._cycles[step], min_bar_length)
+            return [self._denoise_cycle(i, cycle, min_bar_length) for i, cycle in enumerate(self._cycles)]
+        return self._denoise_cycle(step, self._cycles[step], min_bar_length)
 
     def plot_vineyards(
         self,
@@ -922,7 +927,7 @@ class PointCloudRipsVineyard:
                 axes.plot([u[0], v[0]], [u[1], v[1]], [u[2], v[2]], color=c)
 
     def plot_1D_representative_cycles(
-        self, step: int, index: int = None, min_bar_length: np.number = -1
+        self, step: int, index: int = None, min_bar_length: np.number = None
     ):
         """If `store_cycles` and `store_point_coordinates` were set to `True` at construction, plots the representative
         1-cycles at given step, except for those representing bars of length 0. The point coordinates must be 2 or
@@ -933,7 +938,7 @@ class PointCloudRipsVineyard:
         :param index: Optional. If provided, only plots the cycle at given index at given step. Defaults to `None`.
         :type index: int, optional
         :param min_bar_length: Optional. If provided, only plots 1-cycles corresponding to bars with length at least
-            `min_bar_length`. Defaults to -1 (i.e., all non-trivial ones).
+            `min_bar_length`. Defaults to None (i.e., all non-trivial ones).
         :type min_bar_length: Any numerical type coercible to the filtration value type, optional
         :raises NotImplementedError: If `store_cycles` or `store_point_coordinates` were set to `False` at construction.
         :raises ValueError: If the number of coordinates of a point is different from 2 or 3.
@@ -961,14 +966,20 @@ class PointCloudRipsVineyard:
         i = 0
 
         if index is None:
-            for cycle in cycles:
-                if cycle[1] >= min_bar_length:
-                    self._plot_cycle(axes, cycle[0], points, cpx, cmap[i])
+            if min_bar_length is None:
+                for _, c in cycles.items():
+                    self._plot_cycle(axes, c, points, cpx, cmap[i])
                     i = (i + 1) % csize
+            else:
+                vineyard = self.get_current_vineyard_view(dim=1)
+                for (_, idx), c in cycles.items():
+                    if vineyard[idx][step][1] - vineyard[idx][step][0] >= min_bar_length:
+                        self._plot_cycle(axes, c, points, cpx, cmap[i])
+                        i = (i + 1) % csize
         else:
-            if min_bar_length != -1:
+            if min_bar_length is not None:
                 warnings.warn(
-                    "Specified argument `min_length` is ignored.",
+                    "Specified argument `min_bar_length` is ignored.",
                     UserWarning,
                 )
             self._plot_cycle(axes, cycles[index][0], points, cpx, cmap[i])
