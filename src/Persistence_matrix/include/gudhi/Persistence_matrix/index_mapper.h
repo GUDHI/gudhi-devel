@@ -32,7 +32,7 @@ namespace persistence_matrix {
  * Inherited instead of @ref Index_mapper.
  */
 struct Dummy_index_mapper {
-  friend void swap([[maybe_unused]] Dummy_index_mapper& d1, [[maybe_unused]] Dummy_index_mapper& d2) {}
+  friend void swap([[maybe_unused]] Dummy_index_mapper& d1, [[maybe_unused]] Dummy_index_mapper& d2) noexcept {}
 };
 
 /**
@@ -40,18 +40,16 @@ struct Dummy_index_mapper {
  * @ingroup persistence_matrix
  *
  * @brief Map container. Though for translation between different index types.
- * 
+ *
  * @tparam Map Map type
  */
-template<class Map>
+template <class Map>
 struct Index_mapper {
   using Index_map = Map;
 
   Index_map map_;
 
-  friend void swap(Index_mapper& mapper1, Index_mapper& mapper2) {
-    mapper1.map_.swap(mapper2.map_);
-  }
+  friend void swap(Index_mapper& mapper1, Index_mapper& mapper2) noexcept { mapper1.map_.swap(mapper2.map_); }
 };
 
 }  // namespace persistence_matrix

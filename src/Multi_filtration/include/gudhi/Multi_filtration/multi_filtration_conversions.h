@@ -16,7 +16,9 @@
 #ifndef MF_CONVERSIONS_H_
 #define MF_CONVERSIONS_H_
 
+#include <algorithm>
 #include <cstddef>
+#include <numeric>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
@@ -33,7 +35,7 @@ namespace multi_filtration {
  * @brief Converts the given multi filtration value into the type given as template argument. It is assumed that the
  * given value is simplified (i.e. minimal and ordered lexicographically). If the new type is
  * @ref Gudhi::multi_filtration::Degree_rips_bifiltration it is additionally assumed that the given value is compatible
- *  with the type, that is,the number of parameters is 2 and the first parameter is an index (positive and convertible
+ *  with the type, that is,the number of parameters is 2 and the second parameter is an index (positive and convertible
  * to an integer without loss).
  *
  * @tparam Out_multi_filtration New filtration value type. Has to be either
@@ -60,10 +62,14 @@ Out_multi_filtration as_type(const Multi_parameter_filtration<T, Co, Ensure1Crit
     if (f.num_parameters() != 2) throw std::invalid_argument("Cannot convert a non-bifiltration to a bifiltration.");
     U inf = co ? Out_multi_filtration::T_m_inf : Out_multi_filtration::T_inf;
 
-    // f generators assumed to be in lexicographical order
-    std::vector<U> values(f(f.num_generators() - 1, 0) + 1, inf);
+    T maxIndex = 0;
     for (std::size_t g = 0; g < f.num_generators(); ++g) {
-      values[f(g, 0)] = f(g, 1);
+      maxIndex = maxIndex < f(g, 1) ? f(g, 1) : maxIndex;
+    }
+
+    std::vector<U> values(maxIndex + 1, inf);
+    for (std::size_t g = 0; g < f.num_generators(); ++g) {
+      values[f(g, 1)] = f(g, 0);
     }
     return Out_multi_filtration(std::move(values), 2);
   } else {
@@ -75,7 +81,7 @@ Out_multi_filtration as_type(const Multi_parameter_filtration<T, Co, Ensure1Crit
  * @brief Converts the given multi filtration value into the type given as template argument. It is assumed that the
  * given value is simplified (i.e. minimal and ordered lexicographically). If the new type is
  * @ref Gudhi::multi_filtration::Degree_rips_bifiltration it is additionally assumed that the given value is compatible
- *  with the type, that is,the number of parameters is 2 and the first parameter is an index (positive and convertible
+ * with the type, that is,the number of parameters is 2 and the second parameter is an index (positive and convertible
  * to an integer without loss).
  *
  * @tparam Out_multi_filtration New filtration value type. Has to be either
@@ -110,10 +116,14 @@ Out_multi_filtration as_type(const Dynamic_multi_parameter_filtration<T, Co, Ens
     if (f.num_parameters() != 2) throw std::invalid_argument("Cannot convert a non-bifiltration to a bifiltration.");
     U inf = co ? Out_multi_filtration::T_m_inf : Out_multi_filtration::T_inf;
 
-    // f generators assumed to be in lexicographical order
-    std::vector<U> values(f(f.num_generators() - 1, 0) + 1, inf);
+    T maxIndex = 0;
     for (std::size_t g = 0; g < f.num_generators(); ++g) {
-      values[f(g, 0)] = f(g, 1);
+      maxIndex = maxIndex < f(g, 1) ? f(g, 1) : maxIndex;
+    }
+
+    std::vector<U> values(maxIndex + 1, inf);
+    for (std::size_t g = 0; g < f.num_generators(); ++g) {
+      values[f(g, 1)] = f(g, 0);
     }
     return Out_multi_filtration(std::move(values), 2);
   } else {
@@ -161,17 +171,26 @@ Out_multi_filtration as_type(const Degree_rips_bifiltration<T, Co, Ensure1Critic
 
     if (f.size() == 0) return Out_multi_filtration(0);
 
+    std::vector<std::size_t> order(f.num_generators());
+    std::iota(order.begin(), order.end(), 0);
+    // lexicographical order
+    std::sort(order.begin(), order.end(), [&](std::size_t i, std::size_t j){
+      if (f(i, 0) == f(j, 0)) return f(i, 1) < f(j, 1); // f(i, 1) and f(j, 1) cannot be equal for i != j
+      return f(i, 0) < f(j, 0);
+    });
+
     if constexpr (std::is_same_v<Out_multi_filtration, Multi_parameter_filtration<U, co, one_crit> >) {
       std::vector<U> values;
       values.reserve(f.num_generators() * 2);
-      T threshold = f(gen_index(0), 1);
-      values.push_back(gen_index(0));
+      std::size_t g = order[gen_index(0)];
+      T threshold = g;
+      values.push_back(f(g, 0));
       values.push_back(threshold);
       for (std::size_t i = 1; i < f.num_generators(); ++i) {
-        std::size_t g = gen_index(i);
-        if (strictly_dominates(threshold, f(g, 1))) {
-          threshold = f(g, 1);
-          values.push_back(g);
+        g = order[gen_index(i)];
+        if (strictly_dominates(threshold, g)) {
+          threshold = g;
+          values.push_back(f(g, 0));
           values.push_back(threshold);
         }
       }
@@ -188,13 +207,14 @@ Out_multi_filtration as_type(const Degree_rips_bifiltration<T, Co, Ensure1Critic
     } else if constexpr (std::is_same_v<Out_multi_filtration, Dynamic_multi_parameter_filtration<U, co, one_crit> >) {
       std::vector<Multi_parameter_generator<U> > values;
       values.reserve(f.num_generators());
-      T threshold = f(gen_index(0), 1);
-      values.emplace_back(std::vector<T>{static_cast<T>(gen_index(0)), threshold});
+      std::size_t g = order[gen_index(0)];
+      T threshold = g;
+      values.emplace_back(std::vector<T>{static_cast<T>(f(g, 0)), threshold});
       for (std::size_t i = 1; i < f.num_generators(); ++i) {
-        std::size_t g = gen_index(i);
-        if (strictly_dominates(threshold, f(g, 1))) {
-          threshold = f(g, 1);
-          std::vector<T> v = {static_cast<T>(g), threshold};
+        g = order[gen_index(i)];
+        if (strictly_dominates(threshold, g)) {
+          threshold = g;
+          std::vector<T> v = {static_cast<T>(f(g, 0)), threshold};
           values.emplace_back(std::move(v));
         }
       }

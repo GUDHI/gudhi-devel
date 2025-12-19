@@ -1,4 +1,4 @@
-| [![OSx and Win on Azure](https://dev.azure.com/GUDHI/gudhi-devel/_apis/build/status/GUDHI.gudhi-devel?branchName=master)](https://dev.azure.com/GUDHI/gudhi-devel/_build/latest?definitionId=1&branchName=master) [![Linux on CircleCI](https://circleci.com/gh/GUDHI/gudhi-devel/tree/master.svg?style=svg)](https://circleci.com/gh/GUDHI/gudhi-devel/tree/master) | [![Anaconda Cloud](https://anaconda.org/conda-forge/gudhi/badges/version.svg)](https://anaconda.org/conda-forge/gudhi) ![Conda Downloads](https://img.shields.io/conda/d/conda-forge/gudhi) | ![PyPI - Version](https://img.shields.io/pypi/v/gudhi) ![PyPI - Downloads](https://img.shields.io/pypi/dm/gudhi) |
+| [![OSx and Win on Azure](https://dev.azure.com/GUDHI/gudhi-devel/_apis/build/status/GUDHI.gudhi-devel?branchName=master)](https://dev.azure.com/GUDHI/gudhi-devel/_build/latest?definitionId=1&branchName=master) [![Linux on CircleCI](https://circleci.com/gh/GUDHI/gudhi-devel/tree/master.svg?style=svg)](https://circleci.com/gh/GUDHI/gudhi-devel/tree/master) | [![Anaconda Cloud](https://anaconda.org/conda-forge/gudhi/badges/version.svg)](https://anaconda.org/conda-forge/gudhi) ![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/gudhi) | ![PyPI - Version](https://img.shields.io/pypi/v/gudhi) ![PyPI - Downloads](https://img.shields.io/pypi/dm/gudhi) |
 | --- | --- | --- |
 
 ![GUDHI](src/common/doc/Gudhi_banner.png "Topological Data Analysis (TDA) and Higher Dimensional Geometry Understanding")
@@ -21,7 +21,11 @@ To install GUDHI, you can follow the [C++ compilation procedure](https://gudhi.i
 # More information
 
 * [The GUDHI website](https://gudhi.inria.fr/)
+* [Tutorials](https://gudhi.inria.fr/tutorials/)
+* [Contributing guide](.github/CONTRIBUTING.md)
+* [Changelog](.github/changelog.md)
+
+# Contact
+
 * [Contact us](https://gudhi.inria.fr/contact/)
 * [Subscribe to the GUDHI users mailing list](https://gudhi.inria.fr/keepintouch/)
-* [Tutorials](https://gudhi.inria.fr/tutorials/)
-* [Changelog](.github/changelog.md)

@@ -24,11 +24,10 @@ using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
 using Gudhi::multi_filtration::Multi_parameter_filtration;
 using Gudhi::multi_persistence::Multi_parameter_filtered_complex;
 
-typedef boost::mpl::list<Multi_parameter_filtration<double>,
-                         Dynamic_multi_parameter_filtration<double>,
-                         Multi_parameter_filtration<int>,
-                         Dynamic_multi_parameter_filtration<int> >
-    list_of_tested_variants;
+using list_of_tested_variants = boost::mpl::list<Multi_parameter_filtration<double>,
+                                                 Dynamic_multi_parameter_filtration<double>,
+                                                 Multi_parameter_filtration<int>,
+                                                 Dynamic_multi_parameter_filtration<int> >;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(multi_complex_constructors, Fil, list_of_tested_variants)
 {
@@ -84,6 +83,36 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_complex_constructors, Fil, list_of_tested_va
   // BOOST_CHECK_EQUAL(moveC.get_dimension(3), 0);
   // BOOST_CHECK_EQUAL(moveC.get_dimension(4), 1);
   // BOOST_CHECK_EQUAL(moveC.get_dimension(5), 2);
+
+  Multi_parameter_filtered_complex<Multi_parameter_filtration<long int> > copyCC(copyC);
+  BOOST_CHECK_EQUAL(copyCC.get_number_of_cycle_generators(), 6);
+  BOOST_CHECK_EQUAL(copyCC.get_number_of_parameters(), 3);
+  BOOST_CHECK(copyCC.is_ordered_by_dimension());
+  BOOST_CHECK_EQUAL(copyCC.get_filtration_values().size(), 6);
+  BOOST_CHECK_EQUAL(copyCC.get_dimensions().size(), 6);
+  BOOST_CHECK_EQUAL(copyCC.get_boundaries().size(), 6);
+  BOOST_CHECK_EQUAL(copyCC.get_max_dimension(), 2);
+  // BOOST_CHECK_EQUAL(copyCC.get_dimension(0), 0);
+  // BOOST_CHECK_EQUAL(copyCC.get_dimension(1), 0);
+  // BOOST_CHECK_EQUAL(copyCC.get_dimension(2), 0);
+  // BOOST_CHECK_EQUAL(copyCC.get_dimension(3), 1);
+  // BOOST_CHECK_EQUAL(copyCC.get_dimension(4), 1);
+  // BOOST_CHECK_EQUAL(copyCC.get_dimension(5), 2);
+
+  Multi_parameter_filtered_complex<Multi_parameter_filtration<long int> > copyCC2 = copyC;
+  BOOST_CHECK_EQUAL(copyCC2.get_number_of_cycle_generators(), 6);
+  BOOST_CHECK_EQUAL(copyCC2.get_number_of_parameters(), 3);
+  BOOST_CHECK(copyCC2.is_ordered_by_dimension());
+  BOOST_CHECK_EQUAL(copyCC2.get_filtration_values().size(), 6);
+  BOOST_CHECK_EQUAL(copyCC2.get_dimensions().size(), 6);
+  BOOST_CHECK_EQUAL(copyCC2.get_boundaries().size(), 6);
+  BOOST_CHECK_EQUAL(copyCC2.get_max_dimension(), 2);
+  // BOOST_CHECK_EQUAL(copyCC2.get_dimension(0), 0);
+  // BOOST_CHECK_EQUAL(copyCC2.get_dimension(1), 0);
+  // BOOST_CHECK_EQUAL(copyCC2.get_dimension(2), 0);
+  // BOOST_CHECK_EQUAL(copyCC2.get_dimension(3), 1);
+  // BOOST_CHECK_EQUAL(copyCC2.get_dimension(4), 1);
+  // BOOST_CHECK_EQUAL(copyCC2.get_dimension(5), 2);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(multi_complex_sorts, Fil, list_of_tested_variants)
@@ -146,7 +175,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_complex_other, Fil, list_of_tested_variants)
   Multi_parameter_filtered_complex<Fil> cpxToGridCoord(bc, dc, fc);
 
   std::vector<std::vector<typename Fil::value_type> > grid = {{0, 2, 4, 8}, {0, 3, 6, 9}, {0, 4, 8, 16}};
-  fc = {ini{0, 3, 4}, ini{0, 3, 4}, ini{2, 3, 4}, ini{0, 3, 4}, ini{2, 3, 4}, ini{4, 6, 8}, ini{8, 6, 8}};
+  fc = {ini{0, 3, 0}, ini{0, 0, 4}, ini{2, 3, 4}, ini{0, 3, 4}, ini{2, 3, 4}, ini{4, 3, 4}, ini{8, 3, 4}};
 
   cpxToGrid.coarsen_on_grid(grid, false);
   BOOST_CHECK(cpxToGrid.is_ordered_by_dimension());
@@ -155,7 +184,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_complex_other, Fil, list_of_tested_variants)
   BOOST_CHECK(cpxToGrid.get_filtration_values() == fc);
   BOOST_CHECK_EQUAL(cpxToGrid.get_max_dimension(), 3);
 
-  fc = {ini{0, 1, 1}, ini{0, 1, 1}, ini{1, 1, 1}, ini{0, 1, 1}, ini{1, 1, 1}, ini{2, 2, 2}, ini{3, 2, 2}};
+  fc = {ini{0, 1, 0}, ini{0, 0, 1}, ini{1, 1, 1}, ini{0, 1, 1}, ini{1, 1, 1}, ini{2, 1, 1}, ini{3, 1, 1}};
 
   cpxToGridCoord.coarsen_on_grid(grid);
   BOOST_CHECK(cpxToGridCoord.is_ordered_by_dimension());
@@ -217,7 +246,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_complex_friend, Fil, list_of_tested_variants
   using FC2 = typename Complex2::Filtration_value_container;
   using ini2 = std::initializer_list<std::int32_t>;
 
-  FC2 fc2 = {ini2{0, 1, 1}, ini2{0, 1, 1}, ini2{1, 1, 1}, ini2{0, 1, 1}, ini2{1, 1, 1}, ini2{2, 2, 2}, ini2{3, 2, 2}};
+  FC2 fc2 = {ini2{0, 1, 0}, ini2{0, 0, 1}, ini2{1, 1, 1}, ini2{0, 1, 1}, ini2{1, 1, 1}, ini2{2, 1, 1}, ini2{3, 1, 1}};
 
   BOOST_CHECK(cpxToGridCoord.is_ordered_by_dimension());
   BOOST_CHECK(cpxToGridCoord.get_boundaries() == bc);

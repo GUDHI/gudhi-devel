@@ -22,11 +22,13 @@
 #include <algorithm>
 #include <numeric>
 #include <ostream>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_parameter_filtration.h>  //for lex order
+#include <gudhi/Multi_filtration/multi_filtration_conversions.h>
 
 namespace Gudhi {
 namespace multi_persistence {
@@ -105,6 +107,67 @@ class Multi_parameter_filtered_complex
   {
     _initialize_dimension_utils();
   }
+
+  /**
+   * @brief Copy constructor.
+   */
+  Multi_parameter_filtered_complex(const Multi_parameter_filtered_complex& complex) = default;
+
+  /**
+   * @brief Copy constructor.
+   */
+  template <class OtherFiltrationValue>
+  Multi_parameter_filtered_complex(const Multi_parameter_filtered_complex<OtherFiltrationValue>& complex)
+      : boundaries_(complex.get_boundaries()),
+        dimensions_(complex.get_dimensions()),
+        filtrationValues_(complex.get_filtration_values().size()),
+        maxDimension_(complex.get_max_dimension()),
+        isOrderedByDimension_(complex.is_ordered_by_dimension())
+  {
+    const auto& fils = complex.get_filtration_values();
+    for (Index i = 0; i < filtrationValues_.size(); ++i) {
+      filtrationValues_[i] = multi_filtration::as_type<MultiFiltrationValue>(fils[i]);
+    }
+  }
+
+  /**
+   * @brief Move constructor.
+   */
+  Multi_parameter_filtered_complex(Multi_parameter_filtered_complex&& complex) noexcept = default;
+
+  /**
+   * @brief Destructor.
+   */
+  ~Multi_parameter_filtered_complex() = default;
+
+  /**
+   * @brief Assign operator.
+   */
+  Multi_parameter_filtered_complex& operator=(const Multi_parameter_filtered_complex& other) = default;
+
+  /**
+   * @brief Assign operator.
+   */
+  template <class OtherFiltrationValue>
+  Multi_parameter_filtered_complex& operator=(const Multi_parameter_filtered_complex<OtherFiltrationValue>& other)
+  {
+    boundaries_ = other.get_boundaries();
+    dimensions_ = other.get_dimensions();
+    const auto& fils = other.get_filtration_values();
+    filtrationValues_ = Filtration_value_container(fils.size());
+    for (Index i = 0; i < filtrationValues_.size(); ++i) {
+      filtrationValues_[i] = multi_filtration::as_type<MultiFiltrationValue>(fils[i]);
+    }
+    maxDimension_ = other.get_max_dimension();
+    isOrderedByDimension_ = other.is_ordered_by_dimension();
+
+    return *this;
+  }
+
+  /**
+   * @brief Move assign operator.
+   */
+  Multi_parameter_filtered_complex& operator=(Multi_parameter_filtered_complex&& other) noexcept = default;
 
   /**
    * @brief Returns the number of cells in the complex.
@@ -265,10 +328,11 @@ class Multi_parameter_filtered_complex
   friend Multi_parameter_filtered_complex build_permuted_complex(const Multi_parameter_filtered_complex& complex,
                                                                  const std::vector<Index>& permutation)
   {
-    if (permutation.size() != complex.get_number_of_cycle_generators())
+    if (permutation.size() > complex.get_number_of_cycle_generators())
       throw std::invalid_argument("Invalid permutation size.");
 
-    std::vector<Index> inv(permutation.size());
+    const Index nullIndex = -1;
+    std::vector<Index> inv(complex.get_number_of_cycle_generators(), nullIndex);
     for (Index i = 0; i < permutation.size(); ++i) inv[permutation[i]] = i;
 
     Boundary_container newBoundaries;
@@ -279,8 +343,10 @@ class Multi_parameter_filtered_complex
     newBoundaries.reserve(permutation.size());
 
     for (Index i : permutation) {
-      Boundary boundary(complex.boundaries_[i]);
-      for (Index& b : boundary) b = inv[b];
+      Boundary boundary;
+      for (Index b : complex.boundaries_[i]) {
+        if (inv[b] != nullIndex) boundary.push_back(inv[b]);
+      }
       std::sort(boundary.begin(), boundary.end());
       newBoundaries.emplace_back(std::move(boundary));
       newDimensions.push_back(complex.dimensions_[i]);

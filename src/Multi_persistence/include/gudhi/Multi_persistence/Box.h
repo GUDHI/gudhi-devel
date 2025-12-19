@@ -105,12 +105,14 @@ class Box
    * - one of the corners contains the value NaN
    * - both corners have value infinity
    * - both corners have value minus infinity
-   * - both corners don't have the same dimension.
+   *
+   * Throws if both corners don't have the same dimension.
    */
   [[nodiscard]] bool is_trivial() const
   {
     if (lowerCorner_.size() == 0 || upperCorner_.size() == 0) return true;
-    if (lowerCorner_.size() != upperCorner_.size()) return false;  // should not happen?
+    if (lowerCorner_.size() != upperCorner_.size())
+      throw std::logic_error("Upper and lower corner do not have the same dimension");
 
     T inf = Point_t::T_inf;
     T m_inf = Point_t::T_m_inf;
@@ -153,7 +155,7 @@ class Box
   /**
    * @brief Returns the dimension of the box.
    */
-  [[nodiscard]] std::size_t dimension() const { return lowerCorner_.size(); }
+  [[nodiscard]] std::size_t get_dimension() const { return lowerCorner_.size(); }
 
   /**
    * @brief Inflates the box by delta.
@@ -189,6 +191,34 @@ class Box
     os << ", Top corner : ";
     os << box.get_upper_corner();
     return os;
+  }
+
+  /**
+   * @brief Returns the smallest box enclosing both given boxes. Both boxes have to have the same dimension.
+   * If one of the boxes is trivial, returns the other box. If both are trivial, returns an empty box.
+   */
+  friend Box get_smallest_enclosing_box(const Box &a, const Box &b)
+  {
+    if (a.is_trivial()) {
+      if (b.is_trivial()) return Box();
+      return b;
+    }
+    if (b.is_trivial()) return a;
+
+    GUDHI_CHECK(a.get_dimension() == b.get_dimension(), "Both boxes to enclose do not have the same dimension.");
+
+    Point_t lower(a.get_dimension());
+    Point_t upper(a.get_dimension());
+    const auto &aLower = a.get_lower_corner();
+    const auto &aUpper = a.get_upper_corner();
+    const auto &bLower = b.get_lower_corner();
+    const auto &bUpper = b.get_upper_corner();
+    for (unsigned int i = 0; i < a.get_dimension(); ++i) {
+      lower[i] = std::min(aLower[i], bLower[i]);
+      upper[i] = std::max(aUpper[i], bUpper[i]);
+    }
+
+    return Box(lower, upper);
   }
 
  private:

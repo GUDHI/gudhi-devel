@@ -18,6 +18,7 @@
 #ifndef PM_INTRUSIVE_LIST_COLUMN_H
 #define PM_INTRUSIVE_LIST_COLUMN_H
 
+#include <algorithm>
 #include <vector>
 #include <stdexcept>
 #include <type_traits>
@@ -69,6 +70,7 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
   using const_iterator = typename Column_support::const_iterator;
   using reverse_iterator = typename Column_support::reverse_iterator;
   using const_reverse_iterator = typename Column_support::const_reverse_iterator;
+  using Content_range = const Column_support&;
 
   Intrusive_list_column(Column_settings* colSettings = nullptr);
   template <class Container = typename Master_matrix::Boundary>
@@ -78,27 +80,48 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
                         const Container& nonZeroRowIndices,
                         Row_container* rowContainer,
                         Column_settings* colSettings);
-  template <class Container = typename Master_matrix::Boundary>
-  Intrusive_list_column(const Container& nonZeroChainRowIndices, Dimension dimension, Column_settings* colSettings);
-  template <class Container = typename Master_matrix::Boundary, class Row_container>
+  template <class Container = typename Master_matrix::Boundary,
+            class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
+  Intrusive_list_column(const Container& nonZeroRowIndices, Dimension dimension, Column_settings* colSettings);
+  template <class Container = typename Master_matrix::Boundary,
+            class Row_container,
+            class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   Intrusive_list_column(Index columnIndex,
-                        const Container& nonZeroChainRowIndices,
+                        const Container& nonZeroRowIndices,
                         Dimension dimension,
                         Row_container* rowContainer,
                         Column_settings* colSettings);
-  Intrusive_list_column(const Intrusive_list_column& column, Column_settings* colSettings = nullptr);
+  Intrusive_list_column(ID_index idx, Dimension dimension, Column_settings* colSettings);
+  Intrusive_list_column(ID_index idx,
+                        Field_element e,
+                        Dimension dimension,
+                        Column_settings* colSettings);
+  template <class Row_container>
+  Intrusive_list_column(Index columnIndex,
+                        ID_index idx,
+                        Dimension dimension,
+                        Row_container* rowContainer,
+                        Column_settings* colSettings);
+  template <class Row_container>
+  Intrusive_list_column(Index columnIndex,
+                        ID_index idx,
+                        Field_element e,
+                        Dimension dimension,
+                        Row_container* rowContainer,
+                        Column_settings* colSettings);
   template <class Row_container>
   Intrusive_list_column(const Intrusive_list_column& column,
                         Index columnIndex,
                         Row_container* rowContainer,
                         Column_settings* colSettings = nullptr);
+  Intrusive_list_column(const Intrusive_list_column& column, Column_settings* colSettings = nullptr);
   Intrusive_list_column(Intrusive_list_column&& column) noexcept;
   ~Intrusive_list_column();
 
   std::vector<Field_element> get_content(int columnLength = -1) const;
   bool is_non_zero(ID_index rowIndex) const;
-  bool is_empty() const;
-  std::size_t size() const;
+  [[nodiscard]] bool is_empty() const;
+  [[nodiscard]] std::size_t size() const;
 
   template <class Row_index_map>
   void reorder(const Row_index_map& valueMap,
@@ -118,6 +141,8 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
   reverse_iterator rend() noexcept;
   const_reverse_iterator rend() const noexcept;
 
+  Content_range get_non_zero_content_range() const;
+
   template <class Entry_range>
   Intrusive_list_column& operator+=(const Entry_range& column);
   Intrusive_list_column& operator+=(Intrusive_list_column& column);
@@ -135,46 +160,42 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
 
   void push_back(const Entry& entry);
 
-  friend bool operator==(const Intrusive_list_column& c1, const Intrusive_list_column& c2) {
+  friend bool operator==(const Intrusive_list_column& c1, const Intrusive_list_column& c2)
+  {
     if (&c1 == &c2) return true;
 
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      return c1.column_ == c2.column_;
-    } else {
-      auto it1 = c1.column_.begin();
-      auto it2 = c2.column_.begin();
-      if (c1.column_.size() != c2.column_.size()) return false;
-      while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
-        if (it1->get_row_index() != it2->get_row_index() || it1->get_element() != it2->get_element()) return false;
-        ++it1;
-        ++it2;
-      }
-      return true;
-    }
+    return std::equal(c1.column_.begin(),
+                      c1.column_.end(),
+                      c2.column_.begin(),
+                      c2.column_.end(),
+                      [](const Entry& e1, const Entry& e2) {
+                        return e1.get_row_index() == e2.get_row_index() && e1.get_element() == e2.get_element();
+                      });
   }
 
-  friend bool operator<(const Intrusive_list_column& c1, const Intrusive_list_column& c2) {
+  friend bool operator<(const Intrusive_list_column& c1, const Intrusive_list_column& c2)
+  {
     if (&c1 == &c2) return false;
 
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      return c1.column_ < c2.column_;
-    } else {
-      auto it1 = c1.column_.begin();
-      auto it2 = c2.column_.begin();
-      while (it1 != c1.column_.end() && it2 != c2.column_.end()) {
-        if (it1->get_row_index() != it2->get_row_index()) return it1->get_row_index() < it2->get_row_index();
-        if (it1->get_element() != it2->get_element()) return it1->get_element() < it2->get_element();
-        ++it1;
-        ++it2;
-      }
-      return it2 != c2.column_.end();
-    }
+    return std::lexicographical_compare(c1.column_.begin(),
+                                        c1.column_.end(),
+                                        c2.column_.begin(),
+                                        c2.column_.end(),
+                                        [](const Entry& e1, const Entry& e2) {
+                                          if (e1.get_row_index() != e2.get_row_index())
+                                            return e1.get_row_index() < e2.get_row_index();
+                                          if (e1.get_element() != e2.get_element())
+                                            return e1.get_element() < e2.get_element();
+                                          return false;
+                                        });
   }
 
   // Disabled with row access.
   Intrusive_list_column& operator=(const Intrusive_list_column& other);
+  Intrusive_list_column& operator=(Intrusive_list_column&& other) noexcept;
 
-  friend void swap(Intrusive_list_column& col1, Intrusive_list_column& col2) {
+  friend void swap(Intrusive_list_column& col1, Intrusive_list_column& col2) noexcept
+  {
     swap(static_cast<typename Master_matrix::Row_access_option&>(col1),
          static_cast<typename Master_matrix::Row_access_option&>(col2));
     swap(static_cast<typename Master_matrix::Column_dimension_option&>(col1),
@@ -202,10 +223,11 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
 
   // The disposer object function for boost intrusive container
   struct Delete_disposer {
-    Delete_disposer() {};
+    Delete_disposer() = default;
     Delete_disposer(Intrusive_list_column* col) : col_(col) {};
 
-    void operator()(Entry* delete_this) {
+    void operator()(Entry* delete_this)
+    {
       if constexpr (Master_matrix::Option_list::has_row_access) col_->unlink(delete_this);
       col_->entryPool_->destroy(delete_this);
     }
@@ -213,7 +235,7 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
     Intrusive_list_column* col_;
   };
 
-  Field_operators* operators_;
+  Field_operators const* operators_;
   Entry_constructor* entryPool_;
   Column_support column_;
 
@@ -246,8 +268,7 @@ class Intrusive_list_column : public Master_matrix::Row_access_option,
                                                  Column& targetColumn);
 
   void _delete_entry(iterator& it);
-  Entry* _insert_entry(const Field_element& value, ID_index rowIndex, const iterator& position);
-  void _insert_entry(ID_index rowIndex, const iterator& position);
+  Entry* _insert_entry(const iterator& position, ID_index rowIndex, const Field_element& value);
   template <class Entry_range>
   bool _add(const Entry_range& column);
   template <class Entry_range>
@@ -261,40 +282,21 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Column_settin
     : RA_opt(),
       Dim_opt(),
       Chain_opt(),
-      operators_(nullptr),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? nullptr : &(colSettings->entryConstructor)),
       column_()
-{
-  if (colSettings == nullptr) return;  // to allow default constructor which gives a dummy column
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-}
+{}
 
 template <class Master_matrix>
 template <class Container>
 inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(const Container& nonZeroRowIndices,
                                                                    Column_settings* colSettings)
-    : RA_opt(),
-      Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
-      Chain_opt(),
-      operators_(nullptr),
-      entryPool_(&(colSettings->entryConstructor)),
-      column_()
+    : Intrusive_list_column(nonZeroRowIndices,
+                            nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1,
+                            colSettings)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
-
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _insert_entry(id, column_.end());
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      _insert_entry(operators_->get_value(p.second), p.first, column_.end());
-    }
-  }
 }
 
 template <class Master_matrix>
@@ -303,74 +305,39 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Index columnI
                                                                    const Container& nonZeroRowIndices,
                                                                    Row_container* rowContainer,
                                                                    Column_settings* colSettings)
-    : RA_opt(columnIndex, rowContainer),
-      Dim_opt(nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1),
-      Chain_opt([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
-        } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
-        }
-      }()),
-      operators_(nullptr),
-      entryPool_(&(colSettings->entryConstructor)),
-      column_()
+    : Intrusive_list_column(columnIndex,
+                            nonZeroRowIndices,
+                            nonZeroRowIndices.size() == 0 ? 0 : nonZeroRowIndices.size() - 1,
+                            rowContainer,
+                            colSettings)
 {
   static_assert(!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type,
                 "Constructor not available for chain columns, please specify the dimension of the chain.");
-
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _insert_entry(id, column_.end());
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      _insert_entry(operators_->get_value(p.second), p.first, column_.end());
-    }
-  }
 }
 
 template <class Master_matrix>
-template <class Container>
+template <class Container, class>
 inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(const Container& nonZeroRowIndices,
                                                                    Dimension dimension,
                                                                    Column_settings* colSettings)
     : RA_opt(),
       Dim_opt(dimension),
-      Chain_opt([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
-        } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
-        }
-      }()),
-      operators_(nullptr),
+      Chain_opt(nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                    ? Master_matrix::template get_null_value<ID_index>()
+                    : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(&(colSettings->entryConstructor)),
       column_()
 {
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _insert_entry(id, column_.end());
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      _insert_entry(operators_->get_value(p.second), p.first, column_.end());
-    }
+  for (const auto& id : nonZeroRowIndices) {
+    _insert_entry(column_.end(),
+                  Master_matrix::get_row_index(id),
+                  Master_matrix::get_coefficient_value(Master_matrix::get_element(id), operators_));
   }
 }
 
 template <class Master_matrix>
-template <class Container, class Row_container>
+template <class Container, class Row_container, class>
 inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Index columnIndex,
                                                                    const Container& nonZeroRowIndices,
                                                                    Dimension dimension,
@@ -378,31 +345,90 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Index columnI
                                                                    Column_settings* colSettings)
     : RA_opt(columnIndex, rowContainer),
       Dim_opt(dimension),
-      Chain_opt([&] {
-        if constexpr (Master_matrix::Option_list::is_z2) {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : *std::prev(nonZeroRowIndices.end());
-        } else {
-          return nonZeroRowIndices.begin() == nonZeroRowIndices.end()
-                     ? Master_matrix::template get_null_value<ID_index>()
-                     : std::prev(nonZeroRowIndices.end())->first;
-        }
-      }()),
+      Chain_opt(nonZeroRowIndices.begin() == nonZeroRowIndices.end()
+                    ? Master_matrix::template get_null_value<ID_index>()
+                    : Master_matrix::get_row_index(*std::prev(nonZeroRowIndices.end()))),
+      operators_(Master_matrix::get_operator_ptr(colSettings)),
+      entryPool_(&(colSettings->entryConstructor)),
+      column_()
+{
+  for (const auto& id : nonZeroRowIndices) {
+    _insert_entry(column_.end(),
+                  Master_matrix::get_row_index(id),
+                  Master_matrix::get_coefficient_value(Master_matrix::get_element(id), operators_));
+  }
+}
+
+template <class Master_matrix>
+inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(ID_index idx,
+                                                                   Dimension dimension,
+                                                                   Column_settings* colSettings)
+    : RA_opt(),
+      Dim_opt(dimension),
+      Chain_opt(idx),
       operators_(nullptr),
       entryPool_(&(colSettings->entryConstructor)),
       column_()
 {
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    for (ID_index id : nonZeroRowIndices) {
-      _insert_entry(id, column_.end());
-    }
-  } else {
-    operators_ = &(colSettings->operators);
-    for (const auto& p : nonZeroRowIndices) {
-      _insert_entry(operators_->get_value(p.second), p.first, column_.end());
-    }
-  }
+  static_assert(Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp != Z2. Please specify the coefficient.");
+  _insert_entry(column_.end(), idx, 1);
+}
+
+template <class Master_matrix>
+inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(ID_index idx,
+                                                                   Field_element e,
+                                                                   Dimension dimension,
+                                                                   Column_settings* colSettings)
+    : RA_opt(),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      operators_(&(colSettings->operators)),
+      entryPool_(&(colSettings->entryConstructor)),
+      column_()
+{
+  static_assert(!Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
+  _insert_entry(column_.end(), idx, operators_->get_value(e));
+}
+
+template <class Master_matrix>
+template <class Row_container>
+inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Index columnIndex,
+                                                                   ID_index idx,
+                                                                   Dimension dimension,
+                                                                   Row_container* rowContainer,
+                                                                   Column_settings* colSettings)
+    : RA_opt(columnIndex, rowContainer),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      operators_(nullptr),
+      entryPool_(&(colSettings->entryConstructor)),
+      column_()
+{
+  static_assert(Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp != Z2. Please specify the coefficient.");
+  _insert_entry(column_.end(), idx, 1);
+}
+
+template <class Master_matrix>
+template <class Row_container>
+inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Index columnIndex,
+                                                                   ID_index idx,
+                                                                   Field_element e,
+                                                                   Dimension dimension,
+                                                                   Row_container* rowContainer,
+                                                                   Column_settings* colSettings)
+    : RA_opt(columnIndex, rowContainer),
+      Dim_opt(dimension),
+      Chain_opt(idx),
+      operators_(&(colSettings->operators)),
+      entryPool_(&(colSettings->entryConstructor)),
+      column_()
+{
+  static_assert(!Master_matrix::Option_list::is_z2,
+                "Constructor not available for Zp == Z2. Please do not specify any coefficient.");
+  _insert_entry(column_.end(), idx, operators_->get_value(e));
 }
 
 template <class Master_matrix>
@@ -411,16 +437,13 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(const Intrusi
     : RA_opt(),
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
-      operators_(colSettings == nullptr ? column.operators_ : nullptr),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor)),
       column_()
 {
   static_assert(!Master_matrix::Option_list::has_row_access,
                 "Simple copy constructor not available when row access option enabled. Please specify the new column "
                 "index and the row container.");
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    if (colSettings != nullptr) operators_ = &(colSettings->operators);
-  }
 
   column_.clone_from(column.column_, New_cloner(entryPool_), Delete_disposer(this));
 }
@@ -434,20 +457,12 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(const Intrusi
     : RA_opt(columnIndex, rowContainer),
       Dim_opt(static_cast<const Dim_opt&>(column)),
       Chain_opt(static_cast<const Chain_opt&>(column)),
-      operators_(colSettings == nullptr ? column.operators_ : nullptr),
+      operators_(colSettings == nullptr ? column.operators_ : Master_matrix::get_operator_ptr(colSettings)),
       entryPool_(colSettings == nullptr ? column.entryPool_ : &(colSettings->entryConstructor)),
       column_()
 {
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    if (colSettings != nullptr) operators_ = &(colSettings->operators);
-  }
-
   for (const Entry& entry : column.column_) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      _insert_entry(entry.get_row_index(), column_.end());
-    } else {
-      _insert_entry(entry.get_element(), entry.get_row_index(), column_.end());
-    }
+    _insert_entry(column_.end(), entry.get_row_index(), entry.get_element());
   }
 }
 
@@ -459,7 +474,8 @@ inline Intrusive_list_column<Master_matrix>::Intrusive_list_column(Intrusive_lis
       operators_(std::exchange(column.operators_, nullptr)),
       entryPool_(std::exchange(column.entryPool_, nullptr)),
       column_(std::move(column.column_))
-{}
+{
+}
 
 template <class Master_matrix>
 inline Intrusive_list_column<Master_matrix>::~Intrusive_list_column()
@@ -479,11 +495,7 @@ Intrusive_list_column<Master_matrix>::get_content(int columnLength) const
   std::vector<Field_element> container(columnLength);
   for (auto it = column_.begin(); it != column_.end() && it->get_row_index() < static_cast<ID_index>(columnLength);
        ++it) {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      container[it->get_row_index()] = 1;
-    } else {
-      container[it->get_row_index()] = it->get_element();
-    }
+    container[it->get_row_index()] = Master_matrix::get_element(*it);
   }
   return container;
 }
@@ -654,6 +666,13 @@ Intrusive_list_column<Master_matrix>::rend() const noexcept
 }
 
 template <class Master_matrix>
+inline typename Intrusive_list_column<Master_matrix>::Content_range
+Intrusive_list_column<Master_matrix>::get_non_zero_content_range() const
+{
+  return column_;
+}
+
+template <class Master_matrix>
 template <class Entry_range>
 inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix>::operator+=(const Entry_range& column)
 {
@@ -688,28 +707,22 @@ inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix
 template <class Master_matrix>
 inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix>::operator*=(const Field_element& val)
 {
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    if (val % 2 == 0) {
-      if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      } else {
-        clear();
-      }
+  Field_element realVal = Master_matrix::get_coefficient_value(val, operators_);
+
+  if (realVal == Field_operators::get_additive_identity()) {
+    if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
+      throw std::invalid_argument("A chain column should not be multiplied by 0.");
+    } else {
+      clear();
     }
-  } else {
-    Field_element realVal = operators_->get_value(val);
+    return *this;
+  }
 
-    if (realVal == Field_operators::get_additive_identity()) {
-      if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
-        throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      } else {
-        clear();
-      }
-      return *this;
-    }
+  if (realVal == Field_operators::get_multiplicative_identity()) return *this;
 
-    if (realVal == Field_operators::get_multiplicative_identity()) return *this;
-
+  // multiply_inplace needs a non-const reference to element, so even if Z2 never reaches here, it won't compile
+  // without the constexpr, as we are not storing a dummy value just for this purpose.
+  if constexpr (!Master_matrix::Option_list::is_z2) {
     for (Entry& entry : column_) {
       operators_->multiply_inplace(entry.get_element(), realVal);
       if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::update_entry(entry);
@@ -731,16 +744,7 @@ inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    if (val) {
-      _add(column);
-    } else {
-      clear();
-      _add(column);
-    }
-  } else {
-    _multiply_target_and_add(val, column);
-  }
+  _multiply_target_and_add(Master_matrix::get_coefficient_value(val, operators_), column);
 
   return *this;
 }
@@ -752,32 +756,12 @@ inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        if (_add(column)) {
-          Chain_opt::_swap_pivots(column);
-          Dim_opt::_swap_dimension(column);
-        }
-      } else {
-        throw std::invalid_argument("A chain column should not be multiplied by 0.");
-      }
-    } else {
-      if (_multiply_target_and_add(val, column)) {
-        Chain_opt::_swap_pivots(column);
-        Dim_opt::_swap_dimension(column);
-      }
+    if (_multiply_target_and_add(Master_matrix::get_coefficient_value(val, operators_), column)) {
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        _add(column);
-      } else {
-        clear();
-        _add(column);
-      }
-    } else {
-      _multiply_target_and_add(val, column);
-    }
+    _multiply_target_and_add(Master_matrix::get_coefficient_value(val, operators_), column);
   }
 
   return *this;
@@ -795,13 +779,7 @@ inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix
   static_assert((!Master_matrix::isNonBasic || Master_matrix::Option_list::is_of_boundary_type),
                 "For chain columns, the given column cannot be constant.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    if (val) {
-      _add(column);
-    }
-  } else {
-    _multiply_source_and_add(column, val);
-  }
+  _multiply_source_and_add(column, Master_matrix::get_coefficient_value(val, operators_));
 
   return *this;
 }
@@ -813,27 +791,12 @@ inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix
 {
   if constexpr (Master_matrix::isNonBasic && !Master_matrix::Option_list::is_of_boundary_type) {
     // assumes that the addition never zeros out this column.
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        if (_add(column)) {
-          Chain_opt::_swap_pivots(column);
-          Dim_opt::_swap_dimension(column);
-        }
-      }
-    } else {
-      if (_multiply_source_and_add(column, val)) {
-        Chain_opt::_swap_pivots(column);
-        Dim_opt::_swap_dimension(column);
-      }
+    if (_multiply_source_and_add(column, Master_matrix::get_coefficient_value(val, operators_))) {
+      Chain_opt::_swap_pivots(column);
+      Dim_opt::_swap_dimension(column);
     }
   } else {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      if (val) {
-        _add(column);
-      }
-    } else {
-      _multiply_source_and_add(column, val);
-    }
+    _multiply_source_and_add(column, Master_matrix::get_coefficient_value(val, operators_));
   }
 
   return *this;
@@ -846,11 +809,7 @@ inline void Intrusive_list_column<Master_matrix>::push_back(const Entry& entry)
 
   GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
 
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    _insert_entry(entry.get_row_index(), column_.end());
-  } else {
-    _insert_entry(entry.get_element(), entry.get_row_index(), column_.end());
-  }
+  _insert_entry(column_.end(), entry.get_row_index(), entry.get_element());
 }
 
 template <class Master_matrix>
@@ -858,6 +817,9 @@ inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix
     const Intrusive_list_column& other)
 {
   static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
+
+  // otherwise the column will be destroyed before copying itself...
+  if (this == &other) return *this;
 
   Dim_opt::operator=(other);
   Chain_opt::operator=(other);
@@ -872,6 +834,27 @@ inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix
 }
 
 template <class Master_matrix>
+inline Intrusive_list_column<Master_matrix>& Intrusive_list_column<Master_matrix>::operator=(
+    Intrusive_list_column&& other) noexcept
+{
+  static_assert(!Master_matrix::Option_list::has_row_access, "= assignment not enabled with row access option.");
+
+  // to avoid destroying the column before building from it-self...
+  if (&column_ == &(other.column_)) return *this;
+
+  Dim_opt::operator=(std::move(other));
+  Chain_opt::operator=(std::move(other));
+
+  column_.clear_and_dispose(Delete_disposer(this));
+
+  operators_ = std::exchange(other.operators_, nullptr);
+  entryPool_ = std::exchange(other.entryPool_, nullptr);
+  column_ = std::move(other.column_);
+
+  return *this;
+}
+
+template <class Master_matrix>
 inline void Intrusive_list_column<Master_matrix>::_delete_entry(iterator& it)
 {
   it = column_.erase_and_dispose(it, Delete_disposer(this));
@@ -879,35 +862,20 @@ inline void Intrusive_list_column<Master_matrix>::_delete_entry(iterator& it)
 
 template <class Master_matrix>
 inline typename Intrusive_list_column<Master_matrix>::Entry* Intrusive_list_column<Master_matrix>::_insert_entry(
-    const Field_element& value,
+    const iterator& position,
     ID_index rowIndex,
-    const iterator& position)
+    const Field_element& value)
 {
+  Entry* newEntry;
   if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    newEntry->set_element(value);
-    column_.insert(position, *newEntry);
-    RA_opt::insert_entry(rowIndex, newEntry);
-    return newEntry;
+    newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
   } else {
-    Entry* newEntry = entryPool_->construct(rowIndex);
-    newEntry->set_element(value);
-    column_.insert(position, *newEntry);
-    return newEntry;
+    newEntry = entryPool_->construct(rowIndex);
   }
-}
-
-template <class Master_matrix>
-inline void Intrusive_list_column<Master_matrix>::_insert_entry(ID_index rowIndex, const iterator& position)
-{
-  if constexpr (Master_matrix::Option_list::has_row_access) {
-    Entry* newEntry = entryPool_->construct(RA_opt::get_column_index(), rowIndex);
-    column_.insert(position, *newEntry);
-    RA_opt::insert_entry(rowIndex, newEntry);
-  } else {
-    Entry* newEntry = entryPool_->construct(rowIndex);
-    column_.insert(position, *newEntry);
-  }
+  newEntry->set_element(value);
+  column_.insert(position, *newEntry);
+  if constexpr (Master_matrix::Option_list::has_row_access) RA_opt::insert_entry(rowIndex, newEntry);
+  return newEntry;
 }
 
 template <class Master_matrix>
@@ -946,7 +914,8 @@ inline bool Intrusive_list_column<Master_matrix>::_multiply_source_and_add(const
  */
 template <class Master_matrix>
 struct std::hash<Gudhi::persistence_matrix::Intrusive_list_column<Master_matrix> > {
-  std::size_t operator()(const Gudhi::persistence_matrix::Intrusive_list_column<Master_matrix>& column) const {
+  std::size_t operator()(const Gudhi::persistence_matrix::Intrusive_list_column<Master_matrix>& column) const
+  {
     return Gudhi::persistence_matrix::hash_column(column);
   }
 };

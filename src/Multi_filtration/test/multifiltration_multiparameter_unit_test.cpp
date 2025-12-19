@@ -911,14 +911,14 @@ void test_modifiers(){
   f.push_to_least_common_upper_bound({1, 7, 5});
   f.project_onto_grid(grid, true);
   BOOST_CHECK_EQUAL(f(0, 0), 1);
-  BOOST_CHECK_EQUAL(f(0, 1), 3);
-  BOOST_CHECK_EQUAL(f(0, 2), 2);
+  BOOST_CHECK_EQUAL(f(0, 1), 2);
+  BOOST_CHECK_EQUAL(f(0, 2), 1);
 
   f.push_to_least_common_upper_bound({1, 7, 5});
   f.project_onto_grid(grid, false);
   BOOST_CHECK_EQUAL(f(0, 0), 2);
-  BOOST_CHECK_EQUAL(f(0, 1), 9);
-  BOOST_CHECK_EQUAL(f(0, 2), 8);
+  BOOST_CHECK_EQUAL(f(0, 1), 6);
+  BOOST_CHECK_EQUAL(f(0, 2), 4);
 
   if constexpr (!F::ensures_1_criticality()) {
     f.set_num_generators(3);
@@ -926,8 +926,8 @@ void test_modifiers(){
     BOOST_CHECK_EQUAL(f.num_generators(), 3);
     BOOST_CHECK_EQUAL(f.num_entries(), 9);
     BOOST_CHECK_EQUAL(f(0, 0), 2);
-    BOOST_CHECK_EQUAL(f(0, 1), 9);
-    BOOST_CHECK_EQUAL(f(0, 2), 8);
+    BOOST_CHECK_EQUAL(f(0, 1), 6);
+    BOOST_CHECK_EQUAL(f(0, 2), 4);
     BOOST_CHECK_EQUAL(f(1, 0), F::T_m_inf);
     BOOST_CHECK_EQUAL(f(1, 1), F::T_m_inf);
     BOOST_CHECK_EQUAL(f(1, 2), F::T_m_inf);
@@ -1171,8 +1171,8 @@ void test_friends(){
   BOOST_CHECK_EQUAL(res.num_parameters(), 3);
   BOOST_CHECK_EQUAL(f.num_parameters(), 3);
   BOOST_CHECK_EQUAL(res(0, 0), 1);
-  BOOST_CHECK_EQUAL(res(0, 1), 3);
-  BOOST_CHECK_EQUAL(res(0, 2), 2);
+  BOOST_CHECK_EQUAL(res(0, 1), 2);
+  BOOST_CHECK_EQUAL(res(0, 2), 1);
 
   if constexpr (F::ensures_1_criticality()) {
     BOOST_CHECK_EQUAL(res.num_generators(), 1);
@@ -1191,8 +1191,8 @@ void test_friends(){
 
   if constexpr (F::ensures_1_criticality()) {
     BOOST_CHECK_EQUAL(res(0, 0), 2);
-    BOOST_CHECK_EQUAL(res(0, 1), 9);
-    BOOST_CHECK_EQUAL(res(0, 2), 8);
+    BOOST_CHECK_EQUAL(res(0, 1), 6);
+    BOOST_CHECK_EQUAL(res(0, 2), 4);
   } else {
     BOOST_CHECK_EQUAL(res(0, 0), 2);
     BOOST_CHECK_EQUAL(res(0, 1), 0);

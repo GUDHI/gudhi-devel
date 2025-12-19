@@ -18,7 +18,7 @@
 #define MF_MULTI_PARAMETER_FILTRATION_H_
 
 #include <algorithm>    //std::lower_bound
-#include <cmath>        //std::isnan, std::min
+#include <cmath>        //std::isnan, std::min, std::abs
 #include <cstddef>      //std::size_t
 #include <cstdint>      //std::int32_t, std::uint8_t
 #include <cstring>      //memcpy
@@ -1776,9 +1776,11 @@ class Multi_parameter_filtration
         std::invalid_argument("The grid should not be smaller than the number of parameters in the filtration value."));
 
     auto project_generator_value = [&](T &val, const OneDimArray &filtration) {
-      auto d = std::distance(
-          filtration.begin(),
-          std::lower_bound(filtration.begin(), filtration.end(), static_cast<typename OneDimArray::value_type>(val)));
+      auto v = static_cast<typename OneDimArray::value_type>(val);
+      auto d = std::distance(filtration.begin(), std::lower_bound(filtration.begin(), filtration.end(), v));
+      if (d != 0 && std::abs(v - filtration[d]) > std::abs(v - filtration[d - 1])) {
+        --d;
+      }
       val = coordinate ? static_cast<T>(d) : static_cast<T>(filtration[d]);
     };
 

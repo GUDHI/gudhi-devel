@@ -18,7 +18,8 @@
 #ifndef MP_PROJECTIVE_COVER_KERNEL_H_INCLUDED
 #define MP_PROJECTIVE_COVER_KERNEL_H_INCLUDED
 
-#include <utility>  //std::move
+#include <stdexcept>  //std::invalid_argument, std::runtime_error
+#include <utility>    //std::move
 #include <vector>
 #include <set>
 
@@ -83,13 +84,16 @@ class Projective_cover_kernel
     GUDHI_CHECK_code(
       Index i = 0;
       for (; i < complex.get_number_of_cycle_generators() - 1; ++i) {
-        GUDHI_CHECK(filtValues[i].num_generators() == 1, "Only available for 1-critical modules.");
-        GUDHI_CHECK(dimensions[i] <= dimensions[i + 1], "Cells have to be ordered by dimension.");
+        GUDHI_CHECK(filtValues[i].num_generators() == 1,
+                    std::invalid_argument("Only available for 1-critical modules."));
+        GUDHI_CHECK(dimensions[i] <= dimensions[i + 1],
+                    std::invalid_argument("Cells have to be ordered by dimension."));
         if (dimensions[i] == dimensions[i + 1])
           GUDHI_CHECK(is_less_or_equal_than_lexicographically<true>(filtValues[i], filtValues[i + 1]),
-                      "Cells with same dimension have to be ordered co-lexicographically.");
+                      std::invalid_argument("Cells with same dimension have to be ordered co-lexicographically."));
       }
-      GUDHI_CHECK(filtValues[i].num_generators() == 1, "Only available for 1-critical modules.");
+      GUDHI_CHECK(filtValues[i].num_generators() == 1,
+                  std::invalid_argument("Only available for 1-critical modules."));
     )
 
     Index startDim1, startDim2, end;
@@ -255,11 +259,11 @@ class Projective_cover_kernel
       if (pivot >= 0) {
         lexicoIt.insert(filtValues[i + shift], i);
         auto it = pivotCache[pivot].find(i);
-        GUDHI_CHECK(it != pivotCache[pivot].end(), "Column not registered in pivot cache.");
+        GUDHI_CHECK(it != pivotCache[pivot].end(), std::runtime_error("Column not registered in pivot cache."));
         it++;
         for (; it != pivotCache[pivot].end(); ++it) {
           int colIdx = *it;
-          GUDHI_CHECK(static_cast<Index>(colIdx) > i, "Column not registered in the right order.");
+          GUDHI_CHECK(static_cast<Index>(colIdx) > i, std::runtime_error("Column not registered in the right order."));
           auto prev = filtValues[colIdx + shift];
           prev.push_to_least_common_upper_bound(filtValues[i + shift]);
           lexicoIt.insert(std::move(prev), colIdx);
@@ -285,9 +289,10 @@ class Projective_cover_kernel
     it++;
     for (; it != pivotCache[pivot].end(); ++it) {
       int colIdx = *it;
-      GUDHI_CHECK(static_cast<Index>(colIdx) > i, "(update) Column not registered in the right order.");
+      GUDHI_CHECK(static_cast<Index>(colIdx) > i,
+                  std::runtime_error("(update) Column not registered in the right order."));
       auto prev = filtValues[colIdx];
-      if (prev < filtValues[i]) {
+      if (!(prev >= filtValues[i])) {
         prev.push_to_least_common_upper_bound(filtValues[i]);
         if (is_strict_less_than_lexicographically(gridValue, prev)) {
           lexicoIt.insert(prev, colIdx);
@@ -360,7 +365,7 @@ class Projective_cover_kernel
         N.add_to(k, i);
         pivotCache[pivot].erase(i);
         // WARN : we update the pivot cache after the update loop
-        GUDHI_CHECK(std::forward<F>(get_pivot)(i) < pivot, "Column addition failed.");
+        GUDHI_CHECK(std::forward<F>(get_pivot)(i) < pivot, std::runtime_error("Column addition failed."));
         return true;  // pivot has changed
       }
     }

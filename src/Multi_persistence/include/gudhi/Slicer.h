@@ -20,6 +20,9 @@
 
 #include <array>
 #include <initializer_list>
+#include <limits>
+#include <stdexcept>
+#include <string>
 #include <type_traits>
 #include <numeric>  //std::iota
 #include <utility>  //std::move
@@ -44,7 +47,13 @@ namespace multi_persistence {
  * @class Slicer Slicer.h gudhi/Slicer.h
  * @ingroup multi_persistence
  *
- * @brief Class slicing a multi-parameter persistence module. TODO: more details
+ * @brief Class encoding a filtered complex, presentation or resolution, inducing a multiparameter persistence module
+ * with:
+ * (1) a complex / presentation matrix / resolution matrix
+ * (2) a filtration (indexed by the complex) for each generator of (1), and
+ * (3) tools to compute 1-dimensional slices of the induced multi-parameter persistence module.
+ *
+ * TODO: more details
  *
  * @tparam MultiFiltrationValue Filtration value class respecting the @ref MultiFiltrationValue concept.
  * @tparam PersistenceAlgorithm Class respecting the @ref PersistenceAlgorithm concept. Used to compute persistence,
@@ -128,6 +137,17 @@ class Slicer
   {}
 
   /**
+   * @brief Copy constructor. Persistence computation initialization is not updated.
+   */
+  template <class OtherMultiFiltrationValue, class OtherPersistenceAlgorithm>
+  Slicer(const Slicer<OtherMultiFiltrationValue, OtherPersistenceAlgorithm>& other)
+      : complex_(other.get_filtered_complex()),
+        slice_(other.get_slice().begin(), other.get_slice().end()),
+        generatorOrder_(other.get_current_order()),
+        persistence_()
+  {}
+
+  /**
    * @brief Move constructor. Persistence computation initialization is not updated.
    */
   Slicer(Slicer&& other) noexcept
@@ -147,6 +167,20 @@ class Slicer
     complex_ = other.complex_;
     slice_ = other.slice_;
     generatorOrder_ = other.generatorOrder_;
+    persistence_.reset();
+
+    return *this;
+  }
+
+  /**
+   * @brief Assign operator. Persistence computation initialization is not updated.
+   */
+  template <class OtherMultiFiltrationValue, class OtherPersistenceAlgorithm>
+  Slicer& operator=(const Slicer<OtherMultiFiltrationValue, OtherPersistenceAlgorithm>& other)
+  {
+    complex_ = other.get_filtered_complex();
+    slice_ = std::vector<T>(other.get_slice().begin(), other.get_slice().end());
+    generatorOrder_ = other.get_current_order();
     persistence_.reset();
 
     return *this;
@@ -186,8 +220,10 @@ class Slicer
    */
   Index get_number_of_parameters() const { return complex_.get_number_of_parameters(); }
 
-  // // only used for scc io for now
-  // const Complex& get_chain_complex() const { return complex_; }
+  /**
+   * @brief Returns the underlying complex.
+   */
+  const Complex& get_filtered_complex() const { return complex_; }
 
   /**
    * @brief Returns a const reference to the current permutation map, indicating in which order are the generators
@@ -226,11 +262,14 @@ class Slicer
   std::pair<Filtration_value, Filtration_value> get_bounding_box() const
   {
     Filtration_value a = Filtration_value::inf(get_number_of_parameters());
-    Filtration_value b = -a;
+    Filtration_value b = Filtration_value::minus_inf(get_number_of_parameters());
     for (const Filtration_value& fil : complex_.get_filtration_values()) {
       if (fil.num_generators() > 1) {
         a.pull_to_greatest_common_lower_bound(factorize_below(fil));
-        b.push_to_least_common_upper_bound(factorize_above(fil));
+        // Because of Degree_rips_bifiltration
+        Filtration_value above = factorize_above(fil);
+        auto g = above.num_generators() - 1;
+        b.push_to_least_common_upper_bound({above(g, 0), above(g, 1)});
       } else {
         a.pull_to_greatest_common_lower_bound(fil);
         b.push_to_least_common_upper_bound(fil);
@@ -495,6 +534,41 @@ class Slicer
     return _get_representative_cycles(complex_, update);
   }
 
+  Cycle get_most_persistent_cycle(Dimension dim = 1, bool update = true)
+  {
+    static_assert(Persistence::has_rep_cycles,
+                  "Representative cycles not enabled by the chosen PersistenceAlgorithm class.");
+
+    auto barcodeIndices = persistence_.get_barcode();
+
+    Index maxIndex = -1;
+    Index maxBirth = std::numeric_limits<Index>::max();
+    T maxLength = 0;
+    for (Index i = 0; i < barcodeIndices.size(); ++i) {
+      // barcodeIndices[i] does not work
+      const auto& bar = barcodeIndices(i);
+      if (bar.dim == dim) {
+        if (bar.death == Persistence::nullDeath) {
+          if (maxBirth > bar.birth) {
+            maxBirth = bar.birth;
+            maxIndex = i;
+            maxLength = Filtration_value::T_inf;
+          }
+        } else {
+          T length = std::abs(slice_[bar.death] - slice_[bar.birth]);
+          if (maxLength < length) {
+            maxLength = length;
+            maxIndex = i;
+          }
+        }
+      }
+    }
+
+    if (maxIndex == static_cast<Index>(-1)) return {};
+
+    return persistence_.get_representative_cycle(maxIndex, update);
+  }
+
   // FRIENDS
 
   /**
@@ -503,8 +577,10 @@ class Slicer
    */
   friend Slicer build_permuted_slicer(const Slicer& slicer, const std::vector<Index>& permutation)
   {
-    GUDHI_CHECK(permutation.size() > slicer.get_number_of_cycle_generators(),
-                "Too many elements in permutation vector.");
+    GUDHI_CHECK(permutation.size() < slicer.get_number_of_cycle_generators(),
+                std::invalid_argument(
+                    "Too many elements in permutation vector. Got perm size: " + std::to_string(permutation.size()) +
+                    " while this->size: " + std::to_string(slicer.get_number_of_cycle_generators())));
     return Slicer(build_permuted_complex(slicer.complex_, permutation));
   }
 

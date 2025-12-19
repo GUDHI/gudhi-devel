@@ -18,8 +18,6 @@
 #ifndef PM_CHAIN_PAIRING_H
 #define PM_CHAIN_PAIRING_H
 
-#include <utility>  //std::move
-
 namespace Gudhi {
 namespace persistence_matrix {
 
@@ -34,7 +32,7 @@ class Chain_barcode_swap;
  * is already managed by the vine update classes.
  */
 struct Dummy_chain_pairing {
-  friend void swap([[maybe_unused]] Dummy_chain_pairing& d1, [[maybe_unused]] Dummy_chain_pairing& d2) {}
+  friend void swap([[maybe_unused]] Dummy_chain_pairing& d1, [[maybe_unused]] Dummy_chain_pairing& d2) noexcept {}
 };
 
 /**
@@ -55,19 +53,7 @@ class Chain_pairing
   /**
    * @brief Default constructor.
    */
-  Chain_pairing();
-  /**
-   * @brief Copy constructor.
-   *
-   * @param matrixToCopy Matrix to copy.
-   */
-  Chain_pairing(const Chain_pairing& matrixToCopy);
-  /**
-   * @brief Move constructor.
-   *
-   * @param other Matrix to move.
-   */
-  Chain_pairing(Chain_pairing&& other) noexcept;
+  Chain_pairing() = default;
 
   /**
    * @brief Returns the current barcode which is maintained at any insertion, removal or vine swap.
@@ -77,14 +63,10 @@ class Chain_pairing
   const Barcode& get_current_barcode() const;
 
   /**
-   * @brief Assign operator.
-   */
-  Chain_pairing& operator=(Chain_pairing other);
-
-  /**
    * @brief Swap operator.
    */
-  friend void swap(Chain_pairing& pairing1, Chain_pairing& pairing2) {
+  friend void swap(Chain_pairing& pairing1, Chain_pairing& pairing2) noexcept
+  {
     pairing1.barcode_.swap(pairing2.barcode_);
     pairing1.indexToBar_.swap(pairing2.indexToBar_);
   }
@@ -112,30 +94,9 @@ class Chain_pairing
 };
 
 template <class Master_matrix>
-inline Chain_pairing<Master_matrix>::Chain_pairing() {}
-
-template <class Master_matrix>
-inline Chain_pairing<Master_matrix>::Chain_pairing(const Chain_pairing& matrixToCopy)
-    : barcode_(matrixToCopy.barcode_), indexToBar_(matrixToCopy.indexToBar_)
-{}
-
-template <class Master_matrix>
-inline Chain_pairing<Master_matrix>::Chain_pairing(Chain_pairing<Master_matrix>&& other) noexcept
-    : barcode_(std::move(other.barcode_)), indexToBar_(std::move(other.indexToBar_))
-{}
-
-template <class Master_matrix>
 inline const typename Chain_pairing<Master_matrix>::Barcode& Chain_pairing<Master_matrix>::get_current_barcode() const
 {
   return barcode_;
-}
-
-template <class Master_matrix>
-inline Chain_pairing<Master_matrix>& Chain_pairing<Master_matrix>::operator=(Chain_pairing<Master_matrix> other)
-{
-  barcode_.swap(other.barcode_);
-  indexToBar_.swap(other.indexToBar_);
-  return *this;
 }
 
 template <class Master_matrix>
