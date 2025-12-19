@@ -10,8 +10,8 @@
 
 #include <nanobind/nanobind.h>
 
-// For Windows, where _random is the dll provider for the other clients
-#define RANDOM_DLL_EXPORT
+// For Windows, where Random_generator is a client of random here (random.dll is the provider)
+#define RANDOM_DLL_IMPORT
 #include <python_interfaces/random_utils.h>
 
 namespace nb = nanobind;
