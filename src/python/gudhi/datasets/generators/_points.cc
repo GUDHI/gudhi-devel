@@ -16,16 +16,20 @@
 
 #include <CGAL/Epick_d.h>
 
+// For Windows, where points is a client of random here (random.dll is the provider)
+#define RANDOM_DLL_IMPORT
 #include <gudhi/random_point_generators.h>
+
 #include <gudhi/Debug_utils.h>
 #include <python_interfaces/numpy_utils.h>
+#include <python_interfaces/random_utils.h>
 
 namespace nb = nanobind;
 
 typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> Kern;
 
-auto generate_points_on_sphere(const size_t n_samples, const int ambient_dim, double radius, std::string sample)
-{
+auto generate_points_on_sphere(const size_t n_samples, const int ambient_dim, double radius, std::string sample,
+                               Gudhi::random::Random_generator& rng) {
   if (sample != "random") {
     throw nb::value_error("This sample type is not supported");
   }
@@ -33,7 +37,8 @@ auto generate_points_on_sphere(const size_t n_samples, const int ambient_dim, do
   std::vector<typename Kern::Point_d> points_generated;
   {
     nb::gil_scoped_release release;
-    points_generated = Gudhi::generate_points_on_sphere_d<Kern>(n_samples, ambient_dim, radius);
+    points_generated = Gudhi::generate_points_on_sphere_d<Kern>(n_samples, ambient_dim, radius, 0.,
+                                                                rng.get_default_random());
   }
 
   // Reserve sufficient memory space to copy data
@@ -72,12 +77,16 @@ NB_MODULE(_points_ext, m)
 {
   m.attr("__license__") = "LGPL v3";
 
+  // Required to get a default rng from the random module (another nanobind module)
+  nb::object GudhiRandomGenerator = nb::module_::import_("gudhi.random").attr("GudhiRandomGenerator");
+  nb::object default_rng = GudhiRandomGenerator();
   m.def("sphere",
         &generate_points_on_sphere,
         nb::arg("n_samples"),
         nb::arg("ambient_dim"),
         nb::arg("radius") = 1.,
         nb::arg("sample") = "random",
+        nb::arg("rng") = default_rng,
         R"doc(
 Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
 
