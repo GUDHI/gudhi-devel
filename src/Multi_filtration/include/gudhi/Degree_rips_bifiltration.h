@@ -1710,10 +1710,11 @@ class Degree_rips_bifiltration
     for (size_type g = 0; g < num_generators(); ++g) {
       GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, std::invalid_argument("Unvalid grid.")));
 
-      auto d = std::distance(
-          values.begin(),
-          std::lower_bound(
-              values.begin(), values.end(), static_cast<typename OneDimArray::value_type>(generators_[g])));
+      auto v = static_cast<typename OneDimArray::value_type>(generators_[g]);
+      auto d = std::distance(values.begin(), std::lower_bound(values.begin(), values.end(), v));
+      if (d != 0 && std::abs(v - values[d]) > std::abs(v - values[d - 1])) {
+        --d;
+      }
       generators_[g] = coordinate ? static_cast<T>(d) : static_cast<T>(values[d]);
     }
   }

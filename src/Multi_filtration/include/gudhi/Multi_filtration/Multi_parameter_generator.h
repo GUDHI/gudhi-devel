@@ -1370,10 +1370,11 @@ class Multi_parameter_generator
 
     for (size_type p = 0; p < generator_.size(); ++p) {
       const auto &filtration = grid[p];
-      auto d = std::distance(
-          filtration.begin(),
-          std::lower_bound(
-              filtration.begin(), filtration.end(), static_cast<typename OneDimArray::value_type>(generator_[p])));
+      auto v = static_cast<typename OneDimArray::value_type>(generator_[p]);
+      auto d = std::distance(filtration.begin(), std::lower_bound(filtration.begin(), filtration.end(), v));
+      if (d != 0 && std::abs(v - filtration[d]) > std::abs(v - filtration[d - 1])) {
+        --d;
+      }
       generator_[p] = coordinate ? static_cast<T>(d) : static_cast<T>(filtration[d]);
     }
   }

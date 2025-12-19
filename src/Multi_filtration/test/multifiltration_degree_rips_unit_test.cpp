@@ -1138,12 +1138,12 @@ void test_modifiers3()
   std::vector<std::vector<int> > grid = {{0, 3, 6, 9}, {0, 1, 2, 3}, {0, 4, 8, 16}};
 
   f1.project_onto_grid(grid, true);
-  BOOST_CHECK_EQUAL(f1(0, 0), 3);
+  BOOST_CHECK_EQUAL(f1(0, 0), 2);
   BOOST_CHECK_EQUAL(f1(0, 1), 0);
 
   f1 = F({7, 0});
   f1.project_onto_grid(grid, false);
-  BOOST_CHECK_EQUAL(f1(0, 0), 9);
+  BOOST_CHECK_EQUAL(f1(0, 0), 6);
   BOOST_CHECK_EQUAL(f1(0, 1), 0);
 
   if constexpr (!F::ensures_1_criticality()) {
@@ -1152,7 +1152,7 @@ void test_modifiers3()
     BOOST_CHECK_EQUAL(f1.num_parameters(), 2);
     BOOST_CHECK_EQUAL(f1.num_generators(), 5);
     BOOST_CHECK_EQUAL(f1.num_entries(), 10);
-    BOOST_CHECK_EQUAL(f1(0, 0), 9);
+    BOOST_CHECK_EQUAL(f1(0, 0), 6);
     BOOST_CHECK_EQUAL(f1(0, 1), 0);
     BOOST_CHECK_EQUAL(f1(1, 0), def);
     BOOST_CHECK_EQUAL(f1(1, 1), 1);
@@ -1328,15 +1328,15 @@ void test_friends()
   BOOST_CHECK_EQUAL(res.num_generators(), 3);
   BOOST_CHECK_EQUAL(f.num_parameters(), 2);
   BOOST_CHECK_EQUAL(f.num_generators(), 3);
-  BOOST_CHECK_EQUAL(res(0, 0), 1);
-  BOOST_CHECK_EQUAL(res(1, 0), 3);
+  BOOST_CHECK_EQUAL(res(0, 0), 0);
+  BOOST_CHECK_EQUAL(res(1, 0), 2);
   BOOST_CHECK_EQUAL(res(2, 0), 2);
 
   res = evaluate_coordinates_in_grid(res, grid);
   BOOST_CHECK_EQUAL(res.num_parameters(), 2);
   BOOST_CHECK_EQUAL(res.num_generators(), 3);
-  BOOST_CHECK_EQUAL(res(0, 0), 3);
-  BOOST_CHECK_EQUAL(res(1, 0), 9);
+  BOOST_CHECK_EQUAL(res(0, 0), 0);
+  BOOST_CHECK_EQUAL(res(1, 0), 6);
   BOOST_CHECK_EQUAL(res(2, 0), 6);
 }
 
@@ -1359,13 +1359,13 @@ void test_friends_1_critical()
   BOOST_CHECK_EQUAL(f.num_parameters(), 2);
   BOOST_CHECK_EQUAL(res.num_generators(), 1);
   BOOST_CHECK_EQUAL(f.num_generators(), 1);
-  BOOST_CHECK_EQUAL(res(0, 0), 3);
+  BOOST_CHECK_EQUAL(res(0, 0), 2);
   BOOST_CHECK_EQUAL(res(0, 1), 0);
 
   res = evaluate_coordinates_in_grid(res, grid);
   BOOST_CHECK_EQUAL(res.num_generators(), 1);
   BOOST_CHECK_EQUAL(res.num_parameters(), 2);
-  BOOST_CHECK_EQUAL(res(0, 0), 9);
+  BOOST_CHECK_EQUAL(res(0, 0), 6);
   BOOST_CHECK_EQUAL(res(0, 1), 0);
 }
 
