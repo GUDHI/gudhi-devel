@@ -20,7 +20,7 @@
 
 using Gudhi::multi_persistence::Box;
 
-typedef boost::mpl::list<double, float, int> list_of_tested_variants;
+using list_of_tested_variants = boost::mpl::list<double, float, int>;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(box_constructors, T, list_of_tested_variants)
 {
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
   BOOST_CHECK(!b.contains(inf));
   BOOST_CHECK(!b.contains(minus_inf));
 
-  BOOST_CHECK_EQUAL(b.dimension(), 3);
+  BOOST_CHECK_EQUAL(b.get_dimension(), 3);
 
   b.inflate(2);
   auto& bottom = b.get_lower_corner();
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
   BOOST_CHECK(b.contains(inf));
   BOOST_CHECK(!b.contains(minus_inf));
 
-  BOOST_CHECK_EQUAL(b.dimension(), 3);
+  BOOST_CHECK_EQUAL(b.get_dimension(), 3);
 
   b.inflate(2);
   BOOST_CHECK_EQUAL(bottom[0], -4);
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
   BOOST_CHECK(!b.contains(inf));
   BOOST_CHECK(b.contains(minus_inf));
 
-  BOOST_CHECK_EQUAL(b.dimension(), 3);
+  BOOST_CHECK_EQUAL(b.get_dimension(), 3);
 
   b.inflate(2);
   BOOST_CHECK_EQUAL(bottom, minus_inf);
@@ -133,9 +133,73 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
   BOOST_CHECK(b.contains(inf));
   BOOST_CHECK(b.contains(minus_inf));
 
-  BOOST_CHECK_EQUAL(b.dimension(), 3);
+  BOOST_CHECK_EQUAL(b.get_dimension(), 3);
 
   b.inflate(2);
   BOOST_CHECK_EQUAL(bottom, minus_inf);
   BOOST_CHECK_EQUAL(top, inf);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(box_friends, T, list_of_tested_variants)
+{
+  using P = typename Box<T>::Point_t;
+  P inf = {P::T_inf, P::T_inf, P::T_inf};
+  P minus_inf = {P::T_m_inf, P::T_m_inf, P::T_m_inf};
+
+  Box<T> a({0, 1, 2}, {4, 5, 6});
+  Box<T> b({2, 1, 0}, {6, 5, 4});
+
+  auto res = get_smallest_enclosing_box(a, b);
+  auto bottom = res.get_lower_corner();
+  auto top = res.get_upper_corner();
+  BOOST_CHECK_EQUAL(bottom.size(), 3);
+  BOOST_CHECK_EQUAL(top.size(), 3);
+  BOOST_CHECK_EQUAL(bottom[0], 0);
+  BOOST_CHECK_EQUAL(bottom[1], 1);
+  BOOST_CHECK_EQUAL(bottom[2], 0);
+  BOOST_CHECK_EQUAL(top[0], 6);
+  BOOST_CHECK_EQUAL(top[1], 5);
+  BOOST_CHECK_EQUAL(top[2], 6);
+
+  res = get_smallest_enclosing_box(Box(inf, inf), Box(minus_inf, minus_inf));
+  bottom = res.get_lower_corner();
+  top = res.get_upper_corner();
+  BOOST_CHECK_EQUAL(bottom.size(), 0);
+  BOOST_CHECK_EQUAL(top.size(), 0);
+
+  res = get_smallest_enclosing_box(a, Box(inf, inf));
+  bottom = res.get_lower_corner();
+  top = res.get_upper_corner();
+  BOOST_CHECK_EQUAL(bottom.size(), 3);
+  BOOST_CHECK_EQUAL(top.size(), 3);
+  BOOST_CHECK_EQUAL(bottom[0], 0);
+  BOOST_CHECK_EQUAL(bottom[1], 1);
+  BOOST_CHECK_EQUAL(bottom[2], 2);
+  BOOST_CHECK_EQUAL(top[0], 4);
+  BOOST_CHECK_EQUAL(top[1], 5);
+  BOOST_CHECK_EQUAL(top[2], 6);
+
+  res = get_smallest_enclosing_box(a, Box({4, 5, 6}, inf));
+  bottom = res.get_lower_corner();
+  top = res.get_upper_corner();
+  BOOST_CHECK_EQUAL(bottom.size(), 3);
+  BOOST_CHECK_EQUAL(top.size(), 3);
+  BOOST_CHECK_EQUAL(bottom[0], 0);
+  BOOST_CHECK_EQUAL(bottom[1], 1);
+  BOOST_CHECK_EQUAL(bottom[2], 2);
+  BOOST_CHECK_EQUAL(top[0], P::T_inf);
+  BOOST_CHECK_EQUAL(top[1], P::T_inf);
+  BOOST_CHECK_EQUAL(top[2], P::T_inf);
+
+  res = get_smallest_enclosing_box(a, Box(minus_inf, {0, 1, 2}));
+  bottom = res.get_lower_corner();
+  top = res.get_upper_corner();
+  BOOST_CHECK_EQUAL(bottom.size(), 3);
+  BOOST_CHECK_EQUAL(top.size(), 3);
+  BOOST_CHECK_EQUAL(bottom[0], P::T_m_inf);
+  BOOST_CHECK_EQUAL(bottom[1], P::T_m_inf);
+  BOOST_CHECK_EQUAL(bottom[2], P::T_m_inf);
+  BOOST_CHECK_EQUAL(top[0], 4);
+  BOOST_CHECK_EQUAL(top[1], 5);
+  BOOST_CHECK_EQUAL(top[2], 6);
 }

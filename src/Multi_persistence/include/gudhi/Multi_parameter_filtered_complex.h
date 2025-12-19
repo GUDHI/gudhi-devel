@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <numeric>
 #include <ostream>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -327,10 +328,11 @@ class Multi_parameter_filtered_complex
   friend Multi_parameter_filtered_complex build_permuted_complex(const Multi_parameter_filtered_complex& complex,
                                                                  const std::vector<Index>& permutation)
   {
-    if (permutation.size() != complex.get_number_of_cycle_generators())
+    if (permutation.size() > complex.get_number_of_cycle_generators())
       throw std::invalid_argument("Invalid permutation size.");
 
-    std::vector<Index> inv(permutation.size());
+    const Index nullIndex = -1;
+    std::vector<Index> inv(complex.get_number_of_cycle_generators(), nullIndex);
     for (Index i = 0; i < permutation.size(); ++i) inv[permutation[i]] = i;
 
     Boundary_container newBoundaries;
@@ -341,8 +343,10 @@ class Multi_parameter_filtered_complex
     newBoundaries.reserve(permutation.size());
 
     for (Index i : permutation) {
-      Boundary boundary(complex.boundaries_[i]);
-      for (Index& b : boundary) b = inv[b];
+      Boundary boundary;
+      for (Index b : complex.boundaries_[i]) {
+        if (inv[b] != nullIndex) boundary.push_back(inv[b]);
+      }
       std::sort(boundary.begin(), boundary.end());
       newBoundaries.emplace_back(std::move(boundary));
       newDimensions.push_back(complex.dimensions_[i]);
