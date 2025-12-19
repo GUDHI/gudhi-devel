@@ -111,7 +111,7 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           $env:SKBUILD_CMAKE_DEFINE="FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake;VCPKG_TARGET_TRIPLET=x64-windows;Python_FIND_REGISTRY=LAST"
           python --version
-          python -m pip install .
+          python -m pip install -ve .
           cd build
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(gudhiCmakeOptions) --log-level=DEBUG ..
           ninja
