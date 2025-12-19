@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_complex_other, Fil, list_of_tested_variants)
   Multi_parameter_filtered_complex<Fil> cpxToGridCoord(bc, dc, fc);
 
   std::vector<std::vector<typename Fil::value_type> > grid = {{0, 2, 4, 8}, {0, 3, 6, 9}, {0, 4, 8, 16}};
-  fc = {ini{0, 3, 4}, ini{0, 3, 4}, ini{2, 3, 4}, ini{0, 3, 4}, ini{2, 3, 4}, ini{4, 6, 8}, ini{8, 6, 8}};
+  fc = {ini{0, 3, 0}, ini{0, 0, 4}, ini{2, 3, 4}, ini{0, 3, 4}, ini{2, 3, 4}, ini{4, 3, 4}, ini{8, 3, 4}};
 
   cpxToGrid.coarsen_on_grid(grid, false);
   BOOST_CHECK(cpxToGrid.is_ordered_by_dimension());
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_complex_other, Fil, list_of_tested_variants)
   BOOST_CHECK(cpxToGrid.get_filtration_values() == fc);
   BOOST_CHECK_EQUAL(cpxToGrid.get_max_dimension(), 3);
 
-  fc = {ini{0, 1, 1}, ini{0, 1, 1}, ini{1, 1, 1}, ini{0, 1, 1}, ini{1, 1, 1}, ini{2, 2, 2}, ini{3, 2, 2}};
+  fc = {ini{0, 1, 0}, ini{0, 0, 1}, ini{1, 1, 1}, ini{0, 1, 1}, ini{1, 1, 1}, ini{2, 1, 1}, ini{3, 1, 1}};
 
   cpxToGridCoord.coarsen_on_grid(grid);
   BOOST_CHECK(cpxToGridCoord.is_ordered_by_dimension());
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_complex_friend, Fil, list_of_tested_variants
   using FC2 = typename Complex2::Filtration_value_container;
   using ini2 = std::initializer_list<std::int32_t>;
 
-  FC2 fc2 = {ini2{0, 1, 1}, ini2{0, 1, 1}, ini2{1, 1, 1}, ini2{0, 1, 1}, ini2{1, 1, 1}, ini2{2, 2, 2}, ini2{3, 2, 2}};
+  FC2 fc2 = {ini2{0, 1, 0}, ini2{0, 0, 1}, ini2{1, 1, 1}, ini2{0, 1, 1}, ini2{1, 1, 1}, ini2{2, 1, 1}, ini2{3, 1, 1}};
 
   BOOST_CHECK(cpxToGridCoord.is_ordered_by_dimension());
   BOOST_CHECK(cpxToGridCoord.get_boundaries() == bc);

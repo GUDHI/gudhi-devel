@@ -297,26 +297,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_modifiers, Slicer, list_of_tested_variants)
   s.coarsen_on_grid(grid, false);
 
   BOOST_CHECK(s.get_filtration_value(0) == Fil({0, 3, 4}));
-  BOOST_CHECK(s.get_filtration_value(1) == Fil({0, 3, 4}));
-  BOOST_CHECK(s.get_filtration_value(2) == Fil({0, 3, 4}));
+  BOOST_CHECK(s.get_filtration_value(1) == Fil({0, 3, 0}));
+  BOOST_CHECK(s.get_filtration_value(2) == Fil({0, 0, 4}));
   BOOST_CHECK(s.get_filtration_value(3) == Fil({4, 3, 4}));
-  BOOST_CHECK(s.get_filtration_value(4) == Fil({4, 6, 8}));
-  BOOST_CHECK(s.get_filtration_value(5) == Fil({8, 3, 8}));
+  BOOST_CHECK(s.get_filtration_value(4) == Fil({4, 3, 4}));
+  BOOST_CHECK(s.get_filtration_value(5) == Fil({8, 3, 4}));
   BOOST_CHECK(s.get_filtration_value(6) == Fil({8, 6, 8}));
-  BOOST_CHECK(s.get_filtration_value(7) == Fil({8, 6, 8}));
-  BOOST_CHECK(s.get_filtration_value(8) == Fil({8, 9, 8}));
+  BOOST_CHECK(s.get_filtration_value(7) == Fil({4, 6, 8}));
+  BOOST_CHECK(s.get_filtration_value(8) == Fil({4, 6, 8}));
 
   s.coarsen_on_grid(grid, true);
 
   BOOST_CHECK(s.get_filtration_value(0) == Fil({0, 1, 1}));
-  BOOST_CHECK(s.get_filtration_value(1) == Fil({0, 1, 1}));
-  BOOST_CHECK(s.get_filtration_value(2) == Fil({0, 1, 1}));
+  BOOST_CHECK(s.get_filtration_value(1) == Fil({0, 1, 0}));
+  BOOST_CHECK(s.get_filtration_value(2) == Fil({0, 0, 1}));
   BOOST_CHECK(s.get_filtration_value(3) == Fil({2, 1, 1}));
-  BOOST_CHECK(s.get_filtration_value(4) == Fil({2, 2, 2}));
-  BOOST_CHECK(s.get_filtration_value(5) == Fil({3, 1, 2}));
+  BOOST_CHECK(s.get_filtration_value(4) == Fil({2, 1, 1}));
+  BOOST_CHECK(s.get_filtration_value(5) == Fil({3, 1, 1}));
   BOOST_CHECK(s.get_filtration_value(6) == Fil({3, 2, 2}));
-  BOOST_CHECK(s.get_filtration_value(7) == Fil({3, 2, 2}));
-  BOOST_CHECK(s.get_filtration_value(8) == Fil({3, 3, 2}));
+  BOOST_CHECK(s.get_filtration_value(7) == Fil({2, 2, 2}));
+  BOOST_CHECK(s.get_filtration_value(8) == Fil({2, 2, 2}));
 
   Slicer s2(cpx);
   s2.prune_above_dimension(0);

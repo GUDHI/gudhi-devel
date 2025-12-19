@@ -312,7 +312,7 @@ class Persistence_interface_matrix
     matrix_ = Matrix();
     permutation_ = nullptr;
     if constexpr (Options::has_vine_update && !Options::is_of_boundary_type) {
-      idToPos_->clear();
+      if (idToPos_) idToPos_->clear();
     }
   }
 
