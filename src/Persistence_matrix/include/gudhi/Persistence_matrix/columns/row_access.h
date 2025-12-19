@@ -30,12 +30,13 @@ namespace persistence_matrix {
  * Inherited instead of @ref Row_access, if the row access is not enabled.
  */
 struct Dummy_row_access {
-  friend void swap([[maybe_unused]] Dummy_row_access& d1, [[maybe_unused]] Dummy_row_access& d2) {}
+  friend void swap([[maybe_unused]] Dummy_row_access& d1, [[maybe_unused]] Dummy_row_access& d2) noexcept {}
 
-  Dummy_row_access() {}
+  Dummy_row_access() = default;
 
   template <typename Index, class Row_container>
-  Dummy_row_access([[maybe_unused]] Index columnIndex, [[maybe_unused]] Row_container& rows) {}
+  Dummy_row_access([[maybe_unused]] Index columnIndex, [[maybe_unused]] Row_container& rows)
+  {}
 };
 
 /**
@@ -74,6 +75,9 @@ class Row_access
    */
   Row_access(Row_access&& other) noexcept;
 
+  Row_access(const Row_access& other) = delete;
+  ~Row_access() = default;
+
   /**
    * @brief Inserts the given entry at the given row index.
    *
@@ -107,10 +111,14 @@ class Row_access
    */
   Index get_column_index() const;
 
+  Row_access& operator=(const Row_access& other) = delete;
+  Row_access& operator=(Row_access&& other) noexcept = delete;
+
   /**
    * @brief Swap operator.
    */
-  friend void swap(Row_access& r1, Row_access& r2) {
+  friend void swap(Row_access& r1, Row_access& r2) noexcept
+  {
     std::swap(r1.rows_, r2.rows_);
     std::swap(r1.columnIndex_, r2.columnIndex_);
   }

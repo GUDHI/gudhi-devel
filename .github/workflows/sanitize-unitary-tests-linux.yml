@@ -7,15 +7,20 @@ jobs:
     name: debug_tests
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image
-    container: gudhi/ci_for_gudhi:2025.04.01
+    container: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2025.10.02
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      # Check python tests in debug mode and check address sanitizer only for the c++ unitary tests
+      # Sanitizer is more complicated to launch on Python and some known memory leaks for NanoBind on purpose
       - name: Build and test unitary tests
         run: |
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=-fsanitize=address -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
-          make all
+          cmake -DCMAKE_BUILD_TYPE=Debug -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_GUDHUI=OFF ..
+          make
+          ctest --output-on-failure
+          cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=-fsanitize=address -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_PYTHON=OFF .
+          make
           ctest --output-on-failure

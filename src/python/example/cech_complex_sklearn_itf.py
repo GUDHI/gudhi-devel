@@ -6,7 +6,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 
 # Import TDA pipeline requirements
-from gudhi.sklearn.cech_persistence import CechPersistence
+from gudhi.sklearn import CechPersistence
 from gudhi.representations.vector_methods import PersistenceLengths
 # To build the dataset
 from gudhi.datasets.generators import points

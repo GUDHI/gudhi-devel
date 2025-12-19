@@ -26,6 +26,11 @@ jobs:
       - name: Install dependencies
         shell: pwsh
         run: |
+          $originalDir = Get-Location
+          Set-Location "C:\vcpkg"
+          git pull
+          vcpkg update
+          Set-Location $originalDir
           set VCPKG_BUILD_TYPE=release
           vcpkg install eigen3 cgal --triplet x64-windows
           vcpkg version

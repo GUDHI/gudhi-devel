@@ -33,9 +33,8 @@ class RU_barcode_swap;
  * Inherited instead of @ref RU_pairing, when the computation of the barcode was not enabled or if the pairing
  * is already managed by the vine update classes.
  */
-struct Dummy_ru_pairing
-{
-  friend void swap([[maybe_unused]] Dummy_ru_pairing& d1, [[maybe_unused]] Dummy_ru_pairing& d2) {}
+struct Dummy_ru_pairing {
+  friend void swap([[maybe_unused]] Dummy_ru_pairing& d1, [[maybe_unused]] Dummy_ru_pairing& d2) noexcept {}
 };
 
 /**
@@ -43,23 +42,23 @@ struct Dummy_ru_pairing
  * @ingroup persistence_matrix
  *
  * @brief Class managing the barcode for @ref RU_matrix if the option was enabled.
- * 
+ *
  * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
  */
 template <class Master_matrix>
 class RU_pairing
 {
  public:
-  using Barcode = typename Master_matrix::Barcode;  /**< Barcode type. */
+  using Barcode = typename Master_matrix::Barcode; /**< Barcode type. */
 
   /**
    * @brief Default constructor.
    */
-  RU_pairing() {}
+  RU_pairing() = default;
 
   /**
    * @brief Returns the current barcode which is maintained at any insertion, removal or vine swap.
-   * 
+   *
    * @return Const reference to the barcode.
    */
   const Barcode& get_current_barcode() const { return barcode_; }
@@ -67,7 +66,8 @@ class RU_pairing
   /**
    * @brief Swap operator.
    */
-  friend void swap(RU_pairing& pairing1, RU_pairing& pairing2) {
+  friend void swap(RU_pairing& pairing1, RU_pairing& pairing2) noexcept
+  {
     pairing1.barcode_.swap(pairing2.barcode_);
     pairing1.indexToBar_.swap(pairing2.indexToBar_);
     pairing1.idToPosition_.swap(pairing2.idToPosition_);
@@ -80,7 +80,8 @@ class RU_pairing
 
   void _reserve(unsigned int numberOfColumns) { indexToBar_.reserve(numberOfColumns); }
 
-  void _update_barcode(ID_index birthPivot, Pos_index death) {
+  void _update_barcode(ID_index birthPivot, Pos_index death)
+  {
     auto it = idToPosition_.find(birthPivot);
     Pos_index pivotBirth = it == idToPosition_.end() ? birthPivot : it->second;
     if constexpr (Master_matrix::hasFixedBarcode || !Master_matrix::Option_list::has_removable_columns) {
@@ -93,7 +94,8 @@ class RU_pairing
     }
   }
 
-  void _add_bar(Dimension dim, Pos_index birth) {
+  void _add_bar(Dimension dim, Pos_index birth)
+  {
     barcode_.emplace_back(birth, Master_matrix::template get_null_value<Pos_index>(), dim);
     if constexpr (Master_matrix::hasFixedBarcode || !Master_matrix::Option_list::has_removable_columns) {
       indexToBar_.push_back(barcode_.size() - 1);
@@ -102,15 +104,16 @@ class RU_pairing
     }
   }
 
-  void _remove_last(Pos_index eventIndex) {
+  void _remove_last(Pos_index eventIndex)
+  {
     static_assert(Master_matrix::Option_list::has_removable_columns, "_remove_last not available.");
     constexpr const Pos_index nullDeath = Master_matrix::template get_null_value<Pos_index>();
 
     if constexpr (Master_matrix::hasFixedBarcode) {
       auto& bar = barcode_[indexToBar_[eventIndex]];
       if (bar.death == nullDeath) {  // birth
-        barcode_.pop_back();  // sorted by birth and eventIndex has to be the highest one
-      } else {                // death
+        barcode_.pop_back();         // sorted by birth and eventIndex has to be the highest one
+      } else {                       // death
         bar.death = nullDeath;
       };
       indexToBar_.pop_back();
@@ -128,17 +131,16 @@ class RU_pairing
 
     auto& map = static_cast<typename Master_matrix::Master_RU_matrix*>(this)->positionToID_;
     auto it = map.find(eventIndex);
-    if (it != map.end()){
+    if (it != map.end()) {
       idToPosition_.erase(it->second);
       map.erase(it);
     }
   }
 
-  void _insert_id_position(ID_index id, Pos_index pos) {
-    idToPosition_.emplace(id, pos);
-  }
+  void _insert_id_position(ID_index id, Pos_index pos) { idToPosition_.emplace(id, pos); }
 
-  void _reset() {
+  void _reset()
+  {
     barcode_.clear();
     indexToBar_.clear();
   }
@@ -155,7 +157,7 @@ class RU_pairing
   /**
    * @brief Map from cell ID to cell position. Only stores a pair if ID != position.
    */
-  std::unordered_map<ID_index, Pos_index> idToPosition_;  //TODO: test other map types
+  std::unordered_map<ID_index, Pos_index> idToPosition_;  // TODO: test other map types
 };
 
 }  // namespace persistence_matrix
