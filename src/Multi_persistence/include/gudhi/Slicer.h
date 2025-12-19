@@ -128,6 +128,17 @@ class Slicer
   {}
 
   /**
+   * @brief Copy constructor. Persistence computation initialization is not updated.
+   */
+  template <class OtherMultiFiltrationValue, class OtherPersistenceAlgorithm>
+  Slicer(const Slicer<OtherMultiFiltrationValue, OtherPersistenceAlgorithm>& other)
+      : complex_(other.get_filtered_complex()),
+        slice_(other.get_slice().begin(), other.get_slice().end()),
+        generatorOrder_(other.get_current_order()),
+        persistence_()
+  {}
+
+  /**
    * @brief Move constructor. Persistence computation initialization is not updated.
    */
   Slicer(Slicer&& other) noexcept
@@ -147,6 +158,20 @@ class Slicer
     complex_ = other.complex_;
     slice_ = other.slice_;
     generatorOrder_ = other.generatorOrder_;
+    persistence_.reset();
+
+    return *this;
+  }
+
+  /**
+   * @brief Assign operator. Persistence computation initialization is not updated.
+   */
+  template <class OtherMultiFiltrationValue, class OtherPersistenceAlgorithm>
+  Slicer& operator=(const Slicer<OtherMultiFiltrationValue, OtherPersistenceAlgorithm>& other)
+  {
+    complex_ = other.get_filtered_complex();
+    slice_ = std::vector<T>(other.get_slice().begin(), other.get_slice().end());
+    generatorOrder_ = other.get_current_order();
     persistence_.reset();
 
     return *this;
@@ -186,8 +211,10 @@ class Slicer
    */
   Index get_number_of_parameters() const { return complex_.get_number_of_parameters(); }
 
-  // // only used for scc io for now
-  // const Complex& get_chain_complex() const { return complex_; }
+  /**
+   * @brief Returns the underlying complex.
+   */
+  const Complex& get_filtered_complex() const { return complex_; }
 
   /**
    * @brief Returns a const reference to the current permutation map, indicating in which order are the generators

@@ -63,7 +63,7 @@ struct Multi_persistence_chain_options : Multi_persistence_ru_options {
       Gudhi::persistence_matrix::Column_indexation_types::POSITION;
 };
 
-typedef boost::mpl::list<
+using list_of_tested_variants = boost::mpl::list<
     Slicer<Multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_r_options>>,
     Slicer<Multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_ru_options>>,
     Slicer<Multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_chain_options>>,
@@ -72,8 +72,7 @@ typedef boost::mpl::list<
     Slicer<Dynamic_multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_ru_options>>,
     Slicer<Dynamic_multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_chain_options>>,
     Slicer<Dynamic_multi_parameter_filtration<T>,
-           Persistence_interface_cohomology<Dynamic_multi_parameter_filtration<T>>>>
-    list_of_tested_variants;
+           Persistence_interface_cohomology<Dynamic_multi_parameter_filtration<T>>>>;
 
 template <class Fil>
 Multi_parameter_filtered_complex<Fil> build_rep_cycle_input_complex()
@@ -183,30 +182,37 @@ void test_slicer_constructors_empty(const Slicer& s)
   BOOST_CHECK(!s.get_persistence_algorithm().is_initialized());
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_constructors, Slicer, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_constructors, Slicer_t, list_of_tested_variants)
 {
-  using Fil = typename Slicer::Filtration_value;
+  using Fil = typename Slicer_t::Filtration_value;
+  using OtherSlicer =
+      Slicer<Multi_parameter_filtration<long int>, Persistence_interface_cohomology<Multi_parameter_filtration<T>>>;
 
-  Slicer empty;
+  Slicer_t empty;
   test_slicer_constructors_empty(empty);
   test_slicer_constructors_empty(empty.weak_copy());
 
   auto cpx = build_simple_input_complex<Fil>();
 
-  Slicer s1(cpx);
+  Slicer_t s1(cpx);
   test_slicer_constructors(s1);
   test_slicer_constructors(s1.weak_copy());
 
-  Slicer s2(std::move(cpx));
+  Slicer_t s2(std::move(cpx));
   BOOST_CHECK_EQUAL(cpx.get_number_of_cycle_generators(), 0);
   test_slicer_constructors(s2);
   test_slicer_constructors(s2.weak_copy());
 
-  Slicer copy(s1);
+  Slicer_t copy(s1);
   test_slicer_constructors(copy);
   test_slicer_constructors(copy.weak_copy());
 
-  Slicer move(std::move(s2));
+  OtherSlicer copy2(copy);
+  test_slicer_constructors(copy2);
+  OtherSlicer copy3 = copy;
+  test_slicer_constructors(copy3);
+
+  Slicer_t move(std::move(s2));
   test_slicer_constructors_empty(s2);
   test_slicer_constructors_empty(s2.weak_copy());
   test_slicer_constructors(move);
