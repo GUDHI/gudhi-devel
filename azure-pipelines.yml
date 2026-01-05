@@ -62,7 +62,7 @@ jobs:
     pool:
       vmImage: windows-latest
     variables:
-      pythonVersion: "3.9"
+      pythonVersion: "3.10"
       cmakeBuildType: Release
       gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_REMOTE_TEST=ON -DWITH_GUDHI_PYTHON=OFF -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
       SKBUILD_CMAKE_DEFINE: FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake;VCPKG_TARGET_TRIPLET=x64-windows;Python_FIND_REGISTRY=LAST
@@ -112,7 +112,9 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           $env:SKBUILD_CMAKE_DEFINE
           python --version
-          python -m pip install -ve .
+          python -m pip install --verbose --no-build-isolation --editable .
+          Remove-Item build -Recurse -force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path build -Force
           cd build
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(gudhiCmakeOptions) --log-level=DEBUG ..
           ninja
