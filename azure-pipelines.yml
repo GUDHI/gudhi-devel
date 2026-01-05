@@ -64,7 +64,7 @@ jobs:
     variables:
       pythonVersion: "3.10"
       cmakeBuildType: Release
-      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_REMOTE_TEST=ON -DWITH_GUDHI_PYTHON=OFF -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
+      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_REMOTE_TEST=ON -DWITH_GUDHI_PYTHON=OFF -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
       SKBUILD_CMAKE_DEFINE: FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake;VCPKG_TARGET_TRIPLET=x64-windows;Python_FIND_REGISTRY=LAST
       # To cache scikit_learn_data - no need to always download it and fails sometimes
       SCIKIT_LEARN_DATA: $(Agent.BuildDirectory)/scikit_learn_data
