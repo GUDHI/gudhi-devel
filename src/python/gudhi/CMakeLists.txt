@@ -19,6 +19,8 @@ nanobind_add_module_with_targets(_subsampling_ext _subsampling.cc TARGETS Eigen3
 if (TARGET CGAL::CGAL)
   add_library(random SHARED random.cpp)
   target_link_libraries(random PRIVATE CGAL::CGAL)
+  # Required by Windows wheel
+  install(TARGETS random DESTINATION ${CMAKE_INSTALL_PREFIX}/gudhi)
 endif()
 nanobind_add_module_with_targets(_random_ext _random.cc TARGETS Python::NumPy CGAL::CGAL)
 if (TARGET Python::NumPy AND TARGET CGAL::CGAL)

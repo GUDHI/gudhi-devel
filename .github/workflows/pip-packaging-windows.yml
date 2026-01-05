@@ -59,8 +59,8 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           python -m pip wheel --verbose --no-build-isolation --editable .
           ls ".\"
-          delvewheel show --add-path=C:/vcpkg/installed/x64-windows/bin *.whl
-          delvewheel repair --add-path=C:/vcpkg/installed/x64-windows/bin -w wheelhouse -v *.whl
+          delvewheel show --add-path=C:/vcpkg/installed/x64-windows/bin --ignore-existing *.whl
+          delvewheel repair --add-path=C:/vcpkg/installed/x64-windows/bin --ignore-existing -w wheelhouse -v *.whl
       # Test ABI compatibility with numpy 1.X
       - name: Install and test python wheel
         shell: pwsh
