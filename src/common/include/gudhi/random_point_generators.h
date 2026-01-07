@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL
+ *      - 2026/01 Vincent Rouvreau: Add Gudhi::random::Random as an argument for reproductibility
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -190,12 +191,12 @@ generate_points_on_torus_3D(std::size_t num_points, double R, double r, bool uni
 // "Private" function used by generate_points_on_torus_d
 template <typename Kernel, typename OutputIterator>
 static void generate_grid_points_on_torus_d(const Kernel &k, int dim, std::size_t num_slices,
-                                               OutputIterator out,
-                                               double radius_noise_percentage = 0.,
-                                               std::vector<typename Kernel::FT> current_point =
-                                                 std::vector<typename Kernel::FT>(),
-                                               Gudhi::random::Random* rng =
-                                                 Gudhi::random::Random_generator().get_default_random()) {
+                                            OutputIterator out,
+                                            double radius_noise_percentage = 0.,
+                                            std::vector<typename Kernel::FT> current_point =
+                                              std::vector<typename Kernel::FT>(),
+                                            Gudhi::random::Random* rng =
+                                              Gudhi::random::Random_generator().get_default_random()) {
   assert(rng);
   using namespace boost::math::double_constants;
 
@@ -265,7 +266,6 @@ std::vector<typename Kernel::Point_d>
 generate_points_on_sphere_d(std::size_t num_points, int dim, double radius, double radius_noise_percentage = 0.,
                             Gudhi::random::Random* rng = Gudhi::random::Random_generator().get_default_random()) {
   assert(rng);
-  std::cout << "generate_points_on_sphere_d rng = " << rng << std::endl;
   typedef typename Kernel::Point_d Point;
   Kernel k;
   CGAL::Random_points_on_sphere_d<Point> generator(dim, radius, *rng);
