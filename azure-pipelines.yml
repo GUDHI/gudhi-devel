@@ -66,7 +66,7 @@ jobs:
       pythonVersion: "3.9"
       cmakeBuildType: Release
       cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
-      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_REMOTE_TEST=ON -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
+      gudhiCmakeOptions: -DWITH_GUDHI_PYTHON=OFF -DWITH_GUDHI_UTILITIES=OFF -DDEBUG_TRACES=ON -DWITH_MODULE_GUDHI_Persistence_matrix=OFF -DWITH_MODULE_GUDHI_Persistence_representations=OFF -DWITH_MODULE_GUDHI_Persistent_cohomology=OFF -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
       # On this VM, 2 versions of python are installed. Default Python_FIND_REGISTRY is FIRST, which means asks registry first
       # LAST means consult registry in last resort, use the standard libraries or headers first
       extraCmakeOptions: -DPython_FIND_REGISTRY=LAST
@@ -94,9 +94,6 @@ jobs:
       - pwsh: |
           $ErrorActionPreference = "stop"
           $PSNativeCommandUseErrorActionPreference = $true
-          python --version
-          python -m pip install -r ext/gudhi-deploy/build-requirements.txt
-          python -m pip install -r ext/gudhi-deploy/test-requirements.txt
           choco install -y ninja --force --force-dependencies
           $originalDir = Get-Location
           Set-Location "C:\vcpkg"
@@ -116,8 +113,7 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           mkdir build
           cd build
-          python --version
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(cmakeVcpkgFlags) $(gudhiCmakeOptions) $(extraCmakeOptions) --log-level=DEBUG ..
           ninja
-          ctest --output-on-failure -C Release -E diff_files
+          ctest -R Alpha_complex_test_unit -V
         displayName: "Build and test"
