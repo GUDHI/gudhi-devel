@@ -772,7 +772,8 @@ inline void Heap_column<Master_matrix>::push_back(const Entry& entry)
 {
   static_assert(Master_matrix::Option_list::is_of_boundary_type, "`push_back` is not available for Chain matrices.");
 
-  GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
+  GUDHI_CHECK(entry.get_row_index() > get_pivot(),
+              std::invalid_argument("The new row index has to be higher than the current pivot."));
 
   Entry* newEntry = entryPool_->construct(entry.get_row_index());
   newEntry->set_element(Master_matrix::get_coefficient_value(entry.get_element(), operators_));

@@ -347,7 +347,8 @@ class Shared_multi_field_element
       const Characteristic& productOfCharacteristics) const
   {
     GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
-                "The given product is not the product of a subset of the current Multi-field characteristics.");
+                std::invalid_argument(
+                    "The given product is not the product of a subset of the current Multi-field characteristics."));
 
     Element QR;
     mpz_gcd(QR.get_mpz_t(), element_.get_mpz_t(), productOfCharacteristics.get_mpz_t());  // QR <- gcd(x,QS)
@@ -390,7 +391,8 @@ class Shared_multi_field_element
   static Shared_multi_field_element get_partial_multiplicative_identity(const Characteristic& productOfCharacteristics)
   {
     GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
-                "The given product is not the product of a subset of the current Multi-field characteristics.");
+                std::invalid_argument(
+                    "The given product is not the product of a subset of the current Multi-field characteristics."));
 
     if (productOfCharacteristics == 0 || productOfCharacteristics == productOfAllCharacteristics_) {
       return get_multiplicative_identity();

@@ -211,7 +211,7 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
   if constexpr (Master_matrix::Option_list::has_vine_update) {
     ID_index i = 0;
     while (i < nberColumns && get_position(i) != bar.birth) ++i;
-    GUDHI_CHECK(i < nberColumns, "Given birth value is not valid.");
+    GUDHI_CHECK(i < nberColumns, std::invalid_argument("Given birth value is not valid."));
     pivot = i;
   }
 

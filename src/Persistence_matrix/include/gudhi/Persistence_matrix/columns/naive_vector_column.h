@@ -794,7 +794,8 @@ inline void Naive_vector_column<Master_matrix, Support>::push_back(const Entry& 
 {
   static_assert(Master_matrix::Option_list::is_of_boundary_type, "`push_back` is not available for Chain matrices.");
 
-  GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
+  GUDHI_CHECK(entry.get_row_index() > get_pivot(),
+              std::invalid_argument("The new row index has to be higher than the current pivot."));
 
   _insert_entry(column_, entry.get_row_index(), entry.get_element());
 }
