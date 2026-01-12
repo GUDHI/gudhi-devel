@@ -2683,7 +2683,7 @@ template <class Matrix>
 void test_representative_cycles(Matrix& mb) {
   mb.update_representative_cycle(typename Matrix::Bar(7, 12, 1));
 
-  const auto& cycles = mb.get_representative_cycles();
+  const auto& cycles = mb.get_all_representative_cycles();
   BOOST_CHECK_EQUAL(cycles.size(), 1);
 
   using Cy = decltype(cycles[0]);
@@ -2696,9 +2696,9 @@ void test_representative_cycles(Matrix& mb) {
 
   BOOST_CHECK(cycles[0] == mb.get_representative_cycle(typename Matrix::Bar(7, 12, 1)));
 
-  mb.update_representative_cycles(1);
+  mb.update_all_representative_cycles(1);
 
-  // cycles = mb.get_representative_cycles();
+  // cycles = mb.get_all_representative_cycles();
   BOOST_CHECK_EQUAL(cycles.size(), 3);
 
   using Cy = decltype(cycles[0]);
@@ -2723,9 +2723,9 @@ void test_representative_cycles(Matrix& mb) {
     }
   }
 
-  mb.update_representative_cycles();
+  mb.update_all_representative_cycles();
 
-  // cycles = mb.get_representative_cycles();
+  // cycles = mb.get_all_representative_cycles();
   BOOST_CHECK_EQUAL(cycles.size(), 8);
 
   using Cy = decltype(cycles[0]);

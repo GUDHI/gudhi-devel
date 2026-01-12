@@ -72,7 +72,7 @@ class RU_representative_cycles
    * @param dim If different from default value, only the cycles of the given dimension are updated.
    * All others are erased.
    */
-  void update_representative_cycles(Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  void update_all_representative_cycles(Dimension dim = Master_matrix::template get_null_value<Dimension>());
 
   /**
    * @brief Computes the current representative cycle of the given bar. All other cycles already computed are left
@@ -84,14 +84,14 @@ class RU_representative_cycles
 
   /**
    * @brief Returns the current representative cycles. If the matrix was modified since the last call,
-   * @ref update_representative_cycles has to be called to update the returned cycles.
+   * @ref update_all_representative_cycles has to be called to update the returned cycles.
    *
    * @return A const reference to a vector of @ref Matrix::Cycle containing all representative cycles.
    */
-  const std::vector<Cycle>& get_representative_cycles();
+  const std::vector<Cycle>& get_all_representative_cycles();
   /**
    * @brief Returns the representative cycle corresponding to the given bar.
-   * If the matrix was modified since the last call, @ref update_representative_cycles or
+   * If the matrix was modified since the last call, @ref update_all_representative_cycles or
    * @ref update_representative_cycle has to be called to update the returned cycle.
    *
    * @param bar Bar corresponding to the wanted representative cycle.
@@ -128,7 +128,7 @@ class RU_representative_cycles
 };
 
 template <class Master_matrix>
-inline void RU_representative_cycles<Master_matrix>::update_representative_cycles(Dimension dim)
+inline void RU_representative_cycles<Master_matrix>::update_all_representative_cycles(Dimension dim)
 {
   Index nberColumns = _matrix()->reducedMatrixR_.get_number_of_columns();
   Index nullValue = Master_matrix::template get_null_value<Index>();
@@ -195,7 +195,7 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
 
 template <class Master_matrix>
 inline const std::vector<typename RU_representative_cycles<Master_matrix>::Cycle>&
-RU_representative_cycles<Master_matrix>::get_representative_cycles()
+RU_representative_cycles<Master_matrix>::get_all_representative_cycles()
 {
   return representativeCycles_;
 }
