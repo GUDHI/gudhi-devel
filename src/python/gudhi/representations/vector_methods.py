@@ -2,7 +2,7 @@
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Mathieu Carrière, Martin Royer, Gard Spreemann
 #
-# Copyright (C) 2018-2020 Inria
+# Copyright (C) 2018 Inria
 #
 # Modification(s):
 #   - 2020/06 Martin: ATOL integration
