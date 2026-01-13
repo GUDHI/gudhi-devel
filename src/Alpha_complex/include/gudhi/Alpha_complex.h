@@ -340,13 +340,27 @@ class Alpha_complex {
   template<class SimplicialComplexForAlpha>
   auto radius(SimplicialComplexForAlpha& cplx, typename SimplicialComplexForAlpha::Simplex_handle s) {
     auto k = cplx.key(s);
-    if(k!=cplx.null_key())
+    if(k!=cplx.null_key()) {
+#ifdef DEBUG_TRACES
+      std::clog << "radius with sphere found in cache for key " << k << " = (";
+      for (auto vertex : cplx.simplex_vertex_range(s))
+        std::clog << vertex << ", ";
+      std::clog << ") - ";
+#endif  // DEBUG_TRACES
       return kernel_.get_squared_radius(old_cache_[k]);
+    }
     // Using a transform_range is slower, currently.
     thread_local std::vector<Point_d> v;
     v.clear();
+
     for (auto vertex : cplx.simplex_vertex_range(s))
       v.push_back(get_point_(vertex));
+#ifdef DEBUG_TRACES
+    std::clog << "radius compute for (";
+    for (auto vertex : cplx.simplex_vertex_range(s))
+      std::clog << vertex << ", ";
+    std::clog << ") => " << kernel_.get_squared_radius(v.cbegin(), v.cend()) << " - ";
+#endif  // DEBUG_TRACES
     return kernel_.get_squared_radius(v.cbegin(), v.cend());
   }
 
@@ -464,7 +478,7 @@ class Alpha_complex {
             Filtration_value alpha_complex_filtration = 0.0;
             // No need to compute squared_radius on a non-weighted single point - alpha is 0.0
 #ifdef DEBUG_TRACES
-            std::clog << "Weighted =" << Weighted << " - decr_dim =" << decr_dim << " - Output_squared_values =" << Output_squared_values;
+            std::clog << "Weighted =" << Weighted << " - decr_dim =" << decr_dim << " - Output_squared_values =" << Output_squared_values << " - ";
 #endif  // DEBUG_TRACES
             if (Weighted || decr_dim > 0) {
               auto const& sqrad = radius(complex, f_simplex);
