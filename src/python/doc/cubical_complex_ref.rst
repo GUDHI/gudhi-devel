@@ -5,6 +5,10 @@
 Cubical complex reference manual
 ################################
 
+.. tip::
+   If you only want to compute persistent homology, consider using :class:`~gudhi.sklearn.CubicalPersistence`,
+   which can be significantly faster than :class:`~gudhi.CubicalComplex` in some cases.
+
 .. autoclass:: gudhi.CubicalComplex
    :members:
    :inherited-members:

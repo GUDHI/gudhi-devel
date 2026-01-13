@@ -2,7 +2,7 @@
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Mathieu Carrière
 #
-# Copyright (C) 2018-2019 Inria
+# Copyright (C) 2018 Inria
 #
 # Modification(s):
 #   - 2025/01 Vincent Rouvreau: BottleneckDistance(epsilon=...) is deprecated. Consider using BottleneckDistance(e=...)
