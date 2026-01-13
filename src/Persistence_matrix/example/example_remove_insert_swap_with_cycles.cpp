@@ -25,9 +25,9 @@ struct RU_rep_cycles_options : Default_options<Column_types::INTRUSIVE_LIST, tru
 using RU_matrix = Gudhi::persistence_matrix::Matrix<RU_rep_cycles_options>;
 
 template <class Matrix>
-void print_current_representative_cycles(Matrix M) {
-  auto rc = M.get_representative_cycles();
-  for (auto cycle : rc) {
+void print_current_representative_cycles(const Matrix& M) {
+  const auto& rc = M.get_representative_cycles();
+  for (const auto& cycle : rc) {
     std::cout << M.get_column_dimension(cycle[0]);
     std::cout << "-cycle: ";
     for (auto index : cycle) {
