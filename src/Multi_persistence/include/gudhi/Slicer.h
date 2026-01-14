@@ -31,6 +31,10 @@
 #include <ostream>
 // #include <sstream>  //std::stringstream, to remove when to_str gets removed
 
+#ifdef GUDHI_USE_TBB
+#include <oneapi/tbb/parallel_for.h>
+#endif
+
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
 #include <gudhi/Multi_parameter_filtered_complex.h>
@@ -652,7 +656,7 @@ class Slicer
   /**
    * @brief Outstream operator.
    */
-  friend std::ostream& operator<<(std::ostream& stream, Slicer& slicer)
+  friend std::ostream& operator<<(std::ostream& stream, const Slicer& slicer)
   {
     stream << "-------------------- Slicer \n";
 
@@ -670,8 +674,8 @@ class Slicer
     if (!slicer.slice_.empty()) stream << "\b" << "\b";
     stream << "}" << '\n';
 
-    stream << "--- PersBackend \n";
-    stream << slicer.persistence_;
+    // stream << "--- PersBackend \n";
+    // stream << slicer.persistence_;
 
     return stream;
   }
@@ -695,9 +699,15 @@ class Slicer
   void _push_to(const Complex& complex, const Line<U>& line)
   {
     const auto& filtrationValues = complex.get_filtration_values();
-    for (Index i = 0U; i < filtrationValues.size(); i++) {
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_for(Index(0), Index(filtrationValues.size()), [&](Index i) {
+      slice_[i] = line.template compute_forward_intersection<T>(filtrationValues[i]);
+    });
+#else
+    for (Index i = 0; i < filtrationValues.size(); i++) {
       slice_[i] = line.template compute_forward_intersection<T>(filtrationValues[i]);
     }
+#endif
   }
 
   void _initialize_persistence_computation(const Complex& complex, const bool ignoreInf = true)

@@ -625,7 +625,7 @@ inline Slicer build_slicer_from_simplex_tree(Simplex_tree<SimplexTreeOptions>& s
  * @private
  */
 template <bool idx, class U, class Slicer, class F>
-std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
+inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
 persistence_on_slices_(Slicer& slicer, F&& ini_slicer, unsigned int size, [[maybe_unused]] bool ignoreInf = true)
 {
   using Barcode = typename Slicer::template Multi_dimensional_flat_barcode<U>;
@@ -645,11 +645,10 @@ persistence_on_slices_(Slicer& slicer, F&& ini_slicer, unsigned int size, [[mayb
     }
   } else {
 #ifdef GUDHI_USE_TBB
-    using Index = typename Slicer::Index;
     tbb::enumerable_thread_specific<typename Slicer::Thread_safe> threadLocals(slicer.weak_copy());
-    tbb::parallel_for(static_cast<Index>(0), size, [&](const Index& i) {
+    tbb::parallel_for(static_cast<unsigned int>(0), size, [&](const unsigned int& i) {
       typename Slicer::Thread_safe& s = threadLocals.local();
-      std::forward<F>(ini_slicer)(s, i);
+      tbb::this_task_arena::isolate([&] { std::forward<F>(ini_slicer)(s, i); });
       s.initialize_persistence_computation(ignoreInf);
       out[i] = s.template get_flat_barcode<true, U, idx>();
     });
@@ -687,7 +686,7 @@ persistence_on_slices_(Slicer& slicer, F&& ini_slicer, unsigned int size, [[mayb
  * PersistenceAlgorithm::is_vine is true.
  */
 template <class Slicer, class T, class U = T, bool idx = false>
-std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>> persistence_on_slices(
+inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>> persistence_on_slices(
     Slicer& slicer,
     const std::vector<std::vector<T>>& basePoints,
     const std::vector<std::vector<T>>& directions,
@@ -699,13 +698,13 @@ std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>> persist
               "There should be as many directions than base points.");
 
   std::vector<T> dummy;
-  auto get_direction = [&](unsigned int i) -> const std::vector<T>& {
+  auto get_direction = [&](std::size_t i) -> const std::vector<T>& {
     return directions.empty() ? dummy : directions[i];
   };
 
   return persistence_on_slices_<idx, U>(
       slicer,
-      [&](auto& s, unsigned int i) { s.push_to(Line<T>(basePoints[i], get_direction(i))); },
+      [&](auto& s, std::size_t i) { s.push_to(Line<T>(basePoints[i], get_direction(i))); },
       basePoints.size(),
       ignoreInf);
 }
@@ -727,14 +726,14 @@ std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>> persist
  * PersistenceAlgorithm::is_vine is true.
  */
 template <class Slicer, class T, class U = T, bool idx = false>
-std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
+inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
 persistence_on_slices(Slicer& slicer, const std::vector<std::vector<T>>& slices, bool ignoreInf = true)
 {
   GUDHI_CHECK(slices.empty() || slices[0].size() == slicer.get_number_of_cycle_generators(),
               "There should be as many elements in a slice than cells in the slicer.");
 
   return persistence_on_slices_<idx, U>(
-      slicer, [&](auto& s, unsigned int i) { s.set_slice(slices[i]); }, slices.size(), ignoreInf);
+      slicer, [&](auto& s, std::size_t i) { s.set_slice(slices[i]); }, slices.size(), ignoreInf);
 }
 
 // Mostly for python
@@ -756,7 +755,7 @@ persistence_on_slices(Slicer& slicer, const std::vector<std::vector<T>>& slices,
  * PersistenceAlgorithm::is_vine is true.
  */
 template <class Slicer, class T, class U = T, bool idx = false, class = std::enable_if_t<std::is_arithmetic_v<T>>>
-std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
+inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
 persistence_on_slices(Slicer& slicer, T* slices, unsigned int numberOfSlices, bool ignoreInf = true)
 {
   auto num_gen = slicer.get_number_of_cycle_generators();
@@ -764,7 +763,7 @@ persistence_on_slices(Slicer& slicer, T* slices, unsigned int numberOfSlices, bo
 
   return persistence_on_slices_<idx, U>(
       slicer,
-      [&](auto& s, unsigned int i) {
+      [&](auto& s, std::size_t i) {
         T* start = &view(i, 0);
         auto r = boost::iterator_range<T*>(start, start + num_gen);
         s.set_slice(r);

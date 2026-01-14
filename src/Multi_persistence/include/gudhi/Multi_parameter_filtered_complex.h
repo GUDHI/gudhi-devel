@@ -26,6 +26,10 @@
 #include <utility>
 #include <vector>
 
+#ifdef GUDHI_USE_TBB
+#include <oneapi/tbb/parallel_for.h>
+#endif
+
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_parameter_filtration.h>  //for lex order
 #include <gudhi/Multi_filtration/multi_filtration_conversions.h>
@@ -268,7 +272,7 @@ class Multi_parameter_filtered_complex
       Index p = perm[curr];
       Index i = pos[p];
       if (i != curr) {
-        GUDHI_CHECK(curr < i, "Something is wrong");
+        GUDHI_CHECK(curr < i, std::runtime_error("Got curr " + std::to_string(curr) + " >= i " + std::to_string(i)));
         std::swap(boundaries_[curr], boundaries_[i]);
         std::swap(dimensions_[curr], dimensions_[i]);
         swap(filtrationValues_[curr], filtrationValues_[i]);
@@ -317,9 +321,17 @@ class Multi_parameter_filtered_complex
    */
   void coarsen_on_grid(const std::vector<std::vector<T> >& grid, bool coordinate = true)
   {
-    for (auto gen = 0U; gen < filtrationValues_.size(); ++gen) {
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_for(Index(0), Index(filtrationValues_.size()), [&](Index gen) {
+      // TODO : preallocate for tbb
+      // preallocate what?
       filtrationValues_[gen].project_onto_grid(grid, coordinate);
+    });
+#else
+    for (auto& fil : filtrationValues_) {
+      fil.project_onto_grid(grid, coordinate);
     }
+#endif
   }
 
   /**

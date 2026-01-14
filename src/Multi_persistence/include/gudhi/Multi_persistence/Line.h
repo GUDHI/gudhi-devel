@@ -275,6 +275,18 @@ class Line
     return {bottom, top};
   }
 
+  /**
+   * @brief Outstream operator.
+   */
+  friend std::ostream& operator<<(std::ostream& stream, const Line& line)
+  {
+    stream << "Line:\n";
+    stream << "base point: " << line.basePoint_ << "\n";
+    stream << "direction: " << line.direction_ << "\n";
+
+    return stream;
+  }
+
  private:
   Point_t basePoint_; /**< Any point on the line. */
   Point_t direction_; /**< Direction of the line. */
