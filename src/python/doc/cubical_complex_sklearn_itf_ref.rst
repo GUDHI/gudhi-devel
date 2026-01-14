@@ -58,3 +58,11 @@ Cubical complex persistence scikit-learn like interface reference
 .. autoclass:: gudhi.sklearn.CubicalPersistence
    :members:
    :show-inheritance:
+
+.. note::
+   This class uses specialized fast code for the following cases
+
+   * `dimension==1 and min_persistence>=0`
+   * `dimension==2 and min_persistence>=0 and input_type=="top_dimensional_cells"`
+
+   It falls back to :class:`~gudhi.CubicalComplex` in all other cases.
