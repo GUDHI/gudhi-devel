@@ -114,6 +114,6 @@ jobs:
           mkdir build
           cd build
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(cmakeVcpkgFlags) $(gudhiCmakeOptions) $(extraCmakeOptions) --log-level=DEBUG ..
-          ninja
-          ctest -R Alpha_complex_test_unit -V
+          ninja triangulation
+          ctest -R triangulation -V
         displayName: "Build and test"
