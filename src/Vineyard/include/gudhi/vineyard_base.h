@@ -168,8 +168,8 @@ class Vineyard_base
     });
   }
 
-  auto get_current_representative_cycles(Dimension dim = Matrix::template get_null_value<Dimension>(),
-                                         bool update = true)
+  auto get_all_current_representative_cycles(Dimension dim = Matrix::template get_null_value<Dimension>(),
+                                             bool update = true)
   {
     static_assert(Matrix_options::can_retrieve_representative_cycles,
                   "Underlying matrix has to support representative cycles.");
