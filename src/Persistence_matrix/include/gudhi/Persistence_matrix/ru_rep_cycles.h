@@ -22,6 +22,10 @@
 #include <algorithm>  //std::sort
 #include <vector>
 
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_for.h>
+#endif
+
 #include <gudhi/persistence_matrix_options.h>
 
 namespace Gudhi {
@@ -68,7 +72,7 @@ class RU_representative_cycles
    * @param dim If different from default value, only the cycles of the given dimension are updated.
    * All others are erased.
    */
-  void update_representative_cycles(Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  void update_all_representative_cycles(Dimension dim = Master_matrix::template get_null_value<Dimension>());
 
   /**
    * @brief Computes the current representative cycle of the given bar. All other cycles already computed are left
@@ -80,20 +84,20 @@ class RU_representative_cycles
 
   /**
    * @brief Returns the current representative cycles. If the matrix was modified since the last call,
-   * @ref update_representative_cycles has to be called to update the returned cycles.
+   * @ref update_all_representative_cycles has to be called to update the returned cycles.
    *
    * @return A const reference to a vector of @ref Matrix::Cycle containing all representative cycles.
    */
-  const std::vector<Cycle>& get_representative_cycles();
+  const std::vector<Cycle>& get_all_representative_cycles() const;
   /**
    * @brief Returns the representative cycle corresponding to the given bar.
-   * If the matrix was modified since the last call, @ref update_representative_cycles or
+   * If the matrix was modified since the last call, @ref update_all_representative_cycles or
    * @ref update_representative_cycle has to be called to update the returned cycle.
    *
    * @param bar Bar corresponding to the wanted representative cycle.
    * @return A const reference to the representative cycle.
    */
-  const Cycle& get_representative_cycle(const Bar& bar);
+  const Cycle& get_representative_cycle(const Bar& bar) const;
 
   /**
    * @brief Swap operator.
@@ -124,9 +128,9 @@ class RU_representative_cycles
 };
 
 template <class Master_matrix>
-inline void RU_representative_cycles<Master_matrix>::update_representative_cycles(Dimension dim)
+inline void RU_representative_cycles<Master_matrix>::update_all_representative_cycles(Dimension dim)
 {
-  auto nberColumns = _matrix()->reducedMatrixR_.get_number_of_columns();
+  Index nberColumns = _matrix()->reducedMatrixR_.get_number_of_columns();
   Index nullValue = Master_matrix::template get_null_value<Index>();
   representativeCycles_.clear();
   birthToCycle_.clear();
@@ -143,7 +147,18 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
   }
 
   representativeCycles_.resize(c);
-  // TODO: parallelize
+#ifdef GUDHI_USE_TBB
+  tbb::parallel_for(static_cast<Index>(0), nberColumns, [&](Index i) {
+    if (birthToCycle_[i] != nullValue) {
+      Index colIdx = _matrix()->_get_column_with_pivot(i);
+      if (colIdx == nullValue) {
+        _retrieve_cycle_from_u(i, birthToCycle_[i]);
+      } else {
+        _retrieve_cycle_from_r(colIdx, birthToCycle_[i]);
+      }
+    }
+  });
+#else
   for (Index i = 0; i < nberColumns; ++i) {
     if (birthToCycle_[i] != nullValue) {
       Index colIdx = _matrix()->_get_column_with_pivot(i);
@@ -154,6 +169,7 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
       }
     }
   }
+#endif
 }
 
 template <class Master_matrix>
@@ -179,14 +195,14 @@ inline void RU_representative_cycles<Master_matrix>::update_representative_cycle
 
 template <class Master_matrix>
 inline const std::vector<typename RU_representative_cycles<Master_matrix>::Cycle>&
-RU_representative_cycles<Master_matrix>::get_representative_cycles()
+RU_representative_cycles<Master_matrix>::get_all_representative_cycles() const
 {
   return representativeCycles_;
 }
 
 template <class Master_matrix>
 inline const typename RU_representative_cycles<Master_matrix>::Cycle&
-RU_representative_cycles<Master_matrix>::get_representative_cycle(const Bar& bar)
+RU_representative_cycles<Master_matrix>::get_representative_cycle(const Bar& bar) const
 {
   return representativeCycles_[birthToCycle_[bar.birth]];
 }
