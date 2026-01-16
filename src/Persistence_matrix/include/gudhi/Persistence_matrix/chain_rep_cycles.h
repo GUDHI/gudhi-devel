@@ -92,7 +92,7 @@ class Chain_representative_cycles
    *
    * @return A const reference to a vector of @ref Matrix::Cycle containing all representative cycles.
    */
-  const std::vector<Cycle>& get_all_representative_cycles();
+  const std::vector<Cycle>& get_all_representative_cycles() const;
   /**
    * @brief Returns the representative cycle corresponding to the given bar.
    * If the matrix was modified since the last call, @ref update_all_representative_cycles or
@@ -101,7 +101,7 @@ class Chain_representative_cycles
    * @param bar Bar corresponding to the wanted representative cycle.
    * @return A const reference to the representative cycle.
    */
-  const Cycle& get_representative_cycle(const Bar& bar);
+  const Cycle& get_representative_cycle(const Bar& bar) const;
 
   /**
    * @brief Swap operator.
@@ -223,14 +223,14 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
 
 template <class Master_matrix>
 inline const std::vector<typename Chain_representative_cycles<Master_matrix>::Cycle>&
-Chain_representative_cycles<Master_matrix>::get_all_representative_cycles()
+Chain_representative_cycles<Master_matrix>::get_all_representative_cycles() const
 {
   return representativeCycles_;
 }
 
 template <class Master_matrix>
 inline const typename Chain_representative_cycles<Master_matrix>::Cycle&
-Chain_representative_cycles<Master_matrix>::get_representative_cycle(const Bar& bar)
+Chain_representative_cycles<Master_matrix>::get_representative_cycle(const Bar& bar) const
 {
   return representativeCycles_[birthToCycle_[bar.birth]];
 }

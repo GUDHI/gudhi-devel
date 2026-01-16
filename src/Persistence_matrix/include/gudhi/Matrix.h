@@ -1435,7 +1435,7 @@ class Matrix
    *
    * @return A const reference to the vector of representative cycles.
    */
-  const std::vector<Cycle>& get_all_representative_cycles();
+  const std::vector<Cycle>& get_all_representative_cycles() const;
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
    * Returns the cycle representing the given bar. @ref update_all_representative_cycles or
@@ -1445,7 +1445,7 @@ class Matrix
    * @param bar A bar from the current barcode.
    * @return A const reference to the cycle representing @p bar.
    */
-  const Cycle& get_representative_cycle(const Bar& bar);
+  const Cycle& get_representative_cycle(const Bar& bar) const;
 
  private:
   using Underlying_matrix = std::conditional_t<
@@ -2138,7 +2138,7 @@ inline void Matrix<PersistenceMatrixOptions>::update_representative_cycle(const 
 
 template <class PersistenceMatrixOptions>
 inline const std::vector<typename Matrix<PersistenceMatrixOptions>::Cycle>&
-Matrix<PersistenceMatrixOptions>::get_all_representative_cycles()
+Matrix<PersistenceMatrixOptions>::get_all_representative_cycles() const
 {
   static_assert(PersistenceMatrixOptions::can_retrieve_representative_cycles, "This method was not enabled.");
   return matrix_.get_all_representative_cycles();
@@ -2146,7 +2146,7 @@ Matrix<PersistenceMatrixOptions>::get_all_representative_cycles()
 
 template <class PersistenceMatrixOptions>
 inline const typename Matrix<PersistenceMatrixOptions>::Cycle&
-Matrix<PersistenceMatrixOptions>::get_representative_cycle(const Bar& bar)
+Matrix<PersistenceMatrixOptions>::get_representative_cycle(const Bar& bar) const
 {
   static_assert(PersistenceMatrixOptions::can_retrieve_representative_cycles, "This method was not enabled.");
   return matrix_.get_representative_cycle(bar);
