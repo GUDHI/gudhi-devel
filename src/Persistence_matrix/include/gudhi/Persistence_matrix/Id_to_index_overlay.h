@@ -625,7 +625,7 @@ class Id_to_index_overlay
    *
    * @return A const reference to the vector of representative cycles.
    */
-  const std::vector<Cycle>& get_all_representative_cycles();
+  const std::vector<Cycle>& get_all_representative_cycles() const;
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
    * Returns the cycle representing the given bar.
@@ -633,7 +633,7 @@ class Id_to_index_overlay
    * @param bar A bar from the current barcode.
    * @return A const reference to the cycle representing @p bar.
    */
-  const Cycle& get_representative_cycle(const Bar& bar);
+  const Cycle& get_representative_cycle(const Bar& bar) const;
 
  private:
   using Dictionary = typename Master_matrix::template Dictionary<Index>;
@@ -1043,14 +1043,14 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::update_repres
 
 template <class Underlying_matrix, class Master_matrix>
 inline const std::vector<typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::Cycle>&
-Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_all_representative_cycles()
+Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_all_representative_cycles() const
 {
   return matrix_.get_all_representative_cycles();
 }
 
 template <class Underlying_matrix, class Master_matrix>
 inline const typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::Cycle&
-Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_representative_cycle(const Bar& bar)
+Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_representative_cycle(const Bar& bar) const
 {
   return matrix_.get_representative_cycle(bar);
 }
