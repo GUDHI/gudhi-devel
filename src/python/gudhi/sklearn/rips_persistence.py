@@ -42,7 +42,10 @@ from .. import SimplexTree
 
 class RipsPersistence(BaseEstimator, TransformerMixin):
     """
-    This is a class for constructing Vietoris-Rips complexes and computing the persistence diagrams from them.
+    This is a class for constructing Vietoris-Rips filtrations (possibly implicitly) and computing their persistence
+    diagrams.  It does not always use :class:`~gudhi.RipsComplex` or :class:`~gudhi.SimplexTree`, or not naively, it may
+    also use :func:`~gudhi.flag_filtration.edge_collapse.reduce_graph` and a fork of Ripser :cite:`Ripser` and can be
+    significantly faster.
     """
 
     def __init__(
