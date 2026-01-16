@@ -51,6 +51,7 @@ add_gudhi_module(Persistence_matrix)
 add_gudhi_module(Zigzag_persistence)
 add_gudhi_module(Multi_filtration)
 add_gudhi_module(Multi_persistence)
+add_gudhi_module(Vineyard)
 
 # Include module CMake subdirectories
 # GUDHI_SUB_DIRECTORIES is managed in CMAKE_MODULE_PATH/GUDHI_modules.cmake

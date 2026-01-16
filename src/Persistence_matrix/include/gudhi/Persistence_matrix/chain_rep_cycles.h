@@ -55,6 +55,7 @@ class Chain_representative_cycles
   using Column_container = typename Master_matrix::Column_container; /**< Column container type. */
   using Index = typename Master_matrix::Index;                       /**< @ref MatIdx index type. */
   using ID_index = typename Master_matrix::ID_index;                 /**< @ref IDIdx index type. */
+  using Dimension = typename Master_matrix::Dimension;               /**< Dimension type. */
 
   /**
    * @brief Default constructor.
@@ -63,11 +64,25 @@ class Chain_representative_cycles
 
   /**
    * @brief Computes the current representative cycles of the matrix.
+   *
+   * @param dim If different from default value, only the cycles of the given dimension are updated.
+   * All others are erased.
    */
-  void update_representative_cycles();
+  void update_representative_cycles(Dimension dim = Master_matrix::template get_null_value<Dimension>());
 
   /**
-   * @brief Returns the current representative cycles. If the matrix is modified later after the first call,
+   * @brief Computes the current representative cycle of the given bar. All other cycles already computed are left
+   * untouched (and therefore they could be unvalid for the current matrix).
+   *
+   * @note For chain matrices with enabled vine swaps, this method will only be more efficient than
+   * @ref update_representative_cycles if not called for too many bars.
+   *
+   * @param bar Bar corresponding to the wanted representative cycle.
+   */
+  void update_representative_cycle(const Bar& bar);
+
+  /**
+   * @brief Returns the current representative cycles. If the matrix was modified since the last call,
    * @ref update_representative_cycles has to be called to update the returned cycles.
    *
    * @return A const reference to a vector of @ref Matrix::Cycle containing all representative cycles.
@@ -75,8 +90,8 @@ class Chain_representative_cycles
   const std::vector<Cycle>& get_representative_cycles();
   /**
    * @brief Returns the representative cycle corresponding to the given bar.
-   * If the matrix is modified later after the first call,
-   * @ref update_representative_cycles has to be called to update the returned cycles.
+   * If the matrix was modified since the last call, @ref update_representative_cycles or
+   * @ref update_representative_cycle has to be called to update the returned cycle.
    *
    * @param bar Bar corresponding to the wanted representative cycle.
    * @return A const reference to the representative cycle.
@@ -103,12 +118,11 @@ class Chain_representative_cycles
 
   // access to inheriting Chain_matrix class
   constexpr Master_chain_matrix* _matrix() { return static_cast<Master_chain_matrix*>(this); }
-
   constexpr const Master_chain_matrix* _matrix() const { return static_cast<const Master_chain_matrix*>(this); }
 };
 
 template <class Master_matrix>
-inline void Chain_representative_cycles<Master_matrix>::update_representative_cycles()
+inline void Chain_representative_cycles<Master_matrix>::update_representative_cycles(Dimension dim)
 {
   auto nberColumns = _matrix()->get_number_of_columns();
   auto get_position = [&](ID_index pivot) {
@@ -127,9 +141,11 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
   birthToCycle_.resize(nberColumns, Master_matrix::template get_null_value<Index>());
   representativeCycles_.clear();
 
+  // TODO: parallelize
   for (ID_index i = 0; i < nberColumns; i++) {
     auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
-    if (!col.is_paired() || get_position(i) < get_position(_matrix()->get_pivot(col.get_paired_chain_index()))) {
+    if ((dim == Master_matrix::template get_null_value<Dimension>() || _matrix()->get_column_dimension(i) == dim) &&
+        (!col.is_paired() || get_position(i) < get_position(_matrix()->get_pivot(col.get_paired_chain_index())))) {
       representativeCycles_.push_back(Master_matrix::build_cycle_from_range(col.get_non_zero_content_range()));
       birthToCycle_[get_position(i)] = representativeCycles_.size() - 1;
     }
@@ -137,10 +153,50 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
 }
 
 template <class Master_matrix>
+inline void Chain_representative_cycles<Master_matrix>::update_representative_cycle(const Bar& bar)
+{
+  auto nberColumns = _matrix()->get_number_of_columns();
+  auto get_position = [&](ID_index pivot) {
+    if constexpr (Master_matrix::Option_list::has_vine_update) {
+      if constexpr (Master_matrix::Option_list::has_map_column_container) {
+        return _matrix()->map_.at(pivot);
+      } else {
+        return _matrix()->map_[pivot];
+      }
+    } else {
+      return pivot;
+    }
+  };
+
+  Index nullValue = Master_matrix::template get_null_value<Index>();
+
+  if (birthToCycle_.size() <= bar.birth) {
+    birthToCycle_.resize(bar.birth + 1, nullValue);
+  }
+  if (birthToCycle_[bar.birth] == nullValue) {
+    birthToCycle_[bar.birth] = representativeCycles_.size();
+    representativeCycles_.resize(representativeCycles_.size() + 1);
+  }
+
+  if constexpr (Master_matrix::Option_list::has_vine_update) {
+    for (ID_index i = 0; i < nberColumns; i++) {
+      if (get_position(i) == bar.birth) {
+        auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
+        representativeCycles_[birthToCycle_[bar.birth]] =
+            Master_matrix::build_cycle_from_range(col.get_non_zero_content_range());
+      }
+    }
+  } else {
+    auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(bar.birth));
+    representativeCycles_[birthToCycle_[bar.birth]] =
+        Master_matrix::build_cycle_from_range(col.get_non_zero_content_range());
+  }
+}
+
+template <class Master_matrix>
 inline const std::vector<typename Chain_representative_cycles<Master_matrix>::Cycle>&
 Chain_representative_cycles<Master_matrix>::get_representative_cycles()
 {
-  if (representativeCycles_.empty()) update_representative_cycles();
   return representativeCycles_;
 }
 
@@ -148,7 +204,6 @@ template <class Master_matrix>
 inline const typename Chain_representative_cycles<Master_matrix>::Cycle&
 Chain_representative_cycles<Master_matrix>::get_representative_cycle(const Bar& bar)
 {
-  if (representativeCycles_.empty()) update_representative_cycles();
   return representativeCycles_[birthToCycle_[bar.birth]];
 }
 

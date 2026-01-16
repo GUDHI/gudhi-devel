@@ -1409,25 +1409,38 @@ class Matrix
    */
   Index vine_swap(Index columnIndex1, Index columnIndex2);
 
-  // TODO: Rethink the interface for representative cycles
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
-   * the representative cycles of the current state of the filtration represented by the matrix. It does not need to be
-   * called before @ref get_representative_cycles is called for the first time, but needs to be called before calling
-   * @ref get_representative_cycles again if the matrix was modified in between. Otherwise the old cycles will be
-   * returned.
+   * the representative cycles of the current state of the filtration represented by the matrix. It needs to be called
+   * before calling @ref get_representative_cycles if the matrix was modified since last call. Otherwise the old cycles
+   * will be returned.
+   *
+   * @param dim If different from default value, only the cycles of the given dimension are updated.
+   * All others are erased.
    */
-  void update_representative_cycles();
+  void update_representative_cycles(Dimension dim = get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
+   * the representative cycle in the current matrix state of the given bar. It needs to be called
+   * before calling @ref get_representative_cycle if the matrix was modified since last call. Otherwise the old cycle
+   * will be returned.
+   *
+   * @param bar Bar corresponding to the wanted representative cycle.
+   */
+  void update_representative_cycle(const Bar& bar);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
-   * Returns all representative cycles of the current filtration.
+   * Returns all representative cycles of the current filtration. @ref update_representative_cycles has to be called
+   * first if a modification to the matrix has to be token into account since last call.
    *
    * @return A const reference to the vector of representative cycles.
    */
   const std::vector<Cycle>& get_representative_cycles();
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
-   * Returns the cycle representing the given bar.
+   * Returns the cycle representing the given bar. @ref update_representative_cycles or
+   * @ref update_representative_cycle have to be called first if a modification to the matrix has to be token into
+   * account since last call.
    *
    * @param bar A bar from the current barcode.
    * @return A const reference to the cycle representing @p bar.
@@ -2110,10 +2123,17 @@ inline typename Matrix<PersistenceMatrixOptions>::Index Matrix<PersistenceMatrix
 }
 
 template <class PersistenceMatrixOptions>
-inline void Matrix<PersistenceMatrixOptions>::update_representative_cycles()
+inline void Matrix<PersistenceMatrixOptions>::update_representative_cycles(Dimension dim)
 {
   static_assert(PersistenceMatrixOptions::can_retrieve_representative_cycles, "This method was not enabled.");
-  matrix_.update_representative_cycles();
+  matrix_.update_representative_cycles(dim);
+}
+
+template <class PersistenceMatrixOptions>
+inline void Matrix<PersistenceMatrixOptions>::update_representative_cycle(const Bar& bar)
+{
+  static_assert(PersistenceMatrixOptions::can_retrieve_representative_cycles, "This method was not enabled.");
+  matrix_.update_representative_cycle(bar);
 }
 
 template <class PersistenceMatrixOptions>

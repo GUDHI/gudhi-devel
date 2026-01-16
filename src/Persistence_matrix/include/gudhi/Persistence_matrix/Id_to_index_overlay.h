@@ -602,12 +602,23 @@ class Id_to_index_overlay
 
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
-   * the representative cycles of the current state of the filtration represented by the matrix.
-   * It does not need to be called before `get_representative_cycles` is called for the first time, but needs to be
-   * called before calling `get_representative_cycles` again if the matrix was modified in between. Otherwise the
-   * old cycles will be returned.
+   * the representative cycles of the current state of the filtration represented by the matrix. It needs to be called
+   * before calling @ref get_representative_cycles if the matrix was modified since last call. Otherwise the old cycles
+   * will be returned.
+   *
+   * @param dim If different from default value, only the cycles of the given dimension are updated.
+   * All others are erased.
    */
-  void update_representative_cycles();
+  void update_representative_cycles(Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
+   * the representative cycle in the current matrix state of the given bar. It needs to be called
+   * before calling @ref get_representative_cycle if the matrix was modified since last call. Otherwise the old cycle
+   * will be returned.
+   *
+   * @param bar Bar corresponding to the wanted representative cycle.
+   */
+  void update_representative_cycle(const Bar& bar);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
    * Returns all representative cycles of the current filtration.
@@ -1019,9 +1030,15 @@ Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_current_barcode()
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::update_representative_cycles()
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::update_representative_cycles(Dimension dim)
 {
-  matrix_.update_representative_cycles();
+  matrix_.update_representative_cycles(dim);
+}
+
+template <class Underlying_matrix, class Master_matrix>
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::update_representative_cycle(const Bar& bar)
+{
+  matrix_.update_representative_cycle(bar);
 }
 
 template <class Underlying_matrix, class Master_matrix>
