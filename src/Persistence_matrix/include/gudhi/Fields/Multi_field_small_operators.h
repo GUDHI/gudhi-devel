@@ -327,7 +327,8 @@ class Multi_field_operators_with_small_characteristics
                                                          const Characteristic& productOfCharacteristics) const
   {
     GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
-                "The given product is not the product of a subset of the current Multi-field characteristics.");
+                std::invalid_argument(
+                    "The given product is not the product of a subset of the current Multi-field characteristics."));
 
     Characteristic gcd = std::gcd(e, productOfAllCharacteristics_);
 
@@ -368,7 +369,8 @@ class Multi_field_operators_with_small_characteristics
   [[nodiscard]] Element get_partial_multiplicative_identity(const Characteristic& productOfCharacteristics) const
   {
     GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
-                "The given product is not the product of a subset of the current Multi-field characteristics.");
+                std::invalid_argument(
+                    "The given product is not the product of a subset of the current Multi-field characteristics."));
 
     if (productOfCharacteristics == nullCharacteristic || productOfCharacteristics == productOfAllCharacteristics_) {
       return get_multiplicative_identity();
