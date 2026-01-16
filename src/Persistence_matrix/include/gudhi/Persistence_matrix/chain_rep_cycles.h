@@ -20,6 +20,11 @@
 
 #include <vector>
 
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_for.h>
+#endif
+
+#include <gudhi/Debug_utils.h>
 #include <gudhi/persistence_matrix_options.h>
 
 namespace Gudhi {
@@ -68,14 +73,14 @@ class Chain_representative_cycles
    * @param dim If different from default value, only the cycles of the given dimension are updated.
    * All others are erased.
    */
-  void update_representative_cycles(Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  void update_all_representative_cycles(Dimension dim = Master_matrix::template get_null_value<Dimension>());
 
   /**
    * @brief Computes the current representative cycle of the given bar. All other cycles already computed are left
    * untouched (and therefore they could be unvalid for the current matrix).
    *
    * @note For chain matrices with enabled vine swaps, this method will only be more efficient than
-   * @ref update_representative_cycles if not called for too many bars.
+   * @ref update_all_representative_cycles if not called for too many bars.
    *
    * @param bar Bar corresponding to the wanted representative cycle.
    */
@@ -83,20 +88,20 @@ class Chain_representative_cycles
 
   /**
    * @brief Returns the current representative cycles. If the matrix was modified since the last call,
-   * @ref update_representative_cycles has to be called to update the returned cycles.
+   * @ref update_all_representative_cycles has to be called to update the returned cycles.
    *
    * @return A const reference to a vector of @ref Matrix::Cycle containing all representative cycles.
    */
-  const std::vector<Cycle>& get_representative_cycles();
+  const std::vector<Cycle>& get_all_representative_cycles() const;
   /**
    * @brief Returns the representative cycle corresponding to the given bar.
-   * If the matrix was modified since the last call, @ref update_representative_cycles or
+   * If the matrix was modified since the last call, @ref update_all_representative_cycles or
    * @ref update_representative_cycle has to be called to update the returned cycle.
    *
    * @param bar Bar corresponding to the wanted representative cycle.
    * @return A const reference to the representative cycle.
    */
-  const Cycle& get_representative_cycle(const Bar& bar);
+  const Cycle& get_representative_cycle(const Bar& bar) const;
 
   /**
    * @brief Swap operator.
@@ -122,9 +127,9 @@ class Chain_representative_cycles
 };
 
 template <class Master_matrix>
-inline void Chain_representative_cycles<Master_matrix>::update_representative_cycles(Dimension dim)
+inline void Chain_representative_cycles<Master_matrix>::update_all_representative_cycles(Dimension dim)
 {
-  auto nberColumns = _matrix()->get_number_of_columns();
+  Index nberColumns = _matrix()->get_number_of_columns();
   auto get_position = [&](ID_index pivot) {
     if constexpr (Master_matrix::Option_list::has_vine_update) {
       if constexpr (Master_matrix::Option_list::has_map_column_container) {
@@ -136,12 +141,33 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
       return pivot;
     }
   };
+  Index nullValue = Master_matrix::template get_null_value<Index>();
 
   birthToCycle_.clear();
-  birthToCycle_.resize(nberColumns, Master_matrix::template get_null_value<Index>());
+  birthToCycle_.resize(nberColumns, nullValue);
   representativeCycles_.clear();
 
-  // TODO: parallelize
+#ifdef GUDHI_USE_TBB
+  Index c = 0;
+  for (Index i = 0; i < nberColumns; i++) {
+    auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
+    if ((dim == Master_matrix::template get_null_value<Dimension>() || _matrix()->get_column_dimension(i) == dim) &&
+        (!col.is_paired() || get_position(i) < get_position(_matrix()->get_pivot(col.get_paired_chain_index())))) {
+      birthToCycle_[get_position(i)] = c;
+      ++c;
+    }
+  }
+
+  representativeCycles_.resize(c);
+  tbb::parallel_for(static_cast<Index>(0), nberColumns, [&](Index i) {
+    auto idx = get_position(i);
+    if (birthToCycle_[idx] != nullValue) {
+      auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
+      representativeCycles_[birthToCycle_[idx]] =
+          Master_matrix::build_cycle_from_range(col.get_non_zero_content_range());
+    }
+  });
+#else
   for (ID_index i = 0; i < nberColumns; i++) {
     auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
     if ((dim == Master_matrix::template get_null_value<Dimension>() || _matrix()->get_column_dimension(i) == dim) &&
@@ -150,6 +176,7 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
       birthToCycle_[get_position(i)] = representativeCycles_.size() - 1;
     }
   }
+#endif
 }
 
 template <class Master_matrix>
@@ -178,31 +205,31 @@ inline void Chain_representative_cycles<Master_matrix>::update_representative_cy
     representativeCycles_.resize(representativeCycles_.size() + 1);
   }
 
+  ID_index pivot = bar.birth;
+
   if constexpr (Master_matrix::Option_list::has_vine_update) {
-    for (ID_index i = 0; i < nberColumns; i++) {
-      if (get_position(i) == bar.birth) {
-        auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
-        representativeCycles_[birthToCycle_[bar.birth]] =
-            Master_matrix::build_cycle_from_range(col.get_non_zero_content_range());
-      }
-    }
-  } else {
-    auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(bar.birth));
-    representativeCycles_[birthToCycle_[bar.birth]] =
-        Master_matrix::build_cycle_from_range(col.get_non_zero_content_range());
+    ID_index i = 0;
+    while (i < nberColumns && get_position(i) != bar.birth) ++i;
+    GUDHI_CHECK(i < nberColumns, std::invalid_argument("Given birth value is not valid."));
+    pivot = i;
   }
+
+  // if bar.birth does not correspond to a valid birth time, get_column_with_pivot will throw an out of range.
+  auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(pivot));
+  representativeCycles_[birthToCycle_[bar.birth]] =
+      Master_matrix::build_cycle_from_range(col.get_non_zero_content_range());
 }
 
 template <class Master_matrix>
 inline const std::vector<typename Chain_representative_cycles<Master_matrix>::Cycle>&
-Chain_representative_cycles<Master_matrix>::get_representative_cycles()
+Chain_representative_cycles<Master_matrix>::get_all_representative_cycles() const
 {
   return representativeCycles_;
 }
 
 template <class Master_matrix>
 inline const typename Chain_representative_cycles<Master_matrix>::Cycle&
-Chain_representative_cycles<Master_matrix>::get_representative_cycle(const Bar& bar)
+Chain_representative_cycles<Master_matrix>::get_representative_cycle(const Bar& bar) const
 {
   return representativeCycles_[birthToCycle_[bar.birth]];
 }
