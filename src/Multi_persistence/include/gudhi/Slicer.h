@@ -433,48 +433,31 @@ class Slicer
    *
    * @param ignoreInf If true, all cells at infinity filtration values are ignored for the initialization, resulting
    * potentially in less storage use and better performance. But note that this can be problematic with the use of
-   * @ref vineyard_update. Default value: true.
+   * @ref update_persistence_computation. Default value: false.
    */
-  void initialize_persistence_computation(const bool ignoreInf = true)
+  void initialize_persistence_computation(const bool ignoreInf = false)
   {
     _initialize_persistence_computation(complex_, ignoreInf);
   }
 
   /**
-   * @brief After the persistence computation was initialized for a slice and the slice changes, this method can
-   * update everything necessary for the barcode without re-computing everything from scratch (contrary to
-   * @ref initialize_persistence_computation). Furthermore, it guarantees that the new barcode will "match" the
-   * precedent one. TODO: explain exactly what it means and how to do the matching.
-   * The method will have better performance if the complex is ordered by dimension.
-   *
-   * Only available if PersistenceAlgorithm::is_vine is true.
+   * @brief If @ref PersistenceAlgorithm::is_vine is true: after the persistence computation was initialized for a
+   * slice and the slice changes, this method can update everything necessary for the barcode without re-computing
+   * everything from scratch (contrary to @ref initialize_persistence_computation). Furthermore, it guarantees that
+   * the new barcode will "matches" the precedent one. TODO: explain exactly what it means and how to do the matching.
+   * If @ref PersistenceAlgorithm::is_vine is false: equivalent to @ref initialize_persistence_computation with
+   * `ignoreInf` set to false if `ignoreInf` was false in the initial call to @ref initialize_persistence_computation
+   * or was true but no filtration value was at infinity.
    *
    * @pre @ref initialize_persistence_computation has to be called at least once before.
    *
-   * @warning If `ignoreInf` was set to true when initializing the persistence computation, any update of the slice has
-   * to keep at infinity the boundaries which were before, otherwise the behaviour is undefined (it will throw with
-   * high probability).
+   * @warning If @ref PersistenceAlgorithm::is_vine is true and `ignoreInf` was set to true when initializing the
+   * persistence computation, any update of the slice has to keep at infinity the boundaries which were before,
+   * otherwise the behaviour is undefined (it will throw with high probability).
    */
-  void vineyard_update()
+  void update_persistence_computation()
   {
-    static_assert(Persistence::is_vine, "vineyard_update() not enabled by the chosen PersistenceAlgorithm class.");
-
-    const bool is_ordered_by_dim = complex_.is_ordered_by_dimension();
-    // speed up when ordered by dim, to avoid unnecessary swaps
-    auto dim_condition = [&](int curr) {
-      if (is_ordered_by_dim) {
-        return persistence_.get_dimension(curr) == persistence_.get_dimension(curr - 1);
-      }
-      return true;
-    };
-    for (Index i = 1; i < generatorOrder_.size(); i++) {
-      int curr = i;
-      while (curr > 0 && dim_condition(curr) && slice_[generatorOrder_[curr]] < slice_[generatorOrder_[curr - 1]]) {
-        persistence_.vine_swap(curr - 1);
-        std::swap(generatorOrder_[curr - 1], generatorOrder_[curr]);
-        --curr;
-      }
-    }
+    _update_persistence_computation(complex_);
   }
 
   /**
@@ -714,6 +697,30 @@ class Slicer
   {
     _initialize_order(complex, ignoreInf);
     persistence_.reinitialize(complex, generatorOrder_);
+  }
+
+  void _update_persistence_computation(const Complex& complex)
+  {
+    if constexpr (Persistence::is_vine) {
+      const bool is_ordered_by_dim = complex.is_ordered_by_dimension();
+      // speed up when ordered by dim, to avoid unnecessary swaps
+      auto dim_condition = [&](int curr) {
+        if (is_ordered_by_dim) {
+          return persistence_.get_dimension(curr) == persistence_.get_dimension(curr - 1);
+        }
+        return true;
+      };
+      for (Index i = 1; i < generatorOrder_.size(); i++) {
+        int curr = i;
+        while (curr > 0 && dim_condition(curr) && slice_[generatorOrder_[curr]] < slice_[generatorOrder_[curr - 1]]) {
+          persistence_.vine_swap(curr - 1);
+          std::swap(generatorOrder_[curr - 1], generatorOrder_[curr]);
+          --curr;
+        }
+      }
+    } else {
+      _initialize_persistence_computation(complex, complex.get_number_of_cycle_generators() > generatorOrder_.size());
+    }
   }
 
   std::vector<std::vector<Cycle>> _get_representative_cycles(const Complex& complex, bool update = true)

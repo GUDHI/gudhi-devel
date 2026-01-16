@@ -626,7 +626,7 @@ inline Slicer build_slicer_from_simplex_tree(Simplex_tree<SimplexTreeOptions>& s
  */
 template <bool idx, class U, class Slicer, class F>
 inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
-persistence_on_slices_(Slicer& slicer, F&& ini_slicer, unsigned int size, [[maybe_unused]] bool ignoreInf = true)
+persistence_on_slices_(Slicer& slicer, F&& ini_slicer, unsigned int size, [[maybe_unused]] bool ignoreInf = false)
 {
   using Barcode = typename Slicer::template Multi_dimensional_flat_barcode<U>;
 
@@ -640,7 +640,7 @@ persistence_on_slices_(Slicer& slicer, F&& ini_slicer, unsigned int size, [[mayb
     out[0] = slicer.template get_flat_barcode<true, U, idx>();
     for (auto i = 1U; i < size; ++i) {
       std::forward<F>(ini_slicer)(slicer, i);
-      slicer.vineyard_update();
+      slicer.update_persistence_computation();
       out[i] = slicer.template get_flat_barcode<true, U, idx>();
     }
   } else {
@@ -683,14 +683,14 @@ persistence_on_slices_(Slicer& slicer, F&& ini_slicer, unsigned int size, [[mayb
  * Can be empty, then the slope is assumed to be 1.
  * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
  * potentially in less storage use and better performance. But the parameter will be ignored if
- * PersistenceAlgorithm::is_vine is true.
+ * PersistenceAlgorithm::is_vine is true. Default value: false.
  */
 template <class Slicer, class T, class U = T, bool idx = false>
 inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>> persistence_on_slices(
     Slicer& slicer,
     const std::vector<std::vector<T>>& basePoints,
     const std::vector<std::vector<T>>& directions,
-    bool ignoreInf = true)
+    bool ignoreInf = false)
 {
   GUDHI_CHECK(directions.empty() || directions.size() == basePoints.size(),
               "There should be as many directions than base points.");
@@ -723,11 +723,11 @@ inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>> 
  * @param slices Vector of slices. A slice has to has as many elements than cells in the slicer.
  * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
  * potentially in less storage use and better performance. But the parameter will be ignored if
- * PersistenceAlgorithm::is_vine is true.
+ * PersistenceAlgorithm::is_vine is true. Default value: false.
  */
 template <class Slicer, class T, class U = T, bool idx = false>
 inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
-persistence_on_slices(Slicer& slicer, const std::vector<std::vector<T>>& slices, bool ignoreInf = true)
+persistence_on_slices(Slicer& slicer, const std::vector<std::vector<T>>& slices, bool ignoreInf = false)
 {
   GUDHI_CHECK(slices.empty() || slices[0].size() == slicer.get_number_of_cycle_generators(),
               "There should be as many elements in a slice than cells in the slicer.");
@@ -752,11 +752,11 @@ persistence_on_slices(Slicer& slicer, const std::vector<std::vector<T>>& slices,
  * @param numberOfSlices Number of slices represented by the pointer.
  * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
  * potentially in less storage use and better performance. But the parameter will be ignored if
- * PersistenceAlgorithm::is_vine is true.
+ * PersistenceAlgorithm::is_vine is true. Default value: false.
  */
 template <class Slicer, class T, class U = T, bool idx = false, class = std::enable_if_t<std::is_arithmetic_v<T>>>
 inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
-persistence_on_slices(Slicer& slicer, T* slices, unsigned int numberOfSlices, bool ignoreInf = true)
+persistence_on_slices(Slicer& slicer, T* slices, unsigned int numberOfSlices, bool ignoreInf = false)
 {
   auto num_gen = slicer.get_number_of_cycle_generators();
   auto view = Gudhi::Simple_mdspan(slices, numberOfSlices, num_gen);

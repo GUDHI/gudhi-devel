@@ -517,7 +517,7 @@ void test_slicer_vineyard(Slicer& s)
   BOOST_CHECK_EQUAL(bc[2].size(), 0);
 
   s.push_to(Line<T>({0, 1, 1}));
-  s.vineyard_update();
+  s.update_persistence_computation();
 
   bc = get_barcode(s.get_barcode());
   BOOST_CHECK_EQUAL(bc.size(), 3);
@@ -531,7 +531,7 @@ void test_slicer_vineyard(Slicer& s)
   BOOST_CHECK_EQUAL(bc[2].size(), 0);
 
   s.push_to(Line<T>({2, 4, 2}));
-  s.vineyard_update();
+  s.update_persistence_computation();
 
   bc = get_barcode(s.get_barcode());
   BOOST_CHECK_EQUAL(bc.size(), 3);
@@ -545,7 +545,7 @@ void test_slicer_vineyard(Slicer& s)
   BOOST_CHECK_EQUAL(bc[2].size(), 0);
 
   s.push_to(Line<T>({2, 1, 0}));
-  s.vineyard_update();
+  s.update_persistence_computation();
 
   bc = get_barcode(s.get_barcode());
   BOOST_CHECK_EQUAL(bc.size(), 3);

@@ -271,29 +271,29 @@ class Thread_safe_slicer : private Slicer
    *
    * @param ignoreInf If true, all cells at infinity filtration values are ignored for the initialization, resulting
    * potentially in less storage use and better performance. But note that this can be problematic with the use of
-   * @ref vineyard_update. Default value: true.
+   * @ref update_persistence_computation. Default value: false.
    */
-  void initialize_persistence_computation(const bool ignoreInf = true)
+  void initialize_persistence_computation(const bool ignoreInf = false)
   {
     Slicer::_initialize_persistence_computation(slicer_->complex_, ignoreInf);
   }
 
   /**
-   * @brief After the persistence computation was initialized for a slice and the slice changes, this method can
-   * update everything necessary for the barcode without re-computing everything from scratch (contrary to
-   * @ref initialize_persistence_computation). Furthermore, it guarantees that the new barcode will "match" the
-   * precedent one. TODO: explain exactly what it means and how to do the matching.
-   * The method will have better performance if the complex is ordered by dimension.
-   *
-   * Only available if PersistenceAlgorithm::is_vine is true.
+   * @brief If @ref PersistenceAlgorithm::is_vine is true: after the persistence computation was initialized for a
+   * slice and the slice changes, this method can update everything necessary for the barcode without re-computing
+   * everything from scratch (contrary to @ref initialize_persistence_computation). Furthermore, it guarantees that
+   * the new barcode will "matches" the precedent one. TODO: explain exactly what it means and how to do the matching.
+   * If @ref PersistenceAlgorithm::is_vine is false: equivalent to @ref initialize_persistence_computation with
+   * `ignoreInf` set to false if `ignoreInf` was false in the initial call to @ref initialize_persistence_computation
+   * or was true but no filtration value was at infinity.
    *
    * @pre @ref initialize_persistence_computation has to be called at least once before.
    *
-   * @warning If `ignoreInf` was set to true when initializing the persistence computation, any update of the slice has
-   * to keep at infinity the boundaries which were before, otherwise the behaviour is undefined (it will throw with
-   * high probability).
+   * @warning If @ref PersistenceAlgorithm::is_vine is true and `ignoreInf` was set to true when initializing the
+   * persistence computation, any update of the slice has to keep at infinity the boundaries which were before,
+   * otherwise the behaviour is undefined (it will throw with high probability).
    */
-  void vineyard_update() { Slicer::vineyard_update(); }
+  void update_persistence_computation() { Slicer::_update_persistence_computation(slicer_->complex_); }
 
   /**
    * @brief Returns the barcode of the current slice. The barcode format will change depending on the template values.
