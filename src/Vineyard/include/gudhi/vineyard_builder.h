@@ -79,7 +79,9 @@ class Vineyard_builder
   using Flat_vines = std::vector<std::array<T, 2> >;
   using Vineyard = std::conditional_t<flat, std::vector<Flat_vines>, std::vector<Vine_t> >;
 
-  Vineyard_builder(bool storeRepCycles = false, Dimension repCyclesDim = -1)
+  static constexpr Dimension get_null_dimension() { return -1; }
+
+  Vineyard_builder(bool storeRepCycles = false, Dimension repCyclesDim = get_null_dimension())
   {
     if (storeRepCycles) {
       latest_representative_cycles_.emplace();
@@ -188,7 +190,7 @@ class Vineyard_builder
   bool _store_cycle(const typename Base::Bar& bar, const Filtration_range& filtrationValues) const
   {
     if (!repCyclesDim_) return false;
-    if (*repCyclesDim_ >= 0 && bar.dim != *repCyclesDim_) return false;
+    if (*repCyclesDim_ != get_null_dimension() && bar.dim != *repCyclesDim_) return false;
     if (filtrationValues[bar.birth] == Bar::inf) return false;
     return bar.death == Base::Bar::inf || filtrationValues[bar.death] - filtrationValues[bar.birth] > 0;
   }

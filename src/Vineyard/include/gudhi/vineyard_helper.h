@@ -25,6 +25,27 @@
 namespace Gudhi {
 namespace vineyard {
 
+/**
+ * @private
+ */
+template <class FilteredComplex, typename Index>
+inline Index assign_keys_(FilteredComplex& complex, Index start)
+{
+  Index numberOfSimplices = start;
+  // Vertex ID should correspond to position in the original point cloud if there was one.
+  for (auto sh : complex.skeleton_simplex_range(0)) {
+    complex.assign_key(sh, numberOfSimplices);
+    ++numberOfSimplices;
+  }
+  for (auto sh : complex.complex_simplex_range()) {
+    if (complex.dimension(sh) != 0) {
+      complex.assign_key(sh, numberOfSimplices);
+      ++numberOfSimplices;
+    }
+  }
+  return numberOfSimplices;
+}
+
 template <class FilteredComplex,
           typename Filtration_value = typename FilteredComplex::Filtration_value,
           typename Index = typename FilteredComplex::Simplex_key,
@@ -37,19 +58,7 @@ inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
   GUDHI_CHECK(boundaries.size() == dimensions.size() && boundaries.size() == filtrationValues.size(),
               std::invalid_argument("Output containers do not start with the same size"));
 
-  Index numberOfSimplices = boundaries.size();
-
-  // Vertex ID should correspond to position in the original point cloud if there was one.
-  for (auto sh : complex.skeleton_simplex_range(0)) {
-    complex.assign_key(sh, numberOfSimplices);
-    ++numberOfSimplices;
-  }
-  for (auto sh : complex.complex_simplex_range()) {
-    if (complex.dimension(sh) != 0) {
-      complex.assign_key(sh, numberOfSimplices);
-      ++numberOfSimplices;
-    }
-  }
+  Index numberOfSimplices = assign_keys_(complex, boundaries.size());
 
   boundaries.resize(numberOfSimplices);
   dimensions.resize(numberOfSimplices);
@@ -68,23 +77,14 @@ inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
   }
 }
 
+// same name to emphasize that the filtration values computed are in exactly the same order than if computed 
+// with the other version. Usefull if you already called the other version and then only modified the filtration
+// values of the complex and you don't need to recompute the boundaries.
 template <class FilteredComplex, typename Filtration_value = typename FilteredComplex::Filtration_value>
 inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
                                                std::vector<Filtration_value>& filtrationValues)
 {
-  auto numberOfSimplices = filtrationValues.size();
-
-  // Vertex ID should correspond to position in the original point cloud if there was one.
-  for (auto sh : complex.skeleton_simplex_range(0)) {
-    complex.assign_key(sh, numberOfSimplices);
-    ++numberOfSimplices;
-  }
-  for (auto sh : complex.complex_simplex_range()) {
-    if (complex.dimension(sh) != 0) {
-      complex.assign_key(sh, numberOfSimplices);
-      ++numberOfSimplices;
-    }
-  }
+  auto numberOfSimplices = assign_keys_(complex, filtrationValues.size());
 
   filtrationValues.resize(numberOfSimplices);
 

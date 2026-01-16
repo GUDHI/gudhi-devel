@@ -18,6 +18,7 @@
 #include <gudhi/vineyard_builder.h>
 #include <gudhi/vineyard_helper.h>
 #include <python_interfaces/Simplex_tree_interface.h>
+#include <python_interfaces/Cubical_complex_interface.h>
 #include <python_interfaces/numpy_utils.h>
 
 namespace nb = nanobind;
@@ -157,6 +158,10 @@ inline nb::tuple build_python_boundary_matrix_from_complex(FilteredComplex& comp
 namespace gvy = Gudhi::vineyard;
 using gvyi = gvy::Vineyard_interface;
 
+using ST = Gudhi::Simplex_tree_interface;
+using CC = Gudhi::cubical_complex::Cubical_complex_interface;
+using PCC = Gudhi::cubical_complex::Periodic_cubical_complex_interface;
+
 NB_MODULE(_vineyard_ext, m)
 {
   m.attr("__license__") = "MIT";
@@ -165,11 +170,13 @@ NB_MODULE(_vineyard_ext, m)
       .def(nb::init<bool, typename gvyi::Dimension>())
       .def("_initialize", &gvyi::initialize<double, int>)
       .def("_initialize", &gvyi::initialize<float, int>)
-      // TODO: also for Cubical complex
-      .def("_initialize_from_complex", &gvyi::initialize_from_complex<Gudhi::Simplex_tree_interface>)
+      .def("_initialize_from_complex", &gvyi::initialize_from_complex<ST>)
+      .def("_initialize_from_complex", &gvyi::initialize_from_complex<CC>)
+      .def("_initialize_from_complex", &gvyi::initialize_from_complex<PCC>)
       .def("_update", &gvyi::update)
-      // TODO: also for Cubical complex
-      .def("_update_from_complex", &gvyi::update_from_complex<Gudhi::Simplex_tree_interface>)
+      .def("_update_from_complex", &gvyi::update_from_complex<ST>)
+      .def("_update_from_complex", &gvyi::update_from_complex<CC>)
+      .def("_update_from_complex", &gvyi::update_from_complex<PCC>)
       .def("_get_current_vineyard_view", &gvyi::get_current_vineyard_view)
       .def("get_latest_representative_cycles", &gvyi::get_latest_representative_cycles, R"doc(
 Returns a list of (cycle, pers) pairs representing the current representative cycles in the complex.
@@ -179,7 +186,7 @@ associated to the cycle.
 :rtype:  list[tuple[np.ndarray, np.number]]
            )doc");
 
-  // TODO: also for Cubical complex
-  m.def("_build_boundary_matrix_from_complex",
-        &gvy::build_python_boundary_matrix_from_complex<Gudhi::Simplex_tree_interface>);
+  m.def("_build_boundary_matrix_from_complex", &gvy::build_python_boundary_matrix_from_complex<ST>);
+  m.def("_build_boundary_matrix_from_complex", &gvy::build_python_boundary_matrix_from_complex<CC>);
+  m.def("_build_boundary_matrix_from_complex", &gvy::build_python_boundary_matrix_from_complex<PCC>);
 }

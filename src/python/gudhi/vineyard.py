@@ -23,6 +23,8 @@ import matplotlib.pyplot as plt
 from gudhi import _vineyard_ext as t
 from gudhi.rips_complex import RipsComplex
 from gudhi.simplex_tree import SimplexTree
+from gudhi.cubical_complex import CubicalComplex
+from gudhi.periodic_cubical_complex import PeriodicCubicalComplex
 from gudhi.reader_utils import read_lower_triangular_matrix_from_csv_file
 
 
@@ -116,7 +118,7 @@ class Vineyard(t.Vineyard_interface):
 
     def initialize(
         self,
-        filtered_cpx: SimplexTree = None,
+        filtered_cpx: SimplexTree | CubicalComplex | PeriodicCubicalComplex = None,
         boundaries: list[np.ndarray] = None,
         dimensions: np.ndarray = None,
         filtration_values: np.ndarray = None,
@@ -125,10 +127,10 @@ class Vineyard(t.Vineyard_interface):
         """Initializes the vineyard with the first persistence barcode. If another vineyard was initialized before,
         it will be completely replaced.
 
-        :param filtered_cpx: A SimplexTree containing all simplices and filtration values of the initializing
+        :param filtered_cpx: A filtered complex containing all simplices and filtration values of the initializing
             filtration. Alternative to providing `boundaries`, `dimensions` and `filtration_values`, so both should not
             be provided at the same time. Defaults to `None`.
-        :type filtered_cpx: SimplexTree or `None`
+        :type filtered_cpx: SimplexTree or CubicalComplex or PeriodicCubicalComplex or `None`
         :param boundaries: List of the cell boundaries (do not have to be simplicial) of the initializing filtration.
             Alternative to providing `filtered_cpx`, so both should not be provide at the same time. If `boundaries` is
             provided, `dimensions` and `filtration_values` also have to be provided (such that the indices aligns).
@@ -169,16 +171,16 @@ class Vineyard(t.Vineyard_interface):
 
     def update(
         self,
-        filtered_cpx: SimplexTree = None,
+        filtered_cpx: SimplexTree | CubicalComplex | PeriodicCubicalComplex = None,
         filtration_values: np.ndarray = None,
     ) -> list[np.ndarray]:
         """Adds a layer to the current vineyard by updating the persistence diagram such that it corresponds to the
         given filtration.
 
-        :param filtered_cpx: A SimplexTree whose simplices are identical (also label wise) to the SimplexTree provided
+        :param filtered_cpx: A filtered complex whose simplices are identical (also label wise) to the complex provided
             to :meth:`initialize`, but with new filtration values corresponding to the new filtration. If none was
             provided for :meth:`initialize`, provide the argument `filtration_values` instead. Defaults to `None`.
-        :type filtered_cpx: SimplexTree or `None`
+        :type filtered_cpx: SimplexTree or CubicalComplex or PeriodicCubicalComplex or `None`
         :param filtration_values: Array of new filtration values such that `filtration_values[i]` corresponds to
             the new value for `boundaries[i]` provided to :meth:`initialize`. If `boundaries` was not provided to
             :meth:`initialize`, provide the argument `filtered_cpx` instead. Defaults to `None`.
@@ -345,6 +347,7 @@ class Vineyard(t.Vineyard_interface):
                         + ". Possibilities are: `none`, `gray_diagonal`, `gray_band`, `erase_diagonal` and `erase_band`"
                     )
 
+    # TODO: option to handle points at infinity
     def plot_vineyards(
         self,
         dim: int = None,
@@ -356,7 +359,7 @@ class Vineyard(t.Vineyard_interface):
         square_scaling: bool = True,
     ):
         """Plots the current vineyard, except for completely trivial vines (vines where all coordinates are on
-        the diagonal).
+        the diagonal). The points at infinity are mapped to a finite point a bit away from the other points.
 
         :param dim: Optional. If provided, only plots the vines of the given dimension. Defaults to `None`.
         :type dim: int, optional
@@ -888,7 +891,7 @@ class PointCloudRipsVineyard:
         square_scaling: bool = True,
     ):
         """Plots the current vineyard, except for completely trivial vines (vines where all coordinates are on
-        the diagonal).
+        the diagonal). The points at infinity are mapped to a finite point a bit away from the other points.
 
         :param dim: Optional. If provided, only plots the vines of the given dimension. Defaults to `None`.
         :type dim: int, optional
