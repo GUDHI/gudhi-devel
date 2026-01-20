@@ -24,8 +24,9 @@
 #include <gudhi/Thread_safe_slicer.h>
 #include <gudhi/Multi_parameter_filtration.h>
 #include <gudhi/Dynamic_multi_parameter_filtration.h>
-#include <gudhi/Multi_persistence/Persistence_interface_matrix.h>
+#include <gudhi/Multi_persistence/Persistence_interface_homology.h>
 #include <gudhi/Multi_persistence/Persistence_interface_cohomology.h>
+#include <gudhi/Multi_persistence/Persistence_interface_vineyard.h>
 #include <gudhi/Multi_persistence/Line.h>
 
 using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
@@ -33,10 +34,13 @@ using Gudhi::multi_filtration::Multi_parameter_filtration;
 using Gudhi::multi_persistence::Line;
 using Gudhi::multi_persistence::Multi_parameter_filtered_complex;
 using Gudhi::multi_persistence::Persistence_interface_cohomology;
-using Gudhi::multi_persistence::Persistence_interface_matrix;
+using Gudhi::multi_persistence::Persistence_interface_homology;
+using Gudhi::multi_persistence::Persistence_interface_vineyard;
 using Gudhi::multi_persistence::Slicer;
 using Gudhi::multi_persistence::Thread_safe_slicer;
 
+using I = std::uint32_t;
+using D = int;
 using T = double;
 using Bar = Gudhi::persistence_matrix::Persistence_interval<int, T>;
 using Barcode = std::vector<Bar>;
@@ -48,12 +52,12 @@ using Test_multi_dimensional_barcode = std::vector<Test_barcode>;
 
 struct Multi_persistence_r_options
     : Gudhi::persistence_matrix::Default_options<Gudhi::persistence_matrix::Column_types::INTRUSIVE_SET, true> {
-  using Index = std::uint32_t;
+  using Index = I;
+  using Dimension = D;
   static const bool has_column_pairings = true;
 };
 
 struct Multi_persistence_ru_options : Multi_persistence_r_options {
-  static const bool has_vine_update = true;
   static const bool can_retrieve_representative_cycles = true;
 };
 
@@ -63,21 +67,41 @@ struct Multi_persistence_chain_options : Multi_persistence_ru_options {
       Gudhi::persistence_matrix::Column_indexation_types::POSITION;
 };
 
+struct Multi_persistence_vineyard_ru_options : Gudhi::vineyard::Default_vineyard_options {
+  static constexpr bool is_RU = true;
+};
+
+struct Multi_persistence_vineyard_chain_options : Gudhi::vineyard::Default_vineyard_options {
+  static constexpr bool is_RU = false;
+};
+
 using list_of_tested_variants = boost::mpl::list<
-    Slicer<Multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_r_options>>,
-    Slicer<Multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_ru_options>>,
-    Slicer<Multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_chain_options>>,
+    Slicer<Multi_parameter_filtration<T>,
+           Persistence_interface_homology<Multi_persistence_r_options, Multi_parameter_filtration<T>>>,
+    Slicer<Multi_parameter_filtration<T>,
+           Persistence_interface_homology<Multi_persistence_ru_options, Multi_parameter_filtration<T>>>,
+    Slicer<Multi_parameter_filtration<T>,
+           Persistence_interface_homology<Multi_persistence_chain_options, Multi_parameter_filtration<T>>>,
     Slicer<Multi_parameter_filtration<T>, Persistence_interface_cohomology<Multi_parameter_filtration<T>>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_r_options>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_ru_options>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_chain_options>>,
+    Slicer<Multi_parameter_filtration<T>, Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>>,
+    Slicer<Multi_parameter_filtration<T>, Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>,
     Slicer<Dynamic_multi_parameter_filtration<T>,
-           Persistence_interface_cohomology<Dynamic_multi_parameter_filtration<T>>>>;
+           Persistence_interface_homology<Multi_persistence_r_options, Dynamic_multi_parameter_filtration<T>>>,
+    Slicer<Dynamic_multi_parameter_filtration<T>,
+           Persistence_interface_homology<Multi_persistence_ru_options, Dynamic_multi_parameter_filtration<T>>>,
+    Slicer<Dynamic_multi_parameter_filtration<T>,
+           Persistence_interface_homology<Multi_persistence_chain_options, Dynamic_multi_parameter_filtration<T>>>,
+    Slicer<Dynamic_multi_parameter_filtration<T>,
+           Persistence_interface_cohomology<Dynamic_multi_parameter_filtration<T>>>,
+    Slicer<Dynamic_multi_parameter_filtration<T>,
+           Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>>,
+    Slicer<Dynamic_multi_parameter_filtration<T>,
+           Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>>;
 
 template <class Fil>
-Multi_parameter_filtered_complex<Fil> build_rep_cycle_input_complex()
+Multi_parameter_filtered_complex<Fil, I, D> build_rep_cycle_input_complex()
 {
-  using Complex = Multi_parameter_filtered_complex<Fil>;
+  using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;
@@ -106,9 +130,9 @@ Multi_parameter_filtered_complex<Fil> build_rep_cycle_input_complex()
 }
 
 template <class Fil>
-Multi_parameter_filtered_complex<Fil> build_rep_cycle_input_complex2()
+Multi_parameter_filtered_complex<Fil, I, D> build_rep_cycle_input_complex2()
 {
-  using Complex = Multi_parameter_filtered_complex<Fil>;
+  using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;
@@ -139,9 +163,9 @@ Multi_parameter_filtered_complex<Fil> build_rep_cycle_input_complex2()
 }
 
 template <class Fil>
-Multi_parameter_filtered_complex<Fil> build_simple_input_complex()
+Multi_parameter_filtered_complex<Fil, I, D> build_simple_input_complex()
 {
-  using Complex = Multi_parameter_filtered_complex<Fil>;
+  using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;
@@ -167,7 +191,7 @@ void test_slicer_constructors(const Slicer& s)
 {
   BOOST_CHECK_EQUAL(s.get_number_of_cycle_generators(), 9);
   BOOST_CHECK_EQUAL(s.get_number_of_parameters(), 3);
-  BOOST_CHECK_EQUAL(s.get_current_order().size(), 9);
+  BOOST_CHECK_EQUAL(s.get_current_order().size(), 0);
   BOOST_CHECK_EQUAL(s.get_slice().size(), 9);
   BOOST_CHECK(!s.get_persistence_algorithm().is_initialized());
 }
@@ -465,15 +489,17 @@ void test_slicer_persistence(Slicer& s)
   test_barcode(s.template get_flat_barcode<true>());
   test_barcode(s.template get_flat_barcode<false>());
 
-  s.initialize_persistence_computation(true);
-
-  BOOST_CHECK(s.persistence_computation_is_initialized());
-  BOOST_CHECK(s.get_current_order() == (std::vector<Index>{0, 2, 1, 5, 4, 3}));
-
-  test_barcode_ignore_inf(s.template get_barcode<true>());
-  test_barcode_ignore_inf(s.template get_barcode<false>());
-  test_barcode_ignore_inf(s.template get_flat_barcode<true>());
-  test_barcode_ignore_inf(s.template get_flat_barcode<false>());
+  if constexpr (!Slicer::Persistence::is_vine) {
+    s.initialize_persistence_computation(true);
+  
+    BOOST_CHECK(s.persistence_computation_is_initialized());
+    BOOST_CHECK(s.get_current_order() == (std::vector<Index>{0, 2, 1, 5, 4, 3}));
+  
+    test_barcode_ignore_inf(s.template get_barcode<true>());
+    test_barcode_ignore_inf(s.template get_barcode<false>());
+    test_barcode_ignore_inf(s.template get_flat_barcode<true>());
+    test_barcode_ignore_inf(s.template get_flat_barcode<false>());
+  }
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_persistence, Slicer, list_of_tested_variants)
@@ -490,12 +516,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_persistence, Slicer, list_of_tested_variant
   test_slicer_persistence(tss);
 }
 
-typedef boost::mpl::list<
-    Slicer<Multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_ru_options>>,
-    Slicer<Multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_chain_options>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_ru_options>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>, Persistence_interface_matrix<Multi_persistence_chain_options>>>
-    list_of_tested_variants2;
+using list_of_tested_variants2 = boost::mpl::list<
+    Slicer<Multi_parameter_filtration<T>,
+           Persistence_interface_homology<Multi_persistence_ru_options, Multi_parameter_filtration<T>>>,
+    Slicer<Multi_parameter_filtration<T>,
+           Persistence_interface_homology<Multi_persistence_chain_options, Multi_parameter_filtration<T>>>,
+    Slicer<Multi_parameter_filtration<T>, Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>>,
+    Slicer<Multi_parameter_filtration<T>, Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>,
+    Slicer<Dynamic_multi_parameter_filtration<T>,
+           Persistence_interface_homology<Multi_persistence_ru_options, Dynamic_multi_parameter_filtration<T>>>,
+    Slicer<Dynamic_multi_parameter_filtration<T>,
+           Persistence_interface_homology<Multi_persistence_chain_options, Dynamic_multi_parameter_filtration<T>>>,
+    Slicer<Dynamic_multi_parameter_filtration<T>,
+           Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>>,
+    Slicer<Dynamic_multi_parameter_filtration<T>,
+           Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>>;
 
 template <class Slicer>
 void test_slicer_vineyard(Slicer& s)
@@ -613,8 +648,8 @@ void test_slicer_rep_cycles2(Slicer& s)
   s.initialize_persistence_computation(false);
 
   BOOST_CHECK((s.get_most_persistent_cycle(0, true) == Cycle({0})));
-  BOOST_CHECK((s.get_most_persistent_cycle(1, false) == Cycle({5, 6, 7})));
-  BOOST_CHECK((s.get_most_persistent_cycle(2, false) == Cycle()));
+  BOOST_CHECK((s.get_most_persistent_cycle(1, true) == Cycle({5, 6, 7})));
+  BOOST_CHECK((s.get_most_persistent_cycle(2, true) == Cycle()));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_rep_cycles, Slicer, list_of_tested_variants2)

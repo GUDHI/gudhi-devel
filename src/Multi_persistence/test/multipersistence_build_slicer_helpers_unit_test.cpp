@@ -39,13 +39,16 @@ using Gudhi::multi_persistence::write_complex_to_scc_file;
 using Gudhi::multi_persistence::Simplex_tree_options_multidimensional_filtration;
 using Gudhi::multi_persistence::Persistence_interface_cohomology;
 
-typedef boost::mpl::list<Multi_parameter_filtration<double>, Dynamic_multi_parameter_filtration<double> >
-    list_of_tested_variants;
+using list_of_tested_variants =
+    boost::mpl::list<Multi_parameter_filtration<double>, Dynamic_multi_parameter_filtration<double>>;
+
+using I = std::uint32_t;
+using D = int;
 
 template <class Fil>
-Multi_parameter_filtered_complex<Fil> build_input_complex()
+Multi_parameter_filtered_complex<Fil, I, D> build_input_complex()
 {
-  using Complex = Multi_parameter_filtered_complex<Fil>;
+  using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;
@@ -75,7 +78,7 @@ Multi_parameter_filtered_complex<Fil> build_input_complex()
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants)
 {
-  using Complex = Multi_parameter_filtered_complex<Fil>;
+  using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;
@@ -236,7 +239,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants)
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_bitmap_io, Fil, list_of_tested_variants)
 {
-  using Complex = Multi_parameter_filtered_complex<Fil>;
+  using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;
@@ -321,7 +324,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_bitmap_io, Fil, list_of_tested_variants)
 BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_simplex_tree_io, Fil, list_of_tested_variants)
 {
   using ST = Gudhi::Simplex_tree<Simplex_tree_options_multidimensional_filtration<Fil>>;
-  using Complex = Multi_parameter_filtered_complex<Fil>;
+  using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;

@@ -35,13 +35,12 @@ namespace vineyard {
  *
  * @tparam column_type Column type of the matrix.
  */
-template <typename D, typename I, Gudhi::persistence_matrix::Column_types column_type>
+template <typename D, typename I, bool is_RU, Gudhi::persistence_matrix::Column_types column_type>
 struct Vineyard_matrix_options : Gudhi::persistence_matrix::Default_options<column_type, true> {
   using Dimension = D;
   using Index = I;
 
-  // static const bool is_of_boundary_type = true;  // TODO: benchmark the other one too
-  static const bool is_of_boundary_type = false;  // TODO: benchmark the other one too
+  static const bool is_of_boundary_type = is_RU;
   static const Gudhi::persistence_matrix::Column_indexation_types column_indexation_type =
       Gudhi::persistence_matrix::Column_indexation_types::POSITION;
   static const bool has_column_pairings = true;
@@ -57,6 +56,8 @@ struct Vineyard_matrix_options : Gudhi::persistence_matrix::Default_options<colu
 struct Default_vineyard_options {
   using Index = std::uint32_t; /**< Index type. */
   using Dimension = int;       /**< Dimension value type. */
+
+  static constexpr bool is_RU = false;  // TODO: benchmark both
   /**
    * @brief Column type use by the internal matrix.
    */
@@ -80,20 +81,25 @@ class Vineyard_base
  public:
   using Index = typename VineyardOptions::Index;         /**< Complex index type. */
   using Dimension = typename VineyardOptions::Dimension; /**< Dimension type. */
-  using Matrix_options = Vineyard_matrix_options<Dimension, Index, VineyardOptions::column_type>;
+  using Matrix_options =
+      Vineyard_matrix_options<Dimension, Index, VineyardOptions::is_RU, VineyardOptions::column_type>;
   using Matrix = Gudhi::persistence_matrix::Matrix<Matrix_options>;
   using Bar = typename Matrix::Bar;     /**< Bar type. */
   using Cycle = typename Matrix::Cycle; /**< Cycle type. */
   using Permutation = std::vector<Index>;
 
-  Vineyard_base() {}
+  static constexpr Dimension nullDimension = Matrix::template get_null_value<Dimension>();
+
+  Vineyard_base() = default;
 
   template <class Boundary_range, class Dimension_range, class Filtration_range>
   Vineyard_base(const Boundary_range& boundaryMatrix,
                 const Dimension_range& dimensions,
                 const Filtration_range& filtrationValues)
-      : order_(boundaryMatrix.size())
+      : matrix_(boundaryMatrix.size()), order_(boundaryMatrix.size())
   {
+    // All static_assert in this class are quite useless as Matrix_options is fixed and has those enabled
+    // I keep them just here for now in case Matrix_options becomes a template argument instead later
     static_assert(Matrix_options::has_vine_update, "Underlying matrix has to support vine swaps.");
     static_assert(Matrix_options::has_column_pairings, "Underlying matrix has to store barcode.");
     static_assert(
@@ -102,40 +108,27 @@ class Vineyard_base
              Matrix_options::column_indexation_type == Gudhi::persistence_matrix::Column_indexation_types::CONTAINER),
         "Matrix has a non supported index scheme.");
 
-    GUDHI_CHECK(boundaryMatrix.size() == dimensions.size(),
-                std::invalid_argument("Boundary and dimension range sizes are not matching."));
-    GUDHI_CHECK(boundaryMatrix.size() == filtrationValues.size(),
-                std::invalid_argument("Boundary and filtration value range sizes are not matching."));
-
     if constexpr (!Matrix_options::is_of_boundary_type) {
       idToPos_.emplace();
-      idToPos_->reserve(order_.size());
+      idToPos_->resize(order_.size());
     }
 
-    std::iota(order_.begin(), order_.end(), 0);
-    std::sort(order_.begin(), order_.end(), [&](Index i, Index j) {
-      if (dimensions[i] < dimensions[j]) return true;
-      if (dimensions[i] > dimensions[j]) return false;
-      return filtrationValues[i] < filtrationValues[j];
-    });
+    _initialize(boundaryMatrix, dimensions, filtrationValues);
+  }
 
-    // simplex IDs need to be increasing in order, so the original ones cannot be used
-    Permutation orderInv(boundaryMatrix.size());
-    Permutation translatedBoundary;
-    Index id = 0;
-    for (auto i : order_) {
-      orderInv[i] = id;  // order is assumed to be a valid filtration
-      translatedBoundary.resize(boundaryMatrix[i].size());
-      for (Index j = 0; j < boundaryMatrix[i].size(); ++j) {
-        translatedBoundary[j] = orderInv[boundaryMatrix[i][j]];
-      }
-      std::sort(translatedBoundary.begin(), translatedBoundary.end());
-      matrix_.insert_boundary(id, translatedBoundary, dimensions[i]);
-      if constexpr (!Matrix_options::is_of_boundary_type) {
-        idToPos_->push_back(id);
-      }
-      ++id;  // IDs corresponds to the indices in order_
+  template <class Boundary_range, class Dimension_range, class Filtration_range>
+  void initialize(const Boundary_range& boundaryMatrix,
+                  const Dimension_range& dimensions,
+                  const Filtration_range& filtrationValues)
+  {
+    matrix_ = Matrix(boundaryMatrix.size());
+    order_.resize(boundaryMatrix.size());
+    if constexpr (!Matrix_options::is_of_boundary_type) {
+      if (!idToPos_) idToPos_.emplace();
+      idToPos_->resize(order_.size());
     }
+
+    _initialize(boundaryMatrix, dimensions, filtrationValues);
   }
 
   template <class Filtration_range>
@@ -143,6 +136,7 @@ class Vineyard_base
   {
     GUDHI_CHECK(filtrationValues.size() == order_.size(),
                 std::invalid_argument("Filtration value container size is not matching."));
+
     for (Index i = 1; i < order_.size(); i++) {
       int curr = i;
       // speed up when ordered by dim, to avoid unnecessary swaps
@@ -160,6 +154,10 @@ class Vineyard_base
     }
   }
 
+  [[nodiscard]] bool is_initialized() const { return !order_.empty(); }
+
+  const Permutation& get_current_order() const { return order_; }
+
   auto get_current_barcode()
   {
     const auto& barcode = matrix_.get_current_barcode();
@@ -168,14 +166,13 @@ class Vineyard_base
     });
   }
 
-  auto get_all_current_representative_cycles(Dimension dim = Matrix::template get_null_value<Dimension>(),
-                                             bool update = true)
+  auto get_all_current_representative_cycles(bool update = true, Dimension dim = nullDimension)
   {
     static_assert(Matrix_options::can_retrieve_representative_cycles,
                   "Underlying matrix has to support representative cycles.");
 
-    if (update) matrix_.update_representative_cycles(dim);
-    const auto& cycles = matrix_.get_representative_cycles();
+    if (update) matrix_.update_all_representative_cycles(dim);
+    const auto& cycles = matrix_.get_all_representative_cycles();
     return boost::adaptors::transform(cycles, [&](const Cycle& cycle) -> Cycle {
       Cycle c(cycle.size());
       for (Index i = 0; i < cycle.size(); ++i) {
@@ -210,10 +207,77 @@ class Vineyard_base
     });
   }
 
+  // debug purposes mainly
+  /**
+   * @brief Outstream operator.
+   */
+  friend std::ostream& operator<<(std::ostream& stream, Vineyard_base& vyd)
+  {
+    stream << "Matrix:\n";
+    stream << "[\n";
+    for (auto i = 0U; i < vyd.matrix_.get_number_of_columns(); i++) {
+      stream << "[";
+      for (const auto& v : vyd.matrix_.get_column(i)) stream << v << ", ";
+      stream << "]\n";
+    }
+    stream << "]\n";
+    stream << "Permutation:\n";
+    for (auto v : vyd.order_) {
+      stream << v << " ";
+    }
+    stream << "\n";
+    if constexpr (Matrix_options::is_of_boundary_type) {
+      stream << "ID to position map:\n";
+      if (vyd.idToPos_) {
+        for (auto v : *vyd.idToPos_) {
+          stream << v << " ";
+        }
+      }
+      stream << "\n";
+    }
+    return stream;
+  }
+
  private:
   Matrix matrix_;
   Permutation order_;
   std::optional<Permutation> idToPos_;  // TODO: remove if chain does not improve run times in benchmark
+
+  template <class Boundary_range, class Dimension_range, class Filtration_range>
+  void _initialize(const Boundary_range& boundaryMatrix,
+                   const Dimension_range& dimensions,
+                   const Filtration_range& filtrationValues)
+  {
+    GUDHI_CHECK(boundaryMatrix.size() == dimensions.size(),
+                std::invalid_argument("Boundary and dimension range sizes are not matching."));
+    GUDHI_CHECK(boundaryMatrix.size() == filtrationValues.size(),
+                std::invalid_argument("Boundary and filtration value range sizes are not matching."));
+
+    std::iota(order_.begin(), order_.end(), 0);
+    std::sort(order_.begin(), order_.end(), [&](Index i, Index j) {
+      if (dimensions[i] < dimensions[j]) return true;
+      if (dimensions[i] > dimensions[j]) return false;
+      return filtrationValues[i] < filtrationValues[j];
+    });
+
+    // simplex IDs need to be increasing in order, so the original ones cannot be used
+    Permutation orderInv(boundaryMatrix.size());
+    Permutation translatedBoundary;
+    Index id = 0;
+    for (auto i : order_) {
+      orderInv[i] = id;  // order is assumed to be a valid filtration
+      translatedBoundary.resize(boundaryMatrix[i].size());
+      for (Index j = 0; j < boundaryMatrix[i].size(); ++j) {
+        translatedBoundary[j] = orderInv[boundaryMatrix[i][j]];
+      }
+      std::sort(translatedBoundary.begin(), translatedBoundary.end());
+      matrix_.insert_boundary(id, translatedBoundary, dimensions[i]);
+      if constexpr (!Matrix_options::is_of_boundary_type) {
+        (*idToPos_)[id] = id; // before any vine swaps, id == pos
+      }
+      ++id;  // IDs corresponds to the indices in order_
+    }
+  }
 };
 
 }  // namespace vineyard

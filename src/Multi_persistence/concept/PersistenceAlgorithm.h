@@ -19,8 +19,8 @@ namespace multi_persistence {
 
 /**
  * @brief Backend class computing persistence for @ref Gudhi::multi_persistence::Slicer and eventually vineyards and
- * representative cycles. The concept is realized by @ref Persistence_interface_cohomology and
- * @ref Persistence_interface_matrix.
+ * representative cycles. The concept is realized by @ref Persistence_interface_cohomology,
+ * @ref Persistence_interface_homology and @ref Persistence_interface_vineyard.
  */
 class PersistenceAlgorithm
 {
@@ -28,31 +28,11 @@ class PersistenceAlgorithm
   using Dimension = undefined; /**< Dimension type. */
   using Index = undefined;     /**< Index type. */
   using Map = undefined;       /**< Map type. */
-  using Bar = undefined;       /**< Bar type. Has to have public members `dim`, `birth` and `death`. */
-  template<class Complex>
-  using As_type = undefined;   /**< Type of the class for the given template Complex type to be used. */
+  template <class Complex>
+  using As_type = undefined;   /**< Type of this class with given template Complex type. */
 
-  /**
-   * @brief Barcode type. Has to have a `begin`, `end` and `size` method. When dereferenced, the iterators have
-   * to return a object of type @ref Bar.
-   */
-  using Barcode = undefined;
-  /**
-   * @brief Cycle type. Only necessary if  @ref has_rep_cycles is true. Has to have an `empty` and `operator[]` method
-   * and a copy constructor. The `operator[](i)` has to return the index in the originally given complex of the
-   * \f$ i^{th} \f$ element in the cycle.
-   */
-  using Cycle = undefined;
-  /**
-   * @brief Cycle container type. Only necessary if  @ref has_rep_cycles is true. Has to have a `begin`, `end` and
-   * `size` method. When dereferenced, the iterators have to return a object of type @ref Cycle.
-   */
-  using Cycles = undefined;
-
-  static constexpr const auto nullDeath = undefined;      /**< Death value of the barcode when the bar never died. */
-  static constexpr const bool is_vine = undefined;        /**< True if and only if @ref vine_swap is enabled. */
-  static constexpr const bool has_rep_cycles = undefined; /**< True if and only if @ref get_representative_cycles
-                                                               is enabled. */
+  static constexpr auto nullDeath = undefined;      /**< Death value of the barcode when the bar never died. */
+  static constexpr bool has_rep_cycles = undefined; /**< True if and only if rep. cycle methods are enabled. */
 
   /**
    * @brief Default constructor. Should be as empty as possible. Except @ref is_initialized (which returns false here),
@@ -61,91 +41,94 @@ class PersistenceAlgorithm
   PersistenceAlgorithm();
 
   /**
-   * @brief Real constructor. Will store a pointer to the permutation map and eventually to the complex.
-   * So the addresses are assumed to remain valid until the end of this object. If they change, they can be updated
-   * via the copy/move constructors if the content did not change and through @ref reinitialize otherwise.
-   * 
-   * @tparam Complex Any version of @ref Multi_parameter_filtered_complex.
-   * @param cpx Complex containing boundaries and dimensions.
-   * @param permutation Permutation map indicating the order of the cells stored in @p cpx as a standard
-   * 1-dimensional filtration. I.e., `permutation[i]` corresponds to the index in `cpx` which should be
-   * used as the i-th cell in the filtration.
+   * @brief Standard copy constructor.
    */
-  template <class Complex>
-  PersistenceAlgorithm(const Complex& cpx, const Map& permutation);
+  PersistenceAlgorithm(const PersistenceAlgorithm& other);
 
   /**
-   * @brief Standard copy constructor deleted to avoid accidents with invalidated addresses.
+   * @brief Standard move constructor.
    */
-  PersistenceAlgorithm(const PersistenceAlgorithm& other) = delete;
+  PersistenceAlgorithm(PersistenceAlgorithm&& other) noexcept;
 
   /**
-   * @brief Copy constructor. Can assumes that the complex used at construction did not change address and updates the
-   * permutation pointer with the given map if the complex was initialized.
-   *
-   * @param other To copy.
-   * @param permutation Permutation map. Has to correspond to the same map than in @p other, except that its address
-   * does not have to be the same.
+   * @brief Standard destructor
    */
-  PersistenceAlgorithm(const PersistenceAlgorithm& other, const Map& permutation);
+  ~PersistenceAlgorithm();
 
   /**
-   * @brief Standard move constructor deleted to avoid accidents with invalidated addresses.
+   * @brief Standard copy assign
    */
-  PersistenceAlgorithm(PersistenceAlgorithm&& other) = delete;
+  PersistenceAlgorithm& operator=(const PersistenceAlgorithm& other);
 
   /**
-   * @brief Move constructor. Can assumes that the complex used at construction did not change address and updates the
-   * permutation pointer with the given map if the complex was initialized.
-   *
-   * @param other To move.
-   * @param permutation Permutation map. Has to correspond to the same map than in @p other, except that its address
-   * does not have to be the same.
+   * @brief Standard move assign
    */
-  PersistenceAlgorithm(PersistenceAlgorithm&& other, const Map& permutation);
+  PersistenceAlgorithm& operator=(PersistenceAlgorithm&& other) noexcept;
 
   // TODO: swap?
 
   /**
-   * @brief Reinitializes the interface with the new given complex and permutation.
-   * To use instead of the classical assign operator `operator=`.
+   * @brief Initializes the persistence computation with the given complex and filtration values. The filtration values
+   * have to represent a valid 1-dimensional filtration, otherwise the behaviour is undefined.
+   *
+   * @tparam Complex @ref Multi_parameter_filtered_complex with desired template parameters
+   * @tparam Filtration_range Range of Complex::Filtration_value::value_type with `size` and `operator[]` method.
+   * @param cpx Complex containing all cells of the filtration.
+   * @param filtrationValues Range of filtration values with indices corresponding to the indices in @p cpx.
+   * @param ignoreInf If true, all cells at infinity filtration values are ignored for the initialization. Can be
+   * unused in the method if ignoring values is not appropriate for the update method.
    */
-  template <class Complex>
-  void reinitialize(const Complex& cpx, const Map& permutation);
+  template <class Complex, class Filtration_range>
+  void initialize(const Complex& cpx, const Filtration_range& filtrationValues, [[maybe_unused]] bool ignoreInf);
 
   /**
-   * @brief Empties the class such that @ref is_initialized returns false.
+   * @brief Updates the persistence barcode with the given filtration values, assuming the complex remains the same
+   * than for the initialization.
+   *
+   * @tparam Filtration_range Range of Complex::Filtration_value::value_type (used for @ref initialize) with `size`
+   * and `operator[]` method.
+   * @param filtrationValues Range of filtration values with indices corresponding to the indices in originally given
+   * complex.
+   * @param ignoreInf If true, all cells at infinity filtration values are ignored for the initialization. Can be
+   * unused in the method if ignoring values is not appropriate for the update method.
    */
-  void reset();
+  template <class Filtration_range>
+  void update(const Filtration_range& filtrationValues, [[maybe_unused]] bool ignoreInf);
 
   /**
-   * @brief Returns `true` if and only if all stored pointers are not null.
+   * @brief Returns `true` if and only if @ref initialize was called at least once.
    */
   bool is_initialized() const;
 
   /**
-   * @brief Returns the dimension of the \f$ i^{th} \f$ cell in the filtration.
+   * @brief Returns the current permutation map indicating the filtration order. Has a `size` and `operator[]` method.
    */
-  Dimension get_dimension(Index i) const;
+  const Map& get_current_order() const;
 
   /**
-   * @brief Returns the barcode of the filtration.
+   * @brief Returns the barcode of the filtration. The barcode must have a `begin`, `end` and `size` method. A bar in
+   * the barcode has to be of type a variation of @ref Gudhi::persistence_matrix::Persistence_interval.
    */
-  Barcode get_barcode();
-
-  /**
-   * @brief Only enabled if @ref is_vine is true. Swaps the \f$ i^{th} \f$ and \f$ i^{th} + 1 \f$ cell's position in
-   * the filtration while updating the barcode.
-   */
-  void vine_swap(Index i);
+  auto get_barcode();
 
   /**
    * @brief Only enabled if @ref has_rep_cycles is true. Returns the representative cycles of the current barcode.
-   * 
+   *
+   * @param update If true, updates the stored representative cycles, otherwise just returns the container in its
+   * current state. So should be true at least the first time the method is used.
+   * @param dim If given, returns only the cycles in this dimension. Otherwise, returns all cycles.
+   */
+  auto get_all_representative_cycles(bool update, Dimension dim = nullDimension);
+
+  /**
+   * @brief Only enabled if @ref has_rep_cycles is true. Returns the representative cycle at given index in the current
+   * barcode.
+   *
+   * @param barcodeIndex Index of the bar in @ref get_barcode.
    * @param update If true, updates the stored representative cycles, otherwise just returns the container in its
    * current state. So should be true at least the first time the method is used.
    */
-  Cycles get_representative_cycles(bool update);
+  auto get_representative_cycle(Index barcodeIndex, bool update);
 
   /**
    * @brief Only necessary if the `operator<<` method of the Slicer is needed.

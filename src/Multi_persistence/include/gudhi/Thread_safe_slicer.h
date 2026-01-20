@@ -78,19 +78,19 @@ class Thread_safe_slicer : private Slicer
   // CONSTRUCTORS
 
   /**
-   * @brief Constructor. Will store a pointer to the given slicer and copy all persistence related container.
+   * @brief Constructor. Will store a pointer to the given slicer and copy all persistence related containers.
    *
    * @param slicer Original slicer.
    */
   Thread_safe_slicer(const Slicer& slicer)
-      : Slicer(slicer.get_slice(), slicer.get_current_order(), slicer.get_persistence_algorithm()), slicer_(&slicer)
+      : Slicer(slicer.get_slice(), slicer.get_persistence_algorithm()), slicer_(&slicer)
   {}
 
   /**
    * @brief Copy constructor.
    */
   Thread_safe_slicer(const Thread_safe_slicer& slicer)
-      : Slicer(slicer.get_slice(), slicer.get_current_order(), slicer.get_persistence_algorithm()),
+      : Slicer(slicer.get_slice(), slicer.get_persistence_algorithm()),
         slicer_(slicer.slicer_)
   {}
 
@@ -98,7 +98,7 @@ class Thread_safe_slicer : private Slicer
    * @brief Move constructor.
    */
   Thread_safe_slicer(Thread_safe_slicer&& slicer) noexcept
-      : Slicer(std::move(slicer.slice_), std::move(slicer.generatorOrder_), std::move(slicer.persistence_)),
+      : Slicer(std::move(slicer.slice_), std::move(slicer.persistence_)),
         slicer_(slicer.slicer_)
   {}
 
@@ -112,7 +112,6 @@ class Thread_safe_slicer : private Slicer
     if (this == &other) return *this;
 
     Slicer::slice_ = other.slice_;
-    Slicer::generatorOrder_ = other.generatorOrder_;
     Slicer::persistence_.reinitialize(slicer_->complex_, Slicer::generatorOrder_);
     slicer_ = other.slicer_;
 
@@ -270,30 +269,30 @@ class Thread_safe_slicer : private Slicer
    * a valid 1-dimensional filtration, the behaviour is undefined.
    *
    * @param ignoreInf If true, all cells at infinity filtration values are ignored for the initialization, resulting
-   * potentially in less storage use and better performance. But note that this can be problematic with the use of
-   * @ref update_persistence_computation. Default value: false.
+   * potentially in less storage use and better performance. But note that this parameter can be potentially ignored
+   * if the update method of the template parameter @ref PersistenceAlgorithm does not permit this feature.
+   * Default value: false.
    */
-  void initialize_persistence_computation(const bool ignoreInf = false)
+  void initialize_persistence_computation(bool ignoreInf = false)
   {
     Slicer::_initialize_persistence_computation(slicer_->complex_, ignoreInf);
   }
 
   /**
-   * @brief If @ref PersistenceAlgorithm::is_vine is true: after the persistence computation was initialized for a
-   * slice and the slice changes, this method can update everything necessary for the barcode without re-computing
+   * @brief Updates the persistence barcode with the new slice. If @ref PersistenceAlgorithm is
+   * @ref Persistence_interface_vineyard: will update everything necessary for the barcode without re-computing
    * everything from scratch (contrary to @ref initialize_persistence_computation). Furthermore, it guarantees that
    * the new barcode will "matches" the precedent one. TODO: explain exactly what it means and how to do the matching.
-   * If @ref PersistenceAlgorithm::is_vine is false: equivalent to @ref initialize_persistence_computation with
-   * `ignoreInf` set to false if `ignoreInf` was false in the initial call to @ref initialize_persistence_computation
-   * or was true but no filtration value was at infinity.
+   * For other @ref PersistenceAlgorithm: more or less equivalent to @ref initialize_persistence_computation.
    *
    * @pre @ref initialize_persistence_computation has to be called at least once before.
    *
-   * @warning If @ref PersistenceAlgorithm::is_vine is true and `ignoreInf` was set to true when initializing the
-   * persistence computation, any update of the slice has to keep at infinity the boundaries which were before,
-   * otherwise the behaviour is undefined (it will throw with high probability).
+   * @param ignoreInf If true, all cells at infinity filtration values are ignored in the filtration, resulting
+   * potentially in less storage use and better performance. But note that this parameter can be potentially ignored
+   * if the update method of the template parameter `PersistenceAlgorithm` does not permit this feature.
+   * Default value: false.
    */
-  void update_persistence_computation() { Slicer::_update_persistence_computation(slicer_->complex_); }
+  void update_persistence_computation(bool ignoreInf = false) { Slicer::update_persistence_computation(ignoreInf); }
 
   /**
    * @brief Returns the barcode of the current slice. The barcode format will change depending on the template values.

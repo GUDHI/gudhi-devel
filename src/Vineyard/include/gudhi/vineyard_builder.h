@@ -51,7 +51,7 @@ class Vine
   const Coordinate_container& get_pairs() const { return coordinates_; }
 
  private:
-  const Dimension dim_;
+  Dimension dim_;
   Coordinate_container coordinates_;
 };
 
@@ -79,9 +79,7 @@ class Vineyard_builder
   using Flat_vines = std::vector<std::array<T, 2> >;
   using Vineyard = std::conditional_t<flat, std::vector<Flat_vines>, std::vector<Vine_t> >;
 
-  static constexpr Dimension get_null_dimension() { return -1; }
-
-  Vineyard_builder(bool storeRepCycles = false, Dimension repCyclesDim = get_null_dimension())
+  Vineyard_builder(bool storeRepCycles = false, Dimension repCyclesDim = Base::nullDimension)
   {
     if (storeRepCycles) {
       latest_representative_cycles_.emplace();
@@ -95,7 +93,7 @@ class Vineyard_builder
                   const Filtration_range& filtrationValues,
                   int numberOfUpdates = 0)
   {
-    base_ = Base(boundaryMatrix, dimensions, filtrationValues);
+    base_.initialize(boundaryMatrix, dimensions, filtrationValues);
     const auto& barcode = base_.get_current_barcode();  // forward only range
     vineyard_.clear();
     numberOfBars_.clear();
@@ -190,7 +188,7 @@ class Vineyard_builder
   bool _store_cycle(const typename Base::Bar& bar, const Filtration_range& filtrationValues) const
   {
     if (!repCyclesDim_) return false;
-    if (*repCyclesDim_ != get_null_dimension() && bar.dim != *repCyclesDim_) return false;
+    if (*repCyclesDim_ != Base::nullDimension && bar.dim != *repCyclesDim_) return false;
     if (filtrationValues[bar.birth] == Bar::inf) return false;
     return bar.death == Base::Bar::inf || filtrationValues[bar.death] - filtrationValues[bar.birth] > 0;
   }
