@@ -49,7 +49,7 @@ void remove_insert_swap_with_cycles() {
   mp.update_representative_cycles();
   print_current_representative_cycles<RU_matrix>(mp);
 
-  std::cout << "Representative cycles after inserting {1,3} at position 7:\n";
+  std::cout << "Representative cycles after inserting 0-cell at position 4:\n";
   mp.insert_maximal_cell(4, {});
   mp.update_representative_cycles();
   print_current_representative_cycles<RU_matrix>(mp);
