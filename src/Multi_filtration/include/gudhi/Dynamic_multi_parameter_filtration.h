@@ -31,6 +31,10 @@
 #include <vector>
 #include <initializer_list>
 
+#ifdef GUDHI_USE_TBB
+#include <oneapi/tbb/parallel_for.h>
+#endif
+
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_filtration/Multi_parameter_generator.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
@@ -1854,9 +1858,14 @@ class Dynamic_multi_parameter_filtration
         grid.size() >= num_parameters(),
         std::invalid_argument("The grid should not be smaller than the number of parameters in the filtration value."));
 
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_for(
+        size_type(0), num_generators(), [&](size_type i) { generators_[i].project_onto_grid(grid, coordinate); });
+#else
     for (Generator &g : generators_) {
       g.project_onto_grid(grid, coordinate);
     }
+#endif
 
     if (!coordinate && num_generators() > 1) simplify();
   }
@@ -1939,6 +1948,17 @@ class Dynamic_multi_parameter_filtration
   {
     if (f.num_generators() == 1) return compute_linear_projection(f.generators_[0], x);
 
+#ifdef GUDHI_USE_TBB
+    std::vector<U> projections(f.num_generators());
+    tbb::parallel_for(size_type{0}, f.num_generators(), [&](size_type g) {
+      projections[g] = compute_linear_projection(f.generators_[g], x);
+    });
+    if constexpr (Co) {
+      return *std::max_element(projections.begin(), projections.end());
+    } else {
+      return *std::min_element(projections.begin(), projections.end());
+    }
+#else
     if constexpr (Co) {
       U projection = std::numeric_limits<U>::lowest();
       for (const Generator &g : f.generators_) {
@@ -1954,6 +1974,7 @@ class Dynamic_multi_parameter_filtration
       }
       return projection;
     }
+#endif
   }
 
   /**

@@ -31,6 +31,10 @@
 #include <vector>
 #include <initializer_list>
 
+#ifdef GUDHI_USE_TBB
+#include <oneapi/tbb/parallel_for.h>
+#endif
+
 #include <gudhi/Debug_utils.h>
 #include <gudhi/simple_mdspan.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
@@ -1368,7 +1372,7 @@ class Multi_parameter_generator
 
     if (!is_finite()) generator_.resize(grid.size(), generator_[0]);
 
-    for (size_type p = 0; p < generator_.size(); ++p) {
+    auto project_parameter = [&](size_type p) {
       const auto &filtration = grid[p];
       auto v = static_cast<typename OneDimArray::value_type>(generator_[p]);
       auto d = std::distance(filtration.begin(), std::lower_bound(filtration.begin(), filtration.end(), v));
@@ -1376,7 +1380,15 @@ class Multi_parameter_generator
         --d;
       }
       generator_[p] = coordinate ? static_cast<T>(d) : static_cast<T>(filtration[d]);
+    };
+
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_for(size_type(0), generator_.size(), project_parameter);
+#else
+    for (size_type p = 0; p < generator_.size(); ++p) {
+      project_parameter(p);
     }
+#endif
   }
 
   // FONCTIONNALITIES

@@ -32,6 +32,10 @@
 #include <vector>
 #include <initializer_list>
 
+#ifdef GUDHI_USE_TBB
+#include <oneapi/tbb/parallel_for.h>
+#endif
+
 #include <gudhi/Debug_utils.h>
 #include <gudhi/simple_mdspan.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
@@ -1784,6 +1788,20 @@ class Multi_parameter_filtration
       val = coordinate ? static_cast<T>(d) : static_cast<T>(filtration[d]);
     };
 
+#ifdef GUDHI_USE_TBB
+    // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
+    if constexpr (Ensure1Criticality) {
+      tbb::parallel_for(
+          size_type(0), num_parameters(), [&](size_type p) { project_generator_value(generators_[p], grid[p]); });
+    } else {
+      tbb::parallel_for(size_type(0), num_generators(), [&](size_type g) {
+        tbb::parallel_for(size_type(0), num_parameters(), [&](size_type p) {
+          project_generator_value(generator_view_(g, p), grid[p]);
+        });
+      });
+      if (!coordinate && num_generators() > 1) simplify();
+    }
+#else
     // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
     if constexpr (Ensure1Criticality) {
       for (size_type p = 0; p < num_parameters(); ++p) {
@@ -1795,9 +1813,9 @@ class Multi_parameter_filtration
           project_generator_value(generator_view_(g, p), grid[p]);
         }
       }
-
       if (!coordinate && num_generators() > 1) simplify();
     }
+#endif
   }
 
   // FONCTIONNALITIES
@@ -1875,6 +1893,15 @@ class Multi_parameter_filtration
 
     if (f.num_generators() == 1) return project_generator(0);
 
+#ifdef GUDHI_USE_TBB
+    std::vector<U> projections(f.num_generators());
+    tbb::parallel_for(size_type{0}, f.num_generators(), [&](size_type g) { projections[g] = project_generator(g); });
+    if constexpr (Co) {
+      return *std::max_element(projections.begin(), projections.end());
+    } else {
+      return *std::min_element(projections.begin(), projections.end());
+    }
+#else
     if constexpr (Co) {
       U projection = std::numeric_limits<U>::lowest();
       for (size_type g = 0; g < f.num_generators(); ++g) {
@@ -1890,6 +1917,7 @@ class Multi_parameter_filtration
       }
       return projection;
     }
+#endif
   }
 
   /**
