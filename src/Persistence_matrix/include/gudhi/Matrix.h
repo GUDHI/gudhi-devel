@@ -5,6 +5,7 @@
  *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
+ *      - 2025/11 Jānis Lazovskis: Added insert_maximal_cell method
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -850,9 +851,34 @@ class Matrix
    * chains used to reduce the boundary. Otherwise, nothing.
    */
   template <class Boundary_range = Boundary>
-  Insertion_return insert_boundary(ID_index cellIndex,
-                                   const Boundary_range& boundary,
+  Insertion_return insert_boundary(ID_index cellIndex, const Boundary_range& boundary,
                                    Dimension dim = Matrix::get_null_value<Dimension>());
+
+  /**
+   * @brief Inserts the given cell boundary at the given position in the matrix/filtration such that the matrix remains
+   * consistent. Requires @ref PersistenceMatrixOptions::has_vine_update to be true. Only available for
+   * @ref boundarymatrix "RU matrices", but not if @ref PersistenceMatrixOptions::column_indexation_type is set to
+   * @ref Column_indexation_types::IDENTIFIER.
+   *
+   * Appends the input column to the end of the matrix using the @ref insert_boundary "insert boundary" method,
+   * and moves the column using the @ref vine_swap "vine swaps" method to the requested position, which maintains a
+   * reduced decomposition. As a result, the input column (and other columns) may have a different boundary when it
+   * is finally in the requested position `columnIndex`, compared with the boundary `boundary` upon input. No check
+   * is made as to whether the order of cells, after the function has finished, will correspond to a valid filtration.
+   *
+   * See also @ref remove_maximal_cell (for the complementary action) and @ref insert_boundary (for inserting at the
+   * highest index).
+   *
+   * @param columnIndex @ref MatIdx Index where the column should be inserted. This will be the index of the input
+   * column `boundary` after the function has finished.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @p cellIndex values of the matrix and should be ordered in increasing order.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted, in which case it will be deduced from the size of the boundary.
+   */
+  template <class Boundary_range = Boundary>
+  void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary,
+                           Dimension dim = Matrix::get_null_value<Dimension>());
 
   /**
    * @brief Returns the column at the given @ref MatIdx index.
@@ -995,7 +1021,7 @@ class Matrix
    * @ref remove_maximal_cell(ID_index cellIndex, const std::vector<ID_index>& columnsToSwap)
    * "remove_maximal_cell(cellID, {})" will be faster than @ref remove_last().
    *
-   * See also @ref remove_last.
+   * See also @ref remove_last (for removing at the highest index), @ref insert_maximal_cell (for the complementary action).
    *
    * @param cellIndex @ref IDIdx index of the cell to remove
    * @param columnsToSwap Vector of @ref IDIdx indices of the cells coming after @p cellIndex in the filtration.
@@ -1409,30 +1435,43 @@ class Matrix
    */
   Index vine_swap(Index columnIndex1, Index columnIndex2);
 
-  // TODO: Rethink the interface for representative cycles
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
-   * the representative cycles of the current state of the filtration represented by the matrix. It does not need to be
-   * called before @ref get_representative_cycles is called for the first time, but needs to be called before calling
-   * @ref get_representative_cycles again if the matrix was modified in between. Otherwise the old cycles will be
-   * returned.
+   * the representative cycles of the current state of the filtration represented by the matrix. It needs to be called
+   * before calling @ref get_all_representative_cycles if the matrix was modified since last call. Otherwise the old
+   * cycles will be returned.
+   *
+   * @param dim If different from default value, only the cycles of the given dimension are updated.
+   * All others are erased.
    */
-  void update_representative_cycles();
+  void update_all_representative_cycles(Dimension dim = get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
+   * the representative cycle in the current matrix state of the given bar. It needs to be called
+   * before calling @ref get_representative_cycle if the matrix was modified since last call. Otherwise the old cycle
+   * will be returned.
+   *
+   * @param bar Bar corresponding to the wanted representative cycle.
+   */
+  void update_representative_cycle(const Bar& bar);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
-   * Returns all representative cycles of the current filtration.
+   * Returns all representative cycles of the current filtration. @ref update_all_representative_cycles has to be called
+   * first if a modification to the matrix has to be token into account since last call.
    *
    * @return A const reference to the vector of representative cycles.
    */
-  const std::vector<Cycle>& get_representative_cycles();
+  const std::vector<Cycle>& get_all_representative_cycles() const;
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
-   * Returns the cycle representing the given bar.
+   * Returns the cycle representing the given bar. @ref update_all_representative_cycles or
+   * @ref update_representative_cycle have to be called first if a modification to the matrix has to be token into
+   * account since last call.
    *
    * @param bar A bar from the current barcode.
    * @return A const reference to the cycle representing @p bar.
    */
-  const Cycle& get_representative_cycle(const Bar& bar);
+  const Cycle& get_representative_cycle(const Bar& bar) const;
 
  private:
   using Underlying_matrix = std::conditional_t<
@@ -1668,6 +1707,17 @@ Matrix<PersistenceMatrixOptions>::insert_boundary(ID_index cellIndex, const Boun
     return matrix_.insert_boundary(cellIndex, boundary, dim);
   else
     matrix_.insert_boundary(cellIndex, boundary, dim);
+}
+
+template <class PersistenceMatrixOptions>
+template <class Boundary_range>
+inline void Matrix<PersistenceMatrixOptions>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary,
+                                                                  Dimension dim) {
+  static_assert(isNonBasic && PersistenceMatrixOptions::has_vine_update,
+                "'insert_maximal_cell' is not available for the chosen options.");
+  static_assert(PersistenceMatrixOptions::is_of_boundary_type,
+                "'insert_maximal_cell' is not available for the chosen options.");
+  matrix_.insert_maximal_cell(columnIndex, boundary, dim);
 }
 
 template <class PersistenceMatrixOptions>
@@ -2110,23 +2160,30 @@ inline typename Matrix<PersistenceMatrixOptions>::Index Matrix<PersistenceMatrix
 }
 
 template <class PersistenceMatrixOptions>
-inline void Matrix<PersistenceMatrixOptions>::update_representative_cycles()
+inline void Matrix<PersistenceMatrixOptions>::update_all_representative_cycles(Dimension dim)
 {
   static_assert(PersistenceMatrixOptions::can_retrieve_representative_cycles, "This method was not enabled.");
-  matrix_.update_representative_cycles();
+  matrix_.update_all_representative_cycles(dim);
+}
+
+template <class PersistenceMatrixOptions>
+inline void Matrix<PersistenceMatrixOptions>::update_representative_cycle(const Bar& bar)
+{
+  static_assert(PersistenceMatrixOptions::can_retrieve_representative_cycles, "This method was not enabled.");
+  matrix_.update_representative_cycle(bar);
 }
 
 template <class PersistenceMatrixOptions>
 inline const std::vector<typename Matrix<PersistenceMatrixOptions>::Cycle>&
-Matrix<PersistenceMatrixOptions>::get_representative_cycles()
+Matrix<PersistenceMatrixOptions>::get_all_representative_cycles() const
 {
   static_assert(PersistenceMatrixOptions::can_retrieve_representative_cycles, "This method was not enabled.");
-  return matrix_.get_representative_cycles();
+  return matrix_.get_all_representative_cycles();
 }
 
 template <class PersistenceMatrixOptions>
 inline const typename Matrix<PersistenceMatrixOptions>::Cycle&
-Matrix<PersistenceMatrixOptions>::get_representative_cycle(const Bar& bar)
+Matrix<PersistenceMatrixOptions>::get_representative_cycle(const Bar& bar) const
 {
   static_assert(PersistenceMatrixOptions::can_retrieve_representative_cycles, "This method was not enabled.");
   return matrix_.get_representative_cycle(bar);
