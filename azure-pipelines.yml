@@ -61,7 +61,7 @@ jobs:
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
     pool:
-      vmImage: windows-latest
+      vmImage: windows-2022
     variables:
       pythonVersion: "3.9"
       cmakeBuildType: Release
