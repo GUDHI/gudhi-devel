@@ -5,6 +5,7 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
+ *      - 2025/09 Vincent Rouvreau: Add seed mechanism
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -13,6 +14,7 @@
 #include <CGAL/Epick_d.h>
 #include <CGAL/algorithm.h>
 #include <CGAL/assertions.h>
+#include <CGAL/Random.h>
 
 #include <iostream>
 #include <iterator>
@@ -24,14 +26,14 @@ typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > K;
 typedef K::Point_d Point;
 
 void usage(char * const progName) {
-  std::cerr << "Usage: " << progName << " in|on sphere|cube off_file_name points_number[integer > 0] " <<
-      "dimension[integer > 1] radius[double > 0.0 | default = 1.0]" << std::endl;
+  std::cerr << "Usage: " << progName << " in|on sphere|cube|curve|torus|klein off_file_name points_number(integer > 0) " <<
+      "dimension(integer > 1) [radius(double > 0.0, default = 1.0)] [seed(unsigned integer)]" << std::endl;
   exit(-1);
 }
 
 int main(int argc, char **argv) {
   // program args management
-  if ((argc != 6) && (argc != 7)) {
+  if ((argc != 6) && (argc != 7) && (argc != 8)) {
     std::cerr << "Error: Number of arguments (" << argc << ") is not correct" << std::endl;
     usage(argv[0]);
   }
@@ -57,6 +59,14 @@ int main(int argc, char **argv) {
     }
   }
 
+  CGAL::Random* rng = nullptr;
+  if (argc == 8) {
+    // Sets the seed for Random_generator
+    rng = Gudhi::random::Random_generator(atoi(argv[7])).get_default_random();
+  } else {
+    rng = Gudhi::random::Random_generator().get_default_random();
+  }
+  
   bool in = false;
   if (strcmp(argv[1], "in") == 0) {
     in = true;
@@ -65,7 +75,7 @@ int main(int argc, char **argv) {
       usage(argv[0]);
   }
 
-  enum class Data_shape { sphere, cube, curve, torus, klein, undefined};
+  enum class Data_shape { sphere, cube, curve, torus, klein, undefined };
 
   Data_shape shape = Data_shape::undefined;
   if (memcmp(argv[2], "sphere", sizeof("sphere")) == 0) {
@@ -98,10 +108,10 @@ int main(int argc, char **argv) {
     if (in) {
       switch (shape) {
         case Data_shape::sphere:
-          points = Gudhi::generate_points_in_ball_d<K>(points_number, dimension, radius);
+          points = Gudhi::generate_points_in_ball_d<K>(points_number, dimension, radius, rng);
         break;
         case Data_shape::cube:
-          points = Gudhi::generate_points_in_ball_d<K>(points_number, dimension, radius);
+          points = Gudhi::generate_points_in_cube_d<K>(points_number, dimension, radius, rng);
         break;
         case Data_shape::curve:
           std::cerr << "Sorry: in curve is not available" << std::endl;
@@ -122,28 +132,28 @@ int main(int argc, char **argv) {
     } else {  // means "on"
       switch (shape) {
         case Data_shape::sphere:
-          points = Gudhi::generate_points_on_sphere_d<K>(points_number, dimension, radius);
+          points = Gudhi::generate_points_on_sphere_d<K>(points_number, dimension, radius, 0., rng);
         break;
         case Data_shape::cube:
           std::cerr << "Sorry: on cube is not available" << std::endl;
           usage(argv[0]);
         break;
         case Data_shape::curve:
-          points = Gudhi::generate_points_on_moment_curve<K>(points_number, dimension, -radius/2., radius/2.);
+          points = Gudhi::generate_points_on_moment_curve<K>(points_number, dimension, -radius/2., radius/2., rng);
         break;
         case Data_shape::torus:
           if (dimension == 3)
-            points = Gudhi::generate_points_on_torus_3D<K>(points_number, dimension, radius, radius/2.);
+            points = Gudhi::generate_points_on_torus_3D<K>(points_number, radius, radius/2., false, rng);
           else
-            points = Gudhi::generate_points_on_torus_d<K>(points_number, dimension, "grid");
+            points = Gudhi::generate_points_on_torus_d<K>(points_number, dimension, "grid", 0., rng);
         break;
         case Data_shape::klein:
           switch (dimension) {
             case 3:
-              points = Gudhi::generate_points_on_klein_bottle_3D<K>(points_number, radius, radius/2., true);
+              points = Gudhi::generate_points_on_klein_bottle_3D<K>(points_number, radius, radius/2., true, rng);
             break;
             case 4:
-              points = Gudhi::generate_points_on_klein_bottle_4D<K>(points_number, radius, radius/2., 0., true);
+              points = Gudhi::generate_points_on_klein_bottle_4D<K>(points_number, radius, radius/2., 0., true, rng);
             break;
             case 5:
               points = Gudhi::generate_points_on_klein_bottle_variant_5D<K>(points_number, radius, radius/2., true);
@@ -174,4 +184,3 @@ int main(int argc, char **argv) {
 
   return 0;
 }
-

@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2025/01 Vincent Rouvreau: Use nanobind instead of PyBind11 for python bindings
+ *      - 2026/01 Vincent Rouvreau: Add Gudhi::random::Random_generator support to set the seed
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -16,16 +17,20 @@
 
 #include <CGAL/Epick_d.h>
 
+// For Windows, where points is a client of random here (random.dll is the provider)
+#define RANDOM_DLL_IMPORT
 #include <gudhi/random_point_generators.h>
+
 #include <gudhi/Debug_utils.h>
 #include <python_interfaces/numpy_utils.h>
+#include <python_interfaces/random_utils.h>
 
 namespace nb = nanobind;
 
 typedef CGAL::Epick_d<CGAL::Dynamic_dimension_tag> Kern;
 
-auto generate_points_on_sphere(const size_t n_samples, const int ambient_dim, double radius, std::string sample)
-{
+auto generate_points_on_sphere(const size_t n_samples, const int ambient_dim, double radius, std::string sample,
+                               Gudhi::random::Random_generator& rng) {
   if (sample != "random") {
     throw nb::value_error("This sample type is not supported");
   }
@@ -33,7 +38,8 @@ auto generate_points_on_sphere(const size_t n_samples, const int ambient_dim, do
   std::vector<typename Kern::Point_d> points_generated;
   {
     nb::gil_scoped_release release;
-    points_generated = Gudhi::generate_points_on_sphere_d<Kern>(n_samples, ambient_dim, radius);
+    points_generated = Gudhi::generate_points_on_sphere_d<Kern>(n_samples, ambient_dim, radius, 0.,
+                                                                rng.get_default_random());
   }
 
   // Reserve sufficient memory space to copy data
@@ -44,7 +50,7 @@ auto generate_points_on_sphere(const size_t n_samples, const int ambient_dim, do
   return _wrap_as_numpy_array(points, n_samples, ambient_dim);
 }
 
-auto generate_points_on_torus(size_t n_samples, int dim, std::string sample)
+auto generate_points_on_torus(size_t n_samples, int dim, std::string sample, Gudhi::random::Random_generator& rng)
 {
   if ((sample != "random") && (sample != "grid")) {
     throw nb::value_error("This sample type is not supported");
@@ -53,7 +59,7 @@ auto generate_points_on_torus(size_t n_samples, int dim, std::string sample)
   std::vector<typename Kern::Point_d> points_generated;
   {
     nb::gil_scoped_release release;
-    points_generated = Gudhi::generate_points_on_torus_d<Kern>(n_samples, dim, sample);
+    points_generated = Gudhi::generate_points_on_torus_d<Kern>(n_samples, dim, sample, 0., rng.get_default_random());
   }
 
   size_t npoints = points_generated.size();
@@ -72,46 +78,18 @@ NB_MODULE(_points_ext, m)
 {
   m.attr("__license__") = "LGPL v3";
 
-  m.def("sphere",
+  m.def("_sphere",
         &generate_points_on_sphere,
         nb::arg("n_samples"),
         nb::arg("ambient_dim"),
-        nb::arg("radius") = 1.,
-        nb::arg("sample") = "random",
-        R"doc(
-Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
+        nb::arg("radius"),
+        nb::arg("sample"),
+        nb::arg("rng"));
 
-:param n_samples: The number of points to be generated.
-:type n_samples: integer
-:param ambient_dim: The ambient dimension d.
-:type ambient_dim: integer
-:param radius: The radius. Default value is `1.`.
-:type radius: float
-:param sample: The sample type. Default and only available value is `"random"`.
-:type sample: string
-:returns: the generated points on a sphere.
-          )doc");
-
-  m.def("ctorus",
+  m.def("_ctorus",
         &generate_points_on_torus,
         nb::arg("n_samples"),
         nb::arg("dim"),
-        nb::arg("sample") = "random",
-        R"doc(
-Generate random i.i.d. points on a d-torus in R^2d or as a grid
-
-:param n_samples: The number of points to be generated.
-:type n_samples: integer
-:param dim: The dimension of the torus on which points would be generated in R^2*dim.
-:type dim: integer
-:param sample: The sample type. Available values are: `"random"` and `"grid"`. Default value is `"random"`.
-:type sample: string
-:returns: the generated points on a torus.
-
-The shape of returned numpy array is:
-
-If sample is 'random': (n_samples, 2*dim).
-
-If sample is 'grid': (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
-        )doc");
+        nb::arg("sample"),
+        nb::arg("rng"));
 }
