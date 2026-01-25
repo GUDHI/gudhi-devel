@@ -8,5 +8,8 @@ gudhi_add_boost_test(Zigzag_persistence_test_zigzag_persistence)
 add_executable_with_targets(Zigzag_persistence_test_filtered_zigzag_persistence test_filtered_zigzag_persistence.cpp TBB::tbb)
 gudhi_add_boost_test(Zigzag_persistence_test_filtered_zigzag_persistence)
 
+add_executable_with_targets(Zigzag_persistence_test_oscillating_rips test_oscillating_rips.cpp TBB::tbb)
+gudhi_add_boost_test(Zigzag_persistence_test_oscillating_rips)
+
 
 

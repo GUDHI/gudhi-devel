@@ -16,6 +16,10 @@ add_executable_with_targets(Zigzag_persistence_example_zzfiltration_from_file ex
 file(COPY "zigzag_filtration_example.txt" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 add_test(NAME Zigzag_persistence_example_zzfiltration_from_file COMMAND $<TARGET_FILE:Zigzag_persistence_example_zzfiltration_from_file> "${CMAKE_CURRENT_BINARY_DIR}/zigzag_filtration_example.txt")
 
+add_executable_with_targets(Zigzag_persistence_example_oscillating_rips_persistence example_oscillating_rips_persistence.cpp TBB::tbb)
+add_test(NAME Zigzag_persistence_example_oscillating_rips_persistence COMMAND $<TARGET_FILE:Zigzag_persistence_example_oscillating_rips_persistence> "2" "3" "5" "10")
+
+
 
 
 
