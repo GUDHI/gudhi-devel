@@ -94,9 +94,10 @@ class Vineyard_base
       Vineyard_matrix_options<Dimension, Index, VineyardOptions::is_RU, VineyardOptions::column_type>;
   using Matrix = Gudhi::persistence_matrix::Matrix<Matrix_options>; /**< Matrix type. */
   using Bar = typename Matrix::Bar;                                 /**< Bar type. */
-  using Cycle = typename Matrix::Cycle;                             /**< Cycle type. */
 
  public:
+  using Cycle = typename Matrix::Cycle;                             /**< Cycle type. */
+
   /**
    * @brief `None` value for the dimension.
    */
