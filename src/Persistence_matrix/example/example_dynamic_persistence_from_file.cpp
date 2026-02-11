@@ -15,7 +15,8 @@
 #include <gudhi/Matrix.h>
 #include <gudhi/matrix_utilities.h>
 
-using Matrix = Gudhi::persistence_matrix::Matrix<Gudhi::persistence_matrix::Dynamic_default_options>;
+using Options = Gudhi::persistence_matrix::Dynamic_default_options;
+using Matrix = Gudhi::persistence_matrix::Matrix<Options>;
 using Index = Matrix::Index;
 using Barcode = Matrix::Barcode;
 using Cycles = std::vector<Matrix::Cycle>;
@@ -40,7 +41,9 @@ void output_in_stream(const std::string& inputFilePath, std::ostream& stream)
     stream << "\n";
   };
 
-  Gudhi::persistence_matrix::compute_dynamic_persistence_from_file(inputFilePath, output_pairs, output_cycles);
+  // "<Options>" could be remove here because the default options are used, but if other options are needed,
+  // specifying the template becomes necessary here
+  Gudhi::persistence_matrix::compute_dynamic_persistence_from_file<Options>(inputFilePath, output_pairs, output_cycles);
 }
 
 void output_in_terminal(const std::string& inputFilePath) { output_in_stream(inputFilePath, std::cout); }

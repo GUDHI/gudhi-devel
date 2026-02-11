@@ -102,7 +102,7 @@ Operation_types read_operation_(std::string& line, Index& position, std::vector<
   return type;
 }
 
-template <class F1, class F2, class PersistenceMatrixOptions = Dynamic_default_options>
+template <class PersistenceMatrixOptions = Dynamic_default_options, class F1, class F2>
 inline void compute_dynamic_persistence_from_file(const std::string& filePath, F1&& output_pairs, F2&& output_cycles)
 {
   using Index = typename PersistenceMatrixOptions::Index;
