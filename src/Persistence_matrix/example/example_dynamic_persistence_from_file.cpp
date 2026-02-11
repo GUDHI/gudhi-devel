@@ -53,7 +53,7 @@ void output_in_file(const std::string& inputFilePath, const std::string& outputF
   std::ofstream outfile(outputFilePath);
 
   if (!outfile.is_open()) {
-    std::clog << "Unable to open input file." << std::endl;
+    std::clog << "Unable to open input file." << '\n';
     outfile.setstate(std::ios::failbit);
     return;
   }
@@ -67,9 +67,9 @@ int main(int argc, char* const argv[])
 {
   if (argc != 3) {
     if (argc < 3)
-      std::clog << "Missing argument: input file name and output file name are needed." << std::endl;
+      std::clog << "Missing argument: input file name and output file name are needed." << '\n';
     else
-      std::clog << "Too many arguments: only input file name and output file name are needed." << std::endl;
+      std::clog << "Too many arguments: only input file name and output file name are needed." << '\n';
     return 0;
   }
 
