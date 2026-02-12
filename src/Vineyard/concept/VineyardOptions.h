@@ -42,7 +42,7 @@ struct VineyardOptions {
   using Index = unspecified;
 
   /**
-   * @brief Indicated the underlying matrix type: either the RU decomposition or a chain complex base. Depending
+   * @brief Indicates the underlying matrix type: either the RU decomposition or a chain complex base. Depending
    * on the data properties one can be faster than the other or vice versa.
    */
   static constexpr bool is_RU;

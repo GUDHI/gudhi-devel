@@ -26,6 +26,8 @@ namespace Gudhi {
 namespace vineyard {
 
 /**
+ * @ingroup vineyard
+ * 
  * @private
  */
 template <class FilteredComplex, typename Index>
@@ -47,6 +49,8 @@ inline Index assign_keys_(FilteredComplex& complex, Index start)
 }
 
 /**
+ * @ingroup vineyard
+ * 
  * @brief Builds a boundary matrix from the given matrix.
  * 
  * @tparam FilteredComplex Complex type with following methods (see @ref FilteredComplex or @ref Gudhi::Simplex_tree
@@ -97,6 +101,8 @@ inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
 }
 
 /**
+ * @ingroup vineyard
+ * 
  * @brief Same method than @ref build_boundary_matrix_from_complex(FilteredComplex&, std::vector<std::vector<Index> >&,
  * std::vector<Dimension>&, std::vector<Filtration_value>&), but only the filtration values are computed. The order of
  * the filtration values are the same than if computed with the other version. Usefull if one already called the other

@@ -19,6 +19,7 @@
 #define GUDHI_VINEYARD_BUILDER_H_
 
 #include <array>
+#include <cstddef>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
@@ -32,6 +33,8 @@ namespace Gudhi {
 namespace vineyard {
 
 /**
+ * @ingroup vineyard
+ * 
  * @brief Class describing a vine.
  * 
  * @tparam T Birth and death value type.
@@ -74,6 +77,32 @@ class Vine
    */
   const Coordinate_container& get_pairs() const { return coordinates_; }
 
+  /**
+   * @brief Returns the dimension of the vine.
+   */
+  Dimension get_dimension() const { return dim_; }
+
+  /**
+   * @brief Returns the number of pairs in the vine.
+   */
+  std::size_t size() const { return coordinates_.size(); }
+
+  /**
+   * @brief Basic equality operator
+   */
+  friend bool operator==(const Vine& v1, const Vine& v2)
+  {
+    return v1.dim_ == v2.dim_ && v1.coordinates_ == v2.coordinates_;
+  }
+
+  /**
+   * @brief Basic unequality operator
+   */
+  friend bool operator!=(const Vine& v1, const Vine& v2)
+  {
+    return !(v1 == v2);
+  }
+
  private:
   Dimension dim_;
   Coordinate_container coordinates_;
@@ -101,8 +130,8 @@ template <typename T, class VineyardOptions = Default_vineyard_options, bool fla
 class Vineyard_builder
 {
  public:
-  using value_type = T; /**< Filtration value type. */
-  using Base = Vineyard_base<VineyardOptions>;  /**< Base computing the actual updates. */
+  using value_type = T;                                                      /**< Filtration value type. */
+  using Base = Vineyard_base<VineyardOptions>;                               /**< Base computing the actual updates. */
   using Index = typename Base::Index;                                        /**< Complex index type. */
   using Dimension = typename Base::Dimension;                                /**< Dimension type. */
   using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, T>; /**< Bar type. */
@@ -204,7 +233,7 @@ class Vineyard_builder
         vineyard_.emplace_back(bar.dim, numberOfUpdates + 1);
         vineyard_.back().add_pair(filtrationValues[bar.birth],
                                   bar.death == Base::Bar::inf ? Bar::inf : filtrationValues[bar.death]);
-        if (bar.dim >= numberOfBars_.size()) numberOfBars_.resize(bar.dim + 1, 0);
+        if (bar.dim >= static_cast<Dimension>(numberOfBars_.size())) numberOfBars_.resize(bar.dim + 1, 0);
         ++numberOfBars_[bar.dim];
         if (_store_cycle(bar, filtrationValues)) {
           auto cycle = base_.get_current_representative_cycle(idx, true);
@@ -279,6 +308,8 @@ class Vineyard_builder
     if (latest_representative_cycles_) return *latest_representative_cycles_;
     throw std::invalid_argument("Representative cycles were not stored.");
   }
+
+  static constexpr bool has_flat_vineyard() { return flat; }
 
  private:
   Base base_;                             /**< Vine computation base. */

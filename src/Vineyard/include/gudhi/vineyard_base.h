@@ -10,7 +10,7 @@
 
 /**
  * @file vineyard_base.h
- * @author Hannah Schreiber
+ * @author Hannah Schreiber, David Loiseaux
  * @brief Contains the implementation of the @ref Gudhi::vineyard::Vineyard_base class, as well as the
  * @ref Gudhi::vineyard::Vineyard_matrix_options struct and @ref Gudhi::vineyard::Default_vineyard_options struct.
  */
@@ -93,9 +93,9 @@ class Vineyard_base
   using Matrix_options =
       Vineyard_matrix_options<Dimension, Index, VineyardOptions::is_RU, VineyardOptions::column_type>;
   using Matrix = Gudhi::persistence_matrix::Matrix<Matrix_options>; /**< Matrix type. */
-  using Bar = typename Matrix::Bar;                                 /**< Bar type. */
 
  public:
+  using Bar = typename Matrix::Bar;                                 /**< Bar type. */
   using Cycle = typename Matrix::Cycle;                             /**< Cycle type. */
 
   /**
