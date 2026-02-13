@@ -85,13 +85,14 @@ template <class VineyardOptions = Default_vineyard_options>
 class Vineyard_base
 {
  public:
-  using Index = typename VineyardOptions::Index;                    /**< Complex index type. */
-  using Dimension = typename VineyardOptions::Dimension;            /**< Dimension type. */
+  using Options = VineyardOptions;
+  using Index = typename Options::Index;                    /**< Complex index type. */
+  using Dimension = typename Options::Dimension;            /**< Dimension type. */
   using Permutation = std::vector<Index>;                           /**< Filtration permutation map. */
 
  private:
   using Matrix_options =
-      Vineyard_matrix_options<Dimension, Index, VineyardOptions::is_RU, VineyardOptions::column_type>;
+      Vineyard_matrix_options<Dimension, Index, Options::is_RU, Options::column_type>;
   using Matrix = Gudhi::persistence_matrix::Matrix<Matrix_options>; /**< Matrix type. */
 
  public:

@@ -42,47 +42,12 @@ inline std::tuple<BC, DC, FC<T> > build_simple_input_complex()
   return std::tuple<BC, DC, FC<T> >(bc, dc, fc);
 }
 
-template <class Bar, class Barcode>
-std::vector<Bar> get_barcode(const Barcode& bc)
-{
-  std::vector<Bar> barcode(bc.begin(), bc.end());
-  std::sort(barcode.begin(), barcode.end(), [](const Bar& b1, const Bar& b2) {
-    if (b1.dim == b2.dim) return b1.birth < b2.birth;
-    return b1.dim < b2.dim;
-  });
-  return barcode;
-}
-
 template <class Cycle>
 std::vector<int> get_cycle(const Cycle& c)
 {
   std::vector<int> cycle(c.begin(), c.end());
   std::sort(cycle.begin(), cycle.end());
   return cycle;
-}
-
-template <class Cycles>
-std::vector<std::vector<int>> get_all_cycles(const Cycles& cs)
-{
-  std::vector<std::vector<int>> cycles(cs.size());
-  unsigned int i = 0;
-  for (const auto& c : cs) {
-    cycles[i] = get_cycle(c);
-    ++i;
-  }
-  std::sort(cycles.begin(), cycles.end());
-  return cycles;
-}
-
-template <class V>
-std::vector<std::vector<int>> get_all_cycles_individually(V& vy)
-{
-  std::vector<std::vector<int>> cycles(vy.get_current_barcode().size());
-  for (unsigned int i = 0; i < cycles.size(); ++i) {
-    cycles[i] = get_cycle(vy.get_current_representative_cycle(i));
-  }
-  std::sort(cycles.begin(), cycles.end());
-  return cycles;
 }
 
 #endif  // VY_TEST_UTILITIES_H

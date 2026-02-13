@@ -303,7 +303,7 @@ class Vineyard_builder
    *
    * @exception std::invalid_argument If the stored option was set to false at construction.
    */
-  const std::vector<std::tuple<Cycle, Dimension, Index> >& get_latest_representative_cycles()
+  const std::vector<std::tuple<Cycle, Dimension, Index> >& get_latest_representative_cycles() const
   {
     if (latest_representative_cycles_) return *latest_representative_cycles_;
     throw std::invalid_argument("Representative cycles were not stored.");
