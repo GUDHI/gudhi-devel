@@ -140,5 +140,7 @@
  * @example example_simplex_tree_to_matrix.cpp
  * \section Persistence_fields_example_section Persistence_field
  * @example example_field_operations.cpp
+ * \section Vineyard_example_section Vineyard
+ * @example example_simple_vineyard.cpp
  */
  

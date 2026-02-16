@@ -124,7 +124,7 @@ class Vine
  * @tparam T Type of the filtration values.
  * @tparam VineyardOptions Structure following the @ref VineyardOptions concept. Default value:
  * @ref Default_vineyard_options.
- * @tparam flat Determines the Vine and Vineyard type. See @ref Vineyard_builder::Vineyard for more information.
+ * @tparam flat Determines the %Vine and Vineyard type. See @ref Vineyard_builder::Vineyard for more information.
  */
 template <typename T, class VineyardOptions = Default_vineyard_options, bool flat = false>
 class Vineyard_builder
@@ -137,7 +137,7 @@ class Vineyard_builder
   using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, T>; /**< Bar type. */
   using Cycle = typename Base::Cycle;                                        /**< Cycle type. */
   /**
-   * @brief Vine type if the template `flat` of the class is set to false: @ref Vine with template arguments deduced
+   * @brief %Vine type if the template `flat` of the class is set to false: @ref Vine with template arguments deduced
    * from template arguments `T` and `VineyardOptions`.
    */
   using Vine_t = Vine<T, Dimension>;
@@ -146,8 +146,8 @@ class Vineyard_builder
    * vines of same dimension in form of a "tensor": vector of 2-arrays (i.e. contiguous in memory) such that the
    * \f$ n \f$ first element represent the first coordinates of all \f$ n \f$ vines in the vineyard, the \f$ n \f$
    * next elements the second coordinates of the vines and so on... I.e. it is a flat tensor of shape
-   * \f$ (update number x vine number x 2) \f$. The number \f$ n \f$ of vines can be retrieved with the method
-   * @ref get_number_of_vines_by_dimension.
+   * \f$ (update\_number \times vine\_number \times 2) \f$. The number \f$ n \f$ of vines can be retrieved with the
+   * method @ref get_number_of_vines_by_dimension.
    */
   using Flat_vines = std::vector<std::array<T, 2> >;  // used for python
   /**

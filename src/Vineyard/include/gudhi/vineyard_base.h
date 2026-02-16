@@ -12,7 +12,7 @@
  * @file vineyard_base.h
  * @author Hannah Schreiber, David Loiseaux
  * @brief Contains the implementation of the @ref Gudhi::vineyard::Vineyard_base class, as well as the
- * @ref Gudhi::vineyard::Vineyard_matrix_options struct and @ref Gudhi::vineyard::Default_vineyard_options struct.
+ * @ref Gudhi::vineyard::Default_vineyard_options struct.
  */
 
 #ifndef GUDHI_VINEYARD_BASE_H_
@@ -30,6 +30,8 @@ namespace Gudhi {
 namespace vineyard {
 
 /**
+ * @private
+ *
  * @ingroup vineyard
  *
  * @brief Options for the internal matrix of @ref Vineyard_base. Follows the
@@ -229,7 +231,7 @@ class Vineyard_base
 
   /**
    * @brief Returns the permutation map representing the current filtration order. That is `get_current_order()[i]`
-   * will return the index in the initializing complex of the \f$ i^{th} \t$ cell in the discretized filtration. Just
+   * will return the index in the initializing complex of the \f$ i^{th} \f$ cell in the discretized filtration. Just
    * note that the cells are first ordered by dimension and then by filtration value for technical reasons (this does
    * not impact the barcode), so what is meant by "discretized filtration" does correspond to the latter order, not
    * the "real" filtration order.
