@@ -28,7 +28,6 @@ BOOST_AUTO_TEST_CASE(triangulation) {
 
   Kernel_4 k;
   auto f = k.compute_squared_radius_d_object()(points.begin(), points.end());
-  
   std::clog << "compute_squared_radius_d_object = " << f << "\n";
 
 }
