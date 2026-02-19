@@ -1161,7 +1161,7 @@ class Simplex_tree {
      *
      * So, in this case, the property of filtration is not actively maintained.
      *
-     * This option is mainly usefull when the methods @ref FiltrationValue::intersect_lifetimes or
+     * This option is mainly useful when the methods @ref FiltrationValue::intersect_lifetimes or
      * @ref FiltrationValue::unify_lifetimes are heavy for the associated filtration value class and the user
      * wants to avoid calling them just to ensure a valid filtration. It is therefore **responsibility of the user to
      * ensure a valid filtration** at the end of the construction, before any filtration related method is used
@@ -1264,10 +1264,11 @@ class Simplex_tree {
    * - the simplex handle assigned to the simplex, if the filtration value of the simplex is modified.
    */
   template <class InputVertexRange = std::initializer_list<Vertex_handle>>
-  std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(Filtration_maintenance insertion_strategy,
-                                                              const InputVertexRange& n_simplex,
-                                                              const Filtration_value& filtration)
-  {
+  std::pair<Simplex_handle, bool> insert_simplex_and_subfaces(
+      [[maybe_unused]] Filtration_maintenance insertion_strategy,
+      const InputVertexRange& n_simplex,
+      const Filtration_value& filtration)
+ {
     auto first = std::begin(n_simplex);
     auto last = std::end(n_simplex);
 
@@ -1296,6 +1297,7 @@ class Simplex_tree {
           throw std::invalid_argument("Given insertion strategy is not available.");
       }
     } else {
+      // filtration values not stored, so no differences between the strategies
       return _rec_insert_simplex_and_subfaces_sorted(root(), copy.begin(), copy.end(), filtration);
     }
   }
@@ -1315,7 +1317,7 @@ class Simplex_tree {
 
     // insert_node_<bool update_fil, bool update_children, bool set_to_null>(sib, ...)
     // update_fil: if true, calls `unify_lifetimes` on the new and old filtration value of the node
-    // update_children: if true, assign a child to the node if he didn't had one
+    // update_children: if true, assign a child to the node if it did not have one
     // set_to_null: if true, sets returned iterator to null simplex
     
     if (++first == last) return insert_node_<update_fil, false, update_fil>(sib, vertex_one, filt);
