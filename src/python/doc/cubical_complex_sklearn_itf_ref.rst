@@ -19,7 +19,7 @@ Cubical complex persistence scikit-learn like interface example
 In this example, hand written digits are used as an input.
 A TDA scikit-learn pipeline is constructed and is composed of:
 
-#. :class:`~gudhi.sklearn.cubical_persistence.CubicalPersistence` that builds a cubical complex from the input images
+#. :class:`~gudhi.sklearn.CubicalPersistence` that builds a cubical complex from the input images
    and returns its persistence diagrams.
 #. :class:`~gudhi.representations.preprocessing.DiagramSelector` that removes non-finite persistence diagrams values.
 #. :class:`~gudhi.representations.vector_methods.PersistenceImage` that builds the persistence images from persistence
@@ -55,6 +55,14 @@ two holes in :math:`\mathbf{H}_1`, or, like in this example, three connected com
 Cubical complex persistence scikit-learn like interface reference
 -----------------------------------------------------------------
 
-.. autoclass:: gudhi.sklearn.cubical_persistence.CubicalPersistence
+.. autoclass:: gudhi.sklearn.CubicalPersistence
    :members:
    :show-inheritance:
+
+.. note::
+   This class uses specialized fast code for the following cases
+
+   * `dimension==1 and min_persistence>=0`
+   * `dimension==2 and min_persistence>=0 and input_type=="top_dimensional_cells"`
+
+   It falls back to :class:`~gudhi.CubicalComplex` in all other cases.

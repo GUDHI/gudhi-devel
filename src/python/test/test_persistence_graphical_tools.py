@@ -149,7 +149,7 @@ def test_non_existing_persistence_file():
 
 
 def _sklearn_one_homology_dim_plot_persistence(function):
-    # from gudhi.sklearn.rips_persistence import RipsPersistence
+    # from gudhi.sklearn import RipsPersistence
     # X = [[1., 1.], [7., 0.], [4., 6.], [9., 6.], [0., 14.], [2., 19.], [9., 17.]]
     # diag = RipsPersistence(homology_dimensions=1).fit_transform([X])
     # plot_persistence_diagram(diag[0]) # should work
@@ -164,7 +164,7 @@ def test_sklearn_one_homology_dim_plot_persistence():
 
 
 def _sklearn_several_homology_dim_plot_persistence(function):
-    # from gudhi.sklearn.rips_persistence import RipsPersistence
+    # from gudhi.sklearn import RipsPersistence
     # X = [[1., 1.], [7., 0.], [4., 6.], [9., 6.], [0., 14.], [2., 19.], [9., 17.]]
     # diag = RipsPersistence(homology_dimensions=[1,0]).fit_transform([X])
     # plot_persistence_diagram(diag[0]) # should work
@@ -186,3 +186,76 @@ def _sklearn_several_homology_dim_plot_persistence(function):
 def test_sklearn_several_homology_dim_plot_persistence():
     for function in [gd.plot_persistence_barcode, gd.plot_persistence_diagram]:
         _sklearn_several_homology_dim_plot_persistence(function)
+
+
+def _empty_input_diagram(function):
+    ax = function([])
+    diags = [
+        [
+            np.empty((0, 2)),
+            np.array([[11.0, 12.0], [6.0, 7.0]]),
+            np.array([[0.0, 5.0], [0.0, 6.0], [0.0, float("inf")]]),
+        ],
+        [
+            np.array([[11.0, 12.0], [6.0, 7.0]]),
+            np.empty((0, 2)),
+            np.array([[0.0, 5.0], [0.0, 6.0], [0.0, float("inf")]]),
+        ],
+        [
+            np.array([[11.0, 12.0], [6.0, 7.0]]),
+            np.array([[0.0, 5.0], [0.0, 6.0], [0.0, float("inf")]]),
+            np.empty((0, 2)),
+        ],
+    ]
+    for diag in diags:
+        ax = function(diag)
+
+    diags = [
+        [
+            (1, (11.0, 12.0)),
+            (1, (6.0, 7.0)),
+            (2, (0.0, 5.0)),
+            (2, (0.0, 6.0)),
+            (2, (0.0, float("inf"))),
+        ],
+        [
+            (0, (11.0, 12.0)),
+            (0, (6.0, 7.0)),
+            (2, (0.0, 5.0)),
+            (2, (0.0, 6.0)),
+            (2, (0.0, float("inf"))),
+        ],
+    ]
+    for diag in diags:
+        ax = function(diag)
+
+
+def test_empty_input_diagram():
+    for function in [gd.plot_persistence_barcode, gd.plot_persistence_diagram]:
+        _empty_input_diagram(function)
+
+
+def _shuffled_diagram(function):
+    diags = [
+        [
+            (1, (11.0, 12.0)),
+            (0, (6.0, 7.0)),
+            (2, (0.0, 5.0)),
+            (1, (0.0, 6.0)),
+            (2, (0.0, float("inf"))),
+        ],
+        [
+            (3, (11.0, 12.0)),
+            (1, (6.0, 7.0)),
+            (2, (0.0, 5.0)),
+            (1, (0.0, 6.0)),
+            (3, (0.0, float("inf"))),
+        ],
+    ]
+    for diag in diags:
+        ax = function(diag)
+
+
+def test_shuffled_input_diagram():
+    for function in [gd.plot_persistence_barcode, gd.plot_persistence_diagram]:
+        _shuffled_diagram(function)

@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -439,8 +439,6 @@ class Position_to_index_overlay
     nextIndex_ = 0;
   }
 
-  // void set_operators(Field_operators* operators) { matrix_.set_operators(operators); }
-
   /**
    * @brief Assign operator.
    */
@@ -478,19 +476,30 @@ class Position_to_index_overlay
 
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
-   * the representative cycles of the current state of the filtration represented by the matrix.
-   * It does not need to be called before `get_representative_cycles` is called for the first time, but needs to be
-   * called before calling `get_representative_cycles` again if the matrix was modified in between. Otherwise the
-   * old cycles will be returned.
+   * the representative cycles of the current state of the filtration represented by the matrix. It needs to be called
+   * before calling @ref get_all_representative_cycles if the matrix was modified since last call. Otherwise the old
+   * cycles will be returned.
+   *
+   * @param dim If different from default value, only the cycles of the given dimension are updated.
+   * All others are erased.
    */
-  void update_representative_cycles();
+  void update_all_representative_cycles(Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
+   * the representative cycle in the current matrix state of the given bar. It needs to be called
+   * before calling @ref get_representative_cycle if the matrix was modified since last call. Otherwise the old cycle
+   * will be returned.
+   *
+   * @param bar Bar corresponding to the wanted representative cycle.
+   */
+  void update_representative_cycle(const Bar& bar);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
    * Returns all representative cycles of the current filtration.
    *
    * @return A const reference to the vector of representative cycles.
    */
-  const std::vector<Cycle>& get_representative_cycles();
+  const std::vector<Cycle>& get_all_representative_cycles() const;
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
    * Returns the cycle representing the given bar.
@@ -498,7 +507,7 @@ class Position_to_index_overlay
    * @param bar A bar from the current barcode.
    * @return A const reference to the cycle representing @p bar.
    */
-  const Cycle& get_representative_cycle(const Bar& bar);
+  const Cycle& get_representative_cycle(const Bar& bar) const;
 
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
@@ -805,21 +814,27 @@ Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_current_barcode
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::update_representative_cycles()
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::update_all_representative_cycles(Dimension dim)
 {
-  matrix_.update_representative_cycles();
+  matrix_.update_all_representative_cycles(dim);
+}
+
+template <class Underlying_matrix, class Master_matrix>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::update_representative_cycle(const Bar& bar)
+{
+  matrix_.update_representative_cycle(bar);
 }
 
 template <class Underlying_matrix, class Master_matrix>
 inline const std::vector<typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Cycle>&
-Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_representative_cycles()
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_all_representative_cycles() const
 {
-  return matrix_.get_representative_cycles();
+  return matrix_.get_all_representative_cycles();
 }
 
 template <class Underlying_matrix, class Master_matrix>
 inline const typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Cycle&
-Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_representative_cycle(const Bar& bar)
+Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_representative_cycle(const Bar& bar) const
 {
   return matrix_.get_representative_cycle(bar);
 }

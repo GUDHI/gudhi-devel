@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -486,14 +486,8 @@ Boundary_matrix<Master_matrix>::insert_boundary(ID_index cellIndex, const Bounda
   // updates container sizes
   if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows) {
     if (boundary.size() != 0) {
-      ID_index pivot;
-      if constexpr (Master_matrix::Option_list::is_z2) {
-        pivot = *std::prev(boundary.end());
-      } else {
-        pivot = std::prev(boundary.end())->first;
-      }
       // row container
-      RA_opt::_resize(pivot);
+      RA_opt::_resize(Master_matrix::get_row_index(*std::prev(boundary.end())));
     }
   }
 

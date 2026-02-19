@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber, Clément Maria
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -22,6 +22,8 @@
 #include <climits>
 #include <stdexcept>
 #include <numeric>
+
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 namespace persistence_fields {
@@ -324,6 +326,10 @@ class Multi_field_operators_with_small_characteristics
   std::pair<Element, Characteristic> get_partial_inverse(const Element& e,
                                                          const Characteristic& productOfCharacteristics) const
   {
+    GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
+                std::invalid_argument(
+                    "The given product is not the product of a subset of the current Multi-field characteristics."));
+
     Characteristic gcd = std::gcd(e, productOfAllCharacteristics_);
 
     if (gcd == productOfCharacteristics) return {0, get_multiplicative_identity()};  // partial inverse is 0
@@ -362,7 +368,11 @@ class Multi_field_operators_with_small_characteristics
    */
   [[nodiscard]] Element get_partial_multiplicative_identity(const Characteristic& productOfCharacteristics) const
   {
-    if (productOfCharacteristics == nullCharacteristic) {
+    GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
+                std::invalid_argument(
+                    "The given product is not the product of a subset of the current Multi-field characteristics."));
+
+    if (productOfCharacteristics == nullCharacteristic || productOfCharacteristics == productOfAllCharacteristics_) {
       return get_multiplicative_identity();
     }
     Element multIdentity = 0;

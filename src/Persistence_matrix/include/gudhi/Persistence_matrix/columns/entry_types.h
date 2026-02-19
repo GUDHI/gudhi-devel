@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -53,6 +53,9 @@ struct Dummy_entry_field_element_mixin {
   template <class Field_element>
   Dummy_entry_field_element_mixin([[maybe_unused]] Field_element t)
   {}
+
+  static constexpr bool get_element() { return true; };
+  static constexpr void set_element(bool /* element */) {}
 };
 
 /**
@@ -278,11 +281,7 @@ class Entry : public Master_matrix::Entry_column_index_option,
    */
   operator std::pair<ID_index, Field_element>() const
   {
-    if constexpr (Master_matrix::Option_list::is_z2) {
-      return {rowIndex_, 1};
-    } else {
-      return {rowIndex_, field_opt::element_};
-    }
+    return {rowIndex_, field_opt::get_element()};
   }
 
  private:

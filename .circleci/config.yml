@@ -19,7 +19,7 @@ jobs:
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
-            make all
+            make -j 2 all
             ctest --output-on-failure
 
   tests:
@@ -39,7 +39,7 @@ jobs:
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
-            make -j 2 all
+            make -j 3 all
             ctest --output-on-failure
 
   utils:
@@ -66,6 +66,9 @@ jobs:
       - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2025.10.02
     resource_class: large # Delaunay complex requires about 5 Gb of RAM to compile
     steps:
+      - restore_cache:
+          keys:
+            - scikit_learn_data
       - checkout
       - run:
           name: Checkout submodules
@@ -82,7 +85,7 @@ jobs:
             cd version
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
             cd python
-            make sphinx
+            make -j 2 sphinx
             cp -R sphinx /tmp/sphinx
       - store_artifacts:
           path: /tmp/sphinx
@@ -97,6 +100,10 @@ jobs:
       - store_artifacts:
           path: /tmp/htmlcov
           destination: htmlcov
+      - save_cache:
+          key: scikit_learn_data
+          paths:
+            - ~/scikit_learn_data
 
   doxygen:
     docker:
@@ -167,7 +174,7 @@ jobs:
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
-            make all
+            make -j 2 all
             ctest --output-on-failure
 
   tests_without_cgal_eigen:
@@ -186,7 +193,7 @@ jobs:
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
-            make all
+            make -j 2 all
             ctest --output-on-failure
 
   utils_without_cgal_eigen:
@@ -225,7 +232,7 @@ jobs:
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON ..
             cd src/python
-            make
+            make -j 2
             ctest --output-on-failure
 
   ### With all third parties, except CGAL
@@ -253,7 +260,7 @@ jobs:
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_TEST=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
-            make all
+            make -j 2 all
             ctest --output-on-failure
 
   tests_without_cgal:
@@ -279,7 +286,7 @@ jobs:
             mkdir build
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=OFF ..
-            make all
+            make -j 2 all
             ctest --output-on-failure
 
   utils_without_cgal:
@@ -332,7 +339,7 @@ jobs:
             cd build
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON ..
             cd src/python
-            make
+            make -j 2
             ctest --output-on-failure
 
 workflows:
