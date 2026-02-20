@@ -55,7 +55,7 @@ void print_representative_cycles_example()
               { 3, 6 } 
             });
 
-  auto rc = mp.get_representative_cycles();
+  auto rc = mp.get_all_representative_cycles();
   for (auto cycle : rc) {
     // cycle[0] gives the row index of a simplex in the cycle
     // because the simplices where indexed from 0 continuously, the simplex represented by the row index cycle[0] is
