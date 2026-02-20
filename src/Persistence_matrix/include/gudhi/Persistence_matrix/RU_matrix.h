@@ -139,7 +139,8 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    *
    * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
    * method.
-   * @param boundary Boundary generating the new column. The content should be ordered by ID.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @ref PosIdx of the cells in the current filtration and should be ordered in increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
@@ -159,7 +160,8 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * @param cellIndex @ref IDIdx index to use to identify the new cell.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
    * @p cellIndex values of precedent calls of the method for the corresponding cells and should be ordered in
-   * increasing order.
+   * increasing order. Warning: if swaps occurred in between insertions, the cell IDs were swapped too, so the new ones
+   * have to be used in the given boundary.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
@@ -175,19 +177,41 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * See also @ref remove_maximal_cell (for the complementary action) and @ref insert_boundary (for insertion at the
    * highest index).
    *
-   * @param columnIndex @ref MatIdx index of the cell to remove.
    * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
    * method.
-   * @param boundary Boundary generating the column to be inserted. The indices of the boundary have to correspond to
-   * the
-   * @p cellIndex values of precedent calls of the method for the corresponding cells and should be ordered in
-   * increasing order.
+   * @param columnIndex @ref MatIdx index where to move the new inserted column.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @ref PosIdx of the cells in the current filtration and should be ordered in increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary,
+  void insert_maximal_cell(Index columnIndex,
+                           const Boundary_range& boundary,
                            Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
+   * It does the same as the other version, but allows the boundary cells to be identified without restrictions
+   * except that the new ID has to be higher than any other ID use until now. Note that you should avoid then
+   * to use the other insertion method to avoid overwriting IDs.
+   * 
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param columnIndex @ref MatIdx index where to move the new inserted column.
+   * @param cellIndex @ref IDIdx index to use to identify the new cell.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @p cellIndex values of precedent calls of the method for the corresponding cells and should be ordered in
+   * increasing order. Warning: if swaps occurred in between insertions, the cell IDs were swapped too, so the new ones
+   * have to be used in the given boundary.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   */
+  template <class Boundary_range = Boundary>
+  void insert_maximal_cell(Index columnIndex,
+                           ID_index cellIndex,
+                           const Boundary_range& boundary,
+                           Dimension dim = Master_matrix::template get_null_value<Dimension>());
+
   /**
    * @brief Returns the column at the given @ref MatIdx index in \f$ R \f$ if @p inR is true and
    * in \f$ U \f$ if @p inR is false.
@@ -562,12 +586,40 @@ inline void RU_matrix<Master_matrix>::insert_boundary(ID_index cellIndex, const 
 
 template <class Master_matrix>
 template <class Boundary_range>
-inline void RU_matrix<Master_matrix>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary,
-                                                          Dimension dim) {
+inline void RU_matrix<Master_matrix>::insert_maximal_cell(Index columnIndex,
+                                                          const Boundary_range& boundary,
+                                                          Dimension dim)
+{
   static_assert(Master_matrix::Option_list::has_vine_update,
                 "'insert_maximal_cell' is not implemented for the chosen options.");
 
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have be positive."));
+
   insert_boundary(boundary, dim);
+
+  // If started with 0 columns, no swaps are needed
+  if (get_number_of_columns() == 1) return;
+
+  for (Index curr = get_number_of_columns() - 1; curr > columnIndex; --curr) {
+    Swap_opt::vine_swap(curr - 1);
+  }
+}
+
+template <class Master_matrix>
+template <class Boundary_range>
+inline void RU_matrix<Master_matrix>::insert_maximal_cell(Index columnIndex,
+                                                          ID_index cellIndex,
+                                                          const Boundary_range& boundary,
+                                                          Dimension dim)
+{
+  static_assert(Master_matrix::Option_list::has_vine_update,
+                "'insert_maximal_cell' is not implemented for the chosen options.");
+
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have be positive."));
+
+  insert_boundary(cellIndex, boundary, dim);
+
+  // TODO: factorize following with the other insert_maximal_cell ?
 
   // If started with 0 columns, no swaps are needed
   if (get_number_of_columns() == 1) return;

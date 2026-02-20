@@ -663,9 +663,17 @@ void test_ru_maximal_simplex_insertion() {
   // Check that matrix is the one that is expected
   std::vector<witness_content<typename Matrix::Column> > m1;
   if constexpr (Matrix::Option_list::is_z2) {
+#ifdef PM_TEST_ID_IDX
+    m1 = {{}, {}, {}, {0, 1}, {}, {0, 2}};
+#else
     m1 = {{}, {}, {}, {0, 2}, {0, 1}, {}};
+#endif
   } else {
+#ifdef PM_TEST_ID_IDX
+    m1 = {{}, {}, {}, {{0, 1}, {1, 2}}, {}, {{0, 1}, {2, 1}}};
+#else
     m1 = {{}, {}, {}, {{0, 1}, {2, 1}}, {{0, 1}, {1, 2}}, {}};
+#endif
   }
   test_content_equality(m1, m);
 
@@ -680,10 +688,69 @@ void test_ru_maximal_simplex_insertion() {
   // Check that matrix is the one that is expected
   std::vector<witness_content<typename Matrix::Column> > m2;
   if constexpr (Matrix::Option_list::is_z2) {
+#ifdef PM_TEST_ID_IDX
+    m2 = {{}, {}, {}, {1, 2}, {}, {1, 3}, {}, {0, 1}, {4, 5, 6}};
+#else
     m2 = {{}, {}, {}, {}, {1, 3}, {1, 2}, {}, {4, 5, 6}, {0, 1}};
+#endif
   } else {
+#ifdef PM_TEST_ID_IDX
+    m2 = {{}, {}, {}, {{1, 1}, {2, 1}}, {}, {{1, 1}, {3, 1}}, {}, {{0, 1}, {1, 1}}, {{4, 1}, {5, 1}, {6, 1}}};
+#else
     m2 = {{}, {}, {}, {}, {{1, 1}, {3, 1}}, {{1, 1}, {2, 1}}, {}, {{4, 1}, {5, 1}, {6, 1}}, {{0, 1}, {1, 1}}};
+#endif
   }
+  test_content_equality(m2, m);
+}
+
+template <class Matrix>
+void test_chain_maximal_simplex_insertion()
+{
+  // Only implemented for Z2 (for now ?)
+
+  // Allocate space for 9 columns
+  Matrix m(9);
+
+  // Construct 3-vertex, 2-edge complex
+  m.insert_maximal_cell(0, {});
+  m.insert_maximal_cell(1, {});
+  m.insert_maximal_cell(2, {});
+  m.insert_maximal_cell(3, {0, 1});
+  m.insert_maximal_cell(4, {1, 2});
+
+  // Check there are 5 columns
+  BOOST_CHECK_EQUAL(m.get_number_of_columns(), 5);
+
+  // Insert edge between vertices indexed 0 and 2, as first edge
+  m.insert_maximal_cell(3, {0, 2});
+
+  // Check that one column has been added
+  BOOST_CHECK_EQUAL(m.get_number_of_columns(), 6);
+
+  // Check that matrix is the one that is expected
+  std::vector<witness_content<typename Matrix::Column> > m1;
+#ifdef PM_TEST_ID_IDX
+  m1 = {{0}, {0, 1}, {0, 2}, {3}, {5}, {3, 4, 5}};
+#else
+  m1 = {{0}, {0, 1}, {0, 2}, {5}, {3}, {3, 4, 5}};
+#endif
+  test_content_equality(m1, m);
+
+  // Insert vertex, one edge, one 2-simplex
+  m.insert_maximal_cell(0, {});
+  m.insert_maximal_cell(7, {0, 1});
+  m.insert_maximal_cell(7, {4, 5, 6});
+
+  // Check that three columns have been added
+  BOOST_CHECK_EQUAL(m.get_number_of_columns(), 9);
+
+  // Check that matrix is the one that is expected
+  std::vector<witness_content<typename Matrix::Column> > m2;
+#ifdef PM_TEST_ID_IDX
+  m2 = {{0}, {0, 1}, {0, 2}, {3}, {5}, {3, 4, 5}, {3, 4, 5, 6}, {3, 7}, {0, 1, 8}};
+#else
+  m2 = {{3, 4, 5, 6}, {0}, {0, 1}, {0, 2}, {5}, {3}, {3, 4, 5}, {0, 1, 8}, {3, 7}};
+#endif
   test_content_equality(m2, m);
 }
 
