@@ -10,8 +10,10 @@
 
 
 import pytest
+from numpy.testing import assert_almost_equal
 
 from gudhi.datasets.generators import points
+from gudhi.random import GudhiBitGenerator
 
 
 def test_sphere():
@@ -53,3 +55,7 @@ def test_torus():
         points.ctorus(n_samples=10, dim=3, sample="grid").all()
         == points.torus(n_samples=10, dim=3, sample="grid").all()
     )
+
+def test_reproducibility():
+    for algo in [points.sphere, points.torus, points.ctorus]:
+        assert_almost_equal(algo(10,2, rng=GudhiBitGenerator(42)), algo(10,2, rng=GudhiBitGenerator(42)))

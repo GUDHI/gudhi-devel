@@ -13,6 +13,11 @@ Below is a list of changes:
 
 - [Module](link)
      - **...**
+     
+- [Reproducibility](https://gudhi.inria.fr/python/latest/reproducibility.html)
+     - A GUDHI random generator that fits numpy random generator requirements, and can be used by
+       [datasets generators](https://gudhi.inria.fr/python/latest/datasets.html#datasets-generators).
+     - It is possible to set a seed for [OFF point set generator](https://gudhi.inria.fr/pointsetgenerator/) utility.
 
 - [Alpha complex dD](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1alpha__complex_1_1_alpha__complex.html)
      - **API break:** The simplicial complex for the Alpha complex concept has been changed to
@@ -24,6 +29,9 @@ Below is a list of changes:
 
 - [Representations](https://gudhi.inria.fr/python/latest/representations.html)
      - in metrics, `BottleneckDistance` argument `epsilon` is deprecrated and renamed `e` to be consistent with `bottleneck_distance` and `pairwise_persistence_diagram_distances`
+
+- [OFF point set generator](https://gudhi.inria.fr/pointsetgenerator/)
+     - Add a seed mechanism for the OFF point set generator utility
 
 - Installation
      - Pip package is now available for OSx &ge; 13.0 (was &ge; 12.0).

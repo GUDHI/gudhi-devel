@@ -76,6 +76,7 @@ jobs:
           python -m pytest src/python/test/test_euclidean_witness_complex.py
           python -m pytest src/python/test/test_off.py
           python -m pytest src/python/test/test_persistence_graphical_tools.py
+          python -m pytest src/python/test/test_random.py
           python -m pytest src/python/test/test_reader_utils.py
           python -m pytest src/python/test/test_remote_datasets.py
           python -m pytest src/python/test/test_representations_interface.py

@@ -5,6 +5,7 @@
 #include <gudhi/pick_n_random_points.h>
 #include <gudhi/choose_n_farthest_points.h>
 #include <gudhi/reader_utils.h>
+#include <gudhi/random_point_generators.h>
 
 #include <CGAL/Epick_d.h>
 
@@ -14,8 +15,6 @@
 #include <utility>
 #include <string>
 #include <vector>
-
-#include "generators.h"
 
 /** Write a gnuplot readable file.
  *  Data range is a random access range of pairs (arg, value)
@@ -29,6 +28,7 @@ void write_data(Data_range& data, std::string filename) {
 
 int main(int argc, char* const argv[]) {
   using Kernel = CGAL::Epick_d<CGAL::Dynamic_dimension_tag>;
+  using Point_Vector = std::vector<Kernel::Point_d>;
   using Witness_complex = Gudhi::witness_complex::Euclidean_witness_complex<Kernel>;
 
   if (argc != 2) {
@@ -46,14 +46,16 @@ int main(int argc, char* const argv[]) {
     // Construct the Simplex Tree
     Gudhi::Simplex_tree<> simplex_tree;
     Point_Vector point_vector, landmarks;
-    generate_points_sphere(point_vector, nbP, 4);
+    point_vector = Gudhi::generate_points_on_sphere_d<Kernel>(nbP, 4, 1.);
     std::clog << "Successfully generated " << point_vector.size() << " points.\n";
     std::clog << "Ambient dimension is " << point_vector[0].size() << ".\n";
 
     // Choose landmarks
     start = clock();
     // Gudhi::subsampling::pick_n_random_points(point_vector, number_of_landmarks, std::back_inserter(landmarks));
-    Gudhi::subsampling::choose_n_farthest_points(K().squared_distance_d_object(), point_vector, number_of_landmarks,
+    Gudhi::subsampling::choose_n_farthest_points(Kernel().squared_distance_d_object(),
+                                                 point_vector,
+                                                 number_of_landmarks,
                                                  Gudhi::subsampling::random_starting_point,
                                                  std::back_inserter(landmarks));
 
