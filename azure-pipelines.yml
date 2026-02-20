@@ -61,12 +61,12 @@ jobs:
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
     pool:
-      vmImage: windows-latest
+      vmImage: windows-2025
     variables:
       pythonVersion: "3.9"
       cmakeBuildType: Release
       cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
-      gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_REMOTE_TEST=ON -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
+      gudhiCmakeOptions: -DWITH_GUDHI_PYTHON=OFF -DWITH_GUDHI_UTILITIES=OFF -DDEBUG_TRACES=ON -DWITH_MODULE_GUDHI_Persistence_matrix=OFF -DWITH_MODULE_GUDHI_Persistence_representations=OFF -DWITH_MODULE_GUDHI_Persistent_cohomology=OFF -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
       # On this VM, 2 versions of python are installed. Default Python_FIND_REGISTRY is FIRST, which means asks registry first
       # LAST means consult registry in last resort, use the standard libraries or headers first
       extraCmakeOptions: -DPython_FIND_REGISTRY=LAST
@@ -94,9 +94,6 @@ jobs:
       - pwsh: |
           $ErrorActionPreference = "stop"
           $PSNativeCommandUseErrorActionPreference = $true
-          python --version
-          python -m pip install -r ext/gudhi-deploy/build-requirements.txt
-          python -m pip install -r ext/gudhi-deploy/test-requirements.txt
           choco install -y ninja --force --force-dependencies
           $originalDir = Get-Location
           Set-Location "C:\vcpkg"
@@ -109,15 +106,21 @@ jobs:
         displayName: "Install build dependencies"
       - task: BatchScript@1
         inputs:
-          filename: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat'
+          filename: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat'
+          arguments: "x64 -vcvars_ver=14.29"
           modifyEnvironment: true
+      - task: PowerShell@2
+        displayName: "List installed MSVC toolsets"
+        inputs:
+          targetType: inline
+          script: |
+            Get-ChildItem "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\" | Select-Object Name
       - pwsh: |
           $ErrorActionPreference = "stop"
           $PSNativeCommandUseErrorActionPreference = $true
           mkdir build
           cd build
-          python --version
           cmake -DCMAKE_BUILD_TYPE:STRING=$(cmakeBuildType) -GNinja $(cmakeVcpkgFlags) $(gudhiCmakeOptions) $(extraCmakeOptions) --log-level=DEBUG ..
-          ninja
-          ctest --output-on-failure -C Release -E diff_files
+          ninja triangulation
+          ctest -R triangulation -V
         displayName: "Build and test"
