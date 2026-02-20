@@ -21,7 +21,6 @@
 #include <array>
 #include <initializer_list>
 #include <limits>
-#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <utility>  //std::move
@@ -542,7 +541,6 @@ class Slicer
       ++i;
     }
 
-    std::cout << maxIndex << "\n";
     if (maxIndex == static_cast<Index>(-1)) return {};
 
     auto cycle = persistence_.get_representative_cycle(maxIndex, update);
