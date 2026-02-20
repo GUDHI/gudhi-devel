@@ -142,5 +142,7 @@
  * @example example_field_operations.cpp
  * \section Multi_filtration_example_section multi_filtration
  * @example example_multi_simplex_tree.cpp
+ * \section Vineyard_example_section Vineyard
+ * @example example_simple_vineyard.cpp
  */
  

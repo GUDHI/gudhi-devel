@@ -179,11 +179,14 @@ NB_MODULE(_vineyard_ext, m)
       .def("_update_from_complex", &gvyi::update_from_complex<PCC>)
       .def("_get_current_vineyard_view", &gvyi::get_current_vineyard_view)
       .def("get_latest_representative_cycles", &gvyi::get_latest_representative_cycles, R"doc(
-Returns a list of (cycle, pers) pairs representing the current representative cycles in the complex.
-The first half `cycle` is the set of cell indices in the cycle and `pers` is the length of the bar
-associated to the cycle.
+The output is a dictionary of the form :code:`{(dim, idx) : cycle}`, such that:
 
-:rtype:  list[tuple[np.ndarray, np.number]]
+  - if `vy` = :meth:`get_current_vineyard_view`, then `vy[dim][idx][-1]` is the bar corresponding to `cycle`,
+  - if `vy` = :meth:`get_current_vineyard_view(dim=dim) <get_current_vineyard_view>`, then `vy[idx][-1]` is the \
+    bar corresponding to `cycle`,
+  - the cells contained in `cycle` are represented by their index in the original boundary container.
+
+:rtype:  dict[tuple[np.number, np.number], np.ndarray]
            )doc");
 
   m.def("_build_boundary_matrix_from_complex", &gvy::build_python_boundary_matrix_from_complex<ST>);

@@ -26,6 +26,8 @@ namespace Gudhi {
 namespace vineyard {
 
 /**
+ * @ingroup vineyard
+ * 
  * @private
  */
 template <class FilteredComplex, typename Index>
@@ -46,6 +48,27 @@ inline Index assign_keys_(FilteredComplex& complex, Index start)
   return numberOfSimplices;
 }
 
+/**
+ * @ingroup vineyard
+ * 
+ * @brief Builds a boundary matrix from the given matrix.
+ * 
+ * @tparam FilteredComplex Complex type with following methods (see @ref FilteredComplex or @ref Gudhi::Simplex_tree
+ * for method description): complex_simplex_range, skeleton_simplex_range, key, assign_key, dimension, filtration
+ * and boundary_simplex_range. And the following types: Filtration_value and Simplex_key.
+ * @tparam Filtration_value Filtration value type for the boundary matrix. `FilteredComplex::Filtration_value` has
+ * to be convertible into it. Default value: FilteredComplex::Filtration_value.
+ * @tparam Index Index type for the boundary matrix. Has to be an integer type and big enough to count all cells in
+ * the complex. Default value: FilteredComplex::Simplex_key.
+ * @tparam Dimension Dimension type. Has to be an integer type.
+ * @param[in] complex Complex to convert.
+ * @param[out] boundaries Container for the boundaries. If not empty, the elements are not erased and the new
+ * boundaries are added at the end.
+ * @param[out] dimensions Container for the dimensions. If not empty, the elements are not erased and the new
+ * dimensions are added at the end. Has to have the same size than @p boundaries as the indices should correspond.
+ * @param[out] filtrationValues Container for the filtration values. If not empty, the elements are not erased and
+ * the new values are added at the end. Has to have the same size than @p boundaries as the indices should correspond.
+ */
 template <class FilteredComplex,
           typename Filtration_value = typename FilteredComplex::Filtration_value,
           typename Index = typename FilteredComplex::Simplex_key,
@@ -77,9 +100,24 @@ inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
   }
 }
 
-// same name to emphasize that the filtration values computed are in exactly the same order than if computed 
-// with the other version. Usefull if you already called the other version and then only modified the filtration
-// values of the complex and you don't need to recompute the boundaries.
+/**
+ * @ingroup vineyard
+ * 
+ * @brief Same method than @ref build_boundary_matrix_from_complex(FilteredComplex&, std::vector<std::vector<Index> >&,
+ * std::vector<Dimension>&, std::vector<Filtration_value>&), but only the filtration values are computed. The order of
+ * the filtration values are the same than if computed with the other version. Usefull if one already called the other
+ * version and then only modified the filtration values of the complex and therefore don't need to recompute the
+ * boundaries.
+ *
+ * @tparam FilteredComplex Complex type with following methods (see @ref FilteredComplex or @ref Gudhi::Simplex_tree
+ * for method description): complex_simplex_range, skeleton_simplex_range, key, assign_key, dimension, filtration
+ * and boundary_simplex_range. And the following types: Filtration_value and Simplex_key.
+ * @tparam Filtration_value Filtration value type for the boundary matrix. `FilteredComplex::Filtration_value` has
+ * to be convertible into it. Default value: FilteredComplex::Filtration_value.
+ * @param[in] complex Complex to convert.
+ * @param[out] filtrationValues Container for the filtration values. If not empty, the elements are not erased and
+ * the new values are added at the end.
+ */
 template <class FilteredComplex, typename Filtration_value = typename FilteredComplex::Filtration_value>
 inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
                                                std::vector<Filtration_value>& filtrationValues)

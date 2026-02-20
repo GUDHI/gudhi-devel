@@ -130,8 +130,9 @@ class Vineyard(t.Vineyard_interface):
         :param filtered_cpx: A filtered complex containing all simplices and filtration values of the initializing
             filtration. Alternative to providing `boundaries`, `dimensions` and `filtration_values`, so both should not
             be provided at the same time. Defaults to `None`.
-        :type filtered_cpx: SimplexTree or CubicalComplex or PeriodicCubicalComplex or `None`
-        :param boundaries: List of the cell boundaries (do not have to be simplicial) of the initializing filtration.
+        :type filtered_cpx: :class:`~gudhi.SimplexTree` or :class:`~gudhi.CubicalComplex` or
+            :class:`~gudhi.PeriodicCubicalComplex` or `None`
+        :param boundaries: List of the cell boundaries (does not have to be simplicial) of the initializing filtration.
             Alternative to providing `filtered_cpx`, so both should not be provide at the same time. If `boundaries` is
             provided, `dimensions` and `filtration_values` also have to be provided (such that the indices aligns).
             The cells in the boundaries have to be indexed by their own position in the list.
@@ -180,7 +181,8 @@ class Vineyard(t.Vineyard_interface):
         :param filtered_cpx: A filtered complex whose simplices are identical (also label wise) to the complex provided
             to :meth:`initialize`, but with new filtration values corresponding to the new filtration. If none was
             provided for :meth:`initialize`, provide the argument `filtration_values` instead. Defaults to `None`.
-        :type filtered_cpx: SimplexTree or CubicalComplex or PeriodicCubicalComplex or `None`
+        :type filtered_cpx: :class:`~gudhi.SimplexTree` or :class:`~gudhi.CubicalComplex` or
+            :class:`~gudhi.PeriodicCubicalComplex` or `None`
         :param filtration_values: Array of new filtration values such that `filtration_values[i]` corresponds to
             the new value for `boundaries[i]` provided to :meth:`initialize`. If `boundaries` was not provided to
             :meth:`initialize`, provide the argument `filtered_cpx` instead. Defaults to `None`.
@@ -372,13 +374,15 @@ class Vineyard(t.Vineyard_interface):
         :type min_bar_length: Any numerical type coercible to the filtration value type, optional
         :param noise_option: Value describing how "noisy" parts of a vine should be treated. There are 5 options for
             now:
-            - "none": Nothing particular is done.
-            - "gray_diagonal": Every part of a vine contained in the diagonal will be plotted with a gray overline.
-            - "gray_band": Every part of a vine where all coordinates differ by less than `min_bar_length` are plotted
-                with a gray overline.
-            - "erase_diagonal": Every part of a vine contained in the diagonal are not plotted.
-            - "erase_band": Every part of a vine where all coordinates differ by less than `min_bar_length` are not
-                plotted.
+
+                - "none": Nothing particular is done.
+                - "gray_diagonal": Every part of a vine contained in the diagonal will be plotted with a gray overline.
+                - "gray_band": Every part of a vine where all coordinates differ by less than `min_bar_length` are \
+                    plotted with a gray overline.
+                - "erase_diagonal": Every part of a vine contained in the diagonal are not plotted.
+                - "erase_band": Every part of a vine where all coordinates differ by less than `min_bar_length` are \
+                    not plotted.
+
             Defaults to "gray_diagonal".
         :type noise_option: Literal["none", "gray_diagonal", "gray_band", "erase_diagonal", "erase_band"]
         :param square_scaling: If `True`, the min and max values of the birth (x) and death (y) axis of the plot
@@ -464,7 +468,7 @@ class PointCloudRipsVineyard:
         path_suffix: str = ".txt",
         first_index: int = 0,
         number_of_updates: int = None,
-        file_type: str = "point_cloud",
+        file_type: Literal["distance_matrix", "point_cloud"] = "point_cloud",
         delimiter: str = None,
         store_point_coordinates: bool = False,
         store_cycles: bool = False,
@@ -477,10 +481,11 @@ class PointCloudRipsVineyard:
         From one file to the next, the order of points/distances have to be preserved. I.e., it is assumed that the
         point at line 2 in file `n` is the same point at line 2 in file `n + 1` just with different coordinates.
 
-        File format:
-        - Point cloud: plain text where each line represents a different point. A point is given by the ordered
-        sequence of its coordinates separated by the same delimiter. Has to be readable by `numpy.loadtxt`.
-        - Distance matrix: see file format for :meth:`gudhi.reader_utils.read_lower_triangular_matrix_from_csv_file`.
+        **File format:**
+
+            - Point cloud: plain text where each line represents a different point. A point is given by the ordered \
+                sequence of its coordinates separated by the same delimiter. Has to be readable by `numpy.loadtxt`.
+            - Distance matrix: see file format for :func:`gudhi.read_lower_triangular_matrix_from_csv_file`.
 
         :param path_prefix: Part of the file path before the file number. E.g., if files are named
             "./path/to/data_0*_v1.txt" with * being 0, 1, ..., `n`, then `path_prefix` should be set to
@@ -499,7 +504,7 @@ class PointCloudRipsVineyard:
         :type number_of_updates: int, optional
         :param file_type: Indicates the content of the file. Has to be either `"point_cloud"` or `"distance_matrix"`.
             Defaults to `"point_cloud"`.
-        :type file_type: str
+        :type file_type: Literal["distance_matrix", "point_cloud"]
         :param delimiter: Optional. If the files contain point clouds and the coordinates are separated with something
             else than a blank space, the delimiter should be given here. Defaults to `None`.
         :type delimiter: str, optional
@@ -551,14 +556,14 @@ class PointCloudRipsVineyard:
         data: ArrayLike,
         first_index: int = 0,
         number_of_updates: int = None,
-        data_type: str = "point_cloud",
+        data_type: Literal["distance_matrix", "point_cloud"] = "point_cloud",
         store_point_coordinates: bool = False,
         store_cycles: bool = False,
     ):
         """Constructs the vineyard from a sequence of arrays containing either point clouds or distance matrices.
 
-        :param data: A list or array of arrays corresponding to the format accepted by :class:`RipsComplex`. The first
-            axis should correspond to the ordered steps of the vineyard.
+        :param data: A list or array of arrays corresponding to the format accepted by :class:`gudhi.RipsComplex`.
+            The first axis should correspond to the ordered steps of the vineyard.
         :type data: ArrayLike
         :param first_index: Optional. Index of `data` to start with, i.e. all arrays at index strictly lower than
             `first_index` in `data` are ignored. Defaults to 0.
@@ -569,7 +574,7 @@ class PointCloudRipsVineyard:
         :type number_of_updates: int, optional
         :param data_type: Indicates the content of the arrays. Has to be either `"point_cloud"` or `"distance_matrix"`.
             Defaults to `"point_cloud"`.
-        :type data_type: str
+        :type data_type: Literal["distance_matrix", "point_cloud"]
         :param store_point_coordinates: Optional and only possible if `data_type` is `"point_cloud"`. If `True`, the
             given point clouds are copied and stored inside the class. Necessary for :meth:`get_points` and
             :meth:`plot_1D_representative_cycles`. Defaults to False.
@@ -635,18 +640,18 @@ class PointCloudRipsVineyard:
         data: ArrayLike = None,
         path: str = None,
         delimiter: str = None,
-        data_type: str = "point_cloud",
+        data_type: Literal["distance_matrix", "point_cloud"] = "point_cloud",
         number_of_updates: int = 0,
     ):
         """Initializes the vineyard with the first persistence barcode. If another vineyard was initialized before,
         it will be completely replaced.
 
-        :param data: Array corresponding to the format accepted by :class:`RipsComplex`. Alternative to `path`, so both
-            should not be provided. Defaults to `None`.
+        :param data: Array corresponding to the format accepted by :class:`gudhi.RipsComplex`. Alternative to `path`,
+            so both should not be provided. Defaults to `None`.
         :type data: ArrayLike or `None`
         :param path: Path to a file containing either a point cloud or a distance matrix. The point cloud has to be
             readable by `numpy.loadtxt` and the distance matrix by
-            :meth:`gudhi.reader_utils.read_lower_triangular_matrix_from_csv_file`. Alternative to `data`, so both
+            :func:`gudhi.read_lower_triangular_matrix_from_csv_file`. Alternative to `data`, so both
             should not be provided. Defaults to `None`.
         :type path: str or `None`
         :param delimiter: Optional. If `path` was provided for a point cloud and the coordinates of the points are
@@ -654,7 +659,7 @@ class PointCloudRipsVineyard:
         :type delimiter: str, optional
         :param data_type: Indicates the content of the array/file. Has to be either `"point_cloud"` or
             `"distance_matrix"`. Defaults to `"point_cloud"`.
-        :type data_type: str
+        :type data_type: Literal["distance_matrix", "point_cloud"]
         :param number_of_updates: Optional (for optimization purposes). Will allocate memory space for
             `number_of_updates` additional steps in the vineyard after initialization. Defaults to 0.
         :type number_of_updates: int, optional
@@ -697,17 +702,17 @@ class PointCloudRipsVineyard:
         data: ArrayLike = None,
         path: str = None,
         delimiter: str = None,
-        data_type: str = "point_cloud",
+        data_type: Literal["distance_matrix", "point_cloud"] = "point_cloud",
     ):
         """Adds a layer to the current vineyard by updating the persistence diagram such that it corresponds to the
         Rips filtration represented by the given point cloud or distance matrix.
 
-        :param data: Array corresponding to the format accepted by :class:`RipsComplex`. Alternative to `path`, so both
-            should not be provided. Defaults to `None`.
+        :param data: Array corresponding to the format accepted by :class:`gudhi.RipsComplex`. Alternative to `path`,
+            so both should not be provided. Defaults to `None`.
         :type data: ArrayLike or `None`
         :param path: Path to a file containing either a point cloud or a distance matrix. The point cloud has to be
             readable by `numpy.loadtxt` and the distance matrix by
-            :meth:`gudhi.reader_utils.read_lower_triangular_matrix_from_csv_file`. Alternative to `data`, so both
+            :func:`gudhi.read_lower_triangular_matrix_from_csv_file`. Alternative to `data`, so both
             should not be provided. Defaults to `None`.
         :type path: str or `None`
         :param delimiter: Optional. If `path` was provided for a point cloud and the coordinates of the points are
@@ -715,7 +720,7 @@ class PointCloudRipsVineyard:
         :type delimiter: str, optional
         :param data_type: Indicates the content of the array/file. Has to be either `"point_cloud"` or
             `"distance_matrix"`. Defaults to `"point_cloud"`.
-        :type data_type: str
+        :type data_type: Literal["distance_matrix", "point_cloud"]
         :raises ValueError: If both `data` and `path` are provided or none of both.
 
         .. note::
@@ -800,7 +805,8 @@ class PointCloudRipsVineyard:
         :rtype: tuple[list[np.ndarray], np.ndarray]
 
         .. note::
-            Any vertex will have as index the position it had when the point cloud or distance matrix was provided.
+            Any vertex will have as index in the boundary container the position it had when the point cloud or
+            distance matrix was provided.
 
         .. note::
             As the Rips complex is simplicial, every value at `dimensions[i]` will be equal to
@@ -848,10 +854,12 @@ class PointCloudRipsVineyard:
         self, step: int = None, min_bar_length: np.number = 0
     ) -> list[dict[tuple[np.number, np.number], np.ndarray]] | dict[tuple[np.number, np.number], np.ndarray]:
         """If `store_cycles` was set to `True` at construction, returns the stored non-trivial representative 1-cycles.
-        The output is a list of dictionaries of the form `step x {(dim, idx) : cycle}`, such that:
-            - if `vy` = :meth:`get_current_vineyard_view()`, then `vy[dim][idx]` is the bar corresponding to `cycle`,
-            - if `vy` = :meth:`get_current_vineyard_view(dim=dim)`, then `vy[idx]` is the bar corresponding to `cycle`,
-            - the edges contained in `cycle` are represented by their index in the complex which can be retrieved
+        The output is a list of dictionaries of the form :code:`step x {idx : cycle}`, such that:
+
+            - if `vy` = :meth:`get_current_vineyard_view`, then `vy[1][idx][step]` is the bar corresponding to `cycle`,
+            - if `vy` = :meth:`get_current_vineyard_view(dim=1) <get_current_vineyard_view>`, then `vy[idx][step]` \
+                is the bar corresponding to `cycle`,
+            - the edges contained in `cycle` are represented by their index in the complex which can be retrieved \
                 with :meth:`get_complex`.
 
         :param step: Optional. If provided, only the cycles at given step are returned (first axis of the format
@@ -904,13 +912,15 @@ class PointCloudRipsVineyard:
         :type min_bar_length: Any numerical type coercible to the filtration value type, optional
         :param noise_option: Value describing how "noisy" parts of a vine should be treated. There are 5 options for
             now:
-            - "none": Nothing particular is done.
-            - "gray_diagonal": Every part of a vine contained in the diagonal will be plotted with a gray overline.
-            - "gray_band": Every part of a vine where all coordinates differ by less than `min_bar_length` are plotted
-                with a gray overline.
-            - "erase_diagonal": Every part of a vine contained in the diagonal are not plotted.
-            - "erase_band": Every part of a vine where all coordinates differ by less than `min_bar_length` are not
-                plotted.
+
+                - "none": Nothing particular is done.
+                - "gray_diagonal": Every part of a vine contained in the diagonal will be plotted with a gray overline.
+                - "gray_band": Every part of a vine where all coordinates differ by less than `min_bar_length` are \
+                    plotted with a gray overline.
+                - "erase_diagonal": Every part of a vine contained in the diagonal are not plotted.
+                - "erase_band": Every part of a vine where all coordinates differ by less than `min_bar_length` are \
+                    not plotted.
+
             Defaults to "gray_diagonal".
         :type noise_option: Literal["none", "gray_diagonal", "gray_band", "erase_diagonal", "erase_band"]
         :param square_scaling: If `True`, the min and max values of the birth (x) and death (y) axis of the plot

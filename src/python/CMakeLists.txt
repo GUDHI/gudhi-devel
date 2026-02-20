@@ -535,6 +535,9 @@ if(MATPLOTLIB_FOUND)
   add_gudhi_py_test(test_persistence_graphical_tools)
 endif()
 
+# Vineyard
+add_gudhi_py_test(test_vineyard)
+
 # Set missing or not modules
 set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")
 
