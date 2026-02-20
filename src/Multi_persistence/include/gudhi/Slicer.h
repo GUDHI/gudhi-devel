@@ -21,15 +21,17 @@
 #include <array>
 #include <initializer_list>
 #include <limits>
-#include <stdexcept>
 #include <string>
 #include <type_traits>
-#include <numeric>  //std::iota
 #include <utility>  //std::move
 #include <cstdint>  //std::int32_t
 #include <vector>
 #include <ostream>
 // #include <sstream>  //std::stringstream, to remove when to_str gets removed
+
+#ifdef GUDHI_USE_TBB
+#include <oneapi/tbb/parallel_for.h>
+#endif
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
@@ -63,12 +65,15 @@ template <class MultiFiltrationValue, class PersistenceAlgorithm>
 class Slicer
 {
  public:
-  using Persistence = PersistenceAlgorithm;                           /**< Persistence algorithm type. */
-  using Filtration_value = MultiFiltrationValue;                      /**< Filtration value type. */
-  using T = typename Filtration_value::value_type;                    /**< Numerical filtration value element type. */
-  using Complex = Multi_parameter_filtered_complex<Filtration_value>; /**< Complex type. */
-  using Index = typename Complex::Index;                              /**< Complex index type. */
-  using Dimension = typename Complex::Dimension;                      /**< Dimension type. */
+  using Persistence = PersistenceAlgorithm;          /**< Persistence algorithm type. */
+  using Filtration_value = MultiFiltrationValue;     /**< Filtration value type. */
+  using T = typename Filtration_value::value_type;   /**< Numerical filtration value element type. */
+  using Index = typename Persistence::Index;         /**< Complex index type. */
+  using Dimension = typename Persistence::Dimension; /**< Dimension type. */
+  using Complex = Multi_parameter_filtered_complex<Filtration_value, Index, Dimension>; /**< Complex type. */
+  using Map = typename Persistence::Map;             /**< Permutation map for filtration order. */
+  using Cycle = std::vector<Index>;                  /**< Cycle type. */
+  using Thread_safe = Thread_safe_slicer<Slicer>;    /**< Thread safe slicer type. */
   template <typename Value = T>
   using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, Value>; /**< Bar type. */
   /**
@@ -93,8 +98,6 @@ class Slicer
    */
   template <typename Value = T>
   using Multi_dimensional_flat_barcode = std::vector<Flat_barcode<Value>>;
-  using Cycle = std::vector<Index>;               /**< Cycle type. */
-  using Thread_safe = Thread_safe_slicer<Slicer>; /**< Thread safe slicer type. */
 
   // CONSTRUCTORS
 
@@ -112,7 +115,6 @@ class Slicer
   Slicer(const Complex& complex)
       : complex_(complex),
         slice_(complex.get_number_of_cycle_generators()),
-        generatorOrder_(complex.get_number_of_cycle_generators()),
         persistence_()
   {}
 
@@ -125,7 +127,6 @@ class Slicer
   Slicer(Complex&& complex)
       : complex_(std::move(complex)),
         slice_(complex_.get_number_of_cycle_generators()),
-        generatorOrder_(complex_.get_number_of_cycle_generators()),
         persistence_()
   {}
 
@@ -133,7 +134,7 @@ class Slicer
    * @brief Copy constructor. Persistence computation initialization is not updated.
    */
   Slicer(const Slicer& other)
-      : complex_(other.complex_), slice_(other.slice_), generatorOrder_(other.generatorOrder_), persistence_()
+      : complex_(other.complex_), slice_(other.slice_), persistence_()
   {}
 
   /**
@@ -143,7 +144,6 @@ class Slicer
   Slicer(const Slicer<OtherMultiFiltrationValue, OtherPersistenceAlgorithm>& other)
       : complex_(other.get_filtered_complex()),
         slice_(other.get_slice().begin(), other.get_slice().end()),
-        generatorOrder_(other.get_current_order()),
         persistence_()
   {}
 
@@ -153,7 +153,6 @@ class Slicer
   Slicer(Slicer&& other) noexcept
       : complex_(std::move(other.complex_)),
         slice_(std::move(other.slice_)),
-        generatorOrder_(std::move(other.generatorOrder_)),
         persistence_()
   {}
 
@@ -166,8 +165,7 @@ class Slicer
   {
     complex_ = other.complex_;
     slice_ = other.slice_;
-    generatorOrder_ = other.generatorOrder_;
-    persistence_.reset();
+    persistence_ = Persistence();
 
     return *this;
   }
@@ -180,8 +178,7 @@ class Slicer
   {
     complex_ = other.get_filtered_complex();
     slice_ = std::vector<T>(other.get_slice().begin(), other.get_slice().end());
-    generatorOrder_ = other.get_current_order();
-    persistence_.reset();
+    persistence_ = Persistence();
 
     return *this;
   }
@@ -193,8 +190,7 @@ class Slicer
   {
     complex_ = std::move(other.complex_);
     slice_ = std::move(other.slice_);
-    generatorOrder_ = std::move(other.generatorOrder_);
-    persistence_.reset();
+    persistence_ = Persistence();
 
     return *this;
   }
@@ -235,7 +231,7 @@ class Slicer
    * are not stored in the container. That means that the size can be smaller than what
    * @ref get_number_of_cycle_generators returns.
    */
-  const std::vector<Index>& get_current_order() const { return generatorOrder_; }
+  const Map& get_current_order() const { return persistence_.get_current_order(); }
 
   /**
    * @brief Returns a const reference to the current slice. It can be initialized or updated with @ref set_slice
@@ -393,10 +389,8 @@ class Slicer
   void prune_above_dimension(int maxDim)
   {
     int idx = complex_.prune_above_dimension(maxDim);
-    generatorOrder_.resize(idx);
-    generatorOrder_.shrink_to_fit();
     slice_.resize(idx);
-    persistence_.reset();
+    persistence_ = Persistence();
   }
 
   /**
@@ -428,49 +422,32 @@ class Slicer
    * a valid 1-dimensional filtration, the behaviour is undefined.
    *
    * @param ignoreInf If true, all cells at infinity filtration values are ignored for the initialization, resulting
-   * potentially in less storage use and better performance. But note that this can be problematic with the use of
-   * @ref vineyard_update. Default value: true.
+   * potentially in less storage use and better performance. But note that this parameter can be potentially ignored
+   * if the update method of the template parameter @ref PersistenceAlgorithm does not permit this feature.
+   * Default value: false.
    */
-  void initialize_persistence_computation(const bool ignoreInf = true)
+  void initialize_persistence_computation(bool ignoreInf = false)
   {
     _initialize_persistence_computation(complex_, ignoreInf);
   }
 
   /**
-   * @brief After the persistence computation was initialized for a slice and the slice changes, this method can
-   * update everything necessary for the barcode without re-computing everything from scratch (contrary to
-   * @ref initialize_persistence_computation). Furthermore, it guarantees that the new barcode will "match" the
-   * precedent one. TODO: explain exactly what it means and how to do the matching.
-   * The method will have better performance if the complex is ordered by dimension.
-   *
-   * Only available if PersistenceAlgorithm::is_vine is true.
+   * @brief Updates the persistence barcode with the new slice. If @ref PersistenceAlgorithm is
+   * @ref Persistence_interface_vineyard: will update everything necessary for the barcode without re-computing
+   * everything from scratch (contrary to @ref initialize_persistence_computation). Furthermore, it guarantees that
+   * the new barcode will "matches" the precedent one. TODO: explain exactly what it means and how to do the matching.
+   * For other @ref PersistenceAlgorithm: more or less equivalent to @ref initialize_persistence_computation.
    *
    * @pre @ref initialize_persistence_computation has to be called at least once before.
    *
-   * @warning If `ignoreInf` was set to true when initializing the persistence computation, any update of the slice has
-   * to keep at infinity the boundaries which were before, otherwise the behaviour is undefined (it will throw with
-   * high probability).
+   * @param ignoreInf If true, all cells at infinity filtration values are ignored in the filtration, resulting
+   * potentially in less storage use and better performance. But note that this parameter can be potentially ignored
+   * if the update method of the template parameter `PersistenceAlgorithm` does not permit this feature.
+   * Default value: false.
    */
-  void vineyard_update()
+  void update_persistence_computation(bool ignoreInf = false)
   {
-    static_assert(Persistence::is_vine, "vineyard_update() not enabled by the chosen PersistenceAlgorithm class.");
-
-    const bool is_ordered_by_dim = complex_.is_ordered_by_dimension();
-    // speed up when ordered by dim, to avoid unnecessary swaps
-    auto dim_condition = [&](int curr) {
-      if (is_ordered_by_dim) {
-        return persistence_.get_dimension(curr) == persistence_.get_dimension(curr - 1);
-      }
-      return true;
-    };
-    for (Index i = 1; i < generatorOrder_.size(); i++) {
-      int curr = i;
-      while (curr > 0 && dim_condition(curr) && slice_[generatorOrder_[curr]] < slice_[generatorOrder_[curr - 1]]) {
-        persistence_.vine_swap(curr - 1);
-        std::swap(generatorOrder_[curr - 1], generatorOrder_[curr]);
-        --curr;
-      }
-    }
+    persistence_.update(slice_, ignoreInf);
   }
 
   /**
@@ -544,9 +521,8 @@ class Slicer
     Index maxIndex = -1;
     Index maxBirth = std::numeric_limits<Index>::max();
     T maxLength = 0;
-    for (Index i = 0; i < barcodeIndices.size(); ++i) {
-      // barcodeIndices[i] does not work
-      const auto& bar = barcodeIndices(i);
+    Index i = 0;
+    for (const auto& bar : barcodeIndices) {
       if (bar.dim == dim) {
         if (bar.death == Persistence::nullDeath) {
           if (maxBirth > bar.birth) {
@@ -562,11 +538,13 @@ class Slicer
           }
         }
       }
+      ++i;
     }
 
     if (maxIndex == static_cast<Index>(-1)) return {};
 
-    return persistence_.get_representative_cycle(maxIndex, update);
+    auto cycle = persistence_.get_representative_cycle(maxIndex, update);
+    return {cycle.begin(), cycle.end()};
   }
 
   // FRIENDS
@@ -599,7 +577,7 @@ class Slicer
    * @brief Builds a new slicer from the given one by projecting its filtration values on a grid.
    * See @ref coarsen_on_grid with the paramater `coordinate` at true.
    */
-  friend auto build_slicer_coarsen_on_grid(const Slicer& slicer, const std::vector<std::vector<T>> grid)
+  friend auto build_slicer_coarsen_on_grid(const Slicer& slicer, const std::vector<std::vector<T>>& grid)
   {
     using return_filtration_value = decltype(std::declval<Filtration_value>().template as_type<std::int32_t>());
     using return_complex = decltype(build_complex_coarsen_on_grid(slicer.complex_, grid));
@@ -612,7 +590,7 @@ class Slicer
    */
   friend Slicer build_slicer_from_projective_cover_kernel(const Slicer& slicer, Dimension dim)
   {
-    Projective_cover_kernel<Filtration_value> kernel(slicer.complex_, dim);
+    Projective_cover_kernel kernel(slicer.complex_, dim);
     return Slicer(kernel.create_complex());
   }
 
@@ -652,7 +630,7 @@ class Slicer
   /**
    * @brief Outstream operator.
    */
-  friend std::ostream& operator<<(std::ostream& stream, Slicer& slicer)
+  friend std::ostream& operator<<(std::ostream& stream, const Slicer& slicer)
   {
     stream << "-------------------- Slicer \n";
 
@@ -661,7 +639,7 @@ class Slicer
 
     stream << "--- Order \n";
     stream << "{";
-    for (const auto& idx : slicer.generatorOrder_) stream << idx << ", ";
+    for (const auto& idx : slicer.get_current_order()) stream << idx << ", ";
     stream << "}" << '\n';
 
     stream << "--- Current slice filtration\n";
@@ -670,8 +648,8 @@ class Slicer
     if (!slicer.slice_.empty()) stream << "\b" << "\b";
     stream << "}" << '\n';
 
-    stream << "--- PersBackend \n";
-    stream << slicer.persistence_;
+    // stream << "--- PersBackend \n";
+    // stream << slicer.persistence_;
 
     return stream;
   }
@@ -680,30 +658,34 @@ class Slicer
   friend Thread_safe;  // Thread_safe will use the "_*" methods below instead of "*".
 
   // For ThreadSafe version
-  Slicer(const std::vector<T>& slice, const std::vector<Index>& generatorOrder, const Persistence& persistence)
-      : complex_(), slice_(slice), generatorOrder_(generatorOrder), persistence_(persistence, generatorOrder_)
+  Slicer(const std::vector<T>& slice, const Persistence& persistence)
+      : complex_(), slice_(slice), persistence_(persistence)
   {}
 
-  Slicer(std::vector<T>&& slice, std::vector<Index>&& generatorOrder, Persistence&& persistence)
+  Slicer(std::vector<T>&& slice, Persistence&& persistence)
       : complex_(),
         slice_(std::move(slice)),
-        generatorOrder_(std::move(generatorOrder)),
-        persistence_(std::move(persistence), generatorOrder_)
+        persistence_(std::move(persistence))
   {}
 
   template <class U>
   void _push_to(const Complex& complex, const Line<U>& line)
   {
     const auto& filtrationValues = complex.get_filtration_values();
-    for (Index i = 0U; i < filtrationValues.size(); i++) {
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_for(Index(0), Index(filtrationValues.size()), [&](Index i) {
+      slice_[i] = line.template compute_forward_intersection<T>(filtrationValues[i]);
+    });
+#else
+    for (Index i = 0; i < filtrationValues.size(); i++) {
       slice_[i] = line.template compute_forward_intersection<T>(filtrationValues[i]);
     }
+#endif
   }
 
-  void _initialize_persistence_computation(const Complex& complex, const bool ignoreInf = true)
+  void _initialize_persistence_computation(const Complex& complex, bool ignoreInf = false)
   {
-    _initialize_order(complex, ignoreInf);
-    persistence_.reinitialize(complex, generatorOrder_);
+    persistence_.initialize(complex, slice_, ignoreInf);
   }
 
   std::vector<std::vector<Cycle>> _get_representative_cycles(const Complex& complex, bool update = true)
@@ -712,7 +694,7 @@ class Slicer
                   "Representative cycles not enabled by the chosen PersistenceAlgorithm class.");
 
     const auto& dimensions = complex.get_dimensions();
-    auto cycleKeys = persistence_.get_representative_cycles(update);
+    auto cycleKeys = persistence_.get_all_representative_cycles(update);
     auto numCycles = cycleKeys.size();
     std::vector<std::vector<Cycle>> out(complex.get_max_dimension() + 1);
     for (auto& cyclesDim : out) cyclesDim.reserve(numCycles);
@@ -727,31 +709,7 @@ class Slicer
  private:
   Complex complex_;      /**< Complex storing all boundaries, filtration values and dimensions. */
   std::vector<T> slice_; /**< Filtration values of the current slice. The indices corresponds to those in complex_. */
-  std::vector<Index> generatorOrder_; /**< Permutation map from current slice index to complex index. */
   Persistence persistence_;           /**< Class for persistence computations. */
-
-  void _initialize_order(const Complex& complex, const bool ignoreInf = true)
-  {
-    const auto& dimensions = complex.get_dimensions();
-    generatorOrder_.resize(complex.get_number_of_cycle_generators());
-    std::iota(generatorOrder_.begin(), generatorOrder_.end(), 0);
-    std::sort(generatorOrder_.begin(), generatorOrder_.end(), [&](Index i, Index j) {
-      if (ignoreInf) {
-        if (slice_[i] != Filtration_value::T_inf && slice_[j] == Filtration_value::T_inf) return true;
-        // all elements at inf are considered equal
-        if (slice_[i] == Filtration_value::T_inf) return false;
-      }
-      if (dimensions[i] > dimensions[j]) return false;
-      if (dimensions[i] < dimensions[j]) return true;
-      // if filtration values are equal, we don't care about order, so considered the same object
-      return slice_[i] < slice_[j];
-    });
-    if (ignoreInf) {
-      Index end = generatorOrder_.size();
-      while (end > 0 && slice_[generatorOrder_[end - 1]] == Filtration_value::T_inf) --end;
-      generatorOrder_.resize(end);
-    }
-  }
 
   template <bool idx, class Interval, typename Value>
   void _retrieve_interval(const Interval& bar, Dimension& dim, Value& birth, Value& death)

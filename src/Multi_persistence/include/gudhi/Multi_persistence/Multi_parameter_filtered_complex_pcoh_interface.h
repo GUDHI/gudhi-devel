@@ -36,19 +36,21 @@ namespace multi_persistence {
  * @ref Multi_parameter_filtered_complex.
  *
  * @tparam MultiFiltrationValue Filtration value type used in @ref Multi_parameter_filtered_complex.
+ * @tparam I Index type. Default value: std::uint32_t.
+ * @tparam D Dimension type. Default value: int.
  */
-template <class MultiFiltrationValue>
+template <class MultiFiltrationValue, typename I = std::uint32_t, typename D = int>
 class Multi_parameter_filtered_complex_pcoh_interface
 {
  public:
-  using Complex = Multi_parameter_filtered_complex<MultiFiltrationValue>; /**< Complex type */
-  using Simplex_key = std::uint32_t;                                      /**< Simplex_key type */
-  using Simplex_handle = Simplex_key;                                     /**< Simplex_handle type */
-  using Filtration_value = Simplex_key;                                   /**< Internal filtration value type */
-  using Dimension = int;                                                  /**< Internal dimension type */
-  using Map = std::vector<Simplex_handle>;                                /**< Map type */
-  using Filtration_simplex_range = Map;                                   /**< Filtration_simplex_range type */
-  using Boundary_simplex_range = Map;                                     /**< Boundary_simplex_range type */
+  using Complex = Multi_parameter_filtered_complex<MultiFiltrationValue, I, D>; /**< Complex type */
+  using Simplex_key = typename Complex::Index;                                  /**< Simplex_key type */
+  using Simplex_handle = Simplex_key;                                           /**< Simplex_handle type */
+  using Filtration_value = Simplex_key;                                         /**< Internal filtration value type */
+  using Dimension = typename Complex::Dimension;                                /**< Internal dimension type */
+  using Map = std::vector<Simplex_handle>;                                      /**< Map type */
+  using Filtration_simplex_range = Map;                                         /**< Filtration_simplex_range type */
+  using Boundary_simplex_range = Map;                                           /**< Boundary_simplex_range type */
 
   /**
    * @brief Default constructor, storing null pointers.Can be tested with @ref is_initialized(), but any other method
@@ -156,9 +158,9 @@ class Multi_parameter_filtered_complex_pcoh_interface
   ~Multi_parameter_filtered_complex_pcoh_interface() = default;
 
   Multi_parameter_filtered_complex_pcoh_interface &operator=(
-      const Multi_parameter_filtered_complex_pcoh_interface &other) = delete;
+      const Multi_parameter_filtered_complex_pcoh_interface &other) = default;
   Multi_parameter_filtered_complex_pcoh_interface &operator=(
-      Multi_parameter_filtered_complex_pcoh_interface &&other) noexcept = delete;
+      Multi_parameter_filtered_complex_pcoh_interface &&other) noexcept = default;
 
   /**
    * @brief Swap operator.
@@ -169,24 +171,6 @@ class Multi_parameter_filtered_complex_pcoh_interface
     std::swap(be1.boundaries_, be2.boundaries_);
     std::swap(be1.newToOldPerm_, be2.newToOldPerm_);
     be1.keys_.swap(be2.keys_);
-  }
-
-  /**
-   * @brief Reinitializes the interface with the new given complex and permutation.
-   * To use instead of the classical assign operator `operator=`.
-   */
-  void reinitialize(const Complex &boundaries, const Map &permutation)
-  {
-    boundaries_ = &boundaries;
-    newToOldPerm_ = &permutation;
-    keys_ = Map(boundaries.get_number_of_cycle_generators(), -1);
-  }
-
-  void reset()
-  {
-    boundaries_ = nullptr;
-    newToOldPerm_ = nullptr;
-    keys_.clear();
   }
 
   /**
@@ -207,6 +191,8 @@ class Multi_parameter_filtered_complex_pcoh_interface
   {
     return sh == null_simplex() ? -1 : boundaries_->get_dimensions()[sh];
   }
+
+  Complex const *get_complex_ptr() const { return boundaries_; }
 
   // assumes that pcoh will assign the keys from 0 to n in order of filtrations
   void assign_key(Simplex_handle sh, Simplex_key key)
@@ -242,8 +228,7 @@ class Multi_parameter_filtered_complex_pcoh_interface
     return boundaries_->get_boundaries()[sh];
   }
 
-  friend std::ostream &operator<<(std::ostream &stream,
-                                  const Multi_parameter_filtered_complex_pcoh_interface &complex)
+  friend std::ostream &operator<<(std::ostream &stream, const Multi_parameter_filtered_complex_pcoh_interface &complex)
   {
     stream << "[\n";
     for (auto i : complex.filtration_simplex_range()) {

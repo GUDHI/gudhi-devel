@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber, David Loiseaux
  *
- *    Copyright (C) 2024-25 Inria
+ *    Copyright (C) 2024 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -30,6 +30,10 @@
 #include <utility>      //std::swap, std::move
 #include <vector>
 #include <initializer_list>
+
+#ifdef GUDHI_USE_TBB
+#include <oneapi/tbb/parallel_for.h>
+#endif
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/simple_mdspan.h>
@@ -114,7 +118,7 @@ class Degree_rips_bifiltration
   template <class ValueRange = std::initializer_list<T>, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   Degree_rips_bifiltration(const ValueRange &range) : generators_(1, *(range.begin()))
   {
-    GUDHI_CHECK(*(range.begin() + 1) == 0, std::invalid_argument("Second value of the range has to be 0"));
+    GUDHI_CHECK(*(std::next(range.begin())) == 0, std::invalid_argument("Second value of the range has to be 0"));
   }
 
   /**
@@ -129,7 +133,7 @@ class Degree_rips_bifiltration
   template <class Iterator, class = std::enable_if_t<!std::is_arithmetic_v<Iterator> > >
   Degree_rips_bifiltration(Iterator it_begin, [[maybe_unused]] Iterator it_end) : generators_(1, *it_begin)
   {
-    GUDHI_CHECK(*(it_begin + 1) == 0, std::invalid_argument("Second value of the range has to be 0"));
+    GUDHI_CHECK(*(std::next(it_begin)) == 0, std::invalid_argument("Second value of the range has to be 0"));
   }
 
   /**
@@ -1420,8 +1424,8 @@ class Degree_rips_bifiltration
    * generator with same second parameter. This would mean that adding the given generator will not span more
    * "lifetime" and therefore there is no need to store it.
    *
-   * Let \f$ max_idx \$f be the highest second parameter stored so far. If the given second parameter \f$ i \$f to add
-   * is strictly higher than \f$ max_idx + 1 \$f, all possible values between \f$ max_idx \$f and \f$ i \$f will also
+   * Let \f$ max_idx \f$ be the highest second parameter stored so far. If the given second parameter \f$ i \f$ to add
+   * is strictly higher than \f$ max_idx + 1 \f$, all possible values between \f$ max_idx \f$ and \f$ i \f$ will also
    * be added and the corresponding first parameters will be initialized with -inf if `Co` is false and with +inf
    * if `Co` is true.
    *
@@ -1445,8 +1449,8 @@ class Degree_rips_bifiltration
    * generator with same second parameter. This would mean that adding the given generator will not span more
    * "lifetime" and therefore there is no need to store it.
    *
-   * Let \f$ max_idx \$f be the highest second parameter stored so far. If the given second parameter \f$ i \$f to add
-   * is strictly higher than \f$ max_idx + 1 \$f, all possible values between \f$ max_idx \$f and \f$ i \$f will also
+   * Let \f$ max_idx \f$ be the highest second parameter stored so far. If the given second parameter \f$ i \f$ to add
+   * is strictly higher than \f$ max_idx + 1 \f$, all possible values between \f$ max_idx \f$ and \f$ i \f$ will also
    * be added and the corresponding first parameters will be initialized with inf if `Co` is false and with -inf
    * if `Co` is true.
    *
@@ -1465,9 +1469,10 @@ class Degree_rips_bifiltration
 
     const T val = *genStart;
     ++genStart;
-    const size_type index = *genStart;
 
-    GUDHI_CHECK(index >= 0, std::invalid_argument("Second parameter has to be a positive index."));
+    GUDHI_CHECK(*genStart >= 0, std::invalid_argument("Second parameter has to be a positive index."));
+
+    const size_type index = *genStart;
 
     if (_is_nan(val)) return false;
 
@@ -1707,7 +1712,8 @@ class Degree_rips_bifiltration
 
     GUDHI_CHECK_code(const OneDimArray &indices = grid[1]);
     const OneDimArray &values = grid[0];
-    for (size_type g = 0; g < num_generators(); ++g) {
+
+    auto project_generator = [&](size_type g) {
       GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, std::invalid_argument("Unvalid grid.")));
 
       auto v = static_cast<typename OneDimArray::value_type>(generators_[g]);
@@ -1716,7 +1722,15 @@ class Degree_rips_bifiltration
         --d;
       }
       generators_[g] = coordinate ? static_cast<T>(d) : static_cast<T>(values[d]);
+    };
+
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_for(size_type(0), num_generators(), project_generator);
+#else
+    for (size_type g = 0; g < num_generators(); ++g) {
+      project_generator(g);
     }
+#endif
   }
 
   // FONCTIONNALITIES
@@ -1832,6 +1846,15 @@ class Degree_rips_bifiltration
 
     if (f.num_generators() == 1) return project_generator(0);
 
+#ifdef GUDHI_USE_TBB
+    std::vector<U> projections(f.num_generators());
+    tbb::parallel_for(size_type{0}, f.num_generators(), [&](size_type g) { projections[g] = project_generator(g); });
+    if constexpr (Co) {
+      return *std::max_element(projections.begin(), projections.end());
+    } else {
+      return *std::min_element(projections.begin(), projections.end());
+    }
+#else
     if constexpr (Co) {
       U projection = std::numeric_limits<U>::lowest();
       for (size_type g = 0; g < f.num_generators(); ++g) {
@@ -1847,6 +1870,7 @@ class Degree_rips_bifiltration
       }
       return projection;
     }
+#endif
   }
 
   /**
@@ -2223,7 +2247,7 @@ class Degree_rips_bifiltration
   void _apply_operation(const T &val, F &&operate)
   {
     auto &gens = generators_;
-    for (unsigned int i = 0; i < gens.size(); ++i) {
+    for (size_type i = 0; i < gens.size(); ++i) {
       std::forward<F>(operate)(gens[i], val);
     }
   }

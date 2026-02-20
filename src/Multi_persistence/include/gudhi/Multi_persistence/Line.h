@@ -19,7 +19,6 @@
 #ifndef MP_LINE_FILTRATION_H_INCLUDED
 #define MP_LINE_FILTRATION_H_INCLUDED
 
-#include <cmath>
 #include <cstddef>
 #include <stdexcept>
 
@@ -93,7 +92,7 @@ class Line
     Point_t x(basePoint_.size());
 
     if (direction_.size() > 0) {
-      for (std::size_t i = 0; i < x.size(); i++) x[i] = basePoint_[i] + t * direction_[i];
+      for (std::size_t i = 0; i < x.size(); i++) x[i] = basePoint_[i] + (t * direction_[i]);
     } else
       for (std::size_t i = 0; i < x.size(); i++) x[i] = basePoint_[i] + t;
 
@@ -273,6 +272,18 @@ class Line
     if (bottom > top) return {Point_t::T_inf, Point_t::T_m_inf};  // no intersection
 
     return {bottom, top};
+  }
+
+  /**
+   * @brief Outstream operator.
+   */
+  friend std::ostream& operator<<(std::ostream& stream, const Line& line)
+  {
+    stream << "Line:\n";
+    stream << "base point: " << line.basePoint_ << "\n";
+    stream << "direction: " << line.direction_ << "\n";
+
+    return stream;
   }
 
  private:

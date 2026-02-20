@@ -5,6 +5,7 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
+ *      - 2025/12 Jānis Lazovskis: Added test_ru_maximal_simplex_insertion
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -624,6 +625,66 @@ void test_chain_boundary_insertion(Matrix& m1, Matrix& m2) {
   m2.insert_boundary(boundary2);
   BOOST_CHECK_EQUAL(m2.get_number_of_columns(), 7);
   test(m2);
+}
+
+template <class Matrix>
+void test_ru_maximal_simplex_insertion() {
+  // Allocate space for 9 columns
+  Matrix m(9);
+
+  // Construct 3-vertex, 2-edge complex
+  if constexpr (Matrix::Option_list::is_z2) {
+    m.insert_maximal_cell(0, {});
+    m.insert_maximal_cell(1, {});
+    m.insert_maximal_cell(2, {});
+    m.insert_maximal_cell(3, {0, 1});
+    m.insert_maximal_cell(4, {1, 2});
+  } else {
+    m.insert_maximal_cell(0, {});
+    m.insert_maximal_cell(1, {});
+    m.insert_maximal_cell(2, {});
+    m.insert_maximal_cell(3, {{0, 1}, {1, 1}});
+    m.insert_maximal_cell(4, {{1, 1}, {2, 1}});
+  }
+
+  // Check there are 5 columns
+  BOOST_CHECK_EQUAL(m.get_number_of_columns(), 5);
+
+  // Insert edge between vertices indexed 0 and 2, as first edge
+  if constexpr (Matrix::Option_list::is_z2) {
+    m.insert_maximal_cell(3, {0, 2});
+  } else {
+    m.insert_maximal_cell(3, {{0, 1}, {2, 1}});
+  }
+
+  // Check that one column has been added
+  BOOST_CHECK_EQUAL(m.get_number_of_columns(), 6);
+
+  // Check that matrix is the one that is expected
+  std::vector<witness_content<typename Matrix::Column> > m1;
+  if constexpr (Matrix::Option_list::is_z2) {
+    m1 = {{}, {}, {}, {0, 2}, {0, 1}, {}};
+  } else {
+    m1 = {{}, {}, {}, {{0, 1}, {2, 1}}, {{0, 1}, {1, 2}}, {}};
+  }
+  test_content_equality(m1, m);
+
+  // Insert vertex, one edge, one 2-simplex
+  m.insert_maximal_cell(0, {});
+  m.insert_maximal_cell(7, {0, 1});
+  m.insert_maximal_cell(7, {4, 5, 6});
+
+  // Check that three columns have been added
+  BOOST_CHECK_EQUAL(m.get_number_of_columns(), 9);
+
+  // Check that matrix is the one that is expected
+  std::vector<witness_content<typename Matrix::Column> > m2;
+  if constexpr (Matrix::Option_list::is_z2) {
+    m2 = {{}, {}, {}, {}, {1, 3}, {1, 2}, {}, {4, 5, 6}, {0, 1}};
+  } else {
+    m2 = {{}, {}, {}, {}, {{1, 1}, {3, 1}}, {{1, 1}, {2, 1}}, {}, {{4, 1}, {5, 1}, {6, 1}}, {{0, 1}, {1, 1}}};
+  }
+  test_content_equality(m2, m);
 }
 
 template <class Matrix>
@@ -2681,9 +2742,51 @@ void test_vine_swap_with_id_index2() {
 
 template <class Matrix>
 void test_representative_cycles(Matrix& mb) {
-  mb.update_representative_cycles();
+  mb.update_representative_cycle(typename Matrix::Bar(7, 12, 1));
 
-  const auto& cycles = mb.get_representative_cycles();
+  const auto& cycles = mb.get_all_representative_cycles();
+  BOOST_CHECK_EQUAL(cycles.size(), 1);
+
+  using Cy = decltype(cycles[0]);
+
+  if constexpr (Matrix::Option_list::is_z2){
+    BOOST_CHECK((cycles[0] == Cy{5, 6, 7}));
+  } else {
+    BOOST_CHECK((cycles[0] == Cy{{5, 1}, {6, 1}, {7, 1}}));
+  }
+
+  BOOST_CHECK(cycles[0] == mb.get_representative_cycle(typename Matrix::Bar(7, 12, 1)));
+
+  mb.update_all_representative_cycles(1);
+
+  // cycles = mb.get_all_representative_cycles();
+  BOOST_CHECK_EQUAL(cycles.size(), 3);
+
+  using Cy = decltype(cycles[0]);
+
+  if constexpr (Matrix::Option_list::is_z2){
+    BOOST_CHECK((cycles[0] == Cy{5, 6, 7}));
+    BOOST_CHECK((cycles[1] == Cy{8, 9, 10}));
+    BOOST_CHECK((cycles[2] == Cy{6, 9, 11}));
+  } else {
+    BOOST_CHECK((cycles[0] == Cy{{5, 1}, {6, 1}, {7, 1}}));
+    BOOST_CHECK((cycles[1] == Cy{{8, 1}, {9, 1}, {10, 1}}));
+    BOOST_CHECK((cycles[2] == Cy{{6, 4}, {9, 4}, {11, 1}}));
+  }
+
+  if constexpr (Matrix::Option_list::has_column_pairings) {
+    const auto& barcode = mb.get_current_barcode();
+    auto it = barcode.begin();
+    while (it->dim == 0) ++it;
+    for (auto& cycle : cycles) {
+      BOOST_CHECK(cycle == mb.get_representative_cycle(*it));
+      ++it;
+    }
+  }
+
+  mb.update_all_representative_cycles();
+
+  // cycles = mb.get_all_representative_cycles();
   BOOST_CHECK_EQUAL(cycles.size(), 8);
 
   using Cy = decltype(cycles[0]);

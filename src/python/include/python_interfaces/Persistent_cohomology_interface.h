@@ -18,6 +18,7 @@
 #include <unordered_map>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/pair.h>
 
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Simplex_tree.h>  // for Extended_simplex_type
@@ -245,7 +246,7 @@ class Persistent_cohomology_interface
           auto v1 = *i;
           auto v2 = *++i;
           GUDHI_CHECK(++i == std::end(e_vertices), "must be an edge");
-          while (diagsinf.size() < dim + 1) diagsinf.emplace_back();
+          while (static_cast<int>(diagsinf.size()) < dim + 1) diagsinf.emplace_back();
           auto& d = diagsinf[dim];
           d.insert(d.end(), {v1, v2});
         }
@@ -268,7 +269,7 @@ class Persistent_cohomology_interface
           auto v1 = *is;
           auto v2 = *++is;
           GUDHI_CHECK(++is == std::end(es_vertices), "must be an edge");
-          while (diags.size() < dim + 1) diags.emplace_back();
+          while (static_cast<int>(diags.size()) < dim + 1) diags.emplace_back();
           auto& d = diags[dim];
           d.insert(d.end(), {v1, v2, w1, w2});
         }

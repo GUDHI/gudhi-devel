@@ -26,6 +26,10 @@
 #include <utility>
 #include <vector>
 
+#ifdef GUDHI_USE_TBB
+#include <oneapi/tbb/parallel_for.h>
+#endif
+
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_parameter_filtration.h>  //for lex order
 #include <gudhi/Multi_filtration/multi_filtration_conversions.h>
@@ -41,18 +45,20 @@ namespace multi_persistence {
  * @brief Class storing the boundaries, the dimensions and the filtration values of all cells composing a complex.
  *
  * @tparam MultiFiltrationValue Filtration value class respecting the @ref MultiFiltrationValue concept.
+ * @tparam I Index type. Default value: std::uint32_t.
+ * @tparam D Dimension type. Default value: int.
  */
-template <class MultiFiltrationValue>
+template <class MultiFiltrationValue, typename I = std::uint32_t, typename D = int>
 class Multi_parameter_filtered_complex
 {
  public:
-  using Index = std::uint32_t;                        /**< Complex index type. */
+  using Index = I;                                    /**< Complex index type. */
   using Filtration_value = MultiFiltrationValue;      /**< Filtration value type. */
   using T = typename Filtration_value::value_type;    /**< Numerical type of an element in a filtration value. */
   using Filtration_value_container = std::vector<Filtration_value>; /**< Filtration value container type. */
-  using Boundary = std::vector<Index>; /**< Cell boundary type, represented by the complex indices of its faces. */
+  using Boundary = std::vector<Index>;      /**< Cell boundary type, represented by the complex indices of its faces. */
   using Boundary_container = std::vector<Boundary>;   /**< Boundary container type. */
-  using Dimension = int;                              /**< Dimension type. */
+  using Dimension = D;                                /**< Dimension type. */
   using Dimension_container = std::vector<Dimension>; /**< Dimension container type. */
 
   /**
@@ -116,10 +122,10 @@ class Multi_parameter_filtered_complex
   /**
    * @brief Copy constructor.
    */
-  template <class OtherFiltrationValue>
-  Multi_parameter_filtered_complex(const Multi_parameter_filtered_complex<OtherFiltrationValue>& complex)
-      : boundaries_(complex.get_boundaries()),
-        dimensions_(complex.get_dimensions()),
+  template <class OtherFiltrationValue, typename OI, typename OD>
+  Multi_parameter_filtered_complex(const Multi_parameter_filtered_complex<OtherFiltrationValue, OI, OD>& complex)
+      : boundaries_(complex.get_boundaries().begin(), complex.get_boundaries().end()),
+        dimensions_(complex.get_dimensions().begin(), complex.get_dimensions().end()),
         filtrationValues_(complex.get_filtration_values().size()),
         maxDimension_(complex.get_max_dimension()),
         isOrderedByDimension_(complex.is_ordered_by_dimension())
@@ -148,11 +154,12 @@ class Multi_parameter_filtered_complex
   /**
    * @brief Assign operator.
    */
-  template <class OtherFiltrationValue>
-  Multi_parameter_filtered_complex& operator=(const Multi_parameter_filtered_complex<OtherFiltrationValue>& other)
+  template <class OtherFiltrationValue, typename OI, typename OD>
+  Multi_parameter_filtered_complex& operator=(
+      const Multi_parameter_filtered_complex<OtherFiltrationValue, OI, OD>& other)
   {
-    boundaries_ = other.get_boundaries();
-    dimensions_ = other.get_dimensions();
+    boundaries_ = Boundary_container(other.get_boundaries().begin(), other.get_boundaries().end());
+    dimensions_ = Dimension_container(other.get_dimensions().begin(), other.get_dimensions().end());
     const auto& fils = other.get_filtration_values();
     filtrationValues_ = Filtration_value_container(fils.size());
     for (Index i = 0; i < filtrationValues_.size(); ++i) {
@@ -268,7 +275,7 @@ class Multi_parameter_filtered_complex
       Index p = perm[curr];
       Index i = pos[p];
       if (i != curr) {
-        GUDHI_CHECK(curr < i, "Something is wrong");
+        GUDHI_CHECK(curr < i, std::runtime_error("Got curr " + std::to_string(curr) + " >= i " + std::to_string(i)));
         std::swap(boundaries_[curr], boundaries_[i]);
         std::swap(dimensions_[curr], dimensions_[i]);
         swap(filtrationValues_[curr], filtrationValues_[i]);
@@ -317,9 +324,17 @@ class Multi_parameter_filtered_complex
    */
   void coarsen_on_grid(const std::vector<std::vector<T> >& grid, bool coordinate = true)
   {
-    for (auto gen = 0U; gen < filtrationValues_.size(); ++gen) {
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_for(Index(0), Index(filtrationValues_.size()), [&](Index gen) {
+      // TODO : preallocate for tbb
+      // preallocate what?
       filtrationValues_[gen].project_onto_grid(grid, coordinate);
+    });
+#else
+    for (auto& fil : filtrationValues_) {
+      fil.project_onto_grid(grid, coordinate);
     }
+#endif
   }
 
   /**
@@ -388,7 +403,7 @@ class Multi_parameter_filtered_complex
   {
     using namespace Gudhi::multi_filtration;
     using Return_filtration_value = decltype(std::declval<Filtration_value>().template as_type<std::int32_t>());
-    using Return_complex = Multi_parameter_filtered_complex<Return_filtration_value>;
+    using Return_complex = Multi_parameter_filtered_complex<Return_filtration_value, I, D>;
 
     typename Return_complex::Filtration_value_container coords(complex.get_number_of_cycle_generators());
     for (Index gen = 0U; gen < coords.size(); ++gen) {
@@ -396,27 +411,6 @@ class Multi_parameter_filtered_complex
     }
     return Return_complex(complex.boundaries_, complex.dimensions_, coords);
   }
-
-  // /**
-  //  * @brief Compares two boundaries and returns true if and only if the size of the first is strictly smaller than
-  //  the
-  //  * second, or, if the two sizes are the same, the first is lexicographically strictly smaller than the second.
-  //  * The boundaries are assumed to be ordered by increasing values.
-  //  */
-  // static bool boundary_is_strictly_smaller_than(const Boundary& b1, const Boundary& b2) {
-  //   // we want faces to be smaller than proper cofaces
-  //   if (b1.size() < b2.size()) return true;
-  //   if (b1.size() > b2.size()) return false;
-
-  //   // lexico for others
-  //   for (Index i = 0; i < b2.size(); ++i){
-  //     if (b1[i] < b2[i]) return true;
-  //     if (b1[i] > b2[i]) return false;
-  //   }
-
-  //   // equal
-  //   return false;
-  // }
 
   /**
    * @brief Outstream operator.

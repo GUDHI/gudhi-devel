@@ -36,11 +36,12 @@ namespace multi_persistence {
  *
  * @brief TODO (what it is + mention that it only works for 2 parameters)
  *
- * @tparam MultiFiltrationValue Filtration value class respecting the @ref MultiFiltrationValue concept.
+ * @tparam Complex @ref Multi_parameter_filtered_complex with desired template parameters for the resulting projective
+ * cover kernel complex.
  * @tparam columnType Column type to use for the matrix used internally. Default value:
  * @ref Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR "NAIVE_VECTOR".
  */
-template <class MultiFiltrationValue,
+template <class Complex,
           Gudhi::persistence_matrix::Column_types columnType = Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR>
 class Projective_cover_kernel
 {
@@ -49,18 +50,18 @@ class Projective_cover_kernel
    * @brief Options for matrix type.
    */
   struct Matrix_options : Gudhi::persistence_matrix::Default_options<columnType, true> {
-    using Index = std::uint32_t;
+    using Index = typename Complex::Index;
+    using Dimension = typename Complex::Dimension;
   };
 
  public:
-  using Filtration_value = MultiFiltrationValue;                                   /**< Filtration value type. */
-  using Complex = Multi_parameter_filtered_complex<Filtration_value>;              /**< Complex data type. */
+  using Matrix = Gudhi::persistence_matrix::Matrix<Matrix_options>;                /**< Matrix type. */
+  using Filtration_value = typename Complex::Filtration_value;                     /**< Filtration value type. */
   using Index = typename Complex::Index;                                           /**< Index type. */
   using Dimension = typename Complex::Dimension;                                   /**< Dimension type. */
   using Filtration_value_container = typename Complex::Filtration_value_container; /**< Filt. value container type. */
   using Boundary_container = typename Complex::Boundary_container;                 /**< Boundary container type. */
   using Dimension_container = typename Complex::Dimension_container;               /**< Dimension container type. */
-  using Matrix = Gudhi::persistence_matrix::Matrix<Matrix_options>;                /**< Matrix type. */
 
   // TODO: this only works for 2 parameter modules. Optimize w.r.t. this.
   /**

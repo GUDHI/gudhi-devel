@@ -50,6 +50,7 @@ add_gudhi_module(Persistence_matrix)
 add_gudhi_module(Zigzag_persistence)
 add_gudhi_module(Multi_filtration)
 add_gudhi_module(Multi_persistence)
+add_gudhi_module(Vineyard)
 
 set(GUDHI_BIBLIO_DIR ${CMAKE_SOURCE_DIR})
 # For "make doxygen" - Requires GUDHI_USER_VERSION_DIR to be set

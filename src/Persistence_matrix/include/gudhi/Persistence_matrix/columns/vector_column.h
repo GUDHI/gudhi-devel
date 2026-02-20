@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -865,7 +865,8 @@ inline void Vector_column<Master_matrix>::push_back(const Entry& entry)
 {
   static_assert(Master_matrix::Option_list::is_of_boundary_type, "`push_back` is not available for Chain matrices.");
 
-  GUDHI_CHECK(entry.get_row_index() > get_pivot(), "The new row index has to be higher than the current pivot.");
+  GUDHI_CHECK(entry.get_row_index() > get_pivot(),
+              std::invalid_argument("The new row index has to be higher than the current pivot."));
 
   _insert_entry(column_, entry.get_row_index(), entry.get_element());
 }

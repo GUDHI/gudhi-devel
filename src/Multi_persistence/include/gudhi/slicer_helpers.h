@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       David Loiseaux, Hannah Schreiber
  *
- *    Copyright (C) 2023-25 Inria
+ *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -32,7 +32,6 @@
 #include <set>
 #include <limits>
 #include <iomanip>
-#include <cmath>
 
 #ifdef GUDHI_USE_TBB
 #include <oneapi/tbb/enumerable_thread_specific.h>
@@ -61,6 +60,8 @@ namespace multi_persistence {
  *
  * @tparam MultiFiltrationValue Filtration value class respecting the @ref MultiFiltrationValue concept. It will be
  * used as filtration value type of the new complex.
+ * @tparam I Index type for the complex. Default value: std::uint32_t.
+ * @tparam D Dimension type for the complex. Default value: int.
  * @param inFilePath Path to scc file.
  * @param isRivetCompatible Set to true if the file is written such that Rivet can read it. See TODO ref.
  * Default value: false.
@@ -71,15 +72,15 @@ namespace multi_persistence {
  * `shiftDimensions` instead of 0, and if the value is negative, the `abs(shiftDimensions)` smallest dimensions in
  * the file are ignored and the smallest remaining dimension is interpreted as 0. Default value: 0.
  */
-template <class MultiFiltrationValue>
-inline Multi_parameter_filtered_complex<MultiFiltrationValue> build_complex_from_scc_file(
+template <class MultiFiltrationValue, typename I = std::uint32_t, typename D = int>
+inline Multi_parameter_filtered_complex<MultiFiltrationValue, I, D> build_complex_from_scc_file(
     const std::string& inFilePath,
     bool isRivetCompatible = false,
     bool isReversed = false,
     int shiftDimensions = 0)
 {
   using Fil = MultiFiltrationValue;
-  using Complex = Multi_parameter_filtered_complex<Fil>;
+  using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using Index = typename Complex::Index;
 
   std::string line;
@@ -236,6 +237,8 @@ inline Multi_parameter_filtered_complex<MultiFiltrationValue> build_complex_from
  * boundaries).
  *
  * @tparam MultiFiltrationValue Filtration value of the given complex.
+ * @tparam I Index type of the complex.
+ * @tparam D Dimension type of the complex.
  * @param outFilePath Path with file name into which to write.
  * @param complex Complex to write. Every index appearing in a boundary of the complex has to correspond to an existing
  * index in the complex
@@ -249,9 +252,9 @@ inline Multi_parameter_filtered_complex<MultiFiltrationValue> build_complex_from
  * @param reverse Set to true if the generators should be written in increasing order of dimension instead of
  * decreasing. Default value: false.
  */
-template <class MultiFiltrationValue>
+template <class MultiFiltrationValue, typename I, typename D>
 inline void write_complex_to_scc_file(const std::string& outFilePath,
-                                      const Multi_parameter_filtered_complex<MultiFiltrationValue>& complex,
+                                      const Multi_parameter_filtered_complex<MultiFiltrationValue, I, D>& complex,
                                       int degree = -1,
                                       bool rivetCompatible = false,
                                       bool ignoreLastGenerators = false,
@@ -397,19 +400,21 @@ inline void write_complex_to_scc_file(const std::string& outFilePath,
  *
  * @tparam OneCriticalMultiFiltrationValue Filtration value class respecting the @ref MultiFiltrationValue concept.
  * It will be used as filtration value type of the new complex.
+ * @tparam I Index type for the complex. Default value: std::uint32_t.
+ * @tparam D Dimension type for the complex. Default value: int.
  * @param vertexValues Bitmap with 1-critical filtration values. Represented as a single vector, the next input
  * parameter @p shape indicates the shape of the real bitmap.
  * @param shape Shape of the bitmap. E.g., if @p shape is \f$ {3, 4} \f$, then the bitmap is a \f$ (4 x 3) \f$ grid
  * with four lines and three columns. The vector @p vertexValues should then contain 12 elements: the three first
  * elements will be read as the first line, the three next elements as the second line etc. until having 4 lines.
  */
-template <class OneCriticalMultiFiltrationValue>
-inline Multi_parameter_filtered_complex<OneCriticalMultiFiltrationValue> build_complex_from_bitmap(
+template <class OneCriticalMultiFiltrationValue, typename I = std::uint32_t, typename D = int>
+inline Multi_parameter_filtered_complex<OneCriticalMultiFiltrationValue, I, D> build_complex_from_bitmap(
     const std::vector<OneCriticalMultiFiltrationValue>& vertexValues,
     const std::vector<unsigned int>& shape)
 {
   using Fil = OneCriticalMultiFiltrationValue;
-  using Complex = Multi_parameter_filtered_complex<Fil>;
+  using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using Index = typename Complex::Index;
   using Bitmap_cubical_complex_base = Gudhi::cubical_complex::Bitmap_cubical_complex_base<char>;
   using Bitmap_cubical_complex = Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base>;
@@ -482,10 +487,12 @@ inline Multi_parameter_filtered_complex<OneCriticalMultiFiltrationValue> build_c
  * @ref Gudhi::multi_filtration::Multi_parameter_filtration,
  * @ref Gudhi::multi_filtration::Dynamic_multi_parameter_filtration and
  * @ref Gudhi::multi_filtration::Degree_rips_bifiltration.
+ * @tparam I Index type for the complex. Default value: std::uint32_t.
+ * @tparam D Dimension type for the complex. Default value: int.
  * @param simplexTree Simplex tree to convert. The key values of the simplex tree will be overwritten.
  */
-template <class MultiFiltrationValue, class SimplexTreeOptions>
-inline Multi_parameter_filtered_complex<MultiFiltrationValue> build_complex_from_simplex_tree(
+template <class MultiFiltrationValue, class SimplexTreeOptions, typename I = std::uint32_t, typename D = int>
+inline Multi_parameter_filtered_complex<MultiFiltrationValue, I, D> build_complex_from_simplex_tree(
     Simplex_tree<SimplexTreeOptions>& simplexTree)
 {
   // declared here to enable custom `as_type` methods which are not in this namespace.
@@ -497,7 +504,7 @@ inline Multi_parameter_filtered_complex<MultiFiltrationValue> build_complex_from
   static_assert(RangeTraits<MultiFiltrationValue>::is_multi_filtration,
                 "Target filtration value type has to correspond to the MultiFiltrationValue concept.");
 
-  using Complex = Multi_parameter_filtered_complex<MultiFiltrationValue>;
+  using Complex = Multi_parameter_filtered_complex<MultiFiltrationValue, I, D>;
 
   const unsigned int numberOfSimplices = simplexTree.num_simplices();
 
@@ -574,7 +581,9 @@ inline Slicer build_slicer_from_scc_file(const std::string& inFilePath,
                                          bool isReversed = false,
                                          int shiftDimensions = 0)
 {
-  auto cpx = build_complex_from_scc_file<typename Slicer::Filtration_value>(
+  auto cpx = build_complex_from_scc_file<typename Slicer::Filtration_value,
+                                         typename Slicer::Index,
+                                         typename Slicer::Dimension>(
       inFilePath, isRivetCompatible, isReversed, shiftDimensions);
   return Slicer(std::move(cpx));
 }
@@ -600,7 +609,9 @@ template <class Slicer>
 inline Slicer build_slicer_from_bitmap(const std::vector<typename Slicer::Filtration_value>& vertexValues,
                                        const std::vector<unsigned int>& shape)
 {
-  auto cpx = build_complex_from_bitmap<typename Slicer::Filtration_value>(vertexValues, shape);
+  auto cpx =
+      build_complex_from_bitmap<typename Slicer::Filtration_value, typename Slicer::Index, typename Slicer::Dimension>(
+          vertexValues, shape);
   return Slicer(std::move(cpx));
 }
 
@@ -617,7 +628,10 @@ inline Slicer build_slicer_from_bitmap(const std::vector<typename Slicer::Filtra
 template <class Slicer, class SimplexTreeOptions>
 inline Slicer build_slicer_from_simplex_tree(Simplex_tree<SimplexTreeOptions>& simplexTree)
 {
-  auto cpx = build_complex_from_simplex_tree<typename Slicer::Filtration_value, SimplexTreeOptions>(simplexTree);
+  auto cpx = build_complex_from_simplex_tree<typename Slicer::Filtration_value,
+                                             SimplexTreeOptions,
+                                             typename Slicer::Index,
+                                             typename Slicer::Dimension>(simplexTree);
   return Slicer(std::move(cpx));
 }
 
@@ -625,8 +639,8 @@ inline Slicer build_slicer_from_simplex_tree(Simplex_tree<SimplexTreeOptions>& s
  * @private
  */
 template <bool idx, class U, class Slicer, class F>
-std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
-persistence_on_slices_(Slicer& slicer, F&& ini_slicer, unsigned int size, [[maybe_unused]] bool ignoreInf = true)
+inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
+persistence_on_slices_(Slicer& slicer, F&& ini_slicer, unsigned int size, [[maybe_unused]] bool ignoreInf = false)
 {
   using Barcode = typename Slicer::template Multi_dimensional_flat_barcode<U>;
 
@@ -640,18 +654,19 @@ persistence_on_slices_(Slicer& slicer, F&& ini_slicer, unsigned int size, [[mayb
     out[0] = slicer.template get_flat_barcode<true, U, idx>();
     for (auto i = 1U; i < size; ++i) {
       std::forward<F>(ini_slicer)(slicer, i);
-      slicer.vineyard_update();
+      slicer.update_persistence_computation();
       out[i] = slicer.template get_flat_barcode<true, U, idx>();
     }
   } else {
 #ifdef GUDHI_USE_TBB
-    using Index = typename Slicer::Index;
     tbb::enumerable_thread_specific<typename Slicer::Thread_safe> threadLocals(slicer.weak_copy());
-    tbb::parallel_for(static_cast<Index>(0), size, [&](const Index& i) {
+    tbb::parallel_for(static_cast<unsigned int>(0), size, [&](const unsigned int& i) {
       typename Slicer::Thread_safe& s = threadLocals.local();
-      std::forward<F>(ini_slicer)(s, i);
-      s.initialize_persistence_computation(ignoreInf);
-      out[i] = s.template get_flat_barcode<true, U, idx>();
+      tbb::this_task_arena::isolate([&] {
+        std::forward<F>(ini_slicer)(s, i);  // includes another tbb::parallel_for, so needs to be isolated because of s
+        s.initialize_persistence_computation(ignoreInf);
+        out[i] = s.template get_flat_barcode<true, U, idx>();
+      });
     });
 #else
     for (auto i = 0U; i < size; ++i) {
@@ -684,14 +699,14 @@ persistence_on_slices_(Slicer& slicer, F&& ini_slicer, unsigned int size, [[mayb
  * Can be empty, then the slope is assumed to be 1.
  * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
  * potentially in less storage use and better performance. But the parameter will be ignored if
- * PersistenceAlgorithm::is_vine is true.
+ * PersistenceAlgorithm::is_vine is true. Default value: false.
  */
 template <class Slicer, class T, class U = T, bool idx = false>
-std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>> persistence_on_slices(
+inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>> persistence_on_slices(
     Slicer& slicer,
     const std::vector<std::vector<T>>& basePoints,
     const std::vector<std::vector<T>>& directions,
-    bool ignoreInf = true)
+    bool ignoreInf = false)
 {
   GUDHI_CHECK(directions.empty() || directions.size() == basePoints.size(),
               "There should be as many directions than base points.");
@@ -699,13 +714,13 @@ std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>> persist
               "There should be as many directions than base points.");
 
   std::vector<T> dummy;
-  auto get_direction = [&](unsigned int i) -> const std::vector<T>& {
+  auto get_direction = [&](std::size_t i) -> const std::vector<T>& {
     return directions.empty() ? dummy : directions[i];
   };
 
   return persistence_on_slices_<idx, U>(
       slicer,
-      [&](auto& s, unsigned int i) { s.push_to(Line<T>(basePoints[i], get_direction(i))); },
+      [&](auto& s, std::size_t i) { s.push_to(Line<T>(basePoints[i], get_direction(i))); },
       basePoints.size(),
       ignoreInf);
 }
@@ -724,17 +739,17 @@ std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>> persist
  * @param slices Vector of slices. A slice has to has as many elements than cells in the slicer.
  * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
  * potentially in less storage use and better performance. But the parameter will be ignored if
- * PersistenceAlgorithm::is_vine is true.
+ * PersistenceAlgorithm::is_vine is true. Default value: false.
  */
 template <class Slicer, class T, class U = T, bool idx = false>
-std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
-persistence_on_slices(Slicer& slicer, const std::vector<std::vector<T>>& slices, bool ignoreInf = true)
+inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
+persistence_on_slices(Slicer& slicer, const std::vector<std::vector<T>>& slices, bool ignoreInf = false)
 {
   GUDHI_CHECK(slices.empty() || slices[0].size() == slicer.get_number_of_cycle_generators(),
               "There should be as many elements in a slice than cells in the slicer.");
 
   return persistence_on_slices_<idx, U>(
-      slicer, [&](auto& s, unsigned int i) { s.set_slice(slices[i]); }, slices.size(), ignoreInf);
+      slicer, [&](auto& s, std::size_t i) { s.set_slice(slices[i]); }, slices.size(), ignoreInf);
 }
 
 // Mostly for python
@@ -753,18 +768,18 @@ persistence_on_slices(Slicer& slicer, const std::vector<std::vector<T>>& slices,
  * @param numberOfSlices Number of slices represented by the pointer.
  * @param ignoreInf If true, all cells at infinity filtration values are ignored when computing, resulting
  * potentially in less storage use and better performance. But the parameter will be ignored if
- * PersistenceAlgorithm::is_vine is true.
+ * PersistenceAlgorithm::is_vine is true. Default value: false.
  */
 template <class Slicer, class T, class U = T, bool idx = false, class = std::enable_if_t<std::is_arithmetic_v<T>>>
-std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
-persistence_on_slices(Slicer& slicer, T* slices, unsigned int numberOfSlices, bool ignoreInf = true)
+inline std::vector<typename Slicer::template Multi_dimensional_flat_barcode<U>>
+persistence_on_slices(Slicer& slicer, T* slices, unsigned int numberOfSlices, bool ignoreInf = false)
 {
   auto num_gen = slicer.get_number_of_cycle_generators();
   auto view = Gudhi::Simple_mdspan(slices, numberOfSlices, num_gen);
 
   return persistence_on_slices_<idx, U>(
       slicer,
-      [&](auto& s, unsigned int i) {
+      [&](auto& s, std::size_t i) {
         T* start = &view(i, 0);
         auto r = boost::iterator_range<T*>(start, start + num_gen);
         s.set_slice(r);
