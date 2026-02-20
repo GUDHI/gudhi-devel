@@ -822,7 +822,8 @@ class Matrix
    * it will also be updated.
    *
    * @tparam Boundary_range Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
-   * @param boundary Boundary generating the new column. The content should be ordered by ID.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @ref rowindex "row indices" of the cells in the current matrix and should be ordered in increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    * @return If it is a @ref chainmatrix "chain matrix", the method returns the @ref MatIdx indices of the unpaired
@@ -843,8 +844,7 @@ class Matrix
    * @tparam Boundary_range Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
    * @param cellIndex @ref IDIdx index to use to identify the new cell.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
-   * @p cellIndex values of precedent calls of the method for the corresponding cells and should be ordered in
-   * increasing order.
+   * @ref rowindex "row indices" of the cells in the current matrix and should be ordered in increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    * @return If it is a @ref chainmatrix "chain matrix", the method returns the @ref MatIdx indices of the unpaired
@@ -855,10 +855,12 @@ class Matrix
                                    Dimension dim = Matrix::get_null_value<Dimension>());
 
   /**
-   * @brief Inserts the given cell boundary at the given position in the matrix/filtration such that the matrix remains
-   * consistent. Requires @ref PersistenceMatrixOptions::has_vine_update to be true. Only available for
-   * @ref boundarymatrix "RU matrices", but not if @ref PersistenceMatrixOptions::column_indexation_type is set to
-   * @ref Column_indexation_types::IDENTIFIER.
+   * @brief Only available for @ref boundarymatrix "RU" and @ref chainmatrix "chain matrices" and if
+   * @ref PersistenceMatrixOptions::has_vine_update is true.
+   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_column_pairings or
+   * @ref PersistenceMatrixOptions::can_retrieve_representative_cycles also needs to be true.
+   * Inserts the given cell boundary at the given position in the matrix/filtration such that the matrix remains
+   * consistent.
    *
    * Appends the input column to the end of the matrix using the @ref insert_boundary "insert boundary" method,
    * and moves the column using the @ref vine_swap "vine swaps" method to the requested position, which maintains a
@@ -868,17 +870,47 @@ class Matrix
    *
    * See also @ref remove_maximal_cell (for the complementary action) and @ref insert_boundary (for inserting at the
    * highest index).
-   *
+   * 
+   * @tparam Boundary_range Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
    * @param columnIndex @ref MatIdx Index where the column should be inserted. This will be the index of the input
    * column `boundary` after the function has finished.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
-   * @p cellIndex values of the matrix and should be ordered in increasing order.
+   * @ref rowindex "row indices" of the cells in the current matrix and should be ordered in increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
-   * this parameter can be omitted, in which case it will be deduced from the size of the boundary.
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   * @return If it is a @ref chainmatrix "chain matrix", the method returns the @ref MatIdx indices of the unpaired
+   * chains used to reduce the boundary. Otherwise, nothing.
    */
   template <class Boundary_range = Boundary>
-  void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary,
-                           Dimension dim = Matrix::get_null_value<Dimension>());
+  Insertion_return insert_maximal_cell(Index columnIndex,
+                                       const Boundary_range& boundary,
+                                       Dimension dim = Matrix::get_null_value<Dimension>());
+
+  /**
+   * @brief Only available for @ref boundarymatrix "RU" and @ref chainmatrix "chain matrices" and if
+   * @ref PersistenceMatrixOptions::has_vine_update is true.
+   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_column_pairings or
+   * @ref PersistenceMatrixOptions::can_retrieve_representative_cycles also needs to be true.
+   * It does the same as the other version, but allows the boundary cells to be identified without restrictions
+   * except that the new ID has to be higher than any other ID use until now. Note that you should avoid then
+   * to use the other insertion method to avoid overwriting IDs.
+   *
+   * @tparam Boundary_range Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
+   * @param columnIndex @ref MatIdx Index where the column should be inserted. This will be the index of the input
+   * column `boundary` after the function has finished.
+   * @param cellIndex @ref IDIdx index to use to identify the new cell.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @ref rowindex "row indices" of the cells in the current matrix and should be ordered in increasing order.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   * @return If it is a @ref chainmatrix "chain matrix", the method returns the @ref MatIdx indices of the unpaired
+   * chains used to reduce the boundary. Otherwise, nothing.
+   */
+  template <class Boundary_range = Boundary>
+  Insertion_return insert_maximal_cell(Index columnIndex,
+                                       ID_index cellIndex,
+                                       const Boundary_range& boundary,
+                                       Dimension dim = Matrix::get_null_value<Dimension>());
 
   /**
    * @brief Returns the column at the given @ref MatIdx index.
@@ -985,15 +1017,17 @@ class Matrix
   /**
    * @brief Only available for @ref boundarymatrix "RU" and @ref chainmatrix "chain matrices" and if
    * @ref PersistenceMatrixOptions::has_removable_columns and @ref PersistenceMatrixOptions::has_vine_update are true.
-   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_map_column_container and
-   * @ref PersistenceMatrixOptions::has_column_pairings also need to be true. Assumes that the cell is maximal in the
-   * current complex and removes it such that the matrix remains consistent (i.e., RU is still an upper triangular
-   * decomposition of the boundary matrix and chain is still a compatible bases of the chain complex in the sense
-   * of @cite zigzag). The maximality of the cell is not verified. Also updates the barcode if it was computed.
+   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_map_column_container, and,
+   * @ref PersistenceMatrixOptions::has_column_pairings or
+   * @ref PersistenceMatrixOptions::can_retrieve_representative_cycles also need to be true. Assumes that the cell is
+   * maximal in the current complex and removes it such that the matrix remains consistent (i.e., RU is still an upper
+   * triangular decomposition of the boundary matrix and chain is still a compatible bases of the chain complex in the
+   * sense of @cite zigzag). The maximality of the cell is not verified. Also updates the barcode if it was computed.
    *
    * For @ref chainmatrix "chain matrices", using the other version of the method could perform better depending on how
-   * the data is maintained on the side of the user. Then, @ref PersistenceMatrixOptions::has_column_pairings also do
-   * not need to be true.
+   * the data is maintained on the side of the user. Then, there is no need for one of
+   * @ref PersistenceMatrixOptions::has_column_pairings or
+   * @ref PersistenceMatrixOptions::can_retrieve_representative_cycles to be true.
    *
    * See also @ref remove_last and @ref remove_column.
    *
@@ -1021,7 +1055,8 @@ class Matrix
    * @ref remove_maximal_cell(ID_index cellIndex, const std::vector<ID_index>& columnsToSwap)
    * "remove_maximal_cell(cellID, {})" will be faster than @ref remove_last().
    *
-   * See also @ref remove_last (for removing at the highest index), @ref insert_maximal_cell (for the complementary action).
+   * See also @ref remove_last (for removing at the highest index), @ref insert_maximal_cell (for the complementary
+   * action).
    *
    * @param cellIndex @ref IDIdx index of the cell to remove
    * @param columnsToSwap Vector of @ref IDIdx indices of the cells coming after @p cellIndex in the filtration.
@@ -1392,12 +1427,11 @@ class Matrix
    * @ref Column_indexation_types::IDENTIFIER. Does the same than @ref vine_swap, but assumes that the swap is
    * non-trivial and therefore skips a part of the case study.
    *
-   * @param columnIndex1 @ref MatIdx index of the first cell.
-   * @param columnIndex2 @ref MatIdx index of the second cell. It is assumed that the @ref PosIdx of both only differs
-   * by one.
-   * @return Let \f$ pos1 \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ pos2 \f$ be the @ref PosIdx index of
+   * @param columnIndex1 @ref MatIdx index of the first cell with @ref PosIdx \f$ i \f$.
+   * @param columnIndex2 @ref MatIdx index of the second cell with @ref PosIdx \f$ i + 1 \f$.
+   * @return Let \f$ i \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ i + 1 \f$ be the @ref PosIdx index of
    * @p columnIndex2. The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx
-   * \f$ max(pos1, pos2) \f$.
+   * \f$ i + 1 \f$.
    */
   Index vine_swap_with_z_eq_1_case(Index columnIndex1, Index columnIndex2);
   /**
@@ -1426,12 +1460,11 @@ class Matrix
    * which each other ; \f$ F' \f$ has to be a valid filtration.
    * See @cite vineyards for more information about vine and vineyards.
    *
-   * @param columnIndex1 @ref MatIdx index of the first cell.
-   * @param columnIndex2 @ref MatIdx index of the second cell. It is assumed that the @ref PosIdx of both only differs
-   * by one.
-   * @return Let \f$ pos1 \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ pos2 \f$ be the @ref PosIdx index of
+   * @param columnIndex1 @ref MatIdx index of the first cell with @ref PosIdx \f$ i \f$.
+   * @param columnIndex2 @ref MatIdx index of the second cell with @ref PosIdx \f$ i + 1 \f$.
+   * @return Let \f$ i \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ i + 1 \f$ be the @ref PosIdx index of
    * @p columnIndex2. The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx
-   * \f$ max(pos1, pos2) \f$.
+   * \f$ i + 1 \f$.
    */
   Index vine_swap(Index columnIndex1, Index columnIndex2);
 
@@ -1711,13 +1744,35 @@ Matrix<PersistenceMatrixOptions>::insert_boundary(ID_index cellIndex, const Boun
 
 template <class PersistenceMatrixOptions>
 template <class Boundary_range>
-inline void Matrix<PersistenceMatrixOptions>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary,
-                                                                  Dimension dim) {
+inline typename Matrix<PersistenceMatrixOptions>::Insertion_return
+Matrix<PersistenceMatrixOptions>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim)
+{
   static_assert(isNonBasic && PersistenceMatrixOptions::has_vine_update,
                 "'insert_maximal_cell' is not available for the chosen options.");
-  static_assert(PersistenceMatrixOptions::is_of_boundary_type,
+
+  if constexpr (isNonBasic && !PersistenceMatrixOptions::is_of_boundary_type &&
+                PersistenceMatrixOptions::column_indexation_type == Column_indexation_types::CONTAINER)
+    return matrix_.insert_maximal_cell(columnIndex, boundary, dim);
+  else
+    matrix_.insert_maximal_cell(columnIndex, boundary, dim);
+}
+
+template <class PersistenceMatrixOptions>
+template <class Boundary_range>
+inline typename Matrix<PersistenceMatrixOptions>::Insertion_return
+Matrix<PersistenceMatrixOptions>::insert_maximal_cell(Index columnIndex,
+                                                      ID_index cellIndex,
+                                                      const Boundary_range& boundary,
+                                                      Dimension dim)
+{
+  static_assert(isNonBasic && PersistenceMatrixOptions::has_vine_update,
                 "'insert_maximal_cell' is not available for the chosen options.");
-  matrix_.insert_maximal_cell(columnIndex, boundary, dim);
+
+  if constexpr (isNonBasic && !PersistenceMatrixOptions::is_of_boundary_type &&
+                PersistenceMatrixOptions::column_indexation_type == Column_indexation_types::CONTAINER)
+    return matrix_.insert_maximal_cell(columnIndex, cellIndex, boundary, dim);
+  else
+    matrix_.insert_maximal_cell(columnIndex, cellIndex, boundary, dim);
 }
 
 template <class PersistenceMatrixOptions>

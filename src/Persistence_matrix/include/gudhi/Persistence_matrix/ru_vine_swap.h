@@ -219,7 +219,7 @@ class RU_vine_swap
   /**
    * @brief Swap operator.
    */
-  friend void swap(RU_vine_swap& swap1, RU_vine_swap& swap2) noexcept {}
+  friend void swap([[maybe_unused]] RU_vine_swap& swap1, [[maybe_unused]] RU_vine_swap& swap2) noexcept {}
 
  private:
   using Master_RU_matrix = typename Master_matrix::Master_RU_matrix;

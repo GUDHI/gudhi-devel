@@ -17,7 +17,6 @@
 #ifndef PM_ID_TO_POS_TRANSLATION_H
 #define PM_ID_TO_POS_TRANSLATION_H
 
-#include <cmath>
 #include <vector>
 #include <cassert>
 #include <utility>    //std::swap, std::move & std::exchange
@@ -267,6 +266,46 @@ class Id_to_index_overlay
                        const Boundary_range& boundary,
                        Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
+   * Assumes that the cell will be maximal in the current complex and inserts it such that the matrix remains
+   * consistent.
+   * Updates the barcode if it is stored.
+   *
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param columnIndex @ref MatIdx index where to move the new inserted column.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @ref PosIdx of the cells in the current filtration and should be ordered in increasing order.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   */
+  template <class Boundary_range = Boundary>
+  void insert_maximal_cell(Index columnIndex,
+                           const Boundary_range& boundary,
+                           Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
+   * It does the same as the other version, but allows the boundary cells to be identified without restrictions
+   * except that the new ID has to be higher than any other ID use until now. Note that you should avoid then
+   * to use the other insertion method to avoid overwriting IDs.
+   * 
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param columnIndex @ref MatIdx index where to move the new inserted column.
+   * @param cellIndex @ref IDIdx index to use to identify the new cell.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @p cellIndex values of precedent calls of the method for the corresponding cells and should be ordered in
+   * increasing order. Warning: if swaps occurred in between insertions, the cell IDs were swapped too, so the new ones
+   * have to be used in the given boundary.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   */
+  template <class Boundary_range = Boundary>
+  void insert_maximal_cell(Index columnIndex,
+                           ID_index cellIndex,
+                           const Boundary_range& boundary,
+                           Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
    * @brief Returns the column at the given @ref IDIdx index.
    * For @ref boundarymatrix "RU matrices", the returned column is from \f$ R \f$.
    * The type of the column depends on the chosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -318,8 +357,9 @@ class Id_to_index_overlay
   /**
    * @brief Only available for RU and @ref chainmatrix "chain matrices" and if
    * @ref PersistenceMatrixOptions::has_removable_columns and @ref PersistenceMatrixOptions::has_vine_update are true.
-   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_map_column_container and
-   * @ref PersistenceMatrixOptions::has_column_pairings also need to be true.
+   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_map_column_container, and,
+   * @ref PersistenceMatrixOptions::has_column_pairings or
+   * @ref PersistenceMatrixOptions::can_retrieve_representative_cycles also need to be true.
    * Assumes that the cell is maximal in the current complex and removes it such that the matrix remains consistent
    * (i.e., RU is still an upper triangular decomposition of the @ref boundarymatrix "boundary matrix" and chain is
    * still a compatible bases of the chain complex in the sense of @cite zigzag).
@@ -797,6 +837,75 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_bounda
 }
 
 template <class Underlying_matrix, class Master_matrix>
+template <class Boundary_range>
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_maximal_cell(Index columnIndex,
+                                                                                       const Boundary_range& boundary,
+                                                                                       Dimension dim)
+{
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have be positive."));
+
+  if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
+    insert_boundary(boundary, dim);
+
+    if (get_number_of_columns() == 1) return;
+
+    std::vector<ID_index> indexToID(nextIndex_);
+    if constexpr (Master_matrix::Option_list::has_map_column_container) {
+      for (auto& p : *idToIndex_) {
+        indexToID[p.second] = p.first;
+      }
+    } else {
+      for (ID_index i = 0; i < idToIndex_->size(); ++i) {
+        if (_id_to_index(i) != Master_matrix::template get_null_value<Index>()) indexToID[_id_to_index(i)] = i;
+      }
+    }
+    for (Index curr = get_number_of_columns() - 1; curr > columnIndex; --curr) {
+      matrix_.vine_swap(curr - 1);
+      std::swap(idToIndex_->at(indexToID[curr - 1]), idToIndex_->at(indexToID[curr]));
+      std::swap(indexToID[curr - 1], indexToID[curr]);
+    }
+  } else {
+    matrix_.insert_maximal_cell(columnIndex, boundary, dim);
+  }
+}
+
+template <class Underlying_matrix, class Master_matrix>
+template <class Boundary_range>
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_maximal_cell(Index columnIndex,
+                                                                                       ID_index cellIndex,
+                                                                                       const Boundary_range& boundary,
+                                                                                       Dimension dim)
+{
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have be positive."));
+
+  if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
+    insert_boundary(cellIndex, boundary, dim);
+
+    // TODO: factorize following with the other insert_maximal_cell ?
+
+    if (get_number_of_columns() == 1) return;
+
+    std::vector<ID_index> indexToID(nextIndex_);
+    if constexpr (Master_matrix::Option_list::has_map_column_container) {
+      for (auto& p : *idToIndex_) {
+        indexToID[p.second] = p.first;
+      }
+    } else {
+      for (ID_index i = 0; i < idToIndex_->size(); ++i) {
+        if (_id_to_index(i) != Master_matrix::template get_null_value<Index>()) indexToID[_id_to_index(i)] = i;
+      }
+    }
+    for (Index curr = get_number_of_columns() - 1; curr > columnIndex; --curr) {
+      matrix_.vine_swap(curr - 1);
+      std::swap(idToIndex_->at(indexToID[curr - 1]), idToIndex_->at(indexToID[curr]));
+      std::swap(indexToID[curr - 1], indexToID[curr]);
+    }
+  } else {
+    matrix_.insert_maximal_cell(columnIndex, cellIndex, boundary, dim);
+  }
+}
+
+template <class Underlying_matrix, class Master_matrix>
 inline typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::Column&
 Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_column(ID_index cellID)
 {
@@ -834,6 +943,7 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maxima
     for (Index curr = _id_to_index(cellID); curr < nextIndex_; ++curr) {
       matrix_.vine_swap(curr);
       std::swap(idToIndex_->at(indexToID[curr]), idToIndex_->at(indexToID[curr + 1]));
+      std::swap(indexToID[curr], indexToID[curr + 1]);
     }
     matrix_.remove_last();
     GUDHI_CHECK(_id_to_index(cellID) == nextIndex_,

@@ -9,3 +9,4 @@ add_test(NAME Persistence_matrix_example_remove_insert_swap_with_cycles COMMAND 
 
 add_executable_with_targets(Persistence_matrix_example_field_operations example_field_operations.cpp TBB::tbb)
 add_test(NAME Persistence_matrix_example_field_operations COMMAND $<TARGET_FILE:Persistence_matrix_example_field_operations>)
+
