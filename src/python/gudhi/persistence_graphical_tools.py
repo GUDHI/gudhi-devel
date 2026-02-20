@@ -111,8 +111,7 @@ def _get_number_of_pairs_by_dimension(barcode):
         pass
 
     # array of (dim, (b,d))
-    counts = Counter(bar[0] for bar in barcode)
-    return [counts[i] for i in range(barcode[-1][0] + 1)]
+    return Counter(bar[0] for bar in barcode)
 
 
 def _limit_to_max_intervals(persistence, max_intervals, key):
