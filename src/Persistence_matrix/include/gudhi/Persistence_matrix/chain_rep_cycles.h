@@ -123,7 +123,6 @@ class Chain_representative_cycles
 
   // access to inheriting Chain_matrix class
   constexpr Master_chain_matrix* _matrix() { return static_cast<Master_chain_matrix*>(this); }
-
   constexpr const Master_chain_matrix* _matrix() const { return static_cast<const Master_chain_matrix*>(this); }
 };
 
