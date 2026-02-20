@@ -173,13 +173,7 @@ class Simplex_tree {
     Filtration_value& filtration() { return filt_; }
 
     static const Filtration_value& get_infinity() { return inf_; }
-    static Filtration_value get_minus_infinity() {
-      if constexpr (std::numeric_limits<Filtration_value>::has_infinity) {
-        return -inf_;
-      } else {
-        return std::numeric_limits<Filtration_value>::lowest();
-      }
-    }
+    static const Filtration_value& get_minus_infinity() { return minus_inf_; }
 
    private:
     Filtration_value filt_;
@@ -187,6 +181,9 @@ class Simplex_tree {
     inline static const Filtration_value inf_ = std::numeric_limits<Filtration_value>::has_infinity
                                                     ? std::numeric_limits<Filtration_value>::infinity()
                                                     : std::numeric_limits<Filtration_value>::max();
+    inline static const Filtration_value minus_inf_ = std::numeric_limits<Filtration_value>::has_infinity
+                                                          ? -std::numeric_limits<Filtration_value>::infinity()
+                                                          : std::numeric_limits<Filtration_value>::lowest();
   };
 
   struct Filtration_simplex_base_dummy {
