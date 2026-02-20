@@ -36,11 +36,11 @@ void print_current_representative_cycles(const RU_matrix& M) {
   }
 }
 
-template <class Matrix>
 void remove_insert_swap_with_cycles() {
-  Matrix mp({{}, {}, {}, {}, {0, 1}, {0, 3}, {0, 2}, {1, 2}, {2, 3}});
+  RU_matrix mp({{}, {}, {}, {}, {0, 1}, {0, 3}, {0, 2}, {1, 2}, {2, 3}});
 
   std::cout << "Representative cycles at input:\n";
+  mp.update_all_representative_cycles();
   print_current_representative_cycles(mp);
 
   std::cout << "Representative cycles after swapping 6 and 7:\n";
@@ -64,4 +64,4 @@ void remove_insert_swap_with_cycles() {
   print_current_representative_cycles(mp);
 }
 
-int main() { remove_insert_swap_with_cycles<RU_matrix>(); }
+int main() { remove_insert_swap_with_cycles(); }

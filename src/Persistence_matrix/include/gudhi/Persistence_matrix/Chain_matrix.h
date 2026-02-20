@@ -25,7 +25,8 @@
 #include <utility>    //std::swap, std::move & std::exchange
 #include <algorithm>  //std::sort
 
-#include <gudhi/Persistence_matrix/Id_to_index_overlay.h>  //friend
+#include <gudhi/Persistence_matrix/Position_to_index_overlay.h>  //friend
+#include <gudhi/Persistence_matrix/Id_to_index_overlay.h>        //friend
 #include <gudhi/Persistence_matrix/index_mapper.h>
 
 namespace Gudhi {
@@ -297,6 +298,54 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
       const Boundary_range& boundary,
       Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true, as well as,
+   * @ref PersistenceMatrixOptions::has_column_pairings or
+   * @ref PersistenceMatrixOptions::can_retrieve_representative_cycles.
+   * Inserts the given maximal boundary using @ref insert_boundary(const Boundary_range&, Dimension) "insert_boundary"
+   * and then moves the column to the given position such that the matrix remains consistent (i.e., the matrix is still
+   * a compatible bases of the chain complex in the sense of @cite zigzag).
+   * The maximality of the cell is not verified.
+   * Also updates the barcode accordantly if it is stored.
+   * 
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param columnIndex @ref MatIdx index where to move the new inserted column.
+   * @param boundary Boundary generating the new column. The content should be ordered by ID.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   * @return The @ref MatIdx indices of the unpaired chains used to reduce the boundary.
+   */
+  template <class Boundary_range = Boundary>
+  std::vector<Entry_representative> insert_maximal_cell(
+      Index columnIndex,
+      const Boundary_range& boundary,
+      Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true, as well as,
+   * @ref PersistenceMatrixOptions::has_column_pairings or
+   * @ref PersistenceMatrixOptions::can_retrieve_representative_cycles.
+   * It does the same as the other version, but allows the boundary cells to be identified without restrictions
+   * except that the new ID has to be higher than any other ID use until now. Note that you should avoid then
+   * to use the other insertion method to avoid overwriting IDs.
+   * 
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param columnIndex @ref MatIdx index where to move the new inserted column.
+   * @param cellID @ref IDIdx index to use to identify the new cell.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @p cellID values of precedent calls of the method for the corresponding cells and should be ordered in
+   * increasing order.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   * @return The @ref MatIdx index of the inserted boundary.
+   */
+  template <class Boundary_range = Boundary>
+  std::vector<Entry_representative> insert_maximal_cell(
+      Index columnIndex,
+      ID_index cellID,
+      const Boundary_range& boundary,
+      Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
    * @brief Returns the column at the given @ref MatIdx index.
    * The type of the column depends on the chosen options, see @ref PersistenceMatrixOptions::column_type.
    *
@@ -315,7 +364,8 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::has_removable_columns and
    * @ref PersistenceMatrixOptions::has_vine_update are true, as well as,
-   * @ref PersistenceMatrixOptions::has_map_column_container and @ref PersistenceMatrixOptions::has_column_pairings.
+   * @ref PersistenceMatrixOptions::has_map_column_container, and, @ref PersistenceMatrixOptions::has_column_pairings
+   * or @ref PersistenceMatrixOptions::can_retrieve_representative_cycles.
    * Assumes that the cell is maximal in the current complex and removes it such that the matrix remains consistent
    * (i.e., the matrix is still a compatible bases of the chain complex in the sense of @cite zigzag).
    * The maximality of the cell is not verified.
@@ -508,6 +558,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
   void print() const;  // for debug
 
   friend class Id_to_index_overlay<Chain_matrix<Master_matrix>, Master_matrix>;
+  friend class Position_to_index_overlay<Chain_matrix<Master_matrix>, Master_matrix>;
 
  private:
   using Column_container = typename Master_matrix::Column_container;
@@ -750,6 +801,64 @@ Chain_matrix<Master_matrix>::insert_boundary(ID_index cellID, const Boundary_ran
 }
 
 template <class Master_matrix>
+template <class Boundary_range>
+inline std::vector<typename Master_matrix::Entry_representative>
+Chain_matrix<Master_matrix>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim)
+{
+  return insert_maximal_cell(columnIndex, nextIndex_, boundary, dim);
+}
+
+template <class Master_matrix>
+template <class Boundary_range>
+inline std::vector<typename Master_matrix::Entry_representative> Chain_matrix<Master_matrix>::insert_maximal_cell(
+    Index columnIndex,
+    ID_index cellID,
+    const Boundary_range& boundary,
+    Dimension dim)
+{
+  static_assert(
+      Master_matrix::Option_list::has_vine_update && (Master_matrix::Option_list::has_column_pairings ||
+                                                      Master_matrix::Option_list::can_retrieve_representative_cycles),
+      "'insert_maximal_cell' is not implemented for the chosen options.");
+
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have be positive."));
+
+  auto chainsInF = insert_boundary(cellID, boundary, dim);
+
+  const auto& pivotToPosition = Pivot_to_pos_mapper_opt::map_;
+  Pos_index startPos = nextPosition_ - 1;
+  Index startIndex = pivotToColumnIndex_[cellID];
+
+  if (startPos > columnIndex) {
+    std::vector<Index> colToSwap;
+    colToSwap.reserve(matrix_.size());
+
+    if constexpr (Master_matrix::Option_list::has_map_column_container) {
+      for (auto& p : pivotToPosition) {
+        if (p.second >= columnIndex && p.second < startPos) colToSwap.push_back(pivotToColumnIndex_.at(p.first));
+      }
+      std::sort(colToSwap.begin(), colToSwap.end(), [&](Index c1, Index c2) {
+        return pivotToPosition.at(get_pivot(c1)) > pivotToPosition.at(get_pivot(c2));
+      });
+    } else {
+      for (Index i = 0; i < pivotToPosition.size(); ++i) {
+        if (pivotToPosition[i] >= columnIndex && pivotToPosition[i] < startPos)
+          colToSwap.push_back(pivotToColumnIndex_[i]);
+      }
+      std::sort(colToSwap.begin(), colToSwap.end(), [&](Index c1, Index c2) {
+        return pivotToPosition[get_pivot(c1)] > pivotToPosition[get_pivot(c2)];
+      });
+    }
+
+    for (Index i : colToSwap) {
+      startIndex = Swap_opt::vine_swap(i, startIndex) == startIndex ? i : startIndex;
+    }
+  }
+
+  return chainsInF;
+}
+
+template <class Master_matrix>
 inline typename Chain_matrix<Master_matrix>::Column& Chain_matrix<Master_matrix>::get_column(Index columnIndex)
 {
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
@@ -773,11 +882,13 @@ inline const typename Chain_matrix<Master_matrix>::Column& Chain_matrix<Master_m
 template <class Master_matrix>
 inline void Chain_matrix<Master_matrix>::remove_maximal_cell(ID_index cellID)
 {
-  static_assert(Master_matrix::Option_list::has_removable_columns,
-                "'remove_maximal_cell' is not implemented for the chosen options.");
-  static_assert(Master_matrix::Option_list::has_map_column_container && Master_matrix::Option_list::has_vine_update &&
-                    Master_matrix::Option_list::has_column_pairings,
-                "'remove_maximal_cell' is not implemented for the chosen options.");
+  static_assert(
+      Master_matrix::Option_list::has_removable_columns && Master_matrix::Option_list::has_map_column_container,
+      "'remove_maximal_cell' is not implemented for the chosen options.");
+  static_assert(
+      Master_matrix::Option_list::has_vine_update && (Master_matrix::Option_list::has_column_pairings ||
+                                                      Master_matrix::Option_list::can_retrieve_representative_cycles),
+      "'remove_maximal_cell' is not implemented for the chosen options.");
 
   // TODO: find simple test to verify that col at columnIndex is maximal even without row access.
 
