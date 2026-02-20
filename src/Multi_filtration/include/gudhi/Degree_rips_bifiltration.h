@@ -118,7 +118,7 @@ class Degree_rips_bifiltration
   template <class ValueRange = std::initializer_list<T>, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   Degree_rips_bifiltration(const ValueRange &range) : generators_(1, *(range.begin()))
   {
-    GUDHI_CHECK(*(range.begin() + 1) == 0, std::invalid_argument("Second value of the range has to be 0"));
+    GUDHI_CHECK(*(std::next(range.begin())) == 0, std::invalid_argument("Second value of the range has to be 0"));
   }
 
   /**
@@ -133,7 +133,7 @@ class Degree_rips_bifiltration
   template <class Iterator, class = std::enable_if_t<!std::is_arithmetic_v<Iterator> > >
   Degree_rips_bifiltration(Iterator it_begin, [[maybe_unused]] Iterator it_end) : generators_(1, *it_begin)
   {
-    GUDHI_CHECK(*(it_begin + 1) == 0, std::invalid_argument("Second value of the range has to be 0"));
+    GUDHI_CHECK(*(std::next(it_begin)) == 0, std::invalid_argument("Second value of the range has to be 0"));
   }
 
   /**
@@ -1424,8 +1424,8 @@ class Degree_rips_bifiltration
    * generator with same second parameter. This would mean that adding the given generator will not span more
    * "lifetime" and therefore there is no need to store it.
    *
-   * Let \f$ max_idx \$f be the highest second parameter stored so far. If the given second parameter \f$ i \$f to add
-   * is strictly higher than \f$ max_idx + 1 \$f, all possible values between \f$ max_idx \$f and \f$ i \$f will also
+   * Let \f$ max_idx \f$ be the highest second parameter stored so far. If the given second parameter \f$ i \f$ to add
+   * is strictly higher than \f$ max_idx + 1 \f$, all possible values between \f$ max_idx \f$ and \f$ i \f$ will also
    * be added and the corresponding first parameters will be initialized with -inf if `Co` is false and with +inf
    * if `Co` is true.
    *
@@ -1449,8 +1449,8 @@ class Degree_rips_bifiltration
    * generator with same second parameter. This would mean that adding the given generator will not span more
    * "lifetime" and therefore there is no need to store it.
    *
-   * Let \f$ max_idx \$f be the highest second parameter stored so far. If the given second parameter \f$ i \$f to add
-   * is strictly higher than \f$ max_idx + 1 \$f, all possible values between \f$ max_idx \$f and \f$ i \$f will also
+   * Let \f$ max_idx \f$ be the highest second parameter stored so far. If the given second parameter \f$ i \f$ to add
+   * is strictly higher than \f$ max_idx + 1 \f$, all possible values between \f$ max_idx \f$ and \f$ i \f$ will also
    * be added and the corresponding first parameters will be initialized with inf if `Co` is false and with -inf
    * if `Co` is true.
    *
@@ -1469,9 +1469,10 @@ class Degree_rips_bifiltration
 
     const T val = *genStart;
     ++genStart;
-    const size_type index = *genStart;
 
-    GUDHI_CHECK(index >= 0, std::invalid_argument("Second parameter has to be a positive index."));
+    GUDHI_CHECK(*genStart >= 0, std::invalid_argument("Second parameter has to be a positive index."));
+
+    const size_type index = *genStart;
 
     if (_is_nan(val)) return false;
 
@@ -2246,7 +2247,7 @@ class Degree_rips_bifiltration
   void _apply_operation(const T &val, F &&operate)
   {
     auto &gens = generators_;
-    for (unsigned int i = 0; i < gens.size(); ++i) {
+    for (size_type i = 0; i < gens.size(); ++i) {
       std::forward<F>(operate)(gens[i], val);
     }
   }
