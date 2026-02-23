@@ -53,19 +53,28 @@ def _generate_grid_points_on_torus(n_samples: int, dim: int):
         array_points_idx[..., i] = x
     return array_points[array_points_idx].reshape(-1, 2 * dim)
 
+def _get_bit_generator(rng: Optional[int|GudhiBitGenerator]):
+    if rng is None:
+        return GudhiBitGenerator()
+    elif isinstance(rng, (np.integer, int)):
+        return GudhiBitGenerator(rng)
+    elif isinstance(rng, GudhiBitGenerator): 
+        return rng
+    else:
+        raise ValueError(f"Unknown type for rng '{type(rng)}'.")
 
 def torus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random",
-          rng: Optional[GudhiBitGenerator] = None):
+          rng: Optional[int|GudhiBitGenerator] = None):
     """
     Generate points on a flat dim-torus in R^2dim either randomly or on a grid
 
     :param n_samples: The number of points to be generated.
     :param dim: The dimension of the torus on which points would be generated in R^2*dim.
     :param sample: The sample type of the generated points. Can be 'random' or 'grid'.
-    :param rng: For :doc:`reproducible results <reproducibility>`, pass a seed with
+    :param rng: For :doc:`reproducible results <reproducibility>`, pass a seed with `rng = seed` or
         `rng = gudhi.random.GudhiBitGenerator(seed)`. Default is `None`, which means no reproducibility.
         This parameter has no effect when sample is 'grid'.
-    :type rng: gudhi.random.GudhiBitGenerator
+    :type rng: None|int|gudhi.random.GudhiBitGenerator
     :returns: numpy array containing the generated points on a torus.
 
     The shape of returned numpy array is:
@@ -76,10 +85,8 @@ def torus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random"
     'dim'th power.
     """
     if sample == "random":
-        if rng is None:
-            rng = GudhiBitGenerator()
         # Generate points randomly
-        return _generate_random_points_on_torus(n_samples, dim, rng)
+        return _generate_random_points_on_torus(n_samples, dim, rng = _get_bit_generator(rng))
     elif sample == "grid":
         # Generate points on a grid
         return _generate_grid_points_on_torus(n_samples, dim)
@@ -99,14 +106,13 @@ def sphere(n_samples: int, ambient_dim: int, radius: float = 1., sample: Literal
     :type radius: float
     :param sample: The sample type. Default and only available value is `"random"`.
     :type sample: string
-    :param rng: For :doc:`reproducible results <reproducibility>`, pass a seed with
+    :param rng: For :doc:`reproducible results <reproducibility>`, pass a seed with `rng = seed` or
         `rng = gudhi.random.GudhiBitGenerator(seed)`. Default is `None`, which means no reproducibility.
-    :type rng: gudhi.random.GudhiBitGenerator
+    :type rng: None|int|gudhi.random.GudhiBitGenerator
     :returns: the generated points on a sphere.
     """
-    if rng is None:
-        rng = GudhiBitGenerator()
-    return _sphere(n_samples, ambient_dim, radius, sample, rng.rng)
+    bg = _get_bit_generator(rng)
+    return _sphere(n_samples, ambient_dim, radius, sample, bg.rng)
 
 def ctorus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random",
            rng: Optional[GudhiBitGenerator] = None):
@@ -119,9 +125,9 @@ def ctorus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random
     :type dim: integer
     :param sample: The sample type. Available values are: `"random"` and `"grid"`. Default value is `"random"`.
     :type sample: string
-    :param rng: For :doc:`reproducible results <reproducibility>`, pass a seed with
+    :param rng: For :doc:`reproducible results <reproducibility>`, pass a seed with `rng = seed` or
         `rng = gudhi.random.GudhiBitGenerator(seed)`. Default is `None`, which means no reproducibility.
-    :type rng: gudhi.random.GudhiBitGenerator
+    :type rng: None|int|gudhi.random.GudhiBitGenerator
     :returns: the generated points on a torus.
     
     The shape of returned numpy array is:
@@ -130,6 +136,5 @@ def ctorus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random
     
     If sample is 'grid': (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
     """
-    if rng is None:
-        rng = GudhiBitGenerator()
-    return _ctorus(n_samples, dim, sample, rng.rng)
+    bg = _get_bit_generator(rng)
+    return _ctorus(n_samples, dim, sample, bg.rng)

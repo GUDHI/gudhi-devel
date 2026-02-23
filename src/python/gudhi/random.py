@@ -31,7 +31,7 @@ class GudhiBitGenerator(np.random.BitGenerator):
             Default is None.
         :type seed: Optional[int]
         """
-        super().__init__(0)
+        super().__init__()
         if seed is None:
             self.rng = GudhiRandomGenerator()
         else:
