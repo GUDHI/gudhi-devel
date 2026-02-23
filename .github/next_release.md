@@ -13,7 +13,7 @@ Below is a list of changes:
 
 - [Module](link)
      - **...**
-     
+
 - [Reproducibility](https://gudhi.inria.fr/python/latest/reproducibility.html)
      - A GUDHI random generator that fits numpy random generator requirements, and can be used by
        [datasets generators](https://gudhi.inria.fr/python/latest/datasets.html#datasets-generators).
