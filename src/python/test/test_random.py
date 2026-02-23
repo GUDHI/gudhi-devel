@@ -22,4 +22,4 @@ def test_gudhi_bit_generator_when_seeded():
     first_array = np.random.Generator(GudhiBitGenerator(42)).random(5)
     second_array = np.random.Generator(GudhiBitGenerator(42)).random(5)
     print(f"{first_array} == {second_array} ?")
-    assert_almost_equal(first_array, second_array, decimal=1)
+    assert_almost_equal(first_array, second_array)
