@@ -62,8 +62,9 @@ def torus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random"
     :param n_samples: The number of points to be generated.
     :param dim: The dimension of the torus on which points would be generated in R^2*dim.
     :param sample: The sample type of the generated points. Can be 'random' or 'grid'.
-    :param rng: Default is `GudhiBitGenerator()`, but it can be set with a seed with `gudhi.random.GudhiBitGenerator(seed)`.
-        It has no effect when sample is 'grid'.
+    :param rng: For :doc:`reproducible results <reproducibility>`, pass a seed with
+        `rng = gudhi.random.GudhiBitGenerator(seed)`. Default is `GudhiBitGenerator()`, which means no reproducibility.
+        This parameter has no effect when sample is 'grid'.
     :type rng: gudhi.random.GudhiBitGenerator
     :returns: numpy array containing the generated points on a torus.
 
@@ -96,8 +97,8 @@ def sphere(n_samples: int, ambient_dim: int, radius: float = 1., sample: Literal
     :type radius: float
     :param sample: The sample type. Default and only available value is `"random"`.
     :type sample: string
-    :param rng: Default is `GudhiBitGenerator()`, but it can be set with a seed with
-        `gudhi.random.GudhiBitGenerator(seed)`.
+    :param rng: For :doc:`reproducible results <reproducibility>`, pass a seed with
+        `rng = gudhi.random.GudhiBitGenerator(seed)`. Default is `None`, which means no reproducibility.
     :type rng: gudhi.random.GudhiBitGenerator
     :returns: the generated points on a sphere.
     """
@@ -116,8 +117,8 @@ def ctorus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random
     :type dim: integer
     :param sample: The sample type. Available values are: `"random"` and `"grid"`. Default value is `"random"`.
     :type sample: string
-    :param rng: Default is `GudhiBitGenerator()`, but it can be set with a seed with `gudhi.random.GudhiBitGenerator(seed)`.
-        It has no effect when sample is 'grid'.
+    :param rng: For :doc:`reproducible results <reproducibility>`, pass a seed with
+        `rng = gudhi.random.GudhiBitGenerator(seed)`. Default is `None`, which means no reproducibility.
     :type rng: gudhi.random.GudhiBitGenerator
     :returns: the generated points on a torus.
     
