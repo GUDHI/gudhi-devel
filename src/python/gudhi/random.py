@@ -18,7 +18,12 @@ import numpy as np
 
 
 class GudhiBitGenerator(np.random.BitGenerator):
-    """GUDHI random generator that fits numpy random generator requirements."""
+    """GUDHI random generator that fits numpy random generator requirements.
+
+    .. note::
+    
+        This class is not working with parallelism. It is a known and complex issue.
+    """
     def __init__(self, seed: Optional[int] = None):
         """GudhiBitGenerator constructor.
 

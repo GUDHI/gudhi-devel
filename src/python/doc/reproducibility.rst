@@ -45,5 +45,6 @@ Here is an example of how to use it:
 
 .. note::
     
-    This is a work in progress, and for the moment, only `datasets generators <datasets.html#datasets-generators>`_
-    can accept a `GudhiBitGenerator` as an argument.
+    * This is a work in progress, and for the moment, only `datasets generators <datasets.html#datasets-generators>`_ can accept a `GudhiBitGenerator` as an argument.
+    
+    * The :class:`~gudhi.random.GudhiBitGenerator` is not working with parallelism. It is a known and complex issue.
