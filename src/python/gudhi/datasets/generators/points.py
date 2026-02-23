@@ -55,7 +55,7 @@ def _generate_grid_points_on_torus(n_samples: int, dim: int):
 
 
 def torus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random",
-          rng: GudhiBitGenerator = GudhiBitGenerator()):
+          rng: Optional[GudhiBitGenerator] = None):
     """
     Generate points on a flat dim-torus in R^2dim either randomly or on a grid
 
@@ -63,7 +63,7 @@ def torus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random"
     :param dim: The dimension of the torus on which points would be generated in R^2*dim.
     :param sample: The sample type of the generated points. Can be 'random' or 'grid'.
     :param rng: For :doc:`reproducible results <reproducibility>`, pass a seed with
-        `rng = gudhi.random.GudhiBitGenerator(seed)`. Default is `GudhiBitGenerator()`, which means no reproducibility.
+        `rng = gudhi.random.GudhiBitGenerator(seed)`. Default is `None`, which means no reproducibility.
         This parameter has no effect when sample is 'grid'.
     :type rng: gudhi.random.GudhiBitGenerator
     :returns: numpy array containing the generated points on a torus.
@@ -76,6 +76,8 @@ def torus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random"
     'dim'th power.
     """
     if sample == "random":
+        if rng is None:
+            rng = GudhiBitGenerator()
         # Generate points randomly
         return _generate_random_points_on_torus(n_samples, dim, rng)
     elif sample == "grid":
