@@ -14,7 +14,7 @@ __license__ = "MIT"
 import numpy as np
 import os
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Optional
 
 from numpy.random import Generator
 from gudhi.random import GudhiBitGenerator
@@ -76,7 +76,7 @@ def torus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random"
     """
     if sample == "random":
         # Generate points randomly
-        return _generate_random_points_on_torus(n_samples, dim)
+        return _generate_random_points_on_torus(n_samples, dim, rng)
     elif sample == "grid":
         # Generate points on a grid
         return _generate_grid_points_on_torus(n_samples, dim)
@@ -84,7 +84,7 @@ def torus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random"
         raise ValueError(f"Sample type '{sample}' is not supported")
 
 def sphere(n_samples: int, ambient_dim: int, radius: float = 1., sample: Literal["random"] = "random",
-           rng: GudhiBitGenerator = GudhiBitGenerator()):
+           rng: Optional[GudhiBitGenerator] = None):
     """
     Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
     
@@ -101,10 +101,12 @@ def sphere(n_samples: int, ambient_dim: int, radius: float = 1., sample: Literal
     :type rng: gudhi.random.GudhiBitGenerator
     :returns: the generated points on a sphere.
     """
+    if rng is None:
+        rng = GudhiBitGenerator()
     return _sphere(n_samples, ambient_dim, radius, sample, rng.rng)
 
 def ctorus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random",
-           rng: GudhiBitGenerator = GudhiBitGenerator()):
+           rng: Optional[GudhiBitGenerator] = None):
     """
     Generate random i.i.d. points on a d-torus in R^2d or as a grid
     
@@ -125,4 +127,6 @@ def ctorus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random
     
     If sample is 'grid': (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
     """
+    if rng is None:
+        rng = GudhiBitGenerator()
     return _ctorus(n_samples, dim, sample, rng.rng)

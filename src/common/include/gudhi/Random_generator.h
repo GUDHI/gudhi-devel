@@ -59,7 +59,7 @@ class Random_generator {
   Random_generator& operator=(const Random_generator& other) = delete;
   Random_generator& operator=(Random_generator&& other) = delete;
   
-  Random* get_default_random() { return &(CGAL::get_default_random()); }
+  const Random& get_default_random() { return CGAL::get_default_random(); }
   uint32_t next_uint32() { return CGAL::get_default_random().uniform_int<uint32_t>(0, UINT32_MAX); }
   uint64_t next_uint64() { return CGAL::get_default_random().uniform_int<uint64_t>(0, UINT64_MAX); }
   double   next_double() { return CGAL::get_default_random().uniform_real<double>(); }

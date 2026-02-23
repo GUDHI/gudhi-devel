@@ -59,12 +59,10 @@ int main(int argc, char **argv) {
     }
   }
 
-  CGAL::Random* rng = nullptr;
+  CGAL::Random rng = Gudhi::random::Random_generator().get_default_random();
   if (argc == 8) {
     // Sets the seed for Random_generator
     rng = Gudhi::random::Random_generator(atoi(argv[7])).get_default_random();
-  } else {
-    rng = Gudhi::random::Random_generator().get_default_random();
   }
   
   bool in = false;
