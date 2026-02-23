@@ -14,6 +14,7 @@ __license__ = "MIT"
 import numpy as np
 import os
 from pathlib import Path
+from typing import Literal
 
 from numpy.random import Generator
 from gudhi.random import GudhiBitGenerator
@@ -53,7 +54,8 @@ def _generate_grid_points_on_torus(n_samples: int, dim: int):
     return array_points[array_points_idx].reshape(-1, 2 * dim)
 
 
-def torus(n_samples: int, dim: int, sample: str = "random", rng: GudhiBitGenerator = GudhiBitGenerator()):
+def torus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random",
+          rng: GudhiBitGenerator = GudhiBitGenerator()):
     """
     Generate points on a flat dim-torus in R^2dim either randomly or on a grid
 
@@ -81,7 +83,7 @@ def torus(n_samples: int, dim: int, sample: str = "random", rng: GudhiBitGenerat
     else:
         raise ValueError(f"Sample type '{sample}' is not supported")
 
-def sphere(n_samples: int, ambient_dim: int, radius: float = 1., sample: str = "random",
+def sphere(n_samples: int, ambient_dim: int, radius: float = 1., sample: Literal["random"] = "random",
            rng: GudhiBitGenerator = GudhiBitGenerator()):
     """
     Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
@@ -94,13 +96,15 @@ def sphere(n_samples: int, ambient_dim: int, radius: float = 1., sample: str = "
     :type radius: float
     :param sample: The sample type. Default and only available value is `"random"`.
     :type sample: string
-    :param rng: Default is `GudhiBitGenerator()`, but it can be set with a seed with `gudhi.random.GudhiBitGenerator(seed)`.
+    :param rng: Default is `GudhiBitGenerator()`, but it can be set with a seed with
+        `gudhi.random.GudhiBitGenerator(seed)`.
     :type rng: gudhi.random.GudhiBitGenerator
     :returns: the generated points on a sphere.
     """
     return _sphere(n_samples, ambient_dim, radius, sample, rng.rng)
 
-def ctorus(n_samples: int, dim: int, sample: str = "random", rng: GudhiBitGenerator = GudhiBitGenerator()):
+def ctorus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random",
+           rng: GudhiBitGenerator = GudhiBitGenerator()):
     """
     Generate random i.i.d. points on a d-torus in R^2d or as a grid
     
