@@ -9,12 +9,29 @@
  */
 
 #include <nanobind/nanobind.h>
+#include <numpy/random/bitgen.h>  // for bitgen_t
 
 // For Windows, where Random_generator is a client of random here (random.dll is the provider)
 #define RANDOM_DLL_IMPORT
-#include <python_interfaces/random_utils.h>
+
+#include <gudhi/Random_generator.h>
 
 namespace nb = nanobind;
+
+namespace Gudhi {
+namespace random {
+
+void setup_bitgen(Random_generator* rng, nb::capsule capsule) {
+  bitgen_t* bg = static_cast<bitgen_t*>(capsule.data());
+  bg->state = rng;
+  bg->next_uint64 = next_uint64;
+  bg->next_uint32 = next_uint32;
+  bg->next_double = next_double;
+  bg->next_raw    = next_uint64;
+};
+
+}  // namespace random
+}  // namespace Gudhi
 
 NB_MODULE(_random_ext, m) {
   // Based on https://doc.cgal.org/latest/Generator/index.html
