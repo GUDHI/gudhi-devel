@@ -58,5 +58,7 @@ def test_torus():
 
 def test_reproducibility():
     for algo in [points.sphere, points.torus, points.ctorus]:
+        # Mix of positional arguments ((samples, ambient_dim) for sphere and (samples, dim) for torus and ctorus)
+        # but only for loop purpose
         assert_almost_equal(algo(10, 2, rng=GudhiBitGenerator(42)), algo(10, 2, rng=GudhiBitGenerator(42)))
         assert_almost_equal(algo(5, 3, rng=42), algo(5, 3, rng=42))
