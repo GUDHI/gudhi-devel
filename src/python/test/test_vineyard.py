@@ -23,6 +23,7 @@ def file_path_arg(request):
     return request.config.getoption("--filepath")
 
 
+@pytest.mark.filepath
 def test_rips_vineyard(file_path_arg):
     path_prefix = file_path_arg
     path_suffix = ".txt"
