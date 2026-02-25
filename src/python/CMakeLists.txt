@@ -69,6 +69,16 @@ function( add_gudhi_py_test THE_TEST )
   endif()
 endfunction( add_gudhi_py_test )
 
+function( add_gudhi_py_test_with_file_path THE_TEST THE_PATH)
+  if(PYTEST_FOUND)
+    # use ${Python_EXECUTABLE} -B, otherwise a __pycache__ directory is created in sources by python
+    # use py.test no cache provider, otherwise a .cache file is created in sources by py.test
+    add_test(NAME ${THE_TEST}_py_test
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+             COMMAND ${Python_EXECUTABLE} -B -m pytest -p no:cacheprovider --filepath ${THE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/test/${THE_TEST}.py)
+  endif()
+endfunction( add_gudhi_py_test_with_file_path )
+
 function( add_gudhi_symbolic_links GLOBBING_EXPRESSION )
   # No symbolic links if build in sources (aka. 'cmake .' in sources)
   if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
@@ -536,7 +546,7 @@ if(MATPLOTLIB_FOUND)
 endif()
 
 # Vineyard
-add_gudhi_py_test(test_vineyard)
+add_gudhi_py_test_with_file_path(test_vineyard "${CMAKE_SOURCE_DIR}/data/points/unknotting_rings/rings")
 
 # Set missing or not modules
 set(GUDHI_MODULES ${GUDHI_MODULES} "python" CACHE INTERNAL "GUDHI_MODULES")

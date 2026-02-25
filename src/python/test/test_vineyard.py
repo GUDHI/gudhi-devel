@@ -8,6 +8,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
+import pytest
 from pathlib import Path
 import glob
 import numpy as np
@@ -16,22 +17,18 @@ from gudhi import RipsComplex
 from gudhi.vineyard import Vineyard, PointCloudRipsVineyard
 
 
-# not really safe, but as giving command line arguments to pytest while using ctest ask for some
-# more complicated gymnastic, I opted for this option for now...
-def get_file_path_prefix():
-    parent_dir_name = Path(__file__).resolve().parent.parent.parent.name
-    if parent_dir_name == "src":
-        # devel version
-        return "../../../data/points/unknotting_rings/rings"
-    # user version
-    return "../../data/points/unknotting_rings/rings"
+@pytest.fixture
+def file_path_arg(request):
+    return request.config.getoption("--filepath")
 
 
-def test_rips_vineyard():
-    path_prefix = get_file_path_prefix()
+def test_rips_vineyard(file_path_arg):
+    path_prefix = file_path_arg
     path_suffix = ".txt"
 
     number_of_updates = len(glob.glob(path_prefix + "*" + path_suffix)) - 1
+
+    assert number_of_updates == 23
 
     rvy = PointCloudRipsVineyard.from_files(path_prefix)
     vineyard = rvy.get_current_vineyard_view()
