@@ -192,6 +192,11 @@ class numeric_limits<Gudhi::Vector_filtration_value> {
     throw std::logic_error(
         "The maximal value cannot be represented with no finite numbers of parameters.");
   };
+
+  static Gudhi::Vector_filtration_value lowest() noexcept(false) {
+    throw std::logic_error(
+        "The minimal value cannot be represented with no finite numbers of parameters.");
+  };
 };
 
 }  // namespace std
