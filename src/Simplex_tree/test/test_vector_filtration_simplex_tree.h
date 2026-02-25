@@ -34,6 +34,15 @@ class Vector_filtration_value : public std::vector<int>
   Vector_filtration_value(const_iterator start, const_iterator end) : Base(start, end) {}
   // Vector_filtration_value(const Gudhi::simplex_tree::empty_filtration_value_t& e) : Base(0) {}
 
+  friend Vector_filtration_value operator-(Vector_filtration_value f) {
+    std::for_each(f.begin(), f.end(), [](int &v) { v = -v; });
+    return f;
+  }
+
+  friend bool is_positive_infinity(const Vector_filtration_value& f) {
+    return f.size() == 1 && f[0] == std::numeric_limits<int>::max();
+  }
+
   friend bool unify_lifetimes(Vector_filtration_value& f1, const Vector_filtration_value& f2) {
     int max = std::numeric_limits<int>::max();
     bool f1_is_inf = f1.size() == 1 && f1[0] == max;
@@ -182,6 +191,11 @@ class numeric_limits<Gudhi::Vector_filtration_value> {
   static Gudhi::Vector_filtration_value max() noexcept(false) {
     throw std::logic_error(
         "The maximal value cannot be represented with no finite numbers of parameters.");
+  };
+
+  static Gudhi::Vector_filtration_value lowest() noexcept(false) {
+    throw std::logic_error(
+        "The minimal value cannot be represented with no finite numbers of parameters.");
   };
 };
 
