@@ -208,7 +208,7 @@ class Vineyard_base
 
     for (Index i = 1; i < order_.size(); i++) {
       int curr = i;
-      // speed up when ordered by dim, to avoid unnecessary swaps
+      // speed up because ordered by dim, to avoid unnecessary swaps
       while (curr > 0 && matrix_.get_column_dimension(curr) == matrix_.get_column_dimension(curr - 1) &&
              filtrationValues[order_[curr]] < filtrationValues[order_[curr - 1]]) {
         if constexpr (!Matrix_options::is_of_boundary_type) {
@@ -332,7 +332,7 @@ class Vineyard_base
       stream << v << " ";
     }
     stream << "\n";
-    if constexpr (Matrix_options::is_of_boundary_type) {
+    if constexpr (!Matrix_options::is_of_boundary_type) {
       stream << "ID to position map:\n";
       if (vyd.idToPos_) {
         for (auto v : *vyd.idToPos_) {
