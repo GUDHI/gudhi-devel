@@ -14,7 +14,7 @@ __license__ = "MIT"
 import numpy as np
 import os
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 
 from numpy.random import Generator
 from gudhi.random import GudhiBitGenerator
@@ -53,7 +53,7 @@ def _generate_grid_points_on_torus(n_samples: int, dim: int):
         array_points_idx[..., i] = x
     return array_points[array_points_idx].reshape(-1, 2 * dim)
 
-def _get_bit_generator(rng: Optional[int|GudhiBitGenerator]):
+def _get_bit_generator(rng: Optional[Union[int, GudhiBitGenerator]]):
     if rng is None:
         return GudhiBitGenerator()
     elif isinstance(rng, (np.integer, int)):
@@ -64,7 +64,7 @@ def _get_bit_generator(rng: Optional[int|GudhiBitGenerator]):
         raise ValueError(f"Unknown type for rng '{type(rng)}'.")
 
 def torus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random",
-          rng: Optional[int|GudhiBitGenerator] = None):
+          rng: Optional[Union[int, GudhiBitGenerator]] = None):
     """
     Generate points on a flat dim-torus in R^2dim either randomly or on a grid
 
@@ -94,7 +94,7 @@ def torus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random"
         raise ValueError(f"Sample type '{sample}' is not supported")
 
 def sphere(n_samples: int, ambient_dim: int, radius: float = 1., sample: Literal["random"] = "random",
-           rng: Optional[GudhiBitGenerator] = None):
+           rng: Optional[Union[int, GudhiBitGenerator]] = None):
     """
     Generate random i.i.d. points uniformly on a (d-1)-sphere in R^d
     
@@ -115,7 +115,7 @@ def sphere(n_samples: int, ambient_dim: int, radius: float = 1., sample: Literal
     return _sphere(n_samples, ambient_dim, radius, sample, bg.rng)
 
 def ctorus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random",
-           rng: Optional[GudhiBitGenerator] = None):
+           rng: Optional[Union[int, GudhiBitGenerator]] = None):
     """
     Generate random i.i.d. points on a d-torus in R^2d or as a grid
     
