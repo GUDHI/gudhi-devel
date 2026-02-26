@@ -37,8 +37,10 @@ function(nanobind_add_module_with_targets)
     message(DEBUG "nanobind_add_module(${EXECUTABLE_NAME} ${EXE_SOURCES}) + target_link_libraries(${ARGN})")
     # Maintain a list of nanobind modules - Mainly for sphinx purposes to know when the documentation is "buildable"
     set(GUDHI_NANOBIND_MODULES ${GUDHI_NANOBIND_MODULES} ${EXECUTABLE_NAME} CACHE INTERNAL "GUDHI_NANOBIND_MODULES")
+
     # cf. https://nanobind.readthedocs.io/en/latest/api_cmake.html#high-level-interface
     nanobind_add_module(${EXECUTABLE_NAME} NB_STATIC NOMINSIZE ${EXE_SOURCES})
+
     if(MSVC)
       target_compile_options(${EXECUTABLE_NAME} PRIVATE "-DNOMINMAX")
     endif()
@@ -533,6 +535,11 @@ endif()
 # persistence graphical tools
 if(MATPLOTLIB_FOUND)
   add_gudhi_py_test(test_persistence_graphical_tools)
+endif()
+
+# random
+if (TARGET CGAL::CGAL)
+  add_gudhi_py_test(test_random)
 endif()
 
 # Set missing or not modules

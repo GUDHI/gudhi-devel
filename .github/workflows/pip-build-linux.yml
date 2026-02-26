@@ -47,6 +47,7 @@ jobs:
           $PYTHON39/bin/python -m pytest src/python/test/test_euclidean_witness_complex.py
           $PYTHON39/bin/python -m pytest src/python/test/test_off.py
           $PYTHON39/bin/python -m pytest src/python/test/test_persistence_graphical_tools.py
+          $PYTHON39/bin/python -m pytest src/python/test/test_random.py
           $PYTHON39/bin/python -m pytest src/python/test/test_reader_utils.py
           $PYTHON39/bin/python -m pytest src/python/test/test_remote_datasets.py
           $PYTHON39/bin/python -m pytest src/python/test/test_representations_interface.py
