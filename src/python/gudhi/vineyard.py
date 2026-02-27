@@ -15,7 +15,7 @@ import os
 import glob
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import Literal
+from typing import Literal, Optional, Union
 import warnings
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -34,8 +34,8 @@ def _verify_validity(
     path_prefix: str,
     path_suffix: str = ".txt",
     first_index: int = 0,
-    delimiter: str | None = None,
-    number_of_updates: int | None = None,
+    delimiter: Optional[str] = None,
+    number_of_updates: Optional[int] = None,
 ) -> bool:
     # assumes counting starts with 0
     # will fail with "file not found" if not
@@ -118,10 +118,12 @@ class Vineyard(t.Vineyard_interface):
 
     def initialize(
         self,
-        filtered_cpx: SimplexTree | CubicalComplex | PeriodicCubicalComplex | None = None,
-        boundaries: list[np.ndarray] | None = None,
-        dimensions: np.ndarray | None = None,
-        filtration_values: np.ndarray | None = None,
+        filtered_cpx: Optional[
+            Union[SimplexTree, CubicalComplex, PeriodicCubicalComplex]
+        ] = None,
+        boundaries: Optional[list[np.ndarray]] = None,
+        dimensions: Optional[np.ndarray] = None,
+        filtration_values: Optional[np.ndarray] = None,
         number_of_updates: int = 0,
     ) -> list[np.ndarray]:
         """Initializes the vineyard with the first persistence barcode. If another vineyard was initialized before,
@@ -177,8 +179,10 @@ class Vineyard(t.Vineyard_interface):
 
     def update(
         self,
-        filtered_cpx: SimplexTree | CubicalComplex | PeriodicCubicalComplex | None = None,
-        filtration_values: np.ndarray | None = None,
+        filtered_cpx: Optional[
+            Union[SimplexTree, CubicalComplex, PeriodicCubicalComplex]
+        ] = None,
+        filtration_values: Optional[np.ndarray] = None,
     ) -> list[np.ndarray]:
         """Adds a layer to the current vineyard by updating the persistence diagram such that it corresponds to the
         given filtration.
@@ -212,7 +216,7 @@ class Vineyard(t.Vineyard_interface):
         return self.get_current_vineyard_view()
 
     def get_current_vineyard_view(
-        self, dim: int | None = None
+        self, dim: Optional[int] = None
     ) -> list[np.ndarray] | np.ndarray:
         """Returns the list of read-only and unfiltered vine views. See :meth:`get_current_vineyard` for a more flexible
         output. The format of the list is `dimension x vine number x update number x (birth, death)`, e.g.,
@@ -248,7 +252,7 @@ class Vineyard(t.Vineyard_interface):
         return vineyard[mask]
 
     def get_current_vineyard(
-        self, dim: int | None = None, min_bar_length: np.number = -1
+        self, dim: Optional[int] = None, min_bar_length: np.number = -1
     ) -> list[np.ndarray] | np.ndarray:
         """Returns a copy of the current vineyard. If no copy is desired, see :meth:`get_current_vineyard_view`.
         The format of the returned list is `dimension x vine number x update number x (birth, death)`, e.g.,
@@ -378,13 +382,13 @@ class Vineyard(t.Vineyard_interface):
     # TODO: option to handle points at infinity
     def plot_vineyards(
         self,
-        dim: int | None = None,
-        max_dim: int | None = None,
+        dim: Optional[int] = None,
+        max_dim: Optional[int] = None,
         min_bar_length: np.number = -1,
         noise_option: Literal[
             "none", "gray_diagonal", "gray_band", "erase_diagonal", "erase_band"
         ] = "gray_diagonal",
-        square_scaling: bool | None = True,
+        square_scaling: Optional[bool] = True,
     ):
         """Plots the current vineyard, except for completely trivial vines (vines where all coordinates are on
         the diagonal). The points at infinity are mapped to a finite point a bit away from the other points.
@@ -493,9 +497,9 @@ class PointCloudRipsVineyard:
         path_prefix: str,
         path_suffix: str = ".txt",
         first_index: int = 0,
-        number_of_updates: int | None = None,
+        number_of_updates: Optional[int] = None,
         file_type: Literal["distance_matrix", "point_cloud"] = "point_cloud",
-        delimiter: str | None = None,
+        delimiter: Optional[str] = None,
         store_point_coordinates: bool = False,
         store_cycles: bool = False,
     ):
@@ -581,7 +585,7 @@ class PointCloudRipsVineyard:
         cls,
         data: ArrayLike,
         first_index: int = 0,
-        number_of_updates: int | None = None,
+        number_of_updates: Optional[int] = None,
         data_type: Literal["distance_matrix", "point_cloud"] = "point_cloud",
         store_point_coordinates: bool = False,
         store_cycles: bool = False,
@@ -663,9 +667,9 @@ class PointCloudRipsVineyard:
 
     def initialize(
         self,
-        data: ArrayLike | None = None,
-        path: str | None = None,
-        delimiter: str | None = None,
+        data: Optional[ArrayLike] = None,
+        path: Optional[str] = None,
+        delimiter: Optional[str] = None,
         data_type: Literal["distance_matrix", "point_cloud"] = "point_cloud",
         number_of_updates: int = 0,
     ):
@@ -725,9 +729,9 @@ class PointCloudRipsVineyard:
 
     def update(
         self,
-        data: ArrayLike | None = None,
-        path: str | None = None,
-        delimiter: str | None = None,
+        data: Optional[ArrayLike] = None,
+        path: Optional[str] = None,
+        delimiter: Optional[str] = None,
         data_type: Literal["distance_matrix", "point_cloud"] = "point_cloud",
     ):
         """Adds a layer to the current vineyard by updating the persistence diagram such that it corresponds to the
@@ -776,7 +780,7 @@ class PointCloudRipsVineyard:
             self._cycles.append(self._vineyard.get_latest_representative_cycles())
 
     def get_current_vineyard_view(
-        self, dim: int | None = None
+        self, dim: Optional[int] = None
     ) -> list[np.ndarray] | np.ndarray:
         """Returns the list of read-only and unfiltered vine views. See :meth:`get_current_vineyard` for a more flexible
         output. The format of the list is `dimension x vine number x update number x (birth, death)`, e.g.,
@@ -795,7 +799,7 @@ class PointCloudRipsVineyard:
         return self._vineyard.get_current_vineyard_view(dim)
 
     def get_current_vineyard(
-        self, dim: int | None = None, min_bar_length: np.number = -1
+        self, dim: Optional[int] = None, min_bar_length: np.number = -1
     ) -> list[np.ndarray] | np.ndarray:
         """Returns a copy of the current vineyard. If no copy is desired, see :meth:`get_current_vineyard_view`.
         The format of the returned list is `dimension x vine number x update number x (birth, death)`, e.g.,
@@ -851,7 +855,7 @@ class PointCloudRipsVineyard:
         ]
         return cpx, dims
 
-    def get_points(self, step: int | None = None) -> np.ndarray:
+    def get_points(self, step: Optional[int] = None) -> np.ndarray:
         """If `store_point_coordinates` was set to `True` at construction and the provided data were point clouds,
         returns the points stored at each step. The order of the original point clouds is preserved. The array format
         is `step x point number x number of coordinates`.
@@ -886,7 +890,7 @@ class PointCloudRipsVineyard:
         }
 
     def get_1D_representative_cycles(
-        self, step: int | None = None, min_bar_length: np.number = 0
+        self, step: Optional[int] = None, min_bar_length: np.number = 0
     ) -> (
         list[dict[tuple[np.number, np.number], np.ndarray]]
         | dict[tuple[np.number, np.number], np.ndarray]
@@ -931,8 +935,8 @@ class PointCloudRipsVineyard:
 
     def plot_vineyards(
         self,
-        dim: int | None = None,
-        max_dim: int | None = None,
+        dim: Optional[int] = None,
+        max_dim: Optional[int] = None,
         min_bar_length: np.number = -1,
         noise_option: Literal[
             "none", "gray_diagonal", "gray_band", "erase_diagonal", "erase_band"
@@ -981,7 +985,10 @@ class PointCloudRipsVineyard:
                 axes.plot([u[0], v[0]], [u[1], v[1]], [u[2], v[2]], color=c)
 
     def plot_1D_representative_cycles(
-        self, step: int, index: int | None = None, min_bar_length: np.number | None = None
+        self,
+        step: int,
+        index: Optional[int] = None,
+        min_bar_length: Optional[np.number] = None,
     ):
         """If `store_cycles` and `store_point_coordinates` were set to `True` at construction, plots the representative
         1-cycles at given step, except for those representing bars of length 0. The point coordinates must be 2 or
