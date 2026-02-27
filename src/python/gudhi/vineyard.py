@@ -217,7 +217,7 @@ class Vineyard(t.Vineyard_interface):
 
     def get_current_vineyard_view(
         self, dim: Optional[int] = None
-    ) -> list[np.ndarray] | np.ndarray:
+    ) -> Union[list[np.ndarray], np.ndarray]:
         """Returns the list of read-only and unfiltered vine views. See :meth:`get_current_vineyard` for a more flexible
         output. The format of the list is `dimension x vine number x update number x (birth, death)`, e.g.,
         `vineyard[a][b][c][0]` returns the birth value of the `a`-dimensional vine number `b` at step `c`
@@ -253,7 +253,7 @@ class Vineyard(t.Vineyard_interface):
 
     def get_current_vineyard(
         self, dim: Optional[int] = None, min_bar_length: np.number = -1
-    ) -> list[np.ndarray] | np.ndarray:
+    ) -> Union[list[np.ndarray], np.ndarray]:
         """Returns a copy of the current vineyard. If no copy is desired, see :meth:`get_current_vineyard_view`.
         The format of the returned list is `dimension x vine number x update number x (birth, death)`, e.g.,
         `vineyard[a][b][c][0]` returns the birth value of the `a`-dimensional vine number `b` at step `c`
@@ -781,7 +781,7 @@ class PointCloudRipsVineyard:
 
     def get_current_vineyard_view(
         self, dim: Optional[int] = None
-    ) -> list[np.ndarray] | np.ndarray:
+    ) -> Union[list[np.ndarray], np.ndarray]:
         """Returns the list of read-only and unfiltered vine views. See :meth:`get_current_vineyard` for a more flexible
         output. The format of the list is `dimension x vine number x update number x (birth, death)`, e.g.,
         `vineyard[a][b][c][0]` returns the birth value of the `a`-dimensional vine number `b` at step `c`
@@ -800,7 +800,7 @@ class PointCloudRipsVineyard:
 
     def get_current_vineyard(
         self, dim: Optional[int] = None, min_bar_length: np.number = -1
-    ) -> list[np.ndarray] | np.ndarray:
+    ) -> Union[list[np.ndarray], np.ndarray]:
         """Returns a copy of the current vineyard. If no copy is desired, see :meth:`get_current_vineyard_view`.
         The format of the returned list is `dimension x vine number x update number x (birth, death)`, e.g.,
         `vineyard[a][b][c][0]` returns the birth value of the `a`-dimensional vine number `b` at step `c`
@@ -891,10 +891,10 @@ class PointCloudRipsVineyard:
 
     def get_1D_representative_cycles(
         self, step: Optional[int] = None, min_bar_length: np.number = 0
-    ) -> (
-        list[dict[tuple[np.number, np.number], np.ndarray]]
-        | dict[tuple[np.number, np.number], np.ndarray]
-    ):
+    ) -> Union[
+        list[dict[tuple[np.number, np.number], np.ndarray]],
+        dict[tuple[np.number, np.number], np.ndarray],
+    ]:
         """If `store_cycles` was set to `True` at construction, returns the stored non-trivial representative 1-cycles.
         The output is a list of dictionaries of the form :code:`step x {idx : cycle}`, such that:
 
