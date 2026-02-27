@@ -114,10 +114,10 @@ class Multi_parameter_filtration
    * @brief Default constructor. Builds filtration value with one generator and given number of parameters.
    * If Co is false, all values are at -inf, if Co is true, all values are at +inf.
    *
-   * @param number_of_parameters If negative, takes the default value instead. Default value: 2.
+   * @param numberOfParameters If negative, takes the default value instead. Default value: 2.
    */
-  Multi_parameter_filtration(int number_of_parameters = 2)
-      : generators_(number_of_parameters < 0 ? 2 : number_of_parameters, _get_default_value()),
+  Multi_parameter_filtration(int numberOfParameters = 2)
+      : generators_(numberOfParameters < 0 ? 2 : numberOfParameters, _get_default_value()),
         generator_view_(generators_.data(), generators_.empty() ? 0 : 1, generators_.size())
   {}
 
@@ -125,11 +125,11 @@ class Multi_parameter_filtration
    * @brief Builds filtration value with one generator and given number of parameters.
    * All values are initialized at the given value.
    *
-   * @param number_of_parameters If negative, is set to 2 instead.
+   * @param numberOfParameters If negative, is set to 2 instead.
    * @param value Initialization value for every value in the generator.
    */
-  Multi_parameter_filtration(int number_of_parameters, T value)
-      : generators_(number_of_parameters < 0 ? 2 : number_of_parameters, value),
+  Multi_parameter_filtration(int numberOfParameters, T value)
+      : generators_(numberOfParameters < 0 ? 2 : numberOfParameters, value),
         generator_view_(generators_.data(), generators_.empty() ? 0 : 1, generators_.size())
   {}
 
@@ -153,12 +153,12 @@ class Multi_parameter_filtration
    *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyInputIterator and
    * dereferenced elements have to be convertible to `T`.
-   * @param it_begin Iterator pointing to the start of the range.
-   * @param it_end Iterator pointing to the end of the range.
+   * @param itBegin Iterator pointing to the start of the range.
+   * @param itEnd Iterator pointing to the end of the range.
    */
   template <class Iterator>
-  Multi_parameter_filtration(Iterator it_begin, Iterator it_end)
-      : generators_(it_begin, it_end),
+  Multi_parameter_filtration(Iterator itBegin, Iterator itEnd)
+      : generators_(itBegin, itEnd),
         generator_view_(generators_.data(), generators_.empty() ? 0 : 1, generators_.size())
   {}
 
@@ -170,16 +170,16 @@ class Multi_parameter_filtration
    *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyInputIterator and
    * dereferenced elements have to be convertible to `T`.
-   * @param it_begin Iterator pointing to the start of the range.
-   * @param it_end Iterator pointing to the end of the range.
-   * @param number_of_parameters Negative values are associated to 0.
+   * @param itBegin Iterator pointing to the start of the range.
+   * @param itEnd Iterator pointing to the end of the range.
+   * @param numberOfParameters Negative values are associated to 0.
    */
   template <class Iterator, class = std::enable_if_t<!std::is_arithmetic_v<Iterator> > >
-  Multi_parameter_filtration(Iterator it_begin, Iterator it_end, int number_of_parameters)
-      : generators_(it_begin, it_end),
+  Multi_parameter_filtration(Iterator itBegin, Iterator itEnd, int numberOfParameters)
+      : generators_(itBegin, itEnd),
         generator_view_(generators_.data(),
-                        number_of_parameters <= 0 ? 0 : generators_.size() / number_of_parameters,
-                        number_of_parameters)
+                        numberOfParameters <= 0 ? 0 : generators_.size() / numberOfParameters,
+                        numberOfParameters)
   {
     if constexpr (Ensure1Criticality) {
       if (generator_view_.extent(0) != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
@@ -194,15 +194,15 @@ class Multi_parameter_filtration
    * @ref Multi_parameter_filtration::Underlying_container "" and copied into the underlying container of the class.
    *
    * @param generators Values.
-   * @param number_of_parameters Negative values are associated to 0.
+   * @param numberOfParameters Negative values are associated to 0.
    */
-  Multi_parameter_filtration(const Underlying_container &generators, int number_of_parameters)
+  Multi_parameter_filtration(const Underlying_container &generators, int numberOfParameters)
       : generators_(generators),
         generator_view_(generators_.data(),
-                        number_of_parameters <= 0 ? 0 : generators_.size() / number_of_parameters,
-                        number_of_parameters)
+                        numberOfParameters <= 0 ? 0 : generators_.size() / numberOfParameters,
+                        numberOfParameters)
   {
-    GUDHI_CHECK(number_of_parameters > 0 || generators_.empty(),
+    GUDHI_CHECK(numberOfParameters > 0 || generators_.empty(),
                 std::invalid_argument("Number of parameters cannot be 0 if the container is not empty."));
 
     if constexpr (Ensure1Criticality) {
@@ -218,15 +218,15 @@ class Multi_parameter_filtration
    * @ref Multi_parameter_filtration::Underlying_container "" and **moved** into the underlying container of the class.
    *
    * @param generators Values to move.
-   * @param number_of_parameters Negative values are associated to 0.
+   * @param numberOfParameters Negative values are associated to 0.
    */
-  Multi_parameter_filtration(Underlying_container &&generators, int number_of_parameters)
+  Multi_parameter_filtration(Underlying_container &&generators, int numberOfParameters)
       : generators_(std::move(generators)),
         generator_view_(generators_.data(),
-                        number_of_parameters <= 0 ? 0 : generators_.size() / number_of_parameters,
-                        number_of_parameters)
+                        numberOfParameters <= 0 ? 0 : generators_.size() / numberOfParameters,
+                        numberOfParameters)
   {
-    GUDHI_CHECK(number_of_parameters > 0 || generators_.empty(),
+    GUDHI_CHECK(numberOfParameters > 0 || generators_.empty(),
                 std::invalid_argument("Number of parameters cannot be 0 if the container is not empty."));
 
     if constexpr (Ensure1Criticality) {
@@ -519,27 +519,27 @@ class Multi_parameter_filtration
   /**
    * @brief Returns a filtration value with given number of parameters for which @ref is_plus_inf() returns `true`.
    */
-  static Multi_parameter_filtration inf(int number_of_parameters)
+  static Multi_parameter_filtration inf(int numberOfParameters)
   {
-    return Multi_parameter_filtration(number_of_parameters, T_inf);
+    return Multi_parameter_filtration(numberOfParameters, T_inf);
   }
 
   /**
    * @brief Returns a filtration value with given number of parameters for which @ref is_minus_inf() returns `true`.
    */
-  static Multi_parameter_filtration minus_inf(int number_of_parameters)
+  static Multi_parameter_filtration minus_inf(int numberOfParameters)
   {
-    return Multi_parameter_filtration(number_of_parameters, T_m_inf);
+    return Multi_parameter_filtration(numberOfParameters, T_m_inf);
   }
 
   /**
    * @brief If `std::numeric_limits<T>::has_quiet_NaN` is true, returns a filtration value with given number of
    * parameters for which @ref is_nan() returns `true`. Otherwise, throws.
    */
-  static Multi_parameter_filtration nan(int number_of_parameters)
+  static Multi_parameter_filtration nan(int numberOfParameters)
   {
     if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-      return Multi_parameter_filtration(number_of_parameters, std::numeric_limits<T>::quiet_NaN());
+      return Multi_parameter_filtration(numberOfParameters, std::numeric_limits<T>::quiet_NaN());
     } else {
       throw std::logic_error("No NaN value exists.");
     }
@@ -2629,7 +2629,7 @@ class numeric_limits<Gudhi::multi_filtration::Multi_parameter_filtration<T, Co, 
   {
     throw std::logic_error(
         "The max value cannot be represented with no finite numbers of parameters."
-        "Use `max(number_of_parameters)` instead");
+        "Use `max(numberOfParameters)` instead");
   };
 
   static constexpr Filtration_value max(std::size_t p) noexcept

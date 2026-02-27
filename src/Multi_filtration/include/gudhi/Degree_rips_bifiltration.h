@@ -94,19 +94,19 @@ class Degree_rips_bifiltration
    * @brief Default constructor. Builds filtration value with one generator `(val, 0)`.
    * If Co is false, `val` is -inf, if Co is true, `val` is at +inf.
    *
-   * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
+   * @param numberOfParameters Ignored, the number of parameters is always 2. For interface purposes only.
    */
-  Degree_rips_bifiltration([[maybe_unused]] int number_of_parameters = 2) : generators_(1, _get_default_value()) {}
+  Degree_rips_bifiltration([[maybe_unused]] int numberOfParameters = 2) : generators_(1, _get_default_value()) {}
 
   explicit Degree_rips_bifiltration(Gudhi::simplex_tree::empty_filtration_value_t /*e*/) : generators_(0) {}
 
   /**
    * @brief Builds a filtration value with one generator `(value, 0)`.
    *
-   * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
+   * @param numberOfParameters Ignored, the number of parameters is always 2. For interface purposes only.
    * @param value Initialization value for the second parameter.
    */
-  Degree_rips_bifiltration([[maybe_unused]] int number_of_parameters, T value) : generators_(1, value) {}
+  Degree_rips_bifiltration([[maybe_unused]] int numberOfParameters, T value) : generators_(1, value) {}
 
   /**
    * @brief Builds filtration value with one generator `(val, i)`, where `val` and `i` are the two first elements
@@ -127,13 +127,13 @@ class Degree_rips_bifiltration
    *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyInputIterator and
    * dereferenced elements have to be convertible to `T`.
-   * @param it_begin Iterator pointing to the start of the range.
-   * @param it_end Iterator pointing to the end of the range.
+   * @param itBegin Iterator pointing to the start of the range.
+   * @param itEnd Iterator pointing to the end of the range.
    */
   template <class Iterator, class = std::enable_if_t<!std::is_arithmetic_v<Iterator> > >
-  Degree_rips_bifiltration(Iterator it_begin, [[maybe_unused]] Iterator it_end) : generators_(1, *it_begin)
+  Degree_rips_bifiltration(Iterator itBegin, [[maybe_unused]] Iterator itEnd) : generators_(1, *itBegin)
   {
-    GUDHI_CHECK(*(std::next(it_begin)) == 0, std::invalid_argument("Second value of the range has to be 0"));
+    GUDHI_CHECK(*(std::next(itBegin)) == 0, std::invalid_argument("Second value of the range has to be 0"));
   }
 
   /**
@@ -145,21 +145,21 @@ class Degree_rips_bifiltration
    *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyForwardIterator and
    * dereferenced elements have to be convertible to `T`.
-   * @param it_begin Iterator pointing to the start of the range.
-   * @param it_end Iterator pointing to the end of the range.
-   * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
+   * @param itBegin Iterator pointing to the start of the range.
+   * @param itEnd Iterator pointing to the end of the range.
+   * @param numberOfParameters Ignored, the number of parameters is always 2. For interface purposes only.
    */
   template <class Iterator, class = std::enable_if_t<!std::is_arithmetic_v<Iterator> > >
-  Degree_rips_bifiltration(Iterator it_begin, Iterator it_end, [[maybe_unused]] int number_of_parameters)
+  Degree_rips_bifiltration(Iterator itBegin, Iterator itEnd, [[maybe_unused]] int numberOfParameters)
       : generators_()
   {
-    size_type num_gen = std::distance(it_begin, it_end) / 2;
+    size_type numGen = std::distance(itBegin, itEnd) / 2;
     if constexpr (Ensure1Criticality) {
-      if (num_gen > 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
+      if (numGen > 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
-    generators_.resize(num_gen);
-    Iterator it = it_begin;
-    for (size_type i = 0; i < num_gen; ++i) {
+    generators_.resize(numGen);
+    Iterator it = itBegin;
+    for (size_type i = 0; i < numGen; ++i) {
       generators_[i] = *it;
       ++it;
       GUDHI_CHECK(
@@ -177,9 +177,9 @@ class Degree_rips_bifiltration
    * underlying container of the class.
    *
    * @param generators Values for the second parameter.
-   * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
+   * @param numberOfParameters Ignored, the number of parameters is always 2. For interface purposes only.
    */
-  Degree_rips_bifiltration(const Underlying_container &generators, [[maybe_unused]] int number_of_parameters)
+  Degree_rips_bifiltration(const Underlying_container &generators, [[maybe_unused]] int numberOfParameters)
       : generators_(generators)
   {
     if constexpr (Ensure1Criticality) {
@@ -194,9 +194,9 @@ class Degree_rips_bifiltration
    * the underlying container of the class.
    *
    * @param generators Values to move.
-   * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
+   * @param numberOfParameters Ignored, the number of parameters is always 2. For interface purposes only.
    */
-  Degree_rips_bifiltration(Underlying_container &&generators, [[maybe_unused]] int number_of_parameters)
+  Degree_rips_bifiltration(Underlying_container &&generators, [[maybe_unused]] int numberOfParameters)
       : generators_(std::move(generators))
   {
     if constexpr (Ensure1Criticality) {
@@ -522,27 +522,27 @@ class Degree_rips_bifiltration
   /**
    * @brief Returns a filtration value for which @ref is_plus_inf() returns `true`. Throws if `Co` is true.
    */
-  static Degree_rips_bifiltration inf(int number_of_parameters = 2)
+  static Degree_rips_bifiltration inf(int numberOfParameters = 2)
   {
     if constexpr (Co) {
       throw std::logic_error("No biggest value possible for Co-filtrations yet.");
     } else {
-      return Degree_rips_bifiltration(number_of_parameters, T_inf);
+      return Degree_rips_bifiltration(numberOfParameters, T_inf);
     }
   }
 
   /**
    * @brief Returns a filtration value for which @ref is_minus_inf() returns `true`.
    */
-  static Degree_rips_bifiltration minus_inf(int number_of_parameters = 2)
+  static Degree_rips_bifiltration minus_inf(int numberOfParameters = 2)
   {
-    return Degree_rips_bifiltration(number_of_parameters, T_m_inf);
+    return Degree_rips_bifiltration(numberOfParameters, T_m_inf);
   }
 
   /**
    * @brief Returns a filtration value for which @ref is_nan() returns `true`.
    */
-  static constexpr Degree_rips_bifiltration nan([[maybe_unused]] int number_of_parameters = 2)
+  static constexpr Degree_rips_bifiltration nan([[maybe_unused]] int numberOfParameters = 2)
   {
     return Degree_rips_bifiltration(Gudhi::simplex_tree::empty_filtration_value_t());
   }

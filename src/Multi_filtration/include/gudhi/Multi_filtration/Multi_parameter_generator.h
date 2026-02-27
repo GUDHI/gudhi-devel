@@ -72,20 +72,20 @@ class Multi_parameter_generator
    * @brief Default constructor. Builds generator with given number of parameters.
    * All values are set at -inf.
    *
-   * @param number_of_parameters If negative, takes the default value instead. Default value: 1.
+   * @param numberOfParameters If negative, takes the default value instead. Default value: 1.
    */
-  Multi_parameter_generator(int number_of_parameters = 1)
-      : generator_(number_of_parameters < 0 ? 1 : number_of_parameters, _get_default_value())
+  Multi_parameter_generator(int numberOfParameters = 1)
+      : generator_(numberOfParameters < 0 ? 1 : numberOfParameters, _get_default_value())
   {}
 
   /**
    * @brief Builds generator with given number of parameters. All values are initialized at the given value.
    *
-   * @param number_of_parameters If negative, is set to 1 instead.
+   * @param numberOfParameters If negative, is set to 1 instead.
    * @param value Initialization value for every value in the generator.
    */
-  Multi_parameter_generator(int number_of_parameters, T value)
-      : generator_(number_of_parameters < 0 ? 1 : number_of_parameters, value)
+  Multi_parameter_generator(int numberOfParameters, T value)
+      : generator_(numberOfParameters < 0 ? 1 : numberOfParameters, value)
   {}
 
   /**
@@ -106,11 +106,11 @@ class Multi_parameter_generator
    *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyInputIterator and
    * dereferenced elements have to be convertible to `T`.
-   * @param it_begin Iterator pointing to the start of the range.
-   * @param it_end Iterator pointing to the end of the range.
+   * @param itBegin Iterator pointing to the start of the range.
+   * @param itEnd Iterator pointing to the end of the range.
    */
   template <class Iterator>
-  Multi_parameter_generator(Iterator it_begin, Iterator it_end) : generator_(it_begin, it_end)
+  Multi_parameter_generator(Iterator itBegin, Iterator itEnd) : generator_(itBegin, itEnd)
   {}
 
   /**
@@ -1230,22 +1230,22 @@ class Multi_parameter_generator
   /**
    * @brief If the filtration value is at +/- infinity or NaN, the underlying container will probably only contain
    * one element, representing the value. This method forces the underlying container to contain explicitly
-   * `number_of_parameters` elements. If the container is empty, it will fill all new elements with the default
+   * `numberOfParameters` elements. If the container is empty, it will fill all new elements with the default
    * value -inf. If the container had more than one element, it does nothing and fails in Debug Mode if the number was
-   * different from `number_of_parameters`.
+   * different from `numberOfParameters`.
    */
-  void force_size_to_number_of_parameters(int number_of_parameters)
+  void force_size_to_number_of_parameters(int numberOfParameters)
   {
-    if (number_of_parameters < 1) return;
+    if (numberOfParameters < 1) return;
 
     if (generator_.size() > 1) {
-      GUDHI_CHECK(static_cast<std::size_t>(number_of_parameters) == generator_.size(),
+      GUDHI_CHECK(static_cast<std::size_t>(numberOfParameters) == generator_.size(),
                   std::invalid_argument("Cannot force size to another number of parameters than set."));
       return;
     }
 
     auto val = generator_.empty() ? _get_default_value() : generator_[0];
-    generator_.resize(number_of_parameters, val);
+    generator_.resize(numberOfParameters, val);
   }
 
   /**
@@ -1704,7 +1704,7 @@ class numeric_limits<Gudhi::multi_filtration::Multi_parameter_generator<T> >
   {
     throw std::logic_error(
         "The max value cannot be represented with no finite numbers of parameters."
-        "Use `max(number_of_parameters)` instead");
+        "Use `max(numberOfParameters)` instead");
   };
 
   static constexpr Generator max(std::size_t p) noexcept { return Generator(p, std::numeric_limits<T>::max()); };
