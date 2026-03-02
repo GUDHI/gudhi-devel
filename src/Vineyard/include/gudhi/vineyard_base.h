@@ -88,8 +88,8 @@ class Vineyard_base
 {
  public:
   using Options = VineyardOptions;
-  using Index = typename Options::Index;                    /**< Complex index type. */
-  using Dimension = typename Options::Dimension;            /**< Dimension type. */
+  using Index = typename Options::Index;                            /**< Complex index type. */
+  using Dimension = typename Options::Dimension;                    /**< Dimension type. */
   using Permutation = std::vector<Index>;                           /**< Filtration permutation map. */
 
  private:
@@ -114,10 +114,10 @@ class Vineyard_base
   /**
    * @brief Constructor initializing the first barcode.
    * 
-   * @tparam Boundary_range Range of ranges of integers. Has to implement a `size` method and an `operator[]` with
+   * @tparam BoundaryRange Range of ranges of integers. Has to implement a `size` method and an `operator[]` with
    * a another nested `operator[]`.
-   * @tparam Dimension_range Range of integers. Has to implement a `operator[]` method.
-   * @tparam Filtration_range Range of arithmetic values or at least of values with an `operator<`. Has to implement a
+   * @tparam DimensionRange Range of integers. Has to implement a `operator[]` method.
+   * @tparam FiltrationRange Range of arithmetic values or at least of values with an `operator<`. Has to implement a
    * `operator[]` method.
    * @param boundaryMatrix Boundary container of the filtered complex. The container does not need to be ordered, but
    * the boundaries have to be represented by the indices of their faces in the container.
@@ -127,10 +127,10 @@ class Vineyard_base
    * correspond to the filtration value of the cell represented by the boundary at index \f$ i \f$ in `boundaryMatrix`.
    * Note that the filtration is assumed to be a 1-parameter filtration.
    */
-  template <class Boundary_range, class Dimension_range, class Filtration_range>
-  Vineyard_base(const Boundary_range& boundaryMatrix,
-                const Dimension_range& dimensions,
-                const Filtration_range& filtrationValues)
+  template <class BoundaryRange, class DimensionRange, class FiltrationRange>
+  Vineyard_base(const BoundaryRange& boundaryMatrix,
+                const DimensionRange& dimensions,
+                const FiltrationRange& filtrationValues)
       : matrix_(boundaryMatrix.size()), order_(boundaryMatrix.size())
   {
     // All static_assert in this class are quite useless as Matrix_options is fixed and has those enabled
@@ -154,10 +154,10 @@ class Vineyard_base
   /**
    * @brief Initializes the first barcode by recomputing it from scratch.
    * 
-   * @tparam Boundary_range Range of ranges of integers. Has to implement a `size` method and an `operator[]` with
+   * @tparam BoundaryRange Range of ranges of integers. Has to implement a `size` method and an `operator[]` with
    * a another nested `operator[]`.
-   * @tparam Dimension_range Range of integers. Has to implement a `operator[]` method.
-   * @tparam Filtration_range Range of arithmetic values or at least of values with an `operator<`. Has to implement a
+   * @tparam DimensionRange Range of integers. Has to implement a `operator[]` method.
+   * @tparam FiltrationRange Range of arithmetic values or at least of values with an `operator<`. Has to implement a
    * `operator[]` method.
    * @param boundaryMatrix Boundary container of the filtered complex. The container does not need to be ordered, but
    * the boundaries have to be represented by the indices of their faces in the container.
@@ -167,10 +167,10 @@ class Vineyard_base
    * correspond to the filtration value of the cell represented by the boundary at index \f$ i \f$ in `boundaryMatrix`.
    * Note that the filtration is assumed to be a 1-parameter filtration.
    */
-  template <class Boundary_range, class Dimension_range, class Filtration_range>
-  void initialize(const Boundary_range& boundaryMatrix,
-                  const Dimension_range& dimensions,
-                  const Filtration_range& filtrationValues)
+  template <class BoundaryRange, class DimensionRange, class FiltrationRange>
+  void initialize(const BoundaryRange& boundaryMatrix,
+                  const DimensionRange& dimensions,
+                  const FiltrationRange& filtrationValues)
   {
     matrix_ = Matrix(boundaryMatrix.size());
     order_.resize(boundaryMatrix.size());
@@ -194,14 +194,14 @@ class Vineyard_base
    * @pre The first barcode has to have been initialized (either with the initializing constructor or
    * with @ref initialize "").
    * 
-   * @tparam Filtration_range Range of arithmetic values or at least of values with an `operator<`. Has to implement a
+   * @tparam FiltrationRange Range of arithmetic values or at least of values with an `operator<`. Has to implement a
    * `operator[]` method.
    * @param filtrationValues New filtration value container. As at initialization, a value at index \f$ i \f$ has to
    * correspond to the filtration value of the cell represented by the boundary at index \f$ i \f$ in the initializing
    * argument `boundaryMatrix`. Note that the filtration is assumed to be a 1-parameter filtration.
    */
-  template <class Filtration_range>
-  void update(const Filtration_range& filtrationValues)
+  template <class FiltrationRange>
+  void update(const FiltrationRange& filtrationValues)
   {
     GUDHI_CHECK(filtrationValues.size() == order_.size(),
                 std::invalid_argument("Filtration value container size is not matching."));
@@ -349,10 +349,10 @@ class Vineyard_base
   Permutation order_;                  /**< Filtration order. */
   std::optional<Permutation> idToPos_; /**< ID to filtration position map. */
 
-  template <class Boundary_range, class Dimension_range, class Filtration_range>
-  void _initialize(const Boundary_range& boundaryMatrix,
-                   const Dimension_range& dimensions,
-                   const Filtration_range& filtrationValues)
+  template <class BoundaryRange, class DimensionRange, class FiltrationRange>
+  void _initialize(const BoundaryRange& boundaryMatrix,
+                   const DimensionRange& dimensions,
+                   const FiltrationRange& filtrationValues)
   {
     GUDHI_CHECK(boundaryMatrix.size() == dimensions.size(),
                 std::invalid_argument("Boundary and dimension range sizes are not matching."));

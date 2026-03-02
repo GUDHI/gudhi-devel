@@ -178,10 +178,10 @@ class Vineyard_builder
    * @brief Initializes the vineyard with the first barcode recomputed from scratch. Any vineyard or representative
    * cycle computed before will be cleared and replaced.
    * 
-   * @tparam Boundary_range Range of ranges of integers. Has to implement a `size` method and an `operator[]` with
+   * @tparam BoundaryRange Range of ranges of integers. Has to implement a `size` method and an `operator[]` with
    * a another nested `operator[]`.
-   * @tparam Dimension_range Range of integers. Has to implement a `operator[]` method.
-   * @tparam Filtration_range Range of arithmetic values or at least of values with an `operator<`. Has to implement a
+   * @tparam DimensionRange Range of integers. Has to implement a `operator[]` method.
+   * @tparam FiltrationRange Range of arithmetic values or at least of values with an `operator<`. Has to implement a
    * `operator[]` method.
    * @param boundaryMatrix Boundary container of the filtered complex. The container does not need to be ordered, but
    * the boundaries have to be represented by the indices of their faces in the container.
@@ -193,10 +193,10 @@ class Vineyard_builder
    * @param numberOfUpdates Optional. Predicted number of updates after this initialization, to preallocate memory for
    * the vines. Default value: 0.
    */
-  template <class Boundary_range, class Dimension_range, class Filtration_range>
-  void initialize(const Boundary_range& boundaryMatrix,
-                  const Dimension_range& dimensions,
-                  const Filtration_range& filtrationValues,
+  template <class BoundaryRange, class DimensionRange, class FiltrationRange>
+  void initialize(const BoundaryRange& boundaryMatrix,
+                  const DimensionRange& dimensions,
+                  const FiltrationRange& filtrationValues,
                   int numberOfUpdates = 0)
   {
     base_.initialize(boundaryMatrix, dimensions, filtrationValues);
@@ -250,14 +250,14 @@ class Vineyard_builder
    *
    * @pre The first barcode has to have been initialized with @ref initialize.
    * 
-   * @tparam Filtration_range Range of arithmetic values or at least of values with an `operator<`. Has to implement a
+   * @tparam FiltrationRange Range of arithmetic values or at least of values with an `operator<`. Has to implement a
    * `operator[]` method.
    * @param filtrationValues New filtration value container. As at initialization, a value at index \f$ i \f$ has to
    * correspond to the filtration value of the cell represented by the boundary at index \f$ i \f$ in the initializing
    * argument `boundaryMatrix`. Note that the filtration is assumed to be a 1-parameter filtration.
    */
-  template <class Filtration_range>
-  void update(const Filtration_range& filtrationValues)
+  template <class FiltrationRange>
+  void update(const FiltrationRange& filtrationValues)
   {
     base_.update(filtrationValues);
     const auto& barcode = base_.get_current_barcode();  // forward only range + order is preserved
@@ -318,8 +318,8 @@ class Vineyard_builder
   std::optional<Dimension> repCyclesDim_; /**< Dimension of stored cycles. */
   std::optional<std::vector<std::tuple<Cycle, Dimension, Index> > > latest_representative_cycles_; /**< Cycles. */
 
-  template <class Filtration_range>
-  bool _store_cycle(const typename Base::Bar& bar, const Filtration_range& filtrationValues) const
+  template <class FiltrationRange>
+  bool _store_cycle(const typename Base::Bar& bar, const FiltrationRange& filtrationValues) const
   {
     if (!repCyclesDim_) return false;
     if (*repCyclesDim_ != Base::nullDimension && bar.dim != *repCyclesDim_) return false;
