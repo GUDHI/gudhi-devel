@@ -28,8 +28,7 @@ using Cycle = std::vector<int>;
 using option_list = boost::mpl::list<Chain_vineyard_options, RU_vineyard_options>;
 
 template <class VB>
-std::vector<Vine<typename VB::value_type> > get_vineyard(const VB& vb)
-{
+std::vector<Vine<typename VB::value_type> > get_vineyard(const VB& vb) {
   using V = Vine<typename VB::value_type>;
 
   std::vector<V> res;
@@ -65,8 +64,7 @@ std::vector<Vine<typename VB::value_type> > get_vineyard(const VB& vb)
 }
 
 template <class VB>
-std::vector<std::tuple<Cycle, typename VB::Dimension, typename VB::Index> > get_ordered_cycles(const VB& vb)
-{
+std::vector<std::tuple<Cycle, typename VB::Dimension, typename VB::Index> > get_ordered_cycles(const VB& vb) {
   using C = std::tuple<Cycle, typename VB::Dimension, typename VB::Index>;
   const auto& cs = vb.get_latest_representative_cycles();
   std::vector<C> res(cs.size());
@@ -81,8 +79,7 @@ std::vector<std::tuple<Cycle, typename VB::Dimension, typename VB::Index> > get_
 }
 
 template <class VB>
-void test_initialization()
-{
+void test_initialization() {
   using T = typename VB::value_type;
   using Bar = typename VB::Bar;
   using P = typename Vine<T>::Coordinate;
@@ -142,8 +139,7 @@ void test_initialization()
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(vyb_initialization, Option, option_list)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(vyb_initialization, Option, option_list) {
   test_initialization<Vineyard_builder<double, Option, false> >();
   test_initialization<Vineyard_builder<double, Option, true> >();
   test_initialization<Vineyard_builder<int, Option, false> >();
@@ -153,7 +149,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(vyb_initialization, Option, option_list)
 }
 
 template <class VB>
-void test_update(){
+void test_update() {
   using T = typename VB::value_type;
   using Bar = typename VB::Bar;
   using P = typename Vine<T>::Coordinate;
@@ -241,20 +237,18 @@ void test_update(){
   BOOST_CHECK(vy == get_vineyard(vb_c_dim1));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(vyb_update, Option, option_list)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(vyb_update, Option, option_list) {
   test_update<Vineyard_builder<double, Option, false> >();
   test_update<Vineyard_builder<double, Option, true> >();
   test_update<Vineyard_builder<int, Option, false> >();
   test_update<Vineyard_builder<int, Option, true> >();
 }
 
-template<class Option>
-void test_rep_cycles(){}
+template <class Option>
+void test_rep_cycles() {}
 
 template <>
-void test_rep_cycles<Chain_vineyard_options>()
-{
+void test_rep_cycles<Chain_vineyard_options>() {
   using VB = Vineyard_builder<double, Chain_vineyard_options, false>;
   using T = typename VB::value_type;
 
@@ -311,7 +305,7 @@ void test_rep_cycles<Chain_vineyard_options>()
 
   vb_c.update(FC<double>{0, -1, 1, 1, 3, 4, 5, 6, 7});
   vb_c_dim1.update(FC<double>{0, -1, 1, 1, 3, 4, 5, 6, 7});
-  
+
   cycles = get_ordered_cycles(vb_c);
   BOOST_CHECK_EQUAL(cycles.size(), 5);
   BOOST_CHECK(get<0>(cycles[0]) == (Cycle{0, 1}));
@@ -338,8 +332,7 @@ void test_rep_cycles<Chain_vineyard_options>()
 }
 
 template <>
-void test_rep_cycles<RU_vineyard_options>()
-{
+void test_rep_cycles<RU_vineyard_options>() {
   using VB = Vineyard_builder<double, RU_vineyard_options, false>;
   using T = typename VB::value_type;
 
@@ -392,7 +385,7 @@ void test_rep_cycles<RU_vineyard_options>()
 
   vb_c.update(FC<double>{0, -1, 1, 1, 3, 4, 5, 6, 7});
   vb_c_dim1.update(FC<double>{0, -1, 1, 1, 3, 4, 5, 6, 7});
-  
+
   cycles = get_ordered_cycles(vb_c);
   BOOST_CHECK_EQUAL(cycles.size(), 5);
   BOOST_CHECK(get<0>(cycles[0]) == (Cycle{0, 1}));
@@ -418,6 +411,4 @@ void test_rep_cycles<RU_vineyard_options>()
   BOOST_CHECK_EQUAL(get<2>(cycles[0]), 4);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(vy_rep_cycles, Option, option_list) {
-  test_rep_cycles<Option>();
-}
+BOOST_AUTO_TEST_CASE_TEMPLATE(vy_rep_cycles, Option, option_list) { test_rep_cycles<Option>(); }

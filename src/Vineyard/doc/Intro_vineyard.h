@@ -84,7 +84,7 @@ namespace vineyard {
  * of the matrix and the barcode if stored (see
  * @ref Gudhi::persistence_matrix::PersistenceMatrixOptions::has_column_pairings "has_column_pairings" option).
  * See \gudhi_example_link{Persistence_matrix,example_vine_swaps.cpp} for an example.
- * 
+ *
  * \section vineyardexamples Examples
  *
  * \subsection vyminusage Minimalistic example
@@ -97,8 +97,8 @@ namespace vineyard {
 
         // underlying complex
         std::vector<std::vector<int>> boundaries = {
-            {}, {}, {}, {}, 
-            {0, 3}, {0, 2}, {1, 2}, {2, 3}, {0, 1}, 
+            {}, {}, {}, {},
+            {0, 3}, {0, 2}, {1, 2}, {2, 3}, {0, 1},
             {4, 5, 7}, {5, 6, 8}
         };
         std::vector<int> dimensions = {0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2};
@@ -149,7 +149,7 @@ namespace vineyard {
  *   @skip int main()
  *   @until }
  * </details>
- * 
+ *
  * @}
  */
 }  // namespace vineyard

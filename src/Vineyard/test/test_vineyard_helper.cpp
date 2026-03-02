@@ -23,8 +23,7 @@
 using ST = Gudhi::Simplex_tree<>;
 using CC = Gudhi::cubical_complex::Bitmap_cubical_complex<Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> >;
 
-BOOST_AUTO_TEST_CASE(vy_helper_simplex_tree)
-{
+BOOST_AUTO_TEST_CASE(vy_helper_simplex_tree) {
   ST st;
   st.insert_simplex_and_subfaces({0, 1, 2}, 0.5);
   st.insert_simplex_and_subfaces({0, 2, 3}, 0.9);
@@ -63,8 +62,7 @@ BOOST_AUTO_TEST_CASE(vy_helper_simplex_tree)
   BOOST_CHECK(real_fc == fc);
 }
 
-BOOST_AUTO_TEST_CASE(vy_helper_cubical)
-{
+BOOST_AUTO_TEST_CASE(vy_helper_cubical) {
   CC cc({2, 1}, std::vector<double>{0.5, 0.9}, true);
 
   BC bc;

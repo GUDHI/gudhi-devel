@@ -27,12 +27,11 @@ namespace vineyard {
 
 /**
  * @ingroup vineyard
- * 
+ *
  * @private
  */
 template <class FilteredComplex, typename Index>
-inline Index assign_keys_(FilteredComplex& complex, Index start)
-{
+inline Index assign_keys_(FilteredComplex& complex, Index start) {
   Index numberOfSimplices = start;
   // Vertex ID should correspond to position in the original point cloud if there was one.
   for (auto sh : complex.skeleton_simplex_range(0)) {
@@ -50,9 +49,9 @@ inline Index assign_keys_(FilteredComplex& complex, Index start)
 
 /**
  * @ingroup vineyard
- * 
+ *
  * @brief Builds a boundary matrix from the given matrix.
- * 
+ *
  * @tparam FilteredComplex Complex type with following methods (see @ref FilteredComplex or @ref Gudhi::Simplex_tree
  * for method description): complex_simplex_range, skeleton_simplex_range, key, assign_key, dimension, filtration
  * and boundary_simplex_range. And the following types: Filtration_value and Simplex_key.
@@ -69,15 +68,11 @@ inline Index assign_keys_(FilteredComplex& complex, Index start)
  * @param[out] filtrationValues Container for the filtration values. If not empty, the elements are not erased and
  * the new values are added at the end. Has to have the same size than @p boundaries as the indices should correspond.
  */
-template <class FilteredComplex,
-          typename Filtration_value = typename FilteredComplex::Filtration_value,
-          typename Index = typename FilteredComplex::Simplex_key,
-          typename Dimension = int>
-inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
-                                               std::vector<std::vector<Index> >& boundaries,
+template <class FilteredComplex, typename Filtration_value = typename FilteredComplex::Filtration_value,
+          typename Index = typename FilteredComplex::Simplex_key, typename Dimension = int>
+inline void build_boundary_matrix_from_complex(FilteredComplex& complex, std::vector<std::vector<Index> >& boundaries,
                                                std::vector<Dimension>& dimensions,
-                                               std::vector<Filtration_value>& filtrationValues)
-{
+                                               std::vector<Filtration_value>& filtrationValues) {
   GUDHI_CHECK(boundaries.size() == dimensions.size() && boundaries.size() == filtrationValues.size(),
               std::invalid_argument("Output containers do not start with the same size"));
 
@@ -102,7 +97,7 @@ inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
 
 /**
  * @ingroup vineyard
- * 
+ *
  * @brief Same method than @ref build_boundary_matrix_from_complex(FilteredComplex&, std::vector<std::vector<Index> >&,
  * std::vector<Dimension>&, std::vector<Filtration_value>&), but only the filtration values are computed. The order of
  * the filtration values are the same than if computed with the other version. Usefull if one already called the other
@@ -120,8 +115,7 @@ inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
  */
 template <class FilteredComplex, typename Filtration_value = typename FilteredComplex::Filtration_value>
 inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
-                                               std::vector<Filtration_value>& filtrationValues)
-{
+                                               std::vector<Filtration_value>& filtrationValues) {
   auto numberOfSimplices = assign_keys_(complex, filtrationValues.size());
 
   filtrationValues.resize(numberOfSimplices);
