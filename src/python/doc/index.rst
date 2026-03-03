@@ -63,6 +63,11 @@ Persistent cohomology
 
 .. include:: persistent_cohomology_sum.inc
 
+Vineyard
+========
+
+.. include:: vineyard_sum.inc
+
 Topological descriptors tools
 *****************************
 
