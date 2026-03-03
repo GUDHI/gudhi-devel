@@ -28,7 +28,8 @@ def test_rips_vineyard(file_path_arg):
     path_prefix = file_path_arg
     path_suffix = ".txt"
 
-    path = os.path.realpath(path_prefix + "0" + path_suffix, strict=True)
+    path = os.path.realpath(path_prefix + "0" + path_suffix)
+    assert os.path.isfile(path)
     path_prefix = path[: -len("0" + path_suffix)]
 
     number_of_updates = len(glob.glob(path_prefix + "*" + path_suffix)) - 1

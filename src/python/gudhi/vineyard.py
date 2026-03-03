@@ -38,8 +38,10 @@ def _verify_validity(
     number_of_updates: Optional[int] = None,
 ) -> bool:
     # assumes counting starts with 0
-    # will fail with "file not found" if not
-    path = os.path.realpath(path_prefix + "0" + path_suffix, strict=True)
+    path = os.path.realpath(path_prefix + "0" + path_suffix)
+    # can be removed with python 3.10+ when adding parameter `strict=True` do the `realpath` method
+    if not os.path.isfile(path):
+        raise FileNotFoundError(f"The file {path} does not exists.")
     path_prefix = path[: -len("0" + path_suffix)]
 
     if number_of_updates is None:
@@ -555,8 +557,10 @@ class PointCloudRipsVineyard:
         res = cls(store_point_coordinates, store_cycles)
 
         # assumes counting starts with 0
-        # will fail with "file not found" if not
-        path = os.path.realpath(path_prefix + "0" + path_suffix, strict=True)
+        path = os.path.realpath(path_prefix + "0" + path_suffix)
+        # can be removed with python 3.10+ when adding parameter `strict=True` do the `realpath` method
+        if not os.path.isfile(path):
+            raise FileNotFoundError(f"The file {path} does not exists.")
         path_prefix = path[: -len("0" + path_suffix)]
 
         if number_of_updates is None:
