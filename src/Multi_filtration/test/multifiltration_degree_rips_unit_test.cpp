@@ -1730,4 +1730,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_converters_co, T, list_of
   BOOST_CHECK_EQUAL(f23(2, 1), 2);
   BOOST_CHECK_EQUAL(f23(3, 0), 4);
   BOOST_CHECK_EQUAL(f23(3, 1), 3);
+
+  Degree_rips_bifiltration<T, true> f24 = as_type<Degree_rips_bifiltration<T, true> >(f21[0], 2);
+  BOOST_CHECK(f24.num_parameters() == 2);
+  BOOST_CHECK(f24.num_generators() == 4);
+  BOOST_CHECK_EQUAL(f24(0, 0), inf);
+  BOOST_CHECK_EQUAL(f24(0, 1), 0);
+  BOOST_CHECK_EQUAL(f24(1, 0), inf);
+  BOOST_CHECK_EQUAL(f24(1, 1), 1);
+  BOOST_CHECK_EQUAL(f24(2, 0), inf);
+  BOOST_CHECK_EQUAL(f24(2, 1), 2);
+  BOOST_CHECK_EQUAL(f24(3, 0), 4);
+  BOOST_CHECK_EQUAL(f24(3, 1), 3);
 }

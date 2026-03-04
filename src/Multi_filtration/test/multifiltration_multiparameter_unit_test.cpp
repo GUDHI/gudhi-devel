@@ -1466,5 +1466,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_converters, T, list_of_t
   BOOST_CHECK_EQUAL(f2(2,1), 3);
   BOOST_CHECK_EQUAL(f2(3,0), 3);
   BOOST_CHECK_EQUAL(f2(3,1), 2);
+
+  Dynamic_multi_parameter_filtration<T> f3 = as_type<Dynamic_multi_parameter_filtration<T> >(f0[0], 2);
+  BOOST_CHECK(f3.num_parameters() == 2);
+  BOOST_CHECK(f3.num_generators() == 1);
+  BOOST_CHECK_EQUAL(f3(0,0), 0);
+  BOOST_CHECK_EQUAL(f3(0,1), 5);
+
+  Multi_parameter_filtration<T> f4 = as_type<Multi_parameter_filtration<T> >(f0[0], 2);
+  BOOST_CHECK(f4.num_parameters() == 2);
+  BOOST_CHECK(f4.num_generators() == 1);
+  BOOST_CHECK_EQUAL(f4(0,0), 0);
+  BOOST_CHECK_EQUAL(f4(0,1), 5);
 }
 
