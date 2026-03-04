@@ -19,6 +19,9 @@
  * throw when called, as well as, `std::numeric_limits<FiltrationValue>::infinity()` if
  * `std::numeric_limits<FiltrationValue>::has_infinity` returns `false`.
  *
+ * Note that all native types like `int`, `double` etc. are already respecting this concept and can be used as
+ * filtration value types without any wrapper.
+ *
  * A <EM>filtration</EM> of a cell complex (see FilteredComplex) is
  * a function \f$f:\mathbf{K} \rightarrow \mathbb{R}\f$ satisfying \f$f(\tau)\leq
  * f(\sigma)\f$ whenever \f$\tau \subseteq \sigma\f$. Ordering the simplices

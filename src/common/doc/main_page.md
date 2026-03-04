@@ -434,6 +434,29 @@
  </tr>
 </table>
 
+### Vineyard
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "vineyard_ex2.png"
+    </td>
+    <td width="50%">
+    Vineyards record changes in the barcode when cells change positions in a filtration.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Hannah Schreiber, David Loiseaux<br>
+      <b>Introduced in:</b> GUDHI 3.1x.0<br>
+      <b>Copyright:</b> MIT<br>
+    </td>
+ </tr>
+ <tr>
+    <td colspan=2 height="25">
+    <b>User manual:</b> \ref vineyard
+    </td>
+ </tr>
+</table>
+
 ## Topological descriptors tools {#TopologicalDescriptorsTools}
 
 ### Bottleneck distance

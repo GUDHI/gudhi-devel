@@ -1,0 +1,3 @@
+Data set of two linked rings unknotting step by step.
+
+Provided by Francesca Bertoglio. Also available at https://github.com/frabertoglio/TDAdynamicdata/tree/main/simulations/rings.
