@@ -43,13 +43,10 @@ namespace Persistence_representations {
  *
  * @ingroup Persistence_representations
  **/
-inline std::vector<std::vector<double> > create_Gaussian_filter(std::size_t pixel_radius, double sigma, int approximation=2)
+inline std::vector<std::vector<double> > create_Gaussian_filter(std::size_t pixel_radius, double approximation=2)
 {
-  // we are computing the kernel mask to 2 standard deviations away from the center. We discretize it in a grid of a
+  // we are computing the kernel mask up to a constant factor (default = 2) times standard deviation away from the center. We discretize it in a grid of a
   // size 2*pixel_radius times 2*pixel_radius.
-
-  double r = 0;
-  double sigma_sqr = sigma * sigma;
 
   // sum is for normalization
   double sum = 0;
@@ -65,10 +62,10 @@ inline std::vector<std::vector<double> > create_Gaussian_filter(std::size_t pixe
 
   for (int x = -pixel_radius; x <= static_cast<int>(pixel_radius); x++) {
     for (int y = -pixel_radius; y <= static_cast<int>(pixel_radius); y++) {
-      double real_x = approximation * sigma * x / pixel_radius;
-      double real_y = approximation * sigma * y / pixel_radius;
-      r = std::sqrt(real_x * real_x + real_y * real_y);
-      kernel[x + pixel_radius][y + pixel_radius] = (std::exp(-(r * r) / (2 * sigma_sqr))) / (2 * 3.141592 * sigma_sqr);
+      double real_x = approximation * x / pixel_radius;
+      double real_y = approximation * y / pixel_radius;
+      double r_sqr = real_x * real_x + real_y * real_y;
+      kernel[x + pixel_radius][y + pixel_radius] = std::exp(-r_sqr/2);
       sum += kernel[x + pixel_radius][y + pixel_radius];
     }
   }
@@ -232,7 +229,7 @@ class Persistence_heat_maps
    * `min`. Default value: `std::numeric_limits<double>::max()`.
    */
   Persistence_heat_maps(const std::vector<std::pair<double, double> >& interval,
-                        const std::vector<std::vector<double> >& filter = create_Gaussian_filter(5, 1),
+                        const std::vector<std::vector<double> >& filter = create_Gaussian_filter(5),
                         bool erase_below_diagonal = false,
                         std::size_t number_of_pixels = 1000,
                         double min = std::numeric_limits<double>::max(),
@@ -262,7 +259,7 @@ class Persistence_heat_maps
    * this given dimension are token into account. Default value: `std::numeric_limits<double>::max()`.
    */
   Persistence_heat_maps(const char* filename,
-                        const std::vector<std::vector<double> >& filter = create_Gaussian_filter(5, 1),
+                        const std::vector<std::vector<double> >& filter = create_Gaussian_filter(5),
                         bool erase_below_diagonal = false,
                         std::size_t number_of_pixels = 1000,
                         double min = std::numeric_limits<double>::max(),
@@ -628,7 +625,7 @@ class Persistence_heat_maps
  private:
   std::vector<std::vector<double> > _check_and_initialize_maps(const std::vector<Persistence_heat_maps*>& maps);
   void _construct(const std::vector<std::pair<double, double> >& intervals,
-                 const std::vector<std::vector<double> >& filter = create_Gaussian_filter(5, 1),
+                 const std::vector<std::vector<double> >& filter = create_Gaussian_filter(5),
                  bool erase_below_diagonal = false,
                  std::size_t number_of_pixels = 1000,
                  double min = std::numeric_limits<double>::max(),
