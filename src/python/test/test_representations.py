@@ -101,15 +101,20 @@ metrics_dict = {  # (class, metric_kwargs, tolerance_pytest_approx)
 
 
 def test_distance_transform_consistency():
+    print("Hello")
     l1 = _n_diags(9)
     l1b = l1.copy()
     for metricName, (metricClass, metricParams, tolerance) in metrics_dict.items():
+        print(f"{metricName=} {metricParams=} {tolerance=}")
         d1 = pairwise_persistence_diagram_distances(l1, metric=metricName, **metricParams)
         d2 = metricClass.fit_transform(l1)
+        print("d1 vs d2")
         assert d1 == pytest.approx(d2)
         d3 = pairwise_persistence_diagram_distances(l1, l1b, metric=metricName, **metricParams)
+        print("d3 vs d2")
         assert d3 == pytest.approx(d2, **tolerance)  # Because of 0 entries (on the diagonal)
         d4 = metricClass.fit(l1).transform(l1b)
+        print("d4 vs d2")
         assert d4 == pytest.approx(d2, **tolerance)
 
 
