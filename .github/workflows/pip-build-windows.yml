@@ -14,10 +14,10 @@ jobs:
             numpy-version: "1.21.6"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -53,7 +53,7 @@ jobs:
           delvewheel show --add-path=C:/vcpkg/installed/x64-windows/bin *.whl
           delvewheel repair --add-path=C:/vcpkg/installed/x64-windows/bin -w wheelhouse -v *.whl
       - name: Upload Windows python wheel
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: windows python wheel
           path: wheelhouse/*.whl
