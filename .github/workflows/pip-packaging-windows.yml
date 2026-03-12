@@ -5,16 +5,14 @@ on:
     types: [published]
 
 jobs:
-  # Python 3.9+ specific case where NumPy 2.x will be supported
+  # Python 3.10+ specific case where NumPy 2.x will be supported
   wheels:
     runs-on: windows-latest
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         include:
-          - python-version: "3.9"
-            numpy-version: "1.19.3"
           - python-version: "3.10"
             numpy-version: "1.21.6"
           - python-version: "3.11"
@@ -23,6 +21,8 @@ jobs:
             numpy-version: "1.26.0"
           - python-version: "3.13"
             numpy-version: "2.1.0"
+          - python-version: "3.14"
+            numpy-version: "2.3.4"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +32,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-      # For python >=3.9, numpy >= 2.0 for package build and ABI compatibility with numpy 1.X and 2.X
+      # For python >=3.10, numpy >= 2.0 for package build and ABI compatibility with numpy 1.X and 2.X
       # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
       - name: Install dependencies
         shell: pwsh
