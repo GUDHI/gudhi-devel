@@ -12,7 +12,7 @@
 import numpy as np
 from sklearn import datasets
 
-from gudhi.sklearn.cubical_persistence import CubicalPersistence
+from gudhi.sklearn import CubicalPersistence
 import gudhi
 
 

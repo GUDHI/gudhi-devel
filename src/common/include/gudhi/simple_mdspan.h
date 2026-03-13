@@ -177,6 +177,9 @@ class extents
   {
     stream << "[ " << sizeof...(Extents) << " ] ";
     ((stream << Extents << ' '), ...);
+    stream << " [";
+    for (rank_type r = 0; r < e.rank(); ++r) stream << e.extent(r) << " ";
+    stream << "]";
 
     return stream;
   }
@@ -395,7 +398,7 @@ class Simple_mdspan
 
   constexpr rank_type rank_dynamic() noexcept { return map_.extents().rank_dynamic(); }
 
-  static constexpr std::size_t static_extent(rank_type r) noexcept { return std::numeric_limits<std::size_t>::max(); }
+  static constexpr std::size_t static_extent(rank_type r) noexcept { return extents_type::static_extent(r); }
 
   constexpr index_type extent(rank_type r) const
   {

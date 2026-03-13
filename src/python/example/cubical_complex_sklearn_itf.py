@@ -9,7 +9,7 @@ from sklearn.svm import SVC
 from sklearn import metrics
 
 # Import TDA pipeline requirements
-from gudhi.sklearn.cubical_persistence import CubicalPersistence
+from gudhi.sklearn import CubicalPersistence
 from gudhi.representations import PersistenceImage, DiagramSelector
 
 X, y = fetch_openml("mnist_784", version=1, return_X_y=True, as_frame=False)

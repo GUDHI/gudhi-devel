@@ -90,44 +90,11 @@ endfunction( add_gudhi_debug_info )
 
 function(disable_python_documentation MISSING_MODULE)
   set(GUDHI_PYTHON_DOCUMENTATION_MISSING_MODULES "${GUDHI_PYTHON_DOCUMENTATION_MISSING_MODULES}'${MISSING_MODULE}', " PARENT_SCOPE)
-  set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
 endfunction( disable_python_documentation )
 
 add_gudhi_debug_info("Python version ${Python_VERSION}")
 add_gudhi_debug_info("Nanobind version ${NANOBIND_VERSION}")
 add_gudhi_debug_info("Numpy version ${NUMPY_VERSION}")
-
-# Python modules for __all__ list in __init__.py
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'bottleneck', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'off_utils', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'simplex_tree', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'rips_complex', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'cubical_complex', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'periodic_cubical_complex', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'persistence_graphical_tools', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'reader_utils', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'witness_complex', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'strong_witness_complex', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'nerve_gic', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'subsampling', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'tangential_complex', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'delaunay_complex', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_witness_complex', ")
-set(GUDHI_PYTHON_MODULES "${GUDHI_PYTHON_MODULES}'euclidean_strong_witness_complex', ")
-# Modules that should not be auto-imported in __init__.py
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'hera', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'clustering', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'datasets', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'representations', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'sklearn', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'tensorflow', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'wasserstein', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'point_cloud', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'weighted_rips_complex', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'dtm_rips_complex', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'cover_complex', ")
-set(GUDHI_PYTHON_MODULES_EXTRA "${GUDHI_PYTHON_MODULES_EXTRA}'flag_filtration', ")
-
 
 if(PYTEST_FOUND)
   add_gudhi_debug_info("Pytest version ${PYTEST_VERSION}")
@@ -249,7 +216,7 @@ execute_process(
 find_package(nanobind CONFIG REQUIRED)
 
 # Add src/python/include directory
-include_directories(include)
+include_directories(BEFORE include)
 add_subdirectory("gudhi")
 add_subdirectory("gudhi/clustering")
 add_subdirectory("gudhi/datasets/generators")
@@ -264,6 +231,8 @@ endif(WIN32)
 # Documentation generation is available through sphinx - requires all modules
 # Make it first as sphinx test is by far the longest test which is nice when testing in parallel
 if(GUDHI_PYTHON_DOCUMENTATION_MISSING_MODULES)
+  # set GUDHI_MISSING_MODULES once and not for each GUDHI_PYTHON_DOCUMENTATION_MISSING_MODULES
+  set(GUDHI_MISSING_MODULES ${GUDHI_MISSING_MODULES} "python-documentation" CACHE INTERNAL "GUDHI_MISSING_MODULES")
   message("++ Python documentation will not be compilable because of the following missing modules: ${GUDHI_PYTHON_DOCUMENTATION_MISSING_MODULES}")
 else()
   set (GUDHI_SPHINX_MESSAGE "Generating API documentation with Sphinx in ${CMAKE_CURRENT_BINARY_DIR}/sphinx/")

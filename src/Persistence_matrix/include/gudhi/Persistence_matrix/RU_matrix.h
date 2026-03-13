@@ -2,9 +2,10 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
+ *      - 2025/11 Jānis Lazovskis: Added insert_maximal_cell method
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -17,7 +18,6 @@
 #ifndef PM_RU_MATRIX_H
 #define PM_RU_MATRIX_H
 
-#include <type_traits>  //std::conditional
 #include <utility>      //std::swap, std::move & std::exchange
 #include <iostream>     //print() only
 #include <vector>
@@ -164,9 +164,30 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    */
   template <class Boundary_range = Boundary>
-  void insert_boundary(ID_index cellIndex,
-                       const Boundary_range& boundary,
+  void insert_boundary(ID_index cellIndex, const Boundary_range& boundary,
                        Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
+   * Assumes that the cell will be maximal in the current complex and inserts it such that the matrix remains consistent
+   * (i.e., RU is still an upper triangular decomposition of the @ref boundarymatrix "boundary matrix").
+   * Updates the barcode if it is stored.
+   *
+   * See also @ref remove_maximal_cell (for the complementary action) and @ref insert_boundary (for insertion at the
+   * highest index).
+   *
+   * @param columnIndex @ref MatIdx index of the cell to remove.
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param boundary Boundary generating the column to be inserted. The indices of the boundary have to correspond to
+   * the
+   * @p cellIndex values of precedent calls of the method for the corresponding cells and should be ordered in
+   * increasing order.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   */
+  template <class Boundary_range = Boundary>
+  void insert_maximal_cell(Index columnIndex, const Boundary_range& boundary,
+                           Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
    * @brief Returns the column at the given @ref MatIdx index in \f$ R \f$ if @p inR is true and
    * in \f$ U \f$ if @p inR is false.
@@ -223,7 +244,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
    * The maximality of the cell is not verified.
    * Also updates the barcode if it is stored.
    *
-   * See also @ref remove_last.
+   * See also @ref remove_last, @ref insert_maximal_cell.
    *
    * @param columnIndex @ref MatIdx index of the cell to remove.
    */
@@ -373,9 +394,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
     pivotToColumnIndex_.clear();
     nextEventIndex_ = 0;
     positionToID_.clear();
-    if constexpr (!Master_matrix::Option_list::is_z2) {
-      operators_ = &(colSettings->operators);
-    }
+    operators_ = Master_matrix::get_operator_ptr(colSettings);
   }
 
   /**
@@ -424,7 +443,7 @@ class RU_matrix : public Master_matrix::RU_pairing_option,
   Pivot_dictionary pivotToColumnIndex_; /**< Map from pivot row index to column @ref MatIdx index. */
   Pos_index nextEventIndex_;            /**< Next birth or death index. */
   Position_dictionary positionToID_;    /**< Map from @ref MatIdx to @ref IDIdx. */
-  Field_operators* operators_;          /**< Field operators, can be nullptr if
+  Field_operators const* operators_;    /**< Field operators, can be nullptr if
                                              @ref PersistenceMatrixOptions::is_z2 is true. */
 
   void _insert_boundary(Index currentIndex);
@@ -447,12 +466,8 @@ inline RU_matrix<Master_matrix>::RU_matrix(Column_settings* colSettings)
       reducedMatrixR_(colSettings),
       mirrorMatrixU_(colSettings),
       nextEventIndex_(0),
-      operators_(nullptr)
-{
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-}
+      operators_(Master_matrix::get_operator_ptr(colSettings))
+{}
 
 template <class Master_matrix>
 template <class Boundary_range>
@@ -464,12 +479,8 @@ inline RU_matrix<Master_matrix>::RU_matrix(const std::vector<Boundary_range>& or
       reducedMatrixR_(orderedBoundaries, colSettings),
       mirrorMatrixU_(orderedBoundaries.size(), colSettings),
       nextEventIndex_(orderedBoundaries.size()),
-      operators_(nullptr)
+      operators_(Master_matrix::get_operator_ptr(colSettings))
 {
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.reserve(orderedBoundaries.size());
   } else {
@@ -489,12 +500,8 @@ inline RU_matrix<Master_matrix>::RU_matrix(unsigned int numberOfColumns, Column_
       mirrorMatrixU_(numberOfColumns, colSettings),
       nextEventIndex_(0),
       positionToID_(numberOfColumns),
-      operators_(nullptr)
+      operators_(Master_matrix::get_operator_ptr(colSettings))
 {
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    operators_ = &(colSettings->operators);
-  }
-
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
     pivotToColumnIndex_.reserve(numberOfColumns);
   } else {
@@ -515,12 +522,8 @@ inline RU_matrix<Master_matrix>::RU_matrix(const RU_matrix& matrixToCopy, Column
       pivotToColumnIndex_(matrixToCopy.pivotToColumnIndex_),
       nextEventIndex_(matrixToCopy.nextEventIndex_),
       positionToID_(matrixToCopy.positionToID_),
-      operators_(colSettings == nullptr ? matrixToCopy.operators_ : nullptr)
-{
-  if constexpr (!Master_matrix::Option_list::is_z2) {
-    if (colSettings != nullptr) operators_ = &(colSettings->operators);
-  }
-}
+      operators_(colSettings == nullptr ? matrixToCopy.operators_ : Master_matrix::get_operator_ptr(colSettings))
+{}
 
 template <class Master_matrix>
 inline RU_matrix<Master_matrix>::RU_matrix(RU_matrix&& other) noexcept
@@ -555,6 +558,23 @@ inline void RU_matrix<Master_matrix>::insert_boundary(ID_index cellIndex, const 
   }
 
   _insert_boundary(reducedMatrixR_.insert_boundary(cellIndex, boundary, dim));
+}
+
+template <class Master_matrix>
+template <class Boundary_range>
+inline void RU_matrix<Master_matrix>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary,
+                                                          Dimension dim) {
+  static_assert(Master_matrix::Option_list::has_vine_update,
+                "'insert_maximal_cell' is not implemented for the chosen options.");
+
+  insert_boundary(boundary, dim);
+
+  // If started with 0 columns, no swaps are needed
+  if (get_number_of_columns() == 1) return;
+
+  for (Index curr = get_number_of_columns() - 1; curr > columnIndex; --curr) {
+    Swap_opt::vine_swap(curr - 1);
+  }
 }
 
 template <class Master_matrix>
@@ -782,11 +802,7 @@ inline void RU_matrix<Master_matrix>::print()
 template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_insert_boundary(Index currentIndex)
 {
-  if constexpr (Master_matrix::Option_list::is_z2) {
-    mirrorMatrixU_.insert_column({currentIndex});
-  } else {
-    mirrorMatrixU_.insert_column({{currentIndex, 1}});
-  }
+  mirrorMatrixU_.insert_column(currentIndex, 1);
 
   if constexpr (!Master_matrix::Option_list::has_map_column_container) {
     ID_index pivot = reducedMatrixR_.get_column(currentIndex).get_pivot();
@@ -801,15 +817,8 @@ inline void RU_matrix<Master_matrix>::_insert_boundary(Index currentIndex)
 template <class Master_matrix>
 inline void RU_matrix<Master_matrix>::_initialize_U()
 {
-  typename std::conditional<Master_matrix::Option_list::is_z2, Index, std::pair<Index, Field_element> >::type id;
-  if constexpr (!Master_matrix::Option_list::is_z2) id.second = 1;
-
   for (ID_index i = 0; i < reducedMatrixR_.get_number_of_columns(); i++) {
-    if constexpr (Master_matrix::Option_list::is_z2)
-      id = i;
-    else
-      id.first = i;
-    mirrorMatrixU_.insert_column({id});
+    mirrorMatrixU_.insert_column(i, 1);
   }
 }
 
@@ -900,6 +909,7 @@ inline typename RU_matrix<Master_matrix>::Index RU_matrix<Master_matrix>::_get_c
     if (it == pivotToColumnIndex_.end()) return Master_matrix::template get_null_value<Index>();
     return it->second;
   } else {
+    if (pivot >= pivotToColumnIndex_.size()) return Master_matrix::template get_null_value<Index>();
     return pivotToColumnIndex_[pivot];
   }
 }

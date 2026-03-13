@@ -22,7 +22,7 @@ In order to complicate things, some noise (+/- 5% of the radius value) to the po
 
 The TDA scikit-learn pipeline is constructed and is composed of:
 
-#. :class:`~gudhi.sklearn.cech_persistence.CechPersistence` that builds a Čech complex from the inputs and
+#. :class:`~gudhi.sklearn.CechPersistence` that builds a Čech complex from the inputs and
    returns its persistence diagrams in dimension 1.
 #. :class:`~gudhi.representations.vector_methods.PersistenceLengths` that returns here the biggest persistence bar in
    dimension 1.
@@ -43,10 +43,10 @@ regression line of the model when fitting on the other 25% of the dataset.
 Čech complex persistence scikit-learn like interface reference
 --------------------------------------------------------------
 
-.. autoclass:: gudhi.sklearn.cech_persistence.CechPersistence
+.. autoclass:: gudhi.sklearn.CechPersistence
    :members:
    :show-inheritance:
 
-.. autoclass:: gudhi.sklearn.cech_persistence.WeightedCechPersistence
+.. autoclass:: gudhi.sklearn.WeightedCechPersistence
    :members:
    :show-inheritance:

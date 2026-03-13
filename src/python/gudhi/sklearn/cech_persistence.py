@@ -163,7 +163,7 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
                 one dimension matters (in other words, when `homology_dimensions` is an int).
             precision: Complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
             output_squared_values: Square filtration values when `True`. Default is `True`  (contrary to the unweighted
-                version :class:`~gudhi.sklearn.cech_persistence.CechPersistence`).
+                version :class:`~gudhi.sklearn.CechPersistence`).
             threshold: The maximum filtration value the simplices shall not exceed. Default is set to infinity, and
                 there is very little point using anything else since it does not save time.
                 Notice that the filtration values (equal to squared radii, by default, or radii) will be different in

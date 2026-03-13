@@ -161,6 +161,71 @@ struct Column_mini_matrix {
                                                   std::initializer_list<ID_index>,
                                                   std::initializer_list<std::pair<ID_index, Element> >
                                                  >::type;
+
+  using Entry_representative = std::conditional_t<Options::is_z2, ID_index, std::pair<ID_index, Element> >;
+
+  static Field_operators const* get_operator_ptr(Column_settings const* colSettings)
+  {
+    if constexpr (Options::is_z2) {
+      return nullptr;
+    } else {
+      if (colSettings == nullptr) return nullptr; // used for dummy columns
+      return &(colSettings->operators);
+    }
+  }
+
+  template <typename T>
+  static Element get_coefficient_value(T v, [[maybe_unused]] Field_operators const* operators)
+  {
+    if constexpr (Options::is_z2) {
+      return Field_operators::get_value(v);
+    } else {
+      return operators->get_value(v);
+    }
+  }
+
+  static Element get_coefficient_value(bool v, [[maybe_unused]] Field_operators const* operators) { return v; }
+
+  static ID_index get_row_index(const Matrix_entry& e)
+  {
+    return e.get_row_index();
+  }
+
+  static ID_index get_row_index(const Entry_representative& e)
+  {
+    if constexpr (Options::is_z2) {
+      return e;
+    } else {
+      return e.first;
+    }
+  }
+
+  static ID_index& get_row_index(Entry_representative& e)
+  {
+    if constexpr (Options::is_z2) {
+      return e;
+    } else {
+      return e.first;
+    }
+  }
+
+  static Element get_element(const Matrix_entry& e)
+  {
+    if constexpr (Options::is_z2) {
+      return Field_operators::get_multiplicative_identity();
+    } else {
+      return e.get_element();
+    }
+  }
+
+  static Element get_element(const Entry_representative& e)
+  {
+    if constexpr (Options::is_z2) {
+      return Field_operators::get_multiplicative_identity();
+    } else {
+      return e.second;
+    }
+  }
 };
 
 template <bool is_z2_only, Column_types col_type, bool has_row, bool rem_row, bool intr_row>

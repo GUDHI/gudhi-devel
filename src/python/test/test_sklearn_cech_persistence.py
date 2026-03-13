@@ -16,7 +16,7 @@ import pytest
 import math
 
 from gudhi.datasets.generators import points
-from gudhi.sklearn.cech_persistence import CechPersistence, WeightedCechPersistence
+from gudhi.sklearn import CechPersistence, WeightedCechPersistence
 
 
 def test_cech_persistence_of_points_on_a_circle():

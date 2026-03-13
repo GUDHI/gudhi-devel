@@ -72,7 +72,7 @@ struct PersistenceMatrixOptions
    * by a same column.
    *
    * Note that some methods of the @ref basematrix "base matrix" are not available when true:
-   * - @ref Matrix::insert_column(const Container&, Index) "insert_column(const Container&, Index)",
+   * - @ref Matrix::insert_column,
    * - @ref Matrix::zero_column(Index) "zero_column(Index)",
    * - @ref Matrix::zero_entry(Index, Index) "zero_entry(Index, ID_index)",
    * - @ref Matrix::swap_columns(Index, Index) "swap_columns(Index, Index)",
@@ -153,8 +153,8 @@ struct PersistenceMatrixOptions
    */
   static const bool has_vine_update;
   /**
-   * @brief If set to true, enables the methods @ref Matrix::update_representative_cycles and
-   * @ref Matrix::get_representative_cycles.
+   * @brief If set to true, enables the methods @ref Matrix::update_all_representative_cycles and
+   * @ref Matrix::get_all_representative_cycles.
    * The matrix will then either be a @ref boundarymatrix "boundary matrix" (if @ref is_of_boundary_type is true),
    * or a @ref chainmatrix "chain matrix" (if @ref is_of_boundary_type is false).
    */

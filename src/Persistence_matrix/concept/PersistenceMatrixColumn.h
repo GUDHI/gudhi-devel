@@ -72,6 +72,7 @@ class PersistenceMatrixColumn :
   using const_iterator = unspecified;         /**< Column const_iterator type. */
   using reverse_iterator = unspecified;       /**< Column reverse_iterator type. */
   using const_reverse_iterator = unspecified; /**< Column const_reverse_iterator type. */
+  using Content_range = unspecified;          /**< Return type for @ref get_non_zero_content_range method. */
 
   /**
    * @brief Constructs an empty column. If @p entryConstructor is not specified or is set to `nullptr`, the column
@@ -371,6 +372,17 @@ class PersistenceMatrixColumn :
    * @return @ref Entry const reverse iterator.
    */
   const_reverse_iterator rend() const noexcept;
+
+  /**
+   * @brief Returns a range of the column's non-zero content such that the row indices are ordered by increasing values.
+   * The range has to have a `begin` and `end` method return an iterator pointing to a (const) @ref Entry. An additional
+   * `size` method is preferable for pre-allocation purposes, but is optional.
+   *
+   * Note that depending on the column type, this method can have different complexity. If the underlying container is
+   * already ordered, it will be almost trivial. But if the underlying container in unordered or contains also zero
+   * elements, the complexity will can potentially be linear.
+   */
+  Content_range get_non_zero_content_range();
 
   /**
    * @brief Adds the given @ref Entry range onto the column.
