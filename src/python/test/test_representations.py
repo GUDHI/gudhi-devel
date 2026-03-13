@@ -101,7 +101,6 @@ metrics_dict = {  # (class, metric_kwargs, tolerance_pytest_approx)
 
 
 def test_distance_transform_consistency():
-    print("Hello")
     l1 = _n_diags(9)
     l1b = l1.copy()
     for metricName, (metricClass, metricParams, tolerance) in metrics_dict.items():
