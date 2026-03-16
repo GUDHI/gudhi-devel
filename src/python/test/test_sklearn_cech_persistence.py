@@ -1,13 +1,14 @@
-"""This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
-See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-Author(s):       Vincent Rouvreau
+""" This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
+    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
+    Author(s):       Vincent Rouvreau
 
-Copyright (C) 2025 Inria
+    Copyright (C) 2025 Inria
 
-Modification(s):
-  - 2026/03 Vincent Rouvreau: Rewrite H1 tests and only check lifetimes > 1e-11
-  - YYYY/MM Author: Description of the modification
+    Modification(s):
+      - 2026/03 Vincent Rouvreau: Rewrite H1 tests and only check lifetimes > 1e-11
+      - YYYY/MM Author: Description of the modification
 """
+
 
 import numpy as np
 from numpy.testing import assert_almost_equal
@@ -60,16 +61,15 @@ def test_cech_persistence_of_points_on_a_circle():
 def test_h1_only_cech_persistence_of_points_on_a_circle():
     pts = [points.sphere(n_samples=150, ambient_dim=2)]
     diags = CechPersistence(homology_dimensions=1, n_jobs=1).fit_transform(pts)[0]
-    assert_almost_equal(np.array([[0.1, 1.0]]), diags, decimal=1)
+    assert_almost_equal(np.array([[0.1, 1.]]), diags, decimal=1)
 
     # Same test but for the weighted version
     wpts = [np.append(pts[0], np.zeros((len(pts[0]), 1)), axis=1)]
     diags = WeightedCechPersistence(homology_dimensions=1, n_jobs=1).fit_transform(wpts)[0]
     for diag in diags:
         # H1 - can have some [1., 1.] - Maybe points on a circle is not the best test case
-        if not math.isclose(diag[0], 1.0):
-            assert_almost_equal(np.array([0.1, 1.0]), diag, decimal=1)
-
+        if not math.isclose(diag[0], 1.):
+            assert_almost_equal(np.array([0.1, 1.]), diag, decimal=1)
 
 def test_set_output():
     try:
