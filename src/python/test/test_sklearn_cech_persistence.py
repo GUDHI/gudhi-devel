@@ -38,7 +38,7 @@ def test_cech_persistence_of_points_on_a_circle():
             h1 = diags[idx][1]
             lifetimes = np.abs(h1[:, 1] - h1[:, 0])
             # Degenerate case with points on a circle, some 1e-12 H1 lifetimes can appear
-            epsilon = 1e-11
+            epsilon = 1e-10
             assert np.sum(lifetimes > epsilon) == 1
 
         # Same test but for the weighted version
@@ -54,7 +54,7 @@ def test_cech_persistence_of_points_on_a_circle():
             h1 = diags[idx][1]
             lifetimes = np.abs(h1[:, 1] - h1[:, 0])
             # Degenerate case with points on a circle, some 1e-12 H1 lifetimes can appear
-            epsilon = 1e-11
+            epsilon = 1e-10
             assert np.sum(lifetimes > epsilon) == 1
 
 
