@@ -26,6 +26,8 @@ Below is a list of changes:
      - in metrics, `BottleneckDistance` argument `epsilon` is deprecrated and renamed `e` to be consistent with `bottleneck_distance` and `pairwise_persistence_diagram_distances`
 
 - Installation
+     - Minimal Python version is now &ge; 3.10.0 (was &ge; 3.9.0).
+     - Minimal NumPy version is now &ge; 1.21.6 (was &ge; 1.15.0).
      - Pip package is now available for OSx &ge; 13.0 (was &ge; 12.0).
      - Support Eigen 3.4.1 and 5.X.X
      
