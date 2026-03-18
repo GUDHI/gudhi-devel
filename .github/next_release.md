@@ -1,6 +1,7 @@
 We are pleased to announce the release 3.12.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers  **...**
+As a major new feature, the GUDHI library now offers  Čech complex persistence scikit-learn like interface.
+Python bindings were rewritten using NanoBind.
 
 The GUDHI library is mainly developped using GitHub, do not hesitate to
 [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel).
@@ -8,24 +9,26 @@ From a user point of view, we recommend to download GUDHI user version (gudhi.3.
 
 Below is a list of changes:
 
-- [Module](link)
-     - **...**
+- [Čech complex](https://gudhi.inria.fr/python/3.12.0rc1/delaunay_complex_sklearn_itf_ref.html)
+     - Čech complex persistence scikit-learn like interface
 
-- [Module](link)
-     - **...**
-
-- [Alpha complex dD](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1alpha__complex_1_1_alpha__complex.html)
+- [Alpha complex dD](https://gudhi.inria.fr/doc/3.12.0rc1/class_gudhi_1_1alpha__complex_1_1_alpha__complex.html)
      - **API break:** The simplicial complex for the Alpha complex concept has been changed to
        `dimension_simplex_range` (that must returns a range of simplices of a given dimension) instead of
        `skeleton_simplex_range` (that was returning a range of simplices lower or equal to a given dimension)
 
-- [Simplex_tree](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1_simplex__tree.html)
+- [Simplex_tree](https://gudhi.inria.fr/doc/3.12.0rc1/class_gudhi_1_1_simplex__tree.html)
      - A new iterator over the simplices of the simplicial complex that match a given dimension
 
-- [Representations](https://gudhi.inria.fr/python/latest/representations.html)
+- [Persistence matrix](https://gudhi.inria.fr/doc/3.12.0rc1/group__persistence__matrix.html)
+     > Matrix API is in a beta version and may change in incompatible ways in the near future.
+     - A new function to insert a maximal cell using swaps.
+
+- [Representations](https://gudhi.inria.fr/python/3.12.0rc1/representations.html)
      - in metrics, `BottleneckDistance` argument `epsilon` is deprecrated and renamed `e` to be consistent with `bottleneck_distance` and `pairwise_persistence_diagram_distances`
 
 - Installation
+     - Python bindings are now requiring NanoBind. PyBind11 and Cython dependencies are no more required.
      - Minimal Python version is now &ge; 3.10.0 (was &ge; 3.9.0).
      - Minimal NumPy version is now &ge; 1.21.6 (was &ge; 1.15.0).
      - Pip package is now available for OSx &ge; 13.0 (was &ge; 12.0).
@@ -52,5 +55,13 @@ For further information about downloading and installing the library
 
 ## Contributors
 
-- **...**
-- **...**
+- @DavidLapous
+- @ErwanDemairy
+- @g0byx3
+- @hschreiber
+- @j-l-s
+- @jlazovskis
+- @martinroyer
+- @mglisse
+- @tkloczko
+- @VincentRouvreau
