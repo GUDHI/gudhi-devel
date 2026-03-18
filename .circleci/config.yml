@@ -5,7 +5,7 @@ jobs:
   examples:
     docker:
       # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.02
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.01
     steps:
       - checkout
       - run:
@@ -24,7 +24,7 @@ jobs:
 
   tests:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.02
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.01
     resource_class: large # Sometimes takes a long time to build matrices - Timeout is 1h
     steps:
       - checkout
@@ -44,7 +44,7 @@ jobs:
 
   utils:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.02
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.01
     steps:
       - checkout
       - run:
@@ -63,7 +63,7 @@ jobs:
 
   python:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.02
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.01
     resource_class: large # Delaunay complex requires about 5 Gb of RAM to compile
     steps:
       - restore_cache:
