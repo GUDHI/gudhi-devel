@@ -10,7 +10,9 @@ From a user point of view, we recommend to download GUDHI user version (gudhi.3.
 Below is a list of changes:
 
 - [Čech complex](https://gudhi.inria.fr/python/3.12.0rc1/delaunay_complex_sklearn_itf_ref.html)
-     - Čech complex persistence scikit-learn like interface
+     - Čech complex persistence scikit-learn like interface provides 2 new classes:
+         * [CechPersistence](https://gudhi.inria.fr/python/3.12.0rc1/delaunay_complex_sklearn_itf_ref.html#gudhi.sklearn.CechPersistence) for computing the same persistent homology as the Čech complex, while being significantly smaller, using internally a [DelaunayCechComplex](https://gudhi.inria.fr/python/3.12.0rc1/delaunay_complex_ref.html#gudhi.DelaunayCechComplex).
+         * [WeightedCechPersistence](https://gudhi.inria.fr/python/3.12.0rc1/delaunay_complex_sklearn_itf_ref.html#gudhi.sklearn.WeightedCechPersistence) for computing the same persistent homology as the Weighted Čech complex, while being significantly smaller, using internally a Weighted version of [AlphaComplex](https://gudhi.inria.fr/python/3.12.0rc1/delaunay_complex_ref.html#gudhi.AlphaComplex).
 
 - [Alpha complex dD](https://gudhi.inria.fr/doc/3.12.0rc1/class_gudhi_1_1alpha__complex_1_1_alpha__complex.html)
      - **API break:** The simplicial complex for the Alpha complex concept has been changed to
