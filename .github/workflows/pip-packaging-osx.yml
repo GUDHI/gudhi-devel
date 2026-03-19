@@ -44,7 +44,7 @@ jobs:
           brew install boost eigen gmp mpfr cgal || echo "brew install failed, continuing..."
           python -m pip install --user numpy>=2.0
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-          python -m pip install --user delocate
+          python -m pip install --user twine delocate
           ./scripts/build_osx_universal_gmpfr.sh
           # Now the universal libraries are in $PWD/deps-uni/lib
       - name: Build python wheel
