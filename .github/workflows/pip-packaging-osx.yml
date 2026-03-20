@@ -48,9 +48,10 @@ jobs:
           ./scripts/build_osx_universal_gmpfr.sh
           # Now the universal libraries are in $PWD/deps-uni/lib
       - name: Build python wheel
-        # To workaround an issue on Sonoma where mixing ar from brew install
+        # Force the use of apple clang - brew clang seems problematic for universal wheel
         env:
-          SKBUILD_CMAKE_DEFINE: "CMAKE_AR=/usr/bin/ar"
+          CXX: /usr/bin/clang++
+          CC: /usr/bin/clang
         run: |
           export   GMP_LIB_DIR=$PWD/deps-uni/lib
           export GMPXX_LIB_DIR=$PWD/deps-uni/lib
