@@ -2,23 +2,32 @@ name: pip build osx
 
 on: [push, pull_request]
 
-env:
-  MACOSX_DEPLOYMENT_TARGET: 14.0
-  _PYTHON_HOST_PLATFORM: macosx-14.0-universal2
-  ARCHFLAGS: "-arch arm64 -arch x86_64"
+strategy:
+  max-parallel: 4
+  matrix:
+    os: [macos-14, macos-14-large]
+    python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    include:
+      - python-version: "3.10"
+        numpy-version: "1.21.6"
+      - python-version: "3.11"
+        numpy-version: "1.23.2"
+      - python-version: "3.12"
+        numpy-version: "1.26.0"
+      - python-version: "3.13"
+        numpy-version: "2.1.0"
+      - python-version: "3.14"
+        numpy-version: "2.3.4"
+    # Python 3.11+ is only available for MacOS free version cf. https://github.com/actions/runner-images
+    exclude:
+      - os: macos-14
+        python-version: "3.10"
 
 jobs:
-  build:
-    # Python 3.11+ is only available for MacOS free version cf. https://github.com/actions/runner-images
-    runs-on: macos-14
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: ["3.11"]
-        include:
-          - python-version: "3.11"
-            numpy-version: "1.23.2"
-    name: Build wheels for Python ${{ matrix.python-version }}
+  # Build with minimal supported version of NumPy 1.X with ABI compatibility feature
+  wheels:
+    runs-on: ${{ matrix.os }}
+    name: Build wheels on ${{ matrix.os }} for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -35,23 +44,19 @@ jobs:
           brew install boost eigen gmp mpfr cgal || echo "brew install failed, continuing..."
           python -m pip install --user numpy>=2.0
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-          python -m pip install --user delocate
-          ./scripts/build_osx_universal_gmpfr.sh
-          # Now the universal libraries are in $PWD/deps-uni/lib
+          python -m pip install --user twine delocate
       - name: Build python wheel
         run: |
-          export   GMP_LIB_DIR=$PWD/deps-uni/lib
-          export GMPXX_LIB_DIR=$PWD/deps-uni/lib
-          export  MPFR_LIB_DIR=$PWD/deps-uni/lib
           python --version
           python -m pip wheel -ve .
           export PATH="$PATH:`python -m site --user-base`/bin"
           delocate-listdeps --depending *.whl
-          delocate-wheel --require-archs universal2 -w wheelhouse -v *.whl
-      - name: Upload OSx python wheel
+          mkdir wheelhouse || true
+          delocate-wheel -w wheelhouse -v *.whl
+      - name: Upload linux python wheel
         uses: actions/upload-artifact@v6
         with:
-          name: osx python wheel
+          name: linux python wheel
           path: wheelhouse/*.whl
       # Test ABI compatibility with numpy 1.X
       - name: Install and test python wheel
