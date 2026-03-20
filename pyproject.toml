@@ -28,9 +28,9 @@ wheel.packages = []
 
 [project]
 name = "gudhi"
-version = "3.12.0a1"
+version = "3.12.0rc3"
 description = "The Gudhi library is an open source library for Computational Topology and Topological Data Analysis (TDA)."
-# readme = "doc/pypi_introduction.inc"
+readme = "src/python/doc/pypi_introduction.rst"
 requires-python = ">=3.10"
 authors = [{ name = "GUDHI Editorial Board <https://gudhi.inria.fr/contact/>" }]
 classifiers = [

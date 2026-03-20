@@ -9,24 +9,24 @@ From a user point of view, we recommend to download GUDHI user version (gudhi.3.
 
 Below is a list of changes:
 
-- [Čech complex](https://gudhi.inria.fr/python/3.12.0rc1/delaunay_complex_sklearn_itf_ref.html) `[Python]`
+- [Čech complex](https://gudhi.inria.fr/python/3.12.0rc3/delaunay_complex_sklearn_itf_ref.html) `[Python]`
      - Čech complex persistence scikit-learn like interface provides 2 new classes:
-         * [CechPersistence](https://gudhi.inria.fr/python/3.12.0rc1/delaunay_complex_sklearn_itf_ref.html#gudhi.sklearn.CechPersistence) for computing the same persistent homology as the Čech complex, while being significantly smaller, using internally a [DelaunayCechComplex](https://gudhi.inria.fr/python/3.12.0rc1/delaunay_complex_ref.html#gudhi.DelaunayCechComplex).
-         * [WeightedCechPersistence](https://gudhi.inria.fr/python/3.12.0rc1/delaunay_complex_sklearn_itf_ref.html#gudhi.sklearn.WeightedCechPersistence) for computing the same persistent homology as the Weighted Čech complex, while being significantly smaller, using internally a Weighted version of [AlphaComplex](https://gudhi.inria.fr/python/3.12.0rc1/delaunay_complex_ref.html#gudhi.AlphaComplex).
+         * [CechPersistence](https://gudhi.inria.fr/python/3.12.0rc3/delaunay_complex_sklearn_itf_ref.html#gudhi.sklearn.CechPersistence) for computing the same persistent homology as the Čech complex, while being significantly smaller, using internally a [DelaunayCechComplex](https://gudhi.inria.fr/python/3.12.0rc3/delaunay_complex_ref.html#gudhi.DelaunayCechComplex).
+         * [WeightedCechPersistence](https://gudhi.inria.fr/python/3.12.0rc3/delaunay_complex_sklearn_itf_ref.html#gudhi.sklearn.WeightedCechPersistence) for computing the same persistent homology as the Weighted Čech complex, while being significantly smaller, using internally a Weighted version of [AlphaComplex](https://gudhi.inria.fr/python/3.12.0rc3/delaunay_complex_ref.html#gudhi.AlphaComplex).
 
-- [Alpha complex dD](https://gudhi.inria.fr/doc/3.12.0rc1/class_gudhi_1_1alpha__complex_1_1_alpha__complex.html) `[C++]`
+- [Alpha complex dD](https://gudhi.inria.fr/doc/3.12.0rc3/class_gudhi_1_1alpha__complex_1_1_alpha__complex.html) `[C++]`
      - **API break:** The simplicial complex for the Alpha complex concept has been changed to
        `dimension_simplex_range` (that must returns a range of simplices of a given dimension) instead of
        `skeleton_simplex_range` (that was returning a range of simplices lower or equal to a given dimension)
 
-- [Simplex_tree](https://gudhi.inria.fr/doc/3.12.0rc1/class_gudhi_1_1_simplex__tree.html) `[C++]`
+- [Simplex_tree](https://gudhi.inria.fr/doc/3.12.0rc3/class_gudhi_1_1_simplex__tree.html) `[C++]`
      - A new iterator over the simplices of the simplicial complex that match a given dimension
 
-- [Persistence matrix](https://gudhi.inria.fr/doc/3.12.0rc1/group__persistence__matrix.html) `[C++]`
+- [Persistence matrix](https://gudhi.inria.fr/doc/3.12.0rc3/group__persistence__matrix.html) `[C++]`
      > Matrix API is in a beta version and may change in incompatible ways in the near future.
      - A new function to insert a maximal cell using swaps.
 
-- [Representations](https://gudhi.inria.fr/python/3.12.0rc1/representations.html) `[Python]`
+- [Representations](https://gudhi.inria.fr/python/3.12.0rc3/representations.html) `[Python]`
      - in metrics, `BottleneckDistance` argument `epsilon` is deprecrated and renamed `e` to be consistent with `bottleneck_distance` and `pairwise_persistence_diagram_distances`
 
 - Installation

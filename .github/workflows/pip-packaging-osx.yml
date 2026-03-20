@@ -48,6 +48,10 @@ jobs:
           ./scripts/build_osx_universal_gmpfr.sh
           # Now the universal libraries are in $PWD/deps-uni/lib
       - name: Build python wheel
+        # Force the use of apple clang - brew clang seems problematic for universal wheel
+        env:
+          CXX: /usr/bin/clang++
+          CC: /usr/bin/clang
         run: |
           export   GMP_LIB_DIR=$PWD/deps-uni/lib
           export GMPXX_LIB_DIR=$PWD/deps-uni/lib
