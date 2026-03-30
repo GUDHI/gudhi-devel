@@ -122,7 +122,6 @@ Create a Pull Request (PR) from this fork.
 If you need to update conda tools (conda-build, conda-smithy, ...), add a comment in your PR saying `@conda-forge-admin, please rerender`, it will done automatically (do not forget to `git pull` the changes).
 
 ## Docker image
- and the file pyproject.toml
 You have to modify the
 [Dockerfile_gudhi_installation](https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_gudhi_installation)
 in gudhi-deploy repository in order to use the last release, cf. lines:
