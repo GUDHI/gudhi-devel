@@ -581,6 +581,9 @@ class Position_to_index_overlay
   std::vector<Index> positionToIndex_; /**< Map from @ref PosIdx index to @ref MatIdx index. */
   Pos_index nextPosition_;             /**< Next unused position. */
   Index nextIndex_;                    /**< Next unused index. */
+
+  template <bool dir>
+  void _move_column(Pos_index start, Pos_index end);
 };
 
 template <class Underlying_matrix, class Master_matrix>
@@ -705,17 +708,14 @@ inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::insert_
     const Boundary_range& boundary,
     Dimension dim)
 {
-  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have be positive."));
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have to be positive."));
 
   insert_boundary(boundary, dim);
 
-  // avoids wrong loop if Pos_index is unsigned
   if (nextPosition_ == 1) return;
 
-  for (Pos_index p = nextPosition_ - 1; p > columnIndex; --p) {
-    auto next = matrix_.vine_swap(positionToIndex_[p - 1], positionToIndex_[p]);
-    if (next != positionToIndex_[p]) std::swap(positionToIndex_[p - 1], positionToIndex_[p]);
-  }
+  // false = backward direction
+  _move_column<false>(nextPosition_ - 1, columnIndex);
 }
 
 template <class Underlying_matrix, class Master_matrix>
@@ -726,16 +726,14 @@ inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::insert_
     const Boundary_range& boundary,
     Dimension dim)
 {
-  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have be positive."));
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have to be positive."));
 
   insert_boundary(cellIndex, boundary, dim);
 
   if (nextPosition_ == 1) return;
 
-  for (Pos_index p = nextPosition_ - 2; p >= columnIndex; --p) {
-    auto next = matrix_.vine_swap(positionToIndex_[p], positionToIndex_[p + 1]);
-    if (next != positionToIndex_[p + 1]) std::swap(positionToIndex_[p], positionToIndex_[p + 1]);
-  }
+  // false = backward direction
+  _move_column<false>(nextPosition_ - 1, columnIndex);
 }
 
 template <class Underlying_matrix, class Master_matrix>
@@ -777,10 +775,8 @@ inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::remove_
 {
   --nextPosition_;
 
-  for (Pos_index p = position; p < nextPosition_; ++p) {
-    auto next = matrix_.vine_swap(positionToIndex_[p], positionToIndex_[p + 1]);
-    if (next != positionToIndex_[p + 1]) std::swap(positionToIndex_[p], positionToIndex_[p + 1]);
-  }
+  // true = forward direction
+  _move_column<true>(position, nextPosition_);
 
   matrix_._remove_last(positionToIndex_[nextPosition_]);
 }
@@ -936,6 +932,21 @@ inline bool Position_to_index_overlay<Underlying_matrix, Master_matrix>::vine_sw
   }
 
   return false;
+}
+
+template <class Underlying_matrix, class Master_matrix>
+template <bool dir>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::_move_column(Pos_index start, Pos_index end)
+{
+  if constexpr (dir) {
+    for (Pos_index p = start; p < end; ++p) {
+      vine_swap(p);
+    }
+  } else {
+    for (Pos_index p = start; p > end; --p) {
+      vine_swap(p - 1);
+    }
+  }
 }
 
 }  // namespace persistence_matrix
