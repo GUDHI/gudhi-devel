@@ -282,7 +282,7 @@ computed with these values.
     Note that this code creates an extra vertex internally, so you should make sure that the simplex tree does not
     contain a vertex with the largest possible value (i.e., 4294967295).
 
-This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
+This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-extended-persistence.ipynb>`_
 explains how to compute an extension of persistence called extended persistence.
            )doc")
       .def("_collapse_edges",
