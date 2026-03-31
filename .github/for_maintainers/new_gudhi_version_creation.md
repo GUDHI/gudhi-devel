@@ -152,6 +152,6 @@ Send version mail to the following lists :
 
 ## File to update after the release
 
-**Edit the file CMakeGUDHIVersion.txt**, and increment major, minor, or patch version number, in function of the future version (something like `3.X+1.0a0`).
+**Edit the file CMakeGUDHIVersion.txt and the file pyproject.toml**, and increment major, minor, or patch version number, in function of the future version (something like `3.X+1.0a0`).
 
 Reset [.github/next_release.md](.github/next_release.md) with [.github/for_maintainers/next_release_template.md](.github/for_maintainers/next_release_template.md).
