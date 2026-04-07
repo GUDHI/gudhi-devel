@@ -290,7 +290,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
-   * @return The @ref MatIdx index of the inserted boundary.
+   * @return The @ref MatIdx indices of the unpaired chains used to reduce the boundary.
    */
   template <class Boundary_range = Boundary>
   std::vector<Entry_representative> insert_boundary(
@@ -337,7 +337,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
-   * @return The @ref MatIdx index of the inserted boundary.
+   * @return The @ref MatIdx indices of the unpaired chains used to reduce the boundary.
    */
   template <class Boundary_range = Boundary>
   std::vector<Entry_representative> insert_maximal_cell(
