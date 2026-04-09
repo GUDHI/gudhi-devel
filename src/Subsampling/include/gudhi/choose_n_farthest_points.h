@@ -22,11 +22,11 @@
 #endif
 
 #include <gudhi/Null_output_iterator.h>
+#include <gudhi/Random.h>
 
 #include <iterator>
 #include <vector>
 #include <utility>
-#include <random>
 #include <limits>
 
 namespace Gudhi {
@@ -88,10 +88,8 @@ void choose_n_farthest_points(Distance dist,
 
   if (starting_point == random_starting_point) {
     // Choose randomly the first landmark
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<std::size_t> dis(0, nb_points - 1);
-    starting_point = dis(gen);
+    auto rng = Gudhi::random::get_default_random();
+    starting_point = rng.get<std::size_t>(0, nb_points - 1);
   }
 
   // FIXME: don't hard-code the type as double. For Epeck_d, we also want to handle types that do not have an infinity.
@@ -221,10 +219,8 @@ void choose_n_farthest_points_metric(Distance dist_,
 
   if (starting_point == random_starting_point) {
     // Choose randomly the first landmark
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<std::size_t> dis(0, nb_points - 1);
-    starting_point = dis(gen);
+    auto rng = Gudhi::random::get_default_random();
+    starting_point = rng.get<std::size_t>(0, nb_points - 1);
   }
 
   // FIXME: don't hard-code the type as double. For Epeck_d, we also want to handle types that do not have an infinity.
