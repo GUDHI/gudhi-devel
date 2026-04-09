@@ -28,9 +28,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(random_same_seed, RndType, list_of_rnd_types) {
   RndType min{0};
   RndType max{100};
   Gudhi::random::Random rng_1(1);
-  RndType first  = rng_1(min, max);
+  RndType first  = rng_1.get(min, max);
   Gudhi::random::Random rng_2(1);
-  RndType second = rng_2(min, max);
+  RndType second = rng_2.get(min, max);
 
   std::clog << "First random number: " << first << " - Second random number: " << second << std::endl;
   BOOST_CHECK(first >= min);
@@ -44,9 +44,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(random_different_seed, RndType, list_of_rnd_types)
   RndType min{0};
   RndType max{100};
   Gudhi::random::Random rng_1;
-  RndType first  = rng_1(min, max);
+  RndType first  = rng_1.get(min, max);
   Gudhi::random::Random rng_2;
-  RndType second = rng_2(min, max);
+  RndType second = rng_2.get(min, max);
 
   std::clog << "First random number: " << first << " - Second random number: " << second << std::endl;
   BOOST_CHECK(first >= min);
@@ -63,8 +63,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(default_random, RndType, list_of_rnd_types) {
   const RndType MAX_VAL{100};
   
   auto rng = Gudhi::random::get_default_random();
-  RndType first  = rng(MIN_VAL, MAX_VAL);
-  RndType second = rng(MIN_VAL, MAX_VAL);
+  RndType first  = rng.get(MIN_VAL, MAX_VAL);
+  RndType second = rng.get(MIN_VAL, MAX_VAL);
 
   std::clog << "First random number: " << first << " - Second random number: " << second << std::endl;
   BOOST_CHECK(first >= MIN_VAL);
@@ -75,9 +75,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(default_random, RndType, list_of_rnd_types) {
 
   const int SEED{42};
   rng.set_seed(SEED);
-  first  = rng(MIN_VAL, MAX_VAL);
+  first  = rng.get(MIN_VAL, MAX_VAL);
   rng.set_seed(SEED);
-  second = rng(MIN_VAL, MAX_VAL);
+  second = rng.get(MIN_VAL, MAX_VAL);
 
   std::clog << "First random number seeded : " << first << " - Second random number seeded : " << second << std::endl;
   BOOST_CHECK(first >= MIN_VAL);
@@ -92,8 +92,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(operator_parenthesis, RndType, list_of_rnd_types) 
   const RndType MAX_VAL{100};
   
   auto rng = Gudhi::random::get_default_random();
-  RndType first  = rng(MIN_VAL, MAX_VAL);
-  RndType second = rng(MIN_VAL, MAX_VAL);
+  RndType first  = rng.get(MIN_VAL, MAX_VAL);
+  RndType second = rng.get(MIN_VAL, MAX_VAL);
 
   std::clog << ".operator(min, max) - First random number: " << first << " - Second random number: " << second << std::endl;
   BOOST_CHECK(first >= MIN_VAL);
@@ -101,8 +101,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(operator_parenthesis, RndType, list_of_rnd_types) 
   BOOST_CHECK(second >= MIN_VAL);
   BOOST_CHECK(second <= MAX_VAL);
 
-  first  = rng(MAX_VAL);
-  second = rng(MAX_VAL);
+  first  = rng.get(MAX_VAL);
+  second = rng.get(MAX_VAL);
 
   std::clog << ".operator() - First random number: " << first << " - Second random number: " << second << std::endl;
   BOOST_CHECK(first >= RndType{0});
@@ -110,8 +110,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(operator_parenthesis, RndType, list_of_rnd_types) 
   BOOST_CHECK(second >= RndType{0});
   BOOST_CHECK(second <= MAX_VAL);
 
-  first  = rng.operator()<RndType>();
-  second = rng.operator()<RndType>();
+  first  = rng.get<RndType>();
+  second = rng.get<RndType>();
 
   std::clog << ".operator() - First random number: " << first << " - Second random number: " << second << std::endl;
   BOOST_CHECK(first >= RndType{0});

@@ -38,7 +38,7 @@ namespace random {
     }
     
     template <typename Type>
-    Type operator() (const Type& min, const Type& max) {
+    Type get(const Type& min, const Type& max) {
       if constexpr (std::is_floating_point_v<Type>) {
         std::uniform_real_distribution<Type> dis(min, max);
         return dis(gen_);
@@ -49,13 +49,13 @@ namespace random {
     }
 
     template <typename Type>
-    Type operator() (const Type& max) {
-      return operator()<Type>(static_cast<Type>(0), max);
+    Type get(const Type& max) {
+      return get<Type>(static_cast<Type>(0), max);
     }
 
     template <typename Type>
-    Type operator() () {
-      return operator()<Type>(static_cast<Type>(0), static_cast<Type>(1));
+    Type get() {
+      return get<Type>(static_cast<Type>(0), static_cast<Type>(1));
     }
 
     Engine get_engine() const {
