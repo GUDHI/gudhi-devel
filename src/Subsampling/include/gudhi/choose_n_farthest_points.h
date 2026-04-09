@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2022/11 Glisse: New *_metric variant
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random::get_default_random()
  *      - YYYY/MM Author: Description of the modification
  */
 
