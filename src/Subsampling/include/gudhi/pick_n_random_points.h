@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2026/04 Vincent Rouvreau: Remove non c++17 code
+ *                                  Use Gudhi::random::get_default_random()
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -15,9 +16,9 @@
 #ifdef GUDHI_SUBSAMPLING_PROFILING
 # include <gudhi/Clock.h>
 #endif
+#include <gudhi/Random.h>
 
 #include <cstddef>  // for std::size_t
-#include <random>  // random_device, mt19937
 #include <algorithm>  // for std::sample
 
 
@@ -42,10 +43,8 @@ void pick_n_random_points(Point_container const &points,
   Gudhi::Clock t;
 #endif
 
-  std::random_device rd;
-  std::mt19937 g(rd());
-
-  std::sample(std::begin(points), std::end(points), output_it, final_size, g);
+  auto rng = Gudhi::random::get_default_random();
+  std::sample(std::begin(points), std::end(points), output_it, final_size, rng.get_engine());
 
 #ifdef GUDHI_SUBSAMPLING_PROFILING
   t.end();
