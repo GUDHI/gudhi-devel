@@ -5,6 +5,7 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Replace std::random_device with Gudhi::random
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -19,9 +20,9 @@
 
 #include <gudhi/choose_n_farthest_points.h>
 #include <gudhi/distance_functions.h>
+#include <gudhi/Random.h>
 #include <vector>
 #include <iterator>
-#include <random>
 #include <array>
 
 #include <CGAL/Epick_d.h>
@@ -111,15 +112,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_choose_farthest_point_limits, Kernel, list_of
   landmarks.clear(); distances.clear();
 }
 
-BOOST_AUTO_TEST_CASE(test_compare_choose_farthest_point)
-{
-  std::default_random_engine e;
-  std::uniform_real_distribution<double> r(0,1);
+BOOST_AUTO_TEST_CASE(test_compare_choose_farthest_point) {
   typedef std::array<double, 2> Point;
   typedef std::vector<Point> Cloud;
   Cloud orig;
+  auto rng = Gudhi::random::get_default_random();
   for(int i=0; i<1000; ++i) {
-    orig.push_back({ r(e), r(e) });
+    orig.push_back({rng.get<double>(0., 1.), rng.get<double>(0., 1.)});
   }
   Cloud out1, out2;
   std::vector<double> dist1, dist2;
