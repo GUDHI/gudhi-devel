@@ -5,12 +5,12 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Replace std::random_device with Gudhi::random
  *      - YYYY/MM Author: Description of the modification
  */
 
 #include <iostream>
 #include <cstring>  // for std::size_t and strncmp
-#include <random>
 #include <type_traits>
 #include <cstdint>  // for std::uint8_t
 #include <iomanip>  // for std::setfill, setw
@@ -24,6 +24,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Simplex_tree/serialization_utils.h>  // for de/serialize_value_to_char_buffer
 #include <gudhi/Unitary_tests_utils.h>  // for GUDHI_TEST_FLOAT_EQUALITY_CHECK
+#include <gudhi/Random.h>
 
 #include "test_vector_filtration_simplex_tree.h"
 
@@ -59,11 +60,8 @@ template <class Filtration_type>
 Filtration_type random_filtration_ar(Filtration_type lower_bound = 0,
                                      Filtration_type upper_bound = 1)
 {
-  std::uniform_real_distribution<Filtration_type> unif(lower_bound, upper_bound);
-  std::random_device rand_dev;
-  std::mt19937 rand_engine(rand_dev());
-
-  return unif(rand_engine);
+  auto rng = Gudhi::random::get_default_random();
+  return rng.get<Filtration_type>(lower_bound, upper_bound);
 }
 
 template <class Filtration_type>
@@ -71,12 +69,11 @@ Filtration_type random_filtration_vec(typename Filtration_type::value_type lower
                                       typename Filtration_type::value_type upper_bound = 10,
                                       unsigned int number_of_parameters = 2)
 {
-  std::uniform_int_distribution<typename Filtration_type::value_type> unif(lower_bound, upper_bound);
-  std::random_device rand_dev;
-  std::mt19937 rand_engine(rand_dev());
-
+  auto rng = Gudhi::random::get_default_random();
+  
   Filtration_type res(number_of_parameters);
-  for (unsigned int i = 0; i < number_of_parameters; ++i) res[i] = unif(rand_engine);
+  for (unsigned int i = 0; i < number_of_parameters; ++i)
+    res[i] = rng.get<typename Filtration_type::value_type>(lower_bound, upper_bound);
 
   return res;
 }
