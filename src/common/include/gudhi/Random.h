@@ -15,6 +15,8 @@
 #include <vector>
 #include <algorithm>  // for std::generate
 #include <cstddef>  // for std::size_t
+#include <vector>
+#include <algorithm>  // for std::generate
 #ifdef DEBUG_TRACES
 #include <iostream>
 #endif  // DEBUG_TRACES
@@ -58,6 +60,29 @@ namespace random {
       return get<Type>(static_cast<Type>(0), static_cast<Type>(1));
     }
 
+    template <typename Type>
+    std::vector<Type> get_range(std::size_t nbr, const Type& min, const Type& max) {
+      std::vector<Type> result(nbr);
+      if constexpr (std::is_floating_point_v<Type>) {
+        std::uniform_real_distribution<Type> dis(min, max);
+        std::generate(result.begin(), result.end(), [&]() { return dis(gen_); });
+      } else if constexpr (std::is_integral_v<Type>) {
+        std::uniform_int_distribution<Type> dis(min, max);
+        std::generate(result.begin(), result.end(), [&]() { return dis(gen_); });
+      }
+      return result;
+    }
+    
+    template <typename Type>
+    std::vector<Type> get_range(std::size_t nbr, const Type& max) {
+      return get_range<Type>(nbr, static_cast<Type>(0), max);
+    }
+    
+    template <typename Type>
+    std::vector<Type> get_range(std::size_t nbr) {
+      return get_range<Type>(nbr, static_cast<Type>(0), static_cast<Type>(1));
+    }
+    
     Engine get_engine() const {
       return gen_;
     }
