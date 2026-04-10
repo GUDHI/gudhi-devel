@@ -5,6 +5,7 @@
  *    Copyright (C) 2018  Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random::get_default_random()
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -17,12 +18,12 @@
 #include <algorithm>  // for std::sort, std::max, std::merge
 #include <cmath>      // for std::abs, std::sqrt
 #include <stdexcept>  // for std::invalid_argument
-#include <random>     // for std::random_device
 
 // gudhi include
 #include <gudhi/read_persistence_from_file.h>
 #include <gudhi/common_persistence_representations.h>
 #include <gudhi/Debug_utils.h>
+#include <gudhi/Random.h>
 
 namespace Gudhi {
 namespace Persistence_representations {
@@ -251,11 +252,9 @@ class Sliced_Wasserstein
       double epsilon = 0.0001;
       double thresh_y = (max_ordinate - min_ordinate) * epsilon;
       double thresh_x = (max_abscissa - min_abscissa) * epsilon;
-      std::random_device rd;
-      std::default_random_engine re(rd());
-      std::uniform_real_distribution<double> uni(-1, 1);
+      auto rng = Gudhi::random::get_default_random();
       for (int i = 0; i < num_pts_dgm; i++) {
-        double u = uni(re);
+        double u = rng.get<double>(-1., 1.);
         diagram1[i].first += u * thresh_x;
         diagram1[i].second += u * thresh_y;
         diagram2[i].first += u * thresh_x;
