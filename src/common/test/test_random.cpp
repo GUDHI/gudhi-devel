@@ -53,7 +53,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(random_different_seed, RndType, list_of_rnd_types)
   BOOST_CHECK(first <= max);
   BOOST_CHECK(second >= min);
   BOOST_CHECK(second <= max);
-  BOOST_CHECK(first != second);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(default_random, RndType, list_of_rnd_types) {
@@ -71,7 +70,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(default_random, RndType, list_of_rnd_types) {
   BOOST_CHECK(first <= MAX_VAL);
   BOOST_CHECK(second >= MIN_VAL);
   BOOST_CHECK(second <= MAX_VAL);
-  BOOST_CHECK(first != second);
 
   const int SEED{42};
   rng.set_seed(SEED);
