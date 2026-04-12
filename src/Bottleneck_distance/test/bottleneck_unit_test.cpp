@@ -5,6 +5,7 @@
  *    Copyright (C) 2015 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random::get_default_random() in place of c++ custom use
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -13,9 +14,9 @@
 #define BOOST_TEST_MODULE "bottleneck distance"
 #include <boost/test/unit_test.hpp>
 
-#include <random>
 #include <gudhi/Bottleneck.h>
 #include <gudhi/Unitary_tests_utils.h>
+#include <gudhi/Random.h>
 
 using namespace Gudhi::persistence_diagram;
 
@@ -24,20 +25,19 @@ int n2 = 180;  // a natural number >0
 double upper_bound = 406.43;  // any real >0
 
 
-std::uniform_real_distribution<double> unif(0., upper_bound);
-std::default_random_engine re;
 std::vector< std::pair<double, double> > v1, v2;
 
 BOOST_AUTO_TEST_CASE(persistence_graph) {
   // Random construction
+  auto rng = Gudhi::random::get_default_random();
   for (int i = 0; i < n1; i++) {
-    double a = unif(re);
-    double b = unif(re);
+    double a = rng.get<double>(0., upper_bound);;
+    double b = rng.get<double>(0., upper_bound);;
     v1.emplace_back(std::min(a, b), std::max(a, b));
   }
   for (int i = 0; i < n2; i++) {
-    double a = unif(re);
-    double b = unif(re);
+    double a = rng.get<double>(0., upper_bound);;
+    double b = rng.get<double>(0., upper_bound);;
     v2.emplace_back(std::min(a, b), std::max(a, b));
   }
   Persistence_graph g(v1, v2, 0.);
@@ -134,15 +134,16 @@ BOOST_AUTO_TEST_CASE(graph_matching) {
 }
 
 BOOST_AUTO_TEST_CASE(global) {
-  std::uniform_real_distribution<double> unif1(0., upper_bound);
-  std::uniform_real_distribution<double> unif2(upper_bound / 10000., upper_bound / 100.);
-  std::default_random_engine re;
+  auto rng = Gudhi::random::get_default_random();
+  double delta_min = upper_bound / 1000.;
+  double delta_max = upper_bound / 100.;
+
   std::vector< std::pair<double, double> > v1, v2;
   for (int i = 0; i < n1; i++) {
-    double a = unif1(re);
-    double b = unif1(re);
-    double x = unif2(re);
-    double y = unif2(re);
+    double a = rng.get<double>(0., upper_bound);
+    double b = rng.get<double>(0., upper_bound);
+    double x = rng.get<double>(delta_min, delta_max);
+    double y = rng.get<double>(delta_min, delta_max);
     v1.emplace_back(std::min(a, b), std::max(a, b));
     v2.emplace_back(std::min(a, b) + std::min(x, y), std::max(a, b) + std::max(x, y));
     if (i % 5 == 0)
@@ -161,15 +162,16 @@ BOOST_AUTO_TEST_CASE(global) {
 }
 
 BOOST_AUTO_TEST_CASE(neg_global) {
-  std::uniform_real_distribution<double> unif1(0., upper_bound);
-  std::uniform_real_distribution<double> unif2(upper_bound / 10000., upper_bound / 100.);
-  std::default_random_engine re;
+  auto rng = Gudhi::random::get_default_random();
+  double delta_min = upper_bound / 1000.;
+  double delta_max = upper_bound / 100.;
+
   std::vector< std::pair<double, double> > v1, v2;
   for (int i = 0; i < n1; i++) {
-    double a = std::log(unif1(re));
-    double b = std::log(unif1(re));
-    double x = std::log(unif2(re));
-    double y = std::log(unif2(re));
+    double a = std::log(rng.get<double>(0., upper_bound));
+    double b = std::log(rng.get<double>(0., upper_bound));
+    double x = std::log(rng.get<double>(delta_min, delta_max));
+    double y = std::log(rng.get<double>(delta_min, delta_max));
     v1.emplace_back(std::min(a, b), std::max(a, b));
     v2.emplace_back(std::min(a, b) + std::min(x, y), std::max(a, b) + std::max(x, y));
     if (i % 5 == 0)
