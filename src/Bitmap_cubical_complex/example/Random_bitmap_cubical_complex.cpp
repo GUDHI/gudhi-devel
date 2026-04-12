@@ -5,6 +5,7 @@
  *    Copyright (C) 2015 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random::get_default_random() in place of c++ custom use
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -12,22 +13,13 @@
 #include <gudhi/reader_utils.h>
 #include <gudhi/Bitmap_cubical_complex.h>
 #include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Random.h>
 
 // standard stuff
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <random>
 #include <algorithm>
-
-std::random_device rd;
-std::mt19937 gen(rd());
-
-double get_random()
-{
-  std::uniform_real_distribution<double> dist(0., 1.);
-  return dist(gen);
-}
 
 int main(int argc, char** argv) {
 
@@ -54,8 +46,8 @@ int main(int argc, char** argv) {
     multipliers *= sizeInThisDimension;
   }
 
-  std::vector<double> data(multipliers);
-  std::generate(data.begin(), data.end(), get_random);
+  auto rng = Gudhi::random::get_default_random();
+  std::vector<double> data = rng.get_range<double>(multipliers, 0., 1.);
 
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
