@@ -5,13 +5,15 @@
  *    Copyright (C) 2015 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random::get_default_random() in place of c++ custom use
  *      - YYYY/MM Author: Description of the modification
  */
 
 #include <gudhi/Bottleneck.h>
+#include <gudhi/Random.h>
+
 #include <chrono>
 #include <fstream>
-#include <random>
 
 using namespace Gudhi::persistence_diagram;
 
@@ -22,16 +24,16 @@ int main() {
   std::ofstream result_file;
   result_file.open("results.csv", std::ios::out);
 
+  auto rng = Gudhi::random::get_default_random();
+  double delta_min = upper_bound / 1000.;
+  double delta_max = upper_bound / 100.;
   for (int n = 1000; n <= 10000; n += 1000) {
-    std::uniform_real_distribution<double> unif1(0., upper_bound);
-    std::uniform_real_distribution<double> unif2(upper_bound / 1000., upper_bound / 100.);
-    std::default_random_engine re;
     std::vector< std::pair<double, double> > v1, v2;
     for (int i = 0; i < n; i++) {
-      double a = unif1(re);
-      double b = unif1(re);
-      double x = unif2(re);
-      double y = unif2(re);
+      double a = rng.get<double>(0., upper_bound);
+      double b = rng.get<double>(0., upper_bound);
+      double x = rng.get<double>(delta_min, delta_max);
+      double y = rng.get<double>(delta_min, delta_max);
       v1.emplace_back(std::min(a, b), std::max(a, b));
       v2.emplace_back(std::min(a, b) + std::min(x, y), std::max(a, b) + std::max(x, y));
       if (i % 5 == 0)
