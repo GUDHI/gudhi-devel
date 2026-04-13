@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Vincent Rouvreau
  *
- *    Copyright (C) 2024 Inria
+ *    Copyright (C) 2026 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -23,7 +23,7 @@
 using list_of_rnd_types = boost::mpl::list<double, float, int, unsigned int, long>;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(random_same_seed, RndType, list_of_rnd_types) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_same_seed )" << std::endl;
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_same_seed )" << "\n";
   
   RndType min{0};
   RndType max{100};
@@ -32,14 +32,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(random_same_seed, RndType, list_of_rnd_types) {
   Gudhi::random::Random rng_2(1);
   RndType second = rng_2.get(min, max);
 
-  std::clog << "First random number: " << first << " - Second random number: " << second << std::endl;
+  std::clog << "First random number: " << first << " - Second random number: " << second << "\n";
   BOOST_CHECK(first >= min);
   BOOST_CHECK(first <= max);
   BOOST_CHECK(first == second);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(random_different_seed, RndType, list_of_rnd_types) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_different_seed )" << std::endl;
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_different_seed )" << "\n";
   
   RndType min{0};
   RndType max{100};
@@ -48,15 +48,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(random_different_seed, RndType, list_of_rnd_types)
   Gudhi::random::Random rng_2;
   RndType second = rng_2.get(min, max);
 
-  std::clog << "First random number: " << first << " - Second random number: " << second << std::endl;
+  std::clog << "First random number: " << first << " - Second random number: " << second << "\n";
   BOOST_CHECK(first >= min);
   BOOST_CHECK(first <= max);
   BOOST_CHECK(second >= min);
   BOOST_CHECK(second <= max);
+  // Can happen that first == second
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(default_random, RndType, list_of_rnd_types) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( default_random )" << std::endl;
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( default_random )" << "\n";
   
   const RndType MIN_VAL{0};
   const RndType MAX_VAL{100};
@@ -65,11 +66,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(default_random, RndType, list_of_rnd_types) {
   RndType first  = rng.get(MIN_VAL, MAX_VAL);
   RndType second = rng.get(MIN_VAL, MAX_VAL);
 
-  std::clog << "First random number: " << first << " - Second random number: " << second << std::endl;
+  std::clog << "First random number: " << first << " - Second random number: " << second << "\n";
   BOOST_CHECK(first >= MIN_VAL);
   BOOST_CHECK(first <= MAX_VAL);
   BOOST_CHECK(second >= MIN_VAL);
   BOOST_CHECK(second <= MAX_VAL);
+  // Can happen that first == second
 
   const int SEED{42};
   rng.set_seed(SEED);
@@ -77,14 +79,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(default_random, RndType, list_of_rnd_types) {
   rng.set_seed(SEED);
   second = rng.get(MIN_VAL, MAX_VAL);
 
-  std::clog << "First random number seeded : " << first << " - Second random number seeded : " << second << std::endl;
+  std::clog << "First random number seeded : " << first << " - Second random number seeded : " << second << "\n";
   BOOST_CHECK(first >= MIN_VAL);
   BOOST_CHECK(first <= MAX_VAL);
   BOOST_CHECK(first == second);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(operator_parenthesis, RndType, list_of_rnd_types) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( operator_parenthesis )" << std::endl;
+BOOST_AUTO_TEST_CASE_TEMPLATE(get_default_random_get, RndType, list_of_rnd_types) {
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( get_default_random_get )" << "\n";
   
   const RndType MIN_VAL{10};
   const RndType MAX_VAL{100};
@@ -93,33 +95,50 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(operator_parenthesis, RndType, list_of_rnd_types) 
   RndType first  = rng.get(MIN_VAL, MAX_VAL);
   RndType second = rng.get(MIN_VAL, MAX_VAL);
 
-  std::clog << ".operator(min, max) - First random number: " << first << " - Second random number: " << second << std::endl;
+  std::clog << "get_default_random().get(min, max) - First random number: " << first
+            << " - Second random number: " << second << "\n";
   BOOST_CHECK(first >= MIN_VAL);
   BOOST_CHECK(first <= MAX_VAL);
   BOOST_CHECK(second >= MIN_VAL);
   BOOST_CHECK(second <= MAX_VAL);
+  // Can happen that first == second
 
   first  = rng.get(MAX_VAL);
   second = rng.get(MAX_VAL);
 
-  std::clog << ".operator() - First random number: " << first << " - Second random number: " << second << std::endl;
+  std::clog << "get_default_random().get(max) - First random number: " << first
+            << " - Second random number: " << second << "\n";
   BOOST_CHECK(first >= RndType{0});
   BOOST_CHECK(first <= MAX_VAL);
   BOOST_CHECK(second >= RndType{0});
   BOOST_CHECK(second <= MAX_VAL);
+  // Can happen that first == second
 
   first  = rng.get<RndType>();
   second = rng.get<RndType>();
 
-  std::clog << ".operator() - First random number: " << first << " - Second random number: " << second << std::endl;
+  std::clog << "get_default_random().get() - First random number: " << first
+            << " - Second random number: " << second << "\n";
   BOOST_CHECK(first >= RndType{0});
   BOOST_CHECK(first <= RndType{1});
   BOOST_CHECK(second >= RndType{0});
   BOOST_CHECK(second <= RndType{1});
+  // Can happen that first == second
+
+  rng.set_seed(42);
+  first  = rng.get(MIN_VAL, MAX_VAL);
+  rng.set_seed(42);
+  second = rng.get(MIN_VAL, MAX_VAL);
+
+  std::clog << "get_default_random().set_seed + .get(min, max) - First random number: " << first
+            << " - Second random number: " << second << "\n";
+  BOOST_CHECK(first >= MIN_VAL);
+  BOOST_CHECK(first <= MAX_VAL);
+  BOOST_CHECK(first == second);
 }
 
 BOOST_AUTO_TEST_CASE(random_get_engine) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_get_engine )" << std::endl;
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_get_engine )" << "\n";
   
   std::vector<int> v(100);
   std::iota(v.begin(), v.end(), 0);
