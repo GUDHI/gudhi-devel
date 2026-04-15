@@ -24,6 +24,59 @@ namespace Gudhi {
 namespace random {
   
   /**
+   * @defgroup reproducibility Reproducibility
+   * 
+   * Some of the GUDHI functionnalities are using randomness. Here is a list of classes and methods that are using
+   * internally @ref Gudhi::random::Random
+   * 
+   * - @ref Gudhi::subsampling::choose_n_farthest_points
+   * - @ref Gudhi::subsampling::pick_n_random_points
+   * - @ref Gudhi::Persistence_representations::Sliced_Wasserstein
+   * - @ref Gudhi::cover_complex::Cover_complex
+   * 
+   * In order to reproduce the results, a specific GUDHI random generator is available, and one can set its seed:
+   * 
+   * @code{.cpp}
+   * #include <gudhi/Random.h>
+   * 
+   * // Get the default static thread local GUDHI random generator - It is the one that is used internally
+   * auto rng = Gudhi::random::get_default_random();
+   * // Set the seed for the default generator
+   * rng.set_seed(42);
+   * @endcode
+   * 
+   * Other GUDHI functionnalities, that are based on CGAL, are using also randomness, but depends on
+   * <a href="https://doc.cgal.org/latest/Generator/classCGAL_1_1Random.html">CGAL::Random</a>.
+   * Here is the list:
+   * 
+   * - @ref Gudhi::random::generate_points_on_plane 
+   * - @ref Gudhi::random::generate_points_on_moment_curve
+   * - @ref Gudhi::random::generate_points_on_torus_3D
+   * - @ref Gudhi::random::generate_grid_points_on_torus_d
+   * - @ref Gudhi::random::generate_points_on_torus_d
+   * - @ref Gudhi::random::generate_points_on_sphere_d
+   * - @ref Gudhi::random::generate_points_in_ball_d
+   * - @ref Gudhi::random::generate_points_in_cube_d
+   * - @ref Gudhi::random::generate_points_on_two_spheres_d
+   * - @ref Gudhi::random::generate_points_on_3sphere_and_circle
+   * - @ref Gudhi::random::generate_points_on_klein_bottle_3D
+   * - @ref Gudhi::random::generate_points_on_klein_bottle_4D
+   * - @ref Gudhi::random::generate_points_on_klein_bottle_variant_5D
+   * - @ref Gudhi::coxeter_triangulation::random_orthogonal_matrix
+   * 
+   * In order to reproduce the results, one can set the seed of the default CGAL random generator, that is used
+   * internally in GUDHI, by doing:
+   * 
+   * @code{.cpp}
+   * #include <CGAL/Random.h>
+   * 
+   * // Get the default static thread local CGAL random generator and set its seed
+   * // It is the one that is used internally
+   * CGAL::get_default_random() = CGAL::Random(42);
+   * @endcode
+   *
+   * @{
+   * 
    * @class Random
    * @brief A generic random number generator class using C++11 random facilities.
    *
@@ -159,7 +212,7 @@ namespace random {
   
   /**
    * @brief Returns a thread-local default random number generator instance.
-   *
+   * 
    * @return A reference to the thread-local default @ref Random instance.
    */
   inline Random<>& get_default_random() {
@@ -169,6 +222,8 @@ namespace random {
 #endif  // DEBUG_TRACES
     return default_random;
   }
+
+  /** @} */  // end defgroup random
 
 }  // namespace random
 

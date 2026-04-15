@@ -30,7 +30,7 @@ void benchmark_points_on_torus_dD(const std::string& msg) {
   using K = CGAL::Epick_d<CGAL::Dimension_tag<3>>;
   for (int nb_points = 1000; nb_points <= 125000; nb_points *= 5) {
     std::clog << "  Alpha complex dD on torus with " << nb_points << " points." << std::endl;
-    std::vector<K::Point_d> points_on_torus = Gudhi::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
+    std::vector<K::Point_d> points_on_torus = Gudhi::random::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
     std::vector<typename Kernel::Point_d> points;
 
     for (auto p : points_on_torus) {
@@ -70,7 +70,7 @@ void benchmark_points_on_torus_3D(const std::string& msg) {
 
   for (int nb_points = 1000; nb_points <= 125000; nb_points *= 5) {
     std::clog << "  Alpha complex 3d on torus with " << nb_points << " points." << std::endl;
-    std::vector<K::Point_d> points_on_torus = Gudhi::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
+    std::vector<K::Point_d> points_on_torus = Gudhi::random::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
     std::vector<typename Alpha_complex_3d::Point_3> points;
 
     for (auto p : points_on_torus) {
@@ -113,7 +113,7 @@ void benchmark_weighted_points_on_torus_3D(const std::string& msg) {
 
   for (int nb_points = 1000; nb_points <= 125000; nb_points *= 5) {
     std::clog << "  Alpha complex 3d on torus with " << nb_points << " points." << std::endl;
-    std::vector<K::Point_d> points_on_torus = Gudhi::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
+    std::vector<K::Point_d> points_on_torus = Gudhi::random::generate_points_on_torus_3D<K>(nb_points, 1.0, 0.5);
 
     using Point = typename Weighted_alpha_complex_3d::Bare_point_3;
     using Weighted_point = typename Weighted_alpha_complex_3d::Weighted_point_3;

@@ -671,56 +671,55 @@ int main() {
             TC::TS_container tangent_spaces;
 
             if (input == "generate_moment_curve") {
-              points = Gudhi::generate_points_on_moment_curve<Kernel>(
-                                                                      num_points, ambient_dim,
-                                                                      std::atof(param1.c_str()), std::atof(param2.c_str()));
+              points = Gudhi::random::generate_points_on_moment_curve<Kernel>(num_points, ambient_dim,
+                                                                              std::atof(param1.c_str()),
+                                                                              std::atof(param2.c_str()));
             } else if (input == "generate_plane") {
-              points = Gudhi::generate_points_on_plane<Kernel>(
-                                                               num_points, intrinsic_dim, ambient_dim);
+              points = Gudhi::random::generate_points_on_plane<Kernel>(num_points, intrinsic_dim, ambient_dim);
             } else if (input == "generate_sphere_d") {
-              points = Gudhi::generate_points_on_sphere_d<Kernel>(
-                                                                  num_points, ambient_dim,
-                                                                  std::atof(param1.c_str()),  // radius
-                                                                  std::atof(param2.c_str()));  // radius_noise_percentage
+              points = Gudhi::random::generate_points_on_sphere_d<Kernel>(num_points, ambient_dim,
+                                                                          // radius
+                                                                          std::atof(param1.c_str()),
+                                                                          // radius_noise_percentage
+                                                                          std::atof(param2.c_str()));
             } else if (input == "generate_two_spheres_d") {
-              points = Gudhi::generate_points_on_two_spheres_d<Kernel>(
-                                                                       num_points, ambient_dim,
-                                                                       std::atof(param1.c_str()),
-                                                                       std::atof(param2.c_str()),
-                                                                       std::atof(param3.c_str()));
+              points = Gudhi::random::generate_points_on_two_spheres_d<Kernel>(num_points, ambient_dim,
+                                                                               std::atof(param1.c_str()),
+                                                                               std::atof(param2.c_str()),
+                                                                               std::atof(param3.c_str()));
             } else if (input == "generate_3sphere_and_circle_d") {
               GUDHI_CHECK(intrinsic_dim == 3,
                           std::logic_error("Intrinsic dim should be 3"));
               GUDHI_CHECK(ambient_dim == 5,
                           std::logic_error("Ambient dim should be 5"));
-              points = Gudhi::generate_points_on_3sphere_and_circle<Kernel>(
-                                                                            num_points,
-                                                                            std::atof(param1.c_str()));
+              points = Gudhi::random::generate_points_on_3sphere_and_circle<Kernel>(num_points,
+                                                                                    std::atof(param1.c_str()));
             } else if (input == "generate_torus_3D") {
-              points = Gudhi::generate_points_on_torus_3D<Kernel>(
-                                                                  num_points,
-                                                                  std::atof(param1.c_str()),
-                                                                  std::atof(param2.c_str()),
-                                                                  param3 == "Y");
+              points = Gudhi::random::generate_points_on_torus_3D<Kernel>(num_points,
+                                                                          std::atof(param1.c_str()),
+                                                                          std::atof(param2.c_str()),
+                                                                          param3 == "Y");
             } else if (input == "generate_torus_d") {
-              points = Gudhi::generate_points_on_torus_d<Kernel>(
-                                                                 num_points,
-                                                                 intrinsic_dim,
-                                                                 (param1 == "Y") ? "grid" : "random",  // grid or random sample type
-                                                                 std::atof(param2.c_str()));  // radius_noise_percentage
+              points = Gudhi::random::generate_points_on_torus_d<Kernel>(num_points,
+                                                                         intrinsic_dim,
+                                                                         // grid or random sample type
+                                                                         (param1 == "Y") ? "grid" : "random",
+                                                                         // radius_noise_percentage
+                                                                         std::atof(param2.c_str()));
             } else if (input == "generate_klein_bottle_3D") {
-              points = Gudhi::generate_points_on_klein_bottle_3D<Kernel>(
-                                                                         num_points,
-                                                                         std::atof(param1.c_str()), std::atof(param2.c_str()));
+              points = Gudhi::random::generate_points_on_klein_bottle_3D<Kernel>(num_points,
+                                                                                 std::atof(param1.c_str()),
+                                                                                 std::atof(param2.c_str()));
             } else if (input == "generate_klein_bottle_4D") {
-              points = Gudhi::generate_points_on_klein_bottle_4D<Kernel>(
-                                                                         num_points,
-                                                                         std::atof(param1.c_str()), std::atof(param2.c_str()),
-                                                                         std::atof(param3.c_str()));  // noise
+              points = Gudhi::random::generate_points_on_klein_bottle_4D<Kernel>(num_points,
+                                                                                 std::atof(param1.c_str()),
+                                                                                 std::atof(param2.c_str()),
+                                                                                 // noise
+                                                                                 std::atof(param3.c_str()));
             } else if (input == "generate_klein_bottle_variant_5D") {
-              points = Gudhi::generate_points_on_klein_bottle_variant_5D<Kernel>(
-                                                                                 num_points,
-                                                                                 std::atof(param1.c_str()), std::atof(param2.c_str()));
+              points = Gudhi::random::generate_points_on_klein_bottle_variant_5D<Kernel>(num_points,
+                                                                                         std::atof(param1.c_str()),
+                                                                                         std::atof(param2.c_str()));
             } else {
               // Contains tangent space basis
               if (input.substr(input.size() - 3) == "pwt") {

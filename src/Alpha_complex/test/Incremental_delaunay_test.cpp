@@ -5,6 +5,7 @@
  *    Copyright (C) 2024 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Functions from gudhi/random_point_generators.h moved in a Gudhi::random namespace
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -42,7 +43,7 @@ template<class K, class R> Complex check_contains_sub_delaunay(K const&, Complex
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Incremental_delaunay_random_points, K, list_of_kernel_3_variants) {
   K k(3);
-  auto points = Gudhi::generate_points_in_ball_d<K>(100, 3, 1);
+  auto points = Gudhi::random::generate_points_in_ball_d<K>(100, 3, 1);
   Complex cplx;
   Gudhi::construct_incremental_delaunay(k, cplx, points);
   BOOST_CHECK(cplx.dimension() == 4); // 3 could theoretically happen, but unlikely
