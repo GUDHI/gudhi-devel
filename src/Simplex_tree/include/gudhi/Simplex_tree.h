@@ -914,8 +914,8 @@ class Simplex_tree {
     auto dimension_count = num_simplices_by_dimension();
     int euler = 0;
     int sign = 1;
-    for (const int d : dimension_count) {
-      euler += sign * d;
+    for (const int count : dimension_count) {
+      euler += sign * count;
       sign = -sign;
     }
     return euler;
