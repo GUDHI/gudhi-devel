@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -17,7 +17,6 @@
 #ifndef PM_ID_TO_POS_TRANSLATION_H
 #define PM_ID_TO_POS_TRANSLATION_H
 
-#include <cmath>
 #include <vector>
 #include <cassert>
 #include <utility>    //std::swap, std::move & std::exchange
@@ -267,6 +266,46 @@ class Id_to_index_overlay
                        const Boundary_range& boundary,
                        Dimension dim = Master_matrix::template get_null_value<Dimension>());
   /**
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
+   * Assumes that the cell will be maximal in the current complex and inserts it such that the matrix remains
+   * consistent.
+   * Updates the barcode if it is stored.
+   *
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param columnIndex @ref MatIdx index where to move the new inserted column.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @ref PosIdx of the cells in the current filtration and should be ordered in increasing order.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   */
+  template <class Boundary_range = Boundary>
+  void insert_maximal_cell(Index columnIndex,
+                           const Boundary_range& boundary,
+                           Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
+   * It does the same as the other version, but allows the boundary cells to be identified without restrictions
+   * except that the new ID has to be higher than any other ID use until now. Note that you should avoid then
+   * to use the other insertion method to avoid overwriting IDs.
+   * 
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param columnIndex @ref MatIdx index where to move the new inserted column.
+   * @param cellIndex @ref IDIdx index to use to identify the new cell.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @p cellIndex values of precedent calls of the method for the corresponding cells and should be ordered in
+   * increasing order. Warning: if swaps occurred in between insertions, the cell IDs were swapped too, so the new ones
+   * have to be used in the given boundary.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   */
+  template <class Boundary_range = Boundary>
+  void insert_maximal_cell(Index columnIndex,
+                           ID_index cellIndex,
+                           const Boundary_range& boundary,
+                           Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
    * @brief Returns the column at the given @ref IDIdx index.
    * For @ref boundarymatrix "RU matrices", the returned column is from \f$ R \f$.
    * The type of the column depends on the chosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -318,8 +357,9 @@ class Id_to_index_overlay
   /**
    * @brief Only available for RU and @ref chainmatrix "chain matrices" and if
    * @ref PersistenceMatrixOptions::has_removable_columns and @ref PersistenceMatrixOptions::has_vine_update are true.
-   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_map_column_container and
-   * @ref PersistenceMatrixOptions::has_column_pairings also need to be true.
+   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_map_column_container, and,
+   * @ref PersistenceMatrixOptions::has_column_pairings or
+   * @ref PersistenceMatrixOptions::can_retrieve_representative_cycles also need to be true.
    * Assumes that the cell is maximal in the current complex and removes it such that the matrix remains consistent
    * (i.e., RU is still an upper triangular decomposition of the @ref boundarymatrix "boundary matrix" and chain is
    * still a compatible bases of the chain complex in the sense of @cite zigzag).
@@ -602,19 +642,30 @@ class Id_to_index_overlay
 
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
-   * the representative cycles of the current state of the filtration represented by the matrix.
-   * It does not need to be called before `get_representative_cycles` is called for the first time, but needs to be
-   * called before calling `get_representative_cycles` again if the matrix was modified in between. Otherwise the
-   * old cycles will be returned.
+   * the representative cycles of the current state of the filtration represented by the matrix. It needs to be called
+   * before calling @ref get_all_representative_cycles if the matrix was modified since last call. Otherwise the old
+   * cycles will be returned.
+   *
+   * @param dim If different from default value, only the cycles of the given dimension are updated.
+   * All others are erased.
    */
-  void update_representative_cycles();
+  void update_all_representative_cycles(Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
+   * the representative cycle in the current matrix state of the given bar. It needs to be called
+   * before calling @ref get_representative_cycle if the matrix was modified since last call. Otherwise the old cycle
+   * will be returned.
+   *
+   * @param bar Bar corresponding to the wanted representative cycle.
+   */
+  void update_representative_cycle(const Bar& bar);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
    * Returns all representative cycles of the current filtration.
    *
    * @return A const reference to the vector of representative cycles.
    */
-  const std::vector<Cycle>& get_representative_cycles();
+  const std::vector<Cycle>& get_all_representative_cycles() const;
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
    * Returns the cycle representing the given bar.
@@ -622,7 +673,7 @@ class Id_to_index_overlay
    * @param bar A bar from the current barcode.
    * @return A const reference to the cycle representing @p bar.
    */
-  const Cycle& get_representative_cycle(const Bar& bar);
+  const Cycle& get_representative_cycle(const Bar& bar) const;
 
  private:
   using Dictionary = typename Master_matrix::template Dictionary<Index>;
@@ -634,6 +685,9 @@ class Id_to_index_overlay
   void _initialize_map(unsigned int size);
   Index _id_to_index(ID_index id) const;
   Index& _id_to_index(ID_index id);
+
+  template <bool dir>
+  void _move_column_in_RU(Pos_index start, Pos_index end);
 };
 
 template <class Underlying_matrix, class Master_matrix>
@@ -786,6 +840,47 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_bounda
 }
 
 template <class Underlying_matrix, class Master_matrix>
+template <class Boundary_range>
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_maximal_cell(Index columnIndex,
+                                                                                       const Boundary_range& boundary,
+                                                                                       Dimension dim)
+{
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have to be positive."));
+
+  if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
+    insert_boundary(boundary, dim);
+
+    if (get_number_of_columns() == 1) return;
+
+    // false = backward direction
+    _move_column_in_RU<false>(get_number_of_columns() - 1, columnIndex);
+  } else {
+    matrix_.insert_maximal_cell(columnIndex, boundary, dim);
+  }
+}
+
+template <class Underlying_matrix, class Master_matrix>
+template <class Boundary_range>
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_maximal_cell(Index columnIndex,
+                                                                                       ID_index cellIndex,
+                                                                                       const Boundary_range& boundary,
+                                                                                       Dimension dim)
+{
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have to be positive."));
+
+  if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
+    insert_boundary(cellIndex, boundary, dim);
+
+    if (get_number_of_columns() == 1) return;
+
+    // false = backward direction
+    _move_column_in_RU<false>(get_number_of_columns() - 1, columnIndex);
+  } else {
+    matrix_.insert_maximal_cell(columnIndex, cellIndex, boundary, dim);
+  }
+}
+
+template <class Underlying_matrix, class Master_matrix>
 inline typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::Column&
 Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_column(ID_index cellID)
 {
@@ -809,21 +904,10 @@ template <class Underlying_matrix, class Master_matrix>
 inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maximal_cell(ID_index cellID)
 {
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
-    std::vector<ID_index> indexToID(nextIndex_);
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      for (auto& p : *idToIndex_) {
-        indexToID[p.second] = p.first;
-      }
-    } else {
-      for (ID_index i = 0; i < idToIndex_->size(); ++i) {
-        if (_id_to_index(i) != Master_matrix::template get_null_value<Index>()) indexToID[_id_to_index(i)] = i;
-      }
-    }
+    // true = forward direction
+    _move_column_in_RU<true>(_id_to_index(cellID), nextIndex_ - 1);
+    // nextIndex_ is used in _move_column_in_RU, should not be decremented before
     --nextIndex_;
-    for (Index curr = _id_to_index(cellID); curr < nextIndex_; ++curr) {
-      matrix_.vine_swap(curr);
-      std::swap(idToIndex_->at(indexToID[curr]), idToIndex_->at(indexToID[curr + 1]));
-    }
     matrix_.remove_last();
     GUDHI_CHECK(_id_to_index(cellID) == nextIndex_,
                 std::logic_error("Id_to_index_overlay::remove_maximal_cell - Indexation problem."));
@@ -1019,21 +1103,27 @@ Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_current_barcode()
 }
 
 template <class Underlying_matrix, class Master_matrix>
-inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::update_representative_cycles()
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::update_all_representative_cycles(Dimension dim)
 {
-  matrix_.update_representative_cycles();
+  matrix_.update_all_representative_cycles(dim);
+}
+
+template <class Underlying_matrix, class Master_matrix>
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::update_representative_cycle(const Bar& bar)
+{
+  matrix_.update_representative_cycle(bar);
 }
 
 template <class Underlying_matrix, class Master_matrix>
 inline const std::vector<typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::Cycle>&
-Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_representative_cycles()
+Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_all_representative_cycles() const
 {
-  return matrix_.get_representative_cycles();
+  return matrix_.get_all_representative_cycles();
 }
 
 template <class Underlying_matrix, class Master_matrix>
 inline const typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::Cycle&
-Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_representative_cycle(const Bar& bar)
+Id_to_index_overlay<Underlying_matrix, Master_matrix>::get_representative_cycle(const Bar& bar) const
 {
   return matrix_.get_representative_cycle(bar);
 }
@@ -1132,6 +1222,37 @@ inline typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::Index&
 Id_to_index_overlay<Underlying_matrix, Master_matrix>::_id_to_index(ID_index id)
 {
   return idToIndex_->operator[](id);  // for maps, the entry is created if not existing as needed in the constructors
+}
+
+template <class Underlying_matrix, class Master_matrix>
+template <bool dir>
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::_move_column_in_RU(Pos_index start, Pos_index end)
+{
+  // nextIndex_ would be overkill if start (dir == true) / end (dir == false) was different from end of matrix
+  // but it is not used that way for now
+  std::vector<ID_index> indexToID(nextIndex_);
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    for (auto& p : *idToIndex_) {
+      indexToID[p.second] = p.first;
+    }
+  } else {
+    for (ID_index i = 0; i < idToIndex_->size(); ++i) {
+      if (_id_to_index(i) != Master_matrix::template get_null_value<Index>()) indexToID[_id_to_index(i)] = i;
+    }
+  }
+  if constexpr (dir) {
+    for (Index curr = start; curr < end; ++curr) {
+      matrix_.vine_swap(curr);
+      std::swap(idToIndex_->at(indexToID[curr]), idToIndex_->at(indexToID[curr + 1]));
+      std::swap(indexToID[curr], indexToID[curr + 1]);
+    }
+  } else {
+    for (Index curr = start; curr > end; --curr) {
+      matrix_.vine_swap(curr - 1);
+      std::swap(idToIndex_->at(indexToID[curr - 1]), idToIndex_->at(indexToID[curr]));
+      std::swap(indexToID[curr - 1], indexToID[curr]);
+    }
+  }
 }
 
 }  // namespace persistence_matrix

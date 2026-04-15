@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber, Clément Maria
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -395,7 +395,8 @@ class Shared_multi_field_element_with_small_characteristics
       Characteristic productOfCharacteristics) const
   {
     GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
-                "The given product is not the product of a subset of the current Multi-field characteristics.");
+                std::invalid_argument(
+                    "The given product is not the product of a subset of the current Multi-field characteristics."));
 
     Characteristic gcd = std::gcd(element_, productOfAllCharacteristics_);
 
@@ -443,7 +444,8 @@ class Shared_multi_field_element_with_small_characteristics
       const Characteristic& productOfCharacteristics)
   {
     GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
-                "The given product is not the product of a subset of the current Multi-field characteristics.");
+                std::invalid_argument(
+                    "The given product is not the product of a subset of the current Multi-field characteristics."));
 
     if (productOfCharacteristics == 0 || productOfCharacteristics == productOfAllCharacteristics_) {
       return Shared_multi_field_element_with_small_characteristics(multiplicativeID_);

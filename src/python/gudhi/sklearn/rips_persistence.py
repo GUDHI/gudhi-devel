@@ -13,7 +13,7 @@ __license__ = "MIT"
 import math
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import Union, Literal, Optional
+from typing import Literal, Optional
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
 from scipy.sparse import coo_matrix
@@ -42,17 +42,20 @@ from .. import SimplexTree
 
 class RipsPersistence(BaseEstimator, TransformerMixin):
     """
-    This is a class for constructing Vietoris-Rips complexes and computing the persistence diagrams from them.
+    This is a class for constructing Vietoris-Rips filtrations (possibly implicitly) and computing their persistence
+    diagrams.  It does not always use :class:`~gudhi.RipsComplex` or :class:`~gudhi.SimplexTree`, or not naively, it may
+    also use :func:`~gudhi.flag_filtration.edge_collapse.reduce_graph` and a fork of Ripser :cite:`Ripser` and can be
+    significantly faster.
     """
 
     def __init__(
         self,
-        homology_dimensions: Union[int, ArrayLike],
+        homology_dimensions: int | ArrayLike,
         threshold: float = float("inf"),
         input_type: Literal[
             "point cloud", "full distance matrix", "lower distance matrix", "distance coo_matrix"
         ] = "point cloud",
-        num_collapses: Union[int, Literal["auto"]] = "auto",
+        num_collapses: int | Literal["auto"] = "auto",
         homology_coeff_field: int = 11,
         n_jobs: Optional[int] = None,
     ):

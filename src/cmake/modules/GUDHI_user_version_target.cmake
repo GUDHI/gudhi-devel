@@ -45,8 +45,12 @@ add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
 add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
                    copy ${CMAKE_SOURCE_DIR}/src/Doxyfile.in ${GUDHI_USER_VERSION_DIR}/Doxyfile.in)
 
-add_custom_command(TARGET user_version PRE_BUILD COMMAND ${CMAKE_COMMAND} -E
-                   copy ${CMAKE_SOURCE_DIR}/pyproject.toml ${GUDHI_USER_VERSION_DIR}/pyproject.toml)
+# readme is not in the same place in developper and user version
+file(READ "${CMAKE_SOURCE_DIR}/pyproject.toml" PYPROJECT_TOML)
+string(REGEX REPLACE "readme = \"src/python/doc/pypi_introduction.rst\""
+                     "readme = \"python/doc/pypi_introduction.rst\"" MODIFIED_PYPROJECT_TOML "${PYPROJECT_TOML}")
+file(WRITE "${GUDHI_USER_VERSION_DIR}/pyproject.toml" "${MODIFIED_PYPROJECT_TOML}")
+
 file(GLOB_RECURSE PYTHON_FILES ${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/*)
 foreach(PYTHON_FILE ${PYTHON_FILES})
   string(REPLACE "${CMAKE_SOURCE_DIR}/${GUDHI_PYTHON_PATH}/" "" RELATIVE_PYTHON_FILE ${PYTHON_FILE})
