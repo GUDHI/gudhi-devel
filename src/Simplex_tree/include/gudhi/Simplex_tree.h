@@ -860,7 +860,7 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Returns the number of simplices of each dimension in the simplex tree. */
+  /** \brief Returns the number of simplices of each dimension in the complex. */
   std::vector<size_t> num_simplices_by_dimension() const {
     if (is_empty()) return {};
     // std::min in case the upper bound got crazy

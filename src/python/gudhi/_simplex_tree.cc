@@ -144,9 +144,9 @@ This function returns a valid dimension upper bound of the simplicial complex.
       .def("num_simplices_by_dimension",
            &gsti::num_simplices_by_dimension,
            R"doc(
-Returns the number of simplices of each dimension in the simplex tree.
+Returns the number of simplices of each dimension in the complex.
 
-:returns:  Array containing at index `d` the number of simplices of dimension `d` in the simplex tree.
+:returns:  Array containing at index `d` the number of simplices of dimension `d` in the complex.
 :rtype:  1-dimensional numpy.array of length `maximal dimension + 1`.
            )doc")
       .def("compute_euler_characteristic",
