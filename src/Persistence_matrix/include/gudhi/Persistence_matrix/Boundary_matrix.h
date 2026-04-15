@@ -19,6 +19,7 @@
 
 #include <cassert>
 #include <iostream>  //print() only
+#include <stdexcept>
 #include <vector>
 #include <utility>  //std::swap, std::move & std::exchange
 
@@ -733,11 +734,15 @@ inline void Boundary_matrix<Master_matrix>::print()
   if constexpr (Master_matrix::Option_list::has_row_access) {
     std::cout << "Row Matrix:\n";
     for (ID_index i = 0; i < nextInsertIndex_; ++i) {
-      const auto& row = RA_opt::get_row(i);
-      for (const typename Column::Entry& entry : row) {
-        std::cout << entry.get_column_index() << " ";
+      try {
+        const auto& row = RA_opt::get_row(i);
+        for (const typename Column::Entry& entry : row) {
+          std::cout << entry.get_column_index() << " ";
+        }
+        std::cout << "(" << i << ")\n";
+      } catch (const std::out_of_range&) {
+        std::cout << "-\n";
       }
-      std::cout << "(" << i << ")\n";
     }
     std::cout << "\n";
   }

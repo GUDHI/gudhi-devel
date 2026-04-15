@@ -17,9 +17,12 @@
 #ifndef PM_POS_TO_ID_TRANSLATION_H
 #define PM_POS_TO_ID_TRANSLATION_H
 
+#include <stdexcept>
 #include <vector>
 #include <utility>    //std::swap, std::move & std::exchange
 #include <algorithm>  //std::transform
+
+#include <gudhi/Debug_utils.h>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -256,6 +259,45 @@ class Position_to_index_overlay
   void insert_boundary(ID_index cellIndex,
                        const Boundary_range& boundary,
                        Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
+   * Assumes that the cell will be maximal in the current complex and inserts it such that the matrix remains
+   * consistent.
+   * Updates the barcode if it is stored.
+   *
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param columnIndex @ref MatIdx index where to move the new inserted column.
+   * @param boundary Boundary generating the new column. The content should be ordered by ID.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   */
+  template <class Boundary_range = Boundary>
+  void insert_maximal_cell(Index columnIndex,
+                           const Boundary_range& boundary,
+                           Dimension dim = Master_matrix::template get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::has_vine_update is true.
+   * It does the same as the other version, but allows the boundary cells to be identified without restrictions
+   * except that the new ID has to be higher than any other ID use until now. Note that you should avoid then
+   * to use the other insertion method to avoid overwriting IDs.
+   * 
+   * @tparam Boundary_range Range of @ref Matrix::Entry_representative. Assumed to have a begin(), end() and size()
+   * method.
+   * @param columnIndex @ref MatIdx index where to move the new inserted column.
+   * @param cellIndex @ref IDIdx index to use to identify the new cell.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @p cellID values of precedent calls of the method for the corresponding cells and should be ordered in
+   * increasing order.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   */
+  template <class Boundary_range = Boundary>
+  void insert_maximal_cell(Index columnIndex,
+                           ID_index cellIndex,
+                           const Boundary_range& boundary,
+                           Dimension dim = Master_matrix::template get_null_value<Dimension>());
+
   /**
    * @brief Returns the column at the given @ref PosIdx index.
    * The type of the column depends on the chosen options, see @ref PersistenceMatrixOptions::column_type.
@@ -539,6 +581,9 @@ class Position_to_index_overlay
   std::vector<Index> positionToIndex_; /**< Map from @ref PosIdx index to @ref MatIdx index. */
   Pos_index nextPosition_;             /**< Next unused position. */
   Index nextIndex_;                    /**< Next unused index. */
+
+  template <bool dir>
+  void _move_column(Pos_index start, Pos_index end);
 };
 
 template <class Underlying_matrix, class Master_matrix>
@@ -657,6 +702,41 @@ inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::insert_
 }
 
 template <class Underlying_matrix, class Master_matrix>
+template <class Boundary_range>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::insert_maximal_cell(
+    Index columnIndex,
+    const Boundary_range& boundary,
+    Dimension dim)
+{
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have to be positive."));
+
+  insert_boundary(boundary, dim);
+
+  if (nextPosition_ == 1) return;
+
+  // false = backward direction
+  _move_column<false>(nextPosition_ - 1, columnIndex);
+}
+
+template <class Underlying_matrix, class Master_matrix>
+template <class Boundary_range>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::insert_maximal_cell(
+    Index columnIndex,
+    ID_index cellIndex,
+    const Boundary_range& boundary,
+    Dimension dim)
+{
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have to be positive."));
+
+  insert_boundary(cellIndex, boundary, dim);
+
+  if (nextPosition_ == 1) return;
+
+  // false = backward direction
+  _move_column<false>(nextPosition_ - 1, columnIndex);
+}
+
+template <class Underlying_matrix, class Master_matrix>
 inline typename Position_to_index_overlay<Underlying_matrix, Master_matrix>::Column&
 Position_to_index_overlay<Underlying_matrix, Master_matrix>::get_column(Pos_index position)
 {
@@ -695,19 +775,10 @@ inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::remove_
 {
   --nextPosition_;
 
-  ID_index pivot = matrix_.get_pivot(positionToIndex_[position]);
-  std::vector<Index> columnsToSwap(nextPosition_ - position);
+  // true = forward direction
+  _move_column<true>(position, nextPosition_);
 
-  if (nextPosition_ != position) {
-    positionToIndex_[position] = positionToIndex_[position + 1];
-    for (Pos_index p = position + 1; p < nextPosition_; ++p) {
-      columnsToSwap[p - position - 1] = positionToIndex_[p];
-      positionToIndex_[p] = positionToIndex_[p + 1];
-    }
-    columnsToSwap.back() = positionToIndex_[nextPosition_];
-  }
-
-  matrix_.remove_maximal_cell(pivot, columnsToSwap);
+  matrix_._remove_last(positionToIndex_[nextPosition_]);
 }
 
 template <class Underlying_matrix, class Master_matrix>
@@ -861,6 +932,21 @@ inline bool Position_to_index_overlay<Underlying_matrix, Master_matrix>::vine_sw
   }
 
   return false;
+}
+
+template <class Underlying_matrix, class Master_matrix>
+template <bool dir>
+inline void Position_to_index_overlay<Underlying_matrix, Master_matrix>::_move_column(Pos_index start, Pos_index end)
+{
+  if constexpr (dir) {
+    for (Pos_index p = start; p < end; ++p) {
+      vine_swap(p);
+    }
+  } else {
+    for (Pos_index p = start; p > end; --p) {
+      vine_swap(p - 1);
+    }
+  }
 }
 
 }  // namespace persistence_matrix
