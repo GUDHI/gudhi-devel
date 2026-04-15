@@ -94,24 +94,25 @@ def _format_handler(a):
 # only necessary because _format_handler does not directly decompose everything into xd, yd arrays for plotting
 def _get_number_of_pairs_by_dimension(barcode):
     if len(barcode) == 0:
-        return []
+        return [], 0
 
     try:
         if np.issubdtype(type(barcode[0][1]), np.number):
             # array of (b,d)
-            return [len(barcode)]
+            return [len(barcode)], 1
     except IndexError:
         pass
 
     try:
         if len(barcode[0]) == 0 or np.issubdtype(type(barcode[0][0][1]), np.number):
             # array of array of (b,d)
-            return [len(barcode[d]) for d in range(len(barcode))]
+            return [len(barcode[d]) for d in range(len(barcode))], len(barcode)
     except TypeError:
         pass
 
     # array of (dim, (b,d))
-    return Counter(bar[0] for bar in barcode)
+    res = Counter(bar[0] for bar in barcode)
+    return res, max(res) + 1
 
 
 def _limit_to_max_intervals(persistence, max_intervals, key):
@@ -130,9 +131,9 @@ def _limit_to_max_intervals(persistence, max_intervals, key):
             % (len(persistence), max_intervals)
         )
         # Sort by life time, then takes only the max_intervals elements
-        return sorted(persistence, key=key, reverse=True)[:max_intervals]
+        return sorted(persistence, key=key, reverse=True)[:max_intervals], True
     else:
-        return persistence
+        return persistence, False
 
 
 @lru_cache(maxsize=1)
@@ -235,7 +236,7 @@ def plot_persistence_barcode(
 
     try:
         persistence, input_type = _format_handler(persistence)
-        persistence = _limit_to_max_intervals(
+        persistence, _ = _limit_to_max_intervals(
             persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
         )
         (min_birth, max_death) = _min_birth_max_death(persistence)
@@ -364,16 +365,19 @@ def plot_persistence_diagram(
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), persistence_file)
 
-    sizes = _get_number_of_pairs_by_dimension(persistence)
     try:
         persistence, input_type = _format_handler(persistence)
-        persistence = _limit_to_max_intervals(
+        persistence, changed = _limit_to_max_intervals(
             persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
         )
+        if changed or input_type == 0:
+            persistence = sorted(persistence, key=lambda x: x[0])
         min_birth, max_death = _min_birth_max_death(persistence, band)
     except IndexError:
         min_birth, max_death = 0.0, 1.0
         pass
+
+    sizes, max_dim = _get_number_of_pairs_by_dimension(persistence)
 
     delta = (max_death - min_birth) * inf_delta
     # Replace infinity values with max_death + delta for diagram to be more
@@ -402,13 +406,11 @@ def plot_persistence_diagram(
     # line display of equation : birth = death
     axes.plot([axis_start, axis_end], [axis_start, axis_end], linewidth=1.0, color="k")
 
-    if input_type == 0:
-        persistence = sorted(persistence, key=lambda x: x[0])
     x = [birth for (dim, (birth, death)) in persistence]
     y = [death if death != float("inf") else infinity for (dim, (birth, death)) in persistence]
 
     i = 0
-    for d in range(len(sizes)):
+    for d in range(max_dim):
         if sizes[d] != 0:
             j = i + sizes[d]
             xd = x[i:j]
@@ -563,7 +565,7 @@ def plot_persistence_density(
                 persistence_dim,
                 max_intervals,
                 key=lambda life_time: life_time[1] - life_time[0],
-            )
+            )[0]
         )
 
         # Set as numpy array birth and death (remove undefined values - inf and NaN)
