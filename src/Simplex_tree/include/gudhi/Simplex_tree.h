@@ -906,6 +906,21 @@ class Simplex_tree {
     return dimension_;
   }
 
+  /**
+   * @brief Computes and returns the euler characteristic of the non-filtered underlying complex represented
+   * by the simplex tree.
+   */
+  int compute_euler_characteristic() const {
+    auto dimension_count = num_simplices_by_dimension();
+    int euler = 0;
+    int sign = 1;
+    for (const int d : dimension_count) {
+      euler += sign * d;
+      sign = -sign;
+    }
+    return euler;
+  }
+
   /** \brief Returns true if the node in the simplex tree pointed by
    * the given simplex handle has children.*/
   template<class SimplexHandle>

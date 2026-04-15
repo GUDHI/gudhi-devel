@@ -141,6 +141,23 @@ This function returns a valid dimension upper bound of the simplicial complex.
 :returns:  an upper bound on the dimension of the simplicial complex.
 :rtype:  int
            )doc")
+      .def("num_simplices_by_dimension",
+           &gsti::num_simplices_by_dimension,
+           R"doc(
+Returns the number of simplices of each dimension in the simplex tree.
+
+:returns:  Array containing at index `d` the number of simplices of dimension `d` in the simplex tree.
+:rtype:  1-dimensional numpy.array of length `maximal dimension + 1`.
+           )doc")
+      .def("compute_euler_characteristic",
+           &gsti::compute_euler_characteristic,
+           R"doc(
+This function computes and returns the euler characteristic of the non-filtered underlying complex represented
+by the simplex tree.
+
+:returns:  The euler characteristic.
+:rtype:  int
+           )doc")
       .def("find", &gsti::find_simplex, nb::arg("simplex"), nb::call_guard<nb::gil_scoped_release>(), R"doc(
 This function returns if the N-simplex was found in the simplicial complex or not.
 

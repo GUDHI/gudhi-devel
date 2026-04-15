@@ -751,3 +751,18 @@ def test_prune_above_dimension():
     assert st.num_simplices() == 0
 
     assert st.prune_above_dimension(-200) == False
+
+
+def test_euler_characteristic():
+    st = SimplexTree()
+    st.insert([0, 1, 2])
+    st.insert([0, 3])
+    st.insert([3, 4, 5])
+    st.insert([0, 1, 6, 7])
+    st.insert([2, 5])
+    
+    dims = st.num_simplices_by_dimension()
+    assert dims.shape[0] == 4
+    assert np.array_equal(dims, [8, 13, 6, 1])
+
+    assert st.compute_euler_characteristic() == 0

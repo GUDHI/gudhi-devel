@@ -189,6 +189,11 @@ class Simplex_tree_interface : public Simplex_tree<Simplex_tree_options_for_pyth
     return cofaces;
   }
 
+  nanobind::ndarray<nanobind::numpy, std::size_t> num_simplices_by_dimension() const {
+    auto dimension_count = Base::num_simplices_by_dimension();
+    return _wrap_as_numpy_array(std::move(dimension_count), dimension_count.size());
+  }
+
   void compute_extended_filtration()
   {
     this->efd = this->extend_filtration();
