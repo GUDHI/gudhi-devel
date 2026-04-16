@@ -92,7 +92,7 @@ def test_limit_to_max_intervals():
     # check no warnings if max_intervals equals to the diagrams number
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        truncated_diags = gd.persistence_graphical_tools._limit_to_max_intervals(
+        truncated_diags, _ = gd.persistence_graphical_tools._limit_to_max_intervals(
             diags, 10, key=lambda life_time: life_time[1][1] - life_time[1][0]
         )
         # check diagrams are not sorted
@@ -100,7 +100,7 @@ def test_limit_to_max_intervals():
 
     # check warning if max_intervals lower than the diagrams number
     with pytest.warns(UserWarning) as record:
-        truncated_diags = gd.persistence_graphical_tools._limit_to_max_intervals(
+        truncated_diags, _ = gd.persistence_graphical_tools._limit_to_max_intervals(
             diags, 5, key=lambda life_time: life_time[1][1] - life_time[1][0]
         )
         # check diagrams are truncated and sorted by life time

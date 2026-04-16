@@ -40,22 +40,25 @@ def _min_birth_max_death(persistence, band=0.0):
     :returns: (float, float) -- (min_birth, max_death).
     """
     # Look for minimum birth date and maximum death date for plot optimisation
-    max_death = 0
-    min_birth = persistence[0][1][0]
-    for interval in reversed(persistence):
-        if float(interval[1][1]) != float("inf"):
-            if float(interval[1][1]) > max_death:
-                max_death = float(interval[1][1])
-        if float(interval[1][0]) > max_death:
-            max_death = float(interval[1][0])
-        if float(interval[1][0]) < min_birth:
-            min_birth = float(interval[1][0])
-    if band > 0.0:
-        max_death += band
-    # can happen if only points at inf death
-    if min_birth == max_death:
-        max_death = max_death + 1.0
-    return (min_birth, max_death)
+    try:
+        max_death = 0
+        min_birth = persistence[0][1][0]
+        for interval in reversed(persistence):
+            if float(interval[1][1]) != float("inf"):
+                if float(interval[1][1]) > max_death:
+                    max_death = float(interval[1][1])
+            if float(interval[1][0]) > max_death:
+                max_death = float(interval[1][0])
+            if float(interval[1][0]) < min_birth:
+                min_birth = float(interval[1][0])
+        if band > 0.0:
+            max_death += band
+        # can happen if only points at inf death
+        if min_birth == max_death:
+            max_death = max_death + 1.0
+        return (min_birth, max_death)
+    except IndexError:
+        return (0.0, 1.0)
 
 
 def _format_handler(a):
@@ -234,16 +237,12 @@ def plot_persistence_barcode(
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), persistence_file)
 
-    try:
-        persistence, input_type = _format_handler(persistence)
-        persistence, _ = _limit_to_max_intervals(
-            persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
-        )
-        (min_birth, max_death) = _min_birth_max_death(persistence)
-        persistence = sorted(persistence, key=lambda birth: birth[1][0])
-    except IndexError:
-        min_birth, max_death = 0.0, 1.0
-        pass
+    persistence, input_type = _format_handler(persistence)
+    persistence, _ = _limit_to_max_intervals(
+        persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
+    )
+    (min_birth, max_death) = _min_birth_max_death(persistence)
+    persistence = sorted(persistence, key=lambda birth: birth[1][0])
 
     delta = (max_death - min_birth) * inf_delta
     # Replace infinity values with max_death + delta for bar code to be more readable
@@ -365,17 +364,13 @@ def plot_persistence_diagram(
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), persistence_file)
 
-    try:
-        persistence, input_type = _format_handler(persistence)
-        persistence, changed = _limit_to_max_intervals(
-            persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
-        )
-        if changed or input_type == 0:
-            persistence = sorted(persistence, key=lambda x: x[0])
-        min_birth, max_death = _min_birth_max_death(persistence, band)
-    except IndexError:
-        min_birth, max_death = 0.0, 1.0
-        pass
+    persistence, input_type = _format_handler(persistence)
+    persistence, changed = _limit_to_max_intervals(
+        persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
+    )
+    if changed or input_type == 0:
+        persistence = sorted(persistence, key=lambda x: x[0])
+    min_birth, max_death = _min_birth_max_death(persistence, band)
 
     sizes, max_dim = _get_number_of_pairs_by_dimension(persistence)
 
