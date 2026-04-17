@@ -264,11 +264,11 @@ class Chain_vine_swap
    * @brief Does the same than @ref vine_swap, but assumes that the swap is non trivial and
    * therefore skips a part of the case study.
    *
-   * @param columnIndex1 @ref MatIdx index of the first cell.
-   * @param columnIndex2 @ref MatIdx index of the second cell.
-   * @return Let \f$ pos1 \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ pos2 \f$ be the @ref PosIdx index of
+   * @param columnIndex1 @ref MatIdx index of the first cell with @ref PosIdx \f$ i \f$.
+   * @param columnIndex2 @ref MatIdx index of the second cell with @ref PosIdx \f$ i + 1 \f$.
+   * @return Let \f$ i \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ i + 1 \f$ be the @ref PosIdx index of
    * @p columnIndex2. The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx
-   * \f$ max(pos1, pos2) \f$.
+   * \f$ i + 1 \f$.
    */
   Index vine_swap_with_z_eq_1_case(Index columnIndex1, Index columnIndex2);
   /**
@@ -279,12 +279,11 @@ class Chain_vine_swap
    * \f$ F' \f$ has to be a valid filtration.
    * See @cite vineyards for more information about vine and vineyards.
    *
-   * @param columnIndex1 @ref MatIdx index of the first cell.
-   * @param columnIndex2 @ref MatIdx index of the second cell. It is assumed that the @ref PosIdx of both only differs
-   * by one if the barcode is maintained.
-   * @return Let \f$ pos1 \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ pos2 \f$ be the @ref PosIdx index of
+   * @param columnIndex1 @ref MatIdx index of the first cell with @ref PosIdx \f$ i \f$.
+   * @param columnIndex2 @ref MatIdx index of the second cell with @ref PosIdx \f$ i + 1 \f$.
+   * @return Let \f$ i \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ i + 1 \f$ be the @ref PosIdx index of
    * @p columnIndex2. The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx
-   * \f$ max(pos1, pos2) \f$.
+   * \f$ i + 1 \f$.
    */
   Index vine_swap(Index columnIndex1, Index columnIndex2);
 
