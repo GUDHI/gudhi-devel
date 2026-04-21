@@ -60,19 +60,14 @@ int nb_insert_simplex2 = 3000;
 int nb_membership2 = 400000;
 
 Simplex random_simplex(int n, std::size_t d) {
-  // Do not use Gudhi::random::get_default_random() here. Reset seeds randomly on each call - like it was previously
-  // Otherwise num_maximal_simplices is quite small
-  Gudhi::random::Random<> rng;
   Simplex s;
-  while (s.size() < d) s.insert(rng.get<std::size_t>(1, n));
+  while (s.size() < d) s.insert(Gudhi::random::get<std::size_t>(1, n));
   return s;
 }
 
 std::vector<Simplex> r_vector_simplices(int n, int max_d, int m) {
-  // Do not use Gudhi::random::get_default_random() here. Reset seeds randomly on each call - like it was previously
-  Gudhi::random::Random<> rng;
   std::vector<Simplex> v;
-  for (int i = 0; i < m; i++) v.push_back(random_simplex(n, rng.get<std::size_t>(1, max_d)));
+  for (int i = 0; i < m; i++) v.push_back(random_simplex(n, Gudhi::random::get<std::size_t>(1, max_d)));
   return v;
 }
 
@@ -105,13 +100,13 @@ void chrono(int n, int d) {
   auto c2 = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
   if (c3 > 0)
-    std::clog << c1 << "\t \t" << c2 << "\t \t" << c3 << "\t \t" << K.num_maximal_simplices() << " - " << simplices_insert_simplex2.size() << " - " << simplices_membership2.size() << std::endl;
+    std::clog << c1 << "\t \t" << c2 << "\t \t" << c3 << "\t \t" << K.num_maximal_simplices() << std::endl;
   else
-    std::clog << c1 << "\t \t" << c2 << "\t \tN/A\t \t" << K.num_maximal_simplices() << " - " << simplices_insert_simplex2.size() << " - " << simplices_membership2.size() << std::endl;
+    std::clog << c1 << "\t \t" << c2 << "\t \tN/A\t \t" << K.num_maximal_simplices() << std::endl;
 }
 
 int main() {
-  for (int d = 5; d <= 10; d += 5) {
+  for (int d = 5; d <= 40; d += 5) {
     std::clog << "d=" << d << " \t  Insertions \t   Membership \t Contractions \t        Size" << std::endl;
     std::clog << "T Map \t \t";
     chrono<Toplex_map>(n, d);

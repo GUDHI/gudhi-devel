@@ -39,30 +39,28 @@ namespace random {
    * @code{.cpp}
    * #include <gudhi/Random.h>
    * 
-   * // Get the default thread local GUDHI random generator - It is the one that is used internally
-   * auto rng = Gudhi::random::get_default_random();
-   * // Set the seed for the default generator
-   * rng.set_seed(42);
+   * // Set the seed for the default generator that is used internally in GUDHI
+   * Gudhi::random::set_seed(42);
    * @endcode
    * 
    * Other GUDHI functionnalities, that are based on CGAL, are using also randomness, but depends on
    * <a href="https://doc.cgal.org/latest/Generator/classCGAL_1_1Random.html">CGAL::Random</a>.
    * Here is the list:
    * 
-   * - @ref Gudhi::random::generate_points_on_plane 
-   * - @ref Gudhi::random::generate_points_on_moment_curve
-   * - @ref Gudhi::random::generate_points_on_torus_3D
-   * - @ref Gudhi::random::generate_grid_points_on_torus_d
-   * - @ref Gudhi::random::generate_points_on_torus_d
-   * - @ref Gudhi::random::generate_points_on_sphere_d
-   * - @ref Gudhi::random::generate_points_in_ball_d
-   * - @ref Gudhi::random::generate_points_in_cube_d
-   * - @ref Gudhi::random::generate_points_on_two_spheres_d
-   * - @ref Gudhi::random::generate_points_on_3sphere_and_circle
-   * - @ref Gudhi::random::generate_points_on_klein_bottle_3D
-   * - @ref Gudhi::random::generate_points_on_klein_bottle_4D
-   * - @ref Gudhi::random::generate_points_on_klein_bottle_variant_5D
-   * - @ref Gudhi::coxeter_triangulation::random_orthogonal_matrix
+   * - Gudhi::random::generate_points_on_plane 
+   * - Gudhi::random::generate_points_on_moment_curve
+   * - Gudhi::random::generate_points_on_torus_3D
+   * - Gudhi::random::generate_grid_points_on_torus_d
+   * - Gudhi::random::generate_points_on_torus_d
+   * - Gudhi::random::generate_points_on_sphere_d
+   * - Gudhi::random::generate_points_in_ball_d
+   * - Gudhi::random::generate_points_in_cube_d
+   * - Gudhi::random::generate_points_on_two_spheres_d
+   * - Gudhi::random::generate_points_on_3sphere_and_circle
+   * - Gudhi::random::generate_points_on_klein_bottle_3D
+   * - Gudhi::random::generate_points_on_klein_bottle_4D
+   * - Gudhi::random::generate_points_on_klein_bottle_variant_5D
+   * - Gudhi::coxeter_triangulation::random_orthogonal_matrix
    * 
    * In order to reproduce the results, one can set the seed of the default CGAL random generator, that is used
    * internally in GUDHI, by doing:
@@ -76,151 +74,90 @@ namespace random {
    * @endcode
    *
    * @{
-   * 
-   * @class Random
-   * @brief A generic random number generator class using C++11 random facilities.
-   *
-   * This class provides a flexible interface for generating random numbers of various types
-   * (integral and floating-point) and ranges, using a customizable random engine.
-   * If you do not need a specific one, consider using the one provided by `Gudhi::random::get_default_random()`.
-   *
-   * @tparam Engine The random engine type to use (default: `std::mt19937_64`).
    */
-  template<typename Engine = std::mt19937_64>
-  class Random {
-   public:
-    /**
-     * @brief Constructs a `Random` object with an optional seed. If no seed is provided, a random seed is generated.
-     *
-     * @param seed (Optional) The seed value for the random engine.
-     */
-    explicit Random(typename Engine::result_type seed = std::random_device{}())
-      : gen_(seed) {
-#ifdef DEBUG_TRACES
-        std::clog << "Random ctor " << this << " - " << seed << "\n";
-#endif  // DEBUG_TRACES
-    }
 
-    /**
-     * @brief Sets the seed for the random engine.
-     *
-     * @param seed The new seed value.
-     */
-    void set_seed(typename Engine::result_type seed) {
-      gen_.seed(seed);
-    }
-    
-    /**
-     * @brief Generates a random number in the range [min, max].
-     *
-     * @tparam Type The type of the random number (must be integral or floating-point).
-     * @param min The minimum value (inclusive).
-     * @param max The maximum value (inclusive).
-     * @return A random number of type `Type` in the range [min, max].
-     */
-    template <typename Type>
-    Type get(const Type& min, const Type& max) {
-      if constexpr (std::is_floating_point_v<Type>) {
-        std::uniform_real_distribution<Type> dis(min, max);
-        return dis(gen_);
-      } else if constexpr (std::is_integral_v<Type>) {
-        std::uniform_int_distribution<Type> dis(min, max);
-        return dis(gen_);
-      }
-    }
-
-    /**
-     * @brief Generates a random number in the range [0, max].
-     *
-     * @tparam Type The type of the random number (must be integral or floating-point).
-     * @param max The maximum value (inclusive).
-     * @return A random number of type `Type` in the range [0, max].
-     */
-    template <typename Type>
-    Type get(const Type& max) {
-      return get<Type>(static_cast<Type>(0), max);
-    }
-
-    /**
-     * @brief Generates a random number in the range [0, 1].
-     *
-     * @tparam Type The type of the random number (must be integral or floating-point).
-     * @return A random number of type `Type` in the range [0, 1].
-     */
-    template <typename Type>
-    Type get() {
-      return get<Type>(static_cast<Type>(0), static_cast<Type>(1));
-    }
-
-    /**
-     * @brief Generates a vector of N random numbers in the range [min, max].
-     *
-     * @tparam Type The type of the random numbers (must be integral or floating-point).
-     * @param nbr The number of random numbers to generate.
-     * @param min The minimum value (inclusive).
-     * @param max The maximum value (inclusive).
-     * @return A vector of random numbers of type `Type` in the range [min, max].
-     */
-    template <typename Type>
-    std::vector<Type> get_range(std::size_t nbr, const Type& min, const Type& max) {
-      std::vector<Type> result(nbr);
-      if constexpr (std::is_floating_point_v<Type>) {
-        std::uniform_real_distribution<Type> dis(min, max);
-        std::generate(result.begin(), result.end(), [&]() { return dis(gen_); });
-      } else if constexpr (std::is_integral_v<Type>) {
-        std::uniform_int_distribution<Type> dis(min, max);
-        std::generate(result.begin(), result.end(), [&]() { return dis(gen_); });
-      }
-      return result;
-    }
-    
-    /**
-     * @brief Generates a vector of N random numbers in the range [0, max].
-     *
-     * @tparam Type The type of the random numbers (must be integral or floating-point).
-     * @param nbr The number of random numbers to generate.
-     * @param max The maximum value (inclusive).
-     * @return A vector of random numbers of type `Type` in the range [0, max].
-     */
-    template <typename Type>
-    std::vector<Type> get_range(std::size_t nbr, const Type& max) {
-      return get_range<Type>(nbr, static_cast<Type>(0), max);
-    }
-    
-    /**
-     * @brief Generates a N vector of random numbers in the range [0, 1].
-     *
-     * @tparam Type The type of the random numbers (must be integral or floating-point).
-     * @param nbr The number of random numbers to generate.
-     * @return A vector of random numbers of type `Type` in the range [0, 1].
-     */
-    template <typename Type>
-    std::vector<Type> get_range(std::size_t nbr) {
-      return get_range<Type>(nbr, static_cast<Type>(0), static_cast<Type>(1));
-    }
-    
-    /**
-     * @return The underlying random engine.
-     */
-    Engine& get_engine() {
-      return gen_;
-    }
-
-   private:
-    Engine gen_;
-  };
+   /**
+    * The default random number generator type returned by @ref get_default_random
+    */
+  using RandomGenerator = std::mt19937_64;
   
   /**
    * @brief Returns a thread-local default random number generator instance.
    * 
-   * @return A reference to the thread-local default @ref Random instance.
+   * @return A reference to the thread-local default random instance.
    */
-  inline Random<>& get_default_random() {
-    static thread_local Random<> default_random;
+  inline RandomGenerator& get_default_random() {
+    static thread_local RandomGenerator default_random{std::random_device{}()};
 #ifdef DEBUG_TRACES
     std::clog << "get_default_random() " << &default_random << "\n";
 #endif  // DEBUG_TRACES
     return default_random;
+  }
+
+  /**
+   * @brief Sets the seed for the default random engine.
+   *
+   * @param seed The new seed value.
+   */
+  void set_seed(RandomGenerator::result_type seed) {
+    get_default_random().seed(seed);
+  }
+
+  /**
+   * @brief Generates a random number in the range [min, max].
+   *
+   * @tparam Type The type of the random number (must be integral or floating-point).
+   * @tparam CustomRandomGenerator The type of the random generator. Default is @ref RandomGenerator.
+   * @param min The minimum value (inclusive).
+   * @param max The maximum value (inclusive).
+   * @param rng A random generator. Use the default one if not set.
+   * @return A random number of type `Type` in the range [min, max].
+   */
+   template <typename Type, typename CustomRandomGenerator = RandomGenerator>
+   Type get(const Type& min, const Type& max, CustomRandomGenerator& rng = get_default_random()) {
+       if constexpr (std::is_floating_point_v<Type>) {
+           std::uniform_real_distribution<Type> dis(min, max);
+           return dis(rng);
+       } else if constexpr (std::is_integral_v<Type>) {
+           std::uniform_int_distribution<Type> dis(min, max);
+           return dis(rng);
+       }
+   }
+
+   template <typename Type, typename CustomRandomGenerator = RandomGenerator>
+   Type get(const Type& min, const Type& max, CustomRandomGenerator&& rng) {
+       return get(min, max, rng);
+   }
+
+  /**
+   * @brief Generates a vector of N random numbers in the range [min, max].
+   *
+   * @tparam Type The type of the random numbers (must be integral or floating-point).
+   * @tparam CustomRandomGenerator The type of the random generator. Default is @ref RandomGenerator.
+   * @param nbr The number of random numbers to generate.
+   * @param min The minimum value (inclusive).
+   * @param max The maximum value (inclusive).
+   * @param rng A random generator. Use the default one if not set.
+   * @return A vector of random numbers of type `Type` in the range [min, max].
+   */
+  template <typename Type, typename CustomRandomGenerator = RandomGenerator>
+  std::vector<Type> get_range(std::size_t nbr, const Type& min, const Type& max,
+                              CustomRandomGenerator& rng = get_default_random()) {
+    std::vector<Type> result(nbr);
+    if constexpr (std::is_floating_point_v<Type>) {
+      std::uniform_real_distribution<Type> dis(min, max);
+      std::generate(result.begin(), result.end(), [&]() { return dis(rng); });
+    } else if constexpr (std::is_integral_v<Type>) {
+      std::uniform_int_distribution<Type> dis(min, max);
+      std::generate(result.begin(), result.end(), [&]() { return dis(rng); });
+    }
+    return result;
+  }
+  
+  
+  template <typename Type, typename CustomRandomGenerator = RandomGenerator>
+  std::vector<Type> get_range(std::size_t nbr, const Type& min, const Type& max, CustomRandomGenerator&& rng) {
+      return get_range(nbr, min, max, rng);
   }
 
   /** @} */  // end defgroup random

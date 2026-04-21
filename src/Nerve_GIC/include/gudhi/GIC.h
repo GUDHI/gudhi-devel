@@ -6,7 +6,7 @@
  *
  *    Modification(s):
  *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL
- *      - 2026/04 Vincent Rouvreau: Remove GetUniform method and use Gudhi::random::get_default_random() instead
+ *      - 2026/04 Vincent Rouvreau: Remove GetUniform method and use Gudhi::random instead
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -157,9 +157,8 @@ class Cover_complex {
     int t = 0;
     int m = 0;
     double u;
-    auto rng = Gudhi::random::get_default_random();
     while (m < sampleSize) {
-      u = rng.get<double>(0., 1.);
+      u = Gudhi::random::get<double>(0., 1.);
       if ((populationSize - t) * u >= sampleSize - m) {
         t++;
       } else {
@@ -1223,7 +1222,6 @@ class Cover_complex {
   void compute_distribution(unsigned int N = 100) {
     unsigned int sz = distribution.size();
     if (sz < N) {
-      auto rng = Gudhi::random::get_default_random();
       for (unsigned int i = 0; i < N - sz; i++) {
         if (verbose)  std::clog << "Computing " << i << "th bootstrap, bottleneck distance = ";
 
@@ -1231,7 +1229,7 @@ class Cover_complex {
 
         std::vector<int> boot(this->num_points);
         for (int j = 0; j < this->num_points; j++) {
-          double u = rng.get<double>(0., 1.);
+          double u = Gudhi::random::get<double>(0., 1.);
           int id = std::floor(u * (this->num_points)); boot[j] = id;
           Cboot.point_cloud.push_back(this->point_cloud[id]); Cboot.cover.emplace_back(); Cboot.func.push_back(this->func[id]);
           boost::add_vertex(Cboot.one_skeleton_OFF); Cboot.vertices.push_back(boost::add_vertex(Cboot.one_skeleton));

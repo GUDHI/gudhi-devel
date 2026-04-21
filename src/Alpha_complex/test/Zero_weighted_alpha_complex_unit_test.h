@@ -28,9 +28,8 @@ void do_test() {
   // Random points construction
   using Point_d = typename Kernel::Point_d;
   std::vector<Point_d> points;
-  auto rng = Gudhi::random::get_default_random();
   for (int idx = 0; idx < 20; idx++) {
-    std::vector<double> point = rng.get_range<double>(4, -10., 10.);
+    std::vector<double> point = Gudhi::random::get_range<double>(4, -10., 10.);
     points.emplace_back(point.begin(), point.end());
   }
   

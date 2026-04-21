@@ -27,10 +27,9 @@ void benchmark_stars_computation(int nb_vertices) {
   std::clog << "... Simplex_tree construction" << std::endl;
 
   Stree st;
-  auto rng = Gudhi::random::get_default_random();
   // Insert 'nb_vertices' random simplices, of size in between [2; 5] and vertices in between [0; nb_vertices]
   for (Vertex_handle v=0; v < nb_vertices; v++) {
-    auto random_simplex = rng.get_range<Vertex_handle>(rng.get<int>(2, 5), nb_vertices);
+    auto random_simplex = Gudhi::random::get_range<Vertex_handle>(Gudhi::random::get<int>(2, 5), 0., nb_vertices);
     st.insert_simplex_and_subfaces(random_simplex);
   }
   std::cout << "... " << st.num_vertices() << " vertices and " << st.num_simplices() << " simplices." << std::endl;
@@ -42,7 +41,7 @@ void benchmark_stars_computation(int nb_vertices) {
   sh_list.reserve(SH_SIZE);
 
   std::sample(st.complex_simplex_range().begin(), st.complex_simplex_range().end(), std::back_inserter(sh_list),
-              SH_SIZE, rng.get_engine());
+              SH_SIZE, Gudhi::random::get_default_random());
   std::clog << benchmark_search << std::endl;
 
   Gudhi::Clock benchmark_stars("Benchmark the stars search of the random simplices");

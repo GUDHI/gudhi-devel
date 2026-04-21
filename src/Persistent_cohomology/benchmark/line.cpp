@@ -5,7 +5,7 @@
  *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
- *      - 2026/04 Vincent Rouvreau: Use Gudhi::random::get_default_random() in place of c++ custom use
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random in place of c++ custom use
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -33,16 +33,15 @@ int main(int argc, char* argv[]) {
   if (argc >= 2) N = atoi(argv[1]);
   if (argc >= 3) repeat = atoi(argv[2]);
 
-  auto rng = Gudhi::random::get_default_random();
   for (int rep = 0; rep < repeat; ++rep) {
     for (bool b : { false, true }) {
       std::vector<float> data(N);
       if (b) {
         std::clog << "Many repeated values\n";
-        std::generate(data.begin(), data.end(), [rng]() mutable { return rng.get<int>(0, 7); });
+        std::generate(data.begin(), data.end(), []() { return Gudhi::random::get<int>(0, 7); });
       } else {
         std::clog << "Mostly unique values\n";
-        std::generate(data.begin(), data.end(), [rng]() mutable { return rng.get<float>(0., 1.); });
+        std::generate(data.begin(), data.end(), []() { return Gudhi::random::get<float>(0., 1.); });
       }
       auto convert_result = [](auto& cplx, auto& pers){
         std::vector<std::pair<float,float>> res;

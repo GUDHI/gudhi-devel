@@ -5,7 +5,7 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
- *      - 2026/04 Vincent Rouvreau: Use Gudhi::random::get_default_random() in place of c++ custom use
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random in place of c++ custom use
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -30,8 +30,7 @@ int main() {
   if (monotone) {
     std::iota(data.begin(), data.end(), std::size_t(0));
   } else {
-    auto rng = Gudhi::random::get_default_random();
-    std::generate(data.begin(), data.end(),  [rng]() mutable { return rng.get<double>(0., 1.); });
+    std::generate(data.begin(), data.end(),  []() { return Gudhi::random::get<double>(0., 1.); });
   }
 
   Gudhi::Clock clock;

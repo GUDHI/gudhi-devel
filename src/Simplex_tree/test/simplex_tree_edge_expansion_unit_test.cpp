@@ -48,13 +48,12 @@ std::vector<Point> build_point_cloud(unsigned int numberOfPoints, int seed){
   std::vector<Point> finalPoints;
   std::set<Point> points;
 
-  Gudhi::random::Random<> rng = Gudhi::random::get_default_random();
-  if (seed > -1) rng = Gudhi::random::Random<>(seed);
+  if (seed > -1) Gudhi::random::set_seed(seed);
 
   for (unsigned int i = 0; i < numberOfPoints; ++i){
-    auto res = points.insert({rng.get<double>(0., 10.), rng.get<double>(0., 10.)});
+    auto res = points.insert({Gudhi::random::get<double>(0., 10.), Gudhi::random::get<double>(0., 10.)});
     while(!res.second){
-      res = points.insert({rng.get<double>(0., 10.), rng.get<double>(0., 10.)});
+      res = points.insert({Gudhi::random::get<double>(0., 10.), Gudhi::random::get<double>(0., 10.)});
     }
     finalPoints.push_back(*res.first);
   }

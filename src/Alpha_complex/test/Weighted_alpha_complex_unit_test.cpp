@@ -5,7 +5,7 @@
  *    Copyright (C) 2020 Inria
  *
  *    Modification(s):
- *      - 2026/04 Vincent Rouvreau: Use Gudhi::random::get_default_random() in place of c++ custom use
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random in place of c++ custom use
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -43,10 +43,9 @@ BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
   using Weighted_point_3 = typename Exact_weighted_alpha_complex_3d::Weighted_point_3;
   std::vector<Weighted_point_3> w_points_3;
 
-  auto rng = Gudhi::random::get_default_random();
   for (int idx = 0; idx < 20; idx++) {
-    std::vector<double> point = rng.get_range<double>(3, -10., 10.);
-    double weight = rng.get<double>(-0.5, 0.5);
+    std::vector<double> point = Gudhi::random::get_range<double>(3, -10., 10.);
+    double weight = Gudhi::random::get<double>(-0.5, 0.5);
     w_points_d.emplace_back(Bare_point_d(point.begin(), point.end()), weight);
     w_points_3.emplace_back(Bare_point_3(point[0], point[1], point[2]), weight);
   }

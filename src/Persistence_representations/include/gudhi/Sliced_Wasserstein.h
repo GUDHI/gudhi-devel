@@ -5,7 +5,7 @@
  *    Copyright (C) 2018  Inria
  *
  *    Modification(s):
- *      - 2026/04 Vincent Rouvreau: Use Gudhi::random::get_default_random()
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -252,9 +252,8 @@ class Sliced_Wasserstein
       double epsilon = 0.0001;
       double thresh_y = (max_ordinate - min_ordinate) * epsilon;
       double thresh_x = (max_abscissa - min_abscissa) * epsilon;
-      auto rng = Gudhi::random::get_default_random();
       for (int i = 0; i < num_pts_dgm; i++) {
-        double u = rng.get<double>(-1., 1.);
+        double u = Gudhi::random::get<double>(-1., 1.);
         diagram1[i].first += u * thresh_x;
         diagram1[i].second += u * thresh_y;
         diagram2[i].first += u * thresh_x;

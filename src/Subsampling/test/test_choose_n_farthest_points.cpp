@@ -116,9 +116,8 @@ BOOST_AUTO_TEST_CASE(test_compare_choose_farthest_point) {
   typedef std::array<double, 2> Point;
   typedef std::vector<Point> Cloud;
   Cloud orig;
-  auto rng = Gudhi::random::get_default_random();
   for(int i=0; i<1000; ++i) {
-    orig.push_back({rng.get<double>(0., 1.), rng.get<double>(0., 1.)});
+    orig.push_back({Gudhi::random::get<double>(0., 1.), Gudhi::random::get<double>(0., 1.)});
   }
   Cloud out1, out2;
   std::vector<double> dist1, dist2;

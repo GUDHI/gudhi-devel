@@ -5,8 +5,7 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
- *      - 2026/04 Vincent Rouvreau: Remove non c++17 code
- *                                  Use Gudhi::random::get_default_random()
+ *      - 2026/04 Vincent Rouvreau: Remove non c++17 code and use Gudhi::random
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -43,8 +42,7 @@ void pick_n_random_points(Point_container const &points,
   Gudhi::Clock t;
 #endif
 
-  auto rng = Gudhi::random::get_default_random();
-  std::sample(std::begin(points), std::end(points), output_it, final_size, rng.get_engine());
+  std::sample(std::begin(points), std::end(points), output_it, final_size, Gudhi::random::get_default_random());
 
 #ifdef GUDHI_SUBSAMPLING_PROFILING
   t.end();

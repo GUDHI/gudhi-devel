@@ -60,8 +60,7 @@ template <class Filtration_type>
 Filtration_type random_filtration_ar(Filtration_type lower_bound = 0,
                                      Filtration_type upper_bound = 1)
 {
-  auto rng = Gudhi::random::get_default_random();
-  return rng.get<Filtration_type>(lower_bound, upper_bound);
+  return Gudhi::random::get<Filtration_type>(lower_bound, upper_bound);
 }
 
 template <class Filtration_type>
@@ -69,11 +68,9 @@ Filtration_type random_filtration_vec(typename Filtration_type::value_type lower
                                       typename Filtration_type::value_type upper_bound = 10,
                                       unsigned int number_of_parameters = 2)
 {
-  auto rng = Gudhi::random::get_default_random();
-  
   Filtration_type res(number_of_parameters);
   for (unsigned int i = 0; i < number_of_parameters; ++i)
-    res[i] = rng.get<typename Filtration_type::value_type>(lower_bound, upper_bound);
+    res[i] = Gudhi::random::get<typename Filtration_type::value_type>(lower_bound, upper_bound);
 
   return res;
 }

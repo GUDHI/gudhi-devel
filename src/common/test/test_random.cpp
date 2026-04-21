@@ -14,6 +14,7 @@
 #include <vector>
 #include <numeric>  // for std::iota
 #include <algorithm>  // for std::shuffle
+#include <random>  // for std::random_device
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "random"
@@ -22,128 +23,165 @@
 
 using list_of_rnd_types = boost::mpl::list<double, float, int, unsigned int, long>;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(random_same_seed, RndType, list_of_rnd_types) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_same_seed )" << "\n";
-  
-  RndType min{0};
-  RndType max{100};
-  Gudhi::random::Random rng_1(1);
-  RndType first  = rng_1.get(min, max);
-  Gudhi::random::Random rng_2(1);
-  RndType second = rng_2.get(min, max);
+// Note: If you need to add some tests, consider to separate them, with first, all tests that are requiring some
+// randomness, and then, the tests that sets the seed (cf. TESTS_WITH_SEED).
 
-  std::clog << "First random number: " << first << " - Second random number: " << second << "\n";
-  BOOST_CHECK(first >= min);
-  BOOST_CHECK(first <= max);
-  BOOST_CHECK(first == second);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(random_different_seed, RndType, list_of_rnd_types) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_different_seed )" << "\n";
-  
-  RndType min{0};
-  RndType max{100};
-  Gudhi::random::Random rng_1;
-  RndType first  = rng_1.get(min, max);
-  Gudhi::random::Random rng_2;
-  RndType second = rng_2.get(min, max);
-
-  std::clog << "First random number: " << first << " - Second random number: " << second << "\n";
-  BOOST_CHECK(first >= min);
-  BOOST_CHECK(first <= max);
-  BOOST_CHECK(second >= min);
-  BOOST_CHECK(second <= max);
-  // Can happen that first == second
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(default_random, RndType, list_of_rnd_types) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( default_random )" << "\n";
-  
-  const RndType MIN_VAL{0};
-  const RndType MAX_VAL{100};
-  
-  auto rng = Gudhi::random::get_default_random();
-  RndType first  = rng.get(MIN_VAL, MAX_VAL);
-  RndType second = rng.get(MIN_VAL, MAX_VAL);
-
-  std::clog << "First random number: " << first << " - Second random number: " << second << "\n";
-  BOOST_CHECK(first >= MIN_VAL);
-  BOOST_CHECK(first <= MAX_VAL);
-  BOOST_CHECK(second >= MIN_VAL);
-  BOOST_CHECK(second <= MAX_VAL);
-  // Can happen that first == second
-
-  const int SEED{42};
-  rng.set_seed(SEED);
-  first  = rng.get(MIN_VAL, MAX_VAL);
-  rng.set_seed(SEED);
-  second = rng.get(MIN_VAL, MAX_VAL);
-
-  std::clog << "First random number seeded : " << first << " - Second random number seeded : " << second << "\n";
-  BOOST_CHECK(first >= MIN_VAL);
-  BOOST_CHECK(first <= MAX_VAL);
-  BOOST_CHECK(first == second);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(get_default_random_get, RndType, list_of_rnd_types) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( get_default_random_get )" << "\n";
+// TESTS_WITHOUT_SEED
+BOOST_AUTO_TEST_CASE_TEMPLATE(random_get_limits, RndType, list_of_rnd_types) {
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_get_limits )" << "\n";
   
   const RndType MIN_VAL{10};
   const RndType MAX_VAL{100};
   
-  auto rng = Gudhi::random::get_default_random();
-  RndType first  = rng.get(MIN_VAL, MAX_VAL);
-  RndType second = rng.get(MIN_VAL, MAX_VAL);
+  RndType random_value = Gudhi::random::get(MIN_VAL, MAX_VAL);
 
-  std::clog << "get_default_random().get(min, max) - First random number: " << first
-            << " - Second random number: " << second << "\n";
-  BOOST_CHECK(first >= MIN_VAL);
-  BOOST_CHECK(first <= MAX_VAL);
-  BOOST_CHECK(second >= MIN_VAL);
-  BOOST_CHECK(second <= MAX_VAL);
-  // Can happen that first == second
+  std::clog << "get_default_random().get(min, max) - random value: " << random_value << "\n";
+  BOOST_CHECK(random_value >= MIN_VAL);
+  BOOST_CHECK(random_value <= MAX_VAL);
+}
 
-  first  = rng.get(MAX_VAL);
-  second = rng.get(MAX_VAL);
+BOOST_AUTO_TEST_CASE_TEMPLATE(random_get_range_limits, RndType, list_of_rnd_types) {
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_get_limits )" << "\n";
+  
+  const RndType MIN_VAL{10};
+  const RndType MAX_VAL{100};
+  int NB{50};
+  
+  std::vector<RndType> first_range   = Gudhi::random::get_range(NB, MIN_VAL, MAX_VAL);
+  std::vector<RndType> second_range  = Gudhi::random::get_range(NB, MIN_VAL, MAX_VAL);
 
-  std::clog << "get_default_random().get(max) - First random number: " << first
-            << " - Second random number: " << second << "\n";
-  BOOST_CHECK(first >= RndType{0});
-  BOOST_CHECK(first <= MAX_VAL);
-  BOOST_CHECK(second >= RndType{0});
-  BOOST_CHECK(second <= MAX_VAL);
-  // Can happen that first == second
+  std::clog << "get_default_random().get_range(nb, min, max)\n";
+  for (auto val: first_range) {
+    std::clog << val << ", ";
+    BOOST_CHECK(val >= MIN_VAL);
+    BOOST_CHECK(val <= MAX_VAL);
+  }
+  std::clog << "\n";
+  for (auto val: second_range) {
+    std::clog << val << ", ";
+    BOOST_CHECK(val >= MIN_VAL);
+    BOOST_CHECK(val <= MAX_VAL);
+  }
+  std::clog << "\n";
+  // NB times the same values is not normal
+  BOOST_CHECK(first_range != second_range);
+}
 
-  first  = rng.get<RndType>();
-  second = rng.get<RndType>();
+BOOST_AUTO_TEST_CASE(random_generator_external_use) {
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_generator_external_use )" << "\n";
+  
+  std::vector<int> v(100);
+  std::iota(v.begin(), v.end(), 0);
+  std::shuffle(v.begin(), v.end(), Gudhi::random::get_default_random());
+  
+  BOOST_CHECK(!std::is_sorted(v.cbegin(), v.cend()));
+}
 
-  std::clog << "get_default_random().get() - First random number: " << first
-            << " - Second random number: " << second << "\n";
-  BOOST_CHECK(first >= RndType{0});
-  BOOST_CHECK(first <= RndType{1});
-  BOOST_CHECK(second >= RndType{0});
-  BOOST_CHECK(second <= RndType{1});
-  // Can happen that first == second
+BOOST_AUTO_TEST_CASE_TEMPLATE(custom_random_generator, RndType, list_of_rnd_types) {
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( custom_random_generator )" << "\n";
+  const RndType MIN{5};
+  const RndType MAX{10};
+  const int NB{50};
+  auto rng = std::default_random_engine{std::random_device{}()};
+  std::clog << "Custom random engine - get() returns " << Gudhi::random::get(MIN, MAX, rng) << "\n";
+  
+  auto first_range  = Gudhi::random::get_range(NB, MIN, MAX, rng);
+  auto second_range = Gudhi::random::get_range(NB, MIN, MAX, rng);
+  
+  std::clog << "Custom random engine - get_range()\nFirst range:\n";
+  for (RndType value: first_range) {
+    std::clog << value << ", ";
+  }
+  std::clog << "\nSecond range:\n";
+  for (RndType value: second_range) {
+    std::clog << value << ", ";
+  }
+  std::clog << "\n";
+  // No seed means at least one value on the NB ones should be different
+  BOOST_CHECK(first_range != second_range);
+  
+  rng.seed(42);
+  auto first  = Gudhi::random::get(MIN, MAX, rng);
+  rng.seed(42);
+  auto second = Gudhi::random::get(MIN, MAX, rng);
+  std::clog << "Custom random engine with seed - first = " << first << " - second = " << second << "\n";
+  BOOST_CHECK(first == second);
 
-  rng.set_seed(42);
-  first  = rng.get(MIN_VAL, MAX_VAL);
-  rng.set_seed(42);
-  second = rng.get(MIN_VAL, MAX_VAL);
+  rng.seed(42);
+  first_range  = Gudhi::random::get_range(NB, MIN, MAX, rng);
+  rng.seed(42);
+  second_range = Gudhi::random::get_range(NB, MIN, MAX, rng);
+  
+  std::clog << "Custom random engine - get_range() with a seed\nFirst range:\n";
+  for (RndType value: first_range) {
+    std::clog << value << ", ";
+  }
+  std::clog << "\nSecond range:\n";
+  for (RndType value: second_range) {
+    std::clog << value << ", ";
+  }
+  std::clog << "\n";
+  BOOST_CHECK(first_range == second_range);
+}
 
-  std::clog << "get_default_random().set_seed + .get(min, max) - First random number: " << first
+// TESTS_WITH_SEED
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(random_get_with_seed, RndType, list_of_rnd_types) {
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_get_with_seed )" << "\n";
+  
+  const RndType MIN_VAL{10};
+  const RndType MAX_VAL{100};
+  Gudhi::random::set_seed(42);
+  RndType first  = Gudhi::random::get(MIN_VAL, MAX_VAL);
+  Gudhi::random::set_seed(42);
+  RndType second = Gudhi::random::get(MIN_VAL, MAX_VAL);
+
+  std::clog << "Gudhi::random::set_seed + Gudhi::random::get(min, max) - First random number: " << first
             << " - Second random number: " << second << "\n";
   BOOST_CHECK(first >= MIN_VAL);
   BOOST_CHECK(first <= MAX_VAL);
   BOOST_CHECK(first == second);
 }
 
-BOOST_AUTO_TEST_CASE(random_get_engine) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_get_engine )" << "\n";
+BOOST_AUTO_TEST_CASE_TEMPLATE(random_get_range_with_seed, RndType, list_of_rnd_types) {
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_get_range_with_seed )" << "\n";
   
-  std::vector<int> v(100);
-  std::iota(v.begin(), v.end(), 0);
-  auto rng = Gudhi::random::get_default_random();
-  std::shuffle(v.begin(), v.end(), rng.get_engine());
+  const RndType MIN_VAL{10};
+  const RndType MAX_VAL{100};
+  int NB{50};
+  Gudhi::random::set_seed(42);
+  std::vector<RndType> first_range  = Gudhi::random::get_range(NB, MIN_VAL, MAX_VAL);
+  Gudhi::random::set_seed(42);
+  std::vector<RndType> second_range = Gudhi::random::get_range(NB, MIN_VAL, MAX_VAL);
+
+  std::clog << "Gudhi::random::set_seed + Gudhi::random::get_range(nb, min, max)\n";
+  for (auto val: first_range) {
+    std::clog << val << ", ";
+    BOOST_CHECK(val >= MIN_VAL);
+    BOOST_CHECK(val <= MAX_VAL);
+  }
+  std::clog << "\n";
+  for (auto val: second_range) {
+    std::clog << val << ", ";
+    BOOST_CHECK(val >= MIN_VAL);
+    BOOST_CHECK(val <= MAX_VAL);
+  }
+  std::clog << "\n";
+  BOOST_CHECK(first_range == second_range);
+}
+
+BOOST_AUTO_TEST_CASE(random_generator_external_use_with_seed) {
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_generator_external_use_with_seed )" << "\n";
   
-  BOOST_CHECK(!std::is_sorted(v.cbegin(), v.cend()));
+  Gudhi::random::set_seed(42);
+  std::vector<int> vec1(100);
+  std::iota(vec1.begin(), vec1.end(), 0);
+  std::shuffle(vec1.begin(), vec1.end(), Gudhi::random::get_default_random());
+
+  Gudhi::random::set_seed(42);
+  std::vector<int> vec2(100);
+  std::iota(vec2.begin(), vec2.end(), 0);
+  std::shuffle(vec2.begin(), vec2.end(), Gudhi::random::get_default_random());
+  
+  BOOST_CHECK(vec1 == vec2);
 }

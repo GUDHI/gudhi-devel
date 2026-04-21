@@ -5,7 +5,7 @@
  *    Copyright (C) 2015 Inria
  *
  *    Modification(s):
- *      - 2026/04 Vincent Rouvreau: Use Gudhi::random::get_default_random() in place of c++ custom use
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random in place of c++ custom use
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -46,8 +46,7 @@ int main(int argc, char** argv) {
     multipliers *= sizeInThisDimension;
   }
 
-  auto rng = Gudhi::random::get_default_random();
-  std::vector<double> data = rng.get_range<double>(multipliers, 0., 1.);
+  std::vector<double> data = Gudhi::random::get_range<double>(multipliers, 0., 1.);
 
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;

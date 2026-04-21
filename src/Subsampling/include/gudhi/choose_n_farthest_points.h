@@ -6,7 +6,7 @@
  *
  *    Modification(s):
  *      - 2022/11 Glisse: New *_metric variant
- *      - 2026/04 Vincent Rouvreau: Use Gudhi::random::get_default_random()
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -89,8 +89,7 @@ void choose_n_farthest_points(Distance dist,
 
   if (starting_point == random_starting_point) {
     // Choose randomly the first landmark
-    auto rng = Gudhi::random::get_default_random();
-    starting_point = rng.get<std::size_t>(0, nb_points - 1);
+    starting_point = Gudhi::random::get<std::size_t>(0, nb_points - 1);
   }
 
   // FIXME: don't hard-code the type as double. For Epeck_d, we also want to handle types that do not have an infinity.
@@ -220,8 +219,7 @@ void choose_n_farthest_points_metric(Distance dist_,
 
   if (starting_point == random_starting_point) {
     // Choose randomly the first landmark
-    auto rng = Gudhi::random::get_default_random();
-    starting_point = rng.get<std::size_t>(0, nb_points - 1);
+    starting_point = Gudhi::random::get<std::size_t>(0, nb_points - 1);
   }
 
   // FIXME: don't hard-code the type as double. For Epeck_d, we also want to handle types that do not have an infinity.
