@@ -39,7 +39,7 @@ namespace random {
    * @code{.cpp}
    * #include <gudhi/Random.h>
    * 
-   * // Get the default static thread local GUDHI random generator - It is the one that is used internally
+   * // Get the default thread local GUDHI random generator - It is the one that is used internally
    * auto rng = Gudhi::random::get_default_random();
    * // Set the seed for the default generator
    * rng.set_seed(42);
