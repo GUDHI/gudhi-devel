@@ -442,7 +442,12 @@
       \image html "vineyard_ex2.png"
     </td>
     <td width="50%">
-    Vineyards record changes in the barcode when cells change positions in a filtration.
+    A vine is the trajectory traced by a single point in the persistence diagram as the filtration of a same complex
+    changes over time. The set of those vines from all (or several) points in the persistence diagram form a 3D space
+    of curves called a vineyard. Vineyards can therefore be used as a tool to analyze more dynamic systems with fixed
+    number of underlying elements (for example, moving point clouds).
+
+    The implementation is based on @cite vineyards and @cite zigzag.
     </td>
     <td width="15%">
       <b>Author:</b> Hannah Schreiber, David Loiseaux<br>
