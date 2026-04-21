@@ -92,18 +92,20 @@ def test_limit_to_max_intervals():
     # check no warnings if max_intervals equals to the diagrams number
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        truncated_diags, _ = gd.persistence_graphical_tools._limit_to_max_intervals(
+        truncated_diags, truncated = gd.persistence_graphical_tools._limit_to_max_intervals(
             diags, 10, key=lambda life_time: life_time[1][1] - life_time[1][0]
         )
         # check diagrams are not sorted
+        assert truncated == False
         assert truncated_diags == diags
 
     # check warning if max_intervals lower than the diagrams number
     with pytest.warns(UserWarning) as record:
-        truncated_diags, _ = gd.persistence_graphical_tools._limit_to_max_intervals(
+        truncated_diags, truncated = gd.persistence_graphical_tools._limit_to_max_intervals(
             diags, 5, key=lambda life_time: life_time[1][1] - life_time[1][0]
         )
         # check diagrams are truncated and sorted by life time
+        assert truncated == True
         assert truncated_diags == [
             (0, (0.0, float("inf"))),
             (0, (0.0983494, float("inf"))),
@@ -112,6 +114,48 @@ def test_limit_to_max_intervals():
             (0, (0.0, 0.12047)),
         ]
     assert len(record) == 1
+
+
+def test_get_number_of_pairs_by_dimension():
+    nb_pairs_by_dim, n_dims = gd.persistence_graphical_tools._get_number_of_pairs_by_dimension(
+        []
+    )
+    assert n_dims == 0
+    assert nb_pairs_by_dim == []
+
+    diags = np.array([[1, 2], [3, 4], [5, 6]], float)
+    nb_pairs_by_dim, n_dims = gd.persistence_graphical_tools._get_number_of_pairs_by_dimension(
+        diags
+    )
+    assert n_dims == 1
+    assert nb_pairs_by_dim == [len(diags)]
+
+    diags = [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
+    nb_pairs_by_dim, n_dims = gd.persistence_graphical_tools._get_number_of_pairs_by_dimension(
+        diags
+    )
+    assert n_dims == 1
+    assert nb_pairs_by_dim == [len(diags)]
+
+    diags = [(0, (1.0, 2.0)), (0, (3.0, 4.0)), (0, (5.0, 6.0))]
+    nb_pairs_by_dim, n_dims = gd.persistence_graphical_tools._get_number_of_pairs_by_dimension(
+        diags
+    )
+    assert n_dims == 1
+    for val in nb_pairs_by_dim.values():
+        assert val == len(diags)
+    for k in nb_pairs_by_dim.keys():
+        assert k == 0
+
+    diags = [(2, (1.0, 2.0)), (2, (3.0, 4.0))]
+    nb_pairs_by_dim, n_dims = gd.persistence_graphical_tools._get_number_of_pairs_by_dimension(
+        diags
+    )
+    assert n_dims == 3
+    for val in nb_pairs_by_dim.values():
+        assert val == len(diags)
+    for k in nb_pairs_by_dim.keys():
+        assert val == 2
 
 
 def _limit_plot_persistence(function):
@@ -180,7 +224,7 @@ def _sklearn_several_homology_dim_plot_persistence(function):
     ]
     for diag in diags:
         ax = function(diag)
-        assert ax.get_legend().get_title().get_text() == "Range"
+        assert ax.get_legend().get_title().get_text() == "Diagram"
 
 
 def test_sklearn_several_homology_dim_plot_persistence():
