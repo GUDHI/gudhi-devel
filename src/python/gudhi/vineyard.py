@@ -464,8 +464,8 @@ class Vineyard(t.Vineyard_interface):
 
 class PointCloudRipsVineyard:
     """Specialized overlay for :class:`Vineyard`. Computes the vineyard from a sequence of point clouds or distance
-    matrices by computing the Rips Complex for each of them. Can also provide non-trivial representative 1-cycles for
-    each step of the vineyard if enabled.
+    matrices by computing the 2-dimensional Rips Complex for each of them. Can also provide non-trivial representative
+    1-cycles for each step of the vineyard if enabled.
 
     A trivial representative cycle is a cycle representing a persistence bar of length 0. That is, the cycle is born
     and killed at the same time.
