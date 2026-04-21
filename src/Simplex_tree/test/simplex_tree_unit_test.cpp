@@ -49,7 +49,7 @@ void test_empty_simplex_tree(const typeST& tst) {
   BOOST_CHECK(STRoot->oncles() == nullptr);
   BOOST_CHECK(STRoot->parent() == DEFAULT_VERTEX_VALUE);
   BOOST_CHECK(tst.dimension() == -1);
-  BOOST_CHECK_EQUAL(tst.compute_euler_characteristic(), 0);
+  BOOST_CHECK_EQUAL(tst.euler_characteristic(), 0);
 }
 
 template<class typeST>
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   std::clog << "st.num_vertices()=" << st.num_vertices() << std::endl;
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
-  BOOST_CHECK_EQUAL(st.compute_euler_characteristic(), 1);
+  BOOST_CHECK_EQUAL(st.euler_characteristic(), 1);
 
   // ++ ELEVENTH
   std::clog << "   - INSERT (2,1,0) (already inserted)" << std::endl;
@@ -334,7 +334,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_insertion, typeST, list_of_tested_var
   BOOST_CHECK(st.num_vertices() == (size_t) 4); // Not incremented !!
   BOOST_CHECK(st.dimension() == dim_max);
   BOOST_CHECK(st.num_simplices_by_dimension() == std::vector<size_t>({4, 4, 1}));
-  BOOST_CHECK_EQUAL(st.compute_euler_characteristic(), 1);
+  BOOST_CHECK_EQUAL(st.euler_characteristic(), 1);
 
   /* Inserted simplex:        */
   /*    1                     */
@@ -1447,7 +1447,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(for_each_simplex_skip_iteration, typeST, list_of_t
 
   BOOST_CHECK(num_simplices_by_dim_until_two[0] == num_simplices_by_dim[0]);
   BOOST_CHECK(num_simplices_by_dim_until_two[1] == num_simplices_by_dim[1]);
-  BOOST_CHECK_EQUAL(st.compute_euler_characteristic(), 1);
+  BOOST_CHECK_EQUAL(st.euler_characteristic(), 1);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_dimension_vertex_iterator, typeST, list_of_tested_variants) {

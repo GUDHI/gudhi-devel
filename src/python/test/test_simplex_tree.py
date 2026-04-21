@@ -765,4 +765,4 @@ def test_euler_characteristic():
     assert dims.shape[0] == 4
     assert np.array_equal(dims, [8, 13, 6, 1])
 
-    assert st.compute_euler_characteristic() == 0
+    assert st.euler_characteristic() == 0

@@ -860,7 +860,7 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Returns the number of simplices of each dimension in the complex. */
+  /** \brief Computes and returns the number of simplices of each dimension in the complex. */
   std::vector<size_t> num_simplices_by_dimension() const {
     if (is_empty()) return {};
     // std::min in case the upper bound got crazy
@@ -910,7 +910,7 @@ class Simplex_tree {
    * @brief Computes and returns the euler characteristic of the non-filtered underlying complex represented
    * by the simplex tree.
    */
-  int compute_euler_characteristic() const {
+  int euler_characteristic() const {
     auto dimension_count = num_simplices_by_dimension();
     int euler = 0;
     int sign = 1;
