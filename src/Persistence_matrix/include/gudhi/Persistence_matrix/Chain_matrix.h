@@ -290,7 +290,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
-   * @return The @ref MatIdx index of the inserted boundary.
+   * @return The @ref MatIdx indices of the unpaired chains used to reduce the boundary.
    */
   template <class Boundary_range = Boundary>
   std::vector<Entry_representative> insert_boundary(
@@ -337,7 +337,7 @@ class Chain_matrix : public Master_matrix::Matrix_dimension_option,
    * increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
-   * @return The @ref MatIdx index of the inserted boundary.
+   * @return The @ref MatIdx indices of the unpaired chains used to reduce the boundary.
    */
   template <class Boundary_range = Boundary>
   std::vector<Entry_representative> insert_maximal_cell(
@@ -821,7 +821,7 @@ inline std::vector<typename Master_matrix::Entry_representative> Chain_matrix<Ma
                                                       Master_matrix::Option_list::can_retrieve_representative_cycles),
       "'insert_maximal_cell' is not implemented for the chosen options.");
 
-  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have be positive."));
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have to be positive."));
 
   auto chainsInF = insert_boundary(cellID, boundary, dim);
 
@@ -831,8 +831,12 @@ inline std::vector<typename Master_matrix::Entry_representative> Chain_matrix<Ma
 
   if (startPos > columnIndex) {
     std::vector<Index> colToSwap;
-    colToSwap.reserve(matrix_.size());
+    colToSwap.reserve(pivotToPosition.size());
 
+    // first loop stores all column indices whose filtration position should be after the new column
+    // then orders the matrix indices by filtration position as they do not have to correspond
+    // the underlying column container is not the same depending on `has_map_column_container`: one is a map, the
+    // other a vector. To optimize the usage of both containers, the `if constexpr` differentiation is made
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       for (auto& p : pivotToPosition) {
         if (p.second >= columnIndex && p.second < startPos) colToSwap.push_back(pivotToColumnIndex_.at(p.first));
