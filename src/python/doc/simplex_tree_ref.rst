@@ -11,3 +11,6 @@ Simplex tree reference manual
    :inherited-members:
    :special-members: __eq__, __getstate__, __setstate__
    :exclude-members: __new__
+
+.. autoclass:: gudhi.simplex_tree.SteenrodBarcodes
+   :members:
