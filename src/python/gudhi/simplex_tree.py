@@ -18,8 +18,57 @@ __license__ = "MIT"
 import numpy as np
 from numpy.typing import ArrayLike
 import warnings
+from dataclasses import dataclass, field
 
 from gudhi import _simplex_tree_ext as t
+
+
+@dataclass
+class SteenrodBarcodes:
+    """Container for the output of :func:`SimplexTree.compute_steenrod_barcodes`.
+
+    :ivar ordinary: ``ordinary[d]`` is the list of ``(birth, death)`` pairs of
+        the ordinary persistence barcode in cohomological dimension ``d``.
+    :ivar steenrod: ``steenrod[d]`` is the list of ``(birth, death)`` pairs of
+        the Sq\\ :sup:`k` Steenrod barcode in cohomological dimension ``d``. It
+        is empty for ``d < k``.
+
+    In both fields ``death = float('inf')`` marks an essential (infinite) bar.
+
+    When ``absolute=True`` (the default), bars satisfy ``birth <= death`` and
+    ``d`` is the true cohomological degree of the class.  When
+    ``absolute=False``, bars use the *relative* cohomology convention inherited
+    from the internal reduction: for finite bars ``birth > death`` and the
+    index ``d`` is one greater than the cohomological degree.  Essential bars
+    are identical in both conventions.
+    """
+
+    ordinary: list = field(default_factory=list)
+    steenrod: list = field(default_factory=list)
+
+
+def _to_absolute(bars_by_dim: list) -> list:
+    """Convert relative cohomology bars to absolute cohomology convention.
+
+    In the relative convention, a finite bar at dimension *d* has
+    ``birth > death`` and represents a class in cohomological degree *d - 1*.
+    This function moves such bars to index *d - 1* and swaps birth / death so
+    that the output satisfies ``birth <= death``.  Essential bars (``death =
+    inf``) are unchanged.
+    """
+    n = len(bars_by_dim)
+    result: list = [[] for _ in range(n)]
+    for d, bars in enumerate(bars_by_dim):
+        for birth, death in bars:
+            if death == float("inf"):
+                # Essential: cohomological degree is d, no change.
+                result[d].append((birth, death))
+            elif d > 0:
+                # Finite relative bar at dim d → absolute bar at dim d-1,
+                # with birth and death swapped (birth_abs < death_abs).
+                result[d - 1].append((death, birth))
+            # d == 0 finite bars cannot exist (no (-1)-simplices).
+    return result
 
 
 # SimplexTree python interface
@@ -248,6 +297,88 @@ class SimplexTree(t._Simplex_tree_python_interface):
         self._pers = t._Simplex_tree_persistence_interface(self, bool(persistence_dim_max))
         self._pers._compute_persistence(homology_coeff_field, min_persistence)
         return self
+
+    def compute_steenrod_barcodes(self, k=1, absolute=True, n_jobs=-1):
+        """Compute the ordinary persistence barcode together with the
+        Sq\\ :sup:`k` Steenrod barcode of the filtered simplicial complex.
+
+        Coefficients are in :math:`\\mathbb{F}_2` — Steenrod squares are only
+        defined there, so no field parameter is exposed. This method does
+        **not** require a previous call to :func:`compute_persistence`; the
+        reduction needed to obtain cocycle representatives is run internally.
+
+        Based on the persistence Steenrod module theory of Lupo,
+        Medina-Mardones and Tauzin (J. Appl. Comput. Topol., 2022) and the
+        fast cup-:math:`i` formulas of Medina-Mardones (Comput. Geom., 2023).
+
+        :param k: the Steenrod square exponent (non-negative integer).
+            Default ``1``.
+        :type k: int
+        :param absolute: if ``True`` (default), return bars in the *absolute*
+            cohomology convention: ``birth <= death`` and index ``d`` is the
+            true cohomological degree.  If ``False``, return bars in the
+            *relative* cohomology convention used internally: for finite bars
+            ``birth > death`` and the index is one greater than the
+            cohomological degree.  Essential bars are identical in both
+            conventions.
+        :type absolute: bool
+        :param n_jobs: number of OpenMP threads to use for the parallelised
+            stages (``compute_steenrod_matrix`` and
+            ``compute_steenrod_barcode``). ``-1`` (default) uses all available
+            cores. Has no effect if the library was built without OpenMP.
+        :type n_jobs: int
+        :returns: An object with two attributes ``ordinary`` and ``steenrod``.
+            Each is a list indexed by cohomological dimension; element ``d`` is
+            a list of ``(birth, death)`` pairs, with ``death = float('inf')``
+            for essential bars.  ``steenrod[d]`` is empty for ``d < k``.
+        :rtype: SteenrodBarcodes
+
+        Example (cone on :math:`\\mathbb{CP}^2`, Sq²)::
+
+            from gudhi import SimplexTree
+            from itertools import combinations
+
+            top_cp2 = [
+                (1,2,4,5,6),(2,3,5,6,4),(3,1,6,4,5),(1,2,4,5,9),(2,3,5,6,7),
+                (3,1,6,4,8),(2,3,6,4,9),(3,1,4,5,7),(1,2,5,6,8),(3,1,5,6,9),
+                (1,2,6,4,7),(2,3,4,5,8),(4,5,7,8,9),(5,6,8,9,7),(6,4,9,7,8),
+                (4,5,7,8,3),(5,6,8,9,1),(6,4,9,7,2),(5,6,9,7,3),(6,4,7,8,1),
+                (4,5,8,9,2),(6,4,8,9,3),(4,5,9,7,1),(5,6,7,8,2),(7,8,1,2,3),
+                (8,9,2,3,1),(9,7,3,1,2),(7,8,1,2,6),(8,9,2,3,4),(9,7,3,1,5),
+                (8,9,3,1,6),(9,7,1,2,4),(7,8,2,3,5),(9,7,2,3,6),(7,8,3,1,4),
+                (8,9,1,2,5),
+            ]
+
+            def all_faces(tops):
+                faces = set()
+                for s in tops:
+                    for d in range(len(s) + 1):
+                        for f in combinations(s, d + 1):
+                            faces.add(tuple(sorted(f)))
+                return faces
+
+            st = SimplexTree()
+            for f in all_faces(top_cp2):
+                st.insert(list(f), filtration=0.0)
+            cone_v = 10
+            for f in all_faces(top_cp2):
+                st.insert(list(f) + [cone_v], filtration=1.0)
+            st.insert([cone_v], filtration=1.0)
+
+            bars = st.compute_steenrod_barcodes(k=2)
+            # bars.steenrod[4] contains one finite bar (0.0, 1.0):
+            # the Sq^2 map H^2(CP^2) -> H^4(CP^2) is an isomorphism,
+            # and the cone kills both classes at filtration value 1.0.
+            assert len(bars.steenrod[4]) == 1
+            b, d = bars.steenrod[4][0]
+            assert b == 0.0 and d == 1.0
+        """
+        iface = t._Steenrod_barcode_interface(self, int(k))
+        ordinary, steenrod = iface._compute(int(n_jobs))
+        if absolute:
+            ordinary = _to_absolute(ordinary)
+            steenrod = _to_absolute(steenrod)
+        return SteenrodBarcodes(ordinary=ordinary, steenrod=steenrod)
 
     def betti_numbers(self) -> list[int]:
         """This function returns the Betti numbers of the simplicial complex.
