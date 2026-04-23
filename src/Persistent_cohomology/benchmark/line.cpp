@@ -5,6 +5,7 @@
  *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random in place of c++ custom use
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -13,27 +14,12 @@
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Persistence_on_a_line.h>
 #include <gudhi/Clock.h>
+#include <gudhi/Random.h>
 
 #include <vector>
 #include <cstdlib>
-#include <random>
 #include <algorithm>
 
-std::random_device rd;
-std::mt19937 gen(rd());
-
-float get_random_f()
-{
-  // values essentially unique
-  std::uniform_real_distribution<float> dist(0., 1.);
-  return dist(gen);
-}
-float get_random_i()
-{
-  // lots of repetitions in the values
-  std::uniform_int_distribution<int> dist(0, 7);
-  return dist(gen);
-}
 
 // $ prog [n_points [n_repeat]]
 int main(int argc, char* argv[]) {
@@ -52,10 +38,10 @@ int main(int argc, char* argv[]) {
       std::vector<float> data(N);
       if (b) {
         std::clog << "Many repeated values\n";
-        std::generate(data.begin(), data.end(), get_random_i);
+        std::generate(data.begin(), data.end(), []() { return Gudhi::random::get<int>(0, 7); });
       } else {
         std::clog << "Mostly unique values\n";
-        std::generate(data.begin(), data.end(), get_random_f);
+        std::generate(data.begin(), data.end(), []() { return Gudhi::random::get<float>(0., 1.); });
       }
       auto convert_result = [](auto& cplx, auto& pers){
         std::vector<std::pair<float,float>> res;

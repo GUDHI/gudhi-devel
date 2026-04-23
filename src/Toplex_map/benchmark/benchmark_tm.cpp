@@ -5,6 +5,7 @@
  *    Copyright (C) 2018  INRIA
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Replace std::random_device with Gudhi::random
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -15,6 +16,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Toplex_map.h>
 #include <gudhi/Lazy_toplex_map.h>
+#include <gudhi/Random.h>
 
 using namespace Gudhi;
 
@@ -58,20 +60,14 @@ int nb_insert_simplex2 = 3000;
 int nb_membership2 = 400000;
 
 Simplex random_simplex(int n, std::size_t d) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<std::size_t> dis(1, n);
   Simplex s;
-  while (s.size() < d) s.insert(dis(gen));
+  while (s.size() < d) s.insert(Gudhi::random::get<std::size_t>(1, n));
   return s;
 }
 
 std::vector<Simplex> r_vector_simplices(int n, int max_d, int m) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<std::size_t> dis(1, max_d);
   std::vector<Simplex> v;
-  for (int i = 0; i < m; i++) v.push_back(random_simplex(n, dis(gen)));
+  for (int i = 0; i < m; i++) v.push_back(random_simplex(n, Gudhi::random::get<std::size_t>(1, max_d)));
   return v;
 }
 

@@ -5,13 +5,13 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Replace std::random_device with Gudhi::random - remove random_simplices.h
  *      - YYYY/MM Author: Description of the modification
  */
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Clock.h>
-
-#include "random_simplices.h"
+#include <gudhi/Random.h>
 
 #include <iostream>
 #include <vector>
@@ -35,8 +35,10 @@ int main(int argc, char *argv[]) {
 
   Simplex_tree st;
   // Insert 'nb_vertices' random simplices, of size in between [2; 5] and vertices in between [0; nb_vertices]
-  for (Vertex_handle v=0; v < nb_vertices; v++)
-    st.insert_simplex_and_subfaces(random_simplex<Vertex_handle>(2, 5, nb_vertices));
+  for (Vertex_handle v=0; v < nb_vertices; v++) {
+    auto random_simplex = Gudhi::random::get_range<Vertex_handle>(Gudhi::random::get<int>(2, 5), 0., nb_vertices);
+    st.insert_simplex_and_subfaces(random_simplex);
+  }
   std::clog << "... " << st.num_vertices() << " vertices and " << st.num_simplices()
             << " simplices. Dimension is " << st.dimension() << "\n";
 

@@ -5,6 +5,7 @@
  *    Copyright (C) 2020 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Functions from gudhi/random_point_generators.h moved in a Gudhi::random namespace
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -28,7 +29,7 @@ void compare_delaunay_complex_simplices() {
   using Point = typename CGAL_kernel::Point_d;
   std::vector<Point> points;
   // 50 points on a 4-sphere
-  points = Gudhi::generate_points_on_sphere_d<CGAL_kernel>(10, 5, 1.);
+  points = Gudhi::random::generate_points_on_sphere_d<CGAL_kernel>(10, 5, 1.);
 
   Gudhi::alpha_complex::Alpha_complex<CGAL_kernel> alpha_complex(points);
 

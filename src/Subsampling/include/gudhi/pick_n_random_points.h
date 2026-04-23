@@ -5,6 +5,7 @@
  *    Copyright (C) 2016 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Remove non c++17 code and use Gudhi::random
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -14,15 +15,10 @@
 #ifdef GUDHI_SUBSAMPLING_PROFILING
 # include <gudhi/Clock.h>
 #endif
+#include <gudhi/Random.h>
 
-#include <boost/range/size.hpp>
-
-#include <cstddef>
-#include <random>     // random_device, mt19937
-#include <algorithm>  // shuffle
-#include <numeric>    // iota
-#include <iterator>
-#include <vector>
+#include <cstddef>  // for std::size_t
+#include <algorithm>  // for std::sample
 
 
 namespace Gudhi {
@@ -46,25 +42,7 @@ void pick_n_random_points(Point_container const &points,
   Gudhi::Clock t;
 #endif
 
-  std::random_device rd;
-  std::mt19937 g(rd());
-
-#if __cplusplus >= 201703L
-  std::sample(std::begin(points), std::end(points), output_it, final_size, g);
-#else
-  std::size_t nbP = boost::size(points);
-  if (final_size > nbP)
-      final_size = nbP;
-
-  std::vector<int> landmarks(nbP);
-  std::iota(landmarks.begin(), landmarks.end(), 0);
-
-  std::shuffle(landmarks.begin(), landmarks.end(), g);
-  landmarks.resize(final_size);
-
-  for (int l : landmarks)
-    *output_it++ = points[l];
-#endif
+  std::sample(std::begin(points), std::end(points), output_it, final_size, Gudhi::random::get_default_random());
 
 #ifdef GUDHI_SUBSAMPLING_PROFILING
   t.end();

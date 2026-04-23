@@ -5,6 +5,7 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Use Gudhi::random in place of c++ custom use
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -12,10 +13,10 @@
 #include <gudhi/Bitmap_cubical_complex.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Persistence_on_rectangle.h>
+#include <gudhi/Random.h>
 
 #include <vector>
 #include <cstdlib>
-#include <random>
 #include <algorithm>
 #include <functional>
 #include <limits>
@@ -29,10 +30,7 @@ int main() {
   if (monotone) {
     std::iota(data.begin(), data.end(), std::size_t(0));
   } else {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<double> dist(0., 1.);
-    std::generate(data.begin(), data.end(), std::bind(dist, gen));
+    std::generate(data.begin(), data.end(),  []() { return Gudhi::random::get<double>(0., 1.); });
   }
 
   Gudhi::Clock clock;

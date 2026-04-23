@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2025/01 Vincent Rouvreau: Use nanobind instead of PyBind11 for python bindings
+ *      - 2026/04 Vincent Rouvreau: Functions from gudhi/random_point_generators.h moved in a Gudhi::random namespace
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -33,7 +34,7 @@ auto generate_points_on_sphere(const size_t n_samples, const int ambient_dim, do
   std::vector<typename Kern::Point_d> points_generated;
   {
     nb::gil_scoped_release release;
-    points_generated = Gudhi::generate_points_on_sphere_d<Kern>(n_samples, ambient_dim, radius);
+    points_generated = Gudhi::random::generate_points_on_sphere_d<Kern>(n_samples, ambient_dim, radius);
   }
 
   // Reserve sufficient memory space to copy data
@@ -53,7 +54,7 @@ auto generate_points_on_torus(size_t n_samples, int dim, std::string sample)
   std::vector<typename Kern::Point_d> points_generated;
   {
     nb::gil_scoped_release release;
-    points_generated = Gudhi::generate_points_on_torus_d<Kern>(n_samples, dim, sample);
+    points_generated = Gudhi::random::generate_points_on_torus_d<Kern>(n_samples, dim, sample);
   }
 
   size_t npoints = points_generated.size();

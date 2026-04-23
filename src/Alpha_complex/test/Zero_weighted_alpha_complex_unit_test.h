@@ -5,18 +5,20 @@
  *    Copyright (C) 2020 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Replace std::random_device with Gudhi::random
  *      - YYYY/MM Author: Description of the modification
  */
 
 #include <CGAL/Epeck_d.h>
 
+#include <iostream>
 #include <vector>
-#include <random>
-#include <cmath> // for std::fabs
+#include <limits> // for std::numeric_limits
 
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Unitary_tests_utils.h>
+#include <gudhi/Random.h>
 
 template<class Kernel>
 void do_test() {
@@ -26,11 +28,8 @@ void do_test() {
   // Random points construction
   using Point_d = typename Kernel::Point_d;
   std::vector<Point_d> points;
-  std::uniform_real_distribution<double> rd_pts(-10., 10.);
-  std::random_device rand_dev;
-  std::mt19937 rand_engine(rand_dev());
   for (int idx = 0; idx < 20; idx++) {
-    std::vector<double> point {rd_pts(rand_engine), rd_pts(rand_engine), rd_pts(rand_engine), rd_pts(rand_engine)};
+    std::vector<double> point = Gudhi::random::get_range<double>(4, -10., 10.);
     points.emplace_back(point.begin(), point.end());
   }
   

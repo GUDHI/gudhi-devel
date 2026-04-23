@@ -5,12 +5,12 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Replace std::random_device with Gudhi::random
  *      - YYYY/MM Author: Description of the modification
  */
 
 #include <iostream>
 #include <vector>
-#include <random>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_edge_expansion"
@@ -22,6 +22,7 @@
 #include <gudhi/Rips_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/distance_functions.h>
+#include <gudhi/Random.h>
 
 using namespace Gudhi;
 
@@ -46,15 +47,13 @@ using Point = std::vector<double>;
 std::vector<Point> build_point_cloud(unsigned int numberOfPoints, int seed){
   std::vector<Point> finalPoints;
   std::set<Point> points;
-  std::random_device dev;
-  std::mt19937 rng(dev());
-  if (seed > -1) rng.seed(seed);
-  std::uniform_real_distribution<double> dist(0,10);
+
+  if (seed > -1) Gudhi::random::set_seed(seed);
 
   for (unsigned int i = 0; i < numberOfPoints; ++i){
-    auto res = points.insert({dist(rng), dist(rng)});
+    auto res = points.insert({Gudhi::random::get<double>(0., 10.), Gudhi::random::get<double>(0., 10.)});
     while(!res.second){
-      res = points.insert({dist(rng), dist(rng)});
+      res = points.insert({Gudhi::random::get<double>(0., 10.), Gudhi::random::get<double>(0., 10.)});
     }
     finalPoints.push_back(*res.first);
   }
