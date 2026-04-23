@@ -113,8 +113,8 @@ namespace random {
    * @param rng A random generator. Use the default one if not set.
    * @return A random number of type `Type` in the range [min, max].
    */
-   template <typename Type, typename CustomRandomGenerator = RandomGenerator>
-   Type get(const Type& min, const Type& max, CustomRandomGenerator& rng = get_default_random()) {
+   template <typename Type, typename CustomRandomGenerator = RandomGenerator&>
+   Type get(const Type& min, const Type& max, CustomRandomGenerator&& rng = get_default_random()) {
        if constexpr (std::is_floating_point_v<Type>) {
            std::uniform_real_distribution<Type> dis(min, max);
            return dis(rng);
@@ -122,11 +122,6 @@ namespace random {
            std::uniform_int_distribution<Type> dis(min, max);
            return dis(rng);
        }
-   }
-
-   template <typename Type, typename CustomRandomGenerator = RandomGenerator>
-   Type get(const Type& min, const Type& max, CustomRandomGenerator&& rng) {
-       return get(min, max, rng);
    }
 
   /**
@@ -140,9 +135,9 @@ namespace random {
    * @param rng A random generator. Use the default one if not set.
    * @return A vector of random numbers of type `Type` in the range [min, max].
    */
-  template <typename Type, typename CustomRandomGenerator = RandomGenerator>
+  template <typename Type, typename CustomRandomGenerator = RandomGenerator&>
   std::vector<Type> get_range(std::size_t nbr, const Type& min, const Type& max,
-                              CustomRandomGenerator& rng = get_default_random()) {
+                              CustomRandomGenerator&& rng = get_default_random()) {
     std::vector<Type> result(nbr);
     if constexpr (std::is_floating_point_v<Type>) {
       std::uniform_real_distribution<Type> dis(min, max);
@@ -155,11 +150,6 @@ namespace random {
   }
   
   
-  template <typename Type, typename CustomRandomGenerator = RandomGenerator>
-  std::vector<Type> get_range(std::size_t nbr, const Type& min, const Type& max, CustomRandomGenerator&& rng) {
-      return get_range(nbr, min, max, rng);
-  }
-
   /** @} */  // end defgroup random
 
 }  // namespace random
