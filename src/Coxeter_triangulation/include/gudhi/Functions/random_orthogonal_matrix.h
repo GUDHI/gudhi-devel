@@ -45,7 +45,7 @@ Eigen::MatrixXd random_orthogonal_matrix(std::size_t d) {
   if (d == 1) return Eigen::VectorXd::Constant(1, 1.0);
   if (d == 2) {
     // 0. < alpha < 2 Pi
-    auto rng = CGAL::get_default_random();
+    CGAL::Random& rng = CGAL::get_default_random();
     double alpha = rng.get_double(0., 2 * boost::math::constants::pi<double>());
 
     Eigen::Matrix2d rot;
