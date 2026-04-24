@@ -14,44 +14,44 @@ Steenrod squares are cohomology operations
 
 .. math::
 
-    \mathrm{Sq}^k : H^n(X;\mathbb{F}_2) \longrightarrow H^{n+k}(X;\mathbb{F}_2)
+    \mathrm{Sq}^k : H^n(X;\mathbb{F}_2) \longrightarrow
+    H^{n+k}(X;\mathbb{F}_2)
 
-defined for all integers :math:`k \geq 0` and all topological spaces :math:`X`.
-They are natural transformations — commuting with continuous maps — and together they
-determine the cohomology ring structure in a finer sense than the cup product alone.
-In particular :math:`\mathrm{Sq}^0 = \mathrm{id}`, and for a class :math:`\alpha \in H^n`
-we have :math:`\mathrm{Sq}^n(\alpha) = \alpha \smile \alpha` (the cup-square).
-When :math:`k > n`, :math:`\mathrm{Sq}^k` is identically zero.
+defined naturally for all integers :math:`k \geq 0` and all topological
+spaces :math:`X`. They provide finer discriminatory information beyond
+Betti numbers. For example, with mod 2 coefficients, the real projective
+plane and the wedge of a circle and a sphere are indistinguishable using
+Betti numbers alone, but :math:`\mathrm{Sq}^k` separates them. With any
+coefficients, the complex projective space and the wedge of a 2-sphere
+and a 4-sphere are indistinguishable, but :math:`\mathrm{Sq}^k` tells
+them apart.
 
 Persistence Steenrod barcodes
-------------------------------
+-----------------------------
 
-Given a filtered simplicial complex :math:`K_0 \subseteq K_1 \subseteq \cdots \subseteq K_m`
-over :math:`\mathbb{F}_2`, ordinary persistent cohomology tracks the birth and death of
-cohomology classes across the filtration, yielding a persistence barcode.
-
-The *Sq^k Steenrod barcode* enriches this picture: for each cohomological degree :math:`n`,
-it records which persistent cohomology classes in degree :math:`n` have a non-trivial image
-under :math:`\mathrm{Sq}^k` in degree :math:`n+k`.  Formally, if a cohomology class
-:math:`\alpha` is born at index :math:`b` and dies at index :math:`d`, and the cup-i
-cochain representative of :math:`\mathrm{Sq}^k(\alpha)` is non-zero, then the bar
-:math:`(b, d)` appears in ``steenrod[n]``.
-
-Two filtered complexes may share identical ordinary barcodes yet differ in their Steenrod
-barcodes, making the latter a strictly finer invariant.
+The :math:`\mathrm{Sq}^k` *Steenrod barcode* generalizes the
+:math:`\mathbb{F}_2` relative cohomology barcode of a filtered
+simplicial complex in the sense that for :math:`k = 0` one recovers it.
+It is defined as the barcode of the image of the persistent module
+morphism given by
+:math:`\mathrm{Sq}^k \colon H^n(X,X_i) \to H^{n+k}(X,X_i)` for each
+:math:`i` in the filtration index, and thus records the action of
+Steenrod squares along the filtration producing more discriminatory
+barcodes. For a more comprehensive treatment of persistent cohomology
+operations consult :cite:`medina2025cohomologyoperations`.
 
 Algorithm
 ---------
 
 The computation proceeds in four stages, following :cite:`lupo2022persistencesteenrod` and
-using the fast cup-i product formulas of :cite:`medina2023cupifast`:
+using the fast cup-:math:`i` product formulas of :cite:`medina2023cupifast`:
 
 1. **Filtration sort** — simplices are sorted by dimension within each filtration value,
    producing a boundary matrix in the correct reduction order.
 2. **Persistence reduction** — a standard cohomology twist-reduction (with the clearing
    optimization) reduces the coboundary matrix and records cocycle representatives
    in a triangular matrix :math:`V`.
-3. **Steenrod matrix** — for each cocycle representative, the cup-i product formula is
+3. **Steenrod matrix** — for each cocycle representative, the cup-:math:`i` product formula is
    applied to produce a cochain representing :math:`\mathrm{Sq}^k` of that class.
    This stage is parallelised with OpenMP.
 4. **Steenrod reduction** — the augmented coboundary-plus-Steenrod matrix is reduced to
@@ -62,48 +62,57 @@ No prior call to :func:`~gudhi.SimplexTree.compute_persistence` is required.
 Python interface
 -----------------
 
-.. autoclass:: gudhi.SimplexTree
-   :members: compute_steenrod_barcodes
-   :noindex:
+.. automethod:: gudhi.SimplexTree.compute_steenrod_barcodes
 
-.. autoclass:: gudhi.simplex_tree.SteenrodBarcodes
-   :members:
-   :noindex:
+Example — cone on :math:`\mathbb{C}P^2`
+-----------------------------------------
 
-Example — :math:`\mathbb{R}P^2`
----------------------------------
+The complex projective plane :math:`\mathbb{C}P^2` satisfies
+:math:`H^*(\mathbb{C}P^2;\mathbb{F}_2) \cong \mathbb{F}_2` in degrees 0, 2, and 4,
+with :math:`\mathrm{Sq}^2 : H^2 \to H^4` an isomorphism (the generator squares to
+the generator).  Coning off :math:`\mathbb{C}P^2` at filtration value 1 kills all
+classes, so every bar is finite.  This makes the example ideal for illustrating the
+difference between the ``absolute`` and ``relative`` output conventions.
 
-The real projective plane :math:`\mathbb{R}P^2` is a classical test case:
-:math:`H^*(\mathbb{R}P^2;\mathbb{F}_2) \cong \mathbb{F}_2` in each degree 0, 1, and 2,
-and :math:`\mathrm{Sq}^1 : H^1 \to H^2` is an isomorphism.  Therefore the Sq\ :sup:`1`
-Steenrod barcode contains exactly one essential bar, in degree 2 (tracking the class
-detected via Sq\ :sup:`1` applied to the degree-1 generator).
+In the **absolute** convention (``absolute=True``, the default) bars satisfy
+``birth ≤ death`` and the index is the true cohomological degree of the class.
+In the **relative** convention (``absolute=False``) finite bars have ``birth > death``
+and the index is one greater than the cohomological degree.
 
 .. testcode::
 
-    import math
     from gudhi import SimplexTree
 
-    # Minimal triangulation of RP^2: 6 vertices, 15 edges, 10 triangles.
-    rp2_top = [
-        [1, 2, 4], [2, 3, 4], [1, 3, 5], [2, 3, 5], [1, 4, 5],
-        [1, 2, 6], [1, 3, 6], [3, 4, 6], [2, 5, 6], [4, 5, 6],
+    top_cp2 = [
+        (1,2,4,5,6),(2,3,5,6,4),(3,1,6,4,5),(1,2,4,5,9),(2,3,5,6,7),
+        (3,1,6,4,8),(2,3,6,4,9),(3,1,4,5,7),(1,2,5,6,8),(3,1,5,6,9),
+        (1,2,6,4,7),(2,3,4,5,8),(4,5,7,8,9),(5,6,8,9,7),(6,4,9,7,8),
+        (4,5,7,8,3),(5,6,8,9,1),(6,4,9,7,2),(5,6,9,7,3),(6,4,7,8,1),
+        (4,5,8,9,2),(6,4,8,9,3),(4,5,9,7,1),(5,6,7,8,2),(7,8,1,2,3),
+        (8,9,2,3,1),(9,7,3,1,2),(7,8,1,2,6),(8,9,2,3,4),(9,7,3,1,5),
+        (8,9,3,1,6),(9,7,1,2,4),(7,8,2,3,5),(9,7,2,3,6),(7,8,3,1,4),
+        (8,9,1,2,5),
     ]
 
+    # SimplexTree.insert inserts the simplex and all its faces automatically.
     st = SimplexTree()
-    for tri in rp2_top:
-        st.insert(tri, filtration=0.0)
+    for s in top_cp2:
+        st.insert(list(s), filtration=0.0)
+    cone_v = 10
+    for s in top_cp2:
+        st.insert(list(s) + [cone_v], filtration=1.0)
 
-    bars = st.compute_steenrod_barcodes(k=1)
+    # Absolute convention (default): birth <= death, index = true cohomological degree.
+    # Sq^2 detects the non-trivial H^4 class; the bar lives in steenrod[4].
+    _, steenrod_abs = st.compute_steenrod_barcodes(k=2)
+    print("absolute steenrod[4]:", steenrod_abs[4])
 
-    # Ordinary barcode: H0 and H1 each have one essential bar.
-    assert len([b for b in bars.ordinary[0] if math.isinf(b[1])]) == 1
-    assert len([b for b in bars.ordinary[1] if math.isinf(b[1])]) == 1
-
-    # Steenrod barcode: exactly one essential bar in degree 2.
-    essential_sq1 = [b for b in bars.steenrod[2] if math.isinf(b[1])]
-    print("Essential Sq^1 bars in degree 2:", len(essential_sq1))
+    # Relative convention: birth > death, index shifted by +1.
+    # The same bar appears in steenrod[5] with birth and death swapped.
+    _, steenrod_rel = st.compute_steenrod_barcodes(k=2, absolute=False)
+    print("relative steenrod[5]:", steenrod_rel[5])
 
 .. testoutput::
 
-    Essential Sq^1 bars in degree 2: 1
+    absolute steenrod[4]: [(0.0, 1.0)]
+    relative steenrod[5]: [(1.0, 0.0)]

@@ -1,7 +1,6 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       Umberto Lupo, Anibal M. Medina-Mardones, Guillaume Tauzin
- *                     (port to Gudhi: Maximiliano Alvarez)
+ *    Author(s):       Anibal M. Medina-Mardones
  *
  *    Copyright (C) 2026 Inria
  *

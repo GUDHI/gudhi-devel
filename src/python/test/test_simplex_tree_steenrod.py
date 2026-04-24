@@ -1,6 +1,6 @@
 """ This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
     See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
-    Author(s):       Maximiliano Alvarez
+    Author(s):       Anibal M. Medina-Mardones
 
     Copyright (C) 2026 Inria
 
@@ -66,8 +66,8 @@ def _rp2_simplex_tree():
 
 def test_rp2_sq1_three_essential_ordinary_bars():
     """RP² has three essential ordinary bars (H^0, H^1, H^2 over F_2)."""
-    bars = _rp2_simplex_tree().compute_steenrod_barcodes(k=1)
-    n_ess = sum(1 for d in bars.ordinary for _, death in d if math.isinf(death))
+    ordinary, _ = _rp2_simplex_tree().compute_steenrod_barcodes(k=1)
+    n_ess = sum(1 for d in ordinary for _, death in d if math.isinf(death))
     assert n_ess == 3
 
 
@@ -77,16 +77,16 @@ def test_rp2_sq1_one_essential_steenrod_bar_in_dim2():
     This reflects the non-orientability of RP^2: Sq^1: H^1 -> H^2 is an
     isomorphism over F_2.
     """
-    bars = _rp2_simplex_tree().compute_steenrod_barcodes(k=1)
-    sq1_ess = [b for b in bars.steenrod[2] if math.isinf(b[1])]
+    _, steenrod = _rp2_simplex_tree().compute_steenrod_barcodes(k=1)
+    sq1_ess = [b for b in steenrod[2] if math.isinf(b[1])]
     assert len(sq1_ess) == 1
 
 
 def test_does_not_require_compute_persistence():
     """compute_steenrod_barcodes must not require a prior compute_persistence."""
     st = _rp2_simplex_tree()
-    bars = st.compute_steenrod_barcodes(k=1)
-    assert len(bars.steenrod) > 2
+    _, steenrod = st.compute_steenrod_barcodes(k=1)
+    assert len(steenrod) > 2
 
 
 def test_rejects_negative_k():
@@ -169,8 +169,8 @@ def test_cone_cp2_sq2_one_finite_bar_in_dim4():
     one finite persistence bar.  With integer filtration the bar is
     (birth=254, death=329), spanning 75 simplices.
     """
-    bars = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
-    sq2 = bars.steenrod[4]
+    _, steenrod = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
+    sq2 = steenrod[4]
     assert len(sq2) == 1
     birth, death = sq2[0]
     assert birth == 254.0   # last CP² 4-simplex completes H⁴(CP²)
@@ -180,8 +180,8 @@ def test_cone_cp2_sq2_one_finite_bar_in_dim4():
 
 def test_cone_cp2_sq2_bar_born_in_cp2_killed_in_cone():
     """The Sq^2 bar must be born in the CP² part and killed in the cone part."""
-    bars = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
-    birth, death = bars.steenrod[4][0]
+    _, steenrod = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
+    birth, death = steenrod[4][0]
     assert birth < N_CP2   # born before the cone is attached
     assert death >= N_CP2  # killed by a cone simplex
 
@@ -194,12 +194,12 @@ def test_cone_cp2_sq2_shorter_than_h4_bar():
     H^2(CP^2) is non-trivial while Sq^2 on H^2(S^2 v S^4) is zero.
     The shorter bar length is one manifestation of this richer structure.
     """
-    bars = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
+    ordinary, steenrod = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
     # The topologically meaningful H^4 bar is the one that spans the CP²/cone
     # boundary (born in CP², killed by the cone).
-    h4_boundary = [(b, d) for b, d in bars.ordinary[4]
+    h4_boundary = [(b, d) for b, d in ordinary[4]
                    if not math.isinf(d) and b < N_CP2 and d >= N_CP2]
-    sq2_bars = bars.steenrod[4]
+    sq2_bars = steenrod[4]
     assert len(h4_boundary) == 1
     assert len(sq2_bars) == 1
     h4_length  = h4_boundary[0][1] - h4_boundary[0][0]
@@ -217,14 +217,14 @@ def test_cone_cp2_ordinary_h0_essential_h2_h4_boundary_bar():
     by a cone simplex (index >= N_CP2).  These are the topologically meaningful
     bars corresponding to H^2(CP^2) and H^4(CP^2).
     """
-    bars = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
+    ordinary, _ = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
 
-    h0_ess = [b for b in bars.ordinary[0] if math.isinf(b[1])]
+    h0_ess = [b for b in ordinary[0] if math.isinf(b[1])]
     assert len(h0_ess) == 1
 
     # Exactly one boundary-spanning bar in each of H^2 and H^4.
     for deg in (2, 4):
-        boundary = [(b, d) for b, d in bars.ordinary[deg]
+        boundary = [(b, d) for b, d in ordinary[deg]
                     if not math.isinf(d) and b < N_CP2 and d >= N_CP2]
         assert len(boundary) == 1, (
             f"Expected 1 boundary-spanning H^{deg} bar, got {len(boundary)}"
@@ -236,8 +236,8 @@ def test_cone_cp2_ordinary_h0_essential_h2_h4_boundary_bar():
 
 def test_cone_cp2_relative_convention():
     """With absolute=False the Sq^2 bar appears at index 5 with birth > death."""
-    bars = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=False)
-    sq2_rel = bars.steenrod[5]
+    _, steenrod = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=False)
+    sq2_rel = steenrod[5]
     assert len(sq2_rel) == 1
     birth, death = sq2_rel[0]
     assert birth > death   # relative convention: birth = killing simplex (later)
@@ -248,5 +248,6 @@ def test_cone_cp2_relative_convention():
 def test_absolute_default_is_true():
     """absolute=True must be the default."""
     st = _cone_cp2_simplex_tree()
-    assert (st.compute_steenrod_barcodes(k=2).steenrod ==
-            st.compute_steenrod_barcodes(k=2, absolute=True).steenrod)
+    _, steenrod_default  = st.compute_steenrod_barcodes(k=2)
+    _, steenrod_explicit = st.compute_steenrod_barcodes(k=2, absolute=True)
+    assert steenrod_default == steenrod_explicit

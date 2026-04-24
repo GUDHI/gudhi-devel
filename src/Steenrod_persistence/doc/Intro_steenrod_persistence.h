@@ -1,6 +1,6 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s):       Maximiliano Alvarez
+ *    Author(s):       Anibal M. Medina-Mardones
  *
  *    Copyright (C) 2026 Inria
  *
@@ -18,16 +18,14 @@ namespace steenrod_persistence {
 
 /** \defgroup steenrod_persistence Persistence Steenrod modules
 
-  \author    Umberto Lupo, Anibal M. Medina-Mardones, Guillaume Tauzin
-             (port to Gudhi: Maximiliano Alvarez)
+  \author    Anibal M. Medina-Mardones
 
   Given a filtered simplicial complex this module computes, over
   \f$\mathbb{F}_2\f$, the ordinary persistence barcode together with the
   Sq\f$^k\f$ Steenrod barcode. The Steenrod barcode is an algebraic-topology
-  invariant strictly refining the ordinary persistence barcode: two filtered
-  spaces with identical ordinary barcodes may be distinguished by their
-  Steenrod barcodes. The case \f$k = 1\f$ is already sensitive to the Sq\f$^1\f$
-  obstruction of the real projective plane.
+  invariant generalizing the ordinary mod 2 persistence barcode. This
+  module is based on the project Steenroder by Lupo, Medina-Mardones,
+  and Tauzin.
 
   \section implementation Implementation overview
 
