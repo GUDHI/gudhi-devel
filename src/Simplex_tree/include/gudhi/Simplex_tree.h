@@ -860,11 +860,11 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Returns the number of simplices of each dimension in the simplex tree. */
-  std::vector<size_t> num_simplices_by_dimension() const {
+  /** \brief Computes and returns the number of simplices of each dimension in the complex. */
+  std::vector<std::size_t> num_simplices_by_dimension() const {
     if (is_empty()) return {};
     // std::min in case the upper bound got crazy
-    std::vector<size_t> res(std::min(upper_bound_dimension()+1, max_dimension()+1));
+    std::vector<std::size_t> res(std::min(upper_bound_dimension()+1, max_dimension()+1));
     auto fun = [&res](Simplex_handle, int dim) -> void { ++res[dim]; };
     for_each_simplex(fun);
     if (dimension_to_be_lowered_) {
@@ -904,6 +904,23 @@ class Simplex_tree {
     if (dimension_to_be_lowered_)
       lower_upper_bound_dimension();
     return dimension_;
+  }
+
+  /**
+   * @brief Computes and returns the euler characteristic of the non-filtered underlying complex represented
+   * by the simplex tree.
+   */
+  auto euler_characteristic() const {
+    using ssize_t = std::make_signed_t<std::size_t>;
+
+    auto dimension_count = num_simplices_by_dimension();
+    ssize_t euler = 0;
+    ssize_t sign = 1;
+    for (const ssize_t count : dimension_count) {
+      euler += sign * count;
+      sign = -sign;
+    }
+    return euler;
   }
 
   /** \brief Returns true if the node in the simplex tree pointed by
