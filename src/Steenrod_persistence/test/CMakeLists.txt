@@ -1,0 +1,4 @@
+include(GUDHI_boost_test)
+
+add_executable_with_targets(Steenrod_persistence_test_unit test_steenrod_barcode.cpp TBB::tbb)
+gudhi_add_boost_test(Steenrod_persistence_test_unit)
