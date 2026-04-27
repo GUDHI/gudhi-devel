@@ -900,13 +900,16 @@ class PointCloudRipsVineyard:
         dict[tuple[np.number, np.number], np.ndarray],
     ]:
         """If `store_cycles` was set to `True` at construction, returns the stored non-trivial representative 1-cycles.
-        The output is a list of dictionaries of the form :code:`step x {idx : cycle}`, such that:
+        The output is a list of dictionaries of the form :code:`step x {(dim, idx) : cycle}`, such that:
 
             - if `vy` = :meth:`get_current_vineyard_view`, then `vy[1][idx][step]` is the bar corresponding to `cycle`,
             - if `vy` = :meth:`get_current_vineyard_view(dim=1) <get_current_vineyard_view>`, then `vy[idx][step]` \
                 is the bar corresponding to `cycle`,
             - the edges contained in `cycle` are represented by their index in the complex which can be retrieved \
                 with :meth:`get_complex`.
+
+        Note that the value of `dim` in the dictionary key will always be 1 and is therefore redundant. It is just to
+        keep the output format consistent with other modules.
 
         :param step: Optional. If provided, only the cycles at given step are returned (first axis of the format
             is lost). Defaults to `None`.

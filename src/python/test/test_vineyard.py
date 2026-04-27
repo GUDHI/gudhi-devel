@@ -9,6 +9,7 @@
 """
 
 import numpy as np
+import pytest
 
 from gudhi import RipsComplex, SimplexTree
 from gudhi.vineyard import Vineyard, PointCloudRipsVineyard
@@ -821,3 +822,124 @@ def test_rips_vineyard():
         pers.sort()
         v_pers.sort()
         assert pers == v_pers
+
+
+def test_rips_vineyard_complex():
+    points = np.array(
+        [
+            [[0.0, 0.0], [1.0, 1.0], [1.0, 2.0], [3.0, 3.0]],
+            [[1.0, 1.0], [2.0, 1.0], [2.0, 2.0], [3.0, 4.0]],
+        ]
+    )
+    simplices = [
+        np.array([], dtype=np.uint32),
+        np.array([], dtype=np.uint32),
+        np.array([], dtype=np.uint32),
+        np.array([], dtype=np.uint32),
+        np.array([6, 8, 11], dtype=np.uint32),
+        np.array([6, 9, 12], dtype=np.uint32),
+        np.array([0, 1], dtype=np.uint32),
+        np.array([8, 9, 13], dtype=np.uint32),
+        np.array([0, 2], dtype=np.uint32),
+        np.array([0, 3], dtype=np.uint32),
+        np.array([11, 12, 13], dtype=np.uint32),
+        np.array([1, 2], dtype=np.uint32),
+        np.array([1, 3], dtype=np.uint32),
+        np.array([2, 3], dtype=np.uint32),
+    ]
+    dimensions = np.array([0, 0, 0, 0, 2, 2, 1, 2, 1, 1, 2, 1, 1, 1])
+
+    rvy = PointCloudRipsVineyard.from_tensors(points)
+    cpx, dims = rvy.get_complex()
+
+    assert len(simplices) == len(cpx)
+    for sig1, sig2 in zip(simplices, cpx):
+        np.testing.assert_equal(sig1, sig2)
+    np.testing.assert_equal(dimensions, dims)
+
+    simplices = [
+        np.array([0]),
+        np.array([1]),
+        np.array([2]),
+        np.array([3]),
+        np.array([0, 1, 2]),
+        np.array([0, 1, 3]),
+        np.array([0, 1]),
+        np.array([0, 2, 3]),
+        np.array([0, 2]),
+        np.array([0, 3]),
+        np.array([1, 2, 3]),
+        np.array([1, 2]),
+        np.array([1, 3]),
+        np.array([2, 3]),
+    ]
+
+    cpx, dims = rvy.get_complex(as_vertices=True)
+
+    assert len(simplices) == len(cpx)
+    for sig1, sig2 in zip(simplices, cpx):
+        np.testing.assert_equal(sig1, sig2)
+    np.testing.assert_equal(dimensions, dims)
+
+
+def test_rips_vineyard_points():
+    points = np.array(
+        [
+            [[0.0, 0.0], [1.0, 1.0], [1.0, 2.0], [3.0, 3.0]],
+            [[1.0, 1.0], [2.0, 1.0], [2.0, 2.0], [3.0, 4.0]],
+        ]
+    )
+
+    rvy = PointCloudRipsVineyard.from_tensors(points)
+    with pytest.raises(NotImplementedError):
+        pts = rvy.get_points()
+
+    rvy = PointCloudRipsVineyard.from_tensors(points, store_point_coordinates=True)
+    pts = rvy.get_points()
+    np.testing.assert_equal(points, pts)
+    pts = rvy.get_points(step=0)
+    np.testing.assert_equal(points[0], pts)
+    pts = rvy.get_points(step=1)
+    np.testing.assert_equal(points[1], pts)
+
+    with pytest.raises(IndexError):
+        pts = rvy.get_points(step=2)
+
+
+def test_rips_vineyard_cycles():
+    points = np.array(
+        [
+            [[0.0, 0.0], [1.0, 0.0], [0.0, 2.0], [3.0, 3.0]],
+            [[0.0, 0.0], [3.0, 0.0], [0.0, 2.0], [3.0, 3.0]],
+        ]
+    )
+
+    rvy = PointCloudRipsVineyard.from_tensors(points)
+    with pytest.raises(NotImplementedError):
+        cycles = rvy.get_1D_representative_cycles()
+
+    rvy = PointCloudRipsVineyard.from_tensors(points, store_cycles=True)
+    vineyard = rvy.get_current_vineyard_view()
+    cycles = rvy.get_1D_representative_cycles()
+
+    assert len(cycles) == 2
+    assert len(cycles[0]) == 0
+    assert len(cycles[1]) == 1
+
+    cycle = rvy.get_1D_representative_cycles(step=1)
+    assert cycle == cycles[1]
+
+    k, c = next(iter(cycles[1].items()))
+    # dim == 1
+    assert k[0] == 1
+    bar = vineyard[k[0]][k[1]][1]
+    # bar is non trivial
+    assert bar[1] - bar[0] > 0
+
+    cycles = rvy.get_1D_representative_cycles(min_bar_length=1.0)
+
+    assert bar[1] - bar[0] < 1.0
+    assert len(cycles) == 2
+    assert len(cycles[0]) == 0
+    assert len(cycles[1]) == 0
+
