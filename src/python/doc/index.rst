@@ -87,8 +87,8 @@ Persistence representations
 
 .. include:: representations_sum.inc
 
-Persistence graphical tools
-===========================
+Graphical tools
+===============
 
 .. include:: persistence_graphical_tools_sum.inc
 

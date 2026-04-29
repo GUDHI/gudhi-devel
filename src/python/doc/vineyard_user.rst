@@ -6,6 +6,10 @@ Vineyard user manual
 ====================
 .. include:: vineyard_sum.inc
 
+.. note::
+    The graphical tools used in those examples require additionally third party library
+    `Matplotlib <installation.html#matplotlib>`_.
+
 Definition
 ----------
 
@@ -50,7 +54,7 @@ This will result in the following diagram:
     st.insert([0, 1], 8)
     st.insert([0, 1, 2], 9)
     st.insert([0, 2, 3], 10)
-    plot_persistence_diagram(st.persistence(homology_coeff_field=2, min_persistence=0, persistence_dim_max=True))
+    ax = plot_persistence_diagram(st.persistence(homology_coeff_field=2, min_persistence=0, persistence_dim_max=True))
 
 But now we could decide to let :math:`[2, 3]` appear before :math:`[1, 2]` and the resulting filtration would still be
 valid (any face appears before its cofaces), but the first 1-cycle would be born one step earlier:
@@ -61,7 +65,7 @@ valid (any face appears before its cofaces), but the first 1-cycle would be born
     
     st.assign_filtration([2, 3], 6)
     st.assign_filtration([1, 2], 7)
-    plot_persistence_diagram(st.persistence(homology_coeff_field=2, min_persistence=-1, persistence_dim_max=True))
+    ax = plot_persistence_diagram(st.persistence(homology_coeff_field=2, min_persistence=-1, persistence_dim_max=True))
 
 Note that the number of bars does not change as the final complex remains the same. And because persistence diagrams
 are stable under the right distance functions, the points in the diagram will not move a lot. Therefore we can "stack"
@@ -99,6 +103,7 @@ This example builds the vineyard from a hand constructed filtration, based on th
 
     import numpy as np
     from gudhi.vineyard import Vineyard
+    from gudhi.vineyard_graphical_tools import plot_vineyards
 
     # boundaries from two adjacent triangles sharing the edge [0, 2]
     # note that different from the simplex tree, the boundary cells are represented by their position in the array
@@ -121,7 +126,7 @@ This example builds the vineyard from a hand constructed filtration, based on th
     vy.update(filtration_values=f2)
     vy.update(filtration_values=f3)
 
-    vy.plot_vineyards(dim=None, square_scaling=False)
+    ax = plot_vineyards(vy, dim=None, square_scaling=False)
 
 
 Simple example with rips filtration from file
@@ -138,6 +143,7 @@ The data set in this example is provided by
     :include-source:
 
     from gudhi.vineyard import PointCloudRipsVineyard
+    from gudhi.vineyard_graphical_tools import plot_vineyards, plot_1D_representative_cycles
 
     rvy = PointCloudRipsVineyard.from_files(
         path_prefix="../../data/points/unknotting_rings/rings", 
@@ -152,10 +158,10 @@ The data set in this example is provided by
                 :context: close-figs
                 :include-source:
 
-                rvy.plot_vineyards(dim=1, min_bar_length=4.5, noise_option="gray_band")
+                plot_vineyards(rvy, dim=1, min_bar_length=4.5, noise_option="gray_band")
       - .. plot::
                 :context: close-figs
                 :include-source:
 
-                rvy.plot_1D_representative_cycles(10, min_bar_length=4.5)
+                plot_1D_representative_cycles(rvy, 10, min_bar_length=4.5)
 
