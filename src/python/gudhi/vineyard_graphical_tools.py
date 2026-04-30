@@ -291,6 +291,8 @@ def plot_vineyards(
         fig.suptitle("Finite (left) and infinite (right) vineyards")
         ax_finite = fig.add_subplot(1, 2, 1, projection="3d")
         ax_infinite = fig.add_subplot(1, 2, 2)
+    else:
+        fig = None
     if cmap is None:
         color_base = _get_default_colors(dim)
     else:
@@ -338,11 +340,11 @@ def plot_vineyards(
             h: HandlerGradient(colors) for h, colors in zip(handles, gradients.values())
         }
         labels = list(gradients.keys())
-        if fig:
+        if fig is not None:
             _set_legend(fig, handles, labels, handler_map, "lower center")
         else:
             if ax_finite is not None:
-                _set_legend(ax_finite, handles, labels, handler_map, "lower right")
+                _set_legend(ax_finite, handles, labels, handler_map, "upper right")
             if ax_infinite is not None:
                 _set_legend(ax_infinite, handles, labels, handler_map, "lower right")
 
