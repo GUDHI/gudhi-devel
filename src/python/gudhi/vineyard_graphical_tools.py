@@ -16,8 +16,29 @@ from typing import Literal, Optional
 import warnings
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from matplotlib.legend_handler import HandlerBase
+from matplotlib.image import BboxImage
+from matplotlib.transforms import TransformedBbox, Bbox
 
 from gudhi.vineyard import Vineyard, PointCloudRipsVineyard
+
+
+class HandlerGradient(HandlerBase):
+    def __init__(self, colors, **kwargs):
+        """
+        colors: array of RGBA colors, shape [n, 4]
+        """
+        self.colors = np.array(colors)[np.newaxis, :, :]  # [1, n, 4]
+        super().__init__(**kwargs)
+
+    def create_artists(
+        self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans
+    ):
+        bbox = Bbox.from_bounds(-xdescent, -ydescent, width, height)
+        img = BboxImage(TransformedBbox(bbox, trans), interpolation="bilinear")
+        img.set_data(self.colors)
+        return [img]
 
 
 def _setdefault_aliases(kwargs, default_value, *aliases):
@@ -99,22 +120,25 @@ def _get_vine_color_map(cmap, base, dim, nber_vines):
     )
 
 
-def _filter_vines(vines, inf_v, min_bar_length):
-    real_vines = []
-    for i in range(vines.shape[0]):
-        x = vines[i, :, 0]
-        y = vines[i, :, 1]
-        y[y >= np.inf] = inf_v
-        x[x >= np.inf] = inf_v
-        z = np.asarray(range(vines.shape[1]))
-        diff = y - x
-        diff[diff < min_bar_length] = 0
-        if np.any(diff):
-            real_vines.append((x, y, z))
-    return real_vines
+def _filter_vines(vines, min_bar_length):
+    # split between finite and inf + sort out too short bars
+    mask_inf = np.any(vines >= np.inf, axis=(1, 2))
+    # if birth is inf, inf - inf will be NaN and the condition False, so they are also sorted out
+    # but with a unclear warning. Should we catch it to raise a more explicit one?
+    mask_valid = np.any(vines[:, :, 1] - vines[:, :, 0] >= min_bar_length, axis=1)
+    vines_inf = vines[mask_inf]
+    vines_finite = vines[~mask_inf & mask_valid]
+
+    # add z axis
+    z_axis = np.arange(vines.shape[1], dtype=vines.dtype)
+    tag = np.broadcast_to(z_axis, vines_finite.shape[:2])[..., np.newaxis]
+    vines_finite = np.concatenate([vines_finite, tag], axis=2)
+    vines_inf[:, :, 1] = z_axis
+
+    return vines_finite, vines_inf
 
 
-def _plot_vines(
+def _plot_finite_vines(
     ax,
     vines,
     min_bar_length,
@@ -124,7 +148,11 @@ def _plot_vines(
     cmap,
 ):
     i = 0
-    for x, y, z in vines:
+    ax.zaxis.get_major_locator().set_params(integer=True)
+    for v in range(vines.shape[0]):
+        x = vines[v, :, 0]
+        y = vines[v, :, 1]
+        z = vines[v, :, 2]
         match noise_option:
             case "none":
                 ax.plot(x, y, z, c=cmap[i])
@@ -147,29 +175,73 @@ def _plot_vines(
         i = i + 1
         if i == len(cmap):
             i = 0
+    ax.set_xlabel("Birth")
+    ax.set_ylabel("Death")
 
 
-# TODO: option to handle points at infinity
+def _plot_infinite_vines(ax, vines, cmap):
+    i = 0
+    ax.yaxis.get_major_locator().set_params(integer=True)
+    for v in range(vines.shape[0]):
+        ax.plot(vines[v, :, 0], vines[v, :, 1], c=cmap[i])
+        i = i + 1
+        if i == len(cmap):
+            i = 0
+    ax.set_xlabel("Birth")
+
+
+def _plot_vines(
+    ax_finite, ax_infinite, vines, dim, min_bar_length, noise_option, cmap, color_base
+):
+    vines_finite, vines_inf = _filter_vines(vines, min_bar_length)
+    d_cmap = _get_vine_color_map(
+        cmap, color_base, dim, vines_finite.shape[0] + vines_inf.shape[0]
+    )
+    if ax_finite is not None:
+        _plot_finite_vines(ax_finite, vines_finite, min_bar_length, noise_option, d_cmap)
+    if ax_infinite is not None:
+        _plot_infinite_vines(ax_infinite, vines_inf, d_cmap)
+
+    return d_cmap
+
+
+def _set_legend(ax, handles, labels, handler_map, loc):
+    ax.legend(
+        handles=handles,
+        labels=labels,
+        handler_map=handler_map,
+        title="Dimension",
+        loc=loc,
+    )
+
+
 def plot_vineyards(
     vineyard: Vineyard | PointCloudRipsVineyard,
-    ax=None,
+    ax_finite=None,
+    ax_infinite=None,
     dim: Optional[int] = None,
     max_dim: Optional[int] = None,
     min_bar_length: np.number = -1,
     noise_option: Literal[
         "none", "gray_diagonal", "gray_band", "erase_diagonal", "erase_band"
     ] = "gray_diagonal",
-    square_scaling: Optional[bool] = True,
+    square_scaling: bool = True,
     cmap: Optional[np.ndarray] = None,
+    legend: bool = True,
 ):
     """Plots the given vineyard, except for completely trivial vines (vines where all coordinates are on
     the diagonal). The points at infinity are mapped to a finite point a bit away from the other points.
 
     :param vineyard: Vineyard class to plot.
     :type vineyard: :class:`~gudhi.vineyard.Vineyard` or :class:`~gudhi.vineyard.PointCloudRipsVineyard`
-    :param ax: Optional. Matplotlib 3D-axis to plot into. If not provided, a new one is created. Defaults to `None`.
-    :type ax: `mpl_toolkits.mplot3d.axes3d.Axes3D \
+    :param ax_finite: Optional. Matplotlib 3D-axis to plot finite vines into. If not provided, a new one is created
+        if and only if `ax_infinite` is also not provided. Otherwise, finite vines are not plotted. Defaults to `None`.
+    :type ax_finite: `mpl_toolkits.mplot3d.axes3d.Axes3D \
         <https://matplotlib.org/stable/api/toolkits/mplot3d/axes3d.html#mpl_toolkits.mplot3d.axes3d.Axes3D>`_, optional
+    :param ax_infinite: Optional. Matplotlib 2D-axis to plot infinite vines into. If not provided, a new one is created
+        if and only if `ax_finite` is also not provided. Otherwise, infinite vines are not plotted. Defaults to `None`.
+    :type ax_infinite: `matplotlib.axes.Axes \
+        <https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes>`_, optional
     :param dim: Optional. If provided, only plots the vines of the given dimension. Defaults to `None`.
     :type dim: int, optional
     :param max_dim: Optional. If provided, only plots the vines with the given maximal dimension included. If `dim`
@@ -204,15 +276,21 @@ def plot_vineyards(
         <https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.Colormap.html#matplotlib.colors.Colormap>`_.
         Defaults to None.
     :type cmap: Numpy array of shape (*, 4) or (*, *, 4), optional
+    :param legend: If `True`, a legend indicating the dimensions is added to the plots. Defaults to `True`.
+    :type legend: bool, optional
     :raises ValueError: If the value provided for `noise_option` is not valid.
     :raises ValueError: If cmap is provided and its shape is neither (*, 4) nor (*, *, 4).
-    :return: Matplotlib axis into which was plotted.
-    :rtype: `mpl_toolkits.mplot3d.axes3d.Axes3D \
+    :return: Two Matplotlib axes. If one plot was not constructed, the corresponding axis will be `None`.
+    :rtype: tuple of `mpl_toolkits.mplot3d.axes3d.Axes3D \
         <https://matplotlib.org/stable/api/toolkits/mplot3d/axes3d.html#mpl_toolkits.mplot3d.axes3d.Axes3D>`_
+        (or `None`) and `matplotlib.axes.Axes \
+        <https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes>`_ (or `None`)
     """
-    if ax is None:
-        fig = plt.figure()
-        ax = fig.add_subplot(projection="3d")
+    if ax_finite is None and ax_infinite is None:
+        fig = plt.figure(figsize=plt.figaspect(0.5), layout="constrained")
+        fig.suptitle("Finite (left) and infinite (right) vineyards")
+        ax_finite = fig.add_subplot(1, 2, 1, projection="3d")
+        ax_infinite = fig.add_subplot(1, 2, 2)
     if cmap is None:
         color_base = _get_default_colors(dim)
     else:
@@ -222,37 +300,53 @@ def plot_vineyards(
         vy = vineyard.get_current_vineyard_view()
         if max_dim is not None:
             vy = vy[: max_dim + 1]
-        max_death = max(
-            [
-                np.max(vines[:, :, 1], where=~np.isinf(vines[:, :, 1]), initial=-1)
-                for vines in vy
-            ]
-        )
-        # arbitrary, just to distance them a bit from the finite bars
-        inf_v = max_death + 10
 
+        gradients = {}
         for d, vines in enumerate(vy):
-            real_vines = _filter_vines(vines, inf_v, min_bar_length)
-            d_cmap = _get_vine_color_map(cmap, color_base, d, len(real_vines))
-            _plot_vines(ax, real_vines, min_bar_length, noise_option, d_cmap)
+            d_cmap = _plot_vines(
+                ax_finite,
+                ax_infinite,
+                vines,
+                d,
+                min_bar_length,
+                noise_option,
+                cmap,
+                color_base,
+            )
+            if legend:
+                gradients[str(d)] = d_cmap
     else:
         vines = vineyard.get_current_vineyard_view(dim=dim)
-        max_death = np.max(vines[:, :, 1], where=~np.isinf(vines[:, :, 1]), initial=-1)
-        # arbitrary, just to distance them a bit from the finite bars
-        inf_v = max_death + 10
-        real_vines = _filter_vines(vines, inf_v, min_bar_length)
-        d_cmap = _get_vine_color_map(cmap, color_base, dim, len(real_vines))
-        _plot_vines(ax, real_vines, min_bar_length, noise_option, d_cmap)
-
-    if square_scaling:
-        scaling = np.array([getattr(ax, "get_{}lim".format(dim))() for dim in "xy"])
-        ax.auto_scale_xyz(
-            *[[np.min(scaling), np.max(scaling)]] * 2,
-            [getattr(ax, "get_{}lim".format("z"))()],
+        d_cmap = _plot_vines(
+            ax_finite, ax_infinite, vines, dim, min_bar_length, noise_option, cmap, color_base
         )
-    ax.set_aspect("equalxy", "box")
+        if legend:
+            gradients = {str(dim): d_cmap}
 
-    return ax
+    if ax_finite is not None:
+        if square_scaling:
+            scaling = np.array([getattr(ax_finite, "get_{}lim".format(dim))() for dim in "xy"])
+            ax_finite.auto_scale_xyz(
+                *[[np.min(scaling), np.max(scaling)]] * 2,
+                [getattr(ax_finite, "get_{}lim".format("z"))()],
+            )
+        ax_finite.set_aspect("equalxy", "box")
+
+    if legend:
+        handles = [mpatches.Patch() for _ in gradients]
+        handler_map = {
+            h: HandlerGradient(colors) for h, colors in zip(handles, gradients.values())
+        }
+        labels = list(gradients.keys())
+        if fig:
+            _set_legend(fig, handles, labels, handler_map, "lower center")
+        else:
+            if ax_finite is not None:
+                _set_legend(ax_finite, handles, labels, handler_map, "lower right")
+            if ax_infinite is not None:
+                _set_legend(ax_infinite, handles, labels, handler_map, "lower right")
+
+    return ax_finite, ax_infinite
 
 
 def _plot_cycle(axes, cycle, points, cpx, c, ls, lw):
