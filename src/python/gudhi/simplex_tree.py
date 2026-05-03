@@ -21,27 +21,76 @@ import warnings
 from gudhi import _simplex_tree_ext as t
 
 
-def _to_absolute(bars_by_dim: list) -> list:
-    """Convert relative cohomology bars to absolute cohomology convention.
+_NEG_INF = -float("inf")
+_POS_INF = float("inf")
 
-    In the relative convention, a finite bar at dimension *d* has
-    ``birth > death`` and represents a class in cohomological degree *d - 1*.
-    This function moves such bars to index *d - 1* and swaps birth / death so
-    that the output satisfies ``birth <= death``.  Essential bars (``death =
-    inf``) are unchanged.
+
+def _is_essential_relative(pair) -> bool:
+    """Detect an essential relative-cohomology bar.
+
+    Raw relative bars are ``(death_value, birth_value)`` with
+    ``death_value < birth_value`` for finite bars and
+    ``death_value = -inf`` for essential bars (the convention of
+    Lupo-Medina-Mardones-Tauzin 2022 §2.4).
+    """
+    return pair[0] == _NEG_INF
+
+
+def _to_absolute(bars_by_dim: list) -> list:
+    """Convert raw relative cohomology bars to absolute cohomology convention.
+
+    Input convention (raw relative):
+        * Finite bar at dim *d*: ``(death_value, birth_value)`` with
+          ``death_value < birth_value``; the bar represents an absolute class
+          in degree *d - 1*.
+        * Essential bar at dim *d*: ``(-inf, birth_value)``; the bar
+          represents an absolute essential class in degree *d* (no shift).
+
+    Output convention (absolute / display):
+        * Finite bar at dim *d - 1*: ``(birth_value, death_value)`` with
+          ``birth_value < death_value``.  (Same value pair, slot meaning
+          flipped — slot 0 is now the birth.)
+        * Essential bar at dim *d*: ``(birth_value, +inf)``.
     """
     n = len(bars_by_dim)
     result: list = [[] for _ in range(n)]
     for d, bars in enumerate(bars_by_dim):
-        for birth, death in bars:
-            if death == float("inf"):
-                # Essential: cohomological degree is d, no change.
-                result[d].append((birth, death))
+        for pair in bars:
+            if _is_essential_relative(pair):
+                # Raw (-inf, birth) → display (birth, +inf), same dim.
+                _, birth = pair
+                result[d].append((birth, _POS_INF))
             elif d > 0:
-                # Finite relative bar at dim d → absolute bar at dim d-1,
-                # with birth and death swapped (birth_abs < death_abs).
-                result[d - 1].append((death, birth))
+                # Raw (death, birth) at dim d → display (death=birth_abs,
+                # birth=death_abs) at dim d-1.  The slot order already gives
+                # (lower, higher), so it doubles as the absolute display pair.
+                result[d - 1].append(tuple(pair))
             # d == 0 finite bars cannot exist (no (-1)-simplices).
+    return result
+
+
+def _to_absolute_steenrod(bars_by_dim: list) -> list:
+    """Convert raw relative Steenrod bars to absolute cohomology convention.
+
+    Same rule as :func:`_to_absolute`.  In the absolute output a Steenrod bar
+    at degree *q* lives in the image of :math:`\\mathrm{Sq}^k : H^{q-k} \\to
+    H^q` (the bar is indexed by the image degree).
+
+    .. note::
+        The bijection ``Sq^k Bar_{H^d_R} ≅ Sq^k Bar_{H^{d-1}_A}`` is only
+        guaranteed when all ordinary bars at relative dimensions ``[1, ...]``
+        are finite (Lupo-Medina-Mardones-Tauzin 2022 §3.3).  Call sites are
+        responsible for warning the user when this condition is not satisfied.
+    """
+    n = len(bars_by_dim)
+    result: list = [[] for _ in range(n)]
+    for d, bars in enumerate(bars_by_dim):
+        for pair in bars:
+            if _is_essential_relative(pair):
+                _, birth = pair
+                result[d].append((birth, _POS_INF))
+            elif d > 0:
+                result[d - 1].append(tuple(pair))
     return result
 
 
@@ -272,7 +321,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         self._pers._compute_persistence(homology_coeff_field, min_persistence)
         return self
 
-    def compute_steenrod_barcodes(self, k=1, absolute=True, n_jobs=-1):
+    def compute_steenrod_barcodes(self, k=1, absolute=False, max_dim=None, n_jobs=-1):
         """Compute the ordinary persistence barcode together with the
         Sq\\ :sup:`k` Steenrod barcode of the filtered simplicial complex.
 
@@ -282,16 +331,35 @@ class SimplexTree(t._Simplex_tree_python_interface):
         reduction needed to obtain cocycle representatives is run internally.
 
         :param k: the Steenrod square exponent (non-negative integer).
-            Default ``1``.
+            Default ``1``.  ``k = 0`` is supported and returns the ordinary
+            barcode in both outputs (Sq⁰ is the identity); negative values
+            raise :class:`ValueError`.
         :type k: int
-        :param absolute: if ``True`` (default), return bars in the *absolute*
-            cohomology convention: ``birth <= death`` and index ``d`` is the
-            true cohomological degree.  If ``False``, return bars in the
-            *relative* cohomology convention used internally: for finite bars
-            ``birth > death`` and the index is one greater than the
-            cohomological degree.  Essential bars are identical in both
-            conventions.
+        :param absolute: if ``False`` (default), return bars in the **raw
+            relative cohomology convention** of the base ``python/steenroder``
+            package and Lupo, Medina-Mardones, Tauzin (2022) §2.4: each bar is
+            a tuple ``(death_value, birth_value)`` with ``death < birth`` for
+            finite bars; essential bars carry ``death = -float('inf')``.  The
+            slot order encodes the half-open interval
+            ``[death_value, birth_value)``, i.e. the bar is the relative
+            cohomology class alive on ``[a_p, a_{q+1})`` with ``a_0 = -inf``.
+            If ``True``, return bars in the *absolute* cohomology convention:
+            ``(birth_value, death_value)`` with ``birth <= death`` for finite
+            bars, ``death = +float('inf')`` for essentials, and finite bars
+            shifted from relative dim ``d`` to absolute dim ``d-1``.  The
+            absolute conversion rests on a duality bijection that requires all
+            ordinary bars at relative dimensions ``[1, max_dim]`` to be finite;
+            a :class:`UserWarning` is emitted when this condition is not
+            satisfied.
         :type absolute: bool
+        :param max_dim: if not ``None``, truncate the returned barcodes (and the
+            duality-condition check) to dimensions ``0..max_dim``.  Higher-
+            dimensional simplices are still used internally for the reduction
+            (so that ``H^max_dim`` classes can be killed by simplices in
+            dimension ``max_dim + 1``), but no bars in those higher dimensions
+            are reported and they do not contribute to the duality check.
+            Default ``None`` returns all dimensions of the complex.
+        :type max_dim: int or None
         :param n_jobs: number of OpenMP threads to use for the parallelised
             stages (``compute_steenrod_matrix`` and
             ``compute_steenrod_barcode``). ``-1`` (default) uses all available
@@ -299,8 +367,18 @@ class SimplexTree(t._Simplex_tree_python_interface):
         :type n_jobs: int
         :returns: A pair ``(ordinary, steenrod)`` where each element is a list
             indexed by cohomological dimension; element ``d`` is a list of
-            ``(birth, death)`` pairs, with ``death = float('inf')`` for
-            essential bars.  ``steenrod[d]`` is empty for ``d < k``.
+            value-tuples whose meaning depends on ``absolute``:
+
+            * ``absolute=False`` (raw relative): ``(death_value, birth_value)``
+              with ``death < birth`` for finite bars and
+              ``death = -float('inf')`` for essential bars.
+              ``steenrod[d]`` corresponds to the reduction at relative
+              dimension ``d`` (true cohomological degree ``d - 1`` for finite
+              bars).  ``steenrod[d]`` is empty for ``d < k + 1``.
+            * ``absolute=True`` (absolute): ``(birth_value, death_value)`` with
+              ``birth <= death`` for finite bars and
+              ``death = +float('inf')`` for essential bars.  Finite bars are
+              shifted from relative dim ``d`` to absolute dim ``d - 1``.
         :rtype: tuple(list, list)
 
         Example (:math:`\\mathbb{R}P^2`, Sq¹)::
@@ -319,15 +397,69 @@ class SimplexTree(t._Simplex_tree_python_interface):
                 st.insert(tri, filtration=0.0)
 
             ordinary, steenrod = st.compute_steenrod_barcodes(k=1)
-            # Sq^1: H^1(RP^2) -> H^2(RP^2) is an isomorphism over F_2,
-            # so steenrod[2] contains exactly one essential bar.
-            assert len([b for b in steenrod[2] if math.isinf(b[1])]) == 1
+            # Sq^1: H^1(RP^2) -> H^2(RP^2) is an isomorphism over F_2, so
+            # steenrod[2] contains exactly one essential bar.  Raw relative
+            # essentials carry death = -inf in slot 0 (LMT 2022 §2.4).
+            assert len([b for b in steenrod[2]
+                        if math.isinf(b[0]) and b[0] < 0]) == 1
         """
         iface = t._Steenrod_barcode_interface(self, int(k))
         ordinary, steenrod = iface._compute(int(n_jobs))
+
+        # Sq^0 is the identity, so the Steenrod barcode equals the ordinary
+        # one.  The C++ pipeline (Steenrod_barcode.h) already short-circuits
+        # k == 0, so this Python branch is just defensive: it guarantees
+        # equality even if someone bypasses the C++ short-circuit later.
+        # Matches the behaviour of the base ``python/steenroder`` package.
+        if int(k) == 0:
+            steenrod = [list(bars) for bars in ordinary]
+
         if absolute:
+            # Duality-condition check (Lupo-Medina-Mardones-Tauzin 2022 §3.3):
+            # The bijection Sq^k Bar_{H^d_R} ≅ Sq^k Bar_{H^{d-1}_A} requires
+            # all ordinary bars at relative degree d to be finite, for every
+            # d in [1, max_dim] (or all dims if max_dim is None).  d = 0 is
+            # excluded because the absolute Steenrod bar a relative-d bar
+            # would map to lives at absolute dim d-1, which for d = 0 has no
+            # Sq^k counterpart (Sq^k for k ≥ 1 has no source at H^{-k}); the
+            # ever-present essential H^0 connected-component bar in the
+            # unreduced ordinary cohomology used here cannot affect any
+            # absolute Steenrod bar and so must not trip the warning.
+            check_max = (len(ordinary) - 1) if max_dim is None else int(max_dim)
+            check_max = min(check_max, len(ordinary) - 1)
+            # Essential relative bars carry the sentinel ``death = -inf`` (raw
+            # relative convention from the C++ interface); see _to_absolute.
+            problematic_dims = [
+                d for d in range(1, check_max + 1)
+                if any(_is_essential_relative(pair) for pair in ordinary[d])
+            ]
+            if problematic_dims:
+                dims_str = ", ".join(f"H^{d}" for d in problematic_dims)
+                warnings.warn(
+                    f"absolute=True: the duality condition is not satisfied "
+                    f"(ordinary {dims_str} has essential bars in relative "
+                    f"convention).  The absolute interpretation of the Steenrod "
+                    f"barcode is not theoretically guaranteed.  Use "
+                    f"absolute=False for the unambiguous relative convention, "
+                    f"or pass a smaller max_dim to limit the check to the "
+                    f"dimensions you care about.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+            # Convert relative → absolute *before* truncating, so that finite
+            # bars at relative dim max_dim+1 (which become absolute dim
+            # max_dim) survive the truncation that follows.
             ordinary = _to_absolute(ordinary)
-            steenrod = _to_absolute(steenrod)
+            steenrod = _to_absolute_steenrod(steenrod)
+
+        # Truncate output to dimensions 0..max_dim if requested.  Higher-dim
+        # simplices were still used in the reduction (so that H^max_dim
+        # classes can be killed correctly), but bars above max_dim are dropped.
+        if max_dim is not None:
+            cutoff = int(max_dim) + 1
+            ordinary = ordinary[:cutoff]
+            steenrod = steenrod[:cutoff]
+
         return ordinary, steenrod
 
     def betti_numbers(self) -> list[int]:

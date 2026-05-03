@@ -64,10 +64,15 @@ def _rp2_simplex_tree():
     return st
 
 
+def _is_essential_relative(pair):
+    """Essential relative-cohomology bars carry ``death = -inf`` in slot 0."""
+    return math.isinf(pair[0]) and pair[0] < 0
+
+
 def test_rp2_sq1_three_essential_ordinary_bars():
     """RP² has three essential ordinary bars (H^0, H^1, H^2 over F_2)."""
     ordinary, _ = _rp2_simplex_tree().compute_steenrod_barcodes(k=1)
-    n_ess = sum(1 for d in ordinary for _, death in d if math.isinf(death))
+    n_ess = sum(1 for d in ordinary for pair in d if _is_essential_relative(pair))
     assert n_ess == 3
 
 
@@ -78,7 +83,7 @@ def test_rp2_sq1_one_essential_steenrod_bar_in_dim2():
     isomorphism over F_2.
     """
     _, steenrod = _rp2_simplex_tree().compute_steenrod_barcodes(k=1)
-    sq1_ess = [b for b in steenrod[2] if math.isinf(b[1])]
+    sq1_ess = [b for b in steenrod[2] if _is_essential_relative(b)]
     assert len(sq1_ess) == 1
 
 
@@ -92,6 +97,64 @@ def test_does_not_require_compute_persistence():
 def test_rejects_negative_k():
     with pytest.raises(Exception):
         _rp2_simplex_tree().compute_steenrod_barcodes(k=-1)
+
+
+def test_k0_returns_ordinary_in_both():
+    """Sq^0 is the identity, so the Steenrod barcode equals the ordinary one."""
+    st = _rp2_simplex_tree()
+    ordinary, steenrod = st.compute_steenrod_barcodes(k=0)
+    assert len(ordinary) == len(steenrod)
+    for d, (o_bars, s_bars) in enumerate(zip(ordinary, steenrod)):
+        assert sorted(o_bars) == sorted(s_bars), \
+            f"dim {d}: ordinary {o_bars} != steenrod {s_bars}"
+
+
+def test_max_dim_truncates_output_not_input():
+    """max_dim must truncate the *output*, not the input filtration.
+
+    The two strategies are mathematically distinct: output-truncation runs the
+    full reduction (so higher-dim simplices can kill lower-dim classes) and
+    only drops bars above max_dim from the returned lists.  Input-truncation
+    would drop higher-dim simplices entirely from the complex, which would
+    leave low-dim classes essential that should have been killed.
+
+    Concretely on RP²: ordinary H¹ has exactly one essential bar (β₁=1 over
+    F₂) — but only because the 2-simplices are present to kill the other
+    1-cycles.  With input-truncation at max_dim=1, the 2-simplices would be
+    gone and ordinary[1] would have many more essentials.
+
+    This test pins compute_steenrod_barcodes(max_dim=1) to the
+    output-truncation semantics by checking that ordinary[1] matches the
+    untruncated computation's ordinary[1] exactly.
+    """
+    st = _rp2_simplex_tree()
+
+    # Untruncated reference
+    ord_full, _ = st.compute_steenrod_barcodes(k=1)
+    assert len(ord_full) >= 3, "RP² should produce bars at dims 0, 1, 2"
+
+    # Truncated to dim 1
+    ord_trunc, _ = st.compute_steenrod_barcodes(k=1, max_dim=1)
+    assert len(ord_trunc) == 2, \
+        f"max_dim=1 must keep dims [0, 1]; got {len(ord_trunc)} dims"
+
+    # Output-truncation invariant: bars at d ≤ max_dim must be unchanged.
+    for d in range(len(ord_trunc)):
+        assert sorted(ord_trunc[d]) == sorted(ord_full[d]), (
+            f"dim {d}: max_dim truncation altered ordinary bars "
+            f"(input-truncation regression?). "
+            f"truncated={ord_trunc[d]}, full={ord_full[d]}"
+        )
+
+    # Sanity: input-truncation at max_dim=1 would yield many more H¹ essentials
+    # (no 2-simplices to kill 1-cycles).  RP² has 6 vertices, 15 edges, 10
+    # triangles → β₁ of the 1-skeleton is 15 - 6 + 1 = 10, so input-truncation
+    # would give ≥ 10 essential H¹ bars.  Output-truncation gives exactly 1.
+    n_h1_essential = sum(1 for pair in ord_trunc[1] if _is_essential_relative(pair))
+    assert n_h1_essential == 1, (
+        f"RP² ordinary H¹ should have exactly 1 essential bar (β₁=1 over F₂); "
+        f"got {n_h1_essential} — input-truncation regression?"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -235,19 +298,26 @@ def test_cone_cp2_ordinary_h0_essential_h2_h4_boundary_bar():
 
 
 def test_cone_cp2_relative_convention():
-    """With absolute=False the Sq^2 bar appears at index 5 with birth > death."""
+    """With absolute=False the Sq^2 bar appears at relative index 5 in the
+    raw relative format ``(death, birth)`` with ``death < birth``.
+
+    This matches the convention of the base ``python/steenroder`` package and
+    Lupo, Medina-Mardones, Tauzin (2022) §2.4: a relative-cohomology bar
+    [p, q] with 0 <= p <= q <= n-1 is the half-open interval
+    [a_p, a_{q+1}), with a_0 = -inf for essential bars.
+    """
     _, steenrod = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=False)
     sq2_rel = steenrod[5]
     assert len(sq2_rel) == 1
-    birth, death = sq2_rel[0]
-    assert birth > death   # relative convention: birth = killing simplex (later)
-    assert birth == 329.0
+    death, birth = sq2_rel[0]
+    assert death < birth   # raw relative slot order: (lower=death, higher=birth)
     assert death == 254.0
+    assert birth == 329.0
 
 
-def test_absolute_default_is_true():
-    """absolute=True must be the default."""
+def test_absolute_default_is_false():
+    """absolute=False must be the default."""
     st = _cone_cp2_simplex_tree()
     _, steenrod_default  = st.compute_steenrod_barcodes(k=2)
-    _, steenrod_explicit = st.compute_steenrod_barcodes(k=2, absolute=True)
+    _, steenrod_explicit = st.compute_steenrod_barcodes(k=2, absolute=False)
     assert steenrod_default == steenrod_explicit

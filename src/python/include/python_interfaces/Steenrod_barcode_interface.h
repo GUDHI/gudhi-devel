@@ -82,8 +82,17 @@ class Steenrod_barcode_interface {
     // 2. Run the steenroder pipeline (GF(2) implicit).
     auto result = steenrod_persistence::barcodes(k_, fbd, &filt_values, n_jobs, /*maxdim=*/-1);
 
-    // 3. Convert cohomology {death_idx, birth_idx} bars to gudhi
-    //    (birth_filt_value, death_filt_value) pairs per dimension.
+    // 3. Convert cohomology {death_idx, birth_idx} bars to relative
+    //    cohomology pairs (death_filt_value, birth_filt_value) per dimension.
+    //    Essential relative-cohomology bars have death = -inf, matching the
+    //    convention of the base ``python/steenroder`` package and Lupo,
+    //    Medina-Mardones & Tauzin (2022) §2.4: a relative-cohomology bar
+    //    [p, q] with 0 <= p <= q <= n-1 is the half-open interval
+    //    [a_p, a_{q+1}), with a_0 = -inf.
+    //
+    //    The shift to absolute-cohomology (birth_value, death_value) with
+    //    +inf essentials is applied by the Python wrapper only when the user
+    //    requests absolute=True AND the duality condition is satisfied.
     Bars_by_dim ordinary = to_filt_pairs(result.ordinary, filt_values);
     Bars_by_dim steenrod = to_filt_pairs(result.steenrod, filt_values);
     return {std::move(ordinary), std::move(steenrod)};
@@ -92,7 +101,7 @@ class Steenrod_barcode_interface {
  private:
   static Bars_by_dim to_filt_pairs(const steenrod_persistence::BarcodeByDim& bars_by_dim,
                                    const std::vector<double>& fv) {
-    const double inf = std::numeric_limits<double>::infinity();
+    const double neg_inf = -std::numeric_limits<double>::infinity();
     Bars_by_dim out(bars_by_dim.size());
     for (std::size_t d = 0; d < bars_by_dim.size(); ++d) {
       out[d].reserve(bars_by_dim[d].size());
@@ -100,8 +109,8 @@ class Steenrod_barcode_interface {
         const auto death_idx = bar[0];
         const auto birth_idx = bar[1];
         const double birth_f = fv[birth_idx];
-        const double death_f = (death_idx < 0) ? inf : fv[death_idx];
-        out[d].emplace_back(birth_f, death_f);
+        const double death_f = (death_idx < 0) ? neg_inf : fv[death_idx];
+        out[d].emplace_back(death_f, birth_f);   // (death, birth) raw relative
       }
     }
     return out;

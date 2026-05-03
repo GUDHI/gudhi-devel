@@ -74,10 +74,20 @@ the generator).  Coning off :math:`\mathbb{C}P^2` at filtration value 1 kills al
 classes, so every bar is finite.  This makes the example ideal for illustrating the
 difference between the ``absolute`` and ``relative`` output conventions.
 
-In the **absolute** convention (``absolute=True``, the default) bars satisfy
-``birth ≤ death`` and the index is the true cohomological degree of the class.
-In the **relative** convention (``absolute=False``) finite bars have ``birth > death``
-and the index is one greater than the cohomological degree.
+In the **raw relative** convention (``absolute=False``, the default) each bar
+is a tuple ``(death_value, birth_value)`` with ``death < birth`` for finite
+bars and ``death = -inf`` for essential bars.  This matches the half-open
+interval convention of Lupo, Medina-Mardones, Tauzin (2022) §2.4 — the bar
+``[p, q]`` represents ``[a_p, a_{q+1})`` with ``a_0 = -inf``.  The slot order
+is ``(slot 0 = death, slot 1 = birth)`` and finite bars sit at one degree
+higher than the absolute image degree.
+
+In the **absolute** convention (``absolute=True``) bars satisfy
+``(birth_value, death_value)`` with ``birth ≤ death``, ``death = +inf`` for
+essentials, and finite bars are shifted from relative dimension ``d`` to
+absolute dimension ``d - 1``.  This conversion rests on a duality bijection
+that requires all ordinary bars at relative dimensions ``[1, max_dim]`` to be
+finite; a warning is emitted when this condition is not met.
 
 .. testcode::
 
@@ -102,17 +112,21 @@ and the index is one greater than the cohomological degree.
     for s in top_cp2:
         st.insert(list(s) + [cone_v], filtration=1.0)
 
-    # Absolute convention (default): birth <= death, index = true cohomological degree.
-    # Sq^2 detects the non-trivial H^4 class; the bar lives in steenrod[4].
-    _, steenrod_abs = st.compute_steenrod_barcodes(k=2)
-    print("absolute steenrod[4]:", steenrod_abs[4])
-
-    # Relative convention: birth > death, index shifted by +1.
-    # The same bar appears in steenrod[5] with birth and death swapped.
-    _, steenrod_rel = st.compute_steenrod_barcodes(k=2, absolute=False)
+    # Raw relative convention (default): tuples are (death, birth) with
+    # death < birth (or death = -inf for essential).  Finite bars sit one
+    # degree higher than their absolute image degree.  The Sq^2 bar lives in
+    # steenrod[5].
+    _, steenrod_rel = st.compute_steenrod_barcodes(k=2)
     print("relative steenrod[5]:", steenrod_rel[5])
+
+    # Absolute convention (opt-in): tuples are (birth, death) with birth <=
+    # death (death = +inf for essential), and the index is the absolute image
+    # degree.  Sq^2 detects the non-trivial H^4 class; the bar lives in
+    # steenrod[4].
+    _, steenrod_abs = st.compute_steenrod_barcodes(k=2, absolute=True)
+    print("absolute steenrod[4]:", steenrod_abs[4])
 
 .. testoutput::
 
+    relative steenrod[5]: [(0.0, 1.0)]
     absolute steenrod[4]: [(0.0, 1.0)]
-    relative steenrod[5]: [(1.0, 0.0)]

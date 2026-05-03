@@ -11,6 +11,7 @@
 #ifndef STEENROD_BARCODE_H_
 #define STEENROD_BARCODE_H_
 
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -64,6 +65,9 @@ inline Barcodes_result barcodes(int k,
                                 const std::vector<double>* filtration_values = nullptr,
                                 int n_jobs = -1,
                                 int maxdim = -1) {
+  if (k < 0) {
+    throw std::invalid_argument("Sq^k exponent k must be non-negative");
+  }
   const int n_dims_in = static_cast<int>(fbd.size());
   const bool truncate = (maxdim >= 0) && (maxdim + 1 < n_dims_in);
 
@@ -77,6 +81,16 @@ inline Barcodes_result barcodes(int k,
 
   auto rt = compute_reduced_triangular(*fbd_used);
   auto br = compute_barcode_and_coho_reps(rt, filtration_values);
+
+  // Sq^0 is the identity, so the Steenrod barcode is the ordinary barcode.
+  // Short-circuit before compute_steenrod_matrix / compute_steenrod_barcode:
+  // those routines loop ``for (int dim = k; ...)`` and read ``rt.idxs[dim - 1]``,
+  // which underflows the bounds check when ``k == 0``.
+  if (k == 0) {
+    auto barcode_copy = br.barcode;
+    return Barcodes_result{std::move(br.barcode), std::move(barcode_copy)};
+  }
+
   auto sm = compute_steenrod_matrix(k, br.coho_reps, *fbd_used, rt.spx2idx, n_jobs);
   auto sb = compute_steenrod_barcode(k, sm, rt, br, filtration_values, n_jobs);
 
