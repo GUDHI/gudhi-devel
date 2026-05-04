@@ -114,7 +114,7 @@ namespace random {
    * @return A random number of type `Type` in the range [min, max].
    */
    template <typename Type, typename CustomRandomGenerator = RandomGenerator&>
-   Type get(const Type& min, const Type& max, CustomRandomGenerator&& rng = get_default_random()) {
+   Type get_uniform(const Type& min, const Type& max, CustomRandomGenerator&& rng = get_default_random()) {
        if constexpr (std::is_floating_point_v<Type>) {
            std::uniform_real_distribution<Type> dis(min, max);
            return dis(rng);
@@ -136,7 +136,7 @@ namespace random {
    * @return A vector of random numbers of type `Type` in the range [min, max].
    */
   template <typename Type, typename CustomRandomGenerator = RandomGenerator&>
-  std::vector<Type> get_range(std::size_t nbr, const Type& min, const Type& max,
+  std::vector<Type> get_uniform_range(std::size_t nbr, const Type& min, const Type& max,
                               CustomRandomGenerator&& rng = get_default_random()) {
     std::vector<Type> result(nbr);
     if constexpr (std::is_floating_point_v<Type>) {

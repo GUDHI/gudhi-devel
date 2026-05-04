@@ -38,10 +38,10 @@ int main(int argc, char* argv[]) {
       std::vector<float> data(N);
       if (b) {
         std::clog << "Many repeated values\n";
-        std::generate(data.begin(), data.end(), []() { return Gudhi::random::get<int>(0, 7); });
+        std::generate(data.begin(), data.end(), []() { return Gudhi::random::get_uniform<int>(0, 7); });
       } else {
         std::clog << "Mostly unique values\n";
-        std::generate(data.begin(), data.end(), []() { return Gudhi::random::get<float>(0., 1.); });
+        std::generate(data.begin(), data.end(), []() { return Gudhi::random::get_uniform<float>(0., 1.); });
       }
       auto convert_result = [](auto& cplx, auto& pers){
         std::vector<std::pair<float,float>> res;

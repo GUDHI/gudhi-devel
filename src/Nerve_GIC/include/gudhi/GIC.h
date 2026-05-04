@@ -158,7 +158,7 @@ class Cover_complex {
     int m = 0;
     double u;
     while (m < sampleSize) {
-      u = Gudhi::random::get<double>(0., 1.);
+      u = Gudhi::random::get_uniform<double>(0., 1.);
       if ((populationSize - t) * u >= sampleSize - m) {
         t++;
       } else {
@@ -1229,7 +1229,7 @@ class Cover_complex {
 
         std::vector<int> boot(this->num_points);
         for (int j = 0; j < this->num_points; j++) {
-          double u = Gudhi::random::get<double>(0., 1.);
+          double u = Gudhi::random::get_uniform<double>(0., 1.);
           int id = std::floor(u * (this->num_points)); boot[j] = id;
           Cboot.point_cloud.push_back(this->point_cloud[id]); Cboot.cover.emplace_back(); Cboot.func.push_back(this->func[id]);
           boost::add_vertex(Cboot.one_skeleton_OFF); Cboot.vertices.push_back(boost::add_vertex(Cboot.one_skeleton));

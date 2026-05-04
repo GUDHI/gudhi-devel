@@ -30,7 +30,7 @@ int main() {
   if (monotone) {
     std::iota(data.begin(), data.end(), std::size_t(0));
   } else {
-    std::generate(data.begin(), data.end(),  []() { return Gudhi::random::get<double>(0., 1.); });
+    std::generate(data.begin(), data.end(),  []() { return Gudhi::random::get_uniform<double>(0., 1.); });
   }
 
   Gudhi::Clock clock;

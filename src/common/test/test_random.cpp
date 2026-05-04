@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(random_get_limits, RndType, list_of_rnd_types) {
   const RndType MIN_VAL{10};
   const RndType MAX_VAL{100};
   
-  RndType random_value = Gudhi::random::get(MIN_VAL, MAX_VAL);
+  RndType random_value = Gudhi::random::get_uniform(MIN_VAL, MAX_VAL);
 
   std::clog << "get_default_random().get(min, max) - random value: " << random_value << "\n";
   BOOST_CHECK(random_value >= MIN_VAL);
@@ -47,8 +47,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(random_get_range_limits, RndType, list_of_rnd_type
   const RndType MAX_VAL{100};
   int NB{50};
   
-  std::vector<RndType> first_range   = Gudhi::random::get_range(NB, MIN_VAL, MAX_VAL);
-  std::vector<RndType> second_range  = Gudhi::random::get_range(NB, MIN_VAL, MAX_VAL);
+  std::vector<RndType> first_range   = Gudhi::random::get_uniform_range(NB, MIN_VAL, MAX_VAL);
+  std::vector<RndType> second_range  = Gudhi::random::get_uniform_range(NB, MIN_VAL, MAX_VAL);
 
   std::clog << "get_default_random().get_range(nb, min, max)\n";
   for (auto val: first_range) {
@@ -83,10 +83,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(custom_random_generator, RndType, list_of_rnd_type
   const RndType MAX{10};
   const int NB{50};
   auto rng = std::default_random_engine{std::random_device{}()};
-  std::clog << "Custom random engine - get() returns " << Gudhi::random::get(MIN, MAX, rng) << "\n";
+  std::clog << "Custom random engine - get() returns " << Gudhi::random::get_uniform(MIN, MAX, rng) << "\n";
   
-  auto first_range  = Gudhi::random::get_range(NB, MIN, MAX, rng);
-  auto second_range = Gudhi::random::get_range(NB, MIN, MAX, rng);
+  auto first_range  = Gudhi::random::get_uniform_range(NB, MIN, MAX, rng);
+  auto second_range = Gudhi::random::get_uniform_range(NB, MIN, MAX, rng);
   
   std::clog << "Custom random engine - get_range()\nFirst range:\n";
   for (RndType value: first_range) {
@@ -101,16 +101,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(custom_random_generator, RndType, list_of_rnd_type
   BOOST_CHECK(first_range != second_range);
   
   rng.seed(42);
-  auto first  = Gudhi::random::get(MIN, MAX, rng);
+  auto first  = Gudhi::random::get_uniform(MIN, MAX, rng);
   rng.seed(42);
-  auto second = Gudhi::random::get(MIN, MAX, rng);
+  auto second = Gudhi::random::get_uniform(MIN, MAX, rng);
   std::clog << "Custom random engine with seed - first = " << first << " - second = " << second << "\n";
   BOOST_CHECK(first == second);
 
   rng.seed(42);
-  first_range  = Gudhi::random::get_range(NB, MIN, MAX, rng);
+  first_range  = Gudhi::random::get_uniform_range(NB, MIN, MAX, rng);
   rng.seed(42);
-  second_range = Gudhi::random::get_range(NB, MIN, MAX, rng);
+  second_range = Gudhi::random::get_uniform_range(NB, MIN, MAX, rng);
   
   std::clog << "Custom random engine - get_range() with a seed\nFirst range:\n";
   for (RndType value: first_range) {
@@ -132,11 +132,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(random_get_with_seed, RndType, list_of_rnd_types) 
   const RndType MIN_VAL{10};
   const RndType MAX_VAL{100};
   Gudhi::random::set_seed(42);
-  RndType first  = Gudhi::random::get(MIN_VAL, MAX_VAL);
+  RndType first  = Gudhi::random::get_uniform(MIN_VAL, MAX_VAL);
   Gudhi::random::set_seed(42);
-  RndType second = Gudhi::random::get(MIN_VAL, MAX_VAL);
+  RndType second = Gudhi::random::get_uniform(MIN_VAL, MAX_VAL);
 
-  std::clog << "Gudhi::random::set_seed + Gudhi::random::get(min, max) - First random number: " << first
+  std::clog << "Gudhi::random::set_seed + Gudhi::random::get_uniform(min, max) - First random number: " << first
             << " - Second random number: " << second << "\n";
   BOOST_CHECK(first >= MIN_VAL);
   BOOST_CHECK(first <= MAX_VAL);
@@ -150,11 +150,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(random_get_range_with_seed, RndType, list_of_rnd_t
   const RndType MAX_VAL{100};
   int NB{50};
   Gudhi::random::set_seed(42);
-  std::vector<RndType> first_range  = Gudhi::random::get_range(NB, MIN_VAL, MAX_VAL);
+  std::vector<RndType> first_range  = Gudhi::random::get_uniform_range(NB, MIN_VAL, MAX_VAL);
   Gudhi::random::set_seed(42);
-  std::vector<RndType> second_range = Gudhi::random::get_range(NB, MIN_VAL, MAX_VAL);
+  std::vector<RndType> second_range = Gudhi::random::get_uniform_range(NB, MIN_VAL, MAX_VAL);
 
-  std::clog << "Gudhi::random::set_seed + Gudhi::random::get_range(nb, min, max)\n";
+  std::clog << "Gudhi::random::set_seed + Gudhi::random::get_uniform_range(nb, min, max)\n";
   for (auto val: first_range) {
     std::clog << val << ", ";
     BOOST_CHECK(val >= MIN_VAL);

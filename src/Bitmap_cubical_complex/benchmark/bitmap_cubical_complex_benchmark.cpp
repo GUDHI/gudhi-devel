@@ -24,14 +24,14 @@ int main() {
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
   
   std::vector<unsigned> sizes_1d (1, 3000000);
-  std::vector<double> data_1d = Gudhi::random::get_range<double>(sizes_1d[0], 0., 1.);
+  std::vector<double> data_1d = Gudhi::random::get_uniform_range<double>(sizes_1d[0], 0., 1.);
 
   std::vector<unsigned> sizes_5d_top_cells(5, 10);
   std::vector<unsigned> sizes_5d_vertices(5, 11);
   const unsigned multiplier_top_cells = round(pow(10., 5.));
   const unsigned multiplier_vertices = round(pow(11., 5.));
-  std::vector<double> data_5d_top_cells = Gudhi::random::get_range<double>(multiplier_top_cells, 0., 1.);
-  std::vector<double> data_5d_vertices = Gudhi::random::get_range<double>(multiplier_vertices, 0., 1.);
+  std::vector<double> data_5d_top_cells = Gudhi::random::get_uniform_range<double>(multiplier_top_cells, 0., 1.);
+  std::vector<double> data_5d_vertices = Gudhi::random::get_uniform_range<double>(multiplier_vertices, 0., 1.);
 
   Gudhi::Clock cub_1d_from_top_cells_creation_clock("Cubical complex creation from 3 000 000 top cells in 1D");
   cub_1d_from_top_cells_creation_clock.begin();

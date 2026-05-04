@@ -29,7 +29,7 @@ void benchmark_stars_computation(int nb_vertices) {
   Stree st;
   // Insert 'nb_vertices' random simplices, of size in between [2; 5] and vertices in between [0; nb_vertices]
   for (Vertex_handle v=0; v < nb_vertices; v++) {
-    auto random_simplex = Gudhi::random::get_range<Vertex_handle>(Gudhi::random::get<int>(2, 5), 0., nb_vertices);
+    auto random_simplex = Gudhi::random::get_uniform_range<Vertex_handle>(Gudhi::random::get_uniform<int>(2, 5), 0., nb_vertices);
     st.insert_simplex_and_subfaces(random_simplex);
   }
   std::cout << "... " << st.num_vertices() << " vertices and " << st.num_simplices() << " simplices." << std::endl;

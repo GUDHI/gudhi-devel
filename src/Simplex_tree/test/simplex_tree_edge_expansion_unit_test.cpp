@@ -51,9 +51,9 @@ std::vector<Point> build_point_cloud(unsigned int numberOfPoints, int seed){
   if (seed > -1) Gudhi::random::set_seed(seed);
 
   for (unsigned int i = 0; i < numberOfPoints; ++i){
-    auto res = points.insert({Gudhi::random::get<double>(0., 10.), Gudhi::random::get<double>(0., 10.)});
+    auto res = points.insert({Gudhi::random::get_uniform<double>(0., 10.), Gudhi::random::get_uniform<double>(0., 10.)});
     while(!res.second){
-      res = points.insert({Gudhi::random::get<double>(0., 10.), Gudhi::random::get<double>(0., 10.)});
+      res = points.insert({Gudhi::random::get_uniform<double>(0., 10.), Gudhi::random::get_uniform<double>(0., 10.)});
     }
     finalPoints.push_back(*res.first);
   }

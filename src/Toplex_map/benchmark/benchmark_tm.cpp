@@ -61,13 +61,13 @@ int nb_membership2 = 400000;
 
 Simplex random_simplex(int n, std::size_t d) {
   Simplex s;
-  while (s.size() < d) s.insert(Gudhi::random::get<std::size_t>(1, n));
+  while (s.size() < d) s.insert(Gudhi::random::get_uniform<std::size_t>(1, n));
   return s;
 }
 
 std::vector<Simplex> r_vector_simplices(int n, int max_d, int m) {
   std::vector<Simplex> v;
-  for (int i = 0; i < m; i++) v.push_back(random_simplex(n, Gudhi::random::get<std::size_t>(1, max_d)));
+  for (int i = 0; i < m; i++) v.push_back(random_simplex(n, Gudhi::random::get_uniform<std::size_t>(1, max_d)));
   return v;
 }
 

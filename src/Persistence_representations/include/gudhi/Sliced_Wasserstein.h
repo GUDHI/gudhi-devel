@@ -253,7 +253,7 @@ class Sliced_Wasserstein
       double thresh_y = (max_ordinate - min_ordinate) * epsilon;
       double thresh_x = (max_abscissa - min_abscissa) * epsilon;
       for (int i = 0; i < num_pts_dgm; i++) {
-        double u = Gudhi::random::get<double>(-1., 1.);
+        double u = Gudhi::random::get_uniform<double>(-1., 1.);
         diagram1[i].first += u * thresh_x;
         diagram1[i].second += u * thresh_y;
         diagram2[i].first += u * thresh_x;

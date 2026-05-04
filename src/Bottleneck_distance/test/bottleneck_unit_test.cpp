@@ -30,13 +30,13 @@ std::vector< std::pair<double, double> > v1, v2;
 BOOST_AUTO_TEST_CASE(persistence_graph) {
   // Random construction
   for (int i = 0; i < n1; i++) {
-    double a = Gudhi::random::get<double>(0., upper_bound);;
-    double b = Gudhi::random::get<double>(0., upper_bound);;
+    double a = Gudhi::random::get_uniform<double>(0., upper_bound);;
+    double b = Gudhi::random::get_uniform<double>(0., upper_bound);;
     v1.emplace_back(std::min(a, b), std::max(a, b));
   }
   for (int i = 0; i < n2; i++) {
-    double a = Gudhi::random::get<double>(0., upper_bound);;
-    double b = Gudhi::random::get<double>(0., upper_bound);;
+    double a = Gudhi::random::get_uniform<double>(0., upper_bound);;
+    double b = Gudhi::random::get_uniform<double>(0., upper_bound);;
     v2.emplace_back(std::min(a, b), std::max(a, b));
   }
   Persistence_graph g(v1, v2, 0.);
@@ -138,10 +138,10 @@ BOOST_AUTO_TEST_CASE(global) {
 
   std::vector< std::pair<double, double> > v1, v2;
   for (int i = 0; i < n1; i++) {
-    double a = Gudhi::random::get<double>(0., upper_bound);
-    double b = Gudhi::random::get<double>(0., upper_bound);
-    double x = Gudhi::random::get<double>(delta_min, delta_max);
-    double y = Gudhi::random::get<double>(delta_min, delta_max);
+    double a = Gudhi::random::get_uniform<double>(0., upper_bound);
+    double b = Gudhi::random::get_uniform<double>(0., upper_bound);
+    double x = Gudhi::random::get_uniform<double>(delta_min, delta_max);
+    double y = Gudhi::random::get_uniform<double>(delta_min, delta_max);
     v1.emplace_back(std::min(a, b), std::max(a, b));
     v2.emplace_back(std::min(a, b) + std::min(x, y), std::max(a, b) + std::max(x, y));
     if (i % 5 == 0)
@@ -165,10 +165,10 @@ BOOST_AUTO_TEST_CASE(neg_global) {
 
   std::vector< std::pair<double, double> > v1, v2;
   for (int i = 0; i < n1; i++) {
-    double a = std::log(Gudhi::random::get<double>(0., upper_bound));
-    double b = std::log(Gudhi::random::get<double>(0., upper_bound));
-    double x = std::log(Gudhi::random::get<double>(delta_min, delta_max));
-    double y = std::log(Gudhi::random::get<double>(delta_min, delta_max));
+    double a = std::log(Gudhi::random::get_uniform<double>(0., upper_bound));
+    double b = std::log(Gudhi::random::get_uniform<double>(0., upper_bound));
+    double x = std::log(Gudhi::random::get_uniform<double>(delta_min, delta_max));
+    double y = std::log(Gudhi::random::get_uniform<double>(delta_min, delta_max));
     v1.emplace_back(std::min(a, b), std::max(a, b));
     v2.emplace_back(std::min(a, b) + std::min(x, y), std::max(a, b) + std::max(x, y));
     if (i % 5 == 0)

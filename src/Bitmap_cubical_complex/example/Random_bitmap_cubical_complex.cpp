@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     multipliers *= sizeInThisDimension;
   }
 
-  std::vector<double> data = Gudhi::random::get_range<double>(multipliers, 0., 1.);
+  std::vector<double> data = Gudhi::random::get_uniform_range<double>(multipliers, 0., 1.);
 
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
