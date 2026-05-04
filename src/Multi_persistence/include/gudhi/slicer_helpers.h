@@ -156,7 +156,7 @@ inline Multi_parameter_filtered_complex<MultiFiltrationValue, I, D> build_comple
   if (dimIt == counts.size()) return Complex();
 
   std::size_t shift = isReversed ? 0 : counts[dimIt];
-  unsigned int nextShift = isReversed ? 0 : counts.size() == 1 ? 0 : counts[dimIt + 1];
+  unsigned int nextShift = isReversed ? 0 : (counts.size() - dimIt) == 1 ? 0 : counts[dimIt + 1];
   unsigned int tmpNextShift = counts[dimIt];
 
   auto get_boundary = [&isReversed, &numberOfCells](
@@ -331,8 +331,7 @@ inline void write_complex_to_scc_file(const std::string& outFilePath,
     }
   };
 
-  if (minIndex < 0) file << 0 << " ";
-  for (int i = 0; i < minIndex; ++i) file << 0 << " ";
+  for (int i = std::min(0, minIndex); i < std::max(0, minIndex); ++i) file << 0 << " ";
   for (int i = std::max(minIndex, 0); i <= std::min(maxDim, maxIndex); ++i) {
     file << indicesByDim[i].size() << " ";
   }
@@ -341,10 +340,13 @@ inline void write_complex_to_scc_file(const std::string& outFilePath,
   if (maxIndex > maxDim) file << 0;
   file << "\n";
 
+  // Only 0s where written on the line before
+  if (maxIndex < 0) return;
+
   file << std::setprecision(std::numeric_limits<typename Fil::value_type>::digits);
 
   std::size_t startIndex = reverse ? minIndex + 1 : minIndex;
-  std::size_t endIndex = reverse ? maxIndex : maxIndex - 1;
+  std::size_t endIndex = reverse ? maxIndex + 1 : maxIndex;
   const auto& filtValues = complex.get_filtration_values();
   const auto& boundaries = complex.get_boundaries();
   int currDim;
@@ -362,7 +364,7 @@ inline void write_complex_to_scc_file(const std::string& outFilePath,
       }
     }
   }
-  for (std::size_t i = startIndex; i <= endIndex; ++i) {
+  for (std::size_t i = startIndex; i < endIndex; ++i) {
     if (!stripComments) {
       file << "# Block of dimension " << currDim << "\n";
       if (reverse)
