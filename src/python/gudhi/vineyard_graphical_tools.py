@@ -17,6 +17,7 @@ import warnings
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import matplotlib.colors as mcolors
 from matplotlib.legend_handler import HandlerBase
 from matplotlib.image import BboxImage
 from matplotlib.transforms import TransformedBbox, Bbox
@@ -24,7 +25,7 @@ from matplotlib.transforms import TransformedBbox, Bbox
 from gudhi.vineyard import Vineyard, PointCloudRipsVineyard
 
 
-class HandlerGradient(HandlerBase):
+class GradientHandler(HandlerBase):
     def __init__(self, colors, **kwargs):
         """
         colors: array of RGBA colors, shape [n, 4]
@@ -39,31 +40,6 @@ class HandlerGradient(HandlerBase):
         img = BboxImage(TransformedBbox(bbox, trans), interpolation="bilinear")
         img.set_data(self.colors)
         return [img]
-
-
-def _setdefault_aliases(kwargs, default_value, *aliases):
-    """Set a default only if none of the aliases are already in kwargs."""
-    if not any(alias in kwargs for alias in aliases):
-        kwargs[aliases[0]] = default_value
-
-
-def _gray_on_band(ax, x, y, z, band):
-    gray = (0.75, 0.75, 0.75)
-    mask = np.concatenate(([0], np.asarray(y - x <= band), [0]))
-    diff = np.diff(mask)
-    starts = np.where(diff == 1)[0]
-    ends = np.where(diff == -1)[0]
-    for s, e in zip(starts, ends):
-        ax.plot(x[s:e], y[s:e], z[s:e], c=gray)
-
-
-def _erase_on_band(ax, x, y, z, band, c):
-    mask = np.concatenate(([0], np.asarray(y - x > band), [0]))
-    diff = np.diff(mask)
-    starts = np.where(diff == 1)[0]
-    ends = np.where(diff == -1)[0]
-    for s, e in zip(starts, ends):
-        ax.plot(x[s:e], y[s:e], z[s:e], c=c)
 
 
 def _get_default_colors(dim: int | None):
@@ -138,6 +114,25 @@ def _filter_vines(vines, min_bar_length):
     return vines_finite, vines_inf
 
 
+def _gray_on_band(ax, x, y, z, band, kwargs):
+    kwargs["color"] = (0.75, 0.75, 0.75)  # gray
+    mask = np.concatenate(([0], np.asarray(y - x <= band), [0]))
+    diff = np.diff(mask)
+    starts = np.where(diff == 1)[0]
+    ends = np.where(diff == -1)[0]
+    for s, e in zip(starts, ends):
+        ax.plot(x[s:e], y[s:e], z[s:e], **kwargs)
+
+
+def _erase_on_band(ax, x, y, z, band, kwargs):
+    mask = np.concatenate(([0], np.asarray(y - x > band), [0]))
+    diff = np.diff(mask)
+    starts = np.where(diff == 1)[0]
+    ends = np.where(diff == -1)[0]
+    for s, e in zip(starts, ends):
+        ax.plot(x[s:e], y[s:e], z[s:e], **kwargs)
+
+
 def _plot_finite_vines(
     ax,
     vines,
@@ -146,6 +141,7 @@ def _plot_finite_vines(
         "none", "gray_diagonal", "gray_band", "erase_diagonal", "erase_band"
     ],
     cmap,
+    kwargs,
 ):
     i = 0
     ax.zaxis.get_major_locator().set_params(integer=True)
@@ -153,19 +149,20 @@ def _plot_finite_vines(
         x = vines[v, :, 0]
         y = vines[v, :, 1]
         z = vines[v, :, 2]
+        kwargs["color"] = cmap[i]
         match noise_option:
             case "none":
-                ax.plot(x, y, z, c=cmap[i])
+                ax.plot(x, y, z, **kwargs)
             case "gray_diagonal":
-                ax.plot(x, y, z, c=cmap[i])
-                _gray_on_band(ax, x, y, z, 0)
+                ax.plot(x, y, z, **kwargs)
+                _gray_on_band(ax, x, y, z, 0, kwargs)
             case "gray_band":
-                ax.plot(x, y, z, c=cmap[i])
-                _gray_on_band(ax, x, y, z, min_bar_length)
+                ax.plot(x, y, z, **kwargs)
+                _gray_on_band(ax, x, y, z, min_bar_length, kwargs)
             case "erase_diagonal":
-                _erase_on_band(ax, x, y, z, 0, cmap[i])
+                _erase_on_band(ax, x, y, z, 0, kwargs)
             case "erase_band":
-                _erase_on_band(ax, x, y, z, min_bar_length, cmap[i])
+                _erase_on_band(ax, x, y, z, min_bar_length, kwargs)
             case _:
                 raise ValueError(
                     "argument `noise_option` does not contain a valid literal: "
@@ -179,11 +176,12 @@ def _plot_finite_vines(
     ax.set_ylabel("Death")
 
 
-def _plot_infinite_vines(ax, vines, cmap):
+def _plot_infinite_vines(ax, vines, cmap, kwargs):
     i = 0
     ax.yaxis.get_major_locator().set_params(integer=True)
     for v in range(vines.shape[0]):
-        ax.plot(vines[v, :, 0], vines[v, :, 1], c=cmap[i])
+        kwargs["color"] = cmap[i]
+        ax.plot(vines[v, :, 0], vines[v, :, 1], **kwargs)
         i = i + 1
         if i == len(cmap):
             i = 0
@@ -191,16 +189,19 @@ def _plot_infinite_vines(ax, vines, cmap):
 
 
 def _plot_vines(
-    ax_finite, ax_infinite, vines, dim, min_bar_length, noise_option, cmap, color_base
+    ax_finite, ax_infinite, vines, dim, min_bar_length, noise_option, cmap, color_base, kwargs
 ):
     vines_finite, vines_inf = _filter_vines(vines, min_bar_length)
     d_cmap = _get_vine_color_map(
         cmap, color_base, dim, vines_finite.shape[0] + vines_inf.shape[0]
     )
+    kwargs.pop("c", None)
     if ax_finite is not None:
-        _plot_finite_vines(ax_finite, vines_finite, min_bar_length, noise_option, d_cmap)
+        _plot_finite_vines(
+            ax_finite, vines_finite, min_bar_length, noise_option, d_cmap, kwargs
+        )
     if ax_infinite is not None:
-        _plot_infinite_vines(ax_infinite, vines_inf, d_cmap)
+        _plot_infinite_vines(ax_infinite, vines_inf, d_cmap, kwargs)
 
     return d_cmap
 
@@ -228,9 +229,10 @@ def plot_vineyards(
     square_scaling: bool = True,
     cmap: Optional[np.ndarray] = None,
     legend: bool = True,
+    **line_kwargs,
 ):
     """Plots the given vineyard, except for completely trivial vines (vines where all coordinates are on
-    the diagonal). The points at infinity are mapped to a finite point a bit away from the other points.
+    the diagonal). The vines at infinity are plotted in a different diagram than the others for better visibility.
 
     :param vineyard: Vineyard class to plot.
     :type vineyard: :class:`~gudhi.vineyard.Vineyard` or :class:`~gudhi.vineyard.PointCloudRipsVineyard`
@@ -275,11 +277,15 @@ def plot_vineyards(
         They can for example be constructed from a `matplotlib.colors.Colormap \
         <https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.Colormap.html#matplotlib.colors.Colormap>`_.
         Defaults to None.
-    :type cmap: Numpy array of shape (*, 4) or (*, *, 4), optional
+    :type cmap: Numpy array of shape (:math:`\\cdot`, 4) or (:math:`\\cdot`, :math:`\\cdot`, 4), optional
     :param legend: If `True`, a legend indicating the dimensions is added to the plots. Defaults to `True`.
     :type legend: bool, optional
+    :param line_kwargs: Optional. All arguments to forward to the `matplotlib.axes.Axes.plot \
+        <https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot>`_ method
+        when plotting all vine lines (finite and infinite).
     :raises ValueError: If the value provided for `noise_option` is not valid.
-    :raises ValueError: If cmap is provided and its shape is neither (*, 4) nor (*, *, 4).
+    :raises ValueError: If cmap is provided and its shape is neither (:math:`\\cdot`, 4) nor
+        (:math:`\\cdot`, :math:`\\cdot`, 4).
     :return: Two Matplotlib axes. If one plot was not constructed, the corresponding axis will be `None`.
     :rtype: tuple of `mpl_toolkits.mplot3d.axes3d.Axes3D \
         <https://matplotlib.org/stable/api/toolkits/mplot3d/axes3d.html#mpl_toolkits.mplot3d.axes3d.Axes3D>`_
@@ -293,7 +299,23 @@ def plot_vineyards(
         ax_infinite = fig.add_subplot(1, 2, 2)
     else:
         fig = None
-    if cmap is None:
+
+    if "c" in line_kwargs:
+        if cmap is not None:
+            warnings.warn(
+                "Arguments `c` and `cmap` where given which is ambiguous: `cmap` is ignored.",
+                UserWarning,
+            )
+        cmap = np.asarray([mcolors.to_rgba(line_kwargs["c"])])
+    elif "color" in line_kwargs:
+        if cmap is not None:
+            warnings.warn(
+                "Arguments `color` and `cmap` where given which is ambiguous: `cmap` is ignored.",
+                UserWarning,
+            )
+        cmap = np.asarray([mcolors.to_rgba(line_kwargs["color"])])
+    if cmap is None or cmap.shape[0] == 0:
+        cmap = None
         color_base = _get_default_colors(dim)
     else:
         color_base = None
@@ -314,13 +336,22 @@ def plot_vineyards(
                 noise_option,
                 cmap,
                 color_base,
+                line_kwargs,
             )
             if legend:
                 gradients[str(d)] = d_cmap
     else:
         vines = vineyard.get_current_vineyard_view(dim=dim)
         d_cmap = _plot_vines(
-            ax_finite, ax_infinite, vines, dim, min_bar_length, noise_option, cmap, color_base
+            ax_finite,
+            ax_infinite,
+            vines,
+            dim,
+            min_bar_length,
+            noise_option,
+            cmap,
+            color_base,
+            line_kwargs,
         )
         if legend:
             gradients = {str(dim): d_cmap}
@@ -337,7 +368,7 @@ def plot_vineyards(
     if legend:
         handles = [mpatches.Patch() for _ in gradients]
         handler_map = {
-            h: HandlerGradient(colors) for h, colors in zip(handles, gradients.values())
+            h: GradientHandler(colors) for h, colors in zip(handles, gradients.values())
         }
         labels = list(gradients.keys())
         if fig is not None:
@@ -349,6 +380,14 @@ def plot_vineyards(
                 _set_legend(ax_infinite, handles, labels, handler_map, "lower right")
 
     return ax_finite, ax_infinite
+
+
+def _setdefault_aliases(kwargs, default_value, *aliases):
+    """
+    Set a default only if none of the aliases are already in kwargs.
+    """
+    if not any(alias in kwargs for alias in aliases):
+        kwargs[aliases[0]] = default_value
 
 
 def _plot_cycle(axes, cycle, points, cpx, c, ls, lw):
@@ -407,7 +446,7 @@ def plot_1D_representative_cycles(
     :raises NotImplementedError: If `store_cycles` or `store_point_coordinates` were set to `False` at construction.
     :raises ValueError: If the number of coordinates of a point is different from 2 or 3.
     :raises IndexError: If `index` is provided and is out of range.
-    :raises ValueError: If cmap is provided and its shape is not (*, 4).
+    :raises ValueError: If cmap is provided and its shape is not (:math:`\\cdot`, 4).
     :return: Matplotlib axis into which was plotted.
     :rtype: `mpl_toolkits.mplot3d.axes3d.Axes3D \
         <https://matplotlib.org/stable/api/toolkits/mplot3d/axes3d.html#mpl_toolkits.mplot3d.axes3d.Axes3D>`_

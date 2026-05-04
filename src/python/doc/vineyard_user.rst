@@ -158,7 +158,10 @@ The data set in this example is provided by
                 :context: close-figs
                 :include-source:
 
-                plot_vineyards(rvy, dim=1, min_bar_length=4.5, noise_option="gray_band")
+                fig = plt.figure()
+                ax = fig.add_subplot(projection="3d");
+                plot_vineyards(rvy, ax_finite=ax, dim=1, min_bar_length=4.5,
+                                noise_option="gray_band")
       - .. plot::
                 :context: close-figs
                 :include-source:
