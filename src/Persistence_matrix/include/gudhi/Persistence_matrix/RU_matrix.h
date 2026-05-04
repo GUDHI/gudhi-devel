@@ -593,7 +593,7 @@ inline void RU_matrix<Master_matrix>::insert_maximal_cell(Index columnIndex,
   static_assert(Master_matrix::Option_list::has_vine_update,
                 "'insert_maximal_cell' is not implemented for the chosen options.");
 
-  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have be positive."));
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have to be positive."));
 
   insert_boundary(boundary, dim);
 
@@ -615,7 +615,7 @@ inline void RU_matrix<Master_matrix>::insert_maximal_cell(Index columnIndex,
   static_assert(Master_matrix::Option_list::has_vine_update,
                 "'insert_maximal_cell' is not implemented for the chosen options.");
 
-  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have be positive."));
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have to be positive."));
 
   insert_boundary(cellIndex, boundary, dim);
 

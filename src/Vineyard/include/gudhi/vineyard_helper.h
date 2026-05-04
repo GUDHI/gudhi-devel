@@ -87,7 +87,7 @@ inline void build_boundary_matrix_from_complex(FilteredComplex& complex, std::ve
     dimensions[index] = complex.dimension(sh);
     filtrationValues[index] = complex.filtration(sh);
     std::vector<Index> boundary;
-    for (auto b : complex.boundary_simplex_range(sh)) {
+    for (const auto& b : complex.boundary_simplex_range(sh)) {
       boundary.push_back(complex.key(b));
     }
     std::sort(boundary.begin(), boundary.end());

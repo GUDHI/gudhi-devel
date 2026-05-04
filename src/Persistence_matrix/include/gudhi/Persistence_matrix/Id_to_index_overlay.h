@@ -685,6 +685,9 @@ class Id_to_index_overlay
   void _initialize_map(unsigned int size);
   Index _id_to_index(ID_index id) const;
   Index& _id_to_index(ID_index id);
+
+  template <bool dir>
+  void _move_column_in_RU(Pos_index start, Pos_index end);
 };
 
 template <class Underlying_matrix, class Master_matrix>
@@ -842,28 +845,15 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_maxima
                                                                                        const Boundary_range& boundary,
                                                                                        Dimension dim)
 {
-  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have be positive."));
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have to be positive."));
 
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
     insert_boundary(boundary, dim);
 
     if (get_number_of_columns() == 1) return;
 
-    std::vector<ID_index> indexToID(nextIndex_);
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      for (auto& p : *idToIndex_) {
-        indexToID[p.second] = p.first;
-      }
-    } else {
-      for (ID_index i = 0; i < idToIndex_->size(); ++i) {
-        if (_id_to_index(i) != Master_matrix::template get_null_value<Index>()) indexToID[_id_to_index(i)] = i;
-      }
-    }
-    for (Index curr = get_number_of_columns() - 1; curr > columnIndex; --curr) {
-      matrix_.vine_swap(curr - 1);
-      std::swap(idToIndex_->at(indexToID[curr - 1]), idToIndex_->at(indexToID[curr]));
-      std::swap(indexToID[curr - 1], indexToID[curr]);
-    }
+    // false = backward direction
+    _move_column_in_RU<false>(get_number_of_columns() - 1, columnIndex);
   } else {
     matrix_.insert_maximal_cell(columnIndex, boundary, dim);
   }
@@ -876,30 +866,15 @@ inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::insert_maxima
                                                                                        const Boundary_range& boundary,
                                                                                        Dimension dim)
 {
-  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have be positive."));
+  GUDHI_CHECK(columnIndex >= 0, std::invalid_argument("Indices have to be positive."));
 
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
     insert_boundary(cellIndex, boundary, dim);
 
-    // TODO: factorize following with the other insert_maximal_cell ?
-
     if (get_number_of_columns() == 1) return;
 
-    std::vector<ID_index> indexToID(nextIndex_);
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      for (auto& p : *idToIndex_) {
-        indexToID[p.second] = p.first;
-      }
-    } else {
-      for (ID_index i = 0; i < idToIndex_->size(); ++i) {
-        if (_id_to_index(i) != Master_matrix::template get_null_value<Index>()) indexToID[_id_to_index(i)] = i;
-      }
-    }
-    for (Index curr = get_number_of_columns() - 1; curr > columnIndex; --curr) {
-      matrix_.vine_swap(curr - 1);
-      std::swap(idToIndex_->at(indexToID[curr - 1]), idToIndex_->at(indexToID[curr]));
-      std::swap(indexToID[curr - 1], indexToID[curr]);
-    }
+    // false = backward direction
+    _move_column_in_RU<false>(get_number_of_columns() - 1, columnIndex);
   } else {
     matrix_.insert_maximal_cell(columnIndex, cellIndex, boundary, dim);
   }
@@ -929,22 +904,10 @@ template <class Underlying_matrix, class Master_matrix>
 inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::remove_maximal_cell(ID_index cellID)
 {
   if constexpr (Master_matrix::Option_list::is_of_boundary_type) {
-    std::vector<ID_index> indexToID(nextIndex_);
-    if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      for (auto& p : *idToIndex_) {
-        indexToID[p.second] = p.first;
-      }
-    } else {
-      for (ID_index i = 0; i < idToIndex_->size(); ++i) {
-        if (_id_to_index(i) != Master_matrix::template get_null_value<Index>()) indexToID[_id_to_index(i)] = i;
-      }
-    }
+    // true = forward direction
+    _move_column_in_RU<true>(_id_to_index(cellID), nextIndex_ - 1);
+    // nextIndex_ is used in _move_column_in_RU, should not be decremented before
     --nextIndex_;
-    for (Index curr = _id_to_index(cellID); curr < nextIndex_; ++curr) {
-      matrix_.vine_swap(curr);
-      std::swap(idToIndex_->at(indexToID[curr]), idToIndex_->at(indexToID[curr + 1]));
-      std::swap(indexToID[curr], indexToID[curr + 1]);
-    }
     matrix_.remove_last();
     GUDHI_CHECK(_id_to_index(cellID) == nextIndex_,
                 std::logic_error("Id_to_index_overlay::remove_maximal_cell - Indexation problem."));
@@ -1259,6 +1222,37 @@ inline typename Id_to_index_overlay<Underlying_matrix, Master_matrix>::Index&
 Id_to_index_overlay<Underlying_matrix, Master_matrix>::_id_to_index(ID_index id)
 {
   return idToIndex_->operator[](id);  // for maps, the entry is created if not existing as needed in the constructors
+}
+
+template <class Underlying_matrix, class Master_matrix>
+template <bool dir>
+inline void Id_to_index_overlay<Underlying_matrix, Master_matrix>::_move_column_in_RU(Pos_index start, Pos_index end)
+{
+  // nextIndex_ would be overkill if start (dir == true) / end (dir == false) was different from end of matrix
+  // but it is not used that way for now
+  std::vector<ID_index> indexToID(nextIndex_);
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    for (auto& p : *idToIndex_) {
+      indexToID[p.second] = p.first;
+    }
+  } else {
+    for (ID_index i = 0; i < idToIndex_->size(); ++i) {
+      if (_id_to_index(i) != Master_matrix::template get_null_value<Index>()) indexToID[_id_to_index(i)] = i;
+    }
+  }
+  if constexpr (dir) {
+    for (Index curr = start; curr < end; ++curr) {
+      matrix_.vine_swap(curr);
+      std::swap(idToIndex_->at(indexToID[curr]), idToIndex_->at(indexToID[curr + 1]));
+      std::swap(indexToID[curr], indexToID[curr + 1]);
+    }
+  } else {
+    for (Index curr = start; curr > end; --curr) {
+      matrix_.vine_swap(curr - 1);
+      std::swap(idToIndex_->at(indexToID[curr - 1]), idToIndex_->at(indexToID[curr]));
+      std::swap(indexToID[curr - 1], indexToID[curr]);
+    }
+  }
 }
 
 }  // namespace persistence_matrix
