@@ -383,14 +383,11 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise
                 bottleneck distances.
         """
-        if self.epsilon is not None:
-            return pairwise_persistence_diagram_distances(
-                X, self.diagrams_, metric="bottleneck", e=self.epsilon, n_jobs=self.n_jobs
-            )
-        else:
-            return pairwise_persistence_diagram_distances(
-                X, self.diagrams_, metric="bottleneck", e=self.e, n_jobs=self.n_jobs
-            )
+        e = self.epsilon if self.epsilon is not None else self.e
+        return pairwise_persistence_diagram_distances(
+            X, self.diagrams_, metric="bottleneck", e=e, n_jobs=self.n_jobs
+        )
+
 
     def __call__(self, diag1, diag2):
         """
