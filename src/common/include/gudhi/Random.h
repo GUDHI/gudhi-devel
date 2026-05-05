@@ -109,7 +109,7 @@ namespace random {
    * @tparam Type The type of the random number (must be integral or floating-point).
    * @tparam CustomRandomGenerator The type of the random generator. Default is @ref Random_generator.
    * @param min The minimum value (inclusive).
-   * @param max The maximum value (inclusive).
+   * @param max The maximum value (inclusive for integral types, but exclusive for floating-point types).
    * @param rng A random generator. Use the default one if not set.
    * @return A random number of type `Type` in the range [min, max].
    */
@@ -131,7 +131,7 @@ namespace random {
    * @tparam CustomRandomGenerator The type of the random generator. Default is @ref Random_generator.
    * @param nbr The number of random numbers to generate.
    * @param min The minimum value (inclusive).
-   * @param max The maximum value (inclusive).
+   * @param max The maximum value (inclusive for integral types, but exclusive for floating-point types).
    * @param rng A random generator. Use the default one if not set.
    * @return A vector of random numbers of type `Type` in the range [min, max].
    */
