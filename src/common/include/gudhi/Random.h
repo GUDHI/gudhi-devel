@@ -79,15 +79,15 @@ namespace random {
    /**
     * The default random number generator type returned by @ref get_default_random
     */
-  using RandomGenerator = std::mt19937_64;
+  using Random_generator = std::mt19937_64;
   
   /**
    * @brief Returns a thread-local default random number generator instance.
    * 
    * @return A reference to the thread-local default random instance.
    */
-  inline RandomGenerator& get_default_random() {
-    static thread_local RandomGenerator default_random{std::random_device{}()};
+  inline Random_generator& get_default_random() {
+    static thread_local Random_generator default_random{std::random_device{}()};
 #ifdef DEBUG_TRACES
     std::clog << "get_default_random() " << &default_random << "\n";
 #endif  // DEBUG_TRACES
@@ -99,7 +99,7 @@ namespace random {
    *
    * @param seed The new seed value.
    */
-  void set_seed(RandomGenerator::result_type seed) {
+  void set_seed(Random_generator::result_type seed) {
     get_default_random().seed(seed);
   }
 
@@ -107,13 +107,13 @@ namespace random {
    * @brief Generates a random number in the range [min, max].
    *
    * @tparam Type The type of the random number (must be integral or floating-point).
-   * @tparam CustomRandomGenerator The type of the random generator. Default is @ref RandomGenerator.
+   * @tparam CustomRandomGenerator The type of the random generator. Default is @ref Random_generator.
    * @param min The minimum value (inclusive).
    * @param max The maximum value (inclusive).
    * @param rng A random generator. Use the default one if not set.
    * @return A random number of type `Type` in the range [min, max].
    */
-   template <typename Type, typename CustomRandomGenerator = RandomGenerator&>
+   template <typename Type, typename CustomRandomGenerator = Random_generator&>
    Type get_uniform(const Type& min, const Type& max, CustomRandomGenerator&& rng = get_default_random()) {
        if constexpr (std::is_floating_point_v<Type>) {
            std::uniform_real_distribution<Type> dis(min, max);
@@ -128,14 +128,14 @@ namespace random {
    * @brief Generates a vector of N random numbers in the range [min, max].
    *
    * @tparam Type The type of the random numbers (must be integral or floating-point).
-   * @tparam CustomRandomGenerator The type of the random generator. Default is @ref RandomGenerator.
+   * @tparam CustomRandomGenerator The type of the random generator. Default is @ref Random_generator.
    * @param nbr The number of random numbers to generate.
    * @param min The minimum value (inclusive).
    * @param max The maximum value (inclusive).
    * @param rng A random generator. Use the default one if not set.
    * @return A vector of random numbers of type `Type` in the range [min, max].
    */
-  template <typename Type, typename CustomRandomGenerator = RandomGenerator&>
+  template <typename Type, typename CustomRandomGenerator = Random_generator&>
   std::vector<Type> get_uniform_range(std::size_t nbr, const Type& min, const Type& max,
                               CustomRandomGenerator&& rng = get_default_random()) {
     std::vector<Type> result(nbr);
