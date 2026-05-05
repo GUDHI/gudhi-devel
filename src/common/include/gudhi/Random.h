@@ -138,6 +138,7 @@ namespace random {
   template <typename Type, typename CustomRandomGenerator = Random_generator&>
   std::vector<Type> get_uniform_range(std::size_t nbr, const Type& min, const Type& max,
                               CustomRandomGenerator&& rng = get_default_random()) {
+    // With C++26, this should be replaced with std::ranges::generate_random
     std::vector<Type> result(nbr);
     if constexpr (std::is_floating_point_v<Type>) {
       std::uniform_real_distribution<Type> dis(min, max);
