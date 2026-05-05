@@ -152,10 +152,10 @@ Computes and returns the number of simplices of each dimension in the complex.
       .def("euler_characteristic",
            &gsti::euler_characteristic,
            R"doc(
-This function computes and returns the euler characteristic of the non-filtered underlying complex represented
+This function computes and returns the Euler characteristic of the non-filtered underlying complex represented
 by the simplex tree.
 
-:returns:  The euler characteristic.
+:returns:  The Euler characteristic.
 :rtype:  int
            )doc")
       .def("find", &gsti::find_simplex, nb::arg("simplex"), nb::call_guard<nb::gil_scoped_release>(), R"doc(

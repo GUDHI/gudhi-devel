@@ -907,7 +907,7 @@ class Simplex_tree {
   }
 
   /**
-   * @brief Computes and returns the euler characteristic of the non-filtered underlying complex represented
+   * @brief Computes and returns the Euler characteristic of the non-filtered underlying complex represented
    * by the simplex tree.
    */
   auto euler_characteristic() const {
