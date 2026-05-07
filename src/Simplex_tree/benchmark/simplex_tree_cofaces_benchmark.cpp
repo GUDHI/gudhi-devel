@@ -5,14 +5,14 @@
  *    Copyright (C) 2023 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Replace std::random_device with Gudhi::random - remove random_simplices.h
  *      - 2025/08 Vincent Rouvreau: externalize rand_int_range in random_simplices.h for DRY purposes
  *      - YYYY/MM Author: Description of the modification
  */
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Clock.h>
-
-#include "random_simplices.h"
+#include <gudhi/Random.h>
 
 #include <iostream>
 #include <algorithm>  // for std::sample
@@ -28,8 +28,10 @@ void benchmark_stars_computation(int nb_vertices) {
 
   Stree st;
   // Insert 'nb_vertices' random simplices, of size in between [2; 5] and vertices in between [0; nb_vertices]
-  for (Vertex_handle v=0; v < nb_vertices; v++)
-    st.insert_simplex_and_subfaces(random_simplex<Vertex_handle>(2, 5, nb_vertices));
+  for (Vertex_handle v=0; v < nb_vertices; v++) {
+    auto random_simplex = Gudhi::random::get_uniform_range<Vertex_handle>(Gudhi::random::get_uniform<int>(2, 5), 0., nb_vertices);
+    st.insert_simplex_and_subfaces(random_simplex);
+  }
   std::cout << "... " << st.num_vertices() << " vertices and " << st.num_simplices() << " simplices." << std::endl;
 
   Gudhi::Clock benchmark_search("... Looking for random existing simplices");
@@ -39,7 +41,7 @@ void benchmark_stars_computation(int nb_vertices) {
   sh_list.reserve(SH_SIZE);
 
   std::sample(st.complex_simplex_range().begin(), st.complex_simplex_range().end(), std::back_inserter(sh_list),
-              SH_SIZE, std::mt19937 {rd()});
+              SH_SIZE, Gudhi::random::get_default_random());
   std::clog << benchmark_search << std::endl;
 
   Gudhi::Clock benchmark_stars("Benchmark the stars search of the random simplices");

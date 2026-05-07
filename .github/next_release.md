@@ -8,9 +8,15 @@ From a user point of view, we recommend to download GUDHI user version (gudhi.3.
 
 Below is a list of changes:
 
+- API break: `[C++]`
+     - The free functions in src/common/include/gudhi/random_point_generators.h has been moved in a `random` namespace
+
+- [Reproducibility](https://gudhi.inria.fr/doc/latest/group__reproducibility.html) `[C++]`
+     - New random functions, with a default random generator that is used internally, and where the user can set the global seed.
+     
 - [Module](link)
      - **...**
-
+     
 - [Module](link)
      - **...**
      

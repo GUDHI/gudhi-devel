@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL
+ *      - 2026/04 Vincent Rouvreau: Remove GetUniform method and use Gudhi::random instead
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -40,6 +41,7 @@ using ssize_t = std::make_signed_t<std::size_t>;
 #include <gudhi/Points_off_io.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Persistent_cohomology.h>
+#include <gudhi/Random.h>
 
 #include <boost/config.hpp>
 #include <boost/graph/graph_traits.hpp>
@@ -56,7 +58,6 @@ using ssize_t = std::make_signed_t<std::size_t>;
 #include <limits>     // for numeric_limits
 #include <utility>    // for std::pair<>
 #include <algorithm>  // for (std::max)
-#include <random>
 #include <cassert>
 #include <cmath>
 
@@ -151,20 +152,13 @@ class Cover_complex {
     for (boost::tie(ei, ei_end) = boost::edges(G); ei != ei_end; ++ei) boost::remove_edge(*ei, G);
   }
 
-  // Find random number in [0,1].
-  double GetUniform() {
-    thread_local std::default_random_engine re;
-    std::uniform_real_distribution<double> Dist(0, 1);
-    return Dist(re);
-  }
-
   // Subsample points.
   void SampleWithoutReplacement(int populationSize, int sampleSize, std::vector<int>& samples) {
     int t = 0;
     int m = 0;
     double u;
     while (m < sampleSize) {
-      u = GetUniform();
+      u = Gudhi::random::get_uniform<double>(0., 1.);
       if ((populationSize - t) * u >= sampleSize - m) {
         t++;
       } else {
@@ -1235,7 +1229,7 @@ class Cover_complex {
 
         std::vector<int> boot(this->num_points);
         for (int j = 0; j < this->num_points; j++) {
-          double u = GetUniform();
+          double u = Gudhi::random::get_uniform<double>(0., 1.);
           int id = std::floor(u * (this->num_points)); boot[j] = id;
           Cboot.point_cloud.push_back(this->point_cloud[id]); Cboot.cover.emplace_back(); Cboot.func.push_back(this->func[id]);
           boost::add_vertex(Cboot.one_skeleton_OFF); Cboot.vertices.push_back(boost::add_vertex(Cboot.one_skeleton));
