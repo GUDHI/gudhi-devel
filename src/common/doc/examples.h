@@ -139,6 +139,7 @@
  * \section Persistence_matrix_example_section Persistence_matrix
  * @example example_representative_cycles_from_matrix.cpp
  * @example example_simplex_tree_to_matrix.cpp
+ * @example example_remove_insert_swap_with_cycles.cpp
  * \section Persistence_fields_example_section Persistence_field
  * @example example_field_operations.cpp
  */

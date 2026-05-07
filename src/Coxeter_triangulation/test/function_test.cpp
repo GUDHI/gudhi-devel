@@ -5,6 +5,7 @@
  *    Copyright (C) 2019 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Include what you use
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -36,9 +37,6 @@
 
 #include <gudhi/Coxeter_triangulation.h>
 
-#include <string>
-
-#include <random>
 #include <cstdlib>
 
 using namespace Gudhi::coxeter_triangulation;

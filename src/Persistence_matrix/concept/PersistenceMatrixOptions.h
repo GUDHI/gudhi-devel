@@ -150,6 +150,7 @@ struct PersistenceMatrixOptions
    * @brief If set to true, enables the methods @ref Matrix::vine_swap and @ref Matrix::vine_swap_with_z_eq_1_case.
    * The matrix will then either be a @ref boundarymatrix "boundary matrix" (if @ref is_of_boundary_type is true),
    * or a @ref chainmatrix "chain matrix" (if @ref is_of_boundary_type is false).
+   * For now, only implemented for @ref is_z2 set to true.
    */
   static const bool has_vine_update;
   /**

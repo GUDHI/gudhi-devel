@@ -9,63 +9,20 @@ jobs:
     name: build pip wheel
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
-    container: ghcr.io/gudhi/gudhi-deploy/pip_for_gudhi:2025.10.02
+    container: ghcr.io/gudhi/gudhi-deploy/pip_for_gudhi:2026.03.03
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
-      - name: Build wheel for Python 3.9
-        env:
-          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON39/bin/python"
-        run: |
-          $PYTHON39/bin/python -m pip wheel -ve .
-      # For python >=3.9, numpy >= 2.0 is used to package and test ABI compatibility with numpy 1.X
-      # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
-      # gudhi requires numpy >= 1.15.0, but minimal numpy version for python 3.9 is 1.19.3 for instance
-      # numpy~=1.19.3 means any numpy=1.19.*, but also numpy>=1.19.3 (numpy~=1.19 do not work as it means any numpy==1.*)
-      - name: Install and test wheel for Python 3.9
-        run: |
-          $PYTHON39/bin/python -m pip install numpy~=1.19.3
-          $PYTHON39/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp39-linux_x86_64.whl
-          $PYTHON39/bin/python -c "import gudhi; print(gudhi.__version__)"
-          cp data/points/human.off .
-          $PYTHON39/bin/python -m pytest src/python/test/test_off.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_weighted_rips_complex.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_tomato.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_betti_curve_representations.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_witness_complex.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_simplex_tree_serialization.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_cover_complex.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_time_delay.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_sklearn_cubical_persistence.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_tangential_complex.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_subsampling.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_rips_complex.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_bottleneck_distance.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_delaunay_complex.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_sklearn_rips_persistence.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_persistence_graphical_tools.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_datasets_generators.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_euclidean_witness_complex.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_cubical_persistence_low_dim.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_cubical_complex.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_representations_preprocessing.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_dtm_rips_complex.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_representations.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_wasserstein_barycenter.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_remote_datasets.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_simplex_tree.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_representations_interface.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_simplex_generators.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_reader_utils.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_alpha_complex.py
-          $PYTHON39/bin/python -m pytest src/python/test/test_collapse_edges.py
-
       - name: Build wheel for Python 3.10
         env:
           SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON310/bin/python"
         run: |
           $PYTHON310/bin/python -m pip wheel -ve .
+      # For python >=3.10, numpy >= 2.0 is used to package and test ABI compatibility with numpy 1.X
+      # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
+      # Minimal numpy version for python 3.10 is 1.21.6 for instance
+      # numpy~=1.21.6 means any numpy=1.21.*, but also numpy>=1.21.6 (numpy~=1.21 do not work as it means any numpy==1.*)
       - name: Install and test wheel for Python 3.10
         run: |
           $PYTHON310/bin/python -m pip install numpy~=1.21.6
@@ -192,7 +149,7 @@ jobs:
           $PYTHON313/bin/python -m pip wheel -ve .
       - name: Install and test wheel for Python 3.13
         run: |
-          $PYTHON313/bin/python -m pip install numpy~=1.26.0
+          $PYTHON313/bin/python -m pip install numpy~=2.1.0
           $PYTHON313/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp313-linux_x86_64.whl
           $PYTHON313/bin/python -c "import gudhi; print(gudhi.__version__)"
           $PYTHON313/bin/python -m pytest src/python/test/test_off.py
@@ -226,10 +183,51 @@ jobs:
           $PYTHON313/bin/python -m pytest src/python/test/test_reader_utils.py
           $PYTHON313/bin/python -m pytest src/python/test/test_alpha_complex.py
           $PYTHON313/bin/python -m pytest src/python/test/test_collapse_edges.py
+      - name: Build wheel for Python 3.14
+        env:
+          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON314/bin/python"
+        run: |
+          $PYTHON314/bin/python -m pip wheel -ve .
+      - name: Install and test wheel for Python 3.14
+        run: |
+          $PYTHON314/bin/python -m pip install numpy~=2.3.4
+          $PYTHON314/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp314-linux_x86_64.whl
+          $PYTHON314/bin/python -c "import gudhi; print(gudhi.__version__)"
+          $PYTHON314/bin/python -m pytest src/python/test/test_off.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_weighted_rips_complex.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_tomato.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_betti_curve_representations.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_witness_complex.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_simplex_tree_serialization.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_cover_complex.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_time_delay.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_sklearn_cubical_persistence.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_tangential_complex.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_subsampling.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_rips_complex.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_bottleneck_distance.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_delaunay_complex.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_sklearn_rips_persistence.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_persistence_graphical_tools.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_datasets_generators.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_euclidean_witness_complex.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_cubical_persistence_low_dim.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_cubical_complex.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_representations_preprocessing.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_dtm_rips_complex.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_representations.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_wasserstein_barycenter.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_remote_datasets.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_simplex_tree.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_representations_interface.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_simplex_generators.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_reader_utils.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_alpha_complex.py
+          $PYTHON314/bin/python -m pytest src/python/test/test_collapse_edges.py
       - name: Publish on PyPi
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           auditwheel repair *.whl
-          $PYTHON38/bin/python -m twine upload wheelhouse/*.whl
+          $PYTHON310/bin/python -m twine upload wheelhouse/*.whl

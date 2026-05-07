@@ -5,6 +5,7 @@
  *    Copyright (C) 2015 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Include what you use
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -13,12 +14,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
-#include <cmath>  // float comparison
-#include <limits>
-#include <string>
 #include <vector>
-#include <random>
 #include <cstddef>  // for std::size_t
+#include <iostream>
+#include <stdexcept>
 
 #include <gudhi/Alpha_complex_3d.h>
 #include <gudhi/graph_simplicial_complex.h>
