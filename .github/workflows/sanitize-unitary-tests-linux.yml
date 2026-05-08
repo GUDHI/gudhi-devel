@@ -7,9 +7,9 @@ jobs:
     name: debug_tests
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image
-    container: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2025.10.02
+    container: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.03
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
       # Check python tests in debug mode and check address sanitizer only for the c++ unitary tests

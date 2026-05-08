@@ -43,6 +43,7 @@ from gudhi.representations import (
     Padding,
     ProminentPoints,
     DiagramSelector,
+    DimensionSelector,
 )
 
 # Kernel
@@ -104,12 +105,16 @@ def test_distance_transform_consistency():
     l1 = _n_diags(9)
     l1b = l1.copy()
     for metricName, (metricClass, metricParams, tolerance) in metrics_dict.items():
+        print(f"{metricName=} {metricParams=} {tolerance=}")
         d1 = pairwise_persistence_diagram_distances(l1, metric=metricName, **metricParams)
         d2 = metricClass.fit_transform(l1)
+        print("d1 vs d2")
         assert d1 == pytest.approx(d2)
         d3 = pairwise_persistence_diagram_distances(l1, l1b, metric=metricName, **metricParams)
+        print("d3 vs d2")
         assert d3 == pytest.approx(d2, **tolerance)  # Because of 0 entries (on the diagonal)
         d4 = metricClass.fit(l1).transform(l1b)
+        print("d4 vs d2")
         assert d4 == pytest.approx(d2, **tolerance)
 
 
@@ -288,7 +293,8 @@ def test_bottleneck_distance_deprecated_argument():
     empty_diag = np.empty(shape = [0, 2])
     with pytest.warns(DeprecationWarning):
         bdist = BottleneckDistance(epsilon=.001)
-        assert bdist.e == .001
+        assert bdist.epsilon == .001
+        assert bdist.e is None
         assert bdist(empty_diag, empty_diag) == 0.
 
 def test_kernel_empty_diagrams():
@@ -448,3 +454,38 @@ def test_persistence_lengths():
                 assert pl[idx] == 0.0
     with pytest.raises(ValueError):
         pl = PersistenceLengths(num_lengths=0)(diag)
+
+
+def test_base_estimator():
+    # For GridSearchCV cf. https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html
+    for estimator in [
+        # kernel_methods
+        SlicedWassersteinKernel,
+        PersistenceWeightedGaussianKernel,
+        PersistenceScaleSpaceKernel,
+        PersistenceFisherKernel,
+        # metrics
+        SlicedWassersteinDistance,
+        BottleneckDistance,
+        PersistenceFisherDistance,
+        WassersteinDistance,
+        # preprocessing
+        Clamping,
+        BirthPersistenceTransform,
+        DiagramScaler,
+        Padding,
+        ProminentPoints,
+        DiagramSelector,
+        DimensionSelector,
+        # vector_methods
+        PersistenceImage,
+        Landscape,
+        Silhouette,
+        BettiCurve,
+        Entropy,
+        TopologicalVector,
+        ComplexPolynomial,
+        Atol,
+        PersistenceLengths,
+        ]:
+        estimator().get_params()

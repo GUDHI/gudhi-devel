@@ -17,7 +17,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
         include:
           - python-version: "3.11"
             numpy-version: "1.23.2"
@@ -25,12 +25,14 @@ jobs:
             numpy-version: "1.26.0"
           - python-version: "3.13"
             numpy-version: "2.1.0"
+          - python-version: "3.14"
+            numpy-version: "2.3.4"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -42,10 +44,14 @@ jobs:
           brew install boost eigen gmp mpfr cgal || echo "brew install failed, continuing..."
           python -m pip install --user numpy>=2.0
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-          python -m pip install --user delocate
+          python -m pip install --user twine delocate
           ./scripts/build_osx_universal_gmpfr.sh
           # Now the universal libraries are in $PWD/deps-uni/lib
       - name: Build python wheel
+        # Force the use of apple clang - brew clang seems problematic for universal wheel
+        env:
+          CXX: /usr/bin/clang++
+          CC: /usr/bin/clang
         run: |
           export   GMP_LIB_DIR=$PWD/deps-uni/lib
           export GMPXX_LIB_DIR=$PWD/deps-uni/lib

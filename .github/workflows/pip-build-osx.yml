@@ -20,14 +20,14 @@ jobs:
             numpy-version: "1.23.2"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-      # For python>=3.9, numpy>=2.0 for package build and ABI compatibility with numpy 1.X and 2.X
+      # For python>=3.10, numpy>=2.0 for package build and ABI compatibility with numpy 1.X and 2.X
       # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
       - name: Install dependencies
         run: |
@@ -39,6 +39,10 @@ jobs:
           ./scripts/build_osx_universal_gmpfr.sh
           # Now the universal libraries are in $PWD/deps-uni/lib
       - name: Build python wheel
+        # Force the use of apple clang - brew clang seems problematic for universal wheel
+        env:
+          CXX: /usr/bin/clang++
+          CC: /usr/bin/clang
         run: |
           export   GMP_LIB_DIR=$PWD/deps-uni/lib
           export GMPXX_LIB_DIR=$PWD/deps-uni/lib
@@ -49,7 +53,7 @@ jobs:
           delocate-listdeps --depending *.whl
           delocate-wheel --require-archs universal2 -w wheelhouse -v *.whl
       - name: Upload OSx python wheel
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: osx python wheel
           path: wheelhouse/*.whl
