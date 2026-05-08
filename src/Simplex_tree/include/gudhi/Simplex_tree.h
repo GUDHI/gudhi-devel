@@ -3095,6 +3095,45 @@ class Simplex_tree {
     return ptr;
   }
 
+ public:
+  // Print a Simplex_tree in os.
+  friend std::ostream& operator<<(std::ostream & os, const Simplex_tree & st) {
+    // lexicographical order to ensure total order even with custom filtration values
+    st.initialize_filtration(
+        [&](Simplex_handle sh1, Simplex_handle sh2) { return st.reverse_lexicographic_order(sh1, sh2); },
+        [](Simplex_handle) -> bool { return false; });
+
+    for (auto sh : st.filtration_simplex_range()) {
+      os << st.dimension(sh) << " ";
+      for (auto v : st.simplex_vertex_range(sh)) {
+        os << v << " ";
+      }
+      os << st.filtration(sh) << "\n";  // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
+    }
+    st.clear_filtration();
+    return os;
+  }
+
+  friend std::istream& operator>>(std::istream & is, Simplex_tree & st) {
+    std::vector<Vertex_handle> simplex;
+    Filtration_value fil;
+    int max_dim = -1;
+    while (read_simplex(is, simplex, fil)) {
+      // read all simplices in the file as a list of vertices
+      // Warning : simplex_size needs to be casted in int - Can be 0
+      int dim = static_cast<int> (simplex.size() - 1);
+      if (max_dim < dim) {
+        max_dim = dim;
+      }
+      // insert every simplex in the simplex tree
+      st.insert_simplex(simplex, fil);
+      simplex.clear();
+    }
+    st.set_dimension(max_dim);
+
+    return is;
+  }
+
  private:
   Vertex_handle null_vertex_;
   /** \brief Set of simplex tree Nodes representing the vertices.*/
@@ -3109,66 +3148,6 @@ class Simplex_tree {
   mutable int dimension_;
   mutable bool dimension_to_be_lowered_;
 };
-
-// Print a Simplex_tree in os.
-template<typename...T>
-std::ostream& operator<<(std::ostream & os, const Simplex_tree<T...> & st) {
-  using handle = typename Simplex_tree<T...>::Simplex_handle;
-  // lexicographical order to ensure total order even with custom filtration values
-  st.initialize_filtration(
-      [&](handle sh1, handle sh2) {
-        if (st.dimension(sh1) < st.dimension(sh2)) return true;
-        if (st.dimension(sh1) > st.dimension(sh2)) return false;
-
-        auto rg1 = st.simplex_vertex_range(sh1);
-        auto rg2 = st.simplex_vertex_range(sh2);
-        auto it1 = rg1.begin();
-        auto it2 = rg2.begin();
-        // same size
-        while (it1 != rg1.end()) {
-          if (*it1 == *it2) {
-            ++it1;
-            ++it2;
-          } else {
-            return *it1 < *it2;
-          }
-        }
-        return false;
-      },
-      [](handle) -> bool { return false; });
-
-  for (auto sh : st.filtration_simplex_range()) {
-    os << st.dimension(sh) << " ";
-    for (auto v : st.simplex_vertex_range(sh)) {
-      os << v << " ";
-    }
-    os << st.filtration(sh) << "\n";  // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
-  }
-  st.clear_filtration();
-  return os;
-}
-
-template<typename...T>
-std::istream& operator>>(std::istream & is, Simplex_tree<T...> & st) {
-  typedef Simplex_tree<T...> ST;
-  std::vector<typename ST::Vertex_handle> simplex;
-  typename ST::Filtration_value fil;
-  int max_dim = -1;
-  while (read_simplex(is, simplex, fil)) {
-    // read all simplices in the file as a list of vertices
-    // Warning : simplex_size needs to be casted in int - Can be 0
-    int dim = static_cast<int> (simplex.size() - 1);
-    if (max_dim < dim) {
-      max_dim = dim;
-    }
-    // insert every simplex in the simplex tree
-    st.insert_simplex(simplex, fil);
-    simplex.clear();
-  }
-  st.set_dimension(max_dim);
-
-  return is;
-}
 
 /** @}*/  // end addtogroup simplex_tree
 
