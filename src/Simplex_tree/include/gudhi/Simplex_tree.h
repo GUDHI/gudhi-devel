@@ -3114,20 +3114,15 @@ class Simplex_tree {
 
  public:
   // Print a Simplex_tree in os.
-  friend std::ostream& operator<<(std::ostream & os, const Simplex_tree & st) {
-    // lexicographical order to ensure total order even with custom filtration values
-    st.initialize_filtration(
-        [&](Simplex_handle sh1, Simplex_handle sh2) { return st.reverse_lexicographic_order(sh1, sh2); },
-        [](Simplex_handle) -> bool { return false; });
-
-    for (auto sh : st.filtration_simplex_range()) {
-      os << st.dimension(sh) << " ";
+  friend std::ostream& operator<<(std::ostream& os, const Simplex_tree& st) {
+    st.for_each_simplex([&](Simplex_handle sh, int dim) {
+      os << dim << " ";
       for (auto v : st.simplex_vertex_range(sh)) {
         os << v << " ";
       }
-      os << st.filtration(sh) << "\n";  // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
-    }
-    st.clear_filtration();
+      // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
+      os << st.filtration(sh) << "\n";
+    });
     return os;
   }
 
