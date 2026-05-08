@@ -1837,17 +1837,19 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Projects the filtration value into the given grid. If @p coordinate is false, the entries are set to
-   * the nearest upper bound value with the same parameter in the grid. Otherwise, the entries are set to the indices
-   * of those nearest upper bound values.
+   * @brief Projects the generator into the given grid. If @p coordinate is false, the entries are set to
+   * the nearest value with the same parameter in the grid. Otherwise, the entries are set to the indices
+   * of those nearest values. If an entry in the generator is higher than any value in the grid, this entry
+   * is set to infinity if @p coordinate is false and to the grids size at the corresponding parameter otherwise.
    * The grid has to be represented as a vector of ordered ranges of values convertible into `T`. An index
    * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
    * therefore all together a 2D grid.
    *
-   * @tparam OneDimArray A range of values convertible into `T` ordered by increasing value. Has to implement
-   * a begin, end and operator[] method.
-   * @param grid Vector of @p OneDimArray with size at least number of filtration parameters.
+   * @tparam RandomAccessArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @param coordinate If true, the values are set to the coordinates of the projection in the grid. If false,
    * the values are set to the values at the coordinates of the projection.
    */
@@ -2033,24 +2035,26 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Computes the coordinates in the given grid, corresponding to the nearest upper bounds of the entries
+   * @brief Computes the coordinates in the given grid, corresponding to the nearest value of the entries
    * in the given filtration value.
-   * The grid has to be represented as a vector of vectors of ordered values convertible into `OutValue`. An index
-   * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
+   * The grid has to be represented as a 2-dimensional array of ordered values convertible into `OutValue`. An index
+   * \f$ i \f$ of the array corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
    * therefore all together a 2D grid.
    *
    * @tparam OutValue Signed arithmetic type. Default value: std::int32_t.
-   * @tparam U Type which is convertible into `OutValue`.
+   * @tparam RandomAccessArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
    * @param f Filtration value to project.
-   * @param grid Vector of vectors to project into.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @return Filtration value \f$ out \f$ whose entry correspond to the indices of the projected values. That is,
    * the projection of \f$ f(g,p) \f$ is \f$ grid[p][out(g,p)] \f$.
    */
-  template <typename OutValue = std::int32_t, typename U = T>
+  template <typename OutValue = std::int32_t, class RandomAccessArray>
   friend Dynamic_multi_parameter_filtration<OutValue, Co, Ensure1Criticality> compute_coordinates_in_grid(
       Dynamic_multi_parameter_filtration f,
-      const std::vector<std::vector<U> > &grid)
+      const std::vector<RandomAccessArray> &grid)
   {
     // TODO: by replicating the code of "project_onto_grid", this could be done with just one copy
     // instead of two. But it is not clear if it is really worth it, i.e., how much the change in type is really
@@ -2068,15 +2072,18 @@ class Dynamic_multi_parameter_filtration
    * value. That is, if \f$ out \f$ is the result, \f$ out(g,p) = grid[p][f(g,p)] \f$. Assumes therefore, that the
    * values stored in the filtration value corresponds to indices existing in the given grid.
    *
-   * @tparam U Signed arithmetic type.
+   * @tparam RandomAccessArray A range of values convertible into `U`. Has to implement
+   * a size and operator[] method and a `value_type` definition.
+   * @tparam U Signed arithmetic type. Default: `RandomAccessArray::value_type`.
    * @param f Filtration value storing coordinates compatible with `grid`.
-   * @param grid Vector of vector.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @return Filtration value \f$ out \f$ whose entry correspond to \f$ out(g,p) = grid[p][f(g,p)] \f$.
    */
-  template <typename U>
+  template <class RandomAccessArray, typename U = typename RandomAccessArray::value_type>
   friend Dynamic_multi_parameter_filtration<U, Co, Ensure1Criticality> evaluate_coordinates_in_grid(
       const Dynamic_multi_parameter_filtration &f,
-      const std::vector<std::vector<U> > &grid)
+      const std::vector<RandomAccessArray> &grid)
   {
     GUDHI_CHECK(grid.size() >= f.num_parameters(),
                 std::invalid_argument(

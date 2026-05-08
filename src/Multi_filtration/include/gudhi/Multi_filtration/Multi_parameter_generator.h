@@ -1348,16 +1348,18 @@ class Multi_parameter_generator
 
   /**
    * @brief Projects the generator into the given grid. If @p coordinate is false, the entries are set to
-   * the nearest upper bound value with the same parameter in the grid. Otherwise, the entries are set to the indices
-   * of those nearest upper bound values.
+   * the nearest value with the same parameter in the grid. Otherwise, the entries are set to the indices
+   * of those nearest values. If an entry in the generator is higher than any value in the grid, this entry
+   * is set to infinity if @p coordinate is false and to the grids size at the corresponding parameter otherwise.
    * The grid has to be represented as a vector of ordered ranges of values convertible into `T`. An index
    * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
    * therefore all together a 2D grid.
    *
-   * @tparam OneDimArray A range of values convertible into `T` ordered by increasing value. Has to implement
-   * a begin, end and operator[] method.
-   * @param grid Vector of @p OneDimArray with size at least number of filtration parameters.
+   * @tparam OneDimArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
+   * @param grid Vector of @p OneDimArray with size at least number of filtration parameters. Each array has to be
+   * ordered by increasing value.
    * @param coordinate If true, the values are set to the coordinates of the projection in the grid. If false,
    * the values are set to the values at the coordinates of the projection.
    */
@@ -1375,11 +1377,15 @@ class Multi_parameter_generator
     auto project_parameter = [&](size_type p) {
       const auto &filtration = grid[p];
       auto v = static_cast<typename OneDimArray::value_type>(generator_[p]);
-      auto d = std::distance(filtration.begin(), std::lower_bound(filtration.begin(), filtration.end(), v));
-      if (d != 0 && std::abs(v - filtration[d]) > std::abs(v - filtration[d - 1])) {
-        --d;
+      std::size_t d = std::distance(filtration.begin(), std::lower_bound(filtration.begin(), filtration.end(), v));
+      if (d == filtration.size()) {
+        generator_[p] = coordinate ? static_cast<T>(d) : T_inf;
+      } else {
+        if (d != 0 && std::abs(v - filtration[d]) > std::abs(v - filtration[d - 1])) {
+          --d;
+        }
+        generator_[p] = coordinate ? static_cast<T>(d) : static_cast<T>(filtration[d]);
       }
-      generator_[p] = coordinate ? static_cast<T>(d) : static_cast<T>(filtration[d]);
     };
 
 #ifdef GUDHI_USE_TBB
@@ -1466,14 +1472,17 @@ class Multi_parameter_generator
    * That is, if \f$ out \f$ is the result, \f$ out(g,p) = grid[p][f(g,p)] \f$. Assumes therefore, that the
    * values stored in the filtration value corresponds to indices existing in the given grid.
    *
-   * @tparam U Signed arithmetic type.
+   * @tparam RandomAccessArray A range of values convertible into `U`. Has to implement
+   * a size and operator[] method and a `value_type` definition.
+   * @tparam U Signed arithmetic type. Default: `RandomAccessArray::value_type`.
    * @param g Filtration value storing coordinates compatible with `grid`.
-   * @param grid Vector of vector.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @return Filtration value \f$ out \f$ whose entry correspond to \f$ out(g,p) = grid[p][f(g,p)] \f$.
    */
-  template <typename U>
+  template <class RandomAccessArray, typename U = typename RandomAccessArray::value_type>
   friend Multi_parameter_generator<U> evaluate_coordinates_in_grid(const Multi_parameter_generator &g,
-                                                                   const std::vector<std::vector<U> > &grid)
+                                                                   const std::vector<RandomAccessArray> &grid)
   {
     GUDHI_CHECK(grid.size() >= g.num_parameters(),
                 std::invalid_argument(
