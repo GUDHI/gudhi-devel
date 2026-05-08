@@ -376,8 +376,10 @@ class Simplex_tree {
                                    Dimension_simplex_iterator());
   }
 
-  /** \brief Returns a range over the simplices of the simplicial complex,
-   * in the order of the filtration.
+  /** \brief Returns a range over the simplices of the simplicial complex, in the order of the filtration.
+   * If the `operator<` method of the filtration value type does not induce a total ordering of the simplices,
+   * be sure to call @ref initialize_filtration(Comparator&&, Ignorer&&) const "initialize_filtration" with a proper
+   * comparison operator at some point before. Otherwise the behaviour is undefined.
    *
    * The filtration is a monotonic function \f$ f: \mathbf{K} \rightarrow \mathbb{R} \f$, i.e. if two simplices
    * \f$\tau\f$ and \f$\sigma\f$ satisfy \f$\tau \subseteq \sigma\f$ then
@@ -393,6 +395,13 @@ class Simplex_tree {
    * was initialized, please call `clear_filtration()` or `initialize_filtration()` to recompute it.
    *
    * @note Not thread safe
+   * @par
+   * @note If @ref filtration_simplex_range or
+   * @ref initialize_filtration(Comparator&&, Ignorer&&) const "initialize_filtration" was never called before, this
+   * method will try to initialize the filtration order, assuming that `operator<` for @ref Filtration_value induces a
+   * total order of the simplices. If the assumption is wrong,
+   * @ref initialize_filtration(Comparator&&, Ignorer&&) const "initialize_filtration" has to be used before, otherwise
+   * the behaviour is undefined.
    */
   Filtration_simplex_range const& filtration_simplex_range(Indexing_tag = Indexing_tag()) const {
     maybe_initialize_filtration();
