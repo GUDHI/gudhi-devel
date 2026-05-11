@@ -27,7 +27,7 @@ namespace random {
    * @defgroup reproducibility Reproducibility
    * 
    * Some of the GUDHI functionnalities are using randomness. Here is a list of classes and methods that are using
-   * internally @ref Gudhi::random::Random
+   * internally @ref Gudhi::random::get_default_random (and are thus affected by @ref Gudhi::random::set_seed):
    * 
    * - @ref Gudhi::subsampling::choose_n_farthest_points
    * - @ref Gudhi::subsampling::pick_n_random_points
@@ -62,8 +62,9 @@ namespace random {
    * - Gudhi::random::generate_points_on_klein_bottle_variant_5D
    * - Gudhi::coxeter_triangulation::random_orthogonal_matrix
    * 
-   * In order to reproduce the results, one can set the seed of the default CGAL random generator, that is used
-   * internally in GUDHI, by doing:
+   * In order to reproduce the results, one can set the seed of the
+   * <a href="https://doc.cgal.org/latest/Generator/classCGAL_1_1Random.html">default CGAL random generator</a>, that
+   * is used internally in GUDHI, by doing:
    * 
    * @code{.cpp}
    * #include <CGAL/Random.h>
