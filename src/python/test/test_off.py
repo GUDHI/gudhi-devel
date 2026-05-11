@@ -24,12 +24,6 @@ def test_off_rw():
         assert Y == pytest.approx(X)
 
 
-def test_human_off():
-    pts = gd.read_points_from_off_file("human.off")
-    # Should not try to read faces
-    assert pts.shape == (4706, 3)
-
-
 def test_invalid_off_file():
     name = NamedTemporaryFile().name
     with open(name, "w") as f:

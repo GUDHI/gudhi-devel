@@ -63,7 +63,6 @@ jobs:
           python -m pip install --user numpy~=${{ matrix.numpy-version }}
           python -m pip install --user pytest scipy matplotlib scikit-learn POT wheelhouse/*.whl
           python -c "import gudhi; print(gudhi.__version__)"
-          cp data/points/human.off .
           python -m pytest src/python/test/test_alpha_complex.py
           python -m pytest src/python/test/test_betti_curve_representations.py
           python -m pytest src/python/test/test_bottleneck_distance.py
