@@ -193,7 +193,8 @@ class SimplexTree(t._Simplex_tree_python_interface):
             original filtration values due to the internal transformation (scaling to [-2,-1]) that is
             performed on these values during the computation of extended persistence.
 
-        This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-extended-persistence.ipynb>`_
+        This
+        `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-extended-persistence.ipynb>`_
         explains how to compute an extension of persistence called extended persistence.
         """
         self._pers = t._Simplex_tree_persistence_interface(self, False)
