@@ -1857,7 +1857,13 @@ class Degree_rips_bifiltration
     auto project_generator = [&](size_type g) -> U {
       U projection = 0;
       std::size_t size = std::min(x.size(), Degree_rips_bifiltration::num_parameters());
-      for (std::size_t i = 0; i < size; i++) projection += x[i] * static_cast<U>(f(g, i));
+      for (std::size_t i = 0; i < size; i++) {
+        // workaround -Ofast optimization which is default on Windows
+        // otherwise 0 += Nan is equal to 0 with -Ofast which we don't want
+        // even though I am not sure why `compute_norm` works without, perhaps the difference is the cast?
+        if (_is_nan(f(g, i))) return f(g, i);
+        projection += x[i] * static_cast<U>(f(g, i));
+      }
       return projection;
     };
 
