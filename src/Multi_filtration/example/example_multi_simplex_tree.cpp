@@ -8,6 +8,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <cassert>
 #include <initializer_list>
 
 #include <gudhi/Simplex_tree.h>
@@ -36,14 +37,14 @@ int main()
   auto triangle012 = {0, 1, 2};
   auto edge03 = {0, 3};
   // Inserts the triangle with multi filtration value {1,2,3}
-  st.insert_simplex_and_subfaces(triangle012, Multi_filtration_value({1, 2, 3}));
+  st.insert_simplex_and_subfaces(triangle012, Multi_filtration_value({1., 2., 3.}));
   // The filtration value can also be given as an initializer list
-  st.insert_simplex_and_subfaces(edge03, std::initializer_list<double>{4, 5, 6});
+  st.insert_simplex_and_subfaces(edge03, {4., 5., 6.});
 
   auto edge02 = {0, 2};
   ST::Simplex_handle e = st.find(edge02);
   // Multi_filtration_value has an operator<<
   std::cout << st.filtration(e) << std::endl;
-  GUDHI_CHECK(st.filtration(st.find(edge03)) == ST::Filtration_value({4, 5, 6}),
-              "edge03 does not have the right value.");
+
+  assert(st.filtration(st.find(edge03)) == ST::Filtration_value({4., 5., 6.}));
 }

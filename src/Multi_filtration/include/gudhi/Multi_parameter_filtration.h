@@ -137,10 +137,21 @@ class Multi_parameter_filtration
    * @brief Builds filtration value with one generator that is initialized with the given range. The number of
    * parameters are therefore deduced from the length of the range.
    *
+   * @param range Values of the generator.
+   */
+  Multi_parameter_filtration(std::initializer_list<T> range)
+      : generators_(range.begin(), range.end()),
+        generator_view_(generators_.data(), generators_.empty() ? 0 : 1, generators_.size())
+  {}
+
+  /**
+   * @brief Builds filtration value with one generator that is initialized with the given range. The number of
+   * parameters are therefore deduced from the length of the range.
+   *
    * @tparam ValueRange Range of types convertible to `T`. Should have a begin() and end() method.
    * @param range Values of the generator.
    */
-  template <class ValueRange = std::initializer_list<T>, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
+  template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   Multi_parameter_filtration(const ValueRange &range)
       : generators_(range.begin(), range.end()),
         generator_view_(generators_.data(), generators_.empty() ? 0 : 1, generators_.size())

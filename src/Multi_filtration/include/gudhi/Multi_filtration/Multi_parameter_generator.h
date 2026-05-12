@@ -92,6 +92,15 @@ class Multi_parameter_generator
    * @brief Builds generator that is initialized with the given range. The number of
    * parameters are therefore deduced from the length of the range.
    *
+   * @param range Values of the generator.
+   */
+  Multi_parameter_generator(std::initializer_list<T> range) : generator_(range.begin(), range.end())
+  {}
+
+  /**
+   * @brief Builds generator that is initialized with the given range. The number of
+   * parameters are therefore deduced from the length of the range.
+   *
    * @tparam ValueRange Range of types convertible to `T`. Should have a begin() and end() method.
    * @param range Values of the generator.
    */

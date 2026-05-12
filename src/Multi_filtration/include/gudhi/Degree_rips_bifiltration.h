@@ -112,10 +112,21 @@ class Degree_rips_bifiltration
    * @brief Builds filtration value with one generator `(val, i)`, where `val` and `i` are the two first elements
    * of the given range. Note that `i` has to be 0.
    *
+   * @param range Values of the generator. The range has to have at least two elements.
+   */
+  Degree_rips_bifiltration(std::initializer_list<T> range) : generators_(1, *(range.begin()))
+  {
+    GUDHI_CHECK(*(std::next(range.begin())) == 0, std::invalid_argument("Second value of the range has to be 0"));
+  }
+
+  /**
+   * @brief Builds filtration value with one generator `(val, i)`, where `val` and `i` are the two first elements
+   * of the given range. Note that `i` has to be 0.
+   *
    * @tparam ValueRange Range of types convertible to `T`. Should have a begin() method.
    * @param range Values of the generator. The range has to have at least two elements.
    */
-  template <class ValueRange = std::initializer_list<T>, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
+  template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   Degree_rips_bifiltration(const ValueRange &range) : generators_(1, *(range.begin()))
   {
     GUDHI_CHECK(*(std::next(range.begin())) == 0, std::invalid_argument("Second value of the range has to be 0"));
