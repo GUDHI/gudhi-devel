@@ -2051,7 +2051,7 @@ class Dynamic_multi_parameter_filtration
    * @return Filtration value \f$ out \f$ whose entry correspond to the indices of the projected values. That is,
    * the projection of \f$ f(g,p) \f$ is \f$ grid[p][out(g,p)] \f$.
    */
-  template <typename OutValue = std::int32_t, class RandomAccessArray>
+  template <class RandomAccessArray, typename OutValue = std::int32_t>
   friend Dynamic_multi_parameter_filtration<OutValue, Co, Ensure1Criticality> compute_coordinates_in_grid(
       Dynamic_multi_parameter_filtration f,
       const std::vector<RandomAccessArray> &grid)
@@ -2339,16 +2339,6 @@ class Dynamic_multi_parameter_filtration
  private:
   size_type numberOfParameters_;  /**< Number of parameters. */
   Underlying_container generators_; /**< Container of the filtration value elements. */
-
-  constexpr static bool _is_nan(T val)
-  {
-    if constexpr (std::is_integral_v<T>) {
-      // to avoid Windows issue which don't know how to cast integers for cmath methods
-      return false;
-    } else {
-      return std::isnan(val);
-    }
-  }
 
   /**
    * @brief Verifies if @p b is strictly contained in the positive cone originating in `a`.

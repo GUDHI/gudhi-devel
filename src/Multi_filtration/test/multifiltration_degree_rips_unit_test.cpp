@@ -8,7 +8,6 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <cmath>      //std::isnan
 #include <cstddef>    //std::size_t
 #include <cstdint>    //std::int32_t
 #include <limits>     //std::numerical_limits
@@ -23,6 +22,7 @@
 #include <boost/mpl/list.hpp>
 
 #include <gudhi/Debug_utils.h>
+#include <gudhi/Multi_filtration/multi_filtration_utils.h>  // _is_nan with Windows fix
 #include <gudhi/Degree_rips_bifiltration.h>
 #include <gudhi/Simplex_tree/filtration_value_utils.h>
 #include <gudhi/Multi_parameter_filtration.h>
@@ -33,6 +33,7 @@ using Gudhi::multi_filtration::as_type;
 using Gudhi::multi_filtration::Degree_rips_bifiltration;
 using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
 using Gudhi::multi_filtration::Multi_parameter_filtration;
+using Gudhi::multi_filtration::_is_nan;
 
 typedef boost::mpl::list<double, float, int> list_of_tested_variants;
 
@@ -594,7 +595,7 @@ void test_operators()
   res = f3 - f3;
   BOOST_CHECK_EQUAL(res(0, 1), 0);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN)
-    BOOST_CHECK(std::isnan(res(0, 0)));
+    BOOST_CHECK(_is_nan(res(0, 0)));
   else
     BOOST_CHECK_EQUAL(res(0, 0), 0);
   res = f3 - f4;
@@ -629,7 +630,7 @@ void test_operators()
   res = f3 + f4;
   BOOST_CHECK_EQUAL(res(0, 1), 0);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN)
-    BOOST_CHECK(std::isnan(res(0, 0)));
+    BOOST_CHECK(_is_nan(res(0, 0)));
   else
     BOOST_CHECK_EQUAL(res(0, 0), 0);
   res = f3 + f3;
@@ -647,7 +648,7 @@ void test_operators()
   res = T(0) * f3;
   BOOST_CHECK_EQUAL(res(0, 1), 0);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(std::isnan(res(0, 0)));
+    BOOST_CHECK(_is_nan(res(0, 0)));
   } else {
     BOOST_CHECK_EQUAL(res(0, 0), 0);
   }
@@ -701,7 +702,7 @@ void test_operators()
   res = f3 / T(0);
   BOOST_CHECK_EQUAL(res(0, 1), f4(0, 1));
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(std::isnan(res(0, 0)));
+    BOOST_CHECK(_is_nan(res(0, 0)));
   } else {
     BOOST_CHECK_EQUAL(res(0, 0), 0);
   }
@@ -736,19 +737,19 @@ void test_operators()
   res = f3 / f3;
   BOOST_CHECK_EQUAL(res(0, 1), 0);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN)
-    BOOST_CHECK(std::isnan(res(0, 0)));
+    BOOST_CHECK(_is_nan(res(0, 0)));
   else
     BOOST_CHECK_EQUAL(res(0, 0), 0);
   res = f3 / f4;
   BOOST_CHECK_EQUAL(res(0, 1), 0);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN)
-    BOOST_CHECK(std::isnan(res(0, 0)));
+    BOOST_CHECK(_is_nan(res(0, 0)));
   else
     BOOST_CHECK_EQUAL(res(0, 0), 0);
   res = f / F({0, 0, 0});
   BOOST_CHECK_EQUAL(res(0, 1), 0);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN)
-    BOOST_CHECK(std::isnan(res(0, 0)));
+    BOOST_CHECK(_is_nan(res(0, 0)));
   else
     BOOST_CHECK_EQUAL(res(0, 0), 0);
 }
@@ -1304,9 +1305,9 @@ void test_friends()
     std::vector<T> v = {nan, 0, 2, 1, nan, 2};
     F f2(v.begin(), v.end(), 3);
 
-    BOOST_CHECK(std::isnan(compute_norm(f2)));
-    BOOST_CHECK(std::isnan(compute_euclidean_distance_to(f2, std::initializer_list<T>{2, 0})));
-    BOOST_CHECK(std::isnan(compute_linear_projection(f2, {3, 0})));
+    BOOST_CHECK(_is_nan(compute_norm(f2)));
+    BOOST_CHECK(_is_nan(compute_euclidean_distance_to(f2, std::initializer_list<T>{2, 0})));
+    BOOST_CHECK(_is_nan(compute_linear_projection(f2, {3, 0})));
     F f2f = factorize_below(f2);
     BOOST_CHECK_EQUAL(f2f(0, 0), 2);
     BOOST_CHECK_EQUAL(f2f(0, 1), 0);

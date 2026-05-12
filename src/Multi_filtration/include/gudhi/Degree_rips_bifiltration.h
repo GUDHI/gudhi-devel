@@ -1956,7 +1956,7 @@ class Degree_rips_bifiltration
    * @return Filtration value \f$ out \f$ whose entry correspond to the indices of the projected values. That is,
    * the projection of \f$ f(g,p) \f$ is \f$ grid[p][out(g,p)] \f$.
    */
-  template <typename OutValue = std::int32_t, class RandomAccessArray>
+  template <class RandomAccessArray, typename OutValue = std::int32_t>
   friend Degree_rips_bifiltration<OutValue, Co, Ensure1Criticality> compute_coordinates_in_grid(
       Degree_rips_bifiltration f,
       const std::vector<RandomAccessArray> &grid)
