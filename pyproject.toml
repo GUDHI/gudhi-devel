@@ -64,9 +64,6 @@ keywords = [
     "deep-learning",
 ]
 
-[project.optional-dependencies]
-visu = [ "matplotlib" ]
-
 [dependency-groups]
 build = [
     "numpy>=1.21.6",
