@@ -1843,120 +1843,6 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Computes the smallest (resp. the greatest if `Co` is true) scalar product of the all generators with the
-   * given vector.
-   *
-   * @tparam U Arithmetic type of the result. Default value: `T`.
-   * @param f Filtration value.
-   * @param x Vector of coefficients.
-   * @return Scalar product of @p f with @p x.
-   */
-  template <typename U = T>
-  friend U compute_linear_projection(const Degree_rips_bifiltration &f, const std::vector<U> &x)
-  {
-    auto project_generator = [&](size_type g) -> U {
-      U projection = 0;
-      std::size_t size = std::min(x.size(), Degree_rips_bifiltration::num_parameters());
-      for (std::size_t i = 0; i < size; i++) {
-        // workaround -Ofast optimization which is default on Windows
-        // otherwise 0 += Nan is equal to 0 with -Ofast which we don't want
-        // even though I am not sure why `compute_norm` works without, perhaps the difference is the cast?
-        if (_is_nan(f(g, i))) return f(g, i);
-        projection += x[i] * static_cast<U>(f(g, i));
-      }
-      return projection;
-    };
-
-    if (f.num_generators() == 1) return project_generator(0);
-
-#ifdef GUDHI_USE_TBB
-    std::vector<U> projections(f.num_generators());
-    tbb::parallel_for(size_type{0}, f.num_generators(), [&](size_type g) { projections[g] = project_generator(g); });
-    if constexpr (Co) {
-      return *std::max_element(projections.begin(), projections.end());
-    } else {
-      return *std::min_element(projections.begin(), projections.end());
-    }
-#else
-    if constexpr (Co) {
-      U projection = std::numeric_limits<U>::lowest();
-      for (size_type g = 0; g < f.num_generators(); ++g) {
-        // Order in the max important to spread possible NaNs
-        projection = std::max(project_generator(g), projection);
-      }
-      return projection;
-    } else {
-      U projection = std::numeric_limits<U>::max();
-      for (size_type g = 0; g < f.num_generators(); ++g) {
-        // Order in the min important to spread possible NaNs
-        projection = std::min(project_generator(g), projection);
-      }
-      return projection;
-    }
-#endif
-  }
-
-  /**
-   * @brief Computes the euclidean distance from the first parameter to the second parameter as the minimum of
-   * all Euclidean distances between a generator of @p f and a generator of @p other.
-   *
-   * @param f Source filtration value.
-   * @param other Target filtration value.
-   * @return Euclidean distance between @p f and @p other.
-   */
-  template <typename U = T>
-  friend U compute_euclidean_distance_to(const Degree_rips_bifiltration &f, const Degree_rips_bifiltration &other)
-  {
-    // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
-    if constexpr (Ensure1Criticality) {
-      return _compute_frobenius_norm(Degree_rips_bifiltration::num_parameters(),
-                                     [&](size_type p) -> T { return f(0, p) - other(0, p); });
-    } else {
-      U res = std::numeric_limits<U>::max();
-      for (size_type g1 = 0; g1 < f.num_generators(); ++g1) {
-        for (size_type g2 = 0; g2 < other.num_generators(); ++g2) {
-          // Euclidean distance as a Frobenius norm with matrix 1 x p and values 'f(g1, p) - other(g2, p)'
-          // Order in the min important to spread possible NaNs
-          res = std::min(_compute_frobenius_norm(Degree_rips_bifiltration::num_parameters(),
-                                                 [&](size_type p) -> T { return f(g1, p) - other(g2, p); }),
-                         res);
-        }
-      }
-      return res;
-    }
-  }
-
-  /**
-   * @brief Computes the norm of the given filtration value.
-   *
-   * The filtration value is seen as a \f$ num_generators x num_parameters \f$ matrix and a standard Frobenius norm
-   * is computed from it: the square root of the sum of the squares of all elements in the matrix.
-   *
-   * @param f Filtration value.
-   * @return The norm of @p f.
-   */
-  template <typename U = T>
-  friend U compute_norm(const Degree_rips_bifiltration &f)
-  {
-    // Frobenius norm with matrix g x p based on Euclidean norm
-
-    if (f.num_generators() == 1) return f.generators_[0];
-
-    U out = 0;
-    for (size_type g = 0; g < f.num_generators(); ++g) {
-      out += g * g;
-      out += f.generators_[g] * f.generators_[g];
-    }
-
-    if constexpr (std::is_integral_v<U>) {
-      // to avoid Windows issue that don't know how to cast integers for cmath methods
-      return std::sqrt(static_cast<double>(out));
-    } else {
-      return std::sqrt(out);
-    }
-  }
-
-  /**
    * @brief Computes the coordinates in the given grid, corresponding to the nearest values of the entries
    * in the given filtration value.
    * The grid has to be represented as a 2-dimensional array of ordered values convertible into `OutValue`. An index
@@ -2290,6 +2176,9 @@ class Degree_rips_bifiltration
     U out = 0;
     for (size_type p = 0; p < number_of_elements; ++p) {
       T v = std::forward<F>(norm)(p);
+      // workaround -Ofast optimization which is default on Windows
+      // otherwise 0 += NaN can be equal to 0 with -Ofast which we don't want
+      if (_is_nan(v)) return v;
       out += v * v;
     }
     if constexpr (std::is_integral_v<U>) {

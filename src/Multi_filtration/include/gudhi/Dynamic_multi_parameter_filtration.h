@@ -18,7 +18,6 @@
 #define MF_DYNAMIC_MULTI_PARAMETER_FILTRATION_H_
 
 #include <algorithm>    //std::lower_bound
-#include <cmath>        //std::isnan, std::min
 #include <cstddef>      //std::size_t
 #include <cstdint>      //std::int32_t, std::uint8_t
 #include <cstring>      //memcpy
@@ -1946,104 +1945,6 @@ class Dynamic_multi_parameter_filtration
     if (isPlusInf) result = {Generator::inf()};
 
     return Dynamic_multi_parameter_filtration(std::move(result), f.num_parameters());
-  }
-
-  /**
-   * @brief Computes the smallest (resp. the greatest if `Co` is true) scalar product of the all generators with the
-   * given vector.
-   *
-   * @tparam U Arithmetic type of the result. Default value: `T`.
-   * @param f Filtration value.
-   * @param x Vector of coefficients.
-   * @return Scalar product of @p f with @p x.
-   */
-  template <typename U = T>
-  friend U compute_linear_projection(const Dynamic_multi_parameter_filtration &f, const std::vector<U> &x)
-  {
-    if (f.num_generators() == 1) return compute_linear_projection(f.generators_[0], x);
-
-#ifdef GUDHI_USE_TBB
-    std::vector<U> projections(f.num_generators());
-    tbb::parallel_for(size_type{0}, f.num_generators(), [&](size_type g) {
-      projections[g] = compute_linear_projection(f.generators_[g], x);
-    });
-    if constexpr (Co) {
-      return *std::max_element(projections.begin(), projections.end());
-    } else {
-      return *std::min_element(projections.begin(), projections.end());
-    }
-#else
-    if constexpr (Co) {
-      U projection = std::numeric_limits<U>::lowest();
-      for (const Generator &g : f.generators_) {
-        // Order in the max important to spread possible NaNs
-        projection = std::max(compute_linear_projection(g, x), projection);
-      }
-      return projection;
-    } else {
-      U projection = std::numeric_limits<U>::max();
-      for (const Generator &g : f.generators_) {
-        // Order in the min important to spread possible NaNs
-        projection = std::min(compute_linear_projection(g, x), projection);
-      }
-      return projection;
-    }
-#endif
-  }
-
-  /**
-   * @brief Computes the euclidean distance from the first parameter to the second parameter as the minimum of
-   * all Euclidean distances between a generator of @p f and a generator of @p other.
-   *
-   * @param f Source filtration value.
-   * @param other Target filtration value.
-   * @return Euclidean distance between @p f and @p other.
-   */
-  template <typename U = T>
-  friend U compute_euclidean_distance_to(const Dynamic_multi_parameter_filtration &f,
-                                         const Dynamic_multi_parameter_filtration &other)
-  {
-    GUDHI_CHECK(f.num_parameters() == other.num_parameters(),
-                std::invalid_argument("We cannot compute the distance between two points of different dimensions."));
-
-    // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
-    if constexpr (Ensure1Criticality) {
-      return compute_euclidean_distance_to(f.generators_[0], other.generators_[0]);
-    } else {
-      U res = std::numeric_limits<U>::max();
-      for (const Generator &g1 : f.generators_) {
-        for (const Generator &g2 : other.generators_) {
-          // Order in the min important to spread possible NaNs
-          res = std::min(compute_euclidean_distance_to(g1, g2), res);
-        }
-      }
-      return res;
-    }
-  }
-
-  /**
-   * @brief Computes the norm of the given filtration value.
-   *
-   * The filtration value is seen as a \f$ num_generators x num_parameters \f$ matrix and a standard Frobenius norm
-   * is computed from it: the square root of the sum of the squares of all elements in the matrix.
-   *
-   * @param f Filtration value.
-   * @return The norm of @p f.
-   */
-  template <typename U = T>
-  friend U compute_norm(const Dynamic_multi_parameter_filtration &f)
-  {
-    // Frobenius norm with matrix g x p based on Euclidean norm
-    U out = 0;
-    for (const Generator &g : f.generators_) {
-      out += compute_squares(g);
-    }
-    if constexpr (std::is_integral_v<U>) {
-      // to avoid Windows issue that don't know how to cast integers for cmath methods
-      return std::sqrt(static_cast<double>(out));
-    } else {
-      return std::sqrt(out);
-    }
   }
 
   /**

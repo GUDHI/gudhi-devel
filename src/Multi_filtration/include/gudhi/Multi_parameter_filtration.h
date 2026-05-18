@@ -42,13 +42,6 @@
 
 namespace Gudhi::multi_filtration {
 
-// declaration needed pre C++20 for friends with templates defined inside a class
-template <typename U>
-U compute_linear_projection();
-template <typename U>
-U compute_euclidean_distance_to();
-template <typename U>
-U compute_norm();
 template <typename OutValue, typename U>
 void compute_coordinates_in_grid();
 template <typename U>
@@ -1890,103 +1883,6 @@ class Multi_parameter_filtration
   }
 
   /**
-   * @brief Computes the smallest (resp. the greatest if `Co` is true) scalar product of the all generators with the
-   * given vector.
-   *
-   * @tparam U Arithmetic type of the result. Default value: `T`.
-   * @param f Filtration value.
-   * @param x Vector of coefficients.
-   * @return Scalar product of @p f with @p x.
-   */
-  template <typename U = T>
-  friend U compute_linear_projection(const Multi_parameter_filtration &f, const std::vector<U> &x)
-  {
-    auto project_generator = [&](size_type g) -> U {
-      U projection = 0;
-      std::size_t size = std::min(x.size(), f.num_parameters());
-      for (std::size_t i = 0; i < size; i++) projection += x[i] * static_cast<U>(f(g, i));
-      return projection;
-    };
-
-    if (f.num_generators() == 1) return project_generator(0);
-
-#ifdef GUDHI_USE_TBB
-    std::vector<U> projections(f.num_generators());
-    tbb::parallel_for(size_type{0}, f.num_generators(), [&](size_type g) { projections[g] = project_generator(g); });
-    if constexpr (Co) {
-      return *std::max_element(projections.begin(), projections.end());
-    } else {
-      return *std::min_element(projections.begin(), projections.end());
-    }
-#else
-    if constexpr (Co) {
-      U projection = std::numeric_limits<U>::lowest();
-      for (size_type g = 0; g < f.num_generators(); ++g) {
-        // Order in the max important to spread possible NaNs
-        projection = std::max(project_generator(g), projection);
-      }
-      return projection;
-    } else {
-      U projection = std::numeric_limits<U>::max();
-      for (size_type g = 0; g < f.num_generators(); ++g) {
-        // Order in the min important to spread possible NaNs
-        projection = std::min(project_generator(g), projection);
-      }
-      return projection;
-    }
-#endif
-  }
-
-  /**
-   * @brief Computes the euclidean distance from the first parameter to the second parameter as the minimum of
-   * all Euclidean distances between a generator of @p f and a generator of @p other.
-   *
-   * @param f Source filtration value.
-   * @param other Target filtration value.
-   * @return Euclidean distance between @p f and @p other.
-   */
-  template <typename U = T>
-  friend U compute_euclidean_distance_to(const Multi_parameter_filtration &f, const Multi_parameter_filtration &other)
-  {
-    GUDHI_CHECK(f.num_parameters() == other.num_parameters(),
-                std::invalid_argument("We cannot compute the distance between two points of different dimensions."));
-
-    // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
-    if constexpr (Ensure1Criticality) {
-      return _compute_frobenius_norm(f.num_parameters(),
-                                     [&](size_type p) -> T { return f.generators_[p] - other.generators_[p]; });
-    } else {
-      U res = std::numeric_limits<U>::max();
-      for (size_type g1 = 0; g1 < f.num_generators(); ++g1) {
-        for (size_type g2 = 0; g2 < other.num_generators(); ++g2) {
-          // Euclidean distance as a Frobenius norm with matrix 1 x p and values 'f(g1, p) - other(g2, p)'
-          // Order in the min important to spread possible NaNs
-          res = std::min(
-              _compute_frobenius_norm(f.num_parameters(), [&](size_type p) -> T { return f(g1, p) - other(g2, p); }),
-              res);
-        }
-      }
-      return res;
-    }
-  }
-
-  /**
-   * @brief Computes the norm of the given filtration value.
-   *
-   * The filtration value is seen as a \f$ num_generators x num_parameters \f$ matrix and a standard Frobenius norm
-   * is computed from it: the square root of the sum of the squares of all elements in the matrix.
-   *
-   * @param f Filtration value.
-   * @return The norm of @p f.
-   */
-  template <typename U = T>
-  friend U compute_norm(const Multi_parameter_filtration &f)
-  {
-    // Frobenius norm with matrix g x p based on Euclidean norm
-    return _compute_frobenius_norm(f.num_entries(), [&](size_type i) -> T { return f.generators_[i]; });
-  }
-
-  /**
    * @brief Computes the coordinates in the given grid, corresponding to the nearest values of the entries
    * in the given filtration value.
    * The grid has to be represented as a 2-dimensional array of ordered values convertible into `OutValue`. An index
@@ -2609,24 +2505,6 @@ class Multi_parameter_filtration
       if (!isInf && !isMinusInf && !isNan) return true;
     }
     return false;
-  }
-
-  template <class F, typename U = T>
-  static U _compute_frobenius_norm(size_type number_of_elements, F &&norm)
-  {
-    if (number_of_elements == 1) return std::forward<F>(norm)(0);
-
-    U out = 0;
-    for (size_type p = 0; p < number_of_elements; ++p) {
-      T v = std::forward<F>(norm)(p);
-      out += v * v;
-    }
-    if constexpr (std::is_integral_v<U>) {
-      // to avoid Windows issue that don't know how to cast integers for cmath methods
-      return std::sqrt(static_cast<double>(out));
-    } else {
-      return std::sqrt(out);
-    }
   }
 };
 

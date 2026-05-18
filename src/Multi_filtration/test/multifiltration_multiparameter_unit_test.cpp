@@ -24,11 +24,20 @@
 #include <gudhi/Multi_parameter_filtration.h>
 #include <gudhi/Dynamic_multi_parameter_filtration.h>
 #include <gudhi/Multi_filtration/multi_filtration_conversions.h>
+#include <gudhi/Multi_filtration/multi_filtration_products.h>
 
 using Gudhi::multi_filtration::Multi_parameter_filtration;
 using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
 using Gudhi::multi_filtration::as_type;
 using Gudhi::multi_filtration::_is_nan;
+
+// declaration needed pre C++20
+template <typename U, class MultiFiltrationValue, class CoefficientRange>
+U compute_linear_projection();
+template <typename U, class MultiFiltrationValue>
+U compute_euclidean_distance_to();
+template <typename U, class MultiFiltrationValue>
+U compute_norm();
 
 typedef boost::mpl::list<double, float, int> list_of_tested_variants;
 
@@ -1126,9 +1135,13 @@ void test_friends(){
   F f({0, 1, 2});
 
   BOOST_CHECK_EQUAL(compute_norm(f), static_cast<T>(std::sqrt(T(5))));
-  BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, std::initializer_list<T>{2, 3, 5}),
+  BOOST_CHECK_EQUAL(compute_norm<double>(f), std::sqrt(double(5.)));
+  BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, {2, 3, 5}),
                     static_cast<T>(std::sqrt(T(17))));
+  BOOST_CHECK_EQUAL(compute_euclidean_distance_to<double>(f, {2, 3, 5}),
+                    std::sqrt(double(17.)));
   BOOST_CHECK_EQUAL(compute_linear_projection(f, {2, 3, 5, 9}), 13);
+  BOOST_CHECK_EQUAL(compute_linear_projection<double>(f, {2, 3, 5, 9}), 13.);
   BOOST_CHECK(factorize_below(f) == f);
   BOOST_CHECK(factorize_above(f) == f);
 
@@ -1138,7 +1151,7 @@ void test_friends(){
     BOOST_CHECK_EQUAL(f.num_parameters(), 3);
 
     BOOST_CHECK_EQUAL(compute_norm(f), static_cast<T>(std::sqrt(T(25))));
-    BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, std::initializer_list<T>{2, 3, 5}),
+    BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, {2, 3, 5}),
                       static_cast<T>(std::sqrt(T(10))));
     BOOST_CHECK_EQUAL(compute_linear_projection(f, {2, 3, 5, 9}), 13);
     BOOST_CHECK(factorize_below(f) == F({0, 0, 2}));
@@ -1150,7 +1163,7 @@ void test_friends(){
       F f2(v.begin(), v.end(), 3);
 
       BOOST_CHECK(_is_nan(compute_norm(f2)));
-      BOOST_CHECK(_is_nan(compute_euclidean_distance_to(f2, std::initializer_list<T>{2, 3, 5})));
+      BOOST_CHECK(_is_nan(compute_euclidean_distance_to(f2, {2, 3, 5})));
       BOOST_CHECK(_is_nan(compute_linear_projection(f2, {2, 3, 5, 9})));
       auto bf2 = factorize_below(f2);
       BOOST_CHECK_EQUAL(bf2(0, 0), 0);

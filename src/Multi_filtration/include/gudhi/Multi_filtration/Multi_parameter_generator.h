@@ -41,12 +41,6 @@
 
 namespace Gudhi::multi_filtration {
 
-// declaration needed pre C++20 for friends with templates defined inside a class
-template <typename U>
-U compute_euclidean_distance_to();
-template <typename U>
-U compute_norm();
-
 /**
  * private
  * @class Multi_parameter_generator Multi_parameter_generator.h gudhi/Multi_parameter_generator.h
@@ -1407,74 +1401,6 @@ class Multi_parameter_generator
   }
 
   // FONCTIONNALITIES
-
-  /**
-   * @brief Computes the scalar product of the generator with the given vector.
-   *
-   * @tparam U Arithmetic type of the result. Default value: `T`.
-   * @param g Filtration value.
-   * @param x Vector of coefficients.
-   * @return Scalar product of @p f with @p x.
-   */
-  template <typename U = T>
-  friend U compute_linear_projection(const Multi_parameter_generator &g, const std::vector<U> &x)
-  {
-    U projection = 0;
-    std::size_t size = std::min(x.size(), g.num_parameters());
-    for (std::size_t i = 0; i < size; i++) projection += x[i] * static_cast<U>(g[i]);
-    return projection;
-  }
-
-  /**
-   * @brief Computes the euclidean distance from the first parameter to the second parameter.
-   *
-   * @param g Source filtration value.
-   * @param other Target filtration value.
-   * @return Euclidean distance between @p f and @p other.
-   */
-  template <typename U = T>
-  friend U compute_euclidean_distance_to(const Multi_parameter_generator &g, const Multi_parameter_generator &other)
-  {
-    if (!g.is_finite() || !other.is_finite()) {
-      if constexpr (std::numeric_limits<T>::has_quiet_NaN)
-        return std::numeric_limits<T>::quiet_NaN();
-      else
-        return T_inf;
-    }
-
-    GUDHI_CHECK(g.num_parameters() == other.num_parameters(),
-                std::invalid_argument("We cannot compute the distance between two points of different dimensions."));
-
-    if (g.num_parameters() == 1) return g[0] - other[0];
-
-    U out = 0;
-    for (size_type p = 0; p < g.num_parameters(); ++p) {
-      T v = g[p] - other[p];
-      out += v * v;
-    }
-    if constexpr (std::is_integral_v<U>) {
-      // to avoid Windows issue that don't know how to cast integers for cmath methods
-      return std::sqrt(static_cast<double>(out));
-    } else {
-      return std::sqrt(out);
-    }
-  }
-
-  /**
-   * @brief Computes the sum of the squares of all values in the given generator.
-   *
-   * @param g Filtration value.
-   * @return The norm of @p f.
-   */
-  template <typename U = T>
-  friend U compute_squares(const Multi_parameter_generator &g)
-  {
-    U out = 0;
-    for (size_type p = 0; p < g.num_parameters(); ++p) {
-      out += g[p] * g[p];
-    }
-    return out;
-  }
 
   /**
    * @brief Computes the values in the given grid corresponding to the coordinates given by the given generator.
