@@ -53,8 +53,8 @@ bool _is_less(U a, U b)
  *
  * @tparam U Arithmetic type of the result.
  * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
- * operator(g, p). For example: @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or
- * @ref Degree_rips_bifiltration.
+ * operator(g, p), as well as has_negative_cones() and type definition `size_type`. For example:
+ * @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or @ref Degree_rips_bifiltration.
  * @tparam CoefficientRange Range of values convertible into `U` with a begin() and size() method.
  * @param f Multi filtration value.
  * @param x Vector of coefficients.
@@ -117,8 +117,8 @@ U compute_linear_projection(const MultiFiltrationValue &f, const CoefficientRang
  * scalar product of all its generators with the given range.
  *
  * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
- * operator(g, p). For example: @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or
- * @ref Degree_rips_bifiltration.
+ * operator(g, p), as well as has_negative_cones() and type definition `size_type`. For example:
+ * @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or @ref Degree_rips_bifiltration.
  * @tparam CoefficientRange Range of values convertible into `U` with a begin() and size() method.
  * @param f Multi filtration value.
  * @param x Vector of coefficients.
@@ -171,8 +171,8 @@ T _compute_frobenius_norm(size_type number_of_elements, F &&norm)
  *
  * @tparam U Arithmetic type of the result.
  * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
- * operator(g, p). For example: @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or
- * @ref Degree_rips_bifiltration.
+ * operator(g, p), as well as ensures_1_criticality() and type definitions `size_type` and `value_type`. For example:
+ * @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or @ref Degree_rips_bifiltration.
  * @param f1 Source filtration value.
  * @param f2 Target filtration value.
  * @return Euclidean distance between @p f1 and @p f2 with type `U`.
@@ -213,9 +213,9 @@ U compute_euclidean_distance_to(const MultiFiltrationValue &f1, const MultiFiltr
  * @brief Computes the euclidean distance from the first parameter to the second parameter as the minimum of
  * all Euclidean distances between a generator of @p f1 and a generator of @p f2.
  *
- * @tparam MMultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
- * operator(g, p). For example: @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or
- * @ref Degree_rips_bifiltration.
+ * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
+ * operator(g, p), as well as ensures_1_criticality() and type definitions `size_type` and `value_type`. For example:
+ * @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or @ref Degree_rips_bifiltration.
  * @param f1 Source filtration value.
  * @param f2 Target filtration value.
  * @return Euclidean distance between @p f1 and @p f2 with type `MultiFiltrationValue::value_type`.
@@ -234,8 +234,8 @@ auto compute_euclidean_distance_to(const MultiFiltrationValue &f1, const MultiFi
  *
  * @tparam U Arithmetic type of the result.
  * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
- * operator(g, p). For example: @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or
- * @ref Degree_rips_bifiltration.
+ * operator(g, p), as well as type definitions `size_type` and `value_type`. For example:
+ * @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or @ref Degree_rips_bifiltration.
  * @param f Multi filtration value.
  * @return The norm of @p f of type `U`.
  */
@@ -266,8 +266,8 @@ U compute_norm(const MultiFiltrationValue &f)
  * is computed from it: the square root of the sum of the squares of all elements in the matrix.
  *
  * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
- * operator(g, p). For example: @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or
- * @ref Degree_rips_bifiltration.
+ * operator(g, p), as well as type definitions `size_type` and `value_type`. For example:
+ * @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or @ref Degree_rips_bifiltration.
  * @param f Multi filtration value.
  * @return The norm of @p f of type `MultiFiltrationValue::value_type`.
  */
