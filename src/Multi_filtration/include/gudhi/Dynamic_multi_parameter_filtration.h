@@ -1964,7 +1964,7 @@ class Dynamic_multi_parameter_filtration
    * @return Filtration value \f$ out \f$ whose entry correspond to the indices of the projected values. That is,
    * the projection of \f$ f(g,p) \f$ is \f$ grid[p][out(g,p)] \f$.
    */
-  template <class RandomAccessArray, typename OutValue = std::int32_t>
+  template <typename OutValue = std::int32_t, class RandomAccessArray = std::vector<T> >
   friend Dynamic_multi_parameter_filtration<OutValue, Co, Ensure1Criticality> compute_coordinates_in_grid(
       Dynamic_multi_parameter_filtration f,
       const std::vector<RandomAccessArray> &grid)
