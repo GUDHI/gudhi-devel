@@ -8,7 +8,6 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <cmath>    //std::isnan
 #include <cstdint>  //std::int32_t
 #include <limits>   //std::numerical_limits
 #include <type_traits>
@@ -21,13 +20,24 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
+#include <gudhi/Multi_filtration/multi_filtration_utils.h>  // _is_nan with Windows fix
 #include <gudhi/Multi_parameter_filtration.h>
 #include <gudhi/Dynamic_multi_parameter_filtration.h>
 #include <gudhi/Multi_filtration/multi_filtration_conversions.h>
+#include <gudhi/Multi_filtration/multi_filtration_products.h>
 
 using Gudhi::multi_filtration::Multi_parameter_filtration;
 using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
 using Gudhi::multi_filtration::as_type;
+using Gudhi::multi_filtration::_is_nan;
+
+// declaration needed pre C++20
+template <typename U, class MultiFiltrationValue, class CoefficientRange>
+U compute_linear_projection();
+template <typename U, class MultiFiltrationValue>
+U compute_euclidean_distance_to();
+template <typename U, class MultiFiltrationValue>
+U compute_norm();
 
 typedef boost::mpl::list<double, float, int> list_of_tested_variants;
 
@@ -643,7 +653,7 @@ void test_operators(){
   res = f * f3;
   BOOST_CHECK_EQUAL(res(0,0), f4(0,0));
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(std::isnan(res(0,1)));
+    BOOST_CHECK(_is_nan(res(0,1)));
   } else {
     BOOST_CHECK_EQUAL(res(0,1), 0);
   }
@@ -662,7 +672,7 @@ void test_operators(){
   res = f * F::inf(num_param);
   BOOST_CHECK_EQUAL(res(0,0), F::T_m_inf);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(std::isnan(res(0,1)));
+    BOOST_CHECK(_is_nan(res(0,1)));
   } else {
     BOOST_CHECK_EQUAL(res(0,1), 0);
   }
@@ -671,7 +681,7 @@ void test_operators(){
   res = F::inf(num_param) * f;
   BOOST_CHECK_EQUAL(res(0,0), F::T_m_inf);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(std::isnan(res(0,1)));
+    BOOST_CHECK(_is_nan(res(0,1)));
   } else {
     BOOST_CHECK_EQUAL(res(0,1), 0);
   }
@@ -680,7 +690,7 @@ void test_operators(){
   res = f * F::minus_inf(num_param);
   BOOST_CHECK_EQUAL(res(0,0), F::T_inf);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(std::isnan(res(0,1)));
+    BOOST_CHECK(_is_nan(res(0,1)));
   } else {
     BOOST_CHECK_EQUAL(res(0,1), 0);
   }
@@ -689,7 +699,7 @@ void test_operators(){
   res = F::minus_inf(num_param) * f;
   BOOST_CHECK_EQUAL(res(0,0), F::T_inf);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(std::isnan(res(0,1)));
+    BOOST_CHECK(_is_nan(res(0,1)));
   } else {
     BOOST_CHECK_EQUAL(res(0,1), 0);
   }
@@ -720,7 +730,7 @@ void test_operators(){
   res = f3 / f;
   BOOST_CHECK_EQUAL(res(0,0), f4(0,0));
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(std::isnan(res(0,1)));
+    BOOST_CHECK(_is_nan(res(0,1)));
   } else {
     BOOST_CHECK_EQUAL(res(0,1), 0);
   }
@@ -729,7 +739,7 @@ void test_operators(){
   res = T(5) / f;
   BOOST_CHECK_EQUAL(res(0,0), static_cast<T>(-0.5));
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(std::isnan(res(0,1)));
+    BOOST_CHECK(_is_nan(res(0,1)));
   } else {
     BOOST_CHECK_EQUAL(res(0,1), 0);
   }
@@ -747,7 +757,7 @@ void test_operators(){
   res = F::inf(num_param) / f;
   BOOST_CHECK_EQUAL(res(0,0), F::T_m_inf);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(std::isnan(res(0,1)));
+    BOOST_CHECK(_is_nan(res(0,1)));
   } else {
     BOOST_CHECK_EQUAL(res(0,1), 0);
   }
@@ -760,7 +770,7 @@ void test_operators(){
   res = F::minus_inf(num_param) / f;
   BOOST_CHECK_EQUAL(res(0,0), F::T_inf);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(std::isnan(res(0,1)));
+    BOOST_CHECK(_is_nan(res(0,1)));
   } else {
     BOOST_CHECK_EQUAL(res(0,1), 0);
   }
@@ -1043,9 +1053,9 @@ void test_add_generators(){
     BOOST_CHECK_EQUAL(f2(3, 0), F::T_inf);
     BOOST_CHECK_EQUAL(f2(3, 1), F::T_inf);
     BOOST_CHECK_EQUAL(f2(3, 2), F::T_inf);
-    BOOST_CHECK(std::isnan(f2(4, 0)));
-    BOOST_CHECK(std::isnan(f2(4, 1)));
-    BOOST_CHECK(std::isnan(f2(4, 2)));
+    BOOST_CHECK(_is_nan(f2(4, 0)));
+    BOOST_CHECK(_is_nan(f2(4, 1)));
+    BOOST_CHECK(_is_nan(f2(4, 2)));
   } else {
     BOOST_CHECK_EQUAL(f2(0, 0), F::T_m_inf);
     BOOST_CHECK_EQUAL(f2(0, 1), F::T_m_inf);
@@ -1125,9 +1135,13 @@ void test_friends(){
   F f({0, 1, 2});
 
   BOOST_CHECK_EQUAL(compute_norm(f), static_cast<T>(std::sqrt(T(5))));
-  BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, std::initializer_list<T>{2, 3, 5}),
+  BOOST_CHECK_EQUAL(compute_norm<double>(f), std::sqrt(double(5.)));
+  BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, {2, 3, 5}),
                     static_cast<T>(std::sqrt(T(17))));
+  BOOST_CHECK_EQUAL(compute_euclidean_distance_to<double>(f, {2, 3, 5}),
+                    std::sqrt(double(17.)));
   BOOST_CHECK_EQUAL(compute_linear_projection(f, {2, 3, 5, 9}), 13);
+  BOOST_CHECK_EQUAL(compute_linear_projection<double>(f, {2, 3, 5, 9}), 13.);
   BOOST_CHECK(factorize_below(f) == f);
   BOOST_CHECK(factorize_above(f) == f);
 
@@ -1137,7 +1151,7 @@ void test_friends(){
     BOOST_CHECK_EQUAL(f.num_parameters(), 3);
 
     BOOST_CHECK_EQUAL(compute_norm(f), static_cast<T>(std::sqrt(T(25))));
-    BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, std::initializer_list<T>{2, 3, 5}),
+    BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, {2, 3, 5}),
                       static_cast<T>(std::sqrt(T(10))));
     BOOST_CHECK_EQUAL(compute_linear_projection(f, {2, 3, 5, 9}), 13);
     BOOST_CHECK(factorize_below(f) == F({0, 0, 2}));
@@ -1148,16 +1162,16 @@ void test_friends(){
       std::vector<T> v = {0, nan, 2, 2, nan, 4};
       F f2(v.begin(), v.end(), 3);
 
-      BOOST_CHECK(std::isnan(compute_norm(f2)));
-      BOOST_CHECK(std::isnan(compute_euclidean_distance_to(f2, std::initializer_list<T>{2, 3, 5})));
-      BOOST_CHECK(std::isnan(compute_linear_projection(f2, {2, 3, 5, 9})));
+      BOOST_CHECK(_is_nan(compute_norm(f2)));
+      BOOST_CHECK(_is_nan(compute_euclidean_distance_to(f2, {2, 3, 5})));
+      BOOST_CHECK(_is_nan(compute_linear_projection(f2, {2, 3, 5, 9})));
       auto bf2 = factorize_below(f2);
       BOOST_CHECK_EQUAL(bf2(0, 0), 0);
-      BOOST_CHECK(std::isnan(bf2(0, 1)));
+      BOOST_CHECK(_is_nan(bf2(0, 1)));
       BOOST_CHECK_EQUAL(bf2(0, 2), 2);
       auto af2 = factorize_above(f2);
       BOOST_CHECK_EQUAL(af2(0, 0), 2);
-      BOOST_CHECK(std::isnan(af2(0, 1)));
+      BOOST_CHECK(_is_nan(af2(0, 1)));
       BOOST_CHECK_EQUAL(af2(0, 2), 4);
     }
   }

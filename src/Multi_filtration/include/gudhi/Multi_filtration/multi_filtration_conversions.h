@@ -143,6 +143,7 @@ Out_multi_filtration as_type(const Dynamic_multi_parameter_filtration<T, Co, Ens
  * @ref Gudhi::multi_filtration::Degree_rips_bifiltration with desired template arguments.
  * @tparam T First template argument of the initial filtration value type.
  * @param f Filtration value to convert.
+ * @param numberOfParameters Number of parameters of the filtration value.
  */
 template <class Out_multi_filtration, typename T>
 Out_multi_filtration as_type(const Multi_parameter_generator<T>& f, std::size_t numberOfParameters) {

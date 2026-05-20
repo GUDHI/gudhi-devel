@@ -18,7 +18,6 @@
 #define MF_DYNAMIC_MULTI_PARAMETER_FILTRATION_H_
 
 #include <algorithm>    //std::lower_bound
-#include <cmath>        //std::isnan, std::min
 #include <cstddef>      //std::size_t
 #include <cstdint>      //std::int32_t, std::uint8_t
 #include <cstring>      //memcpy
@@ -124,10 +123,22 @@ class Dynamic_multi_parameter_filtration
    * @brief Builds filtration value with one generator that is initialized with the given range. The number of
    * parameters are therefore deduced from the length of the range.
    *
+   * @param range Values of the generator.
+   */
+  Dynamic_multi_parameter_filtration(std::initializer_list<T> range)
+      : generators_(1, Generator(range.begin(), range.end()))
+  {
+    numberOfParameters_ = generators_[0].size();
+  }
+
+  /**
+   * @brief Builds filtration value with one generator that is initialized with the given range. The number of
+   * parameters are therefore deduced from the length of the range.
+   *
    * @tparam ValueRange Range of types convertible to `T`. Should have a begin() and end() method.
    * @param range Values of the generator.
    */
-  template <class ValueRange = std::initializer_list<T>, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
+  template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   Dynamic_multi_parameter_filtration(const ValueRange &range) : generators_(1, Generator(range.begin(), range.end()))
   {
     numberOfParameters_ = generators_[0].size();
@@ -1837,17 +1848,19 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Projects the filtration value into the given grid. If @p coordinate is false, the entries are set to
-   * the nearest upper bound value with the same parameter in the grid. Otherwise, the entries are set to the indices
-   * of those nearest upper bound values.
+   * @brief Projects the generator into the given grid. If @p coordinate is false, the entries are set to
+   * the nearest value with the same parameter in the grid. Otherwise, the entries are set to the indices
+   * of those nearest values. If an entry in the generator is higher than any value in the grid, this entry
+   * is set to infinity if @p coordinate is false and to the grids size at the corresponding parameter otherwise.
    * The grid has to be represented as a vector of ordered ranges of values convertible into `T`. An index
    * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
    * therefore all together a 2D grid.
    *
-   * @tparam OneDimArray A range of values convertible into `T` ordered by increasing value. Has to implement
-   * a begin, end and operator[] method.
-   * @param grid Vector of @p OneDimArray with size at least number of filtration parameters.
+   * @tparam RandomAccessArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @param coordinate If true, the values are set to the coordinates of the projection in the grid. If false,
    * the values are set to the values at the coordinates of the projection.
    */
@@ -1935,122 +1948,26 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Computes the smallest (resp. the greatest if `Co` is true) scalar product of the all generators with the
-   * given vector.
-   *
-   * @tparam U Arithmetic type of the result. Default value: `T`.
-   * @param f Filtration value.
-   * @param x Vector of coefficients.
-   * @return Scalar product of @p f with @p x.
-   */
-  template <typename U = T>
-  friend U compute_linear_projection(const Dynamic_multi_parameter_filtration &f, const std::vector<U> &x)
-  {
-    if (f.num_generators() == 1) return compute_linear_projection(f.generators_[0], x);
-
-#ifdef GUDHI_USE_TBB
-    std::vector<U> projections(f.num_generators());
-    tbb::parallel_for(size_type{0}, f.num_generators(), [&](size_type g) {
-      projections[g] = compute_linear_projection(f.generators_[g], x);
-    });
-    if constexpr (Co) {
-      return *std::max_element(projections.begin(), projections.end());
-    } else {
-      return *std::min_element(projections.begin(), projections.end());
-    }
-#else
-    if constexpr (Co) {
-      U projection = std::numeric_limits<U>::lowest();
-      for (const Generator &g : f.generators_) {
-        // Order in the max important to spread possible NaNs
-        projection = std::max(compute_linear_projection(g, x), projection);
-      }
-      return projection;
-    } else {
-      U projection = std::numeric_limits<U>::max();
-      for (const Generator &g : f.generators_) {
-        // Order in the min important to spread possible NaNs
-        projection = std::min(compute_linear_projection(g, x), projection);
-      }
-      return projection;
-    }
-#endif
-  }
-
-  /**
-   * @brief Computes the euclidean distance from the first parameter to the second parameter as the minimum of
-   * all Euclidean distances between a generator of @p f and a generator of @p other.
-   *
-   * @param f Source filtration value.
-   * @param other Target filtration value.
-   * @return Euclidean distance between @p f and @p other.
-   */
-  template <typename U = T>
-  friend U compute_euclidean_distance_to(const Dynamic_multi_parameter_filtration &f,
-                                         const Dynamic_multi_parameter_filtration &other)
-  {
-    GUDHI_CHECK(f.num_parameters() == other.num_parameters(),
-                std::invalid_argument("We cannot compute the distance between two points of different dimensions."));
-
-    // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
-    if constexpr (Ensure1Criticality) {
-      return compute_euclidean_distance_to(f.generators_[0], other.generators_[0]);
-    } else {
-      U res = std::numeric_limits<U>::max();
-      for (const Generator &g1 : f.generators_) {
-        for (const Generator &g2 : other.generators_) {
-          // Order in the min important to spread possible NaNs
-          res = std::min(compute_euclidean_distance_to(g1, g2), res);
-        }
-      }
-      return res;
-    }
-  }
-
-  /**
-   * @brief Computes the norm of the given filtration value.
-   *
-   * The filtration value is seen as a \f$ num_generators x num_parameters \f$ matrix and a standard Frobenius norm
-   * is computed from it: the square root of the sum of the squares of all elements in the matrix.
-   *
-   * @param f Filtration value.
-   * @return The norm of @p f.
-   */
-  template <typename U = T>
-  friend U compute_norm(const Dynamic_multi_parameter_filtration &f)
-  {
-    // Frobenius norm with matrix g x p based on Euclidean norm
-    U out = 0;
-    for (const Generator &g : f.generators_) {
-      out += compute_squares(g);
-    }
-    if constexpr (std::is_integral_v<U>) {
-      // to avoid Windows issue that don't know how to cast integers for cmath methods
-      return std::sqrt(static_cast<double>(out));
-    } else {
-      return std::sqrt(out);
-    }
-  }
-
-  /**
-   * @brief Computes the coordinates in the given grid, corresponding to the nearest upper bounds of the entries
+   * @brief Computes the coordinates in the given grid, corresponding to the nearest value of the entries
    * in the given filtration value.
-   * The grid has to be represented as a vector of vectors of ordered values convertible into `OutValue`. An index
-   * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
+   * The grid has to be represented as a 2-dimensional array of ordered values convertible into `OutValue`. An index
+   * \f$ i \f$ of the array corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
    * therefore all together a 2D grid.
    *
    * @tparam OutValue Signed arithmetic type. Default value: std::int32_t.
-   * @tparam U Type which is convertible into `OutValue`.
+   * @tparam RandomAccessArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
    * @param f Filtration value to project.
-   * @param grid Vector of vectors to project into.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @return Filtration value \f$ out \f$ whose entry correspond to the indices of the projected values. That is,
    * the projection of \f$ f(g,p) \f$ is \f$ grid[p][out(g,p)] \f$.
    */
-  template <typename OutValue = std::int32_t, typename U = T>
+  template <class RandomAccessArray, typename OutValue = std::int32_t>
   friend Dynamic_multi_parameter_filtration<OutValue, Co, Ensure1Criticality> compute_coordinates_in_grid(
       Dynamic_multi_parameter_filtration f,
-      const std::vector<std::vector<U> > &grid)
+      const std::vector<RandomAccessArray> &grid)
   {
     // TODO: by replicating the code of "project_onto_grid", this could be done with just one copy
     // instead of two. But it is not clear if it is really worth it, i.e., how much the change in type is really
@@ -2068,15 +1985,18 @@ class Dynamic_multi_parameter_filtration
    * value. That is, if \f$ out \f$ is the result, \f$ out(g,p) = grid[p][f(g,p)] \f$. Assumes therefore, that the
    * values stored in the filtration value corresponds to indices existing in the given grid.
    *
-   * @tparam U Signed arithmetic type.
+   * @tparam RandomAccessArray A range of values convertible into `U`. Has to implement
+   * a size and operator[] method and a `value_type` definition.
+   * @tparam U Signed arithmetic type. Default: `RandomAccessArray::value_type`.
    * @param f Filtration value storing coordinates compatible with `grid`.
-   * @param grid Vector of vector.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @return Filtration value \f$ out \f$ whose entry correspond to \f$ out(g,p) = grid[p][f(g,p)] \f$.
    */
-  template <typename U>
+  template <class RandomAccessArray, typename U = typename RandomAccessArray::value_type>
   friend Dynamic_multi_parameter_filtration<U, Co, Ensure1Criticality> evaluate_coordinates_in_grid(
       const Dynamic_multi_parameter_filtration &f,
-      const std::vector<std::vector<U> > &grid)
+      const std::vector<RandomAccessArray> &grid)
   {
     GUDHI_CHECK(grid.size() >= f.num_parameters(),
                 std::invalid_argument(
@@ -2332,16 +2252,6 @@ class Dynamic_multi_parameter_filtration
  private:
   size_type numberOfParameters_;  /**< Number of parameters. */
   Underlying_container generators_; /**< Container of the filtration value elements. */
-
-  constexpr static bool _is_nan(T val)
-  {
-    if constexpr (std::is_integral_v<T>) {
-      // to avoid Windows issue which don't know how to cast integers for cmath methods
-      return false;
-    } else {
-      return std::isnan(val);
-    }
-  }
 
   /**
    * @brief Verifies if @p b is strictly contained in the positive cone originating in `a`.

@@ -42,13 +42,6 @@
 
 namespace Gudhi::multi_filtration {
 
-// declaration needed pre C++20 for friends with templates defined inside a class
-template <typename U>
-U compute_linear_projection();
-template <typename U>
-U compute_euclidean_distance_to();
-template <typename U>
-U compute_norm();
 template <typename OutValue, typename U>
 void compute_coordinates_in_grid();
 template <typename U>
@@ -137,10 +130,21 @@ class Multi_parameter_filtration
    * @brief Builds filtration value with one generator that is initialized with the given range. The number of
    * parameters are therefore deduced from the length of the range.
    *
+   * @param range Values of the generator.
+   */
+  Multi_parameter_filtration(std::initializer_list<T> range)
+      : generators_(range.begin(), range.end()),
+        generator_view_(generators_.data(), generators_.empty() ? 0 : 1, generators_.size())
+  {}
+
+  /**
+   * @brief Builds filtration value with one generator that is initialized with the given range. The number of
+   * parameters are therefore deduced from the length of the range.
+   *
    * @tparam ValueRange Range of types convertible to `T`. Should have a begin() and end() method.
    * @param range Values of the generator.
    */
-  template <class ValueRange = std::initializer_list<T>, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
+  template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   Multi_parameter_filtration(const ValueRange &range)
       : generators_(range.begin(), range.end()),
         generator_view_(generators_.data(), generators_.empty() ? 0 : 1, generators_.size())
@@ -1758,17 +1762,19 @@ class Multi_parameter_filtration
   }
 
   /**
-   * @brief Projects the filtration value into the given grid. If @p coordinate is false, the entries are set to
-   * the nearest upper bound value with the same parameter in the grid. Otherwise, the entries are set to the indices
-   * of those nearest upper bound values.
+   * @brief Projects the generator into the given grid. If @p coordinate is false, the entries are set to
+   * the nearest value with the same parameter in the grid. Otherwise, the entries are set to the indices
+   * of those nearest values. If an entry in the generator is higher than any value in the grid, this entry
+   * is set to infinity if @p coordinate is false and to the grids size at the corresponding parameter otherwise.
    * The grid has to be represented as a vector of ordered ranges of values convertible into `T`. An index
    * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
    * therefore all together a 2D grid.
    *
-   * @tparam OneDimArray A range of values convertible into `T` ordered by increasing value. Has to implement
-   * a begin, end and operator[] method.
-   * @param grid Vector of @p OneDimArray with size at least number of filtration parameters.
+   * @tparam OneDimArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
+   * @param grid Vector of @p OneDimArray with size at least number of filtration parameters. Each array has to be
+   * ordered by increasing value.
    * @param coordinate If true, the values are set to the coordinates of the projection in the grid. If false,
    * the values are set to the values at the coordinates of the projection.
    */
@@ -1781,11 +1787,15 @@ class Multi_parameter_filtration
 
     auto project_generator_value = [&](T &val, const OneDimArray &filtration) {
       auto v = static_cast<typename OneDimArray::value_type>(val);
-      auto d = std::distance(filtration.begin(), std::lower_bound(filtration.begin(), filtration.end(), v));
-      if (d != 0 && std::abs(v - filtration[d]) > std::abs(v - filtration[d - 1])) {
-        --d;
+      std::size_t d = std::distance(filtration.begin(), std::lower_bound(filtration.begin(), filtration.end(), v));
+      if (d == filtration.size()) {
+        val = coordinate ? static_cast<T>(d) : T_inf;
+      } else {
+        if (d != 0 && std::abs(v - filtration[d]) > std::abs(v - filtration[d - 1])) {
+          --d;
+        }
+        val = coordinate ? static_cast<T>(d) : static_cast<T>(filtration[d]);
       }
-      val = coordinate ? static_cast<T>(d) : static_cast<T>(filtration[d]);
     };
 
 #ifdef GUDHI_USE_TBB
@@ -1873,121 +1883,26 @@ class Multi_parameter_filtration
   }
 
   /**
-   * @brief Computes the smallest (resp. the greatest if `Co` is true) scalar product of the all generators with the
-   * given vector.
-   *
-   * @tparam U Arithmetic type of the result. Default value: `T`.
-   * @param f Filtration value.
-   * @param x Vector of coefficients.
-   * @return Scalar product of @p f with @p x.
-   */
-  template <typename U = T>
-  friend U compute_linear_projection(const Multi_parameter_filtration &f, const std::vector<U> &x)
-  {
-    auto project_generator = [&](size_type g) -> U {
-      U projection = 0;
-      std::size_t size = std::min(x.size(), f.num_parameters());
-      for (std::size_t i = 0; i < size; i++) projection += x[i] * static_cast<U>(f(g, i));
-      return projection;
-    };
-
-    if (f.num_generators() == 1) return project_generator(0);
-
-#ifdef GUDHI_USE_TBB
-    std::vector<U> projections(f.num_generators());
-    tbb::parallel_for(size_type{0}, f.num_generators(), [&](size_type g) { projections[g] = project_generator(g); });
-    if constexpr (Co) {
-      return *std::max_element(projections.begin(), projections.end());
-    } else {
-      return *std::min_element(projections.begin(), projections.end());
-    }
-#else
-    if constexpr (Co) {
-      U projection = std::numeric_limits<U>::lowest();
-      for (size_type g = 0; g < f.num_generators(); ++g) {
-        // Order in the max important to spread possible NaNs
-        projection = std::max(project_generator(g), projection);
-      }
-      return projection;
-    } else {
-      U projection = std::numeric_limits<U>::max();
-      for (size_type g = 0; g < f.num_generators(); ++g) {
-        // Order in the min important to spread possible NaNs
-        projection = std::min(project_generator(g), projection);
-      }
-      return projection;
-    }
-#endif
-  }
-
-  /**
-   * @brief Computes the euclidean distance from the first parameter to the second parameter as the minimum of
-   * all Euclidean distances between a generator of @p f and a generator of @p other.
-   *
-   * @param f Source filtration value.
-   * @param other Target filtration value.
-   * @return Euclidean distance between @p f and @p other.
-   */
-  template <typename U = T>
-  friend U compute_euclidean_distance_to(const Multi_parameter_filtration &f, const Multi_parameter_filtration &other)
-  {
-    GUDHI_CHECK(f.num_parameters() == other.num_parameters(),
-                std::invalid_argument("We cannot compute the distance between two points of different dimensions."));
-
-    // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
-    if constexpr (Ensure1Criticality) {
-      return _compute_frobenius_norm(f.num_parameters(),
-                                     [&](size_type p) -> T { return f.generators_[p] - other.generators_[p]; });
-    } else {
-      U res = std::numeric_limits<U>::max();
-      for (size_type g1 = 0; g1 < f.num_generators(); ++g1) {
-        for (size_type g2 = 0; g2 < other.num_generators(); ++g2) {
-          // Euclidean distance as a Frobenius norm with matrix 1 x p and values 'f(g1, p) - other(g2, p)'
-          // Order in the min important to spread possible NaNs
-          res = std::min(
-              _compute_frobenius_norm(f.num_parameters(), [&](size_type p) -> T { return f(g1, p) - other(g2, p); }),
-              res);
-        }
-      }
-      return res;
-    }
-  }
-
-  /**
-   * @brief Computes the norm of the given filtration value.
-   *
-   * The filtration value is seen as a \f$ num_generators x num_parameters \f$ matrix and a standard Frobenius norm
-   * is computed from it: the square root of the sum of the squares of all elements in the matrix.
-   *
-   * @param f Filtration value.
-   * @return The norm of @p f.
-   */
-  template <typename U = T>
-  friend U compute_norm(const Multi_parameter_filtration &f)
-  {
-    // Frobenius norm with matrix g x p based on Euclidean norm
-    return _compute_frobenius_norm(f.num_entries(), [&](size_type i) -> T { return f.generators_[i]; });
-  }
-
-  /**
-   * @brief Computes the coordinates in the given grid, corresponding to the nearest upper bounds of the entries
+   * @brief Computes the coordinates in the given grid, corresponding to the nearest values of the entries
    * in the given filtration value.
-   * The grid has to be represented as a vector of vectors of ordered values convertible into `OutValue`. An index
-   * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
+   * The grid has to be represented as a 2-dimensional array of ordered values convertible into `OutValue`. An index
+   * \f$ i \f$ of the array corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
    * therefore all together a 2D grid.
    *
    * @tparam OutValue Signed arithmetic type. Default value: std::int32_t.
-   * @tparam U Type which is convertible into `OutValue`.
+   * @tparam RandomAccessArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
    * @param f Filtration value to project.
-   * @param grid Vector of vectors to project into.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @return Filtration value \f$ out \f$ whose entry correspond to the indices of the projected values. That is,
    * the projection of \f$ f(g,p) \f$ is \f$ grid[p][out(g,p)] \f$.
    */
-  template <typename OutValue = std::int32_t, typename U = T>
+  template <class RandomAccessArray, typename OutValue = std::int32_t>
   friend Multi_parameter_filtration<OutValue, Co, Ensure1Criticality> compute_coordinates_in_grid(
       Multi_parameter_filtration f,
-      const std::vector<std::vector<U> > &grid)
+      const std::vector<RandomAccessArray> &grid)
   {
     // TODO: by replicating the code of "project_onto_grid", this could be done with just one copy
     // instead of two. But it is not clear if it is really worth it, i.e., how much the change in type is really
@@ -2005,15 +1920,18 @@ class Multi_parameter_filtration
    * value. That is, if \f$ out \f$ is the result, \f$ out(g,p) = grid[p][f(g,p)] \f$. Assumes therefore, that the
    * values stored in the filtration value corresponds to indices existing in the given grid.
    *
-   * @tparam U Signed arithmetic type.
+   * @tparam RandomAccessArray A range of values convertible into `U`. Has to implement
+   * a size and operator[] method and a `value_type` definition.
+   * @tparam U Signed arithmetic type. Default: `RandomAccessArray::value_type`.
    * @param f Filtration value storing coordinates compatible with `grid`.
-   * @param grid Vector of vector.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @return Filtration value \f$ out \f$ whose entry correspond to \f$ out(g,p) = grid[p][f(g,p)] \f$.
    */
-  template <typename U>
+  template <class RandomAccessArray, typename U = typename RandomAccessArray::value_type>
   friend Multi_parameter_filtration<U, Co, Ensure1Criticality> evaluate_coordinates_in_grid(
       const Multi_parameter_filtration &f,
-      const std::vector<std::vector<U> > &grid)
+      const std::vector<RandomAccessArray> &grid)
   {
     GUDHI_CHECK(grid.size() >= f.num_parameters(),
                 std::invalid_argument(
@@ -2025,15 +1943,19 @@ class Multi_parameter_filtration
     // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
     if constexpr (Ensure1Criticality) {
       for (size_type p = 0; p < f.num_parameters(); ++p) {
-        const std::vector<U> &filtration = grid[p];
+        const RandomAccessArray &filtration = grid[p];
         const T &c = f.generators_[p];
+        GUDHI_CHECK(c == T_inf || static_cast<std::size_t>(c) < filtration.size(),
+                    std::invalid_argument("f coordinate is out of bound: non compatible grid."));
         outVec[p] = (c == T_inf ? grid_inf : filtration[c]);
       }
     } else {
       for (size_type g = 0; g < f.num_generators(); ++g) {
         for (size_type p = 0; p < f.num_parameters(); ++p) {
-          const std::vector<U> &filtration = grid[p];
+          const RandomAccessArray &filtration = grid[p];
           const T &c = f(g, p);
+          GUDHI_CHECK(c == T_inf || static_cast<std::size_t>(c) < filtration.size(),
+                      std::invalid_argument("f coordinate is out of bound: non compatible grid."));
           outVec[f.generator_view_.mapping()(g, p)] = (c == T_inf ? grid_inf : filtration[c]);
         }
       }
@@ -2583,24 +2505,6 @@ class Multi_parameter_filtration
       if (!isInf && !isMinusInf && !isNan) return true;
     }
     return false;
-  }
-
-  template <class F, typename U = T>
-  static U _compute_frobenius_norm(size_type number_of_elements, F &&norm)
-  {
-    if (number_of_elements == 1) return std::forward<F>(norm)(0);
-
-    U out = 0;
-    for (size_type p = 0; p < number_of_elements; ++p) {
-      T v = std::forward<F>(norm)(p);
-      out += v * v;
-    }
-    if constexpr (std::is_integral_v<U>) {
-      // to avoid Windows issue that don't know how to cast integers for cmath methods
-      return std::sqrt(static_cast<double>(out));
-    } else {
-      return std::sqrt(out);
-    }
   }
 };
 

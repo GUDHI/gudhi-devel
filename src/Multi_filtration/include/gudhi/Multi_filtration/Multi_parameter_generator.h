@@ -41,12 +41,6 @@
 
 namespace Gudhi::multi_filtration {
 
-// declaration needed pre C++20 for friends with templates defined inside a class
-template <typename U>
-U compute_euclidean_distance_to();
-template <typename U>
-U compute_norm();
-
 /**
  * private
  * @class Multi_parameter_generator Multi_parameter_generator.h gudhi/Multi_parameter_generator.h
@@ -86,6 +80,15 @@ class Multi_parameter_generator
    */
   Multi_parameter_generator(int numberOfParameters, T value)
       : generator_(numberOfParameters < 0 ? 1 : numberOfParameters, value)
+  {}
+
+  /**
+   * @brief Builds generator that is initialized with the given range. The number of
+   * parameters are therefore deduced from the length of the range.
+   *
+   * @param range Values of the generator.
+   */
+  Multi_parameter_generator(std::initializer_list<T> range) : generator_(range.begin(), range.end())
   {}
 
   /**
@@ -1348,16 +1351,18 @@ class Multi_parameter_generator
 
   /**
    * @brief Projects the generator into the given grid. If @p coordinate is false, the entries are set to
-   * the nearest upper bound value with the same parameter in the grid. Otherwise, the entries are set to the indices
-   * of those nearest upper bound values.
+   * the nearest value with the same parameter in the grid. Otherwise, the entries are set to the indices
+   * of those nearest values. If an entry in the generator is higher than any value in the grid, this entry
+   * is set to infinity if @p coordinate is false and to the grids size at the corresponding parameter otherwise.
    * The grid has to be represented as a vector of ordered ranges of values convertible into `T`. An index
    * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
    * therefore all together a 2D grid.
    *
-   * @tparam OneDimArray A range of values convertible into `T` ordered by increasing value. Has to implement
-   * a begin, end and operator[] method.
-   * @param grid Vector of @p OneDimArray with size at least number of filtration parameters.
+   * @tparam OneDimArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
+   * @param grid Vector of @p OneDimArray with size at least number of filtration parameters. Each array has to be
+   * ordered by increasing value.
    * @param coordinate If true, the values are set to the coordinates of the projection in the grid. If false,
    * the values are set to the values at the coordinates of the projection.
    */
@@ -1375,11 +1380,15 @@ class Multi_parameter_generator
     auto project_parameter = [&](size_type p) {
       const auto &filtration = grid[p];
       auto v = static_cast<typename OneDimArray::value_type>(generator_[p]);
-      auto d = std::distance(filtration.begin(), std::lower_bound(filtration.begin(), filtration.end(), v));
-      if (d != 0 && std::abs(v - filtration[d]) > std::abs(v - filtration[d - 1])) {
-        --d;
+      std::size_t d = std::distance(filtration.begin(), std::lower_bound(filtration.begin(), filtration.end(), v));
+      if (d == filtration.size()) {
+        generator_[p] = coordinate ? static_cast<T>(d) : T_inf;
+      } else {
+        if (d != 0 && std::abs(v - filtration[d]) > std::abs(v - filtration[d - 1])) {
+          --d;
+        }
+        generator_[p] = coordinate ? static_cast<T>(d) : static_cast<T>(filtration[d]);
       }
-      generator_[p] = coordinate ? static_cast<T>(d) : static_cast<T>(filtration[d]);
     };
 
 #ifdef GUDHI_USE_TBB
@@ -1394,86 +1403,21 @@ class Multi_parameter_generator
   // FONCTIONNALITIES
 
   /**
-   * @brief Computes the scalar product of the generator with the given vector.
-   *
-   * @tparam U Arithmetic type of the result. Default value: `T`.
-   * @param g Filtration value.
-   * @param x Vector of coefficients.
-   * @return Scalar product of @p f with @p x.
-   */
-  template <typename U = T>
-  friend U compute_linear_projection(const Multi_parameter_generator &g, const std::vector<U> &x)
-  {
-    U projection = 0;
-    std::size_t size = std::min(x.size(), g.num_parameters());
-    for (std::size_t i = 0; i < size; i++) projection += x[i] * static_cast<U>(g[i]);
-    return projection;
-  }
-
-  /**
-   * @brief Computes the euclidean distance from the first parameter to the second parameter.
-   *
-   * @param g Source filtration value.
-   * @param other Target filtration value.
-   * @return Euclidean distance between @p f and @p other.
-   */
-  template <typename U = T>
-  friend U compute_euclidean_distance_to(const Multi_parameter_generator &g, const Multi_parameter_generator &other)
-  {
-    if (!g.is_finite() || !other.is_finite()) {
-      if constexpr (std::numeric_limits<T>::has_quiet_NaN)
-        return std::numeric_limits<T>::quiet_NaN();
-      else
-        return T_inf;
-    }
-
-    GUDHI_CHECK(g.num_parameters() == other.num_parameters(),
-                std::invalid_argument("We cannot compute the distance between two points of different dimensions."));
-
-    if (g.num_parameters() == 1) return g[0] - other[0];
-
-    U out = 0;
-    for (size_type p = 0; p < g.num_parameters(); ++p) {
-      T v = g[p] - other[p];
-      out += v * v;
-    }
-    if constexpr (std::is_integral_v<U>) {
-      // to avoid Windows issue that don't know how to cast integers for cmath methods
-      return std::sqrt(static_cast<double>(out));
-    } else {
-      return std::sqrt(out);
-    }
-  }
-
-  /**
-   * @brief Computes the sum of the squares of all values in the given generator.
-   *
-   * @param g Filtration value.
-   * @return The norm of @p f.
-   */
-  template <typename U = T>
-  friend U compute_squares(const Multi_parameter_generator &g)
-  {
-    U out = 0;
-    for (size_type p = 0; p < g.num_parameters(); ++p) {
-      out += g[p] * g[p];
-    }
-    return out;
-  }
-
-  /**
    * @brief Computes the values in the given grid corresponding to the coordinates given by the given generator.
    * That is, if \f$ out \f$ is the result, \f$ out(g,p) = grid[p][f(g,p)] \f$. Assumes therefore, that the
    * values stored in the filtration value corresponds to indices existing in the given grid.
    *
-   * @tparam U Signed arithmetic type.
+   * @tparam RandomAccessArray A range of values convertible into `U`. Has to implement
+   * a size and operator[] method and a `value_type` definition.
+   * @tparam U Signed arithmetic type. Default: `RandomAccessArray::value_type`.
    * @param g Filtration value storing coordinates compatible with `grid`.
-   * @param grid Vector of vector.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @return Filtration value \f$ out \f$ whose entry correspond to \f$ out(g,p) = grid[p][f(g,p)] \f$.
    */
-  template <typename U>
+  template <class RandomAccessArray, typename U = typename RandomAccessArray::value_type>
   friend Multi_parameter_generator<U> evaluate_coordinates_in_grid(const Multi_parameter_generator &g,
-                                                                   const std::vector<std::vector<U> > &grid)
+                                                                   const std::vector<RandomAccessArray> &grid)
   {
     GUDHI_CHECK(grid.size() >= g.num_parameters(),
                 std::invalid_argument(
