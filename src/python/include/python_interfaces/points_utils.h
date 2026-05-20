@@ -18,7 +18,7 @@
 using Sequence1D = std::vector<double>;
 using Tensor1D = nanobind::ndarray<const double, nanobind::ndim<1>>;
 using Sequence2D = std::vector<std::vector<double>>;
-using Tensor2D = nanobind::ndarray<const double, nanobind::ndim<2>>;
+using Tensor2D = nanobind::ndarray<const double, nanobind::ndim<2>, nanobind::any_contig>;
 
 inline Sequence2D _get_sequence_from_tensor(const Tensor2D& tensor)
 {
