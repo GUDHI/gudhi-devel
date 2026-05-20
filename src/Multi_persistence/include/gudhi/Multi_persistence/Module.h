@@ -61,8 +61,8 @@ class Module {
   using iterator = typename Module_t::iterator;             /**< Iterator type. */
   using const_iterator = typename Module_t::const_iterator; /**< Const iterator type. */
   using Index = typename Module_t::size_type;
-  using Summand_of_dimension_range =
-      boost::any_range<Summand_t, boost::forward_traversal_tag, const Summand_t &, std::ptrdiff_t>;
+  // using Summand_of_dimension_range =
+  //     boost::any_range<Summand_t, boost::forward_traversal_tag, const Summand_t &, std::ptrdiff_t>;
   using Bar = std::array<value_type, 2>;
 
   static constexpr T T_inf = Summand_t::T_inf;
@@ -80,11 +80,14 @@ class Module {
 
   const_iterator end() const { return module_.cend(); }
 
-  Summand_of_dimension_range get_summand_of_dimension_range(Dimension dimension) const {
+  // TODO: nanobind binding for multipers
+  /* Summand_of_dimension_range */ auto get_summand_of_dimension_range(Dimension dimension) const {
     auto has_dimension = [&](const Summand_t &sum) { return sum.get_dimension() == dimension; };
     // cython does not handle the adaptor properly without explicitly using boost::adaptors::type_erased
-    return module_ | boost::adaptors::filtered(has_dimension) |
-           boost::adaptors::type_erased<Summand_t, boost::forward_traversal_tag, const Summand_t &, std::ptrdiff_t>();
+    return module_ |
+           boost::adaptors::filtered(has_dimension) /*  |
+  boost::adaptors::type_erased<Summand_t, boost::forward_traversal_tag, const Summand_t &, std::ptrdiff_t>() */
+        ;
   }
 
   const Box<value_type> &get_box() const { return box_; }
@@ -96,8 +99,7 @@ class Module {
 
   const Summand_t &get_summand(Index index) const { return module_[index]; }
 
-  void add_summand(Index i,
-                   const Summand_t &summand,
+  void add_summand(Index i, const Summand_t &summand,
                    Dimension dimension = Summand_t::template get_null_value<Dimension>()) {
     if (module_.size() <= i) resize(i + 1, summand.get_number_of_parameters());
     module_[i] = summand;
@@ -134,8 +136,7 @@ class Module {
 
   // dim x bar number
   std::vector<std::vector<Bar>> get_barcode_from_line(
-      const Line<value_type> &l,
-      Dimension dimension = Summand_t::template get_null_value<Dimension>()) const {
+      const Line<value_type> &l, Dimension dimension = Summand_t::template get_null_value<Dimension>()) const {
     std::vector<std::vector<Bar>> barcode(get_max_dimension() + 1);
     for (Dimension i = 0; i < get_max_dimension(); ++i) {
       if (dimension == Summand_t::template get_null_value<Dimension>() || i == dimension) {
@@ -151,16 +152,17 @@ class Module {
   }
 
   // dim x line number x bar number
+  // LineRange = std::vector<Line<value_type>>
+  template <class LineRange>
   std::vector<std::vector<Bar>> get_barcodes_from_set_of_lines(
-      const std::vector<Line<value_type>> &lines,
-      Dimension dimension = Summand_t::template get_null_value<Dimension>()) const {
+      const LineRange &lines, Dimension dimension = Summand_t::template get_null_value<Dimension>()) const {
     std::size_t nlines = lines.size();
     if (nlines == 0) return std::vector<std::vector<Bar>>(get_max_dimension() + 1);
 
 #ifdef GUDHI_USE_TBB
     std::vector<std::vector<std::vector<Bar>>> tmp(nlines);
-    tbb::parallel_for(
-        std::size_t(0), nlines, [&](std::size_t i) { tmp[i] = get_barcode_from_line(lines[i], dimension); });
+    tbb::parallel_for(std::size_t(0), nlines,
+                      [&](std::size_t i) { tmp[i] = get_barcode_from_line(lines[i], dimension); });
     std::vector<std::vector<Bar>> barcodes(get_max_dimension() + 1);
     tbb::parallel_for(Dimension(0), get_max_dimension() + 1, [&](Dimension d) {
       barcodes[d].resize(nlines * tmp[0][d].size());
@@ -185,8 +187,7 @@ class Module {
     return barcodes;
   }
 
-  void add_barcode(const Line<value_type> &line,
-                   const std::vector<std::vector<std::array<value_type, 2>>> &barcode,
+  void add_barcode(const Line<value_type> &line, const std::vector<std::vector<std::array<value_type, 2>>> &barcode,
                    bool thresholdToBox) {
 #ifdef GUDHI_USE_TBB
     std::vector<std::size_t> shifts(barcode.size(), 0U);
@@ -211,7 +212,7 @@ class Module {
         std::remove_if(module_.begin(), module_.end(), [](const Summand_t &s) { return s.get_upset().is_plus_inf(); }),
         module_.end());
     maxDim_ = Summand_t::template get_null_value<Dimension>();
-    for (const auto& sum : module_) maxDim_ = std::max(maxDim_, sum.get_dimension());
+    for (const auto &sum : module_) maxDim_ = std::max(maxDim_, sum.get_dimension());
   }
 
   void fill(value_type precision) {
@@ -222,7 +223,8 @@ class Module {
     }
   }
 
-  void rescale(const std::vector<value_type> &rescaleFactors,
+  template <class RandomAccessValueRange>
+  void rescale(const RandomAccessValueRange &rescaleFactors,
                Dimension dimension = Summand_t::template get_null_value<Dimension>()) {
     for (auto &summand : module_) {
       if (dimension == Summand_t::template get_null_value<Dimension>() || summand.get_dimension() == dimension)
@@ -230,7 +232,8 @@ class Module {
     }
   }
 
-  void translate(const std::vector<value_type> &translation,
+  template <class RandomAccessValueRange>
+  void translate(const RandomAccessValueRange &translation,
                  Dimension dimension = Summand_t::template get_null_value<Dimension>()) {
     for (auto &summand : module_) {
       if (dimension == Summand_t::template get_null_value<Dimension>() || summand.get_dimension() == dimension)
@@ -238,7 +241,8 @@ class Module {
     }
   }
 
-  void evaluate_in_grid(const std::vector<std::vector<value_type>> &grid) {
+  template <class GridRange>
+  void evaluate_in_grid(const GridRange &grid) {
 #ifdef GUDHI_USE_TBB
     tbb::parallel_for(std::size_t(0), module_.size(), [&](std::size_t i) { module_[i].evaluate_in_grid(grid); });
 #else
@@ -280,9 +284,7 @@ class Module {
   Box<value_type> box_;
   Dimension maxDim_;
 
-  void _add_bar_with_threshold(const Line<value_type> &line,
-                               const std::array<value_type, 2> &bar,
-                               bool thresholdToBox,
+  void _add_bar_with_threshold(const Line<value_type> &line, const std::array<value_type, 2> &bar, bool thresholdToBox,
                                Summand_t &summand) {
     if (bar[0] >= bar[1]) return;
 
