@@ -68,24 +68,34 @@ inline T compute_summand_distance_to(const Summand<T, D> &sum, const RandomAcces
   return std::max(lowerDist, upperDist);
 }
 
-template <typename T, typename D, class RandomAccessValueRange>
-inline std::vector<typename Summand<T, D>::Index>
-compute_summand_lower_and_upper_generator_of(const Summand<T, D> &sum, const RandomAccessValueRange &x, bool full) {
+template <typename T, typename D, class RandomAccessValueRange, class OutputIt>
+inline void compute_summand_lower_and_upper_generator_of(const Summand<T, D> &sum, const RandomAccessValueRange &x,
+                                                         bool full, OutputIt dFirst) {
   [[maybe_unused]] auto [lowerDist, lowerGen, lowerParam] = _compute_distance_to_front<Summand<T, D> >(
       x, sum.get_upset(), true, [](T cornerVal, T xVal) -> T { return cornerVal - xVal; });
   [[maybe_unused]] auto [upperDist, upperGen, upperParam] = _compute_distance_to_front<Summand<T, D> >(
       x, sum.get_downset(), true, [](T cornerVal, T xVal) -> T { return xVal - cornerVal; });
 
-  if (full) return {lowerGen, lowerParam, upperGen, upperParam};
-  return {lowerGen, upperGen};
+  if (full) {
+    *dFirst = lowerGen;
+    ++dFirst;
+    *dFirst = lowerParam;
+    ++dFirst;
+    *dFirst = upperGen;
+    ++dFirst;
+    *dFirst = upperParam;
+  } else {
+    *dFirst = lowerGen;
+    ++dFirst;
+    *dFirst = upperGen;
+  }
 }
 
 /**
  * @private
  */
 template <typename T, class RandomAccessValueRange1, class RandomAccessValueRange2>
-inline T _get_summand_max_diagonal(const RandomAccessValueRange1 &birth,
-                                   const RandomAccessValueRange2 &death,
+inline T _get_summand_max_diagonal(const RandomAccessValueRange1 &birth, const RandomAccessValueRange2 &death,
                                    const Box<T> &box = {}) {
   // assumes birth and death to be never NaN
   GUDHI_CHECK(birth.size() == 1 || death.size() == 1 || birth.size() == death.size(),
@@ -157,7 +167,7 @@ inline T _summand_rectangle_volume(const BirthGenerator &birth, const DeathGener
 
 template <typename T, typename D, class RandomAccessValueRange>
 inline T compute_summand_local_weight(const Summand<T, D> &sum, const RandomAccessValueRange &x, T delta) {
-  using P = Box<T>::Point_t;
+  using P = typename Box<T>::Point_t;
 
   GUDHI_CHECK(x.size() == sum.get_number_of_parameters(),
               std::invalid_argument("Input range does not have the right size."));

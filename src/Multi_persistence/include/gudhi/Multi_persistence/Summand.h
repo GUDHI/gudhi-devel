@@ -54,7 +54,7 @@ class Summand {
   using Births = Gudhi::multi_filtration::Dynamic_multi_parameter_filtration<value_type, false, false>;
   using Deaths = Gudhi::multi_filtration::Dynamic_multi_parameter_filtration<value_type, true, false>;
   using Dimension = D;
-  using Index = Births::size_type;
+  using Index = typename Births::size_type;
 
   static constexpr T T_inf = Births::T_inf;
   static constexpr T T_m_inf = Births::T_m_inf;
@@ -65,9 +65,7 @@ class Summand {
         dimension_(get_null_value<Dimension>()) {}
 
   Summand(const Births &birthCorners, const Deaths &deathCorners, Dimension dimension)
-      : birthCorners_(birthCorners),
-        deathCorners_(deathCorners),
-        dimension_(dimension) {}
+      : birthCorners_(birthCorners), deathCorners_(deathCorners), dimension_(dimension) {}
 
   // Builds filtration value with given number of parameters and values from the given range. Lets \f$ p \f$
   // be the number of parameters. The \f$ p \f$ first elements of the range have to correspond to the first generator,
@@ -122,13 +120,9 @@ class Summand {
 
   const Deaths &get_downset() const { return deathCorners_; }
 
-  std::vector<value_type> compute_birth_list() const {
-    return _compute_list(birthCorners_);
-  }
+  std::vector<value_type> compute_birth_list() const { return _compute_list(birthCorners_); }
 
-  std::vector<value_type> compute_death_list() const {
-    return _compute_list(deathCorners_);
-  }
+  std::vector<value_type> compute_death_list() const { return _compute_list(deathCorners_); }
 
   void complete_birth(value_type precision) {
     if (!birthCorners_.is_finite()) return;
@@ -186,7 +180,7 @@ class Summand {
 
   // TODO: generalize as a "GeneratorRange" like for `add_generator` ?
   // Not usefull for multipers right now, just for C++ interface purposes
-  void add_bar(const Births::Generator &birth, const Deaths::Generator &death) {
+  void add_bar(const typename Births::Generator &birth, const typename Deaths::Generator &death) {
     birthCorners_.add_generator(birth);
     deathCorners_.add_generator(death);
   }
@@ -201,7 +195,8 @@ class Summand {
     _transform(translation, [](value_type &cornerVal, value_type fact) -> value_type { return cornerVal += fact; });
   }
 
-  void evaluate_in_grid(const std::vector<std::vector<value_type>> &grid) {
+  template <class GridRange>
+  void evaluate_in_grid(const GridRange &grid) {
     if (birthCorners_.num_generators() == 0) return;
 
     auto snap = [](value_type x) -> std::size_t {
@@ -260,8 +255,8 @@ class Summand {
   }
 
   friend void swap(Summand &sum1, Summand &sum2) noexcept {
-    std::swap(sum1.birthCorners_, sum2.birthCorners_);
-    std::swap(sum1.deathCorners_, sum2.deathCorners_);
+    swap(sum1.birthCorners_, sum2.birthCorners_);
+    swap(sum1.deathCorners_, sum2.deathCorners_);
     std::swap(sum1.dimension_, sum2.dimension_);
   }
 
