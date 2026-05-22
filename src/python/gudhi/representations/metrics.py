@@ -344,20 +344,25 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
 
         Parameters:
             epsilon (double): **[deprecated]** consider using `e` instead.
-            e (double): absolute (additive) error tolerated on the distance (default is the smallest positive float), see :func:`gudhi.bottleneck_distance`.
-            n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
+            e (double): absolute (additive) error tolerated on the distance (default is the smallest positive float),
+                see :func:`gudhi.bottleneck_distance`.
+            n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances`
+                for details.
         """
-        self.e = None
-        if epsilon is not None:
+        self.e = e
+        self.epsilon = epsilon
+        if self.epsilon is not None:
+            if self.e is not None:
+                raise ValueError(
+                    "'epsilon' (deprecated argument in favor of 'e') cannot be set at the same time as 'e'"
+                )
             warnings.warn("epsilon is a deprecated argument, please consider using e", DeprecationWarning)
-            self.e = epsilon
-        if e is not None:
-            self.e = e
         self.n_jobs = n_jobs
 
     def fit(self, X, y=None):
         """
-        Fit the BottleneckDistance class on a list of persistence diagrams: persistence diagrams are stored in a numpy array called **diagrams**.
+        Fit the BottleneckDistance class on a list of persistence diagrams: persistence diagrams are stored in a numpy
+        array called **diagrams**.
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
@@ -368,18 +373,21 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         """
-        Compute all bottleneck distances between the persistence diagrams that were stored after calling the fit() method, and a given list of (possibly different) persistence diagrams.
+        Compute all bottleneck distances between the persistence diagrams that were stored after calling the fit()
+        method, and a given list of (possibly different) persistence diagrams.
 
         Parameters:
             X (list of n x 2 numpy arrays): input persistence diagrams.
 
         Returns:
-            numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise bottleneck distances.
+            numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise
+                bottleneck distances.
         """
-        Xfit = pairwise_persistence_diagram_distances(
-            X, self.diagrams_, metric="bottleneck", e=self.e, n_jobs=self.n_jobs
+        e = self.epsilon if self.epsilon is not None else self.e
+        return pairwise_persistence_diagram_distances(
+            X, self.diagrams_, metric="bottleneck", e=e, n_jobs=self.n_jobs
         )
-        return Xfit
+
 
     def __call__(self, diag1, diag2):
         """
@@ -395,7 +403,10 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         try:
             from .. import bottleneck_distance
 
-            return bottleneck_distance(diag1, diag2, e=self.e)
+            if self.epsilon is not None:
+                return bottleneck_distance(diag1, diag2, e=self.epsilon)
+            else:
+                return bottleneck_distance(diag1, diag2, e=self.e)
         except ImportError:
             print("Gudhi built without CGAL")
             raise

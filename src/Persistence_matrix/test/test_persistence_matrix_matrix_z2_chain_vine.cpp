@@ -62,6 +62,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_insertion, Matrix, full_matri
   Matrix m2(orderedBoundaries);
 
   test_chain_boundary_insertion<Matrix>(m1, m2);
+  test_chain_maximal_simplex_insertion<Matrix>();
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(Chain_matrix_z2_vine_access, Matrix, full_matrices) {
