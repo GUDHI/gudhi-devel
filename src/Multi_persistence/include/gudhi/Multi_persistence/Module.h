@@ -218,8 +218,8 @@ class Module {
   void fill(value_type precision) {
     // TODO: parallelize
     for (Summand_t &sum : module_) {
-      sum.complete_birth(precision);
-      sum.complete_death(precision);
+      sum.identify_births(precision);
+      sum.identify_deaths(precision);
     }
   }
 

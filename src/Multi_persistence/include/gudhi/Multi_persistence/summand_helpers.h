@@ -21,9 +21,8 @@
 #include <algorithm>  //std::max
 #include <cstddef>    //std::size_t
 #include <stdexcept>  //std::invalid_argument
-#include <vector>
-#include <tuple>
 
+#include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_persistence/Box.h>
 #include <gudhi/Multi_persistence/Summand.h>
 
@@ -34,61 +33,43 @@ namespace multi_persistence {
  * @private
  */
 template <class Summand, class RandomAccessValueRange, class Corners, typename F>
-inline std::tuple<typename Summand::value_type, typename Summand::Index, typename Summand::Index>
-_compute_distance_to_front(const RandomAccessValueRange &x, const Corners &corners, bool negative, F &&diff) {
+inline typename Summand::value_type _compute_distance_to_front(const RandomAccessValueRange &x, const Corners &corners,
+                                                               bool negative, F &&diff) {
   typename Summand::value_type distance = Summand::T_inf;
-  typename Summand::Index gen = 0, param = 0;
 
   for (typename Summand::Index g = 0; g < corners.num_generators(); ++g) {
     typename Summand::value_type tempDist = negative ? Summand::T_m_inf : 0;
-    typename Summand::Index tempParam = 0;
     for (typename Summand::Index p = 0; p < corners.num_parameters(); ++p) {
-      typename Summand::value_type d = std::forward<F>(diff)(corners(g, p), x[p]);
-      if (tempDist < d) {
-        tempDist = d;
-        tempParam = p;
-      }
+      auto d = std::forward<F>(diff)(corners(g, p), x[p]);
+      if (tempDist < d) tempDist = d;
     }
-    if (distance > tempDist) {
-      distance = tempDist;
-      gen = g;
-      param = tempParam;
-    }
+    if (distance > tempDist) distance = tempDist;
   }
 
-  return {distance, gen, param};
+  return distance;
 }
 
+/**
+ * @brief Computes the distance from the given point `x` to the given Summand `sum`.
+ * TODO: proper definition of the distance.
+ * 
+ * @tparam T First template argument of @ref Summand.
+ * @tparam D Second template argument of @ref Summand.
+ * @tparam RandomAccessValueRange Range of `T` with a size() and operator[] method.
+ * @param sum Summand.
+ * @param x Point.
+ * @param negative If true, the distance is allowed to be signed.
+ */
 template <typename T, typename D, class RandomAccessValueRange>
 inline T compute_summand_distance_to(const Summand<T, D> &sum, const RandomAccessValueRange &x, bool negative) {
-  T lowerDist = std::get<0>(_compute_distance_to_front<Summand<T, D> >(
-      x, sum.get_upset(), negative, [](T cornerVal, T xVal) -> T { return cornerVal - xVal; }));
-  T upperDist = std::get<0>(_compute_distance_to_front<Summand<T, D> >(
-      x, sum.get_downset(), negative, [](T cornerVal, T xVal) -> T { return xVal - cornerVal; }));
+  GUDHI_CHECK(x.size() >= sum.get_number_of_parameters(),
+              std::invalid_argument("The given point does not have enough coordinates compared to the given Summand."));
+
+  T lowerDist = _compute_distance_to_front<Summand<T, D> >(x, sum.get_upset(), negative,
+                                                           [](T cornerVal, T xVal) -> T { return cornerVal - xVal; });
+  T upperDist = _compute_distance_to_front<Summand<T, D> >(x, sum.get_downset(), negative,
+                                                           [](T cornerVal, T xVal) -> T { return xVal - cornerVal; });
   return std::max(lowerDist, upperDist);
-}
-
-template <typename T, typename D, class RandomAccessValueRange, class OutputIt>
-inline void compute_summand_lower_and_upper_generator_of(const Summand<T, D> &sum, const RandomAccessValueRange &x,
-                                                         bool full, OutputIt dFirst) {
-  [[maybe_unused]] auto [lowerDist, lowerGen, lowerParam] = _compute_distance_to_front<Summand<T, D> >(
-      x, sum.get_upset(), true, [](T cornerVal, T xVal) -> T { return cornerVal - xVal; });
-  [[maybe_unused]] auto [upperDist, upperGen, upperParam] = _compute_distance_to_front<Summand<T, D> >(
-      x, sum.get_downset(), true, [](T cornerVal, T xVal) -> T { return xVal - cornerVal; });
-
-  if (full) {
-    *dFirst = lowerGen;
-    ++dFirst;
-    *dFirst = lowerParam;
-    ++dFirst;
-    *dFirst = upperGen;
-    ++dFirst;
-    *dFirst = upperParam;
-  } else {
-    *dFirst = lowerGen;
-    ++dFirst;
-    *dFirst = upperGen;
-  }
 }
 
 /**
@@ -131,6 +112,15 @@ inline T _get_summand_max_diagonal(const RandomAccessValueRange1 &birth, const R
   return diag;
 }
 
+/**
+ * @brief 
+ * 
+ * @tparam T 
+ * @tparam D 
+ * @param sum 
+ * @param box 
+ * @return T 
+ */
 template <typename T, typename D>
 T compute_summand_interleaving(const Summand<T, D> &sum, const Box<T> &box) {
   T interleaving = 0;

@@ -72,42 +72,7 @@ inline std::vector<T> _get_module_landscape_values(const Module<T> &mod, const s
   return values;
 }
 
-// // TODO: extend in higher resolution dimension
-// template <typename T, class RandomAccessValueRange>
-// inline std::vector<T> compute_module_landscape(const Module<T> &mod, typename Module<T>::Dimension dimension,
-//                                                unsigned int k, const Box<T> &box,
-//                                                const RandomAccessValueRange &resolution) {
-//   GUDHI_CHECK(resolution.size() >= 2, std::invalid_argument("Not enough resolution values."));
-
-//   std::vector<T> image;
-//   image.resize(resolution[0] * resolution[1]);
-//   Simple_mdspan view(image.data(), resolution[0], resolution[1]);
-//   T stepX = (box.get_upper_corner()[0] - box.get_lower_corner()[0]) / resolution[0];
-//   T stepY = (box.get_upper_corner()[1] - box.get_lower_corner()[1]) / resolution[1];
-
-//   auto get_image_values = [&](unsigned int i) {
-//     return [&, i](unsigned int j) {
-//       auto landscape = _get_module_landscape_values(
-//           mod, {box.get_lower_corner()[0] + (stepX * i), box.get_lower_corner()[1] + (stepY * j)}, dimension);
-//       view(i, j) = k < landscape.size() ? landscape[k] : 0;
-//     };
-//   };
-
-// #ifdef GUDHI_USE_TBB
-//   tbb::parallel_for(0U, resolution[0],
-//                     [&](unsigned int i) { tbb::parallel_for(0U, resolution[1], get_image_values(i)); });
-// #else
-//   for (unsigned int i = 0; i < resolution[0]; ++i) {
-//     auto get_image_values_at = get_image_values(i);
-//     for (unsigned int j = 0; j < resolution[1]; ++j) {
-//       get_image_values_at(j);
-//     }
-//   }
-// #endif
-
-//   return image;
-// }
-
+// TODO: extend in higher resolution dimension
 template <typename T, class RandomAccessValueRange1, class RandomAccessValueRange2>
 inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typename Module<T>::Dimension dimension,
                                                        const RandomAccessValueRange1 &ks, const Box<T> &box,
@@ -189,31 +154,6 @@ inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typ
   return images;
 }
 
-// template <typename T, class MultiFiltrationValue>
-// inline std::vector<int> compute_module_euler_curve(const Module<T> &mod,
-//                                                    const std::vector<MultiFiltrationValue> &points) {
-//   std::vector<int> eulerCurve(points.size());
-
-//   auto get_curve = [&](std::size_t i) {
-//     for (const auto &sum : mod) {
-//       if (sum.contains(points[i])) {
-//         int sign = sum.get_dimension() % 2 ? -1 : 1;
-//         eulerCurve[i] += sign;
-//       }
-//     }
-//   };
-
-// #ifdef GUDHI_USE_TBB
-//   tbb::parallel_for(std::size_t(0), eulerCurve.size(), get_curve);
-// #else
-//   for (std::size_t i = 0; i < eulerCurve.size(); ++i) {
-//     get_curve(i);
-//   }
-// #endif
-
-//   return eulerCurve;
-// }
-
 template <typename T, class RandomAccessPointRange>
 inline std::vector<T> compute_module_distances_to(const Module<T> &mod, const RandomAccessPointRange &pts,
                                                   bool negative, int n_jobs) {
@@ -237,37 +177,6 @@ inline std::vector<T> compute_module_distances_to(const Module<T> &mod, const Ra
 
   return res;
 }
-
-// template <typename T, class RandomAccessPointRange>
-// inline std::vector<typename Module<T>::Summand_t::Index> compute_module_lower_and_upper_generators_of(
-//     const Module<T> &mod, const RandomAccessPointRange &pts, bool full, int n_jobs) {
-//   unsigned int tupleSize = full ? 4 : 2;
-//   std::vector<typename Module<T>::Summand_t::Index> out(pts.size() * mod.size() * tupleSize);
-//   Gudhi::Simple_mdspan data(out.data(), pts.size(), mod.size(), tupleSize);
-
-//   auto get_generators = [&](std::size_t i) {
-//     return [&, i](std::size_t j) {
-//       compute_summand_lower_and_upper_generator_of(mod.get_summand(j), pts[i], full, &data(i, j, 0));
-//     };
-//   };
-
-// #ifdef GUDHI_USE_TBB
-//   oneapi::tbb::task_arena arena(n_jobs);  // limits the number of threads
-//   arena.execute([&] {
-//     tbb::parallel_for(std::size_t(0), pts.size(),
-//                       [&](std::size_t i) { tbb::parallel_for(std::size_t(0), mod.size(), get_generators(i)); });
-//   });
-// #else
-//   for (std::size_t i = 0; i < pts.size(); ++i) {
-//     auto get_generators_at = get_generators(i);
-//     for (std::size_t j = 0; j < mod.size(); ++j) {
-//       get_generators_at(j);
-//     }
-//   }
-// #endif
-
-//   return out;
-// }
 
 template <typename T>
 inline std::vector<T> compute_module_interleavings(const Module<T> &mod, const Box<T> &box) {
@@ -398,69 +307,6 @@ inline std::vector<T> compute_module_pixels(const Module<T> &mod, const RandomAc
   }
   return out;
 }
-
-// /**
-//  * @private
-//  */
-// template <typename T, class RandomAccessArray>
-// inline std::vector<int> _project_generator_into_grid(const Gudhi::multi_filtration::Multi_parameter_generator<T> &pt,
-//                                                      const std::vector<RandomAccessArray> &grid) {
-//   std::size_t num_parameters = grid.size();
-//   std::vector<int> out(num_parameters);
-//   if (pt.is_plus_inf() || pt.is_nan()) [[unlikely]] {
-//     for (std::size_t i = 0; i < num_parameters; ++i) out[i] = grid[i].size() - 1;
-//     return out;
-//   }
-//   if (pt.is_minus_inf()) [[unlikely]] {
-//     for (std::size_t i = 0; i < num_parameters; ++i) out[i] = 0;
-//     return out;
-//   }
-//   // pt has to be of size num_parameters now
-//   for (std::size_t i = 0; i < num_parameters; ++i) {
-//     if (pt[i] >= grid[i].back()) [[unlikely]]
-//       out[i] = grid[i].size() - 1;
-//     else if (pt[i] <= grid[i][0]) [[unlikely]] {
-//       out[i] = 0;
-//     } else {
-//       auto temp = std::distance(grid[i].begin(), std::lower_bound(grid[i].begin(), grid[i].end(), pt[i]));
-//       if (std::abs(grid[i][temp] - pt[i]) < std::abs(grid[i][temp - 1] - pt[i])) {
-//         out[i] = temp;
-//       } else {
-//         out[i] = temp - 1;
-//       }
-//     }
-//   }
-//   return out;
-// }
-
-// template <typename T, class RandomAccessArray>
-// inline std::vector<std::vector<std::vector<int>>> project_module_into_grid(const Module<T> &mod,
-//                                                                            const std::vector<RandomAccessArray> &grid) {
-//   std::vector<std::vector<std::vector<int>>> out(3);
-//   auto &idx = out[0];
-//   auto &births = out[1];
-//   auto &deaths = out[2];
-
-//   idx.resize(2);
-//   idx[0].resize(mod.size());
-//   idx[1].resize(mod.size());
-
-//   // some heuristic: usually
-//   births.reserve(2 * mod.size());
-//   deaths.reserve(2 * mod.size());
-//   for (std::size_t i = 0; i < mod.size(); ++i) {
-//     auto &interval = mod.get_summand(i);
-//     idx[0][i] = interval.get_upset().size();
-//     for (const auto &pt : interval.get_upset()) {
-//       births.push_back(_project_generator_into_grid(pt, grid));
-//     }
-//     idx[1][i] = interval.get_downset().size();
-//     for (const auto &pt : interval.get_downset()) {
-//       deaths.push_back(_project_generator_into_grid(pt, grid));
-//     }
-//   }
-//   return out;
-// }
 
 }  // namespace multi_persistence
 }  // namespace Gudhi

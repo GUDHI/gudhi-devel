@@ -18,7 +18,7 @@
 #ifndef MP_SUMMAND_H_INCLUDED
 #define MP_SUMMAND_H_INCLUDED
 
-#include <cstddef>    // std::size_t
+#include <cstddef>    //std::size_t
 #include <ostream>    //std::ostream
 #include <stdexcept>  //std::invalid_argument, std::runtime_error
 #include <utility>
@@ -43,50 +43,100 @@ namespace multi_persistence {
  * @class Summand Summand.h gudhi/Multi_persistence/Summand.h
  * @ingroup multi_persistence
  *
- * @brief
+ * @brief Summand of a multi-parameter persistence module, represented by a range of "birth corners" and a range of
+ * "death corners".
  *
- * @tparam T
+ * @tparam T Type of a parameter in the filtration value.
+ * @tparam D Dimension type. Default: int.
  */
 template <typename T, typename D = int>
 class Summand {
  public:
-  using value_type = T;
+  using value_type = T;                         /**< Filtration value parameter type. */
+  using Dimension = D;                          /**< Dimension type. */
+  /**
+   * @brief Birth corners range type.
+   */
   using Births = Gudhi::multi_filtration::Dynamic_multi_parameter_filtration<value_type, false, false>;
+  /**
+   * @brief Death corners range type.
+   */
   using Deaths = Gudhi::multi_filtration::Dynamic_multi_parameter_filtration<value_type, true, false>;
-  using Dimension = D;
-  using Index = typename Births::size_type;
+  using Index = typename Births::size_type;     /**< Range index type. */
 
-  static constexpr T T_inf = Births::T_inf;
-  static constexpr T T_m_inf = Births::T_m_inf;
+  static constexpr T T_inf = Births::T_inf;     /**< Parameter infinite value. */
+  static constexpr T T_m_inf = Births::T_m_inf; /**< Parameter minus infinite value. */
 
+  /**
+   * @brief Default constructor. Constructs an empty summand.
+   *
+   * @param numberOfParameters Number of parameters of the filtration values. Default: 1.
+   */
   Summand(int numberOfParameters = 1)
       : birthCorners_(numberOfParameters, T_inf),
         deathCorners_(numberOfParameters, T_m_inf),
         dimension_(get_null_value<Dimension>()) {}
 
+  /**
+   * @brief Constructs a summand from the given corners.
+   *
+   * @param birthCorners Birth corners.
+   * @param deathCorners Death corners.
+   * @param dimension Dimension of the summand.
+   */
   Summand(const Births &birthCorners, const Deaths &deathCorners, Dimension dimension)
       : birthCorners_(birthCorners), deathCorners_(deathCorners), dimension_(dimension) {}
 
-  // Builds filtration value with given number of parameters and values from the given range. Lets \f$ p \f$
-  // be the number of parameters. The \f$ p \f$ first elements of the range have to correspond to the first generator,
-  // the \f$ p \f$ next elements to the second generator and so on... So the length of the range has to be a multiple
-  // of \f$ p \f$ and the number of generators will be \f$ length / p \f$. The range is represented by two iterators.
+  /**
+   * @brief Constructs a summand from the given corners. The corners are represented by ranges of coordinates such that
+   * the \f$ p \f$ first elements of the range corresponds to the first corner, the \f$ p \f$ next elements to the
+   * second corner and so on... Where \f$ p \f$ is the number of parameters.
+   *
+   * @tparam ValueRange Range of type convertible into `T` with a begin() and end() method.
+   * @param birthCorners Birth corners.
+   * @param deathCorners Death corners.
+   * @param numberOfParameters Number of parameters.
+   * @param dimension Dimension of the summand.
+   */
   template <class ValueRange = std::initializer_list<value_type>>
   Summand(const ValueRange &birthCorners, const ValueRange &deathCorners, int numberOfParameters, Dimension dimension)
       : birthCorners_(birthCorners.begin(), birthCorners.end(), numberOfParameters),
         deathCorners_(deathCorners.begin(), deathCorners.end(), numberOfParameters),
         dimension_(dimension) {}
 
+  /**
+   * @brief Returns the dimension of the summand.
+   */
   Dimension get_dimension() const { return dimension_; }
 
+  /**
+   * @brief Sets the dimension of summand to the given dimension.
+   */
   void set_dimension(Dimension dimension) { dimension_ = dimension; }
 
+  /**
+   * @brief Returns the number of parameters.
+   */
   [[nodiscard]] int get_number_of_parameters() const { return birthCorners_.num_parameters(); }
 
+  /**
+   * @brief Returns the number of birth corners (positive generators) in the summand.
+   */
   [[nodiscard]] int get_number_of_birth_corners() const { return birthCorners_.num_generators(); }
 
+  /**
+   * @brief Returns the number of death corners (negative generators) in the summand.
+   */
   [[nodiscard]] int get_number_of_death_corners() const { return deathCorners_.num_generators(); }
 
+  /**
+   * @brief Returns `true` if and only if the given filtration value is contained in summand.
+   *
+   * @tparam MultiFiltrationValue Either @ref Gudhi::multi_filtration::Multi_parameter_filtration,
+   * @ref Gudhi::multi_filtration::Dynamic_multi_parameter_filtration or
+   * @ref Gudhi::multi_filtration::Degree_rips_bifiltration.
+   * @param x Multi-parameter filtration value.
+   */
   template <class MultiFiltrationValue>
   bool contains(const MultiFiltrationValue &x) const {
     auto xPos = Gudhi::multi_filtration::as_type<Births>(x);
@@ -94,6 +144,9 @@ class Summand {
     return birthCorners_ <= xPos && deathCorners_ <= xNeg;
   }
 
+  /**
+   * @brief Returns the minimal box containing the summand.
+   */
   Box<value_type> compute_bounds() const {
     if (birthCorners_.num_generators() == 0) return {};
 
@@ -116,15 +169,41 @@ class Summand {
     return Box<value_type>(m, M);
   }
 
+  /**
+   * @brief Returns const reference to the range of birth corners.
+   */
   const Births &get_upset() const { return birthCorners_; }
 
+  /**
+   * @brief Returns const reference to the range of death corners.
+   */
   const Deaths &get_downset() const { return deathCorners_; }
 
-  std::vector<value_type> compute_birth_list() const { return _compute_list(birthCorners_); }
+  /**
+   * @brief Flatten the range of birth corners as vector of `T`, such that the \f$ p \f$ first elements of the range
+   * corresponds to the first corner, the \f$ p \f$ next elements to the second corner and so on... Where \f$ p \f$ is
+   * the number of parameters.
+   */
+  std::vector<value_type> compute_flat_upset() const { return _compute_flat_set(birthCorners_); }
 
-  std::vector<value_type> compute_death_list() const { return _compute_list(deathCorners_); }
+  /**
+   * @brief Flatten the range of death corners as vector of `T`, such that the \f$ p \f$ first elements of the range
+   * corresponds to the first corner, the \f$ p \f$ next elements to the second corner and so on... Where \f$ p \f$ is
+   * the number of parameters.
+   */
+  std::vector<value_type> compute_flat_downset() const { return _compute_flat_set(deathCorners_); }
 
-  void complete_birth(value_type precision) {
+  /**
+   * @brief Identifies/merges all birth corners whose maximal coordinate difference is smaller than the
+   * given threshold. The new corner takes all minimal coordinates of the two, covering therefore both.
+   *
+   * Note that the merge is done in ordered pairs, so if \f$ b_1 \f$ is close enough to \f$ b_2 \f$ and \f$ b_2 \f$
+   * close enough to \f$ b_3 \f$, once \f$ b_1 \f$ and \f$ b_2 \f$ merge, the new point is eventually not merged with
+   * \f$ b_3 \f$.
+   *
+   * @param precision Distance threshold.
+   */
+  void identify_births(value_type precision) {
     if (!birthCorners_.is_finite()) return;
 
     const value_type error = 0.99;
@@ -141,7 +220,17 @@ class Summand {
     birthCorners_.simplify();
   }
 
-  void complete_death(value_type precision) {
+  /**
+   * @brief Identifies/merges all death corners whose maximal coordinate difference is smaller than the
+   * given threshold. The new corner takes all maximal coordinates of the two, covering therefore both.
+   *
+   * Note that the merge is done in ordered pairs, so if \f$ b_1 \f$ is close enough to \f$ b_2 \f$ and \f$ b_2 \f$
+   * close enough to \f$ b_3 \f$, once \f$ b_1 \f$ and \f$ b_2 \f$ merge, the new point is eventually not merged with
+   * \f$ b_3 \f$.
+   *
+   * @param precision Distance threshold.
+   */
+  void identify_deaths(value_type precision) {
     if (!deathCorners_.is_finite()) return;
 
     const value_type error = 0.99;
@@ -158,6 +247,16 @@ class Summand {
     deathCorners_.simplify();
   }
 
+  /**
+   * @brief Computes the two end points of the intersection between the summand and the given line.
+   * Returns \f$ {inf, inf} \f$ if the intersection is empty.
+   *
+   * As the line has to have a positive slope, it can represent a 1-parameter sub-filtration and the intersection
+   * is a bar in its barcode.
+   *
+   * @param l Line to intersect with. It has to have the same number of coordinates/parameters then the summand.
+   * @return The two endpoints as an `std::array<T,2>`.
+   */
   std::array<value_type, 2> get_bar(const Line<value_type> &l) const {
     value_type pushedBirth = T_inf;
     value_type pushedDeath = T_m_inf;
@@ -178,26 +277,68 @@ class Summand {
     return {pushedBirth, pushedDeath};
   }
 
-  // TODO: generalize as a "GeneratorRange" like for `add_generator` ?
-  // Not usefull for multipers right now, just for C++ interface purposes
-  void add_bar(const typename Births::Generator &birth, const typename Deaths::Generator &death) {
+  /**
+   * @brief Adds the given birth and death corners to the summand.
+   *
+   * Note that if a new corner is overshadowed by an already existing corner, the new corner will be ignored and will
+   * not appear in the corner range.
+   *
+   * @tparam BirthGeneratorRange Range of elements convertible to `T`. Must have a begin(), end() method and the
+   * iterator type should satisfy the requirements of the standard `LegacyForwardIterator`. Note that
+   * @ref Births "Births::Generator" does fullfill those requirements.
+   * @tparam DeathGeneratorRange  Range of elements convertible to `T`. Must have a begin(), end() method and the
+   * iterator type should satisfy the requirements of the standard `LegacyForwardIterator`. Note that
+   * @ref Deaths "Deaths::Generator" does fullfill those requirements.
+   * @param birth Birth corner.
+   * @param death Death corner.
+   */
+  template <class BirthGeneratorRange = std::initializer_list<T>, class DeathGeneratorRange = std::initializer_list<T>>
+  void add_bar(const BirthGeneratorRange &birth, const DeathGeneratorRange &death) {
     birthCorners_.add_generator(birth);
     deathCorners_.add_generator(death);
   }
 
+  /**
+   * @brief Rescales the summand's corners for each parameter, that is, for each corner in the summand,
+   * the \f$ p^{th} \f$ coordinate is multiplied by `rescaleFactors[p]`.
+   *
+   * @tparam RandomAccessValueRange Range with a size() and operator[] method.
+   * @param rescaleFactors Rescale factors. There must be at least as many elements than parameters in the summand.
+   */
   template <class RandomAccessValueRange>
   void rescale(const RandomAccessValueRange &rescaleFactors) {
     _transform(rescaleFactors, [](value_type &cornerVal, value_type fact) -> value_type { return cornerVal *= fact; });
   }
 
+  /**
+   * @brief Translates each parameter of the summand, that is, for each corner in the summand,
+   * the \f$ p^{th} \f$ coordinate is summed with `translation[p]`.
+   *
+   * @tparam RandomAccessValueRange Range with a size() and operator[] method.
+   * @param translation Translation factors. There must be at least as many elements than parameters in the summand.
+   */
   template <class RandomAccessValueRange>
   void translate(const RandomAccessValueRange &translation) {
     _transform(translation, [](value_type &cornerVal, value_type fact) -> value_type { return cornerVal += fact; });
   }
 
+  /**
+   * @brief Snaps the summand's corner coordinates to their closest integer and interprets them as indices in a grid
+   * to replaces them with the values at those indices in the given grid. For example, if \f$ c \f$ is a birth or
+   * death corner in the summand, its new value at parameter \f$ p \f$ will be \f$ c[p] = grid[p][snap(c[p])] \f$.
+   * If \f$ snap(c[p]) \f$ is out of bound, the value is replaced with infinity.
+   *
+   * @tparam GridRange Range with size() and operator[] method. The operator[] method must return a type with the
+   * same methods and a value type convertible to `T`.
+   * @param grid 2-dimensional range with first axis at least as long as number of parameters.
+   */
   template <class GridRange>
   void evaluate_in_grid(const GridRange &grid) {
     if (birthCorners_.num_generators() == 0) return;
+
+    GUDHI_CHECK(grid.size() >= birthCorners_.num_parameters(),
+                std::invalid_argument(
+                    "The size of the grid should correspond to the number of parameters in the filtration value."));
 
     auto snap = [](value_type x) -> std::size_t {
       value_type a = std::floor(x);
@@ -231,11 +372,18 @@ class Summand {
 #endif
   }
 
+  /**
+   * @brief Returns the default value of the Summand type `Y`. E.g., `get_null_value<Summand::Dimension>()` corresponds
+   * to the value of the dimension of the Summand if not explicitly set.
+   */
   template <typename Y>
   static constexpr Y get_null_value() {
     return -1;
   }
 
+  /**
+   * @brief Equality operator.
+   */
   friend bool operator==(const Summand &a, const Summand &b) {
     return a.dimension_ == b.dimension_ && a.birthCorners_ == b.birthCorners_ && a.deathCorners_ == b.deathCorners_;
   }
@@ -254,6 +402,9 @@ class Summand {
     return stream;
   }
 
+  /**
+   * @brief Swap operator.
+   */
   friend void swap(Summand &sum1, Summand &sum2) noexcept {
     swap(sum1.birthCorners_, sum2.birthCorners_);
     swap(sum1.deathCorners_, sum2.deathCorners_);
@@ -261,9 +412,9 @@ class Summand {
   }
 
  private:
-  Births birthCorners_;
-  Deaths deathCorners_;
-  Dimension dimension_;
+  Births birthCorners_; /**< Birth corner range. */
+  Deaths deathCorners_; /**< Death corner range. */
+  Dimension dimension_; /**< Dimension. */
 
   template <class RandomAccessValueRange, class F>
   void _transform(const RandomAccessValueRange &factors, F &&operate) {
@@ -287,7 +438,7 @@ class Summand {
   }
 
   template <class Corners>
-  static std::vector<value_type> _compute_list(const Corners &corners) {
+  static std::vector<value_type> _compute_flat_set(const Corners &corners) {
     std::vector<value_type> res(corners.num_generators() * corners.num_parameters());
     Simple_mdspan view(res.data(), corners.num_generators(), corners.num_parameters());
     for (Index g = 0; g < corners.num_generators(); ++g) {

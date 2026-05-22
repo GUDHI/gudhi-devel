@@ -21,6 +21,7 @@
 #include <array>
 #include <initializer_list>
 #include <limits>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <utility>  //std::move
@@ -352,7 +353,12 @@ class Slicer
   template <class Array = std::initializer_list<T>>
   void set_slice(const Array& slice)
   {
-    slice_ = std::vector<T>(slice.begin(), slice.end());
+    GUDHI_CHECK(slice.size() == complex_.get_number_of_cycle_generators(),
+                std::invalid_argument("Slice should have the same size than the number of generators in the complex."));
+
+    // just in case slice_ was empty before, otherwise should already be of the right size and not reallocate.
+    slice_.resize(slice.size());
+    std::copy(slice.begin(), slice.end(), slice_.begin());
   }
 
   /**
@@ -703,7 +709,7 @@ class Slicer
     std::vector<std::vector<Cycle>> out(complex.get_max_dimension() + 1);
     for (auto& cyclesDim : out) cyclesDim.reserve(numCycles);
     for (const auto& cycle : cycleKeys) {
-      GUDHI_CHECK(!cycle.empty(), "A cycle should not be empty...");
+      GUDHI_CHECK(!cycle.empty(), std::runtime_error("A cycle should not be empty..."));
       // assumes cycle to be never empty & all faces have same dimension
       out[dimensions[cycle[0]]].push_back(cycle);
     }
