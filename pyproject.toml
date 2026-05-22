@@ -71,6 +71,7 @@ build = [
     "nanobind >=1.3.2",
 ]
 wheel = [
+    "cmake",
     "build",
     "wheel",
     {include-group = "build"},
