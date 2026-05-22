@@ -28,7 +28,7 @@ _POS_INF = float("inf")
 def _is_essential_relative(pair) -> bool:
     """Detect an essential relative-cohomology bar.
 
-    Raw relative bars are ``(death_value, birth_value)`` with
+    Relative bars are ``(death_value, birth_value)`` with
     ``death_value < birth_value`` for finite bars and
     ``death_value = -inf`` for essential bars (the convention of
     Lupo-Medina-Mardones-Tauzin 2022 §2.4).
@@ -37,9 +37,9 @@ def _is_essential_relative(pair) -> bool:
 
 
 def _to_absolute(bars_by_dim: list) -> list:
-    """Convert raw relative cohomology bars to absolute cohomology convention.
+    """Convert relative cohomology bars to absolute cohomology convention.
 
-    Input convention (raw relative):
+    Input convention (relative):
         * Finite bar at dim *d*: ``(death_value, birth_value)`` with
           ``death_value < birth_value``; the bar represents an absolute class
           in degree *d - 1*.
@@ -70,7 +70,7 @@ def _to_absolute(bars_by_dim: list) -> list:
 
 
 def _to_absolute_steenrod(bars_by_dim: list) -> list:
-    """Convert raw relative Steenrod bars to absolute cohomology convention.
+    """Convert relative Steenrod bars to absolute cohomology convention.
 
     Same rule as :func:`_to_absolute`.  In the absolute output a Steenrod bar
     at degree *q* lives in the image of :math:`\\mathrm{Sq}^k : H^{q-k} \\to
@@ -335,8 +335,8 @@ class SimplexTree(t._Simplex_tree_python_interface):
             barcode in both outputs (Sq⁰ is the identity); negative values
             raise :class:`ValueError`.
         :type k: int
-        :param absolute: if ``False`` (default), return bars in the **raw
-            relative cohomology convention** of the base ``python/steenroder``
+        :param absolute: if ``False`` (default), return bars in the **relative
+            cohomology convention** of the base ``python/steenroder``
             package and Lupo, Medina-Mardones, Tauzin (2022) §2.4: each bar is
             a tuple ``(death_value, birth_value)`` with ``death < birth`` for
             finite bars; essential bars carry ``death = -float('inf')``.  The
@@ -369,7 +369,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
             indexed by cohomological dimension; element ``d`` is a list of
             value-tuples whose meaning depends on ``absolute``:
 
-            * ``absolute=False`` (raw relative): ``(death_value, birth_value)``
+            * ``absolute=False`` (relative): ``(death_value, birth_value)``
               with ``death < birth`` for finite bars and
               ``death = -float('inf')`` for essential bars.
               ``steenrod[d]`` corresponds to the reduction at relative
@@ -398,7 +398,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
             ordinary, steenrod = st.compute_steenrod_barcodes(k=1)
             # Sq^1: H^1(RP^2) -> H^2(RP^2) is an isomorphism over F_2, so
-            # steenrod[2] contains exactly one essential bar.  Raw relative
+            # steenrod[2] contains exactly one essential bar.  Relative
             # essentials carry death = -inf in slot 0 (LMT 2022 §2.4).
             assert len([b for b in steenrod[2]
                         if math.isinf(b[0]) and b[0] < 0]) == 1
@@ -427,8 +427,8 @@ class SimplexTree(t._Simplex_tree_python_interface):
             # absolute Steenrod bar and so must not trip the warning.
             check_max = (len(ordinary) - 1) if max_dim is None else int(max_dim)
             check_max = min(check_max, len(ordinary) - 1)
-            # Essential relative bars carry the sentinel ``death = -inf`` (raw
-            # relative convention from the C++ interface); see _to_absolute.
+            # Essential relative bars carry the sentinel ``death = -inf``;
+            # see _to_absolute.
             problematic_dims = [
                 d for d in range(1, check_max + 1)
                 if any(_is_essential_relative(pair) for pair in ordinary[d])

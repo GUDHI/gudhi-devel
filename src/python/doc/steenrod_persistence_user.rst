@@ -74,7 +74,7 @@ the generator).  Coning off :math:`\mathbb{C}P^2` at filtration value 1 kills al
 classes, so every bar is finite.  This makes the example ideal for illustrating the
 difference between the ``absolute`` and ``relative`` output conventions.
 
-In the **raw relative** convention (``absolute=False``, the default) each bar
+In the **relative** convention (``absolute=False``, the default) each bar
 is a tuple ``(death_value, birth_value)`` with ``death < birth`` for finite
 bars and ``death = -inf`` for essential bars.  This matches the half-open
 interval convention of Lupo, Medina-Mardones, Tauzin (2022) §2.4 — the bar
@@ -112,7 +112,7 @@ finite; a warning is emitted when this condition is not met.
     for s in top_cp2:
         st.insert(list(s) + [cone_v], filtration=1.0)
 
-    # Raw relative convention (default): tuples are (death, birth) with
+    # Relative convention (default): tuples are (death, birth) with
     # death < birth (or death = -inf for essential).  Finite bars sit one
     # degree higher than their absolute image degree.  The Sq^2 bar lives in
     # steenrod[5].

@@ -110,7 +110,7 @@ class Steenrod_barcode_interface {
         const auto birth_idx = bar[1];
         const double birth_f = fv[birth_idx];
         const double death_f = (death_idx < 0) ? neg_inf : fv[death_idx];
-        out[d].emplace_back(death_f, birth_f);   // (death, birth) raw relative
+        out[d].emplace_back(death_f, birth_f);   // (death, birth) relative
       }
     }
     return out;

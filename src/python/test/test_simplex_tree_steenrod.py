@@ -299,7 +299,7 @@ def test_cone_cp2_ordinary_h0_essential_h2_h4_boundary_bar():
 
 def test_cone_cp2_relative_convention():
     """With absolute=False the Sq^2 bar appears at relative index 5 in the
-    raw relative format ``(death, birth)`` with ``death < birth``.
+    relative format ``(death, birth)`` with ``death < birth``.
 
     This matches the convention of the base ``python/steenroder`` package and
     Lupo, Medina-Mardones, Tauzin (2022) §2.4: a relative-cohomology bar
@@ -310,7 +310,7 @@ def test_cone_cp2_relative_convention():
     sq2_rel = steenrod[5]
     assert len(sq2_rel) == 1
     death, birth = sq2_rel[0]
-    assert death < birth   # raw relative slot order: (lower=death, higher=birth)
+    assert death < birth   # relative slot order: (lower=death, higher=birth)
     assert death == 254.0
     assert birth == 329.0
 
