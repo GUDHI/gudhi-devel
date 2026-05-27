@@ -56,7 +56,6 @@ class Steenrod_barcode_interface {
   std::pair<Bars_by_dim, Bars_by_dim> compute(int n_jobs = -1) {
     using steenrod_persistence::Index;
     using steenrod_persistence::Filtration_by_dim;
-    using steenrod_persistence::Dim_filtration;
     using steenrod_persistence::Simplex;
 
     // 1. Walk the filtration and bucket each simplex by dimension.

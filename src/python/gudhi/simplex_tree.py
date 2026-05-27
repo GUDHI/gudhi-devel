@@ -18,6 +18,7 @@ __license__ = "MIT"
 import numpy as np
 from numpy.typing import ArrayLike
 import warnings
+
 from gudhi import _simplex_tree_ext as t
 
 
@@ -321,7 +322,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         self._pers._compute_persistence(homology_coeff_field, min_persistence)
         return self
 
-    def compute_steenrod_barcodes(self, k=1, absolute=False, max_dim=None, n_jobs=-1):
+    def compute_steenrod_barcodes(self, k: int = 1, absolute: bool = False, max_dim: int | None = None, n_jobs: int = -1):
         """Compute the ordinary persistence barcode together with the
         Sq\\ :sup:`k` Steenrod barcode of the filtered simplicial complex.
 

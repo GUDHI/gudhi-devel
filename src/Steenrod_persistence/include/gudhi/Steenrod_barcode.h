@@ -65,6 +65,10 @@ inline Barcodes_result barcodes(int k,
                                 const std::vector<double>* filtration_values = nullptr,
                                 int n_jobs = -1,
                                 int maxdim = -1) {
+  // Keep ``int k`` (matching the Python interface) and check at runtime in
+  // both Debug and Release builds: ``unsigned int`` would silently turn a
+  // user-passed ``-1`` into a huge positive value via integral conversion,
+  // and ``GUDHI_CHECK`` would only fire in Debug.
   if (k < 0) {
     throw std::invalid_argument("Sq^k exponent k must be non-negative");
   }
