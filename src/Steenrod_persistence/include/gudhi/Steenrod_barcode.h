@@ -72,18 +72,14 @@ inline Barcodes_result barcodes(int k,
   if (k < 0) {
     throw std::invalid_argument("Sq^k exponent k must be non-negative");
   }
-  const int n_dims_in = static_cast<int>(fbd.size());
-  const bool truncate = (maxdim >= 0) && (maxdim + 1 < n_dims_in);
-
-  Filtration_by_dim fbd_capped;
-  const Filtration_by_dim* fbd_used = &fbd;
-  if (truncate) {
-    fbd_capped.reserve(maxdim + 1);
-    for (int d = 0; d <= maxdim; ++d) fbd_capped.push_back(fbd[d]);
-    fbd_used = &fbd_capped;
-  }
-
-  auto rt = compute_reduced_triangular(*fbd_used);
+  // Pass ``maxdim`` down to the reduction as the loop bound; no copy of the
+  // filtration is needed (compute_reduced_triangular clamps negative or
+  // out-of-range values to fbd.size() - 1, so passing -1 keeps the
+  // "process all dimensions" default).  All downstream functions derive
+  // their own ``n_dims`` from ``rt.idxs.size()`` (or its descendants
+  // ``br.coho_reps.size()`` and ``sm.size()``), so the truncation
+  // propagates naturally without further plumbing.
+  auto rt = compute_reduced_triangular(fbd, maxdim);
   auto br = compute_barcode_and_coho_reps(rt, filtration_values);
 
   // Sq^0 is the identity, so the Steenrod barcode is the ordinary barcode.
@@ -95,7 +91,7 @@ inline Barcodes_result barcodes(int k,
     return Barcodes_result{std::move(br.barcode), std::move(barcode_copy)};
   }
 
-  auto sm = compute_steenrod_matrix(k, br.coho_reps, *fbd_used, rt.spx2idx, n_jobs);
+  auto sm = compute_steenrod_matrix(k, br.coho_reps, fbd, rt.spx2idx, n_jobs);
   auto sb = compute_steenrod_barcode(k, sm, rt, br, filtration_values, n_jobs);
 
   return Barcodes_result{std::move(br.barcode), std::move(sb)};

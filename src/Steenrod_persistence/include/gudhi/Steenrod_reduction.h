@@ -229,12 +229,22 @@ inline void fix_triangular_after_clearing(Matrix& triangular,
   }
 }
 
-/** \brief Full ``R = D V`` decomposition over all dimensions.
+/** \brief Full ``R = D V`` decomposition over all dimensions, or up to
+ * ``maxdim`` if provided.
  * \ingroup steenrod_persistence
+ *
+ * @param filtration_by_dim  Filtration grouped by dimension.
+ * @param maxdim             Highest dimension to process.  Negative values
+ *                           and values that exceed ``filtration_by_dim.size() - 1``
+ *                           are clamped to ``filtration_by_dim.size() - 1``.
+ *                           Passing a smaller ``maxdim`` lets the caller
+ *                           limit the reduction without copying the input.
  */
-inline Reduced_triangular compute_reduced_triangular(const Filtration_by_dim& filtration_by_dim) {
-  const int maxdim = static_cast<int>(filtration_by_dim.size()) - 1;
-  assert(maxdim >= 0 && "filtration_by_dim must have at least one dimension");
+inline Reduced_triangular compute_reduced_triangular(const Filtration_by_dim& filtration_by_dim,
+                                                     int maxdim = -1) {
+  const int n_dims_in = static_cast<int>(filtration_by_dim.size());
+  assert(n_dims_in >= 1 && "filtration_by_dim must have at least one dimension");
+  if (maxdim < 0 || maxdim >= n_dims_in) maxdim = n_dims_in - 1;
 
   Reduced_triangular result;
   result.spx2idx.resize(maxdim + 1);
