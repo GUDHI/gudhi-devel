@@ -6,7 +6,7 @@
  *
  *    Modification(s):
  *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL
- *      - 2026/04 Vincent Rouvreau: Move functions in Gudhi::random namespace. Use CGAL::get_default_random()
+ *      - 2026/05 Vincent Rouvreau: Use CGAL::get_default_random() for user to be able to set the seed.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -27,8 +27,6 @@
 #endif
 
 namespace Gudhi {
-
-namespace random {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Note: All these functions have been tested with the CGAL::Epick_d kernel
@@ -514,8 +512,6 @@ generate_points_on_klein_bottle_variant_5D(
   }
   return points;
 }
-
-}  // namespace random
 
 }  // namespace Gudhi
 

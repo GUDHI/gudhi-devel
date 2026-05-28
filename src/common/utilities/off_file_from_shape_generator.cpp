@@ -5,8 +5,7 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
- *      - 2026/04 Vincent Rouvreau: Add seed mechanism
- *                                  Functions from gudhi/random_point_generators.h moved in a Gudhi::random namespace
+ *      - 2026/05 Vincent Rouvreau: Add seed mechanism
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -106,10 +105,10 @@ int main(int argc, char **argv) {
     if (in) {
       switch (shape) {
         case Data_shape::sphere:
-          points = Gudhi::random::generate_points_in_ball_d<K>(points_number, dimension, radius);
+          points = Gudhi::generate_points_in_ball_d<K>(points_number, dimension, radius);
         break;
         case Data_shape::cube:
-          points = Gudhi::random::generate_points_in_ball_d<K>(points_number, dimension, radius);
+          points = Gudhi::generate_points_in_ball_d<K>(points_number, dimension, radius);
         break;
         case Data_shape::curve:
           std::cerr << "Sorry: in curve is not available" << std::endl;
@@ -130,32 +129,32 @@ int main(int argc, char **argv) {
     } else {  // means "on"
       switch (shape) {
         case Data_shape::sphere:
-          points = Gudhi::random::generate_points_on_sphere_d<K>(points_number, dimension, radius);
+          points = Gudhi::generate_points_on_sphere_d<K>(points_number, dimension, radius);
         break;
         case Data_shape::cube:
           std::cerr << "Sorry: on cube is not available" << std::endl;
           usage(argv[0]);
         break;
         case Data_shape::curve:
-          points = Gudhi::random::generate_points_on_moment_curve<K>(points_number, dimension, -radius/2., radius/2.);
+          points = Gudhi::generate_points_on_moment_curve<K>(points_number, dimension, -radius/2., radius/2.);
         break;
         case Data_shape::torus:
           if (dimension == 3)
-            points = Gudhi::random::generate_points_on_torus_3D<K>(points_number, dimension, radius, radius/2.);
+            points = Gudhi::generate_points_on_torus_3D<K>(points_number, dimension, radius, radius/2.);
           else
-            points = Gudhi::random::generate_points_on_torus_d<K>(points_number, dimension, "grid");
+            points = Gudhi::generate_points_on_torus_d<K>(points_number, dimension, "grid");
         break;
         case Data_shape::klein:
           switch (dimension) {
             case 3:
-              points = Gudhi::random::generate_points_on_klein_bottle_3D<K>(points_number, radius, radius/2., true);
+              points = Gudhi::generate_points_on_klein_bottle_3D<K>(points_number, radius, radius/2., true);
             break;
             case 4:
-              points = Gudhi::random::generate_points_on_klein_bottle_4D<K>(points_number, radius, radius/2., 0.,
+              points = Gudhi::generate_points_on_klein_bottle_4D<K>(points_number, radius, radius/2., 0.,
                                                                             true);
             break;
             case 5:
-              points = Gudhi::random::generate_points_on_klein_bottle_variant_5D<K>(points_number, radius, radius/2.,
+              points = Gudhi::generate_points_on_klein_bottle_variant_5D<K>(points_number, radius, radius/2.,
                                                                                     true);
             break;
             default:
