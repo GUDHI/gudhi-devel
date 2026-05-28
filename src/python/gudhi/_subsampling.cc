@@ -14,9 +14,12 @@
 #include <nanobind/stl/vector.h>
 
 #include <gudhi/distance_functions.h>
-#include <gudhi/choose_n_farthest_points.h>
-#include <gudhi/pick_n_random_points.h>
 #include <gudhi/Points_off_io.h>
+// For Windows, where _default_random is the dll provider for the other clients
+// Must be done before #include <gudhi/random.h>
+#define GUDHI_DEFAULT_RANDOM_DLL_IMPORT
+#include <gudhi/choose_n_farthest_points.h>  // choose_n_farthest_points is including gudhi/random.h
+#include <gudhi/pick_n_random_points.h>      // pick_n_random_points is including gudhi/random.h
 
 // Default value is undefined
 #define _GUDHI_SUBSAMPLING_USE_CGAL 0

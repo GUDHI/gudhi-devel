@@ -25,3 +25,7 @@ Mapper/GIC/Nerve complexes reference manual
 .. autoclass:: gudhi.cover_complex.NerveComplex
    :members:
    :inherited-members:
+
+
+.. note::
+   For reproducible results, consider using :func:`~gudhi.random.set_seed`.

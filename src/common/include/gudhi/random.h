@@ -51,6 +51,34 @@ namespace random {
     */
   using Random_generator = std::mt19937_64;
   
+// Export macro — works on Linux/macOS (ELF) and Windows (PE)
+#if defined(_WIN32)
+  #if defined GUDHI_DEFAULT_RANDOM_DLL_EXPORT
+    #define RANDOM_DLL_API __declspec(dllexport)
+  #endif
+  #if defined GUDHI_DEFAULT_RANDOM_DLL_IMPORT
+    #define RANDOM_DLL_API __declspec(dllimport)
+  #endif
+#else
+  // Defined but empty
+  #define RANDOM_DLL_API
+#endif
+
+  RANDOM_DLL_API Random_generator& get_default_random();
+
+#if defined GUDHI_DEFAULT_RANDOM_DLL_EXPORT
+  // No inline here
+  Random_generator& get_default_random() {
+    thread_local Random_generator default_random{std::random_device{}()};
+#ifdef DEBUG_TRACES
+    std::clog << "get_default_random() " << &default_random << "\n";
+#endif  // DEBUG_TRACES
+    return default_random;
+  }
+#else
+  #if defined GUDHI_DEFAULT_RANDOM_DLL_IMPORT
+    // No declaration, only definition
+  #else
   /**
    * @brief Returns a thread-local default random number generator instance.
    * 
@@ -63,6 +91,8 @@ namespace random {
 #endif  // DEBUG_TRACES
     return default_random;
   }
+  #endif  // GUDHI_DEFAULT_RANDOM_DLL_IMPORT
+#endif  // GUDHI_DEFAULT_RANDOM_DLL_EXPORT
 
   /**
    * @brief Sets the seed for the default random engine.

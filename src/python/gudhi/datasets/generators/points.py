@@ -11,11 +11,20 @@ __license__ = "MIT"
 
 
 import numpy as np
+import os
+from pathlib import Path
+from typing import Literal
+
+# Specific for Windows - To be done before import _ctorus and _sphere
+if os.name == 'nt':
+    # Add random.dll that is located in "../.."
+    dll_dir = Path(__file__).parent / "../.."
+    os.add_dll_directory(str(dll_dir.resolve()))
 
 from ._points_ext import ctorus, sphere
 
 
-def _generate_random_points_on_torus(n_samples, dim):
+def _generate_random_points_on_torus(n_samples: int, dim: int):
 
     # Generate random angles of size n_samples*dim
     alpha = 2 * np.pi * np.random.rand(n_samples * dim)
@@ -27,7 +36,7 @@ def _generate_random_points_on_torus(n_samples, dim):
     return array_points
 
 
-def _generate_grid_points_on_torus(n_samples, dim):
+def _generate_grid_points_on_torus(n_samples: int, dim: int):
 
     # Generate points on a dim-torus as a grid
     n_samples_grid = int(
@@ -42,7 +51,7 @@ def _generate_grid_points_on_torus(n_samples, dim):
     return array_points[array_points_idx].reshape(-1, 2 * dim)
 
 
-def torus(n_samples, dim, sample="random"):
+def torus(n_samples: int, dim: int, sample: Literal["random", "grid"] = "random"):
     """
     Generate points on a flat dim-torus in R^2dim either randomly or on a grid
 

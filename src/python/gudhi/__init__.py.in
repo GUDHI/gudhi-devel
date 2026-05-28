@@ -98,3 +98,11 @@ try:
     ]
 except ImportError:
     pass
+
+
+# Modules exposed at package level
+from . import random
+
+__all__ += [
+    'random',
+]
