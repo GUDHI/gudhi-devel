@@ -38,7 +38,17 @@
 namespace Gudhi {
 namespace multi_persistence {
 
-// RandomAccessValueRange: std::vector<int>
+/**
+ * @ingroup multi_persistence
+ *
+ * @brief Constructs a new identical module but with permuted summand indices.
+ * 
+ * @tparam T First template parameter of @ref Module.
+ * @tparam RandomAccessValueRange Range of intergers with a size() and operator[] method.
+ * @param module Module to permute.
+ * @param permutation Permutation map of the summand indices, such that the \f$ i^{th} \f$ summand in the new module
+ * corresponds to the summand at index \f$ perm[i] \f$ in the original module.
+ */
 template <typename T, class RandomAccessValueRange>
 Module<T> build_permuted_module(const Module<T> &module, const RandomAccessValueRange &permutation) {
   GUDHI_CHECK(permutation.size() <= module.size(),
@@ -57,6 +67,8 @@ Module<T> build_permuted_module(const Module<T> &module, const RandomAccessValue
 }
 
 /**
+ * @ingroup multi_persistence
+ *
  * @private
  */
 template <typename T>
@@ -73,6 +85,25 @@ inline std::vector<T> _get_module_landscape_values(const Module<T> &mod, const s
 }
 
 // TODO: extend in higher resolution dimension
+/**
+ * @ingroup multi_persistence
+ *
+ * @brief Computes a set of landscape images for each given `k` (corresponding to the \f$ k^{th} \f$ landscape
+ * function).
+ * 
+ * @tparam T Value type of a parameter in a filtration value.
+ * @tparam RandomAccessValueRange1 Range of unsigned integers with a size() and operator[] method.
+ * @tparam RandomAccessValueRange2 Range of unsigned integers with a size() and operator[] method.
+ * @param mod Module.
+ * @param dimension Dimension of the summands to be used.
+ * @param ks Range of \f$ k \f$'s to compute the \f$ k^{th} \f$ landscape function of the module.
+ * @param box Box in which to restrict the landscapes.
+ * @param resolution Image resolution. Should have size 2.
+ * @param n_jobs If TBB is linked, allows to specify the number of threads that should be used for parallelization.
+ * @return A continuous vector of landscape values which should be interpreted as a c-ordered 3-dimensional array with
+ * a first axis corresponding the the \f$ k \f$'s, a second axis corresponding to the image axis with the first
+ * resolution and a third axis corresponding to the image axis with the second resolution.
+ */
 template <typename T, class RandomAccessValueRange1, class RandomAccessValueRange2>
 inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typename Module<T>::Dimension dimension,
                                                        const RandomAccessValueRange1 &ks, const Box<T> &box,
@@ -116,6 +147,24 @@ inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typ
   return images;
 }
 
+/**
+ * @ingroup multi_persistence
+ *
+ * @brief Computes a set of landscape images for each given `k` (corresponding to the \f$ k^{th} \f$ landscape
+ * function).
+ * 
+ * @tparam T Value type of a parameter in a filtration value.
+ * @tparam RandomAccessValueRange Range of unsigned integers with a size() and operator[] method.
+ * @tparam RandomAccessArray Range of arithmetic values with a size() and operator[] method.
+ * @param mod Module.
+ * @param dimension Dimension of the summands to be used.
+ * @param ks Range of \f$ k \f$'s to compute the \f$ k^{th} \f$ landscape function of the module.
+ * @param grid Grid partitioning the image. Should have size 2 and the sub-arrays partition an axis of the image each.
+ * @param n_jobs If TBB is linked, allows to specify the number of threads that should be used for parallelization.
+ * @return A continuous vector of landscape values which should be interpreted as a c-ordered 3-dimensional array with
+ * a first axis corresponding the the \f$ k \f$'s, a second axis corresponding to the image axis with the first
+ * grid resolution and a third axis corresponding to the image axis with the second grid resolution.
+ */
 template <typename T, class RandomAccessValueRange, class RandomAccessArray>
 inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typename Module<T>::Dimension dimension,
                                                        const RandomAccessValueRange &ks,
@@ -154,6 +203,22 @@ inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typ
   return images;
 }
 
+/**
+ * @ingroup multi_persistence
+ *
+ * @brief Computes the distance of all given points to all summands in the module.
+ * TODO: proper definition of the distance.
+ * 
+ * @tparam T Value type of a parameter in a filtration value.
+ * @tparam RandomAccessPointRange Range with size() and operator[] method. The operator[] method must return a
+ * type with the same methods and a value type convertible to `T`.
+ * @param mod Module.
+ * @param pts Range of points with number of coordinates corresponding to the number of parameters in the module.
+ * @param negative If true, the distance is allowed to be signed.
+ * @param n_jobs If TBB is linked, allows to specify the number of threads that should be used for parallelization.
+ * @return A continuous vector of distance values which should be interpreted as a c-ordered 2-dimensional array with
+ * a first axis corresponding to the points and a second axis to the summands.
+ */
 template <typename T, class RandomAccessPointRange>
 inline std::vector<T> compute_module_distances_to(const Module<T> &mod, const RandomAccessPointRange &pts,
                                                   bool negative, int n_jobs) {
@@ -178,6 +243,17 @@ inline std::vector<T> compute_module_distances_to(const Module<T> &mod, const Ra
   return res;
 }
 
+/**
+ * @ingroup multi_persistence
+ *
+ * @brief For a birth and death corner in a summand of the module, let the diagonal between those two be
+ * \f$ min\{death[p] - birth[p]\} \f$ for all parameters \f$ p \f$. This method returns for all summands in the module
+ * the maximal diagonal of all birth-death pairs in the intersection between the summand and the box.
+ * 
+ * @tparam T Value type of a parameter in a filtration value.
+ * @param mod Module.
+ * @param box Box to intersect with. The box is ignored if trivial.
+ */
 template <typename T>
 inline std::vector<T> compute_module_interleavings(const Module<T> &mod, const Box<T> &box) {
   std::vector<T> interleavings(mod.size());
@@ -198,6 +274,8 @@ inline std::vector<T> compute_module_interleavings(const Module<T> &mod, const B
 }
 
 /**
+ * @ingroup multi_persistence
+ *
  * @private
  */
 template <typename T, class RandomAccessValueRange>
@@ -232,6 +310,8 @@ inline T _get_module_pixel_value(typename Module<T>::const_iterator start, typen
 }
 
 /**
+ * @ingroup multi_persistence
+ *
  * @private
  */
 template <typename T, class RandomAccessPointRange, class OutputIt>
@@ -284,6 +364,29 @@ inline void _compute_module_pixels_of_degree(typename Module<T>::const_iterator 
 #endif
 }
 
+/**
+ * @ingroup multi_persistence
+ *
+ * @brief Assumes that the summands in the module are ordered by increasing dimension. Computes the persistence images
+ * of the module for the given dimensions.
+ * 
+ * @tparam T Value type of a parameter in a filtration value.
+ * @tparam RandomAccessPointRange Range with size() and operator[] method. The operator[] method must return a
+ * type with the same methods and a value type convertible to `T`.
+ * @tparam DimensionRange Integer range with a size() and begin() method.
+ * @param mod Module.
+ * @param coordinates Image coordinates. One value will be computed for each of them for each requested dimension.
+ * @param dimensions Range of dimensions to compute. Has to be ordered by increasing value.
+ * @param box Box within to compute the module weight. Default: trivial box.
+ * @param delta Radius. If positive, the weight computed is the interleaving distance to 0 of the
+ * summand restricted to the current point and radius. If negative, the weight is the volume of the largest rectangle
+ * spanned by a birth and a death corner of the summand intersected with the current point and radius.
+ * @param p \f$ p \f$ coefficient of the \f$ p \f$-norm to use.
+ * @param normalize Indicates if the values have to be normalized or not.
+ * @param n_jobs If TBB is linked, allows to specify the number of threads that should be used for parallelization.
+ * @return A continuous vector of pixel values which should be interpreted as a c-ordered 2-dimensional array with
+ * a first axis corresponding to the dimensions and a second axis to the coordinates.
+ */
 template <typename T, class RandomAccessPointRange, class DimensionRange>
 inline std::vector<T> compute_module_pixels(const Module<T> &mod, const RandomAccessPointRange &coordinates,
                                             const DimensionRange &dimensions, const Box<T> &box = {}, T delta = 0.1,

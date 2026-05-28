@@ -299,6 +299,48 @@ class Summand {
   }
 
   /**
+   * @brief Builds a birth and death corner from the given arguments and adds them to the summand.
+   *
+   * @param line Line in the module in which lives the bar.
+   * @param b Birth corner time parameter of the line.
+   * @param d Death corner time parameter of the line.
+   * @param box Box to which restrict the bar if the bar flows over it.
+   * @param thresholdToBox Indicates how to restrict. If true, the coordinates outside of the box are mapped to
+   * the box on the same line. If false, the coordinates are mapped to minus infinity (if birth corner) or
+   * infinity (if death corner).
+   */
+  void add_bar(const Line<value_type> &line, value_type b, value_type d, const Box<T> &box, bool thresholdToBox) {
+    if (b >= d) return;
+
+    // TODO: parallelize
+    const value_type error = 1e-10;
+
+    auto birthContainer = line[b];
+    bool allInf = true;
+    for (std::size_t i = 0; i < birthContainer.size(); i++) {
+      value_type t = box.get_lower_corner()[i];
+      if (birthContainer[i] < t - error) birthContainer[i] = thresholdToBox ? t : T_m_inf;
+      if (birthContainer[i] != T_m_inf) allInf = false;
+    }
+    if (allInf) birthContainer.resize(1);
+
+    auto deathContainer = line[d];
+    allInf = true;
+    for (std::size_t i = 0; i < deathContainer.size(); i++) {
+      value_type t = box.get_upper_corner()[i];
+      if (deathContainer[i] > t + error) deathContainer[i] = thresholdToBox ? t : T_inf;
+      if (deathContainer[i] != T_inf) allInf = false;
+    }
+    if (allInf) deathContainer.resize(1);
+
+    // could be automaticaly converted, but this should avoid one copy?
+    typename Births::Generator births(std::move(birthContainer.retrieve_underlying_container()));
+    typename Deaths::Generator deaths(std::move(deathContainer.retrieve_underlying_container()));
+    add_bar(births, deaths);
+    // add_bar(birthContainer, deathContainer);
+  }
+
+  /**
    * @brief Rescales the summand's corners for each parameter, that is, for each corner in the summand,
    * the \f$ p^{th} \f$ coordinate is multiplied by `rescaleFactors[p]`.
    *

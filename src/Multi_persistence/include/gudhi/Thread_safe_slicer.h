@@ -229,7 +229,10 @@ class Thread_safe_slicer : private Slicer
   template <class Array = std::initializer_list<T>>
   void set_slice(const Array& slice)
   {
-    Slicer::set_slice(slice);
+    GUDHI_CHECK(slice.size() == slicer_->complex_.get_number_of_cycle_generators(),
+                std::invalid_argument("Slice should have the same size than the number of generators in the complex."));
+
+    Slicer::_set_slice(slice);
   }
 
   /**

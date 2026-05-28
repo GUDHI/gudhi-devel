@@ -356,9 +356,7 @@ class Slicer
     GUDHI_CHECK(slice.size() == complex_.get_number_of_cycle_generators(),
                 std::invalid_argument("Slice should have the same size than the number of generators in the complex."));
 
-    // just in case slice_ was empty before, otherwise should already be of the right size and not reallocate.
-    slice_.resize(slice.size());
-    std::copy(slice.begin(), slice.end(), slice_.begin());
+    _set_slice(slice);
   }
 
   /**
@@ -678,6 +676,14 @@ class Slicer
         persistence_(std::move(persistence))
   {}
 
+  template <class Array = std::initializer_list<T>>
+  void _set_slice(const Array& slice)
+  {
+    // just in case slice_ was empty before, otherwise should already be of the right size and not reallocate.
+    slice_.resize(slice.size());
+    std::copy(slice.begin(), slice.end(), slice_.begin());
+  }
+
   template <class U>
   void _push_to(const Complex& complex, const Line<U>& line)
   {
@@ -719,7 +725,7 @@ class Slicer
  private:
   Complex complex_;      /**< Complex storing all boundaries, filtration values and dimensions. */
   std::vector<T> slice_; /**< Filtration values of the current slice. The indices corresponds to those in complex_. */
-  Persistence persistence_;           /**< Class for persistence computations. */
+  Persistence persistence_; /**< Class for persistence computations. */
 
   template <bool idx, class Interval, typename Value>
   void _retrieve_interval(const Interval& bar, Dimension& dim, Value& birth, Value& death)
