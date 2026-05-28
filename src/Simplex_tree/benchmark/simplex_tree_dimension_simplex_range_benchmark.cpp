@@ -11,7 +11,7 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Clock.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 #include <iostream>
 #include <vector>

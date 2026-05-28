@@ -11,7 +11,7 @@
 
 #include <gudhi/Bitmap_cubical_complex.h>
 #include <gudhi/Clock.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 #include <vector>
 #include <cstdlib>

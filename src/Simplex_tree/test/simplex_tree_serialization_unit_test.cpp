@@ -24,7 +24,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Simplex_tree/serialization_utils.h>  // for de/serialize_value_to_char_buffer
 #include <gudhi/Unitary_tests_utils.h>  // for GUDHI_TEST_FLOAT_EQUALITY_CHECK
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 #include "test_vector_filtration_simplex_tree.h"
 

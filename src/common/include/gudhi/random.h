@@ -37,7 +37,7 @@ namespace random {
    * In order to reproduce the results, a specific GUDHI random generator is available, and one can set its seed:
    * 
    * @code{.cpp}
-   * #include <gudhi/Random.h>
+   * #include <gudhi/random.h>
    * 
    * // Set the seed for the default generator that is used internally in GUDHI
    * Gudhi::random::set_seed(42);

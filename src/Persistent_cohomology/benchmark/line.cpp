@@ -14,7 +14,7 @@
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Persistence_on_a_line.h>
 #include <gudhi/Clock.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 #include <vector>
 #include <cstdlib>

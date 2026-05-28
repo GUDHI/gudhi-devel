@@ -8,7 +8,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 #include <iostream>
 #include <vector>

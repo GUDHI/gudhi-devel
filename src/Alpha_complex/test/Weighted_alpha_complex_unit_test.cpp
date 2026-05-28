@@ -26,7 +26,7 @@
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Alpha_complex_3d.h>
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 BOOST_AUTO_TEST_CASE(Weighted_alpha_complex_3d_comparison) {
   // check that for random weighted 3d points in safe mode the 3D and dD codes give the same result with some tolerance

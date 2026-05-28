@@ -13,7 +13,7 @@
 #include <gudhi/Bitmap_cubical_complex.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Persistence_on_rectangle.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 #include <vector>
 #include <cstdlib>

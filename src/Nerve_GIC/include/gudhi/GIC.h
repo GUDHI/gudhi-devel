@@ -41,7 +41,7 @@ using ssize_t = std::make_signed_t<std::size_t>;
 #include <gudhi/Points_off_io.h>
 #include <gudhi/distance_functions.h>
 #include <gudhi/Persistent_cohomology.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 #include <boost/config.hpp>
 #include <boost/graph/graph_traits.hpp>

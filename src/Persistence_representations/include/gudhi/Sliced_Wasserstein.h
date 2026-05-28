@@ -23,7 +23,7 @@
 #include <gudhi/read_persistence_from_file.h>
 #include <gudhi/common_persistence_representations.h>
 #include <gudhi/Debug_utils.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 namespace Gudhi {
 namespace Persistence_representations {

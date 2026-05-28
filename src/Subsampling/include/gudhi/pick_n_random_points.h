@@ -15,7 +15,7 @@
 #ifdef GUDHI_SUBSAMPLING_PROFILING
 # include <gudhi/Clock.h>
 #endif
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 #include <cstddef>  // for std::size_t
 #include <algorithm>  // for std::sample

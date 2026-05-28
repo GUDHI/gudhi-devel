@@ -16,7 +16,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Toplex_map.h>
 #include <gudhi/Lazy_toplex_map.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 using namespace Gudhi;
 

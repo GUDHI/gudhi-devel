@@ -23,7 +23,7 @@
 #endif
 
 #include <gudhi/Null_output_iterator.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 #include <iterator>
 #include <vector>

@@ -18,7 +18,7 @@
 #include <gudhi/Alpha_complex.h>
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Unitary_tests_utils.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 template<class Kernel>
 void do_test() {

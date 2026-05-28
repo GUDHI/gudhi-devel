@@ -16,7 +16,7 @@
 
 #include <gudhi/Bottleneck.h>
 #include <gudhi/Unitary_tests_utils.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 using namespace Gudhi::persistence_diagram;
 

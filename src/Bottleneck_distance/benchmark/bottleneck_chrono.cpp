@@ -10,7 +10,7 @@
  */
 
 #include <gudhi/Bottleneck.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 
 #include <chrono>
 #include <fstream>

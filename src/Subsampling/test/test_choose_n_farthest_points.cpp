@@ -20,7 +20,7 @@
 
 #include <gudhi/choose_n_farthest_points.h>
 #include <gudhi/distance_functions.h>
-#include <gudhi/Random.h>
+#include <gudhi/random.h>
 #include <vector>
 #include <iterator>
 #include <array>
