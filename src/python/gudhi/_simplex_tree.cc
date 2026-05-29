@@ -26,12 +26,14 @@
 
 #include <python_interfaces/Persistent_cohomology_interface.h>
 #include <python_interfaces/Simplex_tree_interface.h>
+#include <python_interfaces/Steenrod_barcode_interface.h>
 #include <python_interfaces/numpy_utils.h>
 
 namespace nb = nanobind;
 
 using gsti = Gudhi::Simplex_tree_interface;
 using gpers = Gudhi::Persistent_cohomology_interface<gsti>;
+using gstd = Gudhi::Steenrod_barcode_interface<gsti>;
 
 gsti deserialize_from_python(const nb::ndarray<const char, nb::ndim<1>, nb::numpy> &state)
 {
@@ -429,4 +431,9 @@ unpickle a SimplexTree.
       .def("_lower_star_generators", &gpers::lower_star_generators)
       .def("_flag_generators", &gpers::flag_generators)
       .def("_compute_extended_persistence_subdiagrams", &gpers::compute_extended_persistence_subdiagrams);
+
+  nb::class_<gstd>(m, "_Steenrod_barcode_interface")
+      .def(nb::init<gsti*, int>(), nb::arg("simplex_tree"), nb::arg("k"))
+      .def("_compute", &gstd::compute, nb::arg("n_jobs") = -1,
+           nb::call_guard<nb::gil_scoped_release>());
 }
