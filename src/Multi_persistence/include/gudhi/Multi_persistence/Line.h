@@ -80,21 +80,32 @@ class Line
    * @brief Returns the coordinates of the point on the line with "time" parameter `t`. That is, the point \f$ x \f$
    * such that \f$ x[i] = base\_point[i] + t \times direction[i] \f$ for all \f$ i \in [0, n - 1] \f$ with \f$ n \f$
    * the number of coordinates.
+   * 
+   * @tparam U Arithmetic type.
+   *
+   * @note If `U` is different from `T` (e.g., `T` is `unsigned int`, but `t` is `-1` and so signed), make sure
+   * that the result remains in the scope of `T` (e.g., in the previous example, if the point computed ends up having
+   * negative coordinates, the result will underflow into very big integers), except if the overflow/underflow
+   * behaviour is wanted.
    */
-  Point_t operator[](T t) const
+  template<typename U = T>
+  Point_t operator[](U t) const
   {
     GUDHI_CHECK(direction_.size() == 0 || direction_.size() == basePoint_.size(),
                 "Direction and base point do not have the same dimension.");
 
-    if (Gudhi::multi_filtration::_is_nan(t) || t == Point_t::T_inf || t == Point_t::T_m_inf)
+    if (Gudhi::multi_filtration::_is_nan(t) || t == Point<U>::T_inf || t == Point<U>::T_m_inf)
       return Point_t(basePoint_.size(), t);
 
     Point_t x(basePoint_.size());
 
+    // static_cast because T can be unsigned while U is signed and still valid (i.e. result is positive)
     if (direction_.size() > 0) {
-      for (std::size_t i = 0; i < x.size(); i++) x[i] = basePoint_[i] + (t * direction_[i]);
-    } else
-      for (std::size_t i = 0; i < x.size(); i++) x[i] = basePoint_[i] + t;
+      for (std::size_t i = 0; i < x.size(); i++)
+        x[i] = static_cast<U>(basePoint_[i]) + (t * static_cast<U>(direction_[i]));
+    } else {
+      for (std::size_t i = 0; i < x.size(); i++) x[i] = static_cast<U>(basePoint_[i]) + t;
+    }
 
     return x;
   }

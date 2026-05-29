@@ -130,6 +130,30 @@ class Summand {
   [[nodiscard]] int get_number_of_death_corners() const { return deathCorners_.num_generators(); }
 
   /**
+   * @brief Returns const reference to the range of birth corners.
+   */
+  const Births &get_upset() const { return birthCorners_; }
+
+  /**
+   * @brief Returns const reference to the range of death corners.
+   */
+  const Deaths &get_downset() const { return deathCorners_; }
+
+  /**
+   * @brief Flatten the range of birth corners as vector of `T`, such that the \f$ p \f$ first elements of the range
+   * corresponds to the first corner, the \f$ p \f$ next elements to the second corner and so on... Where \f$ p \f$ is
+   * the number of parameters.
+   */
+  std::vector<value_type> compute_flat_upset() const { return _compute_flat_set(birthCorners_); }
+
+  /**
+   * @brief Flatten the range of death corners as vector of `T`, such that the \f$ p \f$ first elements of the range
+   * corresponds to the first corner, the \f$ p \f$ next elements to the second corner and so on... Where \f$ p \f$ is
+   * the number of parameters.
+   */
+  std::vector<value_type> compute_flat_downset() const { return _compute_flat_set(deathCorners_); }
+
+  /**
    * @brief Returns `true` if and only if the given filtration value is contained in summand.
    *
    * @tparam MultiFiltrationValue Either @ref Gudhi::multi_filtration::Multi_parameter_filtration,
@@ -170,30 +194,6 @@ class Summand {
   }
 
   /**
-   * @brief Returns const reference to the range of birth corners.
-   */
-  const Births &get_upset() const { return birthCorners_; }
-
-  /**
-   * @brief Returns const reference to the range of death corners.
-   */
-  const Deaths &get_downset() const { return deathCorners_; }
-
-  /**
-   * @brief Flatten the range of birth corners as vector of `T`, such that the \f$ p \f$ first elements of the range
-   * corresponds to the first corner, the \f$ p \f$ next elements to the second corner and so on... Where \f$ p \f$ is
-   * the number of parameters.
-   */
-  std::vector<value_type> compute_flat_upset() const { return _compute_flat_set(birthCorners_); }
-
-  /**
-   * @brief Flatten the range of death corners as vector of `T`, such that the \f$ p \f$ first elements of the range
-   * corresponds to the first corner, the \f$ p \f$ next elements to the second corner and so on... Where \f$ p \f$ is
-   * the number of parameters.
-   */
-  std::vector<value_type> compute_flat_downset() const { return _compute_flat_set(deathCorners_); }
-
-  /**
    * @brief Identifies/merges all birth corners whose maximal coordinate difference is smaller than the
    * given threshold. The new corner takes all minimal coordinates of the two, covering therefore both.
    *
@@ -206,7 +206,7 @@ class Summand {
   void identify_births(value_type precision) {
     if (!birthCorners_.is_finite()) return;
 
-    const value_type error = 0.99;
+    constexpr value_type error = std::is_integral_v<value_type> ? 1. : 0.99;
 
     for (Index i = 0; i < birthCorners_.num_generators(); i++) {
       for (Index j = i + 1; j < birthCorners_.num_generators(); j++) {
@@ -233,7 +233,7 @@ class Summand {
   void identify_deaths(value_type precision) {
     if (!deathCorners_.is_finite()) return;
 
-    const value_type error = 0.99;
+    constexpr value_type error = std::is_integral_v<value_type> ? 1. : 0.99;
 
     for (Index i = 0; i < deathCorners_.num_generators(); i++) {
       for (Index j = i + 1; j < deathCorners_.num_generators(); j++) {
@@ -255,24 +255,24 @@ class Summand {
    * is a bar in its barcode.
    *
    * @param l Line to intersect with. It has to have the same number of coordinates/parameters then the summand.
-   * @return The two endpoints as an `std::array<T,2>`.
+   * @return The time parameters on the line of the two endpoints as an `std::array<double,2>`.
    */
-  std::array<value_type, 2> get_bar(const Line<value_type> &l) const {
-    value_type pushedBirth = T_inf;
-    value_type pushedDeath = T_m_inf;
+  std::array<double, 2> get_bar(const Line<value_type> &l) const {
+    double pushedBirth = std::numeric_limits<double>::infinity();
+    double pushedDeath = -std::numeric_limits<double>::infinity();
 
     for (const auto &birth : birthCorners_) {
-      value_type pb = l.compute_forward_intersection(birth.begin(), birth.end());
+      double pb = l.template compute_forward_intersection<double>(birth.begin(), birth.end());
       pushedBirth = std::min(pb, pushedBirth);
     }
     for (const auto &death : deathCorners_) {
-      value_type pd = l.compute_backward_intersection(death.begin(), death.end());
+      double pd = l.template compute_backward_intersection<double>(death.begin(), death.end());
       pushedDeath = std::max(pd, pushedDeath);
     }
 
     // !(<=) in case there is a NaN ?
     if (!(pushedBirth <= pushedDeath)) {
-      return {T_inf, T_inf};
+      return {std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()};
     }
     return {pushedBirth, pushedDeath};
   }
@@ -301,25 +301,27 @@ class Summand {
   /**
    * @brief Builds a birth and death corner from the given arguments and adds them to the summand.
    *
+   * @tparam U Arithmetic type into which `T` can be casted.
    * @param line Line in the module in which lives the bar.
    * @param b Birth corner time parameter of the line.
    * @param d Death corner time parameter of the line.
-   * @param box Box to which restrict the bar if the bar flows over it.
-   * @param thresholdToBox Indicates how to restrict. If true, the coordinates outside of the box are mapped to
-   * the box on the same line. If false, the coordinates are mapped to minus infinity (if birth corner) or
-   * infinity (if death corner).
+   * @param box Box to which project the bar if the bar flows over it.
+   * @param thresholdToBox Indicates how to project. If true, a coordinate outside of the box is projected to the
+   * coordinate of the borders of the box at same parameter (note that the projection can therefore not be on the
+   * line). If false, the coordinate is mapped to minus infinity (if birth corner) or infinity (if death corner).
    */
-  void add_bar(const Line<value_type> &line, value_type b, value_type d, const Box<T> &box, bool thresholdToBox) {
+  template <typename U>
+  void add_bar(const Line<value_type> &line, U b, U d, const Box<T> &box, bool thresholdToBox) {
     if (b >= d) return;
 
     // TODO: parallelize
-    const value_type error = 1e-10;
+    const double error = 1e-10;
 
     auto birthContainer = line[b];
     bool allInf = true;
     for (std::size_t i = 0; i < birthContainer.size(); i++) {
       value_type t = box.get_lower_corner()[i];
-      if (birthContainer[i] < t - error) birthContainer[i] = thresholdToBox ? t : T_m_inf;
+      if (birthContainer[i] < static_cast<double>(t) - error) birthContainer[i] = thresholdToBox ? t : T_m_inf;
       if (birthContainer[i] != T_m_inf) allInf = false;
     }
     if (allInf) birthContainer.resize(1);
@@ -328,7 +330,7 @@ class Summand {
     allInf = true;
     for (std::size_t i = 0; i < deathContainer.size(); i++) {
       value_type t = box.get_upper_corner()[i];
-      if (deathContainer[i] > t + error) deathContainer[i] = thresholdToBox ? t : T_inf;
+      if (deathContainer[i] > static_cast<double>(t) + error) deathContainer[i] = thresholdToBox ? t : T_inf;
       if (deathContainer[i] != T_inf) allInf = false;
     }
     if (allInf) deathContainer.resize(1);
@@ -365,9 +367,9 @@ class Summand {
   }
 
   /**
-   * @brief Snaps the summand's corner coordinates to their closest integer and interprets them as indices in a grid
-   * to replaces them with the values at those indices in the given grid. For example, if \f$ c \f$ is a birth or
-   * death corner in the summand, its new value at parameter \f$ p \f$ will be \f$ c[p] = grid[p][snap(c[p])] \f$.
+   * @brief Snaps the summand's corner coordinates to their closest positive integer and interprets them as indices in
+   * a grid to replaces them with the values at those indices in the given grid. For example, if \f$ c \f$ is a birth
+   * or death corner in the summand, its new value at parameter \f$ p \f$ will be \f$ c[p] = grid[p][snap(c[p])] \f$.
    * If \f$ snap(c[p]) \f$ is out of bound, the value is replaced with infinity.
    *
    * @tparam GridRange Range with size() and operator[] method. The operator[] method must return a type with the
@@ -383,6 +385,7 @@ class Summand {
                     "The size of the grid should correspond to the number of parameters in the filtration value."));
 
     auto snap = [](value_type x) -> std::size_t {
+      if (x < 0) return 0;
       value_type a = std::floor(x);
       value_type b = std::ceil(x);
       if (x - a < b - x) return a;
@@ -496,8 +499,14 @@ class Summand {
   static value_type _d_inf(const Generator &a, const Generator &b) {
     if (a.size() == 0 || b.size() == 0 || a.size() != b.size()) return T_inf;
 
-    value_type d = std::abs(a[0] - b[0]);
-    for (Index i = 1; i < a.size(); i++) d = std::max(d, std::abs(a[i] - b[i]));
+    // instead of std::abs in case of unsigned value type
+    auto diff = [](value_type a, value_type b) -> value_type {
+      if (a < b) return b - a;
+      return a - b;
+    };
+
+    value_type d = diff(a[0], b[0]);
+    for (Index i = 1; i < a.size(); i++) d = std::max(d, diff(a[i], b[i]));
 
     return d;
   }
