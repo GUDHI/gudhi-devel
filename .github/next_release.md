@@ -10,7 +10,7 @@ Below is a list of changes:
 
 - Reproducibility
      - [`[C++]`](https://gudhi.inria.fr/doc/latest/group__reproducibility.html) New random functions, with a default random generator that is used internally, and where the user can set the global seed.
-     - [`[Python]`](https://gudhi.inria.fr/python/latest/reproducibility.html) New `gudhi.random.set_seed` function to set the global seeds.
+     - [`[Python]`](https://gudhi.inria.fr/python/latest/reproducibility.html) New `gudhi.random.set_seed` function to set the global seed.
 
 - [Module](link)
      - **...**
