@@ -41,16 +41,16 @@ class Tangential_complex_interface
   }
 
  public:
-  Tangential_complex_interface(int intrisic_dim, const Sequence2D& points = Sequence2D())
-      : tangential_complex_(points, intrisic_dim, Dynamic_kernel())
+  Tangential_complex_interface(int intrinsic_dim, const Sequence2D& points = Sequence2D())
+      : tangential_complex_(points, intrinsic_dim, Dynamic_kernel())
   {}
 
-  Tangential_complex_interface(int intrisic_dim, const Tensor2D& points)
-      : Tangential_complex_interface(intrisic_dim, _get_sequence_from_tensor(points))
+  Tangential_complex_interface(int intrinsic_dim, const Tensor2D& points)
+      : Tangential_complex_interface(intrinsic_dim, _get_sequence_from_tensor(points))
   {}
 
-  Tangential_complex_interface(int intrisic_dim, const std::string& off_file_name)
-      : tangential_complex_(_get_points_from_file(off_file_name), intrisic_dim, Dynamic_kernel())
+  Tangential_complex_interface(int intrinsic_dim, const std::string& off_file_name)
+      : tangential_complex_(_get_points_from_file(off_file_name), intrinsic_dim, Dynamic_kernel())
   {}
 
   void compute_tangential_complex()
@@ -113,7 +113,7 @@ NB_MODULE(_tangential_complex_ext, m)
 
   nb::class_<gtci>(m, "_Tangential_complex_interface")
       .def(nb::init<int, const Sequence2D&>(),
-           nb::arg("intrisic_dim"),
+           nb::arg("intrinsic_dim"),
            nb::arg("points") = Sequence2D(),
            nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<int, const Tensor2D&>(), nb::call_guard<nb::gil_scoped_release>())

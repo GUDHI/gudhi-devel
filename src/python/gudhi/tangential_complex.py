@@ -24,11 +24,11 @@ class TangentialComplex(t._Tangential_complex_interface):
     can be run to attempt to remove inconsistencies.
     """
 
-    def __init__(self, intrisic_dim, points=None, off_file=""):
+    def __init__(self, intrinsic_dim, points=None, off_file=""):
         """TangentialComplex constructor.
 
-        :param intrisic_dim: Intrinsic dimension of the manifold.
-        :type intrisic_dim: integer
+        :param intrinsic_dim: Intrinsic dimension of the manifold.
+        :type intrinsic_dim: integer
 
         :param points: A list of points in d-Dimension.
         :type points (Sequence[Sequence[float]]): list of list of double
@@ -40,14 +40,14 @@ class TangentialComplex(t._Tangential_complex_interface):
         """
         if off_file:
             if os.path.isfile(off_file):
-                super().__init__(intrisic_dim, off_file)
+                super().__init__(intrinsic_dim, off_file)
             else:
                 raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), off_file)
         else:
             if points is None:
-                super().__init__(intrisic_dim)
+                super().__init__(intrinsic_dim)
             else:
-                super().__init__(intrisic_dim, points)
+                super().__init__(intrinsic_dim, points)
 
     def create_simplex_tree(self):
         """Exports the complex into a simplex tree.
