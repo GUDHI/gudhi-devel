@@ -15,6 +15,7 @@
 #include <utility>
 #include <vector>
 
+#include <gudhi/Debug_utils.h>
 #include <gudhi/Steenrod_types.h>
 #include <gudhi/Steenrod_reduction.h>
 #include <gudhi/Steenrod_cocycles.h>
@@ -65,13 +66,10 @@ inline Barcodes_result barcodes(int k,
                                 const std::vector<double>* filtration_values = nullptr,
                                 int n_jobs = -1,
                                 int maxdim = -1) {
-  // Keep ``int k`` (matching the Python interface) and check at runtime in
-  // both Debug and Release builds: ``unsigned int`` would silently turn a
-  // user-passed ``-1`` into a huge positive value via integral conversion,
-  // and ``GUDHI_CHECK`` would only fire in Debug.
-  if (k < 0) {
-    throw std::invalid_argument("Sq^k exponent k must be non-negative");
-  }
+  // Debug-mode guard against negative k.  Python users already get a clean
+  // ValueError from the nanobind interface in any build mode; this guard is
+  // the gudhi house-style way to flag direct C++ misuse in Debug builds.
+  GUDHI_CHECK(k >= 0, std::invalid_argument("Sq^k exponent k must be non-negative"));
   // Pass ``maxdim`` down to the reduction as the loop bound; no copy of the
   // filtration is needed (compute_reduced_triangular clamps negative or
   // out-of-range values to fbd.size() - 1, so passing -1 keeps the
