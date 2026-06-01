@@ -25,10 +25,15 @@ class TangentialComplex(t._Tangential_complex_interface):
     """
 
     def __init__(self, intrinsic_dim, points=None, off_file=""):
+# ^^ import warnings
+
+    def __init__(self, intrinsic_dim, intrisic_dim=None, points=None, off_file=""):
         """TangentialComplex constructor.
 
         :param intrinsic_dim: Intrinsic dimension of the manifold.
         :type intrinsic_dim: integer
+
+        :param intrisic_dim: **[deprecated]** consider using `intrinsic_dim` instead.
 
         :param points: A list of points in d-Dimension.
         :type points (Sequence[Sequence[float]]): list of list of double
@@ -38,6 +43,12 @@ class TangentialComplex(t._Tangential_complex_interface):
         :param off_file: An OFF file style name.
         :type off_file: string
         """
+        if intrisic_dim is not None:
+            warnings.warn(
+                "The 'intrisic_dim' argument is deprecated and will be removed in a future version. Use 'intrinsic_dim' instead.",
+                DeprecationWarning
+            )
+            intrinsic_dim = intrisic_dim
         if off_file:
             if os.path.isfile(off_file):
                 super().__init__(intrinsic_dim, off_file)
