@@ -51,9 +51,9 @@ inline Barcode steenrod_barcode_single_dim(const Matrix& steenrod_matrix_dim,
                                            const std::vector<Index>& idxs_prev_dim,
                                            const Matrix& reduced_prev_dim,
                                            const std::vector<Index>& births_dim_minus_k) {
-  const int n_cols_red = static_cast<int>(reduced_prev_dim.size());
-  const int n_cols_st = static_cast<int>(steenrod_matrix_dim.size());
-  const int n_births = static_cast<int>(births_dim_minus_k.size());
+  const int n_cols_red = reduced_prev_dim.size();
+  const int n_cols_st = steenrod_matrix_dim.size();
+  const int n_births = births_dim_minus_k.size();
 
   // Augmented = [reduced_prev_dim | steenrod_matrix_dim]
   std::vector<Column> augmented;
@@ -87,8 +87,7 @@ inline Barcode steenrod_barcode_single_dim(const Matrix& steenrod_matrix_dim,
         if (idx >= next_birth) {
           if (i > 0) {
             const Index next_idx = idxs_prev_dim[i - 1];
-            for (int jj = n_cols_st_curr; jj < n_cols_st; ++jj) {
-              if (next_idx >= births_dim_minus_k[jj]) break;
+            for (int jj = n_cols_st_curr; jj < n_cols_st && next_idx < births_dim_minus_k[jj]; ++jj) {
               ++n_cols_st_curr;
             }
           } else {
@@ -162,14 +161,12 @@ inline BarcodeByDim compute_steenrod_barcode(int k,
                                              const Reduced_triangular& rt,
                                              const Barcode_result& br,
                                              const std::vector<double>* filtration_values = nullptr,
-                                             int n_jobs = -1) {
+                                             [[maybe_unused]] int n_jobs = -1) {
   const int n_st_dims = static_cast<int>(steenrod_matrix.size());
   BarcodeByDim sb(n_st_dims);
 
 #ifdef _OPENMP
   const int n_threads = (n_jobs <= 0) ? omp_get_max_threads() : n_jobs;
-#else
-  (void)n_jobs;
 #endif
 
 #ifdef _OPENMP

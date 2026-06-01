@@ -100,12 +100,10 @@ inline Matrix populate_steenrod_matrix_single_dim(const std::vector<CohoRep>& co
                                                   const std::vector<Simplex>& tups_dim,
                                                   const Spx_to_idx& spx2idx_dpk,
                                                   int length,
-                                                  int n_jobs = -1) {
+                                                  [[maybe_unused]] int n_jobs = -1) {
   const int n_reps = static_cast<int>(coho_reps_dim.size());
 #ifdef _OPENMP
   const int n_threads = (n_jobs <= 0) ? omp_get_max_threads() : n_jobs;
-#else
-  (void)n_jobs;
 #endif
 
   Matrix result(n_reps);

@@ -23,6 +23,10 @@ static Filtration_by_dim make_filtration_from_top(const std::vector<Simplex>& to
   std::set<Simplex> all_simplices;
   for (const Simplex& t : top) {
     const int n = static_cast<int>(t.size());
+    // Enumerate all non-empty subsets of the n vertices of ``t`` using a bit
+    // mask: ``(1 << n)`` is 2^n, so ``mask`` runs over the integers
+    // ``1, 2, ..., 2^n - 1`` (excluding 0 = the empty subset).  The bit
+    // ``mask & (1 << i)`` is non-zero iff vertex ``t[i]`` is in the subset.
     for (int mask = 1; mask < (1 << n); ++mask) {
       Simplex s;
       for (int i = 0; i < n; ++i) {
@@ -41,8 +45,8 @@ static Filtration_by_dim make_filtration_from_top(const std::vector<Simplex>& to
 
   Filtration_by_dim fbd;
   for (std::size_t i = 0; i < sorted.size(); ++i) {
-    const int dim = static_cast<int>(sorted[i].size()) - 1;
-    while (static_cast<int>(fbd.size()) <= dim) fbd.emplace_back();
+    const auto dim = sorted[i].size() - 1;
+    if (fbd.size() <= dim) fbd.resize(dim + 1);
     fbd[dim].idxs.push_back(static_cast<Index>(i));
     fbd[dim].tups.push_back(sorted[i]);
   }
