@@ -21,6 +21,7 @@
 #include <cstddef>    //std::size_t
 #include <ostream>    //std::ostream
 #include <stdexcept>  //std::invalid_argument, std::runtime_error
+#include <limits>     //std::numeric_limits
 #include <utility>
 #include <vector>
 
@@ -351,7 +352,19 @@ class Summand {
    */
   template <class RandomAccessValueRange>
   void rescale(const RandomAccessValueRange &rescaleFactors) {
-    _transform(rescaleFactors, [](value_type &cornerVal, value_type fact) -> value_type { return cornerVal *= fact; });
+    _transform(rescaleFactors, [](value_type cornerVal, auto fact) -> value_type {
+      // mostly usefull when value_type is integer type and "infinity" is not properly handled by *.
+      if (cornerVal == T_inf || cornerVal == T_m_inf) {
+        if (fact == 0) return std::numeric_limits<T>::quiet_NaN();
+        if (cornerVal == T_inf) {
+          if (fact < 0) return T_m_inf;
+          return T_inf;
+        }
+        if (fact < 0) return T_inf;
+        return T_m_inf;
+      }
+      return cornerVal * fact;
+    });
   }
 
   /**
@@ -363,7 +376,15 @@ class Summand {
    */
   template <class RandomAccessValueRange>
   void translate(const RandomAccessValueRange &translation) {
-    _transform(translation, [](value_type &cornerVal, value_type fact) -> value_type { return cornerVal += fact; });
+    _transform(translation, [](value_type cornerVal, auto fact) -> value_type {
+      // mostly usefull when value_type is integer type and "infinity" is not properly handled by +.
+      if (cornerVal == T_inf || cornerVal == T_m_inf) {
+        if ((cornerVal == T_inf && fact == T_m_inf) && (cornerVal == T_m_inf && fact == T_inf))
+          return std::numeric_limits<T>::quiet_NaN();
+        return cornerVal;
+      }
+      return cornerVal + fact;
+    });
   }
 
   /**
@@ -472,12 +493,12 @@ class Summand {
     // TODO: parallelize?
     for (unsigned int g = 0; g < birthCorners_.num_generators(); ++g) {
       for (unsigned int p = 0; p < dimension; ++p) {
-        std::forward<F>(operate)(birthCorners_(g, p), factors[p]);
+        birthCorners_(g, p) = std::forward<F>(operate)(birthCorners_(g, p), factors[p]);
       }
     }
     for (unsigned int g = 0; g < deathCorners_.num_generators(); ++g) {
       for (unsigned int p = 0; p < dimension; ++p) {
-        std::forward<F>(operate)(deathCorners_(g, p), factors[p]);
+        deathCorners_(g, p) = std::forward<F>(operate)(deathCorners_(g, p), factors[p]);
       }
     }
   }

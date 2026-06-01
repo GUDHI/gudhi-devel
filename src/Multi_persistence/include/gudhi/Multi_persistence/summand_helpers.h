@@ -21,8 +21,10 @@
 #include <algorithm>  //std::max
 #include <cstddef>    //std::size_t
 #include <stdexcept>  //std::invalid_argument
+#include <type_traits>
 
 #include <gudhi/Debug_utils.h>
+#include <gudhi/Multi_filtration/multi_filtration_utils.h>
 #include <gudhi/Multi_persistence/Box.h>
 #include <gudhi/Multi_persistence/Summand.h>
 
@@ -34,13 +36,13 @@ namespace multi_persistence {
  *
  * @private
  */
-template <class Summand, class RandomAccessValueRange, class Corners, typename F>
-inline typename Summand::value_type _compute_distance_to_front(const RandomAccessValueRange &x, const Corners &corners,
-                                                               bool negative, F &&diff) {
-  typename Summand::value_type distance = Summand::T_inf;
+template <typename Distance, class Summand, class RandomAccessValueRange, class Corners, typename F>
+inline auto _compute_distance_to_front(const RandomAccessValueRange &x, const Corners &corners, bool negative,
+                                       F &&diff) {
+  Distance distance = Gudhi::multi_filtration::MF_T_inf<Distance>;
 
   for (typename Summand::Index g = 0; g < corners.num_generators(); ++g) {
-    typename Summand::value_type tempDist = negative ? Summand::T_m_inf : 0;
+    Distance tempDist = negative ? Gudhi::multi_filtration::MF_T_m_inf<Distance> : 0;
     for (typename Summand::Index p = 0; p < corners.num_parameters(); ++p) {
       auto d = std::forward<F>(diff)(corners(g, p), x[p]);
       if (tempDist < d) tempDist = d;
@@ -63,16 +65,36 @@ inline typename Summand::value_type _compute_distance_to_front(const RandomAcces
  * @param sum Summand.
  * @param x Point.
  * @param negative If true, the distance is allowed to be signed.
+ *
+ * @note If `T` is unsigned, the values in the summand and in the point have to be small enough to fit in the
+ * corresponding signed type, otherwise the behaviour is undefined. E.g., if `T` is `unsigned int`, the values
+ * should not exceed `INT_MAX`.
  */
 template <typename T, typename D, class RandomAccessValueRange>
 inline T compute_summand_distance_to(const Summand<T, D> &sum, const RandomAccessValueRange &x, bool negative) {
-  GUDHI_CHECK(x.size() >= sum.get_number_of_parameters(),
+  GUDHI_CHECK(x.size() >= static_cast<std::size_t>(sum.get_number_of_parameters()),
               std::invalid_argument("The given point does not have enough coordinates compared to the given Summand."));
 
-  T lowerDist = _compute_distance_to_front<Summand<T, D> >(x, sum.get_upset(), negative,
-                                                           [](T cornerVal, T xVal) -> T { return cornerVal - xVal; });
-  T upperDist = _compute_distance_to_front<Summand<T, D> >(x, sum.get_downset(), negative,
-                                                           [](T cornerVal, T xVal) -> T { return xVal - cornerVal; });
+  T lowerDist, upperDist;
+  if constexpr (std::is_unsigned_v<T>) {
+    // std::make_signed_t does not compile for T signed and std::conditional evaluates both possibilities,
+    // so the case has to be separated...
+    using stype = std::make_signed_t<T>;
+    // This is a bit unsafe, as the unsigned value can be truncated
+    // but I will just assume that the user will not use coordinates that big
+    // otherwise I would need to do a quite long case study here, which seems overkill
+    // for a case which will probably never happen
+    lowerDist = _compute_distance_to_front<stype, Summand<T, D> >(
+        x, sum.get_upset(), negative, [](stype cornerVal, stype xVal) { return cornerVal - xVal; });
+    upperDist = _compute_distance_to_front<stype, Summand<T, D> >(
+        x, sum.get_downset(), negative, [](stype cornerVal, stype xVal) { return xVal - cornerVal; });
+  } else {
+    lowerDist = _compute_distance_to_front<T, Summand<T, D> >(x, sum.get_upset(), negative,
+                                                              [](T cornerVal, T xVal) { return cornerVal - xVal; });
+    upperDist = _compute_distance_to_front<T, Summand<T, D> >(x, sum.get_downset(), negative,
+                                                              [](T cornerVal, T xVal) { return xVal - cornerVal; });
+  }
+
   return std::max(lowerDist, upperDist);
 }
 
