@@ -20,7 +20,15 @@ using namespace Gudhi::steenrod_persistence;
 // Close the complex spanned by ``top`` and return a Filtration_by_dim whose
 // filtration order is (dim, lexicographic).
 static Filtration_by_dim make_filtration_from_top(const std::vector<Simplex>& top) {
-  std::set<Simplex> all_simplices;
+  // Custom comparator sorts simplices by (size, lexicographic) — exactly the
+  // filtration order we want.  Putting it on the std::set keeps the entries
+  // sorted as they are inserted, so we can iterate the set directly into the
+  // Filtration_by_dim without an extra copy + re-sort step.
+  auto cmp = [](const Simplex& a, const Simplex& b) {
+    if (a.size() != b.size()) return a.size() < b.size();
+    return a < b;
+  };
+  std::set<Simplex, decltype(cmp)> all_simplices(cmp);
   for (const Simplex& t : top) {
     const int n = static_cast<int>(t.size());
     // Enumerate all non-empty subsets of the n vertices of ``t`` using a bit
@@ -37,18 +45,14 @@ static Filtration_by_dim make_filtration_from_top(const std::vector<Simplex>& to
     }
   }
 
-  std::vector<Simplex> sorted(all_simplices.begin(), all_simplices.end());
-  std::sort(sorted.begin(), sorted.end(), [](const Simplex& a, const Simplex& b) {
-    if (a.size() != b.size()) return a.size() < b.size();
-    return a < b;
-  });
-
   Filtration_by_dim fbd;
-  for (std::size_t i = 0; i < sorted.size(); ++i) {
-    const auto dim = sorted[i].size() - 1;
+  Index i = 0;
+  for (const Simplex& s : all_simplices) {
+    const auto dim = s.size() - 1;
     if (fbd.size() <= dim) fbd.resize(dim + 1);
-    fbd[dim].idxs.push_back(static_cast<Index>(i));
-    fbd[dim].tups.push_back(sorted[i]);
+    fbd[dim].idxs.push_back(i);
+    fbd[dim].tups.push_back(s);
+    ++i;
   }
   return fbd;
 }
@@ -62,9 +66,6 @@ int main() {
   const auto fbd = make_filtration_from_top(top);
   const auto result = barcodes(/*k=*/1, fbd);
 
-  std::cout << "RP^2 — Sq^1 Steenrod barcode, bars per dimension:\n";
-  for (std::size_t d = 0; d < result.steenrod.size(); ++d) {
-    std::cout << "  dim " << d << " : " << result.steenrod[d].size() << " bar(s)\n";
-  }
+  std::cout << "RP^2 — Sq^1 result:\n" << result;
   return 0;
 }

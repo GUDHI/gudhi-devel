@@ -11,6 +11,8 @@
 #ifndef STEENROD_BARCODE_H_
 #define STEENROD_BARCODE_H_
 
+#include <cstddef>
+#include <ostream>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -32,6 +34,19 @@ namespace steenrod_persistence {
 struct Barcodes_result {
   BarcodeByDim ordinary;   /**< Ordinary persistence barcode, per degree. */
   BarcodeByDim steenrod;   /**< Sq^k Steenrod barcode,        per degree. */
+
+  /** \brief Print bars-per-dimension summary for both barcodes. */
+  friend std::ostream& operator<<(std::ostream& os, const Barcodes_result& r) {
+    os << "ordinary barcode:\n";
+    for (std::size_t d = 0; d < r.ordinary.size(); ++d) {
+      os << "  dim " << d << " : " << r.ordinary[d].size() << " bar(s)\n";
+    }
+    os << "steenrod barcode:\n";
+    for (std::size_t d = 0; d < r.steenrod.size(); ++d) {
+      os << "  dim " << d << " : " << r.steenrod[d].size() << " bar(s)\n";
+    }
+    return os;
+  }
 };
 
 /** \brief Run the full pipeline and return both barcodes.
