@@ -43,7 +43,7 @@ namespace steenrod_persistence {
        previous-dimension \f$R\f$ produces the Sq\f$^k\f$ Steenrod barcode.
 
   The algorithm follows \cite lupo2022persistencesteenrod. Stages 3 and 4 are
-  parallelised with OpenMP when available.
+  parallelised with TBB when ``GUDHI_USE_TBB`` is enabled.
 
   \section userinterface User interface
 

@@ -57,8 +57,10 @@ class Steenrod_barcode_interface {
   /** Returns ``(ordinary, steenrod)`` in the (finite, infinite) per-dim
    * format in the **relative-cohomology convention**.
    *
-   * @param[in] n_jobs  Number of OpenMP threads for the parallelised stages.
-   *                    ``-1`` (default) uses all available cores.
+   * @param[in] n_jobs  Maximum number of TBB worker threads for the
+   *                    parallelised stages.  ``-1`` (default) uses the
+   *                    global TBB scheduler default.  Honoured only when
+   *                    the build has ``GUDHI_USE_TBB`` defined.
    */
   nanobind::tuple compute(int n_jobs = -1) {
     std::vector<double> filt_values;
@@ -87,7 +89,9 @@ class Steenrod_barcode_interface {
    * degrees that violate the condition; the Python wrapper turns it into
    * a ``UserWarning``.
    *
-   * @param[in] n_jobs   OpenMP threads.  ``-1`` (default) uses all cores.
+   * @param[in] n_jobs   Maximum TBB worker threads (honoured only when
+   *                     ``GUDHI_USE_TBB`` is defined; ``-1`` uses the
+   *                     global default).
    * @param[in] max_dim  Largest absolute dimension to return.  Negative or
    *                     out-of-range values keep every dimension of the
    *                     complex.  Higher-dimensional simplices remain in

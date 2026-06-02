@@ -297,10 +297,11 @@ class SimplexTree(t._Simplex_tree_python_interface):
             but no bars in those higher dimensions are reported.  Default
             ``None`` returns all dimensions of the complex.
         :type max_dim: int or None
-        :param n_jobs: number of OpenMP threads to use for the parallelised
-            stages (``compute_steenrod_matrix`` and
-            ``compute_steenrod_barcode``). ``-1`` (default) uses all available
-            cores. Has no effect if the library was built without OpenMP.
+        :param n_jobs: maximum number of TBB worker threads used for the
+            parallelised stages (``compute_steenrod_matrix`` and
+            ``compute_steenrod_barcode``).  ``-1`` (default) uses the global
+            TBB scheduler default.  Honoured via ``tbb::task_arena`` only
+            when gudhi was built with ``GUDHI_USE_TBB``; ignored otherwise.
         :type n_jobs: int
         :returns: A pair ``(ordinary, steenrod)``.  Each element is itself a
             pair ``(finites, infinites)`` of per-dimension lists of numpy
@@ -341,6 +342,16 @@ class SimplexTree(t._Simplex_tree_python_interface):
             # endpoint is -inf).
             assert st_infinites[2].shape == (1,)
         """
+        if max_dim is not None and int(max_dim) < 0:
+            # ``None`` already means "all dimensions"; a negative integer
+            # would silently behave differently in the two paths (relative
+            # truncates to an empty list via Python slicing, absolute treats
+            # negative as "all dimensions" in the C++ interface).  Reject
+            # rather than pick a winner.
+            raise ValueError(
+                f"max_dim must be None or a non-negative integer; got {max_dim}"
+            )
+
         iface = t._Steenrod_barcode_interface(self, int(k))
 
         if absolute:

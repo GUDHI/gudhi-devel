@@ -111,6 +111,28 @@ def test_rejects_negative_k():
         _rp2_simplex_tree().compute_steenrod_barcodes(k=-1)
 
 
+def test_empty_simplex_tree_returns_empty_barcodes():
+    """Computing on an empty SimplexTree must not crash; both barcodes
+    should be empty in both relative and absolute modes."""
+    empty = SimplexTree()
+    for absolute in (False, True):
+        ordinary, steenrod = empty.compute_steenrod_barcodes(k=1, absolute=absolute)
+        ord_fin, ord_inf = ordinary
+        st_fin,  st_inf  = steenrod
+        assert ord_fin == [] and ord_inf == []
+        assert st_fin == [] and st_inf == []
+
+
+def test_negative_max_dim_raises():
+    """max_dim must be None or non-negative; reject negatives consistently
+    in both modes (the relative and absolute paths used to silently
+    disagree on what a negative value means)."""
+    st = _rp2_simplex_tree()
+    for absolute in (False, True):
+        with pytest.raises(ValueError, match="max_dim"):
+            st.compute_steenrod_barcodes(k=1, absolute=absolute, max_dim=-1)
+
+
 def test_k0_returns_ordinary_in_both():
     """Sq^0 is the identity, so the Steenrod barcode equals the ordinary one."""
     st = _rp2_simplex_tree()

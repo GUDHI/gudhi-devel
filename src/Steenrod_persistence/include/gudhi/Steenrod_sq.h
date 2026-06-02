@@ -17,8 +17,8 @@
 #include <utility>
 #include <vector>
 
-#ifdef _OPENMP
-#include <omp.h>
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_for.h>
 #endif
 
 #include <gudhi/Steenrod_types.h>
@@ -93,7 +93,9 @@ inline bool stsq_parity(const Simplex& a, const Simplex& b, const Simplex& u) {
  * @param[in] tups_dim      Vertex lists for every dim-simplex.
  * @param[in] spx2idx_dpk   Map from (dim+k)-simplex to its relative index.
  * @param[in] length        ``dim + k + 1``.
- * @param[in] n_jobs        Number of OpenMP threads; ``0`` or negative = all.
+ * @param[in] n_jobs        Reserved; currently ignored.  The parallelism is
+ *                          controlled by the TBB task_arena set up at the
+ *                          top-level ``barcodes()`` entry.
  * @return One column per representative (sorted relative indices in dim+k).
  */
 inline Matrix populate_steenrod_matrix_single_dim(const std::vector<CohoRep>& coho_reps_dim,
@@ -102,16 +104,17 @@ inline Matrix populate_steenrod_matrix_single_dim(const std::vector<CohoRep>& co
                                                   int length,
                                                   [[maybe_unused]] int n_jobs = -1) {
   const int n_reps = static_cast<int>(coho_reps_dim.size());
-#ifdef _OPENMP
-  const int n_threads = (n_jobs <= 0) ? omp_get_max_threads() : n_jobs;
-#endif
-
   Matrix result(n_reps);
 
-#ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic) num_threads(n_threads)
-#endif
+  // Concurrency control happens at the top-level ``barcodes()`` entry via
+  // ``tbb::task_arena`` (when TBB is enabled); ``n_jobs`` is ignored here.
+  // Writes to ``result[idx]`` are slot-disjoint, so the loop is safe to
+  // parallelise.
+#ifdef GUDHI_USE_TBB
+  tbb::parallel_for(0, n_reps, [&](int idx) {
+#else
   for (int idx = 0; idx < n_reps; ++idx) {
+#endif
     const CohoRep& rep = coho_reps_dim[idx];
 
     // Gather actual simplex vertex lists for this representative.
@@ -155,7 +158,11 @@ inline Matrix populate_steenrod_matrix_single_dim(const std::vector<CohoRep>& co
       p = q;
     }
     result[idx] = std::move(col);
+#ifdef GUDHI_USE_TBB
+  });
+#else
   }
+#endif
 
   return result;
 }

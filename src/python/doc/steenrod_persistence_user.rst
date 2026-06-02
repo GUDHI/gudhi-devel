@@ -53,9 +53,9 @@ using the fast cup-:math:`i` product formulas of :cite:`medina2023cupifast`:
    in a triangular matrix :math:`V`.
 3. **Steenrod matrix** — for each cocycle representative, the cup-:math:`i` product formula is
    applied to produce a cochain representing :math:`\mathrm{Sq}^k` of that class.
-   This stage is parallelised with OpenMP.
+   This stage is parallelised with TBB when ``GUDHI_USE_TBB`` is enabled.
 4. **Steenrod reduction** — the augmented coboundary-plus-Steenrod matrix is reduced to
-   extract the Steenrod barcode.  This stage is also parallelised with OpenMP.
+   extract the Steenrod barcode.  This stage is also parallelised with TBB.
 
 No prior call to :func:`~gudhi.SimplexTree.compute_persistence` is required.
 

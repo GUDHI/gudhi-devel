@@ -17,8 +17,8 @@
 #include <utility>
 #include <vector>
 
-#ifdef _OPENMP
-#include <omp.h>
+#ifdef GUDHI_USE_TBB
+#include <tbb/parallel_for.h>
 #endif
 
 #include <gudhi/Steenrod_types.h>
@@ -159,7 +159,7 @@ inline Barcode steenrod_barcode_single_dim(Matrix& steenrod_matrix_dim,
  * \ingroup steenrod_persistence
  *
  * Each per-dimension slot is independent: the outer loop is parallelised
- * with OpenMP.
+ * with TBB when ``GUDHI_USE_TBB`` is defined, and runs serially otherwise.
  *
  * @param[in] k                  Steenrod square exponent.
  * @param[in] steenrod_matrix    Output of \ref compute_steenrod_matrix.
@@ -167,7 +167,10 @@ inline Barcode steenrod_barcode_single_dim(Matrix& steenrod_matrix_dim,
  * @param[in] br                 Output of \ref compute_barcode_and_coho_reps.
  * @param[in] filtration_values  Optional filtration values; when provided,
  *                               zero-length finite bars are discarded.
- * @param[in] n_jobs             OpenMP threads; ``0`` or negative = all.
+ * @param[in] n_jobs             Reserved; currently ignored.  The
+ *                               parallelism is controlled by the TBB
+ *                               task_arena set up at the top-level
+ *                               ``barcodes()`` entry.
  * @return ``BarcodeByDim`` where indices ``0..k-1`` are empty.
  */
 inline BarcodeByDim compute_steenrod_barcode(int k,
@@ -179,14 +182,15 @@ inline BarcodeByDim compute_steenrod_barcode(int k,
   const int n_st_dims = static_cast<int>(steenrod_matrix.size());
   BarcodeByDim sb(n_st_dims);
 
-#ifdef _OPENMP
-  const int n_threads = (n_jobs <= 0) ? omp_get_max_threads() : n_jobs;
-#endif
-
-#ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic) num_threads(n_threads)
-#endif
+  // Concurrency control happens at the top-level ``barcodes()`` entry via
+  // ``tbb::task_arena`` (when TBB is enabled); ``n_jobs`` is ignored here.
+  // Writes to ``sb[dim]`` are slot-disjoint between iterations, so the
+  // outer loop is safe to parallelise.
+#ifdef GUDHI_USE_TBB
+  tbb::parallel_for(k, n_st_dims, [&](int dim) {
+#else
   for (int dim = k; dim < n_st_dims; ++dim) {
+#endif
     const Barcode& barcode_src = br.barcode[dim - k];
     std::vector<Index> births;
     births.reserve(barcode_src.size());
@@ -220,7 +224,11 @@ inline BarcodeByDim compute_steenrod_barcode(int k,
     }
 
     sb[dim] = std::move(sbd);
+#ifdef GUDHI_USE_TBB
+  });
+#else
   }
+#endif
 
   return sb;
 }
