@@ -49,7 +49,7 @@ struct Persistence_interval {
    */
   static constexpr Event_value inf = std::numeric_limits<Event_value>::has_infinity
                                          ? std::numeric_limits<Event_value>::infinity()
-                                         : static_cast<Event_value>(-1);
+                                         : std::numeric_limits<Event_value>::max();
 
   /**
    * @brief Constructor.
@@ -89,6 +89,22 @@ struct Persistence_interval {
         stream << interval.death;
     }
     return stream;
+  }
+
+  /**
+   * @brief Basic equality operator
+   */
+  friend bool operator==(const Persistence_interval& i1, const Persistence_interval& i2)
+  {
+    return i1.dim == i2.dim && i1.birth == i2.birth && i1.death == i2.death;
+  }
+
+  /**
+   * @brief Basic unequality operator
+   */
+  friend bool operator!=(const Persistence_interval& i1, const Persistence_interval& i2)
+  {
+    return !(i1 == i2);
   }
 
   /**
