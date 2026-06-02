@@ -79,10 +79,12 @@ inline Barcode steenrod_barcode_single_dim(Matrix& steenrod_matrix_dim,
     // Find the first index ii in [0, n_births) where ``births_dim_minus_k[ii]
     // <= idxs_prev_dim.back()``, or n_births - 1 if no such index exists.
     // ``births_dim_minus_k`` is decreasing, so we use
-    // ``std::upper_bound`` with ``std::greater<Index>{}`` (O(log n)).
+    // ``std::lower_bound`` with ``std::greater<Index>{}`` (O(log n)) --
+    // this includes equality, matching the original loop's
+    // ``max_prev >= births_dim_minus_k[ii]`` break condition.
     int n_cols_st_curr = 0;
     {
-      auto it = std::upper_bound(births_dim_minus_k.begin(), births_dim_minus_k.end(),
+      auto it = std::lower_bound(births_dim_minus_k.begin(), births_dim_minus_k.end(),
                                  idxs_prev_dim.back(), std::greater<Index>{});
       n_cols_st_curr = (it == births_dim_minus_k.end())
                            ? n_births - 1

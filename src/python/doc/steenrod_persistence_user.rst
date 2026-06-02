@@ -71,23 +71,31 @@ The complex projective plane :math:`\mathbb{C}P^2` satisfies
 :math:`H^*(\mathbb{C}P^2;\mathbb{F}_2) \cong \mathbb{F}_2` in degrees 0, 2, and 4,
 with :math:`\mathrm{Sq}^2 : H^2 \to H^4` an isomorphism (the generator squares to
 the generator).  Coning off :math:`\mathbb{C}P^2` at filtration value 1 kills all
-classes, so every bar is finite.  This makes the example ideal for illustrating the
-difference between the ``absolute`` and ``relative`` output conventions.
+classes, so every bar is finite.  This makes the example a clean illustration
+of the relative-cohomology output.
 
-In the **relative** convention (``absolute=False``, the default) each bar
-is a tuple ``(death_value, birth_value)`` with ``death < birth`` for finite
-bars and ``death = -inf`` for essential bars.  This matches the half-open
-interval convention of Lupo, Medina-Mardones, Tauzin (2022) §2.4 — the bar
-``[p, q]`` represents ``[a_p, a_{q+1})`` with ``a_0 = -inf``.  The slot order
-is ``(slot 0 = death, slot 1 = birth)`` and finite bars sit at one degree
-higher than the absolute image degree.
+The default **relative** convention (``absolute=False``) returns each
+barcode as a pair ``(finites_per_dim, infinites_per_dim)``:
 
-In the **absolute** convention (``absolute=True``) bars satisfy
-``(birth_value, death_value)`` with ``birth ≤ death``, ``death = +inf`` for
-essentials, and finite bars are shifted from relative dimension ``d`` to
-absolute dimension ``d - 1``.  This conversion rests on a duality bijection
-that requires all ordinary bars at relative dimensions ``[1, max_dim]`` to be
-finite; a warning is emitted when this condition is not met.
+* ``finites[d]`` is a numpy array of shape ``(n_bars, 2)`` whose rows are
+  ``(death_value, birth_value)`` with ``death < birth``, encoding the
+  relative-cohomology bar ``[a_p, a_{q+1})`` of Lupo, Medina-Mardones,
+  Tauzin (2022) §2.4.
+
+* ``infinites[d]`` is a numpy array of shape ``(n_bars,)`` listing the
+  birth values of essential bars; the implicit lower endpoint of the
+  relative-cohomology interval is ``-inf``.
+
+Sq\ :sup:`k` Steenrod bars sit at one relative dimension higher than the
+absolute image degree they represent.
+
+Passing ``absolute=True`` switches to the absolute-cohomology
+convention: finite bars at relative dimension ``d`` move down to
+absolute dimension ``d - 1`` and essential bars stay where they are.
+Numerical values do not change.  The conversion is well-defined only
+when the relative ordinary barcode has no essential bars at degrees
+``[1, max_dim]`` (the duality bijection of LMT 2022 §3.3); a
+``UserWarning`` is emitted otherwise.
 
 .. testcode::
 
@@ -112,21 +120,16 @@ finite; a warning is emitted when this condition is not met.
     for s in top_cp2:
         st.insert(list(s) + [cone_v], filtration=1.0)
 
-    # Relative convention (default): tuples are (death, birth) with
-    # death < birth (or death = -inf for essential).  Finite bars sit one
-    # degree higher than their absolute image degree.  The Sq^2 bar lives in
-    # steenrod[5].
-    _, steenrod_rel = st.compute_steenrod_barcodes(k=2)
-    print("relative steenrod[5]:", steenrod_rel[5])
-
-    # Absolute convention (opt-in): tuples are (birth, death) with birth <=
-    # death (death = +inf for essential), and the index is the absolute image
-    # degree.  Sq^2 detects the non-trivial H^4 class; the bar lives in
-    # steenrod[4].
-    _, steenrod_abs = st.compute_steenrod_barcodes(k=2, absolute=True)
-    print("absolute steenrod[4]:", steenrod_abs[4])
+    # Default (relative) convention.  Each of ``ordinary`` and ``steenrod``
+    # is a pair ``(finites_per_dim, infinites_per_dim)``.  At k=2 the Sq^2
+    # bar lives at relative dimension 5 — one higher than its absolute
+    # image degree H^4(CP^2; F_2).
+    _, steenrod = st.compute_steenrod_barcodes(k=2)
+    st_finites, st_infinites = steenrod
+    print("steenrod finites[5]:", st_finites[5].tolist())
+    print("steenrod infinites[5]:", st_infinites[5].tolist())
 
 .. testoutput::
 
-    relative steenrod[5]: [(0.0, 1.0)]
-    absolute steenrod[4]: [(0.0, 1.0)]
+    steenrod finites[5]: [[0.0, 1.0]]
+    steenrod infinites[5]: []

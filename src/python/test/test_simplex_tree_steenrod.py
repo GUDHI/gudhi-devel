@@ -11,6 +11,7 @@
 import math
 from itertools import combinations
 
+import numpy as np
 import pytest
 
 from gudhi import SimplexTree
@@ -47,6 +48,16 @@ def _simplex_tree_with_integer_filtration(faces, offset=0):
     return st, len(ordered)
 
 
+def _count_finite(finites):
+    """Total number of finite bars across all dimensions."""
+    return sum(arr.shape[0] for arr in finites)
+
+
+def _count_infinite(infinites):
+    """Total number of essential bars across all dimensions."""
+    return sum(arr.shape[0] for arr in infinites)
+
+
 # ---------------------------------------------------------------------------
 # RP² — Sq¹, essential bars
 # ---------------------------------------------------------------------------
@@ -64,16 +75,11 @@ def _rp2_simplex_tree():
     return st
 
 
-def _is_essential_relative(pair):
-    """Essential relative-cohomology bars carry ``death = -inf`` in slot 0."""
-    return math.isinf(pair[0]) and pair[0] < 0
-
-
 def test_rp2_sq1_three_essential_ordinary_bars():
     """RP² has three essential ordinary bars (H^0, H^1, H^2 over F_2)."""
     ordinary, _ = _rp2_simplex_tree().compute_steenrod_barcodes(k=1)
-    n_ess = sum(1 for d in ordinary for pair in d if _is_essential_relative(pair))
-    assert n_ess == 3
+    _, ord_inf = ordinary
+    assert _count_infinite(ord_inf) == 3
 
 
 def test_rp2_sq1_one_essential_steenrod_bar_in_dim2():
@@ -83,15 +89,21 @@ def test_rp2_sq1_one_essential_steenrod_bar_in_dim2():
     isomorphism over F_2.
     """
     _, steenrod = _rp2_simplex_tree().compute_steenrod_barcodes(k=1)
-    sq1_ess = [b for b in steenrod[2] if _is_essential_relative(b)]
-    assert len(sq1_ess) == 1
+    st_fin, st_inf = steenrod
+    assert st_inf[2].shape[0] == 1
+    # And it really is the only essential Steenrod bar.
+    assert _count_infinite(st_inf) == 1
+    assert _count_finite(st_fin) == 0
 
 
 def test_does_not_require_compute_persistence():
     """compute_steenrod_barcodes must not require a prior compute_persistence."""
     st = _rp2_simplex_tree()
     _, steenrod = st.compute_steenrod_barcodes(k=1)
-    assert len(steenrod) > 2
+    st_fin, st_inf = steenrod
+    # RP² is 2-complex; we should get per-dim entries for dims 0, 1, 2.
+    assert len(st_fin) >= 3
+    assert len(st_inf) >= 3
 
 
 def test_rejects_negative_k():
@@ -103,10 +115,14 @@ def test_k0_returns_ordinary_in_both():
     """Sq^0 is the identity, so the Steenrod barcode equals the ordinary one."""
     st = _rp2_simplex_tree()
     ordinary, steenrod = st.compute_steenrod_barcodes(k=0)
-    assert len(ordinary) == len(steenrod)
-    for d, (o_bars, s_bars) in enumerate(zip(ordinary, steenrod)):
-        assert sorted(o_bars) == sorted(s_bars), \
-            f"dim {d}: ordinary {o_bars} != steenrod {s_bars}"
+    ord_fin, ord_inf = ordinary
+    st_fin,  st_inf  = steenrod
+    assert len(ord_fin) == len(st_fin) and len(ord_inf) == len(st_inf)
+    for d in range(len(ord_fin)):
+        assert np.array_equal(np.sort(ord_fin[d], axis=0),
+                              np.sort(st_fin[d], axis=0)), f"finite dim {d}"
+        assert np.array_equal(np.sort(ord_inf[d]),
+                              np.sort(st_inf[d])), f"infinite dim {d}"
 
 
 def test_max_dim_truncates_output_not_input():
@@ -121,39 +137,42 @@ def test_max_dim_truncates_output_not_input():
     Concretely on RP²: ordinary H¹ has exactly one essential bar (β₁=1 over
     F₂) — but only because the 2-simplices are present to kill the other
     1-cycles.  With input-truncation at max_dim=1, the 2-simplices would be
-    gone and ordinary[1] would have many more essentials.
-
-    This test pins compute_steenrod_barcodes(max_dim=1) to the
-    output-truncation semantics by checking that ordinary[1] matches the
-    untruncated computation's ordinary[1] exactly.
+    gone and ord_inf[1] would have many more essentials.
     """
     st = _rp2_simplex_tree()
 
     # Untruncated reference
     ord_full, _ = st.compute_steenrod_barcodes(k=1)
-    assert len(ord_full) >= 3, "RP² should produce bars at dims 0, 1, 2"
+    ord_full_fin, ord_full_inf = ord_full
+    assert len(ord_full_fin) >= 3, "RP² should produce bars at dims 0, 1, 2"
 
     # Truncated to dim 1
     ord_trunc, _ = st.compute_steenrod_barcodes(k=1, max_dim=1)
-    assert len(ord_trunc) == 2, \
-        f"max_dim=1 must keep dims [0, 1]; got {len(ord_trunc)} dims"
+    ord_trunc_fin, ord_trunc_inf = ord_trunc
+    assert len(ord_trunc_fin) == 2, \
+        f"max_dim=1 must keep dims [0, 1]; got {len(ord_trunc_fin)} dims"
+    assert len(ord_trunc_inf) == 2
 
     # Output-truncation invariant: bars at d ≤ max_dim must be unchanged.
-    for d in range(len(ord_trunc)):
-        assert sorted(ord_trunc[d]) == sorted(ord_full[d]), (
-            f"dim {d}: max_dim truncation altered ordinary bars "
-            f"(input-truncation regression?). "
-            f"truncated={ord_trunc[d]}, full={ord_full[d]}"
+    for d in range(len(ord_trunc_fin)):
+        assert np.array_equal(np.sort(ord_trunc_fin[d], axis=0),
+                              np.sort(ord_full_fin[d], axis=0)), (
+            f"dim {d}: max_dim truncation altered finite ordinary bars "
+            f"(input-truncation regression?)."
+        )
+        assert np.array_equal(np.sort(ord_trunc_inf[d]),
+                              np.sort(ord_full_inf[d])), (
+            f"dim {d}: max_dim truncation altered infinite ordinary bars "
+            f"(input-truncation regression?)."
         )
 
     # Sanity: input-truncation at max_dim=1 would yield many more H¹ essentials
     # (no 2-simplices to kill 1-cycles).  RP² has 6 vertices, 15 edges, 10
     # triangles → β₁ of the 1-skeleton is 15 - 6 + 1 = 10, so input-truncation
     # would give ≥ 10 essential H¹ bars.  Output-truncation gives exactly 1.
-    n_h1_essential = sum(1 for pair in ord_trunc[1] if _is_essential_relative(pair))
-    assert n_h1_essential == 1, (
+    assert ord_trunc_inf[1].shape[0] == 1, (
         f"RP² ordinary H¹ should have exactly 1 essential bar (β₁=1 over F₂); "
-        f"got {n_h1_essential} — input-truncation regression?"
+        f"got {ord_trunc_inf[1].shape[0]} — input-truncation regression?"
     )
 
 
@@ -169,7 +188,7 @@ def test_max_dim_truncates_output_not_input():
 # With this filtration the bar lengths carry structural information:
 #   ordinary[2]:  birth=73,  death=329, length=256  (H²(CP²))
 #   ordinary[4]:  birth=254, death=510, length=256  (H⁴(CP²))
-#   steenrod[4]:  birth=254, death=329, length=75   (Sq²: H²->H⁴)
+#   steenrod[5]:  birth=254, death=329, length=75   (relative Sq²: H²->H⁴)
 #
 # The Sq² bar is strictly shorter than the H⁴ bar (75 < 256): Sq² detects
 # structure that ordinary persistence does not.
@@ -225,94 +244,28 @@ def test_cone_cp2_total_simplex_count():
     assert _cone_cp2_simplex_tree().num_simplices() == 511
 
 
-def test_cone_cp2_sq2_one_finite_bar_in_dim4():
-    """CCP² has exactly one Sq^2 bar in absolute cohomological degree 4.
-
-    The Sq^2 map H^2(CP^2; F_2) -> H^4(CP^2; F_2) is an isomorphism, producing
-    one finite persistence bar.  With integer filtration the bar is
-    (birth=254, death=329), spanning 75 simplices.
-    """
-    _, steenrod = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
-    sq2 = steenrod[4]
-    assert len(sq2) == 1
-    birth, death = sq2[0]
-    assert birth == 254.0   # last CP² 4-simplex completes H⁴(CP²)
-    assert death == 329.0   # cone 3-simplex kills the Sq² class
-    assert death - birth == 75.0
-
-
-def test_cone_cp2_sq2_bar_born_in_cp2_killed_in_cone():
-    """The Sq^2 bar must be born in the CP² part and killed in the cone part."""
-    _, steenrod = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
-    birth, death = steenrod[4][0]
-    assert birth < N_CP2   # born before the cone is attached
-    assert death >= N_CP2  # killed by a cone simplex
-
-
-def test_cone_cp2_sq2_shorter_than_h4_bar():
-    """The Sq^2 bar (length 75) is strictly shorter than the H^4 bar (length 256).
-
-    Ordinary persistence cannot distinguish CP^2 from S^2 v S^4 (both have the
-    same Betti numbers); the Steenrod barcode can, precisely because Sq^2 on
-    H^2(CP^2) is non-trivial while Sq^2 on H^2(S^2 v S^4) is zero.
-    The shorter bar length is one manifestation of this richer structure.
-    """
-    ordinary, steenrod = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
-    # The topologically meaningful H^4 bar is the one that spans the CP²/cone
-    # boundary (born in CP², killed by the cone).
-    h4_boundary = [(b, d) for b, d in ordinary[4]
-                   if not math.isinf(d) and b < N_CP2 and d >= N_CP2]
-    sq2_bars = steenrod[4]
-    assert len(h4_boundary) == 1
-    assert len(sq2_bars) == 1
-    h4_length  = h4_boundary[0][1] - h4_boundary[0][0]
-    sq2_length = sq2_bars[0][1]    - sq2_bars[0][0]
-    assert sq2_length < h4_length
-
-
-def test_cone_cp2_ordinary_h0_essential_h2_h4_boundary_bar():
-    """CCP² ordinary barcode structure.
-
-    H^0: one essential bar (the single connected component survives).
-    H^2 and H^4: the filtration produces many finite bars within CP² itself
-    (from the fine integer ordering), but exactly one bar in each degree spans
-    the CP²/cone boundary — born in the CP² part (index < N_CP2) and killed
-    by a cone simplex (index >= N_CP2).  These are the topologically meaningful
-    bars corresponding to H^2(CP^2) and H^4(CP^2).
-    """
-    ordinary, _ = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
-
-    h0_ess = [b for b in ordinary[0] if math.isinf(b[1])]
-    assert len(h0_ess) == 1
-
-    # Exactly one boundary-spanning bar in each of H^2 and H^4.
-    for deg in (2, 4):
-        boundary = [(b, d) for b, d in ordinary[deg]
-                    if not math.isinf(d) and b < N_CP2 and d >= N_CP2]
-        assert len(boundary) == 1, (
-            f"Expected 1 boundary-spanning H^{deg} bar, got {len(boundary)}"
-        )
-        birth, death = boundary[0]
-        assert birth < N_CP2
-        assert death >= N_CP2
-
-
 def test_cone_cp2_relative_convention():
-    """With absolute=False the Sq^2 bar appears at relative index 5 in the
-    relative format ``(death, birth)`` with ``death < birth``.
+    """With absolute=False (relative) the Sq^2 bar appears at relative index
+    5 as a single finite bar storing the endpoints of the half-open
+    interval ``[a_p, a_{q+1}) = [254, 329)``.
 
-    This matches the convention of the base ``python/steenroder`` package and
     Lupo, Medina-Mardones, Tauzin (2022) §2.4: a relative-cohomology bar
     [p, q] with 0 <= p <= q <= n-1 is the half-open interval
-    [a_p, a_{q+1}), with a_0 = -inf for essential bars.
+    [a_p, a_{q+1}); slot 0 holds a_p (the death value), slot 1 holds
+    a_{q+1} (the birth value), with death < birth.
     """
     _, steenrod = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=False)
-    sq2_rel = steenrod[5]
-    assert len(sq2_rel) == 1
-    death, birth = sq2_rel[0]
-    assert death < birth   # relative slot order: (lower=death, higher=birth)
-    assert death == 254.0
-    assert birth == 329.0
+    st_fin, st_inf = steenrod
+    sq2_fin_d5 = st_fin[5]
+    sq2_inf_d5 = st_inf[5]
+    assert sq2_fin_d5.shape == (1, 2), \
+        f"Expected one finite Sq^2 bar at relative dim 5, got shape {sq2_fin_d5.shape}"
+    assert sq2_inf_d5.shape == (0,), \
+        f"Expected no essential Sq^2 bar at relative dim 5, got shape {sq2_inf_d5.shape}"
+    death, birth = sq2_fin_d5[0]
+    assert death == 254.0   # lower endpoint a_p
+    assert birth == 329.0   # upper endpoint a_{q+1}
+    assert death < birth
 
 
 def test_absolute_default_is_false():
@@ -320,4 +273,85 @@ def test_absolute_default_is_false():
     st = _cone_cp2_simplex_tree()
     _, steenrod_default  = st.compute_steenrod_barcodes(k=2)
     _, steenrod_explicit = st.compute_steenrod_barcodes(k=2, absolute=False)
-    assert steenrod_default == steenrod_explicit
+    def_fin, def_inf = steenrod_default
+    exp_fin, exp_inf = steenrod_explicit
+    assert len(def_fin) == len(exp_fin)
+    for a, b in zip(def_fin, exp_fin):
+        assert np.array_equal(a, b)
+    for a, b in zip(def_inf, exp_inf):
+        assert np.array_equal(a, b)
+
+
+# ---------------------------------------------------------------------------
+# Tests that exercise absolute=True (CCP² is contractible, so no duality
+# warning is expected — every Klein generator of the underlying CP² is
+# killed by a cone simplex.)
+# ---------------------------------------------------------------------------
+
+def test_cone_cp2_sq2_one_finite_bar_in_dim4():
+    """CCP² has exactly one Sq^2 bar in absolute cohomological degree 4.
+
+    The Sq^2 map H^2(CP^2; F_2) -> H^4(CP^2; F_2) is an isomorphism,
+    producing one finite persistence bar.  In absolute convention this
+    sits at dimension 4; the dim shift from relative dimension 5 is
+    purely structural — values are unchanged (death=254 from the last
+    CP^2 4-simplex, birth=329 from the cone 3-simplex that kills the
+    Sq^2 class).
+    """
+    _, steenrod = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
+    st_fin, st_inf = steenrod
+    assert st_fin[4].shape == (1, 2)
+    assert st_inf[4].shape == (0,)
+    death, birth = st_fin[4][0]
+    assert death == 254.0
+    assert birth == 329.0
+    assert birth - death == 75.0
+
+
+def test_cone_cp2_sq2_bar_born_in_cp2_killed_in_cone():
+    """The Sq^2 bar must be born in the CP^2 part and killed in the cone
+    part of the filtration."""
+    _, steenrod = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
+    st_fin, _ = steenrod
+    death, birth = st_fin[4][0]
+    assert death < N_CP2    # born in CP^2 (the smaller filtration value)
+    assert birth >= N_CP2   # killed in the cone (the larger one)
+
+
+def test_cone_cp2_sq2_shorter_than_h4_bar():
+    """The Sq^2 bar (length 75) is strictly shorter than the H^4 bar
+    (length 256).  Ordinary persistence cannot distinguish CP^2 from
+    S^2 v S^4 (same Betti numbers); the Steenrod barcode can, because
+    Sq^2 on H^2(CP^2) is non-trivial while Sq^2 on H^2(S^2 v S^4) is
+    zero.  The shorter bar length is one manifestation of this.
+    """
+    ordinary, steenrod = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
+    ord_fin, _ = ordinary
+    st_fin,  _ = steenrod
+    h4_bars = ord_fin[4]
+    h4_boundary = h4_bars[(h4_bars[:, 0] < N_CP2) & (h4_bars[:, 1] >= N_CP2)]
+    assert h4_boundary.shape[0] == 1
+    assert st_fin[4].shape[0] == 1
+    h4_length  = h4_boundary[0, 1] - h4_boundary[0, 0]
+    sq2_length = st_fin[4][0, 1]   - st_fin[4][0, 0]
+    assert sq2_length < h4_length
+
+
+def test_cone_cp2_ordinary_h0_essential_h2_h4_boundary_bar():
+    """CCP² ordinary barcode structure with absolute=True.
+
+    H^0: one essential bar (the single connected component survives).
+    H^2 and H^4: exactly one bar each spans the CP^2/cone boundary —
+    born in the CP^2 part (death < N_CP2) and killed by a cone simplex
+    (birth >= N_CP2).
+    """
+    ordinary, _ = _cone_cp2_simplex_tree().compute_steenrod_barcodes(k=2, absolute=True)
+    ord_fin, ord_inf = ordinary
+    assert ord_inf[0].shape[0] == 1     # H^0 essential
+
+    for deg in (2, 4):
+        bars = ord_fin[deg]
+        boundary = bars[(bars[:, 0] < N_CP2) & (bars[:, 1] >= N_CP2)]
+        assert boundary.shape[0] == 1, (
+            f"Expected 1 boundary-spanning H^{deg} bar, got {boundary.shape[0]}"
+        )
