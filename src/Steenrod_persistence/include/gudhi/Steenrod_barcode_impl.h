@@ -11,6 +11,9 @@
 #ifndef STEENROD_BARCODE_IMPL_H_
 #define STEENROD_BARCODE_IMPL_H_
 
+#include <algorithm>
+#include <functional>
+#include <iterator>
 #include <utility>
 #include <vector>
 
@@ -39,42 +42,51 @@ namespace steenrod_persistence {
  * A column that reduces to zero records a finite bar; surviving columns yield
  * essential bars.
  *
- * @param[in] steenrod_matrix_dim   Steenrod columns in dimension ``dim``.
+ * @param[in,out] steenrod_matrix_dim   Steenrod columns in dimension ``dim``.
+ *                                      Mutated in place during reduction; not
+ *                                      read after the call returns.
  * @param[in] n_idxs_dim            Number of dim-simplices.
  * @param[in] idxs_prev_dim         Absolute indices of (dim-1)-simplices, sorted.
- * @param[in] reduced_prev_dim      R-matrix columns from dimension ``dim-1``.
+ * @param[in,out] reduced_prev_dim  R-matrix columns from dimension ``dim-1``.
+ *                                  Mutated in place during reduction; the only
+ *                                  prior consumer (``compute_barcode_and_coho_reps``)
+ *                                  has already finished by this point.
  * @param[in] births_dim_minus_k    Birth indices of (dim-k)-classes, decreasing.
  * @return Barcode of finite + essential bars. ``death == -1`` marks essentials.
  */
-inline Barcode steenrod_barcode_single_dim(const Matrix& steenrod_matrix_dim,
+inline Barcode steenrod_barcode_single_dim(Matrix& steenrod_matrix_dim,
                                            int n_idxs_dim,
                                            const std::vector<Index>& idxs_prev_dim,
-                                           const Matrix& reduced_prev_dim,
+                                           Matrix& reduced_prev_dim,
                                            const std::vector<Index>& births_dim_minus_k) {
   const int n_cols_red = reduced_prev_dim.size();
   const int n_cols_st = steenrod_matrix_dim.size();
   const int n_births = births_dim_minus_k.size();
 
-  // Augmented = [reduced_prev_dim | steenrod_matrix_dim]
-  std::vector<Column> augmented;
-  augmented.reserve(n_cols_red + n_cols_st);
-  for (const Column& c : reduced_prev_dim) augmented.push_back(c);
-  for (const Column& c : steenrod_matrix_dim) augmented.push_back(c);
+  // Logical "augmented" view = [reduced_prev_dim | steenrod_matrix_dim], with
+  // no copy: column ``i`` lives in ``reduced_prev_dim`` for i < n_cols_red and
+  // in ``steenrod_matrix_dim`` for i >= n_cols_red.  All mutating accesses go
+  // through this accessor.
+  auto col = [&](int i) -> Column& {
+    return i < n_cols_red ? reduced_prev_dim[i] : steenrod_matrix_dim[i - n_cols_red];
+  };
 
   std::vector<int> pivots_lookup(n_idxs_dim, -1);
   std::vector<bool> alive(n_cols_st, true);
   Barcode result;
 
   if (n_births != 0 && n_cols_red != 0) {
+    // Find the first index ii in [0, n_births) where ``births_dim_minus_k[ii]
+    // <= idxs_prev_dim.back()``, or n_births - 1 if no such index exists.
+    // ``births_dim_minus_k`` is decreasing, so we use
+    // ``std::upper_bound`` with ``std::greater<Index>{}`` (O(log n)).
     int n_cols_st_curr = 0;
     {
-      const Index max_prev = idxs_prev_dim.back();
-      for (int ii = 0; ii < n_births; ++ii) {
-        n_cols_st_curr = ii;
-        if (max_prev >= births_dim_minus_k[ii]) break;
-      }
-      // If the loop ran to completion, n_cols_st_curr stays at n_births - 1
-      // (mirrors Python ``enumerate`` semantics).
+      auto it = std::upper_bound(births_dim_minus_k.begin(), births_dim_minus_k.end(),
+                                 idxs_prev_dim.back(), std::greater<Index>{});
+      n_cols_st_curr = (it == births_dim_minus_k.end())
+                           ? n_births - 1
+                           : static_cast<int>(std::distance(births_dim_minus_k.begin(), it));
     }
 
     for (int i = n_cols_red - 1; i >= 0; --i) {
@@ -97,19 +109,19 @@ inline Barcode steenrod_barcode_single_dim(const Matrix& steenrod_matrix_dim,
       }
 
       // Register the R-column pivot of this (dim-1)-simplex permanently.
-      if (!augmented[i].empty()) {
-        pivots_lookup[augmented[i].front()] = i;
+      if (!col(i).empty()) {
+        pivots_lookup[col(i).front()] = i;
       }
 
       // Reduce each unlocked Steenrod column against the permanent pivots.
       std::vector<Index> st_pivots_claimed;
       for (int ii = n_cols_red; ii < n_cols_red + n_cols_st_curr; ++ii) {
-        Index highest_one = augmented[ii].empty() ? -1 : augmented[ii].front();
+        Index highest_one = col(ii).empty() ? -1 : col(ii).front();
         int pc = (highest_one >= 0) ? pivots_lookup[highest_one] : -1;
 
         while (highest_one >= 0 && pc >= 0) {
-          symm_diff_inplace(augmented[ii], augmented[pc]);
-          highest_one = augmented[ii].empty() ? -1 : augmented[ii].front();
+          symm_diff_inplace(col(ii), col(pc));
+          highest_one = col(ii).empty() ? -1 : col(ii).front();
           pc = (highest_one >= 0) ? pivots_lookup[highest_one] : -1;
         }
 
@@ -157,8 +169,8 @@ inline Barcode steenrod_barcode_single_dim(const Matrix& steenrod_matrix_dim,
  * @return ``BarcodeByDim`` where indices ``0..k-1`` are empty.
  */
 inline BarcodeByDim compute_steenrod_barcode(int k,
-                                             const Steenrod_matrix& steenrod_matrix,
-                                             const Reduced_triangular& rt,
+                                             Steenrod_matrix& steenrod_matrix,
+                                             Reduced_triangular& rt,
                                              const Barcode_result& br,
                                              const std::vector<double>* filtration_values = nullptr,
                                              [[maybe_unused]] int n_jobs = -1) {
