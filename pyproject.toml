@@ -74,6 +74,9 @@ wheel = [
     "cmake",
     "build",
     "wheel",
+    "delocate ; sys_platform == 'darwin'",
+    "auditwheel ; sys_platform == 'linux'",
+    "delvewheel ; platform_system == 'Windows'",
     {include-group = "build"},
 ]
 common = [
@@ -87,7 +90,7 @@ test = [
     "pytest",
     "pytest-cov",
     "torch",
-    "pykeops",
+    "pykeops ; platform_system != 'Windows'",
     "hnswlib",
     "eagerpy",
     "networkx",
