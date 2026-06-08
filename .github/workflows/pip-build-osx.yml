@@ -33,11 +33,11 @@ jobs:
         run: |
           brew update || echo "brew update failed, continuing..."
           brew install boost eigen gmp mpfr cgal || echo "brew install failed, continuing..."
+          python -m pip install --user numpy>=2.0
+          python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
+          python -m pip install --user delocate
           ./scripts/build_osx_universal_gmpfr.sh
           # Now the universal libraries are in $PWD/deps-uni/lib
-          python -m pip install --user uv
-          python -m uv sync --group wheel
-          python -m uv tree --group wheel
       - name: Build python wheel
         # Force the use of apple clang - brew clang seems problematic for universal wheel
         env:
@@ -62,6 +62,5 @@ jobs:
         run: |
           python -m uv sync --group test --no-install-project
           python -m uv lock --upgrade-package numpy~=${{ matrix.numpy-version }}
-          python -m uv pip install wheelhouse/*.whl
           python -m uv tree --group test
-          python -m uv run pytest
+          python -m uv run --isolated --no-project --with dist/*.whl pytest
