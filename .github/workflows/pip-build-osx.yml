@@ -63,5 +63,6 @@ jobs:
           python -m pip install uv
           python -m uv sync --group test --no-install-project
           python -m uv lock --upgrade-package numpy~=${{ matrix.numpy-version }}
+          python -m uv pip install wheelhouse/gudhi*.whl
           python -m uv tree --group test
-          python -m uv run --isolated --no-project --with wheelhouse/gudhi*.whl pytest
+          python -m uv run pytest
