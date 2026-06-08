@@ -48,10 +48,10 @@ jobs:
           export GMPXX_LIB_DIR=$PWD/deps-uni/lib
           export  MPFR_LIB_DIR=$PWD/deps-uni/lib
           python --version
-          python -m uv build --wheel
-          export PATH="$PATH:`python -m uv run python -m site --user-base`/bin"
-          delocate-listdeps --depending dist/*.whl
-          delocate-wheel --require-archs universal2 -w wheelhouse -v dist/*.whl
+          python -m pip wheel -ve .
+          export PATH="$PATH:`python -m site --user-base`/bin"
+          delocate-listdeps --depending *.whl
+          delocate-wheel --require-archs universal2 -w wheelhouse -v *.whl
       - name: Upload OSx python wheel
         uses: actions/upload-artifact@v6
         with:
@@ -60,6 +60,7 @@ jobs:
       # Test ABI compatibility with numpy 1.X
       - name: Install and test python wheel
         run: |
+          python -m pip install uv
           python -m uv sync --group test --no-install-project
           python -m uv lock --upgrade-package numpy~=${{ matrix.numpy-version }}
           python -m uv tree --group test
