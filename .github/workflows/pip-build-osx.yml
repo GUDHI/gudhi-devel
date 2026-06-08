@@ -64,4 +64,4 @@ jobs:
           python -m uv sync --group test --no-install-project
           python -m uv lock --upgrade-package numpy~=${{ matrix.numpy-version }}
           python -m uv tree --group test
-          python -m uv run --isolated --no-project --with dist/*.whl pytest
+          python -m uv run --isolated --no-project --with wheelhouse/*.whl pytest
