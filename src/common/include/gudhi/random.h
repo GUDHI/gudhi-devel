@@ -50,7 +50,11 @@ namespace random {
     * The default random number generator type returned by @ref get_default_random
     */
   using Random_generator = std::mt19937_64;
-  
+
+#if defined( GUDHI_DEFAULT_RANDOM_DLL_EXPORT ) && defined( GUDHI_DEFAULT_RANDOM_DLL_IMPORT )
+#error "GUDHI_DEFAULT_RANDOM_DLL_EXPORT and GUDHI_DEFAULT_RANDOM_DLL_IMPORT cannot be enabled at the same time"
+#endif // GUDHI_DEFAULT_RANDOM_DLL_EXPORT && GUDHI_DEFAULT_RANDOM_DLL_IMPORT
+
 // Export macro — works on Linux/macOS (ELF) and Windows (PE)
 #if defined(_WIN32)
   #if defined GUDHI_DEFAULT_RANDOM_DLL_EXPORT
@@ -66,8 +70,17 @@ namespace random {
 
   RANDOM_DLL_API Random_generator& get_default_random();
 
-#if defined GUDHI_DEFAULT_RANDOM_DLL_EXPORT
-  // No inline here
+#if defined GUDHI_DEFAULT_RANDOM_DLL_IMPORT
+  // No declaration, only definition
+#else
+  /**
+   * @brief Returns a thread-local default random number generator instance.
+   * 
+   * @return A reference to the thread-local default random instance.
+   */
+  #if !defined GUDHI_DEFAULT_RANDOM_DLL_IMPORT
+  inline
+  #endif
   Random_generator& get_default_random() {
     thread_local Random_generator default_random{std::random_device{}()};
 #ifdef DEBUG_TRACES
@@ -75,24 +88,7 @@ namespace random {
 #endif  // DEBUG_TRACES
     return default_random;
   }
-#else
-  #if defined GUDHI_DEFAULT_RANDOM_DLL_IMPORT
-    // No declaration, only definition
-  #else
-  /**
-   * @brief Returns a thread-local default random number generator instance.
-   * 
-   * @return A reference to the thread-local default random instance.
-   */
-  inline Random_generator& get_default_random() {
-    static thread_local Random_generator default_random{std::random_device{}()};
-#ifdef DEBUG_TRACES
-    std::clog << "get_default_random() " << &default_random << "\n";
-#endif  // DEBUG_TRACES
-    return default_random;
-  }
-  #endif  // GUDHI_DEFAULT_RANDOM_DLL_IMPORT
-#endif  // GUDHI_DEFAULT_RANDOM_DLL_EXPORT
+#endif  // GUDHI_DEFAULT_RANDOM_DLL_IMPORT
 
   /**
    * @brief Sets the seed for the default random engine.
