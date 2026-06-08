@@ -50,13 +50,13 @@ jobs:
           python --version
           python -m pip wheel -ve .
           export PATH="$PATH:`python -m site --user-base`/bin"
-          delocate-listdeps --depending *.whl
-          delocate-wheel --require-archs universal2 -w wheelhouse -v *.whl
+          delocate-listdeps --depending gudhi*.whl
+          delocate-wheel --require-archs universal2 -w wheelhouse -v gudhi*.whl
       - name: Upload OSx python wheel
         uses: actions/upload-artifact@v6
         with:
           name: osx python wheel
-          path: wheelhouse/*.whl
+          path: wheelhouse/gudhi*.whl
       # Test ABI compatibility with numpy 1.X
       - name: Install and test python wheel
         run: |
@@ -64,4 +64,4 @@ jobs:
           python -m uv sync --group test --no-install-project
           python -m uv lock --upgrade-package numpy~=${{ matrix.numpy-version }}
           python -m uv tree --group test
-          python -m uv run --isolated --no-project --with wheelhouse/*.whl pytest
+          python -m uv run --isolated --no-project --with wheelhouse/gudhi*.whl pytest
