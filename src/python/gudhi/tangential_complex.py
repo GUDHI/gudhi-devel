@@ -24,9 +24,6 @@ class TangentialComplex(t._Tangential_complex_interface):
     can be run to attempt to remove inconsistencies.
     """
 
-    def __init__(self, intrinsic_dim, points=None, off_file=""):
-# ^^ import warnings
-
     def __init__(self, intrinsic_dim, intrisic_dim=None, points=None, off_file=""):
         """TangentialComplex constructor.
 
