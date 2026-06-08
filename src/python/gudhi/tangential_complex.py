@@ -12,6 +12,7 @@
 __license__ = "GPL v3"
 
 import os
+import warnings
 
 from gudhi import _tangential_complex_ext as t
 from gudhi.simplex_tree import SimplexTree
