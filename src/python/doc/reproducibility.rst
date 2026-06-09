@@ -14,7 +14,8 @@ available.
 .. note::
 
     :func:`~gudhi.random.set_seed` does not set NumPy seed, while some GUDHI functionnalities are using NumPy random
-    methods. NumPy seed can be set with:
+    methods. `NumPy seed <https://numpy.org/doc/stable/reference/random/generated/numpy.random.seed.html>`_ can be set
+    with:
     
     .. code-block:: python
     
