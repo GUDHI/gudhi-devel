@@ -49,7 +49,9 @@ nanobind_add_module_with_targets(_rips_complex_ext _rips_complex.cc TARGETS TBB:
 link_with_default_random(_rips_complex_ext)
 
 nanobind_add_module_with_targets(_subsampling_ext _subsampling.cc TARGETS Eigen3::Eigen CGAL::CGAL TBB::tbb)
-link_with_default_random(_subsampling_ext)
+if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
+  link_with_default_random(_subsampling_ext)
+endif()
 
 nanobind_add_module_with_targets(_default_random_seed_ext _default_random_seed.cc)
 link_with_default_random(_default_random_seed_ext)

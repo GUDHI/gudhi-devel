@@ -1,4 +1,4 @@
-if (TARGET CGAL::CGAL)
+if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   nanobind_add_module_with_targets(_points_ext _points.cc TARGETS Eigen3::Eigen CGAL::CGAL)
   target_link_libraries(_points_ext PRIVATE _default_cgal_random)
   add_dependencies(_points_ext _default_cgal_random)
