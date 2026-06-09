@@ -1,18 +1,24 @@
 add_library(_default_random SHARED _default_random.cc)
 # Required by Windows wheel
 install(TARGETS _default_random DESTINATION ${CMAKE_INSTALL_PREFIX}/gudhi)
+# _default_random needs to be the on that EXPORT, and when you link with it you need to IMPORT
+target_compile_definitions(_default_random PUBLIC GUDHI_DEFAULT_RANDOM_DLL_EXPORT)
 
 function( link_with_default_random THE_TARGET )
   target_link_libraries(${THE_TARGET} PRIVATE _default_random)
   add_dependencies(${THE_TARGET} _default_random)
   # CMake translates "$ORIGIN" to "@loader_path" on MacOS. Windows searchs in local path, then in PATH
   set_target_properties(${THE_TARGET} PROPERTIES BUILD_RPATH "$ORIGIN" INSTALL_RPATH "$ORIGIN")
+  # link with _default_random, need to IMPORT
+  target_compile_definitions(_default_random PUBLIC GUDHI_DEFAULT_RANDOM_DLL_IMPORT)
 endfunction( link_with_default_random )
 
 if (TARGET CGAL::CGAL)
   add_library(_default_cgal_random SHARED _default_cgal_random.cc)
   # Required by Windows wheel
   install(TARGETS _default_cgal_random DESTINATION ${CMAKE_INSTALL_PREFIX}/gudhi)
+  # _default_cgal_random needs to be the on that EXPORT, and when you link with it you need to IMPORT
+  target_compile_definitions(_default_cgal_random GUDHI_DEFAULT_CGAL_RANDOM_DLL_EXPORT)
 endif()
 
 nanobind_add_module_with_targets(_pers_cub_low_dim_ext _pers_cub_low_dim.cc TARGETS TBB::tbb)
@@ -50,4 +56,6 @@ if (TARGET CGAL::CGAL)
   add_dependencies(_default_cgal_random_seed_ext _default_cgal_random)
   # CMake translates "$ORIGIN" to "@loader_path" on MacOS. Windows searchs in local path, then in PATH
   set_target_properties(_default_cgal_random_seed_ext PROPERTIES BUILD_RPATH "$ORIGIN" INSTALL_RPATH "$ORIGIN")
+  # link with _default_cgal_random, need to IMPORT
+  target_compile_definitions(_default_cgal_random_seed_ext PUBLIC GUDHI_DEFAULT_CGAL_RANDOM_DLL_IMPORT)
 endif()

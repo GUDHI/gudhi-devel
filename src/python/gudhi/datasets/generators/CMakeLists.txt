@@ -7,4 +7,6 @@ if (TARGET CGAL::CGAL)
     # CMake translates "$ORIGIN/../.." to "@loader_path/../.." on MacOS. Potentially unreliable on MacOS < 11
     set_target_properties(_points_ext PROPERTIES BUILD_RPATH "$ORIGIN/../.." INSTALL_RPATH "$ORIGIN/../..")
   endif()
+  # link with _default_cgal_random, need to IMPORT
+  target_compile_definitions(_points_ext PUBLIC GUDHI_DEFAULT_CGAL_RANDOM_DLL_IMPORT)
 endif()

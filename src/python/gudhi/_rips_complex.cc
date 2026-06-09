@@ -18,10 +18,7 @@
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Rips_complex.h>
 #include <gudhi/distance_functions.h>
-// For Windows, where _default_random is the dll provider for the other clients
-// Must be done before #include <gudhi/random.h>
-#define GUDHI_DEFAULT_RANDOM_DLL_IMPORT
-#include <gudhi/Sparse_rips_complex.h>  // Sparse_rips_complex is including gudhi/random.h
+#include <gudhi/Sparse_rips_complex.h>
 
 #include <python_interfaces/Simplex_tree_interface.h>
 #include <python_interfaces/points_utils.h>

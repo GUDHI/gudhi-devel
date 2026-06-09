@@ -8,7 +8,4 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-// For Windows, where _default_random is the dll provider for the other clients
-// Must be done before #include <gudhi/random.h>
-#define GUDHI_DEFAULT_RANDOM_DLL_EXPORT
 #include <gudhi/random.h>

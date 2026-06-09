@@ -22,10 +22,7 @@
 
 #include <gudhi/distance_functions.h>
 #include <python_interfaces/Simplex_tree_interface.h>
-// For Windows, where _default_random is the dll provider for the other clients
-// Must be done before #include <gudhi/random.h>
-#define GUDHI_DEFAULT_RANDOM_DLL_IMPORT
-#include <gudhi/GIC.h>  // GIC is including gudhi/random.h
+#include <gudhi/GIC.h>
 
 namespace Gudhi {
 namespace cover_complex {

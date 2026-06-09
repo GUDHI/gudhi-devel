@@ -10,9 +10,6 @@
 
 #include <nanobind/nanobind.h>
 
-// For Windows, where _default_random is the dll provider for the other clients
-// Must be done before #include <gudhi/random.h>
-#define GUDHI_DEFAULT_RANDOM_DLL_IMPORT
 #include <gudhi/random.h>
 
 NB_MODULE(_default_random_seed_ext, m) {
