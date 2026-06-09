@@ -2898,12 +2898,13 @@ class Simplex_tree {
    *   architecture.
    */
   std::size_t get_serialization_size() const {
+    const std::size_t version_byte_size = sizeof(int);
     const std::size_t vh_byte_size = sizeof(Vertex_handle);
     std::size_t fv_byte_size = 0;
     const std::size_t tree_size = num_simplices_and_filtration_serialization_size(&root_, fv_byte_size);
-    const std::size_t buffer_byte_size = vh_byte_size + fv_byte_size + tree_size * 2 * vh_byte_size;
+    const std::size_t buffer_byte_size = version_byte_size + vh_byte_size + fv_byte_size + tree_size * 2 * vh_byte_size;
 #ifdef DEBUG_TRACES
-      std::clog << "Gudhi::simplex_tree::get_serialization_size - buffer size = " << buffer_byte_size << std::endl;
+    std::clog << "Gudhi::simplex_tree::get_serialization_size - buffer size = " << buffer_byte_size << std::endl;
 #endif  // DEBUG_TRACES
     return buffer_byte_size;
   }
@@ -2942,7 +2943,8 @@ class Simplex_tree {
   /* Without explanation and with filtration values:                                                                 */
   /* 04 0a F(a) 0b F(b) 0c F(c) 0d F(d) 01 0b F(a,b) 00 02 0c F(b,c) 0d F(b,d) 01 0d F(b,c,d) 00 00 01 0d F(c,d) 00 00 */
   void serialize(char* buffer, const std::size_t buffer_size) const {
-    char* buffer_end = rec_serialize(&root_, buffer);
+    char* buffer_end = serialize_value_to_char_buffer(SER_VERSION, buffer);
+    buffer_end = rec_serialize(&root_, buffer_end);
     if (static_cast<std::size_t>(buffer_end - buffer) != buffer_size)
       throw std::invalid_argument("Serialization does not match end of buffer");
   }
@@ -2986,6 +2988,8 @@ class Simplex_tree {
    * @param[in] buffer_size The size of the buffer.
    *
    * @exception std::invalid_argument In case the deserialization does not finish at the correct buffer_size.
+   * @exception std::invalid_argument If the buffer was certifiably constructed from a non-compatible simplex tree
+   * serialization version.
    * @exception std::logic_error In debug mode, if the Simplex_tree is not 'empty'.
    *
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
@@ -3015,6 +3019,8 @@ class Simplex_tree {
    * reading.
    *
    * @exception std::invalid_argument In case the deserialization does not finish at the correct buffer_size.
+   * @exception std::invalid_argument If the buffer was certifiably constructed from a non-compatible simplex tree
+   * serialization version.
    * @exception std::logic_error In debug mode, if the Simplex_tree is not 'empty'.
    *
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
@@ -3025,6 +3031,11 @@ class Simplex_tree {
   void deserialize(const char* buffer, const std::size_t buffer_size, F&& deserialize_filtration_value) {
     GUDHI_CHECK(num_vertices() == 0, std::logic_error("Simplex_tree::deserialize - Simplex_tree must be empty"));
     const char* ptr = buffer;
+    int version;
+    ptr = deserialize_value_from_char_buffer(version, ptr);
+    if (version != SER_VERSION) {
+      throw std::invalid_argument("The buffer comes from an non-compatible serialization version of the simplex tree.");
+    }
     // Needs to read size before recursivity to manage new siblings for children
     Vertex_handle members_size;
     ptr = deserialize_value_from_char_buffer(members_size, ptr);
@@ -3090,6 +3101,11 @@ class Simplex_tree {
   /** \brief Upper bound on the dimension of the simplicial complex.*/
   mutable int dimension_;
   mutable bool dimension_to_be_lowered_;
+
+  /**
+   * @brief Serialization version number. Should be incremented for each change in the serialization strategy.
+   */
+  static constexpr int SER_VERSION = 0;
 };
 
 // Print a Simplex_tree in os.
