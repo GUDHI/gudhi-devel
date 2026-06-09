@@ -14,8 +14,8 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 
-// For Windows, where _default_random is the dll provider for the other clients
-// Must be done before #include <gudhi/random.h>
+// For Windows, where _default_cgal_random is the dll provider for the other clients
+// Must be done before #include <python_interfaces/cgal_random.h>
 #define GUDHI_DEFAULT_CGAL_RANDOM_DLL_IMPORT
 #include <python_interfaces/cgal_random.h>
 
