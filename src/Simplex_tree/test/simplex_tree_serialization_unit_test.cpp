@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
 
   char* buffer = new char[256];
   char* ptr = buffer;
-  ptr = serialize_value_to_char_buffer(int(-1)     , ptr); // version number
+  ptr = serialize_value_to_char_buffer(std::int16_t(-1)     , ptr); // version number
   // 3 simplices ({0}, {1}, {2}) and its filtration values
   ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(3)     , ptr);
   ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(0)     , ptr);
@@ -151,14 +151,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
   const std::size_t filtration_size =
       Stree::Options::store_filtration ? get_serialization_size_of(random_filtration<Filtration_type>()) : 0;
   const std::size_t serialization_size =
-      sizeof(int) + vertex_size + st.num_simplices() * (2 * vertex_size + filtration_size);
+      sizeof(std::int16_t) + vertex_size + st.num_simplices() * (2 * vertex_size + filtration_size);
   BOOST_CHECK_EQUAL(serialization_size, buffer_size);
 
   Vertex_type vertex = 0;
   Filtration_type filtration(0);
   // Reset position pointer at start
   const char* c_ptr = buffer;
-  int version;
+  std::int16_t version;
   c_ptr = deserialize_value_from_char_buffer(version, c_ptr);
   BOOST_CHECK_EQUAL(version, -1);
   // 3 simplices ({0}, {1}, {2}) and its filtration values
@@ -224,7 +224,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
               << std::hex << (0xFF & buffer[idx]) << " " << std::dec;
   }
   // skip version number for comparision
-  BOOST_CHECK(strncmp(stree_buffer + sizeof(int), buffer + sizeof(int), stree_buffer_size - sizeof(int)) == 0);
+  BOOST_CHECK(strncmp(stree_buffer + sizeof(std::int16_t), buffer + sizeof(std::int16_t),
+                      stree_buffer_size - sizeof(std::int16_t)) == 0);
 
   Stree st_from_buffer;
   st_from_buffer.deserialize(stree_buffer, serialization_size);
@@ -332,7 +333,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(simplex_tree_non_empty_deserialize_throw, Stree, l
   auto start = stree_buffer;
 
   st.serialize(stree_buffer, stree_buffer_size);
-  serialize_value_to_char_buffer(int(-1), start); // overwrites version in buffer with a wrong version
+  serialize_value_to_char_buffer(std::int16_t(-1), start); // overwrites version in buffer with a wrong version
 
   Stree st_from_buffer2;
   BOOST_CHECK_THROW(st_from_buffer2.deserialize(stree_buffer, stree_buffer_size), std::invalid_argument);
