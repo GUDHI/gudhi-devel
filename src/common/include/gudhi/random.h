@@ -55,7 +55,9 @@ namespace random {
 #error "GUDHI_DEFAULT_RANDOM_DLL_EXPORT and GUDHI_DEFAULT_RANDOM_DLL_IMPORT cannot be enabled at the same time"
 #endif // GUDHI_DEFAULT_RANDOM_DLL_EXPORT && GUDHI_DEFAULT_RANDOM_DLL_IMPORT
 
-// Export macro — works on Linux/macOS (ELF) and Windows (PE)
+// Defined but empty by default
+#define RANDOM_DLL_API
+
 #if defined(_WIN32)
   #if defined GUDHI_DEFAULT_RANDOM_DLL_EXPORT
     #define RANDOM_DLL_API __declspec(dllexport)
@@ -63,9 +65,6 @@ namespace random {
   #if defined GUDHI_DEFAULT_RANDOM_DLL_IMPORT
     #define RANDOM_DLL_API __declspec(dllimport)
   #endif
-#else
-  // Defined but empty
-  #define RANDOM_DLL_API
 #endif
 
   RANDOM_DLL_API Random_generator& get_default_random();
@@ -78,7 +77,7 @@ namespace random {
    * 
    * @return A reference to the thread-local default random instance.
    */
-  #if !defined GUDHI_DEFAULT_RANDOM_DLL_IMPORT
+  #if !defined GUDHI_DEFAULT_RANDOM_DLL_EXPORT
   inline
   #endif
   Random_generator& get_default_random() {
