@@ -16,6 +16,13 @@ __version__ = "@GUDHI_VERSION@"
 __root_source_dir__ = "@CMAKE_SOURCE_DIR@"
 __debug_info__ = @GUDHI_PYTHON_DEBUG_INFO@
 
+import os
+from pathlib import Path
+
+# Specific for Windows - required by datasets/generators that links with _default_cgal_random.dll in gudhi directory
+if os.name == 'nt':
+    os.add_dll_directory(Path(__file__).parent)
+
 from .cubical_complex import CubicalComplex
 from .periodic_cubical_complex import PeriodicCubicalComplex
 from .simplex_tree import SimplexTree

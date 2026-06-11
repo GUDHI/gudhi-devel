@@ -11,15 +11,7 @@ __license__ = "MIT"
 
 
 import numpy as np
-import os
-from pathlib import Path
 from typing import Literal
-
-# Specific for Windows - To be done before import _ctorus and _sphere
-if os.name == 'nt':
-    # Add random.dll that is located in "../.."
-    dll_dir = Path(__file__).parent / "../.."
-    os.add_dll_directory(str(dll_dir.resolve()))
 
 from ._points_ext import ctorus, sphere
 
