@@ -51,9 +51,9 @@ jobs:
         run: |
           python -m pip wheel -ve .
           ls "./"
-          ls "./build/src/python/gudhi"
-          delvewheel show --add-path="C:/vcpkg/installed/x64-windows/bin;./build/src/python/gudhi" *.whl
-          delvewheel repair --add-path="C:/vcpkg/installed/x64-windows/bin;./build/src/python/gudhi" -w wheelhouse -v *.whl
+          ls "./build/src/python/gudhi/Release"
+          delvewheel show --add-path="C:/vcpkg/installed/x64-windows/bin;./build/src/python/gudhi/Release" *.whl
+          delvewheel repair --add-path="C:/vcpkg/installed/x64-windows/bin;./build/src/python/gudhi/Release" -w wheelhouse -v *.whl
       - name: Upload Windows python wheel
         uses: actions/upload-artifact@v6
         with:
