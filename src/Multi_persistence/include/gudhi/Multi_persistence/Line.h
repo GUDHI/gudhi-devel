@@ -21,10 +21,12 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include <type_traits>
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_persistence/Box.h>
 #include <gudhi/Multi_persistence/Point.h>
+#include <gudhi/Multi_persistence/utils.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
 
 namespace Gudhi {
@@ -75,6 +77,45 @@ class Line
    * @param vector Direction of the line. Positive and non trivial.
    */
   Line(const Point_t &x, const Point_t &vector) : basePoint_(x), direction_(vector) { _check_direction(); }
+
+  /**
+   * @brief Constructs a line going through the given point in the direction of the given vector.
+   * If the vector has no coordinates, the slope is assumed to be 1.
+   * Otherwise, the vector has to be non trivial and all its coordinates have to be positive.
+   *
+   * @param x A point of the line. Will be moved.
+   * @param vector Direction of the line. Positive and non trivial. Will be moved.
+   */
+  Line(Point_t &&x, Point_t &&vector) : basePoint_(std::move(x)), direction_(std::move(vector)) { _check_direction(); }
+
+  /**
+   * @brief Constructs a line going through the given point with slope 1.
+   * 
+   * @tparam CoordinateIterator Forward iterator derefencing to an arithmetic value convertible to `T`.
+   * @param begin Begin iterator of the point.
+   * @param end End iterator of the point.
+   */
+  template <class CoordinateIterator,
+            class = std::enable_if_t<is_forward_iterator_v<CoordinateIterator> > >
+  Line(CoordinateIterator begin, CoordinateIterator end) : basePoint_(begin, end), direction_() {}
+
+  /**
+   * @brief Constructs a line going through the given point in the direction of the given range.
+   * If the range is empty, the slope is assumed to be 1.
+   * Otherwise, the range has to be non trivial and all its coordinates have to be positive.
+   * 
+   * @tparam CoordinateIterator Forward iterator derefencing to an arithmetic value convertible to `T`.
+   * @tparam DirectionIterator Forward iterator derefencing to an arithmetic value convertible to `T`.
+   * @param baseBegin Begin iterator of the point.
+   * @param baseEnd End iterator of the point.
+   * @param dirBegin Begin iterator of the direction.
+   * @param dirEnd End iterator of the direction.
+   */
+  template <class CoordinateIterator, class DirectionIterator>
+  Line(CoordinateIterator baseBegin, CoordinateIterator baseEnd, DirectionIterator dirBegin, DirectionIterator dirEnd)
+      : basePoint_(baseBegin, baseEnd), direction_(dirBegin, dirEnd) {
+    _check_direction();
+  }
 
   /**
    * @brief Returns the coordinates of the point on the line with "time" parameter `t`. That is, the point \f$ x \f$

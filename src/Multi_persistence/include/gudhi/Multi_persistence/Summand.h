@@ -89,6 +89,16 @@ class Summand {
       : birthCorners_(birthCorners), deathCorners_(deathCorners), dimension_(dimension) {}
 
   /**
+   * @brief Move constructs a summand from the given corners.
+   *
+   * @param birthCorners Birth corners.
+   * @param deathCorners Death corners.
+   * @param dimension Dimension of the summand.
+   */
+  Summand(Births &&birthCorners, Deaths &&deathCorners, Dimension dimension)
+      : birthCorners_(std::move(birthCorners)), deathCorners_(std::move(deathCorners)), dimension_(dimension) {}
+
+  /**
    * @brief Constructs a summand from the given corners. The corners are represented by ranges of coordinates such that
    * the \f$ p \f$ first elements of the range corresponds to the first corner, the \f$ p \f$ next elements to the
    * second corner and so on... Where \f$ p \f$ is the number of parameters.
@@ -452,6 +462,51 @@ class Summand {
    */
   friend bool operator==(const Summand &a, const Summand &b) {
     return a.dimension_ == b.dimension_ && a.birthCorners_ == b.birthCorners_ && a.deathCorners_ == b.deathCorners_;
+  }
+
+  /**
+   * @brief Serialize given value into the buffer at given pointer.
+   *
+   * @param value Value to serialize.
+   * @param start Pointer to the start of the space in the buffer where to store the serialization.
+   * @return End position of the serialization in the buffer.
+   */
+  friend char *serialize_value_to_char_buffer(const Summand &value, char *start)
+  {
+    const std::size_t dimSize = sizeof(Dimension);
+    memcpy(start, &value.dimension_, dimSize);
+    char *curr = start + dimSize;
+    curr = serialize_value_to_char_buffer(value.birthCorners_, curr);
+    curr = serialize_value_to_char_buffer(value.deathCorners_, curr);
+    return curr;
+  }
+
+  /**
+   * @brief Deserialize the value from a buffer at given pointer and stores it in given value.
+   *
+   * @param value Value to fill with the deserialized summand.
+   * @param start Pointer to the start of the space in the buffer where the serialization is stored.
+   * @return End position of the serialization in the buffer.
+   */
+  friend const char *deserialize_value_from_char_buffer(Summand &value, const char *start)
+  {
+    const std::size_t dimSize = sizeof(Dimension);
+    memcpy(&value.dimension_, start, dimSize);
+    const char *curr = start + dimSize;
+    curr = deserialize_value_from_char_buffer(value.birthCorners_, curr);
+    curr = deserialize_value_from_char_buffer(value.deathCorners_, curr);
+    return curr;
+  }
+
+  /**
+   * @brief Returns the serialization size of the given summand.
+   */
+  friend std::size_t get_serialization_size_of(const Summand &value)
+  {
+    std::size_t size = sizeof(Dimension);
+    size += get_serialization_size_of(value.birthCorners_);
+    size += get_serialization_size_of(value.deathCorners_);
+    return size;
   }
 
   /**

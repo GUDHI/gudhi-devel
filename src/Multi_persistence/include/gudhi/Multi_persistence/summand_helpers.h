@@ -31,6 +31,17 @@
 namespace Gudhi {
 namespace multi_persistence {
 
+template <typename T>
+struct type_identity {
+  using type = T;
+};
+
+// std::make_signed_t does not compile for T signed and std::conditional evaluates both possibilities
+// so this trick is necessary if we want to avoid using `if constexpr` everywhere
+template <typename T>
+using maybe_make_signed_t =
+    typename std::conditional_t<std::is_unsigned_v<T>, std::make_signed<T>, type_identity<T>>::type;
+
 /**
  * @ingroup multi_persistence
  *
@@ -71,30 +82,20 @@ inline auto _compute_distance_to_front(const RandomAccessValueRange &x, const Co
  * should not exceed `INT_MAX`.
  */
 template <typename T, typename D, class RandomAccessValueRange>
-inline T compute_summand_distance_to(const Summand<T, D> &sum, const RandomAccessValueRange &x, bool negative) {
+inline auto compute_summand_distance_to(const Summand<T, D> &sum, const RandomAccessValueRange &x, bool negative) {
   GUDHI_CHECK(x.size() >= static_cast<std::size_t>(sum.get_number_of_parameters()),
               std::invalid_argument("The given point does not have enough coordinates compared to the given Summand."));
 
-  T lowerDist, upperDist;
-  if constexpr (std::is_unsigned_v<T>) {
-    // std::make_signed_t does not compile for T signed and std::conditional evaluates both possibilities,
-    // so the case has to be separated...
-    using stype = std::make_signed_t<T>;
-    // This is a bit unsafe, as the unsigned value can be truncated
-    // but I will just assume that the user will not use coordinates that big
-    // otherwise I would need to do a quite long case study here, which seems overkill
-    // for a case which will probably never happen
-    lowerDist = _compute_distance_to_front<stype, Summand<T, D> >(
-        x, sum.get_upset(), negative, [](stype cornerVal, stype xVal) { return cornerVal - xVal; });
-    upperDist = _compute_distance_to_front<stype, Summand<T, D> >(
-        x, sum.get_downset(), negative, [](stype cornerVal, stype xVal) { return xVal - cornerVal; });
-  } else {
-    lowerDist = _compute_distance_to_front<T, Summand<T, D> >(x, sum.get_upset(), negative,
-                                                              [](T cornerVal, T xVal) { return cornerVal - xVal; });
-    upperDist = _compute_distance_to_front<T, Summand<T, D> >(x, sum.get_downset(), negative,
-                                                              [](T cornerVal, T xVal) { return xVal - cornerVal; });
-  }
+  // This is a bit unsafe, as the unsigned value can be truncated
+  // but I will just assume that the user will not use coordinates that big
+  // otherwise I would need to do a quite long case study here, which seems overkill
+  // for a case which will probably never happen
+  using signedT = maybe_make_signed_t<T>;
 
+  signedT lowerDist = _compute_distance_to_front<signedT, Summand<T, D> >(
+      x, sum.get_upset(), negative, [](signedT cornerVal, signedT xVal) -> signedT { return cornerVal - xVal; });
+  signedT upperDist = _compute_distance_to_front<signedT, Summand<T, D> >(
+      x, sum.get_downset(), negative, [](signedT cornerVal, signedT xVal) -> signedT { return xVal - cornerVal; });
   return std::max(lowerDist, upperDist);
 }
 
@@ -103,38 +104,56 @@ inline T compute_summand_distance_to(const Summand<T, D> &sum, const RandomAcces
  *
  * @private
  */
-template <typename T, class RandomAccessValueRange1, class RandomAccessValueRange2>
-inline T _get_summand_diagonal(const RandomAccessValueRange1 &birth, const RandomAccessValueRange2 &death,
-                               const Box<T> &box = {}) {
+template <typename Distance, class RandomAccessValueRange1, class RandomAccessValueRange2>
+inline Distance _get_summand_diagonal(const RandomAccessValueRange1 &birth, const RandomAccessValueRange2 &death) {
   // assumes birth and death to be never NaN
   GUDHI_CHECK(birth.size() == 1 || death.size() == 1 || birth.size() == death.size(),
               std::invalid_argument("Inputs must be of the same size !"));
 
-  bool useThreshold = !box.is_trivial();
-
-  GUDHI_CHECK((birth.size() == 1 && death.size() == 1) || !useThreshold || birth.size() == box.get_dimension() ||
-                  death.size() == box.get_dimension(),
-              std::invalid_argument("Inputs must be of the same size !"));
-
-  auto get_val = [](const auto &r, std::size_t i) -> T {
+  auto get_val = [](const auto &r, std::size_t i) -> Distance {
     if (i < r.size()) return r[i];
     // never used if r.size() == 0
     return r[0];
   };
 
-  T diag = Summand<T>::T_inf;
-  if (useThreshold) {
-    for (std::size_t i = 0; i < birth.size(); ++i) {
-      T max_i = box.get_upper_corner()[i];
-      T min_i = box.get_lower_corner()[i];
-      T t_death = std::min(get_val(death, i), max_i);
-      T t_birth = std::max(get_val(birth, i), min_i);
-      diag = std::min(diag, t_death - t_birth);
-    }
-  } else {
-    for (std::size_t i = 0; i < birth.size(); i++) {
-      diag = std::min(diag, get_val(death, i) - get_val(birth, i));
-    }
+  Distance diag = Summand<Distance>::T_inf;
+  for (std::size_t i = 0; i < birth.size(); i++) {
+    diag = std::min(diag, get_val(death, i) - get_val(birth, i));
+  }
+
+  return diag;
+}
+
+/**
+ * @ingroup multi_persistence
+ *
+ * @private
+ */
+template <typename Distance, class RandomAccessValueRange1, class RandomAccessValueRange2, class Box>
+inline Distance _get_summand_diagonal(const RandomAccessValueRange1 &birth, const RandomAccessValueRange2 &death,
+                                      const Box &box) {
+  if (box.is_trivial()) return _get_summand_diagonal<Distance>(birth, death);
+
+  // assumes birth and death to be never NaN
+  GUDHI_CHECK(birth.size() == 1 || death.size() == 1 || birth.size() == death.size(),
+              std::invalid_argument("Inputs must be of the same size !"));
+  GUDHI_CHECK((birth.size() == 1 && death.size() == 1) || birth.size() == box.get_number_of_coordinates() ||
+                  death.size() == box.get_number_of_coordinates(),
+              std::invalid_argument("Inputs must be of the same size !"));
+
+  auto get_val = [](const auto &r, std::size_t i) -> Distance {
+    if (i < r.size()) return r[i];
+    // never used if r.size() == 0
+    return r[0];
+  };
+
+  Distance diag = Summand<Distance>::T_inf;
+  for (std::size_t i = 0; i < birth.size(); ++i) {
+    Distance max_i = box.get_upper_corner()[i];
+    Distance min_i = box.get_lower_corner()[i];
+    Distance t_death = std::min(get_val(death, i), max_i);
+    Distance t_birth = std::max(get_val(birth, i), min_i);
+    diag = std::min(diag, t_death - t_birth);
   }
 
   return diag;
@@ -145,22 +164,31 @@ inline T _get_summand_diagonal(const RandomAccessValueRange1 &birth, const Rando
  *
  * @brief For a birth and death corner in the summand, let the diagonal between those two be
  * \f$ min\{death[p] - birth[p]\} \f$ for all parameters \f$ p \f$. This method returns the maximal diagonal
- * of all birth-death pairs in the intersection between the summand and the box.
+ * of all birth-death pairs in the summand projected to the box.
  *
  * @tparam T First template argument of @ref Summand.
  * @tparam D Second template argument of @ref Summand.
+ * @tparam U Template argument of @ref Box. Has to be either T or std::make_signed_t<T>.
  * @param sum Summand.
  * @param box Box to intersect with. The box is ignored if trivial.
  */
-template <typename T, typename D>
-T compute_summand_interleaving(const Summand<T, D> &sum, const Box<T> &box) {
-  T interleaving = 0;
+template <typename T, typename D, typename U>
+auto compute_summand_interleaving(const Summand<T, D> &sum, const Box<U> &box) {
+  static_assert(std::is_same_v<U, T> || std::is_same_v<U, maybe_make_signed_t<T>>,
+                "Box template parameter is not compatible with Summand value type.");
+  // This is a bit unsafe, as the unsigned value can be truncated
+  // but I will just assume that the user will not use coordinates that big
+  // otherwise I would need to do a quite long case study here, which seems overkill
+  // for a case which will probably never happen
+  using signedT = maybe_make_signed_t<T>;
+
+  signedT interleaving = 0;
   for (const auto &birth : sum.get_upset()) {
     for (const auto &death : sum.get_downset()) {
       // TODO: if the types of Births and Deaths in Summand changes (to become a template for example)
       // the input to _get_summand_diagonal has to get adapted to it, as it makes use of
       // Dynamic_multi_parameter_filtration::Generator working like a vector
-      interleaving = std::max(interleaving, _get_summand_diagonal<T>(birth, death, box));
+      interleaving = std::max(interleaving, _get_summand_diagonal<signedT>(birth, death, box));
     }
   }
   return interleaving;
@@ -171,24 +199,55 @@ T compute_summand_interleaving(const Summand<T, D> &sum, const Box<T> &box) {
  *
  * @private
  */
-template <class BirthGenerator, class DeathGenerator, typename T>
-inline T _summand_rectangle_volume(const BirthGenerator &birth, const DeathGenerator &death, const Box<T> &box) {
+template <class BirthGenerator, class DeathGenerator, typename Distance>
+inline Distance _summand_rectangle_volume(const BirthGenerator &birth, const DeathGenerator &death,
+                                          const Box<Distance> &box) {
   // NaN?
   if (birth.size() == 0 || death.size() == 0) return 0;
 
-  auto get_val = [](const auto &r, std::size_t i) -> T {
+  auto get_val = [](const auto &r, std::size_t i) -> Distance {
     if (i < r.size()) return r[i];
     // never used if r.size() == 0
     return r[0];
   };
 
-  T volume = std::min(death[0], box.get_upper_corner()[0]) - std::max(birth[0], box.get_lower_corner()[0]);
+  Distance volume =
+      std::min(get_val(death, 0), box.get_upper_corner()[0]) - std::max(get_val(birth, 0), box.get_lower_corner()[0]);
   for (std::size_t i = 1; i < birth.size(); i++) {
-    T t_death = std::min(get_val(death, i), box.get_upper_corner()[i]);
-    T t_birth = std::max(get_val(birth, i), box.get_lower_corner()[i]);
+    Distance t_death = std::min(get_val(death, i), box.get_upper_corner()[i]);
+    Distance t_birth = std::max(get_val(birth, i), box.get_lower_corner()[i]);
     volume = volume * (t_death - t_birth);
   }
   return volume;
+}
+
+/**
+ * @ingroup multi_persistence
+ *
+ * @private
+ */
+template <typename T, class RandomAccessValueRange>
+inline auto _get_local_weight_threshold(const RandomAccessValueRange &x, double delta) {
+  using signedT = maybe_make_signed_t<T>;
+  using P = typename Box<signedT>::Point_t;
+
+  bool rectangle = delta <= 0;
+  // we want the box to have the same type of metric than the summand it leaves in
+  signedT diam;
+  if constexpr (std::is_integral_v<signedT>) {
+    diam = std::llround(delta);
+  } else {
+    diam = delta;
+  }
+  P mini(x.size());
+  P maxi(x.size());
+  for (std::size_t i = 0; i < x.size(); i++) {
+    signedT v = x[i];
+    mini[i] = rectangle ? v + diam : v - diam;
+    maxi[i] = rectangle ? v - diam : v + diam;
+  }
+  return Box<signedT>(std::move(rectangle ? maxi : mini), std::move(rectangle ? mini : maxi));
+  // return Box<signedT>(std::move(mini), std::move(maxi));
 }
 
 /**
@@ -207,41 +266,32 @@ inline T _summand_rectangle_volume(const BirthGenerator &birth, const DeathGener
  * and a death corner of the summand intersected with the box.
  */
 template <typename T, typename D, class RandomAccessValueRange>
-inline T compute_summand_local_weight(const Summand<T, D> &sum, const RandomAccessValueRange &x, T delta) {
-  using P = typename Box<T>::Point_t;
-
-  GUDHI_CHECK(x.size() == sum.get_number_of_parameters(),
+inline double compute_summand_local_weight(const Summand<T, D> &sum, const RandomAccessValueRange &x, double delta) {
+  GUDHI_CHECK(static_cast<int>(x.size()) == sum.get_number_of_parameters(),
               std::invalid_argument("Input range does not have the right size."));
 
-  bool rectangle = delta <= 0;
-
   // box on which to compute the local weight
-  P mini(x.size());
-  P maxi(x.size());
-  for (typename Summand<T, D>::Index i = 0; i < x.size(); i++) {
-    mini[i] = rectangle ? x[i] + delta : x[i] - delta;
-    maxi[i] = rectangle ? x[i] - delta : x[i] + delta;
-  }
-  Box<T> threshold(rectangle ? maxi : mini, rectangle ? mini : maxi);
+  auto threshold = _get_local_weight_threshold<T>(x, delta);
 
-  T localWeight = 0;
+  double localWeight = 0.;
+  const double normCoef = 2.;
 
-  if (rectangle) {
+  if (delta <= 0) {
     // local weight is the volume of the largest rectangle in the restricted
     for (const auto &birth : sum.get_upset()) {
       for (const auto &death : sum.get_downset()) {
         // TODO: if the types of Births and Deaths in Summand changes (to become a template for example)
         // _summand_rectangle_volume has to get adapted to it, as it makes use of
         // Dynamic_multi_parameter_filtration::Generator working like a vector
-        localWeight = std::max(localWeight, _summand_rectangle_volume(birth, death, threshold));
+        localWeight = std::max(localWeight, static_cast<double>(_summand_rectangle_volume(birth, death, threshold)));
       }
     }
-    return localWeight / std::pow(2 * std::abs(delta), x.size());
+    return localWeight / std::pow(normCoef * std::abs(delta), x.size());
   }
 
   // local weight is interleaving to 0 of module restricted to the square
   localWeight = compute_summand_interleaving(sum, threshold);
-  return localWeight / (2 * std::abs(delta));
+  return localWeight / (normCoef * std::abs(delta));
 }
 
 /**
@@ -256,11 +306,12 @@ inline T compute_summand_local_weight(const Summand<T, D> &sum, const RandomAcce
  * @param x Local point. Assumed to have as many coordinates than there are parameters in the summand.
  */
 template <typename T, typename D, class RandomAccessValueRange>
-inline T compute_summand_landscape_value(const Summand<T, D> &sum, const RandomAccessValueRange &x) {
-  T landscapeValue = 0;
+inline auto compute_summand_landscape_value(const Summand<T, D> &sum, const RandomAccessValueRange &x) {
+  using signedT = maybe_make_signed_t<T>;
+  signedT landscapeValue = 0;
   for (const auto &birth : sum.get_upset()) {
     for (const auto &death : sum.get_downset()) {
-      T value = std::min(_get_summand_diagonal<T>(birth, x), _get_summand_diagonal<T>(x, death));
+      signedT value = std::min(_get_summand_diagonal<signedT>(birth, x), _get_summand_diagonal<signedT>(x, death));
       landscapeValue = std::max(landscapeValue, value);
     }
   }

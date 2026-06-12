@@ -23,20 +23,12 @@
 
 using Gudhi::multi_persistence::Module;
 
-using I = std::uint32_t;
-using D = int;
-using T = double;
-// using Bar = Gudhi::persistence_matrix::Persistence_interval<int, T>;
-// using Barcode = std::vector<Bar>;
-// using Flat_barcode = std::vector<std::array<T, 2>>;
-// using Multi_dimensional_barcode = std::vector<Barcode>;
-// using Multi_dimensional_flat_barcode = std::vector<Flat_barcode>;
-// using Test_barcode = std::vector<std::pair<T, T>>;
-// using Test_multi_dimensional_barcode = std::vector<Test_barcode>;
+using list_of_tested_variants = boost::mpl::list<double, float, int, unsigned int>;
 
-using list_of_tested_variants = boost::mpl::list<>;
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(module_constructors, Module_t, list_of_tested_variants)
+BOOST_AUTO_TEST_CASE_TEMPLATE(module_constructors, T, list_of_tested_variants)
 {
+  Module<T> empty;
+  BOOST_CHECK_EQUAL(empty.size(), 0);
+  BOOST_CHECK(empty.begin() == empty.end());
 }
 

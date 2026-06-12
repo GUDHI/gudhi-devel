@@ -22,6 +22,7 @@
 #include <ostream>    //std::ostream
 #include <algorithm>  // std::max
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 #include <array>
 #include <vector>
@@ -74,14 +75,42 @@ class Module {
   /**
    * @brief Default constructor. Builds empty module.
    */
-  Module() : module_(), box_(), maxDim_(Summand_t::template get_null_value<Dimension>()) {}
+  Module() : module_(), maxDim_(Summand_t::template get_null_value<Dimension>()) {}
 
   /**
-   * @brief Builds an empty module with given box.
-   * 
-   * @param box Box restricting the module.
+   * @brief Returns the number of parameters.
    */
-  Module(const Box<value_type> &box) : module_(), box_(box), maxDim_(Summand_t::template get_null_value<Dimension>()) {}
+  [[nodiscard]] int get_number_of_parameters() const {
+    if (!module_.empty()) return module_[0].get_number_of_parameters();
+    // if (!box_.is_trivial()) return box_.get_number_of_coordinates();
+    return Summand_t::template get_null_value<int>();
+  }
+
+  /**
+   * @brief Returns the number of summands in the module.
+   */
+  [[nodiscard]] Index size() const { return module_.size(); }
+
+  /**
+   * @brief Resizes the summand container. If the container contained less than @p size summands, allocates as
+   * many trivial summands necessary to fill the count. If the container contained more than @p size summands,
+   * the container is truncated to the first @p size summands.
+   * 
+   * @param size New number of summands.
+   * @param numberOfParameters Number of parameters of the new summands.
+   */
+  void resize(Index size, int numberOfParameters) { module_.resize(size, Summand_t(numberOfParameters)); }
+
+  /**
+   * @brief Returns the maximal dimension of the summands in the module.
+   */
+  [[nodiscard]] Dimension get_max_dimension() const { return maxDim_; }
+
+  /**
+   * @brief Sets the maximal dimension of the summands in the module. Has to be used if the dimension of the summands
+   * where modified after being added to the module.
+   */
+  void set_max_dimension(Dimension maxDim) { maxDim_ = maxDim; }
 
   /**
    * @brief Returns the begin iterator. Iterators are LegacyRandomAccessIterator.
@@ -109,26 +138,11 @@ class Module {
    * 
    * @param dimension Summand dimension.
    */
-  /* Summand_of_dimension_range */ auto get_summand_of_dimension_range(Dimension dimension) const {
-    auto has_dimension = [&](const Summand_t &sum) { return sum.get_dimension() == dimension; };
-    // cython does not handle the adaptor properly without explicitly using boost::adaptors::type_erased
-    return module_ |
-           boost::adaptors::filtered(has_dimension) /*  |
-  boost::adaptors::type_erased<Summand_t, boost::forward_traversal_tag, const Summand_t &, std::ptrdiff_t>() */
-        ;
+  /* Summand_of_dimension_range */auto get_summands_of_dimension_range(Dimension dimension) const {
+    auto has_dimension = [dimension](const Summand_t &sum) { return sum.get_dimension() == dimension; };
+    return module_ | boost::adaptors::filtered(has_dimension)/*  |
+           boost::adaptors::type_erased<Summand_t, boost::forward_traversal_tag, const Summand_t &, std::ptrdiff_t>() */;
   }
-
-  /**
-   * @brief Returns the restricting box.
-   */
-  const Box<value_type> &get_box() const { return box_; }
-
-  /**
-   * @brief Sets the box.
-   * 
-   * @param box Box restricting the module.
-   */
-  void set_box(const Box<value_type> &box) { box_ = box; }
 
   /**
    * @brief Returns a reference to the summand at given index.
@@ -159,6 +173,8 @@ class Module {
    */
   void add_summand(Index i, const Summand_t &summand,
                    Dimension dimension = Summand_t::template get_null_value<Dimension>()) {
+    GUDHI_CHECK(module_.empty() || module_[0].get_number_of_parameters() == summand.get_number_of_parameters(),
+                std::invalid_argument("New summand does not have coherent number of parameters."));
     if (module_.size() <= i) resize(i + 1, summand.get_number_of_parameters());
     module_[i] = summand;
     if (dimension != Summand_t::template get_null_value<Dimension>()) {
@@ -180,36 +196,72 @@ class Module {
   }
 
   /**
-   * @brief Returns the maximal dimension of the summands in the module.
-   */
-  [[nodiscard]] Dimension get_max_dimension() const { return maxDim_; }
-
-  /**
-   * @brief Sets the maximal dimension of the summands in the module. Has to be used if the dimension of the summands
-   * where modified after being added to the module.
-   */
-  void set_max_dimension(Dimension maxDim) { maxDim_ = maxDim; }
-
-  /**
-   * @brief Returns the number of summands in the module.
-   */
-  [[nodiscard]] Index size() const { return module_.size(); }
-
-  /**
-   * @brief Resizes the summand container. If the container contained less than @p size summands, allocates as
-   * many trivial summands necessary to fill the count. If the container contained more than @p size summands,
-   * the container is truncated to the first @p size summands.
+   * @brief Adds all summands from the given module to this module.
    * 
-   * @param size New number of summands.
-   * @param numberOfParameters Number of parameters of the new summands.
+   * @tparam U Template parameter of @ref Module.
+   * @param toMerge Module to merge into this module.
    */
-  void resize(Index size, int numberOfParameters) { module_.resize(size, Summand_t(numberOfParameters)); }
+  template <typename U>
+  void merge(const Module<U> &toMerge) {
+    GUDHI_CHECK(
+        module_.empty() || toMerge.get_number_of_parameters() == get_number_of_parameters(),
+        std::invalid_argument("Number of parameters of the module to merge is not the same than the target module."));
+    Index curr = size();
+    resize(curr + toMerge.size(), 1);
+    for (const auto &sum : toMerge) {
+      GUDHI_CHECK(
+          sum.get_number_of_parameters() == toMerge.get_number_of_parameters(),
+          std::invalid_argument("Number of parameters of the module to merge is not coherent."));
+      maxDim_ = std::max(maxDim_, sum.get_dimension());
+      if constexpr (std::is_same_v<U, T>) {
+        module_[curr] = sum;
+      } else {
+        Summand_t sumT(std::move(sum.get_upset().template as_type<T>()),
+                       std::move(sum.get_downset().template as_type<T>()), sum.get_dimension());
+        module_[curr] = std::move(sumT);
+      }
+      ++curr;
+    }
+  }
+
+  /**
+   * @brief Adds all summands of given dimension from the given module to this module.
+   * 
+   * @tparam U Template parameter of @ref Module.
+   * @param toMerge Module to merge into this module.
+   * @param dimension Dimension of the summands to merge.
+   */
+  template <typename U>
+  void merge(const Module<U> &toMerge, Dimension dimension) {
+    GUDHI_CHECK(
+        module_.empty() || toMerge.get_number_of_parameters() == get_number_of_parameters(),
+        std::invalid_argument("Number of parameters of the module to merge is not the same than the target module."));
+    Index curr = size();
+    Index size = curr;
+    auto r = toMerge.get_summands_of_dimension_range(dimension);
+    for (auto it = r.begin(); it != r.end(); ++it) ++size;
+    resize(size, 1);
+    for (const auto &sum : toMerge.get_summands_of_dimension_range(dimension)) {
+      GUDHI_CHECK(
+          sum.get_number_of_parameters() == toMerge.get_number_of_parameters(),
+          std::invalid_argument("Number of parameters of the module to merge is not coherent."));
+      maxDim_ = std::max(maxDim_, sum.get_dimension());
+      if constexpr (std::is_same_v<U, T>) {
+        module_[curr] = sum;
+      } else {
+        Summand_t sumT(std::move(sum.get_upset().template as_type<T>()),
+                       std::move(sum.get_downset().template as_type<T>()), sum.get_dimension());
+        module_[curr] = std::move(sumT);
+      }
+      ++curr;
+    }
+  }
 
   /**
    * @brief Returns the bounding box of the module independently of the restricting box.
    */
   Box<value_type> compute_bounds() const {
-    Dimension numParam = box_.get_lower_corner().size();
+    Dimension numParam = get_number_of_parameters();
     typename Box<value_type>::Point_t lower_bound(numParam, T_inf);
     typename Box<value_type>::Point_t upper_bound(numParam, T_m_inf);
     for (const auto &summand : module_) {
@@ -344,12 +396,68 @@ class Module {
    */
   friend bool operator==(const Module &a, const Module &b) {
     if (a.get_max_dimension() != b.get_max_dimension()) return false;
-    if (a.box_ != b.box_) return false;
     if (a.size() != b.size()) return false;
     for (std::size_t i = 0; i < a.size(); ++i) {
       if (a.get_summand(i) != b.get_summand(i)) return false;
     }
     return true;
+  }
+
+  /**
+   * @brief Serialize given value into the buffer at given pointer.
+   *
+   * @param value Value to serialize.
+   * @param start Pointer to the start of the space in the buffer where to store the serialization.
+   * @return End position of the serialization in the buffer.
+   */
+  friend char *serialize_value_to_char_buffer(const Module &value, char *start)
+  {
+    const std::size_t dimSize = sizeof(Dimension);
+    const std::size_t indexSize = sizeof(typename Module_t::size_type);
+    typename Module_t::size_type length = value.module_.size();
+    memcpy(start, &value.maxDim_, dimSize);
+    char *curr = start + dimSize;
+    memcpy(curr, &length, indexSize);
+    curr += indexSize;
+    for (const auto& sum : value.module_) {
+      curr = serialize_value_to_char_buffer(sum, curr);
+    }
+    return curr;
+  }
+
+  /**
+   * @brief Deserialize the value from a buffer at given pointer and stores it in given value.
+   *
+   * @param value Value to fill with the deserialized summand.
+   * @param start Pointer to the start of the space in the buffer where the serialization is stored.
+   * @return End position of the serialization in the buffer.
+   */
+  friend const char *deserialize_value_from_char_buffer(Module &value, const char *start)
+  {
+    const std::size_t dimSize = sizeof(Dimension);
+    const std::size_t indexSize = sizeof(typename Module_t::size_type);
+    typename Module_t::size_type length;
+    memcpy(&value.maxDim_, start, dimSize);
+    const char *curr = start + dimSize;
+    memcpy(&length, curr, indexSize);
+    curr += indexSize;
+    value.module_.resize(length);
+    for (auto& sum : value.module_) {
+      curr = deserialize_value_from_char_buffer(sum, curr);
+    }
+    return curr;
+  }
+
+  /**
+   * @brief Returns the serialization size of the given summand.
+   */
+  friend std::size_t get_serialization_size_of(const Module &value) {
+    std::size_t size = sizeof(Dimension);
+    size += sizeof(typename Module_t::size_type);
+    for (const auto &sum : value.module_) {
+      size += get_serialization_size_of(sum);
+    }
+    return size;
   }
 
   /**
@@ -368,13 +476,11 @@ class Module {
    */
   friend void swap(Module &mod1, Module &mod2) noexcept {
     mod1.module_.swap(mod2.module_);
-    swap(mod1.box_, mod2.box_);
     std::swap(mod1.maxDim_, mod2.maxDim_);
   }
 
  private:
   Module_t module_;     /**< Summand container. */
-  Box<value_type> box_; /**< Restricting box. */
   Dimension maxDim_;    /**< Maximal dimension of the module. */
 };
 

@@ -8,6 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <cstddef>
+#include <type_traits>
 #include <vector>
 
 #define BOOST_TEST_DYN_LINK
@@ -259,7 +261,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(summand_transformers, T, list_of_tested_variants) 
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(summand_helpers, T, list_of_tested_variants) {
   std::vector<T> b = {2, 3, 4, 1};
-  std::vector<T> d = {7, 6};
+  std::vector<T> d = {3, 8, 7, 6};
 
   Summand<T> sum(b, d, 2, 2);
   auto distance = compute_summand_distance_to(sum, std::vector<T>{1, 4}, false);
@@ -268,4 +270,66 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(summand_helpers, T, list_of_tested_variants) {
   BOOST_CHECK_EQUAL(distance, 0);
   distance = compute_summand_distance_to(sum, std::vector<T>{10, 3}, false);
   BOOST_CHECK_EQUAL(distance, 3);
+  distance = compute_summand_distance_to(sum, std::vector<T>{1, 4}, true);
+  BOOST_CHECK_EQUAL(distance, 1);
+  distance = compute_summand_distance_to(sum, std::vector<T>{5, 5}, true);
+  BOOST_CHECK_EQUAL(distance, -1);
+  distance = compute_summand_distance_to(sum, std::vector<T>{10, 3}, true);
+  BOOST_CHECK_EQUAL(distance, 3);
+
+  auto inter = compute_summand_interleaving(sum, Box<T>());
+  BOOST_CHECK_EQUAL(inter, 3);
+  inter = compute_summand_interleaving(sum, Box<T>({1, 1}, {7, 8}));
+  BOOST_CHECK_EQUAL(inter, 3);
+  inter = compute_summand_interleaving(sum, Box<T>({3, 2}, {6, 5}));
+  BOOST_CHECK_EQUAL(inter, 2);
+
+  auto weight = compute_summand_local_weight(sum, std::vector<T>{4, 3}, 4.);
+  BOOST_CHECK_EQUAL(weight, 0.375);
+  weight = compute_summand_local_weight(sum, std::vector<T>{5, 2}, 2.);
+  BOOST_CHECK_EQUAL(weight, 0.75);
+  if constexpr (std::is_integral_v<T>) {
+    weight = compute_summand_local_weight(sum, std::vector<T>{5, 2}, 0.75);
+    BOOST_CHECK_EQUAL(weight, 1. / 0.75);
+  } else {
+    weight = compute_summand_local_weight(sum, std::vector<T>{5, 2}, 0.75);
+    BOOST_CHECK_EQUAL(weight, 1.);
+  }
+  weight = compute_summand_local_weight(sum, std::vector<T>{4, 3}, -4.);
+  BOOST_CHECK_EQUAL(weight, 15. / 64.);
+  weight = compute_summand_local_weight(sum, std::vector<T>{5, 2}, -2.);
+  BOOST_CHECK_EQUAL(weight, 9. / 16.);
+  if constexpr (std::is_integral_v<T>) {
+    weight = compute_summand_local_weight(sum, std::vector<T>{5, 2}, -0.75);
+    BOOST_CHECK_EQUAL(weight, 4. / 2.25);
+  } else {
+    weight = compute_summand_local_weight(sum, std::vector<T>{5, 2}, -0.75);
+    BOOST_CHECK_EQUAL(weight, 1.);
+  }
+
+  auto landscape = compute_summand_landscape_value(sum, std::vector<T>{1, 4});
+  BOOST_CHECK_EQUAL(landscape, 0);
+  landscape = compute_summand_landscape_value(sum, std::vector<T>{5, 5});
+  BOOST_CHECK_EQUAL(landscape, 1);
+  landscape = compute_summand_landscape_value(sum, std::vector<T>{10, 3});
+  BOOST_CHECK_EQUAL(landscape, 0);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(summand_serialization, T, list_of_tested_variants) {
+  std::vector<T> b = {2, 3, 4, 1};
+  std::vector<T> d = {3, 8, 7, 6, 6, 99};
+
+  Summand<T> sum(b, d, 2, 2);
+  char* buffer = new char[256];
+  char* ptr = buffer;
+
+  std::size_t serSize = get_serialization_size_of(sum);
+  ptr = serialize_value_to_char_buffer(sum, ptr);
+  BOOST_CHECK_EQUAL(serSize, ptr - buffer);
+
+  Summand<T> copy;
+  const char* c_ptr = buffer;
+  c_ptr = deserialize_value_from_char_buffer(copy, c_ptr);
+  BOOST_CHECK_EQUAL(serSize, c_ptr - buffer);
+  BOOST_CHECK(sum == copy);
 }

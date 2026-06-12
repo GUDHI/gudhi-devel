@@ -104,9 +104,14 @@ class Point
   operator std::vector<T>() const { return coordinates_; }
 
   /**
-   * @brief Returns the underlying std::vector.
+   * @brief Returns a reference to the underlying std::vector.
    */
   std::vector<T> &retrieve_underlying_container() { return coordinates_; }
+
+  /**
+   * @brief Returns a const reference to the underlying std::vector.
+   */
+  const std::vector<T> &retrieve_underlying_container() const { return coordinates_; }
 
   /**
    * @brief At operator.
@@ -825,6 +830,46 @@ class Point
   {
     f._apply_operation(val, [](T &valF, const T &valR) { Gudhi::multi_filtration::_divide(valF, valR); });
     return f;
+  }
+
+  /**
+   * @brief Serialize given value into the buffer at given pointer.
+   *
+   * @param value Value to serialize.
+   * @param start Pointer to the start of the space in the buffer where to store the serialization.
+   * @return End position of the serialization in the buffer.
+   */
+  friend char *serialize_value_to_char_buffer(const Point &value, char *start) {
+    const size_type length = value.coordinates_.size();
+    const std::size_t argSize = sizeof(T) * length;
+    const std::size_t typeSize = sizeof(size_type);
+    memcpy(start, &length, typeSize);
+    memcpy(start + typeSize, value.coordinates_.data(), argSize);
+    return start + argSize + typeSize;
+  }
+
+  /**
+   * @brief Deserialize the value from a buffer at given pointer and stores it in given value.
+   *
+   * @param value Value to fill with the deserialized point.
+   * @param start Pointer to the start of the space in the buffer where the serialization is stored.
+   * @return End position of the serialization in the buffer.
+   */
+  friend const char *deserialize_value_from_char_buffer(Point &value, const char *start) {
+    const std::size_t type_size = sizeof(size_type);
+    size_type length;
+    memcpy(&length, start, type_size);
+    std::size_t arg_size = sizeof(T) * length;
+    value.coordinates_.resize(length);
+    memcpy(value.coordinates_.data(), start + type_size, arg_size);
+    return start + arg_size + type_size;
+  }
+
+  /**
+   * @brief Returns the serialization size of the given point.
+   */
+  friend std::size_t get_serialization_size_of(const Point &value) {
+    return sizeof(size_type) + (sizeof(T) * value.coordinates_.size());
   }
 
   /**

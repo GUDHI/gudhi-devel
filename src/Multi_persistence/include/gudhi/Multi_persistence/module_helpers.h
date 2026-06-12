@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <iterator>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
 
 #ifdef GUDHI_USE_TBB
@@ -54,7 +55,7 @@ Module<T> build_permuted_module(const Module<T> &module, const RandomAccessValue
   GUDHI_CHECK(permutation.size() <= module.size(),
               std::invalid_argument("Permutation size is greater than the module size."));
 
-  Module<T> out(module.get_box());
+  Module<T> out;
 
   if (module.size() == 0) return out;
 
@@ -63,6 +64,79 @@ Module<T> build_permuted_module(const Module<T> &module, const RandomAccessValue
     out.get_summand(i) = module.get_summand(permutation[i]);
   }
   out.set_max_dimension(module.get_max_dimension());
+  return out;
+}
+
+/**
+ * @ingroup multi_persistence
+ *
+ * @brief Builds a copy of the given module but only keeping the summands of given dimension.
+ * 
+ * @tparam T First template parameter of @ref Module.
+ * @param module Module.
+ * @param dim Dimension.
+ */
+template <typename T>
+Module<T> build_module_of_dimension(const Module<T> &module, int dim) {
+  if (dim < 0 || module.size() == 0) return {};
+
+  Module<T> out;
+
+  // My guess is that iterating twice over the summands is cheaper then having potentially several
+  // reallocations because of the push_backs. But I could be wrong? Is it worth benchmarking?
+  std::size_t size = 0;
+  auto r = module.get_summands_of_dimension_range(dim);
+  for (auto it = r.begin(); it != r.end(); ++it) ++size;
+
+  out.resize(size, 1);
+  std::size_t i = 0;
+  for (const auto &sum : module.get_summands_of_dimension_range(dim)) {
+    out.get_summand(i) = sum;
+    ++i;
+  }
+  out.set_max_dimension(dim);
+  return out;
+}
+
+/**
+ * @ingroup multi_persistence
+ *
+ * @brief Builds a copy of the given module but only keeping the summands of given dimensions.
+ * 
+ * @tparam T First template parameter of @ref Module.
+ * @tparam ContinuousRandomAccessRange Continuous (in memory) dimension range with random access iterators.
+ * Must have a begin() and end() method.
+ * @param module Module.
+ * @param dims Range of dimensions corresponding to the dimensions of the summands to copy.
+ */
+template <typename T, class ContinuousRandomAccessRange,
+          class = std::enable_if_t<!std::is_arithmetic_v<ContinuousRandomAccessRange> > >
+Module<T> build_module_of_dimension(const Module<T> &module, const ContinuousRandomAccessRange &dims) {
+  if (module.size() == 0) return {};
+
+  Module<T> out;
+
+  // Assuming dims will not have more than 10 values, this should be even faster then a std::set::find
+  auto contains = [&dims](auto v) { return std::find(dims.begin(), dims.end(), v) != dims.end(); };
+
+  // My guess is that iterating twice over the summands is cheaper then having potentially several
+  // reallocations because of the push_backs. But I could be wrong? Is it worth benchmarking?
+  std::size_t size = 0;
+  for (auto it = module.begin(); it != module.end(); ++it) {
+    if (contains(it->get_dimension())) ++size;
+  }
+
+  out.resize(size, 1);
+  std::size_t i = 0;
+  typename Module<T>::Dimension maxDim = -1;
+  for (const auto &sum : module) {
+    if (contains(sum.get_dimension())) {
+      out.get_summand(i) = sum;
+      ++i;
+      if (sum.get_dimension() > maxDim) maxDim = sum.get_dimension();
+    }
+  }
+  out.set_max_dimension(maxDim);
   return out;
 }
 

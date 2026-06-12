@@ -57,6 +57,7 @@ class Numpy_span
 {
  public:
   using value_type = T;
+  using const_reference = const T &;
   using const_pointer = value_type const *;
   using const_iterator = const_pointer;
   using iterator = const_iterator;
@@ -75,6 +76,10 @@ class Numpy_span
   size_type size() const { return end_ - begin_; }
 
   bool empty() const { return end_ == begin_; }
+
+  const_reference operator[](size_type n) const {
+    return *(begin_ + n);
+  }
 
  private:
   const_pointer begin_;
