@@ -50,19 +50,44 @@ namespace random {
     * The default random number generator type returned by @ref get_default_random
     */
   using Random_generator = std::mt19937_64;
-  
+
+#if defined( GUDHI_DEFAULT_RANDOM_DLL_EXPORT ) && defined( GUDHI_DEFAULT_RANDOM_DLL_IMPORT )
+#error "GUDHI_DEFAULT_RANDOM_DLL_EXPORT and GUDHI_DEFAULT_RANDOM_DLL_IMPORT cannot be enabled at the same time"
+#endif // GUDHI_DEFAULT_RANDOM_DLL_EXPORT && GUDHI_DEFAULT_RANDOM_DLL_IMPORT
+
+// Defined but empty by default
+#define RANDOM_DLL_API
+
+#if defined(_WIN32)
+  #if defined GUDHI_DEFAULT_RANDOM_DLL_EXPORT
+    #define RANDOM_DLL_API __declspec(dllexport)
+  #endif
+  #if defined GUDHI_DEFAULT_RANDOM_DLL_IMPORT
+    #define RANDOM_DLL_API __declspec(dllimport)
+  #endif
+#endif
+
+  RANDOM_DLL_API Random_generator& get_default_random();
+
+#if defined GUDHI_DEFAULT_RANDOM_DLL_IMPORT
+  // No declaration, only definition
+#else
   /**
    * @brief Returns a thread-local default random number generator instance.
    * 
    * @return A reference to the thread-local default random instance.
    */
-  inline Random_generator& get_default_random() {
-    static thread_local Random_generator default_random{std::random_device{}()};
+  #if !defined GUDHI_DEFAULT_RANDOM_DLL_EXPORT
+  inline
+  #endif
+  Random_generator& get_default_random() {
+    thread_local Random_generator default_random{std::random_device{}()};
 #ifdef DEBUG_TRACES
     std::clog << "get_default_random() " << &default_random << "\n";
 #endif  // DEBUG_TRACES
     return default_random;
   }
+#endif  // GUDHI_DEFAULT_RANDOM_DLL_IMPORT
 
   /**
    * @brief Sets the seed for the default random engine.

@@ -8,10 +8,10 @@
       - YYYY/MM Author: Description of the modification
 """
 
-
 import gudhi
 import pytest
 import numpy as np
+from numpy.testing import assert_almost_equal
 
 
 def test_write_off_file_for_tests():
@@ -194,3 +194,22 @@ def test_simple_sparsify_points():
     else:
         with pytest.raises(NotImplementedError):
             gudhi.sparsify_point_set(points=point_set, min_squared_dist=0.0)
+
+
+def test_reproductibility_pick_n_random_points():
+    pts = np.random.random((20, 3))
+    gudhi.random.set_seed(42)
+    rand_pts1 = gudhi.subsampling.pick_n_random_points(points=pts, nb_points=5)
+    gudhi.random.set_seed(42)
+    rand_pts2 = gudhi.subsampling.pick_n_random_points(points=pts, nb_points=5)
+    assert_almost_equal(rand_pts1, rand_pts2)
+
+
+def test_reproductibility_choose_n_farthest_points():
+    pts = np.random.random((20, 3))
+    for fast in [True, False]:
+        gudhi.random.set_seed(42)
+        rand_pts1 = gudhi.subsampling.choose_n_farthest_points(points=pts, nb_points=5, fast=fast)
+        gudhi.random.set_seed(42)
+        rand_pts2 = gudhi.subsampling.choose_n_farthest_points(points=pts, nb_points=5, fast=fast)
+        assert_almost_equal(rand_pts1, rand_pts2)

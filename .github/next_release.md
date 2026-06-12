@@ -8,9 +8,10 @@ From a user point of view, we recommend to download GUDHI user version (gudhi.3.
 
 Below is a list of changes:
 
-- [Reproducibility](https://gudhi.inria.fr/doc/latest/group__reproducibility.html) `[C++]`
-     - New random functions, with a default random generator that is used internally, and where the user can set the global seed.
-     
+- Reproducibility
+     - [`[C++]`](https://gudhi.inria.fr/doc/latest/group__reproducibility.html) New random functions, with a default random generator that is used internally, and where the user can set the global seed.
+     - [`[Python]`](https://gudhi.inria.fr/python/latest/reproducibility.html) New `gudhi.random.set_seed` function to set the global seed.
+
 - [Module](link)
      - **...**
      

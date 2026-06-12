@@ -17,8 +17,9 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Rips_complex.h>
-#include <gudhi/Sparse_rips_complex.h>
 #include <gudhi/distance_functions.h>
+#include <gudhi/Sparse_rips_complex.h>
+
 #include <python_interfaces/Simplex_tree_interface.h>
 #include <python_interfaces/points_utils.h>
 
