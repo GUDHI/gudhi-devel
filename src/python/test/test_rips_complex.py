@@ -6,6 +6,7 @@
 
     Modification(s):
       - 2025/04 Hannah Schreiber: Add tests to verify possibility of tensor input
+      - 2026/06 Joo-Heung Nahm and Vincent Rouvreau: Add tests for F-contiguous numpy arrays
       - YYYY/MM Author: Description of the modification
 """
 
@@ -242,3 +243,17 @@ def test_tensors():
         rips = RipsComplex(points=points)
     except ImportError:
         pass
+
+def _get_h1(pts):
+    st = RipsComplex(points=pts).create_simplex_tree(max_dimension=2)
+    st.persistence()
+    return st.persistence_intervals_in_dimension(1)
+
+def test_f_contiguous_numpy_array():
+    rng = np.random.default_rng(42)
+    base = rng.standard_normal((10, 2))
+    
+    h1_c = _get_h1(np.ascontiguousarray(base)) # C-contiguous
+    h1_f = _get_h1(np.asfortranarray(base)) # F-contiguous (same data)
+    assert h1_c.size == 0
+    assert h1_f.size == 0
