@@ -56,10 +56,10 @@ class Box
    */
   Box(const Point_t &lowerCorner, const Point_t &upperCorner) : lowerCorner_(lowerCorner), upperCorner_(upperCorner)
   {
-    GUDHI_CHECK(lowerCorner.size() == upperCorner.size(),
+    GUDHI_CHECK(lowerCorner_.size() == upperCorner_.size(),
                 std::invalid_argument("The two corners of the box don't have the same dimension."));
-    // GUDHI_CHECK(lowerCorner <= upperCorner, std::invalid_argument("The first corner is not smaller than the
-    // second."));
+    // GUDHI_CHECK(lowerCorner_ <= upperCorner_,
+    //             std::invalid_argument("The first corner is not smaller than the second."));
   }
 
   /**

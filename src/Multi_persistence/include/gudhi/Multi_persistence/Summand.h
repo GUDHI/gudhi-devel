@@ -387,9 +387,11 @@ class Summand {
   template <class RandomAccessValueRange>
   void translate(const RandomAccessValueRange &translation) {
     _transform(translation, [](value_type cornerVal, auto fact) -> value_type {
+      auto fInf = Gudhi::multi_filtration::MF_T_inf<decltype(fact)>;
+      auto fmInf = Gudhi::multi_filtration::MF_T_m_inf<decltype(fact)>;
       // mostly usefull when value_type is integer type and "infinity" is not properly handled by +.
       if (cornerVal == T_inf || cornerVal == T_m_inf) {
-        if ((cornerVal == T_inf && fact == T_m_inf) && (cornerVal == T_m_inf && fact == T_inf))
+        if ((cornerVal == T_inf && fact == fmInf) && (cornerVal == T_m_inf && fact == fInf))
           return std::numeric_limits<T>::quiet_NaN();
         return cornerVal;
       }

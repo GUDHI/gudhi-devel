@@ -246,8 +246,8 @@ inline auto _get_local_weight_threshold(const RandomAccessValueRange &x, double 
     mini[i] = rectangle ? v + diam : v - diam;
     maxi[i] = rectangle ? v - diam : v + diam;
   }
-  return Box<signedT>(std::move(rectangle ? maxi : mini), std::move(rectangle ? mini : maxi));
-  // return Box<signedT>(std::move(mini), std::move(maxi));
+  // return Box<signedT>(std::move(rectangle ? maxi : mini), std::move(rectangle ? mini : maxi));
+  return Box<signedT>(std::move(mini), std::move(maxi));
 }
 
 /**
