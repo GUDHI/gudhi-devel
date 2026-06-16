@@ -6,7 +6,7 @@
 
     Modification(s):
       - 2025/04 Hannah Schreiber: Add tests to verify possibility of tensor input
-      - 2026/06 Joo-Heung Nahm and Vincent Rouvreau: Add tests for F-contiguous numpy arrays
+      - 2026/06 Joo-Heung Nahm and Vincent Rouvreau: Add tests for F-contiguous and non contiguous numpy arrays
       - YYYY/MM Author: Description of the modification
 """
 
@@ -244,16 +244,43 @@ def test_tensors():
     except ImportError:
         pass
 
-def _get_h1(pts):
-    st = RipsComplex(points=pts).create_simplex_tree(max_dimension=2)
-    st.persistence()
-    return st.persistence_intervals_in_dimension(1)
 
-def test_f_contiguous_numpy_array():
+def test_contiguity_for_points():
     rng = np.random.default_rng(42)
     base = rng.standard_normal((10, 2))
     
-    h1_c = _get_h1(np.ascontiguousarray(base)) # C-contiguous
-    h1_f = _get_h1(np.asfortranarray(base)) # F-contiguous (same data)
-    assert h1_c.size == 0
-    assert h1_f.size == 0
+    # Need to test with a small epsilon value for complete rips - or require a seed to be set
+    for sparse in [None, 0.01]:
+        st_c = RipsComplex(points=np.ascontiguousarray(base),
+                           sparse=sparse).create_simplex_tree(max_dimension=2) # C-contiguous
+        st_f = RipsComplex(points=np.asfortranarray(base),
+                           sparse=sparse).create_simplex_tree(max_dimension=2) # F-contiguous (same data)
+        
+        assert st_c == st_f
+        
+        base_repeat = np.repeat(base, 2, axis=0)
+        st_r = RipsComplex(points=base_repeat[::2],
+                           sparse=sparse).create_simplex_tree(max_dimension=2) # no contiguity (but same data)
+        
+        assert st_c == st_r
+
+
+def test_contiguity_for_distance_matrix():
+    rng = np.random.default_rng(42)
+    # Get a lower triangle 10x10 random positivevalues
+    base = np.absolute(np.tril(rng.standard_normal((10, 10)), k=-1))
+    
+    # Need to test with a small epsilon value for complete rips - or require a seed to be set
+    for sparse in [None, 0.01]:
+        st_c = RipsComplex(distance_matrix=np.ascontiguousarray(base),
+                           sparse=sparse).create_simplex_tree(max_dimension=2) # C-contiguous
+        st_f = RipsComplex(distance_matrix=np.asfortranarray(base),
+                           sparse=sparse).create_simplex_tree(max_dimension=2) # F-contiguous (same data)
+        
+        assert st_c == st_f
+        
+        base_repeat = np.repeat(base, 2, axis=0)
+        st_r = RipsComplex(distance_matrix=base_repeat[::2],
+                           sparse=sparse).create_simplex_tree(max_dimension=2) # no contiguity (but same data)
+        
+        assert st_c == st_r
