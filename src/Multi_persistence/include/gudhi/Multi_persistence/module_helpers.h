@@ -440,7 +440,6 @@ inline void _compute_module_pixels_of_degree(typename Module<T>::const_iterator 
   };
 
   double moduleWeight = compute_module_weight(op);
-  std::cout << "moduleWeight: " << moduleWeight << "\n";
   if (moduleWeight == 0) return;
 
 #ifdef GUDHI_USE_TBB
