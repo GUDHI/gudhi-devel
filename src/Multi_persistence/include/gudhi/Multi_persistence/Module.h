@@ -21,9 +21,9 @@
 #include <cstddef>
 #include <ostream>    //std::ostream
 #include <algorithm>  // std::max
-#include <stdexcept>
 #include <type_traits>
 #include <utility>
+#include <initializer_list>
 #include <array>
 #include <vector>
 
@@ -34,6 +34,7 @@
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/simple_mdspan.h>
+#include <gudhi/Multi_persistence/Line.h>
 #include <gudhi/Multi_persistence/Box.h>
 #include <gudhi/Multi_persistence/Summand.h>
 
@@ -283,7 +284,7 @@ class Module {
    * @param l Line with positive slope.
    * @param dimension If specified, only the barcode in that dimension is stored in the output. Otherwise,
    * all dimensions are returned.
-   * @return A vector of vector of @ref Box "": the first axis corresponds to a dimension and the second axis
+   * @return A vector of vector of @ref Bar "": the first axis corresponds to a dimension and the second axis
    * to the bars in that dimension. If the argument @p dimension was given, the first axis will still contain all
    * dimensions, but all except one sub-vector will be empty.
    */
@@ -298,6 +299,39 @@ class Module {
     for (const auto &summand : module_) {
       if (dimension == get_null_value<Dimension>() || summand.get_dimension() == dimension) {
         barcode[summand.get_dimension()].push_back(summand.get_bar(l));
+      }
+    }
+    return barcode;
+  }
+
+  /**
+   * @brief For all lines in the range, computes the intersection of the (positive slope) line with the summands.
+   * That corresponds to the barcodes of the 1-dimensional filtrations along those lines in the module.
+   * 
+   * @tparam LineRange Range of @ref Line with a size(), begin() and end() method.
+   * @param lines Range of lines with positive slope.
+   * @param dimension If specified, only the barcodes in that dimension are stored in the output. Otherwise,
+   * all dimensions are returned.
+   * @return A vector of vector of @ref Bar "": the first axis corresponds to a dimension and the second axis
+   * to the bars in that dimension. The bars are ordered in the same order than the lines with consistent order
+   * relative to the summands. Therefore, the inside vector can be seen as a 2-dimensional array of shape
+   * (number of lines x number of summands in that dim). If the argument @p dimension was given, the first axis will
+   * still contain all dimensions, but all except one sub-vector will be empty.
+   */
+  template <class LineRange = std::initializer_list<Line<T> > >
+  std::vector<std::vector<Bar>> get_barcode_from_range_of_lines(
+      const LineRange &lines, Dimension dimension = get_null_value<Dimension>()) const {
+    std::vector<std::vector<Bar>> barcode(get_max_dimension() + 1);
+    for (Dimension i = 0; i < get_max_dimension(); ++i) {
+      if (dimension == get_null_value<Dimension>() || i == dimension) {
+        barcode[i].reserve(size() * lines.size());
+      }
+    }
+    for (const auto &l : lines) {
+      for (const auto &summand : module_) {
+        if (dimension == get_null_value<Dimension>() || summand.get_dimension() == dimension) {
+          barcode[summand.get_dimension()].push_back(summand.get_bar(l));
+        }
       }
     }
     return barcode;

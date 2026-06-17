@@ -332,4 +332,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(summand_serialization, T, list_of_tested_variants)
   c_ptr = deserialize_value_from_char_buffer(copy, c_ptr);
   BOOST_CHECK_EQUAL(serSize, c_ptr - buffer);
   BOOST_CHECK(sum == copy);
+
+  delete [] buffer;
 }
