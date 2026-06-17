@@ -43,7 +43,7 @@ namespace multi_persistence {
  * @ingroup multi_persistence
  *
  * @brief Constructs a new identical module but with permuted summand indices.
- * 
+ *
  * @tparam T First template parameter of @ref Module.
  * @tparam RandomAccessValueRange Range of intergers with a size() and operator[] method.
  * @param module Module to permute.
@@ -71,7 +71,7 @@ Module<T> build_permuted_module(const Module<T> &module, const RandomAccessValue
  * @ingroup multi_persistence
  *
  * @brief Builds a copy of the given module but only keeping the summands of given dimension.
- * 
+ *
  * @tparam T First template parameter of @ref Module.
  * @param module Module.
  * @param dim Dimension.
@@ -102,7 +102,7 @@ Module<T> build_module_of_dimension(const Module<T> &module, int dim) {
  * @ingroup multi_persistence
  *
  * @brief Builds a copy of the given module but only keeping the summands of given dimensions.
- * 
+ *
  * @tparam T First template parameter of @ref Module.
  * @tparam ContinuousRandomAccessRange Continuous (in memory) dimension range with random access iterators.
  * Must have a begin() and end() method.
@@ -110,7 +110,7 @@ Module<T> build_module_of_dimension(const Module<T> &module, int dim) {
  * @param dims Range of dimensions corresponding to the dimensions of the summands to copy.
  */
 template <typename T, class ContinuousRandomAccessRange,
-          class = std::enable_if_t<!std::is_arithmetic_v<ContinuousRandomAccessRange> > >
+          class = std::enable_if_t<!std::is_arithmetic_v<ContinuousRandomAccessRange>>>
 Module<T> build_module_of_dimension(const Module<T> &module, const ContinuousRandomAccessRange &dims) {
   if (module.size() == 0) return {};
 
@@ -145,16 +145,18 @@ Module<T> build_module_of_dimension(const Module<T> &module, const ContinuousRan
  *
  * @private
  */
-template <typename T>
-inline std::vector<T> _get_module_landscape_values(const Module<T> &mod, const std::vector<T> &x,
-                                                   typename Module<T>::Dimension dimension) {
-  std::vector<T> values;
+template <typename T, typename U>
+inline std::vector<maybe_make_signed_t<T>> _get_module_landscape_values(const Module<T> &mod, const std::vector<U> &x,
+                                                                        typename Module<T>::Dimension dimension) {
+  using signedT = maybe_make_signed_t<T>;
+
+  std::vector<signedT> values;
   values.reserve(mod.size());
   for (std::size_t i = 0; i < mod.size(); i++) {
     const auto &summand = mod.get_summand(i);
     if (summand.get_dimension() == dimension) values.push_back(compute_summand_landscape_value(summand, x));
   }
-  std::sort(values.begin(), values.end(), [](T x, T y) { return x > y; });
+  std::sort(values.begin(), values.end(), [](signedT x, signedT y) { return x > y; });
   return values;
 }
 
@@ -164,8 +166,9 @@ inline std::vector<T> _get_module_landscape_values(const Module<T> &mod, const s
  *
  * @brief Computes a set of landscape images for each given `k` (corresponding to the \f$ k^{th} \f$ landscape
  * function).
- * 
+ *
  * @tparam T Value type of a parameter in a filtration value.
+ * @tparam U Template argument of @ref Box. Has to be either T or std::make_signed_t<T>.
  * @tparam RandomAccessValueRange1 Range of unsigned integers with a size() and operator[] method.
  * @tparam RandomAccessValueRange2 Range of unsigned integers with a size() and operator[] method.
  * @param mod Module.
@@ -178,24 +181,29 @@ inline std::vector<T> _get_module_landscape_values(const Module<T> &mod, const s
  * a first axis corresponding the the \f$ k \f$'s, a second axis corresponding to the image axis with the first
  * resolution and a third axis corresponding to the image axis with the second resolution.
  */
-template <typename T, class RandomAccessValueRange1, class RandomAccessValueRange2>
-inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typename Module<T>::Dimension dimension,
-                                                       const RandomAccessValueRange1 &ks, const Box<T> &box,
-                                                       const RandomAccessValueRange2 &resolution,
-                                                       [[maybe_unused]] int n_jobs = 0) {
+template <typename T, typename U, class RandomAccessValueRange1, class RandomAccessValueRange2>
+inline std::vector<maybe_make_signed_t<T>> compute_set_of_module_landscapes(
+    const Module<T> &mod, typename Module<T>::Dimension dimension, const RandomAccessValueRange1 &ks, const Box<U> &box,
+    const RandomAccessValueRange2 &resolution, [[maybe_unused]] int n_jobs = 0) {
+  static_assert(std::is_same_v<U, T> || std::is_same_v<U, maybe_make_signed_t<T>>,
+                "Box template parameter is not compatible with Summand value type.");
+
   GUDHI_CHECK(resolution.size() >= 2, std::invalid_argument("Not enough resolution values."));
 
-  using ResT = typename RandomAccessValueRange2::value_type;
+  using signedT = maybe_make_signed_t<T>;
 
-  std::vector<T> images(ks.size() * resolution[0] * resolution[1]);
+  std::vector<signedT> images(ks.size() * resolution[0] * resolution[1]);
   Simple_mdspan view(images.data(), ks.size(), resolution[0], resolution[1]);
-  T stepX = (box.get_upper_corner()[0] - box.get_lower_corner()[0]) / resolution[0];
-  T stepY = (box.get_upper_corner()[1] - box.get_lower_corner()[1]) / resolution[1];
+  U stepX = (box.get_upper_corner()[0] - box.get_lower_corner()[0]) / static_cast<U>(resolution[0]);
+  U stepY = (box.get_upper_corner()[1] - box.get_lower_corner()[1]) / static_cast<U>(resolution[1]);
 
   auto get_image_values = [&](unsigned int i) {
     return [&, i](unsigned int j) {
-      std::vector<T> landscapes = _get_module_landscape_values(
-          mod, {box.get_lower_corner()[0] + (stepX * i), box.get_lower_corner()[1] + (stepY * j)}, dimension);
+      std::vector<signedT> landscapes =
+          _get_module_landscape_values<T, U>(mod,
+                                             {box.get_lower_corner()[0] + (stepX * static_cast<U>(i)),
+                                              box.get_lower_corner()[1] + (stepY * static_cast<U>(j))},
+                                             dimension);
       for (std::size_t k_idx = 0; k_idx < ks.size(); ++k_idx) {
         unsigned int k = ks[k_idx];
         view(k_idx, i, j) = k < landscapes.size() ? landscapes[k] : 0;
@@ -204,6 +212,7 @@ inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typ
   };
 
 #ifdef GUDHI_USE_TBB
+  using ResT = typename RandomAccessValueRange2::value_type;
   oneapi::tbb::task_arena arena(n_jobs);
   arena.execute([&] {
     tbb::parallel_for(ResT(0), resolution[0],
@@ -226,7 +235,7 @@ inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typ
  *
  * @brief Computes a set of landscape images for each given `k` (corresponding to the \f$ k^{th} \f$ landscape
  * function).
- * 
+ *
  * @tparam T Value type of a parameter in a filtration value.
  * @tparam RandomAccessValueRange Range of unsigned integers with a size() and operator[] method.
  * @tparam RandomAccessArray Range of arithmetic values with a size() and operator[] method.
@@ -240,18 +249,24 @@ inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typ
  * grid resolution and a third axis corresponding to the image axis with the second grid resolution.
  */
 template <typename T, class RandomAccessValueRange, class RandomAccessArray>
-inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typename Module<T>::Dimension dimension,
-                                                       const RandomAccessValueRange &ks,
-                                                       const std::vector<RandomAccessArray> &grid,
-                                                       [[maybe_unused]] int n_jobs = 0) {
+inline std::vector<maybe_make_signed_t<T>> compute_set_of_module_landscapes(const Module<T> &mod,
+                                                                            typename Module<T>::Dimension dimension,
+                                                                            const RandomAccessValueRange &ks,
+                                                                            const std::vector<RandomAccessArray> &grid,
+                                                                            [[maybe_unused]] int n_jobs = 0) {
   GUDHI_CHECK(grid.size() >= 2, std::invalid_argument("First axis of the grid has not enough values."));
 
-  std::vector<T> images(ks.size() * grid[0].size() * grid[1].size());
+  if (grid[0].size() == 0 || grid[1].size() == 0) return {};
+
+  using signedT = maybe_make_signed_t<T>;
+  using gT = std::decay_t<decltype(grid[0][0])>;
+
+  std::vector<signedT> images(ks.size() * grid[0].size() * grid[1].size());
   Simple_mdspan view(images.data(), ks.size(), grid[0].size(), grid[1].size());
 
   auto get_image_values = [&](std::size_t i) {
     return [&, i](std::size_t j) {
-      std::vector<T> landscapes = _get_module_landscape_values(mod, {grid[0][i], grid[1][j]}, dimension);
+      std::vector<signedT> landscapes = _get_module_landscape_values<T, gT>(mod, {grid[0][i], grid[1][j]}, dimension);
       for (std::size_t k_idx = 0; k_idx < ks.size(); ++k_idx) {
         unsigned int k = ks[k_idx];
         view(k_idx, i, j) = k < landscapes.size() ? landscapes[k] : 0;
@@ -282,7 +297,7 @@ inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typ
  *
  * @brief Computes the distance of all given points to all summands in the module.
  * TODO: proper definition of the distance.
- * 
+ *
  * @tparam T Value type of a parameter in a filtration value.
  * @tparam RandomAccessPointRange Range with size() and operator[] method. The operator[] method must return a
  * type with the same methods and a value type convertible to `T`.
@@ -294,9 +309,10 @@ inline std::vector<T> compute_set_of_module_landscapes(const Module<T> &mod, typ
  * a first axis corresponding to the points and a second axis to the summands.
  */
 template <typename T, class RandomAccessPointRange>
-inline std::vector<T> compute_module_distances_to(const Module<T> &mod, const RandomAccessPointRange &pts,
-                                                  bool negative, int n_jobs) {
-  std::vector<T> res(pts.size() * mod.size());
+inline std::vector<maybe_make_signed_t<T>> compute_module_distances_to(const Module<T> &mod,
+                                                                       const RandomAccessPointRange &pts, bool negative,
+                                                                       [[maybe_unused]] int n_jobs = 0) {
+  std::vector<maybe_make_signed_t<T>> res(pts.size() * mod.size());
   Gudhi::Simple_mdspan data(res.data(), pts.size(), mod.size());
 
   auto get_distances_of_point = [&](std::size_t i) {
@@ -323,14 +339,18 @@ inline std::vector<T> compute_module_distances_to(const Module<T> &mod, const Ra
  * @brief For a birth and death corner in a summand of the module, let the diagonal between those two be
  * \f$ min\{death[p] - birth[p]\} \f$ for all parameters \f$ p \f$. This method returns for all summands in the module
  * the maximal diagonal of all birth-death pairs in the intersection between the summand and the box.
- * 
+ *
  * @tparam T Value type of a parameter in a filtration value.
+ * @tparam U Template argument of @ref Box. Has to be either T or std::make_signed_t<T>.
  * @param mod Module.
  * @param box Box to intersect with. The box is ignored if trivial.
  */
-template <typename T>
-inline std::vector<T> compute_module_interleavings(const Module<T> &mod, const Box<T> &box) {
-  std::vector<T> interleavings(mod.size());
+template <typename T, typename U>
+inline std::vector<maybe_make_signed_t<T>> compute_module_interleavings(const Module<T> &mod, const Box<U> &box) {
+  static_assert(std::is_same_v<U, T> || std::is_same_v<U, maybe_make_signed_t<T>>,
+                "Box template parameter is not compatible with Module value type.");
+
+  std::vector<maybe_make_signed_t<T>> interleavings(mod.size());
 
   auto get_interleaving = [&](std::size_t i) {
     interleavings[i] = compute_summand_interleaving(mod.get_summand(i), box);
@@ -353,10 +373,10 @@ inline std::vector<T> compute_module_interleavings(const Module<T> &mod, const B
  * @private
  */
 template <typename T, class RandomAccessValueRange>
-inline T _get_module_pixel_value(typename Module<T>::const_iterator start, typename Module<T>::const_iterator end,
-                                 const RandomAccessValueRange &x, T delta, T p, bool normalize, T moduleWeight,
-                                 const std::vector<T> &interleavings) {
-  T value = 0;
+inline double _get_module_pixel_value(typename Module<T>::const_iterator start, typename Module<T>::const_iterator end,
+                                      const RandomAccessValueRange &x, double delta, double p, bool normalize,
+                                      double moduleWeight, const std::vector<double> &interleavings) {
+  double value = 0;
 
   if (p == 0) {
     for (auto it = start; it != end; it++) {
@@ -366,11 +386,11 @@ inline T _get_module_pixel_value(typename Module<T>::const_iterator start, typen
     return value;
   }
 
-  if (p != Module<T>::T_inf) {
+  if (p != Module<double>::T_inf) {
     std::size_t c = 0;
     for (auto it = start; it != end; it++) {
-      T summandWeight = interleavings[c++];
-      T summandXWeight = compute_summand_local_weight(*it, x, delta);
+      double summandWeight = interleavings[c++];
+      double summandXWeight = compute_summand_local_weight(*it, x, delta);
       value += std::pow(summandWeight, p) * summandXWeight;
     }
     if (normalize) value /= moduleWeight;
@@ -388,38 +408,39 @@ inline T _get_module_pixel_value(typename Module<T>::const_iterator start, typen
  *
  * @private
  */
-template <typename T, class RandomAccessPointRange, class OutputIt>
+template <typename T, typename U, class RandomAccessPointRange, class OutputIt>
 inline void _compute_module_pixels_of_degree(typename Module<T>::const_iterator start,
-                                             typename Module<T>::const_iterator end, T delta, T p, bool normalize,
-                                             const Box<T> &box, const RandomAccessPointRange &coordinates, int n_jobs,
-                                             OutputIt dFirst) {
-  std::vector<T> interleavings(std::distance(start, end));
+                                             typename Module<T>::const_iterator end, double delta, double p,
+                                             bool normalize, const Box<U> &box,
+                                             const RandomAccessPointRange &coordinates, int n_jobs, OutputIt dFirst) {
+  std::vector<double> interleavings(std::distance(start, end));
 
-  auto compute_module_weight = [&](auto &&op) -> T {
-    T moduleWeight = 0;
+  auto compute_module_weight = [&](auto &&op) -> double {
+    double moduleWeight = 0;
     std::size_t c = 0;
     for (auto it = start; it != end; it++) {
-      interleavings[c] = compute_summand_interleaving(*it, box);
+      interleavings[c] = compute_summand_interleaving<T, double>(*it, box);
       moduleWeight += op(moduleWeight, interleavings[c]);
       ++c;
     }
     return moduleWeight;
   };
 
-  auto op = [&](T mw, T inter) -> T {
+  auto op = [p](double mw, double inter) -> double {
     if (p == 0) {
       return inter > 0;
     }
-    if (p != Module<T>::T_inf) {
+    if (p != Module<double>::T_inf) {
       // /!\ TODO: deal with inf summands (for the moment,  depends on the box...)
-      if (inter > 0 && inter != Module<T>::T_inf) return std::pow(inter, p);
+      if (inter > 0 && inter != Module<double>::T_inf) return std::pow(inter, p);
       return 0;
     }
-    if (inter > 0 && inter != Module<T>::T_inf) return std::max(mw, inter);
+    if (inter > 0 && inter != Module<double>::T_inf) return std::max(mw, inter);
     return 0;
   };
 
-  T moduleWeight = compute_module_weight(op);
+  double moduleWeight = compute_module_weight(op);
+  std::cout << "moduleWeight: " << moduleWeight << "\n";
   if (moduleWeight == 0) return;
 
 #ifdef GUDHI_USE_TBB
@@ -427,13 +448,13 @@ inline void _compute_module_pixels_of_degree(typename Module<T>::const_iterator 
   arena.execute([&] {
     tbb::parallel_for(std::size_t(0), coordinates.size(), [&](std::size_t i) {
       *(dFirst + i) =
-          _get_module_pixel_value(start, end, coordinates[i], delta, p, normalize, moduleWeight, interleavings);
+          _get_module_pixel_value<T>(start, end, coordinates[i], delta, p, normalize, moduleWeight, interleavings);
     });
   });
 #else
   for (std::size_t i = 0; i < coordinates.size(); ++i) {
     *(dFirst + i) =
-        _get_module_pixel_value(start, end, coordinates[i], delta, p, normalize, moduleWeight, interleavings);
+        _get_module_pixel_value<T>(start, end, coordinates[i], delta, p, normalize, moduleWeight, interleavings);
   }
 #endif
 }
@@ -443,11 +464,12 @@ inline void _compute_module_pixels_of_degree(typename Module<T>::const_iterator 
  *
  * @brief Assumes that the summands in the module are ordered by increasing dimension. Computes the persistence images
  * of the module for the given dimensions.
- * 
+ *
  * @tparam T Value type of a parameter in a filtration value.
  * @tparam RandomAccessPointRange Range with size() and operator[] method. The operator[] method must return a
  * type with the same methods and a value type convertible to `T`.
  * @tparam DimensionRange Integer range with a size() and begin() method.
+ * @tparam U Template argument of @ref Box. Has to be either T or std::make_signed_t<T>. Default: T.
  * @param mod Module.
  * @param coordinates Image coordinates. One value will be computed for each of them for each requested dimension.
  * @param dimensions Range of dimensions to compute. Has to be ordered by increasing value.
@@ -461,12 +483,13 @@ inline void _compute_module_pixels_of_degree(typename Module<T>::const_iterator 
  * @return A continuous vector of pixel values which should be interpreted as a c-ordered 2-dimensional array with
  * a first axis corresponding to the dimensions and a second axis to the coordinates.
  */
-template <typename T, class RandomAccessPointRange, class DimensionRange>
-inline std::vector<T> compute_module_pixels(const Module<T> &mod, const RandomAccessPointRange &coordinates,
-                                            const DimensionRange &dimensions, const Box<T> &box = {}, T delta = 0.1,
-                                            T p = 1, bool normalize = true, int n_jobs = 0) {
+template <typename T, class RandomAccessPointRange, class DimensionRange, typename U = T>
+inline std::vector<double> compute_module_pixels(const Module<T> &mod, const RandomAccessPointRange &coordinates,
+                                                 const DimensionRange &dimensions, const Box<U> &box = {},
+                                                 double delta = 0.1, double p = 1, bool normalize = true,
+                                                 int n_jobs = 0) {
   auto numDegrees = dimensions.size();
-  std::vector<T> out(numDegrees * coordinates.size());
+  std::vector<double> out(numDegrees * coordinates.size());
   Gudhi::Simple_mdspan view(out.data(), numDegrees, coordinates.size());
 
   auto start = mod.begin();
@@ -480,7 +503,7 @@ inline std::vector<T> compute_module_pixels(const Module<T> &mod, const RandomAc
     if (start == mod.end()) break;
     end = start;
     while (end != mod.end() && end->get_dimension() == d) end++;
-    _compute_module_pixels_of_degree(start, end, delta, p, normalize, box, coordinates, n_jobs, &view(degreeIdx, 0));
+    _compute_module_pixels_of_degree<T>(start, end, delta, p, normalize, box, coordinates, n_jobs, &view(degreeIdx, 0));
   }
   return out;
 }

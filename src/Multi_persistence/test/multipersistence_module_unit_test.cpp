@@ -9,6 +9,7 @@
  */
 
 #include <array>
+#include <cstddef>
 #include <vector>
 
 #define BOOST_TEST_DYN_LINK
@@ -18,8 +19,15 @@
 
 #include <gudhi/Multi_persistence/Module.h>
 #include <gudhi/Multi_persistence/Box.h>
+#include <gudhi/Multi_persistence/module_helpers.h>
 
 using Gudhi::multi_persistence::Box;
+using Gudhi::multi_persistence::build_module_of_dimension;
+using Gudhi::multi_persistence::build_permuted_module;
+using Gudhi::multi_persistence::compute_module_distances_to;
+using Gudhi::multi_persistence::compute_module_interleavings;
+using Gudhi::multi_persistence::compute_module_pixels;
+using Gudhi::multi_persistence::compute_set_of_module_landscapes;
 using Gudhi::multi_persistence::Module;
 
 using list_of_tested_variants = boost::mpl::list<double, float, int, unsigned int>;
@@ -246,4 +254,103 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(module_serialization, T, list_of_tested_variants) 
   c_ptr = deserialize_value_from_char_buffer(copy, c_ptr);
   BOOST_CHECK_EQUAL(serSize, c_ptr - buffer);
   BOOST_CHECK(m == copy);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(module_helpers, T, list_of_tested_variants) {
+  using S = typename Module<T>::Summand_t;
+  using B = typename S::Births;
+  using D = typename S::Deaths;
+
+  const int numParam = 2;
+  S s1({1, 6, 2, 5}, {8, 9, 12, 8}, numParam, 0);
+  S s2({4, 3}, {10, 7}, numParam, 2);
+  S s3({5, 2, 8, 1}, {13, 7, 14, 6}, numParam, 0);
+  S s5(B::inf(numParam), D::inf(numParam), 0);
+  S s6(B::minus_inf(numParam), D::minus_inf(numParam), 2);
+
+  Module<T> m;
+
+  m.add_summand(s1);
+  m.add_summand(s6);
+  m.add_summand(s3);
+  m.add_summand(s2);
+  m.add_summand(s5);
+
+  std::vector<std::size_t> perm{3, 1, 4, 2, 0};
+  auto pm = build_permuted_module(m, perm);
+  BOOST_CHECK_EQUAL(m.size(), pm.size());
+  BOOST_CHECK_EQUAL(m.get_max_dimension(), pm.get_max_dimension());
+  BOOST_CHECK(m.get_summand(0) == pm.get_summand(4));
+  BOOST_CHECK(m.get_summand(1) == pm.get_summand(1));
+  BOOST_CHECK(m.get_summand(2) == pm.get_summand(3));
+  BOOST_CHECK(m.get_summand(3) == pm.get_summand(0));
+  BOOST_CHECK(m.get_summand(4) == pm.get_summand(2));
+
+  auto dm1 = build_module_of_dimension(m, 0);
+  BOOST_CHECK_EQUAL(dm1.size(), 3);
+  BOOST_CHECK_EQUAL(dm1.get_max_dimension(), 0);
+  BOOST_CHECK(dm1.get_summand(0) == s1);
+  BOOST_CHECK(dm1.get_summand(1) == s3);
+  BOOST_CHECK(dm1.get_summand(2) == s5);
+
+  std::vector<int> dims{0, 1};
+  auto dm2 = build_module_of_dimension(m, dims);
+  BOOST_CHECK_EQUAL(dm2.size(), 3);
+  BOOST_CHECK_EQUAL(dm2.get_max_dimension(), 0);
+  BOOST_CHECK(dm2.get_summand(0) == s1);
+  BOOST_CHECK(dm2.get_summand(1) == s3);
+  BOOST_CHECK(dm2.get_summand(2) == s5);
+
+  m.clean();
+
+  auto landscape = compute_set_of_module_landscapes(m, 0, std::vector<T>{0, 1}, Box<T>({0, 0}, {15, 10}),
+                                                    std::vector<unsigned int>{5, 5});
+  decltype(landscape) rl = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 2, 1, 0, 0, 1, 2, 1, 0,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0};
+  BOOST_CHECK_EQUAL(landscape.size(), 50);
+  BOOST_CHECK(landscape == rl);
+
+  std::vector<std::vector<T>> grid = {{0, 3, 6, 9, 12}, {0, 2, 4, 6, 8}};
+  landscape = compute_set_of_module_landscapes(m, 0, std::vector<T>{0, 1}, grid);
+  BOOST_CHECK_EQUAL(landscape.size(), 50);
+  BOOST_CHECK(landscape == rl);
+
+  std::vector<std::vector<T>> points = {{0, 0}, {0, 2}, {0, 4},  {0, 6},  {0, 8},  {3, 0},  {3, 2}, {3, 4}, {3, 6},
+                                        {3, 8}, {6, 0}, {6, 2},  {6, 4},  {6, 6},  {6, 8},  {9, 0}, {9, 2}, {9, 4},
+                                        {9, 6}, {9, 8}, {12, 0}, {12, 2}, {12, 4}, {12, 6}, {12, 8}};
+  auto distance = compute_module_distances_to(m, points, false);
+  decltype(distance) rd = {5, 5, 4, 3, 5, 4, 2, 5, 4, 1, 5, 4, 1, 5, 4, 5, 2, 3, 3, 2, 1, 1, 2, 1, 0,
+                           2, 1, 0, 2, 1, 5, 2, 3, 3, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 5, 1, 3, 3, 0,
+                           1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 5, 1, 3, 3, 0, 2, 1, 0, 2, 0, 0, 2, 0, 1, 2};
+  BOOST_CHECK_EQUAL(distance.size(), 75);
+  BOOST_CHECK(distance == rd);
+
+  distance = compute_module_distances_to(m, points, true);
+  rd = {5, 5, 4,  3,  5,  4,  2,  5, 4, 1, 5, 4, 1,  5,  4,  5,  2,  3,  3, 2, 1,  1, 2, 1, -1,
+        2, 1, -1, 2,  1,  5,  2,  3, 3, 0, 1, 1, -1, -1, -1, -1, -1, -1, 1, 1, 5,  1, 3, 3, -1,
+        1, 1, -2, -1, -1, -1, -1, 0, 1, 1, 5, 1, 3,  3,  -1, 2,  1,  -2, 2, 0, -1, 2, 0, 1, 2};
+  BOOST_CHECK_EQUAL(distance.size(), 75);
+  BOOST_CHECK(distance == rd);
+
+  auto inter = compute_module_interleavings(m, Box<T>({0, 0}, {15, 10}));
+  decltype(inter) ri = {4, 5, 4};
+  BOOST_CHECK_EQUAL(inter.size(), 3);
+  BOOST_CHECK(inter == ri);
+
+  std::vector<double> image = compute_module_pixels(m, points, dims, {}, 2.);
+  std::vector<double> rim = {0,       0,         0,        1. / 9.,   1. / 9., 0,         0,         1. / 9.,  1. / 3.,
+                             1. / 3., 0,         5. / 18., 19. / 36., 3. / 4., 17. / 36., 5. / 36.,  5. / 12., 2. / 3.,
+                             3. / 4., 13. / 36., 5. / 36., 5. / 12.,  2. / 3., 23. / 36., 13. / 36., 0,        0,
+                             0,       0,         0,        0,         0,       0,         0,         0,        0,
+                             0,       0,         0,        0,         0,       0,         0,         0,        0,
+                             0,       0,         0,        0,         0};
+  BOOST_CHECK_EQUAL(image.size(), 50);
+  BOOST_CHECK(image == rim);
+
+  image = compute_module_pixels(m, points, dims, {}, 2., Module<double>::T_inf);
+  rim = {0, 0,    0,   0.25, 0.25, 0, 0,    0.25, 0.75, 0.75, 0, 0.5, 0.75, 0.75, 0.75, 0.25, 0.75,
+         1, 0.75, 0.5, 0.25, 0.75, 1, 0.75, 0.5,  0,    0,    0, 0,   0,    0,    0,    0,    0,
+         0, 0,    0,   0,    0,    0, 0,    0,    0,    0,    0, 0,   0,    0,    0,    0};
+  BOOST_CHECK_EQUAL(image.size(), 50);
+  BOOST_CHECK(image == rim);
 }

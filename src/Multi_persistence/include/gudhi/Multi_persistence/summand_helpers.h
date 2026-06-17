@@ -22,6 +22,7 @@
 #include <cstddef>    //std::size_t
 #include <stdexcept>  //std::invalid_argument
 #include <type_traits>
+#include <vector>
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
@@ -69,33 +70,28 @@ inline auto _compute_distance_to_front(const RandomAccessValueRange &x, const Co
  *
  * @brief Computes the distance from the given point `x` to the given Summand `sum`.
  * TODO: proper definition of the distance.
- *
+ * 
  * @tparam T First template argument of @ref Summand.
- * @tparam D Second template argument of @ref Summand.
- * @tparam RandomAccessValueRange Range of `T` with a size() and operator[] method.
+ * @tparam Out Arithmetic type for the resulting output. Default: signed version of `T`.
+ * @tparam D Second template argument of @ref Summand. Default: int.
+ * @tparam RandomAccessValueRange Range of `T` with a size() and operator[] method. Default: std::vector<T>.
  * @param sum Summand.
  * @param x Point.
  * @param negative If true, the distance is allowed to be signed.
  *
- * @note If `T` is unsigned, the values in the summand and in the point have to be small enough to fit in the
- * corresponding signed type, otherwise the behaviour is undefined. E.g., if `T` is `unsigned int`, the values
- * should not exceed `INT_MAX`.
+ * @note The values in the summand and in the point have to fit in the `Out` type, otherwise the behaviour is
+ * undefined. E.g., if `T` is `unsigned int` and `Out` is `int`, the values should not exceed `INT_MAX`.
  */
-template <typename T, typename D, class RandomAccessValueRange>
-inline auto compute_summand_distance_to(const Summand<T, D> &sum, const RandomAccessValueRange &x, bool negative) {
+template <typename T, typename Out = maybe_make_signed_t<T>, typename D = int,
+          class RandomAccessValueRange = std::vector<T>>
+inline Out compute_summand_distance_to(const Summand<T, D> &sum, const RandomAccessValueRange &x, bool negative) {
   GUDHI_CHECK(x.size() >= static_cast<std::size_t>(sum.get_number_of_parameters()),
               std::invalid_argument("The given point does not have enough coordinates compared to the given Summand."));
 
-  // This is a bit unsafe, as the unsigned value can be truncated
-  // but I will just assume that the user will not use coordinates that big
-  // otherwise I would need to do a quite long case study here, which seems overkill
-  // for a case which will probably never happen
-  using signedT = maybe_make_signed_t<T>;
-
-  signedT lowerDist = _compute_distance_to_front<signedT, Summand<T, D> >(
-      x, sum.get_upset(), negative, [](signedT cornerVal, signedT xVal) -> signedT { return cornerVal - xVal; });
-  signedT upperDist = _compute_distance_to_front<signedT, Summand<T, D> >(
-      x, sum.get_downset(), negative, [](signedT cornerVal, signedT xVal) -> signedT { return xVal - cornerVal; });
+  Out lowerDist = _compute_distance_to_front<Out, Summand<T, D>>(
+      x, sum.get_upset(), negative, [](Out cornerVal, Out xVal) -> Out { return cornerVal - xVal; });
+  Out upperDist = _compute_distance_to_front<Out, Summand<T, D>>(
+      x, sum.get_downset(), negative, [](Out cornerVal, Out xVal) -> Out { return xVal - cornerVal; });
   return std::max(lowerDist, upperDist);
 }
 
@@ -165,30 +161,29 @@ inline Distance _get_summand_diagonal(const RandomAccessValueRange1 &birth, cons
  * @brief For a birth and death corner in the summand, let the diagonal between those two be
  * \f$ min\{death[p] - birth[p]\} \f$ for all parameters \f$ p \f$. This method returns the maximal diagonal
  * of all birth-death pairs in the summand projected to the box.
- *
+ * 
  * @tparam T First template argument of @ref Summand.
- * @tparam D Second template argument of @ref Summand.
- * @tparam U Template argument of @ref Box. Has to be either T or std::make_signed_t<T>.
+ * @tparam Out Arithmetic type for the resulting output. Default: signed version of `T`.
+ * @tparam D Second template argument of @ref Summand. Default: int.
+ * @tparam U Template argument of @ref Box. Has to be either T or std::make_signed_t<T>. Default: T.
  * @param sum Summand.
  * @param box Box to intersect with. The box is ignored if trivial.
+ *
+ * @note The values in the summand and in the box have to fit in the `Out` type, otherwise the behaviour is
+ * undefined. E.g., if `T` is `unsigned int` and `Out` is `int`, the values should not exceed `INT_MAX`.
  */
-template <typename T, typename D, typename U>
-auto compute_summand_interleaving(const Summand<T, D> &sum, const Box<U> &box) {
+template <typename T, typename Out = maybe_make_signed_t<T>, typename D = int, typename U = T>
+Out compute_summand_interleaving(const Summand<T, D> &sum, const Box<U> &box) {
   static_assert(std::is_same_v<U, T> || std::is_same_v<U, maybe_make_signed_t<T>>,
                 "Box template parameter is not compatible with Summand value type.");
-  // This is a bit unsafe, as the unsigned value can be truncated
-  // but I will just assume that the user will not use coordinates that big
-  // otherwise I would need to do a quite long case study here, which seems overkill
-  // for a case which will probably never happen
-  using signedT = maybe_make_signed_t<T>;
 
-  signedT interleaving = 0;
+  Out interleaving = 0;
   for (const auto &birth : sum.get_upset()) {
     for (const auto &death : sum.get_downset()) {
       // TODO: if the types of Births and Deaths in Summand changes (to become a template for example)
       // the input to _get_summand_diagonal has to get adapted to it, as it makes use of
       // Dynamic_multi_parameter_filtration::Generator working like a vector
-      interleaving = std::max(interleaving, _get_summand_diagonal<signedT>(birth, death, box));
+      interleaving = std::max(interleaving, _get_summand_diagonal<Out>(birth, death, box));
     }
   }
   return interleaving;
@@ -290,7 +285,7 @@ inline double compute_summand_local_weight(const Summand<T, D> &sum, const Rando
   }
 
   // local weight is interleaving to 0 of module restricted to the square
-  localWeight = compute_summand_interleaving(sum, threshold);
+  localWeight = compute_summand_interleaving<T, double>(sum, threshold);
   return localWeight / (normCoef * std::abs(delta));
 }
 
