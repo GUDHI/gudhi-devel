@@ -856,13 +856,13 @@ class Point
    * @return End position of the serialization in the buffer.
    */
   friend const char *deserialize_value_from_char_buffer(Point &value, const char *start) {
-    const std::size_t type_size = sizeof(size_type);
+    const std::size_t typeSize = sizeof(size_type);
     size_type length;
-    memcpy(&length, start, type_size);
-    std::size_t arg_size = sizeof(T) * length;
+    memcpy(&length, start, typeSize);
+    std::size_t argSize = sizeof(T) * length;
     value.coordinates_.resize(length);
-    memcpy(value.coordinates_.data(), start + type_size, arg_size);
-    return start + arg_size + type_size;
+    memcpy(value.coordinates_.data(), start + typeSize, argSize);
+    return start + argSize + typeSize;
   }
 
   /**
