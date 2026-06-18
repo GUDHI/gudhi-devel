@@ -17,6 +17,12 @@ def set_seed(seed: int):
     Sets the seed for internal GUDHI functionnalities that are using randomness.
 
     :param seed: The new seed value.
+    
+    .. note::
+
+        This function also sets the default random CGAL seed (cf.
+        `CGAL::Random <https://doc.cgal.org/latest/Generator/classCGAL_1_1Random.html>`_).
+
     """
     _set_gudhi_cxx_seed(seed)
     # Nothing to be done if no CGAL
