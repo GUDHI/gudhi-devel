@@ -31,7 +31,6 @@ jobs:
       # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
       - name: Install dependencies
         run: |
-          brew update || echo "brew update failed, continuing..."
           brew install boost eigen gmp mpfr cgal || echo "brew install failed, continuing..."
           python -m pip install --user numpy>=2.0
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
