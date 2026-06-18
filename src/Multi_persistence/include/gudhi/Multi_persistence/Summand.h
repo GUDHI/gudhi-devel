@@ -23,7 +23,6 @@
 #include <stdexcept>  //std::invalid_argument, std::runtime_error
 #include <limits>     //std::numeric_limits
 #include <utility>
-#include <vector>
 
 #ifdef GUDHI_USE_TBB
 #include <oneapi/tbb/parallel_for.h>
@@ -149,20 +148,6 @@ class Summand {
    * @brief Returns const reference to the range of death corners.
    */
   const Deaths &get_downset() const { return deathCorners_; }
-
-  /**
-   * @brief Flatten the range of birth corners as vector of `T`, such that the \f$ p \f$ first elements of the range
-   * corresponds to the first corner, the \f$ p \f$ next elements to the second corner and so on... Where \f$ p \f$ is
-   * the number of parameters.
-   */
-  std::vector<value_type> compute_flat_upset() const { return _compute_flat_set(birthCorners_); }
-
-  /**
-   * @brief Flatten the range of death corners as vector of `T`, such that the \f$ p \f$ first elements of the range
-   * corresponds to the first corner, the \f$ p \f$ next elements to the second corner and so on... Where \f$ p \f$ is
-   * the number of parameters.
-   */
-  std::vector<value_type> compute_flat_downset() const { return _compute_flat_set(deathCorners_); }
 
   /**
    * @brief Returns `true` if and only if the given filtration value is contained in summand.
@@ -558,18 +543,6 @@ class Summand {
         deathCorners_(g, p) = std::forward<F>(operate)(deathCorners_(g, p), factors[p]);
       }
     }
-  }
-
-  template <class Corners>
-  static std::vector<value_type> _compute_flat_set(const Corners &corners) {
-    std::vector<value_type> res(corners.num_generators() * corners.num_parameters());
-    Simple_mdspan view(res.data(), corners.num_generators(), corners.num_parameters());
-    for (Index g = 0; g < corners.num_generators(); ++g) {
-      for (Index p = 0; p < corners.num_parameters(); ++p) {
-        view(g, p) = corners(g, p);
-      }
-    }
-    return res;
   }
 
   // TODO: better name?

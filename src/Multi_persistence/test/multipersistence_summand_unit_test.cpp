@@ -68,11 +68,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(summand_constructors, T, list_of_tested_variants) 
   BOOST_CHECK_EQUAL(downset1(0, 1), 7);
   BOOST_CHECK_EQUAL(downset1(0, 2), 8);
 
-  const auto& flatUpset = sum1.compute_flat_upset();
-  const auto& flatDownset = sum1.compute_flat_downset();
-  BOOST_CHECK(flatUpset == b);
-  BOOST_CHECK(flatDownset == d);
-
   Summand<T> sum2(b, d, numParam, 2);
   BOOST_CHECK_EQUAL(sum2.get_dimension(), 2);
   BOOST_CHECK_EQUAL(sum2.get_number_of_parameters(), numParam);
