@@ -38,9 +38,6 @@ jobs:
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user -r ext/gudhi-deploy/test-requirements.txt
           python -m pip uninstall -y pykeops
-          if ! brew update; then
-            echo "Warning: brew update returned a non-zero exit code."
-          fi
           if ! brew install ninja graphviz doxygen boost eigen gmp mpfr tbb cgal; then
             echo "Warning: brew install returned a non-zero exit code."
           fi
