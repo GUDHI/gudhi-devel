@@ -134,7 +134,7 @@ This example builds the Tangential complex of point set.
            [0., 14.],
            [2., 19.],
            [9., 17.]]
-    tc = TangentialComplex(intrisic_dim = 1, points = pts)
+    tc = TangentialComplex(intrinsic_dim = 1, points = pts)
     tc.compute_tangential_complex()
     print(f'Tangential contains {tc.num_simplices()} simplices - {tc.num_vertices()} vertices.')
 
@@ -176,7 +176,7 @@ simplices.
 .. testcode::
 
     from gudhi import TangentialComplex
-    tc = TangentialComplex(intrisic_dim = 1, points = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+    tc = TangentialComplex(intrinsic_dim = 1, points = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
     tc.compute_tangential_complex()
     print(f'Tangential contains {tc.num_vertices()} vertices.')
 
