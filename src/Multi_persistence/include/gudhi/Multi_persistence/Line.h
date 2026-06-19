@@ -21,10 +21,12 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include <type_traits>
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_persistence/Box.h>
 #include <gudhi/Multi_persistence/Point.h>
+#include <gudhi/Multi_persistence/utils.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
 
 namespace Gudhi {
@@ -77,24 +79,74 @@ class Line
   Line(const Point_t &x, const Point_t &vector) : basePoint_(x), direction_(vector) { _check_direction(); }
 
   /**
+   * @brief Constructs a line going through the given point in the direction of the given vector.
+   * If the vector has no coordinates, the slope is assumed to be 1.
+   * Otherwise, the vector has to be non trivial and all its coordinates have to be positive.
+   *
+   * @param x A point of the line. Will be moved.
+   * @param vector Direction of the line. Positive and non trivial. Will be moved.
+   */
+  Line(Point_t &&x, Point_t &&vector) : basePoint_(std::move(x)), direction_(std::move(vector)) { _check_direction(); }
+
+  /**
+   * @brief Constructs a line going through the given point with slope 1.
+   * 
+   * @tparam CoordinateIterator Forward iterator derefencing to an arithmetic value convertible to `T`.
+   * @param begin Begin iterator of the point.
+   * @param end End iterator of the point.
+   */
+  template <class CoordinateIterator,
+            class = std::enable_if_t<is_forward_iterator_v<CoordinateIterator> > >
+  Line(CoordinateIterator begin, CoordinateIterator end) : basePoint_(begin, end), direction_() {}
+
+  /**
+   * @brief Constructs a line going through the given point in the direction of the given range.
+   * If the range is empty, the slope is assumed to be 1.
+   * Otherwise, the range has to be non trivial and all its coordinates have to be positive.
+   * 
+   * @tparam CoordinateIterator Forward iterator derefencing to an arithmetic value convertible to `T`.
+   * @tparam DirectionIterator Forward iterator derefencing to an arithmetic value convertible to `T`.
+   * @param baseBegin Begin iterator of the point.
+   * @param baseEnd End iterator of the point.
+   * @param dirBegin Begin iterator of the direction.
+   * @param dirEnd End iterator of the direction.
+   */
+  template <class CoordinateIterator, class DirectionIterator>
+  Line(CoordinateIterator baseBegin, CoordinateIterator baseEnd, DirectionIterator dirBegin, DirectionIterator dirEnd)
+      : basePoint_(baseBegin, baseEnd), direction_(dirBegin, dirEnd) {
+    _check_direction();
+  }
+
+  /**
    * @brief Returns the coordinates of the point on the line with "time" parameter `t`. That is, the point \f$ x \f$
    * such that \f$ x[i] = base\_point[i] + t \times direction[i] \f$ for all \f$ i \in [0, n - 1] \f$ with \f$ n \f$
    * the number of coordinates.
+   * 
+   * @tparam U Arithmetic type.
+   *
+   * @note If `U` is different from `T` (e.g., `T` is `unsigned int`, but `t` is `-1` and so signed), make sure
+   * that the result remains in the scope of `T` (e.g., in the previous example, if the point computed ends up having
+   * negative coordinates, the result will underflow into very big integers), except if the overflow/underflow
+   * behaviour is wanted.
    */
-  Point_t operator[](T t) const
+  template<typename U = T>
+  Point_t operator[](U t) const
   {
     GUDHI_CHECK(direction_.size() == 0 || direction_.size() == basePoint_.size(),
                 "Direction and base point do not have the same dimension.");
 
-    if (Gudhi::multi_filtration::_is_nan(t) || t == Point_t::T_inf || t == Point_t::T_m_inf)
+    if (Gudhi::multi_filtration::_is_nan(t) || t == Point<U>::T_inf || t == Point<U>::T_m_inf)
       return Point_t(basePoint_.size(), t);
 
     Point_t x(basePoint_.size());
 
+    // static_cast because T can be unsigned while U is signed and still valid (i.e. result is positive)
     if (direction_.size() > 0) {
-      for (std::size_t i = 0; i < x.size(); i++) x[i] = basePoint_[i] + (t * direction_[i]);
-    } else
-      for (std::size_t i = 0; i < x.size(); i++) x[i] = basePoint_[i] + t;
+      for (std::size_t i = 0; i < x.size(); i++)
+        x[i] = static_cast<U>(basePoint_[i]) + (t * static_cast<U>(direction_[i]));
+    } else {
+      for (std::size_t i = 0; i < x.size(); i++) x[i] = static_cast<U>(basePoint_[i]) + t;
+    }
 
     return x;
   }
@@ -139,21 +191,7 @@ class Line
   U compute_forward_intersection(const Point_t &x) const
   {
     GUDHI_CHECK(basePoint_.size() == x.size(), "x has not as many parameters as the line.");
-
-    constexpr const U inf = Point<U>::T_inf;
-
-    U t = Point<U>::T_m_inf;
-    for (unsigned int p = 0; p < x.size(); ++p) {
-      if (Gudhi::multi_filtration::_is_nan(x[p])) return inf;
-      auto div = direction_.size() == 0 ? 1 : direction_[p];
-      if (div == 0) {
-        if (x[p] > basePoint_[p]) return inf;
-      } else {
-        t = std::max(t, (static_cast<U>(x[p]) - static_cast<U>(basePoint_[p])) / static_cast<U>(div));
-      }
-    }
-
-    return t;
+    return compute_forward_intersection(x.begin(), x.end());
   }
 
   /**
@@ -191,6 +229,36 @@ class Line
 
     return t;
   }
+  
+  /**
+   * @brief Computes the "time" parameter \f$ t \f$ of the starting point \f$ p = base\_point + t \times direction \f$
+   * of the intersection between the line and the closed positive cone originating at the given point.
+   * 
+   * @tparam U Type of the time parameter.
+   * @tparam Iterator Forward iterator, iterating over the point coordinates. The dereferenced values should be
+   * convertible into `U`.
+   * @param it_begin Begin iterator of the coordinate range.
+   * @param it_end End iterator of the coordinate range.
+   */
+  template <typename U = T, class Iterator>
+  U compute_forward_intersection(Iterator it_begin, Iterator it_end) const
+  {
+    constexpr const U inf = Point<U>::T_inf;
+
+    U t = Point<U>::T_m_inf;
+    for (unsigned int p = 0; it_begin != it_end && p < direction_.size(); ++p, ++it_begin) {
+      auto val = *it_begin;
+      if (Gudhi::multi_filtration::_is_nan(val)) return inf;
+      auto div = direction_.size() == 0 ? 1 : direction_[p];
+      if (div == 0) {
+        if (val > basePoint_[p]) return inf;
+      } else {
+        t = std::max(t, (static_cast<U>(val) - static_cast<U>(basePoint_[p])) / static_cast<U>(div));
+      }
+    }
+
+    return t;
+  }
 
   /**
    * @brief Computes the "time" parameter \f$ t \f$ of the starting point \f$ p = base\_point + t \times direction \f$
@@ -203,21 +271,7 @@ class Line
   U compute_backward_intersection(const Point_t &x) const
   {
     GUDHI_CHECK(basePoint_.size() == x.size(), "x has not as many parameters as the line.");
-
-    constexpr const U m_inf = Point<U>::T_m_inf;
-
-    U t = Point<U>::T_inf;
-    for (unsigned int p = 0; p < x.size(); ++p) {
-      if (Gudhi::multi_filtration::_is_nan(x[p])) return m_inf;
-      auto div = direction_.size() == 0 ? 1 : direction_[p];
-      if (div == 0) {
-        if (x[p] <= basePoint_[p]) return m_inf;
-      } else {
-        t = std::min(t, (static_cast<U>(x[p]) - static_cast<U>(basePoint_[p])) / static_cast<U>(div));
-      }
-    }
-
-    return t;
+    return compute_backward_intersection(x.begin(), x.end());
   }
 
   /**
@@ -250,6 +304,36 @@ class Line
         }
       }
       t = std::max(t, tmp);
+    }
+
+    return t;
+  }
+  
+  /**
+   * @brief Computes the "time" parameter \f$ t \f$ of the starting point \f$ p = base\_point + t \times direction \f$
+   * of the intersection between the line and the open negative cone originating at the given point.
+   * 
+   * @tparam U Type of the time parameter.
+   * @tparam Iterator Forward iterator, iterating over the point coordinates. The dereferenced values should be
+   * convertible into `U`.
+   * @param it_begin Begin iterator of the coordinate range.
+   * @param it_end End iterator of the coordinate range.
+   */
+  template <typename U = T, class Iterator>
+  U compute_backward_intersection(Iterator it_begin, Iterator it_end) const
+  {
+    constexpr const U m_inf = Point<U>::T_m_inf;
+
+    U t = Point<U>::T_inf;
+    for (unsigned int p = 0; it_begin != it_end && p < direction_.size(); ++p, ++it_begin) {
+      auto val = *it_begin;
+      if (Gudhi::multi_filtration::_is_nan(val)) return m_inf;
+      auto div = direction_.size() == 0 ? 1 : direction_[p];
+      if (div == 0) {
+        if (val <= basePoint_[p]) return m_inf;
+      } else {
+        t = std::min(t, (static_cast<U>(val) - static_cast<U>(basePoint_[p])) / static_cast<U>(div));
+      }
     }
 
     return t;

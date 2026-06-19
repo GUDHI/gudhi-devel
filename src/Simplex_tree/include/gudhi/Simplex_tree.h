@@ -190,10 +190,10 @@ class Simplex_tree {
   struct Filtration_simplex_base_dummy {
     Filtration_simplex_base_dummy() {}
     Filtration_simplex_base_dummy(Filtration_value GUDHI_CHECK_code(f)) {
-      GUDHI_CHECK(f == null_, "filtration value specified in the constructor for a complex that does not store them");
+      // GUDHI_CHECK(f == null_, "filtration value specified in the constructor for a complex that does not store them");
     }
     void assign_filtration(const Filtration_value& GUDHI_CHECK_code(f)) {
-      GUDHI_CHECK(f == null_, "filtration value assigned for a complex that does not store them");
+      // GUDHI_CHECK(f == null_, "filtration value assigned for a complex that does not store them");
     }
     const Filtration_value& filtration() const { return null_; }
 
@@ -376,8 +376,10 @@ class Simplex_tree {
                                    Dimension_simplex_iterator());
   }
 
-  /** \brief Returns a range over the simplices of the simplicial complex,
-   * in the order of the filtration.
+  /** \brief Returns a range over the simplices of the simplicial complex, in the order of the filtration.
+   * If the `operator<` method of the filtration value type does not induce a total ordering of the simplices,
+   * be sure to call @ref initialize_filtration(Comparator&&, Ignorer&&) const "initialize_filtration" with a proper
+   * comparison operator at some point before. Otherwise the behaviour is undefined.
    *
    * The filtration is a monotonic function \f$ f: \mathbf{K} \rightarrow \mathbb{R} \f$, i.e. if two simplices
    * \f$\tau\f$ and \f$\sigma\f$ satisfy \f$\tau \subseteq \sigma\f$ then
@@ -393,6 +395,13 @@ class Simplex_tree {
    * was initialized, please call `clear_filtration()` or `initialize_filtration()` to recompute it.
    *
    * @note Not thread safe
+   * @par
+   * @note If @ref filtration_simplex_range or
+   * @ref initialize_filtration(Comparator&&, Ignorer&&) const "initialize_filtration" was never called before, this
+   * method will try to initialize the filtration order, assuming that `operator<` for @ref Filtration_value induces a
+   * total order of the simplices. If the assumption is wrong,
+   * @ref initialize_filtration(Comparator&&, Ignorer&&) const "initialize_filtration" has to be used before, otherwise
+   * the behaviour is undefined.
    */
   Filtration_simplex_range const& filtration_simplex_range(Indexing_tag = Indexing_tag()) const {
     maybe_initialize_filtration();
@@ -456,10 +465,10 @@ class Simplex_tree {
   Simplex_tree()
       : null_vertex_(-1),
         root_(nullptr, null_vertex_),
-        number_of_parameters_(1),
         filtration_vect_(),
         dimension_(-1),
-        dimension_to_be_lowered_(false) {}
+        dimension_to_be_lowered_(false),
+        number_of_parameters_(1) {}
 
   /**
    * @brief Construct the simplex tree as the copy of a given simplex tree with eventually different template
@@ -546,7 +555,7 @@ class Simplex_tree {
   }
   /** @} */  // end constructor/destructor
 
- private:
+ protected:
   // Copy from complex_source to "this"
   void copy_from(const Simplex_tree& complex_source) {
     null_vertex_ = complex_source.null_vertex_;
@@ -904,11 +913,11 @@ class Simplex_tree {
   }
 
  public:
-  /** \brief Returns the number of simplices of each dimension in the simplex tree. */
-  std::vector<size_t> num_simplices_by_dimension() const {
+  /** \brief Computes and returns the number of simplices of each dimension in the complex. */
+  std::vector<std::size_t> num_simplices_by_dimension() const {
     if (is_empty()) return {};
     // std::min in case the upper bound got crazy
-    std::vector<size_t> res(std::min(upper_bound_dimension()+1, max_dimension()+1));
+    std::vector<std::size_t> res(std::min(upper_bound_dimension()+1, max_dimension()+1));
     auto fun = [&res](Simplex_handle, int dim) -> void { ++res[dim]; };
     for_each_simplex(fun);
     if (dimension_to_be_lowered_) {
@@ -968,6 +977,23 @@ class Simplex_tree {
    */
   void set_num_parameters(int new_number) {
     number_of_parameters_ = new_number;
+  }
+
+  /**
+   * @brief Computes and returns the Euler characteristic of the non-filtered underlying complex represented
+   * by the simplex tree.
+   */
+  auto euler_characteristic() const {
+    using ssize_t = std::make_signed_t<std::size_t>;
+
+    auto dimension_count = num_simplices_by_dimension();
+    ssize_t euler = 0;
+    ssize_t sign = 1;
+    for (const ssize_t count : dimension_count) {
+      euler += sign * count;
+      sign = -sign;
+    }
+    return euler;
   }
 
   /** \brief Returns true if the node in the simplex tree pointed by
@@ -2945,13 +2971,15 @@ class Simplex_tree {
    *   architecture.
    */
   std::size_t get_serialization_size() const {
-    const std::size_t np_byte_size = sizeof(decltype(number_of_parameters_));
+    // const std::size_t version_byte_size = sizeof(std::int16_t);
+    // const std::size_t np_byte_size = sizeof(decltype(number_of_parameters_));
     const std::size_t vh_byte_size = sizeof(Vertex_handle);
     std::size_t fv_byte_size = 0;
     const std::size_t tree_size = num_simplices_and_filtration_serialization_size(&root_, fv_byte_size);
-    const std::size_t buffer_byte_size = np_byte_size + vh_byte_size + fv_byte_size + tree_size * 2 * vh_byte_size;
+    const std::size_t buffer_byte_size =
+        /* version_byte_size + np_byte_size + */ vh_byte_size + fv_byte_size + tree_size * 2 * vh_byte_size;
 #ifdef DEBUG_TRACES
-      std::clog << "Gudhi::simplex_tree::get_serialization_size - buffer size = " << buffer_byte_size << std::endl;
+    std::clog << "Gudhi::simplex_tree::get_serialization_size - buffer size = " << buffer_byte_size << std::endl;
 #endif  // DEBUG_TRACES
     return buffer_byte_size;
   }
@@ -2991,7 +3019,8 @@ class Simplex_tree {
   /* 04 0a F(a) 0b F(b) 0c F(c) 0d F(d) 01 0b F(a,b) 00 02 0c F(b,c) 0d F(b,d) 01 0d F(b,c,d) 00 00 01 0d F(c,d) 00 00 */
   void serialize(char* buffer, const std::size_t buffer_size) const {
     char* buffer_end = buffer;
-    buffer_end = serialize_value_to_char_buffer(number_of_parameters_, buffer_end);
+    // char* buffer_end = serialize_value_to_char_buffer(SERIALIZATION_VERSION, buffer);
+    // buffer_end = serialize_value_to_char_buffer(number_of_parameters_, buffer_end);
     buffer_end = rec_serialize(&root_, buffer_end);
     if (static_cast<std::size_t>(buffer_end - buffer) != buffer_size)
       throw std::invalid_argument("Serialization does not match end of buffer");
@@ -3036,6 +3065,8 @@ class Simplex_tree {
    * @param[in] buffer_size The size of the buffer.
    *
    * @exception std::invalid_argument In case the deserialization does not finish at the correct buffer_size.
+   * @exception std::invalid_argument If the buffer was certifiably constructed from a non-compatible simplex tree
+   * serialization version.
    * @exception std::logic_error In debug mode, if the Simplex_tree is not 'empty'.
    *
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
@@ -3065,6 +3096,8 @@ class Simplex_tree {
    * reading.
    *
    * @exception std::invalid_argument In case the deserialization does not finish at the correct buffer_size.
+   * @exception std::invalid_argument If the buffer was certifiably constructed from a non-compatible simplex tree
+   * serialization version.
    * @exception std::logic_error In debug mode, if the Simplex_tree is not 'empty'.
    *
    * @warning Serialize/Deserialize is not portable. It is meant to be read in a Simplex_tree with the same
@@ -3075,7 +3108,12 @@ class Simplex_tree {
   void deserialize(const char* buffer, const std::size_t buffer_size, F&& deserialize_filtration_value) {
     GUDHI_CHECK(num_vertices() == 0, std::logic_error("Simplex_tree::deserialize - Simplex_tree must be empty"));
     const char* ptr = buffer;
-    ptr = deserialize_value_from_char_buffer(number_of_parameters_, ptr);
+    // std::int16_t version;
+    // ptr = deserialize_value_from_char_buffer(version, ptr);
+    // if (version != SERIALIZATION_VERSION) {
+    //   throw std::invalid_argument("The buffer comes from an non-compatible serialization version of the simplex tree.");
+    // }
+    // ptr = deserialize_value_from_char_buffer(number_of_parameters_, ptr);
     // Needs to read size before recursivity to manage new siblings for children
     Vertex_handle members_size;
     ptr = deserialize_value_from_char_buffer(members_size, ptr);
@@ -3128,12 +3166,66 @@ class Simplex_tree {
     return ptr;
   }
 
+ public:
+  // Print a Simplex_tree in os.
+  friend std::ostream& operator<<(std::ostream& os, const Simplex_tree& st) {
+    if (st.num_parameters() > 1) os << st.num_parameters() << "\n";
+
+    st.for_each_simplex([&](Simplex_handle sh, int dim) {
+      os << dim << " ";
+      for (auto v : st.simplex_vertex_range(sh)) {
+        os << v << " ";
+      }
+      // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
+      os << st.filtration(sh) << "\n";
+    });
+    return os;
+  }
+
+  friend std::istream& operator>>(std::istream & is, Simplex_tree & st) {
+    std::vector<Vertex_handle> simplex;
+    Filtration_value fil;
+    int max_dim = -1;
+
+    // searching for number of parameters which are potentially specified in the first line
+    // if nothing is specified, the value is assumed to be 1
+    std::string first_line;
+    auto pos = is.tellg();
+    getline(is, first_line);
+    std::stringstream fl_stream;
+    fl_stream << first_line;
+    int num_param, dummy;
+    fl_stream >> num_param; // tries to retrieve first numerical value
+    if (fl_stream.fail()) throw std::invalid_argument("Incoming stream should not start with a non integer.");
+    fl_stream >> dummy;     // if number of parameters were specified, this should fail
+    if (!fl_stream.fail()) {
+      num_param = 1;
+      is.seekg(pos, std::ios_base::beg);
+    }
+
+    while (read_simplex(is, simplex, fil)) {
+      // read all simplices in the file as a list of vertices
+      // Warning : simplex_size needs to be casted in int - Can be 0
+      int dim = static_cast<int> (simplex.size() - 1);
+      if (max_dim < dim) {
+        max_dim = dim;
+      }
+      // insert every simplex in the simplex tree
+      st.insert_simplex(simplex, fil);
+      simplex.clear();
+    }
+    st.set_dimension(max_dim);
+    st.set_num_parameters(num_param);
+
+    return is;
+  }
+
  private:
   Vertex_handle null_vertex_;
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
-  int number_of_parameters_;  /**< Stores the number of parameters set by the user. */
-
+  // int number_of_parameters_;  /**< Stores the number of parameters set by the user. */
+  
   // all mutable as their content has no impact on the content of the simplex tree itself
   // they correspond to some kind of cache or helper attributes.
   /** \brief Simplices ordered according to a filtration.*/
@@ -3141,88 +3233,13 @@ class Simplex_tree {
   /** \brief Upper bound on the dimension of the simplicial complex.*/
   mutable int dimension_;
   mutable bool dimension_to_be_lowered_;
+  int number_of_parameters_;  /**< Stores the number of parameters set by the user. */
+
+  // /**
+  //  * @brief Serialization version number. Should be incremented for each change in the serialization strategy.
+  //  */
+  // static constexpr std::int16_t SERIALIZATION_VERSION = 1;
 };
-
-// Print a Simplex_tree in os.
-template<typename...T>
-std::ostream& operator<<(std::ostream & os, const Simplex_tree<T...> & st) {
-  using handle = typename Simplex_tree<T...>::Simplex_handle;
-
-  if (st.num_parameters() > 1) os << st.num_parameters() << "\n";
-
-  // lexicographical order to ensure total order even with custom filtration values
-  st.initialize_filtration(
-      [&](handle sh1, handle sh2) {
-        if (st.dimension(sh1) < st.dimension(sh2)) return true;
-        if (st.dimension(sh1) > st.dimension(sh2)) return false;
-
-        auto rg1 = st.simplex_vertex_range(sh1);
-        auto rg2 = st.simplex_vertex_range(sh2);
-        auto it1 = rg1.begin();
-        auto it2 = rg2.begin();
-        // same size
-        while (it1 != rg1.end()) {
-          if (*it1 == *it2) {
-            ++it1;
-            ++it2;
-          } else {
-            return *it1 < *it2;
-          }
-        }
-        return false;
-      },
-      [](handle) -> bool { return false; });
-
-  for (auto sh : st.filtration_simplex_range()) {
-    os << st.dimension(sh) << " ";
-    for (auto v : st.simplex_vertex_range(sh)) {
-      os << v << " ";
-    }
-    os << st.filtration(sh) << "\n";  // TODO(VR): why adding the key ?? not read ?? << "     " << st.key(sh) << " \n";
-  }
-  st.clear_filtration();
-  return os;
-}
-
-template <typename... T>
-std::istream& operator>>(std::istream& is, Simplex_tree<T...>& st) {
-  typedef Simplex_tree<T...> ST;
-  std::vector<typename ST::Vertex_handle> simplex;
-  typename ST::Filtration_value fil;
-  int max_dim = -1;
-
-  // searching for number of parameters which are potentially specified in the first line
-  // if nothing is specified, the value is assumed to be 1
-  std::string first_line;
-  auto pos = is.tellg();
-  getline(is, first_line);
-  std::stringstream fl_stream;
-  fl_stream << first_line;
-  int num_param, dummy;
-  fl_stream >> num_param; // tries to retrieve first numerical value
-  if (fl_stream.fail()) throw std::invalid_argument("Incoming stream should not start with a non integer.");
-  fl_stream >> dummy;     // if number of parameters were specified, this should fail
-  if (!fl_stream.fail()) {
-    num_param = 1;
-    is.seekg(pos, std::ios_base::beg);
-  }
-
-  while (read_simplex(is, simplex, fil)) {
-    // read all simplices in the file as a list of vertices
-    // Warning : simplex_size needs to be casted in int - Can be 0
-    int dim = static_cast<int>(simplex.size() - 1);
-    if (max_dim < dim) {
-      max_dim = dim;
-    }
-    // insert every simplex in the simplex tree
-    st.insert_simplex(simplex, fil);
-    simplex.clear();
-  }
-  st.set_dimension(max_dim);
-  st.set_num_parameters(num_param);
-
-  return is;
-}
 
 /** @}*/  // end addtogroup simplex_tree
 

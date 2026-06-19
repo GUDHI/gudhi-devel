@@ -18,7 +18,6 @@
 #define MF_DYNAMIC_MULTI_PARAMETER_FILTRATION_H_
 
 #include <algorithm>    //std::lower_bound
-#include <cmath>        //std::isnan, std::min
 #include <cstddef>      //std::size_t
 #include <cstdint>      //std::int32_t, std::uint8_t
 #include <cstring>      //memcpy
@@ -97,10 +96,10 @@ class Dynamic_multi_parameter_filtration
    * @brief Default constructor. Builds filtration value with one generator and given number of parameters.
    * If Co is false, initializes at -inf, if Co is true, at +inf.
    *
-   * @param number_of_parameters If negative, takes the default value instead. Default value: 2.
+   * @param numberOfParameters If negative, takes the default value instead. Default value: 2.
    */
-  Dynamic_multi_parameter_filtration(int number_of_parameters = 2)
-      : number_of_parameters_(number_of_parameters < 0 ? 2 : number_of_parameters),
+  Dynamic_multi_parameter_filtration(int numberOfParameters = 2)
+      : numberOfParameters_(numberOfParameters < 0 ? 2 : numberOfParameters),
         generators_(1, Generator(1, Co ? T_inf : T_m_inf))
   {}
 
@@ -108,17 +107,29 @@ class Dynamic_multi_parameter_filtration
    * @brief Builds filtration value with one generator and given number of parameters.
    * All values are initialized at the given value.
    *
-   * @warning The generator `{-inf, -inf, ...}`/`{inf, inf, ...}` with \f$ number_of_parameters > 1 \f$ entries is
+   * @warning The generator `{-inf, -inf, ...}`/`{inf, inf, ...}` with \f$ numberOfParameters > 1 \f$ entries is
    * valid but will not benefit from possible optimizations. If those values are not planed to be replaced, it is
-   * recommended to use the static methods @ref minus_inf() or @ref inf(), or set `number_of_parameters` to 1, instead.
+   * recommended to use the static methods @ref minus_inf() or @ref inf(), or set `numberOfParameters` to 1, instead.
    *
-   * @param number_of_parameters If negative, is set to 2 instead.
+   * @param numberOfParameters If negative, is set to 2 instead.
    * @param value Initialization value for every value in the generator.
    */
-  Dynamic_multi_parameter_filtration(int number_of_parameters, T value)
-      : number_of_parameters_(number_of_parameters < 0 ? 2 : number_of_parameters),
-        generators_(1, Generator(number_of_parameters_, value))
+  Dynamic_multi_parameter_filtration(int numberOfParameters, T value)
+      : numberOfParameters_(numberOfParameters < 0 ? 2 : numberOfParameters),
+        generators_(1, Generator(numberOfParameters_, value))
   {}
+
+  /**
+   * @brief Builds filtration value with one generator that is initialized with the given range. The number of
+   * parameters are therefore deduced from the length of the range.
+   *
+   * @param range Values of the generator.
+   */
+  Dynamic_multi_parameter_filtration(std::initializer_list<T> range)
+      : generators_(1, Generator(range.begin(), range.end()))
+  {
+    numberOfParameters_ = generators_[0].size();
+  }
 
   /**
    * @brief Builds filtration value with one generator that is initialized with the given range. The number of
@@ -127,10 +138,10 @@ class Dynamic_multi_parameter_filtration
    * @tparam ValueRange Range of types convertible to `T`. Should have a begin() and end() method.
    * @param range Values of the generator.
    */
-  template <class ValueRange = std::initializer_list<T>, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
+  template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   Dynamic_multi_parameter_filtration(const ValueRange &range) : generators_(1, Generator(range.begin(), range.end()))
   {
-    number_of_parameters_ = generators_[0].size();
+    numberOfParameters_ = generators_[0].size();
   }
 
   /**
@@ -140,13 +151,13 @@ class Dynamic_multi_parameter_filtration
    *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyInputIterator and
    * dereferenced elements have to be convertible to `T`.
-   * @param it_begin Iterator pointing to the start of the range.
-   * @param it_end Iterator pointing to the end of the range.
+   * @param itBegin Iterator pointing to the start of the range.
+   * @param itEnd Iterator pointing to the end of the range.
    */
   template <class Iterator>
-  Dynamic_multi_parameter_filtration(Iterator it_begin, Iterator it_end) : generators_(1, Generator(it_begin, it_end))
+  Dynamic_multi_parameter_filtration(Iterator itBegin, Iterator itEnd) : generators_(1, Generator(itBegin, itEnd))
   {
-    number_of_parameters_ = generators_[0].size();
+    numberOfParameters_ = generators_[0].size();
   }
 
   /**
@@ -157,25 +168,25 @@ class Dynamic_multi_parameter_filtration
    *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyForwardIterator and
    * dereferenced elements have to be convertible to `T`.
-   * @param it_begin Iterator pointing to the start of the range.
-   * @param it_end Iterator pointing to the end of the range.
-   * @param number_of_parameters Negative values are associated to 0.
+   * @param itBegin Iterator pointing to the start of the range.
+   * @param itEnd Iterator pointing to the end of the range.
+   * @param numberOfParameters Negative values are associated to 0.
    */
   template <class Iterator, class = std::enable_if_t<!std::is_arithmetic_v<Iterator> > >
-  Dynamic_multi_parameter_filtration(Iterator it_begin, Iterator it_end, int number_of_parameters)
-      : number_of_parameters_(number_of_parameters < 0 ? 0 : number_of_parameters), generators_()
+  Dynamic_multi_parameter_filtration(Iterator itBegin, Iterator itEnd, int numberOfParameters)
+      : numberOfParameters_(numberOfParameters < 0 ? 0 : numberOfParameters), generators_()
   {
     // Will discard any value at the end which does not fit into a complete generator.
-    const size_type num_gen = std::distance(it_begin, it_end) / number_of_parameters;
+    const size_type num_gen = std::distance(itBegin, itEnd) / numberOfParameters;
 
     if constexpr (Ensure1Criticality) {
       if (num_gen != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
 
-    Iterator it = it_begin;
+    Iterator it = itBegin;
     for (size_type i = 0; i < num_gen; ++i) {
       Iterator endIt = it;
-      std::advance(endIt, number_of_parameters);
+      std::advance(endIt, numberOfParameters);
       generators_.emplace_back(it, endIt);
       it = endIt;
     }
@@ -186,12 +197,12 @@ class Dynamic_multi_parameter_filtration
    * @ref Dynamic_multi_parameter_filtration::Underlying_container container.
    *
    * @param generators Values.
-   * @param number_of_parameters Negative values are associated to 0.
+   * @param numberOfParameters Negative values are associated to 0.
    */
-  Dynamic_multi_parameter_filtration(const Underlying_container &generators, int number_of_parameters)
-      : number_of_parameters_(number_of_parameters < 0 ? 0 : number_of_parameters), generators_(generators)
+  Dynamic_multi_parameter_filtration(const Underlying_container &generators, int numberOfParameters)
+      : numberOfParameters_(numberOfParameters < 0 ? 0 : numberOfParameters), generators_(generators)
   {
-    GUDHI_CHECK(number_of_parameters > 0 || generators_.empty(),
+    GUDHI_CHECK(numberOfParameters > 0 || generators_.empty(),
                 std::invalid_argument("Number of parameters cannot be 0 if the container is not empty."));
 
     if constexpr (Ensure1Criticality) {
@@ -204,12 +215,12 @@ class Dynamic_multi_parameter_filtration
    * @ref Dynamic_multi_parameter_filtration::Underlying_container container.
    *
    * @param generators Values to move.
-   * @param number_of_parameters Negative values are associated to 0.
+   * @param numberOfParameters Negative values are associated to 0.
    */
-  Dynamic_multi_parameter_filtration(Underlying_container &&generators, int number_of_parameters)
-      : number_of_parameters_(number_of_parameters < 0 ? 0 : number_of_parameters), generators_(std::move(generators))
+  Dynamic_multi_parameter_filtration(Underlying_container &&generators, int numberOfParameters)
+      : numberOfParameters_(numberOfParameters < 0 ? 0 : numberOfParameters), generators_(std::move(generators))
   {
-    GUDHI_CHECK(number_of_parameters > 0 || generators_.empty(),
+    GUDHI_CHECK(numberOfParameters > 0 || generators_.empty(),
                 std::invalid_argument("Number of parameters cannot be 0 if the container is not empty."));
 
     if constexpr (Ensure1Criticality) {
@@ -230,7 +241,7 @@ class Dynamic_multi_parameter_filtration
   template <typename U, bool OtherCo, bool OtherEnsure1Criticality>
   Dynamic_multi_parameter_filtration(
       const Dynamic_multi_parameter_filtration<U, OtherCo, OtherEnsure1Criticality> &other)
-      : number_of_parameters_(other.num_parameters()), generators_(other.begin(), other.end())
+      : numberOfParameters_(other.num_parameters()), generators_(other.begin(), other.end())
   {
     if constexpr (Ensure1Criticality && !OtherEnsure1Criticality) {
       if (generators_.size() != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
@@ -267,7 +278,7 @@ class Dynamic_multi_parameter_filtration
       if (other.num_generators() != 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
     generators_ = Underlying_container(other.begin(), other.end());
-    number_of_parameters_ = other.num_parameters();
+    numberOfParameters_ = other.num_parameters();
     return *this;
   }
 
@@ -277,7 +288,7 @@ class Dynamic_multi_parameter_filtration
   friend void swap(Dynamic_multi_parameter_filtration &f1, Dynamic_multi_parameter_filtration &f2) noexcept
   {
     f1.generators_.swap(f2.generators_);
-    std::swap(f1.number_of_parameters_, f2.number_of_parameters_);
+    std::swap(f1.numberOfParameters_, f2.numberOfParameters_);
   }
 
   // VECTOR-LIKE
@@ -301,8 +312,9 @@ class Dynamic_multi_parameter_filtration
    */
   reference operator()(size_type g, size_type p)
   {
-    GUDHI_CHECK(g < generators_.size() && p < number_of_parameters_, std::out_of_range("Out of bound index."));
-    if (generators_[g].size() < number_of_parameters_) return generators_[g][0];
+    GUDHI_CHECK(g < generators_.size(), std::out_of_range("First index out of bound."));
+    GUDHI_CHECK(p < numberOfParameters_, std::out_of_range("Second index out of bound."));
+    if (generators_[g].size() < numberOfParameters_) return generators_[g][0];
     return generators_[g][p];
   }
 
@@ -311,8 +323,9 @@ class Dynamic_multi_parameter_filtration
    */
   const_reference operator()(size_type g, size_type p) const
   {
-    GUDHI_CHECK(g < generators_.size() && p < number_of_parameters_, std::out_of_range("Out of bound index."));
-    if (generators_[g].size() < number_of_parameters_) return generators_[g][0];
+    GUDHI_CHECK(g < generators_.size(), std::out_of_range("First index out of bound."));
+    GUDHI_CHECK(p < numberOfParameters_, std::out_of_range("Second index out of bound."));
+    if (generators_[g].size() < numberOfParameters_) return generators_[g][0];
     return generators_[g][p];
   }
 
@@ -500,7 +513,7 @@ class Dynamic_multi_parameter_filtration
   /**
    * @brief Returns the number of parameters in the filtration value.
    */
-  size_type num_parameters() const { return number_of_parameters_; }
+  size_type num_parameters() const { return numberOfParameters_; }
 
   /**
    * @brief Returns the number of generators in the filtration value, i.e. the criticality of the element.
@@ -518,39 +531,39 @@ class Dynamic_multi_parameter_filtration
    * @brief Returns the total number of values in the filtration value, that is,
    * @ref num_parameters() * @ref num_generators().
    */
-  size_type num_entries() const { return generators_.size() * number_of_parameters_; }
+  size_type num_entries() const { return generators_.size() * numberOfParameters_; }
 
   /**
    * @brief Returns a filtration value with given number of parameters for which @ref is_plus_inf() returns `true`
-   * or an empty filtration value if `number_of_parameters` is 0.
+   * or an empty filtration value if `numberOfParameters` is 0.
    */
-  static Dynamic_multi_parameter_filtration inf(int number_of_parameters)
+  static Dynamic_multi_parameter_filtration inf(int numberOfParameters)
   {
-    if (number_of_parameters == 0) return Dynamic_multi_parameter_filtration();
+    if (numberOfParameters == 0) return Dynamic_multi_parameter_filtration();
     Underlying_container out(1, Generator::inf());
-    return Dynamic_multi_parameter_filtration(std::move(out), number_of_parameters);
+    return Dynamic_multi_parameter_filtration(std::move(out), numberOfParameters);
   }
 
   /**
    * @brief Returns a filtration value with given number of parameters for which @ref is_minus_inf() returns `true`
-   * or an empty filtration value if `number_of_parameters` is 0.
+   * or an empty filtration value if `numberOfParameters` is 0.
    */
-  static Dynamic_multi_parameter_filtration minus_inf(int number_of_parameters)
+  static Dynamic_multi_parameter_filtration minus_inf(int numberOfParameters)
   {
-    if (number_of_parameters == 0) return Dynamic_multi_parameter_filtration();
+    if (numberOfParameters == 0) return Dynamic_multi_parameter_filtration();
     Underlying_container out(1, Generator::minus_inf());
-    return Dynamic_multi_parameter_filtration(std::move(out), number_of_parameters);
+    return Dynamic_multi_parameter_filtration(std::move(out), numberOfParameters);
   }
 
   /**
    * @brief Returns a filtration value with given number of parameters for which @ref is_nan() returns `true`
-   * or an empty filtration value if `number_of_parameters` is 0.
+   * or an empty filtration value if `numberOfParameters` is 0.
    */
-  static Dynamic_multi_parameter_filtration nan(int number_of_parameters)
+  static Dynamic_multi_parameter_filtration nan(int numberOfParameters)
   {
-    if (number_of_parameters == 0) return Dynamic_multi_parameter_filtration();
+    if (numberOfParameters == 0) return Dynamic_multi_parameter_filtration();
     Underlying_container out(1, Generator::nan());
-    return Dynamic_multi_parameter_filtration(std::move(out), number_of_parameters);
+    return Dynamic_multi_parameter_filtration(std::move(out), numberOfParameters);
   }
 
   // DESCRIPTORS
@@ -766,12 +779,14 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns `true` if and only if the cones generated by @p a are strictly contained in the
-   * cones generated by @p b (recall that the cones are positive if `Co` is false and negative if `Co` is true).
+   * @brief Returns `true` if and only if the cones generated by @p b are contained in or are (partially)
+   * equal to the cones generated by @p a (recall that the cones are positive if `Co` is false and negative if `Co` is
+   * true).
    * Both @p a and @p b  have to have the same number of parameters.
    *
-   * Note that not all filtration values are comparable. That is, \f$ a \le b \f$ and \f$ b \le a \f$ can both return
-   * `false`. If a total order is needed, use @ref is_less_or_equal_than_lexicographically instead.
+   * Note that not all filtration values are comparable. That is, \f$ a > b \f$ and \f$ b > a \f$ returning both false
+   * does **not** imply \f$ a == b \f$. If a total order is needed, use @ref is_strict_less_than_lexicographically
+   * instead.
    */
   friend bool operator<=(const Dynamic_multi_parameter_filtration &a, const Dynamic_multi_parameter_filtration &b)
   {
@@ -805,14 +820,12 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Returns `true` if and only if the cones generated by @p b are contained in or are (partially)
-   * equal to the cones generated by @p a (recall that the cones are positive if `Co` is false and negative if `Co` is
-   * true).
+   * @brief Returns `true` if and only if the cones generated by @p a are strictly contained in the
+   * cones generated by @p b (recall that the cones are positive if `Co` is false and negative if `Co` is true).
    * Both @p a and @p b  have to have the same number of parameters.
    *
-   * Note that not all filtration values are comparable. That is, \f$ a > b \f$ and \f$ b > a \f$ returning both false
-   * does **not** imply \f$ a == b \f$. If a total order is needed, use @ref is_strict_less_than_lexicographically
-   * instead.
+   * Note that not all filtration values are comparable. That is, \f$ a \le b \f$ and \f$ b \le a \f$ can both return
+   * `false`. If a total order is needed, use @ref is_less_or_equal_than_lexicographically instead.
    */
   friend bool operator>(const Dynamic_multi_parameter_filtration &a, const Dynamic_multi_parameter_filtration &b)
   {
@@ -840,7 +853,7 @@ class Dynamic_multi_parameter_filtration
   {
     if (a.is_nan() || b.is_nan()) return false;
     if (&a == &b) return true;
-    if (a.number_of_parameters_ != b.number_of_parameters_) return false;
+    if (a.numberOfParameters_ != b.numberOfParameters_) return false;
     // assumes lexicographical order for both
     return a.generators_ == b.generators_;
   }
@@ -1599,7 +1612,7 @@ class Dynamic_multi_parameter_filtration
   void force_generator_size_to_number_of_parameters(size_type g)
   {
     if (g > num_generators()) return;
-    generators_[g].force_size_to_number_of_parameters(number_of_parameters_);
+    generators_[g].force_size_to_number_of_parameters(numberOfParameters_);
   }
 
   /**
@@ -1625,12 +1638,12 @@ class Dynamic_multi_parameter_filtration
       if (Co && xIsMinusInf) return false;
       if (xIsPlusInf) {
         if (is_plus_inf()) return false;
-        *this = inf(number_of_parameters_);
+        *this = inf(numberOfParameters_);
         return true;
       }
       if (xIsMinusInf) {
         if (is_minus_inf()) return false;
-        *this = minus_inf(number_of_parameters_);
+        *this = minus_inf(numberOfParameters_);
         return true;
       }
     }
@@ -1714,12 +1727,12 @@ class Dynamic_multi_parameter_filtration
         if (!generators_[curr].is_finite()) {
           if constexpr (Co) {
             if (generators_[curr].is_plus_inf()) {
-              *this = inf(number_of_parameters_);
+              *this = inf(numberOfParameters_);
               return;
             }
           } else {
             if (generators_[curr].is_minus_inf()) {
-              *this = minus_inf(number_of_parameters_);
+              *this = minus_inf(numberOfParameters_);
               return;
             }
           }
@@ -1837,17 +1850,19 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Projects the filtration value into the given grid. If @p coordinate is false, the entries are set to
-   * the nearest upper bound value with the same parameter in the grid. Otherwise, the entries are set to the indices
-   * of those nearest upper bound values.
+   * @brief Projects the generator into the given grid. If @p coordinate is false, the entries are set to
+   * the nearest value with the same parameter in the grid. Otherwise, the entries are set to the indices
+   * of those nearest values. If an entry in the generator is higher than any value in the grid, this entry
+   * is set to infinity if @p coordinate is false and to the grids size at the corresponding parameter otherwise.
    * The grid has to be represented as a vector of ordered ranges of values convertible into `T`. An index
    * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
    * therefore all together a 2D grid.
    *
-   * @tparam OneDimArray A range of values convertible into `T` ordered by increasing value. Has to implement
-   * a begin, end and operator[] method.
-   * @param grid Vector of @p OneDimArray with size at least number of filtration parameters.
+   * @tparam RandomAccessArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @param coordinate If true, the values are set to the coordinates of the projection in the grid. If false,
    * the values are set to the values at the coordinates of the projection.
    */
@@ -1935,122 +1950,26 @@ class Dynamic_multi_parameter_filtration
   }
 
   /**
-   * @brief Computes the smallest (resp. the greatest if `Co` is true) scalar product of the all generators with the
-   * given vector.
-   *
-   * @tparam U Arithmetic type of the result. Default value: `T`.
-   * @param f Filtration value.
-   * @param x Vector of coefficients.
-   * @return Scalar product of @p f with @p x.
-   */
-  template <typename U = T>
-  friend U compute_linear_projection(const Dynamic_multi_parameter_filtration &f, const std::vector<U> &x)
-  {
-    if (f.num_generators() == 1) return compute_linear_projection(f.generators_[0], x);
-
-#ifdef GUDHI_USE_TBB
-    std::vector<U> projections(f.num_generators());
-    tbb::parallel_for(size_type{0}, f.num_generators(), [&](size_type g) {
-      projections[g] = compute_linear_projection(f.generators_[g], x);
-    });
-    if constexpr (Co) {
-      return *std::max_element(projections.begin(), projections.end());
-    } else {
-      return *std::min_element(projections.begin(), projections.end());
-    }
-#else
-    if constexpr (Co) {
-      U projection = std::numeric_limits<U>::lowest();
-      for (const Generator &g : f.generators_) {
-        // Order in the max important to spread possible NaNs
-        projection = std::max(compute_linear_projection(g, x), projection);
-      }
-      return projection;
-    } else {
-      U projection = std::numeric_limits<U>::max();
-      for (const Generator &g : f.generators_) {
-        // Order in the min important to spread possible NaNs
-        projection = std::min(compute_linear_projection(g, x), projection);
-      }
-      return projection;
-    }
-#endif
-  }
-
-  /**
-   * @brief Computes the euclidean distance from the first parameter to the second parameter as the minimum of
-   * all Euclidean distances between a generator of @p f and a generator of @p other.
-   *
-   * @param f Source filtration value.
-   * @param other Target filtration value.
-   * @return Euclidean distance between @p f and @p other.
-   */
-  template <typename U = T>
-  friend U compute_euclidean_distance_to(const Dynamic_multi_parameter_filtration &f,
-                                         const Dynamic_multi_parameter_filtration &other)
-  {
-    GUDHI_CHECK(f.num_parameters() == other.num_parameters(),
-                std::invalid_argument("We cannot compute the distance between two points of different dimensions."));
-
-    // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
-    if constexpr (Ensure1Criticality) {
-      return compute_euclidean_distance_to(f.generators_[0], other.generators_[0]);
-    } else {
-      U res = std::numeric_limits<U>::max();
-      for (const Generator &g1 : f.generators_) {
-        for (const Generator &g2 : other.generators_) {
-          // Order in the min important to spread possible NaNs
-          res = std::min(compute_euclidean_distance_to(g1, g2), res);
-        }
-      }
-      return res;
-    }
-  }
-
-  /**
-   * @brief Computes the norm of the given filtration value.
-   *
-   * The filtration value is seen as a \f$ num_generators x num_parameters \f$ matrix and a standard Frobenius norm
-   * is computed from it: the square root of the sum of the squares of all elements in the matrix.
-   *
-   * @param f Filtration value.
-   * @return The norm of @p f.
-   */
-  template <typename U = T>
-  friend U compute_norm(const Dynamic_multi_parameter_filtration &f)
-  {
-    // Frobenius norm with matrix g x p based on Euclidean norm
-    U out = 0;
-    for (const Generator &g : f.generators_) {
-      out += compute_squares(g);
-    }
-    if constexpr (std::is_integral_v<U>) {
-      // to avoid Windows issue that don't know how to cast integers for cmath methods
-      return std::sqrt(static_cast<double>(out));
-    } else {
-      return std::sqrt(out);
-    }
-  }
-
-  /**
-   * @brief Computes the coordinates in the given grid, corresponding to the nearest upper bounds of the entries
+   * @brief Computes the coordinates in the given grid, corresponding to the nearest value of the entries
    * in the given filtration value.
-   * The grid has to be represented as a vector of vectors of ordered values convertible into `OutValue`. An index
-   * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
+   * The grid has to be represented as a 2-dimensional array of ordered values convertible into `OutValue`. An index
+   * \f$ i \f$ of the array corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
    * therefore all together a 2D grid.
    *
    * @tparam OutValue Signed arithmetic type. Default value: std::int32_t.
-   * @tparam U Type which is convertible into `OutValue`.
+   * @tparam RandomAccessArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
    * @param f Filtration value to project.
-   * @param grid Vector of vectors to project into.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @return Filtration value \f$ out \f$ whose entry correspond to the indices of the projected values. That is,
    * the projection of \f$ f(g,p) \f$ is \f$ grid[p][out(g,p)] \f$.
    */
-  template <typename OutValue = std::int32_t, typename U = T>
+  template <typename OutValue = std::int32_t, class RandomAccessArray = std::vector<T> >
   friend Dynamic_multi_parameter_filtration<OutValue, Co, Ensure1Criticality> compute_coordinates_in_grid(
       Dynamic_multi_parameter_filtration f,
-      const std::vector<std::vector<U> > &grid)
+      const std::vector<RandomAccessArray> &grid)
   {
     // TODO: by replicating the code of "project_onto_grid", this could be done with just one copy
     // instead of two. But it is not clear if it is really worth it, i.e., how much the change in type is really
@@ -2068,15 +1987,18 @@ class Dynamic_multi_parameter_filtration
    * value. That is, if \f$ out \f$ is the result, \f$ out(g,p) = grid[p][f(g,p)] \f$. Assumes therefore, that the
    * values stored in the filtration value corresponds to indices existing in the given grid.
    *
-   * @tparam U Signed arithmetic type.
+   * @tparam RandomAccessArray A range of values convertible into `U`. Has to implement
+   * a size and operator[] method and a `value_type` definition.
+   * @tparam U Signed arithmetic type. Default: `RandomAccessArray::value_type`.
    * @param f Filtration value storing coordinates compatible with `grid`.
-   * @param grid Vector of vector.
+   * @param grid Vector of @p RandomAccessArray with size at least number of filtration parameters. Each array
+   * has to be ordered by increasing value.
    * @return Filtration value \f$ out \f$ whose entry correspond to \f$ out(g,p) = grid[p][f(g,p)] \f$.
    */
-  template <typename U>
+  template <class RandomAccessArray, typename U = typename RandomAccessArray::value_type>
   friend Dynamic_multi_parameter_filtration<U, Co, Ensure1Criticality> evaluate_coordinates_in_grid(
       const Dynamic_multi_parameter_filtration &f,
-      const std::vector<std::vector<U> > &grid)
+      const std::vector<RandomAccessArray> &grid)
   {
     GUDHI_CHECK(grid.size() >= f.num_parameters(),
                 std::invalid_argument(
@@ -2138,7 +2060,7 @@ class Dynamic_multi_parameter_filtration
     stream >> num_param;
     if (!stream.good())
       throw std::invalid_argument("Invalid incoming stream format for Dynamic_multi_parameter_filtration (num_param).");
-    f.number_of_parameters_ = num_param;
+    f.numberOfParameters_ = num_param;
     stream >> delimiter;  // )
     stream >> delimiter;  // [
     if (delimiter != '[')
@@ -2277,7 +2199,7 @@ class Dynamic_multi_parameter_filtration
   {
     const std::size_t nberOfGenerators = value.generators_.size();
     const std::size_t type_size = sizeof(std::size_t);
-    memcpy(start, &value.number_of_parameters_, type_size);
+    memcpy(start, &value.numberOfParameters_, type_size);
     memcpy(start + type_size, &nberOfGenerators, type_size);
     char *curr = start + type_size + type_size;
     for (const Generator &g : value) {
@@ -2297,7 +2219,7 @@ class Dynamic_multi_parameter_filtration
   {
     const std::size_t type_size = sizeof(std::size_t);
     std::size_t nberOfGenerators;
-    memcpy(&value.number_of_parameters_, start, type_size);
+    memcpy(&value.numberOfParameters_, start, type_size);
     memcpy(&nberOfGenerators, start + type_size, type_size);
     value.generators_.resize(nberOfGenerators);
     const char *curr = start + type_size + type_size;
@@ -2330,18 +2252,8 @@ class Dynamic_multi_parameter_filtration
   constexpr static const T T_m_inf = Generator::T_m_inf;
 
  private:
-  size_type number_of_parameters_;  /**< Number of parameters. */
+  size_type numberOfParameters_;  /**< Number of parameters. */
   Underlying_container generators_; /**< Container of the filtration value elements. */
-
-  constexpr static bool _is_nan(T val)
-  {
-    if constexpr (std::is_integral_v<T>) {
-      // to avoid Windows issue which don't know how to cast integers for cmath methods
-      return false;
-    } else {
-      return std::isnan(val);
-    }
-  }
 
   /**
    * @brief Verifies if @p b is strictly contained in the positive cone originating in `a`.
@@ -2520,7 +2432,7 @@ class numeric_limits<Gudhi::multi_filtration::Dynamic_multi_parameter_filtration
   {
     throw std::logic_error(
         "The max value cannot be represented with no finite numbers of parameters."
-        "Use `max(number_of_parameters)` instead");
+        "Use `max(numberOfParameters)` instead");
   };
 
   static constexpr Filtration_value max(std::size_t p) noexcept

@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
   BOOST_CHECK(!b.contains(inf));
   BOOST_CHECK(!b.contains(minus_inf));
 
-  BOOST_CHECK_EQUAL(b.get_dimension(), 3);
+  BOOST_CHECK_EQUAL(b.get_number_of_coordinates(), 3);
 
   b.inflate(2);
   auto& bottom = b.get_lower_corner();
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
   BOOST_CHECK(b.contains(inf));
   BOOST_CHECK(!b.contains(minus_inf));
 
-  BOOST_CHECK_EQUAL(b.get_dimension(), 3);
+  BOOST_CHECK_EQUAL(b.get_number_of_coordinates(), 3);
 
   b.inflate(2);
   BOOST_CHECK_EQUAL(bottom[0], -4);
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
   BOOST_CHECK(!b.contains(inf));
   BOOST_CHECK(b.contains(minus_inf));
 
-  BOOST_CHECK_EQUAL(b.get_dimension(), 3);
+  BOOST_CHECK_EQUAL(b.get_number_of_coordinates(), 3);
 
   b.inflate(2);
   BOOST_CHECK_EQUAL(bottom, minus_inf);
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
   BOOST_CHECK(b.contains(inf));
   BOOST_CHECK(b.contains(minus_inf));
 
-  BOOST_CHECK_EQUAL(b.get_dimension(), 3);
+  BOOST_CHECK_EQUAL(b.get_number_of_coordinates(), 3);
 
   b.inflate(2);
   BOOST_CHECK_EQUAL(bottom, minus_inf);
@@ -202,4 +202,22 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_friends, T, list_of_tested_variants)
   BOOST_CHECK_EQUAL(top[0], 4);
   BOOST_CHECK_EQUAL(top[1], 5);
   BOOST_CHECK_EQUAL(top[2], 6);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(box_serialization, T, list_of_tested_variants) {
+  Box<T> box({0, 1, 2}, {4, 5, 6});
+  char* buffer = new char[256];
+  char* ptr = buffer;
+
+  std::size_t serSize = get_serialization_size_of(box);
+  ptr = serialize_value_to_char_buffer(box, ptr);
+  BOOST_CHECK_EQUAL(serSize, ptr - buffer);
+
+  Box<T> copy;
+  const char* c_ptr = buffer;
+  c_ptr = deserialize_value_from_char_buffer(copy, c_ptr);
+  BOOST_CHECK_EQUAL(serSize, c_ptr - buffer);
+  BOOST_CHECK(box == copy);
+
+  delete [] buffer;
 }

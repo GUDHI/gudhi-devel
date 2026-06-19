@@ -22,8 +22,7 @@
 using option_list = boost::mpl::list<Chain_vineyard_options, RU_vineyard_options>;
 
 template <class Bar, class Barcode>
-std::vector<Bar> get_barcode(const Barcode& bc)
-{
+std::vector<Bar> get_barcode(const Barcode& bc) {
   std::vector<Bar> barcode(bc.begin(), bc.end());
   std::sort(barcode.begin(), barcode.end(), [](const Bar& b1, const Bar& b2) {
     if (b1.dim == b2.dim) return b1.birth < b2.birth;
@@ -33,8 +32,7 @@ std::vector<Bar> get_barcode(const Barcode& bc)
 }
 
 template <class Cycles>
-std::vector<std::vector<int>> get_all_cycles(const Cycles& cs)
-{
+std::vector<std::vector<int>> get_all_cycles(const Cycles& cs) {
   std::vector<std::vector<int>> cycles(cs.size());
   unsigned int i = 0;
   for (const auto& c : cs) {
@@ -46,8 +44,7 @@ std::vector<std::vector<int>> get_all_cycles(const Cycles& cs)
 }
 
 template <class V>
-std::vector<std::vector<int>> get_all_cycles_individually(V& vy)
-{
+std::vector<std::vector<int>> get_all_cycles_individually(V& vy) {
   std::vector<std::vector<int>> cycles(vy.get_current_barcode().size());
   for (unsigned int i = 0; i < cycles.size(); ++i) {
     cycles[i] = get_cycle(vy.get_current_representative_cycle(i));
@@ -151,11 +148,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(vy_update, Option, option_list) {
   BOOST_CHECK_EQUAL(barcode[4], Bar(5, 6, 1));
 }
 
-template<class Option>
-void test_rep_cycles(){}
+template <class Option>
+void test_rep_cycles() {}
 
-template<>
-void test_rep_cycles<Chain_vineyard_options>(){
+template <>
+void test_rep_cycles<Chain_vineyard_options>() {
   using V = Gudhi::vineyard::Vineyard_base<Chain_vineyard_options>;
   using C = std::vector<int>;
 
@@ -213,8 +210,8 @@ void test_rep_cycles<Chain_vineyard_options>(){
   BOOST_CHECK(cycles3[0] == (C{3, 4, 5}));
 }
 
-template<>
-void test_rep_cycles<RU_vineyard_options>(){
+template <>
+void test_rep_cycles<RU_vineyard_options>() {
   using V = Gudhi::vineyard::Vineyard_base<RU_vineyard_options>;
   using C = std::vector<int>;
 
@@ -272,6 +269,4 @@ void test_rep_cycles<RU_vineyard_options>(){
   BOOST_CHECK(cycles3[0] == (C{3, 4, 5}));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(vy_rep_cycles, Option, option_list) {
-  test_rep_cycles<Option>();
-}
+BOOST_AUTO_TEST_CASE_TEMPLATE(vy_rep_cycles, Option, option_list) { test_rep_cycles<Option>(); }

@@ -15,10 +15,8 @@ import os
 import glob
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import Literal
+from typing import Literal, Optional
 import warnings
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 
 from gudhi import _vineyard_ext as t
 from gudhi.rips_complex import RipsComplex
@@ -34,12 +32,14 @@ def _verify_validity(
     path_prefix: str,
     path_suffix: str = ".txt",
     first_index: int = 0,
-    delimiter: str = None,
-    number_of_updates: int = None,
+    delimiter: Optional[str] = None,
+    number_of_updates: Optional[int] = None,
 ) -> bool:
     # assumes counting starts with 0
-    # will fail with "file not found" if not
-    path = os.path.realpath(path_prefix + "0" + path_suffix, strict=True)
+    path = os.path.realpath(path_prefix + "0" + path_suffix)
+    # can be removed with python 3.10+ when adding parameter `strict=True` do the `realpath` method
+    if not os.path.isfile(path):
+        raise FileNotFoundError(f"The file {path} does not exists.")
     path_prefix = path[: -len("0" + path_suffix)]
 
     if number_of_updates is None:
@@ -94,7 +94,7 @@ def _verify_validity(
 
 
 class Vineyard(t.Vineyard_interface):
-    """Class constructing and plotting vineyards from given inputs. Can also provide non-trivial representative cycles
+    """Class constructing vineyards from given inputs. Can also provide non-trivial representative cycles
     for the latest filtration given.
 
     A trivial representative cycle is a cycle representing a persistence bar of length 0. That is, the cycle is born
@@ -118,10 +118,10 @@ class Vineyard(t.Vineyard_interface):
 
     def initialize(
         self,
-        filtered_cpx: SimplexTree | CubicalComplex | PeriodicCubicalComplex = None,
-        boundaries: list[np.ndarray] = None,
-        dimensions: np.ndarray = None,
-        filtration_values: np.ndarray = None,
+        filtered_cpx: Optional[SimplexTree | CubicalComplex | PeriodicCubicalComplex] = None,
+        boundaries: Optional[list[np.ndarray]] = None,
+        dimensions: Optional[np.ndarray] = None,
+        filtration_values: Optional[np.ndarray] = None,
         number_of_updates: int = 0,
     ) -> list[np.ndarray]:
         """Initializes the vineyard with the first persistence barcode. If another vineyard was initialized before,
@@ -156,9 +156,14 @@ class Vineyard(t.Vineyard_interface):
         :rtype: list[read-only np.ndarray]
         """
         if filtered_cpx is not None:
-            if boundaries != None or dimensions != None or filtration_values != None:
+            if (
+                boundaries is not None
+                or dimensions is not None
+                or filtration_values is not None
+            ):
                 raise ValueError(
-                    "Either a filtered complex or (boundaries/dimensions/filtration values) should be given, but not both."
+                    "Either a filtered complex or (boundaries/dimensions/filtration values) should be given,"
+                    " but not both."
                 )
             super()._initialize_from_complex(filtered_cpx, number_of_updates)
             return self.get_current_vineyard_view()
@@ -172,8 +177,8 @@ class Vineyard(t.Vineyard_interface):
 
     def update(
         self,
-        filtered_cpx: SimplexTree | CubicalComplex | PeriodicCubicalComplex = None,
-        filtration_values: np.ndarray = None,
+        filtered_cpx: Optional[SimplexTree | CubicalComplex | PeriodicCubicalComplex] = None,
+        filtration_values: Optional[np.ndarray] = None,
     ) -> list[np.ndarray]:
         """Adds a layer to the current vineyard by updating the persistence diagram such that it corresponds to the
         given filtration.
@@ -192,7 +197,7 @@ class Vineyard(t.Vineyard_interface):
         :rtype: list[read-only np.ndarray]
         """
         if filtered_cpx is not None:
-            if filtration_values != None:
+            if filtration_values is not None:
                 raise ValueError(
                     "Either a filtered complex or new filtration values should be given, but not both."
                 )
@@ -206,7 +211,9 @@ class Vineyard(t.Vineyard_interface):
         super()._update(filtration_values)
         return self.get_current_vineyard_view()
 
-    def get_current_vineyard_view(self, dim: int = None) -> list[np.ndarray] | np.ndarray:
+    def get_current_vineyard_view(
+        self, dim: Optional[int] = None
+    ) -> list[np.ndarray] | np.ndarray:
         """Returns the list of read-only and unfiltered vine views. See :meth:`get_current_vineyard` for a more flexible
         output. The format of the list is `dimension x vine number x update number x (birth, death)`, e.g.,
         `vineyard[a][b][c][0]` returns the birth value of the `a`-dimensional vine number `b` at step `c`
@@ -241,7 +248,7 @@ class Vineyard(t.Vineyard_interface):
         return vineyard[mask]
 
     def get_current_vineyard(
-        self, dim: int = None, min_bar_length: np.number = -1
+        self, dim: Optional[int] = None, min_bar_length: np.number = -1
     ) -> list[np.ndarray] | np.ndarray:
         """Returns a copy of the current vineyard. If no copy is desired, see :meth:`get_current_vineyard_view`.
         The format of the returned list is `dimension x vine number x update number x (birth, death)`, e.g.,
@@ -264,176 +271,11 @@ class Vineyard(t.Vineyard_interface):
 
         return self._denoise_vineyard(vineyard, min_bar_length)
 
-    def _gray_on_band(self, ax, x, y, z, band):
-        gray = (0.75, 0.75, 0.75)
-        mask = np.concatenate(([0], np.asarray(y - x <= band), [0]))
-        diff = np.diff(mask)
-        starts = np.where(diff == 1)[0]
-        ends = np.where(diff == -1)[0]
-        for s, e in zip(starts, ends):
-            ax.plot3D(x[s:e], y[s:e], z[s:e], c=gray)
-
-    def _erase_on_band(self, ax, x, y, z, band, c):
-        mask = np.concatenate(([0], np.asarray(y - x > band), [0]))
-        diff = np.diff(mask)
-        starts = np.where(diff == 1)[0]
-        ends = np.where(diff == -1)[0]
-        for s, e in zip(starts, ends):
-            ax.plot3D(x[s:e], y[s:e], z[s:e], c=c)
-
-    def _get_colors_for_all_dim(self, dim: int):
-        plot_colors = [
-            "Oranges",
-            "Purples",
-            "Greens",
-            "Blues",
-            "Reds",
-            "YlOrBr",
-            "PuRd",
-            "YlOrRd",
-            "OrRd",
-            "RdPu",
-            "BuPu",
-            "GnBu",
-            "PuBu",
-            "YlGnBu",
-            "PuBuGn",
-            "BuGn",
-            "YlGn",
-        ]
-        return mpl.colormaps[plot_colors[dim % len(plot_colors)]]
-
-    def _plot_vines(
-        self,
-        ax,
-        vines,
-        inf_v,
-        min_bar_length,
-        noise_option: Literal[
-            "none", "gray_diagonal", "gray_band", "erase_diagonal", "erase_band"
-        ],
-        cmap,
-    ):
-        real_vines = []
-        for i in range(vines.shape[0]):
-            x = vines[i, :, 0]
-            y = vines[i, :, 1]
-            y[y >= np.inf] = inf_v
-            x[x >= np.inf] = inf_v
-            z = np.asarray(range(vines.shape[1]))
-            diff = y - x
-            diff[diff < min_bar_length] = 0
-            if np.any(diff):
-                real_vines.append((x, y, z))
-
-        cmap = list(reversed(cmap(np.linspace(0, 1, len(real_vines) + 2))))
-
-        for i, (x, y, z) in enumerate(real_vines):
-            match noise_option:
-                case "none":
-                    ax.plot3D(x, y, z, c=cmap[i])
-                case "gray_diagonal":
-                    ax.plot3D(x, y, z, c=cmap[i])
-                    self._gray_on_band(ax, x, y, z, 0)
-                case "gray_band":
-                    ax.plot3D(x, y, z, c=cmap[i])
-                    self._gray_on_band(ax, x, y, z, min_bar_length)
-                case "erase_diagonal":
-                    self._erase_on_band(ax, x, y, z, 0, cmap[i])
-                case "erase_band":
-                    self._erase_on_band(ax, x, y, z, min_bar_length, cmap[i])
-                case _:
-                    raise ValueError(
-                        "argument `noise_option` does not contain a valid literal: "
-                        + noise_option
-                        + ". Possibilities are: `none`, `gray_diagonal`, `gray_band`, `erase_diagonal` and `erase_band`"
-                    )
-
-    # TODO: option to handle points at infinity
-    def plot_vineyards(
-        self,
-        dim: int = None,
-        max_dim: int = None,
-        min_bar_length: np.number = -1,
-        noise_option: Literal[
-            "none", "gray_diagonal", "gray_band", "erase_diagonal", "erase_band"
-        ] = "gray_diagonal",
-        square_scaling: bool = True,
-    ):
-        """Plots the current vineyard, except for completely trivial vines (vines where all coordinates are on
-        the diagonal). The points at infinity are mapped to a finite point a bit away from the other points.
-
-        :param dim: Optional. If provided, only plots the vines of the given dimension. Defaults to `None`.
-        :type dim: int, optional
-        :param max_dim: Optional. If provided, only plots the vines with the given maximal dimension included. If `dim`
-            was already provided, `max_dim` is ignored. Defaults to `None`.
-        :type max_dim: int, optional
-        :param min_bar_length: Optional. If provided, only vines with at least one coordinate corresponding to a bar of
-            length equal or higher than `min_bar_length` are plotted. Defaults to -1 (i.e., all vines except trivial
-            ones are plotted). Note that trivial vines are never plotted even if `min_bar_length` is set to 0.
-        :type min_bar_length: Any numerical type coercible to the filtration value type, optional
-        :param noise_option: Value describing how "noisy" parts of a vine should be treated. There are 5 options for
-            now:
-
-                - "none": Nothing particular is done.
-                - "gray_diagonal": Every part of a vine contained in the diagonal will be plotted with a gray overline.
-                - "gray_band": Every part of a vine where all coordinates differ by less than `min_bar_length` are \
-                    plotted with a gray overline.
-                - "erase_diagonal": Every part of a vine contained in the diagonal are not plotted.
-                - "erase_band": Every part of a vine where all coordinates differ by less than `min_bar_length` are \
-                    not plotted.
-
-            Defaults to "gray_diagonal".
-        :type noise_option: Literal["none", "gray_diagonal", "gray_band", "erase_diagonal", "erase_band"]
-        :param square_scaling: If `True`, the min and max values of the birth (x) and death (y) axis of the plot
-            are equalized. Defaults to `True`. In any case, the scale ration of both axis will be equal.
-        :type square_scaling: bool, optional
-        :raises ValueError: If the value provided for `noise_option` is not valid.
-        """
-        fig = plt.figure()
-        ax = fig.add_subplot(projection="3d")
-
-        if dim is None:
-            vineyard = self.get_current_vineyard_view()
-            if max_dim is not None:
-                vineyard = vineyard[: max_dim + 1]
-            max_death = max(
-                [
-                    np.max(vines[:, :, 1], where=~np.isinf(vines[:, :, 1]), initial=-1)
-                    for vines in vineyard
-                ]
-            )
-            # arbitrary, just to distance them a bit from the finite bars
-            inf_v = max_death + 10
-
-            for d, vines in enumerate(vineyard):
-                cmap = self._get_colors_for_all_dim(d)
-                self._plot_vines(ax, vines, inf_v, min_bar_length, noise_option, cmap)
-        else:
-            vines = self.get_current_vineyard_view(dim=dim)
-            max_death = np.max(vines[:, :, 1], where=~np.isinf(vines[:, :, 1]), initial=-1)
-            # arbitrary, just to distance them a bit from the finite bars
-            inf_v = max_death + 10
-            self._plot_vines(
-                ax, vines, inf_v, min_bar_length, noise_option, mpl.colormaps["viridis"]
-            )
-
-        if square_scaling:
-            scaling = np.array([getattr(ax, "get_{}lim".format(dim))() for dim in "xy"])
-            ax.auto_scale_xyz(
-                *[[np.min(scaling), np.max(scaling)]] * 2,
-                [getattr(ax, "get_{}lim".format("z"))()],
-            )
-        ax.set_aspect("equalxy", "box")
-
-        plt.show()
-        return
-
 
 class PointCloudRipsVineyard:
     """Specialized overlay for :class:`Vineyard`. Computes the vineyard from a sequence of point clouds or distance
-    matrices by computing the Rips Complex for each of them. Can also provide non-trivial representative 1-cycles for
-    each step of the vineyard if enabled.
+    matrices by computing the 2-dimensional Rips Complex for each of them. Can also provide non-trivial representative
+    1-cycles for each step of the vineyard if enabled.
 
     A trivial representative cycle is a cycle representing a persistence bar of length 0. That is, the cycle is born
     and killed at the same time.
@@ -446,10 +288,10 @@ class PointCloudRipsVineyard:
 
         :param store_point_coordinates: Optional. If `True`, the given point clouds for :meth:`initialize` and
             :meth:`update` are copied and stored inside the class. Necessary for :meth:`get_points` and
-            :meth:`plot_1D_representative_cycles`. Defaults to False.
+            to plot representative 1-cycles. Defaults to False.
         :type store_point_coordinates: bool, optional
         :param store_cycles: Optional. If `True`, the non-trivial representative 1-cycles will be computed and stored at
-            each step. Necessary for :meth:`get_1D_representative_cycles` and :meth:`plot_1D_representative_cycles`.
+            each step. Necessary for :meth:`get_1D_representative_cycles` and to plot representative 1-cycles.
             Defaults to False.
         :type store_cycles: bool, optional
         """
@@ -467,9 +309,9 @@ class PointCloudRipsVineyard:
         path_prefix: str,
         path_suffix: str = ".txt",
         first_index: int = 0,
-        number_of_updates: int = None,
+        number_of_updates: Optional[int] = None,
         file_type: Literal["distance_matrix", "point_cloud"] = "point_cloud",
-        delimiter: str = None,
+        delimiter: Optional[str] = None,
         store_point_coordinates: bool = False,
         store_cycles: bool = False,
     ):
@@ -510,10 +352,10 @@ class PointCloudRipsVineyard:
         :type delimiter: str, optional
         :param store_point_coordinates: Optional and only possible if `file_type` is `"point_cloud"`. If `True`, the
             given point clouds are copied and stored inside the class. Necessary for :meth:`get_points` and
-            :meth:`plot_1D_representative_cycles`. Defaults to False.
+            plotting representative 1-cycles. Defaults to False.
         :type store_point_coordinates: bool, optional
         :param store_cycles: Optional. If `True`, the non-trivial representative 1-cycles will be computed and stored at
-            each step. Necessary for :meth:`get_1D_representative_cycles` and :meth:`plot_1D_representative_cycles`.
+            each step. Necessary for :meth:`get_1D_representative_cycles` and plotting representative 1-cycles.
             Defaults to False.
         :type store_cycles: bool, optional
         :raises FileNotFoundError: If the file `path_prefix + 0 + path_suffix` is not found and if any file with
@@ -525,8 +367,10 @@ class PointCloudRipsVineyard:
         res = cls(store_point_coordinates, store_cycles)
 
         # assumes counting starts with 0
-        # will fail with "file not found" if not
-        path = os.path.realpath(path_prefix + "0" + path_suffix, strict=True)
+        path = os.path.realpath(path_prefix + "0" + path_suffix)
+        # can be removed with python 3.10+ when adding parameter `strict=True` do the `realpath` method
+        if not os.path.isfile(path):
+            raise FileNotFoundError(f"The file {path} does not exists.")
         path_prefix = path[: -len("0" + path_suffix)]
 
         if number_of_updates is None:
@@ -555,7 +399,7 @@ class PointCloudRipsVineyard:
         cls,
         data: ArrayLike,
         first_index: int = 0,
-        number_of_updates: int = None,
+        number_of_updates: Optional[int] = None,
         data_type: Literal["distance_matrix", "point_cloud"] = "point_cloud",
         store_point_coordinates: bool = False,
         store_cycles: bool = False,
@@ -577,10 +421,10 @@ class PointCloudRipsVineyard:
         :type data_type: Literal["distance_matrix", "point_cloud"]
         :param store_point_coordinates: Optional and only possible if `data_type` is `"point_cloud"`. If `True`, the
             given point clouds are copied and stored inside the class. Necessary for :meth:`get_points` and
-            :meth:`plot_1D_representative_cycles`. Defaults to False.
+            plotting representative 1-cycles. Defaults to False.
         :type store_point_coordinates: bool, optional
         :param store_cycles: Optional. If `True`, the non-trivial representative 1-cycles will be computed and stored at
-            each step. Necessary for :meth:`get_1D_representative_cycles` and :meth:`plot_1D_representative_cycles`.
+            each step. Necessary for :meth:`get_1D_representative_cycles` and plotting representative 1-cycles.
             Defaults to False.
         :type store_cycles: bool, optional
         :raises IndexError: If `first_index` is out of range in `data`.
@@ -637,9 +481,9 @@ class PointCloudRipsVineyard:
 
     def initialize(
         self,
-        data: ArrayLike = None,
-        path: str = None,
-        delimiter: str = None,
+        data: Optional[ArrayLike] = None,
+        path: Optional[str] = None,
+        delimiter: Optional[str] = None,
         data_type: Literal["distance_matrix", "point_cloud"] = "point_cloud",
         number_of_updates: int = 0,
     ):
@@ -668,7 +512,7 @@ class PointCloudRipsVineyard:
         .. note::
             If `data_type` is `"distance_matrix"` and `store_point_coordinates` was set to `True` at construction, an
             empty list will be initialized but nothing will be stored in it. So :meth:`get_points` will return an empty
-            list and :meth:`plot_1D_representative_cycles` will raise an `IndexError`. A warning will be raised for
+            list and plotting the representative 1-cycles will raise an `IndexError`. A warning will be raised for
             this purpose.
         """
         if self._store_points:
@@ -699,9 +543,9 @@ class PointCloudRipsVineyard:
 
     def update(
         self,
-        data: ArrayLike = None,
-        path: str = None,
-        delimiter: str = None,
+        data: Optional[ArrayLike] = None,
+        path: Optional[str] = None,
+        delimiter: Optional[str] = None,
         data_type: Literal["distance_matrix", "point_cloud"] = "point_cloud",
     ):
         """Adds a layer to the current vineyard by updating the persistence diagram such that it corresponds to the
@@ -726,7 +570,7 @@ class PointCloudRipsVineyard:
         .. note::
             If `data_type` is `"distance_matrix"` and `store_point_coordinates` was set to `True` at construction, an
             empty list will be initialized but nothing will be stored in it. So :meth:`get_points` will return an empty
-            list and :meth:`plot_1D_representative_cycles` will raise an `IndexError`. A warning will be raised for
+            list and plotting the representative 1-cycles will raise an `IndexError`. A warning will be raised for
             this purpose.
         """
         if self._store_points and data_type == "distance_matrix":
@@ -749,7 +593,9 @@ class PointCloudRipsVineyard:
         if self._store_cycles:
             self._cycles.append(self._vineyard.get_latest_representative_cycles())
 
-    def get_current_vineyard_view(self, dim: int = None) -> list[np.ndarray] | np.ndarray:
+    def get_current_vineyard_view(
+        self, dim: Optional[int] = None
+    ) -> list[np.ndarray] | np.ndarray:
         """Returns the list of read-only and unfiltered vine views. See :meth:`get_current_vineyard` for a more flexible
         output. The format of the list is `dimension x vine number x update number x (birth, death)`, e.g.,
         `vineyard[a][b][c][0]` returns the birth value of the `a`-dimensional vine number `b` at step `c`
@@ -767,7 +613,7 @@ class PointCloudRipsVineyard:
         return self._vineyard.get_current_vineyard_view(dim)
 
     def get_current_vineyard(
-        self, dim: int = None, min_bar_length: np.number = -1
+        self, dim: Optional[int] = None, min_bar_length: np.number = -1
     ) -> list[np.ndarray] | np.ndarray:
         """Returns a copy of the current vineyard. If no copy is desired, see :meth:`get_current_vineyard_view`.
         The format of the returned list is `dimension x vine number x update number x (birth, death)`, e.g.,
@@ -823,7 +669,7 @@ class PointCloudRipsVineyard:
         ]
         return cpx, dims
 
-    def get_points(self, step: int = None) -> np.ndarray:
+    def get_points(self, step: Optional[int] = None) -> np.ndarray:
         """If `store_point_coordinates` was set to `True` at construction and the provided data were point clouds,
         returns the points stored at each step. The order of the original point clouds is preserved. The array format
         is `step x point number x number of coordinates`.
@@ -845,22 +691,35 @@ class PointCloudRipsVineyard:
         return self._points[step]
 
     def _denoise_cycle(
-        self, step: int, cycle: dict[tuple[np.number, np.number], np.ndarray], min_bar_length: np.number
+        self,
+        step: int,
+        cycle: dict[tuple[np.number, np.number], np.ndarray],
+        min_bar_length: np.number,
     ) -> dict[tuple[np.number, np.number], np.ndarray]:
         vineyard = self.get_current_vineyard_view(dim=1)
-        return {k: v for k, v in cycle.items() if vineyard[k[1]][step][1] - vineyard[k[1]][step][0] >= min_bar_length}
+        return {
+            k: v
+            for k, v in cycle.items()
+            if vineyard[k[1]][step][1] - vineyard[k[1]][step][0] >= min_bar_length
+        }
 
     def get_1D_representative_cycles(
-        self, step: int = None, min_bar_length: np.number = 0
-    ) -> list[dict[tuple[np.number, np.number], np.ndarray]] | dict[tuple[np.number, np.number], np.ndarray]:
+        self, step: Optional[int] = None, min_bar_length: np.number = 0
+    ) -> (
+        list[dict[tuple[np.number, np.number], np.ndarray]]
+        | dict[tuple[np.number, np.number], np.ndarray]
+    ):
         """If `store_cycles` was set to `True` at construction, returns the stored non-trivial representative 1-cycles.
-        The output is a list of dictionaries of the form :code:`step x {idx : cycle}`, such that:
+        The output is a list of dictionaries of the form :code:`step x {(dim, idx) : cycle}`, such that:
 
             - if `vy` = :meth:`get_current_vineyard_view`, then `vy[1][idx][step]` is the bar corresponding to `cycle`,
             - if `vy` = :meth:`get_current_vineyard_view(dim=1) <get_current_vineyard_view>`, then `vy[idx][step]` \
                 is the bar corresponding to `cycle`,
             - the edges contained in `cycle` are represented by their index in the complex which can be retrieved \
                 with :meth:`get_complex`.
+
+        Note that the value of `dim` in the dictionary key will always be 1 and is therefore redundant. It is just to
+        keep the output format consistent with other modules.
 
         :param step: Optional. If provided, only the cycles at given step are returned (first axis of the format
             is lost). Defaults to `None`.
@@ -885,125 +744,8 @@ class PointCloudRipsVineyard:
             return self._cycles[step]
 
         if step is None:
-            return [self._denoise_cycle(i, cycle, min_bar_length) for i, cycle in enumerate(self._cycles)]
+            return [
+                self._denoise_cycle(i, cycle, min_bar_length)
+                for i, cycle in enumerate(self._cycles)
+            ]
         return self._denoise_cycle(step, self._cycles[step], min_bar_length)
-
-    def plot_vineyards(
-        self,
-        dim: int = None,
-        max_dim: int = None,
-        min_bar_length: np.number = -1,
-        noise_option: Literal[
-            "none", "gray_diagonal", "gray_band", "erase_diagonal", "erase_band"
-        ] = "gray_diagonal",
-        square_scaling: bool = True,
-    ):
-        """Plots the current vineyard, except for completely trivial vines (vines where all coordinates are on
-        the diagonal). The points at infinity are mapped to a finite point a bit away from the other points.
-
-        :param dim: Optional. If provided, only plots the vines of the given dimension. Defaults to `None`.
-        :type dim: int, optional
-        :param max_dim: Optional. If provided, only plots the vines with the given maximal dimension included. If `dim`
-            was already provided, `max_dim` is ignored. Defaults to `None`.
-        :type max_dim: int, optional
-        :param min_bar_length: Optional. If provided, only vines with at least one coordinate corresponding to a bar of
-            length equal or higher than `min_bar_length` are plotted. Defaults to -1 (i.e., all vines except trivial
-            ones are plotted). Note that trivial vines are never plotted even if `min_bar_length` is set to 0.
-        :type min_bar_length: Any numerical type coercible to the filtration value type, optional
-        :param noise_option: Value describing how "noisy" parts of a vine should be treated. There are 5 options for
-            now:
-
-                - "none": Nothing particular is done.
-                - "gray_diagonal": Every part of a vine contained in the diagonal will be plotted with a gray overline.
-                - "gray_band": Every part of a vine where all coordinates differ by less than `min_bar_length` are \
-                    plotted with a gray overline.
-                - "erase_diagonal": Every part of a vine contained in the diagonal are not plotted.
-                - "erase_band": Every part of a vine where all coordinates differ by less than `min_bar_length` are \
-                    not plotted.
-
-            Defaults to "gray_diagonal".
-        :type noise_option: Literal["none", "gray_diagonal", "gray_band", "erase_diagonal", "erase_band"]
-        :param square_scaling: If `True`, the min and max values of the birth (x) and death (y) axis of the plot
-            are equalized. Defaults to `True`. In any case, the scale ration of both axis will be equal.
-        :type square_scaling: bool, optional
-        :raises ValueError: If the value provided for `noise_option` is not valid.
-        """
-        self._vineyard.plot_vineyards(
-            dim, max_dim, min_bar_length, noise_option, square_scaling
-        )
-
-    def _plot_cycle(self, axes, cycle, points, cpx, c):
-        for u, v in [(points[cpx[idx][0]], points[cpx[idx][1]]) for idx in cycle]:
-            if points.shape[1] == 2:
-                axes.plot([u[0], v[0]], [u[1], v[1]], color=c)
-            else:
-                axes.plot([u[0], v[0]], [u[1], v[1]], [u[2], v[2]], color=c)
-
-    def plot_1D_representative_cycles(
-        self, step: int, index: int = None, min_bar_length: np.number = None
-    ):
-        """If `store_cycles` and `store_point_coordinates` were set to `True` at construction, plots the representative
-        1-cycles at given step, except for those representing bars of length 0. The point coordinates must be 2 or
-        3-dimensional.
-
-        :param step: Vineyard step to plot.
-        :type step: int
-        :param index: Optional. If provided, only plots the cycle at given index at given step. Defaults to `None`.
-        :type index: int, optional
-        :param min_bar_length: Optional. If provided, only plots 1-cycles corresponding to bars with length at least
-            `min_bar_length`. Defaults to None (i.e., all non-trivial ones).
-        :type min_bar_length: Any numerical type coercible to the filtration value type, optional
-        :raises NotImplementedError: If `store_cycles` or `store_point_coordinates` were set to `False` at construction.
-        :raises ValueError: If the number of coordinates of a point is different from 2 or 3.
-        :raises IndexError: If `index` is provided and is out of range.
-        """
-        points = self.get_points(step)
-        cycles = self.get_1D_representative_cycles(step)
-        cpx, _ = self.get_complex()
-
-        fig = plt.figure()
-        if points.shape[1] == 2:
-            axes = fig.add_subplot()
-        elif points.shape[1] == 3:
-            axes = fig.add_subplot(projection="3d")
-        else:
-            raise ValueError("Plotting only possible in 2D and 3D.")
-
-        cmap_f = mpl.colormaps["tab10"]
-        cmap = cmap_f(np.arange(10))
-        cmap_f = mpl.colormaps["Set2"]
-        cmap = np.concatenate((cmap, cmap_f(np.arange(8))))
-        cmap_f = mpl.colormaps["Dark2"]
-        cmap = np.concatenate((cmap, cmap_f(np.arange(8))))
-        csize = 10 + 8 + 8
-        i = 0
-
-        if index is None:
-            if min_bar_length is None:
-                for _, c in cycles.items():
-                    self._plot_cycle(axes, c, points, cpx, cmap[i])
-                    i = (i + 1) % csize
-            else:
-                vineyard = self.get_current_vineyard_view(dim=1)
-                for (_, idx), c in cycles.items():
-                    if vineyard[idx][step][1] - vineyard[idx][step][0] >= min_bar_length:
-                        self._plot_cycle(axes, c, points, cpx, cmap[i])
-                        i = (i + 1) % csize
-        else:
-            if min_bar_length is not None:
-                warnings.warn(
-                    "Specified argument `min_bar_length` is ignored.",
-                    UserWarning,
-                )
-            self._plot_cycle(axes, cycles[index][0], points, cpx, cmap[i])
-
-        gray = (0.25, 0.25, 0.25)
-        x = points[:, 0]
-        y = points[:, 1]
-        if points.shape[1] == 2:
-            axes.plot(x, y, linestyle="none", markersize=3, marker="o", c=gray)
-        else:
-            axes.plot(x, y, points[:, 2], linestyle="none", markersize=3, marker="o", c=gray)
-
-        plt.show()
-        return

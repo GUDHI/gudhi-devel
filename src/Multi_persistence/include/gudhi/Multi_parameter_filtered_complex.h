@@ -28,6 +28,7 @@
 
 #ifdef GUDHI_USE_TBB
 #include <oneapi/tbb/parallel_for.h>
+#include <oneapi/tbb/parallel_sort.h>
 #endif
 
 #include <gudhi/Debug_utils.h>
@@ -384,7 +385,11 @@ class Multi_parameter_filtered_complex
 
     std::vector<Index> perm(complex.get_number_of_cycle_generators());
     std::iota(perm.begin(), perm.end(), 0);
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_sort(perm.begin(), perm.end(), [&](Index i, Index j) -> bool {
+#else
     std::sort(perm.begin(), perm.end(), [&](Index i, Index j) -> bool {
+#endif
       if (complex.dimensions_[i] == complex.dimensions_[j]) {
         return is_strict_less_than_lexicographically<true>(complex.filtrationValues_[i], complex.filtrationValues_[j]);
       }
@@ -406,10 +411,19 @@ class Multi_parameter_filtered_complex
     using Return_complex = Multi_parameter_filtered_complex<Return_filtration_value, I, D>;
 
     typename Return_complex::Filtration_value_container coords(complex.get_number_of_cycle_generators());
+#ifdef GUDHI_USE_TBB
+    tbb::parallel_for(Index(0), Index(coords.size()), [&](Index gen) {
+      coords[gen] = compute_coordinates_in_grid<std::int32_t>(complex.filtrationValues_[gen], grid);
+    });
+#else
     for (Index gen = 0U; gen < coords.size(); ++gen) {
       coords[gen] = compute_coordinates_in_grid<std::int32_t>(complex.filtrationValues_[gen], grid);
     }
-    return Return_complex(complex.boundaries_, complex.dimensions_, coords);
+#endif
+    // all r-value to prevent copy of coords (the other are copied anyway)
+    auto b = complex.boundaries_;
+    auto d = complex.dimensions_;
+    return Return_complex(std::move(b), std::move(d), std::move(coords));
   }
 
   /**

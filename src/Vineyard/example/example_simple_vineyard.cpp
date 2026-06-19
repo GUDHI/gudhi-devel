@@ -29,16 +29,14 @@ using Simplex_tree = Gudhi::Simplex_tree<>;  // uses double as Filtration_value 
 using Rips_complex = Gudhi::rips_complex::Rips_complex<Filtration_value>;
 using Point = std::vector<Filtration_value>;
 
-bool is_trivial(const Vine& vine, Filtration_value threshold)
-{
+bool is_trivial(const Vine& vine, Filtration_value threshold) {
   for (const auto& pair : vine.get_pairs()) {
     if (pair[1] - pair[0] > threshold) return false;
   }
   return true;
 }
 
-void print_vineyard(const std::vector<Vine>& vineyard, Filtration_value threshold, Dimension maxDim)
-{
+void print_vineyard(const std::vector<Vine>& vineyard, Filtration_value threshold, Dimension maxDim) {
   std::cout << "Vines above threshold " << threshold << ":\n";
   unsigned int i = 0;
   for (const Vine& vine : vineyard) {
@@ -56,8 +54,7 @@ void print_vineyard(const std::vector<Vine>& vineyard, Filtration_value threshol
   std::cout << "\n";
 }
 
-void print_cycles(const std::vector<std::tuple<Cycle, Dimension, Index>>& cycles, int step)
-{
+void print_cycles(const std::vector<std::tuple<Cycle, Dimension, Index>>& cycles, int step) {
   std::cout << "Non-trivial representative 1-cycles at step " << step << ":\n";
   for (const auto& cycle : cycles) {
     std::cout << "[" << get<1>(cycle) << "] ";
@@ -70,15 +67,13 @@ void print_cycles(const std::vector<std::tuple<Cycle, Dimension, Index>>& cycles
   std::cout << "\n";
 }
 
-void build_rips_complex(Simplex_tree& st, const std::vector<Point>& points)
-{
-  Rips_complex rips_complex_from_points(
-      points, std::numeric_limits<Filtration_value>::infinity(), Gudhi::Euclidean_distance());
+void build_rips_complex(Simplex_tree& st, const std::vector<Point>& points) {
+  Rips_complex rips_complex_from_points(points, std::numeric_limits<Filtration_value>::infinity(),
+                                        Gudhi::Euclidean_distance());
   rips_complex_from_points.create_complex(st, 2);
 }
 
-std::vector<Point> point_cloud_1()
-{
+std::vector<Point> point_cloud_1() {
   return {{-5.923219, 3.448312, 4.423653},  {-4.537442, 3.979718, 4.258528},   {-2.184740, 3.722509, 2.830755},
           {-1.536782, 3.765269, 1.400056},  {-1.468656, 3.360516, -0.794839},  {-2.160547, 3.318545, -2.527798},
           {-3.541939, 3.575503, -4.488310}, {-4.929805, 3.444428, -4.907573},  {-7.000496, 3.291212, -4.986328},
@@ -91,8 +86,7 @@ std::vector<Point> point_cloud_1()
           {2.029499, -2.032840, -0.163618}, {4.460381, -0.778737, -0.461743},  {6.180998, 1.164147, -0.155191}};
 }
 
-std::vector<Point> point_cloud_2()
-{
+std::vector<Point> point_cloud_2() {
   return {{-8.584966, 3.473100, 4.471038},   {-7.199189, 4.004506, 4.305912},   {-4.846487, 3.747298, 2.878140},
           {-4.198530, 3.790057, 1.447441},   {-4.130403, 3.385305, -0.747455},  {-4.822294, 3.343333, -2.480413},
           {-6.203686, 3.600291, -4.440925},  {-7.591552, 3.469216, -4.860188},  {-9.662243, 3.316001, -4.938943},
@@ -105,8 +99,7 @@ std::vector<Point> point_cloud_2()
           {4.735187, -2.336024, -0.521192},  {6.991530, -1.088274, -0.489849},  {8.580836, 1.151733, -0.464560}};
 }
 
-std::vector<Point> point_cloud_3()
-{
+std::vector<Point> point_cloud_3() {
   return {{-11.059176, 3.512883, 4.418220},  {-9.673399, 4.044289, 4.253094},   {-7.320697, 3.787080, 2.825321},
           {-6.672740, 3.829840, 1.394622},   {-6.604613, 3.425087, -0.800273},  {-7.296504, 3.383116, -2.533231},
           {-8.677896, 3.640074, -4.493743},  {-10.065762, 3.508999, -4.913006}, {-12.136453, 3.355783, -4.991761},
@@ -119,8 +112,7 @@ std::vector<Point> point_cloud_3()
           {7.527898, -2.437508, -0.344064},  {9.643542, -1.089942, -0.250708},  {11.187654, 1.202300, -0.148680}};
 }
 
-int main()
-{
+int main() {
   // `true` to save non-trivial representative cycles and `1` to only store 1-cycles
   // if all non-trivial cycles are desired, just don't specify the last argument
   Vineyard_builder vyb(true, 1);

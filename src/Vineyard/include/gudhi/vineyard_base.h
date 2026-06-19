@@ -36,7 +36,7 @@ namespace vineyard {
  *
  * @brief Options for the internal matrix of @ref Vineyard_base. Follows the
  * @ref Gudhi::persistence_matrix::PersistenceMatrixOptions concept.
- * 
+ *
  * @tparam D Dimension type.
  * @tparam I Index type.
  * @tparam is_RU Boundary representation type: if true, the matrix is the RU decomposition, if false, the matrix
@@ -84,17 +84,15 @@ struct Default_vineyard_options {
  * @ref Default_vineyard_options.
  */
 template <class VineyardOptions = Default_vineyard_options>
-class Vineyard_base
-{
+class Vineyard_base {
  public:
   using Options = VineyardOptions;
-  using Index = typename Options::Index;                    /**< Complex index type. */
-  using Dimension = typename Options::Dimension;            /**< Dimension type. */
+  using Index = typename Options::Index;                            /**< Complex index type. */
+  using Dimension = typename Options::Dimension;                    /**< Dimension type. */
   using Permutation = std::vector<Index>;                           /**< Filtration permutation map. */
 
  private:
-  using Matrix_options =
-      Vineyard_matrix_options<Dimension, Index, Options::is_RU, Options::column_type>;
+  using Matrix_options = Vineyard_matrix_options<Dimension, Index, Options::is_RU, Options::column_type>;
   using Matrix = Gudhi::persistence_matrix::Matrix<Matrix_options>; /**< Matrix type. */
 
  public:
@@ -113,11 +111,11 @@ class Vineyard_base
 
   /**
    * @brief Constructor initializing the first barcode.
-   * 
-   * @tparam Boundary_range Range of ranges of integers. Has to implement a `size` method and an `operator[]` with
+   *
+   * @tparam BoundaryRange Range of ranges of integers. Has to implement a `size` method and an `operator[]` with
    * a another nested `operator[]`.
-   * @tparam Dimension_range Range of integers. Has to implement a `operator[]` method.
-   * @tparam Filtration_range Range of arithmetic values or at least of values with an `operator<`. Has to implement a
+   * @tparam DimensionRange Range of integers. Has to implement a `operator[]` method.
+   * @tparam FiltrationRange Range of arithmetic values or at least of values with an `operator<`. Has to implement a
    * `operator[]` method.
    * @param boundaryMatrix Boundary container of the filtered complex. The container does not need to be ordered, but
    * the boundaries have to be represented by the indices of their faces in the container.
@@ -127,12 +125,10 @@ class Vineyard_base
    * correspond to the filtration value of the cell represented by the boundary at index \f$ i \f$ in `boundaryMatrix`.
    * Note that the filtration is assumed to be a 1-parameter filtration.
    */
-  template <class Boundary_range, class Dimension_range, class Filtration_range>
-  Vineyard_base(const Boundary_range& boundaryMatrix,
-                const Dimension_range& dimensions,
-                const Filtration_range& filtrationValues)
-      : matrix_(boundaryMatrix.size()), order_(boundaryMatrix.size())
-  {
+  template <class BoundaryRange, class DimensionRange, class FiltrationRange>
+  Vineyard_base(const BoundaryRange& boundaryMatrix, const DimensionRange& dimensions,
+                const FiltrationRange& filtrationValues)
+      : matrix_(boundaryMatrix.size()), order_(boundaryMatrix.size()) {
     // All static_assert in this class are quite useless as Matrix_options is fixed and has those enabled
     // I keep them just here for now in case Matrix_options becomes a template argument instead later
     static_assert(Matrix_options::has_vine_update, "Underlying matrix has to support vine swaps.");
@@ -153,11 +149,11 @@ class Vineyard_base
 
   /**
    * @brief Initializes the first barcode by recomputing it from scratch.
-   * 
-   * @tparam Boundary_range Range of ranges of integers. Has to implement a `size` method and an `operator[]` with
+   *
+   * @tparam BoundaryRange Range of ranges of integers. Has to implement a `size` method and an `operator[]` with
    * a another nested `operator[]`.
-   * @tparam Dimension_range Range of integers. Has to implement a `operator[]` method.
-   * @tparam Filtration_range Range of arithmetic values or at least of values with an `operator<`. Has to implement a
+   * @tparam DimensionRange Range of integers. Has to implement a `operator[]` method.
+   * @tparam FiltrationRange Range of arithmetic values or at least of values with an `operator<`. Has to implement a
    * `operator[]` method.
    * @param boundaryMatrix Boundary container of the filtered complex. The container does not need to be ordered, but
    * the boundaries have to be represented by the indices of their faces in the container.
@@ -167,11 +163,9 @@ class Vineyard_base
    * correspond to the filtration value of the cell represented by the boundary at index \f$ i \f$ in `boundaryMatrix`.
    * Note that the filtration is assumed to be a 1-parameter filtration.
    */
-  template <class Boundary_range, class Dimension_range, class Filtration_range>
-  void initialize(const Boundary_range& boundaryMatrix,
-                  const Dimension_range& dimensions,
-                  const Filtration_range& filtrationValues)
-  {
+  template <class BoundaryRange, class DimensionRange, class FiltrationRange>
+  void initialize(const BoundaryRange& boundaryMatrix, const DimensionRange& dimensions,
+                  const FiltrationRange& filtrationValues) {
     matrix_ = Matrix(boundaryMatrix.size());
     order_.resize(boundaryMatrix.size());
     if constexpr (!Matrix_options::is_of_boundary_type) {
@@ -193,22 +187,21 @@ class Vineyard_base
    *
    * @pre The first barcode has to have been initialized (either with the initializing constructor or
    * with @ref initialize "").
-   * 
-   * @tparam Filtration_range Range of arithmetic values or at least of values with an `operator<`. Has to implement a
+   *
+   * @tparam FiltrationRange Range of arithmetic values or at least of values with an `operator<`. Has to implement a
    * `operator[]` method.
    * @param filtrationValues New filtration value container. As at initialization, a value at index \f$ i \f$ has to
    * correspond to the filtration value of the cell represented by the boundary at index \f$ i \f$ in the initializing
    * argument `boundaryMatrix`. Note that the filtration is assumed to be a 1-parameter filtration.
    */
-  template <class Filtration_range>
-  void update(const Filtration_range& filtrationValues)
-  {
+  template <class FiltrationRange>
+  void update(const FiltrationRange& filtrationValues) {
     GUDHI_CHECK(filtrationValues.size() == order_.size(),
                 std::invalid_argument("Filtration value container size is not matching."));
 
     for (Index i = 1; i < order_.size(); i++) {
       int curr = i;
-      // speed up when ordered by dim, to avoid unnecessary swaps
+      // speed up because ordered by dim, to avoid unnecessary swaps
       while (curr > 0 && matrix_.get_column_dimension(curr) == matrix_.get_column_dimension(curr - 1) &&
              filtrationValues[order_[curr]] < filtrationValues[order_[curr - 1]]) {
         if constexpr (!Matrix_options::is_of_boundary_type) {
@@ -241,8 +234,7 @@ class Vineyard_base
   /**
    * @brief Returns the current barcode in the form of a read only random access range with it's usual methods.
    */
-  auto get_current_barcode()
-  {
+  auto get_current_barcode() {
     const auto& barcode = matrix_.get_current_barcode();
     return boost::adaptors::transform(barcode, [&](const Bar& bar) -> Bar {
       return Bar(order_[bar.birth], bar.death == Bar::inf ? bar.death : order_[bar.death], bar.dim);
@@ -255,14 +247,13 @@ class Vineyard_base
    * it. Note that no particular order for the cycles is guaranteed.
    * If only few particular cycles are needed, or the correspondence between bar and cycle, it is recommended to use
    * @ref get_current_representative_cycle instead.
-   * 
+   *
    * @param update If true, updates the underlying cycles before returning them. Which means it has to be true at least
    * the first time this method is called after the barcode changed.
    * @param dim If given (with a positive integer), only returns the cycles of this dimension. By default, returns all
    * cycles in all dimension.
    */
-  auto get_all_current_representative_cycles(bool update = true, Dimension dim = nullDimension)
-  {
+  auto get_all_current_representative_cycles(bool update = true, Dimension dim = nullDimension) {
     static_assert(Matrix_options::can_retrieve_representative_cycles,
                   "Underlying matrix has to support representative cycles.");
 
@@ -287,15 +278,14 @@ class Vineyard_base
    * @brief Returns the representative cycle of the given bar in the form of a read only random access range
    * with it's usual methods. A cycle is represented by the indices in the initializing complex of the cells composing
    * it.
-   * 
+   *
    * @param barcodeIndex Index in the barcode returned by @ref get_current_barcode of the bar.
    * @param update If true, updates the underlying cycle before returning them. Which means it has to be true at least
    * the first time this method is called after the barcode changed. Contrary to
    * @ref get_all_current_representative_cycles, it only updates the desired cycle and not all of them, which can be
    * a significant time gain if not all cycles are needed.
    */
-  auto get_current_representative_cycle(Index barcodeIndex, bool update = true)
-  {
+  auto get_current_representative_cycle(Index barcodeIndex, bool update = true) {
     static_assert(Matrix_options::can_retrieve_representative_cycles,
                   "Underlying matrix has to support representative cycles.");
 
@@ -317,8 +307,7 @@ class Vineyard_base
   /**
    * @brief Outstream operator.
    */
-  friend std::ostream& operator<<(std::ostream& stream, Vineyard_base& vyd)
-  {
+  friend std::ostream& operator<<(std::ostream& stream, Vineyard_base& vyd) {
     stream << "Matrix:\n";
     stream << "[\n";
     for (auto i = 0U; i < vyd.matrix_.get_number_of_columns(); i++) {
@@ -332,7 +321,7 @@ class Vineyard_base
       stream << v << " ";
     }
     stream << "\n";
-    if constexpr (Matrix_options::is_of_boundary_type) {
+    if constexpr (!Matrix_options::is_of_boundary_type) {
       stream << "ID to position map:\n";
       if (vyd.idToPos_) {
         for (auto v : *vyd.idToPos_) {
@@ -349,11 +338,9 @@ class Vineyard_base
   Permutation order_;                  /**< Filtration order. */
   std::optional<Permutation> idToPos_; /**< ID to filtration position map. */
 
-  template <class Boundary_range, class Dimension_range, class Filtration_range>
-  void _initialize(const Boundary_range& boundaryMatrix,
-                   const Dimension_range& dimensions,
-                   const Filtration_range& filtrationValues)
-  {
+  template <class BoundaryRange, class DimensionRange, class FiltrationRange>
+  void _initialize(const BoundaryRange& boundaryMatrix, const DimensionRange& dimensions,
+                   const FiltrationRange& filtrationValues) {
     GUDHI_CHECK(boundaryMatrix.size() == dimensions.size(),
                 std::invalid_argument("Boundary and dimension range sizes are not matching."));
     GUDHI_CHECK(boundaryMatrix.size() == filtrationValues.size(),
@@ -379,7 +366,7 @@ class Vineyard_base
       std::sort(translatedBoundary.begin(), translatedBoundary.end());
       matrix_.insert_boundary(id, translatedBoundary, dimensions[i]);
       if constexpr (!Matrix_options::is_of_boundary_type) {
-        (*idToPos_)[id] = id; // before any vine swaps, id == pos
+        (*idToPos_)[id] = id;  // before any vine swaps, id == pos
       }
       ++id;  // IDs corresponds to the indices in order_
     }

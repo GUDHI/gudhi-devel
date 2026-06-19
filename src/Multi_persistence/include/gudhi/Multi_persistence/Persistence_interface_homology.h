@@ -197,18 +197,18 @@ class Persistence_interface_homology
   template <class Filtration_range>
   void _initialize_order(const Filtration_range& filtrationValues, bool ignoreInf)
   {
-    GUDHI_CHECK_code(const auto& boundaryMatrix = complex_->get_boundaries();)
     const auto& dimensions = complex_->get_dimensions();
 
-    GUDHI_CHECK(boundaryMatrix.size() == dimensions.size(),
+    GUDHI_CHECK(complex_->get_boundaries().size() == dimensions.size(),
                 std::invalid_argument("Boundary and dimension range sizes are not matching."));
-    GUDHI_CHECK(boundaryMatrix.size() == filtrationValues.size(),
+    GUDHI_CHECK(complex_->get_boundaries().size() == filtrationValues.size(),
                 std::invalid_argument("Boundary and filtration value range sizes are not matching."));
 
     std::iota(order_.begin(), order_.end(), 0);
     std::sort(order_.begin(), order_.end(), [&](Index i, Index j) {
       if (ignoreInf) {
-        if (filtrationValues[i] != MultiFiltrationValue::T_inf && filtrationValues[j] == MultiFiltrationValue::T_inf) return true;
+        if (filtrationValues[i] != MultiFiltrationValue::T_inf && filtrationValues[j] == MultiFiltrationValue::T_inf)
+          return true;
         // all elements at inf are considered equal
         if (filtrationValues[i] == MultiFiltrationValue::T_inf) return false;
       }

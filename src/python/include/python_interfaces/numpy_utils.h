@@ -52,11 +52,21 @@ inline auto _wrap_as_numpy_array(std::vector<std::array<T, I> > &&tensor)
       }));
 }
 
+template <class T, std::size_t I, typename... Shape>
+inline auto _wrap_as_numpy_array(std::vector<std::array<T, I> > &&tensor, Shape... shapes) {
+  std::vector<std::array<T, I> > *tensor_ptr = new std::vector<std::array<T, I> >(std::move(tensor));
+  return nanobind::ndarray<nanobind::numpy, T>(tensor_ptr->data(), {static_cast<std::size_t>(shapes)...},
+                                               nanobind::capsule(tensor_ptr, [](void *p) noexcept {
+                                                 delete reinterpret_cast<std::vector<std::array<T, I> > *>(p);
+                                               }));
+}
+
 template <typename T, class = std::enable_if<std::is_arithmetic_v<T> > >
 class Numpy_span
 {
  public:
   using value_type = T;
+  using const_reference = const T &;
   using const_pointer = value_type const *;
   using const_iterator = const_pointer;
   using iterator = const_iterator;
@@ -75,6 +85,10 @@ class Numpy_span
   size_type size() const { return end_ - begin_; }
 
   bool empty() const { return end_ == begin_; }
+
+  const_reference operator[](size_type n) const {
+    return *(begin_ + n);
+  }
 
  private:
   const_pointer begin_;
@@ -157,7 +171,7 @@ template <typename T, class = std::enable_if<std::is_arithmetic_v<T> > >
 class Numpy_2d_span
 {
  public:
-  using Array = nanobind::ndarray<const T, nanobind::ndim<2> >;
+  using Array = nanobind::ndarray<const T, nanobind::ndim<2>, nanobind::any_contig>;
   using value_type = T;
   using const_pointer = T const *;
   using difference_type = std::ptrdiff_t;
@@ -185,7 +199,7 @@ class Numpy_2d_span
 
   const_pointer get_start_ptr() const { return &array_view_(0, 0); }
 
-  const_pointer get_end_ptr() const { return get_start_ptr() + array_view_.shape(0) * array_view_.shape(1); }
+  const_pointer get_end_ptr() const { return get_start_ptr() + array_view_.shape(0) * array_view_.stride(0); }
 };
 
 #endif  // INCLUDE_NUMPY_UTILS_PYTHON_H_

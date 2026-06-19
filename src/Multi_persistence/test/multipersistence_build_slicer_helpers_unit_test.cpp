@@ -237,6 +237,118 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants)
   BOOST_CHECK_EQUAL(in_cpx.get_max_dimension(), out_cpx.get_max_dimension());
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io2, Fil, list_of_tested_variants)
+{
+  using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
+  using FC = typename Complex::Filtration_value_container;
+  using BC = typename Complex::Boundary_container;
+  using DC = typename Complex::Dimension_container;
+  using ini = std::initializer_list<typename Fil::value_type>;
+  using Slicer = Slicer<Fil, Persistence_interface_cohomology<Fil> >;
+
+  const std::string& filePath = "scc_test.txt";
+  int degree = 1;
+  bool rivetCompatible = false;
+  bool ignoreLastGenerators = false;
+  bool reverse = false;
+  int dimShift = 0;
+
+  Complex in_cpx({{}, {}, {}}, {0, 0, 0}, {ini{0, 0}, ini{1, 1}, ini{2, 2}});
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  auto out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
+
+  write_slicer_to_scc_file(filePath, Slicer(in_cpx), degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  Slicer out_slicer = build_slicer_from_scc_file<Slicer>(filePath, rivetCompatible, reverse, dimShift);
+
+  BOOST_CHECK(out_slicer.get_boundaries() == out_cpx.get_boundaries());
+  BOOST_CHECK(out_slicer.get_dimensions() == out_cpx.get_dimensions());
+  BOOST_CHECK(out_slicer.get_filtration_values() == out_cpx.get_filtration_values());
+  BOOST_CHECK_EQUAL(out_slicer.get_max_dimension(), out_cpx.get_max_dimension());
+
+  // columns within a same dimension are reversed in order when reverse == false
+  BC bc = {{}, {}, {}};
+  DC dc = {0, 0, 0};
+  FC fc = {ini{2, 2}, ini{1, 1}, ini{0, 0}};
+
+  BOOST_CHECK(bc == out_cpx.get_boundaries());
+  BOOST_CHECK(dc == out_cpx.get_dimensions());
+  BOOST_CHECK(fc == out_cpx.get_filtration_values());
+  BOOST_CHECK_EQUAL(in_cpx.get_max_dimension(), out_cpx.get_max_dimension());
+
+  rivetCompatible = true;
+
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
+
+  BOOST_CHECK(bc == out_cpx.get_boundaries());
+  BOOST_CHECK(dc == out_cpx.get_dimensions());
+  BOOST_CHECK(fc == out_cpx.get_filtration_values());
+  BOOST_CHECK_EQUAL(in_cpx.get_max_dimension(), out_cpx.get_max_dimension());
+
+  rivetCompatible = false;
+  reverse = true;
+
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
+
+  BOOST_CHECK(in_cpx.get_boundaries() == out_cpx.get_boundaries());
+  BOOST_CHECK(in_cpx.get_dimensions() == out_cpx.get_dimensions());
+  BOOST_CHECK(in_cpx.get_filtration_values() == out_cpx.get_filtration_values());
+  BOOST_CHECK_EQUAL(in_cpx.get_max_dimension(), out_cpx.get_max_dimension());
+
+  ignoreLastGenerators = true;
+  reverse = false;
+
+  bc = {};
+  dc = {};
+  fc = {};
+
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
+
+  BOOST_CHECK(bc == out_cpx.get_boundaries());
+  BOOST_CHECK(dc == out_cpx.get_dimensions());
+  BOOST_CHECK(fc == out_cpx.get_filtration_values());
+  BOOST_CHECK_EQUAL(-1, out_cpx.get_max_dimension());
+
+  reverse = true;
+
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
+
+  BOOST_CHECK(bc == out_cpx.get_boundaries());
+  BOOST_CHECK(dc == out_cpx.get_dimensions());
+  BOOST_CHECK(fc == out_cpx.get_filtration_values());
+  BOOST_CHECK_EQUAL(-1, out_cpx.get_max_dimension());
+
+  ignoreLastGenerators = false;
+  reverse = false;
+  degree = 0;
+  dimShift = -1;
+
+  bc = {{}, {}, {}};
+  dc = {0, 0, 0};
+  fc = {ini{2, 2}, ini{1, 1}, ini{0, 0}};
+
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
+
+  BOOST_CHECK(bc == out_cpx.get_boundaries());
+  BOOST_CHECK(dc == out_cpx.get_dimensions());
+  BOOST_CHECK(fc == out_cpx.get_filtration_values());
+  BOOST_CHECK_EQUAL(in_cpx.get_max_dimension(), out_cpx.get_max_dimension());
+
+  reverse = true;
+
+  write_complex_to_scc_file(filePath, in_cpx, degree, rivetCompatible, ignoreLastGenerators, false, reverse);
+  out_cpx = build_complex_from_scc_file<Fil>(filePath, rivetCompatible, reverse, dimShift);
+
+  BOOST_CHECK(in_cpx.get_boundaries() == out_cpx.get_boundaries());
+  BOOST_CHECK(in_cpx.get_dimensions() == out_cpx.get_dimensions());
+  BOOST_CHECK(in_cpx.get_filtration_values() == out_cpx.get_filtration_values());
+  BOOST_CHECK_EQUAL(in_cpx.get_max_dimension(), out_cpx.get_max_dimension());
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_bitmap_io, Fil, list_of_tested_variants)
 {
   using Complex = Multi_parameter_filtered_complex<Fil, I, D>;

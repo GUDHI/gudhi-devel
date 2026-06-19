@@ -71,7 +71,20 @@ namespace vineyard {
  * Note also the existence of the helper method @ref build_boundary_matrix_from_complex which constructs the right
  * input for @ref Vineyard_builder from a filtered complex such as @ref Gudhi::Simplex_tree and
  * @ref Gudhi::cubical_complex::Bitmap_cubical_complex.
- * 
+ *
+ * \subsection vyadditional For more fine grained usage
+ *
+ * @ref Vineyard_builder offers to construct automatically a vineyard from a sequence of filtrations. But if one
+ * needs to have complete control on the swaps done, one can also directly use the underlying
+ * @ref Gudhi::persistence_matrix::Matrix class to do one's own sequence of swaps (with additionally a direct access
+ * to the state of the matrix). The template class of @ref Gudhi::persistence_matrix::Matrix,
+ * @ref Gudhi::persistence_matrix::PersistenceMatrixOptions, just needs to be set with
+ * @ref Gudhi::persistence_matrix::PersistenceMatrixOptions::has_vine_update "has_vine_update" to true. Then use the
+ * @ref Gudhi::persistence_matrix::Matrix::vine_swap methods to perform the wished swaps. This will update the state
+ * of the matrix and the barcode if stored (see
+ * @ref Gudhi::persistence_matrix::PersistenceMatrixOptions::has_column_pairings "has_column_pairings" option).
+ * See \gudhi_example_link{Persistence_matrix,example_vine_swaps.cpp} for an example.
+ *
  * \section vineyardexamples Examples
  *
  * \subsection vyminusage Minimalistic example
@@ -84,8 +97,8 @@ namespace vineyard {
 
         // underlying complex
         std::vector<std::vector<int>> boundaries = {
-            {}, {}, {}, {}, 
-            {0, 3}, {0, 2}, {1, 2}, {2, 3}, {0, 1}, 
+            {}, {}, {}, {},
+            {0, 3}, {0, 2}, {1, 2}, {2, 3}, {0, 1},
             {4, 5, 7}, {5, 6, 8}
         };
         std::vector<int> dimensions = {0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2};
@@ -136,7 +149,7 @@ namespace vineyard {
  *   @skip int main()
  *   @until }
  * </details>
- * 
+ *
  * @}
  */
 }  // namespace vineyard

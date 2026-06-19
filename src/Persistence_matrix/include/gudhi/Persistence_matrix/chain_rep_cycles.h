@@ -130,6 +130,8 @@ template <class Master_matrix>
 inline void Chain_representative_cycles<Master_matrix>::update_all_representative_cycles(Dimension dim)
 {
   Index nberColumns = _matrix()->get_number_of_columns();
+  Index nullValue = Master_matrix::template get_null_value<Index>();
+
   auto get_position = [&](ID_index pivot) {
     if constexpr (Master_matrix::Option_list::has_vine_update) {
       if constexpr (Master_matrix::Option_list::has_map_column_container) {
@@ -141,7 +143,14 @@ inline void Chain_representative_cycles<Master_matrix>::update_all_representativ
       return pivot;
     }
   };
-  Index nullValue = Master_matrix::template get_null_value<Index>();
+  auto get_col_index = [&](ID_index pivot) -> Index {
+    if constexpr (Master_matrix::Option_list::has_map_column_container) {
+      auto it = _matrix()->pivotToColumnIndex_.find(pivot);
+      return it == _matrix()->pivotToColumnIndex_.end() ? nullValue : it->second;
+    } else {
+      return _matrix()->pivotToColumnIndex_[pivot];
+    }
+  };
 
   birthToCycle_.clear();
   birthToCycle_.resize(nberColumns, nullValue);
@@ -150,30 +159,37 @@ inline void Chain_representative_cycles<Master_matrix>::update_all_representativ
 #ifdef GUDHI_USE_TBB
   Index c = 0;
   for (Index i = 0; i < nberColumns; i++) {
-    auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
-    if ((dim == Master_matrix::template get_null_value<Dimension>() || _matrix()->get_column_dimension(i) == dim) &&
-        (!col.is_paired() || get_position(i) < get_position(_matrix()->get_pivot(col.get_paired_chain_index())))) {
-      birthToCycle_[get_position(i)] = c;
-      ++c;
+    Index colIdx = get_col_index(i);
+    if (colIdx != nullValue) {
+      auto& col = _matrix()->get_column(colIdx);
+      if ((dim == Master_matrix::template get_null_value<Dimension>() || col.get_dimension() == dim) &&
+          (!col.is_paired() || get_position(i) < get_position(_matrix()->get_pivot(col.get_paired_chain_index())))) {
+        birthToCycle_[get_position(i)] = c;
+        ++c;
+      }
     }
   }
 
   representativeCycles_.resize(c);
   tbb::parallel_for(static_cast<Index>(0), nberColumns, [&](Index i) {
-    auto idx = get_position(i);
-    if (birthToCycle_[idx] != nullValue) {
-      auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
-      representativeCycles_[birthToCycle_[idx]] =
+    Index colIdx = get_col_index(i);
+    // condition order matters
+    if (colIdx != nullValue && birthToCycle_[get_position(i)] != nullValue) {
+      auto& col = _matrix()->get_column(colIdx);
+      representativeCycles_[birthToCycle_[get_position(i)]] =
           Master_matrix::build_cycle_from_range(col.get_non_zero_content_range());
     }
   });
 #else
   for (ID_index i = 0; i < nberColumns; i++) {
-    auto& col = _matrix()->get_column(_matrix()->get_column_with_pivot(i));
-    if ((dim == Master_matrix::template get_null_value<Dimension>() || _matrix()->get_column_dimension(i) == dim) &&
-        (!col.is_paired() || get_position(i) < get_position(_matrix()->get_pivot(col.get_paired_chain_index())))) {
-      representativeCycles_.push_back(Master_matrix::build_cycle_from_range(col.get_non_zero_content_range()));
-      birthToCycle_[get_position(i)] = representativeCycles_.size() - 1;
+    Index colIdx = get_col_index(i);
+    if (colIdx != nullValue) {
+      auto& col = _matrix()->get_column(colIdx);
+      if ((dim == Master_matrix::template get_null_value<Dimension>() || col.get_dimension() == dim) &&
+          (!col.is_paired() || get_position(i) < get_position(_matrix()->get_pivot(col.get_paired_chain_index())))) {
+        representativeCycles_.push_back(Master_matrix::build_cycle_from_range(col.get_non_zero_content_range()));
+        birthToCycle_[get_position(i)] = representativeCycles_.size() - 1;
+      }
     }
   }
 #endif

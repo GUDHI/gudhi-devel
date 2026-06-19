@@ -22,8 +22,8 @@ In order to complicate things, some noise (+/- 5% of the radius value) to the po
 
 The TDA scikit-learn pipeline is constructed and is composed of:
 
-#. :class:`~gudhi.sklearn.CechPersistence` that builds a Čech complex from the inputs and
-   returns its persistence diagrams in dimension 1.
+#. :class:`~gudhi.sklearn.CechPersistence` that computes the persistence of the Čech complex (through some Delaunay
+   equivalent) from the inputs and returns its persistence diagrams in dimension 1.
 #. :class:`~gudhi.representations.vector_methods.PersistenceLengths` that returns here the biggest persistence bar in
    dimension 1.
 #. `LinearRegression <https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html>`_

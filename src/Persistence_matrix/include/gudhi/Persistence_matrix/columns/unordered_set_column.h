@@ -33,6 +33,7 @@
 #endif
 
 #include <gudhi/Persistence_matrix/allocators/entry_constructors.h>
+#include <gudhi/persistence_matrix_options.h>
 
 namespace Gudhi {
 namespace persistence_matrix {
@@ -922,6 +923,19 @@ inline bool Unordered_set_column<Master_matrix>::_generic_add(const Entry_range&
                                                               [[maybe_unused]] F2&& update_target)
 {
   bool pivotIsZeroed = false;
+
+  // Chatty
+  if constexpr (RangeTraits<Entry_range>::has_size) {
+    const std::size_t sourceSize = source.size();
+    if (sourceSize >= 8) {
+      const std::size_t targetSize = column_.size() + sourceSize;
+      const std::size_t bucketCount = column_.bucket_count();
+      if (bucketCount == 0 ||
+          static_cast<float>(targetSize) > static_cast<float>(bucketCount) * column_.max_load_factor()) {
+        column_.reserve(targetSize);
+      }
+    }
+  }
 
   for (const Entry& entry : source) {
     Entry* newEntry;

@@ -19,7 +19,7 @@
 
 using BC = std::vector<std::vector<int>>;
 using DC = std::vector<int>;
-template<typename T>
+template <typename T>
 using FC = std::vector<T>;
 
 struct Chain_vineyard_options : Gudhi::vineyard::Default_vineyard_options {
@@ -30,21 +30,19 @@ struct RU_vineyard_options : Gudhi::vineyard::Default_vineyard_options {
   static constexpr bool is_RU = true;
 };
 
-template<typename T = double>
-inline std::tuple<BC, DC, FC<T> > build_simple_input_complex()
-{
+template <typename T = double>
+inline std::tuple<BC, DC, FC<T>> build_simple_input_complex() {
   T inf = std::numeric_limits<T>::has_infinity ? std::numeric_limits<T>::infinity() : std::numeric_limits<T>::max();
 
   BC bc = {{}, {}, {}, {0, 1}, {1, 2}, {0, 2}, {3, 4, 5}, {}, {1, 7}};
   DC dc = {0, 0, 0, 1, 1, 1, 2, 0, 1};
   FC<T> fc = {1, 2, 1, 6, 4, 3, inf, inf, inf};
 
-  return std::tuple<BC, DC, FC<T> >(bc, dc, fc);
+  return std::tuple<BC, DC, FC<T>>(bc, dc, fc);
 }
 
 template <class Cycle>
-std::vector<int> get_cycle(const Cycle& c)
-{
+std::vector<int> get_cycle(const Cycle& c) {
   std::vector<int> cycle(c.begin(), c.end());
   std::sort(cycle.begin(), cycle.end());
   return cycle;

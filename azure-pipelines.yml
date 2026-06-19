@@ -38,9 +38,6 @@ jobs:
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user -r ext/gudhi-deploy/test-requirements.txt
           python -m pip uninstall -y pykeops
-          if ! brew update; then
-            echo "Warning: brew update returned a non-zero exit code."
-          fi
           if ! brew install ninja graphviz doxygen boost eigen gmp mpfr tbb cgal; then
             echo "Warning: brew install returned a non-zero exit code."
           fi
@@ -63,7 +60,7 @@ jobs:
     pool:
       vmImage: windows-latest
     variables:
-      pythonVersion: "3.9"
+      pythonVersion: "3.10"
       cmakeBuildType: Release
       cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
       gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_REMOTE_TEST=ON -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON

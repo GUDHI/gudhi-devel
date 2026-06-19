@@ -148,6 +148,11 @@ inline void RU_representative_cycles<Master_matrix>::update_all_representative_c
 
   representativeCycles_.resize(c);
 #ifdef GUDHI_USE_TBB
+  if (nberColumns > 0) {
+    // force row reordering before parallelization to avoid data race
+    _matrix()->reducedMatrixR_.get_column(0);
+    _matrix()->mirrorMatrixU_.get_column(0);
+  }
   tbb::parallel_for(static_cast<Index>(0), nberColumns, [&](Index i) {
     if (birthToCycle_[i] != nullValue) {
       Index colIdx = _matrix()->_get_column_with_pivot(i);

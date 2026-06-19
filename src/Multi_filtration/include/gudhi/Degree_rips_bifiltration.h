@@ -94,19 +94,30 @@ class Degree_rips_bifiltration
    * @brief Default constructor. Builds filtration value with one generator `(val, 0)`.
    * If Co is false, `val` is -inf, if Co is true, `val` is at +inf.
    *
-   * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
+   * @param numberOfParameters Ignored, the number of parameters is always 2. For interface purposes only.
    */
-  Degree_rips_bifiltration([[maybe_unused]] int number_of_parameters = 2) : generators_(1, _get_default_value()) {}
+  Degree_rips_bifiltration([[maybe_unused]] int numberOfParameters = 2) : generators_(1, _get_default_value()) {}
 
   explicit Degree_rips_bifiltration(Gudhi::simplex_tree::empty_filtration_value_t /*e*/) : generators_(0) {}
 
   /**
    * @brief Builds a filtration value with one generator `(value, 0)`.
    *
-   * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
+   * @param numberOfParameters Ignored, the number of parameters is always 2. For interface purposes only.
    * @param value Initialization value for the second parameter.
    */
-  Degree_rips_bifiltration([[maybe_unused]] int number_of_parameters, T value) : generators_(1, value) {}
+  Degree_rips_bifiltration([[maybe_unused]] int numberOfParameters, T value) : generators_(1, value) {}
+
+  /**
+   * @brief Builds filtration value with one generator `(val, i)`, where `val` and `i` are the two first elements
+   * of the given range. Note that `i` has to be 0.
+   *
+   * @param range Values of the generator. The range has to have at least two elements.
+   */
+  Degree_rips_bifiltration(std::initializer_list<T> range) : generators_(1, *(range.begin()))
+  {
+    GUDHI_CHECK(*(std::next(range.begin())) == 0, std::invalid_argument("Second value of the range has to be 0"));
+  }
 
   /**
    * @brief Builds filtration value with one generator `(val, i)`, where `val` and `i` are the two first elements
@@ -115,7 +126,7 @@ class Degree_rips_bifiltration
    * @tparam ValueRange Range of types convertible to `T`. Should have a begin() method.
    * @param range Values of the generator. The range has to have at least two elements.
    */
-  template <class ValueRange = std::initializer_list<T>, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
+  template <class ValueRange, class = std::enable_if_t<RangeTraits<ValueRange>::has_begin> >
   Degree_rips_bifiltration(const ValueRange &range) : generators_(1, *(range.begin()))
   {
     GUDHI_CHECK(*(std::next(range.begin())) == 0, std::invalid_argument("Second value of the range has to be 0"));
@@ -127,13 +138,13 @@ class Degree_rips_bifiltration
    *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyInputIterator and
    * dereferenced elements have to be convertible to `T`.
-   * @param it_begin Iterator pointing to the start of the range.
-   * @param it_end Iterator pointing to the end of the range.
+   * @param itBegin Iterator pointing to the start of the range.
+   * @param itEnd Iterator pointing to the end of the range.
    */
   template <class Iterator, class = std::enable_if_t<!std::is_arithmetic_v<Iterator> > >
-  Degree_rips_bifiltration(Iterator it_begin, [[maybe_unused]] Iterator it_end) : generators_(1, *it_begin)
+  Degree_rips_bifiltration(Iterator itBegin, [[maybe_unused]] Iterator itEnd) : generators_(1, *itBegin)
   {
-    GUDHI_CHECK(*(std::next(it_begin)) == 0, std::invalid_argument("Second value of the range has to be 0"));
+    GUDHI_CHECK(*(std::next(itBegin)) == 0, std::invalid_argument("Second value of the range has to be 0"));
   }
 
   /**
@@ -145,21 +156,21 @@ class Degree_rips_bifiltration
    *
    * @tparam Iterator Iterator type that has to satisfy the requirements of standard LegacyForwardIterator and
    * dereferenced elements have to be convertible to `T`.
-   * @param it_begin Iterator pointing to the start of the range.
-   * @param it_end Iterator pointing to the end of the range.
-   * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
+   * @param itBegin Iterator pointing to the start of the range.
+   * @param itEnd Iterator pointing to the end of the range.
+   * @param numberOfParameters Ignored, the number of parameters is always 2. For interface purposes only.
    */
   template <class Iterator, class = std::enable_if_t<!std::is_arithmetic_v<Iterator> > >
-  Degree_rips_bifiltration(Iterator it_begin, Iterator it_end, [[maybe_unused]] int number_of_parameters)
+  Degree_rips_bifiltration(Iterator itBegin, Iterator itEnd, [[maybe_unused]] int numberOfParameters)
       : generators_()
   {
-    size_type num_gen = std::distance(it_begin, it_end) / 2;
+    size_type numGen = std::distance(itBegin, itEnd) / 2;
     if constexpr (Ensure1Criticality) {
-      if (num_gen > 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
+      if (numGen > 1) throw std::logic_error("Multiparameter filtration value is not 1-critical.");
     }
-    generators_.resize(num_gen);
-    Iterator it = it_begin;
-    for (size_type i = 0; i < num_gen; ++i) {
+    generators_.resize(numGen);
+    Iterator it = itBegin;
+    for (size_type i = 0; i < numGen; ++i) {
       generators_[i] = *it;
       ++it;
       GUDHI_CHECK(
@@ -177,9 +188,9 @@ class Degree_rips_bifiltration
    * underlying container of the class.
    *
    * @param generators Values for the second parameter.
-   * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
+   * @param numberOfParameters Ignored, the number of parameters is always 2. For interface purposes only.
    */
-  Degree_rips_bifiltration(const Underlying_container &generators, [[maybe_unused]] int number_of_parameters)
+  Degree_rips_bifiltration(const Underlying_container &generators, [[maybe_unused]] int numberOfParameters)
       : generators_(generators)
   {
     if constexpr (Ensure1Criticality) {
@@ -194,9 +205,9 @@ class Degree_rips_bifiltration
    * the underlying container of the class.
    *
    * @param generators Values to move.
-   * @param number_of_parameters Ignored, the number of parameters is always 2. For interface purposes only.
+   * @param numberOfParameters Ignored, the number of parameters is always 2. For interface purposes only.
    */
-  Degree_rips_bifiltration(Underlying_container &&generators, [[maybe_unused]] int number_of_parameters)
+  Degree_rips_bifiltration(Underlying_container &&generators, [[maybe_unused]] int numberOfParameters)
       : generators_(std::move(generators))
   {
     if constexpr (Ensure1Criticality) {
@@ -522,27 +533,27 @@ class Degree_rips_bifiltration
   /**
    * @brief Returns a filtration value for which @ref is_plus_inf() returns `true`. Throws if `Co` is true.
    */
-  static Degree_rips_bifiltration inf(int number_of_parameters = 2)
+  static Degree_rips_bifiltration inf(int numberOfParameters = 2)
   {
     if constexpr (Co) {
       throw std::logic_error("No biggest value possible for Co-filtrations yet.");
     } else {
-      return Degree_rips_bifiltration(number_of_parameters, T_inf);
+      return Degree_rips_bifiltration(numberOfParameters, T_inf);
     }
   }
 
   /**
    * @brief Returns a filtration value for which @ref is_minus_inf() returns `true`.
    */
-  static Degree_rips_bifiltration minus_inf(int number_of_parameters = 2)
+  static Degree_rips_bifiltration minus_inf(int numberOfParameters = 2)
   {
-    return Degree_rips_bifiltration(number_of_parameters, T_m_inf);
+    return Degree_rips_bifiltration(numberOfParameters, T_m_inf);
   }
 
   /**
    * @brief Returns a filtration value for which @ref is_nan() returns `true`.
    */
-  static constexpr Degree_rips_bifiltration nan([[maybe_unused]] int number_of_parameters = 2)
+  static constexpr Degree_rips_bifiltration nan([[maybe_unused]] int numberOfParameters = 2)
   {
     return Degree_rips_bifiltration(Gudhi::simplex_tree::empty_filtration_value_t());
   }
@@ -1689,39 +1700,45 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Projects the filtration value into the given grid. If @p coordinate is false, the entries are set to
-   * the nearest upper bound value with the same parameter in the grid. Otherwise, the entries are set to the indices
-   * of those nearest upper bound values.
+   * @brief Projects the generator into the given grid. If @p coordinate is false, the entries are set to
+   * the nearest value with the same parameter in the grid. Otherwise, the entries are set to the indices
+   * of those nearest values. If an entry in the generator is higher than any value in the grid, this entry
+   * is set to infinity if @p coordinate is false and to the grids size at the corresponding parameter otherwise.
    * The grid has to be represented as a vector of ordered ranges of values convertible into `T`. An index
    * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
    * therefore all together a 2D grid. The range of the second parameter has to start at 0 and continue continuously.
    *
-   * @tparam OneDimArray A range of values convertible into `T` ordered by increasing value. Has to implement
-   * a begin, end and operator[] method.
-   * @param grid Vector of @p OneDimArray with size at least 2.
+   * @tparam RandomAccessArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
+   * @param grid Vector of @p RandomAccessArray with size at least 2. Each array has to be ordered by
+   * increasing value.
    * @param coordinate If true, the values are set to the coordinates of the projection in the grid. If false,
    * the values are set to the values at the coordinates of the projection.
    */
-  template <typename OneDimArray>
-  void project_onto_grid(const std::vector<OneDimArray> &grid, bool coordinate = true)
+  template <class RandomAccessArray>
+  void project_onto_grid(const std::vector<RandomAccessArray> &grid, bool coordinate = true)
   {
     GUDHI_CHECK(
         grid.size() >= 2,
         std::invalid_argument("The grid should not be smaller than the number of parameters in the filtration value."));
 
-    GUDHI_CHECK_code(const OneDimArray &indices = grid[1]);
-    const OneDimArray &values = grid[0];
+    GUDHI_CHECK_code(const RandomAccessArray &indices = grid[1]);
+    const RandomAccessArray &values = grid[0];
 
     auto project_generator = [&](size_type g) {
       GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, std::invalid_argument("Unvalid grid.")));
 
-      auto v = static_cast<typename OneDimArray::value_type>(generators_[g]);
-      auto d = std::distance(values.begin(), std::lower_bound(values.begin(), values.end(), v));
-      if (d != 0 && std::abs(v - values[d]) > std::abs(v - values[d - 1])) {
-        --d;
+      auto v = static_cast<typename RandomAccessArray::value_type>(generators_[g]);
+      std::size_t d = std::distance(values.begin(), std::lower_bound(values.begin(), values.end(), v));
+      if (d == values.size()) {
+        generators_[g] = coordinate ? static_cast<T>(d) : T_inf;
+      } else {
+        if (d != 0 && std::abs(v - values[d]) > std::abs(v - values[d - 1])) {
+          --d;
+        }
+        generators_[g] = coordinate ? static_cast<T>(d) : static_cast<T>(values[d]);
       }
-      generators_[g] = coordinate ? static_cast<T>(d) : static_cast<T>(values[d]);
     };
 
 #ifdef GUDHI_USE_TBB
@@ -1826,132 +1843,26 @@ class Degree_rips_bifiltration
   }
 
   /**
-   * @brief Computes the smallest (resp. the greatest if `Co` is true) scalar product of the all generators with the
-   * given vector.
-   *
-   * @tparam U Arithmetic type of the result. Default value: `T`.
-   * @param f Filtration value.
-   * @param x Vector of coefficients.
-   * @return Scalar product of @p f with @p x.
-   */
-  template <typename U = T>
-  friend U compute_linear_projection(const Degree_rips_bifiltration &f, const std::vector<U> &x)
-  {
-    auto project_generator = [&](size_type g) -> U {
-      U projection = 0;
-      std::size_t size = std::min(x.size(), Degree_rips_bifiltration::num_parameters());
-      for (std::size_t i = 0; i < size; i++) projection += x[i] * static_cast<U>(f(g, i));
-      return projection;
-    };
-
-    if (f.num_generators() == 1) return project_generator(0);
-
-#ifdef GUDHI_USE_TBB
-    std::vector<U> projections(f.num_generators());
-    tbb::parallel_for(size_type{0}, f.num_generators(), [&](size_type g) { projections[g] = project_generator(g); });
-    if constexpr (Co) {
-      return *std::max_element(projections.begin(), projections.end());
-    } else {
-      return *std::min_element(projections.begin(), projections.end());
-    }
-#else
-    if constexpr (Co) {
-      U projection = std::numeric_limits<U>::lowest();
-      for (size_type g = 0; g < f.num_generators(); ++g) {
-        // Order in the max important to spread possible NaNs
-        projection = std::max(project_generator(g), projection);
-      }
-      return projection;
-    } else {
-      U projection = std::numeric_limits<U>::max();
-      for (size_type g = 0; g < f.num_generators(); ++g) {
-        // Order in the min important to spread possible NaNs
-        projection = std::min(project_generator(g), projection);
-      }
-      return projection;
-    }
-#endif
-  }
-
-  /**
-   * @brief Computes the euclidean distance from the first parameter to the second parameter as the minimum of
-   * all Euclidean distances between a generator of @p f and a generator of @p other.
-   *
-   * @param f Source filtration value.
-   * @param other Target filtration value.
-   * @return Euclidean distance between @p f and @p other.
-   */
-  template <typename U = T>
-  friend U compute_euclidean_distance_to(const Degree_rips_bifiltration &f, const Degree_rips_bifiltration &other)
-  {
-    // TODO: verify if this really makes a differences in the 1-critical case, otherwise just keep the general case
-    if constexpr (Ensure1Criticality) {
-      return _compute_frobenius_norm(Degree_rips_bifiltration::num_parameters(),
-                                     [&](size_type p) -> T { return f(0, p) - other(0, p); });
-    } else {
-      U res = std::numeric_limits<U>::max();
-      for (size_type g1 = 0; g1 < f.num_generators(); ++g1) {
-        for (size_type g2 = 0; g2 < other.num_generators(); ++g2) {
-          // Euclidean distance as a Frobenius norm with matrix 1 x p and values 'f(g1, p) - other(g2, p)'
-          // Order in the min important to spread possible NaNs
-          res = std::min(_compute_frobenius_norm(Degree_rips_bifiltration::num_parameters(),
-                                                 [&](size_type p) -> T { return f(g1, p) - other(g2, p); }),
-                         res);
-        }
-      }
-      return res;
-    }
-  }
-
-  /**
-   * @brief Computes the norm of the given filtration value.
-   *
-   * The filtration value is seen as a \f$ num_generators x num_parameters \f$ matrix and a standard Frobenius norm
-   * is computed from it: the square root of the sum of the squares of all elements in the matrix.
-   *
-   * @param f Filtration value.
-   * @return The norm of @p f.
-   */
-  template <typename U = T>
-  friend U compute_norm(const Degree_rips_bifiltration &f)
-  {
-    // Frobenius norm with matrix g x p based on Euclidean norm
-
-    if (f.num_generators() == 1) return f.generators_[0];
-
-    U out = 0;
-    for (size_type g = 0; g < f.num_generators(); ++g) {
-      out += g * g;
-      out += f.generators_[g] * f.generators_[g];
-    }
-
-    if constexpr (std::is_integral_v<U>) {
-      // to avoid Windows issue that don't know how to cast integers for cmath methods
-      return std::sqrt(static_cast<double>(out));
-    } else {
-      return std::sqrt(out);
-    }
-  }
-
-  /**
-   * @brief Computes the coordinates in the given grid, corresponding to the nearest upper bounds of the entries
+   * @brief Computes the coordinates in the given grid, corresponding to the nearest values of the entries
    * in the given filtration value.
-   * The grid has to be represented as a vector of vectors of ordered values convertible into `OutValue`. An index
-   * \f$ i \f$ of the vector corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
+   * The grid has to be represented as a 2-dimensional array of ordered values convertible into `OutValue`. An index
+   * \f$ i \f$ of the array corresponds to the same parameter as the index \f$ i \f$ in a generator of the filtration
    * value. The ranges correspond to the possible values of the parameters, ordered by increasing value, forming
    * therefore all together a 2D grid. The range of the second parameter has to start at 0 and continue continuously.
    *
    * @tparam OutValue Signed arithmetic type. Default value: std::int32_t.
-   * @tparam U Type which is convertible into `OutValue`.
+   * @tparam RandomAccessArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
    * @param f Filtration value to project.
-   * @param grid Vector of vectors to project into.
+   * @param grid Vector of @p RandomAccessArray with size at least 2. Each array has to be ordered by increasing
+   * value.
    * @return Filtration value \f$ out \f$ whose entry correspond to the indices of the projected values. That is,
    * the projection of \f$ f(g,p) \f$ is \f$ grid[p][out(g,p)] \f$.
    */
-  template <typename OutValue = std::int32_t, typename U = T>
+  template <typename OutValue = std::int32_t, class RandomAccessArray = std::vector<T> >
   friend Degree_rips_bifiltration<OutValue, Co, Ensure1Criticality> compute_coordinates_in_grid(
       Degree_rips_bifiltration f,
-      const std::vector<std::vector<U> > &grid)
+      const std::vector<RandomAccessArray> &grid)
   {
     // TODO: by replicating the code of "project_onto_grid", this could be done with just one copy
     // instead of two. But it is not clear if it is really worth it, i.e., how much the change in type is really
@@ -1969,15 +1880,18 @@ class Degree_rips_bifiltration
    * value. That is, if \f$ out \f$ is the result, \f$ out(g,p) = grid[p][f(g,p)] \f$. Assumes therefore, that the
    * values stored in the filtration value corresponds to indices existing in the given grid.
    *
-   * @tparam U Signed arithmetic type.
+   * @tparam RandomAccessArray A range of values convertible into `U`. Has to implement
+   * a size and operator[] method and a `value_type` definition.
+   * @tparam U Signed arithmetic type. Default: `RandomAccessArray::value_type`.
    * @param f Filtration value storing coordinates compatible with `grid`.
-   * @param grid Vector of vector.
+   * @param grid Vector of @p RandomAccessArray with size at least 2. Each array has to be ordered by increasing
+   * value.
    * @return Filtration value \f$ out \f$ whose entry correspond to \f$ out(g,p) = grid[p][f(g,p)] \f$.
    */
-  template <typename U>
+  template <class RandomAccessArray, typename U = typename RandomAccessArray::value_type>
   friend Degree_rips_bifiltration<U, Co, Ensure1Criticality> evaluate_coordinates_in_grid(
       const Degree_rips_bifiltration &f,
-      const std::vector<std::vector<U> > &grid)
+      const std::vector<RandomAccessArray> &grid)
   {
     GUDHI_CHECK(grid.size() >= f.num_parameters(),
                 std::invalid_argument(
@@ -1986,12 +1900,14 @@ class Degree_rips_bifiltration
     U grid_inf = Degree_rips_bifiltration<U, Co, Ensure1Criticality>::T_inf;
     std::vector<U> outVec(f.num_generators());
 
-    GUDHI_CHECK_code(const std::vector<U> &indices = grid[1]);
-    const std::vector<U> &values = grid[0];
+    GUDHI_CHECK_code(const RandomAccessArray &indices = grid[1]);
+    const RandomAccessArray &values = grid[0];
     for (size_type g = 0; g < f.num_generators(); ++g) {
       GUDHI_CHECK_code(GUDHI_CHECK(static_cast<size_type>(indices[g]) == g, std::invalid_argument("Unvalid grid.")));
 
       const T &c = f.generators_[g];
+      GUDHI_CHECK(c == T_inf || static_cast<std::size_t>(c) < values.size(),
+                  std::invalid_argument("f coordinate is out of bound: non compatible grid."));
       outVec[g] = (c == T_inf ? grid_inf : values[c]);
     }
 
@@ -2260,6 +2176,9 @@ class Degree_rips_bifiltration
     U out = 0;
     for (size_type p = 0; p < number_of_elements; ++p) {
       T v = std::forward<F>(norm)(p);
+      // workaround -Ofast optimization which is default on Windows
+      // otherwise 0 += NaN can be equal to 0 with -Ofast which we don't want
+      if (_is_nan(v)) return v;
       out += v * v;
     }
     if constexpr (std::is_integral_v<U>) {

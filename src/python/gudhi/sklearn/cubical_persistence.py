@@ -12,7 +12,7 @@ __license__ = "MIT"
 
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import Union, Literal, Optional
+from typing import Literal, Optional
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
 
@@ -44,7 +44,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        homology_dimensions: Union[int, ArrayLike],
+        homology_dimensions: int | ArrayLike,
         input_type: Literal["top_dimensional_cells", "vertices"] = "top_dimensional_cells",
         homology_coeff_field: int = 11,
         min_persistence: float = 0.0,

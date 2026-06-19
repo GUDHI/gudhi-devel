@@ -21,7 +21,7 @@ using Gudhi::multi_filtration::Multi_parameter_filtration;
 using Gudhi::multi_persistence::Line;
 using Gudhi::multi_persistence::Point;
 
-typedef boost::mpl::list<double, float, int> list_of_tested_variants;
+using list_of_tested_variants = boost::mpl::list<double, float, int>;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(line_constructors, T, list_of_tested_variants)
 {
@@ -115,42 +115,42 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_other, T, list_of_tested_variants)
 {
   using P = typename Line<T>::Point_t;
 
-  Line<T> l({1, 2, 3}, {4, 0, 6});
+  Line<T> l({-1, 2, 3}, {4, 0, 6});
 
   P x = l[1.25];
   BOOST_CHECK_EQUAL(x.size(), 3);
-  BOOST_CHECK_EQUAL(x[0], 1. + T(1.25) * 4.);
-  BOOST_CHECK_EQUAL(x[1], 2);
-  BOOST_CHECK_EQUAL(x[2], 3. + T(1.25) * 6.);
+  BOOST_CHECK_EQUAL(x[0], T(-1. + 1.25 * 4.));
+  BOOST_CHECK_EQUAL(x[1], T(2));
+  BOOST_CHECK_EQUAL(x[2], T(3. + 1.25 * 6.));
 
   x = l[0];
   BOOST_CHECK_EQUAL(x.size(), 3);
-  BOOST_CHECK_EQUAL(x[0], 1);
-  BOOST_CHECK_EQUAL(x[1], 2);
-  BOOST_CHECK_EQUAL(x[2], 3);
+  BOOST_CHECK_EQUAL(x[0], T(-1));
+  BOOST_CHECK_EQUAL(x[1], T(2));
+  BOOST_CHECK_EQUAL(x[2], T(3));
 
   x = l[-3.25];
   BOOST_CHECK_EQUAL(x.size(), 3);
-  BOOST_CHECK_EQUAL(x[0], 1. + T(-3.25) * 4.);
-  BOOST_CHECK_EQUAL(x[1], 2);
-  BOOST_CHECK_EQUAL(x[2], 3. + T(-3.25) * 6.);
+  BOOST_CHECK_EQUAL(x[0], T(-1. + (-3.25) * 4.));
+  BOOST_CHECK_EQUAL(x[1], T(2));
+  BOOST_CHECK_EQUAL(x[2], T(3. + (-3.25) * 6.));
 
   l += {2, 5, 6};
   x = l[1.25];
   BOOST_CHECK_EQUAL(x.size(), 3);
-  BOOST_CHECK_EQUAL(x[0], 3. + T(1.25) * 4.);
-  BOOST_CHECK_EQUAL(x[1], 7);
-  BOOST_CHECK_EQUAL(x[2], 9. + T(1.25) * 6.);
+  BOOST_CHECK_EQUAL(x[0], T(1. + 1.25 * 4.));
+  BOOST_CHECK_EQUAL(x[1], T(7));
+  BOOST_CHECK_EQUAL(x[2], T(9. + 1.25 * 6.));
 
   x = l[0];
   BOOST_CHECK_EQUAL(x.size(), 3);
-  BOOST_CHECK_EQUAL(x[0], 3);
+  BOOST_CHECK_EQUAL(x[0], 1);
   BOOST_CHECK_EQUAL(x[1], 7);
   BOOST_CHECK_EQUAL(x[2], 9);
 
   x = l[-3.25];
   BOOST_CHECK_EQUAL(x.size(), 3);
-  BOOST_CHECK_EQUAL(x[0], 3. + T(-3.25) * 4.);
-  BOOST_CHECK_EQUAL(x[1], 7);
-  BOOST_CHECK_EQUAL(x[2], 9. + T(-3.25) * 6.);
+  BOOST_CHECK_EQUAL(x[0], T(1. + (-3.25) * 4.));
+  BOOST_CHECK_EQUAL(x[1], T(7));
+  BOOST_CHECK_EQUAL(x[2], T(9. + (-3.25) * 6.));
 }

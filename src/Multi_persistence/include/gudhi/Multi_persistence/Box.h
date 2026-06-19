@@ -56,9 +56,46 @@ class Box
    */
   Box(const Point_t &lowerCorner, const Point_t &upperCorner) : lowerCorner_(lowerCorner), upperCorner_(upperCorner)
   {
-    GUDHI_CHECK(lowerCorner.size() == upperCorner.size(),
+    GUDHI_CHECK(lowerCorner_.size() == upperCorner_.size(),
                 std::invalid_argument("The two corners of the box don't have the same dimension."));
-    GUDHI_CHECK(lowerCorner <= upperCorner, std::invalid_argument("The first corner is not smaller than the second."));
+    // GUDHI_CHECK(lowerCorner_ <= upperCorner_,
+    //             std::invalid_argument("The first corner is not smaller than the second."));
+  }
+
+  /**
+   * @brief Move constructs a box from the two given corners. Assumes that \f$ lowerCorner \le @p upperCorner \f$ and
+   * if both are finite values, they have the same dimension.
+   *
+   * @param lowerCorner First corner of the box. Has to be smaller than `upperCorner`.
+   * @param upperCorner Second corner of the box. Has to be greater than `lowerCorner`.
+   */
+  Box(Point_t &&lowerCorner, Point_t &&upperCorner)
+      : lowerCorner_(std::move(lowerCorner)), upperCorner_(std::move(upperCorner)) {
+    GUDHI_CHECK(lowerCorner_.size() == upperCorner_.size(),
+                std::invalid_argument("The two corners of the box don't have the same dimension."));
+    // GUDHI_CHECK(lowerCorner_ <= upperCorner_,
+    //             std::invalid_argument("The first corner is not smaller than the second."));
+  }
+
+  /**
+   * @brief Constructs a box from the two given corners. Assumes that \f$ lowerCorner \le @p upperCorner \f$ and
+   * if both are finite values, they have the same dimension.
+   * 
+   * @tparam CoordinateIterator1 Forward iterator derefencing to an arithmetic value convertible to `T`.
+   * @tparam CoordinateIterator2 Forward iterator derefencing to an arithmetic value convertible to `T`.
+   * @param lowerBegin Begin iterator of the lower corner.
+   * @param lowerEnd End iterator of the lower corner.
+   * @param upperBegin Begin iterator of the upper corner.
+   * @param upperEnd End iterator of the upper corner.
+   */
+  template <class CoordinateIterator1, class CoordinateIterator2>
+  Box(CoordinateIterator1 lowerBegin, CoordinateIterator1 lowerEnd, CoordinateIterator2 upperBegin,
+      CoordinateIterator2 upperEnd)
+      : lowerCorner_(lowerBegin, lowerEnd), upperCorner_(upperBegin, upperEnd) {
+    GUDHI_CHECK(lowerCorner_.size() == upperCorner_.size(),
+                std::invalid_argument("The two corners of the box don't have the same dimension."));
+    // GUDHI_CHECK(lowerCorner_ <= upperCorner_,
+    //             std::invalid_argument("The first corner is not smaller than the second."));
   }
 
   /**
@@ -153,9 +190,9 @@ class Box
   }
 
   /**
-   * @brief Returns the dimension of the box.
+   * @brief Returns the number of coordinates of the box.
    */
-  [[nodiscard]] std::size_t get_dimension() const { return lowerCorner_.size(); }
+  [[nodiscard]] std::size_t get_number_of_coordinates() const { return lowerCorner_.size(); }
 
   /**
    * @brief Inflates the box by delta.
@@ -205,20 +242,58 @@ class Box
     }
     if (b.is_trivial()) return a;
 
-    GUDHI_CHECK(a.get_dimension() == b.get_dimension(), "Both boxes to enclose do not have the same dimension.");
+    GUDHI_CHECK(a.get_number_of_coordinates() == b.get_number_of_coordinates(), "Both boxes to enclose do not have the same dimension.");
 
-    Point_t lower(a.get_dimension());
-    Point_t upper(a.get_dimension());
+    Point_t lower(a.get_number_of_coordinates());
+    Point_t upper(a.get_number_of_coordinates());
     const auto &aLower = a.get_lower_corner();
     const auto &aUpper = a.get_upper_corner();
     const auto &bLower = b.get_lower_corner();
     const auto &bUpper = b.get_upper_corner();
-    for (unsigned int i = 0; i < a.get_dimension(); ++i) {
+    for (unsigned int i = 0; i < a.get_number_of_coordinates(); ++i) {
       lower[i] = std::min(aLower[i], bLower[i]);
       upper[i] = std::max(aUpper[i], bUpper[i]);
     }
 
     return Box(lower, upper);
+  }
+
+  /**
+   * @brief Serialize given value into the buffer at given pointer.
+   *
+   * @param value Value to serialize.
+   * @param start Pointer to the start of the space in the buffer where to store the serialization.
+   * @return End position of the serialization in the buffer.
+   */
+  friend char *serialize_value_to_char_buffer(const Box &value, char *start) {
+    char *curr = start;
+    curr = serialize_value_to_char_buffer(value.lowerCorner_, curr);
+    curr = serialize_value_to_char_buffer(value.upperCorner_, curr);
+    return curr;
+  }
+
+  /**
+   * @brief Deserialize the value from a buffer at given pointer and stores it in given value.
+   *
+   * @param value Value to fill with the deserialized box.
+   * @param start Pointer to the start of the space in the buffer where the serialization is stored.
+   * @return End position of the serialization in the buffer.
+   */
+  friend const char *deserialize_value_from_char_buffer(Box &value, const char *start) {
+    const char *curr = start;
+    curr = deserialize_value_from_char_buffer(value.lowerCorner_, curr);
+    curr = deserialize_value_from_char_buffer(value.upperCorner_, curr);
+    return curr;
+  }
+
+  /**
+   * @brief Returns the serialization size of the given box.
+   */
+  friend std::size_t get_serialization_size_of(const Box &value) {
+    std::size_t size = 0;
+    // both corners have same length and same value type
+    size += get_serialization_size_of(value.lowerCorner_) * 2;
+    return size;
   }
 
  private:

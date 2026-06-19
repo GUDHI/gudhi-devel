@@ -10,7 +10,7 @@
 __license__ = "GPL v3"
 
 
-from typing import Union, Iterable, Literal, Optional, Any
+from typing import Iterable, Literal, Optional, Any
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
@@ -40,7 +40,7 @@ class CechPersistence(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        homology_dimensions: Union[int, Iterable[int]],
+        homology_dimensions: int | Iterable[int],
         precision: Literal["fast", "safe", "exact"] = "safe",
         output_squared_values: bool = False,
         threshold: float = float("inf"),
@@ -148,7 +148,7 @@ class WeightedCechPersistence(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        homology_dimensions: Union[int, Iterable[int]],
+        homology_dimensions: int | Iterable[int],
         precision: Literal["fast", "safe", "exact"] = "safe",
         output_squared_values: bool = True,
         threshold: float = float("inf"),
