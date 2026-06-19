@@ -39,10 +39,7 @@ template <typename U>
 bool _is_less(U a, U b)
 {
   // workaround -Ofast optimization which is default on Windows, where x < NaN / NaN < x is not well defined
-  if (_is_nan(a)) {
-    if (_is_nan(b)) return false;
-    return true;
-  }
+  if (_is_nan(a)) return !_is_nan(b);
   if (_is_nan(b)) return false;
   return a < b;
 };
