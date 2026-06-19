@@ -312,7 +312,8 @@ class Dynamic_multi_parameter_filtration
    */
   reference operator()(size_type g, size_type p)
   {
-    GUDHI_CHECK(g < generators_.size() && p < numberOfParameters_, std::out_of_range("Out of bound index."));
+    GUDHI_CHECK(g < generators_.size(), std::out_of_range("First index out of bound."));
+    GUDHI_CHECK(p < numberOfParameters_, std::out_of_range("Second index out of bound."));
     if (generators_[g].size() < numberOfParameters_) return generators_[g][0];
     return generators_[g][p];
   }
@@ -322,7 +323,8 @@ class Dynamic_multi_parameter_filtration
    */
   const_reference operator()(size_type g, size_type p) const
   {
-    GUDHI_CHECK(g < generators_.size() && p < numberOfParameters_, std::out_of_range("Out of bound index."));
+    GUDHI_CHECK(g < generators_.size(), std::out_of_range("First index out of bound."));
+    GUDHI_CHECK(p < numberOfParameters_, std::out_of_range("Second index out of bound."));
     if (generators_[g].size() < numberOfParameters_) return generators_[g][0];
     return generators_[g][p];
   }
