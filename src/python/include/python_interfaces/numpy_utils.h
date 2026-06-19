@@ -171,7 +171,7 @@ template <typename T, class = std::enable_if<std::is_arithmetic_v<T> > >
 class Numpy_2d_span
 {
  public:
-  using Array = nanobind::ndarray<const T, nanobind::ndim<2>, nanobind::any_contig>;
+  using Array = nanobind::ndarray<const T, nanobind::ndim<2> >;
   using value_type = T;
   using const_pointer = T const *;
   using difference_type = std::ptrdiff_t;
