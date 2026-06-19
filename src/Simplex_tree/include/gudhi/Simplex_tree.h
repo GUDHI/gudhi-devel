@@ -465,10 +465,10 @@ class Simplex_tree {
   Simplex_tree()
       : null_vertex_(-1),
         root_(nullptr, null_vertex_),
+        number_of_parameters_(1),
         filtration_vect_(),
         dimension_(-1),
-        dimension_to_be_lowered_(false),
-        number_of_parameters_(1) {}
+        dimension_to_be_lowered_(false) {}
 
   /**
    * @brief Construct the simplex tree as the copy of a given simplex tree with eventually different template
@@ -2971,13 +2971,13 @@ class Simplex_tree {
    *   architecture.
    */
   std::size_t get_serialization_size() const {
-    // const std::size_t version_byte_size = sizeof(std::int16_t);
-    // const std::size_t np_byte_size = sizeof(decltype(number_of_parameters_));
+    const std::size_t version_byte_size = sizeof(std::int16_t);
+    const std::size_t np_byte_size = sizeof(decltype(number_of_parameters_));
     const std::size_t vh_byte_size = sizeof(Vertex_handle);
     std::size_t fv_byte_size = 0;
     const std::size_t tree_size = num_simplices_and_filtration_serialization_size(&root_, fv_byte_size);
     const std::size_t buffer_byte_size =
-        /* version_byte_size + np_byte_size + */ vh_byte_size + fv_byte_size + tree_size * 2 * vh_byte_size;
+        version_byte_size + np_byte_size + vh_byte_size + fv_byte_size + tree_size * 2 * vh_byte_size;
 #ifdef DEBUG_TRACES
     std::clog << "Gudhi::simplex_tree::get_serialization_size - buffer size = " << buffer_byte_size << std::endl;
 #endif  // DEBUG_TRACES
@@ -3018,9 +3018,8 @@ class Simplex_tree {
   /* Without explanation and with filtration values:                                                                 */
   /* 04 0a F(a) 0b F(b) 0c F(c) 0d F(d) 01 0b F(a,b) 00 02 0c F(b,c) 0d F(b,d) 01 0d F(b,c,d) 00 00 01 0d F(c,d) 00 00 */
   void serialize(char* buffer, const std::size_t buffer_size) const {
-    char* buffer_end = buffer;
-    // char* buffer_end = serialize_value_to_char_buffer(SERIALIZATION_VERSION, buffer);
-    // buffer_end = serialize_value_to_char_buffer(number_of_parameters_, buffer_end);
+    char* buffer_end = serialize_value_to_char_buffer(SERIALIZATION_VERSION, buffer);
+    buffer_end = serialize_value_to_char_buffer(number_of_parameters_, buffer_end);
     buffer_end = rec_serialize(&root_, buffer_end);
     if (static_cast<std::size_t>(buffer_end - buffer) != buffer_size)
       throw std::invalid_argument("Serialization does not match end of buffer");
@@ -3108,12 +3107,12 @@ class Simplex_tree {
   void deserialize(const char* buffer, const std::size_t buffer_size, F&& deserialize_filtration_value) {
     GUDHI_CHECK(num_vertices() == 0, std::logic_error("Simplex_tree::deserialize - Simplex_tree must be empty"));
     const char* ptr = buffer;
-    // std::int16_t version;
-    // ptr = deserialize_value_from_char_buffer(version, ptr);
-    // if (version != SERIALIZATION_VERSION) {
-    //   throw std::invalid_argument("The buffer comes from an non-compatible serialization version of the simplex tree.");
-    // }
-    // ptr = deserialize_value_from_char_buffer(number_of_parameters_, ptr);
+    std::int16_t version;
+    ptr = deserialize_value_from_char_buffer(version, ptr);
+    if (version != SERIALIZATION_VERSION) {
+      throw std::invalid_argument("The buffer comes from an non-compatible serialization version of the simplex tree.");
+    }
+    ptr = deserialize_value_from_char_buffer(number_of_parameters_, ptr);
     // Needs to read size before recursivity to manage new siblings for children
     Vertex_handle members_size;
     ptr = deserialize_value_from_char_buffer(members_size, ptr);
@@ -3224,7 +3223,7 @@ class Simplex_tree {
   Vertex_handle null_vertex_;
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
-  // int number_of_parameters_;  /**< Stores the number of parameters set by the user. */
+  int number_of_parameters_;
   
   // all mutable as their content has no impact on the content of the simplex tree itself
   // they correspond to some kind of cache or helper attributes.
@@ -3233,12 +3232,11 @@ class Simplex_tree {
   /** \brief Upper bound on the dimension of the simplicial complex.*/
   mutable int dimension_;
   mutable bool dimension_to_be_lowered_;
-  int number_of_parameters_;  /**< Stores the number of parameters set by the user. */
 
-  // /**
-  //  * @brief Serialization version number. Should be incremented for each change in the serialization strategy.
-  //  */
-  // static constexpr std::int16_t SERIALIZATION_VERSION = 1;
+  /**
+   * @brief Serialization version number. Should be incremented for each change in the serialization strategy.
+   */
+  static constexpr std::int16_t SERIALIZATION_VERSION = 1;
 };
 
 /** @}*/  // end addtogroup simplex_tree
