@@ -185,7 +185,7 @@ class Numpy_2d_span
 
   const_pointer get_start_ptr() const { return &array_view_(0, 0); }
 
-  const_pointer get_end_ptr() const { return get_start_ptr() + array_view_.shape(0) * array_view_.shape(1); }
+  const_pointer get_end_ptr() const { return get_start_ptr() + array_view_.shape(0) * array_view_.stride(0); }
 };
 
 #endif  // INCLUDE_NUMPY_UTILS_PYTHON_H_

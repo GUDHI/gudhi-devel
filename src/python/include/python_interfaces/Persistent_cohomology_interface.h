@@ -15,6 +15,7 @@
 #include <vector>
 #include <utility>    // for std::pair
 #include <algorithm>  // for sort
+#include <stdexcept>
 #include <unordered_map>
 
 #include <nanobind/nanobind.h>
@@ -228,6 +229,8 @@ class Persistent_cohomology_interface
     auto& diags = out.first;
     // diagsinf[0] should be interpreted as vector<int> and other diagsinf[i] as vector<array<int,2>>
     auto& diagsinf = out.second;
+    constexpr const char* non_flag_complex_error =
+        "flag_persistence_generators() requires a flag complex: a simplex has no edge with the same filtration";
     for (auto pair : Base::get_persistent_pairs()) {
       auto s = std::get<0>(pair);
       auto t = std::get<1>(pair);
@@ -240,6 +243,9 @@ class Persistent_cohomology_interface
           diagsinf[0].push_back(v);
         } else {
           auto e = stptr_->edge_with_same_filtration(s);
+          if (e == stptr_->null_simplex()) {
+            throw std::invalid_argument(non_flag_complex_error);
+          }
           auto&& e_vertices = stptr_->simplex_vertex_range(e);
           auto i = std::begin(e_vertices);
           auto v1 = *i;
@@ -251,6 +257,9 @@ class Persistent_cohomology_interface
         }
       } else {
         auto et = stptr_->edge_with_same_filtration(t);
+        if (et == stptr_->null_simplex()) {
+          throw std::invalid_argument(non_flag_complex_error);
+        }
         auto&& et_vertices = stptr_->simplex_vertex_range(et);
         auto it = std::begin(et_vertices);
         auto w1 = *it;
@@ -263,6 +272,9 @@ class Persistent_cohomology_interface
           d.insert(d.end(), {v, w1, w2});
         } else {
           auto es = stptr_->edge_with_same_filtration(s);
+          if (es == stptr_->null_simplex()) {
+            throw std::invalid_argument(non_flag_complex_error);
+          }
           auto&& es_vertices = stptr_->simplex_vertex_range(es);
           auto is = std::begin(es_vertices);
           auto v1 = *is;
