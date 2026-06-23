@@ -36,7 +36,8 @@ using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomolog
 
 using Persistence_interval = std::tuple<int, Filtration_value, Filtration_value>;
 /*
- * Compare two intervals by dimension, then by length.
+ * Compare two intervals lexicographically.
+ * (if you want to sort by length, remember to handle infinite intervals)
  */
 struct cmp_intervals_by_length {
   explicit cmp_intervals_by_length(Simplex_tree * sc)
@@ -44,8 +45,8 @@ struct cmp_intervals_by_length {
 
   template<typename Persistent_interval>
   bool operator()(const Persistent_interval & p1, const Persistent_interval & p2) {
-    return (sc_->filtration(get < 1 > (p1)) - sc_->filtration(get < 0 > (p1))
-            > sc_->filtration(get < 1 > (p2)) - sc_->filtration(get < 0 > (p2)));
+    return std::pair(sc_->filtration(get<0>(p1)), sc_->filtration(get<1>(p1)))
+         < std::pair(sc_->filtration(get<0>(p2)), sc_->filtration(get<1>(p2)));
   }
   Simplex_tree* sc_;
 };
