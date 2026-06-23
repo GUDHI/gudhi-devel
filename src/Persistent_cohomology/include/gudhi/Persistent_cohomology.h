@@ -18,7 +18,12 @@
 #include <boost/intrusive/set.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 #include <boost/intrusive/list.hpp>
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 108100
+#include <boost/unordered/unordered_flat_map.hpp>
+#else
 #include <boost/unordered_map.hpp>
+#endif
 
 #include <iostream>
 #include <map>
@@ -745,12 +750,17 @@ class Persistent_cohomology {
   boost::disjoint_sets<int *, Simplex_key *> dsets_;
   /* The compressed annotation matrix fields.*/
   Cam cam_;
+#if BOOST_VERSION >= 108100
   /*  Dictionary establishing the correspondence between the Simplex_key of
    * the root vertex in the union-find ds and the Simplex_key of the vertex which
    * created the connected component as a 0-dimension homology feature.*/
-  boost::unordered_map<Simplex_key, Simplex_key> zero_cocycles_;
+  boost::unordered_flat_map<Simplex_key, Simplex_key> zero_cocycles_;
   /*  Key -> row. */
+  boost::unordered_flat_map<Simplex_key, cocycle> transverse_idx_;
+#else
+  boost::unordered_map<Simplex_key, Simplex_key> zero_cocycles_;
   boost::unordered_map<Simplex_key, cocycle> transverse_idx_;
+#endif
   /* Persistent intervals. */
   std::vector<Persistent_interval> persistent_pairs_;
   length_interval interval_length_policy;
