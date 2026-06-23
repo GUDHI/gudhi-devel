@@ -32,6 +32,8 @@ namespace Gudhi {
 namespace multi_filtration {
 
 /**
+ * @ingroup multi_filtration
+ *
  * @brief Converts the given multi filtration value into the type given as template argument. It is assumed that the
  * given value is simplified (i.e. minimal and ordered lexicographically). If the new type is
  * @ref Gudhi::multi_filtration::Degree_rips_bifiltration it is additionally assumed that the given value is compatible
@@ -48,7 +50,7 @@ namespace multi_filtration {
  * @param f Filtration value to convert.
  */
 template <class Out_multi_filtration, typename T, bool Co, bool Ensure1Criticality>
-Out_multi_filtration as_type(const Multi_parameter_filtration<T, Co, Ensure1Criticality>& f)
+inline Out_multi_filtration as_type(const Multi_parameter_filtration<T, Co, Ensure1Criticality>& f)
 {
   using U = typename Out_multi_filtration::value_type;
   constexpr bool co = Out_multi_filtration::has_negative_cones();
@@ -78,6 +80,8 @@ Out_multi_filtration as_type(const Multi_parameter_filtration<T, Co, Ensure1Crit
 }
 
 /**
+ * @ingroup multi_filtration
+ *
  * @brief Converts the given multi filtration value into the type given as template argument. It is assumed that the
  * given value is simplified (i.e. minimal and ordered lexicographically). If the new type is
  * @ref Gudhi::multi_filtration::Degree_rips_bifiltration it is additionally assumed that the given value is compatible
@@ -94,7 +98,7 @@ Out_multi_filtration as_type(const Multi_parameter_filtration<T, Co, Ensure1Crit
  * @param f Filtration value to convert.
  */
 template <class Out_multi_filtration, typename T, bool Co, bool Ensure1Criticality>
-Out_multi_filtration as_type(const Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>& f)
+inline Out_multi_filtration as_type(const Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>& f)
 {
   using U = typename Out_multi_filtration::value_type;
   constexpr bool co = Out_multi_filtration::has_negative_cones();
@@ -132,6 +136,8 @@ Out_multi_filtration as_type(const Dynamic_multi_parameter_filtration<T, Co, Ens
 }
 
 /**
+ * @ingroup multi_filtration
+ *
  * @brief Converts the given multi filtration value into the type given as template argument. If the new type is
  * @ref Gudhi::multi_filtration::Degree_rips_bifiltration it is additionally assumed that the given value is compatible
  * with the type, that is,the number of parameters is 2 and the second parameter is an index (positive and convertible
@@ -146,7 +152,7 @@ Out_multi_filtration as_type(const Dynamic_multi_parameter_filtration<T, Co, Ens
  * @param numberOfParameters Number of parameters of the filtration value.
  */
 template <class Out_multi_filtration, typename T>
-Out_multi_filtration as_type(const Multi_parameter_generator<T>& f, std::size_t numberOfParameters) {
+inline Out_multi_filtration as_type(const Multi_parameter_generator<T>& f, std::size_t numberOfParameters) {
   using U = typename Out_multi_filtration::value_type;
   constexpr bool co = Out_multi_filtration::has_negative_cones();
   constexpr bool one_crit = Out_multi_filtration::ensures_1_criticality();
@@ -173,6 +179,8 @@ Out_multi_filtration as_type(const Multi_parameter_generator<T>& f, std::size_t 
 }
 
 /**
+ * @ingroup multi_filtration
+ *
  * @brief Converts the given multi filtration value into the type given as template argument.
  *
  * @tparam Out_multi_filtration New filtration value type. Has to be either
@@ -185,7 +193,7 @@ Out_multi_filtration as_type(const Multi_parameter_generator<T>& f, std::size_t 
  * @param f Filtration value to convert.
  */
 template <class Out_multi_filtration, typename T, bool Co, bool Ensure1Criticality>
-Out_multi_filtration as_type(const Degree_rips_bifiltration<T, Co, Ensure1Criticality>& f)
+inline Out_multi_filtration as_type(const Degree_rips_bifiltration<T, Co, Ensure1Criticality>& f)
 {
   using U = typename Out_multi_filtration::value_type;
   constexpr bool co = Out_multi_filtration::has_negative_cones();

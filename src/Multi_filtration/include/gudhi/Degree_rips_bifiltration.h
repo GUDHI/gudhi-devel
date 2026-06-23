@@ -478,9 +478,10 @@ class Degree_rips_bifiltration
 
   /**
    * @brief Converts the filtration value to @ref Multi_parameter_filtration without any set simplification.
-   * @warning The filtration value is converted one to one and is not simplified to a minimal set of generators or
+   * @note The filtration value is converted one to one and is not simplified to a minimal set of generators or
    * ordered by lexicographical order, that undefines the behaviour of some methods of the class.
-   * Use @ref as_type(const Degree_rips_bifiltration&) instead if needed.
+   * Use @ref Gudhi::multi_filtration::as_type(const Degree_rips_bifiltration<T,Co,Ensure1Criticality>&)
+   * instead if needed.
    */
   Multi_parameter_filtration<T, Co, Ensure1Criticality> convert_to_non_simplified_multi_parameter_filtration() const
   {
@@ -496,9 +497,10 @@ class Degree_rips_bifiltration
 
   /**
    * @brief Converts the filtration value to @ref Dynamic_multi_parameter_filtration without any set simplification.
-   * @warning The filtration value is converted one to one and is not simplified to a minimal set of generators or
+   * @note The filtration value is converted one to one and is not simplified to a minimal set of generators or
    * ordered by lexicographical order, that undefines the behaviour of some methods of the class.
-   * Use @ref as_type(const Degree_rips_bifiltration&) instead if needed.
+   * Use @ref Gudhi::multi_filtration::as_type(const Degree_rips_bifiltration<T,Co,Ensure1Criticality>&)
+   * instead if needed.
    */
   Dynamic_multi_parameter_filtration<T, Co, Ensure1Criticality>
   convert_to_non_simplified_dynamic_multi_parameter_filtration() const

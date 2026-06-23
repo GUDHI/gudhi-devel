@@ -29,6 +29,8 @@ namespace Gudhi {
 namespace multi_filtration {
 
 /**
+ * @ingroup multi_filtration
+ *
  * @private
  */
 template <typename T>
@@ -55,6 +57,8 @@ class RangeTraits
 };
 
 /**
+ * @ingroup multi_filtration
+ *
  * @private
  */
 template <typename T>
@@ -69,6 +73,8 @@ constexpr bool _is_nan(T val)
 };
 
 /**
+ * @ingroup multi_filtration
+ *
  * @private
  * @brief Infinity value of an entry of the filtration value.
  */
@@ -77,6 +83,8 @@ constexpr const T MF_T_inf =
     std::numeric_limits<T>::has_infinity ? std::numeric_limits<T>::infinity() : std::numeric_limits<T>::max();
 
 /**
+ * @ingroup multi_filtration
+ *
  * @private
  * @brief Minus infinity value of an entry of the filtration value.
  */
@@ -85,6 +93,8 @@ constexpr const T MF_T_m_inf =
     std::numeric_limits<T>::has_infinity ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::lowest();
 
 /**
+ * @ingroup multi_filtration
+ *
  * @private
  * @brief Adds v1 and v2, stores the result in v1 and returns true if and only if v1 was modified.
  */
@@ -109,6 +119,8 @@ constexpr bool _add(T &v1, T v2)
 };
 
 /**
+ * @ingroup multi_filtration
+ *
  * @private
  * @brief Subtracts v1 and v2, stores the result in v1 and returns true if and only if v1 was modified.
  */
@@ -119,6 +131,8 @@ constexpr bool _subtract(T &v1, T v2)
 };
 
 /**
+ * @ingroup multi_filtration
+ *
  * @private
  * @brief Multiplies v1 and v2, stores the result in v1 and returns true if and only if v1 was modified.
  */
@@ -150,6 +164,8 @@ constexpr bool _multiply(T &v1, T v2)
 };
 
 /**
+ * @ingroup multi_filtration
+ *
  * @private
  * @brief Divides v1 and v2, stores the result in v1 and returns true if and only if v1 was modified.
  */
@@ -180,8 +196,13 @@ constexpr bool _divide(T &v1, T v2)
   return true;
 };
 
+/**
+ * @ingroup multi_filtration
+ *
+ * @private
+ */
 template <class T>
-T _get_value(std::istream &stream)
+inline T _get_value(std::istream &stream)
 {
   if constexpr (std::numeric_limits<T>::has_infinity) {
     auto pos = stream.tellg();

@@ -33,10 +33,12 @@ namespace Gudhi {
 namespace multi_filtration {
 
 /**
+ * @ingroup multi_filtration
+ *
  * @private
  */
 template <typename U>
-bool _is_less(U a, U b)
+inline bool _is_less(U a, U b)
 {
   // workaround -Ofast optimization which is default on Windows, where x < NaN / NaN < x is not well defined
   if (_is_nan(a)) return !_is_nan(b);
@@ -45,20 +47,24 @@ bool _is_less(U a, U b)
 };
 
 /**
+ * @ingroup multi_filtration
+ *
  * @brief For the first argument, computes the smallest (resp. the greatest if `MultiFiltrationValue::Co` is true)
  * scalar product of all its generators with the given range.
  *
  * @tparam U Arithmetic type of the result.
  * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
  * operator(g, p), as well as has_negative_cones() and type definition `size_type`. For example:
- * @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or @ref Degree_rips_bifiltration.
+ * @ref Gudhi::multi_filtration::Multi_parameter_filtration,
+ * @ref Gudhi::multi_filtration::Dynamic_multi_parameter_filtration or
+ * @ref Gudhi::multi_filtration::Degree_rips_bifiltration.
  * @tparam CoefficientRange Range of values convertible into `U` with a begin() and size() method.
  * @param f Multi filtration value.
  * @param x Vector of coefficients.
  * @return Scalar product of @p f with @p x of type `U`.
  */
 template <typename U, class MultiFiltrationValue, class CoefficientRange = std::initializer_list<U> >
-U compute_linear_projection(const MultiFiltrationValue &f, const CoefficientRange &x)
+inline U compute_linear_projection(const MultiFiltrationValue &f, const CoefficientRange &x)
 {
   using size_type = typename MultiFiltrationValue::size_type;
 
@@ -110,12 +116,16 @@ U compute_linear_projection(const MultiFiltrationValue &f, const CoefficientRang
 // enables compute_linear_projection<U>(...) as well as compute_linear_projection(...) with default value
 // MultiFiltrationValue::value_type and not a fixed type like double
 /**
+ * @ingroup multi_filtration
+ *
  * @brief For the first argument, computes the smallest (resp. the greatest if `MultiFiltrationValue::Co` is true)
  * scalar product of all its generators with the given range.
  *
  * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
  * operator(g, p), as well as has_negative_cones() and type definition `size_type`. For example:
- * @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or @ref Degree_rips_bifiltration.
+ * @ref Gudhi::multi_filtration::Multi_parameter_filtration,
+ * @ref Gudhi::multi_filtration::Dynamic_multi_parameter_filtration or
+ * @ref Gudhi::multi_filtration::Degree_rips_bifiltration.
  * @tparam CoefficientRange Range of values convertible into `U` with a begin() and size() method.
  * @param f Multi filtration value.
  * @param x Vector of coefficients.
@@ -123,17 +133,19 @@ U compute_linear_projection(const MultiFiltrationValue &f, const CoefficientRang
  */
 template <class MultiFiltrationValue,
           class CoefficientRange = std::initializer_list<typename MultiFiltrationValue::value_type> >
-auto compute_linear_projection(const MultiFiltrationValue &f, const CoefficientRange &x)
+inline auto compute_linear_projection(const MultiFiltrationValue &f, const CoefficientRange &x)
 {
   return compute_linear_projection<typename MultiFiltrationValue::value_type, MultiFiltrationValue, CoefficientRange>(
       f, x);
 }
 
 /**
+ * @ingroup multi_filtration
+ *
  * @private
  */
 template <typename T>
-T _sqrt(T v)
+inline T _sqrt(T v)
 {
   if constexpr (std::is_integral_v<T>) {
     // to avoid Windows issue that don't know how to cast integers for cmath methods
@@ -144,10 +156,12 @@ T _sqrt(T v)
 }
 
 /**
+ * @ingroup multi_filtration
+ *
  * @private
  */
 template <typename T, class F, typename size_type>
-T _compute_frobenius_norm(size_type number_of_elements, F &&norm)
+inline T _compute_frobenius_norm(size_type number_of_elements, F &&norm)
 {
   if (number_of_elements == 1) return std::forward<F>(norm)(0);
 
@@ -163,19 +177,23 @@ T _compute_frobenius_norm(size_type number_of_elements, F &&norm)
 }
 
 /**
+ * @ingroup multi_filtration
+ *
  * @brief Computes the euclidean distance from the first parameter to the second parameter as the minimum of
  * all Euclidean distances between a generator of @p f1 and a generator of @p f2.
  *
  * @tparam U Arithmetic type of the result.
  * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
  * operator(g, p), as well as ensures_1_criticality() and type definitions `size_type` and `value_type`. For example:
- * @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or @ref Degree_rips_bifiltration.
+ * @ref Gudhi::multi_filtration::Multi_parameter_filtration,
+ * @ref Gudhi::multi_filtration::Dynamic_multi_parameter_filtration or
+ * @ref Gudhi::multi_filtration::Degree_rips_bifiltration.
  * @param f1 Source filtration value.
  * @param f2 Target filtration value.
  * @return Euclidean distance between @p f1 and @p f2 with type `U`.
  */
 template <typename U, class MultiFiltrationValue>
-U compute_euclidean_distance_to(const MultiFiltrationValue &f1, const MultiFiltrationValue &f2)
+inline U compute_euclidean_distance_to(const MultiFiltrationValue &f1, const MultiFiltrationValue &f2)
 {
   using size_type = typename MultiFiltrationValue::size_type;
   using T = typename MultiFiltrationValue::value_type;
@@ -207,23 +225,29 @@ U compute_euclidean_distance_to(const MultiFiltrationValue &f1, const MultiFiltr
 // enables compute_euclidean_distance_to<U>(...) as well as compute_euclidean_distance_to(...) with default value
 // MultiFiltrationValue::value_type and not a fixed type like double
 /**
+ * @ingroup multi_filtration
+ *
  * @brief Computes the euclidean distance from the first parameter to the second parameter as the minimum of
  * all Euclidean distances between a generator of @p f1 and a generator of @p f2.
  *
  * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
  * operator(g, p), as well as ensures_1_criticality() and type definitions `size_type` and `value_type`. For example:
- * @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or @ref Degree_rips_bifiltration.
+ * @ref Gudhi::multi_filtration::Multi_parameter_filtration,
+ * @ref Gudhi::multi_filtration::Dynamic_multi_parameter_filtration or
+ * @ref Gudhi::multi_filtration::Degree_rips_bifiltration.
  * @param f1 Source filtration value.
  * @param f2 Target filtration value.
  * @return Euclidean distance between @p f1 and @p f2 with type `MultiFiltrationValue::value_type`.
  */
 template <class MultiFiltrationValue>
-auto compute_euclidean_distance_to(const MultiFiltrationValue &f1, const MultiFiltrationValue &f2)
+inline auto compute_euclidean_distance_to(const MultiFiltrationValue &f1, const MultiFiltrationValue &f2)
 {
   return compute_euclidean_distance_to<typename MultiFiltrationValue::value_type, MultiFiltrationValue>(f1, f2);
 }
 
 /**
+ * @ingroup multi_filtration
+ *
  * @brief Computes the norm of the given filtration value.
  *
  * The filtration value is seen as a \f$ num_generators x num_parameters \f$ matrix and a standard Frobenius norm
@@ -232,12 +256,14 @@ auto compute_euclidean_distance_to(const MultiFiltrationValue &f1, const MultiFi
  * @tparam U Arithmetic type of the result.
  * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
  * operator(g, p), as well as type definitions `size_type` and `value_type`. For example:
- * @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or @ref Degree_rips_bifiltration.
+ * @ref Gudhi::multi_filtration::Multi_parameter_filtration,
+ * @ref Gudhi::multi_filtration::Dynamic_multi_parameter_filtration or
+ * @ref Gudhi::multi_filtration::Degree_rips_bifiltration.
  * @param f Multi filtration value.
  * @return The norm of @p f of type `U`.
  */
 template <typename U, class MultiFiltrationValue>
-U compute_norm(const MultiFiltrationValue &f)
+inline U compute_norm(const MultiFiltrationValue &f)
 {
   using size_type = typename MultiFiltrationValue::size_type;
   using T = typename MultiFiltrationValue::value_type;
@@ -257,6 +283,8 @@ U compute_norm(const MultiFiltrationValue &f)
 // enables compute_norm<U>(...) as well as compute_norm(...) with default value
 // MultiFiltrationValue::value_type and not a fixed type like double
 /**
+ * @ingroup multi_filtration
+ *
  * @brief Computes the norm of the given filtration value.
  *
  * The filtration value is seen as a \f$ num_generators x num_parameters \f$ matrix and a standard Frobenius norm
@@ -264,12 +292,14 @@ U compute_norm(const MultiFiltrationValue &f)
  *
  * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and
  * operator(g, p), as well as type definitions `size_type` and `value_type`. For example:
- * @ref Multi_parameter_filtration, @ref Dynamic_multi_parameter_filtration or @ref Degree_rips_bifiltration.
+ * @ref Gudhi::multi_filtration::Multi_parameter_filtration,
+ * @ref Gudhi::multi_filtration::Dynamic_multi_parameter_filtration or
+ * @ref Gudhi::multi_filtration::Degree_rips_bifiltration.
  * @param f Multi filtration value.
  * @return The norm of @p f of type `MultiFiltrationValue::value_type`.
  */
 template <class MultiFiltrationValue>
-auto compute_norm(const MultiFiltrationValue &f)
+inline auto compute_norm(const MultiFiltrationValue &f)
 {
   return compute_norm<typename MultiFiltrationValue::value_type, MultiFiltrationValue>(f);
 }

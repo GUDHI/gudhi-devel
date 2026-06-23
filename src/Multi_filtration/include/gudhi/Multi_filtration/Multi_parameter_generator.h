@@ -42,7 +42,7 @@
 namespace Gudhi::multi_filtration {
 
 /**
- * private
+ * @private
  * @class Multi_parameter_generator Multi_parameter_generator.h gudhi/Multi_parameter_generator.h
  * @ingroup multi_filtration
  *
