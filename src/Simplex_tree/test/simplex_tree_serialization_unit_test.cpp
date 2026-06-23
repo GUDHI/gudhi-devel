@@ -12,11 +12,10 @@
 #include <iostream>
 #include <cstring>  // for std::size_t and strncmp
 #include <stdexcept>
-#include <random>
 #include <type_traits>
 #include <cstdint>  // for std::uint8_t
 #include <iomanip>  // for std::setfill, setw
-#include <ios>  // for std::hex, uppercase
+#include <ios>      // for std::hex, uppercase
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_serialization"
