@@ -385,9 +385,9 @@ class Simplex_tree {
    * \f$\tau\f$ and \f$\sigma\f$ satisfy \f$\tau \subseteq \sigma\f$ then
    * \f$f(\tau) \leq f(\sigma)\f$.
    *
-   * By default, if @ref initialize_filtration(Comparator&&, Ignorer&&) was not called with a comparator method,
-   * the method returns simplices ordered according to increasing filtration values and ties are
-   * resolved by considering inclusion relation (subsimplices appear before their cofaces). If two
+   * By default, if @ref initialize_filtration(Comparator&&, Ignorer&&) const "initialize_filtration" was not
+   * called with a comparator method, the method returns simplices ordered according to increasing filtration values
+   * and ties are resolved by considering inclusion relation (subsimplices appear before their cofaces). If two
    * simplices have same filtration value but are not comparable w.r.t. inclusion, lexicographic
    * order is used.
    *
