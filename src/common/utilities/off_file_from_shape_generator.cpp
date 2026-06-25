@@ -5,6 +5,7 @@
  *    Copyright (C) 2014 Inria
  *
  *    Modification(s):
+ *      - 2026/05 Vincent Rouvreau: Add seed mechanism
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -13,6 +14,7 @@
 #include <CGAL/Epick_d.h>
 #include <CGAL/algorithm.h>
 #include <CGAL/assertions.h>
+#include <CGAL/Random.h>
 
 #include <iostream>
 #include <iterator>
@@ -24,14 +26,14 @@ typedef CGAL::Epick_d< CGAL::Dynamic_dimension_tag > K;
 typedef K::Point_d Point;
 
 void usage(char * const progName) {
-  std::cerr << "Usage: " << progName << " in|on sphere|cube off_file_name points_number[integer > 0] " <<
-      "dimension[integer > 1] radius[double > 0.0 | default = 1.0]" << std::endl;
+  std::cerr << "Usage: " << progName << " in|on sphere|cube|curve|torus|klein off_file_name points_number(integer > 0)"
+            << " dimension(integer > 1) [radius(double > 0.0, default = 1.0) [seed(unsigned integer)]]" << std::endl;
   exit(-1);
 }
 
 int main(int argc, char **argv) {
   // program args management
-  if ((argc != 6) && (argc != 7)) {
+  if ((argc != 6) && (argc != 7) && (argc != 8)) {
     std::cerr << "Error: Number of arguments (" << argc << ") is not correct" << std::endl;
     usage(argv[0]);
   }
@@ -56,7 +58,12 @@ int main(int argc, char **argv) {
       usage(argv[0]);
     }
   }
-
+  
+  if (argc == 8) {
+    // Sets the seed for the default CGAL random generator that is used internally in gudhi/random_point_generators.h
+    CGAL::get_default_random() = CGAL::Random(atoi(argv[7]));
+  }
+  
   bool in = false;
   if (strcmp(argv[1], "in") == 0) {
     in = true;
@@ -143,10 +150,12 @@ int main(int argc, char **argv) {
               points = Gudhi::generate_points_on_klein_bottle_3D<K>(points_number, radius, radius/2., true);
             break;
             case 4:
-              points = Gudhi::generate_points_on_klein_bottle_4D<K>(points_number, radius, radius/2., 0., true);
+              points = Gudhi::generate_points_on_klein_bottle_4D<K>(points_number, radius, radius/2., 0.,
+                                                                            true);
             break;
             case 5:
-              points = Gudhi::generate_points_on_klein_bottle_variant_5D<K>(points_number, radius, radius/2., true);
+              points = Gudhi::generate_points_on_klein_bottle_variant_5D<K>(points_number, radius, radius/2.,
+                                                                                    true);
             break;
             default:
               std::cerr << "Sorry: on klein is only available for dimension 3, 4 and 5" << std::endl;
@@ -174,4 +183,3 @@ int main(int argc, char **argv) {
 
   return 0;
 }
-
