@@ -123,8 +123,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(basic_simplex_tree_serialization, Stree, list_of_t
 
   char* buffer = new char[256];
   char* ptr = buffer;
-  ptr = serialize_value_to_char_buffer(std::int16_t(-1)     , ptr);     // version number
-  ptr = serialize_value_to_char_buffer(static_cast<int>(1)     , ptr);  // number of parameters
+  ptr = serialize_value_to_char_buffer(std::int16_t(-1)     , ptr); // version number
+  ptr = serialize_value_to_char_buffer(static_cast<int>(1)  , ptr); // number of parameters
   // 3 simplices ({0}, {1}, {2}) and its filtration values
   ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(3)     , ptr);
   ptr = serialize_value_to_char_buffer(static_cast<Vertex_type>(0)     , ptr);

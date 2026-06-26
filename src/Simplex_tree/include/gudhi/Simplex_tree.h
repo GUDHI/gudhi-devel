@@ -190,10 +190,10 @@ class Simplex_tree {
   struct Filtration_simplex_base_dummy {
     Filtration_simplex_base_dummy() {}
     Filtration_simplex_base_dummy(Filtration_value GUDHI_CHECK_code(f)) {
-      GUDHI_CHECK(f == null_, "filtration value specified in the constructor for a complex that does not store them");
+      // GUDHI_CHECK(f == null_, "filtration value specified in the constructor for a complex that does not store them");
     }
     void assign_filtration(const Filtration_value& GUDHI_CHECK_code(f)) {
-      GUDHI_CHECK(f == null_, "filtration value assigned for a complex that does not store them");
+      // GUDHI_CHECK(f == null_, "filtration value assigned for a complex that does not store them");
     }
     const Filtration_value& filtration() const { return null_; }
 
@@ -556,7 +556,7 @@ class Simplex_tree {
   }
   /** @} */  // end constructor/destructor
 
- private:
+ protected:
   // Copy from complex_source to "this"
   void copy_from(const Simplex_tree& complex_source) {
     null_vertex_ = complex_source.null_vertex_;
@@ -786,6 +786,44 @@ class Simplex_tree {
     }
   }
 
+  /**
+   * @brief Returns a non-const reference to the filtration value of a simplex.
+   * 
+   * @warning Cannot be called on a null_simplex.
+   * @warning Only available if SimplexTreeOptions::store_filtration is true.
+   */
+  Filtration_value& get_filtration_value(Simplex_handle sh) {
+    static_assert(Options::store_filtration,
+                  "A modifiable reference to a filtration value cannot be returned if no filtration value is stored.");
+
+    if (sh == null_simplex()) {
+      throw std::invalid_argument("Cannot bind reference to filtration value of a null simplex.");
+    }
+    return _to_node_it(sh)->second.filtration();
+  }
+
+  /**
+   * @brief Returns a const reference to the filtration value of a simplex. It is a more strict variant of
+   * @ref filtration, as it will not compile if @ref SimplexTreeOptions::store_filtration is false and it will throw if
+   * the given simplex is a @ref null_simplex.
+   * 
+   * @warning Cannot be called on a null_simplex. If this option is necessary, use @ref filtration instead.
+   * @warning Only available if @ref SimplexTreeOptions::store_filtration is true. If false is necessary,
+   * use @ref filtration instead.
+   */
+  const Filtration_value& get_filtration_value(Simplex_handle sh) const {
+    static_assert(
+        Options::store_filtration,
+        "Filtration values are not stored. If you still want something to be returned, use `filtration(sh)` instead.");
+
+    if (sh == null_simplex()) {
+      throw std::invalid_argument(
+          "Null simplices are not associated to filtration values. If you still want something to be returned, use "
+          "`filtration(sh)` instead.");
+    }
+    return sh->second.filtration();
+  }
+
   /** \brief Sets the filtration value of a simplex.
    * \exception std::invalid_argument In debug mode, if sh is a null_simplex.
    */
@@ -933,6 +971,10 @@ class Simplex_tree {
 
   /**
    * @brief Stores the given value as number of parameters of the filtration values.
+   * At construction, the default number of parameters is set to 1.
+   *
+   * Note that there will not be any verification to ensure that the filtration values stored have this amount
+   * of parameters.
    */
   void set_num_parameters(int new_number) {
     number_of_parameters_ = new_number;
@@ -3127,6 +3169,8 @@ class Simplex_tree {
  public:
   // Print a Simplex_tree in os.
   friend std::ostream& operator<<(std::ostream& os, const Simplex_tree& st) {
+    if (st.num_parameters() > 1) os << st.num_parameters() << "\n";
+
     st.for_each_simplex([&](Simplex_handle sh, int dim) {
       os << dim << " ";
       for (auto v : st.simplex_vertex_range(sh)) {
@@ -3142,6 +3186,23 @@ class Simplex_tree {
     std::vector<Vertex_handle> simplex;
     Filtration_value fil;
     int max_dim = -1;
+
+    // searching for number of parameters which are potentially specified in the first line
+    // if nothing is specified, the value is assumed to be 1
+    std::string first_line;
+    auto pos = is.tellg();
+    getline(is, first_line);
+    std::stringstream fl_stream;
+    fl_stream << first_line;
+    int num_param, dummy;
+    fl_stream >> num_param; // tries to retrieve first numerical value
+    if (fl_stream.fail()) throw std::invalid_argument("Incoming stream should not start with a non integer.");
+    fl_stream >> dummy;     // if number of parameters were specified, this should fail
+    if (!fl_stream.fail()) {
+      num_param = 1;
+      is.seekg(pos, std::ios_base::beg);
+    }
+
     while (read_simplex(is, simplex, fil)) {
       // read all simplices in the file as a list of vertices
       // Warning : simplex_size needs to be casted in int - Can be 0
@@ -3154,6 +3215,7 @@ class Simplex_tree {
       simplex.clear();
     }
     st.set_dimension(max_dim);
+    st.set_num_parameters(num_param);
 
     return is;
   }
@@ -3163,7 +3225,7 @@ class Simplex_tree {
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
   int number_of_parameters_;
-
+  
   // all mutable as their content has no impact on the content of the simplex tree itself
   // they correspond to some kind of cache or helper attributes.
   /** \brief Simplices ordered according to a filtration.*/
