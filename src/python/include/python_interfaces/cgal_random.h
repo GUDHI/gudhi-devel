@@ -11,7 +11,7 @@
 #ifndef PYTHON_INTERFACES_CGAL_RANDOM_H_
 #define PYTHON_INTERFACES_CGAL_RANDOM_H_
 
-// Must be done before #include <CGAL/Random.h> - Requires also to compile without -fvisibility=hidden
+// Must be done before #include <CGAL/Random.h>
 namespace CGAL {
   class Random;
 #ifdef _WIN32
