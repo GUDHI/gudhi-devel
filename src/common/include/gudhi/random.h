@@ -56,18 +56,18 @@ namespace random {
 #endif // GUDHI_DEFAULT_RANDOM_DLL_EXPORT && GUDHI_DEFAULT_RANDOM_DLL_IMPORT
 
 // Defined but empty by default
-#define RANDOM_DLL_API
+#define GUDHI_RANDOM_DLL_API
 
 #if defined(_WIN32)
   #if defined GUDHI_DEFAULT_RANDOM_DLL_EXPORT
-    #define RANDOM_DLL_API __declspec(dllexport)
+    #define GUDHI_RANDOM_DLL_API __declspec(dllexport)
   #endif
   #if defined GUDHI_DEFAULT_RANDOM_DLL_IMPORT
-    #define RANDOM_DLL_API __declspec(dllimport)
+    #define GUDHI_RANDOM_DLL_API __declspec(dllimport)
   #endif
 #endif
 
-  RANDOM_DLL_API Random_generator& get_default_random();
+  GUDHI_RANDOM_DLL_API Random_generator& get_default_random();
 
 #if defined GUDHI_DEFAULT_RANDOM_DLL_IMPORT
   // No declaration, only definition
