@@ -11,7 +11,7 @@ Below is a list of changes:
      - Preliminary support for multiple filtration values stored in the Simplex tree (available only in `C++`).
      - Serialization has been upgraded for multiple filtration values support, but also for a `SERIALIZATION_VERSION` number in order to track modification and compatibility between serialization files. It means the serialization files, including pickled SimplexTree, generated from a pre-3.13.0 gudhi version won't be supported (an exception is thrown).
 
-- [Reproducibility](https://gudhi.inria.fr/doc/latest/group__reproducibility.html) `[C++]`
+- Reproducibility
      - [`[C++]`](https://gudhi.inria.fr/doc/latest/group__reproducibility.html) New random functions, with a default random generator that is used internally, and where the user can set the global seed.
      - [`[Python]`](https://gudhi.inria.fr/python/latest/reproducibility.html) New `gudhi.random.set_seed` function to set the global seed.
 
