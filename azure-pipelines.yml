@@ -14,6 +14,7 @@ jobs:
       extraCmakeOptions: -DPython_FIND_FRAMEWORK=LAST
       # To cache scikit_learn_data - no need to always download it and fails sometimes
       SCIKIT_LEARN_DATA: $(Agent.BuildDirectory)/scikit_learn_data
+    condition: not(contains(variables['Build.SourceVersionMessage'], '[skip ci]'))
 
     steps:
       - task: Cache@2
@@ -69,6 +70,7 @@ jobs:
       extraCmakeOptions: -DPython_FIND_REGISTRY=LAST
       # To cache scikit_learn_data - no need to always download it and fails sometimes
       SCIKIT_LEARN_DATA: $(Agent.BuildDirectory)/scikit_learn_data
+    condition: not(contains(variables['Build.SourceVersionMessage'], '[skip ci]'))
 
     steps:
       - task: Cache@2
