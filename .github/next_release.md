@@ -1,16 +1,22 @@
 We are pleased to announce the release 3.13.0 of the GUDHI library.
 
-As a major new feature, the GUDHI library now offers **...**
-
 The GUDHI library is mainly developped using GitHub, do not hesitate to
 [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel).
 From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
 Below is a list of changes:
 
+- Simplex tree [`[C++]`](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1_simplex__tree.html) and [`[Python`](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
+     - A new `euler_characteristic` method, and a Python binding to `num_simplices_by_dimension`.
+     - Preliminary support for multiple filtration values stored in the Simplex tree (available only in `C++`).
+     - Serialization has been upgraded for multiple filtration values support, but also for a `SERIALIZATION_VERSION` number in order to track modification and compatibility between serialization files. It means the serialization files, including pickled SimplexTree, generated from a pre-3.13.0 gudhi version won't be supported (an exception is thrown).
+
 - [Reproducibility](https://gudhi.inria.fr/doc/latest/group__reproducibility.html) `[C++]`
      - New random functions, with a default random generator that is used internally, and where the user can set the global seed.
-     
+
+- [Tangential complex](https://gudhi.inria.fr/python/latest/tangential_complex_user.html) `[Python]`
+     - `intrisic_dim` constructor argument is deprecated (typo), please use `intrinsic_dim` instead.
+
 - [Module](link)
      - **...**
      
@@ -38,5 +44,7 @@ For further information about downloading and installing the library
 
 ## Contributors
 
-- **...**
-- **...**
+- @hschreiber
+- @mglisse
+- @ryan-charette
+- @VincentRouvreau
