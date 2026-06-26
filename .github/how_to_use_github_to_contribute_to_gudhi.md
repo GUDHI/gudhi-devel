@@ -96,6 +96,12 @@ Because of `-u`, it will remember where you like to push this branch, and next t
 ## Play again!
 Possibly iterate a few times, add more commits and push them.
 
+### Skip CI
+For minor changes (like typos), it is a good practice to skip CI and avoid to build and test all the code. From git 2.18, you can do it directly from your `git push` command by adding the option:
+```bash
+git push -o ci.skip
+```
+
 ## Your pull request is ready
 Do not forget to update `.github/next_release.md` to announce your development in the next release note.
 
