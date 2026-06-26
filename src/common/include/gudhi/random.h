@@ -65,6 +65,11 @@ namespace random {
   #if defined GUDHI_DEFAULT_RANDOM_DLL_IMPORT
     #define GUDHI_RANDOM_DLL_API __declspec(dllimport)
   #endif
+#else
+  #if defined GUDHI_DEFAULT_RANDOM_DLL_EXPORT
+    // In case we start using '-fvisibility=hidden'
+    #define GUDHI_RANDOM_DLL_API __attribute__((visibility("default")))
+  #endif
 #endif
 
   GUDHI_RANDOM_DLL_API Random_generator& get_default_random();
