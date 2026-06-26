@@ -1,11 +1,12 @@
 add_library(_default_random SHARED _default_random.cc)
 # Required by Windows wheel
 install(TARGETS _default_random DESTINATION ${CMAKE_INSTALL_PREFIX}/gudhi)
-# _default_random needs to be the on that EXPORT, and when you link with it you need to IMPORT
+# _default_random needs to define EXPORT at compilation, and when you link with it you need to IMPORT
 target_compile_definitions(_default_random
                            PRIVATE GUDHI_DEFAULT_RANDOM_DLL_EXPORT
                            INTERFACE GUDHI_DEFAULT_RANDOM_DLL_IMPORT)
 
+# This function assumes that THE_TARGET is directly under gudhi/ and not in a subdirectory
 function( link_with_default_random THE_TARGET )
   target_link_libraries(${THE_TARGET} PRIVATE _default_random)
   add_dependencies(${THE_TARGET} _default_random)
@@ -20,7 +21,7 @@ if (TARGET CGAL::CGAL)
   add_library(_default_cgal_random SHARED _default_cgal_random.cc)
   # Required by Windows wheel
   install(TARGETS _default_cgal_random DESTINATION ${CMAKE_INSTALL_PREFIX}/gudhi)
-  # _default_cgal_random needs to be the on that EXPORT, and when you link with it you need to IMPORT
+  # _default_cgal_random needs to define EXPORT at compilation, and when you link with it you need to IMPORT
   target_compile_definitions(_default_cgal_random
                              PRIVATE GUDHI_DEFAULT_CGAL_RANDOM_DLL_EXPORT
                              INTERFACE GUDHI_DEFAULT_CGAL_RANDOM_DLL_IMPORT)
