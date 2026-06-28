@@ -5,6 +5,7 @@
     Copyright (C) 2025 Inria
 
     Modification(s):
+      - 2026/06 Vincent Rouvreau: Add tests for F-contiguous and non contiguous numpy arrays
       - YYYY/MM Author: Description of the modification
 """
 
@@ -55,3 +56,29 @@ def test_basic_persistence_on_rectangle_from_top_cells():
     # Check persistence are equal, but maybe not sorted, maybe some duplicates
     assert_almost_equal(np.unique(pers0, axis=0), np.unique(persrec[0], axis=0))
     assert_almost_equal(np.unique(pers1, axis=0), np.unique(persrec[1], axis=0))
+
+def test_contiguity_for_persistence_on_a_line():
+    rng = np.random.default_rng(42)
+    # Get a 10x10 random values
+    base = rng.standard_normal((10))
+    persline_c = _persistence_on_a_line(np.ascontiguousarray(base))
+    persline_f = _persistence_on_a_line(np.asfortranarray(base))
+    assert_almost_equal(persline_c, persline_f)
+
+    base_repeat = np.repeat(base, 2, axis=0)
+    persline_r = _persistence_on_a_line(base_repeat[::2])
+    assert_almost_equal(persline_c, persline_r)
+
+def test_contiguity_for_persistence_on_rectangle():
+    rng = np.random.default_rng(42)
+    # Get a 10x10 random values
+    base = rng.standard_normal((10, 10))
+    persrec_c = _persistence_on_rectangle_from_top_cells(np.ascontiguousarray(base), 0.)
+    persrec_f = _persistence_on_rectangle_from_top_cells(np.asfortranarray(base), 0.)
+    for idx in range(2):
+        assert_almost_equal(persrec_c[idx], persrec_f[idx])
+
+    base_repeat = np.repeat(base, 2, axis=0)
+    persrec_r = _persistence_on_rectangle_from_top_cells(base_repeat[::2], 0.)
+    for idx in range(2):
+        assert_almost_equal(persrec_c[idx], persrec_r[idx])
