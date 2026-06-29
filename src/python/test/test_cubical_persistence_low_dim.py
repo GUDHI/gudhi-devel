@@ -59,26 +59,24 @@ def test_basic_persistence_on_rectangle_from_top_cells():
 
 def test_contiguity_for_persistence_on_a_line():
     rng = np.random.default_rng(42)
-    # Get a 10x10 random values
-    base = rng.standard_normal((10))
+    # Get a slice of 10 elements of 20 random values - base is not contiguous
+    base = rng.standard_normal((20))[::2]
     persline_c = _persistence_on_a_line(np.ascontiguousarray(base))
     persline_f = _persistence_on_a_line(np.asfortranarray(base))
     assert_almost_equal(persline_c, persline_f)
 
-    base_repeat = np.repeat(base, 2, axis=0)
-    persline_r = _persistence_on_a_line(base_repeat[::2])
+    persline_r = _persistence_on_a_line(base)
     assert_almost_equal(persline_c, persline_r)
 
 def test_contiguity_for_persistence_on_rectangle():
     rng = np.random.default_rng(42)
-    # Get a 10x10 random values
-    base = rng.standard_normal((10, 10))
+    # Get a 10x10 slice of a 20x10 random values - base is not contiguous
+    base = rng.standard_normal((20, 10))[::2]
     persrec_c = _persistence_on_rectangle_from_top_cells(np.ascontiguousarray(base), 0.)
     persrec_f = _persistence_on_rectangle_from_top_cells(np.asfortranarray(base), 0.)
     for idx in range(2):
         assert_almost_equal(persrec_c[idx], persrec_f[idx])
 
-    base_repeat = np.repeat(base, 2, axis=0)
-    persrec_r = _persistence_on_rectangle_from_top_cells(base_repeat[::2], 0.)
+    persrec_r = _persistence_on_rectangle_from_top_cells(base, 0.)
     for idx in range(2):
         assert_almost_equal(persrec_c[idx], persrec_r[idx])

@@ -393,16 +393,15 @@ def test_tensors():
 
 def test_contiguity_for_vertices_input():
     rng = np.random.default_rng(42)
-    # Get a 10x10 random values
-    base = rng.standard_normal((10, 10))
+    # Get a 10x10 slice of a 20x10 random values - base is not contiguous
+    base = rng.standard_normal((20, 10))[::2]
 
     cub_c = CubicalComplex(vertices=np.ascontiguousarray(base))
     cub_f = CubicalComplex(vertices=np.asfortranarray(base))
     # Test vertices() should be enough here, but let's go with all_cells()
     assert_almost_equal(cub_c.all_cells(), cub_f.all_cells())
     
-    base_repeat = np.repeat(base, 2, axis=0)
-    cub_r = CubicalComplex(vertices=base_repeat[::2])
+    cub_r = CubicalComplex(vertices=base)
     # Test vertices() should be enough here, but let's go with all_cells()
     assert_almost_equal(cub_c.all_cells(), cub_r.all_cells())
 
@@ -412,24 +411,22 @@ def test_contiguity_for_vertices_input():
     # Test vertices() should be enough here, but let's go with all_cells()
     assert_almost_equal(cub_c.all_cells(), cub_f.all_cells())
     
-    base_repeat = np.repeat(base, 2, axis=0)
-    cub_r = PeriodicCubicalComplex(vertices=base_repeat[::2], periodic_dimensions=(False, False))
+    cub_r = PeriodicCubicalComplex(vertices=base, periodic_dimensions=(False, False))
     # Test vertices() should be enough here, but let's go with all_cells()
     assert_almost_equal(cub_c.all_cells(), cub_r.all_cells())
 
 
 def test_contiguity_for_top_dimensional_cells_input():
     rng = np.random.default_rng(42)
-    # Get a 10x10 random values
-    base = rng.standard_normal((10, 10))
+    # Get a 10x10 slice of a 20x10 random values - base is not contiguous
+    base = rng.standard_normal((20, 10))[::2]
 
     cub_c = CubicalComplex(top_dimensional_cells=np.ascontiguousarray(base))
     cub_f = CubicalComplex(top_dimensional_cells=np.asfortranarray(base))
     # Test top_dimensional_cells() should be enough here, but let's go with all_cells()
     assert_almost_equal(cub_c.all_cells(), cub_f.all_cells())
     
-    base_repeat = np.repeat(base, 2, axis=0)
-    cub_r = CubicalComplex(top_dimensional_cells=base_repeat[::2])
+    cub_r = CubicalComplex(top_dimensional_cells=base)
     # Test top_dimensional_cells() should be enough here, but let's go with all_cells()
     assert_almost_equal(cub_c.all_cells(), cub_r.all_cells())
 
@@ -441,8 +438,7 @@ def test_contiguity_for_top_dimensional_cells_input():
     # Test top_dimensional_cells() should be enough here, but let's go with all_cells()
     assert_almost_equal(cub_c.all_cells(), cub_f.all_cells())
     
-    base_repeat = np.repeat(base, 2, axis=0)
-    cub_r = PeriodicCubicalComplex(top_dimensional_cells=base_repeat[::2],
+    cub_r = PeriodicCubicalComplex(top_dimensional_cells=base,
                                    periodic_dimensions=(False, False))
     # Test top_dimensional_cells() should be enough here, but let's go with all_cells()
     assert_almost_equal(cub_c.all_cells(), cub_r.all_cells())
