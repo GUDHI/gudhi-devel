@@ -52,7 +52,8 @@ class RipsComplex(t.Rips_complex_interface):
             inserted in the graph.
         :type max_edge_length: float
         :param sparse: If this is not None, it switches to building a sparse Rips and represents the approximation
-            parameter epsilon.
+            parameter epsilon. For reproducible results, when building a sparse Rips consider using
+            :func:`~gudhi.random.set_seed`.
         :type sparse: float
         """
         if sparse is not None:
