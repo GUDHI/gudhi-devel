@@ -1,5 +1,10 @@
 jobs:
   - job: "OSx"
+    condition: and(
+      not(contains(variables['Build.SourceVersionMessage'], '[skip ci]')),
+      not(contains(variables['System.PullRequest.PullRequestTitle'], '[skip ci]')),
+      not(contains(variables['System.PullRequest.PullRequestDescription'], '[skip ci]'))
+      )
     displayName: "Build and test OSx"
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
@@ -54,6 +59,11 @@ jobs:
         displayName: "Build, test and documentation generation"
 
   - job: "Windows"
+    condition: and(
+      not(contains(variables['Build.SourceVersionMessage'], '[skip ci]')),
+      not(contains(variables['System.PullRequest.PullRequestTitle'], '[skip ci]')),
+      not(contains(variables['System.PullRequest.PullRequestDescription'], '[skip ci]'))
+      )
     displayName: "Build and test Windows"
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60

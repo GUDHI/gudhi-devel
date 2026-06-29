@@ -102,6 +102,14 @@ Do not forget to update `.github/next_release.md` to announce your development i
 Get your web browser to https://github.com/LOGIN/gudhi-devel, click on the button that says **Branch: some-name** (below the number of commits, above the list of files) and select the branch you are so proud of.
 Click on **New pull request** next to it.
 
+### Skip CI
+For minor changes (like typos), it is a good practice to skip CI and avoid to build and test all the code. Uou can do it directly from your `git commit` command by adding the specific `[skip ci]` in the message field:
+```bash
+git commit -m "[skip ci] some other interesting message for my commit"
+```
+
+To skip CI on a pull request, you need to add `[skip ci]` on the latest commit you push, and in the pull request title or description.
+
 ## Follow the instructions ;-)
 Note that if your branch is not quite ready, you can make a **draft pull request** (see the arrow next to the confirmation button), and later you will have access to a button to say that the branch is ready for reviews now.
 Draft pull requests can be a way to advertise that you are working on something, and possibly ask others for comments or help.
