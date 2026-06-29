@@ -1,5 +1,6 @@
 jobs:
   - job: "OSx"
+    condition: not(contains(variables['Build.SourceVersionMessage'], '[skip ci]'))
     displayName: "Build and test OSx"
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
@@ -54,6 +55,7 @@ jobs:
         displayName: "Build, test and documentation generation"
 
   - job: "Windows"
+    condition: not(contains(variables['Build.SourceVersionMessage'], '[skip ci]'))
     displayName: "Build and test Windows"
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
