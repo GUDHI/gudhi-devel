@@ -1,23 +1,23 @@
 Release History
 ===============
 
-[Release 3.13.0rc1](https://github.com/GUDHI/gudhi-devel/releases/tag/tags%2Fgudhi-release-3.13.0rc1)
+[Release 3.13.0rc2](https://github.com/GUDHI/gudhi-devel/releases/tag/tags%2Fgudhi-release-3.13.0rc2)
 -----------
 
 Release date: July 2026
 
 Below is a list of changes made since GUDHI 3.12.0:
 
-- Simplex tree [`[C++]`](https://gudhi.inria.fr/doc/3.13.0rc1/class_gudhi_1_1_simplex__tree.html) and [`[Python`](https://gudhi.inria.fr/python/3.13.0rc1/simplex_tree_ref.html)
+- Simplex tree [`[C++]`](https://gudhi.inria.fr/doc/3.13.0rc2/class_gudhi_1_1_simplex__tree.html) and [`[Python`](https://gudhi.inria.fr/python/3.13.0rc2/simplex_tree_ref.html)
      - A new `euler_characteristic` method, and a Python binding to `num_simplices_by_dimension`.
      - Preliminary support for multiple filtration values stored in the Simplex tree (available only in `C++`).
      - Serialization has been upgraded for multiple filtration values support, but also for a `SERIALIZATION_VERSION` number in order to track modification and compatibility between serialization files. It means the serialization files, including pickled SimplexTree, generated from a pre-3.13.0 gudhi version won't be supported (an exception is thrown).
 
 - Reproducibility
-     - [`[C++]`](https://gudhi.inria.fr/doc/3.13.0rc1/group__reproducibility.html) New random functions, with a default random generator that is used internally, and where the user can set the global seed.
-     - [`[Python]`](https://gudhi.inria.fr/python/3.13.0rc1/reproducibility.html) New `gudhi.random.set_seed` function to set the global seed.
+     - [`[C++]`](https://gudhi.inria.fr/doc/3.13.0rc2/group__reproducibility.html) New random functions, with a default random generator that is used internally, and where the user can set the global seed.
+     - [`[Python]`](https://gudhi.inria.fr/python/3.13.0rc2/reproducibility.html) New `gudhi.random.set_seed` function to set the global seed.
 
-- [Tangential complex](https://gudhi.inria.fr/python/3.13.0rc1/tangential_complex_user.html) `[Python]`
+- [Tangential complex](https://gudhi.inria.fr/python/3.13.0rc2/tangential_complex_user.html) `[Python]`
      - `intrisic_dim` constructor argument is deprecated (typo), please use `intrinsic_dim` instead.
      
 - Miscellaneous
