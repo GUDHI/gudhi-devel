@@ -53,12 +53,14 @@ jobs:
       - name: Build python wheel and repair it
         env:
           SKBUILD_CMAKE_DEFINE: "FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake;VCPKG_TARGET_TRIPLET=x64-windows"
+          SKBUILD_BUILD_DIR: "build"
         shell: pwsh
         run: |
           python -m pip wheel -ve .
           ls ".\"
-          delvewheel show --add-path=C:/vcpkg/installed/x64-windows/bin *.whl
-          delvewheel repair --add-path=C:/vcpkg/installed/x64-windows/bin -w wheelhouse -v *.whl
+          ls "./build/src/python/gudhi/Release"
+          delvewheel show --add-path="C:/vcpkg/installed/x64-windows/bin;./build/src/python/gudhi/Release" *.whl
+          delvewheel repair --add-path="C:/vcpkg/installed/x64-windows/bin;./build/src/python/gudhi/Release" -w wheelhouse -v *.whl
       # Test ABI compatibility with numpy 1.X
       - name: Install and test python wheel
         shell: pwsh
