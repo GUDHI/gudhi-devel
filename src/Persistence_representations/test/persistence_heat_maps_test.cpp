@@ -25,7 +25,7 @@ double epsilon = 0.0005;
 
 BOOST_AUTO_TEST_CASE(check_construction_of_heat_maps)
 {
-  std::vector<std::vector<double> > filter = create_Gaussian_filter(100, 1);
+  std::vector<std::vector<double> > filter = create_Gaussian_filter(100);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   p.print_to_file("data/persistence_heat_map_from_file_with_diagram");
 
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(check_construction_of_heat_maps)
 
 BOOST_AUTO_TEST_CASE(check_averages_of_heat_maps)
 {
-  std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
+  std::vector<std::vector<double> > filter = create_Gaussian_filter(30);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 10);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 10);
   Persistence_heat_maps<constant_scaling_function> r("data/file_with_diagram_2", filter, false, 1000, 0, 10);
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(check_averages_of_heat_maps)
 
 BOOST_AUTO_TEST_CASE(check_median_of_heat_maps)
 {
-  std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
+  std::vector<std::vector<double> > filter = create_Gaussian_filter(30);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> r("data/file_with_diagram_2", filter, false, 1000, 0, 1);
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(check_median_of_heat_maps)
 
 BOOST_AUTO_TEST_CASE(check_compute_percentage_of_active_of_heat_maps)
 {
-  std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
+  std::vector<std::vector<double> > filter = create_Gaussian_filter(30);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> r("data/file_with_diagram_2", filter, false, 1000, 0, 1);
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(check_compute_percentage_of_active_of_heat_maps)
 
 BOOST_AUTO_TEST_CASE(check_vectorize_for_heat_maps)
 {
-  std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
+  std::vector<std::vector<double> > filter = create_Gaussian_filter(30);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 5, 0, 1);
 
   std::vector<double> p_vect_template;
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(check_vectorize_for_heat_maps)
 
 BOOST_AUTO_TEST_CASE(check_distance_for_heat_maps)
 {
-  std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
+  std::vector<std::vector<double> > filter = create_Gaussian_filter(30);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> r("data/file_with_diagram_2", filter, false, 1000, 0, 1);
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(check_distance_for_heat_maps)
 
 BOOST_AUTO_TEST_CASE(check_projections_to_R_for_heat_maps)
 {
-  std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
+  std::vector<std::vector<double> > filter = create_Gaussian_filter(30);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> r("data/file_with_diagram_2", filter, false, 1000, 0, 1);
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(check_projections_to_R_for_heat_maps)
 
 BOOST_AUTO_TEST_CASE(check_scalar_products_for_heat_maps)
 {
-  std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
+  std::vector<std::vector<double> > filter = create_Gaussian_filter(30);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> r("data/file_with_diagram_2", filter, false, 1000, 0, 1);
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(check_scalar_products_for_heat_maps)
 
 BOOST_AUTO_TEST_CASE(check_arythmetic_operations_for_heat_maps)
 {
-  std::vector<std::vector<double> > filter = create_Gaussian_filter(30, 1);
+  std::vector<std::vector<double> > filter = create_Gaussian_filter(30);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram_1", filter, false, 1000, 0, 1);
 
@@ -204,10 +204,10 @@ BOOST_AUTO_TEST_CASE(check_arythmetic_operations_for_heat_maps)
 
 BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters)
 {
-  std::vector<std::vector<double> > filter = create_Gaussian_filter(100, 1);
+  std::vector<std::vector<double> > filter = create_Gaussian_filter(100);
   Persistence_heat_maps<constant_scaling_function> p("data/file_with_diagram", filter, false, 1000, 0, 1);
 
-  std::vector<std::vector<double> > filter_2 = create_Gaussian_filter(150, 1);
+  std::vector<std::vector<double> > filter_2 = create_Gaussian_filter(150);
   Persistence_heat_maps<constant_scaling_function> q("data/file_with_diagram", filter_2, true, 1000, 0, 1);
 
   double distance_max_double_parameter = p.distance(q, std::numeric_limits<double>::max());
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters)
 /*
         std::vector< std::pair< double,double > > intervals;
         intervals.push_back( std::make_pair(0.5,0.5) );
-        std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);
+        std::vector< std::vector<double> > filter = create_Gaussian_filter(5);
         Persistence_heat_maps p( intervals , filter ,  constant_function, false , 100 , 0 , 1 );
         p.plot( "heat_map_1" );
 
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters)
 /*
         std::vector< std::pair< double,double > > intervals;
         intervals.push_back( std::make_pair(0.5,0.5) );
-        std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);
+        std::vector< std::vector<double> > filter = create_Gaussian_filter(5);
         Persistence_heat_maps p( intervals , filter ,  constant_function, false , 10 , 0 , 1 );
         p.write_to_file( "aaa" );
 
@@ -247,14 +247,14 @@ BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters)
         */
 
 /*
-        std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);
+        std::vector< std::vector<double> > filter = create_Gaussian_filter(30);
         Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 100 , 0 , 1 );
         p.plot( "heat_map_1" );
 */
 
 /*
    //test to construct persistence heat map:
-    std::vector< std::vector<double> > filter = create_Gaussian_filter(100,1);
+    std::vector< std::vector<double> > filter = create_Gaussian_filter(100);
         Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 1 );
         p.print_to_file( "persistence_heat_map_from_file_with_diagram" );
 
@@ -267,7 +267,7 @@ BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters)
         //test of computations of a mean:
         std::vector< std::pair< double,double > > intervals;
         intervals.push_back( std::make_pair(5,5) );
-        std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);
+        std::vector< std::vector<double> > filter = create_Gaussian_filter(5);
         Persistence_heat_maps p( intervals , filter ,  constant_function, false , 100 , 0 , 10 );
         p.plot( "heat_map_1" );
 
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters)
 */
 
 /*
-        std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);
+        std::vector< std::vector<double> > filter = create_Gaussian_filter(30);
         Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 10 );
         Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 10 );
         Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 10 );
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters)
 /*
         std::vector< std::pair< double,double > > intervals;
         intervals.push_back( std::make_pair(5,5) );
-        std::vector< std::vector<double> > filter = create_Gaussian_filter(5,1);
+        std::vector< std::vector<double> > filter = create_Gaussian_filter(5);
         Persistence_heat_maps p( intervals , filter ,  constant_function, false , 10 , 0 , 10 );
         p.plot( "heat_map_1" );
 
@@ -312,7 +312,7 @@ BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters)
 */
 
 /*
-        std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);
+        std::vector< std::vector<double> > filter = create_Gaussian_filter(30);
         Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 1 );
         Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 1 );
         Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 1 );
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(check_distance_of_heat_maps_infinite_power_parameters)
 */
 
 /*
-        std::vector< std::vector<double> > filter = create_Gaussian_filter(30,1);
+        std::vector< std::vector<double> > filter = create_Gaussian_filter(30);
         Persistence_heat_maps p( "file_with_diagram" , filter ,  constant_function, false , 1000 , 0 , 1 );
         Persistence_heat_maps q( "file_with_diagram_1" , filter ,  constant_function, false , 1000 , 0 , 1 );
         Persistence_heat_maps r( "file_with_diagram_2" , filter ,  constant_function, false , 1000 , 0 , 1 );
