@@ -62,12 +62,21 @@ class Steenrod_barcode_interface {
    *                    global TBB scheduler default.  Honoured only when
    *                    the build has ``GUDHI_USE_TBB`` defined.
    */
-  nanobind::tuple compute(int n_jobs = -1) {
+  nanobind::tuple compute(int n_jobs = -1, int max_dim = -1) {
     std::vector<double> filt_values;
-    auto result = run_pipeline(n_jobs, filt_values);
+    auto result = run_pipeline(n_jobs, max_dim, filt_values);
 
     auto ord_split = split_to_vectors(result.ordinary, filt_values);
     auto st_split  = split_to_vectors(result.steenrod, filt_values);
+
+    // The reduction was capped at ``max_dim + 1`` (see run_pipeline), so
+    // dimension ``max_dim + 1`` may carry over-reported essentials — its
+    // R-column was never built.  Drop everything above ``max_dim``; the bars
+    // that remain are bit-for-bit identical to a full reduction.
+    if (max_dim >= 0) {
+      truncate_split(ord_split, max_dim);
+      truncate_split(st_split, max_dim);
+    }
 
     nanobind::gil_scoped_acquire acquire;
     return nanobind::make_tuple(wrap_split(std::move(ord_split)),
@@ -101,7 +110,7 @@ class Steenrod_barcode_interface {
    */
   nanobind::tuple compute_absolute(int n_jobs = -1, int max_dim = -1) {
     std::vector<double> filt_values;
-    auto result = run_pipeline(n_jobs, filt_values);
+    auto result = run_pipeline(n_jobs, max_dim, filt_values);
 
     auto ord_split = split_to_vectors(result.ordinary, filt_values);
     auto st_split  = split_to_vectors(result.steenrod, filt_values);
@@ -135,6 +144,7 @@ class Steenrod_barcode_interface {
    * not touch any Python state.
    */
   steenrod_persistence::Barcodes_result run_pipeline(int n_jobs,
+                                                     int max_dim,
                                                      std::vector<double>& filt_values) {
     using steenrod_persistence::Index;
     using steenrod_persistence::Filtration_by_dim;
@@ -157,7 +167,12 @@ class Steenrod_barcode_interface {
       ++abs_idx;
     }
 
-    return steenrod_persistence::barcodes(k_, fbd, &filt_values, n_jobs, /*maxdim=*/-1);
+    // Cap the reduction at ``max_dim + 1``: the (max_dim+1)-simplices are
+    // needed to kill H^max_dim, so ``reduced[max_dim]`` must be built, but
+    // higher dimensions can be skipped.  Output is identical to a full
+    // reduction truncated to max_dim (both relative and absolute conventions).
+    const int reduction_cap = (max_dim < 0) ? -1 : max_dim + 1;
+    return steenrod_persistence::barcodes(k_, fbd, &filt_values, n_jobs, reduction_cap);
   }
 
 
@@ -194,6 +209,17 @@ class Steenrod_barcode_interface {
       }
     }
     return out;
+  }
+
+  /** Drop every dimension above ``max_dim`` from a ``Split`` in the
+   * relative convention (no shift).  Never pads: dimensions that the complex
+   * does not have stay absent, matching ``list[:max_dim + 1]`` slicing.
+   */
+  static void truncate_split(Split& s, int max_dim) {
+    const std::size_t keep =
+        std::min<std::size_t>(static_cast<std::size_t>(max_dim) + 1, s.finite.size());
+    s.finite.resize(keep);
+    s.infinite.resize(keep);
   }
 
   /** Apply the relative→absolute dim shift to a ``Split`` and truncate to

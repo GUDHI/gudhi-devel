@@ -377,3 +377,67 @@ def test_cone_cp2_ordinary_h0_essential_h2_h4_boundary_bar():
         assert boundary.shape[0] == 1, (
             f"Expected 1 boundary-spanning H^{deg} bar, got {boundary.shape[0]}"
         )
+
+
+# ---------------------------------------------------------------------------
+# max_dim caps the *reduction* at max_dim + 1 (a performance optimization),
+# not the output alone.  These checks lock in that the capped reduction is
+# bit-for-bit identical to a full reduction truncated to max_dim — across the
+# Steenrod bars and the absolute convention, which the RP²/k=1 check above
+# (test_max_dim_truncates_output_not_input) does not exercise.  A regression
+# to a max_dim (rather than max_dim + 1) reduction cap would empty the
+# top-dimension R-column and over-report its essentials, breaking these.
+# ---------------------------------------------------------------------------
+
+def _per_dim_equal(a, b):
+    """True if two per-dim lists of numpy arrays are equal up to row order."""
+    if len(a) != len(b):
+        return False
+    for x, y in zip(a, b):
+        x = np.asarray(x)
+        y = np.asarray(y)
+        if x.shape != y.shape:
+            return False
+        if x.size and not np.array_equal(np.sort(x, axis=0), np.sort(y, axis=0)):
+            return False
+    return True
+
+
+# The cap is binding because of *essential* bars: a finite bar at dimension d
+# only needs the reduction to reach d, but an essential bar at d needs it to
+# reach d + 1 (to confirm nothing kills the class).  So the complexes below are
+# chosen to carry essentials where the cap bites: RP² has an essential at its
+# top dimension (the exact failure mode), CP² interleaves essentials at dims
+# 0/2/4 with many finite bars, and CCP² is the cone with a Steenrod bar.
+# RP² is not contractible, so absolute=True legitimately trips the duality
+# warning; it does not affect the structural cap-vs-full comparison here.
+@pytest.mark.filterwarnings("ignore::UserWarning")
+@pytest.mark.parametrize("complex_factory", [_rp2_simplex_tree,
+                                             _cone_cp2_simplex_tree],
+                         ids=["RP2", "CCP2"])
+@pytest.mark.parametrize("absolute", [False, True])
+@pytest.mark.parametrize("k", [1, 2])
+def test_max_dim_cap_matches_full_reduction(absolute, k, complex_factory):
+    """compute(max_dim=M) must equal the full computation sliced to M, for
+    both the ordinary and Steenrod components and both conventions."""
+    st = complex_factory()
+    top = st.dimension()
+
+    full_ord, full_st = st.compute_steenrod_barcodes(k=k, absolute=absolute)
+    full_of, full_oi = full_ord
+    full_sf, full_si = full_st
+
+    # Guard: the complex must actually carry essential bars, otherwise this
+    # test would not exercise the finite-vs-essential distinction the cap
+    # depends on.
+    assert sum(arr.shape[0] for arr in full_oi) > 0
+
+    for max_dim in range(0, top + 1):
+        ordn, steen = st.compute_steenrod_barcodes(k=k, absolute=absolute, max_dim=max_dim)
+        of, oi = ordn
+        sf, si = steen
+        cut = max_dim + 1
+        assert _per_dim_equal(of, full_of[:cut]), f"ordinary finite mismatch at max_dim={max_dim}"
+        assert _per_dim_equal(oi, full_oi[:cut]), f"ordinary infinite mismatch at max_dim={max_dim}"
+        assert _per_dim_equal(sf, full_sf[:cut]), f"steenrod finite mismatch at max_dim={max_dim}"
+        assert _per_dim_equal(si, full_si[:cut]), f"steenrod infinite mismatch at max_dim={max_dim}"

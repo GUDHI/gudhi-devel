@@ -417,7 +417,7 @@ unpickle a SimplexTree.
 
   nb::class_<gstd>(m, "_Steenrod_barcode_interface")
       .def(nb::init<gsti*, int>(), nb::arg("simplex_tree"), nb::arg("k"))
-      .def("_compute", &gstd::compute, nb::arg("n_jobs") = -1,
+      .def("_compute", &gstd::compute, nb::arg("n_jobs") = -1, nb::arg("max_dim") = -1,
            nb::call_guard<nb::gil_scoped_release>())
       .def("_compute_absolute", &gstd::compute_absolute,
            nb::arg("n_jobs") = -1, nb::arg("max_dim") = -1,

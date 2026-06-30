@@ -22,12 +22,6 @@ import warnings
 from gudhi import _simplex_tree_ext as t
 
 
-def _truncate_per_dim(finites: list, infinites: list, max_dim: int) -> tuple:
-    """Slice per-dim ``(finites, infinites)`` lists down to ``0..max_dim``."""
-    cutoff = max_dim + 1
-    return finites[:cutoff], infinites[:cutoff]
-
-
 def _copy_per_dim(finites: list, infinites: list) -> tuple:
     """Defensive deep-copy used by the Sq^0 = identity short-circuit.
 
@@ -290,12 +284,12 @@ class SimplexTree(t._Simplex_tree_python_interface):
             ``[1, max_dim]``; a :class:`UserWarning` is emitted when this
             condition is not satisfied.
         :type absolute: bool
-        :param max_dim: if not ``None``, truncate the returned barcodes to
-            dimensions ``0..max_dim``.  Higher-dimensional simplices are
-            still used internally for the reduction (so that ``H^max_dim``
-            classes can be killed by simplices in dimension ``max_dim + 1``),
-            but no bars in those higher dimensions are reported.  Default
-            ``None`` returns all dimensions of the complex.
+        :param max_dim: if not ``None``, cap the reduction just above
+            dimension ``max_dim`` instead of running it over the whole
+            complex.  The bars returned at dimensions ``0..max_dim`` are
+            identical to a full computation; higher dimensions are skipped,
+            which is much cheaper on a high-dimensional complex.  Default
+            ``None`` reduces all dimensions.
         :type max_dim: int or None
         :param n_jobs: maximum number of TBB worker threads used for the
             parallelised stages (``compute_steenrod_matrix`` and
@@ -371,7 +365,8 @@ class SimplexTree(t._Simplex_tree_python_interface):
                     stacklevel=2,
                 )
         else:
-            ordinary, steenrod = iface._compute(int(n_jobs))
+            ordinary, steenrod = iface._compute(
+                int(n_jobs), -1 if max_dim is None else int(max_dim))
 
         ord_fin, ord_inf = ordinary
         st_fin,  st_inf  = steenrod
@@ -383,13 +378,9 @@ class SimplexTree(t._Simplex_tree_python_interface):
         if int(k) == 0:
             st_fin, st_inf = _copy_per_dim(ord_fin, ord_inf)
 
-        # Relative path: C++ returns every dimension.  Truncate here.
-        # Absolute path: C++ already truncated (and used the truncation for
-        # the duality check), so skip the slice.
-        if max_dim is not None and not absolute:
-            ord_fin, ord_inf = _truncate_per_dim(ord_fin, ord_inf, int(max_dim))
-            st_fin,  st_inf  = _truncate_per_dim(st_fin,  st_inf,  int(max_dim))
-
+        # Both paths already truncated to ``max_dim`` inside the C++ interface
+        # (and capped the reduction at ``max_dim + 1`` for speed), so there is
+        # nothing left to slice here.
         return (ord_fin, ord_inf), (st_fin, st_inf)
 
     def betti_numbers(self) -> list[int]:
