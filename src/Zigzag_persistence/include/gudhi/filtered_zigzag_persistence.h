@@ -41,8 +41,10 @@ namespace zigzag_persistence {
  * @brief Default options for @ref Filtered_zigzag_persistence_with_storage and @ref Filtered_zigzag_persistence.
  */
 struct Default_filtered_zigzag_options : Default_zigzag_options {
-  using Cell_key = int;            /**< Cell ID used in the given boundaries. */
-  using Filtration_value = double; /**< Filtration value type. */
+  using Cell_key = int;                           /**< Cell ID used in the given boundaries. */
+  using Filtration_value = double;                /**< Filtration value type. */
+  using Cell_key_hash = std::hash<Cell_key>;      /**< Hash method for Cell_key */
+  using Cell_key_equal = std::equal_to<Cell_key>; /**< Equality comparator for Cell_key */
 };
 
 /**
@@ -295,7 +297,11 @@ class Filtered_zigzag_persistence_with_storage
   }
 
  private:
-  std::unordered_map<Cell_key, Internal_key> handleToKey_;  /**< Map from input keys to internal keys. */
+  /**
+   * @brief Map from input keys to internal keys.
+   */
+  std::unordered_map<Cell_key, Internal_key, typename Options::Cell_key_hash, typename Options::Cell_key_equal>
+      handleToKey_;
   Dimension dimMax_;                                        /**< Maximal dimension of a bar to record. */
   std::vector<Index_interval> persistenceDiagram_;          /**< Stores current closed persistence intervals. */
   Internal_key numArrow_;                                   /**< Current arrow number. */
@@ -445,7 +451,7 @@ class Filtered_zigzag_persistence {
   using Internal_key = typename Options::Internal_key;          /**< Key and index type, has to be signed. */
   using Cell_key = typename Options::Cell_key;                  /**< Cell ID type from external inputs. */
   using Filtration_value = typename Options::Filtration_value;  /**< Type for filtration values. */
-  using Dimension = typename Options::Dimension;      /**< Type for dimension values. */
+  using Dimension = typename Options::Dimension;                /**< Type for dimension values. */
 
   /**
    * @brief Constructor.
@@ -568,13 +574,15 @@ class Filtered_zigzag_persistence {
   }
 
  private:
-  template <typename key_type, typename value_type>
-  using Dictionary = std::unordered_map<key_type, value_type>;  // TODO: benchmark with other map types
-
-  Dictionary<Cell_key, Internal_key> handleToKey_;                  /**< Map from input keys to internal keys. */
-  Internal_key numArrow_;                                           /**< Current arrow number. */
-  Dictionary<Internal_key, Filtration_value> keyToFiltrationValue_; /**< Cell Key to filtration value map. */
-  Zigzag_persistence<FilteredZigzagOptions> pers_;                  /**< Class computing the pairs. */
+  // TODO: benchmark with other map types
+  /**
+   * @brief Map from input keys to internal keys.
+   */
+  std::unordered_map<Cell_key, Internal_key, typename Options::Cell_key_hash, typename Options::Cell_key_equal>
+      handleToKey_;
+  Internal_key numArrow_;                                                   /**< Current arrow number. */
+  std::unordered_map<Internal_key, Filtration_value> keyToFiltrationValue_; /**< Cell Key to filtration value map. */
+  Zigzag_persistence<FilteredZigzagOptions> pers_;                          /**< Class computing the pairs. */
 };  // end class Filtered_zigzag_persistence
 
 }  // namespace zigzag_persistence
