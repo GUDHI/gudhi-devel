@@ -5,12 +5,14 @@
     Copyright (C) 2020 Inria
 
     Modification(s):
+      - 2026/06 Vincent Rouvreau: Skip all tests if no tensorflow.
       - YYYY/MM Author: Description of the modification
 """
 
+import pytest
+tf = pytest.importorskip("tensorflow")  # All file is skipped if no tensorflow installed
 
 import numpy as np
-import tensorflow as tf
 
 from gudhi.tensorflow import *
 import gudhi as gd

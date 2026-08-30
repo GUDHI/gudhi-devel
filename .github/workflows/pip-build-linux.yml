@@ -33,7 +33,6 @@ jobs:
           $PYTHON310/bin/python -m pip install numpy~=1.21.6
           $PYTHON310/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT wheelhouse/*.whl
           $PYTHON310/bin/python -c "import gudhi; print(gudhi.__version__)"
-          cp data/points/human.off .
           $PYTHON310/bin/python -m pytest src/python/test/test_alpha_complex.py
           $PYTHON310/bin/python -m pytest src/python/test/test_betti_curve_representations.py
           $PYTHON310/bin/python -m pytest src/python/test/test_bottleneck_distance.py
