@@ -2,13 +2,14 @@
    :widths: 30 40 30
 
    +-----------------------------------+--------------------------------------------+---------------------------------------------+
-   | .. figure::                       | Datasets either generated or fetched.      | :Authors: Hind Montassif                    |
-   |     img/sphere_3d.png             |                                            |                                             |
+   | .. figure::                       | Datasets either generated or fetched.      | :Authors: Hind Montassif, Henrique Ennes,   |
+   |   img/sphere_3d.png               |                                            |           Raphaël Tinarrage                 |
+   |                                   |                                            |                                             |
    |                                   |                                            | :Since: GUDHI 3.5.0                         |
    |                                   |                                            |                                             |
    |                                   |                                            | :License: MIT (`LGPL v3 </licensing/>`_)    |
    |                                   |                                            |                                             |
    |                                   |                                            | :Requires: `CGAL <installation.html#cgal>`_ |
    +-----------------------------------+--------------------------------------------+---------------------------------------------+
-   | * :doc:`datasets`                                                                                                            |
+   | * :doc:`datasets`                 | * :doc:`linear_orbits`                     |                                             |
    +-----------------------------------+------------------------------------------------------------------------------------------+

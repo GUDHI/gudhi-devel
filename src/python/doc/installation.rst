@@ -420,6 +420,22 @@ for incorporating them in neural nets.
 
 `TensorFlow`_ is also used in some automatic differentiation tests.
 
+
+Autograd
+----------
+
+The :doc:`LieDetect </liedetect_user>` module requires `autograd <https://pypi.org/project/autograd/>`_, a
+package for automatic differentiation for native Python and Numpy.
+
+
+Pymanopt
+--------
+
+The :doc:`LieDetect </liedetect_user>` module requires `Pymanopt <https://pymanopt.org/>`_, a
+Python toolbox for optimization on Riemannian manifolds.
+
+
+
 Bug reports and contributions
 *****************************
 

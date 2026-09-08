@@ -101,3 +101,9 @@ Datasets
 ********
 
 .. include:: datasets.inc
+
+
+LieDetect
+*********
+
+.. include:: liedetect_sum.inc
