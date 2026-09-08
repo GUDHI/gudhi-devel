@@ -1,0 +1,2 @@
+add_executable_with_targets(Vineyard_example_simple_vineyard example_simple_vineyard.cpp TBB::tbb)
+add_test(NAME Vineyard_example_simple_vineyard COMMAND $<TARGET_FILE:Vineyard_example_simple_vineyard>)
