@@ -12,6 +12,7 @@
 
 import numpy as np
 from numpy.testing import assert_almost_equal
+import pytest
 
 from gudhi._pers_cub_low_dim_ext import _persistence_on_rectangle_from_top_cells
 from gudhi._pers_cub_low_dim_ext import _persistence_on_a_line
@@ -73,10 +74,21 @@ def test_contiguity_for_persistence_on_rectangle():
     # Get a 10x10 slice of a 20x10 random values - base is not contiguous
     base = rng.standard_normal((20, 10))[::2]
     persrec_c = _persistence_on_rectangle_from_top_cells(np.ascontiguousarray(base), 0.)
-    persrec_f = _persistence_on_rectangle_from_top_cells(np.asfortranarray(base), 0.)
-    for idx in range(2):
-        assert_almost_equal(persrec_c[idx], persrec_f[idx])
+    # _persistence_on_rectangle_from_top_cells only accepts c_contig
+    with pytest.raises(TypeError):
+        persrec_f = _persistence_on_rectangle_from_top_cells(np.asfortranarray(base), 0.)
+    
+    with pytest.raises(TypeError):
+        persrec_r = _persistence_on_rectangle_from_top_cells(base, 0.)
 
-    persrec_r = _persistence_on_rectangle_from_top_cells(base, 0.)
-    for idx in range(2):
-        assert_almost_equal(persrec_c[idx], persrec_r[idx])
+def test_filtration_types_for_persistence_on_a_line():
+    for type in [np.float32, np.float64]:
+        cells = np.array([1. ,2. ,3. ,2. ,4. ,1.], dtype=type)
+        diag = _persistence_on_a_line(cells)
+        assert diag.dtype == type
+    
+def test_filtration_types_for_persistence_on_rectangle():
+    for type in [np.float32, np.float64]:
+        cells = np.array([[1., 2., 3.], [2., 4., 1.], [3., 2., 1.]], dtype=type)
+        diag = _persistence_on_rectangle_from_top_cells(cells, 0.)
+        assert diag[0].dtype == type

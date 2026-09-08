@@ -14,13 +14,13 @@ __license__ = "MIT"
 import numpy as np
 
 from gudhi._cubical_complex_ext import (
-    _Periodic_cubical_complex_interface,
-    _Periodic_cubical_complex_persistence_interface,
+    _Periodic_cubical_complex_interface_float64,
+    _Periodic_cubical_complex_persistence_interface_float64,
 )
 
 
 # PeriodicCubicalComplex python interface
-class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
+class PeriodicCubicalComplex(_Periodic_cubical_complex_interface_float64):
     """The PeriodicCubicalComplex is an example of a structured complex useful
     in computational mathematics (specially rigorous numerics) and image
     analysis.
@@ -163,7 +163,7 @@ class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
         :type min_persistence: float.
         :returns: Nothing.
         """
-        self._pers = _Periodic_cubical_complex_persistence_interface(self, True)
+        self._pers = _Periodic_cubical_complex_persistence_interface_float64(self, True)
         self._pers._compute_persistence(homology_coeff_field, min_persistence)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):

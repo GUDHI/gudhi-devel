@@ -83,3 +83,23 @@ def test_compare_top_cells():
     cmp(np.array(a, order="F"))
     cmp(a[0:18])
     cmp(a[::2, ::-1])
+
+
+def test_filtration_types():
+    for type in [np.float32, np.float64]:
+        # 1d
+        a = np.array([2., 4., 3., 5.], dtype=type)
+        r = CubicalPersistence(0).fit_transform([a])[0]
+        assert r.dtype == type
+
+        # 2d
+        a = np.array([[1., 2., 3.], [2., 4., 1.], [3., 2., 1.]], dtype=type)
+        r = CubicalPersistence(0).fit_transform([a])[0]
+        assert r.dtype == type
+
+        # 3d
+        a = np.array([[ 1.,  8.,  7.],
+                      [ 4., 20.,  6.],
+                      [ 6.,  4.,  5.]], dtype=type)
+        r = CubicalPersistence(0).fit_transform([a])[0]
+        assert r.dtype == type

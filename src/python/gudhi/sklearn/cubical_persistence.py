@@ -16,7 +16,12 @@ from typing import Literal, Optional
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
 
-from .. import CubicalComplex
+from .._cubical_complex_ext import (
+    _Bitmap_cubical_complex_interface_float64,
+    _Cubical_complex_persistence_interface_float64,
+    _Bitmap_cubical_complex_interface_float32,
+    _Cubical_complex_persistence_interface_float32,
+)
 from .._pers_cub_low_dim_ext import (
     _persistence_on_a_line,
     _persistence_on_rectangle_from_top_cells,
@@ -41,6 +46,16 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
     """
     This is a class for computing the persistence diagrams from a cubical complex.
     """
+
+    _DTYPE_CUBICAL_COMPLEX_MAP = {
+        np.dtype(np.float32): _Bitmap_cubical_complex_interface_float32,
+        np.dtype(np.float64): _Bitmap_cubical_complex_interface_float64,
+    }
+
+    _DTYPE_CUBICAL_COMPLEX_PERSISTENCE_MAP = {
+        np.dtype(np.float32): _Cubical_complex_persistence_interface_float32,
+        np.dtype(np.float64): _Cubical_complex_persistence_interface_float64,
+    }
 
     def __init__(
         self,
@@ -75,10 +90,16 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         if dim_list.ndim not in [0, 1]:
             raise ValueError(f"Invalid dimension. Got {self.homology_dimensions=}, expected type=int|ArrayLike[int].")
 
+    def _validate_attributes(self):
+        # Must not be done in constructor, but in fit and transform methods
+        if self.input_type not in ["top_dimensional_cells", "vertices"]:
+            raise ValueError("input_type can only be 'top_dimensional_cells' or 'vertices'")
+
     def fit(self, X, Y=None):
         """
         Fit the `CubicalPersistence` class in function of `homology_dimensions` type.
         """
+        self._validate_attributes()
         # Must be in the `fit` part, as `transform` should be const and as `__init__` is not called on a parallel grid
         # search for instance
         self._dim_list = np.asarray(self.homology_dimensions, dtype=int)
@@ -88,8 +109,29 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
             self._dim_list = self._dim_list.reshape(1)
         return self
 
+    def _persistence_intervals_in_dimension(self, cub_pers, dimension):
+        """This function returns the persistence intervals of the complex in a
+        specific dimension.
+
+        :param dimension: The specific dimension.
+        :type dimension: int.
+        :returns: The persistence intervals.
+        :rtype:  numpy array of dimension 2
+        """
+        piid = np.array(cub_pers._intervals_in_dimension(dimension))
+        # Workaround https://github.com/GUDHI/gudhi-devel/issues/507
+        if len(piid) == 0:
+            return np.empty(shape=[0, 2])
+        return piid
+            
     def __transform(self, cells):
-        cells = np.asarray(cells)
+        cells = np.asarray(cells, order="C")
+        # cf. src/python/test/test_sklearn_cubical_persistence.py - test_1d
+        # a = np.array([2, 4, 3, 5])
+        # ri = CubicalPersistence(0).fit_transform([a])[0]
+        # assert ri.dtype == np.dtype("float64") # whereas a.dtype == np.int64
+        if not np.issubdtype(cells.dtype, np.floating):
+            cells = cells.astype("float64")
         if len(cells.shape) == 1 and self.min_persistence >= 0:
             res = _persistence_on_a_line(cells)
             if self.min_persistence > 0:
@@ -111,17 +153,18 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
                 diags = _persistence_on_rectangle_from_top_cells(cells, self.min_persistence)
             return [diags[i] if i in (0, 1) else np.empty((0, 2)) for i in self._dim_list]
 
-        if self.input_type == "top_dimensional_cells":
-            cubical_complex = CubicalComplex(top_dimensional_cells=cells)
-        elif self.input_type == "vertices":
-            cubical_complex = CubicalComplex(vertices=cells)
-        else:
-            raise ValueError("input_type can only be 'top_dimensional_cells' or 'vertices'")
-        cubical_complex.compute_persistence(
-            homology_coeff_field=self.homology_coeff_field,
-            min_persistence=self.min_persistence,
-        )
-        return [cubical_complex.persistence_intervals_in_dimension(dim) for dim in self._dim_list]
+        cells = np.asarray(cells)
+        if not cells.flags.f_contiguous:
+            cells = cells.T
+        dimensions = cells.shape
+        cells = cells.ravel(order="F")
+        CubicalComplexItf = self._DTYPE_CUBICAL_COMPLEX_MAP[cells.dtype]
+        cub = CubicalComplexItf(dimensions, cells, self.input_type == "top_dimensional_cells")
+
+        CubicalComplexPersistenceItf = self._DTYPE_CUBICAL_COMPLEX_PERSISTENCE_MAP[cells.dtype]
+        cub_pers = CubicalComplexPersistenceItf(cub, True)
+        cub_pers._compute_persistence(self.homology_coeff_field, self.min_persistence)
+        return [self._persistence_intervals_in_dimension(cub_pers, dim) for dim in self._dim_list]
 
     def transform(self, X, Y=None):
         """Compute all the cubical complexes and their associated persistence diagrams.
@@ -136,6 +179,8 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
                 `[[array( Hi(X[0]) ), array( Hj(X[0]) )], [array( Hi(X[1]) ), array( Hj(X[1]) )], ...]`
         :rtype: list of (,2) array_like or list of list of (,2) array_like
         """
+        self._validate_attributes()
+
         # threads is preferred as cubical construction and persistence computation releases the GIL
         res = Parallel(n_jobs=self.n_jobs, prefer="threads")(delayed(self.__transform)(cells) for cells in X)
         # cf. `fit`

@@ -14,13 +14,13 @@ __license__ = "MIT"
 import numpy as np
 
 from gudhi._cubical_complex_ext import (
-    _Bitmap_cubical_complex_interface,
-    _Cubical_complex_persistence_interface,
+    _Bitmap_cubical_complex_interface_float64,
+    _Cubical_complex_persistence_interface_float64,
 )
 
 
 # CubicalComplex python interface
-class CubicalComplex(_Bitmap_cubical_complex_interface):
+class CubicalComplex(_Bitmap_cubical_complex_interface_float64):
     """The CubicalComplex is an example of a structured complex useful in
     computational mathematics (specially rigorous numerics) and image
     analysis.
@@ -150,7 +150,7 @@ class CubicalComplex(_Bitmap_cubical_complex_interface):
         :type min_persistence: float.
         :returns: Nothing.
         """
-        self._pers = _Cubical_complex_persistence_interface(self, True)
+        self._pers = _Cubical_complex_persistence_interface_float64(self, True)
         self._pers._compute_persistence(homology_coeff_field, min_persistence)
 
     def persistence(self, homology_coeff_field=11, min_persistence=0):

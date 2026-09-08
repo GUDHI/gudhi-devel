@@ -15,6 +15,7 @@ import numpy as np
 import pytest
 
 from gudhi import CubicalComplex, PeriodicCubicalComplex
+from gudhi._cubical_complex_ext import _Bitmap_cubical_complex_interface_float64, _Bitmap_cubical_complex_interface_float32
 from numpy.testing import assert_almost_equal
 
 def test_empty_constructor():
@@ -442,3 +443,13 @@ def test_contiguity_for_top_dimensional_cells_input():
                                    periodic_dimensions=(False, False))
     # Test top_dimensional_cells() should be enough here, but let's go with all_cells()
     assert_almost_equal(cub_c.all_cells(), cub_r.all_cells())
+
+def test_filtration_types():
+    for from_vertices in [True, False]:
+        cells = np.array([1., 2., 3., 2., 4., 1., 3., 2., 1.], dtype=np.float64)
+        cub = _Bitmap_cubical_complex_interface_float64((3, 3), cells, from_vertices)
+        assert cub._get_numpy_array().dtype == np.float64
+    
+        cells = np.array([1., 2., 3., 2., 4., 1., 3., 2., 1.], dtype=np.float32)
+        cub = _Bitmap_cubical_complex_interface_float32((3, 3), cells, from_vertices)
+        assert cub._get_numpy_array().dtype == np.float32
