@@ -331,7 +331,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         """This function writes the persistence intervals of the simplicial
         complex in a user given file name.
 
-        :param persistence_file: Name of the file.
+        :param persistence_file: Name of the `persistence diagram <fileformats.html#persistence-diagram>`_ file.
         :type persistence_file: string
 
         :note: intervals_in_dim function requires
