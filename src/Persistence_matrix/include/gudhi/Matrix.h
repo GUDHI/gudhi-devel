@@ -651,6 +651,7 @@ class Matrix
    */
   Matrix(unsigned int numberOfColumns, Characteristic characteristic = Field_operators::nullCharacteristic);
   /**
+   * @anchor Matrix_constructor_from_birth_death_comparator
    * @brief Constructs a new empty matrix with the given comparator functions. Only available when those comparators
    * are necessary.
    *
@@ -683,7 +684,8 @@ class Matrix
    *
    * See description of @ref Matrix(const std::vector<Container>& columns, Characteristic characteristic)
    * for more information about  @p orderedBoundaries and
-   * @ref Matrix(const std::function<bool(Pos_index,Pos_index)>&, const std::function<bool(Pos_index,Pos_index)>&)
+   * @ref Matrix_constructor_from_birth_death_comparator
+   * "Matrix(const std::function<bool(Pos_index,Pos_index)>&, const std::function<bool(Pos_index,Pos_index)>&)"
    * for more information about the comparators.
    *
    * @tparam Boundary_range Range type for @ref Entry_representative ranges. Assumed to have a begin(), end() and size()
@@ -712,7 +714,8 @@ class Matrix
    *   - @ref PersistenceMatrixOptions::has_column_pairings = false
    *
    * See description of
-   * @ref Matrix(const std::function<bool(Pos_index,Pos_index)>&, const std::function<bool(Pos_index,Pos_index)>&)
+   * @ref Matrix_constructor_from_birth_death_comparator
+   * "Matrix(const std::function<bool(Pos_index,Pos_index)>&, const std::function<bool(Pos_index,Pos_index)>&)"
    * for more information about the comparators.
    *
    * @param numberOfColumns Number of columns to reserve space for.

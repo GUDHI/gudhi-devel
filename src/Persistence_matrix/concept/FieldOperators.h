@@ -20,7 +20,7 @@ namespace persistence_matrix {
 /** 
  * @ingroup persistence_matrix
  *
- * @brief Concept of the field operator classes needed for the class @ref Matrix.
+ * @brief Concept of the field operator classes needed for the class @ref Gudhi::persistence_matrix::Matrix "Matrix".
  *
  * Implementations of this concept are @ref Gudhi::persistence_fields::Zp_field_operators,
  * @ref Gudhi::persistence_fields::Z2_field_operators,
