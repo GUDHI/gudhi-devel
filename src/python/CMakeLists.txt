@@ -273,7 +273,7 @@ add_gudhi_py_test(test_cubical_complex)
 add_gudhi_py_test(test_cubical_persistence_low_dim)
 
 # Datasets are fetched for these tests
-if(SCIKIT-LEARN_FOUND AND PANDAS_FOUND AND WITH_GUDHI_REMOTE_TEST)
+if(SCIKIT-LEARN_FOUND AND WITH_GUDHI_REMOTE_TEST)
   add_gudhi_py_test(test_sklearn_cubical_persistence)
 
   add_test(NAME cubical_complex_sklearn_itf_py_test
