@@ -359,7 +359,7 @@ If you do not need the filtration values, the boundary can also be obtained as
 :returns:  The (simplices of the) boundary of a simplex
 :rtype:  Iterator over tuples(simplex, filtration)
           )doc")
-      .def("expansion_with_blocker",
+      .def("expansion_with_blockers",
            &gsti::expansion_with_blockers_callback,
            nb::arg("max_dim"),
            nb::arg("blocker_func"),
