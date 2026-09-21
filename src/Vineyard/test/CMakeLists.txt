@@ -1,0 +1,15 @@
+project(Vineyard_tests)
+
+include(GUDHI_boost_test)
+
+add_executable_with_targets(Vineyard_test_vineyard_base test_vineyard_base.cpp TBB::tbb)
+gudhi_add_boost_test(Vineyard_test_vineyard_base)
+
+add_executable_with_targets(Vineyard_test_vineyard_builder test_vineyard_builder.cpp TBB::tbb)
+gudhi_add_boost_test(Vineyard_test_vineyard_builder)
+
+add_executable_with_targets(Vineyard_test_vineyard_helper test_vineyard_helper.cpp TBB::tbb)
+gudhi_add_boost_test(Vineyard_test_vineyard_helper)
+
+
+
