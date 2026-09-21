@@ -7,7 +7,7 @@ jobs:
     name: build pip wheel
     runs-on: ubuntu-latest
     # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_pip
-    container: ghcr.io/gudhi/gudhi-deploy/pip_for_gudhi:2026.09.02
+    container: ghcr.io/gudhi/gudhi-deploy/pip_for_gudhi:2026.09.03
     steps:
       - uses: actions/checkout@v6
         with:
@@ -28,9 +28,9 @@ jobs:
       # Minimal test setup that requires optional pytest scipy matplotlib scikit-learn POT
       # but without tests that requires torch, tensorflow, eagerpy, pykeops, hnswlib
       # TODO: test_human_off fails because the file is not copied at the right place
-      - name: Install and test wheel for Python 3.10
+      - name: Install and test wheel for Python 3.11
         run: |
-          $PYTHON311/bin/python -m pip install numpy~=1.21.6
+          $PYTHON311/bin/python -m pip install numpy~=1.23.2
           $PYTHON311/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT wheelhouse/*.whl
           $PYTHON311/bin/python -c "import gudhi; print(gudhi.__version__)"
           cp data/points/human.off .
