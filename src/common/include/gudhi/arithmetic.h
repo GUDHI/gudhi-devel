@@ -13,6 +13,7 @@
 
 namespace Gudhi {
 
+// This method is templated but its aim is to test small primes (not the largest prime that fits in the number type)
 template<typename Integer>
 static constexpr bool is_prime(const Integer p) {
   if (p <= 1) return false;
