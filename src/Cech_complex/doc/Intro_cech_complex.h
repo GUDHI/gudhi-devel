@@ -23,10 +23,11 @@ namespace cech_complex {
  * 
  * \section cechdefinition Čech complex definition
  * 
- * Čech complex
- * <a target="_blank" href="https://en.wikipedia.org/wiki/%C4%8Cech_complex">(Wikipedia)</a> is a
- * <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a> constructed
- *  from a proximity graph. The set of all simplices is filtered by the radius of their minimal enclosing ball.
+ * <a target="_blank" href="https://en.wikipedia.org/wiki/%C4%8Cech_complex">Čech complex <sup>[Wikipedia]</sup></a>
+ * is a
+ * <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex <sup>[Wikipedia]</sup></a>
+ * constructed from a proximity graph. The set of all simplices is filtered by the radius of their minimal enclosing
+ * ball.
  *
  * The input shall be a range of points where a point is defined as <a target="_blank" href="https://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Point__d.html">CGAL kernel Point_d.</a>
  * 

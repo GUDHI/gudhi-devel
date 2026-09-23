@@ -8,10 +8,10 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.11"]
         include:
-          - python-version: "3.10"
-            numpy-version: "1.21.6"
+          - python-version: "3.11"
+            numpy-version: "1.23.2"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v6

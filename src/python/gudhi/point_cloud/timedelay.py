@@ -14,8 +14,8 @@ import numpy as np
 
 class TimeDelayEmbedding:
     """Point cloud transformation class. Embeds time-series data in the R^d according to
-    `Takens' Embedding Theorem <https://en.wikipedia.org/wiki/Takens%27s_theorem>`_ and obtains the
-    coordinates of each point.
+    `Takens' Embedding Theorem <https://en.wikipedia.org/wiki/Takens%27s_theorem>`_\ :sup:`[Wikipedia]`
+    and obtains the coordinates of each point.
 
     Example
     -------

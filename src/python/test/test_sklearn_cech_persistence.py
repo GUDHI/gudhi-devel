@@ -95,7 +95,7 @@ def test_set_output():
         assert len(diags_pandas.index) == NB_PC
 
     except ImportError:
-        print("Missing pandas, skipping set_output test")
+        pytest.skip("Missing pandas, skipping set_output test")
 
 
 def test_cech_persistence_constructor_exception():

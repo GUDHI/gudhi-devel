@@ -87,6 +87,7 @@
 
 #include <gudhi/uint128.h>
 #include <gudhi/Debug_utils.h>
+#include <gudhi/arithmetic.h>
 
 
 namespace Gudhi::ripser {
@@ -154,14 +155,6 @@ class Union_find {
     }
 };
 
-template<class coefficient_t>
-bool is_prime(const coefficient_t n) {
-  if (!(n & 1) || n < 2) return n == 2;
-  for (coefficient_t p = 3; p * p <= n; p += 2)
-    if (!(n % p)) return false;
-  return true;
-}
-
 // For pretty printing, modulo 11, we prefer -1 to 10.
 template<class coefficient_t>
 coefficient_t normalize(const coefficient_t n, const coefficient_t modulus) {
@@ -171,7 +164,7 @@ coefficient_t normalize(const coefficient_t n, const coefficient_t modulus) {
 template<class coefficient_storage_t, class coefficient_t>
 std::vector<coefficient_storage_t> multiplicative_inverse_vector(const coefficient_t m) {
   std::vector<coefficient_storage_t> inverse(m);
-  if (!is_prime(m))
+  if (!Gudhi::is_prime(m))
     throw std::domain_error("Modulus must be a prime number");
   if ((m - 1) != (coefficient_storage_t)(m - 1))
     throw std::overflow_error("Modulus is too large");

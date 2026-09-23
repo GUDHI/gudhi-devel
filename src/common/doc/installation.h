@@ -44,8 +44,8 @@ make \endverbatim
  * \verbatim cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_REMOTE_TEST=ON --DWITH_GUDHI_PYTHON=ON .. \endverbatim
  * 
  * \subsection documentationgeneration C++ documentation
- * To generate the C++ documentation, the <a target="_blank" href="http://www.doxygen.org/">doxygen</a> program
- * is required (version &ge; 1.9.5 is advised). Run the following command in a terminal:
+ * To generate the C++ documentation, the <a target="_blank" href="http://www.doxygen.org/">doxygen</a> &ge; 1.9.5
+ * program is required. Run the following command in a terminal:
  * \verbatim make doxygen \endverbatim
  * Documentation will be generated in a folder named <code>html</code>.
  *

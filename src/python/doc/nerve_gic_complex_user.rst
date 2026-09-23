@@ -16,7 +16,8 @@ Nerve definition
 
 Assume you are given a cover C of your point cloud P. Then, the Nerve of this cover
 is the simplicial complex that has one k-simplex per k-fold intersection of cover elements.
-See also `Wikipedia <https://en.wikipedia.org/wiki/Nerve_of_a_covering>`_.
+See also
+`Nerve of a covering <https://en.wikipedia.org/wiki/Nerve_of_a_covering>`_\ :sup:`[Wikipedia]`
 
 .. figure::
     ../../doc/Nerve_GIC/nerve.png
