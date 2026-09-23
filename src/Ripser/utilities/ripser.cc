@@ -45,6 +45,7 @@
 //#define GUDHI_INDICATE_PROGRESS
 
 #include <gudhi/ripser.h>
+#include <gudhi/arithmetic.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -312,7 +313,7 @@ int main(int argc, char** argv) {
       std::string parameter = std::string(argv[++i]);
       std::size_t next_pos;
       modulus = std::stol(parameter, &next_pos);
-      if (next_pos != parameter.size() || !Gudhi::ripser::is_prime(modulus)) print_usage_and_exit(-1);
+      if (next_pos != parameter.size() || !Gudhi::is_prime(modulus)) print_usage_and_exit(-1);
     } else {
       if (filename) { print_usage_and_exit(-1); }
       filename = argv[i];
