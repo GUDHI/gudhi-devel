@@ -28,8 +28,12 @@ namespace multi_filtration {
  */
 class StoragePolicy {
  public:
+  // TODO / Note: Using unsigned arithmetic types made a few things (I don't exactly remember what) annoying to handle
+  // and as there are not needed for now, I just decided to forbid them.
   /**
-   * @brief Type of an element of the filtration value at a parameter (in a generator).
+   * @brief Type of an element of the filtration value at a parameter (in a generator). Has to be somehow be
+   * "configurable" directly or indirectly through a template parameter of the class.
+   * Has to be a **signed** arithmetic type.
    */
   using value_type = unspecified;
   /**
@@ -45,27 +49,33 @@ class StoragePolicy {
    */
   using reference = unspecified;
   /**
-   * @brief Const reference type for an element in the filtration value.
-   * Does not really have to be a r-value (e.g., can just be the same than `value_type`, that is a copy).
+   * @brief Const reference type for an element in the filtration value. Does not really have to be a reference
+   * despite the name (e.g., can just be `value_type` and @ref operator() returns a copy).
    */
   using const_reference = unspecified;
   /**
-   * @brief Iterator type for a generator of the filtration value. Has to be at least LegacyForwardIterator.
+   * @brief Iterator type that iterates over the values of a single stored generator.
+   * Has to be at least LegacyForwardIterator.
    */
   using iterator = unspecified;
   /**
-   * @brief Const iterator type for a generator of the filtration value. Has to be at least LegacyForwardIterator.
+   * @brief Const iterator type that iterates over the values of a single stored generator.
+   * Has to be at least LegacyForwardIterator.
    */
   using const_iterator = unspecified;
   /**
-   * @brief Returns the type of @ref StoragePolicy if @ref value_type is equal to the template parameter `U`.
+   * @brief It is assumed that the type @ref value_type is deduced from the template parameter of the class.
+   * Returns the class with the right template parameters such that @ref value_type of the returned type is `U` and
+   * the potential remaining template parameter are as close as possible to the current ones.
+   * If not all signed arithmetic types are allowed for `U`, unallowed types should not compile.
    */
   template <typename U>
   using As_type = unspecified;
 
   /**
    * @brief Value considered +infinity for an element in the filtration value.
-   * @note `-T_inf` does **not** have to be equal to `T_m_inf`.
+   * @note `-T_inf` has to be equal to `T_m_inf` only if `std::numeric_limits<U>::has_infinity` is true,
+   * otherwise they can be different.
    *
    * @tparam U Type of the element. Default value: @ref value_type.
    */
@@ -74,7 +84,8 @@ class StoragePolicy {
 
   /**
    * @brief Value considered -infinity for an element in the filtration value.
-   * @note `-T_m_inf` does **not** have to be equal to `T_inf`.
+   * @note `-T_m_inf` has to be equal to `T_inf` only if `std::numeric_limits<U>::has_infinity` is true,
+   * otherwise they can be different.
    *
    * @tparam U Type of the element. Default value: @ref value_type.
    */
@@ -95,8 +106,10 @@ class StoragePolicy {
    */
   constexpr static const bool has_lexicographical_storage;
   /**
-   * @brief True if and only if the storage strategy allows to simplify the set of generators such that it becomes
-   * minimal.
+   * @brief True if and only if the storage strategy is supposed to store a minimal set of generators, that is, enables
+   * to swap the position of two generators in the container (see @ref swap_generators) and allows to only store
+   * specific generators and so to remove explicitly generators from it (e.g., generators are not implicitly stored,
+   * so among others not compatible with @ref has_an_implicit_axis at true).
    */
   constexpr static const bool has_minimal_set_representation;
   /**

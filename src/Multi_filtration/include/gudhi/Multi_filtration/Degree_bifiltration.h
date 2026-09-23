@@ -14,8 +14,8 @@
  * @brief Contains the @ref Gudhi::multi_filtration::Degree_bifiltration class.
  */
 
-#ifndef MF_DEGREE_BIFILTRATION_H_
-#define MF_DEGREE_BIFILTRATION_H_
+#ifndef GUDHI_MF_DEGREE_BIFILTRATION_H_
+#define GUDHI_MF_DEGREE_BIFILTRATION_H_
 
 #include <cstddef>      //std::size_t
 #include <cstdint>      //std::int64_t
@@ -57,18 +57,14 @@ namespace Gudhi::multi_filtration {
  * The generators are always internally ordered by the second parameter.
  *
  * `std::numeric_limits<Multi_parameter_filtration_value<Degree_bifiltration>, Co>` will behave such that:
- * - `::has_infinity` returns `true` if and only if `Co` is false,
+ * - `::has_infinity` returns `true` if and only if `Co` is false and `T` is floating point type,
  * - `::has_quiet_NaN` returns `true`,
- * - `::infinity(int)` returns `Degree_bifiltration::inf(size_type)`,
- * - `::minus_infinity(int)` returns `Degree_bifiltration::minus_inf(size_type)`,
- * - `::max(int)` throws if `Co` is true and otherwise returns a @ref Degree_bifiltration with one generator with
- * first parameter 0 and second parameter `std::numeric_limits<T>::max()`,
- * - `::quiet_NaN(int)` returns `Degree_bifiltration::nan(size_type)`.
+ * - `::max(int)` and `::lowest(int)` only compile when `Co` is false.
  *
  * At construction, the format will be \f$ [(v_0,0), (v_1,1), (v_2,2), ..., (v_{k-1},k-1)] \f$, but it is possible
  * to set a shit and step value to get
  * \f$ [(v_0,shift+0*step), (v_1,shift+1*step), (v_2,shift+2*step), ..., (v_{k-1},shift+(k-1)*step)] \f$ using
- * @ref Degree_bifiltration::set_mapping:
+ * @ref Degree_bifiltration::set_mapping "":
  * ```
  * using Storage_policy = Gudhi::multi_filtration::Degree_bifiltration<double>;
  * using Multi_filtration_value = Gudhi::multi_filtration::Multi_parameter_filtration_value<Storage_policy>;
@@ -474,4 +470,4 @@ class Degree_bifiltration {
 
 }  // namespace Gudhi::multi_filtration
 
-#endif  // MF_DEGREE_BIFILTRATION_H_
+#endif  // GUDHI_MF_DEGREE_BIFILTRATION_H_

@@ -1341,20 +1341,18 @@ template <class F, typename T>
 void test_numerical_limits() {
   const int num_param = 3;
 
-  BOOST_CHECK(std::numeric_limits<F>::has_infinity);
-
-  BOOST_CHECK_THROW(std::numeric_limits<F>::max(), std::logic_error);
-
   BOOST_CHECK(std::numeric_limits<F>::infinity(num_param).is_plus_inf());
-  BOOST_CHECK(std::numeric_limits<F>::minus_infinity(num_param).is_minus_inf());
+  BOOST_CHECK(std::numeric_limits<F>::max(num_param).is_plus_inf());
+  BOOST_CHECK(std::numeric_limits<F>::lowest(num_param).is_minus_inf());
 
-  auto max = std::numeric_limits<F>::max(num_param);
-  BOOST_CHECK_EQUAL(max(0, 0), std::numeric_limits<T>::max());
-  BOOST_CHECK_EQUAL(max(0, 1), std::numeric_limits<T>::max());
-  BOOST_CHECK_EQUAL(max(0, 2), std::numeric_limits<T>::max());
+  if constexpr (std::numeric_limits<T>::has_infinity) {
+    BOOST_CHECK(std::numeric_limits<F>::has_infinity);
+    BOOST_CHECK((-std::numeric_limits<F>::infinity(num_param)).is_minus_inf());
+  } else {
+    BOOST_CHECK(!std::numeric_limits<F>::has_infinity);
+  }
 
-  if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(std::numeric_limits<F>::has_quiet_NaN);
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
     BOOST_CHECK(std::numeric_limits<F>::quiet_NaN(num_param).is_nan());
   }
 }

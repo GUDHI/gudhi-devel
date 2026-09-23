@@ -13,8 +13,8 @@
  * @author Hannah Schreiber, David Loiseaux
  */
 
-#ifndef MF_PRODUCTS_H_
-#define MF_PRODUCTS_H_
+#ifndef GUDHI_MF_PRODUCTS_H_
+#define GUDHI_MF_PRODUCTS_H_
 
 #include <algorithm>
 #include <cstddef>
@@ -290,4 +290,4 @@ inline auto compute_norm(const MultiFiltrationValue &f) {
 
 }  // namespace Gudhi
 
-#endif  // MF_PRODUCTS_H_
+#endif  // GUDHI_MF_PRODUCTS_H_

@@ -8,8 +8,8 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#ifndef DOC_MULTI_FILTRATION_INTRO_H_
-#define DOC_MULTI_FILTRATION_INTRO_H_
+#ifndef GUDHI_DOC_MULTI_FILTRATION_INTRO_H_
+#define GUDHI_DOC_MULTI_FILTRATION_INTRO_H_
 
 // needs namespace for Doxygen to link on classes
 namespace Gudhi {
@@ -33,4 +33,4 @@ namespace multi_filtration {
 }  // namespace persistence_fields
 }  // namespace Gudhi
 
-#endif  // DOC_MULTI_FILTRATION_INTRO_H_
+#endif  // GUDHI_DOC_MULTI_FILTRATION_INTRO_H_

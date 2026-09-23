@@ -14,8 +14,8 @@
  * @brief Contains the @ref Gudhi::multi_filtration::Flat_array_filtration class.
  */
 
-#ifndef MF_FLAT_ARRAY_FILTRATION_H_
-#define MF_FLAT_ARRAY_FILTRATION_H_
+#ifndef GUDHI_MF_FLAT_ARRAY_FILTRATION_H_
+#define GUDHI_MF_FLAT_ARRAY_FILTRATION_H_
 
 #include <algorithm>    //std::lower_bound
 #include <cmath>        //std::isnan, std::min, std::abs
@@ -46,14 +46,9 @@ namespace Gudhi::multi_filtration {
  * @details For more documentation of the public interface, see @ref StoragePolicy.
  *
  * `std::numeric_limits<Multi_parameter_filtration_value<Flat_array_filtration>, Co>` will behave such that:
- * - `::has_infinity` returns `true`,
+ * - `::has_infinity` returns `true` if `T` is floating point type,
  * - `::has_quiet_NaN` returns `std::numeric_limits<T>::has_quiet_NaN`,
- * - `::infinity(int)` returns `Flat_array_filtration::inf(size_type)`,
- * - `::minus_infinity(int)` returns `Flat_array_filtration::minus_inf(size_type)`,
- * - `::max(int)` throws if `Co` is true and otherwise returns a @ref Flat_array_filtration with one generator with
- * all parameters at std::numeric_limits<T>::max()`,
- * - `::quiet_NaN(int)` returns `Flat_array_filtration::nan(size_type)` if `std::numeric_limits<T>::has_quiet_NaN`
- * and throws otherwise.
+ * - `::max(int)` and `::lowest(int)` always compile.
  * 
  * @tparam T Arithmetic type of an entry for one parameter of a filtration value. Has to be **signed** and
  * to implement `std::isnan(T)`, `std::numeric_limits<T>::has_quiet_NaN`, `std::numeric_limits<T>::quiet_NaN()`,
@@ -370,4 +365,4 @@ class Flat_array_filtration {
 
 }  // namespace Gudhi::multi_filtration
 
-#endif  // MF_FLAT_ARRAY_FILTRATION_H_
+#endif  // GUDHI_MF_FLAT_ARRAY_FILTRATION_H_
