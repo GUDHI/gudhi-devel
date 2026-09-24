@@ -188,5 +188,5 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           auditwheel repair *.whl
-          $PYTHON311/bin/python -m pip twine 
+          $PYTHON311/bin/python -m pip install --user twine 
           $PYTHON311/bin/python -m twine upload wheelhouse/*.whl
