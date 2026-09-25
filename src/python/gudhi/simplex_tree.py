@@ -18,6 +18,7 @@ __license__ = "MIT"
 import numpy as np
 from numpy.typing import ArrayLike
 import warnings
+from collections.abc import Callable, Sequence
 
 from gudhi import _simplex_tree_ext as t
 
@@ -82,8 +83,6 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
         .. deprecated:: 3.2.0
         """
-        import warnings
-
         warnings.warn(
             "Since Gudhi 3.2, calling SimplexTree.initialize_filtration is unnecessary.",
             DeprecationWarning,
@@ -426,3 +425,21 @@ class SimplexTree(t._Simplex_tree_python_interface):
             warnings.warn(message, RuntimeWarning)
         super()._collapse_edges(nb_iterations)
         return self
+
+    def expansion_with_blocker(self, max_dim: int, blocker_func: Callable[[Sequence[int]], bool]) -> None:
+        """Please consider using :func:`expansion_with_blockers`
+
+        :param max_dim: Expansion maximal dimension value.
+        :type max_dim: int
+        :param blocker_func: Blocker oracle.
+        :type blocker_func: Callable[[Sequence[int]], bool]
+        :rtype: None
+
+        .. deprecated:: 3.14.0
+        """
+        warnings.warn(
+            "Since Gudhi 3.14, calling SimplexTree.expansion_with_blocker is deprecated. Please consider using "\
+            "SimplexTree.expansion_with_blockers.",
+            DeprecationWarning,
+        )
+        super().expansion_with_blockers(max_dim, blocker_func)

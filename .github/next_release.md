@@ -10,8 +10,8 @@ Below is a list of changes:
 - [Module](link)
      - **...**
 
-- [Module](link)
-     - **...**
+- Simplex tree [`[Python`](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
+     - `expansion_with_blocker` is deprecated. Please consider using `expansion_with_blockers`.
 
 - Miscellaneous
      - Reader utilities now require an explicit file path and raise an exception when the file cannot be opened.
