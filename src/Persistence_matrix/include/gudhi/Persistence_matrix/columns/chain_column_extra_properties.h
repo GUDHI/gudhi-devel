@@ -51,7 +51,8 @@ struct Dummy_chain_properties {
  * corresponds to the @ref MatIdx index of the image of the bijection if the column is in either \f$ G \f$ or \f$ H \f$.
  * See @cite zigzag for more details.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Chain_column_extra_properties

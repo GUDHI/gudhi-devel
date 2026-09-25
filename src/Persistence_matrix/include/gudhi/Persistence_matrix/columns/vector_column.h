@@ -45,7 +45,8 @@ namespace persistence_matrix {
  * so erased values can still be in the underlying container.
  * On the other hand, two entries will never have the same row index.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Vector_column : public Master_matrix::Row_access_option,

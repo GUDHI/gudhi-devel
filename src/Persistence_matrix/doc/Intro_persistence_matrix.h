@@ -25,8 +25,9 @@ namespace persistence_matrix {
  * and used as backend for persistence algorithms, such at persistent homology, @ref persistent_cohomology,
  * or zigzag @cite zigzag.
  *
- * The structure is entirely accessed via the class @ref Matrix and it provides several functionalities which can
- * be enabled or disabled through a template argument following the @ref PersistenceMatrixOptions concept.
+ * The structure is entirely accessed via the class @ref Gudhi::persistence_matrix::Matrix "Matrix" and it provides
+ * several functionalities which can be enabled or disabled through a template argument following the
+ * @ref PersistenceMatrixOptions concept.
  * The main functionalities are:
  * @li column and row access,
  * @li column addition and scalar multiplication,

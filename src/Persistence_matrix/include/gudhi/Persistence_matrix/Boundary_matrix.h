@@ -35,7 +35,8 @@ namespace persistence_matrix {
  * in order to compute its persistent homology. Provides an access to its columns and rows as well as the possibility
  * to remove the last cells of the filtration while maintaining a valid barcode.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Boundary_matrix : public Master_matrix::Matrix_dimension_option,

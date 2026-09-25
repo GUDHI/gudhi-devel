@@ -59,7 +59,8 @@ struct EntryPointerEq {
  * are stored uniquely in the underlying container. When adding an entry range into it, the given entry range
  * also does not need to be ordered (contrary to most other column types).
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Unordered_set_column : public Master_matrix::Row_access_option,

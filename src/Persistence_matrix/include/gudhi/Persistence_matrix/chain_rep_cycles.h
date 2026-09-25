@@ -49,7 +49,8 @@ struct Dummy_chain_representative_cycles {
  *
  * @brief Class managing the representative cycles for @ref Chain_matrix if the option was enabled.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Chain_representative_cycles

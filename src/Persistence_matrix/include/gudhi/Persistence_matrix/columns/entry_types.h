@@ -153,7 +153,8 @@ class Entry_field_element
  * column index when the row access is enabled, as well as its value when they are different from only 0 and 1.
  * Zero-valued entries are never made explicit in the matrix.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Entry : public Master_matrix::Entry_column_index_option,

@@ -55,7 +55,8 @@ struct Dummy_ru_vine_pairing {
  *
  * @brief Class managing the barcode for @ref RU_vine_swap.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <typename Master_matrix>
 class RU_barcode_swap : public RU_pairing<Master_matrix>
@@ -178,7 +179,8 @@ class RU_barcode_swap : public RU_pairing<Master_matrix>
  *
  * @brief Class managing the vine swaps for @ref RU_matrix.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class RU_vine_swap

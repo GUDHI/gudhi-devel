@@ -41,7 +41,8 @@ namespace persistence_matrix {
  * computed, as well as representative cycles. Supports vineyards (see @cite vineyards) and the removal
  * of maximal cells while maintaining a valid barcode. Provides an access to its columns and rows.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Chain_matrix : public Master_matrix::Matrix_dimension_option,
