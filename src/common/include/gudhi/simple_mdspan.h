@@ -258,13 +258,13 @@ class layout_right
     template <class IndexRange = std::initializer_list<index_type> >
     constexpr index_type operator()(const IndexRange& indices) const
     {
-      GUDHI_CHECK(indices.size() == extents_type::rank(), "Wrong number of parameters.");
+      GUDHI_CHECK(indices.size() == extents_type::rank(), std::invalid_argument("Wrong number of parameters."));
 
       index_type newIndex = 0;
       auto it = indices.begin();
       GUDHI_CHECK_code(unsigned int i = 0);
       for (auto stride : ext_shifts_) {
-        GUDHI_CHECK_code(GUDHI_CHECK(*it < exts_.extent(i), "Out of bound index."));
+        GUDHI_CHECK_code(GUDHI_CHECK(*it < exts_.extent(i), std::out_of_range("Out of bound index.")));
         newIndex += (stride * (*it));
         ++it;
         GUDHI_CHECK_code(++i);
@@ -287,7 +287,7 @@ class layout_right
 
     index_type stride(rank_type r) const
     {
-      GUDHI_CHECK(r < ext_shifts_.size(), "Stride out of bound.");
+      GUDHI_CHECK(r < ext_shifts_.size(), std::out_of_range("Stride out of bound."));
       return ext_shifts_[r];
     }
 
@@ -302,7 +302,7 @@ class layout_right
     // update can be faster than reconstructing everytime if only relatively small r's are updated.
     void update_extent(rank_type r, index_type new_value)
     {
-      GUDHI_CHECK(r < extents_type::rank(), "Index out of bound.");
+      GUDHI_CHECK(r < extents_type::rank(), std::out_of_range("Index out of bound."));
       exts_.update_dynamic_extent(r, new_value);
       _update_strides(r);
     }
@@ -366,14 +366,16 @@ class Simple_mdspan
   explicit Simple_mdspan(data_handle_type ptr, IndexTypes... exts)
       : ptr_(ptr), map_(extents_type(exts...))
   {
-    GUDHI_CHECK(ptr != nullptr || empty() || Extents::rank() == 0, "Given pointer is not properly initialized.");
+    GUDHI_CHECK(ptr != nullptr || empty() || Extents::rank() == 0,
+                std::invalid_argument("Given pointer is not properly initialized."));
   }
 
   template <class OtherIndexType, size_t N>
   constexpr explicit Simple_mdspan(data_handle_type ptr, const std::array<OtherIndexType, N>& exts)
       : ptr_(ptr), map_(extents_type(exts))
   {
-    GUDHI_CHECK(ptr != nullptr || empty() || Extents::rank() == 0, "Given pointer is not properly initialized.");
+    GUDHI_CHECK(ptr != nullptr || empty() || Extents::rank() == 0,
+                std::invalid_argument("Given pointer is not properly initialized."));
   }
 
   Simple_mdspan(data_handle_type ptr, const mapping_type& m) : ptr_(ptr), map_(m) {}
@@ -402,7 +404,7 @@ class Simple_mdspan
 
   constexpr index_type extent(rank_type r) const
   {
-    GUDHI_CHECK(r < map_.extents().rank(), "Out of bound index.");
+    GUDHI_CHECK(r < map_.extents().rank(), std::out_of_range("Out of bound index."));
     return map_.extents().extent(r);
   }
 
@@ -449,7 +451,7 @@ class Simple_mdspan
   // for update_extent to make sense, as resizing the vector can move it in the memory
   void update_data(data_handle_type ptr)
   {
-    GUDHI_CHECK(ptr != nullptr, "Null pointer not valid input.");
+    GUDHI_CHECK(ptr != nullptr, std::invalid_argument("Null pointer not valid input."));
     ptr_ = ptr;
   }
 

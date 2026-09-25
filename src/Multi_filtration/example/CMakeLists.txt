@@ -1,0 +1,4 @@
+add_executable_with_targets(Multi_filtration_example_multi_simplex_tree example_multi_simplex_tree.cpp TBB::tbb)
+add_test(NAME Multi_filtration_example_multi_simplex_tree COMMAND $<TARGET_FILE:Multi_filtration_example_multi_simplex_tree>)
+
+
