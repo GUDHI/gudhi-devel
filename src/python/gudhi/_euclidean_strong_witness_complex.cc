@@ -94,8 +94,8 @@ NB_MODULE(_euclidean_strong_witness_complex_ext, m)
 
   nb::class_<gwci>(m, "Euclidean_strong_witness_complex_interface")
       .def(nb::init<>(), nb::call_guard<nb::gil_scoped_release>())
-      .def(nb::init<const Sequence2D&, const Sequence2D&>(), nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<const Tensor2D&, const Tensor2D&>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const Sequence2D&, const Sequence2D&>(), nb::call_guard<nb::gil_scoped_release>())
       .def("create_simplex_tree",
            &gwci::create_simplex_tree,
            nb::arg("simplex_tree"),
