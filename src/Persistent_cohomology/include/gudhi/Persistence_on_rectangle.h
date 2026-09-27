@@ -511,6 +511,13 @@ struct Persistence_on_rectangle {
 #endif
   }
 
+// Hack to prevent gcc from generating cmov, which prevents the processor from loading the next data in advance.
+// To be re-benchmarked sometimes with newer compilers and hardware.
+#ifdef __GNUC__
+#define GUDHI_NOP asm(""::);
+#else
+#define GUDHI_NOP
+#endif
   template<class Out>
   void primal(Out&&out){
     auto it = std::remove_if(edges.begin(), edges.end(), [&](Edge& e) {
@@ -518,7 +525,7 @@ struct Persistence_on_rectangle {
         Index a = ds_find_set_vertex(e.v1);
         Index b = ds_find_set_vertex(e.v2);
         if (a == b) return false;
-        if (data_vertex(b) < data_vertex(a)) std::swap(a, b);
+        if (data_vertex(b) < data_vertex(a)) { GUDHI_NOP std::swap(a, b); }
         ds_parent_vertex(b) = a;
         out(data_vertex(b).out(), e.f.out());
         return true;
@@ -537,7 +544,7 @@ struct Persistence_on_rectangle {
       Index b = ds_find_set_square(e.v2);
       GUDHI_CHECK(a != b, std::logic_error("Bug in Gudhi"));
       // This is more robust in case the input contains inf? I used to set the filtration of 0 to inf.
-      if (b == 0 || (a != 0 && input(a) < input(b))) std::swap(a, b);
+      if (b == 0 || (a != 0 && input(a) < input(b))) { GUDHI_NOP std::swap(a, b); }
       ds_parent_square(b) = a;
       if constexpr (output_index)
         out(e.f.out(), b);
@@ -545,6 +552,7 @@ struct Persistence_on_rectangle {
         out(e.f.out(), input(b));
     }
   }
+#undef GUDHI_NOP
 };
 // Ideas for improvement:
 // * for large hard (many intervals) inputs, primal/dual dominate the running time because of the random reads in
@@ -560,6 +568,7 @@ struct Persistence_on_rectangle {
 //   that take about as much space as the input. We could, on a subarray, fill a dense ds_parent, then reduce it and
 //   export only the critical vertices and boundary to some sparse datastructure, but it doesn't seem worth the trouble
 //   for now.
+// * Try handling dual before primal.
 
 /**
  * @private
