@@ -16,12 +16,13 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef PERSISTENCE_ON_RECTANGLE_H
-#define PERSISTENCE_ON_RECTANGLE_H
+#ifndef GUDHI_PERSISTENCE_ON_RECTANGLE_H
+#define GUDHI_PERSISTENCE_ON_RECTANGLE_H
 
 #include <gudhi/Debug_utils.h>
 #ifdef GUDHI_DETAILED_TIMES
  #include <gudhi/Clock.h>
+ #include <iostream>
 #endif
 
 #include <boost/range/adaptor/reversed.hpp>
@@ -53,9 +54,7 @@ struct Persistence_on_rectangle {
     Filtration_value first; Index second;
     T_with_index() = default;
     T_with_index(Filtration_value f, Index i) : first(f), second(i) {}
-    bool operator<(T_with_index const& other) const {
-      return std::tie(first, second) < std::tie(other.first, other.second);
-    }
+    bool operator<(T_with_index const& other) const { return first < other.first; }
     Index out() const { return second; }
   };
   // Don't store the index if we don't want to output it.
@@ -234,7 +233,9 @@ struct Persistence_on_rectangle {
     auto pair_square_left  = [&](){ set_parent_square(i, i - 1); };
     auto pair_square_right = [&](){ set_parent_square(i, i + 1); };
 
-    // Mark the corners as critical, it will be overwritten if not
+#if 1
+    // Mark the corners as critical, it will be overwritten if not.
+    // Requires size at least 3x3 so the corners are distinct.
     i = 0; f = input(i);
     mark_vertex_critical(v_up_right());
     i = size_x; f = input(i);
@@ -243,6 +244,20 @@ struct Persistence_on_rectangle {
     mark_vertex_critical(v_down_right());
     i = size_x + dy * size_y; f = input(i);
     mark_vertex_critical(v_down_left());
+#else
+    i = 0; f = input(i);
+    if (has_larger_input(i + 1, i, f) && has_larger_input(i + dy, i, f) && has_larger_input(i + dy + 1, i, f))
+      mark_vertex_critical(v_up_right());
+    i = size_x; f = input(i);
+    if (has_larger_input(i - 1, i, f) && has_larger_input(i + dy, i, f) && has_larger_input(i + dy - 1, i, f))
+      mark_vertex_critical(v_up_left());
+    i = dy * size_y; f = input(i);
+    if (has_larger_input(i + 1, i, f) && has_larger_input(i - dy, i, f) && has_larger_input(i - dy + 1, i, f))
+      mark_vertex_critical(v_down_right());
+    i = size_x + dy * size_y; f = input(i);
+    if (has_larger_input(i - 1, i, f) && has_larger_input(i - dy, i, f) && has_larger_input(i - dy - 1, i, f))
+      mark_vertex_critical(v_down_left());
+#endif
 
     // Boundary nodes, 1st row
     for(Index x = 1; x < size_x; ++x) {
@@ -299,11 +314,12 @@ struct Persistence_on_rectangle {
               set_parent_vertex(v_up_left(), v_up_right());
               if (down()) { // U l UL d
                 if (down_left()) { // U l UL d dl
-                  set_parent_vertex(v_down_left(), v_up_left());
+                  set_parent_vertex(v_down_left(), v_up_right()); // v_up_left()
                   if (right()) { // U L UL d DL r
                     if (down_right()) { // U L UL d DL r dr
-                      set_parent_vertex(v_down_right(), v_down_left());
-                      pair_square_right();
+                      set_parent_vertex(v_down_right(), v_up_right()); // v_down_left()
+                      // The following pair exists, but nothing will look at it
+                      // pair_square_right();
                       if (up_right()) { // U L UL D DL R DR ur - cr
                         mark_vertex_critical(v_up_right());
                       }
@@ -412,7 +428,7 @@ struct Persistence_on_rectangle {
                 set_parent_vertex(v_down_left(), v_up_left());
                 if (right()) { // !u L d DL r
                   if (down_right()) { // !u L d DL r dr
-                    set_parent_vertex(v_down_right(), v_down_left());
+                    set_parent_vertex(v_down_right(), v_up_left()); // v_down_left()
                   } else { // !u L d DL r !dr
                     mark_edge_critical(v_down_left(), v_down_right());
                   }
@@ -544,7 +560,7 @@ struct Persistence_on_rectangle {
       Index b = ds_find_set_square(e.v2);
       GUDHI_CHECK(a != b, std::logic_error("Bug in Gudhi"));
       // This is more robust in case the input contains inf? I used to set the filtration of 0 to inf.
-      if (b == 0 || (a != 0 && input(a) < input(b))) { GUDHI_NOP std::swap(a, b); }
+      if (b == 0 || (a != 0 && input(a) < input(b))) std::swap(a, b);
       ds_parent_square(b) = a;
       if constexpr (output_index)
         out(e.f.out(), b);
@@ -596,8 +612,9 @@ auto persistence_on_rectangle_from_top_cells(Filtration_value const* input, Inde
 #ifdef GUDHI_DETAILED_TIMES
   Gudhi::Clock clock;
 #endif
-  GUDHI_CHECK(n_rows >= 2 && n_cols >= 2,
-      std::domain_error("The complex must truly be 2d, i.e. at least 2 rows and 2 columns"));
+  GUDHI_CHECK(n_rows >= 3 && n_cols >= 3,
+      std::domain_error("The complex must truly be 2d, i.e. at least 3 rows and 3 columns"));
+  // For 2 rows, compute the min and use the 1d code
   Persistence_on_rectangle<Filtration_value, Index, output_index> X;
   X.init(input, n_rows, n_cols);
 #ifdef GUDHI_DETAILED_TIMES
@@ -623,4 +640,4 @@ auto persistence_on_rectangle_from_top_cells(Filtration_value const* input, Inde
 }
 }  // namespace Gudhi::cubical_complex
 
-#endif  // PERSISTENCE_ON_RECTANGLE_H
+#endif  // GUDHI_PERSISTENCE_ON_RECTANGLE_H

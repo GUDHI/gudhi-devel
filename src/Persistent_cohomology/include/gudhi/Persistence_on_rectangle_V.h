@@ -1,6 +1,6 @@
 /*    This file is part of the Gudhi Library - https://gudhi.inria.fr/ - which is released under MIT.
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
- *    Author(s): TODO: fill in author name(s)
+ *    Author(s): Marc Glisse (with Claude Sonnet 5)
  *
  *    Copyright (C) 2026 Inria
  *
@@ -18,8 +18,8 @@
 //  dualized here to be vertex-centered); comments below note where and why
 //  this file's approach differs.
 
-#ifndef PERSISTENCE_ON_RECTANGLE_V_H
-#define PERSISTENCE_ON_RECTANGLE_V_H
+#ifndef GUDHI_PERSISTENCE_ON_RECTANGLE_V_H
+#define GUDHI_PERSISTENCE_ON_RECTANGLE_V_H
 
 #include <gudhi/Debug_utils.h>
 #ifdef GUDHI_DETAILED_TIMES
@@ -372,25 +372,12 @@ struct Persistence_on_rectangle_V {
                   if (diagUR()) {
                     ds_parent_square(sUR) = sUR; sq_birth_[sUR] = T(f, i);
                   }
-                  // else: U and R are already known true here, so qUR
-                  // (U && R && diagUR) reduces to exactly diagUR -- if
-                  // it's false, i is not sUR's argmax, so i has no
-                  // business touching its parent; some other vertex,
-                  // whichever really is sUR's argmax, decides its fate.
-                  //
-                  // Either way, D, L, U are already consumed above, so R
-                  // is always the one direction left over here (it would
-                  // be consumed too, by a fourth set_parent_square(sUR,
-                  // sDR), if diagUR triggered it -- but that's exactly
-                  // the cycle the class-level comment above describes
-                  // this special-casing around), so R pairs the vertex
-                  // the same way regardless of diagUR (see that comment
-                  // for why NOT marking i critical here matters).
-                  set_parent_vertex(i, i + 1);
+                  // The following pair exists, but nothing will look at it
+                  // set_parent_vertex(i, i + 1);
                 } else {
                   if (diagUR()) {
                     set_parent_square(sUR, sDR);
-                    set_parent_vertex(i, i - dy);
+                    // set_parent_vertex(i, i - dy);
                   } else {
                     set_parent_vertex(i, i + 1);
                     edges.emplace_back(T(f, i), i - dy, i);
@@ -628,6 +615,12 @@ struct Persistence_on_rectangle_V {
 #endif
   }
 
+#ifdef __GNUC__
+#define GUDHI_NOP asm(""::);
+#else
+#define GUDHI_NOP
+#endif
+
   // H0: standard elder-rule Kruskal directly on the real vertices/edges.
   // Vertex birth is simply input(v) -- no derived value to reconstruct,
   // unlike the T-construction's data_vertex.
@@ -644,7 +637,7 @@ struct Persistence_on_rectangle_V {
       Index a = ds_find_set_vertex(e.v1);
       Index b = ds_find_set_vertex(e.v2);
       if (a == b) return false;  // not needed by primal; dual might still need it -> keep
-      if (input(a) > input(b) || (input(a) == input(b) && a > b)) std::swap(a, b);
+      if (input(a) > input(b)) { GUDHI_NOP std::swap(a, b); }
       ds_parent_vertex(b) = a;
       // drop zero-persistence pairs, still consume the edge
       if (input(b) != e.f.first) {
@@ -675,11 +668,8 @@ struct Persistence_on_rectangle_V {
       // corruption, not an expected case to skip.
       GUDHI_CHECK(a != b, std::logic_error("Bug in Persistence_on_rectangle_V"));
       // a should end up as the survivor: exterior, or the larger birth (ties by index).
-      bool b_is_smaller = (a != exterior) &&
-          (b == exterior ||
-           square_birth(a) < square_birth(b) ||
-           (square_birth(a) == square_birth(b) && a < b));
-      if (b_is_smaller) std::swap(a, b);
+      if(a != exterior && (b == exterior || square_birth(a) < square_birth(b)))
+        std::swap(a, b);
       ds_parent_square(b) = a;
       // Zero-persistence pairs (birth == death) carry no topological
       // information and are dropped here, as Gudhi's diagrams also omit
@@ -689,6 +679,8 @@ struct Persistence_on_rectangle_V {
     }
   }
 };
+
+#undef GUDHI_NOP
 
 /**
  * @private
@@ -748,4 +740,9 @@ auto persistence_on_rectangle_from_vertices(
 
 }  // namespace Gudhi::cubical_complex
 
-#endif  // PERSISTENCE_ON_RECTANGLE_V_H
+// Ideas for improvement:
+// * see ideas in the T file.
+// * currently, in fill_and_pair, we test edges clockwise, and pair a square with the next edge clockwise. Using opposing directions for those 2 things would have the advantage that we could sometimes simplify the parent tree directly, for instance if we have UR->UL then DR->UR, we could write directly DR->UL (we already do it a bit in the T construction).
+// * specialize fill_and_pair_boundary (as in the T construction), probably only relevant for very small (or at least thin) input.
+
+#endif  // GUDHI_PERSISTENCE_ON_RECTANGLE_V_H
