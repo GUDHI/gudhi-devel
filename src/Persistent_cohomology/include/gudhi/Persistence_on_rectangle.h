@@ -188,6 +188,7 @@ struct Persistence_on_rectangle {
     // Initializing the boundary squares to 0 is important, it represents the infinite exterior cell.
     ds_parent_s_.resize(input_size);
     // What is a good estimate here? For a random 1000x1000 input, we get ~311k edges. For a checkerboard, ~498k.
+    // The maximum is around 3/4*H*W.
     edges.reserve(input_size / 2);
   }
 

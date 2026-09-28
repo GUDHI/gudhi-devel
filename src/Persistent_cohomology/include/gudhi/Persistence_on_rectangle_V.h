@@ -55,11 +55,10 @@ namespace Gudhi::cubical_complex {
  *
  * All n_rows*n_cols input values are genuine vertices; the derived
  * squares are indexed on an (n_rows-1) x (n_cols-1) grid. Unlike the
- * T-construction, no layer of cells can be dropped for memory-saving
- * purposes here: every input value is a genuine vertex of the complex
- * and must be represented. The derived squares number
- * (n_rows-1)*(n_cols-1), exactly the mirror image of the T-construction's
- * square/vertex counts.
+ * T-construction, no layer of cells can be dropped: every input value is
+ * a genuine vertex of the complex and must be represented. The derived
+ * squares number (n_rows-1)*(n_cols-1), exactly the mirror image of the
+ * T-construction's square/vertex counts.
  *
  * fill_and_pair() computes a maximal local pairing around each vertex,
  * mirroring the T-construction's square-centered recipe with vertex and
@@ -82,31 +81,19 @@ namespace Gudhi::cubical_complex {
  * critical directly (self-rooted in ds_parent_square_, with its birth
  * recorded), and R -- the one direction with nowhere else to go -- still
  * pairs the vertex into its R-neighbor in ds_parent_vertex_, exactly as
- * it would have if the last square hadn't qualified at all. (Marking
- * the *vertex* critical here instead would be incorrect: i is a local
- * maximum, already connected to that neighbor by a real edge from the
- * moment it's born -- see fill_and_pair_interior's own comment on this
- * leaf.) Otherwise, among i's matching edges not already consumed by a square-pairing,
+ * it would have if the last square hadn't qualified at all.
+ * Otherwise, among i's matching edges not already consumed by a square-pairing,
  * one is used to merge i into that neighbor in ds_parent_vertex_ (H0);
- * any further such edges -- there is often, but not always, exactly one
- * -- are added directly to the shared `edges` list, the same way
- * Persistence_on_rectangle.h's own fill_and_pair adds a leftover edge
- * as critical.
+ * any further such edges are added directly to the shared `edges` list,
+ * the same way Persistence_on_rectangle.h's own fill_and_pair adds a
+ * leftover edge as critical.
  *
  * That single shared `edges` list plays the same role as in the
  * T-construction: primal() is handed the whole list and physically
  * removes (via remove_if) whatever it actually uses for a real H0
  * merge; dual() then only ever looks at the true remainder, relying on
  * the standard planar-graph fact that a spanning tree's edges are
- * exactly the complement of a spanning tree of the dual graph. This was
- * checked -- including that dual() never encounters an already-connected
- * pair, so its GUDHI_CHECK can stay a real assertion rather than a
- * silent skip -- against gudhi.CubicalComplex(vertices=...) on thousands
- * of random and tie-heavy grids up to 1000x1000. In early benchmarks
- * (2000x2000, both uniform-random and smoother Gaussian-random-field
- * inputs), this file's total running time was within roughly 5-20% of
- * Persistence_on_rectangle_from_top_cells's on equivalent T-construction
- * data -- close, though not fully performance-matched.
+ * exactly the complement of a spanning tree of the dual graph.
  *
  * Squares are indexed by their own down-right corner, sharing the same
  * index range as vertices (see the class-level comment by `exterior`),
@@ -287,7 +274,7 @@ struct Persistence_on_rectangle_V {
     // that's the only square that ever ends up genuinely self-rooted.
     sq_birth_.reset(new T[input_size]);
 
-    edges.reserve(input_size);  // same rough order-of-magnitude estimate as T's
+    edges.reserve(input_size / 2);  // same rough order-of-magnitude estimate as T's
   }
 
   bool beats(Index a, Filtration_value fa, Index b) const {
@@ -599,9 +586,9 @@ struct Persistence_on_rectangle_V {
     // around the interior fast path, then the bottom row), in the same
     // row-major order as a single unified loop would visit them.
     for (Index x = 0; x < size_x; ++x) fill_and_pair_boundary(0, x);
-    for (Index y = 1; y + 1 < size_y; ++y) {
+    for (Index y = 1; y < size_y - 1; ++y) {
       fill_and_pair_boundary(y, 0);
-      for (Index x = 1; x + 1 < size_x; ++x) fill_and_pair_interior(y, x);
+      for (Index x = 1; x < size_x - 1; ++x) fill_and_pair_interior(y, x);
       fill_and_pair_boundary(y, size_x - 1);
     }
     for (Index x = 0; x < size_x; ++x) fill_and_pair_boundary(size_y - 1, x);
@@ -636,14 +623,11 @@ struct Persistence_on_rectangle_V {
     auto it = std::remove_if(edges.begin(), edges.end(), [&](Edge& e) {
       Index a = ds_find_set_vertex(e.v1);
       Index b = ds_find_set_vertex(e.v2);
-      if (a == b) return false;  // not needed by primal; dual might still need it -> keep
+      if (a == b) return false;  // not needed by primal; dual will need it -> keep
       if (input(a) > input(b)) { GUDHI_NOP std::swap(a, b); }
       ds_parent_vertex(b) = a;
-      // drop zero-persistence pairs, still consume the edge
-      if (input(b) != e.f.first) {
-        if constexpr (output_index) out(b, e.f.out());
-        else out(input(b), e.f.out());
-      }
+      if constexpr (output_index) out(b, e.f.out());
+      else out(input(b), e.f.out());
       return true;  // used by primal -> remove from the list
     });
     edges.erase(it, edges.end());
@@ -660,21 +644,16 @@ struct Persistence_on_rectangle_V {
     for (auto& e : boost::adaptors::reverse(edges)) {
       auto [dv1, dv2] = dualize_edge(e.v1, e.v2);
       Index a = ds_find_set_square(dv1), b = ds_find_set_square(dv2);
-      // fill_and_pair's local matching is maximal enough that dual()
+      // fill_and_pair's local matching is maximal so dual()
       // never actually sees an edge whose two sides are already
-      // connected (checked exhaustively against gudhi.CubicalComplex
-      // (vertices=...) up to 1000x1000) -- so, exactly as in the
+      // connected -- so, exactly as in the
       // T-construction's own dual(), a==b here indicates real
       // corruption, not an expected case to skip.
       GUDHI_CHECK(a != b, std::logic_error("Bug in Persistence_on_rectangle_V"));
-      // a should end up as the survivor: exterior, or the larger birth (ties by index).
+      // a should end up as the survivor: exterior, or the larger birth.
       if(a != exterior && (b == exterior || square_birth(a) < square_birth(b)))
         std::swap(a, b);
       ds_parent_square(b) = a;
-      // Zero-persistence pairs (birth == death) carry no topological
-      // information and are dropped here, as Gudhi's diagrams also omit
-      // them.
-      if (e.f.first == square_birth(b)) continue;
       out(e.f.out(), sq_birth_[b].out());  // b is never exterior here
     }
   }
@@ -744,5 +723,6 @@ auto persistence_on_rectangle_from_vertices(
 // * see ideas in the T file.
 // * currently, in fill_and_pair, we test edges clockwise, and pair a square with the next edge clockwise. Using opposing directions for those 2 things would have the advantage that we could sometimes simplify the parent tree directly, for instance if we have UR->UL then DR->UR, we could write directly DR->UL (we already do it a bit in the T construction).
 // * specialize fill_and_pair_boundary (as in the T construction), probably only relevant for very small (or at least thin) input.
+// * Reduce tests in dualize_edge: if we fill the unused boundary with 0 (=exterior), returning one of those boundary squares may be safe, although it may not be faster if it just delays the work to the next find.
 
 #endif  // GUDHI_PERSISTENCE_ON_RECTANGLE_V_H
