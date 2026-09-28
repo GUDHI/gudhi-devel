@@ -15,6 +15,10 @@
 
 #include <nanobind/ndarray.h>
 
+// In the nanobind module definitions, make sure to define overloads using Tensor*D before the overloads with
+// Sequence*D to make sure they are visited. Nanobind selects the right overload to use by the order of appearance
+// (i.e. choses the first in order if definition which fits), so Tensor*D overloads are never reached if the overload
+// with Sequence*D is defined first.
 using Sequence1D = std::vector<double>;
 using Tensor1D = nanobind::ndarray<const double, nanobind::ndim<1>>;
 using Sequence2D = std::vector<std::vector<double>>;
