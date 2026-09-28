@@ -148,14 +148,7 @@ if (WITH_GUDHI_PYTHON)
     # (as opposed to VERSION: Try to find the most recent version in all specified locations.)
     cmake_policy(SET CMP0094 NEW)
 
-    # cf. https://nanobind.readthedocs.io/en/latest/building.html #preliminaries
-    if (CMAKE_VERSION VERSION_LESS 3.18)
-        set(DEV_MODULE Development)
-    else()
-        set(DEV_MODULE Development.Module)
-    endif()
-
-    find_package( Python COMPONENTS Interpreter ${DEV_MODULE} NumPy)
+    find_package( Python COMPONENTS Interpreter Development.Module NumPy OPTIONAL_COMPONENTS Development.SABIModule)
 
     # find_python_module tries to import module in Python interpreter and to retrieve its version number
     # returns ${PYTHON_MODULE_NAME_UP}_VERSION and ${PYTHON_MODULE_NAME_UP}_FOUND
@@ -197,6 +190,7 @@ if (WITH_GUDHI_PYTHON)
         find_python_module("sphinxcontrib.bibtex")
         find_python_module("sphinx-autodoc-typehints")
         # Optional third parties libraries (also required for documentation)
+        find_python_module("nanobind-backend")
         find_python_module("matplotlib")
         find_python_module("scipy")
         find_python_module("scikit-learn")
@@ -217,5 +211,22 @@ if (WITH_GUDHI_PYTHON)
     if(NOT GUDHI_PYTHON_PATH)
         message(FATAL_ERROR "ERROR: GUDHI_PYTHON_PATH is not valid.")
     endif(NOT GUDHI_PYTHON_PATH)
+    
+    # Default value
+    set(${NANOBIND_BACKEND_FOR_GUDHI} "NB_STATIC")
+    # But if user defined env variable with something like "cp312"
+    # cf. https://scikit-build-core.readthedocs.io/en/latest/reference/configs.html#confval-wheel.py-api
+    # and nanobind-backend>= 1.0 
+    if(DEFINED ENV{SKBUILD_WHEEL_PY_API})
+      if(NANOBIND-BACKEND_FOUND AND NANOBIND-BACKEND_VERSION VERSION_GREATER_EQUAL 1.0)
+        if (TARGET Python::SABIModule)
+          set(${NANOBIND_BACKEND_FOR_GUDHI} "BACKEND_MODULE nanobind_backend")
+        else()
+          message("SKBUILD_WHEEL_PY_API environment variable was set by user, but Python::SABIModule was not found")
+        endif()
+      else()
+        message("SKBUILD_WHEEL_PY_API environment variable was set by user, but nanobind_backend does not meet requirements")
+      endif()
+    endif()
 
 endif (WITH_GUDHI_PYTHON)

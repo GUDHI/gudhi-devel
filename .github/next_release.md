@@ -13,6 +13,9 @@ Below is a list of changes:
 - [Module](link)
      - **...**
 
+- Installation
+     - Minimal CMake version is now &ge; 3.18 (was &ge; 3.15).
+
 - Miscellaneous
      - Reader utilities now require an explicit file path and raise an exception when the file cannot be opened.
      - Minimal doxygen version is now ≥ 1.9.5 (was not fixed).
