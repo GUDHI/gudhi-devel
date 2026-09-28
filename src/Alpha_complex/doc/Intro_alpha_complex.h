@@ -36,7 +36,8 @@ Table of Contents
 
  * \section definition Definition
  *
- * Alpha_complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
+ * Alpha_complex is a
+ * <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex <sup>[Wikipedia]</sup></a>
  * constructed from the finite cells of a Delaunay Triangulation.
  *
  * The filtration value of each simplex is computed as the square of the circumradius of the simplex if the

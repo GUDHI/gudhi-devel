@@ -10,10 +10,12 @@ Below is a list of changes:
 - [Module](link)
      - **...**
 
-- [Module](link)
-     - **...**
+- Simplex tree [`[Python`](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
+     - `expansion_with_blocker` is deprecated. Please consider using `expansion_with_blockers`.
 
 - Miscellaneous
+     - Reader utilities now require an explicit file path and raise an exception when the file cannot be opened.
+     - Minimal doxygen version is now ≥ 1.9.5 (was not fixed).
      - The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.14.0+is%3Aclosed) is available on GitHub.
 
 All modules are distributed under the terms of the MIT license.

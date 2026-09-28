@@ -42,7 +42,8 @@ namespace cover_complex {
  *
  * Assume you are given a cover C of your point cloud P. Then, the Nerve of this cover
  * is the simplicial complex that has one k-simplex per k-fold intersection of cover elements.
- * See also <a target="_blank" href="https://en.wikipedia.org/wiki/Nerve_of_a_covering"> Wikipedia </a>.
+ * See also
+ * <a target="_blank" href="https://en.wikipedia.org/wiki/Nerve_of_a_covering">Nerve of a covering <sup>[Wikipedia]</sup></a>.
  *
  * \image html "nerve.png" "Nerve of a double torus"
  *

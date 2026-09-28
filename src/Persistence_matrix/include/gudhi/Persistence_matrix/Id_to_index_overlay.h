@@ -34,7 +34,8 @@ namespace persistence_matrix {
  * the original methods with @ref IDIdx indices.
  *
  * @tparam Underlying_matrix %Matrix type taking the overlay.
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Underlying_matrix, class Master_matrix>
 class Id_to_index_overlay

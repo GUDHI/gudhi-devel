@@ -31,7 +31,8 @@ namespace persistence_matrix {
  * @brief A @ref basematrix "basic matrix" structure allowing to easily manipulate and access entire columns and rows,
  * but not individual entries.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Base_matrix : public Master_matrix::template Base_swap_option<Base_matrix<Master_matrix> >,

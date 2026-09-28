@@ -42,7 +42,8 @@ struct Dummy_base_swap {
  *
  * @brief Class managing the column and row swaps in @ref Base_matrix and @ref Boundary_matrix.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  * @tparam Base_matrix Either @ref Base_matrix or @ref Boundary_matrix.
  */
 template <class Master_matrix, class Base_matrix>

@@ -23,8 +23,8 @@ namespace rips_complex {
  * 
  * \section ripsdefinition Rips complex definition
  * 
- * The Vietoris-Rips complex
- * <a target="_blank" href="https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex">(Wikipedia)</a>
+ * The
+ * <a target="_blank" href="https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex">Vietoris-Rips complex <sup>[Wikipedia]</sup></a>
  * is an abstract simplicial complex
  * defined on a finite metric space, where each simplex corresponds to a subset
  * of points whose diameter is smaller that some given threshold.
