@@ -148,12 +148,10 @@ struct Persistence_on_rectangle_V {
   // the T-construction does.
   Index exterior = 0;
 
-  // Birth value of each derived square = max of its 4 corners, paired
-  // (when output_index) with the index of the corner vertex that
-  // achieved it -- see fill_and_pair_interior's all4 case, the one place
-  // this is ever written, where that vertex is exactly `i`.
-  std::unique_ptr<T[]> sq_birth_;
-  Filtration_value square_birth(Index s) const { return sq_birth_[s].first; }
+  // Birth value of each derived square = max of its 4 corners.
+  // This is only needed for critical squares, which from fill_and_pair
+  // always have the value of the same corner.
+  T square_birth(Index s) const { return T(input(s - 1), s - 1); }
 
   // Union-find forests. ds_parent_vertex_ needs no special "point at
   // infinity": H0 never needs one, only H1 does (Alexander duality).
@@ -269,11 +267,6 @@ struct Persistence_on_rectangle_V {
     ds_parent_square_.reset(new Index[input_size]);
     ds_parent_square_[exterior] = exterior;
 
-    // No eager fill: every entry that ever actually gets read is written
-    // during fill_and_pair itself (see the all4 branch there), since
-    // that's the only square that ever ends up genuinely self-rooted.
-    sq_birth_.reset(new T[input_size]);
-
     edges.reserve(input_size / 2);  // same rough order-of-magnitude estimate as T's
   }
 
@@ -357,7 +350,7 @@ struct Persistence_on_rectangle_V {
                 if (diagUL()) {
                   set_parent_square(sUL, sUR);
                   if (diagUR()) {
-                    ds_parent_square(sUR) = sUR; sq_birth_[sUR] = T(f, i);
+                    ds_parent_square(sUR) = sUR; // square_birth(sUR) = T(f, i);
                   }
                   // The following pair exists, but nothing will look at it
                   // set_parent_vertex(i, i + 1);
@@ -651,10 +644,10 @@ struct Persistence_on_rectangle_V {
       // corruption, not an expected case to skip.
       GUDHI_CHECK(a != b, std::logic_error("Bug in Persistence_on_rectangle_V"));
       // a should end up as the survivor: exterior, or the larger birth.
-      if(a != exterior && (b == exterior || square_birth(a) < square_birth(b)))
-        std::swap(a, b);
+      if(a != exterior && (b == exterior || square_birth(a).first < square_birth(b).first))
+      { GUDHI_NOP std::swap(a, b);}
       ds_parent_square(b) = a;
-      out(e.f.out(), sq_birth_[b].out());  // b is never exterior here
+      out(e.f.out(), square_birth(b).out());  // b is never exterior here
     }
   }
 };

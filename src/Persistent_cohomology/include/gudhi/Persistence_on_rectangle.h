@@ -584,7 +584,9 @@ struct Persistence_on_rectangle {
 //   instances, if we also remove the calls to reserve(), the saving is less negligible, but we still have ds_parent_*_
 //   that take about as much space as the input. We could, on a subarray, fill a dense ds_parent, then reduce it and
 //   export only the critical vertices and boundary to some sparse datastructure, but it doesn't seem worth the trouble
-//   for now.
+//   for now. For internal vertices, the min square is always in the same corner, it is only on the boundary that it
+//   may be in a different direction, I don't know if that can help though, unlike in the V construction, unless we
+//   stop dropping the outer layer.
 // * Try handling dual before primal.
 
 /**
