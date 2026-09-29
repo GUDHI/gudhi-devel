@@ -18,7 +18,7 @@ jobs:
           SKBUILD_WHEEL_PY_API: "cp312"
         run: |
           $PYTHON312/bin/python -m pip install --user ninja nanobind-backend
-          $PYTHON312/bin/python -m build --wheel --no-isolation -o ./
+          $PYTHON312/bin/python -m pip wheel --no-build-isolation -ve .
           auditwheel repair *.whl
         # manylinux_2_17_x86_64 (aliased by manylinux2014_x86_64)
       - name: Upload linux python wheel

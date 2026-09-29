@@ -62,7 +62,7 @@ jobs:
           SKBUILD_WHEEL_PY_API: "cp312"
         run: |
           $PYTHON312/bin/python -m pip install --user ninja nanobind-backend
-          $PYTHON312/bin/python -m build --wheel --no-isolation -o ./
+          $PYTHON312/bin/python -m pip wheel --no-build-isolation -ve .
       - name: Install and test wheel for Python 3.12
         run: |
           $PYTHON312/bin/python -m pip install numpy~=1.26.0

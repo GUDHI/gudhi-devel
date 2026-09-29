@@ -56,7 +56,7 @@ jobs:
           export GMPXX_LIB_DIR=$PWD/deps-uni/lib
           export  MPFR_LIB_DIR=$PWD/deps-uni/lib
           python --version
-          python -m build --wheel --no-isolation -o ./
+          python -m pip wheel --no-build-isolation -ve .
           export PATH="$PATH:`python -m site --user-base`/bin"
           delocate-listdeps --depending *.whl
           mkdir wheelhouse || true

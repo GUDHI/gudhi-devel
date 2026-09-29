@@ -46,7 +46,7 @@ jobs:
           SKBUILD_WHEEL_PY_API: "cp312"
         shell: pwsh
         run: |
-          python -m build --wheel --no-isolation -o ./
+          python -m pip wheel --no-build-isolation -ve .
           ls "./"
           ls "./build/src/python/gudhi/Release"
           delvewheel show --add-path="C:/vcpkg/installed/x64-windows-release/bin;./build/src/python/gudhi/Release" *.whl

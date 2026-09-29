@@ -213,7 +213,7 @@ if (WITH_GUDHI_PYTHON)
     endif(NOT GUDHI_PYTHON_PATH)
     
     # Default value
-    set(${NANOBIND_BACKEND_FOR_GUDHI} "NB_STATIC")
+    set(NANOBIND_BACKEND_FOR_GUDHI "NB_STATIC")
     # But if user defined env variable with something like "cp312"
     # cf. https://scikit-build-core.readthedocs.io/en/latest/reference/configs.html#confval-wheel.py-api
     # and nanobind-backend>= 1.0 
@@ -221,7 +221,7 @@ if (WITH_GUDHI_PYTHON)
       if(NANOBIND-BACKEND_FOUND AND NANOBIND-BACKEND_VERSION VERSION_GREATER_EQUAL 1.0)
         if (TARGET Python::SABIModule)
           message("++ use nanobind_backend for ABI stable version")
-          set(${NANOBIND_BACKEND_FOR_GUDHI} "BACKEND_MODULE nanobind_backend")
+          set(NANOBIND_BACKEND_FOR_GUDHI "BACKEND_MODULE" "nanobind_backend")
         else()
           message("SKBUILD_WHEEL_PY_API environment variable was set by user, but Python::SABIModule was not found")
         endif()
