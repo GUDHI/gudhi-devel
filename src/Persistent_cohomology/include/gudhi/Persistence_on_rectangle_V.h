@@ -27,6 +27,7 @@
  #include <iostream>
 #endif
 
+#include <boost/config.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
 #ifdef GUDHI_USE_TBB
@@ -324,6 +325,7 @@ struct Persistence_on_rectangle_V {
   // if/else for just that one direction -- e.g. the qUL/qUR interplay
   // below is shared between the qUL-true and qUL-false cases wherever
   // the two aren't entangled by the (rare) all4 interaction.
+  BOOST_FORCEINLINE
   void fill_and_pair_interior(Index y, Index x) {
     Index i = y * dy + x;
     Filtration_value f = input(i);
