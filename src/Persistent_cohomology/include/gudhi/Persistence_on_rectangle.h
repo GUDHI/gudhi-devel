@@ -549,40 +549,45 @@ struct Persistence_on_rectangle {
 #else
 #define GUDHI_NOP
 #endif
-  template<class Out>
-  void primal(Out&&out){
-    auto it = std::remove_if(edges.begin(), edges.end(), [&](Edge& e) {
-        assert(e.v1 < e.v2);
-        Index a = ds_find_set_vertex(e.v1);
-        Index b = ds_find_set_vertex(e.v2);
-        if (a == b) return false;
-        if (data_vertex(b) < data_vertex(a)) { GUDHI_NOP std::swap(a, b); }
-        ds_parent_vertex(b) = a;
-        out(data_vertex(b).out(), e.f.out());
-        return true;
-    });
-    edges.erase(it, edges.end());
-    global_min = data_vertex(ds_find_set_vertex(0)).out();
-  }
+
+  // dual() moves the edges it uses to the beginning. The remaining ones start here.
+  std::vector<Edge>::iterator primal_begin;
 
   // In the dual, squares behave like vertices, and edges are rotated 90° around their middle.
   // To handle boundaries correctly, we imagine a single exterior cell with filtration +inf.
   template<class Out>
   void dual(Out&&out){
-    for (auto e : boost::adaptors::reverse(edges)) {
-      dualize_edge(e);
-      Index a = ds_find_set_square(e.v1);
-      Index b = ds_find_set_square(e.v2);
-      GUDHI_CHECK(a != b, std::logic_error("Bug in Gudhi"));
-      // This is more robust in case the input contains inf? I used to set the filtration of 0 to inf.
-      if (b == 0 || (a != 0 && input(a) < input(b))) std::swap(a, b);
-      ds_parent_square(b) = a;
-      if constexpr (output_index)
-        out(e.f.out(), b);
-      else
-        out(e.f.out(), input(b));
-    }
+    auto rit = std::remove_if(edges.rbegin(), edges.rend(), [&](Edge e) {
+        dualize_edge(e);
+        Index a = ds_find_set_square(e.v1);
+        Index b = ds_find_set_square(e.v2);
+        if (a == b) return false;
+        // This is more robust in case the input contains inf? I used to set the filtration of 0 to inf.
+        if (b == 0 || (a != 0 && input(a) < input(b))) std::swap(a, b);
+        ds_parent_square(b) = a;
+        if constexpr (output_index)
+          out(e.f.out(), b);
+        else
+          out(e.f.out(), input(b));
+        return true;
+        });
+    primal_begin = rit.base();   // kept edges are [primal_begin, edges.end()), original order
   }
+
+  template<class Out>
+  void primal(Out&&out){
+    for (auto it = primal_begin; it != edges.end(); ++it) {
+      Edge e = *it;
+      Index a = ds_find_set_vertex(e.v1);
+      Index b = ds_find_set_vertex(e.v2);
+      GUDHI_CHECK(a != b, std::logic_error("Bug in Gudhi"));
+      if (data_vertex(b) < data_vertex(a)) { GUDHI_NOP std::swap(a, b); }
+      ds_parent_vertex(b) = a;
+      out(data_vertex(b).out(), e.f.out());
+    }
+    global_min = data_vertex(ds_find_set_vertex(0)).out();
+  }
+
 #undef GUDHI_NOP
 };
 // Ideas for improvement:
@@ -645,13 +650,13 @@ auto persistence_on_rectangle_from_top_cells(Filtration_value const* input, Inde
 #ifdef GUDHI_DETAILED_TIMES
     std::clog << "sort: " << clock; clock.begin();
 #endif
-  X.primal(out0);
-#ifdef GUDHI_DETAILED_TIMES
-    std::clog << "primal pass: " << clock; clock.begin();
-#endif
   X.dual(out1);
 #ifdef GUDHI_DETAILED_TIMES
-    std::clog << "dual pass: " << clock;
+    std::clog << "dual pass: " << clock; clock.begin();
+#endif
+  X.primal(out0);
+#ifdef GUDHI_DETAILED_TIMES
+    std::clog << "primal pass: " << clock;
 #endif
   return X.global_min;
 }
