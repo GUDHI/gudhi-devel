@@ -32,6 +32,8 @@
 
 #ifdef GUDHI_USE_TBB
  #include <tbb/parallel_sort.h>
+#else
+ #include <boost/sort/pdqsort/pdqsort.hpp>
 #endif
 
 #ifdef DEBUG_TRACES
@@ -284,6 +286,17 @@ struct Persistence_on_rectangle_V {
     if (fa < fb) return false;
     return a > b;  // tie-break: larger index wins ("beats")
   }
+  // Same as beats when we already know the order of a and b.
+  bool beats_before(Index a, Filtration_value fa, Index b) const {
+    GUDHI_CHECK(a > b, std::logic_error("Bug: inconsistent order"));
+    Filtration_value fb = input(b);
+    return fa >= fb;
+  }
+  bool beats_after(Index a, Filtration_value fa, Index b) const {
+    GUDHI_CHECK(a < b, std::logic_error("Bug: inconsistent order"));
+    Filtration_value fb = input(b);
+    return fa > fb;
+  }
 
   // See the class-level comment above for the general fill_and_pair
   // algorithm this implements, including the all4 cycle-avoidance case.
@@ -329,15 +342,15 @@ struct Persistence_on_rectangle_V {
   void fill_and_pair_interior(Index y, Index x) {
     Index i = y * dy + x;
     Filtration_value f = input(i);
-    auto U = [&](){ return beats(i, f, i - dy); };
-    auto D = [&](){ return beats(i, f, i + dy); };
-    auto L = [&](){ return beats(i, f, i - 1); };
-    auto R = [&](){ return beats(i, f, i + 1); };
+    auto U = [&](){ return beats_before(i, f, i - dy); };
+    auto D = [&](){ return beats_after (i, f, i + dy); };
+    auto L = [&](){ return beats_before(i, f, i - 1); };
+    auto R = [&](){ return beats_after (i, f, i + 1); };
 
-    auto diagUL = [&](){ return beats(i, f, i - dy - 1); };
-    auto diagUR = [&](){ return beats(i, f, i - dy + 1); };
-    auto diagDL = [&](){ return beats(i, f, i + dy - 1); };
-    auto diagDR = [&](){ return beats(i, f, i + dy + 1); };
+    auto diagUL = [&](){ return beats_before(i, f, i - dy - 1); };
+    auto diagUR = [&](){ return beats_before(i, f, i - dy + 1); };
+    auto diagDL = [&](){ return beats_after (i, f, i + dy - 1); };
+    auto diagDR = [&](){ return beats_after (i, f, i + dy + 1); };
 
     Index sUL = i, sUR = i + 1, sDL = i + dy, sDR = i + dy + 1;
 
@@ -593,7 +606,8 @@ struct Persistence_on_rectangle_V {
 #ifdef GUDHI_USE_TBB
     tbb::parallel_sort(edges.begin(), edges.end());
 #else
-    std::sort(edges.begin(), edges.end());
+    // std::sort(edges.begin(), edges.end());
+    boost::sort::pdqsort_branchless(edges.begin(), edges.end());
 #endif
   }
 

@@ -29,6 +29,8 @@
 
 #ifdef GUDHI_USE_TBB
  #include <tbb/parallel_sort.h>
+#else
+ #include <boost/sort/pdqsort/pdqsort.hpp>
 #endif
 
 #ifdef DEBUG_TRACES
@@ -200,6 +202,17 @@ struct Persistence_on_rectangle {
     if (fa < fb) return false;
     return a > b; // Arbitrary, but has to be consistent
   }
+  // Same as has_larger_input when we already know the order of a and b.
+  bool has_larger_input_before(Index a, Index b, Filtration_value fb) const {
+    GUDHI_CHECK(a > b, std::logic_error("Bug in Gudhi: inconsistent order"));
+    Filtration_value fa = input(a);
+    return fb <= fa;
+  }
+  bool has_larger_input_after(Index a, Index b, Filtration_value fb) const {
+    GUDHI_CHECK(a < b, std::logic_error("Bug in Gudhi: inconsistent order"));
+    Filtration_value fa = input(a);
+    return fb < fa;
+  }
   void set_parent_vertex(Index child, Index parent) {
     GUDHI_CHECK(child != parent, std::logic_error("Bug in Gudhi: use mark_*_critical instead of set_parent"));
     ds_parent_vertex(child) = parent;
@@ -247,16 +260,16 @@ struct Persistence_on_rectangle {
     mark_vertex_critical(v_down_left());
 #else
     i = 0; f = input(i);
-    if (has_larger_input(i + 1, i, f) && has_larger_input(i + dy, i, f) && has_larger_input(i + dy + 1, i, f))
+    if (has_larger_input_before(i + 1, i, f) && has_larger_input_before(i + dy, i, f) && has_larger_input_before(i + dy + 1, i, f))
       mark_vertex_critical(v_up_right());
     i = size_x; f = input(i);
-    if (has_larger_input(i - 1, i, f) && has_larger_input(i + dy, i, f) && has_larger_input(i + dy - 1, i, f))
+    if (has_larger_input_after (i - 1, i, f) && has_larger_input_before(i + dy, i, f) && has_larger_input_before(i + dy - 1, i, f))
       mark_vertex_critical(v_up_left());
     i = dy * size_y; f = input(i);
-    if (has_larger_input(i + 1, i, f) && has_larger_input(i - dy, i, f) && has_larger_input(i - dy + 1, i, f))
+    if (has_larger_input_before(i + 1, i, f) && has_larger_input_after (i - dy, i, f) && has_larger_input_after (i - dy + 1, i, f))
       mark_vertex_critical(v_down_right());
     i = size_x + dy * size_y; f = input(i);
-    if (has_larger_input(i - 1, i, f) && has_larger_input(i - dy, i, f) && has_larger_input(i - dy - 1, i, f))
+    if (has_larger_input_after (i - 1, i, f) && has_larger_input_after (i - dy, i, f) && has_larger_input_after (i - dy - 1, i, f))
       mark_vertex_critical(v_down_left());
 #endif
 
@@ -264,9 +277,9 @@ struct Persistence_on_rectangle {
     for(Index x = 1; x < size_x; ++x) {
       i = x;
       f = input(x);
-      if (has_larger_input(i + dy, i, f)) {
-        auto up_left  = [&](){ return has_larger_input(i - 1, i, f) && has_larger_input(i + dy - 1, i, f); };
-        auto up_right = [&](){ return has_larger_input(i + 1, i, f) && has_larger_input(i + dy + 1, i, f); };
+      if (has_larger_input_before(i + dy, i, f)) {
+        auto up_left  = [&](){ return has_larger_input_after (i - 1, i, f) && has_larger_input_before(i + dy - 1, i, f); };
+        auto up_right = [&](){ return has_larger_input_before(i + 1, i, f) && has_larger_input_before(i + dy + 1, i, f); };
         if (up_left()) {
           set_parent_vertex(v_up_left(), v_up_right());
           if (up_right()) mark_vertex_critical(v_up_right());
@@ -283,9 +296,9 @@ struct Persistence_on_rectangle {
       {
         i = y * dy;
         f = input(i);
-        if (has_larger_input(i + 1, i, f)) {
-          auto down_right = [&](){ return has_larger_input(i - dy, i, f) && has_larger_input(i + 1 - dy, i, f); };
-          auto up_right   = [&](){ return has_larger_input(i + dy, i, f) && has_larger_input(i + 1 + dy, i, f); };
+        if (has_larger_input_before(i + 1, i, f)) {
+          auto down_right = [&](){ return has_larger_input_after (i - dy, i, f) && has_larger_input_after (i + 1 - dy, i, f); };
+          auto up_right   = [&](){ return has_larger_input_before(i + dy, i, f) && has_larger_input_before(i + 1 + dy, i, f); };
           if (down_right()) {
             set_parent_vertex(v_down_right(), v_up_right());
             if (up_right()) mark_vertex_critical(v_up_right());
@@ -301,14 +314,14 @@ struct Persistence_on_rectangle {
         i = x + dy * y;
         f = input(i);
         // See what part of the boundary shares f
-        auto left  = [&]() { return has_larger_input(i - 1, i, f); };
-        auto right = [&]() { return has_larger_input(i + 1, i, f); };
-        auto down  = [&]() { return has_larger_input(i - dy, i, f); };
-        auto up    = [&]() { return has_larger_input(i + dy, i, f); };
-        auto down_left  = [&]() { return has_larger_input(i - dy - 1, i, f); };
-        auto up_left    = [&]() { return has_larger_input(i + dy - 1, i, f); };
-        auto down_right = [&]() { return has_larger_input(i - dy + 1, i, f); };
-        auto up_right   = [&]() { return has_larger_input(i + dy + 1, i, f); };
+        auto left       = [&]() { return has_larger_input_after (i - 1, i, f); };
+        auto right      = [&]() { return has_larger_input_before(i + 1, i, f); };
+        auto down       = [&]() { return has_larger_input_after (i - dy, i, f); };
+        auto up         = [&]() { return has_larger_input_before(i + dy, i, f); };
+        auto down_left  = [&]() { return has_larger_input_after (i - dy - 1, i, f); };
+        auto up_left    = [&]() { return has_larger_input_before(i + dy - 1, i, f); };
+        auto down_right = [&]() { return has_larger_input_after (i - dy + 1, i, f); };
+        auto up_right   = [&]() { return has_larger_input_before(i + dy + 1, i, f); };
         if (up()) { // u
           if (left()) { // u l
             if (up_left()) { // u l ul
@@ -480,9 +493,9 @@ struct Persistence_on_rectangle {
       {
         i = size_x + dy * y;
         f = input(i);
-        if (has_larger_input(i - 1, i, f)) {
-          auto down_left = [&](){ return has_larger_input(i - dy, i, f) && has_larger_input(i - 1 - dy, i, f); };
-          auto up_left   = [&](){ return has_larger_input(i + dy, i, f) && has_larger_input(i - 1 + dy, i, f); };
+        if (has_larger_input_after (i - 1, i, f)) {
+          auto down_left = [&](){ return has_larger_input_after (i - dy, i, f) && has_larger_input_after (i - 1 - dy, i, f); };
+          auto up_left   = [&](){ return has_larger_input_before(i + dy, i, f) && has_larger_input_before(i - 1 + dy, i, f); };
           if (down_left()) {
             set_parent_vertex(v_down_left(), v_up_left());
             if (up_left()) mark_vertex_critical(v_up_left());
@@ -498,9 +511,9 @@ struct Persistence_on_rectangle {
     for(Index x = 1; x < size_x; ++x) {
       i = size_y * dy + x;
       f = input(i);
-      if (has_larger_input(i - dy, i, f)) {
-        auto down_left  = [&](){ return has_larger_input(i - 1, i, f) && has_larger_input(i - dy - 1, i, f); };
-        auto down_right = [&](){ return has_larger_input(i + 1, i, f) && has_larger_input(i - dy + 1, i, f); };
+      if (has_larger_input_after (i - dy, i, f)) {
+        auto down_left  = [&](){ return has_larger_input_after (i - 1, i, f) && has_larger_input_after (i - dy - 1, i, f); };
+        auto down_right = [&](){ return has_larger_input_before(i + 1, i, f) && has_larger_input_after (i - dy + 1, i, f); };
         if (down_left()) {
           set_parent_vertex(v_down_left(), v_down_right());
           if (down_right()) mark_vertex_critical(v_down_right());
@@ -520,7 +533,8 @@ struct Persistence_on_rectangle {
     // parallel with the primal if we were motivated...
     tbb::parallel_sort(edges.begin(), edges.end());
 #else
-    std::sort(edges.begin(), edges.end());
+    // std::sort(edges.begin(), edges.end());
+    boost::sort::pdqsort_branchless(edges.begin(), edges.end());
 #endif
 #ifdef DEBUG_TRACES
     std::clog << "edges\n";
