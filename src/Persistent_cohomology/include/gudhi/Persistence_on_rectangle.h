@@ -551,7 +551,7 @@ struct Persistence_on_rectangle {
 #endif
 
   // dual() moves the edges it uses to the beginning. The remaining ones start here.
-  std::vector<Edge>::iterator primal_begin;
+  typename std::vector<Edge>::iterator primal_begin;
 
   // In the dual, squares behave like vertices, and edges are rotated 90° around their middle.
   // To handle boundaries correctly, we imagine a single exterior cell with filtration +inf.
