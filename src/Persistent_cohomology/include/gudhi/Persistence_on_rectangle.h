@@ -606,6 +606,8 @@ struct Persistence_on_rectangle {
 //   for now. For internal vertices, the min square is always in the same corner, it is only on the boundary that it
 //   may be in a different direction, I don't know if that can help though, unlike in the V construction, unless we
 //   stop dropping the outer layer.
+// * There are usually more dual pairs than primal in the T construction, but that isn't a guarantee. We could count
+//   critical vertices/squares during fill_and_pair and decide based on that whether to do primal or dual first.
 
 /**
  * @private

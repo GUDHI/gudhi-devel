@@ -231,22 +231,12 @@ struct Persistence_on_rectangle_V {
   // The two squares flanking a real grid edge (v1,v2) are fully
   // determined by the edge's endpoints and direction, so they need not
   // be stored in Edge at all -- just recomputed here, once per edge,
-  // only when dual() actually needs them. With the down-right-corner square indexing, the in-bounds
-  // case is a plain offset from v1, exactly as for sUL/sUR/sDL/sDR in
-  // fill_and_pair; only detecting the grid boundary needs any real
-  // work, and even that needs no division for a horizontal edge (only
-  // a magnitude comparison against dy or input_size).
+  // only when dual() actually needs them. With the down-right-corner square
+  // indexing, the in-bounds case is a plain offset from v1, exactly as for
+  // sUL/sUR/sDL/sDR in fill_and_pair; only the boundary is tricky, but that's
+  // handled by filling a ring of 0 around the squares in init.
   std::pair<Index, Index> dualize_edge(Index v1, Index v2) const {
-    if (v2 == v1 + 1) {  // horizontal edge: flanked by the squares above/below
-      Index dv1 = (v1 >= dy) ? v1 + 1 : exterior;                    // above exists iff y>0
-      Index dv2 = (v1 + dy < input_size) ? v1 + dy + 1 : exterior;   // below exists iff y<size_y-1
-      return {dv1, dv2};
-    } else {  // vertical edge (v2 == v1 + dy): flanked by the squares left/right
-      Index x = v1 % dy;
-      Index dv1 = (x != 0) ? v1 + dy : exterior;          // left exists iff x>0
-      Index dv2 = (x + 1 < dy) ? v1 + dy + 1 : exterior;  // right exists iff x<size_x-1
-      return {dv1, dv2};
-    }
+    return { v2, v1 + dy + 1 };
   }
 
   void init(Filtration_value const* input_, Index n_rows, Index n_cols) {
@@ -264,11 +254,15 @@ struct Persistence_on_rectangle_V {
     // Every real square's ds_parent_square_ entry gets written exactly
     // once, by its own unique argmax corner, during fill_and_pair (see
     // set_parent_square) -- so, like the T-construction's own
-    // fill_and_pair, there is no need to eagerly fill it here. Only
-    // `exterior` itself is never a "child" in any merge, so it alone
-    // needs pre-initializing.
-    ds_parent_square_.reset(new Index[input_size]);
-    ds_parent_square_[exterior] = exterior;
+    // fill_and_pair, there is no need to eagerly fill it here.
+    // `exterior` itself is never a "child" in any merge, so it
+    // needs pre-initializing. In addition, we surround the real squares
+    // with 0 so dualize_edge does not need to check boundary cases.
+    ds_parent_square_.reset(new Index[input_size+dy]);
+    // ds_parent_square_[exterior] = exterior;
+    for (Index i = 0; i < dy; ++i) ds_parent_square_[i] = exterior;
+    for (Index i = 0; i < dy; ++i) ds_parent_square_[input_size + i] = exterior;
+    for (Index i = 1; i < size_y; ++i) ds_parent_square_[dy * i] = exterior;
 
     edges.reserve(input_size / 2);  // same rough order-of-magnitude estimate as T's
   }

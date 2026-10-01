@@ -89,7 +89,12 @@ template <bool V, class Sizes, class Data> void testit(Sizes const& sizes, Data 
 }
 
 int main() {
+#ifndef ONLY_2D
   std::vector<unsigned> sizes {1000, 999};
+#else
+  // Takes about 1s, better for a benchmark, but would be too slow with the old code.
+  std::vector<unsigned> sizes {2000, 9999};
+#endif
   std::vector<double> data(sizes[0] * sizes[1]);
   if (monotone) {
     std::iota(data.begin(), data.end(), std::size_t(0));
