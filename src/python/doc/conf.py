@@ -81,6 +81,22 @@ html_css_files = [
     "python_gudhi.css",
 ]
 
+linkcheck_allowed_redirects = {
+    r"https://doi.org/.+": r".*",
+    r"https://dx.doi.org/.+": r".*"
+}
+
+linkcheck_ignore = [
+    # ignore links to local html files e.g. installation.html#scipy
+    r"[\w.-]+\.html#[\w.-]+",
+    "/licensing/",
+    # linkcheck fails to reach https://dl.acm.org
+    "https://doi.org/10.1145/2462356.2462387",
+    "https://doi.org/10.1145/2535927",
+    "https://doi.org/10.1145/3064175",
+    "https://doi.org/10.1145/2582112.2582165",
+]
+
 def autodoc_skip_member(app, what, name, obj, skip, options):
     # Do not generate documentation for these methods, cf. https://github.com/GUDHI/gudhi-devel/issues/1071
     if name in {"set_fit_request", "set_transform_request", "set_score_request", "set_predict_request",

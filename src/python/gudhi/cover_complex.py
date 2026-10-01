@@ -281,7 +281,7 @@ class CoverComplexPy(BaseEstimator):
         color_name="color",
     ):
         """
-        Write the cover complex to an HTML file called "{file_name}.html", that can be visualized in a browser. This function is based on a fork of https://github.com/MLWave/kepler-mapper
+        Write the cover complex to an HTML file called "{file_name}.html", that can be visualized in a browser. This function is based on a fork of https://github.com/scikit-tda/kepler-mapper
 
         Parameters
         ----------
@@ -360,15 +360,15 @@ class MapperComplex(CoverComplexPy):
         resolutions : list or numpy array of shape num_filters containing integers
             resolution of each filter function, ie number of intervals required to cover each filter image. If None, it is estimated from data.
         gains : list or numpy array of shape num_filters containing doubles in [0,1]
-            gain of each filter function, ie overlap percentage of the intervals covering each filter image. If None, it is set as 1/3 for all filters, since in the automatic parameter selection method in http://www.jmlr.org/papers/volume19/17-291/17-291.pdf, any arbitrary value between 1/3 and 1/2 works, so we go with the minimal one (ensuring that the complex is a graph if only given one filter).
+            gain of each filter function, ie overlap percentage of the intervals covering each filter image. If None, it is set as 1/3 for all filters, since in the automatic parameter selection method in https://www.jmlr.org/papers/volume19/17-291/17-291.pdf, any arbitrary value between 1/3 and 1/2 works, so we go with the minimal one (ensuring that the complex is a graph if only given one filter).
         clustering : class
             clustering class (default sklearn.cluster.DBSCAN()). Common clustering classes can be found in the scikit-learn library (such as AgglomerativeClustering for instance). If None, it is set to hierarchical clustering, with scale estimated from data.
         N : int
-            subsampling iterations (default 100) for estimating scale and resolutions. Used only if clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+            subsampling iterations (default 100) for estimating scale and resolutions. Used only if clustering or resolutions = None. See https://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
         beta : float
-            exponent parameter (default 0.) for estimating scale and resolutions. Used only if clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+            exponent parameter (default 0.) for estimating scale and resolutions. Used only if clustering or resolutions = None. See https://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
         C : float
-            constant parameter (default 10.) for estimating scale and resolutions. Used only if clustering or resolutions = None. See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+            constant parameter (default 10.) for estimating scale and resolutions. Used only if clustering or resolutions = None. See https://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
         verbose : bool
             whether to display info while computing.
         """
@@ -397,11 +397,11 @@ class MapperComplex(CoverComplexPy):
             X : numpy array of shape (num_points) x (num_coordinates) if point cloud and (num_points) x (num_points) if distance matrix
                 input point cloud or distance matrix.
             N : int
-                subsampling iterations (default 100). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+                subsampling iterations (default 100). See https://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
             beta : float
-                exponent parameter (default 0.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+                exponent parameter (default 0.). See https://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
             C : float
-                constant parameter (default 10.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+                constant parameter (default 10.). See https://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
 
         Returns
         -------
@@ -428,11 +428,11 @@ class MapperComplex(CoverComplexPy):
             X : numpy array of shape (num_points) x (num_coordinates) if point cloud and (num_points) x (num_points) if distance matrix
                 input point cloud or distance matrix.
             beta : float
-                exponent parameter (default 0.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+                exponent parameter (default 0.). See https://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
             C : float
-                constant parameter (default 10.). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+                constant parameter (default 10.). See https://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
             N : int
-                subsampling iterations (default 100). See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+                subsampling iterations (default 100). See https://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
 
         Returns
         -------
@@ -714,9 +714,9 @@ class GraphInducedComplex(CoverComplexPy):
             filter_bnds (list or numpy array of shape 2): limits of the filter function, of the form [f^min, f^max]. If one of the values is numpy.nan, it can be computed from the dataset with the fit() method. Used only if cover = "functional".
             resolution (int): resolution of the filter function, ie number of intervals required to cover each filter image. Used only if cover = "functional". If None, it is estimated from data.
             gain (double in [0,1]): gain of the filter function, ie overlap percentage of the intervals covering each filter image. Used only if cover = "functional".
-            N (int): subsampling iterations (default 100) for estimating scale and resolutions. Used only if cover = "functional". See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
-            beta (double): exponent parameter (default 0.) for estimating scale and resolutions. Used only if cover = "functional". See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
-            C (double): constant parameter (default 10.) for estimating scale and resolutions. Used only if cover = "functional". See http://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+            N (int): subsampling iterations (default 100) for estimating scale and resolutions. Used only if cover = "functional". See https://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+            beta (double): exponent parameter (default 0.) for estimating scale and resolutions. Used only if cover = "functional". See https://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
+            C (double): constant parameter (default 10.) for estimating scale and resolutions. Used only if cover = "functional". See https://www.jmlr.org/papers/volume19/17-291/17-291.pdf for details.
             graph (string): type of graph to use for GIC. Currently accepts "rips" only.
             rips_threshold (float): Rips parameter. Used only if graph = "rips".
             verbose (bool): whether to display info while computing.

@@ -11,8 +11,8 @@ Definition
 .. include:: delaunay_complex_sum.inc
 
 :class:`~gudhi.DelaunayComplex` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
-`Delaunay Triangulation  <http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations>`_
-:cite:`cgal:hdj-t-19b` from the `Computational Geometry Algorithms Library <http://www.cgal.org/>`_
+`Delaunay Triangulation  <https://doc.cgal.org/latest/Triangulation/index.html#TriangulationSecTriangulations>`_
+:cite:`cgal:hdj-t-19b` from the `Computational Geometry Algorithms Library <https://www.cgal.org/>`_
 :cite:`cgal:eb-19b`.
 
 The Delaunay complex (all filtration values are set to `NaN`) is available by passing :code:`filtrations = None`

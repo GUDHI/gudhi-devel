@@ -22,7 +22,7 @@ namespace cover_complex {
  * @{
  * 
  * Visualizations of the simplicial complexes can be done with either
- * neato (from <a target="_blank" href="http://www.graphviz.org/">graphviz</a>),
+ * neato (from <a target="_blank" href="https://www.graphviz.org/">graphviz</a>),
  * <a target="_blank" href="http://www.geomview.org/">geomview</a>,
  * <a target="_blank" href="https://github.com/scikit-tda/kepler-mapper">KeplerMapper</a>.
  * Input point clouds are assumed to be \ref FileFormatsOFF "OFF files"

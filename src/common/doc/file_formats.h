@@ -87,7 +87,7 @@ namespace Gudhi {
  \section FileFormatsPerseus Perseus
 
  This file format is a format inspired from the Perseus software
- (http://www.sas.upenn.edu/~vnanda/perseus/) by Vidit Nanda.
+ (https://people.maths.ox.ac.uk/nanda/perseus/index.html) by Vidit Nanda.
  The first line contains a number d begin the dimension of the
  bitmap (2 in the example below). Next d lines are the numbers of top dimensional cubes in each dimensions (3 and 3
  in the example below). Next, in lexicographical order, the filtration of top dimensional cubes is given (1 4 6 8
