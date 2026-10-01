@@ -8,7 +8,7 @@ TensorFlow layer for representations
 
 .. include:: representations_sum.inc
 
-`PersLay <http://proceedings.mlr.press/v108/carriere20a.html>`_ is a layer for neural network architectures that allows
+`PersLay <https://proceedings.mlr.press/v108/carriere20a.html>`_ is a layer for neural network architectures that allows
 to automatically learn the best representation to use for persistence diagrams in supervised machine learning during
 training time. Its parameters allow to reproduce most of the known finite-dimensional representations (such as, e.g.,
 landscapes and images), and can be combined to create even new ones, that are best suited for a given supervised

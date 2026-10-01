@@ -35,7 +35,7 @@ def _persistence_weighted_gaussian_kernel(
     D1, D2, weight=lambda x: 1, kernel_approx=None, bandwidth=1.0
 ):
     """
-    This is a function for computing the persistence weighted Gaussian kernel value from two persistence diagrams. The persistence weighted Gaussian kernel is computed by convolving the persistence diagram points with weighted Gaussian kernels. See http://proceedings.mlr.press/v48/kusano16.html for more details.
+    This is a function for computing the persistence weighted Gaussian kernel value from two persistence diagrams. The persistence weighted Gaussian kernel is computed by convolving the persistence diagram points with weighted Gaussian kernels. See https://proceedings.mlr.press/v48/kusano16.html for more details.
 
     Parameters:
         D1: (n x 2) numpy.array encoding the (finite points of the) first diagram. Must not contain essential points (i.e. with infinite coordinate).
@@ -92,7 +92,7 @@ def pairwise_persistence_diagram_kernels(
         X (list of n numpy arrays of shape (numx2)): first list of persistence diagrams.
         Y (list of m numpy arrays of shape (numx2)): second list of persistence diagrams (optional). If None, pairwise kernel values are computed from the first list only.
         kernel: kernel to use. It can be either a string ("sliced_wasserstein", "persistence_scale_space", "persistence_weighted_gaussian", "persistence_fisher") or a function taking two numpy arrays of shape (nx2) and (mx2) as inputs. If it is a function, make sure that it is symmetric.
-        n_jobs (int): number of jobs to use for the computation. This uses joblib.Parallel(prefer="threads"), so kernels that do not release the GIL may not scale unless run inside a `joblib.parallel_backend <https://joblib.readthedocs.io/en/latest/parallel.html#joblib.parallel_backend>`_ block.
+        n_jobs (int): number of jobs to use for the computation. This uses joblib.Parallel(prefer="threads"), so kernels that do not release the GIL may not scale unless run inside a `joblib.parallel_backend <https://joblib.readthedocs.io/en/stable/generated/joblib.parallel_backend.html>`_ block.
         **kwargs: optional keyword parameters. Any further parameters are passed directly to the kernel function. See the docs of the various kernel classes in this module.
 
     Returns:
@@ -154,7 +154,7 @@ def pairwise_persistence_diagram_kernels(
 
 class SlicedWassersteinKernel(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing the sliced Wasserstein kernel matrix from a list of persistence diagrams. The sliced Wasserstein kernel is computed by exponentiating the corresponding sliced Wasserstein distance with a Gaussian kernel. See http://proceedings.mlr.press/v70/carriere17a.html for more details.
+    This is a class for computing the sliced Wasserstein kernel matrix from a list of persistence diagrams. The sliced Wasserstein kernel is computed by exponentiating the corresponding sliced Wasserstein distance with a Gaussian kernel. See https://proceedings.mlr.press/v70/carriere17a.html for more details.
     """
 
     def __init__(self, num_directions=10, bandwidth=1.0, n_jobs=None):
@@ -219,7 +219,7 @@ class SlicedWassersteinKernel(BaseEstimator, TransformerMixin):
 
 class PersistenceWeightedGaussianKernel(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing the persistence weighted Gaussian kernel matrix from a list of persistence diagrams. The persistence weighted Gaussian kernel is computed by convolving the persistence diagram points with weighted Gaussian kernels. See http://proceedings.mlr.press/v48/kusano16.html for more details.
+    This is a class for computing the persistence weighted Gaussian kernel matrix from a list of persistence diagrams. The persistence weighted Gaussian kernel is computed by convolving the persistence diagram points with weighted Gaussian kernels. See https://proceedings.mlr.press/v48/kusano16.html for more details.
     """
 
     def __init__(self, bandwidth=1.0, weight=lambda x: 1, kernel_approx=None, n_jobs=None):

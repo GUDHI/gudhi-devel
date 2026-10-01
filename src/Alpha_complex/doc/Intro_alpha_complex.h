@@ -50,12 +50,12 @@ Table of Contents
  * \image html "alpha_complex_representation.png" "Alpha-complex representation"
  *
  * Alpha_complex is constructing a <a target="_blank"
- * href="http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations">Delaunay Triangulation</a>
- * \cite cgal:hdj-t-19b from <a target="_blank" href="http://www.cgal.org/">CGAL</a> (the Computational Geometry
+ * href="https://doc.cgal.org/latest/Triangulation/index.html#TriangulationSecTriangulations">Delaunay Triangulation</a>
+ * \cite cgal:hdj-t-19b from <a target="_blank" href="https://www.cgal.org/">CGAL</a> (the Computational Geometry
  * Algorithms Library \cite cgal:eb-19b) and is able to create a `SimplicialComplexForAlpha`.
  *
  * The complex is a template class requiring an Epick_d <a target="_blank"
- * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
+ * href="https://doc.cgal.org/4.3/Kernel_d/index.html#Kernel_dKernel_1">dD Geometry Kernel</a>
  * \cite cgal:s-gkd-19b from CGAL as template parameter.
  *
  * \remark
