@@ -7,8 +7,12 @@ From a user point of view, we recommend to download GUDHI user version (gudhi.3.
 
 Below is a list of changes:
 
-- [Module](link)
-     - **...**
+- [Steenrod_persistence](https://gudhi.inria.fr/doc/latest/group__steenrod__persistence.html)
+     - **New module**: `gudhi.SimplexTree.compute_steenrod_barcodes(k)` computes
+       the ordinary persistence barcode together with the Sq^k Steenrod barcode
+       over GF(2), following the algorithm of Lupo, Medina-Mardones and Tauzin
+       (J. Appl. Comput. Topol., 2022) and the cup-i formulas of Medina-Mardones
+       (Comput. Geom., 2023). Stages 3 and 4 are parallelised with OpenMP.
 
 - Simplex tree [`[Python`](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
      - `expansion_with_blocker` is deprecated. Please consider using `expansion_with_blockers`.
