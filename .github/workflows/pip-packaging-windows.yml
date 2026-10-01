@@ -11,16 +11,12 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.11", "3.12"]
         include:
           - python-version: "3.11"
             numpy-version: "1.23.2"
           - python-version: "3.12"
             numpy-version: "1.26.0"
-          - python-version: "3.13"
-            numpy-version: "2.1.0"
-          - python-version: "3.14"
-            numpy-version: "2.3.4"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v6
@@ -47,14 +43,18 @@ jobs:
           python -m pip install --user numpy>=2.0
           python -m pip install --user -r .\ext\gudhi-deploy\build-requirements.txt
           python -m pip install --user twine delvewheel
+          switch ("${{ matrix.python-version }}") {
+            "3.12"  { python -m pip install --user ninja nanobind-backend }
+          }
           python -m pip list
       - name: Build python wheel and repair it
         env:
           SKBUILD_CMAKE_DEFINE: "FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake;VCPKG_TARGET_TRIPLET=x64-windows"
           SKBUILD_BUILD_DIR: "build"
+          SKBUILD_WHEEL_PY_API: "cp312"
         shell: pwsh
         run: |
-          python -m pip wheel -ve .
+          python -m pip wheel --no-build-isolation -ve .
           ls ".\"
           ls "./build/src/python/gudhi/Release"
           delvewheel show --add-path="C:/vcpkg/installed/x64-windows/bin;./build/src/python/gudhi/Release" *.whl
