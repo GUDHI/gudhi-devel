@@ -16,18 +16,21 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef PERSISTENCE_ON_RECTANGLE_H
-#define PERSISTENCE_ON_RECTANGLE_H
+#ifndef GUDHI_PERSISTENCE_ON_RECTANGLE_H
+#define GUDHI_PERSISTENCE_ON_RECTANGLE_H
 
 #include <gudhi/Debug_utils.h>
 #ifdef GUDHI_DETAILED_TIMES
  #include <gudhi/Clock.h>
+ #include <iostream>
 #endif
 
 #include <boost/range/adaptor/reversed.hpp>
 
 #ifdef GUDHI_USE_TBB
  #include <tbb/parallel_sort.h>
+#else
+ #include <boost/sort/pdqsort/pdqsort.hpp>
 #endif
 
 #ifdef DEBUG_TRACES
@@ -53,9 +56,7 @@ struct Persistence_on_rectangle {
     Filtration_value first; Index second;
     T_with_index() = default;
     T_with_index(Filtration_value f, Index i) : first(f), second(i) {}
-    bool operator<(T_with_index const& other) const {
-      return std::tie(first, second) < std::tie(other.first, other.second);
-    }
+    bool operator<(T_with_index const& other) const { return first < other.first; }
     Index out() const { return second; }
   };
   // Don't store the index if we don't want to output it.
@@ -189,6 +190,7 @@ struct Persistence_on_rectangle {
     // Initializing the boundary squares to 0 is important, it represents the infinite exterior cell.
     ds_parent_s_.resize(input_size);
     // What is a good estimate here? For a random 1000x1000 input, we get ~311k edges. For a checkerboard, ~498k.
+    // The maximum is around 3/4*H*W.
     edges.reserve(input_size / 2);
   }
 
@@ -199,6 +201,17 @@ struct Persistence_on_rectangle {
     if (fb < fa) return true;
     if (fa < fb) return false;
     return a > b; // Arbitrary, but has to be consistent
+  }
+  // Same as has_larger_input when we already know the order of a and b.
+  bool has_larger_input_before(Index a, Index b, Filtration_value fb) const {
+    GUDHI_CHECK(a > b, std::logic_error("Bug in Gudhi: inconsistent order"));
+    Filtration_value fa = input(a);
+    return fb <= fa;
+  }
+  bool has_larger_input_after(Index a, Index b, Filtration_value fb) const {
+    GUDHI_CHECK(a < b, std::logic_error("Bug in Gudhi: inconsistent order"));
+    Filtration_value fa = input(a);
+    return fb < fa;
   }
   void set_parent_vertex(Index child, Index parent) {
     GUDHI_CHECK(child != parent, std::logic_error("Bug in Gudhi: use mark_*_critical instead of set_parent"));
@@ -234,7 +247,9 @@ struct Persistence_on_rectangle {
     auto pair_square_left  = [&](){ set_parent_square(i, i - 1); };
     auto pair_square_right = [&](){ set_parent_square(i, i + 1); };
 
-    // Mark the corners as critical, it will be overwritten if not
+#if 1
+    // Mark the corners as critical, it will be overwritten if not.
+    // Requires size at least 3x3 so the corners are distinct.
     i = 0; f = input(i);
     mark_vertex_critical(v_up_right());
     i = size_x; f = input(i);
@@ -243,14 +258,28 @@ struct Persistence_on_rectangle {
     mark_vertex_critical(v_down_right());
     i = size_x + dy * size_y; f = input(i);
     mark_vertex_critical(v_down_left());
+#else
+    i = 0; f = input(i);
+    if (has_larger_input_before(i + 1, i, f) && has_larger_input_before(i + dy, i, f) && has_larger_input_before(i + dy + 1, i, f))
+      mark_vertex_critical(v_up_right());
+    i = size_x; f = input(i);
+    if (has_larger_input_after (i - 1, i, f) && has_larger_input_before(i + dy, i, f) && has_larger_input_before(i + dy - 1, i, f))
+      mark_vertex_critical(v_up_left());
+    i = dy * size_y; f = input(i);
+    if (has_larger_input_before(i + 1, i, f) && has_larger_input_after (i - dy, i, f) && has_larger_input_after (i - dy + 1, i, f))
+      mark_vertex_critical(v_down_right());
+    i = size_x + dy * size_y; f = input(i);
+    if (has_larger_input_after (i - 1, i, f) && has_larger_input_after (i - dy, i, f) && has_larger_input_after (i - dy - 1, i, f))
+      mark_vertex_critical(v_down_left());
+#endif
 
     // Boundary nodes, 1st row
     for(Index x = 1; x < size_x; ++x) {
       i = x;
       f = input(x);
-      if (has_larger_input(i + dy, i, f)) {
-        auto up_left  = [&](){ return has_larger_input(i - 1, i, f) && has_larger_input(i + dy - 1, i, f); };
-        auto up_right = [&](){ return has_larger_input(i + 1, i, f) && has_larger_input(i + dy + 1, i, f); };
+      if (has_larger_input_before(i + dy, i, f)) {
+        auto up_left  = [&](){ return has_larger_input_after (i - 1, i, f) && has_larger_input_before(i + dy - 1, i, f); };
+        auto up_right = [&](){ return has_larger_input_before(i + 1, i, f) && has_larger_input_before(i + dy + 1, i, f); };
         if (up_left()) {
           set_parent_vertex(v_up_left(), v_up_right());
           if (up_right()) mark_vertex_critical(v_up_right());
@@ -267,9 +296,9 @@ struct Persistence_on_rectangle {
       {
         i = y * dy;
         f = input(i);
-        if (has_larger_input(i + 1, i, f)) {
-          auto down_right = [&](){ return has_larger_input(i - dy, i, f) && has_larger_input(i + 1 - dy, i, f); };
-          auto up_right   = [&](){ return has_larger_input(i + dy, i, f) && has_larger_input(i + 1 + dy, i, f); };
+        if (has_larger_input_before(i + 1, i, f)) {
+          auto down_right = [&](){ return has_larger_input_after (i - dy, i, f) && has_larger_input_after (i + 1 - dy, i, f); };
+          auto up_right   = [&](){ return has_larger_input_before(i + dy, i, f) && has_larger_input_before(i + 1 + dy, i, f); };
           if (down_right()) {
             set_parent_vertex(v_down_right(), v_up_right());
             if (up_right()) mark_vertex_critical(v_up_right());
@@ -285,25 +314,26 @@ struct Persistence_on_rectangle {
         i = x + dy * y;
         f = input(i);
         // See what part of the boundary shares f
-        auto left  = [&]() { return has_larger_input(i - 1, i, f); };
-        auto right = [&]() { return has_larger_input(i + 1, i, f); };
-        auto down  = [&]() { return has_larger_input(i - dy, i, f); };
-        auto up    = [&]() { return has_larger_input(i + dy, i, f); };
-        auto down_left  = [&]() { return has_larger_input(i - dy - 1, i, f); };
-        auto up_left    = [&]() { return has_larger_input(i + dy - 1, i, f); };
-        auto down_right = [&]() { return has_larger_input(i - dy + 1, i, f); };
-        auto up_right   = [&]() { return has_larger_input(i + dy + 1, i, f); };
+        auto left       = [&]() { return has_larger_input_after (i - 1, i, f); };
+        auto right      = [&]() { return has_larger_input_before(i + 1, i, f); };
+        auto down       = [&]() { return has_larger_input_after (i - dy, i, f); };
+        auto up         = [&]() { return has_larger_input_before(i + dy, i, f); };
+        auto down_left  = [&]() { return has_larger_input_after (i - dy - 1, i, f); };
+        auto up_left    = [&]() { return has_larger_input_before(i + dy - 1, i, f); };
+        auto down_right = [&]() { return has_larger_input_after (i - dy + 1, i, f); };
+        auto up_right   = [&]() { return has_larger_input_before(i + dy + 1, i, f); };
         if (up()) { // u
           if (left()) { // u l
             if (up_left()) { // u l ul
               set_parent_vertex(v_up_left(), v_up_right());
               if (down()) { // U l UL d
                 if (down_left()) { // U l UL d dl
-                  set_parent_vertex(v_down_left(), v_up_left());
+                  set_parent_vertex(v_down_left(), v_up_right()); // v_up_left()
                   if (right()) { // U L UL d DL r
                     if (down_right()) { // U L UL d DL r dr
-                      set_parent_vertex(v_down_right(), v_down_left());
-                      pair_square_right();
+                      set_parent_vertex(v_down_right(), v_up_right()); // v_down_left()
+                      // The following pair exists, but nothing will look at it
+                      // pair_square_right();
                       if (up_right()) { // U L UL D DL R DR ur - cr
                         mark_vertex_critical(v_up_right());
                       }
@@ -412,7 +442,7 @@ struct Persistence_on_rectangle {
                 set_parent_vertex(v_down_left(), v_up_left());
                 if (right()) { // !u L d DL r
                   if (down_right()) { // !u L d DL r dr
-                    set_parent_vertex(v_down_right(), v_down_left());
+                    set_parent_vertex(v_down_right(), v_up_left()); // v_down_left()
                   } else { // !u L d DL r !dr
                     mark_edge_critical(v_down_left(), v_down_right());
                   }
@@ -463,9 +493,9 @@ struct Persistence_on_rectangle {
       {
         i = size_x + dy * y;
         f = input(i);
-        if (has_larger_input(i - 1, i, f)) {
-          auto down_left = [&](){ return has_larger_input(i - dy, i, f) && has_larger_input(i - 1 - dy, i, f); };
-          auto up_left   = [&](){ return has_larger_input(i + dy, i, f) && has_larger_input(i - 1 + dy, i, f); };
+        if (has_larger_input_after (i - 1, i, f)) {
+          auto down_left = [&](){ return has_larger_input_after (i - dy, i, f) && has_larger_input_after (i - 1 - dy, i, f); };
+          auto up_left   = [&](){ return has_larger_input_before(i + dy, i, f) && has_larger_input_before(i - 1 + dy, i, f); };
           if (down_left()) {
             set_parent_vertex(v_down_left(), v_up_left());
             if (up_left()) mark_vertex_critical(v_up_left());
@@ -481,9 +511,9 @@ struct Persistence_on_rectangle {
     for(Index x = 1; x < size_x; ++x) {
       i = size_y * dy + x;
       f = input(i);
-      if (has_larger_input(i - dy, i, f)) {
-        auto down_left  = [&](){ return has_larger_input(i - 1, i, f) && has_larger_input(i - dy - 1, i, f); };
-        auto down_right = [&](){ return has_larger_input(i + 1, i, f) && has_larger_input(i - dy + 1, i, f); };
+      if (has_larger_input_after (i - dy, i, f)) {
+        auto down_left  = [&](){ return has_larger_input_after (i - 1, i, f) && has_larger_input_after (i - dy - 1, i, f); };
+        auto down_right = [&](){ return has_larger_input_before(i + 1, i, f) && has_larger_input_after (i - dy + 1, i, f); };
         if (down_left()) {
           set_parent_vertex(v_down_left(), v_down_right());
           if (down_right()) mark_vertex_critical(v_down_right());
@@ -503,7 +533,8 @@ struct Persistence_on_rectangle {
     // parallel with the primal if we were motivated...
     tbb::parallel_sort(edges.begin(), edges.end());
 #else
-    std::sort(edges.begin(), edges.end());
+    // std::sort(edges.begin(), edges.end());
+    boost::sort::pdqsort_branchless(edges.begin(), edges.end());
 #endif
 #ifdef DEBUG_TRACES
     std::clog << "edges\n";
@@ -511,40 +542,53 @@ struct Persistence_on_rectangle {
 #endif
   }
 
-  template<class Out>
-  void primal(Out&&out){
-    auto it = std::remove_if(edges.begin(), edges.end(), [&](Edge& e) {
-        assert(e.v1 < e.v2);
-        Index a = ds_find_set_vertex(e.v1);
-        Index b = ds_find_set_vertex(e.v2);
-        if (a == b) return false;
-        if (data_vertex(b) < data_vertex(a)) std::swap(a, b);
-        ds_parent_vertex(b) = a;
-        out(data_vertex(b).out(), e.f.out());
-        return true;
-    });
-    edges.erase(it, edges.end());
-    global_min = data_vertex(ds_find_set_vertex(0)).out();
-  }
+// Hack to prevent gcc from generating cmov, which prevents the processor from loading the next data in advance.
+// To be re-benchmarked sometimes with newer compilers and hardware.
+#ifdef __GNUC__
+#define GUDHI_NOP asm(""::);
+#else
+#define GUDHI_NOP
+#endif
+
+  // dual() moves the edges it uses to the beginning. The remaining ones start here.
+  typename std::vector<Edge>::iterator primal_begin;
 
   // In the dual, squares behave like vertices, and edges are rotated 90° around their middle.
   // To handle boundaries correctly, we imagine a single exterior cell with filtration +inf.
   template<class Out>
   void dual(Out&&out){
-    for (auto e : boost::adaptors::reverse(edges)) {
-      dualize_edge(e);
-      Index a = ds_find_set_square(e.v1);
-      Index b = ds_find_set_square(e.v2);
-      GUDHI_CHECK(a != b, std::logic_error("Bug in Gudhi"));
-      // This is more robust in case the input contains inf? I used to set the filtration of 0 to inf.
-      if (b == 0 || (a != 0 && input(a) < input(b))) std::swap(a, b);
-      ds_parent_square(b) = a;
-      if constexpr (output_index)
-        out(e.f.out(), b);
-      else
-        out(e.f.out(), input(b));
-    }
+    auto rit = std::remove_if(edges.rbegin(), edges.rend(), [&](Edge e) {
+        dualize_edge(e);
+        Index a = ds_find_set_square(e.v1);
+        Index b = ds_find_set_square(e.v2);
+        if (a == b) return false;
+        // This is more robust in case the input contains inf? I used to set the filtration of 0 to inf.
+        if (b == 0 || (a != 0 && input(a) < input(b))) std::swap(a, b);
+        ds_parent_square(b) = a;
+        if constexpr (output_index)
+          out(e.f.out(), b);
+        else
+          out(e.f.out(), input(b));
+        return true;
+        });
+    primal_begin = rit.base();   // kept edges are [primal_begin, edges.end()), original order
   }
+
+  template<class Out>
+  void primal(Out&&out){
+    for (auto it = primal_begin; it != edges.end(); ++it) {
+      Edge e = *it;
+      Index a = ds_find_set_vertex(e.v1);
+      Index b = ds_find_set_vertex(e.v2);
+      GUDHI_CHECK(a != b, std::logic_error("Bug in Gudhi"));
+      if (data_vertex(b) < data_vertex(a)) { GUDHI_NOP std::swap(a, b); }
+      ds_parent_vertex(b) = a;
+      out(data_vertex(b).out(), e.f.out());
+    }
+    global_min = data_vertex(ds_find_set_vertex(0)).out();
+  }
+
+#undef GUDHI_NOP
 };
 // Ideas for improvement:
 // * for large hard (many intervals) inputs, primal/dual dominate the running time because of the random reads in
@@ -559,7 +603,16 @@ struct Persistence_on_rectangle {
 //   instances, if we also remove the calls to reserve(), the saving is less negligible, but we still have ds_parent_*_
 //   that take about as much space as the input. We could, on a subarray, fill a dense ds_parent, then reduce it and
 //   export only the critical vertices and boundary to some sparse datastructure, but it doesn't seem worth the trouble
-//   for now.
+//   for now. For internal vertices, the min square is always in the same corner, it is only on the boundary that it
+//   may be in a different direction, I don't know if that can help though, unlike in the V construction, unless we
+//   stop dropping the outer layer.
+// * There are usually more dual pairs than primal in the T construction, but that isn't a guarantee. We could count
+//   critical vertices/squares during fill_and_pair and decide based on that whether to do primal or dual first.
+// * In most cases, storing the index is unnecessary, it can be deduced at the point of use, or storing 1 bit (possibly
+//   packed with nearby data) is enough to reconstruct it.
+// * In Edge, v2 could be replaced by 1 bit, possibly packed with v1. This could help sorting with float+uint32, but
+//   would be useless for double+uint32.
+// * ds_parent_s_ only needs its boundary initialized in init, not the whole thing.
 
 /**
  * @private
@@ -587,8 +640,9 @@ auto persistence_on_rectangle_from_top_cells(Filtration_value const* input, Inde
 #ifdef GUDHI_DETAILED_TIMES
   Gudhi::Clock clock;
 #endif
-  GUDHI_CHECK(n_rows >= 2 && n_cols >= 2,
-      std::domain_error("The complex must truly be 2d, i.e. at least 2 rows and 2 columns"));
+  GUDHI_CHECK(n_rows >= 3 && n_cols >= 3,
+      std::domain_error("The complex must truly be 2d, i.e. at least 3 rows and 3 columns"));
+  // For 2 rows, compute the min and use the 1d code
   Persistence_on_rectangle<Filtration_value, Index, output_index> X;
   X.init(input, n_rows, n_cols);
 #ifdef GUDHI_DETAILED_TIMES
@@ -602,16 +656,16 @@ auto persistence_on_rectangle_from_top_cells(Filtration_value const* input, Inde
 #ifdef GUDHI_DETAILED_TIMES
     std::clog << "sort: " << clock; clock.begin();
 #endif
-  X.primal(out0);
-#ifdef GUDHI_DETAILED_TIMES
-    std::clog << "primal pass: " << clock; clock.begin();
-#endif
   X.dual(out1);
 #ifdef GUDHI_DETAILED_TIMES
-    std::clog << "dual pass: " << clock;
+    std::clog << "dual pass: " << clock; clock.begin();
+#endif
+  X.primal(out0);
+#ifdef GUDHI_DETAILED_TIMES
+    std::clog << "primal pass: " << clock;
 #endif
   return X.global_min;
 }
 }  // namespace Gudhi::cubical_complex
 
-#endif  // PERSISTENCE_ON_RECTANGLE_H
+#endif  // GUDHI_PERSISTENCE_ON_RECTANGLE_H

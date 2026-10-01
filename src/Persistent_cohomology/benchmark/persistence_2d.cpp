@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2026/04 Vincent Rouvreau: Use Gudhi::random in place of c++ custom use
+ *      - 2026/09 Marc Glisse: add V construction
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -13,6 +14,7 @@
 #include <gudhi/Bitmap_cubical_complex.h>
 #include <gudhi/Persistent_cohomology.h>
 #include <gudhi/Persistence_on_rectangle.h>
+#include <gudhi/Persistence_on_rectangle_V.h>
 #include <gudhi/random.h>
 
 #include <vector>
@@ -24,36 +26,35 @@
 // Set to true to test on a simple example with no finite interval.
 const bool monotone = false;
 
-int main() {
-  std::vector<unsigned> sizes {1000, 999};
-  std::vector<double> data(sizes[0] * sizes[1]);
-  if (monotone) {
-    std::iota(data.begin(), data.end(), std::size_t(0));
-  } else {
-    std::generate(data.begin(), data.end(),  []() { return Gudhi::random::get_uniform<double>(0., 1.); });
-  }
+template <bool I, class...T> auto pers2d(bool V, T&&...t) {
+  if (V)
+    return Gudhi::cubical_complex::persistence_on_rectangle_from_vertices<I>(std::forward<T>(t)...);
+  else
+    return Gudhi::cubical_complex::persistence_on_rectangle_from_top_cells<I>(std::forward<T>(t)...);
+}
 
+template <bool V, class Sizes, class Data> void testit(Sizes const& sizes, Data const& data) {
   Gudhi::Clock clock;
 #ifndef ONLY_2D
   Gudhi::Clock clock_old;
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> Base;
   typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Base> Cubical;
-  Cubical complex_from_top_cells(sizes, data, true);
-  std::clog << "Construction from top cells: " << clock;
+  Cubical cplx(sizes, data, !V);
+  std::clog << "Construction from input: " << clock;
 
   clock.begin();
-  complex_from_top_cells.initialize_filtration();
+  cplx.initialize_filtration();
   std::clog << "initialize_filtration: " << clock;
 
   clock.begin();
   using Field_Zp = Gudhi::persistent_cohomology::Field_Zp;
-  Gudhi::persistent_cohomology::Persistent_cohomology<Cubical, Field_Zp> pers(complex_from_top_cells);
+  Gudhi::persistent_cohomology::Persistent_cohomology<Cubical, Field_Zp> pers(cplx);
   pers.init_coefficients(2);
   pers.compute_persistent_cohomology();
   std::clog << "Compute persistent homology: " << clock;
   std::vector<std::pair<double, double>> res1;
   for (auto p: pers.get_persistent_pairs()){
-    res1.emplace_back(complex_from_top_cells.filtration(std::get<0>(p)), complex_from_top_cells.filtration(std::get<1>(p)));
+    res1.emplace_back(cplx.filtration(std::get<0>(p)), cplx.filtration(std::get<1>(p)));
   }
   std::clog << "Total old code: " << clock_old << std::endl;
 #endif
@@ -61,14 +62,14 @@ int main() {
   clock.begin();
   std::vector<std::pair<double, double>> res2; res2.reserve(data.size() / 2);
   auto out = [&res2](double b, double d) { if (b < d) res2.emplace_back(b, d); };
-  double global_min = Gudhi::cubical_complex::persistence_on_rectangle_from_top_cells(data.data(), sizes[1], sizes[0], out, out);
+  double global_min = pers2d<false>(V, data.data(), sizes[1], sizes[0], out, out);
   res2.emplace_back(global_min, std::numeric_limits<double>::infinity());
   std::clog << "Total new code: " << clock << std::endl;
 
   clock.begin();
   std::vector<std::pair<double, double>> res3; res3.reserve(data.size() / 2);
   auto outi = [&res3, &data](double b, double d) { if (data[b] < data[d]) res3.emplace_back(data[b], data[d]); };
-  std::size_t gm = Gudhi::cubical_complex::persistence_on_rectangle_from_top_cells<true>(data.data(), sizes[1], sizes[0], outi, outi);
+  std::size_t gm = pers2d<true>(V, data.data(), sizes[1], sizes[0], outi, outi);
   res3.emplace_back(data[gm], std::numeric_limits<double>::infinity());
   std::clog << "Total new code with index: " << clock << std::endl;
 
@@ -85,6 +86,23 @@ int main() {
     std::exit(-3);
   }
 #endif
+}
 
-  return 0;
+int main() {
+#ifndef ONLY_2D
+  std::vector<unsigned> sizes {1000, 999};
+#else
+  // Takes about 1s, better for a benchmark, but would be too slow with the old code.
+  std::vector<unsigned> sizes {2000, 9999};
+#endif
+  std::vector<double> data(sizes[0] * sizes[1]);
+  if (monotone) {
+    std::iota(data.begin(), data.end(), std::size_t(0));
+  } else {
+    std::generate(data.begin(), data.end(),  []() { return Gudhi::random::get_uniform<double>(0., 1.); });
+  }
+  std::clog << "T construction\n--------------\n";
+  testit<false>(sizes, data);
+  std::clog << "V construction\n--------------\n";
+  testit<true>(sizes, data);
 }
