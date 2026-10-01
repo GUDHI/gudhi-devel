@@ -80,3 +80,13 @@ html_static_path = ["_static"]
 html_css_files = [
     "python_gudhi.css",
 ]
+
+def autodoc_skip_member(app, what, name, obj, skip, options):
+    # Do not generate documentation for these methods, cf. https://github.com/GUDHI/gudhi-devel/issues/1071
+    if name in {"set_fit_request", "set_transform_request", "set_score_request", "set_predict_request",
+                "get_metadata_routing"}:
+        return True
+    return skip
+
+def setup(app):
+    app.connect("autodoc-skip-member", autodoc_skip_member)

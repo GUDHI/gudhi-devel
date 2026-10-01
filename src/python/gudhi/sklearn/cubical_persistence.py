@@ -142,3 +142,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         if self._unwrap:
             res = [d[0] for d in res]
         return res
+
+    def get_feature_names_out(self):
+        """Provide column names for implementing sklearn's set_output API."""
+        return [f"H{i}" for i in self._dim_list]

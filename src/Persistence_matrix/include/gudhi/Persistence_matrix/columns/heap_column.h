@@ -45,7 +45,8 @@ namespace persistence_matrix {
  * The real value of an entry at a row index corresponds to the sum in the coefficient field of all values with same
  * row index. Additionally, the given entry range added into the heap does not need to be somehow ordered.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Heap_column : public Master_matrix::Column_dimension_option, public Master_matrix::Chain_column_option

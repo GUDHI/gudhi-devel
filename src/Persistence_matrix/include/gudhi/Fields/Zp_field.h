@@ -21,6 +21,8 @@
 #include <array>
 #include <climits>
 
+#include <gudhi/arithmetic.h>
+
 namespace Gudhi {
 namespace persistence_fields {
 
@@ -48,7 +50,7 @@ class Zp_field_element
   /**
    * @brief Default constructor. Sets the element to 0.
    */
-  Zp_field_element() : element_(0) { static_assert(_is_prime(), "Characteristic has to be a prime number."); }
+  Zp_field_element() : element_(0) { static_assert(Gudhi::is_prime(characteristic), "Characteristic has to be a prime number."); }
 
   /**
    * @brief Constructor setting the element to the given value.
@@ -59,7 +61,7 @@ class Zp_field_element
   template <typename Integer_type, class = isInteger<Integer_type> >
   Zp_field_element(Integer_type element) : element_(_get_value(element))
   {
-    static_assert(_is_prime(), "Characteristic has to be a prime number.");
+    static_assert(Gudhi::is_prime(characteristic), "Characteristic has to be a prime number.");
   }
 
   /**
@@ -472,18 +474,6 @@ class Zp_field_element
     } else {
       return e < characteristic ? e : e % characteristic;
     }
-  }
-
-  static constexpr bool _is_prime()
-  {
-    if (characteristic <= 1) return false;
-    if (characteristic <= 3) return true;
-    if (characteristic % 2 == 0 || characteristic % 3 == 0) return false;
-
-    for (long i = 5; i * i <= characteristic; i = i + 6)
-      if (characteristic % i == 0 || characteristic % (i + 2) == 0) return false;
-
-    return true;
   }
 };
 

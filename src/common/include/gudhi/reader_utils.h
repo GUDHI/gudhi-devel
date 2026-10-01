@@ -21,6 +21,7 @@
 #include <fstream>
 #include <map>
 #include <limits>  // for numeric_limits
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <utility>  // for pair
@@ -215,6 +216,8 @@ bool read_hasse_simplex(std::istream& in_, std::vector<Simplex_key>& boundary, F
  * ...<br>
  * Dj1;Dj2;...;Dj(j-1);<br>
  *
+ * @throws std::invalid_argument If `filename` cannot be opened.
+ *
  **/
 template <typename Filtration_value>
 std::vector<std::vector<Filtration_value>> read_lower_triangular_matrix_from_csv_file(const std::string& filename,
@@ -226,7 +229,9 @@ std::vector<std::vector<Filtration_value>> read_lower_triangular_matrix_from_csv
   std::ifstream in;
   in.open(filename.c_str());
   if (!in.is_open()) {
-    return result;
+    std::string error_str("read_lower_triangular_matrix_from_csv_file - Unable to open file ");
+    error_str.append(filename);
+    throw std::invalid_argument(error_str);
   }
 
   std::string line;

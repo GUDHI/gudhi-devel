@@ -154,46 +154,46 @@ def test_simple_sparsify_points():
     point_set = [[0, 1], [0, 0], [1, 0], [1, 1]]
     if gudhi.GUDHI_SUBSAMPLING_USE_CGAL:
         # Test the limits
-        # assert gudhi.sparsify_point_set(points = [], min_squared_dist = 0.0) == []
-        # assert gudhi.sparsify_point_set(points = [], min_squared_dist = 10.0) == []
-        assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=0.0) == point_set
-        assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=0.999) == point_set
-        assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=1.001) == [
+        # assert gudhi.subsampling.sparsify_point_set(points = [], min_squared_dist = 0.0) == []
+        # assert gudhi.subsampling.sparsify_point_set(points = [], min_squared_dist = 10.0) == []
+        assert gudhi.subsampling.sparsify_point_set(points=point_set, min_squared_dist=0.0) == point_set
+        assert gudhi.subsampling.sparsify_point_set(points=point_set, min_squared_dist=0.999) == point_set
+        assert gudhi.subsampling.sparsify_point_set(points=point_set, min_squared_dist=1.001) == [
             [0, 1],
             [1, 0],
         ]
-        assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=1.999) == [
+        assert gudhi.subsampling.sparsify_point_set(points=point_set, min_squared_dist=1.999) == [
             [0, 1],
             [1, 0],
         ]
-        assert gudhi.sparsify_point_set(points=point_set, min_squared_dist=2.001) == [[0, 1]]
+        assert gudhi.subsampling.sparsify_point_set(points=point_set, min_squared_dist=2.001) == [[0, 1]]
         assert (
-            len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=0.0)) == 7
+            len(gudhi.subsampling.sparsify_point_set(off_file="subsample.off", min_squared_dist=0.0)) == 7
         )
         assert (
-            len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=30.0)) == 5
+            len(gudhi.subsampling.sparsify_point_set(off_file="subsample.off", min_squared_dist=30.0)) == 5
         )
         assert (
-            len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=40.1)) == 4
+            len(gudhi.subsampling.sparsify_point_set(off_file="subsample.off", min_squared_dist=40.1)) == 4
         )
         assert (
-            len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=89.9)) == 3
+            len(gudhi.subsampling.sparsify_point_set(off_file="subsample.off", min_squared_dist=89.9)) == 3
         )
         assert (
-            len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=100.0))
+            len(gudhi.subsampling.sparsify_point_set(off_file="subsample.off", min_squared_dist=100.0))
             == 2
         )
         assert (
-            len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=324.9))
+            len(gudhi.subsampling.sparsify_point_set(off_file="subsample.off", min_squared_dist=324.9))
             == 2
         )
         assert (
-            len(gudhi.sparsify_point_set(off_file="subsample.off", min_squared_dist=325.01))
+            len(gudhi.subsampling.sparsify_point_set(off_file="subsample.off", min_squared_dist=325.01))
             == 1
         )
     else:
         with pytest.raises(NotImplementedError):
-            gudhi.sparsify_point_set(points=point_set, min_squared_dist=0.0)
+            gudhi.subsampling.sparsify_point_set(points=point_set, min_squared_dist=0.0)
 
 
 def test_reproductibility_pick_n_random_points():
