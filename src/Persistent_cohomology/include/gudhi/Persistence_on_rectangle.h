@@ -608,6 +608,11 @@ struct Persistence_on_rectangle {
 //   stop dropping the outer layer.
 // * There are usually more dual pairs than primal in the T construction, but that isn't a guarantee. We could count
 //   critical vertices/squares during fill_and_pair and decide based on that whether to do primal or dual first.
+// * In most cases, storing the index is unnecessary, it can be deduced at the point of use, or storing 1 bit (possibly
+//   packed with nearby data) is enough to reconstruct it.
+// * In Edge, v2 could be replaced by 1 bit, possibly packed with v1. This could help sorting with float+uint32, but
+//   would be useless for double+uint32.
+// * ds_parent_s_ only needs its boundary initialized in init, not the whole thing.
 
 /**
  * @private
