@@ -22,7 +22,7 @@ namespace persistence_matrix {
 /** 
  * @ingroup persistence_matrix
  *
- * @brief Concept of the template parameter for the class @ref Matrix.
+ * @brief Concept of the template parameter for the class @ref Gudhi::persistence_matrix::Matrix "Matrix".
  *
  * An implementation of this concept is @ref Default_options.
  * If you want to provide your own, it is recommended that you derive from it and override some parts instead of
@@ -179,4 +179,3 @@ struct PersistenceMatrixOptions
 
 }  // namespace persistence_matrix
 }  // namespace Gudhi
-

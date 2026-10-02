@@ -23,6 +23,7 @@
 #include <stdexcept>
 
 #include <gudhi/Debug_utils.h>
+#include <gudhi/arithmetic.h>
 
 namespace Gudhi {
 namespace persistence_fields {
@@ -68,7 +69,7 @@ class Shared_multi_field_element
   {
     if (maximum < 2) throw std::invalid_argument("Characteristic must be strictly positive");
     if (minimum > maximum) throw std::invalid_argument("The given interval is not valid.");
-    if (minimum == maximum && !_is_prime(minimum))
+    if (minimum == maximum && !Gudhi::is_prime(minimum))
       throw std::invalid_argument("The given interval does not contain a prime number.");
 
     unsigned int curr_prime = minimum;
@@ -426,18 +427,6 @@ class Shared_multi_field_element
   static inline Characteristic productOfAllCharacteristics_ = 0; /**< Product of all characteristics. */
   static inline std::vector<Element> partials_;                  /**< Partial products of the characteristics. */
   static inline const Element multiplicativeID_ = 1;             /**< Multiplicative identity. */
-
-  static constexpr bool _is_prime(const unsigned int p)
-  {
-    if (p <= 1) return false;
-    if (p <= 3) return true;
-    if (p % 2 == 0 || p % 3 == 0) return false;
-
-    for (long i = 5; i * i <= p; i = i + 6)
-      if (p % i == 0 || p % (i + 2) == 0) return false;
-
-    return true;
-  }
 };
 
 }  // namespace persistence_fields
