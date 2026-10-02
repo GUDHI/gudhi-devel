@@ -21,6 +21,10 @@ def test_empty_constructor():
     cover = CoverComplex()
 
 
+def test_mapper_complex_get_params():
+    assert "colors" not in MapperComplex().get_params()
+
+
 def test_non_existing_file_read():
     # Try to open a non existing file
     cover = CoverComplex()
