@@ -59,12 +59,14 @@ jobs:
       - name: Build wheel for Python 3.12
         env:
           SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON312/bin/python"
+          SKBUILD_WHEEL_PY_API: "cp312"
         run: |
-          $PYTHON312/bin/python -m pip wheel -ve .
+          $PYTHON312/bin/python -m pip install --user ninja nanobind-backend
+          $PYTHON312/bin/python -m pip wheel --no-build-isolation -ve .
       - name: Install and test wheel for Python 3.12
         run: |
           $PYTHON312/bin/python -m pip install numpy~=1.26.0
-          $PYTHON312/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp312-linux_x86_64.whl
+          $PYTHON312/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *abi3-linux_x86_64.whl
           $PYTHON312/bin/python -c "import gudhi; print(gudhi.__version__)"
           cp data/points/human.off .
           $PYTHON312/bin/python -m pytest src/python/test/test_alpha_complex.py
@@ -98,15 +100,10 @@ jobs:
           $PYTHON312/bin/python -m pytest src/python/test/test_wasserstein_barycenter.py
           $PYTHON312/bin/python -m pytest src/python/test/test_weighted_rips_complex.py
           $PYTHON312/bin/python -m pytest src/python/test/test_witness_complex.py
-      - name: Build wheel for Python 3.13
-        env:
-          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON313/bin/python"
-        run: |
-          $PYTHON313/bin/python -m pip wheel -ve .
       - name: Install and test wheel for Python 3.13
         run: |
           $PYTHON313/bin/python -m pip install numpy~=2.1.0
-          $PYTHON313/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp313-linux_x86_64.whl
+          $PYTHON313/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *abi3-linux_x86_64.whl
           $PYTHON313/bin/python -c "import gudhi; print(gudhi.__version__)"
           cp data/points/human.off .
           $PYTHON313/bin/python -m pytest src/python/test/test_alpha_complex.py
@@ -140,15 +137,10 @@ jobs:
           $PYTHON313/bin/python -m pytest src/python/test/test_wasserstein_barycenter.py
           $PYTHON313/bin/python -m pytest src/python/test/test_weighted_rips_complex.py
           $PYTHON313/bin/python -m pytest src/python/test/test_witness_complex.py
-      - name: Build wheel for Python 3.14
-        env:
-          SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON314/bin/python"
-        run: |
-          $PYTHON314/bin/python -m pip wheel -ve .
       - name: Install and test wheel for Python 3.14
         run: |
           $PYTHON314/bin/python -m pip install numpy~=2.3.4
-          $PYTHON314/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *cp314-linux_x86_64.whl
+          $PYTHON314/bin/python -m pip install --user pytest scipy matplotlib scikit-learn POT *abi3-linux_x86_64.whl
           $PYTHON314/bin/python -c "import gudhi; print(gudhi.__version__)"
           cp data/points/human.off .
           $PYTHON314/bin/python -m pytest src/python/test/test_alpha_complex.py
