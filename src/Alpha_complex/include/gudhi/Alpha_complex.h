@@ -71,7 +71,7 @@ template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool val
  *
  * \details
  * The data structure is constructing a CGAL Delaunay triangulation (for more information on CGAL Delaunay
- * triangulation, please refer to the corresponding chapter in page http://doc.cgal.org/latest/Triangulation/) from a
+ * triangulation, please refer to the corresponding chapter in page https://doc.cgal.org/latest/Triangulation/) from a
  * range of points or from an OFF file (cf. Points_off_reader).
  *
  * Please refer to \ref alpha_complex for examples.
@@ -80,10 +80,10 @@ template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool val
  * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>,
  * or an <a target="_blank"
  * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epick__d.html">CGAL::Epick_d</a> <a target="_blank"
- * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
+ * href="https://doc.cgal.org/latest/Kernel_d/index.html#Kernel_dKernel_1">dD Geometry Kernel</a>
  * \cite cgal:s-gkd-19b from CGAL as template, default value is <a target="_blank"
  * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>
- * < <a target="_blank" href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dynamic__dimension__tag.html">
+ * < <a target="_blank" href="https://doc.cgal.org/latest/Kernel_23/structCGAL_1_1Dynamic__dimension__tag.html">
  * CGAL::Dynamic_dimension_tag </a> >
  *
  * \remark

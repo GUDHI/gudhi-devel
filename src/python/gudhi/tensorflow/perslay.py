@@ -268,7 +268,7 @@ class FlatPerslayPhi(tf.keras.layers.Layer):
 
 class Perslay(tf.keras.layers.Layer):
     """
-    This is a TensorFlow layer for vectorizing persistence diagrams in a differentiable way within a neural network. This function implements the PersLay equation, see `the corresponding article <http://proceedings.mlr.press/v108/carriere20a.html>`_.
+    This is a TensorFlow layer for vectorizing persistence diagrams in a differentiable way within a neural network. This function implements the PersLay equation, see `the corresponding article <https://proceedings.mlr.press/v108/carriere20a.html>`_.
     """
 
     def __init__(self, weight, phi, perm_op, rho, **kwargs):

@@ -40,10 +40,10 @@ different, and in particular the `python/` subdirectory is actually `src/python/
 there.
 
 The library uses c++17 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.71.0,
-`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.15,
-Python :math:`\geq` 3.10, `NumPy <http://numpy.org>`_ :math:`\geq` 1.21.6,
-`scikit-build-core <https://scikit-build-core.readthedocs.io>`_ :math:`\geq` 0.4.3
-`nanobind <https://nanobind.readthedocs.io>`_ :math:`\geq` 1.3.2 to compile the GUDHI Python module.
+`CMake <https://cmake.org/>`_ :math:`\geq` 3.15,
+Python :math:`\geq` 3.10, `NumPy <https://numpy.org/>`_ :math:`\geq` 1.21.6,
+`scikit-build-core <https://scikit-build-core.readthedocs.io/en/latest/>`_ :math:`\geq` 0.4.3
+`nanobind <https://nanobind.readthedocs.io/en/latest/>`_ :math:`\geq` 1.3.2 to compile the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2017 or later.
 
 If you have several Python/python installed, you can force it by adding
@@ -95,7 +95,7 @@ Or install GUDHI in your Python packages folder with the
 Test suites
 ===========
 
-To test your build, `py.test <http://doc.pytest.org>`_ is required. Run the
+To test your build, `py.test <https://docs.pytest.org/en/stable/>`_ is required. Run the
 following `Ctest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`_
 (CMake test driver program) command in a terminal:
 
@@ -192,8 +192,8 @@ A complete configuration would be :
 Documentation
 =============
 
-To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_,
-`sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_,
+To build the documentation, `sphinx-doc <https://www.sphinx-doc.org/en/master/>`_,
+`sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io/en/latest/>`_,
 `sphinx-autodoc-typehints <https://github.com/tox-dev/sphinx-autodoc-typehints>`_,
 `sphinxcontrib-paramlinks <https://github.com/sqlalchemyorg/sphinx-paramlinks>`_ and
 `pydata-sphinx-theme <https://github.com/pydata/pydata-sphinx-theme>`_ :math:`\geq` 0.8.0 are
@@ -214,7 +214,7 @@ Optional third-party library
 Compilation dependencies
 ========================
 
-These third party dependencies are detected by `CMake <https://www.cmake.org/>`_.
+These third party dependencies are detected by `CMake <https://cmake.org/>`_.
 They have to be installed before performing the `GUDHI Python module compilation`_.
 
 CGAL
@@ -227,7 +227,7 @@ access to efficient and reliable geometric algorithms.
 
 The procedure to install this library
 according to your operating system is detailed
-`here <http://doc.cgal.org/latest/Manual/installation.html>`_.
+`here <https://doc.cgal.org/latest/Manual/installation.html>`_.
 
 The following examples require CGAL:
 
@@ -244,11 +244,11 @@ Eigen
 -----
 
 Some GUDHI modules (cf. :doc:`modules list </index>`), and few examples
-require `Eigen <http://eigen.tuxfamily.org/>`_ version :math:`\geq` 3.3.0, a C++ template
+require `Eigen <https://libeigen.gitlab.io/>`_ version :math:`\geq` 3.3.0, a C++ template
 library for linear algebra: matrices, vectors, numerical solvers, and related
 algorithms.
 
-The following examples require `Eigen <http://eigen.tuxfamily.org/>`_:
+The following examples require `Eigen <https://libeigen.gitlab.io/>`_:
 
 .. only:: builder_html
 
@@ -261,7 +261,7 @@ The following examples require `Eigen <http://eigen.tuxfamily.org/>`_:
 oneAPI Threading Building Blocks
 --------------------------------
 
-`Intel® oneAPI TBB <https://github.com/oneapi-src/oneTBB>`_ lets you easily write parallel C++ programs that take
+`Intel® oneAPI TBB <https://github.com/uxlfoundation/oneTBB>`_ lets you easily write parallel C++ programs that take
 full advantage of multicore performance, that are portable and composable, and that have future-proof scalability.
 
 Having Intel® oneAPI TBB  (version 20.19.7 or higher) installed is recommended to parallelize and accelerate some GUDHI
@@ -284,7 +284,7 @@ PyTorch, TensorFlow and JAX in a common interface.
 Joblib
 ------
 
-`Joblib <https://joblib.readthedocs.io/>`_ is used both as a dependency of
+`Joblib <https://joblib.readthedocs.io/en/stable/>`_ is used both as a dependency of
 `Scikit-learn`_, and directly for parallelism in some modules
 (:class:`~gudhi.point_cloud.knn.KNearestNeighbors`,
 :func:`~gudhi.representations.metrics.pairwise_persistence_diagram_distances`).
@@ -329,11 +329,11 @@ Matplotlib
 ----------
 
 The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
-module requires `Matplotlib <http://matplotlib.org>`_, a Python 2D plotting
+module requires `Matplotlib <https://matplotlib.org>`_, a Python 2D plotting
 library which produces publication quality figures in a variety of hardcopy
 formats and interactive environments across platforms.
 
-The following examples require the `Matplotlib <http://matplotlib.org>`_:
+The following examples require the `Matplotlib <https://matplotlib.org>`_:
 
 .. only:: builder_html
 
@@ -360,7 +360,7 @@ Pandas
 `Pandas <https://pandas.pydata.org/docs/>`_ is an optional Run time dependency of
 `Scikit-learn`_.
 For instance `sklearn.datasets.fetch_openml`, used in
-`Cubical complex persistence scikit-learn like interface example <cubical_complex_sklearn_itf_ref.html>`_
+:doc:`Cubical complex persistence scikit-learn like interface example <cubical_complex_sklearn_itf_ref>`
 requires pandas with Scikit-learn :math:`\geq` 1.5.0.
 
 PyKeOps
@@ -403,11 +403,11 @@ SciPy
 The :doc:`persistence graphical tools </persistence_graphical_tools_user>`,
 `Wasserstein distance (POT version) <wasserstein_distance_user.html#optimal-transport>`_ and
 `Wasserstein barycenters <wasserstein_distance_user.html#barycenters>`_ modules require `SciPy
-<http://scipy.org>`_, a Python-based ecosystem of open-source software for
+<https://scipy.org/>`_, a Python-based ecosystem of open-source software for
 mathematics, science, and engineering.
 
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
-`SciPy <http://scipy.org>`_ :math:`\geq` 1.6.0 as a backend if explicitly requested.
+`SciPy <https://scipy.org/>`_ :math:`\geq` 1.6.0 as a backend if explicitly requested.
 
 TensorFlow
 ----------
