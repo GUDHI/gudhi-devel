@@ -55,7 +55,7 @@ Table of Contents
  * Algorithms Library \cite cgal:eb-19b) and is able to create a `SimplicialComplexForAlpha`.
  *
  * The complex is a template class requiring an Epick_d <a target="_blank"
- * href="https://doc.cgal.org/4.3/Kernel_d/index.html#Kernel_dKernel_1">dD Geometry Kernel</a>
+ * href="https://doc.cgal.org/latest/Kernel_d/index.html#Kernel_dKernel_1">dD Geometry Kernel</a>
  * \cite cgal:s-gkd-19b from CGAL as template parameter.
  *
  * \remark

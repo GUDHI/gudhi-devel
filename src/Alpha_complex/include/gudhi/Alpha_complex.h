@@ -80,7 +80,7 @@ template<typename D> struct Is_Epeck_D<CGAL::Epeck_d<D>> { static const bool val
  * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>,
  * or an <a target="_blank"
  * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epick__d.html">CGAL::Epick_d</a> <a target="_blank"
- * href="https://doc.cgal.org/4.3/Kernel_d/index.html#Kernel_dKernel_1">dD Geometry Kernel</a>
+ * href="https://doc.cgal.org/latest/Kernel_d/index.html#Kernel_dKernel_1">dD Geometry Kernel</a>
  * \cite cgal:s-gkd-19b from CGAL as template, default value is <a target="_blank"
  * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epeck__d.html">CGAL::Epeck_d</a>
  * < <a target="_blank" href="https://doc.cgal.org/latest/Kernel_23/structCGAL_1_1Dynamic__dimension__tag.html">
