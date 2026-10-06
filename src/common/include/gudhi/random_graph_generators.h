@@ -38,8 +38,8 @@ std::vector<std::array<Vertex_handle, 2>> random_edges(Vertex_handle nb_vertices
   if (nb_vertices < 2)
     return edges;
 
-  std::size_t nb_permutations = (nb_vertices * (nb_vertices - 1)) / 2;
-  edges.reserve(nb_permutations);
+  std::size_t nb_possibilities = (nb_vertices * (nb_vertices - 1)) / 2;
+  edges.reserve(nb_possibilities);
   
   for (Vertex_handle u = 0; u < nb_vertices; u++) {
     for (Vertex_handle v = u + 1; v < nb_vertices; v++) {
@@ -48,7 +48,7 @@ std::vector<std::array<Vertex_handle, 2>> random_edges(Vertex_handle nb_vertices
   }
   
   std::shuffle(edges.begin(), edges.end(), Gudhi::random::get_default_random());
-  edges.resize(std::round(nb_permutations * density));
+  edges.resize(std::round(nb_possibilities * density));
   return edges;
 }
 
