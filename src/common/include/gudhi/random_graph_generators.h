@@ -24,21 +24,21 @@
 
 namespace Gudhi {
 
-namespace random {
-
-/* @brief Returns exactly \f$ density * nb_vertices(nb_vertices - 1) / 2 \f$ edges, chosen randomly.
+/* @brief Returns 'nb_edges' edges in the possible \f$ nb_vertices(nb_vertices - 1) / 2 \f$ edges, chosen randomly.
  * 
  * @param[in] nb_vertices The number of vertices.
- * @param[in] density The percentage of edges to keep.
+ * @param[in] nb_edges The number of random edges to return.
  * @return Some random edges.
  */
 template <typename Vertex_handle>
-std::vector<std::array<Vertex_handle, 2>> random_edges(Vertex_handle nb_vertices, double density = 0.15) {
+std::vector<std::array<Vertex_handle, 2>> generate_random_edges(Vertex_handle nb_vertices, std::size_t nb_edges) {
   std::vector<std::array<Vertex_handle, 2>> edges;
   if (nb_vertices < 2)
     return edges;
 
   std::size_t nb_possibilities = (nb_vertices * (nb_vertices - 1)) / 2;
+  if (nb_edges > nb_possibilities)
+      nb_edges = nb_possibilities;
   edges.reserve(nb_possibilities);
   
   for (Vertex_handle u = 0; u < nb_vertices; u++) {
@@ -48,11 +48,11 @@ std::vector<std::array<Vertex_handle, 2>> random_edges(Vertex_handle nb_vertices
   }
   
   std::shuffle(edges.begin(), edges.end(), Gudhi::random::get_default_random());
-  edges.resize(std::round(nb_possibilities * density));
+  edges.resize(nb_edges);
   return edges;
 }
 
-/* @brief Constructs the Simplex_tree with nb_vertices and @ref Gudhi::random::random_edges. Each edge is initialized
+/* @brief Constructs the Simplex_tree with nb_vertices and @ref Gudhi::generate_random_edges. Each edge is initialized
  * with a random filtration value in the interval [filt_min, filt_max].
  * 
  * @param[in] st The Simplex_tree to initialize.
@@ -70,7 +70,9 @@ void simplex_tree_random_graph(
     typename Simplex_tree::Filtration_value filt_max = 1.) {
   st.insert_batch_vertices(boost::irange(nb_vertices));
 
-  auto edges = random_edges(nb_vertices, density);
+  std::size_t nb_possibilities = (nb_vertices * (nb_vertices - 1)) / 2;
+  std::size_t nb_edges = std::round(nb_possibilities * density);
+  auto edges = generate_random_edges(nb_vertices, nb_edges);
 
   using Filtration_value = typename Simplex_tree::Filtration_value;
   std::vector<Filtration_value> random_filtrations;
@@ -87,8 +89,6 @@ void simplex_tree_random_graph(
   }
 
 }
-
-}  // namespace random
 
 }  // namespace Gudhi
 

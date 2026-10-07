@@ -23,27 +23,28 @@
 using Edge = std::array<int, 2>;
 using Edge_range = std::vector<Edge>;
 
-BOOST_AUTO_TEST_CASE( random_edges_limits ) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_edges_limits )\n";
-  Edge_range edges = Gudhi::random::random_edges(0);
-  std::cout << "Gudhi::random_edges(0).size() = " << edges.size() << "\n";
+BOOST_AUTO_TEST_CASE( generate_random_edges_limits ) {
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( generate_random_edges_limits )\n";
+  Edge_range edges = Gudhi::generate_random_edges(0, 21);
+  std::cout << "Gudhi::generate_random_edges(0, 21).size() = " << edges.size() << "\n";
   BOOST_CHECK(edges.size() == 0);
 
-  edges = Gudhi::random::random_edges(1);
-  std::cout << "Gudhi::random_edges(1).size() = " << edges.size() << "\n";
+  edges = Gudhi::generate_random_edges(1, 42);
+  std::cout << "Gudhi::generate_random_edges(1, 42).size() = " << edges.size() << "\n";
   BOOST_CHECK(edges.size() == 0);
 
-  edges = Gudhi::random::random_edges(2, 1.);
-  std::cout << "Gudhi::random_edges(2).size() = " << edges.size() << "\n";
+  edges = Gudhi::generate_random_edges(2, 63);
+  std::cout << "Gudhi::generate_random_edges(2, 63).size() = " << edges.size() << "\n";
   BOOST_CHECK(edges.size() == 1);
 
-  edges = Gudhi::random::random_edges(15, 0.);
-  std::cout << "Gudhi::random_edges(15, 0.).size() = " << edges.size() << "\n";
+  edges = Gudhi::generate_random_edges(15, 0);
+  std::cout << "Gudhi::generate_random_edges(15, 0).size() = " << edges.size() << "\n";
   BOOST_CHECK(edges.size() == 0);
 
-  edges = Gudhi::random::random_edges(15, 1.);
-  std::cout << "Gudhi::random_edges(15, 1.).size() = " << edges.size() << "\n";
-  // when density is 1., it returns all possible edges. nb_edges = (nb_vertices * (nb_vertices - 1)) / 2
+  edges = Gudhi::generate_random_edges(15, 15 * 14);
+  std::cout << "Gudhi::generate_random_edges(15, 15 * 14).size() = " << edges.size() << "\n";
+  // when nb_edges > (nb_vertices * (nb_vertices - 1)) / 2, it returns all possible edges
+  // aka. nb_edges = (nb_vertices * (nb_vertices - 1)) / 2
   BOOST_CHECK(edges.size() == (15 * 14) / 2);
   
   // Check edges vertex_handle
@@ -53,27 +54,23 @@ BOOST_AUTO_TEST_CASE( random_edges_limits ) {
   }
 }
 
-BOOST_AUTO_TEST_CASE( random_edges_density ) {
-  std::cout << "  ## BOOST_AUTO_TEST_CASE( random_edges_density )\n";
-  // default density is 0.15, it returns 15% of nb_edges_max = (nb_vertices * (nb_vertices - 1)) / 2
-  Edge_range edges = Gudhi::random::random_edges(15);
-  std::size_t nb_edges = std::round(0.15 * ((15 * 14) / 2));
-  std::cout << "Total number of edges for Gudhi::random_edges(15) [aka. 15% of 105] = " << nb_edges << "\n";
-  std::cout << "Gudhi::random_edges(15) returns " << edges.size() << " edges.\n";
-  BOOST_CHECK(nb_edges == edges.size());
-
-  // with density = 0.2, it returns 20% of nb_edges_max = (nb_vertices * (nb_vertices - 1)) / 2
-  edges = Gudhi::random::random_edges(15, 0.2);
-  nb_edges = std::round(0.2 * ((15 * 14) / 2));
-  std::cout << "Total number of edges for Gudhi::random_edges(15, 0.2) [aka. 20% of 105] = " << nb_edges << "\n";
-  std::cout << "Gudhi::random_edges(15, 0.2) returns " << edges.size() << " edges.\n";
+BOOST_AUTO_TEST_CASE( generate_random_edges_fixed ) {
+  std::cout << "  ## BOOST_AUTO_TEST_CASE( generate_random_edges_fixed )\n";
+  
+  int nb_vertices = 15;
+  std::size_t nb_edges_max = (nb_vertices * (nb_vertices - 1)) / 2;
+  for (std::size_t nb_edges = 0; nb_edges <= nb_edges_max; nb_edges++) {
+    Edge_range edges = Gudhi::generate_random_edges(nb_vertices, nb_edges);
+    std::cout << "Gudhi::generate_random_edges(" << nb_vertices << ", " << nb_edges << ") returns " << edges.size() << " edges.\n";
+    BOOST_CHECK(nb_edges == edges.size());
+  }
 }
 
 BOOST_AUTO_TEST_CASE( simplex_tree_random_graph_test ) {
   std::cout << "  ## BOOST_AUTO_TEST_CASE( simplex_tree_random_graph_test )\n";
   Gudhi::Simplex_tree<> stree;
   // Insert 100% of the possible edges, with 10 vertices
-  Gudhi::random::simplex_tree_random_graph(stree, 10, 1.);
+  Gudhi::simplex_tree_random_graph(stree, 10, 1.);
 
   std::cout << "Random graph with " << stree.num_vertices() << " vertices and " << stree.num_simplices() <<
                " simplices\n";
@@ -85,7 +82,7 @@ BOOST_AUTO_TEST_CASE( simplex_tree_random_graph_test_1000 ) {
   std::cout << "  ## BOOST_AUTO_TEST_CASE( simplex_tree_random_graph_test_1000 )\n";
   Gudhi::Simplex_tree<> stree;
   // Insert 15% of the possible edges, with 1000 vertices
-  Gudhi::random::simplex_tree_random_graph(stree, 1000);
+  Gudhi::simplex_tree_random_graph(stree, 1000);
 
   std::cout << "Random graph with " << stree.num_vertices() << " vertices and " << stree.num_simplices() <<
                " simplices\n";
@@ -103,7 +100,7 @@ BOOST_AUTO_TEST_CASE( simplex_tree_random_graph_test_1000 ) {
   // Empty the Simplex_tree
   stree.prune_above_dimension(-1);
   // Insert 20% of the possible edges, with 1000 vertices, and filtration values all equals to 0.
-  Gudhi::random::simplex_tree_random_graph(stree, 1000, 0.2, 0., 0.);
+  Gudhi::simplex_tree_random_graph(stree, 1000, 0.2, 0., 0.);
   expected_nb_edges = std::round(0.2 * ((1000*999)/2));
   std::cout << "(number of simplices - number of vertices) should be (0.2 * ((1000*999)/2) = "
             << expected_nb_edges << "\n";
