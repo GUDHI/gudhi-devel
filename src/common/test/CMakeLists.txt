@@ -5,6 +5,7 @@ add_executable ( Common_test_distance_matrix_reader test_distance_matrix_reader.
 add_executable ( Common_test_persistence_intervals_reader test_persistence_intervals_reader.cpp )
 add_executable ( Common_test_simple_mdspan test_simple_mdspan.cpp )
 add_executable ( Common_test_random test_random.cpp )
+add_executable_with_targets(Common_test_random_graph_generators test_random_graph_generators.cpp TBB::tbb)
 
 # Do not forget to copy test files in current binary dir
 file(COPY "${CMAKE_SOURCE_DIR}/data/points/alphacomplexdoc.off" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
@@ -19,3 +20,4 @@ gudhi_add_boost_test(Common_test_distance_matrix_reader)
 gudhi_add_boost_test(Common_test_persistence_intervals_reader)
 gudhi_add_boost_test(Common_test_simple_mdspan)
 gudhi_add_boost_test(Common_test_random)
+gudhi_add_boost_test(Common_test_random_graph_generators)
