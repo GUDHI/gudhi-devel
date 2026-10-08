@@ -147,6 +147,49 @@ Example
 .. autofunction:: gudhi.datasets.generators.points.torus
 
 
+Points on a 2-torus
+^^^^^^^^^^^^^^^^^^^
+
+.. table::
+   :widths: 50 50
+
+   +---------------------------------------------+------------------------------------------+
+   | :Requires: `CGAL <installation.html#cgal>`_ | :License: MIT (`LGPL v3 </licensing/>`_) |
+   +---------------------------------------------+------------------------------------------+
+
+The user should provide the number of points to be generated on the 2-torus :code:`n_samples`,
+the :code:`major_radius`, the :code:`minor_radius` of the 2-torus on which points would be generated, uniformly or not
+(cf. :code:`uniform`), in :math:`R^3`.
+
+
+Example
+"""""""
+.. plot::
+   :include-source:
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from gudhi.datasets.generators import points
+    
+    points1 = points.c_2_torus(n_samples=200, major_radius=4., minor_radius=1., uniform=False)
+    points2 = points.c_2_torus(n_samples=200, major_radius=4., minor_radius=1., uniform=True)
+    
+    fig = plt.figure(figsize=(12, 5))
+    
+    ax1 = fig.add_subplot(121, projection='3d')
+    ax1.scatter(points1[:, 0], points1[:, 1], points1[:, 2])
+    ax1.set_title('uniform=False')
+    ax1.set_zlim(-4., 4.)
+    
+    ax2 = fig.add_subplot(122, projection='3d')
+    ax2.scatter(points2[:, 0], points2[:, 1], points2[:, 2])
+    ax2.set_title('uniform=True')
+    ax2.set_zlim(-4., 4.)
+    
+    plt.show()
+
+.. autofunction:: gudhi.datasets.generators.points.c_2_torus
+
 Fetching datasets
 =================
 
