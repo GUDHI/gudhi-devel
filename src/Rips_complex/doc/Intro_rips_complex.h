@@ -45,6 +45,13 @@ namespace rips_complex {
  * point set sparser, for instance with
  * `Gudhi::subsampling::sparsify_point_set()`, since small clusters of points
  * have a disproportionate cost without affecting the persistence diagram much.
+ * Another option which is especially useful if you want to compute persistent homology in “high” dimension (2 or more,
+ * sometimes even 1), is to compute it from a @ref Gudhi::Simplex_tree built with @ref Gudhi::compute_proximity_graph
+ * (that returns a graph aka. a Rips complex of dimension 1) and
+ * @ref Gudhi::collapse::flag_complex_collapse_edges(const FilteredEdgeRange&).
+ * This trick gives the same persistence diagram as one would get with a plain use of RipsComplex, with a complex that
+ * is often significantly smaller and thus faster to process.
+ * A more general technique is to use a @ref sparserips "sparse approximation of the Rips".
  *
  * In order to build this complex, the algorithm first builds the graph.
  * The filtration value of each edge is computed from a user-given distance
