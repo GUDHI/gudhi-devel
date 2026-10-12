@@ -214,6 +214,7 @@ class Bitmap_cubical_complex : public T {
    **/
   typedef typename std::vector<Simplex_handle>::iterator Boundary_simplex_iterator;
   typedef typename std::vector<Simplex_handle> Boundary_simplex_range;
+  typedef typename std::vector<Simplex_handle> Complex_simplex_range;
 
   /**
    * Range of all the cells in filtration order.
@@ -231,6 +232,12 @@ class Bitmap_cubical_complex : public T {
    * that provides ranges for the Boundary_simplex_iterator.
    **/
   Boundary_simplex_range boundary_simplex_range(Simplex_handle sh) { return this->get_boundary_of_a_cell(sh); }
+
+  Complex_simplex_range complex_simplex_range() {
+    Complex_simplex_range res(T::data.size());
+    std::iota(res.begin(), res.end(), 0);
+    return res;
+  }
 
   /**
    * Range of all the cells in filtration order.

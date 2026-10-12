@@ -39,17 +39,18 @@ namespace persistence_matrix {
 template <typename Dimension, typename Event_value>
 struct Persistence_interval {
   /**
-   * @brief Stores the infinity value for birth and death events. Its value depends on the template parameter
-   * `Event_value`:
-   * - if `Event_value` has a native infinity value, it takes this value,
-   * - otherwise, if `Event_value` is a signed type, it takes value -1,
-   * - otherwise, if `Event_value` is a unsigned type, it takes the maximal possible value.
-   *
+   * @brief Stores the infinity value for birth and death events.
    * Is also used as default value for birth and death attributes when not initialized.
    */
   static constexpr Event_value inf = std::numeric_limits<Event_value>::has_infinity
                                          ? std::numeric_limits<Event_value>::infinity()
-                                         : static_cast<Event_value>(-1);
+                                         : std::numeric_limits<Event_value>::max();
+  /**
+   * @brief Stores the minus infinity value for birth and death events.
+   */
+  static constexpr Event_value m_inf = std::numeric_limits<Event_value>::has_infinity
+                                           ? -std::numeric_limits<Event_value>::infinity()
+                                           : std::numeric_limits<Event_value>::lowest();
 
   /**
    * @brief Constructor.
@@ -80,15 +81,35 @@ struct Persistence_interval {
     } else {
       if (interval.birth == inf)
         stream << "inf";
+      else if (interval.birth == m_inf)
+        stream << "-inf";
       else
         stream << interval.birth;
       stream << " - ";
       if (interval.death == inf)
         stream << "inf";
+      else if (interval.death == m_inf)
+        stream << "-inf";
       else
         stream << interval.death;
     }
     return stream;
+  }
+
+  /**
+   * @brief Basic equality operator
+   */
+  friend bool operator==(const Persistence_interval& i1, const Persistence_interval& i2)
+  {
+    return i1.dim == i2.dim && i1.birth == i2.birth && i1.death == i2.death;
+  }
+
+  /**
+   * @brief Basic unequality operator
+   */
+  friend bool operator!=(const Persistence_interval& i1, const Persistence_interval& i2)
+  {
+    return !(i1 == i2);
   }
 
   /**
