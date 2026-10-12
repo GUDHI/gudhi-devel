@@ -735,7 +735,7 @@ class Multi_parameter_filtration_value {
   // subtraction
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -761,7 +761,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) - f(g,p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ r(p) - f(g,p) \f$
    * if \f$ p < length_r \f$ and to \f$ -f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -835,7 +835,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -884,7 +884,7 @@ class Multi_parameter_filtration_value {
   // addition
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -910,7 +910,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) + f(g,p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ r(p) + f(g,p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -978,7 +978,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -1026,7 +1026,7 @@ class Multi_parameter_filtration_value {
   // multiplication
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -1054,7 +1054,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) * f(g,p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ r(p) * f(g,p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -1128,7 +1128,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -1181,7 +1181,7 @@ class Multi_parameter_filtration_value {
   // division
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -1212,7 +1212,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) / f(g,p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ r(p) / f(g,p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -1303,7 +1303,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *

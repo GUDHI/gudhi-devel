@@ -238,7 +238,7 @@ inline auto compute_euclidean_distance_to(const MultiFiltrationValue &f1, const 
  *
  * @brief Computes the norm of the given filtration value.
  *
- * The filtration value is seen as a \f$ num_generators x num_parameters \f$ matrix and a standard Frobenius norm
+ * The filtration value is seen as a \f$ num\_generators \times num\_parameters \f$ matrix and a standard Frobenius norm
  * is computed from it: the square root of the sum of the squares of all elements in the matrix.
  *
  * @tparam U Arithmetic type of the result.
@@ -272,7 +272,7 @@ inline U compute_norm(const MultiFiltrationValue &f) {
  *
  * @brief Computes the norm of the given filtration value.
  *
- * The filtration value is seen as a \f$ num_generators x num_parameters \f$ matrix and a standard Frobenius norm
+ * The filtration value is seen as a \f$ num\_generators \times num\_parameters \f$ matrix and a standard Frobenius norm
  * is computed from it: the square root of the sum of the squares of all elements in the matrix.
  *
  * @tparam MultiFiltrationValue Multi filtration value type with methods num_parameters(), num_generators() and

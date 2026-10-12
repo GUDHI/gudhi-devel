@@ -434,6 +434,34 @@
  </tr>
 </table>
 
+### Multi-parameter Persistence
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "radius_density_complex_without_interval.png"
+    </td>
+    <td width="50%">
+    Multi-parameter persistence studies topological features across filtrations indexed by several parameters
+    simultaneously, rather than a single scalar. The Multi-parameter Filtration Values module provides data structures
+    to represent and compare filtration values under the coordinatewise partial order, including efficient
+    representations for structured bifiltrations. The Multi-parameter Persistence module builds on this foundation
+    to support computations in multi-parameter persistent homology, allowing topological information to be studied as
+    several parameters vary independently.
+    </td>
+    <td width="15%">
+      <b>Author:</b> David Loiseaux, Hannah Schreiber<br>
+      <b>Introduced in:</b> GUDHI 3.xx.0<br>
+      <b>License:</b> MIT<br>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2 height="25">
+      <b>User manual:</b> \ref multi_filtration and multi_persistence (to come)
+    </td>
+  </tr>
+</table>
+
 ## Topological descriptors tools {#TopologicalDescriptorsTools}
 
 ### Bottleneck distance

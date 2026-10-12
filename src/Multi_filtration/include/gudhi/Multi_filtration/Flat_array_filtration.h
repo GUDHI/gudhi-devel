@@ -45,7 +45,7 @@ namespace Gudhi::multi_filtration {
  *
  * @details For more documentation of the public interface, see @ref StoragePolicy.
  *
- * `std::numeric_limits<Multi_parameter_filtration_value<Flat_array_filtration>, Co>` will behave such that:
+ * `std::numeric_limits<Multi_parameter_filtration_value<Flat_array_filtration>>` will behave such that:
  * - `::has_infinity` returns `true` if `T` is floating point type,
  * - `::has_quiet_NaN` returns `std::numeric_limits<T>::has_quiet_NaN`,
  * - `::max(int)` and `::lowest(int)` always compile.

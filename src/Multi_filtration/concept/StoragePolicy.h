@@ -50,7 +50,7 @@ class StoragePolicy {
   using reference = unspecified;
   /**
    * @brief Const reference type for an element in the filtration value. Does not really have to be a reference
-   * despite the name (e.g., can just be `value_type` and @ref operator() returns a copy).
+   * despite the name (e.g., can just be `value_type` and @ref operator()(size_type, size_type) returns a copy).
    */
   using const_reference = unspecified;
   /**
