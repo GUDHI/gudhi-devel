@@ -13,7 +13,7 @@ __license__ = "MIT"
 import numpy as np
 from typing import Literal
 
-from ._points_ext import ctorus, sphere
+from ._points_ext import ctorus, sphere, c_2_torus
 
 
 def _generate_random_points_on_torus(n_samples: int, dim: int):
