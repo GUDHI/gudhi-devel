@@ -439,7 +439,7 @@
 <table>
   <tr>
     <td width="35%" rowspan=2>
-      \image html "radius_density_complex_without_interval.png"
+      \image html "multidiagrams.png"
     </td>
     <td width="50%">
     Multi-parameter persistence studies topological features across filtrations indexed by several parameters
@@ -457,7 +457,7 @@
   </tr>
   <tr>
     <td colspan=2 height="25">
-      <b>User manual:</b> \ref multi_filtration and multi_persistence (to come)
+      <b>User manual:</b> \ref multi_filtration and \ref multi_persistence
     </td>
   </tr>
 </table>

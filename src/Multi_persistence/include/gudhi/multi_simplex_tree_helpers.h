@@ -159,7 +159,7 @@ Simplex_tree<OneDimSimplexTreeOptions> make_one_dimensional(const MultiDimSimple
  * `num_generators()` which returns the number of generators and `operator(g, p)` which returns the value of the
  * \f$ p^{th} \f$ element of the \f$ g^{th} \f$ generator. It should also define a type `value_type` with the type of
  * an element in the filtration value, which has to be convertible to `Filtration_value` of `OneDimSimplexTreeOptions`.
- * @tparam U Template argument of the @ref Line class.
+ * @tparam U Template argument of the @ref Gudhi::multi_persistence::Line class.
  * @param st Simplex tree to project.
  * @param line Line with positive slope into which to project the multi parameter filtration onto to obtain
  * a 1-parameter filtration.
@@ -223,11 +223,12 @@ void _insert_simplices(const std::vector<std::vector<Index>> &simplices, int num
 /**
  * @brief Constructs a multi-parameter filtered simplex tree from the given complex.
  * 
- * @tparam SimplexTreeOptions Options of the @ref Simplex_tree to construct.
- * @tparam MultiFiltrationValue First template argument of @ref Multi_parameter_filtered_complex. Must be
- * convertible into @ref Simplex_tree::FiltrationValue of the resulting simplex tree with a `as_type` method.
- * @tparam I Second template argument of @ref Multi_parameter_filtered_complex.
- * @tparam D Third template argument of @ref Multi_parameter_filtered_complex.
+ * @tparam SimplexTreeOptions Options of the @ref Gudhi::Simplex_tree to construct.
+ * @tparam MultiFiltrationValue First template argument of
+ * @ref Gudhi::multi_persistence::Multi_parameter_filtered_complex. Must be convertible into
+ * @ref Gudhi::Simplex_tree::Filtration_value of the resulting simplex tree with a `as_type` method.
+ * @tparam I Second template argument of @ref Gudhi::multi_persistence::Multi_parameter_filtered_complex.
+ * @tparam D Third template argument of @ref Gudhi::multi_persistence::Multi_parameter_filtered_complex.
  * @param cpx Complex to translate.
  * @param maxDim Maximal dimension to include in the translation. If negative, all dimensions are kept. Default: -1.
  * @param numParam New number of parameters if it should change. If negative, it remains the same. If the new value
