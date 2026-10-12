@@ -141,5 +141,7 @@
  * @example example_remove_insert_swap_with_cycles.cpp
  * \section Persistence_fields_example_section Persistence_field
  * @example example_field_operations.cpp
+ * \section Multi_filtration_example_section multi_filtration
+ * @example example_multi_simplex_tree.cpp
  */
  
