@@ -14,8 +14,8 @@
  * @author Hannah Schreiber
  */
 
-#ifndef MF_UTILS_H_
-#define MF_UTILS_H_
+#ifndef GUDHI_MF_UTILS_H_
+#define GUDHI_MF_UTILS_H_
 
 #include <istream>
 #include <stdexcept>
@@ -238,4 +238,4 @@ inline T _get_value(std::istream &stream) {
 
 }  // namespace Gudhi
 
-#endif  // MF_UTILS_H_
+#endif  // GUDHI_MF_UTILS_H_

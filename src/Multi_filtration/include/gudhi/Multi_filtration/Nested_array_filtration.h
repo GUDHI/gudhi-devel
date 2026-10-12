@@ -14,8 +14,8 @@
  * @brief Contains the @ref Gudhi::multi_filtration::Nested_array_filtration class.
  */
 
-#ifndef MF_NESTED_ARRAY_FILTRATION_H_
-#define MF_NESTED_ARRAY_FILTRATION_H_
+#ifndef GUDHI_MF_NESTED_ARRAY_FILTRATION_H_
+#define GUDHI_MF_NESTED_ARRAY_FILTRATION_H_
 
 #include <cstddef>      //std::size_t
 #include <limits>       //std::numerical_limits
@@ -40,13 +40,9 @@ namespace Gudhi::multi_filtration {
  * @details For more documentation of the public interface, see @ref StoragePolicy.
  *
  * `std::numeric_limits<Multi_parameter_filtration_value<Nested_array_filtration>>` will behave such that:
- * - `::has_infinity` returns `true`,
+ * - `::has_infinity` returns `true` if `T` is floating point type,
  * - `::has_quiet_NaN` returns `true`,
- * - `::infinity(int)` returns `Nested_array_filtration::inf(size_type)`,
- * - `::minus_infinity(int)` returns `Nested_array_filtration::minus_inf(size_type)`,
- * - `::max(int)` returns a @ref Nested_array_filtration with one generator with all parameters at
- * std::numeric_limits<T>::max()`,
- * - `::quiet_NaN(int)` returns `Nested_array_filtration::nan(size_type)`.
+ * - `::max(int)` and `::lowest(int)` always compile.
  *
  * @tparam T Arithmetic type of an entry for one parameter of a filtration value. Has to be **signed** and
  * to implement `std::isnan(T)`, `std::numeric_limits<T>::has_quiet_NaN`, `std::numeric_limits<T>::quiet_NaN()`,
@@ -370,4 +366,4 @@ class Nested_array_filtration {
 
 }  // namespace Gudhi::multi_filtration
 
-#endif  // MF_NESTED_ARRAY_FILTRATION_H_
+#endif  // GUDHI_MF_NESTED_ARRAY_FILTRATION_H_

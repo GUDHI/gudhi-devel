@@ -1746,22 +1746,23 @@ template <class F, typename T, bool Co>
 void test_numerical_limits() {
   const int num_param = 2;
 
-  if constexpr (Co)
-    BOOST_CHECK(!std::numeric_limits<F>::has_infinity);
-  else
-    BOOST_CHECK(std::numeric_limits<F>::has_infinity);
-  BOOST_CHECK(std::numeric_limits<F>::has_quiet_NaN);
-
-  BOOST_CHECK(std::numeric_limits<F>::quiet_NaN(num_param).is_nan());
-  BOOST_CHECK(std::numeric_limits<F>::minus_infinity(num_param).is_minus_inf());
   if constexpr (Co) {
-    BOOST_CHECK_THROW(std::numeric_limits<F>::max(num_param), std::logic_error);
+    BOOST_CHECK(!std::numeric_limits<F>::has_infinity);
   } else {
     BOOST_CHECK(std::numeric_limits<F>::infinity(num_param).is_plus_inf());
-    auto max = std::numeric_limits<F>::max(num_param);
-    BOOST_CHECK_EQUAL(max(0, 1), 0);
-    BOOST_CHECK_EQUAL(max(0, 0), std::numeric_limits<T>::max());
+    BOOST_CHECK(std::numeric_limits<F>::max(num_param).is_plus_inf());
+    BOOST_CHECK(std::numeric_limits<F>::lowest(num_param).is_minus_inf());
+
+    if constexpr (std::numeric_limits<T>::has_infinity) {
+      BOOST_CHECK(std::numeric_limits<F>::has_infinity);
+      BOOST_CHECK((-std::numeric_limits<F>::infinity(num_param)).is_minus_inf());
+    } else {
+      BOOST_CHECK(!std::numeric_limits<F>::has_infinity);
+    }
   }
+
+  BOOST_CHECK(std::numeric_limits<F>::has_quiet_NaN);
+  BOOST_CHECK(std::numeric_limits<F>::quiet_NaN(num_param).is_nan());
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(degree_rips_bifiltration_numerical_limits, T, list_of_tested_variants) {

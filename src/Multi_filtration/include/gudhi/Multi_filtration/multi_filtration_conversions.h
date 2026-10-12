@@ -13,8 +13,8 @@
  * @author Hannah Schreiber
  */
 
-#ifndef MF_CONVERSIONS_H_
-#define MF_CONVERSIONS_H_
+#ifndef GUDHI_MF_CONVERSIONS_H_
+#define GUDHI_MF_CONVERSIONS_H_
 
 #include <algorithm>
 #include <cstddef>
@@ -309,4 +309,4 @@ inline bool are_equal_filtration_values(const MultiFiltrationValue1& f1, const M
 
 }  // namespace Gudhi
 
-#endif  // MF_CONVERSIONS_H_
+#endif  // GUDHI_MF_CONVERSIONS_H_

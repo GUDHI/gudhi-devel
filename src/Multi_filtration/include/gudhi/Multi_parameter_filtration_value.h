@@ -14,8 +14,8 @@
  * @brief Contains the @ref Gudhi::multi_filtration::Multi_parameter_filtration_value class.
  */
 
-#ifndef MF_MULTI_PARAMETER_FILTRATION_VALUE_H_
-#define MF_MULTI_PARAMETER_FILTRATION_VALUE_H_
+#ifndef GUDHI_MF_MULTI_PARAMETER_FILTRATION_VALUE_H_
+#define GUDHI_MF_MULTI_PARAMETER_FILTRATION_VALUE_H_
 
 #include <algorithm>    //std::lower_bound
 #include <cmath>        //std::isnan, std::min, std::abs
@@ -320,8 +320,8 @@ class Multi_parameter_filtration_value {
   }
 
   /**
-   * @brief If `U` is a native arithmetic type, returns a copy by casting every filtration value element in that type.
-   * Otherwise, `U` has to be @ref Multi_parameter_filtration_value with the desired template arguments, and
+   * @brief If `U` is a **signed** native arithmetic type, returns a copy by casting every filtration value element in
+   * that type. Otherwise, `U` has to be @ref Multi_parameter_filtration_value with the desired template arguments, and
    * the method returns a copy into that new format.
    */
   template <typename U,
@@ -735,7 +735,7 @@ class Multi_parameter_filtration_value {
   // subtraction
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -761,7 +761,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) - f(g,p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ r(p) - f(g,p) \f$
    * if \f$ p < length_r \f$ and to \f$ -f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -835,7 +835,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -884,7 +884,7 @@ class Multi_parameter_filtration_value {
   // addition
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -910,7 +910,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) + f(g,p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ r(p) + f(g,p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -978,7 +978,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -1026,7 +1026,7 @@ class Multi_parameter_filtration_value {
   // multiplication
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -1054,7 +1054,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) * f(g,p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ r(p) * f(g,p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -1128,7 +1128,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -1181,7 +1181,7 @@ class Multi_parameter_filtration_value {
   // division
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -1212,7 +1212,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ r(p) / f(g,p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ r(p) / f(g,p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -1303,7 +1303,7 @@ class Multi_parameter_filtration_value {
 
   /**
    * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$, with
-   * \f$ 0 \leq g \leq num_generators \f$ and \f$ 0 \leq p \leq num_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
+   * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
    *
@@ -2719,29 +2719,28 @@ class numeric_limits<Gudhi::multi_filtration::Multi_parameter_filtration_value<S
   using Filtration_value =
       Gudhi::multi_filtration::Multi_parameter_filtration_value<StoragePolicy, Co, Ensure1Criticality>;
 
-  static constexpr bool has_infinity = StoragePolicy::template has_infinity<Co>;
+  // Those are only used for compatibility with the Simplex_tree, so the usage is perhaps not really generic.
+  // The idea is that if has_infinity is true, -infinity == Filtration_value::minus_inf and that is does not matter
+  // for the tree what value `p` has, so the default value is good enough, as std::numeric_limits has to also work
+  // for generic types in the Simplex_tree (i.e., with no argument).
+  // TODO: For filtration values where StoragePolicy::template has(_minus)_infinity<Co> is false, the Simplex_tree will
+  // not compile. We could find a more clever way to represent infinity in a meaningful way for those cases. But not
+  // useful for now, so I will leave that to someone else when the need arises.
+
+  static constexpr bool has_infinity = std::numeric_limits<T>::has_infinity && StoragePolicy::template has_infinity<Co>;
   static constexpr bool has_quiet_NaN = StoragePolicy::has_quiet_NaN;
 
   static constexpr Filtration_value infinity(std::size_t p = 1) { return Filtration_value::inf(p); };
 
-  // non-standard
-  static constexpr Filtration_value minus_infinity(std::size_t p = 1) { return Filtration_value::minus_inf(p); };
-
-  static constexpr Filtration_value max() noexcept(false) {
-    throw std::logic_error(
-        "The max value cannot be represented with no finite numbers of parameters."
-        "Use `max(numberOfParameters)` instead");
+  static constexpr Filtration_value max(std::size_t p = 1) {
+    static_assert(StoragePolicy::template has_infinity<Co>, "No maximal value possible.");
+    return Filtration_value::inf(p);
   };
 
-  static constexpr Filtration_value max(std::size_t p) {
-    if constexpr (has_infinity) {
-      return Filtration_value(p, std::numeric_limits<T>::max());
-    } else {
-      throw std::logic_error("No biggest value possible for Co-filtrations yet.");
-    }
+  static constexpr Filtration_value lowest(std::size_t p = 1) {
+    static_assert(StoragePolicy::template has_minus_infinity<Co>, "No lowest value possible.");
+    return Filtration_value::minus_inf(p);
   };
-
-  static constexpr Filtration_value lowest(std::size_t p = 1) { return Filtration_value::minus_inf(p); };
 
   static constexpr Filtration_value quiet_NaN(std::size_t p = 1) {
     if constexpr (has_quiet_NaN) {
@@ -2754,4 +2753,4 @@ class numeric_limits<Gudhi::multi_filtration::Multi_parameter_filtration_value<S
 
 }  // namespace std
 
-#endif  // MF_MULTI_PARAMETER_FILTRATION_VALUE_H_
+#endif  // GUDHI_MF_MULTI_PARAMETER_FILTRATION_VALUE_H_
