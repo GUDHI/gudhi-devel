@@ -328,8 +328,8 @@
       \image html "tc_examples.png"
     </td>
     <td width="50%">
-    A Tangential Delaunay complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
-    designed to reconstruct a \f$ k \f$-dimensional manifold embedded in \f$ d \f$-dimensional Euclidean space. 
+    A Tangential Delaunay complex is a simplicial complex designed to reconstruct a \f$ k \f$-dimensional manifold
+    embedded in \f$ d \f$-dimensional Euclidean space. 
     The input is a point sample coming from an unknown manifold.
     The running time depends only linearly on the extrinsic dimension \f$ d \f$
     and exponentially on the intrinsic dimension \f$ k \f$.
@@ -426,12 +426,40 @@
       <b>Introduced in:</b> GUDHI 3.11.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref zigzag_persistence
+  </tr>
+  <tr>
+      <td colspan=2 height="25">
+      <b>User manual:</b> \ref zigzag_persistence
+      </td>
+  </tr>
+</table>
+
+### Multi-parameter Persistence
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "multidiagrams.png"
     </td>
- </tr>
+    <td width="50%">
+    Multi-parameter persistence studies topological features across filtrations indexed by several parameters
+    simultaneously, rather than a single scalar. The Multi-parameter Filtration Values module provides data structures
+    to represent and compare filtration values under the coordinatewise partial order, including efficient
+    representations for structured bifiltrations. The Multi-parameter Persistence module builds on this foundation
+    to support computations in multi-parameter persistent homology, allowing topological information to be studied as
+    several parameters vary independently.
+    </td>
+    <td width="15%">
+      <b>Author:</b> David Loiseaux, Hannah Schreiber<br>
+      <b>Introduced in:</b> GUDHI 3.xx.0<br>
+      <b>License:</b> MIT<br>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2 height="25">
+      <b>User manual:</b> \ref multi_filtration and \ref multi_persistence
+    </td>
+  </tr>
 </table>
 
 ### Vineyard
@@ -454,12 +482,12 @@
       <b>Introduced in:</b> GUDHI 3.1x.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref vineyard
-    </td>
- </tr>
+  </tr>
+  <tr>
+      <td colspan=2 height="25">
+      <b>User manual:</b> \ref vineyard
+      </td>
+  </tr>
 </table>
 
 ## Topological descriptors tools {#TopologicalDescriptorsTools}

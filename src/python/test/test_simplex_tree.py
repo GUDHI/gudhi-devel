@@ -687,7 +687,7 @@ def test_expansion_with_blocker():
             st.assign_filtration(simplex, st.filtration(simplex) + 1.0)
             return False
 
-    st.expansion_with_blocker(2, blocker)
+    st.expansion_with_blockers(2, blocker)
     assert st.num_simplices() == 22
     assert st.dimension() == 2
     assert st.find([4, 5, 6]) == False
@@ -696,7 +696,7 @@ def test_expansion_with_blocker():
     assert st.filtration([0, 2, 3]) == 6.0
     assert st.filtration([1, 2, 3]) == 6.0
 
-    st.expansion_with_blocker(3, blocker)
+    st.expansion_with_blockers(3, blocker)
     assert st.num_simplices() == 23
     assert st.dimension() == 3
     assert st.find([4, 5, 6]) == False

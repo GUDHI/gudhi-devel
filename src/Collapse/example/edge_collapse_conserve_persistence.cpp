@@ -36,16 +36,17 @@ using Persistent_cohomology = Gudhi::persistent_cohomology::Persistent_cohomolog
 
 using Persistence_interval = std::tuple<int, Filtration_value, Filtration_value>;
 /*
- * Compare two intervals by dimension, then by length.
+ * Compare two intervals lexicographically.
+ * (if you want to sort by length, remember to handle infinite intervals)
  */
-struct cmp_intervals_by_length {
-  explicit cmp_intervals_by_length(Simplex_tree * sc)
+struct cmp_intervals {
+  explicit cmp_intervals(Simplex_tree * sc)
       : sc_(sc) { }
 
   template<typename Persistent_interval>
   bool operator()(const Persistent_interval & p1, const Persistent_interval & p2) {
-    return (sc_->filtration(get < 1 > (p1)) - sc_->filtration(get < 0 > (p1))
-            > sc_->filtration(get < 1 > (p2)) - sc_->filtration(get < 0 > (p2)));
+    return std::pair(sc_->filtration(get<0>(p1)), sc_->filtration(get<1>(p1)))
+         < std::pair(sc_->filtration(get<0>(p2)), sc_->filtration(get<1>(p2)));
   }
   Simplex_tree* sc_;
 };
@@ -65,7 +66,7 @@ std::vector<Persistence_interval> get_persistence_intervals(Simplex_tree& st, in
   // Default min_interval_length = 0.
   pcoh.compute_persistent_cohomology();
   // Custom sort and output persistence
-  cmp_intervals_by_length cmp(&st);
+  cmp_intervals cmp(&st);
   auto persistent_pairs = pcoh.get_persistent_pairs();
   std::sort(std::begin(persistent_pairs), std::end(persistent_pairs), cmp);
   for (auto pair : persistent_pairs) {

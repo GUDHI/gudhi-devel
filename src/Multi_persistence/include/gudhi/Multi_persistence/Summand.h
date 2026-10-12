@@ -19,6 +19,7 @@
 #define MP_SUMMAND_H_INCLUDED
 
 #include <cstddef>    //std::size_t
+#include <iterator>
 #include <ostream>    //std::ostream
 #include <stdexcept>  //std::invalid_argument, std::runtime_error
 #include <limits>     //std::numeric_limits
@@ -30,7 +31,9 @@
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/simple_mdspan.h>
-#include <gudhi/Dynamic_multi_parameter_filtration.h>
+#include <gudhi/serialization_utils.h>
+#include <gudhi/Multi_filtration/Nested_array_filtration.h>
+#include <gudhi/Multi_parameter_filtration_value.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
 #include <gudhi/Multi_filtration/multi_filtration_conversions.h>
 #include <gudhi/Multi_persistence/Box.h>
@@ -51,17 +54,20 @@ namespace multi_persistence {
  */
 template <typename T, typename D = int>
 class Summand {
+ private:
+  using Storage_policy = Gudhi::multi_filtration::Nested_array_filtration<T>;
+
  public:
   using value_type = T;                         /**< Filtration value parameter type. */
   using Dimension = D;                          /**< Dimension type. */
   /**
    * @brief Birth corners range type.
    */
-  using Births = Gudhi::multi_filtration::Dynamic_multi_parameter_filtration<value_type, false, false>;
+  using Births = Gudhi::multi_filtration::Multi_parameter_filtration_value<Storage_policy, false, false>;
   /**
    * @brief Death corners range type.
    */
-  using Deaths = Gudhi::multi_filtration::Dynamic_multi_parameter_filtration<value_type, true, false>;
+  using Deaths = Gudhi::multi_filtration::Multi_parameter_filtration_value<Storage_policy, true, false>;
   using Index = typename Births::size_type;     /**< Range index type. */
 
   static constexpr T T_inf = Births::T_inf;     /**< Parameter infinite value. */
@@ -152,15 +158,14 @@ class Summand {
   /**
    * @brief Returns `true` if and only if the given filtration value is contained in summand.
    *
-   * @tparam MultiFiltrationValue Either @ref Gudhi::multi_filtration::Multi_parameter_filtration,
-   * @ref Gudhi::multi_filtration::Dynamic_multi_parameter_filtration or
-   * @ref Gudhi::multi_filtration::Degree_rips_bifiltration.
+   * @tparam MultiFiltrationValue Class with a `as_type` method able to copy itself as types @ref Births
+   * and @ref Deaths.
    * @param x Multi-parameter filtration value.
    */
   template <class MultiFiltrationValue>
   bool contains(const MultiFiltrationValue &x) const {
-    auto xPos = Gudhi::multi_filtration::as_type<Births>(x);
-    auto xNeg = Gudhi::multi_filtration::as_type<Deaths>(x);
+    auto xPos = x.template as_type<Births>();
+    auto xNeg = x.template as_type<Deaths>();
     return birthCorners_ <= xPos && deathCorners_ <= xNeg;
   }
 
@@ -182,11 +187,14 @@ class Summand {
     for (Index g = 0; g < deathCorners_.num_generators(); ++g) {
       for (Index p = 0; p < numParam; ++p) {
         auto corner_i = deathCorners_(g, p);
-        if (corner_i != T_inf) M[p] = std::max(M[p], corner_i);
+        if (corner_i == T_inf)
+          M[p] = T_inf;
+        else if (M[p] != T_inf)
+          M[p] = std::max(M[p], corner_i);
       }
     }
 
-    return Box<value_type>(m, M);
+    return Box<value_type>(std::move(m), std::move(M));
   }
 
   /**
@@ -206,9 +214,10 @@ class Summand {
 
     for (Index i = 0; i < birthCorners_.num_generators(); i++) {
       for (Index j = i + 1; j < birthCorners_.num_generators(); j++) {
-        if (_d_inf(birthCorners_[i], birthCorners_[j]) < error * precision) {  // for machine error ?
-          _factorize_min(birthCorners_[i], birthCorners_[j]);
-          birthCorners_[j] = Births::Generator::inf();
+        // error * precision for machine error ?
+        if (_d_inf(birthCorners_.begin(i), birthCorners_.end(i), birthCorners_.begin(j), birthCorners_.end(j)) <
+            error * precision) {
+          _factorize_min(birthCorners_.begin(i), birthCorners_.end(i), birthCorners_.begin(j), birthCorners_.end(j));
           i++;
         }
       }
@@ -233,9 +242,10 @@ class Summand {
 
     for (Index i = 0; i < deathCorners_.num_generators(); i++) {
       for (Index j = i + 1; j < deathCorners_.num_generators(); j++) {
-        if (_d_inf(deathCorners_[i], deathCorners_[j]) < error * precision) {  // for machine error ?
-          _factorize_max(deathCorners_[i], deathCorners_[j]);
-          deathCorners_[j] = Deaths::Generator::minus_inf();
+        // error * precision for machine error ?
+        if (_d_inf(deathCorners_.begin(i), deathCorners_.end(i), deathCorners_.begin(j), deathCorners_.end(j)) <
+            error * precision) {
+          _factorize_max(deathCorners_.begin(i), deathCorners_.end(i), deathCorners_.begin(j), deathCorners_.end(j));
           i++;
         }
       }
@@ -257,12 +267,12 @@ class Summand {
     double pushedBirth = std::numeric_limits<double>::infinity();
     double pushedDeath = -std::numeric_limits<double>::infinity();
 
-    for (const auto &birth : birthCorners_) {
-      double pb = l.template compute_forward_intersection<double>(birth.begin(), birth.end());
+    for (std::size_t g = 0; g < birthCorners_.num_generators(); ++g) {
+      double pb = l.template compute_forward_intersection<double>(birthCorners_.begin(g), birthCorners_.end(g));
       pushedBirth = std::min(pb, pushedBirth);
     }
-    for (const auto &death : deathCorners_) {
-      double pd = l.template compute_backward_intersection<double>(death.begin(), death.end());
+    for (std::size_t g = 0; g < deathCorners_.num_generators(); ++g) {
+      double pd = l.template compute_backward_intersection<double>(deathCorners_.begin(g), deathCorners_.end(g));
       pushedDeath = std::max(pd, pushedDeath);
     }
 
@@ -280,11 +290,9 @@ class Summand {
    * not appear in the corner range.
    *
    * @tparam BirthGeneratorRange Range of elements convertible to `T`. Must have a begin(), end() method and the
-   * iterator type should satisfy the requirements of the standard `LegacyForwardIterator`. Note that
-   * @ref Births "Births::Generator" does fullfill those requirements.
+   * iterator type should satisfy the requirements of the standard `LegacyForwardIterator`.
    * @tparam DeathGeneratorRange  Range of elements convertible to `T`. Must have a begin(), end() method and the
-   * iterator type should satisfy the requirements of the standard `LegacyForwardIterator`. Note that
-   * @ref Deaths "Deaths::Generator" does fullfill those requirements.
+   * iterator type should satisfy the requirements of the standard `LegacyForwardIterator`.
    * @param birth Birth corner.
    * @param death Death corner.
    */
@@ -314,28 +322,18 @@ class Summand {
     const double error = 1e-10;
 
     auto birthContainer = line[b];
-    bool allInf = true;
     for (std::size_t i = 0; i < birthContainer.size(); i++) {
       value_type t = box.get_lower_corner()[i];
       if (birthContainer[i] < static_cast<double>(t) - error) birthContainer[i] = thresholdToBox ? t : T_m_inf;
-      if (birthContainer[i] != T_m_inf) allInf = false;
     }
-    if (allInf) birthContainer.resize(1);
 
     auto deathContainer = line[d];
-    allInf = true;
     for (std::size_t i = 0; i < deathContainer.size(); i++) {
       value_type t = box.get_upper_corner()[i];
       if (deathContainer[i] > static_cast<double>(t) + error) deathContainer[i] = thresholdToBox ? t : T_inf;
-      if (deathContainer[i] != T_inf) allInf = false;
     }
-    if (allInf) deathContainer.resize(1);
 
-    // could be automaticaly converted, but this should avoid one copy?
-    typename Births::Generator births(std::move(birthContainer.retrieve_underlying_container()));
-    typename Deaths::Generator deaths(std::move(deathContainer.retrieve_underlying_container()));
-    add_bar(births, deaths);
-    // add_bar(birthContainer, deathContainer);
+    add_bar(birthContainer, deathContainer);
   }
 
   /**
@@ -372,8 +370,8 @@ class Summand {
   template <class RandomAccessValueRange>
   void translate(const RandomAccessValueRange &translation) {
     _transform(translation, [](value_type cornerVal, auto fact) -> value_type {
-      auto fInf = Gudhi::multi_filtration::MF_T_inf<decltype(fact)>;
-      auto fmInf = Gudhi::multi_filtration::MF_T_m_inf<decltype(fact)>;
+      auto fInf = Gudhi::multi_filtration::detail::MF_T_inf<decltype(fact)>;
+      auto fmInf = Gudhi::multi_filtration::detail::MF_T_m_inf<decltype(fact)>;
       // mostly usefull when value_type is integer type and "infinity" is not properly handled by +.
       if (cornerVal == T_inf || cornerVal == T_m_inf) {
         if ((cornerVal == T_inf && fact == fmInf) && (cornerVal == T_m_inf && fact == fInf))
@@ -458,11 +456,9 @@ class Summand {
    * @param start Pointer to the start of the space in the buffer where to store the serialization.
    * @return End position of the serialization in the buffer.
    */
-  friend char *serialize_value_to_char_buffer(const Summand &value, char *start)
-  {
-    const std::size_t dimSize = sizeof(Dimension);
-    memcpy(start, &value.dimension_, dimSize);
-    char *curr = start + dimSize;
+  friend char *serialize_value_to_char_buffer(const Summand &value, char *start) {
+    char *curr = start;
+    curr = serialize_value_to_char_buffer(value.dimension_, curr);
     curr = serialize_value_to_char_buffer(value.birthCorners_, curr);
     curr = serialize_value_to_char_buffer(value.deathCorners_, curr);
     return curr;
@@ -475,11 +471,9 @@ class Summand {
    * @param start Pointer to the start of the space in the buffer where the serialization is stored.
    * @return End position of the serialization in the buffer.
    */
-  friend const char *deserialize_value_from_char_buffer(Summand &value, const char *start)
-  {
-    const std::size_t dimSize = sizeof(Dimension);
-    memcpy(&value.dimension_, start, dimSize);
-    const char *curr = start + dimSize;
+  friend const char *deserialize_value_from_char_buffer(Summand &value, const char *start) {
+    const char *curr = start;
+    curr = deserialize_value_from_char_buffer(value.dimension_, curr);
     curr = deserialize_value_from_char_buffer(value.birthCorners_, curr);
     curr = deserialize_value_from_char_buffer(value.deathCorners_, curr);
     return curr;
@@ -488,9 +482,8 @@ class Summand {
   /**
    * @brief Returns the serialization size of the given summand.
    */
-  friend std::size_t get_serialization_size_of(const Summand &value)
-  {
-    std::size_t size = sizeof(Dimension);
+  friend std::size_t get_serialization_size_of(const Summand &value) {
+    std::size_t size = get_serialization_size_of(value.dimension_);
     size += get_serialization_size_of(value.birthCorners_);
     size += get_serialization_size_of(value.deathCorners_);
     return size;
@@ -546,9 +539,9 @@ class Summand {
   }
 
   // TODO: better name?
-  template <class Generator>
-  static value_type _d_inf(const Generator &a, const Generator &b) {
-    if (a.size() == 0 || b.size() == 0 || a.size() != b.size()) return T_inf;
+  template <class Iterator>
+  static value_type _d_inf(Iterator itA, Iterator endA, Iterator itB, Iterator endB) {
+    if (itA == endA || itB == endB || std::distance(itA, endA) != std::distance(itB, endB)) return T_inf;
 
     // instead of std::abs in case of unsigned value type
     auto diff = [](value_type a, value_type b) -> value_type {
@@ -556,20 +549,26 @@ class Summand {
       return a - b;
     };
 
-    value_type d = diff(a[0], b[0]);
-    for (Index i = 1; i < a.size(); i++) d = std::max(d, diff(a[i], b[i]));
+    value_type d = diff(*itA, *itB);
+    while (itA != endA) d = std::max(d, diff(*(itA++), *(itB++)));
 
     return d;
   }
 
-  template <class Generator>
-  static void _factorize_min(Generator &a, const Generator &b) {
-    for (Index i = 0; i < std::min(b.size(), a.size()); i++) a[i] = std::min(a[i], b[i]);
+  template <class Iterator>
+  static void _factorize_min(Iterator itA, Iterator endA, Iterator itB, Iterator endB) {
+    for (; itA != endA && itB != endB; ++itA, ++itB) {
+      *itA = std::min(*itA, *itB);
+      *itB = T_inf;
+    }
   }
 
-  template <class Generator>
-  static void _factorize_max(Generator &a, const Generator &b) {
-    for (Index i = 0; i < std::min(b.size(), a.size()); i++) a[i] = std::max(a[i], b[i]);
+  template <class Iterator>
+  static void _factorize_max(Iterator itA, Iterator endA, Iterator itB, Iterator endB) {
+    for (; itA != endA && itB != endB; ++itA, ++itB) {
+      *itA = std::max(*itA, *itB);
+      *itB = T_m_inf;
+    }
   }
 };
 

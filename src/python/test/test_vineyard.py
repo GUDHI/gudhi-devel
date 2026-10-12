@@ -148,6 +148,54 @@ def test_vineyard():
         assert pers[i] == v_pers
 
 
+def test_discrete_vineyard():
+    pers = [None] * 3
+    vy = Vineyard()
+
+    cpx = _get_test_complex_2()
+    vy.discrete_initialize(
+        boundaries=cpx[0],
+        dimensions=cpx[1],
+        is_before_in_filtration=lambda i, j: cpx[2][i] < cpx[2][j],
+        number_of_updates=2,
+    )
+
+    vy.discrete_update(1)
+    vy.discrete_update(4)
+    vy.discrete_update(5)
+    vy.discrete_update(4, True)
+    vy.discrete_update(0, True)
+    vineyard = vy.get_current_vineyard_view()
+
+    np.testing.assert_equal(vineyard, vy.get_current_vineyard())
+    np.testing.assert_equal(vineyard[1], vy.get_current_vineyard(dim=1))
+
+    vineyard = vy.get_current_vineyard(dim=1)
+
+    st = _get_test_complex_1()
+    pers[0] = st.persistence(homology_coeff_field=2, min_persistence=-1)
+    pers[0] = [bar[1] for bar in pers[0] if bar[0] == 1]
+    st = _update_test_complex_1_step_1(st)
+    pers[1] = st.persistence(homology_coeff_field=2, min_persistence=-1)
+    pers[1] = [bar[1] for bar in pers[1] if bar[0] == 1]
+    st = _update_test_complex_1_step_2(st)
+    pers[2] = st.persistence(homology_coeff_field=2, min_persistence=-1)
+    pers[2] = [bar[1] for bar in pers[2] if bar[0] == 1]
+
+    fil = [None] * 3
+    fil[0] = cpx[2]
+    fil[1] = _update_test_complex_2_step_1()
+    fil[2] = _update_test_complex_2_step_2()
+
+    for i in range(3):
+        v_pers = [(fil[i][int(b)], fil[i][int(d)] if d != np.inf else d) for b, d in vineyard[:, i, :]]
+        assert len(pers[i]) == len(v_pers)
+
+        pers[i].sort()
+        v_pers.sort()
+        assert pers[i] == v_pers
+
+
 def get_test_point_clouds():
     return np.array(
         [
@@ -942,4 +990,3 @@ def test_rips_vineyard_cycles():
     assert len(cycles) == 2
     assert len(cycles[0]) == 0
     assert len(cycles[1]) == 0
-

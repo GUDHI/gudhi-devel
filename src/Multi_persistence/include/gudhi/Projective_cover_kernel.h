@@ -43,8 +43,7 @@ namespace multi_persistence {
  */
 template <class Complex,
           Gudhi::persistence_matrix::Column_types columnType = Gudhi::persistence_matrix::Column_types::NAIVE_VECTOR>
-class Projective_cover_kernel
-{
+class Projective_cover_kernel {
  private:
   /**
    * @brief Options for matrix type.
@@ -71,11 +70,10 @@ class Projective_cover_kernel
    * ordered by dimension and then co-lexicographically with respect to the filtration values.
    * @param dim Dimension for which to compute the kernel.
    */
-  Projective_cover_kernel(const Complex &complex, Dimension dim)
-  {
+  Projective_cover_kernel(const Complex &complex, Dimension dim) {
     using namespace Gudhi::multi_filtration;
 
-    if (complex.get_number_of_parameters() != 2) throw std::invalid_argument("Only available for 2-parameter modules.");
+    if (complex.num_parameters() != 2) throw std::invalid_argument("Only available for 2-parameter modules.");
     if (!complex.is_ordered_by_dimension()) throw std::invalid_argument("Complex has to be ordered by dimension.");
 
     const auto &boundaries = complex.get_boundaries();
@@ -129,8 +127,7 @@ class Projective_cover_kernel
   /**
    * @brief Returns the kernel generators. (? TODO)
    */
-  Boundary_container build_generators()
-  {
+  Boundary_container build_generators() {
     Index start = 0;
     while (dimensions_[start] == dimensions_[0]) ++start;
     return Boundary_container(boundaries_.begin() + start, boundaries_.end());
@@ -154,8 +151,8 @@ class Projective_cover_kernel
 
       MFWrapper(const Filtration_value &g, int col) : g(g) { someCols.insert(col); }
 
-      MFWrapper(const Filtration_value &g, std::initializer_list<int> cols) : g(g), someCols(cols.begin(), cols.end())
-      {}
+      MFWrapper(const Filtration_value &g, std::initializer_list<int> cols)
+          : g(g), someCols(cols.begin(), cols.end()) {}
 
       void insert(int col) const { someCols.insert(col); }
 
@@ -166,8 +163,7 @@ class Projective_cover_kernel
       mutable std::set<int> someCols;
     };
 
-    void insert(const Filtration_value &g, int col)
-    {
+    void insert(const Filtration_value &g, int col) {
       auto it = queue.find(g);
       if (it != queue.end()) {
         it->insert(col);
@@ -176,8 +172,7 @@ class Projective_cover_kernel
       }
     };
 
-    void insert(const Filtration_value &g, const std::initializer_list<int> &cols)
-    {
+    void insert(const Filtration_value &g, const std::initializer_list<int> &cols) {
       auto it = queue.find(g);
       if (it != queue.end()) {
         for (int c : cols) it->insert(c);
@@ -188,8 +183,7 @@ class Projective_cover_kernel
 
     [[nodiscard]] bool empty() const { return queue.empty(); }
 
-    Filtration_value pop()
-    {
+    Filtration_value pop() {
       if (queue.empty()) throw std::runtime_error("Queue is empty");
 
       auto out = std::move(*queue.begin());
@@ -209,12 +203,8 @@ class Projective_cover_kernel
   Dimension_container dimensions_;              /** Dimension container. */
   Filtration_value_container filtrationValues_; /** Filtration value container. */
 
-  static void _get_complex_indices(const Complex &complex,
-                                   Dimension dim,
-                                   Index &startDim1,
-                                   Index &startDim2,
-                                   Index &end)
-  {
+  static void _get_complex_indices(const Complex &complex, Dimension dim, Index &startDim1, Index &startDim2,
+                                   Index &end) {
     const auto &dims = complex.get_dimensions();
     startDim1 = 0;
     startDim2 = 0;
@@ -232,14 +222,12 @@ class Projective_cover_kernel
     end = i;
   }
 
-  static int _get_pivot(Matrix &M, Index i, Index shift)
-  {
+  static int _get_pivot(Matrix &M, Index i, Index shift) {
     const auto &col = M.get_column(i);
     return col.size() > 0 ? (*col.rbegin()).get_row_index() - shift : -1;
   }
 
-  static void _initialize_matrices(Index start, Index end, const Boundary_container &boundaries, Matrix &M, Matrix &N)
-  {
+  static void _initialize_matrices(Index start, Index end, const Boundary_container &boundaries, Matrix &M, Matrix &N) {
     for (Index i = start; i < end; i++) {
       M.insert_boundary(boundaries[i]);
       N.insert_boundary({i - start});
@@ -247,13 +235,9 @@ class Projective_cover_kernel
   }
 
   template <typename F>
-  static SmallQueue _initialize_lex_queue(Index nberDim,
-                                          Index nberGen,
-                                          Index shift,
+  static SmallQueue _initialize_lex_queue(Index nberDim, Index nberGen, Index shift,
                                           const Filtration_value_container &filtValues,
-                                          const std::vector<std::set<int>> &pivotCache,
-                                          F &&get_pivot)
-  {
+                                          const std::vector<std::set<int>> &pivotCache, F &&get_pivot) {
     SmallQueue lexicoIt;
     for (Index i = nberDim; i < nberGen; ++i) {
       int pivot = std::forward<F>(get_pivot)(i);
@@ -275,13 +259,9 @@ class Projective_cover_kernel
   }
 
   template <typename F>
-  static void _update_after_new_pivot(Index i,
-                                      SmallQueue &lexicoIt,
-                                      std::vector<std::set<int>> &pivotCache,
-                                      const Filtration_value_container &filtValues,
-                                      const Filtration_value &gridValue,
-                                      F &&get_pivot)
-  {
+  static void _update_after_new_pivot(Index i, SmallQueue &lexicoIt, std::vector<std::set<int>> &pivotCache,
+                                      const Filtration_value_container &filtValues, const Filtration_value &gridValue,
+                                      F &&get_pivot) {
     int pivot = std::forward<F>(get_pivot)(i);
 
     if (pivot < 0) return;
@@ -303,15 +283,9 @@ class Projective_cover_kernel
   }
 
   template <typename F>
-  void _initialize_containers(Index nberDim,
-                              Index nberGen,
-                              Index shift,
-                              const Filtration_value_container &filtValues,
-                              const Dimension_container &dimensions,
-                              F &&get_pivot,
-                              std::vector<std::set<int>> &pivotCache,
-                              std::vector<bool> &isReduced)
-  {
+  void _initialize_containers(Index nberDim, Index nberGen, Index shift, const Filtration_value_container &filtValues,
+                              const Dimension_container &dimensions, F &&get_pivot,
+                              std::vector<std::set<int>> &pivotCache, std::vector<bool> &isReduced) {
     Index size = (nberGen - nberDim) * 2;
     boundaries_.reserve(size);
     filtrationValues_.reserve(size);
@@ -332,15 +306,9 @@ class Projective_cover_kernel
   }
 
   template <typename F>
-  bool _reduce_column(const Complex &complex,
-                      Index i,
-                      std::vector<bool> &isReduced,
-                      std::vector<std::set<int>> &pivotCache,
-                      Matrix &M,
-                      Matrix &N,
-                      const Filtration_value &gridValue,
-                      F &&get_pivot)
-  {
+  bool _reduce_column(const Complex &complex, Index i, std::vector<bool> &isReduced,
+                      std::vector<std::set<int>> &pivotCache, Matrix &M, Matrix &N, const Filtration_value &gridValue,
+                      F &&get_pivot) {
     int pivot = std::forward<F>(get_pivot)(i);
     if (pivot < 0) {
       if (!isReduced[i]) {

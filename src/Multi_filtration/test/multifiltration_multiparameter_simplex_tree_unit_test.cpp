@@ -14,14 +14,16 @@
 #include <boost/mpl/list.hpp>
 
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Multi_parameter_filtration.h>
-#include <gudhi/Dynamic_multi_parameter_filtration.h>
-#include <gudhi/Degree_rips_bifiltration.h>
+#include <gudhi/Multi_filtration/Degree_bifiltration.h>
+#include <gudhi/Multi_filtration/Flat_array_filtration.h>
+#include <gudhi/Multi_filtration/Nested_array_filtration.h>
+#include <gudhi/Multi_parameter_filtration_value.h>
 
 using Gudhi::Simplex_tree;
-using Gudhi::multi_filtration::Degree_rips_bifiltration;
-using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
-using Gudhi::multi_filtration::Multi_parameter_filtration;
+using Gudhi::multi_filtration::Degree_bifiltration;
+using Gudhi::multi_filtration::Flat_array_filtration;
+using Gudhi::multi_filtration::Multi_parameter_filtration_value;
+using Gudhi::multi_filtration::Nested_array_filtration;
 
 template <typename MultiFiltrationValue>
 struct Simplex_tree_options_multidimensional_filtration : Gudhi::Simplex_tree_options_default {
@@ -31,13 +33,12 @@ struct Simplex_tree_options_multidimensional_filtration : Gudhi::Simplex_tree_op
 template <class F>
 using Opt = Simplex_tree_options_multidimensional_filtration<F>;
 
-typedef boost::mpl::list<double, float, int> list_of_tested_variants;
+using list_of_tested_variants = boost::mpl::list<double, float, int>;
 
 // just a very simple test to see if the basics work with the simplex tree.
 
 template <class ST>
-void test_multi_simplex_tree()
-{
+void test_multi_simplex_tree() {
   using F = typename ST::Filtration_value;
   using T = typename F::value_type;
   using ini = std::initializer_list<T>;
@@ -83,12 +84,11 @@ void test_multi_simplex_tree()
   std::clog << simplexTree << "\n";
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_io_operator, T, list_of_tested_variants)
-{
-  std::clog << "Multi_parameter_filtration\n";
-  test_multi_simplex_tree<Simplex_tree<Opt<Multi_parameter_filtration<T> > > >();
-  std::clog << "Dynamic_multi_parameter_filtration\n";
-  test_multi_simplex_tree<Simplex_tree<Opt<Dynamic_multi_parameter_filtration<T> > > >();
-  std::clog << "Degree_rips_bifiltration\n";
-  test_multi_simplex_tree<Simplex_tree<Opt<Degree_rips_bifiltration<T> > > >();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_io_operator, T, list_of_tested_variants) {
+  std::clog << "Flat_array_filtration\n";
+  test_multi_simplex_tree<Simplex_tree<Opt<Multi_parameter_filtration_value<Flat_array_filtration<T> > > > >();
+  std::clog << "Nested_array_filtration\n";
+  test_multi_simplex_tree<Simplex_tree<Opt<Multi_parameter_filtration_value<Nested_array_filtration<T> > > > >();
+  std::clog << "Degree_bifiltration\n";
+  test_multi_simplex_tree<Simplex_tree<Opt<Multi_parameter_filtration_value<Degree_bifiltration<T> > > > >();
 }

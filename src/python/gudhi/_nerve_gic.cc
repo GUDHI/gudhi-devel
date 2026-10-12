@@ -21,8 +21,8 @@
 #include <nanobind/stl/string.h>
 
 #include <gudhi/distance_functions.h>
-#include <gudhi/GIC.h>
 #include <python_interfaces/Simplex_tree_interface.h>
+#include <gudhi/GIC.h>
 
 namespace Gudhi {
 namespace cover_complex {

@@ -22,8 +22,7 @@ namespace multi_persistence {
  * representative cycles. The concept is realized by @ref Persistence_interface_cohomology,
  * @ref Persistence_interface_homology and @ref Persistence_interface_vineyard.
  */
-class PersistenceAlgorithm
-{
+class PersistenceAlgorithm {
  public:
   using Dimension = undefined; /**< Dimension type. */
   using Index = undefined;     /**< Index type. */

@@ -8,6 +8,7 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
+#include <cstddef>
 #include <vector>
 
 #define BOOST_TEST_DYN_LINK
@@ -62,6 +63,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(vy_initialization, Option, option_list) {
   V empty;
   BOOST_CHECK(!empty.is_initialized());
   BOOST_CHECK_EQUAL(empty.get_current_barcode().size(), 0);
+  V empty2 = empty;
+  BOOST_CHECK(!empty2.is_initialized());
+  BOOST_CHECK_EQUAL(empty2.get_current_barcode().size(), 0);
 
   V vy(bc, dc, fc);
   BOOST_CHECK(vy.is_initialized());
@@ -93,6 +97,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(vy_initialization, Option, option_list) {
   BOOST_CHECK(order == empty.get_current_order());
   BOOST_CHECK(barcode == get_barcode<Bar>(empty.get_current_barcode()));
   BOOST_CHECK(cycles == get_all_cycles(empty.get_all_current_representative_cycles()));
+
+  V vy2(bc, dc, [&](std::size_t i, std::size_t j){
+    return fc[i] < fc[j];
+  });
+  BOOST_CHECK(vy2.is_initialized());
+  BOOST_CHECK(order == vy2.get_current_order());
+  BOOST_CHECK(barcode == get_barcode<Bar>(vy2.get_current_barcode()));
+  BOOST_CHECK(cycles == get_all_cycles(vy2.get_all_current_representative_cycles()));
+
+  empty2.initialize(bc, dc, [&](std::size_t i, std::size_t j){
+    return fc[i] < fc[j];
+  });
+  BOOST_CHECK(order == empty2.get_current_order());
+  BOOST_CHECK(barcode == get_barcode<Bar>(empty2.get_current_barcode()));
+  BOOST_CHECK(cycles == get_all_cycles(empty2.get_all_current_representative_cycles()));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(vy_update, Option, option_list) {
@@ -100,52 +119,73 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(vy_update, Option, option_list) {
   using Bar = typename V::Bar;
 
   auto [bc, dc, fc] = build_simple_input_complex();
+  FC<double> up1{1, 1, 2, 3, 4, 6, 6, 7, 7};
+  FC<double> up2{0, -1, 1, 1, 3, 4, 4, 6, 6};
 
   V vy(bc, dc, fc);
+  auto order0 = vy.get_current_order();
+  auto barcode0 = get_barcode<Bar>(vy.get_current_barcode());
 
-  vy.update(FC<double>{1, 1, 2, 3, 4, 6, 6, 7, 7});
+  vy.update(up1);
 
-  auto order = vy.get_current_order();
-  BOOST_CHECK_EQUAL(order.size(), 9);
-  BOOST_CHECK_EQUAL(order[0], 0);
-  BOOST_CHECK_EQUAL(order[1], 1);
-  BOOST_CHECK_EQUAL(order[2], 2);
-  BOOST_CHECK_EQUAL(order[3], 7);
-  BOOST_CHECK_EQUAL(order[4], 3);
-  BOOST_CHECK_EQUAL(order[5], 4);
-  BOOST_CHECK_EQUAL(order[6], 5);
-  BOOST_CHECK_EQUAL(order[7], 8);
-  BOOST_CHECK_EQUAL(order[8], 6);
+  auto order1 = vy.get_current_order();
+  BOOST_CHECK_EQUAL(order1.size(), 9);
+  BOOST_CHECK_EQUAL(order1[0], 0);
+  BOOST_CHECK_EQUAL(order1[1], 1);
+  BOOST_CHECK_EQUAL(order1[2], 2);
+  BOOST_CHECK_EQUAL(order1[3], 7);
+  BOOST_CHECK_EQUAL(order1[4], 3);
+  BOOST_CHECK_EQUAL(order1[5], 4);
+  BOOST_CHECK_EQUAL(order1[6], 5);
+  BOOST_CHECK_EQUAL(order1[7], 8);
+  BOOST_CHECK_EQUAL(order1[8], 6);
 
-  auto barcode = get_barcode<Bar>(vy.get_current_barcode());
-  BOOST_CHECK_EQUAL(barcode.size(), 5);
-  BOOST_CHECK_EQUAL(barcode[0], Bar(0, Bar::inf, 0));
-  BOOST_CHECK_EQUAL(barcode[1], Bar(1, 3, 0));
-  BOOST_CHECK_EQUAL(barcode[2], Bar(2, 4, 0));
-  BOOST_CHECK_EQUAL(barcode[3], Bar(7, 8, 0));
-  BOOST_CHECK_EQUAL(barcode[4], Bar(5, 6, 1));
+  auto barcode1 = get_barcode<Bar>(vy.get_current_barcode());
+  BOOST_CHECK_EQUAL(barcode1.size(), 5);
+  BOOST_CHECK_EQUAL(barcode1[0], Bar(0, Bar::inf, 0));
+  BOOST_CHECK_EQUAL(barcode1[1], Bar(1, 3, 0));
+  BOOST_CHECK_EQUAL(barcode1[2], Bar(2, 4, 0));
+  BOOST_CHECK_EQUAL(barcode1[3], Bar(7, 8, 0));
+  BOOST_CHECK_EQUAL(barcode1[4], Bar(5, 6, 1));
 
-  vy.update(FC<double>{0, -1, 1, 1, 3, 4, 4, 6, 6});
+  vy.update(up2);
 
-  order = vy.get_current_order();
-  BOOST_CHECK_EQUAL(order.size(), 9);
-  BOOST_CHECK_EQUAL(order[0], 1);
-  BOOST_CHECK_EQUAL(order[1], 0);
-  BOOST_CHECK_EQUAL(order[2], 2);
-  BOOST_CHECK_EQUAL(order[3], 7);
-  BOOST_CHECK_EQUAL(order[4], 3);
-  BOOST_CHECK_EQUAL(order[5], 4);
-  BOOST_CHECK_EQUAL(order[6], 5);
-  BOOST_CHECK_EQUAL(order[7], 8);
-  BOOST_CHECK_EQUAL(order[8], 6);
+  auto order2 = vy.get_current_order();
+  BOOST_CHECK_EQUAL(order2.size(), 9);
+  BOOST_CHECK_EQUAL(order2[0], 1);
+  BOOST_CHECK_EQUAL(order2[1], 0);
+  BOOST_CHECK_EQUAL(order2[2], 2);
+  BOOST_CHECK_EQUAL(order2[3], 7);
+  BOOST_CHECK_EQUAL(order2[4], 3);
+  BOOST_CHECK_EQUAL(order2[5], 4);
+  BOOST_CHECK_EQUAL(order2[6], 5);
+  BOOST_CHECK_EQUAL(order2[7], 8);
+  BOOST_CHECK_EQUAL(order2[8], 6);
 
-  barcode = get_barcode<Bar>(vy.get_current_barcode());
-  BOOST_CHECK_EQUAL(barcode.size(), 5);
-  BOOST_CHECK_EQUAL(barcode[0], Bar(0, 3, 0));
-  BOOST_CHECK_EQUAL(barcode[1], Bar(1, Bar::inf, 0));
-  BOOST_CHECK_EQUAL(barcode[2], Bar(2, 4, 0));
-  BOOST_CHECK_EQUAL(barcode[3], Bar(7, 8, 0));
-  BOOST_CHECK_EQUAL(barcode[4], Bar(5, 6, 1));
+  auto barcode2 = get_barcode<Bar>(vy.get_current_barcode());
+  BOOST_CHECK_EQUAL(barcode2.size(), 5);
+  BOOST_CHECK_EQUAL(barcode2[0], Bar(0, 3, 0));
+  BOOST_CHECK_EQUAL(barcode2[1], Bar(1, Bar::inf, 0));
+  BOOST_CHECK_EQUAL(barcode2[2], Bar(2, 4, 0));
+  BOOST_CHECK_EQUAL(barcode2[3], Bar(7, 8, 0));
+  BOOST_CHECK_EQUAL(barcode2[4], Bar(5, 6, 1));
+
+  V vy2(bc, dc, [&](std::size_t i, std::size_t j){
+    return fc[i] < fc[j];
+  });
+  BOOST_CHECK(order0 == vy2.get_current_order());
+  BOOST_CHECK(barcode0 == get_barcode<Bar>(vy2.get_current_barcode()));
+
+  vy2.update(1);
+  vy2.update(4);
+  vy2.update(5);
+  vy2.update(4);
+  BOOST_CHECK(order1 == vy2.get_current_order());
+  BOOST_CHECK(barcode1 == get_barcode<Bar>(vy2.get_current_barcode()));
+
+  vy2.update(0);
+  BOOST_CHECK(order2 == vy2.get_current_order());
+  BOOST_CHECK(barcode2 == get_barcode<Bar>(vy2.get_current_barcode()));
 }
 
 template <class Option>

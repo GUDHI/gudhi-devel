@@ -33,11 +33,10 @@ namespace multi_persistence {
  * @brief Interface respecting the @ref PersistenceAlgorithm concept to use @ref Slicer with the homology, vineyard
  * and representative cycle algorithms implemented in @ref Gudhi::persistence_matrix::Matrix.
  *
- * @tparam VineyardOptions Options respecting the @ref VineyardOptions concept.
+ * @tparam VineyardOptions Options respecting the @ref Gudhi::vineyard::VineyardOptions concept.
  */
 template <class VineyardOptions = Gudhi::vineyard::Default_vineyard_options>
-class Persistence_interface_vineyard
-{
+class Persistence_interface_vineyard {
  public:
   using Options = VineyardOptions;
   using Vineyard = Gudhi::vineyard::Vineyard_base<Options>; /**< Vineyard computation base */
@@ -56,11 +55,9 @@ class Persistence_interface_vineyard
   Persistence_interface_vineyard() = default;
 
   template <class Complex, class Filtration_range>
-  Persistence_interface_vineyard(const Complex& cpx,
-                                 const Filtration_range& filtrationValues,
+  Persistence_interface_vineyard(const Complex& cpx, const Filtration_range& filtrationValues,
                                  [[maybe_unused]] bool ignoreInf = false)
-      : vineyard_(cpx.get_boundaries(), cpx.get_dimensions(), filtrationValues)
-  {}
+      : vineyard_(cpx.get_boundaries(), cpx.get_dimensions(), filtrationValues) {}
 
   Persistence_interface_vineyard(const Persistence_interface_vineyard& other) = default;
 
@@ -74,23 +71,22 @@ class Persistence_interface_vineyard
 
   // TODO: swap?
 
-  /** 
+  /**
    * @brief The `ignoreInf` argument is ignored for this class, as it disrupts the matching property of the barcodes
    * after update.
    */
   template <class Complex, class Filtration_range>
-  void initialize(const Complex& cpx, const Filtration_range& filtrationValues, [[maybe_unused]] bool ignoreInf = false)
-  {
+  void initialize(const Complex& cpx, const Filtration_range& filtrationValues,
+                  [[maybe_unused]] bool ignoreInf = false) {
     vineyard_.initialize(cpx.get_boundaries(), cpx.get_dimensions(), filtrationValues);
   }
 
-  /** 
+  /**
    * @brief The `ignoreInf` argument is ignored for this class, as it disrupts the matching property of the barcodes
    * after update.
    */
   template <class Filtration_range>
-  void update(const Filtration_range& filtrationValues, [[maybe_unused]] bool ignoreInf = false)
-  {
+  void update(const Filtration_range& filtrationValues, [[maybe_unused]] bool ignoreInf = false) {
     GUDHI_CHECK(is_initialized(), std::logic_error("Barcode can not be updated uninitialized."));
 
     vineyard_.update(filtrationValues);
@@ -100,29 +96,25 @@ class Persistence_interface_vineyard
 
   const Map& get_current_order() const { return vineyard_.get_current_order(); }
 
-  auto get_barcode()
-  {
+  auto get_barcode() {
     GUDHI_CHECK(is_initialized(), std::logic_error("Barcode can not be computed uninitialized."));
 
     return vineyard_.get_current_barcode();
   }
 
-  auto get_all_representative_cycles(bool update = true, Dimension dim = Vineyard::nullDimension)
-  {
+  std::vector<Cycle> get_all_representative_cycles(bool update = true, Dimension dim = Vineyard::nullDimension) {
     GUDHI_CHECK(is_initialized(), std::logic_error("Representative cycles can not be computed uninitialized."));
 
     return vineyard_.get_all_current_representative_cycles(update, dim);
   }
 
-  auto get_representative_cycle(Index barcodeIndex, bool update = true)
-  {
+  auto get_representative_cycle(Index barcodeIndex, bool update = true) {
     GUDHI_CHECK(is_initialized(), std::logic_error("Representative cycles can not be computed uninitialized."));
 
     return vineyard_.get_current_representative_cycle(barcodeIndex, update);
   }
 
-  friend std::ostream& operator<<(std::ostream& stream, Persistence_interface_vineyard& pers)
-  {
+  friend std::ostream& operator<<(std::ostream& stream, Persistence_interface_vineyard& pers) {
     stream << pers.vineyard_;
 
     return stream;

@@ -15,16 +15,17 @@
 
 #include <gudhi/Multi_persistence/Point.h>
 #include <gudhi/Multi_persistence/Line.h>
-#include <gudhi/Multi_parameter_filtration.h>
+#include <gudhi/Multi_filtration/Flat_array_filtration.h>
+#include <gudhi/Multi_parameter_filtration_value.h>
 
-using Gudhi::multi_filtration::Multi_parameter_filtration;
+using Gudhi::multi_filtration::Flat_array_filtration;
+using Gudhi::multi_filtration::Multi_parameter_filtration_value;
 using Gudhi::multi_persistence::Line;
 using Gudhi::multi_persistence::Point;
 
 using list_of_tested_variants = boost::mpl::list<double, float, int>;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(line_constructors, T, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(line_constructors, T, list_of_tested_variants) {
   using P = typename Line<T>::Point_t;
 
   Line<T> l;
@@ -66,9 +67,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_constructors, T, list_of_tested_variants)
   BOOST_CHECK_THROW(Line<T> l7({1, 2, 3}, {1, 2, 3, 4}), std::invalid_argument);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(line_intersections, T, list_of_tested_variants)
-{
-  using F = Multi_parameter_filtration<T>;
+BOOST_AUTO_TEST_CASE_TEMPLATE(line_intersections, T, list_of_tested_variants) {
+  using F = Multi_parameter_filtration_value<Flat_array_filtration<T>>;
   Point<T> p_inf = {Point<T>::T_inf, Point<T>::T_inf, Point<T>::T_inf};
   Point<T> p_minus_inf = {Point<T>::T_m_inf, Point<T>::T_m_inf, Point<T>::T_m_inf};
 
@@ -111,8 +111,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(line_intersections, T, list_of_tested_variants)
   BOOST_CHECK(l[bounds.second] == p_minus_inf);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(line_other, T, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(line_other, T, list_of_tested_variants) {
   using P = typename Line<T>::Point_t;
 
   Line<T> l({-1, 2, 3}, {4, 0, 6});

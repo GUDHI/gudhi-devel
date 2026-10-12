@@ -12,11 +12,10 @@
 #include <iostream>
 #include <cstring>  // for std::size_t and strncmp
 #include <stdexcept>
-#include <random>
 #include <type_traits>
 #include <cstdint>  // for std::uint8_t
 #include <iomanip>  // for std::setfill, setw
-#include <ios>  // for std::hex, uppercase
+#include <ios>      // for std::hex, uppercase
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE "simplex_tree_serialization"
@@ -24,7 +23,6 @@
 #include <boost/mpl/list.hpp>
 
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Simplex_tree/serialization_utils.h>  // for de/serialize_value_to_char_buffer
 #include <gudhi/Unitary_tests_utils.h>  // for GUDHI_TEST_FLOAT_EQUALITY_CHECK
 #include <gudhi/random.h>
 

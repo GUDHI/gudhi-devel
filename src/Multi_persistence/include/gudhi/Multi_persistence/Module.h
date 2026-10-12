@@ -34,6 +34,7 @@
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/simple_mdspan.h>
+#include <gudhi/serialization_utils.h>
 #include <gudhi/Multi_persistence/Line.h>
 #include <gudhi/Multi_persistence/Box.h>
 #include <gudhi/Multi_persistence/Summand.h>
@@ -307,7 +308,7 @@ class Module {
   /**
    * @brief For all lines in the range, computes the intersection of the (positive slope) line with the summands.
    * That corresponds to the barcodes of the 1-dimensional filtrations along those lines in the module.
-   * 
+   *
    * @tparam LineRange Range of @ref Line with a size(), begin() and end() method.
    * @param lines Range of lines with positive slope.
    * @param dimension If specified, only the barcodes in that dimension are stored in the output. Otherwise,
@@ -318,7 +319,7 @@ class Module {
    * (number of lines x number of summands in that dim). If the argument @p dimension was given, the first axis will
    * still contain all dimensions, but all except one sub-vector will be empty.
    */
-  template <class LineRange = std::initializer_list<Line<T> > >
+  template <class LineRange = std::initializer_list<Line<T>>>
   std::vector<std::vector<Bar>> get_barcode_from_range_of_lines(
       const LineRange &lines, Dimension dimension = get_null_value<Dimension>()) const {
     std::vector<std::vector<Bar>> barcode(get_max_dimension() + 1);
@@ -443,16 +444,9 @@ class Module {
    * @return End position of the serialization in the buffer.
    */
   friend char *serialize_value_to_char_buffer(const Module &value, char *start) {
-    const std::size_t dimSize = sizeof(Dimension);
-    const std::size_t indexSize = sizeof(typename Module_t::size_type);
-    typename Module_t::size_type length = value.module_.size();
-    memcpy(start, &value.maxDim_, dimSize);
-    char *curr = start + dimSize;
-    memcpy(curr, &length, indexSize);
-    curr += indexSize;
-    for (const auto &sum : value.module_) {
-      curr = serialize_value_to_char_buffer(sum, curr);
-    }
+    char *curr = start;
+    curr = serialize_value_to_char_buffer(value.maxDim_, curr);
+    curr = serialize_value_to_char_buffer(value.module_, curr);
     return curr;
   }
 
@@ -464,17 +458,9 @@ class Module {
    * @return End position of the serialization in the buffer.
    */
   friend const char *deserialize_value_from_char_buffer(Module &value, const char *start) {
-    const std::size_t dimSize = sizeof(Dimension);
-    const std::size_t indexSize = sizeof(typename Module_t::size_type);
-    typename Module_t::size_type length;
-    memcpy(&value.maxDim_, start, dimSize);
-    const char *curr = start + dimSize;
-    memcpy(&length, curr, indexSize);
-    curr += indexSize;
-    value.module_.resize(length);
-    for (auto &sum : value.module_) {
-      curr = deserialize_value_from_char_buffer(sum, curr);
-    }
+    const char *curr = start;
+    curr = deserialize_value_from_char_buffer(value.maxDim_, curr);
+    curr = deserialize_value_from_char_buffer(value.module_, curr);
     return curr;
   }
 
@@ -482,11 +468,8 @@ class Module {
    * @brief Returns the serialization size of the given summand.
    */
   friend std::size_t get_serialization_size_of(const Module &value) {
-    std::size_t size = sizeof(Dimension);
-    size += sizeof(typename Module_t::size_type);
-    for (const auto &sum : value.module_) {
-      size += get_serialization_size_of(sum);
-    }
+    std::size_t size = get_serialization_size_of(value.maxDim_);
+    size += get_serialization_size_of(value.module_);
     return size;
   }
 

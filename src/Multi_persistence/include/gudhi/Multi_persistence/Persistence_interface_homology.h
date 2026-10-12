@@ -47,8 +47,7 @@ namespace multi_persistence {
  * @tparam MultiFiltrationValue Value of @ref Slicer::Filtration_value.
  */
 template <class PosIdxPersistenceMatrixOptions, class MultiFiltrationValue>
-class Persistence_interface_homology
-{
+class Persistence_interface_homology {
  public:
   using Options = PosIdxPersistenceMatrixOptions;            /**< Matrix options */
   using Dimension = typename Options::Dimension;             /**< Dimension type */
@@ -74,8 +73,7 @@ class Persistence_interface_homology
 
   template <class Filtration_range>
   Persistence_interface_homology(const Complex& cpx, const Filtration_range& filtrationValues, bool ignoreInf = false)
-      : complex_(&cpx), matrix_(filtrationValues.size()), order_(filtrationValues.size())
-  {
+      : complex_(&cpx), matrix_(filtrationValues.size()), order_(filtrationValues.size()) {
     static_assert(Options::has_column_pairings, "Underlying matrix has to store barcode.");
 
     _initialize_order(filtrationValues, ignoreInf);
@@ -87,15 +85,13 @@ class Persistence_interface_homology
   Persistence_interface_homology(Persistence_interface_homology&& other) noexcept
       : complex_(std::exchange(other.complex_, nullptr)),
         matrix_(std::move(other.matrix_)),
-        order_(std::move(other.order_))
-  {}
+        order_(std::move(other.order_)) {}
 
   ~Persistence_interface_homology() = default;
 
   Persistence_interface_homology& operator=(const Persistence_interface_homology& other) = default;
 
-  Persistence_interface_homology& operator=(Persistence_interface_homology&& other) noexcept
-  {
+  Persistence_interface_homology& operator=(Persistence_interface_homology&& other) noexcept {
     complex_ = std::exchange(other.complex_, nullptr);
     matrix_ = std::move(other.matrix_);
     order_ = std::move(other.order_);
@@ -104,12 +100,11 @@ class Persistence_interface_homology
 
   // TODO: swap?
 
-  /** 
+  /**
    * @brief The `ignoreInf` argument is not ignored for this class.
    */
   template <class Filtration_range>
-  void initialize(const Complex& cpx, const Filtration_range& filtrationValues, bool ignoreInf = false)
-  {
+  void initialize(const Complex& cpx, const Filtration_range& filtrationValues, bool ignoreInf = false) {
     complex_ = &cpx;
     matrix_ = Matrix(filtrationValues.size());
     order_.resize(filtrationValues.size());
@@ -118,12 +113,11 @@ class Persistence_interface_homology
     _initialize_persistence();
   }
 
-  /** 
+  /**
    * @brief The `ignoreInf` argument is not ignored for this class.
    */
   template <class Filtration_range>
-  void update(const Filtration_range& filtrationValues, bool ignoreInf = false)
-  {
+  void update(const Filtration_range& filtrationValues, bool ignoreInf = false) {
     GUDHI_CHECK(is_initialized(), std::logic_error("Barcode can not be updated uninitialized."));
 
     initialize(*complex_, filtrationValues, ignoreInf);
@@ -133,8 +127,7 @@ class Persistence_interface_homology
 
   const Map& get_current_order() const { return order_; }
 
-  auto get_barcode()
-  {
+  auto get_barcode() {
     GUDHI_CHECK(is_initialized(), std::logic_error("Barcode can not be computed uninitialized."));
 
     const auto& barcode = matrix_.get_current_barcode();
@@ -143,24 +136,29 @@ class Persistence_interface_homology
     });
   }
 
-  auto get_all_representative_cycles(bool update = true, Dimension dim = nullDimension)
-  {
+  std::vector<Cycle> get_all_representative_cycles(bool update = true, Dimension dim = nullDimension) {
     static_assert(has_rep_cycles, "`get_all_representative_cycles` is not enabled with the given options.");
     GUDHI_CHECK(is_initialized(), std::logic_error("Representative cycles can not be computed uninitialized."));
 
     if (update) matrix_.update_all_representative_cycles(dim);
     const auto& cycles = matrix_.get_all_representative_cycles();
-    return boost::adaptors::transform(cycles, [&](const Cycle& cycle) -> Cycle {
-      Cycle c(cycle.size());
-      for (Index i = 0; i < cycle.size(); ++i) {
-        c[i] = order_[cycle[i]];
+    std::vector<Cycle> out;
+    if (dim == nullDimension) out.reserve(cycles.size());
+    // if update is false, there could be more than the right cycles in `cycles`
+    for (const auto& c : cycles) {
+      // c should never be empty
+      if (dim == nullDimension || matrix_.get_column_dimension(c[0]) == dim) {
+        out.emplace_back();
+        out.back().reserve(c.size());
+        std::transform(c.begin(), c.end(), std::back_inserter(out.back()), [&](Index i) {
+          return order_[i];
+        });
       }
-      return c;
-    });
+    }
+    return out;
   }
 
-  auto get_representative_cycle(Index barcodeIndex, bool update = true)
-  {
+  auto get_representative_cycle(Index barcodeIndex, bool update = true) {
     static_assert(has_rep_cycles, "`get_representative_cycle` is not enabled with the given options.");
     GUDHI_CHECK(is_initialized(), std::logic_error("Representative cycles can not be computed uninitialized."));
 
@@ -170,8 +168,7 @@ class Persistence_interface_homology
     return boost::adaptors::transform(cycle, [&](const Index& i) -> Index { return order_[i]; });
   }
 
-  friend std::ostream& operator<<(std::ostream& stream, Persistence_interface_homology& pers)
-  {
+  friend std::ostream& operator<<(std::ostream& stream, Persistence_interface_homology& pers) {
     stream << "Matrix:\n";
     stream << "[\n";
     for (auto i = 0U; i < pers.matrix_.get_number_of_columns(); i++) {
@@ -195,8 +192,7 @@ class Persistence_interface_homology
   Map order_;
 
   template <class Filtration_range>
-  void _initialize_order(const Filtration_range& filtrationValues, bool ignoreInf)
-  {
+  void _initialize_order(const Filtration_range& filtrationValues, bool ignoreInf) {
     const auto& dimensions = complex_->get_dimensions();
 
     GUDHI_CHECK(complex_->get_boundaries().size() == dimensions.size(),
@@ -223,8 +219,7 @@ class Persistence_interface_homology
     }
   }
 
-  void _initialize_persistence()
-  {
+  void _initialize_persistence() {
     const auto& boundaryMatrix = complex_->get_boundaries();
     const auto& dimensions = complex_->get_dimensions();
 

@@ -1,25 +1,14 @@
 #!/bin/bash
 set -e
 
-# oldest OSx version that brew supports for gmp and mpfr 'bottles'
-OSX_VERSION='ventura'
-
 # In the working directory, creates deps-uni/lib/*
-# Assumes that the user has enough rights to run brew fetch
 
-# Downloading
-mkdir deps-amd64
-cd deps-amd64
-brew fetch --bottle-tag=x86_64_$OSX_VERSION gmp mpfr
-tar xf "`brew --cache --bottle-tag=x86_64_$OSX_VERSION gmp `"
-tar xf "`brew --cache --bottle-tag=x86_64_$OSX_VERSION mpfr`"
-cd ..
-mkdir deps-arm64
-cd deps-arm64
-brew fetch --bottle-tag=arm64_$OSX_VERSION gmp mpfr
-tar xf "`brew --cache --bottle-tag=arm64_$OSX_VERSION gmp `"
-tar xf "`brew --cache --bottle-tag=arm64_$OSX_VERSION mpfr`"
-cd ..
+# Downloading deps-amd64 (x86_64 gmp and mpfr) and deps-arm64 (arm64 gmp and mpfr)
+# 2nd July 2026 version from ventura brew bottles - broken from brew version 6.X
+curl -OL "https://gudhi.inria.fr/gmp_mpfr_ventura_brew_bottles.tgz"
+curl -OL "https://gudhi.inria.fr/gmp_mpfr_ventura_brew_bottles.tgz.sha512"
+shasum -a 512 -c *.sha512
+tar xf gmp_mpfr_ventura_brew_bottles.tgz
 
 # Merging
 mkdir -p deps-uni/lib

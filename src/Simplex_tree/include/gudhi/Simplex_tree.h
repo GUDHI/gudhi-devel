@@ -377,7 +377,7 @@ class Simplex_tree {
   }
 
   /** \brief Returns a range over the simplices of the simplicial complex, in the order of the filtration.
-   * If the `operator<` method of the filtration value type does not induce a total ordering of the simplices,
+   * If the `operator<` method of the filtration value type does not induce a total ordering of the filtration values,
    * be sure to call @ref initialize_filtration(Comparator&&, Ignorer&&) const "initialize_filtration" with a proper
    * comparison operator at some point before. Otherwise the behaviour is undefined.
    *
@@ -385,8 +385,9 @@ class Simplex_tree {
    * \f$\tau\f$ and \f$\sigma\f$ satisfy \f$\tau \subseteq \sigma\f$ then
    * \f$f(\tau) \leq f(\sigma)\f$.
    *
-   * The method returns simplices ordered according to increasing filtration values. Ties are
-   * resolved by considering inclusion relation (subsimplices appear before their cofaces). If two
+   * By default, if @ref initialize_filtration(Comparator&&, Ignorer&&) const "initialize_filtration" was not
+   * called with a comparator method, the method returns simplices ordered according to increasing filtration values
+   * and ties are resolved by considering inclusion relation (subsimplices appear before their cofaces). If two
    * simplices have same filtration value but are not comparable w.r.t. inclusion, lexicographic
    * order is used.
    *
@@ -399,7 +400,7 @@ class Simplex_tree {
    * @note If @ref filtration_simplex_range or
    * @ref initialize_filtration(Comparator&&, Ignorer&&) const "initialize_filtration" was never called before, this
    * method will try to initialize the filtration order, assuming that `operator<` for @ref Filtration_value induces a
-   * total order of the simplices. If the assumption is wrong,
+   * total order on the filtration values. If the assumption is wrong,
    * @ref initialize_filtration(Comparator&&, Ignorer&&) const "initialize_filtration" has to be used before, otherwise
    * the behaviour is undefined.
    */
@@ -3224,7 +3225,6 @@ class Simplex_tree {
   /** \brief Set of simplex tree Nodes representing the vertices.*/
   Siblings root_;
   int number_of_parameters_;
-  
   // all mutable as their content has no impact on the content of the simplex tree itself
   // they correspond to some kind of cache or helper attributes.
   /** \brief Simplices ordered according to a filtration.*/

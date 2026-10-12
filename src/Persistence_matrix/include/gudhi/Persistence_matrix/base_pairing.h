@@ -45,7 +45,8 @@ struct Dummy_base_pairing {
  *
  * @brief Class managing the barcode for @ref Boundary_matrix if the option was enabled.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Base_pairing

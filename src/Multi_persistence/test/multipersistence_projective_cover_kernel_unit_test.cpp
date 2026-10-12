@@ -16,24 +16,25 @@
 #include <boost/mpl/list.hpp>
 
 #include <gudhi/Multi_parameter_filtered_complex.h>
-#include <gudhi/Multi_parameter_filtration.h>
-#include <gudhi/Dynamic_multi_parameter_filtration.h>
+#include <gudhi/Multi_filtration/Flat_array_filtration.h>
+#include <gudhi/Multi_filtration/Nested_array_filtration.h>
+#include <gudhi/Multi_parameter_filtration_value.h>
 #include <gudhi/Projective_cover_kernel.h>
 
-using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
-using Gudhi::multi_filtration::Multi_parameter_filtration;
+using Gudhi::multi_filtration::Flat_array_filtration;
+using Gudhi::multi_filtration::Multi_parameter_filtration_value;
+using Gudhi::multi_filtration::Nested_array_filtration;
 using Gudhi::multi_persistence::Multi_parameter_filtered_complex;
 using Gudhi::multi_persistence::Projective_cover_kernel;
 
 using I = std::uint32_t;
 using D = int;
 
-using list_of_tested_variants =
-    boost::mpl::list<Multi_parameter_filtration<double>, Dynamic_multi_parameter_filtration<double> >;
+using list_of_tested_variants = boost::mpl::list<Multi_parameter_filtration_value<Flat_array_filtration<double>>,
+                                                 Multi_parameter_filtration_value<Nested_array_filtration<double>>>;
 
 template <class Fil>
-Multi_parameter_filtered_complex<Fil, I, D> build_input_complex()
-{
+Multi_parameter_filtered_complex<Fil, I, D> build_input_complex() {
   using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
@@ -64,8 +65,7 @@ Multi_parameter_filtered_complex<Fil, I, D> build_input_complex()
 }
 
 template <class Fil>
-Multi_parameter_filtered_complex<Fil, I, D> build_output_complex()
-{
+Multi_parameter_filtered_complex<Fil, I, D> build_output_complex() {
   using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
@@ -164,8 +164,7 @@ Multi_parameter_filtered_complex<Fil, I, D> build_output_complex()
   return Complex(bc, dc, fc);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(projective_cover_kernel, Fil, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(projective_cover_kernel, Fil, list_of_tested_variants) {
   using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using BC = typename Complex::Boundary_container;
 

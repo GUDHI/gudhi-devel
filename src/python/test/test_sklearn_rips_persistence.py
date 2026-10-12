@@ -87,7 +87,7 @@ def test_set_output():
         assert "H2" == diags_pandas.columns[1]
         assert len(diags_pandas.index) == NB_PC
     except ImportError:
-        print("Missing pandas, skipping set_output test")
+        pytest.skip("Missing pandas, skipping set_output test")
 
 
 def test_big():

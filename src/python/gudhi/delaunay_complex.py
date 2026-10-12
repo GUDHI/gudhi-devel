@@ -34,7 +34,7 @@ class DelaunayComplex(t.Delaunay_complex_interface):
 
     def __init__(
         self,
-        points: Sequence[Sequence[float]] = [],
+        points: Sequence[Sequence[float]],
         weights: Optional[Sequence[float]] = None,
         precision: Literal["fast", "safe", "exact"] = "safe",
     ):
@@ -154,7 +154,7 @@ class DelaunayCechComplex(DelaunayComplex):
         When DelaunayCechComplex is constructed with an infinite value of alpha, the complex is a Delaunay complex.
     """
 
-    def __init__(self, points=[], precision="safe"):
+    def __init__(self, points, precision="safe"):
         """
         Args:
             points (Sequence[Sequence[float]]): A list of points in d-Dimension.

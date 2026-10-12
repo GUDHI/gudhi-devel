@@ -15,7 +15,7 @@ import os
 import glob
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import Literal, Optional
+from typing import Literal, Optional, Callable
 import warnings
 
 from gudhi import _vineyard_ext as t
@@ -125,7 +125,7 @@ class Vineyard(t.Vineyard_interface):
         number_of_updates: int = 0,
     ) -> list[np.ndarray]:
         """Initializes the vineyard with the first persistence barcode. If another vineyard was initialized before,
-        it will be completely replaced.
+        it will be completely replaced. Updates should be done with :meth:`update`.
 
         :param filtered_cpx: A filtered complex containing all simplices and filtration values of the initializing
             filtration. Alternative to providing `boundaries`, `dimensions` and `filtration_values`, so both should not
@@ -175,13 +175,46 @@ class Vineyard(t.Vineyard_interface):
         super()._initialize(boundaries, dimensions, filtration_values, number_of_updates)
         return self.get_current_vineyard_view()
 
+    def discrete_initialize(
+        self,
+        boundaries: list[np.ndarray],
+        dimensions: np.ndarray,
+        is_before_in_filtration: Callable[[int, int], bool],
+        number_of_updates: int = 0,
+    ) -> list[np.ndarray]:
+        """Initializes the vineyard with the first persistence barcode. If another vineyard was initialized before,
+        it will be completely replaced. But contrary to :meth:`initialize`, the vineyard values do not correspond
+        the filtration values, but to the indices of the cells in the complex given at initialization (i.e. the
+        indices in `boundaries`). Updates should be done with :meth:`discrete_update`.
+
+        :param boundaries: List of the cell boundaries (does not have to be simplicial) of the initializing filtration.
+            The cells in the boundaries have to be indexed by their own position in the list.
+            E.g., `[[], [], [], [0, 1], [0, 2], [1, 2], [3, 4, 5]]`, represents the filtration containing a triangle
+            and all its faces.
+        :type boundaries: list[np.ndarray]
+        :param dimensions: Array of the dimensions of the cells represented in `boundaries`, such that `dimensions[i]`
+            corresponds to the dimension of `boundaries[i]`.
+        :type dimensions: np.ndarray
+        :param is_before_in_filtration: Callable that takes two integers `i` and `j` as input and returns `True` if
+            and only if `boundaries[i]` has to appear before `boundaries[j]` in the filtration.
+            Returns `False` otherwise.
+        :type is_before_in_filtration: Callable[[int, int], bool]
+        :param number_of_updates: Optional (for optimization purposes). Will allocate memory space for
+            `number_of_updates` additional steps in the vineyard after initialization. Defaults to 0.
+        :type number_of_updates: int, optional
+        :return: Current state of the vineyard. See :meth:`get_current_vineyard_view`.
+        :rtype: list[read-only np.ndarray]
+        """
+        super()._initialize(boundaries, dimensions, is_before_in_filtration, number_of_updates)
+        return self.get_current_vineyard_view()
+
     def update(
         self,
         filtered_cpx: Optional[SimplexTree | CubicalComplex | PeriodicCubicalComplex] = None,
         filtration_values: Optional[np.ndarray] = None,
     ) -> list[np.ndarray]:
         """Adds a layer to the current vineyard by updating the persistence diagram such that it corresponds to the
-        given filtration.
+        given filtration. Meant to be used with :meth:`initialize`.
 
         :param filtered_cpx: A filtered complex whose simplices are identical (also label wise) to the complex provided
             to :meth:`initialize`, but with new filtration values corresponding to the new filtration. If none was
@@ -209,6 +242,28 @@ class Vineyard(t.Vineyard_interface):
                 "Either a filtered complex or filtration values should be not `None`."
             )
         super()._update(filtration_values)
+        return self.get_current_vineyard_view()
+
+    def discrete_update(
+        self,
+        i: int,
+        store: bool = False,
+    ) -> list[np.ndarray]:
+        """Adds a layer to the current vineyard by updating the persistence diagram after the swap of cell at position
+        `i` in the filtration with the cell at position `i + 1`. The filtration order to consider for the positions
+        is the one first ordered by dimension, then by the comparison callable given at the call of
+        :meth:`discrete_initialize`. The new filtration after the swap has to be a valid filtration.
+
+        :param i: Index in the filtration ordered by dimension of the cell to swap with the cell at the next position.
+        :type i: int
+        :param store: The new layer is only effectively stored in the vineyard if this parameter is `True`.
+            Default value: `False`.
+        :type store: bool
+        :raises ValueError: If `i` is negative or higher or equal to the filtration size minus one.
+        :return: Current state of the vineyard. See :meth:`get_current_vineyard_view`.
+        :rtype: list[read-only np.ndarray]
+        """
+        super()._update(i, store)
         return self.get_current_vineyard_view()
 
     def get_current_vineyard_view(

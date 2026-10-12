@@ -27,7 +27,7 @@ from gudhi import AlphaComplex, DelaunayComplex, DelaunayCechComplex
 
 
 def _empty_complex(simplicial_complex, precision):
-    cplx = simplicial_complex(precision=precision)
+    cplx = simplicial_complex(points=[], precision=precision)
 
 
 def _one_2d_point_complex(simplicial_complex, precision):

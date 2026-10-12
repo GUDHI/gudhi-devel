@@ -19,7 +19,8 @@
 #ifndef MP_BOX_H_INCLUDED
 #define MP_BOX_H_INCLUDED
 
-#include <ostream>  //std::ostream
+#include <ostream>    //std::ostream
+#include <stdexcept>  //std::invalid_argument
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Multi_persistence/Point.h>
@@ -37,8 +38,7 @@ namespace multi_persistence {
  * @tparam T Type of the coordinates of the Box.
  */
 template <typename T>
-class Box
-{
+class Box {
  public:
   using Point_t = Point<T>; /**< Type of a point in \f$\mathbb R^n\f$. */
 
@@ -54,8 +54,7 @@ class Box
    * @param lowerCorner First corner of the box. Has to be smaller than `upperCorner`.
    * @param upperCorner Second corner of the box. Has to be greater than `lowerCorner`.
    */
-  Box(const Point_t &lowerCorner, const Point_t &upperCorner) : lowerCorner_(lowerCorner), upperCorner_(upperCorner)
-  {
+  Box(const Point_t &lowerCorner, const Point_t &upperCorner) : lowerCorner_(lowerCorner), upperCorner_(upperCorner) {
     GUDHI_CHECK(lowerCorner_.size() == upperCorner_.size(),
                 std::invalid_argument("The two corners of the box don't have the same dimension."));
     // GUDHI_CHECK(lowerCorner_ <= upperCorner_,
@@ -80,7 +79,7 @@ class Box
   /**
    * @brief Constructs a box from the two given corners. Assumes that \f$ lowerCorner \le @p upperCorner \f$ and
    * if both are finite values, they have the same dimension.
-   * 
+   *
    * @tparam CoordinateIterator1 Forward iterator derefencing to an arithmetic value convertible to `T`.
    * @tparam CoordinateIterator2 Forward iterator derefencing to an arithmetic value convertible to `T`.
    * @param lowerBegin Begin iterator of the lower corner.
@@ -145,8 +144,7 @@ class Box
    *
    * Throws if both corners don't have the same dimension.
    */
-  [[nodiscard]] bool is_trivial() const
-  {
+  [[nodiscard]] bool is_trivial() const {
     if (lowerCorner_.size() == 0 || upperCorner_.size() == 0) return true;
     if (lowerCorner_.size() != upperCorner_.size())
       throw std::logic_error("Upper and lower corner do not have the same dimension");
@@ -159,7 +157,7 @@ class Box
     for (unsigned int i = 0; i < lowerCorner_.size(); ++i) {
       T lc = lowerCorner_[i];
       T uc = upperCorner_[i];
-      if (Gudhi::multi_filtration::_is_nan(lc) || Gudhi::multi_filtration::_is_nan(uc)) return true;
+      if (Gudhi::multi_filtration::detail::_is_nan(lc) || Gudhi::multi_filtration::detail::_is_nan(uc)) return true;
       if (lc != inf) lowerIsInf = false;
       if (lc != m_inf) lowerIsMinusInf = false;
       if (uc != inf) upperIsInf = false;
@@ -172,8 +170,7 @@ class Box
   /**
    * @brief Returns true if and only if the given point is inside the box.
    */
-  bool contains(const Point_t &point) const
-  {
+  bool contains(const Point_t &point) const {
     GUDHI_CHECK(point.size() == lowerCorner_.size(),
                 std::invalid_argument("Point should not have a different dimension than the box."));
 
@@ -181,8 +178,8 @@ class Box
       T lc = lowerCorner_[i];
       T uc = upperCorner_[i];
       T p = point[i];
-      if (Gudhi::multi_filtration::_is_nan(p) || Gudhi::multi_filtration::_is_nan(lc) ||
-          Gudhi::multi_filtration::_is_nan(uc))
+      if (Gudhi::multi_filtration::detail::_is_nan(p) || Gudhi::multi_filtration::detail::_is_nan(lc) ||
+          Gudhi::multi_filtration::detail::_is_nan(uc))
         return false;
       if (lc > p || uc < p) return false;
     }
@@ -199,8 +196,7 @@ class Box
    *
    * @param delta Inflation coefficient.
    */
-  void inflate(T delta)
-  {
+  void inflate(T delta) {
     lowerCorner_ -= delta;
     upperCorner_ += delta;
   }
@@ -208,8 +204,7 @@ class Box
   /**
    * @brief Equality operator. Two boxes are equal if and only if both defining corners are equal.
    */
-  friend bool operator==(const Box &a, const Box &b)
-  {
+  friend bool operator==(const Box &a, const Box &b) {
     return a.upperCorner_ == b.upperCorner_ && a.lowerCorner_ == b.lowerCorner_;
   }
 
@@ -221,8 +216,7 @@ class Box
   /**
    * @brief Outstream operator.
    */
-  friend std::ostream &operator<<(std::ostream &os, const Box &box)
-  {
+  friend std::ostream &operator<<(std::ostream &os, const Box &box) {
     os << "Box -- Bottom corner : ";
     os << box.get_lower_corner();
     os << ", Top corner : ";
@@ -234,15 +228,15 @@ class Box
    * @brief Returns the smallest box enclosing both given boxes. Both boxes have to have the same dimension.
    * If one of the boxes is trivial, returns the other box. If both are trivial, returns an empty box.
    */
-  friend Box get_smallest_enclosing_box(const Box &a, const Box &b)
-  {
+  friend Box get_smallest_enclosing_box(const Box &a, const Box &b) {
     if (a.is_trivial()) {
       if (b.is_trivial()) return Box();
       return b;
     }
     if (b.is_trivial()) return a;
 
-    GUDHI_CHECK(a.get_number_of_coordinates() == b.get_number_of_coordinates(), "Both boxes to enclose do not have the same dimension.");
+    GUDHI_CHECK(a.get_number_of_coordinates() == b.get_number_of_coordinates(),
+                std::invalid_argument("Both boxes to enclose do not have the same dimension."));
 
     Point_t lower(a.get_number_of_coordinates());
     Point_t upper(a.get_number_of_coordinates());

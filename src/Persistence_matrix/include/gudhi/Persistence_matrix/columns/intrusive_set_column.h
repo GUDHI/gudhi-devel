@@ -41,7 +41,8 @@ namespace persistence_matrix {
  * Column based on a intrusive set structure. The entries are ordered by row index and only non-zero values
  * are stored uniquely in the underlying container.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Intrusive_set_column : public Master_matrix::Row_access_option,

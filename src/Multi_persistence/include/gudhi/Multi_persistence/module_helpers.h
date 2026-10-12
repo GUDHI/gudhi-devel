@@ -12,7 +12,10 @@
 /**
  * @file module_helpers.h
  * @author David Loiseaux
- * @brief Contains the helper methods @ref Gudhi::multi_persistence::.
+ * @brief Contains the helper methods @ref Gudhi::multi_persistence::build_permuted_module,
+ * @ref Gudhi::multi_persistence::build_module_of_dimension,
+ * @ref Gudhi::multi_persistence::compute_module_distances_to,
+ * @ref Gudhi::multi_persistence::compute_module_interleavings and @ref Gudhi::multi_persistence::compute_module_pixels.
  */
 
 #ifndef MP_MODULE_HELPERS_H_
@@ -21,7 +24,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
-#include <stdexcept>
 #include <type_traits>
 #include <vector>
 
@@ -35,6 +37,7 @@
 #include <gudhi/Multi_persistence/Box.h>
 #include <gudhi/Multi_persistence/Module.h>
 #include <gudhi/Multi_persistence/summand_helpers.h>
+#include <gudhi/Multi_persistence/utils.h>
 
 namespace Gudhi {
 namespace multi_persistence {
@@ -51,7 +54,7 @@ namespace multi_persistence {
  * corresponds to the summand at index \f$ perm[i] \f$ in the original module.
  */
 template <typename T, class RandomAccessValueRange>
-Module<T> build_permuted_module(const Module<T> &module, const RandomAccessValueRange &permutation) {
+inline Module<T> build_permuted_module(const Module<T> &module, const RandomAccessValueRange &permutation) {
   GUDHI_CHECK(permutation.size() <= module.size(),
               std::invalid_argument("Permutation size is greater than the module size."));
 
@@ -77,7 +80,7 @@ Module<T> build_permuted_module(const Module<T> &module, const RandomAccessValue
  * @param dim Dimension.
  */
 template <typename T>
-Module<T> build_module_of_dimension(const Module<T> &module, int dim) {
+inline Module<T> build_module_of_dimension(const Module<T> &module, int dim) {
   if (dim < 0 || module.size() == 0) return {};
 
   Module<T> out;
@@ -111,7 +114,7 @@ Module<T> build_module_of_dimension(const Module<T> &module, int dim) {
  */
 template <typename T, class ContinuousRandomAccessRange,
           class = std::enable_if_t<!std::is_arithmetic_v<ContinuousRandomAccessRange>>>
-Module<T> build_module_of_dimension(const Module<T> &module, const ContinuousRandomAccessRange &dims) {
+inline Module<T> build_module_of_dimension(const Module<T> &module, const ContinuousRandomAccessRange &dims) {
   if (module.size() == 0) return {};
 
   Module<T> out;
@@ -138,158 +141,6 @@ Module<T> build_module_of_dimension(const Module<T> &module, const ContinuousRan
   }
   out.set_max_dimension(maxDim);
   return out;
-}
-
-/**
- * @ingroup multi_persistence
- *
- * @private
- */
-template <typename T, typename U>
-inline std::vector<maybe_make_signed_t<T>> _get_module_landscape_values(const Module<T> &mod, const std::vector<U> &x,
-                                                                        typename Module<T>::Dimension dimension) {
-  using signedT = maybe_make_signed_t<T>;
-
-  std::vector<signedT> values;
-  values.reserve(mod.size());
-  for (std::size_t i = 0; i < mod.size(); i++) {
-    const auto &summand = mod.get_summand(i);
-    if (summand.get_dimension() == dimension) values.push_back(compute_summand_landscape_value(summand, x));
-  }
-  std::sort(values.begin(), values.end(), [](signedT x, signedT y) { return x > y; });
-  return values;
-}
-
-// TODO: extend in higher resolution dimension
-/**
- * @ingroup multi_persistence
- *
- * @brief Computes a set of landscape images for each given `k` (corresponding to the \f$ k^{th} \f$ landscape
- * function).
- *
- * @tparam T Value type of a parameter in a filtration value.
- * @tparam U Template argument of @ref Box. Has to be either T or std::make_signed_t<T>.
- * @tparam RandomAccessValueRange1 Range of unsigned integers with a size() and operator[] method.
- * @tparam RandomAccessValueRange2 Range of unsigned integers with a size() and operator[] method.
- * @param mod Module.
- * @param dimension Dimension of the summands to be used.
- * @param ks Range of \f$ k \f$'s to compute the \f$ k^{th} \f$ landscape function of the module.
- * @param box Box in which to restrict the landscapes.
- * @param resolution Image resolution. Should have size 2.
- * @param n_jobs If TBB is linked, allows to specify the number of threads that should be used for parallelization.
- * @return A continuous vector of landscape values which should be interpreted as a c-ordered 3-dimensional array with
- * a first axis corresponding the the \f$ k \f$'s, a second axis corresponding to the image axis with the first
- * resolution and a third axis corresponding to the image axis with the second resolution.
- */
-template <typename T, typename U, class RandomAccessValueRange1, class RandomAccessValueRange2>
-inline std::vector<maybe_make_signed_t<T>> compute_set_of_module_landscapes(
-    const Module<T> &mod, typename Module<T>::Dimension dimension, const RandomAccessValueRange1 &ks, const Box<U> &box,
-    const RandomAccessValueRange2 &resolution, [[maybe_unused]] int n_jobs = 0) {
-  static_assert(std::is_same_v<U, T> || std::is_same_v<U, maybe_make_signed_t<T>>,
-                "Box template parameter is not compatible with Summand value type.");
-
-  GUDHI_CHECK(resolution.size() >= 2, std::invalid_argument("Not enough resolution values."));
-
-  using signedT = maybe_make_signed_t<T>;
-
-  std::vector<signedT> images(ks.size() * resolution[0] * resolution[1]);
-  Simple_mdspan view(images.data(), ks.size(), resolution[0], resolution[1]);
-  U stepX = (box.get_upper_corner()[0] - box.get_lower_corner()[0]) / static_cast<U>(resolution[0]);
-  U stepY = (box.get_upper_corner()[1] - box.get_lower_corner()[1]) / static_cast<U>(resolution[1]);
-
-  auto get_image_values = [&](unsigned int i) {
-    return [&, i](unsigned int j) {
-      std::vector<signedT> landscapes =
-          _get_module_landscape_values<T, U>(mod,
-                                             {box.get_lower_corner()[0] + (stepX * static_cast<U>(i)),
-                                              box.get_lower_corner()[1] + (stepY * static_cast<U>(j))},
-                                             dimension);
-      for (std::size_t k_idx = 0; k_idx < ks.size(); ++k_idx) {
-        unsigned int k = ks[k_idx];
-        view(k_idx, i, j) = k < landscapes.size() ? landscapes[k] : 0;
-      }
-    };
-  };
-
-#ifdef GUDHI_USE_TBB
-  using ResT = typename RandomAccessValueRange2::value_type;
-  oneapi::tbb::task_arena arena(n_jobs);
-  arena.execute([&] {
-    tbb::parallel_for(ResT(0), resolution[0],
-                      [&](unsigned int i) { tbb::parallel_for(ResT(0), resolution[1], get_image_values(i)); });
-  });
-#else
-  for (unsigned int i = 0; i < resolution[0]; ++i) {
-    auto get_image_values_at = get_image_values(i);
-    for (unsigned int j = 0; j < resolution[1]; ++j) {
-      get_image_values_at(j);
-    }
-  }
-#endif
-
-  return images;
-}
-
-/**
- * @ingroup multi_persistence
- *
- * @brief Computes a set of landscape images for each given `k` (corresponding to the \f$ k^{th} \f$ landscape
- * function).
- *
- * @tparam T Value type of a parameter in a filtration value.
- * @tparam RandomAccessValueRange Range of unsigned integers with a size() and operator[] method.
- * @tparam RandomAccessArray Range of arithmetic values with a size() and operator[] method.
- * @param mod Module.
- * @param dimension Dimension of the summands to be used.
- * @param ks Range of \f$ k \f$'s to compute the \f$ k^{th} \f$ landscape function of the module.
- * @param grid Grid partitioning the image. Should have size 2 and the sub-arrays partition an axis of the image each.
- * @param n_jobs If TBB is linked, allows to specify the number of threads that should be used for parallelization.
- * @return A continuous vector of landscape values which should be interpreted as a c-ordered 3-dimensional array with
- * a first axis corresponding the the \f$ k \f$'s, a second axis corresponding to the image axis with the first
- * grid resolution and a third axis corresponding to the image axis with the second grid resolution.
- */
-template <typename T, class RandomAccessValueRange, class RandomAccessArray>
-inline std::vector<maybe_make_signed_t<T>> compute_set_of_module_landscapes(const Module<T> &mod,
-                                                                            typename Module<T>::Dimension dimension,
-                                                                            const RandomAccessValueRange &ks,
-                                                                            const std::vector<RandomAccessArray> &grid,
-                                                                            [[maybe_unused]] int n_jobs = 0) {
-  GUDHI_CHECK(grid.size() >= 2, std::invalid_argument("First axis of the grid has not enough values."));
-
-  if (grid[0].size() == 0 || grid[1].size() == 0) return {};
-
-  using signedT = maybe_make_signed_t<T>;
-  using gT = std::decay_t<decltype(grid[0][0])>;
-
-  std::vector<signedT> images(ks.size() * grid[0].size() * grid[1].size());
-  Simple_mdspan view(images.data(), ks.size(), grid[0].size(), grid[1].size());
-
-  auto get_image_values = [&](std::size_t i) {
-    return [&, i](std::size_t j) {
-      std::vector<signedT> landscapes = _get_module_landscape_values<T, gT>(mod, {grid[0][i], grid[1][j]}, dimension);
-      for (std::size_t k_idx = 0; k_idx < ks.size(); ++k_idx) {
-        unsigned int k = ks[k_idx];
-        view(k_idx, i, j) = k < landscapes.size() ? landscapes[k] : 0;
-      }
-    };
-  };
-
-#ifdef GUDHI_USE_TBB
-  oneapi::tbb::task_arena arena(n_jobs);
-  arena.execute([&] {
-    tbb::parallel_for(std::size_t(0), grid[0].size(),
-                      [&](std::size_t i) { tbb::parallel_for(std::size_t(0), grid[1].size(), get_image_values(i)); });
-  });
-#else
-  for (std::size_t i = 0; i < grid[0].size(); ++i) {
-    auto get_image_values_at = get_image_values(i);
-    for (std::size_t j = 0; j < grid[1].size(); ++j) {
-      get_image_values_at(j);
-    }
-  }
-#endif
-
-  return images;
 }
 
 /**
@@ -366,6 +217,8 @@ inline std::vector<maybe_make_signed_t<T>> compute_module_interleavings(const Mo
 
   return interleavings;
 }
+
+namespace detail {
 
 /**
  * @ingroup multi_persistence
@@ -458,6 +311,8 @@ inline void _compute_module_pixels_of_degree(typename Module<T>::const_iterator 
 #endif
 }
 
+}  // namespace detail
+
 /**
  * @ingroup multi_persistence
  *
@@ -502,7 +357,8 @@ inline std::vector<double> compute_module_pixels(const Module<T> &mod, const Ran
     if (start == mod.end()) break;
     end = start;
     while (end != mod.end() && end->get_dimension() == d) end++;
-    _compute_module_pixels_of_degree<T>(start, end, delta, p, normalize, box, coordinates, n_jobs, &view(degreeIdx, 0));
+    detail::_compute_module_pixels_of_degree<T>(start, end, delta, p, normalize, box, coordinates, n_jobs,
+                                                &view(degreeIdx, 0));
   }
   return out;
 }

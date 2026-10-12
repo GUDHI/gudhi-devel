@@ -9,6 +9,7 @@
  */
 
 #include <array>
+#include <cstddef>
 #include <initializer_list>
 #include <limits>
 #include <utility>
@@ -22,15 +23,18 @@
 #include <gudhi/Multi_parameter_filtered_complex.h>
 #include <gudhi/Slicer.h>
 #include <gudhi/Thread_safe_slicer.h>
-#include <gudhi/Multi_parameter_filtration.h>
-#include <gudhi/Dynamic_multi_parameter_filtration.h>
+#include <gudhi/Multi_filtration/Flat_array_filtration.h>
+#include <gudhi/Multi_filtration/Nested_array_filtration.h>
+#include <gudhi/Multi_parameter_filtration_value.h>
 #include <gudhi/Multi_persistence/Persistence_interface_homology.h>
 #include <gudhi/Multi_persistence/Persistence_interface_cohomology.h>
 #include <gudhi/Multi_persistence/Persistence_interface_vineyard.h>
+#include <gudhi/Multi_persistence/Box.h>
 #include <gudhi/Multi_persistence/Line.h>
 
-using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
-using Gudhi::multi_filtration::Multi_parameter_filtration;
+using Gudhi::multi_filtration::Flat_array_filtration;
+using Gudhi::multi_filtration::Multi_parameter_filtration_value;
+using Gudhi::multi_filtration::Nested_array_filtration;
 using Gudhi::multi_persistence::Line;
 using Gudhi::multi_persistence::Multi_parameter_filtered_complex;
 using Gudhi::multi_persistence::Persistence_interface_cohomology;
@@ -75,32 +79,25 @@ struct Multi_persistence_vineyard_chain_options : Gudhi::vineyard::Default_viney
   static constexpr bool is_RU = false;
 };
 
-using list_of_tested_variants = boost::mpl::list<
-    Slicer<Multi_parameter_filtration<T>,
-           Persistence_interface_homology<Multi_persistence_r_options, Multi_parameter_filtration<T>>>,
-    Slicer<Multi_parameter_filtration<T>,
-           Persistence_interface_homology<Multi_persistence_ru_options, Multi_parameter_filtration<T>>>,
-    Slicer<Multi_parameter_filtration<T>,
-           Persistence_interface_homology<Multi_persistence_chain_options, Multi_parameter_filtration<T>>>,
-    Slicer<Multi_parameter_filtration<T>, Persistence_interface_cohomology<Multi_parameter_filtration<T>>>,
-    Slicer<Multi_parameter_filtration<T>, Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>>,
-    Slicer<Multi_parameter_filtration<T>, Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>,
-           Persistence_interface_homology<Multi_persistence_r_options, Dynamic_multi_parameter_filtration<T>>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>,
-           Persistence_interface_homology<Multi_persistence_ru_options, Dynamic_multi_parameter_filtration<T>>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>,
-           Persistence_interface_homology<Multi_persistence_chain_options, Dynamic_multi_parameter_filtration<T>>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>,
-           Persistence_interface_cohomology<Dynamic_multi_parameter_filtration<T>>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>,
-           Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>,
-           Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>>;
+using Flat_MFV = Multi_parameter_filtration_value<Flat_array_filtration<T>>;
+using Nested_MFV = Multi_parameter_filtration_value<Nested_array_filtration<T>>;
+
+using list_of_tested_variants =
+    boost::mpl::list<Slicer<Flat_MFV, Persistence_interface_homology<Multi_persistence_r_options, Flat_MFV>>,
+                     Slicer<Flat_MFV, Persistence_interface_homology<Multi_persistence_ru_options, Flat_MFV>>,
+                     Slicer<Flat_MFV, Persistence_interface_homology<Multi_persistence_chain_options, Flat_MFV>>,
+                     Slicer<Flat_MFV, Persistence_interface_cohomology<Flat_MFV>>,
+                     Slicer<Flat_MFV, Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>>,
+                     Slicer<Flat_MFV, Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>,
+                     Slicer<Nested_MFV, Persistence_interface_homology<Multi_persistence_r_options, Nested_MFV>>,
+                     Slicer<Nested_MFV, Persistence_interface_homology<Multi_persistence_ru_options, Nested_MFV>>,
+                     Slicer<Nested_MFV, Persistence_interface_homology<Multi_persistence_chain_options, Nested_MFV>>,
+                     Slicer<Nested_MFV, Persistence_interface_cohomology<Nested_MFV>>,
+                     Slicer<Nested_MFV, Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>>,
+                     Slicer<Nested_MFV, Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>>;
 
 template <class Fil>
-Multi_parameter_filtered_complex<Fil, I, D> build_rep_cycle_input_complex()
-{
+Multi_parameter_filtered_complex<Fil, I, D> build_rep_cycle_input_complex() {
   using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
@@ -130,16 +127,15 @@ Multi_parameter_filtered_complex<Fil, I, D> build_rep_cycle_input_complex()
 }
 
 template <class Fil>
-Multi_parameter_filtered_complex<Fil, I, D> build_rep_cycle_input_complex2()
-{
+Multi_parameter_filtered_complex<Fil, I, D> build_rep_cycle_input_complex2() {
   using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;
   using ini = std::initializer_list<T>;
 
-  BC bc = {
-      {}, {}, {}, {}, {}, {0, 4}, {1, 4}, {0, 1}, {2, 4}, {3, 4}, {2, 3}, {1, 3}, {5, 6, 7}, {6, 9, 11}, {8, 9, 10}};
+  BC bc = {{},     {},     {},     {},     {},        {0, 4},     {1, 4},    {0, 1},
+           {2, 4}, {3, 4}, {2, 3}, {1, 3}, {5, 6, 7}, {6, 9, 11}, {8, 9, 10}};
 
   DC dc = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2};
 
@@ -163,8 +159,7 @@ Multi_parameter_filtered_complex<Fil, I, D> build_rep_cycle_input_complex2()
 }
 
 template <class Fil>
-Multi_parameter_filtered_complex<Fil, I, D> build_simple_input_complex()
-{
+Multi_parameter_filtered_complex<Fil, I, D> build_simple_input_complex() {
   using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
@@ -187,8 +182,7 @@ Multi_parameter_filtered_complex<Fil, I, D> build_simple_input_complex()
 }
 
 template <class Slicer>
-void test_slicer_constructors(const Slicer& s)
-{
+void test_slicer_constructors(const Slicer& s) {
   BOOST_CHECK_EQUAL(s.get_number_of_cycle_generators(), 9);
   BOOST_CHECK_EQUAL(s.get_number_of_parameters(), 3);
   BOOST_CHECK_EQUAL(s.get_current_order().size(), 0);
@@ -197,8 +191,7 @@ void test_slicer_constructors(const Slicer& s)
 }
 
 template <class Slicer>
-void test_slicer_constructors_empty(const Slicer& s)
-{
+void test_slicer_constructors_empty(const Slicer& s) {
   BOOST_CHECK_EQUAL(s.get_number_of_cycle_generators(), 0);
   BOOST_CHECK_EQUAL(s.get_number_of_parameters(), 0);
   BOOST_CHECK(s.get_current_order().empty());
@@ -206,11 +199,11 @@ void test_slicer_constructors_empty(const Slicer& s)
   BOOST_CHECK(!s.get_persistence_algorithm().is_initialized());
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_constructors, Slicer_t, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_constructors, Slicer_t, list_of_tested_variants) {
   using Fil = typename Slicer_t::Filtration_value;
   using OtherSlicer =
-      Slicer<Multi_parameter_filtration<long int>, Persistence_interface_cohomology<Multi_parameter_filtration<T>>>;
+      Slicer<Multi_parameter_filtration_value<Flat_array_filtration<long int>>,
+             Persistence_interface_cohomology<Multi_parameter_filtration_value<Flat_array_filtration<long int>>>>;
 
   Slicer_t empty;
   test_slicer_constructors_empty(empty);
@@ -249,14 +242,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_constructors, Slicer_t, list_of_tested_vari
 }
 
 template <class Slicer>
-void test_slicer_accessors(const Slicer& s)
-{
+void test_slicer_accessors(const Slicer& s) {
   using Fil = typename Slicer::Filtration_value;
   using B = std::vector<typename Slicer::Index>;
 
   auto box = s.get_bounding_box();
-  BOOST_CHECK(box.first == Fil({0, 1, 1}));
-  BOOST_CHECK(box.second == Fil({6, 7, 8}));
+  const auto& lower = box.get_lower_corner();
+  const auto& upper = box.get_upper_corner();
+  BOOST_CHECK_EQUAL(lower.size(), 3);
+  BOOST_CHECK_EQUAL(lower[0], 0);
+  BOOST_CHECK_EQUAL(lower[1], 1);
+  BOOST_CHECK_EQUAL(lower[2], 1);
+  BOOST_CHECK_EQUAL(upper.size(), 3);
+  BOOST_CHECK_EQUAL(upper[0], 6);
+  BOOST_CHECK_EQUAL(upper[1], 7);
+  BOOST_CHECK_EQUAL(upper[2], 8);
   BOOST_CHECK_EQUAL(s.get_dimension(0), 0);
   BOOST_CHECK_EQUAL(s.get_dimension(1), 0);
   BOOST_CHECK_EQUAL(s.get_dimension(2), 0);
@@ -286,8 +286,7 @@ void test_slicer_accessors(const Slicer& s)
   BOOST_CHECK(s.get_boundary(8) == (B{1, 7}));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_accessors, Slicer, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_accessors, Slicer, list_of_tested_variants) {
   using Fil = typename Slicer::Filtration_value;
 
   auto cpx = build_simple_input_complex<Fil>();
@@ -299,8 +298,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_accessors, Slicer, list_of_tested_variants)
 }
 
 template <class Slicer>
-void test_slicer_slice_modifiers(Slicer& s)
-{
+void test_slicer_slice_modifiers(Slicer& s) {
   BOOST_CHECK_EQUAL(s.get_slice().size(), 9);
   s.set_slice({0, 0, 0, 2, 3, 3, 5, 5, 5});
   BOOST_CHECK(s.get_slice() == (std::vector<T>{0, 0, 0, 2, 3, 3, 5, 5, 5}));
@@ -310,8 +308,7 @@ void test_slicer_slice_modifiers(Slicer& s)
   BOOST_CHECK(s.get_slice() == (std::vector<T>{1, 1, 2, 3, 4, 6, 6, 7, 7}));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_modifiers, Slicer, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_modifiers, Slicer, list_of_tested_variants) {
   using Fil = typename Slicer::Filtration_value;
 
   auto cpx = build_simple_input_complex<Fil>();
@@ -364,10 +361,37 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_modifiers, Slicer, list_of_tested_variants)
   BOOST_CHECK(s2.get_boundary(1).empty());
   BOOST_CHECK(s2.get_boundary(2).empty());
   BOOST_CHECK(s2.get_boundary(3).empty());
+
+  Slicer s3(cpx);
+  std::vector<std::vector<T>> real = {{0., 1. / 6., 1. / 7.},      {0., 1. / 6., 0.},           {0., 0., 2. / 7.},
+                                      {1. / 2., 1. / 6., 2. / 7.}, {1. / 2., 1. / 2., 4. / 7.}, {1., 1. / 3., 4. / 7.},
+                                      {1., 2. / 3., 5. / 7.},      {5. / 6., 5. / 6., 1.},      {5. / 6., 1., 1.}};
+  s3.normalize_filtration_values();
+  const auto& fils1 = s3.get_filtration_values();
+  BOOST_CHECK_EQUAL(fils1.size(), real.size());
+  for (std::size_t i = 0; i < real.size(); ++i) {
+    BOOST_CHECK_EQUAL(fils1[i].num_parameters(), real[i].size());
+    for (std::size_t j = 0; j < real[i].size(); ++j) {
+      BOOST_CHECK_EQUAL(fils1[i](0, j), real[i][j]);
+    }
+  }
+
+  Slicer s4(cpx);
+  real = {{0., 1. / 2., 1. / 2.},      {0., 1. / 2., 1. / 4.}, {0., 1. / 4., 3. / 4.},
+          {3. / 4., 1. / 2., 3. / 4.}, {3. / 4., 1., 5. / 4.}, {3. / 2., 3. / 4., 5. / 4.},
+          {3. / 2., 5. / 4., 3. / 2.}, {5. / 4., 3. / 2., 2.}, {5. / 4., 7. / 4., 2.}};
+  s4.normalize_filtration_values(Gudhi::multi_persistence::Box<T>({0, 0, 0}, {4, 4, 4}));
+  const auto& fils2 = s4.get_filtration_values();
+  BOOST_CHECK_EQUAL(fils2.size(), real.size());
+  for (std::size_t i = 0; i < real.size(); ++i) {
+    BOOST_CHECK_EQUAL(fils2[i].num_parameters(), real[i].size());
+    for (std::size_t j = 0; j < real[i].size(); ++j) {
+      BOOST_CHECK_EQUAL(fils2[i](0, j), real[i][j]);
+    }
+  }
 }
 
-Test_multi_dimensional_barcode get_barcode(const Barcode& barcode)
-{
+Test_multi_dimensional_barcode get_barcode(const Barcode& barcode) {
   Test_multi_dimensional_barcode out(3);  // depends on build_simple_input_complex()...
   for (const auto& bar : barcode) {
     out[bar.dim].emplace_back(bar.birth, bar.death);
@@ -376,8 +400,7 @@ Test_multi_dimensional_barcode get_barcode(const Barcode& barcode)
   return out;
 }
 
-Test_multi_dimensional_barcode get_barcode(const Multi_dimensional_barcode& barcode)
-{
+Test_multi_dimensional_barcode get_barcode(const Multi_dimensional_barcode& barcode) {
   Test_multi_dimensional_barcode out(barcode.size());
   for (unsigned int i = 0; i < barcode.size(); ++i) {
     out[i].resize(barcode[i].size());
@@ -391,8 +414,7 @@ Test_multi_dimensional_barcode get_barcode(const Multi_dimensional_barcode& barc
   return out;
 }
 
-Test_multi_dimensional_barcode get_barcode(const Multi_dimensional_flat_barcode& barcode)
-{
+Test_multi_dimensional_barcode get_barcode(const Multi_dimensional_flat_barcode& barcode) {
   Test_multi_dimensional_barcode out(barcode.size());
   for (unsigned int i = 0; i < barcode.size(); ++i) {
     out[i].resize(barcode[i].size());
@@ -405,8 +427,7 @@ Test_multi_dimensional_barcode get_barcode(const Multi_dimensional_flat_barcode&
   return out;
 }
 
-Test_barcode get_barcode(const Flat_barcode& barcode)
-{
+Test_barcode get_barcode(const Flat_barcode& barcode) {
   Test_barcode out(barcode.size());
   for (unsigned int i = 0; i < out.size(); ++i) {
     out[i].first = barcode[i][0];
@@ -417,8 +438,7 @@ Test_barcode get_barcode(const Flat_barcode& barcode)
 }
 
 template <class Barcode>
-void test_barcode(const Barcode& barcode)
-{
+void test_barcode(const Barcode& barcode) {
   auto inf = std::numeric_limits<T>::infinity();
   Test_multi_dimensional_barcode bc = get_barcode(barcode);
   BOOST_CHECK_EQUAL(bc.size(), 3);
@@ -433,8 +453,7 @@ void test_barcode(const Barcode& barcode)
 }
 
 template <>
-void test_barcode(const Flat_barcode& barcode)
-{
+void test_barcode(const Flat_barcode& barcode) {
   auto inf = std::numeric_limits<T>::infinity();
   Test_barcode bc = get_barcode(barcode);
   BOOST_CHECK_EQUAL(bc.size(), 5);
@@ -446,8 +465,7 @@ void test_barcode(const Flat_barcode& barcode)
 }
 
 template <class Barcode>
-void test_barcode_ignore_inf(const Barcode& barcode)
-{
+void test_barcode_ignore_inf(const Barcode& barcode) {
   auto inf = std::numeric_limits<T>::infinity();
   Test_multi_dimensional_barcode bc = get_barcode(barcode);
   BOOST_CHECK_EQUAL(bc.size(), 3);
@@ -461,8 +479,7 @@ void test_barcode_ignore_inf(const Barcode& barcode)
 }
 
 template <>
-void test_barcode_ignore_inf(const Flat_barcode& barcode)
-{
+void test_barcode_ignore_inf(const Flat_barcode& barcode) {
   auto inf = std::numeric_limits<T>::infinity();
   Test_barcode bc = get_barcode(barcode);
   BOOST_CHECK_EQUAL(bc.size(), 4);
@@ -473,8 +490,7 @@ void test_barcode_ignore_inf(const Flat_barcode& barcode)
 }
 
 template <class Slicer>
-void test_slicer_persistence(Slicer& s)
-{
+void test_slicer_persistence(Slicer& s) {
   using Index = typename Slicer::Index;
   T inf = std::numeric_limits<T>::infinity();
 
@@ -491,10 +507,10 @@ void test_slicer_persistence(Slicer& s)
 
   if constexpr (!Slicer::Persistence::is_vine) {
     s.initialize_persistence_computation(true);
-  
+
     BOOST_CHECK(s.persistence_computation_is_initialized());
     BOOST_CHECK(s.get_current_order() == (std::vector<Index>{0, 2, 1, 5, 4, 3}));
-  
+
     test_barcode_ignore_inf(s.template get_barcode<true>());
     test_barcode_ignore_inf(s.template get_barcode<false>());
     test_barcode_ignore_inf(s.template get_flat_barcode<true>());
@@ -502,8 +518,7 @@ void test_slicer_persistence(Slicer& s)
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_persistence, Slicer, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_persistence, Slicer, list_of_tested_variants) {
   using Fil = typename Slicer::Filtration_value;
 
   auto cpx = build_simple_input_complex<Fil>();
@@ -516,25 +531,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_persistence, Slicer, list_of_tested_variant
   test_slicer_persistence(tss);
 }
 
-using list_of_tested_variants2 = boost::mpl::list<
-    Slicer<Multi_parameter_filtration<T>,
-           Persistence_interface_homology<Multi_persistence_ru_options, Multi_parameter_filtration<T>>>,
-    Slicer<Multi_parameter_filtration<T>,
-           Persistence_interface_homology<Multi_persistence_chain_options, Multi_parameter_filtration<T>>>,
-    Slicer<Multi_parameter_filtration<T>, Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>>,
-    Slicer<Multi_parameter_filtration<T>, Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>,
-           Persistence_interface_homology<Multi_persistence_ru_options, Dynamic_multi_parameter_filtration<T>>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>,
-           Persistence_interface_homology<Multi_persistence_chain_options, Dynamic_multi_parameter_filtration<T>>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>,
-           Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>>,
-    Slicer<Dynamic_multi_parameter_filtration<T>,
-           Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>>;
+using list_of_tested_variants2 =
+    boost::mpl::list<Slicer<Flat_MFV, Persistence_interface_homology<Multi_persistence_ru_options, Flat_MFV>>,
+                     Slicer<Flat_MFV, Persistence_interface_homology<Multi_persistence_chain_options, Flat_MFV>>,
+                     Slicer<Flat_MFV, Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>>,
+                     Slicer<Flat_MFV, Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>,
+                     Slicer<Nested_MFV, Persistence_interface_homology<Multi_persistence_ru_options, Nested_MFV>>,
+                     Slicer<Nested_MFV, Persistence_interface_homology<Multi_persistence_chain_options, Nested_MFV>>,
+                     Slicer<Nested_MFV, Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>>,
+                     Slicer<Nested_MFV, Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>>;
 
 template <class Slicer>
-void test_slicer_vineyard(Slicer& s)
-{
+void test_slicer_vineyard(Slicer& s) {
   auto inf = std::numeric_limits<T>::infinity();
 
   s.set_slice({1, 2, 1, 6, 4, 3, inf, inf, inf});
@@ -594,8 +602,7 @@ void test_slicer_vineyard(Slicer& s)
   BOOST_CHECK_EQUAL(bc[2].size(), 0);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_vineyard, Slicer, list_of_tested_variants2)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_vineyard, Slicer, list_of_tested_variants2) {
   using Fil = typename Slicer::Filtration_value;
 
   auto cpx = build_simple_input_complex<Fil>();
@@ -609,8 +616,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_vineyard, Slicer, list_of_tested_variants2)
 }
 
 template <class Slicer>
-void test_slicer_rep_cycles(Slicer& s)
-{
+void test_slicer_rep_cycles(Slicer& s) {
   using Cycle = typename Slicer::Cycle;
 
   s.set_slice({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13});
@@ -634,14 +640,52 @@ void test_slicer_rep_cycles(Slicer& s)
 
   BOOST_CHECK_EQUAL(cycles[2].size(), 0);
 
+  std::vector<Cycle> cyclesDim = s.get_representative_cycles_in_dim(0, false);
+
+  BOOST_CHECK_EQUAL(cyclesDim.size(), 5);
+  BOOST_CHECK(cyclesDim[0] == Cycle({0}));
+  BOOST_CHECK(cyclesDim[1] == Cycle({0, 1}));
+  BOOST_CHECK(cyclesDim[2] == Cycle({0, 2}));
+  BOOST_CHECK(cyclesDim[3] == Cycle({0, 3}));
+  BOOST_CHECK(cyclesDim[4] == Cycle({0, 4}));
+
+  cyclesDim = s.get_representative_cycles_in_dim(1, false);
+
+  BOOST_CHECK_EQUAL(cyclesDim.size(), 3);
+  BOOST_CHECK(cyclesDim[0] == Cycle({5, 6, 7}));
+  BOOST_CHECK(cyclesDim[1] == Cycle({8, 9, 10}));
+  BOOST_CHECK(cyclesDim[2] == Cycle({6, 9, 11}));
+
+  cyclesDim = s.get_representative_cycles_in_dim(2, false);
+
+  BOOST_CHECK_EQUAL(cyclesDim.size(), 0);
+
   BOOST_CHECK((s.get_most_persistent_cycle(0, false) == Cycle({0})));
   BOOST_CHECK((s.get_most_persistent_cycle(1, false) == Cycle({6, 9, 11})));
   BOOST_CHECK((s.get_most_persistent_cycle(2, false) == Cycle()));
+
+  BOOST_CHECK((s.get_n_most_persistent_cycles(0, 1, false)[0] == Cycle({0})));
+  BOOST_CHECK((s.get_n_most_persistent_cycles(1, 1, false)[0] == Cycle({6, 9, 11})));
+  BOOST_CHECK((s.get_n_most_persistent_cycles(2, 1, false).empty()));
+
+  std::vector<Cycle> persCycles = s.get_n_most_persistent_cycles(0, 3, false);
+  BOOST_CHECK_EQUAL(persCycles.size(), 3);
+  BOOST_CHECK(persCycles[0] == Cycle({0}));
+  BOOST_CHECK(persCycles[1] == Cycle({0, 3}) || persCycles[1] == Cycle({0, 2}));  // same length
+  BOOST_CHECK((persCycles[2] == Cycle({0, 2}) || persCycles[2] == Cycle({0, 3})) && persCycles[2] != persCycles[1]);
+
+  persCycles = s.get_n_most_persistent_cycles(1, 3, false);
+  BOOST_CHECK_EQUAL(persCycles.size(), 3);
+  BOOST_CHECK(persCycles[0] == Cycle({6, 9, 11}));
+  BOOST_CHECK(persCycles[1] == Cycle({5, 6, 7}));
+  BOOST_CHECK(persCycles[2] == Cycle({8, 9, 10}));
+
+  persCycles = s.get_n_most_persistent_cycles(2, 3, false);
+  BOOST_CHECK_EQUAL(persCycles.size(), 0);
 }
 
 template <class Slicer>
-void test_slicer_rep_cycles2(Slicer& s)
-{
+void test_slicer_rep_cycles2(Slicer& s) {
   using Cycle = typename Slicer::Cycle;
 
   s.set_slice({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14});
@@ -650,10 +694,28 @@ void test_slicer_rep_cycles2(Slicer& s)
   BOOST_CHECK((s.get_most_persistent_cycle(0, true) == Cycle({0})));
   BOOST_CHECK((s.get_most_persistent_cycle(1, true) == Cycle({5, 6, 7})));
   BOOST_CHECK((s.get_most_persistent_cycle(2, true) == Cycle()));
+
+  BOOST_CHECK((s.get_n_most_persistent_cycles(0, 1, false)[0] == Cycle({0})));
+  BOOST_CHECK((s.get_n_most_persistent_cycles(1, 1, false)[0] == Cycle({5, 6, 7})));
+  BOOST_CHECK((s.get_n_most_persistent_cycles(2, 1, false).empty()));
+
+  std::vector<Cycle> persCycles = s.get_n_most_persistent_cycles(0, 3, true);
+  BOOST_CHECK_EQUAL(persCycles.size(), 3);
+  BOOST_CHECK(persCycles[0] == Cycle({0}));
+  BOOST_CHECK(persCycles[1] == Cycle({0, 3}) || persCycles[1] == Cycle({0, 2}));  // same length
+  BOOST_CHECK((persCycles[2] == Cycle({0, 2}) || persCycles[2] == Cycle({0, 3})) && persCycles[2] != persCycles[1]);
+
+  persCycles = s.get_n_most_persistent_cycles(1, 3, true);
+  BOOST_CHECK_EQUAL(persCycles.size(), 3);
+  BOOST_CHECK(persCycles[0] == Cycle({5, 6, 7}));
+  BOOST_CHECK(persCycles[1] == Cycle({8, 9, 10}));
+  BOOST_CHECK(persCycles[2] == Cycle({6, 9, 11}));
+
+  persCycles = s.get_n_most_persistent_cycles(2, 3, true);
+  BOOST_CHECK_EQUAL(persCycles.size(), 0);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_rep_cycles, Slicer, list_of_tested_variants2)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_rep_cycles, Slicer, list_of_tested_variants2) {
   using Fil = typename Slicer::Filtration_value;
 
   auto cpx = build_rep_cycle_input_complex<Fil>();
@@ -673,4 +735,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_rep_cycles, Slicer, list_of_tested_variants
   test_slicer_rep_cycles2(wc2);
   Thread_safe_slicer tss2(s2);
   test_slicer_rep_cycles2(tss2);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_serialization, Slicer, list_of_tested_variants) {
+  using Fil = typename Slicer::Filtration_value;
+
+  Slicer s(build_simple_input_complex<Fil>());
+  char* buffer = new char[1024];
+  char* ptr = buffer;
+
+  std::size_t serSize = get_serialization_size_of(s);
+  ptr = serialize_value_to_char_buffer(s, ptr);
+  BOOST_CHECK_EQUAL(serSize, ptr - buffer);
+
+  Slicer copy;
+  const char* c_ptr = buffer;
+  c_ptr = deserialize_value_from_char_buffer(copy, c_ptr);
+  BOOST_CHECK_EQUAL(serSize, c_ptr - buffer);
+
+  BOOST_CHECK(s == copy);
+  BOOST_CHECK(s.get_slice() == copy.get_slice());
+
+  delete[] buffer;
 }

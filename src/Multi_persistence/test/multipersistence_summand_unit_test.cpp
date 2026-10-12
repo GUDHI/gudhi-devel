@@ -23,12 +23,11 @@
 #include <gudhi/Multi_persistence/Line.h>
 
 using Gudhi::multi_persistence::Box;
-using Gudhi::multi_persistence::Line;
-using Gudhi::multi_persistence::Summand;
 using Gudhi::multi_persistence::compute_summand_distance_to;
 using Gudhi::multi_persistence::compute_summand_interleaving;
 using Gudhi::multi_persistence::compute_summand_local_weight;
-using Gudhi::multi_persistence::compute_summand_landscape_value;
+using Gudhi::multi_persistence::Line;
+using Gudhi::multi_persistence::Summand;
 
 template <typename T>
 using B = typename Summand<T>::Births;
@@ -301,13 +300,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(summand_helpers, T, list_of_tested_variants) {
     weight = compute_summand_local_weight(sum, std::vector<T>{5, 2}, -0.75);
     BOOST_CHECK_EQUAL(weight, 1.);
   }
-
-  auto landscape = compute_summand_landscape_value(sum, std::vector<T>{1, 4});
-  BOOST_CHECK_EQUAL(landscape, 0);
-  landscape = compute_summand_landscape_value(sum, std::vector<T>{5, 5});
-  BOOST_CHECK_EQUAL(landscape, 1);
-  landscape = compute_summand_landscape_value(sum, std::vector<T>{10, 3});
-  BOOST_CHECK_EQUAL(landscape, 0);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(summand_serialization, T, list_of_tested_variants) {
@@ -328,5 +320,5 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(summand_serialization, T, list_of_tested_variants)
   BOOST_CHECK_EQUAL(serSize, c_ptr - buffer);
   BOOST_CHECK(sum == copy);
 
-  delete [] buffer;
+  delete[] buffer;
 }

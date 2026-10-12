@@ -37,8 +37,7 @@ namespace multi_persistence {
  * @tparam MultiFiltrationValue Filtration value type used in @ref Slicer.
  */
 template <class MultiFiltrationValue>
-class Persistence_interface_cohomology
-{
+class Persistence_interface_cohomology {
  public:
   /**
    * @brief Complex interface for @ref Gudhi::persistent_cohomology::Persistent_cohomology
@@ -66,34 +65,29 @@ class Persistence_interface_cohomology
 
   template <class Filtration_range>
   Persistence_interface_cohomology(const Complex& cpx, const Filtration_range& filtrationValues, bool ignoreInf = false)
-      : order_(cpx.get_number_of_cycle_generators()), interface_(cpx, order_), barcode_()
-  {
+      : order_(cpx.get_number_of_cycle_generators()), interface_(cpx, order_), barcode_() {
     _initialize_order(cpx, filtrationValues, ignoreInf);
     _initialize_persistence();
   }
 
   Persistence_interface_cohomology(const Persistence_interface_cohomology& other)
-      : order_(other.order_), interface_(other.interface_, order_), barcode_(other.barcode_)
-  {}
+      : order_(other.order_), interface_(other.interface_, order_), barcode_(other.barcode_) {}
 
   Persistence_interface_cohomology(Persistence_interface_cohomology&& other) noexcept
       : order_(std::move(other.order_)),
         interface_(std::move(other.interface_), order_),
-        barcode_(std::move(other.barcode_))
-  {}
+        barcode_(std::move(other.barcode_)) {}
 
   ~Persistence_interface_cohomology() = default;
 
-  Persistence_interface_cohomology& operator=(const Persistence_interface_cohomology& other)
-  {
+  Persistence_interface_cohomology& operator=(const Persistence_interface_cohomology& other) {
     order_ = other.order_;
     interface_ = PCOH_complex(other.interface_, order_);
     barcode_ = other.barcode_;
     return *this;
   }
 
-  Persistence_interface_cohomology& operator=(Persistence_interface_cohomology&& other) noexcept
-  {
+  Persistence_interface_cohomology& operator=(Persistence_interface_cohomology&& other) noexcept {
     order_ = std::move(other.order_);
     interface_ = PCOH_complex(std::move(other.interface_), order_);
     barcode_ = std::move(other.barcode_);
@@ -102,12 +96,11 @@ class Persistence_interface_cohomology
 
   // TODO: swap?
 
-  /** 
+  /**
    * @brief The `ignoreInf` argument is not ignored for this class.
    */
   template <class Filtration_range>
-  void initialize(const Complex& cpx, const Filtration_range& filtrationValues, bool ignoreInf = false)
-  {
+  void initialize(const Complex& cpx, const Filtration_range& filtrationValues, bool ignoreInf = false) {
     _initialize_order(cpx, filtrationValues, ignoreInf);  // may trigger a relocation for order_
     interface_ = PCOH_complex(cpx, order_);
     _initialize_persistence();
@@ -117,8 +110,7 @@ class Persistence_interface_cohomology
    * @brief The `ignoreInf` argument is not ignored for this class.
    */
   template <class Filtration_range>
-  void update(const Filtration_range& filtrationValues, bool ignoreInf = false)
-  {
+  void update(const Filtration_range& filtrationValues, bool ignoreInf = false) {
     GUDHI_CHECK(is_initialized(), std::logic_error("Barcode can not be updated uninitialized."));
 
     auto const* cpx = interface_.get_complex_ptr();
@@ -132,14 +124,12 @@ class Persistence_interface_cohomology
 
   const Map& get_current_order() const { return order_; }
 
-  const Barcode& get_barcode()
-  {
+  const Barcode& get_barcode() {
     GUDHI_CHECK(is_initialized(), std::logic_error("Barcode can not be computed uninitialized."));
     return barcode_;
   }
 
-  friend std::ostream& operator<<(std::ostream& stream, const Persistence_interface_cohomology& pers)
-  {
+  friend std::ostream& operator<<(std::ostream& stream, const Persistence_interface_cohomology& pers) {
     stream << "Complex:\n";
     stream << pers.interface_ << "\n";
     stream << "Permutation:\n";
@@ -162,8 +152,7 @@ class Persistence_interface_cohomology
   Barcode barcode_;
 
   template <class Filtration_range>
-  void _initialize_order(const Complex& complex, const Filtration_range& filtrationValues, bool ignoreInf)
-  {
+  void _initialize_order(const Complex& complex, const Filtration_range& filtrationValues, bool ignoreInf) {
     const auto& dimensions = complex.get_dimensions();
     order_.resize(complex.get_number_of_cycle_generators());
     std::iota(order_.begin(), order_.end(), 0);
@@ -186,8 +175,7 @@ class Persistence_interface_cohomology
     }
   }
 
-  void _initialize_persistence()
-  {
+  void _initialize_persistence() {
     Persistent_cohomology pcoh(interface_, true);
     pcoh.init_coefficients(2);
     pcoh.compute_persistent_cohomology_without_optimizations(0);

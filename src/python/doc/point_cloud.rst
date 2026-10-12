@@ -24,6 +24,10 @@ Subsampling
 .. automodule:: gudhi.subsampling
    :members:
 
+.. note::
+   For reproducible results, consider using :func:`~gudhi.random.set_seed`.
+       
+
 Time Delay Embedding
 --------------------
 

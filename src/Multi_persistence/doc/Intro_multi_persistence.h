@@ -23,7 +23,6 @@ namespace multi_persistence {
  * \section multiparameterintro Multi-parameter Persistence
  *
  * TODO:
- * To come: a Multi-parameter Persistence module, with, for the beginnings, an interface mostly in Python.
  * 
  * @}
  */

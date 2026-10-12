@@ -15,12 +15,21 @@ from pytest import raises
 import gudhi as gd
 
 
+def test_file_arguments_are_required():
+    with raises(TypeError):
+        gd.read_lower_triangular_matrix_from_csv_file()
+    with raises(TypeError):
+        gd.read_persistence_intervals_grouped_by_dimension()
+    with raises(TypeError):
+        gd.read_persistence_intervals_in_dimension()
+
+
 def test_non_existing_csv_file():
     # Try to open a non existing file
-    matrix = gd.read_lower_triangular_matrix_from_csv_file(
-        csv_file="pouetpouettralala.toubiloubabdou"
-    )
-    assert matrix == []
+    with raises(FileNotFoundError, match="pouetpouettralala.toubiloubabdou"):
+        gd.read_lower_triangular_matrix_from_csv_file(
+            csv_file="pouetpouettralala.toubiloubabdou"
+        )
 
 
 def test_full_square_distance_matrix_csv_file():
@@ -47,14 +56,14 @@ def test_lower_triangular_distance_matrix_csv_file():
 
 def test_non_existing_persistence_file():
     # Try to open a non existing file
-    persistence = gd.read_persistence_intervals_grouped_by_dimension(
-        persistence_file="pouetpouettralala.toubiloubabdou"
-    )
-    assert persistence == []
-    persistence = gd.read_persistence_intervals_in_dimension(
-        persistence_file="pouetpouettralala.toubiloubabdou", only_this_dim=1
-    )
-    np.testing.assert_array_equal(persistence, [])
+    with raises(FileNotFoundError, match="pouetpouettralala.toubiloubabdou"):
+        gd.read_persistence_intervals_grouped_by_dimension(
+            persistence_file="pouetpouettralala.toubiloubabdou"
+        )
+    with raises(FileNotFoundError, match="pouetpouettralala.toubiloubabdou"):
+        gd.read_persistence_intervals_in_dimension(
+            persistence_file="pouetpouettralala.toubiloubabdou", only_this_dim=1
+        )
 
 
 def test_read_persistence_intervals_without_dimension():

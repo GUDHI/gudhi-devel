@@ -19,12 +19,14 @@
 #define GUDHI_VINEYARD_BASE_H_
 
 #include <numeric>
+#include <type_traits>
 #include <vector>
 
 #include <boost/range/adaptor/transformed.hpp>
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Matrix.h>
+#include <gudhi/persistence_matrix_options.h>
 
 namespace Gudhi {
 namespace vineyard {
@@ -116,7 +118,7 @@ class Vineyard_base {
    * a another nested `operator[]`.
    * @tparam DimensionRange Range of integers. Has to implement a `operator[]` method.
    * @tparam FiltrationRange Range of arithmetic values or at least of values with an `operator<`. Has to implement a
-   * `operator[]` method.
+   * `operator[]` and a size() method.
    * @param boundaryMatrix Boundary container of the filtered complex. The container does not need to be ordered, but
    * the boundaries have to be represented by the indices of their faces in the container.
    * @param dimensions Dimension container of cells in the complex. A value at index \f$ i \f$ has to correspond to the
@@ -125,9 +127,53 @@ class Vineyard_base {
    * correspond to the filtration value of the cell represented by the boundary at index \f$ i \f$ in `boundaryMatrix`.
    * Note that the filtration is assumed to be a 1-parameter filtration.
    */
-  template <class BoundaryRange, class DimensionRange, class FiltrationRange>
+  template <class BoundaryRange, class DimensionRange, class FiltrationRange,
+            class = std::enable_if_t<Gudhi::persistence_matrix::RangeTraits<FiltrationRange>::has_size> >
   Vineyard_base(const BoundaryRange& boundaryMatrix, const DimensionRange& dimensions,
                 const FiltrationRange& filtrationValues)
+      : matrix_(boundaryMatrix.size()), order_(boundaryMatrix.size()) {
+    // All static_assert in this class are quite useless as Matrix_options is fixed and has those enabled
+    // I keep them just here for now in case Matrix_options becomes a template argument instead later
+    static_assert(Matrix_options::has_vine_update, "Underlying matrix has to support vine swaps.");
+    static_assert(Matrix_options::has_column_pairings, "Underlying matrix has to store barcode.");
+    static_assert(
+        Matrix_options::column_indexation_type == Gudhi::persistence_matrix::Column_indexation_types::POSITION ||
+            (Matrix_options::is_of_boundary_type &&
+             Matrix_options::column_indexation_type == Gudhi::persistence_matrix::Column_indexation_types::CONTAINER),
+        "Matrix has a non supported index scheme.");
+
+    GUDHI_CHECK(boundaryMatrix.size() == filtrationValues.size(),
+                std::invalid_argument("Boundary and filtration value range sizes are not matching."));
+
+    if constexpr (!Matrix_options::is_of_boundary_type) {
+      idToPos_.emplace();
+      idToPos_->resize(order_.size());
+    }
+
+    _initialize(boundaryMatrix, dimensions,
+                [&filtrationValues](Index i, Index j) { return filtrationValues[i] < filtrationValues[j]; });
+  }
+
+  /**
+   * @brief Constructor initializing the first barcode.
+   * 
+   * @tparam BoundaryRange Range of ranges of integers. Has to implement a `size` method and an `operator[]` with
+   * a another nested `operator[]`.
+   * @tparam DimensionRange Range of integers. Has to implement a `operator[]` method.
+   * @tparam F Method taking to integer values and returning a boolean.
+   * @param boundaryMatrix Boundary container of the filtered complex. The container does not need to be ordered, but
+   * the boundaries have to be represented by the indices of their faces in the container.
+   * @param dimensions Dimension container of cells in the complex. A value at index \f$ i \f$ has to correspond to the
+   * dimension of the cell represented by the boundary at index \f$ i \f$ in `boundaryMatrix`.
+   * @param is_before_in_filtration Method taking two indices \f$ i \f$ and \f$ j \f$, returning `true` if and only if
+   * the cell at index \f$ i \f$ in the boundary matrix should appear in the filtration strictly before the cell
+   * at index \f$ j \f$. Note that the stored filtration will first be sorted by dimension, so there is no particular
+   * need to distinguish two cells with same filtration value: the order induced by this parameter has to be total
+   * for filtration values, but not for the cells them-selves.
+   */
+  template <class BoundaryRange, class DimensionRange, class F,
+            class = std::enable_if_t<!Gudhi::persistence_matrix::RangeTraits<F>::has_size> >
+  Vineyard_base(const BoundaryRange& boundaryMatrix, const DimensionRange& dimensions, F&& is_before_in_filtration)
       : matrix_(boundaryMatrix.size()), order_(boundaryMatrix.size()) {
     // All static_assert in this class are quite useless as Matrix_options is fixed and has those enabled
     // I keep them just here for now in case Matrix_options becomes a template argument instead later
@@ -144,7 +190,7 @@ class Vineyard_base {
       idToPos_->resize(order_.size());
     }
 
-    _initialize(boundaryMatrix, dimensions, filtrationValues);
+    _initialize(boundaryMatrix, dimensions, std::forward<F>(is_before_in_filtration));
   }
 
   /**
@@ -163,9 +209,13 @@ class Vineyard_base {
    * correspond to the filtration value of the cell represented by the boundary at index \f$ i \f$ in `boundaryMatrix`.
    * Note that the filtration is assumed to be a 1-parameter filtration.
    */
-  template <class BoundaryRange, class DimensionRange, class FiltrationRange>
+  template <class BoundaryRange, class DimensionRange, class FiltrationRange,
+            class = std::enable_if_t<Gudhi::persistence_matrix::RangeTraits<FiltrationRange>::has_size> >
   void initialize(const BoundaryRange& boundaryMatrix, const DimensionRange& dimensions,
                   const FiltrationRange& filtrationValues) {
+    GUDHI_CHECK(boundaryMatrix.size() == filtrationValues.size(),
+                std::invalid_argument("Boundary and filtration value range sizes are not matching."));
+
     matrix_ = Matrix(boundaryMatrix.size());
     order_.resize(boundaryMatrix.size());
     if constexpr (!Matrix_options::is_of_boundary_type) {
@@ -173,7 +223,38 @@ class Vineyard_base {
       idToPos_->resize(order_.size());
     }
 
-    _initialize(boundaryMatrix, dimensions, filtrationValues);
+    _initialize(boundaryMatrix, dimensions,
+                [&filtrationValues](Index i, Index j) { return filtrationValues[i] < filtrationValues[j]; });
+  }
+
+  /**
+   * @brief Initializes the first barcode by recomputing it from scratch.
+   * 
+   * @tparam BoundaryRange Range of ranges of integers. Has to implement a `size` method and an `operator[]` with
+   * a another nested `operator[]`.
+   * @tparam DimensionRange Range of integers. Has to implement a `operator[]` method.
+   * @tparam F Method taking to integer values and returning a boolean.
+   * @param boundaryMatrix Boundary container of the filtered complex. The container does not need to be ordered, but
+   * the boundaries have to be represented by the indices of their faces in the container.
+   * @param dimensions Dimension container of cells in the complex. A value at index \f$ i \f$ has to correspond to the
+   * dimension of the cell represented by the boundary at index \f$ i \f$ in `boundaryMatrix`.
+   * @param is_before_in_filtration Method taking two indices \f$ i \f$ and \f$ j \f$, returning `true` if and only if
+   * the cell at index \f$ i \f$ in the boundary matrix should appear in the filtration strictly before the cell
+   * at index \f$ j \f$. Note that the stored filtration will first be sorted by dimension, so there is no particular
+   * need to distinguish two cells with same filtration value: the order induced by this parameter has to be total
+   * for filtration values, but not for the cells them-selves.
+   */
+  template <class BoundaryRange, class DimensionRange, class F,
+            class = std::enable_if_t<!Gudhi::persistence_matrix::RangeTraits<F>::has_size> >
+  void initialize(const BoundaryRange& boundaryMatrix, const DimensionRange& dimensions, F&& is_before_in_filtration) {
+    matrix_ = Matrix(boundaryMatrix.size());
+    order_.resize(boundaryMatrix.size());
+    if constexpr (!Matrix_options::is_of_boundary_type) {
+      if (!idToPos_) idToPos_.emplace();
+      idToPos_->resize(order_.size());
+    }
+
+    _initialize(boundaryMatrix, dimensions, std::forward<F>(is_before_in_filtration));
   }
 
   /**
@@ -186,7 +267,7 @@ class Vineyard_base {
    * are from the same vine. TODO: explain the matching more mathematically?
    *
    * @pre The first barcode has to have been initialized (either with the initializing constructor or
-   * with @ref initialize "").
+   * with one of the two @ref initialize "").
    *
    * @tparam FiltrationRange Range of arithmetic values or at least of values with an `operator<`. Has to implement a
    * `operator[]` method.
@@ -194,7 +275,7 @@ class Vineyard_base {
    * correspond to the filtration value of the cell represented by the boundary at index \f$ i \f$ in the initializing
    * argument `boundaryMatrix`. Note that the filtration is assumed to be a 1-parameter filtration.
    */
-  template <class FiltrationRange>
+  template <class FiltrationRange, class = std::enable_if_t<!std::is_integral_v<FiltrationRange> > >
   void update(const FiltrationRange& filtrationValues) {
     GUDHI_CHECK(filtrationValues.size() == order_.size(),
                 std::invalid_argument("Filtration value container size is not matching."));
@@ -204,16 +285,33 @@ class Vineyard_base {
       // speed up because ordered by dim, to avoid unnecessary swaps
       while (curr > 0 && matrix_.get_column_dimension(curr) == matrix_.get_column_dimension(curr - 1) &&
              filtrationValues[order_[curr]] < filtrationValues[order_[curr - 1]]) {
-        if constexpr (!Matrix_options::is_of_boundary_type) {
-          auto id1 = matrix_.get_pivot(curr - 1);
-          auto id2 = matrix_.get_pivot(curr);
-          std::swap((*idToPos_)[id1], (*idToPos_)[id2]);
-        }
-        matrix_.vine_swap(curr - 1);
-        std::swap(order_[curr - 1], order_[curr]);
+        update(curr - 1);
         --curr;
       }
     }
+  }
+
+  /**
+   * @brief Updates the barcode by swapping the \f$ i^{th} \f$ cell in the current filtration ordered by dimension with
+   * the \f$ (i+1)^{th} \f$ cell. Assumes that the new order is still a valid filtration order, otherwise the behaviour
+   * is undefined.
+   *
+   * @pre The first barcode has to have been initialized (either with the initializing constructor or
+   * with one of the two @ref initialize "").
+   * 
+   * @param i Position of the cell to swap with the cell at position `i + 1`.
+   */
+  template <typename I, class = std::enable_if_t<std::is_integral_v<I> > >
+  void update(I i) {
+    GUDHI_CHECK(i < static_cast<I>(order_.size() - 1),
+                std::invalid_argument("The given index cannot be the last index of the filtration."));
+    if constexpr (!Matrix_options::is_of_boundary_type) {
+      auto id1 = matrix_.get_pivot(i);
+      auto id2 = matrix_.get_pivot(i + 1);
+      std::swap((*idToPos_)[id1], (*idToPos_)[id2]);
+    }
+    matrix_.vine_swap(i);
+    std::swap(order_[i], order_[i + 1]);
   }
 
   /**
@@ -253,25 +351,32 @@ class Vineyard_base {
    * @param dim If given (with a positive integer), only returns the cycles of this dimension. By default, returns all
    * cycles in all dimension.
    */
-  auto get_all_current_representative_cycles(bool update = true, Dimension dim = nullDimension) {
+  std::vector<Cycle> get_all_current_representative_cycles(bool update = true, Dimension dim = nullDimension) {
     static_assert(Matrix_options::can_retrieve_representative_cycles,
                   "Underlying matrix has to support representative cycles.");
 
     if (update) matrix_.update_all_representative_cycles(dim);
     const auto& cycles = matrix_.get_all_representative_cycles();
-    return boost::adaptors::transform(cycles, [&](const Cycle& cycle) -> Cycle {
-      Cycle c(cycle.size());
-      for (Index i = 0; i < cycle.size(); ++i) {
-        if constexpr (Matrix_options::is_of_boundary_type) {
-          // works for RU because id == pos, but does not work for chain with vine
-          // we need a id to pos map in that case
-          c[i] = order_[cycle[i]];
-        } else {
-          c[i] = order_[(*idToPos_)[cycle[i]]];
-        }
+    std::vector<Cycle> out;
+    if (dim == nullDimension) out.reserve(cycles.size());
+    // if update is false, there could be more than the right cycles in `cycles`
+    for (const auto& c : cycles) {
+      // c should never be empty
+      if (dim == nullDimension || matrix_.get_column_dimension(c[0]) == dim) {
+        out.emplace_back();
+        out.back().reserve(c.size());
+        std::transform(c.begin(), c.end(), std::back_inserter(out.back()), [&](Index i) {
+          if constexpr (Matrix_options::is_of_boundary_type) {
+            // works for RU because id == pos, but does not work for chain with vine
+            // we need a id to pos map in that case
+            return order_[i];
+          } else {
+            return order_[(*idToPos_)[i]];
+          }
+        });
       }
-      return c;
-    });
+    }
+    return out;
   }
 
   /**
@@ -338,19 +443,16 @@ class Vineyard_base {
   Permutation order_;                  /**< Filtration order. */
   std::optional<Permutation> idToPos_; /**< ID to filtration position map. */
 
-  template <class BoundaryRange, class DimensionRange, class FiltrationRange>
-  void _initialize(const BoundaryRange& boundaryMatrix, const DimensionRange& dimensions,
-                   const FiltrationRange& filtrationValues) {
+  template <class BoundaryRange, class DimensionRange, class F>
+  void _initialize(const BoundaryRange& boundaryMatrix, const DimensionRange& dimensions, F&& is_before_in_filtration) {
     GUDHI_CHECK(boundaryMatrix.size() == dimensions.size(),
                 std::invalid_argument("Boundary and dimension range sizes are not matching."));
-    GUDHI_CHECK(boundaryMatrix.size() == filtrationValues.size(),
-                std::invalid_argument("Boundary and filtration value range sizes are not matching."));
 
     std::iota(order_.begin(), order_.end(), 0);
     std::sort(order_.begin(), order_.end(), [&](Index i, Index j) {
       if (dimensions[i] < dimensions[j]) return true;
       if (dimensions[i] > dimensions[j]) return false;
-      return filtrationValues[i] < filtrationValues[j];
+      return std::forward<F>(is_before_in_filtration)(i, j);
     });
 
     // simplex IDs need to be increasing in order, so the original ones cannot be used

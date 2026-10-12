@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <gudhi/Multi_persistence/Line.h>
+#include <gudhi/Multi_persistence/Box.h>
 
 namespace Gudhi {
 namespace multi_persistence {
@@ -38,39 +39,38 @@ namespace multi_persistence {
  * @tparam Slicer Underlying @ref Slicer type.
  */
 template <class Slicer>
-class Thread_safe_slicer : private Slicer
-{
+class Thread_safe_slicer : private Slicer {
  public:
   using Persistence = typename Slicer::Persistence;           /**< Persistence algorithm type. */
   using Filtration_value = typename Slicer::Filtration_value; /**< Filtration value type. */
-  using T = typename Slicer::T;                               /**< Numerical filtration value element type. */
+  using value_type = typename Slicer::value_type;             /**< Numerical filtration value element type. */
   using Complex = typename Slicer::Complex;                   /**< Complex type. */
   using Index = typename Slicer::Index;                       /**< Complex index type. */
   using Dimension = typename Slicer::Dimension;               /**< Dimension type. */
-  template <typename Value = T>
+  template <typename Value = value_type>
   using Bar = typename Slicer::template Bar<Value>;           /**< Bar type. */
   /**
    * @brief Barcode type. A vector of @ref Bar, a tuple like structure containing birth, death and dimension of a bar.
    */
-  template <typename Value = T>
+  template <typename Value = value_type>
   using Barcode = typename Slicer::template Barcode<Value>;
   /**
    * @brief Flat barcode type. All bars are represented by a birth and a death value stored respectively at even and
    * odd indices of the vector.
    */
-  template <typename Value = T>
+  template <typename Value = value_type>
   using Flat_barcode = typename Slicer::template Flat_barcode<Value>;
   /**
    * @brief Barcode ordered by dimension type. A vector which has at index \f$ d \f$ the @ref Barcode of dimension
    * \f$ d \f$.
    */
-  template <typename Value = T>
+  template <typename Value = value_type>
   using Multi_dimensional_barcode = typename Slicer::template Multi_dimensional_barcode<Value>;
   /**
    * @brief Flat barcode ordered by dimension type. A vector which has at index \f$ d \f$ the @ref Flat_barcode of
    * dimension \f$ d \f$.
    */
-  template <typename Value = T>
+  template <typename Value = value_type>
   using Multi_dimensional_flat_barcode = typename Slicer::template Multi_dimensional_flat_barcode<Value>;
   using Cycle = typename Slicer::Cycle;   /**< Cycle type. */
   using Thread_safe = Thread_safe_slicer; /**< Thread safe slicer type. */
@@ -83,32 +83,26 @@ class Thread_safe_slicer : private Slicer
    * @param slicer Original slicer.
    */
   Thread_safe_slicer(const Slicer& slicer)
-      : Slicer(slicer.get_slice(), slicer.get_persistence_algorithm()), slicer_(&slicer)
-  {}
+      : Slicer(slicer.get_slice(), slicer.get_persistence_algorithm()), slicer_(&slicer) {}
 
   /**
    * @brief Copy constructor.
    */
   Thread_safe_slicer(const Thread_safe_slicer& slicer)
-      : Slicer(slicer.get_slice(), slicer.get_persistence_algorithm()),
-        slicer_(slicer.slicer_)
-  {}
+      : Slicer(slicer.get_slice(), slicer.get_persistence_algorithm()), slicer_(slicer.slicer_) {}
 
   /**
    * @brief Move constructor.
    */
   Thread_safe_slicer(Thread_safe_slicer&& slicer) noexcept
-      : Slicer(std::move(slicer.slice_), std::move(slicer.persistence_)),
-        slicer_(slicer.slicer_)
-  {}
+      : Slicer(std::move(slicer.slice_), std::move(slicer.persistence_)), slicer_(slicer.slicer_) {}
 
   ~Thread_safe_slicer() = default;
 
   /**
    * @brief Assign operator.
    */
-  Thread_safe_slicer& operator=(const Thread_safe_slicer& other)
-  {
+  Thread_safe_slicer& operator=(const Thread_safe_slicer& other) {
     if (this == &other) return *this;
 
     Slicer::slice_ = other.slice_;
@@ -156,13 +150,13 @@ class Thread_safe_slicer : private Slicer
    * @brief Returns a const reference to the current slice. It can be initialized or updated with @ref set_slice
    * and @ref push_to.
    */
-  const std::vector<T>& get_slice() const { return Slicer::get_slice(); }
+  const std::vector<value_type>& get_slice() const { return Slicer::get_slice(); }
 
   /**
    * @brief Returns a reference to the current slice. It can also be initialized or updated with @ref set_slice
    * and @ref push_to.
    */
-  std::vector<T>& get_slice() { return Slicer::get_slice(); }
+  std::vector<value_type>& get_slice() { return Slicer::get_slice(); }
 
   /**
    * @brief Returns a const reference to the class computing the persistence of the current slice. It will be
@@ -174,14 +168,13 @@ class Thread_safe_slicer : private Slicer
    * @brief Returns two filtration values representing respectively the greatest common lower bound of all filtration
    * values in the filtration and the lowest common upper bound of them.
    */
-  std::pair<Filtration_value, Filtration_value> get_bounding_box() const { return slicer_->get_bounding_box(); }
+  Box<value_type> get_bounding_box() const { return slicer_->get_bounding_box(); }
 
   /**
    * @brief Returns a const reference to the filtration value container. A filtration value at index \$f i \$f
    * correspond to the filtration value associated to the generators at index \$f i \$f.
    */
-  const typename Complex::Filtration_value_container& get_filtration_values() const
-  {
+  const typename Complex::Filtration_value_container& get_filtration_values() const {
     return slicer_->get_filtration_values();
   }
 
@@ -226,9 +219,8 @@ class Thread_safe_slicer : private Slicer
    *
    * @tparam Array Container which can be converted into a vector of `T`.
    */
-  template <class Array = std::initializer_list<T>>
-  void set_slice(const Array& slice)
-  {
+  template <class Array = std::initializer_list<value_type>>
+  void set_slice(const Array& slice) {
     GUDHI_CHECK(slice.size() == slicer_->complex_.get_number_of_cycle_generators(),
                 std::invalid_argument("Slice should have the same size than the number of generators in the complex."));
 
@@ -240,9 +232,8 @@ class Thread_safe_slicer : private Slicer
    *
    * @tparam Line_like Any type convertible to a @ref Line class. Default value: `std::initializer_list<T>`.
    */
-  template <class Line_like = std::initializer_list<T>>
-  void push_to(const Line_like& line)
-  {
+  template <class Line_like = std::initializer_list<value_type>>
+  void push_to(const Line_like& line) {
     Slicer::_push_to(slicer_->complex_, Line<typename Line_like::value_type>(line));
   }
 
@@ -252,8 +243,7 @@ class Thread_safe_slicer : private Slicer
    * @tparam U Template parameter of the given line.
    */
   template <class U>
-  void push_to(const Line<U>& line)
-  {
+  void push_to(const Line<U>& line) {
     Slicer::_push_to(slicer_->complex_, line);
   }
 
@@ -262,8 +252,7 @@ class Thread_safe_slicer : private Slicer
   /**
    * @brief Returns true if and only if @ref initialize_persistence_computation was properly called.
    */
-  [[nodiscard]] bool persistence_computation_is_initialized() const
-  {
+  [[nodiscard]] bool persistence_computation_is_initialized() const {
     return Slicer::persistence_computation_is_initialized();
   }
 
@@ -276,17 +265,16 @@ class Thread_safe_slicer : private Slicer
    * if the update method of the template parameter @ref PersistenceAlgorithm does not permit this feature.
    * Default value: false.
    */
-  void initialize_persistence_computation(bool ignoreInf = false)
-  {
+  void initialize_persistence_computation(bool ignoreInf = false) {
     Slicer::_initialize_persistence_computation(slicer_->complex_, ignoreInf);
   }
 
   /**
    * @brief Updates the persistence barcode with the new slice. If @ref PersistenceAlgorithm is
-   * @ref Persistence_interface_vineyard: will update everything necessary for the barcode without re-computing
+   * @ref Persistence_interface_vineyard "": will update everything necessary for the barcode without re-computing
    * everything from scratch (contrary to @ref initialize_persistence_computation). Furthermore, it guarantees that
    * the new barcode will "matches" the precedent one. TODO: explain exactly what it means and how to do the matching.
-   * For other @ref PersistenceAlgorithm: more or less equivalent to @ref initialize_persistence_computation.
+   * For other @ref PersistenceAlgorithm "": more or less equivalent to @ref initialize_persistence_computation.
    *
    * @pre @ref initialize_persistence_computation has to be called at least once before.
    *
@@ -307,9 +295,8 @@ class Thread_safe_slicer : private Slicer
    * @param maxDim Maximal dimension to be included in the barcode. If negative, all dimensions are included.
    * Default value: -1.
    */
-  template <bool byDim = true, typename Value = T, bool idx = false>
-  auto get_barcode(int maxDim = -1)
-  {
+  template <bool byDim = true, typename Value = value_type, bool idx = false>
+  auto get_barcode(int maxDim = -1) {
     // complex in parent is empty, so maxDim needs to be initialized from the outside.
     if (maxDim < 0) maxDim = slicer_->get_max_dimension();
     return Slicer::template get_barcode<byDim, Value, idx>(maxDim);
@@ -326,9 +313,8 @@ class Thread_safe_slicer : private Slicer
    * @param maxDim Maximal dimension to be included in the barcode. If negative, all dimensions are included.
    * Default value: -1.
    */
-  template <bool byDim = false, typename Value = T, bool idx = false>
-  auto get_flat_barcode(int maxDim = -1)
-  {
+  template <bool byDim = false, typename Value = value_type, bool idx = false>
+  auto get_flat_barcode(int maxDim = -1) {
     // complex in parent is empty, so maxDim needs to be initialized from the outside.
     if (maxDim < 0) maxDim = slicer_->get_max_dimension();
     return Slicer::template get_flat_barcode<byDim, Value, idx>(maxDim);
@@ -346,14 +332,64 @@ class Thread_safe_slicer : private Slicer
    * @param update If true, updates the stored representative cycles, otherwise just returns the container in its
    * current state. So should be true at least the first time the method is used.
    */
-  std::vector<std::vector<Cycle>> get_representative_cycles(bool update = true)
-  {
+  std::vector<std::vector<Cycle>> get_representative_cycles(bool update = true) {
     return Slicer::_get_representative_cycles(slicer_->complex_, update);
   }
 
-  Cycle get_most_persistent_cycle(Dimension dim = 1, bool update = true)
-  {
+  /**
+   * @brief Returns the representative cycles of given dimension of the current slice. A cycle is represented by a
+   * vector of boundary indices. That is, the index \f$ i \f$ in a cycle represents the cell which boundary can be
+   * retrieved by @ref get_boundary "get_boundary(i)". The cycles are stored in the same order than the bars are in
+   * the multi-dimensional barcode.
+   *
+   * Only available if PersistenceAlgorithm::has_rep_cycles is true.
+   *
+   * @pre @ref initialize_persistence_computation has to be called at least once before.
+   *
+   * @param dimension Dimension of the cycles.
+   * @param update If true, updates the stored representative cycles, otherwise just returns the container in its
+   * current state. So should be true at least the first time the method is used. Default: true.
+   */
+  std::vector<Cycle> get_representative_cycles_in_dim(Dimension dimension, bool update = true) {
+    return Slicer::get_representative_cycles_in_dim(dimension, update);
+  }
+
+  /**
+   * @brief Returns the longest living representative cycles of the current slice in the given dimension. A cycle is
+   * represented by a vector of boundary indices. That is, the index \f$ i \f$ in a cycle represents the cell which
+   * boundary can be retrieved by @ref get_boundary "get_boundary(i)". If no cycle existed at given dimension, the
+   * returned cycle will be empty.
+   *
+   * Only available if PersistenceAlgorithm::has_rep_cycles is true.
+   *
+   * @pre @ref initialize_persistence_computation has to be called at least once before.
+   *
+   * @param dim Dimension of the cycle. Default: 1.
+   * @param update If true, updates the representative cycle before returning it, otherwise just returns the cycle
+   * in its current state. So should be true at least the first time the method is used. Default: true.
+   */
+  Cycle get_most_persistent_cycle(Dimension dim = 1, bool update = true) {
     return Slicer::get_most_persistent_cycle(dim, update);
+  }
+
+  /**
+   * @brief Returns the `n` longest living representative cycles of the current slice in the given dimension. A cycle is
+   * represented by a vector of boundary indices. That is, the index \f$ i \f$ in a cycle represents the cell which
+   * boundary can be retrieved by @ref get_boundary "get_boundary(i)". If no cycle existed at given dimension, the
+   * returned container will be empty. The cycles are ordered by bar length in decreasing order.
+   *
+   * Only available if PersistenceAlgorithm::has_rep_cycles is true.
+   *
+   * @pre @ref initialize_persistence_computation has to be called at least once before.
+   *
+   * @param dim Dimension of the cycle. Default: 1.
+   * @param n Number of cycles to return. If 0, no cycle is returned. If higher than the number of available cycles,
+   * it is set down to this number and all cycles are returned. Default: 1.
+   * @param update If true, updates the representative cycles before returning them, otherwise just returns the cycles
+   * in their current state. So should be true at least the first time the method is used. Default: true.
+   */
+  std::vector<Cycle> get_n_most_persistent_cycles(Dimension dim = 1, Index n = 1, bool update = true) {
+    return Slicer::get_n_most_persistent_cycles(dim, n, update);
   }
 
   // FRIENDS
@@ -361,8 +397,7 @@ class Thread_safe_slicer : private Slicer
   /**
    * @brief Outstream operator.
    */
-  friend std::ostream& operator<<(std::ostream& stream, const Thread_safe_slicer& slicer)
-  {
+  friend std::ostream& operator<<(std::ostream& stream, const Thread_safe_slicer& slicer) {
     stream << "-------------------- Thread_safe_slicer \n";
 
     stream << "--- Filtered complex \n";

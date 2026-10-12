@@ -17,19 +17,20 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
-#include <gudhi/Multi_parameter_filtration.h>
-#include <gudhi/Dynamic_multi_parameter_filtration.h>
-#include <gudhi/Degree_rips_bifiltration.h>
+#include <gudhi/Multi_filtration/Degree_bifiltration.h>
+#include <gudhi/Multi_filtration/Flat_array_filtration.h>
+#include <gudhi/Multi_filtration/Nested_array_filtration.h>
+#include <gudhi/Multi_parameter_filtration_value.h>
 
-using Gudhi::multi_filtration::Degree_rips_bifiltration;
-using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
-using Gudhi::multi_filtration::Multi_parameter_filtration;
+using Gudhi::multi_filtration::Degree_bifiltration;
+using Gudhi::multi_filtration::Flat_array_filtration;
+using Gudhi::multi_filtration::Multi_parameter_filtration_value;
+using Gudhi::multi_filtration::Nested_array_filtration;
 
-typedef boost::mpl::list<double, float, int> list_of_tested_variants;
+using list_of_tested_variants = boost::mpl::list<double, float, int>;
 
 template <class F>
-void test_io_operator(const F& f)
-{
+void test_io_operator(const F& f) {
   std::stringstream ss;
   ss << f;
   F f2;
@@ -38,8 +39,7 @@ void test_io_operator(const F& f)
 }
 
 template <class F, typename T>
-void test_io()
-{
+void test_io() {
   const int num_param = 2;
   std::vector<T> v1, v2 = {0, 0, -2, 1, -1, 2, 0, 3};
 
@@ -59,12 +59,11 @@ void test_io()
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_io_operator, T, list_of_tested_variants)
-{
-  std::clog << "Multi_parameter_filtration\n";
-  test_io<Multi_parameter_filtration<T>, T>();
-  std::clog << "Dynamic_multi_parameter_filtration\n";
-  test_io<Dynamic_multi_parameter_filtration<T>, T>();
-  std::clog << "Degree_rips_bifiltration\n";
-  test_io<Degree_rips_bifiltration<T>, T>();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_io_operator, T, list_of_tested_variants) {
+  std::clog << "Flat_array_filtration\n";
+  test_io<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
+  std::clog << "Nested_array_filtration\n";
+  test_io<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
+  std::clog << "Degree_bifiltration\n";
+  test_io<Multi_parameter_filtration_value<Degree_bifiltration<T>>, T>();
 }

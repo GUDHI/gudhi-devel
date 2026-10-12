@@ -8,7 +8,6 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-#include <cstdint>  //std::int32_t
 #include <limits>   //std::numerical_limits
 #include <type_traits>
 #include <utility>  //std::swap, std::move
@@ -21,15 +20,13 @@
 #include <boost/mpl/list.hpp>
 
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>  // _is_nan with Windows fix
-#include <gudhi/Multi_parameter_filtration.h>
-#include <gudhi/Dynamic_multi_parameter_filtration.h>
+#include <gudhi/Multi_filtration/Flat_array_filtration.h>
+#include <gudhi/Multi_filtration/Nested_array_filtration.h>
 #include <gudhi/Multi_filtration/multi_filtration_conversions.h>
 #include <gudhi/Multi_filtration/multi_filtration_products.h>
+#include <gudhi/Multi_parameter_filtration_value.h>
 
-using Gudhi::multi_filtration::Multi_parameter_filtration;
-using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
-using Gudhi::multi_filtration::as_type;
-using Gudhi::multi_filtration::_is_nan;
+using namespace Gudhi::multi_filtration;
 
 // declaration needed pre C++20
 template <typename U, class MultiFiltrationValue, class CoefficientRange>
@@ -39,58 +36,58 @@ U compute_euclidean_distance_to();
 template <typename U, class MultiFiltrationValue>
 U compute_norm();
 
-typedef boost::mpl::list<double, float, int> list_of_tested_variants;
+using list_of_tested_variants = boost::mpl::list<double, float, int>;
 
-template <class F, typename T, class F_alt>
-void test_constructors(){
+template <class F, typename T>
+void test_constructors() {
   F f0;
   BOOST_CHECK_EQUAL(f0.num_entries(), 2);
   BOOST_CHECK_EQUAL(f0.num_generators(), 1);
   BOOST_CHECK_EQUAL(f0.num_parameters(), 2);
-  BOOST_CHECK_EQUAL(f0(0,0), F::T_m_inf);
-  BOOST_CHECK_EQUAL(f0(0,1), F::T_m_inf);
-  
+  BOOST_CHECK_EQUAL(f0(0, 0), F::T_m_inf);
+  BOOST_CHECK_EQUAL(f0(0, 1), F::T_m_inf);
+
   F f1(3);
   BOOST_CHECK_EQUAL(f1.num_entries(), 3);
   BOOST_CHECK_EQUAL(f1.num_generators(), 1);
   BOOST_CHECK_EQUAL(f1.num_parameters(), 3);
-  BOOST_CHECK_EQUAL((f1[{0,0}]), F::T_m_inf);
-  BOOST_CHECK_EQUAL((f1[{0,1}]), F::T_m_inf);
-  BOOST_CHECK_EQUAL((f1[{0,2}]), F::T_m_inf);
+  BOOST_CHECK_EQUAL((f1[{0, 0}]), F::T_m_inf);
+  BOOST_CHECK_EQUAL((f1[{0, 1}]), F::T_m_inf);
+  BOOST_CHECK_EQUAL((f1[{0, 2}]), F::T_m_inf);
 
   F f2(3, 0);
   BOOST_CHECK_EQUAL(f2.num_entries(), 3);
   BOOST_CHECK_EQUAL(f2.num_generators(), 1);
   BOOST_CHECK_EQUAL(f2.num_parameters(), 3);
-  BOOST_CHECK_EQUAL(f2(0,0), 0);
-  BOOST_CHECK_EQUAL(f2(0,1), 0);
-  BOOST_CHECK_EQUAL(f2(0,2), 0);
+  BOOST_CHECK_EQUAL(f2(0, 0), 0);
+  BOOST_CHECK_EQUAL(f2(0, 1), 0);
+  BOOST_CHECK_EQUAL(f2(0, 2), 0);
 
-  F f3({0,1,2});
+  F f3({0, 1, 2});
   BOOST_CHECK_EQUAL(f3.num_entries(), 3);
   BOOST_CHECK_EQUAL(f3.num_generators(), 1);
   BOOST_CHECK_EQUAL(f3.num_parameters(), 3);
-  BOOST_CHECK_EQUAL(f3(0,0), 0);
-  BOOST_CHECK_EQUAL(f3(0,1), 1);
-  BOOST_CHECK_EQUAL(f3(0,2), 2);
+  BOOST_CHECK_EQUAL(f3(0, 0), 0);
+  BOOST_CHECK_EQUAL(f3(0, 1), 1);
+  BOOST_CHECK_EQUAL(f3(0, 2), 2);
 
   std::vector<T> v{0, 1, 2, 3, 4, 5};
   F f4(v.begin(), v.end());
   BOOST_CHECK_EQUAL(f4.num_entries(), 6);
   BOOST_CHECK_EQUAL(f4.num_generators(), 1);
   BOOST_CHECK_EQUAL(f4.num_parameters(), 6);
-  BOOST_CHECK_EQUAL(f4(0,0), 0);
-  BOOST_CHECK_EQUAL(f4(0,1), 1);
-  BOOST_CHECK_EQUAL(f4(0,2), 2);
-  BOOST_CHECK_EQUAL(f4(0,3), 3);
-  BOOST_CHECK_EQUAL(f4(0,4), 4);
-  BOOST_CHECK_EQUAL(f4(0,5), 5);
+  BOOST_CHECK_EQUAL(f4(0, 0), 0);
+  BOOST_CHECK_EQUAL(f4(0, 1), 1);
+  BOOST_CHECK_EQUAL(f4(0, 2), 2);
+  BOOST_CHECK_EQUAL(f4(0, 3), 3);
+  BOOST_CHECK_EQUAL(f4(0, 4), 4);
+  BOOST_CHECK_EQUAL(f4(0, 5), 5);
 
   if constexpr (F::ensures_1_criticality()) {
-    BOOST_CHECK_THROW(F f9(v.begin(), v.end(), 3), std::logic_error);
-    if constexpr (std::is_same_v<std::vector<T>, typename F::Underlying_container>){
-      BOOST_CHECK_THROW(F f5(v, 3), std::logic_error);
-      BOOST_CHECK_THROW(F f6(std::move(v), 3), std::logic_error);
+    BOOST_CHECK_THROW(F f9(v.begin(), v.end(), 3), std::invalid_argument);
+    if constexpr (std::is_same_v<std::vector<T>, typename F::Underlying_container>) {
+      BOOST_CHECK_THROW(F f5(v, 3), std::invalid_argument);
+      BOOST_CHECK_THROW(F f6(std::move(v), 3), std::invalid_argument);
     }
   } else {
     F f9(v.begin(), v.end(), 3);
@@ -104,105 +101,84 @@ void test_constructors(){
     BOOST_CHECK_EQUAL(f9(1, 1), 4);
     BOOST_CHECK_EQUAL(f9(1, 2), 5);
 
-    if constexpr (std::is_same_v<std::vector<T>, typename F::Underlying_container>){
+    if constexpr (std::is_same_v<std::vector<T>, typename F::Underlying_container>) {
       F f5(v, 3);
       BOOST_CHECK_EQUAL(f5.num_entries(), 6);
       BOOST_CHECK_EQUAL(f5.num_generators(), 2);
       BOOST_CHECK_EQUAL(f5.num_parameters(), 3);
-      BOOST_CHECK_EQUAL((f5[{0,0}]), 0);
-      BOOST_CHECK_EQUAL((f5[{0,1}]), 1);
-      BOOST_CHECK_EQUAL((f5[{0,2}]), 2);
-      BOOST_CHECK_EQUAL((f5[{1,0}]), 3);
-      BOOST_CHECK_EQUAL((f5[{1,1}]), 4);
-      BOOST_CHECK_EQUAL((f5[{1,2}]), 5);
-    
+      BOOST_CHECK_EQUAL((f5[{0, 0}]), 0);
+      BOOST_CHECK_EQUAL((f5[{0, 1}]), 1);
+      BOOST_CHECK_EQUAL((f5[{0, 2}]), 2);
+      BOOST_CHECK_EQUAL((f5[{1, 0}]), 3);
+      BOOST_CHECK_EQUAL((f5[{1, 1}]), 4);
+      BOOST_CHECK_EQUAL((f5[{1, 2}]), 5);
+
       F f6(std::move(v), 3);
       BOOST_CHECK(v.empty());
       BOOST_CHECK_EQUAL(f6.num_entries(), 6);
       BOOST_CHECK_EQUAL(f6.num_generators(), 2);
       BOOST_CHECK_EQUAL(f6.num_parameters(), 3);
-      BOOST_CHECK_EQUAL(f6(0,0), 0);
-      BOOST_CHECK_EQUAL(f6(0,1), 1);
-      BOOST_CHECK_EQUAL(f6(0,2), 2);
-      BOOST_CHECK_EQUAL(f6(1,0), 3);
-      BOOST_CHECK_EQUAL(f6(1,1), 4);
-      BOOST_CHECK_EQUAL(f6(1,2), 5);
+      BOOST_CHECK_EQUAL(f6(0, 0), 0);
+      BOOST_CHECK_EQUAL(f6(0, 1), 1);
+      BOOST_CHECK_EQUAL(f6(0, 2), 2);
+      BOOST_CHECK_EQUAL(f6(1, 0), 3);
+      BOOST_CHECK_EQUAL(f6(1, 1), 4);
+      BOOST_CHECK_EQUAL(f6(1, 2), 5);
     }
-  
+
     F f7(f9);
     BOOST_CHECK_EQUAL(f7.num_entries(), 6);
     BOOST_CHECK_EQUAL(f7.num_generators(), 2);
     BOOST_CHECK_EQUAL(f7.num_parameters(), 3);
-    BOOST_CHECK_EQUAL(f7(0,0), 0);
-    BOOST_CHECK_EQUAL(f7(0,1), 1);
-    BOOST_CHECK_EQUAL(f7(0,2), 2);
-    BOOST_CHECK_EQUAL(f7(1,0), 3);
-    BOOST_CHECK_EQUAL(f7(1,1), 4);
-    BOOST_CHECK_EQUAL(f7(1,2), 5);
-  
+    BOOST_CHECK_EQUAL(f7(0, 0), 0);
+    BOOST_CHECK_EQUAL(f7(0, 1), 1);
+    BOOST_CHECK_EQUAL(f7(0, 2), 2);
+    BOOST_CHECK_EQUAL(f7(1, 0), 3);
+    BOOST_CHECK_EQUAL(f7(1, 1), 4);
+    BOOST_CHECK_EQUAL(f7(1, 2), 5);
+
     F f8(std::move(f9));
     BOOST_CHECK_EQUAL(f8.num_entries(), 6);
     BOOST_CHECK_EQUAL(f8.num_generators(), 2);
     BOOST_CHECK_EQUAL(f8.num_parameters(), 3);
-    BOOST_CHECK_EQUAL(f8(0,0), 0);
-    BOOST_CHECK_EQUAL(f8(0,1), 1);
-    BOOST_CHECK_EQUAL(f8(0,2), 2);
-    BOOST_CHECK_EQUAL(f8(1,0), 3);
-    BOOST_CHECK_EQUAL(f8(1,1), 4);
-    BOOST_CHECK_EQUAL(f8(1,2), 5);
-  
+    BOOST_CHECK_EQUAL(f8(0, 0), 0);
+    BOOST_CHECK_EQUAL(f8(0, 1), 1);
+    BOOST_CHECK_EQUAL(f8(0, 2), 2);
+    BOOST_CHECK_EQUAL(f8(1, 0), 3);
+    BOOST_CHECK_EQUAL(f8(1, 1), 4);
+    BOOST_CHECK_EQUAL(f8(1, 2), 5);
+
     swap(f0, f8);
     BOOST_CHECK_EQUAL(f8.num_entries(), 2);
     BOOST_CHECK_EQUAL(f8.num_generators(), 1);
     BOOST_CHECK_EQUAL(f8.num_parameters(), 2);
-    BOOST_CHECK_EQUAL(f8(0,0), F::T_m_inf);
-    BOOST_CHECK_EQUAL(f8(0,1), F::T_m_inf);
+    BOOST_CHECK_EQUAL(f8(0, 0), F::T_m_inf);
+    BOOST_CHECK_EQUAL(f8(0, 1), F::T_m_inf);
     BOOST_CHECK_EQUAL(f0.num_entries(), 6);
     BOOST_CHECK_EQUAL(f0.num_generators(), 2);
     BOOST_CHECK_EQUAL(f0.num_parameters(), 3);
-    BOOST_CHECK_EQUAL(f0(0,0), 0);
-    BOOST_CHECK_EQUAL(f0(0,1), 1);
-    BOOST_CHECK_EQUAL(f0(0,2), 2);
-    BOOST_CHECK_EQUAL(f0(1,0), 3);
-    BOOST_CHECK_EQUAL(f0(1,1), 4);
-    BOOST_CHECK_EQUAL(f0(1,2), 5);
+    BOOST_CHECK_EQUAL(f0(0, 0), 0);
+    BOOST_CHECK_EQUAL(f0(0, 1), 1);
+    BOOST_CHECK_EQUAL(f0(0, 2), 2);
+    BOOST_CHECK_EQUAL(f0(1, 0), 3);
+    BOOST_CHECK_EQUAL(f0(1, 1), 4);
+    BOOST_CHECK_EQUAL(f0(1, 2), 5);
   }
-
-  F_alt f10({0,1,2});
-  F f11(f10);
-  BOOST_CHECK_EQUAL(f11.num_entries(), 3);
-  BOOST_CHECK_EQUAL(f11.num_generators(), 1);
-  BOOST_CHECK_EQUAL(f11.num_parameters(), 3);
-  BOOST_CHECK_EQUAL(f11(0,0), 0);
-  BOOST_CHECK_EQUAL(f11(0,1), 1);
-  BOOST_CHECK_EQUAL(f11(0,2), 2);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_constructors, T, list_of_tested_variants)
-{
-  test_constructors<Multi_parameter_filtration<T>, T, Multi_parameter_filtration<std::int32_t> >();
-  test_constructors<Multi_parameter_filtration<T, false, true>, T, Multi_parameter_filtration<std::int32_t> >();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_constructors, T, list_of_tested_variants) {
+  test_constructors<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
+  test_constructors<Multi_parameter_filtration_value<Flat_array_filtration<T>, false, true>, T>();
 
-  test_constructors<Dynamic_multi_parameter_filtration<T>, T, Dynamic_multi_parameter_filtration<std::int32_t> >();
-  test_constructors<Dynamic_multi_parameter_filtration<T, false, true>,
-                    T,
-                    Dynamic_multi_parameter_filtration<std::int32_t> >();
+  test_constructors<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
+  test_constructors<Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true>, T>();
 }
 
-template <class F, typename T, class F_alt>
-void test_utilities(){
+template <class F, typename T>
+void test_utilities() {
   F f0({0, 1, 2});
   bool test = std::is_same_v<decltype(f0(0, 0)), T&>;
   BOOST_CHECK(test);
-
-  F_alt f2 = f0.template as_type<float>();
-  test = std::is_same_v<decltype(f2(0, 0)), float&>;
-  BOOST_CHECK(test);
-  BOOST_CHECK_EQUAL(f2.num_generators(), 1);
-  BOOST_CHECK_EQUAL(f2.num_parameters(), 3);
-  BOOST_CHECK_EQUAL(f2(0, 0), 0.);
-  BOOST_CHECK_EQUAL(f2(0, 1), 1.);
-  BOOST_CHECK_EQUAL(f2(0, 2), 2.);
 
   BOOST_CHECK(!f0.is_plus_inf());
   BOOST_CHECK(!f0.is_minus_inf());
@@ -227,7 +203,7 @@ void test_utilities(){
   BOOST_CHECK(!f5.is_nan());
   BOOST_CHECK(!f5.is_finite());
 
-  if constexpr (std::numeric_limits<F>::has_quiet_NaN){
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
     F f6 = F::nan(3);
     BOOST_CHECK(!f6.is_plus_inf());
     BOOST_CHECK(!f6.is_minus_inf());
@@ -236,17 +212,16 @@ void test_utilities(){
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_utilities, T, list_of_tested_variants)
-{
-  test_utilities<Multi_parameter_filtration<T>, T, Multi_parameter_filtration<float> >();
-  test_utilities<Multi_parameter_filtration<T, false, true>, T, Multi_parameter_filtration<float> >();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_utilities, T, list_of_tested_variants) {
+  test_utilities<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
+  test_utilities<Multi_parameter_filtration_value<Flat_array_filtration<T>, false, true>, T>();
 
-  test_utilities<Dynamic_multi_parameter_filtration<T>, T, Dynamic_multi_parameter_filtration<float> >();
-  test_utilities<Dynamic_multi_parameter_filtration<T, false, true>, T, Dynamic_multi_parameter_filtration<float> >();
+  test_utilities<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
+  test_utilities<Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true>, T>();
 }
 
 template <class F, typename T>
-void test_comparators(){
+void test_comparators() {
   const int num_param = 3;
   std::vector<T> v1, v2, v3, v4;
 
@@ -317,7 +292,7 @@ void test_comparators(){
 }
 
 template <class F, typename T>
-void test_lex_comparators(){
+void test_lex_comparators() {
   const int num_param = 3;
   std::vector<T> v1, v2, v3, v4, v5;
 
@@ -419,7 +394,7 @@ void test_lex_comparators(){
 }
 
 template <class F, typename T>
-void test_co_lex_comparators(){
+void test_co_lex_comparators() {
   using namespace Gudhi::multi_filtration;
 
   const int num_param = 3;
@@ -522,25 +497,24 @@ void test_co_lex_comparators(){
   BOOST_CHECK(!is_strict_less_than_lexicographically<true>(f4, F::minus_inf(num_param)));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_comparators, T, list_of_tested_variants)
-{
-  test_comparators<Multi_parameter_filtration<T>, T>();
-  test_comparators<Multi_parameter_filtration<T, false, true>, T>();
-  test_lex_comparators<Multi_parameter_filtration<T>, T>();
-  test_lex_comparators<Multi_parameter_filtration<T, false, true>, T>();
-  test_co_lex_comparators<Multi_parameter_filtration<T>, T>();
-  test_co_lex_comparators<Multi_parameter_filtration<T, false, true>, T>();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_comparators, T, list_of_tested_variants) {
+  test_comparators<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
+  test_comparators<Multi_parameter_filtration_value<Flat_array_filtration<T>, false, true>, T>();
+  test_lex_comparators<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
+  test_lex_comparators<Multi_parameter_filtration_value<Flat_array_filtration<T>, false, true>, T>();
+  test_co_lex_comparators<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
+  test_co_lex_comparators<Multi_parameter_filtration_value<Flat_array_filtration<T>, false, true>, T>();
 
-  test_comparators<Dynamic_multi_parameter_filtration<T>, T>();
-  test_comparators<Dynamic_multi_parameter_filtration<T, false, true>, T>();
-  test_lex_comparators<Dynamic_multi_parameter_filtration<T>, T>();
-  test_lex_comparators<Dynamic_multi_parameter_filtration<T, false, true>, T>();
-  test_co_lex_comparators<Dynamic_multi_parameter_filtration<T>, T>();
-  test_co_lex_comparators<Dynamic_multi_parameter_filtration<T, false, true>, T>();
+  test_comparators<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
+  test_comparators<Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true>, T>();
+  test_lex_comparators<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
+  test_lex_comparators<Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true>, T>();
+  test_co_lex_comparators<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
+  test_co_lex_comparators<Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true>, T>();
 }
 
 template <class F, typename T>
-void test_operators(){
+void test_operators() {
   const int num_param = 3;
 
   F f({-10, 0, 1});
@@ -550,37 +524,37 @@ void test_operators(){
   // TODO: tests with more than 1 generator
 
   F res = -f;
-  BOOST_CHECK_EQUAL(res(0,0), 10);
-  BOOST_CHECK_EQUAL(res(0,1), 0);
-  BOOST_CHECK_EQUAL(res(0,2), -1);
+  BOOST_CHECK_EQUAL(res(0, 0), 10);
+  BOOST_CHECK_EQUAL(res(0, 1), 0);
+  BOOST_CHECK_EQUAL(res(0, 2), -1);
   BOOST_CHECK((-F::inf(num_param)).is_minus_inf());
   BOOST_CHECK((-F::minus_inf(num_param)).is_plus_inf());
   if constexpr (std::numeric_limits<F>::has_quiet_NaN) BOOST_CHECK((-F::nan(num_param)).is_nan());
 
   res = f - f2;
-  BOOST_CHECK_EQUAL(res(0,0), -15);
-  BOOST_CHECK_EQUAL(res(0,1), -2);
-  BOOST_CHECK_EQUAL(res(0,2), 2);
+  BOOST_CHECK_EQUAL(res(0, 0), -15);
+  BOOST_CHECK_EQUAL(res(0, 1), -2);
+  BOOST_CHECK_EQUAL(res(0, 2), 2);
 
   res = f - f3;
-  BOOST_CHECK_EQUAL(res(0,0), f4(0,0));
-  BOOST_CHECK_EQUAL(res(0,1), f4(0,1));
-  BOOST_CHECK_EQUAL(res(0,2), f4(0,2));
+  BOOST_CHECK_EQUAL(res(0, 0), f4(0, 0));
+  BOOST_CHECK_EQUAL(res(0, 1), f4(0, 1));
+  BOOST_CHECK_EQUAL(res(0, 2), f4(0, 2));
 
   res = f3 - f;
-  BOOST_CHECK_EQUAL(res(0,0), f3(0,0));
-  BOOST_CHECK_EQUAL(res(0,1), f3(0,1));
-  BOOST_CHECK_EQUAL(res(0,2), f3(0,2));
+  BOOST_CHECK_EQUAL(res(0, 0), f3(0, 0));
+  BOOST_CHECK_EQUAL(res(0, 1), f3(0, 1));
+  BOOST_CHECK_EQUAL(res(0, 2), f3(0, 2));
 
   res = T(5) - f;
-  BOOST_CHECK_EQUAL(res(0,0), 15);
-  BOOST_CHECK_EQUAL(res(0,1), 5);
-  BOOST_CHECK_EQUAL(res(0,2), 4);
+  BOOST_CHECK_EQUAL(res(0, 0), 15);
+  BOOST_CHECK_EQUAL(res(0, 1), 5);
+  BOOST_CHECK_EQUAL(res(0, 2), 4);
 
   res = f - T(5);
-  BOOST_CHECK_EQUAL(res(0,0), -15);
-  BOOST_CHECK_EQUAL(res(0,1), -5);
-  BOOST_CHECK_EQUAL(res(0,2), -4);
+  BOOST_CHECK_EQUAL(res(0, 0), -15);
+  BOOST_CHECK_EQUAL(res(0, 1), -5);
+  BOOST_CHECK_EQUAL(res(0, 2), -4);
   BOOST_CHECK((f - F::inf(num_param)).is_minus_inf());
   BOOST_CHECK((F::inf(num_param) - f).is_plus_inf());
   BOOST_CHECK((f - F::minus_inf(num_param)).is_plus_inf());
@@ -594,34 +568,34 @@ void test_operators(){
   if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
     BOOST_CHECK(res.is_nan());
   } else {
-    BOOST_CHECK_EQUAL(res(0,0), 0);
-    BOOST_CHECK_EQUAL(res(0,1), 0);
-    BOOST_CHECK_EQUAL(res(0,2), 0);
+    BOOST_CHECK_EQUAL(res(0, 0), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
+    BOOST_CHECK_EQUAL(res(0, 2), 0);
   }
   res = f3 - f4;
-  BOOST_CHECK_EQUAL(res(0,0), f3(0,0));
-  BOOST_CHECK_EQUAL(res(0,1), f3(0,1));
-  BOOST_CHECK_EQUAL(res(0,2), f3(0,2));
+  BOOST_CHECK_EQUAL(res(0, 0), f3(0, 0));
+  BOOST_CHECK_EQUAL(res(0, 1), f3(0, 1));
+  BOOST_CHECK_EQUAL(res(0, 2), f3(0, 2));
 
   res = f + f2;
-  BOOST_CHECK_EQUAL(res(0,0), -5);
-  BOOST_CHECK_EQUAL(res(0,1), 2);
-  BOOST_CHECK_EQUAL(res(0,2), 0);
+  BOOST_CHECK_EQUAL(res(0, 0), -5);
+  BOOST_CHECK_EQUAL(res(0, 1), 2);
+  BOOST_CHECK_EQUAL(res(0, 2), 0);
 
   res = f + f3;
-  BOOST_CHECK_EQUAL(res(0,0), f3(0,0));
-  BOOST_CHECK_EQUAL(res(0,1), f3(0,1));
-  BOOST_CHECK_EQUAL(res(0,2), f3(0,2));
+  BOOST_CHECK_EQUAL(res(0, 0), f3(0, 0));
+  BOOST_CHECK_EQUAL(res(0, 1), f3(0, 1));
+  BOOST_CHECK_EQUAL(res(0, 2), f3(0, 2));
 
   res = T(5) + f;
-  BOOST_CHECK_EQUAL(res(0,0), -5);
-  BOOST_CHECK_EQUAL(res(0,1), 5);
-  BOOST_CHECK_EQUAL(res(0,2), 6);
+  BOOST_CHECK_EQUAL(res(0, 0), -5);
+  BOOST_CHECK_EQUAL(res(0, 1), 5);
+  BOOST_CHECK_EQUAL(res(0, 2), 6);
 
   res = f + T(5);
-  BOOST_CHECK_EQUAL(res(0,0), -5);
-  BOOST_CHECK_EQUAL(res(0,1), 5);
-  BOOST_CHECK_EQUAL(res(0,2), 6);
+  BOOST_CHECK_EQUAL(res(0, 0), -5);
+  BOOST_CHECK_EQUAL(res(0, 1), 5);
+  BOOST_CHECK_EQUAL(res(0, 2), 6);
 
   BOOST_CHECK((f + F::inf(num_param)).is_plus_inf());
   BOOST_CHECK((F::inf(num_param) + f).is_plus_inf());
@@ -636,74 +610,74 @@ void test_operators(){
   if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
     BOOST_CHECK(res.is_nan());
   } else {
-    BOOST_CHECK_EQUAL(res(0,0), 0);
-    BOOST_CHECK_EQUAL(res(0,1), 0);
-    BOOST_CHECK_EQUAL(res(0,2), 0);
+    BOOST_CHECK_EQUAL(res(0, 0), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
+    BOOST_CHECK_EQUAL(res(0, 2), 0);
   }
   res = f3 + f3;
-  BOOST_CHECK_EQUAL(res(0,0), f3(0,0));
-  BOOST_CHECK_EQUAL(res(0,1), f3(0,1));
-  BOOST_CHECK_EQUAL(res(0,2), f3(0,2));
+  BOOST_CHECK_EQUAL(res(0, 0), f3(0, 0));
+  BOOST_CHECK_EQUAL(res(0, 1), f3(0, 1));
+  BOOST_CHECK_EQUAL(res(0, 2), f3(0, 2));
 
   res = f * f2;
-  BOOST_CHECK_EQUAL(res(0,0), -50);
-  BOOST_CHECK_EQUAL(res(0,1), 0);
-  BOOST_CHECK_EQUAL(res(0,2), -1);
+  BOOST_CHECK_EQUAL(res(0, 0), -50);
+  BOOST_CHECK_EQUAL(res(0, 1), 0);
+  BOOST_CHECK_EQUAL(res(0, 2), -1);
 
   res = f * f3;
-  BOOST_CHECK_EQUAL(res(0,0), f4(0,0));
+  BOOST_CHECK_EQUAL(res(0, 0), f4(0, 0));
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(_is_nan(res(0,1)));
+    BOOST_CHECK(detail::_is_nan(res(0, 1)));
   } else {
-    BOOST_CHECK_EQUAL(res(0,1), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
   }
-  BOOST_CHECK_EQUAL(res(0,2), f3(0,2));
+  BOOST_CHECK_EQUAL(res(0, 2), f3(0, 2));
 
   res = T(5) * f;
-  BOOST_CHECK_EQUAL(res(0,0), -50);
-  BOOST_CHECK_EQUAL(res(0,1), 0);
-  BOOST_CHECK_EQUAL(res(0,2), 5);
+  BOOST_CHECK_EQUAL(res(0, 0), -50);
+  BOOST_CHECK_EQUAL(res(0, 1), 0);
+  BOOST_CHECK_EQUAL(res(0, 2), 5);
 
   res = f * T(5);
-  BOOST_CHECK_EQUAL(res(0,0), -50);
-  BOOST_CHECK_EQUAL(res(0,1),  0);
-  BOOST_CHECK_EQUAL(res(0,2), 5);
+  BOOST_CHECK_EQUAL(res(0, 0), -50);
+  BOOST_CHECK_EQUAL(res(0, 1), 0);
+  BOOST_CHECK_EQUAL(res(0, 2), 5);
 
   res = f * F::inf(num_param);
-  BOOST_CHECK_EQUAL(res(0,0), F::T_m_inf);
+  BOOST_CHECK_EQUAL(res(0, 0), F::T_m_inf);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(_is_nan(res(0,1)));
+    BOOST_CHECK(detail::_is_nan(res(0, 1)));
   } else {
-    BOOST_CHECK_EQUAL(res(0,1), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
   }
-  BOOST_CHECK_EQUAL(res(0,2), F::T_inf);
+  BOOST_CHECK_EQUAL(res(0, 2), F::T_inf);
 
   res = F::inf(num_param) * f;
-  BOOST_CHECK_EQUAL(res(0,0), F::T_m_inf);
+  BOOST_CHECK_EQUAL(res(0, 0), F::T_m_inf);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(_is_nan(res(0,1)));
+    BOOST_CHECK(detail::_is_nan(res(0, 1)));
   } else {
-    BOOST_CHECK_EQUAL(res(0,1), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
   }
-  BOOST_CHECK_EQUAL(res(0,2), F::T_inf);
+  BOOST_CHECK_EQUAL(res(0, 2), F::T_inf);
 
   res = f * F::minus_inf(num_param);
-  BOOST_CHECK_EQUAL(res(0,0), F::T_inf);
+  BOOST_CHECK_EQUAL(res(0, 0), F::T_inf);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(_is_nan(res(0,1)));
+    BOOST_CHECK(detail::_is_nan(res(0, 1)));
   } else {
-    BOOST_CHECK_EQUAL(res(0,1), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
   }
-  BOOST_CHECK_EQUAL(res(0,2), F::T_m_inf);
+  BOOST_CHECK_EQUAL(res(0, 2), F::T_m_inf);
 
   res = F::minus_inf(num_param) * f;
-  BOOST_CHECK_EQUAL(res(0,0), F::T_inf);
+  BOOST_CHECK_EQUAL(res(0, 0), F::T_inf);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(_is_nan(res(0,1)));
+    BOOST_CHECK(detail::_is_nan(res(0, 1)));
   } else {
-    BOOST_CHECK_EQUAL(res(0,1), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
   }
-  BOOST_CHECK_EQUAL(res(0,2), F::T_m_inf);
+  BOOST_CHECK_EQUAL(res(0, 2), F::T_m_inf);
 
   if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
     res = f * F::nan(num_param);
@@ -718,63 +692,63 @@ void test_operators(){
   BOOST_CHECK(res.is_minus_inf());
 
   res = f / f2;
-  BOOST_CHECK_EQUAL(res(0,0), -2);
-  BOOST_CHECK_EQUAL(res(0,1), 0);
-  BOOST_CHECK_EQUAL(res(0,2), -1);
+  BOOST_CHECK_EQUAL(res(0, 0), -2);
+  BOOST_CHECK_EQUAL(res(0, 1), 0);
+  BOOST_CHECK_EQUAL(res(0, 2), -1);
 
   res = f / f3;
-  BOOST_CHECK_EQUAL(res(0,0), 0);
-  BOOST_CHECK_EQUAL(res(0,1), 0);
-  BOOST_CHECK_EQUAL(res(0,2), 0);
+  BOOST_CHECK_EQUAL(res(0, 0), 0);
+  BOOST_CHECK_EQUAL(res(0, 1), 0);
+  BOOST_CHECK_EQUAL(res(0, 2), 0);
 
   res = f3 / f;
-  BOOST_CHECK_EQUAL(res(0,0), f4(0,0));
+  BOOST_CHECK_EQUAL(res(0, 0), f4(0, 0));
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(_is_nan(res(0,1)));
+    BOOST_CHECK(detail::_is_nan(res(0, 1)));
   } else {
-    BOOST_CHECK_EQUAL(res(0,1), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
   }
-  BOOST_CHECK_EQUAL(res(0,2), f3(0,2));
+  BOOST_CHECK_EQUAL(res(0, 2), f3(0, 2));
 
   res = T(5) / f;
-  BOOST_CHECK_EQUAL(res(0,0), static_cast<T>(-0.5));
+  BOOST_CHECK_EQUAL(res(0, 0), static_cast<T>(-0.5));
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(_is_nan(res(0,1)));
+    BOOST_CHECK(detail::_is_nan(res(0, 1)));
   } else {
-    BOOST_CHECK_EQUAL(res(0,1), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
   }
-  BOOST_CHECK_EQUAL(res(0,2), 5);
+  BOOST_CHECK_EQUAL(res(0, 2), 5);
 
   res = f / T(5);
-  BOOST_CHECK_EQUAL(res(0,0), -2);
-  BOOST_CHECK_EQUAL(res(0,1),  0);
-  BOOST_CHECK_EQUAL(res(0,2), static_cast<T>(1) / static_cast<T>(5)); //to avoid precision error
+  BOOST_CHECK_EQUAL(res(0, 0), -2);
+  BOOST_CHECK_EQUAL(res(0, 1), 0);
+  BOOST_CHECK_EQUAL(res(0, 2), static_cast<T>(1) / static_cast<T>(5));  // to avoid precision error
 
   res = f / F::inf(num_param);
-  BOOST_CHECK_EQUAL(res(0,0), 0);
-  BOOST_CHECK_EQUAL(res(0,1), 0);
-  BOOST_CHECK_EQUAL(res(0,2), 0);
+  BOOST_CHECK_EQUAL(res(0, 0), 0);
+  BOOST_CHECK_EQUAL(res(0, 1), 0);
+  BOOST_CHECK_EQUAL(res(0, 2), 0);
   res = F::inf(num_param) / f;
-  BOOST_CHECK_EQUAL(res(0,0), F::T_m_inf);
+  BOOST_CHECK_EQUAL(res(0, 0), F::T_m_inf);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(_is_nan(res(0,1)));
+    BOOST_CHECK(detail::_is_nan(res(0, 1)));
   } else {
-    BOOST_CHECK_EQUAL(res(0,1), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
   }
-  BOOST_CHECK_EQUAL(res(0,2), F::T_inf);
+  BOOST_CHECK_EQUAL(res(0, 2), F::T_inf);
 
   res = f / F::minus_inf(num_param);
-  BOOST_CHECK_EQUAL(res(0,0), 0);
-  BOOST_CHECK_EQUAL(res(0,1), 0);
-  BOOST_CHECK_EQUAL(res(0,2), 0);
+  BOOST_CHECK_EQUAL(res(0, 0), 0);
+  BOOST_CHECK_EQUAL(res(0, 1), 0);
+  BOOST_CHECK_EQUAL(res(0, 2), 0);
   res = F::minus_inf(num_param) / f;
-  BOOST_CHECK_EQUAL(res(0,0), F::T_inf);
+  BOOST_CHECK_EQUAL(res(0, 0), F::T_inf);
   if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
-    BOOST_CHECK(_is_nan(res(0,1)));
+    BOOST_CHECK(detail::_is_nan(res(0, 1)));
   } else {
-    BOOST_CHECK_EQUAL(res(0,1), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
   }
-  BOOST_CHECK_EQUAL(res(0,2), F::T_m_inf);
+  BOOST_CHECK_EQUAL(res(0, 2), F::T_m_inf);
 
   if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
     res = f / F::nan(num_param);
@@ -787,39 +761,38 @@ void test_operators(){
   if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
     BOOST_CHECK(res.is_nan());
   } else {
-    BOOST_CHECK_EQUAL(res(0,0), 0);
-    BOOST_CHECK_EQUAL(res(0,1), 0);
-    BOOST_CHECK_EQUAL(res(0,2), 0);
+    BOOST_CHECK_EQUAL(res(0, 0), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
+    BOOST_CHECK_EQUAL(res(0, 2), 0);
   }
   res = f3 / f4;
   if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
     BOOST_CHECK(res.is_nan());
   } else {
-    BOOST_CHECK_EQUAL(res(0,0), 0);
-    BOOST_CHECK_EQUAL(res(0,1), 0);
-    BOOST_CHECK_EQUAL(res(0,2), 0);
+    BOOST_CHECK_EQUAL(res(0, 0), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
+    BOOST_CHECK_EQUAL(res(0, 2), 0);
   }
   res = f / F({0, 0, 0});
   if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
     BOOST_CHECK(res.is_nan());
   } else {
-    BOOST_CHECK_EQUAL(res(0,0), 0);
-    BOOST_CHECK_EQUAL(res(0,1), 0);
-    BOOST_CHECK_EQUAL(res(0,2), 0);
+    BOOST_CHECK_EQUAL(res(0, 0), 0);
+    BOOST_CHECK_EQUAL(res(0, 1), 0);
+    BOOST_CHECK_EQUAL(res(0, 2), 0);
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_operators, T, list_of_tested_variants)
-{
-  test_operators<Multi_parameter_filtration<T>, T>();
-  test_operators<Multi_parameter_filtration<T, false, true>, T>();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_operators, T, list_of_tested_variants) {
+  test_operators<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
+  test_operators<Multi_parameter_filtration_value<Flat_array_filtration<T>, false, true>, T>();
 
-  test_operators<Dynamic_multi_parameter_filtration<T>, T>();
-  test_operators<Dynamic_multi_parameter_filtration<T, false, true>, T>();
+  test_operators<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
+  test_operators<Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true>, T>();
 }
 
 template <class F, typename T>
-void test_modifiers(){
+void test_modifiers() {
   const int num_param = 3;
   std::vector<T> v;
 
@@ -888,7 +861,7 @@ void test_modifiers(){
   f.push_to_least_common_upper_bound(F::inf(num_param));
   BOOST_CHECK(f.is_plus_inf());
 
-  if constexpr (std::numeric_limits<F>::has_quiet_NaN){
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
     f.push_to_least_common_upper_bound(F::nan(num_param));
     BOOST_CHECK(f.is_plus_inf());
   }
@@ -911,12 +884,12 @@ void test_modifiers(){
   f.pull_to_greatest_common_lower_bound(F::minus_inf(num_param));
   BOOST_CHECK(f.is_minus_inf());
 
-  if constexpr (std::numeric_limits<F>::has_quiet_NaN){
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
     f.pull_to_greatest_common_lower_bound(F::nan(num_param));
     BOOST_CHECK(f.is_minus_inf());
   }
 
-  std::vector<std::vector<int> > grid = {{0, 2, 4, 8}, {0, 3, 6, 9}, {0, 4, 8, 16}};
+  std::vector<std::vector<int>> grid = {{0, 2, 4, 8}, {0, 3, 6, 9}, {0, 4, 8, 16}};
 
   f.push_to_least_common_upper_bound({1, 7, 5});
   f.project_onto_grid(grid, true);
@@ -938,26 +911,39 @@ void test_modifiers(){
     BOOST_CHECK_EQUAL(f(0, 0), 2);
     BOOST_CHECK_EQUAL(f(0, 1), 6);
     BOOST_CHECK_EQUAL(f(0, 2), 4);
-    BOOST_CHECK_EQUAL(f(1, 0), F::T_m_inf);
-    BOOST_CHECK_EQUAL(f(1, 1), F::T_m_inf);
-    BOOST_CHECK_EQUAL(f(1, 2), F::T_m_inf);
-    BOOST_CHECK_EQUAL(f(2, 0), F::T_m_inf);
-    BOOST_CHECK_EQUAL(f(2, 1), F::T_m_inf);
-    BOOST_CHECK_EQUAL(f(2, 2), F::T_m_inf);
+    BOOST_CHECK_EQUAL(f(1, 0), F::T_inf);
+    BOOST_CHECK_EQUAL(f(1, 1), F::T_inf);
+    BOOST_CHECK_EQUAL(f(1, 2), F::T_inf);
+    BOOST_CHECK_EQUAL(f(2, 0), F::T_inf);
+    BOOST_CHECK_EQUAL(f(2, 1), F::T_inf);
+    BOOST_CHECK_EQUAL(f(2, 2), F::T_inf);
+  }
+
+  if constexpr (!F::ensures_1_criticality()) {
+    v = {1, 2, 3, 1, 5, 0};
+    F f2(v.begin(), v.end(), 2);
+    f2.push_to_least_common_upper_bound({0, 1});
+    if constexpr (F::has_negative_cones()) {
+      BOOST_CHECK_EQUAL(f2(1, 0), 5);
+    } else {
+      BOOST_CHECK_EQUAL(f2(1, 0), 3);
+    }
+    BOOST_CHECK_EQUAL(f2(0, 0), 1);
+    BOOST_CHECK_EQUAL(f2(0, 1), 2);
+    BOOST_CHECK_EQUAL(f2(1, 1), 1);
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_modifiers, T, list_of_tested_variants)
-{
-  test_modifiers<Multi_parameter_filtration<T>, T>();
-  test_modifiers<Multi_parameter_filtration<T, false, true>, T>();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_modifiers, T, list_of_tested_variants) {
+  test_modifiers<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
+  test_modifiers<Multi_parameter_filtration_value<Flat_array_filtration<T>, false, true>, T>();
 
-  test_modifiers<Dynamic_multi_parameter_filtration<T>, T>();
-  test_modifiers<Dynamic_multi_parameter_filtration<T, false, true>, T>();
+  test_modifiers<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
+  test_modifiers<Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true>, T>();
 }
 
 template <class F, typename T>
-void test_add_generators(){
+void test_add_generators() {
   const int num_param = 3;
 
   F f({0, 1, 2});
@@ -1011,7 +997,7 @@ void test_add_generators(){
   BOOST_CHECK_EQUAL(f(1, 1), -2);
   BOOST_CHECK_EQUAL(f(1, 2), -3);
 
-  if constexpr (std::numeric_limits<T>::has_quiet_NaN){
+  if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
     res = f.add_generator(std::vector<T>(num_param, std::numeric_limits<T>::quiet_NaN()));
     BOOST_CHECK(!res);
     BOOST_CHECK_EQUAL(f.num_generators(), 2);
@@ -1030,72 +1016,21 @@ void test_add_generators(){
   BOOST_CHECK_EQUAL(f.num_parameters(), num_param);
   BOOST_CHECK_EQUAL(f(0, 0), F::T_m_inf);
 
-  std::vector<T> v{
-      0, 1, 2,
-      F::T_inf, F::T_inf, F::T_inf,
-      0, 1, 2,
-      std::numeric_limits<T>::quiet_NaN(), std::numeric_limits<T>::quiet_NaN(), std::numeric_limits<T>::quiet_NaN(),
-      F::T_m_inf, F::T_m_inf, F::T_m_inf};
-
-  F f2(v.begin(), v.end(), num_param);
-  f2.remove_empty_generators(false);
-  BOOST_CHECK_EQUAL(f2.num_generators(), 5);
-  if constexpr (std::numeric_limits<T>::has_quiet_NaN){
-    BOOST_CHECK_EQUAL(f2(0, 0), F::T_m_inf);
-    BOOST_CHECK_EQUAL(f2(0, 1), F::T_m_inf);
-    BOOST_CHECK_EQUAL(f2(0, 2), F::T_m_inf);
-    BOOST_CHECK_EQUAL(f2(1, 0), 0);
-    BOOST_CHECK_EQUAL(f2(1, 1), 1);
-    BOOST_CHECK_EQUAL(f2(1, 2), 2);
-    BOOST_CHECK_EQUAL(f2(2, 0), 0);
-    BOOST_CHECK_EQUAL(f2(2, 1), 1);
-    BOOST_CHECK_EQUAL(f2(2, 2), 2);
-    BOOST_CHECK_EQUAL(f2(3, 0), F::T_inf);
-    BOOST_CHECK_EQUAL(f2(3, 1), F::T_inf);
-    BOOST_CHECK_EQUAL(f2(3, 2), F::T_inf);
-    BOOST_CHECK(_is_nan(f2(4, 0)));
-    BOOST_CHECK(_is_nan(f2(4, 1)));
-    BOOST_CHECK(_is_nan(f2(4, 2)));
-  } else {
-    BOOST_CHECK_EQUAL(f2(0, 0), F::T_m_inf);
-    BOOST_CHECK_EQUAL(f2(0, 1), F::T_m_inf);
-    BOOST_CHECK_EQUAL(f2(0, 2), F::T_m_inf);
-    BOOST_CHECK_EQUAL(f2(1, 0), 0);
-    BOOST_CHECK_EQUAL(f2(1, 1), 0);
-    BOOST_CHECK_EQUAL(f2(1, 2), 0);
-    BOOST_CHECK_EQUAL(f2(2, 0), 0);
-    BOOST_CHECK_EQUAL(f2(2, 1), 1);
-    BOOST_CHECK_EQUAL(f2(2, 2), 2);
-    BOOST_CHECK_EQUAL(f2(3, 0), 0);
-    BOOST_CHECK_EQUAL(f2(3, 1), 1);
-    BOOST_CHECK_EQUAL(f2(3, 2), 2);
-    BOOST_CHECK_EQUAL(f2(4, 0), F::T_inf);
-    BOOST_CHECK_EQUAL(f2(4, 1), F::T_inf);
-    BOOST_CHECK_EQUAL(f2(4, 2), F::T_inf);
-  }
-
-  F f3(v.begin(), v.end(), num_param);
-  f3.remove_empty_generators(true);
-  if constexpr (std::numeric_limits<T>::has_quiet_NaN){
-    BOOST_CHECK_EQUAL(f3.num_generators(), 2);
-    BOOST_CHECK_EQUAL(f3(0, 0), 0);
-    BOOST_CHECK_EQUAL(f3(0, 1), 1);
-    BOOST_CHECK_EQUAL(f3(0, 2), 2);
-    BOOST_CHECK_EQUAL(f3(1, 0), 0);
-    BOOST_CHECK_EQUAL(f3(1, 1), 1);
-    BOOST_CHECK_EQUAL(f3(1, 2), 2);
-  } else {
-    BOOST_CHECK_EQUAL(f3.num_generators(), 3);
-    BOOST_CHECK_EQUAL(f3(0, 0), 0);
-    BOOST_CHECK_EQUAL(f3(0, 1), 0);
-    BOOST_CHECK_EQUAL(f3(0, 2), 0);
-    BOOST_CHECK_EQUAL(f3(1, 0), 0);
-    BOOST_CHECK_EQUAL(f3(1, 1), 1);
-    BOOST_CHECK_EQUAL(f3(1, 2), 2);
-    BOOST_CHECK_EQUAL(f3(2, 0), 0);
-    BOOST_CHECK_EQUAL(f3(2, 1), 1);
-    BOOST_CHECK_EQUAL(f3(2, 2), 2);
-  }
+  std::vector<T> v{0,
+                   1,
+                   2,
+                   F::T_inf,
+                   F::T_inf,
+                   F::T_inf,
+                   0,
+                   1,
+                   2,
+                   std::numeric_limits<T>::quiet_NaN(),
+                   std::numeric_limits<T>::quiet_NaN(),
+                   std::numeric_limits<T>::quiet_NaN(),
+                   F::T_m_inf,
+                   F::T_m_inf,
+                   F::T_m_inf};
 
   F f4(v.begin(), v.end(), num_param);
   f4.simplify();
@@ -1106,7 +1041,7 @@ void test_add_generators(){
   F f5(v.begin(), v.end(), num_param);
   f5.simplify();
   BOOST_CHECK_EQUAL(f5.num_generators(), 1);
-  if constexpr (std::numeric_limits<T>::has_quiet_NaN){
+  if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
     BOOST_CHECK_EQUAL(f5(0, 0), 0);
     BOOST_CHECK_EQUAL(f5(0, 1), 1);
     BOOST_CHECK_EQUAL(f5(0, 2), 2);
@@ -1117,29 +1052,26 @@ void test_add_generators(){
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_add_generators, T, list_of_tested_variants)
-{
-  test_add_generators<Multi_parameter_filtration<T>, T>();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_add_generators, T, list_of_tested_variants) {
+  test_add_generators<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
 
-  Multi_parameter_filtration<T, false, true> f({0, 1, 2});
+  Multi_parameter_filtration_value<Flat_array_filtration<T>, false, true> f({0, 1, 2});
   BOOST_CHECK_THROW(f.add_generator({-3, 1, 7}), std::logic_error);
 
-  test_add_generators<Dynamic_multi_parameter_filtration<T>, T>();
+  test_add_generators<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
 
-  Dynamic_multi_parameter_filtration<T, false, true> f2({0, 1, 2});
+  Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true> f2({0, 1, 2});
   BOOST_CHECK_THROW(f2.add_generator({-3, 1, 7}), std::logic_error);
 }
 
 template <class F, typename T>
-void test_friends(){
+void test_friends() {
   F f({0, 1, 2});
 
   BOOST_CHECK_EQUAL(compute_norm(f), static_cast<T>(std::sqrt(T(5))));
   BOOST_CHECK_EQUAL(compute_norm<double>(f), std::sqrt(double(5.)));
-  BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, {2, 3, 5}),
-                    static_cast<T>(std::sqrt(T(17))));
-  BOOST_CHECK_EQUAL(compute_euclidean_distance_to<double>(f, {2, 3, 5}),
-                    std::sqrt(double(17.)));
+  BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, {2, 3, 5}), static_cast<T>(std::sqrt(T(17))));
+  BOOST_CHECK_EQUAL(compute_euclidean_distance_to<double>(f, {2, 3, 5}), std::sqrt(double(17.)));
   BOOST_CHECK_EQUAL(compute_linear_projection(f, {2, 3, 5, 9}), 13);
   BOOST_CHECK_EQUAL(compute_linear_projection<double>(f, {2, 3, 5, 9}), 13.);
   BOOST_CHECK(factorize_below(f) == f);
@@ -1151,36 +1083,35 @@ void test_friends(){
     BOOST_CHECK_EQUAL(f.num_parameters(), 3);
 
     BOOST_CHECK_EQUAL(compute_norm(f), static_cast<T>(std::sqrt(T(25))));
-    BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, {2, 3, 5}),
-                      static_cast<T>(std::sqrt(T(10))));
+    BOOST_CHECK_EQUAL(compute_euclidean_distance_to(f, {2, 3, 5}), static_cast<T>(std::sqrt(T(10))));
     BOOST_CHECK_EQUAL(compute_linear_projection(f, {2, 3, 5, 9}), 13);
     BOOST_CHECK(factorize_below(f) == F({0, 0, 2}));
     BOOST_CHECK(factorize_above(f) == F({2, 1, 4}));
 
-    if constexpr (std::numeric_limits<T>::has_quiet_NaN){
+    if constexpr (std::numeric_limits<T>::has_quiet_NaN) {
       T nan = std::numeric_limits<T>::quiet_NaN();
       std::vector<T> v = {0, nan, 2, 2, nan, 4};
       F f2(v.begin(), v.end(), 3);
 
-      BOOST_CHECK(_is_nan(compute_norm(f2)));
-      BOOST_CHECK(_is_nan(compute_euclidean_distance_to(f2, {2, 3, 5})));
-      BOOST_CHECK(_is_nan(compute_linear_projection(f2, {2, 3, 5, 9})));
+      BOOST_CHECK(detail::_is_nan(compute_norm(f2)));
+      BOOST_CHECK(detail::_is_nan(compute_euclidean_distance_to(f2, {2, 3, 5})));
+      BOOST_CHECK(detail::_is_nan(compute_linear_projection(f2, {2, 3, 5, 9})));
       auto bf2 = factorize_below(f2);
       BOOST_CHECK_EQUAL(bf2(0, 0), 0);
-      BOOST_CHECK(_is_nan(bf2(0, 1)));
+      BOOST_CHECK(detail::_is_nan(bf2(0, 1)));
       BOOST_CHECK_EQUAL(bf2(0, 2), 2);
       auto af2 = factorize_above(f2);
       BOOST_CHECK_EQUAL(af2(0, 0), 2);
-      BOOST_CHECK(_is_nan(af2(0, 1)));
+      BOOST_CHECK(detail::_is_nan(af2(0, 1)));
       BOOST_CHECK_EQUAL(af2(0, 2), 4);
     }
   }
 
-  f(0,0) = 1;
-  f(0,1) = 7;
-  f(0,2) = 5;
+  f(0, 0) = 1;
+  f(0, 1) = 7;
+  f(0, 2) = 5;
 
-  std::vector<std::vector<int> > grid = {{0, 2, 4, 8}, {0, 3, 6, 9}, {0, 4, 8, 16}};
+  std::vector<std::vector<int>> grid = {{0, 2, 4, 8}, {0, 3, 6, 9}, {0, 4, 8, 16}};
   auto res = compute_coordinates_in_grid(f, grid);
   BOOST_CHECK_EQUAL(res.num_parameters(), 3);
   BOOST_CHECK_EQUAL(f.num_parameters(), 3);
@@ -1214,119 +1145,117 @@ void test_friends(){
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_friends, T, list_of_tested_variants)
-{
-  test_friends<Multi_parameter_filtration<T>, T>();
-  test_friends<Multi_parameter_filtration<T, false, true>, T>();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_friends, T, list_of_tested_variants) {
+  test_friends<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
+  test_friends<Multi_parameter_filtration_value<Flat_array_filtration<T>, false, true>, T>();
 
-  test_friends<Dynamic_multi_parameter_filtration<T>, T>();
-  test_friends<Dynamic_multi_parameter_filtration<T, false, true>, T>();
+  test_friends<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
+  test_friends<Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true>, T>();
 }
 
 template <class F, typename T>
-void test_unify_intersect(){
+void test_unify_intersect() {
   const int num_param = 2;
 
-  std::vector<T> v1 = {0,5,2,3,5,2};
+  std::vector<T> v1 = {0, 5, 2, 3, 5, 2};
   F f1(v1.begin(), v1.end(), num_param);
 
-  std::vector<T> v2 = {1,4,4,1};
+  std::vector<T> v2 = {1, 4, 4, 1};
   F f2(v2.begin(), v2.end(), num_param);
 
   bool modified = unify_lifetimes(f1, f2);
   BOOST_CHECK(modified);
   BOOST_CHECK(f1.num_parameters() == num_param);
   BOOST_CHECK(f1.num_generators() == 4);
-  BOOST_CHECK_EQUAL(f1(0,0), 0);
-  BOOST_CHECK_EQUAL(f1(0,1), 5);
-  BOOST_CHECK_EQUAL(f1(1,0), 1);
-  BOOST_CHECK_EQUAL(f1(1,1), 4);
-  BOOST_CHECK_EQUAL(f1(2,0), 2);
-  BOOST_CHECK_EQUAL(f1(2,1), 3);
-  BOOST_CHECK_EQUAL(f1(3,0), 4);
-  BOOST_CHECK_EQUAL(f1(3,1), 1);
+  BOOST_CHECK_EQUAL(f1(0, 0), 0);
+  BOOST_CHECK_EQUAL(f1(0, 1), 5);
+  BOOST_CHECK_EQUAL(f1(1, 0), 1);
+  BOOST_CHECK_EQUAL(f1(1, 1), 4);
+  BOOST_CHECK_EQUAL(f1(2, 0), 2);
+  BOOST_CHECK_EQUAL(f1(2, 1), 3);
+  BOOST_CHECK_EQUAL(f1(3, 0), 4);
+  BOOST_CHECK_EQUAL(f1(3, 1), 1);
 
-  std::vector<T> v3 = {0,5,2,3,5,2};
+  std::vector<T> v3 = {0, 5, 2, 3, 5, 2};
   F f3(v3.begin(), v3.end(), num_param);
 
   modified = intersect_lifetimes(f3, f2);
   BOOST_CHECK(modified);
   BOOST_CHECK(f3.num_parameters() == num_param);
   BOOST_CHECK(f3.num_generators() == 4);
-  BOOST_CHECK_EQUAL(f3(0,0), 1);
-  BOOST_CHECK_EQUAL(f3(0,1), 5);
-  BOOST_CHECK_EQUAL(f3(1,0), 2);
-  BOOST_CHECK_EQUAL(f3(1,1), 4);
-  BOOST_CHECK_EQUAL(f3(2,0), 4);
-  BOOST_CHECK_EQUAL(f3(2,1), 3);
-  BOOST_CHECK_EQUAL(f3(3,0), 5);
-  BOOST_CHECK_EQUAL(f3(3,1), 2);
+  BOOST_CHECK_EQUAL(f3(0, 0), 1);
+  BOOST_CHECK_EQUAL(f3(0, 1), 5);
+  BOOST_CHECK_EQUAL(f3(1, 0), 2);
+  BOOST_CHECK_EQUAL(f3(1, 1), 4);
+  BOOST_CHECK_EQUAL(f3(2, 0), 4);
+  BOOST_CHECK_EQUAL(f3(2, 1), 3);
+  BOOST_CHECK_EQUAL(f3(3, 0), 5);
+  BOOST_CHECK_EQUAL(f3(3, 1), 2);
 
   modified = unify_lifetimes(f1, f3);
   BOOST_CHECK(!modified);
 }
 
 template <class F, typename T>
-void test_unify_intersect_1_critical(){
+void test_unify_intersect_1_critical() {
   const int num_param = 3;
 
-  std::vector<T> v1 = {0,5,2};
+  std::vector<T> v1 = {0, 5, 2};
   F f1(v1.begin(), v1.end(), num_param);
 
-  std::vector<T> v2 = {1,8,4};
+  std::vector<T> v2 = {1, 8, 4};
   F f2(v2.begin(), v2.end(), num_param);
 
   bool modified = unify_lifetimes(f1, f2);
   BOOST_CHECK(!modified);
   BOOST_CHECK(f1.num_parameters() == num_param);
   BOOST_CHECK(f1.num_generators() == 1);
-  BOOST_CHECK_EQUAL(f1(0,0), 0);
-  BOOST_CHECK_EQUAL(f1(0,1), 5);
-  BOOST_CHECK_EQUAL(f1(0,2), 2);
+  BOOST_CHECK_EQUAL(f1(0, 0), 0);
+  BOOST_CHECK_EQUAL(f1(0, 1), 5);
+  BOOST_CHECK_EQUAL(f1(0, 2), 2);
 
   modified = intersect_lifetimes(f1, f2);
   BOOST_CHECK(modified);
   BOOST_CHECK(f1.num_parameters() == num_param);
   BOOST_CHECK(f1.num_generators() == 1);
-  BOOST_CHECK_EQUAL(f1(0,0), 1);
-  BOOST_CHECK_EQUAL(f1(0,1), 8);
-  BOOST_CHECK_EQUAL(f1(0,2), 4);
+  BOOST_CHECK_EQUAL(f1(0, 0), 1);
+  BOOST_CHECK_EQUAL(f1(0, 1), 8);
+  BOOST_CHECK_EQUAL(f1(0, 2), 4);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_unify_intersect, T, list_of_tested_variants)
-{
-  test_unify_intersect<Multi_parameter_filtration<T>, T>();
-  test_unify_intersect_1_critical<Multi_parameter_filtration<T, false, true>, T>();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_unify_intersect, T, list_of_tested_variants) {
+  test_unify_intersect<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
+  test_unify_intersect_1_critical<Multi_parameter_filtration_value<Flat_array_filtration<T>, false, true>, T>();
 
-  test_unify_intersect<Dynamic_multi_parameter_filtration<T>, T>();
-  test_unify_intersect_1_critical<Dynamic_multi_parameter_filtration<T, false, true>, T>();
+  test_unify_intersect<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
+  test_unify_intersect_1_critical<Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true>, T>();
 }
 
 template <class F, typename T>
-void test_serialize(){
-  std::vector<T> v = {0,5,2,3,5,2};
+void test_serialize() {
+  std::vector<T> v = {0, 5, 2, 3, 5, 2};
   F f1(v.begin(), v.end(), 2);
   BOOST_CHECK(f1.num_parameters() == 2);
   BOOST_CHECK(f1.num_generators() == 3);
-  BOOST_CHECK_EQUAL(f1(0,0), 0);
-  BOOST_CHECK_EQUAL(f1(0,1), 5);
-  BOOST_CHECK_EQUAL(f1(1,0), 2);
-  BOOST_CHECK_EQUAL(f1(1,1), 3);
-  BOOST_CHECK_EQUAL(f1(2,0), 5);
-  BOOST_CHECK_EQUAL(f1(2,1), 2);
+  BOOST_CHECK_EQUAL(f1(0, 0), 0);
+  BOOST_CHECK_EQUAL(f1(0, 1), 5);
+  BOOST_CHECK_EQUAL(f1(1, 0), 2);
+  BOOST_CHECK_EQUAL(f1(1, 1), 3);
+  BOOST_CHECK_EQUAL(f1(2, 0), 5);
+  BOOST_CHECK_EQUAL(f1(2, 1), 2);
   F f2(v.begin(), v.end(), 3);
   BOOST_CHECK(f2.num_parameters() == 3);
   BOOST_CHECK(f2.num_generators() == 2);
-  BOOST_CHECK_EQUAL(f2(0,0), 0);
-  BOOST_CHECK_EQUAL(f2(0,1), 5);
-  BOOST_CHECK_EQUAL(f2(0,2), 2);
-  BOOST_CHECK_EQUAL(f2(1,0), 3);
-  BOOST_CHECK_EQUAL(f2(1,1), 5);
-  BOOST_CHECK_EQUAL(f2(1,2), 2);
+  BOOST_CHECK_EQUAL(f2(0, 0), 0);
+  BOOST_CHECK_EQUAL(f2(0, 1), 5);
+  BOOST_CHECK_EQUAL(f2(0, 2), 2);
+  BOOST_CHECK_EQUAL(f2(1, 0), 3);
+  BOOST_CHECK_EQUAL(f2(1, 1), 5);
+  BOOST_CHECK_EQUAL(f2(1, 2), 2);
 
   char* buffer = new char[256];
   std::size_t serializationSize = get_serialization_size_of(f1);
-  
+
   char* ptr = buffer;
   ptr = serialize_value_to_char_buffer(f1, ptr);
   BOOST_CHECK_EQUAL((void*)ptr, (void*)(buffer + serializationSize));
@@ -1337,15 +1266,15 @@ void test_serialize(){
   BOOST_CHECK_EQUAL((void*)c_ptr, (void*)(buffer + serializationSize));
   BOOST_CHECK(f3.num_parameters() == 2);
   BOOST_CHECK(f3.num_generators() == 3);
-  BOOST_CHECK_EQUAL(f3(0,0), 0);
-  BOOST_CHECK_EQUAL(f3(0,1), 5);
-  BOOST_CHECK_EQUAL(f3(1,0), 2);
-  BOOST_CHECK_EQUAL(f3(1,1), 3);
-  BOOST_CHECK_EQUAL(f3(2,0), 5);
-  BOOST_CHECK_EQUAL(f3(2,1), 2);
+  BOOST_CHECK_EQUAL(f3(0, 0), 0);
+  BOOST_CHECK_EQUAL(f3(0, 1), 5);
+  BOOST_CHECK_EQUAL(f3(1, 0), 2);
+  BOOST_CHECK_EQUAL(f3(1, 1), 3);
+  BOOST_CHECK_EQUAL(f3(2, 0), 5);
+  BOOST_CHECK_EQUAL(f3(2, 1), 2);
 
   serializationSize = get_serialization_size_of(f2);
-  
+
   ptr = buffer;
   ptr = serialize_value_to_char_buffer(f2, ptr);
   BOOST_CHECK_EQUAL((void*)ptr, (void*)(buffer + serializationSize));
@@ -1356,30 +1285,28 @@ void test_serialize(){
   BOOST_CHECK_EQUAL((void*)c_ptr, (void*)(buffer + serializationSize));
   BOOST_CHECK(f4.num_parameters() == 3);
   BOOST_CHECK(f4.num_generators() == 2);
-  BOOST_CHECK_EQUAL(f4(0,0), 0);
-  BOOST_CHECK_EQUAL(f4(0,1), 5);
-  BOOST_CHECK_EQUAL(f4(0,2), 2);
-  BOOST_CHECK_EQUAL(f4(1,0), 3);
-  BOOST_CHECK_EQUAL(f4(1,1), 5);
-  BOOST_CHECK_EQUAL(f4(1,2), 2);
+  BOOST_CHECK_EQUAL(f4(0, 0), 0);
+  BOOST_CHECK_EQUAL(f4(0, 1), 5);
+  BOOST_CHECK_EQUAL(f4(0, 2), 2);
+  BOOST_CHECK_EQUAL(f4(1, 0), 3);
+  BOOST_CHECK_EQUAL(f4(1, 1), 5);
+  BOOST_CHECK_EQUAL(f4(1, 2), 2);
 
   delete[] buffer;
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_serialize, T, list_of_tested_variants)
-{
-  test_serialize<Multi_parameter_filtration<T>, T>();
-
-  test_serialize<Dynamic_multi_parameter_filtration<T>, T>();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_serialize, T, list_of_tested_variants) {
+  test_serialize<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
+  test_serialize<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
 }
 
 template <class F, typename T>
-void test_co(){
+void test_co() {
   F f;
   BOOST_CHECK(f.num_parameters() == 2);
   BOOST_CHECK(f.num_generators() == 1);
-  BOOST_CHECK_EQUAL(f(0,0), F::T_inf);
-  BOOST_CHECK_EQUAL(f(0,1), F::T_inf);
+  BOOST_CHECK_EQUAL(f(0, 0), F::T_inf);
+  BOOST_CHECK_EQUAL(f(0, 1), F::T_inf);
 
   BOOST_CHECK(f.is_plus_inf());
   BOOST_CHECK(!f.is_minus_inf());
@@ -1394,103 +1321,85 @@ void test_co(){
   if constexpr (F::ensures_1_criticality()) {
     std::vector<T> v = {0, 1, 2};
     F f2(v.begin(), v.end(), 3);
-    BOOST_CHECK_EQUAL(compute_linear_projection(f2, {2,3,5,9}), 13);
+    BOOST_CHECK_EQUAL(compute_linear_projection(f2, {2, 3, 5, 9}), 13);
   } else {
     std::vector<T> v = {0, 1, 2, 2, 0, 4};
     F f2(v.begin(), v.end(), 3);
-    BOOST_CHECK_EQUAL(compute_linear_projection(f2, {2,3,5,9}), 24);
+    BOOST_CHECK_EQUAL(compute_linear_projection(f2, {2, 3, 5, 9}), 24);
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_co, T, list_of_tested_variants)
-{
-  test_co<Multi_parameter_filtration<T, true>, T>();
-  test_co<Multi_parameter_filtration<T, true, true>, T>();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_co, T, list_of_tested_variants) {
+  test_co<Multi_parameter_filtration_value<Flat_array_filtration<T>, true>, T>();
+  test_co<Multi_parameter_filtration_value<Flat_array_filtration<T>, true, true>, T>();
 
-  test_co<Dynamic_multi_parameter_filtration<T, true>, T>();
-  test_co<Dynamic_multi_parameter_filtration<T, true, true>, T>();
+  test_co<Multi_parameter_filtration_value<Nested_array_filtration<T>, true>, T>();
+  test_co<Multi_parameter_filtration_value<Nested_array_filtration<T>, true, true>, T>();
 }
 
 template <class F, typename T>
-void test_numerical_limits(){
+void test_numerical_limits() {
   const int num_param = 3;
 
-  BOOST_CHECK(std::numeric_limits<F>::has_infinity);
-
-  BOOST_CHECK_THROW(std::numeric_limits<F>::max(), std::logic_error);
-
   BOOST_CHECK(std::numeric_limits<F>::infinity(num_param).is_plus_inf());
-  BOOST_CHECK(std::numeric_limits<F>::minus_infinity(num_param).is_minus_inf());
-  
-  auto max = std::numeric_limits<F>::max(num_param);
-  BOOST_CHECK_EQUAL(max(0,0), std::numeric_limits<T>::max());
-  BOOST_CHECK_EQUAL(max(0,1), std::numeric_limits<T>::max());
-  BOOST_CHECK_EQUAL(max(0,2), std::numeric_limits<T>::max());
+  BOOST_CHECK(std::numeric_limits<F>::max(num_param).is_plus_inf());
+  BOOST_CHECK(std::numeric_limits<F>::lowest(num_param).is_minus_inf());
 
-  if constexpr (std::numeric_limits<T>::has_quiet_NaN){
-    BOOST_CHECK(std::numeric_limits<F>::has_quiet_NaN);
+  if constexpr (std::numeric_limits<T>::has_infinity) {
+    BOOST_CHECK(std::numeric_limits<F>::has_infinity);
+    BOOST_CHECK((-std::numeric_limits<F>::infinity(num_param)).is_minus_inf());
+  } else {
+    BOOST_CHECK(!std::numeric_limits<F>::has_infinity);
+  }
+
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN) {
     BOOST_CHECK(std::numeric_limits<F>::quiet_NaN(num_param).is_nan());
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_numerical_limits, T, list_of_tested_variants)
-{
-  test_numerical_limits<Multi_parameter_filtration<T>, T>();
-  test_numerical_limits<Multi_parameter_filtration<T, false, true>, T>();
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_numerical_limits, T, list_of_tested_variants) {
+  test_numerical_limits<Multi_parameter_filtration_value<Flat_array_filtration<T>>, T>();
+  test_numerical_limits<Multi_parameter_filtration_value<Flat_array_filtration<T>, false, true>, T>();
 
-  test_numerical_limits<Dynamic_multi_parameter_filtration<T>, T>();
-  test_numerical_limits<Dynamic_multi_parameter_filtration<T, false, true>, T>();
+  test_numerical_limits<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
+  test_numerical_limits<Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true>, T>();
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_converters, T, list_of_tested_variants)
-{
+template <typename T, typename T_alt>
+void test_conversions() {
+  auto test_value = [](const auto& f) {
+    BOOST_CHECK(f.num_parameters() == 2);
+    BOOST_CHECK(f.num_generators() == 4);
+    BOOST_CHECK_EQUAL(f(0, 0), 0);
+    BOOST_CHECK_EQUAL(f(0, 1), 5);
+    BOOST_CHECK_EQUAL(f(1, 0), 1);
+    BOOST_CHECK_EQUAL(f(1, 1), 4);
+    BOOST_CHECK_EQUAL(f(2, 0), 2);
+    BOOST_CHECK_EQUAL(f(2, 1), 3);
+    BOOST_CHECK_EQUAL(f(3, 0), 3);
+    BOOST_CHECK_EQUAL(f(3, 1), 2);
+  };
+
   std::vector<T> v = {0, 5, 1, 4, 2, 3, 3, 2};
-  Dynamic_multi_parameter_filtration<T> f0(v.begin(), v.end(), 2);
-  BOOST_CHECK(f0.num_parameters() == 2);
-  BOOST_CHECK(f0.num_generators() == 4);
-  BOOST_CHECK_EQUAL(f0(0,0), 0);
-  BOOST_CHECK_EQUAL(f0(0,1), 5);
-  BOOST_CHECK_EQUAL(f0(1,0), 1);
-  BOOST_CHECK_EQUAL(f0(1,1), 4);
-  BOOST_CHECK_EQUAL(f0(2,0), 2);
-  BOOST_CHECK_EQUAL(f0(2,1), 3);
-  BOOST_CHECK_EQUAL(f0(3,0), 3);
-  BOOST_CHECK_EQUAL(f0(3,1), 2);
+  Multi_parameter_filtration_value<Nested_array_filtration<T>> f0(v.begin(), v.end(), 2);
+  test_value(f0);
+  test_value(f0.template as_type<Flat_array_filtration<T_alt>>());
+  test_value(f0.template as_type<T_alt>());
+  test_value(f0.template as_type<Nested_array_filtration<T_alt>>());
 
-  Multi_parameter_filtration<T> f1 = as_type<Multi_parameter_filtration<T> >(f0);
-  BOOST_CHECK(f1.num_parameters() == 2);
-  BOOST_CHECK(f1.num_generators() == 4);
-  BOOST_CHECK_EQUAL(f1(0,0), 0);
-  BOOST_CHECK_EQUAL(f1(0,1), 5);
-  BOOST_CHECK_EQUAL(f1(1,0), 1);
-  BOOST_CHECK_EQUAL(f1(1,1), 4);
-  BOOST_CHECK_EQUAL(f1(2,0), 2);
-  BOOST_CHECK_EQUAL(f1(2,1), 3);
-  BOOST_CHECK_EQUAL(f1(3,0), 3);
-  BOOST_CHECK_EQUAL(f1(3,1), 2);
-
-  Dynamic_multi_parameter_filtration<T> f2 = as_type<Dynamic_multi_parameter_filtration<T> >(f1);
-  BOOST_CHECK(f2.num_parameters() == 2);
-  BOOST_CHECK(f2.num_generators() == 4);
-  BOOST_CHECK_EQUAL(f2(0,0), 0);
-  BOOST_CHECK_EQUAL(f2(0,1), 5);
-  BOOST_CHECK_EQUAL(f2(1,0), 1);
-  BOOST_CHECK_EQUAL(f2(1,1), 4);
-  BOOST_CHECK_EQUAL(f2(2,0), 2);
-  BOOST_CHECK_EQUAL(f2(2,1), 3);
-  BOOST_CHECK_EQUAL(f2(3,0), 3);
-  BOOST_CHECK_EQUAL(f2(3,1), 2);
-
-  Dynamic_multi_parameter_filtration<T> f3 = as_type<Dynamic_multi_parameter_filtration<T> >(f0[0], 2);
-  BOOST_CHECK(f3.num_parameters() == 2);
-  BOOST_CHECK(f3.num_generators() == 1);
-  BOOST_CHECK_EQUAL(f3(0,0), 0);
-  BOOST_CHECK_EQUAL(f3(0,1), 5);
-
-  Multi_parameter_filtration<T> f4 = as_type<Multi_parameter_filtration<T> >(f0[0], 2);
-  BOOST_CHECK(f4.num_parameters() == 2);
-  BOOST_CHECK(f4.num_generators() == 1);
-  BOOST_CHECK_EQUAL(f4(0,0), 0);
-  BOOST_CHECK_EQUAL(f4(0,1), 5);
+  Multi_parameter_filtration_value<Nested_array_filtration<T>> f2 = f0.template as_type<Nested_array_filtration<T>>();
+  test_value(f2);
+  test_value(f2.template as_type<Nested_array_filtration<T_alt>>());
+  test_value(f2.template as_type<T_alt>());
+  test_value(f2.template as_type<Flat_array_filtration<T>>());
+  test_value(f2.template as_type<Flat_array_filtration<T_alt>>());
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_converters, T, list_of_tested_variants) {
+  test_conversions<T, T>();
+  if constexpr (std::is_floating_point_v<T>) {
+    test_conversions<T, int>();
+  } else {
+    test_conversions<T, double>();
+  }
+}

@@ -40,8 +40,7 @@ namespace multi_persistence {
  * @tparam D Dimension type. Default value: int.
  */
 template <class MultiFiltrationValue, typename I = std::uint32_t, typename D = int>
-class Multi_parameter_filtered_complex_pcoh_interface
-{
+class Multi_parameter_filtered_complex_pcoh_interface {
  public:
   using Complex = Multi_parameter_filtered_complex<MultiFiltrationValue, I, D>; /**< Complex type */
   using Simplex_key = typename Complex::Index;                                  /**< Simplex_key type */
@@ -61,8 +60,7 @@ class Multi_parameter_filtered_complex_pcoh_interface
   /**
    * @brief Constructs the interface and stores a pointer to the given complex and the given permutation. Assumes that
    * the pointers remain valid through the whole life of the instance. If they get invalidated, they can be updated
-   * via the copy/move constructors if the content did not change (otherwise, reconstruct from scratch with
-   * @ref reinitialize).
+   * via the copy/move constructors if the content did not change.
    *
    * @param boundaries Complex to interface.
    * @param permutation Permutation map indicating the order of the cells stored in @p boundaries as a standard
@@ -70,8 +68,7 @@ class Multi_parameter_filtered_complex_pcoh_interface
    * used as the i-th cell in the filtration.
    */
   Multi_parameter_filtered_complex_pcoh_interface(const Complex &boundaries, const Map &permutation)
-      : boundaries_(&boundaries), newToOldPerm_(&permutation), keys_(boundaries.get_number_of_cycle_generators(), -1)
-  {}
+      : boundaries_(&boundaries), newToOldPerm_(&permutation), keys_(boundaries.get_number_of_cycle_generators(), -1) {}
 
   Multi_parameter_filtered_complex_pcoh_interface(const Multi_parameter_filtered_complex_pcoh_interface &other) =
       delete;
@@ -88,8 +85,7 @@ class Multi_parameter_filtered_complex_pcoh_interface
                                                   const Map &permutation)
       : boundaries_(other.boundaries_),
         newToOldPerm_(boundaries_ != nullptr ? &permutation : nullptr),
-        keys_(other.keys_)
-  {
+        keys_(other.keys_) {
     GUDHI_CHECK(!other.is_initialized() || permutation == *other.newToOldPerm_,
                 "Only the address of the permutation vector is allowed to change, not its content.");
   }
@@ -104,12 +100,10 @@ class Multi_parameter_filtered_complex_pcoh_interface
    * does not have to be the same.
    */
   Multi_parameter_filtered_complex_pcoh_interface(const Multi_parameter_filtered_complex_pcoh_interface &other,
-                                                  const Complex &boundaries,
-                                                  const Map &permutation)
+                                                  const Complex &boundaries, const Map &permutation)
       : boundaries_(other.is_initialized() ? &boundaries : nullptr),
         newToOldPerm_(other.is_initialized() ? &permutation : nullptr),
-        keys_(other.keys_)
-  {
+        keys_(other.keys_) {
     GUDHI_CHECK(!other.is_initialized() || permutation == *other.newToOldPerm_,
                 "Only the address of the permutation vector is allowed to change, not its content.");
     GUDHI_CHECK(!other.is_initialized() || boundaries.get_boundaries() == *other.boundaries_->get_boundaries(),
@@ -130,8 +124,7 @@ class Multi_parameter_filtered_complex_pcoh_interface
                                                   const Map &permutation)
       : boundaries_(std::exchange(other.boundaries_, nullptr)),
         newToOldPerm_(boundaries_ != nullptr ? &permutation : nullptr),
-        keys_(std::move(other.keys_))
-  {
+        keys_(std::move(other.keys_)) {
     other.newToOldPerm_ = nullptr;
   }
 
@@ -145,12 +138,10 @@ class Multi_parameter_filtered_complex_pcoh_interface
    * does not have to be the same.
    */
   Multi_parameter_filtered_complex_pcoh_interface(Multi_parameter_filtered_complex_pcoh_interface &&other,
-                                                  const Complex &boundaries,
-                                                  const Map &permutation)
+                                                  const Complex &boundaries, const Map &permutation)
       : boundaries_(other.is_initialized() ? &boundaries : nullptr),
         newToOldPerm_(other.is_initialized() ? &permutation : nullptr),
-        keys_(std::move(other.keys_))
-  {
+        keys_(std::move(other.keys_)) {
     other.boundaries_ = nullptr;
     other.newToOldPerm_ = nullptr;
   }
@@ -166,8 +157,7 @@ class Multi_parameter_filtered_complex_pcoh_interface
    * @brief Swap operator.
    */
   friend void swap(Multi_parameter_filtered_complex_pcoh_interface &be1,
-                   Multi_parameter_filtered_complex_pcoh_interface &be2) noexcept
-  {
+                   Multi_parameter_filtered_complex_pcoh_interface &be2) noexcept {
     std::swap(be1.boundaries_, be2.boundaries_);
     std::swap(be1.newToOldPerm_, be2.newToOldPerm_);
     be1.keys_.swap(be2.keys_);
@@ -180,23 +170,20 @@ class Multi_parameter_filtered_complex_pcoh_interface
 
   [[nodiscard]] std::size_t num_simplices() const { return newToOldPerm_->size(); }
 
-  [[nodiscard]] Filtration_value filtration(Simplex_handle sh) const
-  {
+  [[nodiscard]] Filtration_value filtration(Simplex_handle sh) const {
     return sh == null_simplex() ? std::numeric_limits<Filtration_value>::max() : keys_[sh];
   }
 
   [[nodiscard]] Dimension dimension() const { return boundaries_->get_max_dimension(); }
 
-  [[nodiscard]] Dimension dimension(Simplex_handle sh) const
-  {
+  [[nodiscard]] Dimension dimension(Simplex_handle sh) const {
     return sh == null_simplex() ? -1 : boundaries_->get_dimensions()[sh];
   }
 
   Complex const *get_complex_ptr() const { return boundaries_; }
 
   // assumes that pcoh will assign the keys from 0 to n in order of filtrations
-  void assign_key(Simplex_handle sh, Simplex_key key)
-  {
+  void assign_key(Simplex_handle sh, Simplex_key key) {
     if (sh != null_simplex()) keys_[sh] = key;
   }
 
@@ -204,16 +191,14 @@ class Multi_parameter_filtered_complex_pcoh_interface
 
   static constexpr Simplex_key null_key() { return static_cast<Simplex_key>(-1); }
 
-  [[nodiscard]] Simplex_handle simplex(Simplex_key key) const
-  {
+  [[nodiscard]] Simplex_handle simplex(Simplex_key key) const {
     return key == null_key() ? null_simplex() : (*newToOldPerm_)[key];
   }
 
   static constexpr Simplex_handle null_simplex() { return static_cast<Simplex_handle>(-1); }
 
   // only used in update_cohomology_groups_edge, so not used without optimizations
-  [[nodiscard]] std::pair<Simplex_handle, Simplex_handle> endpoints(Simplex_handle sh) const
-  {
+  [[nodiscard]] std::pair<Simplex_handle, Simplex_handle> endpoints(Simplex_handle sh) const {
     if (sh == null_simplex()) return {null_simplex(), null_simplex()};
     GUDHI_CHECK(dimension(sh) == 1, "Endpoints only available for edges.");
     const auto &col = boundary_simplex_range(sh);
@@ -223,13 +208,12 @@ class Multi_parameter_filtered_complex_pcoh_interface
 
   [[nodiscard]] const Filtration_simplex_range &filtration_simplex_range() const { return *newToOldPerm_; }
 
-  [[nodiscard]] const Boundary_simplex_range &boundary_simplex_range(Simplex_handle sh) const
-  {
+  [[nodiscard]] const Boundary_simplex_range &boundary_simplex_range(Simplex_handle sh) const {
     return boundaries_->get_boundaries()[sh];
   }
 
-  friend std::ostream &operator<<(std::ostream &stream, const Multi_parameter_filtered_complex_pcoh_interface &complex)
-  {
+  friend std::ostream &operator<<(std::ostream &stream,
+                                  const Multi_parameter_filtered_complex_pcoh_interface &complex) {
     stream << "[\n";
     for (auto i : complex.filtration_simplex_range()) {
       stream << "[";

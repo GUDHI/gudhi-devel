@@ -20,17 +20,19 @@
 #include <gudhi/Multi_persistence/Persistence_interface_cohomology.h>
 #include <gudhi/Multi_persistence/Persistence_interface_vineyard.h>
 #include <gudhi/Multi_parameter_filtered_complex.h>
-#include <gudhi/Multi_parameter_filtration.h>
+#include <gudhi/Multi_filtration/Flat_array_filtration.h>
+#include <gudhi/Multi_parameter_filtration_value.h>
 
-using Gudhi::multi_filtration::Multi_parameter_filtration;
+using Gudhi::multi_filtration::Flat_array_filtration;
+using Gudhi::multi_filtration::Multi_parameter_filtration_value;
 using Gudhi::multi_persistence::Multi_parameter_filtered_complex;
-using Gudhi::multi_persistence::Persistence_interface_homology;
 using Gudhi::multi_persistence::Persistence_interface_cohomology;
+using Gudhi::multi_persistence::Persistence_interface_homology;
 using Gudhi::multi_persistence::Persistence_interface_vineyard;
 
 using I = std::uint32_t;
 using D = int;
-using Fil = Multi_parameter_filtration<double>;
+using Fil = Multi_parameter_filtration_value<Flat_array_filtration<double>>;
 using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
 using FC = typename Complex::Filtration_value_container;
 using BC = typename Complex::Boundary_container;
@@ -69,8 +71,7 @@ using list_of_tested_variants =
                      Persistence_interface_vineyard<Multi_persistence_vineyard_ru_options>,
                      Persistence_interface_vineyard<Multi_persistence_vineyard_chain_options>>;
 
-Complex build_complex()
-{
+Complex build_complex() {
   using ini = std::initializer_list<typename Fil::value_type>;
 
   BC bc = {{}, {0, 5}, {}, {}, {}, {}, {0, 4}, {5, 3}, {5, 4}, {2, 3}, {2, 4}, {3, 4}, {1, 6, 8}, {9, 10, 11}};
@@ -93,8 +94,7 @@ Complex build_complex()
   return {bc, dc, fc};
 }
 
-Complex build_complex_vine()
-{
+Complex build_complex_vine() {
   using ini = std::initializer_list<typename Fil::value_type>;
 
   BC bc = {{}, {}, {}, {0, 1}, {1, 2}, {0, 2}, {3, 4, 5}, {}, {1, 7}};
@@ -112,8 +112,7 @@ Complex build_complex_vine()
   return {bc, dc, fc};
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(interface_constructors, Interface, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(interface_constructors, Interface, list_of_tested_variants) {
   using Map = typename Interface::Map;
 
   Interface empty;
@@ -122,7 +121,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(interface_constructors, Interface, list_of_tested_
   Complex cpx = build_complex();
   std::vector<double> filtration = {0, 7, 2, 3, 4, 1, 5, 11, 6, 10, 8, 9, 12, 13};
   Map permutation = {0, 5, 2, 3, 4, 6, 8, 1, 10, 11, 9, 7, 12, 13};
-  
+
   empty.initialize(cpx, filtration);
   BOOST_CHECK(empty.is_initialized());
   BOOST_CHECK(empty.get_current_order() == permutation);
@@ -142,14 +141,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(interface_constructors, Interface, list_of_tested_
 }
 
 template <class Barcode, class Bar>
-void test_barcode_equality(const Barcode& barcode1, const std::vector<Bar>& barcode2)
-{
+void test_barcode_equality(const Barcode& barcode1, const std::vector<Bar>& barcode2) {
   std::vector<Bar> sorted;
   for (const Bar& b : barcode1) sorted.push_back(b);
   BOOST_CHECK_EQUAL(sorted.size(), barcode2.size());
-  std::sort(sorted.begin(), sorted.end(), [](const Bar& b1, const Bar& b2){
-    return b1.birth < b2.birth;
-  });
+  std::sort(sorted.begin(), sorted.end(), [](const Bar& b1, const Bar& b2) { return b1.birth < b2.birth; });
   for (unsigned int i = 0; i < barcode2.size(); ++i) {
     const auto& b1 = sorted[i];
     const auto& b2 = barcode2[i];
@@ -159,8 +155,7 @@ void test_barcode_equality(const Barcode& barcode1, const std::vector<Bar>& barc
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(interface_barcode, Interface, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(interface_barcode, Interface, list_of_tested_variants) {
   using Bar = typename Interface::Bar;
 
   Complex cpx = build_complex();
@@ -182,8 +177,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(interface_barcode, Interface, list_of_tested_varia
   test_barcode_equality(barcode, realBarcode);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(interface_vine, Interface, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(interface_vine, Interface, list_of_tested_variants) {
   using Bar = typename Interface::Bar;
 
   if constexpr (Interface::is_vine) {
@@ -227,8 +221,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(interface_vine, Interface, list_of_tested_variants
   }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(interface_rep_cycles, Interface, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(interface_rep_cycles, Interface, list_of_tested_variants) {
   if constexpr (Interface::has_rep_cycles) {
     using Cy = typename Interface::Cycle;
 
@@ -239,14 +232,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(interface_rep_cycles, Interface, list_of_tested_va
     const auto& cycles = inter.get_all_representative_cycles(true);
     BOOST_CHECK_EQUAL(cycles.size(), 8);
 
-    BOOST_CHECK((cycles(0) == Cy{0}));
-    BOOST_CHECK((cycles(1) == Cy{0, 5}));
-    BOOST_CHECK((cycles(2) == Cy{0, 2}));
-    BOOST_CHECK((cycles(3) == Cy{0, 3}));
-    BOOST_CHECK((cycles(4) == Cy{0, 4}));
-    BOOST_CHECK((cycles(5) == Cy{6, 8, 1}));
-    BOOST_CHECK((cycles(6) == Cy{10, 11, 9}));
-    BOOST_CHECK((cycles(7) == Cy{8, 11, 7}));
+    BOOST_CHECK((cycles[0] == Cy{0}));
+    BOOST_CHECK((cycles[1] == Cy{0, 5}));
+    BOOST_CHECK((cycles[2] == Cy{0, 2}));
+    BOOST_CHECK((cycles[3] == Cy{0, 3}));
+    BOOST_CHECK((cycles[4] == Cy{0, 4}));
+    BOOST_CHECK((cycles[5] == Cy{6, 8, 1}));
+    BOOST_CHECK((cycles[6] == Cy{10, 11, 9}));
+    BOOST_CHECK((cycles[7] == Cy{8, 11, 7}));
 
     BOOST_CHECK((inter.get_representative_cycle(0, false) == Cy{0}));
     BOOST_CHECK((inter.get_representative_cycle(1, false) == Cy{0, 5}));

@@ -89,6 +89,7 @@ void test_initialization() {
   VB vb_no_c;
   VB vb_c(true);
   VB vb_c_dim1(true, 1);
+  VB vb_no_c_no_fil;
 
   auto vy = get_vineyard(vb_no_c);
   BOOST_CHECK(vy.empty());
@@ -100,6 +101,7 @@ void test_initialization() {
   vb_no_c.initialize(bc, dc, fc);
   vb_c.initialize(bc, dc, fc);
   vb_c_dim1.initialize(bc, dc, fc);
+  vb_no_c_no_fil.initialize(bc, dc, [fc=fc](std::size_t i, std::size_t j) { return fc[i] < fc[j]; });
 
   vy = get_vineyard(vb_no_c);
   BOOST_CHECK_EQUAL(vy.size(), 5);
@@ -122,7 +124,26 @@ void test_initialization() {
   BOOST_CHECK(vy == get_vineyard(vb_c));
   BOOST_CHECK(vy == get_vineyard(vb_c_dim1));
 
+  vy = get_vineyard(vb_no_c_no_fil);
+  BOOST_CHECK_EQUAL(vy.size(), 5);
+  BOOST_CHECK_EQUAL(vy[0].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[0].size(), 1);
+  BOOST_CHECK(vy[0].get_pair(0) == (P{0, Bar::inf}));
+  BOOST_CHECK_EQUAL(vy[1].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[1].size(), 1);
+  BOOST_CHECK(vy[1].get_pair(0) == (P{1, 4}));
+  BOOST_CHECK_EQUAL(vy[2].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[2].size(), 1);
+  BOOST_CHECK(vy[2].get_pair(0) == (P{2, 5}));
+  BOOST_CHECK_EQUAL(vy[3].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[3].size(), 1);
+  BOOST_CHECK(vy[3].get_pair(0) == (P{7, 8}));
+  BOOST_CHECK_EQUAL(vy[4].get_dimension(), 1);
+  BOOST_CHECK_EQUAL(vy[4].size(), 1);
+  BOOST_CHECK(vy[4].get_pair(0) == (P{3, 6}));
+
   BOOST_CHECK_THROW(vb_no_c.get_latest_representative_cycles(), std::invalid_argument);
+  BOOST_CHECK_THROW(vb_no_c_no_fil.get_latest_representative_cycles(), std::invalid_argument);
 
   auto cycles = get_ordered_cycles(vb_c);
   if constexpr (VB::has_flat_vineyard()) {
@@ -159,6 +180,7 @@ void test_update() {
   VB vb_no_c;
   VB vb_c(true);
   VB vb_c_dim1(true, 1);
+  VB vb_no_c_no_fil;
 
   auto vy = get_vineyard(vb_no_c);
   BOOST_CHECK(vy.empty());
@@ -170,10 +192,15 @@ void test_update() {
   vb_no_c.initialize(bc, dc, fc);
   vb_c.initialize(bc, dc, fc);
   vb_c_dim1.initialize(bc, dc, fc);
+  vb_no_c_no_fil.initialize(bc, dc, [fc=fc](std::size_t i, std::size_t j) { return fc[i] < fc[j]; });
 
   vb_no_c.update(FC<double>{1, 1, 2, 3, 4, 6, 6, 7, 7});
   vb_c.update(FC<double>{1, 1, 2, 3, 4, 6, 6, 7, 7});
   vb_c_dim1.update(FC<double>{1, 1, 2, 3, 4, 6, 6, 7, 7});
+  vb_no_c_no_fil.update(1);
+  vb_no_c_no_fil.update(4);
+  vb_no_c_no_fil.update(5);
+  vb_no_c_no_fil.update(4, true);
 
   vy = get_vineyard(vb_no_c);
   BOOST_CHECK_EQUAL(vy.size(), 5);
@@ -201,9 +228,33 @@ void test_update() {
   BOOST_CHECK(vy == get_vineyard(vb_c));
   BOOST_CHECK(vy == get_vineyard(vb_c_dim1));
 
+  vy = get_vineyard(vb_no_c_no_fil);
+  BOOST_CHECK_EQUAL(vy.size(), 5);
+  BOOST_CHECK_EQUAL(vy[0].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[0].size(), 2);
+  BOOST_CHECK(vy[0].get_pair(0) == (P{0, Bar::inf}));
+  BOOST_CHECK(vy[0].get_pair(1) == (P{0, Bar::inf}));
+  BOOST_CHECK_EQUAL(vy[1].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[1].size(), 2);
+  BOOST_CHECK(vy[1].get_pair(0) == (P{1, 4}));
+  BOOST_CHECK(vy[1].get_pair(1) == (P{1, 3}));
+  BOOST_CHECK_EQUAL(vy[2].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[2].size(), 2);
+  BOOST_CHECK(vy[2].get_pair(0) == (P{2, 5}));
+  BOOST_CHECK(vy[2].get_pair(1) == (P{2, 4}));
+  BOOST_CHECK_EQUAL(vy[3].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[3].size(), 2);
+  BOOST_CHECK(vy[3].get_pair(0) == (P{7, 8}));
+  BOOST_CHECK(vy[3].get_pair(1) == (P{7, 8}));
+  BOOST_CHECK_EQUAL(vy[4].get_dimension(), 1);
+  BOOST_CHECK_EQUAL(vy[4].size(), 2);
+  BOOST_CHECK(vy[4].get_pair(0) == (P{3, 6}));
+  BOOST_CHECK(vy[4].get_pair(1) == (P{5, 6}));
+
   vb_no_c.update(FC<double>{0, -1, 1, 1, 3, 4, 4, 6, 6});
   vb_c.update(FC<double>{0, -1, 1, 1, 3, 4, 4, 6, 6});
   vb_c_dim1.update(FC<double>{0, -1, 1, 1, 3, 4, 4, 6, 6});
+  vb_no_c_no_fil.update(0, true);
 
   vy = get_vineyard(vb_no_c);
   BOOST_CHECK_EQUAL(vy.size(), 5);
@@ -235,6 +286,34 @@ void test_update() {
 
   BOOST_CHECK(vy == get_vineyard(vb_c));
   BOOST_CHECK(vy == get_vineyard(vb_c_dim1));
+
+  vy = get_vineyard(vb_no_c_no_fil);
+  BOOST_CHECK_EQUAL(vy.size(), 5);
+  BOOST_CHECK_EQUAL(vy[0].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[0].size(), 3);
+  BOOST_CHECK(vy[0].get_pair(0) == (P{0, Bar::inf}));
+  BOOST_CHECK(vy[0].get_pair(1) == (P{0, Bar::inf}));
+  BOOST_CHECK(vy[0].get_pair(2) == (P{1, Bar::inf}));
+  BOOST_CHECK_EQUAL(vy[1].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[1].size(), 3);
+  BOOST_CHECK(vy[1].get_pair(0) == (P{1, 4}));
+  BOOST_CHECK(vy[1].get_pair(1) == (P{1, 3}));
+  BOOST_CHECK(vy[1].get_pair(2) == (P{0, 3}));
+  BOOST_CHECK_EQUAL(vy[2].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[2].size(), 3);
+  BOOST_CHECK(vy[2].get_pair(0) == (P{2, 5}));
+  BOOST_CHECK(vy[2].get_pair(1) == (P{2, 4}));
+  BOOST_CHECK(vy[2].get_pair(2) == (P{2, 4}));
+  BOOST_CHECK_EQUAL(vy[3].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[3].size(), 3);
+  BOOST_CHECK(vy[3].get_pair(0) == (P{7, 8}));
+  BOOST_CHECK(vy[3].get_pair(1) == (P{7, 8}));
+  BOOST_CHECK(vy[3].get_pair(2) == (P{7, 8}));
+  BOOST_CHECK_EQUAL(vy[4].get_dimension(), 1);
+  BOOST_CHECK_EQUAL(vy[4].size(), 3);
+  BOOST_CHECK(vy[4].get_pair(0) == (P{3, 6}));
+  BOOST_CHECK(vy[4].get_pair(1) == (P{5, 6}));
+  BOOST_CHECK(vy[4].get_pair(2) == (P{5, 6}));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(vyb_update, Option, option_list) {

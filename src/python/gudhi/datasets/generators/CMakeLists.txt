@@ -1,1 +1,11 @@
-nanobind_add_module_with_targets(_points_ext _points.cc TARGETS Eigen3::Eigen CGAL::CGAL)
+if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
+  nanobind_add_module_with_targets(_points_ext _points.cc TARGETS Eigen3::Eigen CGAL::CGAL)
+  target_link_libraries(_points_ext PRIVATE _default_cgal_random)
+  add_dependencies(_points_ext _default_cgal_random)
+  # Does not work on Windows - cf. datasets/generators/points.py on how PATH is modified before importing the libs
+  if(APPLE)
+    set_target_properties(_points_ext PROPERTIES BUILD_RPATH "@loader_path/../.." INSTALL_RPATH "@loader_path/../..")
+  elseif(UNIX)
+    set_target_properties(_points_ext PROPERTIES BUILD_RPATH "$ORIGIN/../.." INSTALL_RPATH "$ORIGIN/../..")
+  endif()
+endif()

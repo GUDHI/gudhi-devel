@@ -23,14 +23,11 @@ namespace multi_persistence {
 /**
  * @brief Concept for multi-parameter filtration values templated in various classes of the module:
  * @ref Multi_parameter_filtered_complex, @ref Projective_cover_kernel, @ref Slicer...
- * The concept is realized by @ref Gudhi::multi_filtration::Multi_parameter_filtration,
- * @ref Gudhi::multi_filtration::Dynamic_multi_parameter_filtration and
- * @ref Gudhi::multi_filtration::Degree_rips_bifiltration.
+ * The concept is realized by @ref Gudhi::multi_filtration::Multi_parameter_filtration_value.
  */
-class MultiFiltrationValue
-{
+class MultiFiltrationValue {
  public:
-  using value_type = unspecified;           /**< Numerical value type. */
+  using value_type = unspecified;           /**< Signed numerical value type. */
   using Underlying_container = unspecified; /**< Underlying container for values. */
   using size_type = unspecified;            /**< Size type. */
   using reference = unspecified;            /**< Reference type. */

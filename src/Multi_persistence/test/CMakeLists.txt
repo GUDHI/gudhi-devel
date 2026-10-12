@@ -32,3 +32,6 @@ gudhi_add_boost_test(Multi_persistence_summand_unit_test)
 
 add_executable_with_targets(Multi_persistence_module_unit_test multipersistence_module_unit_test.cpp TBB::tbb)
 gudhi_add_boost_test(Multi_persistence_module_unit_test)
+
+add_executable_with_targets(Multi_persistence_mma_unit_test multipersistence_mma_unit_test.cpp TBB::tbb)
+gudhi_add_boost_test(Multi_persistence_mma_unit_test)

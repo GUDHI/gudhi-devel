@@ -17,15 +17,17 @@
 
 #include <gudhi/Simplex_tree.h>
 #include <gudhi/Multi_parameter_filtered_complex.h>
-#include <gudhi/Multi_parameter_filtration.h>
-#include <gudhi/Dynamic_multi_parameter_filtration.h>
+#include <gudhi/Multi_filtration/Flat_array_filtration.h>
+#include <gudhi/Multi_filtration/Nested_array_filtration.h>
+#include <gudhi/Multi_parameter_filtration_value.h>
 #include <gudhi/slicer_helpers.h>
 #include <gudhi/Slicer.h>
 #include <gudhi/Multi_persistence/Persistence_interface_cohomology.h>
 #include <gudhi/multi_simplex_tree_helpers.h>
 
-using Gudhi::multi_filtration::Dynamic_multi_parameter_filtration;
-using Gudhi::multi_filtration::Multi_parameter_filtration;
+using Gudhi::multi_filtration::Flat_array_filtration;
+using Gudhi::multi_filtration::Multi_parameter_filtration_value;
+using Gudhi::multi_filtration::Nested_array_filtration;
 using Gudhi::multi_persistence::build_complex_from_bitmap;
 using Gudhi::multi_persistence::build_complex_from_scc_file;
 using Gudhi::multi_persistence::build_complex_from_simplex_tree;
@@ -34,20 +36,18 @@ using Gudhi::multi_persistence::build_slicer_from_scc_file;
 using Gudhi::multi_persistence::build_slicer_from_simplex_tree;
 using Gudhi::multi_persistence::Multi_parameter_filtered_complex;
 using Gudhi::multi_persistence::Persistence_interface_cohomology;
+using Gudhi::multi_persistence::Simplex_tree_options_multidimensional_filtration;
 using Gudhi::multi_persistence::Slicer;
 using Gudhi::multi_persistence::write_complex_to_scc_file;
-using Gudhi::multi_persistence::Simplex_tree_options_multidimensional_filtration;
-using Gudhi::multi_persistence::Persistence_interface_cohomology;
 
-using list_of_tested_variants =
-    boost::mpl::list<Multi_parameter_filtration<double>, Dynamic_multi_parameter_filtration<double>>;
+using list_of_tested_variants = boost::mpl::list<Multi_parameter_filtration_value<Flat_array_filtration<double>>,
+                                                 Multi_parameter_filtration_value<Nested_array_filtration<double>>>;
 
 using I = std::uint32_t;
 using D = int;
 
 template <class Fil>
-Multi_parameter_filtered_complex<Fil, I, D> build_input_complex()
-{
+Multi_parameter_filtered_complex<Fil, I, D> build_input_complex() {
   using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
@@ -76,14 +76,13 @@ Multi_parameter_filtered_complex<Fil, I, D> build_input_complex()
   return Complex(bc, dc, fc);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants) {
   using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;
   using ini = std::initializer_list<typename Fil::value_type>;
-  using Slicer = Slicer<Fil, Persistence_interface_cohomology<Fil> >;
+  using Slicer = Slicer<Fil, Persistence_interface_cohomology<Fil>>;
 
   const std::string& filePath = "scc_test.txt";
   int degree = 1;
@@ -237,14 +236,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io, Fil, list_of_tested_variants)
   BOOST_CHECK_EQUAL(in_cpx.get_max_dimension(), out_cpx.get_max_dimension());
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io2, Fil, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io2, Fil, list_of_tested_variants) {
   using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;
   using ini = std::initializer_list<typename Fil::value_type>;
-  using Slicer = Slicer<Fil, Persistence_interface_cohomology<Fil> >;
+  using Slicer = Slicer<Fil, Persistence_interface_cohomology<Fil>>;
 
   const std::string& filePath = "scc_test.txt";
   int degree = 1;
@@ -349,14 +347,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_scc_file_io2, Fil, list_of_tested_variants)
   BOOST_CHECK_EQUAL(in_cpx.get_max_dimension(), out_cpx.get_max_dimension());
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_bitmap_io, Fil, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_bitmap_io, Fil, list_of_tested_variants) {
   using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;
   using ini = std::initializer_list<typename Fil::value_type>;
-  using Slicer = Slicer<Fil, Persistence_interface_cohomology<Fil> >;
+  using Slicer = Slicer<Fil, Persistence_interface_cohomology<Fil>>;
 
   std::vector<Fil> vertexValues = {ini{0.636869, 0.0729406},
                                    ini{1.27032, 0.0729406},
@@ -433,30 +430,30 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_bitmap_io, Fil, list_of_tested_variants)
   BOOST_CHECK_EQUAL(2, slicer.get_max_dimension());
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_simplex_tree_io, Fil, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_simplex_tree_io, Fil, list_of_tested_variants) {
   using ST = Gudhi::Simplex_tree<Simplex_tree_options_multidimensional_filtration<Fil>>;
   using Complex = Multi_parameter_filtered_complex<Fil, I, D>;
   using FC = typename Complex::Filtration_value_container;
   using BC = typename Complex::Boundary_container;
   using DC = typename Complex::Dimension_container;
   using ini = std::initializer_list<typename Fil::value_type>;
-  using Slicer1 = Slicer<Fil, Persistence_interface_cohomology<Fil> >;
-  using Fil2 = Multi_parameter_filtration<int>; // Will always be different from ST::Filtration_value
-  using Slicer2 = Slicer<Fil2, Persistence_interface_cohomology<Fil2> >;
+  using Slicer1 = Slicer<Fil, Persistence_interface_cohomology<Fil>>;
+  // Will always be different from ST::Filtration_value
+  using Fil2 = Multi_parameter_filtration_value<Flat_array_filtration<int>>;
+  using Slicer2 = Slicer<Fil2, Persistence_interface_cohomology<Fil2>>;
 
   ST simplexTree;
 
-  simplexTree.insert_simplex_and_subfaces({0,1,2}, ini{0, 3});
-  simplexTree.insert_simplex_and_subfaces({1,3}, ini{0, 4});
-  simplexTree.insert_simplex_and_subfaces({4,5}, ini{0, 6});
-  simplexTree.insert_simplex_and_subfaces({3,4,5,6}, ini{0, 5});
-  simplexTree.insert_simplex_and_subfaces({2,6}, ini{0, 7});
-  simplexTree.insert_simplex_and_subfaces({3,4}, ini{0, 8});
-  simplexTree.insert_simplex_and_subfaces({0,1,2}, ini{0, 2});
-  simplexTree.insert_simplex_and_subfaces({4,5,6}, ini{0, 4});
-  simplexTree.insert_simplex_and_subfaces({2,6}, ini{0, 1});
-  simplexTree.insert_simplex_and_subfaces({1,3}, ini{0, 8});
+  simplexTree.insert_simplex_and_subfaces({0, 1, 2}, ini{0, 3});
+  simplexTree.insert_simplex_and_subfaces({1, 3}, ini{0, 4});
+  simplexTree.insert_simplex_and_subfaces({4, 5}, ini{0, 6});
+  simplexTree.insert_simplex_and_subfaces({3, 4, 5, 6}, ini{0, 5});
+  simplexTree.insert_simplex_and_subfaces({2, 6}, ini{0, 7});
+  simplexTree.insert_simplex_and_subfaces({3, 4}, ini{0, 8});
+  simplexTree.insert_simplex_and_subfaces({0, 1, 2}, ini{0, 2});
+  simplexTree.insert_simplex_and_subfaces({4, 5, 6}, ini{0, 4});
+  simplexTree.insert_simplex_and_subfaces({2, 6}, ini{0, 1});
+  simplexTree.insert_simplex_and_subfaces({1, 3}, ini{0, 8});
 
   auto cpx = build_complex_from_simplex_tree<Fil>(simplexTree);
 
@@ -487,4 +484,3 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(slicer_simplex_tree_io, Fil, list_of_tested_varian
   BOOST_CHECK_EQUAL(slicer.get_filtration_values().size(), slicer2.get_filtration_values().size());
   BOOST_CHECK_EQUAL(3, slicer2.get_max_dimension());
 }
-

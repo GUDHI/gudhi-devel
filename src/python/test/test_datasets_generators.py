@@ -8,10 +8,11 @@
       - YYYY/MM Author: Description of the modification
 """
 
-
 import pytest
+from numpy.testing import assert_almost_equal
 
 from gudhi.datasets.generators import points
+from gudhi.random import set_seed
 
 
 def test_sphere():
@@ -53,3 +54,20 @@ def test_torus():
         points.ctorus(n_samples=10, dim=3, sample="grid").all()
         == points.torus(n_samples=10, dim=3, sample="grid").all()
     )
+
+
+def test_reproductibility_sphere():
+    set_seed(42)
+    rand_pts1 = points.sphere(n_samples=20, ambient_dim=4)
+    set_seed(42)
+    rand_pts2 = points.sphere(n_samples=20, ambient_dim=4)
+    assert_almost_equal(rand_pts1, rand_pts2)
+
+
+def test_reproductibility_ctorus():
+    for sample in ["grid", "random"]:
+        set_seed(42)
+        rand_pts1 = points.ctorus(n_samples=20, dim=4, sample=sample)
+        set_seed(42)
+        rand_pts2 = points.ctorus(n_samples=20, dim=4, sample=sample)
+        assert_almost_equal(rand_pts1, rand_pts2)

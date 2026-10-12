@@ -2,8 +2,7 @@ We are pleased to announce the release 3.X.X of the GUDHI library.
 
 As a major new feature, the GUDHI library now offers **...**
 
-The GUDHI library is mainly developped using GitHub, do not hesitate to
-[fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel).
+The GUDHI library is mainly developped using GitHub, do not hesitate to [fork the GUDHI project on GitHub](https://github.com/GUDHI/gudhi-devel).
 From a user point of view, we recommend to download GUDHI user version (gudhi.3.X.X.tar.gz).
 
 Below is a list of changes:

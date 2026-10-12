@@ -22,8 +22,7 @@ using Gudhi::multi_persistence::Box;
 
 using list_of_tested_variants = boost::mpl::list<double, float, int>;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(box_constructors, T, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(box_constructors, T, list_of_tested_variants) {
   Box<T> b;
   BOOST_CHECK(b.is_trivial());
   auto bottom = b.get_lower_corner();
@@ -64,11 +63,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_constructors, T, list_of_tested_variants)
   BOOST_CHECK(b3.get_bounding_corners().second == top);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants) {
   using P = typename Box<T>::Point_t;
-  P nan = {
-      std::numeric_limits<T>::quiet_NaN(), std::numeric_limits<T>::quiet_NaN(), std::numeric_limits<T>::quiet_NaN()};
+  P nan = {std::numeric_limits<T>::quiet_NaN(), std::numeric_limits<T>::quiet_NaN(),
+           std::numeric_limits<T>::quiet_NaN()};
   P inf = {P::T_inf, P::T_inf, P::T_inf};
   P minus_inf = {P::T_m_inf, P::T_m_inf, P::T_m_inf};
 
@@ -140,8 +138,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_other, T, list_of_tested_variants)
   BOOST_CHECK_EQUAL(top, inf);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(box_friends, T, list_of_tested_variants)
-{
+BOOST_AUTO_TEST_CASE_TEMPLATE(box_friends, T, list_of_tested_variants) {
   using P = typename Box<T>::Point_t;
   P inf = {P::T_inf, P::T_inf, P::T_inf};
   P minus_inf = {P::T_m_inf, P::T_m_inf, P::T_m_inf};
@@ -219,5 +216,5 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(box_serialization, T, list_of_tested_variants) {
   BOOST_CHECK_EQUAL(serSize, c_ptr - buffer);
   BOOST_CHECK(box == copy);
 
-  delete [] buffer;
+  delete[] buffer;
 }

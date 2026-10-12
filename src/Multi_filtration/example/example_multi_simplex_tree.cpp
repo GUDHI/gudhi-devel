@@ -12,7 +12,8 @@
 #include <initializer_list>
 
 #include <gudhi/Simplex_tree.h>
-#include <gudhi/Multi_parameter_filtration.h>
+#include <gudhi/Multi_filtration/Flat_array_filtration.h>
+#include <gudhi/Multi_parameter_filtration_value.h>
 
 // Options for the simplex tree
 template <typename MultiFiltrationValue>
@@ -20,7 +21,8 @@ struct Simplex_tree_options_multidimensional_filtration : Gudhi::Simplex_tree_op
   using Filtration_value = MultiFiltrationValue;
 };
 
-using Multi_filtration_value = Gudhi::multi_filtration::Multi_parameter_filtration<double>;
+using Storage_policy = Gudhi::multi_filtration::Flat_array_filtration<double>;
+using Multi_filtration_value = Gudhi::multi_filtration::Multi_parameter_filtration_value<Storage_policy>;
 using ST = Gudhi::Simplex_tree<Simplex_tree_options_multidimensional_filtration<Multi_filtration_value> >;
 
 int main()

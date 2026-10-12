@@ -18,6 +18,7 @@
 #ifndef MP_SLICER_H_INCLUDED
 #define MP_SLICER_H_INCLUDED
 
+#include <algorithm>
 #include <array>
 #include <initializer_list>
 #include <limits>
@@ -28,15 +29,17 @@
 #include <cstdint>  //std::int32_t
 #include <vector>
 #include <ostream>
-// #include <sstream>  //std::stringstream, to remove when to_str gets removed
 
 #ifdef GUDHI_USE_TBB
 #include <oneapi/tbb/parallel_for.h>
 #endif
 
 #include <gudhi/Debug_utils.h>
+#include <gudhi/serialization_utils.h>
 #include <gudhi/Multi_filtration/multi_filtration_utils.h>
 #include <gudhi/Multi_parameter_filtered_complex.h>
+#include <gudhi/Multi_persistence/utils.h>
+#include <gudhi/Multi_persistence/Box.h>
 #include <gudhi/Multi_persistence/Line.h>
 #include <gudhi/Thread_safe_slicer.h>
 #include <gudhi/Projective_cover_kernel.h>
@@ -63,41 +66,40 @@ namespace multi_persistence {
  * eventually vineyards and representative cycles.
  */
 template <class MultiFiltrationValue, class PersistenceAlgorithm>
-class Slicer
-{
+class Slicer {
  public:
-  using Persistence = PersistenceAlgorithm;          /**< Persistence algorithm type. */
-  using Filtration_value = MultiFiltrationValue;     /**< Filtration value type. */
-  using T = typename Filtration_value::value_type;   /**< Numerical filtration value element type. */
-  using Index = typename Persistence::Index;         /**< Complex index type. */
-  using Dimension = typename Persistence::Dimension; /**< Dimension type. */
+  using Persistence = PersistenceAlgorithm;                 /**< Persistence algorithm type. */
+  using Filtration_value = MultiFiltrationValue;            /**< Filtration value type. */
+  using value_type = typename Filtration_value::value_type; /**< Numerical filtration value element type. */
+  using Index = typename Persistence::Index;                /**< Complex index type. */
+  using Dimension = typename Persistence::Dimension;        /**< Dimension type. */
   using Complex = Multi_parameter_filtered_complex<Filtration_value, Index, Dimension>; /**< Complex type. */
-  using Map = typename Persistence::Map;             /**< Permutation map for filtration order. */
-  using Cycle = std::vector<Index>;                  /**< Cycle type. */
-  using Thread_safe = Thread_safe_slicer<Slicer>;    /**< Thread safe slicer type. */
-  template <typename Value = T>
-  using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, Value>; /**< Bar type. */
+  using Map = typename Persistence::Map;                    /**< Permutation map for filtration order. */
+  using Cycle = std::vector<Index>;                         /**< Cycle type. */
+  using Thread_safe = Thread_safe_slicer<Slicer>;           /**< Thread safe slicer type. */
+  template <typename Value = value_type>
+  using Bar = Gudhi::persistence_matrix::Persistence_interval<Dimension, Value>;        /**< Bar type. */
   /**
    * @brief Barcode type. A vector of @ref Bar, a tuple like structure containing birth, death and dimension of a bar.
    */
-  template <typename Value = T>
+  template <typename Value = value_type>
   using Barcode = std::vector<Bar<Value>>;
   /**
    * @brief Flat barcode type. All bars are represented by a birth and a death value stored in arrays of size 2.
    */
-  template <typename Value = T>
-  using Flat_barcode = std::vector<std::array<Value,2> >;
+  template <typename Value = value_type>
+  using Flat_barcode = std::vector<std::array<Value, 2>>;
   /**
    * @brief Barcode ordered by dimension type. A vector which has at index \f$ d \f$ the @ref Barcode of dimension
    * \f$ d \f$.
    */
-  template <typename Value = T>
+  template <typename Value = value_type>
   using Multi_dimensional_barcode = std::vector<Barcode<Value>>;
   /**
    * @brief Flat barcode ordered by dimension type. A vector which has at index \f$ d \f$ the @ref Flat_barcode of
    * dimension \f$ d \f$.
    */
-  template <typename Value = T>
+  template <typename Value = value_type>
   using Multi_dimensional_flat_barcode = std::vector<Flat_barcode<Value>>;
 
   // CONSTRUCTORS
@@ -114,10 +116,7 @@ class Slicer
    * It is recommended to use a complex which is ordered by dimension for better performance.
    */
   Slicer(const Complex& complex)
-      : complex_(complex),
-        slice_(complex.get_number_of_cycle_generators()),
-        persistence_()
-  {}
+      : complex_(complex), slice_(complex.get_number_of_cycle_generators()), persistence_() {}
 
   /**
    * @brief Constructs the slicer by moving the given complex. The current slice is not initialized to a default
@@ -126,17 +125,12 @@ class Slicer
    * It is recommended to use a complex which is ordered by dimension for better performance.
    */
   Slicer(Complex&& complex)
-      : complex_(std::move(complex)),
-        slice_(complex_.get_number_of_cycle_generators()),
-        persistence_()
-  {}
+      : complex_(std::move(complex)), slice_(complex_.get_number_of_cycle_generators()), persistence_() {}
 
   /**
    * @brief Copy constructor. Persistence computation initialization is not updated.
    */
-  Slicer(const Slicer& other)
-      : complex_(other.complex_), slice_(other.slice_), persistence_()
-  {}
+  Slicer(const Slicer& other) : complex_(other.complex_), slice_(other.slice_), persistence_() {}
 
   /**
    * @brief Copy constructor. Persistence computation initialization is not updated.
@@ -145,25 +139,20 @@ class Slicer
   Slicer(const Slicer<OtherMultiFiltrationValue, OtherPersistenceAlgorithm>& other)
       : complex_(other.get_filtered_complex()),
         slice_(other.get_slice().begin(), other.get_slice().end()),
-        persistence_()
-  {}
+        persistence_() {}
 
   /**
    * @brief Move constructor. Persistence computation initialization is not updated.
    */
   Slicer(Slicer&& other) noexcept
-      : complex_(std::move(other.complex_)),
-        slice_(std::move(other.slice_)),
-        persistence_()
-  {}
+      : complex_(std::move(other.complex_)), slice_(std::move(other.slice_)), persistence_() {}
 
   ~Slicer() = default;
 
   /**
    * @brief Assign operator. Persistence computation initialization is not updated.
    */
-  Slicer& operator=(const Slicer& other)
-  {
+  Slicer& operator=(const Slicer& other) {
     complex_ = other.complex_;
     slice_ = other.slice_;
     persistence_ = Persistence();
@@ -175,10 +164,9 @@ class Slicer
    * @brief Assign operator. Persistence computation initialization is not updated.
    */
   template <class OtherMultiFiltrationValue, class OtherPersistenceAlgorithm>
-  Slicer& operator=(const Slicer<OtherMultiFiltrationValue, OtherPersistenceAlgorithm>& other)
-  {
+  Slicer& operator=(const Slicer<OtherMultiFiltrationValue, OtherPersistenceAlgorithm>& other) {
     complex_ = other.get_filtered_complex();
-    slice_ = std::vector<T>(other.get_slice().begin(), other.get_slice().end());
+    slice_ = std::vector<value_type>(other.get_slice().begin(), other.get_slice().end());
     persistence_ = Persistence();
 
     return *this;
@@ -187,8 +175,7 @@ class Slicer
   /**
    * @brief Move assign operator. Persistence computation initialization is not updated.
    */
-  Slicer& operator=(Slicer&& other) noexcept
-  {
+  Slicer& operator=(Slicer&& other) noexcept {
     complex_ = std::move(other.complex_);
     slice_ = std::move(other.slice_);
     persistence_ = Persistence();
@@ -215,7 +202,7 @@ class Slicer
   /**
    * @brief Returns the number of parameters of the stored filtration. If the module is empty, the number returned is 0.
    */
-  Index get_number_of_parameters() const { return complex_.get_number_of_parameters(); }
+  Index get_number_of_parameters() const { return complex_.num_parameters(); }
 
   /**
    * @brief Returns the underlying complex.
@@ -238,13 +225,13 @@ class Slicer
    * @brief Returns a const reference to the current slice. It can be initialized or updated with @ref set_slice
    * and @ref push_to.
    */
-  const std::vector<T>& get_slice() const { return slice_; }
+  const std::vector<value_type>& get_slice() const { return slice_; }
 
   /**
    * @brief Returns a reference to the current slice. It can also be initialized or updated with @ref set_slice
    * and @ref push_to.
    */
-  std::vector<T>& get_slice() { return slice_; }
+  std::vector<value_type>& get_slice() { return slice_; }
 
   /**
    * @brief Returns a const reference to the class computing the persistence of the current slice. It will be
@@ -253,34 +240,23 @@ class Slicer
   const Persistence& get_persistence_algorithm() const { return persistence_; }
 
   /**
-   * @brief Returns two filtration values representing respectively the greatest common lower bound of all filtration
-   * values in the filtration and the lowest common upper bound of them.
+   * @brief Returns a box which corners are respectively the greatest common lower bound of all finite filtration
+   * values in the filtration and the lowest common upper bound of them. If at some parameter, there where no finite
+   * values, the lower corner at that parameter will be inf and the upper corner -inf.
    */
-  std::pair<Filtration_value, Filtration_value> get_bounding_box() const
-  {
-    Filtration_value a = Filtration_value::inf(get_number_of_parameters());
-    Filtration_value b = Filtration_value::minus_inf(get_number_of_parameters());
-    for (const Filtration_value& fil : complex_.get_filtration_values()) {
-      if (fil.num_generators() > 1) {
-        a.pull_to_greatest_common_lower_bound(factorize_below(fil));
-        // Because of Degree_rips_bifiltration
-        Filtration_value above = factorize_above(fil);
-        auto g = above.num_generators() - 1;
-        b.push_to_least_common_upper_bound({above(g, 0), above(g, 1)});
-      } else {
-        a.pull_to_greatest_common_lower_bound(fil);
-        b.push_to_least_common_upper_bound(fil);
+  Box<value_type> get_bounding_box() const {
+    return get_bounding_box_of_complex(complex_, [this](auto&& to_apply) {
+      for (const auto& f : get_filtration_values()) {
+        to_apply(f);
       }
-    }
-    return std::make_pair(std::move(a), std::move(b));
+    });
   }
 
   /**
    * @brief Returns a const reference to the filtration value container. A filtration value at index \$f i \$f
    * correspond to the filtration value associated to the generators at index \$f i \$f.
    */
-  const typename Complex::Filtration_value_container& get_filtration_values() const
-  {
+  const typename Complex::Filtration_value_container& get_filtration_values() const {
     return complex_.get_filtration_values();
   }
 
@@ -333,14 +309,6 @@ class Slicer
    */
   const typename Complex::Boundary& get_boundary(Index i) const { return complex_.get_boundaries()[i]; }
 
-  // // TODO: only used to print info in python, so put in some interface instead
-  // std::string to_str() const
-  // {
-  //   std::stringstream stream;
-  //   stream << *this;
-  //   return stream.str();
-  // }
-
   // MODIFIERS
 
   /**
@@ -350,9 +318,8 @@ class Slicer
    *
    * @tparam Array Container with a begin() and end() method and whose element can be converted into `T`.
    */
-  template <class Array = std::initializer_list<T>>
-  void set_slice(const Array& slice)
-  {
+  template <class Array = std::initializer_list<value_type>>
+  void set_slice(const Array& slice) {
     GUDHI_CHECK(slice.size() == complex_.get_number_of_cycle_generators(),
                 std::invalid_argument("Slice should have the same size than the number of generators in the complex."));
 
@@ -364,9 +331,8 @@ class Slicer
    *
    * @tparam Line_like Any type convertible to a @ref Line class. Default value: `std::initializer_list<T>`.
    */
-  template <class Line_like = std::initializer_list<T>>
-  void push_to(const Line_like& line)
-  {
+  template <class Line_like = std::initializer_list<value_type>>
+  void push_to(const Line_like& line) {
     _push_to(complex_, Line<typename Line_like::value_type>(line));
   }
 
@@ -376,8 +342,7 @@ class Slicer
    * @tparam U Template parameter of the given line.
    */
   template <class U>
-  void push_to(const Line<U>& line)
-  {
+  void push_to(const Line<U>& line) {
     _push_to(complex_, line);
   }
 
@@ -390,8 +355,7 @@ class Slicer
    *
    * @param maxDim Maximal dimension to keep.
    */
-  void prune_above_dimension(int maxDim)
-  {
+  void prune_above_dimension(int maxDim) {
     int idx = complex_.prune_above_dimension(maxDim);
     slice_.resize(idx);
     persistence_ = Persistence();
@@ -405,13 +369,45 @@ class Slicer
    * filtration value. The internal vectors correspond to the possible values of the parameters, ordered by increasing
    * value, forming therefore all together a 2D grid.
    *
-   * @param grid Vector of vector with size at least number of filtration parameters.
+   * @tparam OneDimArray A range of values \f$ U \f$ convertible into `T`. Has to implement
+   * a begin, end and operator[] method and a `value_type` definition equal to \f$ U \f$.
+   * @param grid Vector of @p OneDimArray with size at least number of filtration parameters. Each array has to be
+   * ordered by increasing value.
    * @param coordinate If true, the values are set to the coordinates of the projection in the grid. If false,
    * the values are set to the values at the coordinates of the projection. Default value: true.
    */
-  void coarsen_on_grid(const std::vector<std::vector<T>>& grid, bool coordinate = true)
-  {
+  template <typename OneDimArray>
+  void coarsen_on_grid(const std::vector<OneDimArray>& grid, bool coordinate = true) {
     complex_.coarsen_on_grid(grid, coordinate);
+  }
+
+  /**
+   * @brief Modifies the filtration values such that at each parameters, the values of a generator is higher or equal
+   * than the values at that parameter of its faces.
+   */
+  void make_filtration_non_decreasing() { complex_.make_filtration_non_decreasing(); }
+
+  /**
+   * @brief Normalizes the finite filtration values with respect to the given box. If no box is given or the given
+   * box is trivial, the current bounding box is used (computed with @ref get_bounding_box) and its corner values at
+   * infinity are rescaled to respectively 0 (lower corner) and 1 (upper corner).
+   *
+   * Not enabled for @ref Gudhi::multi_filtration::StoragePolicy::has_an_implicit_axis equal to true, as the implicit
+   * parameter cannot be properly mapped.
+   *
+   * @tparam U Box template parameter
+   * @param box Box. Default: trivial box.
+   */
+  template <typename U = value_type>
+  void normalize_filtration_values(const Box<U>& box = {}) {
+    return normalize_filtration_values_in_complex(
+        complex_,
+        [this](auto&& to_apply) {
+          for (auto& f : get_filtration_values()) {
+            to_apply(f);
+          }
+        },
+        box);
   }
 
   // PERSISTENCE
@@ -430,17 +426,16 @@ class Slicer
    * if the update method of the template parameter @ref PersistenceAlgorithm does not permit this feature.
    * Default value: false.
    */
-  void initialize_persistence_computation(bool ignoreInf = false)
-  {
+  void initialize_persistence_computation(bool ignoreInf = false) {
     _initialize_persistence_computation(complex_, ignoreInf);
   }
 
   /**
    * @brief Updates the persistence barcode with the new slice. If @ref PersistenceAlgorithm is
-   * @ref Persistence_interface_vineyard: will update everything necessary for the barcode without re-computing
+   * @ref Persistence_interface_vineyard "": will update everything necessary for the barcode without re-computing
    * everything from scratch (contrary to @ref initialize_persistence_computation). Furthermore, it guarantees that
    * the new barcode will "matches" the precedent one. TODO: explain exactly what it means and how to do the matching.
-   * For other @ref PersistenceAlgorithm: more or less equivalent to @ref initialize_persistence_computation.
+   * For other @ref PersistenceAlgorithm "": more or less equivalent to @ref initialize_persistence_computation.
    *
    * @pre @ref initialize_persistence_computation has to be called at least once before.
    *
@@ -449,10 +444,7 @@ class Slicer
    * if the update method of the template parameter `PersistenceAlgorithm` does not permit this feature.
    * Default value: false.
    */
-  void update_persistence_computation(bool ignoreInf = false)
-  {
-    persistence_.update(slice_, ignoreInf);
-  }
+  void update_persistence_computation(bool ignoreInf = false) { persistence_.update(slice_, ignoreInf); }
 
   /**
    * @brief Returns the barcode of the current slice. The barcode format will change depending on the template values.
@@ -466,9 +458,8 @@ class Slicer
    * @param maxDim Maximal dimension to be included in the barcode. If negative, all dimensions are included.
    * Default value: -1.
    */
-  template <bool byDim = true, typename Value = T, bool idx = false>
-  std::conditional_t<byDim, Multi_dimensional_barcode<Value>, Barcode<Value>> get_barcode(int maxDim = -1)
-  {
+  template <bool byDim = true, typename Value = value_type, bool idx = false>
+  std::conditional_t<byDim, Multi_dimensional_barcode<Value>, Barcode<Value>> get_barcode(int maxDim = -1) {
     if (maxDim < 0) maxDim = get_max_dimension();
     if constexpr (byDim) {
       return _get_barcode_by_dim<idx, Value>(maxDim);
@@ -490,10 +481,9 @@ class Slicer
    * @param maxDim Maximal dimension to be included in the barcode. If negative, all dimensions are included.
    * Default value: -1.
    */
-  template <bool byDim = false, typename Value = T, bool idx = false>
+  template <bool byDim = false, typename Value = value_type, bool idx = false>
   std::conditional_t<byDim, Multi_dimensional_flat_barcode<Value>, Flat_barcode<Value>> get_flat_barcode(
-      int maxDim = -1)
-  {
+      int maxDim = -1) {
     if (maxDim < 0) maxDim = get_max_dimension();
     if constexpr (byDim) {
       return _get_flat_barcode_by_dim<idx, Value>(maxDim);
@@ -506,21 +496,71 @@ class Slicer
    * @brief Returns the representative cycles of the current slice. All cycles of dimension \f$ d \f$ are stored at
    * index \f$ d \f$ of the returned vector. A cycle is represented by a vector of boundary indices. That is, the index
    * \f$ i \f$ in a cycle represents the cell which boundary can be retrieved by @ref get_boundary "get_boundary(i)".
+   * The cycles are stored in the same order than the bars are in the multi-dimensional barcode.
    *
    * Only available if PersistenceAlgorithm::has_rep_cycles is true.
    *
    * @pre @ref initialize_persistence_computation has to be called at least once before.
    *
    * @param update If true, updates the stored representative cycles, otherwise just returns the container in its
-   * current state. So should be true at least the first time the method is used.
+   * current state. So should be true at least the first time the method is used. Default: true.
    */
-  std::vector<std::vector<Cycle>> get_representative_cycles(bool update = true)
-  {
+  std::vector<std::vector<Cycle>> get_representative_cycles(bool update = true) {
     return _get_representative_cycles(complex_, update);
   }
 
-  Cycle get_most_persistent_cycle(Dimension dim = 1, bool update = true)
-  {
+  /**
+   * @brief Returns the representative cycles of given dimension of the current slice. A cycle is represented by a
+   * vector of boundary indices. That is, the index \f$ i \f$ in a cycle represents the cell which boundary can be
+   * retrieved by @ref get_boundary "get_boundary(i)". The cycles are stored in the same order than the bars are in
+   * the multi-dimensional barcode.
+   *
+   * Only available if PersistenceAlgorithm::has_rep_cycles is true.
+   *
+   * @pre @ref initialize_persistence_computation has to be called at least once before.
+   *
+   * @param dimension Dimension of the cycles.
+   * @param update If true, updates the stored representative cycles, otherwise just returns the container in its
+   * current state. So should be true at least the first time the method is used. Default: true.
+   */
+  std::vector<Cycle> get_representative_cycles_in_dim(Dimension dimension, bool update = true) {
+    static_assert(Persistence::has_rep_cycles,
+                  "Representative cycles not enabled by the chosen PersistenceAlgorithm class.");
+
+    GUDHI_CHECK(dimension >= 0, std::invalid_argument("Given dimension is not valid."));
+
+    // to trigger global update which is faster with parallelization
+    auto cycleKeys = persistence_.get_all_representative_cycles(update, dimension);
+    std::vector<Cycle> out(cycleKeys.size());
+    Index i = 0;
+    Index curr = 0;
+    // to ensure same order than for barcode by dim
+    for (const auto& bar : persistence_.get_barcode()) {
+      if (bar.dim == dimension) {
+        auto cycle = persistence_.get_representative_cycle(i, false);
+        out[curr].assign(cycle.begin(), cycle.end());
+        ++curr;
+      }
+      ++i;
+    }
+    return out;
+  }
+
+  /**
+   * @brief Returns the longest living representative cycles of the current slice in the given dimension. A cycle is
+   * represented by a vector of boundary indices. That is, the index \f$ i \f$ in a cycle represents the cell which
+   * boundary can be retrieved by @ref get_boundary "get_boundary(i)". If no cycle existed at given dimension, the
+   * returned cycle will be empty.
+   *
+   * Only available if PersistenceAlgorithm::has_rep_cycles is true.
+   *
+   * @pre @ref initialize_persistence_computation has to be called at least once before.
+   *
+   * @param dim Dimension of the cycle. Default: 1.
+   * @param update If true, updates the representative cycle before returning it, otherwise just returns the cycle
+   * in its current state. So should be true at least the first time the method is used. Default: true.
+   */
+  Cycle get_most_persistent_cycle(Dimension dim = 1, bool update = true) {
     static_assert(Persistence::has_rep_cycles,
                   "Representative cycles not enabled by the chosen PersistenceAlgorithm class.");
 
@@ -528,7 +568,7 @@ class Slicer
 
     Index maxIndex = -1;
     Index maxBirth = std::numeric_limits<Index>::max();
-    T maxLength = 0;
+    value_type maxLength = 0;
     Index i = 0;
     for (const auto& bar : barcodeIndices) {
       if (bar.dim == dim) {
@@ -539,7 +579,7 @@ class Slicer
             maxLength = Filtration_value::T_inf;
           }
         } else {
-          T length = std::abs(slice_[bar.death] - slice_[bar.birth]);
+          value_type length = std::abs(slice_[bar.death] - slice_[bar.birth]);
           if (maxLength < length) {
             maxLength = length;
             maxIndex = i;
@@ -555,14 +595,112 @@ class Slicer
     return {cycle.begin(), cycle.end()};
   }
 
+  /**
+   * @brief Returns the `n` longest living representative cycles of the current slice in the given dimension. A cycle is
+   * represented by a vector of boundary indices. That is, the index \f$ i \f$ in a cycle represents the cell which
+   * boundary can be retrieved by @ref get_boundary "get_boundary(i)". If no cycle existed at given dimension, the
+   * returned container will be empty. The cycles are ordered by bar length in decreasing order.
+   *
+   * Only available if PersistenceAlgorithm::has_rep_cycles is true.
+   *
+   * @pre @ref initialize_persistence_computation has to be called at least once before.
+   *
+   * @param dim Dimension of the cycle. Default: 1.
+   * @param n Number of cycles to return. If 0, no cycle is returned. If higher than the number of available cycles,
+   * it is set down to this number and all cycles are returned. Default: 1.
+   * @param update If true, updates the representative cycles before returning them, otherwise just returns the cycles
+   * in their current state. So should be true at least the first time the method is used. Default: true.
+   */
+  std::vector<Cycle> get_n_most_persistent_cycles(Dimension dim = 1, Index n = 1, bool update = true) {
+    static_assert(Persistence::has_rep_cycles,
+                  "Representative cycles not enabled by the chosen PersistenceAlgorithm class.");
+
+    if (n < 1) return {};
+    if (n == 1) {
+      auto cycle = get_most_persistent_cycle(dim, update);
+      if (cycle.empty()) return {};
+      return {std::move(cycle)};
+    }
+
+    auto barcodeIndices = persistence_.get_barcode();
+
+    Index numberOfBars = 0;
+    for (const auto& bar : barcodeIndices) {
+      if (bar.dim == dim) {
+        ++numberOfBars;
+      }
+    }
+
+    if (numberOfBars < 1) return {};
+    if (numberOfBars == 1) {
+      Index i = 0;
+      for (const auto& bar : barcodeIndices) {
+        if (bar.dim == dim) {
+          auto cycle = persistence_.get_representative_cycle(i, update);
+          return {cycle.begin(), cycle.end()};
+        }
+        ++i;
+      }
+    }
+
+    n = std::min(n, numberOfBars);
+
+    // max s.t. you can substract from it and differentiate essential cycles
+    const value_type inf = std::numeric_limits<value_type>::max();
+#ifdef GUDHI_USE_TBB
+    std::vector<value_type> lengths(barcodeIndices.size(),
+                                    std::numeric_limits<value_type>::lowest());  // negative should be sufficient
+    tbb::parallel_for(static_cast<Index>(0), static_cast<Index>(barcodeIndices.size()), [&](Index i) {
+      const auto& bar = barcodeIndices[i];
+      if (bar.dim == dim) {
+        lengths[i] = std::abs((bar.death == Persistence::nullDeath ? inf : slice_[bar.death]) - slice_[bar.birth]);
+      }
+    });
+#else
+    // Not so clear if numberOfBars is really small enough compared to barcodeIndices.size() to be worth it here
+    std::vector<Index> barcodeIdx(numberOfBars);
+    std::vector<T> lengths(numberOfBars);
+    Index i = 0;
+    Index curr = 0;
+    for (const auto& bar : barcodeIndices) {
+      if (bar.dim == dim) {
+        lengths[curr] = std::abs((bar.death == Persistence::nullDeath ? inf : slice_[bar.death]) - slice_[bar.birth]);
+        barcodeIdx[curr] = i;
+        ++curr;
+      }
+      ++i;
+    }
+#endif
+
+    std::vector<Index> lengthIdx(lengths.size());
+    std::iota(lengthIdx.begin(), lengthIdx.end(), 0);
+    auto cmp = [&lengths](Index a, Index b) { return lengths[a] > lengths[b]; };
+    // puts the n largest elements in front (unordered)
+    std::nth_element(lengthIdx.begin(), lengthIdx.begin() + n, lengthIdx.end(), cmp);
+
+    // to sort cycles. Useful?
+    std::sort(lengthIdx.begin(), lengthIdx.begin() + n, cmp);
+
+    std::vector<Cycle> cycles(n);
+    for (Index i = 0; i < n; ++i) {
+#ifdef GUDHI_USE_TBB
+      // when update is true, this method cannot be parallelized... But n should be relatively small anyway.
+      auto cycle = persistence_.get_representative_cycle(lengthIdx[i], update);
+#else
+      auto cycle = persistence_.get_representative_cycle(barcodeIdx[lengthIdx[i]], update);
+#endif
+      cycles[i] = {cycle.begin(), cycle.end()};
+    }
+    return cycles;
+  }
+
   // FRIENDS
 
   /**
    * @brief Builds a new slicer by reordering the cells in the complex of the given slicer with the given permutation
    * map.
    */
-  friend Slicer build_permuted_slicer(const Slicer& slicer, const std::vector<Index>& permutation)
-  {
+  friend Slicer build_permuted_slicer(const Slicer& slicer, const std::vector<Index>& permutation) {
     GUDHI_CHECK(permutation.size() < slicer.get_number_of_cycle_generators(),
                 std::invalid_argument(
                     "Too many elements in permutation vector. Got perm size: " + std::to_string(permutation.size()) +
@@ -575,8 +713,7 @@ class Slicer
    * @ref Multi_parameter_filtered_complex::sort_by_dimension_co_lexicographically. Returns a pair with the new slicer
    * as first element and the permutation map used as second element.
    */
-  friend std::pair<Slicer, std::vector<Index>> build_permuted_slicer(const Slicer& slicer)
-  {
+  friend std::pair<Slicer, std::vector<Index>> build_permuted_slicer(const Slicer& slicer) {
     auto [complex, permutation] = build_permuted_complex(slicer.complex_);
     return std::make_pair(Slicer(std::move(complex)), std::move(permutation));
   }
@@ -585,8 +722,7 @@ class Slicer
    * @brief Builds a new slicer from the given one by projecting its filtration values on a grid.
    * See @ref coarsen_on_grid with the paramater `coordinate` at true.
    */
-  friend auto build_slicer_coarsen_on_grid(const Slicer& slicer, const std::vector<std::vector<T>>& grid)
-  {
+  friend auto build_slicer_coarsen_on_grid(const Slicer& slicer, const std::vector<std::vector<value_type>>& grid) {
     using return_filtration_value = decltype(std::declval<Filtration_value>().template as_type<std::int32_t>());
     using return_complex = decltype(build_complex_coarsen_on_grid(slicer.complex_, grid));
     using return_pers = typename Persistence::template As_type<return_complex>;
@@ -596,8 +732,7 @@ class Slicer
   /**
    * @brief Builds a new slicer using @ref Projective_cover_kernel. TODO: explain what that means.
    */
-  friend Slicer build_slicer_from_projective_cover_kernel(const Slicer& slicer, Dimension dim)
-  {
+  friend Slicer build_slicer_from_projective_cover_kernel(const Slicer& slicer, Dimension dim) {
     Projective_cover_kernel kernel(slicer.complex_, dim);
     return Slicer(kernel.create_complex());
   }
@@ -621,25 +756,56 @@ class Slicer
    * @param reverse Set to true if the generators should be written in increasing order of dimension instead of
    * decreasing. Default value: false.
    */
-  friend void write_slicer_to_scc_file(const std::string& outFilePath,
-                                       const Slicer& slicer,
-                                       int degree = -1,
-                                       bool rivetCompatible = false,
-                                       bool ignoreLastGenerators = false,
-                                       bool stripComments = false,
-                                       bool reverse = false)
-  {
+  friend void write_slicer_to_scc_file(const std::string& outFilePath, const Slicer& slicer, int degree = -1,
+                                       bool rivetCompatible = false, bool ignoreLastGenerators = false,
+                                       bool stripComments = false, bool reverse = false) {
     const Complex& cpx =
         slicer.complex_.is_ordered_by_dimension() ? slicer.complex_ : build_permuted_complex(slicer.complex_).first;
-    write_complex_to_scc_file<typename Slicer::Filtration_value>(
-        outFilePath, cpx, degree, rivetCompatible, ignoreLastGenerators, stripComments, reverse);
+    write_complex_to_scc_file<typename Slicer::Filtration_value>(outFilePath, cpx, degree, rivetCompatible,
+                                                                 ignoreLastGenerators, stripComments, reverse);
   };
+
+  /**
+   * @brief Serialize given value into the buffer at given pointer.
+   *
+   * @param value Value to serialize.
+   * @param start Pointer to the start of the space in the buffer where to store the serialization.
+   * @return End position of the serialization in the buffer.
+   */
+  friend char* serialize_value_to_char_buffer(const Slicer& value, char* start) {
+    char* curr = start;
+    curr = serialize_value_to_char_buffer(value.complex_, curr);
+    curr = serialize_value_to_char_buffer(value.slice_, curr);
+    return curr;
+  }
+
+  /**
+   * @brief Deserialize the value from a buffer at given pointer and stores it in given value.
+   *
+   * @param value Value to fill with the deserialized summand.
+   * @param start Pointer to the start of the space in the buffer where the serialization is stored.
+   * @return End position of the serialization in the buffer.
+   */
+  friend const char* deserialize_value_from_char_buffer(Slicer& value, const char* start) {
+    const char* curr = start;
+    curr = deserialize_value_from_char_buffer(value.complex_, curr);
+    curr = deserialize_value_from_char_buffer(value.slice_, curr);
+    return curr;
+  }
+
+  /**
+   * @brief Returns the serialization size of the given summand.
+   */
+  friend std::size_t get_serialization_size_of(const Slicer& value) {
+    std::size_t size = get_serialization_size_of(value.complex_);
+    size += get_serialization_size_of(value.slice_);
+    return size;
+  }
 
   /**
    * @brief Outstream operator.
    */
-  friend std::ostream& operator<<(std::ostream& stream, const Slicer& slicer)
-  {
+  friend std::ostream& operator<<(std::ostream& stream, const Slicer& slicer) {
     stream << "-------------------- Slicer \n";
 
     stream << "--- Filtered complex \n";
@@ -662,35 +828,34 @@ class Slicer
     return stream;
   }
 
+  /**
+   * @brief Equality operator. Tests only equality of the underlying complexes.
+   */
+  friend bool operator==(const Slicer& a, const Slicer& b) { return a.complex_ == b.complex_; }
+
  protected:
   friend Thread_safe;  // Thread_safe will use the "_*" methods below instead of "*".
 
   // For ThreadSafe version
-  Slicer(const std::vector<T>& slice, const Persistence& persistence)
-      : complex_(), slice_(slice), persistence_(persistence)
-  {}
+  Slicer(const std::vector<value_type>& slice, const Persistence& persistence)
+      : complex_(), slice_(slice), persistence_(persistence) {}
 
-  Slicer(std::vector<T>&& slice, Persistence&& persistence)
-      : complex_(),
-        slice_(std::move(slice)),
-        persistence_(std::move(persistence))
-  {}
+  Slicer(std::vector<value_type>&& slice, Persistence&& persistence)
+      : complex_(), slice_(std::move(slice)), persistence_(std::move(persistence)) {}
 
-  template <class Array = std::initializer_list<T>>
-  void _set_slice(const Array& slice)
-  {
+  template <class Array = std::initializer_list<value_type>>
+  void _set_slice(const Array& slice) {
     // just in case slice_ was empty before, otherwise should already be of the right size and not reallocate.
     slice_.resize(slice.size());
     std::copy(slice.begin(), slice.end(), slice_.begin());
   }
 
   template <class U>
-  void _push_to(const Complex& complex, const Line<U>& line)
-  {
+  void _push_to(const Complex& complex, const Line<U>& line) {
     const auto& filtrationValues = complex.get_filtration_values();
 #ifdef GUDHI_USE_TBB
     tbb::parallel_for(Index(0), Index(filtrationValues.size()), [&](Index i) {
-      slice_[i] = line.template compute_forward_intersection<T>(filtrationValues[i]);
+      slice_[i] = line.template compute_forward_intersection<value_type>(filtrationValues[i]);
     });
 #else
     for (Index i = 0; i < filtrationValues.size(); i++) {
@@ -699,38 +864,41 @@ class Slicer
 #endif
   }
 
-  void _initialize_persistence_computation(const Complex& complex, bool ignoreInf = false)
-  {
+  void _initialize_persistence_computation(const Complex& complex, bool ignoreInf = false) {
     persistence_.initialize(complex, slice_, ignoreInf);
   }
 
-  std::vector<std::vector<Cycle>> _get_representative_cycles(const Complex& complex, bool update = true)
-  {
+  std::vector<std::vector<Cycle>> _get_representative_cycles(const Complex& complex, bool update = true) {
     static_assert(Persistence::has_rep_cycles,
                   "Representative cycles not enabled by the chosen PersistenceAlgorithm class.");
 
     const auto& dimensions = complex.get_dimensions();
+    // to trigger global update which is faster with parallelization
     auto cycleKeys = persistence_.get_all_representative_cycles(update);
     auto numCycles = cycleKeys.size();
     std::vector<std::vector<Cycle>> out(complex.get_max_dimension() + 1);
     for (auto& cyclesDim : out) cyclesDim.reserve(numCycles);
-    for (const auto& cycle : cycleKeys) {
+    // to ensure same order than for barcode by dim
+    for (Index i = 0; i < numCycles; ++i) {
+      auto cycle = persistence_.get_representative_cycle(i, false);
       GUDHI_CHECK(!cycle.empty(), std::runtime_error("A cycle should not be empty..."));
       // assumes cycle to be never empty & all faces have same dimension
-      out[dimensions[cycle[0]]].push_back(cycle);
+      out[dimensions[cycle[0]]].push_back({cycle.begin(), cycle.end()});
     }
     return out;
   }
 
  private:
-  Complex complex_;      /**< Complex storing all boundaries, filtration values and dimensions. */
-  std::vector<T> slice_; /**< Filtration values of the current slice. The indices corresponds to those in complex_. */
+  Complex complex_;         /**< Complex storing all boundaries, filtration values and dimensions. */
+  /**
+   * @brief Filtration values of the current slice. The indices corresponds to those in complex_.
+   */
+  std::vector<value_type> slice_;
   Persistence persistence_; /**< Class for persistence computations. */
 
   template <bool idx, class Interval, typename Value>
-  void _retrieve_interval(const Interval& bar, Dimension& dim, Value& birth, Value& death)
-  {
-    const Value inf = Gudhi::multi_filtration::MF_T_inf<Value>;
+  void _retrieve_interval(const Interval& bar, Dimension& dim, Value& birth, Value& death) {
+    const Value inf = Gudhi::multi_filtration::detail::MF_T_inf<Value>;
     dim = bar.dim;
     if constexpr (idx) {
       birth = bar.birth;
@@ -748,8 +916,7 @@ class Slicer
   }
 
   template <bool idx, typename Value>
-  Barcode<Value> _get_barcode(int maxDim)
-  {
+  Barcode<Value> _get_barcode(int maxDim) {
     auto barcodeIndices = persistence_.get_barcode();
     Barcode<Value> out(barcodeIndices.size());
     Index i = 0;
@@ -764,8 +931,7 @@ class Slicer
   }
 
   template <bool idx, typename Value>
-  Multi_dimensional_barcode<Value> _get_barcode_by_dim(int maxDim)
-  {
+  Multi_dimensional_barcode<Value> _get_barcode_by_dim(int maxDim) {
     // TODO: This doesn't allow for negative dimensions
     // Hannah: not sure what this comment means ?
     Multi_dimensional_barcode<Value> out(maxDim + 1);
@@ -781,8 +947,7 @@ class Slicer
   }
 
   template <bool idx, typename Value>
-  Flat_barcode<Value> _get_flat_barcode(int maxDim)
-  {
+  Flat_barcode<Value> _get_flat_barcode(int maxDim) {
     auto barcodeIndices = persistence_.get_barcode();
     Flat_barcode<Value> out(barcodeIndices.size());
     Index i = 0;
@@ -798,8 +963,7 @@ class Slicer
   }
 
   template <bool idx, typename Value>
-  Multi_dimensional_flat_barcode<Value> _get_flat_barcode_by_dim(int maxDim)
-  {
+  Multi_dimensional_flat_barcode<Value> _get_flat_barcode_by_dim(int maxDim) {
     Multi_dimensional_flat_barcode<Value> out(maxDim + 1);
     Value birth, death;
     Dimension dim;

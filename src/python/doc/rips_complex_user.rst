@@ -9,10 +9,11 @@ Definition
 
 .. include:: rips_complex_sum.inc
 
-The `Rips complex <https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex>`_ is a simplicial complex that
-generalizes proximity (:math:`\varepsilon`-ball) graphs to higher dimensions. The vertices correspond to the input
-points, and a simplex is present if and only if its diameter is smaller than some parameter α.  Considering all
-parameters α defines a filtered simplicial complex, where the filtration value of a simplex is its diameter.
+The `Vietoris-Rips complex <https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex>`_\ :sup:`[Wikipedia]`
+is a simplicial complex that generalizes proximity (:math:`\varepsilon`-ball) graphs to higher dimensions. The vertices
+correspond to the input points, and a simplex is present if and only if its diameter is smaller than some parameter α.
+Considering all parameters α defines a filtered simplicial complex, where the filtration value of a simplex is its
+diameter.
 The filtration can be restricted to values α smaller than some threshold, to reduce its size.  Beware that some
 people define the Rips complex using a bound of 2α instead of α, particularly when comparing it to an ambient
 Čech complex.  They end up with the same combinatorial object, but filtration values which are half of ours.

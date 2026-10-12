@@ -14,9 +14,9 @@
 #include <nanobind/stl/vector.h>
 
 #include <gudhi/distance_functions.h>
+#include <gudhi/Points_off_io.h>
 #include <gudhi/choose_n_farthest_points.h>
 #include <gudhi/pick_n_random_points.h>
-#include <gudhi/Points_off_io.h>
 
 // Default value is undefined
 #define _GUDHI_SUBSAMPLING_USE_CGAL 0
