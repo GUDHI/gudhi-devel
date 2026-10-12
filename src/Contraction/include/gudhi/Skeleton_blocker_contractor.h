@@ -84,7 +84,7 @@ Contraction_visitor<Profile>* make_remove_popable_blockers_visitor() {
  *
  * @details The simplification algorithm consists in iteratively picking the
  * edge with lowest cost and performing an edge contraction if the contraction is valid.
- * This class is policy based (and much inspired from the edge collapse package of CGAL http://doc.cgal.org/latest/Surface_mesh_simplification/index.html).
+ * This class is policy based (and much inspired from the edge collapse package of CGAL https://doc.cgal.org/latest/Surface_mesh_simplification/index.html).
  *
  * Policies that can be changed are :
  *  - the cost policy : how much cost an edge contraction

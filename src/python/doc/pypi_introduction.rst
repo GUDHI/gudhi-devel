@@ -1,3 +1,5 @@
+:orphan:
+
 The Gudhi library is an open source library for Computational Topology and
 Topological Data Analysis (TDA). It offers state-of-the-art algorithms
 to construct various types of simplicial complexes, data structures to

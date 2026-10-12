@@ -49,7 +49,7 @@ namespace spatial_searching {
   *
   * \details
   * The class Kd_tree_search is a tree-based data structure, based on
-  * <a target="_blank" href="http://doc.cgal.org/latest/Spatial_searching/index.html">CGAL dD spatial searching data structures</a>.
+  * <a target="_blank" href="https://doc.cgal.org/latest/Spatial_searching/index.html">CGAL dD spatial searching data structures</a>.
   * It provides a simplified API to perform (approximate) nearest and furthest neighbor searches. Contrary to CGAL default behavior, the tree
   * does not store the points themselves, but stores indices.
   *
@@ -59,9 +59,9 @@ namespace spatial_searching {
   * neighbors will be computed incrementally when the iterator on the range is incremented.
   *
   * \tparam Search_traits must be a model of the <a target="_blank"
-  *   href="http://doc.cgal.org/latest/Spatial_searching/classSearchTraits.html">SearchTraits</a>
+  *   href="https://doc.cgal.org/latest/Spatial_searching/classSearchTraits.html">SearchTraits</a>
   *   concept, such as the <a target="_blank"
-  *   href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
+  *   href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
   *   can be static if you know the ambiant dimension at compile-time, or dynamic if you don't.
   * \tparam Point_range is the type of the range that provides the points.
   *   It must be a range whose iterator type is a `RandomAccessIterator`.
