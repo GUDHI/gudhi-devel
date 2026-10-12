@@ -42,7 +42,7 @@ def read_persistence_intervals_grouped_by_dimension(persistence_file):
     where `dim` is an `int`, `birth` a `float`, and `death` a `float`.
     Note: the function does not check that birth <= death.
 
-    :param persistence_file: A persistence file style name.
+    :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_ file style name.
     :type persistence_file: string
 
     :returns:  The persistence pairs grouped by dimension.
@@ -62,14 +62,13 @@ def read_persistence_intervals_in_dimension(persistence_file, only_this_dim=-1):
     [[field] dimension] birth death
     Note: the function does not check that birth <= death.
 
-    :param persistence_file: A persistence file style name.
+    :param persistence_file: A `persistence diagram <fileformats.html#persistence-diagram>`_ file style name.
     :type persistence_file: string
     :param only_this_dim: The specific dimension. Default value is -1.
         If `only_this_dim` = -1, dimension is ignored and all lines are returned.
         If `only_this_dim` is >= 0, only the lines where dimension =
         `only_this_dim` (or where dimension is not specified) are returned.
     :type only_this_dim: int.
-
     :returns:  The persistence intervals.
     :rtype: numpy array of dimension 2
 

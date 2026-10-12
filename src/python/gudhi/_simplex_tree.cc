@@ -23,6 +23,7 @@
 #include <nanobind/stl/tuple.h>
 #include <nanobind/operators.h>
 #include <nanobind/ndarray.h>
+#include <nanobind/stl/string.h>
 
 #include <python_interfaces/Persistent_cohomology_interface.h>
 #include <python_interfaces/Simplex_tree_interface.h>
