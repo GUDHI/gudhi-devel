@@ -436,6 +436,7 @@ add_test(NAME simplex_tree_example_py_test
 add_gudhi_py_test(test_simplex_tree)
 add_gudhi_py_test(test_simplex_generators)
 add_gudhi_py_test(test_simplex_tree_serialization)
+add_gudhi_py_test(test_simplex_tree_steenrod)
 
 # Edge collapse
 if(SCIPY_FOUND)
