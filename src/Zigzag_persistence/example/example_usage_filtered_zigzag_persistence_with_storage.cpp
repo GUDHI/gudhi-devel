@@ -20,7 +20,7 @@ int main() {
   Zigzag_persistence zp;
 
   // It is important that the operations of insertions and removals are made **in the same order** as in the zigzag
-  // filtration ones wants to compute the barcode from.
+  // filtration one wants to compute the barcode from.
   // A cell can be identified in the boundaries by any given numerical label, it is just important that the given
   // filtration values are monotonous (ie., either only increasing or only decreasing).
 

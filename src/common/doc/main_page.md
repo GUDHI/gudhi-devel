@@ -294,6 +294,29 @@
   </tr>
 </table>
 
+### Oscillating Rips Filtrations
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "osc_rips.svg" width=100%
+    </td>
+    <td width="50%">
+    Variant of the Rips filtration in which the diameter not only grows but "oscillates". The resulting filtration
+    is therefore a zigzag filtration.<br>
+    </td>
+    <td width="15%">
+      <b>Author:</b> Cl&eacute;ment Maria, Hannah Schreiber<br>
+      <b>Introduced in:</b> GUDHI 3.11.x<br>
+      <b>License:</b> MIT<br>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2 height="25">
+      <b>User manual:</b> \ref zigzagrips
+    </td>
+  </tr>
+</table>
+
 ## Manifold reconstructions
 ### Coxeter triangulation
 
