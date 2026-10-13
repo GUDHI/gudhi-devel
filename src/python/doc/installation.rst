@@ -40,14 +40,14 @@ different, and in particular the `python/` subdirectory is actually `src/python/
 there.
 
 The library uses c++17 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.71.0,
-`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.15,
+`CMake <https://cmake.org/>`_ :math:`\geq` 3.18,
 Python :math:`\geq` 3.10, `NumPy <http://numpy.org>`_ :math:`\geq` 1.21.6,
 `scikit-build-core <https://scikit-build-core.readthedocs.io>`_ :math:`\geq` 0.4.3
 `nanobind <https://nanobind.readthedocs.io>`_ :math:`\geq` 1.3.2 to compile the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2017 or later.
 
 If you have several Python/python installed, you can force it by adding
-:code:`-DPython_EXECUTABLE=/custom/path/to/python3` to the cmake command (requires CMake :math:`\geq` 3.16).
+:code:`-DPython_EXECUTABLE=/custom/path/to/python3` to the cmake command.
 
 GUDHI Python module compilation
 ===============================
@@ -214,7 +214,7 @@ Optional third-party library
 Compilation dependencies
 ========================
 
-These third party dependencies are detected by `CMake <https://www.cmake.org/>`_.
+These third party dependencies are detected by `CMake <https://cmake.org/>`_.
 They have to be installed before performing the `GUDHI Python module compilation`_.
 
 CGAL
