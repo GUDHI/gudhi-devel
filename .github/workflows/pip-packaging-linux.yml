@@ -18,7 +18,7 @@ jobs:
         env:
           SKBUILD_CMAKE_DEFINE: "Python_EXECUTABLE=$PYTHON311/bin/python"
         run: |
-          $PYTHON311/bin/python -m pip wheel -ve .
+          $PYTHON311/bin/python -m pip wheel --no-build-isolation --no-deps -ve .
       - name: Install and test wheel for Python 3.11
         run: |
           $PYTHON311/bin/python -m pip install numpy~=1.23.2
@@ -62,7 +62,7 @@ jobs:
           SKBUILD_WHEEL_PY_API: "cp312"
         run: |
           $PYTHON312/bin/python -m pip install --user ninja nanobind-backend
-          $PYTHON312/bin/python -m pip wheel --no-build-isolation -ve .
+          $PYTHON312/bin/python -m pip wheel --no-build-isolation --no-deps -ve .
       - name: Install and test wheel for Python 3.12
         run: |
           $PYTHON312/bin/python -m pip install numpy~=1.26.0
