@@ -16,8 +16,8 @@
 //  http://www.boost.org/LICENSE_1_0.txt)
 
 
-#ifndef GUDHI_PERSISTENCE_ON_RECTANGLE_H
-#define GUDHI_PERSISTENCE_ON_RECTANGLE_H
+#ifndef GUDHI_PERSISTENCE_ON_RECTANGLE_FROM_TOP_CELLS_H
+#define GUDHI_PERSISTENCE_ON_RECTANGLE_FROM_TOP_CELLS_H
 
 #include <gudhi/Debug_utils.h>
 #ifdef GUDHI_DETAILED_TIMES
@@ -49,7 +49,7 @@ namespace Gudhi::cubical_complex {
 // However, the top cells along the boundary turn out to be collapsible, and we
 // only need to work with (x-1)*(y-1) vertices.
 template <class Filtration_value, class Index = std::size_t, bool output_index = false>
-struct Persistence_on_rectangle {
+struct Persistence_on_rectangle_T {
   // If we want to save space, we don't have to store the redundant 'first'
   // field in T_with_index. However, it would slow down the primal pass.
   struct T_with_index {
@@ -644,7 +644,7 @@ auto persistence_on_rectangle_from_top_cells(Filtration_value const* input, Inde
   GUDHI_CHECK(n_rows >= 3 && n_cols >= 3,
       std::domain_error("The complex must truly be 2d, i.e. at least 3 rows and 3 columns"));
   // For 2 rows, compute the min and use the 1d code
-  Persistence_on_rectangle<Filtration_value, Index, output_index> X;
+  Persistence_on_rectangle_T<Filtration_value, Index, output_index> X;
   X.init(input, n_rows, n_cols);
 #ifdef GUDHI_DETAILED_TIMES
     std::clog << "init: " << clock; clock.begin();
@@ -669,4 +669,4 @@ auto persistence_on_rectangle_from_top_cells(Filtration_value const* input, Inde
 }
 }  // namespace Gudhi::cubical_complex
 
-#endif  // GUDHI_PERSISTENCE_ON_RECTANGLE_H
+#endif  // GUDHI_PERSISTENCE_ON_RECTANGLE_FROM_TOP_CELLS_H

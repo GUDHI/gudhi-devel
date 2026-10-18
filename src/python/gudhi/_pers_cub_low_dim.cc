@@ -20,8 +20,8 @@
 #include <boost/range/adaptor/transformed.hpp>
 
 #include <gudhi/Persistence_on_a_line.h>
-#include <gudhi/Persistence_on_rectangle.h>
-#include <gudhi/Persistence_on_rectangle_V.h>
+#include <gudhi/Persistence_on_rectangle_from_top_cells.h>
+#include <gudhi/Persistence_on_rectangle_from_vertices.h>
 #include <python_interfaces/numpy_utils.h>
 
 namespace nb = nanobind;

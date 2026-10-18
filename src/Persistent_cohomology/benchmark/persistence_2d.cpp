@@ -13,8 +13,8 @@
 #include <gudhi/Clock.h>
 #include <gudhi/Bitmap_cubical_complex.h>
 #include <gudhi/Persistent_cohomology.h>
-#include <gudhi/Persistence_on_rectangle.h>
-#include <gudhi/Persistence_on_rectangle_V.h>
+#include <gudhi/Persistence_on_rectangle_from_top_cells.h>
+#include <gudhi/Persistence_on_rectangle_from_vertices.h>
 #include <gudhi/random.h>
 
 #include <vector>

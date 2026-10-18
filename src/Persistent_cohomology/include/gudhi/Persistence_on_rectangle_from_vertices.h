@@ -8,15 +8,15 @@
  *      - YYYY/MM Author: Description of the modification
  */
 
-//  Adapted from Persistence_on_rectangle.h, which computes persistence for
-//  the T-construction (values given at top-dimensional cells, extended to
-//  lower-dimensional cells by the MINIMUM of incident top cells). This file
-//  is its V-construction counterpart: values are given at vertices instead,
-//  and extended to edges and squares by the MAXIMUM of incident vertices.
-//  See Persistence_on_rectangle.h for details.
+//  Adapted from Persistence_on_rectangle_from_top_cells.h, which computes
+//  persistence for the T-construction (values given at top-dimensional cells,
+//  extended to lower-dimensional cells by the MINIMUM of incident top cells).
+//  This file is its V-construction counterpart: values are given at vertices
+//  instead, and extended to edges and squares by the MAXIMUM of incident
+//  vertices.  See Persistence_on_rectangle.h for details.
 
-#ifndef GUDHI_PERSISTENCE_ON_RECTANGLE_V_H
-#define GUDHI_PERSISTENCE_ON_RECTANGLE_V_H
+#ifndef GUDHI_PERSISTENCE_ON_RECTANGLE_FROM_VERTICES_H
+#define GUDHI_PERSISTENCE_ON_RECTANGLE_FROM_VERTICES_H
 
 #include <gudhi/Debug_utils.h>
 #ifdef GUDHI_DETAILED_TIMES
@@ -535,4 +535,4 @@ auto persistence_on_rectangle_from_vertices(
 // * specialize fill_and_pair_boundary (as in the T construction), probably only relevant for very small (or at least thin) input.
 // * Reduce tests in dualize_edge: if we fill the unused boundary with 0 (=exterior), returning one of those boundary squares may be safe, although it may not be faster if it just delays the work to the next find.
 
-#endif  // GUDHI_PERSISTENCE_ON_RECTANGLE_V_H
+#endif  // GUDHI_PERSISTENCE_ON_RECTANGLE_FROM_VERTICES_H
