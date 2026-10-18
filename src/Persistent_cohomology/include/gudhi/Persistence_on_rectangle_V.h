@@ -13,10 +13,7 @@
 //  lower-dimensional cells by the MINIMUM of incident top cells). This file
 //  is its V-construction counterpart: values are given at vertices instead,
 //  and extended to edges and squares by the MAXIMUM of incident vertices.
-//  See Persistence_on_rectangle.h's own header comment for the general
-//  T-construction algorithm this one mirrors (square-centered pairing,
-//  dualized here to be vertex-centered); comments below note where and why
-//  this file's approach differs.
+//  See Persistence_on_rectangle.h for details.
 
 #ifndef GUDHI_PERSISTENCE_ON_RECTANGLE_V_H
 #define GUDHI_PERSISTENCE_ON_RECTANGLE_V_H
@@ -49,73 +46,8 @@
 
 namespace Gudhi::cubical_complex {
 
-/**
- * @private
- * V-construction analog of Persistence_on_rectangle: persistence of a
- * function given at the vertices of a 2d grid, extended to edges and
- * squares by the MAXIMUM of incident vertices (as opposed to the
- * T-construction's minimum-of-top-cells).
- *
- * All n_rows*n_cols input values are genuine vertices; the derived
- * squares are indexed on an (n_rows-1) x (n_cols-1) grid. Unlike the
- * T-construction, no layer of cells can be dropped: every input value is
- * a genuine vertex of the complex and must be represented. The derived
- * squares number (n_rows-1)*(n_cols-1), exactly the mirror image of the
- * T-construction's square/vertex counts.
- *
- * fill_and_pair() computes a maximal local pairing around each vertex,
- * mirroring the T-construction's square-centered recipe with vertex and
- * square swapped (duality). For vertex i: an incident EDGE "matches" i
- * when i is the argmax of its two endpoints (the edge's value equals
- * input(i)); an incident quadrant SQUARE "matches" i when i is the
- * argmax of all four of its corners. Because `beats` is a strict total
- * order, a given edge only ever matches from the ONE endpoint that beats
- * the other, so there is no ambiguity to resolve and no need to keep two
- * independently-pruned edge lists; each matching edge is handled exactly
- * once, by its one relevant vertex.
- *
- * Walking the four squares around i in cyclic order [DR, DL, UL, UR], a
- * square that matches AND whose two bordering edges both match gets
- * paired with the edge that follows it in the cycle: concretely, that
- * square is merged with its neighbor across that edge (or the exterior,
- * at the grid boundary) in ds_parent_square_ (the H1/dual union-find).
- * If all four qualify, pairing all four would close a cycle, so the
- * last one (UR's, "R") is left alone instead: the square is marked
- * critical directly (self-rooted in ds_parent_square_, with its birth
- * recorded), and R -- the one direction with nowhere else to go -- still
- * pairs the vertex into its R-neighbor in ds_parent_vertex_, exactly as
- * it would have if the last square hadn't qualified at all.
- * Otherwise, among i's matching edges not already consumed by a square-pairing,
- * one is used to merge i into that neighbor in ds_parent_vertex_ (H0);
- * any further such edges are added directly to the shared `edges` list,
- * the same way Persistence_on_rectangle.h's own fill_and_pair adds a
- * leftover edge as critical.
- *
- * That single shared `edges` list plays the same role as in the
- * T-construction: primal() is handed the whole list and physically
- * removes (via remove_if) whatever it actually uses for a real H0
- * merge; dual() then only ever looks at the true remainder, relying on
- * the standard planar-graph fact that a spanning tree's edges are
- * exactly the complement of a spanning tree of the dual graph.
- *
- * Squares are indexed by their own down-right corner, sharing the same
- * index range as vertices (see the class-level comment by `exterior`),
- * which safely allows index 0 to double as the point at infinity for
- * the dual (H1) union-find, exactly as the T-construction does.
- */
 template <class Filtration_value, class Index = std::size_t, bool output_index = false>
 struct Persistence_on_rectangle_V {
-  // As in the T-construction: when output_index is requested, a
-  // derived (edge/square) filtration value is paired with the index of
-  // the vertex that achieved it, so a caller doing autodiff can trace a
-  // birth/death back to the specific input entry it came from, instead
-  // of only getting the (already-differentiated-away) numeric value.
-  // Vertex births need no such wrapper at all: unlike the T-construction
-  // (where a vertex's value is itself derived, as the min of incident
-  // squares, so which square achieved it must be tracked), here a
-  // vertex's birth is simply input(v) directly, so v's own index already
-  // *is* the vertex's "index" for free -- see primal()/dual() below,
-  // which branch on output_index directly for those, with no T needed.
   struct T_with_index {
     Filtration_value first; Index second;
     T_with_index() = default;
@@ -139,16 +71,10 @@ struct Persistence_on_rectangle_V {
   Index dy;
 
   // Squares are indexed by their own down-right corner, sharing the same
-  // stride (dy) and index range as the vertices themselves, exactly as
-  // the T-construction indexes its derived vertices relative to squares:
-  // the four squares around vertex i are then simply i, i+1, i+dy,
-  // i+dy+1, with no separate square stride or multiplication needed.
-  // This leaves the entire top row and left column of this index range
-  // unused by any real square (there is no square whose down-right
-  // corner is on the grid's own top row or left column) -- in
-  // particular, index 0 is never a real square, so it can safely double
-  // as the point at infinity for the dual (H1) union-find, exactly as
-  // the T-construction does.
+  // stride (dy) and index range as the vertices themselves: the four squares
+  // around vertex i are then simply i, i+1, i+dy, i+dy+1.  This leaves the
+  // entire top row and left column of this index range (including 0) unused by
+  // any real square so they can safely represent the exterior cell.
   Index exterior = 0;
 
   // Birth value of each derived square = max of its 4 corners.
@@ -156,8 +82,7 @@ struct Persistence_on_rectangle_V {
   // always have the value of the same corner.
   T square_birth(Index s) const { return T(input(s - 1), s - 1); }
 
-  // Union-find forests. ds_parent_vertex_ needs no special "point at
-  // infinity": H0 never needs one, only H1 does (Alexander duality).
+  // Union-find forests.
   std::unique_ptr<Index[]> ds_parent_vertex_;
   std::unique_ptr<Index[]> ds_parent_square_;
   Index& ds_parent_vertex(Index n) { return ds_parent_vertex_[n]; }
@@ -169,7 +94,7 @@ struct Persistence_on_rectangle_V {
 
   template<class Parent>
   Index ds_find_set_(Index v, Parent&& ds_parent) {
-    // Path halving, as in Persistence_on_rectangle's own ds_find_set_.
+    // Path halving
     Index parent = ds_parent(v);
     Index grandparent = ds_parent(parent);
     while (parent != grandparent) {
@@ -186,55 +111,25 @@ struct Persistence_on_rectangle_V {
   Index ds_find_set_square(Index v) {
     return ds_find_set_(v, [this](Index i) -> Index& { return ds_parent_square(i); });
   }
-  // Used for a genuine H0 merge (never for marking a vertex critical,
-  // which instead sets ds_parent_vertex(i) = i directly): despite taking
-  // two vertices, this is not a symmetric union -- child and parent play
-  // fixed, distinct roles (child's forest entry is what gets written).
-  // Named set_parent_vertex, not e.g. "merge_vertices", for the same
-  // reason set_parent_square below isn't "merge_squares".
+
   void set_parent_vertex(Index child, Index parent) {
     GUDHI_CHECK(child != parent, std::logic_error("Bug: use a direct self-assignment to mark a vertex critical"));
     ds_parent_vertex(child) = parent;
   }
-  // Every real square is the unique argmax of its own 4 corners for
-  // exactly one of them (a strict total order has a unique max), so
-  // this is called with `child` equal to that square from exactly that
-  // one vertex's own processing, and never again -- ds_parent_square_
-  // is write-only here, same as the T-construction's own fill_and_pair,
-  // with no find() needed (path-compression during later reads in
-  // primal()/dual() is what actually resolves the chains this builds).
   void set_parent_square(Index child, Index parent) {
     ds_parent_square(child) = parent;
   }
 
   struct Edge {
-    T f;  // derived (max-of-two-endpoints) value, paired with the achieving vertex's index
+    T f;  // derived (max-of-two-endpoints) value
     Index v1, v2;  // primal (real vertex) endpoints, v1 < v2
     Edge() = default;
     Edge(T f, Index v1, Index v2) : f(f), v1(v1), v2(v2) {}
     bool operator<(Edge const& other) const { return f.first < other.f.first; }
   };
-  // A single shared list, mirroring the T-construction's own
-  // fill_and_pair: since `beats` is a strict total order, a given edge
-  // only ever "matches" (in the fill_and_pair sense) from the one
-  // endpoint that beats the other, so there is no genuine ambiguity to
-  // resolve and no need for two separately-pruned edge lists. Each
-  // matching edge, from its one relevant endpoint's local processing,
-  // ends up in exactly one of three states: consumed by a
-  // square-pairing (dual), chosen as that vertex's one primal leftover,
-  // or -- if matched but neither of those -- added here. primal() then
-  // physically removes whatever it actually uses (exactly as the
-  // T-construction's own primal() does), leaving only the true
-  // remainder for dual() to look at.
   std::vector<Edge> edges;
 
-  // The two squares flanking a real grid edge (v1,v2) are fully
-  // determined by the edge's endpoints and direction, so they need not
-  // be stored in Edge at all -- just recomputed here, once per edge,
-  // only when dual() actually needs them. With the down-right-corner square
-  // indexing, the in-bounds case is a plain offset from v1, exactly as for
-  // sUL/sUR/sDL/sDR in fill_and_pair; only the boundary is tricky, but that's
-  // handled by filling a ring of 0 around the squares in init.
+  // This works thanks to the empty row and column of 0s from init.
   std::pair<Index, Index> dualize_edge(Index v1, Index v2) const {
     return { v2, v1 + dy + 1 };
   }
@@ -245,19 +140,10 @@ struct Persistence_on_rectangle_V {
     dy = n_cols;
     input_size = n_rows * n_cols;
 
-    // Both arrays are sized like the vertex grid itself (input_size),
-    // not the smaller true square count: down-right-corner indexing
-    // leaves the top row and left column unused, in exchange for the
-    // simpler offset arithmetic used throughout (see the class-level
-    // comment by `exterior`).
     ds_parent_vertex_.reset(new Index[input_size]);
-    // Every real square's ds_parent_square_ entry gets written exactly
-    // once, by its own unique argmax corner, during fill_and_pair (see
-    // set_parent_square) -- so, like the T-construction's own
-    // fill_and_pair, there is no need to eagerly fill it here.
-    // `exterior` itself is never a "child" in any merge, so it
-    // needs pre-initializing. In addition, we surround the real squares
-    // with 0 so dualize_edge does not need to check boundary cases.
+    // Only `exterior` needs pre-initializing. In addition, we surround the
+    // real squares with 0 so dualize_edge does not need to check boundary
+    // cases.
     ds_parent_square_.reset(new Index[input_size+dy]);
     // ds_parent_square_[exterior] = exterior;
     for (Index i = 0; i < dy; ++i) ds_parent_square_[i] = exterior;
@@ -268,17 +154,12 @@ struct Persistence_on_rectangle_V {
   }
 
   bool beats(Index a, Filtration_value fa, Index b) const {
-    // True if vertex a is functionally LARGER than vertex b. Takes fa
-    // (input(a)) rather than looking it up itself: every call site is of
-    // the form beats(i, f, neighbor) where f = input(i) is already sitting
-    // in a local the caller computed once at function entry, so passing it
-    // in avoids re-reading input(a) on every single call; input(b) is the
-    // one genuinely-fresh read, so it stays looked up in here.
+    // True if vertex a is functionally LARGER than vertex b.
     GUDHI_CHECK(a != b, std::logic_error("Bug: comparing a vertex to itself"));
     Filtration_value fb = input(b);
     if (fa > fb) return true;
     if (fa < fb) return false;
-    return a > b;  // tie-break: larger index wins ("beats")
+    return a > b;  // tie-break: larger index wins
   }
   // Same as beats when we already know the order of a and b.
   bool beats_before(Index a, Filtration_value fa, Index b) const {
@@ -292,46 +173,6 @@ struct Persistence_on_rectangle_V {
     return fa > fb;
   }
 
-  // See the class-level comment above for the general fill_and_pair
-  // algorithm this implements, including the all4 cycle-avoidance case.
-  //
-  // Interior fast path: has_u/has_d/has_l/has_r (and all four has_ul/ur/
-  // dl/dr) are unconditionally true away from the boundary, so every
-  // existence check and every exterior fallback in the general version
-  // below is dead weight here -- skipped entirely.
-  //
-  // R/D/L/U and the four diagUL/UR/DL/DR quadrant checks are lambdas,
-  // not eagerly-computed bools, matching the style Persistence_on_
-  // rectangle.h itself uses (its left()/right()/up_left() etc.): the
-  // decision tree below tests each one at most once per cell, in a fixed
-  // order (R, D, DR, L, DL, U, UL, UR), so a lambda costs nothing beyond
-  // an eager bool on the happy path, but never computes one that a given
-  // cell's branch never needs. Because the tree always confirms U and L
-  // (resp. U/R, D/L, D/R) true before ever testing diagUL (resp. diagUR,
-  // diagDL, diagDR) -- checked exhaustively, for all 256 combinations of
-  // the 8 booleans this tree branches on -- the diag lambdas need no
-  // redundant "U() && L() &&" prefix of their own.
-  //
-  // Within any one leaf, the emitted actions (a set_parent_square call,
-  // the single ds_parent_vertex(i) assignment, and any
-  // edges.emplace_back calls) touch disjoint state -- each of the four
-  // quadrant squares gets set_parent_square'd at most once,
-  // ds_parent_vertex(i) is set exactly once, and edge insertion order is
-  // unobserved (edges are only ever later compared by value, never by
-  // position) -- so they have no ordering dependency on one another, and
-  // neither does testing a diagXX condition (a pure read). That's what
-  // makes it sound to physically hoist whatever's common between two
-  // sibling branches out of their if/else, wherever it happens to sit
-  // in each
-  // branch: it can only remove a duplicate, never change what runs, on
-  // any given execution path. Where two branches differ only in one
-  // direction's leftover fate (e.g. whether U ends up consumed by a
-  // square-pairing or left as its own critical edge), this collapses
-  // what would otherwise be two full duplicated copies of the *other*
-  // three directions' handling down to a shared copy plus a two-line
-  // if/else for just that one direction -- e.g. the qUL/qUR interplay
-  // below is shared between the qUL-true and qUL-false cases wherever
-  // the two aren't entangled by the (rare) all4 interaction.
   BOOST_FORCEINLINE
   void fill_and_pair_interior(Index y, Index x) {
     Index i = y * dy + x;
@@ -525,11 +366,7 @@ struct Persistence_on_rectangle_V {
     }
   }
 
-  // General version, for boundary vertices where some neighbors may not
-  // exist. all4 (see fill_and_pair_interior) is impossible here -- a
-  // boundary vertex is always missing at least one of has_u/has_d/has_l/
-  // has_r -- so, unlike the interior version, there is no all4 branch at
-  // all here (see the GUDHI_CHECK inside).
+  // Version for boundary vertices where some neighbors don't exist.
   void fill_and_pair_boundary(Index y, Index x) {
     Index i = y * dy + x;
     Filtration_value f = input(i);
@@ -543,15 +380,6 @@ struct Persistence_on_rectangle_V {
     bool qUR = U && R && beats(i, f, i - dy + 1);
     bool qDL = D && L && beats(i, f, i + dy - 1);
     bool qDR = D && R && beats(i, f, i + dy + 1);
-    // Unlike fill_and_pair_interior, all4 (all four quadrants qualifying
-    // at once) cannot happen here: it needs all four of has_u/has_d/
-    // has_l/has_r true, which is false by construction for any boundary
-    // vertex (at least one side is missing). So qUR's own square-pairing
-    // always fires unconditionally when qUR holds -- there's no cycle to
-    // avoid, and so no all4 special case to write here at all. Kept as a
-    // GUDHI_CHECK (free: it only reuses already-computed booleans) so the
-    // invariant stays documented and would fail loudly if this function
-    // were ever called on a non-boundary vertex by mistake.
     GUDHI_CHECK(!(qUL && qUR && qDL && qDR),
                 std::logic_error("Bug in Persistence_on_rectangle_V: all4 on a boundary vertex"));
 
@@ -611,16 +439,6 @@ struct Persistence_on_rectangle_V {
 #define GUDHI_NOP
 #endif
 
-  // H0: standard elder-rule Kruskal directly on the real vertices/edges.
-  // Vertex birth is simply input(v) -- no derived value to reconstruct,
-  // unlike the T-construction's data_vertex.
-  //
-  // As in the T-construction's own primal(), edges that ARE used here (a
-  // genuine merge) are physically removed from `edges` via remove_if
-  // before returning; dual() then only has to look at whatever primal
-  // did NOT need -- valid by the standard planar-graph fact that a
-  // spanning tree's edges are exactly the complement of a spanning tree
-  // of the dual graph.
   template<class Out>
   void primal(Out&& out) {
     auto it = std::remove_if(edges.begin(), edges.end(), [&](Edge& e) {
@@ -638,20 +456,13 @@ struct Persistence_on_rectangle_V {
     else global_min = input(ds_find_set_vertex(0));
   }
 
-  // H1: Alexander duality on the square graph + point at infinity
-  // (exterior), processing edges from LARGEST to smallest, exactly as
-  // the T-construction's own dual() does -- only the source of the
-  // square values and edges differs.
   template<class Out>
   void dual(Out&& out) {
     for (auto& e : boost::adaptors::reverse(edges)) {
       auto [dv1, dv2] = dualize_edge(e.v1, e.v2);
       Index a = ds_find_set_square(dv1), b = ds_find_set_square(dv2);
-      // fill_and_pair's local matching is maximal so dual()
-      // never actually sees an edge whose two sides are already
-      // connected -- so, exactly as in the
-      // T-construction's own dual(), a==b here indicates real
-      // corruption, not an expected case to skip.
+      // fill_and_pair's local matching is maximal so dual() never actually
+      // sees an edge whose two sides are already connected.
       GUDHI_CHECK(a != b, std::logic_error("Bug in Persistence_on_rectangle_V"));
       // a should end up as the survivor: exterior, or the larger birth.
       if(a != exterior && (b == exterior || square_birth(a).first < square_birth(b).first))
@@ -683,8 +494,7 @@ struct Persistence_on_rectangle_V {
  * @param[out] out0 called as out0(birth, death) for each finite interval
  *   of dimension 0.
  * @param[out] out1 called as out1(birth, death) for each interval of
- *   dimension 1 (all necessarily finite: H1 needs no point at infinity
- *   beyond the one already absorbed into the exterior).
+ *   dimension 1
  * @returns The global minimum, i.e. the birth of the single infinite
  *   interval of dimension 0 (an index if output_index, else a value).
  */
