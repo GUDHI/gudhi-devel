@@ -5,6 +5,7 @@
     Copyright (C) 2019 Inria, Copyright (C) 2022 Institute of Science and Technology Austria
 
     Modification(s):
+      - 2026/10 Cherith1222: Test PersistenceImage weight coordinates
       - 2024/08 Vincent Rouvreau: Test PersistenceLengths
       - 2022/11 Wojtek Reise: Test Kernels
       - 2022/06 Wojtek Reise: Test Landscape and Silhouette
@@ -489,3 +490,23 @@ def test_base_estimator():
         PersistenceLengths,
         ]:
         estimator().get_params()
+
+
+def test_persistence_image_weight_receives_birth_persistence():
+    diagram = np.array([[1.0, 4.0]])
+    seen = []
+
+    def weight(point):
+        seen.append(np.array(point, dtype=float, copy=True))
+        return 1.0
+
+    PersistenceImage(
+        bandwidth=1.0,
+        weight=weight,
+        resolution=[2, 2],
+        im_range=[0.0, 2.0, 0.0, 4.0],
+    ).fit_transform([diagram])
+
+    assert len(seen) == 1
+    np.testing.assert_allclose(seen[0], [1.0, 3.0])
+    assert "[birth, persistence]" in PersistenceImage.__init__.__doc__
