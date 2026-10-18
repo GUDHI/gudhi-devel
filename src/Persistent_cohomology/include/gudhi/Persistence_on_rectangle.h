@@ -328,6 +328,7 @@ struct Persistence_on_rectangle {
               set_parent_vertex(v_up_left(), v_up_right());
               if (down()) { // U l UL d
                 if (down_left()) { // U l UL d dl
+                  // The new pair would make DL→UL, but since we already know that UL→UR, we shortcut
                   set_parent_vertex(v_down_left(), v_up_right()); // v_up_left()
                   if (right()) { // U L UL d DL r
                     if (down_right()) { // U L UL d DL r dr
