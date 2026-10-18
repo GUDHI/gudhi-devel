@@ -129,22 +129,20 @@ struct Persistence_on_rectangle_V {
   };
   std::vector<Edge> edges;
 
-  // This works thanks to the empty row and column of 0s from init.
+  // This works thanks to the empty row and column of 0s from the constructor.
   std::pair<Index, Index> dualize_edge(Index v1, Index v2) const {
     return { v2, v1 + dy + 1 };
   }
 
-  void init(Filtration_value const* input_, Index n_rows, Index n_cols) {
-    input_p = input_;
-    size_x = n_cols; size_y = n_rows;
-    dy = n_cols;
-    input_size = n_rows * n_cols;
-
-    ds_parent_vertex_.reset(new Index[input_size]);
+  Persistence_on_rectangle_V(Filtration_value const* input_, Index n_rows, Index n_cols):
+    input_p(input_), size_x(n_cols), size_y(n_rows),
+    input_size(n_rows * n_cols), dy(n_cols),
+    ds_parent_vertex_(new Index[input_size]),
+    ds_parent_square_(new Index[input_size+dy])
+  {
     // Only `exterior` needs pre-initializing. In addition, we surround the
     // real squares with 0 so dualize_edge does not need to check boundary
     // cases.
-    ds_parent_square_.reset(new Index[input_size+dy]);
     // ds_parent_square_[exterior] = exterior;
     for (Index i = 0; i < dy; ++i) ds_parent_square_[i] = exterior;
     for (Index i = 0; i < dy; ++i) ds_parent_square_[input_size + i] = exterior;
@@ -506,8 +504,7 @@ auto persistence_on_rectangle_from_vertices(
 #endif
   GUDHI_CHECK(n_rows >= 2 && n_cols >= 2,
       std::domain_error("The complex must truly be 2d, i.e. at least 2 rows and 2 columns"));
-  Persistence_on_rectangle_V<Filtration_value, Index, output_index> X;
-  X.init(input, n_rows, n_cols);
+  Persistence_on_rectangle_V<Filtration_value, Index, output_index> X(input, n_rows, n_cols);
 #ifdef GUDHI_DETAILED_TIMES
     std::clog << "init: " << clock; clock.begin();
 #endif
