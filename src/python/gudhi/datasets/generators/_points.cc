@@ -10,6 +10,7 @@
  */
 
 #include <vector>
+#include <algorithm>  // for std::swap
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
@@ -70,6 +71,25 @@ auto generate_points_on_torus(size_t n_samples, int dim, std::string sample)
   return _wrap_as_numpy_array(points, npoints, 2 * dim);
 }
 
+auto generate_points_on_2_torus(size_t n_samples, double major_radius, double minor_radius, bool uniform)
+{
+  if (major_radius < minor_radius)
+    std::swap(major_radius, minor_radius);
+
+  std::vector<typename Kern::Point_d> points_generated;
+  {
+    nb::gil_scoped_release release;
+    points_generated = Gudhi::generate_points_on_torus_3D<Kern>(n_samples, major_radius, minor_radius, uniform);
+  }
+  
+  // Reserve sufficient memory space to copy data
+  auto points = new double[n_samples * 3];
+  for (size_t i = 0; i < n_samples; i++)
+    for (int j = 0; j < 3; j++) points[i * 3 + j] = points_generated[i][j];
+
+  return _wrap_as_numpy_array(points, n_samples, 3);
+}
+
 NB_MODULE(_points_ext, m)
 {
   m.attr("__license__") = "LGPL v3";
@@ -115,5 +135,28 @@ The shape of returned numpy array is:
 If sample is 'random': (n_samples, 2*dim).
 
 If sample is 'grid': (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
+        )doc");
+
+  m.def("c_2_torus",
+        &generate_points_on_2_torus,
+        nb::arg("n_samples"),
+        nb::arg("major_radius") = 1.,
+        nb::arg("minor_radius") = 0.5,
+        nb::arg("uniform") = false,
+        R"doc(
+Generate random i.i.d., or uniformly distributed points on a 2-torus in R^3.
+
+:param n_samples: The number of points to be generated.
+:type n_samples: integer
+:param major_radius: The major radius of the 2-torus. Default value is `1.`.
+:type major_radius: float
+:param minor_radius: The minor radius of the 2-torus. Default value is `0.5`.
+:type minor_radius: float
+:param uniform: random i.i.d. points when `False`, or uniformly distributed points when `True`. Default value is
+    `False`.
+:type uniform: bool
+:returns: the generated points on a 2-torus.
+
+The shape of returned numpy array is (n_samples, 3).
         )doc");
 }
