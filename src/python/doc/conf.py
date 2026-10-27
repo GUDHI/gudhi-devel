@@ -94,6 +94,8 @@ linkcheck_ignore = [
     "https://doi.org/10.1145/2535927",
     "https://doi.org/10.1145/3064175",
     "https://doi.org/10.1145/2582112.2582165",
+    # linkcheck fails to reach https://bookstore.ams.org from CI - not locally
+    "https://bookstore.ams.org/mbk-69",
 ]
 
 def autodoc_skip_member(app, what, name, obj, skip, options):
