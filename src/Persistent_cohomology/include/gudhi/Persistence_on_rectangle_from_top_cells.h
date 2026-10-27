@@ -543,7 +543,7 @@ struct Persistence_on_rectangle_T {
 #endif
   }
 
-// Hack to prevent gcc from generating cmov, which prevents the processor from loading the next data in advance.
+// Hack to prevent gcc (and clang) from generating cmov, which prevents the processor from loading the next data in advance.
 // To be re-benchmarked sometimes with newer compilers and hardware.
 #ifdef __GNUC__
 #define GUDHI_NOP asm(""::);
