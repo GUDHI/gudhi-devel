@@ -45,7 +45,7 @@ namespace witness_complex {
  * \ingroup witness_complex
  *
  * \tparam Kernel_ requires a <a target="_blank"
- * href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class.
+ * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class.
  */
 template< class Kernel_ >
 class Euclidean_witness_complex
