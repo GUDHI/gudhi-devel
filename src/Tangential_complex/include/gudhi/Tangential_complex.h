@@ -107,13 +107,13 @@ class Vertex_data {
  *  be run to attempt to remove inconsistencies.
  *
  * \tparam Kernel_ requires a <a target="_blank"
- * href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
+ * href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
  * can be static if you know the ambiant dimension at compile-time, or dynamic if you don't.
  * \tparam DimensionTag can be either <a target="_blank"
- * href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dimension__tag.html">Dimension_tag<d></a>
+ * href="https://doc.cgal.org/latest/Kernel_23/structCGAL_1_1Dimension__tag.html">Dimension_tag<d></a>
  * if you know the intrinsic dimension at compile-time,
  * or <a target="_blank"
- * href="http://doc.cgal.org/latest/Kernel_23/classCGAL_1_1Dynamic__dimension__tag.html">CGAL::Dynamic_dimension_tag</a>
+ * href="https://doc.cgal.org/latest/Kernel_23/structCGAL_1_1Dynamic__dimension__tag.html">CGAL::Dynamic_dimension_tag</a>
  * if you don't.
  * \tparam Concurrency_tag enables sequential versus parallel computation. Possible values are `CGAL::Parallel_tag` (the
  * default) and `CGAL::Sequential_tag`. \tparam Triangulation_ is the type used for storing the local regular

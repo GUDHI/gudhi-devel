@@ -1,7 +1,7 @@
 #include <gudhi/Points_off_io.h>
 
 // For CGAL points type in dimension d
-// cf. http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Point__d.html
+// cf. https://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Point__d.html
 #include <CGAL/Epick_d.h>
 
 #include <iostream>

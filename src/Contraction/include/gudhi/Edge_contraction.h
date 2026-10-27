@@ -57,7 +57,7 @@ simplices which would take much more time and memory.
 
 \section Design
 
-This class design is policy based and heavily inspired from the similar edge collapse package of CGAL http://doc.cgal.org/latest/Surface_mesh_simplification/index.html (which is however restricted to 2D triangulations).
+This class design is policy based and heavily inspired from the similar edge collapse package of CGAL https://doc.cgal.org/latest/Surface_mesh_simplification/index.html (which is however restricted to 2D triangulations).
 
 
 \subsection Policies
