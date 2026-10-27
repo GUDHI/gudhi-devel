@@ -83,7 +83,6 @@ html_css_files = [
 
 linkcheck_allowed_redirects = {
     r"https://doi.org/.+": r".*",
-    r"https://dx.doi.org/.+": r".*"
 }
 
 linkcheck_ignore = [
