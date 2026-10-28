@@ -38,6 +38,7 @@ jobs:
           python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install --user -r ext/gudhi-deploy/test-requirements.txt
           python -m pip uninstall -y pykeops
+          if python -c "import numpy; exit(0 if numpy.__version__.startswith('2.') else 1)"; then python -m pip install --upgrade "tensorflow>=2.18"; fi
           if ! brew install ninja graphviz doxygen boost eigen gmp mpfr tbb cgal; then
             echo "Warning: brew install returned a non-zero exit code."
           fi
