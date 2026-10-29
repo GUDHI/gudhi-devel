@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Cache scikit-learn data
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           key: scikit-learn-data-${{ runner.os }}
           restore-keys: |
@@ -25,12 +25,12 @@ jobs:
           path: ${{ github.workspace }}/scikit_learn_data
 
       - name: Checkout with submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: true
 
       - name: Use Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
