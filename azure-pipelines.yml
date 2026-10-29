@@ -32,11 +32,9 @@ jobs:
         inputs:
           versionSpec: $(pythonVersion)
           addToPath: true
-          architecture: "arm64"
 
       - bash: |
-          python -m pip install --user -r ext/gudhi-deploy/build-requirements.txt
-          python -m pip install --user -r ext/gudhi-deploy/test-requirements.txt
+          python -m pip install "numpy<2" "ml-dtypes==0.3.2" --user -r ext/gudhi-deploy/build-requirements.txt -r ext/gudhi-deploy/test-requirements.txt
           python -m pip uninstall -y pykeops
           if ! brew install ninja graphviz doxygen boost eigen gmp mpfr tbb cgal; then
             echo "Warning: brew install returned a non-zero exit code."
