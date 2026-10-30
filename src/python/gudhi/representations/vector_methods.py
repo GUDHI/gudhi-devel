@@ -5,6 +5,7 @@
 # Copyright (C) 2018 Inria
 #
 # Modification(s):
+#   - 2026/10 Cherith1222: Document PersistenceImage weight coordinates
 #   - 2020/06 Martin: ATOL integration
 #   - 2020/12 Gard: A more flexible Betti curve class capable of computing exact curves.
 #   - 2021/11 Vincent Rouvreau: factorize _automatic_sample_range
@@ -52,7 +53,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
 
         Parameters:
             bandwidth (double): bandwidth of the Gaussian kernel (default 1.).
-            weight (function): weight function for the persistence diagram points (default constant function, ie lambda x: 1). This function must be defined on 2D points, ie lists or numpy arrays of the form [p_x,p_y].
+            weight (function): weight function for the persistence diagram points (default constant function, ie lambda x: 1). It is called on points of the form [birth, persistence], where persistence is death minus birth, not on the original [birth, death] coordinates.
             resolution ([int,int]): size (in pixels) of the persistence image (default [20,20]).
             im_range ([double,double,double,double]): minimum and maximum of each axis of the persistence image, of the form [x_min, x_max, y_min, y_max] (default [numpy.nan, numpy.nan, numpy.nan, numpyp.nan]). If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
