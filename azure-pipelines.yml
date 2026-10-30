@@ -4,9 +4,9 @@ jobs:
     timeoutInMinutes: 0
     cancelTimeoutInMinutes: 60
     pool:
-      vmImage: windows-latest
+      vmImage: windows-2025
     variables:
-      pythonVersion: "3.10"
+      pythonVersion: "3.11"
       cmakeBuildType: Release
       cmakeVcpkgFlags: -DVCPKG_TARGET_TRIPLET=x64-windows-release -DCMAKE_TOOLCHAIN_FILE=c:\vcpkg\scripts\buildsystems\vcpkg.cmake
       gudhiCmakeOptions: -DWITH_GUDHI_EXAMPLE=ON -DWITH_GUDHI_REMOTE_TEST=ON -DFORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON
@@ -43,10 +43,6 @@ jobs:
           choco install -y ninja --force --force-dependencies
           vcpkg install boost-filesystem boost-test boost-program-options tbb eigen3 cgal --triplet x64-windows-release
         displayName: "Install build dependencies"
-      - task: BatchScript@1
-        inputs:
-          filename: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat'
-          modifyEnvironment: true
       - pwsh: |
           $ErrorActionPreference = "stop"
           $PSNativeCommandUseErrorActionPreference = $true
