@@ -63,6 +63,11 @@ Persistent cohomology
 
 .. include:: persistent_cohomology_sum.inc
 
+Persistence Steenrod modules
+============================
+
+.. include:: steenrod_persistence_sum.inc
+
 Topological descriptors tools
 *****************************
 
