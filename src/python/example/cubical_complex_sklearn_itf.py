@@ -12,7 +12,7 @@ from sklearn import metrics
 from gudhi.sklearn import CubicalPersistence
 from gudhi.representations import PersistenceImage, DiagramSelector
 
-X, y = fetch_openml("mnist_784", version=1, return_X_y=True, as_frame=False)
+X, y = fetch_openml("mnist_784", version=1, return_X_y=True, as_frame=False, parser="liac-arff")
 
 # Take only the 500 images from this 70.000 images dataset
 # Remove these 2 lines if you want to test the full dataset

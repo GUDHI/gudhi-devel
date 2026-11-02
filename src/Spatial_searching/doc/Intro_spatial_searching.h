@@ -24,12 +24,12 @@ namespace spatial_searching {
  * \section introduction Introduction
  * 
  * This Gudhi component is a wrapper around 
- * <a target="_blank" href="http://doc.cgal.org/latest/Spatial_searching/index.html">CGAL dD spatial searching algorithms</a>.
+ * <a target="_blank" href="https://doc.cgal.org/latest/Spatial_searching/index.html">CGAL dD spatial searching algorithms</a>.
  * It provides a simplified API to perform (approximate) neighbor searches. Contrary to CGAL default behavior, the tree
  * does not store the points themselves, but stores indices.
  *
  * For more details about the data structure or the algorithms, or for more advanced usages, reading 
- * <a target="_blank" href="http://doc.cgal.org/latest/Spatial_searching/index.html">CGAL documentation</a>
+ * <a target="_blank" href="https://doc.cgal.org/latest/Spatial_searching/index.html">CGAL documentation</a>
  * is highly recommended.
  * 
  * \section spatial_searching_examples Example

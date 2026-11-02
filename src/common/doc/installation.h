@@ -44,7 +44,7 @@ make \endverbatim
  * \verbatim cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_TEST=ON -DWITH_GUDHI_REMOTE_TEST=ON --DWITH_GUDHI_PYTHON=ON .. \endverbatim
  * 
  * \subsection documentationgeneration C++ documentation
- * To generate the C++ documentation, the <a target="_blank" href="http://www.doxygen.org/">doxygen</a> &ge; 1.9.5
+ * To generate the C++ documentation, the <a target="_blank" href="https://www.doxygen.nl/">doxygen</a> &ge; 1.9.5
  * program is required. Run the following command in a terminal:
  * \verbatim make doxygen \endverbatim
  * Documentation will be generated in a folder named <code>html</code>.
@@ -78,9 +78,9 @@ make doxygen\endverbatim
  * compile GUDHI by calling <CODE>cmake -DCMAKE_BUILD_TYPE=Release -DCGAL_DIR=/your/path/to/CGAL-X.Y .. && make</CODE>
  * 
  * The procedure to install this library according to
- * your operating system is detailed here http://doc.cgal.org/latest/Manual/installation.html
+ * your operating system is detailed here https://doc.cgal.org/latest/Manual/installation.html
  * 
- * The following examples/utilities require the <a target="_blank" href="http://www.cgal.org/">Computational Geometry Algorithms
+ * The following examples/utilities require the <a target="_blank" href="https://www.cgal.org/">Computational Geometry Algorithms
  * Library</a> (CGAL \cite cgal:eb-19b) and will not be built if CGAL version 5.1.0 or higher is not installed:
  * \li \gudhi_example_link{Simplex_tree,example_alpha_shapes_3_simplex_tree_from_off_file.cpp}
  * \li \gudhi_example_link{Witness_complex,strong_witness_persistence.cpp}
@@ -111,10 +111,10 @@ make doxygen\endverbatim
  *
  * \subsection eigen Eigen
  * Some GUDHI modules (cf. \ref main_page "modules list"), and few examples require
- * <a target="_blank" href="https://eigen.tuxfamily.org">Eigen</a> is a C++ template library for linear algebra:
+ * <a target="_blank" href="https://libeigen.gitlab.io/">Eigen</a> is a C++ template library for linear algebra:
  * matrices, vectors, numerical solvers, and related algorithms.
  * 
- * The following examples/utilities require the <a target="_blank" href="https://eigen.tuxfamily.org">Eigen</a> and will not be
+ * The following examples/utilities require the <a target="_blank" href="https://libeigen.gitlab.io/">Eigen</a> and will not be
  * built if Eigen version 3.3.0 or higher is not installed:
  * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_off.cpp}
  * \li \gudhi_example_link{Alpha_complex,Alpha_complex_from_points.cpp}
@@ -139,7 +139,7 @@ make doxygen\endverbatim
  * \li \gudhi_example_link{Coxeter_triangulation,manifold_tracing_flat_torus_with_boundary.cpp}
  *
  * \subsection tbb oneAPI Threading Building Blocks
- * <a target="_blank" href="https://github.com/oneapi-src/oneTBB">Intel&reg; oneAPI TBB</a> lets you easily write
+ * <a target="_blank" href="https://github.com/uxlfoundation/oneTBB">Intel&reg; oneAPI TBB</a> lets you easily write
  * parallel C++ programs that take full advantage of multicore performance, that are portable and composable, and that
  * have future-proof scalability.
  * 
