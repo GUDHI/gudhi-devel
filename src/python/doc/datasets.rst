@@ -147,8 +147,8 @@ Example
 .. autofunction:: gudhi.datasets.generators.points.torus
 
 
-Points on a 2-torus
-^^^^^^^^^^^^^^^^^^^
+Points on a 2-torus embedded in :math:`R^3`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. table::
    :widths: 50 50
