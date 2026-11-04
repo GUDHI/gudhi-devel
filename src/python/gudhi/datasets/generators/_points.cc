@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <algorithm>  // for std::swap
+#include <string>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
@@ -71,15 +72,20 @@ auto generate_points_on_torus(size_t n_samples, int dim, std::string sample)
   return _wrap_as_numpy_array(points, npoints, 2 * dim);
 }
 
-auto generate_points_on_2_torus(size_t n_samples, double major_radius, double minor_radius, bool uniform)
+auto generate_points_on_2_torus_embedded_in_r3(size_t n_samples, double major_radius, double minor_radius,
+                                               const std::string& sample)
 {
+  if ((sample != "random") && (sample != "grid")) {
+    throw nb::value_error("This sample type is not supported");
+  }
+  
   if (major_radius < minor_radius)
     std::swap(major_radius, minor_radius);
 
   std::vector<typename Kern::Point_d> points_generated;
   {
     nb::gil_scoped_release release;
-    points_generated = Gudhi::generate_points_on_torus_3D<Kern>(n_samples, major_radius, minor_radius, uniform);
+    points_generated = Gudhi::generate_points_on_torus_3D<Kern>(n_samples, major_radius, minor_radius, sample);
   }
   
   // Reserve sufficient memory space to copy data
@@ -137,12 +143,12 @@ If sample is 'random': (n_samples, 2*dim).
 If sample is 'grid': (⌊n_samples**(1./dim)⌋**dim, 2*dim), where shape[0] is rounded down to the closest perfect 'dim'th power.
         )doc");
 
-  m.def("c_2_torus",
-        &generate_points_on_2_torus,
+  m.def("torus_embedded_r3",
+        &generate_points_on_2_torus_embedded_in_r3,
         nb::arg("n_samples"),
         nb::arg("major_radius") = 1.,
         nb::arg("minor_radius") = 0.5,
-        nb::arg("uniform") = false,
+        nb::arg("sample") = "random",
         R"doc(
 Generate random i.i.d., or uniformly distributed points on a 2-torus in R^3.
 
@@ -152,9 +158,10 @@ Generate random i.i.d., or uniformly distributed points on a 2-torus in R^3.
 :type major_radius: float
 :param minor_radius: The minor radius of the 2-torus. Default value is `0.5`.
 :type minor_radius: float
-:param uniform: random i.i.d. points when `False`, or uniformly distributed points when `True`. Default value is
-    `False`.
-:type uniform: bool
+:param sample: The sample type. Available values are: `"random"` and `"grid"`. Default value is `"random"`.
+    `"random"` means random i.i.d. points according to the uniform measure on the parameter space (not the uniform
+    measure in the embedding).
+:type sample: string
 :returns: the generated points on a 2-torus.
 
 The shape of returned numpy array is (n_samples, 3).
