@@ -1285,3 +1285,125 @@ BOOST_AUTO_TEST_CASE(perseus_file_read) {
   std::clog << "Second value of sinusoid.txt is " << value << std::endl;
   BOOST_CHECK(value == std::numeric_limits<double>::infinity());
 }
+
+// Independent oracle: extend each input cell directly to its incident cells,
+// including all codimensions and wrapped periodic faces/cofaces.
+namespace {
+void extend_input_to_incident_cells(std::vector<double>& expected, const std::vector<unsigned>& lengths,
+                          const std::vector<std::size_t>& strides, const std::vector<unsigned>& coordinates,
+                          std::size_t axis, std::size_t cell, double value, bool top = true) {
+  if (axis == lengths.size()) {
+    expected[cell] = top ? std::min(expected[cell], value) : std::max(expected[cell], value);
+    return;
+  }
+  for (unsigned offset = 0; offset < 3; ++offset) {
+    int coordinate = 2 * static_cast<int>(coordinates[axis]) + static_cast<int>(offset) - !top;
+    if (lengths[axis] % 2 == 1 && (coordinate < 0 || coordinate >= static_cast<int>(lengths[axis]))) continue;
+    coordinate = (coordinate + lengths[axis]) % lengths[axis];
+    extend_input_to_incident_cells(expected, lengths, strides, coordinates, axis + 1,
+                         cell + coordinate * strides[axis], value, top);
+  }
+}
+
+template <class Complex>
+void check_top_cell_extension(Complex& complex, const std::vector<unsigned>& shape,
+                              const std::vector<bool>& periodic, const std::vector<double>& values) {
+  std::vector<unsigned> lengths(shape.size()), coordinates(shape.size());
+  std::vector<std::size_t> strides(shape.size());
+  std::size_t count = 1;
+  for (std::size_t axis = 0; axis < shape.size(); ++axis) {
+    strides[axis] = count;
+    lengths[axis] = 2 * shape[axis] + !periodic[axis];
+    count *= lengths[axis];
+  }
+  std::vector<double> expected(count, std::numeric_limits<double>::infinity());
+  for (std::size_t input = 0; input < values.size(); ++input) {
+    std::size_t remainder = input;
+    for (std::size_t axis = 0; axis < shape.size(); ++axis) {
+      coordinates[axis] = remainder % shape[axis];
+      remainder /= shape[axis];
+    }
+    extend_input_to_incident_cells(expected, lengths, strides, coordinates, 0, 0, values[input]);
+  }
+  BOOST_REQUIRE_EQUAL(complex.num_simplices(), expected.size());
+  for (std::size_t cell = 0; cell < expected.size(); ++cell)
+    BOOST_CHECK_EQUAL(complex.filtration(cell), expected[cell]);
+
+  std::vector<std::size_t> order(count);
+  std::iota(order.begin(), order.end(), std::size_t{0});
+  std::sort(order.begin(), order.end(), [&](std::size_t a, std::size_t b) {
+    if (expected[a] != expected[b]) return expected[a] < expected[b];
+    auto da = complex.get_dimension_of_a_cell(a), db = complex.get_dimension_of_a_cell(b);
+    return da != db ? da < db : a < b;
+  });
+  const auto& actual = complex.filtration_simplex_range();
+  BOOST_CHECK_EQUAL_COLLECTIONS(actual.begin(), actual.end(), order.begin(), order.end());
+  // Reapplying propagation to a valid filtration is idempotent.
+  complex.impose_lower_star_filtration();
+  for (std::size_t cell = 0; cell < expected.size(); ++cell)
+    BOOST_CHECK_EQUAL(complex.filtration(cell), expected[cell]);
+}
+}  // namespace
+
+BOOST_AUTO_TEST_CASE(top_cell_extension_in_arbitrary_dimension) {
+  const double inf = std::numeric_limits<double>::infinity();
+  for (unsigned dim = 1; dim <= 6; ++dim) {
+    std::vector<unsigned> shape(dim);
+    std::size_t count = 1;
+    for (unsigned axis = 0; axis < dim; ++axis) {
+      shape[axis] = 1 + axis % 3;
+      count *= shape[axis];
+    }
+    std::vector<double> values(count);
+    for (std::size_t i = 0; i < count; ++i)
+      values[i] = i % 7 == 0 ? inf : i % 11 == 0 ? -inf : static_cast<double>((i * 13) % 5) - 2;
+    Bitmap_cubical_complex ordinary(shape, values);
+    check_top_cell_extension(ordinary, shape, std::vector<bool>(dim, false), values);
+    for (unsigned mask = 0; mask < (1u << dim); ++mask) {
+      std::vector<bool> periodic(dim);
+      for (unsigned axis = 0; axis < dim; ++axis) periodic[axis] = (mask >> axis) & 1;
+      Bitmap_cubical_complex_periodic_boundary_conditions wrapped(shape, values, periodic);
+      check_top_cell_extension(wrapped, shape, periodic, values);
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(periodic_vertex_extension_in_arbitrary_dimension) {
+  const double inf = std::numeric_limits<double>::infinity();
+  for (unsigned dim = 1; dim <= 6; ++dim) {
+    std::vector<unsigned> shape(dim);
+    std::size_t count = 1;
+    for (unsigned axis = 0; axis < dim; ++axis) {
+      shape[axis] = 1 + axis % 3;
+      count *= shape[axis];
+    }
+    std::vector<double> values(count);
+    for (std::size_t i = 0; i < count; ++i)
+      values[i] = i % 7 == 0 ? -inf : i % 11 == 0 ? inf : static_cast<double>((i * 13) % 5) - 2;
+    for (unsigned mask = 0; mask < (1u << dim); ++mask) {
+      std::vector<bool> periodic(dim);
+      std::vector<unsigned> lengths(dim), coordinates(dim);
+      std::vector<std::size_t> strides(dim);
+      std::size_t cells = 1;
+      for (unsigned axis = 0; axis < dim; ++axis) {
+        periodic[axis] = (mask >> axis) & 1;
+        lengths[axis] = 2 * shape[axis] - !periodic[axis];
+        strides[axis] = cells;
+        cells *= lengths[axis];
+      }
+      Bitmap_cubical_complex_periodic_boundary_conditions complex(shape, values, periodic, false);
+      std::vector<double> expected(cells, -inf);
+      for (std::size_t input = 0; input < values.size(); ++input) {
+        std::size_t remainder = input;
+        for (unsigned axis = 0; axis < dim; ++axis) {
+          coordinates[axis] = remainder % shape[axis];
+          remainder /= shape[axis];
+        }
+        extend_input_to_incident_cells(expected, lengths, strides, coordinates, 0, 0, values[input], false);
+      }
+      BOOST_REQUIRE_EQUAL(complex.num_simplices(), cells);
+      for (std::size_t cell = 0; cell < cells; ++cell)
+        BOOST_CHECK_EQUAL(complex.filtration(cell), expected[cell]);
+    }
+  }
+}

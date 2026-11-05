@@ -262,12 +262,6 @@ class Bitmap_cubical_complex_periodic_boundary_conditions_base : public Bitmap_c
   /* Returns a range over all vertices. */
   Vertices_range vertices_range() { return Vertices_range(this); }
 
-  /**
-   * Set cells filtrations given those of the vertices, and based on lower star filtration.
-   * This is already called by the relevant constructors.
-   **/
-  void impose_lower_star_filtration_from_vertices();
-
  protected:
   std::vector<bool> directions_in_which_periodic_b_cond_are_to_be_imposed;
 
@@ -312,8 +306,10 @@ void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_comp
   this->directions_in_which_periodic_b_cond_are_to_be_imposed = directions_in_which_periodic_b_cond_are_to_be_imposed;
   this->set_up_containers(dimensions, true);
 
+  // TODO: use for_each_* as in the non-periodic case
   std::size_t i = 0;
-  for (auto it = this->top_dimensional_cells_iterator_begin(); it != this->top_dimensional_cells_iterator_end(); ++it) {
+  auto end = this->top_dimensional_cells_iterator_end();
+  for (auto it = this->top_dimensional_cells_iterator_begin(); it != end; ++it) {
     this->get_cell_data(*it) = topDimensionalCells[i];
     ++i;
   }
@@ -332,7 +328,8 @@ void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::construct_comp
   this->set_up_containers(top_cells_sizes, false);
 
   std::size_t i = 0;
-  for (auto it = this->vertices_iterator_begin(); it != this->vertices_iterator_end(); ++it) {
+  auto end = this->vertices_iterator_end();
+  for (auto it = this->vertices_iterator_begin(); it != end; ++it) {
     this->get_cell_data(*it) = vertices[i];
     ++i;
   }
@@ -524,52 +521,6 @@ std::vector<std::size_t> Bitmap_cubical_complex_periodic_boundary_conditions_bas
   return coboundary_elements;
 }
 
-// Exact same code as the non-periodic version, duplicated for now to ensure it calls the right version of vertices_iterator_begin.
-template <typename T>
-void Bitmap_cubical_complex_periodic_boundary_conditions_base<T>::impose_lower_star_filtration_from_vertices() {
-  // this vector will be used to check which elements have already been taken care of in imposing lower star filtration
-  std::vector<bool> is_this_cell_considered(this->data.size(), false);
-
-  std::vector<std::size_t> indices_to_consider;
-  // we assume here that we already have a filtration on the vertices and
-  // we have to extend it to higher ones.
-  for (auto it = this->vertices_iterator_begin();
-       it != this->vertices_iterator_end(); ++it) {
-    indices_to_consider.push_back(it.compute_index_in_bitmap());
-  }
-
-  while (indices_to_consider.size()) { // Iteration on the dimension
-#ifdef DEBUG_TRACES
-    std::clog << "indices_to_consider in this iteration \n";
-    for (auto index : indices_to_consider) {
-      std::clog << index << "  ";
-    }
-#endif
-    std::vector<std::size_t> new_indices_to_consider;
-    for (auto index : indices_to_consider) {
-      std::vector<std::size_t> cbd = this->get_coboundary_of_a_cell(index);
-      for (auto coboundary : cbd) {
-#ifdef DEBUG_TRACES
-        std::clog << "filtration of a cell : " << coboundary << " is : " << this->data[coboundary]
-                  << " while of a cell: " << index << " is: " << this->data[index]
-                  << std::endl;
-#endif
-        if (this->data[coboundary] < this->data[index]) {
-          this->data[coboundary] = this->data[index];
-#ifdef DEBUG_TRACES
-          std::clog << "Setting the value of a cell : " << coboundary
-                    << " to : " << this->data[index] << std::endl;
-#endif
-        }
-        if (is_this_cell_considered[coboundary] == false) {
-          new_indices_to_consider.push_back(coboundary);
-          is_this_cell_considered[coboundary] = true;
-        }
-      }
-    }
-    indices_to_consider.swap(new_indices_to_consider);
-  }
-}
 }  // namespace cubical_complex
 
 namespace Cubical_complex = cubical_complex;
