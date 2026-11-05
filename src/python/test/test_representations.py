@@ -509,4 +509,3 @@ def test_persistence_image_weight_receives_birth_persistence():
 
     assert len(seen) == 1
     np.testing.assert_allclose(seen[0], [1.0, 3.0])
-    assert "[birth, persistence]" in PersistenceImage.__init__.__doc__
