@@ -36,7 +36,8 @@ Table of Contents
 
  * \section definition Definition
  *
- * Alpha_complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
+ * Alpha_complex is a
+ * <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex <sup>[Wikipedia]</sup></a>
  * constructed from the finite cells of a Delaunay Triangulation.
  *
  * The filtration value of each simplex is computed as the square of the circumradius of the simplex if the
@@ -49,12 +50,12 @@ Table of Contents
  * \image html "alpha_complex_representation.png" "Alpha-complex representation"
  *
  * Alpha_complex is constructing a <a target="_blank"
- * href="http://doc.cgal.org/latest/Triangulation/index.html#Chapter_Triangulations">Delaunay Triangulation</a>
- * \cite cgal:hdj-t-19b from <a target="_blank" href="http://www.cgal.org/">CGAL</a> (the Computational Geometry
+ * href="https://doc.cgal.org/latest/Triangulation/index.html#TriangulationSecTriangulations">Delaunay Triangulation</a>
+ * \cite cgal:hdj-t-19b from <a target="_blank" href="https://www.cgal.org/">CGAL</a> (the Computational Geometry
  * Algorithms Library \cite cgal:eb-19b) and is able to create a `SimplicialComplexForAlpha`.
  *
  * The complex is a template class requiring an Epick_d <a target="_blank"
- * href="http://doc.cgal.org/latest/Kernel_d/index.html#Chapter_dD_Geometry_Kernel">dD Geometry Kernel</a>
+ * href="https://doc.cgal.org/latest/Kernel_d/index.html#Kernel_dKernel_1">dD Geometry Kernel</a>
  * \cite cgal:s-gkd-19b from CGAL as template parameter.
  *
  * \remark

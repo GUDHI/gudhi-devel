@@ -38,7 +38,8 @@ class RU_pairing;
  * Supports vineyards (see @cite vineyards) and the removal of maximal cells while maintaining
  * a valid barcode. Provides an access to its columns and rows.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class RU_matrix : public Master_matrix::RU_pairing_option,

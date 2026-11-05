@@ -32,9 +32,9 @@ namespace subsampling {
  *         is greater than `min_squared_dist`.
  *
  * \tparam Kernel must be a model of the <a target="_blank"
- *   href="http://doc.cgal.org/latest/Spatial_searching/classSearchTraits.html">SearchTraits</a>
+ *   href="https://doc.cgal.org/latest/Spatial_searching/classSearchTraits.html">SearchTraits</a>
  *   concept, such as the <a target="_blank"
- *   href="http://doc.cgal.org/latest/Kernel_d/classCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
+ *   href="https://doc.cgal.org/latest/Kernel_d/structCGAL_1_1Epick__d.html">CGAL::Epick_d</a> class, which
  *   can be static if you know the ambiant dimension at compile-time, or dynamic if you don't.
  * \tparam Point_range Range whose value type is Kernel::Point_d.  It must provide random-access 
  *         via `operator[]` and the points should be stored contiguously in memory.

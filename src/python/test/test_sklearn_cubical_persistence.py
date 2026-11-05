@@ -11,6 +11,7 @@
 
 import numpy as np
 from sklearn import datasets
+import pytest
 
 from gudhi.sklearn import CubicalPersistence
 import gudhi
@@ -83,3 +84,17 @@ def test_compare_top_cells():
     cmp(np.array(a, order="F"))
     cmp(a[0:18])
     cmp(a[::2, ::-1])
+
+def test_set_output():
+    try:
+        import pandas
+
+        NB_PC = 10
+        digits = datasets.load_digits().images[:NB_PC]
+        cp = CubicalPersistence(homology_dimensions=[0, 1], input_type="vertices", n_jobs=-2)
+        diags_pandas = cp.set_output(transform="pandas").fit_transform(digits)
+        assert "H0" == diags_pandas.columns[0]
+        assert "H1" == diags_pandas.columns[1]
+        assert len(diags_pandas.index) == NB_PC
+    except ImportError:
+        pytest.skip("Missing pandas, skipping set_output test")

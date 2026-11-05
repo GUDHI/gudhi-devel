@@ -1,11 +1,11 @@
-version: 2.0
+version: 2.1
 jobs:
   ### With all third parties
 
   examples:
     docker:
       # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.09.03
     steps:
       - checkout
       - run:
@@ -24,7 +24,7 @@ jobs:
 
   tests:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.09.03
     resource_class: large # Sometimes takes a long time to build matrices - Timeout is 1h
     steps:
       - checkout
@@ -44,7 +44,7 @@ jobs:
 
   utils:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.09.03
     steps:
       - checkout
       - run:
@@ -63,7 +63,7 @@ jobs:
 
   python:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi:2026.09.03
     resource_class: large # Delaunay complex requires about 5 Gb of RAM to compile
     steps:
       - restore_cache:
@@ -85,7 +85,8 @@ jobs:
             cd version
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
             cd python
-            make -j 2 sphinx
+            make -j 2 sphinx sphinx_linkcheck
+            mv sphinx/output.txt sphinx/sphinx_linkcheck_output.txt 
             cp -R sphinx /tmp/sphinx
       - store_artifacts:
           path: /tmp/sphinx
@@ -107,7 +108,7 @@ jobs:
 
   doxygen:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/doxygen_for_gudhi:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/doxygen_for_gudhi:2026.09.03
     steps:
       - checkout
       - run:
@@ -137,7 +138,7 @@ jobs:
 
   bibliography:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/doxygen_for_gudhi:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/doxygen_for_gudhi:2026.09.03
     steps:
       - checkout
       - run:
@@ -160,7 +161,7 @@ jobs:
   examples_without_cgal_eigen:
     docker:
       # cf. https://github.com/GUDHI/gudhi-deploy/blob/main/Dockerfile_for_circleci_image_without_cgal
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.09.03
     steps:
       - checkout
       - run:
@@ -179,7 +180,7 @@ jobs:
 
   tests_without_cgal_eigen:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.09.03
     steps:
       - checkout
       - run:
@@ -198,7 +199,7 @@ jobs:
 
   utils_without_cgal_eigen:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.09.03
     steps:
       - checkout
       - run:
@@ -217,7 +218,7 @@ jobs:
 
   python_without_cgal_eigen:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.09.03
     steps:
       - checkout
       - run:
@@ -239,7 +240,7 @@ jobs:
 
   examples_without_cgal:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.09.03
     steps:
       - checkout
       - run:
@@ -265,7 +266,7 @@ jobs:
 
   tests_without_cgal:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.09.03
     steps:
       - checkout
       - run:
@@ -291,7 +292,7 @@ jobs:
 
   utils_without_cgal:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.09.03
     steps:
       - checkout
       - run:
@@ -317,7 +318,7 @@ jobs:
 
   python_without_cgal:
     docker:
-      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.03.03
+      - image: ghcr.io/gudhi/gudhi-deploy/ci_for_gudhi_wo_cgal:2026.09.03
     steps:
       - checkout
       - run:

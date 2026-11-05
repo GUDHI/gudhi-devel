@@ -82,7 +82,8 @@ struct Dummy_chain_vine_pairing {
  *
  * @brief Class managing the barcode for @ref Chain_vine_swap.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <typename Master_matrix>
 class Chain_barcode_swap : public Chain_pairing<Master_matrix>
@@ -228,7 +229,8 @@ class Chain_barcode_swap : public Chain_pairing<Master_matrix>
  *
  * @brief Class managing the vine swaps for @ref Chain_matrix.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Chain_vine_swap

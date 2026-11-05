@@ -13,7 +13,7 @@ jobs:
   # Build with minimal supported version of NumPy 1.X with ABI compatibility feature
   wheels:
     # Python 3.11+ is only available for MacOS free version cf. https://github.com/actions/runner-images
-    runs-on: macos-14
+    runs-on: macOS-15
     strategy:
       max-parallel: 4
       matrix:

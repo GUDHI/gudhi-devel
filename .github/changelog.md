@@ -1,6 +1,28 @@
 Release History
 ===============
 
+[Release 3.13.0](https://github.com/GUDHI/gudhi-devel/releases/tag/tags%2Fgudhi-release-3.13.0)
+-----------
+
+Release date: July 2026
+
+Below is a list of changes made since GUDHI 3.12.0:
+
+- Simplex tree [`[C++]`](https://gudhi.inria.fr/doc/latest/class_gudhi_1_1_simplex__tree.html) and [`[Python`](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
+     - A new `euler_characteristic` method, and a Python binding to `num_simplices_by_dimension`.
+     - Preliminary support for multiple filtration values stored in the Simplex tree (available only in `C++`).
+     - Serialization has been upgraded for multiple filtration values support, but also for a `SERIALIZATION_VERSION` number in order to track modification and compatibility between serialization files. It means the serialization files, including pickled SimplexTree, generated from a pre-3.13.0 gudhi version won't be supported (an exception is thrown).
+
+- Reproducibility
+     - [`[C++]`](https://gudhi.inria.fr/doc/latest/group__reproducibility.html) New random functions, with a default random generator that is used internally, and where the user can set the global seed.
+     - [`[Python]`](https://gudhi.inria.fr/python/latest/reproducibility.html) New `gudhi.random.set_seed` function to set the global seed.
+
+- [Tangential complex](https://gudhi.inria.fr/python/latest/tangential_complex_user.html) `[Python]`
+     - `intrisic_dim` constructor argument is deprecated (typo), please use `intrinsic_dim` instead.
+     
+- Miscellaneous
+     - The [list of bugs that were solved](https://github.com/GUDHI/gudhi-devel/issues?q=label%3A3.13.0+is%3Aclosed) is available on GitHub.
+
 [Release 3.12.0](https://github.com/GUDHI/gudhi-devel/releases/tag/tags%2Fgudhi-release-3.12.0)
 -----------
 
@@ -398,7 +420,7 @@ Below is a list of changes made since Gudhi 3.1.1:
      - A new module [Weighted Rips Complex](https://gudhi.inria.fr/python/latest/rips_complex_user.html#weighted-rips-complex) to construct a simplicial complex from a distance matrix and weights on vertices.
 
 - [Wassertein distance](https://gudhi.inria.fr/python/latest/wasserstein_distance_user.html)
-     - An [another implementation](https://gudhi.inria.fr/python/latest/wasserstein_distance_user.html#hera) comes from Hera (BSD-3-Clause) which is based on [Geometry Helps to Compare Persistence Diagrams](http://doi.acm.org/10.1145/3064175) by Michael Kerber, Dmitriy Morozov, and Arnur Nigmetov.
+     - An [another implementation](https://gudhi.inria.fr/python/latest/wasserstein_distance_user.html#hera) comes from Hera (BSD-3-Clause) which is based on [Geometry Helps to Compare Persistence Diagrams](https://doi.org/10.1145/3064175) by Michael Kerber, Dmitriy Morozov, and Arnur Nigmetov.
      - `gudhi.wasserstein.wasserstein_distance` has now an option to return the optimal matching that achieves the distance between the two diagrams.
      - A new module [Barycenters](https://gudhi.inria.fr/python/latest/wasserstein_distance_user.html#barycenters) to estimate the Frechet mean (aka Wasserstein barycenter) between persistence diagrams.
 
@@ -639,7 +661,7 @@ Below is a list of changes made since Gudhi 1.3.1:
 
 - Spatial searching (new package)
 
-     - Spatial searching is a wrapper around [CGAL dD spatial searching](http://doc.cgal.org/latest/Spatial_searching/index.html)
+     - Spatial searching is a wrapper around [CGAL dD spatial searching](https://doc.cgal.org/latest/Spatial_searching/index.html)
      algorithms that provides a simplified API to perform (approximate) neighbor searches.
 
 - Subsampling (new package)
@@ -692,7 +714,7 @@ Simplex_handle default type is now an 'std::uint32_t' and can go up to about 4 b
      - Mandatory and optional third party libraries have been separated in the documentation.
 
 - Data sets
-     - in data/points/generator : thanks to [Aurélien Alvarez](http://www.aurelienalvarez.org/), aurelien_alvarez_surfaces_in_R8.py is
+     - in data/points/generator : thanks to [Aurélien Alvarez](https://perso.ens-lyon.fr/aurelien.alvarez/), aurelien_alvarez_surfaces_in_R8.py is
      a script to generate points on a surface in R8.
 
 

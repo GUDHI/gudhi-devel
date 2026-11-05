@@ -90,7 +90,7 @@ def _read_off_file_header(file_desc):
     return dim, nb_vertices
 
 
-def read_points_from_off_file(off_file=""):
+def read_points_from_off_file(off_file):
     """Read points from an `OFF file <fileformats.html#off-file-format>`_.
 
     :param off_file: An OFF file style name.
@@ -98,6 +98,8 @@ def read_points_from_off_file(off_file=""):
 
     :returns:  The point set.
     :rtype: numpy.ndarray
+
+    :raises FileNotFoundError: If the file cannot be opened.
 
     .. warning::
         This function is using `numpy.loadtxt <https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html>`_

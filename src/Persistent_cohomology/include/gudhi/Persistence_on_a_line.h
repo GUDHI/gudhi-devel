@@ -13,8 +13,10 @@
 
 #include <vector>
 #include <limits>
-#include <type_traits>
+#include <type_traits> // decay
 #include <stdexcept>
+#include <functional> // less
+#include <iterator> // begin
 #include <gudhi/Debug_utils.h>
 
 namespace Gudhi::persistent_cohomology {
@@ -54,7 +56,6 @@ state1: // data contains a single element
   if (it == stop) goto infinite;
   v = *it++;
   if (le(v, data[0])) {
-state1down:
     data[0] = v;
     goto state1;
   }
@@ -126,14 +127,11 @@ up: // data[-1] < v after a simplification
   if (data.size() == 1) { data.push_back(v); goto state12; }
   goto state132up;
 down: // v < data[-1] after a simplification
-  switch (data.size()) {
-    case 1:
-      goto state1down;
-    case 2:
-      goto state12down;
-    default:
-      goto state312down;
-  }
+  GUDHI_CHECK (data.size() % 2 == 0, std::logic_error("Bug in Gudhi"));
+  if (data.size() == 2)
+    goto state12down;
+  else
+    goto state312down;
   // From here on, we have finished reading input
 endup: // data[-2] < data[-1]
   data.pop_back();
