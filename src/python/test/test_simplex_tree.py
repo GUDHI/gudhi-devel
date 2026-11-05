@@ -5,6 +5,7 @@
     Copyright (C) 2016 Inria
 
     Modification(s):
+      - 2026/07 Vincent Rouvreau: Add tests for write_persistence_file
       - YYYY/MM Author: Description of the modification
 """
 
@@ -13,7 +14,7 @@ import numpy as np
 import pytest
 import warnings
 
-from gudhi import SimplexTree
+from gudhi import SimplexTree, read_persistence_intervals_in_dimension
 
 
 def test_insertion():
@@ -766,3 +767,17 @@ def test_euler_characteristic():
     assert np.array_equal(dims, [8, 13, 6, 1])
 
     assert st.euler_characteristic() == 0
+
+def test_write_persistence_file():
+    st = SimplexTree()
+    st.insert([0, 1])
+    st.insert([0, 1, 2], filtration=4.0)
+    st.remove_maximal_simplex([0, 1, 2])
+    st.compute_persistence(persistence_dim_max=True)
+    file = "stree.pers"
+    st.write_persistence_diagram(file)
+    H0 = read_persistence_intervals_in_dimension(persistence_file=file, only_this_dim=0)
+    assert (H0 == np.array([[ 0., np.inf]])).all()
+    H1 = read_persistence_intervals_in_dimension(persistence_file=file, only_this_dim=1)
+    assert (H1 == np.array([[ 4., np.inf]])).all()
+    assert len(read_persistence_intervals_in_dimension(persistence_file=file, only_this_dim=2)) == 0

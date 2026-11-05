@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2025/03 Hannah Schreiber: Use nanobind instead of Cython for python bindings.
+ *      - 2026/07 Vincent Rouvreau: Add write_persistence_file
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -120,7 +121,8 @@ This function returns the dimension of the complex.
            nb::call_guard<nb::gil_scoped_release>())
       .def("_betti_numbers", &CPers::betti_numbers)
       .def("_persistent_betti_numbers", &CPers::persistent_betti_numbers)
-      .def("_intervals_in_dimension", &CPers::intervals_in_dimension);
+      .def("_intervals_in_dimension", &CPers::intervals_in_dimension)
+      .def("_write_output_diagram", &CPers::write_output_diagram, nb::call_guard<nb::gil_scoped_release>());
 
   nb::class_<PCC>(m, "_Periodic_cubical_complex_interface")
       .def(nb::init<const std::vector<unsigned int>&, const std::vector<double>&, const std::vector<bool>&, bool>(),
@@ -155,5 +157,6 @@ This function returns the dimension of the complex.
            nb::call_guard<nb::gil_scoped_release>())
       .def("_betti_numbers", &PCPers::betti_numbers)
       .def("_persistent_betti_numbers", &PCPers::persistent_betti_numbers)
-      .def("_intervals_in_dimension", &PCPers::intervals_in_dimension);
+      .def("_intervals_in_dimension", &PCPers::intervals_in_dimension)
+      .def("_write_output_diagram", &PCPers::write_output_diagram, nb::call_guard<nb::gil_scoped_release>());;
 }
