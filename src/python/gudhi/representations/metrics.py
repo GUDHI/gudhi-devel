@@ -79,7 +79,7 @@ def _compute_persistence_diagram_projections(X, num_directions):
     return XX
 
 
-def _sliced_wasserstein_distance_on_projections(D1, D2):
+def _sliced_wasserstein_distance_on_projections(D1, D2, **_):
     """
     This is a function for computing the sliced Wasserstein distance between two persistence diagrams that have already been projected onto some lines. It simply amounts to comparing the sorted projections with the 1-norm, and averaging over the lines. See http://proceedings.mlr.press/v70/carriere17a.html for more details.
 
@@ -185,14 +185,6 @@ def _sklearn_wrapper(metric, X, Y, **kwargs):
     return flat_metric
 
 
-PAIRWISE_DISTANCE_FUNCTIONS = {
-    "wasserstein": hera_wasserstein_distance,
-    "hera_wasserstein": hera_wasserstein_distance,
-    "persistence_fisher": _persistence_fisher_distance,
-    "hera_bottleneck": hera_bottleneck_distance,
-}
-
-
 def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_jobs=None, **kwargs):
     """
     This function computes the distance matrix between two lists of persistence diagrams given as numpy arrays of shape
@@ -221,48 +213,47 @@ def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_job
     """
     XX = np.reshape(np.arange(len(X)), [-1, 1])
     YY = None if Y is None or Y is X else np.reshape(np.arange(len(Y)), [-1, 1])
-    if metric == "sliced_wasserstein":
-        Xproj = _compute_persistence_diagram_projections(X, **kwargs)
-        Yproj = None if Y is None else _compute_persistence_diagram_projections(Y, **kwargs)
-        return _pairwise(
-            pairwise_distances,
-            True,
-            XX,
-            YY,
-            metric=_sklearn_wrapper(_sliced_wasserstein_distance_on_projections, Xproj, Yproj),
-            n_jobs=n_jobs,
-        )
-    elif isinstance(metric, str):
+    if isinstance(metric, str):
         if metric == "bottleneck" or metric == "gudhi_bottleneck":
             # Import here as it can fail if GUDHI is built without CGAL - Will throw ImportError
             from .. import bottleneck_distance as gudhi_bottleneck_distance
-
-            PAIRWISE_DISTANCE_FUNCTIONS["bottleneck"] = gudhi_bottleneck_distance
-            PAIRWISE_DISTANCE_FUNCTIONS["gudhi_bottleneck"] = gudhi_bottleneck_distance
-
+            pairwise_distance_function = gudhi_bottleneck_distance
+        
+        elif metric == "hera_bottleneck":
+            pairwise_distance_function = hera_bottleneck_distance
+        
+        elif metric == "wasserstein" or metric == "hera_wasserstein":
+            pairwise_distance_function = hera_wasserstein_distance
+        
         elif metric == "pot_wasserstein":
             # Import here as it can fail if POT is not installed - Will throw ImportError
             from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
+            pairwise_distance_function = pot_wasserstein_distance
 
-            PAIRWISE_DISTANCE_FUNCTIONS["pot_wasserstein"] = pot_wasserstein_distance
+        elif metric == "persistence_fisher":
+            pairwise_distance_function = _persistence_fisher_distance
 
-        return _pairwise(
-            pairwise_distances,
-            True,
-            XX,
-            YY,
-            metric=_sklearn_wrapper(PAIRWISE_DISTANCE_FUNCTIONS[metric], X, Y, **kwargs),
-            n_jobs=n_jobs,
-        )
+        elif metric == "sliced_wasserstein":
+            # Projection in this specific case
+            X = _compute_persistence_diagram_projections(X, **kwargs)
+            Y = None if Y is None else _compute_persistence_diagram_projections(Y, **kwargs)
+            pairwise_distance_function = _sliced_wasserstein_distance_on_projections
+            
+        else:
+            raise ValueError(f"Unknown string metric '{metric}'")
+
     else:
-        return _pairwise(
-            pairwise_distances,
-            True,
-            XX,
-            YY,
-            metric=_sklearn_wrapper(metric, X, Y, **kwargs),
-            n_jobs=n_jobs,
-        )
+        # User-given function
+        pairwise_distance_function = metric
+    
+    return _pairwise(
+        pairwise_distances,
+        True,
+        XX,
+        YY,
+        metric=_sklearn_wrapper(pairwise_distance_function, X, Y, **kwargs),
+        n_jobs=n_jobs,
+    )
 
 
 class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
