@@ -23,6 +23,15 @@ from collections.abc import Callable, Sequence
 from gudhi import _simplex_tree_ext as t
 
 
+def _copy_per_dim(finites: list, infinites: list) -> tuple:
+    """Defensive deep-copy used by the Sq^0 = identity short-circuit.
+
+    The numpy arrays are duplicated so that the ordinary and Steenrod
+    halves of the returned pair don't alias.
+    """
+    return ([f.copy() for f in finites], [i.copy() for i in infinites])
+
+
 # SimplexTree python interface
 class SimplexTree(t._Simplex_tree_python_interface):
     """The simplex tree is an efficient and flexible data structure for
@@ -248,6 +257,131 @@ class SimplexTree(t._Simplex_tree_python_interface):
         self._pers = t._Simplex_tree_persistence_interface(self, bool(persistence_dim_max))
         self._pers._compute_persistence(homology_coeff_field, min_persistence)
         return self
+
+    def compute_steenrod_barcodes(self, k: int = 1, absolute: bool = False, max_dim: int | None = None, n_jobs: int = -1):
+        """Compute the ordinary persistence barcode together with the
+        Sq\\ :sup:`k` Steenrod barcode of the filtered simplicial complex.
+
+        Coefficients are in :math:`\\mathbb{F}_2` — Steenrod squares are only
+        defined there, so no field parameter is exposed. This method does
+        **not** require a previous call to :func:`compute_persistence`; the
+        reduction needed to obtain cocycle representatives is run internally.
+
+        :param k: the Steenrod square exponent (non-negative integer).
+            Default ``1``.  ``k = 0`` is supported and returns the ordinary
+            barcode in both outputs (Sq⁰ is the identity); negative values
+            raise :class:`ValueError`.
+        :type k: int
+        :param absolute: if ``False`` (default), return bars in the
+            **relative cohomology convention** of Lupo, Medina-Mardones,
+            Tauzin (2022) §2.4 — see ``:returns:`` for the on-the-wire
+            format.  If ``True``, return bars in the **absolute cohomology
+            convention**: finite bars at relative dimension ``d`` shift
+            down to absolute dimension ``d - 1``; essentials stay where
+            they are; the numerical values do not change.  The absolute
+            interpretation rests on a duality bijection that requires the
+            relative ordinary barcode to have no essential bars at degrees
+            ``[1, max_dim]``; a :class:`UserWarning` is emitted when this
+            condition is not satisfied.
+        :type absolute: bool
+        :param max_dim: if not ``None``, cap the reduction just above
+            dimension ``max_dim`` instead of running it over the whole
+            complex.  The bars returned at dimensions ``0..max_dim`` are
+            identical to a full computation; higher dimensions are skipped,
+            which is much cheaper on a high-dimensional complex.  Default
+            ``None`` reduces all dimensions.
+        :type max_dim: int or None
+        :param n_jobs: maximum number of TBB worker threads used for the
+            parallelised stages (``compute_steenrod_matrix`` and
+            ``compute_steenrod_barcode``).  ``-1`` (default) uses the global
+            TBB scheduler default.  Honoured via ``tbb::task_arena`` only
+            when gudhi was built with ``GUDHI_USE_TBB``; ignored otherwise.
+        :type n_jobs: int
+        :returns: A pair ``(ordinary, steenrod)``.  Each element is itself a
+            pair ``(finites, infinites)`` of per-dimension lists of numpy
+            arrays:
+
+            * ``finites[d]`` has shape ``(n_bars, 2)``; rows are
+              ``(death_value, birth_value)`` with ``death < birth``,
+              encoding the relative-cohomology bar ``[a_p, a_{q+1})`` of
+              Lupo, Medina-Mardones, Tauzin (2022) §2.4.
+            * ``infinites[d]`` has shape ``(n_bars,)``; entries are the
+              birth values of essential bars (the implicit lower endpoint
+              of the relative-cohomology interval is ``-inf``).
+
+            For Steenrod, ``finites[d]`` and ``infinites[d]`` are empty for
+            ``d < k + 1`` — the first ``k`` relative dimensions are
+            produced empty by the algorithm.
+        :rtype: tuple(tuple(list, list), tuple(list, list))
+
+        Example (:math:`\\mathbb{R}P^2`, Sq¹)::
+
+            from gudhi import SimplexTree
+
+            # Minimal triangulation of RP^2: 6 vertices, 15 edges, 10 triangles.
+            rp2_top = [
+                [1, 2, 4], [2, 3, 4], [1, 3, 5], [2, 3, 5], [1, 4, 5],
+                [1, 2, 6], [1, 3, 6], [3, 4, 6], [2, 5, 6], [4, 5, 6],
+            ]
+
+            st = SimplexTree()
+            for tri in rp2_top:
+                st.insert(tri, filtration=0.0)
+
+            ordinary, steenrod = st.compute_steenrod_barcodes(k=1)
+            (st_finites, st_infinites) = steenrod
+            # Sq^1: H^1(RP^2) -> H^2(RP^2) is an isomorphism over F_2, so
+            # st_infinites[2] holds exactly one essential bar (the upper
+            # endpoint of the relative interval; the implicit lower
+            # endpoint is -inf).
+            assert st_infinites[2].shape == (1,)
+        """
+        if max_dim is not None and int(max_dim) < 0:
+            # ``None`` already means "all dimensions"; a negative integer
+            # would silently behave differently in the two paths (relative
+            # truncates to an empty list via Python slicing, absolute treats
+            # negative as "all dimensions" in the C++ interface).  Reject
+            # rather than pick a winner.
+            raise ValueError(
+                f"max_dim must be None or a non-negative integer; got {max_dim}"
+            )
+
+        iface = t._Steenrod_barcode_interface(self, int(k))
+
+        if absolute:
+            ordinary, steenrod, problematic_dims = iface._compute_absolute(
+                int(n_jobs), -1 if max_dim is None else int(max_dim))
+            if problematic_dims:
+                dims_str = ", ".join(f"H^{d}" for d in problematic_dims)
+                warnings.warn(
+                    f"absolute=True: the duality condition is not satisfied "
+                    f"(ordinary {dims_str} has essential bars in relative "
+                    f"convention).  The absolute interpretation of the "
+                    f"Steenrod barcode is not theoretically guaranteed.  "
+                    f"Use absolute=False for the unambiguous relative "
+                    f"convention, or pass a smaller max_dim to limit the "
+                    f"check to the dimensions you care about.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+        else:
+            ordinary, steenrod = iface._compute(
+                int(n_jobs), -1 if max_dim is None else int(max_dim))
+
+        ord_fin, ord_inf = ordinary
+        st_fin,  st_inf  = steenrod
+
+        # Sq^0 is the identity, so the Steenrod barcode equals the ordinary
+        # one.  The C++ pipeline (Steenrod_barcode.h) already short-circuits
+        # k == 0; this Python branch is defensive and also gives the user
+        # genuinely distinct arrays to mutate if they want to.
+        if int(k) == 0:
+            st_fin, st_inf = _copy_per_dim(ord_fin, ord_inf)
+
+        # Both paths already truncated to ``max_dim`` inside the C++ interface
+        # (and capped the reduction at ``max_dim + 1`` for speed), so there is
+        # nothing left to slice here.
+        return (ord_fin, ord_inf), (st_fin, st_inf)
 
     def betti_numbers(self) -> list[int]:
         """This function returns the Betti numbers of the simplicial complex.
