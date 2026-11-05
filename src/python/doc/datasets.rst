@@ -188,6 +188,7 @@ Example
     
     plt.show()
 
+
 .. autofunction:: gudhi.datasets.generators.points.torus_embedded_r3
 
 Fetching datasets
