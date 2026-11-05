@@ -27,7 +27,7 @@ jobs:
         shell: pwsh
         run: |
           vcpkg version
-          vcpkg install eigen3 cgal --triplet x64-windows-release
+          vcpkg install eigen3 cgal boost-sort --triplet x64-windows-release
           python -m pip install --user numpy>=2.0
           python -m pip install --user -r .\ext\gudhi-deploy\build-requirements.txt
           python -m pip install --user delvewheel
