@@ -23,7 +23,7 @@ For `nb_times = 80` times, we subsample `nb_points = 200` points from the point 
 
 The TDA scikit-learn pipeline is constructed and is composed of:
 
-#. :class:`~gudhi.sklearn.rips_persistence.RipsPersistence` that builds a Rips complex from the inputs and
+#. :class:`~gudhi.sklearn.RipsPersistence` that builds a Rips complex from the inputs and
    returns its persistence diagrams
 #. :class:`~gudhi.representations.preprocessing.DiagramSelector` that removes non-finite persistence diagrams values
 #. :class:`~gudhi.representations.vector_methods.Landscape` that builds the persistence landscapes from persistence diagrams
@@ -49,6 +49,6 @@ activities performed while wearing only magnetic sensor unit on the left leg.
 Rips complex persistence scikit-learn like interface reference
 --------------------------------------------------------------
 
-.. autoclass:: gudhi.sklearn.rips_persistence.RipsPersistence
+.. autoclass:: gudhi.sklearn.RipsPersistence
    :members:
    :show-inheritance:

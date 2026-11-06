@@ -40,10 +40,10 @@ different, and in particular the `python/` subdirectory is actually `src/python/
 there.
 
 The library uses c++17 and requires `Boost <https://www.boost.org/>`_ :math:`\geq` 1.71.0,
-`CMake <https://www.cmake.org/>`_ :math:`\geq` 3.15,
-Python :math:`\geq` 3.9, `NumPy <http://numpy.org>`_ :math:`\geq` 1.15.0,
-`scikit-build-core <https://scikit-build-core.readthedocs.io>`_ :math:`\geq` 0.4.3
-`nanobind <https://nanobind.readthedocs.io>`_ :math:`\geq` 1.3.2 to compile the GUDHI Python module.
+`CMake <https://cmake.org/>`_ :math:`\geq` 3.15,
+Python :math:`\geq` 3.10, `NumPy <https://numpy.org/>`_ :math:`\geq` 1.21.6,
+`scikit-build-core <https://scikit-build-core.readthedocs.io/en/latest/>`_ :math:`\geq` 0.4.3
+`nanobind <https://nanobind.readthedocs.io/en/latest/>`_ :math:`\geq` 1.3.2 to compile the GUDHI Python module.
 It is a multi-platform library and compiles on Linux, Mac OSX and Visual Studio 2017 or later.
 
 If you have several Python/python installed, you can force it by adding
@@ -95,7 +95,7 @@ Or install GUDHI in your Python packages folder with the
 Test suites
 ===========
 
-To test your build, `py.test <http://doc.pytest.org>`_ is required. Run the
+To test your build, `py.test <https://docs.pytest.org/en/stable/>`_ is required. Run the
 following `Ctest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`_
 (CMake test driver program) command in a terminal:
 
@@ -128,71 +128,72 @@ If :code:`import gudhi` succeeds, please have a look to debug information:
 
     import gudhi as gd
     print(gd.__debug_info__)
-    print("+ Installed modules are: " + gd.__available_modules)
-    print("+ Missing modules are: " + gd.__missing_modules)
+    print("+ Installed modules are:", "; ".join(gd.__all__))
 
 You shall have something like:
 
 .. code-block:: none
 
-    Nanobind version 2.4.0
-    Python version 3.7.12
-    Numpy version 1.21.4
-    Boost version 1.77.0
-    + Installed modules are: off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
-        persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;
-    + Missing modules are: bottleneck;nerve_gic;subsampling;tangential_complex;alpha_complex;euclidean_witness_complex;
-        euclidean_strong_witness_complex;
+    Python version 3.11.14
+    Nanobind version 2.9.2
+    Numpy version 2.3.3
+    Boost version 1.83.0
+    + Installed modules are: CubicalComplex; PeriodicCubicalComplex; SimplexTree; RipsComplex; WitnessComplex;
+    StrongWitnessComplex; CoverComplex; read_lower_triangular_matrix_from_csv_file;
+    read_persistence_intervals_grouped_by_dimension; read_persistence_intervals_in_dimension;
+    read_points_from_off_file; write_points_to_off_file; plot_persistence_barcode; plot_persistence_diagram;
+    plot_persistence_density
 
 Here, you can see that the modules that need CGAL are missing, because CGAL is not installed.
-:code:`persistence_graphical_tools` is installed, but
-`its functions <https://gudhi.inria.fr/python/latest/persistence_graphical_tools_ref.html>`_ will produce an error as
-matplotlib is not available.
+`plot_persistence_* functions <https://gudhi.inria.fr/python/latest/persistence_graphical_tools_ref.html>`_
+will produce an error as matplotlib is not available.
 Unitary tests cannot be run as pytest is missing.
 
 A complete configuration would be :
 
 .. code-block:: none
 
-    Python version 3.11.9
-    Nanobind version 2.4.0
-    Numpy version 1.24.3
-    Pytest version 8.2.1
-    Matplotlib version 3.9.0
-    Scipy version 1.13.1
-    Scikit-learn version 1.3.2
-    POT version 0.9.4
+    Python version 3.10.0
+    Nanobind version 2.6.1
+    Numpy version 2.1.3
+    Pytest version 8.3.5
+    Matplotlib version 3.10.1
+    Scipy version 1.15.2
+    Scikit-learn version 1.6.1
+    POT version 0.9.6.post1
     HNSWlib version 0.8.0
-    PyTorch version 2.3.0
+    PyTorch version 2.6.0
     PyKeOps version 2.2.3
     EagerPy version 0.30.0
-    TensorFlow version 2.13.1
-    Sphinx version 7.3.7
+    TensorFlow version 2.19.0
+    Sphinx version 8.1.3
     Sphinx-paramlinks version 0.6.0
-    pydata_sphinx_theme version 0.15.2
-    sphinxcontrib-bibtex version 2.6.2
-    sphinx-autodoc-typehints version 2.4.4
-    NetworkX version 3.3
+    pydata_sphinx_theme version 0.16.1
+    sphinxcontrib-bibtex version 2.6.3
+    sphinx-autodoc-typehints version 3.0.1
+    NetworkX version 3.4.2
     Eigen3 version 3.4.0
     Boost version 1.84.0
-    CGAL header only version 5.6.1
+    CGAL version 5.6.1
     GMP_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmp.so
     GMPXX_LIBRARIES = /usr/lib/x86_64-linux-gnu/libgmpxx.so
     MPFR_LIBRARIES = /usr/lib/x86_64-linux-gnu/libmpfr.so
     TBB version 2021.7.0 found and used
-    TBB_LIBRARY = /usr/lib/x86_64-linux-gnu/libtbb.so
-    TBB_MALLOC_LIBRARY = /usr/lib/x86_64-linux-gnu/libtbbmalloc.so
-    + Installed modules are: bottleneck;off_utils;simplex_tree;rips_complex;cubical_complex;periodic_cubical_complex;
-        persistence_graphical_tools;reader_utils;witness_complex;strong_witness_complex;nerve_gic;subsampling;
-        tangential_complex;alpha_complex;euclidean_witness_complex;euclidean_strong_witness_complex;
-    + Missing modules are:
-
+    TBB_LIBRARY = /usr/lib/x86_64-linux-gnu/libtbb.so.12.7
+    TBB_MALLOC_LIBRARY = /usr/lib/x86_64-linux-gnu/libtbbmalloc.so.2.7
+    + Installed modules are: CubicalComplex; PeriodicCubicalComplex; SimplexTree; RipsComplex; WitnessComplex;
+    StrongWitnessComplex; CoverComplex; read_lower_triangular_matrix_from_csv_file;
+    read_persistence_intervals_grouped_by_dimension; read_persistence_intervals_in_dimension;
+    read_points_from_off_file; write_points_to_off_file; plot_persistence_barcode; plot_persistence_diagram;
+    plot_persistence_density; bottleneck_distance; DelaunayComplex; AlphaComplex; DelaunayCechComplex;
+    EuclideanStrongWitnessComplex; EuclideanWitnessComplex; TangentialComplex; choose_n_farthest_points;
+    pick_n_random_points; sparsify_point_set
 
 Documentation
 =============
 
-To build the documentation, `sphinx-doc <http://www.sphinx-doc.org>`_,
-`sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io>`_,
+To build the documentation, `sphinx-doc <https://www.sphinx-doc.org/en/master/>`_,
+`sphinxcontrib-bibtex <https://sphinxcontrib-bibtex.readthedocs.io/en/latest/>`_,
 `sphinx-autodoc-typehints <https://github.com/tox-dev/sphinx-autodoc-typehints>`_,
 `sphinxcontrib-paramlinks <https://github.com/sqlalchemyorg/sphinx-paramlinks>`_ and
 `pydata-sphinx-theme <https://github.com/pydata/pydata-sphinx-theme>`_ :math:`\geq` 0.8.0 are
@@ -213,7 +214,7 @@ Optional third-party library
 Compilation dependencies
 ========================
 
-These third party dependencies are detected by `CMake <https://www.cmake.org/>`_.
+These third party dependencies are detected by `CMake <https://cmake.org/>`_.
 They have to be installed before performing the `GUDHI Python module compilation`_.
 
 CGAL
@@ -226,7 +227,7 @@ access to efficient and reliable geometric algorithms.
 
 The procedure to install this library
 according to your operating system is detailed
-`here <http://doc.cgal.org/latest/Manual/installation.html>`_.
+`here <https://doc.cgal.org/latest/Manual/installation.html>`_.
 
 The following examples require CGAL:
 
@@ -243,11 +244,11 @@ Eigen
 -----
 
 Some GUDHI modules (cf. :doc:`modules list </index>`), and few examples
-require `Eigen <http://eigen.tuxfamily.org/>`_ version :math:`\geq` 3.3.0, a C++ template
+require `Eigen <https://libeigen.gitlab.io/>`_ version :math:`\geq` 3.3.0, a C++ template
 library for linear algebra: matrices, vectors, numerical solvers, and related
 algorithms.
 
-The following examples require `Eigen <http://eigen.tuxfamily.org/>`_:
+The following examples require `Eigen <https://libeigen.gitlab.io/>`_:
 
 .. only:: builder_html
 
@@ -260,7 +261,7 @@ The following examples require `Eigen <http://eigen.tuxfamily.org/>`_:
 oneAPI Threading Building Blocks
 --------------------------------
 
-`Intel® oneAPI TBB <https://github.com/oneapi-src/oneTBB>`_ lets you easily write parallel C++ programs that take
+`Intel® oneAPI TBB <https://github.com/uxlfoundation/oneTBB>`_ lets you easily write parallel C++ programs that take
 full advantage of multicore performance, that are portable and composable, and that have future-proof scalability.
 
 Having Intel® oneAPI TBB  (version 20.19.7 or higher) installed is recommended to parallelize and accelerate some GUDHI
@@ -283,7 +284,7 @@ PyTorch, TensorFlow and JAX in a common interface.
 Joblib
 ------
 
-`Joblib <https://joblib.readthedocs.io/>`_ is used both as a dependency of
+`Joblib <https://joblib.readthedocs.io/en/stable/>`_ is used both as a dependency of
 `Scikit-learn`_, and directly for parallelism in some modules
 (:class:`~gudhi.point_cloud.knn.KNearestNeighbors`,
 :func:`~gudhi.representations.metrics.pairwise_persistence_diagram_distances`).
@@ -328,11 +329,11 @@ Matplotlib
 ----------
 
 The :doc:`persistence graphical tools </persistence_graphical_tools_user>`
-module requires `Matplotlib <http://matplotlib.org>`_, a Python 2D plotting
+module requires `Matplotlib <https://matplotlib.org>`_, a Python 2D plotting
 library which produces publication quality figures in a variety of hardcopy
 formats and interactive environments across platforms.
 
-The following examples require the `Matplotlib <http://matplotlib.org>`_:
+The following examples require the `Matplotlib <https://matplotlib.org>`_:
 
 .. only:: builder_html
 
@@ -359,7 +360,7 @@ Pandas
 `Pandas <https://pandas.pydata.org/docs/>`_ is an optional Run time dependency of
 `Scikit-learn`_.
 For instance `sklearn.datasets.fetch_openml`, used in
-`Cubical complex persistence scikit-learn like interface example <cubical_complex_sklearn_itf_ref.html>`_
+:doc:`Cubical complex persistence scikit-learn like interface example <cubical_complex_sklearn_itf_ref>`
 requires pandas with Scikit-learn :math:`\geq` 1.5.0.
 
 PyKeOps
@@ -402,11 +403,11 @@ SciPy
 The :doc:`persistence graphical tools </persistence_graphical_tools_user>`,
 `Wasserstein distance (POT version) <wasserstein_distance_user.html#optimal-transport>`_ and
 `Wasserstein barycenters <wasserstein_distance_user.html#barycenters>`_ modules require `SciPy
-<http://scipy.org>`_, a Python-based ecosystem of open-source software for
+<https://scipy.org/>`_, a Python-based ecosystem of open-source software for
 mathematics, science, and engineering.
 
 :class:`~gudhi.point_cloud.knn.KNearestNeighbors` can use the Python package
-`SciPy <http://scipy.org>`_ :math:`\geq` 1.6.0 as a backend if explicitly requested.
+`SciPy <https://scipy.org/>`_ :math:`\geq` 1.6.0 as a backend if explicitly requested.
 
 TensorFlow
 ----------

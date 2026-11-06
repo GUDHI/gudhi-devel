@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -45,7 +45,8 @@ struct Dummy_row_access {
  *
  * @brief Class managing the row access for the columns.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Row_access

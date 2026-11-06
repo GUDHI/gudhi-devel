@@ -22,6 +22,7 @@ import warnings
 import errno
 import os
 import shutil
+from collections import Counter
 
 from gudhi.reader_utils import read_persistence_intervals_in_dimension
 from gudhi.reader_utils import read_persistence_intervals_grouped_by_dimension
@@ -39,22 +40,25 @@ def _min_birth_max_death(persistence, band=0.0):
     :returns: (float, float) -- (min_birth, max_death).
     """
     # Look for minimum birth date and maximum death date for plot optimisation
-    max_death = 0
-    min_birth = persistence[0][1][0]
-    for interval in reversed(persistence):
-        if float(interval[1][1]) != float("inf"):
-            if float(interval[1][1]) > max_death:
-                max_death = float(interval[1][1])
-        if float(interval[1][0]) > max_death:
-            max_death = float(interval[1][0])
-        if float(interval[1][0]) < min_birth:
-            min_birth = float(interval[1][0])
-    if band > 0.0:
-        max_death += band
-    # can happen if only points at inf death
-    if min_birth == max_death:
-        max_death = max_death + 1.0
-    return (min_birth, max_death)
+    try:
+        max_death = 0
+        min_birth = persistence[0][1][0]
+        for interval in reversed(persistence):
+            if float(interval[1][1]) != float("inf"):
+                if float(interval[1][1]) > max_death:
+                    max_death = float(interval[1][1])
+            if float(interval[1][0]) > max_death:
+                max_death = float(interval[1][0])
+            if float(interval[1][0]) < min_birth:
+                min_birth = float(interval[1][0])
+        if band > 0.0:
+            max_death += band
+        # can happen if only points at inf death
+        if min_birth == max_death:
+            max_death = max_death + 1.0
+        return (min_birth, max_death)
+    except IndexError:
+        return (0.0, 1.0)
 
 
 def _format_handler(a):
@@ -71,20 +75,18 @@ def _format_handler(a):
     # Array
     try:
         first_death_value = a[0][1]
-        if isinstance(first_death_value, (np.floating, float, np.integer, int)):
-            return [[0, x] for x in a], 1
+        if np.issubdtype(type(first_death_value), np.number):
+            pers = [[0, x] for x in a]
+            return pers, 1
     except IndexError:
         pass
     # Iterable of array
     try:
-        pers = []
-        fake_dim = 0
-        for elt in a:
-            first_death_value = elt[0][1]
-            if not isinstance(first_death_value, (np.floating, float, np.integer, int)):
-                raise TypeError("Should be a list of (birth,death)")
-            pers.extend([fake_dim, x] for x in elt)
-            fake_dim = fake_dim + 1
+        for elt in a:  # check that death values have correct type
+            if len(elt) != 0:
+                if not np.issubdtype(type(elt[0][1]), np.number):
+                    raise TypeError("Should be a list of (birth, death)")
+        pers = [[fake_dim, x] for fake_dim, elt in enumerate(a) for x in elt]
         return pers, 2
     except TypeError:
         pass
@@ -92,8 +94,33 @@ def _format_handler(a):
     return a, 0
 
 
+# only necessary because _format_handler does not directly decompose everything into xd, yd arrays for plotting
+def _get_number_of_pairs_by_dimension(barcode):
+    if len(barcode) == 0:
+        return [], 0
+
+    try:
+        if np.issubdtype(type(barcode[0][1]), np.number):
+            # array of (b,d)
+            return [len(barcode)], 1
+    except IndexError:
+        pass
+
+    try:
+        if len(barcode[0]) == 0 or np.issubdtype(type(barcode[0][0][1]), np.number):
+            # array of array of (b,d)
+            return [len(barcode[d]) for d in range(len(barcode))], len(barcode)
+    except TypeError:
+        pass
+
+    # array of (dim, (b,d))
+    res = Counter(bar[0] for bar in barcode)
+    return res, max(res) + 1
+
+
 def _limit_to_max_intervals(persistence, max_intervals, key):
-    """This function returns truncated persistence if length is bigger than max_intervals.
+    """This function returns truncated persistence if length is bigger than max_intervals and a boolean which is `True`
+    if and only if the persistence array was actually truncated.
     :param persistence: Persistence intervals values list. Can be grouped by dimension or not.
     :type persistence: an array of (dimension, (birth, death)) or an array of (birth, death).
     :param max_intervals: maximal number of intervals to display. Selected intervals are those with the longest life
@@ -108,9 +135,9 @@ def _limit_to_max_intervals(persistence, max_intervals, key):
             % (len(persistence), max_intervals)
         )
         # Sort by life time, then takes only the max_intervals elements
-        return sorted(persistence, key=key, reverse=True)[:max_intervals]
+        return sorted(persistence, key=key, reverse=True)[:max_intervals], True
     else:
-        return persistence
+        return persistence, False
 
 
 @lru_cache(maxsize=1)
@@ -211,16 +238,12 @@ def plot_persistence_barcode(
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), persistence_file)
 
-    try:
-        persistence, input_type = _format_handler(persistence)
-        persistence = _limit_to_max_intervals(
-            persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
-        )
-        (min_birth, max_death) = _min_birth_max_death(persistence)
-        persistence = sorted(persistence, key=lambda birth: birth[1][0])
-    except IndexError:
-        min_birth, max_death = 0.0, 1.0
-        pass
+    persistence, input_type = _format_handler(persistence)
+    persistence, _ = _limit_to_max_intervals(
+        persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
+    )
+    (min_birth, max_death) = _min_birth_max_death(persistence)
+    persistence = sorted(persistence, key=lambda birth: birth[1][0])
 
     delta = (max_death - min_birth) * inf_delta
     # Replace infinity values with max_death + delta for bar code to be more readable
@@ -249,7 +272,7 @@ def plot_persistence_barcode(
     if legend:
         title = "Dimension"
         if input_type == 2:
-            title = "Range"
+            title = "Diagram"
         dimensions = {item[0] for item in persistence}
         axes.legend(
             handles=[
@@ -342,15 +365,15 @@ def plot_persistence_diagram(
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), persistence_file)
 
-    try:
-        persistence, input_type = _format_handler(persistence)
-        persistence = _limit_to_max_intervals(
-            persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
-        )
-        min_birth, max_death = _min_birth_max_death(persistence, band)
-    except IndexError:
-        min_birth, max_death = 0.0, 1.0
-        pass
+    persistence, input_type = _format_handler(persistence)
+    persistence, changed = _limit_to_max_intervals(
+        persistence, max_intervals, key=lambda life_time: life_time[1][1] - life_time[1][0]
+    )
+    if changed or input_type == 0:
+        persistence = sorted(persistence, key=lambda x: x[0])
+    min_birth, max_death = _min_birth_max_death(persistence, band)
+
+    sizes, num_dim = _get_number_of_pairs_by_dimension(persistence)
 
     delta = (max_death - min_birth) * inf_delta
     # Replace infinity values with max_death + delta for diagram to be more
@@ -381,9 +404,25 @@ def plot_persistence_diagram(
 
     x = [birth for (dim, (birth, death)) in persistence]
     y = [death if death != float("inf") else infinity for (dim, (birth, death)) in persistence]
-    c = [colormap[dim] for (dim, (birth, death)) in persistence]
 
-    axes.scatter(x, y, alpha=alpha, color=c)
+    i = 0
+    for d in range(num_dim):
+        if sizes[d] != 0:
+            j = i + sizes[d]
+            xd = x[i:j]
+            yd = y[i:j]
+            i = j
+            c = colormap[d]
+            axes.plot(
+                xd,
+                yd,
+                linestyle="none",
+                markersize=6,
+                marker="o",
+                color=c,
+                alpha=alpha,
+            )
+
     if float("inf") in (death for (dim, (birth, death)) in persistence):
         # infinity line and text
         axes.plot(
@@ -391,12 +430,13 @@ def plot_persistence_diagram(
         )
         # Infinity label
         yt = axes.get_yticks()
-        yt = yt[np.where(yt < axis_end)]  # to avoid plotting ticklabel higher than infinity
+        ytl = np.array(axes.get_yticklabels())
+        mask = yt < axis_end
+        yt = yt[mask]  # to avoid plotting ticklabel higher than infinity
+        ytl = ytl[mask]
         yt = np.append(yt, infinity)
-        ytl = ["%.3f" % e for e in yt]  # to avoid float precision error
-        ytl[-1] = r"$+\infty$"
-        axes.set_yticks(yt)
-        axes.set_yticklabels(ytl)
+        ytl = np.append(ytl, r"$+\infty$")
+        axes.set_yticks(yt, labels=ytl)
 
     if legend is None and input_type != 1:
         # By default, if persistence is an array of (dimension, (birth, death)), or an
@@ -406,7 +446,7 @@ def plot_persistence_diagram(
     if legend:
         title = "Dimension"
         if input_type == 2:
-            title = "Range"
+            title = "Diagram"
         dimensions = list({item[0] for item in persistence})
         axes.legend(
             handles=[
@@ -522,7 +562,7 @@ def plot_persistence_density(
                 persistence_dim,
                 max_intervals,
                 key=lambda life_time: life_time[1] - life_time[0],
-            )
+            )[0]
         )
 
         # Set as numpy array birth and death (remove undefined values - inf and NaN)

@@ -1,6 +1,62 @@
-from .kernel_methods import *
-from .metrics import *
-from .preprocessing import *
-from .vector_methods import *
+from .kernel_methods import (
+    SlicedWassersteinKernel,
+    PersistenceWeightedGaussianKernel,
+    PersistenceScaleSpaceKernel,
+    PersistenceFisherKernel,
+)
 
-__all__ = ["kernel_methods", "metrics", "preprocessing", "vector_methods"]
+from .metrics import (
+    SlicedWassersteinDistance,
+    BottleneckDistance,
+    PersistenceFisherDistance,
+    WassersteinDistance,
+)
+
+from .preprocessing import (
+    Clamping,
+    BirthPersistenceTransform,
+    DiagramScaler,
+    Padding,
+    ProminentPoints,
+    DiagramSelector,
+    DimensionSelector,
+)
+
+from .vector_methods import (
+    PersistenceImage,
+    Landscape,
+    Silhouette,
+    BettiCurve,
+    Entropy,
+    TopologicalVector,
+    ComplexPolynomial,
+    Atol,
+    PersistenceLengths,
+)
+
+__all__ = [
+    'SlicedWassersteinKernel',
+    'PersistenceWeightedGaussianKernel',
+    'PersistenceScaleSpaceKernel',
+    'PersistenceFisherKernel',
+    'SlicedWassersteinDistance',
+    'BottleneckDistance',
+    'PersistenceFisherDistance',
+    'WassersteinDistance',
+    'Clamping',
+    'BirthPersistenceTransform',
+    'DiagramScaler',
+    'Padding',
+    'ProminentPoints',
+    'DiagramSelector',
+    'DimensionSelector',
+    'PersistenceImage',
+    'Landscape',
+    'Silhouette',
+    'BettiCurve',
+    'Entropy',
+    'TopologicalVector',
+    'ComplexPolynomial',
+    'Atol',
+    'PersistenceLengths',
+]

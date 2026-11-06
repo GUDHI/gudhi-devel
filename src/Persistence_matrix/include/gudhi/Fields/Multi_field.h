@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber, Clément Maria
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -21,6 +21,9 @@
 #include <vector>
 #include <gmpxx.h>
 #include <stdexcept>
+
+#include <gudhi/Debug_utils.h>
+#include <gudhi/arithmetic.h>
 
 namespace Gudhi {
 namespace persistence_fields {
@@ -49,7 +52,7 @@ class Multi_field_element
   {
     static_assert(maximum >= 2, "Characteristics have to be positive.");
     static_assert(minimum <= maximum, "The given interval is not valid.");
-    static_assert(minimum != maximum || _is_prime(minimum), "The given interval does not contain a prime number.");
+    static_assert(minimum != maximum || Gudhi::is_prime(minimum), "The given interval does not contain a prime number.");
 
     if (productOfAllCharacteristics_ == 1)
       throw std::runtime_error("The given interval does not contain a prime number.");
@@ -64,7 +67,7 @@ class Multi_field_element
   {
     static_assert(maximum >= 2, "Characteristics has to be positive.");
     static_assert(minimum <= maximum, "The given interval is not valid.");
-    static_assert(minimum != maximum || _is_prime(minimum), "The given interval does not contain a prime number.");
+    static_assert(minimum != maximum || Gudhi::is_prime(minimum), "The given interval does not contain a prime number.");
 
     if (productOfAllCharacteristics_ == 1)
       throw std::runtime_error("The given interval does not contain a prime number.");
@@ -302,6 +305,10 @@ class Multi_field_element
   [[nodiscard]] std::pair<Multi_field_element, Characteristic> get_partial_inverse(
       const Characteristic& productOfCharacteristics) const
   {
+    GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
+                std::invalid_argument(
+                    "The given product is not the product of a subset of the current Multi-field characteristics."));
+
     Characteristic QR;
     mpz_gcd(QR.get_mpz_t(), element_.get_mpz_t(), productOfCharacteristics.get_mpz_t());  // QR <- gcd(x,QS)
 
@@ -344,8 +351,12 @@ class Multi_field_element
    */
   static Multi_field_element get_partial_multiplicative_identity(const Characteristic& productOfCharacteristics)
   {
-    if (productOfCharacteristics == 0) {
-      return Multi_field_element<minimum, maximum>(multiplicativeID_);
+    GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
+                std::invalid_argument(
+                    "The given product is not the product of a subset of the current Multi-field characteristics."));
+
+    if (productOfCharacteristics == 0 || productOfCharacteristics == productOfAllCharacteristics_) {
+      return get_multiplicative_identity();
     }
     Multi_field_element<minimum, maximum> mult;
     for (unsigned int idx = 0; idx < primes_.size(); ++idx) {
@@ -425,18 +436,6 @@ class Multi_field_element
 
            return res;
    }();*/
-
-  static constexpr bool _is_prime(const int p)
-  {
-    if (p <= 1) return false;
-    if (p <= 3) return true;
-    if (p % 2 == 0 || p % 3 == 0) return false;
-
-    for (long i = 5; i * i <= p; i = i + 6)
-      if (p % i == 0 || p % (i + 2) == 0) return false;
-
-    return true;
-  }
 };
 
 }  // namespace persistence_fields

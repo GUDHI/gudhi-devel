@@ -12,7 +12,7 @@ function(add_gudhi_module file_path)
   set(GUDHI_MODULES_FULL_LIST ${GUDHI_MODULES_FULL_LIST} ${file_path} PARENT_SCOPE)
   # Include module headers is independent - You may ask for no Alpha complex module but Python interface i.e.
   if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/${file_path}/include/)
-    include_directories(src/${file_path}/include/)
+    include_directories(BEFORE src/${file_path}/include/)
   endif()
 
 endfunction(add_gudhi_module)
@@ -36,6 +36,3 @@ if (WITH_GUDHI_UTILITIES)
 endif()
 
 message("++ GUDHI_SUB_DIRECTORIES list is:\"${GUDHI_SUB_DIRECTORIES}\"")
-
-
-

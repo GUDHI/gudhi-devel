@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -17,7 +17,7 @@
 #ifndef PM_OPTIONS_INCLUDED
 #define PM_OPTIONS_INCLUDED
 
-#include <cstdint>
+#include <cstdint>  // std::uint8_t
 
 #include <gudhi/Fields/Zp_field_operators.h>
 
@@ -60,7 +60,7 @@ enum class Column_indexation_types : std::uint8_t {
  * @struct Default_options persistence_matrix_options.h gudhi/persistence_matrix_options.h
  * @ingroup persistence_matrix
  *
- * @brief Default option structure for @ref Matrix class.
+ * @brief Default option structure for @ref Gudhi::persistence_matrix::Matrix "Matrix" class.
  * See the @ref PersistenceMatrixOptions concept for a more detailed description of the fields.
  * Produces a @ref basematrix "base matrix" with no enabled option.
  *
@@ -160,6 +160,26 @@ struct Cohomology_persistence_options : Default_options<column_type, is_z2_only,
   static const bool has_row_access = true;
   static const bool has_column_compression = true;
   static const bool has_removable_rows = true;
+};
+
+/**
+ * @private
+ */
+template <typename T>
+class RangeTraits
+{
+ private:
+  static auto check_begin(...) -> std::false_type;
+  template <typename U>
+  static auto check_begin(const U& x) -> decltype(x.begin(), std::true_type{});
+
+  static auto check_size(...) -> std::false_type;
+  template <typename U>
+  static auto check_size(const U& x) -> decltype(x.size(), std::true_type{});
+
+ public:
+  static constexpr bool has_begin = decltype(check_begin(std::declval<T>()))::value;
+  static constexpr bool has_size = decltype(check_size(std::declval<T>()))::value;
 };
 
 }  // namespace persistence_matrix

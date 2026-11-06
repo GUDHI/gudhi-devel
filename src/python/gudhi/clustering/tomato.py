@@ -82,8 +82,10 @@ class Tomato:
             n_clusters (int): number of clusters requested. Defaults to None, i.e. no merging occurs and we get
                 the maximal number of clusters.
             merge_threshold (float): minimum prominence of a cluster so it doesn't get merged.
-            symmetrize_graph (bool): whether we should add edges to make the neighborhood graph symmetric.
-                This can be useful with k-NN for small k. Defaults to false.
+            symmetrize_graph (bool): whether we should add neighbors to make the neighborhood graph symmetric.
+                For each point, Tomato only looks at its neighbors with a larger weight, so the actual graph used
+                depends on the weights for non-symmetric input graphs. This is usually not a problem, but the option
+                can be useful with k-NN for small k. Defaults to false.
             p (float): norm L^p on input points. Defaults to 2.
             q (float): order used to compute the distance to measure. Defaults to dim.
             dim (float): final exponent in DTM density estimation, representing the dimension. Defaults to the

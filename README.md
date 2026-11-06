@@ -21,7 +21,11 @@ To install GUDHI, you can follow the [C++ compilation procedure](https://gudhi.i
 # More information
 
 * [The GUDHI website](https://gudhi.inria.fr/)
+* [Tutorials](https://gudhi.inria.fr/tutorials/)
+* [Contributing guide](.github/CONTRIBUTING.md)
+* [Changelog](.github/changelog.md)
+
+# Contact
+
 * [Contact us](https://gudhi.inria.fr/contact/)
 * [Subscribe to the GUDHI users mailing list](https://gudhi.inria.fr/keepintouch/)
-* [Tutorials](https://gudhi.inria.fr/tutorials/)
-* [Changelog](.github/changelog.md)

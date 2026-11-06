@@ -2,9 +2,10 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
+ *      - 2025/11 Jānis Lazovskis: Added insert_maximal_cell method
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -243,6 +244,54 @@ class Matrix
       std::conditional_t<PersistenceMatrixOptions::is_z2, ID_index, std::pair<ID_index, Element> >;
 
   /**
+   * @private
+   */
+  static ID_index get_row_index(const Matrix_entry& e)
+  {
+    return e.get_row_index();
+  }
+  /**
+   * @private
+   */
+  static ID_index get_row_index(const Entry_representative& e)
+  {
+    if constexpr (PersistenceMatrixOptions::is_z2) {
+      return e;
+    } else {
+      return e.first;
+    }
+  }
+  /**
+   * @private
+   */
+  static ID_index& get_row_index(Entry_representative& e)
+  {
+    if constexpr (PersistenceMatrixOptions::is_z2) {
+      return e;
+    } else {
+      return e.first;
+    }
+  }
+  /**
+   * @private
+   */
+  static Element get_element(const Matrix_entry& e)
+  {
+    return e.get_element();
+  }
+  /**
+   * @private
+   */
+  static Element get_element(const Entry_representative& e)
+  {
+    if constexpr (PersistenceMatrixOptions::is_z2) {
+      return Field_operators::get_multiplicative_identity();
+    } else {
+      return e.second;
+    }
+  }
+
+  /**
    * @brief Compares two entries by their position in the row. They are assume to be in the same row.
    */
   struct RowEntryComp {
@@ -391,6 +440,35 @@ class Matrix
   // To prepare a more flexible use of the column types later (custom allocators depending on the column type etc.)
   using Column_settings = std::conditional_t<PersistenceMatrixOptions::is_z2, Column_z2_settings, Column_zp_settings>;
 
+  /**
+   * @private
+   */
+  static Field_operators const* get_operator_ptr(Column_settings const* colSettings)
+  {
+    if constexpr (PersistenceMatrixOptions::is_z2) {
+      return nullptr;
+    } else {
+      if (colSettings == nullptr) return nullptr; // used for dummy columns
+      return &(colSettings->operators);
+    }
+  }
+  /**
+   * @private
+   */
+  template <typename T>
+  static Element get_coefficient_value(T v, [[maybe_unused]] Field_operators const* operators)
+  {
+    if constexpr (PersistenceMatrixOptions::is_z2) {
+      return Field_operators::get_value(v);
+    } else {
+      return operators->get_value(v);
+    }
+  }
+  /**
+   * @private
+   */
+  static Element get_coefficient_value(bool v, [[maybe_unused]] Field_operators const* operators) { return v; }
+
   // using Column_settings = typename std::conditional<
   //     PersistenceMatrixOptions::is_z2,
   //     typename std::conditional<PersistenceMatrixOptions::has_row_access,
@@ -492,7 +570,27 @@ class Matrix
   /**
    * @brief Type of a representative cycle. Vector of @ref rowindex "row indices".
    */
-  using Cycle = std::vector<ID_index>; //TODO: add coefficients
+  using Cycle = std::vector<Entry_representative>;
+
+  /**
+   * @private
+   */
+  template <class EntryRange>
+  static Cycle build_cycle_from_range(const EntryRange& entries)
+  {
+    Cycle cycle;
+    if constexpr (RangeTraits<EntryRange>::has_size) {
+      cycle.reserve(entries.size());
+    }
+    for (const auto& c : entries) {
+      if constexpr (PersistenceMatrixOptions::is_z2) {
+        cycle.push_back(c.get_row_index());
+      } else {
+        cycle.push_back({c.get_row_index(), c.get_element()});
+      }
+    }
+    return cycle;
+  }
 
   // Return types to factorize the corresponding methods
 
@@ -553,6 +651,7 @@ class Matrix
    */
   Matrix(unsigned int numberOfColumns, Characteristic characteristic = Field_operators::nullCharacteristic);
   /**
+   * @anchor Matrix_constructor_from_birth_death_comparator
    * @brief Constructs a new empty matrix with the given comparator functions. Only available when those comparators
    * are necessary.
    *
@@ -585,7 +684,8 @@ class Matrix
    *
    * See description of @ref Matrix(const std::vector<Container>& columns, Characteristic characteristic)
    * for more information about  @p orderedBoundaries and
-   * @ref Matrix(const std::function<bool(Pos_index,Pos_index)>&, const std::function<bool(Pos_index,Pos_index)>&)
+   * @ref Matrix_constructor_from_birth_death_comparator
+   * "Matrix(const std::function<bool(Pos_index,Pos_index)>&, const std::function<bool(Pos_index,Pos_index)>&)"
    * for more information about the comparators.
    *
    * @tparam Boundary_range Range type for @ref Entry_representative ranges. Assumed to have a begin(), end() and size()
@@ -614,7 +714,8 @@ class Matrix
    *   - @ref PersistenceMatrixOptions::has_column_pairings = false
    *
    * See description of
-   * @ref Matrix(const std::function<bool(Pos_index,Pos_index)>&, const std::function<bool(Pos_index,Pos_index)>&)
+   * @ref Matrix_constructor_from_birth_death_comparator
+   * "Matrix(const std::function<bool(Pos_index,Pos_index)>&, const std::function<bool(Pos_index,Pos_index)>&)"
    * for more information about the comparators.
    *
    * @param numberOfColumns Number of columns to reserve space for.
@@ -675,7 +776,7 @@ class Matrix
    * @tparam Container Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
    * @param column Column to be inserted.
    */
-  template <class Container>
+  template <class Container, class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   void insert_column(const Container& column);
   /**
    * @brief Inserts a new ordered column at the given index by copying the given range of @ref Entry_representative.
@@ -688,8 +789,15 @@ class Matrix
    * @param column Column to be inserted.
    * @param columnIndex @ref MatIdx index to which the column has to be inserted.
    */
-  template <class Container>
+  template <class Container, class = std::enable_if_t<!std::is_arithmetic_v<Container> > >
   void insert_column(const Container& column, Index columnIndex);
+  /**
+   * @brief Inserts a new column at the end of the matrix. The column will consist of the given index only.
+   * 
+   * @param idx Entry ID.
+   * @param e Entry coefficient. Ignored if the coefficient field is Z2. Default value: 1.
+   */
+  void insert_column(ID_index idx, Element e = 1U);
   // TODO: for simple boundary matrices, add an index pointing to the first column inserted after the last call of
   // get_current_barcode to enable several calls to get_current_barcode
   /**
@@ -717,7 +825,8 @@ class Matrix
    * it will also be updated.
    *
    * @tparam Boundary_range Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
-   * @param boundary Boundary generating the new column. The content should be ordered by ID.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @ref rowindex "row indices" of the cells in the current matrix and should be ordered in increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    * @return If it is a @ref chainmatrix "chain matrix", the method returns the @ref MatIdx indices of the unpaired
@@ -738,17 +847,73 @@ class Matrix
    * @tparam Boundary_range Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
    * @param cellIndex @ref IDIdx index to use to identify the new cell.
    * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
-   * @p cellIndex values of precedent calls of the method for the corresponding cells and should be ordered in
-   * increasing order.
+   * @ref rowindex "row indices" of the cells in the current matrix and should be ordered in increasing order.
    * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
    * this parameter can be omitted as it can be deduced from the size of the boundary.
    * @return If it is a @ref chainmatrix "chain matrix", the method returns the @ref MatIdx indices of the unpaired
    * chains used to reduce the boundary. Otherwise, nothing.
    */
   template <class Boundary_range = Boundary>
-  Insertion_return insert_boundary(ID_index cellIndex,
-                                   const Boundary_range& boundary,
+  Insertion_return insert_boundary(ID_index cellIndex, const Boundary_range& boundary,
                                    Dimension dim = Matrix::get_null_value<Dimension>());
+
+  /**
+   * @brief Only available for @ref boundarymatrix "RU" and @ref chainmatrix "chain matrices" and if
+   * @ref PersistenceMatrixOptions::has_vine_update is true.
+   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_column_pairings or
+   * @ref PersistenceMatrixOptions::can_retrieve_representative_cycles also needs to be true.
+   * Inserts the given cell boundary at the given position in the matrix/filtration such that the matrix remains
+   * consistent.
+   *
+   * Appends the input column to the end of the matrix using the @ref insert_boundary "insert boundary" method,
+   * and moves the column using the @ref vine_swap "vine swaps" method to the requested position, which maintains a
+   * reduced decomposition. As a result, the input column (and other columns) may have a different boundary when it
+   * is finally in the requested position `columnIndex`, compared with the boundary `boundary` upon input. No check
+   * is made as to whether the order of cells, after the function has finished, will correspond to a valid filtration.
+   *
+   * See also @ref remove_maximal_cell (for the complementary action) and @ref insert_boundary (for inserting at the
+   * highest index).
+   * 
+   * @tparam Boundary_range Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
+   * @param columnIndex @ref MatIdx Index where the column should be inserted. This will be the index of the input
+   * column `boundary` after the function has finished.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @ref rowindex "row indices" of the cells in the current matrix and should be ordered in increasing order.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   * @return If it is a @ref chainmatrix "chain matrix", the method returns the @ref MatIdx indices of the unpaired
+   * chains used to reduce the boundary. Otherwise, nothing.
+   */
+  template <class Boundary_range = Boundary>
+  Insertion_return insert_maximal_cell(Index columnIndex,
+                                       const Boundary_range& boundary,
+                                       Dimension dim = Matrix::get_null_value<Dimension>());
+
+  /**
+   * @brief Only available for @ref boundarymatrix "RU" and @ref chainmatrix "chain matrices" and if
+   * @ref PersistenceMatrixOptions::has_vine_update is true.
+   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_column_pairings or
+   * @ref PersistenceMatrixOptions::can_retrieve_representative_cycles also needs to be true.
+   * It does the same as the other version, but allows the boundary cells to be identified without restrictions
+   * except that the new ID has to be higher than any other ID use until now. Note that you should avoid then
+   * to use the other insertion method to avoid overwriting IDs.
+   *
+   * @tparam Boundary_range Range of @ref Entry_representative. Assumed to have a begin(), end() and size() method.
+   * @param columnIndex @ref MatIdx Index where the column should be inserted. This will be the index of the input
+   * column `boundary` after the function has finished.
+   * @param cellIndex @ref IDIdx index to use to identify the new cell.
+   * @param boundary Boundary generating the new column. The indices of the boundary have to correspond to the
+   * @ref rowindex "row indices" of the cells in the current matrix and should be ordered in increasing order.
+   * @param dim Dimension of the cell whose boundary is given. If the complex is simplicial,
+   * this parameter can be omitted as it can be deduced from the size of the boundary.
+   * @return If it is a @ref chainmatrix "chain matrix", the method returns the @ref MatIdx indices of the unpaired
+   * chains used to reduce the boundary. Otherwise, nothing.
+   */
+  template <class Boundary_range = Boundary>
+  Insertion_return insert_maximal_cell(Index columnIndex,
+                                       ID_index cellIndex,
+                                       const Boundary_range& boundary,
+                                       Dimension dim = Matrix::get_null_value<Dimension>());
 
   /**
    * @brief Returns the column at the given @ref MatIdx index.
@@ -855,15 +1020,17 @@ class Matrix
   /**
    * @brief Only available for @ref boundarymatrix "RU" and @ref chainmatrix "chain matrices" and if
    * @ref PersistenceMatrixOptions::has_removable_columns and @ref PersistenceMatrixOptions::has_vine_update are true.
-   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_map_column_container and
-   * @ref PersistenceMatrixOptions::has_column_pairings also need to be true. Assumes that the cell is maximal in the
-   * current complex and removes it such that the matrix remains consistent (i.e., RU is still an upper triangular
-   * decomposition of the boundary matrix and chain is still a compatible bases of the chain complex in the sense
-   * of @cite zigzag). The maximality of the cell is not verified. Also updates the barcode if it was computed.
+   * For @ref chainmatrix "chain matrices", @ref PersistenceMatrixOptions::has_map_column_container, and,
+   * @ref PersistenceMatrixOptions::has_column_pairings or
+   * @ref PersistenceMatrixOptions::can_retrieve_representative_cycles also need to be true. Assumes that the cell is
+   * maximal in the current complex and removes it such that the matrix remains consistent (i.e., RU is still an upper
+   * triangular decomposition of the boundary matrix and chain is still a compatible bases of the chain complex in the
+   * sense of @cite zigzag). The maximality of the cell is not verified. Also updates the barcode if it was computed.
    *
    * For @ref chainmatrix "chain matrices", using the other version of the method could perform better depending on how
-   * the data is maintained on the side of the user. Then, @ref PersistenceMatrixOptions::has_column_pairings also do
-   * not need to be true.
+   * the data is maintained on the side of the user. Then, there is no need for one of
+   * @ref PersistenceMatrixOptions::has_column_pairings or
+   * @ref PersistenceMatrixOptions::can_retrieve_representative_cycles to be true.
    *
    * See also @ref remove_last and @ref remove_column.
    *
@@ -891,7 +1058,8 @@ class Matrix
    * @ref remove_maximal_cell(ID_index cellIndex, const std::vector<ID_index>& columnsToSwap)
    * "remove_maximal_cell(cellID, {})" will be faster than @ref remove_last().
    *
-   * See also @ref remove_last.
+   * See also @ref remove_last (for removing at the highest index), @ref insert_maximal_cell (for the complementary
+   * action).
    *
    * @param cellIndex @ref IDIdx index of the cell to remove
    * @param columnsToSwap Vector of @ref IDIdx indices of the cells coming after @p cellIndex in the filtration.
@@ -1262,12 +1430,11 @@ class Matrix
    * @ref Column_indexation_types::IDENTIFIER. Does the same than @ref vine_swap, but assumes that the swap is
    * non-trivial and therefore skips a part of the case study.
    *
-   * @param columnIndex1 @ref MatIdx index of the first cell.
-   * @param columnIndex2 @ref MatIdx index of the second cell. It is assumed that the @ref PosIdx of both only differs
-   * by one.
-   * @return Let \f$ pos1 \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ pos2 \f$ be the @ref PosIdx index of
+   * @param columnIndex1 @ref MatIdx index of the first cell with @ref PosIdx \f$ i \f$.
+   * @param columnIndex2 @ref MatIdx index of the second cell with @ref PosIdx \f$ i + 1 \f$.
+   * @return Let \f$ i \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ i + 1 \f$ be the @ref PosIdx index of
    * @p columnIndex2. The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx
-   * \f$ max(pos1, pos2) \f$.
+   * \f$ i + 1 \f$.
    */
   Index vine_swap_with_z_eq_1_case(Index columnIndex1, Index columnIndex2);
   /**
@@ -1296,39 +1463,51 @@ class Matrix
    * which each other ; \f$ F' \f$ has to be a valid filtration.
    * See @cite vineyards for more information about vine and vineyards.
    *
-   * @param columnIndex1 @ref MatIdx index of the first cell.
-   * @param columnIndex2 @ref MatIdx index of the second cell. It is assumed that the @ref PosIdx of both only differs
-   * by one.
-   * @return Let \f$ pos1 \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ pos2 \f$ be the @ref PosIdx index of
+   * @param columnIndex1 @ref MatIdx index of the first cell with @ref PosIdx \f$ i \f$.
+   * @param columnIndex2 @ref MatIdx index of the second cell with @ref PosIdx \f$ i + 1 \f$.
+   * @return Let \f$ i \f$ be the @ref PosIdx index of @p columnIndex1 and \f$ i + 1 \f$ be the @ref PosIdx index of
    * @p columnIndex2. The method returns the @ref MatIdx of the column which has now, after the swap, the @ref PosIdx
-   * \f$ max(pos1, pos2) \f$.
+   * \f$ i + 1 \f$.
    */
   Index vine_swap(Index columnIndex1, Index columnIndex2);
 
-  // TODO: Rethink the interface for representative cycles
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
-   * the representative cycles of the current state of the filtration represented by the matrix. It does not need to be
-   * called before @ref get_representative_cycles is called for the first time, but needs to be called before calling
-   * @ref get_representative_cycles again if the matrix was modified in between. Otherwise the old cycles will be
-   * returned.
+   * the representative cycles of the current state of the filtration represented by the matrix. It needs to be called
+   * before calling @ref get_all_representative_cycles if the matrix was modified since last call. Otherwise the old
+   * cycles will be returned.
+   *
+   * @param dim If different from default value, only the cycles of the given dimension are updated.
+   * All others are erased.
    */
-  void update_representative_cycles();
+  void update_all_representative_cycles(Dimension dim = get_null_value<Dimension>());
+  /**
+   * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true. Pre-computes
+   * the representative cycle in the current matrix state of the given bar. It needs to be called
+   * before calling @ref get_representative_cycle if the matrix was modified since last call. Otherwise the old cycle
+   * will be returned.
+   *
+   * @param bar Bar corresponding to the wanted representative cycle.
+   */
+  void update_representative_cycle(const Bar& bar);
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
-   * Returns all representative cycles of the current filtration.
+   * Returns all representative cycles of the current filtration. @ref update_all_representative_cycles has to be called
+   * first if a modification to the matrix has to be token into account since last call.
    *
    * @return A const reference to the vector of representative cycles.
    */
-  const std::vector<Cycle>& get_representative_cycles();
+  const std::vector<Cycle>& get_all_representative_cycles() const;
   /**
    * @brief Only available if @ref PersistenceMatrixOptions::can_retrieve_representative_cycles is true.
-   * Returns the cycle representing the given bar.
+   * Returns the cycle representing the given bar. @ref update_all_representative_cycles or
+   * @ref update_representative_cycle have to be called first if a modification to the matrix has to be token into
+   * account since last call.
    *
    * @param bar A bar from the current barcode.
    * @return A const reference to the cycle representing @p bar.
    */
-  const Cycle& get_representative_cycle(const Bar& bar);
+  const Cycle& get_representative_cycle(const Bar& bar) const;
 
  private:
   using Underlying_matrix = std::conditional_t<
@@ -1364,6 +1543,8 @@ class Matrix
   Underlying_matrix matrix_;
 
   static constexpr void _assert_options();
+
+  Element _get_value(int coefficient) const;
 };
 
 template <class PersistenceMatrixOptions>
@@ -1477,7 +1658,7 @@ inline void Matrix<PersistenceMatrixOptions>::set_characteristic(Characteristic 
 }
 
 template <class PersistenceMatrixOptions>
-template <class Container>
+template <class Container, class>
 inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container& column)
 {
   if constexpr (!PersistenceMatrixOptions::is_z2) {
@@ -1493,7 +1674,7 @@ inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container& col
 }
 
 template <class PersistenceMatrixOptions>
-template <class Container>
+template <class Container, class>
 inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container& column, Index columnIndex)
 {
   if constexpr (!PersistenceMatrixOptions::is_z2) {
@@ -1507,6 +1688,23 @@ inline void Matrix<PersistenceMatrixOptions>::insert_column(const Container& col
   static_assert(!PersistenceMatrixOptions::has_row_access,
                 "Columns have to be inserted at the end of the matrix when row access is enabled.");
   matrix_.insert_column(column, columnIndex);
+}
+
+template <class PersistenceMatrixOptions>
+inline void Matrix<PersistenceMatrixOptions>::insert_column(ID_index idx, [[maybe_unused]] Element e)
+{
+  static_assert(
+      !isNonBasic,
+      "'insert_column' not available for the chosen options. The input has to be in the form of a cell boundary.");
+
+  if constexpr (PersistenceMatrixOptions::is_z2) {
+    matrix_.insert_column(idx);
+  } else {
+    GUDHI_CHECK(colSettings_->operators.get_characteristic() != Field_operators::nullCharacteristic,
+                std::logic_error("Matrix::insert_column - Columns cannot be initialized if the coefficient field "
+                                 "characteristic is not specified."));
+    matrix_.insert_column(idx, e);
+  }
 }
 
 template <class PersistenceMatrixOptions>
@@ -1545,6 +1743,39 @@ Matrix<PersistenceMatrixOptions>::insert_boundary(ID_index cellIndex, const Boun
     return matrix_.insert_boundary(cellIndex, boundary, dim);
   else
     matrix_.insert_boundary(cellIndex, boundary, dim);
+}
+
+template <class PersistenceMatrixOptions>
+template <class Boundary_range>
+inline typename Matrix<PersistenceMatrixOptions>::Insertion_return
+Matrix<PersistenceMatrixOptions>::insert_maximal_cell(Index columnIndex, const Boundary_range& boundary, Dimension dim)
+{
+  static_assert(isNonBasic && PersistenceMatrixOptions::has_vine_update,
+                "'insert_maximal_cell' is not available for the chosen options.");
+
+  if constexpr (isNonBasic && !PersistenceMatrixOptions::is_of_boundary_type &&
+                PersistenceMatrixOptions::column_indexation_type == Column_indexation_types::CONTAINER)
+    return matrix_.insert_maximal_cell(columnIndex, boundary, dim);
+  else
+    matrix_.insert_maximal_cell(columnIndex, boundary, dim);
+}
+
+template <class PersistenceMatrixOptions>
+template <class Boundary_range>
+inline typename Matrix<PersistenceMatrixOptions>::Insertion_return
+Matrix<PersistenceMatrixOptions>::insert_maximal_cell(Index columnIndex,
+                                                      ID_index cellIndex,
+                                                      const Boundary_range& boundary,
+                                                      Dimension dim)
+{
+  static_assert(isNonBasic && PersistenceMatrixOptions::has_vine_update,
+                "'insert_maximal_cell' is not available for the chosen options.");
+
+  if constexpr (isNonBasic && !PersistenceMatrixOptions::is_of_boundary_type &&
+                PersistenceMatrixOptions::column_indexation_type == Column_indexation_types::CONTAINER)
+    return matrix_.insert_maximal_cell(columnIndex, cellIndex, boundary, dim);
+  else
+    matrix_.insert_maximal_cell(columnIndex, cellIndex, boundary, dim);
 }
 
 template <class PersistenceMatrixOptions>
@@ -1724,13 +1955,7 @@ Matrix<PersistenceMatrixOptions>::multiply_target_and_add_to(Integer_index sourc
                                                              int coefficient,
                                                              Integer_index targetColumnIndex)
 {
-  if constexpr (PersistenceMatrixOptions::is_z2) {
-    // coef will be converted to bool, because of Element
-    matrix_.multiply_target_and_add_to(sourceColumnIndex, coefficient % 2, targetColumnIndex);
-  } else {
-    matrix_.multiply_target_and_add_to(
-        sourceColumnIndex, colSettings_->operators.get_value(coefficient), targetColumnIndex);
-  }
+  matrix_.multiply_target_and_add_to(sourceColumnIndex, _get_value(coefficient), targetColumnIndex);
 }
 
 template <class PersistenceMatrixOptions>
@@ -1744,12 +1969,7 @@ inline std::enable_if_t<!std::is_integral_v<Entry_range> > Matrix<PersistenceMat
                 "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain "
                 "algebraic consistency.");
 
-  if constexpr (PersistenceMatrixOptions::is_z2) {
-    // coef will be converted to bool, because of Element
-    matrix_.multiply_target_and_add_to(sourceColumn, coefficient % 2, targetColumnIndex);
-  } else {
-    matrix_.multiply_target_and_add_to(sourceColumn, colSettings_->operators.get_value(coefficient), targetColumnIndex);
-  }
+  matrix_.multiply_target_and_add_to(sourceColumn, _get_value(coefficient), targetColumnIndex);
 }
 
 template <class PersistenceMatrixOptions>
@@ -1759,13 +1979,7 @@ Matrix<PersistenceMatrixOptions>::multiply_source_and_add_to(int coefficient,
                                                              Integer_index sourceColumnIndex,
                                                              Integer_index targetColumnIndex)
 {
-  if constexpr (PersistenceMatrixOptions::is_z2) {
-    // coef will be converted to bool, because of Element
-    matrix_.multiply_source_and_add_to(coefficient % 2, sourceColumnIndex, targetColumnIndex);
-  } else {
-    matrix_.multiply_source_and_add_to(
-        colSettings_->operators.get_value(coefficient), sourceColumnIndex, targetColumnIndex);
-  }
+  matrix_.multiply_source_and_add_to(_get_value(coefficient), sourceColumnIndex, targetColumnIndex);
 }
 
 template <class PersistenceMatrixOptions>
@@ -1779,12 +1993,7 @@ inline std::enable_if_t<!std::is_integral_v<Entry_range> > Matrix<PersistenceMat
                 "For boundary or chain matrices, only additions with columns inside the matrix is allowed to maintain "
                 "algebraic consistency.");
 
-  if constexpr (PersistenceMatrixOptions::is_z2) {
-    // coef will be converted to bool, because of Element
-    matrix_.multiply_source_and_add_to(coefficient % 2, sourceColumn, targetColumnIndex);
-  } else {
-    matrix_.multiply_source_and_add_to(colSettings_->operators.get_value(coefficient), sourceColumn, targetColumnIndex);
-  }
+  matrix_.multiply_source_and_add_to(_get_value(coefficient), sourceColumn, targetColumnIndex);
 }
 
 template <class PersistenceMatrixOptions>
@@ -2009,23 +2218,30 @@ inline typename Matrix<PersistenceMatrixOptions>::Index Matrix<PersistenceMatrix
 }
 
 template <class PersistenceMatrixOptions>
-inline void Matrix<PersistenceMatrixOptions>::update_representative_cycles()
+inline void Matrix<PersistenceMatrixOptions>::update_all_representative_cycles(Dimension dim)
 {
   static_assert(PersistenceMatrixOptions::can_retrieve_representative_cycles, "This method was not enabled.");
-  matrix_.update_representative_cycles();
+  matrix_.update_all_representative_cycles(dim);
+}
+
+template <class PersistenceMatrixOptions>
+inline void Matrix<PersistenceMatrixOptions>::update_representative_cycle(const Bar& bar)
+{
+  static_assert(PersistenceMatrixOptions::can_retrieve_representative_cycles, "This method was not enabled.");
+  matrix_.update_representative_cycle(bar);
 }
 
 template <class PersistenceMatrixOptions>
 inline const std::vector<typename Matrix<PersistenceMatrixOptions>::Cycle>&
-Matrix<PersistenceMatrixOptions>::get_representative_cycles()
+Matrix<PersistenceMatrixOptions>::get_all_representative_cycles() const
 {
   static_assert(PersistenceMatrixOptions::can_retrieve_representative_cycles, "This method was not enabled.");
-  return matrix_.get_representative_cycles();
+  return matrix_.get_all_representative_cycles();
 }
 
 template <class PersistenceMatrixOptions>
 inline const typename Matrix<PersistenceMatrixOptions>::Cycle&
-Matrix<PersistenceMatrixOptions>::get_representative_cycle(const Bar& bar)
+Matrix<PersistenceMatrixOptions>::get_representative_cycle(const Bar& bar) const
 {
   static_assert(PersistenceMatrixOptions::can_retrieve_representative_cycles, "This method was not enabled.");
   return matrix_.get_representative_cycle(bar);
@@ -2064,6 +2280,13 @@ constexpr void Matrix<PersistenceMatrixOptions>::_assert_options()
   // static_assert(
   //     !PersistenceMatrixOptions::has_column_compression || !PersistenceMatrixOptions::has_map_column_container,
   //     "When column compression is used, the removal of columns is not implemented yet.");
+}
+
+template <class PersistenceMatrixOptions>
+inline typename Matrix<PersistenceMatrixOptions>::Element Matrix<PersistenceMatrixOptions>::_get_value(
+    int coefficient) const
+{
+  return get_coefficient_value(coefficient, get_operator_ptr(colSettings_));
 }
 
 }  // namespace persistence_matrix

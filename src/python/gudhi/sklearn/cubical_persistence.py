@@ -12,7 +12,7 @@ __license__ = "MIT"
 
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import Union, Literal, Optional
+from typing import Literal, Optional
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
 
@@ -20,6 +20,7 @@ from .. import CubicalComplex
 from .._pers_cub_low_dim_ext import (
     _persistence_on_a_line,
     _persistence_on_rectangle_from_top_cells,
+    _persistence_on_rectangle_from_vertices,
 )
 
 
@@ -44,7 +45,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        homology_dimensions: Union[int, ArrayLike],
+        homology_dimensions: int | ArrayLike,
         input_type: Literal["top_dimensional_cells", "vertices"] = "top_dimensional_cells",
         homology_coeff_field: int = 11,
         min_persistence: float = 0.0,
@@ -98,17 +99,22 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
             # Wasteful if dim_list_ does not contain 0, but that seems unlikely.
             return [res if i == 0 else np.empty((0, 2)) for i in self._dim_list]
 
-        if len(cells.shape) == 2 and self.input_type == "top_dimensional_cells" and self.min_persistence >= 0:
+        if len(cells.shape) == 2 and self.min_persistence >= 0:
             if cells.size == 0:
                 diags = [np.empty((0, 2)), np.empty((0, 2))]
             elif cells.shape[0] == 1 or cells.shape[1] == 1:
                 diags = [_persistence_on_a_line(cells.reshape(-1)), np.empty((0, 2))]
-            elif cells.shape[0] == 2:
-                diags = [_persistence_on_a_line(cells.min(0)), np.empty((0, 2))]
-            elif cells.shape[1] == 2:
-                diags = [_persistence_on_a_line(cells.min(1)), np.empty((0, 2))]
+            elif self.input_type == "top_dimensional_cells":
+                if cells.shape[0] == 2:
+                    diags = [_persistence_on_a_line(cells.min(0)), np.empty((0, 2))]
+                elif cells.shape[1] == 2:
+                    diags = [_persistence_on_a_line(cells.min(1)), np.empty((0, 2))]
+                else:
+                    diags = _persistence_on_rectangle_from_top_cells(cells, self.min_persistence)
+            elif self.input_type == "vertices":
+                diags = _persistence_on_rectangle_from_vertices(cells, self.min_persistence)
             else:
-                diags = _persistence_on_rectangle_from_top_cells(cells, self.min_persistence)
+                raise ValueError("input_type can only be 'top_dimensional_cells' or 'vertices'")
             return [diags[i] if i in (0, 1) else np.empty((0, 2)) for i in self._dim_list]
 
         if self.input_type == "top_dimensional_cells":
@@ -142,3 +148,7 @@ class CubicalPersistence(BaseEstimator, TransformerMixin):
         if self._unwrap:
             res = [d[0] for d in res]
         return res
+
+    def get_feature_names_out(self):
+        """Provide column names for implementing sklearn's set_output API."""
+        return [f"H{i}" for i in self._dim_list]

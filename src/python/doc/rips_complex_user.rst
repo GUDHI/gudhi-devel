@@ -9,10 +9,11 @@ Definition
 
 .. include:: rips_complex_sum.inc
 
-The `Rips complex <https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex>`_ is a simplicial complex that
-generalizes proximity (:math:`\varepsilon`-ball) graphs to higher dimensions. The vertices correspond to the input
-points, and a simplex is present if and only if its diameter is smaller than some parameter α.  Considering all
-parameters α defines a filtered simplicial complex, where the filtration value of a simplex is its diameter.
+The `Vietoris-Rips complex <https://en.wikipedia.org/wiki/Vietoris%E2%80%93Rips_complex>`_\ :sup:`[Wikipedia]`
+is a simplicial complex that generalizes proximity (:math:`\varepsilon`-ball) graphs to higher dimensions. The vertices
+correspond to the input points, and a simplex is present if and only if its diameter is smaller than some parameter α.
+Considering all parameters α defines a filtered simplicial complex, where the filtration value of a simplex is its
+diameter.
 The filtration can be restricted to values α smaller than some threshold, to reduce its size.  Beware that some
 people define the Rips complex using a bound of 2α instead of α, particularly when comparing it to an ambient
 Čech complex.  They end up with the same combinatorial object, but filtration values which are half of ours.
@@ -36,7 +37,7 @@ set with :math:`max(filtration(4,5), filtration(4,6), filtration(5,6))`. And so 
 
 A Rips complex can easily become huge, even if we limit the length of the edges
 and the dimension of the simplices. One easy trick, before building a Rips
-complex on a point cloud, is to call :func:`~gudhi.sparsify_point_set` which removes points
+complex on a point cloud, is to call :func:`~gudhi.subsampling.sparsify_point_set` which removes points
 that are too close to each other. This does not change its persistence diagram
 by more than the length used to define "too close".
 
@@ -60,7 +61,7 @@ trick gives the same persistence diagram as one would get with a plain use of `R
 often significantly smaller and thus faster to process.
 
 Finally, if you are only interested in the persistence diagram of a Rips complex, you should consider using
-:class:`~gudhi.sklearn.rips_persistence.RipsPersistence` instead, which directly returns the diagram and can be faster
+:class:`~gudhi.sklearn.RipsPersistence` instead, which directly returns the diagram and can be faster
 than explicitly building the complex before computing its persistence.
 
 Point cloud
@@ -220,7 +221,9 @@ until dimension 1 - one skeleton graph in other words), the output is:
     [4, 6] -> 9.49
     [3, 6] -> 11.00
 
-In case this lower triangular matrix is stored in a CSV file, like `data/distance_matrix/full_square_distance_matrix.csv` in the Gudhi distribution, you can read it with :func:`~gudhi.read_lower_triangular_matrix_from_csv_file`.
+In case this lower triangular matrix is stored in a CSV file, like
+`data/distance_matrix/full_square_distance_matrix.csv` in the Gudhi distribution, you can read it with
+:func:`~gudhi.read_lower_triangular_matrix_from_csv_file`.
 
 Correlation matrix
 ------------------
@@ -295,7 +298,8 @@ until dimension 1 - one skeleton graph in other words), the output is:
 Weighted Rips Complex
 ---------------------
 
-`WeightedRipsComplex <rips_complex_ref.html#weighted-rips-complex-reference-manual>`_ builds a simplicial complex from a distance matrix and weights on vertices.
+`WeightedRipsComplex <rips_complex_ref.html#weighted-rips-complex-reference-manual>`_ builds a simplicial complex from
+a distance matrix and weights on vertices.
 
 
 Example from a distance matrix and weights
@@ -321,7 +325,8 @@ The output is:
 Example from a point cloud combined with DistanceToMeasure
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Combining with DistanceToMeasure, one can compute the DTM-filtration of a point set, as in `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-DTM-filtrations.ipynb>`_. 
+Combining with DistanceToMeasure, one can compute the DTM-filtration of a point set, as in
+`this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-DTM-filtrations.ipynb>`_.
 Remark that `DTMRipsComplex <rips_complex_user.html#dtm-rips-complex>`_ class provides exactly this function.
 
 .. testcode::
@@ -347,8 +352,12 @@ The output is:
 DTM Rips Complex
 ----------------
 
-:class:`~gudhi.dtm_rips_complex.DTMRipsComplex` builds a simplicial complex from a point set or a full distance matrix (in the form of ndarray), as described in the above example.
-This class constructs a weighted Rips complex giving larger weights to outliers, which reduces their impact on the persistence diagram. See `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-DTM-filtrations.ipynb>`_ for some experiments.
+:class:`~gudhi.dtm_rips_complex.DTMRipsComplex` builds a simplicial complex from a point set or a full distance matrix
+(in the form of ndarray), as described in the above example.
+This class constructs a weighted Rips complex giving larger weights to outliers, which reduces their impact on the
+persistence diagram.
+See `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-DTM-filtrations.ipynb>`_
+for some experiments.
 
 .. testcode::
 

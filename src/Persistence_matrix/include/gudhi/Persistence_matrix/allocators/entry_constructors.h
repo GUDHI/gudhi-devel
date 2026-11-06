@@ -61,7 +61,8 @@ struct New_entry_constructor {
   /**
    * @brief Swap operator.
    */
-  friend void swap(New_entry_constructor& col1, New_entry_constructor& col2) noexcept {}
+  friend void swap([[maybe_unused]] New_entry_constructor& col1,
+                   [[maybe_unused]] New_entry_constructor& col2) noexcept {}
 };
 
 /**

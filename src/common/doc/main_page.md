@@ -328,8 +328,8 @@
       \image html "tc_examples.png"
     </td>
     <td width="50%">
-    A Tangential Delaunay complex is a <a target="_blank" href="https://en.wikipedia.org/wiki/Simplicial_complex">simplicial complex</a>
-    designed to reconstruct a \f$ k \f$-dimensional manifold embedded in \f$ d \f$-dimensional Euclidean space. 
+    A Tangential Delaunay complex is a simplicial complex designed to reconstruct a \f$ k \f$-dimensional manifold
+    embedded in \f$ d \f$-dimensional Euclidean space. 
     The input is a point sample coming from an unknown manifold.
     The running time depends only linearly on the extrinsic dimension \f$ d \f$
     and exponentially on the intrinsic dimension \f$ k \f$.

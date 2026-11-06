@@ -202,5 +202,5 @@ Tutorial
 ********
 
 This
-`notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-Barycenters-of-persistence-diagrams.ipynb>`_
+`notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-Barycenters-of-persistence-diagrams.ipynb>`_
 presents the concept of barycenter, or Fréchet mean, of a family of persistence diagrams.

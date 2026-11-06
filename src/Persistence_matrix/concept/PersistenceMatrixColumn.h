@@ -47,8 +47,9 @@ using Chain_column_option = Chain_column_extra_properties;
 /**
  * @ingroup persistence_matrix
  *
- * @brief Concept of the column classes used by the @ref Matrix class. The classes the columns inherit from
- * are either real or dummy classes, see @ref Row_access_option, @ref Column_dimension_option, @ref Chain_column_option.
+ * @brief Concept of the column classes used by the @ref Gudhi::persistence_matrix::Matrix "Matrix" class. The classes
+ * the columns inherit from are either real or dummy classes, see @ref Row_access_option, @ref Column_dimension_option,
+ * @ref Chain_column_option.
  * If used with column compression, the column type has to have its `std::hash` method.
  *
  * Implementations of this concept are @ref Heap_column, @ref List_column, @ref Vector_column, @ref Naive_vector_column
@@ -60,7 +61,8 @@ class PersistenceMatrixColumn :
     public Chain_column_option
 {
  public:
-  using Master = unspecified;                 /**< Master matrix, that is a templated @ref Matrix. */
+  using Master = unspecified;                 /**< Master matrix, that is a templated
+                                                   @ref Gudhi::persistence_matrix::Matrix "Matrix". */
   using Index = unspecified;                  /**< Type of @ref MatIdx index. */
   using ID_index = unspecified;               /**< Type of @ref IDIdx index. */
   using Dimension = unspecified;              /**< Type for dimension value. */
@@ -72,6 +74,7 @@ class PersistenceMatrixColumn :
   using const_iterator = unspecified;         /**< Column const_iterator type. */
   using reverse_iterator = unspecified;       /**< Column reverse_iterator type. */
   using const_reverse_iterator = unspecified; /**< Column const_reverse_iterator type. */
+  using Content_range = unspecified;          /**< Return type for @ref get_non_zero_content_range method. */
 
   /**
    * @brief Constructs an empty column. If @p entryConstructor is not specified or is set to `nullptr`, the column
@@ -371,6 +374,17 @@ class PersistenceMatrixColumn :
    * @return @ref Entry const reverse iterator.
    */
   const_reverse_iterator rend() const noexcept;
+
+  /**
+   * @brief Returns a range of the column's non-zero content such that the row indices are ordered by increasing values.
+   * The range has to have a `begin` and `end` method return an iterator pointing to a (const) @ref Entry. An additional
+   * `size` method is preferable for pre-allocation purposes, but is optional.
+   *
+   * Note that depending on the column type, this method can have different complexity. If the underlying container is
+   * already ordered, it will be almost trivial. But if the underlying container in unordered or contains also zero
+   * elements, the complexity will can potentially be linear.
+   */
+  Content_range get_non_zero_content_range();
 
   /**
    * @brief Adds the given @ref Entry range onto the column.

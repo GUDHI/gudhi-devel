@@ -15,7 +15,7 @@ while :class:`~gudhi.cover_complex.NerveComplex`, :class:`~gudhi.cover_complex.G
 Key differences between Mapper, Nerve and Graph Induced complexes (GIC) are: Mapper nodes are defined with given input clustering method while GIC nodes are defined with given input graph and Nerve nodes are defined with cover elements, GIC accepts partitions instead of covers while Mapper and Nerve require cover elements to overlap. Also, note that when the cover is functional (i.e., preimages of filter functions), GIC only accepts one scalar-valued filter with gain < 0.5. On the other hand, Mapper complexes accept resolutions and gains with any length.
 
 These classes can print output files, which can then be visualized with either
-neato (from `graphviz <http://www.graphviz.org/>`_),
+neato (from `graphviz <https://www.graphviz.org/>`_),
 `geomview <http://www.geomview.org/>`_,
 `KeplerMapper <https://github.com/scikit-tda/kepler-mapper>`_.
 
@@ -40,8 +40,9 @@ Class for cover complexes
      - :License: MIT
      - :Requires: `Scikit-learn <installation.html#scikit-learn>`_
 
-We provide classes for computing cover complexes, i.e., Nerve, Graph Induced and Mapper complexes. Detailed examples on how to use these classes in practice are available
-in the following `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/Tuto-GUDHI-cover-complex.ipynb>`_.
+We provide classes for computing cover complexes, i.e., Nerve, Graph Induced and Mapper complexes. Detailed examples on
+how to use these classes in practice are available in the following
+`notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-cover-complex.ipynb>`_.
 
 Example of Mapper cover complex computed from a point cloud
 -----------------------------------------------------------

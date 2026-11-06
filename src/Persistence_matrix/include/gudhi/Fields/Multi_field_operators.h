@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber, Clément Maria
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -21,6 +21,9 @@
 #include <vector>
 #include <gmpxx.h>
 #include <stdexcept>
+
+#include <gudhi/Debug_utils.h>
+#include <gudhi/arithmetic.h>
 
 namespace Gudhi {
 namespace persistence_fields {
@@ -67,7 +70,7 @@ class Multi_field_operators
   {
     if (maximum < 2) throw std::invalid_argument("Characteristic must be strictly positive");
     if (minimum > maximum) throw std::invalid_argument("The given interval is not valid.");
-    if (minimum == maximum && !_is_prime(minimum))
+    if (minimum == maximum && !Gudhi::is_prime(minimum))
       throw std::invalid_argument("The given interval does not contain a prime number.");
 
     unsigned int curr_prime = minimum;
@@ -363,6 +366,10 @@ class Multi_field_operators
       const Element& e,
       const Characteristic& productOfCharacteristics) const
   {
+    GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
+                std::invalid_argument(
+                    "The given product is not the product of a subset of the current Multi-field characteristics."));
+
     Characteristic QR;
     mpz_gcd(QR.get_mpz_t(), e.get_mpz_t(), productOfCharacteristics.get_mpz_t());  // QR <- gcd(x,QS)
 
@@ -403,7 +410,11 @@ class Multi_field_operators
    */
   [[nodiscard]] Element get_partial_multiplicative_identity(const Characteristic& productOfCharacteristics) const
   {
-    if (productOfCharacteristics == nullCharacteristic) {
+    GUDHI_CHECK(productOfCharacteristics >= 0 && productOfCharacteristics <= productOfAllCharacteristics_,
+                std::invalid_argument(
+                    "The given product is not the product of a subset of the current Multi-field characteristics."));
+
+    if (productOfCharacteristics == nullCharacteristic || productOfCharacteristics == productOfAllCharacteristics_) {
       return get_multiplicative_identity();
     }
     Element multIdentity(0);
@@ -432,18 +443,6 @@ class Multi_field_operators
   std::vector<Characteristic> partials_;       /**< Partial products of the characteristics. */
   inline static const Element multiplicativeID_ = 1;
   inline static const Element additiveID_ = 0;
-
-  static constexpr bool _is_prime(const int p)
-  {
-    if (p <= 1) return false;
-    if (p <= 3) return true;
-    if (p % 2 == 0 || p % 3 == 0) return false;
-
-    for (long i = 5; i * i <= p; i = i + 6)
-      if (p % i == 0 || p % (i + 2) == 0) return false;
-
-    return true;
-  }
 };
 
 }  // namespace persistence_fields

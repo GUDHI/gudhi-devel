@@ -27,7 +27,7 @@ parser = argparse.ArgumentParser(
     "points from the given OFF file",
 )
 parser.add_argument("-f", "--file", type=str, required=True)
-parser.add_argument("-i", "--intrisic_dim", type=int, required=True)
+parser.add_argument("-i", "--intrinsic_dim", type=int, required=True)
 parser.add_argument("-b", "--band", type=float, default=0.0)
 parser.add_argument(
     "--no-diagram",
@@ -44,7 +44,7 @@ with open(args.file) as f:
         print("##############################################################")
         print("TangentialComplex creation from points read in a OFF file")
 
-        tc = gd.TangentialComplex(intrisic_dim=args.intrisic_dim, off_file=args.file)
+        tc = gd.TangentialComplex(intrinsic_dim=args.intrinsic_dim, off_file=args.file)
         tc.compute_tangential_complex()
         st = tc.create_simplex_tree()
 

@@ -22,7 +22,7 @@ namespace persistence_matrix {
 /** 
  * @ingroup persistence_matrix
  *
- * @brief Concept of the template parameter for the class @ref Matrix.
+ * @brief Concept of the template parameter for the class @ref Gudhi::persistence_matrix::Matrix "Matrix".
  *
  * An implementation of this concept is @ref Default_options.
  * If you want to provide your own, it is recommended that you derive from it and override some parts instead of
@@ -72,7 +72,7 @@ struct PersistenceMatrixOptions
    * by a same column.
    *
    * Note that some methods of the @ref basematrix "base matrix" are not available when true:
-   * - @ref Matrix::insert_column(const Container&, Index) "insert_column(const Container&, Index)",
+   * - @ref Matrix::insert_column,
    * - @ref Matrix::zero_column(Index) "zero_column(Index)",
    * - @ref Matrix::zero_entry(Index, Index) "zero_entry(Index, ID_index)",
    * - @ref Matrix::swap_columns(Index, Index) "swap_columns(Index, Index)",
@@ -150,11 +150,12 @@ struct PersistenceMatrixOptions
    * @brief If set to true, enables the methods @ref Matrix::vine_swap and @ref Matrix::vine_swap_with_z_eq_1_case.
    * The matrix will then either be a @ref boundarymatrix "boundary matrix" (if @ref is_of_boundary_type is true),
    * or a @ref chainmatrix "chain matrix" (if @ref is_of_boundary_type is false).
+   * For now, only implemented for @ref is_z2 set to true.
    */
   static const bool has_vine_update;
   /**
-   * @brief If set to true, enables the methods @ref Matrix::update_representative_cycles and
-   * @ref Matrix::get_representative_cycles.
+   * @brief If set to true, enables the methods @ref Matrix::update_all_representative_cycles and
+   * @ref Matrix::get_all_representative_cycles.
    * The matrix will then either be a @ref boundarymatrix "boundary matrix" (if @ref is_of_boundary_type is true),
    * or a @ref chainmatrix "chain matrix" (if @ref is_of_boundary_type is false).
    */
@@ -178,4 +179,3 @@ struct PersistenceMatrixOptions
 
 }  // namespace persistence_matrix
 }  // namespace Gudhi
-

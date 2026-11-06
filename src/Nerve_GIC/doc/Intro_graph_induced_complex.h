@@ -22,7 +22,7 @@ namespace cover_complex {
  * @{
  * 
  * Visualizations of the simplicial complexes can be done with either
- * neato (from <a target="_blank" href="http://www.graphviz.org/">graphviz</a>),
+ * neato (from <a target="_blank" href="https://www.graphviz.org/">graphviz</a>),
  * <a target="_blank" href="http://www.geomview.org/">geomview</a>,
  * <a target="_blank" href="https://github.com/scikit-tda/kepler-mapper">KeplerMapper</a>.
  * Input point clouds are assumed to be \ref FileFormatsOFF "OFF files"
@@ -42,7 +42,8 @@ namespace cover_complex {
  *
  * Assume you are given a cover C of your point cloud P. Then, the Nerve of this cover
  * is the simplicial complex that has one k-simplex per k-fold intersection of cover elements.
- * See also <a target="_blank" href="https://en.wikipedia.org/wiki/Nerve_of_a_covering"> Wikipedia </a>.
+ * See also
+ * <a target="_blank" href="https://en.wikipedia.org/wiki/Nerve_of_a_covering">Nerve of a covering <sup>[Wikipedia]</sup></a>.
  *
  * \image html "nerve.png" "Nerve of a double torus"
  *

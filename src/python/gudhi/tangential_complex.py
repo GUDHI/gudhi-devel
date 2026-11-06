@@ -12,6 +12,7 @@
 __license__ = "GPL v3"
 
 import os
+import warnings
 
 from gudhi import _tangential_complex_ext as t
 from gudhi.simplex_tree import SimplexTree
@@ -24,11 +25,13 @@ class TangentialComplex(t._Tangential_complex_interface):
     can be run to attempt to remove inconsistencies.
     """
 
-    def __init__(self, intrisic_dim, points=None, off_file=""):
+    def __init__(self, intrinsic_dim, intrisic_dim=None, points=None, off_file=""):
         """TangentialComplex constructor.
 
-        :param intrisic_dim: Intrinsic dimension of the manifold.
-        :type intrisic_dim: integer
+        :param intrinsic_dim: Intrinsic dimension of the manifold.
+        :type intrinsic_dim: integer
+
+        :param intrisic_dim: **[deprecated]** consider using `intrinsic_dim` instead.
 
         :param points: A list of points in d-Dimension.
         :type points (Sequence[Sequence[float]]): list of list of double
@@ -38,16 +41,22 @@ class TangentialComplex(t._Tangential_complex_interface):
         :param off_file: An OFF file style name.
         :type off_file: string
         """
+        if intrisic_dim is not None:
+            warnings.warn(
+                "The 'intrisic_dim' argument is deprecated and will be removed in a future version. Use 'intrinsic_dim' instead.",
+                DeprecationWarning
+            )
+            intrinsic_dim = intrisic_dim
         if off_file:
             if os.path.isfile(off_file):
-                super().__init__(intrisic_dim, off_file)
+                super().__init__(intrinsic_dim, off_file)
             else:
                 raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), off_file)
         else:
             if points is None:
-                super().__init__(intrisic_dim)
+                super().__init__(intrinsic_dim)
             else:
-                super().__init__(intrisic_dim, points)
+                super().__init__(intrinsic_dim, points)
 
     def create_simplex_tree(self):
         """Exports the complex into a simplex tree.

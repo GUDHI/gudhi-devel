@@ -2,9 +2,10 @@
 # See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
 # Author(s):       Mathieu Carrière, Martin Royer, Gard Spreemann
 #
-# Copyright (C) 2018-2020 Inria
+# Copyright (C) 2018 Inria
 #
 # Modification(s):
+#   - 2026/10 Cherith1222: Document PersistenceImage weight coordinates
 #   - 2020/06 Martin: ATOL integration
 #   - 2020/12 Gard: A more flexible Betti curve class capable of computing exact curves.
 #   - 2021/11 Vincent Rouvreau: factorize _automatic_sample_range
@@ -37,7 +38,7 @@ from .preprocessing import DiagramScaler, BirthPersistenceTransform, _maybe_fit_
 
 class PersistenceImage(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing persistence images from a list of persistence diagrams. A persistence image is a 2D function computed from a persistence diagram by convolving the diagram points with a weighted Gaussian kernel. The plane is then discretized into an image with pixels, which is flattened and returned as a vector. See http://jmlr.org/papers/v18/16-337.html for more details.
+    This is a class for computing persistence images from a list of persistence diagrams. A persistence image is a 2D function computed from a persistence diagram by convolving the diagram points with a weighted Gaussian kernel. The plane is then discretized into an image with pixels, which is flattened and returned as a vector. See https://jmlr.org/papers/v18/16-337.html for more details.
     """
 
     def __init__(
@@ -52,7 +53,7 @@ class PersistenceImage(BaseEstimator, TransformerMixin):
 
         Parameters:
             bandwidth (double): bandwidth of the Gaussian kernel (default 1.).
-            weight (function): weight function for the persistence diagram points (default constant function, ie lambda x: 1). This function must be defined on 2D points, ie lists or numpy arrays of the form [p_x,p_y].
+            weight (function): weight function for the persistence diagram points (default constant function, ie lambda x: 1). It is called on points of the form [birth, persistence], where persistence is death minus birth, not on the original [birth, death] coordinates.
             resolution ([int,int]): size (in pixels) of the persistence image (default [20,20]).
             im_range ([double,double,double,double]): minimum and maximum of each axis of the persistence image, of the form [x_min, x_max, y_min, y_max] (default [numpy.nan, numpy.nan, numpy.nan, numpyp.nan]). If one of the values is numpy.nan, it can be computed from the persistence diagrams with the fit() method.
         """
@@ -209,7 +210,7 @@ def _grid_from_sample_range(self, X):
 
 class Landscape(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing persistence landscapes from a list of persistence diagrams. A persistence landscape is a collection of 1D piecewise-linear functions computed from the rank function associated to the persistence diagram. These piecewise-linear functions are then sampled evenly on a given range and the corresponding vectors of samples are concatenated and returned. See http://jmlr.org/papers/v16/bubenik15a.html for more details.
+    This is a class for computing persistence landscapes from a list of persistence diagrams. A persistence landscape is a collection of 1D piecewise-linear functions computed from the rank function associated to the persistence diagram. These piecewise-linear functions are then sampled evenly on a given range and the corresponding vectors of samples are concatenated and returned. See https://jmlr.org/papers/v16/bubenik15a.html for more details.
 
     Attributes:
         grid_ (1d array): The grid on which the landscapes are computed.
@@ -564,7 +565,7 @@ class BettiCurve(BaseEstimator, TransformerMixin):
 
 class Entropy(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing persistence entropy. Persistence entropy is a statistic for persistence diagrams inspired from Shannon entropy. This statistic can also be used to compute a feature vector, called the entropy summary function. See https://arxiv.org/pdf/1803.08304.pdf for more details. Note that a previous implementation was contributed by Manuel Soriano-Trigueros.
+    This is a class for computing persistence entropy. Persistence entropy is a statistic for persistence diagrams inspired from Shannon entropy. This statistic can also be used to compute a feature vector, called the entropy summary function. See https://arxiv.org/pdf/1803.08304 for more details. Note that a previous implementation was contributed by Manuel Soriano-Trigueros.
 
     Attributes:
         grid_ (1d array): In vector mode, the grid on which the entropy summary function is computed.
@@ -672,7 +673,7 @@ class Entropy(BaseEstimator, TransformerMixin):
 
 class TopologicalVector(BaseEstimator, TransformerMixin):
     """
-    This is a class for computing topological vectors from a list of persistence diagrams. The topological vector associated to a persistence diagram is the sorted vector of a slight modification of the pairwise distances between the persistence diagram points. See https://diglib.eg.org/handle/10.1111/cgf12692 for more details.
+    This is a class for computing topological vectors from a list of persistence diagrams. The topological vector associated to a persistence diagram is the sorted vector of a slight modification of the pairwise distances between the persistence diagram points. See https://diglib.eg.org/items/811815ee-6ccc-41a4-b430-b8ba7372afe3 for more details.
     """
 
     def __init__(self, threshold=10):

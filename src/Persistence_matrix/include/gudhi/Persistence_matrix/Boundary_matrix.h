@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -19,6 +19,7 @@
 
 #include <cassert>
 #include <iostream>  //print() only
+#include <stdexcept>
 #include <vector>
 #include <utility>  //std::swap, std::move & std::exchange
 
@@ -34,7 +35,8 @@ namespace persistence_matrix {
  * in order to compute its persistent homology. Provides an access to its columns and rows as well as the possibility
  * to remove the last cells of the filtration while maintaining a valid barcode.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class Boundary_matrix : public Master_matrix::Matrix_dimension_option,
@@ -486,14 +488,8 @@ Boundary_matrix<Master_matrix>::insert_boundary(ID_index cellIndex, const Bounda
   // updates container sizes
   if constexpr (Master_matrix::Option_list::has_row_access && !Master_matrix::Option_list::has_removable_rows) {
     if (boundary.size() != 0) {
-      ID_index pivot;
-      if constexpr (Master_matrix::Option_list::is_z2) {
-        pivot = *std::prev(boundary.end());
-      } else {
-        pivot = std::prev(boundary.end())->first;
-      }
       // row container
-      RA_opt::_resize(pivot);
+      RA_opt::_resize(Master_matrix::get_row_index(*std::prev(boundary.end())));
     }
   }
 
@@ -739,11 +735,15 @@ inline void Boundary_matrix<Master_matrix>::print()
   if constexpr (Master_matrix::Option_list::has_row_access) {
     std::cout << "Row Matrix:\n";
     for (ID_index i = 0; i < nextInsertIndex_; ++i) {
-      const auto& row = RA_opt::get_row(i);
-      for (const typename Column::Entry& entry : row) {
-        std::cout << entry.get_column_index() << " ";
+      try {
+        const auto& row = RA_opt::get_row(i);
+        for (const typename Column::Entry& entry : row) {
+          std::cout << entry.get_column_index() << " ";
+        }
+        std::cout << "(" << i << ")\n";
+      } catch (const std::out_of_range&) {
+        std::cout << "-\n";
       }
-      std::cout << "(" << i << ")\n";
     }
     std::cout << "\n";
   }

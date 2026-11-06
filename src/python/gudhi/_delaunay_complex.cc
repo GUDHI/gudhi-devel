@@ -154,10 +154,10 @@ NB_MODULE(_delaunay_complex_ext, m)
       .value("ALPHA", gdc::Delaunay_filtration::ALPHA, "Alpha Complex");
 
   nb::class_<gdci>(m, "Delaunay_complex_interface")
-      .def(nb::init<const Sequence2D&, const Sequence1D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<const Tensor2D&, const Tensor1D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
-      .def(nb::init<const Sequence2D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const Sequence2D&, const Sequence1D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def(nb::init<const Tensor2D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
+      .def(nb::init<const Sequence2D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def("create_simplex_tree", &gdci::create_simplex_tree, nb::call_guard<nb::gil_scoped_release>())
       .def("get_point", &gdci::get_point, nb::arg("vertex"), R"doc(
 This function returns the point corresponding to a given vertex from the :class:`~gudhi.SimplexTree` (the

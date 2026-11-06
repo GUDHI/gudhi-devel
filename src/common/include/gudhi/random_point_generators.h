@@ -6,6 +6,7 @@
  *
  *    Modification(s):
  *      - 2019/08 Vincent Rouvreau: Fix issue #10 for CGAL
+ *      - 2026/05 Vincent Rouvreau: Use CGAL::get_default_random() for user to be able to set the seed.
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -106,7 +107,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_plane(std::size_t num_p
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::FT FT;
   Kernel k;
-  CGAL::Random rng;
+  CGAL::Random& rng = CGAL::get_default_random();
   std::vector<Point> points;
   points.reserve(num_points);
   for (std::size_t i = 0; i < num_points;) {
@@ -128,7 +129,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_moment_curve(std::size_
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::FT FT;
   Kernel k;
-  CGAL::Random rng;
+  CGAL::Random& rng = CGAL::get_default_random();
   std::vector<Point> points;
   points.reserve(num_points);
   for (std::size_t i = 0; i < num_points;) {
@@ -155,7 +156,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_torus_3D(std::size_t nu
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::FT FT;
   Kernel k;
-  CGAL::Random rng;
+  CGAL::Random& rng = CGAL::get_default_random();
 
   // if uniform
   std::size_t num_lines = (std::size_t)sqrt(num_points);
@@ -192,7 +193,7 @@ static void generate_grid_points_on_torus_d(const Kernel &k, int dim, std::size_
                                                        std::vector<typename Kernel::FT>()) {
   using namespace boost::math::double_constants;
 
-  CGAL::Random rng;
+  CGAL::Random& rng = CGAL::get_default_random();
   int point_size = static_cast<int>(current_point.size());
   if (point_size == 2 * dim) {
     *out++ = k.construct_point_d_object()(point_size, current_point.begin(), current_point.end());
@@ -222,7 +223,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_torus_d(std::size_t num
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::FT FT;
   Kernel k;
-  CGAL::Random rng;
+  CGAL::Random& rng = CGAL::get_default_random();
 
   std::vector<Point> points;
   points.reserve(num_points);
@@ -259,8 +260,8 @@ std::vector<typename Kernel::Point_d> generate_points_on_sphere_d(std::size_t nu
                                                                   double radius_noise_percentage = 0.) {
   typedef typename Kernel::Point_d Point;
   Kernel k;
-  CGAL::Random rng;
-  CGAL::Random_points_on_sphere_d<Point> generator(dim, radius);
+  CGAL::Random& rng = CGAL::get_default_random();
+  CGAL::Random_points_on_sphere_d<Point> generator(dim, radius, rng);
   std::vector<Point> points;
   points.reserve(num_points);
   for (std::size_t i = 0; i < num_points;) {
@@ -288,8 +289,8 @@ template <typename Kernel>
 std::vector<typename Kernel::Point_d> generate_points_in_ball_d(std::size_t num_points, int dim, double radius) {
   typedef typename Kernel::Point_d Point;
   Kernel k;
-  CGAL::Random rng;
-  CGAL::Random_points_in_ball_d<Point> generator(dim, radius);
+  CGAL::Random& rng = CGAL::get_default_random();
+  CGAL::Random_points_in_ball_d<Point> generator(dim, radius, rng);
   std::vector<Point> points;
   points.reserve(num_points);
   for (std::size_t i = 0; i < num_points;) {
@@ -304,8 +305,8 @@ template <typename Kernel>
 std::vector<typename Kernel::Point_d> generate_points_in_cube_d(std::size_t num_points, int dim, double radius) {
   typedef typename Kernel::Point_d Point;
   Kernel k;
-  CGAL::Random rng;
-  CGAL::Random_points_in_cube_d<Point> generator(dim, radius);
+  CGAL::Random& rng = CGAL::get_default_random();
+  CGAL::Random_points_in_cube_d<Point> generator(dim, radius, rng);
   std::vector<Point> points;
   points.reserve(num_points);
   for (std::size_t i = 0; i < num_points;) {
@@ -324,8 +325,8 @@ std::vector<typename Kernel::Point_d> generate_points_on_two_spheres_d(std::size
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::Vector_d Vector;
   Kernel k;
-  CGAL::Random rng;
-  CGAL::Random_points_on_sphere_d<Point> generator(dim, radius);
+  CGAL::Random& rng = CGAL::get_default_random();
+  CGAL::Random_points_on_sphere_d<Point> generator(dim, radius, rng);
   std::vector<Point> points;
   points.reserve(num_points);
 
@@ -369,8 +370,8 @@ std::vector<typename Kernel::Point_d> generate_points_on_3sphere_and_circle(std:
   typedef typename Kernel::FT FT;
   typedef typename Kernel::Point_d Point;
   Kernel k;
-  CGAL::Random rng;
-  CGAL::Random_points_on_sphere_d<Point> generator(3, sphere_radius);
+  CGAL::Random& rng = CGAL::get_default_random();
+  CGAL::Random_points_on_sphere_d<Point> generator(3, sphere_radius, rng);
   std::vector<Point> points;
   points.reserve(num_points);
 
@@ -402,7 +403,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_klein_bottle_3D(std::si
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::FT FT;
   Kernel k;
-  CGAL::Random rng;
+  CGAL::Random& rng = CGAL::get_default_random();
 
   // if uniform
   std::size_t num_lines = (std::size_t)sqrt(num_points);
@@ -440,7 +441,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_klein_bottle_4D(std::si
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::FT FT;
   Kernel k;
-  CGAL::Random rng;
+  CGAL::Random& rng = CGAL::get_default_random();
 
   // if uniform
   std::size_t num_lines = (std::size_t)sqrt(num_points);
@@ -481,7 +482,7 @@ generate_points_on_klein_bottle_variant_5D(
   typedef typename Kernel::Point_d Point;
   typedef typename Kernel::FT FT;
   Kernel k;
-  CGAL::Random rng;
+  CGAL::Random& rng = CGAL::get_default_random();
 
   // if uniform
   std::size_t num_lines = (std::size_t)sqrt(num_points);

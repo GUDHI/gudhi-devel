@@ -18,10 +18,15 @@
 #include <boost/intrusive/set.hpp>
 #include <boost/pending/disjoint_sets.hpp>
 #include <boost/intrusive/list.hpp>
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 108100
+#include <boost/unordered/unordered_flat_map.hpp>
+#else
+#include <boost/unordered_map.hpp>
+#endif
 
 #include <iostream>
 #include <map>
-#include <unordered_map>
 #include <utility>
 #include <list>
 #include <vector>
@@ -326,7 +331,7 @@ class Persistent_cohomology {
       if (key != cpx_->null_key()) {  // A simplex with null_key is a killer, and have null annotation
         // Find its annotation vector
         curr_col = ds_repr_[dsets_.find_set(key)];
-        if (curr_col != NULL) {  // and insert it in annotations_in_boundary with multyiplicative factor "sign".
+        if (curr_col != NULL) {  // and insert it in annotations_in_boundary with multiplicative factor "sign".
           annotations_in_boundary.emplace_back(curr_col, sign);
         }
       }
@@ -348,11 +353,11 @@ class Persistent_cohomology {
       }
       // The following test is just a heuristic, it is not required, and it is fine that is misses p == 0.
       if (mult != coeff_field_.additive_identity()) {  // For all columns in the boundary,
-        for (auto cell_ref : col->col_) {  // insert every cell in map_a_ds with multiplicity
+        for (auto&& cell_ref : col->col_) {  // insert every cell in map_a_ds with multiplicity
           Arith_element w_y = coeff_field_.times(cell_ref.coefficient_, mult);  // coefficient * multiplicity
 
           if (w_y != coeff_field_.additive_identity()) {  // if != 0
-            result_insert_a_ds = map_a_ds.insert(std::pair<Simplex_key, Arith_element>(cell_ref.key_, w_y));
+            result_insert_a_ds = map_a_ds.emplace(cell_ref.key_, w_y);
             if (!(result_insert_a_ds.second)) {  // if cell_ref.key_ already a Key in map_a_ds
               result_insert_a_ds.first->second = coeff_field_.plus_equal(result_insert_a_ds.first->second, w_y);
               if (result_insert_a_ds.first->second == coeff_field_.additive_identity()) {
@@ -379,12 +384,10 @@ class Persistent_cohomology {
                        coeff_field_.characteristic());
       }
     } else {        // sigma is a destructor in at least a field in coeff_field_
-      // Convert map_a_ds to a vector
+      // Convert map_a_ds to a sorted vector
       A_ds_type a_ds;  // admits reverse iterators
       for (auto map_a_ds_ref : map_a_ds) {
-        a_ds.push_back(
-            std::pair<Simplex_key, Arith_element>(map_a_ds_ref.first,
-                                                  map_a_ds_ref.second));
+        a_ds.emplace_back(map_a_ds_ref.first, map_a_ds_ref.second);
       }
 
       Arith_element inv_x, charac;
@@ -747,12 +750,17 @@ class Persistent_cohomology {
   boost::disjoint_sets<int *, Simplex_key *> dsets_;
   /* The compressed annotation matrix fields.*/
   Cam cam_;
+#if BOOST_VERSION >= 108100
   /*  Dictionary establishing the correspondence between the Simplex_key of
    * the root vertex in the union-find ds and the Simplex_key of the vertex which
    * created the connected component as a 0-dimension homology feature.*/
-  std::unordered_map<Simplex_key, Simplex_key> zero_cocycles_;
+  boost::unordered_flat_map<Simplex_key, Simplex_key> zero_cocycles_;
   /*  Key -> row. */
-  std::map<Simplex_key, cocycle> transverse_idx_;
+  boost::unordered_flat_map<Simplex_key, cocycle> transverse_idx_;
+#else
+  boost::unordered_map<Simplex_key, Simplex_key> zero_cocycles_;
+  boost::unordered_map<Simplex_key, cocycle> transverse_idx_;
+#endif
   /* Persistent intervals. */
   std::vector<Persistent_interval> persistent_pairs_;
   length_interval interval_length_policy;

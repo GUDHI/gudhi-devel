@@ -67,7 +67,7 @@ inline bool Graph_matching::multi_augment() {
     return false;
   Layered_neighbors_finder layered_nf(layering());
   int max_depth = layered_nf.vlayers_number()*2 - 1;
-  double rn = sqrt(gp->size());
+  double rn = sqrt(2. * gp->size());
   // verification of a necessary criterion in order to shortcut if possible
   if (max_depth < 0 || (unmatched_in_u.size() > rn && max_depth >= rn))
     return false;

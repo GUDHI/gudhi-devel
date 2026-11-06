@@ -170,6 +170,17 @@ BOOST_AUTO_TEST_CASE(test_simple_mdspan_properties)
   BOOST_CHECK_EQUAL(ms5.extent(1), 3);
   BOOST_CHECK_EQUAL(ms5.extent(2), 2);
 
+  BOOST_CHECK_EQUAL(ms2.static_extent(0), Gudhi::dynamic_extent);
+  BOOST_CHECK_EQUAL(ms2.static_extent(1), Gudhi::dynamic_extent);
+  BOOST_CHECK_EQUAL(ms3.static_extent(0), Gudhi::dynamic_extent);
+  BOOST_CHECK_EQUAL(ms3.static_extent(1), Gudhi::dynamic_extent);
+  BOOST_CHECK_EQUAL(ms3.static_extent(2), Gudhi::dynamic_extent);
+  BOOST_CHECK_EQUAL(ms4.static_extent(0), Gudhi::dynamic_extent);
+  BOOST_CHECK_EQUAL(ms4.static_extent(1), Gudhi::dynamic_extent);
+  BOOST_CHECK_EQUAL(ms5.static_extent(0), 2);
+  BOOST_CHECK_EQUAL(ms5.static_extent(1), Gudhi::dynamic_extent);
+  BOOST_CHECK_EQUAL(ms5.static_extent(2), 2);
+
   BOOST_CHECK_EQUAL(ms2.size(), 12);
   BOOST_CHECK_EQUAL(ms3.size(), 12);
   BOOST_CHECK_EQUAL(ms4.size(), 12);

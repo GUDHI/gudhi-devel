@@ -51,6 +51,10 @@ Example
    
 .. autofunction:: gudhi.datasets.generators.points.sphere
 
+.. note::
+
+    For reproducible results, consider using :func:`~gudhi.random.set_seed`.
+
 Points on a flat torus
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -91,6 +95,10 @@ Otherwise, if set to **'grid'**, the points are generated on a grid and would be
     This version is recommended when the user wishes to use **'grid'** as sample type, or **'random'** with a
     relatively small number of samples (~ less than 150).
 
+.. note::
+
+    For reproducible results, consider using :func:`~gudhi.random.set_seed`.
+
 Example
 """""""
 .. code-block:: python
@@ -117,6 +125,11 @@ The other allowed value of sample type is **'grid'**.
 
     This version is recommended when the user wishes to use **'random'** as sample type with a great number of
     samples and a low dimension.
+
+.. note::
+
+    For reproducible results, consider using :code:`import numpy as np; np.random.seed(42)`.
+        
 
 Example
 """""""

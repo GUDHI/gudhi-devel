@@ -2,7 +2,7 @@
  *    See file LICENSE or go to https://gudhi.inria.fr/licensing/ for full license details.
  *    Author(s):       Hannah Schreiber
  *
- *    Copyright (C) 2022-24 Inria
+ *    Copyright (C) 2022 Inria
  *
  *    Modification(s):
  *      - YYYY/MM Author: Description of the modification
@@ -19,8 +19,8 @@
 #ifndef PM_RU_VINE_SWAP_H
 #define PM_RU_VINE_SWAP_H
 
-#include <utility>  //std::move
 #include <cassert>
+#include <utility>    //std::move
 #include <stdexcept>  //std::invalid_argument
 
 #include <gudhi/Persistence_matrix/ru_pairing.h>
@@ -55,7 +55,8 @@ struct Dummy_ru_vine_pairing {
  *
  * @brief Class managing the barcode for @ref RU_vine_swap.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <typename Master_matrix>
 class RU_barcode_swap : public RU_pairing<Master_matrix>
@@ -178,7 +179,8 @@ class RU_barcode_swap : public RU_pairing<Master_matrix>
  *
  * @brief Class managing the vine swaps for @ref RU_matrix.
  *
- * @tparam Master_matrix An instantiation of @ref Matrix from which all types and options are deduced.
+ * @tparam Master_matrix An instantiation of @ref Gudhi::persistence_matrix::Matrix "Matrix" from which all types and
+ * options are deduced.
  */
 template <class Master_matrix>
 class RU_vine_swap
@@ -219,7 +221,7 @@ class RU_vine_swap
   /**
    * @brief Swap operator.
    */
-  friend void swap(RU_vine_swap& swap1, RU_vine_swap& swap2) noexcept {}
+  friend void swap([[maybe_unused]] RU_vine_swap& swap1, [[maybe_unused]] RU_vine_swap& swap2) noexcept {}
 
  private:
   using Master_RU_matrix = typename Master_matrix::Master_RU_matrix;
@@ -326,12 +328,11 @@ inline bool RU_vine_swap<Master_matrix>::_is_paired(Index columnIndex)
     if (!_matrix()->reducedMatrixR_.is_zero_column(columnIndex)) return true;
 
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
-      if (_matrix()->pivotToColumnIndex_.find(columnIndex) == _matrix()->pivotToColumnIndex_.end()) return false;
+      return _matrix()->pivotToColumnIndex_.find(columnIndex) != _matrix()->pivotToColumnIndex_.end();
     } else {
-      if (_matrix()->pivotToColumnIndex_[columnIndex] == Master_matrix::template get_null_value<Index>()) return false;
+      if (_matrix()->pivotToColumnIndex_.size() <= columnIndex) return false;
+      return _matrix()->pivotToColumnIndex_[columnIndex] != Master_matrix::template get_null_value<Index>();
     }
-
-    return true;
   }
 }
 
@@ -367,7 +368,13 @@ inline void RU_vine_swap<Master_matrix>::_positive_transpose(Index columnIndex)
       _matrix()->pivotToColumnIndex_.erase(columnIndex + 1);
     }
   } else {
-    std::swap(_matrix()->pivotToColumnIndex_[columnIndex], _matrix()->pivotToColumnIndex_[columnIndex + 1]);
+    if (_is_paired(columnIndex) || _is_paired(columnIndex + 1)) {
+      if (columnIndex + 1 >= _matrix()->pivotToColumnIndex_.size()) {
+        // pivotToColumnIndex_ has at least size columnIndex + 1
+        _matrix()->pivotToColumnIndex_.push_back(Master_matrix::template get_null_value<Index>());
+      }
+      std::swap(_matrix()->pivotToColumnIndex_[columnIndex], _matrix()->pivotToColumnIndex_[columnIndex + 1]);
+    }
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
@@ -381,22 +388,34 @@ inline void RU_vine_swap<Master_matrix>::_negative_transpose(Index columnIndex)
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
     _matrix()->_negative_transpose_barcode(columnIndex);
   }
-  std::swap(_matrix()->pivotToColumnIndex_.at(_get_birth(columnIndex)),
-            _matrix()->pivotToColumnIndex_.at(_get_birth(columnIndex + 1)));
+  if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    std::swap(_matrix()->pivotToColumnIndex_.at(_get_birth(columnIndex)),
+              _matrix()->pivotToColumnIndex_.at(_get_birth(columnIndex + 1)));
+  } else {
+    std::swap(_matrix()->pivotToColumnIndex_[_get_birth(columnIndex)],
+              _matrix()->pivotToColumnIndex_[_get_birth(columnIndex + 1)]);
+  }
 }
 
 template <class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_positive_negative_transpose(Index columnIndex)
 {
-  _matrix()->pivotToColumnIndex_.at(_get_birth(columnIndex + 1)) = columnIndex;
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    _matrix()->pivotToColumnIndex_.at(_get_birth(columnIndex + 1)) = columnIndex;
     if (_is_paired(columnIndex)) {
       _matrix()->pivotToColumnIndex_.emplace(columnIndex + 1, _matrix()->pivotToColumnIndex_.at(columnIndex));
       _matrix()->pivotToColumnIndex_.erase(columnIndex);
     }
   } else {
-    _matrix()->pivotToColumnIndex_[columnIndex + 1] = _matrix()->pivotToColumnIndex_[columnIndex];
-    _matrix()->pivotToColumnIndex_[columnIndex] = Master_matrix::template get_null_value<Index>();
+    _matrix()->pivotToColumnIndex_[_get_birth(columnIndex + 1)] = columnIndex;
+    if (_is_paired(columnIndex)){
+      if (columnIndex + 1 >= _matrix()->pivotToColumnIndex_.size()) {
+        // pivotToColumnIndex_ has at least size columnIndex + 1
+        _matrix()->pivotToColumnIndex_.push_back(Master_matrix::template get_null_value<Index>());
+      }
+      _matrix()->pivotToColumnIndex_[columnIndex + 1] = _matrix()->pivotToColumnIndex_[columnIndex];
+      _matrix()->pivotToColumnIndex_[columnIndex] = Master_matrix::template get_null_value<Index>();
+    }
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
@@ -407,15 +426,18 @@ inline void RU_vine_swap<Master_matrix>::_positive_negative_transpose(Index colu
 template <class Master_matrix>
 inline void RU_vine_swap<Master_matrix>::_negative_positive_transpose(Index columnIndex)
 {
-  _matrix()->pivotToColumnIndex_.at(_get_birth(columnIndex)) = columnIndex + 1;
   if constexpr (Master_matrix::Option_list::has_map_column_container) {
+    _matrix()->pivotToColumnIndex_.at(_get_birth(columnIndex)) = columnIndex + 1;
     if (_is_paired(columnIndex + 1)) {
       _matrix()->pivotToColumnIndex_.emplace(columnIndex, _matrix()->pivotToColumnIndex_.at(columnIndex + 1));
       _matrix()->pivotToColumnIndex_.erase(columnIndex + 1);
     }
   } else {
-    _matrix()->pivotToColumnIndex_[columnIndex] = _matrix()->pivotToColumnIndex_[columnIndex + 1];
-    _matrix()->pivotToColumnIndex_[columnIndex + 1] = Master_matrix::template get_null_value<Index>();
+    _matrix()->pivotToColumnIndex_[_get_birth(columnIndex)] = columnIndex + 1;
+    if (_is_paired(columnIndex + 1)){
+      _matrix()->pivotToColumnIndex_[columnIndex] = _matrix()->pivotToColumnIndex_[columnIndex + 1];
+      _matrix()->pivotToColumnIndex_[columnIndex + 1] = Master_matrix::template get_null_value<Index>();
+    }
   }
 
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
@@ -479,8 +501,8 @@ inline bool RU_vine_swap<Master_matrix>::_positive_negative_vine_swap(Index colu
 {
   _matrix()->mirrorMatrixU_.zero_entry(columnIndex, _get_row_id_from_position(columnIndex + 1));
 
-  _swap_at_index(columnIndex);
   _positive_negative_transpose(columnIndex);
+  _swap_at_index(columnIndex);
 
   return true;
 }
@@ -509,6 +531,8 @@ inline typename RU_vine_swap<Master_matrix>::Pos_index RU_vine_swap<Master_matri
       if (it == _matrix()->pivotToColumnIndex_.end()) return Master_matrix::template get_null_value<Pos_index>();
       return it->second;
     } else {
+      if (simplexIndex >= _matrix()->pivotToColumnIndex_.size())
+        return Master_matrix::template get_null_value<Pos_index>();
       return _matrix()->pivotToColumnIndex_[simplexIndex];
     }
   }

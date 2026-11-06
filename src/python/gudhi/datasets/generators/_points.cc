@@ -16,6 +16,8 @@
 
 #include <CGAL/Epick_d.h>
 
+// Must be included before random_point_generators.h
+#include <python_interfaces/cgal_random.h>
 #include <gudhi/random_point_generators.h>
 #include <gudhi/Debug_utils.h>
 #include <python_interfaces/numpy_utils.h>

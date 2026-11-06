@@ -16,6 +16,11 @@ from tempfile import NamedTemporaryFile
 import gudhi as gd
 
 
+def test_off_file_argument_is_required():
+    with pytest.raises(TypeError):
+        gd.read_points_from_off_file()
+
+
 def test_off_rw():
     for dim in range(2, 6):
         X = np.random.rand(123, dim)

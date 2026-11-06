@@ -8,28 +8,26 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.9"]
+        python-version: ["3.11"]
         include:
-          - python-version: "3.9"
-            numpy-version: "1.19.3"
+          - python-version: "3.11"
+            numpy-version: "1.23.2"
     name: Build wheels for Python ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-      # For python >=3.9, numpy >= 2.0 for package build and ABI compatibility with numpy 1.X and 2.X
+      # For python >=3.10, numpy >= 2.0 for package build and ABI compatibility with numpy 1.X and 2.X
       # cf. https://numpy.org/doc/stable/dev/depending_on_numpy.html#numpy-2-0-specific-advice
       - name: Install dependencies
         shell: pwsh
         run: |
-          set VCPKG_BUILD_TYPE=release
-          vcpkg install eigen3 cgal --triplet x64-windows
           vcpkg version
-          ls "C:\vcpkg\installed\x64-windows\bin\"
+          vcpkg install eigen3 cgal boost-sort --triplet x64-windows-release
           python -m pip install --user numpy>=2.0
           python -m pip install --user -r .\ext\gudhi-deploy\build-requirements.txt
           python -m pip install --user delvewheel
@@ -40,15 +38,17 @@ jobs:
       # Workaround is to compile with '-DEIGEN_DEFAULT_DENSE_INDEX_TYPE=int'
       - name: Build python wheel and repair it
         env:
-          SKBUILD_CMAKE_DEFINE: "FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake;VCPKG_TARGET_TRIPLET=x64-windows"
+          SKBUILD_CMAKE_DEFINE: "FORCE_EIGEN_DEFAULT_DENSE_INDEX_TYPE_TO_INT=ON;CMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake;VCPKG_TARGET_TRIPLET=x64-windows-release"
+          SKBUILD_BUILD_DIR: "build"
         shell: pwsh
         run: |
           python -m pip wheel -ve .
-          ls ".\"
-          delvewheel show --add-path=C:/vcpkg/installed/x64-windows/bin *.whl
-          delvewheel repair --add-path=C:/vcpkg/installed/x64-windows/bin -w wheelhouse -v *.whl
+          ls "./"
+          ls "./build/src/python/gudhi/Release"
+          delvewheel show --add-path="C:/vcpkg/installed/x64-windows-release/bin;./build/src/python/gudhi/Release" *.whl
+          delvewheel repair --add-path="C:/vcpkg/installed/x64-windows-release/bin;./build/src/python/gudhi/Release" -w wheelhouse -v *.whl
       - name: Upload Windows python wheel
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: windows python wheel
           path: wheelhouse/*.whl

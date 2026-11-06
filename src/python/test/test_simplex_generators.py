@@ -10,6 +10,7 @@
 
 
 import numpy as np
+import pytest
 
 import gudhi
 
@@ -52,6 +53,21 @@ def test_flag_generators():
     assert {(i[0], i[1]) for i in g[3][0]} == {
         tuple(i[0]) for i in pairs if len(i[0]) == 2 and len(i[1]) == 0
     }
+
+
+def test_flag_generators_requires_flag_filtration():
+    st = gudhi.SimplexTree()
+    st.insert([0], 0)
+    st.insert([1], 0)
+    st.insert([2], 0)
+    st.insert([0, 1], 1)
+    st.insert([0, 2], 1)
+    st.insert([1, 2], 1)
+    st.insert([0, 1, 2], 2)
+    st.persistence()
+
+    with pytest.raises(ValueError, match="requires a flag complex"):
+        st.flag_persistence_generators()
 
 
 def test_lower_star_generators():

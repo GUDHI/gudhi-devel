@@ -5,6 +5,7 @@
  *    Copyright (C) 2019 Inria
  *
  *    Modification(s):
+ *      - 2026/04 Vincent Rouvreau: Replace c++ random call with CGAL::get_default_random().get_double()
  *      - YYYY/MM Author: Description of the modification
  */
 
@@ -13,7 +14,6 @@
 
 #include <cstdlib>  // for std::size_t
 #include <cmath>    // for std::cos, std::sin
-#include <random>   // for std::uniform_real_distribution, std::random_device
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
@@ -21,6 +21,7 @@
 
 #include <CGAL/Epick_d.h>
 #include <CGAL/point_generators_d.h>
+#include <CGAL/Random.h>
 
 #include <boost/math/constants/constants.hpp>  // for PI value
 
@@ -44,10 +45,8 @@ Eigen::MatrixXd random_orthogonal_matrix(std::size_t d) {
   if (d == 1) return Eigen::VectorXd::Constant(1, 1.0);
   if (d == 2) {
     // 0. < alpha < 2 Pi
-    std::uniform_real_distribution<double> unif(0., 2 * boost::math::constants::pi<double>());
-    std::random_device rand_dev;
-    std::mt19937 rand_engine(rand_dev());
-    double alpha = unif(rand_engine);
+    CGAL::Random& rng = CGAL::get_default_random();
+    double alpha = rng.get_double(0., 2 * boost::math::constants::pi<double>());
 
     Eigen::Matrix2d rot;
     rot << std::cos(alpha), -std::sin(alpha), std::sin(alpha), cos(alpha);
