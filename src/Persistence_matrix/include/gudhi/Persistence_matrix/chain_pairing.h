@@ -116,7 +116,7 @@ inline void Chain_pairing<Master_matrix>::_update_barcode(Pos_index birth, Pos_i
 template <class Master_matrix>
 inline void Chain_pairing<Master_matrix>::_add_bar(Dimension dim, Pos_index birth)
 {
-  barcode_.emplace_back(birth, Master_matrix::template get_null_value<Pos_index>(), dim);
+  barcode_.emplace_back(birth, Master_matrix::Bar::inf, dim);
   if constexpr (Master_matrix::Option_list::has_removable_columns) {
     indexToBar_.try_emplace(birth, --barcode_.end());
   } else {
@@ -130,10 +130,10 @@ inline void Chain_pairing<Master_matrix>::_erase_bar(Pos_index event)
   auto it = indexToBar_.find(event);
   typename Barcode::iterator bar = it->second;
 
-  if (bar->death == Master_matrix::template get_null_value<Pos_index>())
+  if (bar->death == Master_matrix::Bar::inf)
     barcode_.erase(bar);
   else
-    bar->death = Master_matrix::template get_null_value<Pos_index>();
+    bar->death = Master_matrix::Bar::inf;
 
   indexToBar_.erase(it);
 }

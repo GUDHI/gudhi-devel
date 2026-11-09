@@ -323,7 +323,7 @@ template <class Master_matrix>
 inline bool RU_vine_swap<Master_matrix>::_is_paired(Index columnIndex)
 {
   if constexpr (Master_matrix::Option_list::has_column_pairings) {
-    return _get_death(columnIndex) != Master_matrix::template get_null_value<Pos_index>();
+    return _get_death(columnIndex) != Master_matrix::Bar::inf;
   } else {
     if (!_matrix()->reducedMatrixR_.is_zero_column(columnIndex)) return true;
 
@@ -446,13 +446,11 @@ inline void RU_vine_swap<Master_matrix>::_negative_positive_transpose(Index colu
 }
 
 template <class Master_matrix>
-inline bool RU_vine_swap<Master_matrix>::_positive_vine_swap(Index columnIndex)
-{
+inline bool RU_vine_swap<Master_matrix>::_positive_vine_swap(Index columnIndex) {
   const Pos_index iDeath = _get_death(columnIndex);
   const Pos_index iiDeath = _get_death(columnIndex + 1);
 
-  if (iDeath != Master_matrix::template get_null_value<Pos_index>() &&
-      iiDeath != Master_matrix::template get_null_value<Pos_index>() &&
+  if (iDeath != Master_matrix::Bar::inf && iiDeath != Master_matrix::Bar::inf &&
       !(_matrix()->reducedMatrixR_.is_zero_entry(iiDeath, _get_row_id_from_position(columnIndex)))) {
     if (iDeath < iiDeath) {
       _swap_at_index(columnIndex);
@@ -468,8 +466,7 @@ inline bool RU_vine_swap<Master_matrix>::_positive_vine_swap(Index columnIndex)
 
   _swap_at_index(columnIndex);
 
-  if (iDeath != Master_matrix::template get_null_value<Pos_index>() ||
-      iiDeath == Master_matrix::template get_null_value<Pos_index>() ||
+  if (iDeath != Master_matrix::Bar::inf || iiDeath == Master_matrix::Bar::inf ||
       _matrix()->reducedMatrixR_.is_zero_entry(iiDeath, _get_row_id_from_position(columnIndex + 1))) {
     _positive_transpose(columnIndex);
     return true;
@@ -528,11 +525,11 @@ inline typename RU_vine_swap<Master_matrix>::Pos_index RU_vine_swap<Master_matri
 
     if constexpr (Master_matrix::Option_list::has_map_column_container) {
       auto it = _matrix()->pivotToColumnIndex_.find(simplexIndex);
-      if (it == _matrix()->pivotToColumnIndex_.end()) return Master_matrix::template get_null_value<Pos_index>();
+      if (it == _matrix()->pivotToColumnIndex_.end()) return Master_matrix::Bar::inf;
       return it->second;
     } else {
       if (simplexIndex >= _matrix()->pivotToColumnIndex_.size())
-        return Master_matrix::template get_null_value<Pos_index>();
+        return Master_matrix::Bar::inf;
       return _matrix()->pivotToColumnIndex_[simplexIndex];
     }
   }

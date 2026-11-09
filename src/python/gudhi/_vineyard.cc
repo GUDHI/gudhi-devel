@@ -186,7 +186,7 @@ class Vineyard_interface
     nb::list ret;
     for (std::size_t d = 0; d < vy.size(); ++d) {
       // read only, ownership is not transferred
-      ret.append(nb::ndarray<nb::numpy, const value_type>(vy[d].data(), {numberOfSteps, nberDims[d], 2}));
+      ret.append(_wrap_view_as_numpy_array(nanobind::find(*this), vy[d], numberOfSteps, nberDims[d], 2));
     }
 
     return ret;

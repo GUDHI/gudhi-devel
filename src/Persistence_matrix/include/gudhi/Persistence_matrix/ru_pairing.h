@@ -97,7 +97,7 @@ class RU_pairing
 
   void _add_bar(Dimension dim, Pos_index birth)
   {
-    barcode_.emplace_back(birth, Master_matrix::template get_null_value<Pos_index>(), dim);
+    barcode_.emplace_back(birth, Master_matrix::Bar::inf, dim);
     if constexpr (Master_matrix::hasFixedBarcode || !Master_matrix::Option_list::has_removable_columns) {
       indexToBar_.push_back(barcode_.size() - 1);
     } else {
@@ -108,7 +108,7 @@ class RU_pairing
   void _remove_last(Pos_index eventIndex)
   {
     static_assert(Master_matrix::Option_list::has_removable_columns, "_remove_last not available.");
-    constexpr const Pos_index nullDeath = Master_matrix::template get_null_value<Pos_index>();
+    constexpr const Pos_index nullDeath = Master_matrix::Bar::inf;
 
     if constexpr (Master_matrix::hasFixedBarcode) {
       auto& bar = barcode_[indexToBar_[eventIndex]];
