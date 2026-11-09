@@ -18,6 +18,7 @@
 #define GUDHI_VINEYARD_HELPER_H_
 
 #include <algorithm>
+#include <limits>
 #include <vector>
 
 #include <gudhi/Debug_utils.h>
@@ -25,13 +26,14 @@
 namespace Gudhi {
 namespace vineyard {
 
+namespace detail {
+
 /**
  * @ingroup vineyard
- *
  * @private
  */
-template <class FilteredComplex, typename Index>
-inline Index assign_keys_(FilteredComplex& complex, Index start) {
+template <class FilteredComplex, typename Index, typename Dimension>
+inline Index assign_keys_(FilteredComplex& complex, Index start, Dimension maxDimension) {
   Index numberOfSimplices = start;
   // Vertex ID should correspond to position in the original point cloud if there was one.
   for (auto sh : complex.skeleton_simplex_range(0)) {
@@ -39,13 +41,15 @@ inline Index assign_keys_(FilteredComplex& complex, Index start) {
     ++numberOfSimplices;
   }
   for (auto sh : complex.complex_simplex_range()) {
-    if (complex.dimension(sh) != 0) {
+    if (complex.dimension(sh) != 0 && static_cast<Dimension>(complex.dimension(sh)) <= maxDimension) {
       complex.assign_key(sh, numberOfSimplices);
       ++numberOfSimplices;
     }
   }
   return numberOfSimplices;
 }
+
+}  // namespace detail
 
 /**
  * @ingroup vineyard
@@ -67,31 +71,38 @@ inline Index assign_keys_(FilteredComplex& complex, Index start) {
  * dimensions are added at the end. Has to have the same size than @p boundaries as the indices should correspond.
  * @param[out] filtrationValues Container for the filtration values. If not empty, the elements are not erased and
  * the new values are added at the end. Has to have the same size than @p boundaries as the indices should correspond.
+ * @param maxDimension Maximal dimension to take into account: all cells of dimension strictly higher are ignored.
+ * Default: `std::numeric_limits<Dimension>::max()`.
  */
 template <class FilteredComplex, typename Filtration_value = typename FilteredComplex::Filtration_value,
           typename Index = typename FilteredComplex::Simplex_key, typename Dimension = int>
 inline void build_boundary_matrix_from_complex(FilteredComplex& complex, std::vector<std::vector<Index> >& boundaries,
                                                std::vector<Dimension>& dimensions,
-                                               std::vector<Filtration_value>& filtrationValues) {
+                                               std::vector<Filtration_value>& filtrationValues,
+                                               Dimension maxDimension = std::numeric_limits<Dimension>::max()) {
   GUDHI_CHECK(boundaries.size() == dimensions.size() && boundaries.size() == filtrationValues.size(),
               std::invalid_argument("Output containers do not start with the same size"));
 
-  Index numberOfSimplices = assign_keys_(complex, boundaries.size());
+  if (maxDimension < 0) return;
+
+  Index numberOfSimplices = detail::assign_keys_(complex, boundaries.size(), maxDimension);
 
   boundaries.resize(numberOfSimplices);
   dimensions.resize(numberOfSimplices);
   filtrationValues.resize(numberOfSimplices);
 
   for (auto sh : complex.complex_simplex_range()) {
-    auto index = complex.key(sh);
-    dimensions[index] = complex.dimension(sh);
-    filtrationValues[index] = complex.filtration(sh);
-    std::vector<Index> boundary;
-    for (const auto& b : complex.boundary_simplex_range(sh)) {
-      boundary.push_back(complex.key(b));
+    if (static_cast<Dimension>(complex.dimension(sh)) <= maxDimension) {
+      auto index = complex.key(sh);
+      dimensions[index] = complex.dimension(sh);
+      filtrationValues[index] = complex.filtration(sh);
+      std::vector<Index> boundary;
+      for (auto b : complex.boundary_simplex_range(sh)) {
+        boundary.push_back(complex.key(b));
+      }
+      std::sort(boundary.begin(), boundary.end());
+      boundaries[index] = std::move(boundary);
     }
-    std::sort(boundary.begin(), boundary.end());
-    boundaries[index] = std::move(boundary);
   }
 }
 
@@ -112,16 +123,23 @@ inline void build_boundary_matrix_from_complex(FilteredComplex& complex, std::ve
  * @param[in] complex Complex to convert.
  * @param[out] filtrationValues Container for the filtration values. If not empty, the elements are not erased and
  * the new values are added at the end.
+ * @param maxDimension Maximal dimension to take into account: all cells of dimension strictly higher are ignored.
+ * Default: `std::numeric_limits<int>::max()`.
  */
 template <class FilteredComplex, typename Filtration_value = typename FilteredComplex::Filtration_value>
 inline void build_boundary_matrix_from_complex(FilteredComplex& complex,
-                                               std::vector<Filtration_value>& filtrationValues) {
-  auto numberOfSimplices = assign_keys_(complex, filtrationValues.size());
+                                               std::vector<Filtration_value>& filtrationValues,
+                                               int maxDimension = std::numeric_limits<int>::max()) {
+  if (maxDimension < 0) return;
+
+  auto numberOfSimplices = detail::assign_keys_(complex, filtrationValues.size(), maxDimension);
 
   filtrationValues.resize(numberOfSimplices);
 
   for (auto sh : complex.complex_simplex_range()) {
-    filtrationValues[complex.key(sh)] = complex.filtration(sh);
+    if (static_cast<int>(complex.dimension(sh)) <= maxDimension) {
+      filtrationValues[complex.key(sh)] = complex.filtration(sh);
+    }
   }
 }
 
