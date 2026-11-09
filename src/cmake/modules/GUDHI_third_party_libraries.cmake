@@ -71,7 +71,7 @@ if(WITH_GUDHI_USE_TBB)
         # TBB Error management
         if (TBB_VERSION VERSION_LESS 2019.0.11007)
             # TBBTargets.cmake was introduced in 2019.7, so this case should not happen
-            # cf. https://github.com/oneapi-src/oneTBB/blob/2019_U7/CHANGES
+            # cf. https://github.com/uxlfoundation/oneTBB/blob/2019_U7/CHANGES
             message(WARNING "++ TBB found but version ${TBB_VERSION} is too old - GUDHI cannot compile with TBB")
         else()
             if (NOT TBB_LIBRARY)
@@ -83,7 +83,7 @@ if(WITH_GUDHI_USE_TBB)
                 message("++ TBB version ${TBB_VERSION}. Includes found in ${TBB_INCLUDE_DIRS}, libraries found in ${TBB_LIBRARY_DIRS}")
                 add_definitions(-DGUDHI_USE_TBB)
                 if(MSVC)
-                    # cf. https://github.com/oneapi-src/oneTBB/issues/573
+                    # cf. https://github.com/uxlfoundation/oneTBB/issues/573
                     add_definitions(-DNOMINMAX)
                 endif()
             endif()
