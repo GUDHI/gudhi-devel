@@ -498,7 +498,9 @@ def plot_1D_representative_cycles(
                 "Specified argument `min_bar_length` is ignored.",
                 UserWarning,
             )
-        _plot_cycle(ax, cycles[index][0], points, cpx, cmap[i], edge_linestyle, edge_linewidth)
+        # TODO: if index out of bound, just use the error raised by the dict, or raise our own?
+        # to print the existing indices for example
+        _plot_cycle(ax, cycles[(1, index)], points, cpx, cmap[i], edge_linestyle, edge_linewidth)
 
     # plot points
     gray = (0.25, 0.25, 0.25)

@@ -498,7 +498,7 @@ class PointCloudRipsVineyard:
             data_type=data_type,
         )
 
-        for step in range(first_index + 1, number_of_updates + 1):
+        for step in range(first_index + 1, first_index + number_of_updates + 1):
             res.update(
                 data=data[step],
                 data_type=data_type,
@@ -513,9 +513,7 @@ class PointCloudRipsVineyard:
                 self._points.append(points)
             return RipsComplex(points=points).create_simplex_tree(max_dimension=2)
         elif file_type == "distance_matrix":
-            matrix = read_lower_triangular_matrix_from_csv_file(
-                path_prefix + str(first_index) + path_suffix, separator=delimiter
-            )
+            matrix = read_lower_triangular_matrix_from_csv_file(path, separator=delimiter)
             return RipsComplex(distance_matrix=matrix).create_simplex_tree(max_dimension=2)
         else:
             raise ValueError(
@@ -525,7 +523,7 @@ class PointCloudRipsVineyard:
     def _create_simplex_tree_from_data(self, data: ArrayLike, data_type: str):
         if data_type == "point_cloud":
             if self._store_points:
-                self._points.append(data)
+                self._points.append(np.array(data, copy=True))
             return RipsComplex(points=data).create_simplex_tree(max_dimension=2)
         elif data_type == "distance_matrix":
             return RipsComplex(distance_matrix=data).create_simplex_tree(max_dimension=2)
