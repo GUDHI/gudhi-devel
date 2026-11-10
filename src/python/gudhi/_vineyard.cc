@@ -27,8 +27,7 @@ namespace nb = nanobind;
 namespace Gudhi {
 namespace vineyard {
 
-class Vineyard_interface
-{
+class Vineyard_interface {
   template <typename T>
   struct Range {
     using value_type = T;
@@ -62,35 +61,38 @@ class Vineyard_interface
   Vineyard_interface(bool storeRepCycles, Dimension repCyclesDim) : vineyard_(storeRepCycles, repCyclesDim) {}
 
   template <typename F, typename I>
-  void initialize(nb::list boundaryMatrix,
-                  nb::ndarray<const I, nb::ndim<1>> dimensions,
-                  nb::ndarray<const F, nb::ndim<1>> filtrationValues,
-                  int numberOfUpdates = 0)
-  {
+  void initialize(nb::list boundaryMatrix, nb::ndarray<const I, nb::ndim<1>> dimensions,
+                  nb::ndarray<const F, nb::ndim<1>> filtrationValues, int numberOfUpdates = 0,
+                  bool storeLastPersDim = true) {
+    if (boundaryMatrix.size() != dimensions.shape(0) || boundaryMatrix.size() != filtrationValues.shape(0))
+      throw std::invalid_argument("Boundary, dimension and filtration value container should have the same size.");
+
     std::vector<Range<I>> boundaries(boundaryMatrix.size());
     // views are faster than the direct `nb::ndarray`s, but their get destructed together with the array,
     // so everything needs to be store the time the initializing finishs. Normally, they should be no copy,
-    // so it should be negligible enough compared to all the rest
+    // if boundaries are of the right type, so it should be negligible enough compared to all the rest
     std::vector<nb::ndarray<const I, nb::ndim<1>>> numpy_b(boundaryMatrix.size());
 
     for (std::size_t i = 0; i < boundaries.size(); ++i) {
-      numpy_b[i] = nb::cast<nb::ndarray<const I, nb::ndim<1>>>(boundaryMatrix[i]);
+      if (!nb::try_cast<nb::ndarray<const I, nb::ndim<1>>>(boundaryMatrix[i], numpy_b[i]))
+        throw std::invalid_argument("The boundary container has to be a list/tuple of ArrayLike.");
       boundaries[i] = Range<I>(numpy_b[i]);
     }
 
     {
-      nanobind::gil_scoped_release release;
-      vineyard_.initialize(boundaries, Range<I>(dimensions), Range<F>(filtrationValues), numberOfUpdates);
+      nb::gil_scoped_release release;
+      vineyard_.initialize(boundaries, Range<I>(dimensions), Range<F>(filtrationValues), numberOfUpdates,
+                           storeLastPersDim);
       discrete_ = false;
     }
   }
 
   template <typename I>
-  void initialize(nb::list boundaryMatrix,
-                  nb::ndarray<const I, nb::ndim<1>> dimensions,
-                  nb::callable is_before_in_filtration,
-                  int numberOfUpdates = 0)
-  {
+  void initialize(nb::list boundaryMatrix, nb::ndarray<const I, nb::ndim<1>> dimensions,
+                  nb::callable is_before_in_filtration, int numberOfUpdates = 0, bool storeLastPersDim = true) {
+    if (boundaryMatrix.size() != dimensions.shape(0))
+      throw std::invalid_argument("Boundary and dimension container should have the same size.");
+
     std::vector<Range<I>> boundaries(boundaryMatrix.size());
     // views are faster than the direct `nb::ndarray`s, but their get destructed together with the array,
     // so everything needs to be store the time the initializing finishs. Normally, they should be no copy,
@@ -98,7 +100,8 @@ class Vineyard_interface
     std::vector<nb::ndarray<const I, nb::ndim<1>>> numpy_b(boundaryMatrix.size());
 
     for (std::size_t i = 0; i < boundaries.size(); ++i) {
-      numpy_b[i] = nb::cast<nb::ndarray<const I, nb::ndim<1>>>(boundaryMatrix[i]);
+      if (!nb::try_cast<nb::ndarray<const I, nb::ndim<1>>>(boundaryMatrix[i], numpy_b[i]))
+        throw std::invalid_argument("The boundary container has to be a list/tuple of ArrayLike.");
       boundaries[i] = Range<I>(numpy_b[i]);
     }
 
@@ -114,40 +117,37 @@ class Vineyard_interface
     };
 
     {
-      nanobind::gil_scoped_release release;
-      vineyard_.initialize(boundaries, Range<I>(dimensions), comp, numberOfUpdates);
+      nb::gil_scoped_release release;
+      vineyard_.initialize(boundaries, Range<I>(dimensions), comp, numberOfUpdates, storeLastPersDim);
       discrete_ = true;
     }
   }
 
   template <class FilteredComplex>
-  void initialize_from_complex(FilteredComplex& complex, int numberOfUpdates = 0)
-  {
+  void initialize_from_complex(FilteredComplex& complex, int numberOfUpdates = 0, bool storeLastPersDim = true) {
     {
-      nanobind::gil_scoped_release release;
+      nb::gil_scoped_release release;
       std::vector<std::vector<std::uint32_t>> boundaries;
       std::vector<int> dimensions;
       std::vector<double> filtrationValues;
 
       Gudhi::vineyard::build_boundary_matrix_from_complex(complex, boundaries, dimensions, filtrationValues);
-      vineyard_.initialize(boundaries, dimensions, filtrationValues, numberOfUpdates);
+      vineyard_.initialize(boundaries, dimensions, filtrationValues, numberOfUpdates, storeLastPersDim);
       discrete_ = false;
     }
   }
 
-  void update(nb::ndarray<const value_type, nb::ndim<1>> filtrationValues)
-  {
+  void update(nb::ndarray<const value_type, nb::ndim<1>> filtrationValues) {
     if (discrete_)
       throw std::logic_error(
           "Update with filtration values is only possible when the vineyard was initialized with filtration values.");
     {
-      nanobind::gil_scoped_release release;
+      nb::gil_scoped_release release;
       vineyard_.update(Range<value_type>(filtrationValues));
     }
   }
 
-  void update(int i, bool store)
-  {
+  void update(int i, bool store) {
     if (!discrete_)
       throw std::logic_error(
           "Update without filtration values is only possible when the vineyard was initialized without filtration "
@@ -155,27 +155,25 @@ class Vineyard_interface
     if (i < 0 || static_cast<std::size_t>(i) >= vineyard_.get_filtration_size() - 1)
       throw std::out_of_range("Index of first cell to swap is out of bound.");
     {
-      nanobind::gil_scoped_release release;
+      nb::gil_scoped_release release;
       vineyard_.update(i, store);
     }
   }
 
   template <class FilteredComplex>
-  void update_from_complex(FilteredComplex& complex)
-  {
+  void update_from_complex(FilteredComplex& complex) {
     if (discrete_)
       throw std::logic_error(
           "Update with filtration values is only possible when the vineyard was initialized with filtration values.");
     {
-      nanobind::gil_scoped_release release;
+      nb::gil_scoped_release release;
       std::vector<double> filtrationValues;
       Gudhi::vineyard::build_boundary_matrix_from_complex(complex, filtrationValues);
       vineyard_.update(filtrationValues);
     }
   }
 
-  nb::list get_current_vineyard_view() const
-  {
+  nb::list get_current_vineyard_view() const {
     const auto& vy = vineyard_.get_current_vineyard();
     const std::vector<Index>& nberDims = vineyard_.get_number_of_vines_by_dimension();
 
@@ -186,14 +184,13 @@ class Vineyard_interface
     nb::list ret;
     for (std::size_t d = 0; d < vy.size(); ++d) {
       // read only, ownership is not transferred
-      ret.append(_wrap_view_as_numpy_array(nanobind::find(*this), vy[d], numberOfSteps, nberDims[d], 2));
+      ret.append(_wrap_view_as_numpy_array(nb::find(*this), vy[d], numberOfSteps, nberDims[d], 2));
     }
 
     return ret;
   }
 
-  nb::dict get_latest_representative_cycles()
-  {
+  nb::dict get_latest_representative_cycles() {
     nb::dict ret;
     for (auto cycle : vineyard_.get_latest_representative_cycles()) {
       ret[nb::make_tuple(get<1>(cycle), get<2>(cycle))] =
@@ -208,14 +205,13 @@ class Vineyard_interface
 };
 
 template <class FilteredComplex>
-inline nb::tuple build_python_boundary_matrix_from_complex(FilteredComplex& complex)
-{
+inline nb::tuple build_python_boundary_matrix_from_complex(FilteredComplex& complex) {
   std::vector<std::vector<typename FilteredComplex::Simplex_key>> boundaries;
   std::vector<int> dimensions;
   std::vector<typename FilteredComplex::Filtration_value> filtrationValues;
 
   {
-    nanobind::gil_scoped_release release;
+    nb::gil_scoped_release release;
     build_boundary_matrix_from_complex(complex, boundaries, dimensions, filtrationValues);
   }
 
@@ -236,8 +232,7 @@ using ST = Gudhi::Simplex_tree_interface;
 using CC = Gudhi::cubical_complex::Cubical_complex_interface;
 using PCC = Gudhi::cubical_complex::Periodic_cubical_complex_interface;
 
-NB_MODULE(_vineyard_ext, m)
-{
+NB_MODULE(_vineyard_ext, m) {
   m.attr("__license__") = "MIT";
 
   nb::class_<gvyi>(m, "Vineyard_interface")

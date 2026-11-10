@@ -261,7 +261,8 @@ class Vineyard_base {
    * @brief Updates the stored barcode with the new given filtration values. The underlying complex is assumed to be
    * the same than at initialization.
    *
-   * The update is done with vine swaps, which not only will be more performant than recomputing from scratch, but
+   * The update is done with vine swaps, which not only will be more performant than recomputing from scratch
+   * (if the new filtration is close enough to the previous one, i.e. there are not too many swaps), but
    * also allow to match the old and new barcode: the order is preserved, i.e., the "logical" bar at index \f$ i \f$ in
    * the old barcode is still at index \f$ i \f$ in the new one, just updated. That is, all bars at index \f$ i \f$
    * are from the same vine. TODO: explain the matching more mathematically?

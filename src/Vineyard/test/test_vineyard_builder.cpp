@@ -27,6 +27,16 @@ using Cycle = std::vector<int>;
 
 using option_list = boost::mpl::list<Chain_vineyard_options, RU_vineyard_options>;
 
+template <typename T = double>
+inline std::tuple<BC, DC, FC<T>> build_simple_input_complex2() {
+  BC bc = {{}, {},     {},     {0, 1}, {1, 2},     {0, 2},     {3, 4, 5},
+           {}, {1, 7}, {0, 7}, {2, 7}, {5, 9, 10}, {4, 8, 10}, {3, 8, 9}};
+  DC dc = {0, 0, 0, 1, 1, 1, 2, 0, 1, 1, 1, 2, 2, 2};
+  FC<T> fc = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+
+  return std::tuple<BC, DC, FC<T>>(bc, dc, fc);
+}
+
 template <class VB>
 std::vector<Vine<typename VB::value_type> > get_vineyard(const VB& vb) {
   using V = Vine<typename VB::value_type>;
@@ -321,6 +331,116 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(vyb_update, Option, option_list) {
   test_update<Vineyard_builder<double, Option, true> >();
   test_update<Vineyard_builder<int, Option, false> >();
   test_update<Vineyard_builder<int, Option, true> >();
+}
+
+template <class VB>
+void test_no_max_dim() {
+  using T = typename VB::value_type;
+  using Bar = typename VB::Bar;
+  using P = typename Vine<T>::Coordinate;
+
+  auto [bc, dc, fc] = build_simple_input_complex2<T>();
+
+  VB vb;
+
+  auto vy = get_vineyard(vb);
+  BOOST_CHECK(vy.empty());
+
+  vb.initialize(bc, dc, fc);
+  vb.update(FC<double>{1, 1, 1, 2, 2, 2, 6, 1, 2, 2, 2, 7, 8, 9});
+  vb.update(FC<double>{2, 1, 0, 3, 3, 3, 4, -1, 5, 5, 7, 8, 8, 6});
+
+  vy = get_vineyard(vb);
+  BOOST_CHECK_EQUAL(vy.size(), 8);
+  BOOST_CHECK_EQUAL(vy[0].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[0].size(), 3);
+  BOOST_CHECK(vy[0].get_pair(0) == (P{0, Bar::inf}));
+  BOOST_CHECK(vy[0].get_pair(1) == (P{1, Bar::inf}));
+  BOOST_CHECK(vy[0].get_pair(2) == (P{-1, Bar::inf}));
+  BOOST_CHECK_EQUAL(vy[1].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[1].size(), 3);
+  BOOST_CHECK(vy[1].get_pair(0) == (P{1, 3}));
+  BOOST_CHECK(vy[1].get_pair(1) == (P{1, 2}));
+  BOOST_CHECK(vy[1].get_pair(2) == (P{2, 3}));
+  BOOST_CHECK_EQUAL(vy[2].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[2].size(), 3);
+  BOOST_CHECK(vy[2].get_pair(0) == (P{2, 4}));
+  BOOST_CHECK(vy[2].get_pair(1) == (P{1, 2}));
+  BOOST_CHECK(vy[2].get_pair(2) == (P{1, 3}));
+  BOOST_CHECK_EQUAL(vy[3].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[3].size(), 3);
+  BOOST_CHECK(vy[3].get_pair(0) == (P{7, 8}));
+  BOOST_CHECK(vy[3].get_pair(1) == (P{1, 2}));
+  BOOST_CHECK(vy[3].get_pair(2) == (P{0, 5}));
+  BOOST_CHECK_EQUAL(vy[4].get_dimension(), 1);
+  BOOST_CHECK_EQUAL(vy[4].size(), 3);
+  BOOST_CHECK(vy[4].get_pair(0) == (P{5, 6}));
+  BOOST_CHECK(vy[4].get_pair(1) == (P{2, 6}));
+  BOOST_CHECK(vy[4].get_pair(2) == (P{3, 4}));
+  BOOST_CHECK_EQUAL(vy[5].get_dimension(), 1);
+  BOOST_CHECK_EQUAL(vy[5].size(), 3);
+  BOOST_CHECK(vy[5].get_pair(0) == (P{9, 12}));
+  BOOST_CHECK(vy[5].get_pair(1) == (P{2, 8}));
+  BOOST_CHECK(vy[5].get_pair(2) == (P{5, 6}));
+  BOOST_CHECK_EQUAL(vy[6].get_dimension(), 1);
+  BOOST_CHECK_EQUAL(vy[6].size(), 3);
+  BOOST_CHECK(vy[6].get_pair(0) == (P{10, 11}));
+  BOOST_CHECK(vy[6].get_pair(1) == (P{2, 7}));
+  BOOST_CHECK(vy[6].get_pair(2) == (P{7, 8}));
+  BOOST_CHECK_EQUAL(vy[7].get_dimension(), 2);
+  BOOST_CHECK_EQUAL(vy[7].size(), 3);
+  BOOST_CHECK(vy[7].get_pair(0) == (P{13, Bar::inf}));
+  BOOST_CHECK(vy[7].get_pair(1) == (P{9, Bar::inf}));
+  BOOST_CHECK(vy[7].get_pair(2) == (P{8, Bar::inf}));
+
+  vb.initialize(bc, dc, fc, 2, false);
+  vb.update(FC<double>{1, 1, 1, 2, 2, 2, 6, 1, 2, 2, 2, 7, 8, 9});
+  vb.update(FC<double>{2, 1, 0, 3, 3, 3, 4, -1, 5, 5, 7, 8, 8, 6});
+
+  vy = get_vineyard(vb);
+  BOOST_CHECK_EQUAL(vy.size(), 7);
+  BOOST_CHECK_EQUAL(vy[0].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[0].size(), 3);
+  BOOST_CHECK(vy[0].get_pair(0) == (P{0, Bar::inf}));
+  BOOST_CHECK(vy[0].get_pair(1) == (P{1, Bar::inf}));
+  BOOST_CHECK(vy[0].get_pair(2) == (P{-1, Bar::inf}));
+  BOOST_CHECK_EQUAL(vy[1].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[1].size(), 3);
+  BOOST_CHECK(vy[1].get_pair(0) == (P{1, 3}));
+  BOOST_CHECK(vy[1].get_pair(1) == (P{1, 2}));
+  BOOST_CHECK(vy[1].get_pair(2) == (P{2, 3}));
+  BOOST_CHECK_EQUAL(vy[2].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[2].size(), 3);
+  BOOST_CHECK(vy[2].get_pair(0) == (P{2, 4}));
+  BOOST_CHECK(vy[2].get_pair(1) == (P{1, 2}));
+  BOOST_CHECK(vy[2].get_pair(2) == (P{1, 3}));
+  BOOST_CHECK_EQUAL(vy[3].get_dimension(), 0);
+  BOOST_CHECK_EQUAL(vy[3].size(), 3);
+  BOOST_CHECK(vy[3].get_pair(0) == (P{7, 8}));
+  BOOST_CHECK(vy[3].get_pair(1) == (P{1, 2}));
+  BOOST_CHECK(vy[3].get_pair(2) == (P{0, 5}));
+  BOOST_CHECK_EQUAL(vy[4].get_dimension(), 1);
+  BOOST_CHECK_EQUAL(vy[4].size(), 3);
+  BOOST_CHECK(vy[4].get_pair(0) == (P{5, 6}));
+  BOOST_CHECK(vy[4].get_pair(1) == (P{2, 6}));
+  BOOST_CHECK(vy[4].get_pair(2) == (P{3, 4}));
+  BOOST_CHECK_EQUAL(vy[5].get_dimension(), 1);
+  BOOST_CHECK_EQUAL(vy[5].size(), 3);
+  BOOST_CHECK(vy[5].get_pair(0) == (P{9, 12}));
+  BOOST_CHECK(vy[5].get_pair(1) == (P{2, 8}));
+  BOOST_CHECK(vy[5].get_pair(2) == (P{5, 6}));
+  BOOST_CHECK_EQUAL(vy[6].get_dimension(), 1);
+  BOOST_CHECK_EQUAL(vy[6].size(), 3);
+  BOOST_CHECK(vy[6].get_pair(0) == (P{10, 11}));
+  BOOST_CHECK(vy[6].get_pair(1) == (P{2, 7}));
+  BOOST_CHECK(vy[6].get_pair(2) == (P{7, 8}));
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(vyb_no_max_dim, Option, option_list) {
+  test_no_max_dim<Vineyard_builder<double, Option, false> >();
+  test_no_max_dim<Vineyard_builder<double, Option, true> >();
+  test_no_max_dim<Vineyard_builder<int, Option, false> >();
+  test_no_max_dim<Vineyard_builder<int, Option, true> >();
 }
 
 template <class Option>

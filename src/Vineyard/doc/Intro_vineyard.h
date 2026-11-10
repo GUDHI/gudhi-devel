@@ -63,7 +63,9 @@ namespace vineyard {
  *
  * The update methods can take filtration values which differs completely from the precedent filtration. The sequence
  * of swaps will be automatically deduced from them, but the resulting vineyard will only show the start and end state
- * of the points, not the intermediate swaps.
+ * of the points, not the intermediate swaps (as there is no way to know which of the several possible swap sequences
+ * is the right one, only the endpoints are guaranteed). It is then the user's responsibility to provide filtration
+ * steps as close as necessary to obtain the desired approximation factor of the vineyard.
  *
  * In addition to the vineyard, @ref Vineyard_builder can also retrieve a **representative cycle** for each point in
  * the diagram between each update.

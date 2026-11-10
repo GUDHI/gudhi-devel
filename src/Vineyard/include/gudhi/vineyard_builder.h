@@ -18,6 +18,7 @@
 #ifndef GUDHI_VINEYARD_BUILDER_H_
 #define GUDHI_VINEYARD_BUILDER_H_
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <stdexcept>
@@ -211,8 +212,13 @@ class Vineyard_builder {
   template <class BoundaryRange, class DimensionRange, class FiltrationRange,
             class = std::enable_if_t<Gudhi::persistence_matrix::RangeTraits<FiltrationRange>::has_size> >
   void initialize(const BoundaryRange& boundaryMatrix, const DimensionRange& dimensions,
-                  const FiltrationRange& filtrationValues, int numberOfUpdates = 0) {
+                  const FiltrationRange& filtrationValues, int numberOfUpdates = 0, bool storeLastPersDim = true) {
     base_.initialize(boundaryMatrix, dimensions, filtrationValues);
+    maxDimToStore_ = 0;
+    for (std::size_t i = 0; i < boundaryMatrix.size(); ++i) maxDimToStore_ = std::max(maxDimToStore_, dimensions[i]);
+    GUDHI_CHECK(boundaryMatrix.size() == 0 || storeLastPersDim || maxDimToStore_ > 0,
+                std::invalid_argument("Cannot not store max dimension bars when max dimension is 0."));
+    if (!storeLastPersDim) --maxDimToStore_;
     _initialize_stored_vineyard(
         numberOfUpdates, [&](auto b) -> T { return filtrationValues[b]; },
         [&](auto d) -> T { return d == Base::Bar::inf ? Bar::inf : filtrationValues[d]; },
@@ -244,8 +250,13 @@ class Vineyard_builder {
   template <class BoundaryRange, class DimensionRange, class F,
             class = std::enable_if_t<!Gudhi::persistence_matrix::RangeTraits<F>::has_size> >
   void initialize(const BoundaryRange& boundaryMatrix, const DimensionRange& dimensions, F&& is_before_in_filtration,
-                  int numberOfUpdates = 0) {
+                  int numberOfUpdates = 0, bool storeLastPersDim = true) {
     base_.initialize(boundaryMatrix, dimensions, std::forward<F>(is_before_in_filtration));
+    maxDimToStore_ = 0;
+    for (std::size_t i = 0; i < boundaryMatrix.size(); ++i) maxDimToStore_ = std::max(maxDimToStore_, dimensions[i]);
+    GUDHI_CHECK(boundaryMatrix.size() == 0 || storeLastPersDim || maxDimToStore_ > 0,
+                std::invalid_argument("Cannot not store max dimension bars when max dimension is 0."));
+    if (!storeLastPersDim) --maxDimToStore_;
     _initialize_stored_vineyard(
         numberOfUpdates, [&](auto b) -> T { return b; },
         [&](auto d) -> T { return d == Base::Bar::inf ? Bar::inf : static_cast<T>(d); },
@@ -256,6 +267,12 @@ class Vineyard_builder {
    * @brief Extends the vines with the barcode from the new given filtration values. The underlying complex is assumed
    * to be the same than at initialization. Is meant to be used with
    * @ref initialize(const BoundaryRange&,const DimensionRange&,const FiltrationRange&,int).
+   *
+   * Note that this method only samples point on the real vineyard depending on the filtrations given at each call.
+   * As there are several ways to go from one point to another, if the chosen path should correspond as much as
+   * possible to the path of a real vine, the given filtrations should be as close as necessary, i.e. they should
+   * not be too many possible swaps to go from one to the next. If a guaranteed exact vineyard is needed, one can use
+   * the other @ref update(I, bool) to indicate precisely every swap generating the vines.
    *
    * @pre The first barcode has to have been initialized with @ref initialize.
    *
@@ -330,6 +347,7 @@ class Vineyard_builder {
   std::vector<Index> numberOfBars_;       /**< Number fo vines by dimension. */
   std::optional<Dimension> repCyclesDim_; /**< Dimension of stored cycles. */
   std::optional<std::vector<std::tuple<Cycle, Dimension, Index> > > latest_representative_cycles_; /**< Cycles. */
+  Dimension maxDimToStore_;
 
   template <class FiltrationRange>
   bool _store_cycle(const typename Base::Bar& bar, const FiltrationRange& filtrationValues) const {
@@ -357,15 +375,19 @@ class Vineyard_builder {
     if constexpr (flat) {
       std::vector<Index> latestIndex;
       for (const auto& bar : barcode) {
-        if (bar.dim >= static_cast<Dimension>(vineyard_.size())) {
-          vineyard_.resize(bar.dim + 1);
-          latestIndex.resize(bar.dim + 1, -1);
-        }
-        ++latestIndex[bar.dim];
-        vineyard_[bar.dim].push_back({std::forward<F1>(get_birth)(bar.birth), std::forward<F2>(get_death)(bar.death)});
-        if (std::forward<F3>(store_cycle)(bar)) {
-          auto cycle = base_.get_current_representative_cycle(idx, true);
-          latest_representative_cycles_->emplace_back(Cycle(cycle.begin(), cycle.end()), bar.dim, latestIndex[bar.dim]);
+        if (bar.dim <= maxDimToStore_) {
+          if (bar.dim >= static_cast<Dimension>(vineyard_.size())) {
+            vineyard_.resize(bar.dim + 1);
+            latestIndex.resize(bar.dim + 1, -1);
+          }
+          ++latestIndex[bar.dim];
+          vineyard_[bar.dim].push_back(
+              {std::forward<F1>(get_birth)(bar.birth), std::forward<F2>(get_death)(bar.death)});
+          if (std::forward<F3>(store_cycle)(bar)) {
+            auto cycle = base_.get_current_representative_cycle(idx, true);
+            latest_representative_cycles_->emplace_back(Cycle(cycle.begin(), cycle.end()), bar.dim,
+                                                        latestIndex[bar.dim]);
+          }
         }
         ++idx;
       }
@@ -375,14 +397,18 @@ class Vineyard_builder {
         vineyard_[i].reserve(numberOfBars_[i] * (numberOfUpdates + 1));
       }
     } else {
+      Index latestIndex = 0;
       for (const auto& bar : barcode) {
-        vineyard_.emplace_back(bar.dim, numberOfUpdates + 1);
-        vineyard_.back().add_pair(std::forward<F1>(get_birth)(bar.birth), std::forward<F2>(get_death)(bar.death));
-        if (bar.dim >= static_cast<Dimension>(numberOfBars_.size())) numberOfBars_.resize(bar.dim + 1, 0);
-        ++numberOfBars_[bar.dim];
-        if (std::forward<F3>(store_cycle)(bar)) {
-          auto cycle = base_.get_current_representative_cycle(idx, true);
-          latest_representative_cycles_->emplace_back(Cycle(cycle.begin(), cycle.end()), bar.dim, idx);
+        if (bar.dim <= maxDimToStore_) {
+          vineyard_.emplace_back(bar.dim, numberOfUpdates + 1);
+          vineyard_.back().add_pair(std::forward<F1>(get_birth)(bar.birth), std::forward<F2>(get_death)(bar.death));
+          if (bar.dim >= static_cast<Dimension>(numberOfBars_.size())) numberOfBars_.resize(bar.dim + 1, 0);
+          ++numberOfBars_[bar.dim];
+          if (std::forward<F3>(store_cycle)(bar)) {
+            auto cycle = base_.get_current_representative_cycle(idx, true);
+            latest_representative_cycles_->emplace_back(Cycle(cycle.begin(), cycle.end()), bar.dim, latestIndex);
+          }
+          ++latestIndex;
         }
         ++idx;
       }
@@ -393,24 +419,27 @@ class Vineyard_builder {
   void _update_stored_vineyard(F1&& get_birth, F2&& get_death, F3&& store_cycle) {
     const auto& barcode = base_.get_current_barcode();  // forward only range + order is preserved
     Index idx = 0;
-    std::vector<Index> latestIndex;
+    std::vector<Index> latestIndex(1, -1);
     if constexpr (flat) latestIndex.resize(vineyard_.size(), -1);
     if (latest_representative_cycles_) {
       latest_representative_cycles_->clear();
     }
     for (const auto& bar : barcode) {
-      T birth = std::forward<F1>(get_birth)(bar.birth);
-      T death = std::forward<F2>(get_death)(bar.death);
-      if constexpr (flat) {
-        ++latestIndex[bar.dim];
-        vineyard_[bar.dim].push_back({birth, death});
-      } else {
-        vineyard_[idx].add_pair(birth, death);
-      }
-      if (std::forward<F3>(store_cycle)(bar)) {
-        const auto& cycle = base_.get_current_representative_cycle(idx, true);
-        latest_representative_cycles_->emplace_back(Cycle(cycle.begin(), cycle.end()), bar.dim,
-                                                    flat ? latestIndex[bar.dim] : idx);
+      if (bar.dim <= maxDimToStore_) {
+        T birth = std::forward<F1>(get_birth)(bar.birth);
+        T death = std::forward<F2>(get_death)(bar.death);
+        if constexpr (flat) {
+          ++latestIndex[bar.dim];
+          vineyard_[bar.dim].push_back({birth, death});
+        } else {
+          ++latestIndex[0];
+          vineyard_[latestIndex[0]].add_pair(birth, death);
+        }
+        if (std::forward<F3>(store_cycle)(bar)) {
+          const auto& cycle = base_.get_current_representative_cycle(idx, true);
+          latest_representative_cycles_->emplace_back(Cycle(cycle.begin(), cycle.end()), bar.dim,
+                                                      flat ? latestIndex[bar.dim] : latestIndex[0]);
+        }
       }
       ++idx;
     }
