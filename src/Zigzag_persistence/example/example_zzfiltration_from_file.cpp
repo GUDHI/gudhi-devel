@@ -27,7 +27,7 @@ lineType read_operation(std::string& line, std::vector<ID_handle>& cells, double
   cells.clear();
   ID_handle num;
 
-  size_t current = line.find_first_not_of(' ', 0);
+  std::size_t current = line.find_first_not_of(' ', 0);
   if (current == std::string::npos) return COMMENT;
 
   if (line[current] == 'i')
@@ -46,7 +46,7 @@ lineType read_operation(std::string& line, std::vector<ID_handle>& cells, double
     std::clog << "(2) Syntaxe error in file." << std::endl;
     exit(0);
   }
-  size_t next = line.find_first_of(' ', current);
+  std::size_t next = line.find_first_of(' ', current);
   timestamp = std::stod(line.substr(current, next - current));
 
   current = line.find_first_not_of(' ', next);
