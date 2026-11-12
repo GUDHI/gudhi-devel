@@ -446,8 +446,8 @@ class is_before_in_filtration {
   }
 
  protected:
-  Bitmap_cubical_complex<T>* CC_;
-  const std::vector<unsigned char>* cell_dimensions_;
+  Bitmap_cubical_complex<T>* CC_; // not owned
+  const std::vector<unsigned char>* cell_dimensions_; // not owned
 };
 
 }  // namespace cubical_complex
