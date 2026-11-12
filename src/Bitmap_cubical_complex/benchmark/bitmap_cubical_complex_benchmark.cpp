@@ -33,27 +33,27 @@ int main() {
   std::vector<double> data_5d_top_cells = Gudhi::random::get_uniform_range<double>(multiplier_top_cells, 0., 1.);
   std::vector<double> data_5d_vertices = Gudhi::random::get_uniform_range<double>(multiplier_vertices, 0., 1.);
 
-  Gudhi::Clock cub_1d_from_top_cells_creation_clock("Cubical complex creation from 10⁷ top cells in 1D");
+  Gudhi::Clock cub_1d_from_top_cells_creation_clock("Cubical complex creation from 10^7 top cells in 1D");
   cub_1d_from_top_cells_creation_clock.begin();
   Bitmap_cubical_complex complex_from_top_cells_1d(sizes_1d, data_1d, true);
   std::clog << cub_1d_from_top_cells_creation_clock;
 
-  Gudhi::Clock cub_1d_from_vertices_creation_clock("Cubical complex creation from 10⁷ vertices in 1D");
+  Gudhi::Clock cub_1d_from_vertices_creation_clock("Cubical complex creation from 10^7 vertices in 1D");
   cub_1d_from_vertices_creation_clock.begin();
   Bitmap_cubical_complex complex_from_vertices_1d(sizes_1d, data_1d, false);
   std::clog << cub_1d_from_vertices_creation_clock;
 
-  Gudhi::Clock cub_5d_from_top_cells_creation_clock("Cubical complex creation from 17⁵ top cells in 5D");
+  Gudhi::Clock cub_5d_from_top_cells_creation_clock("Cubical complex creation from 17^5 top cells in 5D");
   cub_5d_from_top_cells_creation_clock.begin();
   Bitmap_cubical_complex complex_from_top_cells_5d(sizes_5d_top_cells, data_5d_top_cells, true);
   std::clog << cub_5d_from_top_cells_creation_clock;
 
-  Gudhi::Clock cub_5d_from_vertices1_creation_clock("Cubical complex creation from 17⁵ vertices in 5D");
+  Gudhi::Clock cub_5d_from_vertices1_creation_clock("Cubical complex creation from 17^5 vertices in 5D");
   cub_5d_from_vertices1_creation_clock.begin();
   Bitmap_cubical_complex complex_from_vertices1_5d(sizes_5d_top_cells, data_5d_top_cells, false);
   std::clog << cub_5d_from_vertices1_creation_clock;
 
-  Gudhi::Clock cub_5d_from_vertices2_creation_clock("Cubical complex creation from 18⁵ vertices (equivalent to 17⁵ top cells) in 5D");
+  Gudhi::Clock cub_5d_from_vertices2_creation_clock("Cubical complex creation from 18^5 vertices (equivalent to 17^5 top cells) in 5D");
   cub_5d_from_vertices2_creation_clock.begin();
   Bitmap_cubical_complex complex_from_vertices2_5d(sizes_5d_vertices, data_5d_vertices, false);
   std::clog << cub_5d_from_vertices2_creation_clock;
