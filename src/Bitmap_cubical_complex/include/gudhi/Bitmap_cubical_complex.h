@@ -407,10 +407,10 @@ void Bitmap_cubical_complex<T>::initialize_filtration() {
   // With lower-star filtrations, cells often have the same filtration and we end up comparing dimensions,
   // which are costly to compute, so do it just once.
   // This cache may be useful elsewhere (persistence?), but for now only used locally.
-  std::vector<unsigned char> dimensions(this->data.size());
-  for (std::size_t cell = 0; cell < dimensions.size(); ++cell)
-    dimensions[cell] = static_cast<unsigned char>(this->get_dimension_of_a_cell(cell));
-  is_before_in_filtration<T> before(this, &dimensions);
+  std::vector<unsigned char> cell_dimensions(this->data.size());
+  for (std::size_t cell = 0; cell < cell_dimensions.size(); ++cell)
+    cell_dimensions[cell] = static_cast<unsigned char>(this->get_dimension_of_a_cell(cell));
+  is_before_in_filtration<T> before(this, &cell_dimensions);
 #ifdef GUDHI_USE_TBB
   tbb::parallel_sort(sorted_cells.begin(), sorted_cells.end(), before);
 #else
@@ -422,8 +422,8 @@ template <typename T>
 class is_before_in_filtration {
  public:
   explicit is_before_in_filtration(Bitmap_cubical_complex<T>* CC,
-                                   const std::vector<unsigned char>* dimensions = nullptr)
-      : CC_(CC), dimensions_(dimensions) {}
+                                   const std::vector<unsigned char>* cell_dimensions = nullptr)
+      : CC_(CC), cell_dimensions_(cell_dimensions) {}
 
   bool operator()(const typename Bitmap_cubical_complex<T>::Simplex_handle& sh1,
                   const typename Bitmap_cubical_complex<T>::Simplex_handle& sh2) const {
@@ -435,8 +435,8 @@ class is_before_in_filtration {
       return fil1 < fil2;
     }
     // in this case they are on the same filtration level, so the dimension decide.
-    std::size_t dim1 = dimensions_ ? (*dimensions_)[sh1] : CC_->get_dimension_of_a_cell(sh1);
-    std::size_t dim2 = dimensions_ ? (*dimensions_)[sh2] : CC_->get_dimension_of_a_cell(sh2);
+    std::size_t dim1 = cell_dimensions_ ? (*cell_dimensions_)[sh1] : CC_->get_dimension_of_a_cell(sh1);
+    std::size_t dim2 = cell_dimensions_ ? (*cell_dimensions_)[sh2] : CC_->get_dimension_of_a_cell(sh2);
     if (dim1 != dim2) {
       return dim1 < dim2;
     }
@@ -447,7 +447,7 @@ class is_before_in_filtration {
 
  protected:
   Bitmap_cubical_complex<T>* CC_;
-  const std::vector<unsigned char>* dimensions_;
+  const std::vector<unsigned char>* cell_dimensions_;
 };
 
 }  // namespace cubical_complex
