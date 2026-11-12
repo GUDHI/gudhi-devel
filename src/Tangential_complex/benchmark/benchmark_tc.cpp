@@ -701,7 +701,7 @@ int main() {
                                                                   num_points,
                                                                   std::atof(param1.c_str()),
                                                                   std::atof(param2.c_str()),
-                                                                  param3 == "Y");
+                                                                  (param3 == "Y") ? "grid" : "random");  // grid or random sample type
             } else if (input == "generate_torus_d") {
               points = Gudhi::generate_points_on_torus_d<Kernel>(
                                                                  num_points,

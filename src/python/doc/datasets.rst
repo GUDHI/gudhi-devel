@@ -147,6 +147,50 @@ Example
 .. autofunction:: gudhi.datasets.generators.points.torus
 
 
+Points on a 2-torus embedded in :math:`R^3`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. table::
+   :widths: 50 50
+
+   +---------------------------------------------+------------------------------------------+
+   | :Requires: `CGAL <installation.html#cgal>`_ | :License: MIT (`LGPL v3 </licensing/>`_) |
+   +---------------------------------------------+------------------------------------------+
+
+The user should provide the number of points to be generated on the 2-torus :code:`n_samples`,
+the :code:`major_radius`, the :code:`minor_radius` of the 2-torus on which points would be generated in :math:`R^3`.
+Points can be generated on a grid or randomly (cf. :code:`sample`).
+
+
+Example
+"""""""
+.. plot::
+   :include-source:
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from gudhi.datasets.generators import points
+    
+    points1 = points.torus_embedded_r3(n_samples=200, major_radius=4., minor_radius=1., sample="random")
+    points2 = points.torus_embedded_r3(n_samples=200, major_radius=4., minor_radius=1., sample="grid")
+    
+    fig = plt.figure(figsize=(12, 5))
+    
+    ax1 = fig.add_subplot(121, projection="3d")
+    ax1.scatter(points1[:, 0], points1[:, 1], points1[:, 2])
+    ax1.set_title("sample='random'")
+    ax1.set_zlim(-4., 4.)
+    
+    ax2 = fig.add_subplot(122, projection="3d")
+    ax2.scatter(points2[:, 0], points2[:, 1], points2[:, 2])
+    ax2.set_title("sample='grid'")
+    ax2.set_zlim(-4., 4.)
+    
+    plt.show()
+
+
+.. autofunction:: gudhi.datasets.generators.points.torus_embedded_r3
+
 Fetching datasets
 =================
 

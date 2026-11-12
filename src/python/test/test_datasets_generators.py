@@ -71,3 +71,27 @@ def test_reproductibility_ctorus():
         set_seed(42)
         rand_pts2 = points.ctorus(n_samples=20, dim=4, sample=sample)
         assert_almost_equal(rand_pts1, rand_pts2)
+
+
+def test_reproductibility_torus_embedded_r3():
+    for sample in ["grid", "random"]:
+        set_seed(42)
+        rand_pts1 = points.torus_embedded_r3(n_samples=20, major_radius=4., minor_radius=1., sample=sample)
+        set_seed(42)
+        rand_pts2 = points.torus_embedded_r3(n_samples=20, major_radius=4., minor_radius=1., sample=sample)
+        assert_almost_equal(rand_pts1, rand_pts2)
+
+
+def test_torus_embedded_r3():
+    random_torus = points.torus_embedded_r3(n_samples=64, sample="random")
+    grid_torus = points.torus_embedded_r3(n_samples=64, sample="grid")
+    assert random_torus.shape == (64, 3)
+    assert grid_torus.shape   == (64, 3)
+
+    for torus in [random_torus, grid_torus]:
+        for point in torus:
+            # Test the point is inside a sphere of radius 1.5 (major radius = 1. + minor radius = 0.5)
+            assert (point[0]*point[0] + point[1]*point[1] + point[2]*point[2]) <= 2.25
+    
+    with pytest.raises(ValueError):
+        points.torus_embedded_r3(n_samples=10, sample="other")
