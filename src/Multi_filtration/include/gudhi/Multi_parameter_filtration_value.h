@@ -233,7 +233,7 @@ class Multi_parameter_filtration_value {
   Multi_parameter_filtration_value(const Underlying_container &generators, int numberOfParameters)
       : generators_(generators, numberOfParameters < 0 ? 0 : numberOfParameters) {
     if constexpr (Ensure1Criticality) {
-      if (generators_.num_generators() != 1)
+      if (generators_.num_generators() > 1)
         throw std::invalid_argument("Multiparameter filtration value is not 1-critical.");
     }
   }
@@ -248,7 +248,7 @@ class Multi_parameter_filtration_value {
   Multi_parameter_filtration_value(Underlying_container &&generators, int numberOfParameters)
       : generators_(std::move(generators), numberOfParameters < 0 ? 0 : numberOfParameters) {
     if constexpr (Ensure1Criticality) {
-      if (generators_.num_generators() != 1)
+      if (generators_.num_generators() > 1)
         throw std::invalid_argument("Multiparameter filtration value is not 1-critical.");
     }
   }
@@ -256,12 +256,22 @@ class Multi_parameter_filtration_value {
   /**
    * @brief Builds filtration value by copying given @ref StoragePolicy.
    */
-  Multi_parameter_filtration_value(const StoragePolicy &generators) : generators_(generators) {}
+  Multi_parameter_filtration_value(const StoragePolicy &generators) : generators_(generators) {
+    if constexpr (Ensure1Criticality) {
+      if (generators_.num_generators() > 1)
+        throw std::invalid_argument("Multiparameter filtration value is not 1-critical.");
+    }
+  }
 
   /**
    * @brief Builds filtration value by moving given @ref StoragePolicy.
    */
-  Multi_parameter_filtration_value(StoragePolicy &&generators) : generators_(std::move(generators)) {}
+  Multi_parameter_filtration_value(StoragePolicy &&generators) : generators_(std::move(generators)) {
+    if constexpr (Ensure1Criticality) {
+      if (generators_.num_generators() > 1)
+        throw std::invalid_argument("Multiparameter filtration value is not 1-critical.");
+    }
+  }
 
   /**
    * @brief Copy constructor.
@@ -368,8 +378,12 @@ class Multi_parameter_filtration_value {
    */
   const StoragePolicy &get_underlying_policy() const { return generators_; }
 
+  // TODO: return a real view disabling all unsafe methods?
   /**
-   * @brief Returns reference to underlying value container.
+   * @brief Returns reference to underlying value container. Only meant as a writable view, to modify directly already
+   * existing generators in the container. **Do not** resize it or any other operation which could reallocate it and
+   * invalidate stored pointers. There is also no guarantee that any changes in number of parameters or generators will
+   * be properly registered by the storage class.
    */
   Underlying_container &get_underlying_container() { return generators_.get_underlying_container(); }
 
@@ -700,6 +714,8 @@ class Multi_parameter_filtration_value {
   /**
    * @brief Returns a filtration value such that an entry at index \f$ i,j \f$ is equal to \f$ -f(i,j) \f$.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is not ordered anymore if it was. Do not forget to call
+   * @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ -NaN = NaN \f$.
@@ -738,6 +754,8 @@ class Multi_parameter_filtration_value {
    * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -764,6 +782,8 @@ class Multi_parameter_filtration_value {
    * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ r(p) - f(g,p) \f$
    * if \f$ p < length_r \f$ and to \f$ -f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -838,6 +858,8 @@ class Multi_parameter_filtration_value {
    * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) - r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ inf - inf = NaN \f$,
@@ -887,6 +909,8 @@ class Multi_parameter_filtration_value {
    * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -913,6 +937,8 @@ class Multi_parameter_filtration_value {
    * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ r(p) + f(g,p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -981,6 +1007,8 @@ class Multi_parameter_filtration_value {
    * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) + r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ inf + (-inf) = NaN \f$,
@@ -1029,6 +1057,8 @@ class Multi_parameter_filtration_value {
    * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1057,6 +1087,8 @@ class Multi_parameter_filtration_value {
    * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ r(p) * f(g,p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1083,6 +1115,8 @@ class Multi_parameter_filtration_value {
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) * val \f$.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1106,6 +1140,8 @@ class Multi_parameter_filtration_value {
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val * f(g,p) \f$.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1131,6 +1167,8 @@ class Multi_parameter_filtration_value {
    * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) * r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1158,6 +1196,8 @@ class Multi_parameter_filtration_value {
   /**
    * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) * val \f$.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ inf * 0 = NaN \f$,
@@ -1184,6 +1224,8 @@ class Multi_parameter_filtration_value {
    * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1215,6 +1257,8 @@ class Multi_parameter_filtration_value {
    * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ r(p) / f(g,p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1248,6 +1292,8 @@ class Multi_parameter_filtration_value {
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) / val \f$.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1274,6 +1320,8 @@ class Multi_parameter_filtration_value {
   /**
    * @brief Returns a filtration value such that an entry at index \f$ (g,p) \f$ is equal to \f$ val / f(g,p) \f$.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1306,6 +1354,8 @@ class Multi_parameter_filtration_value {
    * \f$ 0 \leq g \leq num\_generators \f$ and \f$ 0 \leq p \leq num\_parameters \f$ is equal to \f$ f(g,p) / r(p) \f$
    * if \f$ p < length_r \f$ and to \f$ f(g,p) \f$ otherwise.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -1335,6 +1385,8 @@ class Multi_parameter_filtration_value {
   /**
    * @brief Modifies the first parameter such that an entry at index \f$ (g,p) \f$ is equal to \f$ f(g,p) / val \f$.
    * If `StoragePolicy` has a fixed parameter, this one will not change value.
+   * Note that it means that the resulting value is potentially not ordered or simplified anymore if it was. Do not
+   * forget to call @ref simplify before calling another method expecting it.
    *
    * Used conventions:
    * - \f$ a / 0 = NaN \f$,
@@ -2317,7 +2369,12 @@ class Multi_parameter_filtration_value {
    * @return End position of the serialization in the buffer.
    */
   friend const char *deserialize_value_from_char_buffer(Multi_parameter_filtration_value &value, const char *start) {
-    return deserialize_value_from_char_buffer(value.generators_, start);
+    const char *end = deserialize_value_from_char_buffer(value.generators_, start);
+    if constexpr (Ensure1Criticality) {
+      if (value.generators_.num_generators() != 1)
+        throw std::invalid_argument("Underlying buffer does not contain a 1-critical value.");
+    }
+    return end;
   }
 
   /**
@@ -2456,16 +2513,18 @@ class Multi_parameter_filtration_value {
         // for each generator in b, verify if it is in the cone of at least one generator of a
         bool isContained = false;
         for (size_type j = 0; j < a.num_generators() && !isContained; ++j) {
+          size_type aj = Co ? a.num_generators() - 1 - j : j;
+          size_type bi = Co ? b.num_generators() - 1 - i : i;
           // lexicographical order, so if a[j][0] strictly dom b[j][0], than a[j'] can never contain b[i]
           // for all j' > j.
           if constexpr (strict) {
             if constexpr (StoragePolicy::has_lexicographical_storage)
-              if (_dominates(a.generators_(j, 0), b.generators_(i, 0))) return false;
-            isContained = _strictly_contains(a.generators_, j, b.generators_, i);
+              if (_dominates(a.generators_(aj, 0), b.generators_(bi, 0))) return false;
+            isContained = _strictly_contains(a.generators_, aj, b.generators_, bi);
           } else {
             if constexpr (StoragePolicy::has_lexicographical_storage)
-              if (_strictly_dominates(a.generators_(j, 0), b.generators_(i, 0))) return false;
-            isContained = _contains(a.generators_, j, b.generators_, i);
+              if (_strictly_dominates(a.generators_(aj, 0), b.generators_(bi, 0))) return false;
+            isContained = _contains(a.generators_, aj, b.generators_, bi);
           }
         }
         if (!isContained) return false;

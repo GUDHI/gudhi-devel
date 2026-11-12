@@ -292,6 +292,76 @@ void test_comparators() {
 }
 
 template <class F, typename T>
+void test_co_comparators() {
+  const int num_param = 2;
+  std::vector<T> v1, v2, v3;
+
+  if constexpr (F::ensures_1_criticality()) {
+    v1 = {3, 1};
+    v2 = {3, 1};
+    v3 = {2, 0};
+  } else {
+    v1 = {1, 3, 3, 1};
+    v2 = {1, 3, 3, 1};
+    v3 = {2, 0};
+  }
+
+  F f1(v1.begin(), v1.end(), num_param);
+  F f2(v2.begin(), v2.end(), num_param);
+  F f3(v3.begin(), v3.end(), num_param);
+
+  BOOST_CHECK(!(f1 < f1));
+  BOOST_CHECK(!(f1 < f2));
+  std::cout << f1 << "\n";
+  std::cout << f2 << "\n";
+  std::cout << f3 << "\n";
+  BOOST_CHECK(f1 < f3);
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN) BOOST_CHECK(!(f1 < F::nan(num_param)));
+  BOOST_CHECK(!(f1 < F::inf(num_param)));
+  BOOST_CHECK(f1 < F::minus_inf(num_param));
+
+  BOOST_CHECK(f1 <= f1);
+  BOOST_CHECK(f1 <= f2);
+  BOOST_CHECK(f1 <= f3);
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN) BOOST_CHECK(!(f1 <= F::nan(num_param)));
+  BOOST_CHECK(!(f1 <= F::inf(num_param)));
+  BOOST_CHECK(f1 <= F::minus_inf(num_param));
+
+  BOOST_CHECK(!(f1 > f1));
+  BOOST_CHECK(!(f1 > f2));
+  BOOST_CHECK(!(f1 > f3));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN) BOOST_CHECK(!(f1 > F::nan(num_param)));
+  BOOST_CHECK(f1 > F::inf(num_param));
+  BOOST_CHECK(!(f1 > F::minus_inf(num_param)));
+
+  BOOST_CHECK(f1 >= f1);
+  BOOST_CHECK(f1 >= f2);
+  BOOST_CHECK(!(f1 >= f3));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN) BOOST_CHECK(!(f1 >= F::nan(num_param)));
+  BOOST_CHECK(f1 > F::inf(num_param));
+  BOOST_CHECK(!(f1 > F::minus_inf(num_param)));
+
+  BOOST_CHECK(f1 == f1);
+  BOOST_CHECK(f1 == f2);
+  BOOST_CHECK(!(f1 == f3));
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN) BOOST_CHECK(!(f1 == F::nan(num_param)));
+  BOOST_CHECK(!(f1 == F::inf(num_param)));
+  BOOST_CHECK(!(f1 == F::minus_inf(num_param)));
+
+  BOOST_CHECK(!(f1 != f1));
+  BOOST_CHECK(!(f1 != f2));
+  BOOST_CHECK(f1 != f3);
+  if constexpr (std::numeric_limits<F>::has_quiet_NaN) BOOST_CHECK(f1 != F::nan(num_param));
+  BOOST_CHECK(f1 != F::inf(num_param));
+  BOOST_CHECK(f1 != F::minus_inf(num_param));
+
+  BOOST_CHECK(!(f3 < f1));
+  BOOST_CHECK(!(f3 <= f1));
+  BOOST_CHECK(f3 > f1);
+  BOOST_CHECK(f3 >= f1);
+}
+
+template <class F, typename T>
 void test_lex_comparators() {
   const int num_param = 3;
   std::vector<T> v1, v2, v3, v4, v5;
@@ -511,6 +581,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(multi_critical_filtration_comparators, T, list_of_
   test_lex_comparators<Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true>, T>();
   test_co_lex_comparators<Multi_parameter_filtration_value<Nested_array_filtration<T>>, T>();
   test_co_lex_comparators<Multi_parameter_filtration_value<Nested_array_filtration<T>, false, true>, T>();
+
+  test_co_comparators<Multi_parameter_filtration_value<Flat_array_filtration<T>, true, false>, T>();
+  test_co_comparators<Multi_parameter_filtration_value<Flat_array_filtration<T>, true, true>, T>();
+  test_co_comparators<Multi_parameter_filtration_value<Nested_array_filtration<T>, true, false>, T>();
+  test_co_comparators<Multi_parameter_filtration_value<Nested_array_filtration<T>, true, true>, T>();
 }
 
 template <class F, typename T>

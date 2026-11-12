@@ -110,9 +110,8 @@ class Degree_bifiltration {
     // necessary for boost::iterator_range to be able to use operator[].
     // Seg fails otherwise for some reasons
     reference operator[](difference_type n) const {
-      GUDHI_CHECK(n == -1 || n == 0 || n == 1, std::out_of_range("Out of range index for Generator."));
-      if (n < 0) return second_;
-      return (index_ == 0) ? *ptr_first_ : second_;
+      GUDHI_CHECK(n + index_ == 0 || n + index_ == 1, std::out_of_range("Out of range index for Generator."));
+      return (n + index_ == 0) ? *ptr_first_ : second_;
     }
 
    private:

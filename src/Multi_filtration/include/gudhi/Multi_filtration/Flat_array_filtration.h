@@ -168,6 +168,8 @@ class Flat_array_filtration {
     return As_type<U>(std::move(newContainer), numberOfParameters);
   }
 
+  // **Do not** resize it or any other operation which could reallocate it.
+  // TODO: find a more safe solution, e.g. with a wrapper which disables all reallocating methods?
   Underlying_container &get_underlying_container() { return generators_; }
 
   const Underlying_container &get_underlying_container() const { return generators_; }

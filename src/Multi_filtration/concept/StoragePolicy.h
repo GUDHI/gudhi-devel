@@ -240,7 +240,8 @@ class StoragePolicy {
   bool has_same_implicit_values(const StoragePolicy& other) const;
 
   /**
-   * @brief Returns reference to underlying container.
+   * @brief Returns reference to underlying container. It is not expected that the container is getting resized,
+   * that is reallocated.
    */
   Underlying_container &get_underlying_container();
 
