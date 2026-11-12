@@ -58,11 +58,9 @@ int main() {
   Bitmap_cubical_complex complex_from_vertices2_5d(sizes_5d_vertices, data_5d_vertices, false);
   std::clog << cub_5d_from_vertices2_creation_clock;
 
-#if 0
-  // TODO: this takes a bit too long, do it on a smaller complex
+  // This takes a bit long, especially without tbb, so don't include this program in the tests (or reduce the size).
   Gudhi::Clock sort_5d_clock("Cubical complex initialize_filtration in 5D");
   complex_from_vertices2_5d.initialize_filtration();
   std::clog << sort_5d_clock;
-#endif
   return 0;
 }
