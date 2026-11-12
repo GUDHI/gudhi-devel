@@ -21,6 +21,7 @@
 #include <sstream>
 #include <vector>
 #include <limits>
+#include <algorithm>
 
 typedef Gudhi::cubical_complex::Bitmap_cubical_complex_base<double> Bitmap_cubical_complex_base;
 typedef Gudhi::cubical_complex::Bitmap_cubical_complex<Bitmap_cubical_complex_base> Bitmap_cubical_complex;
