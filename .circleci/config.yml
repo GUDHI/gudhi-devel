@@ -85,7 +85,8 @@ jobs:
             cd version
             cmake -DCMAKE_BUILD_TYPE=Release -DWITH_GUDHI_EXAMPLE=OFF -DWITH_GUDHI_UTILITIES=OFF -DWITH_GUDHI_PYTHON=ON -DWITH_GUDHI_REMOTE_TEST=ON .
             cd python
-            make -j 2 sphinx
+            make -j 2 sphinx sphinx_linkcheck
+            mv sphinx/output.txt sphinx/sphinx_linkcheck_output.txt 
             cp -R sphinx /tmp/sphinx
       - store_artifacts:
           path: /tmp/sphinx

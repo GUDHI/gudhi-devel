@@ -275,7 +275,7 @@ def _load_and_cache_activity(file_path):
 def fetch_daily_activities(file_path=None, subset=None, accept_license=False):
     """
     Load a subset of the Daily and Sports Activities dataset. This dataset comes from
-    https://archive.ics.uci.edu/ml/datasets/daily+and+sports+activities (CC BY 4.0 license).
+    https://archive.ics.uci.edu/dataset/256/daily+and+sports+activities (CC BY 4.0 license).
 
     Note that if the dataset already exists in the target location, it is not downloaded again,
     and the corresponding dataset is read from cache.

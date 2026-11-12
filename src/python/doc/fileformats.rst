@@ -84,7 +84,7 @@ Perseus
 *******
 
 This file format is a format inspired from the
-`Perseus software <http://www.sas.upenn.edu/~vnanda/perseus/>`_ by Vidit Nanda.
+`Perseus software <https://people.maths.ox.ac.uk/nanda/perseus/index.html>`_ by Vidit Nanda.
 The first line contains a number d begin the dimension of the bitmap (2 in the
 example below). Next d lines are the numbers of top dimensional cubes in each
 dimensions (3 and 3 in the example below). Next, in lexicographical order, the

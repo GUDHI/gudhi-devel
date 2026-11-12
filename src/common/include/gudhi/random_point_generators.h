@@ -18,7 +18,8 @@
 #include <CGAL/point_generators_d.h>
 #include <CGAL/version.h>  // for CGAL_VERSION_NR
 
-#include <vector>  // for vector<>
+#include <vector>
+#include <string>
 #include <boost/math/constants/constants.hpp> // for pi constant
 
 // Make compilation fail - required for external projects - https://github.com/GUDHI/gudhi-devel/issues/10
@@ -150,7 +151,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_moment_curve(std::size_
 // R = big radius, r = small radius
 template <typename Kernel/*, typename TC_basis*/>
 std::vector<typename Kernel::Point_d> generate_points_on_torus_3D(std::size_t num_points, double R, double r,
-                                                                  bool uniform = false) {
+                                                                  const std::string& sample = "random") {
   using namespace boost::math::double_constants;
 
   typedef typename Kernel::Point_d Point;
@@ -163,6 +164,7 @@ std::vector<typename Kernel::Point_d> generate_points_on_torus_3D(std::size_t nu
 
   std::vector<Point> points;
   points.reserve(num_points);
+  bool uniform = (sample == "grid");
   for (std::size_t i = 0; i < num_points;) {
     FT u, v;
     if (uniform) {

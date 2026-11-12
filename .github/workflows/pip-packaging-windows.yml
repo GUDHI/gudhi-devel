@@ -41,7 +41,7 @@ jobs:
           vcpkg update
           Set-Location $originalDir
           set VCPKG_BUILD_TYPE=release
-          vcpkg install eigen3 cgal --triplet x64-windows
+          vcpkg install eigen3 cgal boost-sort --triplet x64-windows
           vcpkg version
           ls "C:\vcpkg\installed\x64-windows\bin\"
           python -m pip install --user numpy>=2.0

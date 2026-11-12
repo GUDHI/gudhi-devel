@@ -145,7 +145,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
 
     def insert_batch(self, vertex_array: ArrayLike, filtrations: ArrayLike) -> SimplexTree:
         """Inserts k-simplices given by a sparse array in a format similar
-        to `torch.sparse <https://pytorch.org/docs/stable/sparse.html>`_.
+        to `torch.sparse <https://docs.pytorch.org/docs/stable/sparse.html>`_.
         The n-th simplex has vertices `vertex_array[0,n]`, ...,
         `vertex_array[k,n]` and filtration value `filtrations[n]`.
         If a simplex is repeated, the smallest filtration value is used.
