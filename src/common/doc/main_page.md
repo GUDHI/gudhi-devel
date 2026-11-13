@@ -426,12 +426,68 @@
       <b>Introduced in:</b> GUDHI 3.11.0<br>
       <b>Copyright:</b> MIT<br>
     </td>
- </tr>
- <tr>
-    <td colspan=2 height="25">
-    <b>User manual:</b> \ref zigzag_persistence
+  </tr>
+  <tr>
+      <td colspan=2 height="25">
+      <b>User manual:</b> \ref zigzag_persistence
+      </td>
+  </tr>
+</table>
+
+### Multi-parameter Persistence
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "multidiagrams.png"
     </td>
- </tr>
+    <td width="50%">
+    Multi-parameter persistence studies topological features across filtrations indexed by several parameters
+    simultaneously, rather than a single scalar. The Multi-parameter Filtration Values module provides data structures
+    to represent and compare filtration values under the coordinatewise partial order, including efficient
+    representations for structured bifiltrations. The Multi-parameter Persistence module builds on this foundation
+    to support computations in multi-parameter persistent homology, allowing topological information to be studied as
+    several parameters vary independently.
+    </td>
+    <td width="15%">
+      <b>Author:</b> David Loiseaux, Hannah Schreiber<br>
+      <b>Introduced in:</b> GUDHI 3.xx.0<br>
+      <b>License:</b> MIT<br>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2 height="25">
+      <b>User manual:</b> \ref multi_filtration and \ref multi_persistence
+    </td>
+  </tr>
+</table>
+
+### Vineyard
+
+<table>
+  <tr>
+    <td width="35%" rowspan=2>
+      \image html "vineyard_ex2.png"
+    </td>
+    <td width="50%">
+    A vine is the trajectory traced by a single point in the persistence diagram as the filtration of a same complex
+    changes over time. The set of those vines from all (or several) points in the persistence diagram form a 3D space
+    of curves called a vineyard. Vineyards can therefore be used as a tool to analyze more dynamic systems with fixed
+    number of underlying elements (for example, moving point clouds).
+
+    The implementation is based on @cite vineyards and @cite zigzag.
+    </td>
+    <td width="15%">
+      <b>Author:</b> Hannah Schreiber, David Loiseaux<br>
+      <b>Introduced in:</b> GUDHI 3.1x.0<br>
+      <b>Copyright:</b> MIT<br>
+    </td>
+  </tr>
+  <tr>
+      <td colspan=2 height="25">
+      <b>User manual:</b> \ref vineyard
+      </td>
+  </tr>
 </table>
 
 ## Topological descriptors tools {#TopologicalDescriptorsTools}
