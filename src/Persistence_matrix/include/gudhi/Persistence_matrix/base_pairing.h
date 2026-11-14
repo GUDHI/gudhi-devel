@@ -139,7 +139,7 @@ inline const typename Base_pairing<Master_matrix>::Barcode& Base_pairing<Master_
 template <class Master_matrix>
 inline void Base_pairing<Master_matrix>::_reduce()
 {
-  constexpr const Pos_index nullDeath = Master_matrix::template get_null_value<Pos_index>();
+  constexpr const Pos_index nullDeath = Master_matrix::Bar::inf;
   constexpr const Index nullIndex = Master_matrix::template get_null_value<Index>();
   constexpr const ID_index nullPivot = Master_matrix::template get_null_value<ID_index>();
 
@@ -194,7 +194,7 @@ inline void Base_pairing<Master_matrix>::_reduce()
     // map can only be constructed once barcode is sorted
     for (Index i = 0; i < barcode_.size(); ++i) {
       auto d = barcode_[i].death;
-      if (d != Master_matrix::template get_null_value<Pos_index>()) {
+      if (d != Master_matrix::Bar::inf) {
         deathToBar_.emplace(d, i);
       }
     }
@@ -228,7 +228,7 @@ inline void Base_pairing<Master_matrix>::_remove_last(Pos_index columnIndex)
     if (it == deathToBar_.end()) {  // birth
       barcode_.pop_back();          // sorted by birth and columnIndex has to be the highest one
     } else {                        // death
-      barcode_[it->second].death = Master_matrix::template get_null_value<Pos_index>();
+      barcode_[it->second].death = Master_matrix::Bar::inf;
       deathToBar_.erase(it);
     };
   }
