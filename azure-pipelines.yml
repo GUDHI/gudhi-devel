@@ -41,7 +41,7 @@ jobs:
           python -m pip install -r ext/gudhi-deploy/build-requirements.txt
           python -m pip install -r ext/gudhi-deploy/test-requirements.txt
           choco install -y ninja --force --force-dependencies
-          vcpkg install boost-filesystem boost-test boost-program-options tbb eigen3 cgal --triplet x64-windows-release
+          vcpkg install boost-filesystem boost-test boost-program-options boost-safe-numerics tbb eigen3 cgal --triplet x64-windows-release
         displayName: "Install build dependencies"
       - task: BatchScript@1
         inputs:
