@@ -15,6 +15,7 @@
 #include <cstring>  // for memcpy and std::size_t
 #include <vector>
 #include <utility>
+#include <type_traits>
 
 namespace Gudhi {
 
@@ -38,7 +39,7 @@ namespace Gudhi {
 //  */
 
 
-template <typename T, class>
+template <typename T, class = std::enable_if_t<std::is_arithmetic_v<T>>>
 inline char *serialize_value_to_char_buffer(T value, char *start);
 template <typename T>
 inline char *serialize_value_to_char_buffer(const std::vector<T> &range, char *start);
@@ -60,7 +61,7 @@ inline char *serialize_value_to_char_buffer(const std::pair<T1, T2> &pair, char 
 //  */
 
 
-template <typename T, class>
+template <typename T, class = std::enable_if_t<std::is_arithmetic_v<T>>>
 inline const char *deserialize_value_from_char_buffer(T &value, const char *start);
 template <typename T>
 inline const char *deserialize_value_from_char_buffer(std::vector<T> &range, const char *start);
@@ -79,7 +80,7 @@ inline const char *deserialize_value_from_char_buffer(std::pair<T1, T2> &pair, c
 //  */
 
 
-template <typename T, class>
+template <typename T, class = std::enable_if_t<std::is_arithmetic_v<T>>>
 inline std::size_t get_serialization_size_of([[maybe_unused]] T value);
 template <typename T>
 inline std::size_t get_serialization_size_of(const std::vector<T> &range);
@@ -92,21 +93,21 @@ inline std::size_t get_serialization_size_of(const std::pair<T1, T2> &pair);
 /****************************************************/
 
 
-template <typename T, class = std::enable_if_t<std::is_arithmetic_v<T>>>
+template <typename T, class>
 inline char *serialize_value_to_char_buffer(T value, char *start) {
   const std::size_t argSize = sizeof(T);
   memcpy(start, &value, argSize);
   return start + argSize;
 }
 
-template <typename T, class = std::enable_if_t<std::is_arithmetic_v<T>>>
+template <typename T, class>
 inline const char *deserialize_value_from_char_buffer(T &value, const char *start) {
   const std::size_t argSize = sizeof(T);
   memcpy(&value, start, argSize);
   return start + argSize;
 }
 
-template <typename T, class = std::enable_if_t<std::is_arithmetic_v<T>>>
+template <typename T, class>
 inline std::size_t get_serialization_size_of([[maybe_unused]] T value) {
   return sizeof(T);
 }
