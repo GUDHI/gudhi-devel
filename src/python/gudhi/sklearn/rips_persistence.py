@@ -21,7 +21,7 @@ from scipy.spatial import cKDTree
 from scipy.spatial.distance import pdist, squareform
 
 from .._ripser_ext import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
-from ..flag_filtration.edge_collapse import reduce_graph
+from ..filtrations.edge_collapse import reduce_graph
 from ..data_structures import SimplexTree
 
 
@@ -45,7 +45,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
     This is a class for constructing Vietoris-Rips filtrations (possibly implicitly) and computing their persistence
     diagrams. sIt does not always use :class:`~gudhi.filtrations.RipsComplex` or
     :class:`~gudhi.data_structures.SimplexTree`, or not naively, it may also use
-    :func:`~gudhi.flag_filtration.edge_collapse.reduce_graph` and a fork of Ripser :cite:`Ripser` and can be
+    :func:`~gudhi.filtrations.edge_collapse.reduce_graph` and a fork of Ripser :cite:`Ripser` and can be
     significantly faster.
     """
 
@@ -74,7 +74,7 @@ class RipsPersistence(BaseEstimator, TransformerMixin):
                 sparse format, which should contain each edge at most once (avoid the symmetric) and no diagonal entry.
                 Default is 'point cloud'.
             num_collapses: Specify the number of iterations of
-                :func:`~gudhi.flag_filtration.edge_collapse.reduce_graph` (edge collapse) to perform on the graph.
+                :func:`~gudhi.filtrations.edge_collapse.reduce_graph` (edge collapse) to perform on the graph.
                 Default value is 'auto'.
             homology_coeff_field: The homology coefficient field. Must be a prime number. Default value is 11.
             n_jobs: Number of jobs to run in parallel. `None` (default value) means `n_jobs = 1` unless in a

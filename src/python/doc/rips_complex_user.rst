@@ -161,7 +161,7 @@ or
    cplx.expansion(2)
 
 
-This way, you can easily add a call to :func:`~gudhi.flag_filtration.edge_collapse.reduce_graph` before the insertion,
+This way, you can easily add a call to :func:`~gudhi.filtrations.edge_collapse.reduce_graph` before the insertion,
 use a different metric to compute the matrix, or other variations.
 
 Distance matrix

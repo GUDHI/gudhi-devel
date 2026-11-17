@@ -29,7 +29,6 @@ endif()
 
 nanobind_add_module_with_targets(_pers_cub_low_dim_ext _pers_cub_low_dim.cc TARGETS TBB::tbb)
 nanobind_add_module_with_targets(_ripser_ext _ripser.cc)
-nanobind_add_module_with_targets(_edge_collapse_ext _edge_collapse.cc TARGETS TBB::tbb)
 nanobind_add_module_with_targets(_reader_utils_ext _reader_utils.cc)
 nanobind_add_module_with_targets(_witness_complex_ext _witness_complex.cc TARGETS TBB::tbb)
 nanobind_add_module_with_targets(_strong_witness_complex_ext _strong_witness_complex.cc TARGETS TBB::tbb)

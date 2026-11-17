@@ -24,7 +24,7 @@ When :paramref:`~gudhi.filtrations.DelaunayComplex.create_simplex_tree.filtratio
 * `'cech'`      - The filtration value of each simplex is computed as a :class:`~gudhi.filtrations.DelaunayCechComplex`
 
 Remarks about the :class:`~gudhi.filtrations.AlphaComplex` and the :class:`~gudhi.filtrations.DelaunayCechComplex`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 These remarks apply to the :class:`~gudhi.filtrations.AlphaComplex` and to the
 :class:`~gudhi.filtrations.DelaunayCechComplex` that we will call *'complex'* in the following text.
