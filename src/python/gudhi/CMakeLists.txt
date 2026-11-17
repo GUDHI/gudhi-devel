@@ -33,9 +33,6 @@ nanobind_add_module_with_targets(_reader_utils_ext _reader_utils.cc)
 nanobind_add_module_with_targets(_hera_ext _hera.cc)
 nanobind_add_module_with_targets(_bottleneck_ext _bottleneck.cc TARGETS CGAL::CGAL TBB::tbb)
 
-nanobind_add_module_with_targets(_nerve_gic_ext _nerve_gic.cc TARGETS TBB::tbb)
-link_with_default_random(_nerve_gic_ext)
-
 nanobind_add_module_with_targets(_subsampling_ext _subsampling.cc TARGETS Eigen3::Eigen CGAL::CGAL TBB::tbb)
 if (TARGET CGAL::CGAL AND TARGET Eigen3::Eigen)
   link_with_default_random(_subsampling_ext)

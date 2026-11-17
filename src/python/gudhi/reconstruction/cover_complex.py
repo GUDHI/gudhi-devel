@@ -25,8 +25,8 @@ from sklearn.utils.fixes import parse_version
 
 agglomerative_clustering_metric = parse_version(sklearn_version) >= parse_version("1.2.0")
 
-from . import CoverComplex
-from .data_structures import SimplexTree
+from .nerve_gic import CoverComplex
+from ..data_structures import SimplexTree
 
 
 def _save_to_html(dat, lens, color, param, points, edges, html_output_filename):

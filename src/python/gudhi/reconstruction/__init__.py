@@ -1,9 +1,11 @@
 from .witness_complex import WitnessComplex
 from .strong_witness_complex import StrongWitnessComplex
+from .nerve_gic import CoverComplex
 
 __all__ = [
     'WitnessComplex',
     'StrongWitnessComplex',
+    'CoverComplex',
 ]
 
 try:

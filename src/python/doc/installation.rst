@@ -350,9 +350,10 @@ The following examples require the `Matplotlib <https://matplotlib.org>`_:
 NetworkX
 --------
 
-The :class:`~gudhi.cover_complex.GraphInducedComplex`, :class:`~gudhi.cover_complex.MapperComplex` and
-:class:`~gudhi.cover_complex.NerveComplex` `get_networkx` methods require `NetworkX <https://networkx.org/>`_,
-a Python library for studying and visualizing graphs and networks.
+The :class:`~gudhi.reconstruction.cover_complex.GraphInducedComplex`,
+:class:`~gudhi.reconstruction.cover_complex.MapperComplex` and
+:class:`~gudhi.reconstruction.cover_complex.NerveComplex` `get_networkx` methods require
+`NetworkX <https://networkx.org/>`_, a Python library for studying and visualizing graphs and networks.
 
 Pandas
 -------

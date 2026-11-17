@@ -8,9 +8,16 @@ Mapper/GIC/Nerve complexes user manual
 Definition
 ----------
 
-We provide two types of classes for computing cover complexes: one is comprised of the :class:`~gudhi.cover_complex.NerveComplex`, :class:`~gudhi.cover_complex.GraphInducedComplex` and :class:`~gudhi.cover_complex.MapperComplex` classes, which correspond to the Nerve, Graph Induced and Mapper complexes respectively, and are written in a scikit-learn format,
-while the other type is :class:`~gudhi.CoverComplex`, which only computes Nerve and Graph Induced complexes, but is a bit more flexible for input types (it can read inputs from paths to files for instance,
-while :class:`~gudhi.cover_complex.NerveComplex`, :class:`~gudhi.cover_complex.GraphInducedComplex` and :class:`~gudhi.cover_complex.MapperComplex` need the inputs to be stored in memory).
+We provide two types of classes for computing cover complexes: one is comprised of the
+:class:`~gudhi.reconstruction.cover_complex.NerveComplex`,
+:class:`~gudhi.reconstruction.cover_complex.GraphInducedComplex` and
+:class:`~gudhi.reconstruction.cover_complex.MapperComplex` classes, which correspond to the Nerve, Graph Induced and
+Mapper complexes respectively, and are written in a scikit-learn format,
+while the other type is :class:`~gudhi.reconstruction.CoverComplex`, which only computes Nerve and Graph Induced
+complexes, but is a bit more flexible for input types (it can read inputs from paths to files for instance,
+while :class:`~gudhi.reconstruction.cover_complex.NerveComplex`,
+:class:`~gudhi.reconstruction.cover_complex.GraphInducedComplex` and
+:class:`~gudhi.reconstruction.cover_complex.MapperComplex` need the inputs to be stored in memory).
 
 Key differences between Mapper, Nerve and Graph Induced complexes (GIC) are: Mapper nodes are defined with given input clustering method while GIC nodes are defined with given input graph and Nerve nodes are defined with cover elements, GIC accepts partitions instead of covers while Mapper and Nerve require cover elements to overlap. Also, note that when the cover is functional (i.e., preimages of filter functions), GIC only accepts one scalar-valued filter with gain < 0.5. On the other hand, Mapper complexes accept resolutions and gains with any length.
 
@@ -51,7 +58,7 @@ Example of Mapper cover complex computed from a point cloud
 
     import numpy as np
     from sklearn.cluster import AgglomerativeClustering
-    from gudhi.cover_complex import MapperComplex
+    from gudhi.reconstruction.cover_complex import MapperComplex
 
     X = np.array([[1,1],[1,1.5],[1,2],[1,2.5],[1,3],[1.5,2],[1.5,3],[2,2],[2,2.5],[2,3],[2,3.5],[2,4]])
     F = np.array([[1,1,1,1,1,1.5,1.5,2,2,2,2,2],[1,1.5,2,2.5,3,2,3,2,2.5,3,3.5,4]]).T

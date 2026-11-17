@@ -5,17 +5,17 @@
 Mapper/GIC/Nerve complexes reference manual
 ===========================================
 
-:class:`~gudhi.cover_complex.MapperComplex` reference manual
-------------------------------------------------------------
+:class:`~gudhi.reconstruction.cover_complex.MapperComplex` reference manual
+---------------------------------------------------------------------------
 
-.. autoclass:: gudhi.cover_complex.MapperComplex
+.. autoclass:: gudhi.reconstruction.cover_complex.MapperComplex
    :members:
    :inherited-members:
 
-:class:`~gudhi.cover_complex.GraphInducedComplex` reference manual
-------------------------------------------------------------------
+:class:`~gudhi.reconstruction.cover_complex.GraphInducedComplex` reference manual
+---------------------------------------------------------------------------------
 
-.. autoclass:: gudhi.cover_complex.GraphInducedComplex
+.. autoclass:: gudhi.reconstruction.cover_complex.GraphInducedComplex
    :members:
    :inherited-members:
 
