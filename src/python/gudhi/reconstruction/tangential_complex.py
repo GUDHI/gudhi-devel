@@ -14,8 +14,8 @@ __license__ = "GPL v3"
 import os
 import warnings
 
-from gudhi import _tangential_complex_ext as t
-from gudhi.data_structures.simplex_tree import SimplexTree
+from . import _tangential_complex_ext as t
+from ..data_structures.simplex_tree import SimplexTree
 
 
 # TangentialComplex python interface

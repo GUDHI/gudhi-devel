@@ -9,7 +9,7 @@
       - YYYY/MM Author: Description of the modification
 """
 
-from gudhi import TangentialComplex
+from gudhi.reconstruction import TangentialComplex
 
 
 def test_tangential():

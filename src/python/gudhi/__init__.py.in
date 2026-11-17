@@ -84,7 +84,7 @@ try:
     from .euclidean_strong_witness_complex import EuclideanStrongWitnessComplex
     from .euclidean_witness_complex import EuclideanWitnessComplex
 
-    from .tangential_complex import TangentialComplex
+    from .reconstruction import TangentialComplex
     
     from .subsampling import (
         choose_n_farthest_points,

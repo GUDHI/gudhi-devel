@@ -110,9 +110,9 @@ Output
 The result of the computation is exported as a :class:`~gudhi.data_structures.SimplexTree`. It is the union of
 the stars of all the input points. A vertex in the Simplex Tree is the index of
 the point in the range provided by the user. The point corresponding to a
-vertex can also be obtained through the :func:`gudhi.TangentialComplex.get_point` function.
+vertex can also be obtained through the :func:`gudhi.reconstruction.TangentialComplex.get_point` function.
 Note that even if the positions of the points are perturbed, their original
-positions are kept (e.g. :func:`~gudhi.TangentialComplex.get_point` returns the original
+positions are kept (e.g. :func:`~gudhi.reconstruction.TangentialComplex.get_point` returns the original
 position of the point).
 
 The result can be obtained after the computation of the Tangential complex
@@ -126,7 +126,7 @@ This example builds the Tangential complex of point set.
 
 .. testcode::
 
-    from gudhi import TangentialComplex
+    from gudhi.reconstruction import TangentialComplex
     pts = [[1., 1. ],
            [7., 0. ],
            [4., 6. ],
@@ -175,7 +175,7 @@ simplices.
 
 .. testcode::
 
-    from gudhi import TangentialComplex
+    from gudhi.reconstruction import TangentialComplex
     tc = TangentialComplex(intrinsic_dim = 1, points = [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
     tc.compute_tangential_complex()
     print(f'Tangential contains {tc.num_vertices()} vertices.')
