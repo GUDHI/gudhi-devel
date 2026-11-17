@@ -59,11 +59,10 @@ Here is a simple sample file::
 Other sample files can be found in the `data/persistence_diagram` folder.
 
 Such files can be generated with
-:meth:`gudhi.SimplexTree.write_persistence_diagram`, read with
-:meth:`gudhi.read_persistence_intervals_grouped_by_dimension`, or
-:meth:`gudhi.read_persistence_intervals_in_dimension` and displayed with
-:meth:`gudhi.plot_persistence_barcode` or
-:meth:`gudhi.plot_persistence_diagram`.
+:meth:`gudhi.SimplexTree.write_persistence_diagram`, :meth:`gudhi.CubicalComplex.write_persistence_diagram` or
+:meth:`gudhi.PeriodicCubicalComplex.write_persistence_diagram`, read with
+:meth:`gudhi.read_persistence_intervals_grouped_by_dimension`, or :meth:`gudhi.read_persistence_intervals_in_dimension`
+and displayed with :meth:`gudhi.plot_persistence_barcode` or :meth:`gudhi.plot_persistence_diagram`.
 
 Iso-cuboid
 **********

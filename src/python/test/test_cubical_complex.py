@@ -7,6 +7,7 @@
     Modification(s):
       - 2025/04 Hannah Schreiber: Add tests to verify possibility of tensor input
       - 2026/06 Vincent Rouvreau: Add tests for F-contiguous and non contiguous numpy arrays
+      - 2026/07 Vincent Rouvreau: Add tests for write_persistence_file
       - YYYY/MM Author: Description of the modification
 """
 
@@ -14,7 +15,7 @@
 import numpy as np
 import pytest
 
-from gudhi import CubicalComplex, PeriodicCubicalComplex
+from gudhi import CubicalComplex, PeriodicCubicalComplex, read_persistence_intervals_in_dimension
 from numpy.testing import assert_almost_equal
 
 def test_empty_constructor():
@@ -442,3 +443,29 @@ def test_contiguity_for_top_dimensional_cells_input():
                                    periodic_dimensions=(False, False))
     # Test top_dimensional_cells() should be enough here, but let's go with all_cells()
     assert_almost_equal(cub_c.all_cells(), cub_r.all_cells())
+
+def test_cubical_write_persistence_file():
+    cub = CubicalComplex(top_dimensional_cells=[[1000.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]])
+    cub.compute_persistence()
+    # [(1, (0.0, 1.0)), (0, (0.0, float("inf")))]
+    file = "cub.pers"
+    cub.write_persistence_diagram(file)
+    H0 = read_persistence_intervals_in_dimension(persistence_file=file, only_this_dim=0)
+    assert (H0 == np.array([[ 0., np.inf]])).all()
+    H1 = read_persistence_intervals_in_dimension(persistence_file=file, only_this_dim=1)
+    assert (H1 == np.array([[ 0., 1.]])).all()
+    assert len(read_persistence_intervals_in_dimension(persistence_file=file, only_this_dim=2)) == 0
+
+def test_periodic_cubical_write_persistence_file():
+    pcc = PeriodicCubicalComplex(dimensions=[1, 2], top_dimensional_cells=[0.0, 1.0], periodic_dimensions=[True, True])
+    pcc.compute_persistence()
+    # [(2, (1.0, inf)), (1, (0.0, inf)), (1, (1.0, inf)), (0, (0.0, inf))]
+    file = "periodiccub.pers"
+    pcc.write_persistence_diagram(file)
+    H0 = read_persistence_intervals_in_dimension(persistence_file=file, only_this_dim=0)
+    assert (H0 == np.array([[ 0., np.inf]])).all()
+    H1 = read_persistence_intervals_in_dimension(persistence_file=file, only_this_dim=1)
+    assert (H1 == np.array([[ 0., np.inf], [ 1., np.inf]])).all()
+    H2 = read_persistence_intervals_in_dimension(persistence_file=file, only_this_dim=2)
+    assert (H2 == np.array([[ 1., np.inf]])).all()
+    assert len(read_persistence_intervals_in_dimension(persistence_file=file, only_this_dim=3)) == 0
