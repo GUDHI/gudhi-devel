@@ -12,8 +12,8 @@
 __license__ = "GPL v3"
 
 
-from gudhi import _euclidean_witness_complex_ext as t
-from gudhi.data_structures.simplex_tree import SimplexTree
+from . import _euclidean_witness_complex_ext as t
+from ..data_structures.simplex_tree import SimplexTree
 
 
 # EuclideanWitnessComplex python interface

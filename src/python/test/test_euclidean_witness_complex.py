@@ -10,7 +10,7 @@
 """
 
 
-from gudhi import EuclideanWitnessComplex, EuclideanStrongWitnessComplex
+from gudhi.reconstruction import EuclideanWitnessComplex, EuclideanStrongWitnessComplex
 
 
 def test_empty_euclidean_witness_complex():

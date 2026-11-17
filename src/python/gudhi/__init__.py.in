@@ -28,8 +28,8 @@ from .data_structures import CubicalComplex
 from .data_structures import PeriodicCubicalComplex
 from .data_structures import SimplexTree
 from .filtrations import RipsComplex
-from .witness_complex import WitnessComplex
-from .strong_witness_complex import StrongWitnessComplex
+from .reconstruction import WitnessComplex
+from .reconstruction import StrongWitnessComplex
 from .nerve_gic import CoverComplex
 
 from .reader_utils import (
@@ -81,8 +81,8 @@ try:
     # if no CGAL or no Eigen
     from .filtrations import DelaunayComplex, DelaunayCechComplex, AlphaComplex
 
-    from .euclidean_strong_witness_complex import EuclideanStrongWitnessComplex
-    from .euclidean_witness_complex import EuclideanWitnessComplex
+    from .reconstruction import EuclideanStrongWitnessComplex
+    from .reconstruction import EuclideanWitnessComplex
 
     from .reconstruction import TangentialComplex
     
