@@ -5,6 +5,7 @@
 # Copyright (C) 2018 Inria
 #
 # Modification(s):
+#   - 2025/09 Vincent Rouvreau: Hera mode for BottleneckDistance. Remove try/catch ImportError for POT and CGAL
 #   - 2025/01 Vincent Rouvreau: BottleneckDistance(epsilon=...) is deprecated. Consider using BottleneckDistance(e=...)
 #   - YYYY/MM Author: Description of the modification
 
@@ -18,7 +19,7 @@ from joblib import Parallel, delayed
 import warnings
 
 from gudhi.hera import wasserstein_distance as hera_wasserstein_distance
-from .preprocessing import Padding
+from gudhi.hera import bottleneck_distance as hera_bottleneck_distance
 
 
 #############################################
@@ -78,7 +79,7 @@ def _compute_persistence_diagram_projections(X, num_directions):
     return XX
 
 
-def _sliced_wasserstein_distance_on_projections(D1, D2):
+def _sliced_wasserstein_distance_on_projections(D1, D2, **_):
     """
     This is a function for computing the sliced Wasserstein distance between two persistence diagrams that have already been projected onto some lines. It simply amounts to comparing the sorted projections with the 1-norm, and averaging over the lines. See https://proceedings.mlr.press/v70/carriere17a.html for more details.
 
@@ -184,92 +185,75 @@ def _sklearn_wrapper(metric, X, Y, **kwargs):
     return flat_metric
 
 
-PAIRWISE_DISTANCE_FUNCTIONS = {
-    "wasserstein": hera_wasserstein_distance,
-    "hera_wasserstein": hera_wasserstein_distance,
-    "persistence_fisher": _persistence_fisher_distance,
-}
-
-
-def pairwise_persistence_diagram_distances(
-    X, Y=None, metric="bottleneck", n_jobs=None, **kwargs
-):
+def pairwise_persistence_diagram_distances(X, Y=None, metric="bottleneck", n_jobs=None, **kwargs):
     """
-    This function computes the distance matrix between two lists of persistence diagrams given as numpy arrays of shape (nx2).
+    This function computes the distance matrix between two lists of persistence diagrams given as numpy arrays of shape
+    (nx2).
 
     Parameters:
         X (list of n numpy arrays of shape (numx2)): first list of persistence diagrams.
-        Y (list of m numpy arrays of shape (numx2)): second list of persistence diagrams (optional). If None, pairwise distances are computed from the first list only.
-        metric: distance to use. It can be either a string ("sliced_wasserstein", "wasserstein", "hera_wasserstein" (Wasserstein distance computed with Hera---note that Hera is also used for the default option "wasserstein"), "pot_wasserstein" (Wasserstein distance computed with POT), "bottleneck", "persistence_fisher") or a function taking two numpy arrays of shape (nx2) and (mx2) as inputs. If it is a function, make sure that it is symmetric and that it outputs 0 if called on the same two arrays.
-        n_jobs (int): number of jobs to use for the computation. This uses joblib.Parallel(prefer="threads"), so metrics that do not release the GIL may not scale unless run inside a `joblib.parallel_backend <https://joblib.readthedocs.io/en/stable/generated/joblib.parallel_backend.html>`_ block.
-        **kwargs: optional keyword parameters. Any further parameters are passed directly to the distance function. See the docs of the various distance classes in this module.
+        Y (list of m numpy arrays of shape (numx2)): second list of persistence diagrams (optional).
+            If None, pairwise distances are computed from the first list only.
+        metric: distance to use. It can be either a string ("sliced_wasserstein", "wasserstein", "hera_wasserstein"
+            (Wasserstein distance computed with Hera - note that Hera is also used for the default option
+            "wasserstein"), "pot_wasserstein" (Wasserstein distance computed with POT), "bottleneck",
+            "gudhi_bottleneck" (bottleneck distance computed with GUDHI - note that GUDHI is also used for the default
+            option "bottleneck"), "hera_bottleneck" (bottleneck distance computed with Hera), "persistence_fisher" or a
+            function taking two numpy arrays of shape (nx2) and (mx2) as inputs.
+            If it is a function, make sure that it is symmetric and that it outputs 0 if called on the same two arrays.
+        n_jobs (int): number of jobs to use for the computation. This uses joblib.Parallel(prefer="threads"), so
+            metrics that do not release the GIL may not scale unless run inside a
+            `joblib.parallel_backend <https://joblib.readthedocs.io/en/stable/generated/joblib.parallel_backend.html>`
+            block.
+        **kwargs: optional keyword parameters. Any further parameters are passed directly to the distance function.
+            See the docs of the various distance classes in this module.
 
     Returns:
         numpy array of shape (nxm): distance matrix
     """
     XX = np.reshape(np.arange(len(X)), [-1, 1])
     YY = None if Y is None or Y is X else np.reshape(np.arange(len(Y)), [-1, 1])
-    if metric == "bottleneck":
-        try:
-            from .. import bottleneck_distance
-
-            return _pairwise(
-                pairwise_distances,
-                True,
-                XX,
-                YY,
-                metric=_sklearn_wrapper(bottleneck_distance, X, Y, **kwargs),
-                n_jobs=n_jobs,
-            )
-        except ImportError:
-            print("Gudhi built without CGAL")
-            raise
-    elif metric == "pot_wasserstein":
-        try:
+    if isinstance(metric, str):
+        if metric == "bottleneck" or metric == "gudhi_bottleneck":
+            # Import here as it can fail if GUDHI is built without CGAL - Will throw ImportError
+            from .. import bottleneck_distance as gudhi_bottleneck_distance
+            pairwise_distance_function = gudhi_bottleneck_distance
+        
+        elif metric == "hera_bottleneck":
+            pairwise_distance_function = hera_bottleneck_distance
+        
+        elif metric == "wasserstein" or metric == "hera_wasserstein":
+            pairwise_distance_function = hera_wasserstein_distance
+        
+        elif metric == "pot_wasserstein":
+            # Import here as it can fail if POT is not installed - Will throw ImportError
             from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
+            pairwise_distance_function = pot_wasserstein_distance
 
-            return _pairwise(
-                pairwise_distances,
-                True,
-                XX,
-                YY,
-                metric=_sklearn_wrapper(pot_wasserstein_distance, X, Y, **kwargs),
-                n_jobs=n_jobs,
-            )
-        except ImportError:
-            print(
-                "POT (Python Optimal Transport) is not installed. Please install POT or use metric='wasserstein' or metric='hera_wasserstein'"
-            )
-            raise
-    elif metric == "sliced_wasserstein":
-        Xproj = _compute_persistence_diagram_projections(X, **kwargs)
-        Yproj = None if Y is None else _compute_persistence_diagram_projections(Y, **kwargs)
-        return _pairwise(
-            pairwise_distances,
-            True,
-            XX,
-            YY,
-            metric=_sklearn_wrapper(_sliced_wasserstein_distance_on_projections, Xproj, Yproj),
-            n_jobs=n_jobs,
-        )
-    elif type(metric) == str:
-        return _pairwise(
-            pairwise_distances,
-            True,
-            XX,
-            YY,
-            metric=_sklearn_wrapper(PAIRWISE_DISTANCE_FUNCTIONS[metric], X, Y, **kwargs),
-            n_jobs=n_jobs,
-        )
+        elif metric == "persistence_fisher":
+            pairwise_distance_function = _persistence_fisher_distance
+
+        elif metric == "sliced_wasserstein":
+            # Projection in this specific case
+            X = _compute_persistence_diagram_projections(X, **kwargs)
+            Y = None if Y is None else _compute_persistence_diagram_projections(Y, **kwargs)
+            pairwise_distance_function = _sliced_wasserstein_distance_on_projections
+            
+        else:
+            raise ValueError(f"Unknown string metric '{metric}'")
+
     else:
-        return _pairwise(
-            pairwise_distances,
-            True,
-            XX,
-            YY,
-            metric=_sklearn_wrapper(metric, X, Y, **kwargs),
-            n_jobs=n_jobs,
-        )
+        # User-given function
+        pairwise_distance_function = metric
+    
+    return _pairwise(
+        pairwise_distances,
+        True,
+        XX,
+        YY,
+        metric=_sklearn_wrapper(pairwise_distance_function, X, Y, **kwargs),
+        n_jobs=n_jobs,
+    )
 
 
 class SlicedWassersteinDistance(BaseEstimator, TransformerMixin):
@@ -335,17 +319,21 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
     r"""
     This is a class for computing the bottleneck distance matrix from a list of persistence diagrams.
 
-    :Requires: `CGAL <installation.html#cgal>`_
+    :Requires: `CGAL <installation.html#cgal>`_ for ``mode='gudhi'``.
     """
 
-    def __init__(self, e=None, n_jobs=None, epsilon=None):
+    def __init__(self, mode="gudhi", e=None, delta=None, n_jobs=None, epsilon=None):
         """
         Constructor for the BottleneckDistance class.
 
         Parameters:
+            mode (str): method for computing bottleneck distance. Either ``'gudhi'`` or ``'hera'``. Default set to
+                ``'gudhi'``.
             epsilon (double): **[deprecated]** consider using `e` instead.
             e (double): absolute (additive) error tolerated on the distance (default is the smallest positive float),
-                see :func:`gudhi.bottleneck_distance`.
+                Used only if ``mode == 'gudhi'``, see :func:`gudhi.bottleneck_distance`.
+            delta (double): delta (float): Relative error 1+delta. Used only if ``mode == 'hera'``,
+                see :func:`gudhi.hera.bottleneck_distance`.
             n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances`
                 for details.
         """
@@ -357,6 +345,8 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
                     "'epsilon' (deprecated argument in favor of 'e') cannot be set at the same time as 'e'"
                 )
             warnings.warn("epsilon is a deprecated argument, please consider using e", DeprecationWarning)
+        self.mode = mode
+        self.delta = delta
         self.n_jobs = n_jobs
 
     def fit(self, X, y=None):
@@ -368,6 +358,12 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
             X (list of n x 2 numpy arrays): input persistence diagrams.
             y (n x 1 array): persistence diagram labels (unused).
         """
+        if self.mode not in ("gudhi", "hera"):
+            raise ValueError("Unknown mode. Current available values for mode are 'gudhi' and 'hera'")
+        if self.mode == "gudhi" and self.delta is not None:
+            raise ValueError("mode='gudhi' and set 'delta' is contradictory, as 'delta' only applies for mode='hera'")
+        if self.mode == "hera" and self.e is not None:
+            raise ValueError("mode='hera' and set 'e' is contradictory, as 'e' only applies for mode='gudhi'")
         self.diagrams_ = X
         return self
 
@@ -383,11 +379,16 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
             numpy array of shape (number of diagrams in **diagrams**) x (number of diagrams in X): matrix of pairwise
                 bottleneck distances.
         """
-        e = self.epsilon if self.epsilon is not None else self.e
-        return pairwise_persistence_diagram_distances(
-            X, self.diagrams_, metric="bottleneck", e=e, n_jobs=self.n_jobs
-        )
-
+        if self.mode == "gudhi":
+            e = self.epsilon if self.epsilon is not None else self.e
+            Xfit = pairwise_persistence_diagram_distances(
+                X, self.diagrams_, metric="bottleneck", e=e, n_jobs=self.n_jobs
+            )
+        if self.mode == "hera":
+            Xfit = pairwise_persistence_diagram_distances(
+                X, self.diagrams_, metric="hera_bottleneck", delta=self.delta, n_jobs=self.n_jobs
+            )
+        return Xfit
 
     def __call__(self, diag1, diag2):
         """
@@ -400,16 +401,25 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
         Returns:
             float: bottleneck distance.
         """
-        try:
+        if self.mode == "gudhi":
+            if self.delta is not None:
+                raise ValueError(
+                    "mode='gudhi' and set 'delta' is contradictory, as 'delta' only applies for mode='hera'"
+                )
+
+            # Import here as it can fail if GUDHI is built without CGAL - Will throw ImportError
             from .. import bottleneck_distance
 
             if self.epsilon is not None:
                 return bottleneck_distance(diag1, diag2, e=self.epsilon)
             else:
                 return bottleneck_distance(diag1, diag2, e=self.e)
-        except ImportError:
-            print("Gudhi built without CGAL")
-            raise
+        elif self.mode == "hera":
+            if self.e is not None:
+                raise ValueError("mode=hera' and set 'e' is contradictory, as 'e' only applies for mode='gudhi'")
+            return hera_bottleneck_distance(diag1, diag2, delta=self.delta)
+        else:
+            raise ValueError(f"Unknown mode '{self.mode}'. Current available values for mode are 'hera' and 'gudhi'")
 
 
 class PersistenceFisherDistance(BaseEstimator, TransformerMixin):
@@ -485,11 +495,16 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
         Constructor for the WassersteinDistance class.
 
         Parameters:
-            order (int): exponent for Wasserstein, default value is 1., see :func:`gudhi.wasserstein.wasserstein_distance`.
-            internal_p (int): ground metric on the (upper-half) plane (i.e. norm l_p in R^2), default value is `np.inf`, see :func:`gudhi.wasserstein.wasserstein_distance`.
-            mode (str): method for computing Wasserstein distance. Either "pot" or "hera". Default set to "hera".
-            delta (float): relative error 1+delta. Used only if mode == "hera".
-            n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
+            order (int): exponent for Wasserstein, default value is 1., see
+                :func:`gudhi.wasserstein.wasserstein_distance`.
+            internal_p (int): ground metric on the (upper-half) plane (i.e. norm l_p in R^2), default value is
+                ``np.inf``, see :func:`gudhi.wasserstein.wasserstein_distance`.
+            mode (str): method for computing Wasserstein distance. Either ``'pot'`` or ``'hera'``. Default set to
+                ``'hera'``.
+            delta (float): relative error 1+delta. Used only if ``mode == 'hera'``, see
+                :func:`gudhi.hera.wasserstein_distance`.
+            n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances`
+                for details.
         """
         self.order, self.internal_p, self.mode = order, internal_p, mode
         self.delta = delta
@@ -504,9 +519,7 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
             y (n x 1 array): persistence diagram labels (unused).
         """
         if self.mode not in ("pot", "hera"):
-            raise NameError(
-                "Unknown mode. Current available values for mode are 'hera' and 'pot'"
-            )
+            raise NameError("Unknown mode. Current available values for mode are 'hera' and 'pot'")
         self.diagrams_ = X
         return self
 
@@ -558,18 +571,9 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
                 diag1, diag2, order=self.order, internal_p=self.internal_p, delta=self.delta
             )
         elif self.mode == "pot":
-            try:
-                from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
+            # Import here as it can fail if POT is not installed - Will throw ImportError
+            from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
 
-                return pot_wasserstein_distance(
-                    diag1, diag2, order=self.order, internal_p=self.internal_p, matching=False
-                )
-            except ImportError:
-                print(
-                    "POT (Python Optimal Transport) is not installed. Please install POT or use mode='hera'"
-                )
-                raise
+            return pot_wasserstein_distance(diag1, diag2, order=self.order, internal_p=self.internal_p, matching=False)
         else:
-            raise NameError(
-                "Unknown mode. Current available values for mode are 'hera' and 'pot'"
-            )
+            raise NameError("Unknown mode. Current available values for mode are 'hera' and 'pot'")
