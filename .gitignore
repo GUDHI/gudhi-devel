@@ -12,6 +12,7 @@ data/points/KleinBottle5D.off_sc.dot
 data/points/human.off_dist
 data/points/human.off_sc.off
 data/points/human.off_sc.txt
+src/python/doc/2_torus_H1.npy
 
 # IDE specific
 # CLion

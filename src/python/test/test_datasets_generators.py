@@ -13,6 +13,7 @@ from numpy.testing import assert_almost_equal
 
 from gudhi.datasets.generators import points
 from gudhi.random import set_seed
+import ssl
 
 
 def test_sphere():
@@ -91,7 +92,11 @@ def test_torus_embedded_r3():
     for torus in [random_torus, grid_torus]:
         for point in torus:
             # Test the point is inside a sphere of radius 1.5 (major radius = 1. + minor radius = 0.5)
-            assert (point[0]*point[0] + point[1]*point[1] + point[2]*point[2]) <= 2.25
+            squared_distance = point[0]*point[0] + point[1]*point[1] + point[2]*point[2]
+            if squared_distance > 2.25:
+                # If on the radius 1.5, it can happen that the rounding is greater than 2.25 but almost equal
+                assert_almost_equal(squared_distance, 2.25)
+            # We could test in else case that squared_distance <= 2.25 but this would be always True
     
     with pytest.raises(ValueError):
         points.torus_embedded_r3(n_samples=10, sample="other")
