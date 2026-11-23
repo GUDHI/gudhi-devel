@@ -115,6 +115,12 @@ class Bitmap_cubical_complex : public T {
    **/
   std::size_t num_simplices() const { return this->data.size(); }
 
+  std::size_t num_vertices() {
+    std::size_t num = 0;
+    for ([[maybe_unused]] const auto& handle : skeleton_simplex_range(0)) ++num;
+    return num;
+  }
+
   /**
    * Returns a Simplex_handle to a cube that do not exist in this complex.
    **/

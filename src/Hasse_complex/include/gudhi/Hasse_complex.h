@@ -120,6 +120,10 @@ class Hasse_complex {
     return complex_.size();
   }
 
+  size_t num_vertices() {
+    return vertices_.size();
+  }
+
   Filtration_simplex_range filtration_simplex_range() {
     return Filtration_simplex_range(Filtration_simplex_iterator(0)
                                     , Filtration_simplex_iterator(complex_.size()));
