@@ -102,6 +102,10 @@ class CubicalComplex(_Bitmap_cubical_complex_interface):
             array = np.asarray(array, order="F")
             dimensions = array.shape
             array = array.ravel(order="F")
+        if len(dimensions) == 0:
+            raise ValueError("A 0-dimensional complex (scalar input) is not supported")
+        if self._built_from_vertices and 0 in dimensions:
+            raise ValueError("A complex built from vertices with a dimension of size 0 is not supported")
         super().__init__(dimensions, array, vertices is None)
 
     def _is_persistence_defined(self):
