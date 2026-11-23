@@ -13,6 +13,9 @@ Below is a list of changes:
 - Simplex tree [`[Python`](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
      - `expansion_with_blocker` is deprecated. Please consider using `expansion_with_blockers`.
 
+- [Cubical complex](https://gudhi.inria.fr/python/latest/cubical_complex_ref.html)
+     - `CubicalComplex` and `PeriodicCubicalComplex` now raise a `ValueError` for a scalar input, and for a dimension of size 0 that used to crash or raise a `MemoryError`.
+
 - Miscellaneous
      - Reader utilities now require an explicit file path and raise an exception when the file cannot be opened.
      - Minimal doxygen version is now ≥ 1.9.5 (was not fixed).
