@@ -15,11 +15,11 @@
 #include <utility>    // std::move, std::pair
 #include <vector>
 
-// #if BOOST_VERSION >= 108100
+#if BOOST_VERSION >= 108100
 #include <boost/unordered/unordered_flat_map.hpp>
-// #else
-// #include <boost/unordered_map.hpp>
-// #endif
+#else
+#include <boost/unordered_map.hpp>
+#endif
 #include <boost/intrusive/set.hpp>
 #include <boost/intrusive/list.hpp>
 
@@ -91,7 +91,7 @@ class Persistent_cohomology_column
  public:
   using Entry = Persistent_cohomology_entry<SimplexKey, ArithmeticElement>;
   using Col_type = boost::intrusive::list<Entry, boost::intrusive::constant_time_size<false>,
-                                 boost::intrusive::base_hook<base_hook_cam_v>>;
+                                          boost::intrusive::base_hook<base_hook_cam_v>>;
   using iterator = typename Col_type::iterator;
   using const_iterator = typename Col_type::const_iterator;
 
@@ -274,11 +274,11 @@ class Compressed_annotation_matrix {
  private:
   Field_operators coeff_field_;
   std::vector<Column*> ds_repr_;
-  // #if BOOST_VERSION >= 108100
+#if BOOST_VERSION >= 108100
   boost::unordered_flat_map<Cell_key, Row> transverse_idx_;
-  // #else
-  // boost::unordered_map<Cell_key, Row> transverse_idx_;
-  // #endif
+#else
+  boost::unordered_map<Cell_key, Row> transverse_idx_;
+#endif
   Cam cam_;
   Simple_union_find<Cell_key> cell_sets_;
 

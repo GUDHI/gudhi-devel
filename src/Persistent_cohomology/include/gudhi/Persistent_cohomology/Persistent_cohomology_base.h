@@ -18,11 +18,11 @@
 #include <map>
 #include <limits>  // std::numeric_limits
 
-// #if BOOST_VERSION >= 108100
+#if BOOST_VERSION >= 108100
 #include <boost/unordered/unordered_flat_map.hpp>
-// #else
-// #include <boost/unordered_map.hpp>
-// #endif
+#else
+#include <boost/unordered_map.hpp>
+#endif
 
 #include <gudhi/Debug_utils.h>
 #include <gudhi/Persistent_cohomology/Simple_union_find.h>
@@ -119,11 +119,11 @@ class Persistent_cohomology_base {
   using Column = typename Cam::Column;
 
   Cam cam_;
-  // #if BOOST_VERSION >= 108100
+#if BOOST_VERSION >= 108100
   boost::unordered_flat_map<Cell_key, Arith_element> transverse_idx_;
-  // #else
-  // boost::unordered_map<Cell_key, Arith_element> transverse_idx_;
-  // #endif
+#else
+  boost::unordered_map<Cell_key, Arith_element> transverse_idx_;
+#endif
 
   /*
    * Compute the annotation of the boundary of a simplex.
@@ -286,14 +286,14 @@ class Polytopal_persistent_cohomology_base : public Persistent_cohomology_base<C
   Simple_union_find<Cell_key> vertex_sets_;
   // maps vertex position wrt other vertices to position in the whole filtration.
   std::vector<Cell_handle> vertices_;
-  // #if BOOST_VERSION >= 108100
+#if BOOST_VERSION >= 108100
   /*  Dictionary establishing the correspondence between the Cell_key of
    * the root vertex in the union-find ds and the Cell_key of the vertex which
    * created the connected component as a 0-dimension homology feature.*/
   boost::unordered_flat_map<Cell_key, Cell_key> zero_cocycles_;
-  // #else
-  //   boost::unordered_map<Simplex_key, Simplex_key> zero_cocycles_;
-  // #endif
+#else
+  boost::unordered_map<Simplex_key, Simplex_key> zero_cocycles_;
+#endif
 
   void _update_vertex_cohomology_groups(Cell_handle vertex) {
     Base::key_handle_map_->assign_key(vertex, current_vertex_index_);
