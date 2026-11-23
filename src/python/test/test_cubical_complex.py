@@ -442,3 +442,25 @@ def test_contiguity_for_top_dimensional_cells_input():
                                    periodic_dimensions=(False, False))
     # Test top_dimensional_cells() should be enough here, but let's go with all_cells()
     assert_almost_equal(cub_c.all_cells(), cub_r.all_cells())
+
+
+def test_scalar_input():
+    # A 0-dimensional input used to crash the interpreter
+    for kwargs in [{"top_dimensional_cells": 1.0}, {"vertices": 1.0}]:
+        with pytest.raises(ValueError):
+            CubicalComplex(**kwargs)
+        with pytest.raises(ValueError):
+            PeriodicCubicalComplex(periodic_dimensions=[], **kwargs)
+    with pytest.raises(ValueError):
+        CubicalComplex(top_dimensional_cells=[1.0], dimensions=[])
+
+
+def test_dimension_of_size_zero():
+    # Used to crash the interpreter (periodic) or raise a MemoryError (vertices)
+    with pytest.raises(ValueError):
+        CubicalComplex(vertices=np.zeros((3, 0)))
+    with pytest.raises(ValueError):
+        CubicalComplex(vertices=[], dimensions=[3, 0])
+    for kwargs in [{"top_dimensional_cells": np.zeros((3, 0))}, {"vertices": np.zeros((3, 0))}]:
+        with pytest.raises(ValueError):
+            PeriodicCubicalComplex(periodic_dimensions=[True, False], **kwargs)

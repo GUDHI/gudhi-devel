@@ -98,3 +98,9 @@ def test_set_output():
         assert len(diags_pandas.index) == NB_PC
     except ImportError:
         pytest.skip("Missing pandas, skipping set_output test")
+
+
+def test_scalar_input():
+    # fit_transform(X) with a 1d array X instead of [X] passes scalars, which used to crash the interpreter (#1282)
+    with pytest.raises(ValueError):
+        CubicalPersistence(homology_dimensions=[0]).fit_transform([1])
