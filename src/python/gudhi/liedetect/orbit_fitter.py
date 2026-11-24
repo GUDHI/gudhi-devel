@@ -21,7 +21,6 @@ import scipy
 
 # Local imports.
 from .liepca import get_lie_pca_operator
-from .optimization import find_closest_algebra
 from .utils import sample_from_lie_algebra
 
 
@@ -55,20 +54,23 @@ class OrbitFitter:
     """
 
     def __init__(self, pts: np.ndarray) -> None:
-        self.points = pts
-        self.shape = pts.shape
-
-        # Takes care of checking whether particular methods have been called.
+        self.points = pts.copy()
+        self.shape = self.points.shape
         self.is_lie_pca = False
-        self.is_closest_algebra = False
-        self.is_sample_orbit = False
-
-        # These will be updated as the methods get called.
         self.orbit_dim = None
         self.lie_pca_operator_ = None
+        self._clear_algebra()
+
+    def _clear_algebra(self) -> None:
+        self.is_closest_algebra = False
         self.group = None
         self.representation_type_ = None
         self.algebra_ = None
+        self.fit_diagnostics_ = None
+        self._clear_orbit()
+
+    def _clear_orbit(self) -> None:
+        self.is_sample_orbit = False
         self.orbit_ = None
         self.hausdorff_distances_ = None
 
@@ -97,8 +99,7 @@ class OrbitFitter:
         Returns:
             lie_pca (np.ndarray): The computed Lie-PCA operator.
         """
-        self.orbit_dim = orbit_dim
-        self.lie_pca_operator_ = get_lie_pca_operator(
+        operator = get_lie_pca_operator(
             pts=self.points,
             nb_neighbors=nb_neighbors,
             orbit_dim=orbit_dim,
@@ -106,9 +107,12 @@ class OrbitFitter:
             correction=correction,
             verbose=verbose,
         )
+        self.orbit_dim = orbit_dim
+        self.lie_pca_operator_ = operator
         self.is_lie_pca = True
+        self._clear_algebra()
 
-        return self.lie_pca_operator_
+        return operator
 
     def print_lie_pca_eigenvalues(self, return_vals: bool = False) -> np.ndarray | None:
         """
@@ -144,10 +148,14 @@ class OrbitFitter:
         method: Literal["bottom_lie_pca", "full_lie_pca", "abelian"] = "bottom_lie_pca",
         verbose: bool = False,
         verbose_top_scores: bool = False,
+        *,
+        seed: int | np.random.Generator | None = None,
+        initial_point: np.ndarray | None = None,
+        optimizer_options: dict | None = None,
     ) -> tuple[tuple, list[np.ndarray]]:
         """
-        Finds the closest pushforward Lie algebra of a group (subspace of skew-symmetric matrices) to the given
-        Lie PCA operator. This requires that `get_lie_pca` has been run beforehand.
+        Estimates the closest pushforward Lie algebra of a group (subspace of skew-symmetric matrices) to the given
+        Lie PCA operator. This requires that `lie_pca` has been run beforehand.
 
         Args:
             group (str): The group ('torus', 'SU(2)', or 'SO(3)').
@@ -160,6 +168,15 @@ class OrbitFitter:
                 to 'bottom_lie_pca'.
             verbose (bool): If True, prints progress and results. Defaults to False.
             verbose_top_scores (bool): If True, prints top scoring representations. Defaults to False.
+            seed (int or numpy.random.Generator, optional): Random source for optimizer starts.
+            initial_point (np.ndarray, optional): Starting matrix in SO(ambient_dim) for each solver run.
+                The second orthogonal component uses its reflected counterpart. Overrides the seed.
+            optimizer_options (dict, optional): Pymanopt steepest descent settings overriding the defaults.
+                These three controls apply to iterative solves.
+
+        The successful fit sets `fit_diagnostics_` with the candidate objective value, stopping
+        criterion, convergence flag, and per-run summaries. A direct solve has no iterative
+        convergence flag. A finite budget-limited result can participate in candidate selection.
 
         Returns:
             optimal_rep: The optimal representation type found.
@@ -167,12 +184,19 @@ class OrbitFitter:
         """
         if not self.is_lie_pca:
             raise RuntimeError(
-                "'get_lie_pca' must be run before finding the closest algebra."
+                "'lie_pca' must be run before finding the closest algebra."
             )
 
-        self.group = group
-        self.representation_type_, self.algebra_ = find_closest_algebra(
-            group=self.group,
+        try:
+            from .optimization import find_closest_algebra
+        except ModuleNotFoundError as exc:
+            if exc.name not in ("autograd", "pymanopt"):
+                raise
+            raise ImportError("LieDetect algebra fitting requires Autograd and Pymanopt.") from exc
+
+        diagnostics = {}
+        representation, algebra = find_closest_algebra(
+            group=group,
             lie_pca=self.lie_pca_operator_,
             group_dim=group_dim,
             frequency_max=frequency_max,
@@ -181,10 +205,19 @@ class OrbitFitter:
             method=method,
             verbose=verbose,
             verbose_top_scores=verbose_top_scores,
+            seed=seed,
+            initial_point=initial_point,
+            optimizer_options=optimizer_options,
+            diagnostics=diagnostics,
         )
+        self.group = group
+        self.representation_type_ = representation
+        self.algebra_ = algebra
+        self.fit_diagnostics_ = diagnostics
         self.is_closest_algebra = True
+        self._clear_orbit()
 
-        return self.representation_type_, self.algebra_
+        return representation, algebra
 
     """
     Step 4: Compute distance to orbit.
@@ -196,12 +229,14 @@ class OrbitFitter:
         method: Literal["evenly_spaced", "random_uniform"] = "evenly_spaced",
         verbose: bool = False,
         x: np.ndarray | None = None,
+        *,
+        seed: int | np.random.Generator | None = None,
     ) -> np.ndarray:
         """
         Samples points on the orbit of a compact Lie group representation, given its Lie algebra generators. We suppose
         that the algebra is isomorphic to the canonical algebra estimate. This allows us to compute the periods, which
         are, otherwise, not stably computable from the algebra alone. In particular, it requires that
-        `get_closest_algebra` has been run beforehand.
+        `closest_algebra` has been run beforehand.
 
         Args:
             nb_points (int): Number of points to sample.
@@ -209,19 +244,20 @@ class OrbitFitter:
             verbose (bool): Whether to print information about the sampled orbit. Defaults to False.
             x (np.ndarray, optional): Initial vector to act on. If None, the first vector of the data is.
                 Defaults to None.
+            seed (int or numpy.random.Generator, optional): Random source for random sampling.
 
         Returns:
             np.ndarray: Array of sampled points on the orbit.
         """
         if not self.is_closest_algebra:
             raise RuntimeError(
-                "'get_closest_algebra' must be run before sampling an orbit."
+                "'closest_algebra' must be run before sampling an orbit."
             )
 
         if x is None:
             x = self.points[0]
 
-        self.orbit_ = sample_from_lie_algebra(
+        orbit = sample_from_lie_algebra(
             group=self.group,
             rep_type=self.representation_type_,
             algebra=self.algebra_,
@@ -229,12 +265,14 @@ class OrbitFitter:
             nb_points=nb_points,
             method=method,
             verbose=verbose,
+            seed=seed,
         )
+        distances = (
+            print_hausdorff_distance(self.points, orbit, verbose=False),
+            print_hausdorff_distance(orbit, self.points, verbose=False),
+        )
+        self.orbit_ = orbit
+        self.hausdorff_distances_ = distances
         self.is_sample_orbit = True
 
-        self.hausdorff_distances_ = (
-            print_hausdorff_distance(self.points, self.orbit_, verbose=False),
-            print_hausdorff_distance(self.orbit_, self.points, verbose=False),
-        )
-
-        return self.orbit_
+        return orbit

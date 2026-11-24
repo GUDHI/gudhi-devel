@@ -38,10 +38,11 @@ Canonical bases of representations:
 import sys
 import itertools
 from math import gcd
+from numbers import Integral
 from typing import Literal
 
 # Third-party imports.
-import autograd.numpy as np
+import numpy as np
 from numpy.random import Generator, default_rng
 
 RandomSeed = int | Generator | None
@@ -72,8 +73,12 @@ def skew_sym_to_vect(mat: np.ndarray) -> np.ndarray:
         vect = skew_sym_to_vect(mat)
         # vect = [1, 2, 1]
     """
+    return _skew_sym_to_vect(mat, np)
+
+
+def _skew_sym_to_vect(mat, array_backend):
     # Sanity check: the matrix must be skew-symmetric
-    if not np.allclose(mat, -mat.T):
+    if not array_backend.allclose(mat, -mat.T):
         raise ValueError("Matrix A must be skew-symmetric.")
 
     # Gets the size of the matrix.
@@ -83,7 +88,7 @@ def skew_sym_to_vect(mat: np.ndarray) -> np.ndarray:
     indices = (tuple([i, j]) for i in range(n) for j in range(i + 1, n))
 
     # Gets entries at the indices
-    vect = np.array([mat[t] for t in indices])
+    vect = array_backend.array([mat[t] for t in indices])
 
     return vect
 
@@ -156,13 +161,17 @@ def skew_sym_frame_to_projection(
         #  [0.16666667 0.33333333 0.16666667]]
     """
     # Converts matrices to vectors in the canonical basis of S_n(R).
-    frame_vectors = [skew_sym_to_vect(matrix) for matrix in frame]
+    if method == "differentiable":
+        import autograd.numpy as array_backend
+    else:
+        array_backend = np
+    frame_vectors = [_skew_sym_to_vect(matrix, array_backend) for matrix in frame]
 
     # Orthonormalizes
     frame_vectors = gram_schmidt_orthonormalization(frame_vectors, method=method)
 
     # Builds projection matrix.
-    frame_vectors = np.array(frame_vectors)
+    frame_vectors = array_backend.array(frame_vectors)
     projection = frame_vectors.T @ frame_vectors
 
     return projection
@@ -190,8 +199,13 @@ def gram_schmidt_orthonormalization(
     is_matrix = frame[0].ndim > 1 and frame[0].shape[0] == frame[0].shape[1]
     n = frame[0].shape[0]
 
+    if method == "differentiable":
+        import autograd.numpy as array_backend
+    else:
+        array_backend = np
+
     # Normalize the frame.
-    frame_orth = [v / np.linalg.norm(v) for v in frame]
+    frame_orth = [v / array_backend.linalg.norm(v) for v in frame]
 
     # If matrix: flatten to vectors.
     if is_matrix:
@@ -209,8 +223,8 @@ def gram_schmidt_orthonormalization(
                 v = frame_orth[i]
                 for j in range(i):
                     w = frame_orth[j]
-                    v -= np.dot(v, w) * w
-                v /= np.linalg.norm(v)
+                    v -= array_backend.dot(v, w) * w
+                v /= array_backend.linalg.norm(v)
                 frame_orth[i] = v
 
     # If matrix: reshapes back to square matrices
@@ -239,7 +253,7 @@ def get_random_lattice(
 
     Args:
         lattice_rank (int): Dimension of the lattice.
-        ambient_rank (int): Ambient space dimension (should be even).
+        ambient_rank (int): Number of two-dimensional character blocks.
         frequency_max (int): Maximum frequency for irreps.
         span_ambient_space (bool): Whether to only consider representations whose orbits span the ambient space. Only
             implemented for rank-1 lattices.
@@ -248,54 +262,34 @@ def get_random_lattice(
     Returns:
         tuple: The generated lattice as a tuple of tuples.
     """
-    # Parameter checks.
-    if frequency_max < 1:
-        raise ValueError("'frequency_max' must be at least 1.")
+    for name, value in (
+        ("lattice_rank", lattice_rank),
+        ("ambient_rank", ambient_rank),
+        ("frequency_max", frequency_max),
+    ):
+        if isinstance(value, (bool, np.bool_)) or not isinstance(value, Integral) or value < 1:
+            raise ValueError(f"'{name}' must be a positive integer.")
     if lattice_rank > ambient_rank:
         raise ValueError("Rank of ambient lattice is too small.")
-    # Create generator.
+    if span_ambient_space:
+        if lattice_rank != 1:
+            raise ValueError("'span_ambient_space' is only implemented for rank-1 lattices.")
+        if ambient_rank > frequency_max:
+            raise ValueError("Full span requires at least one distinct nonzero frequency per character block.")
+
     rng = default_rng(seed)
-
-    # Picks a random lattice
-    has_maximal_rank = False
-
-    max_attempts = 100
-    for _ in range(max_attempts):
-        # Generates lattice_rank random integral vectors in Z^ambient_rank
-        values = list(range(-frequency_max, frequency_max + 1))
-        lattice = tuple(
-                    tuple(
-                        int(value) for value in rng.choice(values, size=ambient_rank, replace=False, ))
-                        for _ in range(lattice_rank)
-        )
-        # Check its rank
-        has_maximal_rank = np.linalg.matrix_rank(np.array(lattice).T) == lattice_rank
-        if has_maximal_rank:
-            break
-    else:
-        raise RuntimeError("Failed to generate a valid lattice.")
-
-    # If required, check whether the orbit spans the ambient space
-    if span_ambient_space and lattice_rank == 1:
-        # Checks whether the orbit spans the ambient space
-        if (
-            (0 in lattice[0])
-            or (not gcd(*lattice[0]) == 1)
-            or len(np.unique(np.abs(lattice[0]))) < len(lattice[0])
-        ):
-            # If not, generates a new lattice
-            lattice = get_random_lattice(
-                lattice_rank=lattice_rank,
-                ambient_rank=ambient_rank,
-                frequency_max=frequency_max,
-                span_ambient_space=True,
-                seed=rng,
-            )
-
-    elif span_ambient_space:
-        raise ValueError("""The parameter 'span_ambient_space' is only
-            implemented for rank-1 lattices.""")
-    return lattice
+    for _ in range(100):
+        if span_ambient_space:
+            # Draw distinct nonzero magnitudes directly, then keep the existing primitive-row condition.
+            magnitudes = rng.choice(frequency_max, size=ambient_rank, replace=False) + 1
+            weights = tuple(int(value) for value in magnitudes * rng.choice((-1, 1), size=ambient_rank))
+            if gcd(*weights) == 1:
+                return (weights,)
+        else:
+            rows = rng.integers(-frequency_max, frequency_max, size=(lattice_rank, ambient_rank), endpoint=True)
+            if np.linalg.matrix_rank(rows) == lattice_rank:
+                return tuple(tuple(int(value) for value in row) for row in rows)
+    raise RuntimeError("Failed to generate a valid lattice after 100 attempts.")
 
 
 def invariant_of_lattices(
@@ -325,15 +319,11 @@ def invariant_of_lattices(
     elif method == "orbit-equivalence":
         lattice = np.asarray(lattice)
         m = lattice.shape[1]
-        projections = []
-        for perm in itertools.permutations(range(m)):
-            for sign in itertools.product([-1, 1], repeat=m):
-                permuted = lattice[:, perm] * sign  # apply signed permutation
-                frame = np.array(gram_schmidt_orthonormalization(permuted))
-                proj = np.sum([np.outer(v, v) for v in frame], axis=0)
-                projections.append(np.round(proj.flatten(), decimals=decimals_accuracy))
-        invariant = min(tuple(p) for p in projections)
-        return invariant
+        return min(
+            invariant_of_lattices(lattice[:, perm] * sign, "span-equivalence", decimals_accuracy)
+            for perm in itertools.permutations(range(m))
+            for sign in itertools.product([-1, 1], repeat=m)
+        )
     else:
         raise ValueError(f"Method not recognized: {method}.")
 
@@ -388,30 +378,21 @@ def get_lattices(
     else:
         lattices = itertools.product(irreps, repeat=ambient_rank)
 
-    # Transposes the lattices, to write them as tuples of vectors
-    # in Z^ambient_rank.
-    lattices = [tuple(zip(*c)) for c in lattices]
-
-    # For SO(2), discards non-primitive vectors
-    if lattice_rank == 1:
-        lattices = [lattice for lattice in lattices if gcd(*lattice[0]) == 1]
-
-    # Keeps only maximal rank lattices
-    lattices = [
-        lattice
-        for lattice in lattices
-        if np.linalg.matrix_rank(lattice) == lattice_rank
-    ]
+    # Visit candidates in the original order and keep the first representative of each span.
+    full_rank_count = 0
+    span_equivalence_classes = {}
+    for characters in lattices:
+        lattice = tuple(zip(*characters))
+        if lattice_rank == 1 and gcd(*lattice[0]) != 1:
+            continue
+        if np.linalg.matrix_rank(lattice) != lattice_rank:
+            continue
+        full_rank_count += 1
+        invariant = invariant_of_lattices(lattice, method="span-equivalence")
+        span_equivalence_classes.setdefault(invariant, lattice)
 
     if verbose:
-        sys.stdout.write(f"Full-rank lattices: {len(lattices)}... ")
-
-    # Discards lattices that span the same vector subspace
-    span_equivalence_classes = dict()
-    for lattice in lattices:
-        invariant = invariant_of_lattices(lattice=lattice, method="span-equivalence")
-        if invariant not in span_equivalence_classes:
-            span_equivalence_classes[invariant] = lattice
+        sys.stdout.write(f"Full-rank lattices: {full_rank_count}... ")
     lattices = list(span_equivalence_classes.values())
 
     if verbose:
@@ -672,6 +653,18 @@ def get_canonical_pushforward_algebra(group: str, rep_type: tuple) -> list[np.nd
     """
     # If the group is the torus
     if group == "torus":
+        if (
+            len(rep_type) == 0
+            or not isinstance(rep_type[0], (tuple, list, np.ndarray))
+            or len(rep_type[0]) == 0
+            or any(
+                not isinstance(row, (tuple, list, np.ndarray))
+                or len(row) != len(rep_type[0])
+                or any(isinstance(value, (bool, np.bool_)) or not isinstance(value, Integral) for value in row)
+                for row in rep_type
+            )
+        ):
+            raise ValueError("A torus representation requires a nonempty rectangular array of integer weights.")
         reduced_ambient_dim = len(rep_type[0])
         # Constructs basis of 2x2-block-diagonal skew-symmetric matrices
         basis = [
@@ -688,6 +681,14 @@ def get_canonical_pushforward_algebra(group: str, rep_type: tuple) -> list[np.nd
 
     # If the group is SU(2) or SO(3)
     elif group in ["SU(2)", "SO(3)"]:
+        if len(rep_type) == 0 or any(
+            isinstance(dim, (bool, np.bool_))
+            or not isinstance(dim, Integral)
+            or dim < 1
+            or (dim % 2 == 0 and (group == "SO(3)" or dim % 4 != 0))
+            for dim in rep_type
+        ):
+            raise ValueError(f"Invalid real irrep dimensions for {group}: {rep_type!r}.")
         ambient_dim, nb_irreps = sum(rep_type), len(rep_type)
         algebra_irreps = [get_pushforward_alg_irrep_su2(k) for k in rep_type]
         pushforward_algebra = [np.zeros((ambient_dim, ambient_dim)) for _ in range(3)]

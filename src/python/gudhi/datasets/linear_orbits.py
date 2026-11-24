@@ -13,8 +13,9 @@ Namely, the Lie algebras are stored through bases (tuples of skew-symmetric matr
 to the canonical pushforward algebras of the representations implemented in the module "algebra", through conjugation
 by an orthogonal matrix. This assumption it crucial since, combined with the representation type of the algebra, we are
 able to compute the periods of the basis elements (minimal t>0 such that exp(tA)=I), and hence be able to reconstruct
-the orbit entirely (and without repetition for the torus). Note that, given the algebra alone, we cannot compute the
-periods in a robust way.
+the orbit. Torus sampling uses individual generator periods. The evenly spaced grid can give repeated
+points if the parametrization covers the same orbit point more than once. The algebra alone does not
+provide a robust way to compute these periods.
 
 -----------------------------------------------------------------------------------------------------------------------
 
@@ -26,6 +27,7 @@ Sample on orbits:
 """
 
 # Standard imports.
+from numbers import Integral
 from typing import Literal
 
 # Third-party imports.
@@ -76,7 +78,7 @@ def sample_from_lie_group_rep(
             Defaults to False.
         right_multiply_algebra (bool, optional): Whether to right-multiply the algebra by a random orthogonal matrix.
             Defaults to False.
-        translate_orbit (bool, optional): Whether to translate the sampled orbit by a random orthogonal transformation.
+        translate_orbit (bool, optional): Whether to rotate the sampled orbit by a random orthogonal transformation.
             Defaults to False.
         method (str, optional): Sampling method, 'evenly_spaced' or 'random_uniform'. Defaults to 'evenly_spaced'.
         verbose (bool, optional): Whether to print information about the sampled orbit.
@@ -87,14 +89,17 @@ def sample_from_lie_group_rep(
     """
     # Create generator.
     rng = default_rng(seed)
-    # Define ambient dimension.
-    ambient_dim = len(rep_type[0]) * 2 if group == "torus" else sum(rep_type)
-    # Get canonical pushforward algebra.
+    # Validate the representation before reading its ambient dimension.
     algebra = get_canonical_pushforward_algebra(group=group, rep_type=rep_type)
+    ambient_dim = algebra[0].shape[0]
     # Get initial vector.
     if x is None:
         x = np.ones(ambient_dim)
         x /= np.linalg.norm(x)
+    else:
+        x = np.asarray(x)
+        if x.shape != (ambient_dim,) or x.dtype.kind not in "iuf" or not np.isfinite(x).all():
+            raise ValueError(f"'x' must be a finite real vector of length {ambient_dim}.")
     # Conjugate algebra if needed.
     if conjugate_algebra:
         orth = scipy.stats.special_ortho_group.rvs(ambient_dim, random_state=rng)
@@ -159,7 +164,7 @@ def sample_from_lie_group(
             Defaults to False.
         right_multiply_algebra (bool, optional): Whether to right-multiply the algebra by a random orthogonal matrix.
             Defaults to False.
-        translate_orbit (bool, optional): Whether to translate the sampled orbit by a random orthogonal transformation.
+        translate_orbit (bool, optional): Whether to rotate the sampled orbit by a random orthogonal transformation.
             Defaults to False.
         method (str, optional): Sampling method, 'random_uniform' or 'evenly_spaced'. Defaults to 'evenly_spaced'.
         span_ambient_space (bool, optional): Whether to only consider representations whose orbits span the ambient
@@ -175,6 +180,8 @@ def sample_from_lie_group(
     rng = default_rng(seed)
     # Gets random representation
     if group == "torus":
+        if not isinstance(ambient_dim, Integral) or ambient_dim < 2 or ambient_dim % 2:
+            raise ValueError("'ambient_dim' must be a positive even integer for a torus.")
         rep_type = get_random_lattice(
             lattice_rank=group_dim,
             ambient_rank=ambient_dim // 2,

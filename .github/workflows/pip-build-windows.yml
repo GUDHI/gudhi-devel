@@ -94,3 +94,20 @@ jobs:
           python -m pytest src/python/test/test_wasserstein_barycenter.py
           python -m pytest src/python/test/test_weighted_rips_complex.py
           python -m pytest src/python/test/test_witness_complex.py
+      - name: Test LieDetect with optional dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --user "numpy>=2" scipy scikit-learn pymanopt autograd
+          python -m pytest src/python/test/test_liedetect_so_2.py `
+            src/python/test/test_liedetect_so_3.py `
+            src/python/test/test_liedetect_t_2.py `
+            src/python/test/test_liedetect_orthonormalize.py `
+            src/python/test/test_datasets_linear_orbits.py `
+            src/python/test/test_liedetect_public_api.py `
+            src/python/test/test_liedetect_representations.py `
+            src/python/test/test_liedetect_optional_dependencies.py `
+            src/python/test/test_liedetect_input_validation.py `
+            src/python/test/test_liedetect_fitter_state.py `
+            src/python/test/test_liedetect_optimization.py `
+            src/python/test/test_liedetect_performance_equivalence.py `
+            src/python/test/test_liedetect_documentation.py

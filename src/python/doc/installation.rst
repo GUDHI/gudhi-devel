@@ -424,14 +424,14 @@ for incorporating them in neural nets.
 Autograd
 ----------
 
-The :doc:`LieDetect </liedetect_user>` module requires `autograd <https://pypi.org/project/autograd/>`_, a
+The :doc:`LieDetect </liedetect_user>` algebra fitting step requires `autograd <https://pypi.org/project/autograd/>`_, a
 package for automatic differentiation for native Python and Numpy.
 
 
 Pymanopt
 --------
 
-The :doc:`LieDetect </liedetect_user>` module requires `Pymanopt <https://pymanopt.org/>`_, a
+The :doc:`LieDetect </liedetect_user>` algebra fitting step requires `Pymanopt <https://pymanopt.org/>`_, a
 Python toolbox for optimization on Riemannian manifolds.
 
 

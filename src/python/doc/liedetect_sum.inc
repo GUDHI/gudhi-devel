@@ -10,7 +10,7 @@
      - :Authors: Henrique Ennes & Raphaël Tinarrage
        :Since: GUDHI 3.13.0
        :License: MIT (`GPL v3 </licensing/>`_)
-       :Requires: `Pymanopt <installation.html#Pymanopt>`_ and `Autograd <installation.html#Autograd>`_
+       :Algebra fitting requires: `Pymanopt <installation.html#Pymanopt>`_ and `Autograd <installation.html#Autograd>`_
 
    * - * :doc:`liedetect_user`
      - * :doc:`liedetect_orbit_fitter_ref`

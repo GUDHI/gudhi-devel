@@ -30,12 +30,12 @@ Lie PCA:
 """
 
 # Standard imports.
+from numbers import Integral
 from typing import Literal
 
 # Third-party imports.
 import numpy as np
 import scipy
-import sklearn
 
 """
 -----------------------------------------------------------------------------------------------------------------------
@@ -72,7 +72,10 @@ def get_covariance_matrix(
 
     # Normalize if needed.
     if normalize:
-        cov = cov / np.linalg.norm(cov) * np.sqrt(orbit_dim)
+        norm = np.linalg.norm(cov)
+        if norm == 0 or not np.isfinite(norm):
+            raise ValueError("Local covariance must have a finite, nonzero norm.")
+        cov = cov / norm * np.sqrt(orbit_dim)
 
     return cov
 
@@ -162,7 +165,17 @@ def batch_matrix_multiplication(pts: np.ndarray, matrix: np.ndarray) -> np.ndarr
     Returns:
         (np.ndarray): The product of the matrix with each vector in the batch.
     """
-    return np.array([np.real(matrix.dot(x)) for x in pts])
+    return pts @ matrix.T
+
+
+def _as_real_points(pts: np.ndarray) -> np.ndarray:
+    pts = np.asarray(pts)
+    if pts.ndim != 2 or pts.shape[1] == 0 or pts.dtype.kind not in "iuf":
+        raise ValueError("Points must be a two-dimensional array of real coordinates.")
+    pts = np.asarray(pts, dtype=float)
+    if not np.isfinite(pts).all():
+        raise ValueError("Point coordinates must be finite.")
+    return pts
 
 
 def orthonormalize(pts: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -177,15 +190,16 @@ def orthonormalize(pts: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         orthonormal_transf (np.ndarray): The matrix for the linear projection onto orthonormalization.
             Points are transformed by left multiplication by it.
     """
-    # Copies to not modify the original points
-    pts_orth = pts.copy()
+    pts = _as_real_points(pts)
+    if len(pts) <= pts.shape[1]:
+        raise ValueError("Orthonormalization requires full-rank centered covariance.")
 
-    # Centers
-    pts_orth -= np.mean(pts_orth, 0)
-
-    # Homogenizes
+    pts_orth = pts - np.mean(pts, axis=0)
     cov = get_covariance_matrix(pts_orth, center=True, normalize=False)
-    orthonormal_transf = scipy.linalg.sqrtm(np.linalg.inv(cov))
+    eigenvalues, eigenvectors = scipy.linalg.eigh(cov)
+    if eigenvalues[0] <= 0:
+        raise ValueError("Orthonormalization requires full-rank centered covariance.")
+    orthonormal_transf = (eigenvectors / np.sqrt(eigenvalues)) @ eigenvectors.T
     pts_orth = batch_matrix_multiplication(pts_orth, orthonormal_transf)
 
     # Normalizes
@@ -201,11 +215,14 @@ class Orthonormalize:
     Orthonormalizes a point cloud by centering, homogenizing and normalizing it. This is Step 1 of LieDetect.
 
     Parameters:
-        pts (np.ndarray): Point cloud.
+        pts (np.ndarray): Finite real point cloud with full-rank centered covariance.
+            Integer coordinates are converted to floating point.
     """
 
     def __init__(self, pts: np.ndarray) -> None:
-        self.points = pts.copy()
+        self.points = _as_real_points(pts).copy()
+        if len(self.points) == 0:
+            raise ValueError("Orthonormalization requires at least one point.")
         self.cov = get_covariance_matrix(self.points, center=True, normalize=False)
         self.mean = np.mean(self.points, 0)
         self.is_fitted = False
@@ -260,9 +277,10 @@ class Orthonormalize:
                 "'fit' or 'fit_transform' must be run before 'transform'."
             )
 
-        pts = pts.copy() - self.mean
-
-        return batch_matrix_multiplication(pts, self.orthonormal_transf)
+        pts = _as_real_points(pts)
+        if pts.shape[1] != self.mean.size:
+            raise ValueError(f"Points must have {self.mean.size} coordinates.")
+        return batch_matrix_multiplication(pts - self.mean, self.orthonormal_transf)
 
     def inverse_transform(
         self,
@@ -276,8 +294,8 @@ class Orthonormalize:
 
         Args:
             pts (np.ndarray, optional): Point cloud to apply the inverse
-                transform. If None, applies to the training set. Defaults
-                to None.
+                transform. If None, uses the transformed training points
+                from the last fit. Defaults to None.
             add_mean (bool): If True, adds the training mean to the inverse
                 transformation. Defaults to True.
             in_place (bool): If True, makes the object's points the inversed
@@ -290,15 +308,21 @@ class Orthonormalize:
             raise RuntimeError("'fit' or 'fit_transform' must be run before 'inverse'.")
 
         if pts is None:
-            pts = self.points
+            pts = self.orth_points
+        else:
+            pts = _as_real_points(pts)
+            if pts.shape[1] != self.mean.size:
+                raise ValueError(f"Points must have {self.mean.size} coordinates.")
 
         inverse_transform = np.linalg.inv(self.orthonormal_transf)
         inversed_points = batch_matrix_multiplication(pts, inverse_transform)
+        if add_mean:
+            inversed_points += self.mean
 
         if in_place:
             self.points = inversed_points
 
-        return inversed_points + add_mean * self.mean
+        return inversed_points
 
 
 """
@@ -338,10 +362,35 @@ def get_lie_pca_operator(
     Returns:
         np.ndarray: The Lie-PCA operator as a matrix of shape (ambient_dim**2, ambient_dim**2).
     """
-    nb_points, ambient_dim = np.shape(pts)
+    try:
+        from sklearn.neighbors import KDTree
+    except ModuleNotFoundError as exc:
+        if exc.name != "sklearn":
+            raise
+        raise ImportError("Lie-PCA requires scikit-learn.") from exc
+
+    pts = _as_real_points(pts)
+    nb_points, ambient_dim = pts.shape
+    if nb_points < 2:
+        raise ValueError("Lie-PCA requires at least two points.")
+    if (
+        isinstance(nb_neighbors, (bool, np.bool_))
+        or not isinstance(nb_neighbors, Integral)
+        or not 1 <= nb_neighbors < nb_points
+    ):
+        raise ValueError("'nb_neighbors' must be an integer between 1 and the point count minus one.")
+    if (
+        isinstance(orbit_dim, (bool, np.bool_))
+        or not isinstance(orbit_dim, Integral)
+        or not 1 <= orbit_dim <= ambient_dim
+    ):
+        raise ValueError("'orbit_dim' must be an integer between 1 and the ambient dimension.")
+    squared_norms = np.einsum("ij,ij->i", pts, pts)
+    if not np.all(np.isfinite(squared_norms) & (squared_norms > 0)):
+        raise ValueError("Lie-PCA points must have finite, nonzero squared norms.")
 
     # Computes local covariance matrices.
-    kdt = sklearn.neighbors.KDTree(pts, leaf_size=nb_neighbors + 1, metric="euclidean")
+    kdt = KDTree(pts, leaf_size=nb_neighbors + 1, metric="euclidean")
     neighbors_idx = kdt.query(pts, nb_neighbors + 1, return_distance=False)[:, 1::]
     proj_tangent_spaces = [
         get_covariance_matrix(
@@ -379,51 +428,23 @@ def get_lie_pca_operator(
         raise ValueError(f"Method {method} not recognized.")
     # Compute projections on lines.
     proj_lines = [
-        np.outer(pts[i, :], pts[i, :]) / np.dot(pts[i, :], pts[i, :])
+        np.outer(pts[i, :], pts[i, :]) / squared_norms[i]
         for i in range(nb_points)
     ]
-    # Create basis of space of matrices.
-    basis_matrices = []
-    for i in range(ambient_dim):
-        for j in range(ambient_dim):
-            mat = np.zeros((ambient_dim, ambient_dim))
-            mat[i, j] = 1
-            basis_matrices.append(mat)
-    # Compute Lie-PCA operator.
-    lie_pca = np.zeros((ambient_dim**2, ambient_dim**2))
-    for i in range(len(basis_matrices)):
-        lie_pca[:, i] = np.sum(
-            [
-                proj_normal_spaces[j] @ basis_matrices[i] @ proj_lines[j]
-                for j in range(nb_points)
-            ],
-            axis=0,
-        ).flatten()
-    lie_pca /= len(pts)
+    # Entry ((a, b), (i, j)) is the mean of N[a, i] * P[j, b].
+    size = ambient_dim**2
+    lie_pca = np.einsum("nai,njb->abij", proj_normal_spaces, proj_lines).reshape(size, size)
+    lie_pca /= nb_points
 
-    # Correction: set values of non-skew-symmetric matrices to zero. To do so, we skew-symmetrize the basis.
     if correction:
-        lie_pca_corrected = np.zeros((ambient_dim**2, ambient_dim**2))
-        for k in range(len(basis_matrices)):
-            # Take basis element and decompose it into symmetric and skew-symmetric parts
-            mat = basis_matrices[k]
-            mat_sym = (mat + mat.T) / 2
-            mat_skew_sym = (mat - mat.T) / 2
-
-            # Computes the image via Lie PCA.
-            # The image of the symmetric part is itself, so eigenvalue is 1
-            mat_sym_image = mat_sym
-            mat_skew_sym_image = (lie_pca @ (mat_skew_sym.reshape(-1))).reshape(
-                ambient_dim, ambient_dim
-            )
-            mat_image = mat_sym_image + mat_skew_sym_image
-
-            # Stores the image in the Lie PCA operator
-            lie_pca_corrected[:, k] = mat_image.flatten()
-
-        # Symmetrizes the operator
-        lie_pca_corrected = (lie_pca_corrected + lie_pca_corrected.T) / 2
-        lie_pca = lie_pca_corrected
+        # Preserve the existing correction: symmetrize S + L K, where
+        # S and K project onto symmetric and skew-symmetric matrices.
+        indices = np.arange(size)
+        transposed = indices.reshape(ambient_dim, ambient_dim).T.ravel()
+        corrected = (lie_pca - lie_pca[:, transposed]) / 2
+        corrected[indices, indices] += 0.5
+        corrected[indices, transposed] += 0.5
+        lie_pca = (corrected + corrected.T) / 2
 
     if verbose:
         vals = np.sort(np.linalg.eigvals(lie_pca).real)

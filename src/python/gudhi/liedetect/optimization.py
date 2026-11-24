@@ -47,6 +47,8 @@ from typing import Literal, Optional
 import autograd.numpy as np
 import pymanopt
 import scipy
+from numpy.random import default_rng
+from pymanopt.optimizers.line_search import BackTrackingLineSearcher
 
 # Local imports
 from .algebra import (
@@ -98,6 +100,48 @@ PARAMS_PYMANOPT = {
 }
 
 
+class _NonfiniteOptimizationError(RuntimeError):
+    pass
+
+
+class _StationaryBackTrackingLineSearcher(BackTrackingLineSearcher):
+    def search(self, objective, manifold, x, d, f0, df0):
+        if not (np.isfinite(f0) and np.isfinite(df0)):
+            raise _NonfiniteOptimizationError("The cost or directional derivative is nonfinite.")
+        # Steepest descent checks its stopping conditions after line search.
+        if df0 == 0:
+            return 0.0, x
+        return super().search(objective, manifold, x, d, f0, df0)
+
+
+def _run_optimizer(problem, ambient_dim, rng, initial_point, optimizer_options):
+    options = PARAMS_PYMANOPT | (optimizer_options or {})
+    if initial_point is None and rng is not None:
+        initial_point = scipy.stats.special_ortho_group.rvs(
+            ambient_dim,
+            random_state=rng,
+        )
+    optimizer = pymanopt.optimizers.SteepestDescent(
+        line_searcher=_StationaryBackTrackingLineSearcher(), **options
+    )
+    result = optimizer.run(problem, initial_point=initial_point)
+    if not np.isfinite(result.cost) or not np.isfinite(result.point).all():
+        raise _NonfiniteOptimizationError("The optimizer returned a nonfinite cost or point.")
+    return result
+
+
+def _run_summary(result, optimizer_options):
+    tolerance = (optimizer_options or {}).get(
+        "min_gradient_norm", PARAMS_PYMANOPT["min_gradient_norm"]
+    )
+    return {
+        "cost": float(result.cost),
+        "iterations": result.iterations,
+        "stopping_criterion": result.stopping_criterion,
+        "converged": bool(result.gradient_norm <= tolerance),
+    }
+
+
 def find_closest_algebra(
     group: str,
     lie_pca: np.ndarray,
@@ -108,6 +152,11 @@ def find_closest_algebra(
     method: Literal["bottom_lie_pca", "full_lie_pca", "abelian"] = "bottom_lie_pca",
     verbose: bool = True,
     verbose_top_scores: bool = False,
+    *,
+    seed=None,
+    initial_point=None,
+    optimizer_options=None,
+    diagnostics=None,
 ) -> tuple[tuple, list[np.ndarray]]:
     """
     Finds the closest pushforward Lie algebra of a group (subspace of skew-symmetric matrices) to the given Lie PCA
@@ -130,13 +179,40 @@ def find_closest_algebra(
     """
     if group not in ["torus", "SU(2)", "SO(3)"]:
         raise ValueError(f"Group {group!r} not recognized.")
+    if method not in ("bottom_lie_pca", "full_lie_pca", "abelian"):
+        raise ValueError(f"Method {method!r} not recognized.")
+    if method == "abelian" and group != "torus":
+        raise ValueError("The 'abelian' method is only supported for a torus.")
     group_dim = group_dim if group == "torus" else 3
     ambient_dim = int(np.sqrt(lie_pca.shape[0]))
+    rng = None if seed is None else default_rng(seed)
+    if initial_point is not None:
+        initial_point = np.asarray(initial_point)
+        if (
+            initial_point.shape != (ambient_dim, ambient_dim)
+            or initial_point.dtype.kind not in "iuf"
+            or not np.isfinite(initial_point).all()
+        ):
+            raise ValueError("'initial_point' must be a finite matrix in SO(ambient_dim).")
+        initial_point = initial_point.astype(float, copy=False)
+        if (
+            not np.allclose(initial_point.T @ initial_point, np.eye(ambient_dim))
+            or np.linalg.det(initial_point) <= 0
+        ):
+            raise ValueError("'initial_point' must be a finite matrix in SO(ambient_dim).")
+    runs = {}
+    solver_kwargs = {
+        "rng": rng,
+        "initial_point": initial_point,
+        "optimizer_options": optimizer_options,
+    }
+
 
     if verbose:
         sys.stdout.write(f"""----> Optimization problem via \x1b[34m{method}\x1b[0m method for {group}  <----\n""")
 
     # Gets representations to test.
+    explicit_candidates = reps_to_test is not None
     if reps_to_test is None:
         if group == "torus":
             if group_dim is None:
@@ -162,6 +238,20 @@ def find_closest_algebra(
         else:
             raise ValueError(f"Group {group} not recognized.")
 
+    if len(reps_to_test) == 0:
+        raise ValueError("No candidate representations to test.")
+    if explicit_candidates:
+        if group == "torus" and group_dim is None:
+            group_dim = len(reps_to_test[0])
+        for rep_type in reps_to_test:
+            algebra = get_canonical_pushforward_algebra(group, rep_type)
+            if algebra[0].shape[0] != ambient_dim:
+                raise ValueError(f"Candidate {rep_type!r} does not match ambient dimension {ambient_dim}.")
+            if group == "torus" and (
+                len(algebra) != group_dim or np.linalg.matrix_rank(rep_type) != group_dim
+            ):
+                raise ValueError(f"Torus candidate {rep_type!r} must have row rank {group_dim}.")
+
     # Gets bottom eigenvectors of Lie PCA if needed
     if method in ["bottom_lie_pca", "abelian"]:
         _, vecs = np.linalg.eigh(lie_pca)
@@ -182,22 +272,22 @@ def find_closest_algebra(
             rep_type = reps_to_test[i]
             # Runs over the two connected components of the orthogonal group
             for determinant in ["+1", "-1"]:
-                if method == "bottom_lie_pca":
-                    result = optimization_bottom_lie_pca(
-                        group=group,
-                        lie_pca_proj=lie_pca_proj,
-                        rep_type=rep_type,
-                        determinant=determinant,
-                    )
-                elif method == "full_lie_pca":
-                    result = optimization_full_lie_pca(
-                        group=group,
-                        lie_pca=lie_pca,
-                        rep_type=rep_type,
-                        determinant=determinant,
-                    )
-                costs[(rep_type, determinant)] = result.cost
-                minimizers[(rep_type, determinant)] = result.point
+                key = (rep_type, determinant)
+                try:
+                    if method == "bottom_lie_pca":
+                        result = optimization_bottom_lie_pca(
+                            group, lie_pca_proj, rep_type, determinant, **solver_kwargs
+                        )
+                    else:
+                        result = optimization_full_lie_pca(
+                            group, lie_pca, rep_type, determinant, **solver_kwargs
+                        )
+                except _NonfiniteOptimizationError as exc:
+                    runs[key] = {"error": str(exc)}
+                    continue
+                costs[key] = result.cost
+                minimizers[key] = result.point
+                runs[key] = _run_summary(result, optimizer_options)
             if verbose:
                 chronometer_tick(
                     start_time,
@@ -206,8 +296,12 @@ def find_closest_algebra(
                     "Solve minimization problem... ",
                 )
 
-        optimal_rep, optimal_det = min(costs.keys(), key=(lambda k: costs[k]))
-        optimal_change_of_basis = minimizers[(optimal_rep, optimal_det)]
+        if not costs:
+            raise RuntimeError("Algebra fitting failed: all optimizer runs were nonfinite.")
+        winner = min(costs, key=costs.get)
+        optimal_rep, _ = winner
+        selected = runs[winner]
+        optimal_change_of_basis = minimizers[winner]
         canonical_algebra = get_canonical_pushforward_algebra(
             group=group, rep_type=optimal_rep
         )
@@ -219,7 +313,22 @@ def find_closest_algebra(
     # Runs optimization in the Abelian case
     elif method == "abelian":
         optimal_rep, optimal_algebra, costs = optimization_abelian(
-            lie_pca_algebra=lie_pca_algebra, reps_to_test=reps_to_test
+            lie_pca_algebra=lie_pca_algebra, reps_to_test=reps_to_test,
+            runs=runs, **solver_kwargs
+        )
+        winner = optimal_rep
+        selected = runs.get(
+            "joint_normal_form",
+            {"iterations": 0, "stopping_criterion": "Direct Schur decomposition", "converged": None},
+        )
+
+    if diagnostics is not None:
+        diagnostics.update(
+            objective_value=float(costs[winner]),
+            iterations=selected["iterations"],
+            stopping_criterion=selected["stopping_criterion"],
+            converged=selected["converged"],
+            runs=runs,
         )
 
     if verbose:
@@ -239,6 +348,10 @@ def optimization_bottom_lie_pca(
     lie_pca_proj: np.ndarray,
     rep_type: tuple,
     determinant: Literal["+1", "-1"] = "+1",
+    *,
+    rng=None,
+    initial_point=None,
+    optimizer_options=None,
 ):
     """
     Given a representation type and an initial guess of pushforward algebra, this function optimizes over the special
@@ -281,8 +394,7 @@ def optimization_bottom_lie_pca(
 
     # Runs optimization
     problem = pymanopt.Problem(manifold, _cost_function)
-    optimizer = pymanopt.optimizers.SteepestDescent(**PARAMS_PYMANOPT)
-    result = optimizer.run(problem)
+    result = _run_optimizer(problem, ambient_dim, rng, initial_point, optimizer_options)
     # Transforms to provided connected component of orthogonal group
     if determinant == "-1":
         result.point = result.point @ np.diag([-1] + [1] * (ambient_dim - 1))
@@ -294,6 +406,10 @@ def optimization_full_lie_pca(
     lie_pca: np.ndarray,
     rep_type: tuple,
     determinant: Literal["+1", "-1"] = "+1",
+    *,
+    rng=None,
+    initial_point=None,
+    optimizer_options=None,
 ):
     """
     Given a representation type and the Lie PCA operator, this function optimizes over the special orthogonal matrices
@@ -332,8 +448,7 @@ def optimization_full_lie_pca(
 
     # Runs optimization
     problem = pymanopt.Problem(manifold, _cost_function)
-    optimizer = pymanopt.optimizers.SteepestDescent(**PARAMS_PYMANOPT)
-    result = optimizer.run(problem)
+    result = _run_optimizer(problem, ambient_dim, rng, initial_point, optimizer_options)
     # Transforms to provided connected component of orthogonal group
     if determinant == "-1":
         result.point = result.point @ np.diag([-1] + [1] * (ambient_dim - 1))
@@ -348,7 +463,8 @@ Closest Lie algebra - Abelian case
 
 
 def optimization_abelian(
-    lie_pca_algebra: list, reps_to_test: list
+    lie_pca_algebra: list, reps_to_test: list, *, rng=None,
+    initial_point=None, optimizer_options=None, runs=None,
 ) -> tuple[tuple, list, dict]:
     """
     Finds the closest Abelian (torus) Lie algebra to the given Lie PCA algebra.
@@ -371,7 +487,8 @@ def optimization_abelian(
         opt_weights = (opt_weights,)
     else:
         opt_weights, opt_change_of_basis = normal_form_skew_symmetric_matrices(
-            lie_pca_algebra
+            lie_pca_algebra, rng=rng, initial_point=initial_point,
+            optimizer_options=optimizer_options, runs=runs,
         )
 
     # Computes invariant for the given lattice
@@ -394,9 +511,9 @@ def optimization_abelian(
                 decimals_accuracy=20,
             )
             invariant /= np.linalg.norm(invariant)
-            costs[weights] = np.linalg.norm(
-                np.array(optimal_invariant) - np.array(invariant)
-            )
+            cost = np.linalg.norm(np.array(optimal_invariant) - np.array(invariant))
+            if np.isfinite(cost):
+                costs[weights] = cost
         else:
             lattice = np.asarray(weights)
             for perm in itertools.permutations(range(m)):
@@ -408,11 +525,13 @@ def optimization_abelian(
                         decimals_accuracy=20,
                     )
                     permuted = tuple(tuple(row) for row in permuted.tolist())
-                    costs[permuted] = np.linalg.norm(
-                        np.array(optimal_invariant) - np.array(invariant)
-                    )
+                    cost = np.linalg.norm(np.array(optimal_invariant) - np.array(invariant))
+                    if np.isfinite(cost):
+                        costs[permuted] = cost
 
     # Deduces optimal representation
+    if not costs:
+        raise RuntimeError("Abelian algebra fitting failed: no finite candidate scores.")
     optimal_rep = min(costs, key=costs.get)
 
     # Defines optimal_algebra
@@ -470,7 +589,8 @@ def normal_form_skew_sym_matrix(mat: np.ndarray) -> tuple[np.ndarray, np.ndarray
 
 
 def normal_form_skew_symmetric_matrices(
-    matrices: list[np.ndarray],
+    matrices: list[np.ndarray], *, rng=None, initial_point=None,
+    optimizer_options=None, runs=None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Computes the weights of a joint normal form of a list of skew-symmetric matrices. This is done by optimizing over
@@ -511,8 +631,9 @@ def normal_form_skew_symmetric_matrices(
 
     # Runs optimization
     problem = pymanopt.Problem(manifold, _cost_function)
-    optimizer = pymanopt.optimizers.SteepestDescent(**PARAMS_PYMANOPT)
-    result = optimizer.run(problem)
+    result = _run_optimizer(problem, ambient_dim, rng, initial_point, optimizer_options)
+    if runs is not None:
+        runs["joint_normal_form"] = _run_summary(result, optimizer_options)
     change_of_basis = result.point
     # Transforms in normal form
     matrices_normal_form = [change_of_basis @ A @ change_of_basis.T for A in matrices]

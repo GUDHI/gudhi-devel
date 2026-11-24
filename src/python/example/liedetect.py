@@ -47,7 +47,7 @@ print("\n\nClosest representation type:", la)
 
 # Sample from estimated orbit
 pred = orbit_fitter.sample_orbit(nb_points=1000)
-print("\n\nMinimal Hausdorff distance:", min(orbit_fitter.hausdorff_distances_))
+print("\n\nDirected Hausdorff distance from data to reconstruction:", orbit_fitter.hausdorff_distances_[0])
 
 # Visualize the point cloud and the estimated orbit in 3D using PCA
 pca = sklearn.decomposition.PCA(n_components=3).fit(pts)

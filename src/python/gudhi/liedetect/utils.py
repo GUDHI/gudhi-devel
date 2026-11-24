@@ -193,17 +193,13 @@ def sample_orbit_from_algebra_su2(
     algebra_y = algebra[1]
     algebra_z = algebra[2]
 
-    # Create generator.
-    rng = default_rng(seed)
-
     # Create sampler.
     if method == "evenly_spaced":
         # With scramble=False, this is a fixed deterministic sequence.
         sampler = qmc.Halton(d=3, scramble=False)
         parameters = sampler.random(n=nb_points)
     elif method == "random_uniform":
-        rng = np.random.default_rng(seed)
-        parameters = rng.random((nb_points, 3))
+        parameters = default_rng(seed).random((nb_points, 3))
     else:
         raise ValueError(
             f"Method '{method}' not recognized. Use 'evenly_spaced' or 'random_uniform'."
@@ -218,15 +214,26 @@ def sample_orbit_from_algebra_su2(
     period = max(period_irrep_su2(dim) for dim in rep_type)
     gamma = period * parameters[:, 2]
 
-    # Create orbit.
-    orbit = np.empty((nb_points, x.size), dtype=float)
-    for i in range(nb_points):
-        group_element = (
-            scipy.linalg.expm(alpha[i] * algebra_z)
-            @ scipy.linalg.expm(beta[i] * algebra_y)
-            @ scipy.linalg.expm(gamma[i] * algebra_z)
-        )
-        orbit[i] = group_element @ x
+    return _apply_euler_rotations(algebra_y, algebra_z, x, alpha, beta, gamma)
+
+
+def _apply_euler_rotations(algebra_y, algebra_z, x, alpha, beta, gamma):
+    # For real skew A, iA is Hermitian and exp(tA) is diagonal in its eigenbasis.
+    eigenvalues_y, basis_y = scipy.linalg.eigh(1j * algebra_y)
+    eigenvalues_z, basis_z = scipy.linalg.eigh(1j * algebra_z)
+    coordinates = basis_z.conj().T @ x
+    # Rows hold sample coordinates. This matrix changes them from the z basis to the y basis.
+    z_to_y = basis_z.T @ basis_y.conj()
+    y_to_z = z_to_y.conj().T
+
+    orbit = np.empty((len(alpha), x.size), dtype=float)
+    batch_size = 4096
+    for start in range(0, len(orbit), batch_size):
+        batch = slice(start, start + batch_size)
+        vectors = np.exp(-1j * gamma[batch, None] * eigenvalues_z) * coordinates
+        vectors = (vectors @ z_to_y) * np.exp(-1j * beta[batch, None] * eigenvalues_y)
+        vectors = (vectors @ y_to_z) * np.exp(-1j * alpha[batch, None] * eigenvalues_z)
+        orbit[batch] = (vectors @ basis_z.T).real
     return orbit
 
 
@@ -276,7 +283,12 @@ def sample_from_lie_algebra(
         )
     elif group in ["SU(2)", "SO(3)"]:
         orbit = sample_orbit_from_algebra_su2(
-            rep_type=rep_type, algebra=algebra, x=x, nb_points=nb_points, seed=rng
+            rep_type=rep_type,
+            algebra=algebra,
+            x=x,
+            nb_points=nb_points,
+            method=method,
+            seed=rng,
         )
     else:
         raise ValueError(f"Group '{group}' not recognized.")
