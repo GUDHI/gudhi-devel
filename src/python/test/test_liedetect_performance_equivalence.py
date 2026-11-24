@@ -86,26 +86,33 @@ def _primitive_line(vector):
 @pytest.mark.parametrize("span", [False, True])
 def test_lattice_streaming_preserves_representatives_and_order(rank, span):
     width, bound = 3, 2 if rank == 1 else 1
-    characters = list(itertools.product(range(bound + 1), repeat=rank))[1:]
-    blocks = itertools.combinations(characters, width) if span else itertools.product(characters, repeat=width)
-    candidates = [tuple(zip(*candidate)) for candidate in blocks]
-    if rank == 1:
-        candidates = [candidate for candidate in candidates if gcd(*candidate[0]) == 1]
-    representatives = {}
-    for candidate in candidates:
-        # Lines in rank one and normal lines in codimension one have the
-        # same signed-permutation equivalence test. Cross products here use
-        # small integer fixtures and do not depend on the production RREF.
+    characters = [
+        weight
+        for weight in itertools.product(range(-bound, bound + 1), repeat=rank)
+        if any(weight)
+    ]
+    representatives, orbits = {}, {}
+    for columns in itertools.product(characters, repeat=width):
+        canonical = [max(weight, tuple(-entry for entry in weight)) for weight in columns]
+        if span and len(set(canonical)) != width:
+            continue
+        candidate = tuple(zip(*columns))
+        if rank == 1 and gcd(*candidate[0]) != 1:
+            continue
+        # A primitive line or normal is an independent key in these dimensions.
         vector = candidate[0] if rank == 1 else tuple(map(int, np.cross(*candidate)))
-        if any(vector):
-            representatives.setdefault(_primitive_line(vector), candidate)
+        if not any(vector):
+            continue
+        key = _primitive_line(vector)
+        representatives.setdefault(key, candidate)
+        if columns == tuple(sorted(canonical)):
+            orbits.setdefault(tuple(sorted(map(abs, key))), candidate)
     assert get_lattices(rank, width, bound, "span-equivalence", span) == list(representatives.values())
-    orbits = {}
-    for key, candidate in representatives.items():
+    assert get_lattices(rank, width, bound, "orbit-equivalence", span) == list(orbits.values())
+    for candidate in orbits.values():
         expected = _legacy_invariant(candidate, "orbit-equivalence")
         assert invariant_of_lattices(candidate, "orbit-equivalence") == expected
-        orbits.setdefault(tuple(sorted(map(abs, key))), candidate)
-    assert get_lattices(rank, width, bound, "orbit-equivalence", span) == list(orbits.values())
+
 
 def test_rank_two_torus_equivalence_distinguishes_three_column_images():
     weights = ((1, 0, 1), (0, 1, 1))

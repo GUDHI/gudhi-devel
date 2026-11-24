@@ -165,7 +165,7 @@ class OrbitFitter:
         Args:
             group (str): The group ('torus', 'SU(2)', or 'SO(3)').
             group_dim (Optional[int]): Dimension of the torus (if group='torus'), otherwise ignored.
-            frequency_max (int): Maximum frequency for lattice search (torus case).
+            frequency_max (int): Inclusive absolute coordinate bound for the automatic torus weight search.
             reps_to_test (list, optional): List of representations to test. If None, computed automatically.
             span_ambient_space (bool): Restrict the automatic search to representations
                 admitting an orbit of full centered span. Defaults to True.

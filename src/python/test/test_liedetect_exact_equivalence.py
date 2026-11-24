@@ -18,9 +18,12 @@ def test_non_nested_coverings_give_the_same_orbit_class():
 
 
 def test_span_equivalence_preserves_the_weight_coordinate_order():
-    assert get_lattices(1, 2, 2, "span-equivalence", False) == [
-        ((1, 1),), ((1, 2),), ((2, 1),)
-    ]
+    assert {
+        tuple(-value for value in table[0]) if table[0][0] < 0 else table[0]
+        for table in get_lattices(1, 2, 2, "span-equivalence", False)
+    } == {
+        (2, 1), (2, -1), (1, 2), (1, 1), (1, -1), (1, -2)
+    }
     assert get_lattices(1, 2, 2, "orbit-equivalence", False) == [
         ((1, 1),), ((1, 2),)
     ]

@@ -124,7 +124,13 @@ In this step, LieDetect estimates a nearby algebra compatible with a valid
 representation type. Iterative fitting uses local optimization. Supply
 `seed` or `initial_point` for repeatable starts and inspect
 `orbit_fitter.fit_diagnostics_` for the selected score and solver stop reason.
-Use `reps_to_test` to provide candidate representations directly when the
+The automatic torus search uses nonzero weights with integer coordinates
+between ``-frequency_max`` and ``frequency_max``, inclusive. It chooses one sign
+per real rotation character, requires full row rank, and deduplicates
+orbit-equivalent representations. With ``span_ambient_space=True``, character
+blocks must also be distinct up to sign. The number of candidates grows
+combinatorially with the rank, frequency bound, and number of blocks. Use
+``reps_to_test`` to provide candidate representations directly when the
 automatic search is too large.
 
 .. code-block:: python

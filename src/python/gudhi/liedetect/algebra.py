@@ -458,13 +458,14 @@ def get_lattices(
     row space in fixed coordinates. With 'orbit-equivalence', also identify
     row spaces related by signed column permutations. Representatives retain
     their original integer rows and can be nonprimitive.
-    In addition, with the parameter "span_ambient_space", we only return lattices whose irreps in its decomposition do
-    not repeat. This ensures that the corresponding orbit spans the ambient space.
+    Search nonzero weight columns in the signed coordinate box. If
+    span_ambient_space is True, require their classes modulo sign to be
+    distinct, which yields full centered span for a generic base point.
 
     Args:
-        ambient_rank (int): Dimension of the vector.
+        ambient_rank (int): Number of two-dimensional character blocks.
         lattice_rank (int): Rank of the lattice.
-        frequency_max (int): Maximum frequency for irreps.
+        frequency_max (int): Inclusive bound on the absolute value of each weight coordinate.
         method (str, optional): 'span-equivalence' or 'orbit-equivalence'.
         span_ambient_space (bool, optional): If True, only return lattices whose generic orbits span the ambient space.
         verbose (int, optional): Verbosity level.
@@ -481,21 +482,36 @@ def get_lattices(
     if verbose:
         sys.stdout.write(f"""Generate lattices up to frequency {frequency_max}... """)
 
-    # Gets irreps of T^lattice_rank with frequencies in
-    # [0, frequency_max] (tuples of length lattice_dim)
-    irreps = list(itertools.product(range(frequency_max + 1), repeat=lattice_rank))
-    irreps.remove((0,) * lattice_rank)
+    frequencies = range(-frequency_max, frequency_max + 1)
+    positive_first = [
+        weight
+        for weight in itertools.product(frequencies, repeat=lattice_rank)
+        if next((entry for entry in weight if entry), 0) > 0
+    ]
+    if span_ambient_space and ambient_rank > len(positive_first):
+        return []
 
-    # Gets lattices, as combinations of irreps (comb instead of prod, for the orbit to span the ambient space)
-    if span_ambient_space:
-        lattices = itertools.combinations(irreps, ambient_rank)
+    if method == "orbit-equivalence":
+        # Signed permutations of the blocks are already part of orbit equivalence.
+        combinations = (
+            itertools.combinations if span_ambient_space else itertools.combinations_with_replacement
+        )
+        tables = combinations(positive_first, ambient_rank)
     else:
-        lattices = itertools.product(irreps, repeat=ambient_rank)
+        # Signs and column order matter to the row space in fixed coordinates.
+        sign_classes = {weight: weight for weight in positive_first}
+        sign_classes.update({tuple(-entry for entry in weight): weight for weight in positive_first})
+        tables = itertools.product(sorted(sign_classes), repeat=ambient_rank)
+        if span_ambient_space:
+            tables = (
+                columns for columns in tables
+                if len({sign_classes[weight] for weight in columns}) == ambient_rank
+            )
 
-    # Visit candidates in the original order and keep the first representative of each span.
+    # Keep the first representative of each exact span.
     full_rank_count = 0
     span_equivalence_classes = {}
-    for characters in lattices:
+    for characters in tables:
         lattice = tuple(zip(*characters))
         if lattice_rank == 1 and gcd(*lattice[0]) != 1:
             continue
