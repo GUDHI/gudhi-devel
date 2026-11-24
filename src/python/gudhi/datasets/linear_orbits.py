@@ -209,11 +209,11 @@ def sample_from_lie_group(
         translate_orbit (bool, optional): Whether to rotate the sampled orbit by a random orthogonal transformation.
             Defaults to False.
         method (str, optional): Sampling method, 'random_uniform' or 'evenly_spaced'. Defaults to 'evenly_spaced'.
-        span_ambient_space (bool, optional): Restrict to representations admitting an orbit of
-            full centered span. For SU(2) and SO(3), the base point must also be cyclic for the
-            selected representation. Cyclicity is checked numerically and nearly dependent
-            directions may be rejected. This property concerns the continuous orbit. Defaults to
-            False. Only implemented for the circle or the non-Abelian groups.
+        span_ambient_space (bool, optional): Require the base point's continuous orbit
+            to have full centered span. For tori, the nonzero character blocks must be
+            distinct modulo sign and the base point must be nonzero in each plane.
+            For SU(2) and SO(3), cyclicity is checked numerically and nearly dependent
+            directions may be rejected. Defaults to False.
         verbose (bool, optional): Whether to print information about the sampled orbit. Defaults to False.
         seed (int or numpy.random.Generator, optional): Seed or generator for sampling. If None, uses a random generator.
 
@@ -227,6 +227,13 @@ def sample_from_lie_group(
     if group == "torus":
         if not isinstance(ambient_dim, Integral) or ambient_dim < 2 or ambient_dim % 2:
             raise ValueError("'ambient_dim' must be a positive even integer for a torus.")
+        if span_ambient_space and x is not None:
+            x = _validate_base_point(x, ambient_dim)
+            if not np.all(np.any(x.reshape(-1, 2) != 0, axis=1)):
+                raise ValueError(
+                    "The torus base point must be nonzero in every rotation plane "
+                    "when 'span_ambient_space' is True."
+                )
         rep_type = get_random_lattice(
             lattice_rank=group_dim,
             ambient_rank=ambient_dim // 2,

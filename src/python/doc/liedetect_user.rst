@@ -193,7 +193,19 @@ Generate synthetic data
 -----------------------
 
 LieDetect also provides functions to generate synthetic data near orbits of
-representations.
+representations. For a random torus, ``group_dim`` specifies the dimension of
+the image. Full row rank gives an injective differential. Faithfulness of
+the group action additionally requires the weight columns to generate the
+entire integer character lattice.
+
+With ``span_ambient_space=True``, the random torus sampler chooses distinct
+nonzero characters up to sign, so the representation admits an orbit of
+full centered span. The selected orbit has that span when its base point
+is nonzero in every rotation plane. The sampler checks supplied base points
+and uses nonzero coordinates in every plane by default. This is a property
+of the continuous orbit. A finite sample can have smaller rank. The sampler
+draws weight presentations, so the induced distribution on orbit-equivalence
+classes need not be uniform.
 
 .. code-block:: python
 

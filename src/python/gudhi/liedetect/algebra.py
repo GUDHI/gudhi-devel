@@ -243,6 +243,41 @@ Lattices and partitions
 """
 
 
+def _random_index(rng, stop: int) -> int:
+    if stop <= np.iinfo(np.int64).max:
+        return int(rng.integers(stop))
+    # Use Python integers for pools that cannot be passed to NumPy's integers.
+    bits = (stop - 1).bit_length()
+    byte_count = (bits + 7) // 8
+    mask = (1 << bits) - 1
+    while True:
+        index = int.from_bytes(rng.bytes(byte_count), "little") & mask
+        if index < stop:
+            return index
+
+
+def _sample_weight_class_indices(rng, population: int, count: int):
+    # Partial Fisher-Yates on an implicit array of indices 1 through population.
+    moved = {}
+    for offset in range(count):
+        last = population - offset - 1
+        position = _random_index(rng, last + 1)
+        index = moved.get(position, position)
+        if position != last:
+            moved[position] = moved.get(last, last)
+        moved.pop(last, None)
+        yield index + 1
+
+
+def _decode_weight_class(index: int, rank: int, frequency_max: int) -> tuple[int, ...]:
+    radix = 2 * frequency_max + 1
+    digits = []
+    for _ in range(rank):
+        index, digit = divmod(index + frequency_max, radix)
+        digits.append(digit - frequency_max)
+    return tuple(reversed(digits))
+
+
 def get_random_lattice(
     lattice_rank: int,
     ambient_rank: int,
@@ -251,14 +286,18 @@ def get_random_lattice(
     seed: RandomSeed = None,
 ) -> tuple[tuple[int, ...], ...]:
     """
-    Generates a random lattice of rank lattice_rank in Z^ambient_rank. It may not be primitive.
+    Draw an integer weight table of full row rank.
+
+    The rows need not generate a primitive lattice. Sampling is over weight
+    presentations, with rejection for rank, rather than orbit classes.
 
     Args:
         lattice_rank (int): Dimension of the lattice.
         ambient_rank (int): Number of two-dimensional character blocks.
-        frequency_max (int): Maximum frequency for irreps.
-        span_ambient_space (bool): Whether to only consider representations whose orbits span the ambient space. Only
-            implemented for rank-1 lattices.
+        frequency_max (int): Inclusive absolute bound on each weight coordinate.
+        span_ambient_space (bool): Require distinct nonzero character columns
+            modulo sign. A base point with nonzero coordinates in every
+            plane then has a continuous orbit of full centered span.
         seed (int or numpy.random.Generator, optional): Seed or generator for sampling. If None, uses a random generator.
 
     Returns:
@@ -273,24 +312,36 @@ def get_random_lattice(
             raise ValueError(f"'{name}' must be a positive integer.")
     if lattice_rank > ambient_rank:
         raise ValueError("Rank of ambient lattice is too small.")
+    frequency_max = int(frequency_max)
+    lattice_rank = int(lattice_rank)
+    ambient_rank = int(ambient_rank)
     if span_ambient_space:
-        if lattice_rank != 1:
-            raise ValueError("'span_ambient_space' is only implemented for rank-1 lattices.")
-        if ambient_rank > frequency_max:
+        class_count = ((2 * frequency_max + 1) ** lattice_rank - 1) // 2
+        if ambient_rank > class_count:
             raise ValueError("Full span requires at least one distinct nonzero frequency per character block.")
 
     rng = default_rng(seed)
     for _ in range(100):
         if span_ambient_space:
-            # Draw distinct nonzero magnitudes directly, then keep the existing primitive-row condition.
-            magnitudes = rng.choice(frequency_max, size=ambient_rank, replace=False) + 1
-            weights = tuple(int(value) for value in magnitudes * rng.choice((-1, 1), size=ambient_rank))
-            if gcd(*weights) == 1:
-                return (weights,)
+            indices = _sample_weight_class_indices(rng, class_count, ambient_rank)
+            signs = rng.choice((-1, 1), size=ambient_rank)
+            columns = (
+                tuple(int(sign) * value for value in _decode_weight_class(index, lattice_rank, frequency_max))
+                for index, sign in zip(indices, signs)
+            )
+            lattice = tuple(zip(*columns))
+        elif frequency_max <= np.iinfo(np.int64).max:
+            rows = rng.integers(
+                -frequency_max, frequency_max, size=(lattice_rank, ambient_rank), endpoint=True
+            )
+            lattice = tuple(tuple(map(int, row)) for row in rows)
         else:
-            rows = rng.integers(-frequency_max, frequency_max, size=(lattice_rank, ambient_rank), endpoint=True)
-            if np.linalg.matrix_rank(rows) == lattice_rank:
-                return tuple(tuple(int(value) for value in row) for row in rows)
+            lattice = tuple(
+                tuple(_random_index(rng, 2 * frequency_max + 1) - frequency_max for _ in range(ambient_rank))
+                for _ in range(lattice_rank)
+            )
+        if len(_exact_span(lattice)) == lattice_rank:
+            return lattice
     raise RuntimeError("Failed to generate a valid lattice after 100 attempts.")
 
 
