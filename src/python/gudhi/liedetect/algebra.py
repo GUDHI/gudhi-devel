@@ -37,6 +37,7 @@ Canonical bases of representations:
 # Standard imports.
 import sys
 import itertools
+from collections import Counter
 from math import gcd
 from numbers import Integral
 from typing import Literal
@@ -487,7 +488,11 @@ def get_partitions(n: int):
 def get_constrained_partitions(
     group: str, ambient_dim: int, span_ambient_space: bool = False
 ) -> list[tuple[int, ...]]:
-    """Returns all partitions of the integer n that are valid representations of the specified group."""
+    """Return the nontrivial real representation partitions for the group.
+
+    With span_ambient_space=True, each partition admits a cyclic vector
+    and has no fixed directions, so it admits an orbit of full centered span.
+    """
     # Defines integers (j % mod == rem) that are not irreps of the group
     if group == "SO(3)":
         mod, rem = 2, 0
@@ -510,13 +515,17 @@ def get_constrained_partitions(
     # Discards the trivial representation
     partitions.remove(tuple([1] * ambient_dim))
 
-    # Discards representations that do not span the ambient space
-    # (i.e., if contains the trivial irrep)
     if span_ambient_space:
+        # Real-type irreps have commutant R. Even-dimensional SU(2) irreps
+        # have commutant H, so their dimension over H is one quarter as large.
         partitions = [
             partition
             for partition in partitions
-            if (1 not in partition and len(np.unique(partition)) == len(partition))
+            if 1 not in partition
+            and all(
+                multiplicity <= (dim if dim % 2 else dim // 4)
+                for dim, multiplicity in Counter(partition).items()
+            )
         ]
 
     # Sanity check: the set cannot be empty

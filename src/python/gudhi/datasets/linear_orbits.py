@@ -52,6 +52,48 @@ Sample on orbits
 """
 
 
+def _validate_base_point(x, ambient_dim):
+    x = np.asarray(x)
+    if x.shape != (ambient_dim,) or x.dtype.kind not in "iuf" or not np.isfinite(x).all():
+        raise ValueError(f"'x' must be a finite real vector of length {ambient_dim}.")
+    return x
+
+
+def _is_cyclic(x, generators):
+    # For a connected group, the orbit span is the generator-invariant
+    # subspace obtained by repeatedly applying the generators to x.
+    scale = np.max(np.abs(x.astype(float)))
+    if scale == 0:
+        return False
+    initial = x / scale
+    ambient_dim = x.size
+    basis = np.empty((ambient_dim, ambient_dim))
+    basis[:, 0] = initial / np.linalg.norm(initial)
+    rank = 1
+    tolerance = 10 * ambient_dim * np.finfo(basis.dtype).eps
+    directions = [
+        generator / norm
+        for generator in generators
+        if (norm := np.linalg.norm(generator)) > 0
+    ]
+    column = 0
+    while column < rank and rank < ambient_dim:
+        for direction in directions:
+            residual = direction @ basis[:, column]
+            accepted = basis[:, :rank]
+            # Reorthogonalize before deciding whether this direction is new.
+            for _ in range(2):
+                residual -= accepted @ (accepted.T @ residual)
+            norm = np.linalg.norm(residual)
+            if norm > tolerance:
+                basis[:, rank] = residual / norm
+                rank += 1
+                if rank == ambient_dim:
+                    return True
+        column += 1
+    return rank == ambient_dim
+
+
 def sample_from_lie_group_rep(
     group: str,
     rep_type: tuple,
@@ -97,9 +139,7 @@ def sample_from_lie_group_rep(
         x = np.ones(ambient_dim)
         x /= np.linalg.norm(x)
     else:
-        x = np.asarray(x)
-        if x.shape != (ambient_dim,) or x.dtype.kind not in "iuf" or not np.isfinite(x).all():
-            raise ValueError(f"'x' must be a finite real vector of length {ambient_dim}.")
+        x = _validate_base_point(x, ambient_dim)
     # Conjugate algebra if needed.
     if conjugate_algebra:
         orth = scipy.stats.special_ortho_group.rvs(ambient_dim, random_state=rng)
@@ -159,7 +199,9 @@ def sample_from_lie_group(
         nb_points (int): Number of points to sample on the orbit.
         frequency_max (Optional[int]): Maximal frequency for torus representations.
         group_dim (Optional[int]): Dimension of the group (for torus).
-        x (np.ndarray, optional): Initial vector to act on. Defaults to (1,1,...)/sqrt(ambient_dim).
+        x (np.ndarray, optional): Initial vector to act on. With non-Abelian full-span
+            sampling and repeated irreps, the default is a seeded random unit vector.
+            Otherwise the default is (1,1,...)/sqrt(ambient_dim).
         conjugate_algebra (bool, optional): Whether to conjugate the algebra by a random orthogonal matrix.
             Defaults to False.
         right_multiply_algebra (bool, optional): Whether to right-multiply the algebra by a random orthogonal matrix.
@@ -167,8 +209,11 @@ def sample_from_lie_group(
         translate_orbit (bool, optional): Whether to rotate the sampled orbit by a random orthogonal transformation.
             Defaults to False.
         method (str, optional): Sampling method, 'random_uniform' or 'evenly_spaced'. Defaults to 'evenly_spaced'.
-        span_ambient_space (bool, optional): Whether to only consider representations whose orbits span the ambient
-            space. Defaults to False. Only implemented for the circle or the non-Abelian groups.
+        span_ambient_space (bool, optional): Restrict to representations admitting an orbit of
+            full centered span. For SU(2) and SO(3), the base point must also be cyclic for the
+            selected representation. Cyclicity is checked numerically and nearly dependent
+            directions may be rejected. This property concerns the continuous orbit. Defaults to
+            False. Only implemented for the circle or the non-Abelian groups.
         verbose (bool, optional): Whether to print information about the sampled orbit. Defaults to False.
         seed (int or numpy.random.Generator, optional): Seed or generator for sampling. If None, uses a random generator.
 
@@ -197,6 +242,18 @@ def sample_from_lie_group(
             span_ambient_space=span_ambient_space,
             seed=rng,
         )
+        if span_ambient_space:
+            if x is None and len(set(rep_type)) != len(rep_type):
+                x = rng.standard_normal(ambient_dim)
+                x /= np.linalg.norm(x)
+            if x is not None:
+                x = _validate_base_point(x, ambient_dim)
+                generators = get_canonical_pushforward_algebra(group, rep_type)
+                if not _is_cyclic(x, generators):
+                    raise ValueError(
+                        f"The base point must be cyclic for the selected representation {rep_type} "
+                        "when 'span_ambient_space' is True."
+                    )
 
     else:
         raise NotImplementedError(f"Group '{group}' not recognized.")

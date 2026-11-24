@@ -162,8 +162,8 @@ class OrbitFitter:
             group_dim (Optional[int]): Dimension of the torus (if group='torus'), otherwise ignored.
             frequency_max (int): Maximum frequency for lattice search (torus case).
             reps_to_test (list, optional): List of representations to test. If None, computed automatically.
-            span_ambient_space (bool): Whether to restrict to representations with orbits spanning the ambient space.
-                Defaults to True.
+            span_ambient_space (bool): Restrict the automatic search to representations
+                admitting an orbit of full centered span. Defaults to True.
             method (str): Optimization method: 'bottom_lie_pca', 'full_lie_pca',  or 'abelian' (torus only). Defaults
                 to 'bottom_lie_pca'.
             verbose (bool): If True, prints progress and results. Defaults to False.
