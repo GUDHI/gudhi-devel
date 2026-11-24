@@ -50,8 +50,18 @@ This step is implemented by the :class:`~gudhi.liedetect.Orthonormalize` class.
     ortho = Orthonormalize(pts)
     pts = ortho.fit_transform()
 
-The input must have finite real coordinates and full-rank centered covariance.
-Integer coordinates are converted to floating point.
+The input must have finite real coordinates. The default requires full-rank
+centered covariance. Integer coordinates are converted to floating point.
+
+For data in a lower-dimensional affine subspace, set ``rank_tol`` when
+constructing ``Orthonormalize``. A value in ``[0, 1)`` is a relative covariance
+eigenvalue threshold, with a numerical floor applied to the singular values
+of the centered cloud. For example, ``rank_tol=0`` retains all numerically
+resolved directions. ``transform`` then returns coordinates in the retained
+subspace, and ``inverse_transform`` lifts them back to the original ambient
+dimension. Inverse after forward transformation is orthogonal projection
+onto the retained affine subspace. A threshold can discard genuine
+low-variance directions as well as noise.
 
 This operation is not equivalent to the usual radial projection onto the sphere
 obtained by normalization.
@@ -92,9 +102,18 @@ compression explicitly. Calls using the old keyword should use the new name.
 The near-zero eigenvalues estimate the dimension of the full infinitesimal
 symmetry algebra of the orbit. It can be larger than the algebra of the
 generating group. Set `orbit_dim` to the tangent dimension of the observed
-orbit. It equals the dimension of the group minus the dimension of the
+orbit. It must be strictly smaller than the ambient dimension after any
+preprocessing, and the number of neighbors must be at least this large.
+Orbit dimension equals the dimension of the group minus the dimension of the
 stabilizer of the base point. For example, an :math:`SO(3)` sphere orbit has
 dimension two.
+
+The default PCA estimator computes the tangent directions from a thin SVD
+of the neighborhood differences. A neighborhood must have at least
+``orbit_dim`` numerically resolved directions. This check measures rank
+at working precision. Tangent accuracy still depends on sampling,
+neighborhood geometry, and noise. The optional ``covariance`` estimator
+uses its normalized covariance complement and has no numerical rank gate.
 
 They can be displayed with
 
@@ -122,8 +141,23 @@ Step 3: Optimization
 
 In this step, LieDetect estimates a nearby algebra compatible with a valid
 representation type. Iterative fitting uses local optimization. Supply
-`seed` or `initial_point` for repeatable starts and inspect
-`orbit_fitter.fit_diagnostics_` for the selected score and solver stop reason.
+``seed`` or ``initial_point`` for repeatable starts and inspect
+``orbit_fitter.fit_diagnostics_`` for the selected score, returned-point
+gradient norm, and solver stop reason. ``n_starts`` defaults to one and can
+be increased to try additional random starts per candidate and orthogonal
+component, or for the joint Abelian normal form. Each start has its own
+solver budget. An explicit ``initial_point`` supplies the first start of
+each series, and the seed controls the additional starts.
+
+By default, a finite valid estimate can win on score after a budget-limited
+stop. ``require_convergence=True`` restricts selection to estimates whose
+returned-point gradient norm meets the configured tolerance and raises an
+error if none qualifies. This tolerance measures first-order stationarity.
+Rank-one Abelian fitting uses a direct Schur decomposition and has no
+iterative convergence check. For higher-rank Abelian fitting, the gradient
+norm describes the joint normal-form solve, and the selected score describes
+the subsequent comparison of torus weights.
+
 The automatic torus search uses nonzero weights with integer coordinates
 between ``-frequency_max`` and ``frequency_max``, inclusive. It chooses one sign
 per real rotation character, requires full row rank, and deduplicates
@@ -174,7 +208,11 @@ Step 4: Generate orbit and compute Hausdorff distances
 ------------------------------------------------------
 
 Once the representation type has been estimated, the corresponding orbit can
-be reconstructed.
+be reconstructed. For a torus, the evenly spaced sampler uses a grid in the
+joint period coordinates of the image group. This avoids repeated group
+transformations caused by a covering of that image. Distinct transformations
+give distinct orbit points when the base point has trivial stabilizer in
+the image group, up to floating-point precision.
 
 .. code-block:: python
 

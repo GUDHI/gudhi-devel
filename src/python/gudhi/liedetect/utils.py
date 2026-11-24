@@ -36,6 +36,8 @@ RandomSeed = int | Generator | None
 # Local imports.
 import gudhi.subsampling
 
+from .algebra import _rational_row_reduction
+
 """
 -----------------------------------------------------------------------------------------------------------------------
 Sample on orbits
@@ -61,7 +63,7 @@ def get_periods_torus(
                 sqrt(2) * ||(a1, ..., am)||.
         In particular, if A is a skew-symmetric matrix that is, up to normalization, conjugate to A*, then its period
             is
-                2 * pi / gcd(a1, ..., am) * 2 * ||(a1, ..., am)|| / ||A||.
+                2 * pi / gcd(a1, ..., am) * sqrt(2) * ||(a1, ..., am)|| / ||A||.
 
     Case of T^d:
         Similar to the case of SO(2), but reasoning coordinate by coordinate.
@@ -89,6 +91,61 @@ def get_periods_torus(
     return periods
 
 
+def _integer_column_lattice_basis(weights):
+    # Row Hermite elimination on W.T. Each operation is unimodular on
+    # the generating rows, so the integer span is preserved.
+    rows = [list(column) for column in zip(*weights)]
+    rank = len(weights)
+    for column in range(rank):
+        pivot = next(i for i in range(column, len(rows)) if rows[i][column])
+        rows[column], rows[pivot] = rows[pivot], rows[column]
+        for i in range(column + 1, len(rows)):
+            while rows[i][column]:
+                quotient = rows[column][column] // rows[i][column]
+                rows[column], rows[i] = rows[i], [
+                    a - quotient * b for a, b in zip(rows[column], rows[i])
+                ]
+        if rows[column][column] < 0:
+            rows[column] = [-value for value in rows[column]]
+        for i in range(column):
+            quotient = rows[i][column] // rows[column][column]
+            rows[i] = [a - quotient * b for a, b in zip(rows[i], rows[column])]
+    return tuple(zip(*rows[:rank]))
+
+
+def _joint_period_generators(rep_type, algebra):
+    # Retain original generator indices. Independent rows span the same
+    # connected image even when the parameterization has redundant generators.
+    weights = tuple(tuple(map(int, row)) for row in rep_type)
+    independent = _rational_row_reduction(zip(*weights), len(weights))
+    indices = [next(i for i, value in enumerate(row) if value) for row in independent]
+    rank = len(indices)
+    if rank == 0:
+        return []
+    independent_weights = [weights[i] for i in indices]
+
+    basis = _integer_column_lattice_basis(independent_weights)
+    augmented = [
+        (*row, *(int(i == j) for j in range(rank)))
+        for i, row in enumerate(basis)
+    ]
+    inverse = _rational_row_reduction(augmented, rank)
+    # Convert the supplied generators back to the canonical angle scale.
+    angle_generators = [
+        algebra[i] * (
+            np.sqrt(2) * np.linalg.norm(np.asarray(weights[i], dtype=float))
+            / np.linalg.norm(algebra[i])
+        )
+        for i in indices
+    ]
+    # Row j of B^-1 supplies the coefficients of column j of B^-T.
+    return [
+        sum((2 * np.pi * float(coefficient)) * matrix
+            for coefficient, matrix in zip(row[rank:], angle_generators))
+        for row in inverse
+    ]
+
+
 def sample_orbit_from_algebra_torus(
     rep_type: tuple,
     algebra: list[np.ndarray],
@@ -98,8 +155,12 @@ def sample_orbit_from_algebra_torus(
     seed: RandomSeed = None,
 ) -> np.ndarray:
     """
-    Sample points on the orbit of a torus representation from its Lie algebra. We suppose that the algebra is
-    the canonical algebra indicated in rep_type.
+    Sample a torus orbit using generators corresponding to the given integer rows.
+
+    The generators may be simultaneously orthogonally conjugated and positively
+    rescaled per row. The evenly spaced grid uses joint image periods. Distinct
+    grid transformations give distinct orbit points when the base point has
+    trivial stabilizer in the image group, up to floating-point precision.
 
     Args:
     rep_type (tuple): Representation type parameters (e.g., weights).
@@ -112,25 +173,18 @@ def sample_orbit_from_algebra_torus(
     Returns:
         np.ndarray: Array of sampled points on the orbit.
     """
-    # Gets periods
-    periods = np.asarray(get_periods_torus(rep_type, algebra), dtype=float)
-    group_dim = len(algebra)
-
-    # Generates grid based on the method.
     if method == "random_uniform":
-        # Create generator.
+        periods = np.asarray(get_periods_torus(rep_type, algebra), dtype=float)
         rng = default_rng(seed)
-        # Generates random points in hypercube
-        # [0, period[0]] x ... x [0, period[-1]]
-        times = rng.random((nb_points, group_dim)) * periods
+        times = rng.random((nb_points, len(algebra))) * periods
     elif method == "evenly_spaced":
-        # Get number of points (potentially too many, sparsify later).
+        algebra = _joint_period_generators(rep_type, algebra)
+        group_dim = len(algebra)
+        if group_dim == 0:
+            return np.repeat(np.asarray(x, dtype=float)[None, :], nb_points, axis=0)
         nb_points_circle = int(np.ceil(nb_points ** (1.0 / group_dim)))
-        grids = [
-            np.linspace(0.0, periods[i], nb_points_circle, endpoint=False)
-            for i in range(group_dim)
-        ]
-        times = np.array(list(itertools.product(*grids)), dtype=float)
+        grid = np.linspace(0.0, 1.0, nb_points_circle, endpoint=False)
+        times = np.array(list(itertools.product(grid, repeat=group_dim)), dtype=float)
     else:
         raise ValueError(
             f"Method '{method}' not recognized. Use 'evenly_spaced' or 'random_uniform'."

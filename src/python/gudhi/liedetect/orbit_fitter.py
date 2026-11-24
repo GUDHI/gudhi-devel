@@ -95,7 +95,8 @@ class OrbitFitter:
 
         Args:
             nb_neighbors (int): Number of neighbors to consider for the Lie-PCA operator.
-            orbit_dim (int): Dimension of the orbit to detect.
+            orbit_dim (int): Tangent dimension of the observed orbit, strictly
+                smaller than the ambient dimension and at most nb_neighbors.
             method (str): Method to compute the Lie-PCA operator. Options are "PCA" (default) and "covariance".
             compress_to_skew (bool): If True, use the skew compression of the raw
                 operator and the identity on symmetric matrices. Defaults to False.
@@ -157,6 +158,8 @@ class OrbitFitter:
         seed: int | np.random.Generator | None = None,
         initial_point: np.ndarray | None = None,
         optimizer_options: dict | None = None,
+        n_starts: int = 1,
+        require_convergence: bool = False,
     ) -> tuple[tuple, list[np.ndarray]]:
         """
         Estimates the closest pushforward Lie algebra of a group (subspace of skew-symmetric matrices) to the given
@@ -174,16 +177,20 @@ class OrbitFitter:
             verbose (bool): If True, prints progress and results. Defaults to False.
             verbose_top_scores (bool): If True, prints top scoring representations. Defaults to False.
             seed (int or numpy.random.Generator, optional): Random source for optimizer starts.
-            initial_point (np.ndarray, optional): Starting matrix in SO(ambient_dim) for each solver run.
-                The second orthogonal component uses its reflected counterpart. Overrides the seed.
+            initial_point (np.ndarray, optional): Starting matrix in SO(ambient_dim) for the first start of each
+                conjugation problem. The second orthogonal component uses its reflected counterpart.
             optimizer_options (dict, optional): Pymanopt steepest descent settings overriding the defaults.
-                These three controls apply to iterative solves.
+            n_starts (int): Number of local solves per candidate and orthogonal component, or for the joint Abelian
+                normal form. Additional starts use random initial points. Defaults to one.
+            require_convergence (bool): Only accept iterative results whose returned-point gradient norm is at or below
+                the configured tolerance. If none qualifies, raise RuntimeError. Defaults to False.
 
         The successful fit sets `fit_diagnostics_` with the candidate objective value, stopping
-        criterion, convergence flag, and per-run summaries. A direct solve has no iterative
-        convergence flag. For `full_lie_pca`, the score is the sum of squared images
-        of a Frobenius-orthonormal frame. A finite budget-limited result can participate
-        in candidate selection.
+        criterion, returned-point gradient norm, convergence flag, and per-start summaries.
+        The convergence flag measures first-order stationarity. By default, finite valid estimates can
+        participate in candidate selection even if they are above the gradient tolerance. Rank-one
+        Abelian fitting uses a direct Schur decomposition and has no iterative gradient or convergence flag.
+        For `full_lie_pca`, the score is the sum of squared images of a Frobenius-orthonormal frame.
 
         Returns:
             optimal_rep: The optimal representation type found.
@@ -215,6 +222,8 @@ class OrbitFitter:
             seed=seed,
             initial_point=initial_point,
             optimizer_options=optimizer_options,
+            n_starts=n_starts,
+            require_convergence=require_convergence,
             diagnostics=diagnostics,
         )
         self.group = group
@@ -248,6 +257,8 @@ class OrbitFitter:
         Args:
             nb_points (int): Number of points to sample.
             method (str): Sampling method, 'evenly_spaced' or 'random_uniform'. Defaults to 'evenly_spaced'.
+                A deterministic torus grid uses joint image periods. A base point with a
+                nontrivial stabilizer can still give repeated orbit points.
             verbose (bool): Whether to print information about the sampled orbit. Defaults to False.
             x (np.ndarray, optional): Initial vector to act on. If None, the first vector of the data is.
                 Defaults to None.

@@ -41,6 +41,8 @@ import datetime
 import itertools
 import sys
 import time
+from functools import partial
+from numbers import Integral
 from typing import Literal, Optional
 
 # Third-party imports
@@ -104,12 +106,20 @@ class _NonfiniteOptimizationError(RuntimeError):
     pass
 
 
+class _InvalidOptimizationError(RuntimeError):
+    pass
+
+
 class _StationaryBackTrackingLineSearcher(BackTrackingLineSearcher):
+    def __init__(self, tolerance):
+        super().__init__()
+        self.tolerance = tolerance
+
     def search(self, objective, manifold, x, d, f0, df0):
         if not (np.isfinite(f0) and np.isfinite(df0)):
             raise _NonfiniteOptimizationError("The cost or directional derivative is nonfinite.")
         # Steepest descent checks its stopping conditions after line search.
-        if df0 == 0:
+        if df0 == 0 or np.sqrt(-df0) <= self.tolerance:
             return 0.0, x
         return super().search(objective, manifold, x, d, f0, df0)
 
@@ -122,11 +132,22 @@ def _run_optimizer(problem, ambient_dim, rng, initial_point, optimizer_options):
             random_state=rng,
         )
     optimizer = pymanopt.optimizers.SteepestDescent(
-        line_searcher=_StationaryBackTrackingLineSearcher(), **options
+        line_searcher=_StationaryBackTrackingLineSearcher(options["min_gradient_norm"]), **options
     )
     result = optimizer.run(problem, initial_point=initial_point)
     if not np.isfinite(result.cost) or not np.isfinite(result.point).all():
         raise _NonfiniteOptimizationError("The optimizer returned a nonfinite cost or point.")
+    if (
+        result.point.shape != (ambient_dim, ambient_dim)
+        or not np.allclose(result.point.T @ result.point, np.eye(ambient_dim))
+        or np.linalg.det(result.point) <= 0
+    ):
+        raise _InvalidOptimizationError("The optimizer returned a point outside SO(ambient_dim).")
+    # Pymanopt reports the gradient norm before the final retraction.
+    gradient = problem.riemannian_gradient(result.point)
+    result.gradient_norm = problem.manifold.norm(result.point, gradient)
+    if not np.isfinite(result.gradient_norm):
+        raise _NonfiniteOptimizationError("The gradient norm at the returned point is nonfinite.")
     return result
 
 
@@ -138,8 +159,50 @@ def _run_summary(result, optimizer_options):
         "cost": float(result.cost),
         "iterations": result.iterations,
         "stopping_criterion": result.stopping_criterion,
+        "gradient_norm": float(result.gradient_norm),
         "converged": bool(result.gradient_norm <= tolerance),
     }
+
+
+def _best_optimizer_start(solve, *, rng, initial_point, optimizer_options, n_starts, require_convergence):
+    best_result = None
+    selected_start = None
+    starts = []
+    for index in range(n_starts):
+        try:
+            result = solve(
+                rng=rng,
+                initial_point=initial_point if index == 0 else None,
+                optimizer_options=optimizer_options,
+            )
+        except (_NonfiniteOptimizationError, _InvalidOptimizationError) as exc:
+            status = "nonfinite" if isinstance(exc, _NonfiniteOptimizationError) else "invalid"
+            starts.append({"status": status, "error": str(exc)})
+            continue
+
+        summary = _run_summary(result, optimizer_options)
+        if require_convergence and not summary["converged"]:
+            starts.append({**summary, "status": "not_stationary"})
+            continue
+        starts.append({**summary, "status": "eligible"})
+        if best_result is None or result.cost < best_result.cost:
+            best_result = result
+            selected_start = index
+
+    if selected_start is None:
+        summary = {"error": "No eligible start.", "selected_start": None, "starts": starts}
+    else:
+        summary = {**starts[selected_start], "selected_start": selected_start, "starts": starts}
+    return best_result, summary
+
+
+def _no_eligible_start(runs, description):
+    statuses = {start["status"] for summary in runs for start in summary["starts"]}
+    if statuses == {"nonfinite"}:
+        return RuntimeError(f"{description} failed: all optimizer runs were nonfinite.")
+    if "not_stationary" in statuses:
+        return RuntimeError(f"{description} failed: no eligible run reached the gradient tolerance.")
+    return RuntimeError(f"{description} failed: no optimizer run returned a finite, valid estimate.")
 
 
 def find_closest_algebra(
@@ -156,6 +219,8 @@ def find_closest_algebra(
     seed=None,
     initial_point=None,
     optimizer_options=None,
+    n_starts: int = 1,
+    require_convergence: bool = False,
     diagnostics=None,
 ) -> tuple[tuple, list[np.ndarray]]:
     """
@@ -183,6 +248,8 @@ def find_closest_algebra(
         raise ValueError(f"Method {method!r} not recognized.")
     if method == "abelian" and group != "torus":
         raise ValueError("The 'abelian' method is only supported for a torus.")
+    if isinstance(n_starts, (bool, np.bool_)) or not isinstance(n_starts, Integral) or n_starts < 1:
+        raise ValueError("'n_starts' must be a positive integer.")
     group_dim = group_dim if group == "torus" else 3
     ambient_dim = int(np.sqrt(lie_pca.shape[0]))
     rng = None if seed is None else default_rng(seed)
@@ -205,6 +272,8 @@ def find_closest_algebra(
         "rng": rng,
         "initial_point": initial_point,
         "optimizer_options": optimizer_options,
+        "n_starts": n_starts,
+        "require_convergence": require_convergence,
     }
 
 
@@ -277,21 +346,14 @@ def find_closest_algebra(
             # Runs over the two connected components of the orthogonal group
             for determinant in ["+1", "-1"]:
                 key = (rep_type, determinant)
-                try:
-                    if method == "bottom_lie_pca":
-                        result = optimization_bottom_lie_pca(
-                            group, lie_pca_proj, rep_type, determinant, **solver_kwargs
-                        )
-                    else:
-                        result = _optimize_full_lie_pca_frame(
-                            lie_pca, frame, determinant, **solver_kwargs
-                        )
-                except _NonfiniteOptimizationError as exc:
-                    runs[key] = {"error": str(exc)}
-                    continue
-                costs[key] = result.cost
-                minimizers[key] = result.point
-                runs[key] = _run_summary(result, optimizer_options)
+                if method == "bottom_lie_pca":
+                    solve = partial(optimization_bottom_lie_pca, group, lie_pca_proj, rep_type, determinant)
+                else:
+                    solve = partial(_optimize_full_lie_pca_frame, lie_pca, frame, determinant)
+                result, runs[key] = _best_optimizer_start(solve, **solver_kwargs)
+                if result is not None:
+                    costs[key] = result.cost
+                    minimizers[key] = result.point
             if verbose:
                 chronometer_tick(
                     start_time,
@@ -301,7 +363,7 @@ def find_closest_algebra(
                 )
 
         if not costs:
-            raise RuntimeError("Algebra fitting failed: all optimizer runs were nonfinite.")
+            raise _no_eligible_start(runs.values(), "Algebra fitting")
         winner = min(costs, key=costs.get)
         optimal_rep, _ = winner
         selected = runs[winner]
@@ -331,6 +393,7 @@ def find_closest_algebra(
             objective_value=float(costs[winner]),
             iterations=selected["iterations"],
             stopping_criterion=selected["stopping_criterion"],
+            gradient_norm=selected.get("gradient_norm"),
             converged=selected["converged"],
             runs=runs,
         )
@@ -471,7 +534,7 @@ Closest Lie algebra - Abelian case
 
 def optimization_abelian(
     lie_pca_algebra: list, reps_to_test: list, *, rng=None,
-    initial_point=None, optimizer_options=None, runs=None,
+    initial_point=None, optimizer_options=None, n_starts=1, require_convergence=False, runs=None,
 ) -> tuple[tuple, list, dict]:
     """
     Finds the closest Abelian (torus) Lie algebra to the given Lie PCA algebra.
@@ -495,7 +558,8 @@ def optimization_abelian(
     else:
         opt_weights, opt_change_of_basis = normal_form_skew_symmetric_matrices(
             lie_pca_algebra, rng=rng, initial_point=initial_point,
-            optimizer_options=optimizer_options, runs=runs,
+            optimizer_options=optimizer_options, n_starts=n_starts,
+            require_convergence=require_convergence, runs=runs,
         )
 
     # Computes invariant for the given lattice
@@ -597,7 +661,7 @@ def normal_form_skew_sym_matrix(mat: np.ndarray) -> tuple[np.ndarray, np.ndarray
 
 def normal_form_skew_symmetric_matrices(
     matrices: list[np.ndarray], *, rng=None, initial_point=None,
-    optimizer_options=None, runs=None,
+    optimizer_options=None, n_starts=1, require_convergence=False, runs=None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Computes the weights of a joint normal form of a list of skew-symmetric matrices. This is done by optimizing over
@@ -630,7 +694,8 @@ def normal_form_skew_symmetric_matrices(
         ]
         entries = np.array(entries)
 
-        # Computes norm of not block-diagonal terms.
+        # For each input matrix with squared Frobenius norm E_i, the objective
+        # adds E_i**2 - E_i to the squared norm of its off-block terms.
         differences = np.array([np.trace(A @ A.T) for A in matrices_conjugate])
         norm = np.sum(differences @ differences.T) - np.sum(entries @ entries.T)
 
@@ -638,9 +703,15 @@ def normal_form_skew_symmetric_matrices(
 
     # Runs optimization
     problem = pymanopt.Problem(manifold, _cost_function)
-    result = _run_optimizer(problem, ambient_dim, rng, initial_point, optimizer_options)
+    solve = partial(_run_optimizer, problem, ambient_dim)
+    result, summary = _best_optimizer_start(
+        solve, rng=rng, initial_point=initial_point, optimizer_options=optimizer_options,
+        n_starts=n_starts, require_convergence=require_convergence,
+    )
+    if result is None:
+        raise _no_eligible_start([summary], "Joint normal-form fitting")
     if runs is not None:
-        runs["joint_normal_form"] = _run_summary(result, optimizer_options)
+        runs["joint_normal_form"] = summary
     change_of_basis = result.point
     # Transforms in normal form
     matrices_normal_form = [change_of_basis @ A @ change_of_basis.T for A in matrices]

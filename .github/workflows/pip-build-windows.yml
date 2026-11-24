@@ -109,11 +109,15 @@ jobs:
             src/python/test/test_liedetect_input_validation.py `
             src/python/test/test_liedetect_fitter_state.py `
             src/python/test/test_liedetect_optimization.py `
+            src/python/test/test_liedetect_convergence.py `
             src/python/test/test_liedetect_full_objective.py `
             src/python/test/test_liedetect_cyclic_vectors.py `
             src/python/test/test_liedetect_performance_equivalence.py `
             src/python/test/test_liedetect_exact_equivalence.py `
             src/python/test/test_liedetect_signed_weights.py `
             src/python/test/test_liedetect_random_torus_span.py `
+            src/python/test/test_liedetect_torus_periods.py `
+            src/python/test/test_liedetect_rank_reduction.py `
+            src/python/test/test_liedetect_local_pca.py `
             src/python/test/test_liedetect_skew_compression.py `
             src/python/test/test_liedetect_documentation.py

@@ -30,7 +30,7 @@ Lie PCA:
 """
 
 # Standard imports.
-from numbers import Integral
+from numbers import Integral, Real
 from typing import Literal
 
 # Third-party imports.
@@ -178,36 +178,63 @@ def _as_real_points(pts: np.ndarray) -> np.ndarray:
     return pts
 
 
-def orthonormalize(pts: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Orthonormalizes a point cloud by centering, homogenizing and normalizing it. This is Step 1 of LieDetect.
+def _whiten_centered(pts: np.ndarray, rank_tol: float | None):
+    if rank_tol is None:
+        if len(pts) <= pts.shape[1]:
+            raise ValueError("Orthonormalization requires full-rank centered covariance.")
+        cov = get_covariance_matrix(pts, center=True, normalize=False)
+        eigenvalues, basis = scipy.linalg.eigh(cov)
+        if eigenvalues[0] <= 0:
+            raise ValueError("Orthonormalization requires full-rank centered covariance.")
+        scales = np.sqrt(eigenvalues)
+    else:
+        if (
+            isinstance(rank_tol, (bool, np.bool_))
+            or not isinstance(rank_tol, Real)
+            or not 0 <= rank_tol < 1
+        ):
+            raise ValueError("'rank_tol' must be a relative covariance threshold in [0, 1).")
+        if len(pts) == 0:
+            raise ValueError("Orthonormalization found no retained directions.")
+        _, singular_values, right_vectors = scipy.linalg.svd(pts, full_matrices=False)
+        cutoff = max(np.sqrt(rank_tol), np.finfo(pts.dtype).eps * max(pts.shape))
+        if singular_values[0] == 0:
+            raise ValueError("Orthonormalization found no retained directions.")
+        retained = singular_values / singular_values[0] > cutoff
+        if not retained.any():
+            raise ValueError("Orthonormalization found no retained directions.")
+        basis = right_vectors[retained].T
+        scales = singular_values[retained] / np.sqrt(len(pts))
 
-    Args:
-        pts (np.ndarray): Point cloud.
+    if basis.shape[1] == pts.shape[1]:
+        # Preserve the symmetric ambient-coordinate convention at full rank.
+        forward = (basis / scales) @ basis.T
+        inverse = (basis * scales) @ basis.T
+    else:
+        forward = (basis / scales).T
+        inverse = basis * scales
 
-    Returns:
-        pts_orth (np.ndarray): Orthonormalized points.
-        orthonormal_transf (np.ndarray): The matrix for the linear projection onto orthonormalization.
-            Points are transformed by left multiplication by it.
+    whitened = batch_matrix_multiplication(pts, forward)
+    mean_norm = np.mean(np.linalg.norm(whitened, axis=1))
+    return whitened / mean_norm, forward / mean_norm, inverse * mean_norm
+
+
+def orthonormalize(
+    pts: np.ndarray, *, rank_tol: float | None = None
+) -> tuple[np.ndarray, np.ndarray]:
+    """Center, whiten, and scale a finite real cloud to mean point norm one.
+
+    With rank_tol=None, require full-rank centered covariance and keep
+    ambient coordinates. Otherwise select covariance eigenvalues above
+    rank_tol times the largest, subject to a numerical SVD floor.
+    Return transformed points and the forward matrix, whose rows are
+    the retained coordinates when reduction occurs.
     """
     pts = _as_real_points(pts)
-    if len(pts) <= pts.shape[1]:
-        raise ValueError("Orthonormalization requires full-rank centered covariance.")
-
-    pts_orth = pts - np.mean(pts, axis=0)
-    cov = get_covariance_matrix(pts_orth, center=True, normalize=False)
-    eigenvalues, eigenvectors = scipy.linalg.eigh(cov)
-    if eigenvalues[0] <= 0:
-        raise ValueError("Orthonormalization requires full-rank centered covariance.")
-    orthonormal_transf = (eigenvectors / np.sqrt(eigenvalues)) @ eigenvectors.T
-    pts_orth = batch_matrix_multiplication(pts_orth, orthonormal_transf)
-
-    # Normalizes
-    mean_norm = np.mean(np.linalg.norm(pts_orth, axis=1))
-    pts_orth /= mean_norm
-    orthonormal_transf /= mean_norm
-
-    return pts_orth, orthonormal_transf
+    if len(pts) == 0:
+        raise ValueError("Orthonormalization requires at least one point.")
+    transformed, forward, _ = _whiten_centered(pts - np.mean(pts, axis=0), rank_tol)
+    return transformed, forward
 
 
 class Orthonormalize:
@@ -215,16 +242,22 @@ class Orthonormalize:
     Orthonormalizes a point cloud by centering, homogenizing and normalizing it. This is Step 1 of LieDetect.
 
     Parameters:
-        pts (np.ndarray): Finite real point cloud with full-rank centered covariance.
-            Integer coordinates are converted to floating point.
+        pts (np.ndarray): Finite real point cloud. Integer coordinates are
+            converted to floating point.
+        rank_tol (float, optional): Relative covariance eigenvalue threshold
+            in [0, 1). Directions must exceed this fraction of the largest
+            eigenvalue and the numerical SVD floor. The default None requires
+            full-rank centered covariance.
     """
 
-    def __init__(self, pts: np.ndarray) -> None:
+    def __init__(self, pts: np.ndarray, *, rank_tol: float | None = None) -> None:
         self.points = _as_real_points(pts).copy()
+        self.rank_tol = rank_tol
         if len(self.points) == 0:
             raise ValueError("Orthonormalization requires at least one point.")
-        self.cov = get_covariance_matrix(self.points, center=True, normalize=False)
-        self.mean = np.mean(self.points, 0)
+        self.mean = np.mean(self.points, axis=0)
+        centered = self.points - self.mean
+        self.cov = centered.T @ centered / len(centered)
         self.is_fitted = False
 
     def print_norms(self) -> None:
@@ -244,9 +277,18 @@ class Orthonormalize:
         Returns:
             pts_orth (np.ndarray): Orthonormalized points.
         """
-        orth_pts, orth_cov = orthonormalize(self.points)
+        points = _as_real_points(self.points)
+        if len(points) == 0:
+            raise ValueError("Orthonormalization requires at least one point.")
+        mean = np.mean(points, axis=0)
+        centered = points - mean
+        orth_pts, forward, inverse = _whiten_centered(centered, self.rank_tol)
+        cov = centered.T @ centered / len(centered)
+        self.mean = mean
+        self.cov = cov
         self.orth_points = orth_pts
-        self.orthonormal_transf = orth_cov
+        self.orthonormal_transf = forward
+        self._inverse_orthonormal_transf = inverse
         self.is_fitted = True
 
         return orth_pts
@@ -269,8 +311,7 @@ class Orthonormalize:
             pts (np.ndarray): Point cloud.
 
         Returns:
-            (np.ndarray): Point cloud projected by the same orthogonal
-                transformation.
+            (np.ndarray): Whitened points in the fitted coordinate space.
         """
         if not self.is_fitted:
             raise RuntimeError(
@@ -289,8 +330,11 @@ class Orthonormalize:
         in_place: bool = False,
     ) -> np.ndarray:
         """
-        Inverses the orthonormalization. Naturally assumes that either 'fit' or 'fit_transform' has been previously
-        called.
+        Lift fitted coordinates back to the original ambient space.
+
+        After dimension reduction, inverse_transform(transform(points))
+        gives their orthogonal projection onto the retained affine subspace.
+        Requires a previous call to fit or fit_transform.
 
         Args:
             pts (np.ndarray, optional): Point cloud to apply the inverse
@@ -311,11 +355,11 @@ class Orthonormalize:
             pts = self.orth_points
         else:
             pts = _as_real_points(pts)
-            if pts.shape[1] != self.mean.size:
-                raise ValueError(f"Points must have {self.mean.size} coordinates.")
+            fitted_dim = self.orthonormal_transf.shape[0]
+            if pts.shape[1] != fitted_dim:
+                raise ValueError(f"Points must have {fitted_dim} fitted coordinates.")
 
-        inverse_transform = np.linalg.inv(self.orthonormal_transf)
-        inversed_points = batch_matrix_multiplication(pts, inverse_transform)
+        inversed_points = batch_matrix_multiplication(pts, self._inverse_orthonormal_transf)
         if add_mean:
             inversed_points += self.mean
 
@@ -357,10 +401,11 @@ def get_lie_pca_operator(
     """
     Computes the Lie-PCA operator of a given point cloud. For the estimation of normal spaces, two options are
     available:
-            - 'covariance': uses local covariance matrices, correctly
-                normalized.
-            - 'PCA': uses local PCA, i.e., takes the top eigenvectors
-                of previous estimation).
+            - 'covariance': uses normalized local covariance matrices.
+            - 'PCA': uses the leading right singular vectors of local
+                differences. Each neighborhood must have numerical rank at
+                least orbit_dim, using a relative cutoff of machine epsilon
+                times the larger dimension of the difference matrix.
     The raw full-matrix operator is returned by default. With 'compress_to_skew',
     the operator is the identity on symmetric matrices and the compression of
     the raw operator on skew-symmetric matrices.
@@ -397,50 +442,44 @@ def get_lie_pca_operator(
     if (
         isinstance(orbit_dim, (bool, np.bool_))
         or not isinstance(orbit_dim, Integral)
-        or not 1 <= orbit_dim <= ambient_dim
+        or not 1 <= orbit_dim < ambient_dim
     ):
-        raise ValueError("'orbit_dim' must be an integer between 1 and the ambient dimension.")
+        raise ValueError("'orbit_dim' must be a positive integer strictly smaller than the ambient dimension.")
+    if nb_neighbors < orbit_dim:
+        raise ValueError("'nb_neighbors' must be at least 'orbit_dim'.")
     squared_norms = np.einsum("ij,ij->i", pts, pts)
     if not np.all(np.isfinite(squared_norms) & (squared_norms > 0)):
         raise ValueError("Lie-PCA points must have finite, nonzero squared norms.")
 
-    # Computes local covariance matrices.
-    kdt = KDTree(pts, leaf_size=nb_neighbors + 1, metric="euclidean")
-    neighbors_idx = kdt.query(pts, nb_neighbors + 1, return_distance=False)[:, 1::]
-    proj_tangent_spaces = [
-        get_covariance_matrix(
-            pts=pts[i] - pts[neighbors_idx[i, :]],
-            center=False,
-            normalize=True,
-            orbit_dim=orbit_dim,
-        )
-        for i in range(nb_points)
-    ]
-
-    # Computes projection on normal spaces via local covariance (take complementary of previous estimation)
-    if method == "covariance":
-        proj_normal_spaces = [
-            np.eye(ambient_dim) - proj for proj in proj_tangent_spaces
-        ]
-
-    # Computes projection on normal spaces via local PCA.
-    elif method == "PCA":
-        proj_normal_spaces = []
-        for proj_tangent in proj_tangent_spaces:
-            # Gets the eigenvalues and eigenvectors of the covariance matrix
-            eigenvalues, mat = scipy.linalg.eigh(proj_tangent)
-
-            # Gets top "orbit_dim" indices (largest eigenvalues), they represent the tangent space.
-            idx = np.argsort(eigenvalues)[-orbit_dim:]
-
-            # Creates canonical projection matrix (zero out the tangent space)
-            proj_normal = np.eye(ambient_dim)
-            proj_normal[idx, idx] = 0
-
-            # Conjugates
-            proj_normal_spaces.append(mat @ proj_normal @ mat.T)
-    else:
+    if method not in ("PCA", "covariance"):
         raise ValueError(f"Method {method} not recognized.")
+
+    kdt = KDTree(pts, leaf_size=nb_neighbors + 1, metric="euclidean")
+    candidates = kdt.query(pts, nb_neighbors + 1, return_distance=False)
+    identity = np.eye(ambient_dim)
+    proj_normal_spaces = []
+    for i, row in enumerate(candidates):
+        neighbors = row[row != i][:nb_neighbors]
+        differences = pts[i] - pts[neighbors]
+        if method == "PCA":
+            _, singular_values, right_vectors = scipy.linalg.svd(differences, full_matrices=False)
+            if singular_values[0] == 0:
+                raise ValueError(f"Local covariance must have a finite, nonzero norm at point {i}.")
+            cutoff = np.finfo(differences.dtype).eps * max(differences.shape)
+            numerical_rank = np.count_nonzero(singular_values / singular_values[0] > cutoff)
+            if numerical_rank < orbit_dim:
+                raise ValueError(
+                    f"The PCA neighborhood at point {i} has numerical rank {numerical_rank}, "
+                    f"below orbit_dim={orbit_dim}."
+                )
+            tangent_basis = right_vectors[:orbit_dim]
+            tangent = tangent_basis.T @ tangent_basis
+        else:
+            tangent = get_covariance_matrix(
+                differences, center=False, normalize=True, orbit_dim=orbit_dim
+            )
+        proj_normal_spaces.append(identity - tangent)
+
     # Compute projections on lines.
     proj_lines = [
         np.outer(pts[i, :], pts[i, :]) / squared_norms[i]

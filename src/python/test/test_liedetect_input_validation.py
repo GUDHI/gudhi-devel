@@ -48,8 +48,7 @@ def test_lie_pca_invalid_input(points, nb_neighbors, orbit_dim, message):
         get_lie_pca_operator(points, nb_neighbors, orbit_dim)
 
 
-def test_lie_pca_retains_ambient_dimension_option():
+def test_lie_pca_rejects_ambient_dimension_as_tangent_dimension():
     points = np.array([[1, 0], [0, 1], [-1, 0]])
-    operator = get_lie_pca_operator(points, nb_neighbors=1, orbit_dim=2)
-    assert operator.shape == (4, 4)
-    assert np.isfinite(operator).all()
+    with pytest.raises(ValueError, match="strictly smaller than the ambient dimension"):
+        get_lie_pca_operator(points, nb_neighbors=1, orbit_dim=2)

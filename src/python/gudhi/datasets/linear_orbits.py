@@ -12,10 +12,9 @@ This module provides functions to sample points on orbits of representations, fr
 Namely, the Lie algebras are stored through bases (tuples of skew-symmetric matrices), that we suppose to be isomorphic
 to the canonical pushforward algebras of the representations implemented in the module "algebra", through conjugation
 by an orthogonal matrix. This assumption it crucial since, combined with the representation type of the algebra, we are
-able to compute the periods of the basis elements (minimal t>0 such that exp(tA)=I), and hence be able to reconstruct
-the orbit. Torus sampling uses individual generator periods. The evenly spaced grid can give repeated
-points if the parametrization covers the same orbit point more than once. The algebra alone does not
-provide a robust way to compute these periods.
+able to reconstruct the orbit. The evenly spaced torus grid uses joint periods of the connected
+image group. Distinct transformations can give repeated points when the base point has a
+nontrivial stabilizer in that image. Period calculations depend on the integer weight presentation.
 
 -----------------------------------------------------------------------------------------------------------------------
 
