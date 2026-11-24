@@ -10,6 +10,20 @@ Below is a list of changes:
 - [Module](link)
      - **...**
 
+- New design [`[Python`](https://gudhi.inria.fr/python/latest/)
+     - Backward compatibility is guaranteed, but:
+          - data_structures folder contains:
+               - Cubical complex, Periodic Cubical complex
+               - Simplex tree
+          - filtrations folder contains:
+               - Rips complex, DTM Rips complex, Weighted Rips complex
+               - Delaunay complex, Delaunay Cech complex, Alpha complex
+               - Edge collapse
+          - reconstruction folder contains:
+               - Tangential complex
+               - Witness complexes (Euclidean, Strong, …)
+               - Cover complexes (mapper, Nerve, Graph induced complex)
+
 - Simplex tree [`[Python`](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
      - `expansion_with_blocker` is deprecated. Please consider using `expansion_with_blockers`.
 
