@@ -570,6 +570,7 @@ if(SCIPY_FOUND AND SCIKIT-LEARN_FOUND AND PYMANOPT_FOUND AND AUTOGRAD_FOUND)
   add_gudhi_py_test(test_liedetect_local_pca)
   add_gudhi_py_test(test_liedetect_skew_compression)
   add_gudhi_py_test(test_liedetect_documentation)
+  add_gudhi_py_test(test_liedetect_final_review)
 endif()
 
 # Set missing or not modules

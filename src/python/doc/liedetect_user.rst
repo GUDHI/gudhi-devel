@@ -84,6 +84,7 @@ objective drops the symmetric part of each residual, and bottom-eigenspace
 fitting can select a different subspace. Both bottom-eigenspace methods
 still take eigenvectors of the full returned matrix before skew-projecting
 them. A tie at eigenvalue one can mix symmetric and skew directions.
+Both methods raise an error if this projection loses numerical rank.
 
 The earlier keyword ``correction`` has been renamed to ``compress_to_skew``.
 Existing calls that relied on the old default can opt into the repaired
@@ -165,7 +166,10 @@ orbit-equivalent representations. With ``span_ambient_space=True``, character
 blocks must also be distinct up to sign. The number of candidates grows
 combinatorially with the rank, frequency bound, and number of blocks. Use
 ``reps_to_test`` to provide candidate representations directly when the
-automatic search is too large.
+automatic search is too large. Explicit torus candidates must have
+full row rank at working precision. An exactly full-rank integer table
+can fail this check when it is poorly conditioned. Explicit SO(3) and
+SU(2) candidates must contain at least one nontrivial summand.
 
 .. code-block:: python
 

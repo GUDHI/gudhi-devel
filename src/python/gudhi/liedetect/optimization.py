@@ -319,7 +319,11 @@ def find_closest_algebra(
             if group == "torus" and (
                 len(algebra) != group_dim or np.linalg.matrix_rank(rep_type) != group_dim
             ):
-                raise ValueError(f"Torus candidate {rep_type!r} must have row rank {group_dim}.")
+                raise ValueError(
+                    f"Torus candidate {rep_type!r} must have row rank {group_dim} at working precision."
+                )
+            if group != "torus" and all(dim == 1 for dim in rep_type):
+                raise ValueError(f"Candidate {rep_type!r} must contain a nontrivial irrep for {group} fitting.")
 
     # Gets bottom eigenvectors of Lie PCA if needed
     if method in ["bottom_lie_pca", "abelian"]:
@@ -604,6 +608,15 @@ def optimization_abelian(
     if not costs:
         raise RuntimeError("Abelian algebra fitting failed: no finite candidate scores.")
     optimal_rep = min(costs, key=costs.get)
+    if group_dim == 1:
+        # The Schur basis uses nonnegative, sorted weights. Put its planes
+        # back in the selected presentation's order and restore their signs.
+        weights = np.asarray(optimal_rep[0])
+        order = np.argsort(np.abs(weights), kind="stable")
+        inverse_order = np.argsort(order)
+        columns = np.column_stack((2 * inverse_order, 2 * inverse_order + 1)).ravel()
+        opt_change_of_basis = opt_change_of_basis[:, columns]
+        opt_change_of_basis[:, 1::2] *= np.where(weights < 0, -1, 1)
 
     # Defines optimal_algebra
     optimal_algebra = get_canonical_pushforward_algebra(

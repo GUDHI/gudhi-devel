@@ -120,4 +120,5 @@ jobs:
             src/python/test/test_liedetect_rank_reduction.py `
             src/python/test/test_liedetect_local_pca.py `
             src/python/test/test_liedetect_skew_compression.py `
-            src/python/test/test_liedetect_documentation.py
+            src/python/test/test_liedetect_documentation.py `
+            src/python/test/test_liedetect_final_review.py

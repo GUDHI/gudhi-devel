@@ -137,4 +137,4 @@ def test_sample_orbit(fix_pts):
 
     _ = orbit_fitter.sample_orbit(nb_points=1000)
 
-    assert min(orbit_fitter.hausdorff_distances_) < 1e-2
+    assert orbit_fitter.hausdorff_distances_[0] < 1e-2

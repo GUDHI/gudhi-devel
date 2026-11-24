@@ -67,6 +67,9 @@ def get_periods_torus(
 
     Case of T^d:
         Similar to the case of SO(2), but reasoning coordinate by coordinate.
+
+    A zero weight row acts as the identity at every time. It is assigned a
+    sampling interval of length zero.
     """
 
     def period_so2(weights: tuple[int, ...]) -> float:
@@ -77,13 +80,13 @@ def get_periods_torus(
 
     # Compute the periods
     periods = [
-        period_so2(weights) * norm_so2(weights) / np.linalg.norm(mat)
+        period_so2(weights) * norm_so2(weights) / np.linalg.norm(mat) if any(weights) else 0.0
         for weights, mat in zip(rep_type, algebra)
     ]
 
     # Sanity check: the exponentiated matrices should be the identity
     for period, mat in zip(periods, algebra):
-        if not np.isclose(scipy.linalg.expm(period * mat), np.eye(len(mat))).all():
+        if period and not np.isclose(scipy.linalg.expm(period * mat), np.eye(len(mat))).all():
             print(
                 "Error! Incorrect period. Distance to identity:",
                 np.linalg.norm(scipy.linalg.expm(period * mat) - np.eye(len(mat))),

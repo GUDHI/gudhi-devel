@@ -23,9 +23,10 @@ A representation, or linear action, is a smooth group morphism :math:`\rho: G \t
 Given a non-zero point :math:`x\in \mathbb{R}^{n}`, the orbit of :math:`x` under :math:`\rho` is
 :math:`O_x=\{\rho(g)\cdot x \mid g \in G\}`.
 
-Orbits of :math:`T^d` are dimension-:math:`d` submanifolds of :math:`\mathbb{R}^{n}`, whereas orbits of :math:`SO(3)` and
-:math:`SU(2)` are both of dimension :math:`3`. The **linear_orbits** module generates a point cloud close to or exactly on
-an orbit of the families of Lie groups considered.
+The orbit dimension is :math:`\dim G - \dim G_x`, where :math:`G_x` is the stabilizer of the base point.
+For example, the standard :math:`SO(3)` action on a nonzero point in :math:`\mathbb{R}^3` gives a
+two-dimensional sphere. A torus orbit has dimension :math:`d` when the stabilizer in :math:`T^d` is finite.
+The **linear_orbits** module samples points on these orbits.
 
 
 Uses
@@ -38,10 +39,10 @@ representation type of the specified Lie group.
 
    from gudhi.datasets.linear_orbits import sample_from_lie_group
 
-   # Generates 500 uniformly spaced points from an SO(2) representation orbit in R^4
-   # This is equivalent to a linearly embedded torus knot in R^4
-
-   gen_points = sample_from_lie_group(group = "torus", ambient_dim = 4, nb_points = 500)
+   # Sample 500 points from a random SO(2) representation orbit in R^4.
+   gen_points, rep_type = sample_from_lie_group(
+       group="torus", ambient_dim=4, nb_points=500, group_dim=1, frequency_max=4, seed=1
+   )
 
 .. autofunction:: gudhi.datasets.linear_orbits.sample_from_lie_group
 
@@ -63,6 +64,8 @@ The last method allows sampling from a specific representation orbit of the spec
 
 .. code-block:: python
 
+   import numpy as np
+
    from gudhi.datasets.linear_orbits import sample_from_lie_algebra
 
    alg = [
@@ -77,4 +80,3 @@ The last method allows sampling from a specific representation orbit of the spec
    gen_points = sample_from_lie_algebra(group = "torus", rep_type = ((1, 2),), algebra = alg, nb_points = 500)
 
 .. autofunction:: gudhi.datasets.linear_orbits.sample_from_lie_algebra
-

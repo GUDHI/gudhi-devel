@@ -169,6 +169,17 @@ def skew_sym_frame_to_projection(
         array_backend = np
     frame_vectors = [_skew_sym_to_vect(matrix, array_backend) for matrix in frame]
 
+    if method == "QR":
+        vectors = np.asarray(frame_vectors)
+        # The bottom Lie-PCA frame comes from unit eigenvectors. Keep the
+        # cutoff on that scale so skew projection noise cannot set the scale.
+        tolerance = np.finfo(float).eps * max(vectors.shape)
+        rank = np.linalg.matrix_rank(vectors, tol=tolerance)
+        if rank < len(frame):
+            raise ValueError(
+                f"The frame has numerical rank {rank} after skew projection, expected {len(frame)}."
+            )
+
     # Orthonormalizes
     frame_vectors = gram_schmidt_orthonormalization(frame_vectors, method=method)
 
