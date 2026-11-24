@@ -66,6 +66,19 @@ of the representation (i.e., the associated Lie algebra representation).
 
 This functionality is provided by the :class:`~gudhi.liedetect.OrbitFitter` class.
 
+The default uses the raw operator on the full matrix space, following the
+operator formulation in the paper. Pass ``compress_to_skew=True`` to use the
+skew-to-skew compression and the identity on symmetric matrices. This is an
+alternative finite-sample formulation. With compression, the full fitting
+objective drops the symmetric part of each residual, and bottom-eigenspace
+fitting can select a different subspace. Both bottom-eigenspace methods
+still take eigenvectors of the full returned matrix before skew-projecting
+them. A tie at eigenvalue one can mix symmetric and skew directions.
+
+The earlier keyword ``correction`` has been renamed to ``compress_to_skew``.
+Existing calls that relied on the old default can opt into the repaired
+compression explicitly. Calls using the old keyword should use the new name.
+
 .. code-block:: python
 
     from gudhi.liedetect import OrbitFitter

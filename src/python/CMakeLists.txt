@@ -561,6 +561,7 @@ if(SCIPY_FOUND AND SCIKIT-LEARN_FOUND AND PYMANOPT_FOUND AND AUTOGRAD_FOUND)
   add_gudhi_py_test(test_liedetect_full_objective)
   add_gudhi_py_test(test_liedetect_cyclic_vectors)
   add_gudhi_py_test(test_liedetect_performance_equivalence)
+  add_gudhi_py_test(test_liedetect_skew_compression)
   add_gudhi_py_test(test_liedetect_documentation)
 endif()
 

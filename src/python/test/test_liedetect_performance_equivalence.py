@@ -45,12 +45,12 @@ def test_lie_pca_assembly_matches_dense_reference(method, correction):
             [normal @ argument @ line for normal, line in zip(normal_projectors, line_projectors)],
             axis=0,
         )
-        columns.append((image + symmetric if correction else image).ravel())
+        if correction:
+            image = symmetric + (image - image.T) / 2
+        columns.append(image.ravel())
     expected = np.array(columns).T
-    if correction:
-        expected = (expected + expected.T) / 2
 
-    computed = get_lie_pca_operator(points, 5, 2, method=method, correction=correction)
+    computed = get_lie_pca_operator(points, 5, 2, method=method, compress_to_skew=correction)
     np.testing.assert_allclose(computed, expected, atol=1e-13)
 
 

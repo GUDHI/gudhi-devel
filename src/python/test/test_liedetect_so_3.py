@@ -42,7 +42,7 @@ Test functions
 def test_lie_pca(fix_pts):
     orbit_fitter = OrbitFitter(fix_pts)
     nb_neighbors = 100
-    orbit_dim = 3
+    orbit_dim = 2
 
     _ = orbit_fitter.lie_pca(
         nb_neighbors=nb_neighbors, orbit_dim=orbit_dim, verbose=False
@@ -59,7 +59,7 @@ def test_lie_pca(fix_pts):
 def test_project_lie_algebra(fix_pts):
     orbit_fitter = OrbitFitter(fix_pts)
     nb_neighbors = 100
-    orbit_dim = 3
+    orbit_dim = 2
 
     _ = orbit_fitter.lie_pca(
         nb_neighbors=nb_neighbors, orbit_dim=orbit_dim, method="PCA", verbose=False
@@ -75,7 +75,7 @@ def test_project_lie_algebra(fix_pts):
 def test_sample_orbit(fix_pts):
     orbit_fitter = OrbitFitter(fix_pts)
     nb_neighbors = 100
-    orbit_dim = 3
+    orbit_dim = 2
 
     _ = orbit_fitter.lie_pca(
         nb_neighbors=nb_neighbors, orbit_dim=orbit_dim, method="PCA", verbose=False

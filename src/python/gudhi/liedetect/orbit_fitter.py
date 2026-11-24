@@ -83,17 +83,22 @@ class OrbitFitter:
         nb_neighbors: int,
         orbit_dim: int,
         method: Literal["PCA", "covariance"] = "PCA",
-        correction: bool = True,
+        compress_to_skew: bool = False,
         verbose: bool = False,
     ) -> np.ndarray:
         """
-        Computes the LiePCA operator from the input point cloud.
+        Compute the Lie-PCA operator used by all subsequent fitting methods.
+
+        The default raw operator follows the full-matrix formulation in the
+        LieDetect paper. Skew compression changes the finite-sample operator
+        and the residuals used by the full fitting objective.
 
         Args:
             nb_neighbors (int): Number of neighbors to consider for the Lie-PCA operator.
             orbit_dim (int): Dimension of the orbit to detect.
             method (str): Method to compute the Lie-PCA operator. Options are "PCA" (default) and "covariance".
-            correction (bool): Whether to apply the bias correction to the Lie-PCA operator.
+            compress_to_skew (bool): If True, use the skew compression of the raw
+                operator and the identity on symmetric matrices. Defaults to False.
             verbose (bool): Whether to print progress and debug information.
 
         Returns:
@@ -104,7 +109,7 @@ class OrbitFitter:
             nb_neighbors=nb_neighbors,
             orbit_dim=orbit_dim,
             method=method,
-            correction=correction,
+            compress_to_skew=compress_to_skew,
             verbose=verbose,
         )
         self.orbit_dim = orbit_dim

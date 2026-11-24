@@ -332,12 +332,26 @@ Lie PCA
 """
 
 
+def _compress_lie_pca_to_skew(lie_pca: np.ndarray, ambient_dim: int) -> np.ndarray:
+    # Right and left multiplication by K applies skew projection to the
+    # input and output, respectively. Flattening uses row-major order.
+    indices = np.arange(ambient_dim**2)
+    transposed = indices.reshape(ambient_dim, ambient_dim).T.ravel()
+    right_projected = (lie_pca - lie_pca[:, transposed]) / 2
+    compressed = (right_projected - right_projected[transposed, :]) / 2
+
+    # Add S = (I + T) / 2, then remove roundoff asymmetry.
+    compressed[indices, indices] += 0.5
+    compressed[indices, transposed] += 0.5
+    return (compressed + compressed.T) / 2
+
+
 def get_lie_pca_operator(
     pts: np.ndarray,
     nb_neighbors: int,
     orbit_dim: int,
     method: Literal["PCA", "covariance"] = "PCA",
-    correction: bool = True,
+    compress_to_skew: bool = False,
     verbose: bool = False,
 ) -> np.ndarray:
     """
@@ -347,16 +361,17 @@ def get_lie_pca_operator(
                 normalized.
             - 'PCA': uses local PCA, i.e., takes the top eigenvectors
                 of previous estimation).
-    In addition, the parameter 'correction' can be set to True to ensure that the operator is the identity on symmetric
-    matrices (hence its kernel contains only skew-symmetric matrices).
+    The raw full-matrix operator is returned by default. With 'compress_to_skew',
+    the operator is the identity on symmetric matrices and the compression of
+    the raw operator on skew-symmetric matrices.
 
     Args:
         pts (np.ndarray): Array of shape (nb_points, ambient_dim) representing the sampled points on the orbit.
         nb_neighbors (int): Number of neighbors to use for tangent space estimation.
         orbit_dim (int): Dimension of the orbit for tangent space estimation.
         method (str, optional): Method to estimate normal spaces, either 'covariance' or 'PCA'. Defaults to 'PCA'.
-        correction (bool, optional): If True, applies a correction to ensure the operator is the identity on symmetric
-            matrices. Defaults to True.
+        compress_to_skew (bool, optional): If True, return S + K L K for the raw
+            operator L and the symmetric and skew projections S and K. Defaults to False.
         verbose (bool, optional): If True, prints eigenvalues and eigengap information. Defaults to False.
 
     Returns:
@@ -436,15 +451,8 @@ def get_lie_pca_operator(
     lie_pca = np.einsum("nai,njb->abij", proj_normal_spaces, proj_lines).reshape(size, size)
     lie_pca /= nb_points
 
-    if correction:
-        # Preserve the existing correction: symmetrize S + L K, where
-        # S and K project onto symmetric and skew-symmetric matrices.
-        indices = np.arange(size)
-        transposed = indices.reshape(ambient_dim, ambient_dim).T.ravel()
-        corrected = (lie_pca - lie_pca[:, transposed]) / 2
-        corrected[indices, indices] += 0.5
-        corrected[indices, transposed] += 0.5
-        lie_pca = (corrected + corrected.T) / 2
+    if compress_to_skew:
+        lie_pca = _compress_lie_pca_to_skew(lie_pca, ambient_dim)
 
     if verbose:
         vals = np.sort(np.linalg.eigvals(lie_pca).real)
