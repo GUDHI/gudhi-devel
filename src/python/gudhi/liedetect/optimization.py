@@ -270,6 +270,10 @@ def find_closest_algebra(
         # Runs over all rep types
         for i in range(len(reps_to_test)):
             rep_type = reps_to_test[i]
+            if method == "full_lie_pca":
+                frame = _frobenius_orthonormal_frame(
+                    get_canonical_pushforward_algebra(group, rep_type)
+                )
             # Runs over the two connected components of the orthogonal group
             for determinant in ["+1", "-1"]:
                 key = (rep_type, determinant)
@@ -279,8 +283,8 @@ def find_closest_algebra(
                             group, lie_pca_proj, rep_type, determinant, **solver_kwargs
                         )
                     else:
-                        result = optimization_full_lie_pca(
-                            group, lie_pca, rep_type, determinant, **solver_kwargs
+                        result = _optimize_full_lie_pca_frame(
+                            lie_pca, frame, determinant, **solver_kwargs
                         )
                 except _NonfiniteOptimizationError as exc:
                     runs[key] = {"error": str(exc)}
@@ -401,6 +405,15 @@ def optimization_bottom_lie_pca(
     return result
 
 
+def _frobenius_orthonormal_frame(generators: list[np.ndarray]) -> np.ndarray:
+    columns = np.stack([generator.ravel() for generator in generators], axis=1)
+    basis, singular_values, _ = np.linalg.svd(columns, full_matrices=False)
+    tolerance = np.finfo(columns.dtype).eps * max(columns.shape) * singular_values[0]
+    if len(singular_values) != len(generators) or singular_values[-1] <= tolerance:
+        raise ValueError("Full Lie-PCA requires linearly independent candidate generators.")
+    return basis.T.reshape(len(generators), *generators[0].shape)
+
+
 def optimization_full_lie_pca(
     group: str,
     lie_pca: np.ndarray,
@@ -411,47 +424,41 @@ def optimization_full_lie_pca(
     initial_point=None,
     optimizer_options=None,
 ):
-    """
-    Given a representation type and the Lie PCA operator, this function optimizes over the special orthogonal matrices
-    to find a conjugation of the canonical matrices that is the closest to the kernel of Lie PCA.
+    """Fit a conjugation using the full Lie-PCA operator.
 
-    Args:
-        group (str): The group type ('torus', 'SU(2)', or 'SO(3)').
-        lie_pca (np array): The target projection matrix on the space of skew-symmetric matrices.
-        rep_type (tuple): The representation type (e.g., frequencies or partition).
-        determinant (int): '+1' for SO(n), '-1' for the other component of O(n).
-
-    Returns:
-        result: A pymanopt optimization result with the optimal orthogonal matrix and cost.
+    The cost is the sum of squared images of a Frobenius-orthonormal frame
+    under the operator in flattened matrix coordinates. The result contains
+    the minimizing change of basis in the requested component of O(n).
     """
-    # Defines basis
-    canonical_algebra = get_canonical_pushforward_algebra(
-        group=group, rep_type=rep_type
+    frame = _frobenius_orthonormal_frame(get_canonical_pushforward_algebra(group, rep_type))
+    return _optimize_full_lie_pca_frame(
+        lie_pca,
+        frame,
+        determinant,
+        rng=rng,
+        initial_point=initial_point,
+        optimizer_options=optimizer_options,
     )
-    # Defines cost function
-    ambient_dim = len(canonical_algebra[0])
+
+
+def _optimize_full_lie_pca_frame(
+    lie_pca, frame, determinant, *, rng, initial_point, optimizer_options
+):
+    ambient_dim = frame.shape[1]
     manifold = pymanopt.manifolds.SpecialOrthogonalGroup(ambient_dim, k=1)
+    reflection = np.diag([-1] + [1] * (ambient_dim - 1))
 
     @pymanopt.function.autograd(manifold)
     def _cost_function(orth):
-        # Transform sto provided connected component of orthogonal group
         if determinant == "-1":
-            orth = orth @ np.diag([-1] + [1] * (ambient_dim - 1))
-        # Conjugates canonical matrices
-        algebra = [orth @ mat @ orth.T for mat in canonical_algebra]
-        # Computes cost
-        differences = [
-            lie_pca.dot(algebra[i].flatten()) for i in range(len(canonical_algebra))
-        ]
-        differences = [np.sum(difference @ difference.T) for difference in differences]
-        return np.sum(differences)
+            orth = orth @ reflection
+        residuals = [lie_pca.dot((orth @ matrix @ orth.T).ravel()) for matrix in frame]
+        return sum(residual @ residual for residual in residuals)
 
-    # Runs optimization
     problem = pymanopt.Problem(manifold, _cost_function)
     result = _run_optimizer(problem, ambient_dim, rng, initial_point, optimizer_options)
-    # Transforms to provided connected component of orthogonal group
     if determinant == "-1":
-        result.point = result.point @ np.diag([-1] + [1] * (ambient_dim - 1))
+        result.point = result.point @ reflection
     return result
 
 

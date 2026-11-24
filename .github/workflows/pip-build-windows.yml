@@ -109,5 +109,6 @@ jobs:
             src/python/test/test_liedetect_input_validation.py `
             src/python/test/test_liedetect_fitter_state.py `
             src/python/test/test_liedetect_optimization.py `
+            src/python/test/test_liedetect_full_objective.py `
             src/python/test/test_liedetect_performance_equivalence.py `
             src/python/test/test_liedetect_documentation.py

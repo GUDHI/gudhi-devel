@@ -176,7 +176,9 @@ class OrbitFitter:
 
         The successful fit sets `fit_diagnostics_` with the candidate objective value, stopping
         criterion, convergence flag, and per-run summaries. A direct solve has no iterative
-        convergence flag. A finite budget-limited result can participate in candidate selection.
+        convergence flag. For `full_lie_pca`, the score is the sum of squared images
+        of a Frobenius-orthonormal frame. A finite budget-limited result can participate
+        in candidate selection.
 
         Returns:
             optimal_rep: The optimal representation type found.
