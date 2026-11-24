@@ -13,7 +13,7 @@ import numpy as np
 import tensorflow as tf
 
 from gudhi.tensorflow import *
-import gudhi as gd
+from gudhi.data_structures import SimplexTree
 
 
 def test_rips_diff():
@@ -62,7 +62,7 @@ def test_nonsquare_cubical_diff():
 
 def test_st_diff():
 
-    st = gd.SimplexTree()
+    st = SimplexTree()
     st.insert([0])
     st.insert([1])
     st.insert([2])

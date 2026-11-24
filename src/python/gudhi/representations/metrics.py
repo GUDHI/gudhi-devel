@@ -17,7 +17,7 @@ from sklearn.metrics import pairwise_distances
 from joblib import Parallel, delayed
 import warnings
 
-from gudhi.hera import wasserstein_distance as hera_wasserstein_distance
+from gudhi.diagram_distances.hera import wasserstein_distance as hera_wasserstein_distance
 from .preprocessing import Padding
 
 
@@ -211,7 +211,7 @@ def pairwise_persistence_diagram_distances(
     YY = None if Y is None or Y is X else np.reshape(np.arange(len(Y)), [-1, 1])
     if metric == "bottleneck":
         try:
-            from .. import bottleneck_distance
+            from ..diagram_distances import bottleneck_distance
 
             return _pairwise(
                 pairwise_distances,
@@ -226,7 +226,7 @@ def pairwise_persistence_diagram_distances(
             raise
     elif metric == "pot_wasserstein":
         try:
-            from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
+            from gudhi.diagram_distances import wasserstein_distance as pot_wasserstein_distance
 
             return _pairwise(
                 pairwise_distances,
@@ -401,7 +401,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
             float: bottleneck distance.
         """
         try:
-            from .. import bottleneck_distance
+            from ..diagram_distances import bottleneck_distance
 
             if self.epsilon is not None:
                 return bottleneck_distance(diag1, diag2, e=self.epsilon)
@@ -485,8 +485,8 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
         Constructor for the WassersteinDistance class.
 
         Parameters:
-            order (int): exponent for Wasserstein, default value is 1., see :func:`gudhi.wasserstein.wasserstein_distance`.
-            internal_p (int): ground metric on the (upper-half) plane (i.e. norm l_p in R^2), default value is `np.inf`, see :func:`gudhi.wasserstein.wasserstein_distance`.
+            order (int): exponent for Wasserstein, default value is 1., see :func:`gudhi.diagram_distances.wasserstein_distance`.
+            internal_p (int): ground metric on the (upper-half) plane (i.e. norm l_p in R^2), default value is `np.inf`, see :func:`gudhi.diagram_distances.wasserstein_distance`.
             mode (str): method for computing Wasserstein distance. Either "pot" or "hera". Default set to "hera".
             delta (float): relative error 1+delta. Used only if mode == "hera".
             n_jobs (int): number of jobs to use for the computation. See :func:`pairwise_persistence_diagram_distances` for details.
@@ -559,7 +559,7 @@ class WassersteinDistance(BaseEstimator, TransformerMixin):
             )
         elif self.mode == "pot":
             try:
-                from gudhi.wasserstein import wasserstein_distance as pot_wasserstein_distance
+                from gudhi.diagram_distances import wasserstein_distance as pot_wasserstein_distance
 
                 return pot_wasserstein_distance(
                     diag1, diag2, order=self.order, internal_p=self.internal_p, matching=False

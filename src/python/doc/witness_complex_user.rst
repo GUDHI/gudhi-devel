@@ -47,7 +47,7 @@ which leads to definitions of **weak relaxed witness complex** (or just relaxed 
 In particular case of 0-relaxation, weak complex corresponds to **witness complex** introduced in
 :cite:`de2004topological`, whereas 0-relaxed strong witness complex consists of just vertices and is not very
 interesting. Hence for small relaxation weak version is preferable.
-However, to capture the homotopy type (for example using :func:`gudhi.SimplexTree.persistence`) it is
+However, to capture the homotopy type (for example using :func:`gudhi.data_structures.SimplexTree.persistence`) it is
 often necessary to work with higher filtration values. In this case strong relaxed witness complex is faster to compute
 and offers similar results.
 

@@ -16,6 +16,7 @@ __license__ = "MIT"
 import matplotlib.pyplot as plt
 import time
 import gudhi as gd
+from gudhi.filtrations import RipsComplex
 from gudhi.datasets.generators import points
 
 print("#####################################################################")
@@ -23,7 +24,7 @@ print("RipsComplex (only the one-skeleton) creation from tore3D_300.off file")
 
 gd.random.set_seed(42)
 point_cloud = points.torus_embedded_r3(n_samples=300, major_radius=2., minor_radius=1.)
-rips_complex = gd.RipsComplex(points=point_cloud)
+rips_complex = RipsComplex(points=point_cloud)
 simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
 print(f"1. Rips complex has {simplex_tree.num_simplices()} simplices - {simplex_tree.num_vertices()} vertices.")
 

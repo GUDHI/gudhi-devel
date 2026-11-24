@@ -13,8 +13,8 @@ __license__ = "GPL v3"
 import errno
 import os
 
-from gudhi._nerve_gic_ext import _Nerve_gic_interface
-from gudhi.simplex_tree import SimplexTree
+from ._nerve_gic_ext import _Nerve_gic_interface
+from ..data_structures.simplex_tree import SimplexTree
 
 # CoverComplex python interface
 class CoverComplex(_Nerve_gic_interface):

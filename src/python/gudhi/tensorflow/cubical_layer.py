@@ -12,7 +12,7 @@ __license__ = "MIT"
 
 import numpy as np
 import tensorflow as tf
-from ..cubical_complex import CubicalComplex
+from ..data_structures.cubical_complex import CubicalComplex
 
 
 ######################

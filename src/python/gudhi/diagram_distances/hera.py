@@ -13,7 +13,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 import warnings
 
-from gudhi import _hera_ext as t
+from . import _hera_ext as t
 
 
 def _diagram_as_numpy_array(diagram: ArrayLike) -> np.ndarray:
@@ -69,7 +69,7 @@ def wasserstein_distance(
             
             .. warning::
             
-                For matching request, please consider using :func:`~gudhi.wasserstein.wasserstein_distance` (POT
+                For matching request, please consider using :func:`~gudhi.diagram_distances.wasserstein_distance` (POT
                 version) instead. This version with ``matching=True`` is known to have bugs.
 
     Returns:
@@ -81,7 +81,7 @@ def wasserstein_distance(
         warnings.warn(
             """
             There is known bug (https://github.com/GUDHI/gudhi-devel/issues/1158) when `matching` is set to `True` with
-            the Hera backend. For the moment, we recommend using `gudhi.wasserstein.wasserstein_distance` instead.
+            the Hera backend. For the moment, we recommend using `gudhi.diagram_distances.wasserstein_distance` instead.
             """, UserWarning)
         
     return t._wasserstein_distance(

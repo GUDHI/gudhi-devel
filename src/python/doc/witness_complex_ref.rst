@@ -6,5 +6,5 @@
 Witness complex reference manual
 ================================
 
-.. autoclass:: gudhi.WitnessComplex
+.. autoclass:: gudhi.reconstruction.WitnessComplex
    :members:

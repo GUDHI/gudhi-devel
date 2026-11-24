@@ -13,15 +13,15 @@
 import numpy as np
 import pytest
 
-from gudhi.wasserstein.wasserstein import (
+from gudhi.diagram_distances.wasserstein import (
     _proj_on_diag,
     _finite_part,
     _handle_essential_parts,
     _get_essential_parts,
+    _warn_infty,
 )
-from gudhi.wasserstein.wasserstein import _warn_infty
-from gudhi.wasserstein import wasserstein_distance as pot
-from gudhi.hera import wasserstein_distance as hera
+from gudhi.diagram_distances import wasserstein_distance as pot
+from gudhi.diagram_distances.hera import wasserstein_distance as hera
 
 
 def test_proj_on_diag():

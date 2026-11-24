@@ -13,7 +13,7 @@ __license__ = "MIT"
 import numpy as np
 import tensorflow as tf
 
-from ..rips_complex import RipsComplex
+from ..filtrations import RipsComplex
 
 
 ############################

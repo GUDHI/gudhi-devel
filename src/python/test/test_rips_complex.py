@@ -13,7 +13,7 @@
 from math import sqrt
 import numpy as np
 
-from gudhi import RipsComplex
+from gudhi.filtrations import RipsComplex
 
 
 def test_empty_rips():

@@ -13,7 +13,7 @@
 __license__ = "MIT"
 
 
-from gudhi import RipsComplex
+from gudhi.filtrations import RipsComplex
 
 
 print("#####################################################################")

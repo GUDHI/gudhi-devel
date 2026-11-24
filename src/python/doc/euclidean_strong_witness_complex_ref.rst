@@ -6,7 +6,7 @@
 Euclidean strong witness complex reference manual
 =================================================
 
-.. autoclass:: gudhi.EuclideanStrongWitnessComplex
+.. autoclass:: gudhi.reconstruction.EuclideanStrongWitnessComplex
    :members:
    :inherited-members:
    :exclude-members: __new__

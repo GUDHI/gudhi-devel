@@ -14,14 +14,14 @@ __license__ = "MIT"
 
 
 import numpy as np
-import gudhi
+from gudhi.data_structures import SimplexTree
 
 # Coordinates of the points
 points = np.array(
     [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 1], [1, 1, 0], [0, 1, 1]]
 )
 # Build the simplicial complex with a tetrahedon, an edge and an isolated vertex
-cplx = gudhi.SimplexTree()
+cplx = SimplexTree()
 cplx.insert([1, 2, 3, 5])
 cplx.insert([4, 6])
 cplx.insert([0])

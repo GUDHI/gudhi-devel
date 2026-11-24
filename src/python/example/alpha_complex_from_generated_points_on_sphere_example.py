@@ -15,7 +15,7 @@ __license__ = "GPL v3"
 
 
 from gudhi.datasets.generators import points
-from gudhi import AlphaComplex
+from gudhi.filtrations import AlphaComplex
 
 
 print("#####################################################################")

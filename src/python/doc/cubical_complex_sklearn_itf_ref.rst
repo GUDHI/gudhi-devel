@@ -65,4 +65,4 @@ Cubical complex persistence scikit-learn like interface reference
    * `dimension==1 and min_persistence>=0`
    * `dimension==2 and min_persistence>=0`
 
-   It falls back to :class:`~gudhi.CubicalComplex` in all other cases.
+   It falls back to :class:`~gudhi.data_structures.CubicalComplex` in all other cases.

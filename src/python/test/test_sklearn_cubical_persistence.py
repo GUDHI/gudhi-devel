@@ -14,7 +14,7 @@ from sklearn import datasets
 import pytest
 
 from gudhi.sklearn import CubicalPersistence
-import gudhi
+from gudhi.data_structures import CubicalComplex
 
 
 CUBICAL_PERSISTENCE_H0_IMG0 = np.array([[0.0, 6.0], [0.0, 8.0], [0.0, np.inf]])
@@ -62,7 +62,7 @@ def cmp(a):
     d1 = CubicalPersistence(
         homology_dimensions=dim_list, input_type="top_dimensional_cells"
     ).fit_transform([a])[0]
-    p = gudhi.CubicalComplex(top_dimensional_cells=a).persistence()
+    p = CubicalComplex(top_dimensional_cells=a).persistence()
     # Ideally we would compare multisets, but length + set should be good enough.
     assert sum(len(d) for d in d1) == len(p)
     d1 = [{(a, b) for [a, b] in d} for d in d1]

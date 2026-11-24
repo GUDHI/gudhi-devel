@@ -16,7 +16,7 @@ from numpy.testing import assert_almost_equal
 from gudhi._pers_cub_low_dim_ext import _persistence_on_rectangle_from_top_cells
 from gudhi._pers_cub_low_dim_ext import _persistence_on_rectangle_from_vertices
 from gudhi._pers_cub_low_dim_ext import _persistence_on_a_line
-from gudhi import CubicalComplex as Cubical
+from gudhi.data_structures import CubicalComplex as Cubical
 
 
 def test_basic_persistence_on_a_line():

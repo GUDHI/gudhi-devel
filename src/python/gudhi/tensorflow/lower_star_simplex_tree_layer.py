@@ -80,11 +80,16 @@ class LowerStarSimplexTreeLayer(tf.keras.layers.Layer):
         Constructor for the LowerStarSimplexTreeLayer class
 
         Parameters:
-            simplextree (gudhi.SimplexTree): underlying simplex tree. Its vertices MUST be named with integers from 0 to n-1, where n is its number of vertices. Note that its filtration values are modified in each call of the class.
+            simplextree (gudhi.data_structures.SimplexTree): underlying simplex tree. Its vertices MUST be named with
+            integers from 0 to n-1, where n is its number of vertices. Note that its filtration values are modified in
+            each call of the class.
             homology_dimensions (List[int]): list of homology dimensions
-            min_persistence (List[float]): minimum distance-to-diagonal of the points in the output persistence diagrams (default None, in which case 0. is used for all dimensions)
-            homology_coeff_field (int): homology field coefficient. Must be a prime number. Default value is 11. Max is 46337.
-            persistence_dim_max (bool): if true, the persistent homology for the maximal dimension in the simplex tree is computed. If false, it is ignored. Default is false.
+            min_persistence (List[float]): minimum distance-to-diagonal of the points in the output persistence
+                diagrams (default None, in which case 0. is used for all dimensions)
+            homology_coeff_field (int): homology field coefficient. Must be a prime number. Default value is 11. Max is
+                46337.
+            persistence_dim_max (bool): if true, the persistent homology for the maximal dimension in the simplex tree
+                is computed. If false, it is ignored. Default is false.
         """
         super().__init__(**kwargs)
         self.dimensions = homology_dimensions

@@ -14,11 +14,11 @@ specifically, it provides tools, using the scikit-learn standard interface, to c
 persistence diagrams, and to convert these diagrams into vectors in Euclidean space.
 
 A diagram is represented as a numpy array of shape (n,2), as can be obtained from
-:func:`~gudhi.SimplexTree.persistence_intervals_in_dimension` for instance. Points at infinity are represented as a
-numpy array of shape (n,1), storing only the birth time. The classes in this module can handle several persistence
-diagrams at once. In that case, the diagrams are provided as a list of numpy arrays. Note that it is not necessary for
-the diagrams to have the same number of points, i.e., for the corresponding arrays to have the same number of rows: all
-classes can handle arrays with different shapes.
+:func:`~gudhi.data_structures.SimplexTree.persistence_intervals_in_dimension` for instance. Points at infinity are
+represented as a numpy array of shape (n,1), storing only the birth time. The classes in this module can handle several
+persistence diagrams at once. In that case, the diagrams are provided as a list of numpy arrays. Note that it is not
+necessary for the diagrams to have the same number of points, i.e., for the corresponding arrays to have the same
+number of rows: all classes can handle arrays with different shapes.
 
 This `notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-representations.ipynb>`__
 explains how to efficiently combine machine learning and topological data analysis with the

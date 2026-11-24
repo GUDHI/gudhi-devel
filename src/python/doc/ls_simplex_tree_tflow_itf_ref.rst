@@ -14,9 +14,9 @@ Example of gradient computed from lower-star filtration of a simplex tree
 
     from gudhi.tensorflow import LowerStarSimplexTreeLayer
     import tensorflow as tf
-    import gudhi as gd
+    from gudhi.data_structures import SimplexTree
 
-    st = gd.SimplexTree()
+    st = SimplexTree()
     st.insert([0, 1]) 
     st.insert([1, 2]) 
     st.insert([2, 3]) 

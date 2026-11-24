@@ -14,7 +14,8 @@ __license__ = "MIT"
 
 
 import argparse
-import gudhi as gd
+from gudhi import read_lower_triangular_matrix_from_csv_file, plot_persistence_diagram
+from gudhi.filtrations import RipsComplex
 
 
 parser = argparse.ArgumentParser(
@@ -44,12 +45,8 @@ print("RipsComplex creation from distance matrix read in a csv file")
 
 print(f"RipsComplex with max_edge_length={args.max_edge_length}")
 
-distance_matrix = gd.read_lower_triangular_matrix_from_csv_file(
-    csv_file=args.file, separator=args.separator
-)
-rips_complex = gd.RipsComplex(
-    distance_matrix=distance_matrix, max_edge_length=args.max_edge_length
-)
+distance_matrix = read_lower_triangular_matrix_from_csv_file(csv_file=args.file, separator=args.separator)
+rips_complex = RipsComplex(distance_matrix=distance_matrix, max_edge_length=args.max_edge_length)
 simplex_tree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
 
 print(f"Number of simplices={simplex_tree.num_simplices()}")
@@ -61,5 +58,5 @@ print(f"betti_numbers()={simplex_tree.betti_numbers()}")
 if args.no_diagram == False:
     import matplotlib.pyplot as plot
 
-    gd.plot_persistence_diagram(diag, band=args.band)
+    plot_persistence_diagram(diag, band=args.band)
     plot.show()

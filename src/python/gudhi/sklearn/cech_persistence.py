@@ -15,7 +15,7 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import Parallel, delayed
 
-from .. import DelaunayCechComplex, AlphaComplex
+from ..filtrations import DelaunayCechComplex, AlphaComplex
 
 # Mermaid sequence diagram - https://mermaid-js.github.io/mermaid-live-editor/
 # sequenceDiagram
@@ -35,7 +35,7 @@ from .. import DelaunayCechComplex, AlphaComplex
 class CechPersistence(BaseEstimator, TransformerMixin):
     """
     This is a class for computing the same persistent homology as the Čech complex, while being significantly smaller,
-    using internally a :class:`~gudhi.DelaunayCechComplex`.
+    using internally a :class:`~gudhi.filtrations.DelaunayCechComplex`.
     """
 
     def __init__(
@@ -55,7 +55,7 @@ class CechPersistence(BaseEstimator, TransformerMixin):
                 one dimension matters (in other words, when `homology_dimensions` is an int).
             precision: Complex precision can be 'fast', 'safe' or 'exact'. Default is 'safe'.
             output_squared_values: Square filtration values when `True`. Default is `False` (contrary to its
-                default value in :class:`~gudhi.DelaunayCechComplex`).
+                default value in :class:`~gudhi.filtrations.DelaunayCechComplex`).
             threshold: The maximum filtration value the simplices shall not exceed. Default is set to infinity, and
                 there is very little point using anything else since it does not save time.
                 Notice that the filtration values (equal to radii, by default, or squared radii) will be different in
@@ -143,7 +143,7 @@ class CechPersistence(BaseEstimator, TransformerMixin):
 class WeightedCechPersistence(BaseEstimator, TransformerMixin):
     """
     This is a class for computing the same persistent homology as the Weighted Čech complex, while being significantly
-    smaller, using internally a Weighted version of :class:`~gudhi.AlphaComplex`.
+    smaller, using internally a Weighted version of :class:`~gudhi.filtrations.AlphaComplex`.
     """
 
     def __init__(

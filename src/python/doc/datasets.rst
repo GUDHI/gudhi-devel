@@ -41,7 +41,7 @@ Example
 .. code-block:: python
 
    from gudhi.datasets.generators import points
-   from gudhi import AlphaComplex
+   from gudhi.filtrations import AlphaComplex
 
    # Generate 50 points on a sphere in R^2
    gen_points = points.sphere(n_samples = 50, ambient_dim = 2, radius = 1, sample = "random")

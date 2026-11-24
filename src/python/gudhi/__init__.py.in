@@ -5,6 +5,7 @@
 # Copyright (C) 2016  Inria
 #
 # Modification(s):
+#   - 2026/11 Vincent Rouvreau: Move SimplexTree and *Cubical in data_structures, Rips and Delaunay* in filtrations
 #   - 2025/10 Vincent Rouvreau: Remove import_module, __available_modules and __mechanism_modules mechanism
 #   - YYYY/MM Author: Description of the modification
 
@@ -23,13 +24,13 @@ from pathlib import Path
 if os.name == 'nt':
     os.add_dll_directory(Path(__file__).parent)
 
-from .cubical_complex import CubicalComplex
-from .periodic_cubical_complex import PeriodicCubicalComplex
-from .simplex_tree import SimplexTree
-from .rips_complex import RipsComplex
-from .witness_complex import WitnessComplex
-from .strong_witness_complex import StrongWitnessComplex
-from .nerve_gic import CoverComplex
+from .data_structures import CubicalComplex
+from .data_structures import PeriodicCubicalComplex
+from .data_structures import SimplexTree
+from .filtrations import RipsComplex
+from .reconstruction import WitnessComplex
+from .reconstruction import StrongWitnessComplex
+from .reconstruction import CoverComplex
 
 from .reader_utils import (
     read_lower_triangular_matrix_from_csv_file,
@@ -68,7 +69,7 @@ __all__ = [
 
 try:
     # if no CGAL
-    from .bottleneck import bottleneck_distance
+    from .diagram_distances import bottleneck_distance
 
     __all__ += [
         'bottleneck_distance',
@@ -78,12 +79,12 @@ except ImportError:
 
 try:
     # if no CGAL or no Eigen
-    from .delaunay_complex import DelaunayComplex, DelaunayCechComplex, AlphaComplex
+    from .filtrations import DelaunayComplex, DelaunayCechComplex, AlphaComplex
 
-    from .euclidean_strong_witness_complex import EuclideanStrongWitnessComplex
-    from .euclidean_witness_complex import EuclideanWitnessComplex
+    from .reconstruction import EuclideanStrongWitnessComplex
+    from .reconstruction import EuclideanWitnessComplex
 
-    from .tangential_complex import TangentialComplex
+    from .reconstruction import TangentialComplex
     
     from .subsampling import (
         choose_n_farthest_points,

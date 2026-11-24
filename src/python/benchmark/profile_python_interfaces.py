@@ -1,7 +1,8 @@
 import numpy as np
 import timeit
 
-from gudhi import SimplexTree, RipsComplex, DelaunayComplex, DelaunayCechComplex, AlphaComplex
+from gudhi.data_structures import SimplexTree
+from gudhi.filtrations import RipsComplex, DelaunayComplex, DelaunayCechComplex, AlphaComplex
 from gudhi.datasets.generators import points
 
 try:

@@ -5,7 +5,7 @@
 Delaunay complex reference manual
 *********************************
 
-.. autoclass:: gudhi.DelaunayComplex
+.. autoclass:: gudhi.filtrations.DelaunayComplex
    :members:
    :inherited-members:
    :exclude-members: __new__, get_point, get_float_relative_precision, set_float_relative_precision
@@ -17,13 +17,13 @@ Static methods
  cf. https://github.com/wjakob/nanobind/discussions/707
  A workaround is to exclude them from autoclass and to use automethod on it
 
-.. automethod:: gudhi.DelaunayComplex.get_float_relative_precision
-.. automethod:: gudhi.DelaunayComplex.set_float_relative_precision
+.. automethod:: gudhi.filtrations.DelaunayComplex.get_float_relative_precision
+.. automethod:: gudhi.filtrations.DelaunayComplex.set_float_relative_precision
 
 Alpha complex reference manual
 ******************************
 
-.. autoclass:: gudhi.AlphaComplex
+.. autoclass:: gudhi.filtrations.AlphaComplex
    :members:
    :inherited-members:
    :exclude-members: __new__, get_float_relative_precision, set_float_relative_precision
@@ -32,7 +32,7 @@ Alpha complex reference manual
 Delaunay Čech complex reference manual
 **************************************
 
-.. autoclass:: gudhi.DelaunayCechComplex
+.. autoclass:: gudhi.filtrations.DelaunayCechComplex
    :members:
    :inherited-members:
    :exclude-members: __new__, get_point, get_float_relative_precision, set_float_relative_precision

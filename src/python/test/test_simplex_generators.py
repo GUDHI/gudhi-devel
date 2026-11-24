@@ -12,7 +12,8 @@
 import numpy as np
 import pytest
 
-import gudhi
+from gudhi.data_structures import SimplexTree
+from gudhi.filtrations import RipsComplex
 
 
 def test_flag_generators():
@@ -28,7 +29,7 @@ def test_flag_generators():
             [103.02, 3.03],
         ]
     )
-    r = gudhi.RipsComplex(points=pts, max_edge_length=4)
+    r = RipsComplex(points=pts, max_edge_length=4)
     st = r.create_simplex_tree(max_dimension=50)
     st.persistence()
     g = st.flag_persistence_generators()
@@ -56,7 +57,7 @@ def test_flag_generators():
 
 
 def test_flag_generators_requires_flag_filtration():
-    st = gudhi.SimplexTree()
+    st = SimplexTree()
     st.insert([0], 0)
     st.insert([1], 0)
     st.insert([2], 0)
@@ -71,7 +72,7 @@ def test_flag_generators_requires_flag_filtration():
 
 
 def test_lower_star_generators():
-    st = gudhi.SimplexTree()
+    st = SimplexTree()
     st.insert([0, 1, 2], -10)
     st.insert([0, 3], -10)
     st.insert([1, 3], -10)
@@ -91,7 +92,7 @@ def test_lower_star_generators():
 
 
 def test_empty():
-    st = gudhi.SimplexTree()
+    st = SimplexTree()
     st.persistence()
     assert st.lower_star_persistence_generators() == ([], [])
     g = st.flag_persistence_generators()

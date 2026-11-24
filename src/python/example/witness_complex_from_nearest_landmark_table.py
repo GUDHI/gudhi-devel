@@ -13,7 +13,7 @@
 __license__ = "MIT"
 
 
-from gudhi import StrongWitnessComplex
+from gudhi.reconstruction import StrongWitnessComplex
 
 
 print("#####################################################################")

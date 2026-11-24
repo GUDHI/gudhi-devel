@@ -14,7 +14,8 @@ __license__ = "GPL v3"  # Because of AlphaComplex
 
 
 import argparse
-import gudhi as gd
+from gudhi.filtrations import AlphaComplex
+from gudhi import read_points_from_off_file, plot_persistence_diagram
 
 
 parser = argparse.ArgumentParser(
@@ -40,8 +41,8 @@ args = parser.parse_args()
 print("##############################################################")
 print("AlphaComplex creation from points read in a OFF file")
 
-points = gd.read_points_from_off_file(off_file=args.file)
-alpha_complex = gd.AlphaComplex(points=points)
+points = read_points_from_off_file(off_file=args.file)
+alpha_complex = AlphaComplex(points=points)
 if args.max_alpha_square is not None:
     print("with max_edge_length=", args.max_alpha_square)
     simplex_tree = alpha_complex.create_simplex_tree(max_alpha_square=args.max_alpha_square)
@@ -55,5 +56,5 @@ print("betti_numbers()=", simplex_tree.betti_numbers())
 if args.no_diagram == False:
     import matplotlib.pyplot as plot
 
-    gd.plot_persistence_diagram(diag, band=args.band)
+    plot_persistence_diagram(diag, band=args.band)
     plot.show()

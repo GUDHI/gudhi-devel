@@ -17,7 +17,9 @@ __license__ = "GPL v3"  # Because of AlphaComplex and bottleneck_distance
 import argparse
 import math
 import numpy as np
-import gudhi as gd
+from gudhi import read_points_from_off_file
+from gudhi.diagram_distances import bottleneck_distance
+from gudhi.filtrations import AlphaComplex, RipsComplex
 
 
 parser = argparse.ArgumentParser(
@@ -34,14 +36,14 @@ parser.add_argument("-t", "--threshold", type=float, default=0.5)
 parser.add_argument("-d", "--max_dimension", type=int, default=1)
 
 args = parser.parse_args()
-point_cloud = gd.read_points_from_off_file(off_file=args.file)
+point_cloud = read_points_from_off_file(off_file=args.file)
 print("##############################################################")
 print("RipsComplex creation from points read in a OFF file")
 
 message = "RipsComplex with max_edge_length=" + repr(args.threshold)
 print(message)
 
-rips_complex = gd.RipsComplex(points=point_cloud, max_edge_length=args.threshold)
+rips_complex = RipsComplex(points=point_cloud, max_edge_length=args.threshold)
 
 rips_stree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
 
@@ -56,7 +58,7 @@ print("AlphaComplex creation from points read in a OFF file")
 message = "AlphaComplex with max_edge_length=" + repr(args.threshold)
 print(message)
 
-alpha_complex = gd.AlphaComplex(points=point_cloud)
+alpha_complex = AlphaComplex(points=point_cloud)
 alpha_stree = alpha_complex.create_simplex_tree(
     max_alpha_square=(args.threshold * args.threshold)
 )
@@ -73,12 +75,9 @@ for dim in range(args.max_dimension):
     alpha_intervals = np.sqrt(alpha_stree.persistence_intervals_in_dimension(dim))
 
     rips_intervals = rips_stree.persistence_intervals_in_dimension(dim)
-    bottleneck_distance = gd.bottleneck_distance(rips_intervals, alpha_intervals)
-    message = (
-        "In dimension " + repr(dim) + ", bottleneck distance = " + repr(bottleneck_distance)
-    )
-    print(message)
-    max_b_distance = max(bottleneck_distance, max_b_distance)
+    bottleneck = bottleneck_distance(rips_intervals, alpha_intervals)
+    print(f"In dimension {dim}, bottleneck distance = {bottleneck}")
+    max_b_distance = max(bottleneck, max_b_distance)
 
 print("==============================================================")
 message = "Bottleneck distance is " + repr(max_b_distance)

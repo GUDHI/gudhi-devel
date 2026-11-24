@@ -15,7 +15,7 @@ __license__ = "GPL v3"  # Because of CoverComplex
 
 
 import argparse
-from gudhi import CoverComplex
+from gudhi.reconstruction import CoverComplex
 
 
 parser = argparse.ArgumentParser(

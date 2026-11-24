@@ -2,11 +2,11 @@
 
 .. To get rid of WARNING: document isn't included in any toctree
 
-=============================================
-:class:`~gudhi.CoverComplex` reference manual
-=============================================
+============================================================
+:class:`~gudhi.reconstruction.CoverComplex` reference manual
+============================================================
 
-.. autoclass:: gudhi.CoverComplex
+.. autoclass:: gudhi.reconstruction.CoverComplex
    :members:
    :inherited-members:
    :exclude-members: __new__

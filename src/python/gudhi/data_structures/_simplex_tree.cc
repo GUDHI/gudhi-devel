@@ -410,8 +410,8 @@ Serialize (or flatten) the SimplexTree data structure in order to pickle Simplex
              new (&st) gsti(deserialize_from_python(state));
            },
            nb::arg("state"), R"doc(
-Construct the SimplexTree data structure from a Numpy Array (cf. :func:`~gudhi.SimplexTree.__getstate__`) in order to
-unpickle a SimplexTree.
+Construct the SimplexTree data structure from a Numpy Array (cf.
+:func:`~gudhi.data_structures.SimplexTree.__getstate__`) in order to unpickle a SimplexTree.
 
 :param state: Serialized SimplexTree data structure
 :type state: numpy.array of shape (n,)

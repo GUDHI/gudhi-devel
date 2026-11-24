@@ -14,11 +14,12 @@ __license__ = "MIT"
 
 
 import numpy as np
-import gudhi as gd
+from gudhi import read_points_from_off_file
+from gudhi.filtrations import RipsComplex
 
 
-points = np.array(gd.read_points_from_off_file("../../data/points/Kl.off"))
-rc = gd.RipsComplex(points=points, max_edge_length=0.2)
+points = np.array(read_points_from_off_file("../../data/points/Kl.off"))
+rc = RipsComplex(points=points, max_edge_length=0.2)
 st = rc.create_simplex_tree(max_dimension=2)
 # We are only going to plot the triangles
 triangles = np.array([s[0] for s in st.get_skeleton(2) if len(s[0]) == 3])

@@ -14,7 +14,7 @@
 import numpy as np
 import pytest
 
-from gudhi import CubicalComplex, PeriodicCubicalComplex
+from gudhi.data_structures import CubicalComplex, PeriodicCubicalComplex
 from numpy.testing import assert_almost_equal
 
 def test_empty_constructor():

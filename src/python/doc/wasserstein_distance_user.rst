@@ -31,7 +31,7 @@ This first implementation uses the `Python Optimal Transport <installation.html#
 library and is based on ideas from "Large Scale Computation of Means and Cluster for Persistence
 Diagrams via Optimal Transport" :cite:`10.5555/3327546.3327645`.
 
-.. autofunction:: gudhi.wasserstein.wasserstein_distance
+.. autofunction:: gudhi.diagram_distances.wasserstein_distance
 
 Hera
 ****
@@ -42,7 +42,7 @@ based on "Geometry Helps to Compare Persistence Diagrams"
 :cite:`Kerber:2017:GHC:3047249.3064175` by Michael Kerber, Dmitriy
 Morozov, and Arnur Nigmetov.
 
-.. autofunction:: gudhi.hera.wasserstein_distance
+.. autofunction:: gudhi.diagram_distances.hera.wasserstein_distance
 
 Basic example
 *************
@@ -52,7 +52,7 @@ Note that persistence diagrams must be submitted as (n x 2) numpy arrays.
 
 .. testcode::
 
-    from gudhi.wasserstein import wasserstein_distance # Could also be: from gudhi.hera import wasserstein_distance
+    from gudhi.diagram_distances import wasserstein_distance # Could also be: from gudhi.hera import wasserstein_distance
     import numpy as np
 
     dgm1 = np.array([[2.7, 3.7],[9.6, 14.],[34.2, 34.974]])
@@ -75,7 +75,7 @@ any matching has a cost +inf and thus can be considered to be optimal. In such a
 
 .. testcode::
 
-    from gudhi.wasserstein import wasserstein_distance # Could also be: from gudhi.hera import wasserstein_distance
+    from gudhi.diagram_distances import wasserstein_distance # Could also be: from gudhi.hera import wasserstein_distance
     import numpy as np
 
     dgm1 = np.array([[2.7, 3.7],[9.6, 14.],[34.2, 34.974], [3, np.inf]])

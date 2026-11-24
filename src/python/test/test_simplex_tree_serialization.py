@@ -13,7 +13,7 @@ import numpy as np
 import pickle
 import pytest
 
-from gudhi import SimplexTree
+from gudhi.data_structures import SimplexTree
 
 
 def test_pickle_simplex_tree():

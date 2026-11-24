@@ -13,7 +13,7 @@ import numpy as np
 import pytest
 import warnings
 
-from gudhi import SimplexTree
+from gudhi.data_structures import SimplexTree
 
 
 def test_insertion():

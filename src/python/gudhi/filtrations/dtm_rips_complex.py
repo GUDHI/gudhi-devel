@@ -13,7 +13,7 @@ __license__ = "MIT"
 from scipy.spatial.distance import cdist
 import numpy as np
 
-from gudhi.weighted_rips_complex import WeightedRipsComplex
+from gudhi.filtrations.weighted_rips_complex import WeightedRipsComplex
 from gudhi.point_cloud.dtm import DistanceToMeasure
 
 

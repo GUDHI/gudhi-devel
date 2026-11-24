@@ -6,5 +6,5 @@
 Strong witness complex reference manual
 =======================================
 
-.. autoclass:: gudhi.StrongWitnessComplex
+.. autoclass:: gudhi.reconstruction.StrongWitnessComplex
    :members:

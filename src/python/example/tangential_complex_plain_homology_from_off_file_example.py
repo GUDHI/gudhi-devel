@@ -15,7 +15,8 @@ __license__ = "GPL v3"  # Because of TangentialComplex
 import argparse
 import errno
 import os
-import gudhi as gd
+from gudhi.reconstruction import TangentialComplex
+from gudhi import plot_persistence_diagram
 
 
 parser = argparse.ArgumentParser(
@@ -44,7 +45,7 @@ with open(args.file) as f:
         print("##############################################################")
         print("TangentialComplex creation from points read in a OFF file")
 
-        tc = gd.TangentialComplex(intrinsic_dim=args.intrinsic_dim, off_file=args.file)
+        tc = TangentialComplex(intrinsic_dim=args.intrinsic_dim, off_file=args.file)
         tc.compute_tangential_complex()
         st = tc.create_simplex_tree()
 
@@ -57,7 +58,7 @@ with open(args.file) as f:
         if args.no_diagram == False:
             import matplotlib.pyplot as plot
 
-            gd.plot_persistence_diagram(diag, band=args.band)
+            plot_persistence_diagram(diag, band=args.band)
             plot.show()
     else:
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), args.file)

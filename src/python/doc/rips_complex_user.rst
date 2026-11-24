@@ -49,16 +49,16 @@ a :math:`\frac{1}{1-\varepsilon}`-interleaving, although in practice the
 error is usually smaller.  A more intuitive presentation of the idea is
 available in :cite:`cavanna15geometric`, and in a video
 :cite:`cavanna15visualizing`. Passing an extra argument `sparse=0.3` at the
-construction of a :class:`~gudhi.RipsComplex` object asks it to build a sparse Rips with
+construction of a :class:`~gudhi.filtrations.RipsComplex` object asks it to build a sparse Rips with
 parameter :math:`\varepsilon=0.3`, while the default `sparse=None` builds the
 regular Rips complex.
 
 Another option which is especially useful if you want to compute persistent homology in "high" dimension (2 or more,
 sometimes even 1), is to build the Rips complex only up to dimension 1 (a graph), then use
-:func:`~gudhi.SimplexTree.collapse_edges` to reduce the size of this graph, and finally call
-:func:`~gudhi.SimplexTree.expansion` to get a simplicial complex of a suitable dimension to compute its homology. This
-trick gives the same persistence diagram as one would get with a plain use of `RipsComplex`, with a complex that is
-often significantly smaller and thus faster to process.
+:func:`~gudhi.data_structures.SimplexTree.collapse_edges` to reduce the size of this graph, and finally call
+:func:`~gudhi.data_structures.SimplexTree.expansion` to get a simplicial complex of a suitable dimension to compute its
+homology. This trick gives the same persistence diagram as one would get with a plain use of `RipsComplex`, with a
+complex that is often significantly smaller and thus faster to process.
 
 Finally, if you are only interested in the persistence diagram of a Rips complex, you should consider using
 :class:`~gudhi.sklearn.RipsPersistence` instead, which directly returns the diagram and can be faster
@@ -77,9 +77,9 @@ Finally, it is asked to display information about the simplicial complex.
 
 .. testcode::
 
-    import gudhi
-    rips_complex = gudhi.RipsComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
-                                     max_edge_length=12.0)
+    from gudhi.filtrations import RipsComplex
+    rips_complex = RipsComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
+                               max_edge_length=12.0)
 
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
     result_str = 'Rips complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
@@ -119,8 +119,8 @@ Notice that if we use
 
 .. code-block:: python
 
-    rips_complex = gudhi.RipsComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
-                                     max_edge_length=12.0, sparse=2)
+    rips_complex = RipsComplex(points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]],
+                               max_edge_length=12.0, sparse=2)
 
 asking for a very sparse version (theory only gives some guarantee on the meaning of the output if `sparse<1`),
 2 to 5 edges disappear, depending on the random vertex used to start the sparsification.
@@ -132,36 +132,36 @@ While :doc:`RipsComplex <rips_complex_ref>` is convenient, for instance to build
 
 .. testcode::
 
-   import gudhi
+   from gudhi.filtrations import RipsComplex
    points = [[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
-   cplx = gudhi.RipsComplex(points=points, max_edge_length=12.0).create_simplex_tree(max_dimension=2)
+   cplx = RipsComplex(points=points, max_edge_length=12.0).create_simplex_tree(max_dimension=2)
 
 you can achieve the same result without this class for more flexibility
 
 .. testcode::
 
-   import gudhi
+   from gudhi.data_structures import SimplexTree
    from scipy.spatial.distance import cdist
    points = [[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
    distance_matrix = cdist(points, points)
-   cplx = gudhi.SimplexTree.create_from_array(distance_matrix, max_filtration=12.0)
+   cplx = SimplexTree.create_from_array(distance_matrix, max_filtration=12.0)
    cplx.expansion(2)
 
 or
 
 .. testcode::
 
-   import gudhi
+   from gudhi.data_structures import SimplexTree
    from scipy.spatial import cKDTree
    points = [[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
    tree = cKDTree(points)
    edges = tree.sparse_distance_matrix(tree, max_distance=12.0, output_type="coo_matrix")
-   cplx = gudhi.SimplexTree()
+   cplx = SimplexTree()
    cplx.insert_edges_from_coo_matrix(edges)
    cplx.expansion(2)
 
 
-This way, you can easily add a call to :func:`~gudhi.flag_filtration.edge_collapse.reduce_graph` before the insertion,
+This way, you can easily add a call to :func:`~gudhi.filtrations.edge_collapse.reduce_graph` before the insertion,
 use a different metric to compute the matrix, or other variations.
 
 Distance matrix
@@ -177,14 +177,14 @@ Finally, it is asked to display information about the simplicial complex.
 
 .. testcode::
 
-    import gudhi
-    rips_complex = gudhi.RipsComplex(distance_matrix=[[],
-                                                      [6.0827625303],
-                                                      [5.8309518948, 6.7082039325],
-                                                      [9.4339811321, 6.3245553203, 5],
-                                                      [13.0384048104, 15.6524758425, 8.94427191, 12.0415945788],
-                                                      [18.0277563773, 19.6468827044, 13.152946438, 14.7648230602, 5.3851648071],
-                                                      [17.88854382, 17.1172427686, 12.0830459736, 11, 9.4868329805, 7.2801098893]],
+    from gudhi.filtrations import RipsComplex
+    rips_complex = RipsComplex(distance_matrix=[[],
+                                                [6.0827625303],
+                                                [5.8309518948, 6.7082039325],
+                                                [9.4339811321, 6.3245553203, 5],
+                                                [13.0384048104, 15.6524758425, 8.94427191, 12.0415945788],
+                                                [18.0277563773, 19.6468827044, 13.152946438, 14.7648230602, 5.3851648071],
+                                                [17.88854382, 17.1172427686, 12.0830459736, 11, 9.4868329805, 7.2801098893]],
                                      max_edge_length=12.0)
 
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
@@ -240,7 +240,7 @@ Finally, it is asked to display information about the simplicial complex.
 
 .. testcode::
 
-    import gudhi
+    from gudhi.filtrations import RipsComplex
     import numpy as np
 
     # User defined correlation matrix is:
@@ -256,7 +256,7 @@ Finally, it is asked to display information about the simplicial complex.
                                 [0.89, 0.61, 0.03, 0.7, 1.]], float)
 
     distance_matrix = 1 - correlation_matrix
-    rips_complex = gudhi.RipsComplex(distance_matrix=distance_matrix, max_edge_length=1.0)
+    rips_complex = RipsComplex(distance_matrix=distance_matrix, max_edge_length=1.0)
 
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=1)
     result_str = 'Rips complex is of dimension ' + repr(simplex_tree.dimension()) + ' - ' + \
@@ -309,7 +309,7 @@ The following example computes the weighted Rips filtration associated with a di
 
 .. testcode::
 
-    from gudhi.weighted_rips_complex import WeightedRipsComplex
+    from gudhi.filtrations import WeightedRipsComplex
     dist = [[], [1]]
     weights = [1, 100]
     w_rips = WeightedRipsComplex(distance_matrix=dist, weights=weights)
@@ -334,7 +334,7 @@ Remark that `DTMRipsComplex <rips_complex_user.html#dtm-rips-complex>`_ class pr
     import numpy as np
     from scipy.spatial.distance import cdist
     from gudhi.point_cloud.dtm import DistanceToMeasure
-    from gudhi.weighted_rips_complex import WeightedRipsComplex
+    from gudhi.filtrations import WeightedRipsComplex
     pts = np.array([[2.0, 2.0], [0.0, 1.0], [3.0, 4.0]])
     dist = cdist(pts,pts)
     dtm = DistanceToMeasure(2, q=2, metric="precomputed")
@@ -352,8 +352,8 @@ The output is:
 DTM Rips Complex
 ----------------
 
-:class:`~gudhi.dtm_rips_complex.DTMRipsComplex` builds a simplicial complex from a point set or a full distance matrix
-(in the form of ndarray), as described in the above example.
+:class:`~gudhi.filtrations.dtm_rips_complex.DTMRipsComplex` builds a simplicial complex from a point set or a full
+distance matrix (in the form of ndarray), as described in the above example.
 This class constructs a weighted Rips complex giving larger weights to outliers, which reduces their impact on the
 persistence diagram.
 See `this notebook <https://github.com/GUDHI/TDA-tutorial/blob/master/tutorials/Tuto-GUDHI-DTM-filtrations.ipynb>`_
@@ -362,7 +362,7 @@ for some experiments.
 .. testcode::
 
     import numpy as np
-    from gudhi.dtm_rips_complex import DTMRipsComplex
+    from gudhi.filtrations import DTMRipsComplex
     pts = np.array([[2.0, 2.0], [0.0, 1.0], [3.0, 4.0]])
     dtm_rips = DTMRipsComplex(points=pts, k=2)
     st = dtm_rips.create_simplex_tree(max_dimension=2)

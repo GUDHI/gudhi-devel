@@ -3,10 +3,11 @@
 .. To get rid of WARNING: document isn't included in any toctree
 
 
-:class:`~gudhi.CoverComplex` user manual
-========================================
+:class:`~gudhi.reconstruction.CoverComplex` user manual
+=======================================================
 
-In the following, we provide examples for the old :class:`~gudhi.CoverComplex` class (see :doc:`cover_complex_sklearn_user` for a general introduction and links to newer alternatives).
+In the following, we provide examples for the old :class:`~gudhi.reconstruction.CoverComplex` class (see
+:doc:`cover_complex_sklearn_user` for a general introduction and links to newer alternatives).
 
 Nerves
 ------

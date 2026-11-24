@@ -16,7 +16,8 @@ __license__ = "MIT"
 import argparse
 import errno
 import os
-import gudhi as gd
+from gudhi import read_points_from_off_file, plot_persistence_diagram
+from gudhi.filtrations import RipsComplex
 
 
 parser = argparse.ArgumentParser(
@@ -49,10 +50,8 @@ with open(args.file) as f:
         message = "RipsComplex with max_edge_length=" + repr(args.max_edge_length)
         print(message)
 
-        point_cloud = gd.read_points_from_off_file(off_file=args.file)
-        rips_complex = gd.RipsComplex(
-            points=point_cloud, max_edge_length=args.max_edge_length
-        )
+        point_cloud = read_points_from_off_file(off_file=args.file)
+        rips_complex = RipsComplex(points=point_cloud, max_edge_length=args.max_edge_length)
         simplex_tree = rips_complex.create_simplex_tree(max_dimension=args.max_dimension)
 
         print(f"Number of simplices={simplex_tree.num_simplices()}")
@@ -64,7 +63,7 @@ with open(args.file) as f:
         if args.no_diagram == False:
             import matplotlib.pyplot as plot
 
-            gd.plot_persistence_diagram(diag, band=args.band)
+            plot_persistence_diagram(diag, band=args.band)
             plot.show()
     else:
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), args.file)

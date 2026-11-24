@@ -83,7 +83,7 @@ who want to use the code directly. They can be found in the :doc:`cubical_comple
 
 .. testcode::
 
-    from gudhi import CubicalComplex
+    from gudhi.data_structures import CubicalComplex
     import numpy as np
     cc = CubicalComplex(top_dimensional_cells=np.array([[ 1.,  8.,  7.],
                                                         [ 4., 20.,  6.],
@@ -112,7 +112,7 @@ It can be defined as follows:
 
 .. testcode::
 
-    from gudhi import PeriodicCubicalComplex as PCC
+    from gudhi.data_structures import PeriodicCubicalComplex as PCC
     pcc = PCC(top_dimensional_cells = [[0, 0, 0], [0, 1, 0], [0, 0, 0]],
               periodic_dimensions=[True, False])
     print(f"Periodic cubical complex is of dimension {pcc.dimension()} - {pcc.num_simplices()} simplices.")

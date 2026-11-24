@@ -14,7 +14,7 @@ from math import sqrt
 from scipy.spatial.distance import cdist
 import pytest
 
-from gudhi.weighted_rips_complex import WeightedRipsComplex
+from gudhi.filtrations import WeightedRipsComplex
 from gudhi.point_cloud.dtm import DistanceToMeasure
 
 

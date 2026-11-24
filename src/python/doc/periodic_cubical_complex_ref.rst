@@ -5,7 +5,7 @@
 Periodic cubical complex reference manual
 #########################################
 
-.. autoclass:: gudhi.PeriodicCubicalComplex
+.. autoclass:: gudhi.data_structures.PeriodicCubicalComplex
    :members:
    :inherited-members:
    :exclude-members: __new__

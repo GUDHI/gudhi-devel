@@ -23,8 +23,8 @@ scheme.
 Implementation
 --------------
 
-The :class:`simplex tree<gudhi.SimplexTree>` is an efficient and flexible data structure for representing general
-(filtered) simplicial complexes.
+The :class:`simplex tree<gudhi.data_structures.SimplexTree>` is an efficient and flexible data structure for
+representing general (filtered) simplicial complexes.
 The data structure is described in :cite:`boissonnatmariasimplextreealgorithmica`.
 
 Example
@@ -32,8 +32,8 @@ Example
 
 .. testcode::
 
-   import gudhi
-   st = gudhi.SimplexTree()
+   from gudhi.data_structures import SimplexTree
+   st = SimplexTree()
    if st.insert([0, 1]):
        print("[0, 1] inserted")
    if st.insert([0, 1, 2], filtration=4.0):

@@ -13,7 +13,7 @@ __license__ = "MIT"
 import numpy as np
 import warnings
 
-from gudhi.wasserstein import wasserstein_distance
+from .wasserstein import wasserstein_distance
 
 
 def _mean(x, m):

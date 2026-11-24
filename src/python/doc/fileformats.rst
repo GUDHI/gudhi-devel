@@ -59,7 +59,7 @@ Here is a simple sample file::
 Other sample files can be found in the `data/persistence_diagram` folder.
 
 Such files can be generated with
-:meth:`gudhi.SimplexTree.write_persistence_diagram`, read with
+:meth:`gudhi.data_structures.SimplexTree.write_persistence_diagram`, read with
 :meth:`gudhi.read_persistence_intervals_grouped_by_dimension`, or
 :meth:`gudhi.read_persistence_intervals_in_dimension` and displayed with
 :meth:`gudhi.plot_persistence_barcode` or

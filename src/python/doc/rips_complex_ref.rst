@@ -8,9 +8,9 @@ Rips complex reference manual
 
 .. tip::
    If you only want to compute persistent homology, consider using :class:`~gudhi.sklearn.RipsPersistence`,
-   which can be significantly faster than :class:`~gudhi.RipsComplex` in some cases.
+   which can be significantly faster than :class:`~gudhi.filtrations.RipsComplex` in some cases.
 
-.. autoclass:: gudhi.RipsComplex
+.. autoclass:: gudhi.filtrations.RipsComplex
    :members:
    :undoc-members:
 
@@ -18,7 +18,7 @@ Rips complex reference manual
 Weighted Rips complex reference manual
 ======================================
 
-.. autoclass:: gudhi.weighted_rips_complex.WeightedRipsComplex
+.. autoclass:: gudhi.filtrations.WeightedRipsComplex
    :members:
    :undoc-members:
 
@@ -26,7 +26,7 @@ Weighted Rips complex reference manual
 DTM Rips complex reference manual
 =================================
 
-.. autoclass:: gudhi.dtm_rips_complex.DTMRipsComplex
+.. autoclass:: gudhi.filtrations.DTMRipsComplex
    :members:
    :undoc-members:
    :show-inheritance:

@@ -14,7 +14,7 @@
 import numpy as np
 import pytest
 
-from gudhi import AlphaComplex
+from gudhi.filtrations import AlphaComplex
 
 
 def _alpha_get_point(precision):

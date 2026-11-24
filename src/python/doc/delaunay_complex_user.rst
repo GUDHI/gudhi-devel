@@ -10,24 +10,24 @@ Definition
 
 .. include:: delaunay_complex_sum.inc
 
-:class:`~gudhi.DelaunayComplex` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
+:class:`~gudhi.filtrations.DelaunayComplex` is constructing a :doc:`SimplexTree <simplex_tree_ref>` using
 `Delaunay Triangulation  <https://doc.cgal.org/latest/Triangulation/index.html#TriangulationSecTriangulations>`_
 :cite:`cgal:hdj-t-19b` from the `Computational Geometry Algorithms Library <https://www.cgal.org/>`_
 :cite:`cgal:eb-19b`.
 
 The Delaunay complex (all filtration values are set to `NaN`) is available by passing :code:`filtrations = None`
-(default value) to :func:`~gudhi.DelaunayComplex.create_simplex_tree`.
+(default value) to :func:`~gudhi.filtrations.DelaunayComplex.create_simplex_tree`.
 
-When :paramref:`~gudhi.DelaunayComplex.create_simplex_tree.filtrations` is:
+When :paramref:`~gudhi.filtrations.DelaunayComplex.create_simplex_tree.filtrations` is:
 
-* `'alpha'`              - The filtration value of each simplex is computed as an :class:`~gudhi.AlphaComplex`
-* `'cech'`               - The filtration value of each simplex is computed as a :class:`~gudhi.DelaunayCechComplex`
+* `'alpha'`     - The filtration value of each simplex is computed as an :class:`~gudhi.filtrations.AlphaComplex`
+* `'cech'`      - The filtration value of each simplex is computed as a :class:`~gudhi.filtrations.DelaunayCechComplex`
 
-Remarks about the :class:`~gudhi.AlphaComplex` and the :class:`~gudhi.DelaunayCechComplex`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Remarks about the :class:`~gudhi.filtrations.AlphaComplex` and the :class:`~gudhi.filtrations.DelaunayCechComplex`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-These remarks apply to the :class:`~gudhi.AlphaComplex` and to the :class:`~gudhi.DelaunayCechComplex` that we will
-call *'complex'* in the following text.
+These remarks apply to the :class:`~gudhi.filtrations.AlphaComplex` and to the
+:class:`~gudhi.filtrations.DelaunayCechComplex` that we will call *'complex'* in the following text.
 
 * When a complex is constructed with an infinite value of :math:`\alpha^2`, the complex is a Delaunay complex (with
   special filtration values).
@@ -37,7 +37,7 @@ call *'complex'* in the following text.
   make sense in higher dimension precisely because you can bound the radii.
 * Using the default :code:`precision = 'safe'` makes the construction safe, but, the filtration values are only
   guaranteed to have a small multiplicative error compared to the exact value, see
-  :func:`~gudhi.DelaunayComplex.set_float_relative_precision` to modify the precision.
+  :func:`~gudhi.filtrations.DelaunayComplex.set_float_relative_precision` to modify the precision.
   A drawback, when computing persistence, is that an empty exact interval [10^12,10^12] may become a
   non-empty approximate interval [10^12,10^12+10^6].
   If you pass :code:`precision = 'exact'` to the complex constructor, the filtration values are the exact
@@ -46,8 +46,8 @@ call *'complex'* in the following text.
   the filtration values can exceptionally be arbitrarily bad. In all cases, we still guarantee that the
   output is a valid filtration (faces have a filtration value no larger than their cofaces).
 
-:class:`~gudhi.DelaunayCechComplex` is a bit faster than :class:`~gudhi.AlphaComplex`, but only
-:class:`~gudhi.AlphaComplex` has a weighted version.
+:class:`~gudhi.filtrations.DelaunayCechComplex` is a bit faster than :class:`~gudhi.filtrations.AlphaComplex`, but only
+:class:`~gudhi.filtrations.AlphaComplex` has a weighted version.
 
 Example from points
 -------------------
@@ -56,7 +56,7 @@ This example builds the Delaunay Čech complex from the given points:
 
 .. testcode::
 
-    from gudhi import DelaunayCechComplex
+    from gudhi.filtrations import DelaunayCechComplex
     points=[[1, 1], [7, 0], [4, 6], [9, 6], [0, 14], [2, 19], [9, 17]]
     cpx = DelaunayCechComplex(points=points)
 
@@ -119,7 +119,7 @@ Then, it is asked to display information about the :math:`\alpha`-complex.
 
 .. testcode::
 
-    from gudhi import AlphaComplex
+    from gudhi.filtrations import AlphaComplex
     wgt_ac = AlphaComplex(points=[[ 1., -1., -1.],
                                   [-1.,  1., -1.],
                                   [-1., -1.,  1.],

@@ -6,7 +6,7 @@
 Tangential complex reference manual
 ===================================
 
-.. autoclass:: gudhi.TangentialComplex
+.. autoclass:: gudhi.reconstruction.TangentialComplex
    :members:
    :inherited-members:
    :exclude-members: __new__

@@ -13,7 +13,7 @@ import numpy as np
 import torch
 import tensorflow as tf
 
-from gudhi.wasserstein import wasserstein_distance as pot
+from gudhi.diagram_distances import wasserstein_distance as pot
 
 
 def test_wasserstein_distance_grad():

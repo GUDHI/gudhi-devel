@@ -6,7 +6,7 @@
 Simplex tree reference manual
 =============================
 
-.. autoclass:: gudhi.SimplexTree
+.. autoclass:: gudhi.data_structures.SimplexTree
    :members:
    :inherited-members:
    :special-members: __eq__, __getstate__, __setstate__

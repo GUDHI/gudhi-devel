@@ -20,7 +20,7 @@ from numpy.typing import ArrayLike
 import warnings
 from collections.abc import Callable, Sequence
 
-from gudhi import _simplex_tree_ext as t
+from . import _simplex_tree_ext as t
 
 
 # SimplexTree python interface
@@ -404,7 +404,7 @@ class SimplexTree(t._Simplex_tree_python_interface):
         expansion has the same persistent homology, using a technique known as edge collapses
         (see :cite:`edgecollapsearxiv`).
 
-        A natural application is to get a simplex tree of dimension 1 from :class:`~gudhi.RipsComplex`,
+        A natural application is to get a simplex tree of dimension 1 from :class:`~gudhi.filtrations.RipsComplex`,
         then collapse edges, perform :meth:`expansion()` and finally compute persistence
         (cf. :download:`rips_complex_edge_collapse_example.py <../example/rips_complex_edge_collapse_example.py>`).
 

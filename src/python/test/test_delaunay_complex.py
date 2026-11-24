@@ -23,7 +23,7 @@ import numpy as np
 import pytest
 import random
 
-from gudhi import AlphaComplex, DelaunayComplex, DelaunayCechComplex
+from gudhi.filtrations import AlphaComplex, DelaunayComplex, DelaunayCechComplex
 
 
 def _empty_complex(simplicial_complex, precision):

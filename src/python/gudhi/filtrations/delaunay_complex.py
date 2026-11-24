@@ -17,19 +17,21 @@ __license__ = "GPL v3"
 from typing import Literal, Optional
 from collections.abc import Sequence
 
-from gudhi import _delaunay_complex_ext as t
-from gudhi.simplex_tree import SimplexTree
+from gudhi.filtrations import _delaunay_complex_ext as t
+from gudhi.data_structures.simplex_tree import SimplexTree
 
 
 # DelaunayComplex python interface
 class DelaunayComplex(t.Delaunay_complex_interface):
     """DelaunayComplex is a simplicial complex constructed from the finite cells of a Delaunay Triangulation.
 
-    When :paramref:`~gudhi.DelaunayComplex.create_simplex_tree.filtration` is:
+    When :paramref:`~gudhi.filtrations.DelaunayComplex.create_simplex_tree.filtration` is:
 
     * `None` (default value) - The filtration value of each simplex is not computed (set to `NaN`)
-    * `'alpha'`              - The filtration value of each simplex is computed as an :class:`~gudhi.AlphaComplex`
-    * `'cech'`               - The filtration value of each simplex is computed as a :class:`~gudhi.DelaunayCechComplex`
+    * `'alpha'`              - The filtration value of each simplex is computed as an
+        :class:`~gudhi.filtrations.AlphaComplex`
+    * `'cech'`               - The filtration value of each simplex is computed as a
+        :class:`~gudhi.filtrations.DelaunayCechComplex`
     """
 
     def __init__(
@@ -127,7 +129,7 @@ class AlphaComplex(DelaunayComplex):
                 to infinity, and there is very little point using anything else since it does not save time.
             default_filtration_value (bool): Default value is `False` (which means compute the filtration values). Set
                 this value to `True` if filtration values are not needed to be computed (will be set to `NaN`), but
-                please consider constructing a :class:`~gudhi.DelaunayComplex` instead.
+                please consider constructing a :class:`~gudhi.filtrations.DelaunayComplex` instead.
             output_squared_values (bool): Square filtration values when `True`. Default is `True` to keep backward
                 compatibility.
         Returns:

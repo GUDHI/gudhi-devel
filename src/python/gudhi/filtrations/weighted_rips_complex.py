@@ -10,7 +10,7 @@
 __license__ = "MIT"
 
 
-from gudhi import SimplexTree
+from gudhi.data_structures import SimplexTree
 
 
 class WeightedRipsComplex:

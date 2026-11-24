@@ -17,7 +17,7 @@ import numpy
 from functools import reduce
 import argparse
 import operator
-from gudhi import CubicalComplex
+from gudhi.data_structures import CubicalComplex
 
 parser = argparse.ArgumentParser(
     description="Random cubical complex.",

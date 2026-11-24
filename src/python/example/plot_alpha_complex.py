@@ -14,11 +14,12 @@ __license__ = "GPL v3"  # Because of AlphaComplex
 
 
 import numpy as np
-import gudhi as gd
+from gudhi import read_points_from_off_file
+from gudhi.filtrations import AlphaComplex
 
 
-points = gd.read_points_from_off_file(off_file="../../data/points/tore3D_1307.off")
-ac = gd.AlphaComplex(points=points)
+points = read_points_from_off_file(off_file="../../data/points/tore3D_1307.off")
+ac = AlphaComplex(points=points)
 st = ac.create_simplex_tree()
 points = np.array([ac.get_point(i) for i in range(st.num_vertices())])
 # We want to plot the alpha-complex with alpha=0.1.

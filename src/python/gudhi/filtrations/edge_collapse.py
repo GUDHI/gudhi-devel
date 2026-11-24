@@ -10,7 +10,7 @@
 __license__ = "MIT"
 
 
-from .._edge_collapse_ext import _collapse_edges
+from ._edge_collapse_ext import _collapse_edges
 
 
 def reduce_graph(input_edges, nb_iterations=1):

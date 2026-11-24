@@ -24,7 +24,7 @@ This function can display the persistence result as a barcode:
     gudhi.random.set_seed(42)
     point_cloud = points.torus_embedded_r3(n_samples=300, major_radius=2., minor_radius=1.)
     
-    rips_complex = gudhi.RipsComplex(points=point_cloud, max_edge_length=0.7)
+    rips_complex = gudhi.filtrations.RipsComplex(points=point_cloud, max_edge_length=0.7)
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=3)
     diag = simplex_tree.persistence(min_persistence=0.4)
     
@@ -48,7 +48,7 @@ This function can display the persistence result as a diagram:
     gudhi.random.set_seed(42)
     point_cloud = points.torus_embedded_r3(n_samples=2500, major_radius=2., minor_radius=1.)
     
-    simplex_tree = gudhi.RipsComplex(points=point_cloud, max_edge_length=0.67).create_simplex_tree(max_dimension=3)
+    simplex_tree = gudhi.filtrations.RipsComplex(points=point_cloud, max_edge_length=0.67).create_simplex_tree(max_dimension=3)
     diags = simplex_tree.persistence(min_persistence=0.01)
     # Save the H1 persistence results in a file
     diags_H1 = simplex_tree.persistence_intervals_in_dimension(1)

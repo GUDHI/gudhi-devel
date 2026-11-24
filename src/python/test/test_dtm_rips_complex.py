@@ -9,8 +9,7 @@
 """
 
 
-from gudhi.dtm_rips_complex import DTMRipsComplex
-from gudhi import RipsComplex
+from gudhi.filtrations import DTMRipsComplex, RipsComplex
 import numpy as np
 from math import sqrt
 import pytest

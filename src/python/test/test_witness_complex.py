@@ -10,7 +10,7 @@
 """
 
 
-from gudhi import WitnessComplex, StrongWitnessComplex, SimplexTree
+from gudhi.reconstruction import WitnessComplex, StrongWitnessComplex
 
 
 def test_empty_witness_complex():

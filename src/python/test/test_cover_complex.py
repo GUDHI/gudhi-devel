@@ -9,8 +9,8 @@
 """
 
 
-from gudhi import CoverComplex
-from gudhi.cover_complex import MapperComplex, GraphInducedComplex, NerveComplex
+from gudhi.reconstruction import CoverComplex
+from gudhi.reconstruction.cover_complex import MapperComplex, GraphInducedComplex, NerveComplex
 import pytest
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering

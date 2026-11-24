@@ -160,8 +160,8 @@ NB_MODULE(_delaunay_complex_ext, m)
       .def(nb::init<const Sequence2D&, bool, bool>(), nb::call_guard<nb::gil_scoped_release>())
       .def("create_simplex_tree", &gdci::create_simplex_tree, nb::call_guard<nb::gil_scoped_release>())
       .def("get_point", &gdci::get_point, nb::arg("vertex"), R"doc(
-This function returns the point corresponding to a given vertex from the :class:`~gudhi.SimplexTree` (the
-same as the k-th input point, where `k=vertex`)
+This function returns the point corresponding to a given vertex from the :class:`~gudhi.data_structures.SimplexTree`
+(the same as the k-th input point, where `k=vertex`)
 
 Args:
     vertex: The vertex.
@@ -183,10 +183,11 @@ Set the float relative precision of filtration values computation when construct
 (the default).
 
 Args:
-    precision: When constructing :class:`~gudhi.AlphaComplex`, :class:`~gudhi.DelaunayCechComplex`, or
-        :class:`~gudhi.DelaunayComplex` with :code:`precision = 'safe'` (the default), one can set the float relative
-        precision of filtration values computed. Default is :code:`1e-5` (cf.
-        :func:`~gudhi.DelaunayComplex.get_float_relative_precision`). For more details, please refer to
+    precision: When constructing :class:`~gudhi.filtrations.AlphaComplex`,
+        :class:`~gudhi.filtrations.DelaunayCechComplex`, or :class:`~gudhi.filtrations.DelaunayComplex` with
+        :code:`precision = 'safe'` (the default), one can set the float relative precision of filtration values
+        computed. Default is :code:`1e-5` (cf. :func:`~gudhi.filtrations.DelaunayComplex.get_float_relative_precision`).
+        For more details, please refer to
         `CGAL::Lazy_exact_nt<NT>::set_relative_precision_of_to_double <https://doc.cgal.org/latest/Number_types/classCGAL_1_1Lazy__exact__nt.html>`_
 
 :raises ValueError: If precision is not in (0, 1).
