@@ -17,7 +17,8 @@ __license__ = "GPL v3"  # Because of AlphaComplex and bottleneck_distance
 import argparse
 import math
 import numpy as np
-from gudhi import read_points_from_off_file, bottleneck_distance
+from gudhi import read_points_from_off_file
+from gudhi.diagram_distances import bottleneck_distance
 from gudhi.filtrations import AlphaComplex, RipsComplex
 
 

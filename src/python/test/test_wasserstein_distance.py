@@ -20,8 +20,8 @@ from gudhi.diagram_distances.wasserstein import (
     _get_essential_parts,
     _warn_infty,
 )
-from gudhi.wasserstein import wasserstein_distance as pot
-from gudhi.hera import wasserstein_distance as hera
+from gudhi.diagram_distances import wasserstein_distance as pot
+from gudhi.diagram_distances.hera import wasserstein_distance as hera
 
 
 def test_proj_on_diag():

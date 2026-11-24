@@ -19,10 +19,10 @@ Mapper/GIC/Nerve complexes reference manual
    :members:
    :inherited-members:
 
-:class:`~gudhi.cover_complex.NerveComplex` reference manual
------------------------------------------------------------
+:class:`~gudhi.reconstruction.cover_complex.NerveComplex` reference manual
+--------------------------------------------------------------------------
 
-.. autoclass:: gudhi.cover_complex.NerveComplex
+.. autoclass:: gudhi.reconstruction.cover_complex.NerveComplex
    :members:
    :inherited-members:
 

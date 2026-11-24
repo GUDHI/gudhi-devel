@@ -16,7 +16,7 @@ __license__ = "GPL v3"
 
 
 import numpy as np
-from gudhi import bottleneck_distance
+from gudhi.diagram_distances import bottleneck_distance
 
 
 diag1 = np.array([[2.7, 3.7], [9.6, 14.0], [34.2, 34.974], [3.0, float("Inf")]])

@@ -20,7 +20,7 @@ from gudhi.sklearn import RipsPersistence
 from gudhi.filtrations import RipsComplex
 from gudhi.data_structures import SimplexTree
 from gudhi._ripser_ext import _lower, _full, _sparse, _lower_to_coo, _lower_cone_radius
-from gudhi import bottleneck_distance
+from gudhi.diagram_distances import bottleneck_distance
 
 
 def test_rips_persistence_of_points_on_a_circle():
