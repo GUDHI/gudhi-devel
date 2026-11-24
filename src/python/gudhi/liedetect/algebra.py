@@ -38,6 +38,7 @@ Canonical bases of representations:
 import sys
 import itertools
 from collections import Counter
+from fractions import Fraction
 from math import gcd
 from numbers import Integral
 from typing import Literal
@@ -299,7 +300,9 @@ def invariant_of_lattices(
     decimals_accuracy: int = 5,
 ) -> tuple:
     """
-    Returns an invariant for a lattice basis up to a certain equivalence relation.
+    Return the legacy numerical features for lattice scoring.
+
+    These rounded features must not be used for exact representation equivalence.
         - 'span-equivalence':
             Returns the projection matrix on the space it spans.
         - 'orbit-equivalence':
@@ -329,6 +332,117 @@ def invariant_of_lattices(
         raise ValueError(f"Method not recognized: {method}.")
 
 
+def _rational_row_reduction(rows, pivot_columns):
+    rows = [[Fraction(entry) for entry in row] for row in rows]
+    rank = 0
+    for column in range(pivot_columns):
+        pivot = next((i for i in range(rank, len(rows)) if rows[i][column]), None)
+        if pivot is None:
+            continue
+        rows[rank], rows[pivot] = rows[pivot], rows[rank]
+        row = rows[rank]
+        scale = row[column]
+        row = rows[rank] = [entry / scale for entry in row]
+        for i, other in enumerate(rows):
+            if i != rank and other[column]:
+                factor = other[column]
+                rows[i] = [a - factor * b for a, b in zip(other, row)]
+        rank += 1
+        if rank == len(rows):
+            break
+    return tuple(tuple(row) for row in rows[:rank])
+
+
+def _primitive_row(row):
+    divisor = gcd(*row)
+    if not divisor:
+        return row
+    if next(weight for weight in row if weight) < 0:
+        divisor = -divisor
+    return tuple(weight // divisor for weight in row)
+
+
+def _exact_span(rows):
+    if len(rows) == 1:
+        return (_primitive_row(rows[0]),) if any(rows[0]) else ()
+    return _rational_row_reduction(rows, len(rows[0]))
+
+
+def _rational_projector(basis, width):
+    rank = len(basis)
+    if rank == 0 or rank == width:
+        return tuple(tuple(int(rank != 0 and i == j) for j in range(width)) for i in range(width))
+    # Solve (R R^T) X = R in exact arithmetic, then form R^T X.
+    gram = [tuple(sum(a * b for a, b in zip(row, other)) for other in basis) for row in basis]
+    solved = _rational_row_reduction(
+        [gram_row + row for gram_row, row in zip(gram, basis)], rank
+    )
+    return tuple(
+        tuple(sum(basis[k][i] * solved[k][rank + j] for k in range(rank)) for j in range(width))
+        for i in range(width)
+    )
+
+
+def _projector_profiles(projector):
+    return tuple(
+        (row[i], tuple(sorted(map(abs, row)))) for i, row in enumerate(projector)
+    )
+
+
+def _projectors_orbit_equivalent(left, right, left_profiles, right_profiles):
+    if left == right:
+        return True
+    width = len(left)
+    choices = [
+        [i for i, left_profile in enumerate(left_profiles) if left_profile == profile]
+        for profile in right_profiles
+    ]
+    order = sorted(range(width), key=lambda index: len(choices[index]))
+    permutation = [-1] * width
+    used = set()
+
+    def signs_are_consistent():
+        # A nonzero edge prescribes the relative sign of its endpoints.
+        # Propagate from one vertex per connected component and check cycles.
+        signs = [0] * width
+        for start in range(width):
+            if signs[start]:
+                continue
+            signs[start] = 1
+            pending = [start]
+            while pending:
+                i = pending.pop()
+                for j in range(width):
+                    if i == j or not right[i][j]:
+                        continue
+                    sign = signs[i] * (1 if right[i][j] == left[permutation[i]][permutation[j]] else -1)
+                    if not signs[j]:
+                        signs[j] = sign
+                        pending.append(j)
+                    elif signs[j] != sign:
+                        return False
+        return True
+
+    def match(depth):
+        if depth == width:
+            return signs_are_consistent()
+        j = order[depth]
+        for i in choices[j]:
+            if i in used or any(
+                abs(left[i][permutation[k]]) != abs(right[j][k])
+                for k in order[:depth]
+            ):
+                continue
+            permutation[j] = i
+            used.add(i)
+            if match(depth + 1):
+                return True
+            used.remove(i)
+        return False
+
+    return match(0)
+
+
 def get_lattices(
     lattice_rank: int,
     ambient_rank: int,
@@ -338,15 +452,12 @@ def get_lattices(
     verbose: bool = False,
 ) -> list[tuple[tuple[int, ...], ...]]:
     """
-    Returns a list of lattices of rank lattice_dim in R^{ambient_rank}, written in a basis.
-        - 'span-equivalence':
-            Returns one lattice per span-equivalence class (span the same subspace of R^ambient_rank). This set is in
-            correspondence with the primitive lattices, we do not guarantee that the selected representatives are
-            primitive. For our purpose, having an arbitrary representative is enough.
-        - 'orbit-equivalence':
-            Returns one representative per orbit-equivalence class (up to signed permutations). It is stronger than
-            'span-equivalence'.  For lattice_dim==1, the output are equivalent. Just as above, the output lattices may
-            not be primitive.
+    Return full-rank integer row bases for torus candidate representations.
+
+    With 'span-equivalence', retain the first representative of each rational
+    row space in fixed coordinates. With 'orbit-equivalence', also identify
+    row spaces related by signed column permutations. Representatives retain
+    their original integer rows and can be nonprimitive.
     In addition, with the parameter "span_ambient_space", we only return lattices whose irreps in its decomposition do
     not repeat. This ensures that the corresponding orbit spans the ambient space.
 
@@ -354,13 +465,15 @@ def get_lattices(
         ambient_rank (int): Dimension of the vector.
         lattice_rank (int): Rank of the lattice.
         frequency_max (int): Maximum frequency for irreps.
-        method (str, optional): 'exact' for unique representatives, 'repetitions' for all (possibly repeated) lattices.
+        method (str, optional): 'span-equivalence' or 'orbit-equivalence'.
         span_ambient_space (bool, optional): If True, only return lattices whose generic orbits span the ambient space.
         verbose (int, optional): Verbosity level.
 
     Returns:
         list: List of lattices, each as a tuple of frequency tuples.
     """
+    if method not in ("span-equivalence", "orbit-equivalence"):
+        raise ValueError(f"Method not recognized: {method}.")
     # Sanity check: ambient dimension must be large enough
     if not lattice_rank <= ambient_rank:
         raise ValueError("Rank of ambient lattice is too small.")
@@ -386,69 +499,88 @@ def get_lattices(
         lattice = tuple(zip(*characters))
         if lattice_rank == 1 and gcd(*lattice[0]) != 1:
             continue
-        if np.linalg.matrix_rank(lattice) != lattice_rank:
+        span_key = _exact_span(lattice)
+        if len(span_key) != lattice_rank:
             continue
         full_rank_count += 1
-        invariant = invariant_of_lattices(lattice, method="span-equivalence")
-        span_equivalence_classes.setdefault(invariant, lattice)
+        span_equivalence_classes.setdefault(span_key, lattice)
 
     if verbose:
         sys.stdout.write(f"Full-rank lattices: {full_rank_count}... ")
-    lattices = list(span_equivalence_classes.values())
+        sys.stdout.write(f"Span-equivalence classes: {len(span_equivalence_classes)}. ")
+    if method == "span-equivalence":
+        return list(span_equivalence_classes.values())
+
+    if lattice_rank == 1:
+        rank_one_classes = {}
+        for (row,), lattice in span_equivalence_classes.items():
+            rank_one_classes.setdefault(tuple(sorted(map(abs, row))), lattice)
+        representatives = list(rank_one_classes.values())
+    else:
+        representatives = []
+        buckets = {}
+        for basis, lattice in span_equivalence_classes.items():
+            projector = _rational_projector(basis, ambient_rank)
+            profiles = _projector_profiles(projector)
+            bucket = buckets.setdefault(tuple(sorted(profiles)), [])
+            if any(
+                _projectors_orbit_equivalent(previous, projector, previous_profiles, profiles)
+                for previous, previous_profiles in bucket
+            ):
+                continue
+            bucket.append((projector, profiles))
+            representatives.append(lattice)
 
     if verbose:
-        sys.stdout.write(f"Span-equivalence classes: {len(lattices)}"
-                         f"{'... ' if method == 'orbit-equivalence' else '. '}")
+        sys.stdout.write(f"Orbit-equivalence classes: {len(representatives)}.\n")
+    return representatives
 
-    # If required, returns lattices obtained
-    if method == "span-equivalence" or lattice_rank == 1:
-        return lattices
 
-    # Otherwise, discards orbit-equivalent lattices (under the action of signed permutations)
-    elif method == "orbit-equivalence":
-        orbit_equivalence_classes = {}
-        for lattice in lattices:
-            invariant = invariant_of_lattices(
-                lattice=lattice, method="orbit-equivalence"
-            )
-            if invariant not in orbit_equivalence_classes:
-                orbit_equivalence_classes[invariant] = lattice
+def _torus_orbit_equivalent(rep0, rep1):
+    _validate_torus_weights(rep0)
+    _validate_torus_weights(rep1)
+    width = len(rep0[0])
+    if len(rep0) != len(rep1) or width != len(rep1[0]):
+        return False
+    left, right = (
+        _exact_span(tuple(tuple(map(int, row)) for row in rep)) for rep in (rep0, rep1)
+    )
+    if len(left) != len(right):
+        return False
+    if left == right:
+        return True
+    if len(rep0) == 1:
+        return sorted(map(abs, left[0])) == sorted(map(abs, right[0]))
 
-        lattices = list(orbit_equivalence_classes.values())
-
-        if verbose:
-            sys.stdout.write(f"Orbit-equivalence classes: {len(lattices)}.\n")
-        return lattices
-
-    else:
-        raise ValueError(f"Method not recognized: {method}.")
+    left_projector, right_projector = (
+        _rational_projector(basis, width) for basis in (left, right)
+    )
+    left_profiles, right_profiles = (
+        _projector_profiles(projector) for projector in (left_projector, right_projector)
+    )
+    return sorted(left_profiles) == sorted(right_profiles) and _projectors_orbit_equivalent(
+        left_projector, right_projector, left_profiles, right_profiles
+    )
 
 
 def are_representations_equivalent(
     group: str, rep0: tuple, rep1: tuple, verbose: bool = False
 ) -> bool:
-    """
-    Determines whether two representations are orbit-equivalent. For the non-Abelian groups SU(2) and SO(3), this boils
-    down to the equality of irreps. For the torus, one checks whether the invariants of the lattices are equal.
+    """Check exact orbit-equivalence for a fixed source group.
 
-    Args:
-        group (str): The group type, one of "torus", "SU(2)", or "SO(3)". Defaults to "torus".
-        rep0 (tuple): The first representation, as a tuple (e.g., partition or lattice basis).
-        rep1 (tuple): The second representation, as a tuple.
-        verbose (bool, optional): If True, prints the result. Defaults to False.
-
-    Returns:
-        bool: True if the representations are equivalent, False otherwise.
+    The connected image groups must be orthogonally conjugate. Torus inputs
+    are nonempty rectangular integer weight tables. Their row counts specify
+    the source torus rank and their column counts specify the ambient
+    dimension. Dependent rows and zero columns are allowed. For SO(3) and
+    SU(2), the complete irrep multisets, including trivial summands, must
+    agree. With verbose=True, print the result.
     """
-    if group in ["SU(2)", "SO(3)"]:
-        nonzero_irreps = [sorted([i for i in rep if i > 1]) for rep in [rep0, rep1]]
-        are_equivalent = nonzero_irreps[0] == nonzero_irreps[1]
+    if group in ("SU(2)", "SO(3)"):
+        _validate_nonabelian_partition(group, rep0)
+        _validate_nonabelian_partition(group, rep1)
+        are_equivalent = sorted(rep0) == sorted(rep1)
     elif group == "torus":
-        invariants = [
-            invariant_of_lattices(lattice=rep, method="orbit-equivalence")
-            for rep in [rep0, rep1]
-        ]
-        are_equivalent = invariants[0] == invariants[1]
+        are_equivalent = _torus_orbit_equivalent(rep0, rep1)
     else:
         raise ValueError(f"Group not recognized: {group}.")
 
@@ -653,6 +785,42 @@ def get_pushforward_alg_irrep_su2(dim: int) -> tuple[np.ndarray, ...] | None:
     return x_1, x_2, x_3
 
 
+def _validate_torus_weights(rep_type):
+    def is_row(row):
+        return isinstance(row, (tuple, list, np.ndarray)) and np.ndim(row) == 1
+
+    if (
+        not isinstance(rep_type, (tuple, list, np.ndarray))
+        or isinstance(rep_type, np.ndarray) and rep_type.ndim == 0
+        or len(rep_type) == 0
+        or not is_row(rep_type[0])
+        or len(rep_type[0]) == 0
+        or any(
+            not is_row(row)
+            or len(row) != len(rep_type[0])
+            or any(isinstance(value, (bool, np.bool_)) or not isinstance(value, Integral) for value in row)
+            for row in rep_type
+        )
+    ):
+        raise ValueError("A torus representation requires a nonempty rectangular array of integer weights.")
+
+
+def _validate_nonabelian_partition(group, rep_type):
+    if (
+        not isinstance(rep_type, (tuple, list, np.ndarray))
+        or isinstance(rep_type, np.ndarray) and rep_type.ndim != 1
+        or len(rep_type) == 0
+        or any(
+            isinstance(dim, (bool, np.bool_))
+            or not isinstance(dim, Integral)
+            or dim < 1
+            or (dim % 2 == 0 and (group == "SO(3)" or dim % 4 != 0))
+            for dim in rep_type
+        )
+    ):
+        raise ValueError(f"Invalid real irrep dimensions for {group}: {rep_type!r}.")
+
+
 def get_canonical_pushforward_algebra(group: str, rep_type: tuple) -> list[np.ndarray]:
     """
     Convert a representation-type of a Lie group into the canonical pushforward Lie algebra of the corresponding
@@ -662,18 +830,7 @@ def get_canonical_pushforward_algebra(group: str, rep_type: tuple) -> list[np.nd
     """
     # If the group is the torus
     if group == "torus":
-        if (
-            len(rep_type) == 0
-            or not isinstance(rep_type[0], (tuple, list, np.ndarray))
-            or len(rep_type[0]) == 0
-            or any(
-                not isinstance(row, (tuple, list, np.ndarray))
-                or len(row) != len(rep_type[0])
-                or any(isinstance(value, (bool, np.bool_)) or not isinstance(value, Integral) for value in row)
-                for row in rep_type
-            )
-        ):
-            raise ValueError("A torus representation requires a nonempty rectangular array of integer weights.")
+        _validate_torus_weights(rep_type)
         reduced_ambient_dim = len(rep_type[0])
         # Constructs basis of 2x2-block-diagonal skew-symmetric matrices
         basis = [
@@ -690,14 +847,7 @@ def get_canonical_pushforward_algebra(group: str, rep_type: tuple) -> list[np.nd
 
     # If the group is SU(2) or SO(3)
     elif group in ["SU(2)", "SO(3)"]:
-        if len(rep_type) == 0 or any(
-            isinstance(dim, (bool, np.bool_))
-            or not isinstance(dim, Integral)
-            or dim < 1
-            or (dim % 2 == 0 and (group == "SO(3)" or dim % 4 != 0))
-            for dim in rep_type
-        ):
-            raise ValueError(f"Invalid real irrep dimensions for {group}: {rep_type!r}.")
+        _validate_nonabelian_partition(group, rep_type)
         ambient_dim, nb_irreps = sum(rep_type), len(rep_type)
         algebra_irreps = [get_pushforward_alg_irrep_su2(k) for k in rep_type]
         pushforward_algebra = [np.zeros((ambient_dim, ambient_dim)) for _ in range(3)]

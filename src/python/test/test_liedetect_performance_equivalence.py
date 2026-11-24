@@ -75,6 +75,13 @@ def _legacy_invariant(weights, method):
     return min(projections)
 
 
+def _primitive_line(vector):
+    factor = gcd(*vector)
+    if next(entry for entry in vector if entry) < 0:
+        factor = -factor
+    return tuple(entry // factor for entry in vector)
+
+
 @pytest.mark.parametrize("rank", [1, 2])
 @pytest.mark.parametrize("span", [False, True])
 def test_lattice_streaming_preserves_representatives_and_order(rank, span):
@@ -86,16 +93,19 @@ def test_lattice_streaming_preserves_representatives_and_order(rank, span):
         candidates = [candidate for candidate in candidates if gcd(*candidate[0]) == 1]
     representatives = {}
     for candidate in candidates:
-        if np.linalg.matrix_rank(candidate) == rank:
-            representatives.setdefault(_legacy_invariant(candidate, "span-equivalence"), candidate)
+        # Lines in rank one and normal lines in codimension one have the
+        # same signed-permutation equivalence test. Cross products here use
+        # small integer fixtures and do not depend on the production RREF.
+        vector = candidate[0] if rank == 1 else tuple(map(int, np.cross(*candidate)))
+        if any(vector):
+            representatives.setdefault(_primitive_line(vector), candidate)
     assert get_lattices(rank, width, bound, "span-equivalence", span) == list(representatives.values())
     orbits = {}
-    for candidate in representatives.values():
+    for key, candidate in representatives.items():
         expected = _legacy_invariant(candidate, "orbit-equivalence")
         assert invariant_of_lattices(candidate, "orbit-equivalence") == expected
-        orbits.setdefault(expected, candidate)
+        orbits.setdefault(tuple(sorted(map(abs, key))), candidate)
     assert get_lattices(rank, width, bound, "orbit-equivalence", span) == list(orbits.values())
-
 
 def test_rank_two_torus_equivalence_distinguishes_three_column_images():
     weights = ((1, 0, 1), (0, 1, 1))

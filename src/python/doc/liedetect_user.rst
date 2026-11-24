@@ -142,7 +142,16 @@ up to permutation and equivalence of the summands, with multiplicities.
 Different representations can nevertheless generate the same orbit, so orbit
 data can leave the underlying representation unidentified. Torus character
 weights are integers, whereas Lie-PCA estimates a subspace from floating-point
-data. The current torus equivalence check compares numerical invariants.
+data. The predicate below tests exact orbit equivalence for valid representations
+of a fixed source group. For tori it compares rational row spaces up to signed
+column permutations, so weights with different covering multiplicities can
+produce the same image. Ordinary representation equivalence instead compares
+the character columns as characters of that fixed torus. For SU(2) and SO(3),
+the full irreducible multisets include trivial summands. A single observed
+orbit can agree for representations with different image groups.
+
+Exact comparison uses integer weight tables. The Abelian fitting method uses
+a separate numerical score for estimated real weights.
 
 .. code-block:: python
 

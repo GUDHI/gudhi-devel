@@ -112,5 +112,6 @@ jobs:
             src/python/test/test_liedetect_full_objective.py `
             src/python/test/test_liedetect_cyclic_vectors.py `
             src/python/test/test_liedetect_performance_equivalence.py `
+            src/python/test/test_liedetect_exact_equivalence.py `
             src/python/test/test_liedetect_skew_compression.py `
             src/python/test/test_liedetect_documentation.py
