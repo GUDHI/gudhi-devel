@@ -1,3 +1,3 @@
-from .wasserstein import wasserstein_distance
+from ..diagram_distances.wasserstein import wasserstein_distance
 
 __all__ = [ 'wasserstein_distance' ]

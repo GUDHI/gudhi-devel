@@ -211,7 +211,7 @@ def pairwise_persistence_diagram_distances(
     YY = None if Y is None or Y is X else np.reshape(np.arange(len(Y)), [-1, 1])
     if metric == "bottleneck":
         try:
-            from .. import bottleneck_distance
+            from ..diagram_distances import bottleneck_distance
 
             return _pairwise(
                 pairwise_distances,
@@ -401,7 +401,7 @@ class BottleneckDistance(BaseEstimator, TransformerMixin):
             float: bottleneck distance.
         """
         try:
-            from .. import bottleneck_distance
+            from ..diagram_distances import bottleneck_distance
 
             if self.epsilon is not None:
                 return bottleneck_distance(diag1, diag2, e=self.epsilon)

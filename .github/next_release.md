@@ -23,6 +23,8 @@ Below is a list of changes:
                - Tangential complex
                - Witness complexes (Euclidean, Strong, …)
                - Cover complexes (mapper, Nerve, Graph induced complex)
+          - diagram_distances folder contains:
+               - Bottleneck and Wasserstein distances (pot and hera version)
 
 - Simplex tree [`[Python`](https://gudhi.inria.fr/python/latest/simplex_tree_ref.html)
      - `expansion_with_blocker` is deprecated. Please consider using `expansion_with_blockers`.

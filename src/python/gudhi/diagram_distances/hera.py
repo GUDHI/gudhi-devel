@@ -13,7 +13,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 import warnings
 
-from gudhi import _hera_ext as t
+from . import _hera_ext as t
 
 
 def _diagram_as_numpy_array(diagram: ArrayLike) -> np.ndarray:

@@ -69,7 +69,7 @@ __all__ = [
 
 try:
     # if no CGAL
-    from .bottleneck import bottleneck_distance
+    from .diagram_distances import bottleneck_distance
 
     __all__ += [
         'bottleneck_distance',

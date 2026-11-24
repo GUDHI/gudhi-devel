@@ -12,8 +12,8 @@ __license__ = "GPL v3"
 from collections.abc import Sequence
 from numpy.typing import ArrayLike
 
-from gudhi import _bottleneck_ext as t
-from gudhi.hera import _diagram_as_numpy_array
+from . import _bottleneck_ext as t
+from .hera import _diagram_as_numpy_array
 
 
 def bottleneck_distance(diagram_1: ArrayLike, diagram_2: ArrayLike, e: float = None) -> float:
