@@ -112,6 +112,10 @@ class PeriodicCubicalComplex(_Periodic_cubical_complex_interface):
             array = np.asarray(array, order="F")
             dimensions = array.shape
             array = array.ravel(order="F")
+        if len(dimensions) == 0:
+            raise ValueError("A 0-dimensional complex (scalar input) is not supported")
+        if 0 in dimensions:
+            raise ValueError("A periodic complex with a dimension of size 0 is not supported")
         super().__init__(dimensions, array, periodic_dimensions, vertices is None)
 
     def _is_persistence_defined(self):
