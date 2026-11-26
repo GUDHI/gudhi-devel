@@ -33,6 +33,10 @@ struct FilteredComplex
   *
   * Does not count the empty simplex. */
   size_t                   num_simplices();
+  /**
+   * @brief Returns the number of vertices in the complex.
+   */
+  size_t                   num_vertices();
 /** \brief Returns the dimension of a simplex. */
   int                      dimension(Simplex_handle sh);
 /** \brief Returns the filtration value of a simplex. 

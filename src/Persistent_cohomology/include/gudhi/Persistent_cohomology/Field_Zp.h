@@ -11,6 +11,7 @@
 #ifndef PERSISTENT_COHOMOLOGY_FIELD_ZP_H_
 #define PERSISTENT_COHOMOLOGY_FIELD_ZP_H_
 
+#include <cassert>
 #include <utility>
 #include <vector>
 #include <stdexcept>
@@ -61,7 +62,7 @@ class Field_Zp {
   }
 
   /** Set x <- x + w * y*/
-  Element plus_times_equal(const Element& x, const Element& y, const Element& w) {
+  Element plus_times_equal(const Element& x, const Element& y, const Element& w) const {
     assert(Prime > 0);  // division by zero + non negative values
     Element result = (x + w * y) % Prime;
     if (result < 0)
@@ -72,11 +73,11 @@ class Field_Zp {
 // operator= defined on Element
 
   /** Returns y * w */
-  Element times(const Element& y, const Element& w) {
+  Element times(const Element& y, const Element& w) const {
     return plus_times_equal(0, y, (Element)w);
   }
 
-  Element plus_equal(const Element& x, const Element& y) {
+  Element plus_equal(const Element& x, const Element& y) const {
     return plus_times_equal(x, y, (Element)1);
   }
 
@@ -89,12 +90,12 @@ class Field_Zp {
     return 1;
   }
   /** Returns the inverse in the field. Modifies P. ??? */
-  std::pair<Element, Element> inverse(Element x, Element P) {
+  std::pair<Element, Element> inverse(Element x, Element P) const {
     return std::pair<Element, Element>(inverse_[x], P);
   }  // <------ return the product of field characteristic for which x is invertible
 
   /** Returns -x * y.*/
-  Element times_minus(Element x, Element y) {
+  Element times_minus(Element x, Element y) const {
     assert(Prime > 0);  // division by zero + non negative values
     Element out = (-x * y) % Prime;
     return (out < 0) ? out + Prime : out;
