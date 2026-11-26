@@ -461,6 +461,7 @@ def test_dimension_of_size_zero():
         CubicalComplex(vertices=np.zeros((3, 0)))
     with pytest.raises(ValueError):
         CubicalComplex(vertices=[], dimensions=[3, 0])
-    for kwargs in [{"top_dimensional_cells": np.zeros((3, 0))}, {"vertices": np.zeros((3, 0))}]:
-        with pytest.raises(ValueError):
-            PeriodicCubicalComplex(periodic_dimensions=[True, False], **kwargs)
+    for periodic_dimensions in [[False, False], [True, False], [False, True], [True, True]]:
+        for kwargs in [{"top_dimensional_cells": np.zeros((3, 0))}, {"vertices": np.zeros((3, 0))}]:
+            with pytest.raises(ValueError):
+                PeriodicCubicalComplex(periodic_dimensions=periodic_dimensions, **kwargs)
