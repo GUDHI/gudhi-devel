@@ -178,6 +178,8 @@ class Compressed_annotation_matrix {
 
   void set_characteristic(int min, int max) { coeff_field_.init(min, max); }
 
+  const Field_operators& get_field_operators() const { return coeff_field_; }
+
   void insert_column(ID_index idx, Element e) {
     // Create a column containing only one entry,
     Column* new_col = column_pool_.construct(idx);

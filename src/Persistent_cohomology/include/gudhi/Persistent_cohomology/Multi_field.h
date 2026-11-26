@@ -13,6 +13,8 @@
 
 #include <gmpxx.h>
 
+#include <cassert>
+#include <iostream>
 #include <vector>
 #include <utility>
 
@@ -84,7 +86,7 @@ class Multi_field {
       Uvect_.push_back(tmp_elem);
     }
     mult_id_all = 0;
-    for (auto uvect : Uvect_) {
+    for (const auto& uvect : Uvect_) {
       assert(prod_characteristics_ > 0);  // division by zero + non negative values
       mult_id_all = (mult_id_all + uvect) % prod_characteristics_;
     }
@@ -99,7 +101,7 @@ class Multi_field {
     return mult_id_all;
   }  // 1 everywhere
 
-  Element multiplicative_identity(Element Q) {
+  Element multiplicative_identity(const Element& Q) const {
     if (Q == prod_characteristics_) {
       return multiplicative_identity();
     }
@@ -116,11 +118,11 @@ class Multi_field {
   }
 
   /** Returns y * w */
-  Element times(const Element& y, const Element& w) {
+  Element times(const Element& y, const Element& w) const {
     return plus_times_equal(0, y, w);
   }
 
-  Element plus_equal(const Element& x, const Element& y) {
+  Element plus_equal(const Element& x, const Element& y) const {
     return plus_times_equal(x, y, (Element)1);
   }
 
@@ -130,7 +132,7 @@ class Multi_field {
   }
 
   /** Returns the inverse in the field. Modifies P. ??? */
-  std::pair<Element, Element> inverse(Element x, Element QS) {
+  std::pair<Element, Element> inverse(const Element& x, const Element& QS) const {
     Element QR;
     mpz_gcd(QR.get_mpz_t(), x.get_mpz_t(), QS.get_mpz_t());  // QR <- gcd(x,QS)
     if (QR == QS)
@@ -143,14 +145,14 @@ class Multi_field {
     return { (inv_qt * multiplicative_identity(QT)) % prod_characteristics_, QT };
   }
   /** Returns -x * y.*/
-  Element times_minus(const Element& x, const Element& y) {
+  Element times_minus(const Element& x, const Element& y) const {
     assert(prod_characteristics_ > 0);  // division by zero + non negative values
     /* This assumes that (x*y)%pc cannot be zero, but Field_Zp has specific code for the 0 case ??? */
     return prod_characteristics_ - ((x * y) % prod_characteristics_);
   }
 
   /** Set x <- x + w * y*/
-  Element plus_times_equal(const Element& x, const Element& y, const Element& w) {
+  Element plus_times_equal(const Element& x, const Element& y, const Element& w) const {
     assert(prod_characteristics_ > 0);  // division by zero + non negative values
     Element result = (x + w * y) % prod_characteristics_;
     if (result < 0)

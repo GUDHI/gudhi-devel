@@ -44,36 +44,33 @@ class Persistent_cohomology_base {
 
  public:
   Persistent_cohomology_base(KeyHandleMap* key_handle_map, std::size_t num_cells)
-      : key_handle_map_(key_handle_map), coeff_field_(), cam_(num_cells), transverse_idx_(num_cells) {
+      : key_handle_map_(key_handle_map), cam_(num_cells), transverse_idx_(num_cells) {
     if (num_cells > std::numeric_limits<Cell_key>::max()) {
       // num_simplices must be strictly lower than the limit, because a value is reserved for null_key.
       throw std::out_of_range("The number of simplices is more than key type numeric limit.");
     }
   };
 
-  // TODO: try to not duplicate coeff_field_? As it can contain tables.
-  // Even though probably negligible compared to the matrix?
   void init_coefficients(int characteristic) {
-    coeff_field_.init(characteristic);
     cam_.set_characteristic(characteristic);
   }
 
   void init_coefficients(int min, int max) {
-    coeff_field_.init(min, max);
     cam_.set_characteristic(min, max);
   }
 
   template <class Cell_boundary_range = std::initializer_list<Cell_handle>, class F>
   void update_cohomology_groups(Cell_handle sigma, const Cell_boundary_range& boundary, bool kill_only, F&& add_pair) {
+    const auto& coeff_field = cam_.get_field_operators();
     // Compute the annotation of the boundary of sigma:
     std::map<Cell_key, Arith_element> map_a_ds;
     _annotation_of_the_boundary(map_a_ds, boundary);
     // Update the cohomology groups:
-    if (map_a_ds.empty()) {  // sigma is a creator in all fields represented in coeff_field_
+    if (map_a_ds.empty()) {  // sigma is a creator in all fields represented in coeff_field
       if (!kill_only) {
-        _create_cocycle(sigma, coeff_field_.multiplicative_identity(), coeff_field_.characteristic());
+        _create_cocycle(sigma, coeff_field.multiplicative_identity(), coeff_field.characteristic());
       }
-    } else {  // sigma is a destructor in at least a field in coeff_field_
+    } else {  // sigma is a destructor in at least a field in coeff_field
       // Convert map_a_ds to a vector
       A_ds_type a_ds;  // admits reverse iterators
       for (const auto& map_a_ds_ref : map_a_ds) {
@@ -81,18 +78,18 @@ class Persistent_cohomology_base {
       }
 
       Arith_element inv_x, characteristic;
-      Arith_element prod = coeff_field_.characteristic();  // Product of characteristic of the fields
-      for (auto a_ds_rit = a_ds.rbegin(); (a_ds_rit != a_ds.rend()) && (prod != coeff_field_.multiplicative_identity());
+      Arith_element prod = coeff_field.characteristic();  // Product of characteristic of the fields
+      for (auto a_ds_rit = a_ds.rbegin(); (a_ds_rit != a_ds.rend()) && (prod != coeff_field.multiplicative_identity());
            ++a_ds_rit) {
-        std::tie(inv_x, characteristic) = coeff_field_.inverse(a_ds_rit->second, prod);
+        std::tie(inv_x, characteristic) = coeff_field.inverse(a_ds_rit->second, prod);
 
-        if (inv_x != coeff_field_.additive_identity()) {
+        if (inv_x != coeff_field.additive_identity()) {
           _destroy_cocycle(sigma, a_ds, a_ds_rit->first, inv_x, characteristic, std::forward<F>(add_pair));
           prod /= characteristic;
         }
       }
-      if (prod != coeff_field_.multiplicative_identity() && !kill_only) {
-        _create_cocycle(sigma, coeff_field_.multiplicative_identity(prod), prod);
+      if (prod != coeff_field.multiplicative_identity() && !kill_only) {
+        _create_cocycle(sigma, coeff_field.multiplicative_identity(prod), prod);
       }
     }
   }
@@ -105,8 +102,11 @@ class Persistent_cohomology_base {
   }
 
  protected:
+  using Cam = Compressed_annotation_matrix<Cell_key, CoefficientField>;
+  using Column = typename Cam::Column;
+
   KeyHandleMap* key_handle_map_;
-  CoefficientField coeff_field_;
+  Cam cam_;
 
   void _create_cocycle(Cell_handle sigma, Arith_element x, Arith_element characteristic) {
     Cell_key key = key_handle_map_->key(sigma);
@@ -115,10 +115,6 @@ class Persistent_cohomology_base {
   }
 
  private:
-  using Cam = Compressed_annotation_matrix<Cell_key, CoefficientField>;
-  using Column = typename Cam::Column;
-
-  Cam cam_;
 #if BOOST_VERSION >= 108100
   boost::unordered_flat_map<Cell_key, Arith_element> transverse_idx_;
 #else
@@ -134,6 +130,7 @@ class Persistent_cohomology_base {
     // with multiplicity. We used to sum the coefficients directly in
     // annotations_in_boundary by using a map, we now do it later.
     using annotation_t = std::pair<Column const*, int>;
+    const auto& coeff_field = cam_.get_field_operators();
     thread_local std::vector<annotation_t> annotations_in_boundary;
     annotations_in_boundary.clear();
     int sign = -1;  // \in {-1,1} provides the sign in the alternate sum in the boundary.
@@ -168,15 +165,15 @@ class Persistent_cohomology_base {
         ++ann_it;
       }
       // The following test is just a heuristic, it is not required, and it is fine that is misses p == 0.
-      if (mult != coeff_field_.additive_identity()) {  // For all columns in the boundary,
+      if (mult != coeff_field.additive_identity()) {  // For all columns in the boundary,
         for (auto&& entry_ref : *col) {                // insert every cell in map_a_ds with multiplicity
-          Arith_element w_y = coeff_field_.times(entry_ref.get_element(), mult);  // coefficient * multiplicity
+          Arith_element w_y = coeff_field.times(entry_ref.get_element(), mult);  // coefficient * multiplicity
 
-          if (w_y != coeff_field_.additive_identity()) {  // if != 0
+          if (w_y != coeff_field.additive_identity()) {  // if != 0
             result_insert_a_ds = map_a_ds.emplace(entry_ref.get_row_index(), w_y);
             if (!(result_insert_a_ds.second)) {  // if cell_ref.key_ already a Key in map_a_ds
-              result_insert_a_ds.first->second = coeff_field_.plus_equal(result_insert_a_ds.first->second, w_y);
-              if (result_insert_a_ds.first->second == coeff_field_.additive_identity()) {
+              result_insert_a_ds.first->second = coeff_field.plus_equal(result_insert_a_ds.first->second, w_y);
+              if (result_insert_a_ds.first->second == coeff_field.additive_identity()) {
                 map_a_ds.erase(result_insert_a_ds.first);
               }
             }
@@ -197,6 +194,7 @@ class Persistent_cohomology_base {
   template <class F>
   void _destroy_cocycle(Cell_handle sigma, A_ds_type const& a_ds, Cell_key death_key, Arith_element inv_x,
                         Arith_element characteristic, F&& add_pair) {
+    const auto& coeff_field = cam_.get_field_operators();
     // Create a finite persistent interval for which the interval exists
     std::forward<F>(add_pair)(key_handle_map_->cell(death_key), sigma, characteristic);
 
@@ -207,9 +205,9 @@ class Persistent_cohomology_base {
 
     while (row_entry_it != death_key_row.end()) {  // Traverse all entries in the row at index death_key.
       const auto& entry = *row_entry_it;
-      Arith_element w = coeff_field_.times_minus(inv_x, entry.get_element());
+      Arith_element w = coeff_field.times_minus(inv_x, entry.get_element());
 
-      if (w != coeff_field_.additive_identity()) {
+      if (w != coeff_field.additive_identity()) {
         ++row_entry_it;  // has to be done before column addition to avoid invalidating the iterator
         cam_.multiply_source_and_add_to(w, a_ds, entry.get_column_index());
       } else {
@@ -218,7 +216,7 @@ class Persistent_cohomology_base {
     }
 
     // Because it is a killer simplex, set the data of sigma to null_key().
-    if (characteristic == coeff_field_.characteristic()) {
+    if (characteristic == coeff_field.characteristic()) {
       key_handle_map_->assign_key(sigma, key_handle_map_->null_key());
     }
     if (death_cocycle_coeff->second == characteristic) {
@@ -265,14 +263,15 @@ class Polytopal_persistent_cohomology_base : public Persistent_cohomology_base<C
 
   template <class F>
   void finalize_computation(F&& add_pair) {
+    const auto& coeff_field = Base::cam_.get_field_operators();
     for (Cell_key i = 0; i < static_cast<Cell_key>(vertices_.size()); ++i) {
       if (vertex_sets_.get_parent(i) == i  // root of its tree
           && zero_cocycles_.find(i) == zero_cocycles_.end()) {
-        add_pair(vertices_[i], Base::key_handle_map_->null_cell(), Base::coeff_field_.characteristic());
+        add_pair(vertices_[i], Base::key_handle_map_->null_cell(), coeff_field.characteristic());
       }
     }
     for (const auto& zero_idx : zero_cocycles_) {
-      add_pair(vertices_[zero_idx.second], Base::key_handle_map_->null_cell(), Base::coeff_field_.characteristic());
+      add_pair(vertices_[zero_idx.second], Base::key_handle_map_->null_cell(), coeff_field.characteristic());
     }
     Base::finalize_computation(std::forward<F>(add_pair));
   }
@@ -304,6 +303,7 @@ class Polytopal_persistent_cohomology_base : public Persistent_cohomology_base<C
 
   template <class F>
   void _update_edge_cohomology_groups(Cell_handle sigma, Cell_key u, Cell_key v, bool kill_only, F&& add_pair) {
+    const auto& coeff_field = Base::cam_.get_field_operators();
     Cell_key ku = vertex_sets_.find_set(u);
     Cell_key kv = vertex_sets_.find_set(v);
 
@@ -329,7 +329,7 @@ class Polytopal_persistent_cohomology_base : public Persistent_cohomology_base<C
       }
 
       if (idx_co_u < idx_co_v) {  // Kill cocycle [idx_co_v], which is younger.
-        std::forward<F>(add_pair)(vertices_[idx_co_v], sigma, Base::coeff_field_.characteristic());
+        std::forward<F>(add_pair)(vertices_[idx_co_v], sigma, coeff_field.characteristic());
         // Maintain the index of the 0-cocycle alive.
         if (kv != idx_co_v) {
           zero_cocycles_.erase(map_it_v);
@@ -341,7 +341,7 @@ class Polytopal_persistent_cohomology_base : public Persistent_cohomology_base<C
           zero_cocycles_[kv] = idx_co_u;
         }
       } else {  // Kill cocycle [idx_co_u], which is younger.
-        std::forward<F>(add_pair)(vertices_[idx_co_u], sigma, Base::coeff_field_.characteristic());
+        std::forward<F>(add_pair)(vertices_[idx_co_u], sigma, coeff_field.characteristic());
         // Maintain the index of the 0-cocycle alive.
         if (ku != idx_co_u) {
           zero_cocycles_.erase(map_it_u);
@@ -357,7 +357,7 @@ class Polytopal_persistent_cohomology_base : public Persistent_cohomology_base<C
     } else {
       // If ku == kv, same connected component: create a 1-cocycle class.
       if (!kill_only) {
-        Base::_create_cocycle(sigma, Base::coeff_field_.multiplicative_identity(), Base::coeff_field_.characteristic());
+        Base::_create_cocycle(sigma, coeff_field.multiplicative_identity(), coeff_field.characteristic());
       }
     }
   }
