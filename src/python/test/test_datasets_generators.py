@@ -13,7 +13,6 @@ from numpy.testing import assert_almost_equal
 
 from gudhi.datasets.generators import points
 from gudhi.random import set_seed
-import ssl
 
 
 def test_sphere():
